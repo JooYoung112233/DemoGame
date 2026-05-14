@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데모 5: 블러드 핏</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #game-container { border-radius: 4px; overflow: hidden; }
+        #game-container canvas { image-rendering: -webkit-optimize-contrast; }
+        .back-btn {
+            position: fixed; top: 10px; left: 10px; z-index: 9999;
+            background: #331111; color: #aa6666; border: none; padding: 6px 14px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-family: monospace;
+        }
+        .back-btn:hover { background: #552222; color: #ff8888; }
+
+        /* Mobile: force landscape overlay */
+        #rotate-msg {
+            display: none;
+            position: fixed; inset: 0; z-index: 99999;
+            background: #1a0a0a; color: #aa6666;
+            flex-direction: column; justify-content: center; align-items: center;
+            font-family: monospace; font-size: 18px; text-align: center;
+        }
+        #rotate-msg span { font-size: 48px; margin-bottom: 12px; }
+        @media (max-width: 900px) and (orientation: portrait) {
+            #rotate-msg { display: flex; }
+        }
+    </style>
+</head>
+<body>
+    <div id="rotate-msg"><span>📱</span>가로로 돌려주세요</div>
+    <button class="back-btn" onclick="location.href='../'">← 목록</button>
+    <div id="game-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <!-- shared systems -->
+    <script src="../shared/FarmingConfig.js"></script>
+    <script src="../shared/ItemRegistry.js"></script>
+    <script src="../shared/StashManager.js"></script>
+    <script src="../shared/LootGenerator.js"></script>
+    <script src="../shared/FarmingUI.js"></script>
+    <!-- data -->
+    <script src="src/data/characters.js"></script>
+    <script src="src/data/skills.js"></script>
+    <script src="src/data/drops.js"></script>
+    <!-- ui -->
+    <script src="src/ui/HealthBar.js"></script>
+    <script src="src/ui/DamagePopup.js"></script>
+    <!-- entities -->
+    <script src="src/entities/Character.js"></script>
+    <!-- systems (order matters: base systems first, then managers) -->
+    <script src="src/systems/DangerSystem.js"></script>
+    <script src="src/systems/CombatSystem.js"></script>
+    <script src="src/systems/DropSystem.js"></script>
+    <script src="src/systems/FarmingBridge.js"></script>
+    <script src="src/systems/RosterManager.js"></script>
+    <script src="src/systems/RunManager.js"></script>
+    <script src="src/systems/EnhanceSystem.js"></script>
+    <script src="src/systems/CraftSystem.js"></script>
+    <!-- scenes -->
+    <script src="src/scenes/SetupScene.js"></script>
+    <script src="src/scenes/BattleScene.js"></script>
+    <script src="src/scenes/DropScene.js"></script>
+    <script src="src/scenes/ChoiceScene.js"></script>
+    <script src="src/scenes/ResultScene.js"></script>
+    <script src="src/scenes/ShopScene.js"></script>
+    <script src="src/scenes/ForgeScene.js"></script>
+    <script src="src/scenes/EventScene.js"></script>
+    <!-- main -->
+    <script src="src/main.js"></script>
+    <script>
+        // Try to lock landscape on mobile (requires fullscreen on some browsers)
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(function(){});
+        }
+    </script>
+</body>
+</html>

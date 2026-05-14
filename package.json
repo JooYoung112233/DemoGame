@@ -1,0 +1,15 @@
+{
+  "name": "auto-battle-demo",
+  "version": "0.1.0",
+  "description": "2D 라인 자동전투 데모 프로토타입",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -o",
+    "dev": "npx http-server . -p 8080 -c-1"
+  },
+  "dependencies": {
+    "phaser": "^3.80.1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

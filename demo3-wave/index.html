@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데모 3: 웨이브 생존</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #game-container { border-radius: 4px; overflow: hidden; }
+        .back-btn {
+            position: fixed; top: 10px; left: 10px; z-index: 9999;
+            background: #333; color: #aaa; border: none; padding: 6px 14px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-family: monospace;
+        }
+        .back-btn:hover { background: #555; color: #fff; }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='../'">← 목록</button>
+    <div id="game-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <script src="src/data/characters.js"></script>
+    <script src="src/data/upgrades.js"></script>
+    <script src="src/ui/HealthBar.js"></script>
+    <script src="src/ui/DamagePopup.js"></script>
+    <script src="src/entities/WaveCharacter.js"></script>
+    <script src="src/systems/WaveManager.js"></script>
+    <script src="src/scenes/WaveBattleScene.js"></script>
+    <script src="src/scenes/WaveSetupScene.js"></script>
+    <script src="src/scenes/UpgradeScene.js"></script>
+    <script src="src/scenes/WaveResultScene.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

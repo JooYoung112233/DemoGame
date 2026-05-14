@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데모 8: 마왕성까지의 마차</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #game-container { border-radius: 4px; overflow: hidden; }
+        .back-btn {
+            position: fixed; top: 10px; left: 10px; z-index: 9999;
+            background: #333; color: #aaa; border: none; padding: 6px 14px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-family: monospace;
+        }
+        .back-btn:hover { background: #555; color: #fff; }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='../'">← 목록</button>
+    <div id="game-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <script src="src/data/units.js"></script>
+    <script src="src/data/enemies.js"></script>
+    <script src="src/data/skills.js"></script>
+    <script src="src/data/traits.js"></script>
+    <script src="src/data/events.js"></script>
+    <script src="src/data/nodes.js"></script>
+    <script src="src/ui/HealthBar.js"></script>
+    <script src="src/ui/DamagePopup.js"></script>
+    <script src="src/ui/PartyHUD.js"></script>
+    <script src="src/entities/Unit.js"></script>
+    <script src="src/entities/Character.js"></script>
+    <script src="src/systems/SkillSystem.js"></script>
+    <script src="src/systems/CombatSystem.js"></script>
+    <script src="src/systems/MapManager.js"></script>
+    <script src="src/systems/PartyManager.js"></script>
+    <script src="src/scenes/CaravanTitleScene.js"></script>
+    <script src="src/scenes/MapScene.js"></script>
+    <script src="src/scenes/VillageScene.js"></script>
+    <script src="src/scenes/BattleScene.js"></script>
+    <script src="src/scenes/EventScene.js"></script>
+    <script src="src/scenes/ResultScene.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

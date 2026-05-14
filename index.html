@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전투 데모 프로토타입</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a1a;
+            color: #fff;
+            font-family: 'Segoe UI', monospace, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            text-align: center;
+            padding: 60px 20px 30px;
+        }
+        .header h1 {
+            font-size: 36px;
+            background: linear-gradient(135deg, #44ff88, #4488ff, #aa44ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .header p {
+            color: #888;
+            font-size: 16px;
+        }
+        .demos {
+            display: flex;
+            gap: 30px;
+            padding: 40px 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+        .demo-card {
+            background: linear-gradient(145deg, #151530, #1a1a35);
+            border: 1px solid #2a2a50;
+            border-radius: 16px;
+            padding: 32px 28px;
+            width: 320px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+        .demo-card:hover {
+            transform: translateY(-6px);
+            border-color: #4466aa;
+            box-shadow: 0 12px 40px rgba(68, 102, 255, 0.15);
+        }
+        .demo-card .number {
+            font-size: 48px;
+            font-weight: 900;
+            opacity: 0.08;
+            position: absolute;
+            top: 16px;
+            right: 20px;
+        }
+        .demo-card .icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+            display: block;
+        }
+        .demo-card h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        .demo-card .tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+        .card-line .tag { background: #1a3a2a; color: #44ff88; }
+        .card-atb .tag { background: #2a2a1a; color: #ffcc44; }
+        .card-wave .tag { background: #2a1a2a; color: #ff6688; }
+        .demo-card .desc {
+            font-size: 14px;
+            color: #999;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+        .demo-card .verify {
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #222244;
+            padding-top: 14px;
+        }
+        .demo-card .verify strong { color: #aaa; }
+        .demo-card .play-btn {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 8px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .card-line .play-btn { background: #225533; color: #44ff88; }
+        .card-atb .play-btn { background: #3a3a1a; color: #ffcc44; }
+        .card-wave .play-btn { background: #3a1a2a; color: #ff6688; }
+        .card-hotel .tag { background: #2a1a1a; color: #ff4466; }
+        .card-hotel .play-btn { background: #3a1a1a; color: #ff4466; }
+        .card-bloodpit .tag { background: #2a0a0a; color: #ff2244; }
+        .card-bloodpit .play-btn { background: #3a1111; color: #ff2244; }
+        .card-cargo .tag { background: #2a1a0a; color: #ff8844; }
+        .card-cargo .play-btn { background: #3a2211; color: #ff8844; }
+        .card-blackout .tag { background: #1a0a2a; color: #8844ff; }
+        .card-blackout .play-btn { background: #221133; color: #8844ff; }
+        .card-caravan .tag { background: #2a1a0a; color: #ffaa44; }
+        .card-caravan .play-btn { background: #3a2a11; color: #ffaa44; }
+        .demo-card:hover .play-btn { filter: brightness(1.3); }
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: #444;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Battle Demo Prototypes</h1>
+        <p>"전투 자체가 재미있는가?" 를 검증하기 위한 8가지 프로토타입</p>
+    </div>
+
+    <div class="demos">
+        <a href="demo1-line/" class="demo-card card-line">
+            <span class="number">01</span>
+            <span class="icon">⚔️</span>
+            <h2>라인 자동전투</h2>
+            <span class="tag">실시간 자동전투</span>
+            <p class="desc">
+                아군과 적이 라인 위에서 자동으로 전투.
+                쿨타임 순환과 스킬 연계의 재미를 검증.
+            </p>
+            <div class="verify">
+                <strong>검증:</strong> 조합을 바꿔보고 싶은 욕구가 생기는가?
+            </div>
+            <span class="play-btn">▶ 플레이</span>
+        </a>
+
+        <a href="demo2-atb/" class="demo-card card-atb">
+            <span class="number">02</span>
+            <span class="icon">⏱️</span>
+            <h2>턴 압축 전투</h2>
+            <span class="tag">ATB 게이지 시스템</span>
+            <p class="desc">
+                행동 게이지가 차면 자동 행동.
+                속도 조합과 턴 순서의 전략적 재미를 검증.
+            </p>
+            <div class="verify">
+                <strong>검증:</strong> 속도/행동 순서를 바꾸는 재미가 있는가?
+            </div>
+            <span class="play-btn">▶ 플레이</span>
+        </a>
+
+        <a href="demo3-wave/" class="demo-card card-wave">
+            <span class="number">03</span>
+            <span class="icon">🌊</span>
+            <h2>웨이브 생존</h2>
+            <span class="tag">로그라이크 서바이벌</span>
+            <p class="desc">
+                몰려오는 적 웨이브를 자동전투로 버텨라.
+                강화 선택과 반복 플레이 중독성을 검증.
+            </p>
+            <div class="verify">
+                <strong>검증:</strong> 한 판 더 하고 싶은가?
+            </div>
+            <span class="play-btn">▶ 플레이</span>
+        </a>
+
+        <a href="demo4-hotel/" class="demo-card card-hotel">
+            <span class="number">04</span>
+            <span class="icon">🏨</span>
+            <h2>호텔 100층</h2>
+            <span class="tag">로그라이트 액션</span>
+            <p class="desc">
+                호텔을 올라가며 전투하라.
+                빠른 조작과 랜덤 성장의 중독성을 검증.
+            </p>
+            <div class="verify">
+                <strong>검증:</strong> 한 층만 더 올라가고 싶은가?
+            </div>
+            <span class="play-btn">▶ 플레이</span>
+        </a>
+        <a href="demo5-bloodpit/" class="demo-card card-bloodpit">
+            <span class="number">05</span>
+            <span class="icon">💀</span>
+            <h2>블러드 핏</h2>
+            <span class="tag">아레나 서바이벌</span>
+            <p class="desc">
+                욕심낼수록 위험해지는 사냥터.
+                위험도와 보상의 균형에서 탈출 타이밍을 검증.
+            </p>
+            <div class="verify">
+                <strong>검증:</strong> 욕심낼수록 위험한데 멈출 수 있는가?
+            </div>
+            <span class="play-btn">▶ 플레이</span>
+        </a>
+
+        <a href="demo6-cargo/" class="demo-card card-cargo">
+            <span class="number">06</span>
+            <span class="icon">🚂</span>
+            <h2>라스트 카고</h2>
+            <span class="tag">열차 방어</span>
+            <p class="desc">
+                열차 칸을 방어하며 자원을 관리하라.
+                어떤 칸을 포기할지 선택의 긴장감을 검증.
+            </p>
+            <div class="verify">
+                <strong>검증:</strong> 어떤 칸을 포기할지 선택의 고통이 있는가?
+            </div>
+            <span class="play-btn">▶ 플레이</span>
+        </a>
+
+        <a href="demo7-blackout/" class="demo-card card-blackout">
+            <span class="number">07</span>
+            <span class="icon">🔦</span>
+            <h2>블랙 아웃</h2>
+            <span class="tag">탈출형 파밍</span>
+            <p class="desc">
+                어둠 속 시설에서 파밍하고 탈출하라.
+                탐욕과 생존 사이의 갈등을 검증.
+            </p>
+            <div class="verify">
+                <strong>검증:</strong> 조금만 더 먹고 나갈까의 유혹이 있는가?
+            </div>
+            <span class="play-btn">▶ 플레이</span>
+        </a>
+
+        <a href="demo8-caravan/" class="demo-card card-caravan">
+            <span class="number">08</span>
+            <span class="icon">🐴</span>
+            <h2>마왕성까지의 마차</h2>
+            <span class="tag">마차 여정 RPG</span>
+            <p class="desc">
+                마을에서 병사를 징집하고 전직시켜라.
+                도적과 이벤트를 헤쳐나가며 마왕성을 향해!
+            </p>
+            <div class="verify">
+                <strong>검증:</strong> 징집/전직 선택에 고민이 생기는가?
+            </div>
+            <span class="play-btn">▶ 플레이</span>
+        </a>
+    </div>
+
+    <div class="footer">
+        전투 데모 프로토타입 v0.1 — Phaser 3 기반
+    </div>
+</body>
+</html>

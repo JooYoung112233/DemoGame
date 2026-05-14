@@ -1,0 +1,102 @@
+const CHAR_DATA = {
+    tank: {
+        name: '탱커',
+        hp: 400,
+        atk: 20,
+        def: 12,
+        attackSpeed: 2000,
+        range: 60,
+        moveSpeed: 80,
+        critRate: 0.05,
+        critDmg: 1.5,
+        color: 0x4488ff,
+        role: 'tank',
+        spriteKey: 'tank'
+    },
+    rogue: {
+        name: '도적',
+        hp: 130,
+        atk: 30,
+        def: 3,
+        attackSpeed: 1200,
+        range: 55,
+        moveSpeed: 120,
+        critRate: 0.2,
+        critDmg: 2.0,
+        color: 0xff4444,
+        role: 'dps',
+        spriteKey: 'rogue'
+    },
+    priest: {
+        name: '사제',
+        hp: 150,
+        atk: 12,
+        def: 4,
+        attackSpeed: 2500,
+        range: 200,
+        moveSpeed: 70,
+        critRate: 0.05,
+        critDmg: 1.5,
+        color: 0x44ff88,
+        role: 'healer',
+        spriteKey: 'priest'
+    },
+    mage: {
+        name: '마법사',
+        hp: 110,
+        atk: 45,
+        def: 2,
+        attackSpeed: 3000,
+        range: 220,
+        moveSpeed: 65,
+        critRate: 0.1,
+        critDmg: 1.8,
+        color: 0xaa44ff,
+        role: 'dps',
+        spriteKey: 'mage'
+    },
+    enemy_normal: {
+        name: '고블린',
+        hp: 320,
+        atk: 20,
+        def: 5,
+        attackSpeed: 1500,
+        range: 55,
+        moveSpeed: 95,
+        critRate: 0.08,
+        critDmg: 1.5,
+        color: 0x88aa44,
+        role: 'enemy',
+        spriteKey: 'enemy_normal'
+    },
+    enemy_tank: {
+        name: '오거',
+        hp: 850,
+        atk: 28,
+        def: 10,
+        attackSpeed: 2200,
+        range: 60,
+        moveSpeed: 55,
+        critRate: 0.05,
+        critDmg: 1.5,
+        color: 0x886622,
+        role: 'enemy',
+        spriteKey: 'enemy_tank'
+    },
+    enemy_ranged: {
+        name: '아처',
+        hp: 230,
+        atk: 28,
+        def: 2,
+        attackSpeed: 1800,
+        range: 200,
+        moveSpeed: 60,
+        critRate: 0.12,
+        critDmg: 1.8,
+        color: 0xcc8844,
+        role: 'enemy',
+        spriteKey: 'enemy_ranged'
+    }
+};
+
+const DEFAULT_ENEMIES = ['enemy_normal', 'enemy_normal', 'enemy_normal', 'enemy_tank', 'enemy_ranged'];

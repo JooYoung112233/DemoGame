@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데모 6: 라스트 카고</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1510;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #game-container { border-radius: 4px; overflow: hidden; }
+        .back-btn {
+            position: fixed; top: 10px; left: 10px; z-index: 9999;
+            background: #332211; color: #aa8866; border: none; padding: 6px 14px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-family: monospace;
+        }
+        .back-btn:hover { background: #553311; color: #ff8844; }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='../'">← 목록</button>
+    <div id="game-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <script src="src/data/characters.js"></script>
+    <script src="src/data/skills.js"></script>
+    <script src="src/data/modules.js"></script>
+    <script src="src/data/cars.js"></script>
+    <script src="src/ui/HealthBar.js"></script>
+    <script src="src/ui/DamagePopup.js"></script>
+    <script src="src/entities/Character.js"></script>
+    <script src="src/entities/TrainCar.js"></script>
+    <script src="src/systems/InvasionSystem.js"></script>
+    <script src="src/systems/TrainManager.js"></script>
+    <script src="src/systems/FarmingBridge.js"></script>
+    <script src="src/scenes/SetupScene.js"></script>
+    <script src="src/scenes/TrainScene.js"></script>
+    <script src="src/scenes/BattleScene.js"></script>
+    <script src="src/scenes/RepairScene.js"></script>
+    <script src="src/scenes/ResultScene.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>
