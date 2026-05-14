@@ -62,31 +62,282 @@ class BPCharacter {
         const flip = this.team === 'enemy' ? -1 : 1;
         const r = (this.color >> 16) & 0xff, g = (this.color >> 8) & 0xff, b = this.color & 0xff;
         const dark = Phaser.Display.Color.GetColor(Math.floor(r*.6), Math.floor(g*.6), Math.floor(b*.6));
+        const light = Phaser.Display.Color.GetColor(Math.min(255,Math.floor(r*1.3)), Math.min(255,Math.floor(g*1.3)), Math.min(255,Math.floor(b*1.3)));
         const bounce = this.animFrame % 2 === 0 ? 0 : -1;
+        const g_ = this.gfx;
 
+        // --- Nest ---
         if (this.isNest) {
-            this.gfx.fillStyle(0x000000, 0.3); this.gfx.fillEllipse(0, 14, 28, 8);
-            this.gfx.fillStyle(this.color); this.gfx.fillRect(-10, -5+bounce, 20, 18);
-            this.gfx.fillStyle(dark); this.gfx.fillRect(-10, -5+bounce, 20, 3);
-            this.gfx.fillStyle(0xff4444, 0.5); this.gfx.fillCircle(0, 4+bounce, 4);
+            g_.fillStyle(0x000000, 0.3); g_.fillEllipse(0, 14, 32, 10);
+            g_.fillStyle(dark); g_.fillRect(-12, -3+bounce, 24, 18);
+            g_.fillStyle(this.color); g_.fillRect(-10, -5+bounce, 20, 16);
+            g_.fillStyle(dark); g_.fillRect(-10, -5+bounce, 20, 3);
+            g_.fillStyle(0xff4444, 0.6); g_.fillCircle(-3, 4+bounce, 3); g_.fillCircle(3, 4+bounce, 3);
+            g_.fillStyle(0xff2222, 0.3); g_.fillCircle(0, 2+bounce, 6);
             return;
         }
 
-        this.gfx.fillStyle(0x000000, 0.3); this.gfx.fillEllipse(0, 14, 18, 5);
-        this.gfx.fillStyle(this.color); this.gfx.fillRect(-6, -3+bounce, 12, 12);
-        this.gfx.fillStyle(dark); this.gfx.fillRect(-6, -3+bounce, 12, 2);
-        this.gfx.fillStyle(0xffcc99); this.gfx.fillRect(-3, -12+bounce, 7, 7);
-        this.gfx.fillStyle(0xffffff); this.gfx.fillRect(flip, -10+bounce, 2, 2);
-        this.gfx.fillStyle(0x333333); this.gfx.fillRect(flip+1, -10+bounce, 1, 2);
-        this.gfx.fillStyle(dark);
-        this.gfx.fillRect(-4, -14+bounce, 9, 3);
-        this.gfx.fillRect(-3, 9+bounce, 3, 4); this.gfx.fillRect(2, 9+bounce, 3, 4);
-        this.gfx.fillStyle(0x664422); this.gfx.fillRect(-3, 12+bounce, 3, 2); this.gfx.fillRect(2, 12+bounce, 3, 2);
+        // --- Boss (2x size) ---
+        if (this.enemyType === 'boss') {
+            this._drawBoss(g_, dark, light, bounce, flip);
+            return;
+        }
+
+        // --- Elite enemies (glow) ---
+        if (this.enemyType && this.enemyType.startsWith('elite_')) {
+            g_.fillStyle(this.color, 0.15);
+            g_.fillCircle(0, 2+bounce, 18);
+        }
+
+        // --- Enemy types ---
+        if (this.team === 'enemy' && this.enemyType) {
+            this._drawEnemy(g_, dark, light, bounce, flip);
+            return;
+        }
+
+        // --- Ally roles ---
+        switch (this.role) {
+            case 'tank':  this._drawTank(g_, dark, light, bounce, flip); break;
+            case 'dps':   this.range > 100 ? this._drawRangedDPS(g_, dark, light, bounce, flip) : this._drawMeleeDPS(g_, dark, light, bounce, flip); break;
+            case 'healer': this._drawHealer(g_, dark, light, bounce, flip); break;
+            default:       this._drawDefault(g_, dark, bounce, flip); break;
+        }
 
         if (this.bleeding) {
-            this.gfx.fillStyle(0xff0000, 0.4);
-            this.gfx.fillCircle(Phaser.Math.Between(-4, 4), Phaser.Math.Between(-2, 8), 2);
+            g_.fillStyle(0xff0000, 0.4);
+            g_.fillCircle(Phaser.Math.Between(-4, 4), Phaser.Math.Between(-2, 8), 2);
         }
+    }
+
+    _drawTank(g, dark, light, b, flip) {
+        // shadow
+        g.fillStyle(0x000000, 0.3); g.fillEllipse(0, 15, 22, 6);
+        // body (wider)
+        g.fillStyle(this.color); g.fillRect(-8, -4+b, 16, 14);
+        g.fillStyle(dark); g.fillRect(-8, -4+b, 16, 3);
+        // shoulder pads
+        g.fillStyle(light); g.fillRect(-10, -3+b, 4, 5); g.fillRect(6, -3+b, 4, 5);
+        // head
+        g.fillStyle(0xffcc99); g.fillRect(-3, -13+b, 7, 7);
+        // helmet (flat top with visor)
+        g.fillStyle(dark); g.fillRect(-5, -16+b, 11, 4);
+        g.fillStyle(0x999999); g.fillRect(-4, -13+b, 9, 2);
+        // eyes behind visor
+        g.fillStyle(0xffffff); g.fillRect(flip, -11+b, 2, 2);
+        // shield on front arm
+        g.fillStyle(0x888899); g.fillRect(flip*5, -2+b, flip*5, 10);
+        g.fillStyle(light); g.fillRect(flip*6, 0+b, flip*3, 6);
+        // legs (thick)
+        g.fillStyle(dark); g.fillRect(-4, 10+b, 4, 4); g.fillRect(2, 10+b, 4, 4);
+        g.fillStyle(0x664422); g.fillRect(-4, 13+b, 4, 2); g.fillRect(2, 13+b, 4, 2);
+    }
+
+    _drawMeleeDPS(g, dark, light, b, flip) {
+        // shadow
+        g.fillStyle(0x000000, 0.3); g.fillEllipse(0, 14, 16, 5);
+        // body (slim)
+        g.fillStyle(this.color); g.fillRect(-5, -2+b, 10, 11);
+        g.fillStyle(dark); g.fillRect(-5, -2+b, 10, 2);
+        // head
+        g.fillStyle(0xffcc99); g.fillRect(-3, -11+b, 6, 7);
+        // hood/mask
+        g.fillStyle(dark); g.fillRect(-4, -13+b, 8, 4);
+        g.fillStyle(this.color, 0.7); g.fillRect(-3, -11+b, 6, 2);
+        // eyes (sharp)
+        g.fillStyle(0xffffff); g.fillRect(flip, -9+b, 3, 1);
+        g.fillStyle(0xff4444, 0.6); g.fillRect(flip+1, -9+b, 1, 1);
+        // blade in hand
+        g.fillStyle(0xccccdd); g.fillRect(flip*5, -4+b, flip*2, 12);
+        g.fillStyle(0xeeeeff); g.fillRect(flip*5, -4+b, flip*1, 10);
+        // legs (slim)
+        g.fillStyle(dark); g.fillRect(-3, 9+b, 3, 4); g.fillRect(1, 9+b, 3, 4);
+        g.fillStyle(0x443322); g.fillRect(-3, 12+b, 3, 2); g.fillRect(1, 12+b, 3, 2);
+    }
+
+    _drawRangedDPS(g, dark, light, b, flip) {
+        // shadow
+        g.fillStyle(0x000000, 0.3); g.fillEllipse(0, 14, 18, 5);
+        // robe (wider at bottom)
+        g.fillStyle(this.color); g.fillRect(-5, -3+b, 10, 8);
+        g.fillStyle(this.color); g.fillRect(-7, 3+b, 14, 6);
+        g.fillStyle(dark); g.fillRect(-5, -3+b, 10, 2);
+        // robe bottom trim
+        g.fillStyle(light); g.fillRect(-7, 8+b, 14, 1);
+        // head
+        g.fillStyle(0xffcc99); g.fillRect(-3, -11+b, 6, 6);
+        // wizard hat (pointed)
+        g.fillStyle(dark);
+        g.beginPath();
+        g.moveTo(0, -20+b);
+        g.lineTo(-6, -10+b);
+        g.lineTo(6, -10+b);
+        g.closePath();
+        g.fillPath();
+        g.fillStyle(this.color);
+        g.fillRect(-6, -11+b, 12, 2);
+        // hat tip accent
+        g.fillStyle(light); g.fillCircle(0, -19+b, 1.5);
+        // eyes
+        g.fillStyle(0xffffff); g.fillRect(flip, -9+b, 2, 2);
+        g.fillStyle(light, 0.8); g.fillRect(flip+1, -9+b, 1, 1);
+        // staff/wand
+        g.fillStyle(0x886644); g.fillRect(flip*6, -8+b, flip*2, 18);
+        g.fillStyle(light); g.fillCircle(flip*7, -9+b, 3);
+        // no visible legs (robe covers)
+        g.fillStyle(0x664422); g.fillRect(-3, 9+b, 3, 2); g.fillRect(2, 9+b, 3, 2);
+    }
+
+    _drawHealer(g, dark, light, b, flip) {
+        // shadow
+        g.fillStyle(0x000000, 0.3); g.fillEllipse(0, 14, 18, 5);
+        // robe
+        g.fillStyle(this.color); g.fillRect(-6, -3+b, 12, 8);
+        g.fillStyle(this.color); g.fillRect(-7, 3+b, 14, 6);
+        g.fillStyle(dark); g.fillRect(-6, -3+b, 12, 2);
+        // robe cross emblem
+        g.fillStyle(0xffffff, 0.7);
+        g.fillRect(-1, 0+b, 2, 6);
+        g.fillRect(-3, 2+b, 6, 2);
+        // head
+        g.fillStyle(0xffcc99); g.fillRect(-3, -11+b, 6, 6);
+        // hood
+        g.fillStyle(dark);
+        g.fillRect(-5, -13+b, 10, 5);
+        g.fillStyle(this.color);
+        g.fillRect(-4, -12+b, 8, 3);
+        // halo
+        g.lineStyle(1, 0xffdd88, 0.6);
+        g.strokeCircle(0, -15+b, 5);
+        g.lineStyle(0);
+        // eyes (gentle)
+        g.fillStyle(0xffffff); g.fillRect(flip, -9+b, 2, 2);
+        g.fillStyle(0x44aa44); g.fillRect(flip+1, -9+b, 1, 1);
+        // staff with cross top
+        g.fillStyle(0xccbb88); g.fillRect(flip*6, -6+b, flip*2, 16);
+        g.fillStyle(0xffdd88); g.fillRect(flip*5, -8+b, flip*4, 2);
+        g.fillStyle(0xffdd88); g.fillRect(flip*6, -10+b, flip*2, 5);
+        // feet
+        g.fillStyle(0x664422); g.fillRect(-3, 9+b, 3, 2); g.fillRect(2, 9+b, 3, 2);
+    }
+
+    _drawEnemy(g, dark, light, b, flip) {
+        const etype = this.enemyType;
+        if (etype === 'runner' || etype === 'elite_runner') {
+            // lean forward, spiky
+            g.fillStyle(0x000000, 0.3); g.fillEllipse(0, 14, 16, 5);
+            g.fillStyle(this.color); g.fillRect(-4+flip*2, -3+b, 9, 10);
+            g.fillStyle(dark); g.fillRect(-4+flip*2, -3+b, 9, 2);
+            // spiky head
+            g.fillStyle(this.color);
+            g.fillRect(-2+flip*2, -10+b, 6, 6);
+            // spikes on head
+            g.fillStyle(light);
+            g.beginPath(); g.moveTo(flip*2, -14+b); g.lineTo(-2+flip*2, -10+b); g.lineTo(2+flip*2, -10+b); g.closePath(); g.fillPath();
+            g.beginPath(); g.moveTo(flip*4, -13+b); g.lineTo(1+flip*2, -10+b); g.lineTo(5+flip*2, -10+b); g.closePath(); g.fillPath();
+            // eyes (angry)
+            g.fillStyle(0xff4444); g.fillRect(flip*2+1, -8+b, 2, 2);
+            // claws
+            g.fillStyle(0xccccaa); g.fillRect(flip*6, 0+b, flip*3, 2); g.fillRect(flip*6, 3+b, flip*3, 2);
+            // thin legs
+            g.fillStyle(dark); g.fillRect(-2, 7+b, 2, 5); g.fillRect(2, 7+b, 2, 5);
+            g.fillStyle(0x554422); g.fillRect(-2, 11+b, 2, 2); g.fillRect(2, 11+b, 2, 2);
+        } else if (etype === 'bruiser' || etype === 'elite_bruiser') {
+            // very wide and large
+            g.fillStyle(0x000000, 0.3); g.fillEllipse(0, 16, 26, 7);
+            g.fillStyle(this.color); g.fillRect(-10, -6+b, 20, 16);
+            g.fillStyle(dark); g.fillRect(-10, -6+b, 20, 3);
+            // big head
+            g.fillStyle(this.color); g.fillRect(-5, -14+b, 10, 8);
+            g.fillStyle(dark); g.fillRect(-5, -14+b, 10, 2);
+            // small eyes
+            g.fillStyle(0xff6644); g.fillRect(-3, -10+b, 2, 2); g.fillRect(2, -10+b, 2, 2);
+            // tusks
+            g.fillStyle(0xeeeecc); g.fillRect(-4, -7+b, 2, 3); g.fillRect(3, -7+b, 2, 3);
+            // big arms
+            g.fillStyle(dark); g.fillRect(-13, -3+b, 4, 10); g.fillRect(9, -3+b, 4, 10);
+            g.fillStyle(this.color); g.fillRect(-12, -2+b, 3, 8); g.fillRect(10, -2+b, 3, 8);
+            // thick legs
+            g.fillStyle(dark); g.fillRect(-6, 10+b, 5, 5); g.fillRect(2, 10+b, 5, 5);
+            g.fillStyle(0x554422); g.fillRect(-6, 14+b, 5, 2); g.fillRect(2, 14+b, 5, 2);
+        } else if (etype === 'spitter') {
+            // ranged enemy with spit sac
+            g.fillStyle(0x000000, 0.3); g.fillEllipse(0, 14, 16, 5);
+            g.fillStyle(this.color); g.fillRect(-5, -2+b, 10, 10);
+            g.fillStyle(dark); g.fillRect(-5, -2+b, 10, 2);
+            // bloated neck/sac
+            g.fillStyle(light, 0.7); g.fillCircle(0, 1+b, 5);
+            // head
+            g.fillStyle(this.color); g.fillRect(-3, -10+b, 6, 6);
+            // slitted eyes
+            g.fillStyle(0x44ff88); g.fillRect(-2, -8+b, 2, 1); g.fillRect(1, -8+b, 2, 1);
+            // antenna
+            g.lineStyle(1, light);
+            g.beginPath(); g.moveTo(-2, -10+b); g.lineTo(-4, -14+b); g.strokePath();
+            g.beginPath(); g.moveTo(2, -10+b); g.lineTo(4, -14+b); g.strokePath();
+            g.lineStyle(0);
+            g.fillStyle(light); g.fillCircle(-4, -14+b, 1.5); g.fillCircle(4, -14+b, 1.5);
+            // legs
+            g.fillStyle(dark); g.fillRect(-3, 8+b, 3, 4); g.fillRect(1, 8+b, 3, 4);
+        } else {
+            this._drawDefault(g, dark, b, flip);
+        }
+
+        if (this.bleeding) {
+            g.fillStyle(0xff0000, 0.4);
+            g.fillCircle(Phaser.Math.Between(-4, 4), Phaser.Math.Between(-2, 8), 2);
+        }
+    }
+
+    _drawBoss(g, dark, light, b, flip) {
+        // large aura
+        g.fillStyle(0xff2244, 0.08); g.fillCircle(0, 0+b, 30);
+        g.fillStyle(0xff2244, 0.05); g.fillCircle(0, 0+b, 38);
+        // shadow
+        g.fillStyle(0x000000, 0.3); g.fillEllipse(0, 22, 36, 10);
+        // body (very large)
+        g.fillStyle(this.color); g.fillRect(-14, -10+b, 28, 24);
+        g.fillStyle(dark); g.fillRect(-14, -10+b, 28, 4);
+        // armor plates
+        g.fillStyle(light, 0.4);
+        g.fillRect(-12, -6+b, 6, 8); g.fillRect(6, -6+b, 6, 8);
+        // head
+        g.fillStyle(this.color); g.fillRect(-7, -22+b, 14, 12);
+        g.fillStyle(dark); g.fillRect(-7, -22+b, 14, 3);
+        // horns
+        g.fillStyle(0xddccaa);
+        g.beginPath(); g.moveTo(-6, -22+b); g.lineTo(-12, -30+b); g.lineTo(-4, -22+b); g.closePath(); g.fillPath();
+        g.beginPath(); g.moveTo(6, -22+b); g.lineTo(12, -30+b); g.lineTo(4, -22+b); g.closePath(); g.fillPath();
+        // glowing eyes
+        g.fillStyle(0xff4444); g.fillRect(-4, -17+b, 3, 3); g.fillRect(2, -17+b, 3, 3);
+        g.fillStyle(0xffaa44, 0.5); g.fillCircle(-3, -16+b, 3); g.fillCircle(3, -16+b, 3);
+        // mouth/fangs
+        g.fillStyle(0xeeeecc); g.fillRect(-3, -12+b, 2, 3); g.fillRect(2, -12+b, 2, 3);
+        // big arms
+        g.fillStyle(dark); g.fillRect(-18, -6+b, 5, 16); g.fillRect(13, -6+b, 5, 16);
+        g.fillStyle(this.color); g.fillRect(-17, -5+b, 4, 14); g.fillRect(14, -5+b, 4, 14);
+        // fists
+        g.fillStyle(light); g.fillRect(-18, 8+b, 6, 5); g.fillRect(13, 8+b, 6, 5);
+        // legs
+        g.fillStyle(dark); g.fillRect(-8, 14+b, 7, 6); g.fillRect(2, 14+b, 7, 6);
+        g.fillStyle(0x554422); g.fillRect(-8, 19+b, 7, 3); g.fillRect(2, 19+b, 7, 3);
+
+        if (this.bleeding) {
+            g.fillStyle(0xff0000, 0.4);
+            g.fillCircle(Phaser.Math.Between(-6, 6), Phaser.Math.Between(-4, 10), 3);
+        }
+    }
+
+    _drawDefault(g, dark, b, flip) {
+        g.fillStyle(0x000000, 0.3); g.fillEllipse(0, 14, 18, 5);
+        g.fillStyle(this.color); g.fillRect(-6, -3+b, 12, 12);
+        g.fillStyle(dark); g.fillRect(-6, -3+b, 12, 2);
+        g.fillStyle(0xffcc99); g.fillRect(-3, -12+b, 7, 7);
+        g.fillStyle(0xffffff); g.fillRect(flip, -10+b, 2, 2);
+        g.fillStyle(0x333333); g.fillRect(flip+1, -10+b, 1, 2);
+        g.fillStyle(dark);
+        g.fillRect(-4, -14+b, 9, 3);
+        g.fillRect(-3, 9+b, 3, 4); g.fillRect(2, 9+b, 3, 4);
+        g.fillStyle(0x664422); g.fillRect(-3, 12+b, 3, 2); g.fillRect(2, 12+b, 3, 2);
     }
 
     update(delta, allCharacters) {
