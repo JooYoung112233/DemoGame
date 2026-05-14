@@ -9,12 +9,30 @@ class RosterManager {
     init() {
         this.load();
         if (this.roster.length === 0) {
-            this.roster.push(this._createCharacter('warrior', 1));
-            this.roster.push(this._createCharacter('rogue', 1));
-            this.roster.push(this._createCharacter('priest', 1));
-            this.roster.push(this._createCharacter('mage', 1));
+            ['warrior', 'rogue', 'priest', 'mage'].forEach(classKey => {
+                const char = this._createCharacter(classKey, 1);
+                const grade = this._rollStarterGrade();
+                const m = grade.statMult;
+                const v = () => 0.9 + Math.random() * 0.2;
+                char.baseStats.hp = Math.floor(char.baseStats.hp * m * v());
+                char.baseStats.atk = Math.floor(char.baseStats.atk * m * v());
+                char.baseStats.def = Math.floor(char.baseStats.def * m * v());
+                char.baseStats.critRate = Math.min(0.8, +(char.baseStats.critRate * (0.9 + m * 0.1 + Math.random() * 0.1)).toFixed(3));
+                char.baseStats.dodgeRate = Math.min(0.6, +(char.baseStats.dodgeRate * (0.9 + m * 0.1 + Math.random() * 0.1)).toFixed(3));
+                char.grade = grade.grade;
+                char.gradeLabel = grade.label;
+                char.gradeColor = grade.color;
+                this.roster.push(char);
+            });
             this.save();
         }
+    }
+
+    _rollStarterGrade() {
+        const r = Math.random();
+        if (r < 0.10) return { grade: 'rare', color: '#4488ff', label: '★희귀', statMult: 1.2 };
+        if (r < 0.40) return { grade: 'uncommon', color: '#44ff88', label: '고급', statMult: 1.1 };
+        return { grade: 'common', color: '#aaaaaa', label: '일반', statMult: 1.0 };
     }
 
     _createCharacter(classKey, level) {

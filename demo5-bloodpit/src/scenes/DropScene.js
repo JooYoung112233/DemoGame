@@ -59,15 +59,19 @@ class BPDropScene extends Phaser.Scene {
             drops.forEach((drop, i) => {
                 const x = startX + i * (cardWidth + gap);
                 const y = 220;
-                const rarity = BP_RARITIES[drop.rarity];
+                const rarity = BP_RARITIES[drop.rarity] || BP_RARITIES.common;
+                const stars = FARMING.getStars(drop.rarity);
 
                 const card = this.add.rectangle(x, y, cardWidth, cardHeight, 0x221111)
                     .setStrokeStyle(3, rarity.borderColor).setInteractive();
-                this.add.text(x, y - 78, `[${rarity.name}]`, {
+                this.add.text(x, y - 85, stars, {
+                    fontSize: '12px', fontFamily: 'monospace', color: rarity.color
+                }).setOrigin(0.5);
+                this.add.text(x, y - 68, `[${rarity.name}]`, {
                     fontSize: '11px', fontFamily: 'monospace', color: rarity.color
                 }).setOrigin(0.5);
-                this.add.text(x, y - 58, drop.name, {
-                    fontSize: '16px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+                this.add.text(x, y - 48, drop.name, {
+                    fontSize: '16px', fontFamily: 'monospace', color: rarity.color, fontStyle: 'bold'
                 }).setOrigin(0.5);
                 const typeLabel = { weapon: '⚔️ 무기', passive: '🔮 패시브', consumable: '🧪 소비' }[drop.type];
                 this.add.text(x, y - 38, typeLabel, {

@@ -345,73 +345,134 @@ class BPSetupScene extends Phaser.Scene {
             return;
         }
 
-        const recruits = BP_ROSTER.generateRecruits(3);
+        if (!this._recruitPool) {
+            this._recruitPool = BP_ROSTER.generateRecruits(3);
+            this._rerollCount = 0;
+        }
+        this._drawRecruitPopup();
+    }
+
+    _getRerollCost() {
+        if (this._rerollCount === 0) return 0;
+        return 20 + (this._rerollCount - 1) * 15;
+    }
+
+    _drawRecruitPopup() {
+        if (this._recruitPopup) this._recruitPopup.destroy();
+
+        const recruits = this._recruitPool;
         const popup = this.add.container(640, 360).setDepth(2000);
+        this._recruitPopup = popup;
         popup.add(this.add.rectangle(0, 0, 1280, 720, 0x000000, 0.7).setInteractive());
-        popup.add(this.add.rectangle(0, 0, 800, 340, 0x111111, 0.98).setStrokeStyle(2, 0x664422));
-        popup.add(this.add.text(0, -145, '🤝 징집 — 캐릭터 고용', {
+        popup.add(this.add.rectangle(0, 0, 850, 380, 0x111111, 0.98).setStrokeStyle(2, 0x664422));
+        popup.add(this.add.text(0, -170, '🤝 징집 — 캐릭터 고용', {
             fontSize: '18px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
         }).setOrigin(0.5));
-        popup.add(this.add.text(0, -120, `💰 ${StashManager.getGold()}G  |  로스터 ${BP_ROSTER.roster.length}/${BP_ROSTER.maxRoster}`, {
+        popup.add(this.add.text(0, -148, `💰 ${StashManager.getGold()}G  |  로스터 ${BP_ROSTER.roster.length}/${BP_ROSTER.maxRoster}`, {
             fontSize: '11px', fontFamily: 'monospace', color: '#888888'
         }).setOrigin(0.5));
 
         recruits.forEach((recruit, i) => {
-            const rx = -260 + i * 260;
+            const rx = -270 + i * 270;
             const base = BP_ALLIES[recruit.classKey];
             const roleLabel = { tank: '🛡️탱커', dps: '⚔️딜러', healer: '💚힐러' }[base.role] || '';
             const gradeColor = recruit.gradeColor || '#aaaaaa';
             const gradeLabel = recruit.gradeLabel || '일반';
+            const gradeStars = { common: '', uncommon: '★', rare: '★★', epic: '★★★', legendary: '★★★★' }[recruit.grade] || '';
             const gradeBorderMap = { legendary: 0xffaa00, epic: 0xaa44ff, rare: 0x4488ff, uncommon: 0x44ff88, common: 0x888888 };
             const gradeBorder = gradeBorderMap[recruit.grade] || 0x888888;
 
-            popup.add(this.add.rectangle(rx, 10, 230, 210, 0x221111).setStrokeStyle(3, gradeBorder));
-            popup.add(this.add.rectangle(rx, -85, 226, 8, gradeBorder));
-            popup.add(this.add.text(rx, -72, `[${gradeLabel}]`, {
+            popup.add(this.add.rectangle(rx, -5, 240, 220, 0x221111).setStrokeStyle(3, gradeBorder));
+            popup.add(this.add.rectangle(rx, -105, 236, 8, gradeBorder));
+            if (gradeStars) {
+                popup.add(this.add.text(rx, -94, gradeStars, {
+                    fontSize: '12px', fontFamily: 'monospace', color: gradeColor
+                }).setOrigin(0.5));
+            }
+            popup.add(this.add.text(rx, -78, `[${gradeLabel}]`, {
                 fontSize: '11px', fontFamily: 'monospace', color: gradeColor, fontStyle: 'bold'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, -54, base.name, {
+            popup.add(this.add.text(rx, -58, base.name, {
                 fontSize: '16px', fontFamily: 'monospace', color: gradeColor, fontStyle: 'bold'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, -34, `"${recruit.name}"`, {
+            popup.add(this.add.text(rx, -38, `"${recruit.name}"`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#cccccc'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, -16, `Lv.${recruit.level} ${roleLabel}`, {
+            popup.add(this.add.text(rx, -20, `Lv.${recruit.level} ${roleLabel}`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#bbbbbb'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, 4, `HP:${recruit.baseStats.hp}  ATK:${recruit.baseStats.atk}  DEF:${recruit.baseStats.def}`, {
+            popup.add(this.add.text(rx, 0, `HP:${recruit.baseStats.hp}  ATK:${recruit.baseStats.atk}  DEF:${recruit.baseStats.def}`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#dddddd'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, 22, `CRIT:${Math.floor(recruit.baseStats.critRate * 100)}%  SPD:${recruit.baseStats.attackSpeed}ms`, {
+            popup.add(this.add.text(rx, 18, `CRIT:${Math.floor(recruit.baseStats.critRate * 100)}%  SPD:${recruit.baseStats.attackSpeed}ms`, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, 38, `출혈:${Math.floor((recruit.baseStats.bleedChance||0)*100)}%  회피:${Math.floor((recruit.baseStats.dodgeRate||0)*100)}%`, {
+            popup.add(this.add.text(rx, 34, `출혈:${Math.floor((recruit.baseStats.bleedChance||0)*100)}%  회피:${Math.floor((recruit.baseStats.dodgeRate||0)*100)}%`, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#888888'
             }).setOrigin(0.5));
 
             const canAfford = StashManager.getGold() >= recruit.hireCost;
-            const hBtn = this.add.rectangle(rx, 68, 160, 36, canAfford ? 0x442211 : 0x222222)
+            const hBtn = this.add.rectangle(rx, 72, 160, 36, canAfford ? 0x442211 : 0x222222)
                 .setStrokeStyle(2, canAfford ? gradeBorder : 0x444444);
             if (canAfford) hBtn.setInteractive();
             popup.add(hBtn);
-            popup.add(this.add.text(rx, 68, `💰 ${recruit.hireCost}G 고용`, {
+            popup.add(this.add.text(rx, 72, `💰 ${recruit.hireCost}G 고용`, {
                 fontSize: '12px', fontFamily: 'monospace', color: canAfford ? '#ffaa44' : '#666666', fontStyle: 'bold'
             }).setOrigin(0.5));
 
             if (canAfford) {
                 hBtn.on('pointerdown', () => {
                     const result = BP_ROSTER.hireCharacter(recruit);
-                    if (result.success) { popup.destroy(); this._drawAll(); }
+                    if (result.success) {
+                        this._recruitPool = null;
+                        this._rerollCount = 0;
+                        popup.destroy();
+                        this._recruitPopup = null;
+                        this._drawAll();
+                    }
                 });
                 hBtn.on('pointerover', () => hBtn.setFillStyle(0x664422));
                 hBtn.on('pointerout', () => hBtn.setFillStyle(0x442211));
             }
         });
 
-        const closeBtn = this.add.rectangle(0, 140, 100, 30, 0x332222).setStrokeStyle(1, 0x664444).setInteractive();
+        // reroll button
+        const rerollCost = this._getRerollCost();
+        const rerollLabel = rerollCost === 0 ? '🔄 리롤 (무료)' : `🔄 리롤 (${rerollCost}G)`;
+        const canReroll = rerollCost === 0 || StashManager.getGold() >= rerollCost;
+        const rerollBtn = this.add.rectangle(-140, 155, 180, 36, canReroll ? 0x223322 : 0x222222)
+            .setStrokeStyle(2, canReroll ? 0x44aa44 : 0x444444);
+        if (canReroll) rerollBtn.setInteractive();
+        popup.add(rerollBtn);
+        popup.add(this.add.text(-140, 155, rerollLabel, {
+            fontSize: '12px', fontFamily: 'monospace', color: canReroll ? '#44ff88' : '#666666', fontStyle: 'bold'
+        }).setOrigin(0.5));
+
+        if (canReroll) {
+            rerollBtn.on('pointerdown', () => {
+                if (rerollCost > 0) StashManager.spendGold(rerollCost);
+                this._rerollCount++;
+                this._recruitPool = BP_ROSTER.generateRecruits(3);
+                this._drawRecruitPopup();
+            });
+            rerollBtn.on('pointerover', () => rerollBtn.setFillStyle(0x335533));
+            rerollBtn.on('pointerout', () => rerollBtn.setFillStyle(0x223322));
+        }
+
+        // next reroll cost preview
+        const nextCost = this._rerollCount === 0 ? 20 : 20 + this._rerollCount * 15;
+        popup.add(this.add.text(-140, 175, `다음 리롤: ${nextCost}G`, {
+            fontSize: '9px', fontFamily: 'monospace', color: '#556655'
+        }).setOrigin(0.5));
+
+        // close button
+        const closeBtn = this.add.rectangle(140, 155, 120, 36, 0x332222).setStrokeStyle(1, 0x664444).setInteractive();
         popup.add(closeBtn);
-        popup.add(this.add.text(0, 140, '닫기', { fontSize: '12px', fontFamily: 'monospace', color: '#aa8888' }).setOrigin(0.5));
-        closeBtn.on('pointerdown', () => popup.destroy());
+        popup.add(this.add.text(140, 155, '닫기', { fontSize: '13px', fontFamily: 'monospace', color: '#aa8888' }).setOrigin(0.5));
+        closeBtn.on('pointerdown', () => {
+            popup.destroy();
+            this._recruitPopup = null;
+        });
     }
 
     _openForge() {

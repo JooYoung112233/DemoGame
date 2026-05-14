@@ -9,7 +9,8 @@ const FarmingUI = {
         const value = ItemRegistry.getValue(item);
 
         const lines = [];
-        lines.push(`${regItem.icon || ''} ${regItem.name}  [${rarity.name}]`);
+        const stars = FARMING.getStars(item.rarity);
+        lines.push(`${regItem.icon || ''} ${regItem.name}  [${rarity.name}] ${stars}`);
         lines.push(regItem.desc || '');
         lines.push(`💰 ${value}G`);
         if (regItem.stats) {
@@ -170,13 +171,19 @@ const FarmingUI = {
 
             const icon = regItem.icon || FARMING.ICON[regItem.category] || '?';
             const enhLabel = entry.enhanceLevel ? ` +${entry.enhanceLevel}` : '';
-            overlay.add(scene.add.text(x - cellW/2 + 12, y - 12, icon + ' ' + regItem.name + enhLabel, {
+            const stars = FARMING.getStars(entry.rarity);
+            overlay.add(scene.add.text(x - cellW/2 + 12, y - 16, icon + ' ' + regItem.name + enhLabel, {
                 fontSize: '12px', fontFamily: 'monospace', color: rarity.color
             }));
+            if (stars) {
+                overlay.add(scene.add.text(x - cellW/2 + 12, y + 2, stars, {
+                    fontSize: '10px', fontFamily: 'monospace', color: rarity.color
+                }));
+            }
 
             const slotLabel = regItem.slot ? FARMING.SLOTS[regItem.slot] : FARMING.CATEGORIES[regItem.category];
-            overlay.add(scene.add.text(x - cellW/2 + 12, y + 8, slotLabel || '', {
-                fontSize: '10px', fontFamily: 'monospace', color: '#666666'
+            overlay.add(scene.add.text(x - cellW/2 + 12, y + 16, slotLabel || '', {
+                fontSize: '9px', fontFamily: 'monospace', color: '#666666'
             }));
 
             const tooltipItem = { ...regItem, rarity: entry.rarity, itemId: entry.itemId };

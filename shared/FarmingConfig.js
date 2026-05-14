@@ -40,5 +40,13 @@ const FARMING = {
         material: '💎',
         consumable: '🧪',
         key: '🔑'
+    },
+
+    RARITY_STARS: {
+        common: '', uncommon: '★', rare: '★★', epic: '★★★', legendary: '★★★★', ancient: '★★★★★', mythical: '★★★★★★'
+    },
+
+    getStars(rarity) {
+        return this.RARITY_STARS[rarity] || '';
     }
 };
