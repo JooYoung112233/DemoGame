@@ -52,50 +52,15 @@ class BPDropScene extends Phaser.Scene {
             }).setOrigin(0.5);
 
             const drops = this._drops || (this._drops = this.dropSystem.generateRoundDrops(clearedLevel));
-            const cardWidth = 280, cardHeight = 200, gap = 30;
+            const cardWidth = 280, cardHeight = 210, gap = 30;
             const totalWidth = 3 * cardWidth + 2 * gap;
             const startX = cx - totalWidth / 2 + cardWidth / 2;
 
             drops.forEach((drop, i) => {
                 const x = startX + i * (cardWidth + gap);
                 const y = 220;
-                const rarity = BP_RARITIES[drop.rarity] || BP_RARITIES.common;
-                const stars = FARMING.getStars(drop.rarity);
 
-                const card = this.add.rectangle(x, y, cardWidth, cardHeight, 0x221111)
-                    .setStrokeStyle(3, rarity.borderColor).setInteractive();
-                this.add.text(x, y - 85, stars, {
-                    fontSize: '12px', fontFamily: 'monospace', color: rarity.color
-                }).setOrigin(0.5);
-                this.add.text(x, y - 68, `[${rarity.name}]`, {
-                    fontSize: '11px', fontFamily: 'monospace', color: rarity.color
-                }).setOrigin(0.5);
-                this.add.text(x, y - 48, drop.name, {
-                    fontSize: '16px', fontFamily: 'monospace', color: rarity.color, fontStyle: 'bold'
-                }).setOrigin(0.5);
-                const typeLabel = { weapon: '⚔️ 무기', passive: '🔮 패시브', consumable: '🧪 소비' }[drop.type];
-                this.add.text(x, y - 38, typeLabel, {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#888888'
-                }).setOrigin(0.5);
-                this.add.text(x, y - 5, drop.desc, {
-                    fontSize: '12px', fontFamily: 'monospace', color: '#cccccc',
-                    wordWrap: { width: cardWidth - 30 }, align: 'center'
-                }).setOrigin(0.5);
-
-                if (drop.tag) {
-                    const tagColor = { bleed: '#ff4444', dodge: '#44ffff', corpse: '#ff8844' }[drop.tag] || '#888888';
-                    this.add.text(x, y + 28, `[${drop.tag} 빌드]`, {
-                        fontSize: '10px', fontFamily: 'monospace', color: tagColor
-                    }).setOrigin(0.5);
-                }
-
-                const selectBtn = this.add.rectangle(x, y + 65, 130, 32, rarity.borderColor, 0.8).setInteractive();
-                this.add.text(x, y + 65, '선택', {
-                    fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
-                }).setOrigin(0.5);
-
-                card.on('pointerover', () => card.setFillStyle(0x331818));
-                card.on('pointerout', () => card.setFillStyle(0x221111));
+                const { container, bg, selectBtn } = IconRenderer.drawItemCard(this, x, y, drop, cardWidth, cardHeight);
 
                 const doSelect = () => {
                     this.appliedDrops.push(drop);
@@ -104,7 +69,7 @@ class BPDropScene extends Phaser.Scene {
                     this._picked = true;
                     this._drawAll();
                 };
-                card.on('pointerdown', doSelect);
+                bg.on('pointerdown', doSelect);
                 selectBtn.on('pointerdown', doSelect);
             });
         } else {
