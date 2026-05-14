@@ -69,18 +69,34 @@ class RosterManager {
         return Math.floor((baseCosts[classKey] || 70) * (1 + (level - 1) * 0.4));
     }
 
+    _rollRecruitGrade() {
+        const r = Math.random();
+        if (r < 0.03) return { grade: 'legendary', color: '#ffaa00', label: '★전설', statMult: 1.5, costMult: 3.0 };
+        if (r < 0.10) return { grade: 'epic', color: '#aa44ff', label: '★에픽', statMult: 1.35, costMult: 2.2 };
+        if (r < 0.25) return { grade: 'rare', color: '#4488ff', label: '★희귀', statMult: 1.2, costMult: 1.6 };
+        if (r < 0.55) return { grade: 'uncommon', color: '#44ff88', label: '고급', statMult: 1.1, costMult: 1.2 };
+        return { grade: 'common', color: '#aaaaaa', label: '일반', statMult: 1.0, costMult: 1.0 };
+    }
+
     generateRecruits(count) {
         count = count || 3;
         const recruits = [];
         for (let i = 0; i < count; i++) {
             const classKey = BP_CLASS_POOL[Math.floor(Math.random() * BP_CLASS_POOL.length)];
-            const level = 1;
+            const level = Math.random() < 0.3 ? 2 : 1;
             const char = this._createCharacter(classKey, level);
-            // ±10% stat variance
+            const gradeInfo = this._rollRecruitGrade();
+            const m = gradeInfo.statMult;
             const variance = () => 0.9 + Math.random() * 0.2;
-            char.baseStats.hp = Math.floor(char.baseStats.hp * variance());
-            char.baseStats.atk = Math.floor(char.baseStats.atk * variance());
-            char.baseStats.def = Math.floor(char.baseStats.def * variance());
+            char.baseStats.hp = Math.floor(char.baseStats.hp * m * variance());
+            char.baseStats.atk = Math.floor(char.baseStats.atk * m * variance());
+            char.baseStats.def = Math.floor(char.baseStats.def * m * variance());
+            char.baseStats.critRate = Math.min(0.8, +(char.baseStats.critRate * (0.9 + m * 0.1 + Math.random() * 0.1)).toFixed(3));
+            char.baseStats.dodgeRate = Math.min(0.6, +(char.baseStats.dodgeRate * (0.9 + m * 0.1 + Math.random() * 0.1)).toFixed(3));
+            char.grade = gradeInfo.grade;
+            char.gradeLabel = gradeInfo.label;
+            char.gradeColor = gradeInfo.color;
+            char.hireCost = Math.floor(char.hireCost * gradeInfo.costMult);
             recruits.push(char);
         }
         return recruits;

@@ -81,8 +81,9 @@ class BPSetupScene extends Phaser.Scene {
                 }).setOrigin(0.5);
             }
 
-            const nameColor = isAvailable ? '#ffffff' : '#666666';
-            this.add.text(x, y - 22, `${base.name} ${char.name}`, {
+            const nameColor = isAvailable ? (char.gradeColor || '#ffffff') : '#666666';
+            const gradeTag = char.gradeLabel && char.grade !== 'common' ? `[${char.gradeLabel}] ` : '';
+            this.add.text(x, y - 22, `${gradeTag}${base.name} ${char.name}`, {
                 fontSize: '13px', fontFamily: 'monospace', color: nameColor, fontStyle: 'bold'
             }).setOrigin(0.5);
 
@@ -359,19 +360,24 @@ class BPSetupScene extends Phaser.Scene {
             const rx = -260 + i * 260;
             const base = BP_ALLIES[recruit.classKey];
             const roleLabel = { tank: '🛡️탱커', dps: '⚔️딜러', healer: '💚힐러' }[base.role] || '';
-            const colorHex = typeof base.color === 'number' ? '#' + base.color.toString(16).padStart(6, '0') : (base.color || '#ffffff');
+            const gradeColor = recruit.gradeColor || '#aaaaaa';
+            const gradeLabel = recruit.gradeLabel || '일반';
+            const gradeBorderMap = { legendary: 0xffaa00, epic: 0xaa44ff, rare: 0x4488ff, uncommon: 0x44ff88, common: 0x888888 };
+            const gradeBorder = gradeBorderMap[recruit.grade] || 0x888888;
 
-            popup.add(this.add.rectangle(rx, 10, 230, 200, 0x221111).setStrokeStyle(2, base.color));
-            // class color bar at top
-            popup.add(this.add.rectangle(rx, -80, 226, 8, base.color));
-            popup.add(this.add.text(rx, -60, base.name, {
-                fontSize: '16px', fontFamily: 'monospace', color: colorHex, fontStyle: 'bold'
+            popup.add(this.add.rectangle(rx, 10, 230, 210, 0x221111).setStrokeStyle(3, gradeBorder));
+            popup.add(this.add.rectangle(rx, -85, 226, 8, gradeBorder));
+            popup.add(this.add.text(rx, -72, `[${gradeLabel}]`, {
+                fontSize: '11px', fontFamily: 'monospace', color: gradeColor, fontStyle: 'bold'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, -38, `"${recruit.name}"`, {
+            popup.add(this.add.text(rx, -54, base.name, {
+                fontSize: '16px', fontFamily: 'monospace', color: gradeColor, fontStyle: 'bold'
+            }).setOrigin(0.5));
+            popup.add(this.add.text(rx, -34, `"${recruit.name}"`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#cccccc'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, -18, `Lv.${recruit.level} ${roleLabel}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: colorHex
+            popup.add(this.add.text(rx, -16, `Lv.${recruit.level} ${roleLabel}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#bbbbbb'
             }).setOrigin(0.5));
             popup.add(this.add.text(rx, 4, `HP:${recruit.baseStats.hp}  ATK:${recruit.baseStats.atk}  DEF:${recruit.baseStats.def}`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#dddddd'
@@ -379,16 +385,16 @@ class BPSetupScene extends Phaser.Scene {
             popup.add(this.add.text(rx, 22, `CRIT:${Math.floor(recruit.baseStats.critRate * 100)}%  SPD:${recruit.baseStats.attackSpeed}ms`, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, 40, `출혈:${Math.floor((recruit.baseStats.bleedChance||0)*100)}%  회피:${Math.floor((recruit.baseStats.dodgeRate||0)*100)}%`, {
+            popup.add(this.add.text(rx, 38, `출혈:${Math.floor((recruit.baseStats.bleedChance||0)*100)}%  회피:${Math.floor((recruit.baseStats.dodgeRate||0)*100)}%`, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#888888'
             }).setOrigin(0.5));
 
             const canAfford = StashManager.getGold() >= recruit.hireCost;
-            const hBtn = this.add.rectangle(rx, 60, 150, 35, canAfford ? 0x442211 : 0x222222)
-                .setStrokeStyle(2, canAfford ? 0xff8844 : 0x444444);
+            const hBtn = this.add.rectangle(rx, 68, 160, 36, canAfford ? 0x442211 : 0x222222)
+                .setStrokeStyle(2, canAfford ? gradeBorder : 0x444444);
             if (canAfford) hBtn.setInteractive();
             popup.add(hBtn);
-            popup.add(this.add.text(rx, 60, `💰 ${recruit.hireCost}G 고용`, {
+            popup.add(this.add.text(rx, 68, `💰 ${recruit.hireCost}G 고용`, {
                 fontSize: '12px', fontFamily: 'monospace', color: canAfford ? '#ffaa44' : '#666666', fontStyle: 'bold'
             }).setOrigin(0.5));
 
@@ -397,6 +403,8 @@ class BPSetupScene extends Phaser.Scene {
                     const result = BP_ROSTER.hireCharacter(recruit);
                     if (result.success) { popup.destroy(); this._drawAll(); }
                 });
+                hBtn.on('pointerover', () => hBtn.setFillStyle(0x664422));
+                hBtn.on('pointerout', () => hBtn.setFillStyle(0x442211));
             }
         });
 
