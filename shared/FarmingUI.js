@@ -153,7 +153,7 @@ const FarmingUI = {
 
         const cols = 6, cellW = 170, cellH = 70;
         const startX = 640 - (cols * cellW) / 2 + cellW / 2;
-        const startY = 120;
+        const startY = 200;
 
         filtered.forEach((entry, i) => {
             const regItem = ItemRegistry.get(entry.itemId);

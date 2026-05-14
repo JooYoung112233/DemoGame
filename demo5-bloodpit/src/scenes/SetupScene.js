@@ -359,22 +359,28 @@ class BPSetupScene extends Phaser.Scene {
             const rx = -260 + i * 260;
             const base = BP_ALLIES[recruit.classKey];
             const roleLabel = { tank: '🛡️탱커', dps: '⚔️딜러', healer: '💚힐러' }[base.role] || '';
+            const colorHex = typeof base.color === 'number' ? '#' + base.color.toString(16).padStart(6, '0') : (base.color || '#ffffff');
 
-            popup.add(this.add.rectangle(rx, 10, 230, 180, 0x221111).setStrokeStyle(2, base.color));
+            popup.add(this.add.rectangle(rx, 10, 230, 200, 0x221111).setStrokeStyle(2, base.color));
+            // class color bar at top
+            popup.add(this.add.rectangle(rx, -80, 226, 8, base.color));
             popup.add(this.add.text(rx, -60, base.name, {
-                fontSize: '16px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+                fontSize: '16px', fontFamily: 'monospace', color: colorHex, fontStyle: 'bold'
             }).setOrigin(0.5));
             popup.add(this.add.text(rx, -38, `"${recruit.name}"`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
+                fontSize: '11px', fontFamily: 'monospace', color: '#cccccc'
             }).setOrigin(0.5));
             popup.add(this.add.text(rx, -18, `Lv.${recruit.level} ${roleLabel}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#888888'
+                fontSize: '11px', fontFamily: 'monospace', color: colorHex
             }).setOrigin(0.5));
             popup.add(this.add.text(rx, 4, `HP:${recruit.baseStats.hp}  ATK:${recruit.baseStats.atk}  DEF:${recruit.baseStats.def}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#dddddd'
+            }).setOrigin(0.5));
+            popup.add(this.add.text(rx, 22, `CRIT:${Math.floor(recruit.baseStats.critRate * 100)}%  SPD:${recruit.baseStats.attackSpeed}ms`, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
             }).setOrigin(0.5));
-            popup.add(this.add.text(rx, 20, `CRIT:${Math.floor(recruit.baseStats.critRate * 100)}%  SPD:${recruit.baseStats.attackSpeed}ms`, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#888888'
+            popup.add(this.add.text(rx, 40, `출혈:${Math.floor((recruit.baseStats.bleedChance||0)*100)}%  회피:${Math.floor((recruit.baseStats.dodgeRate||0)*100)}%`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#888888'
             }).setOrigin(0.5));
 
             const canAfford = StashManager.getGold() >= recruit.hireCost;

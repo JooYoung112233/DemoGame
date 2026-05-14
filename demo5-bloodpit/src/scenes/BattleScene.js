@@ -243,20 +243,33 @@ class BPBattleScene extends Phaser.Scene {
             }
         });
 
-        if (consumables.length === 0) return;
+        if (consumables.length === 0) {
+            const emptyTxt = this.add.text(640, 695, '소비 아이템 없음', {
+                fontSize: '10px', fontFamily: 'monospace', color: '#444444'
+            }).setOrigin(0.5).setDepth(200);
+            this._consumableBarObjects.push(emptyTxt);
+            return;
+        }
 
+        // bar background
         const maxShow = Math.min(consumables.length, 6);
-        const btnW = 140, btnH = 35, gap = 6;
+        const btnW = 150, btnH = 36, gap = 8;
         const totalW = maxShow * btnW + (maxShow - 1) * gap;
         const startX = 640 - totalW / 2;
-        const y = 690;
+        const y = 692;
+
+        // bar label
+        const barLabel = this.add.text(startX + totalW / 2, y - 26, `🧪 소비 아이템 (${consumables.length})`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#886644'
+        }).setOrigin(0.5).setDepth(200);
+        this._consumableBarObjects.push(barLabel);
 
         for (let i = 0; i < maxShow; i++) {
             const c = consumables[i];
             const bx = startX + i * (btnW + gap) + btnW / 2;
 
-            const bg = this.add.rectangle(bx, y, btnW, btnH, 0x332211, 0.85)
-                .setStrokeStyle(1, 0x665533).setDepth(200).setInteractive();
+            const bg = this.add.rectangle(bx, y, btnW, btnH, 0x332211, 0.9)
+                .setStrokeStyle(2, 0x886633).setDepth(200).setInteractive();
             this._consumableBarObjects.push(bg);
 
             const label = this.add.text(bx, y, `${c.reg.icon} ${c.reg.name}`, {
@@ -271,8 +284,8 @@ class BPBattleScene extends Phaser.Scene {
                 this.updateBagCount();
                 this._drawConsumableBar();
             });
-            bg.on('pointerover', () => bg.setFillStyle(0x554422, 0.9));
-            bg.on('pointerout', () => bg.setFillStyle(0x332211, 0.85));
+            bg.on('pointerover', () => { bg.setFillStyle(0x554422, 1); bg.setStrokeStyle(2, 0xffaa44); });
+            bg.on('pointerout', () => { bg.setFillStyle(0x332211, 0.9); bg.setStrokeStyle(2, 0x886633); });
         }
     }
 

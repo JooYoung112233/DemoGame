@@ -10,6 +10,7 @@ class BPDropScene extends Phaser.Scene {
         this.prevAllies = data.allies || [];
         this.battleTime = data.time || 0;
         this._picked = false;
+        this._drops = null;
     }
 
     create() {
