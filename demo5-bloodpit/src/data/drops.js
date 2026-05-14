@@ -60,12 +60,10 @@ function generateDrops(danger, count) {
         const rarity = getRarityByDanger(danger);
         const roll = Math.random();
         let pool;
-        if (roll < 0.25) {
+        if (roll < 0.30) {
             pool = BP_WEAPONS.filter(w => w.id !== 'fist');
-        } else if (roll < 0.85) {
-            pool = BP_PASSIVES;
         } else {
-            pool = BP_CONSUMABLES;
+            pool = BP_PASSIVES;
         }
         const item = { ...pool[Math.floor(Math.random() * pool.length)] };
         item.rarity = rarity;
