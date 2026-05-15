@@ -201,8 +201,11 @@ class BattleScene extends Phaser.Scene {
                 }).setOrigin(0.5).setDepth(90);
                 this.tweens.add({ targets: gText, y: gText.y - 30, alpha: 0, duration: 800, onComplete: () => gText.destroy() });
 
-                if (Math.random() < 0.3 + this.currentRound * 0.04) {
-                    const item = generateItem(this.zoneKey, this.gameState.guildLevel);
+                const luckyBonus = this.collectedCards.includes('lucky') ? 1 : 0;
+                const dropChance = unit.isBoss ? 1.0 : 0.3 + this.currentRound * 0.04;
+                const bossRarityBonus = unit.isBoss ? 2 : (unit.isElite ? 1 : 0);
+                if (Math.random() < dropChance) {
+                    const item = generateItem(this.zoneKey, this.gameState.guildLevel, luckyBonus + bossRarityBonus);
                     if (item) {
                         this.loot.push(item);
                         this._showLootPopup(unit.container.x, unit.container.y - 40, item);
@@ -248,7 +251,10 @@ class BattleScene extends Phaser.Scene {
             this.battleOver = true;
             this.cameras.main.shake(100, 0.002);
 
-            const roundXp = 10 + this.currentRound * 5;
+            this._snapshotAllyState();
+
+            const isBoss = this.currentRound >= this.maxRounds;
+            const roundXp = 10 + this.currentRound * 5 + (isBoss ? 30 : 0);
             this.totalXp += roundXp;
 
             const clearTxt = this.add.text(640, 300, 'ROUND CLEAR', {
@@ -271,6 +277,23 @@ class BattleScene extends Phaser.Scene {
                 }
             });
         }
+    }
+
+    _snapshotAllyState() {
+        this._lastAllyHp = {};
+        this.allies.forEach(u => {
+            const merc = this.party.find(m => m.id === u.mercId);
+            if (!merc) return;
+            if (u.alive) {
+                this._lastAllyHp[u.mercId] = u.hp;
+                merc.currentHp = u.hp;
+            } else {
+                if (!this.casualties.find(c => c.id === merc.id)) {
+                    this.casualties.push(merc);
+                }
+                merc.alive = false;
+            }
+        });
     }
 
     _getRerollCost() {
@@ -433,27 +456,12 @@ class BattleScene extends Phaser.Scene {
 
         const hpState = {};
         this.party.forEach(merc => {
-            if (merc.alive) {
-                if (this.partyHpState && this.partyHpState[merc.id] !== undefined) {
-                    hpState[merc.id] = this.partyHpState[merc.id];
-                } else {
-                    hpState[merc.id] = merc.currentHp;
-                }
-            }
-        });
-
-        if (this._lastAllyHp) {
-            Object.assign(hpState, this._lastAllyHp);
-        }
-
-        // inter-round passive heal: 5% of max HP
-        Object.keys(hpState).forEach(id => {
-            const merc = this.party.find(m => m.id === id);
-            if (merc && merc.alive) {
-                const stats = merc.getStats();
-                const healAmt = Math.floor(stats.hp * 0.05);
-                hpState[id] = Math.min(stats.hp, hpState[id] + healAmt);
-            }
+            if (!merc.alive) return;
+            const snapshotHp = this._lastAllyHp && this._lastAllyHp[merc.id] !== undefined
+                ? this._lastAllyHp[merc.id] : merc.currentHp;
+            const stats = merc.getStats();
+            const healAmt = Math.floor(stats.hp * 0.05);
+            hpState[merc.id] = Math.min(stats.hp, snapshotHp + healAmt);
         });
 
         this.scene.restart({
@@ -471,33 +479,14 @@ class BattleScene extends Phaser.Scene {
     }
 
     _endRun(success) {
-        const survivors = [];
-        const newCasualties = [];
-
-        if (this.allies.length > 0) {
-            this.allies.forEach(u => {
-                const merc = this.party.find(m => m.id === u.mercId);
-                if (!merc) return;
-                if (u.alive) {
-                    merc.currentHp = u.hp;
-                    survivors.push(merc);
-                } else {
-                    newCasualties.push(merc);
-                }
-            });
-        }
-
-        this.party.forEach(merc => {
-            if (!survivors.find(m => m.id === merc.id) && !newCasualties.find(m => m.id === merc.id)) {
-                if (merc.alive) survivors.push(merc);
-            }
-        });
-
-        const allCasualties = [...this.casualties, ...newCasualties];
+        this._snapshotAllyState();
+        const survivors = this.party.filter(m => m.alive);
+        const allCasualties = [...this.casualties];
 
         const result = {
             success,
             zoneKey: this.zoneKey,
+            zoneLevel: this.zoneLevel,
             rounds: this.currentRound,
             goldEarned: this.totalGold,
             xpEarned: this.totalXp,
@@ -505,7 +494,7 @@ class BattleScene extends Phaser.Scene {
             casualties: allCasualties,
             survivors,
             cards: this.collectedCards,
-            events: []
+            zoneLevelUp: success
         };
 
         this.scene.start('RunResultScene', {

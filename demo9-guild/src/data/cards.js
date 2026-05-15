@@ -23,7 +23,7 @@ const CARD_DATA = {
     hp_3:      { name: '불굴',           category: 'buff',  tier: 3, desc: '전체 HP +15%',     apply: units => units.forEach(u => { u.maxHp = Math.floor(u.maxHp * 1.15); u.hp = Math.min(u.hp + Math.floor(u.maxHp * 0.15), u.maxHp); }) },
     allstat:   { name: '전투 숙련',       category: 'buff',  tier: 3, desc: 'ATK/DEF/SPD +5%', apply: units => units.forEach(u => { u.atk = Math.floor(u.atk * 1.05); u.def = Math.floor(u.def * 1.05); u.moveSpeed = Math.floor(u.moveSpeed * 1.05); }) },
     crit_3:    { name: '급소 간파',       category: 'combat', tier: 3, desc: 'CRIT +8% 크리피해+20%', apply: units => units.forEach(u => { u.critRate = Math.min(0.6, u.critRate + 0.08); u.critDmg += 0.2; }) },
-    laststand: { name: '최후의 저항',     category: 'combat', tier: 3, desc: 'HP 25%↓ 시 ATK+15%', apply: units => units.forEach(u => { u.lastStand = true; }) },
+    laststand: { name: '최후의 저항',     category: 'combat', tier: 3, desc: 'HP 25%↓ 시 전투력 +20%', apply: units => units.forEach(u => { u.lastStand = true; }) },
     heal_3:    { name: '대치유',         category: 'heal',  tier: 3, desc: '전체 HP 40% 회복', apply: units => units.forEach(u => { u.hp = Math.min(u.maxHp, u.hp + Math.floor(u.maxHp * 0.40)); }) },
     lucky:     { name: '행운의 기운',     category: 'loot',  tier: 3, desc: '드랍 희귀도 +1',   apply: () => {} }
 };

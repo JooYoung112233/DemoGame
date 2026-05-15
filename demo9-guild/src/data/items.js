@@ -46,7 +46,8 @@ const CONSUMABLE_TEMPLATES = [
 
 let _itemIdCounter = 1;
 
-function generateItem(zone, guildLevel) {
+function generateItem(zone, guildLevel, rarityBonus) {
+    rarityBonus = rarityBonus || 0;
     const roll = Math.random();
     let type, template;
 
@@ -68,7 +69,7 @@ function generateItem(zone, guildLevel) {
     }
 
     const rarityRoll = Math.random() * 100;
-    const levelBonus = guildLevel * 3;
+    const levelBonus = guildLevel * 3 + rarityBonus * 15;
     let rarity;
     if (rarityRoll < 5 + levelBonus * 0.5)       rarity = 'epic';
     else if (rarityRoll < 15 + levelBonus)        rarity = 'rare';

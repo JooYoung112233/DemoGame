@@ -19,8 +19,11 @@ class RunResultScene extends Phaser.Scene {
             fontSize: '28px', fontFamily: 'monospace', color: bannerColor, fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.text(640, 75, `${zone.name} — ${r.rounds}라운드`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#888899'
+        const zoneInfo = r.zoneLevelUp
+            ? `${zone.name} — ${r.rounds}라운드  |  구역 레벨 업!`
+            : `${zone.name} — ${r.rounds}라운드`;
+        this.add.text(640, 75, zoneInfo, {
+            fontSize: '13px', fontFamily: 'monospace', color: r.zoneLevelUp ? '#ffaa44' : '#888899'
         }).setOrigin(0.5);
 
         let cy = 110;
@@ -91,7 +94,8 @@ class RunResultScene extends Phaser.Scene {
         const allParty = [...r.survivors, ...r.casualties];
         let xpX = 60;
         r.survivors.forEach(merc => {
-            const xpGain = Math.floor(r.xpEarned * 0.5 + r.rounds * 5);
+            const bossBonus = r.success ? 15 : 0;
+            const xpGain = Math.floor(r.xpEarned * 0.5 + r.rounds * 5 + bossBonus);
             const oldLevel = merc.level;
             const leveled = merc.gainXp(xpGain);
             const base = merc.getBaseClass();
@@ -126,7 +130,12 @@ class RunResultScene extends Phaser.Scene {
         GuildManager.addGold(gs, r.goldEarned);
         GuildManager.addMessage(gs, `${ZONE_DATA[r.zoneKey].name} ${r.success ? '성공' : '실패'} — +${r.goldEarned}G`);
 
-        const leveled = GuildManager.addXp(gs, r.xpEarned);
+        GuildManager.addXp(gs, r.xpEarned);
+
+        if (r.zoneLevelUp && r.zoneKey) {
+            gs.zoneLevel[r.zoneKey] = (gs.zoneLevel[r.zoneKey] || 1) + 1;
+            GuildManager.addMessage(gs, `${ZONE_DATA[r.zoneKey].name} 구역 Lv.${gs.zoneLevel[r.zoneKey]} 달성!`);
+        }
 
         r.loot.forEach(item => {
             if (!StorageManager.addItem(gs, item)) {
