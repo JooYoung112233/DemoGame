@@ -41,18 +41,56 @@ class BattleScene extends Phaser.Scene {
     _drawBackground() {
         const zone = ZONE_DATA[this.zoneKey];
         const gfx = this.add.graphics();
-        gfx.fillGradientStyle(0x1a0a0a, 0x1a0a0a, 0x2a1515, 0x2a1515);
-        gfx.fillRect(0, 0, 1280, 720);
-        gfx.fillStyle(0x221111);
-        gfx.fillRect(0, 450, 1280, 270);
-        gfx.fillStyle(0x331818);
-        gfx.fillRect(0, 448, 1280, 4);
+
+        if (this.zoneKey === 'cargo') {
+            gfx.fillGradientStyle(0x1a1508, 0x1a1508, 0x2a2010, 0x2a2010);
+            gfx.fillRect(0, 0, 1280, 720);
+            gfx.fillStyle(0x22190a);
+            gfx.fillRect(0, 450, 1280, 270);
+            gfx.fillStyle(0x443311);
+            gfx.fillRect(0, 448, 1280, 4);
+            for (let i = 0; i < 6; i++) {
+                gfx.fillStyle(0x332200, 0.4);
+                const bx = 50 + i * 200 + Phaser.Math.Between(-20, 20);
+                gfx.fillRect(bx, 460, 60, 40);
+                gfx.lineStyle(1, 0x554422, 0.3);
+                gfx.strokeRect(bx, 460, 60, 40);
+            }
+            gfx.lineStyle(2, 0x554422, 0.15);
+            gfx.lineBetween(0, 500, 1280, 500);
+            gfx.lineBetween(0, 520, 1280, 520);
+        } else if (this.zoneKey === 'blackout') {
+            gfx.fillGradientStyle(0x0a0515, 0x0a0515, 0x15102a, 0x15102a);
+            gfx.fillRect(0, 0, 1280, 720);
+            gfx.fillStyle(0x110a22);
+            gfx.fillRect(0, 450, 1280, 270);
+            gfx.fillStyle(0x221144);
+            gfx.fillRect(0, 448, 1280, 4);
+            for (let i = 0; i < 12; i++) {
+                gfx.fillStyle(0x220044, 0.2);
+                gfx.fillCircle(Phaser.Math.Between(50, 1230), Phaser.Math.Between(460, 700), Phaser.Math.Between(3, 12));
+            }
+            for (let i = 0; i < 5; i++) {
+                const fx = Phaser.Math.Between(100, 1180);
+                const fy = Phaser.Math.Between(20, 420);
+                gfx.fillStyle(0x8844ff, 0.04);
+                gfx.fillCircle(fx, fy, Phaser.Math.Between(30, 80));
+            }
+        } else {
+            gfx.fillGradientStyle(0x1a0a0a, 0x1a0a0a, 0x2a1515, 0x2a1515);
+            gfx.fillRect(0, 0, 1280, 720);
+            gfx.fillStyle(0x221111);
+            gfx.fillRect(0, 450, 1280, 270);
+            gfx.fillStyle(0x331818);
+            gfx.fillRect(0, 448, 1280, 4);
+            for (let i = 0; i < 8; i++) {
+                gfx.fillStyle(0x330000, 0.3);
+                gfx.fillCircle(Phaser.Math.Between(50, 1230), Phaser.Math.Between(460, 700), Phaser.Math.Between(5, 15));
+            }
+        }
+
         gfx.fillStyle(zone.color, 0.02);
         gfx.fillRect(0, 0, 1280, 720);
-        for (let i = 0; i < 8; i++) {
-            gfx.fillStyle(0x330000, 0.3);
-            gfx.fillCircle(Phaser.Math.Between(50, 1230), Phaser.Math.Between(460, 700), Phaser.Math.Between(5, 15));
-        }
     }
 
     _drawHUD() {
@@ -139,7 +177,7 @@ class BattleScene extends Phaser.Scene {
     }
 
     _spawnEnemies() {
-        const { composition, scaleMult } = getEnemyComposition(this.currentRound, this.zoneLevel);
+        const { composition, scaleMult } = getEnemyComposition(this.currentRound, this.zoneLevel, this.zoneKey);
 
         const startX = 1100;
         const spacing = 55;
@@ -157,7 +195,8 @@ class BattleScene extends Phaser.Scene {
         });
 
         if (this.currentRound >= this.maxRounds) {
-            const bossUnit = BattleUnit.fromEnemyData(this, 'pitlord', scaleMult * 1.3, 1050, 420);
+            const bossType = getZoneBoss(this.zoneKey);
+            const bossUnit = BattleUnit.fromEnemyData(this, bossType, scaleMult * 1.3, 1050, 420);
             this.enemies.push(bossUnit);
             this.allUnits.push(bossUnit);
         }
