@@ -3,8 +3,8 @@ class DeployScene extends Phaser.Scene {
 
     init(data) {
         this.gameState = data.gameState;
-        this.selectedZone = null;
-        this.deployedIds = [];
+        this.selectedZone = data.selectedZone || null;
+        this.deployedIds = data.deployedIds || [];
     }
 
     create() {
@@ -83,7 +83,9 @@ class DeployScene extends Phaser.Scene {
                 fontSize: '11px', fontFamily: 'monospace', color: '#555566'
             }).setOrigin(0.5);
         } else {
-            this.add.text(x + w / 2, y + 100, `구역 Lv.${gs.zoneLevel[zoneKey]}`, {
+            const zLv = gs.zoneLevel[zoneKey];
+            const rounds = getMaxRounds(zLv);
+            this.add.text(x + w / 2, y + 100, `구역 Lv.${zLv}  |  ${rounds}라운드`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#888899'
             }).setOrigin(0.5);
             this.add.text(x + w / 2, y + 120, zone.desc, {
@@ -94,7 +96,7 @@ class DeployScene extends Phaser.Scene {
             const hitZone = this.add.zone(x + w / 2, y + h / 2, w, h).setInteractive({ useHandCursor: true });
             hitZone.on('pointerdown', () => {
                 this.selectedZone = zoneKey;
-                this.scene.restart({ gameState: gs });
+                this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds });
             });
         }
     }
@@ -155,7 +157,7 @@ class DeployScene extends Phaser.Scene {
                     color: 0x555555, hoverColor: 0x666666, textColor: '#cccccc', fontSize: 10,
                     onClick: () => {
                         this.deployedIds = this.deployedIds.filter(id => id !== merc.id);
-                        this.scene.restart({ gameState: gs });
+                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds });
                     }
                 });
             } else {
@@ -209,7 +211,7 @@ class DeployScene extends Phaser.Scene {
                 const hitZone = this.add.zone(cx + cardW / 2, y + 49, cardW, 55).setInteractive({ useHandCursor: true });
                 hitZone.on('pointerdown', () => {
                     this.deployedIds.push(merc.id);
-                    this.scene.restart({ gameState: gs });
+                    this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds });
                 });
             }
 
@@ -231,7 +233,7 @@ class DeployScene extends Phaser.Scene {
                 const party = this.deployedIds.map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
                 gs.runCount++;
                 SaveManager.save(gs);
-                this.scene.start('PlaceholderBattleScene', {
+                this.scene.start('BattleScene', {
                     gameState: gs,
                     zoneKey: this.selectedZone,
                     party

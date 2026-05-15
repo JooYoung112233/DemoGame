@@ -4,7 +4,7 @@ const config = {
     height: 720,
     parent: 'game-container',
     backgroundColor: '#0a0a1a',
-    scene: [TitleScene, TownScene, RecruitScene, RosterScene, StorageScene, DeployScene, PlaceholderBattleScene, RunResultScene],
+    scene: [TitleScene, TownScene, RecruitScene, RosterScene, StorageScene, DeployScene, PlaceholderBattleScene, BattleScene, RunResultScene],
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
@@ -20,3 +20,4 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+window.game = game;

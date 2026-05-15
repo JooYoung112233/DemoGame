@@ -29,6 +29,24 @@ class RecruitScene extends Phaser.Scene {
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
+        const rerollCost = 50;
+        const canReroll = gs.gold >= rerollCost;
+        UIButton.create(this, 1160, 50, 140, 28, `리롤 (${rerollCost}G)`, {
+            color: canReroll ? 0x446688 : 0x333333,
+            hoverColor: 0x5588aa,
+            textColor: canReroll ? '#ccddee' : '#555555',
+            fontSize: 12,
+            disabled: !canReroll,
+            onClick: () => {
+                if (GuildManager.spendGold(gs, rerollCost)) {
+                    MercenaryManager.generateRecruitPool(gs);
+                    GuildManager.addMessage(gs, `모집 풀 갱신 (-${rerollCost}G)`);
+                    SaveManager.save(gs);
+                    this.scene.restart({ gameState: gs });
+                }
+            }
+        });
+
         if (gs.recruitPool.length === 0) {
             this.add.text(640, 360, '모집 가능한 용병이 없습니다\n런을 진행하면 새로운 용병이 등장합니다', {
                 fontSize: '14px', fontFamily: 'monospace', color: '#555566', align: 'center'
