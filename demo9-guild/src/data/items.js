@@ -150,3 +150,58 @@ function generateItem(zone, guildLevel, rarityBonus) {
 
     return item;
 }
+
+// ── Market Trend System ──────────────────────────────────────
+const MARKET_CATEGORIES = ['equipment', 'material', 'consumable'];
+
+function initMarketTrends(gs) {
+    if (gs.marketTrends) return;
+    gs.marketTrends = {
+        equipment: { modifier: 1.0, trend: 0, supply: 'normal' },
+        material:  { modifier: 1.0, trend: 0, supply: 'normal' },
+        consumable:{ modifier: 1.0, trend: 0, supply: 'normal' }
+    };
+    gs.marketTrendTick = 0;
+}
+
+function updateMarketTrends(gs, event) {
+    initMarketTrends(gs);
+    const trends = gs.marketTrends;
+
+    switch (event) {
+        case 'run_success':
+            trends.material.modifier = Math.max(0.6, trends.material.modifier - 0.05);
+            trends.equipment.modifier = Math.min(1.5, trends.equipment.modifier + 0.03);
+            break;
+        case 'run_fail':
+            trends.consumable.modifier = Math.min(1.5, trends.consumable.modifier + 0.08);
+            trends.equipment.modifier = Math.max(0.6, trends.equipment.modifier - 0.03);
+            break;
+        case 'bulk_sell':
+            trends.material.modifier = Math.max(0.6, trends.material.modifier - 0.08);
+            break;
+        case 'bulk_buy':
+            trends.equipment.modifier = Math.min(1.5, trends.equipment.modifier + 0.05);
+            break;
+    }
+
+    gs.marketTrendTick = (gs.marketTrendTick || 0) + 1;
+    if (gs.marketTrendTick % 3 === 0) {
+        for (const cat of MARKET_CATEGORIES) {
+            const drift = (Math.random() - 0.5) * 0.1;
+            trends[cat].modifier = Math.max(0.5, Math.min(1.6, trends[cat].modifier + drift));
+            trends[cat].modifier = Math.round(trends[cat].modifier * 100) / 100;
+
+            if (trends[cat].modifier <= 0.7) trends[cat].supply = 'surplus';
+            else if (trends[cat].modifier >= 1.3) trends[cat].supply = 'shortage';
+            else trends[cat].supply = 'normal';
+
+            trends[cat].trend = drift > 0.02 ? 1 : drift < -0.02 ? -1 : 0;
+        }
+    }
+}
+
+function getMarketPriceModifier(gs, itemType) {
+    initMarketTrends(gs);
+    return gs.marketTrends[itemType]?.modifier || 1.0;
+}

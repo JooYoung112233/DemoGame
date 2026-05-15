@@ -28,6 +28,7 @@ class AuctionScene extends Phaser.Scene {
         if (!gs.auctionHistory) gs.auctionHistory = [];
         if (!gs.consignedItems) gs.consignedItems = [];
         if (!gs.autoAuctionSlots) gs.autoAuctionSlots = 2;
+        if (typeof initMarketTrends === 'function') initMarketTrends(gs);
 
         this._drawTabs();
         this._drawContent();
@@ -83,7 +84,8 @@ class AuctionScene extends Phaser.Scene {
         const count = 6 + Math.floor(Math.random() * 4);
         for (let i = 0; i < count; i++) {
             const item = generateItem('common', gs.guildLevel, Math.random() < 0.2 ? 1 : 0);
-            const baseMult = 1.2 + Math.random() * 0.8;
+            const marketMod = typeof getMarketPriceModifier === 'function' ? getMarketPriceModifier(gs, item.type) : 1.0;
+            const baseMult = (1.2 + Math.random() * 0.8) * marketMod;
             item.auctionPrice = Math.floor(item.value * baseMult);
             if (Math.random() < 0.15) {
                 item.isHotDeal = true;
@@ -147,6 +149,25 @@ class AuctionScene extends Phaser.Scene {
         this._add(this.add.text(200, 90, `매물 ${stock.length}건`, {
             fontSize: '11px', fontFamily: 'monospace', color: '#666677'
         }));
+
+        if (gs.marketTrends) {
+            const trendIcons = { '-1': '▼', '0': '—', '1': '▲' };
+            const trendColors = { '-1': '#44ff88', '0': '#888888', '1': '#ff6644' };
+            const supplyLabels = { surplus: '과잉', normal: '보통', shortage: '부족' };
+            let tx = 350;
+            for (const cat of ['equipment', 'material', 'consumable']) {
+                const t = gs.marketTrends[cat];
+                const catNames = { equipment: '장비', material: '소재', consumable: '소비' };
+                const icon = trendIcons[t.trend] || '—';
+                const col = trendColors[t.trend] || '#888888';
+                const pct = Math.round((t.modifier - 1) * 100);
+                const pctStr = pct >= 0 ? `+${pct}%` : `${pct}%`;
+                this._add(this.add.text(tx, 107, `${catNames[cat]}: ${icon}${pctStr} (${supplyLabels[t.supply]})`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: col
+                }));
+                tx += 180;
+            }
+        }
 
         if (stock.length === 0) {
             this._add(this.add.text(640, 400, '해당 조건의 매물이 없습니다', {
@@ -383,6 +404,7 @@ class AuctionScene extends Phaser.Scene {
                 gs.auctionHistory.unshift({ action: 'sell', name: `일반 일괄 (${ids.length}개)`, price: totalGold, rarity: 'common', time: Date.now() });
                 if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
                 GuildManager.addMessage(gs, `경매장 일괄 판매: 일반 ${ids.length}개 (+${totalGold}G)`);
+                if (typeof updateMarketTrends === 'function') updateMarketTrends(gs, 'bulk_sell');
                 SaveManager.save(gs);
                 UIToast.show(this, `일반 ${ids.length}개 일괄 판매! +${totalGold}G`, { color: '#ffcc44' });
                 this._bulkSellConfirm = {};
@@ -425,6 +447,7 @@ class AuctionScene extends Phaser.Scene {
                 gs.auctionHistory.unshift({ action: 'sell', name: `소재 일괄 (${ids.length}개)`, price: totalGold, rarity: 'common', time: Date.now() });
                 if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
                 GuildManager.addMessage(gs, `경매장 일괄 판매: 소재 ${ids.length}개 (+${totalGold}G)`);
+                if (typeof updateMarketTrends === 'function') updateMarketTrends(gs, 'bulk_sell');
                 SaveManager.save(gs);
                 UIToast.show(this, `소재 ${ids.length}개 일괄 판매! +${totalGold}G`, { color: '#ffcc44' });
                 this._bulkSellConfirm = {};
@@ -480,7 +503,8 @@ class AuctionScene extends Phaser.Scene {
         const gs = this.gameState;
         const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
         const feePercent = { common: 10, uncommon: 15, rare: 20, epic: 25, legendary: 30 }[item.rarity] || 10;
-        const sellPrice = Math.floor(item.value * (1 - feePercent / 100));
+        const marketMod = typeof getMarketPriceModifier === 'function' ? getMarketPriceModifier(gs, item.type) : 1.0;
+        const sellPrice = Math.floor(item.value * (1 - feePercent / 100) * marketMod);
 
         const bg = this._add(this.add.graphics());
         bg.fillStyle(0x1a1a2e, 1);

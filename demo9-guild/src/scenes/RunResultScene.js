@@ -176,6 +176,10 @@ class RunResultScene extends Phaser.Scene {
 
         this._consignResults = AuctionScene.processConsignments(gs);
 
+        if (typeof updateMarketTrends === 'function') {
+            updateMarketTrends(gs, r.success ? 'run_success' : 'run_fail');
+        }
+
         SaveManager.save(gs);
     }
 }
