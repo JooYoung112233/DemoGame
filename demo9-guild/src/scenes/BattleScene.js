@@ -569,6 +569,20 @@ class BattleScene extends Phaser.Scene {
                 fontSize: '10px', fontFamily: 'monospace', color: '#886666'
             }).setOrigin(0.5).setDepth(100);
         }
+
+        const lvlEffects = typeof getZoneLevelEffects === 'function' ? getZoneLevelEffects(this.zoneKey, this.zoneLevel) : [];
+        this._zoneLevelEffects = lvlEffects;
+        let labelY = 82;
+        for (const eff of lvlEffects) {
+            this.add.text(640, labelY, `⚠ Lv.${this.zoneLevel} — ${eff.name}: ${eff.desc}`, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#cc6644'
+            }).setOrigin(0.5).setDepth(100);
+            labelY += 12;
+
+            if (eff.effect === 'pitlord_rage' && this.pitGaugeMax) {
+                this._pitGaugeDropMult = (this._pitGaugeDropMult || 2) * eff.decayMult;
+            }
+        }
     }
 
     _applyBlessings() {

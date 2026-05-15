@@ -22,8 +22,11 @@ class CargoBattleScene extends Phaser.Scene {
         if (data.trainCars) {
             this.trainCars = data.trainCars;
         } else {
-            this.trainCars = null; // will be initialized in create
+            this.trainCars = null;
         }
+
+        this.visitedStations = data.visitedStations || [];
+        this.currentStation = data.currentStation || null;
     }
 
     create() {
@@ -39,6 +42,7 @@ class CargoBattleScene extends Phaser.Scene {
         this._dangerVignette = null;
 
         this._initTrainCars();
+        this._pickStation();
         this._drawBackground();
         this._drawTrainDisplay();
         this._drawHUD();
@@ -50,6 +54,7 @@ class CargoBattleScene extends Phaser.Scene {
         this._spawnEnemies();
         this._applyCarFunctions();
         this._applyHeldCardBuffs();
+        this._applyStationEffect();
         this._showRoundAnnounce();
 
         // Consume loot bonus after applying to this round
@@ -94,6 +99,63 @@ class CargoBattleScene extends Phaser.Scene {
         // generator being alive enables all; without generator only cargo works on its own
         if (carKey === 'generator' || carKey === 'cargo') return true;
         return this.trainCars.generator.alive;
+    }
+
+    // ─── Station System ────────────────────────────────────────────
+
+    _pickStation() {
+        const stations = [
+            { key: 'deck', name: '갑판', icon: '🚢', desc: '바람이 강하다 — 원거리 ATK +15%', color: '#44aaff' },
+            { key: 'hold', name: '화물창', icon: '📦', desc: '물자가 쏟아진다 — 골드 +30%', color: '#ffcc44' },
+            { key: 'engine', name: '기관실', icon: '⚙', desc: '열기가 오른다 — 전체 SPD +20%', color: '#ff8844' },
+            { key: 'infirmary', name: '의무실', icon: '🏥', desc: '치유의 기운 — 라운드 시작 HP 10% 회복', color: '#44ff88' },
+            { key: 'bridge', name: '함교', icon: '🧭', desc: '전술 지휘 — 전체 DEF +5, CRIT +3%', color: '#cc88ff' }
+        ];
+        if (!this.currentStation) {
+            const available = stations.filter(s => !this.visitedStations.includes(s.key));
+            const pool = available.length > 0 ? available : stations;
+            this.currentStation = pool[Math.floor(Math.random() * pool.length)];
+            this.visitedStations.push(this.currentStation.key);
+        }
+    }
+
+    _applyStationEffect() {
+        if (!this.currentStation) return;
+        const st = this.currentStation;
+
+        const lvlEffects = typeof getZoneLevelEffects === 'function' ? getZoneLevelEffects('cargo', this.zoneLevel) : [];
+        const trainSpeedEff = lvlEffects.find(e => e.effect === 'train_speed');
+        const stationMult = trainSpeedEff ? trainSpeedEff.stationBonus : 1.0;
+
+        switch (st.key) {
+            case 'deck':
+                this.allies.forEach(u => { if (u.range > 100) u.atk = Math.floor(u.atk * (1 + 0.15 * stationMult)); });
+                break;
+            case 'hold':
+                this._stationGoldBonus = 0.3 * stationMult;
+                break;
+            case 'engine':
+                this.allies.forEach(u => { u.moveSpeed = Math.floor(u.moveSpeed * (1 + 0.2 * stationMult)); });
+                break;
+            case 'infirmary':
+                this.allies.forEach(u => { u.hp = Math.min(u.maxHp, u.hp + Math.floor(u.maxHp * 0.1 * stationMult)); });
+                break;
+            case 'bridge':
+                this.allies.forEach(u => {
+                    u.def += Math.floor(5 * stationMult);
+                    u.critRate = Math.min(0.6, u.critRate + 0.03 * stationMult);
+                });
+                break;
+        }
+
+        this._zoneLevelEffects = lvlEffects;
+        for (const eff of lvlEffects) {
+            if (eff.effect === 'storm_zone') {
+                this._stormInterval = eff.interval * 1000;
+                this._stormDmgPercent = eff.dmgPercent;
+                this._stormTimer = this._stormInterval;
+            }
+        }
     }
 
     // ─── Background ──────────────────────────────────────────────
@@ -175,6 +237,12 @@ class CargoBattleScene extends Phaser.Scene {
         _h(this.add.text(60, 40, `구역 Lv.${this.zoneLevel}`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#886666'
         }).setDepth(100));
+
+        if (this.currentStation) {
+            _h(this.add.text(60, 54, `${this.currentStation.icon} ${this.currentStation.name} 정차 — ${this.currentStation.desc}`, {
+                fontSize: '9px', fontFamily: 'monospace', color: this.currentStation.color
+            }).setDepth(100));
+        }
 
         // Gold
         this.goldText = _h(this.add.text(1240, 48, `💰 ${this.totalGold}G`, {
@@ -502,6 +570,9 @@ class CargoBattleScene extends Phaser.Scene {
                 // Cargo car alive: +25% gold
                 if (this.trainCars.cargo.alive) {
                     goldDrop = Math.floor(goldDrop * 1.25);
+                }
+                if (this._stationGoldBonus) {
+                    goldDrop = Math.floor(goldDrop * (1 + this._stationGoldBonus));
                 }
 
                 this.totalGold += goldDrop;
@@ -1302,7 +1373,9 @@ class CargoBattleScene extends Phaser.Scene {
             partyHpState: hpState,
             trainCars: this.trainCars,
             cardHand: this.cardHand,
-            lootBonusNextRound: this.lootBonusNextRound
+            lootBonusNextRound: this.lootBonusNextRound,
+            visitedStations: this.visitedStations,
+            currentStation: null
         });
     }
 
@@ -1358,6 +1431,26 @@ class CargoBattleScene extends Phaser.Scene {
         if (this.killStreakTimer > 0) {
             this.killStreakTimer -= dt;
             if (this.killStreakTimer <= 0) this.killStreak = 0;
+        }
+
+        if (this._stormTimer !== undefined) {
+            this._stormTimer -= dt;
+            if (this._stormTimer <= 0) {
+                this._stormTimer = this._stormInterval;
+                const pct = this._stormDmgPercent || 0.05;
+                [...this.allies, ...this.enemies].forEach(u => {
+                    if (!u.alive) return;
+                    const dmg = Math.max(1, Math.floor(u.maxHp * pct));
+                    u.hp -= dmg;
+                    DamagePopup.show(this, u.container.x, u.container.y - 25, `폭풍 -${dmg}`, 0x4488ff, false);
+                    if (u.hp <= 0) { u.hp = 0; u.die(null, this.allUnits); }
+                });
+                for (const car of Object.values(this.trainCars)) {
+                    if (car.alive) car.hp -= Math.floor(car.maxHp * 0.03);
+                    if (car.hp <= 0) { car.hp = 0; car.alive = false; }
+                }
+                this._drawTrainDisplay();
+            }
         }
 
         const prevDeadCount = this.enemies.filter(e => !e.alive).length;

@@ -43,6 +43,34 @@ const ZONE_DATA = {
     }
 };
 
+const ZONE_LEVEL_EFFECTS = {
+    bloodpit: {
+        5:  { name: '투기장 축소', desc: '전장 범위 -20%, 전투 시간 제한 45초', effect: 'arena_shrink', value: 0.8, timeLimit: 45 },
+        7:  { name: '관중의 야유', desc: '공격 실패 시 ATK -3% (중첩), 적 처치 시 ATK +5%', effect: 'crowd_pressure', penaltyMiss: 0.03, bonusKill: 0.05 },
+        10: { name: '핏로드의 분노', desc: '핏 게이지 감소속도 2배, MAX 시 ATK +50%', effect: 'pitlord_rage', decayMult: 2, maxBonus: 0.5 }
+    },
+    cargo: {
+        5:  { name: '열차 가속', desc: '라운드 시간 제한 50초, 정차 보너스 +50%', effect: 'train_speed', timeLimit: 50, stationBonus: 1.5 },
+        7:  { name: '폭풍 지대', desc: '매 10초마다 전체 피해 (적+아군), 칸 HP 감소', effect: 'storm_zone', interval: 10, dmgPercent: 0.05 },
+        10: { name: '최종 화물', desc: '라운드 시작 시 화물칸 폭발 위협, 방어 성공 시 보상 3배', effect: 'final_cargo', rewardMult: 3 }
+    },
+    blackout: {
+        5:  { name: '완전한 암흑', desc: '시야 -1칸, 저주 레벨 상승 속도 +50%', effect: 'full_dark', fogReduction: 1, curseSpeedMult: 1.5 },
+        7:  { name: '미궁의 변형', desc: '탐색한 방이 랜덤으로 재배치, 보스방 위치 변경', effect: 'maze_shift' },
+        10: { name: '저택의 분노', desc: '모든 적 +30% 강화, 보물방 드랍 등급 +2', effect: 'mansion_rage', enemyBuff: 0.3, lootBonus: 2 }
+    }
+};
+
+function getZoneLevelEffects(zoneKey, zoneLevel) {
+    const effects = [];
+    const zoneEffects = ZONE_LEVEL_EFFECTS[zoneKey];
+    if (!zoneEffects) return effects;
+    for (const [lvl, effect] of Object.entries(zoneEffects)) {
+        if (zoneLevel >= parseInt(lvl)) effects.push(effect);
+    }
+    return effects;
+}
+
 const ZONE_KEYS = Object.keys(ZONE_DATA);
 
 function getAffinityXpNeeded(level) {
