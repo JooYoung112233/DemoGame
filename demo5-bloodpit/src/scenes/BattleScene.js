@@ -416,6 +416,13 @@ class BPBattleScene extends Phaser.Scene {
     }
 
     onRoundCleared() {
+        // add gold reward
+        const goldReward = 15 + this.dangerSystem.level * 8;
+        let totalGold = goldReward;
+        if (this.dangerSystem.isBossRound()) totalGold += 300;
+        else if (this.dangerSystem.isMiniBossRound()) totalGold += 100;
+        StashManager.addGold(totalGold);
+
         // add EXP to surviving characters
         const expPerChar = 30 + this.dangerSystem.level * 5;
         this.allies.forEach(a => {

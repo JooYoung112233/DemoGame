@@ -39,7 +39,7 @@ class RosterManager {
         const base = BP_ALLIES[classKey];
         if (!base) return null;
         const name = this._generateName();
-        const levelMult = 1 + (level - 1) * 0.05;
+        const levelMult = 1 + (level - 1) * 0.08;
         const id = 'char_' + (this._nextId++);
         return {
             id,
@@ -50,8 +50,8 @@ class RosterManager {
             expToNext: this._expForLevel(level),
             baseStats: {
                 hp: Math.floor(base.hp * levelMult),
-                atk: Math.floor(base.atk * (1 + (level - 1) * 0.03)),
-                def: Math.floor(base.def * (1 + (level - 1) * 0.02)),
+                atk: Math.floor(base.atk * (1 + (level - 1) * 0.06)),
+                def: Math.floor(base.def * (1 + (level - 1) * 0.04)),
                 attackSpeed: base.attackSpeed,
                 range: base.range,
                 moveSpeed: base.moveSpeed,
@@ -203,10 +203,10 @@ class RosterManager {
         char.level++;
         char.expToNext = this._expForLevel(char.level);
         const base = BP_ALLIES[char.classKey];
-        const levelMult = 1 + (char.level - 1) * 0.05;
+        const levelMult = 1 + (char.level - 1) * 0.08;
         char.baseStats.hp = Math.floor(base.hp * levelMult);
-        char.baseStats.atk = Math.floor(base.atk * (1 + (char.level - 1) * 0.03));
-        char.baseStats.def = Math.floor(base.def * (1 + (char.level - 1) * 0.02));
+        char.baseStats.atk = Math.floor(base.atk * (1 + (char.level - 1) * 0.06));
+        char.baseStats.def = Math.floor(base.def * (1 + (char.level - 1) * 0.04));
     }
 
     getPromotionPaths(charId) {
@@ -272,11 +272,11 @@ class RosterManager {
 
     _calcStatsForClass(classKey, level) {
         const base = BP_ALLIES[classKey];
-        const levelMult = 1 + (level - 1) * 0.05;
+        const levelMult = 1 + (level - 1) * 0.08;
         return {
             hp: Math.floor(base.hp * levelMult),
-            atk: Math.floor(base.atk * (1 + (level - 1) * 0.03)),
-            def: Math.floor(base.def * (1 + (level - 1) * 0.02)),
+            atk: Math.floor(base.atk * (1 + (level - 1) * 0.06)),
+            def: Math.floor(base.def * (1 + (level - 1) * 0.04)),
             attackSpeed: base.attackSpeed,
             range: base.range,
             moveSpeed: base.moveSpeed,
@@ -303,7 +303,7 @@ class RosterManager {
             const reg = ItemRegistry.get(item.itemId);
             if (!reg || !reg.stats) return;
             const rarityMult = (FARMING.RARITY_STAT_MULT && FARMING.RARITY_STAT_MULT[item.rarity]) || 1;
-            const enhMult = 1 + (item.enhanceLevel || 0) * 0.05;
+            const enhMult = 1 + (item.enhanceLevel || 0) * 0.07;
             Object.keys(reg.stats).forEach(key => {
                 const val = reg.stats[key] * rarityMult * enhMult;
                 if (key === 'hp' || key === 'atk' || key === 'def' || key === 'moveSpeed') {

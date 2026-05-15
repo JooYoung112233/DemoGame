@@ -2,17 +2,17 @@ const ENHANCE_CONFIG = {
     maxLevel: 15,
     breakStartLevel: 10,
     costs: {
-        1: 20, 2: 30, 3: 50, 4: 80, 5: 120,
-        6: 180, 7: 250, 8: 350, 9: 500, 10: 700,
-        11: 1000, 12: 1500, 13: 2200, 14: 3500, 15: 5000
+        1: 15, 2: 25, 3: 40, 4: 60, 5: 90,
+        6: 140, 7: 200, 8: 280, 9: 400, 10: 550,
+        11: 800, 12: 1200, 13: 1800, 14: 2800, 15: 4000
     },
     successRate: {
         1: 1.0, 2: 0.95, 3: 0.90, 4: 0.85, 5: 0.80,
-        6: 0.70, 7: 0.60, 8: 0.50, 9: 0.40, 10: 0.30,
-        11: 0.25, 12: 0.20, 13: 0.15, 14: 0.10, 15: 0.07
+        6: 0.75, 7: 0.65, 8: 0.55, 9: 0.45, 10: 0.35,
+        11: 0.30, 12: 0.25, 13: 0.20, 14: 0.18, 15: 0.15
     },
     breakRate: {
-        10: 0.05, 11: 0.10, 12: 0.20, 13: 0.35, 14: 0.50, 15: 0.60
+        10: 0.03, 11: 0.06, 12: 0.12, 13: 0.20, 14: 0.30, 15: 0.40
     }
 };
 
@@ -70,8 +70,8 @@ class EnhanceSystem {
         const currentLevel = item.enhanceLevel || 0;
         const nextLevel = currentLevel + 1;
         const rarityMult = (FARMING.RARITY_STAT_MULT && FARMING.RARITY_STAT_MULT[item.rarity]) || 1;
-        const currentMult = rarityMult * (1 + currentLevel * 0.05);
-        const nextMult = rarityMult * (1 + nextLevel * 0.05);
+        const currentMult = rarityMult * (1 + currentLevel * 0.07);
+        const nextMult = rarityMult * (1 + nextLevel * 0.07);
 
         const current = {};
         const next = {};

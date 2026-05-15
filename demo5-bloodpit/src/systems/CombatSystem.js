@@ -22,7 +22,14 @@ class BPCombatSystem {
         if (this.nestSpawnTimer >= this.nestSpawnCooldown) {
             this.nestSpawnTimer = 0;
             if (enemies.filter(e => e.alive && !e.isNest).length < 12) {
-                const runnerData = { ...BP_ENEMIES.runner };
+                const scale = this.scene.dangerSystem ? this.scene.dangerSystem.getEnemyScale() : 1;
+                const baseRunner = BP_ENEMIES.runner;
+                const runnerData = {
+                    ...baseRunner,
+                    hp: Math.floor(baseRunner.hp * scale),
+                    atk: Math.floor(baseRunner.atk * scale),
+                    def: Math.floor(baseRunner.def * scale)
+                };
                 const x = nest.container.x + Phaser.Math.Between(-30, 30);
                 const y = nest.container.y + Phaser.Math.Between(-10, 10);
                 const spawned = new BPCharacter(this.scene, runnerData, 'enemy', x, y);

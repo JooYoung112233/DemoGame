@@ -17,7 +17,7 @@ class DangerSystem {
     }
 
     getEnemyScale() {
-        return 1 + this.level * 0.10;
+        return 1 + this.level * 0.08 + Math.max(0, this.level - 12) * 0.03;
     }
 
     getEnemyComposition() {
@@ -144,7 +144,7 @@ class DangerSystem {
         ];
 
         if (this.level === 10) return { name: '핏워든의 도전', desc: '미니보스 등장', apply() {} };
-        if (this.level >= 20) return { name: '핏로드의 분노', desc: '적 ATK +30%, HP +20%', apply(enemies) { enemies.forEach(e => { e.atk = Math.floor(e.atk * 1.3); e.hp = Math.floor(e.hp * 1.2); e.maxHp = e.hp; }); } };
+        if (this.level >= 20) return { name: '핏로드의 분노', desc: '적 ATK +20%, HP +15%', apply(enemies) { enemies.forEach(e => { e.atk = Math.floor(e.atk * 1.2); e.hp = Math.floor(e.hp * 1.15); e.maxHp = e.hp; }); } };
 
         let pool;
         if (this.level <= 6) pool = mods4to6;

@@ -421,11 +421,11 @@ const BP_SKILLS = {
         }
     },
     reaper: {
-        name: '사신의 낫', cooldown: 5000, desc: 'HP 30%이하 적 전원 즉사, 나머지에게 ATK×3',
+        name: '사신의 낫', cooldown: 5000, desc: 'HP 25%이하 적 전원 즉사, 나머지에게 ATK×3',
         execute(caster, enemies, scene) {
             enemies.forEach(e => {
                 if (!e.alive) return;
-                if (e.hp / e.maxHp <= 0.3) {
+                if (e.hp / e.maxHp <= 0.25) {
                     e.takeDamage(e.hp, caster);
                     DamagePopup.show(scene, e.container.x, e.container.y - 20, '즉사!', 0xcc2244, false);
                 } else {
@@ -512,16 +512,16 @@ const BP_SKILLS = {
         }
     },
     marksman: {
-        name: '헤드샷', cooldown: 7000, desc: 'HP 가장 높은 적에게 ATK×7 (DEF 무시, 100% 크리) + 즉사(HP 15%이하)',
+        name: '헤드샷', cooldown: 7000, desc: 'HP 가장 높은 적에게 ATK×5.5 (DEF 무시, 100% 크리) + 즉사(HP 10%이하)',
         execute(caster, enemies, scene) {
             const target = enemies.filter(e => e.alive).sort((a, b) => b.hp - a.hp)[0];
             if (!target) return;
-            if (target.hp / target.maxHp <= 0.15) {
+            if (target.hp / target.maxHp <= 0.10) {
                 target.hp = 0;
                 target.alive = false;
                 DamagePopup.show(scene, target.container.x, target.container.y - 20, '헤드샷!', 0x99dd44, false);
             } else {
-                const dmg = Math.floor(caster.atk * 7 * caster.critDmg);
+                const dmg = Math.floor(caster.atk * 5.5 * caster.critDmg);
                 target.hp -= dmg;
                 if (target.hp <= 0) { target.hp = 0; target.alive = false; }
                 DamagePopup.showCritical(scene, target.container.x, target.container.y - 20, dmg);
@@ -585,15 +585,15 @@ const BP_SKILLS = {
         }
     },
     death_shadow: {
-        name: '죽음의 춤', cooldown: 4000, desc: '랜덤 적 7회 ATK×2.5 (각각 크리 판정) + 킬 시 HP 10% 회복',
+        name: '죽음의 춤', cooldown: 4000, desc: '랜덤 적 6회 ATK×2.2 (각각 크리 판정) + 킬 시 HP 10% 회복',
         execute(caster, enemies, scene) {
             const alive = enemies.filter(e => e.alive);
             if (alive.length === 0) return;
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < 6; i++) {
                 const target = alive[Math.floor(Math.random() * alive.length)];
                 if (!target || !target.alive) continue;
                 const isCrit = Math.random() < caster.critRate;
-                const dmg = Math.floor(caster.atk * 2.5 * (isCrit ? caster.critDmg : 1));
+                const dmg = Math.floor(caster.atk * 2.2 * (isCrit ? caster.critDmg : 1));
                 target.takeDamage(dmg, caster);
                 if (isCrit) DamagePopup.showCritical(scene, target.container.x + (Math.random()-0.5)*20, target.container.y - 20 - i*6, dmg);
                 else DamagePopup.show(scene, target.container.x + (Math.random()-0.5)*20, target.container.y - 20 - i*6, dmg, 0x9955bb, false);
