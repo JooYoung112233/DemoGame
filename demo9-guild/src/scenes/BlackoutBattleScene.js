@@ -869,7 +869,7 @@ class BlackoutBattleScene extends Phaser.Scene {
         });
 
         // Boss + minions
-        const bossScale = 1.0 + this.currentFloor * 0.2 + this.curseLevel * 0.05;
+        const bossScale = 0.4 + this.currentFloor * 0.2 + this.curseLevel * 0.05;
         const boss = BattleUnit.fromEnemyData(this, 'mansion_lord', bossScale, 900, 420);
         this.enemies.push(boss);
         this.allUnits.push(boss);

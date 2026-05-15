@@ -146,6 +146,8 @@ function getEnemyComposition(round, zoneLevel, zoneKey) {
 
 function _getBloodpitComposition(round, maxRounds, progress, zoneLevel) {
     if (round >= maxRounds) {
+        if (zoneLevel <= 1) return [{ type: 'runner', count: 2 }];
+        if (zoneLevel <= 2) return [{ type: 'runner', count: 3 }];
         return [{ type: 'elite_runner', count: 1 }, { type: 'runner', count: 2 }];
     }
     if (progress <= 0.25) {
@@ -171,6 +173,8 @@ function _getBloodpitComposition(round, maxRounds, progress, zoneLevel) {
 
 function _getCargoComposition(round, maxRounds, progress, zoneLevel) {
     if (round >= maxRounds) {
+        if (zoneLevel <= 1) return [{ type: 'mechling', count: 2 }];
+        if (zoneLevel <= 2) return [{ type: 'shielder', count: 1 }, { type: 'turret', count: 1 }];
         return [{ type: 'elite_shielder', count: 1 }, { type: 'turret', count: 2 }];
     }
     if (progress <= 0.25) {
@@ -195,6 +199,8 @@ function _getCargoComposition(round, maxRounds, progress, zoneLevel) {
 
 function _getBlackoutComposition(round, maxRounds, progress, zoneLevel) {
     if (round >= maxRounds) {
+        if (zoneLevel <= 1) return [{ type: 'wraith', count: 2 }];
+        if (zoneLevel <= 2) return [{ type: 'wraith', count: 2 }, { type: 'cursed_mage', count: 1 }];
         return [{ type: 'elite_wraith', count: 1 }, { type: 'cursed_mage', count: 2 }];
     }
     if (progress <= 0.25) {
@@ -224,4 +230,9 @@ function isBossRound(round, zoneLevel) {
 function getZoneBoss(zoneKey) {
     const bosses = { bloodpit: 'pitlord', cargo: 'ironclad', blackout: 'lich_king' };
     return bosses[zoneKey] || 'pitlord';
+}
+
+function getBossScaleMult(zoneLevel) {
+    const table = { 1: 0.5, 2: 0.65, 3: 0.8, 4: 0.9, 5: 1.0 };
+    return table[zoneLevel] || (1.0 + (zoneLevel - 5) * 0.1);
 }

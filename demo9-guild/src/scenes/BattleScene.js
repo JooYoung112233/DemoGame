@@ -507,7 +507,7 @@ class BattleScene extends Phaser.Scene {
 
         if (this.currentRound >= this.maxRounds) {
             const bossType = getZoneBoss(this.zoneKey);
-            const bossScale = scaleMult * (0.8 + this.zoneLevel * 0.15);
+            const bossScale = scaleMult * getBossScaleMult(this.zoneLevel);
             const bossUnit = BattleUnit.fromEnemyData(this, bossType, bossScale, 1050, 420);
             this.enemies.push(bossUnit);
             this.allUnits.push(bossUnit);

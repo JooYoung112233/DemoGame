@@ -479,7 +479,7 @@ class CargoBattleScene extends Phaser.Scene {
         // Boss on final round
         if (this.currentRound >= this.maxRounds) {
             const bossType = getZoneBoss('cargo');
-            const bossScale = scaleMult * (0.8 + this.zoneLevel * 0.15);
+            const bossScale = scaleMult * getBossScaleMult(this.zoneLevel);
             const bossUnit = BattleUnit.fromEnemyData(this, bossType, bossScale, 1050, 420);
             this.enemies.push(bossUnit);
             this.allUnits.push(bossUnit);
