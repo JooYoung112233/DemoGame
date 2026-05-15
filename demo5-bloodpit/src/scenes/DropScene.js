@@ -96,118 +96,286 @@ class BPDropScene extends Phaser.Scene {
             }).setOrigin(0.5);
         }
 
-        // ── Raid Inventory & Secure Container ──
+        // ── Raid Inventory & Secure Container & Escape ──
         this._drawRaidInventory(cx);
-
-        // ── Escape ──
-        if (this.runManager && this.dangerSystem.level < 20) {
-            this._drawEscapeButton(cx);
-        }
     }
 
     _drawRaidInventory(cx) {
         const raidInv = BP_FARMING.getRaidInventory();
         const secure = StashManager.getSecureContainer();
-        const baseY = 380;
+        const baseY = 350;
+        const panelH = 260;
 
-        this.add.text(200, baseY, `🎒 레이드 인벤토리 (${raidInv.length})`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aa8866'
-        });
+        // ── 하단 패널 배경 ──
+        this.add.rectangle(cx, baseY + panelH / 2, 1240, panelH, 0x0d0505)
+            .setStrokeStyle(1, 0x331111);
+
+        // ══════ 좌측: 레이드 인벤토리 ══════
+        const invX = 40;
+        const invW = 520;
+        const invContentH = panelH - 50;
+
+        this.add.text(invX + invW / 2, baseY + 10, `🎒 레이드 인벤토리 (${raidInv.length})`, {
+            fontSize: '14px', fontFamily: 'monospace', color: '#aa8866', fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        // 스크롤 가능한 마스크 영역
+        const maskY = baseY + 32;
+        const maskH = invContentH - 10;
+
+        // 인벤토리 컨테이너 (스크롤용)
+        const invContainer = this.add.container(0, 0);
 
         if (raidInv.length === 0) {
-            this.add.text(200, baseY + 22, '비어있음', {
-                fontSize: '10px', fontFamily: 'monospace', color: '#555555'
-            });
+            invContainer.add(this.add.text(invX + invW / 2, maskY + 30, '비어있음', {
+                fontSize: '12px', fontFamily: 'monospace', color: '#444444'
+            }).setOrigin(0.5));
         } else {
+            const itemH = 34;
+            const itemW = invW - 10;
+
             raidInv.forEach((item, i) => {
-                if (i >= 8) return;
-                const x = 200 + (i % 4) * 140;
-                const y = baseY + 22 + Math.floor(i / 4) * 28;
+                const iy = maskY + i * (itemH + 3);
                 const reg = ItemRegistry.get(item.itemId);
                 const name = reg ? reg.name : item.itemId;
                 const rarity = FARMING.RARITIES[item.rarity] || FARMING.RARITIES.common;
+                const enhLabel = item.enhanceLevel ? `+${item.enhanceLevel}` : '';
 
-                const itemText = this.add.text(x, y, `${reg ? reg.icon || '' : ''} ${name}`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: rarity.color
-                }).setInteractive();
+                const row = this.add.rectangle(invX + invW / 2, iy + itemH / 2, itemW, itemH, 0x150808)
+                    .setStrokeStyle(1, rarity.borderColor, 0.4).setInteractive();
+                invContainer.add(row);
 
-                itemText.on('pointerdown', () => {
+                // 아이콘
+                const iconGfx = this.add.graphics();
+                if (reg && reg.category === 'equipment') {
+                    IconRenderer.drawWeaponIcon(iconGfx, item.itemId, invX + 22, iy + itemH / 2, 18);
+                } else {
+                    IconRenderer.drawConsumableIcon(iconGfx, item.itemId, invX + 22, iy + itemH / 2, 18);
+                }
+                invContainer.add(iconGfx);
+
+                // 이름 + 등급
+                invContainer.add(this.add.text(invX + 42, iy + itemH / 2, `${name}${enhLabel}  [${rarity.name}]`, {
+                    fontSize: '12px', fontFamily: 'monospace', color: rarity.color
+                }).setOrigin(0, 0.5));
+
+                // 보안 이동 버튼
+                const secBtn = this.add.text(invX + itemW - 10, iy + itemH / 2, '🔒이동', {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#4488ff',
+                    backgroundColor: '#111133', padding: { x: 4, y: 2 }
+                }).setOrigin(1, 0.5).setInteractive();
+                invContainer.add(secBtn);
+
+                // 호버 툴팁
+                row.on('pointerover', () => {
+                    row.setFillStyle(0x221212);
+                    this._showItemTooltip(item, reg, rarity, invX + invW / 2, iy - 5);
+                });
+                row.on('pointerout', () => {
+                    row.setFillStyle(0x150808);
+                    this._hideItemTooltip();
+                });
+
+                secBtn.on('pointerover', () => secBtn.setColor('#88ccff'));
+                secBtn.on('pointerout', () => secBtn.setColor('#4488ff'));
+                secBtn.on('pointerdown', () => {
+                    this._hideItemTooltip();
                     if (BP_FARMING.moveToSecure(i)) {
                         this._drawAll();
                     }
                 });
-                itemText.on('pointerover', () => itemText.setColor('#ffffff'));
-                itemText.on('pointerout', () => itemText.setColor(rarity.color));
             });
+
+            // 스크롤 처리
+            const totalContentH = raidInv.length * 37;
+            if (totalContentH > maskH) {
+                const maskShape = this.make.graphics();
+                maskShape.fillRect(invX, maskY, invW, maskH);
+                const mask = maskShape.createGeometryMask();
+                invContainer.setMask(mask);
+
+                // 스크롤바 배경
+                const sbX = invX + invW + 4;
+                this.add.rectangle(sbX, maskY + maskH / 2, 6, maskH, 0x221111).setStrokeStyle(1, 0x331111);
+
+                // 스크롤바 핸들
+                const handleH = Math.max(30, (maskH / totalContentH) * maskH);
+                const handle = this.add.rectangle(sbX, maskY + handleH / 2, 6, handleH, 0x664444)
+                    .setInteractive();
+                this._invScrollHandle = handle;
+                this._invScrollMax = totalContentH - maskH;
+
+                // 마우스 휠 스크롤
+                this.input.on('wheel', (pointer, gameObjects, dx, dy) => {
+                    if (pointer.x >= invX && pointer.x <= invX + invW + 20 &&
+                        pointer.y >= maskY && pointer.y <= maskY + maskH) {
+                        const scrollAmount = dy > 0 ? 37 : -37;
+                        const newY = Phaser.Math.Clamp(
+                            invContainer.y - scrollAmount,
+                            -this._invScrollMax, 0
+                        );
+                        invContainer.y = newY;
+
+                        // 핸들 위치 업데이트
+                        const scrollRatio = -newY / this._invScrollMax;
+                        handle.y = maskY + handleH / 2 + scrollRatio * (maskH - handleH);
+                    }
+                });
+
+                // 스크롤 힌트
+                this.add.text(invX + invW / 2, maskY + maskH + 8, '▼ 스크롤로 더보기', {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#553333'
+                }).setOrigin(0.5);
+            }
         }
 
-        // secure container
-        this.add.text(830, baseY, `🔒 보안 컨테이너 (${secure.filter(s => s).length}/3)`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#44aaff'
-        });
-        this.add.text(830, baseY + 16, '사망/탈출실패 시 보존됨', {
-            fontSize: '9px', fontFamily: 'monospace', color: '#336688'
-        });
+        // ══════ 우측: 보안 컨테이너 ══════
+        const secX = 640;
+        const secW = 580;
+
+        this.add.text(secX + secW / 2, baseY + 10, `🔒 보안 컨테이너 (${secure.filter(s => s).length}/3)`, {
+            fontSize: '14px', fontFamily: 'monospace', color: '#44aaff', fontStyle: 'bold'
+        }).setOrigin(0.5);
+        this.add.text(secX + secW / 2, baseY + 30, '사망/탈출실패 시 보존됨', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#336688'
+        }).setOrigin(0.5);
+
+        const slotW = 170;
+        const slotH = 55;
+        const slotGap = 10;
+        const slotsTotal = FARMING.SECURE_CONTAINER_SIZE * slotW + (FARMING.SECURE_CONTAINER_SIZE - 1) * slotGap;
+        const slotStartX = secX + (secW - slotsTotal) / 2 + slotW / 2;
 
         for (let i = 0; i < FARMING.SECURE_CONTAINER_SIZE; i++) {
-            const sx = 830 + i * 140;
-            const sy = baseY + 38;
+            const sx = slotStartX + i * (slotW + slotGap);
+            const sy = baseY + 70;
             const slot = secure[i];
 
-            const bg = this.add.rectangle(sx + 55, sy, 120, 26, slot ? 0x112244 : 0x111122)
-                .setStrokeStyle(1, slot ? 0x4488ff : 0x333366).setInteractive();
+            const bg = this.add.rectangle(sx, sy, slotW, slotH, slot ? 0x112244 : 0x0a0a1a)
+                .setStrokeStyle(2, slot ? 0x4488ff : 0x222244).setInteractive();
 
             if (slot) {
                 const reg = ItemRegistry.get(slot.itemId);
                 const name = reg ? reg.name : slot.itemId;
                 const rarity = FARMING.RARITIES[slot.rarity] || FARMING.RARITIES.common;
-                this.add.text(sx + 55, sy, `${reg ? reg.icon || '' : ''} ${name}`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: rarity.color
-                }).setOrigin(0.5);
+                const enhLabel = slot.enhanceLevel ? `+${slot.enhanceLevel}` : '';
 
+                // 아이콘
+                const iconGfx = this.add.graphics();
+                if (reg && reg.category === 'equipment') {
+                    IconRenderer.drawWeaponIcon(iconGfx, slot.itemId, sx - slotW / 2 + 20, sy, 18);
+                } else {
+                    IconRenderer.drawConsumableIcon(iconGfx, slot.itemId, sx - slotW / 2 + 20, sy, 18);
+                }
+
+                this.add.text(sx + 5, sy - 8, `${name}${enhLabel}`, {
+                    fontSize: '11px', fontFamily: 'monospace', color: rarity.color, fontStyle: 'bold'
+                }).setOrigin(0.5, 0.5);
+                this.add.text(sx + 5, sy + 10, `[${rarity.name}]`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: rarity.color, alpha: 0.7
+                }).setOrigin(0.5, 0.5);
+
+                bg.on('pointerover', () => {
+                    bg.setFillStyle(0x1a3355);
+                    this._showItemTooltip(slot, reg, rarity, sx, sy - 45);
+                });
+                bg.on('pointerout', () => {
+                    bg.setFillStyle(0x112244);
+                    this._hideItemTooltip();
+                });
                 bg.on('pointerdown', () => {
+                    this._hideItemTooltip();
                     BP_FARMING.removeFromSecure(i);
                     this._drawAll();
                 });
             } else {
-                this.add.text(sx + 55, sy, '빈 슬롯', {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#333366'
+                this.add.text(sx, sy, '빈 슬롯', {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#222244'
                 }).setOrigin(0.5);
             }
         }
+
+        // ── 탈출 버튼 (보안 컨테이너 아래) ──
+        if (this.runManager && this.dangerSystem.level < 20) {
+            const escY = baseY + 145;
+            const kitItem = this._findEscapeKit();
+            const hasKit = !!kitItem;
+
+            let escLabel, successRate;
+            if (hasKit) {
+                const rIdx = FARMING.RARITY_ORDER.indexOf(kitItem.rarity || 'uncommon');
+                successRate = [0.50, 0.65, 0.80, 0.92, 1.0, 1.0, 1.0][rIdx] || 0.50;
+                escLabel = `🚪 탈출킷 사용 (성공률 ${Math.floor(successRate * 100)}%)`;
+            } else {
+                successRate = 0;
+                escLabel = '🚪 탈출 (탈출킷 없음: 보상 절반 손실)';
+            }
+
+            const escColor = hasKit ? 0x224422 : 0x181818;
+            const escBorder = hasKit ? 0x44aa44 : 0x333333;
+            const escBtn = this.add.rectangle(secX + secW / 2, escY, 360, 40, escColor)
+                .setStrokeStyle(2, escBorder).setInteractive();
+            this.add.text(secX + secW / 2, escY, escLabel, {
+                fontSize: '13px', fontFamily: 'monospace', color: hasKit ? '#44ff88' : '#777777'
+            }).setOrigin(0.5);
+
+            escBtn.on('pointerover', () => escBtn.setFillStyle(hasKit ? 0x335533 : 0x222222));
+            escBtn.on('pointerout', () => escBtn.setFillStyle(escColor));
+            escBtn.on('pointerdown', () => { this._hideItemTooltip(); this._escape(hasKit, successRate); });
+
+            this.add.text(secX + secW / 2, escY + 28, '🔒 보안 컨테이너 아이템은 항상 보존됩니다', {
+                fontSize: '9px', fontFamily: 'monospace', color: '#336688'
+            }).setOrigin(0.5);
+        }
     }
 
-    _drawEscapeButton(cx) {
-        const y = 480;
-        const kitItem = this._findEscapeKit();
-        const hasKit = !!kitItem;
+    _showItemTooltip(item, reg, rarity, tx, ty) {
+        this._hideItemTooltip();
+        const tooltip = this.add.container(tx, ty).setDepth(1000);
+        this._tooltip = tooltip;
 
-        let escLabel, successRate;
-        if (hasKit) {
-            const rIdx = FARMING.RARITY_ORDER.indexOf(kitItem.rarity || 'uncommon');
-            successRate = [0.50, 0.65, 0.80, 0.92, 1.0, 1.0, 1.0][rIdx] || 0.50;
-            escLabel = `🚪 탈출킷 사용 (성공률 ${Math.floor(successRate * 100)}%)`;
-        } else {
-            successRate = 0;
-            escLabel = '🚪 탈출 (탈출킷 없음: 보상 절반 손실)';
+        const name = reg ? reg.name : (item.itemId || '???');
+        const enhLabel = item.enhanceLevel ? ` +${item.enhanceLevel}` : '';
+        const lines = [`${name}${enhLabel}  [${rarity.name}]`];
+
+        if (reg && reg.desc) lines.push(reg.desc);
+        if (reg && reg.stats) {
+            const statParts = [];
+            if (reg.stats.atk) statParts.push(`ATK+${reg.stats.atk}`);
+            if (reg.stats.def) statParts.push(`DEF+${reg.stats.def}`);
+            if (reg.stats.hp) statParts.push(`HP+${reg.stats.hp}`);
+            if (reg.stats.critRate) statParts.push(`CRIT+${Math.floor(reg.stats.critRate * 100)}%`);
+            if (reg.stats.attackSpeed) statParts.push(`공속+${reg.stats.attackSpeed}ms`);
+            if (statParts.length > 0) lines.push(statParts.join('  '));
+        }
+        if (reg && reg.slot) {
+            const slotLabel = { weapon: '무기', armor: '방어구', accessory: '악세서리' }[reg.slot] || reg.slot;
+            lines.push(`슬롯: ${slotLabel}`);
         }
 
-        const escColor = hasKit ? 0x224422 : 0x222222;
-        const escBorder = hasKit ? 0x44aa44 : 0x444444;
-        const escBtn = this.add.rectangle(cx, y, 320, 38, escColor)
-            .setStrokeStyle(2, escBorder).setInteractive();
-        this.add.text(cx, y, escLabel, {
-            fontSize: '12px', fontFamily: 'monospace', color: hasKit ? '#44ff88' : '#888888'
-        }).setOrigin(0.5);
+        const maxW = Math.max(...lines.map(l => l.length)) * 8 + 24;
+        const tipH = lines.length * 18 + 16;
 
-        escBtn.on('pointerover', () => escBtn.setFillStyle(hasKit ? 0x335533 : 0x333333));
-        escBtn.on('pointerout', () => escBtn.setFillStyle(escColor));
-        escBtn.on('pointerdown', () => this._escape(hasKit, successRate));
+        tooltip.add(this.add.rectangle(0, 0, maxW, tipH, 0x111111, 0.95)
+            .setStrokeStyle(2, rarity.borderColor));
 
-        this.add.text(cx, y + 28, '🔒 보안 컨테이너 아이템은 항상 보존됩니다', {
-            fontSize: '9px', fontFamily: 'monospace', color: '#336688'
-        }).setOrigin(0.5);
+        lines.forEach((line, i) => {
+            const color = i === 0 ? rarity.color : '#bbbbbb';
+            const size = i === 0 ? '12px' : '10px';
+            tooltip.add(this.add.text(0, -tipH / 2 + 12 + i * 18, line, {
+                fontSize: size, fontFamily: 'monospace', color
+            }).setOrigin(0.5, 0));
+        });
     }
+
+    _hideItemTooltip() {
+        if (this._tooltip) {
+            this._tooltip.destroy();
+            this._tooltip = null;
+        }
+    }
+
+    // _drawEscapeButton removed — now integrated into _drawRaidInventory
 
     _findEscapeKit() {
         const raidInv = BP_FARMING.getRaidInventory();
