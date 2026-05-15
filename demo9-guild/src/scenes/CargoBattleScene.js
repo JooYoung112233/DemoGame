@@ -43,7 +43,10 @@ class CargoBattleScene extends Phaser.Scene {
         this._drawTrainDisplay();
         this._drawHUD();
         this._spawnAllies();
-        if (this.currentRound === 1) this._applyBlessings();
+        if (this.currentRound === 1) {
+            this._applyBlessings();
+            this._applySynergies();
+        }
         this._spawnEnemies();
         this._applyCarFunctions();
         this._applyHeldCardBuffs();
@@ -447,6 +450,23 @@ class CargoBattleScene extends Phaser.Scene {
         });
         gs.blessings = [];
         SaveManager.save(gs);
+    }
+
+    _applySynergies() {
+        const classKeys = this.party.filter(m => m.alive).map(m => m.classKey);
+        const allyUnits = this.allies.filter(u => u.alive);
+        allyUnits.forEach(u => {
+            const merc = this.party.find(m => m.id === u.mercId);
+            if (merc) u.classKey = merc.classKey;
+        });
+        this._activeSynergies = applySynergies(allyUnits, classKeys);
+        if (this._activeSynergies.length > 0) {
+            const names = this._activeSynergies.map(s => s.name).join(', ');
+            const txt = this.add.text(640, 85, `⚡ 시너지: ${names}`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+            }).setOrigin(0.5).setDepth(100).setAlpha(0);
+            this.tweens.add({ targets: txt, alpha: 1, duration: 500, hold: 2000, yoyo: true });
+        }
     }
 
     // ─── Round Announce & Death Callback ─────────────────────────

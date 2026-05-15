@@ -71,7 +71,10 @@ class BattleScene extends Phaser.Scene {
         this._drawBackground();
         this._drawHUD();
         this._spawnAllies();
-        if (this.currentRound === 1) this._applyBlessings();
+        if (this.currentRound === 1) {
+            this._applyBlessings();
+            this._applySynergies();
+        }
         this._spawnEnemies();
         this._applyCards();
         this._applyZoneEffects();
@@ -582,6 +585,25 @@ class BattleScene extends Phaser.Scene {
         SaveManager.save(gs);
     }
 
+    _applySynergies() {
+        const classKeys = this.party.filter(m => m.alive).map(m => m.classKey);
+        const allyUnits = this.allies.filter(u => u.alive);
+        allyUnits.forEach(u => {
+            const merc = this.party.find(m => m.id === u.mercId);
+            if (merc) u.classKey = merc.classKey;
+        });
+        this._activeSynergies = applySynergies(allyUnits, classKeys);
+        if (this._activeSynergies.length > 0) {
+            const names = this._activeSynergies.map(s => s.name).join(', ');
+            const txt = this.add.text(640, 85, `⚡ 시너지: ${names}`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+            }).setOrigin(0.5).setDepth(100).setAlpha(0);
+            this._hudElements.push(txt);
+            this.tweens.add({ targets: txt, alpha: 1, duration: 500, hold: 2000, yoyo: true });
+        }
+        this._synergyXpBonus = this._activeSynergies.reduce((sum, s) => sum + (s.xpBonus || 0), 0);
+    }
+
     _showRoundAnnounce() {
         const isBoss = this.currentRound >= this.maxRounds;
         const label = isBoss ? '💀 보스 출현!' : `라운드 ${this.currentRound}`;
@@ -691,7 +713,8 @@ class BattleScene extends Phaser.Scene {
             this._snapshotAllyState();
 
             const isBoss = this.currentRound >= this.maxRounds;
-            const roundXp = 10 + this.currentRound * 5 + (isBoss ? 30 : 0);
+            let roundXp = 10 + this.currentRound * 5 + (isBoss ? 30 : 0);
+            if (this._synergyXpBonus) roundXp = Math.floor(roundXp * (1 + this._synergyXpBonus));
             this.totalXp += roundXp;
 
             const roundBonus = 15 + this.currentRound * 10 + (isBoss ? 50 : 0);

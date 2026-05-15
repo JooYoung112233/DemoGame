@@ -524,11 +524,47 @@ class BattleUnit {
 
         let dmg = Math.max(1, this.atk - this.target.def * 0.5);
         let isCrit = Math.random() < this.critRate;
+
+        // Legendary: 그림자 발걸음 — first attack always crit + bleed
+        if (this._legendaryShadowStep && this._firstAttack) {
+            this._firstAttack = false;
+            isCrit = true;
+            if (!this.target.bleeding) {
+                this.target.bleeding = true;
+                this.target.bleedTimer = 5000;
+                this.target.bleedTickTimer = 1000;
+                this.target.bleedDamage = Math.max(1, Math.floor(this.atk * 0.3));
+                DamagePopup.show(this.scene, this.target.container.x, this.target.container.y - 50, '그림자 일격!', 0x44ffaa, false);
+            }
+        }
+
         if (isCrit) dmg = Math.floor(dmg * this.critDmg);
         dmg = Math.floor(dmg * (0.9 + Math.random() * 0.2));
 
         this.target.takeDamage(dmg, this, allUnits);
         this.totalDamageDealt += dmg;
+
+        // Legendary: 매의 눈 — crit triggers double hit
+        if (this._legendaryHawksEye && isCrit && this.target && this.target.alive) {
+            const dmg2 = Math.floor(Math.max(1, this.atk - this.target.def * 0.5) * this.critDmg * 0.5);
+            this.scene.time.delayedCall(150, () => {
+                if (this.target && this.target.alive) {
+                    this.target.takeDamage(dmg2, this, allUnits);
+                    DamagePopup.show(this.scene, this.target.container.x, this.target.container.y - 35, dmg2, 0xff8844, true);
+                }
+            });
+        }
+
+        // Legendary: 마력 과부하 — skill attacks deal extra explosion damage
+        if (this._legendaryManaOverload && this.skillReady) {
+            const explodeDmg = Math.floor(this.atk * 0.5);
+            const enemies = allUnits.filter(u => u.team !== this.team && u.alive && Math.abs(u.container.x - this.target.container.x) < 100);
+            enemies.forEach(e => {
+                e.takeDamage(explodeDmg, this, allUnits);
+                const spark = this.scene.add.circle(e.container.x, e.container.y, 6, 0x8844ff, 0.7).setDepth(50);
+                this.scene.tweens.add({ targets: spark, scaleX: 2.5, scaleY: 2.5, alpha: 0, duration: 300, onComplete: () => spark.destroy() });
+            });
+        }
 
         if (this.lifesteal > 0) {
             const heal = Math.floor(dmg * this.lifesteal);
@@ -638,6 +674,25 @@ class BattleUnit {
         this.scene.tweens.add({ targets: this.container, x: this.container.x + dir * kb, duration: 50, yoyo: true });
 
         if (this.hp <= 0) {
+            // Legendary: 불굴의 방패 — survive at 1 HP once per run
+            if (this._legendaryUnyielding && !this._unyieldingUsed) {
+                this._unyieldingUsed = true;
+                this.hp = 1;
+                DamagePopup.show(this.scene, this.container.x, this.container.y - 50, '불굴!', 0xffaa44, false);
+                this.scene.cameras.main.shake(80, 0.002);
+                return;
+            }
+            // Legendary: 성스러운 희생 — nearby priest heals before death
+            if (allUnits) {
+                const priest = allUnits.find(u => u.team === this.team && u.alive && u !== this && u._legendaryHolySacrifice);
+                if (priest && !priest._holySacrificeUsedThisCombat) {
+                    priest._holySacrificeUsedThisCombat = true;
+                    const healAmt = Math.floor(this.maxHp * 0.3);
+                    this.hp = healAmt;
+                    DamagePopup.show(this.scene, this.container.x, this.container.y - 50, `성스러운 희생 +${healAmt}`, 0x44ff88, true);
+                    return;
+                }
+            }
             const overkill = Math.abs(this.hp);
             this.hp = 0;
             this.die(attacker, allUnits);
@@ -724,7 +779,7 @@ class BattleUnit {
     static fromMercenary(scene, merc, x, y) {
         const stats = merc.getStats();
         const base = merc.getBaseClass();
-        return new BattleUnit(scene, {
+        const unit = new BattleUnit(scene, {
             team: 'ally',
             name: merc.name,
             classKey: merc.classKey,
@@ -743,6 +798,17 @@ class BattleUnit {
             skillCooldown: stats.skillCooldown || 0,
             x, y
         });
+
+        // Legendary trait flags
+        const traitIds = (merc.traits || []).map(t => t.id);
+        if (traitIds.includes('unyielding'))     unit._legendaryUnyielding = true;
+        if (traitIds.includes('shadow_step'))     { unit._legendaryShadowStep = true; unit._firstAttack = true; }
+        if (traitIds.includes('mana_overload'))   unit._legendaryManaOverload = true;
+        if (traitIds.includes('hawks_eye'))       { unit.range = Math.floor(unit.range * 1.30); unit._legendaryHawksEye = true; }
+        if (traitIds.includes('holy_sacrifice'))  unit._legendaryHolySacrifice = true;
+        if (traitIds.includes('elixir_master'))   unit._legendaryElixirMaster = true;
+
+        return unit;
     }
 
     static fromEnemyData(scene, enemyKey, scaleMult, x, y) {
