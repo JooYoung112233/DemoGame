@@ -61,6 +61,14 @@ class Mercenary {
             if (trait.apply) trait.apply(stats);
         }
 
+        if (this._trainingRef) {
+            const t = this._trainingRef;
+            if (t.hp)       stats.hp = Math.floor(stats.hp * (1 + t.hp * 0.03));
+            if (t.atk)      stats.atk = Math.floor(stats.atk * (1 + t.atk * 0.03));
+            if (t.survival) stats.def += t.survival * 2;
+            if (t.recovery) stats.skillCooldown = Math.floor(stats.skillCooldown * (1 - t.recovery * 0.03));
+        }
+
         return stats;
     }
 

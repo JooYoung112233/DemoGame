@@ -31,6 +31,7 @@ class BattleScene extends Phaser.Scene {
         this._drawBackground();
         this._drawHUD();
         this._spawnAllies();
+        if (this.currentRound === 1) this._applyBlessings();
         this._spawnEnemies();
         this._applyCards();
         this._applyZoneEffects();
@@ -125,6 +126,7 @@ class BattleScene extends Phaser.Scene {
         const spacing = 70;
         this.party.forEach((merc, idx) => {
             if (!merc.alive) return;
+            merc._trainingRef = this.gameState.training;
             if (this.partyHpState && this.partyHpState[merc.id] !== undefined) {
                 merc.currentHp = this.partyHpState[merc.id];
             }
@@ -212,6 +214,20 @@ class BattleScene extends Phaser.Scene {
                 fontSize: '10px', fontFamily: 'monospace', color: '#886666'
             }).setOrigin(0.5).setDepth(100);
         }
+    }
+
+    _applyBlessings() {
+        const gs = this.gameState;
+        if (!gs.blessings || gs.blessings.length === 0) return;
+        this.allies.forEach(a => {
+            if (gs.blessings.includes('bless_atk'))   a.atk = Math.floor(a.atk * 1.1);
+            if (gs.blessings.includes('bless_def'))   a.def = Math.floor(a.def * 1.1);
+            if (gs.blessings.includes('bless_hp'))  { a.maxHp = Math.floor(a.maxHp * 1.1); a.hp = Math.min(a.hp + Math.floor(a.maxHp * 0.1), a.maxHp); }
+            if (gs.blessings.includes('bless_crit'))  { a.critRate = Math.min(0.8, a.critRate + 0.1); a.critDmg += 0.2; }
+            if (gs.blessings.includes('bless_speed')) { a.moveSpeed = Math.floor(a.moveSpeed * 1.1); a.attackSpeed = Math.floor(a.attackSpeed * 0.9); }
+        });
+        gs.blessings = [];
+        SaveManager.save(gs);
     }
 
     _showRoundAnnounce() {
