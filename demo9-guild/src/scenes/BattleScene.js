@@ -23,6 +23,34 @@ class BattleScene extends Phaser.Scene {
         // Blackout: curse system
         this.curseLevel = data.curseLevel || 0;
         this.ambushTriggered = false;
+
+        // Blood Pit: pit gauge
+        this.pitGauge = data.pitGauge || 0;
+        this.pitGaugeMax = 100;
+        this.pitGaugeWasMax = data.pitGaugeWasMax || false;
+        this._pitDropMult = 1;
+        this._pitGaugeSpeedBonus = 0;
+        this._pitNoDecay = false;
+        this._pitGaugeDropMult = 2;
+        if (this.zoneKey === 'bloodpit') {
+            this._computePitAffinityBonuses();
+            if (this.pitGaugeWasMax) {
+                this._pitDropMult = this._pitGaugeDropMult;
+                this.pitGaugeWasMax = false;
+            }
+        }
+    }
+
+    _computePitAffinityBonuses() {
+        for (const merc of this.party) {
+            if (!merc.alive) continue;
+            const effects = merc.getAffinityEffects('bloodpit');
+            for (const eff of effects) {
+                if (eff.special === 'pitGaugeSpeed') this._pitGaugeSpeedBonus += eff.value;
+                if (eff.special === 'noGaugeDecay') this._pitNoDecay = true;
+                if (eff.special === 'pitGaugeDrop') this._pitGaugeDropMult = Math.max(this._pitGaugeDropMult, eff.value);
+            }
+        }
     }
 
     create() {
@@ -38,6 +66,7 @@ class BattleScene extends Phaser.Scene {
         this._dangerVignette = null;
         this._cargoAttackTimer = 0;
         this._ambushTimer = 0;
+        this._pitMaxAnnounced = this.pitGauge >= this.pitGaugeMax;
 
         this._drawBackground();
         this._drawHUD();
@@ -178,10 +207,81 @@ class BattleScene extends Phaser.Scene {
             this._drawCargoHpBar();
         }
 
+        // --- BLOODPIT: Pit gauge ---
+        if (this.zoneKey === 'bloodpit') {
+            this._drawPitGauge();
+        }
+
         // --- BLACKOUT: Curse level indicator ---
         if (this.zoneKey === 'blackout') {
             this._drawCurseIndicator();
         }
+    }
+
+    _drawPitGauge() {
+        const barX = 40, barY = 665, barW = 220, barH = 16;
+        const ratio = this.pitGauge / this.pitGaugeMax;
+
+        this._pitGaugeGfx = this.add.graphics().setDepth(100);
+        this._pitGaugeGfx.fillStyle(0x331111, 1);
+        this._pitGaugeGfx.fillRoundedRect(barX, barY, barW, barH, 3);
+        const color = ratio >= 1 ? 0xff2244 : ratio > 0.6 ? 0xff6644 : ratio > 0.3 ? 0xcc4422 : 0x882222;
+        this._pitGaugeGfx.fillStyle(color, 1);
+        this._pitGaugeGfx.fillRoundedRect(barX, barY, barW * ratio, barH, 3);
+        this._pitGaugeGfx.lineStyle(1, 0xff4444, 0.5);
+        this._pitGaugeGfx.strokeRoundedRect(barX, barY, barW, barH, 3);
+        this._hudElements.push(this._pitGaugeGfx);
+
+        const gaugeLabel = ratio >= 1 ? `🩸 핏 게이지: MAX! (드랍 ${this._pitGaugeDropMult}배)` : `🩸 핏 게이지: ${Math.floor(this.pitGauge)}/${this.pitGaugeMax}`;
+        this._pitGaugeLabel = this.add.text(barX + 5, barY + 1, gaugeLabel, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+        }).setDepth(101);
+        this._hudElements.push(this._pitGaugeLabel);
+
+        if (this._pitDropMult > 1) {
+            const bonusTxt = this.add.text(barX + barW + 10, barY + 1, `드랍 ${this._pitDropMult}배 적용중!`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#ff4444', fontStyle: 'bold'
+            }).setDepth(101);
+            this._hudElements.push(bonusTxt);
+            this.tweens.add({ targets: bonusTxt, alpha: 0.4, duration: 600, yoyo: true, repeat: -1 });
+        }
+    }
+
+    _updatePitGauge() {
+        if (!this._pitGaugeGfx) return;
+        const barX = 40, barY = 665, barW = 220, barH = 16;
+        const ratio = Math.min(1, this.pitGauge / this.pitGaugeMax);
+
+        this._pitGaugeGfx.clear();
+        this._pitGaugeGfx.fillStyle(0x331111, 1);
+        this._pitGaugeGfx.fillRoundedRect(barX, barY, barW, barH, 3);
+        const color = ratio >= 1 ? 0xff2244 : ratio > 0.6 ? 0xff6644 : ratio > 0.3 ? 0xcc4422 : 0x882222;
+        this._pitGaugeGfx.fillStyle(color, 1);
+        this._pitGaugeGfx.fillRoundedRect(barX, barY, barW * ratio, barH, 3);
+        this._pitGaugeGfx.lineStyle(1, 0xff4444, 0.5);
+        this._pitGaugeGfx.strokeRoundedRect(barX, barY, barW, barH, 3);
+
+        const label = ratio >= 1 ? `🩸 핏 게이지: MAX! (드랍 ${this._pitGaugeDropMult}배)` : `🩸 핏 게이지: ${Math.floor(this.pitGauge)}/${this.pitGaugeMax}`;
+        this._pitGaugeLabel.setText(label);
+    }
+
+    _addPitGauge(amount) {
+        if (this.zoneKey !== 'bloodpit') return;
+        const boosted = amount * (1 + this._pitGaugeSpeedBonus);
+        this.pitGauge = Math.min(this.pitGaugeMax, this.pitGauge + boosted);
+        this._updatePitGauge();
+
+        if (this.pitGauge >= this.pitGaugeMax && !this._pitMaxAnnounced) {
+            this._pitMaxAnnounced = true;
+            DamagePopup.show(this, 640, 250, `🩸 핏 게이지 MAX! 다음 라운드 드랍 ${this._pitGaugeDropMult}배!`, 0xff2244, false);
+            this.cameras.main.shake(100, 0.002);
+        }
+    }
+
+    _reducePitGauge(amount) {
+        if (this.zoneKey !== 'bloodpit' || this._pitNoDecay) return;
+        this.pitGauge = Math.max(0, this.pitGauge - amount);
+        this._updatePitGauge();
     }
 
     _drawCargoHpBar() {
@@ -498,6 +598,13 @@ class BattleScene extends Phaser.Scene {
         this.onUnitDeath = (unit, killer) => {
             if (unit.team === 'enemy') {
                 this._updateEnemyCount();
+
+                // Blood Pit: pit gauge rises on kills, faster with streaks
+                if (this.zoneKey === 'bloodpit') {
+                    const streakBonus = Math.min(this.killStreak, 5) * 3;
+                    this._addPitGauge(8 + streakBonus + (unit.isElite ? 10 : 0) + (unit.isBoss ? 25 : 0));
+                }
+
                 let goldDrop = Phaser.Math.Between(8, 18) + this.currentRound * 4;
                 if (unit.isElite) goldDrop += 20;
                 if (unit.isBoss) goldDrop += 100;
@@ -505,6 +612,10 @@ class BattleScene extends Phaser.Scene {
                 // Cargo: bonus gold for alive cargo
                 if (this.zoneKey === 'cargo' && !this.cargoDestroyed) {
                     goldDrop = Math.floor(goldDrop * 1.15);
+                }
+                // Blood Pit: pit gauge drop multiplier
+                if (this._pitDropMult > 1) {
+                    goldDrop = Math.floor(goldDrop * this._pitDropMult);
                 }
                 this.totalGold += goldDrop;
                 this.goldText.setText(`💰 ${this.totalGold}G`);
@@ -516,10 +627,14 @@ class BattleScene extends Phaser.Scene {
                 this.tweens.add({ targets: gText, y: gText.y - 30, alpha: 0, duration: 800, onComplete: () => gText.destroy() });
 
                 const luckyBonus = this.collectedCards.includes('lucky') ? 1 : 0;
-                const dropChance = unit.isBoss ? 1.0 : 0.3 + this.currentRound * 0.04;
+                let dropChance = unit.isBoss ? 1.0 : 0.3 + this.currentRound * 0.04;
                 const bossRarityBonus = unit.isBoss ? 2 : (unit.isElite ? 1 : 0);
                 // Blackout: curse level adds rarity bonus
                 const curseRarityBonus = this.zoneKey === 'blackout' ? this.curseLevel : 0;
+                // Blood Pit: pit gauge drop multiplier boosts chance
+                if (this._pitDropMult > 1) {
+                    dropChance = Math.min(1, dropChance * this._pitDropMult);
+                }
                 if (Math.random() < dropChance) {
                     const item = generateItem(this.zoneKey, this.gameState.guildLevel, luckyBonus + bossRarityBonus + curseRarityBonus);
                     if (item) {
@@ -527,6 +642,12 @@ class BattleScene extends Phaser.Scene {
                         this._showLootPopup(unit.container.x, unit.container.y - 40, item);
                     }
                 }
+            }
+
+            // Blood Pit: pit gauge drops on ally death
+            if (unit.team === 'ally' && this.zoneKey === 'bloodpit') {
+                this._reducePitGauge(25);
+                DamagePopup.show(this, unit.container.x, unit.container.y - 30, '핏 게이지 -25', 0x882222, false);
             }
 
             this._checkRoundEnd();
@@ -645,6 +766,10 @@ class BattleScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(81);
 
         let statusLine = `생존: ${this.party.filter(m => m.alive).length}/${this.party.length}  |  💰 ${this.totalGold}G  |  💚 HP 5% 회복`;
+        if (this.zoneKey === 'bloodpit') {
+            const gaugeLabel = this.pitGauge >= this.pitGaugeMax ? 'MAX!' : `${Math.floor(this.pitGauge)}%`;
+            statusLine += `  |  🩸 핏 게이지 ${gaugeLabel}`;
+        }
         if (this.zoneKey === 'cargo' && !this.cargoDestroyed) {
             statusLine += `  |  📦 화물 ${this.cargoHp}%`;
         }
@@ -900,7 +1025,9 @@ class BattleScene extends Phaser.Scene {
             cargoHp: this.cargoHp,
             cargoMaxHp: this.cargoMaxHp,
             cargoDestroyed: this.cargoDestroyed,
-            curseLevel: this.curseLevel
+            curseLevel: this.curseLevel,
+            pitGauge: this.pitGauge,
+            pitGaugeWasMax: this.pitGauge >= this.pitGaugeMax
         });
     }
 
@@ -937,7 +1064,8 @@ class BattleScene extends Phaser.Scene {
             zoneLevelUp: success,
             cargoBonus: cargoBonus,
             cargoDestroyed: this.cargoDestroyed,
-            curseLevel: this.curseLevel
+            curseLevel: this.curseLevel,
+            pitGaugeMax: this.zoneKey === 'bloodpit' && this.pitGauge >= this.pitGaugeMax
         };
 
         this.scene.start('RunResultScene', {

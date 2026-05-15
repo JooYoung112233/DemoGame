@@ -120,9 +120,8 @@ class RunResultScene extends Phaser.Scene {
         UIButton.create(this, 640, 660, 200, 44, '본진 복귀', {
             color: 0xffaa44, hoverColor: 0xffcc66, textColor: '#000000', fontSize: 16,
             onClick: () => {
-                MercenaryManager.generateRecruitPool(gs);
                 SaveManager.save(gs);
-                this.scene.start('TownScene', { gameState: gs });
+                this.scene.start('EventScene', { gameState: gs });
             }
         });
     }
