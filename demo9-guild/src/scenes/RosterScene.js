@@ -213,6 +213,34 @@ class RosterScene extends Phaser.Scene {
             cy += 32;
         });
 
+        const line3 = this.add.graphics();
+        line3.lineStyle(1, 0x333355, 0.5);
+        line3.lineBetween(x + 15, cy + 5, x + w - 15, cy + 5);
+        cy += 15;
+
+        this.add.text(x + 20, cy, '구역 친화도', {
+            fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+        });
+        cy += 20;
+        ZONE_KEYS.forEach(zoneKey => {
+            if (gs.zoneLevel[zoneKey] === 0) return;
+            const zone = ZONE_DATA[zoneKey];
+            const aLv = merc.affinityLevel?.[zoneKey] || 0;
+            const aPts = merc.affinityPoints?.[zoneKey] || 0;
+            const aXp = merc.affinityXp?.[zoneKey] || 0;
+            const needed = aLv >= 5 ? 'MAX' : getAffinityXpNeeded(aLv);
+            const ptsLabel = aPts > 0 ? ` [${aPts}P 사용가능]` : '';
+            this.add.text(x + 25, cy, `${zone.icon} ${zone.name}: Lv.${aLv} (${aLv >= 5 ? 'MAX' : `${aXp}/${needed}`})${ptsLabel}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: aPts > 0 ? '#ffaa44' : zone.textColor
+            });
+            cy += 16;
+        });
+
+        UIButton.create(this, x + w / 2, cy + 12, 160, 26, '친화도 트리 열기', {
+            color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 11,
+            onClick: () => this.scene.start('AffinityScene', { gameState: gs, mercId: merc.id })
+        });
+
         UIButton.create(this, x + w / 2 - 80, y + 610, 120, 30, '치료 (30G)', {
             color: gs.gold >= 30 && merc.currentHp < merc.getStats().hp ? 0x44aa44 : 0x444444,
             hoverColor: 0x55cc55, textColor: '#ffffff', fontSize: 12,

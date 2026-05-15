@@ -96,16 +96,20 @@ class RunResultScene extends Phaser.Scene {
         r.survivors.forEach(merc => {
             const bossBonus = r.success ? 15 : 0;
             const xpGain = Math.floor(r.xpEarned * 0.5 + r.rounds * 5 + bossBonus);
-            const oldLevel = merc.level;
             const leveled = merc.gainXp(xpGain);
             const base = merc.getBaseClass();
 
+            const affinityGain = Math.floor(10 + r.rounds * 3 + (r.success ? 10 : 0));
+            const affinityLeveled = merc.gainAffinityXp(r.zoneKey, affinityGain);
+
             let text = `${base.icon} ${merc.name}: +${xpGain} XP`;
             if (leveled) text += ` → Lv.${merc.level}!`;
+            text += `  |  친화도 +${affinityGain}`;
+            if (affinityLeveled) text += ` → 친화 Lv.${merc.affinityLevel[r.zoneKey]}!`;
 
             this.add.text(xpX, cy + 35, text, {
                 fontSize: '11px', fontFamily: 'monospace',
-                color: leveled ? '#ffaa44' : '#aaaacc'
+                color: leveled || affinityLeveled ? '#ffaa44' : '#aaaacc'
             });
             xpX = 60;
             cy += 18;

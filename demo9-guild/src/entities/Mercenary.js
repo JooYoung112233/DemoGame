@@ -12,6 +12,10 @@ class Mercenary {
         this.equipment = { weapon: null, armor: null, accessory: null };
         this.alive = true;
         this.zoneAffinity = { bloodpit: 0, cargo: 0, blackout: 0 };
+        this.affinityLevel = { bloodpit: 0, cargo: 0, blackout: 0 };
+        this.affinityXp = { bloodpit: 0, cargo: 0, blackout: 0 };
+        this.affinityPoints = { bloodpit: 0, cargo: 0, blackout: 0 };
+        this.affinityNodes = [];
         this._maxHp = this.getStats().hp;
         this.currentHp = this._maxHp;
     }
@@ -109,6 +113,66 @@ class Mercenary {
         this.currentHp = this._maxHp;
     }
 
+    gainAffinityXp(zoneKey, amount) {
+        if (!this.affinityXp) { this.affinityXp = { bloodpit: 0, cargo: 0, blackout: 0 }; }
+        if (!this.affinityLevel) { this.affinityLevel = { bloodpit: 0, cargo: 0, blackout: 0 }; }
+        if (!this.affinityPoints) { this.affinityPoints = { bloodpit: 0, cargo: 0, blackout: 0 }; }
+        if (this.affinityLevel[zoneKey] >= 5) return false;
+        this.affinityXp[zoneKey] += amount;
+        let leveled = false;
+        while (this.affinityLevel[zoneKey] < 5) {
+            const needed = getAffinityXpNeeded(this.affinityLevel[zoneKey]);
+            if (this.affinityXp[zoneKey] >= needed) {
+                this.affinityXp[zoneKey] -= needed;
+                this.affinityLevel[zoneKey]++;
+                this.affinityPoints[zoneKey]++;
+                leveled = true;
+            } else break;
+        }
+        return leveled;
+    }
+
+    hasAffinityNode(nodeId) {
+        return (this.affinityNodes || []).includes(nodeId);
+    }
+
+    canUnlockAffinityNode(zoneKey, nodeId) {
+        if (!this.affinityPoints || !this.affinityNodes) return false;
+        if (this.affinityNodes.includes(nodeId)) return false;
+        if (this.affinityPoints[zoneKey] <= 0) return false;
+        const tree = AFFINITY_TREES[zoneKey];
+        if (!tree) return false;
+        const node = tree.nodes[nodeId];
+        if (!node) return false;
+        if (this.affinityLevel[zoneKey] < node.level) return false;
+        if (node.requires.length > 0 && !node.requires.every(r => this.affinityNodes.includes(r))) return false;
+        if (node.branch) {
+            const sameLevelNodes = Object.entries(tree.nodes).filter(([id, n]) => n.level === node.level && n.branch && n.branch !== node.branch);
+            for (const [id] of sameLevelNodes) {
+                if (this.affinityNodes.includes(id)) return false;
+            }
+        }
+        return true;
+    }
+
+    unlockAffinityNode(zoneKey, nodeId) {
+        if (!this.canUnlockAffinityNode(zoneKey, nodeId)) return false;
+        this.affinityPoints[zoneKey]--;
+        this.affinityNodes.push(nodeId);
+        return true;
+    }
+
+    getAffinityEffects(zoneKey) {
+        const effects = [];
+        const tree = AFFINITY_TREES[zoneKey];
+        if (!tree || !this.affinityNodes) return effects;
+        for (const nodeId of this.affinityNodes) {
+            const node = tree.nodes[nodeId];
+            if (node) effects.push(node.effect);
+        }
+        return effects;
+    }
+
     toJSON() {
         return {
             id: this.id,
@@ -121,7 +185,11 @@ class Mercenary {
             equipment: this.equipment,
             alive: this.alive,
             currentHp: this.currentHp,
-            zoneAffinity: this.zoneAffinity
+            zoneAffinity: this.zoneAffinity,
+            affinityLevel: this.affinityLevel,
+            affinityXp: this.affinityXp,
+            affinityPoints: this.affinityPoints,
+            affinityNodes: this.affinityNodes
         };
     }
 
@@ -145,6 +213,10 @@ class Mercenary {
         merc.alive = data.alive;
         merc.currentHp = data.currentHp;
         merc.zoneAffinity = data.zoneAffinity || { bloodpit: 0, cargo: 0, blackout: 0 };
+        merc.affinityLevel = data.affinityLevel || { bloodpit: 0, cargo: 0, blackout: 0 };
+        merc.affinityXp = data.affinityXp || { bloodpit: 0, cargo: 0, blackout: 0 };
+        merc.affinityPoints = data.affinityPoints || { bloodpit: 0, cargo: 0, blackout: 0 };
+        merc.affinityNodes = data.affinityNodes || [];
         merc._maxHp = merc.getStats().hp;
         if (Mercenary._nextId <= data.id) Mercenary._nextId = data.id + 1;
         return merc;
