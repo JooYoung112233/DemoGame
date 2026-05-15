@@ -773,89 +773,111 @@ class BPSetupScene extends Phaser.Scene {
     }
 
     _showPromotionPopup(char) {
-        const info = BP_ROSTER.getPromotionInfo(char.id);
-        if (!info) return;
+        const paths = BP_ROSTER.getPromotionPaths(char.id);
+        if (!paths || paths.length === 0) return;
         const base = BP_ALLIES[char.classKey];
-        const advBase = BP_ALLIES[info.advancedClass];
+        const hasBranch = paths.length > 1;
+        const popW = hasBranch ? 750 : 480;
 
         const popup = this.add.container(640, 360).setDepth(2500);
         popup.add(this.add.rectangle(0, 0, 1280, 720, 0x000000, 0.6).setInteractive());
-        popup.add(this.add.rectangle(0, 0, 480, 320, 0x111100, 0.98).setStrokeStyle(2, 0xffcc44));
+        popup.add(this.add.rectangle(0, 0, popW, 380, 0x111100, 0.98).setStrokeStyle(2, 0xffcc44));
 
-        popup.add(this.add.text(0, -140, '⬆ 전직', {
+        const tierLabel = (paths[0].tier === 3) ? 'Tier 3 최종전직' : 'Tier 2 전직';
+        popup.add(this.add.text(0, -170, `⬆ ${tierLabel}`, {
             fontSize: '20px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
         }).setOrigin(0.5));
-        popup.add(this.add.text(0, -112, `${base.name} "${char.name}" → ${advBase.name}`, {
-            fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+        popup.add(this.add.text(0, -148, `${base.name} "${char.name}" Lv.${char.level}`, {
+            fontSize: '13px', fontFamily: 'monospace', color: '#cccccc'
         }).setOrigin(0.5));
-
-        // stat comparison
-        const stats = [
-            { key: 'hp', label: 'HP' }, { key: 'atk', label: 'ATK' }, { key: 'def', label: 'DEF' },
-            { key: 'attackSpeed', label: '공속(ms)', invert: true }, { key: 'range', label: '사거리' },
-            { key: 'critRate', label: '크리율', pct: true }, { key: 'critDmg', label: '크뎀', mult: true },
-            { key: 'dodgeRate', label: '회피', pct: true }
-        ];
-        const startY = -80;
-        stats.forEach((s, i) => {
-            const row = Math.floor(i / 2);
-            const col = i % 2;
-            const sx = -180 + col * 200;
-            const sy = startY + row * 22;
-            const cur = info.currentStats[s.key] || 0;
-            const nxt = info.newStats[s.key] || 0;
-            let curStr, nxtStr;
-            if (s.pct) { curStr = Math.floor(cur * 100) + '%'; nxtStr = Math.floor(nxt * 100) + '%'; }
-            else if (s.mult) { curStr = cur.toFixed(1) + 'x'; nxtStr = nxt.toFixed(1) + 'x'; }
-            else { curStr = '' + cur; nxtStr = '' + nxt; }
-            const better = s.invert ? nxt < cur : nxt > cur;
-            const worse = s.invert ? nxt > cur : nxt < cur;
-            const color = better ? '#44ff88' : worse ? '#ff6644' : '#aaaaaa';
-            popup.add(this.add.text(sx, sy, `${s.label}: ${curStr} → ${nxtStr}`, {
-                fontSize: '11px', fontFamily: 'monospace', color
-            }));
-        });
-
-        // skill comparison
-        const curSkill = BP_SKILLS[char.classKey];
-        const newSkill = BP_SKILLS[info.advancedClass];
-        if (curSkill && newSkill) {
-            popup.add(this.add.text(0, startY + 100, `스킬: ${curSkill.name} → ${newSkill.name}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#ccaa66'
-            }).setOrigin(0.5));
-            popup.add(this.add.text(0, startY + 118, newSkill.desc, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#888866', wordWrap: { width: 400 }
+        if (hasBranch) {
+            popup.add(this.add.text(0, -130, '전직 경로를 선택하세요', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#aaaa66'
             }).setOrigin(0.5));
         }
 
-        // cost
-        popup.add(this.add.text(0, 80, `💰 ${info.cost}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
-        }).setOrigin(0.5));
+        const statDefs = [
+            { key: 'hp', label: 'HP' }, { key: 'atk', label: 'ATK' }, { key: 'def', label: 'DEF' },
+            { key: 'attackSpeed', label: '공속', invert: true }, { key: 'range', label: '사거리' },
+            { key: 'critRate', label: '크리', pct: true }, { key: 'critDmg', label: '크뎀', mult: true },
+            { key: 'dodgeRate', label: '회피', pct: true }
+        ];
 
-        // confirm
-        const confirmBtn = this.add.rectangle(-70, 115, 130, 35, 0x443300).setStrokeStyle(2, 0xffcc44).setInteractive();
-        popup.add(confirmBtn);
-        popup.add(this.add.text(-70, 115, '전직 확정', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
-        }).setOrigin(0.5));
-        confirmBtn.on('pointerdown', () => {
-            const result = BP_ROSTER.promoteCharacter(char.id);
-            popup.destroy();
-            if (result.success) {
-                this._showMsg(`⬆ ${result.newName}(으)로 전직 완료!`);
-            } else {
-                this._showMsg('전직 실패: ' + result.reason);
+        paths.forEach((info, pathIdx) => {
+            const advBase = BP_ALLIES[info.advancedClass];
+            const cardW = hasBranch ? 320 : 400;
+            const cx = hasBranch ? (-175 + pathIdx * 350) : 0;
+
+            popup.add(this.add.rectangle(cx, 20, cardW, 240, 0x1a1a0a).setStrokeStyle(2, advBase.color));
+            popup.add(this.add.text(cx, -95, info.label, {
+                fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            }).setOrigin(0.5));
+
+            const advColorHex = '#' + advBase.color.toString(16).padStart(6, '0');
+            popup.add(this.add.text(cx, -75, advBase.name, {
+                fontSize: '12px', fontFamily: 'monospace', color: advColorHex
+            }).setOrigin(0.5));
+
+            statDefs.forEach((s, i) => {
+                const row = Math.floor(i / 2);
+                const col = i % 2;
+                const sx = cx - cardW/2 + 20 + col * (cardW/2 - 10);
+                const sy = -55 + row * 20;
+                const cur = info.currentStats[s.key] || 0;
+                const nxt = info.newStats[s.key] || 0;
+                let curStr, nxtStr;
+                if (s.pct) { curStr = Math.floor(cur * 100) + '%'; nxtStr = Math.floor(nxt * 100) + '%'; }
+                else if (s.mult) { curStr = cur.toFixed(1); nxtStr = nxt.toFixed(1); }
+                else { curStr = '' + cur; nxtStr = '' + nxt; }
+                const better = s.invert ? nxt < cur : nxt > cur;
+                const worse = s.invert ? nxt > cur : nxt < cur;
+                const color = better ? '#44ff88' : worse ? '#ff6644' : '#aaaaaa';
+                popup.add(this.add.text(sx, sy, `${s.label}:${curStr}→${nxtStr}`, {
+                    fontSize: '9px', fontFamily: 'monospace', color
+                }));
+            });
+
+            const newSkill = BP_SKILLS[info.advancedClass];
+            if (newSkill) {
+                popup.add(this.add.text(cx, 35, `스킬: ${newSkill.name}`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#ccaa66'
+                }).setOrigin(0.5));
+                popup.add(this.add.text(cx, 50, newSkill.desc, {
+                    fontSize: '8px', fontFamily: 'monospace', color: '#888866', wordWrap: { width: cardW - 30 }
+                }).setOrigin(0.5));
             }
-            this._drawAll();
+
+            popup.add(this.add.text(cx, 75, `💰 ${info.cost}G`, {
+                fontSize: '14px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+            }).setOrigin(0.5));
+
+            const canAfford = StashManager.getGold() >= info.cost;
+            const confirmBtn = this.add.rectangle(cx, 105, 140, 34, canAfford ? 0x443300 : 0x222222)
+                .setStrokeStyle(2, canAfford ? advBase.color : 0x444444);
+            if (canAfford) confirmBtn.setInteractive();
+            popup.add(confirmBtn);
+            popup.add(this.add.text(cx, 105, '전직 확정', {
+                fontSize: '12px', fontFamily: 'monospace', color: canAfford ? '#ffcc44' : '#666666', fontStyle: 'bold'
+            }).setOrigin(0.5));
+
+            if (canAfford) {
+                confirmBtn.on('pointerdown', () => {
+                    const result = BP_ROSTER.promoteCharacter(char.id, pathIdx);
+                    popup.destroy();
+                    if (result.success) {
+                        const tierStr = result.tier === 3 ? '[Tier3] ' : '';
+                        this._showMsg(`⬆ ${tierStr}${result.newName}(으)로 전직 완료!`);
+                    }
+                    this._drawAll();
+                });
+                confirmBtn.on('pointerover', () => confirmBtn.setFillStyle(0x665500));
+                confirmBtn.on('pointerout', () => confirmBtn.setFillStyle(0x443300));
+            }
         });
 
-        // cancel
-        const cancelBtn = this.add.rectangle(70, 115, 100, 35, 0x222222).setStrokeStyle(1, 0x664444).setInteractive();
+        const cancelBtn = this.add.rectangle(0, 160, 100, 30, 0x222222).setStrokeStyle(1, 0x664444).setInteractive();
         popup.add(cancelBtn);
-        popup.add(this.add.text(70, 115, '취소', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#aaaaaa'
-        }).setOrigin(0.5));
+        popup.add(this.add.text(0, 160, '취소', { fontSize: '12px', fontFamily: 'monospace', color: '#aaaaaa' }).setOrigin(0.5));
         cancelBtn.on('pointerdown', () => popup.destroy());
     }
 

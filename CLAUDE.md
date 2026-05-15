@@ -4,10 +4,8 @@
 Phaser 3 기반 전투 데모 프로토타입. "전투 자체가 재미있는가?"를 검증하기 위한 프로토타입 모음.
 
 ## 배포
-- **URL**: https://demobattle01.netlify.app
-- **Site ID**: 0947dd3c-eddc-48a0-8b11-2021eb39f7e1
-- **명령**: `netlify deploy --prod --dir=. --site=0947dd3c-eddc-48a0-8b11-2021eb39f7e1 --skip-functions-cache`
-- 변경 작업 완료 후 반드시 이 사이트에 배포
+- **GitHub 저장소로만 관리** — 변경 작업 완료 후 git commit & push
+- Netlify 사용하지 않음
 
 ## 데모 넘버링 규칙
 - 폴더 형식: `demo{N}-{영문이름}/`

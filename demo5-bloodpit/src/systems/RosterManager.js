@@ -209,23 +209,32 @@ class RosterManager {
         char.baseStats.def = Math.floor(base.def * (1 + (char.level - 1) * 0.02));
     }
 
-    getPromotionInfo(charId) {
+    getPromotionPaths(charId) {
         const char = this.getById(charId);
         if (!char) return null;
         const promo = BP_PROMOTIONS[char.classKey];
-        if (!promo) return null; // already advanced or no promotion exists
-        const advBase = BP_ALLIES[promo.advancedClass];
-        if (!advBase) return null;
-        return {
-            currentClass: char.classKey,
-            advancedClass: promo.advancedClass,
-            advancedName: advBase.name,
-            cost: promo.cost,
-            minLevel: promo.minLevel,
-            label: promo.label,
-            currentStats: { ...char.baseStats },
-            newStats: this._calcStatsForClass(promo.advancedClass, char.level)
-        };
+        if (!promo) return null;
+        return promo.paths.map(path => {
+            const advBase = BP_ALLIES[path.advancedClass];
+            if (!advBase) return null;
+            return {
+                currentClass: char.classKey,
+                advancedClass: path.advancedClass,
+                advancedName: advBase.name,
+                tier: advBase.tier,
+                cost: path.cost,
+                minLevel: path.minLevel,
+                label: path.label,
+                currentStats: { ...char.baseStats },
+                newStats: this._calcStatsForClass(path.advancedClass, char.level)
+            };
+        }).filter(p => p);
+    }
+
+    getPromotionInfo(charId) {
+        const paths = this.getPromotionPaths(charId);
+        if (!paths || paths.length === 0) return null;
+        return paths[0];
     }
 
     canPromote(charId) {
@@ -233,28 +242,32 @@ class RosterManager {
         if (!char) return { can: false, reason: 'not_found' };
         const promo = BP_PROMOTIONS[char.classKey];
         if (!promo) return { can: false, reason: 'no_promotion' };
-        if (char.level < promo.minLevel) return { can: false, reason: 'level_low', minLevel: promo.minLevel };
-        if (StashManager.getGold() < promo.cost) return { can: false, reason: 'not_enough_gold', cost: promo.cost };
+        const minLevel = Math.min(...promo.paths.map(p => p.minLevel));
+        const minCost = Math.min(...promo.paths.map(p => p.cost));
+        if (char.level < minLevel) return { can: false, reason: 'level_low', minLevel };
+        if (StashManager.getGold() < minCost) return { can: false, reason: 'not_enough_gold', cost: minCost };
         return { can: true };
     }
 
-    promoteCharacter(charId) {
-        const check = this.canPromote(charId);
-        if (!check.can) return { success: false, reason: check.reason };
+    promoteCharacter(charId, pathIndex) {
         const char = this.getById(charId);
+        if (!char) return { success: false, reason: 'not_found' };
         const promo = BP_PROMOTIONS[char.classKey];
-        const advBase = BP_ALLIES[promo.advancedClass];
+        if (!promo) return { success: false, reason: 'no_promotion' };
+        pathIndex = pathIndex || 0;
+        const path = promo.paths[pathIndex];
+        if (!path) return { success: false, reason: 'invalid_path' };
+        if (char.level < path.minLevel) return { success: false, reason: 'level_low' };
+        if (StashManager.getGold() < path.cost) return { success: false, reason: 'not_enough_gold' };
 
-        StashManager.spendGold(promo.cost);
-        char.classKey = promo.advancedClass;
+        const advBase = BP_ALLIES[path.advancedClass];
+        StashManager.spendGold(path.cost);
+        char.classKey = path.advancedClass;
         char.color = advBase.color;
         char.role = advBase.role;
-
-        const newStats = this._calcStatsForClass(promo.advancedClass, char.level);
-        char.baseStats = newStats;
-
+        char.baseStats = this._calcStatsForClass(path.advancedClass, char.level);
         this.save();
-        return { success: true, newClass: promo.advancedClass, newName: advBase.name };
+        return { success: true, newClass: path.advancedClass, newName: advBase.name, tier: advBase.tier };
     }
 
     _calcStatsForClass(classKey, level) {

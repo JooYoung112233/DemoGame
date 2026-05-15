@@ -224,5 +224,40 @@ const BP_FARMING = {
     hasLoadout() {
         const lo = StashManager.getLoadout();
         return lo.weapon || lo.armor || lo.accessory;
+    },
+
+    rollKeycardDrop(dangerLevel) {
+        const baseChance = 0.08 + dangerLevel * 0.015;
+        if (Math.random() >= baseChance) return null;
+
+        const r = Math.random();
+        let keyId;
+        if (dangerLevel >= 15 && r < 0.10) keyId = 'vault_key_legendary';
+        else if (dangerLevel >= 10 && r < 0.30) keyId = 'vault_key_epic';
+        else if (dangerLevel >= 5 && r < 0.60) keyId = 'vault_key_rare';
+        else keyId = 'vault_key_uncommon';
+
+        const reg = ItemRegistry.get(keyId);
+        if (!reg) return null;
+        return { itemId: keyId, rarity: reg.rarity, enhanceLevel: 0 };
+    },
+
+    findKeycard() {
+        return this.raidInventory.find(item =>
+            item.itemId && item.itemId.startsWith('vault_key_')
+        ) || null;
+    },
+
+    consumeKeycard() {
+        const idx = this.raidInventory.findIndex(item =>
+            item.itemId && item.itemId.startsWith('vault_key_')
+        );
+        if (idx === -1) return false;
+        this.raidInventory.splice(idx, 1);
+        return true;
+    },
+
+    addToRaidInventory(item) {
+        this.raidInventory.push(item);
     }
 };

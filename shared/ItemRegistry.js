@@ -89,5 +89,11 @@ ItemRegistry.registerAll([
 
     // 전설 등급 방어구/악세 (기존에 없던 것 추가)
     { itemId: 'blood_fortress', name: '혈철 요새', desc: 'DEF+28, HP+180, 가시12, 흡혈5%', category: 'equipment', slot: 'armor', baseValue: 250, weight: 6, rarity: 'legendary', icon: '🛡️', sourceDemos: ['demo5'], stats: { def: 28, hp: 180, thorns: 12, lifesteal: 0.05 } },
-    { itemId: 'pitlord_crown', name: '핏로드의 왕관', desc: 'ATK+20, CRIT+15%, 치명뎀+40%, 회피+8%', category: 'equipment', slot: 'accessory', baseValue: 220, weight: 1, rarity: 'legendary', icon: '👑', sourceDemos: ['demo5'], stats: { atk: 20, critRate: 0.15, critDmg: 0.40, dodgeRate: 0.08 } }
+    { itemId: 'pitlord_crown', name: '핏로드의 왕관', desc: 'ATK+20, CRIT+15%, 치명뎀+40%, 회피+8%', category: 'equipment', slot: 'accessory', baseValue: 220, weight: 1, rarity: 'legendary', icon: '👑', sourceDemos: ['demo5'], stats: { atk: 20, critRate: 0.15, critDmg: 0.40, dodgeRate: 0.08 } },
+
+    // 금고 키카드 (보물 금고 입장용)
+    { itemId: 'vault_key_uncommon', name: '녹슨 키카드', desc: '보물 금고 입장 (하급)', category: 'keycard', slot: null, baseValue: 30, weight: 1, rarity: 'uncommon', icon: '🔑', sourceDemos: ['demo5'], stats: null },
+    { itemId: 'vault_key_rare', name: '은빛 키카드', desc: '보물 금고 입장 (중급)', category: 'keycard', slot: null, baseValue: 60, weight: 1, rarity: 'rare', icon: '🗝️', sourceDemos: ['demo5'], stats: null },
+    { itemId: 'vault_key_epic', name: '황금 키카드', desc: '보물 금고 입장 (상급)', category: 'keycard', slot: null, baseValue: 120, weight: 1, rarity: 'epic', icon: '🗝️', sourceDemos: ['demo5'], stats: null },
+    { itemId: 'vault_key_legendary', name: '혈룡의 키카드', desc: '보물 금고 입장 (최상급)', category: 'keycard', slot: null, baseValue: 250, weight: 1, rarity: 'legendary', icon: '🗝️', sourceDemos: ['demo5'], stats: null }
 ]);

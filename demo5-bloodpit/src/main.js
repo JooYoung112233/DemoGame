@@ -13,7 +13,7 @@ const config = {
         roundPixels: true
     },
     physics: { default: 'arcade', arcade: { debug: false } },
-    scene: [BPSetupScene, BPBattleScene, BPDropScene, BPChoiceScene, BPResultScene, BPShopScene, BPForgeScene, BPEventScene],
+    scene: [BPSetupScene, BPBattleScene, BPDropScene, BPChoiceScene, BPResultScene, BPShopScene, BPForgeScene, BPEventScene, BPVaultScene],
     disableVisibilityChange: true,
     audio: { noAudio: true }
 };
