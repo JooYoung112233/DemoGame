@@ -308,6 +308,8 @@ class BattleUnit {
             DamagePopup.show(this.scene, this.container.x, this.container.y - 35, '각성!', 0xffaa44, false);
         }
 
+        if (this.isBoss) this._updateBossPhase(allUnits);
+
         const enemies = allUnits.filter(u => u.alive && u.team !== this.team);
         if (!enemies.length) return;
 
@@ -404,21 +406,27 @@ class BattleUnit {
             }
         }
 
-        if (this.isBoss && this.team === 'enemy') {
-            const hpRatio = this.hp / this.maxHp;
-            if (this.bossPhase === 0 && hpRatio <= 0.5) {
-                this.bossPhase = 1;
-                this.atk = Math.floor(this.atk * 1.3);
-                this.attackSpeed = Math.floor(this.attackSpeed * 0.8);
-                DamagePopup.show(this.scene, this.container.x, this.container.y - 40, '분노!', 0xff2244, false);
-                const rage = this.scene.add.circle(this.container.x, this.container.y, 10, 0xff2244, 0.6).setDepth(50);
-                this.scene.tweens.add({ targets: rage, scaleX: 5, scaleY: 5, alpha: 0, duration: 500, onComplete: () => rage.destroy() });
-            }
-            if (this.bossPhase === 1 && hpRatio <= 0.25) {
-                this.bossPhase = 2;
-                this.lifesteal = 0.15;
-                this.critRate = 1.0;
-                DamagePopup.show(this.scene, this.container.x, this.container.y - 40, '필사!', 0xff0000, false);
+        // Boss phase summon ability (pitlord phase 1, mansion_lord phase 1)
+        if (this.isBoss && this.team === 'enemy' && this.bossPhase <= 1) {
+            this._bossSummonTimer = (this._bossSummonTimer || 0) + delta;
+            if (this._bossSummonTimer >= 8000) {
+                this._bossSummonTimer = 0;
+                const minions = allUnits.filter(u => u.team === 'enemy' && u.alive && u.isSummon);
+                if (minions.length < 4) {
+                    let minionType = 'runner';
+                    if (this.enemyType === 'ironclad') minionType = 'mechling';
+                    else if (this.enemyType === 'mansion_lord') minionType = 'wraith';
+                    const sx = this.container.x + Phaser.Math.Between(-60, 60);
+                    const sy = this.container.y + Phaser.Math.Between(-15, 15);
+                    const m = BattleUnit.fromEnemyData(this.scene, minionType, 0.7, sx, sy);
+                    m.isSummon = true;
+                    if (this.scene.enemies) this.scene.enemies.push(m);
+                    if (this.scene.allUnits) this.scene.allUnits.push(m);
+                    if (this.scene._updateEnemyCount) this.scene._updateEnemyCount();
+                    DamagePopup.show(this.scene, this.container.x, this.container.y - 40, '소환!', 0xff4444, false);
+                    const p = this.scene.add.circle(sx, sy, 8, 0xff4444, 0.5).setDepth(50);
+                    this.scene.tweens.add({ targets: p, scaleX: 3, scaleY: 3, alpha: 0, duration: 400, onComplete: () => p.destroy() });
+                }
             }
         }
 
@@ -730,8 +738,125 @@ class BattleUnit {
         }
     }
 
+    _updateBossPhase(allUnits) {
+        if (!this.isBoss || !this.alive) return;
+        const hpRatio = this.hp / this.maxHp;
+        let newPhase = 0;
+
+        if (this.enemyType === 'pitlord') {
+            // P1: 100~60% 기본+소환, P2: 60~30% 돌진+출혈, P3: 30~0% 광폭화
+            if (hpRatio <= 0.30) newPhase = 3;
+            else if (hpRatio <= 0.60) newPhase = 2;
+            else newPhase = 1;
+        } else if (this.enemyType === 'ironclad') {
+            // P1: 100~60% 강타+방어, P2: 60~30% 과부하+속도증가, P3: 30~0% 자폭형 근접
+            if (hpRatio <= 0.30) newPhase = 3;
+            else if (hpRatio <= 0.60) newPhase = 2;
+            else newPhase = 1;
+        } else if (this.enemyType === 'mansion_lord') {
+            // P1: 100~70% 기본+망령소환, P2: 70~40% 저주Lv+2, P3: 40~0% 전체공격+분신
+            if (hpRatio <= 0.40) newPhase = 3;
+            else if (hpRatio <= 0.70) newPhase = 2;
+            else newPhase = 1;
+        } else {
+            return;
+        }
+
+        if (newPhase > this.bossPhase) {
+            this.bossPhase = newPhase;
+            this._onBossPhaseChange(newPhase, allUnits);
+        }
+    }
+
+    _onBossPhaseChange(phase, allUnits) {
+        const scene = this.scene;
+        scene.cameras.main.shake(200, 0.004);
+
+        if (this.enemyType === 'pitlord') {
+            if (phase === 2) {
+                DamagePopup.show(scene, this.container.x, this.container.y - 50, '돌진 모드!', 0xff4444, false);
+                this.moveSpeed = Math.floor(this.moveSpeed * 1.5);
+                this.bleedChance = (this.bleedChance || 0) + 0.40;
+                this.range = 80;
+            } else if (phase === 3) {
+                DamagePopup.show(scene, this.container.x, this.container.y - 50, '광폭화!', 0xff0000, false);
+                this.atk = Math.floor(this.atk * 2);
+                this.attackSpeed = Math.floor(this.attackSpeed * 0.7);
+                const aura = scene.add.circle(this.container.x, this.container.y, 20, 0xff0000, 0.3).setDepth(50);
+                scene.tweens.add({ targets: aura, scaleX: 3, scaleY: 3, alpha: 0, duration: 600, onComplete: () => aura.destroy() });
+            }
+        } else if (this.enemyType === 'ironclad') {
+            if (phase === 2) {
+                DamagePopup.show(scene, this.container.x, this.container.y - 50, '과부하!', 0xff8844, false);
+                this.moveSpeed = Math.floor(this.moveSpeed * 1.4);
+                this.attackSpeed = Math.floor(this.attackSpeed * 0.8);
+                this.def = Math.floor(this.def * 0.6);
+            } else if (phase === 3) {
+                DamagePopup.show(scene, this.container.x, this.container.y - 50, '자폭 돌격!', 0xff4400, false);
+                this.atk = Math.floor(this.atk * 1.8);
+                this.moveSpeed = Math.floor(this.moveSpeed * 2);
+                this.range = 40;
+                // AoE pulse every 3 seconds
+                this.aoeCooldown = 3000;
+                this.aoeTimer = 0;
+                this.aoeDamage = this.atk * 0.4;
+            }
+        } else if (this.enemyType === 'mansion_lord') {
+            if (phase === 2) {
+                DamagePopup.show(scene, this.container.x, this.container.y - 50, '저주 강화!', 0xcc00ff, false);
+                // Increase curse level in parent scene if available
+                if (scene.curseLevel !== undefined) {
+                    scene.curseLevel += 2;
+                    DamagePopup.show(scene, 640, 300, '저주 Lv +2!', 0xff22ff, false);
+                }
+                this.bleedChance = (this.bleedChance || 0) + 0.30;
+            } else if (phase === 3) {
+                DamagePopup.show(scene, this.container.x, this.container.y - 50, '그림자 분신!', 0xff00cc, false);
+                this.atk = Math.floor(this.atk * 1.5);
+                this.attackSpeed = Math.floor(this.attackSpeed * 0.7);
+                // Spawn shadow clones
+                for (let i = 0; i < 2; i++) {
+                    const cx = this.container.x + Phaser.Math.Between(-80, 80);
+                    const cy = this.container.y + Phaser.Math.Between(-20, 20);
+                    const clone = BattleUnit.fromEnemyData(scene, 'shade', 1.5, cx, cy);
+                    clone.isSummon = true;
+                    if (scene.enemies) scene.enemies.push(clone);
+                    if (scene.allUnits) scene.allUnits.push(clone);
+                    const portal = scene.add.circle(cx, cy, 8, 0xff00cc, 0.6).setDepth(50);
+                    scene.tweens.add({ targets: portal, scaleX: 3, scaleY: 3, alpha: 0, duration: 400, onComplete: () => portal.destroy() });
+                }
+            }
+        }
+    }
+
     die(killer, allUnits) {
         if (!this.alive) return;
+
+        // Revival token check
+        if (this.team === 'ally' && this.mercId) {
+            const merc = this.scene.party?.find(m => m.id === this.mercId);
+            if (merc && merc.revivalToken) {
+                merc.revivalToken = false;
+                merc.equipment = { weapon: null, armor: null, accessory: null };
+                this.hp = Math.floor(this.maxHp * 0.5);
+                this.alive = true;
+                DamagePopup.show(this.scene, this.container.x, this.container.y - 50, '✨ 부활!', 0xffaa44, false);
+                this.scene.cameras.main.shake(100, 0.003);
+                const glow = this.scene.add.circle(this.container.x, this.container.y, 15, 0xffaa44, 0.5).setDepth(50);
+                this.scene.tweens.add({ targets: glow, scaleX: 3, scaleY: 3, alpha: 0, duration: 600, onComplete: () => glow.destroy() });
+                return;
+            }
+        }
+
+        // Death save from synergy (철벽 용병단)
+        if (this.deathSave && !this._deathSaveUsed) {
+            this._deathSaveUsed = true;
+            this.hp = Math.floor(this.maxHp * 0.10);
+            this.alive = true;
+            DamagePopup.show(this.scene, this.container.x, this.container.y - 50, '사망 방지!', 0xff8844, false);
+            return;
+        }
+
         this.alive = false;
 
         if (killer && killer.lifestealOnKill > 0) {

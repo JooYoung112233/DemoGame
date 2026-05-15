@@ -189,7 +189,8 @@ class Mercenary {
             affinityLevel: this.affinityLevel,
             affinityXp: this.affinityXp,
             affinityPoints: this.affinityPoints,
-            affinityNodes: this.affinityNodes
+            affinityNodes: this.affinityNodes,
+            revivalToken: this.revivalToken || false
         };
     }
 
@@ -217,6 +218,7 @@ class Mercenary {
         merc.affinityXp = data.affinityXp || { bloodpit: 0, cargo: 0, blackout: 0 };
         merc.affinityPoints = data.affinityPoints || { bloodpit: 0, cargo: 0, blackout: 0 };
         merc.affinityNodes = data.affinityNodes || [];
+        merc.revivalToken = data.revivalToken || false;
         merc._maxHp = merc.getStats().hp;
         if (Mercenary._nextId <= data.id) Mercenary._nextId = data.id + 1;
         return merc;

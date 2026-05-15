@@ -32,8 +32,9 @@ class TempleScene extends Phaser.Scene {
         this._objs = [];
         const gs = this.gameState;
 
-        this._drawHealSection(gs, 40, 85, 600);
-        this._drawBlessSection(gs, 660, 85, 590);
+        this._drawHealSection(gs, 40, 85, 390);
+        this._drawRevivalSection(gs, 440, 85, 370);
+        this._drawBlessSection(gs, 820, 85, 440);
     }
 
     _add(o) { if (!this._objs) this._objs = []; this._objs.push(o); return o; }
@@ -119,6 +120,67 @@ class TempleScene extends Phaser.Scene {
                 }).setOrigin(0.5));
             }
 
+            cy += 50;
+        });
+    }
+
+    _drawRevivalSection(gs, x, y, w) {
+        this._add(UIPanel.create(this, x, y, w, 560, { title: '부활권 (500G)' }));
+
+        this._add(this.add.text(x + w / 2, y + 30, '용병 1명에게 부활권을 장착합니다', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+        }).setOrigin(0.5));
+        this._add(this.add.text(x + w / 2, y + 46, '사망 시: HP 50% 부활, 장비 전량 손실', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#ff8888'
+        }).setOrigin(0.5));
+
+        let cy = y + 70;
+        const revivalCost = 500;
+
+        gs.roster.forEach(merc => {
+            if (!merc.alive) return;
+            if (cy > y + 530) return;
+            const base = merc.getBaseClass();
+            const hasRevival = !!merc.revivalToken;
+            const canBuy = !hasRevival && gs.gold >= revivalCost;
+
+            const bg = this._add(this.add.graphics());
+            bg.fillStyle(hasRevival ? 0x2a2a1a : 0x1a1a2a, 1);
+            bg.fillRoundedRect(x + 10, cy, w - 20, 44, 3);
+            bg.lineStyle(1, hasRevival ? 0x886644 : 0x333355, 0.3);
+            bg.strokeRoundedRect(x + 10, cy, w - 20, 44, 3);
+
+            this._add(this.add.text(x + 20, cy + 6, `${base.icon} ${merc.name}`, {
+                fontSize: '12px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+            }));
+
+            const rarityColor = RARITY_DATA[merc.rarity]?.color || '#aaaaaa';
+            this._add(this.add.text(x + 20, cy + 24, `Lv.${merc.level} ${RARITY_DATA[merc.rarity]?.name || merc.rarity}`, {
+                fontSize: '9px', fontFamily: 'monospace', color: rarityColor
+            }));
+
+            if (hasRevival) {
+                this._add(this.add.text(x + w - 60, cy + 14, '✨ 부활권', {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+                }).setOrigin(0.5));
+            } else {
+                this._add(UIButton.create(this, x + w - 60, cy + 22, 80, 24, `${revivalCost}G`, {
+                    color: canBuy ? 0x664422 : 0x333333,
+                    hoverColor: canBuy ? 0x885533 : 0x333333,
+                    textColor: canBuy ? '#ffaa44' : '#555555',
+                    fontSize: 10,
+                    onClick: () => {
+                        if (!canBuy) return;
+                        GuildManager.spendGold(gs, revivalCost);
+                        merc.revivalToken = true;
+                        GuildManager.addMessage(gs, `${merc.name}에게 부활권 장착`);
+                        SaveManager.save(gs);
+                        UIToast.show(this, `${merc.name}에게 부활권 장착!`, { color: '#ffaa44' });
+                        this.goldText.setText(`${gs.gold}G`);
+                        this._drawContent();
+                    }
+                }));
+            }
             cy += 50;
         });
     }
