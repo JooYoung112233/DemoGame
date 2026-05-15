@@ -106,64 +106,67 @@ class BattleScene extends Phaser.Scene {
     }
 
     _drawHUD() {
+        this._hudElements = [];
+        const _h = (obj) => { this._hudElements.push(obj); return obj; };
+
         const zone = ZONE_DATA[this.zoneKey];
         const isBoss = this.currentRound >= this.maxRounds;
 
         const dangerLabel = isBoss ? '💀 보스 출현!' : `라운드 ${this.currentRound} / ${this.maxRounds}`;
-        this.add.text(640, 25, dangerLabel, {
+        _h(this.add.text(640, 25, dangerLabel, {
             fontSize: '20px', fontFamily: 'monospace', color: '#ff4444', fontStyle: 'bold'
-        }).setOrigin(0.5).setDepth(100);
+        }).setOrigin(0.5).setDepth(100));
 
         const meterX = 440, meterY = 42, meterW = 400, meterH = 6;
-        this.add.rectangle(meterX + meterW / 2, meterY, meterW, meterH, 0x331111).setDepth(100);
+        _h(this.add.rectangle(meterX + meterW / 2, meterY, meterW, meterH, 0x331111).setDepth(100));
         const fillW = (this.currentRound / this.maxRounds) * meterW;
         const progress = this.currentRound / this.maxRounds;
         const fillColor = progress <= 0.4 ? 0x44aa44 : progress <= 0.7 ? 0xffaa00 : 0xff2222;
         if (fillW > 0) {
-            this.add.rectangle(meterX + fillW / 2, meterY, fillW, meterH, fillColor).setDepth(101);
+            _h(this.add.rectangle(meterX + fillW / 2, meterY, fillW, meterH, fillColor).setDepth(101));
         }
 
-        this.timerText = this.add.text(640, 50, '0.0초', {
+        this.timerText = _h(this.add.text(640, 50, '0.0초', {
             fontSize: '12px', fontFamily: 'monospace', color: '#aa6666'
-        }).setOrigin(0.5).setDepth(100);
+        }).setOrigin(0.5).setDepth(100));
 
-        this.add.text(60, 25, `${zone.icon} ${zone.name}`, {
+        _h(this.add.text(60, 25, `${zone.icon} ${zone.name}`, {
             fontSize: '14px', fontFamily: 'monospace', color: zone.textColor, fontStyle: 'bold'
-        }).setDepth(100);
+        }).setDepth(100));
 
-        this.add.text(60, 45, `구역 Lv.${this.zoneLevel}`, {
+        _h(this.add.text(60, 45, `구역 Lv.${this.zoneLevel}`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#886666'
-        }).setDepth(100);
+        }).setDepth(100));
 
-        this.goldText = this.add.text(1240, 50, `💰 ${this.totalGold}G`, {
+        this.goldText = _h(this.add.text(1240, 50, `💰 ${this.totalGold}G`, {
             fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44'
-        }).setOrigin(1, 0).setDepth(100);
+        }).setOrigin(1, 0).setDepth(100));
 
-        this.enemyCountText = this.add.text(1240, 25, '', {
+        this.enemyCountText = _h(this.add.text(1240, 25, '', {
             fontSize: '12px', fontFamily: 'monospace', color: '#ff8888'
-        }).setOrigin(1, 0).setDepth(100);
+        }).setOrigin(1, 0).setDepth(100));
 
         if (this.collectedCards.length > 0) {
             let cx = 20;
-            this.add.text(cx, 690, '카드:', {
+            _h(this.add.text(cx, 690, '카드:', {
                 fontSize: '10px', fontFamily: 'monospace', color: '#886644'
-            }).setDepth(100);
+            }).setDepth(100));
             cx += 40;
             this.collectedCards.forEach(key => {
                 const card = CARD_DATA[key];
                 if (card) {
-                    this.add.text(cx, 690, `[${card.name}]`, {
+                    _h(this.add.text(cx, 690, `[${card.name}]`, {
                         fontSize: '10px', fontFamily: 'monospace', color: '#ffaa44'
-                    }).setDepth(100);
+                    }).setDepth(100));
                     cx += card.name.length * 10 + 20;
                 }
             });
         }
 
-        const speedBtn = this.add.text(1220, 690, `×${this.speedMultiplier}`, {
+        const speedBtn = _h(this.add.text(1220, 690, `×${this.speedMultiplier}`, {
             fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold',
             backgroundColor: '#331111', padding: { x: 6, y: 3 }
-        }).setOrigin(0.5).setDepth(100).setInteractive();
+        }).setOrigin(0.5).setDepth(100).setInteractive());
         speedBtn.on('pointerdown', () => {
             this.speedMultiplier = this.speedMultiplier === 1 ? 2 : this.speedMultiplier === 2 ? 3 : 1;
             speedBtn.setText(`×${this.speedMultiplier}`);
@@ -192,14 +195,15 @@ class BattleScene extends Phaser.Scene {
         bgBar.fillRoundedRect(barX, barY, barW * ratio, barH, 3);
         bgBar.lineStyle(1, 0x886644, 0.5);
         bgBar.strokeRoundedRect(barX, barY, barW, barH, 3);
+        this._hudElements.push(bgBar);
 
-        this.add.text(barX + 5, barY + 1, `📦 화물 HP: ${this.cargoHp}/${this.cargoMaxHp}`, {
+        const cargoLabel = this.add.text(barX + 5, barY + 1, `📦 화물 HP: ${this.cargoHp}/${this.cargoMaxHp}`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setDepth(101);
+        this._hudElements.push(cargoLabel);
 
         this.cargoHpBar = bgBar;
 
-        // cargo visual on battlefield
         this._cargoSprite = this.add.graphics().setDepth(3);
         this._cargoSprite.fillStyle(0xff8844, 0.8);
         this._cargoSprite.fillRect(60, 435, 40, 25);
@@ -207,7 +211,9 @@ class BattleScene extends Phaser.Scene {
         this._cargoSprite.strokeRect(60, 435, 40, 25);
         this._cargoSprite.fillStyle(0xffcc44);
         this._cargoSprite.fillRect(72, 440, 16, 8);
-        this.add.text(80, 425, '📦', { fontSize: '12px' }).setOrigin(0.5).setDepth(4);
+        this._hudElements.push(this._cargoSprite);
+        const cargoIcon = this.add.text(80, 425, '📦', { fontSize: '12px' }).setOrigin(0.5).setDepth(4);
+        this._hudElements.push(cargoIcon);
     }
 
     _updateCargoHpBar() {
@@ -232,16 +238,18 @@ class BattleScene extends Phaser.Scene {
         this.curseText = this.add.text(cx, cy, `🔮 ${label}`, {
             fontSize: '11px', fontFamily: 'monospace', color, fontStyle: 'bold'
         }).setDepth(100);
+        this._hudElements.push(this.curseText);
 
         if (this.curseLevel > 0) {
-            this.add.text(cx, cy + 16, `적 강화 +${this.curseLevel * 8}% | 드랍 보너스 +${this.curseLevel}등급`, {
+            const subText = this.add.text(cx, cy + 16, `적 강화 +${this.curseLevel * 8}% | 드랍 보너스 +${this.curseLevel}등급`, {
                 fontSize: '9px', fontFamily: 'monospace', color: '#886688'
             }).setDepth(100);
+            this._hudElements.push(subText);
         }
 
-        // darkness overlay
         if (this.curseLevel > 0) {
             const darkness = this.add.rectangle(640, 360, 1280, 720, 0x000000, Math.min(0.35, this.curseLevel * 0.07)).setDepth(2);
+            this._hudElements.push(darkness);
             this.tweens.add({ targets: darkness, alpha: darkness.alpha * 0.6, duration: 2000, yoyo: true, repeat: -1 });
         }
     }
@@ -616,6 +624,11 @@ class BattleScene extends Phaser.Scene {
     _showCardSelect() {
         this.cardSelectActive = true;
         this.cameras.main.fadeIn(300);
+
+        // Hide battle HUD
+        if (this._hudElements) {
+            this._hudElements.forEach(el => { if (el && el.setVisible) el.setVisible(false); });
+        }
 
         this.allUnits.forEach(u => u.destroy());
         this.allUnits = [];

@@ -52,7 +52,7 @@ class IntelScene extends Phaser.Scene {
                 fontSize: '11px', fontFamily: 'monospace', color: color
             });
 
-            this.add.text(cx + 15, 178, `기본 보상: ${zone.baseGold}G / ${zone.baseXp}XP`, {
+            this.add.text(cx + 15, 178, `기본 보상: ${zone.baseGoldReward}G / ${zone.baseXpReward}XP`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#ffcc44'
             });
 
@@ -61,7 +61,7 @@ class IntelScene extends Phaser.Scene {
             });
 
             const { composition } = unlocked
-                ? getEnemyComposition(maxRounds, level)
+                ? getEnemyComposition(maxRounds, level, key)
                 : { composition: [] };
             if (composition.length > 0) {
                 const enemies = composition.map(c => `${ENEMY_DATA[c.type]?.name || c.type}×${c.count}`).join(', ');
@@ -70,7 +70,7 @@ class IntelScene extends Phaser.Scene {
                 });
             }
 
-            this.add.text(cx + 15, 245, zone.mechanic, {
+            this.add.text(cx + 15, 245, zone.desc, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#886666',
                 wordWrap: { width: 360 }
             });

@@ -326,7 +326,7 @@ class AuctionScene extends Phaser.Scene {
 
         this._drawFilterBar(90);
 
-        this._add(this.add.text(640, 90, '판매 수수료: 일반 10% | 고급 15% | 희귀 20% | 에픽 25% | 전설 30%', {
+        this._add(this.add.text(640, 112, '판매 수수료: 일반 10% | 고급 15% | 희귀 20% | 에픽 25% | 전설 30%', {
             fontSize: '10px', fontFamily: 'monospace', color: '#666677'
         }).setOrigin(0.5));
 
@@ -350,7 +350,7 @@ class AuctionScene extends Phaser.Scene {
             ? `정말 판매? (${commonItems.length}개 → +${commonTotal}G)`
             : `일반 전체 판매 (${commonItems.length}개 / +${commonTotal}G)`;
         const commonEnabled = commonItems.length > 0;
-        this._add(UIButton.create(this, 200, 112, 280, 26, commonLabel, {
+        this._add(UIButton.create(this, 200, 132, 280, 26, commonLabel, {
             color: commonEnabled ? (this._bulkSellConfirm.common ? 0x884422 : 0x443344) : 0x222233,
             hoverColor: commonEnabled ? (this._bulkSellConfirm.common ? 0xaa6644 : 0x554455) : 0x222233,
             textColor: commonEnabled ? (this._bulkSellConfirm.common ? '#ffaa66' : '#ccaacc') : '#444455',
@@ -393,7 +393,7 @@ class AuctionScene extends Phaser.Scene {
             ? `정말 판매? (${materialItems.length}개 → +${materialTotal}G)`
             : `소재 전체 판매 (${materialItems.length}개 / +${materialTotal}G)`;
         const matEnabled = materialItems.length > 0;
-        this._add(UIButton.create(this, 500, 112, 280, 26, matLabel, {
+        this._add(UIButton.create(this, 500, 132, 280, 26, matLabel, {
             color: matEnabled ? (this._bulkSellConfirm.material ? 0x884422 : 0x443344) : 0x222233,
             hoverColor: matEnabled ? (this._bulkSellConfirm.material ? 0xaa6644 : 0x554455) : 0x222233,
             textColor: matEnabled ? (this._bulkSellConfirm.material ? '#ffaa66' : '#ccaacc') : '#444455',
@@ -440,7 +440,7 @@ class AuctionScene extends Phaser.Scene {
             return;
         }
 
-        let cy = 140;
+        let cy = 158;
         sellable.forEach(item => {
             if (cy > 650) return;
             this._drawSellRow(item, 40, cy, 1200);
