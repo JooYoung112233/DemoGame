@@ -396,7 +396,8 @@ class BattleScene extends Phaser.Scene {
 
         if (this.currentRound >= this.maxRounds) {
             const bossType = getZoneBoss(this.zoneKey);
-            const bossUnit = BattleUnit.fromEnemyData(this, bossType, scaleMult * 1.3, 1050, 420);
+            const bossScale = scaleMult * (0.8 + this.zoneLevel * 0.15);
+            const bossUnit = BattleUnit.fromEnemyData(this, bossType, bossScale, 1050, 420);
             this.enemies.push(bossUnit);
             this.allUnits.push(bossUnit);
         }
@@ -489,7 +490,7 @@ class BattleScene extends Phaser.Scene {
         this.onUnitDeath = (unit, killer) => {
             if (unit.team === 'enemy') {
                 this._updateEnemyCount();
-                let goldDrop = Phaser.Math.Between(5, 15) + this.currentRound * 3;
+                let goldDrop = Phaser.Math.Between(8, 18) + this.currentRound * 4;
                 if (unit.isElite) goldDrop += 20;
                 if (unit.isBoss) goldDrop += 100;
                 if (this.collectedCards.includes('golden_hands')) goldDrop = Math.floor(goldDrop * 1.2);
@@ -563,6 +564,10 @@ class BattleScene extends Phaser.Scene {
             const isBoss = this.currentRound >= this.maxRounds;
             const roundXp = 10 + this.currentRound * 5 + (isBoss ? 30 : 0);
             this.totalXp += roundXp;
+
+            const roundBonus = 15 + this.currentRound * 10 + (isBoss ? 50 : 0);
+            this.totalGold += roundBonus;
+            this.goldText.setText(`💰 ${this.totalGold}G`);
 
             const clearTxt = this.add.text(640, 300, 'ROUND CLEAR', {
                 fontSize: '36px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold',
@@ -726,6 +731,16 @@ class BattleScene extends Phaser.Scene {
                 this._proceedToNextRound(key);
             });
         });
+
+        // retreat button
+        const retBg = this.add.rectangle(380, 500, 110, 32, 0x332222).setStrokeStyle(1, 0x664444).setDepth(84).setInteractive({ useHandCursor: true });
+        const retTxt = this.add.text(380, 500, '🚪 철수', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ff8888'
+        }).setOrigin(0.5).setDepth(85);
+        retBg.on('pointerover', () => retBg.setFillStyle(0x443333));
+        retBg.on('pointerout', () => retBg.setFillStyle(0x332222));
+        retBg.on('pointerdown', () => this._endRun(false));
+        this._cardUIObjects.push(retBg, retTxt);
 
         // skip button
         const skipBg = this.add.rectangle(540, 500, 100, 32, 0x222222).setStrokeStyle(1, 0x444444).setDepth(84).setInteractive({ useHandCursor: true });

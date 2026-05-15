@@ -5,7 +5,7 @@ class Mercenary {
         this.id = Mercenary._nextId++;
         this.classKey = classKey;
         this.rarity = rarity;
-        this.name = name;
+        this.name = name || generateMercName();
         this.level = 1;
         this.xp = 0;
         this.traits = traits || [];
