@@ -57,14 +57,17 @@ function getEnemyComposition(round, zoneLevel) {
         // mid-early
         composition = [{ type: 'runner', count: 2 }, { type: 'spitter', count: 1 }];
         if (zoneLevel >= 2) composition.push({ type: 'bruiser', count: 1 });
+        if (zoneLevel >= 3) composition.push({ type: 'summoner', count: 1 });
     } else if (progress <= 0.75) {
         // mid-late
         composition = [{ type: 'bruiser', count: 1 }, { type: 'spitter', count: 1 }, { type: 'runner', count: 2 }];
+        if (zoneLevel >= 2) composition.push({ type: 'summoner', count: 1 });
         if (zoneLevel >= 3) composition[0].count += 1;
     } else {
         // pre-boss
         composition = [{ type: 'bruiser', count: 2 }, { type: 'spitter', count: 1 }];
         if (zoneLevel >= 2) composition.push({ type: 'elite_runner', count: 1 });
+        if (zoneLevel >= 3) composition.push({ type: 'summoner', count: 1 });
     }
 
     return { composition, scaleMult };

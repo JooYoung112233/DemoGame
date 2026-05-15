@@ -33,6 +33,7 @@ class BattleScene extends Phaser.Scene {
         this._spawnAllies();
         this._spawnEnemies();
         this._applyCards();
+        this._applyZoneEffects();
         this._showRoundAnnounce();
     }
 
@@ -170,6 +171,47 @@ class BattleScene extends Phaser.Scene {
                 card.apply(allyUnits);
             }
         });
+    }
+
+    _applyZoneEffects() {
+        const progress = this.currentRound / this.maxRounds;
+        switch (this.zoneKey) {
+            case 'bloodpit':
+                this.enemies.forEach(e => {
+                    e.atk = Math.floor(e.atk * (1 + progress * 0.15));
+                    e.critRate = Math.min(0.5, e.critRate + progress * 0.05);
+                });
+                this.allies.forEach(a => {
+                    a.lifesteal += 0.03;
+                });
+                this._zoneLabel = '🩸 핏 게이지: 적 공격력↑, 아군 흡혈 +3%';
+                break;
+            case 'cargo':
+                this.allies.forEach(a => {
+                    a.def = Math.floor(a.def * 1.15);
+                });
+                this.enemies.forEach(e => {
+                    e.moveSpeed = Math.floor(e.moveSpeed * 1.2);
+                });
+                this._zoneLabel = '📦 화물선: 아군 방어력 +15%, 적 이동속도 +20%';
+                break;
+            case 'blackout':
+                this.allies.forEach(a => {
+                    a.critDmg += 0.3;
+                    a.range = Math.floor(a.range * 0.7);
+                });
+                this.enemies.forEach(e => {
+                    e.moveSpeed = Math.floor(e.moveSpeed * 0.85);
+                    e.bleedChance = Math.min(0.5, (e.bleedChance || 0) + 0.1);
+                });
+                this._zoneLabel = '🔦 암흑: 아군 크리피해 +30% / 사거리 -30%, 적 저주 출혈';
+                break;
+        }
+        if (this._zoneLabel) {
+            this.add.text(640, 70, this._zoneLabel, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#886666'
+            }).setOrigin(0.5).setDepth(100);
+        }
     }
 
     _showRoundAnnounce() {

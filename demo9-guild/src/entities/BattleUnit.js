@@ -55,6 +55,14 @@ class BattleUnit {
         this.abilityTimer = 0;
         this.bossPhase = 0;
 
+        this.skillReady = false;
+        this.shieldAmount = 0;
+        this.shieldTimer = 0;
+        this.atkBuff = 0;
+        this.atkBuffTimer = 0;
+        this.defBuff = 0;
+        this.defBuffTimer = 0;
+
         this.animFrame = 0;
         this.animTimer = 0;
 
@@ -318,7 +326,28 @@ class BattleUnit {
             }
         }
 
-        if (this.healCooldown > 0) {
+        if (this.shieldTimer > 0) {
+            this.shieldTimer -= delta;
+            if (this.shieldTimer <= 0) { this.shieldAmount = 0; this.shieldTimer = 0; }
+        }
+        if (this.atkBuffTimer > 0) {
+            this.atkBuffTimer -= delta;
+            if (this.atkBuffTimer <= 0) { this.atk -= this.atkBuff; this.atkBuff = 0; }
+        }
+        if (this.defBuffTimer > 0) {
+            this.defBuffTimer -= delta;
+            if (this.defBuffTimer <= 0) { this.def -= this.defBuff; this.defBuff = 0; }
+        }
+
+        if (this.skillCooldown > 0 && this.team === 'ally') {
+            this.skillTimer += delta;
+            if (this.skillTimer >= this.skillCooldown) {
+                this.skillTimer = 0;
+                this._useSkill(allUnits);
+            }
+        }
+
+        if (this.healCooldown > 0 && this.team === 'enemy') {
             this.healTimer += delta;
             if (this.healTimer >= this.healCooldown) {
                 this.healTimer = 0;
@@ -326,7 +355,7 @@ class BattleUnit {
             }
         }
 
-        if (this.aoeCooldown > 0) {
+        if (this.aoeCooldown > 0 && this.team === 'enemy') {
             this.aoeTimer += delta;
             if (this.aoeTimer >= this.aoeCooldown) {
                 this.aoeTimer = 0;
@@ -353,6 +382,28 @@ class BattleUnit {
             }
         }
 
+        if (this.enemyType === 'summoner' && this.team === 'enemy') {
+            this.abilityTimer += delta;
+            if (this.abilityTimer >= 8000) {
+                this.abilityTimer = 0;
+                const existingMinions = allUnits.filter(u => u.team === 'enemy' && u.alive && u.isSummon);
+                if (existingMinions.length < 3) {
+                    const spawnX = this.container.x + Phaser.Math.Between(-40, 40);
+                    const spawnY = this.container.y + Phaser.Math.Between(-15, 15);
+                    const minion = BattleUnit.fromEnemyData(this.scene, 'runner', 0.6, spawnX, spawnY);
+                    minion.isSummon = true;
+                    minion.maxHp = Math.floor(minion.maxHp * 0.5);
+                    minion.hp = minion.maxHp;
+                    this.scene.enemies.push(minion);
+                    this.scene.allUnits.push(minion);
+                    this.scene._updateEnemyCount();
+                    DamagePopup.show(this.scene, this.container.x, this.container.y - 35, '소환!', 0x8844cc, false);
+                    const portal = this.scene.add.circle(spawnX, spawnY, 8, 0x8844cc, 0.6).setDepth(50);
+                    this.scene.tweens.add({ targets: portal, scaleX: 3, scaleY: 3, alpha: 0, duration: 400, onComplete: () => portal.destroy() });
+                }
+            }
+        }
+
         if (this.isBoss && this.team === 'enemy') {
             const hpRatio = this.hp / this.maxHp;
             if (this.bossPhase === 0 && hpRatio <= 0.5) {
@@ -373,6 +424,99 @@ class BattleUnit {
 
         this.healthBar.update(this.hp, this.maxHp);
         this.healthBar.setPosition(this.container.x, this.container.y - 30);
+    }
+
+    _useSkill(allUnits) {
+        const allies = allUnits.filter(u => u.team === this.team && u.alive);
+        const enemies = allUnits.filter(u => u.team !== this.team && u.alive);
+
+        switch (this.classKey) {
+            case 'warrior': {
+                const shieldAmt = Math.floor(this.maxHp * 0.3);
+                this.shieldAmount = shieldAmt;
+                this.shieldTimer = 5000;
+                this.defBuff = Math.floor(this.def * 0.3);
+                this.def += this.defBuff;
+                this.defBuffTimer = 5000;
+                DamagePopup.show(this.scene, this.container.x, this.container.y - 35, '방패막이!', 0x4488ff, false);
+                const shield = this.scene.add.circle(this.container.x, this.container.y, 15, 0x4488ff, 0.4).setDepth(50);
+                this.scene.tweens.add({ targets: shield, scaleX: 2, scaleY: 2, alpha: 0, duration: 400, onComplete: () => shield.destroy() });
+                break;
+            }
+            case 'rogue': {
+                if (!this.target || !this.target.alive) break;
+                const dmg = Math.floor(this.atk * 2.0);
+                this.target.takeDamage(dmg, this, allUnits);
+                this.target.bleeding = true;
+                this.target.bleedTimer = 4000;
+                this.target.bleedTickTimer = 800;
+                this.target.bleedDamage = Math.floor(this.atk * 0.3);
+                DamagePopup.showCritical(this.scene, this.target.container.x, this.target.container.y - 20, dmg);
+                DamagePopup.show(this.scene, this.target.container.x, this.target.container.y - 40, '급소!', 0xff4488, false);
+                break;
+            }
+            case 'mage': {
+                if (enemies.length === 0) break;
+                const aoeDmg = Math.floor(this.atk * 1.8);
+                enemies.forEach(e => {
+                    const finalDmg = Math.max(1, aoeDmg - e.def * 0.3);
+                    e.takeDamage(Math.floor(finalDmg), this, allUnits);
+                });
+                const cx = enemies.reduce((s, e) => s + e.container.x, 0) / enemies.length;
+                DamagePopup.show(this.scene, cx, 380, '마력 폭발!', 0x8844ff, false);
+                const blast = this.scene.add.circle(cx, 430, 20, 0x8844ff, 0.5).setDepth(50);
+                this.scene.tweens.add({ targets: blast, scaleX: 6, scaleY: 3, alpha: 0, duration: 500, onComplete: () => blast.destroy() });
+                break;
+            }
+            case 'archer': {
+                if (enemies.length === 0) break;
+                const sorted = [...enemies].sort((a, b) => a.container.x - b.container.x);
+                const pierceDmg = Math.floor(this.atk * 1.5);
+                sorted.forEach((e, i) => {
+                    const dmg = Math.max(1, Math.floor(pierceDmg * (1 - i * 0.15)) - e.def * 0.3);
+                    this.scene.time.delayedCall(i * 100, () => {
+                        if (e.alive) {
+                            e.takeDamage(Math.floor(dmg), this, allUnits);
+                            DamagePopup.show(this.scene, e.container.x, e.container.y - 20, Math.floor(dmg), 0x44cc44, false);
+                        }
+                    });
+                });
+                DamagePopup.show(this.scene, this.container.x, this.container.y - 35, '관통!', 0x44cc44, false);
+                const arrow = this.scene.add.rectangle(this.container.x, this.container.y - 8, 6, 2, 0x44cc44).setDepth(55);
+                this.scene.tweens.add({ targets: arrow, x: 1280, duration: 400, onComplete: () => arrow.destroy() });
+                break;
+            }
+            case 'priest': {
+                const healAmt = Math.floor(this.atk * 2.5);
+                allies.forEach(a => {
+                    const healed = Math.min(healAmt, a.maxHp - a.hp);
+                    if (healed > 0) {
+                        a.hp += healed;
+                        DamagePopup.show(this.scene, a.container.x, a.container.y - 30, healed, 0x44ff88, true);
+                    }
+                });
+                DamagePopup.show(this.scene, this.container.x, this.container.y - 35, '신성 치유!', 0xffcc44, false);
+                allies.forEach(a => {
+                    const glow = this.scene.add.circle(a.container.x, a.container.y, 10, 0x44ff88, 0.3).setDepth(50);
+                    this.scene.tweens.add({ targets: glow, scaleX: 2, scaleY: 2, alpha: 0, duration: 400, onComplete: () => glow.destroy() });
+                });
+                break;
+            }
+            case 'alchemist': {
+                const buffAmt = Math.floor(this.atk * 0.5);
+                allies.forEach(a => {
+                    a.atkBuff += buffAmt;
+                    a.atk += buffAmt;
+                    a.atkBuffTimer = 8000;
+                });
+                DamagePopup.show(this.scene, this.container.x, this.container.y - 35, '강화 물약!', 0x44cccc, false);
+                allies.forEach(a => {
+                    const sparkle = this.scene.add.circle(a.container.x, a.container.y - 5, 5, 0x44cccc, 0.5).setDepth(50);
+                    this.scene.tweens.add({ targets: sparkle, y: a.container.y - 25, alpha: 0, duration: 500, onComplete: () => sparkle.destroy() });
+                });
+                break;
+            }
+        }
     }
 
     performAttack(allUnits) {
@@ -477,6 +621,15 @@ class BattleUnit {
 
     takeDamage(amount, attacker, allUnits) {
         if (!this.alive) return;
+        if (this.shieldAmount > 0) {
+            const absorbed = Math.min(this.shieldAmount, amount);
+            this.shieldAmount -= absorbed;
+            amount -= absorbed;
+            if (absorbed > 0) {
+                DamagePopup.show(this.scene, this.container.x, this.container.y - 45, `🛡${absorbed}`, 0x4488ff, false);
+            }
+            if (amount <= 0) return;
+        }
         this.hp -= amount;
 
         // knockback
