@@ -14,6 +14,15 @@ class BattleScene extends Phaser.Scene {
         this.partyHpState = data.partyHpState || null;
         this.zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
         this.maxRounds = getMaxRounds(this.zoneLevel);
+
+        // Cargo: compartment defense
+        this.cargoHp = data.cargoHp !== undefined ? data.cargoHp : 100;
+        this.cargoMaxHp = 100;
+        this.cargoDestroyed = data.cargoDestroyed || false;
+
+        // Blackout: curse system
+        this.curseLevel = data.curseLevel || 0;
+        this.ambushTriggered = false;
     }
 
     create() {
@@ -27,6 +36,8 @@ class BattleScene extends Phaser.Scene {
         this.killStreakTimer = 0;
         this.battleTime = 0;
         this._dangerVignette = null;
+        this._cargoAttackTimer = 0;
+        this._ambushTimer = 0;
 
         this._drawBackground();
         this._drawHUD();
@@ -35,6 +46,7 @@ class BattleScene extends Phaser.Scene {
         this._spawnEnemies();
         this._applyCards();
         this._applyZoneEffects();
+        this._initZoneMechanics();
         this._showRoundAnnounce();
     }
 
@@ -157,6 +169,194 @@ class BattleScene extends Phaser.Scene {
             speedBtn.setText(`×${this.speedMultiplier}`);
             localStorage.setItem('demo9_speed', this.speedMultiplier);
         });
+
+        // --- CARGO: Cargo HP bar ---
+        if (this.zoneKey === 'cargo' && !this.cargoDestroyed) {
+            this._drawCargoHpBar();
+        }
+
+        // --- BLACKOUT: Curse level indicator ---
+        if (this.zoneKey === 'blackout') {
+            this._drawCurseIndicator();
+        }
+    }
+
+    _drawCargoHpBar() {
+        const barX = 40, barY = 670, barW = 200, barH = 14;
+        const ratio = this.cargoHp / this.cargoMaxHp;
+        const bgBar = this.add.graphics().setDepth(100);
+        bgBar.fillStyle(0x332211, 1);
+        bgBar.fillRoundedRect(barX, barY, barW, barH, 3);
+        const hpColor = ratio > 0.5 ? 0xff8844 : ratio > 0.25 ? 0xff6622 : 0xff2222;
+        bgBar.fillStyle(hpColor, 1);
+        bgBar.fillRoundedRect(barX, barY, barW * ratio, barH, 3);
+        bgBar.lineStyle(1, 0x886644, 0.5);
+        bgBar.strokeRoundedRect(barX, barY, barW, barH, 3);
+
+        this.add.text(barX + 5, barY + 1, `📦 화물 HP: ${this.cargoHp}/${this.cargoMaxHp}`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+        }).setDepth(101);
+
+        this.cargoHpBar = bgBar;
+
+        // cargo visual on battlefield
+        this._cargoSprite = this.add.graphics().setDepth(3);
+        this._cargoSprite.fillStyle(0xff8844, 0.8);
+        this._cargoSprite.fillRect(60, 435, 40, 25);
+        this._cargoSprite.lineStyle(2, 0xffaa44, 0.6);
+        this._cargoSprite.strokeRect(60, 435, 40, 25);
+        this._cargoSprite.fillStyle(0xffcc44);
+        this._cargoSprite.fillRect(72, 440, 16, 8);
+        this.add.text(80, 425, '📦', { fontSize: '12px' }).setOrigin(0.5).setDepth(4);
+    }
+
+    _updateCargoHpBar() {
+        if (!this.cargoHpBar || this.cargoDestroyed) return;
+        const barX = 40, barY = 670, barW = 200, barH = 14;
+        const ratio = this.cargoHp / this.cargoMaxHp;
+        this.cargoHpBar.clear();
+        this.cargoHpBar.fillStyle(0x332211, 1);
+        this.cargoHpBar.fillRoundedRect(barX, barY, barW, barH, 3);
+        const hpColor = ratio > 0.5 ? 0xff8844 : ratio > 0.25 ? 0xff6622 : 0xff2222;
+        this.cargoHpBar.fillStyle(hpColor, 1);
+        this.cargoHpBar.fillRoundedRect(barX, barY, barW * Math.max(0, ratio), barH, 3);
+        this.cargoHpBar.lineStyle(1, 0x886644, 0.5);
+        this.cargoHpBar.strokeRoundedRect(barX, barY, barW, barH, 3);
+    }
+
+    _drawCurseIndicator() {
+        const cx = 40, cy = 665;
+        const skulls = '💀'.repeat(Math.min(this.curseLevel, 5));
+        const label = this.curseLevel === 0 ? '저주 없음' : `저주 Lv.${this.curseLevel} ${skulls}`;
+        const color = this.curseLevel === 0 ? '#666688' : this.curseLevel <= 2 ? '#aa66ff' : this.curseLevel <= 4 ? '#cc44ff' : '#ff22ff';
+        this.curseText = this.add.text(cx, cy, `🔮 ${label}`, {
+            fontSize: '11px', fontFamily: 'monospace', color, fontStyle: 'bold'
+        }).setDepth(100);
+
+        if (this.curseLevel > 0) {
+            this.add.text(cx, cy + 16, `적 강화 +${this.curseLevel * 8}% | 드랍 보너스 +${this.curseLevel}등급`, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#886688'
+            }).setDepth(100);
+        }
+
+        // darkness overlay
+        if (this.curseLevel > 0) {
+            const darkness = this.add.rectangle(640, 360, 1280, 720, 0x000000, Math.min(0.35, this.curseLevel * 0.07)).setDepth(2);
+            this.tweens.add({ targets: darkness, alpha: darkness.alpha * 0.6, duration: 2000, yoyo: true, repeat: -1 });
+        }
+    }
+
+    _initZoneMechanics() {
+        if (this.zoneKey === 'cargo') {
+            this._initCargoMechanics();
+        } else if (this.zoneKey === 'blackout') {
+            this._initBlackoutMechanics();
+        }
+    }
+
+    _initCargoMechanics() {
+        if (this.cargoDestroyed) return;
+        // enemies periodically damage cargo
+        this._cargoAttackInterval = 4000 + Math.random() * 2000;
+        this._cargoAttackTimer = this._cargoAttackInterval * 0.5;
+    }
+
+    _updateCargoMechanics(dt) {
+        if (this.cargoDestroyed || this.zoneKey !== 'cargo') return;
+        this._cargoAttackTimer += dt;
+        if (this._cargoAttackTimer >= this._cargoAttackInterval) {
+            this._cargoAttackTimer = 0;
+            this._cargoAttackInterval = 3000 + Math.random() * 2000;
+            const aliveEnemies = this.enemies.filter(e => e.alive);
+            if (aliveEnemies.length > 0) {
+                const attacker = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+                const dmg = Math.floor(3 + this.currentRound * 2 + this.zoneLevel * 2);
+                this.cargoHp = Math.max(0, this.cargoHp - dmg);
+                this._updateCargoHpBar();
+
+                // visual
+                if (this._cargoSprite) {
+                    this.tweens.add({ targets: this._cargoSprite, alpha: 0.3, duration: 80, yoyo: true });
+                }
+                const dmgTxt = this.add.text(80, 420, `-${dmg}`, {
+                    fontSize: '12px', fontFamily: 'monospace', color: '#ff6644', fontStyle: 'bold',
+                    stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setDepth(90);
+                this.tweens.add({ targets: dmgTxt, y: 400, alpha: 0, duration: 600, onComplete: () => dmgTxt.destroy() });
+
+                if (this.cargoHp <= 0) {
+                    this.cargoDestroyed = true;
+                    DamagePopup.show(this, 640, 400, '화물 파괴!', 0xff4422, false);
+                    this.cameras.main.shake(200, 0.004);
+                    if (this._cargoSprite) {
+                        this.tweens.add({ targets: this._cargoSprite, alpha: 0, duration: 500 });
+                    }
+                    // explosion
+                    for (let i = 0; i < 6; i++) {
+                        const p = this.add.circle(80 + Phaser.Math.Between(-20, 20), 445 + Phaser.Math.Between(-15, 15), 4, 0xff8844, 0.8).setDepth(50);
+                        this.tweens.add({ targets: p, alpha: 0, scaleX: 3, scaleY: 3, duration: 400, delay: i * 50, onComplete: () => p.destroy() });
+                    }
+                }
+            }
+        }
+    }
+
+    _initBlackoutMechanics() {
+        // curse increases each round automatically
+        if (this.currentRound > 1 && this.curseLevel === 0) {
+            this.curseLevel = this.currentRound - 1;
+        }
+
+        // apply curse scaling to enemies
+        if (this.curseLevel > 0) {
+            const curseMult = 1 + this.curseLevel * 0.08;
+            this.enemies.forEach(e => {
+                e.atk = Math.floor(e.atk * curseMult);
+                e.maxHp = Math.floor(e.maxHp * curseMult);
+                e.hp = Math.min(e.hp, e.maxHp);
+            });
+        }
+
+        // ambush chance
+        this._ambushChance = 0.15 + this.curseLevel * 0.05;
+        this._ambushTimer = 5000 + Math.random() * 5000;
+    }
+
+    _updateBlackoutMechanics(dt) {
+        if (this.zoneKey !== 'blackout') return;
+        if (this.ambushTriggered) return;
+
+        this._ambushTimer -= dt;
+        if (this._ambushTimer <= 0 && Math.random() < this._ambushChance) {
+            this.ambushTriggered = true;
+            this._triggerAmbush();
+        }
+    }
+
+    _triggerAmbush() {
+        DamagePopup.show(this, 640, 350, '⚠ 기습!', 0xaa44ff, false);
+        this.cameras.main.shake(150, 0.003);
+
+        // flash darkness
+        const flash = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.5).setDepth(150);
+        this.tweens.add({ targets: flash, alpha: 0, duration: 800, onComplete: () => flash.destroy() });
+
+        const count = 1 + Math.floor(this.curseLevel * 0.5);
+        const types = ['wraith', 'shade'];
+        for (let i = 0; i < count; i++) {
+            const type = types[Math.floor(Math.random() * types.length)];
+            const x = Phaser.Math.Between(800, 1200);
+            const y = 420 + Phaser.Math.Between(-10, 20);
+            const scaleMult = 1 + (this.zoneLevel - 1) * 0.1;
+            const unit = BattleUnit.fromEnemyData(this, type, scaleMult * 0.8, x, y);
+            unit.isSummon = true;
+            this.enemies.push(unit);
+            this.allUnits.push(unit);
+
+            const portal = this.add.circle(x, y, 10, 0x8844ff, 0.6).setDepth(50);
+            this.tweens.add({ targets: portal, scaleX: 3, scaleY: 3, alpha: 0, duration: 500, onComplete: () => portal.destroy() });
+        }
+        this._updateEnemyCount();
     }
 
     _spawnAllies() {
@@ -234,19 +434,23 @@ class BattleScene extends Phaser.Scene {
                 this.enemies.forEach(e => {
                     e.moveSpeed = Math.floor(e.moveSpeed * 1.2);
                 });
-                this._zoneLabel = '📦 화물선: 아군 방어력 +15%, 적 이동속도 +20%';
+                this._zoneLabel = this.cargoDestroyed
+                    ? '📦 화물 파괴됨! 보상 감소'
+                    : '📦 화물 방어: 화물을 지키면 보너스 보상!';
                 break;
-            case 'blackout':
+            case 'blackout': {
+                const curseMult = 1 + this.curseLevel * 0.05;
                 this.allies.forEach(a => {
                     a.critDmg += 0.3;
                     a.range = Math.floor(a.range * 0.7);
                 });
                 this.enemies.forEach(e => {
                     e.moveSpeed = Math.floor(e.moveSpeed * 0.85);
-                    e.bleedChance = Math.min(0.5, (e.bleedChance || 0) + 0.1);
+                    e.bleedChance = Math.min(0.5, (e.bleedChance || 0) + 0.1 + this.curseLevel * 0.03);
                 });
-                this._zoneLabel = '🔦 암흑: 아군 크리피해 +30% / 사거리 -30%, 적 저주 출혈';
+                this._zoneLabel = `🔦 저주 Lv.${this.curseLevel}: 크리피해 +30%, 기습 위험, 적 저주 출혈`;
                 break;
+            }
         }
         if (this._zoneLabel) {
             this.add.text(640, 70, this._zoneLabel, {
@@ -289,6 +493,10 @@ class BattleScene extends Phaser.Scene {
                 if (unit.isElite) goldDrop += 20;
                 if (unit.isBoss) goldDrop += 100;
                 if (this.collectedCards.includes('golden_hands')) goldDrop = Math.floor(goldDrop * 1.2);
+                // Cargo: bonus gold for alive cargo
+                if (this.zoneKey === 'cargo' && !this.cargoDestroyed) {
+                    goldDrop = Math.floor(goldDrop * 1.15);
+                }
                 this.totalGold += goldDrop;
                 this.goldText.setText(`💰 ${this.totalGold}G`);
 
@@ -301,8 +509,10 @@ class BattleScene extends Phaser.Scene {
                 const luckyBonus = this.collectedCards.includes('lucky') ? 1 : 0;
                 const dropChance = unit.isBoss ? 1.0 : 0.3 + this.currentRound * 0.04;
                 const bossRarityBonus = unit.isBoss ? 2 : (unit.isElite ? 1 : 0);
+                // Blackout: curse level adds rarity bonus
+                const curseRarityBonus = this.zoneKey === 'blackout' ? this.curseLevel : 0;
                 if (Math.random() < dropChance) {
-                    const item = generateItem(this.zoneKey, this.gameState.guildLevel, luckyBonus + bossRarityBonus);
+                    const item = generateItem(this.zoneKey, this.gameState.guildLevel, luckyBonus + bossRarityBonus + curseRarityBonus);
                     if (item) {
                         this.loot.push(item);
                         this._showLootPopup(unit.container.x, unit.container.y - 40, item);
@@ -412,15 +622,22 @@ class BattleScene extends Phaser.Scene {
 
         this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a).setDepth(80);
 
-        this.add.text(640, 80, `라운드 ${this.currentRound} 클리어!`, {
+        this.add.text(640, 60, `라운드 ${this.currentRound} 클리어!`, {
             fontSize: '24px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(81);
 
-        this._cardGoldText = this.add.text(640, 115, `생존: ${this.party.filter(m => m.alive).length}/${this.party.length}  |  💰 ${this.totalGold}G  |  💚 HP 5% 회복`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aa6666'
+        let statusLine = `생존: ${this.party.filter(m => m.alive).length}/${this.party.length}  |  💰 ${this.totalGold}G  |  💚 HP 5% 회복`;
+        if (this.zoneKey === 'cargo' && !this.cargoDestroyed) {
+            statusLine += `  |  📦 화물 ${this.cargoHp}%`;
+        }
+        if (this.zoneKey === 'blackout') {
+            statusLine += `  |  🔮 저주 Lv.${this.curseLevel}`;
+        }
+        this._cardGoldText = this.add.text(640, 90, statusLine, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#aa6666'
         }).setOrigin(0.5).setDepth(81);
 
-        this.add.text(640, 145, '카드를 선택하세요', {
+        this.add.text(640, 115, '카드를 선택하세요', {
             fontSize: '14px', fontFamily: 'monospace', color: '#cc8888'
         }).setOrigin(0.5).setDepth(81);
 
@@ -433,6 +650,9 @@ class BattleScene extends Phaser.Scene {
         }
         this._cardUIObjects = [];
 
+        // re-draw zone choices since they were cleared
+        this._drawZoneChoicesOnly();
+
         const cardChoices = generateCardChoices(this.currentRound, this.collectedCards, this.zoneLevel);
 
         if (cardChoices.length === 0) {
@@ -444,7 +664,7 @@ class BattleScene extends Phaser.Scene {
             return;
         }
 
-        const cardW = 280, cardH = 210;
+        const cardW = 280, cardH = 200;
         const gap = 30;
         const totalW = cardChoices.length * cardW + (cardChoices.length - 1) * gap;
         const startX = 640 - totalW / 2;
@@ -452,7 +672,7 @@ class BattleScene extends Phaser.Scene {
         cardChoices.forEach((key, idx) => {
             const card = CARD_DATA[key];
             const cx = startX + idx * (cardW + gap) + cardW / 2;
-            const cy = 340;
+            const cy = 310;
 
             const categoryColors = {
                 buff: { bg: 0x1a2a3a, border: 0x4488ff, text: '#4488ff', label: '강화' },
@@ -508,8 +728,8 @@ class BattleScene extends Phaser.Scene {
         });
 
         // skip button
-        const skipBg = this.add.rectangle(540, 530, 100, 32, 0x222222).setStrokeStyle(1, 0x444444).setDepth(84).setInteractive({ useHandCursor: true });
-        const skipTxt = this.add.text(540, 530, '스킵', {
+        const skipBg = this.add.rectangle(540, 500, 100, 32, 0x222222).setStrokeStyle(1, 0x444444).setDepth(84).setInteractive({ useHandCursor: true });
+        const skipTxt = this.add.text(540, 500, '스킵', {
             fontSize: '12px', fontFamily: 'monospace', color: '#666677'
         }).setOrigin(0.5).setDepth(85);
         skipBg.on('pointerover', () => skipBg.setFillStyle(0x333333));
@@ -525,8 +745,8 @@ class BattleScene extends Phaser.Scene {
         const rrBorder = canAfford ? 0x8855cc : 0x444444;
         const rrTextColor = canAfford ? '#bb88ff' : '#555555';
 
-        const rrBg = this.add.rectangle(740, 530, 140, 32, rrColor).setStrokeStyle(1, rrBorder).setDepth(84);
-        const rrTxt = this.add.text(740, 530, costLabel, {
+        const rrBg = this.add.rectangle(740, 500, 140, 32, rrColor).setStrokeStyle(1, rrBorder).setDepth(84);
+        const rrTxt = this.add.text(740, 500, costLabel, {
             fontSize: '11px', fontFamily: 'monospace', color: rrTextColor
         }).setOrigin(0.5).setDepth(85);
         this._cardUIObjects.push(rrBg, rrTxt);
@@ -538,10 +758,82 @@ class BattleScene extends Phaser.Scene {
             rrBg.on('pointerdown', () => {
                 this.totalGold -= rerollCost;
                 this._rerollCount++;
-                this._cardGoldText.setText(`생존: ${this.party.filter(m => m.alive).length}/${this.party.length}  |  💰 ${this.totalGold}G  |  💚 HP 5% 회복`);
+                this._cardGoldText.setText(`생존: ${this.party.filter(m => m.alive).length}/${this.party.length}  |  💰 ${this.totalGold}G`);
                 this.goldText.setText(`💰 ${this.totalGold}G`);
                 this._drawCardChoices();
             });
+        }
+    }
+
+    _drawZoneChoicesOnly() {
+        // Separated so card reroll doesn't destroy zone choice buttons
+        if (this.zoneKey === 'cargo' && !this.cargoDestroyed) {
+            const repairCost = 30 + this.currentRound * 10;
+            const canRepair = this.totalGold >= repairCost && this.cargoHp < this.cargoMaxHp;
+            const repairAmt = Math.min(25, this.cargoMaxHp - this.cargoHp);
+
+            if (repairAmt > 0) {
+                const btn = UIButton.create(this, 200, 560, 180, 26, `🔧 수리 +${repairAmt}HP (${repairCost}G)`, {
+                    color: canRepair ? 0x443322 : 0x222222,
+                    hoverColor: canRepair ? 0x554433 : 0x222222,
+                    textColor: canRepair ? '#ffcc88' : '#555555',
+                    fontSize: 10,
+                    onClick: () => {
+                        if (!canRepair) return;
+                        this.totalGold -= repairCost;
+                        this.cargoHp = Math.min(this.cargoMaxHp, this.cargoHp + repairAmt);
+                        UIToast.show(this, `화물 수리! HP ${this.cargoHp}/${this.cargoMaxHp}`, { color: '#ff8844' });
+                    }
+                }).setDepth(86);
+                this._cardUIObjects.push(btn);
+            }
+
+            const fortifyCost = 50 + this.currentRound * 15;
+            const canFortify = this.totalGold >= fortifyCost;
+            const fBtn = UIButton.create(this, 420, 560, 180, 26, `🛡 방벽 강화 +20HP (${fortifyCost}G)`, {
+                color: canFortify ? 0x334455 : 0x222222,
+                hoverColor: canFortify ? 0x445566 : 0x222222,
+                textColor: canFortify ? '#88ccff' : '#555555',
+                fontSize: 10,
+                onClick: () => {
+                    if (!canFortify) return;
+                    this.totalGold -= fortifyCost;
+                    this.cargoMaxHp += 20;
+                    this.cargoHp += 20;
+                    UIToast.show(this, `화물 방벽 강화! 최대 HP +20`, { color: '#88ccff' });
+                    fBtn.destroy();
+                }
+            }).setDepth(86);
+            this._cardUIObjects.push(fBtn);
+        }
+
+        if (this.zoneKey === 'blackout') {
+            const cleanseCost = 50 + this.curseLevel * 40;
+            const canCleanse = this.totalGold >= cleanseCost && this.curseLevel > 0;
+
+            const cBtn = UIButton.create(this, 200, 560, 170, 26, `✨ 정화 -1 (${cleanseCost}G)`, {
+                color: canCleanse ? 0x332244 : 0x222222,
+                hoverColor: canCleanse ? 0x443355 : 0x222222,
+                textColor: canCleanse ? '#bb88ff' : '#555555',
+                fontSize: 10,
+                onClick: () => {
+                    if (!canCleanse) return;
+                    this.totalGold -= cleanseCost;
+                    this.curseLevel = Math.max(0, this.curseLevel - 1);
+                    UIToast.show(this, `저주 정화! Lv.${this.curseLevel}`, { color: '#bb88ff' });
+                }
+            }).setDepth(86);
+            this._cardUIObjects.push(cBtn);
+
+            const eBtn = UIButton.create(this, 400, 560, 170, 26, `🔮 수용 +2Lv (보상↑)`, {
+                color: 0x442233, hoverColor: 0x553344,
+                textColor: '#ff66cc', fontSize: 10,
+                onClick: () => {
+                    this.curseLevel += 2;
+                    UIToast.show(this, `저주 수용! Lv.${this.curseLevel}`, { color: '#ff66cc' });
+                }
+            }).setDepth(86);
+            this._cardUIObjects.push(eBtn);
         }
     }
 
@@ -549,6 +841,11 @@ class BattleScene extends Phaser.Scene {
         this._rerollCount = 0;
         if (selectedCardKey) {
             this.collectedCards.push(selectedCardKey);
+        }
+
+        // Blackout: curse auto-increases each round
+        if (this.zoneKey === 'blackout') {
+            this.curseLevel++;
         }
 
         const hpState = {};
@@ -571,7 +868,11 @@ class BattleScene extends Phaser.Scene {
             totalXp: this.totalXp,
             loot: this.loot,
             casualties: this.casualties,
-            partyHpState: hpState
+            partyHpState: hpState,
+            cargoHp: this.cargoHp,
+            cargoMaxHp: this.cargoMaxHp,
+            cargoDestroyed: this.cargoDestroyed,
+            curseLevel: this.curseLevel
         });
     }
 
@@ -579,6 +880,20 @@ class BattleScene extends Phaser.Scene {
         this._snapshotAllyState();
         const survivors = this.party.filter(m => m.alive);
         const allCasualties = [...this.casualties];
+
+        // Cargo bonus
+        let cargoBonus = 0;
+        if (this.zoneKey === 'cargo' && !this.cargoDestroyed && success) {
+            cargoBonus = Math.floor(50 + this.cargoHp * 2);
+            this.totalGold += cargoBonus;
+        }
+
+        // Cargo penalty
+        if (this.zoneKey === 'cargo' && this.cargoDestroyed) {
+            this.totalGold = Math.floor(this.totalGold * 0.6);
+        }
+
+        // Blackout curse loot bonus already applied via drop rarity
 
         const result = {
             success,
@@ -591,7 +906,10 @@ class BattleScene extends Phaser.Scene {
             casualties: allCasualties,
             survivors,
             cards: this.collectedCards,
-            zoneLevelUp: success
+            zoneLevelUp: success,
+            cargoBonus: cargoBonus,
+            cargoDestroyed: this.cargoDestroyed,
+            curseLevel: this.curseLevel
         };
 
         this.scene.start('RunResultScene', {
@@ -633,6 +951,10 @@ class BattleScene extends Phaser.Scene {
                 this._lastAllyHp[u.mercId] = u.hp;
             }
         });
+
+        // Zone-specific update
+        this._updateCargoMechanics(dt);
+        this._updateBlackoutMechanics(dt);
 
         const critAlly = this.allies.find(a => a.alive && a.hp / a.maxHp <= 0.25);
         if (critAlly && !this._dangerVignette) {

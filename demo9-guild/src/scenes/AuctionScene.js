@@ -322,14 +322,116 @@ class AuctionScene extends Phaser.Scene {
     // --- SELL TAB ---
     _drawSellTab() {
         const gs = this.gameState;
+        const feeTable = { common: 10, uncommon: 15, rare: 20, epic: 25, legendary: 30 };
 
         this._drawFilterBar(90);
-        const sellable = this._getFilteredSellable(gs);
 
-        const feeTable = { common: 10, uncommon: 15, rare: 20, epic: 25, legendary: 30 };
         this._add(this.add.text(640, 90, '판매 수수료: 일반 10% | 고급 15% | 희귀 20% | 에픽 25% | 전설 30%', {
             fontSize: '10px', fontFamily: 'monospace', color: '#666677'
         }).setOrigin(0.5));
+
+        // --- Bulk sell buttons ---
+        const allSellable = gs.storage.filter(i => i.value > 0);
+        const commonItems = allSellable.filter(i => i.rarity === 'common');
+        const materialItems = allSellable.filter(i => i.type === 'material');
+
+        const calcBulkTotal = (items) => items.reduce((sum, item) => {
+            const fee = feeTable[item.rarity] || 10;
+            return sum + Math.floor(item.value * (1 - fee / 100));
+        }, 0);
+
+        const commonTotal = calcBulkTotal(commonItems);
+        const materialTotal = calcBulkTotal(materialItems);
+
+        if (!this._bulkSellConfirm) this._bulkSellConfirm = {};
+
+        // "일반 전체 판매" button
+        const commonLabel = this._bulkSellConfirm.common
+            ? `정말 판매? (${commonItems.length}개 → +${commonTotal}G)`
+            : `일반 전체 판매 (${commonItems.length}개 / +${commonTotal}G)`;
+        const commonEnabled = commonItems.length > 0;
+        this._add(UIButton.create(this, 200, 112, 280, 26, commonLabel, {
+            color: commonEnabled ? (this._bulkSellConfirm.common ? 0x884422 : 0x443344) : 0x222233,
+            hoverColor: commonEnabled ? (this._bulkSellConfirm.common ? 0xaa6644 : 0x554455) : 0x222233,
+            textColor: commonEnabled ? (this._bulkSellConfirm.common ? '#ffaa66' : '#ccaacc') : '#444455',
+            fontSize: 10,
+            onClick: () => {
+                if (!commonEnabled) return;
+                if (!this._bulkSellConfirm.common) {
+                    this._bulkSellConfirm.common = true;
+                    this._clearContent();
+                    this._drawContent();
+                    return;
+                }
+                // Execute bulk sell
+                let totalGold = 0;
+                const ids = commonItems.map(i => i.id);
+                ids.forEach(id => {
+                    const item = gs.storage.find(i => i.id === id);
+                    if (!item) return;
+                    const fee = feeTable[item.rarity] || 10;
+                    const price = Math.floor(item.value * (1 - fee / 100));
+                    totalGold += price;
+                    StorageManager.removeItem(gs, id);
+                });
+                GuildManager.addGold(gs, totalGold);
+                gs.auctionHistory = gs.auctionHistory || [];
+                gs.auctionHistory.unshift({ action: 'sell', name: `일반 일괄 (${ids.length}개)`, price: totalGold, rarity: 'common', time: Date.now() });
+                if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+                GuildManager.addMessage(gs, `경매장 일괄 판매: 일반 ${ids.length}개 (+${totalGold}G)`);
+                SaveManager.save(gs);
+                UIToast.show(this, `일반 ${ids.length}개 일괄 판매! +${totalGold}G`, { color: '#ffcc44' });
+                this._bulkSellConfirm = {};
+                this.goldText.setText(`${gs.gold}G`);
+                this._clearContent();
+                this._drawContent();
+            }
+        }));
+
+        // "소재 전체 판매" button
+        const matLabel = this._bulkSellConfirm.material
+            ? `정말 판매? (${materialItems.length}개 → +${materialTotal}G)`
+            : `소재 전체 판매 (${materialItems.length}개 / +${materialTotal}G)`;
+        const matEnabled = materialItems.length > 0;
+        this._add(UIButton.create(this, 500, 112, 280, 26, matLabel, {
+            color: matEnabled ? (this._bulkSellConfirm.material ? 0x884422 : 0x443344) : 0x222233,
+            hoverColor: matEnabled ? (this._bulkSellConfirm.material ? 0xaa6644 : 0x554455) : 0x222233,
+            textColor: matEnabled ? (this._bulkSellConfirm.material ? '#ffaa66' : '#ccaacc') : '#444455',
+            fontSize: 10,
+            onClick: () => {
+                if (!matEnabled) return;
+                if (!this._bulkSellConfirm.material) {
+                    this._bulkSellConfirm.material = true;
+                    this._clearContent();
+                    this._drawContent();
+                    return;
+                }
+                let totalGold = 0;
+                const ids = materialItems.map(i => i.id);
+                ids.forEach(id => {
+                    const item = gs.storage.find(i => i.id === id);
+                    if (!item) return;
+                    const fee = feeTable[item.rarity] || 10;
+                    const price = Math.floor(item.value * (1 - fee / 100));
+                    totalGold += price;
+                    StorageManager.removeItem(gs, id);
+                });
+                GuildManager.addGold(gs, totalGold);
+                gs.auctionHistory = gs.auctionHistory || [];
+                gs.auctionHistory.unshift({ action: 'sell', name: `소재 일괄 (${ids.length}개)`, price: totalGold, rarity: 'common', time: Date.now() });
+                if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+                GuildManager.addMessage(gs, `경매장 일괄 판매: 소재 ${ids.length}개 (+${totalGold}G)`);
+                SaveManager.save(gs);
+                UIToast.show(this, `소재 ${ids.length}개 일괄 판매! +${totalGold}G`, { color: '#ffcc44' });
+                this._bulkSellConfirm = {};
+                this.goldText.setText(`${gs.gold}G`);
+                this._clearContent();
+                this._drawContent();
+            }
+        }));
+
+        // --- Filtered item list ---
+        const sellable = this._getFilteredSellable(gs);
 
         if (sellable.length === 0) {
             this._add(this.add.text(640, 400, '판매할 아이템이 없습니다', {
@@ -338,12 +440,26 @@ class AuctionScene extends Phaser.Scene {
             return;
         }
 
-        let cy = 115;
+        let cy = 140;
         sellable.forEach(item => {
-            if (cy > 680) return;
+            if (cy > 650) return;
             this._drawSellRow(item, 40, cy, 1200);
             cy += 60;
         });
+
+        // --- Total value footer ---
+        const totalValue = allSellable.reduce((sum, item) => {
+            const fee = feeTable[item.rarity] || 10;
+            return sum + Math.floor(item.value * (1 - fee / 100));
+        }, 0);
+        const footerBg = this._add(this.add.graphics());
+        footerBg.fillStyle(0x111122, 1);
+        footerBg.fillRoundedRect(40, 672, 1200, 30, 4);
+        footerBg.lineStyle(1, 0x444466, 0.5);
+        footerBg.strokeRoundedRect(40, 672, 1200, 30, 4);
+        this._add(this.add.text(640, 687, `보관함 전체 매각 시: ${totalValue}G  (아이템 ${allSellable.length}개)`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+        }).setOrigin(0.5));
     }
 
     _getFilteredSellable(gs) {
@@ -387,6 +503,7 @@ class AuctionScene extends Phaser.Scene {
             fontSize: '11px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
         }));
 
+        // Sell button
         this._add(UIButton.create(this, x + w - 55, y + 26, 90, 26, '판매', {
             color: 0x886644, hoverColor: 0xaa8866, textColor: '#ffeecc', fontSize: 11,
             onClick: () => {
@@ -405,6 +522,72 @@ class AuctionScene extends Phaser.Scene {
                 this._drawContent();
             }
         }));
+
+        // Haggling button — only for equipment items, once per item
+        if (item.type === 'equipment' && !item._haggled) {
+            this._add(UIButton.create(this, x + w - 155, y + 26, 80, 26, '흥정', {
+                color: 0x445566, hoverColor: 0x556677, textColor: '#88bbdd', fontSize: 11,
+                onClick: () => {
+                    item._haggled = true;
+                    const roll = Math.random();
+                    let multiplier, resultMsg, resultColor;
+                    if (roll < 0.5) {
+                        // 50% chance: 1.2x price
+                        multiplier = 1.2;
+                        const bonus = Math.round((multiplier - 1) * 100);
+                        resultMsg = `흥정 성공! +${bonus}%`;
+                        resultColor = '#44ff88';
+                    } else if (roll < 0.8) {
+                        // 30% chance: same price
+                        multiplier = 1.0;
+                        resultMsg = '흥정 무승부... 가격 변동 없음';
+                        resultColor = '#aaaaaa';
+                    } else {
+                        // 20% chance: 0.9x price
+                        multiplier = 0.9;
+                        const penalty = Math.round((1 - multiplier) * 100);
+                        resultMsg = `흥정 실패... -${penalty}%`;
+                        resultColor = '#ff6666';
+                    }
+                    item._haggleMultiplier = multiplier;
+                    SaveManager.save(gs);
+                    UIToast.show(this, resultMsg, { color: resultColor });
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
+        } else if (item.type === 'equipment' && item._haggled) {
+            // Show haggle result indicator
+            const mult = item._haggleMultiplier || 1.0;
+            const hagglePrice = Math.floor(sellPrice * mult);
+            const diffG = hagglePrice - sellPrice;
+            const haggleLabel = diffG > 0 ? `흥정가 +${diffG}G` : diffG < 0 ? `흥정가 ${diffG}G` : '흥정가 동일';
+            const haggleColor = diffG > 0 ? '#44ff88' : diffG < 0 ? '#ff6666' : '#aaaaaa';
+            this._add(this.add.text(x + w - 190, y + 30, haggleLabel, {
+                fontSize: '10px', fontFamily: 'monospace', color: haggleColor, fontStyle: 'bold'
+            }));
+
+            // Override the sell button price if haggled — re-draw sell button with haggle price
+            // We already drew the default sell button above, so we override by adding a new one on top
+            this._add(UIButton.create(this, x + w - 55, y + 26, 90, 26, `판매 ${hagglePrice}G`, {
+                color: 0x886644, hoverColor: 0xaa8866, textColor: '#ffeecc', fontSize: 10,
+                onClick: () => {
+                    StorageManager.removeItem(gs, item.id);
+                    GuildManager.addGold(gs, hagglePrice);
+
+                    gs.auctionHistory = gs.auctionHistory || [];
+                    gs.auctionHistory.unshift({ action: 'sell', name: item.name, price: hagglePrice, rarity: item.rarity, time: Date.now() });
+                    if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+
+                    GuildManager.addMessage(gs, `경매장 흥정 판매: ${item.name} (+${hagglePrice}G)`);
+                    SaveManager.save(gs);
+                    UIToast.show(this, `${item.name} 흥정 판매! +${hagglePrice}G`, { color: '#ffcc44' });
+                    this.goldText.setText(`${gs.gold}G`);
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
+        }
     }
 
     // --- BID TAB ---
