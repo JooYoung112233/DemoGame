@@ -179,6 +179,9 @@ class RunResultScene extends Phaser.Scene {
         if (typeof updateMarketTrends === 'function') {
             updateMarketTrends(gs, r.success ? 'run_success' : 'run_fail');
         }
+        if (typeof processMerchantAction === 'function' && r.success) {
+            processMerchantAction(gs, 'run_success');
+        }
 
         SaveManager.save(gs);
     }

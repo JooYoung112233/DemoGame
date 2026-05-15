@@ -284,10 +284,10 @@ class TownScene extends Phaser.Scene {
     _drawMessageLog() {
         const gs = this.gameState;
         const panelX = 815;
-        const panel = UIPanel.create(this, panelX, 65, 457, 640, { title: '최근 소식' });
+        UIPanel.create(this, panelX, 65, 457, 420, { title: '최근 소식' });
 
         const messages = gs.messages || [];
-        const display = messages.slice(0, 15);
+        const display = messages.slice(0, 12);
 
         display.forEach((msg, idx) => {
             const alpha = 1 - idx * 0.05;
@@ -297,9 +297,44 @@ class TownScene extends Phaser.Scene {
         });
 
         if (messages.length === 0) {
-            this.add.text(panelX + 228, 300, '아직 소식이 없습니다', {
+            this.add.text(panelX + 228, 250, '아직 소식이 없습니다', {
                 fontSize: '12px', fontFamily: 'monospace', color: '#444455'
             }).setOrigin(0.5);
+        }
+
+        if (typeof MERCHANT_DATA !== 'undefined') {
+            UIPanel.create(this, panelX, 495, 457, 210, { title: '상인 호감도' });
+            if (typeof initMerchantFavor === 'function') initMerchantFavor(gs);
+            let my = 525;
+            for (const [key, data] of Object.entries(MERCHANT_DATA)) {
+                const favor = gs.merchantFavor?.[key] || 0;
+                const tier = typeof getMerchantTier === 'function' ? getMerchantTier(gs, key) : null;
+                const tierName = tier ? tier.name : '?';
+                const barW = 120, barH = 5;
+                const ratio = Math.min(1, favor / 10);
+
+                this.add.text(panelX + 12, my, `${data.icon} ${data.name}`, {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+                });
+                this.add.text(panelX + 100, my, `[${tierName}]`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+                });
+
+                const barBg = this.add.rectangle(panelX + 250 + barW / 2, my + 7, barW, barH, 0x222244);
+                if (ratio > 0) {
+                    this.add.rectangle(panelX + 250 + (barW * ratio) / 2, my + 7, barW * ratio, barH, 0x44aaff);
+                }
+                this.add.text(panelX + 250 + barW + 8, my + 1, `${favor}`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#667788'
+                });
+
+                if (tier && tier.perks) {
+                    this.add.text(panelX + 12, my + 16, tier.perks, {
+                        fontSize: '8px', fontFamily: 'monospace', color: '#669966'
+                    });
+                }
+                my += 36;
+            }
         }
     }
 }

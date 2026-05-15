@@ -335,6 +335,9 @@ class AuctionScene extends Phaser.Scene {
                 if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
 
                 GuildManager.addMessage(gs, `경매장에서 ${item.name}${item.isBulk ? ' 묶음' : ''} 구매`);
+                if (typeof processMerchantAction === 'function') {
+                    processMerchantAction(gs, item.type === 'equipment' ? 'buy_equipment' : 'buy');
+                }
                 SaveManager.save(gs);
                 UIToast.show(this, `${item.name} 구매!`, { color: '#44ff88' });
                 this.goldText.setText(`${gs.gold}G`);
@@ -543,6 +546,9 @@ class AuctionScene extends Phaser.Scene {
                 if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
 
                 GuildManager.addMessage(gs, `경매장 판매: ${item.name} (+${sellPrice}G)`);
+                if (typeof processMerchantAction === 'function') {
+                    processMerchantAction(gs, item.type === 'equipment' ? 'sell_equipment' : 'sell');
+                }
                 SaveManager.save(gs);
                 UIToast.show(this, `${item.name} 판매! +${sellPrice}G`, { color: '#ffcc44' });
                 this.goldText.setText(`${gs.gold}G`);
