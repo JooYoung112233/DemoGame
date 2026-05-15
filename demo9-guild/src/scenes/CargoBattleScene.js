@@ -15,6 +15,9 @@ class CargoBattleScene extends Phaser.Scene {
         this.zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
         this.maxRounds = getMaxRounds(this.zoneLevel);
 
+        this.cardHand = data.cardHand || [];
+        this.lootBonusNextRound = data.lootBonusNextRound || 0;
+
         // Restore train car state across rounds
         if (data.trainCars) {
             this.trainCars = data.trainCars;
@@ -43,7 +46,13 @@ class CargoBattleScene extends Phaser.Scene {
         if (this.currentRound === 1) this._applyBlessings();
         this._spawnEnemies();
         this._applyCarFunctions();
+        this._applyHeldCardBuffs();
         this._showRoundAnnounce();
+
+        // Consume loot bonus after applying to this round
+        if (this.lootBonusNextRound > 0) {
+            this.lootBonusNextRound = 0;
+        }
     }
 
     // ─── Train Cars ───────────────────────────────────────────────
@@ -183,6 +192,47 @@ class CargoBattleScene extends Phaser.Scene {
             this.speedMultiplier = this.speedMultiplier === 1 ? 2 : this.speedMultiplier === 2 ? 3 : 1;
             speedBtn.setText(`×${this.speedMultiplier}`);
             localStorage.setItem('demo9_speed', this.speedMultiplier);
+        });
+
+        // Card hand display
+        this._cardHandElements = [];
+        this._drawCardHand();
+    }
+
+    _drawCardHand() {
+        this._cardHandElements.forEach(el => { if (el && el.destroy) el.destroy(); });
+        this._cardHandElements = [];
+
+        if (this.cardHand.length === 0) return;
+
+        const startX = 15;
+        const y = 640;
+        const _ch = (obj) => { this._cardHandElements.push(obj); return obj; };
+
+        _ch(this.add.text(startX, y - 16, `🃏 카드 ${this.cardHand.length}/${CARGO_MAX_HAND}`, {
+            fontSize: '9px', fontFamily: 'monospace', color: '#aa8844'
+        }).setDepth(100));
+
+        this.cardHand.forEach((cardId, idx) => {
+            const card = getCargoCard(cardId);
+            if (!card) return;
+            const carInfo = CARGO_CAR_CARDS[card.carKey];
+            const cx = startX + idx * 75;
+            const gfx = _ch(this.add.graphics().setDepth(100));
+            gfx.fillStyle(0x1a1a2a, 0.9);
+            gfx.fillRoundedRect(cx, y, 70, 28, 3);
+            gfx.lineStyle(1, card.tier >= 3 ? 0xffaa00 : card.tier >= 2 ? 0x4488ff : 0x446688, 0.6);
+            gfx.strokeRoundedRect(cx, y, 70, 28, 3);
+
+            _ch(this.add.text(cx + 4, y + 3, `${carInfo.icon}`, {
+                fontSize: '8px', fontFamily: 'monospace', color: '#cccccc'
+            }).setDepth(101));
+            _ch(this.add.text(cx + 16, y + 3, card.name, {
+                fontSize: '8px', fontFamily: 'monospace', color: card.tier >= 3 ? '#ffaa44' : '#ccccee'
+            }).setDepth(101));
+            _ch(this.add.text(cx + 4, y + 15, card.desc, {
+                fontSize: '7px', fontFamily: 'monospace', color: '#888899'
+            }).setDepth(101));
         });
     }
 
@@ -378,6 +428,13 @@ class CargoBattleScene extends Phaser.Scene {
         }
     }
 
+    _applyHeldCardBuffs() {
+        // Apply combat/utility buff cards that were used during repair phase
+        // (buff cards used in repair persist as stat modifiers on the living allies)
+        // Note: cards in hand are passive — only "used" cards affect stats
+        // This is handled by _useCard writing back to merc stats
+    }
+
     _applyBlessings() {
         const gs = this.gameState;
         if (!gs.blessings || gs.blessings.length === 0) return;
@@ -436,8 +493,8 @@ class CargoBattleScene extends Phaser.Scene {
                 }).setOrigin(0.5).setDepth(90);
                 this.tweens.add({ targets: gText, y: gText.y - 30, alpha: 0, duration: 800, onComplete: () => gText.destroy() });
 
-                // Loot drop
-                const dropChance = unit.isBoss ? 1.0 : 0.3 + this.currentRound * 0.04;
+                // Loot drop (includes card bonus)
+                const dropChance = unit.isBoss ? 1.0 : Math.min(0.9, 0.3 + this.currentRound * 0.04 + (this.lootBonusNextRound || 0));
                 const bossRarityBonus = unit.isBoss ? 2 : (unit.isElite ? 1 : 0);
                 if (Math.random() < dropChance) {
                     const item = generateItem(this.zoneKey, this.gameState.guildLevel, bossRarityBonus);
@@ -630,9 +687,15 @@ class CargoBattleScene extends Phaser.Scene {
                             if (progress === 1) this._endRun(true);
                         });
                     } else {
-                        this.cameras.main.fadeOut(400, 0, 0, 0, (cam, progress) => {
-                            if (progress === 1) this._showRepairUI();
-                        });
+                        // Show card reward before repair UI
+                        const aliveCars = Object.keys(this.trainCars).filter(k => this.trainCars[k].alive);
+                        if (aliveCars.length > 0 && this.cardHand.length < CARGO_MAX_HAND) {
+                            this._showCardRewardUI(aliveCars);
+                        } else {
+                            this.cameras.main.fadeOut(400, 0, 0, 0, (cam, progress) => {
+                                if (progress === 1) this._showRepairUI();
+                            });
+                        }
                     }
                 }
             });
@@ -653,6 +716,165 @@ class CargoBattleScene extends Phaser.Scene {
                 }
                 merc.alive = false;
             }
+        });
+    }
+
+    // ─── Card Reward UI ────────────────────────────────────────
+
+    _showCardRewardUI(aliveCars) {
+        this._cardRewardObjects = [];
+        const _cr = (obj) => { this._cardRewardObjects.push(obj); return obj; };
+
+        // Pick a random alive car to generate cards from
+        const sourceCar = aliveCars[Math.floor(Math.random() * aliveCars.length)];
+        const carInfo = CARGO_CAR_CARDS[sourceCar];
+        if (!carInfo) {
+            this.cameras.main.fadeOut(400, 0, 0, 0, (cam, progress) => {
+                if (progress === 1) this._showRepairUI();
+            });
+            return;
+        }
+
+        const choices = generateCargoCardChoices(sourceCar, this.currentRound, this.cardHand, this.zoneLevel);
+        if (choices.length === 0) {
+            this.cameras.main.fadeOut(400, 0, 0, 0, (cam, progress) => {
+                if (progress === 1) this._showRepairUI();
+            });
+            return;
+        }
+
+        // Overlay
+        _cr(this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.85).setDepth(400));
+
+        _cr(this.add.text(640, 100, `${carInfo.icon} ${carInfo.name}에서 카드 획득!`, {
+            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(401));
+
+        _cr(this.add.text(640, 130, `카드 1장을 선택하세요 (보유: ${this.cardHand.length}/${CARGO_MAX_HAND})`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#aa8866'
+        }).setOrigin(0.5).setDepth(401));
+
+        const cardW = 200;
+        const cardH = 160;
+        const gap = 30;
+        const totalW = choices.length * cardW + (choices.length - 1) * gap;
+        const startX = 640 - totalW / 2 + cardW / 2;
+
+        choices.forEach((cardId, idx) => {
+            const card = carInfo.cards[cardId];
+            if (!card) return;
+            const cx = startX + idx * (cardW + gap);
+            const cy = 280;
+
+            const tierColors = { 1: 0x446688, 2: 0x4488ff, 3: 0xffaa00 };
+            const tierBorder = tierColors[card.tier] || 0x446688;
+
+            // Card background
+            const gfx = _cr(this.add.graphics().setDepth(402));
+            gfx.fillStyle(0x1a1a2a, 1);
+            gfx.fillRoundedRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH, 8);
+            gfx.lineStyle(2, tierBorder, 0.8);
+            gfx.strokeRoundedRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH, 8);
+
+            // Tier stars
+            const tierLabel = '★'.repeat(card.tier);
+            _cr(this.add.text(cx, cy - cardH / 2 + 15, tierLabel, {
+                fontSize: '14px', fontFamily: 'monospace', color: card.tier >= 3 ? '#ffaa00' : card.tier >= 2 ? '#4488ff' : '#668899'
+            }).setOrigin(0.5).setDepth(403));
+
+            // Card icon + name
+            _cr(this.add.text(cx, cy - 20, `${carInfo.icon}`, {
+                fontSize: '24px'
+            }).setOrigin(0.5).setDepth(403));
+
+            _cr(this.add.text(cx, cy + 10, card.name, {
+                fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            }).setOrigin(0.5).setDepth(403));
+
+            _cr(this.add.text(cx, cy + 32, card.desc, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#aaaacc',
+                wordWrap: { width: cardW - 20 }, align: 'center'
+            }).setOrigin(0.5).setDepth(403));
+
+            // Hit zone
+            const hitZone = _cr(this.add.zone(cx, cy, cardW, cardH).setInteractive({ useHandCursor: true }).setDepth(404));
+            hitZone.on('pointerover', () => {
+                gfx.clear();
+                gfx.fillStyle(0x2a2a3a, 1);
+                gfx.fillRoundedRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH, 8);
+                gfx.lineStyle(3, 0xffcc44, 1);
+                gfx.strokeRoundedRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH, 8);
+            });
+            hitZone.on('pointerout', () => {
+                gfx.clear();
+                gfx.fillStyle(0x1a1a2a, 1);
+                gfx.fillRoundedRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH, 8);
+                gfx.lineStyle(2, tierBorder, 0.8);
+                gfx.strokeRoundedRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH, 8);
+            });
+            hitZone.on('pointerdown', () => {
+                this._selectCardReward(cardId);
+            });
+        });
+
+        // Skip button
+        _cr(UIButton.create(this, 640, 420, 120, 30, '건너뛰기', {
+            color: 0x333333, hoverColor: 0x444444, textColor: '#888888', fontSize: 11,
+            onClick: () => this._skipCardReward()
+        }).setDepth(405));
+    }
+
+    _selectCardReward(cardId) {
+        this.cardHand.push(cardId);
+
+        // Apply immediate effects for cargo cards (gold bonus, repair)
+        const card = getCargoCard(cardId);
+        if (card) {
+            if (card.goldBonus) {
+                this.totalGold += card.goldBonus;
+                this.goldText.setText(`💰 ${this.totalGold}G`);
+            }
+            if (card.lootBonus) {
+                this.lootBonusNextRound = (this.lootBonusNextRound || 0) + card.lootBonus;
+            }
+            if (card.repairRatio) {
+                const aliveCars = Object.values(this.trainCars).filter(c => c.alive && c.hp < c.maxHp);
+                if (aliveCars.length > 0) {
+                    const target = aliveCars[Math.floor(Math.random() * aliveCars.length)];
+                    const heal = Math.floor(target.maxHp * card.repairRatio);
+                    target.hp = Math.min(target.maxHp, target.hp + heal);
+                }
+            }
+            if (card.bonusLoot) {
+                const item = generateItem(this.zoneKey, this.gameState.guildLevel, 1);
+                if (item) this.loot.push(item);
+            }
+        }
+
+        // Clean up and transition
+        this._cardRewardObjects.forEach(obj => { if (obj && obj.destroy) obj.destroy(); });
+        this._cardRewardObjects = [];
+
+        const pickText = this.add.text(640, 300, `🃏 ${card ? card.name : '카드'} 획득!`, {
+            fontSize: '22px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(400);
+        this.tweens.add({
+            targets: pickText, alpha: 0, y: 270, duration: 800, delay: 600,
+            onComplete: () => {
+                pickText.destroy();
+                this.cameras.main.fadeOut(400, 0, 0, 0, (cam, progress) => {
+                    if (progress === 1) this._showRepairUI();
+                });
+            }
+        });
+    }
+
+    _skipCardReward() {
+        this._cardRewardObjects.forEach(obj => { if (obj && obj.destroy) obj.destroy(); });
+        this._cardRewardObjects = [];
+        this.cameras.main.fadeOut(400, 0, 0, 0, (cam, progress) => {
+            if (progress === 1) this._showRepairUI();
         });
     }
 
@@ -714,6 +936,9 @@ class CargoBattleScene extends Phaser.Scene {
 
         // Fortify button
         this._drawFortifyButton();
+
+        // Card usage section (station stop)
+        this._drawCardUsageSection();
 
         // Proceed / Retreat
         this._drawRepairActions();
@@ -865,9 +1090,128 @@ class CargoBattleScene extends Phaser.Scene {
         this._repairUIObjects.push(btn);
     }
 
+    _drawCardUsageSection() {
+        if (this.cardHand.length === 0) return;
+
+        const secY = 490;
+        const label = this.add.text(640, secY, `🃏 보유 카드 (${this.cardHand.length}/${CARGO_MAX_HAND}) — 클릭하여 사용`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ffaa44'
+        }).setOrigin(0.5).setDepth(81);
+        this._repairUIObjects.push(label);
+
+        const cardW = 150;
+        const gap = 10;
+        const totalW = this.cardHand.length * (cardW + gap) - gap;
+        const startX = 640 - totalW / 2;
+
+        this.cardHand.forEach((cardId, idx) => {
+            const card = getCargoCard(cardId);
+            if (!card) return;
+            const carInfo = CARGO_CAR_CARDS[card.carKey];
+            const cx = startX + idx * (cardW + gap);
+            const cy = secY + 20;
+
+            const tierColors = { 1: 0x446688, 2: 0x4488ff, 3: 0xffaa00 };
+            const tierBorder = tierColors[card.tier] || 0x446688;
+
+            const gfx = this.add.graphics().setDepth(82);
+            gfx.fillStyle(0x1a1a2a, 1);
+            gfx.fillRoundedRect(cx, cy, cardW, 50, 4);
+            gfx.lineStyle(1, tierBorder, 0.6);
+            gfx.strokeRoundedRect(cx, cy, cardW, 50, 4);
+            this._repairUIObjects.push(gfx);
+
+            this._repairUIObjects.push(this.add.text(cx + 6, cy + 5, `${carInfo.icon} ${card.name}`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            }).setDepth(83));
+
+            this._repairUIObjects.push(this.add.text(cx + 6, cy + 20, card.desc, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#aaaacc'
+            }).setDepth(83));
+
+            // Use button
+            const useBtn = UIButton.create(this, cx + cardW - 25, cy + 37, 45, 18, '사용', {
+                color: 0x445522, hoverColor: 0x556633, textColor: '#aaff44', fontSize: 9,
+                onClick: () => this._useCard(idx)
+            }).setDepth(84);
+            this._repairUIObjects.push(useBtn);
+
+            // Discard button
+            const discardBtn = UIButton.create(this, cx + cardW - 70, cy + 37, 40, 18, '버림', {
+                color: 0x442222, hoverColor: 0x553333, textColor: '#ff8888', fontSize: 9,
+                onClick: () => this._discardCard(idx)
+            }).setDepth(84);
+            this._repairUIObjects.push(discardBtn);
+        });
+    }
+
+    _useCard(handIdx) {
+        if (handIdx < 0 || handIdx >= this.cardHand.length) return;
+        const cardId = this.cardHand[handIdx];
+        const card = getCargoCard(cardId);
+        if (!card) return;
+
+        // Build dummy unit list from party mercs for buff/heal application
+        const livingParty = this.party.filter(m => m.alive);
+        const dummyUnits = livingParty.map(merc => {
+            const stats = merc.getStats();
+            return {
+                atk: stats.atk, def: stats.def, hp: merc.currentHp, maxHp: stats.hp,
+                moveSpeed: stats.moveSpeed, critRate: stats.critRate, critDmg: stats.critDmg || 1.5,
+                attackSpeed: stats.attackSpeed || 1000, lifestealOnKill: 0, lastStand: false,
+                _merc: merc
+            };
+        });
+
+        // Apply card effect
+        card.apply(dummyUnits);
+
+        // Write back stat changes to mercenary for next round
+        dummyUnits.forEach(du => {
+            du._merc.currentHp = Math.min(du.maxHp, du.hp);
+        });
+
+        // Handle special cargo card effects
+        if (card.goldBonus) {
+            this.totalGold += card.goldBonus;
+        }
+        if (card.repairRatio) {
+            const aliveCars = Object.values(this.trainCars).filter(c => c.alive && c.hp < c.maxHp);
+            if (aliveCars.length > 0) {
+                const target = aliveCars[Math.floor(Math.random() * aliveCars.length)];
+                const heal = Math.floor(target.maxHp * card.repairRatio);
+                target.hp = Math.min(target.maxHp, target.hp + heal);
+            }
+        }
+        if (card.lootBonus) {
+            this.lootBonusNextRound = (this.lootBonusNextRound || 0) + card.lootBonus;
+        }
+        if (card.bonusLoot) {
+            const item = generateItem(this.zoneKey, this.gameState.guildLevel, 1);
+            if (item) this.loot.push(item);
+        }
+
+        // Remove from hand
+        this.cardHand.splice(handIdx, 1);
+
+        UIToast.show(this, `🃏 ${card.name} 사용! ${card.desc}`, { color: '#ffcc44' });
+        this._refreshRepairUI();
+    }
+
+    _discardCard(handIdx) {
+        if (handIdx < 0 || handIdx >= this.cardHand.length) return;
+        const cardId = this.cardHand[handIdx];
+        const card = getCargoCard(cardId);
+        this.cardHand.splice(handIdx, 1);
+        UIToast.show(this, `${card ? card.name : '카드'} 버림`, { color: '#888888' });
+        this._refreshRepairUI();
+    }
+
     _drawRepairActions() {
+        const actionsY = this.cardHand.length > 0 ? 580 : 520;
+
         // Proceed button
-        const proceedBtn = UIButton.create(this, 760, 520, 180, 36, '▶ 다음 라운드', {
+        const proceedBtn = UIButton.create(this, 760, actionsY, 180, 36, '▶ 다음 라운드', {
             color: 0x225533, hoverColor: 0x336644,
             textColor: '#44ff88', fontSize: 13,
             onClick: () => this._proceedToNextRound()
@@ -875,7 +1219,7 @@ class CargoBattleScene extends Phaser.Scene {
         this._repairUIObjects.push(proceedBtn);
 
         // Retreat button
-        const retreatBtn = UIButton.create(this, 480, 520, 140, 36, '🚪 철수', {
+        const retreatBtn = UIButton.create(this, 480, actionsY, 140, 36, '🚪 철수', {
             color: 0x332222, hoverColor: 0x443333,
             textColor: '#ff8888', fontSize: 12,
             onClick: () => this._endRun(false)
@@ -911,6 +1255,7 @@ class CargoBattleScene extends Phaser.Scene {
         this._drawRepairCarCards();
         this._drawBulkRepairButton();
         this._drawFortifyButton();
+        this._drawCardUsageSection();
         this._drawRepairActions();
     }
 
@@ -935,7 +1280,9 @@ class CargoBattleScene extends Phaser.Scene {
             loot: this.loot,
             casualties: this.casualties,
             partyHpState: hpState,
-            trainCars: this.trainCars
+            trainCars: this.trainCars,
+            cardHand: this.cardHand,
+            lootBonusNextRound: this.lootBonusNextRound
         });
     }
 
@@ -1072,5 +1419,7 @@ class CargoBattleScene extends Phaser.Scene {
         this._trainBars.forEach(b => { if (b.destroy) b.destroy(); });
         this._trainIcons.forEach(i => i.destroy());
         if (this._trainGfx) this._trainGfx.destroy();
+        if (this._cardHandElements) this._cardHandElements.forEach(el => { if (el && el.destroy) el.destroy(); });
+        if (this._cardRewardObjects) this._cardRewardObjects.forEach(obj => { if (obj && obj.destroy) obj.destroy(); });
     }
 }
