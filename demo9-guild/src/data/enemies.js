@@ -108,6 +108,18 @@ const ENEMY_DATA = {
         name: '리치 킹', role: 'ranged', color: 0x8844ff, zone: 'blackout',
         hp: 1200, atk: 50, def: 10, attackSpeed: 1600, range: 250, moveSpeed: 60,
         critRate: 0.20, critDmg: 2.5, isBoss: true, bleedChance: 0.30
+    },
+
+    // --- BLACKOUT 추가 적 ---
+    curse_avatar: {
+        name: '저주 화신', role: 'melee', color: 0xcc00ff, zone: 'blackout',
+        hp: 800, atk: 45, def: 12, attackSpeed: 1100, range: 55, moveSpeed: 120,
+        critRate: 0.20, critDmg: 2.0, isElite: true
+    },
+    mansion_lord: {
+        name: '저택 주인', role: 'melee', color: 0xff00cc, zone: 'blackout',
+        hp: 2000, atk: 55, def: 18, attackSpeed: 1800, range: 60, moveSpeed: 50,
+        critRate: 0.18, critDmg: 2.2, isBoss: true, bleedChance: 0.20
     }
 };
 
