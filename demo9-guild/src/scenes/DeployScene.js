@@ -233,7 +233,13 @@ class DeployScene extends Phaser.Scene {
                 const party = this.deployedIds.map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
                 gs.runCount++;
                 SaveManager.save(gs);
-                this.scene.start('BattleScene', {
+                const sceneMap = {
+                    bloodpit: 'BattleScene',
+                    cargo: 'CargoBattleScene',
+                    blackout: 'BlackoutBattleScene'
+                };
+                const targetScene = sceneMap[this.selectedZone] || 'BattleScene';
+                this.scene.start(targetScene, {
                     gameState: gs,
                     zoneKey: this.selectedZone,
                     party
