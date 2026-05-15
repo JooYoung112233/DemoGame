@@ -440,16 +440,38 @@ class BlackoutBattleScene extends Phaser.Scene {
                         fontSize: Math.max(16, cellSize * 0.3) + 'px', fontFamily: 'monospace', color: '#333344'
                     }).setOrigin(0.5).setDepth(11));
                 } else if (room.visited && room.type !== 'entrance') {
+                    const visitedBorder = canMove ? 0x554466 : 0x222233;
+                    const visitedBorderW = canMove ? 1.5 : 1;
                     gfx.fillStyle(0x0e0e1a, 1);
                     gfx.fillRoundedRect(cx - cellSize / 2, cy - cellSize / 2, cellSize, cellSize, 6);
-                    gfx.lineStyle(1, 0x222233, 0.4);
+                    gfx.lineStyle(visitedBorderW, visitedBorder, canMove ? 0.7 : 0.4);
                     gfx.strokeRoundedRect(cx - cellSize / 2, cy - cellSize / 2, cellSize, cellSize, 6);
                     _g(this.add.text(cx, cy - 4, roomIcons[room.type] || '·', {
-                        fontSize: Math.max(14, cellSize * 0.22) + 'px', fontFamily: 'monospace', color: '#333344'
+                        fontSize: Math.max(14, cellSize * 0.22) + 'px', fontFamily: 'monospace', color: canMove ? '#555566' : '#333344'
                     }).setOrigin(0.5).setDepth(11));
                     _g(this.add.text(cx, cy + cellSize * 0.25, '탐색됨', {
                         fontSize: '8px', fontFamily: 'monospace', color: '#333344'
                     }).setOrigin(0.5).setDepth(11));
+
+                    if (canMove) {
+                        const hitZone = _g(this.add.zone(cx, cy, cellSize, cellSize)
+                            .setInteractive({ useHandCursor: true }).setDepth(15));
+                        hitZone.on('pointerover', () => {
+                            gfx.clear();
+                            gfx.fillStyle(0x151520, 1);
+                            gfx.fillRoundedRect(cx - cellSize / 2, cy - cellSize / 2, cellSize, cellSize, 6);
+                            gfx.lineStyle(2, 0x886699, 0.8);
+                            gfx.strokeRoundedRect(cx - cellSize / 2, cy - cellSize / 2, cellSize, cellSize, 6);
+                        });
+                        hitZone.on('pointerout', () => {
+                            gfx.clear();
+                            gfx.fillStyle(0x0e0e1a, 1);
+                            gfx.fillRoundedRect(cx - cellSize / 2, cy - cellSize / 2, cellSize, cellSize, 6);
+                            gfx.lineStyle(visitedBorderW, visitedBorder, 0.7);
+                            gfx.strokeRoundedRect(cx - cellSize / 2, cy - cellSize / 2, cellSize, cellSize, 6);
+                        });
+                        hitZone.on('pointerdown', () => this._moveToRoom(x, y));
+                    }
                 } else {
                     const bgColor = roomColors[room.type] || 0x1a1a2a;
                     const borderColor = isPlayer ? 0x8844ff : (roomBorderColors[room.type] || 0x333344);
@@ -636,10 +658,12 @@ class BlackoutBattleScene extends Phaser.Scene {
             return;
         }
 
+        const wasVisited = room.visited;
+
         this.playerX = x;
         this.playerY = y;
         this.moveCount++;
-        this.roomsVisited++;
+        if (!wasVisited) this.roomsVisited++;
 
         this._revealAdjacent(x, y);
 
@@ -658,8 +682,8 @@ class BlackoutBattleScene extends Phaser.Scene {
 
         room.visited = true;
 
-        // Curse avatar random encounter
-        if (this._curseAvatarActive && Math.random() < 0.25) {
+        // Curse avatar random encounter (not on revisited rooms)
+        if (!wasVisited && this._curseAvatarActive && Math.random() < 0.25) {
             this._drawGrid();
             this._drawHUD();
             this._startCurseAvatarCombat();
@@ -670,6 +694,13 @@ class BlackoutBattleScene extends Phaser.Scene {
         this._drawHUD();
 
         if (this._checkMoveLimit()) return;
+
+        // Skip room events if already visited (safe backtracking)
+        if (wasVisited) {
+            // ghost_memory adaptation: no combat on revisit
+            // For all: no events on revisited rooms
+            return;
+        }
 
         this._handleRoom(x, y);
     }
