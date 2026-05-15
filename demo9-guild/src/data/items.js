@@ -44,6 +44,57 @@ const CONSUMABLE_TEMPLATES = [
     { name: '화염 폭탄',   effect: 'aoe',    value: 50, desc: '적 전체 50 피해', baseValue: 40 }
 ];
 
+const CURSED_EQUIPMENT = [
+    {
+        name: '저주받은 대검', slot: 'weapon', rarity: 'epic',
+        stats: { atk: 35, def: -5 }, debuff: 'bleed_self',
+        debuffDesc: '매 전투 시작 시 HP 5% 손실', desc: '어둠에 물든 검 — 해제 불가'
+    },
+    {
+        name: '원혼의 갑옷', slot: 'armor', rarity: 'epic',
+        stats: { def: 25, hp: 80 }, debuff: 'slow',
+        debuffDesc: '이동속도 -20%', desc: '영혼이 깃든 갑옷 — 해제 불가'
+    },
+    {
+        name: '탐욕의 반지', slot: 'accessory', rarity: 'epic',
+        stats: { atk: 15, critRate: 0.10 }, debuff: 'gold_drain',
+        debuffDesc: '전투마다 50G 소모', desc: '끝없는 탐욕 — 해제 불가'
+    },
+    {
+        name: '광기의 투구', slot: 'armor', rarity: 'legendary',
+        stats: { atk: 20, def: 30, hp: 50 }, debuff: 'berserk',
+        debuffDesc: 'HP 30% 이하 시 아군 공격', desc: '광기의 무장 — 해제 불가'
+    },
+    {
+        name: '피의 단검', slot: 'weapon', rarity: 'rare',
+        stats: { atk: 20, critRate: 0.08 }, debuff: 'lifedrain',
+        debuffDesc: '매 공격 시 자기 HP 2% 손실', desc: '피를 갈구하는 단검 — 해제 불가'
+    },
+    {
+        name: '그림자 목걸이', slot: 'accessory', rarity: 'rare',
+        stats: { moveSpeed: 30, atk: 10 }, debuff: 'fragile',
+        debuffDesc: '받는 피해 +15%', desc: '그림자와 거래한 대가 — 해제 불가'
+    }
+];
+
+function generateCursedItem() {
+    const template = CURSED_EQUIPMENT[Math.floor(Math.random() * CURSED_EQUIPMENT.length)];
+    return {
+        id: _itemIdCounter++,
+        type: 'equipment',
+        rarity: template.rarity,
+        name: template.name,
+        slot: template.slot,
+        desc: template.desc,
+        stats: { ...template.stats },
+        cursed: true,
+        curseDebuff: template.debuff,
+        curseDebuffDesc: template.debuffDesc,
+        value: Math.floor(ITEM_RARITY[template.rarity].valueMult * 80),
+        weight: 3
+    };
+}
+
 let _itemIdCounter = 1;
 
 function generateItem(zone, guildLevel, rarityBonus) {

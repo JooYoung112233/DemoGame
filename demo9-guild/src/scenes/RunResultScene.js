@@ -117,6 +117,25 @@ class RunResultScene extends Phaser.Scene {
 
         this._applyResults();
 
+        if (this._consignResults && this._consignResults.length > 0) {
+            const sold = this._consignResults.filter(c => c.sold);
+            const unsold = this._consignResults.filter(c => !c.sold);
+            const totalGold = sold.reduce((s, c) => s + c.price, 0);
+            if (sold.length > 0 || unsold.length > 0) {
+                cy = Math.max(cy + 20, 480);
+                const panelH = 30 + this._consignResults.length * 18 + 10;
+                UIPanel.create(this, 40, cy, 1200, Math.min(panelH, 120), { title: `위탁 판매 결과 (+${totalGold}G)` });
+                let conY = cy + 30;
+                this._consignResults.forEach(cr => {
+                    const label = cr.sold ? `✓ ${cr.item.name} → ${cr.price}G` : `✗ ${cr.item.name} — 미판매`;
+                    this.add.text(70, conY, label, {
+                        fontSize: '10px', fontFamily: 'monospace', color: cr.sold ? '#88ffaa' : '#886666'
+                    });
+                    conY += 18;
+                });
+            }
+        }
+
         UIButton.create(this, 640, 660, 200, 44, '본진 복귀', {
             color: 0xffaa44, hoverColor: 0xffcc66, textColor: '#000000', fontSize: 16,
             onClick: () => {
@@ -154,6 +173,8 @@ class RunResultScene extends Phaser.Scene {
             gs.roster = gs.roster.filter(m => m.id !== merc.id);
             GuildManager.addMessage(gs, `${merc.name} 영구 사망`);
         });
+
+        this._consignResults = AuctionScene.processConsignments(gs);
 
         SaveManager.save(gs);
     }

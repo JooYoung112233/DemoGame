@@ -300,6 +300,24 @@ class BattleUnit {
             if (this.bleedTimer <= 0) this.bleeding = false;
         }
 
+        if (this._curseBleedSelf) {
+            if (!this._curseBleedTimer) this._curseBleedTimer = 3000;
+            this._curseBleedTimer -= delta;
+            if (this._curseBleedTimer <= 0) {
+                this._curseBleedTimer = 3000;
+                const dmg = Math.max(1, Math.floor(this.maxHp * 0.05));
+                this.hp -= dmg;
+                DamagePopup.show(this.scene, this.container.x, this.container.y - 25, `저주 -${dmg}`, 0x880088, false);
+                if (this.hp <= 0) { this.hp = 0; this.die(null, allUnits); return; }
+            }
+        }
+
+        if (this._curseBerserk && this.hp <= this.maxHp * 0.3 && !this._berserkTriggered) {
+            this._berserkTriggered = true;
+            this.atk = Math.floor(this.atk * 1.5);
+            DamagePopup.show(this.scene, this.container.x, this.container.y - 35, '광기!', 0xff0044, false);
+        }
+
         if (this.lastStand && !this.lastStandActive && this.hp <= this.maxHp * 0.25) {
             this.lastStandActive = true;
             this.atk = Math.floor(this.atk * 1.2);
@@ -586,6 +604,12 @@ class BattleUnit {
             this.target.bleedDamage = Math.max(1, Math.floor(this.atk * 0.2));
         }
 
+        if (this._curseLifedrain) {
+            const selfDmg = Math.max(1, Math.floor(this.maxHp * this._curseLifedrain));
+            this.hp -= selfDmg;
+            if (this.hp <= 0) { this.hp = 0; this.die(null, allUnits); return; }
+        }
+
         // hit flash
         this.target.gfx.setAlpha(0.3);
         this.scene.time.delayedCall(50, () => { if (this.target && this.target.gfx) this.target.gfx.setAlpha(1); });
@@ -674,6 +698,7 @@ class BattleUnit {
             }
             if (amount <= 0) return;
         }
+        if (this._curseFragile) amount = Math.floor(amount * (1 + this._curseFragile));
         this.hp -= amount;
 
         // knockback
@@ -932,6 +957,31 @@ class BattleUnit {
         if (traitIds.includes('hawks_eye'))       { unit.range = Math.floor(unit.range * 1.30); unit._legendaryHawksEye = true; }
         if (traitIds.includes('holy_sacrifice'))  unit._legendaryHolySacrifice = true;
         if (traitIds.includes('elixir_master'))   unit._legendaryElixirMaster = true;
+
+        // Cursed equipment debuffs
+        for (const eq of Object.values(merc.equipment)) {
+            if (!eq || !eq.cursed) continue;
+            switch (eq.curseDebuff) {
+                case 'bleed_self':
+                    unit._curseBleedSelf = true;
+                    break;
+                case 'slow':
+                    unit.moveSpeed = Math.floor(unit.moveSpeed * 0.8);
+                    break;
+                case 'gold_drain':
+                    unit._curseGoldDrain = 50;
+                    break;
+                case 'berserk':
+                    unit._curseBerserk = true;
+                    break;
+                case 'lifedrain':
+                    unit._curseLifedrain = 0.02;
+                    break;
+                case 'fragile':
+                    unit._curseFragile = 0.15;
+                    break;
+            }
+        }
 
         return unit;
     }

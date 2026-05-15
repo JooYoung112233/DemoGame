@@ -26,6 +26,8 @@ class AuctionScene extends Phaser.Scene {
         this.scrollOffset = 0;
         if (!gs.auctionStock || gs.auctionStock.length === 0) this._refreshStock();
         if (!gs.auctionHistory) gs.auctionHistory = [];
+        if (!gs.consignedItems) gs.consignedItems = [];
+        if (!gs.autoAuctionSlots) gs.autoAuctionSlots = 2;
 
         this._drawTabs();
         this._drawContent();
@@ -35,10 +37,11 @@ class AuctionScene extends Phaser.Scene {
         if (this._tabObjs) this._tabObjs.forEach(o => o.destroy && o.destroy());
         this._tabObjs = [];
         const tabs = [
-            { key: 'buy', label: '구매', x: 440 },
-            { key: 'sell', label: '판매', x: 560 },
-            { key: 'bid', label: '입찰', x: 680 },
-            { key: 'history', label: '거래 내역', x: 800 }
+            { key: 'buy', label: '구매', x: 380 },
+            { key: 'sell', label: '판매', x: 490 },
+            { key: 'consign', label: '위탁', x: 600 },
+            { key: 'bid', label: '입찰', x: 710 },
+            { key: 'history', label: '거래 내역', x: 830 }
         ];
         tabs.forEach(t => {
             const active = this.tab === t.key;
@@ -69,6 +72,7 @@ class AuctionScene extends Phaser.Scene {
         this._clearContent();
         if (this.tab === 'buy') this._drawBuyTab();
         else if (this.tab === 'sell') this._drawSellTab();
+        else if (this.tab === 'consign') this._drawConsignTab();
         else if (this.tab === 'bid') this._drawBidTab();
         else this._drawHistoryTab();
     }
@@ -760,6 +764,153 @@ class AuctionScene extends Phaser.Scene {
         }
     }
 
+    // --- CONSIGN TAB ---
+    _drawConsignTab() {
+        const gs = this.gameState;
+        const maxSlots = gs.autoAuctionSlots || 2;
+        const consigned = gs.consignedItems || [];
+
+        this._add(UIPanel.create(this, 40, 90, 1200, 600, { title: `위탁 판매 (${consigned.length}/${maxSlots} 슬롯)` }));
+
+        this._add(this.add.text(640, 120, '아이템을 등록하면 다음 전투 출발 시 자동으로 판매를 시도합니다', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+        }).setOrigin(0.5));
+
+        const favorability = gs.merchantFavor?.auction || 0;
+        const sellChance = Math.min(90, 50 + favorability * 5);
+        const priceAccuracy = Math.min(95, 70 + favorability * 3);
+        this._add(this.add.text(640, 138, `판매 확률: ${sellChance}%  |  시세 적중률: ${priceAccuracy}%  |  상인 호감도: ${favorability}`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#66aa88'
+        }).setOrigin(0.5));
+
+        let cy = 160;
+        consigned.forEach((entry, idx) => {
+            if (cy > 430) return;
+            const rarity = ITEM_RARITY[entry.item.rarity] || ITEM_RARITY.common;
+            const bg = this._add(this.add.graphics());
+            bg.fillStyle(0x1a2a2a, 1);
+            bg.fillRoundedRect(60, cy, 1160, 50, 4);
+            bg.lineStyle(1, rarity.color, 0.4);
+            bg.strokeRoundedRect(60, cy, 1160, 50, 4);
+
+            const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
+            this._add(this.add.text(80, cy + 8, typeIcons[entry.item.type] || '?', { fontSize: '14px' }));
+            this._add(this.add.text(106, cy + 8, `${entry.item.name} [${rarity.name}]`, {
+                fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            }));
+            this._add(this.add.text(106, cy + 28, `시세: ${entry.item.value}G  |  희망가: ${entry.desiredPrice}G`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+            }));
+
+            this._add(UIButton.create(this, 1160, cy + 25, 80, 26, '회수', {
+                color: 0x664444, hoverColor: 0x886666, textColor: '#ffaaaa', fontSize: 11,
+                onClick: () => {
+                    gs.consignedItems.splice(idx, 1);
+                    StorageManager.addItem(gs, entry.item);
+                    SaveManager.save(gs);
+                    UIToast.show(this, `${entry.item.name} 회수!`);
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
+
+            cy += 56;
+        });
+
+        if (consigned.length >= maxSlots) {
+            this._add(this.add.text(640, cy + 20, '슬롯이 가득 찼습니다 (길드 레벨 UP 또는 이벤트로 확장)', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#886644'
+            }).setOrigin(0.5));
+        }
+
+        cy = Math.max(cy + 10, 440);
+        this._add(this.add.text(640, cy, '── 보관함에서 위탁할 아이템 선택 ──', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#888899'
+        }).setOrigin(0.5));
+        cy += 20;
+
+        const sellable = gs.storage.filter(i => i.value > 0);
+        if (sellable.length === 0) {
+            this._add(this.add.text(640, cy + 30, '보관함에 아이템이 없습니다', {
+                fontSize: '12px', fontFamily: 'monospace', color: '#555566'
+            }).setOrigin(0.5));
+            return;
+        }
+
+        sellable.forEach(item => {
+            if (cy > 650) return;
+            const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
+            const canConsign = consigned.length < maxSlots;
+            const desiredPrice = Math.floor(item.value * (0.9 + Math.random() * 0.3));
+
+            const bg = this._add(this.add.graphics());
+            bg.fillStyle(0x1a1a2e, 1);
+            bg.fillRoundedRect(60, cy, 1160, 42, 3);
+
+            const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
+            this._add(this.add.text(80, cy + 6, typeIcons[item.type] || '?', { fontSize: '13px' }));
+            this._add(this.add.text(106, cy + 6, `${item.name} [${rarity.name}]`, {
+                fontSize: '11px', fontFamily: 'monospace', color: rarity.textColor
+            }));
+            this._add(this.add.text(106, cy + 24, `시세: ${item.value}G`, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#888866'
+            }));
+
+            this._add(UIButton.create(this, 1160, cy + 21, 80, 26, '위탁', {
+                color: canConsign ? 0x446644 : 0x333333,
+                hoverColor: canConsign ? 0x558855 : 0x333333,
+                textColor: canConsign ? '#44ff88' : '#555555',
+                fontSize: 11,
+                onClick: () => {
+                    if (!canConsign) { UIToast.show(this, '슬롯 부족', { color: '#ff6666' }); return; }
+                    StorageManager.removeItem(gs, item.id);
+                    const price = Math.floor(item.value * (0.9 + Math.random() * 0.3));
+                    gs.consignedItems.push({ item, desiredPrice: price, registeredAt: Date.now() });
+                    SaveManager.save(gs);
+                    UIToast.show(this, `${item.name} 위탁 등록! (희망가 ${price}G)`, { color: '#44ff88' });
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
+
+            cy += 48;
+        });
+    }
+
+    static processConsignments(gs) {
+        if (!gs.consignedItems || gs.consignedItems.length === 0) return [];
+        const results = [];
+        const favorability = gs.merchantFavor?.auction || 0;
+        const sellChance = Math.min(90, 50 + favorability * 5);
+        const priceAccuracy = Math.min(95, 70 + favorability * 3);
+        const remaining = [];
+
+        for (const entry of gs.consignedItems) {
+            const roll = Math.random() * 100;
+            if (roll < sellChance) {
+                const accuracyRoll = Math.random() * 100;
+                let finalPrice;
+                if (accuracyRoll < priceAccuracy) {
+                    finalPrice = entry.desiredPrice;
+                } else {
+                    finalPrice = Math.floor(entry.desiredPrice * (0.6 + Math.random() * 0.4));
+                }
+                finalPrice = Math.max(1, finalPrice);
+                GuildManager.addGold(gs, finalPrice);
+                results.push({ item: entry.item, price: finalPrice, sold: true });
+                gs.auctionHistory = gs.auctionHistory || [];
+                gs.auctionHistory.unshift({ action: 'consign_sell', name: entry.item.name, price: finalPrice, time: Date.now() });
+                if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+                GuildManager.addMessage(gs, `위탁 판매: ${entry.item.name} (+${finalPrice}G)`);
+            } else {
+                remaining.push(entry);
+                results.push({ item: entry.item, sold: false });
+            }
+        }
+        gs.consignedItems = remaining;
+        return results;
+    }
+
     // --- HISTORY TAB ---
     _drawHistoryTab() {
         const gs = this.gameState;
@@ -779,11 +930,11 @@ class AuctionScene extends Phaser.Scene {
         let cy = 120;
         const actionLabels = {
             buy: '구매', sell: '판매', buyout: '즉시구매',
-            bid_win: '낙찰', bid_lose: '패찰'
+            bid_win: '낙찰', bid_lose: '패찰', consign_sell: '위탁판매'
         };
         const actionColors = {
             buy: '#44aaff', sell: '#ffcc44', buyout: '#ffaa44',
-            bid_win: '#44ff88', bid_lose: '#ff6666'
+            bid_win: '#44ff88', bid_lose: '#ff6666', consign_sell: '#88ffaa'
         };
 
         history.forEach((h, idx) => {

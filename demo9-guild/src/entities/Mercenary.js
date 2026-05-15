@@ -94,6 +94,7 @@ class Mercenary {
     equip(item) {
         if (!item || !item.slot) return null;
         const prev = this.equipment[item.slot];
+        if (prev && prev.cursed) return null;
         this.equipment[item.slot] = item;
         this._maxHp = this.getStats().hp;
         this.currentHp = Math.min(this.currentHp, this._maxHp);
@@ -102,6 +103,7 @@ class Mercenary {
 
     unequip(slot) {
         const item = this.equipment[slot];
+        if (item && item.cursed) return null;
         this.equipment[slot] = null;
         this._maxHp = this.getStats().hp;
         this.currentHp = Math.min(this.currentHp, this._maxHp);

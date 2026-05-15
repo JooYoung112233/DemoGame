@@ -185,15 +185,26 @@ class RosterScene extends Phaser.Scene {
                     });
                 }
 
-                UIButton.create(this, x + w - 80, cy + 8, 60, 22, '해제', {
-                    color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 10,
-                    onClick: () => {
-                        const item = merc.unequip(slot);
-                        if (item) StorageManager.addItem(gs, item);
-                        SaveManager.save(gs);
-                        this.scene.restart({ gameState: gs });
+                if (eq.cursed) {
+                    this.add.text(x + w - 80, cy + 4, '🔒 저주', {
+                        fontSize: '10px', fontFamily: 'monospace', color: '#cc44ff', fontStyle: 'bold'
+                    });
+                    if (eq.curseDebuffDesc) {
+                        this.add.text(x + 25, cy + 26, `  ⚠ ${eq.curseDebuffDesc}`, {
+                            fontSize: '9px', fontFamily: 'monospace', color: '#cc4488'
+                        });
                     }
-                });
+                } else {
+                    UIButton.create(this, x + w - 80, cy + 8, 60, 22, '해제', {
+                        color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 10,
+                        onClick: () => {
+                            const item = merc.unequip(slot);
+                            if (item) StorageManager.addItem(gs, item);
+                            SaveManager.save(gs);
+                            this.scene.restart({ gameState: gs });
+                        }
+                    });
+                }
             } else {
                 const equippable = StorageManager.getEquippableItems(gs, slot);
                 if (equippable.length > 0) {

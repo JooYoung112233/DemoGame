@@ -1024,7 +1024,10 @@ class BlackoutBattleScene extends Phaser.Scene {
                 const dropMult = this._hasAdaptation('ghost_memory') ? 0.9 : 1.0;
                 if (Math.random() < 0.25 * dropMult) {
                     const rarityBonus = Math.floor(depth * 0.5 + this.curseLevel * 0.3);
-                    const item = generateItem('blackout', this.gameState.guildLevel, rarityBonus);
+                    const cursedChance = 0.08 + this.curseLevel * 0.04;
+                    const item = (Math.random() < cursedChance && typeof generateCursedItem === 'function')
+                        ? generateCursedItem()
+                        : generateItem('blackout', this.gameState.guildLevel, rarityBonus);
                     if (item) {
                         this.loot.push(item);
                         this._showLootPopup(unit.container.x, unit.container.y - 40, item);
