@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데모 9: 용병 길드</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #game-container { border-radius: 4px; overflow: hidden; }
+        .back-btn {
+            position: fixed; top: 10px; left: 10px; z-index: 9999;
+            background: #333; color: #aaa; border: none; padding: 6px 14px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-family: monospace;
+        }
+        .back-btn:hover { background: #555; color: #fff; }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='../'">← 목록</button>
+    <div id="game-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <!-- Data -->
+    <script src="src/data/names.js"></script>
+    <script src="src/data/units.js"></script>
+    <script src="src/data/traits.js"></script>
+    <script src="src/data/facilities.js"></script>
+    <script src="src/data/items.js"></script>
+    <script src="src/data/zones.js"></script>
+    <!-- Entities -->
+    <script src="src/entities/Mercenary.js"></script>
+    <!-- UI -->
+    <script src="src/ui/Button.js"></script>
+    <script src="src/ui/Panel.js"></script>
+    <script src="src/ui/Tooltip.js"></script>
+    <script src="src/ui/Toast.js"></script>
+    <!-- Systems -->
+    <script src="src/systems/SaveManager.js"></script>
+    <script src="src/systems/GuildManager.js"></script>
+    <script src="src/systems/MercenaryManager.js"></script>
+    <script src="src/systems/StorageManager.js"></script>
+    <script src="src/systems/RunSimulator.js"></script>
+    <!-- Scenes -->
+    <script src="src/scenes/TitleScene.js"></script>
+    <script src="src/scenes/TownScene.js"></script>
+    <script src="src/scenes/RecruitScene.js"></script>
+    <script src="src/scenes/RosterScene.js"></script>
+    <script src="src/scenes/StorageScene.js"></script>
+    <script src="src/scenes/DeployScene.js"></script>
+    <script src="src/scenes/PlaceholderBattleScene.js"></script>
+    <script src="src/scenes/RunResultScene.js"></script>
+    <!-- Main -->
+    <script src="src/main.js"></script>
+</body>
+</html>
