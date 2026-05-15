@@ -22,23 +22,9 @@
             border-radius: 6px; cursor: pointer; font-size: 13px; font-family: monospace;
         }
         .back-btn:hover { background: #552222; color: #ff8888; }
-
-        /* Mobile: force landscape overlay */
-        #rotate-msg {
-            display: none;
-            position: fixed; inset: 0; z-index: 99999;
-            background: #1a0a0a; color: #aa6666;
-            flex-direction: column; justify-content: center; align-items: center;
-            font-family: monospace; font-size: 18px; text-align: center;
-        }
-        #rotate-msg span { font-size: 48px; margin-bottom: 12px; }
-        @media (max-width: 900px) and (orientation: portrait) {
-            #rotate-msg { display: flex; }
-        }
     </style>
 </head>
 <body>
-    <div id="rotate-msg"><span>📱</span>가로로 돌려주세요</div>
     <button class="back-btn" onclick="location.href='../'">← 목록</button>
     <div id="game-container"></div>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
@@ -79,11 +65,5 @@
     <script src="src/scenes/VaultScene.js"></script>
     <!-- main -->
     <script src="src/main.js"></script>
-    <script>
-        // Try to lock landscape on mobile (requires fullscreen on some browsers)
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').catch(function(){});
-        }
-    </script>
 </body>
 </html>
