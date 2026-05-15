@@ -18,6 +18,7 @@ class BPBattleScene extends Phaser.Scene {
         this.allies = [];
         this.enemies = [];
         this.combatSystem = new BPCombatSystem(this);
+        this.momentum = new MomentumSystem();
         this.battleOver = false;
         this.speedMultiplier = parseInt(localStorage.getItem('bp_speed') || '1', 10) || 1;
         this.farmDropShown = false;
@@ -63,6 +64,7 @@ class BPBattleScene extends Phaser.Scene {
         }
 
         this.spawnAllies();
+        this.applyMilestones();
         this.spawnEnemies();
         this.applyCollectedDrops();
         this.applyEncounterModifier();
@@ -356,11 +358,15 @@ class BPBattleScene extends Phaser.Scene {
         this.combatSystem.update(dt, this.allies, this.enemies);
         const newDeadCount = this.enemies.filter(e => !e.alive).length;
 
+        this.momentum.update(dt);
+        this._drawMomentumBar();
+
         if (newDeadCount > prevDeadCount) {
             const killsThisFrame = newDeadCount - prevDeadCount;
             this.killStreak += killsThisFrame;
             this.killStreakTimer = 3000;
             this._showKillStreak();
+            for (let k = 0; k < killsThisFrame; k++) this.momentum.onKill();
 
             for (let k = 0; k < killsThisFrame; k++) {
                 if (Math.random() < 0.4 + this.dangerSystem.level * 0.03) {
@@ -505,9 +511,47 @@ class BPBattleScene extends Phaser.Scene {
         });
     }
 
+    applyMilestones() {
+        this.allies.forEach(ally => {
+            if (!ally.charId) return;
+            const rChar = BP_ROSTER.getById(ally.charId);
+            if (!rChar) return;
+            const role = (typeof BP_MILESTONE_ROLE_MAP !== 'undefined' && BP_MILESTONE_ROLE_MAP[rChar.classKey]) || null;
+            if (!role || typeof BP_MILESTONES === 'undefined') return;
+            const tree = BP_MILESTONES[role];
+            if (!tree) return;
+            const lvls = [5, 10, 15, 20];
+            lvls.forEach(lv => {
+                if (rChar.level >= lv && tree[lv]) {
+                    if (tree[lv].apply) tree[lv].apply(ally);
+                    if (tree[lv].applyParty) tree[lv].applyParty(this.allies);
+                }
+            });
+        });
+    }
+
+    _drawMomentumBar() {
+        if (this._momBarObjects) this._momBarObjects.forEach(o => o.destroy());
+        this._momBarObjects = [];
+        const m = this.momentum;
+        const x = 440, y = 55, w = 400, h = 5;
+        const bg = this.add.rectangle(x + w / 2, y, w, h, 0x222222).setDepth(100);
+        const fillW = Math.max(0, (m.value / m.max) * w);
+        const fill = this.add.rectangle(x + fillW / 2, y, fillW, h, m.getTierColor()).setDepth(101);
+        this._momBarObjects.push(bg, fill);
+        const label = m.getTierLabel();
+        if (label) {
+            const txt = this.add.text(x + w + 8, y, label, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+            }).setOrigin(0, 0.5).setDepth(101);
+            this._momBarObjects.push(txt);
+        }
+    }
+
     shutdown() {
         this.allies.forEach(a => a.destroy());
         this.enemies.forEach(e => e.destroy());
+        if (this._momBarObjects) { this._momBarObjects.forEach(o => o.destroy()); this._momBarObjects = []; }
         if (this._dangerVignette) { this._dangerVignette.destroy(); this._dangerVignette = null; }
         if (this._consumableBarObjects) {
             this._consumableBarObjects.forEach(obj => obj.destroy());

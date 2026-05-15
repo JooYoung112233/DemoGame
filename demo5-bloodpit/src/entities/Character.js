@@ -388,7 +388,11 @@ class BPCharacter {
             this.container.x += dir * this.moveSpeed * (delta / 1000);
         } else {
             this.attackTimer += delta;
-            if (this.attackTimer >= this.attackSpeed) {
+            let effectiveAtkSpd = this.attackSpeed;
+            if (this.team === 'ally' && this.scene.momentum) {
+                effectiveAtkSpd = Math.floor(effectiveAtkSpd * this.scene.momentum.getAtkSpeedMult());
+            }
+            if (this.attackTimer >= effectiveAtkSpd) {
                 this.attackTimer = 0;
                 this.performAttack(allCharacters);
             }
@@ -490,8 +494,14 @@ class BPCharacter {
             dmg = Math.floor(dmg * (1 + this.bleedBonusDmg));
         }
 
+        const mom = this.scene.momentum;
+        if (mom) dmg = Math.floor(dmg * mom.getAtkMult());
+
         let isCrit = Math.random() < this.critRate;
-        if (isCrit) dmg = Math.floor(dmg * this.critDmg);
+        if (isCrit) {
+            dmg = Math.floor(dmg * this.critDmg);
+            if (mom) mom.onCrit();
+        }
 
         this.target.takeDamage(dmg, this, allCharacters);
         this.totalDamageDealt += dmg;
@@ -578,7 +588,42 @@ class BPCharacter {
         const dir = attacker ? (this.container.x > attacker.container.x ? 1 : -1) : 1;
         const kb = amount > this.maxHp * 0.15 ? 10 : 6;
         this.scene.tweens.add({ targets: this.container, x: this.container.x + dir * kb, duration: 50, yoyo: true });
-        if (this.hp <= 0) { this.hp = 0; this.die(allCharacters); }
+        if (this.hp <= 0) {
+            const overkill = Math.abs(this.hp);
+            this.hp = 0;
+            this.die(allCharacters);
+            if (overkill > 0 && attacker && attacker.alive && allCharacters) {
+                this._splashOverkill(overkill, attacker, allCharacters);
+            }
+        }
+    }
+
+    _splashOverkill(overkill, attacker, allCharacters) {
+        const maxChains = 3;
+        const falloff = 0.7;
+        const splashRange = 120;
+        let remaining = overkill;
+        const hit = new Set();
+        let srcX = this.container.x;
+        let srcY = this.container.y;
+        for (let chain = 0; chain < maxChains && remaining >= 2; chain++) {
+            const nearby = allCharacters.filter(c =>
+                c.team === this.team && c.alive && !hit.has(c) &&
+                Math.abs(c.container.x - srcX) < splashRange
+            );
+            if (nearby.length === 0) break;
+            nearby.sort((a, b) => Math.abs(a.container.x - srcX) - Math.abs(b.container.x - srcX));
+            const victim = nearby[0];
+            hit.add(victim);
+            const splashDmg = Math.floor(remaining);
+            victim.takeDamage(splashDmg, attacker, allCharacters);
+            DamagePopup.show(this.scene, victim.container.x, victim.container.y - 25, splashDmg, 0xff8844, false);
+            const line = this.scene.add.line(0, 0, srcX, srcY, victim.container.x, victim.container.y, 0xff8844, 0.6).setDepth(55);
+            this.scene.tweens.add({ targets: line, alpha: 0, duration: 300, onComplete: () => line.destroy() });
+            srcX = victim.container.x;
+            srcY = victim.container.y;
+            remaining = Math.floor(remaining * falloff);
+        }
     }
 
     die(allCharacters) {
@@ -648,9 +693,10 @@ class BPCharacter {
             this.scene.tweens.add({ targets: stain, alpha: 0, duration: 6000, onComplete: () => stain.destroy() });
         }
 
-        // ally death: camera shake
+        // ally death: camera shake + momentum penalty
         if (this.team === 'ally') {
             this.scene.cameras.main.shake(150, 0.004);
+            if (this.scene.momentum) this.scene.momentum.onAllyDeath();
         }
 
         this.scene.tweens.add({ targets: this.container, alpha: 0, y: this.container.y - 10, duration: 500, ease: 'Power2' });
