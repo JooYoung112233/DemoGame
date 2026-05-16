@@ -43,16 +43,24 @@ class ManualBattleScene extends Phaser.Scene {
     }
 
     _spawnEnemies() {
-        // 간단: BP Lv1 기준 적 4마리 생성
+        // BP 적 4마리 생성 — 다양한 종류 섞기
         const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
-        const types = ['runner', 'runner', 'spitter', 'bruiser'];
+        let types;
+        if (zoneLevel <= 1)      types = ['runner', 'runner', 'spitter', 'bruiser'];
+        else if (zoneLevel <= 3) types = ['runner', 'bruiser', 'spitter', 'summoner'];
+        else if (zoneLevel <= 6) types = ['bruiser', 'spitter', 'summoner', 'elite_runner'];
+        else if (zoneLevel < 10) types = ['elite_runner', 'elite_bruiser', 'spitter', 'summoner'];
+        else                     types = ['pitlord', 'elite_bruiser', 'elite_runner', 'summoner'];
+
         return types.map((type, i) => {
             const data = ENEMY_DATA[type];
-            const scaleMult = zoneLevel === 1 ? 0.75 : 1.0 + (zoneLevel - 2) * 0.1;
+            const scaleMult = zoneLevel === 1 ? 0.75 : 1.0 + (zoneLevel - 2) * 0.08;
+            const enemyActions = (typeof getEnemyActions === 'function') ? getEnemyActions(type) : [];
             return {
                 id: 'enemy_' + i,
                 name: data.name,
                 classKey: type,
+                actions: enemyActions,    // 적도 액션 풀 보유
                 getStats: () => ({
                     hp: Math.floor(data.hp * scaleMult),
                     atk: Math.floor(data.atk * scaleMult),
@@ -231,17 +239,39 @@ class ManualBattleScene extends Phaser.Scene {
             this._showAllyActionPanel(current);
         } else {
             // 적 AI
-            this.time.delayedCall(900, () => {
+            this.time.delayedCall(700, () => {
                 const result = DarkestCombat.executeAiAction(this.combat, current);
-                if (result) this._showActionResult(result, current);
+                if (result) {
+                    // 적 액션 명 화면 표시
+                    this._showEnemyActionLabel(current, result.actionName, result.actionIcon);
+                    // 결과들 표시
+                    if (result.allResults) {
+                        result.allResults.forEach(r => this._showActionResult(r, current));
+                    } else {
+                        this._showActionResult(result, current);
+                    }
+                }
                 this._refreshAllUnits();
-                this.time.delayedCall(700, () => {
+                this.time.delayedCall(800, () => {
                     DarkestCombat.compactPositions(this.combat);
                     DarkestCombat.advanceTurn(this.combat);
                     this._processNextTurn();
                 });
             });
         }
+    }
+
+    _showEnemyActionLabel(enemy, actionName, icon) {
+        const g = this.unitGfx[enemy.id];
+        if (!g) return;
+        const label = this.add.text(g.baseX, g.baseY - 90, `${icon || '⚔'} ${actionName}`, {
+            fontSize: '13px', fontFamily: 'monospace', color: '#ff8866', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(50);
+        this.tweens.add({
+            targets: label, y: label.y - 25, alpha: 0,
+            duration: 1200, onComplete: () => label.destroy()
+        });
     }
 
     _highlightCurrentUnit(unit) {

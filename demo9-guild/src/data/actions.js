@@ -165,8 +165,118 @@ const ACTION_DATA = {
         casterPositions: [2, 3], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 'all',
         cooldown: 4, effects: { atkMult: 1.0, statusEffect: 'burn', statusDuration: 2 },
         desc: '적 전체 AoE + 화상'
+    },
+
+    // ============================================================
+    // === 적 액션 (BP zone) ===
+    // ============================================================
+
+    // --- runner (러너) ---
+    enemy_runner_swipe: {
+        name: '쾌속 베기', type: 'attack', icon: '⚔',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [1, 2], targetCount: 1,
+        cooldown: 0, effects: { atkMult: 1.0 }
+    },
+    enemy_runner_lunge: {
+        name: '돌진', type: 'attack', icon: '💨',
+        casterPositions: [2, 3], targetType: 'enemy', targetPositions: [1], targetCount: 1,
+        cooldown: 0, effects: { atkMult: 1.2, shiftSelf: -1 }
+    },
+
+    // --- bruiser (브루저) ---
+    enemy_bruiser_smash: {
+        name: '강타', type: 'attack', icon: '💥',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [1, 2], targetCount: 1,
+        cooldown: 0, effects: { atkMult: 1.3 }
+    },
+    enemy_bruiser_quake: {
+        name: '지진 일격', type: 'attack', icon: '🌋',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [1, 2], targetCount: 2,
+        cooldown: 2, effects: { atkMult: 0.9 }
+    },
+
+    // --- spitter (스피터) ---
+    enemy_spitter_spit: {
+        name: '독액 발사', type: 'attack', icon: '💧',
+        casterPositions: [2, 3, 4], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 1,
+        cooldown: 0, effects: { atkMult: 0.9, statusEffect: 'bleed', statusDuration: 2 }
+    },
+    enemy_spitter_spray: {
+        name: '독무 분사', type: 'attack', icon: '🌫',
+        casterPositions: [3, 4], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 'all',
+        cooldown: 3, effects: { atkMult: 0.5, statusEffect: 'bleed', statusDuration: 2 }
+    },
+
+    // --- summoner (소환사) ---
+    enemy_summoner_bolt: {
+        name: '저주의 일격', type: 'attack', icon: '🌑',
+        casterPositions: [3, 4], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 1,
+        cooldown: 0, effects: { atkMult: 0.7, debuffStat: 'def', debuffAmt: 2, duration: 2 }
+    },
+    enemy_summoner_curse: {
+        name: '광기의 저주', type: 'attack', icon: '🕯',
+        casterPositions: [3, 4], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 1,
+        cooldown: 3, effects: { atkMult: 0.0, statusEffect: 'slow', statusDuration: 2 }
+    },
+
+    // --- elite_runner (정예 러너) ---
+    enemy_eliterunner_combo: {
+        name: '연속 베기', type: 'attack', icon: '⚔',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [1, 2], targetCount: 2,
+        cooldown: 0, effects: { atkMult: 0.9 }
+    },
+    enemy_eliterunner_eviscerate: {
+        name: '내장 가르기', type: 'attack', icon: '🩸',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [1, 2], targetCount: 1,
+        cooldown: 2, effects: { atkMult: 1.5, statusEffect: 'bleed', statusDuration: 3 }
+    },
+
+    // --- elite_bruiser (정예 브루저) ---
+    enemy_elitebruiser_slam: {
+        name: '대지 가르기', type: 'attack', icon: '🌋',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [1, 2], targetCount: 2,
+        cooldown: 0, effects: { atkMult: 1.0 }
+    },
+    enemy_elitebruiser_shove: {
+        name: '강제 밀치기', type: 'attack', icon: '🛡',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [1], targetCount: 1,
+        cooldown: 2, effects: { atkMult: 1.0, shiftTarget: 1 }
+    },
+
+    // --- pitlord (보스) ---
+    enemy_pitlord_cleave: {
+        name: '광폭 베기', type: 'attack', icon: '⚔',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [1, 2], targetCount: 2,
+        cooldown: 0, effects: { atkMult: 1.2 }
+    },
+    enemy_pitlord_quake: {
+        name: '핏로드의 분노', type: 'attack', icon: '💥',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 'all',
+        cooldown: 4, effects: { atkMult: 0.8 }
+    },
+    enemy_pitlord_drag: {
+        name: '강제 끌어당기기', type: 'attack', icon: '🪝',
+        casterPositions: [1, 2], targetType: 'enemy', targetPositions: [3, 4], targetCount: 1,
+        cooldown: 3, effects: { atkMult: 1.0, shiftTarget: -2 }
     }
 };
+
+/**
+ * 적별 액션 풀.
+ */
+const ENEMY_ACTIONS = {
+    runner:         ['enemy_runner_swipe', 'enemy_runner_lunge'],
+    bruiser:        ['enemy_bruiser_smash', 'enemy_bruiser_quake'],
+    spitter:        ['enemy_spitter_spit', 'enemy_spitter_spray'],
+    summoner:       ['enemy_summoner_bolt', 'enemy_summoner_curse'],
+    elite_runner:   ['enemy_eliterunner_combo', 'enemy_eliterunner_eviscerate'],
+    elite_bruiser:  ['enemy_elitebruiser_slam', 'enemy_elitebruiser_shove'],
+    pitlord:        ['enemy_pitlord_cleave', 'enemy_pitlord_quake', 'enemy_pitlord_drag']
+};
+
+function getEnemyActions(enemyType) {
+    return (ENEMY_ACTIONS[enemyType] || ['enemy_runner_swipe']).slice();
+}
 
 /**
  * 클래스별 4행동 ID 매핑.

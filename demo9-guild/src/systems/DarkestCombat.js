@@ -29,6 +29,21 @@ class DarkestCombat {
         const maxHp = stats.hp || hp;
         const classKey = source.classKey || source.type || 'warrior';
 
+        // 액션 풀 결정
+        let actions;
+        if (team === 'ally') {
+            actions = (typeof getClassActions === 'function') ? getClassActions(classKey).map(a => a.id) : [];
+        } else {
+            // 적: source.actions 우선, 없으면 getEnemyActions
+            if (source.actions && source.actions.length > 0) {
+                actions = source.actions.slice();
+            } else if (typeof getEnemyActions === 'function') {
+                actions = getEnemyActions(classKey);
+            } else {
+                actions = [];
+            }
+        }
+
         return {
             ref: source,
             id: source.id || `${team}_${position}`,
@@ -45,7 +60,7 @@ class DarkestCombat {
             critDmg: stats.critDmg || 1.5,
             cooldowns: {},
             statusEffects: [],
-            actions: team === 'ally' ? (typeof getClassActions === 'function' ? getClassActions(classKey).map(a => a.id) : []) : null
+            actions
         };
     }
 
@@ -320,52 +335,89 @@ class DarkestCombat {
     }
 
     /**
-     * 적 AI — 사용 가능한 액션 중 단순 선택.
-     * 일반 적은 atk1만 사용. 엘리트는 다양화.
+     * 적 AI — 보유 액션 중 사용 가능한 것 선별 후 선택.
+     * 쿨다운 0 우선, 위치 가능, 타겟 가능한 액션만.
      */
     static aiChooseAction(combat, enemy) {
-        // 일반 적: 단순 공격 (atk1 효과로 가정)
-        // 임시 행동: ATK ×1.0 단일 적 (포지션 1-2 우선)
-        const enemyAlives = combat.allies.filter(u => u.alive);
-        if (enemyAlives.length === 0) return null;
+        const alliesAlive = combat.allies.filter(u => u.alive);
+        if (alliesAlive.length === 0) return null;
 
-        // 도발된 아군 우선
-        const tauntTarget = enemyAlives.find(u => u.statusEffects.some(e => e.type === 'taunt_active'));
-        let target = tauntTarget;
-        if (!target) {
-            // HP% 낮은 우선
-            enemyAlives.sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp));
-            target = enemyAlives[0];
+        // 적이 보유한 액션 풀 (actions가 없으면 기본 액션)
+        const actionIds = (enemy.actions && enemy.actions.length > 0)
+            ? enemy.actions
+            : ['enemy_runner_swipe'];
+
+        // 사용 가능한 액션만 필터
+        const usable = [];
+        for (const aid of actionIds) {
+            const action = ACTION_DATA[aid];
+            if (!action) continue;
+            if (!action.casterPositions.includes(enemy.position)) continue;
+            if (enemy.cooldowns[aid] && enemy.cooldowns[aid] > 0) continue;
+            usable.push({ id: aid, action });
         }
 
-        return {
-            action: { name: '공격', effects: { atkMult: 1.0 }, casterPositions: [1, 2, 3, 4], targetType: 'enemy', targetCount: 1 },
-            target
-        };
+        if (usable.length === 0) {
+            // 폴백: 기본 공격
+            usable.push({ id: 'enemy_runner_swipe', action: ACTION_DATA.enemy_runner_swipe });
+        }
+
+        // 가중치: 쿨다운 큰 액션 (= 강력)은 우선순위 ↑
+        // 단 80% 확률로 일반 공격, 20% 확률로 쿨다운 액션
+        let chosen;
+        const cooldownActions = usable.filter(u => u.action.cooldown > 0);
+        const regularActions = usable.filter(u => u.action.cooldown === 0);
+
+        if (cooldownActions.length > 0 && Math.random() < 0.4) {
+            chosen = cooldownActions[Math.floor(Math.random() * cooldownActions.length)];
+        } else if (regularActions.length > 0) {
+            chosen = regularActions[Math.floor(Math.random() * regularActions.length)];
+        } else {
+            chosen = usable[0];
+        }
+
+        // 타겟 결정 (DarkestCombat._resolveTargets 활용)
+        const targetPositions = DarkestCombat._aiPickTargetPositions(combat, enemy, chosen.action);
+
+        return { actionId: chosen.id, action: chosen.action, targetPositions };
+    }
+
+    /** AI 타겟 위치 선택 — 도발 / HP% 낮은 우선 */
+    static _aiPickTargetPositions(combat, enemy, action) {
+        const isEnemyTarget = action.targetType && action.targetType.startsWith('enemy');
+        const pool = isEnemyTarget ? combat.allies : combat.enemies;
+        const valid = pool.filter(u => u.alive && action.targetPositions.includes(u.position));
+        if (valid.length === 0) return [];
+
+        // 도발 우선
+        const tauntTarget = valid.find(u => u.statusEffects.some(e => e.type === 'taunt_active'));
+        if (tauntTarget && isEnemyTarget) return [tauntTarget.position];
+
+        // HP% 낮은 적 우선
+        valid.sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp));
+        return [valid[0].position];
     }
 
     /**
-     * 적 AI 실행 — 단순 공격 적용.
+     * 적 AI 실행 — 액션 시스템 활용.
      */
     static executeAiAction(combat, enemy) {
         const choice = DarkestCombat.aiChooseAction(combat, enemy);
-        if (!choice || !choice.target) return null;
+        if (!choice || !choice.action) return null;
 
-        const fx = choice.action.effects;
-        const isCrit = Math.random() < (enemy.critRate || 0.05);
-        const critMult = isCrit ? (enemy.critDmg || 1.5) : 1.0;
-        const rawDmg = enemy.atk * (fx.atkMult || 1.0) * critMult;
-        const finalDmg = Math.floor(rawDmg * (1 - choice.target.def / (choice.target.def + 100)));
-        choice.target.hp -= finalDmg;
-        const killed = choice.target.hp <= 0;
-        if (killed) { choice.target.hp = 0; choice.target.alive = false; }
+        // executeAction 활용
+        const result = DarkestCombat.executeAction(combat, enemy, choice.actionId, choice.targetPositions);
+        if (result.error) return null;
 
+        // 첫 번째 결과만 반환 (간단화)
+        const firstResult = result.results && result.results[0] ? result.results[0] : {};
         return {
             casterId: enemy.id,
-            target: choice.target.id,
-            damage: finalDmg,
-            isCrit,
-            killed,
+            actionName: choice.action.name,
+            actionIcon: choice.action.icon || '⚔',
+            ...firstResult,
+            allResults: result.results,
+            targets: result.targets,
             action: choice.action
         };
     }
