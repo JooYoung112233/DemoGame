@@ -6,7 +6,7 @@
 
 | 구역 | 전투 방식 | 카드 방향 | 상태 | 문서 |
 |---|---|---|---|---|
-| Blood Pit | 라운드 + 뱀서식 선택지 | 3택1 임시 능력 (런 한정) | ✅ 확정 | [zone-bloodpit.md](zone-bloodpit.md) |
+| Blood Pit | 다키스트 + 관중 난입 + 쉬는 곳 | **카드 미사용** (v4에서 제거) — 핏 게이지·난입·쉬는 곳·수동 아이템으로 대체 | ✅ 확정 | [zone-bloodpit.md](zone-bloodpit.md) |
 | Cargo | 열차 칸 방어 + 덱빌딩 | 카드 3택1 획득 → 역 정차 시 활성화 | ✅ 확정 | [zone-cargo.md](zone-cargo.md) |
 | Blackout | 타일 뒤집기 탐색 | 방 발견 시 이벤트 선택지 | ✅ 확정 | [zone-blackout.md](zone-blackout.md) |
 
@@ -14,11 +14,15 @@
 
 `CARGO_CAR_CARDS`: 탄약/의무/발전/화물 칸별 5장 × 4종 = 20장. 기존 `cards.js`에 구현됨.
 
-### Blood Pit / Blackout 카드
+### Blood Pit 카드 → 제거 (v4)
 
-각 구역의 핵심 메카닉과 연동되는 전용 카드로 별도 기획 예정.
-- BP: 핏 게이지 조작, 관중 반응, 투기장 룰 변경 등
-- BO: 저주 레벨 조작, 시야 변경, 탐색 보너스 등
+v3까지의 BP 3택1 뱀서식 카드 시스템은 **제거**. 대신:
+- **관중 난입**(핏 게이지 임계점 트리거) + **쉬는 곳**(확률 등장) + **수동 아이템(pocket)** 로 교체
+- 자세한 내용은 [zone-bloodpit.md v4](zone-bloodpit.md) 참고
+
+### Blackout 카드
+
+방 발견 시 이벤트 선택지 — 별도 기획 예정. 저주 레벨 조작, 시야 변경, 탐색 보너스 등.
 
 ## 기존 코드 참고
 
