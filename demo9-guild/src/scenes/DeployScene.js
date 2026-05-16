@@ -377,11 +377,11 @@ class DeployScene extends Phaser.Scene {
                 const party = this.deployedIds.map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
 
                 if (isMain) {
-                    // 메인 전투 (기존 흐름)
+                    // 메인 전투 — BP는 다키스트 (ManualBattleScene), 다른 구역은 기존
                     gs.runCount++;
                     SaveManager.save(gs);
                     const sceneMap = {
-                        bloodpit: 'BattleScene',
+                        bloodpit: 'ManualBattleScene',   // v3 다키스트 적용
                         cargo: 'CargoBattleScene',
                         blackout: 'BlackoutBattleScene'
                     };
