@@ -145,8 +145,27 @@
 
 ---
 
-## 5. 코드 연동
+## 5. 코드 연동 — ✅ 구현 완료
 
-아이콘 PNG가 준비되면 `actions.js` 의 `icon` 필드를 이모지에서 아이콘 키로 전환하거나, 별도 `iconAsset` 필드 추가 → 렌더링 측에서 `this.add.image()` 로 교체.
-- 영향 받는 코드: `ManualBattleScene.js` (3 군데, 액션 라벨/툴팁/로그), `DeployScene.js` (행동 가능 체크 라벨).
-- 폴백: 에셋 미로드시 기존 이모지 그대로 사용.
+PNG 파일을 **`demo9-guild/assets/actions/<action_id>.png`** 에 넣기만 하면 자동 적용.
+
+### 5.1 구조
+- **로더**: `src/ui/ActionIcons.js` — `preload()` / `render()` / `renderInline()` / `hasPng()`
+- **자동 로드**: 각 Scene의 `preload()` 에서 `ActionIcons.preload(this)` 호출 → ACTION_DATA의 모든 키에 대해 `assets/actions/<id>.png` 시도
+- **자동 폴백**: PNG가 없으면 `action.icon` (이모지) 텍스트로 자동 대체
+- **id 자동 주입**: `actions.js` 끝부분에서 `ACTION_DATA[key].id = key` 한 번 수행 → 헬퍼는 객체만 받아도 동작
+
+### 5.2 적용된 코드
+| 파일 | 위치 | 용도 |
+|---|---|---|
+| `ManualBattleScene.js` | `_showAllyActionPanel` | 액션 버튼 좌측 32×32 아이콘 |
+| `ManualBattleScene.js` | `_showEnemyActionLabel` | 적 액션 라벨 22×22 (이름 좌측) |
+| `ManualBattleScene.js` | `_showInspectPanel` | 보유 액션 목록 18×18 |
+| `DeployScene.js` | 액션 미리보기 | ✓/✗ 마커 옆 12×12 |
+
+### 5.3 신규 아이콘 추가 워크플로
+1. `demo9-guild/assets/actions/<id>.png` 저장 (64×64 권장)
+2. Ctrl+Shift+R 새로고침
+3. 끝 — 코드 수정 불필요
+
+PNG 일부만 채워도 OK — 누락된 건 이모지로 표시됨.

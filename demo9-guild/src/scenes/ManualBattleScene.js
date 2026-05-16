@@ -22,8 +22,15 @@ class ManualBattleScene extends Phaser.Scene {
                 this.load.image(`bg_${z}`, `assets/backgrounds/${z}.png`);
             }
         });
+        // 액션 아이콘 — PNG 없으면 자동 이모지 폴백
+        if (typeof ActionIcons !== 'undefined') {
+            ActionIcons.preload(this);
+        }
         this.load.on('loaderror', (file) => {
-            console.warn('자산 로드 실패 (폴백):', file.key);
+            // 액션 아이콘은 폴백 자동 처리 — 캐릭터/배경만 경고
+            if (!file.key || !file.key.startsWith('act_')) {
+                console.warn('자산 로드 실패 (폴백):', file.key);
+            }
         });
     }
 
@@ -355,7 +362,7 @@ class ManualBattleScene extends Phaser.Scene {
                 const result = DarkestCombat.executeAiAction(this.combat, current);
                 if (result) {
                     // 적 액션 명 화면 표시
-                    this._showEnemyActionLabel(current, result.actionName, result.actionIcon);
+                    this._showEnemyActionLabel(current, result.actionName, result.actionIcon, result.actionId);
                     // 결과들 표시
                     if (result.allResults) {
                         result.allResults.forEach(r => this._showActionResult(r, current));
@@ -373,16 +380,40 @@ class ManualBattleScene extends Phaser.Scene {
         }
     }
 
-    _showEnemyActionLabel(enemy, actionName, icon) {
+    _showEnemyActionLabel(enemy, actionName, icon, actionId) {
         const g = this.unitGfx[enemy.id];
         if (!g) return;
-        const label = this.add.text(g.container.x, g.container.y - 90, `${icon || '⚔'} ${actionName}`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#ff8866', fontStyle: 'bold',
-            stroke: '#000000', strokeThickness: 3
-        }).setOrigin(0.5).setDepth(50);
+        const cx = g.container.x, cy = g.container.y - 90;
+
+        // 아이콘 + 이름을 그룹으로 띄움
+        const action = actionId ? ACTION_DATA[actionId] : null;
+        const hasPng = action && typeof ActionIcons !== 'undefined' && ActionIcons.hasPng(this, action.id);
+
+        let iconObj, labelText;
+        if (hasPng) {
+            // PNG 아이콘 좌측 + 이름 우측
+            const labelTmp = this.add.text(0, 0, actionName, { fontSize: '13px', fontFamily: 'monospace' });
+            const tw = labelTmp.width;
+            labelTmp.destroy();
+            const totalW = 22 + tw;
+            iconObj = ActionIcons.render(this, cx - totalW/2 + 11, cy, action, 22);
+            iconObj.setDepth(50);
+            labelText = this.add.text(cx - totalW/2 + 24, cy, actionName, {
+                fontSize: '13px', fontFamily: 'monospace', color: '#ff8866', fontStyle: 'bold',
+                stroke: '#000000', strokeThickness: 3
+            }).setOrigin(0, 0.5).setDepth(50);
+        } else {
+            // 폴백 — 이모지 + 이름 한 줄
+            labelText = this.add.text(cx, cy, `${icon || '⚔'} ${actionName}`, {
+                fontSize: '13px', fontFamily: 'monospace', color: '#ff8866', fontStyle: 'bold',
+                stroke: '#000000', strokeThickness: 3
+            }).setOrigin(0.5).setDepth(50);
+        }
+
+        const targets = iconObj ? [iconObj, labelText] : [labelText];
         this.tweens.add({
-            targets: label, y: label.y - 25, alpha: 0,
-            duration: 1200, onComplete: () => label.destroy()
+            targets, y: '-=25', alpha: 0,
+            duration: 1200, onComplete: () => targets.forEach(t => t.destroy())
         });
     }
 
@@ -426,15 +457,26 @@ class ManualBattleScene extends Phaser.Scene {
             this.actionButtons.push(btnBg);
 
             const titleColor = disabled ? '#555555' : (action.type === 'skill' ? '#ffcc88' : '#aaccff');
-            const titleText = this.add.text(x + 10, y + 6, `${action.icon || ''} ${action.name}`, {
+            // 아이콘 (좌측 32×32)
+            const iconObj = (typeof ActionIcons !== 'undefined')
+                ? ActionIcons.render(this, x + 22, y + btnH/2, action, 32)
+                : this.add.text(x + 10, y + btnH/2, action.icon || '', {
+                    fontSize: '20px', fontFamily: 'monospace'
+                }).setOrigin(0, 0.5);
+            if (iconObj) {
+                if (disabled) iconObj.setAlpha(0.4);
+                this.actionButtons.push(iconObj);
+            }
+
+            const titleText = this.add.text(x + 44, y + 6, action.name, {
                 fontSize: '13px', fontFamily: 'monospace', color: titleColor, fontStyle: 'bold'
             });
             this.actionButtons.push(titleText);
 
             const descColor = disabled ? '#333344' : '#888899';
-            const descText = this.add.text(x + 10, y + 26, action.desc || '', {
+            const descText = this.add.text(x + 44, y + 26, action.desc || '', {
                 fontSize: '10px', fontFamily: 'monospace', color: descColor,
-                wordWrap: { width: btnW - 20 }
+                wordWrap: { width: btnW - 54 }
             });
             this.actionButtons.push(descText);
 
@@ -735,10 +777,21 @@ class ManualBattleScene extends Phaser.Scene {
             const cdLabel = cd > 0 ? ` 쿨${cd}R` : (action.cooldown > 0 ? ` (쿨${action.cooldown})` : '');
             const canUse = action.casterPositions.includes(unit.position);
             const color = !canUse ? '#666677' : (action.type === 'skill' ? '#ffcc88' : '#cccccc');
-            objs.push(this.add.text(mx + 30, cy, `${action.icon || ''} ${action.name}${cdLabel}`, {
+
+            // 아이콘 (좌측 18×18)
+            if (typeof ActionIcons !== 'undefined') {
+                const iconObj = ActionIcons.render(this, mx + 30, cy + 10, action, 18);
+                if (iconObj) {
+                    if (!canUse) iconObj.setAlpha(0.4);
+                    iconObj.setDepth(82);
+                    objs.push(iconObj);
+                }
+            }
+
+            objs.push(this.add.text(mx + 46, cy, `${action.name}${cdLabel}`, {
                 fontSize: '11px', fontFamily: 'monospace', color, fontStyle: 'bold'
             }).setDepth(82));
-            objs.push(this.add.text(mx + 50, cy + 14, `${action.desc || ''} (P${action.casterPositions.join(',')})`, {
+            objs.push(this.add.text(mx + 46, cy + 14, `${action.desc || ''} (P${action.casterPositions.join(',')})`, {
                 fontSize: '9px', fontFamily: 'monospace', color: '#888899'
             }).setDepth(82));
             cy += 32;

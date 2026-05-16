@@ -1,6 +1,13 @@
 class DeployScene extends Phaser.Scene {
     constructor() { super('DeployScene'); }
 
+    preload() {
+        // 액션 아이콘 — DeployScene 미리보기용 (PNG 없으면 이모지 폴백)
+        if (typeof ActionIcons !== 'undefined') {
+            ActionIcons.preload(this);
+        }
+    }
+
     init(data) {
         this.gameState = data.gameState;
         this.selectedZone = data.selectedZone || null;
@@ -281,10 +288,22 @@ class DeployScene extends Phaser.Scene {
                     let ay = y + 72;
                     actions.forEach(action => {
                         const canUse = action.casterPositions.includes(position);
-                        const icon = canUse ? '✓' : '✗';
+                        const mark = canUse ? '✓' : '✗';
                         const color = canUse ? '#88ccaa' : '#aa6666';
                         const posStr = action.casterPositions.join(',');
-                        this.add.text(sx + 10, ay, `${icon} ${action.name} [P${posStr}]`, {
+
+                        // 사용 가능 마크 (✓/✗)
+                        this.add.text(sx + 10, ay, mark, {
+                            fontSize: '9px', fontFamily: 'monospace', color
+                        });
+                        // 액션 아이콘 (작게 12×12)
+                        if (typeof ActionIcons !== 'undefined') {
+                            const iconObj = ActionIcons.render(this, sx + 26, ay + 6, action, 12);
+                            if (iconObj) {
+                                if (!canUse) iconObj.setAlpha(0.4);
+                            }
+                        }
+                        this.add.text(sx + 35, ay, `${action.name} [P${posStr}]`, {
                             fontSize: '9px', fontFamily: 'monospace', color
                         });
                         ay += 12;

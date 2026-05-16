@@ -278,6 +278,12 @@ function getEnemyActions(enemyType) {
     return (ENEMY_ACTIONS[enemyType] || ['enemy_runner_swipe']).slice();
 }
 
+// ACTION_DATA 각 항목에 id 필드 자동 주입 — `ACTION_DATA[key].id` 로 접근 가능
+// (ActionIcons 같은 헬퍼가 키를 모른 채 객체만 받아도 동작하도록)
+Object.keys(ACTION_DATA).forEach(key => {
+    if (ACTION_DATA[key] && !ACTION_DATA[key].id) ACTION_DATA[key].id = key;
+});
+
 /**
  * 클래스별 4행동 ID 매핑.
  * @returns {object} { atk1, atk2, atk3, skill }
