@@ -133,17 +133,99 @@ class GuildHallScene extends Phaser.Scene {
             return;
         }
 
-        // 단계 카드 4×3 그리드 (12개)
-        const gridX = baseX, gridY = baseY + 60;
-        const cardW = 245, cardH = 100, gap = 8;
-        const cols = 4;
+        // === 트리 레이아웃 — 지그재그(snake) 4 티어 × 3 스테이지 ===
+        // 티어 1 (스테이지 1-3): L→R
+        // 티어 2 (스테이지 4-6): R→L
+        // 티어 3 (스테이지 7-9): L→R
+        // 티어 4 (스테이지 10-12): R→L
+        const cardW = 240, cardH = 88;
+        const gapH = 22, gapV = 38;
+        const rowW = 3 * cardW + 2 * gapH;          // 762
+        const startX = baseX + (1020 - rowW) / 2;   // 우측 영역 중앙
+        const startY = baseY + 110;
+
+        // 각 스테이지의 위치 미리 계산
+        const positions = {};
         for (let s = 1; s <= 12; s++) {
-            const col = (s - 1) % cols;
-            const row = Math.floor((s - 1) / cols);
-            const x = gridX + col * (cardW + gap);
-            const y = gridY + row * (cardH + gap);
-            this._drawStageCard(data, s, x, y, cardW, cardH, curStage);
+            const tier = Math.ceil(s / 3);          // 1-4
+            const inTier = (s - 1) % 3;             // 0-2
+            const reversed = (tier % 2 === 0);      // 짝수 티어는 R→L
+            const col = reversed ? (2 - inTier) : inTier;
+            const x = startX + col * (cardW + gapH);
+            const y = startY + (tier - 1) * (cardH + gapV);
+            positions[s] = { x, y, tier, col };
         }
+
+        // === 티어 헤더 + 연결선 먼저 그림 ===
+        const tierGates = [
+            { tier: 1, label: '티어 1 — 기본' },
+            { tier: 2, label: '티어 2 — 길드 Lv.2+' },
+            { tier: 3, label: '티어 3 — 평판 15+ / 길드 Lv.4+' },
+            { tier: 4, label: '티어 4 — 평판 35+ / 길드 Lv.6+' }
+        ];
+        tierGates.forEach(t => {
+            const tY = startY + (t.tier - 1) * (cardH + gapV);
+            this.add.text(baseX, tY + cardH / 2, t.label, {
+                fontSize: '10px', fontFamily: 'monospace',
+                color: this._tierUnlocked(gs, t.tier) ? '#aaccdd' : '#555566',
+                fontStyle: 'bold'
+            }).setOrigin(0, 0.5);
+        });
+
+        // 연결선 그리기 (스테이지 1→2→3→4→...→12)
+        for (let s = 1; s < 12; s++) {
+            const from = positions[s];
+            const to = positions[s + 1];
+            const isReached = s < curStage;       // 둘 다 구매됨
+            const isCurrent = s === curStage;     // 다음 단계로 진행 가능
+            this._drawConnection(from, to, cardW, cardH, isReached, isCurrent, data.color);
+        }
+
+        // === 노드 그림 ===
+        for (let s = 1; s <= 12; s++) {
+            const p = positions[s];
+            this._drawStageCard(data, s, p.x, p.y, cardW, cardH, curStage);
+        }
+    }
+
+    /** 두 노드 사이 연결선 — 수평이면 직선, 수직이면 ㄱ자/ㄴ자 꺾임 */
+    _drawConnection(from, to, cw, ch, isReached, isCurrent, accentColor) {
+        const g = this.add.graphics();
+        const color = isReached ? accentColor : isCurrent ? 0xffaa44 : 0x333344;
+        const alpha = isReached ? 0.9 : isCurrent ? 0.7 : 0.4;
+        const thickness = isReached || isCurrent ? 3 : 2;
+        g.lineStyle(thickness, color, alpha);
+
+        if (from.tier === to.tier) {
+            // 같은 티어 — 수평 직선 (양옆 가운데 연결)
+            const isLR = to.x > from.x;
+            const x1 = isLR ? from.x + cw : from.x;
+            const x2 = isLR ? to.x : to.x + cw;
+            const y = from.y + ch / 2;
+            g.lineBetween(x1, y, x2, y);
+            // 화살표 머리
+            const arrowX = isLR ? x2 - 6 : x2 + 6;
+            g.fillStyle(color, alpha);
+            g.fillTriangle(
+                isLR ? x2 : x2,            y,
+                isLR ? x2 - 8 : x2 + 8,    y - 5,
+                isLR ? x2 - 8 : x2 + 8,    y + 5
+            );
+        } else {
+            // 티어 변경 — 수직 드롭 (같은 x 위치)
+            const x = from.x + cw / 2;
+            const y1 = from.y + ch;
+            const y2 = to.y;
+            g.lineBetween(x, y1, x, y2);
+            // 화살표 머리 (아래쪽)
+            g.fillStyle(color, alpha);
+            g.fillTriangle(x, y2, x - 5, y2 - 8, x + 5, y2 - 8);
+        }
+    }
+
+    _tierUnlocked(gs, tier) {
+        const gate = getGuildHallStageGate((tier - 1) * 3 + 1);
+        return gs.guildLevel >= gate.guildLv && (gs.guildReputation || 0) >= gate.rep;
     }
 
     _drawStageCard(data, stage, x, y, w, h, curStage) {
@@ -158,82 +240,91 @@ class GuildHallScene extends Phaser.Scene {
         const gate = getGuildHallStageGate(stage);
         const gateOK = gs.guildLevel >= gate.guildLv && (gs.guildReputation || 0) >= gate.rep;
         const canBuy = isNext && gateOK && gs.gold >= cost;
+        const isFinish = stage === 12;
 
         const bg = this.add.graphics();
         if (isPurchased) {
-            bg.fillStyle(0x1a3a1a, 1);
-            bg.fillRoundedRect(x, y, w, h, 5);
-            bg.lineStyle(2, 0x44ff88, 0.8);
-            bg.strokeRoundedRect(x, y, w, h, 5);
+            bg.fillStyle(isFinish ? 0x3a2a0a : 0x1a3a1a, 1);
+            bg.fillRoundedRect(x, y, w, h, 8);
+            bg.lineStyle(2, isFinish ? 0xffcc44 : 0x44ff88, 0.9);
+            bg.strokeRoundedRect(x, y, w, h, 8);
         } else if (canBuy) {
             bg.fillStyle(0x2a2a1a, 1);
-            bg.fillRoundedRect(x, y, w, h, 5);
-            bg.lineStyle(2, 0xffaa44, 0.9);
-            bg.strokeRoundedRect(x, y, w, h, 5);
+            bg.fillRoundedRect(x, y, w, h, 8);
+            bg.lineStyle(2, 0xffaa44, 0.95);
+            bg.strokeRoundedRect(x, y, w, h, 8);
         } else if (isNext) {
             bg.fillStyle(0x1a1a26, 1);
-            bg.fillRoundedRect(x, y, w, h, 5);
+            bg.fillRoundedRect(x, y, w, h, 8);
             bg.lineStyle(1, 0x666677, 0.7);
-            bg.strokeRoundedRect(x, y, w, h, 5);
+            bg.strokeRoundedRect(x, y, w, h, 8);
         } else {
             bg.fillStyle(0x111118, 1);
-            bg.fillRoundedRect(x, y, w, h, 5);
+            bg.fillRoundedRect(x, y, w, h, 8);
             bg.lineStyle(1, 0x333344, 0.4);
-            bg.strokeRoundedRect(x, y, w, h, 5);
+            bg.strokeRoundedRect(x, y, w, h, 8);
         }
 
-        // 단계 번호 (좌상)
-        const stageBadge = stage === 12 ? '🏆 12' : `Lv.${stage}`;
-        const badgeColor = isPurchased ? '#88ffaa' : canBuy ? '#ffcc66' : '#666677';
-        this.add.text(x + 8, y + 6, stageBadge, {
-            fontSize: '11px', fontFamily: 'monospace', color: badgeColor, fontStyle: 'bold'
+        // 단계 원형 배지 (좌측)
+        const badgeSize = 26;
+        const bcx = x + 18, bcy = y + 18;
+        const badgeBg = this.add.graphics();
+        const badgeColor = isPurchased ? (isFinish ? 0xffcc44 : 0x44ff88) : canBuy ? 0xffaa44 : 0x444455;
+        badgeBg.fillStyle(badgeColor, 0.9);
+        badgeBg.fillCircle(bcx, bcy, badgeSize / 2);
+        badgeBg.lineStyle(2, 0xffffff, 0.4);
+        badgeBg.strokeCircle(bcx, bcy, badgeSize / 2);
+
+        const badgeText = isFinish ? '🏆' : `${stage}`;
+        this.add.text(bcx, bcy, badgeText, {
+            fontSize: isFinish ? '13px' : '12px', fontFamily: 'monospace',
+            color: isPurchased ? '#000000' : canBuy ? '#000000' : '#888899', fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        // 이름 + 설명 (배지 우측)
+        const txtX = x + 38;
+        const nameColor = isPurchased ? (isFinish ? '#ffe088' : '#aaffcc') : canBuy ? '#ffeecc' : '#777788';
+        this.add.text(txtX, y + 6, stageData.name, {
+            fontSize: '11px', fontFamily: 'monospace', color: nameColor, fontStyle: 'bold'
+        });
+        this.add.text(txtX, y + 22, stageData.desc, {
+            fontSize: '9px', fontFamily: 'monospace',
+            color: isPurchased ? '#88aa99' : '#7788aa',
+            wordWrap: { width: w - 50 }
         });
 
-        // 비용 (우상)
-        if (!isPurchased) {
-            this.add.text(x + w - 8, y + 6, `${cost}G`, {
-                fontSize: '11px', fontFamily: 'monospace',
-                color: gs.gold >= cost ? '#ffcc44' : '#aa6644'
+        // 비용 / 상태 (우상단)
+        if (isPurchased) {
+            this.add.text(x + w - 8, y + 6, '✓', {
+                fontSize: '14px', fontFamily: 'monospace', color: '#88ffaa', fontStyle: 'bold'
             }).setOrigin(1, 0);
         } else {
-            this.add.text(x + w - 8, y + 6, '✓ 완료', {
-                fontSize: '10px', fontFamily: 'monospace', color: '#88ffaa'
+            this.add.text(x + w - 8, y + 6, `${cost}G`, {
+                fontSize: '10px', fontFamily: 'monospace',
+                color: gs.gold >= cost ? '#ffcc44' : '#aa6644', fontStyle: 'bold'
             }).setOrigin(1, 0);
         }
 
-        // 이름
-        this.add.text(x + 8, y + 24, stageData.name, {
-            fontSize: '12px', fontFamily: 'monospace',
-            color: isPurchased ? '#aaccaa' : canBuy ? '#ffeecc' : '#888899', fontStyle: 'bold'
-        });
-
-        // 설명
-        this.add.text(x + 8, y + 42, stageData.desc, {
-            fontSize: '10px', fontFamily: 'monospace',
-            color: isPurchased ? '#778877' : '#888899',
-            wordWrap: { width: w - 16 }
-        });
-
-        // 게이트 조건 (잠금 시)
+        // 잠금/구매 — 카드 하단 작게
         if (!isPurchased && (!gateOK || isLocked)) {
-            const cy = y + h - 30;
+            const cy = y + h - 14;
             if (!gateOK) {
                 const txt = [];
                 if (gs.guildLevel < gate.guildLv) txt.push(`길드 Lv.${gate.guildLv}`);
                 if ((gs.guildReputation || 0) < gate.rep) txt.push(`평판 ${gate.rep}`);
-                this.add.text(x + 8, cy, `🔒 ${txt.join(' / ')} 필요`, {
+                this.add.text(x + 8, cy, `🔒 ${txt.join(' / ')}`, {
                     fontSize: '9px', fontFamily: 'monospace', color: '#aa6666'
                 });
             } else if (isLocked) {
-                this.add.text(x + 8, cy, `이전 단계 먼저 구매`, {
+                this.add.text(x + 8, cy, `이전 단계 먼저`, {
                     fontSize: '9px', fontFamily: 'monospace', color: '#666677'
                 });
             }
         }
 
-        // 구매 버튼
+        // 구매 버튼 — 카드 우하단
         if (canBuy) {
-            UIButton.create(this, x + w/2, y + h - 13, w - 16, 22, `🏛 ${cost}G 구매`, {
+            UIButton.create(this, x + w - 50, y + h - 14, 90, 20, `🏛 구매`, {
                 color: 0x665533, hoverColor: 0x886644, textColor: '#ffffff', fontSize: 10,
                 onClick: () => {
                     const r = GuildHallManager.purchaseNextStage(gs, this.selectedCategory);
