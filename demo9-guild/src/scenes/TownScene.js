@@ -224,7 +224,7 @@ class TownScene extends Phaser.Scene {
             return;
         }
 
-        // 패널 헤더 우측 버튼들 (제목과 겹치지 않게 오른쪽 정렬)
+        // 패널 헤더 우측 버튼들
         UIButton.create(this, 168, 80, 46, 22, '전체', {
             color: 0x335577, hoverColor: 0x446688, textColor: '#cceeff', fontSize: 10,
             onClick: () => this.scene.start('RosterScene', { gameState: gs })
@@ -238,12 +238,80 @@ class TownScene extends Phaser.Scene {
             onClick: () => this.scene.start('SynergyScene', { gameState: gs, returnTo: 'TownScene', returnData: { gameState: gs } })
         });
 
-        let yOff = 95;
+        // === 스크롤 가능한 로스터 목록 ===
+        // 영역: y=95 ~ y=700 (605px 가용)
+        // 카드 80px × N개. 8개 이상이면 스크롤 필요.
+        this._rosterScrollAreaY = 95;
+        this._rosterScrollAreaH = 605;
+        this._rosterCardH = 80;
+        if (this._rosterScrollY === undefined) this._rosterScrollY = 0;
+
+        // 마스크 — 로스터 카드 영역 클립
+        const maskShape = this.make.graphics({ x: 0, y: 0, add: false });
+        maskShape.fillStyle(0xffffff, 1);
+        maskShape.fillRect(13, this._rosterScrollAreaY, 260, this._rosterScrollAreaH);
+        this._rosterMask = maskShape.createGeometryMask();
+
+        this._renderRosterCards();
+
+        // === 마우스 휠 — 로스터 영역에서만 스크롤 (scene.restart 없이 부분 갱신) ===
+        // 기존 핸들러 제거 (씬 첫 진입 외 안전)
+        this.input.off('wheel', this._onRosterWheel, this);
+        this._onRosterWheel = (pointer, _gameObjects, _dx, dy) => {
+            if (pointer.x > 8 && pointer.x < 273
+                && pointer.y > this._rosterScrollAreaY
+                && pointer.y < this._rosterScrollAreaY + this._rosterScrollAreaH) {
+                const totalH = this.gameState.roster.length * this._rosterCardH;
+                const maxScroll = Math.max(0, totalH - this._rosterScrollAreaH);
+                this._rosterScrollY = Math.max(0, Math.min(maxScroll, this._rosterScrollY + dy * 0.5));
+                this._renderRosterCards();
+            }
+        };
+        this.input.on('wheel', this._onRosterWheel, this);
+    }
+
+    /** 로스터 카드 + 스크롤바 부분 렌더링 — wheel 이벤트 등에서 재호출 */
+    _renderRosterCards() {
+        const gs = this.gameState;
+        // 기존 카드/스크롤바 제거
+        if (this._rosterRenderObjs) {
+            this._rosterRenderObjs.forEach(o => o.destroy && o.destroy());
+        }
+        this._rosterRenderObjs = [];
+
+        const scrollAreaY = this._rosterScrollAreaY;
+        const scrollAreaH = this._rosterScrollAreaH;
+        const cardH = this._rosterCardH;
+        const totalH = gs.roster.length * cardH;
+        const maxScroll = Math.max(0, totalH - scrollAreaH);
+        if (this._rosterScrollY > maxScroll) this._rosterScrollY = maxScroll;
+
+        // 영역 안에 들어오는 카드만 렌더
         gs.roster.forEach((merc, idx) => {
-            if (yOff > 670) return;
-            this._drawMercCard(merc, 18, yOff, 245);
-            yOff += 80;
+            const cardY = scrollAreaY + idx * cardH - this._rosterScrollY;
+            if (cardY < scrollAreaY - cardH || cardY > scrollAreaY + scrollAreaH) return;
+            const objs = this._drawMercCard(merc, 18, cardY, 245);
+            if (Array.isArray(objs)) {
+                objs.forEach(o => { if (o && this._rosterMask) o.setMask(this._rosterMask); });
+                this._rosterRenderObjs.push(...objs);
+            }
         });
+
+        // 스크롤바
+        if (maxScroll > 0) {
+            const trackX = 264, trackY = scrollAreaY, trackH = scrollAreaH;
+            const track = this.add.graphics();
+            track.fillStyle(0x222233, 0.6);
+            track.fillRoundedRect(trackX, trackY, 6, trackH, 3);
+            this._rosterRenderObjs.push(track);
+
+            const thumbH = Math.max(30, trackH * (scrollAreaH / totalH));
+            const thumbY = trackY + (this._rosterScrollY / maxScroll) * (trackH - thumbH);
+            const thumb = this.add.graphics();
+            thumb.fillStyle(0x6688aa, 0.9);
+            thumb.fillRoundedRect(trackX, thumbY, 6, thumbH, 3);
+            this._rosterRenderObjs.push(thumb);
+        }
     }
 
     _drawMercCard(merc, x, y, width) {
@@ -251,28 +319,30 @@ class TownScene extends Phaser.Scene {
         const rarity = RARITY_DATA[merc.rarity];
         const stats = merc.getStats();
         const hpRatio = merc.currentHp / stats.hp;
+        const objs = [];
 
         const cardBg = this.add.graphics();
         cardBg.fillStyle(0x1a1a2e, 1);
         cardBg.fillRoundedRect(x, y, width, 70, 3);
         cardBg.lineStyle(1, rarity.color, 0.4);
         cardBg.strokeRoundedRect(x, y, width, 70, 3);
+        objs.push(cardBg);
 
-        this.add.text(x + 8, y + 6, `${base.icon} ${merc.name}`, {
+        objs.push(this.add.text(x + 8, y + 6, `${base.icon} ${merc.name}`, {
             fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
-        });
+        }));
 
-        this.add.text(x + width - 8, y + 6, `Lv.${merc.level}`, {
+        objs.push(this.add.text(x + width - 8, y + 6, `Lv.${merc.level}`, {
             fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
-        }).setOrigin(1, 0);
+        }).setOrigin(1, 0));
 
-        this.add.text(x + 8, y + 24, `${base.name} [${rarity.name}]`, {
+        objs.push(this.add.text(x + 8, y + 24, `${base.name} [${rarity.name}]`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#777788'
-        });
+        }));
 
-        this.add.text(x + 8, y + 40, `HP:${merc.currentHp}/${stats.hp} ATK:${stats.atk} DEF:${stats.def}`, {
+        objs.push(this.add.text(x + 8, y + 40, `HP:${merc.currentHp}/${stats.hp} ATK:${stats.atk} DEF:${stats.def}`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
-        });
+        }));
 
         const barW = width - 16;
         const barH = 4;
@@ -283,6 +353,7 @@ class TownScene extends Phaser.Scene {
         const hpColor = hpRatio > 0.6 ? 0x44ff88 : hpRatio > 0.3 ? 0xffaa44 : 0xff4444;
         hpBar.fillStyle(hpColor, 1);
         hpBar.fillRect(x + 8, barY, barW * hpRatio, barH);
+        objs.push(hpBar);
 
         // 스테미너 바 (HP 바로 아래)
         const stamina = merc.stamina !== undefined ? merc.stamina : 100;
@@ -293,21 +364,23 @@ class TownScene extends Phaser.Scene {
         const stColor = staminaRatio > 0.6 ? 0x44ccff : staminaRatio > 0.3 ? 0xffaa44 : 0xff6666;
         staminaBar.fillStyle(stColor, 1);
         staminaBar.fillRect(x + 8, barY + 6, barW * staminaRatio, 3);
-        this.add.text(x + width - 10, barY + 6, `⚡${Math.round(stamina)}`, {
+        objs.push(staminaBar);
+        objs.push(this.add.text(x + width - 10, barY + 6, `⚡${Math.round(stamina)}`, {
             fontSize: '8px', fontFamily: 'monospace', color: '#88ccdd'
-        }).setOrigin(1, 0);
+        }).setOrigin(1, 0));
 
         const traitText = merc.traits.map(t => {
             const sym = t.type === 'positive' ? '✦' : t.type === 'legendary' ? '★' : '✧';
             return sym;
         }).join('');
         if (traitText) {
-            this.add.text(x + width - 8, y + 24, traitText, {
+            objs.push(this.add.text(x + width - 8, y + 24, traitText, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
-            }).setOrigin(1, 0);
+            }).setOrigin(1, 0));
         }
 
         const hitZone = this.add.zone(x + width / 2, y + 35, width, 70).setInteractive({ useHandCursor: true });
+        objs.push(hitZone);
         hitZone.on('pointerover', () => {
             cardBg.clear();
             cardBg.fillStyle(0x2a2a4a, 1);
@@ -344,50 +417,37 @@ class TownScene extends Phaser.Scene {
             UITooltip.hide(this);
             this.scene.start('RosterScene', { gameState: this.gameState, selectedMercId: merc.id });
         });
+
+        return objs;
     }
 
     _drawFacilityGrid() {
         const gs = this.gameState;
-        const panelX = 285, panelW = 700;   // 중앙 영역
+        // 중앙 영역 — 우측 패널(x=815)과 겹치지 않게 폭 제한
+        const panelX = 285, panelW = 515;
 
-        // === 1) 출발 게이트 — 큰 메인 카드 (panelW 전체) ===
+        // === 1) 출발 게이트 — 큰 메인 카드 ===
         this._drawGateCard(panelX, 75, panelW, 110);
 
         // === 2) 카테고리별 시설 그리드 ===
         const groups = [
-            {
-                title: '🏛 길드 운영',
-                color: '#ffcc66',
-                facilities: ['guildHall', 'recruit', 'eliteRecruit']
-            },
-            {
-                title: '⚒ 용병 관리',
-                color: '#aaccff',
-                facilities: ['equipment', 'training', 'temple']
-            },
-            {
-                title: '💰 경제',
-                color: '#88ccaa',
-                facilities: ['storage', 'forge', 'auction', 'vault']
-            },
-            {
-                title: '🔍 기타',
-                color: '#cc99ee',
-                facilities: ['intel']
-            }
+            { title: '🏛 길드 운영',  color: '#ffcc66', facilities: ['guildHall', 'recruit', 'eliteRecruit'] },
+            { title: '⚒ 용병 관리',  color: '#aaccff', facilities: ['equipment', 'training', 'temple'] },
+            { title: '💰 경제',       color: '#88ccaa', facilities: ['storage', 'forge', 'auction', 'vault'] },
+            { title: '🔍 기타',       color: '#cc99ee', facilities: ['intel'] }
         ];
 
-        const cellW = 158, cellH = 78, gap = 10;
-        let curY = 205;
+        const cellW = 158, cellH = 70, gap = 10;
+        const cols = 3;   // 3열 고정 (4번째 아이템은 자동 wrap)
+        let curY = 195;
 
         groups.forEach(group => {
             this.add.text(panelX, curY, group.title, {
                 fontSize: '12px', fontFamily: 'monospace', color: group.color, fontStyle: 'bold'
             });
-            curY += 18;
+            curY += 16;
 
             const rowStartY = curY;
-            const cols = Math.floor((panelW + gap) / (cellW + gap));   // 4
             group.facilities.forEach((key, idx) => {
                 const col = idx % cols;
                 const row = Math.floor(idx / cols);
@@ -396,14 +456,13 @@ class TownScene extends Phaser.Scene {
                 this._drawFacilityCell(key, x, y, cellW, cellH);
             });
             const rowsUsed = Math.ceil(group.facilities.length / cols);
-            curY += rowsUsed * (cellH + gap) + 6;
+            curY += rowsUsed * (cellH + gap) + 4;
         });
     }
 
-    /** 출발 게이트 — 큰 메인 카드 */
+    /** 출발 게이트 — 큰 메인 카드 (좁은 폭 대응) */
     _drawGateCard(x, y, w, h) {
         const gs = this.gameState;
-        const fac = FACILITY_DATA.gate;
         const isUnlocked = gs.unlockedFacilities.includes('gate');
 
         const bg = this.add.graphics();
@@ -412,41 +471,40 @@ class TownScene extends Phaser.Scene {
         bg.lineStyle(3, 0xffaa44, 0.9);
         bg.strokeRoundedRect(x, y, w, h, 10);
 
-        // 좌측 큰 아이콘 + 메인 라벨
-        this.add.text(x + 36, y + h/2, '🚪', { fontSize: '52px' }).setOrigin(0.5);
+        // 좌측 아이콘
+        this.add.text(x + 32, y + h/2, '🚪', { fontSize: '44px' }).setOrigin(0.5);
 
-        this.add.text(x + 78, y + 18, '출발 게이트', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffe088', fontStyle: 'bold'
+        // 중앙 텍스트
+        this.add.text(x + 66, y + 14, '출발 게이트', {
+            fontSize: '18px', fontFamily: 'monospace', color: '#ffe088', fontStyle: 'bold'
         });
-        this.add.text(x + 78, y + 46, '구역으로 출발 — 메인 도전 / 서브 파견', {
+        this.add.text(x + 66, y + 38, '메인 도전 / 서브 파견', {
             fontSize: '11px', fontFamily: 'monospace', color: '#ffccaa'
         });
 
-        // 우측 정보 — 활성 파견 상태
+        // 활성 파견 / 수령 대기 (중앙 하단)
         const activeExp = (gs.activeExpeditions || []).length;
         const maxSlots = (typeof ExpeditionManager !== 'undefined') ? ExpeditionManager.getMaxSlots(gs) : 0;
         const pending = (gs.pendingResults || []).length;
 
-        this.add.text(x + w - 14, y + 16, `서브 파견 ${activeExp}/${maxSlots}`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
-        }).setOrigin(1, 0);
-        if (pending > 0) {
-            this.add.text(x + w - 14, y + 34, `🎁 수령 대기 ${pending}건`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#ffcc44'
-            }).setOrigin(1, 0);
-        }
+        let statusText = `서브 ${activeExp}/${maxSlots}`;
+        if (pending > 0) statusText += `  |  🎁 ${pending}건 수령`;
+        this.add.text(x + 66, y + h - 18, statusText, {
+            fontSize: '10px', fontFamily: 'monospace',
+            color: pending > 0 ? '#ffcc44' : '#88ccff'
+        });
 
-        // 큰 ▶ 버튼 느낌
-        const btnW = 130, btnH = 36;
-        const btnX = x + w - btnW - 14, btnY = y + h - btnH - 12;
+        // 큰 ▶ 출발 버튼 (우측)
+        const btnW = 120, btnH = 60;
+        const btnX = x + w - btnW - 12, btnY = y + (h - btnH) / 2;
         const btnBg = this.add.graphics();
         btnBg.fillStyle(0xff8833, 1);
-        btnBg.fillRoundedRect(btnX, btnY, btnW, btnH, 6);
+        btnBg.fillRoundedRect(btnX, btnY, btnW, btnH, 8);
         btnBg.lineStyle(2, 0xffcc66, 0.9);
-        btnBg.strokeRoundedRect(btnX, btnY, btnW, btnH, 6);
-        this.add.text(btnX + btnW/2, btnY + btnH/2, '▶ 출발', {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 2
+        btnBg.strokeRoundedRect(btnX, btnY, btnW, btnH, 8);
+        this.add.text(btnX + btnW/2, btnY + btnH/2, '▶\n출발', {
+            fontSize: '18px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2, align: 'center'
         }).setOrigin(0.5);
 
         // 전체 카드 클릭 → 출발
