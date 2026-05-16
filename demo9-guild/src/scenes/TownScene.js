@@ -256,7 +256,7 @@ class TownScene extends Phaser.Scene {
         const gap = 15;
         const cols = 3;
 
-        const facilityOrder = ['recruit', 'storage', 'gate', 'forge', 'auction', 'training', 'temple', 'intel', 'eliteRecruit', 'vault'];
+        const facilityOrder = ['recruit', 'storage', 'equipment', 'gate', 'forge', 'auction', 'training', 'temple', 'intel', 'eliteRecruit', 'vault'];
 
         this.add.text(startX + (cols * (cellW + gap) - gap) / 2, 68, '시설', {
             fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
