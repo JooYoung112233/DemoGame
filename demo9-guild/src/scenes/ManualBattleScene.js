@@ -7,6 +7,20 @@
 class ManualBattleScene extends Phaser.Scene {
     constructor() { super('ManualBattleScene'); }
 
+    preload() {
+        // 캐릭터 스프라이트 로드 (파일 없으면 자동 폴백)
+        const classes = ['warrior', 'rogue', 'archer', 'mage', 'priest', 'alchemist'];
+        classes.forEach(cls => {
+            if (!this.textures.exists(`char_${cls}`)) {
+                this.load.image(`char_${cls}_raw`, `assets/characters/${cls}.png`);
+            }
+        });
+        // 로딩 에러 무시 (파일 없으면 폴백)
+        this.load.on('loaderror', (file) => {
+            console.warn('스프라이트 로드 실패 (이모지 폴백):', file.key);
+        });
+    }
+
     init(data) {
         this.gameState = data.gameState;
         this.zoneKey = data.zoneKey || 'bloodpit';
@@ -26,6 +40,9 @@ class ManualBattleScene extends Phaser.Scene {
     }
 
     create() {
+        // 캐릭터 스프라이트 흰 배경 자동 제거 (최초 1회)
+        this._processCharacterSprites();
+
         this.add.rectangle(640, 360, 1280, 720, 0x0a0a0e);
 
         // 배경 그라데이션
@@ -122,18 +139,29 @@ class ManualBattleScene extends Phaser.Scene {
         const isAlly = team === 'ally';
         const container = this.add.container(x, y);
 
-        // 캐릭터 원형
+        // 캐릭터 원형 (배경)
         const bodyColor = isAlly ? this._getClassColor(unit.classKey) : (ENEMY_DATA[unit.classKey] ? ENEMY_DATA[unit.classKey].color : 0xcc4444);
         const body = this.add.graphics();
-        body.fillStyle(bodyColor, 1);
-        body.fillCircle(0, 0, 38);
+        body.fillStyle(bodyColor, 0.4);
+        body.fillCircle(0, 0, 42);
         body.lineStyle(2, 0xffffff, 0.7);
-        body.strokeCircle(0, 0, 38);
+        body.strokeCircle(0, 0, 42);
         container.add(body);
 
-        // 캐릭터 아이콘
-        const icon = isAlly ? (CLASS_DATA[unit.classKey]?.icon || '?') : '👹';
-        const iconText = this.add.text(0, -5, icon, { fontSize: '32px' }).setOrigin(0.5);
+        // 캐릭터 — 스프라이트 있으면 사용, 없으면 이모지
+        let iconText;
+        if (isAlly && this._useCharSprite(unit.classKey)) {
+            iconText = this.add.image(0, -5, `char_${unit.classKey}`).setOrigin(0.5);
+            // 사이즈 맞춤 (직경 80 정도)
+            const desired = 80;
+            const scale = desired / Math.max(iconText.width, iconText.height);
+            iconText.setScale(scale);
+            // 적 쪽 향하게 (아군은 우측 보게)
+            if (unit.team === 'ally') iconText.setFlipX(false);
+        } else {
+            const icon = isAlly ? (CLASS_DATA[unit.classKey]?.icon || '?') : '👹';
+            iconText = this.add.text(0, -5, icon, { fontSize: '32px' }).setOrigin(0.5);
+        }
         container.add(iconText);
 
         // 포지션 번호
@@ -185,6 +213,48 @@ class ManualBattleScene extends Phaser.Scene {
     _getClassColor(classKey) {
         const colors = { warrior: 0x4488ff, rogue: 0xcc44cc, mage: 0x8844ff, archer: 0x44cc44, priest: 0xffcc44, alchemist: 0x44cccc };
         return colors[classKey] || 0x888888;
+    }
+
+    /**
+     * 캐릭터 스프라이트 흰 배경 자동 제거.
+     * 'char_xxx_raw' 텍스처를 가공해서 'char_xxx'로 캐싱.
+     */
+    _processCharacterSprites() {
+        const classes = ['warrior', 'rogue', 'archer', 'mage', 'priest', 'alchemist'];
+        classes.forEach(cls => {
+            const dstKey = `char_${cls}`;
+            const srcKey = `char_${cls}_raw`;
+            if (this.textures.exists(dstKey)) return;
+            if (!this.textures.exists(srcKey)) return;
+
+            const src = this.textures.get(srcKey).getSourceImage();
+            const w = src.width, h = src.height;
+            const canvas = this.textures.createCanvas(dstKey, w, h);
+            if (!canvas) return;
+            const ctx = canvas.context;
+            ctx.drawImage(src, 0, 0);
+            const imageData = ctx.getImageData(0, 0, w, h);
+            const data = imageData.data;
+            // 흰색에 가까운 픽셀 투명 처리 (R>235 G>235 B>235)
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i+1], b = data[i+2];
+                if (r > 235 && g > 235 && b > 235) {
+                    data[i+3] = 0;
+                } else if (r > 220 && g > 220 && b > 220) {
+                    // 경계 알파 부드럽게
+                    data[i+3] = Math.floor(((255 - r) + (255 - g) + (255 - b)) / 3 * 8);
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            canvas.refresh();
+        });
+    }
+
+    /**
+     * 클래스/적의 시각 표현 (스프라이트 있으면 사용, 없으면 이모지)
+     */
+    _useCharSprite(classKey) {
+        return this.textures.exists(`char_${classKey}`);
     }
 
     _drawActionPanel() {
