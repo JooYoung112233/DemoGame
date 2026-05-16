@@ -172,12 +172,13 @@ class RunResultScene extends Phaser.Scene {
         });
 
         r.casualties.forEach(merc => {
-            merc.alive = false;
-            for (const slot of ['weapon', 'armor', 'accessory']) {
-                merc.equipment[slot] = null;
-            }
-            gs.roster = gs.roster.filter(m => m.id !== merc.id);
-            GuildManager.addMessage(gs, `${merc.name} 영구 사망`);
+            // 사망 → fallenMercs로 이동 (신전 부활 가능)
+            const recoveredItems = GuildManager.markFallen(gs, merc);
+            recoveredItems.forEach(item => {
+                StorageManager.addItem(gs, item);
+            });
+            const cost = GuildManager.getRevivalCost(merc);
+            GuildManager.addMessage(gs, `💀 ${merc.name} 사망 — 신전에서 ${cost}G로 부활 가능`);
         });
 
         this._consignResults = AuctionScene.processConsignments(gs);

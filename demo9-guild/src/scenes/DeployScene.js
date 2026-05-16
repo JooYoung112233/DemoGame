@@ -69,7 +69,96 @@ class DeployScene extends Phaser.Scene {
 
         this._drawDeploySlots(30, 280, maxDeploy);
         this._drawRosterPick(30, 440);
+        this._drawSavedParties(30, 595);
         this._drawDepartButton();
+    }
+
+    _drawSavedParties(x, y) {
+        const gs = this.gameState;
+        if (!gs.savedParties) gs.savedParties = [];
+
+        this.add.text(x, y, '편성 저장 (클릭하여 불러오기 / 우클릭하여 덮어쓰기)', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+        });
+
+        const SLOT_COUNT = 4;
+        const slotW = 195, slotH = 45, gap = 10;
+        for (let i = 0; i < SLOT_COUNT; i++) {
+            const sx = x + i * (slotW + gap);
+            const saved = gs.savedParties[i];
+            const hasSaved = !!saved;
+
+            const bg = this.add.graphics();
+            bg.fillStyle(hasSaved ? 0x223344 : 0x1a1a2a, 1);
+            bg.fillRoundedRect(sx, y + 18, slotW, slotH, 4);
+            bg.lineStyle(1, hasSaved ? 0x5588aa : 0x444455, hasSaved ? 0.7 : 0.4);
+            bg.strokeRoundedRect(sx, y + 18, slotW, slotH, 4);
+
+            if (hasSaved) {
+                // 살아있는 멤버만 카운트
+                const aliveMembers = saved.mercIds.filter(id => gs.roster.find(m => m.id === id && m.alive));
+                this.add.text(sx + 8, y + 23, saved.name || `편성 ${i + 1}`, {
+                    fontSize: '12px', fontFamily: 'monospace', color: '#aaccff', fontStyle: 'bold'
+                });
+                this.add.text(sx + 8, y + 42, `${aliveMembers.length}/${saved.mercIds.length}명 출전 가능`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: aliveMembers.length === saved.mercIds.length ? '#88ccaa' : '#aa8888'
+                });
+            } else {
+                this.add.text(sx + slotW / 2, y + 40, `슬롯 ${i + 1} (빈 슬롯)`, {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+                }).setOrigin(0.5);
+            }
+
+            const hit = this.add.zone(sx + slotW / 2, y + 18 + slotH / 2, slotW, slotH).setInteractive();
+            hit.on('pointerdown', (pointer) => {
+                const isRight = pointer.rightButtonDown && pointer.rightButtonDown();
+                if (isRight || pointer.event && pointer.event.button === 2) {
+                    // 우클릭: 현재 편성으로 덮어쓰기
+                    this._savePartySlot(i);
+                } else {
+                    // 좌클릭: 불러오기 (또는 빈 슬롯이면 저장)
+                    if (hasSaved) this._loadPartySlot(i);
+                    else this._savePartySlot(i);
+                }
+            });
+            // 우클릭 컨텍스트 메뉴 비활성화
+            this.input.mouse.disableContextMenu();
+        }
+    }
+
+    _savePartySlot(idx) {
+        const gs = this.gameState;
+        if (this.deployedIds.length === 0) {
+            UIToast.show(this, '편성된 용병이 없습니다', { color: '#ff6644' });
+            return;
+        }
+        if (!gs.savedParties) gs.savedParties = [];
+        gs.savedParties[idx] = {
+            name: `편성 ${idx + 1}`,
+            mercIds: this.deployedIds.slice()
+        };
+        SaveManager.save(gs);
+        UIToast.show(this, `슬롯 ${idx + 1}에 저장됨`, { color: '#88ccff' });
+        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
+    }
+
+    _loadPartySlot(idx) {
+        const gs = this.gameState;
+        const saved = gs.savedParties[idx];
+        if (!saved) return;
+        // 살아있고 파견 안 중인 용병만
+        const validIds = saved.mercIds.filter(id => {
+            const m = gs.roster.find(r => r.id === id);
+            return m && m.alive && !ExpeditionManager.isOnExpedition(gs, id);
+        });
+        if (validIds.length === 0) {
+            UIToast.show(this, '저장된 용병들이 모두 출전 불가', { color: '#ff6644' });
+            return;
+        }
+        const maxDeploy = GuildManager.getMaxDeploy(gs);
+        this.deployedIds = validIds.slice(0, maxDeploy);
+        UIToast.show(this, `편성 ${idx + 1} 불러옴 (${this.deployedIds.length}명)`, { color: '#88ccff' });
+        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
     }
 
     _drawZoneCard(zoneKey, x, y, w, h) {

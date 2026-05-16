@@ -122,10 +122,12 @@ class ExpeditionManager {
             if (typeof merc.gainAffinityXp === 'function') {
                 merc.gainAffinityXp(result.zoneKey, result.affinityXp);
             }
-            // 사망 처리 (영구사망)
+            // 사망 처리 → fallenMercs (신전 부활 가능)
             if (result.casualtyIds && result.casualtyIds.includes(merc.id)) {
-                merc.alive = false;
-                GuildManager.addMessage(gs, `${merc.name} 영구 사망 (서브 파견)`);
+                const items = GuildManager.markFallen(gs, merc);
+                items.forEach(item => StorageManager.addItem(gs, item));
+                const cost = GuildManager.getRevivalCost(merc);
+                GuildManager.addMessage(gs, `💀 ${merc.name} 사망 (서브 파견) — ${cost}G로 부활 가능`);
             }
             // _onExpedition 해제
             delete merc._onExpedition;

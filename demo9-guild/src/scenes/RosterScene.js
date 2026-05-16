@@ -208,17 +208,19 @@ class RosterScene extends Phaser.Scene {
             } else {
                 const equippable = StorageManager.getEquippableItems(gs, slot);
                 if (equippable.length > 0) {
-                    UIButton.create(this, x + w - 80, cy + 8, 60, 22, '장착', {
-                        color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 10,
-                        onClick: () => {
-                            const item = equippable[0];
-                            StorageManager.removeItem(gs, item.id);
-                            const prev = merc.equip(item);
-                            if (prev) StorageManager.addItem(gs, prev);
-                            SaveManager.save(gs);
-                            this.scene.restart({ gameState: gs });
-                        }
+                    // 스탯 합이 가장 큰 거 우선
+                    equippable.sort((a, b) => {
+                        const sum = e => Object.values(e.stats || {}).reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0);
+                        return sum(b) - sum(a);
                     });
+                    UIButton.create(this, x + w - 80, cy + 8, 75, 22, `장착(${equippable.length})`, {
+                        color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 10,
+                        onClick: () => this._showEquipMenu(merc, slot, equippable)
+                    });
+                } else {
+                    this.add.text(x + w - 80, cy + 14, '(보관 없음)', {
+                        fontSize: '9px', fontFamily: 'monospace', color: '#555566'
+                    }).setOrigin(0, 0.5);
                 }
             }
             cy += 32;
@@ -274,5 +276,103 @@ class RosterScene extends Phaser.Scene {
                 this.scene.restart({ gameState: gs });
             }
         });
+
+        // 자동 장착 버튼 (3슬롯 일괄)
+        UIButton.create(this, x + w / 2, y + 580, 200, 30, '🤖 최적 장비 자동 장착', {
+            color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 12,
+            onClick: () => {
+                let count = 0;
+                ['weapon', 'armor', 'accessory'].forEach(slot => {
+                    const candidates = StorageManager.getEquippableItems(gs, slot);
+                    if (candidates.length === 0) return;
+                    candidates.sort((a, b) => {
+                        const sum = e => Object.values(e.stats || {}).reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0);
+                        return sum(b) - sum(a);
+                    });
+                    const best = candidates[0];
+                    const current = merc.equipment[slot];
+                    const sum = e => e ? Object.values(e.stats || {}).reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0) : 0;
+                    if (sum(best) > sum(current)) {
+                        StorageManager.removeItem(gs, best.id);
+                        const prev = merc.equip(best);
+                        if (prev) StorageManager.addItem(gs, prev);
+                        count++;
+                    }
+                });
+                if (count > 0) {
+                    SaveManager.save(gs);
+                    UIToast.show(this, `${count}개 슬롯 자동 장착!`, { color: '#88ccff' });
+                    this.scene.restart({ gameState: gs });
+                } else {
+                    UIToast.show(this, '더 좋은 장비 없음', { color: '#aaaaaa' });
+                }
+            }
+        });
+    }
+
+    /**
+     * 장비 선택 모달 — 슬롯 클릭 시 장착 가능한 아이템 목록 표시.
+     */
+    _showEquipMenu(merc, slot, items) {
+        const gs = this.gameState;
+        // 오버레이
+        const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7).setDepth(100);
+        const modalW = 600, modalH = Math.min(560, 80 + items.length * 56);
+        const modalX = 640 - modalW / 2, modalY = 360 - modalH / 2;
+        const modalObjs = [overlay];
+
+        const bg = this.add.graphics().setDepth(101);
+        bg.fillStyle(0x151525, 1);
+        bg.fillRoundedRect(modalX, modalY, modalW, modalH, 6);
+        bg.lineStyle(2, 0x5588aa, 0.8);
+        bg.strokeRoundedRect(modalX, modalY, modalW, modalH, 6);
+        modalObjs.push(bg);
+
+        const slotNames = { weapon: '무기', armor: '방어구', accessory: '장신구' };
+        modalObjs.push(this.add.text(modalX + modalW / 2, modalY + 20, `${slotNames[slot]} 선택 (${items.length}개)`, {
+            fontSize: '15px', fontFamily: 'monospace', color: '#ccccee', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(101));
+
+        modalObjs.push(UIButton.create(this, modalX + modalW - 50, modalY + 20, 60, 24, '닫기', {
+            color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 11, depth: 101,
+            onClick: () => modalObjs.forEach(o => o.destroy && o.destroy())
+        }));
+
+        let cy = modalY + 55;
+        items.slice(0, 8).forEach(item => {
+            const ir = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
+            const rowBg = this.add.graphics().setDepth(101);
+            rowBg.fillStyle(0x1a1a2a, 1);
+            rowBg.fillRoundedRect(modalX + 12, cy, modalW - 24, 48, 3);
+            rowBg.lineStyle(1, ir.color, 0.4);
+            rowBg.strokeRoundedRect(modalX + 12, cy, modalW - 24, 48, 3);
+            modalObjs.push(rowBg);
+
+            modalObjs.push(this.add.text(modalX + 24, cy + 5, item.name, {
+                fontSize: '12px', fontFamily: 'monospace', color: ir.textColor, fontStyle: 'bold'
+            }).setDepth(102));
+            const statStr = Object.entries(item.stats || {}).map(([k, v]) => `${k}+${v}`).join(' ');
+            modalObjs.push(this.add.text(modalX + 24, cy + 24, `[${ir.name}] ${statStr}`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+            }).setDepth(102));
+
+            modalObjs.push(UIButton.create(this, modalX + modalW - 60, cy + 24, 80, 26, '장착', {
+                color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 11, depth: 102,
+                onClick: () => {
+                    StorageManager.removeItem(gs, item.id);
+                    const prev = merc.equip(item);
+                    if (prev) StorageManager.addItem(gs, prev);
+                    SaveManager.save(gs);
+                    modalObjs.forEach(o => o.destroy && o.destroy());
+                    this.scene.restart({ gameState: gs });
+                }
+            }));
+            cy += 56;
+        });
+        if (items.length > 8) {
+            modalObjs.push(this.add.text(modalX + modalW / 2, cy + 8, `... +${items.length - 8}개 더`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#666677'
+            }).setOrigin(0.5).setDepth(101));
+        }
     }
 }

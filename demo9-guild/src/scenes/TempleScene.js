@@ -125,16 +125,72 @@ class TempleScene extends Phaser.Scene {
     }
 
     _drawRevivalSection(gs, x, y, w) {
-        this._add(UIPanel.create(this, x, y, w, 560, { title: '부활권 (500G)' }));
+        this._add(UIPanel.create(this, x, y, w, 560, { title: '부활 / 부활권' }));
 
-        this._add(this.add.text(x + w / 2, y + 30, '용병 1명에게 부활권을 장착합니다', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+        // === 사망자 부활 ===
+        const fallen = gs.fallenMercs || [];
+        if (fallen.length > 0) {
+            this._add(this.add.text(x + w / 2, y + 22, `💀 사망 용병 ${fallen.length}명`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ff6666', fontStyle: 'bold'
+            }).setOrigin(0.5));
+
+            let fy = y + 42;
+            const rosterFull = gs.roster.length >= GuildManager.getMaxRoster(gs);
+            const showCount = Math.min(3, fallen.length);
+            fallen.slice(0, showCount).forEach(merc => {
+                const fBase = merc.getBaseClass ? merc.getBaseClass() : { icon: '?' };
+                const cost = GuildManager.getRevivalCost(merc);
+                const canRevive = !rosterFull && gs.gold >= cost;
+                const fRarity = RARITY_DATA[merc.rarity] || { textColor: '#aaa', name: '?' };
+
+                const fbg = this._add(this.add.graphics());
+                fbg.fillStyle(0x2a1010, 1);
+                fbg.fillRoundedRect(x + 10, fy, w - 20, 36, 3);
+
+                this._add(this.add.text(x + 20, fy + 4, `${fBase.icon} ${merc.name}`, {
+                    fontSize: '11px', fontFamily: 'monospace', color: fRarity.textColor, fontStyle: 'bold'
+                }));
+                this._add(this.add.text(x + 20, fy + 20, `Lv.${merc.level} ${fRarity.name}`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#888899'
+                }));
+
+                this._add(UIButton.create(this, x + w - 55, fy + 18, 90, 24, `부활 ${cost}G`, {
+                    color: canRevive ? 0x884422 : 0x333333,
+                    hoverColor: canRevive ? 0xaa5533 : 0x333333,
+                    textColor: canRevive ? '#ffcc88' : '#555555',
+                    fontSize: 10,
+                    onClick: () => {
+                        if (!canRevive) { UIToast.show(this, rosterFull ? '로스터 가득' : '골드 부족', { color: '#ff6644' }); return; }
+                        if (GuildManager.reviveMerc(gs, merc.id)) {
+                            SaveManager.save(gs);
+                            UIToast.show(this, `${merc.name} 부활!`, { color: '#88ffcc' });
+                            this.goldText.setText(`${gs.gold}G`);
+                            this._drawContent();
+                        }
+                    }
+                }));
+                fy += 40;
+            });
+            if (fallen.length > showCount) {
+                this._add(this.add.text(x + w / 2, fy + 4, `... +${fallen.length - showCount}명 더`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#666677'
+                }).setOrigin(0.5));
+            }
+        }
+
+        const divY = y + (fallen.length > 0 ? 200 : 30);
+        const div = this._add(this.add.graphics());
+        div.lineStyle(1, 0x444466, 0.5);
+        div.lineBetween(x + 20, divY, x + w - 20, divY);
+
+        this._add(this.add.text(x + w / 2, divY + 12, '── 부활권 (사전 예방) ──', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
         }).setOrigin(0.5));
-        this._add(this.add.text(x + w / 2, y + 46, '사망 시: HP 50% 부활, 장비 전량 손실', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#ff8888'
+        this._add(this.add.text(x + w / 2, divY + 28, '사망 시: HP 50% 즉시 부활, 장비 손실', {
+            fontSize: '9px', fontFamily: 'monospace', color: '#888899'
         }).setOrigin(0.5));
 
-        let cy = y + 70;
+        let cy = divY + 45;
         const revivalCost = 500;
 
         gs.roster.forEach(merc => {
