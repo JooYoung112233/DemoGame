@@ -67,14 +67,42 @@ class BattleUnit {
         this.animTimer = 0;
 
         this.container = scene.add.container(config.x, config.y).setDepth(5);
+
+        // 아군이면 PNG 스프라이트 사용 (있을 경우), 없으면 Graphics 폴백
+        this.useSprite = this.team === 'ally'
+            && typeof CharacterSprites !== 'undefined'
+            && CharacterSprites.has(scene, this.classKey);
+        if (this.useSprite) {
+            this.charImage = scene.add.image(0, -5, `char_${this.classKey}`).setOrigin(0.5);
+            const desired = 50;
+            const scale = desired / Math.max(this.charImage.width, this.charImage.height);
+            this.charImage.setScale(scale);
+            this.container.add(this.charImage);
+        }
+
         this.gfx = scene.add.graphics();
         this.container.add(this.gfx);
         this.drawCharacter();
         this.healthBar = new BattleHealthBar(scene, config.x, config.y - 30, 36, 4, this.maxHp);
     }
 
+    setFlash(alpha) {
+        if (this.charImage) this.charImage.setAlpha(alpha);
+        if (this.gfx) this.gfx.setAlpha(alpha);
+    }
+
     drawCharacter() {
         this.gfx.clear();
+
+        if (this.useSprite) {
+            const bounce = this.animFrame % 2 === 0 ? 0 : -1;
+            if (this.charImage) this.charImage.y = -5 + bounce;
+            if (this.bleeding) {
+                this.gfx.fillStyle(0xff0000, 0.4);
+                this.gfx.fillCircle(Phaser.Math.Between(-4, 4), Phaser.Math.Between(-2, 8), 2);
+            }
+            return;
+        }
         const flip = this.team === 'enemy' ? -1 : 1;
         const r = (this.color >> 16) & 0xff, g_ = (this.color >> 8) & 0xff, b = this.color & 0xff;
         const dark = Phaser.Display.Color.GetColor(Math.floor(r * .6), Math.floor(g_ * .6), Math.floor(b * .6));
@@ -611,8 +639,9 @@ class BattleUnit {
         }
 
         // hit flash
-        this.target.gfx.setAlpha(0.3);
-        this.scene.time.delayedCall(50, () => { if (this.target && this.target.gfx) this.target.gfx.setAlpha(1); });
+        const flashTarget = this.target;
+        flashTarget.setFlash(0.3);
+        this.scene.time.delayedCall(50, () => { if (flashTarget && flashTarget.alive) flashTarget.setFlash(1); });
 
         // spark
         const tx = this.target.container.x, ty = this.target.container.y - 5;

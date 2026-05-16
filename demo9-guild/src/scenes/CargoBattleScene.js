@@ -1,6 +1,12 @@
 class CargoBattleScene extends Phaser.Scene {
     constructor() { super('CargoBattleScene'); }
 
+    preload() {
+        if (typeof CharacterSprites !== 'undefined') {
+            CharacterSprites.preload(this);
+        }
+    }
+
     init(data) {
         this.gameState = data.gameState;
         this.party = data.party;
@@ -30,6 +36,10 @@ class CargoBattleScene extends Phaser.Scene {
     }
 
     create() {
+        if (typeof CharacterSprites !== 'undefined') {
+            CharacterSprites.process(this);
+        }
+
         this.allies = [];
         this.enemies = [];
         this.allUnits = [];

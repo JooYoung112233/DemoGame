@@ -1,6 +1,12 @@
 class BlackoutBattleScene extends Phaser.Scene {
     constructor() { super('BlackoutBattleScene'); }
 
+    preload() {
+        if (typeof CharacterSprites !== 'undefined') {
+            CharacterSprites.preload(this);
+        }
+    }
+
     init(data) {
         this.gameState = data.gameState;
         this.party = data.party;
@@ -19,6 +25,10 @@ class BlackoutBattleScene extends Phaser.Scene {
     }
 
     create() {
+        if (typeof CharacterSprites !== 'undefined') {
+            CharacterSprites.process(this);
+        }
+
         this.roomsVisited = 0;
         this.moveCount = 0;
         this.maxMoves = 15 + this.zoneLevel * 5 + (this.currentFloor - 1) * 3;
