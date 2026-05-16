@@ -120,48 +120,49 @@ class CargoBattleScene extends Phaser.Scene {
     _drawBackground() {
         const gfx = this.add.graphics();
 
-        // Sky gradient (dark industrial)
+        // 배경 (어두운 산업 톤)
         gfx.fillGradientStyle(0x0a0a15, 0x0a0a15, 0x151520, 0x151520);
         gfx.fillRect(0, 0, 1280, 720);
 
-        // Train interior floor
-        gfx.fillStyle(0x2a2015, 1);
-        gfx.fillRect(0, 480, 1280, 240);
+        // 기차 (12시 방향 = 상단) — 기차 본체
+        gfx.fillStyle(0x2a2520, 1);
+        gfx.fillRect(100, 0, 1080, 100); // 기차 본체 (상단)
 
-        // Train ceiling
-        gfx.fillStyle(0x1a1510, 1);
-        gfx.fillRect(0, 0, 1280, 80);
+        // 기차 외벽 (하단 가장자리 = 적이 도달하는 면)
+        gfx.fillStyle(0x334433, 1);
+        gfx.fillRect(100, 95, 1080, 10); // 외벽 라인
 
-        // Interior walls (left = train wall, right = open/window)
-        gfx.fillStyle(0x332820, 1);
-        gfx.fillRect(0, 80, 40, 400); // left wall (exterior)
+        // 전투 영역 (기차 아래쪽 공간)
+        gfx.fillStyle(0x0f0f1a, 1);
+        gfx.fillRect(0, 105, 1280, 615);
 
-        // Floor line
-        gfx.lineStyle(2, 0x554433, 0.8);
-        gfx.lineBetween(0, 480, 1280, 480);
-
-        // Grid floor pattern
-        gfx.lineStyle(1, 0x332820, 0.3);
-        for (let x = 0; x < 1280; x += 60) {
-            gfx.lineBetween(x, 480, x, 720);
+        // 바닥 그리드 패턴
+        gfx.lineStyle(1, 0x1a1a2a, 0.3);
+        for (let x = 0; x < 1280; x += 80) {
+            gfx.lineBetween(x, 105, x, 720);
+        }
+        for (let y = 105; y < 720; y += 80) {
+            gfx.lineBetween(0, y, 1280, y);
         }
 
-        // Windows on right side (enemies come from here)
-        for (let i = 0; i < 4; i++) {
-            const wy = 140 + i * 80;
-            gfx.fillStyle(0x112233, 0.6);
-            gfx.fillRect(1200, wy, 80, 50);
-            gfx.lineStyle(2, 0x334455, 0.5);
-            gfx.strokeRect(1200, wy, 80, 50);
-        }
-
-        // Exterior landscape (visible through windows)
-        gfx.fillStyle(0x0a1520, 0.4);
-        gfx.fillRect(1200, 80, 80, 400);
+        // 적 진입 방향 표시 (9시=좌, 6시=하, 3시=우)
+        gfx.lineStyle(2, 0x442222, 0.3);
+        // 좌측 진입 화살표
+        gfx.lineBetween(0, 400, 40, 400);
+        gfx.lineBetween(40, 400, 30, 395);
+        gfx.lineBetween(40, 400, 30, 405);
+        // 우측 진입 화살표
+        gfx.lineBetween(1280, 400, 1240, 400);
+        gfx.lineBetween(1240, 400, 1250, 395);
+        gfx.lineBetween(1240, 400, 1250, 405);
+        // 하단 진입 화살표
+        gfx.lineBetween(640, 720, 640, 680);
+        gfx.lineBetween(640, 680, 635, 690);
+        gfx.lineBetween(640, 680, 645, 690);
     }
 
     _drawTrainWall() {
-        // 외벽 시각화 (왼쪽)
+        // 외벽 시각화 (상단 — 기차 하단 가장자리)
         this._wallGfx = this.add.graphics().setDepth(10);
         this._updateWallVisual();
     }
@@ -171,31 +172,34 @@ class CargoBattleScene extends Phaser.Scene {
         gfx.clear();
 
         const hpRatio = this.train.wallHp / this.train.wallMaxHp;
-        const wallX = 40, wallY = 80, wallW = 30, wallH = 400;
+
+        // 외벽 = 상단 가로 바 (기차 하단 면)
+        const wallX = 100, wallY = 90, wallW = 1080, wallH = 16;
 
         // Wall body
         const wallColor = hpRatio > 0.6 ? 0x446644 : hpRatio > 0.3 ? 0x886622 : 0x884422;
         gfx.fillStyle(wallColor, 0.9);
         gfx.fillRect(wallX, wallY, wallW, wallH);
+        gfx.lineStyle(1, 0x668866, 0.5);
+        gfx.strokeRect(wallX, wallY, wallW, wallH);
 
         // Damage cracks
         if (hpRatio < 0.7) {
             gfx.lineStyle(1, 0xff4444, 0.3 + (1 - hpRatio) * 0.4);
-            const numCracks = Math.floor((1 - hpRatio) * 8);
+            const numCracks = Math.floor((1 - hpRatio) * 10);
             for (let i = 0; i < numCracks; i++) {
-                const cy = wallY + 30 + i * (wallH / numCracks);
-                gfx.lineBetween(wallX + 5, cy, wallX + wallW - 5, cy + 15);
+                const cx = wallX + 50 + i * (wallW / numCracks);
+                gfx.lineBetween(cx, wallY + 2, cx + 10, wallY + wallH - 2);
             }
         }
 
-        // HP bar on wall
-        const barX = 10, barY = 100, barW = 20, barH = 360;
+        // HP bar (외벽 위에 가로로 표시)
+        const barX = 100, barY = 75, barW = 1080, barH = 10;
         gfx.fillStyle(0x222222, 1);
-        gfx.fillRect(barX, barY, barW, barH);
+        gfx.fillRoundedRect(barX, barY, barW, barH, 2);
         const hpColor = hpRatio > 0.6 ? 0x44ff44 : hpRatio > 0.3 ? 0xffaa00 : 0xff4444;
-        const fillH = barH * hpRatio;
         gfx.fillStyle(hpColor, 1);
-        gfx.fillRect(barX, barY + barH - fillH, barW, fillH);
+        gfx.fillRoundedRect(barX, barY, barW * hpRatio, barH, 2);
     }
 
     _drawHUD() {
@@ -270,19 +274,21 @@ class CargoBattleScene extends Phaser.Scene {
     // ═══════════════════════════════════════════════════════════════
 
     _spawnAllies() {
+        // 기차(상단) 바로 아래, 중앙 부근에 배치
         const positions = [
-            { x: 200, y: 350 },
-            { x: 320, y: 380 },
-            { x: 440, y: 340 },
-            { x: 560, y: 370 }
+            { x: 440, y: 200 },
+            { x: 580, y: 220 },
+            { x: 700, y: 200 },
+            { x: 840, y: 220 }
         ];
 
         this.party.forEach((merc, idx) => {
             if (!merc.alive) return;
-            const pos = positions[idx] || { x: 200 + idx * 120, y: 360 };
+            const pos = positions[idx] || { x: 400 + idx * 140, y: 210 };
             const unit = BattleUnit.fromMercenary(this, merc, pos.x, pos.y);
             unit._targetPos = null; // RTS 이동 목표
             unit._rtsTarget = null; // 수동 지정 타겟
+            unit._holdPosition = false; // 이동 명령 후 제자�� 유지
             this.allies.push(unit);
             this.allUnits.push(unit);
         });
@@ -329,9 +335,13 @@ class CargoBattleScene extends Phaser.Scene {
 
             // 빈 공간 클릭 → 선택된 유닛 이동
             if (this.selectedUnit && this.selectedUnit.alive) {
-                this.selectedUnit._targetPos = { x, y: Math.max(150, Math.min(460, y)) };
+                // 맵 경계 클램핑 (전투 영역: x 40~1240, y 120~680)
+                const clampX = Math.max(40, Math.min(1240, x));
+                const clampY = Math.max(120, Math.min(680, y));
+                this.selectedUnit._targetPos = { x: clampX, y: clampY };
                 this.selectedUnit._rtsTarget = null;
-                this._showMoveIndicator(x, y);
+                this.selectedUnit._holdPosition = true; // 이동 명령 → 도착 후 제자리 유지
+                this._showMoveIndicator(clampX, clampY);
             }
         });
     }
@@ -393,19 +403,31 @@ class CargoBattleScene extends Phaser.Scene {
             const enemyData = ENEMY_DATA[enemyDef.type];
             if (!enemyData) return;
 
-            // 스폰 위치: 오른쪽 외부에서 진입
-            const spawnX = 1280 + Phaser.Math.Between(20, 150);
-            const spawnY = Phaser.Math.Between(150, 460);
+            // 스폰 위치: 3방향 (9시=좌, 6시=하, 3시=우)에서 진입
+            const direction = idx % 3; // 0=좌, 1=하, 2=우
+            let spawnX, spawnY;
+            if (direction === 0) {
+                // 9시 방향 (좌측)
+                spawnX = -Phaser.Math.Between(20, 100);
+                spawnY = Phaser.Math.Between(200, 600);
+            } else if (direction === 1) {
+                // 6시 방향 (하단)
+                spawnX = Phaser.Math.Between(200, 1080);
+                spawnY = 720 + Phaser.Math.Between(20, 100);
+            } else {
+                // 3시 방향 (우측)
+                spawnX = 1280 + Phaser.Math.Between(20, 100);
+                spawnY = Phaser.Math.Between(200, 600);
+            }
 
             // fromEnemyData는 hp/atk/def에 scaleMult 적용
-            // atkMult은 별도로 처리 (hp스케일과 분리)
             const unit = BattleUnit.fromEnemyData(this, enemyDef.type, enemyDef.statMult, spawnX, spawnY);
             // ATK는 별도 배율 적용 (statMult이 이미 적용됨, atkMult/statMult 비율 보정)
             if (enemyDef.atkMult !== enemyDef.statMult) {
                 unit.atk = Math.floor(enemyData.atk * enemyDef.atkMult);
             }
             unit.moveSpeed = Math.floor(enemyData.moveSpeed * enemyDef.speedMult);
-            unit._wallTarget = true; // 벽을 향해 이동
+            unit._wallTarget = true; // 벽을 향해 이동 (상단)
 
             this.enemies.push(unit);
             this.allUnits.push(unit);
@@ -488,7 +510,7 @@ class CargoBattleScene extends Phaser.Scene {
             return;
         }
 
-        const wallX = 70; // 외벽 위치
+        const wallY = 105; // 외벽 위치 (상단 — 기차 하단 면)
 
         // 가장 가까운 아군 찾기
         let nearestAlly = null;
@@ -521,17 +543,18 @@ class CargoBattleScene extends Phaser.Scene {
                     nearestAlly.alive = false;
                     this.tweens.add({ targets: nearestAlly.container, alpha: 0, duration: 300 });
                     if (nearestAlly.healthBar) nearestAlly.healthBar.destroy();
-                    // 전멸 체크
                     if (this.onUnitDeath) this.onUnitDeath(nearestAlly, unit);
                 }
             }
-        } else if (unit.container.x > wallX + 50) {
-            // 벽을 향해 이동
+        } else if (unit.container.y > wallY + 30) {
+            // 벽(상단)을 향해 위로 이동
             const speed = unit.moveSpeed * (dt / 1000);
-            unit.container.x -= speed;
-            // 약간의 Y 흔들림
-            if (unit.container.y < 150) unit.container.y += speed * 0.3;
-            if (unit.container.y > 460) unit.container.y -= speed * 0.3;
+            // 목표: wallY 방향으로 직진 (약간의 X 수렴 — 벽 중앙 640으로)
+            unit.container.y -= speed;
+            // X축: 벽 범위(100~1180) 안으로 수렴
+            const targetX = 100 + Math.random() * 1080;
+            if (unit.container.x < 100) unit.container.x += speed * 0.5;
+            else if (unit.container.x > 1180) unit.container.x -= speed * 0.5;
         } else {
             // 벽에 도달 → 벽 공격
             this._enemyAttackWall(unit, dt);
@@ -567,8 +590,8 @@ class CargoBattleScene extends Phaser.Scene {
                 unit._stunTimer = this.train.wallStun;
             }
 
-            // 데미지 팝업
-            DamagePopup.show(this, 55, unit.container.y, dmg, 0xff4444, false);
+            // 데미지 팝업 (벽 = 상단이므로 유닛 위치 근처에 표시)
+            DamagePopup.show(this, unit.container.x, 110, dmg, 0xff4444, false);
 
             // 외벽 파괴 체크
             if (this.train.wallHp <= 0) {
@@ -595,11 +618,14 @@ class CargoBattleScene extends Phaser.Scene {
     _updateAlly(unit, dt) {
         if (!unit.alive) return;
 
+        // 맵 경계 상수
+        const BOUNDS = { minX: 40, maxX: 1240, minY: 120, maxY: 680 };
+
         // 애니메이션
         unit.animTimer += dt;
         if (unit.animTimer > 250) { unit.animTimer = 0; unit.animFrame++; unit.drawCharacter(); }
 
-        // RTS 이동 처리
+        // RTS 이동 처리 (플레이어 명령)
         if (unit._targetPos) {
             const dx = unit._targetPos.x - unit.container.x;
             const dy = unit._targetPos.y - unit.container.y;
@@ -610,6 +636,7 @@ class CargoBattleScene extends Phaser.Scene {
                 unit.container.y += (dy / dist) * speed;
             } else {
                 unit._targetPos = null;
+                // _holdPosition이면 도착 후 적에게 돌진하지 않음
             }
         }
 
@@ -618,10 +645,12 @@ class CargoBattleScene extends Phaser.Scene {
         if (target && !target.alive) {
             unit._rtsTarget = null;
             target = null;
+            // 수동 타겟 사망 시 holdPosition 해제
+            unit._holdPosition = false;
         }
 
-        if (!target) {
-            // 자동 타겟: 가장 가까운 적
+        if (!target && !unit._holdPosition) {
+            // 자동 타겟: 가장 가까운 적 (holdPosition이면 자동 타겟팅 안 함)
             let nearestDist = Infinity;
             for (const enemy of this.enemies) {
                 if (!enemy.alive) continue;
@@ -633,9 +662,31 @@ class CargoBattleScene extends Phaser.Scene {
                     target = enemy;
                 }
             }
+        } else if (!target && unit._holdPosition) {
+            // holdPosition 상태: 사거리 내 적만 타겟 (이동은 안 함)
+            let nearestDist = Infinity;
+            for (const enemy of this.enemies) {
+                if (!enemy.alive) continue;
+                const dx = unit.container.x - enemy.container.x;
+                const dy = unit.container.y - enemy.container.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist <= unit.range && dist < nearestDist) {
+                    nearestDist = dist;
+                    target = enemy;
+                }
+            }
         }
 
-        if (!target) return;
+        if (!target) {
+            // 경계 클램핑만 하고 리턴
+            unit.container.x = Math.max(BOUNDS.minX, Math.min(BOUNDS.maxX, unit.container.x));
+            unit.container.y = Math.max(BOUNDS.minY, Math.min(BOUNDS.maxY, unit.container.y));
+            if (unit.healthBar) {
+                unit.healthBar.setPosition(unit.container.x, unit.container.y - 30);
+                unit.healthBar.update(unit.hp);
+            }
+            return;
+        }
         unit.target = target;
 
         // 사거리 내 도달 시 공격
@@ -644,11 +695,21 @@ class CargoBattleScene extends Phaser.Scene {
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist > unit.range) {
-            // 타겟을 향해 이동 (수동 이동 명령이 없을 때만)
-            if (!unit._targetPos) {
+            // 타겟을 향해 이동 — holdPosition이면 이동 안 함, 수동 타겟이면 이동
+            if (!unit._holdPosition && !unit._targetPos) {
                 const speed = unit.moveSpeed * (dt / 1000);
-                unit.container.x += (-dx / dist) * speed;
-                unit.container.y += (-dy / dist) * speed;
+                const newX = unit.container.x + (-dx / dist) * speed;
+                const newY = unit.container.y + (-dy / dist) * speed;
+                // 경계 내에서만 이동
+                unit.container.x = Math.max(BOUNDS.minX, Math.min(BOUNDS.maxX, newX));
+                unit.container.y = Math.max(BOUNDS.minY, Math.min(BOUNDS.maxY, newY));
+            } else if (unit._rtsTarget && !unit._targetPos) {
+                // 수동 타겟 지정 시에는 그 적에게 이동 (경계 내)
+                const speed = unit.moveSpeed * (dt / 1000);
+                const newX = unit.container.x + (-dx / dist) * speed;
+                const newY = unit.container.y + (-dy / dist) * speed;
+                unit.container.x = Math.max(BOUNDS.minX, Math.min(BOUNDS.maxX, newX));
+                unit.container.y = Math.max(BOUNDS.minY, Math.min(BOUNDS.maxY, newY));
             }
         } else {
             // 공격
@@ -686,6 +747,10 @@ class CargoBattleScene extends Phaser.Scene {
                 }
             }
         }
+
+        // 경계 클램핑
+        unit.container.x = Math.max(BOUNDS.minX, Math.min(BOUNDS.maxX, unit.container.x));
+        unit.container.y = Math.max(BOUNDS.minY, Math.min(BOUNDS.maxY, unit.container.y));
 
         // 체력바 위치
         if (unit.healthBar) {
@@ -765,11 +830,11 @@ class CargoBattleScene extends Phaser.Scene {
             this.train.turretTimer = (this.train.turretTimer || 0) + dt;
             if (this.train.turretTimer >= 2000) {
                 this.train.turretTimer = 0;
-                // 가장 가까운 적 공격
+                // 벽(상단)에 가장 가까운 적 공격
                 let nearest = null, nearDist = Infinity;
                 for (const e of this.enemies) {
                     if (!e.alive) continue;
-                    const dist = e.container.x;
+                    const dist = e.container.y; // Y가 작을수록 벽에 가까움
                     if (dist < nearDist) { nearDist = dist; nearest = e; }
                 }
                 if (nearest) {
