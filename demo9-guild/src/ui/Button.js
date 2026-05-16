@@ -7,10 +7,12 @@ class UIButton {
             textColor = '#000000',
             fontSize = 14,
             disabled = false,
-            onClick = null
+            onClick = null,
+            depth = 0
         } = opts;
 
         const container = scene.add.container(x, y);
+        if (depth) container.setDepth(depth);
 
         const bg = scene.add.graphics();
         const drawBg = (c, strokeC) => {

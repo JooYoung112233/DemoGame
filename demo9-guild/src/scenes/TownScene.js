@@ -169,6 +169,12 @@ class TownScene extends Phaser.Scene {
             return;
         }
 
+        // 전체 로스터 (카드 그리드) 진입 — 패널 헤더 우측에 작은 버튼
+        UIButton.create(this, 230, 78, 60, 22, '전체', {
+            color: 0x335577, hoverColor: 0x446688, textColor: '#cceeff', fontSize: 10,
+            onClick: () => this.scene.start('RosterScene', { gameState: gs })
+        });
+
         let yOff = 95;
         gs.roster.forEach((merc, idx) => {
             if (yOff > 670) return;
