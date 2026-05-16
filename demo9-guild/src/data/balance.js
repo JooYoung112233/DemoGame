@@ -29,6 +29,7 @@ const BALANCE = {
     GUILD_HALL_BASE_COST: 300,
     GUILD_HALL_COST_MULT: 1.5,
     GUILD_HALL_MAX_STAGE: 12,
+    GUILD_HALL_MAX_STAGE_BY_CAT: { automation: 8 },
 
     // === 클래스 베이스 (Lv1) ===
     CLASS_BASE: {

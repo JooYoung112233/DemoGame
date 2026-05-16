@@ -10,7 +10,7 @@ guildHall: {
   operations: 0,       // A (0-12)
   infrastructure: 0,   // B
   recovery: 0,         // C
-  automation: 0,       // D
+  automation: 0,       // D (0-8, 예외 최대)
   intel: 0,            // E
   pit_control: 0,      // F (BP 첫 클리어 후 해금)
   cargo_control: 0,    // G (Cargo 첫 클리어 후 해금)

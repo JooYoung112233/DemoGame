@@ -1,745 +1,1008 @@
-// === AuctionScene v2 ===
-// 2단계 미니게임: 1단계(비공개 일회 입찰) → reveal → 2단계(가격 책정+손님 반응) → 정산.
-// 동기 문서: docs/systems/auction.md
-//
-// MVP 범위 (현재 구현):
-//   ✅ 한 사이클 (입장 → 1단계 → reveal → 2단계 → 정산 → 종료)
-//   ✅ NPC 입찰 산출 (정규분포, 등급별)
-//   ✅ 손님 placeholder 4명 + 표정/대사
-//   ✅ 라운드 예산 + 입장료
-// Backlog (다음 라운드):
-//   ⬜ 위작/저주 트리거 + 감식
-//   ⬜ VIP 경매장
-//   ⬜ 골든 호감도 단계 보상 (감식 정확도, 손님 선호 노출)
-//   ⬜ 학습형 손님 선호 노출
-//   ⬜ 손님당 타이머 (현재는 무제한)
-
 class AuctionScene extends Phaser.Scene {
     constructor() { super('AuctionScene'); }
 
-    init(data) { this.gameState = data.gameState; this.round = null; }
+    init(data) { this.gameState = data.gameState; }
 
     create() {
         this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const gs = this.gameState;
 
-        // 헤더
-        this.add.text(640, 22, '🏛 경매장', {
+        this.add.text(640, 25, '🏛 경매장', {
             fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.goldText = this.add.text(1260, 22, `${this.gameState.gold}G`, {
+        this.goldText = this.add.text(1260, 25, `${gs.gold}G`, {
             fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
         }).setOrigin(1, 0);
 
-        UIButton.create(this, 80, 22, 100, 30, '← 마을', {
+        UIButton.create(this, 80, 25, 100, 30, '← 마을', {
             color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
-            onClick: () => this._exitToTown()
+            onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
-        this._contentObjs = [];
-        this._drawLobby();
+        this.tab = 'buy';
+        this.filterType = 'all';
+        this.sortBy = 'price';
+        this.scrollOffset = 0;
+        if (!gs.auctionStock || gs.auctionStock.length === 0) this._refreshStock();
+        if (!gs.auctionHistory) gs.auctionHistory = [];
+        if (!gs.consignedItems) gs.consignedItems = [];
+        if (!gs.autoAuctionSlots) gs.autoAuctionSlots = 2;
+        if (typeof initMarketTrends === 'function') initMarketTrends(gs);
+
+        this._drawTabs();
+        this._drawContent();
     }
 
-    _exitToTown() {
-        this.scene.start('TownScene', { gameState: this.gameState });
+    _drawTabs() {
+        if (this._tabObjs) this._tabObjs.forEach(o => o.destroy && o.destroy());
+        this._tabObjs = [];
+        const tabs = [
+            { key: 'buy', label: '구매', x: 380 },
+            { key: 'sell', label: '판매', x: 490 },
+            { key: 'consign', label: '위탁', x: 600 },
+            { key: 'bid', label: '입찰', x: 710 },
+            { key: 'history', label: '거래 내역', x: 830 }
+        ];
+        tabs.forEach(t => {
+            const active = this.tab === t.key;
+            this._tabObjs.push(UIButton.create(this, t.x, 60, 110, 28, t.label, {
+                color: active ? 0x445588 : 0x222233,
+                hoverColor: active ? 0x445588 : 0x333344,
+                textColor: active ? '#ffffff' : '#888899',
+                fontSize: 12,
+                onClick: () => {
+                    this.tab = t.key;
+                    this.scrollOffset = 0;
+                    this._clearContent();
+                    this._drawTabs();
+                    this._drawContent();
+                }
+            }));
+        });
     }
 
-    _refreshGold() { this.goldText.setText(`${this.gameState.gold}G`); }
-
-    _clear() {
+    _clearContent() {
         if (this._contentObjs) this._contentObjs.forEach(o => o.destroy && o.destroy());
         this._contentObjs = [];
     }
-    _add(o) { this._contentObjs.push(o); return o; }
 
-    // === LOBBY: 경매 시작 전 ===
-    _drawLobby() {
-        this._clear();
+    _add(obj) { if (!this._contentObjs) this._contentObjs = []; this._contentObjs.push(obj); return obj; }
+
+    _drawContent() {
+        this._clearContent();
+        if (this.tab === 'buy') this._drawBuyTab();
+        else if (this.tab === 'sell') this._drawSellTab();
+        else if (this.tab === 'consign') this._drawConsignTab();
+        else if (this.tab === 'bid') this._drawBidTab();
+        else this._drawHistoryTab();
+    }
+
+    _refreshStock() {
+        const gs = this.gameState;
+        const stock = [];
+        const count = 6 + Math.floor(Math.random() * 4);
+        for (let i = 0; i < count; i++) {
+            // 20% 확률로 경매장 전용 아이템
+            let item;
+            if (Math.random() < 0.20 && typeof generateAuctionItem === 'function') {
+                item = generateAuctionItem();
+                item.auctionPrice = item.value;
+                item.isAuctionExclusive = true;
+            } else {
+                item = generateItem('common', gs.guildLevel, Math.random() < 0.2 ? 1 : 0);
+                const marketMod = typeof getMarketPriceModifier === 'function' ? getMarketPriceModifier(gs, item.type) : 1.0;
+                const baseMult = (1.2 + Math.random() * 0.8) * marketMod;
+                item.auctionPrice = Math.floor(item.value * baseMult);
+            }
+            if (!item.isAuctionExclusive && Math.random() < 0.15) {
+                item.isHotDeal = true;
+                item.auctionPrice = Math.floor(item.auctionPrice * 0.6);
+            }
+            if (!item.isAuctionExclusive && Math.random() < 0.1) {
+                item.isBulk = true;
+                item.bulkCount = 2 + Math.floor(Math.random() * 3);
+                item.auctionPrice = Math.floor(item.auctionPrice * item.bulkCount * 0.85);
+            }
+            stock.push(item);
+        }
+        gs.auctionStock = stock;
+        this._generateBidItems(gs);
+        SaveManager.save(gs);
+    }
+
+    _generateBidItems(gs) {
+        gs.auctionBids = [];
+        const bidCount = 2 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < bidCount; i++) {
+            // 입찰에도 경매장 전용 등장
+            let item;
+            if (Math.random() < 0.30 && typeof generateAuctionItem === 'function') {
+                item = generateAuctionItem();
+            } else {
+                item = generateItem('common', gs.guildLevel, 1 + Math.floor(Math.random() * 2));
+            }
+            const startBid = Math.floor(item.value * 0.5);
+            gs.auctionBids.push({
+                item,
+                currentBid: startBid,
+                minIncrement: Math.max(10, Math.floor(startBid * 0.15)),
+                npcBidders: 1 + Math.floor(Math.random() * 3),
+                roundsLeft: 2 + Math.floor(Math.random() * 2),
+                playerBid: 0,
+                resolved: false
+            });
+        }
+    }
+
+    // --- BUY TAB ---
+    _drawBuyTab() {
         const gs = this.gameState;
 
-        this._add(UIPanel.create(this, 240, 130, 800, 460, { title: '경매장 입장' }));
+        this._drawFilterBar(90);
 
-        this._add(this.add.text(640, 200, '비공개 입찰 → 가격 책정 2단계 미니게임', {
-            fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc'
-        }).setOrigin(0.5));
+        const stock = this._getFilteredStock(gs.auctionStock || []);
 
-        // 입장료 미리보기
-        const feeRange = BALANCE.AUCTION.ENTRY_FEE;
-        const budgetPreview = Math.min(
-            Math.floor(gs.gold * BALANCE.AUCTION.ROUND_BUDGET_PCT),
-            BALANCE.AUCTION.ROUND_BUDGET_MAX
-        );
+        const refreshCost = 80 + gs.guildLevel * 20;
+        this._add(UIButton.create(this, 1180, 90, 140, 26, `갱신 (${refreshCost}G)`, {
+            color: gs.gold >= refreshCost ? 0x443322 : 0x333333,
+            hoverColor: gs.gold >= refreshCost ? 0x554433 : 0x333333,
+            textColor: gs.gold >= refreshCost ? '#ffcc88' : '#555555',
+            fontSize: 11,
+            onClick: () => {
+                if (gs.gold < refreshCost) { UIToast.show(this, '골드 부족', { color: '#ff6666' }); return; }
+                GuildManager.spendGold(gs, refreshCost);
+                this._refreshStock();
+                this.goldText.setText(`${gs.gold}G`);
+                this._clearContent();
+                this._drawContent();
+                UIToast.show(this, '경매 목록 갱신!');
+            }
+        }));
 
-        const infoLines = [
-            `입장료: ${feeRange.min}~${feeRange.max}G`,
-            `이번 라운드 예산: ${budgetPreview}G  (보유 골드의 ${Math.round(BALANCE.AUCTION.ROUND_BUDGET_PCT*100)}%)`,
-            `매물 수: ${BALANCE.AUCTION.ITEM_COUNT}장`,
-            '',
-            '1단계: 매물에 비공개로 한 번씩 입찰 → 동시 공개',
-            '2단계: 낙찰 매물을 손님에게 가격 책정 판매'
-        ];
-        infoLines.forEach((line, i) => {
-            this._add(this.add.text(640, 240 + i * 22, line, {
-                fontSize: '12px', fontFamily: 'monospace', color: i >= 4 ? '#888899' : '#cccccc'
+        this._add(this.add.text(200, 90, `매물 ${stock.length}건`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+        }));
+
+        if (gs.marketTrends) {
+            const trendIcons = { '-1': '▼', '0': '—', '1': '▲' };
+            const trendColors = { '-1': '#44ff88', '0': '#888888', '1': '#ff6644' };
+            const supplyLabels = { surplus: '과잉', normal: '보통', shortage: '부족' };
+            let tx = 350;
+            for (const cat of ['equipment', 'material', 'consumable']) {
+                const t = gs.marketTrends[cat];
+                const catNames = { equipment: '장비', material: '소재', consumable: '소비' };
+                const icon = trendIcons[t.trend] || '—';
+                const col = trendColors[t.trend] || '#888888';
+                const pct = Math.round((t.modifier - 1) * 100);
+                const pctStr = pct >= 0 ? `+${pct}%` : `${pct}%`;
+                this._add(this.add.text(tx, 107, `${catNames[cat]}: ${icon}${pctStr} (${supplyLabels[t.supply]})`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: col
+                }));
+                tx += 180;
+            }
+        }
+
+        if (stock.length === 0) {
+            this._add(this.add.text(640, 400, '해당 조건의 매물이 없습니다', {
+                fontSize: '14px', fontFamily: 'monospace', color: '#555566'
             }).setOrigin(0.5));
+            return;
+        }
+
+        let cy = 120;
+        stock.forEach((item, idx) => {
+            if (cy > 680) return;
+            this._drawBuyRow(item, idx, 40, cy, 1200);
+            cy += 68;
         });
-
-        const canEnter = gs.gold >= feeRange.min && budgetPreview >= 10;
-
-        this._add(UIButton.create(this, 640, 470, 220, 44, '경매 시작 →', {
-            color: canEnter ? 0x664422 : 0x333333,
-            hoverColor: canEnter ? 0x886644 : 0x333333,
-            textColor: canEnter ? '#ffcc88' : '#555555',
-            fontSize: 16,
-            onClick: () => {
-                if (!canEnter) { UIToast.show(this, '골드 부족 (입장료 + 예산 필요)', { color: '#ff6666' }); return; }
-                this._beginRound();
-            }
-        }));
-
-        this._add(this.add.text(640, 530, '※ 평균적으로 손해보는 도박 구조. 운/감으로 이득 노리세요.', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#666677'
-        }).setOrigin(0.5));
     }
 
-    // === ROUND START ===
-    _beginRound() {
+    _drawFilterBar(y) {
+        const filters = [
+            { key: 'all', label: '전체' },
+            { key: 'equipment', label: '⚔ 장비' },
+            { key: 'material', label: '🔧 소재' },
+            { key: 'consumable', label: '🧪 소비' }
+        ];
+        let fx = 40;
+        filters.forEach(f => {
+            const active = this.filterType === f.key;
+            this._add(UIButton.create(this, fx + 40, y, 80, 22, f.label, {
+                color: active ? 0x334466 : 0x1a1a2e,
+                hoverColor: active ? 0x334466 : 0x222244,
+                textColor: active ? '#aaccff' : '#666688',
+                fontSize: 10,
+                onClick: () => {
+                    this.filterType = f.key;
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
+            fx += 90;
+        });
+
+        const sorts = [
+            { key: 'price', label: '가격순' },
+            { key: 'rarity', label: '등급순' },
+            { key: 'name', label: '이름순' }
+        ];
+        fx += 30;
+        sorts.forEach(s => {
+            const active = this.sortBy === s.key;
+            this._add(UIButton.create(this, fx + 35, y, 70, 22, s.label, {
+                color: active ? 0x334444 : 0x1a1a2e,
+                hoverColor: active ? 0x334444 : 0x222244,
+                textColor: active ? '#88ccaa' : '#556666',
+                fontSize: 10,
+                onClick: () => {
+                    this.sortBy = s.key;
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
+            fx += 80;
+        });
+    }
+
+    _getFilteredStock(stock) {
+        let filtered = this.filterType === 'all' ? [...stock] : stock.filter(i => i.type === this.filterType);
+        const rarityOrder = { legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 };
+        if (this.sortBy === 'price') filtered.sort((a, b) => a.auctionPrice - b.auctionPrice);
+        else if (this.sortBy === 'rarity') filtered.sort((a, b) => (rarityOrder[a.rarity] || 5) - (rarityOrder[b.rarity] || 5));
+        else filtered.sort((a, b) => a.name.localeCompare(b.name));
+        return filtered;
+    }
+
+    _drawBuyRow(item, idx, x, y, w) {
         const gs = this.gameState;
-        this.round = AuctionRound.newRound(gs);
-
-        // 입장료 차감
-        GuildManager.spendGold(gs, this.round.entryFee);
-        this._refreshGold();
-        UIToast.show(this, `입장료 -${this.round.entryFee}G`, { color: '#ffaa44' });
-
-        this._drawBidding();
-    }
-
-    // === PHASE 1: BIDDING ===
-    _drawBidding() {
-        this._clear();
-        const round = this.round;
-
-        this.add.text && null; // placeholder
-
-        // 헤더 패널
-        this._add(UIPanel.create(this, 30, 60, 1220, 50, {}));
-        this._add(this.add.text(50, 75, '1단계 — 비공개 입찰', {
-            fontSize: '15px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
-        }));
-        this._add(this.add.text(50, 95, '각 매물에 입찰액을 정하고 [동시 공개]를 누르세요. NPC 입찰자와 비공개로 경쟁합니다.', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
-        }));
-
-        const budgetUsed = this._budgetUsed();
-        const budgetLeft = round.budget - budgetUsed;
-        this._add(this.add.text(1230, 75, `예산: ${budgetUsed}/${round.budget}G`, {
-            fontSize: '13px', fontFamily: 'monospace', color: budgetLeft >= 0 ? '#88ccaa' : '#ff6666', fontStyle: 'bold'
-        }).setOrigin(1, 0));
-        this._add(this.add.text(1230, 95, `남은: ${budgetLeft}G`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#666677'
-        }).setOrigin(1, 0));
-
-        // 매물 3장 (가로 배치)
-        const cardW = 380, cardH = 380, gap = 20;
-        const totalW = round.items.length * cardW + (round.items.length - 1) * gap;
-        let cx = (1280 - totalW) / 2;
-        round.items.forEach((item, idx) => {
-            this._drawBidCard(item, cx, 140, cardW, cardH);
-            cx += cardW + gap;
-        });
-
-        // 하단 버튼
-        const allInBudget = budgetUsed <= round.budget;
-        const hasAnyBid = Object.values(round.playerBids).some(v => v > 0);
-
-        this._add(UIButton.create(this, 640, 670, 280, 44, allInBudget && hasAnyBid ? '동시 공개 →' : (hasAnyBid ? '예산 초과!' : '입찰 0건 (그냥 진행)'), {
-            color: allInBudget ? 0x664422 : 0x664422,
-            hoverColor: allInBudget ? 0x886644 : 0x886644,
-            textColor: allInBudget ? '#ffcc88' : '#ff8866',
-            fontSize: 14,
-            onClick: () => {
-                if (!allInBudget) { UIToast.show(this, '예산 초과! 입찰액을 줄이세요', { color: '#ff6666' }); return; }
-                this._resolveBidding();
-            }
-        }));
-    }
-
-    _budgetUsed() {
-        return Object.values(this.round.playerBids).reduce((a, b) => a + (b || 0), 0);
-    }
-
-    _drawBidCard(item, x, y, w, h) {
-        const round = this.round;
         const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
-        const curBid = round.playerBids[item.id] || 0;
+        const cap = GuildManager.getStorageCapacity(gs);
+        const canBuy = gs.gold >= item.auctionPrice && gs.storage.length < cap;
 
-        // 배경
         const bg = this._add(this.add.graphics());
-        bg.fillStyle(0x1a1a2e, 1);
-        bg.fillRoundedRect(x, y, w, h, 8);
-        bg.lineStyle(2, rarity.color, 0.5);
-        bg.strokeRoundedRect(x, y, w, h, 8);
+        bg.fillStyle(item.isHotDeal ? 0x2a1a1a : 0x1a1a2e, 1);
+        bg.fillRoundedRect(x, y, w, 58, 4);
+        bg.lineStyle(1, item.isHotDeal ? 0xff6644 : rarity.color, item.isHotDeal ? 0.6 : 0.3);
+        bg.strokeRoundedRect(x, y, w, 58, 4);
 
-        // 아이콘 + 이름
         const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
-        this._add(this.add.text(x + 16, y + 16, typeIcons[item.type] || '?', { fontSize: '24px' }));
-        this._add(this.add.text(x + 52, y + 18, item.name, {
-            fontSize: '15px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
-        }));
-        this._add(this.add.text(x + 52, y + 40, `[${rarity.name}]  ${item.type}`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+        this._add(this.add.text(x + 12, y + 8, typeIcons[item.type] || '?', { fontSize: '16px' }));
+
+        let nameStr = item.name;
+        if (item.isBulk) nameStr += ` ×${item.bulkCount}`;
+        this._add(this.add.text(x + 38, y + 8, nameStr, {
+            fontSize: '13px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
         }));
 
-        // 설명/스탯
+        const tagX = x + 38;
+        let tagOff = 0;
+        if (item.isHotDeal) {
+            this._add(this.add.text(x + 38 + nameStr.length * 8 + 10, y + 10, '🔥 특가', {
+                fontSize: '10px', fontFamily: 'monospace', color: '#ff6644', fontStyle: 'bold'
+            }));
+        }
+        if (item.isBulk) {
+            this._add(this.add.text(x + 38 + nameStr.length * 8 + 10 + (item.isHotDeal ? 55 : 0), y + 10, '📦 묶음', {
+                fontSize: '10px', fontFamily: 'monospace', color: '#44aaff'
+            }));
+        }
+
+        this._add(this.add.text(x + 38, y + 30, `[${rarity.name}] ${item.desc || ''}`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#667788'
+        }));
+
         if (item.stats) {
             const statStr = Object.entries(item.stats).map(([k, v]) =>
                 typeof v === 'number' && v < 1 ? `${k}+${Math.round(v * 100)}%` : `${k}+${v}`
             ).join('  ');
-            this._add(this.add.text(x + 16, y + 70, statStr, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#aaaaa0', wordWrap: { width: w - 32 }
-            }));
-        }
-        if (item.desc) {
-            this._add(this.add.text(x + 16, y + 95, item.desc, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#778899', wordWrap: { width: w - 32 }
+            this._add(this.add.text(x + 400, y + 10, statStr, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#8888aa'
             }));
         }
 
-        // 시세 정보 박스
-        const infoY = y + 135;
-        this._add(this.add.text(x + 16, infoY, '── 정보 ──', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#556677'
-        }));
-        this._add(this.add.text(x + 16, infoY + 16, `추정 시세:`, { fontSize: '11px', fontFamily: 'monospace', color: '#888899' }));
-        this._add(this.add.text(x + 110, infoY + 16, `${item.marketPrice}G`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
-        }));
-        this._add(this.add.text(x + 16, infoY + 36, `NPC 경쟁자:`, { fontSize: '11px', fontFamily: 'monospace', color: '#888899' }));
-        this._add(this.add.text(x + 110, infoY + 36, `${item.npcBidderCount}명`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#ff8866'
-        }));
-        this._add(this.add.text(x + 16, infoY + 56, `입찰 범위:`, { fontSize: '11px', fontFamily: 'monospace', color: '#888899' }));
-        this._add(this.add.text(x + 110, infoY + 56, `${item.minBid}~${item.maxBid}G`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
+        const marketValue = item.value * (item.isBulk ? item.bulkCount : 1);
+        const priceRatio = item.auctionPrice / marketValue;
+        const priceColor = priceRatio <= 0.7 ? '#44ff88' : priceRatio <= 1.0 ? '#ffcc44' : '#ff8866';
+
+        this._add(this.add.text(x + w - 220, y + 8, `${item.auctionPrice}G`, {
+            fontSize: '16px', fontFamily: 'monospace', color: priceColor, fontStyle: 'bold'
         }));
 
-        // 입찰 입력 영역
-        const bidY = y + h - 130;
-        this._add(this.add.text(x + w/2, bidY, '내 입찰', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc'
-        }).setOrigin(0.5));
-
-        // 큰 입찰액 표시
-        this._add(this.add.text(x + w/2, bidY + 25, curBid > 0 ? `${curBid}G` : '— G', {
-            fontSize: '22px', fontFamily: 'monospace',
-            color: curBid > 0 ? (curBid >= item.minBid ? '#44ff88' : '#ff6666') : '#555566',
-            fontStyle: 'bold'
-        }).setOrigin(0.5));
-
-        // 조정 버튼들 (-50 / -10 / +10 / +50)
-        const btnY = bidY + 60;
-        const deltas = [-100, -10, 10, 100];
-        let bx = x + 30;
-        deltas.forEach(d => {
-            const label = (d > 0 ? '+' : '') + d;
-            this._add(UIButton.create(this, bx + 35, btnY, 70, 26, label, {
-                color: 0x333344, hoverColor: 0x445566, textColor: '#cccccc', fontSize: 12,
-                onClick: () => this._adjustBid(item, d)
-            }));
-            bx += 80;
-        });
-
-        // 빠른 입찰 (시세 0.7x / 1.0x / 1.3x)
-        const quickY = btnY + 36;
-        const quickPresets = [
-            { label: '시세 70%', mult: 0.7 },
-            { label: '시세 100%', mult: 1.0 },
-            { label: '시세 130%', mult: 1.3 }
-        ];
-        let qx = x + 30;
-        quickPresets.forEach(p => {
-            this._add(UIButton.create(this, qx + 55, quickY, 110, 22, p.label, {
-                color: 0x223344, hoverColor: 0x334455, textColor: '#88bbdd', fontSize: 10,
-                onClick: () => this._setBid(item, Math.round(item.marketPrice * p.mult))
-            }));
-            qx += 116;
-        });
-    }
-
-    _adjustBid(item, delta) {
-        const round = this.round;
-        const cur = round.playerBids[item.id] || 0;
-        let v = cur + delta;
-        if (v < 0) v = 0;
-        if (v < item.minBid && v > 0) v = item.minBid;
-        if (v > item.maxBid) v = item.maxBid;
-        round.playerBids[item.id] = v;
-        this._drawBidding();
-    }
-    _setBid(item, v) {
-        if (v < item.minBid) v = item.minBid;
-        if (v > item.maxBid) v = item.maxBid;
-        this.round.playerBids[item.id] = v;
-        this._drawBidding();
-    }
-
-    // === RESOLVE BIDDING ===
-    _resolveBidding() {
-        AuctionRound.resolveBids(this.round);
-        // 골드 차감 (낙찰 매물의 paid)
-        let totalPaid = 0;
-        this.round.items.forEach(it => {
-            if (it._result?.won) totalPaid += it._result.paid;
-        });
-        if (totalPaid > 0) {
-            GuildManager.spendGold(this.gameState, totalPaid);
-            this._refreshGold();
-        }
-        this.round.spent = totalPaid;
-        this._drawReveal();
-    }
-
-    // === REVEAL ===
-    _drawReveal() {
-        this._clear();
-        const round = this.round;
-
-        this._add(UIPanel.create(this, 30, 60, 1220, 50, {}));
-        this._add(this.add.text(50, 75, '결과 공개', {
-            fontSize: '15px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
-        }));
-        const winCnt = round.items.filter(i => i._result?.won).length;
-        this._add(this.add.text(50, 95, `${winCnt}/${round.items.length} 낙찰, 총 지출 ${round.spent}G`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+        const valueLabel = priceRatio <= 0.7 ? '매우 저렴' : priceRatio <= 1.0 ? '적정가' : priceRatio <= 1.5 ? '약간 비쌈' : '비쌈';
+        const valueLabelColor = priceRatio <= 0.7 ? '#44ff88' : priceRatio <= 1.0 ? '#aaaa88' : '#ff8866';
+        this._add(this.add.text(x + w - 220, y + 32, `시세 대비: ${valueLabel}`, {
+            fontSize: '9px', fontFamily: 'monospace', color: valueLabelColor
         }));
 
-        const cardW = 380, cardH = 320, gap = 20;
-        const totalW = round.items.length * cardW + (round.items.length - 1) * gap;
-        let cx = (1280 - totalW) / 2;
-        round.items.forEach(item => {
-            this._drawRevealCard(item, cx, 140, cardW, cardH);
-            cx += cardW + gap;
-        });
-
-        const hasWon = winCnt > 0;
-        this._add(UIButton.create(this, 640, 670, 280, 44, hasWon ? '손님 입장 →' : '정산 → (낙찰 없음)', {
-            color: 0x664422, hoverColor: 0x886644, textColor: '#ffcc88', fontSize: 14,
+        this._add(UIButton.create(this, x + w - 55, y + 30, 90, 28, '구매', {
+            color: canBuy ? 0x446644 : 0x333333,
+            hoverColor: canBuy ? 0x558855 : 0x333333,
+            textColor: canBuy ? '#44ff88' : '#555555',
+            fontSize: 12,
             onClick: () => {
-                if (hasWon) {
-                    const customers = AuctionRound.pickCustomers(this.gameState);
-                    AuctionRound.startSelling(this.round, customers);
-                    this._drawSelling();
-                } else {
-                    AuctionRound.settle(this.round);
-                    this._drawSettle();
+                if (!canBuy) {
+                    if (gs.storage.length >= cap) UIToast.show(this, '보관함이 가득 찼습니다', { color: '#ff6666' });
+                    else UIToast.show(this, '골드가 부족합니다', { color: '#ff6666' });
+                    return;
                 }
+                GuildManager.spendGold(gs, item.auctionPrice);
+                const realIdx = gs.auctionStock.indexOf(item);
+                if (realIdx >= 0) gs.auctionStock.splice(realIdx, 1);
+
+                if (item.isBulk) {
+                    for (let b = 0; b < item.bulkCount; b++) {
+                        const copy = { ...item, id: Date.now() + b, isBulk: false, bulkCount: undefined };
+                        delete copy.auctionPrice;
+                        delete copy.isHotDeal;
+                        StorageManager.addItem(gs, copy);
+                    }
+                } else {
+                    delete item.auctionPrice;
+                    delete item.isHotDeal;
+                    delete item.isBulk;
+                    StorageManager.addItem(gs, item);
+                }
+
+                gs.auctionHistory = gs.auctionHistory || [];
+                gs.auctionHistory.unshift({ action: 'buy', name: item.name, price: item.auctionPrice || 0, time: Date.now() });
+                if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+
+                GuildManager.addMessage(gs, `경매장에서 ${item.name}${item.isBulk ? ' 묶음' : ''} 구매`);
+                if (typeof processMerchantAction === 'function') {
+                    processMerchantAction(gs, item.type === 'equipment' ? 'buy_equipment' : 'buy');
+                }
+                SaveManager.save(gs);
+                UIToast.show(this, `${item.name} 구매!`, { color: '#44ff88' });
+                this.goldText.setText(`${gs.gold}G`);
+                this._clearContent();
+                this._drawContent();
             }
         }));
     }
 
-    _drawRevealCard(item, x, y, w, h) {
-        const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
-        const res = item._result || {};
-        const won = res.won;
+    // --- SELL TAB ---
+    _drawSellTab() {
+        const gs = this.gameState;
+        const feeTable = { common: 10, uncommon: 15, rare: 20, epic: 25, legendary: 30 };
 
-        const bg = this._add(this.add.graphics());
-        bg.fillStyle(won ? 0x1a2a1a : 0x2a1a1a, 1);
-        bg.fillRoundedRect(x, y, w, h, 8);
-        bg.lineStyle(2, won ? 0x44ff88 : 0x886666, 0.6);
-        bg.strokeRoundedRect(x, y, w, h, 8);
+        this._drawFilterBar(90);
 
-        this._add(this.add.text(x + 16, y + 16, item.name, {
-            fontSize: '14px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+        this._add(this.add.text(640, 112, '판매 수수료: 일반 10% | 고급 15% | 희귀 20% | 에픽 25% | 전설 30%', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#666677'
+        }).setOrigin(0.5));
+
+        // --- Bulk sell buttons ---
+        const allSellable = gs.storage.filter(i => i.value > 0);
+        const commonItems = allSellable.filter(i => i.rarity === 'common');
+        const materialItems = allSellable.filter(i => i.type === 'material');
+
+        const calcBulkTotal = (items) => items.reduce((sum, item) => {
+            const fee = feeTable[item.rarity] || 10;
+            return sum + Math.floor(item.value * (1 - fee / 100));
+        }, 0);
+
+        const commonTotal = calcBulkTotal(commonItems);
+        const materialTotal = calcBulkTotal(materialItems);
+
+        if (!this._bulkSellConfirm) this._bulkSellConfirm = {};
+
+        // "일반 전체 판매" button
+        const commonLabel = this._bulkSellConfirm.common
+            ? `정말 판매? (${commonItems.length}개 → +${commonTotal}G)`
+            : `일반 전체 판매 (${commonItems.length}개 / +${commonTotal}G)`;
+        const commonEnabled = commonItems.length > 0;
+        this._add(UIButton.create(this, 200, 132, 280, 26, commonLabel, {
+            color: commonEnabled ? (this._bulkSellConfirm.common ? 0x884422 : 0x443344) : 0x222233,
+            hoverColor: commonEnabled ? (this._bulkSellConfirm.common ? 0xaa6644 : 0x554455) : 0x222233,
+            textColor: commonEnabled ? (this._bulkSellConfirm.common ? '#ffaa66' : '#ccaacc') : '#444455',
+            fontSize: 10,
+            onClick: () => {
+                if (!commonEnabled) return;
+                if (!this._bulkSellConfirm.common) {
+                    this._bulkSellConfirm.common = true;
+                    this._clearContent();
+                    this._drawContent();
+                    return;
+                }
+                // Execute bulk sell
+                let totalGold = 0;
+                const ids = commonItems.map(i => i.id);
+                ids.forEach(id => {
+                    const item = gs.storage.find(i => i.id === id);
+                    if (!item) return;
+                    const fee = feeTable[item.rarity] || 10;
+                    const price = Math.floor(item.value * (1 - fee / 100));
+                    totalGold += price;
+                    StorageManager.removeItem(gs, id);
+                });
+                GuildManager.addGold(gs, totalGold);
+                gs.auctionHistory = gs.auctionHistory || [];
+                gs.auctionHistory.unshift({ action: 'sell', name: `일반 일괄 (${ids.length}개)`, price: totalGold, rarity: 'common', time: Date.now() });
+                if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+                GuildManager.addMessage(gs, `경매장 일괄 판매: 일반 ${ids.length}개 (+${totalGold}G)`);
+                if (typeof updateMarketTrends === 'function') updateMarketTrends(gs, 'bulk_sell');
+                SaveManager.save(gs);
+                UIToast.show(this, `일반 ${ids.length}개 일괄 판매! +${totalGold}G`, { color: '#ffcc44' });
+                this._bulkSellConfirm = {};
+                this.goldText.setText(`${gs.gold}G`);
+                this._clearContent();
+                this._drawContent();
+            }
         }));
-        this._add(this.add.text(x + 16, y + 36, `[${rarity.name}]`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+
+        // "소재 전체 판매" button
+        const matLabel = this._bulkSellConfirm.material
+            ? `정말 판매? (${materialItems.length}개 → +${materialTotal}G)`
+            : `소재 전체 판매 (${materialItems.length}개 / +${materialTotal}G)`;
+        const matEnabled = materialItems.length > 0;
+        this._add(UIButton.create(this, 500, 132, 280, 26, matLabel, {
+            color: matEnabled ? (this._bulkSellConfirm.material ? 0x884422 : 0x443344) : 0x222233,
+            hoverColor: matEnabled ? (this._bulkSellConfirm.material ? 0xaa6644 : 0x554455) : 0x222233,
+            textColor: matEnabled ? (this._bulkSellConfirm.material ? '#ffaa66' : '#ccaacc') : '#444455',
+            fontSize: 10,
+            onClick: () => {
+                if (!matEnabled) return;
+                if (!this._bulkSellConfirm.material) {
+                    this._bulkSellConfirm.material = true;
+                    this._clearContent();
+                    this._drawContent();
+                    return;
+                }
+                let totalGold = 0;
+                const ids = materialItems.map(i => i.id);
+                ids.forEach(id => {
+                    const item = gs.storage.find(i => i.id === id);
+                    if (!item) return;
+                    const fee = feeTable[item.rarity] || 10;
+                    const price = Math.floor(item.value * (1 - fee / 100));
+                    totalGold += price;
+                    StorageManager.removeItem(gs, id);
+                });
+                GuildManager.addGold(gs, totalGold);
+                gs.auctionHistory = gs.auctionHistory || [];
+                gs.auctionHistory.unshift({ action: 'sell', name: `소재 일괄 (${ids.length}개)`, price: totalGold, rarity: 'common', time: Date.now() });
+                if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+                GuildManager.addMessage(gs, `경매장 일괄 판매: 소재 ${ids.length}개 (+${totalGold}G)`);
+                if (typeof updateMarketTrends === 'function') updateMarketTrends(gs, 'bulk_sell');
+                SaveManager.save(gs);
+                UIToast.show(this, `소재 ${ids.length}개 일괄 판매! +${totalGold}G`, { color: '#ffcc44' });
+                this._bulkSellConfirm = {};
+                this.goldText.setText(`${gs.gold}G`);
+                this._clearContent();
+                this._drawContent();
+            }
         }));
 
-        this._add(this.add.text(x + 16, y + 70, '내 입찰:', { fontSize: '11px', fontFamily: 'monospace', color: '#888899' }));
-        this._add(this.add.text(x + 110, y + 70, `${this.round.playerBids[item.id] || 0}G`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#aaccff', fontStyle: 'bold'
-        }));
+        // --- Filtered item list ---
+        const sellable = this._getFilteredSellable(gs);
 
-        this._add(this.add.text(x + 16, y + 92, 'NPC 최고:', { fontSize: '11px', fontFamily: 'monospace', color: '#888899' }));
-        this._add(this.add.text(x + 110, y + 92, `${res.maxNpc || 0}G`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#ff8866', fontStyle: 'bold'
-        }));
-
-        this._add(this.add.text(x + 16, y + 114, '시세:', { fontSize: '11px', fontFamily: 'monospace', color: '#888899' }));
-        this._add(this.add.text(x + 110, y + 114, `${item.marketPrice}G`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aaaaaa'
-        }));
-
-        // NPC 입찰 분포
-        if (item.npcBids && item.npcBids.length) {
-            this._add(this.add.text(x + 16, y + 146, `NPC 입찰가: ${item.npcBids.join(', ')}G`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#666677'
-            }));
-        } else {
-            this._add(this.add.text(x + 16, y + 146, `NPC 입찰자 없음`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#666677'
-            }));
-        }
-
-        // 결과 라벨
-        const labelY = y + 210;
-        if (won) {
-            this._add(this.add.text(x + w/2, labelY, '✓ 낙찰!', {
-                fontSize: '26px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'
+        if (sellable.length === 0) {
+            this._add(this.add.text(640, 400, '판매할 아이템이 없습니다', {
+                fontSize: '14px', fontFamily: 'monospace', color: '#555566'
             }).setOrigin(0.5));
-            this._add(this.add.text(x + w/2, labelY + 32, `−${res.paid}G`, {
-                fontSize: '13px', fontFamily: 'monospace', color: '#aaccaa'
-            }).setOrigin(0.5));
-        } else {
-            const reason = (this.round.playerBids[item.id] || 0) === 0 ? '미입찰' : '패찰';
-            this._add(this.add.text(x + w/2, labelY, reason === '미입찰' ? '—' : '✗ 패찰', {
-                fontSize: '24px', fontFamily: 'monospace', color: reason === '미입찰' ? '#666677' : '#ff6666', fontStyle: 'bold'
-            }).setOrigin(0.5));
-        }
-    }
-
-    // === PHASE 2: SELLING ===
-    _drawSelling() {
-        this._clear();
-        const round = this.round;
-        const customer = round.customers[round.customerIdx];
-        const wonItems = round.wonItems.filter(it => !it._sold && !it._giveUp);
-
-        // 모든 손님 다 끝났거나 매물 다 처분
-        if (!customer || wonItems.length === 0) {
-            // 남은 매물은 unsold로
-            round.wonItems.forEach(it => { if (!it._sold && !it._giveUp) round.unsold.push(it); });
-            AuctionRound.settle(round);
-            this._drawSettle();
             return;
         }
 
-        // 헤더
-        this._add(UIPanel.create(this, 30, 60, 1220, 50, {}));
-        this._add(this.add.text(50, 75, `2단계 — 손님 판매  (${round.customerIdx + 1}/${round.customers.length})`, {
-            fontSize: '15px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
-        }));
-        this._add(this.add.text(50, 95, `남은 매물 ${wonItems.length}장. 손님에게 매물을 제시하고 가격을 정하세요.`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
-        }));
+        let cy = 158;
+        sellable.forEach(item => {
+            if (cy > 650) return;
+            this._drawSellRow(item, 40, cy, 1200);
+            cy += 60;
+        });
 
-        // 손님 패널 (좌측 큰 카드)
-        this._drawCustomerCard(customer, 50, 140, 380, 480);
-
-        // 매물 그리드 (우측)
-        this._drawSellingItemsGrid(wonItems, 460, 140, 780, 480);
-
-        // 하단: "이 손님 그만" 버튼
-        this._add(UIButton.create(this, 640, 670, 240, 36, '이 손님 그만 →', {
-            color: 0x443344, hoverColor: 0x554455, textColor: '#ccaacc', fontSize: 12,
-            onClick: () => {
-                round.customerIdx++;
-                round.selectedItemId = null;
-                this._drawSelling();
-            }
-        }));
+        // --- Total value footer ---
+        const totalValue = allSellable.reduce((sum, item) => {
+            const fee = feeTable[item.rarity] || 10;
+            return sum + Math.floor(item.value * (1 - fee / 100));
+        }, 0);
+        const footerBg = this._add(this.add.graphics());
+        footerBg.fillStyle(0x111122, 1);
+        footerBg.fillRoundedRect(40, 672, 1200, 30, 4);
+        footerBg.lineStyle(1, 0x444466, 0.5);
+        footerBg.strokeRoundedRect(40, 672, 1200, 30, 4);
+        this._add(this.add.text(640, 687, `보관함 전체 매각 시: ${totalValue}G  (아이템 ${allSellable.length}개)`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+        }).setOrigin(0.5));
     }
 
-    _drawCustomerCard(customer, x, y, w, h) {
+    _getFilteredSellable(gs) {
+        let items = gs.storage.filter(i => i.value > 0);
+        if (this.filterType !== 'all') items = items.filter(i => i.type === this.filterType);
+        const rarityOrder = { legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 };
+        if (this.sortBy === 'price') items.sort((a, b) => b.value - a.value);
+        else if (this.sortBy === 'rarity') items.sort((a, b) => (rarityOrder[a.rarity] || 5) - (rarityOrder[b.rarity] || 5));
+        else items.sort((a, b) => a.name.localeCompare(b.name));
+        return items;
+    }
+
+    _drawSellRow(item, x, y, w) {
+        const gs = this.gameState;
+        const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
+        const feePercent = { common: 10, uncommon: 15, rare: 20, epic: 25, legendary: 30 }[item.rarity] || 10;
+        const marketMod = typeof getMarketPriceModifier === 'function' ? getMarketPriceModifier(gs, item.type) : 1.0;
+        const sellPrice = Math.floor(item.value * (1 - feePercent / 100) * marketMod);
+
         const bg = this._add(this.add.graphics());
         bg.fillStyle(0x1a1a2e, 1);
-        bg.fillRoundedRect(x, y, w, h, 8);
-        bg.lineStyle(2, 0x4488aa, 0.5);
-        bg.strokeRoundedRect(x, y, w, h, 8);
+        bg.fillRoundedRect(x, y, w, 50, 4);
+        bg.lineStyle(1, rarity.color, 0.3);
+        bg.strokeRoundedRect(x, y, w, 50, 4);
 
-        // 큰 이모지
-        this._add(this.add.text(x + w/2, y + 70, customer.emoji, {
-            fontSize: '64px'
-        }).setOrigin(0.5));
+        const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
+        this._add(this.add.text(x + 12, y + 8, typeIcons[item.type] || '?', { fontSize: '14px' }));
 
-        this._add(this.add.text(x + w/2, y + 150, customer.name, {
-            fontSize: '18px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
-        }).setOrigin(0.5));
-
-        // 선호 정보 (placeholder — 학습형은 backlog. 현재는 항상 공개)
-        const catLabels = { equipment: '장비', material: '소재', consumable: '소비' };
-        const catStr = customer.prefCategories.map(c => catLabels[c] || c).join(', ');
-        const rarLabels = { common:'일반', uncommon:'고급', rare:'희귀', epic:'에픽', legendary:'전설' };
-        const rarStr = customer.prefRarities.map(r => rarLabels[r] || r).join('·');
-
-        this._add(this.add.text(x + 16, y + 200, '선호 카테고리', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#666677'
-        }));
-        this._add(this.add.text(x + 16, y + 215, catStr, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aaccff'
+        this._add(this.add.text(x + 38, y + 8, `${item.name} [${rarity.name}]`, {
+            fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
         }));
 
-        this._add(this.add.text(x + 16, y + 245, '선호 등급', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#666677'
-        }));
-        this._add(this.add.text(x + 16, y + 260, rarStr, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aaccff'
+        this._add(this.add.text(x + 38, y + 28, `${item.desc || ''} ${item.stats ? Object.entries(item.stats).map(([k, v]) => typeof v === 'number' && v < 1 ? `${k}+${Math.round(v * 100)}%` : `${k}+${v}`).join(' ') : ''}`, {
+            fontSize: '9px', fontFamily: 'monospace', color: '#667788'
         }));
 
-        const tendency = customer.priceMult >= 1.10 ? '후함 (비싸도 사줌)' :
-                         customer.priceMult <= 0.95 ? '짬 (싸게 사려 함)' : '평범';
-        this._add(this.add.text(x + 16, y + 290, '가격 성향', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#666677'
-        }));
-        this._add(this.add.text(x + 16, y + 305, tendency, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aaccff'
+        this._add(this.add.text(x + w - 250, y + 8, `시세: ${item.value}G`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#888866'
         }));
 
-        // 최근 반응 (있으면)
-        if (this._lastReaction) {
-            const colors = { angry: '#ff6666', meh: '#ffaa66', happy: '#88ccaa', elated: '#44ff88' };
-            const emojis = { angry: '😠', meh: '😐', happy: '🙂', elated: '😍' };
-            this._add(this.add.text(x + w/2, y + 360, emojis[this._lastReaction.reaction], {
-                fontSize: '38px'
-            }).setOrigin(0.5));
-            this._add(this.add.text(x + w/2, y + 410, `"${this._lastReaction.dialogue}"`, {
-                fontSize: '13px', fontFamily: 'monospace', color: colors[this._lastReaction.reaction], fontStyle: 'italic',
-                wordWrap: { width: w - 32 }, align: 'center'
-            }).setOrigin(0.5));
-        } else {
-            this._add(this.add.text(x + w/2, y + 390, '매물을 골라 가격을 제시하세요', {
-                fontSize: '11px', fontFamily: 'monospace', color: '#666677'
-            }).setOrigin(0.5));
+        this._add(this.add.text(x + w - 250, y + 26, `수수료 ${feePercent}% → +${sellPrice}G`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+        }));
+
+        // Sell button
+        this._add(UIButton.create(this, x + w - 55, y + 26, 90, 26, '판매', {
+            color: 0x886644, hoverColor: 0xaa8866, textColor: '#ffeecc', fontSize: 11,
+            onClick: () => {
+                StorageManager.removeItem(gs, item.id);
+                GuildManager.addGold(gs, sellPrice);
+
+                gs.auctionHistory = gs.auctionHistory || [];
+                gs.auctionHistory.unshift({ action: 'sell', name: item.name, price: sellPrice, rarity: item.rarity, time: Date.now() });
+                if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+
+                GuildManager.addMessage(gs, `경매장 판매: ${item.name} (+${sellPrice}G)`);
+                if (typeof processMerchantAction === 'function') {
+                    processMerchantAction(gs, item.type === 'equipment' ? 'sell_equipment' : 'sell');
+                }
+                SaveManager.save(gs);
+                UIToast.show(this, `${item.name} 판매! +${sellPrice}G`, { color: '#ffcc44' });
+                this.goldText.setText(`${gs.gold}G`);
+                this._clearContent();
+                this._drawContent();
+            }
+        }));
+
+        // Haggling button — only for equipment items, once per item
+        if (item.type === 'equipment' && !item._haggled) {
+            this._add(UIButton.create(this, x + w - 155, y + 26, 80, 26, '흥정', {
+                color: 0x445566, hoverColor: 0x556677, textColor: '#88bbdd', fontSize: 11,
+                onClick: () => {
+                    item._haggled = true;
+                    const roll = Math.random();
+                    let multiplier, resultMsg, resultColor;
+                    if (roll < 0.5) {
+                        // 50% chance: 1.2x price
+                        multiplier = 1.2;
+                        const bonus = Math.round((multiplier - 1) * 100);
+                        resultMsg = `흥정 성공! +${bonus}%`;
+                        resultColor = '#44ff88';
+                    } else if (roll < 0.8) {
+                        // 30% chance: same price
+                        multiplier = 1.0;
+                        resultMsg = '흥정 무승부... 가격 변동 없음';
+                        resultColor = '#aaaaaa';
+                    } else {
+                        // 20% chance: 0.9x price
+                        multiplier = 0.9;
+                        const penalty = Math.round((1 - multiplier) * 100);
+                        resultMsg = `흥정 실패... -${penalty}%`;
+                        resultColor = '#ff6666';
+                    }
+                    item._haggleMultiplier = multiplier;
+                    SaveManager.save(gs);
+                    UIToast.show(this, resultMsg, { color: resultColor });
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
+        } else if (item.type === 'equipment' && item._haggled) {
+            // Show haggle result indicator
+            const mult = item._haggleMultiplier || 1.0;
+            const hagglePrice = Math.floor(sellPrice * mult);
+            const diffG = hagglePrice - sellPrice;
+            const haggleLabel = diffG > 0 ? `흥정가 +${diffG}G` : diffG < 0 ? `흥정가 ${diffG}G` : '흥정가 동일';
+            const haggleColor = diffG > 0 ? '#44ff88' : diffG < 0 ? '#ff6666' : '#aaaaaa';
+            this._add(this.add.text(x + w - 190, y + 30, haggleLabel, {
+                fontSize: '10px', fontFamily: 'monospace', color: haggleColor, fontStyle: 'bold'
+            }));
+
+            // Override the sell button price if haggled — re-draw sell button with haggle price
+            // We already drew the default sell button above, so we override by adding a new one on top
+            this._add(UIButton.create(this, x + w - 55, y + 26, 90, 26, `판매 ${hagglePrice}G`, {
+                color: 0x886644, hoverColor: 0xaa8866, textColor: '#ffeecc', fontSize: 10,
+                onClick: () => {
+                    StorageManager.removeItem(gs, item.id);
+                    GuildManager.addGold(gs, hagglePrice);
+
+                    gs.auctionHistory = gs.auctionHistory || [];
+                    gs.auctionHistory.unshift({ action: 'sell', name: item.name, price: hagglePrice, rarity: item.rarity, time: Date.now() });
+                    if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+
+                    GuildManager.addMessage(gs, `경매장 흥정 판매: ${item.name} (+${hagglePrice}G)`);
+                    SaveManager.save(gs);
+                    UIToast.show(this, `${item.name} 흥정 판매! +${hagglePrice}G`, { color: '#ffcc44' });
+                    this.goldText.setText(`${gs.gold}G`);
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
         }
     }
 
-    _drawSellingItemsGrid(wonItems, x, y, w, h) {
-        const round = this.round;
+    // --- BID TAB ---
+    _drawBidTab() {
+        const gs = this.gameState;
+        const bids = gs.auctionBids || [];
+        const active = bids.filter(b => !b.resolved);
 
-        // 매물 카드 그리드 (2열)
-        const cardW = (w - 30) / 2;
-        const cardH = 110;
-        wonItems.forEach((item, idx) => {
-            const col = idx % 2, row = Math.floor(idx / 2);
-            if (row > 1) return;  // 최대 4장 표시
-            const ix = x + col * (cardW + 10);
-            const iy = y + row * (cardH + 10);
-            this._drawSellingItemCard(item, ix, iy, cardW, cardH);
-        });
+        this._add(this.add.text(640, 95, '입찰 — 경쟁 입찰로 고급 아이템을 저렴하게 획득하세요', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+        }).setOrigin(0.5));
 
-        // 선택된 매물 가격 입력 영역
-        const inputY = y + 240;
-        const selItem = round.selectedItemId ? wonItems.find(i => i.id === round.selectedItemId) : null;
-        if (!selItem) {
-            this._add(this.add.text(x + w/2, inputY + 100, '↑ 위에서 매물을 선택하세요', {
-                fontSize: '13px', fontFamily: 'monospace', color: '#666677'
+        if (active.length === 0) {
+            this._add(this.add.text(640, 400, '현재 진행 중인 입찰이 없습니다\n구매 탭에서 목록을 갱신하면 새 입찰이 등장합니다', {
+                fontSize: '13px', fontFamily: 'monospace', color: '#555566', align: 'center'
             }).setOrigin(0.5));
             return;
         }
 
-        // 선택된 매물 정보 + 가격 입력
-        const bg = this._add(this.add.graphics());
-        bg.fillStyle(0x2a2a3a, 1);
-        bg.fillRoundedRect(x, inputY, w, h - 240, 8);
+        let cy = 125;
+        active.forEach((bid, idx) => {
+            this._drawBidCard(gs, bid, idx, 60, cy, 1160);
+            cy += 140;
+        });
+    }
 
-        const rarity = ITEM_RARITY[selItem.rarity] || ITEM_RARITY.common;
-        this._add(this.add.text(x + 16, inputY + 12, `선택: ${selItem.name}`, {
-            fontSize: '13px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+    _drawBidCard(gs, bid, idx, x, y, w) {
+        const item = bid.item;
+        const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
+        const isLeading = bid.playerBid > 0 && bid.playerBid >= bid.currentBid;
+        const minBid = bid.currentBid + bid.minIncrement;
+        const canBid = gs.gold >= minBid;
+
+        const bg = this._add(this.add.graphics());
+        bg.fillStyle(isLeading ? 0x1a2a1a : 0x1a1a2e, 1);
+        bg.fillRoundedRect(x, y, w, 125, 6);
+        bg.lineStyle(2, isLeading ? 0x44ff88 : rarity.color, 0.5);
+        bg.strokeRoundedRect(x, y, w, 125, 6);
+
+        const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
+        this._add(this.add.text(x + 15, y + 12, typeIcons[item.type] || '?', { fontSize: '18px' }));
+
+        this._add(this.add.text(x + 45, y + 12, item.name, {
+            fontSize: '15px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
         }));
-        this._add(this.add.text(x + 16, inputY + 34, `시세 ${selItem.marketPrice}G  /  내가 산 가격 ${selItem._result.paid}G`, {
+
+        this._add(this.add.text(x + 45, y + 34, `[${rarity.name}] ${item.desc || ''}`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#667788'
+        }));
+
+        if (item.stats) {
+            const statStr = Object.entries(item.stats).map(([k, v]) =>
+                typeof v === 'number' && v < 1 ? `${k}+${Math.round(v * 100)}%` : `${k}+${v}`
+            ).join('  ');
+            this._add(this.add.text(x + 45, y + 52, statStr, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#8888aa'
+            }));
+        }
+
+        this._add(this.add.text(x + w - 350, y + 12, `현재 입찰가: ${bid.currentBid}G`, {
+            fontSize: '14px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+        }));
+
+        this._add(this.add.text(x + w - 350, y + 34, `시세: ${item.value}G  |  경쟁자: ${bid.npcBidders}명  |  남은 라운드: ${bid.roundsLeft}`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#888899'
         }));
 
-        // 가격 입력
-        if (!selItem._proposedPrice) selItem._proposedPrice = selItem.marketPrice;
-        const price = selItem._proposedPrice;
-
-        this._add(this.add.text(x + w/2, inputY + 70, `제시가: ${price}G`, {
-            fontSize: '22px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
-        }).setOrigin(0.5));
-
-        const profit = price - selItem._result.paid;
-        const profitColor = profit > 0 ? '#44ff88' : profit < 0 ? '#ff6666' : '#aaaaaa';
-        this._add(this.add.text(x + w/2, inputY + 100, `예상 손익: ${profit >= 0 ? '+' : ''}${profit}G`, {
-            fontSize: '11px', fontFamily: 'monospace', color: profitColor
-        }).setOrigin(0.5));
-
-        // 조정 버튼
-        const deltas = [-100, -10, 10, 100];
-        let bx = x + (w - 4 * 75 - 3 * 8) / 2;
-        deltas.forEach(d => {
-            const label = (d > 0 ? '+' : '') + d;
-            this._add(UIButton.create(this, bx + 37, inputY + 140, 75, 26, label, {
-                color: 0x333344, hoverColor: 0x445566, textColor: '#cccccc', fontSize: 12,
-                onClick: () => {
-                    selItem._proposedPrice = Math.max(1, selItem._proposedPrice + d);
-                    this._drawSelling();
-                }
+        if (isLeading) {
+            this._add(this.add.text(x + w - 350, y + 52, '✓ 최고 입찰자', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'
             }));
-            bx += 83;
-        });
-
-        // 제안 버튼
-        this._add(UIButton.create(this, x + w/2, inputY + 178, 200, 32, '제시 →', {
-            color: 0x446644, hoverColor: 0x558855, textColor: '#44ff88', fontSize: 14,
-            onClick: () => this._evaluateSell(selItem)
-        }));
-    }
-
-    _drawSellingItemCard(item, x, y, w, h) {
-        const round = this.round;
-        const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
-        const selected = round.selectedItemId === item.id;
-
-        const bg = this._add(this.add.graphics());
-        bg.fillStyle(selected ? 0x2a3a3a : 0x1a1a2e, 1);
-        bg.fillRoundedRect(x, y, w, h, 6);
-        bg.lineStyle(selected ? 2 : 1, selected ? 0x44ffcc : rarity.color, selected ? 0.8 : 0.4);
-        bg.strokeRoundedRect(x, y, w, h, 6);
-
-        const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
-        this._add(this.add.text(x + 10, y + 10, typeIcons[item.type] || '?', { fontSize: '16px' }));
-        this._add(this.add.text(x + 38, y + 12, item.name, {
-            fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
-        }));
-        this._add(this.add.text(x + 38, y + 30, `[${rarity.name}]`, {
-            fontSize: '9px', fontFamily: 'monospace', color: '#888899'
-        }));
-        this._add(this.add.text(x + 10, y + 55, `시세 ${item.marketPrice}G  /  매입 ${item._result.paid}G`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
-        }));
-
-        if (item._lastReaction) {
-            const emojis = { angry: '😠', meh: '😐', happy: '🙂', elated: '😍' };
-            this._add(this.add.text(x + w - 28, y + 10, emojis[item._lastReaction], { fontSize: '16px' }));
         }
 
-        // 클릭 영역
-        const hit = this._add(this.add.rectangle(x + w/2, y + h/2, w, h, 0x000000, 0));
-        hit.setInteractive({ useHandCursor: true });
-        hit.on('pointerup', () => {
-            round.selectedItemId = item.id;
-            this._drawSelling();
-        });
+        this._add(this.add.text(x + w - 350, y + 70, `최소 입찰: ${minBid}G`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#886666'
+        }));
+
+        this._add(UIButton.create(this, x + w - 200, y + 95, 120, 28, `입찰 (${minBid}G)`, {
+            color: canBid ? 0x446644 : 0x333333,
+            hoverColor: canBid ? 0x558855 : 0x333333,
+            textColor: canBid ? '#44ff88' : '#555555',
+            fontSize: 11,
+            onClick: () => {
+                if (!canBid) { UIToast.show(this, '골드 부족', { color: '#ff6666' }); return; }
+                if (bid.playerBid > 0) {
+                    GuildManager.addGold(gs, bid.playerBid);
+                }
+                GuildManager.spendGold(gs, minBid);
+                bid.playerBid = minBid;
+                bid.currentBid = minBid;
+
+                this._npcBidResponse(gs, bid);
+
+                SaveManager.save(gs);
+                this.goldText.setText(`${gs.gold}G`);
+                this._clearContent();
+                this._drawContent();
+                UIToast.show(this, `${item.name}에 ${minBid}G 입찰!`, { color: '#44aaff' });
+            }
+        }));
+
+        this._add(UIButton.create(this, x + w - 60, y + 95, 100, 28, '즉시 구매', {
+            color: 0x664422, hoverColor: 0x886644, textColor: '#ffcc88', fontSize: 11,
+            onClick: () => {
+                const buyoutPrice = Math.floor(item.value * 1.5);
+                const cap = GuildManager.getStorageCapacity(gs);
+                if (gs.storage.length >= cap) { UIToast.show(this, '보관함 가득', { color: '#ff6666' }); return; }
+                const totalCost = buyoutPrice - (bid.playerBid || 0);
+                if (gs.gold < totalCost) { UIToast.show(this, `골드 부족 (${totalCost}G 필요)`, { color: '#ff6666' }); return; }
+                GuildManager.spendGold(gs, totalCost);
+                bid.resolved = true;
+                StorageManager.addItem(gs, item);
+                gs.auctionHistory = gs.auctionHistory || [];
+                gs.auctionHistory.unshift({ action: 'buyout', name: item.name, price: buyoutPrice, time: Date.now() });
+                GuildManager.addMessage(gs, `입찰 즉시 구매: ${item.name} (${buyoutPrice}G)`);
+                SaveManager.save(gs);
+                UIToast.show(this, `${item.name} 즉시 구매! -${buyoutPrice}G`, { color: '#ffaa44' });
+                this.goldText.setText(`${gs.gold}G`);
+                this._clearContent();
+                this._drawContent();
+            }
+        }));
+
+        const buyoutPrice = Math.floor(item.value * 1.5);
+        this._add(this.add.text(x + w - 60, y + 70, `즉구가: ${buyoutPrice}G`, {
+            fontSize: '9px', fontFamily: 'monospace', color: '#886644'
+        }).setOrigin(0.5));
     }
 
-    // === 제안 평가 ===
-    _evaluateSell(item) {
-        const round = this.round;
-        const customer = round.customers[round.customerIdx];
-        const price = item._proposedPrice;
-
-        const res = AuctionRound.evaluateOffer(customer, item, price, item.marketPrice);
-        this._lastReaction = res;
-        item._lastReaction = res.reaction;
-
-        // 만족이면 매각
-        if (res.reaction === 'happy' || res.reaction === 'elated') {
-            item._sold = true;
-            item._soldPrice = price;
-            GuildManager.addGold(this.gameState, price);
-            this._refreshGold();
-            UIToast.show(this, `${item.name} 판매! +${price}G`, { color: '#44ff88' });
-            // 다음 손님으로 자동 이동? — MVP는 같은 손님 유지, 사용자가 다른 매물 시도 가능
-            round.selectedItemId = null;
+    _npcBidResponse(gs, bid) {
+        if (bid.npcBidders <= 0) return;
+        const willBid = Math.random() < 0.4 + bid.npcBidders * 0.12;
+        if (willBid) {
+            const npcBid = bid.currentBid + bid.minIncrement + Math.floor(Math.random() * bid.minIncrement);
+            bid.currentBid = npcBid;
+            bid.roundsLeft--;
+            if (bid.roundsLeft <= 0) {
+                bid.resolved = true;
+                if (bid.playerBid >= bid.currentBid) {
+                    const cap = GuildManager.getStorageCapacity(gs);
+                    if (gs.storage.length < cap) {
+                        StorageManager.addItem(gs, bid.item);
+                        gs.auctionHistory = gs.auctionHistory || [];
+                        gs.auctionHistory.unshift({ action: 'bid_win', name: bid.item.name, price: bid.playerBid, time: Date.now() });
+                        GuildManager.addMessage(gs, `입찰 낙찰: ${bid.item.name} (${bid.playerBid}G)`);
+                        UIToast.show(this, `${bid.item.name} 낙찰!`, { color: '#44ff88' });
+                    }
+                } else {
+                    if (bid.playerBid > 0) GuildManager.addGold(gs, bid.playerBid);
+                    gs.auctionHistory = gs.auctionHistory || [];
+                    gs.auctionHistory.unshift({ action: 'bid_lose', name: bid.item.name, price: bid.currentBid, time: Date.now() });
+                    UIToast.show(this, `${bid.item.name} — 패찰`, { color: '#ff6666' });
+                }
+            } else {
+                UIToast.show(this, `경쟁자가 ${npcBid}G로 입찰!`, { color: '#ff8844' });
+            }
         } else {
-            // 거절 — 가격 조정 횟수 차감 (MVP는 단순 카운트만)
-            item._rejectCount = (item._rejectCount || 0) + 1;
-            if (item._rejectCount >= BALANCE.AUCTION.CUSTOMER_PRICE_ADJUST_TRIES) {
-                // 이 손님은 포기, 다음 손님으로 강제 이동
-                UIToast.show(this, `${customer.name}이(가) 떠납니다`, { color: '#ff6666' });
-                round.customerIdx++;
-                round.selectedItemId = null;
-                this._lastReaction = null;
-                // 매물별 reject 카운트 초기화 (다른 손님에게 다시 시도)
-                round.wonItems.forEach(it => { it._rejectCount = 0; it._lastReaction = null; });
+            bid.roundsLeft--;
+            if (bid.roundsLeft <= 0 && bid.playerBid > 0) {
+                bid.resolved = true;
+                const cap = GuildManager.getStorageCapacity(gs);
+                if (gs.storage.length < cap) {
+                    StorageManager.addItem(gs, bid.item);
+                    gs.auctionHistory = gs.auctionHistory || [];
+                    gs.auctionHistory.unshift({ action: 'bid_win', name: bid.item.name, price: bid.playerBid, time: Date.now() });
+                    GuildManager.addMessage(gs, `입찰 낙찰: ${bid.item.name} (${bid.playerBid}G)`);
+                    UIToast.show(this, `${bid.item.name} 낙찰!`, { color: '#44ff88' });
+                }
             }
         }
-        this._drawSelling();
     }
 
-    // === SETTLE ===
-    _drawSettle() {
-        this._clear();
-        const round = this.round;
+    // --- CONSIGN TAB ---
+    _drawConsignTab() {
         const gs = this.gameState;
+        const maxSlots = gs.autoAuctionSlots || 2;
+        const consigned = gs.consignedItems || [];
 
-        this._add(UIPanel.create(this, 240, 130, 800, 460, { title: '경매 정산' }));
+        this._add(UIPanel.create(this, 40, 90, 1200, 600, { title: `위탁 판매 (${consigned.length}/${maxSlots} 슬롯)` }));
 
-        const earned = round.wonItems.reduce((s, it) => s + (it._soldPrice || 0), 0);
-        const spent = round.entryFee + round.spent;
-        const net = earned - spent;
+        this._add(this.add.text(640, 120, '아이템을 등록하면 다음 전투 출발 시 자동으로 판매를 시도합니다', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+        }).setOrigin(0.5));
 
-        const lines = [
-            `입장료: -${round.entryFee}G`,
-            `1단계 입찰 지출: -${round.spent}G`,
-            `2단계 판매 수익: +${earned}G`,
-            '',
-            `사이클 순손익: ${net >= 0 ? '+' : ''}${net}G`
-        ];
-        lines.forEach((line, i) => {
-            const color = i === 4 ? (net >= 0 ? '#44ff88' : '#ff6666') :
-                          i === 0 || i === 1 ? '#ff8866' :
-                          i === 2 ? '#88ccaa' : '#888899';
-            const size = i === 4 ? '18px' : '13px';
-            this._add(this.add.text(640, 200 + i * 28, line, {
-                fontSize: size, fontFamily: 'monospace', color, fontStyle: i === 4 ? 'bold' : 'normal'
-            }).setOrigin(0.5));
+        const favorability = gs.merchantFavor?.auction || 0;
+        const sellChance = Math.min(90, 50 + favorability * 5);
+        const priceAccuracy = Math.min(95, 70 + favorability * 3);
+        this._add(this.add.text(640, 138, `판매 확률: ${sellChance}%  |  시세 적중률: ${priceAccuracy}%  |  상인 호감도: ${favorability}`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#66aa88'
+        }).setOrigin(0.5));
+
+        let cy = 160;
+        consigned.forEach((entry, idx) => {
+            if (cy > 430) return;
+            const rarity = ITEM_RARITY[entry.item.rarity] || ITEM_RARITY.common;
+            const bg = this._add(this.add.graphics());
+            bg.fillStyle(0x1a2a2a, 1);
+            bg.fillRoundedRect(60, cy, 1160, 50, 4);
+            bg.lineStyle(1, rarity.color, 0.4);
+            bg.strokeRoundedRect(60, cy, 1160, 50, 4);
+
+            const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
+            this._add(this.add.text(80, cy + 8, typeIcons[entry.item.type] || '?', { fontSize: '14px' }));
+            this._add(this.add.text(106, cy + 8, `${entry.item.name} [${rarity.name}]`, {
+                fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            }));
+            this._add(this.add.text(106, cy + 28, `시세: ${entry.item.value}G  |  희망가: ${entry.desiredPrice}G`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+            }));
+
+            this._add(UIButton.create(this, 1160, cy + 25, 80, 26, '회수', {
+                color: 0x664444, hoverColor: 0x886666, textColor: '#ffaaaa', fontSize: 11,
+                onClick: () => {
+                    gs.consignedItems.splice(idx, 1);
+                    StorageManager.addItem(gs, entry.item);
+                    SaveManager.save(gs);
+                    UIToast.show(this, `${entry.item.name} 회수!`);
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
+
+            cy += 56;
         });
 
-        // 안 팔린 매물 → 보관함
-        const unsold = round.wonItems.filter(it => !it._sold);
-        if (unsold.length > 0) {
-            const cap = GuildManager.getStorageCapacity(gs);
-            const addable = Math.max(0, cap - gs.storage.length);
-            const moved = unsold.slice(0, addable);
-            const dropped = unsold.slice(addable);
-
-            moved.forEach(it => {
-                const copy = { ...it };
-                delete copy.marketPrice; delete copy.npcBids; delete copy.npcBidderCount;
-                delete copy.minBid; delete copy.maxBid; delete copy._result;
-                delete copy._proposedPrice; delete copy._rejectCount;
-                delete copy._lastReaction; delete copy._sold; delete copy._soldPrice;
-                delete copy._giveUp;
-                StorageManager.addItem(gs, copy);
-            });
-
-            const msg = dropped.length > 0
-                ? `안 팔린 ${moved.length}개 → 보관함 (보관함 부족: ${dropped.length}개 분실)`
-                : `안 팔린 ${unsold.length}개 → 보관함`;
-            this._add(this.add.text(640, 380, msg, {
-                fontSize: '11px', fontFamily: 'monospace', color: dropped.length > 0 ? '#ff8866' : '#888899'
+        if (consigned.length >= maxSlots) {
+            this._add(this.add.text(640, cy + 20, '슬롯이 가득 찼습니다 (길드 레벨 UP 또는 이벤트로 확장)', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#886644'
             }).setOrigin(0.5));
         }
 
-        // 거래 기록
-        gs.auctionHistory = gs.auctionHistory || [];
-        gs.auctionHistory.unshift({
-            action: 'cycle',
-            entryFee: round.entryFee,
-            spent: round.spent,
-            earned,
-            net,
-            time: Date.now()
+        cy = Math.max(cy + 10, 440);
+        this._add(this.add.text(640, cy, '── 보관함에서 위탁할 아이템 선택 ──', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#888899'
+        }).setOrigin(0.5));
+        cy += 20;
+
+        const sellable = gs.storage.filter(i => i.value > 0);
+        if (sellable.length === 0) {
+            this._add(this.add.text(640, cy + 30, '보관함에 아이템이 없습니다', {
+                fontSize: '12px', fontFamily: 'monospace', color: '#555566'
+            }).setOrigin(0.5));
+            return;
+        }
+
+        sellable.forEach(item => {
+            if (cy > 650) return;
+            const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
+            const canConsign = consigned.length < maxSlots;
+            const desiredPrice = Math.floor(item.value * (0.9 + Math.random() * 0.3));
+
+            const bg = this._add(this.add.graphics());
+            bg.fillStyle(0x1a1a2e, 1);
+            bg.fillRoundedRect(60, cy, 1160, 42, 3);
+
+            const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
+            this._add(this.add.text(80, cy + 6, typeIcons[item.type] || '?', { fontSize: '13px' }));
+            this._add(this.add.text(106, cy + 6, `${item.name} [${rarity.name}]`, {
+                fontSize: '11px', fontFamily: 'monospace', color: rarity.textColor
+            }));
+            this._add(this.add.text(106, cy + 24, `시세: ${item.value}G`, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#888866'
+            }));
+
+            this._add(UIButton.create(this, 1160, cy + 21, 80, 26, '위탁', {
+                color: canConsign ? 0x446644 : 0x333333,
+                hoverColor: canConsign ? 0x558855 : 0x333333,
+                textColor: canConsign ? '#44ff88' : '#555555',
+                fontSize: 11,
+                onClick: () => {
+                    if (!canConsign) { UIToast.show(this, '슬롯 부족', { color: '#ff6666' }); return; }
+                    StorageManager.removeItem(gs, item.id);
+                    const price = Math.floor(item.value * (0.9 + Math.random() * 0.3));
+                    gs.consignedItems.push({ item, desiredPrice: price, registeredAt: Date.now() });
+                    SaveManager.save(gs);
+                    UIToast.show(this, `${item.name} 위탁 등록! (희망가 ${price}G)`, { color: '#44ff88' });
+                    this._clearContent();
+                    this._drawContent();
+                }
+            }));
+
+            cy += 48;
         });
-        if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
-
-        // NPC 호감도 (골든) 누적
-        if (!gs.npcFavor) gs.npcFavor = {};
-        gs.npcFavor.golden = (gs.npcFavor.golden || 0) + 0.5;
-        const soldCnt = round.wonItems.filter(it => it._sold).length;
-        if (soldCnt > 0) gs.npcFavor.golden += soldCnt * 1.0;
-
-        SaveManager.save(gs);
-        GuildManager.addMessage(gs, `경매장 사이클: ${net >= 0 ? '+' : ''}${net}G (지출 ${spent}, 수익 ${earned})`);
-
-        // 버튼
-        this._add(UIButton.create(this, 520, 510, 200, 40, '다시 입장', {
-            color: 0x664422, hoverColor: 0x886644, textColor: '#ffcc88', fontSize: 14,
-            onClick: () => { this.round = null; this._drawLobby(); }
-        }));
-        this._add(UIButton.create(this, 760, 510, 200, 40, '마을로 →', {
-            color: 0x445566, hoverColor: 0x556677, textColor: '#aaccdd', fontSize: 14,
-            onClick: () => this._exitToTown()
-        }));
     }
 
-    // === 호환성 stub: 구 위탁 정산 ===
-    // RunResultScene이 호출. 신메커닉에 위탁 없음 — 빈 결과 반환.
-    // 구 데이터(gs.consignedItems)가 남아 있어도 처리 안 함.
     static processConsignments(gs) {
-        return [];
+        if (!gs.consignedItems || gs.consignedItems.length === 0) return [];
+        const results = [];
+        const favorability = gs.merchantFavor?.auction || 0;
+        const sellChance = Math.min(90, 50 + favorability * 5);
+        const priceAccuracy = Math.min(95, 70 + favorability * 3);
+        const remaining = [];
+
+        for (const entry of gs.consignedItems) {
+            const roll = Math.random() * 100;
+            if (roll < sellChance) {
+                const accuracyRoll = Math.random() * 100;
+                let finalPrice;
+                if (accuracyRoll < priceAccuracy) {
+                    finalPrice = entry.desiredPrice;
+                } else {
+                    finalPrice = Math.floor(entry.desiredPrice * (0.6 + Math.random() * 0.4));
+                }
+                finalPrice = Math.max(1, finalPrice);
+                GuildManager.addGold(gs, finalPrice);
+                results.push({ item: entry.item, price: finalPrice, sold: true });
+                gs.auctionHistory = gs.auctionHistory || [];
+                gs.auctionHistory.unshift({ action: 'consign_sell', name: entry.item.name, price: finalPrice, time: Date.now() });
+                if (gs.auctionHistory.length > 20) gs.auctionHistory.length = 20;
+                GuildManager.addMessage(gs, `위탁 판매: ${entry.item.name} (+${finalPrice}G)`);
+            } else {
+                remaining.push(entry);
+                results.push({ item: entry.item, sold: false });
+            }
+        }
+        gs.consignedItems = remaining;
+        return results;
+    }
+
+    // --- HISTORY TAB ---
+    _drawHistoryTab() {
+        const gs = this.gameState;
+        const history = gs.auctionHistory || [];
+
+        this._add(this.add.text(640, 95, '최근 거래 내역', {
+            fontSize: '13px', fontFamily: 'monospace', color: '#888899'
+        }).setOrigin(0.5));
+
+        if (history.length === 0) {
+            this._add(this.add.text(640, 400, '거래 내역이 없습니다', {
+                fontSize: '14px', fontFamily: 'monospace', color: '#555566'
+            }).setOrigin(0.5));
+            return;
+        }
+
+        let cy = 120;
+        const actionLabels = {
+            buy: '구매', sell: '판매', buyout: '즉시구매',
+            bid_win: '낙찰', bid_lose: '패찰', consign_sell: '위탁판매'
+        };
+        const actionColors = {
+            buy: '#44aaff', sell: '#ffcc44', buyout: '#ffaa44',
+            bid_win: '#44ff88', bid_lose: '#ff6666', consign_sell: '#88ffaa'
+        };
+
+        history.forEach((h, idx) => {
+            if (cy > 680) return;
+            const bg = this._add(this.add.graphics());
+            bg.fillStyle(idx % 2 === 0 ? 0x151525 : 0x1a1a2e, 1);
+            bg.fillRect(100, cy, 1080, 28);
+
+            const label = actionLabels[h.action] || h.action;
+            this._add(this.add.text(120, cy + 6, `[${label}]`, {
+                fontSize: '11px', fontFamily: 'monospace', color: actionColors[h.action] || '#888888', fontStyle: 'bold'
+            }));
+
+            this._add(this.add.text(230, cy + 6, h.name, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#cccccc'
+            }));
+
+            const sign = h.action === 'sell' ? '+' : '-';
+            const priceCol = h.action === 'sell' ? '#ffcc44' : h.action === 'bid_lose' ? '#ff6666' : '#aaaacc';
+            this._add(this.add.text(700, cy + 6, `${sign}${h.price}G`, {
+                fontSize: '11px', fontFamily: 'monospace', color: priceCol
+            }));
+
+            cy += 32;
+        });
     }
 }

@@ -178,7 +178,8 @@ class ForgeScene extends Phaser.Scene {
         const gs = this.gameState;
         const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
         const nextRar = getNextRarity(item.rarity);
-        const cost = getEnhanceCost(item.rarity);
+        const rarityIdx = (typeof RARITY_ORDER !== 'undefined') ? RARITY_ORDER.indexOf(item.rarity) + 1 : 1;
+        const cost = getEnhanceCost(rarityIdx);
 
         const bg = this._addObj(this.add.graphics());
         bg.fillStyle(0x1a1a2e, 1);
@@ -315,28 +316,40 @@ class ForgeScene extends Phaser.Scene {
         }
 
         const res = recipe.result;
-        const rarity = 'uncommon';
-        const mult = ITEM_RARITY[rarity].valueMult;
+        const rarity = recipe.resultRarity || 'uncommon';
+        const statMult = ITEM_RARITY[rarity].statMult;
+        const valueMult = ITEM_RARITY[rarity].valueMult;
+
+        // 제작 전용 장비 체크
+        const craftOnly = (typeof CRAFT_ONLY_EQUIPMENT !== 'undefined')
+            ? CRAFT_ONLY_EQUIPMENT.find(c => c.id === recipe.id)
+            : null;
+
         const item = {
             id: ++_itemIdCounter,
             type: 'equipment',
             rarity,
+            baseId: recipe.id,
             name: res.name,
             slot: res.slot,
-            desc: '',
-            value: Math.floor(50 * mult),
-            weight: 3,
+            desc: craftOnly ? craftOnly.desc : (res.special ? '' : ''),
+            value: Math.floor(80 * valueMult),
             stats: {}
         };
-        if (res.baseAtk) item.stats.atk = Math.floor(res.baseAtk * mult);
-        if (res.baseDef) item.stats.def = Math.floor(res.baseDef * mult);
-        if (res.baseHp)  item.stats.hp = Math.floor(res.baseHp * mult);
-        if (res.critRate) item.stats.critRate = res.critRate * mult;
-        if (res.moveSpeed) item.stats.moveSpeed = Math.floor(res.moveSpeed * mult);
-        if (res.lifesteal) item.stats.lifesteal = res.lifesteal;
+        if (res.baseAtk) item.stats.atk = Math.floor(res.baseAtk * statMult);
+        if (res.baseDef) item.stats.def = Math.floor(res.baseDef * statMult);
+        if (res.baseHp)  item.stats.hp = Math.floor(res.baseHp * statMult);
+        if (res.baseCrit) item.stats.critRate = +Math.min(0.40, res.baseCrit * statMult).toFixed(3);
+        if (res.baseSpd) item.stats.moveSpeed = Math.floor(res.baseSpd * Math.min(statMult, 2.5));
+
+        if (res.special || (craftOnly && craftOnly.special)) {
+            item.special = res.special || craftOnly.special;
+            item.specialDesc = craftOnly ? craftOnly.specialDesc : '';
+        }
+        if (recipe.craftOnly) item.isCraftOnly = true;
 
         StorageManager.addItem(gs, item);
-        GuildManager.addMessage(gs, `${item.name} [${ITEM_RARITY[rarity].name}] 제작 완료!`);
+        GuildManager.addMessage(gs, `🔨 ${item.name} [${ITEM_RARITY[rarity].name}] 제작 완료!`);
         SaveManager.save(gs);
 
         UIToast.show(this, `${item.name} 제작 완료!`, { color: '#44ff88' });

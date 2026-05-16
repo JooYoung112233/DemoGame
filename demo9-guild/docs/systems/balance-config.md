@@ -39,6 +39,7 @@ const BALANCE = {
   GUILD_HALL_BASE_COST: 300,
   GUILD_HALL_COST_MULT: 1.5,   // cost(stage) = base × mult^(stage-1)
   GUILD_HALL_MAX_STAGE: 12,
+  GUILD_HALL_MAX_STAGE_BY_CAT: { automation: 8 },  // 카테고리별 예외 최대 단계
 
   // === 클래스 베이스 스탯 (Lv1) ===
   CLASS_BASE: {

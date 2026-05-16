@@ -119,11 +119,12 @@ class EquipmentScene extends Phaser.Scene {
             const eq = merc.equipment[slot];
             const isSelected = slot === this.selectedSlot;
 
+            const slotH = eq && eq.specialDesc ? 72 : 60;
             const bg = this.add.graphics();
             bg.fillStyle(isSelected ? 0x2a3a4a : 0x1a1a2a, 1);
-            bg.fillRoundedRect(x + 15, cy, w - 30, 60, 4);
+            bg.fillRoundedRect(x + 15, cy, w - 30, slotH, 4);
             bg.lineStyle(1, isSelected ? 0x66aacc : 0x444455, 0.6);
-            bg.strokeRoundedRect(x + 15, cy, w - 30, 60, 4);
+            bg.strokeRoundedRect(x + 15, cy, w - 30, slotH, 4);
 
             this.add.text(x + 25, cy + 8, slotNames[slot], {
                 fontSize: '13px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
@@ -134,10 +135,23 @@ class EquipmentScene extends Phaser.Scene {
                 this.add.text(x + 100, cy + 8, `${eq.name} [${ir.name}]`, {
                     fontSize: '12px', fontFamily: 'monospace', color: ir.textColor
                 });
-                const statStr = Object.entries(eq.stats || {}).map(([k,v]) => `${k}+${v}`).join(' ');
-                this.add.text(x + 100, cy + 28, statStr, {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+                const statStr = Object.entries(eq.stats || {}).map(([k,v]) => {
+                    if (k === 'critRate') return `CRIT+${Math.round(v*100)}%`;
+                    return `${k.toUpperCase()}+${v}`;
+                }).join(' ');
+                let displayStr = statStr;
+                if (eq.penalty && Object.keys(eq.penalty).length > 0) {
+                    const penStr = Object.entries(eq.penalty).map(([k,v]) => `${k.toUpperCase()}${v}`).join(' ');
+                    displayStr += ` | ${penStr}`;
+                }
+                this.add.text(x + 100, cy + 28, displayStr, {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#888899'
                 });
+                if (eq.specialDesc) {
+                    this.add.text(x + 100, cy + 42, `★ ${eq.specialDesc}`, {
+                        fontSize: '9px', fontFamily: 'monospace', color: '#88ccaa'
+                    });
+                }
 
                 // 슬롯 클릭 시 보관함 필터링 — 해제 버튼보다 먼저 배치해야 버튼이 우선
                 const hit = this.add.zone(x + w/2, cy + 30, w - 30, 60).setInteractive({ useHandCursor: true });
@@ -238,10 +252,17 @@ class EquipmentScene extends Phaser.Scene {
             this.add.text(x + 20, cy + 5, item.name, {
                 fontSize: '12px', fontFamily: 'monospace', color: ir.textColor, fontStyle: 'bold'
             });
-            this.add.text(x + 20, cy + 22, `[${ir.name}]`, {
+            const tagParts = [`[${ir.name}]`];
+            if (item.isZoneEquipment) tagParts.push('🌍');
+            if (item.cursed) tagParts.push('⚠저주');
+            if (item.special) tagParts.push(`★${item.special}`);
+            this.add.text(x + 20, cy + 22, tagParts.join(' '), {
                 fontSize: '10px', fontFamily: 'monospace', color: ir.textColor
             });
-            const statStr = Object.entries(item.stats || {}).map(([k,v]) => `${k}+${v}`).join(' ');
+            const statStr = Object.entries(item.stats || {}).map(([k,v]) => {
+                if (k === 'critRate') return `CRIT+${Math.round(v*100)}%`;
+                return `${k.toUpperCase()}+${v}`;
+            }).join(' ');
             this.add.text(x + 20, cy + 36, statStr, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#aaaacc'
             });
@@ -268,6 +289,12 @@ class EquipmentScene extends Phaser.Scene {
 
     _sumStats(item) {
         if (!item || !item.stats) return 0;
-        return Object.values(item.stats).reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0);
+        let sum = 0;
+        for (const [k, v] of Object.entries(item.stats)) {
+            if (typeof v !== 'number') continue;
+            if (k === 'critRate') sum += v * 100;
+            else sum += v;
+        }
+        return sum;
     }
 }

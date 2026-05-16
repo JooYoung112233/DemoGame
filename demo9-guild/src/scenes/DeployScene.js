@@ -2,288 +2,629 @@ class DeployScene extends Phaser.Scene {
     constructor() { super('DeployScene'); }
 
     preload() {
-        // 액션 아이콘 — DeployScene 미리보기용 (PNG 없으면 이모지 폴백)
-        if (typeof ActionIcons !== 'undefined') {
-            ActionIcons.preload(this);
-        }
+        if (typeof ActionIcons !== 'undefined') ActionIcons.preload(this);
     }
 
     init(data) {
         this.gameState = data.gameState;
         this.selectedZone = data.selectedZone || null;
         this.deployedIds = data.deployedIds || [];
-        this.deployMode = data.deployMode || 'main';  // 'main' | 'sub'
+        this.deployMode = data.deployMode || 'main';
+        this.selectedLevel = data.selectedLevel || null;
     }
 
     create() {
         this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
-        this._drawUI();
-    }
-
-    _drawUI() {
         const gs = this.gameState;
 
-        this.add.text(640, 20, '출발 게이트', {
+        if (this.selectedZone) {
+            this._drawZoneDetail();
+        } else {
+            this._drawZoneOverview();
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    //  구역 개요 — 3구역 카드 + 각각 파견 현황
+    // ═══════════════════════════════════════════════
+
+    _drawZoneOverview() {
+        const gs = this.gameState;
+
+        this.add.text(640, 25, '출발 게이트', {
             fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        UIButton.create(this, 80, 20, 100, 30, '← 마을', {
+        UIButton.create(this, 80, 25, 100, 30, '← 마을', {
             color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
-        UIButton.create(this, 210, 20, 120, 26, '✨ 시너지 도감', {
-            color: 0x443366, hoverColor: 0x554477, textColor: '#ccaaff', fontSize: 11,
-            onClick: () => this.scene.start('SynergyScene', {
-                gameState: gs, returnTo: 'DeployScene',
-                returnData: { gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode }
-            })
-        });
 
-        // 메인/서브 모드 토글
-        const isMain = this.deployMode === 'main';
         const activeExp = (gs.activeExpeditions || []).length;
         const maxSlots = ExpeditionManager.getMaxSlots(gs);
-        UIButton.create(this, 970, 20, 130, 30, '⚔ 메인 도전', {
-            color: isMain ? 0x884422 : 0x333344,
-            hoverColor: 0xaa5533, textColor: isMain ? '#ffcc88' : '#888899', fontSize: 12,
-            onClick: () => { if (!isMain) { this.deployMode = 'main'; this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: 'main' }); } }
+        this.add.text(640, 50, `서브 파견 슬롯: ${activeExp}/${maxSlots}`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#888899'
+        }).setOrigin(0.5);
+
+        const cardW = 380, cardH = 590, gap = 20;
+        const totalW = ZONE_KEYS.length * cardW + (ZONE_KEYS.length - 1) * gap;
+        const startX = (1280 - totalW) / 2;
+
+        ZONE_KEYS.forEach((key, idx) => {
+            this._drawZoneOverviewCard(key, startX + idx * (cardW + gap), 70, cardW, cardH);
         });
-        UIButton.create(this, 1120, 20, 140, 30, `📦 서브 파견 ${activeExp}/${maxSlots}`, {
+    }
+
+    _drawZoneOverviewCard(zoneKey, x, y, w, h) {
+        const gs = this.gameState;
+        const zone = ZONE_DATA[zoneKey];
+        const isLocked = gs.zoneLevel[zoneKey] === 0;
+
+        const bg = this.add.graphics();
+        bg.fillStyle(isLocked ? 0x101018 : 0x12121e, 1);
+        bg.fillRoundedRect(x, y, w, h, 6);
+        bg.lineStyle(2, isLocked ? 0x333344 : zone.color, isLocked ? 0.3 : 0.6);
+        bg.strokeRoundedRect(x, y, w, h, 6);
+
+        // 헤더
+        this.add.text(x + w / 2, y + 25, zone.icon, { fontSize: '32px' }).setOrigin(0.5);
+        this.add.text(x + w / 2, y + 60, zone.name, {
+            fontSize: '16px', fontFamily: 'monospace', color: isLocked ? '#555566' : zone.textColor, fontStyle: 'bold'
+        }).setOrigin(0.5);
+        this.add.text(x + w / 2, y + 80, zone.subtitle, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#777788'
+        }).setOrigin(0.5);
+
+        if (isLocked) {
+            this.add.text(x + w / 2, y + 120, `🔒 길드 Lv.${zone.unlockLevel} 필요`, {
+                fontSize: '13px', fontFamily: 'monospace', color: '#555566'
+            }).setOrigin(0.5);
+            return;
+        }
+
+        // 구역 레벨/정보
+        const zLv = gs.zoneLevel[zoneKey];
+        const rounds = getMaxRounds(zLv);
+        this.add.text(x + w / 2, y + 100, `구역 Lv.${zLv}  |  ${rounds}라운드`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#aaaacc'
+        }).setOrigin(0.5);
+
+        this.add.text(x + w / 2, y + 118, zone.desc, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#667788'
+        }).setOrigin(0.5);
+
+        // 서브 해금 상태
+        const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
+        const clears = GuildManager.getZoneClearCount(gs, zoneKey, zLv);
+        const needed = GuildManager.SUB_UNLOCK_CLEARS;
+        if (maxUnlocked > 0) {
+            this.add.text(x + w / 2, y + 140, `📦 서브 해금 (최대 Lv.${maxUnlocked})`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#88ccff'
+            }).setOrigin(0.5);
+        } else {
+            this.add.text(x + w / 2, y + 140, `🔓 서브 해금까지 ${clears}/${needed}회 클리어`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
+            }).setOrigin(0.5);
+        }
+
+        // === 활성 파견 표시 ===
+        const activeExps = (gs.activeExpeditions || []).filter(e => e.zoneKey === zoneKey);
+        const pendingResults = (gs.pendingResults || []).filter(r => r.zoneKey === zoneKey);
+
+        let cy = y + 165;
+        this.add.text(x + 15, cy, '파견 현황', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+        });
+        cy += 20;
+
+        if (activeExps.length === 0 && pendingResults.length === 0) {
+            this.add.text(x + 15, cy, '진행 중인 파견 없음', {
+                fontSize: '10px', fontFamily: 'monospace', color: '#555566'
+            });
+            cy += 18;
+        }
+
+        activeExps.forEach(exp => {
+            const progress = ExpeditionManager.getProgress(exp);
+            const remainMs = ExpeditionManager.getRemainingMs(exp);
+            const remainSec = Math.ceil(remainMs / 1000);
+            const remainStr = remainSec > 60 ? `${Math.floor(remainSec / 60)}분 ${remainSec % 60}초` : `${remainSec}초`;
+
+            const expBg = this.add.graphics();
+            expBg.fillStyle(0x1a2a3a, 1);
+            expBg.fillRoundedRect(x + 10, cy, w - 20, 55, 3);
+
+            this.add.text(x + 18, cy + 5, `⏳ Lv.${exp.zoneLevel} 파견`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+            });
+            this.add.text(x + w - 18, cy + 5, `잔여 ${remainStr}`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#ffaa66'
+            }).setOrigin(1, 0);
+
+            // 진행률 바
+            const barW = w - 40;
+            this.add.graphics().fillStyle(0x222233, 1).fillRect(x + 18, cy + 24, barW, 6);
+            this.add.graphics().fillStyle(0x4488cc, 1).fillRect(x + 18, cy + 24, barW * progress, 6);
+            this.add.text(x + 18 + barW / 2, cy + 25, `${Math.floor(progress * 100)}%`, {
+                fontSize: '8px', fontFamily: 'monospace', color: '#ffffff'
+            }).setOrigin(0.5);
+
+            // 파견된 용병 이름
+            const names = exp.partyIds.map(id => {
+                const m = gs.roster.find(r => r.id === id);
+                return m ? m.name : '?';
+            }).join(', ');
+            this.add.text(x + 18, cy + 36, names, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#778899'
+            });
+            cy += 60;
+        });
+
+        pendingResults.forEach(result => {
+            const resBg = this.add.graphics();
+            resBg.fillStyle(result.success ? 0x1a2a1a : 0x2a1a1a, 1);
+            resBg.fillRoundedRect(x + 10, cy, w - 20, 40, 3);
+
+            const icon = result.success ? '✅' : '⚠';
+            this.add.text(x + 18, cy + 5, `${icon} Lv.${result.zoneLevel} — ${result.success ? '성공' : '실패'}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: result.success ? '#88ff88' : '#ff8888'
+            });
+            this.add.text(x + 18, cy + 22, `+${result.goldEarned}G | 장비 ${result.loot.length}개 — 수령 대기`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
+            });
+
+            UIButton.create(this, x + w - 55, cy + 20, 70, 26, '수령', {
+                color: 0x448844, hoverColor: 0x55aa55, textColor: '#ccffcc', fontSize: 10,
+                onClick: () => {
+                    ExpeditionManager.collectResult(gs, result.id);
+                    SaveManager.save(gs);
+                    this.scene.restart({ gameState: gs });
+                }
+            });
+            cy += 45;
+        });
+
+        // 입장 버튼
+        UIButton.create(this, x + w / 2, y + h - 35, w - 40, 36, `▶ ${zone.name} 입장`, {
+            color: 0x335566, hoverColor: 0x446688, textColor: '#ccddee', fontSize: 14,
+            onClick: () => {
+                this.selectedZone = zoneKey;
+                this.scene.restart({ gameState: gs, selectedZone: zoneKey, deployedIds: this.deployedIds, deployMode: this.deployMode });
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════════════
+    //  구역 상세 — 라운드 선택 + 편성 + 출발
+    // ═══════════════════════════════════════════════
+
+    _drawZoneDetail() {
+        const gs = this.gameState;
+        const zoneKey = this.selectedZone;
+        const zone = ZONE_DATA[zoneKey];
+        const zLv = gs.zoneLevel[zoneKey];
+
+        // 헤더
+        this.add.text(640, 25, `${zone.icon} ${zone.name} — ${zone.subtitle}`, {
+            fontSize: '18px', fontFamily: 'monospace', color: zone.textColor, fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        UIButton.create(this, 80, 25, 110, 30, '← 구역선택', {
+            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
+            onClick: () => this.scene.restart({ gameState: gs, deployedIds: [], deployMode: this.deployMode })
+        });
+
+        // 메인/서브 모드
+        const isMain = this.deployMode === 'main';
+        UIButton.create(this, 970, 25, 130, 28, '⚔ 메인 도전', {
+            color: isMain ? 0x884422 : 0x333344,
+            hoverColor: 0xaa5533, textColor: isMain ? '#ffcc88' : '#888899', fontSize: 11,
+            onClick: () => { if (!isMain) this.scene.restart({ gameState: gs, selectedZone: zoneKey, deployedIds: this.deployedIds, deployMode: 'main', selectedLevel: this.selectedLevel }); }
+        });
+        UIButton.create(this, 1120, 25, 130, 28, '📦 서브 파견', {
             color: !isMain ? 0x224488 : 0x333344,
-            hoverColor: 0x3355aa, textColor: !isMain ? '#88ccff' : '#888899', fontSize: 12,
-            onClick: () => { if (isMain) { this.deployMode = 'sub'; this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: 'sub' }); } }
+            hoverColor: 0x3355aa, textColor: !isMain ? '#88ccff' : '#888899', fontSize: 11,
+            onClick: () => { if (isMain) this.scene.restart({ gameState: gs, selectedZone: zoneKey, deployedIds: this.deployedIds, deployMode: 'sub', selectedLevel: this.selectedLevel }); }
         });
 
         const modeDesc = isMain
             ? '메인 도전: 직접 전투. 스킬 발동 가능, 보상 1.5배, 구역 레벨업'
             : '서브 파견: 시간 경과형 자동. 일반공격만, 깬 레벨까지만 파밍';
-        this.add.text(640, 47, modeDesc, {
-            fontSize: '11px', fontFamily: 'monospace', color: isMain ? '#ffaa66' : '#88aaff'
+        this.add.text(640, 52, modeDesc, {
+            fontSize: '10px', fontFamily: 'monospace', color: isMain ? '#ffaa66' : '#88aaff'
         }).setOrigin(0.5);
 
-        this.add.text(30, 55, '구역 선택', {
-            fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+        // 좌: 레벨 선택 + 파견 현황 | 우: 파티 편성
+        this._drawLevelSelect(20, 70, 400, 620);
+        this._drawPartyPanel(440, 70, 820, 620);
+    }
+
+    _drawLevelSelect(x, y, w, h) {
+        const gs = this.gameState;
+        const zoneKey = this.selectedZone;
+        const zone = ZONE_DATA[zoneKey];
+        const zLv = gs.zoneLevel[zoneKey];
+        const isMain = this.deployMode === 'main';
+
+        UIPanel.create(this, x, y, w, h, { title: '레벨 선택' });
+
+        let cy = y + 30;
+
+        if (isMain) {
+            // 메인: 현재 구역 레벨로 도전
+            this.add.text(x + 15, cy, `현재 도전 레벨: Lv.${zLv}`, {
+                fontSize: '13px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+            });
+            cy += 20;
+            const rounds = getMaxRounds(zLv);
+            this.add.text(x + 15, cy, `${rounds}라운드 | 보스 포함`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
+            });
+            cy += 16;
+            this.add.text(x + 15, cy, `승리 시 → Lv.${zLv + 1} 해금`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#88ff88'
+            });
+            cy += 30;
+            this.selectedLevel = zLv;
+        } else {
+            // 서브: 해금된 레벨 중 선택
+            const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
+            if (maxUnlocked === 0) {
+                const clears = GuildManager.getZoneClearCount(gs, zoneKey, zLv);
+                this.add.text(x + 15, cy, `🔓 서브 미해금`, {
+                    fontSize: '13px', fontFamily: 'monospace', color: '#ff8866', fontStyle: 'bold'
+                });
+                cy += 18;
+                this.add.text(x + 15, cy, `메인 ${clears}/${GuildManager.SUB_UNLOCK_CLEARS}회 클리어 필요`, {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
+                });
+                cy += 30;
+            } else {
+                this.add.text(x + 15, cy, `서브 가능 레벨 (1 ~ ${maxUnlocked})`, {
+                    fontSize: '12px', fontFamily: 'monospace', color: '#88ccff'
+                });
+                cy += 22;
+
+                const selected = this.selectedLevel || maxUnlocked;
+                for (let lv = 1; lv <= maxUnlocked; lv++) {
+                    const isSel = lv === selected;
+                    UIButton.create(this, x + 15 + (lv - 1) * 50, cy + 12, 44, 24, `Lv.${lv}`, {
+                        color: isSel ? 0x4488cc : 0x222233,
+                        hoverColor: 0x5599dd,
+                        textColor: isSel ? '#ffffff' : '#888899',
+                        fontSize: 10,
+                        onClick: () => {
+                            this.selectedLevel = lv;
+                            this.scene.restart({ gameState: gs, selectedZone: zoneKey, deployedIds: this.deployedIds, deployMode: 'sub', selectedLevel: lv });
+                        }
+                    });
+                }
+                this.selectedLevel = selected;
+                cy += 36;
+            }
+        }
+
+        // === 이 구역 파견 현황 ===
+        cy += 10;
+        this.add.text(x + 15, cy, '── 파견 현황 ──', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+        });
+        cy += 20;
+
+        const activeExps = (gs.activeExpeditions || []).filter(e => e.zoneKey === zoneKey);
+        const pendingResults = (gs.pendingResults || []).filter(r => r.zoneKey === zoneKey);
+
+        if (activeExps.length === 0 && pendingResults.length === 0) {
+            this.add.text(x + 15, cy, '진행 중인 파견 없음', {
+                fontSize: '10px', fontFamily: 'monospace', color: '#555566'
+            });
+            cy += 18;
+        }
+
+        activeExps.forEach(exp => {
+            const progress = ExpeditionManager.getProgress(exp);
+            const remainMs = ExpeditionManager.getRemainingMs(exp);
+            const remainSec = Math.ceil(remainMs / 1000);
+            const remainStr = remainSec > 60 ? `${Math.floor(remainSec / 60)}분 ${remainSec % 60}초` : `${remainSec}초`;
+            const elapsed = Date.now() - exp.startedAtMs;
+            const elapsedStr = elapsed > 60000 ? `${Math.floor(elapsed / 60000)}분 경과` : `${Math.floor(elapsed / 1000)}초 경과`;
+
+            const expBg = this.add.graphics();
+            expBg.fillStyle(0x1a2a3a, 1);
+            expBg.fillRoundedRect(x + 10, cy, w - 20, 75, 3);
+
+            this.add.text(x + 18, cy + 5, `⏳ Lv.${exp.zoneLevel} 서브 파견`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+            });
+            this.add.text(x + w - 18, cy + 5, remainStr, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#ffaa66'
+            }).setOrigin(1, 0);
+
+            // 진행률 바
+            const barW = w - 40;
+            this.add.graphics().fillStyle(0x222233, 1).fillRect(x + 18, cy + 24, barW, 6);
+            this.add.graphics().fillStyle(0x4488cc, 1).fillRect(x + 18, cy + 24, barW * progress, 6);
+
+            this.add.text(x + 18, cy + 36, elapsedStr, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#667788'
+            });
+
+            // 파견 용병
+            const names = exp.partyIds.map(id => {
+                const m = gs.roster.find(r => r.id === id);
+                return m ? `${m.getBaseClass().icon}${m.name}` : '?';
+            }).join('  ');
+            this.add.text(x + 18, cy + 52, names, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#aabbcc'
+            });
+            cy += 80;
         });
 
-        const zoneStartX = 30;
-        let zoneX = zoneStartX;
-        ZONE_KEYS.forEach(key => {
-            this._drawZoneCard(key, zoneX, 80, 390, 160);
-            zoneX += 410;
+        pendingResults.forEach(result => {
+            const resBg = this.add.graphics();
+            resBg.fillStyle(result.success ? 0x1a2a1a : 0x2a1a1a, 1);
+            resBg.fillRoundedRect(x + 10, cy, w - 20, 44, 3);
+
+            const icon = result.success ? '✅' : '⚠';
+            this.add.text(x + 18, cy + 5, `${icon} Lv.${result.zoneLevel} ${result.success ? '성공' : '실패'}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: result.success ? '#88ff88' : '#ff8888'
+            });
+            this.add.text(x + 18, cy + 22, `+${result.goldEarned}G | 장비 ${result.loot.length}개`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
+            });
+            UIButton.create(this, x + w - 55, cy + 22, 70, 24, '수령', {
+                color: 0x448844, hoverColor: 0x55aa55, textColor: '#ccffcc', fontSize: 10,
+                onClick: () => {
+                    ExpeditionManager.collectResult(gs, result.id);
+                    SaveManager.save(gs);
+                    this.scene.restart({ gameState: gs, selectedZone: zoneKey, deployedIds: this.deployedIds, deployMode: this.deployMode });
+                }
+            });
+            cy += 50;
+        });
+    }
+
+    _drawPartyPanel(x, y, w, h) {
+        const gs = this.gameState;
+        const isMain = this.deployMode === 'main';
+        const maxDeploy = GuildManager.getMaxDeploy(gs);
+
+        UIPanel.create(this, x, y, w, h, { title: `파티 편성 (${this.deployedIds.length}/${maxDeploy})` });
+
+        // 편성 슬롯
+        this._drawDeploySlots(x + 10, y + 30, maxDeploy, w - 20);
+
+        // 대기 로스터
+        this._drawRosterPick(x + 10, y + 230, w - 20);
+
+        // 편성 저장/불러오기
+        this._drawSavedParties(x + 10, y + 430, w - 20);
+
+        // 출발 버튼
+        this._drawDepartButton(x, y, w, h);
+    }
+
+    _drawDeploySlots(x, y, maxDeploy, panelW) {
+        const gs = this.gameState;
+        const slotW = Math.min(190, (panelW - (maxDeploy - 1) * 8) / maxDeploy);
+
+        this.add.text(x, y - 2, '← 후열(원거리)          전열(근접) →', {
+            fontSize: '9px', fontFamily: 'monospace', color: '#667788', fontStyle: 'italic'
         });
 
-        this.add.text(30, 255, '파티 편성', {
-            fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+        for (let i = 0; i < maxDeploy; i++) {
+            const sx = x + i * (slotW + 8);
+            const merc = gs.roster.find(m => m.id === this.deployedIds[i]);
+            const position = maxDeploy - i;
+
+            const bg = this.add.graphics();
+            bg.fillStyle(merc ? 0x1a2a3a : 0x151525, 1);
+            bg.fillRoundedRect(sx, y + 14, slotW, 170, 4);
+            bg.lineStyle(1, merc ? 0x446688 : 0x333355, 0.6);
+            bg.strokeRoundedRect(sx, y + 14, slotW, 170, 4);
+
+            const posColor = position <= 2 ? '#ff8866' : '#88ccff';
+            const posLabel = position <= 2 ? `전열[${position}]` : `후열[${position}]`;
+            this.add.text(sx + 5, y + 18, posLabel, {
+                fontSize: '9px', fontFamily: 'monospace', color: posColor, fontStyle: 'bold'
+            });
+
+            if (merc) {
+                const base = merc.getBaseClass();
+                const rarity = RARITY_DATA[merc.rarity];
+                const stats = merc.getStats();
+
+                this.add.text(sx + slotW - 5, y + 18, `Lv.${merc.level}`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#aaaaaa'
+                }).setOrigin(1, 0);
+                this.add.text(sx + 5, y + 32, `${base.icon} ${merc.name}`, {
+                    fontSize: '11px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+                });
+                this.add.text(sx + 5, y + 48, `HP:${merc.currentHp}/${stats.hp}`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#8888aa'
+                });
+                this.add.text(sx + 5, y + 60, `ATK:${stats.atk} DEF:${stats.def}`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#8888aa'
+                });
+
+                // 액션 미리보기
+                if (typeof getClassActions === 'function') {
+                    const actions = getClassActions(merc.classKey);
+                    let ay = y + 76;
+                    actions.forEach(action => {
+                        if (ay > y + 155) return;
+                        const canUse = action.casterPositions.includes(position);
+                        const color = canUse ? '#88ccaa' : '#663333';
+                        this.add.text(sx + 5, ay, `${canUse ? '✓' : '✗'} ${action.name}`, {
+                            fontSize: '8px', fontFamily: 'monospace', color
+                        });
+                        ay += 11;
+                    });
+                }
+
+                // 이동/해제
+                if (i > 0) {
+                    UIButton.create(this, sx + 20, y + 168, 30, 18, '◀', {
+                        color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 10,
+                        onClick: () => this._swapDeployed(i, i - 1)
+                    });
+                }
+                if (i < maxDeploy - 1 && this.deployedIds[i + 1]) {
+                    UIButton.create(this, sx + 55, y + 168, 30, 18, '▶', {
+                        color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 10,
+                        onClick: () => this._swapDeployed(i, i + 1)
+                    });
+                }
+                UIButton.create(this, sx + slotW - 30, y + 168, 50, 18, '해제', {
+                    color: 0x555555, hoverColor: 0x666666, textColor: '#cccccc', fontSize: 9,
+                    onClick: () => {
+                        this.deployedIds = this.deployedIds.filter(id => id !== merc.id);
+                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode, selectedLevel: this.selectedLevel });
+                    }
+                });
+            } else {
+                this.add.text(sx + slotW / 2, y + 95, '(빈 슬롯)', {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#444455'
+                }).setOrigin(0.5);
+            }
+        }
+    }
+
+    _swapDeployed(idx1, idx2) {
+        const gs = this.gameState;
+        const arr = this.deployedIds.slice();
+        const tmp = arr[idx1];
+        arr[idx1] = arr[idx2];
+        arr[idx2] = tmp;
+        this.deployedIds = arr.filter(id => id);
+        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode, selectedLevel: this.selectedLevel });
+    }
+
+    _drawRosterPick(x, y, panelW) {
+        const gs = this.gameState;
+        const available = gs.roster.filter(m =>
+            m.alive &&
+            !this.deployedIds.includes(m.id) &&
+            !ExpeditionManager.isOnExpedition(gs, m.id)
+        );
+        const onExpedition = gs.roster.filter(m =>
+            m.alive && ExpeditionManager.isOnExpedition(gs, m.id)
+        );
+
+        this.add.text(x, y, '대기 용병 (클릭하여 편성)', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
         });
+
+        if (available.length === 0 && onExpedition.length === 0) {
+            this.add.text(x + 100, y + 30, '편성 가능한 용병 없음', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#555566'
+            });
+            return;
+        }
 
         const maxDeploy = GuildManager.getMaxDeploy(gs);
-        this.add.text(130, 257, `(${this.deployedIds.length}/${maxDeploy})`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#888899'
-        });
+        let cx = x, cy = y + 18;
+        const cardW = 135, cardH = 48;
 
-        this._drawDeploySlots(30, 280, maxDeploy);
-        this._drawSynergyPreview(maxDeploy);
-        this._drawBondPreview(maxDeploy);
-        this._drawRosterPick(30, 440);
-        this._drawSavedParties(30, 595);
-        this._drawDepartButton();
-    }
+        available.forEach(merc => {
+            if (cx + cardW > x + panelW) { cx = x; cy += cardH + 4; }
+            if (cy > y + 165) return;
 
-    /** 편성된 용병들의 활성 시너지 미리보기 — 슬롯 위 가로 막대 */
-    _drawSynergyPreview(maxDeploy) {
-        const gs = this.gameState;
-        const deployed = this.deployedIds
-            .map(id => gs.roster.find(m => m.id === id))
-            .filter(Boolean);
-        const classKeys = deployed.map(m => m.classKey);
+            const base = merc.getBaseClass();
+            const rarity = RARITY_DATA[merc.rarity];
+            const canAdd = this.deployedIds.length < maxDeploy;
 
-        // 가로 막대 — 슬롯 영역 위쪽 (y=215~272)
-        const px = 30, py = 215, pw = 1220, ph = 56;
+            const bg = this.add.graphics();
+            bg.fillStyle(0x151525, 1);
+            bg.fillRoundedRect(cx, cy, cardW, cardH, 3);
+            bg.lineStyle(1, rarity.color, 0.3);
+            bg.strokeRoundedRect(cx, cy, cardW, cardH, 3);
 
-        const bg = this.add.graphics();
-        bg.fillStyle(0x141426, 1);
-        bg.fillRoundedRect(px, py, pw, ph, 6);
-        bg.lineStyle(2, 0x665588, 0.7);
-        bg.strokeRoundedRect(px, py, pw, ph, 6);
+            this.add.text(cx + 5, cy + 4, `${base.icon} ${merc.name}`, {
+                fontSize: '10px', fontFamily: 'monospace', color: rarity.textColor
+            });
+            this.add.text(cx + 5, cy + 18, `Lv.${merc.level} ${base.name}`, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#777788'
+            });
+            this.add.text(cx + 5, cy + 32, `HP:${merc.currentHp}/${merc.getStats().hp}`, {
+                fontSize: '8px', fontFamily: 'monospace', color: '#8888aa'
+            });
 
-        this.add.text(px + 12, py + 6, '✨ 활성 시너지', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#ccaaff', fontStyle: 'bold'
-        });
-
-        if (typeof getActiveSynergies !== 'function' || deployed.length === 0) {
-            this.add.text(px + pw/2, py + ph/2 + 4, '용병을 편성하면 발동 가능한 시너지가 표시됩니다', {
-                fontSize: '11px', fontFamily: 'monospace', color: '#666677'
-            }).setOrigin(0.5);
-            return;
-        }
-
-        const active = getActiveSynergies(classKeys);
-        if (active.length === 0) {
-            const close = this._findCloseSynergies(classKeys);
-            if (close.length === 0) {
-                this.add.text(px + pw/2, py + ph/2 + 4, '현재 발동 가능한 시너지 없음 — 다양한 클래스 조합 시도', {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#666677'
-                }).setOrigin(0.5);
-            } else {
-                this.add.text(px + 110, py + 6, ' — 1명 추가 시 발동:', {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#888899', fontStyle: 'italic'
-                });
-                // 가로로 chip 형태
-                let chipX = px + 12;
-                close.slice(0, 5).forEach(c => {
-                    const label = `${c.name} (+${this._classIcon(c.missingClass)})`;
-                    const txt = this.add.text(chipX, py + 30, label, {
-                        fontSize: '10px', fontFamily: 'monospace', color: '#88aacc',
-                        backgroundColor: '#222244', padding: { x: 6, y: 2 }
-                    });
-                    chipX += txt.width + 8;
-                    if (chipX > px + pw - 100) return;
+            if (canAdd) {
+                const hit = this.add.zone(cx + cardW / 2, cy + cardH / 2, cardW, cardH).setInteractive({ useHandCursor: true });
+                hit.on('pointerdown', () => {
+                    this.deployedIds.push(merc.id);
+                    this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode, selectedLevel: this.selectedLevel });
                 });
             }
-            return;
-        }
-
-        // 활성 시너지 — 가로로 chip
-        let chipX = px + 110;
-        active.forEach(syn => {
-            const typeColor = syn.type === 5 ? '#ffcc44' : syn.type === 3 ? '#ff88cc' : '#88ccff';
-            const bgColor = syn.type === 5 ? '#553311' : syn.type === 3 ? '#441133' : '#113344';
-            const typeBadge = syn.type === 5 ? '⭐5인' : syn.type === 3 ? '★3인' : '✦2인';
-
-            const chip = this.add.text(chipX, py + 8, `${typeBadge} ${syn.name}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: typeColor, fontStyle: 'bold',
-                backgroundColor: bgColor, padding: { x: 8, y: 3 }
-            });
-            this.add.text(chipX, py + 30, syn.desc, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#aaaacc',
-                wordWrap: { width: 280 }
-            });
-            chipX += Math.max(chip.width, 200) + 16;
-            if (chipX > px + pw - 50) return;
-        });
-    }
-
-    _classIcon(classKey) {
-        return (CLASS_DATA[classKey]?.icon || '?') + (CLASS_DATA[classKey]?.name || '');
-    }
-
-    /** 편성된 용병들 간 활성 본드 미리보기 — 시너지 막대 위쪽 */
-    _drawBondPreview(maxDeploy) {
-        const gs = this.gameState;
-        const deployed = this.deployedIds
-            .map(id => gs.roster.find(m => m.id === id))
-            .filter(Boolean);
-
-        if (deployed.length < 2 || typeof BondManager === 'undefined') return;
-
-        // 본드 페어 수집
-        const bonds = [];
-        for (let i = 0; i < deployed.length; i++) {
-            for (let j = i + 1; j < deployed.length; j++) {
-                const a = deployed[i], b = deployed[j];
-                const xp = BondManager.getBondXp(gs, a.id, b.id);
-                if (xp <= 0) continue;
-                const tier = BondManager.getTier(xp);
-                bonds.push({ a, b, xp, tier });
-            }
-        }
-        if (bonds.length === 0) return;
-
-        // 시너지 막대 위쪽 (y=180~210)
-        const px = 30, py = 180, pw = 1220, ph = 30;
-        const bg = this.add.graphics();
-        bg.fillStyle(0x281428, 1);
-        bg.fillRoundedRect(px, py, pw, ph, 6);
-        bg.lineStyle(2, 0xaa5577, 0.7);
-        bg.strokeRoundedRect(px, py, pw, ph, 6);
-
-        this.add.text(px + 10, py + 8, '💞 본드:', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#ff88cc', fontStyle: 'bold'
+            cx += cardW + 6;
         });
 
-        let chipX = px + 70;
-        bonds.sort((a, b) => b.xp - a.xp);
-        bonds.forEach(b => {
-            const tierColors = ['#888888', '#88ccaa', '#88ddff', '#ffaa66', '#ff88cc', '#ffcc44'];
-            const tierBadges = ['낯선', '①동료', '②형제', '③전우', '④동반자', '⑤운명'];
-            const color = tierColors[b.tier.tier] || '#888888';
-            const badge = tierBadges[b.tier.tier] || '';
-            const chip = this.add.text(chipX, py + 8, `${badge} ${b.a.name}↔${b.b.name} (${b.xp})`, {
-                fontSize: '10px', fontFamily: 'monospace', color
+        // 파견 중인 용병 표시
+        if (onExpedition.length > 0) {
+            cy += cardH + 10;
+            if (cy > y + 165) return;
+            this.add.text(x, cy, `파견 중 (${onExpedition.length}명)`, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#667788'
             });
-            chipX += chip.width + 14;
-            if (chipX > px + pw - 50) return;
-        });
-    }
-
-    /** 한 명 더 추가하면 발동되는 시너지 후보 */
-    _findCloseSynergies(currentClasses) {
-        if (typeof SYNERGY_DATA !== 'object') return [];
-        const classSet = new Set(currentClasses);
-        const candidates = [];
-        for (const [key, syn] of Object.entries(SYNERGY_DATA)) {
-            if (syn.type !== 2 && syn.type !== 3) continue;
-            const missing = syn.classes.filter(c => !classSet.has(c));
-            if (missing.length === 1) {
-                candidates.push({
-                    name: syn.name,
-                    desc: syn.desc,
-                    missingClass: missing[0]
+            cy += 14;
+            cx = x;
+            onExpedition.forEach(merc => {
+                if (cx + cardW > x + panelW) { cx = x; cy += 22; }
+                if (cy > y + 185) return;
+                const base = merc.getBaseClass();
+                const exp = (gs.activeExpeditions || []).find(e => e.partyIds.includes(merc.id));
+                const zoneName = exp ? ZONE_DATA[exp.zoneKey].name : '?';
+                this.add.text(cx, cy, `${base.icon}${merc.name} → ${zoneName}`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#556677'
                 });
-            }
+                cx += cardW + 6;
+            });
         }
-        return candidates;
     }
 
-    _drawSavedParties(x, y) {
+    _drawSavedParties(x, y, panelW) {
         const gs = this.gameState;
         if (!gs.savedParties) gs.savedParties = [];
 
-        this.add.text(x, y, '편성 저장 (클릭하여 불러오기 / 우클릭하여 덮어쓰기)', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+        this.add.text(x, y, '저장 편성 (클릭=불러오기 / 우클릭=저장)', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#888899'
         });
 
         const SLOT_COUNT = 4;
-        const slotW = 195, slotH = 45, gap = 10;
+        const slotW = Math.min(180, (panelW - (SLOT_COUNT - 1) * 6) / SLOT_COUNT);
         for (let i = 0; i < SLOT_COUNT; i++) {
-            const sx = x + i * (slotW + gap);
+            const sx = x + i * (slotW + 6);
             const saved = gs.savedParties[i];
             const hasSaved = !!saved;
 
             const bg = this.add.graphics();
             bg.fillStyle(hasSaved ? 0x223344 : 0x1a1a2a, 1);
-            bg.fillRoundedRect(sx, y + 18, slotW, slotH, 4);
-            bg.lineStyle(1, hasSaved ? 0x5588aa : 0x444455, hasSaved ? 0.7 : 0.4);
-            bg.strokeRoundedRect(sx, y + 18, slotW, slotH, 4);
+            bg.fillRoundedRect(sx, y + 15, slotW, 38, 3);
+            bg.lineStyle(1, hasSaved ? 0x5588aa : 0x333344, 0.5);
+            bg.strokeRoundedRect(sx, y + 15, slotW, 38, 3);
 
             if (hasSaved) {
-                // 살아있는 멤버만 카운트
-                const aliveMembers = saved.mercIds.filter(id => gs.roster.find(m => m.id === id && m.alive));
-                this.add.text(sx + 8, y + 23, saved.name || `편성 ${i + 1}`, {
-                    fontSize: '12px', fontFamily: 'monospace', color: '#aaccff', fontStyle: 'bold'
+                const aliveCount = saved.mercIds.filter(id => gs.roster.find(m => m.id === id && m.alive)).length;
+                this.add.text(sx + 5, y + 19, saved.name || `편성 ${i + 1}`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#aaccff', fontStyle: 'bold'
                 });
-                this.add.text(sx + 8, y + 42, `${aliveMembers.length}/${saved.mercIds.length}명 출전 가능`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: aliveMembers.length === saved.mercIds.length ? '#88ccaa' : '#aa8888'
+                this.add.text(sx + 5, y + 34, `${aliveCount}/${saved.mercIds.length}명`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: aliveCount === saved.mercIds.length ? '#88ccaa' : '#aa8888'
                 });
             } else {
-                this.add.text(sx + slotW / 2, y + 40, `슬롯 ${i + 1} (빈 슬롯)`, {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+                this.add.text(sx + slotW / 2, y + 33, `슬롯 ${i + 1}`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#555566'
                 }).setOrigin(0.5);
             }
 
-            const hit = this.add.zone(sx + slotW / 2, y + 18 + slotH / 2, slotW, slotH).setInteractive();
+            const hit = this.add.zone(sx + slotW / 2, y + 15 + 19, slotW, 38).setInteractive();
             hit.on('pointerdown', (pointer) => {
-                const isRight = pointer.rightButtonDown && pointer.rightButtonDown();
-                if (isRight || pointer.event && pointer.event.button === 2) {
-                    // 우클릭: 현재 편성으로 덮어쓰기
-                    this._savePartySlot(i);
-                } else {
-                    // 좌클릭: 불러오기 (또는 빈 슬롯이면 저장)
-                    if (hasSaved) this._loadPartySlot(i);
-                    else this._savePartySlot(i);
-                }
+                const isRight = (pointer.event && pointer.event.button === 2);
+                if (isRight) this._savePartySlot(i);
+                else if (hasSaved) this._loadPartySlot(i);
+                else this._savePartySlot(i);
             });
-            // 우클릭 컨텍스트 메뉴 비활성화
             this.input.mouse.disableContextMenu();
         }
     }
@@ -295,471 +636,87 @@ class DeployScene extends Phaser.Scene {
             return;
         }
         if (!gs.savedParties) gs.savedParties = [];
-        gs.savedParties[idx] = {
-            name: `편성 ${idx + 1}`,
-            mercIds: this.deployedIds.slice()
-        };
+        gs.savedParties[idx] = { name: `편성 ${idx + 1}`, mercIds: this.deployedIds.slice() };
         SaveManager.save(gs);
-        UIToast.show(this, `슬롯 ${idx + 1}에 저장됨`, { color: '#88ccff' });
-        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
+        UIToast.show(this, `슬롯 ${idx + 1} 저장됨`, { color: '#88ccff' });
+        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode, selectedLevel: this.selectedLevel });
     }
 
     _loadPartySlot(idx) {
         const gs = this.gameState;
         const saved = gs.savedParties[idx];
         if (!saved) return;
-        // 살아있고 파견 안 중인 용병만
         const validIds = saved.mercIds.filter(id => {
             const m = gs.roster.find(r => r.id === id);
             return m && m.alive && !ExpeditionManager.isOnExpedition(gs, id);
         });
         if (validIds.length === 0) {
-            UIToast.show(this, '저장된 용병들이 모두 출전 불가', { color: '#ff6644' });
+            UIToast.show(this, '저장된 용병들 출전 불가', { color: '#ff6644' });
             return;
         }
         const maxDeploy = GuildManager.getMaxDeploy(gs);
         this.deployedIds = validIds.slice(0, maxDeploy);
-        UIToast.show(this, `편성 ${idx + 1} 불러옴 (${this.deployedIds.length}명)`, { color: '#88ccff' });
-        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
+        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode, selectedLevel: this.selectedLevel });
     }
 
-    _drawZoneCard(zoneKey, x, y, w, h) {
-        const zone = ZONE_DATA[zoneKey];
+    _drawDepartButton(panelX, panelY, panelW, panelH) {
         const gs = this.gameState;
-        const isLocked = gs.zoneLevel[zoneKey] === 0;
-        const isSelected = this.selectedZone === zoneKey;
-
-        const bg = this.add.graphics();
-        if (isLocked) {
-            bg.fillStyle(0x181822, 1);
-            bg.fillRoundedRect(x, y, w, h, 5);
-            bg.lineStyle(1, 0x333344, 0.5);
-            bg.strokeRoundedRect(x, y, w, h, 5);
-        } else {
-            bg.fillStyle(isSelected ? 0x223344 : 0x151525, 1);
-            bg.fillRoundedRect(x, y, w, h, 5);
-            bg.lineStyle(2, isSelected ? zone.color : 0x333355, isSelected ? 0.9 : 0.5);
-            bg.strokeRoundedRect(x, y, w, h, 5);
-        }
-
-        this.add.text(x + w / 2, y + 20, zone.icon, { fontSize: '28px' }).setOrigin(0.5);
-        this.add.text(x + w / 2, y + 55, zone.name, {
-            fontSize: '14px', fontFamily: 'monospace',
-            color: isLocked ? '#555566' : zone.textColor, fontStyle: 'bold'
-        }).setOrigin(0.5);
-
-        this.add.text(x + w / 2, y + 75, zone.subtitle, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#777788'
-        }).setOrigin(0.5);
-
-        if (isLocked) {
-            this.add.text(x + w / 2, y + 100, `🔒 Lv.${zone.unlockLevel} 필요`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#555566'
-            }).setOrigin(0.5);
-        } else {
-            const zLv = gs.zoneLevel[zoneKey];
-            const rounds = getMaxRounds(zLv);
-            this.add.text(x + w / 2, y + 100, `구역 Lv.${zLv}  |  ${rounds}라운드`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#888899'
-            }).setOrigin(0.5);
-            this.add.text(x + w / 2, y + 118, zone.desc, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#667788',
-                wordWrap: { width: w - 20 }, align: 'center'
-            }).setOrigin(0.5);
-
-            // 서브 파견 마스터리 진행 표시 (현재 레벨 기준)
-            const clears = GuildManager.getZoneClearCount(gs, zoneKey, zLv);
-            const needed = GuildManager.SUB_UNLOCK_CLEARS;
-            const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
-            let subText;
-            let subColor;
-            if (clears >= needed) {
-                subText = `📦 서브 해금됨 (최대 Lv.${maxUnlocked})`;
-                subColor = '#88ccff';
-            } else {
-                subText = `🔓 서브 해금까지 ${clears}/${needed}`;
-                subColor = '#aaaaaa';
-            }
-            this.add.text(x + w / 2, y + 140, subText, {
-                fontSize: '10px', fontFamily: 'monospace', color: subColor, fontStyle: 'bold'
-            }).setOrigin(0.5);
-
-            const hitZone = this.add.zone(x + w / 2, y + h / 2, w, h).setInteractive({ useHandCursor: true });
-            hitZone.on('pointerdown', () => {
-                this.selectedZone = zoneKey;
-                this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
-            });
-        }
-    }
-
-    _drawDeploySlots(x, y, maxDeploy) {
-        const gs = this.gameState;
-        // 동적 슬롯 너비 — 항상 1220px 안에 fit (오버플로우 방지)
-        const totalW = 1220;
-        const gap = 8;
-        const slotW = Math.min(230, Math.floor((totalW - (maxDeploy - 1) * gap) / maxDeploy));
-        // 슬롯 width 저장 (다른 함수에서 사용)
-        this._slotW = slotW;
-        this._slotGap = gap;
-
-        // 다키스트 포지션 안내 (포지션 1이 가장 우측 = 전열)
-        const positionInfo = this.add.text(x, y - 18, '편성 순서: ← 좌측이 후열(원거리), 우측이 전열(근접)', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaccff', fontStyle: 'italic'
-        });
-
-        for (let i = 0; i < maxDeploy; i++) {
-            const sx = x + i * (slotW + gap);
-            const merc = gs.roster.find(m => m.id === this.deployedIds[i]);
-            const position = maxDeploy - i;   // 좌측이 후열(높은 번호), 우측이 전열(낮은 번호)
-
-            const bg = this.add.graphics();
-            bg.fillStyle(merc ? 0x1a2a3a : 0x151525, 1);
-            bg.fillRoundedRect(sx, y, slotW, 165, 4);
-            bg.lineStyle(1, merc ? 0x446688 : 0x333355, 0.6);
-            bg.strokeRoundedRect(sx, y, slotW, 165, 4);
-
-            // 포지션 번호 (좌상단)
-            const posColor = position <= 2 ? '#ff8866' : '#88ccff';
-            const posLabel = position <= 2 ? `전열 [${position}]` : `후열 [${position}]`;
-            this.add.text(sx + 8, y + 5, posLabel, {
-                fontSize: '11px', fontFamily: 'monospace', color: posColor, fontStyle: 'bold'
-            });
-
-            if (merc) {
-                const base = merc.getBaseClass();
-                const rarity = RARITY_DATA[merc.rarity];
-                const stats = merc.getStats();
-
-                this.add.text(sx + slotW - 10, y + 5, `Lv.${merc.level}`, {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
-                }).setOrigin(1, 0);
-                this.add.text(sx + 10, y + 22, `${base.icon} ${merc.name}`, {
-                    fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
-                });
-                this.add.text(sx + 10, y + 40, `${base.name} HP:${merc.currentHp}/${stats.hp}`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
-                });
-                this.add.text(sx + 10, y + 55, `ATK:${stats.atk} DEF:${stats.def} SPD:${stats.moveSpeed}`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
-                });
-
-                // 스테미너 표시 (좁은 슬롯에서도 보이게)
-                const stamina = merc.stamina !== undefined ? merc.stamina : 100;
-                const stColor = stamina >= 60 ? '#88ccff' : stamina >= 30 ? '#ffaa44' : '#ff6666';
-                this.add.text(sx + slotW - 10, y + 22, `⚡${Math.round(stamina)}`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: stColor, fontStyle: 'bold'
-                }).setOrigin(1, 0);
-
-                // 액션 미리보기 (현재 포지션에서 가능한지 표시)
-                if (typeof getClassActions === 'function') {
-                    const actions = getClassActions(merc.classKey);
-                    let ay = y + 72;
-                    actions.forEach(action => {
-                        const canUse = action.casterPositions.includes(position);
-                        const mark = canUse ? '✓' : '✗';
-                        const color = canUse ? '#88ccaa' : '#aa6666';
-                        const posStr = action.casterPositions.join(',');
-
-                        // 사용 가능 마크 (✓/✗)
-                        this.add.text(sx + 10, ay, mark, {
-                            fontSize: '9px', fontFamily: 'monospace', color
-                        });
-                        // 액션 아이콘 (작게 12×12)
-                        if (typeof ActionIcons !== 'undefined') {
-                            const iconObj = ActionIcons.render(this, sx + 26, ay + 6, action, 12);
-                            if (iconObj) {
-                                if (!canUse) iconObj.setAlpha(0.4);
-                            }
-                        }
-                        this.add.text(sx + 35, ay, `${action.name} [P${posStr}]`, {
-                            fontSize: '9px', fontFamily: 'monospace', color
-                        });
-                        ay += 12;
-                    });
-                }
-
-                // 좌/우 이동 버튼
-                if (i > 0) {
-                    UIButton.create(this, sx + 25, y + 148, 35, 22, '◀', {
-                        color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 12,
-                        onClick: () => this._swapDeployed(i, i - 1)
-                    });
-                }
-                if (i < maxDeploy - 1 && this.deployedIds[i + 1]) {
-                    UIButton.create(this, sx + 65, y + 148, 35, 22, '▶', {
-                        color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 12,
-                        onClick: () => this._swapDeployed(i, i + 1)
-                    });
-                }
-                UIButton.create(this, sx + slotW - 50, y + 148, 80, 22, '해제', {
-                    color: 0x555555, hoverColor: 0x666666, textColor: '#cccccc', fontSize: 10,
-                    onClick: () => {
-                        this.deployedIds = this.deployedIds.filter(id => id !== merc.id);
-                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
-                    }
-                });
-            } else {
-                this.add.text(sx + slotW / 2, y + 80, '(빈 슬롯)', {
-                    fontSize: '12px', fontFamily: 'monospace', color: '#444455'
-                }).setOrigin(0.5);
-            }
-        }
-    }
-
-    /** 슬롯 idx1과 idx2 위치 스왑 */
-    _swapDeployed(idx1, idx2) {
-        const gs = this.gameState;
-        const arr = this.deployedIds.slice();
-        // 양쪽 다 채워있어야 swap. 한쪽 빈 슬롯이면 한쪽으로 이동
-        const tmp = arr[idx1];
-        arr[idx1] = arr[idx2];
-        arr[idx2] = tmp;
-        this.deployedIds = arr.filter(id => id);
-        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
-    }
-
-    _drawRosterPick(x, y) {
-        const gs = this.gameState;
-        const available = gs.roster.filter(m =>
-            m.alive &&
-            !this.deployedIds.includes(m.id) &&
-            !ExpeditionManager.isOnExpedition(gs, m.id)
-        );
-
-        this.add.text(x, y, '대기 용병 (클릭하여 편성)', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#888899'
-        });
-
-        if (available.length === 0) {
-            this.add.text(x + 200, y + 60, '편성 가능한 용병이 없습니다', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#555566'
-            });
-            return;
-        }
-
-        let cx = x;
-        const maxDeploy = GuildManager.getMaxDeploy(gs);
-        available.forEach(merc => {
-            const base = merc.getBaseClass();
-            const rarity = RARITY_DATA[merc.rarity];
-            const cardW = 150;
-            const canAdd = this.deployedIds.length < maxDeploy;
-
-            const bg = this.add.graphics();
-            bg.fillStyle(0x151525, 1);
-            bg.fillRoundedRect(cx, y + 22, cardW, 55, 3);
-            bg.lineStyle(1, rarity.color, 0.3);
-            bg.strokeRoundedRect(cx, y + 22, cardW, 55, 3);
-
-            this.add.text(cx + 8, y + 28, `${base.icon} ${merc.name}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: rarity.textColor
-            });
-            this.add.text(cx + 8, y + 44, `Lv.${merc.level} ${base.name}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#777788'
-            });
-            this.add.text(cx + 8, y + 58, `HP:${merc.currentHp}/${merc.getStats().hp}`, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#8888aa'
-            });
-
-            if (canAdd) {
-                const hitZone = this.add.zone(cx + cardW / 2, y + 49, cardW, 55).setInteractive({ useHandCursor: true });
-                hitZone.on('pointerdown', () => {
-                    this.deployedIds.push(merc.id);
-                    this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds });
-                });
-            }
-
-            cx += cardW + 10;
-        });
-    }
-
-    _drawDepartButton() {
-        const gs = this.gameState;
+        const zoneKey = this.selectedZone;
         const isMain = this.deployMode === 'main';
         const activeExp = (gs.activeExpeditions || []).length;
         const maxSlots = ExpeditionManager.getMaxSlots(gs);
         const slotsFull = !isMain && activeExp >= maxSlots;
 
-        let canDepart = this.selectedZone && this.deployedIds.length > 0 && !slotsFull;
-        // 서브 모드: 마스터리 해금 체크
-        if (canDepart && !isMain && this.selectedZone) {
-            const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, this.selectedZone);
+        let canDepart = this.deployedIds.length > 0 && !slotsFull;
+        if (canDepart && !isMain) {
+            const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
             if (maxUnlocked === 0) canDepart = false;
         }
 
-        // === 포켓 아이템 슬롯 (BP 전용, F2 해금) ===
-        if (isMain && this.selectedZone === 'bloodpit') {
-            this._drawPocketSlots(gs);
-        }
+        const btnLabel = isMain ? '⚔ 출발 (메인 전투)' : '📦 파견 시작';
+        const btnX = panelX + panelW / 2;
+        const btnY = panelY + panelH - 25;
 
-        // === 스테미너 체크 — 0인 용병이 편성에 있으면 차단 ===
-        const partyMercs = this.deployedIds.map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
-        const exhausted = partyMercs.filter(m => (m.stamina || 0) <= 0);
-        const lowStamina = partyMercs.filter(m => (m.stamina || 0) > 0 && (m.stamina || 0) < 30);
-        if (exhausted.length > 0) canDepart = false;
-
-        // 경고 라벨
-        if (exhausted.length > 0) {
-            this.add.text(640, 660, `⚠ ${exhausted.map(m => m.name).join(', ')} 스테미너 0 — 출전 불가 (마을에서 휴식)`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#ff6666', fontStyle: 'bold'
-            }).setOrigin(0.5);
-        } else if (lowStamina.length > 0) {
-            this.add.text(640, 660, `⚠ ${lowStamina.map(m => m.name).join(', ')} 스테미너 부족 — 능력치 감소 (-25%~-40%)`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#ffaa44'
-            }).setOrigin(0.5);
-        }
-
-        const btnLabel = isMain ? '출발 (메인 전투)' : `파견 시작 (서브)`;
-
-        UIButton.create(this, 640, 690, 220, 40, btnLabel, {
+        UIButton.create(this, btnX, btnY, 240, 36, btnLabel, {
             color: canDepart ? (isMain ? 0xaa4422 : 0x4488cc) : 0x333333,
             hoverColor: isMain ? 0xcc5533 : 0x55aaee,
             textColor: canDepart ? '#ffffff' : '#555555',
-            fontSize: 16,
+            fontSize: 14,
             disabled: !canDepart,
             onClick: () => {
+                if (!canDepart) return;
                 const party = this.deployedIds.map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
 
                 if (isMain) {
-                    // 메인 전투 — BP는 다키스트 (ManualBattleScene), 다른 구역은 기존
                     gs.runCount++;
                     SaveManager.save(gs);
-                    const sceneMap = {
-                        bloodpit: 'ManualBattleScene',   // v3 다키스트 적용
-                        cargo: 'CargoFloorSelectScene',  // 나락식 층 선택 → 전투
-                        blackout: 'BlackoutProtoSelectScene'  // 전투 프로토타입 3종 선택 (탐색은 추후)
-                    };
-                    const targetScene = sceneMap[this.selectedZone] || 'BattleScene';
-                    this.scene.start(targetScene, {
-                        gameState: gs,
-                        zoneKey: this.selectedZone,
-                        party
-                    });
+                    const sceneMap = { bloodpit: 'ManualBattleScene', cargo: 'CargoBattleScene', blackout: 'BlackoutBattleScene' };
+                    this.scene.start(sceneMap[zoneKey] || 'BattleScene', { gameState: gs, zoneKey, party });
                 } else {
-                    // 서브 파견 (시간 경과형)
-                    const exp = ExpeditionManager.dispatch(gs, this.selectedZone, party);
+                    const level = this.selectedLevel || GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
+                    const exp = ExpeditionManager.dispatch(gs, zoneKey, party, level);
                     if (!exp) {
-                        UIToast.show(this, '파견 실패 (슬롯/구역 확인)', { color: '#ff6644' });
+                        UIToast.show(this, '파견 실패 (슬롯/해금 확인)', { color: '#ff6644' });
                         return;
                     }
                     const mins = Math.ceil(exp.durationMs / 60000);
-                    UIToast.show(this, `${ZONE_DATA[this.selectedZone].name} 파견 시작 (~${mins}분)`, { color: '#88ccff' });
+                    UIToast.show(this, `${ZONE_DATA[zoneKey].name} Lv.${level} 파견 (~${mins}분)`, { color: '#88ccff' });
                     SaveManager.save(gs);
-                    this.scene.start('TownScene', { gameState: gs });
+                    this.scene.restart({ gameState: gs, selectedZone: zoneKey, deployedIds: [], deployMode: this.deployMode, selectedLevel: this.selectedLevel });
                 }
             }
         });
 
-        // 안내 메시지
+        // 안내
         let hint = '';
-        if (!this.selectedZone) hint = '구역을 선택하세요';
-        else if (this.deployedIds.length === 0) hint = '용병을 편성하세요';
+        if (this.deployedIds.length === 0) hint = '용병을 편성하세요';
         else if (slotsFull) hint = `파견 슬롯 가득 (${activeExp}/${maxSlots})`;
-        else if (!isMain && gs.zoneLevel[this.selectedZone] === 0) hint = '미클리어 구역엔 서브 파견 불가';
-        else if (!isMain) {
-            const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, this.selectedZone);
-            if (maxUnlocked === 0) {
-                const zLv = gs.zoneLevel[this.selectedZone];
-                const clears = GuildManager.getZoneClearCount(gs, this.selectedZone, zLv);
-                hint = `🔓 서브 해금 필요 (메인 ${clears}/${GuildManager.SUB_UNLOCK_CLEARS}회 클리어)`;
-            }
-        }
+        else if (!isMain && GuildManager.getMaxUnlockedSubLevel(gs, zoneKey) === 0) hint = '서브 파견 미해금';
 
         if (hint) {
-            this.add.text(640, 660, hint, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+            this.add.text(btnX, btnY - 18, hint, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#666677'
             }).setOrigin(0.5);
-        }
-    }
-
-    _drawPocketSlots(gs) {
-        const fLevel = (gs.guildHall && gs.guildHall.pit_control) || 0;
-        if (fLevel < 2) return;
-
-        if (!gs.pocketSlots) gs.pocketSlots = [null, null];
-        const slots = gs.pocketSlots;
-        const shopItems = (typeof POCKET_ITEM_SHOP !== 'undefined') ? POCKET_ITEM_SHOP : {};
-        const itemData = (typeof POCKET_ITEM_DATA !== 'undefined') ? POCKET_ITEM_DATA : {};
-
-        const px = 815, py = 540;
-        UIPanel.create(this, px, py, 457, 150, { title: '🧪 포켓 아이템 (BP 전용)' });
-
-        for (let i = 0; i < slots.length; i++) {
-            const sx = px + 12 + i * 225;
-            const sy = py + 30;
-            const itemKey = slots[i];
-            const item = itemKey ? itemData[itemKey] : null;
-
-            const slotBg = this.add.graphics();
-            slotBg.fillStyle(item ? 0x223344 : 0x181828, 1);
-            slotBg.fillRoundedRect(sx, sy, 210, 44, 5);
-            slotBg.lineStyle(1, item ? 0x4488aa : 0x333344, 0.8);
-            slotBg.strokeRoundedRect(sx, sy, 210, 44, 5);
-
-            if (item) {
-                this.add.text(sx + 8, sy + 6, `${item.icon} ${item.name}`, {
-                    fontSize: '12px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
-                });
-                this.add.text(sx + 8, sy + 24, item.desc, {
-                    fontSize: '9px', fontFamily: 'monospace', color: '#aabbcc'
-                });
-                UIButton.create(this, sx + 168, sy + 22, 40, 22, '해제', {
-                    color: 0x553333, hoverColor: 0x664444, textColor: '#ffaaaa', fontSize: 10,
-                    onClick: () => {
-                        gs.pocketSlots[i] = null;
-                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
-                    }
-                });
-            } else {
-                this.add.text(sx + 105, sy + 12, `슬롯 ${i + 1}: 비어있음`, {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#555566'
-                }).setOrigin(0.5);
-                this.add.text(sx + 105, sy + 28, '(아래 목록에서 선택)', {
-                    fontSize: '9px', fontFamily: 'monospace', color: '#444455'
-                }).setOrigin(0.5);
-            }
-        }
-
-        // 구매 가능 목록
-        const emptySlot = slots.indexOf(null);
-        if (emptySlot === -1) return;
-
-        let bx = px + 12;
-        const by = py + 82;
-        this.add.text(bx, by, '구매:', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#8899aa'
-        });
-        bx += 40;
-        for (const [key, shop] of Object.entries(shopItems)) {
-            const data = itemData[key];
-            if (!data) continue;
-            const canBuy = gs.gold >= shop.cost;
-            const alreadyEquipped = slots.includes(key);
-            const chipW = 115, chipH = 24;
-
-            UIButton.create(this, bx, by - 2, chipW, chipH, `${data.icon} ${shop.cost}G`, {
-                color: (canBuy && !alreadyEquipped) ? 0x224433 : 0x222233,
-                hoverColor: 0x336644,
-                textColor: (canBuy && !alreadyEquipped) ? '#88ffaa' : '#555566',
-                fontSize: 10,
-                onClick: () => {
-                    if (alreadyEquipped) { UIToast.show(this, '이미 장착됨', { color: '#ff6644' }); return; }
-                    if (!canBuy) { UIToast.show(this, '골드 부족', { color: '#ff6644' }); return; }
-                    const empty = gs.pocketSlots.indexOf(null);
-                    if (empty === -1) { UIToast.show(this, '슬롯 가득', { color: '#ff6644' }); return; }
-                    gs.gold -= shop.cost;
-                    gs.pocketSlots[empty] = key;
-                    this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
-                }
-            });
-
-            // 아이템 이름 툴팁 (호버 대신 아래 텍스트)
-            this.add.text(bx + chipW / 2, by + chipH + 2, data.name, {
-                fontSize: '8px', fontFamily: 'monospace', color: '#666677'
-            }).setOrigin(0.5);
-
-            bx += chipW + 8;
-            if (bx > px + 440) break;
         }
     }
 }
