@@ -432,74 +432,65 @@ class ManualBattleScene extends Phaser.Scene {
             }
         });
 
-        // 우측 추가 버튼 — 이동 + 스킵 (4 액션 슬롯 뒤)
-        const extraX = startX + 4 * (btnW + gap);
-        const extraW = 80, extraH = 60;
-
-        // 앞으로 이동 (전열로)
+        // === 액션 패널 위 별도 줄: 위치 이동 + 스킵 ===
         const aliveTeam = this.combat.allies.filter(u => u.alive);
         const canMoveForward = unit.position > 1;
         const canMoveBack = unit.position < aliveTeam.length;
 
-        // ◀ 앞열로 (전열 = position 감소)
+        const utilY = 520;  // 액션 슬롯(560) 위
+        const utilW = 130, utilH = 32;
+        const utilStartX = 640 - (utilW * 3 + 20) / 2;  // 가운데 정렬 3버튼
+
+        // ◀ 앞열로
+        const fwdX = utilStartX;
         const fwdBg = this.add.graphics();
         fwdBg.fillStyle(canMoveForward ? 0x224488 : 0x222233, 1);
-        fwdBg.fillRoundedRect(extraX, 560, extraW, extraH, 5);
-        fwdBg.lineStyle(1, canMoveForward ? 0x4488cc : 0x333344, 0.7);
-        fwdBg.strokeRoundedRect(extraX, 560, extraW, extraH, 5);
+        fwdBg.fillRoundedRect(fwdX, utilY, utilW, utilH, 5);
+        fwdBg.lineStyle(1, canMoveForward ? 0x4488cc : 0x333344, 0.8);
+        fwdBg.strokeRoundedRect(fwdX, utilY, utilW, utilH, 5);
         this.actionButtons.push(fwdBg);
-        this.actionButtons.push(this.add.text(extraX + extraW/2, 572, '◀ 앞', {
-            fontSize: '14px', fontFamily: 'monospace',
+        this.actionButtons.push(this.add.text(fwdX + utilW/2, utilY + utilH/2, '◀ 앞열 이동', {
+            fontSize: '13px', fontFamily: 'monospace',
             color: canMoveForward ? '#aaccff' : '#555555', fontStyle: 'bold'
         }).setOrigin(0.5));
-        this.actionButtons.push(this.add.text(extraX + extraW/2, 595, '전열 이동', {
-            fontSize: '9px', fontFamily: 'monospace', color: '#777788'
-        }).setOrigin(0.5));
         if (canMoveForward) {
-            const fwdHit = this.add.zone(extraX + extraW/2, 590, extraW, extraH).setInteractive({ useHandCursor: true });
+            const fwdHit = this.add.zone(fwdX + utilW/2, utilY + utilH/2, utilW, utilH).setInteractive({ useHandCursor: true });
             fwdHit.on('pointerdown', () => this._moveUnit(unit, -1));
             this.actionButtons.push(fwdHit);
         }
 
-        // ▶ 뒤열로 (후열 = position 증가)
-        const backX = extraX + extraW + 6;
+        // ⏭ 스킵
+        const skipX = fwdX + utilW + 10;
+        const skipBg = this.add.graphics();
+        skipBg.fillStyle(0x332244, 1);
+        skipBg.fillRoundedRect(skipX, utilY, utilW, utilH, 5);
+        skipBg.lineStyle(1, 0x665577, 0.8);
+        skipBg.strokeRoundedRect(skipX, utilY, utilW, utilH, 5);
+        this.actionButtons.push(skipBg);
+        this.actionButtons.push(this.add.text(skipX + utilW/2, utilY + utilH/2, '⏭ 스킵 (방어 +20%)', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ccaaee', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        const skipHit = this.add.zone(skipX + utilW/2, utilY + utilH/2, utilW, utilH).setInteractive({ useHandCursor: true });
+        skipHit.on('pointerdown', () => this._skipTurn(unit));
+        this.actionButtons.push(skipHit);
+
+        // ▶ 뒤열로
+        const backX = skipX + utilW + 10;
         const backBg = this.add.graphics();
         backBg.fillStyle(canMoveBack ? 0x224488 : 0x222233, 1);
-        backBg.fillRoundedRect(backX, 560, extraW, extraH, 5);
-        backBg.lineStyle(1, canMoveBack ? 0x4488cc : 0x333344, 0.7);
-        backBg.strokeRoundedRect(backX, 560, extraW, extraH, 5);
+        backBg.fillRoundedRect(backX, utilY, utilW, utilH, 5);
+        backBg.lineStyle(1, canMoveBack ? 0x4488cc : 0x333344, 0.8);
+        backBg.strokeRoundedRect(backX, utilY, utilW, utilH, 5);
         this.actionButtons.push(backBg);
-        this.actionButtons.push(this.add.text(backX + extraW/2, 572, '▶ 뒤', {
-            fontSize: '14px', fontFamily: 'monospace',
+        this.actionButtons.push(this.add.text(backX + utilW/2, utilY + utilH/2, '뒤열 이동 ▶', {
+            fontSize: '13px', fontFamily: 'monospace',
             color: canMoveBack ? '#aaccff' : '#555555', fontStyle: 'bold'
         }).setOrigin(0.5));
-        this.actionButtons.push(this.add.text(backX + extraW/2, 595, '후열 이동', {
-            fontSize: '9px', fontFamily: 'monospace', color: '#777788'
-        }).setOrigin(0.5));
         if (canMoveBack) {
-            const backHit = this.add.zone(backX + extraW/2, 590, extraW, extraH).setInteractive({ useHandCursor: true });
+            const backHit = this.add.zone(backX + utilW/2, utilY + utilH/2, utilW, utilH).setInteractive({ useHandCursor: true });
             backHit.on('pointerdown', () => this._moveUnit(unit, 1));
             this.actionButtons.push(backHit);
         }
-
-        // ⏭ 스킵
-        const skipX = backX + extraW + 6;
-        const skipW = 100;
-        const skipBg = this.add.graphics();
-        skipBg.fillStyle(0x332244, 1);
-        skipBg.fillRoundedRect(skipX, 560, skipW, extraH, 5);
-        skipBg.lineStyle(1, 0x665577, 0.7);
-        skipBg.strokeRoundedRect(skipX, 560, skipW, extraH, 5);
-        this.actionButtons.push(skipBg);
-        this.actionButtons.push(this.add.text(skipX + skipW/2, 572, '⏭ 스킵', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#ccaaee', fontStyle: 'bold'
-        }).setOrigin(0.5));
-        this.actionButtons.push(this.add.text(skipX + skipW/2, 595, '방어 +20%', {
-            fontSize: '9px', fontFamily: 'monospace', color: '#888899'
-        }).setOrigin(0.5));
-        const skipHit = this.add.zone(skipX + skipW/2, 590, skipW, extraH).setInteractive({ useHandCursor: true });
-        skipHit.on('pointerdown', () => this._skipTurn(unit));
-        this.actionButtons.push(skipHit);
     }
 
     /** 유닛 위치 이동 (행동 소모) — amount: -1 앞열, +1 후열 */
