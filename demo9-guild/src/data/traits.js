@@ -31,7 +31,7 @@ const NEGATIVE_TRAITS = [
     { id: 'claustrophobia',   name: '폐쇄 공포증',    desc: 'Blackout SPD -20%',    apply: () => {}, zone: 'blackout' },
     { id: 'no_tech',          name: '기계치',         desc: 'Cargo DEF 보너스 없음', apply: () => {}, zone: 'cargo' },
     { id: 'coward',           name: '겁쟁이',         desc: '아군 사망 시 스탯 -10%', apply: () => {} },
-    { id: 'greedy',           name: '욕심쟁이',       desc: '보안 컨테이너 -1칸',    apply: () => {} },
+    { id: 'greedy',           name: '욕심쟁이',       desc: '판매 가격 -15%',        apply: () => {} },
     { id: 'stubborn',         name: '고집쟁이',       desc: '시너지 효과 -5%',       apply: () => {} },
     { id: 'scarred',          name: '상처투성이',     desc: '런 시작 HP -10%',       apply: s => { s.hp = Math.floor(s.hp * 0.90); } },
     { id: 'unlucky',          name: '불운아',         desc: '드랍 희귀도 -1 확률',    apply: () => {} },
