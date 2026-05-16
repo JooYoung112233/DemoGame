@@ -26,6 +26,11 @@ class SaveManager {
             data.pendingResults = data.pendingResults || [];
             data.zoneClearCount = data.zoneClearCount || {};
             data.savedParties = data.savedParties || [];
+            // 기존 세이브에 'equipment' 시설 자동 추가 (장비 페이지 신규)
+            data.unlockedFacilities = data.unlockedFacilities || [];
+            if (!data.unlockedFacilities.includes('equipment')) {
+                data.unlockedFacilities.push('equipment');
+            }
             return data;
         } catch (e) {
             console.error('Save load failed:', e);
