@@ -11,7 +11,7 @@ class TownScene extends Phaser.Scene {
         // === 세이브 마이그레이션 (기존 세이브 호환) ===
         if (!gs.unlockedFacilities) gs.unlockedFacilities = [];
         let migrated = false;
-        ['equipment', 'guildHall'].forEach(f => {
+        ['guildHall'].forEach(f => {
             if (!gs.unlockedFacilities.includes(f)) {
                 gs.unlockedFacilities.push(f);
                 migrated = true;
@@ -446,7 +446,7 @@ class TownScene extends Phaser.Scene {
         // === 2) 카테고리별 시설 그리드 ===
         const groups = [
             { title: '🏛 길드 운영',  color: '#ffcc66', facilities: ['guildHall', 'recruit', 'eliteRecruit'] },
-            { title: '⚒ 용병 관리',  color: '#aaccff', facilities: ['equipment', 'training', 'temple'] },
+            { title: '⚒ 용병 관리',  color: '#aaccff', facilities: ['training', 'temple'] },
             { title: '💰 경제',       color: '#88ccaa', facilities: ['storage', 'forge', 'auction', 'vault'] },
             { title: '🔍 기타',       color: '#cc99ee', facilities: ['intel'] }
         ];
