@@ -124,13 +124,19 @@ const ENEMY_DATA = {
 };
 
 function getMaxRounds(zoneLevel) {
-    return Math.min(10, 4 + Math.floor((zoneLevel - 1) * 1.5));
+    // v2 밸런스: 시작 3라운드, Lv 비례 증가
+    // Lv1=3, Lv2=4, Lv3=5, Lv5=7, Lv8=10
+    return Math.min(10, 3 + Math.floor((zoneLevel - 1) * 1.0));
 }
 
 function getEnemyComposition(round, zoneLevel, zoneKey) {
     const maxRounds = getMaxRounds(zoneLevel);
     const progress = round / maxRounds;
-    const scaleMult = 1 + (zoneLevel - 1) * 0.1;
+    // v2 밸런스: Lv1 적 강도 0.75배 (튜토리얼/초반), Lv2 0.85, Lv3+ 일반 스케일
+    let scaleMult;
+    if (zoneLevel === 1) scaleMult = 0.75;
+    else if (zoneLevel === 2) scaleMult = 0.90;
+    else scaleMult = 1 + (zoneLevel - 3) * 0.12;
     let composition;
 
     if (zoneKey === 'cargo') {

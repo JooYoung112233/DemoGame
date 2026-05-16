@@ -769,8 +769,7 @@ class BattleScene extends Phaser.Scene {
                 if (!this.casualties.find(c => c.id === merc.id)) {
                     this.casualties.push(merc);
                 }
-                // 사망 보호: alive는 유지, 부상 상태로 (자동 회복)
-                merc.setInjured(5 * 60 * 1000); // 5분 후 자동 회복
+                merc.alive = false;
             }
         });
     }

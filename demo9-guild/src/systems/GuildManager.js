@@ -16,8 +16,46 @@ class GuildManager {
             messages: [],
             // v2 신규 필드
             activeExpeditions: [],       // 진행 중 서브 파견
-            pendingResults: []           // 미수령 파견 결과
+            pendingResults: [],          // 미수령 파견 결과
+            zoneClearCount: {}           // { 'bloodpit_1': 3, ... } 메인 클리어 누적 (서브 해금용)
         };
+    }
+
+    /** 서브 파견 해금 임계 — 메인 N번 클리어 시 해금 */
+    static SUB_UNLOCK_CLEARS = 3;
+
+    /** 특정 구역+레벨 메인 클리어 횟수 반환 */
+    static getZoneClearCount(state, zoneKey, zoneLevel) {
+        const k = `${zoneKey}_${zoneLevel}`;
+        return (state.zoneClearCount && state.zoneClearCount[k]) || 0;
+    }
+
+    /** 메인 클리어 시 카운트 +1 (RunResultScene에서 호출) */
+    static incrementZoneClear(state, zoneKey, zoneLevel) {
+        if (!state.zoneClearCount) state.zoneClearCount = {};
+        const k = `${zoneKey}_${zoneLevel}`;
+        state.zoneClearCount[k] = (state.zoneClearCount[k] || 0) + 1;
+        // 해금 도달 시 메시지
+        if (state.zoneClearCount[k] === GuildManager.SUB_UNLOCK_CLEARS) {
+            const zone = (typeof ZONE_DATA !== 'undefined') ? ZONE_DATA[zoneKey] : null;
+            const name = zone ? zone.name : zoneKey;
+            GuildManager.addMessage(state, `🎯 ${name} Lv.${zoneLevel} 서브 파견 해금!`);
+        }
+        return state.zoneClearCount[k];
+    }
+
+    /** 서브 파견 가능 여부 (해금됐는지) */
+    static isSubUnlocked(state, zoneKey, zoneLevel) {
+        return GuildManager.getZoneClearCount(state, zoneKey, zoneLevel) >= GuildManager.SUB_UNLOCK_CLEARS;
+    }
+
+    /** 구역의 서브 파견 가능한 최대 레벨 (해금된 것 중 최고) */
+    static getMaxUnlockedSubLevel(state, zoneKey) {
+        const maxZoneLv = state.zoneLevel[zoneKey] || 0;
+        for (let lv = maxZoneLv; lv >= 1; lv--) {
+            if (GuildManager.isSubUnlocked(state, zoneKey, lv)) return lv;
+        }
+        return 0;
     }
 
     static addGold(state, amount) {

@@ -23,6 +23,7 @@ class SaveManager {
             // v2 신규 필드 호환성
             data.activeExpeditions = data.activeExpeditions || [];
             data.pendingResults = data.pendingResults || [];
+            data.zoneClearCount = data.zoneClearCount || {};
             return data;
         } catch (e) {
             console.error('Save load failed:', e);

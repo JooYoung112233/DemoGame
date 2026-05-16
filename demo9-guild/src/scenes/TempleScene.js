@@ -40,42 +40,17 @@ class TempleScene extends Phaser.Scene {
     _add(o) { if (!this._objs) this._objs = []; this._objs.push(o); return o; }
 
     _drawHealSection(gs, x, y, w) {
-        this._add(UIPanel.create(this, x, y, w, 560, { title: '전체 치유 / 부상 치료' }));
+        this._add(UIPanel.create(this, x, y, w, 560, { title: '전체 치유' }));
 
-        // 부상 (전투 후 5분 자동회복) 즉시 치료 — 별도 가격
-        const battleInjured = gs.roster.filter(m => m.alive && m.injured);
-        if (battleInjured.length > 0) {
-            const battleHealCost = battleInjured.length * 200; // 비용: 1명당 200G
-            this._add(this.add.text(x + w / 2, y + 25, `🩹 전투 부상자: ${battleInjured.length}명`, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#ff8844', fontStyle: 'bold'
-            }).setOrigin(0.5));
-            this._add(UIButton.create(this, x + w / 2, y + 50, 240, 28, `즉시 치료 (${battleHealCost}G)`, {
-                color: gs.gold >= battleHealCost ? 0xaa5544 : 0x333333,
-                hoverColor: gs.gold >= battleHealCost ? 0xcc6655 : 0x333333,
-                textColor: gs.gold >= battleHealCost ? '#ffcc88' : '#555555',
-                fontSize: 11,
-                onClick: () => {
-                    if (gs.gold < battleHealCost) return;
-                    GuildManager.spendGold(gs, battleHealCost);
-                    battleInjured.forEach(m => m.fullHeal());
-                    GuildManager.addMessage(gs, `전투 부상 ${battleInjured.length}명 즉시 치료`);
-                    SaveManager.save(gs);
-                    UIToast.show(this, `${battleInjured.length}명 즉시 치료!`, { color: '#ffcc88' });
-                    this.goldText.setText(`${gs.gold}G`);
-                    this._drawContent();
-                }
-            }));
-        }
+        const injured = gs.roster.filter(m => m.alive && m.currentHp < m.getStats().hp);
 
-        const injured = gs.roster.filter(m => m.alive && !m.injured && m.currentHp < m.getStats().hp);
-
-        this._add(this.add.text(x + w / 2, y + 80, `일반 부상: ${injured.length}명`, {
+        this._add(this.add.text(x + w / 2, y + 30, `부상 용병: ${injured.length}명`, {
             fontSize: '12px', fontFamily: 'monospace', color: injured.length > 0 ? '#ff8844' : '#44ff88'
         }).setOrigin(0.5));
 
         if (injured.length > 0) {
             const healAllCost = injured.length * 20;
-            this._add(UIButton.create(this, x + w / 2, y + 105, 200, 28, `전체 치유 (${healAllCost}G)`, {
+            this._add(UIButton.create(this, x + w / 2, y + 58, 200, 30, `전체 치유 (${healAllCost}G)`, {
                 color: gs.gold >= healAllCost ? 0x446644 : 0x333333,
                 hoverColor: gs.gold >= healAllCost ? 0x558855 : 0x333333,
                 textColor: gs.gold >= healAllCost ? '#44ff88' : '#555555',

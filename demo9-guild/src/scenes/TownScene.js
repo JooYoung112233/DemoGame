@@ -8,16 +8,6 @@ class TownScene extends Phaser.Scene {
     create() {
         const gs = this.gameState;
 
-        // 부상 자동 회복 체크 (마을 진입 시)
-        if (gs.roster) {
-            const now = Date.now();
-            gs.roster.forEach(merc => {
-                if (typeof merc.tickRecovery === 'function' && merc.tickRecovery(now)) {
-                    GuildManager.addMessage(gs, `${merc.name} 부상 회복 완료`);
-                }
-            });
-        }
-
         // 파견 완료 처리 (마을 진입 시)
         if (typeof ExpeditionManager !== 'undefined') {
             const newCompleted = ExpeditionManager.processCompleted(gs);
@@ -33,18 +23,10 @@ class TownScene extends Phaser.Scene {
         this._drawFacilityGrid();
         this._drawMessageLog();
 
-        // 1초마다 부상/파견 체크
-        this._recoveryTimer = this.time.addEvent({
+        // 1초마다 파견 완료 체크
+        this._expTimer = this.time.addEvent({
             delay: 1000, loop: true,
             callback: () => {
-                const now = Date.now();
-                let needsRestart = false;
-                this.gameState.roster.forEach(merc => {
-                    if (typeof merc.tickRecovery === 'function' && merc.tickRecovery(now)) {
-                        GuildManager.addMessage(this.gameState, `${merc.name} 부상 회복 완료`);
-                        needsRestart = true;
-                    }
-                });
                 if (typeof ExpeditionManager !== 'undefined') {
                     const newDone = ExpeditionManager.processCompleted(this.gameState);
                     if (newDone.length > 0) {
@@ -52,10 +34,9 @@ class TownScene extends Phaser.Scene {
                             const icon = r.success ? '✅' : '⚠';
                             GuildManager.addMessage(this.gameState, `${icon} ${r.zoneName} 파견 ${r.success ? '성공' : '실패'} (+${r.goldEarned}G)`);
                         });
-                        needsRestart = true;
+                        this.scene.restart();
                     }
                 }
-                if (needsRestart) this.scene.restart();
             }
         });
     }

@@ -22,18 +22,25 @@ class ExpeditionManager {
     }
 
     /**
-     * 파견 시작.
-     * @returns {object|null} 파견 객체 또는 null (슬롯 가득)
+     * 파견 시작. zoneLevel을 명시하지 않으면 해금된 최고 레벨 자동 사용.
+     * @returns {object|null} 파견 객체 또는 null (슬롯/해금 미충족)
      */
-    static dispatch(gs, zoneKey, party) {
+    static dispatch(gs, zoneKey, party, requestedLevel) {
         if (!gs.activeExpeditions) gs.activeExpeditions = [];
         if (gs.activeExpeditions.length >= ExpeditionManager.getMaxSlots(gs)) return null;
         if (!party || party.length < 1) return null;
 
+        // 마스터리 체크 — 메인 3회 클리어한 레벨만 서브 가능
+        const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
+        if (maxUnlocked === 0) return null;  // 해금된 레벨 없음
+
+        const zoneLevel = requestedLevel
+            ? Math.min(requestedLevel, maxUnlocked)
+            : maxUnlocked;
+        if (!GuildManager.isSubUnlocked(gs, zoneKey, zoneLevel)) return null;
+
         const partySize = party.length;
         const power = party.reduce((s, m) => s + ExpeditionManager._calcMercPower(m), 0);
-        const zoneLevel = gs.zoneLevel[zoneKey] || 1;
-        if (zoneLevel === 0) return null;  // 미클리어 구역엔 못 보냄
 
         const recommended = ExpeditionManager._getRecommendedPower(zoneKey, zoneLevel);
 
@@ -115,9 +122,10 @@ class ExpeditionManager {
             if (typeof merc.gainAffinityXp === 'function') {
                 merc.gainAffinityXp(result.zoneKey, result.affinityXp);
             }
-            // 부상 처리
+            // 사망 처리 (영구사망)
             if (result.casualtyIds && result.casualtyIds.includes(merc.id)) {
-                merc.setInjured(5 * 60 * 1000);
+                merc.alive = false;
+                GuildManager.addMessage(gs, `${merc.name} 영구 사망 (서브 파견)`);
             }
             // _onExpedition 해제
             delete merc._onExpedition;

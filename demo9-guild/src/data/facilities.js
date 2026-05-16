@@ -14,14 +14,15 @@ const FACILITY_DATA = {
 const GUILD_LEVEL_XP = [0, 100, 250, 500, 800, 1200, 1800, 2500];
 
 const ROSTER_LIMITS = {
-    1: { max: 4, deploy: 2 },
-    2: { max: 4, deploy: 2 },
-    3: { max: 6, deploy: 3 },
-    4: { max: 6, deploy: 3 },
-    5: { max: 8, deploy: 4 },
-    6: { max: 8, deploy: 4 },
-    7: { max: 10, deploy: 5 },
-    8: { max: 10, deploy: 5 }
+    // v2 밸런스: 초반 deploy 2→3 (화력 보강), 후반 +1
+    1: { max: 4, deploy: 3 },
+    2: { max: 5, deploy: 3 },
+    3: { max: 6, deploy: 4 },
+    4: { max: 7, deploy: 4 },
+    5: { max: 8, deploy: 5 },
+    6: { max: 9, deploy: 5 },
+    7: { max: 10, deploy: 6 },
+    8: { max: 12, deploy: 6 }
 };
 
 const FACILITY_KEYS = Object.keys(FACILITY_DATA);

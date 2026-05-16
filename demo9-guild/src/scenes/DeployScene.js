@@ -111,15 +111,32 @@ class DeployScene extends Phaser.Scene {
             this.add.text(x + w / 2, y + 100, `구역 Lv.${zLv}  |  ${rounds}라운드`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#888899'
             }).setOrigin(0.5);
-            this.add.text(x + w / 2, y + 120, zone.desc, {
+            this.add.text(x + w / 2, y + 118, zone.desc, {
                 fontSize: '9px', fontFamily: 'monospace', color: '#667788',
                 wordWrap: { width: w - 20 }, align: 'center'
+            }).setOrigin(0.5);
+
+            // 서브 파견 마스터리 진행 표시 (현재 레벨 기준)
+            const clears = GuildManager.getZoneClearCount(gs, zoneKey, zLv);
+            const needed = GuildManager.SUB_UNLOCK_CLEARS;
+            const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
+            let subText;
+            let subColor;
+            if (clears >= needed) {
+                subText = `📦 서브 해금됨 (최대 Lv.${maxUnlocked})`;
+                subColor = '#88ccff';
+            } else {
+                subText = `🔓 서브 해금까지 ${clears}/${needed}`;
+                subColor = '#aaaaaa';
+            }
+            this.add.text(x + w / 2, y + 140, subText, {
+                fontSize: '10px', fontFamily: 'monospace', color: subColor, fontStyle: 'bold'
             }).setOrigin(0.5);
 
             const hitZone = this.add.zone(x + w / 2, y + h / 2, w, h).setInteractive({ useHandCursor: true });
             hitZone.on('pointerdown', () => {
                 this.selectedZone = zoneKey;
-                this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds });
+                this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
             });
         }
     }
@@ -194,7 +211,7 @@ class DeployScene extends Phaser.Scene {
     _drawRosterPick(x, y) {
         const gs = this.gameState;
         const available = gs.roster.filter(m =>
-            m.isDeployable() &&
+            m.alive &&
             !this.deployedIds.includes(m.id) &&
             !ExpeditionManager.isOnExpedition(gs, m.id)
         );
@@ -253,7 +270,12 @@ class DeployScene extends Phaser.Scene {
         const maxSlots = ExpeditionManager.getMaxSlots(gs);
         const slotsFull = !isMain && activeExp >= maxSlots;
 
-        const canDepart = this.selectedZone && this.deployedIds.length > 0 && !slotsFull;
+        let canDepart = this.selectedZone && this.deployedIds.length > 0 && !slotsFull;
+        // 서브 모드: 마스터리 해금 체크
+        if (canDepart && !isMain && this.selectedZone) {
+            const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, this.selectedZone);
+            if (maxUnlocked === 0) canDepart = false;
+        }
         const btnLabel = isMain ? '출발 (메인 전투)' : `파견 시작 (서브)`;
 
         UIButton.create(this, 640, 690, 220, 40, btnLabel, {
@@ -301,6 +323,14 @@ class DeployScene extends Phaser.Scene {
         else if (this.deployedIds.length === 0) hint = '용병을 편성하세요';
         else if (slotsFull) hint = `파견 슬롯 가득 (${activeExp}/${maxSlots})`;
         else if (!isMain && gs.zoneLevel[this.selectedZone] === 0) hint = '미클리어 구역엔 서브 파견 불가';
+        else if (!isMain) {
+            const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, this.selectedZone);
+            if (maxUnlocked === 0) {
+                const zLv = gs.zoneLevel[this.selectedZone];
+                const clears = GuildManager.getZoneClearCount(gs, this.selectedZone, zLv);
+                hint = `🔓 서브 해금 필요 (메인 ${clears}/${GuildManager.SUB_UNLOCK_CLEARS}회 클리어)`;
+            }
+        }
 
         if (hint) {
             this.add.text(640, 660, hint, {
