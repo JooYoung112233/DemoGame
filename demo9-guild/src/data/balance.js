@@ -136,6 +136,37 @@ const BALANCE = {
     },
     ENEMY_SCALING: { hpPerLevel: 0.25, atkPerLevel: 0.20, defAddPerLevel: 2 },
 
+    // === 경매장 (v2 신메커닉) ===
+    // 전체 정의: docs/systems/auction.md §11
+    AUCTION: {
+        // 참가
+        TIME_TOKENS: 2,
+        ENTRY_FEE: { min: 50, max: 100 },
+        ROUND_BUDGET_PCT: 0.25,
+        ROUND_BUDGET_MAX: 5000,
+        // 1단계 — 비공개 입찰
+        ITEM_COUNT: 3,
+        NPC_BIDDER_COUNT_BY_RARITY: { common: 1.0, uncommon: 1.2, rare: 2.0, epic: 2.5, legendary: 3.0 },
+        NPC_BID_MEAN_MULT:        { common: 0.95, uncommon: 0.95, rare: 1.05, epic: 1.15, legendary: 1.30 },
+        NPC_BID_STDDEV_PCT:       { common: 0.15, uncommon: 0.15, rare: 0.25, epic: 0.40, legendary: 0.60 },
+        NPC_NO_BID_CHANCE: 0.20,
+        PLAYER_BID_MIN_MULT: 0.5,
+        PLAYER_BID_MAX_MULT: 2.0,
+        TIE_GOES_TO_NPC: true,
+        // 2단계 — 손님 판매
+        CUSTOMER_PER_ROUND: { min: 1, max: 3 },
+        CUSTOMER_TIMER_SEC: { common: 10, uncommon: 12, rare: 15, epic: 18, legendary: 20 },
+        CUSTOMER_SATISFY_MULT_RANGE: { min: 0.85, max: 0.95 },
+        CUSTOMER_PRICE_ADJUST_TRIES: 2,
+        CUSTOMER_PREFERENCE_REVEAL: { category_at: 3, price_range_at: 7, dislike_at: 15 },
+        // 시세
+        MARKET_MODIFIER_RANGE: { min: 0.9, max: 1.3 },
+        // 위작/저주 (Backlog — MVP 미구현)
+        FAKE_TRIGGER_DURATION_H: 24,
+        FAKE_RECOVERY_MULT: { min: 0.10, max: 0.20 },
+        IDENTIFY_BUTTON_COST: 30
+    },
+
     // === 시간 ===
     TIME_OFFLINE_MAX_HOURS: 4,
     TIME_EVENT_INTERVAL_MIN: 30
