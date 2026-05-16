@@ -622,7 +622,7 @@ class DeployScene extends Phaser.Scene {
                     const sceneMap = {
                         bloodpit: 'ManualBattleScene',   // v3 다키스트 적용
                         cargo: 'CargoBattleScene',
-                        blackout: 'BlackoutBattleScene'
+                        blackout: 'BlackoutProtoSelectScene'  // 전투 프로토타입 3종 선택 (탐색은 추후)
                     };
                     const targetScene = sceneMap[this.selectedZone] || 'BattleScene';
                     this.scene.start(targetScene, {
