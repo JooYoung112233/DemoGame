@@ -39,8 +39,8 @@ class ManualBattleScene extends Phaser.Scene {
         this.zoneKey = data.zoneKey || 'bloodpit';
         this.party = (data.party || []).slice(0, 4);
 
-        // 적 생성
-        const enemies = this._spawnEnemies();
+        // 적 생성 (웨이브 1)
+        const enemies = this._spawnEnemies(1);
         this.combat = DarkestCombat.createCombat(this.party, enemies);
 
         // === 스테미너 페널티 적용 (시너지/본드 전에) ===
@@ -71,9 +71,12 @@ class ManualBattleScene extends Phaser.Scene {
         }
 
         this.currentRound = 1;
-        // 다키스트 스타일 — 라운드 제한은 안전장치 (전멸로 끝나는 게 정상)
-        // 너무 길어지면 자동 후퇴 처리
         this.maxRounds = 20;
+
+        // 웨이브 시스템 — Lv 1~4: 2웨이브, Lv 5+: 3웨이브
+        const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
+        this.currentWave = 1;
+        this.maxWaves = zoneLevel <= 4 ? 2 : 3;
         this.selectedAction = null;
         this.battleEnded = false;
         this.totalGold = 0;
@@ -130,27 +133,39 @@ class ManualBattleScene extends Phaser.Scene {
         this._processNextTurn();
     }
 
-    _spawnEnemies() {
-        // BP 적 4마리 — types 순서대로 position 1,2,3,4 (전열→후열)
-        // melee를 앞(전열), ranged를 뒤(후열)로 배치
+    _spawnEnemies(wave) {
         const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
+        const w = wave || 1;
         let types;
-        // [전열 melee, 전열 melee, 후열 ranged, 후열 ranged] 순서
-        if (zoneLevel <= 1)      types = ['runner', 'bruiser', 'spitter', 'runner'];
-        else if (zoneLevel <= 3) types = ['runner', 'bruiser', 'spitter', 'summoner'];
-        else if (zoneLevel <= 6) types = ['bruiser', 'elite_runner', 'spitter', 'summoner'];
-        else if (zoneLevel < 10) types = ['elite_runner', 'elite_bruiser', 'spitter', 'summoner'];
-        else                     types = ['pitlord', 'elite_bruiser', 'summoner', 'summoner'];
 
+        if (w === 1) {
+            if (zoneLevel <= 1)      types = ['runner', 'bruiser', 'spitter', 'runner'];
+            else if (zoneLevel <= 3) types = ['runner', 'bruiser', 'spitter', 'summoner'];
+            else if (zoneLevel <= 6) types = ['bruiser', 'elite_runner', 'spitter', 'summoner'];
+            else if (zoneLevel < 10) types = ['elite_runner', 'elite_bruiser', 'spitter', 'summoner'];
+            else                     types = ['elite_bruiser', 'elite_runner', 'summoner', 'summoner'];
+        } else if (w === 2) {
+            if (zoneLevel <= 1)      types = ['bruiser', 'runner', 'spitter', 'spitter'];
+            else if (zoneLevel <= 3) types = ['bruiser', 'bruiser', 'spitter', 'summoner'];
+            else if (zoneLevel <= 6) types = ['elite_runner', 'elite_bruiser', 'summoner', 'spitter'];
+            else if (zoneLevel < 10) types = ['elite_bruiser', 'elite_runner', 'elite_runner', 'summoner'];
+            else                     types = ['pitlord', 'elite_bruiser', 'summoner', 'summoner'];
+        } else {
+            if (zoneLevel <= 6)      types = ['elite_runner', 'elite_bruiser', 'spitter', 'summoner'];
+            else if (zoneLevel < 10) types = ['elite_bruiser', 'elite_bruiser', 'elite_runner', 'summoner'];
+            else                     types = ['pitlord', 'elite_bruiser', 'elite_runner', 'summoner'];
+        }
+
+        const waveScaleBonus = (w - 1) * 0.08;
         return types.map((type, i) => {
             const data = ENEMY_DATA[type];
-            const scaleMult = zoneLevel === 1 ? 0.75 : 1.0 + (zoneLevel - 2) * 0.08;
+            const scaleMult = (zoneLevel === 1 ? 0.75 : 1.0 + (zoneLevel - 2) * 0.08) + waveScaleBonus;
             const enemyActions = (typeof getEnemyActions === 'function') ? getEnemyActions(type) : [];
             return {
-                id: 'enemy_' + i,
+                id: `enemy_w${w}_${i}`,
                 name: data.name,
                 classKey: type,
-                actions: enemyActions,    // 적도 액션 풀 보유
+                actions: enemyActions,
                 getStats: () => ({
                     hp: Math.floor(data.hp * scaleMult),
                     atk: Math.floor(data.atk * scaleMult),
@@ -171,7 +186,7 @@ class ManualBattleScene extends Phaser.Scene {
         hdrBg.fillStyle(0x000000, 0.5);
         hdrBg.fillRect(0, 0, 1280, 44);
 
-        this.headerText = this.add.text(640, 20, `Round ${this.currentRound}  |  Blood Pit Lv.${gs.zoneLevel[this.zoneKey]}`, {
+        this.headerText = this.add.text(640, 20, `Round ${this.currentRound}  |  Wave ${this.currentWave}/${this.maxWaves}  |  Blood Pit Lv.${gs.zoneLevel[this.zoneKey]}`, {
             fontSize: '16px', fontFamily: 'monospace', color: '#ffcc66', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
@@ -662,6 +677,10 @@ class ManualBattleScene extends Phaser.Scene {
         // 전투 종료 체크
         const end = DarkestCombat.checkBattleEnd(this.combat);
         if (end.ended) {
+            if (end.winner === 'ally' && this.currentWave < this.maxWaves) {
+                this._startNextWave();
+                return;
+            }
             this._endBattle(end.winner === 'ally');
             return;
         }
@@ -1404,6 +1423,71 @@ class ManualBattleScene extends Phaser.Scene {
         });
     }
 
+    _startNextWave() {
+        this.currentWave++;
+
+        // 웨이브 전환 연출
+        const waveBanner = this.add.text(640, 200, `⚔ Wave ${this.currentWave} / ${this.maxWaves}`, {
+            fontSize: '28px', fontFamily: 'monospace', color: '#ff8844', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 5
+        }).setOrigin(0.5).setDepth(70).setAlpha(0);
+        this.tweens.add({
+            targets: waveBanner, alpha: 1, y: 180, duration: 400, ease: 'Back.easeOut',
+            onComplete: () => {
+                this.tweens.add({
+                    targets: waveBanner, alpha: 0, y: 160,
+                    duration: 600, delay: 800,
+                    onComplete: () => waveBanner.destroy()
+                });
+            }
+        });
+
+        // 기존 사망한 적 그래픽 정리
+        this.combat.enemies.forEach(u => {
+            const g = this.unitGfx[u.id];
+            if (g) { g.container.destroy(); delete this.unitGfx[u.id]; }
+        });
+
+        // 새 적 스폰
+        const newEnemies = this._spawnEnemies(this.currentWave);
+        const processed = DarkestCombat.createCombat([], newEnemies);
+        this.combat.enemies = processed.enemies;
+
+        // 새 적 그래픽 생성
+        this.combat.enemies.forEach(u => {
+            const x = 700 + (u.position - 1) * 100;
+            this._drawUnit(u, x, 250, 'enemy');
+            const g = this.unitGfx[u.id];
+            if (g) {
+                g.container.setAlpha(0).setScale(0.3);
+                this.tweens.add({ targets: g.container, alpha: 1, scale: 1, duration: 500, ease: 'Back.easeOut' });
+            }
+        });
+
+        // 헤더 갱신
+        this.headerText.setText(`Round ${this.currentRound}  |  Wave ${this.currentWave}/${this.maxWaves}  |  Blood Pit Lv.${this.gameState.zoneLevel[this.zoneKey]}`);
+
+        // 웨이브 간 쉬는 곳 체크
+        this.time.delayedCall(1200, () => {
+            const continueWave = () => {
+                // 아군 위치 재정렬
+                DarkestCombat.compactPositions(this.combat);
+                DarkestCombat.startRound(this.combat);
+                this._refreshAllUnits();
+                this._processNextTurn();
+            };
+
+            if (this.pitGauge) {
+                const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
+                if (this.pitGauge.shouldShowRestRoom(zoneLevel)) {
+                    this._showRestRoom(continueWave);
+                    return;
+                }
+            }
+            continueWave();
+        });
+    }
+
     _updatePitGaugeUI() {
         if (!this.pitGauge || !this._pitGaugeBarFill) return;
         const pct = this.pitGauge.gauge / this.pitGauge.max;
@@ -1668,7 +1752,7 @@ class ManualBattleScene extends Phaser.Scene {
         }
 
         const startNextRound = () => {
-            this.headerText.setText(`Round ${this.currentRound}  |  Blood Pit Lv.${this.gameState.zoneLevel[this.zoneKey]}`);
+            this.headerText.setText(`Round ${this.currentRound}  |  Wave ${this.currentWave}/${this.maxWaves}  |  Blood Pit Lv.${this.gameState.zoneLevel[this.zoneKey]}`);
             DarkestCombat.startRound(this.combat);
             this._processNextTurn();
         };
