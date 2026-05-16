@@ -30,12 +30,18 @@ class CargoBattleScene extends Phaser.Scene {
         this.totalKills = 0;
         this.totalEnemiesSpawned = 0;
 
-        // 기차 외벽
+        // 기차 — 3칸 시스템 (각 칸 독립 HP)
         const scaling = getCargoFloorScaling(this.floor);
+        const carHp = Math.floor(scaling.wallHp / 3);
         this.train = {
-            wallMaxHp: scaling.wallHp,
-            wallHp: scaling.wallHp,
+            wallMaxHp: scaling.wallHp,   // 총 HP (참조용)
             wallDef: 0,
+            // 3칸: 좌 / 중앙 / 우
+            cars: [
+                { hp: carHp, maxHp: carHp, alive: true, x: 220, w: 280 },
+                { hp: carHp, maxHp: carHp, alive: true, x: 500, w: 280 },
+                { hp: carHp, maxHp: carHp, alive: true, x: 780, w: 280 }
+            ],
             // 카드/모디파이어 효과 슬롯
             autoRepairInterval: 0,
             autoRepairPercent: 0,
@@ -124,45 +130,56 @@ class CargoBattleScene extends Phaser.Scene {
         gfx.fillGradientStyle(0x0a0a15, 0x0a0a15, 0x151520, 0x151520);
         gfx.fillRect(0, 0, 1280, 720);
 
-        // 기차 (12시 방향 = 상단) — 기차 본체
-        gfx.fillStyle(0x2a2520, 1);
-        gfx.fillRect(100, 0, 1080, 100); // 기차 본체 (상단)
+        // 기차 레일 (상단 가로)
+        gfx.fillStyle(0x1a1815, 1);
+        gfx.fillRect(60, 0, 1160, 100);
 
-        // 기차 외벽 (하단 가장자리 = 적이 도달하는 면)
-        gfx.fillStyle(0x334433, 1);
-        gfx.fillRect(100, 95, 1080, 10); // 외벽 라인
+        // 기차 3칸 — 분리된 차량
+        this.train.cars.forEach((car, i) => {
+            // 칸 본체
+            gfx.fillStyle(0x2a2520, 1);
+            gfx.fillRoundedRect(car.x, 10, car.w, 80, 4);
+            // 칸 테두리
+            gfx.lineStyle(1, 0x554433, 0.6);
+            gfx.strokeRoundedRect(car.x, 10, car.w, 80, 4);
+            // 칸 번호 표시
+            gfx.fillStyle(0x443322, 1);
+            gfx.fillCircle(car.x + car.w / 2, 50, 12);
+        });
+
+        // 칸 사이 연결부
+        gfx.fillStyle(0x333333, 0.5);
+        gfx.fillRect(this.train.cars[0].x + this.train.cars[0].w, 40, 20, 20);
+        gfx.fillRect(this.train.cars[1].x + this.train.cars[1].w, 40, 20, 20);
 
         // 전투 영역 (기차 아래쪽 공간)
         gfx.fillStyle(0x0f0f1a, 1);
-        gfx.fillRect(0, 105, 1280, 615);
+        gfx.fillRect(0, 100, 1280, 620);
 
         // 바닥 그리드 패턴
         gfx.lineStyle(1, 0x1a1a2a, 0.3);
         for (let x = 0; x < 1280; x += 80) {
-            gfx.lineBetween(x, 105, x, 720);
+            gfx.lineBetween(x, 100, x, 720);
         }
-        for (let y = 105; y < 720; y += 80) {
+        for (let y = 100; y < 720; y += 80) {
             gfx.lineBetween(0, y, 1280, y);
         }
 
         // 적 진입 방향 표시 (9시=좌, 6시=하, 3시=우)
         gfx.lineStyle(2, 0x442222, 0.3);
-        // 좌측 진입 화살표
         gfx.lineBetween(0, 400, 40, 400);
         gfx.lineBetween(40, 400, 30, 395);
         gfx.lineBetween(40, 400, 30, 405);
-        // 우측 진입 화살표
         gfx.lineBetween(1280, 400, 1240, 400);
         gfx.lineBetween(1240, 400, 1250, 395);
         gfx.lineBetween(1240, 400, 1250, 405);
-        // 하단 진입 화살표
         gfx.lineBetween(640, 720, 640, 680);
         gfx.lineBetween(640, 680, 635, 690);
         gfx.lineBetween(640, 680, 645, 690);
     }
 
     _drawTrainWall() {
-        // 외벽 시각화 (상단 — 기차 하단 가장자리)
+        // 각 칸 별 HP바 / 외벽 시각화
         this._wallGfx = this.add.graphics().setDepth(10);
         this._updateWallVisual();
     }
@@ -171,35 +188,43 @@ class CargoBattleScene extends Phaser.Scene {
         const gfx = this._wallGfx;
         gfx.clear();
 
-        const hpRatio = this.train.wallHp / this.train.wallMaxHp;
-
-        // 외벽 = 상단 가로 바 (기차 하단 면)
-        const wallX = 100, wallY = 90, wallW = 1080, wallH = 16;
-
-        // Wall body
-        const wallColor = hpRatio > 0.6 ? 0x446644 : hpRatio > 0.3 ? 0x886622 : 0x884422;
-        gfx.fillStyle(wallColor, 0.9);
-        gfx.fillRect(wallX, wallY, wallW, wallH);
-        gfx.lineStyle(1, 0x668866, 0.5);
-        gfx.strokeRect(wallX, wallY, wallW, wallH);
-
-        // Damage cracks
-        if (hpRatio < 0.7) {
-            gfx.lineStyle(1, 0xff4444, 0.3 + (1 - hpRatio) * 0.4);
-            const numCracks = Math.floor((1 - hpRatio) * 10);
-            for (let i = 0; i < numCracks; i++) {
-                const cx = wallX + 50 + i * (wallW / numCracks);
-                gfx.lineBetween(cx, wallY + 2, cx + 10, wallY + wallH - 2);
+        this.train.cars.forEach((car, i) => {
+            if (!car.alive) {
+                // 파괴된 칸 — 잔해 표시
+                gfx.fillStyle(0x331111, 0.5);
+                gfx.fillRoundedRect(car.x, 90, car.w, 12, 2);
+                gfx.lineStyle(1, 0x662222, 0.4);
+                gfx.strokeRoundedRect(car.x, 90, car.w, 12, 2);
+                return;
             }
-        }
 
-        // HP bar (외벽 위에 가로로 표시)
-        const barX = 100, barY = 75, barW = 1080, barH = 10;
-        gfx.fillStyle(0x222222, 1);
-        gfx.fillRoundedRect(barX, barY, barW, barH, 2);
-        const hpColor = hpRatio > 0.6 ? 0x44ff44 : hpRatio > 0.3 ? 0xffaa00 : 0xff4444;
-        gfx.fillStyle(hpColor, 1);
-        gfx.fillRoundedRect(barX, barY, barW * hpRatio, barH, 2);
+            const hpRatio = car.hp / car.maxHp;
+
+            // 외벽 바디 (칸 하단면)
+            const wallColor = hpRatio > 0.6 ? 0x446644 : hpRatio > 0.3 ? 0x886622 : 0x884422;
+            gfx.fillStyle(wallColor, 0.9);
+            gfx.fillRoundedRect(car.x, 90, car.w, 12, 2);
+            gfx.lineStyle(1, 0x668866, 0.5);
+            gfx.strokeRoundedRect(car.x, 90, car.w, 12, 2);
+
+            // 균열 표시
+            if (hpRatio < 0.7) {
+                gfx.lineStyle(1, 0xff4444, 0.3 + (1 - hpRatio) * 0.4);
+                const numCracks = Math.floor((1 - hpRatio) * 6);
+                for (let c = 0; c < numCracks; c++) {
+                    const cx = car.x + 20 + c * (car.w / (numCracks + 1));
+                    gfx.lineBetween(cx, 91, cx + 8, 100);
+                }
+            }
+
+            // HP 바 (칸 위에)
+            const barY = 82, barH = 6;
+            gfx.fillStyle(0x222222, 1);
+            gfx.fillRoundedRect(car.x + 4, barY, car.w - 8, barH, 2);
+            const hpColor = hpRatio > 0.6 ? 0x44ff44 : hpRatio > 0.3 ? 0xffaa00 : 0xff4444;
+            gfx.fillStyle(hpColor, 1);
+            gfx.fillRoundedRect(car.x + 4, barY, (car.w - 8) * hpRatio, barH, 2);
+        });
     }
 
     _drawHUD() {
@@ -510,7 +535,7 @@ class CargoBattleScene extends Phaser.Scene {
             return;
         }
 
-        const wallY = 105; // 외벽 위치 (상단 — 기차 하단 면)
+        const wallY = 102; // 외벽 위치 (상단 — 칸 하단 면)
 
         // 가장 가까운 아군 찾기
         let nearestAlly = null;
@@ -547,16 +572,22 @@ class CargoBattleScene extends Phaser.Scene {
                 }
             }
         } else if (unit.container.y > wallY + 30) {
-            // 벽(상단)을 향해 위로 이동
+            // 가장 가까운 살아있는 칸을 향해 이동
+            const targetCar = this._getNearestAliveCar(unit.container.x);
+            if (!targetCar) {
+                // 모든 칸 파괴됨 — 대기
+                return;
+            }
             const speed = unit.moveSpeed * (dt / 1000);
-            // 목표: wallY 방향으로 직진 (약간의 X 수렴 — 벽 중앙 640으로)
             unit.container.y -= speed;
-            // X축: 벽 범위(100~1180) 안으로 수렴
-            const targetX = 100 + Math.random() * 1080;
-            if (unit.container.x < 100) unit.container.x += speed * 0.5;
-            else if (unit.container.x > 1180) unit.container.x -= speed * 0.5;
+            // X축: 타겟 칸의 중심으로 수렴
+            const carCenterX = targetCar.x + targetCar.w / 2;
+            const xDiff = carCenterX - unit.container.x;
+            if (Math.abs(xDiff) > 10) {
+                unit.container.x += Math.sign(xDiff) * speed * 0.4;
+            }
         } else {
-            // 벽에 도달 → 벽 공격
+            // 벽에 도달 → 가장 가까운 칸 공격
             this._enemyAttackWall(unit, dt);
         }
 
@@ -572,8 +603,15 @@ class CargoBattleScene extends Phaser.Scene {
         if (unit.attackTimer >= unit.attackSpeed) {
             unit.attackTimer = 0;
 
+            // 가장 가까운 살아있는 칸 선택
+            const car = this._getNearestAliveCar(unit.container.x);
+            if (!car) {
+                // 모든 칸 파괴 — 이미 endRun 처리됨
+                return;
+            }
+
             let dmg = Math.max(1, unit.atk - this.train.wallDef);
-            this.train.wallHp -= dmg;
+            car.hp -= dmg;
 
             // 외벽 가시 반사
             if (this.train.thornPercent > 0) {
@@ -590,29 +628,54 @@ class CargoBattleScene extends Phaser.Scene {
                 unit._stunTimer = this.train.wallStun;
             }
 
-            // 데미지 팝업 (벽 = 상단이므로 유닛 위치 근처에 표시)
-            DamagePopup.show(this, unit.container.x, 110, dmg, 0xff4444, false);
+            // 데미지 팝업
+            DamagePopup.show(this, unit.container.x, 105, dmg, 0xff4444, false);
 
-            // 외벽 파괴 체크
-            if (this.train.wallHp <= 0) {
-                if (this.train.unsinkable && !this.train.unsinkableActive && this.train.unsinkableTimer <= 0) {
-                    // 불침함 발동
-                    this.train.wallHp = 1;
-                    this.train.unsinkableActive = true;
-                    this.train.unsinkableTimer = this.train.unsinkableDuration;
-                    DamagePopup.show(this, 640, 300, '🛡 불침함 발동!', 0xffcc44, false);
-                } else if (this.train.doubleWall && this.train.innerWallHp > 0) {
-                    // 이중 장벽
-                    this.train.wallHp = this.train.innerWallHp;
-                    this.train.innerWallHp = 0;
-                    this.train.doubleWall = false;
-                    DamagePopup.show(this, 640, 300, '🛡 내부 벽 활성화!', 0x44aaff, false);
+            // 칸 파괴 체크
+            if (car.hp <= 0) {
+                car.hp = 0;
+
+                // 이중 장벽: 칸 1회 부활 (30% HP)
+                if (this.train.doubleWall && !car._revived) {
+                    car._revived = true;
+                    car.hp = Math.floor(car.maxHp * 0.3);
+                    DamagePopup.show(this, car.x + car.w / 2, 60, '🛡 이중 장벽!', 0x44aaff, true);
                 } else {
-                    this.train.wallHp = 0;
-                    this._endRun(false);
+                    car.alive = false;
+                    DamagePopup.show(this, car.x + car.w / 2, 60, '💥 칸 파괴!', 0xff2222, true);
+                    this.cameras.main.shake(200, 0.008);
+
+                    // 모든 칸 파괴 → 실패
+                    const allDestroyed = this.train.cars.every(c => !c.alive);
+                    if (allDestroyed) {
+                        if (this.train.unsinkable && !this.train.unsinkableActive && this.train.unsinkableTimer <= 0) {
+                            car.hp = 1;
+                            car.alive = true;
+                            this.train.unsinkableActive = true;
+                            this.train.unsinkableTimer = this.train.unsinkableDuration;
+                            DamagePopup.show(this, 640, 300, '🛡 불침함 발동!', 0xffcc44, false);
+                        } else {
+                            this._endRun(false);
+                        }
+                    }
                 }
             }
         }
+    }
+
+    /** 유닛 X좌표 기준 가장 가까운 살아있는 칸 반환 */
+    _getNearestAliveCar(unitX) {
+        let nearest = null, nearestDist = Infinity;
+        for (const car of this.train.cars) {
+            if (!car.alive) continue;
+            const carCenter = car.x + car.w / 2;
+            const dist = Math.abs(unitX - carCenter);
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                nearest = car;
+            }
+        }
+        return nearest;
     }
 
     _updateAlly(unit, dt) {
@@ -760,14 +823,17 @@ class CargoBattleScene extends Phaser.Scene {
     }
 
     _updateTrainEffects(dt) {
-        // 자동 수리
+        // 자동 수리 (각 살아있는 칸에 균등 회복)
         if (this.train.autoRepairPercent > 0 && !this.train.noAutoRepair) {
             this.train.autoRepairTimer += dt;
             const interval = this.train.autoRepairInterval || 15000;
             if (this.train.autoRepairTimer >= interval) {
                 this.train.autoRepairTimer = 0;
-                const heal = Math.floor(this.train.wallMaxHp * this.train.autoRepairPercent);
-                this.train.wallHp = Math.min(this.train.wallMaxHp, this.train.wallHp + heal);
+                this.train.cars.forEach(car => {
+                    if (!car.alive) return;
+                    const heal = Math.floor(car.maxHp * this.train.autoRepairPercent);
+                    car.hp = Math.min(car.maxHp, car.hp + heal);
+                });
             }
         }
 
@@ -811,7 +877,8 @@ class CargoBattleScene extends Phaser.Scene {
 
         // 자폭 코어
         if (this.train.selfDestruct && !this.train.selfDestructTriggered) {
-            if (this.train.wallHp / this.train.wallMaxHp <= this.train.selfDestructThreshold) {
+            const totalHp = this.train.cars.reduce((s, c) => s + Math.max(0, c.hp), 0);
+            if (totalHp / this.train.wallMaxHp <= this.train.selfDestructThreshold) {
                 this.train.selfDestructTriggered = true;
                 // 모든 적에게 25% 피해
                 this.enemies.forEach(e => {
@@ -1047,9 +1114,13 @@ class CargoBattleScene extends Phaser.Scene {
     // ═══════════════════════════════════════════════════════════════
 
     _updateHUD() {
-        // 외벽 HP
-        const wallPercent = Math.floor((this.train.wallHp / this.train.wallMaxHp) * 100);
-        this.wallHpText.setText(`외벽 ${this.train.wallHp}/${this.train.wallMaxHp} (${wallPercent}%)`);
+        // 칸 HP (3칸 요약)
+        const carStatus = this.train.cars.map((c, i) => {
+            if (!c.alive) return `${i + 1}칸:💀`;
+            const pct = Math.floor((c.hp / c.maxHp) * 100);
+            return `${i + 1}칸:${pct}%`;
+        }).join(' | ');
+        this.wallHpText.setText(carStatus);
 
         // XP 바
         const xpNeeded = getCargoXpToLevel(this.level + 1);
@@ -1075,7 +1146,9 @@ class CargoBattleScene extends Phaser.Scene {
         if (this.battleOver) return;
         this.battleOver = true;
 
-        const wallHpPercent = this.train.wallHp / this.train.wallMaxHp;
+        // 총 잔여 HP 비율 (살아있는 칸 HP 합산)
+        const totalHpRemaining = this.train.cars.reduce((sum, c) => sum + Math.max(0, c.hp), 0);
+        const wallHpPercent = totalHpRemaining / this.train.wallMaxHp;
         const killPercent = this.totalEnemiesSpawned > 0 ? this.totalKills / this.totalEnemiesSpawned : 0;
 
         // 성적 판정

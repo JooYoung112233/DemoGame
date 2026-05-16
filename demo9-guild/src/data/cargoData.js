@@ -12,10 +12,10 @@ const CARGO_CARDS = {
     atk_r:   { name: '화력 집중 II',  rarity: 'rare',      category: 'stat', statGroup: 'atk',   desc: 'ATK +5%',       apply: (ctx) => { ctx.allies.forEach(u => { u.atk = Math.floor(u.atk * 1.05); }); }, upgradeFrom: 'atk_n' },
     atk_l:   { name: '화력 집중 III', rarity: 'legendary', category: 'stat', statGroup: 'atk',   desc: 'ATK +8%',       apply: (ctx) => { ctx.allies.forEach(u => { u.atk = Math.floor(u.atk * 1.08); }); }, upgradeFrom: 'atk_r' },
 
-    // 외벽 보강
-    wall_n:  { name: '외벽 보강',     rarity: 'normal',    category: 'stat', statGroup: 'wall',  desc: '외벽 HP +3%',   apply: (ctx) => { ctx.train.wallHp += Math.floor(ctx.train.wallMaxHp * 0.03); ctx.train.wallMaxHp = Math.floor(ctx.train.wallMaxHp * 1.03); } },
-    wall_r:  { name: '외벽 보강 II',  rarity: 'rare',      category: 'stat', statGroup: 'wall',  desc: '외벽 HP +5%',   apply: (ctx) => { ctx.train.wallHp += Math.floor(ctx.train.wallMaxHp * 0.05); ctx.train.wallMaxHp = Math.floor(ctx.train.wallMaxHp * 1.05); }, upgradeFrom: 'wall_n' },
-    wall_l:  { name: '외벽 보강 III', rarity: 'legendary', category: 'stat', statGroup: 'wall',  desc: '외벽 HP +8%',   apply: (ctx) => { ctx.train.wallHp += Math.floor(ctx.train.wallMaxHp * 0.08); ctx.train.wallMaxHp = Math.floor(ctx.train.wallMaxHp * 1.08); }, upgradeFrom: 'wall_r' },
+    // 외벽 보강 (각 칸 HP 증가)
+    wall_n:  { name: '외벽 보강',     rarity: 'normal',    category: 'stat', statGroup: 'wall',  desc: '각 칸 HP +3%',   apply: (ctx) => { ctx.train.cars.forEach(c => { if (!c.alive) return; const add = Math.floor(c.maxHp * 0.03); c.maxHp += add; c.hp += add; }); ctx.train.wallMaxHp = ctx.train.cars.reduce((s,c) => s + c.maxHp, 0); } },
+    wall_r:  { name: '외벽 보강 II',  rarity: 'rare',      category: 'stat', statGroup: 'wall',  desc: '각 칸 HP +5%',   apply: (ctx) => { ctx.train.cars.forEach(c => { if (!c.alive) return; const add = Math.floor(c.maxHp * 0.05); c.maxHp += add; c.hp += add; }); ctx.train.wallMaxHp = ctx.train.cars.reduce((s,c) => s + c.maxHp, 0); }, upgradeFrom: 'wall_n' },
+    wall_l:  { name: '외벽 보강 III', rarity: 'legendary', category: 'stat', statGroup: 'wall',  desc: '각 칸 HP +8%',   apply: (ctx) => { ctx.train.cars.forEach(c => { if (!c.alive) return; const add = Math.floor(c.maxHp * 0.08); c.maxHp += add; c.hp += add; }); ctx.train.wallMaxHp = ctx.train.cars.reduce((s,c) => s + c.maxHp, 0); }, upgradeFrom: 'wall_r' },
 
     // 강화 장갑
     def_n:   { name: '강화 장갑',     rarity: 'normal',    category: 'stat', statGroup: 'def',   desc: 'DEF +1',        apply: (ctx) => { ctx.allies.forEach(u => { u.def += 1; }); } },
@@ -62,7 +62,7 @@ const CARGO_CARDS = {
     overcharge:    { name: '폭주 기관',       rarity: 'rare',      category: 'gamble', desc: '공속 +15% BUT 외벽 자동 수리 비활성화', apply: (ctx) => { ctx.allies.forEach(u => { u.attackSpeed = Math.floor(u.attackSpeed * 0.85); }); ctx.train.autoRepairPercent = 0; } },
     gambler_dice:  { name: '도박꾼의 주사위', rarity: 'rare',      category: 'gamble', desc: '50% → 랜덤 스탯 +10% / 50% → -5%', apply: (ctx) => { const lucky = Math.random() < 0.5; const mult = lucky ? 1.10 : 0.95; ctx.allies.forEach(u => { u.atk = Math.floor(u.atk * mult); u.def = Math.floor(u.def * mult); }); ctx._gambleResult = lucky ? '성공! +10%' : '실패... -5%'; } },
     blood_pact:    { name: '피의 계약',       rarity: 'legendary', category: 'gamble', desc: 'ATK +12% BUT 매 30초 파티 HP 3% 감소', apply: (ctx) => { ctx.allies.forEach(u => { u.atk = Math.floor(u.atk * 1.12); }); ctx.train.bloodPact = true; ctx.train.bloodPactInterval = 30000; ctx.train.bloodPactPercent = 0.03; } },
-    self_destruct: { name: '자폭 코어',       rarity: 'legendary', category: 'gamble', desc: '기차 HP 20%↓ 시 적 전체 25% 폭발 BUT 외벽 -10% 즉시', apply: (ctx) => { ctx.train.selfDestruct = true; ctx.train.selfDestructThreshold = 0.2; ctx.train.selfDestructDmg = 0.25; ctx.train.wallHp = Math.floor(ctx.train.wallHp * 0.9); } },
+    self_destruct: { name: '자폭 코어',       rarity: 'legendary', category: 'gamble', desc: '기차 HP 20%↓ 시 적 전체 25% 폭발 BUT 각 칸 -10% 즉시', apply: (ctx) => { ctx.train.selfDestruct = true; ctx.train.selfDestructThreshold = 0.2; ctx.train.selfDestructDmg = 0.25; ctx.train.cars.forEach(c => { if (c.alive) c.hp = Math.floor(c.hp * 0.9); }); } },
     all_in:        { name: '올인',           rarity: 'legendary', category: 'gamble', desc: '다음 레벨업 선택지 전부 전설 BUT 보유 카드 1장 랜덤 삭제', apply: (ctx) => { ctx.train.allInNextLevel = true; if (ctx.heldCards.length > 0) { const idx = Math.floor(Math.random() * ctx.heldCards.length); ctx.heldCards.splice(idx, 1); } } },
     looter:        { name: '약탈자',         rarity: 'normal',    category: 'gamble', desc: '보상 +15% BUT 적 수 +10%', apply: (ctx) => { ctx.train.lootBonus = (ctx.train.lootBonus || 0) + 0.15; ctx.train.enemyCountMult = (ctx.train.enemyCountMult || 1) * 1.1; } },
     thiefs_luck:   { name: '도둑의 운',       rarity: 'normal',    category: 'gamble', desc: '전설 등장률 2배 BUT 일반 카드 효과 -50%', apply: (ctx) => { ctx.train.legendaryMult = (ctx.train.legendaryMult || 1) * 2; ctx.train.normalEffectMult = (ctx.train.normalEffectMult || 1) * 0.5; } }
@@ -143,14 +143,14 @@ function generateCargoLevelUpCards(floor, heldCardIds, options = {}) {
 // ─── 모디파이어 시스템 (다키스트식) ──────────────────────────────
 
 const CARGO_POSITIVE_MODIFIERS = [
-    { id: 'iron_wall',       name: '강철 외벽',   desc: '기차 외벽 HP +15%',              apply: (ctx) => { ctx.train.wallMaxHp = Math.floor(ctx.train.wallMaxHp * 1.15); ctx.train.wallHp = ctx.train.wallMaxHp; } },
+    { id: 'iron_wall',       name: '강철 외벽',   desc: '각 칸 HP +15%',                  apply: (ctx) => { ctx.train.cars.forEach(c => { const add = Math.floor(c.maxHp * 0.15); c.maxHp += add; c.hp += add; }); ctx.train.wallMaxHp = ctx.train.cars.reduce((s,c) => s + c.maxHp, 0); } },
     { id: 'combat_instinct', name: '전투 본능',   desc: '파티 ATK +8%',                   apply: (ctx) => { ctx.allies.forEach(u => { u.atk = Math.floor(u.atk * 1.08); }); } },
     { id: 'quick_hands',     name: '빠른 손',     desc: '공격속도 +10%',                  apply: (ctx) => { ctx.allies.forEach(u => { u.attackSpeed = Math.floor(u.attackSpeed * 0.9); }); } },
     { id: 'first_aid',       name: '응급 키트',   desc: '30초마다 파티 HP 5% 회복',       apply: (ctx) => { ctx.train.periodicHeal = true; ctx.train.periodicHealInterval = 30000; ctx.train.periodicHealPercent = 0.05; } },
     { id: 'armor_up',        name: '강화 장갑',   desc: '파티 DEF +5',                    apply: (ctx) => { ctx.allies.forEach(u => { u.def += 5; }); } },
     { id: 'mechanic',        name: '수리공',      desc: '외벽 15초당 1% 자동 수리',       apply: (ctx) => { ctx.train.autoRepairInterval = 15000; ctx.train.autoRepairPercent = (ctx.train.autoRepairPercent || 0) + 0.01; } },
     { id: 'keen_eye',        name: '예리한 눈',   desc: '크리 확률 +5%',                  apply: (ctx) => { ctx.allies.forEach(u => { u.critRate = Math.min(0.8, u.critRate + 0.05); }); } },
-    { id: 'double_wall',     name: '이중 장벽',   desc: '외벽 파괴 후 내부 벽 (본체 30%)', apply: (ctx) => { ctx.train.doubleWall = true; ctx.train.innerWallHp = Math.floor(ctx.train.wallMaxHp * 0.3); } },
+    { id: 'double_wall',     name: '이중 장벽',   desc: '칸 파괴 시 30% HP로 1회 부활',   apply: (ctx) => { ctx.train.doubleWall = true; } },
     { id: 'supply_drop',     name: '보급 지원',   desc: '시작 레벨 +1 (즉시 카드 1장)',   apply: (ctx) => { ctx.train.startBonus = true; } },
     { id: 'focus_fire',      name: '집중 화력',   desc: '동일 적 집중 시 추가 피해 +10%', apply: (ctx) => { ctx.train.focusFireBonus = 0.10; } }
 ];
@@ -158,7 +158,7 @@ const CARGO_POSITIVE_MODIFIERS = [
 const CARGO_NEGATIVE_MODIFIERS = [
     { id: 'mass_invasion',   name: '대규모 침공', desc: '적 수 +15%',                     apply: (ctx) => { ctx.train.enemyCountMult = (ctx.train.enemyCountMult || 1) * 1.15; } },
     { id: 'strong_enemies',  name: '강화 적',     desc: '적 HP/ATK +10%',                 apply: (ctx) => { ctx.train.enemyStatMult = (ctx.train.enemyStatMult || 1) * 1.10; } },
-    { id: 'weak_wall',       name: '약한 외벽',   desc: '외벽 HP -15%',                   apply: (ctx) => { ctx.train.wallMaxHp = Math.floor(ctx.train.wallMaxHp * 0.85); ctx.train.wallHp = Math.min(ctx.train.wallHp, ctx.train.wallMaxHp); } },
+    { id: 'weak_wall',       name: '약한 외벽',   desc: '각 칸 HP -15%',                  apply: (ctx) => { ctx.train.cars.forEach(c => { c.maxHp = Math.floor(c.maxHp * 0.85); c.hp = Math.min(c.hp, c.maxHp); }); ctx.train.wallMaxHp = ctx.train.cars.reduce((s,c) => s + c.maxHp, 0); } },
     { id: 'fast_invasion',   name: '급속 침입',   desc: '적 이동속도 +15%',               apply: (ctx) => { ctx.train.enemySpeedMult = (ctx.train.enemySpeedMult || 1) * 1.15; } },
     { id: 'no_repair',       name: '수리 불능',   desc: '외벽 자동 수리 비활성화',         apply: (ctx) => { ctx.train.noAutoRepair = true; } },
     { id: 'elite_swarm',     name: '엘리트 다수', desc: '엘리트 등장 빈도 +50%',          apply: (ctx) => { ctx.train.eliteFreqMult = (ctx.train.eliteFreqMult || 1) * 1.5; } },
