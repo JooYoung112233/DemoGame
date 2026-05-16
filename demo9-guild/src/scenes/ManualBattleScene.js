@@ -43,6 +43,20 @@ class ManualBattleScene extends Phaser.Scene {
         const enemies = this._spawnEnemies();
         this.combat = DarkestCombat.createCombat(this.party, enemies);
 
+        // === 스테미너 페널티 적용 (시너지/본드 전에) ===
+        this.combat.allies.forEach(u => {
+            const src = u.ref;
+            if (src && typeof src.getStaminaMultiplier === 'function') {
+                const mult = src.getStaminaMultiplier();
+                if (mult < 1.0) {
+                    u.atk = Math.floor(u.atk * mult);
+                    u.def = Math.floor(u.def * mult);
+                    u.spd = Math.floor(u.spd * mult);
+                    u._staminaPenalty = mult;
+                }
+            }
+        });
+
         // === 시너지 적용 (전투 시작 시 1회) ===
         this._activeSynergies = [];
         if (typeof applySynergies === 'function') {

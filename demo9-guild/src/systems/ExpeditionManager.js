@@ -124,6 +124,11 @@ class ExpeditionManager {
             BondManager.updateBonds(gs, partyForBonds, result.success, 'sub');
         }
 
+        // === 스테미너 소모 (서브 파견은 메인보다 부담 적음) ===
+        partyForBonds.forEach(merc => {
+            if (typeof merc.drainStamina === 'function') merc.drainStamina(25);
+        });
+
         partyMercs.forEach(merc => {
             merc.gainXp(result.mercXp);
             if (typeof merc.gainAffinityXp === 'function') {

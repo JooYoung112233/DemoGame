@@ -156,6 +156,30 @@ class TownScene extends Phaser.Scene {
         this.add.text(640, 18, `용병 ${gs.roster.length}/${maxRoster}  |  런 #${gs.runCount}`, {
             fontSize: '12px', fontFamily: 'monospace', color: '#888899'
         }).setOrigin(0.5, 0);
+
+        // === 단체 휴식 버튼 — 전 용병 스테미너 회복 (10G × 로스터 수) ===
+        const restCost = gs.roster.length * 10;
+        const needsRest = gs.roster.some(m => m.alive && (m.stamina || 0) < 100);
+        const canAfford = gs.gold >= restCost;
+        UIButton.create(this, 1080, 32, 90, 26, `🛌 휴식 ${restCost}G`, {
+            color: needsRest && canAfford ? 0x336655 : 0x333344,
+            hoverColor: 0x448866,
+            textColor: needsRest && canAfford ? '#aaffcc' : '#666677',
+            fontSize: 10,
+            disabled: !needsRest || !canAfford,
+            onClick: () => this._restAllMercs(restCost)
+        });
+    }
+
+    _restAllMercs(cost) {
+        const gs = this.gameState;
+        if (!GuildManager.spendGold(gs, cost)) return;
+        gs.roster.forEach(m => {
+            if (m.alive && typeof m.restStamina === 'function') m.restStamina(100);
+        });
+        GuildManager.addMessage(gs, `🛌 단체 휴식 — 모든 용병 스테미너 회복 (-${cost}G)`);
+        SaveManager.save(gs);
+        this.scene.restart({ gameState: gs });
     }
 
     _drawRosterPanel() {
@@ -169,14 +193,18 @@ class TownScene extends Phaser.Scene {
             return;
         }
 
-        // 전체 로스터 (카드 그리드) 진입 — 패널 헤더 우측에 작은 버튼들
-        UIButton.create(this, 200, 78, 50, 22, '전체', {
+        // 전체 로스터 + 본드 + 시너지 도감 진입 (패널 너비 265 안에 fit)
+        UIButton.create(this, 168, 78, 46, 22, '전체', {
             color: 0x335577, hoverColor: 0x446688, textColor: '#cceeff', fontSize: 10,
             onClick: () => this.scene.start('RosterScene', { gameState: gs })
         });
-        UIButton.create(this, 256, 78, 60, 22, '💞 본드', {
-            color: 0x553355, hoverColor: 0x664466, textColor: '#ffccee', fontSize: 10,
+        UIButton.create(this, 212, 78, 38, 22, '💞', {
+            color: 0x553355, hoverColor: 0x664466, textColor: '#ffccee', fontSize: 12,
             onClick: () => this.scene.start('BondScene', { gameState: gs })
+        });
+        UIButton.create(this, 252, 78, 38, 22, '✨', {
+            color: 0x443366, hoverColor: 0x554477, textColor: '#ccaaff', fontSize: 12,
+            onClick: () => this.scene.start('SynergyScene', { gameState: gs, returnTo: 'TownScene', returnData: { gameState: gs } })
         });
 
         let yOff = 95;
@@ -217,13 +245,26 @@ class TownScene extends Phaser.Scene {
 
         const barW = width - 16;
         const barH = 4;
-        const barY = y + 56;
+        const barY = y + 50;
         const hpBar = this.add.graphics();
         hpBar.fillStyle(0x333344, 1);
         hpBar.fillRect(x + 8, barY, barW, barH);
         const hpColor = hpRatio > 0.6 ? 0x44ff88 : hpRatio > 0.3 ? 0xffaa44 : 0xff4444;
         hpBar.fillStyle(hpColor, 1);
         hpBar.fillRect(x + 8, barY, barW * hpRatio, barH);
+
+        // 스테미너 바 (HP 바로 아래)
+        const stamina = merc.stamina !== undefined ? merc.stamina : 100;
+        const staminaRatio = stamina / (merc.maxStamina || 100);
+        const staminaBar = this.add.graphics();
+        staminaBar.fillStyle(0x223344, 1);
+        staminaBar.fillRect(x + 8, barY + 6, barW, 3);
+        const stColor = staminaRatio > 0.6 ? 0x44ccff : staminaRatio > 0.3 ? 0xffaa44 : 0xff6666;
+        staminaBar.fillStyle(stColor, 1);
+        staminaBar.fillRect(x + 8, barY + 6, barW * staminaRatio, 3);
+        this.add.text(x + width - 10, barY + 6, `⚡${Math.round(stamina)}`, {
+            fontSize: '8px', fontFamily: 'monospace', color: '#88ccdd'
+        }).setOrigin(1, 0);
 
         const traitText = merc.traits.map(t => {
             const sym = t.type === 'positive' ? '✦' : t.type === 'legendary' ? '★' : '✧';

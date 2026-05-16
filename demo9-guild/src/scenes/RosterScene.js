@@ -4,6 +4,7 @@ class RosterScene extends Phaser.Scene {
     init(data) {
         this.gameState = data.gameState;
         this.selectedMercId = data.selectedMercId || null;
+        this.sortMode = data.sortMode || 'level';  // 'level' | 'rarity' | 'class' | 'name' | 'stamina'
     }
 
     create() {
@@ -52,11 +53,97 @@ class RosterScene extends Phaser.Scene {
             return;
         }
 
-        this.add.text(640, 60, '용병 카드를 클릭하여 상세 보기 / 장비 착용 / 해고', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#88aacc'
+        this.add.text(640, 58, '용병 카드를 클릭하여 상세 보기 / 장비 착용 / 해고', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#88aacc'
         }).setOrigin(0.5);
 
+        // === 정렬 옵션 ===
+        const sortLabels = [
+            { mode: 'level',   label: '레벨' },
+            { mode: 'rarity',  label: '희귀도' },
+            { mode: 'class',   label: '클래스' },
+            { mode: 'name',    label: '이름' },
+            { mode: 'stamina', label: '스테미너' }
+        ];
+        this.add.text(40, 80, '정렬:', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc'
+        });
+        let sx = 90;
+        sortLabels.forEach(s => {
+            const active = this.sortMode === s.mode;
+            UIButton.create(this, sx + 35, 85, 70, 22, s.label, {
+                color: active ? 0x446688 : 0x223344,
+                hoverColor: 0x556699,
+                textColor: active ? '#ffffff' : '#aaccdd',
+                fontSize: 10,
+                onClick: () => {
+                    this.sortMode = s.mode;
+                    this.scene.restart({ gameState: gs, sortMode: s.mode });
+                }
+            });
+            sx += 74;
+        });
+
+        // === 편성 저장 표시 ===
+        this._drawSavedPartiesPanel(gs);
+
         this._drawMercGrid(gs);
+    }
+
+    /** 편성 저장 패널 — 카드 그리드 위에 가로 막대 */
+    _drawSavedPartiesPanel(gs) {
+        if (!gs.savedParties || gs.savedParties.length === 0) return;
+
+        const x = 480, y = 76, w = 770, h = 36;
+        const bg = this.add.graphics();
+        bg.fillStyle(0x1a1a2e, 1);
+        bg.fillRoundedRect(x, y, w, h, 5);
+        bg.lineStyle(1, 0x445588, 0.6);
+        bg.strokeRoundedRect(x, y, w, h, 5);
+
+        this.add.text(x + 10, y + 11, '💾 편성:', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+        });
+
+        let chipX = x + 70;
+        gs.savedParties.forEach((party, i) => {
+            const partyMercs = (party.mercIds || []).map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
+            const icons = partyMercs.map(m => CLASS_DATA[m.classKey]?.icon || '?').join('');
+            const label = `[${party.name || `슬롯${i+1}`}] ${icons}`;
+            const chip = this.add.text(chipX, y + 11, label, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ccddff',
+                backgroundColor: '#22334488', padding: { x: 6, y: 2 }
+            });
+            chipX += chip.width + 12;
+            if (chipX > x + w - 50) return;
+        });
+    }
+
+    /** 정렬 함수 */
+    _sortRoster(roster) {
+        const arr = roster.slice();
+        const rarityRank = { legendary: 5, epic: 4, rare: 3, uncommon: 2, common: 1 };
+        switch (this.sortMode) {
+            case 'rarity':
+                arr.sort((a, b) => (rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0)
+                    || (b.level - a.level));
+                break;
+            case 'class':
+                arr.sort((a, b) => (a.classKey || '').localeCompare(b.classKey || '')
+                    || (b.level - a.level));
+                break;
+            case 'name':
+                arr.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                break;
+            case 'stamina':
+                arr.sort((a, b) => (b.stamina || 0) - (a.stamina || 0));
+                break;
+            case 'level':
+            default:
+                arr.sort((a, b) => (b.level - a.level)
+                    || ((rarityRank[b.rarity] || 0) - (rarityRank[a.rarity] || 0)));
+        }
+        return arr;
     }
 
     /** 용병 상세 화면 — 좌(스탯), 중(장비+슬롯), 우(보관함 후보) */
@@ -93,9 +180,10 @@ class RosterScene extends Phaser.Scene {
         const cols = 5;
         const totalW = cols * cardW + (cols - 1) * gap;
         const startX = (1280 - totalW) / 2;
-        const startY = 90;
+        const startY = 130;  // 정렬 버튼/편성 패널 아래로 내림
 
-        gs.roster.forEach((merc, idx) => {
+        const sorted = this._sortRoster(gs.roster);
+        sorted.forEach((merc, idx) => {
             const col = idx % cols;
             const row = Math.floor(idx / cols);
             const x = startX + col * (cardW + gap);
@@ -148,10 +236,25 @@ class RosterScene extends Phaser.Scene {
             fontSize: '9px', fontFamily: 'monospace', color: '#ffffff', stroke: '#000', strokeThickness: 1
         }).setOrigin(0.5));
 
-        // 스탯 한줄
-        container.add(this.add.text(x + 10, y + 60, `ATK ${stats.atk}  DEF ${stats.def}  SPD ${stats.moveSpeed}`, {
+        // 스테미너 바 (HP 바 바로 아래)
+        const stamina = merc.stamina !== undefined ? merc.stamina : 100;
+        const stRatio = stamina / (merc.maxStamina || 100);
+        const stBar = this.add.graphics();
+        stBar.fillStyle(0x223344, 1);
+        stBar.fillRect(x + 10, y + 56, w - 20, 3);
+        const stColor = stRatio > 0.6 ? 0x44ccff : stRatio > 0.3 ? 0xffaa44 : 0xff6666;
+        stBar.fillStyle(stColor, 1);
+        stBar.fillRect(x + 10, y + 56, (w - 20) * stRatio, 3);
+        container.add(stBar);
+
+        // 스탯 한줄 + 스테미너 라벨
+        container.add(this.add.text(x + 10, y + 62, `ATK ${stats.atk}  DEF ${stats.def}  SPD ${stats.moveSpeed}`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#aaaacc'
         }));
+        container.add(this.add.text(x + w - 10, y + 62, `⚡${Math.round(stamina)}`, {
+            fontSize: '9px', fontFamily: 'monospace', color: stRatio > 0.6 ? '#88ccff' : stRatio > 0.3 ? '#ffaa44' : '#ff6666',
+            fontStyle: 'bold'
+        }).setOrigin(1, 0));
 
         // 장착 표시
         const equipCount = ['weapon','armor','accessory'].filter(s => merc.equipment[s]).length;

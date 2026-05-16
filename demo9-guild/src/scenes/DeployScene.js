@@ -31,6 +31,13 @@ class DeployScene extends Phaser.Scene {
             color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
+        UIButton.create(this, 210, 20, 120, 26, '✨ 시너지 도감', {
+            color: 0x443366, hoverColor: 0x554477, textColor: '#ccaaff', fontSize: 11,
+            onClick: () => this.scene.start('SynergyScene', {
+                gameState: gs, returnTo: 'DeployScene',
+                returnData: { gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode }
+            })
+        });
 
         // 메인/서브 모드 토글
         const isMain = this.deployMode === 'main';
@@ -387,7 +394,13 @@ class DeployScene extends Phaser.Scene {
 
     _drawDeploySlots(x, y, maxDeploy) {
         const gs = this.gameState;
-        const slotW = 230;
+        // 동적 슬롯 너비 — 항상 1220px 안에 fit (오버플로우 방지)
+        const totalW = 1220;
+        const gap = 8;
+        const slotW = Math.min(230, Math.floor((totalW - (maxDeploy - 1) * gap) / maxDeploy));
+        // 슬롯 width 저장 (다른 함수에서 사용)
+        this._slotW = slotW;
+        this._slotGap = gap;
 
         // 다키스트 포지션 안내 (포지션 1이 가장 우측 = 전열)
         const positionInfo = this.add.text(x, y - 18, '편성 순서: ← 좌측이 후열(원거리), 우측이 전열(근접)', {
@@ -395,7 +408,7 @@ class DeployScene extends Phaser.Scene {
         });
 
         for (let i = 0; i < maxDeploy; i++) {
-            const sx = x + i * (slotW + 10);
+            const sx = x + i * (slotW + gap);
             const merc = gs.roster.find(m => m.id === this.deployedIds[i]);
             const position = maxDeploy - i;   // 좌측이 후열(높은 번호), 우측이 전열(낮은 번호)
 
@@ -429,6 +442,13 @@ class DeployScene extends Phaser.Scene {
                 this.add.text(sx + 10, y + 55, `ATK:${stats.atk} DEF:${stats.def} SPD:${stats.moveSpeed}`, {
                     fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
                 });
+
+                // 스테미너 표시 (좁은 슬롯에서도 보이게)
+                const stamina = merc.stamina !== undefined ? merc.stamina : 100;
+                const stColor = stamina >= 60 ? '#88ccff' : stamina >= 30 ? '#ffaa44' : '#ff6666';
+                this.add.text(sx + slotW - 10, y + 22, `⚡${Math.round(stamina)}`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: stColor, fontStyle: 'bold'
+                }).setOrigin(1, 0);
 
                 // 액션 미리보기 (현재 포지션에서 가능한지 표시)
                 if (typeof getClassActions === 'function') {
@@ -566,6 +586,24 @@ class DeployScene extends Phaser.Scene {
             const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, this.selectedZone);
             if (maxUnlocked === 0) canDepart = false;
         }
+
+        // === 스테미너 체크 — 0인 용병이 편성에 있으면 차단 ===
+        const partyMercs = this.deployedIds.map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
+        const exhausted = partyMercs.filter(m => (m.stamina || 0) <= 0);
+        const lowStamina = partyMercs.filter(m => (m.stamina || 0) > 0 && (m.stamina || 0) < 30);
+        if (exhausted.length > 0) canDepart = false;
+
+        // 경고 라벨
+        if (exhausted.length > 0) {
+            this.add.text(640, 660, `⚠ ${exhausted.map(m => m.name).join(', ')} 스테미너 0 — 출전 불가 (마을에서 휴식)`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ff6666', fontStyle: 'bold'
+            }).setOrigin(0.5);
+        } else if (lowStamina.length > 0) {
+            this.add.text(640, 660, `⚠ ${lowStamina.map(m => m.name).join(', ')} 스테미너 부족 — 능력치 감소 (-25%~-40%)`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ffaa44'
+            }).setOrigin(0.5);
+        }
+
         const btnLabel = isMain ? '출발 (메인 전투)' : `파견 시작 (서브)`;
 
         UIButton.create(this, 640, 690, 220, 40, btnLabel, {
