@@ -447,7 +447,7 @@ class TownScene extends Phaser.Scene {
         const groups = [
             { title: '🏛 길드 운영',  color: '#ffcc66', facilities: ['guildHall', 'recruit', 'eliteRecruit'] },
             { title: '⚒ 용병 관리',  color: '#aaccff', facilities: ['training', 'temple'] },
-            { title: '💰 경제',       color: '#88ccaa', facilities: ['storage', 'forge', 'auction', 'vault'] },
+            { title: '💰 경제',       color: '#88ccaa', facilities: ['storage', 'forge', 'auction'] },
             { title: '🔍 기타',       color: '#cc99ee', facilities: ['intel'] }
         ];
 

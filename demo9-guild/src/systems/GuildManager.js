@@ -6,7 +6,7 @@ class GuildManager {
             gold: 500,                   // v2: 200 → 500 (초반 모집 부담 완화)
             roster: [],
             storage: [],
-            secureContainer: [],
+            secureContainer: [],  // legacy — 미사용
             unlockedFacilities: ['recruit', 'storage', 'gate', 'guildHall'],
             recruitPool: [],
             runCount: 0,
@@ -204,13 +204,11 @@ class GuildManager {
     }
 
     static getStorageCapacity(state) {
-        return state.unlockedFacilities.includes('vault') ? 20 : 12;
-    }
-
-    static getSecureContainerCapacity(state) {
-        let base = 2;
-        if (state.training.survival) base += state.training.survival;
-        if (state.unlockedFacilities.includes('vault')) base += 2;
+        let base = 12;
+        // 길드 회관 인프라 보너스
+        if (typeof GuildHallManager !== 'undefined') {
+            base += (GuildHallManager.getEffects(state).storageBonus || 0);
+        }
         return base;
     }
 

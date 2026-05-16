@@ -39,20 +39,20 @@ const GUILD_HALL_DATA = {
         textColor: '#ffcc88',
         baseCost: 400,
         unlockCondition: 'always',
-        desc: '보관함, 모집 풀, 보안 컨테이너',
+        desc: '보관함, 모집 풀, 아이템 관리',
         stages: [
             { stage: 1,  name: '보관함 +4',         desc: '12→16',                effect: { storageBonus: 4 } },
             { stage: 2,  name: '보관함 +4',         desc: '16→20',                effect: { storageBonus: 8 } },
             { stage: 3,  name: '모집 풀 +1',         desc: '3→4 매물',             effect: { recruitPoolBonus: 1 } },
-            { stage: 4,  name: '보안 컨테이너 +1', desc: '2→3',                   effect: { secureBonus: 1 } },
-            { stage: 5,  name: '보관함 +6',         desc: '20→26',                effect: { storageBonus: 14 } },
+            { stage: 4,  name: '보관함 +4',         desc: '20→24',                effect: { storageBonus: 12 } },
+            { stage: 5,  name: '보관함 +4',         desc: '24→28',                effect: { storageBonus: 16 } },
             { stage: 6,  name: '모집 풀 +2',         desc: '4→6 매물',             effect: { recruitPoolBonus: 3 } },
             { stage: 7,  name: '보관함 탭 분리',    desc: '장비/소재/소비 분리',  effect: { storageTabs: true } },
-            { stage: 8,  name: '보안 컨테이너 +2', desc: '3→5',                   effect: { secureBonus: 3 } },
+            { stage: 8,  name: '사망 장비 회수 60%',desc: '50→60%',                effect: { fallenItemRecovery: 0.6 } },
             { stage: 9,  name: '모집 풀 +2',         desc: '6→8 매물',             effect: { recruitPoolBonus: 5 } },
-            { stage: 10, name: '보관함 +8 / 장비전용',desc: '+20 장비창',          effect: { storageBonus: 22, equipStorage: 20 } },
-            { stage: 11, name: '사망 인벤 80%',     desc: '50→80%',                effect: { fallenItemRecovery: 0.8 } },
-            { stage: 12, name: '🏆 차원 창고',      desc: '+30 / 보안 무제한 / 모집 풀 ∞', effect: { storageBonus: 52, secureBonus: 999, recruitPoolBonus: 12 } }
+            { stage: 10, name: '보관함 +8 / 장비전용',desc: '+20 장비창',          effect: { storageBonus: 24, equipStorage: 20 } },
+            { stage: 11, name: '사망 장비 회수 80%',desc: '60→80%',                effect: { fallenItemRecovery: 0.8 } },
+            { stage: 12, name: '🏆 차원 창고',      desc: '+30 / 모집 풀 ∞',      effect: { storageBonus: 54, recruitPoolBonus: 12 } }
         ]
     },
     recovery: {

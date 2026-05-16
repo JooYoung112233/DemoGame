@@ -27,14 +27,9 @@ class StorageScene extends Phaser.Scene {
 
         // 스크롤 상태
         this._storageScrollY = 0;
-        this._secureScrollY = 0;
         this._storageContainer = null;
-        this._secureContainer = null;
 
-        this._drawStorageGrid(gs, 30, 75, 750, '보관함', gs.storage, false);
-
-        const secureCap = GuildManager.getSecureContainerCapacity(gs);
-        this._drawSecureContainer(gs, 810, 75, 440, secureCap);
+        this._drawStorageGrid(gs, 30, 75, 1220, '보관함', gs.storage);
 
         // 휠 이벤트
         this.input.on('wheel', this._onWheel, this);
@@ -44,20 +39,11 @@ class StorageScene extends Phaser.Scene {
         const wx = pointer.worldX;
         const wy = pointer.worldY;
 
-        // 보관함 영역 (30, 75, 750, 620)
-        if (wx >= 30 && wx <= 780 && wy >= 75 && wy <= 695) {
+        // 보관함 영역
+        if (wx >= 30 && wx <= 1250 && wy >= 75 && wy <= 695) {
             this._storageScrollY += dy * 0.5;
             this._clampStorageScroll();
             this._updateStorageContainer();
-            return;
-        }
-
-        // 보안 컨테이너 영역 (810, 75, 440, 620)
-        if (wx >= 810 && wx <= 1250 && wy >= 75 && wy <= 695) {
-            this._secureScrollY += dy * 0.5;
-            this._clampSecureScroll();
-            this._updateSecureContainer();
-            return;
         }
     }
 
@@ -65,30 +51,15 @@ class StorageScene extends Phaser.Scene {
         const gs = this.gameState;
         const itemCount = gs.storage.length;
         const contentH = itemCount * 48 + 10;
-        const viewH = 580; // 패널 높이 620 - 헤더 35 - 여유 5
+        const viewH = 580;
         const maxScroll = Math.max(0, contentH - viewH);
         this._storageScrollY = Math.max(0, Math.min(this._storageScrollY, maxScroll));
-    }
-
-    _clampSecureScroll() {
-        const gs = this.gameState;
-        const itemCount = gs.secureContainer.length;
-        const contentH = itemCount * 48 + 25; // 상단 설명 텍스트 여유
-        const viewH = 560;
-        const maxScroll = Math.max(0, contentH - viewH);
-        this._secureScrollY = Math.max(0, Math.min(this._secureScrollY, maxScroll));
     }
 
     _updateStorageContainer() {
         if (this._storageContainer) this._storageContainer.y = 110 - this._storageScrollY;
         this._updateScrollbar(this._storageThumb, this._storageScrollY,
             this.gameState.storage.length * 48 + 10, 580, 75 + 35, 580);
-    }
-
-    _updateSecureContainer() {
-        if (this._secureContainer) this._secureContainer.y = 130 - this._secureScrollY;
-        this._updateScrollbar(this._secureThumb, this._secureScrollY,
-            this.gameState.secureContainer.length * 48 + 25, 560, 75 + 55, 560);
     }
 
     _updateScrollbar(thumb, scrollY, contentH, viewH, trackY, trackH) {
@@ -108,7 +79,7 @@ class StorageScene extends Phaser.Scene {
         thumb.setPosition(thumb.x, thumbY);
     }
 
-    _drawStorageGrid(gs, x, y, w, title, items, isSecure) {
+    _drawStorageGrid(gs, x, y, w, title, items) {
         UIPanel.create(this, x, y, w, 620, { title });
 
         if (items.length === 0) {
@@ -124,7 +95,7 @@ class StorageScene extends Phaser.Scene {
 
         let cy = 0;
         items.forEach((item, idx) => {
-            this._drawItemRow(container, gs, item, x + 10, cy, w - 30, isSecure);
+            this._drawItemRow(container, gs, item, x + 10, cy, w - 30);
             cy += 48;
         });
 
@@ -142,7 +113,7 @@ class StorageScene extends Phaser.Scene {
         this._updateStorageContainer();
     }
 
-    _drawItemRow(container, gs, item, x, y, w, isSecure) {
+    _drawItemRow(container, gs, item, x, y, w) {
         const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
 
         const bg = this.add.graphics();
@@ -165,7 +136,7 @@ class StorageScene extends Phaser.Scene {
 
         if (item.stats) {
             const statStr = Object.entries(item.stats).map(([k, v]) => `${k}+${v}`).join(' ');
-            container.add(this.add.text(x + w - 160, y + 5, statStr, {
+            container.add(this.add.text(x + w - 200, y + 5, statStr, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
             }));
         }
@@ -198,43 +169,5 @@ class StorageScene extends Phaser.Scene {
         });
         hitZone.on('pointerout', () => UITooltip.hide(this));
         container.add(hitZone);
-    }
-
-    _drawSecureContainer(gs, x, y, w, cap) {
-        UIPanel.create(this, x, y, w, 620, { title: `보안 컨테이너 (${gs.secureContainer.length}/${cap})` });
-
-        this.add.text(x + w / 2, y + 40, '사망 시에도 보존되는 아이템', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#667788'
-        }).setOrigin(0.5);
-
-        if (gs.secureContainer.length === 0) {
-            this.add.text(x + w / 2, y + 310, '비어있음', {
-                fontSize: '13px', fontFamily: 'monospace', color: '#444455'
-            }).setOrigin(0.5);
-            return;
-        }
-
-        // 스크롤 가능한 컨테이너
-        const container = this.add.container(0, y + 55);
-        this._secureContainer = container;
-
-        let cy = 0;
-        gs.secureContainer.forEach(item => {
-            this._drawItemRow(container, gs, item, x + 10, cy, w - 30, true);
-            cy += 48;
-        });
-
-        // 마스크
-        const maskShape = this.make.graphics({ add: false });
-        maskShape.fillStyle(0xffffff);
-        maskShape.fillRect(x, y + 55, w, 560);
-        const mask = maskShape.createGeometryMask();
-        container.setMask(mask);
-
-        // 스크롤바
-        this._secureThumb = this.add.graphics();
-        this._secureThumb.setPosition(x + w - 8, y + 55);
-        this._secureThumb.setDepth(10);
-        this._updateSecureContainer();
     }
 }
