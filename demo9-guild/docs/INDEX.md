@@ -32,7 +32,8 @@
 | — | 시너지 14종 | [systems/synergies.md](systems/synergies.md) | ✅ 확정 (M1, 코드 일치) |
 | — | 길드 평판 | [systems/reputation.md](systems/reputation.md) | 🟡 간이 정의 |
 | — | gameState 스키마 | [systems/game-state.md](systems/game-state.md) | ✅ 확정 |
-| — | **구역 전투: Blood Pit** | [systems/zone-bloodpit.md](systems/zone-bloodpit.md) | ✅ 확정 |
+| — | **구역 전투: Blood Pit** | [systems/zone-bloodpit.md](systems/zone-bloodpit.md) | ✅ 확정 (v3 다키스트 적용) |
+| — | **수동 전투: 다키스트 스타일** | [systems/manual-battle-darkest.md](systems/manual-battle-darkest.md) | ✅ 확정 |
 | — | **구역 전투: Cargo** | [systems/zone-cargo.md](systems/zone-cargo.md) | ✅ 확정 |
 | — | **구역 전투: Blackout** | [systems/zone-blackout.md](systems/zone-blackout.md) | ✅ 확정 |
 | — | 클래스 스킬 (6) | [systems/class-skills.md](systems/class-skills.md) | ✅ 확정 |
