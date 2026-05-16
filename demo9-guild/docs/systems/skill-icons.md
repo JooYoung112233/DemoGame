@@ -169,3 +169,59 @@ PNG 파일을 **`demo9-guild/assets/actions/<action_id>.png`** 에 넣기만 하
 3. 끝 — 코드 수정 불필요
 
 PNG 일부만 채워도 OK — 누락된 건 이모지로 표시됨.
+
+---
+
+## 6. 그리드 원본 → 개별 아이콘 슬라이싱
+
+### 6.1 작업 절차
+1. 그리드 원본 PNG 2장을 다음 경로에 저장
+   - `demo9-guild/assets/actions/_raw/skills.png` (2행 × 3열 = 6 셀, 스킬)
+   - `demo9-guild/assets/actions/_raw/attacks.png` (4행 × 5열 = 20 셀, 공격)
+2. 워크트리 루트에서 실행: `pwsh -File demo9-guild/tools/slice-icons.ps1`
+3. 결과:
+   - 매칭 셀 → `demo9-guild/assets/actions/<action_id>.png` (ActionIcons 로더가 자동 인식)
+   - 매칭 없는 셀 → `demo9-guild/assets/actions/_unused/<tag>_r{R}_c{C}.png`
+
+### 6.2 매칭 표
+
+#### skills.png (2 × 3)
+| 셀 (R, C) | action_id | 비주얼 |
+|---|---|---|
+| (1, 1) | `warrior_skill` | 방패 + 황금 광채 |
+| (1, 2) | `rogue_skill` | 단검 + 핏방울 + 표적 |
+| (1, 3) | `mage_skill` | 보라 별 폭발 |
+| (2, 1) | `archer_skill` | 화살 + 해골 |
+| (2, 2) | `priest_skill` | 거대 황금 십자 |
+| (2, 3) | `alchemist_skill` | 화염병 |
+
+#### attacks.png (4 × 5)
+| 셀 | action_id | 비주얼 / 비고 |
+|---|---|---|
+| (1, 1) | `mage_atk2` | 불꽃 화살 → 화염구 |
+| (1, 2) | `warrior_atk2` | 원형 회전 슬래시 |
+| (1, 3) | `rogue_atk1` | 단검 찌르기 |
+| (1, 4) | _unused_ | 핑크 화살 — 매칭 애매 |
+| (1, 5) | `mage_atk1` | 작은 보라 폭발 → 마력 화살 |
+| (2, 1) | `archer_atk2` | 금 화살 → 다중 사격 |
+| (2, 2) | `rogue_atk2` | 단검 + 불꽃 모션 → 투척 단검 |
+| (2, 3) | `alchemist_atk2` | 빨간 폭발 덩어리 → 폭탄 |
+| (2, 4) | `mage_atk3` | 푸른 결정 → 냉기파 |
+| (2, 5) | `warrior_atk1` | 칼날 + 표적 → 정면 베기 |
+| (3, 1) | `archer_atk1` | 활 |
+| (3, 2) | `rogue_atk3` | 보라 화살/잔상 → 측면 이동 |
+| (3, 3) | _unused_ | 금 화살 중복 |
+| (3, 4) | `archer_atk3` | 조준점 → 저격 |
+| (3, 5) | `alchemist_atk1` | 불 병 → 산성 투척 (병 형태) |
+| (4, 1) | `priest_atk1` | 빛 구체 → 신성 빛 |
+| (4, 2) | `priest_atk2` | 십자 + 충격 → 정화 일격 |
+| (4, 3) | _unused_ | 황금 십자 중복 |
+| (4, 4) | `priest_atk3` | 녹색 십자 → 치유 |
+| (4, 5) | `alchemist_atk3` | 불 병 alt → 강화 물약 |
+
+### 6.3 매칭 미해결 — 아이콘 후속 작업 필요
+다음 액션은 그리드에서 매칭되는 아이콘이 없음. 후속 생성 또는 이모지 폴백 유지:
+- `warrior_atk3` 방패 밀치기 (방패 푸시 — 현 그리드에 방패 단독 컷 없음)
+
+### 6.4 매핑 수정
+`demo9-guild/tools/slice-icons.ps1` 상단 `$skillsMap` / `$attacksMap` 해시를 직접 수정 후 재실행. `_unused/`로 빠진 칸을 사용하려면 셀 좌표 키 → action_id 로 바꾸면 됨.
