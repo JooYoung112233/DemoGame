@@ -456,6 +456,7 @@ class DarkestCombat {
             DarkestCombat._shiftUnit(combat, enemy, choice.moveAmount);
             return {
                 casterId: enemy.id,
+                actionId: choice.actionId || null,
                 actionName: choice.action.name,
                 actionIcon: choice.action.icon,
                 isMove: true,
@@ -474,6 +475,7 @@ class DarkestCombat {
         const firstResult = result.results && result.results[0] ? result.results[0] : {};
         return {
             casterId: enemy.id,
+            actionId: choice.actionId,
             actionName: choice.action.name,
             actionIcon: choice.action.icon || '⚔',
             ...firstResult,
