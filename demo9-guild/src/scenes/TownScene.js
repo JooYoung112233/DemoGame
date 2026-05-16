@@ -227,6 +227,11 @@ class TownScene extends Phaser.Scene {
 
         const hitZone = this.add.zone(x + width / 2, y + 35, width, 70).setInteractive({ useHandCursor: true });
         hitZone.on('pointerover', () => {
+            cardBg.clear();
+            cardBg.fillStyle(0x2a2a4a, 1);
+            cardBg.fillRoundedRect(x, y, width, 70, 3);
+            cardBg.lineStyle(2, 0x88ccff, 0.8);
+            cardBg.strokeRoundedRect(x, y, width, 70, 3);
             const lines = [
                 `${base.icon} ${merc.name} [${rarity.name} ${base.name}]`,
                 `Lv.${merc.level}  XP: ${merc.xp}/${merc.level >= 10 ? 'MAX' : merc.getXpToNextLevel()}`,
@@ -242,9 +247,21 @@ class TownScene extends Phaser.Scene {
             if (merc.level >= 5) {
                 lines.push('---', `스킬: ${base.skillName} — ${base.skillDesc}`);
             }
+            lines.push('---', '🖱 클릭 — 상세/장비/해고');
             UITooltip.show(this, x + width + 5, y, lines);
         });
-        hitZone.on('pointerout', () => UITooltip.hide(this));
+        hitZone.on('pointerout', () => {
+            cardBg.clear();
+            cardBg.fillStyle(0x1a1a2e, 1);
+            cardBg.fillRoundedRect(x, y, width, 70, 3);
+            cardBg.lineStyle(1, rarity.color, 0.4);
+            cardBg.strokeRoundedRect(x, y, width, 70, 3);
+            UITooltip.hide(this);
+        });
+        hitZone.on('pointerdown', () => {
+            UITooltip.hide(this);
+            this.scene.start('RosterScene', { gameState: this.gameState, selectedMercId: merc.id });
+        });
     }
 
     _drawFacilityGrid() {
