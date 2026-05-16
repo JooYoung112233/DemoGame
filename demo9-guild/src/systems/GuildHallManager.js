@@ -64,8 +64,6 @@ class GuildHallManager {
         const effects = {
             // SUM
             subSlotsBonus: 0,
-            mainPartyBonus: 0,
-            rosterBonus: 0,
             storageBonus: 0,
             secureBonus: 0,
             restBonus: 0,
@@ -75,6 +73,9 @@ class GuildHallManager {
             autoSell: 0,
             autoSurvive: 0,
             equipStorage: 0,
+            recruitPoolBonus: 0,
+            // 메인/서브 보상 배율 (1 = 100%, 0이면 효과 없음 — MAX 정책)
+            subRewardBonus: 0, mainRewardBonus: 0, dispatchTimeReduction: 0,
             // BOOL — true 우선
             storageTabs: false, swapDuringRun: false, autoEquip: false,
             autoEquipOnPickup: false, autoOptimizeDispatch: false,
@@ -115,9 +116,9 @@ class GuildHallManager {
                         effects[key] = effects[key] || val;
                     } else if (typeof val === 'number') {
                         // 정책: 누적 키는 SUM, 비율/배율 키는 MAX
-                        if (['subSlotsBonus','mainPartyBonus','rosterBonus','storageBonus','secureBonus',
+                        if (['subSlotsBonus','storageBonus','secureBonus',
                              'restBonus','returnStaminaBonus','rumorSlots','duplicateDispatch','autoSell',
-                             'autoSurvive','equipStorage','safeRetreat','autoRepair'].includes(key)) {
+                             'autoSurvive','equipStorage','safeRetreat','autoRepair','recruitPoolBonus'].includes(key)) {
                             effects[key] = Math.max(effects[key] || 0, val);  // 단계별 효과는 누적값으로 정의됨 (덮어쓰기)
                         } else if (key === 'autoSurviveCooldown') {
                             effects[key] = Math.min(effects[key], val);

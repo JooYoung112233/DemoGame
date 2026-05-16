@@ -161,16 +161,13 @@ class GuildManager {
 
     static getMaxRoster(state) {
         const limits = ROSTER_LIMITS[state.guildLevel] || ROSTER_LIMITS[8];
-        const ghBonus = (typeof GuildHallManager !== 'undefined')
-            ? (GuildHallManager.getEffects(state).rosterBonus || 0) : 0;
-        return limits.max + ghBonus;
+        // 길드 회관 rosterBonus 제거 — 로스터는 길드 레벨에 따라 자연 증가만
+        return limits.max;
     }
 
+    /** 편성(파티) 슬롯 — 다키스트 스타일 4명 고정. 길드 레벨/업그레이드 영향 없음 */
     static getMaxDeploy(state) {
-        const limits = ROSTER_LIMITS[state.guildLevel] || ROSTER_LIMITS[8];
-        const ghBonus = (typeof GuildHallManager !== 'undefined')
-            ? (GuildHallManager.getEffects(state).mainPartyBonus || 0) : 0;
-        return limits.deploy + ghBonus;
+        return 4;
     }
 
     static canUnlockFacility(state, facilityKey) {

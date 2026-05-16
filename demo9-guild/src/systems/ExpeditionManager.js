@@ -48,7 +48,11 @@ class ExpeditionManager {
 
         // 시간 = base × Lv 비례 / 파워 비율
         const baseTimeSec = { bloodpit: 90, cargo: 240, blackout: 480 }[zoneKey] || 120;
-        const timeSec = baseTimeSec * Math.max(0.7, zoneLevel * 0.6) / Math.max(0.7, power / recommended);
+        let timeSec = baseTimeSec * Math.max(0.7, zoneLevel * 0.6) / Math.max(0.7, power / recommended);
+        // 길드 회관 운영 — 파견 시간 단축
+        const timeReduction = (typeof GuildHallManager !== 'undefined')
+            ? (GuildHallManager.getEffects(gs).dispatchTimeReduction || 0) : 0;
+        if (timeReduction > 0) timeSec *= (1 - timeReduction);
         const durationMs = Math.max(15 * 1000, timeSec * 1000);  // 최소 15초
 
         const exp = {
@@ -106,6 +110,14 @@ class ExpeditionManager {
 
         const result = gs.pendingResults[idx];
         gs.pendingResults.splice(idx, 1);
+
+        // === 길드 회관 운영 — 서브 보상 보너스 적용 ===
+        const ghBonus = (typeof GuildHallManager !== 'undefined')
+            ? (GuildHallManager.getEffects(gs).subRewardBonus || 0) : 0;
+        if (ghBonus > 0) {
+            result.goldEarned = Math.floor(result.goldEarned * (1 + ghBonus));
+            result.xpEarned = Math.floor(result.xpEarned * (1 + ghBonus));
+        }
 
         // 골드/XP
         if (typeof GuildManager !== 'undefined') {

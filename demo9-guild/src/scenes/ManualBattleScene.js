@@ -37,7 +37,8 @@ class ManualBattleScene extends Phaser.Scene {
     init(data) {
         this.gameState = data.gameState;
         this.zoneKey = data.zoneKey || 'bloodpit';
-        this.party = data.party || [];
+        // 다키스트 스타일 — 4명 고정 (이상 들어와도 잘라냄)
+        this.party = (data.party || []).slice(0, 4);
 
         // 적 생성
         const enemies = this._spawnEnemies();

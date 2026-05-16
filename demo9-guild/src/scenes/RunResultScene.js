@@ -155,6 +155,14 @@ class RunResultScene extends Phaser.Scene {
         const gs = this.gameState;
         const r = this.result;
 
+        // === 길드 회관 운영 — 메인 보상 보너스 적용 ===
+        const mainBonus = (typeof GuildHallManager !== 'undefined')
+            ? (GuildHallManager.getEffects(gs).mainRewardBonus || 0) : 0;
+        if (mainBonus > 0 && r.success) {
+            r.goldEarned = Math.floor(r.goldEarned * (1 + mainBonus));
+            r.xpEarned = Math.floor(r.xpEarned * (1 + mainBonus));
+        }
+
         GuildManager.addGold(gs, r.goldEarned);
         GuildManager.addMessage(gs, `${ZONE_DATA[r.zoneKey].name} ${r.success ? '성공' : '실패'} — +${r.goldEarned}G`);
 
