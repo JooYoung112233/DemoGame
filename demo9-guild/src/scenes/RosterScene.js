@@ -262,35 +262,16 @@ class RosterScene extends Phaser.Scene {
             cy += 16;
         });
 
-        UIButton.create(this, x + w / 2, cy + 12, 160, 26, '친화도 트리 열기', {
+        UIButton.create(this, x + w / 2, cy + 14, 200, 28, '🌳 친화도 트리 열기', {
             color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 11,
             onClick: () => this.scene.start('AffinityScene', { gameState: gs, mercId: merc.id })
         });
 
-        UIButton.create(this, x + w / 2 - 80, y + 610, 120, 30, '치료 (30G)', {
-            color: gs.gold >= 30 && merc.currentHp < merc.getStats().hp ? 0x44aa44 : 0x444444,
-            hoverColor: 0x55cc55, textColor: '#ffffff', fontSize: 12,
-            disabled: gs.gold < 30 || merc.currentHp >= merc.getStats().hp,
-            onClick: () => {
-                if (GuildManager.spendGold(gs, 30)) {
-                    merc.fullHeal();
-                    GuildManager.addMessage(gs, `${merc.name} 치료 완료 (-30G)`);
-                    SaveManager.save(gs);
-                    this.scene.restart({ gameState: gs });
-                }
-            }
-        });
-
-        const rarityMult = { common: 1.0, uncommon: 1.2, rare: 1.5, epic: 2.0, legendary: 2.5 }[merc.rarity] || 1.0;
-        const severance = Math.floor(50 * merc.level * rarityMult);
-        UIButton.create(this, x + w / 2 + 80, y + 610, 140, 30, `해고 (+${severance}G)`, {
-            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffcccc', fontSize: 11,
-            onClick: () => this._confirmDismiss(merc, severance)
-        });
-
-        // 자동 장착 버튼 (3슬롯 일괄)
-        UIButton.create(this, x + w / 2, y + 580, 200, 30, '🤖 최적 장비 자동 장착', {
-            color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 12,
+        // 패널 하단 고정 위치 (절대 좌표) — 친화도 길이와 무관
+        const btnY = y + 595;
+        const isHurt = merc.currentHp < merc.getStats().hp;
+        UIButton.create(this, x + 90, btnY, 150, 32, '🤖 자동 장착', {
+            color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 11,
             onClick: () => {
                 let count = 0;
                 ['weapon', 'armor', 'accessory'].forEach(slot => {
@@ -318,6 +299,27 @@ class RosterScene extends Phaser.Scene {
                     UIToast.show(this, '더 좋은 장비 없음', { color: '#aaaaaa' });
                 }
             }
+        });
+
+        UIButton.create(this, x + 270, btnY, 140, 32, `💊 치료 (30G)`, {
+            color: gs.gold >= 30 && isHurt ? 0x44aa44 : 0x333333,
+            hoverColor: 0x55cc55, textColor: gs.gold >= 30 && isHurt ? '#ffffff' : '#666666', fontSize: 11,
+            disabled: gs.gold < 30 || !isHurt,
+            onClick: () => {
+                if (GuildManager.spendGold(gs, 30)) {
+                    merc.fullHeal();
+                    GuildManager.addMessage(gs, `${merc.name} 치료 완료 (-30G)`);
+                    SaveManager.save(gs);
+                    this.scene.restart({ gameState: gs });
+                }
+            }
+        });
+
+        const rarityMult = { common: 1.0, uncommon: 1.2, rare: 1.5, epic: 2.0, legendary: 2.5 }[merc.rarity] || 1.0;
+        const severance = Math.floor(50 * merc.level * rarityMult);
+        UIButton.create(this, x + w - 110, btnY, 180, 32, `🚪 해고 (+${severance}G)`, {
+            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffcccc', fontSize: 11,
+            onClick: () => this._confirmDismiss(merc, severance)
         });
     }
 
