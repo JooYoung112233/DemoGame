@@ -122,9 +122,9 @@ const BALANCE = {
     // === 구역 보상 ===
     // expeditionTimeMin = Lv1 서브 파견 1회 기본 시간 (분). Lv 비례 증가.
     ZONE_REWARDS: {
-        bloodpit:  { baseGold: 60,  baseXp: 30, deathChance: 0.12, expeditionTimeMin: 1.5 },
-        cargo:     { baseGold: 80,  baseXp: 35, deathChance: 0.10, expeditionTimeMin: 4   },
-        blackout:  { baseGold: 100, baseXp: 40, deathChance: 0.18, expeditionTimeMin: 8   }
+        bloodpit:  { baseGold: 80,  baseXp: 40, deathChance: 0.10, expeditionTimeMin: 1.5 },
+        cargo:     { baseGold: 140, baseXp: 55, deathChance: 0.10, expeditionTimeMin: 4   },
+        blackout:  { baseGold: 200, baseXp: 75, deathChance: 0.15, expeditionTimeMin: 8   }
     },
     PIT_GAUGE_MAX_MULT: 2.0,
 

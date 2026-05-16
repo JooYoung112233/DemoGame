@@ -13,11 +13,11 @@ class RunSimulator {
 
         const goldEarned = success
             ? Math.floor(goldBase * (0.8 + Math.random() * 0.6) * rounds * 0.3)
-            : Math.floor(goldBase * 0.3 * (0.5 + Math.random() * 0.5));
+            : Math.floor(goldBase * 0.4 * (0.5 + Math.random() * 0.5) * rounds * 0.15);
 
         const xpEarned = success
             ? Math.floor(xpBase * (0.8 + Math.random() * 0.4))
-            : Math.floor(xpBase * 0.4);
+            : Math.floor(xpBase * 0.35 * (0.5 + Math.random() * 0.3));
 
         const casualties = [];
         const survivors = [];

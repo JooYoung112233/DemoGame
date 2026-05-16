@@ -83,6 +83,9 @@ class ManualBattleScene extends Phaser.Scene {
         this.totalGold = 0;
         this.totalXp = 0;
         this.loot = [];
+        this._killCount = 0;
+        this._eliteKillCount = 0;
+        this._bossKilled = false;
 
         // === BP v4: 핏 게이지 시스템 ===
         this.pitGauge = (typeof PitGauge !== 'undefined') ? new PitGauge(this.gameState) : null;
@@ -195,6 +198,16 @@ class ManualBattleScene extends Phaser.Scene {
             color: 0x554444, hoverColor: 0x665555, textColor: '#ffaaaa', fontSize: 11,
             onClick: () => { this._retreated = true; this._endBattle(false); }
         });
+
+        // 골드 + 전리품 표시
+        this._goldDisplay = this.add.text(1260, 8, `💰 0G`, {
+            fontSize: '13px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(1, 0).setDepth(10);
+        this._lootDisplay = this.add.text(1260, 26, `📦 0`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#88ccff',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(1, 0).setDepth(10);
 
         // === 활성 시너지 표시 — 헤더 바로 아래 (y=44~70) ===
         let infoBarY = 44;
@@ -728,9 +741,11 @@ class ManualBattleScene extends Phaser.Scene {
                     if (result.allResults) {
                         result.allResults.forEach(r => this._showActionResult(r, current));
                         this._chargePitGauge(result.allResults, false);
+                        this._processKillRewards(result.allResults);
                     } else {
                         this._showActionResult(result, current);
                         this._chargePitGauge([result], false);
+                        this._processKillRewards([result]);
                     }
                 }
                 this._refreshAllUnits();
@@ -1210,10 +1225,11 @@ class ManualBattleScene extends Phaser.Scene {
             return;
         }
 
-        // 결과 표시 + 핏 게이지 충전
+        // 결과 표시 + 핏 게이지 충전 + 처치 보상
         if (result.results) {
             result.results.forEach(r => this._showActionResult(r, caster));
             this._chargePitGauge(result.results, action.type === 'skill');
+            this._processKillRewards(result.results);
         }
 
         // 사망 처리 + 위치 정리
@@ -1549,6 +1565,69 @@ class ManualBattleScene extends Phaser.Scene {
         if (triggered) this._triggerCrowdRush(triggered);
     }
 
+    /**
+     * 적 처치 시 골드 + 아이템 드롭 처리.
+     * 실시간 BattleScene과 동일 체계.
+     */
+    _processKillRewards(results) {
+        const arr = Array.isArray(results) ? results : [results];
+        const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
+        const pitMult = this.pitGauge ? this.pitGauge.getMultiplier() : 1.0;
+
+        for (const r of arr) {
+            if (!r.killed) continue;
+            const unit = [...this.combat.allies, ...this.combat.enemies].find(u => u.id === r.target);
+            if (!unit || unit.team !== 'enemy') continue;
+
+            this._killCount++;
+
+            // 골드 드롭
+            let goldDrop = Phaser.Math.Between(10, 20) + this.currentRound * 3 + zoneLevel * 2;
+            if (unit.isElite) { goldDrop += 25; this._eliteKillCount++; }
+            if (unit.isBoss)  { goldDrop += 120; this._bossKilled = true; }
+            goldDrop = Math.floor(goldDrop * pitMult);
+            this.totalGold += goldDrop;
+
+            // 골드 팝업
+            const g = this.unitGfx[unit.id];
+            if (g) {
+                const gText = this.add.text(g.container.x, g.container.y - 10, `+${goldDrop}G`, {
+                    fontSize: '13px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold',
+                    stroke: '#000', strokeThickness: 3
+                }).setOrigin(0.5).setDepth(60);
+                this.tweens.add({ targets: gText, y: gText.y - 35, alpha: 0, duration: 900, onComplete: () => gText.destroy() });
+            }
+
+            // 아이템 드롭
+            let dropChance = unit.isBoss ? 0.7 : (unit.isElite ? 0.4 : 0.12 + this.currentRound * 0.02);
+            if (pitMult > 1) dropChance = Math.min(1, dropChance * pitMult);
+            const rarityBonus = (unit.isBoss ? 2 : (unit.isElite ? 1 : 0));
+            if (Math.random() < dropChance && typeof generateItem === 'function') {
+                const item = generateItem(this.zoneKey, this.gameState.guildLevel, rarityBonus);
+                if (item) {
+                    this.loot.push(item);
+                    // 아이템 팝업
+                    if (g) {
+                        const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
+                        const iText = this.add.text(g.container.x, g.container.y - 50, `📦 ${item.name}`, {
+                            fontSize: '10px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold',
+                            stroke: '#000', strokeThickness: 2
+                        }).setOrigin(0.5).setDepth(61);
+                        this.tweens.add({ targets: iText, y: iText.y - 30, alpha: 0, duration: 1200, onComplete: () => iText.destroy() });
+                    }
+                }
+            }
+
+            // UI 갱신
+            this._updateRewardDisplay();
+        }
+    }
+
+    _updateRewardDisplay() {
+        if (this._goldDisplay) this._goldDisplay.setText(`💰 ${this.totalGold}G`);
+        if (this._lootDisplay) this._lootDisplay.setText(`📦 ${this.loot.length}`);
+    }
+
     _triggerCrowdRush(threshold) {
         if (!this.pitGauge) return;
         const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
@@ -1791,12 +1870,19 @@ class ManualBattleScene extends Phaser.Scene {
         const zone = ZONE_DATA[this.zoneKey];
         const zoneLevel = gs.zoneLevel[this.zoneKey];
 
-        // 보상 계산 (핏 게이지 배율 적용)
+        // 보상 계산 — 처치 골드(누적) + 클리어 보너스
+        const pitMult = this.pitGauge ? this.pitGauge.getMultiplier() : 1.0;
+        const lootMult = 1 + (this._rushLootBonus || 0);
+
         if (success) {
-            const pitMult = this.pitGauge ? this.pitGauge.getMultiplier() : 1.0;
-            const lootMult = 1 + (this._rushLootBonus || 0);
-            this.totalGold = Math.floor((zone.baseGoldReward + zoneLevel * 15) * pitMult * lootMult * this.currentRound);
-            this.totalXp = Math.floor((zone.baseXpReward + zoneLevel * 8) * pitMult);
+            // 클리어 보너스 (기본 보상 + 라운드/레벨 비례)
+            const clearBonus = Math.floor((zone.baseGoldReward + zoneLevel * 20) * pitMult * lootMult);
+            this.totalGold += clearBonus;
+            this.totalXp = Math.floor((zone.baseXpReward + zoneLevel * 10) * pitMult * (1 + this.currentRound * 0.1));
+        } else {
+            // 실패해도 처치 골드의 60%는 유지, XP는 30% 지급
+            this.totalGold = Math.floor(this.totalGold * 0.6);
+            this.totalXp = Math.floor((zone.baseXpReward + zoneLevel * 5) * 0.3 * (1 + this._killCount * 0.05));
         }
 
         // 결과 정리

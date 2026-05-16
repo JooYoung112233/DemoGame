@@ -7,10 +7,10 @@ const ZONE_DATA = {
         color: 0xff2244,
         textColor: '#ff2244',
         unlockLevel: 1,
-        baseGoldReward: 60,
-        baseXpReward: 30,
+        baseGoldReward: 80,        // 60→80 (클리어 보너스)
+        baseXpReward: 40,          // 30→40
         specialMaterial: '혈정석',
-        deathChance: 0.12,
+        deathChance: 0.10,         // 0.12→0.10 (초반 구역이므로 완화)
         lootCount: { min: 1, max: 3 }
     },
     cargo: {
@@ -21,8 +21,8 @@ const ZONE_DATA = {
         color: 0xff8844,
         textColor: '#ff8844',
         unlockLevel: 3,
-        baseGoldReward: 80,
-        baseXpReward: 35,
+        baseGoldReward: 140,       // 80→140 (BP의 1.75배, 난이도 대비)
+        baseXpReward: 55,          // 35→55
         specialMaterial: '마법 동력석',
         deathChance: 0.10,
         lootCount: { min: 2, max: 4 }
@@ -35,11 +35,11 @@ const ZONE_DATA = {
         color: 0x8844ff,
         textColor: '#8844ff',
         unlockLevel: 5,
-        baseGoldReward: 100,
-        baseXpReward: 40,
+        baseGoldReward: 200,       // 100→200 (BP의 2.5배, 높은 위험 대비)
+        baseXpReward: 75,          // 40→75
         specialMaterial: '저주 유물',
-        deathChance: 0.18,
-        lootCount: { min: 1, max: 5 }
+        deathChance: 0.15,         // 0.18→0.15 (보상 상향분 감안)
+        lootCount: { min: 2, max: 5 }
     }
 };
 
