@@ -379,8 +379,37 @@ class DarkestCombat {
             usable.push({ id: 'enemy_runner_swipe', action: ACTION_DATA.enemy_runner_swipe });
         }
 
+        // 사용 가능한 액션이 없으면 (전열 적이 후열에만 남음) 위치 이동
+        // 또는 15% 확률로 전략적 위치 이동
+        const enemyTeam = combat.enemies.filter(u => u.alive);
+        const shouldMove = (usable.length === 0) ||
+                          (usable.every(u => !u.action.casterPositions.includes(enemy.position))) ||
+                          (Math.random() < 0.12 && enemyTeam.length >= 2);
+        if (shouldMove) {
+            // 사용 가능한 액션이 많은 위치로 이동 (전략)
+            const allActionIds = (enemy.actions && enemy.actions.length > 0) ? enemy.actions : ['enemy_runner_swipe'];
+            let bestPos = enemy.position, bestUsable = -1;
+            for (let p = 1; p <= enemyTeam.length; p++) {
+                if (p === enemy.position) continue;
+                const usableAtP = allActionIds.filter(aid => {
+                    const a = ACTION_DATA[aid];
+                    return a && a.casterPositions.includes(p);
+                }).length;
+                if (usableAtP > bestUsable) {
+                    bestUsable = usableAtP;
+                    bestPos = p;
+                }
+            }
+            if (bestPos !== enemy.position) {
+                return {
+                    isMove: true,
+                    moveAmount: bestPos - enemy.position,
+                    action: { name: '위치 이동', icon: bestPos < enemy.position ? '◀' : '▶' }
+                };
+            }
+        }
+
         // 가중치: 쿨다운 큰 액션 (= 강력)은 우선순위 ↑
-        // 단 80% 확률로 일반 공격, 20% 확률로 쿨다운 액션
         let chosen;
         const cooldownActions = usable.filter(u => u.action.cooldown > 0);
         const regularActions = usable.filter(u => u.action.cooldown === 0);
@@ -420,7 +449,22 @@ class DarkestCombat {
      */
     static executeAiAction(combat, enemy) {
         const choice = DarkestCombat.aiChooseAction(combat, enemy);
-        if (!choice || !choice.action) return null;
+        if (!choice) return null;
+
+        // 위치 이동 (액션 없이 이동만)
+        if (choice.isMove) {
+            DarkestCombat._shiftUnit(combat, enemy, choice.moveAmount);
+            return {
+                casterId: enemy.id,
+                actionName: choice.action.name,
+                actionIcon: choice.action.icon,
+                isMove: true,
+                target: null,
+                allResults: []
+            };
+        }
+
+        if (!choice.action) return null;
 
         // executeAction 활용
         const result = DarkestCombat.executeAction(combat, enemy, choice.actionId, choice.targetPositions);
