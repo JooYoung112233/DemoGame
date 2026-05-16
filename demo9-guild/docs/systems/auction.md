@@ -395,14 +395,26 @@ auctionState: {
 
 ## 14. 구현 메모 (엔진 독립)
 
-### 14.1 Phaser 프로토타입 단계
+### 14.1 Phaser 프로토타입 — MVP 완료 (2026-05-16)
 
-- `AuctionScene.js` — 메인 씬. 1단계/2단계 전환 처리
-- `AuctionRound.js` (시스템) — 한 사이클 상태 머신 (`BIDDING → REVEAL → SELLING → SETTLE`)
-- `NPCBidder.js` (시스템) — 매물 정보로 입찰액 산출 (정규분포)
-- `AuctionCustomer.js` (시스템) — 손님 만족가 계산, 대사/표정 매핑
-- `IdentifySystem.js` (시스템) — 자동/능동 감식 결과 산출
-- 매물/손님 데이터: `src/data/auction.js`
+✅ **구현 완료**:
+- [src/scenes/AuctionScene.js](../../src/scenes/AuctionScene.js) — 완전 재작성. 한 씬 안에서 phase 전환 (LOBBY → BIDDING → REVEAL → SELLING → SETTLE)
+- [src/systems/AuctionRound.js](../../src/systems/AuctionRound.js) — 라운드 상태 머신 + NPC 입찰 산출(정규분포) + 손님 만족가/반응 분류
+- [src/data/auction.js](../../src/data/auction.js) — 손님 placeholder 4명 + 4단계 대사 풀 + 시세 힌트 + 위작 트리거 정의
+- [src/data/balance.js](../../src/data/balance.js) — `BALANCE.AUCTION` 섹션 추가 (참가/1단계/2단계/시세 + 위작 미사용 상수)
+- [index.html](../../index.html) — balance.js / auction.js / AuctionRound.js 스크립트 등록
+- 구 시그니처 호환: `AuctionScene.processConsignments(gs)` → 빈 배열 반환 (RunResultScene에서 호출됨)
+
+✅ **MVP 사이클**:
+입장(입장료 차감 + 예산 계산) → 1단계 비공개 입찰(매물 3장, NPC 1~3 동적, 시세 ±15~60% 정규분포) → 결과 동시 공개 → 2단계 손님 판매(고정 4 placeholder, 표정/대사 + 가격 조정 ±10/±100) → 정산(순손익 표시, 안 팔린 매물 → 보관함, 골든 호감도 +0.5~) → 다시 입장 또는 마을 복귀
+
+⬜ **Backlog (다음 라운드)**:
+- 위작/저주 트리거 + 감식 시스템 (§6, 트리거 정의는 데이터에 있음)
+- VIP 경매장 (§8)
+- 골든 호감도 단계 보상 — 자동 감식 정확도, 손님 선호 영구 공개, 무료 감식
+- 학습형 손님 선호 노출 (현재는 항상 공개)
+- 손님당 타이머 (현재는 무제한, 가격 조정 2회로 사실상 제한)
+- placeholder 손님 4명 캐릭터화 (이름/외양/대사 톤 — 사용자 결정 영역, §13)
 
 ### 14.2 Unity 이식 (참고: [unity-migration.md](unity-migration.md))
 
