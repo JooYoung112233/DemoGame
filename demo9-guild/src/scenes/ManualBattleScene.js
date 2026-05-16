@@ -8,16 +8,22 @@ class ManualBattleScene extends Phaser.Scene {
     constructor() { super('ManualBattleScene'); }
 
     preload() {
-        // 캐릭터 스프라이트 로드 (파일 없으면 자동 폴백)
+        // 캐릭터 스프라이트 로드
         const classes = ['warrior', 'rogue', 'archer', 'mage', 'priest', 'alchemist'];
         classes.forEach(cls => {
             if (!this.textures.exists(`char_${cls}`)) {
                 this.load.image(`char_${cls}_raw`, `assets/characters/${cls}.png`);
             }
         });
-        // 로딩 에러 무시 (파일 없으면 폴백)
+        // 전투 배경 (zone별 — 1920×1080 권장)
+        const zones = ['bloodpit', 'cargo', 'blackout'];
+        zones.forEach(z => {
+            if (!this.textures.exists(`bg_${z}`)) {
+                this.load.image(`bg_${z}`, `assets/backgrounds/${z}.png`);
+            }
+        });
         this.load.on('loaderror', (file) => {
-            console.warn('스프라이트 로드 실패 (이모지 폴백):', file.key);
+            console.warn('자산 로드 실패 (폴백):', file.key);
         });
     }
 
@@ -43,12 +49,32 @@ class ManualBattleScene extends Phaser.Scene {
         // 캐릭터 스프라이트 흰 배경 자동 제거 (최초 1회)
         this._processCharacterSprites();
 
+        // 배경 — 이미지 있으면 사용, 없으면 그라데이션 폴백
         this.add.rectangle(640, 360, 1280, 720, 0x0a0a0e);
-
-        // 배경 그라데이션
-        const bgGfx = this.add.graphics();
-        bgGfx.fillGradientStyle(0x150810, 0x150810, 0x1a0a18, 0x1a0a18, 1);
-        bgGfx.fillRect(0, 0, 1280, 720);
+        const bgKey = `bg_${this.zoneKey}`;
+        if (this.textures.exists(bgKey)) {
+            const bg = this.add.image(640, 360, bgKey).setOrigin(0.5);
+            // 게임 좌표 1280×720에 맞춰 표시 (카메라 zoom 1.5로 1920×1080 backing store에 1:1)
+            bg.setDisplaySize(1280, 720);
+            // 약간 어둡게 (캐릭터 가시성)
+            bg.setTint(0xaaaaaa);
+            // 전투 분위기 비네트
+            const vignette = this.add.graphics();
+            vignette.fillStyle(0x000000, 0.35);
+            vignette.fillRect(0, 0, 1280, 100);
+            vignette.fillRect(0, 620, 1280, 100);
+        } else {
+            // 폴백 — zone별 색조 그라데이션
+            const colors = {
+                bloodpit: [0x150810, 0x1a0a18],
+                cargo:    [0x101822, 0x182030],
+                blackout: [0x0a0818, 0x0e0e22]
+            };
+            const [c1, c2] = colors[this.zoneKey] || colors.bloodpit;
+            const bgGfx = this.add.graphics();
+            bgGfx.fillGradientStyle(c1, c1, c2, c2, 1);
+            bgGfx.fillRect(0, 0, 1280, 720);
+        }
 
         this._drawHeader();
         this._drawBattlefield();
