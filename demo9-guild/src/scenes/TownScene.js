@@ -175,14 +175,25 @@ class TownScene extends Phaser.Scene {
         const restCost = gs.roster.length * 10;
         const needsRest = gs.roster.some(m => m.alive && (m.stamina || 0) < 100);
         const canAfford = gs.gold >= restCost;
-        UIButton.create(this, 1080, 32, 90, 26, `🛌 휴식 ${restCost}G`, {
+        // 평균 스테미너 표시
+        const aliveMercs = gs.roster.filter(m => m.alive);
+        const avgStamina = aliveMercs.length > 0
+            ? Math.round(aliveMercs.reduce((s, m) => s + (m.stamina || 100), 0) / aliveMercs.length)
+            : 100;
+        UIButton.create(this, 1075, 32, 110, 28, `🛌 휴식 ${restCost}G`, {
             color: needsRest && canAfford ? 0x336655 : 0x333344,
             hoverColor: 0x448866,
             textColor: needsRest && canAfford ? '#aaffcc' : '#666677',
-            fontSize: 10,
+            fontSize: 11,
             disabled: !needsRest || !canAfford,
             onClick: () => this._restAllMercs(restCost)
         });
+        // 평균 스테미너 라벨 (휴식 버튼 옆)
+        this.add.text(1010, 34, `⚡${avgStamina}%`, {
+            fontSize: '11px', fontFamily: 'monospace',
+            color: avgStamina >= 70 ? '#88ccff' : avgStamina >= 40 ? '#ffaa44' : '#ff6666',
+            fontStyle: 'bold'
+        }).setOrigin(1, 0.5);
     }
 
     _restAllMercs(cost) {
@@ -198,7 +209,13 @@ class TownScene extends Phaser.Scene {
 
     _drawRosterPanel() {
         const gs = this.gameState;
-        const panel = UIPanel.create(this, 8, 65, 265, 640, { title: '로스터' });
+        // 제목 없는 panel — 커스텀 헤더로 대체
+        const panel = UIPanel.create(this, 8, 65, 265, 640, {});
+
+        // 커스텀 헤더 — 좌측 제목 + 우측 버튼들
+        this.add.text(20, 76, '로스터', {
+            fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+        });
 
         if (gs.roster.length === 0) {
             this.add.text(140, 200, '용병이 없습니다\n모집소에서 고용하세요', {
@@ -207,16 +224,16 @@ class TownScene extends Phaser.Scene {
             return;
         }
 
-        // 전체 로스터 + 본드 + 시너지 도감 진입 (패널 너비 265 안에 fit)
-        UIButton.create(this, 168, 78, 46, 22, '전체', {
+        // 패널 헤더 우측 버튼들 (제목과 겹치지 않게 오른쪽 정렬)
+        UIButton.create(this, 168, 80, 46, 22, '전체', {
             color: 0x335577, hoverColor: 0x446688, textColor: '#cceeff', fontSize: 10,
             onClick: () => this.scene.start('RosterScene', { gameState: gs })
         });
-        UIButton.create(this, 212, 78, 38, 22, '💞', {
+        UIButton.create(this, 212, 80, 38, 22, '💞', {
             color: 0x553355, hoverColor: 0x664466, textColor: '#ffccee', fontSize: 12,
             onClick: () => this.scene.start('BondScene', { gameState: gs })
         });
-        UIButton.create(this, 252, 78, 38, 22, '✨', {
+        UIButton.create(this, 252, 80, 38, 22, '✨', {
             color: 0x443366, hoverColor: 0x554477, textColor: '#ccaaff', fontSize: 12,
             onClick: () => this.scene.start('SynergyScene', { gameState: gs, returnTo: 'TownScene', returnData: { gameState: gs } })
         });
@@ -331,25 +348,123 @@ class TownScene extends Phaser.Scene {
 
     _drawFacilityGrid() {
         const gs = this.gameState;
-        const startX = 350;
-        const startY = 85;
-        const cellW = 130;
-        const cellH = 95;
-        const gap = 15;
-        const cols = 3;
+        const panelX = 285, panelW = 700;   // 중앙 영역
 
-        const facilityOrder = ['recruit', 'storage', 'equipment', 'gate', 'guildHall', 'forge', 'auction', 'training', 'temple', 'intel', 'eliteRecruit', 'vault'];
+        // === 1) 출발 게이트 — 큰 메인 카드 (panelW 전체) ===
+        this._drawGateCard(panelX, 75, panelW, 110);
 
-        this.add.text(startX + (cols * (cellW + gap) - gap) / 2, 68, '시설', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+        // === 2) 카테고리별 시설 그리드 ===
+        const groups = [
+            {
+                title: '🏛 길드 운영',
+                color: '#ffcc66',
+                facilities: ['guildHall', 'recruit', 'eliteRecruit']
+            },
+            {
+                title: '⚒ 용병 관리',
+                color: '#aaccff',
+                facilities: ['equipment', 'training', 'temple']
+            },
+            {
+                title: '💰 경제',
+                color: '#88ccaa',
+                facilities: ['storage', 'forge', 'auction', 'vault']
+            },
+            {
+                title: '🔍 기타',
+                color: '#cc99ee',
+                facilities: ['intel']
+            }
+        ];
+
+        const cellW = 158, cellH = 78, gap = 10;
+        let curY = 205;
+
+        groups.forEach(group => {
+            this.add.text(panelX, curY, group.title, {
+                fontSize: '12px', fontFamily: 'monospace', color: group.color, fontStyle: 'bold'
+            });
+            curY += 18;
+
+            const rowStartY = curY;
+            const cols = Math.floor((panelW + gap) / (cellW + gap));   // 4
+            group.facilities.forEach((key, idx) => {
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                const x = panelX + col * (cellW + gap);
+                const y = rowStartY + row * (cellH + gap);
+                this._drawFacilityCell(key, x, y, cellW, cellH);
+            });
+            const rowsUsed = Math.ceil(group.facilities.length / cols);
+            curY += rowsUsed * (cellH + gap) + 6;
+        });
+    }
+
+    /** 출발 게이트 — 큰 메인 카드 */
+    _drawGateCard(x, y, w, h) {
+        const gs = this.gameState;
+        const fac = FACILITY_DATA.gate;
+        const isUnlocked = gs.unlockedFacilities.includes('gate');
+
+        const bg = this.add.graphics();
+        bg.fillGradientStyle(0x442211, 0x442211, 0x664422, 0x664422, 1);
+        bg.fillRoundedRect(x, y, w, h, 10);
+        bg.lineStyle(3, 0xffaa44, 0.9);
+        bg.strokeRoundedRect(x, y, w, h, 10);
+
+        // 좌측 큰 아이콘 + 메인 라벨
+        this.add.text(x + 36, y + h/2, '🚪', { fontSize: '52px' }).setOrigin(0.5);
+
+        this.add.text(x + 78, y + 18, '출발 게이트', {
+            fontSize: '20px', fontFamily: 'monospace', color: '#ffe088', fontStyle: 'bold'
+        });
+        this.add.text(x + 78, y + 46, '구역으로 출발 — 메인 도전 / 서브 파견', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#ffccaa'
+        });
+
+        // 우측 정보 — 활성 파견 상태
+        const activeExp = (gs.activeExpeditions || []).length;
+        const maxSlots = (typeof ExpeditionManager !== 'undefined') ? ExpeditionManager.getMaxSlots(gs) : 0;
+        const pending = (gs.pendingResults || []).length;
+
+        this.add.text(x + w - 14, y + 16, `서브 파견 ${activeExp}/${maxSlots}`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+        }).setOrigin(1, 0);
+        if (pending > 0) {
+            this.add.text(x + w - 14, y + 34, `🎁 수령 대기 ${pending}건`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ffcc44'
+            }).setOrigin(1, 0);
+        }
+
+        // 큰 ▶ 버튼 느낌
+        const btnW = 130, btnH = 36;
+        const btnX = x + w - btnW - 14, btnY = y + h - btnH - 12;
+        const btnBg = this.add.graphics();
+        btnBg.fillStyle(0xff8833, 1);
+        btnBg.fillRoundedRect(btnX, btnY, btnW, btnH, 6);
+        btnBg.lineStyle(2, 0xffcc66, 0.9);
+        btnBg.strokeRoundedRect(btnX, btnY, btnW, btnH, 6);
+        this.add.text(btnX + btnW/2, btnY + btnH/2, '▶ 출발', {
+            fontSize: '16px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
 
-        facilityOrder.forEach((key, idx) => {
-            const col = idx % cols;
-            const row = Math.floor(idx / cols);
-            const x = startX + col * (cellW + gap);
-            const y = startY + row * (cellH + gap);
-            this._drawFacilityCell(key, x, y, cellW, cellH);
+        // 전체 카드 클릭 → 출발
+        const hit = this.add.zone(x + w/2, y + h/2, w, h).setInteractive({ useHandCursor: true });
+        hit.on('pointerdown', () => this._onFacilityClick('gate'));
+        hit.on('pointerover', () => {
+            bg.clear();
+            bg.fillGradientStyle(0x553322, 0x553322, 0x885533, 0x885533, 1);
+            bg.fillRoundedRect(x, y, w, h, 10);
+            bg.lineStyle(3, 0xffcc66, 1);
+            bg.strokeRoundedRect(x, y, w, h, 10);
+        });
+        hit.on('pointerout', () => {
+            bg.clear();
+            bg.fillGradientStyle(0x442211, 0x442211, 0x664422, 0x664422, 1);
+            bg.fillRoundedRect(x, y, w, h, 10);
+            bg.lineStyle(3, 0xffaa44, 0.9);
+            bg.strokeRoundedRect(x, y, w, h, 10);
         });
     }
 
@@ -373,39 +488,41 @@ class TownScene extends Phaser.Scene {
             bg.strokeRoundedRect(x, y, w, h, 5);
         }
 
-        const iconSize = isUnlocked ? '24px' : '20px';
-        this.add.text(x + w / 2, y + 20, fac.icon, { fontSize: iconSize }).setOrigin(0.5);
+        // 좌측 아이콘
+        const iconSize = isUnlocked ? '26px' : '20px';
+        this.add.text(x + 24, y + h/2, fac.icon, { fontSize: iconSize }).setOrigin(0.5);
 
-        this.add.text(x + w / 2, y + 45, fac.name, {
+        // 우측 텍스트
+        this.add.text(x + 48, y + 10, fac.name, {
             fontSize: '12px', fontFamily: 'monospace',
             color: isUnlocked ? '#ccccee' : '#555566', fontStyle: 'bold'
-        }).setOrigin(0.5);
+        });
 
         if (!isUnlocked) {
             if (canUnlock) {
-                this.add.text(x + w / 2, y + 63, `해금 (${fac.cost}G)`, {
+                this.add.text(x + 48, y + 30, `해금 ${fac.cost}G`, {
                     fontSize: '10px', fontFamily: 'monospace', color: '#ffaa44'
-                }).setOrigin(0.5);
+                });
             } else if (levelReached) {
-                this.add.text(x + w / 2, y + 63, `${fac.cost}G 필요`, {
+                this.add.text(x + 48, y + 30, `${fac.cost}G 필요`, {
                     fontSize: '10px', fontFamily: 'monospace', color: '#884444'
-                }).setOrigin(0.5);
+                });
             } else {
-                this.add.text(x + w / 2, y + 63, `Lv.${fac.unlockLevel} 필요`, {
+                this.add.text(x + 48, y + 30, `Lv.${fac.unlockLevel} 필요`, {
                     fontSize: '10px', fontFamily: 'monospace', color: '#555566'
-                }).setOrigin(0.5);
+                });
             }
 
-            if (!isUnlocked && !canUnlock) {
-                this.add.text(x + w / 2, y + h / 2, '🔒', {
-                    fontSize: '16px'
-                }).setOrigin(0.5).setAlpha(0.3);
+            if (!canUnlock) {
+                this.add.text(x + w - 14, y + h - 14, '🔒', {
+                    fontSize: '14px'
+                }).setOrigin(1, 1).setAlpha(0.5);
             }
         } else {
-            this.add.text(x + w / 2, y + 63, fac.desc, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#667788',
-                wordWrap: { width: w - 10 }, align: 'center'
-            }).setOrigin(0.5);
+            this.add.text(x + 48, y + 28, fac.desc, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#778899',
+                wordWrap: { width: w - 56 }
+            });
         }
 
         const hitZone = this.add.zone(x + w / 2, y + h / 2, w, h).setInteractive({ useHandCursor: true });
