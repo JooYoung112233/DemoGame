@@ -43,6 +43,13 @@ class ManualBattleScene extends Phaser.Scene {
         const enemies = this._spawnEnemies();
         this.combat = DarkestCombat.createCombat(this.party, enemies);
 
+        // === 시너지 적용 (전투 시작 시 1회) ===
+        this._activeSynergies = [];
+        if (typeof applySynergies === 'function') {
+            const classKeys = this.combat.allies.map(u => u.classKey);
+            this._activeSynergies = applySynergies(this.combat.allies, classKeys) || [];
+        }
+
         this.currentRound = 1;
         // 다키스트 스타일 — 라운드 제한은 안전장치 (전멸로 끝나는 게 정상)
         // 너무 길어지면 자동 후퇴 처리
@@ -144,6 +151,31 @@ class ManualBattleScene extends Phaser.Scene {
             color: 0x554444, hoverColor: 0x665555, textColor: '#ffaaaa', fontSize: 11,
             onClick: () => { this._retreated = true; this._endBattle(false); }
         });
+
+        // === 활성 시너지 표시 — 헤더 바로 아래 ===
+        if (this._activeSynergies && this._activeSynergies.length > 0) {
+            const synBg = this.add.graphics();
+            synBg.fillStyle(0x140828, 0.85);
+            synBg.fillRect(0, 44, 1280, 26);
+
+            // 좌측 라벨
+            this.add.text(12, 50, '✨ 시너지:', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ccaaff', fontStyle: 'bold'
+            });
+
+            // 가로로 chip
+            let chipX = 90;
+            this._activeSynergies.forEach(syn => {
+                const typeColor = syn.type === 5 ? '#ffcc44' : syn.type === 3 ? '#ff88cc' : '#88ccff';
+                const typeBadge = syn.type === 5 ? '⭐' : syn.type === 3 ? '★' : '✦';
+                const chip = this.add.text(chipX, 49, `${typeBadge} ${syn.name} — ${syn.desc}`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: typeColor,
+                    stroke: '#000', strokeThickness: 1
+                });
+                chipX += chip.width + 22;
+                if (chipX > 1240) return;
+            });
+        }
     }
 
     _drawBattlefield() {

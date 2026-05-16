@@ -159,6 +159,14 @@ class RosterScene extends Phaser.Scene {
             fontSize: '11px', fontFamily: 'monospace', color: equipCount === 3 ? '#88ffcc' : '#aaaaaa'
         }));
 
+        // 친화도 포인트 알림 (사용 가능한 포인트가 있으면 강조)
+        const totalAffPts = ['bloodpit','cargo','blackout'].reduce((s, z) => s + (merc.affinityPoints?.[z] || 0), 0);
+        if (totalAffPts > 0) {
+            container.add(this.add.text(x + w - 10, y + 78, `🌳 ${totalAffPts}P!`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            }).setOrigin(1, 0));
+        }
+
         // 특성 (1-2개만)
         const traitsStr = merc.traits.slice(0, 2).map(t => {
             const sym = t.type === 'positive' ? '✦' : t.type === 'legendary' ? '★' : '✧';

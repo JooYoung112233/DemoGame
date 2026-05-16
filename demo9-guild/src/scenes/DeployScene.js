@@ -75,9 +75,107 @@ class DeployScene extends Phaser.Scene {
         });
 
         this._drawDeploySlots(30, 280, maxDeploy);
+        this._drawSynergyPreview(maxDeploy);
         this._drawRosterPick(30, 440);
         this._drawSavedParties(30, 595);
         this._drawDepartButton();
+    }
+
+    /** 편성된 용병들의 활성 시너지 미리보기 — 슬롯 위 가로 막대 */
+    _drawSynergyPreview(maxDeploy) {
+        const gs = this.gameState;
+        const deployed = this.deployedIds
+            .map(id => gs.roster.find(m => m.id === id))
+            .filter(Boolean);
+        const classKeys = deployed.map(m => m.classKey);
+
+        // 가로 막대 — 슬롯 영역 위쪽 (y=215~272)
+        const px = 30, py = 215, pw = 1220, ph = 56;
+
+        const bg = this.add.graphics();
+        bg.fillStyle(0x141426, 1);
+        bg.fillRoundedRect(px, py, pw, ph, 6);
+        bg.lineStyle(2, 0x665588, 0.7);
+        bg.strokeRoundedRect(px, py, pw, ph, 6);
+
+        this.add.text(px + 12, py + 6, '✨ 활성 시너지', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ccaaff', fontStyle: 'bold'
+        });
+
+        if (typeof getActiveSynergies !== 'function' || deployed.length === 0) {
+            this.add.text(px + pw/2, py + ph/2 + 4, '용병을 편성하면 발동 가능한 시너지가 표시됩니다', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+            }).setOrigin(0.5);
+            return;
+        }
+
+        const active = getActiveSynergies(classKeys);
+        if (active.length === 0) {
+            const close = this._findCloseSynergies(classKeys);
+            if (close.length === 0) {
+                this.add.text(px + pw/2, py + ph/2 + 4, '현재 발동 가능한 시너지 없음 — 다양한 클래스 조합 시도', {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+                }).setOrigin(0.5);
+            } else {
+                this.add.text(px + 110, py + 6, ' — 1명 추가 시 발동:', {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#888899', fontStyle: 'italic'
+                });
+                // 가로로 chip 형태
+                let chipX = px + 12;
+                close.slice(0, 5).forEach(c => {
+                    const label = `${c.name} (+${this._classIcon(c.missingClass)})`;
+                    const txt = this.add.text(chipX, py + 30, label, {
+                        fontSize: '10px', fontFamily: 'monospace', color: '#88aacc',
+                        backgroundColor: '#222244', padding: { x: 6, y: 2 }
+                    });
+                    chipX += txt.width + 8;
+                    if (chipX > px + pw - 100) return;
+                });
+            }
+            return;
+        }
+
+        // 활성 시너지 — 가로로 chip
+        let chipX = px + 110;
+        active.forEach(syn => {
+            const typeColor = syn.type === 5 ? '#ffcc44' : syn.type === 3 ? '#ff88cc' : '#88ccff';
+            const bgColor = syn.type === 5 ? '#553311' : syn.type === 3 ? '#441133' : '#113344';
+            const typeBadge = syn.type === 5 ? '⭐5인' : syn.type === 3 ? '★3인' : '✦2인';
+
+            const chip = this.add.text(chipX, py + 8, `${typeBadge} ${syn.name}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: typeColor, fontStyle: 'bold',
+                backgroundColor: bgColor, padding: { x: 8, y: 3 }
+            });
+            this.add.text(chipX, py + 30, syn.desc, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#aaaacc',
+                wordWrap: { width: 280 }
+            });
+            chipX += Math.max(chip.width, 200) + 16;
+            if (chipX > px + pw - 50) return;
+        });
+    }
+
+    _classIcon(classKey) {
+        return (CLASS_DATA[classKey]?.icon || '?') + (CLASS_DATA[classKey]?.name || '');
+    }
+
+    /** 한 명 더 추가하면 발동되는 시너지 후보 */
+    _findCloseSynergies(currentClasses) {
+        if (typeof SYNERGY_DATA !== 'object') return [];
+        const classSet = new Set(currentClasses);
+        const candidates = [];
+        for (const [key, syn] of Object.entries(SYNERGY_DATA)) {
+            if (syn.type !== 2 && syn.type !== 3) continue;
+            const missing = syn.classes.filter(c => !classSet.has(c));
+            if (missing.length === 1) {
+                candidates.push({
+                    name: syn.name,
+                    desc: syn.desc,
+                    missingClass: missing[0]
+                });
+            }
+        }
+        return candidates;
     }
 
     _drawSavedParties(x, y) {

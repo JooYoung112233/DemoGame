@@ -121,10 +121,11 @@ class TitleScene extends Phaser.Scene {
             merc.xp = 0;
             merc._maxHp = merc.getStats().hp;
             merc.currentHp = merc._maxHp;
-            // 친화도 약간
+            // 친화도 — 레벨 2 + 포인트 2 (트리 노드 찍어볼 수 있게)
             ['bloodpit', 'cargo', 'blackout'].forEach(z => {
                 if (merc.affinityLevel) merc.affinityLevel[z] = 2;
                 if (merc.affinityXp) merc.affinityXp[z] = 0;
+                if (merc.affinityPoints) merc.affinityPoints[z] = 2;
             });
             gs.roster.push(merc);
         });
