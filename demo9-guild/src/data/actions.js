@@ -258,6 +258,33 @@ const ACTION_DATA = {
         name: '강제 끌어당기기', type: 'attack', icon: '🪝',
         casterPositions: [1, 2], targetType: 'enemy', targetPositions: [3, 4], targetCount: 1,
         cooldown: 3, effects: { atkMult: 1.0, shiftTarget: -2 }
+    },
+
+    // --- 관중 난입 전용 (BP v4) ---
+    enemy_crowd_fodder_strike: {
+        name: '무모한 돌진', type: 'attack', icon: '💢',
+        casterPositions: [1, 2, 3, 4], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 1,
+        cooldown: 0, effects: { atkMult: 1.0 }
+    },
+    enemy_crowd_assassin_stab: {
+        name: '기습 찌르기', type: 'attack', icon: '🗡',
+        casterPositions: [1, 2, 3, 4], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 1,
+        cooldown: 0, effects: { atkMult: 1.2 }
+    },
+    enemy_crowd_assassin_vanish: {
+        name: '은신 공격', type: 'attack', icon: '👤',
+        casterPositions: [1, 2, 3, 4], targetType: 'enemy', targetPositions: [3, 4], targetCount: 1,
+        cooldown: 2, effects: { atkMult: 1.5, statusEffect: 'bleed', statusDuration: 2 }
+    },
+    enemy_crowd_challenger_smash: {
+        name: '도전자의 일격', type: 'attack', icon: '⚔',
+        casterPositions: [1, 2, 3, 4], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 1,
+        cooldown: 0, effects: { atkMult: 1.3 }
+    },
+    enemy_crowd_challenger_roar: {
+        name: '함성', type: 'attack', icon: '📢',
+        casterPositions: [1, 2, 3, 4], targetType: 'enemy', targetPositions: [1, 2, 3, 4], targetCount: 'all',
+        cooldown: 3, effects: { atkMult: 0.6 }
     }
 };
 
@@ -271,7 +298,11 @@ const ENEMY_ACTIONS = {
     summoner:       ['enemy_summoner_bolt', 'enemy_summoner_curse'],
     elite_runner:   ['enemy_eliterunner_combo', 'enemy_eliterunner_eviscerate'],
     elite_bruiser:  ['enemy_elitebruiser_slam', 'enemy_elitebruiser_shove'],
-    pitlord:        ['enemy_pitlord_cleave', 'enemy_pitlord_quake', 'enemy_pitlord_drag']
+    pitlord:        ['enemy_pitlord_cleave', 'enemy_pitlord_quake', 'enemy_pitlord_drag'],
+    // 관중 난입 전용
+    crowd_fodder:     ['enemy_crowd_fodder_strike'],
+    crowd_assassin:   ['enemy_crowd_assassin_stab', 'enemy_crowd_assassin_vanish'],
+    crowd_challenger: ['enemy_crowd_challenger_smash', 'enemy_crowd_challenger_roar']
 };
 
 function getEnemyActions(enemyType) {

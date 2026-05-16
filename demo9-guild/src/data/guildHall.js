@@ -137,18 +137,18 @@ const GUILD_HALL_DATA = {
         unlockCondition: 'zone_clear:bloodpit',
         desc: '[BP 첫 클리어] 핏 게이지 메커니즘',
         stages: [
-            { stage: 1,  name: '핏 게이지 최대 +50%', desc: 'MAX 증가',          effect: { pitMaxBonus: 0.5 } },
-            { stage: 2,  name: 'MAX 드롭률 +15%',     desc: '+20→+35%',          effect: { pitMaxDropBonus: 0.15 } },
-            { stage: 3,  name: '게이지 감소 -30%',    desc: '유지 강화',         effect: { pitDecayReduction: 0.3 } },
-            { stage: 4,  name: '엘리트 처치 +50%',    desc: '즉시 충전',         effect: { eliteKillCharge: 0.5 } },
-            { stage: 5,  name: '핏 오버플로우',       desc: 'MAX 초과 → 골드 +1%/초', effect: { pitOverflowGold: true } },
-            { stage: 6,  name: 'BP 라운드 회복 +10%', desc: 'HP 회복',           effect: { bpRoundHeal: 0.1 } },
-            { stage: 7,  name: '엘리트 확률 2배 + 드롭+1', desc: '강화',         effect: { eliteRateBonus: 2, eliteDropBonus: 1 } },
-            { stage: 8,  name: '핏 연쇄',             desc: '처치 시 인접 출혈', effect: { pitChainBleed: true } },
-            { stage: 9,  name: 'BP 보스 사전 충전',   desc: '50% 시작',          effect: { bpBossPreCharge: 0.5 } },
-            { stage: 10, name: '광전사의 전장',       desc: 'MAX 시 ATK+25%/DEF-15%', effect: { berserkerField: true } },
-            { stage: 11, name: 'BP 보스 전설 +15%',   desc: '드롭 강화',         effect: { bpBossLegendary: 0.15 } },
-            { stage: 12, name: '🏆 피의 군주',         desc: '게이지 영구 MAX + 보스 확정 전설', effect: { pitLordPermaMax: true } }
+            { stage: 1,  name: '핏 게이지 최대 +50%',      desc: 'MAX 증가',              effect: { pitMaxBonus: 0.5 } },
+            { stage: 2,  name: '수동 아이템 슬롯 해금',    desc: '파티 공용 2칸',         effect: { pocketSlotUnlock: true } },
+            { stage: 3,  name: '핏 충전량 +20%',           desc: '라운드 중 모든 충전',   effect: { pitChargeBonus: 0.2 } },
+            { stage: 4,  name: '쉬는 곳 해금',             desc: '라운드 사이 확률 등장', effect: { restRoomUnlock: true } },
+            { stage: 5,  name: '엘리트 처치 충전 +10%',    desc: '+10% → +20%',           effect: { eliteKillCharge: 0.1 } },
+            { stage: 6,  name: '관중 난입 시스템 해금',    desc: '33%/66% 임계점 적 투입', effect: { crowdRushUnlock: true } },
+            { stage: 7,  name: '도파밍 난입 강화',         desc: '5%→10% + 보너스 ×1.5',  effect: { dopamineBoost: true } },
+            { stage: 8,  name: '핏 연쇄',                  desc: '처치 시 인접 출혈',     effect: { pitChainBleed: true } },
+            { stage: 9,  name: '보스전 난입 + 사전 충전',  desc: 'R3 확률 ×2 + 30% 시작', effect: { bossRushBoost: true, bpBossPreCharge: 0.3 } },
+            { stage: 10, name: '광전사의 전장',            desc: '70%+ ATK+25%/DEF-15%',  effect: { berserkerField: true } },
+            { stage: 11, name: '쉬는 곳 강화',             desc: 'HP 회복 +20% (총 40%)', effect: { restRoomBoost: true } },
+            { stage: 12, name: '🏆 피의 군주',              desc: '50% 시작 + 난입 보상 ×2 + 보스 확정 전설', effect: { pitLordV4: true } }
         ]
     },
     cargo_control: {

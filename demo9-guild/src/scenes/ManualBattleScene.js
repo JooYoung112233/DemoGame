@@ -37,7 +37,6 @@ class ManualBattleScene extends Phaser.Scene {
     init(data) {
         this.gameState = data.gameState;
         this.zoneKey = data.zoneKey || 'bloodpit';
-        // 다키스트 스타일 — 4명 고정 (이상 들어와도 잘라냄)
         this.party = (data.party || []).slice(0, 4);
 
         // 적 생성
@@ -80,11 +79,19 @@ class ManualBattleScene extends Phaser.Scene {
         this.totalGold = 0;
         this.totalXp = 0;
         this.loot = [];
+
+        // === BP v4: 핏 게이지 시스템 ===
+        this.pitGauge = (typeof PitGauge !== 'undefined') ? new PitGauge(this.gameState) : null;
+        this._crowdRushUnits = [];
+        this._isBossRound = false;
     }
 
     create() {
         // 캐릭터 스프라이트 흰 배경 자동 제거 (최초 1회)
         this._processCharacterSprites();
+
+        // pocket 아이템 슬롯 초기화
+        if (!this.gameState.pocketSlots) this.gameState.pocketSlots = [null, null];
 
         // 배경 — 이미지 있으면 사용, 없으면 그라데이션 폴백
         this.add.rectangle(640, 360, 1280, 720, 0x0a0a0e);
@@ -195,6 +202,33 @@ class ManualBattleScene extends Phaser.Scene {
                 chipX += chip.width + 22;
                 if (chipX > 1240) return;
             });
+            infoBarY += 26;
+        }
+
+        // === BP v4: 핏 게이지 바 ===
+        if (this.pitGauge) {
+            const pgBg = this.add.graphics();
+            pgBg.fillStyle(0x220808, 0.85);
+            pgBg.fillRect(0, infoBarY, 1280, 26);
+            this.add.text(12, infoBarY + 6, '🩸 핏 게이지:', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ff6644', fontStyle: 'bold'
+            });
+            const barX = 120, barW = 300, barH = 12, barY = infoBarY + 7;
+            this._pitGaugeBarBg = this.add.rectangle(barX + barW/2, barY + barH/2, barW, barH, 0x331111);
+            this._pitGaugeBarFill = this.add.rectangle(barX, barY + barH/2, 1, barH, 0xcc2222).setOrigin(0, 0.5);
+            this._pitGaugeText = this.add.text(barX + barW + 8, barY + barH/2, '0%', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ff8866', fontStyle: 'bold'
+            }).setOrigin(0, 0.5);
+            [33, 66].forEach(t => {
+                const mx = barX + barW * (t / 100);
+                const marker = this.add.graphics();
+                marker.lineStyle(2, 0xffcc44, 0.8);
+                marker.lineBetween(mx, barY - 1, mx, barY + barH + 1);
+            });
+            this._pitMultText = this.add.text(barX + barW + 60, barY + barH/2, '×1.0', {
+                fontSize: '10px', fontFamily: 'monospace', color: '#ffcc88'
+            }).setOrigin(0, 0.5);
+            this._updatePitGaugeUI();
             infoBarY += 26;
         }
 
@@ -563,14 +597,32 @@ class ManualBattleScene extends Phaser.Scene {
             }
         }
 
-        // === 소비템 placeholder (향후 구현) ===
-        this.statusInfoObjs.push(this.add.text(cx, cy, '🧪 소비템', {
+        // === 포켓 아이템 슬롯 ===
+        this.statusInfoObjs.push(this.add.text(cx, cy, '🧪 포켓 아이템', {
             fontSize: '11px', fontFamily: 'monospace', color: '#88ccee', fontStyle: 'bold'
         }).setOrigin(0.5));
         cy += 16;
-        this.statusInfoObjs.push(this.add.text(cx, cy, '(향후 구현)', {
-            fontSize: '9px', fontFamily: 'monospace', color: '#555566'
-        }).setOrigin(0.5));
+        const slots = this.gameState.pocketSlots || [null, null];
+        const hasPocket = this.pitGauge && this.pitGauge.hasPocket;
+        if (!hasPocket) {
+            this.statusInfoObjs.push(this.add.text(cx, cy, '(F2 해금 필요)', {
+                fontSize: '9px', fontFamily: 'monospace', color: '#555566'
+            }).setOrigin(0.5));
+        } else {
+            for (let i = 0; i < slots.length; i++) {
+                const itemKey = slots[i];
+                const item = (itemKey && typeof POCKET_ITEM_DATA !== 'undefined') ? POCKET_ITEM_DATA[itemKey] : null;
+                const label = item ? `${item.icon} ${item.name}` : `슬롯 ${i+1}: (비어있음)`;
+                const color = item ? '#88ccee' : '#555566';
+                this.statusInfoObjs.push(this.add.text(cx, cy, label, {
+                    fontSize: '10px', fontFamily: 'monospace', color
+                }).setOrigin(0.5));
+                cy += 14;
+            }
+            this.statusInfoObjs.push(this.add.text(cx, cy, '(쉬는 곳에서만 사용)', {
+                fontSize: '9px', fontFamily: 'monospace', color: '#555566'
+            }).setOrigin(0.5));
+        }
     }
 
     _drawTurnQueue() {
@@ -630,6 +682,15 @@ class ManualBattleScene extends Phaser.Scene {
         this._highlightCurrentUnit(current);
 
         if (current.team === 'ally') {
+            // F10 광전사 전장 — 게이지 70% 이상 시 ATK↑ DEF↓
+            if (this.pitGauge) {
+                const berserk = this.pitGauge.getBerserkerBonus();
+                if (berserk && !current._berserkerApplied) {
+                    current.atk = Math.floor(current.atk * berserk.atkMult);
+                    current.def = Math.floor(current.def * berserk.defMult);
+                    current._berserkerApplied = true;
+                }
+            }
             this._showAllyActionPanel(current);
         } else {
             // 적 턴 — 좌/우 패널을 적 정보로 갱신
@@ -643,13 +704,13 @@ class ManualBattleScene extends Phaser.Scene {
             this.time.delayedCall(700, () => {
                 const result = DarkestCombat.executeAiAction(this.combat, current);
                 if (result) {
-                    // 적 액션 명 화면 표시
                     this._showEnemyActionLabel(current, result.actionName, result.actionIcon, result.actionId);
-                    // 결과들 표시
                     if (result.allResults) {
                         result.allResults.forEach(r => this._showActionResult(r, current));
+                        this._chargePitGauge(result.allResults, false);
                     } else {
                         this._showActionResult(result, current);
+                        this._chargePitGauge([result], false);
                     }
                 }
                 this._refreshAllUnits();
@@ -1129,9 +1190,10 @@ class ManualBattleScene extends Phaser.Scene {
             return;
         }
 
-        // 결과 표시
+        // 결과 표시 + 핏 게이지 충전
         if (result.results) {
             result.results.forEach(r => this._showActionResult(r, caster));
+            this._chargePitGauge(result.results, action.type === 'skill');
         }
 
         // 사망 처리 + 위치 정리
@@ -1342,21 +1404,284 @@ class ManualBattleScene extends Phaser.Scene {
         });
     }
 
+    _updatePitGaugeUI() {
+        if (!this.pitGauge || !this._pitGaugeBarFill) return;
+        const pct = this.pitGauge.gauge / this.pitGauge.max;
+        this._pitGaugeBarFill.width = Math.max(1, 300 * pct);
+        const color = pct >= 0.66 ? 0xff4444 : pct >= 0.33 ? 0xcc6622 : 0xcc2222;
+        this._pitGaugeBarFill.fillColor = color;
+        this._pitGaugeText.setText(`${Math.floor(this.pitGauge.gauge)}%`);
+        this._pitMultText.setText(`×${this.pitGauge.getMultiplier().toFixed(1)}`);
+    }
+
+    _chargePitGauge(results, wasSkill) {
+        if (!this.pitGauge) return;
+        let triggered = null;
+        if (wasSkill) {
+            const t = this.pitGauge.onCharge('skill_use');
+            if (t) triggered = t;
+        }
+        const arr = Array.isArray(results) ? results : [results];
+        for (const r of arr) {
+            if (r.isCrit) {
+                const t = this.pitGauge.onCharge('crit');
+                if (t && !triggered) triggered = t;
+            }
+            if (r.killed) {
+                const unit = [...this.combat.allies, ...this.combat.enemies].find(u => u.id === r.target);
+                const type = (unit && unit.isElite) ? 'kill_elite' : (unit && unit.isBoss) ? 'kill_boss' : 'kill_normal';
+                const t = this.pitGauge.onCharge(type);
+                if (t && !triggered) triggered = t;
+            }
+            if (r.status === 'bleed') {
+                const t = this.pitGauge.onCharge('bleed_apply');
+                if (t && !triggered) triggered = t;
+            }
+            if (r.status === 'burn') {
+                const t = this.pitGauge.onCharge('burn_apply');
+                if (t && !triggered) triggered = t;
+            }
+            if (r.status && r.status !== 'bleed' && r.status !== 'burn') {
+                const t = this.pitGauge.onCharge('debuff_apply');
+                if (t && !triggered) triggered = t;
+            }
+        }
+        this._updatePitGaugeUI();
+        if (triggered) this._triggerCrowdRush(triggered);
+    }
+
+    _triggerCrowdRush(threshold) {
+        if (!this.pitGauge) return;
+        const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
+        const rush = this.pitGauge.decideCrowdRush(zoneLevel, this.currentRound, this._isBossRound);
+        if (!rush) return;
+
+        const isDopamine = rush.type === 'dopamine';
+        const label = isDopamine ? '🎉 도파민 난입! 보너스 적!' : `⚔ 관중 난입! (${threshold}%)`;
+        const color = isDopamine ? '#ffcc44' : '#ff4444';
+        const announce = this.add.text(640, 200, label, {
+            fontSize: '22px', fontFamily: 'monospace', color, fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 4
+        }).setOrigin(0.5).setDepth(70);
+        this.tweens.add({ targets: announce, y: 170, alpha: 0, duration: 2000, onComplete: () => announce.destroy() });
+
+        const scaleMult = zoneLevel === 1 ? 0.75 : 1.0 + (zoneLevel - 2) * 0.08;
+        rush.enemies.forEach(re => {
+            const data = (typeof ENEMY_DATA !== 'undefined') ? ENEMY_DATA[re.key] : null;
+            if (!data) return;
+            const aliveEnemies = this.combat.enemies.filter(u => u.alive);
+            if (aliveEnemies.length >= 4) return;
+            const pos = aliveEnemies.length + 1;
+            const id = 'rush_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+            const sm = scaleMult * re.scaleMult;
+            const enemyActions = (typeof getEnemyActions === 'function') ? getEnemyActions(re.key) : [];
+            const unit = {
+                id, name: data.name, classKey: re.key, team: 'enemy', position: pos,
+                hp: Math.floor(data.hp * sm), maxHp: Math.floor(data.hp * sm),
+                atk: Math.floor(data.atk * sm), def: data.def, spd: data.moveSpeed || 80,
+                critRate: data.critRate || 0.05, critDmg: data.critDmg || 1.5,
+                alive: true, statusEffects: [], cooldowns: {},
+                actions: enemyActions, isCrowdRush: true,
+                isElite: !!data.isElite
+            };
+            this.combat.enemies.push(unit);
+            this._crowdRushUnits.push(unit);
+            this.combat.turnQueue.push(unit);
+            const ex = 700 + (pos - 1) * 100;
+            this._drawUnit(unit, ex, 250, 'enemy');
+            const g = this.unitGfx[unit.id];
+            if (g) {
+                g.container.setAlpha(0).setScale(0.3);
+                this.tweens.add({ targets: g.container, alpha: 1, scale: 1, duration: 500, ease: 'Back.easeOut' });
+            }
+        });
+        if (rush.lootBonus > 0) this._rushLootBonus = (this._rushLootBonus || 0) + rush.lootBonus;
+    }
+
+    _showRestRoom(callback) {
+        if (!this.pitGauge) { callback(); return; }
+        const pg = this.pitGauge;
+        const restObjs = [];
+
+        const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.8).setDepth(90).setInteractive();
+        restObjs.push(overlay);
+        const panelW = 600, panelH = 400, px = 640 - panelW/2, py = 360 - panelH/2;
+        const bg = this.add.graphics().setDepth(91);
+        bg.fillStyle(0x111822, 1);
+        bg.fillRoundedRect(px, py, panelW, panelH, 8);
+        bg.lineStyle(2, 0x446688, 0.8);
+        bg.strokeRoundedRect(px, py, panelW, panelH, 8);
+        restObjs.push(bg);
+
+        restObjs.push(this.add.text(640, py + 24, '🏚 쉬는 곳 — 투기장 대기실', {
+            fontSize: '18px', fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(92));
+
+        let infoY = py + 60;
+        const deadAllies = this.combat.allies.filter(u => !u.alive);
+        if (deadAllies.length > 0) {
+            const revived = deadAllies[0];
+            revived.alive = true;
+            revived.hp = Math.max(1, Math.floor(revived.maxHp * pg.restReviveHpPct));
+            restObjs.push(this.add.text(640, infoY, `✨ ${revived.name} 부활! (HP ${revived.hp})`, {
+                fontSize: '14px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'
+            }).setOrigin(0.5).setDepth(92));
+            infoY += 24;
+        }
+        this.combat.allies.filter(u => u.alive).forEach(u => {
+            const heal = Math.floor(u.maxHp * pg.restHealPct);
+            u.hp = Math.min(u.maxHp, u.hp + heal);
+            restObjs.push(this.add.text(640, infoY, `💚 ${u.name} HP +${heal} (→ ${u.hp}/${u.maxHp})`, {
+                fontSize: '12px', fontFamily: 'monospace', color: '#88ffaa'
+            }).setOrigin(0.5).setDepth(92));
+            infoY += 18;
+        });
+        infoY += 16;
+
+        if (pg.hasPocket && typeof POCKET_ITEM_DATA !== 'undefined') {
+            restObjs.push(this.add.text(640, infoY, '🧪 포켓 아이템 (쉬는 곳에서만 사용 가능)', {
+                fontSize: '13px', fontFamily: 'monospace', color: '#88ccee', fontStyle: 'bold'
+            }).setOrigin(0.5).setDepth(92));
+            infoY += 24;
+            const slots = this.gameState.pocketSlots || [null, null];
+            for (let i = 0; i < slots.length; i++) {
+                const slotX = 640 - 140 + i * 280;
+                const itemKey = slots[i];
+                const item = itemKey ? POCKET_ITEM_DATA[itemKey] : null;
+                const slotBg = this.add.graphics().setDepth(92);
+                slotBg.fillStyle(item ? 0x223344 : 0x181828, 1);
+                slotBg.fillRoundedRect(slotX - 120, infoY, 240, 50, 5);
+                slotBg.lineStyle(1, item ? 0x4488aa : 0x333344, 0.8);
+                slotBg.strokeRoundedRect(slotX - 120, infoY, 240, 50, 5);
+                restObjs.push(slotBg);
+                if (item) {
+                    restObjs.push(this.add.text(slotX - 100, infoY + 6, `${item.icon} ${item.name}`, {
+                        fontSize: '12px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+                    }).setDepth(93));
+                    restObjs.push(this.add.text(slotX - 100, infoY + 24, item.desc, {
+                        fontSize: '10px', fontFamily: 'monospace', color: '#aabbcc'
+                    }).setDepth(93));
+                    const useBtn = UIButton.create(this, slotX + 80, infoY + 25, 55, 24, '사용', {
+                        color: 0x336644, hoverColor: 0x448855, textColor: '#88ffaa', fontSize: 11, depth: 93,
+                        onClick: () => {
+                            this._usePocketItem(i, itemKey, restObjs);
+                        }
+                    });
+                    restObjs.push(useBtn);
+                } else {
+                    restObjs.push(this.add.text(slotX, infoY + 25, '(비어있음)', {
+                        fontSize: '11px', fontFamily: 'monospace', color: '#555566'
+                    }).setOrigin(0.5).setDepth(93));
+                }
+            }
+            infoY += 60;
+        }
+
+        restObjs.push(UIButton.create(this, 640 - 75, py + panelH - 50, 150, 36, '▶ 다음 라운드로', {
+            color: 0x224488, hoverColor: 0x3366aa, textColor: '#aaccff', fontSize: 14, depth: 93,
+            onClick: () => {
+                restObjs.forEach(o => o.destroy && o.destroy());
+                this._refreshAllUnits();
+                callback();
+            }
+        }));
+    }
+
+    _usePocketItem(slotIndex, itemKey, restObjs) {
+        const item = (typeof POCKET_ITEM_DATA !== 'undefined') ? POCKET_ITEM_DATA[itemKey] : null;
+        if (!item) return;
+        const fx = item.effect;
+        const allies = this.combat.allies.filter(u => u.alive);
+
+        if (fx.healPct) {
+            if (item.targetType === 'single_ally') {
+                const target = allies.reduce((a, b) => (a.hp / a.maxHp < b.hp / b.maxHp) ? a : b);
+                const heal = Math.floor(target.maxHp * fx.healPct);
+                target.hp = Math.min(target.maxHp, target.hp + heal);
+                UIToast.show(this, `${item.icon} ${target.name} HP +${heal}`, { color: '#44ff88' });
+            } else {
+                allies.forEach(u => {
+                    const heal = Math.floor(u.maxHp * fx.healPct);
+                    u.hp = Math.min(u.maxHp, u.hp + heal);
+                });
+                UIToast.show(this, `${item.icon} 전원 HP 회복!`, { color: '#44ff88' });
+            }
+        }
+        if (fx.revivePct) {
+            const dead = this.combat.allies.filter(u => !u.alive);
+            if (dead.length > 0) {
+                const target = dead[0];
+                target.alive = true;
+                target.hp = Math.floor(target.maxHp * fx.revivePct);
+                UIToast.show(this, `${item.icon} ${target.name} 부활! (HP ${target.hp})`, { color: '#ffcc44' });
+            } else {
+                UIToast.show(this, '부활 대상 없음', { color: '#ff6644' });
+                return;
+            }
+        }
+        if (fx.purify) {
+            allies.forEach(u => {
+                u.statusEffects = u.statusEffects.filter(e => e.type.startsWith('buff_'));
+            });
+            UIToast.show(this, `${item.icon} 상태이상 정화!`, { color: '#88ccff' });
+        }
+        if (fx.atkBuff) {
+            allies.forEach(u => {
+                u.statusEffects.push({ type: 'buff_atk', duration: fx.buffDuration || 1, value: fx.atkBuff });
+            });
+            UIToast.show(this, `${item.icon} 전원 ATK 버프!`, { color: '#ffaa44' });
+        }
+        if (fx.pitGaugeAdd && this.pitGauge) {
+            this.pitGauge.gauge = Math.min(this.pitGauge.max, this.pitGauge.gauge + fx.pitGaugeAdd);
+            this._updatePitGaugeUI();
+            UIToast.show(this, `${item.icon} 핏 게이지 +${fx.pitGaugeAdd}%!`, { color: '#ff4444' });
+        }
+
+        this.gameState.pocketSlots[slotIndex] = null;
+        this._refreshAllUnits();
+    }
+
     _endRound() {
-        // 다음 라운드 또는 안전장치 발동
+        // 관중 난입 결과 정산
+        if (this.pitGauge && this._crowdRushUnits.length > 0) {
+            const killed = this._crowdRushUnits.filter(u => !u.alive).length;
+            const missed = this._crowdRushUnits.filter(u => u.alive).length;
+            if (killed > 0) this.pitGauge.onRushKill(killed);
+            if (missed > 0) this.pitGauge.onRushMiss(missed);
+            this._crowdRushUnits = [];
+            this._updatePitGaugeUI();
+        }
+
+        // 라운드 클리어 충전
+        if (this.pitGauge) {
+            this.pitGauge.onCharge('round_clear');
+            this.pitGauge.resetThresholdsForNewRound();
+            this._updatePitGaugeUI();
+        }
+
         this.currentRound++;
         if (this.currentRound > this.maxRounds) {
-            // 너무 오래 끌면 자동 후퇴 (성공 아님)
             this._retreated = true;
             UIToast.show(this, `${this.maxRounds}라운드 초과 — 자동 후퇴`, { color: '#ff8866' });
             this._endBattle(false);
             return;
         }
-        this.headerText.setText(`Round ${this.currentRound}  |  Blood Pit Lv.${this.gameState.zoneLevel[this.zoneKey]}`);
 
-        // 다음 라운드 — 턴 큐 재생성
-        DarkestCombat.startRound(this.combat);
-        this._processNextTurn();
+        const startNextRound = () => {
+            this.headerText.setText(`Round ${this.currentRound}  |  Blood Pit Lv.${this.gameState.zoneLevel[this.zoneKey]}`);
+            DarkestCombat.startRound(this.combat);
+            this._processNextTurn();
+        };
+
+        // 쉬는 곳 체크
+        if (this.pitGauge) {
+            const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
+            if (this.pitGauge.shouldShowRestRoom(zoneLevel)) {
+                this._showRestRoom(startNextRound);
+                return;
+            }
+        }
+        startNextRound();
     }
 
     _endBattle(success) {
@@ -1367,10 +1692,12 @@ class ManualBattleScene extends Phaser.Scene {
         const zone = ZONE_DATA[this.zoneKey];
         const zoneLevel = gs.zoneLevel[this.zoneKey];
 
-        // 보상 계산
+        // 보상 계산 (핏 게이지 배율 적용)
         if (success) {
-            this.totalGold = Math.floor((zone.baseGoldReward + zoneLevel * 15) * 1.5 * this.currentRound);
-            this.totalXp = Math.floor((zone.baseXpReward + zoneLevel * 8) * 1.5);
+            const pitMult = this.pitGauge ? this.pitGauge.getMultiplier() : 1.0;
+            const lootMult = 1 + (this._rushLootBonus || 0);
+            this.totalGold = Math.floor((zone.baseGoldReward + zoneLevel * 15) * pitMult * lootMult * this.currentRound);
+            this.totalXp = Math.floor((zone.baseXpReward + zoneLevel * 8) * pitMult);
         }
 
         // 결과 정리
