@@ -246,17 +246,24 @@ class TownScene extends Phaser.Scene {
         this._rosterCardH = 80;
         if (this._rosterScrollY === undefined) this._rosterScrollY = 0;
 
-        // 마스크 — 로스터 카드 영역 클립
-        const maskShape = this.make.graphics({ x: 0, y: 0, add: false });
-        maskShape.fillStyle(0xffffff, 1);
-        maskShape.fillRect(13, this._rosterScrollAreaY, 260, this._rosterScrollAreaH);
-        this._rosterMask = maskShape.createGeometryMask();
+        // 마스크 — 로스터 카드 영역 클립 (선택적, 실패해도 게임은 동작)
+        try {
+            const maskShape = this.make.graphics({ x: 0, y: 0, add: false });
+            maskShape.fillStyle(0xffffff, 1);
+            maskShape.fillRect(13, this._rosterScrollAreaY, 260, this._rosterScrollAreaH);
+            this._rosterMask = maskShape.createGeometryMask();
+        } catch (e) {
+            console.warn('로스터 마스크 생성 실패 (폴백):', e);
+            this._rosterMask = null;
+        }
 
         this._renderRosterCards();
 
         // === 마우스 휠 — 로스터 영역에서만 스크롤 (scene.restart 없이 부분 갱신) ===
-        // 기존 핸들러 제거 (씬 첫 진입 외 안전)
-        this.input.off('wheel', this._onRosterWheel, this);
+        // 기존 핸들러 제거 (있을 때만)
+        if (this._onRosterWheel) {
+            try { this.input.off('wheel', this._onRosterWheel, this); } catch (e) {}
+        }
         this._onRosterWheel = (pointer, _gameObjects, _dx, dy) => {
             if (pointer.x > 8 && pointer.x < 273
                 && pointer.y > this._rosterScrollAreaY
@@ -292,7 +299,11 @@ class TownScene extends Phaser.Scene {
             if (cardY < scrollAreaY - cardH || cardY > scrollAreaY + scrollAreaH) return;
             const objs = this._drawMercCard(merc, 18, cardY, 245);
             if (Array.isArray(objs)) {
-                objs.forEach(o => { if (o && this._rosterMask) o.setMask(this._rosterMask); });
+                objs.forEach(o => {
+                    if (o && this._rosterMask && typeof o.setMask === 'function' && o.type !== 'Zone') {
+                        try { o.setMask(this._rosterMask); } catch (e) {}
+                    }
+                });
                 this._rosterRenderObjs.push(...objs);
             }
         });
