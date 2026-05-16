@@ -1,13 +1,14 @@
 // 게임 좌표계: 1280×720 (모든 씬 코드 그대로)
-// Backing store / CSS: 1920×1080 (네이티브 렌더링 → 선명)
+// Backing store: 1920×1080 (네이티브 렌더)
 // 카메라 zoom 1.5로 1280×720 좌표를 1920×1080 viewport에 매핑
+// 텍스트 resolution = DPR × ZOOM → 카메라 확대 후에도 선명
 const BASE_W = 1280, BASE_H = 720;
 const CANVAS_W = 1920, CANVAS_H = 1080;
 const CAM_ZOOM = CANVAS_W / BASE_W;             // 1.5
 const DEVICE_DPR = window.devicePixelRatio || 1;
-const TEXT_DPR = DEVICE_DPR;                     // 캔버스가 이미 큼 → DPR만
+const TEXT_DPR = DEVICE_DPR * CAM_ZOOM;          // 카메라 zoom 보상
 
-// GameObjectFactory.text 재등록 — 텍스트는 DPR resolution
+// GameObjectFactory.text 재등록
 Phaser.GameObjects.GameObjectFactory.register('text', function (x, y, text, style) {
     style = style || {};
     if (style.resolution === undefined) style.resolution = TEXT_DPR;
@@ -38,17 +39,20 @@ const config = {
 const game = new Phaser.Game(config);
 window.game = game;
 
-// 모든 씬에 카메라 zoom 1.5 자동 적용 — 1280×720 좌표를 1920×1080에 펼침
+// 모든 씬에 카메라 zoom + centerOn(640, 360) 자동 적용
+// → 1280×720 좌표를 1920×1080에 펼침 (좌상단 (0,0))
+const applyCamera = (scene) => {
+    if (scene && scene.cameras && scene.cameras.main) {
+        scene.cameras.main.setZoom(CAM_ZOOM);
+        scene.cameras.main.centerOn(BASE_W / 2, BASE_H / 2);
+    }
+};
+
 game.events.once('ready', () => {
     game.scene.scenes.forEach(scene => {
-        scene.events.on('create', () => {
-            if (scene.cameras && scene.cameras.main) {
-                scene.cameras.main.setZoom(CAM_ZOOM).setScroll(
-                    -(CANVAS_W - BASE_W * CAM_ZOOM) / 2 / CAM_ZOOM,
-                    -(CANVAS_H - BASE_H * CAM_ZOOM) / 2 / CAM_ZOOM
-                );
-            }
-        });
+        applyCamera(scene);                                    // 즉시 (이미 활성 씬)
+        scene.events.on('create', () => applyCamera(scene));   // 이후 재시작 시
+        scene.events.on('wake',   () => applyCamera(scene));   // 깨어날 때
     });
 });
 
