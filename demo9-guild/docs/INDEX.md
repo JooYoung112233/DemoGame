@@ -35,7 +35,7 @@
 | — | gameState 스키마 | [systems/game-state.md](systems/game-state.md) | ✅ 확정 |
 | — | **구역 전투: Blood Pit** | [systems/zone-bloodpit.md](systems/zone-bloodpit.md) | ✅ 확정 (v3 다키스트 적용) |
 | — | **수동 전투: 다키스트 스타일** | [systems/manual-battle-darkest.md](systems/manual-battle-darkest.md) | ✅ 확정 |
-| — | **구역 전투: Cargo** | [systems/zone-cargo.md](systems/zone-cargo.md) | ✅ 확정 |
+| — | **구역 전투: Cargo** | [systems/zone-cargo.md](systems/zone-cargo.md) | ✅ 재설계 (나락식+RTS+기차방어) |
 | — | **구역 전투: Blackout** | [systems/zone-blackout.md](systems/zone-blackout.md) | ✅ 확정 |
 | — | 클래스 스킬 (6) | [systems/class-skills.md](systems/class-skills.md) | ✅ 확정 |
 | — | **스킬/액션 아이콘 가이드** | [systems/skill-icons.md](systems/skill-icons.md) | ✅ 제작 레퍼런스 |
