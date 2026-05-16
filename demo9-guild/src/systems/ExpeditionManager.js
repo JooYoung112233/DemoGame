@@ -115,8 +115,15 @@ class ExpeditionManager {
             gs.guildXp += result.xpEarned;
         }
 
-        // 용병 XP/친화도/부상
+        // 용병 XP/친화도/부상 — 사망자 포함 본드 누적용으로 원본 파티 보존
+        const partyForBonds = [...gs.roster, ...(gs.fallenMercs || [])].filter(m => result.partyIds.includes(m.id));
         const partyMercs = gs.roster.filter(m => result.partyIds.includes(m.id));
+
+        // === 본드 누적 (서브 파견) ===
+        if (typeof BondManager !== 'undefined' && partyForBonds.length >= 2) {
+            BondManager.updateBonds(gs, partyForBonds, result.success, 'sub');
+        }
+
         partyMercs.forEach(merc => {
             merc.gainXp(result.mercXp);
             if (typeof merc.gainAffinityXp === 'function') {

@@ -9,7 +9,8 @@ class SaveManager {
             fallenMercs: (gameState.fallenMercs || []).map(m => m.toJSON()),
             activeExpeditions: gameState.activeExpeditions || [],
             pendingResults: gameState.pendingResults || [],
-            savedParties: gameState.savedParties || []
+            savedParties: gameState.savedParties || [],
+            bonds: gameState.bonds || {}
         };
         localStorage.setItem(SaveManager.SAVE_KEY, JSON.stringify(data));
     }
@@ -26,6 +27,7 @@ class SaveManager {
             data.pendingResults = data.pendingResults || [];
             data.zoneClearCount = data.zoneClearCount || {};
             data.savedParties = data.savedParties || [];
+            data.bonds = data.bonds || {};
             // 기존 세이브에 'equipment' 시설 자동 추가 (장비 페이지 신규)
             data.unlockedFacilities = data.unlockedFacilities || [];
             if (!data.unlockedFacilities.includes('equipment')) {

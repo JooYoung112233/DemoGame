@@ -377,6 +377,31 @@ class RosterScene extends Phaser.Scene {
             color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 11,
             onClick: () => this.scene.start('AffinityScene', { gameState: gs, mercId: merc.id })
         });
+        cy += 30;
+
+        // === 본드 (Top 5) ===
+        if (typeof BondManager !== 'undefined') {
+            const allMercs = [...gs.roster, ...(gs.fallenMercs || [])];
+            const bonds = BondManager.getBondsForMerc(gs, merc.id, allMercs).slice(0, 5);
+            if (bonds.length > 0) {
+                this.add.text(x + 15, cy, '── 💞 본드 (Top 5) ──', {
+                    fontSize: '12px', fontFamily: 'monospace', color: '#ff88cc', fontStyle: 'bold'
+                });
+                cy += 18;
+                bonds.forEach(b => {
+                    const tierColors = ['#666677', '#88ccaa', '#88ddff', '#ffaa66', '#ff88cc', '#ffcc44'];
+                    const c = tierColors[b.tier.tier] || '#888888';
+                    const dead = !b.otherRef.alive ? ' ☠' : '';
+                    this.add.text(x + 25, cy, `${b.tier.name}: ${b.otherName}${dead}`, {
+                        fontSize: '11px', fontFamily: 'monospace', color: c
+                    });
+                    this.add.text(x + w - 25, cy, `${b.xp}/100`, {
+                        fontSize: '10px', fontFamily: 'monospace', color: c
+                    }).setOrigin(1, 0);
+                    cy += 15;
+                });
+            }
+        }
 
         // 하단 버튼 (자동장착 / 치료 / 해고)
         const btnY = y + h - 50;

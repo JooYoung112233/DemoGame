@@ -50,6 +50,12 @@ class ManualBattleScene extends Phaser.Scene {
             this._activeSynergies = applySynergies(this.combat.allies, classKeys) || [];
         }
 
+        // === 본드 보너스 적용 ===
+        this._activeBonds = [];
+        if (typeof BondManager !== 'undefined') {
+            this._activeBonds = BondManager.applyBondBonuses(this.gameState, this.combat.allies) || [];
+        }
+
         this.currentRound = 1;
         // 다키스트 스타일 — 라운드 제한은 안전장치 (전멸로 끝나는 게 정상)
         // 너무 길어지면 자동 후퇴 처리
@@ -152,27 +158,53 @@ class ManualBattleScene extends Phaser.Scene {
             onClick: () => { this._retreated = true; this._endBattle(false); }
         });
 
-        // === 활성 시너지 표시 — 헤더 바로 아래 ===
+        // === 활성 시너지 표시 — 헤더 바로 아래 (y=44~70) ===
+        let infoBarY = 44;
         if (this._activeSynergies && this._activeSynergies.length > 0) {
             const synBg = this.add.graphics();
             synBg.fillStyle(0x140828, 0.85);
-            synBg.fillRect(0, 44, 1280, 26);
+            synBg.fillRect(0, infoBarY, 1280, 26);
 
-            // 좌측 라벨
-            this.add.text(12, 50, '✨ 시너지:', {
+            this.add.text(12, infoBarY + 6, '✨ 시너지:', {
                 fontSize: '11px', fontFamily: 'monospace', color: '#ccaaff', fontStyle: 'bold'
             });
 
-            // 가로로 chip
             let chipX = 90;
             this._activeSynergies.forEach(syn => {
                 const typeColor = syn.type === 5 ? '#ffcc44' : syn.type === 3 ? '#ff88cc' : '#88ccff';
                 const typeBadge = syn.type === 5 ? '⭐' : syn.type === 3 ? '★' : '✦';
-                const chip = this.add.text(chipX, 49, `${typeBadge} ${syn.name} — ${syn.desc}`, {
+                const chip = this.add.text(chipX, infoBarY + 5, `${typeBadge} ${syn.name} — ${syn.desc}`, {
                     fontSize: '10px', fontFamily: 'monospace', color: typeColor,
                     stroke: '#000', strokeThickness: 1
                 });
                 chipX += chip.width + 22;
+                if (chipX > 1240) return;
+            });
+            infoBarY += 26;
+        }
+
+        // === 활성 본드 표시 ===
+        if (this._activeBonds && this._activeBonds.length > 0) {
+            const bondBg = this.add.graphics();
+            bondBg.fillStyle(0x281428, 0.85);
+            bondBg.fillRect(0, infoBarY, 1280, 26);
+
+            this.add.text(12, infoBarY + 6, '💞 본드:', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ff88cc', fontStyle: 'bold'
+            });
+
+            let chipX = 80;
+            this._activeBonds.forEach(b => {
+                // 티어 색
+                const tierColors = ['#888888', '#88ccaa', '#88ddff', '#ffaa66', '#ff88cc', '#ffcc44'];
+                const tierBadges = ['', '①', '②', '③', '④', '⑤'];
+                const color = tierColors[b.tier] || '#888888';
+                const badge = tierBadges[b.tier] || '';
+                const chip = this.add.text(chipX, infoBarY + 5, `${badge} ${b.aName} ↔ ${b.bName} (${b.name})`, {
+                    fontSize: '10px', fontFamily: 'monospace', color,
+                    stroke: '#000', strokeThickness: 1
+                });
+                chipX += chip.width + 16;
                 if (chipX > 1240) return;
             });
         }

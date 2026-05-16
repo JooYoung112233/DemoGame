@@ -76,6 +76,7 @@ class DeployScene extends Phaser.Scene {
 
         this._drawDeploySlots(30, 280, maxDeploy);
         this._drawSynergyPreview(maxDeploy);
+        this._drawBondPreview(maxDeploy);
         this._drawRosterPick(30, 440);
         this._drawSavedParties(30, 595);
         this._drawDepartButton();
@@ -157,6 +158,55 @@ class DeployScene extends Phaser.Scene {
 
     _classIcon(classKey) {
         return (CLASS_DATA[classKey]?.icon || '?') + (CLASS_DATA[classKey]?.name || '');
+    }
+
+    /** 편성된 용병들 간 활성 본드 미리보기 — 시너지 막대 위쪽 */
+    _drawBondPreview(maxDeploy) {
+        const gs = this.gameState;
+        const deployed = this.deployedIds
+            .map(id => gs.roster.find(m => m.id === id))
+            .filter(Boolean);
+
+        if (deployed.length < 2 || typeof BondManager === 'undefined') return;
+
+        // 본드 페어 수집
+        const bonds = [];
+        for (let i = 0; i < deployed.length; i++) {
+            for (let j = i + 1; j < deployed.length; j++) {
+                const a = deployed[i], b = deployed[j];
+                const xp = BondManager.getBondXp(gs, a.id, b.id);
+                if (xp <= 0) continue;
+                const tier = BondManager.getTier(xp);
+                bonds.push({ a, b, xp, tier });
+            }
+        }
+        if (bonds.length === 0) return;
+
+        // 시너지 막대 위쪽 (y=180~210)
+        const px = 30, py = 180, pw = 1220, ph = 30;
+        const bg = this.add.graphics();
+        bg.fillStyle(0x281428, 1);
+        bg.fillRoundedRect(px, py, pw, ph, 6);
+        bg.lineStyle(2, 0xaa5577, 0.7);
+        bg.strokeRoundedRect(px, py, pw, ph, 6);
+
+        this.add.text(px + 10, py + 8, '💞 본드:', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ff88cc', fontStyle: 'bold'
+        });
+
+        let chipX = px + 70;
+        bonds.sort((a, b) => b.xp - a.xp);
+        bonds.forEach(b => {
+            const tierColors = ['#888888', '#88ccaa', '#88ddff', '#ffaa66', '#ff88cc', '#ffcc44'];
+            const tierBadges = ['낯선', '①동료', '②형제', '③전우', '④동반자', '⑤운명'];
+            const color = tierColors[b.tier.tier] || '#888888';
+            const badge = tierBadges[b.tier.tier] || '';
+            const chip = this.add.text(chipX, py + 8, `${badge} ${b.a.name}↔${b.b.name} (${b.xp})`, {
+                fontSize: '10px', fontFamily: 'monospace', color
+            });
+            chipX += chip.width + 14;
+            if (chipX > px + pw - 50) return;
+        });
     }
 
     /** 한 명 더 추가하면 발동되는 시너지 후보 */

@@ -160,6 +160,12 @@ class RunResultScene extends Phaser.Scene {
 
         GuildManager.addXp(gs, r.xpEarned);
 
+        // === 본드 누적 (메인 전투) ===
+        if (typeof BondManager !== 'undefined') {
+            const party = [...r.survivors, ...r.casualties];
+            BondManager.updateBonds(gs, party, r.success, 'main');
+        }
+
         // 메인 클리어 시 마스터리 카운트 +1 (서브 파견 해금용)
         if (r.success && r.zoneKey) {
             const clearedLv = gs.zoneLevel[r.zoneKey] || 1;

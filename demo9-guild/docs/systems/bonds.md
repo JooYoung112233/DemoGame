@@ -2,6 +2,8 @@
 
 > 같이 굴리고 살아남은 용병끼리 관계가 누적된다. 5인 시너지와는 다른 축의 파티 강화 트랙.
 > 음성 특성(고독, 질투 등)이 Bond 누적을 막거나 감소시킨다.
+>
+> **🟢 구현 완료 (MVP, P1):** 본드 누적 / 티어 stat 보너스 / UI (DeployScene 미리보기, ManualBattleScene 표시, RosterScene 상세, BondScene 관계도). 페어 스킬은 P2.
 
 ## 1. 누적 공식
 

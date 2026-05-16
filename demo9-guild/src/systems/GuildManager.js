@@ -19,7 +19,8 @@ class GuildManager {
             pendingResults: [],          // 미수령 파견 결과
             zoneClearCount: {},          // { 'bloodpit_1': 3, ... } 메인 클리어 누적 (서브 해금용)
             fallenMercs: [],             // 사망 용병 (부활 대기)
-            savedParties: []             // 저장된 파티 편성 [{ id, name, mercIds }]
+            savedParties: [],            // 저장된 파티 편성 [{ id, name, mercIds }]
+            bonds: {}                    // 용병 간 본드 — { 'idA_idB': xp(0-100) } — 영구 보존
         };
     }
 

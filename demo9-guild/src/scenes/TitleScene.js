@@ -133,6 +133,23 @@ class TitleScene extends Phaser.Scene {
         // === 모집 풀도 채워둠 ===
         MercenaryManager.generateRecruitPool(gs);
 
+        // === 본드 시드 — 일부 페어에 높은 본드 (테스트용) ===
+        // 첫 4명을 자주 같이 출전한 것처럼 본드 누적
+        if (typeof BondManager !== 'undefined' && gs.roster.length >= 4) {
+            const corePartyMercs = gs.roster.slice(0, 4);
+            // 메인 전투 성공 10회분 가량 누적
+            for (let i = 0; i < 10; i++) {
+                BondManager.updateBonds(gs, corePartyMercs, true, 'main');
+            }
+            // 5번째와 1-2번째도 약간
+            if (gs.roster[4]) {
+                const subParty = [gs.roster[0], gs.roster[1], gs.roster[4]];
+                for (let i = 0; i < 4; i++) {
+                    BondManager.updateBonds(gs, subParty, true, 'sub');
+                }
+            }
+        }
+
         // === 보관함에 다양한 장비/소재 ===
         if (typeof generateItem === 'function') {
             const zones = ['bloodpit', 'cargo', 'blackout'];
