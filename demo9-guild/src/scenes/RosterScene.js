@@ -163,14 +163,14 @@ class RosterScene extends Phaser.Scene {
             });
         }
 
-        // 클릭 영역
-        const hit = this.add.zone(x + w/2, y + h/2, w, h).setInteractive({ useHandCursor: true });
+        // 클릭 영역 — rectangle (zone보다 안정적)
+        const hit = this.add.rectangle(x + w/2, y + h/2, w, h, 0xffffff, 0.001)
+            .setInteractive({ useHandCursor: true })
+            .setDepth(10);
         hit.on('pointerdown', () => {
-            this._selectedSlot = 'weapon';   // 기본 슬롯 초기화
+            this._selectedSlot = 'weapon';
             this.scene.restart({ gameState: this.gameState, selectedMercId: merc.id });
         });
-
-        // 호버 표시 (하이라이트)
         hit.on('pointerover', () => {
             bg.clear();
             bg.fillStyle(0x223344, 1);
