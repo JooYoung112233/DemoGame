@@ -289,10 +289,10 @@ class ManualBattleScene extends Phaser.Scene {
         this.actionButtons.forEach(b => b.destroy && b.destroy());
         this.actionButtons = [];
 
-        this.actionTitleText.setText(`▶ ${unit.name}의 턴 (포지션 ${unit.position})`);
+        this.actionTitleText.setText(`▶ ${unit.name}의 턴 (포지션 ${unit.position}) — 액션 클릭 또는 유닛 클릭하여 상세 정보`);
 
         const actions = (typeof getClassActions === 'function') ? getClassActions(unit.classKey) : [];
-        const startX = 100, btnW = 270, btnH = 60, gap = 20;
+        const startX = 80, btnW = 220, btnH = 60, gap = 10;
 
         actions.forEach((action, i) => {
             const x = startX + i * (btnW + gap);
@@ -342,6 +342,45 @@ class ManualBattleScene extends Phaser.Scene {
                 this.actionButtons.push(hit);
             }
         });
+
+        // 스킵 버튼 (5번째 슬롯 위치)
+        const skipX = startX + 4 * (btnW + gap);
+        const skipBg = this.add.graphics();
+        skipBg.fillStyle(0x332244, 1);
+        skipBg.fillRoundedRect(skipX, 560, 160, 60, 5);
+        skipBg.lineStyle(1, 0x665577, 0.7);
+        skipBg.strokeRoundedRect(skipX, 560, 160, 60, 5);
+        this.actionButtons.push(skipBg);
+        this.actionButtons.push(this.add.text(skipX + 80, 566, '⏭ 스킵', {
+            fontSize: '13px', fontFamily: 'monospace', color: '#ccaaee', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        this.actionButtons.push(this.add.text(skipX + 80, 590, '턴 넘기기 (방어 +20%)', {
+            fontSize: '9px', fontFamily: 'monospace', color: '#888899',
+            wordWrap: { width: 150 }
+        }).setOrigin(0.5));
+
+        const skipHit = this.add.zone(skipX + 80, 590, 160, 60).setInteractive({ useHandCursor: true });
+        skipHit.on('pointerdown', () => this._skipTurn(unit));
+        this.actionButtons.push(skipHit);
+    }
+
+    /** 턴 스킵 — 방어 자세 (DEF +20% 1라운드) */
+    _skipTurn(unit) {
+        unit.statusEffects.push({ type: 'buff_def', duration: 1, value: 0.2 });
+        // 시각 효과
+        const g = this.unitGfx[unit.id];
+        if (g) {
+            const label = this.add.text(g.baseX, g.baseY - 70, '⏭ 방어 자세', {
+                fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 3
+            }).setOrigin(0.5).setDepth(50);
+            this.tweens.add({ targets: label, y: label.y - 20, alpha: 0, duration: 1000, onComplete: () => label.destroy() });
+        }
+        this._refreshAllUnits();
+        this.time.delayedCall(500, () => {
+            DarkestCombat.advanceTurn(this.combat);
+            this._processNextTurn();
+        });
     }
 
     _selectAction(caster, action) {
@@ -379,21 +418,184 @@ class ManualBattleScene extends Phaser.Scene {
     }
 
     _onUnitClicked(unit) {
-        if (!this.selectedAction) return;
-        const action = this.selectedAction.action;
-
-        // 타겟 유효성 체크
-        const isEnemyTarget = action.targetType.startsWith('enemy');
-        const expectedTeam = isEnemyTarget ? 'enemy' : 'ally';
-        if (unit.team !== expectedTeam) return;
-        if (!action.targetPositions.includes(unit.position)) return;
-        if (!unit.alive) return;
-
-        this._executePlayerAction([unit.position]);
+        // 액션 선택 중 → 타겟으로 사용
+        if (this.selectedAction) {
+            const action = this.selectedAction.action;
+            const isEnemyTarget = action.targetType.startsWith('enemy');
+            const expectedTeam = isEnemyTarget ? 'enemy' : 'ally';
+            if (unit.team !== expectedTeam) return;
+            if (!action.targetPositions.includes(unit.position)) return;
+            if (!unit.alive) return;
+            this._executePlayerAction([unit.position]);
+            return;
+        }
+        // 액션 선택 안 한 상태 — 유닛 상세 정보 토글
+        if (this._inspectedUnitId === unit.id) {
+            this._hideInspectPanel();
+        } else {
+            this._showInspectPanel(unit);
+        }
     }
 
     _onUnitHover(unit, isOver) {
-        // 추후 툴팁
+        // 호버 시 빠른 미리보기 (작은 툴팁)
+        if (!isOver) {
+            if (this._hoverPanel) {
+                this._hoverPanel.forEach(o => o.destroy && o.destroy());
+                this._hoverPanel = null;
+            }
+            return;
+        }
+        if (this._hoverPanel) this._hoverPanel.forEach(o => o.destroy && o.destroy());
+
+        const g = this.unitGfx[unit.id];
+        if (!g) return;
+        const px = g.baseX, py = g.baseY - 130;
+        const w = 200, h = 90;
+
+        const objs = [];
+        const bg = this.add.graphics().setDepth(60);
+        bg.fillStyle(0x000000, 0.9);
+        bg.fillRoundedRect(px - w/2, py, w, h, 4);
+        bg.lineStyle(1, 0x88aacc, 0.7);
+        bg.strokeRoundedRect(px - w/2, py, w, h, 4);
+        objs.push(bg);
+
+        const teamColor = unit.team === 'ally' ? '#88ccff' : '#ff8888';
+        objs.push(this.add.text(px, py + 6, `${unit.name} (P${unit.position})`, {
+            fontSize: '11px', fontFamily: 'monospace', color: teamColor, fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(61));
+        objs.push(this.add.text(px - w/2 + 8, py + 24, `HP ${unit.hp}/${unit.maxHp}  ATK ${unit.atk}  DEF ${unit.def}`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#cccccc'
+        }).setDepth(61));
+        objs.push(this.add.text(px - w/2 + 8, py + 40, `SPD ${unit.spd}  CRIT ${Math.floor(unit.critRate*100)}%`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#cccccc'
+        }).setDepth(61));
+        if (unit.statusEffects && unit.statusEffects.length > 0) {
+            const statusStr = unit.statusEffects.map(e => {
+                const names = { bleed:'출혈', burn:'화상', slow:'둔화', taunt_active:'도발', buff_atk:'ATK↑', buff_def:'DEF↑' };
+                return `${names[e.type]||e.type}(${e.duration})`;
+            }).join(' ');
+            objs.push(this.add.text(px - w/2 + 8, py + 56, statusStr, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#ffaa66',
+                wordWrap: { width: w - 16 }
+            }).setDepth(61));
+        }
+        objs.push(this.add.text(px, py + h - 14, '(클릭: 상세 정보)', {
+            fontSize: '9px', fontFamily: 'monospace', color: '#777788'
+        }).setOrigin(0.5).setDepth(61));
+
+        this._hoverPanel = objs;
+    }
+
+    _showInspectPanel(unit) {
+        this._hideInspectPanel();
+        this._inspectedUnitId = unit.id;
+
+        const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7).setDepth(80);
+        const w = 540, h = 460, mx = 640 - w/2, my = 360 - h/2;
+        const bg = this.add.graphics().setDepth(81);
+        bg.fillStyle(0x111122, 1);
+        bg.fillRoundedRect(mx, my, w, h, 6);
+        const borderColor = unit.team === 'ally' ? 0x4488cc : 0xcc4444;
+        bg.lineStyle(2, borderColor, 0.8);
+        bg.strokeRoundedRect(mx, my, w, h, 6);
+        const objs = [overlay, bg];
+
+        const teamLabel = unit.team === 'ally' ? '🟦 아군' : '🟥 적';
+        objs.push(this.add.text(mx + w/2, my + 18, `${teamLabel} — ${unit.name}`, {
+            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(82));
+        objs.push(this.add.text(mx + w/2, my + 42, `포지션 ${unit.position}  |  ${unit.classKey}`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#aaccee'
+        }).setOrigin(0.5).setDepth(82));
+
+        // 스탯
+        let cy = my + 70;
+        objs.push(this.add.text(mx + 20, cy, '── 스탯 ──', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+        }).setDepth(82));
+        cy += 22;
+        const stats = [
+            ['HP', `${unit.hp}/${unit.maxHp}`], ['ATK', unit.atk], ['DEF', unit.def],
+            ['SPD', unit.spd], ['CRIT', `${Math.floor(unit.critRate*100)}%`], ['CRIT 배율', `${unit.critDmg.toFixed(1)}x`]
+        ];
+        stats.forEach((s, i) => {
+            objs.push(this.add.text(mx + 30 + (i % 2) * 250, cy + Math.floor(i/2) * 20, `${s[0]}: ${s[1]}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#cccccc'
+            }).setDepth(82));
+        });
+        cy += 70;
+
+        // 상태 효과
+        objs.push(this.add.text(mx + 20, cy, '── 상태 효과 ──', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+        }).setDepth(82));
+        cy += 22;
+        if (!unit.statusEffects || unit.statusEffects.length === 0) {
+            objs.push(this.add.text(mx + 30, cy, '없음', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+            }).setDepth(82));
+            cy += 18;
+        } else {
+            unit.statusEffects.forEach(e => {
+                const names = { bleed:'🩸 출혈', burn:'🔥 화상', slow:'🐌 둔화', taunt_active:'⚠ 도발', buff_atk:'⬆ ATK 버프', buff_def:'🛡 DEF 버프' };
+                const label = names[e.type] || e.type;
+                objs.push(this.add.text(mx + 30, cy, `${label}  (${e.duration}R 남음)`, {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#ffaa66'
+                }).setDepth(82));
+                cy += 16;
+            });
+        }
+        cy += 10;
+
+        // 액션 목록
+        objs.push(this.add.text(mx + 20, cy, '── 보유 액션 ──', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+        }).setDepth(82));
+        cy += 22;
+        const actionIds = unit.actions || [];
+        actionIds.forEach(aid => {
+            const action = ACTION_DATA[aid];
+            if (!action) return;
+            const cd = unit.cooldowns[aid] || 0;
+            const cdLabel = cd > 0 ? ` 쿨${cd}R` : (action.cooldown > 0 ? ` (쿨${action.cooldown})` : '');
+            const canUse = action.casterPositions.includes(unit.position);
+            const color = !canUse ? '#666677' : (action.type === 'skill' ? '#ffcc88' : '#cccccc');
+            objs.push(this.add.text(mx + 30, cy, `${action.icon || ''} ${action.name}${cdLabel}`, {
+                fontSize: '11px', fontFamily: 'monospace', color, fontStyle: 'bold'
+            }).setDepth(82));
+            objs.push(this.add.text(mx + 50, cy + 14, `${action.desc || ''} (P${action.casterPositions.join(',')})`, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#888899'
+            }).setDepth(82));
+            cy += 32;
+        });
+
+        // 닫기
+        objs.push(UIButton.create(this, mx + w - 50, my + 18, 70, 24, '닫기', {
+            color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 11, depth: 82,
+            onClick: () => this._hideInspectPanel()
+        }));
+
+        // 배경 클릭 시 닫기
+        const hitBg = this.add.zone(640, 360, 1280, 720).setInteractive().setDepth(80);
+        hitBg.on('pointerdown', (pointer) => {
+            const px = pointer.x, py = pointer.y;
+            if (px < mx || px > mx + w || py < my || py > my + h) {
+                this._hideInspectPanel();
+            }
+        });
+        objs.push(hitBg);
+
+        this._inspectPanel = objs;
+    }
+
+    _hideInspectPanel() {
+        if (this._inspectPanel) {
+            this._inspectPanel.forEach(o => o.destroy && o.destroy());
+            this._inspectPanel = null;
+        }
+        this._inspectedUnitId = null;
     }
 
     _executePlayerAction(targetPositions) {

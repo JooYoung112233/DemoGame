@@ -234,67 +234,101 @@ class DeployScene extends Phaser.Scene {
         const gs = this.gameState;
         const slotW = 230;
 
+        // 다키스트 포지션 안내 (포지션 1이 가장 우측 = 전열)
+        const positionInfo = this.add.text(x, y - 18, '편성 순서: ← 좌측이 후열(원거리), 우측이 전열(근접)', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#aaccff', fontStyle: 'italic'
+        });
+
         for (let i = 0; i < maxDeploy; i++) {
             const sx = x + i * (slotW + 10);
             const merc = gs.roster.find(m => m.id === this.deployedIds[i]);
+            const position = maxDeploy - i;   // 좌측이 후열(높은 번호), 우측이 전열(낮은 번호)
 
             const bg = this.add.graphics();
             bg.fillStyle(merc ? 0x1a2a3a : 0x151525, 1);
-            bg.fillRoundedRect(sx, y, slotW, 140, 4);
+            bg.fillRoundedRect(sx, y, slotW, 165, 4);
             bg.lineStyle(1, merc ? 0x446688 : 0x333355, 0.6);
-            bg.strokeRoundedRect(sx, y, slotW, 140, 4);
+            bg.strokeRoundedRect(sx, y, slotW, 165, 4);
+
+            // 포지션 번호 (좌상단)
+            const posColor = position <= 2 ? '#ff8866' : '#88ccff';
+            const posLabel = position <= 2 ? `전열 [${position}]` : `후열 [${position}]`;
+            this.add.text(sx + 8, y + 5, posLabel, {
+                fontSize: '11px', fontFamily: 'monospace', color: posColor, fontStyle: 'bold'
+            });
 
             if (merc) {
                 const base = merc.getBaseClass();
                 const rarity = RARITY_DATA[merc.rarity];
                 const stats = merc.getStats();
 
-                this.add.text(sx + 10, y + 8, `${base.icon} ${merc.name}`, {
-                    fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
-                });
-                this.add.text(sx + slotW - 10, y + 8, `Lv.${merc.level}`, {
+                this.add.text(sx + slotW - 10, y + 5, `Lv.${merc.level}`, {
                     fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
                 }).setOrigin(1, 0);
-                this.add.text(sx + 10, y + 28, `${base.name} [${rarity.name}]`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#777788'
+                this.add.text(sx + 10, y + 22, `${base.icon} ${merc.name}`, {
+                    fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
                 });
-                this.add.text(sx + 10, y + 46, `HP:${merc.currentHp}/${stats.hp}`, {
+                this.add.text(sx + 10, y + 40, `${base.name} HP:${merc.currentHp}/${stats.hp}`, {
                     fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
                 });
-                this.add.text(sx + 10, y + 62, `ATK:${stats.atk} DEF:${stats.def} SPD:${stats.moveSpeed}`, {
+                this.add.text(sx + 10, y + 55, `ATK:${stats.atk} DEF:${stats.def} SPD:${stats.moveSpeed}`, {
                     fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
                 });
 
-                const hpRatio = merc.currentHp / stats.hp;
-                const hpBar = this.add.graphics();
-                hpBar.fillStyle(0x333344, 1);
-                hpBar.fillRect(sx + 10, y + 80, slotW - 20, 4);
-                const hpColor = hpRatio > 0.6 ? 0x44ff88 : hpRatio > 0.3 ? 0xffaa44 : 0xff4444;
-                hpBar.fillStyle(hpColor, 1);
-                hpBar.fillRect(sx + 10, y + 80, (slotW - 20) * hpRatio, 4);
+                // 액션 미리보기 (현재 포지션에서 가능한지 표시)
+                if (typeof getClassActions === 'function') {
+                    const actions = getClassActions(merc.classKey);
+                    let ay = y + 72;
+                    actions.forEach(action => {
+                        const canUse = action.casterPositions.includes(position);
+                        const icon = canUse ? '✓' : '✗';
+                        const color = canUse ? '#88ccaa' : '#aa6666';
+                        const posStr = action.casterPositions.join(',');
+                        this.add.text(sx + 10, ay, `${icon} ${action.name} [P${posStr}]`, {
+                            fontSize: '9px', fontFamily: 'monospace', color
+                        });
+                        ay += 12;
+                    });
+                }
 
-                const traits = merc.traits.map(t => {
-                    const sym = t.type === 'positive' ? '✦' : t.type === 'legendary' ? '★' : '✧';
-                    return sym + t.name;
-                }).join(' ');
-                this.add.text(sx + 10, y + 92, traits, {
-                    fontSize: '9px', fontFamily: 'monospace', color: '#667788',
-                    wordWrap: { width: slotW - 20 }
-                });
-
-                UIButton.create(this, sx + slotW / 2, y + 125, 80, 22, '해제', {
+                // 좌/우 이동 버튼
+                if (i > 0) {
+                    UIButton.create(this, sx + 25, y + 148, 35, 22, '◀', {
+                        color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 12,
+                        onClick: () => this._swapDeployed(i, i - 1)
+                    });
+                }
+                if (i < maxDeploy - 1 && this.deployedIds[i + 1]) {
+                    UIButton.create(this, sx + 65, y + 148, 35, 22, '▶', {
+                        color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 12,
+                        onClick: () => this._swapDeployed(i, i + 1)
+                    });
+                }
+                UIButton.create(this, sx + slotW - 50, y + 148, 80, 22, '해제', {
                     color: 0x555555, hoverColor: 0x666666, textColor: '#cccccc', fontSize: 10,
                     onClick: () => {
                         this.deployedIds = this.deployedIds.filter(id => id !== merc.id);
-                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds });
+                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
                     }
                 });
             } else {
-                this.add.text(sx + slotW / 2, y + 70, `슬롯 ${i + 1}`, {
+                this.add.text(sx + slotW / 2, y + 80, '(빈 슬롯)', {
                     fontSize: '12px', fontFamily: 'monospace', color: '#444455'
                 }).setOrigin(0.5);
             }
         }
+    }
+
+    /** 슬롯 idx1과 idx2 위치 스왑 */
+    _swapDeployed(idx1, idx2) {
+        const gs = this.gameState;
+        const arr = this.deployedIds.slice();
+        // 양쪽 다 채워있어야 swap. 한쪽 빈 슬롯이면 한쪽으로 이동
+        const tmp = arr[idx1];
+        arr[idx1] = arr[idx2];
+        arr[idx2] = tmp;
+        this.deployedIds = arr.filter(id => id);
+        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
     }
 
     _drawRosterPick(x, y) {
