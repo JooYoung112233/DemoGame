@@ -42,6 +42,7 @@ class ManualBattleScene extends Phaser.Scene {
         // 적 생성 (웨이브 1)
         const enemies = this._spawnEnemies(1);
         this.combat = DarkestCombat.createCombat(this.party, enemies);
+        this.combat._aiLevel = Math.min(10, Math.floor((this.gameState.zoneLevel[this.zoneKey] || 1) / 1));
 
         // === 스테미너 페널티 적용 (시너지/본드 전에) ===
         this.combat.allies.forEach(u => {
