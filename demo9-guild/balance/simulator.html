@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Demo9 — 12시간 자동 플레이 시뮬레이터</title>
+<style>
+  body { font-family: 'Consolas', monospace; background: #1a1a1a; color: #ddd; padding: 20px; line-height: 1.5; }
+  h1 { color: #ffaa00; }
+  h2 { color: #88ccff; margin-top: 30px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+  .controls { background: #222; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+  button { background: #ffaa00; color: #000; border: none; padding: 8px 20px; cursor: pointer; font-weight: bold; margin-right: 10px; border-radius: 3px; }
+  button:hover { background: #ffcc44; }
+  select, input { background: #333; color: #ddd; border: 1px solid #555; padding: 5px 10px; margin-right: 10px; }
+  pre { background: #000; padding: 15px; border-left: 3px solid #ffaa00; overflow-x: auto; white-space: pre-wrap; }
+  .pass { color: #88ff88; }
+  .fail { color: #ff6666; }
+  table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+  th, td { border: 1px solid #444; padding: 5px 10px; text-align: right; }
+  th { background: #333; color: #ffaa00; }
+  td:first-child { text-align: left; }
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { background: #222; padding: 10px; border-radius: 3px; border-left: 3px solid #88ccff; }
+  .stat-label { color: #888; font-size: 0.85em; }
+  .stat-value { color: #fff; font-size: 1.3em; font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>🎮 Demo9 — 12시간 자동 플레이 시뮬레이터</h1>
+
+<div class="controls">
+  <select id="strategy">
+    <option value="balanced">Balanced (대표)</option>
+    <option value="aggressive">Aggressive (도전적)</option>
+    <option value="safe">Safe (안전)</option>
+  </select>
+  <input type="number" id="hours" value="12" min="1" max="24" style="width: 80px;">
+  <input type="number" id="seed" value="42" style="width: 80px;">
+  <input type="number" id="runs" value="1" min="1" max="100" style="width: 80px;" placeholder="횟수">
+  <button onclick="runSim()">▶ 단일 실행</button>
+  <button onclick="runMultiple()">📊 다중 평균</button>
+  <button onclick="runCompare()">🔀 3전략 비교</button>
+</div>
+
+<div id="output"></div>
+
+<script src="../src/data/balance.js"></script>
+<script>
+// === 시드 RNG ===
+let _rngState = 42;
+function seedRng(seed) { _rngState = seed; }
+function rng() {
+    _rngState = (_rngState * 9301 + 49297) % 233280;
+    return _rngState / 233280;
+}
+function rngInt(min, max) { return Math.floor(rng() * (max - min + 1)) + min; }
+function rngPick(arr) { return arr[Math.floor(rng() * arr.length)]; }
+function rngWeighted(weightMap) {
+    const total = Object.values(weightMap).reduce((s, w) => s + w, 0);
+    let r = rng() * total;
+    for (const [key, w] of Object.entries(weightMap)) {
+        r -= w;
+        if (r <= 0) return key;
+    }
+    return Object.keys(weightMap)[0];
+}
+
+let _mercIdCounter = 0;
+let state;
+
+function createGameState() {
+    return {
+        gold: BALANCE.START_GOLD,
+        guildLevel: BALANCE.START_GUILD_LEVEL,
+        guildXp: 0,
+        reputation: 0,
+        roster: [],
+        recruitPool: [],
+        zoneLevel: { bloodpit: 1, cargo: 0, blackout: 0 },
+        bossDefeated: { bp: false, cargo: false, blackout: false },
+        activeExpeditions: [],
+        bonds: {},
+        npcFavor: { krough: 0, mira: 0, herta: 0, golden: 0, speedcar: 0, iron: 0, shadow: 0, priest: 0 },
+        unlockedFacilities: BALANCE.START_FACILITIES.slice(),
+        guildHall: { operations: 0, infrastructure: 0, recovery: 0, automation: 0, intel: 0 },
+        simTimeMin: 0,
+        stats: {
+            mainRuns: 0, mainSuccess: 0, mainFail: 0,
+            subRuns: 0, subSuccess: 0, subFail: 0,
+            deaths: 0,
+            totalGoldEarned: BALANCE.START_GOLD,
+            totalXpEarned: 0,
+            bossKills: 0,
+            facilitiesUnlocked: BALANCE.START_FACILITIES.length,
+            guildHallStages: 0
+        },
+        timeline: []
+    };
+}
+
+function createMerc(guildLv) {
+    const rarity = rngWeighted(BALANCE.RARITY_POOL[Math.min(guildLv, 8)]);
+    const cls = rngPick(Object.keys(BALANCE.CLASS_BASE));
+    const stats = BalanceHelper.getClassStats(cls, 1, rarity);
+    return {
+        id: 'merc_' + (++_mercIdCounter), classKey: cls, rarity, level: 1, xp: 0, stamina: 100,
+        ...stats,
+        zoneAffinity: {
+            bloodpit:  { xp: 0, level: 0, points: 0 },
+            cargo:     { xp: 0, level: 0, points: 0 },
+            blackout:  { xp: 0, level: 0, points: 0 }
+        },
+        alive: true
+    };
+}
+
+function calcMercPower(merc) {
+    const stats = BalanceHelper.getClassStats(merc.classKey, merc.level, merc.rarity);
+    const offense = stats.atk * 1.1;
+    const defense = stats.hp * (1 + stats.def * BALANCE.RUN_SIM.POWER_DEFENSE_MULT);
+    let power = Math.sqrt(offense * defense);
+    power *= (1 + (merc.level - 1) * BALANCE.RUN_SIM.POWER_LEVEL_GROWTH);
+    power *= BALANCE.RUN_SIM.POWER_RARITY_BONUS[merc.rarity];
+    if (merc.stamina < 30) power *= 0.7;
+    else if (merc.stamina < 50) power *= 0.85;
+    else if (merc.stamina < 80) power *= 0.95;
+    return power;
+}
+
+function calcAvgBond(party) {
+    if (party.length < 2) return 0;
+    let total = 0, count = 0;
+    for (let i = 0; i < party.length; i++) {
+        for (let j = i + 1; j < party.length; j++) {
+            const key = [party[i].id, party[j].id].sort().join('_');
+            total += (state.bonds[key] || 0) / 100;
+            count++;
+        }
+    }
+    return count > 0 ? total / count : 0;
+}
+
+function calcSuccessRate(party, zone, zoneLevel) {
+    const power = party.reduce((s, m) => s + calcMercPower(m), 0);
+    const ratio = power / BalanceHelper.getZoneRecommendedPower(zone, zoneLevel);
+    const k = BALANCE.RUN_SIM.SUCCESS_SIGMOID_K;
+    const mid = BALANCE.RUN_SIM.SUCCESS_SIGMOID_MID;
+    let rate = 1 / (1 + Math.exp(-k * (ratio - mid)));
+    rate += calcAvgBond(party) * 0.05;
+    const affinityAvg = party.reduce((s, m) => s + m.zoneAffinity[zone].level, 0) / party.length / 10;
+    rate += affinityAvg * 0.10;
+    return Math.max(0.05, Math.min(0.99, rate));
+}
+
+function getAvailableMercs() {
+    return state.roster.filter(m => m.alive && m.stamina > 30 && !isOnExpedition(m));
+}
+function isOnExpedition(merc) {
+    return state.activeExpeditions.some(e => e.party.includes(merc));
+}
+
+function tryHire() {
+    const rosterMax = BALANCE.ROSTER_LIMITS[state.guildLevel].max;
+    if (state.roster.length >= rosterMax) return false;
+    if (state.recruitPool.length === 0) {
+        for (let i = 0; i < 3; i++) state.recruitPool.push(createMerc(state.guildLevel));
+    }
+    state.recruitPool.sort((a, b) => {
+        const order = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+        return order.indexOf(b.rarity) - order.indexOf(a.rarity);
+    });
+    const candidate = state.recruitPool[0];
+    const cost = BalanceHelper.getHireCost(candidate.rarity, state.guildLevel);
+    if (state.gold < cost) return false;
+    state.gold -= cost;
+    state.roster.push(candidate);
+    state.recruitPool.shift();
+    return true;
+}
+
+function selectMainParty(maxSize) {
+    const available = getAvailableMercs();
+    available.sort((a, b) => calcMercPower(b) - calcMercPower(a));
+    return available.slice(0, maxSize);
+}
+
+function tryMainRun(strategy) {
+    const deployMax = BALANCE.ROSTER_LIMITS[state.guildLevel].deploy;
+    const party = selectMainParty(deployMax);
+    if (party.length < 2) return false;
+
+    let zone, zoneLevel;
+    if (state.bossDefeated.cargo && state.zoneLevel.blackout < 10) {
+        zone = 'blackout';
+        zoneLevel = state.zoneLevel.blackout + 1;
+    } else if (state.bossDefeated.bp && state.zoneLevel.cargo < 10) {
+        zone = 'cargo';
+        zoneLevel = state.zoneLevel.cargo + 1;
+    } else if (state.zoneLevel.bloodpit < 10) {
+        zone = 'bloodpit';
+        zoneLevel = state.zoneLevel.bloodpit + 1;
+    } else {
+        return false;
+    }
+
+    const successRate = calcSuccessRate(party, zone, zoneLevel);
+    const minRate = strategy === 'safe' ? 0.7 : strategy === 'aggressive' ? 0.3 : 0.5;
+    if (successRate < minRate) {
+        zoneLevel = state.zoneLevel[zone];
+        if (zoneLevel === 0) return false;
+    }
+
+    state.stats.mainRuns++;
+    const success = rng() < calcSuccessRate(party, zone, zoneLevel);
+    const reward = BALANCE.ZONE_REWARDS[zone];
+
+    if (success) {
+        state.stats.mainSuccess++;
+        const pitMult = zone === 'bloodpit' ? 1.5 : 1.0;
+        const gold = Math.round(reward.baseGold * zoneLevel * 1.5 * pitMult);
+        const xp = Math.round(reward.baseXp * zoneLevel * 1.5);
+        state.gold += gold;
+        state.stats.totalGoldEarned += gold;
+        state.guildXp += xp;
+        state.stats.totalXpEarned += xp;
+        state.reputation += BALANCE.REPUTATION_GAIN.main_success;
+        const zoneKey = zone === 'bloodpit' ? 'bp' : zone;
+
+        for (const merc of party) {
+            merc.xp += Math.round(xp / party.length);
+            checkLevelUp(merc);
+            merc.stamina -= BALANCE.STAMINA_DEPLETION['main_' + zoneKey];
+            merc.zoneAffinity[zone].xp += rngInt(20, 50);
+            checkAffinityLevelUp(merc, zone);
+        }
+        for (let i = 0; i < party.length; i++) {
+            for (let j = i + 1; j < party.length; j++) {
+                const key = [party[i].id, party[j].id].sort().join('_');
+                state.bonds[key] = Math.min(100, (state.bonds[key] || 0) + BALANCE.BOND_GAIN.main_success);
+            }
+        }
+
+        if (zoneLevel === 10 && !state.bossDefeated[zoneKey]) {
+            state.bossDefeated[zoneKey] = true;
+            state.stats.bossKills++;
+            state.reputation += BALANCE.REPUTATION_GAIN.boss_kill;
+        }
+        if (zoneLevel > state.zoneLevel[zone]) state.zoneLevel[zone] = zoneLevel;
+        checkGuildLevelUp();
+    } else {
+        state.stats.mainFail++;
+        state.reputation += BALANCE.REPUTATION_GAIN.main_fail;
+        for (const merc of party) {
+            merc.stamina -= 15;
+            const deathChance = reward.deathChance * (1 - successRate);
+            if (rng() < deathChance) {
+                merc.alive = false;
+                state.stats.deaths++;
+                state.reputation += BALANCE.REPUTATION_GAIN.merc_death;
+            }
+        }
+    }
+    return true;
+}
+
+function trySubExpedition() {
+    const deployMax = BALANCE.ROSTER_LIMITS[state.guildLevel].deploy;
+    if (state.activeExpeditions.length >= deployMax) return false;
+    const available = getAvailableMercs();
+    if (available.length < 2) return false;
+
+    available.sort((a, b) => calcMercPower(a) - calcMercPower(b));
+    const partySize = Math.min(3, available.length);
+    const party = available.slice(0, partySize);
+
+    let zone;
+    const r = rng();
+    if (state.zoneLevel.blackout > 0 && r < 0.4) zone = 'blackout';
+    else if (state.zoneLevel.cargo > 0 && r < 0.7) zone = 'cargo';
+    else if (state.zoneLevel.bloodpit > 0) zone = 'bloodpit';
+    else return false;
+
+    const zoneLevel = Math.max(1, state.zoneLevel[zone] - 1) || state.zoneLevel[zone];
+    if (zoneLevel === 0) return false;
+
+    const power = party.reduce((s, m) => s + calcMercPower(m), 0);
+    const recommended = BalanceHelper.getZoneRecommendedPower(zone, zoneLevel);
+    const baseTime = BALANCE.ZONE_REWARDS[zone].expeditionTimeMin / 60;  // 분
+    const exp = {
+        party, zone, zoneLevel,
+        completesAtMin: state.simTimeMin + Math.max(2, baseTime / Math.max(0.5, power / recommended))
+    };
+    state.activeExpeditions.push(exp);
+    return true;
+}
+
+function processExpeditions() {
+    const completed = state.activeExpeditions.filter(e => state.simTimeMin >= e.completesAtMin);
+    for (const exp of completed) {
+        resolveSubExpedition(exp);
+        state.activeExpeditions.splice(state.activeExpeditions.indexOf(exp), 1);
+    }
+}
+
+function resolveSubExpedition(exp) {
+    const { party, zone, zoneLevel } = exp;
+    state.stats.subRuns++;
+    const successRate = calcSuccessRate(party, zone, zoneLevel);
+    const success = rng() < successRate;
+    const reward = BALANCE.ZONE_REWARDS[zone];
+    const zoneKey = zone === 'bloodpit' ? 'bp' : zone;
+
+    if (success) {
+        state.stats.subSuccess++;
+        const gold = Math.round(reward.baseGold * zoneLevel);
+        const xp = Math.round(reward.baseXp * zoneLevel);
+        state.gold += gold;
+        state.stats.totalGoldEarned += gold;
+        state.guildXp += xp;
+        state.stats.totalXpEarned += xp;
+        for (const merc of party) {
+            merc.xp += Math.round(xp / party.length);
+            checkLevelUp(merc);
+            merc.zoneAffinity[zone].xp += rngInt(15, 30);
+            checkAffinityLevelUp(merc, zone);
+            merc.stamina -= BALANCE.STAMINA_DEPLETION['sub_' + zoneKey];
+        }
+        for (let i = 0; i < party.length; i++) {
+            for (let j = i + 1; j < party.length; j++) {
+                const key = [party[i].id, party[j].id].sort().join('_');
+                state.bonds[key] = Math.min(100, (state.bonds[key] || 0) + BALANCE.BOND_GAIN.sub_success);
+            }
+        }
+        checkGuildLevelUp();
+    } else {
+        state.stats.subFail++;
+        for (const merc of party) {
+            merc.stamina -= 20;
+            const deathChance = reward.deathChance * (1 - successRate) * 0.7;
+            if (rng() < deathChance) {
+                merc.alive = false;
+                state.stats.deaths++;
+            }
+        }
+    }
+}
+
+function checkLevelUp(merc) {
+    while (merc.level < BALANCE.MERC_MAX_LEVEL) {
+        const needed = BalanceHelper.getMercXpToNext(merc.level);
+        if (merc.xp >= needed) { merc.xp -= needed; merc.level++; } else break;
+    }
+}
+function checkAffinityLevelUp(merc, zone) {
+    const aff = merc.zoneAffinity[zone];
+    while (aff.level < BALANCE.AFFINITY_MAX_LEVEL - 1) {
+        const needed = BALANCE.AFFINITY_XP_TABLE[aff.level];
+        if (aff.xp >= needed) { aff.xp -= needed; aff.level++; aff.points++; } else break;
+    }
+}
+function checkGuildLevelUp() {
+    while (state.guildLevel < BALANCE.GUILD_MAX_LEVEL) {
+        const needed = BALANCE.GUILD_LEVEL_XP[state.guildLevel];
+        if (state.guildXp >= needed) { state.guildXp -= needed; state.guildLevel++; } else break;
+    }
+}
+
+function recoverStamina(min) {
+    const recovery = BALANCE.STAMINA_RECOVERY_BASE +
+        (state.guildHall.recovery >= 3 ? BALANCE.STAMINA_RECOVERY_C_POOL : 0);
+    for (const merc of state.roster) {
+        if (!merc.alive || isOnExpedition(merc)) continue;
+        merc.stamina = Math.min(100, merc.stamina + recovery * min);
+    }
+}
+
+function tryUnlockFacility() {
+    const FACILITIES = [
+        { key: 'forge', cost: 500, lv: 2 }, { key: 'auction', cost: 800, lv: 3 },
+        { key: 'training', cost: 1200, lv: 4 }, { key: 'temple', cost: 1500, lv: 5 },
+        { key: 'intel', cost: 2000, lv: 6 }, { key: 'eliteRecruit', cost: 3000, lv: 7 },
+        { key: 'vault', cost: 4000, lv: 8 }
+    ];
+    for (const f of FACILITIES) {
+        if (state.guildLevel >= f.lv && !state.unlockedFacilities.includes(f.key) && state.gold >= f.cost) {
+            state.gold -= f.cost;
+            state.unlockedFacilities.push(f.key);
+            state.stats.facilitiesUnlocked++;
+        }
+    }
+}
+
+function tryUpgradeGuildHall() {
+    const categories = ['operations', 'infrastructure', 'recovery', 'automation', 'intel'];
+    for (const cat of categories) {
+        const stage = state.guildHall[cat];
+        if (stage >= 12) continue;
+        const cost = BalanceHelper.getGuildHallCost(stage + 1);
+        if (state.gold >= cost + 5000) {
+            state.gold -= cost;
+            state.guildHall[cat]++;
+            state.stats.guildHallStages++;
+        }
+    }
+}
+
+function formatTime(min) {
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return `${h}:${m.toString().padStart(2, '0')}`;
+}
+
+function runSimulation(strategy, hours) {
+    state = createGameState();
+    const endMin = hours * 60;
+    let lastSnapshot = 0;
+
+    while (state.simTimeMin < endMin) {
+        state.simTimeMin++;
+        recoverStamina(1);
+        processExpeditions();
+        if (state.simTimeMin % 5 === 0) tryHire();
+        if (state.simTimeMin % 2 === 0) while (trySubExpedition()) {}
+        if (state.simTimeMin % 5 === 0 && state.roster.length >= 2) tryMainRun(strategy);
+        if (state.simTimeMin % 60 === 0) { tryUnlockFacility(); tryUpgradeGuildHall(); }
+
+        if (state.simTimeMin - lastSnapshot >= 30) {
+            state.timeline.push({
+                time: formatTime(state.simTimeMin),
+                guildLv: state.guildLevel, gold: state.gold,
+                roster: state.roster.filter(m => m.alive).length,
+                reputation: Math.round(state.reputation),
+                zoneLevel: { ...state.zoneLevel },
+                activeExp: state.activeExpeditions.length,
+                bonds: Object.keys(state.bonds).filter(k => state.bonds[k] >= 50).length,
+                deaths: state.stats.deaths,
+                topBond: Math.max(0, ...Object.values(state.bonds))
+            });
+            lastSnapshot = state.simTimeMin;
+        }
+    }
+    return computeValidation(state, strategy);
+}
+
+function computeValidation(state, strategy) {
+    const mainSuccessRate = state.stats.mainRuns > 0 ? state.stats.mainSuccess / state.stats.mainRuns : 0;
+    const topBond = Math.max(0, ...Object.values(state.bonds));
+    const topAffinity = state.roster.reduce((max, m) => {
+        if (!m.alive) return max;
+        return Math.max(max, m.zoneAffinity.bloodpit.level, m.zoneAffinity.cargo.level, m.zoneAffinity.blackout.level);
+    }, 0);
+    const goldDev = Math.abs(state.gold - 320000) / 320000;
+
+    return {
+        strategy,
+        summary: {
+            duration: formatTime(state.simTimeMin),
+            finalGold: state.gold,
+            totalEarned: state.stats.totalGoldEarned,
+            guildLevel: state.guildLevel,
+            mainRuns: state.stats.mainRuns,
+            mainSuccess: (mainSuccessRate * 100).toFixed(1) + '%',
+            subRuns: state.stats.subRuns,
+            deaths: state.stats.deaths,
+            bossKills: state.stats.bossKills,
+            facilities: state.stats.facilitiesUnlocked,
+            ghStages: state.stats.guildHallStages,
+            topBond, topAffinity,
+            roster: state.roster.filter(m => m.alive).length,
+            zoneLevel: state.zoneLevel
+        },
+        validation: {
+            goldCurve:      { actual: state.gold, target: '320K±30%', deviation: (goldDev * 100).toFixed(1) + '%', pass: goldDev < 0.30 },
+            guildLv8:       { actual: state.guildLevel, target: 8, pass: state.guildLevel >= 8 },
+            mainSuccess:    { actual: (mainSuccessRate * 100).toFixed(1) + '%', target: '65-95%', pass: mainSuccessRate >= 0.65 && mainSuccessRate <= 0.95 },
+            deaths:         { actual: state.stats.deaths, target: '≤5', pass: state.stats.deaths <= 5 },
+            topBond:        { actual: topBond, target: '≥75', pass: topBond >= 75 },
+            topAffinity:    { actual: topAffinity, target: '≥6', pass: topAffinity >= 6 },
+            bossKills:      { actual: state.stats.bossKills, target: '≥1', pass: state.stats.bossKills >= 1 },
+            facilities:     { actual: state.stats.facilitiesUnlocked, target: '≥7', pass: state.stats.facilitiesUnlocked >= 7 }
+        },
+        timeline: state.timeline
+    };
+}
+
+// === UI ===
+function renderResult(result) {
+    const passCount = Object.values(result.validation).filter(v => v.pass).length;
+    const totalCount = Object.keys(result.validation).length;
+    let html = `<h2>📊 결과 — ${result.strategy.toUpperCase()} (${passCount}/${totalCount} PASS)</h2>`;
+
+    html += '<div class="summary-grid">';
+    for (const [k, v] of Object.entries(result.summary)) {
+        html += `<div class="stat-card"><div class="stat-label">${k}</div><div class="stat-value">${typeof v === 'object' ? JSON.stringify(v) : v}</div></div>`;
+    }
+    html += '</div>';
+
+    html += '<h2>✅ 검증</h2><table><tr><th>항목</th><th>실제</th><th>타깃</th><th>결과</th></tr>';
+    for (const [k, v] of Object.entries(result.validation)) {
+        const cls = v.pass ? 'pass' : 'fail';
+        html += `<tr><td>${k}</td><td>${v.actual}</td><td>${v.target}</td><td class="${cls}">${v.pass ? '✅ PASS' : '❌ FAIL'}</td></tr>`;
+    }
+    html += '</table>';
+
+    html += '<h2>📈 타임라인 (30분 단위)</h2><table>';
+    html += '<tr><th>시간</th><th>길드Lv</th><th>골드</th><th>로스터</th><th>평판</th><th>구역(BP/Cg/BO)</th><th>파견</th><th>주력Bond</th><th>사망</th></tr>';
+    for (const t of result.timeline) {
+        const zone = `${t.zoneLevel.bloodpit}/${t.zoneLevel.cargo}/${t.zoneLevel.blackout}`;
+        html += `<tr><td>${t.time}</td><td>${t.guildLv}</td><td>${t.gold.toLocaleString()}</td><td>${t.roster}</td><td>${t.reputation}</td><td>${zone}</td><td>${t.activeExp}</td><td>${Math.round(t.topBond)}</td><td>${t.deaths}</td></tr>`;
+    }
+    html += '</table>';
+    return html;
+}
+
+function runSim() {
+    const strategy = document.getElementById('strategy').value;
+    const hours = parseFloat(document.getElementById('hours').value);
+    const seed = parseInt(document.getElementById('seed').value);
+    seedRng(seed);
+    _mercIdCounter = 0;
+    const result = runSimulation(strategy, hours);
+    document.getElementById('output').innerHTML = renderResult(result);
+}
+
+function runMultiple() {
+    const strategy = document.getElementById('strategy').value;
+    const hours = parseFloat(document.getElementById('hours').value);
+    const seed = parseInt(document.getElementById('seed').value);
+    const runs = parseInt(document.getElementById('runs').value);
+    const results = [];
+    for (let i = 0; i < runs; i++) {
+        seedRng(seed + i);
+        _mercIdCounter = 0;
+        results.push(runSimulation(strategy, hours));
+    }
+    const avg = {
+        gold: Math.round(results.reduce((s, r) => s + r.summary.finalGold, 0) / runs),
+        guildLv: (results.reduce((s, r) => s + r.summary.guildLevel, 0) / runs).toFixed(1),
+        deaths: (results.reduce((s, r) => s + r.summary.deaths, 0) / runs).toFixed(1),
+        bossKills: (results.reduce((s, r) => s + r.summary.bossKills, 0) / runs).toFixed(1),
+        topBond: Math.round(results.reduce((s, r) => s + r.summary.topBond, 0) / runs),
+        topAff: (results.reduce((s, r) => s + r.summary.topAffinity, 0) / runs).toFixed(1),
+        passRate: ((results.filter(r => Object.values(r.validation).filter(v => v.pass).length >= 6).length / runs) * 100).toFixed(0) + '%'
+    };
+    let html = `<h2>📊 ${runs}회 평균 — ${strategy.toUpperCase()}</h2>`;
+    html += '<div class="summary-grid">';
+    for (const [k, v] of Object.entries(avg)) {
+        html += `<div class="stat-card"><div class="stat-label">${k}</div><div class="stat-value">${v}</div></div>`;
+    }
+    html += '</div>';
+    document.getElementById('output').innerHTML = html;
+}
+
+function runCompare() {
+    const hours = parseFloat(document.getElementById('hours').value);
+    const seed = parseInt(document.getElementById('seed').value);
+    let html = '';
+    for (const s of ['safe', 'balanced', 'aggressive']) {
+        seedRng(seed);
+        _mercIdCounter = 0;
+        const r = runSimulation(s, hours);
+        html += renderResult(r);
+    }
+    document.getElementById('output').innerHTML = html;
+}
+
+// 페이지 로드 시 자동 실행
+window.addEventListener('load', () => { runSim(); });
+</script>
+</body>
+</html>
