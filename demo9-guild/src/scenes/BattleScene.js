@@ -663,16 +663,21 @@ class BattleScene extends Phaser.Scene {
                 this.tweens.add({ targets: gText, y: gText.y - 30, alpha: 0, duration: 800, onComplete: () => gText.destroy() });
 
                 const luckyBonus = this.collectedCards.includes('lucky') ? 1 : 0;
-                let dropChance = unit.isBoss ? 1.0 : 0.3 + this.currentRound * 0.04;
+                // v2 밸런스: 드롭 빈도 하향
+                // 일반 몹 0.15→0.08, 라운드 보너스 0.04→0.015, 보스 0.6 (이전 1.0)
+                let dropChance = unit.isBoss ? 0.6 : (unit.isElite ? 0.35 : 0.08 + this.currentRound * 0.015);
                 const bossRarityBonus = unit.isBoss ? 2 : (unit.isElite ? 1 : 0);
-                // Blackout: curse level adds rarity bonus
                 const curseRarityBonus = this.zoneKey === 'blackout' ? this.curseLevel : 0;
-                // Blood Pit: pit gauge drop multiplier boosts chance
+                // 친화도 보너스 (해당 구역 친화도 평균)
+                const partyAvgAffinity = this.party && this.party.length > 0
+                    ? this.party.reduce((s, m) => s + ((m.affinityLevel && m.affinityLevel[this.zoneKey]) || 0), 0) / this.party.length
+                    : 0;
+                const affinityRarityBonus = Math.floor(partyAvgAffinity * 0.5);
                 if (this._pitDropMult > 1) {
                     dropChance = Math.min(1, dropChance * this._pitDropMult);
                 }
                 if (Math.random() < dropChance) {
-                    const item = generateItem(this.zoneKey, this.gameState.guildLevel, luckyBonus + bossRarityBonus + curseRarityBonus);
+                    const item = generateItem(this.zoneKey, this.gameState.guildLevel, luckyBonus + bossRarityBonus + curseRarityBonus + affinityRarityBonus);
                     if (item) {
                         this.loot.push(item);
                         this._showLootPopup(unit.container.x, unit.container.y - 40, item);

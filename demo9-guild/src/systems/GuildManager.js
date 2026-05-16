@@ -7,7 +7,7 @@ class GuildManager {
             roster: [],
             storage: [],
             secureContainer: [],
-            unlockedFacilities: ['recruit', 'storage', 'gate'],
+            unlockedFacilities: ['recruit', 'storage', 'equipment', 'gate'],
             recruitPool: [],
             runCount: 0,
             zoneLevel: { bloodpit: 1, cargo: 0, blackout: 0 },

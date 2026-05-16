@@ -1,6 +1,7 @@
 const FACILITY_DATA = {
     recruit:      { name: '용병 모집소',   unlockLevel: 1, cost: 0,    icon: '⚔', desc: '용병을 모집합니다', scene: 'RecruitScene' },
     storage:      { name: '보관함',        unlockLevel: 1, cost: 0,    icon: '📦', desc: '아이템을 보관합니다', scene: 'StorageScene' },
+    equipment:    { name: '장비 착용',     unlockLevel: 1, cost: 0,    icon: '🎽', desc: '용병에게 장비를 착용시킵니다', scene: 'EquipmentScene' },
     gate:         { name: '출발 게이트',   unlockLevel: 1, cost: 0,    icon: '🚪', desc: '구역으로 출발합니다', scene: 'DeployScene' },
     forge:        { name: '장비 제작소',   unlockLevel: 2, cost: 500,  icon: '🔨', desc: '소재로 장비를 제작합니다', scene: 'ForgeScene' },
     auction:      { name: '경매장',        unlockLevel: 3, cost: 800,  icon: '🏛', desc: '아이템을 경매합니다', scene: 'AuctionScene' },

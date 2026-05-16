@@ -102,13 +102,14 @@ function generateItem(zone, guildLevel, rarityBonus) {
     const roll = Math.random();
     let type, template;
 
-    if (roll < 0.35) {
+    // 타입 분포: 장비 25%, 소재 35%, 소비 40%
+    if (roll < 0.25) {
         type = 'equipment';
         const slots = ['weapon', 'armor', 'accessory'];
         const slot = slots[Math.floor(Math.random() * slots.length)];
         const pool = EQUIPMENT_TEMPLATES[slot];
         template = { ...pool[Math.floor(Math.random() * pool.length)] };
-    } else if (roll < 0.65) {
+    } else if (roll < 0.60) {
         type = 'material';
         const pool = zone !== 'common'
             ? MATERIAL_TEMPLATES.filter(m => m.zone === zone || m.zone === 'common')
@@ -119,13 +120,18 @@ function generateItem(zone, guildLevel, rarityBonus) {
         template = { ...CONSUMABLE_TEMPLATES[Math.floor(Math.random() * CONSUMABLE_TEMPLATES.length)] };
     }
 
+    // 희귀도 분포 — common 위주, 친화도/길드Lv/보스로만 상위 등급
+    // 기본 (보너스 0, Lv1): common 75%, uncommon 22%, rare 3%, epic 0%
+    // 후반 (Lv8, 보너스 3): common 25%, uncommon 40%, rare 25%, epic 10%
     const rarityRoll = Math.random() * 100;
-    const levelBonus = guildLevel * 3 + rarityBonus * 15;
+    const lvBonus = (guildLevel - 1) * 4;
+    const bonusPts = rarityBonus * 6;
+    const totalBonus = lvBonus + bonusPts;
     let rarity;
-    if (rarityRoll < 5 + levelBonus * 0.5)       rarity = 'epic';
-    else if (rarityRoll < 15 + levelBonus)        rarity = 'rare';
-    else if (rarityRoll < 40 + levelBonus * 0.5)  rarity = 'uncommon';
-    else                                           rarity = 'common';
+    if (rarityRoll < Math.min(15, 0 + totalBonus * 0.4))           rarity = 'epic';
+    else if (rarityRoll < Math.min(30, 3 + totalBonus * 0.7))       rarity = 'rare';
+    else if (rarityRoll < Math.min(50, 22 + totalBonus * 0.8))      rarity = 'uncommon';
+    else                                                              rarity = 'common';
 
     const mult = ITEM_RARITY[rarity].valueMult;
     const item = {

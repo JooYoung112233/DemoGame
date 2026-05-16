@@ -67,9 +67,24 @@ class MercenaryManager {
             }
         }
         droppedItems.forEach(item => StorageManager.addItem(state, item));
+        // 해고 보상 (퇴직금) — 레벨 × 50G × 희귀도 배율
+        const rarityMult = { common: 1.0, uncommon: 1.2, rare: 1.5, epic: 2.0, legendary: 2.5 }[merc.rarity] || 1.0;
+        const severance = Math.floor(50 * merc.level * rarityMult);
+        GuildManager.addGold(state, severance);
         state.roster.splice(idx, 1);
-        GuildManager.addMessage(state, `${merc.name} 해고`);
+        GuildManager.addMessage(state, `${merc.name} 해고 (+${severance}G 퇴직금)`);
         SaveManager.save(state);
-        return { success: true, msg: `${merc.name}을(를) 해고했습니다`, droppedItems };
+        return { success: true, msg: `${merc.name} 해고 (+${severance}G)`, droppedItems, severance };
+    }
+
+    /** 일괄 해고 — common 등급 모두, 또는 Lv N 이하 모두 */
+    static dismissAll(state, filter) {
+        const toDismiss = state.roster.filter(filter);
+        let total = 0;
+        toDismiss.forEach(m => {
+            const r = MercenaryManager.dismiss(state, m.id);
+            if (r.severance) total += r.severance;
+        });
+        return { count: toDismiss.length, totalSeverance: total };
     }
 }

@@ -23,6 +23,19 @@ class RosterScene extends Phaser.Scene {
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
+        // 우측 상단: 일괄 해고 + 골드 표시
+        this.add.text(1260, 25, `${gs.gold}G`, {
+            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+        }).setOrigin(1, 0);
+
+        const commonCount = gs.roster.filter(m => m.rarity === 'common' && m.alive).length;
+        if (commonCount > 0) {
+            UIButton.create(this, 1100, 25, 130, 28, `일반 ${commonCount}명 정리`, {
+                color: 0x664444, hoverColor: 0x885555, textColor: '#ffcccc', fontSize: 11,
+                onClick: () => this._confirmBulkDismiss('common', `일반 등급 용병 ${commonCount}명`, m => m.rarity === 'common' && m.alive)
+            });
+        }
+
         if (gs.roster.length === 0) {
             this.add.text(640, 360, '로스터가 비어있습니다', {
                 fontSize: '14px', fontFamily: 'monospace', color: '#555566'
@@ -268,13 +281,11 @@ class RosterScene extends Phaser.Scene {
             }
         });
 
-        UIButton.create(this, x + w / 2 + 80, y + 610, 120, 30, '해고', {
-            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffcccc', fontSize: 12,
-            onClick: () => {
-                MercenaryManager.dismiss(gs, merc.id);
-                this.selectedMercId = null;
-                this.scene.restart({ gameState: gs });
-            }
+        const rarityMult = { common: 1.0, uncommon: 1.2, rare: 1.5, epic: 2.0, legendary: 2.5 }[merc.rarity] || 1.0;
+        const severance = Math.floor(50 * merc.level * rarityMult);
+        UIButton.create(this, x + w / 2 + 80, y + 610, 140, 30, `해고 (+${severance}G)`, {
+            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffcccc', fontSize: 11,
+            onClick: () => this._confirmDismiss(merc, severance)
         });
 
         // 자동 장착 버튼 (3슬롯 일괄)
@@ -308,6 +319,90 @@ class RosterScene extends Phaser.Scene {
                 }
             }
         });
+    }
+
+    _confirmDismiss(merc, severance) {
+        const gs = this.gameState;
+        const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7).setDepth(100);
+        const modal = [overlay];
+        const w = 460, h = 220, mx = 640 - w/2, my = 360 - h/2;
+        const bg = this.add.graphics().setDepth(101);
+        bg.fillStyle(0x1a1a2a, 1);
+        bg.fillRoundedRect(mx, my, w, h, 6);
+        bg.lineStyle(2, 0x884444, 0.8);
+        bg.strokeRoundedRect(mx, my, w, h, 6);
+        modal.push(bg);
+        modal.push(this.add.text(mx + w/2, my + 25, '해고 확인', {
+            fontSize: '16px', fontFamily: 'monospace', color: '#ffcccc', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(101));
+        modal.push(this.add.text(mx + w/2, my + 65, `${merc.name} (Lv.${merc.level})를 해고합니다`, {
+            fontSize: '13px', fontFamily: 'monospace', color: '#ccccdd'
+        }).setOrigin(0.5).setDepth(101));
+        modal.push(this.add.text(mx + w/2, my + 90, `퇴직금: +${severance}G  |  장비는 보관함으로 회수`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
+        }).setOrigin(0.5).setDepth(101));
+        modal.push(this.add.text(mx + w/2, my + 115, '⚠ 영구 해고 — 복구 불가', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#ff8888'
+        }).setOrigin(0.5).setDepth(101));
+
+        modal.push(UIButton.create(this, mx + w/2 - 80, my + h - 35, 130, 32, '해고 확정', {
+            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffffff', fontSize: 12, depth: 101,
+            onClick: () => {
+                MercenaryManager.dismiss(gs, merc.id);
+                this.selectedMercId = null;
+                modal.forEach(o => o.destroy && o.destroy());
+                this.scene.restart({ gameState: gs });
+            }
+        }));
+        modal.push(UIButton.create(this, mx + w/2 + 80, my + h - 35, 130, 32, '취소', {
+            color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 12, depth: 101,
+            onClick: () => modal.forEach(o => o.destroy && o.destroy())
+        }));
+    }
+
+    _confirmBulkDismiss(key, label, filter) {
+        const gs = this.gameState;
+        const targets = gs.roster.filter(filter);
+        const totalSeverance = targets.reduce((s, m) => {
+            const mult = { common: 1.0, uncommon: 1.2, rare: 1.5, epic: 2.0, legendary: 2.5 }[m.rarity] || 1.0;
+            return s + Math.floor(50 * m.level * mult);
+        }, 0);
+
+        const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7).setDepth(100);
+        const modal = [overlay];
+        const w = 480, h = 220, mx = 640 - w/2, my = 360 - h/2;
+        const bg = this.add.graphics().setDepth(101);
+        bg.fillStyle(0x1a1a2a, 1);
+        bg.fillRoundedRect(mx, my, w, h, 6);
+        bg.lineStyle(2, 0x884444, 0.8);
+        bg.strokeRoundedRect(mx, my, w, h, 6);
+        modal.push(bg);
+        modal.push(this.add.text(mx + w/2, my + 25, '일괄 해고', {
+            fontSize: '16px', fontFamily: 'monospace', color: '#ffcccc', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(101));
+        modal.push(this.add.text(mx + w/2, my + 60, `${label}을(를) 모두 해고합니다 (${targets.length}명)`, {
+            fontSize: '13px', fontFamily: 'monospace', color: '#ccccdd'
+        }).setOrigin(0.5).setDepth(101));
+        modal.push(this.add.text(mx + w/2, my + 90, `총 퇴직금: +${totalSeverance}G  |  장비는 보관함으로`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
+        }).setOrigin(0.5).setDepth(101));
+        modal.push(this.add.text(mx + w/2, my + 115, '⚠ 영구 해고 — 복구 불가', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#ff8888'
+        }).setOrigin(0.5).setDepth(101));
+
+        modal.push(UIButton.create(this, mx + w/2 - 90, my + h - 35, 150, 32, `전원 해고`, {
+            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffffff', fontSize: 12, depth: 101,
+            onClick: () => {
+                const r = MercenaryManager.dismissAll(gs, filter);
+                modal.forEach(o => o.destroy && o.destroy());
+                UIToast.show(this, `${r.count}명 해고 +${r.totalSeverance}G`, { color: '#ffcc88' });
+                this.scene.restart({ gameState: gs });
+            }
+        }));
+        modal.push(UIButton.create(this, mx + w/2 + 90, my + h - 35, 130, 32, '취소', {
+            color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 12, depth: 101,
+            onClick: () => modal.forEach(o => o.destroy && o.destroy())
+        }));
     }
 
     /**
