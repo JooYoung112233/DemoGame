@@ -90,6 +90,13 @@ class TitleScene extends Phaser.Scene {
         // === 모든 구역 Lv.5 ===
         gs.zoneLevel = { bloodpit: 5, cargo: 5, blackout: 5 };
 
+        // === 길드 회관 — 모든 카테고리 Lv.3 시드 (트리 체험용) ===
+        gs.guildHall = {
+            operations: 3, infrastructure: 3, recovery: 3, automation: 3,
+            intel: 3, pit_control: 3, cargo_control: 3, dark_control: 3
+        };
+        gs.guildReputation = 50;
+
         // === 메인 클리어 누적 (서브 파견 해금) ===
         const subClears = GuildManager.SUB_UNLOCK_CLEARS || 3;
         ['bloodpit', 'cargo', 'blackout'].forEach(z => {

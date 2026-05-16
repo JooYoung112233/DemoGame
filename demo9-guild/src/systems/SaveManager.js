@@ -10,7 +10,9 @@ class SaveManager {
             activeExpeditions: gameState.activeExpeditions || [],
             pendingResults: gameState.pendingResults || [],
             savedParties: gameState.savedParties || [],
-            bonds: gameState.bonds || {}
+            bonds: gameState.bonds || {},
+            guildHall: gameState.guildHall || {},
+            guildReputation: gameState.guildReputation || 0
         };
         localStorage.setItem(SaveManager.SAVE_KEY, JSON.stringify(data));
     }
@@ -28,11 +30,13 @@ class SaveManager {
             data.zoneClearCount = data.zoneClearCount || {};
             data.savedParties = data.savedParties || [];
             data.bonds = data.bonds || {};
-            // 기존 세이브에 'equipment' 시설 자동 추가 (장비 페이지 신규)
+            data.guildHall = data.guildHall || {};
+            data.guildReputation = data.guildReputation || 0;
+            // 기존 세이브에 신규 시설 자동 추가
             data.unlockedFacilities = data.unlockedFacilities || [];
-            if (!data.unlockedFacilities.includes('equipment')) {
-                data.unlockedFacilities.push('equipment');
-            }
+            ['equipment', 'guildHall'].forEach(f => {
+                if (!data.unlockedFacilities.includes(f)) data.unlockedFacilities.push(f);
+            });
             return data;
         } catch (e) {
             console.error('Save load failed:', e);

@@ -168,15 +168,23 @@ class RunResultScene extends Phaser.Scene {
 
         // === 스테미너 소모 (메인 전투) — 라운드 수 기반 ===
         const staminaCostMain = Math.min(60, 30 + (r.rounds || 1) * 3);
+        const ghEffects = (typeof GuildHallManager !== 'undefined') ? GuildHallManager.getEffects(gs) : {};
+        const returnBonus = ghEffects.returnStaminaBonus || 0;  // 복귀 즉시 회복
         r.survivors.forEach(merc => {
             if (typeof merc.drainStamina === 'function') merc.drainStamina(staminaCostMain);
+            if (returnBonus > 0 && typeof merc.restStamina === 'function') merc.restStamina(returnBonus);
         });
         // === 마을 복귀 — 다른 용병들 스테미너 약간 회복 (대기 중) ===
+        const baseRest = 15 + (ghEffects.restBonus || 0);
         gs.roster.forEach(m => {
             if (!r.survivors.includes(m) && typeof m.restStamina === 'function') {
-                m.restStamina(15);  // 대기 용병은 자동 휴식
+                m.restStamina(ghEffects.instantStaminaRecovery ? 100 : baseRest);
             }
         });
+        // === 평판 누적 (메인 전투 성공) ===
+        if (r.success && typeof GuildHallManager !== 'undefined') {
+            GuildHallManager.addReputation(gs, r.rounds * 2);
+        }
 
         // 메인 클리어 시 마스터리 카운트 +1 (서브 파견 해금용)
         if (r.success && r.zoneKey) {
