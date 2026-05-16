@@ -265,9 +265,12 @@ class TownScene extends Phaser.Scene {
             try { this.input.off('wheel', this._onRosterWheel, this); } catch (e) {}
         }
         this._onRosterWheel = (pointer, _gameObjects, _dx, dy) => {
-            if (pointer.x > 8 && pointer.x < 273
-                && pointer.y > this._rosterScrollAreaY
-                && pointer.y < this._rosterScrollAreaY + this._rosterScrollAreaH) {
+            // pointer.worldX/Y = 카메라 보정된 월드 좌표 (1280×720 게임 좌표)
+            // pointer.x/y는 캔버스 픽셀(1920×1080) — 카메라 zoom 1.5 때문에 사용 불가
+            const wx = pointer.worldX, wy = pointer.worldY;
+            if (wx > 8 && wx < 273
+                && wy > this._rosterScrollAreaY
+                && wy < this._rosterScrollAreaY + this._rosterScrollAreaH) {
                 const totalH = this.gameState.roster.length * this._rosterCardH;
                 const maxScroll = Math.max(0, totalH - this._rosterScrollAreaH);
                 this._rosterScrollY = Math.max(0, Math.min(maxScroll, this._rosterScrollY + dy * 0.5));
