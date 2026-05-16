@@ -626,7 +626,7 @@ class DeployScene extends Phaser.Scene {
                     SaveManager.save(gs);
                     const sceneMap = {
                         bloodpit: 'ManualBattleScene',   // v3 다키스트 적용
-                        cargo: 'CargoBattleScene',
+                        cargo: 'CargoFloorSelectScene',  // 나락식 층 선택 → 전투
                         blackout: 'BlackoutProtoSelectScene'  // 전투 프로토타입 3종 선택 (탐색은 추후)
                     };
                     const targetScene = sceneMap[this.selectedZone] || 'BattleScene';

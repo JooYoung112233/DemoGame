@@ -15,8 +15,8 @@ const ZONE_DATA = {
     },
     cargo: {
         name: 'Cargo',
-        subtitle: '화물선',
-        desc: '전략적 거점 방어 — 칸 카드 운영',
+        subtitle: '기차 방어',
+        desc: '나락식 층 진행 — 5분 방어 RTS',
         icon: '🚂',
         color: 0xff8844,
         textColor: '#ff8844',

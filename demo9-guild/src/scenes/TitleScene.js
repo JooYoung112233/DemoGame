@@ -89,6 +89,8 @@ class TitleScene extends Phaser.Scene {
 
         // === 모든 구역 Lv.5 ===
         gs.zoneLevel = { bloodpit: 5, cargo: 5, blackout: 5 };
+        // Cargo 나락식 층 진행 상태
+        gs.cargoFloor = { maxUnlocked: 10, currentFloor: 1 };
 
         // === 길드 회관 — 모든 카테고리 Lv.3 시드 (트리 체험용) ===
         gs.guildHall = {
