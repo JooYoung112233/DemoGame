@@ -60,16 +60,17 @@ class ManualBattleScene extends Phaser.Scene {
         this.add.rectangle(640, 360, 1280, 720, 0x0a0a0e);
         const bgKey = `bg_${this.zoneKey}`;
         if (this.textures.exists(bgKey)) {
-            const bg = this.add.image(640, 360, bgKey).setOrigin(0.5);
-            // 게임 좌표 1280×720에 맞춰 표시 (카메라 zoom 1.5로 1920×1080 backing store에 1:1)
-            bg.setDisplaySize(1280, 720);
-            // 약간 어둡게 (캐릭터 가시성)
+            // 배경은 전투 영역(y=0~440)에만 표시. 좌표상 (640, 220) 중심에 1280×440 으로 fit
+            // 이미지 비율이 16:9 (1920×1080) 이므로 width 기준 fit → 1280 width 유지, height는 잘림
+            const bg = this.add.image(640, 220, bgKey).setOrigin(0.5);
+            bg.setDisplaySize(1280, 440);
             bg.setTint(0xaaaaaa);
-            // 전투 분위기 비네트
+            // 전투 분위기 비네트 — 상단 어둡게 + 하단 액션 패널 경계 페이드
             const vignette = this.add.graphics();
-            vignette.fillStyle(0x000000, 0.35);
-            vignette.fillRect(0, 0, 1280, 100);
-            vignette.fillRect(0, 620, 1280, 100);
+            vignette.fillStyle(0x000000, 0.4);
+            vignette.fillRect(0, 0, 1280, 70);
+            vignette.fillStyle(0x000000, 0.55);
+            vignette.fillRect(0, 380, 1280, 60);  // 배경과 액션 패널 사이 페이드
         } else {
             // 폴백 — zone별 색조 그라데이션
             const colors = {
@@ -80,7 +81,7 @@ class ManualBattleScene extends Phaser.Scene {
             const [c1, c2] = colors[this.zoneKey] || colors.bloodpit;
             const bgGfx = this.add.graphics();
             bgGfx.fillGradientStyle(c1, c1, c2, c2, 1);
-            bgGfx.fillRect(0, 0, 1280, 720);
+            bgGfx.fillRect(0, 0, 1280, 440);
         }
 
         this._drawHeader();
@@ -128,10 +129,16 @@ class ManualBattleScene extends Phaser.Scene {
 
     _drawHeader() {
         const gs = this.gameState;
+        // 헤더 배경 (배경 이미지 위라도 텍스트 잘 보이게)
+        const hdrBg = this.add.graphics();
+        hdrBg.fillStyle(0x000000, 0.5);
+        hdrBg.fillRect(0, 0, 1280, 44);
+
         this.headerText = this.add.text(640, 20, `Round ${this.currentRound}/${this.maxRounds}  |  Blood Pit Lv.${gs.zoneLevel[this.zoneKey]}`, {
-            fontSize: '15px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc66', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
-        UIButton.create(this, 80, 20, 100, 28, '← 후퇴', {
+        UIButton.create(this, 80, 22, 100, 28, '← 후퇴', {
             color: 0x554444, hoverColor: 0x665555, textColor: '#ffaaaa', fontSize: 11,
             onClick: () => { this._retreated = true; this._endBattle(false); }
         });
@@ -143,77 +150,78 @@ class ManualBattleScene extends Phaser.Scene {
         // 그러나 직관적으로: 아군 4321 가 왼쪽, 적 1234 가 오른쪽
         // 즉 포지션 1이 가운데 가까이
 
-        const allyXBase = 200, enemyXBase = 720;
-        const slotW = 110;
+        const allyXBase = 220, enemyXBase = 700;
+        const slotW = 100;
 
         this.unitGfx = {};
 
         // 아군 (포지션 1이 가장 오른쪽, 적과 가까움)
         this.combat.allies.forEach(u => {
-            const x = allyXBase + (4 - u.position) * slotW;  // pos 1 = x=530, pos 4 = x=200
-            const y = 340;
+            const x = allyXBase + (4 - u.position) * slotW;  // pos 1 = x=520, pos 4 = x=220
+            const y = 250;
             this._drawUnit(u, x, y, 'ally');
         });
 
         // 적 (포지션 1이 가장 왼쪽)
         this.combat.enemies.forEach(u => {
-            const x = enemyXBase + (u.position - 1) * slotW;  // pos 1 = x=720
-            const y = 340;
+            const x = enemyXBase + (u.position - 1) * slotW;  // pos 1 = x=700
+            const y = 250;
             this._drawUnit(u, x, y, 'enemy');
         });
 
         // 중앙선
         const centerLine = this.add.graphics();
         centerLine.lineStyle(1, 0x441111, 0.5);
-        centerLine.lineBetween(640, 220, 640, 460);
+        centerLine.lineBetween(640, 140, 640, 370);
     }
 
     _drawUnit(unit, x, y, team) {
         const isAlly = team === 'ally';
         const container = this.add.container(x, y);
 
-        // 캐릭터 원형 (배경)
+        // 캐릭터 원형 (배경) — 축소 (42→34)
+        const bodyRadius = 34;
         const bodyColor = isAlly ? this._getClassColor(unit.classKey) : (ENEMY_DATA[unit.classKey] ? ENEMY_DATA[unit.classKey].color : 0xcc4444);
         const body = this.add.graphics();
         body.fillStyle(bodyColor, 0.4);
-        body.fillCircle(0, 0, 42);
+        body.fillCircle(0, 0, bodyRadius);
         body.lineStyle(2, 0xffffff, 0.7);
-        body.strokeCircle(0, 0, 42);
+        body.strokeCircle(0, 0, bodyRadius);
         container.add(body);
 
         // 캐릭터 — 스프라이트 있으면 사용, 없으면 이모지
         let iconText;
         if (isAlly && this._useCharSprite(unit.classKey)) {
-            iconText = this.add.image(0, -5, `char_${unit.classKey}`).setOrigin(0.5);
-            // 사이즈 맞춤 (직경 80 정도)
-            const desired = 80;
+            iconText = this.add.image(0, -4, `char_${unit.classKey}`).setOrigin(0.5);
+            // 사이즈 맞춤 (직경 64 정도)
+            const desired = 64;
             const scale = desired / Math.max(iconText.width, iconText.height);
             iconText.setScale(scale);
-            // 적 쪽 향하게 (아군은 우측 보게)
             if (unit.team === 'ally') iconText.setFlipX(false);
         } else {
             const icon = isAlly ? (CLASS_DATA[unit.classKey]?.icon || '?') : '👹';
-            iconText = this.add.text(0, -5, icon, { fontSize: '32px' }).setOrigin(0.5);
+            iconText = this.add.text(0, -4, icon, { fontSize: '26px' }).setOrigin(0.5);
         }
         container.add(iconText);
 
         // 포지션 번호
-        const posNum = this.add.text(0, -60, `[${unit.position}]`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#88aaff', fontStyle: 'bold',
+        const posNum = this.add.text(0, -50, `[${unit.position}]`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#88aaff', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
         container.add(posNum);
 
         // 이름
-        const nameText = this.add.text(0, 50, unit.name, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#ccccdd'
+        const nameText = this.add.text(0, 42, unit.name, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#ccccdd',
+            stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
         container.add(nameText);
 
         // HP바
-        const hpBg = this.add.rectangle(0, 70, 90, 8, 0x331111);
-        const hpFill = this.add.rectangle(-45, 70, 90 * (unit.hp / unit.maxHp), 8, 0x44ff44).setOrigin(0, 0.5);
-        const hpText = this.add.text(0, 70, `${unit.hp}/${unit.maxHp}`, {
+        const hpBg = this.add.rectangle(0, 58, 78, 7, 0x331111);
+        const hpFill = this.add.rectangle(-39, 58, 78 * (unit.hp / unit.maxHp), 7, 0x44ff44).setOrigin(0, 0.5);
+        const hpText = this.add.text(0, 58, `${unit.hp}/${unit.maxHp}`, {
             fontSize: '9px', fontFamily: 'monospace', color: '#ffffff', stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
         container.add(hpBg);
@@ -221,16 +229,16 @@ class ManualBattleScene extends Phaser.Scene {
         container.add(hpText);
 
         // 상태 효과
-        const statusText = this.add.text(0, 88, '', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#ffaa88'
+        const statusText = this.add.text(0, 73, '', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#ffaa88'
         }).setOrigin(0.5);
         container.add(statusText);
 
-        // 턴 강조 링 (컨테이너 외부 — 컨테이너와 함께 이동시킴)
+        // 턴 강조 링
         const turnRing = this.add.graphics();
 
-        // 인터랙티브
-        const hitZone = this.add.zone(0, 5, 90, 110).setInteractive({ useHandCursor: true });
+        // 인터랙티브 (축소된 캐릭터에 맞춤)
+        const hitZone = this.add.zone(0, 5, 76, 95).setInteractive({ useHandCursor: true });
         hitZone.on('pointerdown', () => this._onUnitClicked(unit));
         hitZone.on('pointerover', () => this._onUnitHover(unit, true));
         hitZone.on('pointerout', () => this._onUnitHover(unit, false));
@@ -291,24 +299,210 @@ class ManualBattleScene extends Phaser.Scene {
     }
 
     _drawActionPanel() {
-        this.actionPanelY = 540;
+        // === 하단 패널: y=440 ~ 720 (280px) ===
+        this.actionPanelY = 440;
         this.actionPanelBg = this.add.graphics();
-        this.actionPanelBg.fillStyle(0x111122, 1);
-        this.actionPanelBg.fillRect(0, 510, 1280, 210);
-        this.actionPanelBg.lineStyle(1, 0x333355, 0.7);
-        this.actionPanelBg.lineBetween(0, 510, 1280, 510);
+        this.actionPanelBg.fillStyle(0x0a0a14, 1);
+        this.actionPanelBg.fillRect(0, 440, 1280, 280);
+        this.actionPanelBg.lineStyle(2, 0x333355, 0.8);
+        this.actionPanelBg.lineBetween(0, 440, 1280, 440);
 
-        this.actionTitleText = this.add.text(640, 525, '', {
-            fontSize: '14px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+        // 3 컬럼 구분선
+        this.actionPanelBg.lineStyle(1, 0x222244, 0.7);
+        this.actionPanelBg.lineBetween(265, 450, 265, 715);   // 좌/중 구분
+        this.actionPanelBg.lineBetween(1015, 450, 1015, 715); // 중/우 구분
+
+        // 컬럼 헤더
+        this.add.text(133, 450, '── 현재 유닛 ──', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#8899aa'
+        }).setOrigin(0.5, 0);
+        this.add.text(640, 450, '── 액션 ──', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#8899aa'
+        }).setOrigin(0.5, 0);
+        this.add.text(1147, 450, '── 상태 & 소비템 ──', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#8899aa'
+        }).setOrigin(0.5, 0);
+
+        // 액션 타이틀 (중앙 컬럼 상단)
+        this.actionTitleText = this.add.text(640, 470, '', {
+            fontSize: '13px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.actionButtons = [];  // 라운드마다 갱신
+        this.actionButtons = [];
+        this.unitInfoObjs = [];      // 좌측 — 라운드마다 갱신
+        this.statusInfoObjs = [];    // 우측
+    }
+
+    /** 좌측 컬럼 — 현재 유닛 상세 정보 */
+    _drawUnitInfoPanel(unit) {
+        this.unitInfoObjs.forEach(o => o.destroy && o.destroy());
+        this.unitInfoObjs = [];
+        if (!unit) return;
+
+        const cx = 133;  // 컬럼 중심
+        let cy = 472;
+
+        // 이름 + 클래스
+        const base = CLASS_DATA[unit.classKey];
+        const className = base ? base.name : (ENEMY_DATA[unit.classKey] ? ENEMY_DATA[unit.classKey].name : '');
+        this.unitInfoObjs.push(this.add.text(cx, cy, unit.name, {
+            fontSize: '14px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        cy += 18;
+        this.unitInfoObjs.push(this.add.text(cx, cy, `${className} — P${unit.position}`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#8899aa'
+        }).setOrigin(0.5));
+        cy += 20;
+
+        // HP 바
+        const hpW = 230, hpH = 12;
+        const hpRatio = unit.hp / unit.maxHp;
+        const hpColor = hpRatio > 0.6 ? 0x44ff88 : hpRatio > 0.3 ? 0xffaa44 : 0xff4444;
+        const hpBgRect = this.add.rectangle(cx, cy + hpH/2, hpW, hpH, 0x331111);
+        const hpFillRect = this.add.rectangle(cx - hpW/2, cy + hpH/2, hpW * hpRatio, hpH, hpColor).setOrigin(0, 0.5);
+        const hpLabel = this.add.text(cx, cy + hpH/2, `HP ${unit.hp}/${unit.maxHp}`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5);
+        this.unitInfoObjs.push(hpBgRect, hpFillRect, hpLabel);
+        cy += hpH + 8;
+
+        // 스탯 (2 컬럼)
+        const stats = unit.getStats ? unit.getStats() : { atk: unit.atk, def: unit.def, moveSpeed: unit.spd };
+        const atk = stats.atk || unit.atk || 0;
+        const def = stats.def || unit.def || 0;
+        const spd = stats.moveSpeed || unit.spd || 0;
+        const crit = Math.floor((stats.critRate || unit.critRate || 0) * 100);
+
+        const colL = cx - 55, colR = cx + 55;
+        this.unitInfoObjs.push(this.add.text(colL, cy, `⚔ ATK ${atk}`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#ffaaaa'
+        }).setOrigin(0.5));
+        this.unitInfoObjs.push(this.add.text(colR, cy, `🛡 DEF ${def}`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#aaccff'
+        }).setOrigin(0.5));
+        cy += 16;
+        this.unitInfoObjs.push(this.add.text(colL, cy, `⚡ SPD ${spd}`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#ffcc88'
+        }).setOrigin(0.5));
+        this.unitInfoObjs.push(this.add.text(colR, cy, `💥 CRIT ${crit}%`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#ffaa44'
+        }).setOrigin(0.5));
+        cy += 22;
+
+        // 특성 (아군만)
+        if (unit.team === 'ally' && unit.ref && unit.ref.traits) {
+            this.unitInfoObjs.push(this.add.text(cx, cy, '— 특성 —', {
+                fontSize: '10px', fontFamily: 'monospace', color: '#8899aa'
+            }).setOrigin(0.5));
+            cy += 14;
+            unit.ref.traits.slice(0, 3).forEach(t => {
+                const sym = t.type === 'positive' ? '✦' : t.type === 'legendary' ? '★' : '✧';
+                const color = t.type === 'positive' ? '#44cc44' : t.type === 'legendary' ? '#ffaa00' : '#ff6666';
+                this.unitInfoObjs.push(this.add.text(cx, cy, `${sym} ${t.name}`, {
+                    fontSize: '10px', fontFamily: 'monospace', color, fontStyle: 'bold'
+                }).setOrigin(0.5));
+                cy += 13;
+            });
+            cy += 4;
+        }
+
+        // 장비 슬롯 요약 (아군만)
+        if (unit.team === 'ally' && unit.ref && unit.ref.equipment) {
+            const eq = unit.ref.equipment;
+            const equipped = ['weapon','armor','accessory'].filter(s => eq[s]).length;
+            this.unitInfoObjs.push(this.add.text(cx, cy, `🎽 장비: ${equipped}/3`, {
+                fontSize: '10px', fontFamily: 'monospace',
+                color: equipped === 3 ? '#88ffcc' : '#aaaaaa'
+            }).setOrigin(0.5));
+            cy += 14;
+        }
+    }
+
+    /** 우측 컬럼 — 활성 상태이상, 쿨다운, 소비템 (placeholder) */
+    _drawStatusInfoPanel(unit) {
+        this.statusInfoObjs.forEach(o => o.destroy && o.destroy());
+        this.statusInfoObjs = [];
+        if (!unit) return;
+
+        const cx = 1147;
+        let cy = 472;
+
+        // === 활성 상태이상 ===
+        this.statusInfoObjs.push(this.add.text(cx, cy, '⚠ 상태이상', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#ffaa88', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        cy += 16;
+
+        // statusEffects는 배열 형태 — [{type, duration, value}, ...]
+        const statuses = Array.isArray(unit.statusEffects) ? unit.statusEffects : [];
+        const activeStatuses = statuses.filter(s => s && (s.duration === undefined || s.duration > 0));
+        if (activeStatuses.length === 0) {
+            this.statusInfoObjs.push(this.add.text(cx, cy, '(없음)', {
+                fontSize: '10px', fontFamily: 'monospace', color: '#555566'
+            }).setOrigin(0.5));
+            cy += 14;
+        } else {
+            const statusLabels = {
+                bleed: '🩸 출혈', burn: '🔥 화상', slow: '⏳ 둔화',
+                taunt: '🎯 도발', buff_atk: '⚔ ATK↑', buff_def: '🛡 DEF↑',
+                debuff_def: '🛡 DEF↓', stun: '💫 기절', poison: '☠ 중독'
+            };
+            activeStatuses.forEach(s => {
+                const k = s.type || s.kind || '';
+                const label = statusLabels[k] || k;
+                const dur = (s.duration > 0) ? ` (${s.duration}R)` : '';
+                const isBuff = (k === 'buff_atk' || k === 'buff_def' || k === 'taunt');
+                const color = isBuff ? '#88ffaa' : '#ff8866';
+                this.statusInfoObjs.push(this.add.text(cx, cy, `${label}${dur}`, {
+                    fontSize: '10px', fontFamily: 'monospace', color
+                }).setOrigin(0.5));
+                cy += 13;
+            });
+        }
+        cy += 8;
+
+        // === 쿨다운 ===
+        if (unit.cooldowns) {
+            const cooldowns = Object.keys(unit.cooldowns).filter(aid => unit.cooldowns[aid] > 0);
+            if (cooldowns.length > 0) {
+                this.statusInfoObjs.push(this.add.text(cx, cy, '⏱ 쿨다운', {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+                }).setOrigin(0.5));
+                cy += 16;
+                cooldowns.forEach(aid => {
+                    const act = ACTION_DATA[aid];
+                    if (!act) return;
+                    this.statusInfoObjs.push(this.add.text(cx, cy, `${act.name}: ${unit.cooldowns[aid]}R`, {
+                        fontSize: '10px', fontFamily: 'monospace', color: '#ff8866'
+                    }).setOrigin(0.5));
+                    cy += 13;
+                });
+                cy += 6;
+            }
+        }
+
+        // === 소비템 placeholder (향후 구현) ===
+        this.statusInfoObjs.push(this.add.text(cx, cy, '🧪 소비템', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#88ccee', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        cy += 16;
+        this.statusInfoObjs.push(this.add.text(cx, cy, '(향후 구현)', {
+            fontSize: '9px', fontFamily: 'monospace', color: '#555566'
+        }).setOrigin(0.5));
     }
 
     _drawTurnQueue() {
-        // 화면 우측에 턴 순서 표시
-        this.queueText = this.add.text(1270, 60, '', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaaabb',
+        // 우측에 턴 순서 표시 — 배경 박스 추가 (이미지 위에서도 가독성)
+        const qx = 1090, qy = 50, qw = 180, qh = 220;
+        const qBg = this.add.graphics();
+        qBg.fillStyle(0x000000, 0.55);
+        qBg.fillRoundedRect(qx, qy, qw, qh, 5);
+        qBg.lineStyle(1, 0x445566, 0.6);
+        qBg.strokeRoundedRect(qx, qy, qw, qh, 5);
+
+        this.queueText = this.add.text(qx + qw - 8, qy + 6, '', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#cceeff',
             align: 'right'
         }).setOrigin(1, 0);
     }
@@ -357,6 +551,13 @@ class ManualBattleScene extends Phaser.Scene {
         if (current.team === 'ally') {
             this._showAllyActionPanel(current);
         } else {
+            // 적 턴 — 좌/우 패널을 적 정보로 갱신
+            this.actionTitleText.setText(`▶ ${current.name}의 턴 (적, P${current.position})`);
+            this._drawUnitInfoPanel(current);
+            this._drawStatusInfoPanel(current);
+            // 액션 버튼은 비움
+            this.actionButtons.forEach(b => b.destroy && b.destroy());
+            this.actionButtons = [];
             // 적 AI
             this.time.delayedCall(700, () => {
                 const result = DarkestCombat.executeAiAction(this.combat, current);
@@ -423,7 +624,7 @@ class ManualBattleScene extends Phaser.Scene {
         if (!g) return;
         g.turnRing.clear();
         g.turnRing.lineStyle(3, 0xffcc44, 1);
-        g.turnRing.strokeCircle(g.container.x, g.container.y, 44);
+        g.turnRing.strokeCircle(g.container.x, g.container.y, 36);
         // 컨테이너 살짝 펄스
         this.tweens.add({
             targets: g.container, scale: 1.1, duration: 200, yoyo: true
@@ -435,14 +636,26 @@ class ManualBattleScene extends Phaser.Scene {
         this.actionButtons.forEach(b => b.destroy && b.destroy());
         this.actionButtons = [];
 
-        this.actionTitleText.setText(`▶ ${unit.name}의 턴 (포지션 ${unit.position}) — 액션 클릭 또는 유닛 클릭하여 상세 정보`);
+        this.actionTitleText.setText(`▶ ${unit.name}의 턴 (포지션 ${unit.position})`);
 
+        // 좌/우 정보 패널 갱신
+        this._drawUnitInfoPanel(unit);
+        this._drawStatusInfoPanel(unit);
+
+        // 중앙 컬럼: x=275~1005 (730px) — 2×2 그리드 액션 슬롯
         const actions = (typeof getClassActions === 'function') ? getClassActions(unit.classKey) : [];
-        const startX = 80, btnW = 220, btnH = 60, gap = 10;
+        const colW = 730, startX = 275;
+        const btnW = 355, btnH = 56, gap = 10;
+        // 2×2 그리드 — 자리 잡힘
+        const positions = [
+            { col: 0, row: 0 }, { col: 1, row: 0 },
+            { col: 0, row: 1 }, { col: 1, row: 1 }
+        ];
 
         actions.forEach((action, i) => {
-            const x = startX + i * (btnW + gap);
-            const y = 560;
+            const p = positions[i] || { col: i % 2, row: Math.floor(i / 2) };
+            const x = startX + p.col * (btnW + gap);
+            const y = 560 + p.row * (btnH + gap);
             const canUse = action.casterPositions.includes(unit.position);
             const cd = unit.cooldowns[action.id] || 0;
             const onCooldown = cd > 0;
@@ -500,13 +713,13 @@ class ManualBattleScene extends Phaser.Scene {
             }
         });
 
-        // === 액션 패널 위 별도 줄: 위치 이동 + 스킵 ===
+        // === 액션 슬롯 위 별도 줄: 위치 이동 + 스킵 (중앙 컬럼 상단) ===
         const aliveTeam = this.combat.allies.filter(u => u.alive);
         const canMoveForward = unit.position > 1;
         const canMoveBack = unit.position < aliveTeam.length;
 
-        const utilY = 520;  // 액션 슬롯(560) 위
-        const utilW = 130, utilH = 32;
+        const utilY = 495;  // 액션 슬롯(560) 위, 타이틀(470) 아래
+        const utilW = 160, utilH = 30;
         const utilStartX = 640 - (utilW * 3 + 20) / 2;  // 가운데 정렬 3버튼
 
         // ◀ 앞열로
@@ -955,7 +1168,8 @@ class ManualBattleScene extends Phaser.Scene {
     }
 
     _refreshAllUnits() {
-        const slotW = 110;
+        const slotW = 100;
+        const allyXBase = 220, enemyXBase = 700;
         [...this.combat.allies, ...this.combat.enemies].forEach(u => {
             const g = this.unitGfx[u.id];
             if (!g) return;
@@ -979,9 +1193,9 @@ class ManualBattleScene extends Phaser.Scene {
             // 살아있는 유닛 — 새 위치 계산
             let newX;
             if (u.team === 'ally') {
-                newX = 200 + (4 - u.position) * slotW;
+                newX = allyXBase + (4 - u.position) * slotW;
             } else {
-                newX = 720 + (u.position - 1) * slotW;
+                newX = enemyXBase + (u.position - 1) * slotW;
             }
 
             // 위치 이동 (컨테이너 트윈)
@@ -994,8 +1208,8 @@ class ManualBattleScene extends Phaser.Scene {
                 g.baseX = newX;
             }
 
-            // HP 갱신
-            g.hpFill.width = 90 * Math.max(0, u.hp / u.maxHp);
+            // HP 갱신 (HP바 너비 78px)
+            g.hpFill.width = 78 * Math.max(0, u.hp / u.maxHp);
             const hpColor = (u.hp / u.maxHp) > 0.6 ? 0x44ff44 : (u.hp / u.maxHp) > 0.3 ? 0xffaa44 : 0xff4444;
             g.hpFill.fillColor = hpColor;
             g.hpText.setText(`${Math.max(0, u.hp)}/${u.maxHp}`);
