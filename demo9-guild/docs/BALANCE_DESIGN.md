@@ -489,6 +489,10 @@ dropChance = 0.20 + (unit.isElite ? 0.30 : 0) + (unit.isBoss ? 0.80 : 0)
 
 ## 10. 경매장 경제
 
+> ⚠️ **v2 신사양으로 대체됨** — 본 §은 구 사양(5탭: 구매/판매/위탁/입찰/기록) 기록용.
+> **신메커닉은 [systems/auction.md](systems/auction.md) 참조** (2단계 미니게임 + 위작/저주, 골드 싱크 정책).
+> 신사양 수치는 `BALANCE.AUCTION.*` ([systems/balance-config.md](systems/balance-config.md)) 단일 소스.
+
 ### 구매 탭
 ```
 매물 수: 6 + random(0, 3)  →  6~9개
