@@ -10,10 +10,24 @@ class TownScene extends Phaser.Scene {
 
         // === 세이브 마이그레이션 (기존 세이브 호환) ===
         if (!gs.unlockedFacilities) gs.unlockedFacilities = [];
-        if (!gs.unlockedFacilities.includes('equipment')) {
-            gs.unlockedFacilities.push('equipment');
-            if (typeof SaveManager !== 'undefined') SaveManager.save(gs);
+        let migrated = false;
+        ['equipment', 'guildHall'].forEach(f => {
+            if (!gs.unlockedFacilities.includes(f)) {
+                gs.unlockedFacilities.push(f);
+                migrated = true;
+            }
+        });
+        // 길드 회관 데이터 초기화
+        if (!gs.guildHall) {
+            gs.guildHall = { operations: 0, infrastructure: 0, recovery: 0, automation: 0,
+                             intel: 0, pit_control: 0, cargo_control: 0, dark_control: 0 };
+            migrated = true;
         }
+        if (gs.guildReputation === undefined) {
+            gs.guildReputation = 0;
+            migrated = true;
+        }
+        if (migrated && typeof SaveManager !== 'undefined') SaveManager.save(gs);
 
         // 파견 완료 처리 (마을 진입 시)
         if (typeof ExpeditionManager !== 'undefined') {
