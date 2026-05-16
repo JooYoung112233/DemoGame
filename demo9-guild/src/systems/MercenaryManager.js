@@ -1,6 +1,10 @@
 class MercenaryManager {
     static generateRecruitPool(state) {
-        const count = 3 + Math.floor(Math.random() * 3);
+        const baseCount = 3 + Math.floor(Math.random() * 3);
+        // 길드 회관 인프라 — 모집 풀 보너스
+        const ghBonus = (typeof GuildHallManager !== 'undefined')
+            ? (GuildHallManager.getEffects(state).recruitPoolBonus || 0) : 0;
+        const count = baseCount + ghBonus;
         const pool = [];
         for (let i = 0; i < count; i++) {
             pool.push(MercenaryManager.generateMerc(state.guildLevel));

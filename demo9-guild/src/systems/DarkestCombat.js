@@ -352,19 +352,22 @@ class DarkestCombat {
     }
 
     /**
-     * 적 AI — 보유 액션 중 사용 가능한 것 선별 후 선택.
-     * 쿨다운 0 우선, 위치 가능, 타겟 가능한 액션만.
+     * 적 AI — 구역 레벨에 따라 전략 수준 상승.
+     * Lv 1~3: 기본 (랜덤에 가까움)
+     * Lv 4~6: 개피 노림 + 스킬 적극 사용
+     * Lv 7~9: 전략적 위치 이동 + 집중 공격 + 디버프 우선
+     * Lv 10:  완전 전략 (후열 딜러 노림, 잔혈 마무리, 탱커 우회)
      */
     static aiChooseAction(combat, enemy) {
         const alliesAlive = combat.allies.filter(u => u.alive);
         if (alliesAlive.length === 0) return null;
 
-        // 적이 보유한 액션 풀 (actions가 없으면 기본 액션)
+        const aiLevel = combat._aiLevel || 0;
+
         const actionIds = (enemy.actions && enemy.actions.length > 0)
             ? enemy.actions
             : ['enemy_runner_swipe'];
 
-        // 사용 가능한 액션만 필터
         const usable = [];
         for (const aid of actionIds) {
             const action = ACTION_DATA[aid];
@@ -375,30 +378,32 @@ class DarkestCombat {
         }
 
         if (usable.length === 0) {
-            // 폴백: 기본 공격
             usable.push({ id: 'enemy_runner_swipe', action: ACTION_DATA.enemy_runner_swipe });
         }
 
-        // 사용 가능한 액션이 없으면 (전열 적이 후열에만 남음) 위치 이동
-        // 또는 15% 확률로 전략적 위치 이동
+        // --- 위치 이동 판단 ---
         const enemyTeam = combat.enemies.filter(u => u.alive);
-        const shouldMove = (usable.length === 0) ||
-                          (usable.every(u => !u.action.casterPositions.includes(enemy.position))) ||
-                          (Math.random() < 0.12 && enemyTeam.length >= 2);
+        const moveChance = aiLevel >= 7 ? 0.25 : aiLevel >= 4 ? 0.15 : 0.08;
+        const noUsableHere = usable.every(u => !u.action.casterPositions.includes(enemy.position));
+        const shouldMove = noUsableHere || (Math.random() < moveChance && enemyTeam.length >= 2);
+
         if (shouldMove) {
-            // 사용 가능한 액션이 많은 위치로 이동 (전략)
             const allActionIds = (enemy.actions && enemy.actions.length > 0) ? enemy.actions : ['enemy_runner_swipe'];
-            let bestPos = enemy.position, bestUsable = -1;
+            let bestPos = enemy.position, bestScore = -1;
             for (let p = 1; p <= enemyTeam.length; p++) {
                 if (p === enemy.position) continue;
-                const usableAtP = allActionIds.filter(aid => {
+                let score = allActionIds.filter(aid => {
                     const a = ACTION_DATA[aid];
                     return a && a.casterPositions.includes(p);
                 }).length;
-                if (usableAtP > bestUsable) {
-                    bestUsable = usableAtP;
-                    bestPos = p;
+                // 고레벨: 쿨다운 스킬이 해금되는 위치 가산
+                if (aiLevel >= 4) {
+                    score += allActionIds.filter(aid => {
+                        const a = ACTION_DATA[aid];
+                        return a && a.cooldown > 0 && a.casterPositions.includes(p);
+                    }).length * 2;
                 }
+                if (score > bestScore) { bestScore = score; bestPos = p; }
             }
             if (bestPos !== enemy.position) {
                 return {
@@ -409,37 +414,142 @@ class DarkestCombat {
             }
         }
 
-        // 가중치: 쿨다운 큰 액션 (= 강력)은 우선순위 ↑
+        // --- 액션 선택 ---
         let chosen;
         const cooldownActions = usable.filter(u => u.action.cooldown > 0);
         const regularActions = usable.filter(u => u.action.cooldown === 0);
 
-        if (cooldownActions.length > 0 && Math.random() < 0.4) {
-            chosen = cooldownActions[Math.floor(Math.random() * cooldownActions.length)];
-        } else if (regularActions.length > 0) {
-            chosen = regularActions[Math.floor(Math.random() * regularActions.length)];
+        if (aiLevel >= 7) {
+            // 고레벨: 전략적 액션 선택
+            chosen = DarkestCombat._aiSmartActionPick(combat, enemy, usable, alliesAlive);
+        } else if (aiLevel >= 4) {
+            // 중레벨: 쿨다운 스킬 적극 사용 (60%)
+            if (cooldownActions.length > 0 && Math.random() < 0.6) {
+                chosen = cooldownActions[Math.floor(Math.random() * cooldownActions.length)];
+            } else if (regularActions.length > 0) {
+                chosen = regularActions[Math.floor(Math.random() * regularActions.length)];
+            } else {
+                chosen = usable[0];
+            }
         } else {
-            chosen = usable[0];
+            // 저레벨: 기존 로직 (쿨다운 40%)
+            if (cooldownActions.length > 0 && Math.random() < 0.35) {
+                chosen = cooldownActions[Math.floor(Math.random() * cooldownActions.length)];
+            } else if (regularActions.length > 0) {
+                chosen = regularActions[Math.floor(Math.random() * regularActions.length)];
+            } else {
+                chosen = usable[0];
+            }
         }
 
-        // 타겟 결정 (DarkestCombat._resolveTargets 활용)
-        const targetPositions = DarkestCombat._aiPickTargetPositions(combat, enemy, chosen.action);
-
+        const targetPositions = DarkestCombat._aiPickTargetPositions(combat, enemy, chosen.action, aiLevel);
         return { actionId: chosen.id, action: chosen.action, targetPositions };
     }
 
-    /** AI 타겟 위치 선택 — 도발 / HP% 낮은 우선 */
-    static _aiPickTargetPositions(combat, enemy, action) {
+    /** 고레벨 AI — 상황 판단 후 최적 액션 선택 */
+    static _aiSmartActionPick(combat, enemy, usable, alliesAlive) {
+        // 잔혈 마무리 가능한 타겟이 있으면 고 데미지 액션 우선
+        const lowHpAlly = alliesAlive.find(u => u.hp / u.maxHp < 0.25);
+        if (lowHpAlly) {
+            const dmgActions = usable.filter(u => u.action.effects && u.action.effects.atkMult);
+            const bigHit = dmgActions.sort((a, b) => (b.action.effects.atkMult || 0) - (a.action.effects.atkMult || 0));
+            if (bigHit.length > 0 && bigHit[0].action.targetPositions.includes(lowHpAlly.position)) {
+                return bigHit[0];
+            }
+        }
+
+        // 아군 다수 생존 시 AoE 우선
+        if (alliesAlive.length >= 3) {
+            const aoe = usable.find(u => u.action.targetCount === 'all');
+            if (aoe) return aoe;
+        }
+
+        // 디버프/상태이상 액션 — 클린한 타겟이 있으면 우선
+        const debuffActions = usable.filter(u => {
+            const fx = u.action.effects;
+            return fx && (fx.statusEffect || fx.debuffStat);
+        });
+        if (debuffActions.length > 0) {
+            const cleanTarget = alliesAlive.find(u => u.statusEffects.length === 0);
+            if (cleanTarget && Math.random() < 0.5) {
+                return debuffActions[Math.floor(Math.random() * debuffActions.length)];
+            }
+        }
+
+        // 쿨다운 스킬 높은 확률 (75%)
+        const cooldownActions = usable.filter(u => u.action.cooldown > 0);
+        if (cooldownActions.length > 0 && Math.random() < 0.75) {
+            return cooldownActions.sort((a, b) => b.action.cooldown - a.action.cooldown)[0];
+        }
+
+        return usable[Math.floor(Math.random() * usable.length)];
+    }
+
+    /** AI 타겟 선택 — 레벨에 따라 전략 분기 */
+    static _aiPickTargetPositions(combat, enemy, action, aiLevel) {
         const isEnemyTarget = action.targetType && action.targetType.startsWith('enemy');
         const pool = isEnemyTarget ? combat.allies : combat.enemies;
         const valid = pool.filter(u => u.alive && action.targetPositions.includes(u.position));
         if (valid.length === 0) return [];
 
-        // 도발 우선
+        // 도발 우선 (모든 레벨)
         const tauntTarget = valid.find(u => u.statusEffects.some(e => e.type === 'taunt_active'));
-        if (tauntTarget && isEnemyTarget) return [tauntTarget.position];
+        if (tauntTarget && isEnemyTarget) {
+            // 고레벨: 30% 확률로 도발 무시하고 후열 노림
+            if (aiLevel >= 10 && Math.random() < 0.30) {
+                // 도발 무시 — 아래 로직으로 진행
+            } else {
+                return [tauntTarget.position];
+            }
+        }
 
-        // HP% 낮은 적 우선
+        if (!isEnemyTarget) {
+            return [valid[0].position];
+        }
+
+        const al = aiLevel || 0;
+
+        if (al >= 10) {
+            // Lv10: 후열 딜러/힐러 최우선 → 잔혈 마무리 → 최저 HP%
+            const backline = valid.filter(u => u.position >= 3);
+            const squishyClasses = ['mage', 'priest', 'archer', 'alchemist'];
+            const squishy = backline.filter(u => squishyClasses.includes(u.classKey));
+            if (squishy.length > 0) {
+                squishy.sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp));
+                return [squishy[0].position];
+            }
+            // 잔혈 마무리
+            const finishing = valid.filter(u => u.hp < enemy.atk * 1.2);
+            if (finishing.length > 0) {
+                finishing.sort((a, b) => a.hp - b.hp);
+                return [finishing[0].position];
+            }
+        } else if (al >= 7) {
+            // Lv7~9: 개피 노림 (같은 타겟 집중) + 잔혈 마무리
+            const finishing = valid.filter(u => u.hp < enemy.atk * 1.5);
+            if (finishing.length > 0) {
+                finishing.sort((a, b) => a.hp - b.hp);
+                return [finishing[0].position];
+            }
+            // 가장 약한 클래스 우선
+            const squishyClasses = ['mage', 'priest', 'archer', 'alchemist'];
+            const squishy = valid.filter(u => squishyClasses.includes(u.classKey));
+            if (squishy.length > 0 && Math.random() < 0.6) {
+                squishy.sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp));
+                return [squishy[0].position];
+            }
+        } else if (al >= 4) {
+            // Lv4~6: HP% 낮은 쪽 + 가끔 후열 노림 (30%)
+            if (Math.random() < 0.3) {
+                const backline = valid.filter(u => u.position >= 3);
+                if (backline.length > 0) {
+                    backline.sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp));
+                    return [backline[0].position];
+                }
+            }
+        }
+
+        // 기본: HP% 낮은 순
         valid.sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp));
         return [valid[0].position];
     }

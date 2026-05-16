@@ -31,6 +31,13 @@ class DeployScene extends Phaser.Scene {
             color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
+        UIButton.create(this, 210, 20, 120, 26, '✨ 시너지 도감', {
+            color: 0x443366, hoverColor: 0x554477, textColor: '#ccaaff', fontSize: 11,
+            onClick: () => this.scene.start('SynergyScene', {
+                gameState: gs, returnTo: 'DeployScene',
+                returnData: { gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode }
+            })
+        });
 
         // 메인/서브 모드 토글
         const isMain = this.deployMode === 'main';
@@ -75,9 +82,157 @@ class DeployScene extends Phaser.Scene {
         });
 
         this._drawDeploySlots(30, 280, maxDeploy);
+        this._drawSynergyPreview(maxDeploy);
+        this._drawBondPreview(maxDeploy);
         this._drawRosterPick(30, 440);
         this._drawSavedParties(30, 595);
         this._drawDepartButton();
+    }
+
+    /** 편성된 용병들의 활성 시너지 미리보기 — 슬롯 위 가로 막대 */
+    _drawSynergyPreview(maxDeploy) {
+        const gs = this.gameState;
+        const deployed = this.deployedIds
+            .map(id => gs.roster.find(m => m.id === id))
+            .filter(Boolean);
+        const classKeys = deployed.map(m => m.classKey);
+
+        // 가로 막대 — 슬롯 영역 위쪽 (y=215~272)
+        const px = 30, py = 215, pw = 1220, ph = 56;
+
+        const bg = this.add.graphics();
+        bg.fillStyle(0x141426, 1);
+        bg.fillRoundedRect(px, py, pw, ph, 6);
+        bg.lineStyle(2, 0x665588, 0.7);
+        bg.strokeRoundedRect(px, py, pw, ph, 6);
+
+        this.add.text(px + 12, py + 6, '✨ 활성 시너지', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ccaaff', fontStyle: 'bold'
+        });
+
+        if (typeof getActiveSynergies !== 'function' || deployed.length === 0) {
+            this.add.text(px + pw/2, py + ph/2 + 4, '용병을 편성하면 발동 가능한 시너지가 표시됩니다', {
+                fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+            }).setOrigin(0.5);
+            return;
+        }
+
+        const active = getActiveSynergies(classKeys);
+        if (active.length === 0) {
+            const close = this._findCloseSynergies(classKeys);
+            if (close.length === 0) {
+                this.add.text(px + pw/2, py + ph/2 + 4, '현재 발동 가능한 시너지 없음 — 다양한 클래스 조합 시도', {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+                }).setOrigin(0.5);
+            } else {
+                this.add.text(px + 110, py + 6, ' — 1명 추가 시 발동:', {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#888899', fontStyle: 'italic'
+                });
+                // 가로로 chip 형태
+                let chipX = px + 12;
+                close.slice(0, 5).forEach(c => {
+                    const label = `${c.name} (+${this._classIcon(c.missingClass)})`;
+                    const txt = this.add.text(chipX, py + 30, label, {
+                        fontSize: '10px', fontFamily: 'monospace', color: '#88aacc',
+                        backgroundColor: '#222244', padding: { x: 6, y: 2 }
+                    });
+                    chipX += txt.width + 8;
+                    if (chipX > px + pw - 100) return;
+                });
+            }
+            return;
+        }
+
+        // 활성 시너지 — 가로로 chip
+        let chipX = px + 110;
+        active.forEach(syn => {
+            const typeColor = syn.type === 5 ? '#ffcc44' : syn.type === 3 ? '#ff88cc' : '#88ccff';
+            const bgColor = syn.type === 5 ? '#553311' : syn.type === 3 ? '#441133' : '#113344';
+            const typeBadge = syn.type === 5 ? '⭐5인' : syn.type === 3 ? '★3인' : '✦2인';
+
+            const chip = this.add.text(chipX, py + 8, `${typeBadge} ${syn.name}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: typeColor, fontStyle: 'bold',
+                backgroundColor: bgColor, padding: { x: 8, y: 3 }
+            });
+            this.add.text(chipX, py + 30, syn.desc, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#aaaacc',
+                wordWrap: { width: 280 }
+            });
+            chipX += Math.max(chip.width, 200) + 16;
+            if (chipX > px + pw - 50) return;
+        });
+    }
+
+    _classIcon(classKey) {
+        return (CLASS_DATA[classKey]?.icon || '?') + (CLASS_DATA[classKey]?.name || '');
+    }
+
+    /** 편성된 용병들 간 활성 본드 미리보기 — 시너지 막대 위쪽 */
+    _drawBondPreview(maxDeploy) {
+        const gs = this.gameState;
+        const deployed = this.deployedIds
+            .map(id => gs.roster.find(m => m.id === id))
+            .filter(Boolean);
+
+        if (deployed.length < 2 || typeof BondManager === 'undefined') return;
+
+        // 본드 페어 수집
+        const bonds = [];
+        for (let i = 0; i < deployed.length; i++) {
+            for (let j = i + 1; j < deployed.length; j++) {
+                const a = deployed[i], b = deployed[j];
+                const xp = BondManager.getBondXp(gs, a.id, b.id);
+                if (xp <= 0) continue;
+                const tier = BondManager.getTier(xp);
+                bonds.push({ a, b, xp, tier });
+            }
+        }
+        if (bonds.length === 0) return;
+
+        // 시너지 막대 위쪽 (y=180~210)
+        const px = 30, py = 180, pw = 1220, ph = 30;
+        const bg = this.add.graphics();
+        bg.fillStyle(0x281428, 1);
+        bg.fillRoundedRect(px, py, pw, ph, 6);
+        bg.lineStyle(2, 0xaa5577, 0.7);
+        bg.strokeRoundedRect(px, py, pw, ph, 6);
+
+        this.add.text(px + 10, py + 8, '💞 본드:', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ff88cc', fontStyle: 'bold'
+        });
+
+        let chipX = px + 70;
+        bonds.sort((a, b) => b.xp - a.xp);
+        bonds.forEach(b => {
+            const tierColors = ['#888888', '#88ccaa', '#88ddff', '#ffaa66', '#ff88cc', '#ffcc44'];
+            const tierBadges = ['낯선', '①동료', '②형제', '③전우', '④동반자', '⑤운명'];
+            const color = tierColors[b.tier.tier] || '#888888';
+            const badge = tierBadges[b.tier.tier] || '';
+            const chip = this.add.text(chipX, py + 8, `${badge} ${b.a.name}↔${b.b.name} (${b.xp})`, {
+                fontSize: '10px', fontFamily: 'monospace', color
+            });
+            chipX += chip.width + 14;
+            if (chipX > px + pw - 50) return;
+        });
+    }
+
+    /** 한 명 더 추가하면 발동되는 시너지 후보 */
+    _findCloseSynergies(currentClasses) {
+        if (typeof SYNERGY_DATA !== 'object') return [];
+        const classSet = new Set(currentClasses);
+        const candidates = [];
+        for (const [key, syn] of Object.entries(SYNERGY_DATA)) {
+            if (syn.type !== 2 && syn.type !== 3) continue;
+            const missing = syn.classes.filter(c => !classSet.has(c));
+            if (missing.length === 1) {
+                candidates.push({
+                    name: syn.name,
+                    desc: syn.desc,
+                    missingClass: missing[0]
+                });
+            }
+        }
+        return candidates;
     }
 
     _drawSavedParties(x, y) {
@@ -239,7 +394,13 @@ class DeployScene extends Phaser.Scene {
 
     _drawDeploySlots(x, y, maxDeploy) {
         const gs = this.gameState;
-        const slotW = 230;
+        // 동적 슬롯 너비 — 항상 1220px 안에 fit (오버플로우 방지)
+        const totalW = 1220;
+        const gap = 8;
+        const slotW = Math.min(230, Math.floor((totalW - (maxDeploy - 1) * gap) / maxDeploy));
+        // 슬롯 width 저장 (다른 함수에서 사용)
+        this._slotW = slotW;
+        this._slotGap = gap;
 
         // 다키스트 포지션 안내 (포지션 1이 가장 우측 = 전열)
         const positionInfo = this.add.text(x, y - 18, '편성 순서: ← 좌측이 후열(원거리), 우측이 전열(근접)', {
@@ -247,7 +408,7 @@ class DeployScene extends Phaser.Scene {
         });
 
         for (let i = 0; i < maxDeploy; i++) {
-            const sx = x + i * (slotW + 10);
+            const sx = x + i * (slotW + gap);
             const merc = gs.roster.find(m => m.id === this.deployedIds[i]);
             const position = maxDeploy - i;   // 좌측이 후열(높은 번호), 우측이 전열(낮은 번호)
 
@@ -281,6 +442,13 @@ class DeployScene extends Phaser.Scene {
                 this.add.text(sx + 10, y + 55, `ATK:${stats.atk} DEF:${stats.def} SPD:${stats.moveSpeed}`, {
                     fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
                 });
+
+                // 스테미너 표시 (좁은 슬롯에서도 보이게)
+                const stamina = merc.stamina !== undefined ? merc.stamina : 100;
+                const stColor = stamina >= 60 ? '#88ccff' : stamina >= 30 ? '#ffaa44' : '#ff6666';
+                this.add.text(sx + slotW - 10, y + 22, `⚡${Math.round(stamina)}`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: stColor, fontStyle: 'bold'
+                }).setOrigin(1, 0);
 
                 // 액션 미리보기 (현재 포지션에서 가능한지 표시)
                 if (typeof getClassActions === 'function') {
@@ -418,6 +586,29 @@ class DeployScene extends Phaser.Scene {
             const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, this.selectedZone);
             if (maxUnlocked === 0) canDepart = false;
         }
+
+        // === 포켓 아이템 슬롯 (BP 전용, F2 해금) ===
+        if (isMain && this.selectedZone === 'bloodpit') {
+            this._drawPocketSlots(gs);
+        }
+
+        // === 스테미너 체크 — 0인 용병이 편성에 있으면 차단 ===
+        const partyMercs = this.deployedIds.map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
+        const exhausted = partyMercs.filter(m => (m.stamina || 0) <= 0);
+        const lowStamina = partyMercs.filter(m => (m.stamina || 0) > 0 && (m.stamina || 0) < 30);
+        if (exhausted.length > 0) canDepart = false;
+
+        // 경고 라벨
+        if (exhausted.length > 0) {
+            this.add.text(640, 660, `⚠ ${exhausted.map(m => m.name).join(', ')} 스테미너 0 — 출전 불가 (마을에서 휴식)`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ff6666', fontStyle: 'bold'
+            }).setOrigin(0.5);
+        } else if (lowStamina.length > 0) {
+            this.add.text(640, 660, `⚠ ${lowStamina.map(m => m.name).join(', ')} 스테미너 부족 — 능력치 감소 (-25%~-40%)`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ffaa44'
+            }).setOrigin(0.5);
+        }
+
         const btnLabel = isMain ? '출발 (메인 전투)' : `파견 시작 (서브)`;
 
         UIButton.create(this, 640, 690, 220, 40, btnLabel, {
@@ -435,8 +626,8 @@ class DeployScene extends Phaser.Scene {
                     SaveManager.save(gs);
                     const sceneMap = {
                         bloodpit: 'ManualBattleScene',   // v3 다키스트 적용
-                        cargo: 'CargoBattleScene',
-                        blackout: 'BlackoutBattleScene'
+                        cargo: 'CargoFloorSelectScene',  // 나락식 층 선택 → 전투
+                        blackout: 'BlackoutProtoSelectScene'  // 전투 프로토타입 3종 선택 (탐색은 추후)
                     };
                     const targetScene = sceneMap[this.selectedZone] || 'BattleScene';
                     this.scene.start(targetScene, {
@@ -478,6 +669,97 @@ class DeployScene extends Phaser.Scene {
             this.add.text(640, 660, hint, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#666677'
             }).setOrigin(0.5);
+        }
+    }
+
+    _drawPocketSlots(gs) {
+        const fLevel = (gs.guildHall && gs.guildHall.pit_control) || 0;
+        if (fLevel < 2) return;
+
+        if (!gs.pocketSlots) gs.pocketSlots = [null, null];
+        const slots = gs.pocketSlots;
+        const shopItems = (typeof POCKET_ITEM_SHOP !== 'undefined') ? POCKET_ITEM_SHOP : {};
+        const itemData = (typeof POCKET_ITEM_DATA !== 'undefined') ? POCKET_ITEM_DATA : {};
+
+        const px = 815, py = 540;
+        UIPanel.create(this, px, py, 457, 150, { title: '🧪 포켓 아이템 (BP 전용)' });
+
+        for (let i = 0; i < slots.length; i++) {
+            const sx = px + 12 + i * 225;
+            const sy = py + 30;
+            const itemKey = slots[i];
+            const item = itemKey ? itemData[itemKey] : null;
+
+            const slotBg = this.add.graphics();
+            slotBg.fillStyle(item ? 0x223344 : 0x181828, 1);
+            slotBg.fillRoundedRect(sx, sy, 210, 44, 5);
+            slotBg.lineStyle(1, item ? 0x4488aa : 0x333344, 0.8);
+            slotBg.strokeRoundedRect(sx, sy, 210, 44, 5);
+
+            if (item) {
+                this.add.text(sx + 8, sy + 6, `${item.icon} ${item.name}`, {
+                    fontSize: '12px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+                });
+                this.add.text(sx + 8, sy + 24, item.desc, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#aabbcc'
+                });
+                UIButton.create(this, sx + 168, sy + 22, 40, 22, '해제', {
+                    color: 0x553333, hoverColor: 0x664444, textColor: '#ffaaaa', fontSize: 10,
+                    onClick: () => {
+                        gs.pocketSlots[i] = null;
+                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
+                    }
+                });
+            } else {
+                this.add.text(sx + 105, sy + 12, `슬롯 ${i + 1}: 비어있음`, {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#555566'
+                }).setOrigin(0.5);
+                this.add.text(sx + 105, sy + 28, '(아래 목록에서 선택)', {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#444455'
+                }).setOrigin(0.5);
+            }
+        }
+
+        // 구매 가능 목록
+        const emptySlot = slots.indexOf(null);
+        if (emptySlot === -1) return;
+
+        let bx = px + 12;
+        const by = py + 82;
+        this.add.text(bx, by, '구매:', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#8899aa'
+        });
+        bx += 40;
+        for (const [key, shop] of Object.entries(shopItems)) {
+            const data = itemData[key];
+            if (!data) continue;
+            const canBuy = gs.gold >= shop.cost;
+            const alreadyEquipped = slots.includes(key);
+            const chipW = 115, chipH = 24;
+
+            UIButton.create(this, bx, by - 2, chipW, chipH, `${data.icon} ${shop.cost}G`, {
+                color: (canBuy && !alreadyEquipped) ? 0x224433 : 0x222233,
+                hoverColor: 0x336644,
+                textColor: (canBuy && !alreadyEquipped) ? '#88ffaa' : '#555566',
+                fontSize: 10,
+                onClick: () => {
+                    if (alreadyEquipped) { UIToast.show(this, '이미 장착됨', { color: '#ff6644' }); return; }
+                    if (!canBuy) { UIToast.show(this, '골드 부족', { color: '#ff6644' }); return; }
+                    const empty = gs.pocketSlots.indexOf(null);
+                    if (empty === -1) { UIToast.show(this, '슬롯 가득', { color: '#ff6644' }); return; }
+                    gs.gold -= shop.cost;
+                    gs.pocketSlots[empty] = key;
+                    this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
+                }
+            });
+
+            // 아이템 이름 툴팁 (호버 대신 아래 텍스트)
+            this.add.text(bx + chipW / 2, by + chipH + 2, data.name, {
+                fontSize: '8px', fontFamily: 'monospace', color: '#666677'
+            }).setOrigin(0.5);
+
+            bx += chipW + 8;
+            if (bx > px + 440) break;
         }
     }
 }

@@ -7,7 +7,7 @@ class GuildManager {
             roster: [],
             storage: [],
             secureContainer: [],
-            unlockedFacilities: ['recruit', 'storage', 'equipment', 'gate'],
+            unlockedFacilities: ['recruit', 'storage', 'gate', 'guildHall'],
             recruitPool: [],
             runCount: 0,
             zoneLevel: { bloodpit: 1, cargo: 0, blackout: 0 },
@@ -19,7 +19,13 @@ class GuildManager {
             pendingResults: [],          // 미수령 파견 결과
             zoneClearCount: {},          // { 'bloodpit_1': 3, ... } 메인 클리어 누적 (서브 해금용)
             fallenMercs: [],             // 사망 용병 (부활 대기)
-            savedParties: []             // 저장된 파티 편성 [{ id, name, mercIds }]
+            savedParties: [],            // 저장된 파티 편성 [{ id, name, mercIds }]
+            bonds: {},                   // 용병 간 본드 — { 'idA_idB': xp(0-100) } — 영구 보존
+            guildHall: {                 // 길드 회관 트리 카테고리별 단계 (0-12)
+                operations: 0, infrastructure: 0, recovery: 0, automation: 0,
+                intel: 0, pit_control: 0, cargo_control: 0, dark_control: 0
+            },
+            guildReputation: 0           // 길드 평판 (0-100)
         };
     }
 
@@ -155,12 +161,13 @@ class GuildManager {
 
     static getMaxRoster(state) {
         const limits = ROSTER_LIMITS[state.guildLevel] || ROSTER_LIMITS[8];
+        // 길드 회관 rosterBonus 제거 — 로스터는 길드 레벨에 따라 자연 증가만
         return limits.max;
     }
 
+    /** 편성(파티) 슬롯 — 다키스트 스타일 4명 고정. 길드 레벨/업그레이드 영향 없음 */
     static getMaxDeploy(state) {
-        const limits = ROSTER_LIMITS[state.guildLevel] || ROSTER_LIMITS[8];
-        return limits.deploy;
+        return 4;
     }
 
     static canUnlockFacility(state, facilityKey) {

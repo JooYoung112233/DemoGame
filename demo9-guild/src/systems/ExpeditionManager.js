@@ -18,7 +18,9 @@ class ExpeditionManager {
     static getMaxSlots(gs) {
         const tableByLv = { 1: 1, 2: 1, 3: 2, 4: 2, 5: 3, 6: 3, 7: 4, 8: 4 };
         const base = tableByLv[gs.guildLevel] || 1;
-        return base;
+        const ghBonus = (typeof GuildHallManager !== 'undefined')
+            ? (GuildHallManager.getEffects(gs).subSlotsBonus || 0) : 0;
+        return base + ghBonus;
     }
 
     /**
@@ -46,7 +48,11 @@ class ExpeditionManager {
 
         // 시간 = base × Lv 비례 / 파워 비율
         const baseTimeSec = { bloodpit: 90, cargo: 240, blackout: 480 }[zoneKey] || 120;
-        const timeSec = baseTimeSec * Math.max(0.7, zoneLevel * 0.6) / Math.max(0.7, power / recommended);
+        let timeSec = baseTimeSec * Math.max(0.7, zoneLevel * 0.6) / Math.max(0.7, power / recommended);
+        // 길드 회관 운영 — 파견 시간 단축
+        const timeReduction = (typeof GuildHallManager !== 'undefined')
+            ? (GuildHallManager.getEffects(gs).dispatchTimeReduction || 0) : 0;
+        if (timeReduction > 0) timeSec *= (1 - timeReduction);
         const durationMs = Math.max(15 * 1000, timeSec * 1000);  // 최소 15초
 
         const exp = {
@@ -105,6 +111,14 @@ class ExpeditionManager {
         const result = gs.pendingResults[idx];
         gs.pendingResults.splice(idx, 1);
 
+        // === 길드 회관 운영 — 서브 보상 보너스 적용 ===
+        const ghBonus = (typeof GuildHallManager !== 'undefined')
+            ? (GuildHallManager.getEffects(gs).subRewardBonus || 0) : 0;
+        if (ghBonus > 0) {
+            result.goldEarned = Math.floor(result.goldEarned * (1 + ghBonus));
+            result.xpEarned = Math.floor(result.xpEarned * (1 + ghBonus));
+        }
+
         // 골드/XP
         if (typeof GuildManager !== 'undefined') {
             GuildManager.addGold(gs, result.goldEarned);
@@ -115,8 +129,20 @@ class ExpeditionManager {
             gs.guildXp += result.xpEarned;
         }
 
-        // 용병 XP/친화도/부상
+        // 용병 XP/친화도/부상 — 사망자 포함 본드 누적용으로 원본 파티 보존
+        const partyForBonds = [...gs.roster, ...(gs.fallenMercs || [])].filter(m => result.partyIds.includes(m.id));
         const partyMercs = gs.roster.filter(m => result.partyIds.includes(m.id));
+
+        // === 본드 누적 (서브 파견) ===
+        if (typeof BondManager !== 'undefined' && partyForBonds.length >= 2) {
+            BondManager.updateBonds(gs, partyForBonds, result.success, 'sub');
+        }
+
+        // === 스테미너 소모 (서브 파견은 메인보다 부담 적음) ===
+        partyForBonds.forEach(merc => {
+            if (typeof merc.drainStamina === 'function') merc.drainStamina(25);
+        });
+
         partyMercs.forEach(merc => {
             merc.gainXp(result.mercXp);
             if (typeof merc.gainAffinityXp === 'function') {

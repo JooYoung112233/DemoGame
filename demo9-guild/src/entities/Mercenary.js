@@ -20,6 +20,32 @@ class Mercenary {
         this.affinityNodes = [];
         this._maxHp = this.getStats().hp;
         this.currentHp = this._maxHp;
+        // === 스테미너 (0-100) — 출전 시 소모, 휴식/시간으로 회복 ===
+        this.stamina = 100;
+        this.maxStamina = 100;
+    }
+
+    /** 스테미너 회복 — 마을 복귀 시(시설별) / 시간 경과 */
+    restStamina(amount) {
+        this.stamina = Math.min(this.maxStamina, this.stamina + amount);
+    }
+
+    /** 스테미너 소모 — 출전 시 */
+    drainStamina(amount) {
+        this.stamina = Math.max(0, this.stamina - amount);
+    }
+
+    /** 출전 가능 여부 — 스테미너 20 이상 권장, 0이면 페널티 */
+    canDeploy() {
+        return this.alive && this.stamina > 0;
+    }
+
+    /** 스테미너 페널티 — 낮을수록 stat 감소 (전투에 적용) */
+    getStaminaMultiplier() {
+        if (this.stamina >= 60) return 1.0;
+        if (this.stamina >= 30) return 0.9;
+        if (this.stamina >= 10) return 0.75;
+        return 0.6;  // 매우 피로
     }
 
     getBaseClass() {
@@ -226,7 +252,9 @@ class Mercenary {
             affinityXp: this.affinityXp,
             affinityPoints: this.affinityPoints,
             affinityNodes: this.affinityNodes,
-            revivalToken: this.revivalToken || false
+            revivalToken: this.revivalToken || false,
+            stamina: this.stamina !== undefined ? this.stamina : 100,
+            maxStamina: this.maxStamina || 100
         };
     }
 
@@ -257,6 +285,8 @@ class Mercenary {
         merc.affinityPoints = data.affinityPoints || { bloodpit: 0, cargo: 0, blackout: 0 };
         merc.affinityNodes = data.affinityNodes || [];
         merc.revivalToken = data.revivalToken || false;
+        merc.stamina = (data.stamina !== undefined) ? data.stamina : 100;
+        merc.maxStamina = data.maxStamina || 100;
         merc._maxHp = merc.getStats().hp;
         if (Mercenary._nextId <= data.id) Mercenary._nextId = data.id + 1;
         return merc;

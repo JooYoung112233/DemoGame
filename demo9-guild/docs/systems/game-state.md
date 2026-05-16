@@ -80,6 +80,11 @@ zoneLevel: { bloodpit: 0, cargo: 0, blackout: 0 },  // 메인으로 클리어한
 unlockedZoneLevels: {},    // { 'bloodpit_3': { autoUnlocked: true } } — 자동전투 잠금해제
 bossDefeated: { bp: false, cargo: false, blackout: false },
 
+// === BP 전용 (v4) ===
+// 파티 공용 수동 아이템 슬롯 (길드회관 F2 해금 시 2칸 활성).
+// BP 입장 전 마을에서 사전에 채움. BP 쉬는 곳에서만 사용. 사용 시 비움.
+pocketSlots: [null, null],  // [{ key, name } | null, ...]
+
 // === 사망/은퇴 ===
 fallenMercs: [],           // 사망 용병 기록
 retiredMercs: [],          // 은퇴 용병 기록
@@ -122,6 +127,7 @@ currentCycle: {
 | `lastActiveAt`, `totalPlayTime`, `totalRealTime` | [time-system.md](time-system.md) |
 | `activeEvent`, `recentEventKeys`, `eventLastTriggeredAt`, `completedEvents` | [town-events.md](town-events.md) |
 | `zoneLevel`, `unlockedZoneLevels`, `bossDefeated` | [zone-bloodpit.md](zone-bloodpit.md) / [zone-cargo.md](zone-cargo.md) / [zone-blackout.md](zone-blackout.md) |
+| `pocketSlots` | [zone-bloodpit.md §8](zone-bloodpit.md) — BP 수동 아이템 슬롯 |
 | `fallenMercs`, `retiredMercs`, `permadeathMode`, `memorialMoraleBoostUsedAt` | [death-retirement.md](death-retirement.md) |
 | `metaProgress`, `currentCycle` | [newgame-plus.md](newgame-plus.md) |
 

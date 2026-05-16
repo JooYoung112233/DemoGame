@@ -139,9 +139,17 @@ class EquipmentScene extends Phaser.Scene {
                     fontSize: '11px', fontFamily: 'monospace', color: '#888899'
                 });
 
+                // 슬롯 클릭 시 보관함 필터링 — 해제 버튼보다 먼저 배치해야 버튼이 우선
+                const hit = this.add.zone(x + w/2, cy + 30, w - 30, 60).setInteractive({ useHandCursor: true });
+                hit.on('pointerdown', () => {
+                    this.selectedSlot = slot;
+                    this.scene.restart({ gameState: gs, selectedMercId: merc.id, selectedSlot: slot });
+                });
+
                 if (!eq.cursed) {
                     UIButton.create(this, x + w - 60, cy + 30, 80, 26, '해제', {
-                        color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 11,
+                        color: 0x664444, hoverColor: 0x885555, textColor: '#ffaaaa', fontSize: 11,
+                        depth: 5,
                         onClick: () => {
                             const item = merc.unequip(slot);
                             if (item) StorageManager.addItem(gs, item);
@@ -158,14 +166,14 @@ class EquipmentScene extends Phaser.Scene {
                 this.add.text(x + 100, cy + 20, '(비어있음 — 오른쪽에서 선택)', {
                     fontSize: '11px', fontFamily: 'monospace', color: '#666677'
                 });
-            }
 
-            // 슬롯 클릭 시 보관함 필터링
-            const hit = this.add.zone(x + w/2, cy + 30, w - 30, 60).setInteractive({ useHandCursor: true });
-            hit.on('pointerdown', () => {
-                this.selectedSlot = slot;
-                this.scene.restart({ gameState: gs, selectedMercId: merc.id, selectedSlot: slot });
-            });
+                // 슬롯 클릭 시 보관함 필터링
+                const hit = this.add.zone(x + w/2, cy + 30, w - 30, 60).setInteractive({ useHandCursor: true });
+                hit.on('pointerdown', () => {
+                    this.selectedSlot = slot;
+                    this.scene.restart({ gameState: gs, selectedMercId: merc.id, selectedSlot: slot });
+                });
+            }
             cy += 68;
         });
 

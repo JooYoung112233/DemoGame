@@ -120,6 +120,23 @@ const ENEMY_DATA = {
         name: '저택 주인', role: 'melee', color: 0xff00cc, zone: 'blackout',
         hp: 2000, atk: 55, def: 18, attackSpeed: 1800, range: 60, moveSpeed: 50,
         critRate: 0.18, critDmg: 2.2, isBoss: true, bleedChance: 0.20
+    },
+
+    // --- 관중 난입 전용 (BP v4) ---
+    crowd_fodder: {
+        name: '잡졸 도전자', role: 'melee', color: 0xcc8844, zone: 'bloodpit',
+        hp: 50, atk: 8, def: 1, attackSpeed: 1400, range: 50, moveSpeed: 100,
+        critRate: 0.05, critDmg: 1.3, isCrowdRush: true
+    },
+    crowd_assassin: {
+        name: '자객', role: 'melee', color: 0xcc4488, zone: 'bloodpit',
+        hp: 90, atk: 18, def: 3, attackSpeed: 1000, range: 50, moveSpeed: 130,
+        critRate: 0.15, critDmg: 1.8, isCrowdRush: true
+    },
+    crowd_challenger: {
+        name: '도전자', role: 'melee', color: 0xff6644, zone: 'bloodpit',
+        hp: 200, atk: 28, def: 8, attackSpeed: 1500, range: 55, moveSpeed: 80,
+        critRate: 0.12, critDmg: 1.6, isCrowdRush: true, isElite: true
     }
 };
 

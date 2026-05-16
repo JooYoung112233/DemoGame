@@ -198,6 +198,46 @@ const BALANCE = {
   ENHANCE_STAT_BONUS: { 1: 0.05, 2: 0.10, 3: 0.15, 4: 0.25, 5: 0.35 },
   CRAFT_SLOTS_BY_GUILD: { 1: 1, 3: 2, 5: 3, 7: 4 },
 
+  // === 경매장 ===
+  // 전체 정의: docs/systems/auction.md §11
+  // 시뮬 검증 후 확정값 이관 예정
+  AUCTION: {
+    TIME_TOKENS: 2,
+    ENTRY_FEE: { min: 50, max: 100 },
+    ROUND_BUDGET_PCT: 0.25,
+    ROUND_BUDGET_MAX: 5000,
+    ITEM_COUNT: 3,
+    NPC_BIDDER_COUNT_BY_RARITY: { common: 1.0, uncommon: 1.2, rare: 2.0, epic: 2.5, legendary: 3.0 },
+    NPC_BID_MEAN_MULT: { common: 0.95, uncommon: 0.95, rare: 1.05, epic: 1.15, legendary: 1.30 },
+    NPC_BID_STDDEV_PCT: { common: 0.15, uncommon: 0.15, rare: 0.25, epic: 0.40, legendary: 0.60 },
+    NPC_NO_BID_CHANCE: 0.20,
+    PLAYER_BID_MIN_MULT: 0.5,
+    PLAYER_BID_MAX_MULT: 2.0,
+    TIE_GOES_TO_NPC: true,
+    CUSTOMER_FIXED_POOL_SIZE: { min: 4, max: 6 },
+    CUSTOMER_PER_ROUND: { min: 1, max: 3 },
+    CUSTOMER_TIMER_SEC: { common: 10, uncommon: 12, rare: 15, epic: 18, legendary: 20 },
+    CUSTOMER_SATISFY_MULT_RANGE: { min: 0.85, max: 0.95 },
+    CUSTOMER_PRICE_ADJUST_TRIES: 2,
+    CUSTOMER_PREFERENCE_REVEAL: { category_at: 3, price_range_at: 7, dislike_at: 15 },
+    FAKE_TRIGGER_DURATION_H: 24,
+    FAKE_SLOT_BONUS: 1,
+    FAKE_RECOVERY_MULT: { min: 0.10, max: 0.20 },
+    CURSED_DROP_RATE_BONUS_SHADOW_30: 0.10,
+    EVENT_BLACK_MARKET_FAKE_CHANCE: 0.25,
+    IDENTIFY_BUTTON_COST: 30,
+    IDENTIFY_AUTO_BY_GOLDEN_TIER: [0, 0, 1, 2, 3],
+    GOLDEN_TIER_FEE_DISCOUNT: [0, 0.10, 0.10, 0.10, 0.10],
+    GOLDEN_TIER_IDENTIFY_DISCOUNT: [0, 0.20, 0, 0, 1.0],
+    VIP_ENTRY_FEE: { min: 200, max: 500 },
+    VIP_RARITY_POOL: { common: 0, uncommon: 5, rare: 60, epic: 30, legendary: 5 },
+    VIP_NPC_BIDDER_BONUS: 1,
+    VIP_FAKE_CHANCE_BONUS: 0.10,
+    VIP_TIME_TOKENS: 3,
+    MARKET_MODIFIER_RANGE: { min: 0.9, max: 1.3 },
+    MARKET_REFRESH_MIN: 60
+  },
+
   // === 시간 ===
   TIME_OFFLINE_MAX_HOURS: 4,
   TIME_OFFLINE_MAX_HOURS_AUTOMATION: 8,
@@ -330,3 +370,8 @@ Lv10 일반 몹 ATK 34 vs 워리어 DEF 36 → DEF mode percent:
 - [ ] NPC 중 2-3명 호감 60+ 도달
 - [ ] 길드회관 약 50% 완성
 - [ ] 명예 포인트 150-300 획득
+- [ ] **경매장 평균 사이클 수익률** ([auction.md §9](auction.md)):
+  - 골든 0단계: -20% ± 30% (도박)
+  - 골든 4단계: ±0% ~ +10% (안정)
+- [ ] 위작 적발률: 골든 4단계 시 100% (스펙대로)
+- [ ] 12시간 누적 경매장 골드 흐름: -5K ~ +5K (싱크 정책 유지)

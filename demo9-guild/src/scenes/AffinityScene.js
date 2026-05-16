@@ -231,27 +231,38 @@ class AffinityScene extends Phaser.Scene {
 
         const otherMercs = this.gameState.roster.filter(m => m.alive && m.id !== this.mercId);
         if (otherMercs.length > 0) {
-            const selectPanel = UIPanel.create(this, 540, panelY, 720, 100, { fillColor: 0x151525, strokeColor: 0x333355 });
-            this.add.text(555, panelY + 8, '다른 용병:', {
+            // 다른 용병 패널 — 1260 안에 fit (2줄 wrap)
+            const panX = 540, panW = 720;
+            const selectPanel = UIPanel.create(this, panX, panelY, panW, 100, { fillColor: 0x151525, strokeColor: 0x333355 });
+            this.add.text(panX + 15, panelY + 8, '다른 용병 (클릭으로 전환):', {
                 fontSize: '11px', fontFamily: 'monospace', color: '#888899'
             });
-            let mx = 555;
-            otherMercs.forEach(m => {
-                if (mx > 1200) return;
+            // chip 동적 크기 — 5개씩 wrap
+            const btnW = 130;
+            const btnH = 26;
+            const chipsPerRow = Math.floor((panW - 30) / (btnW + 8));
+            otherMercs.slice(0, chipsPerRow * 2).forEach((m, i) => {
+                const row = Math.floor(i / chipsPerRow);
+                const col = i % chipsPerRow;
+                const cx = panX + 20 + col * (btnW + 8) + btnW/2;
+                const cy = panelY + 38 + row * (btnH + 6);
                 const b = m.getBaseClass();
                 const r = RARITY_DATA[m.rarity];
                 const aLv = m.affinityLevel?.[zoneKey] || 0;
                 const aPts = m.affinityPoints?.[zoneKey] || 0;
                 const label = `${b.icon}${m.name} Lv.${aLv}${aPts > 0 ? `(${aPts}P)` : ''}`;
-
-                UIButton.create(this, mx + 70, panelY + 50, 140, 28, label, {
+                UIButton.create(this, cx, cy, btnW, btnH, label, {
                     color: 0x222233, hoverColor: 0x334455, textColor: r.textColor, fontSize: 10,
                     onClick: () => {
                         this.scene.restart({ gameState: this.gameState, mercId: m.id, selectedZone: this.selectedZone });
                     }
                 });
-                mx += 155;
             });
+            if (otherMercs.length > chipsPerRow * 2) {
+                this.add.text(panX + panW - 15, panelY + 90, `+${otherMercs.length - chipsPerRow * 2}명 더`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#666677'
+                }).setOrigin(1, 1);
+            }
         }
     }
 }

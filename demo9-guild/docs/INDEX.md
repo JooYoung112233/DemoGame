@@ -25,6 +25,7 @@
 | 8 | 특성 제거/변환 | [systems/traits.md](systems/traits.md) | ✅ 확정 |
 | — | 특성 라인업 (양/음/전설) | [systems/traits-list.md](systems/traits-list.md) | ✅ 확정 |
 | 9 | NPC 상인 | [systems/npc-merchants.md](systems/npc-merchants.md) | ✅ 확정 |
+| — | **경매장 (2단계 + 위작/저주)** | [systems/auction.md](systems/auction.md) | ✅ 확정 (수치 시뮬 대기) |
 | 10 | 마을 이벤트 (NPC 의뢰 중심) | [systems/town-events.md](systems/town-events.md) | ✅ 재설계 (~70개) |
 | 11 | 친화도 트리 vs 구역 통제 | [systems/affinity-tree.md](systems/affinity-tree.md) | ✅ 확정 (M1) |
 | — | 친밀도 / Bond | [systems/bonds.md](systems/bonds.md) | ✅ 확정 (M1) |
@@ -34,7 +35,7 @@
 | — | gameState 스키마 | [systems/game-state.md](systems/game-state.md) | ✅ 확정 |
 | — | **구역 전투: Blood Pit** | [systems/zone-bloodpit.md](systems/zone-bloodpit.md) | ✅ 확정 (v3 다키스트 적용) |
 | — | **수동 전투: 다키스트 스타일** | [systems/manual-battle-darkest.md](systems/manual-battle-darkest.md) | ✅ 확정 |
-| — | **구역 전투: Cargo** | [systems/zone-cargo.md](systems/zone-cargo.md) | ✅ 확정 |
+| — | **구역 전투: Cargo** | [systems/zone-cargo.md](systems/zone-cargo.md) | ✅ 재설계 (나락식+RTS+기차방어) |
 | — | **구역 전투: Blackout** | [systems/zone-blackout.md](systems/zone-blackout.md) | ✅ 확정 |
 | — | 클래스 스킬 (6) | [systems/class-skills.md](systems/class-skills.md) | ✅ 확정 |
 | — | **스킬/액션 아이콘 가이드** | [systems/skill-icons.md](systems/skill-icons.md) | ✅ 제작 레퍼런스 |
