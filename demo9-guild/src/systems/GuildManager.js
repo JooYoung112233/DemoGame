@@ -3,7 +3,7 @@ class GuildManager {
         return {
             guildLevel: 1,
             guildXp: 0,
-            gold: 200,
+            gold: 500,                   // v2: 200 → 500 (초반 모집 부담 완화)
             roster: [],
             storage: [],
             secureContainer: [],
@@ -13,7 +13,10 @@ class GuildManager {
             zoneLevel: { bloodpit: 1, cargo: 0, blackout: 0 },
             trainingPoints: 0,
             training: { hp: 0, atk: 0, survival: 0, recovery: 0 },
-            messages: []
+            messages: [],
+            // v2 신규 필드
+            activeExpeditions: [],       // 진행 중 서브 파견
+            pendingResults: []           // 미수령 파견 결과
         };
     }
 

@@ -11,6 +11,8 @@ class Mercenary {
         this.traits = traits || [];
         this.equipment = { weapon: null, armor: null, accessory: null };
         this.alive = true;
+        this.injured = false;          // 부상 상태 (사망 보호) — HP 0 = 부상, 신전에서 회복
+        this.injuredUntilMs = 0;       // 자동 회복 시각 (실시간 ms)
         this.zoneAffinity = { bloodpit: 0, cargo: 0, blackout: 0 };
         this.affinityLevel = { bloodpit: 0, cargo: 0, blackout: 0 };
         this.affinityXp = { bloodpit: 0, cargo: 0, blackout: 0 };
@@ -113,6 +115,36 @@ class Mercenary {
     fullHeal() {
         this._maxHp = this.getStats().hp;
         this.currentHp = this._maxHp;
+        this.injured = false;
+        this.injuredUntilMs = 0;
+    }
+
+    /**
+     * 부상 처리 — 사망 대신 부상 상태로 (사망 보호).
+     * @param {number} recoveryMs 자동 회복까지 걸리는 실시간 ms (기본 5분).
+     */
+    setInjured(recoveryMs = 5 * 60 * 1000) {
+        this.injured = true;
+        this.currentHp = Math.max(1, Math.floor(this._maxHp * 0.05));
+        this.injuredUntilMs = Date.now() + recoveryMs;
+    }
+
+    /**
+     * 자동 회복 체크 — 시간이 지났으면 회복. RosterScene/TownScene 진입 시 호출.
+     */
+    tickRecovery(now = Date.now()) {
+        if (this.injured && now >= this.injuredUntilMs) {
+            this.injured = false;
+            this.injuredUntilMs = 0;
+            this.currentHp = this._maxHp;
+            return true;
+        }
+        return false;
+    }
+
+    /** 출전 가능 여부 — 부상 중이거나 사망이면 불가 */
+    isDeployable() {
+        return this.alive && !this.injured;
     }
 
     gainAffinityXp(zoneKey, amount) {
@@ -186,6 +218,8 @@ class Mercenary {
             traits: this.traits.map(t => ({ id: t.id, type: t.type })),
             equipment: this.equipment,
             alive: this.alive,
+            injured: this.injured || false,
+            injuredUntilMs: this.injuredUntilMs || 0,
             currentHp: this.currentHp,
             zoneAffinity: this.zoneAffinity,
             affinityLevel: this.affinityLevel,
@@ -214,6 +248,8 @@ class Mercenary {
         merc.xp = data.xp;
         merc.equipment = data.equipment || { weapon: null, armor: null, accessory: null };
         merc.alive = data.alive;
+        merc.injured = data.injured || false;
+        merc.injuredUntilMs = data.injuredUntilMs || 0;
         merc.currentHp = data.currentHp;
         merc.zoneAffinity = data.zoneAffinity || { bloodpit: 0, cargo: 0, blackout: 0 };
         merc.affinityLevel = data.affinityLevel || { bloodpit: 0, cargo: 0, blackout: 0 };

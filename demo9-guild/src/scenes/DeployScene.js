@@ -5,6 +5,7 @@ class DeployScene extends Phaser.Scene {
         this.gameState = data.gameState;
         this.selectedZone = data.selectedZone || null;
         this.deployedIds = data.deployedIds || [];
+        this.deployMode = data.deployMode || 'main';  // 'main' | 'sub'
     }
 
     create() {
@@ -23,6 +24,28 @@ class DeployScene extends Phaser.Scene {
             color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
+
+        // 메인/서브 모드 토글
+        const isMain = this.deployMode === 'main';
+        const activeExp = (gs.activeExpeditions || []).length;
+        const maxSlots = ExpeditionManager.getMaxSlots(gs);
+        UIButton.create(this, 970, 20, 130, 30, '⚔ 메인 도전', {
+            color: isMain ? 0x884422 : 0x333344,
+            hoverColor: 0xaa5533, textColor: isMain ? '#ffcc88' : '#888899', fontSize: 12,
+            onClick: () => { if (!isMain) { this.deployMode = 'main'; this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: 'main' }); } }
+        });
+        UIButton.create(this, 1120, 20, 140, 30, `📦 서브 파견 ${activeExp}/${maxSlots}`, {
+            color: !isMain ? 0x224488 : 0x333344,
+            hoverColor: 0x3355aa, textColor: !isMain ? '#88ccff' : '#888899', fontSize: 12,
+            onClick: () => { if (isMain) { this.deployMode = 'sub'; this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: 'sub' }); } }
+        });
+
+        const modeDesc = isMain
+            ? '메인 도전: 직접 전투. 스킬 발동 가능, 보상 1.5배, 구역 레벨업'
+            : '서브 파견: 시간 경과형 자동. 일반공격만, 깬 레벨까지만 파밍';
+        this.add.text(640, 47, modeDesc, {
+            fontSize: '11px', fontFamily: 'monospace', color: isMain ? '#ffaa66' : '#88aaff'
+        }).setOrigin(0.5);
 
         this.add.text(30, 55, '구역 선택', {
             fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
@@ -170,7 +193,11 @@ class DeployScene extends Phaser.Scene {
 
     _drawRosterPick(x, y) {
         const gs = this.gameState;
-        const available = gs.roster.filter(m => m.alive && !this.deployedIds.includes(m.id));
+        const available = gs.roster.filter(m =>
+            m.isDeployable() &&
+            !this.deployedIds.includes(m.id) &&
+            !ExpeditionManager.isOnExpedition(gs, m.id)
+        );
 
         this.add.text(x, y, '대기 용병 (클릭하여 편성)', {
             fontSize: '12px', fontFamily: 'monospace', color: '#888899'
@@ -221,38 +248,62 @@ class DeployScene extends Phaser.Scene {
 
     _drawDepartButton() {
         const gs = this.gameState;
-        const canDepart = this.selectedZone && this.deployedIds.length > 0;
+        const isMain = this.deployMode === 'main';
+        const activeExp = (gs.activeExpeditions || []).length;
+        const maxSlots = ExpeditionManager.getMaxSlots(gs);
+        const slotsFull = !isMain && activeExp >= maxSlots;
 
-        UIButton.create(this, 640, 690, 200, 40, '출발!', {
-            color: canDepart ? 0x44aa44 : 0x333333,
-            hoverColor: 0x55cc55,
+        const canDepart = this.selectedZone && this.deployedIds.length > 0 && !slotsFull;
+        const btnLabel = isMain ? '출발 (메인 전투)' : `파견 시작 (서브)`;
+
+        UIButton.create(this, 640, 690, 220, 40, btnLabel, {
+            color: canDepart ? (isMain ? 0xaa4422 : 0x4488cc) : 0x333333,
+            hoverColor: isMain ? 0xcc5533 : 0x55aaee,
             textColor: canDepart ? '#ffffff' : '#555555',
             fontSize: 16,
             disabled: !canDepart,
             onClick: () => {
                 const party = this.deployedIds.map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
-                gs.runCount++;
-                SaveManager.save(gs);
-                const sceneMap = {
-                    bloodpit: 'BattleScene',
-                    cargo: 'CargoBattleScene',
-                    blackout: 'BlackoutBattleScene'
-                };
-                const targetScene = sceneMap[this.selectedZone] || 'BattleScene';
-                this.scene.start(targetScene, {
-                    gameState: gs,
-                    zoneKey: this.selectedZone,
-                    party
-                });
+
+                if (isMain) {
+                    // 메인 전투 (기존 흐름)
+                    gs.runCount++;
+                    SaveManager.save(gs);
+                    const sceneMap = {
+                        bloodpit: 'BattleScene',
+                        cargo: 'CargoBattleScene',
+                        blackout: 'BlackoutBattleScene'
+                    };
+                    const targetScene = sceneMap[this.selectedZone] || 'BattleScene';
+                    this.scene.start(targetScene, {
+                        gameState: gs,
+                        zoneKey: this.selectedZone,
+                        party
+                    });
+                } else {
+                    // 서브 파견 (시간 경과형)
+                    const exp = ExpeditionManager.dispatch(gs, this.selectedZone, party);
+                    if (!exp) {
+                        UIToast.show(this, '파견 실패 (슬롯/구역 확인)', { color: '#ff6644' });
+                        return;
+                    }
+                    const mins = Math.ceil(exp.durationMs / 60000);
+                    UIToast.show(this, `${ZONE_DATA[this.selectedZone].name} 파견 시작 (~${mins}분)`, { color: '#88ccff' });
+                    SaveManager.save(gs);
+                    this.scene.start('TownScene', { gameState: gs });
+                }
             }
         });
 
-        if (!this.selectedZone) {
-            this.add.text(640, 660, '구역을 선택하세요', {
-                fontSize: '11px', fontFamily: 'monospace', color: '#666677'
-            }).setOrigin(0.5);
-        } else if (this.deployedIds.length === 0) {
-            this.add.text(640, 660, '용병을 편성하세요', {
+        // 안내 메시지
+        let hint = '';
+        if (!this.selectedZone) hint = '구역을 선택하세요';
+        else if (this.deployedIds.length === 0) hint = '용병을 편성하세요';
+        else if (slotsFull) hint = `파견 슬롯 가득 (${activeExp}/${maxSlots})`;
+        else if (!isMain && gs.zoneLevel[this.selectedZone] === 0) hint = '미클리어 구역엔 서브 파견 불가';
+
+        if (hint) {
+            this.add.text(640, 660, hint, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#666677'
             }).setOrigin(0.5);
         }

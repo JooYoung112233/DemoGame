@@ -6,11 +6,126 @@ class TownScene extends Phaser.Scene {
     }
 
     create() {
+        const gs = this.gameState;
+
+        // 부상 자동 회복 체크 (마을 진입 시)
+        if (gs.roster) {
+            const now = Date.now();
+            gs.roster.forEach(merc => {
+                if (typeof merc.tickRecovery === 'function' && merc.tickRecovery(now)) {
+                    GuildManager.addMessage(gs, `${merc.name} 부상 회복 완료`);
+                }
+            });
+        }
+
+        // 파견 완료 처리 (마을 진입 시)
+        if (typeof ExpeditionManager !== 'undefined') {
+            const newCompleted = ExpeditionManager.processCompleted(gs);
+            if (newCompleted.length > 0) {
+                GuildManager.addMessage(gs, `🎁 파견 ${newCompleted.length}건 완료 — 수령 대기`);
+            }
+        }
+
         this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
         this._drawHeader();
         this._drawRosterPanel();
+        this._drawExpeditionPanel();
         this._drawFacilityGrid();
         this._drawMessageLog();
+
+        // 1초마다 부상/파견 체크
+        this._recoveryTimer = this.time.addEvent({
+            delay: 1000, loop: true,
+            callback: () => {
+                const now = Date.now();
+                let needsRestart = false;
+                this.gameState.roster.forEach(merc => {
+                    if (typeof merc.tickRecovery === 'function' && merc.tickRecovery(now)) {
+                        GuildManager.addMessage(this.gameState, `${merc.name} 부상 회복 완료`);
+                        needsRestart = true;
+                    }
+                });
+                if (typeof ExpeditionManager !== 'undefined') {
+                    const newDone = ExpeditionManager.processCompleted(this.gameState);
+                    if (newDone.length > 0) {
+                        newDone.forEach(r => {
+                            const icon = r.success ? '✅' : '⚠';
+                            GuildManager.addMessage(this.gameState, `${icon} ${r.zoneName} 파견 ${r.success ? '성공' : '실패'} (+${r.goldEarned}G)`);
+                        });
+                        needsRestart = true;
+                    }
+                }
+                if (needsRestart) this.scene.restart();
+            }
+        });
+    }
+
+    _drawExpeditionPanel() {
+        const gs = this.gameState;
+        const active = gs.activeExpeditions || [];
+        const pending = gs.pendingResults || [];
+        if (active.length === 0 && pending.length === 0) return;
+
+        const panelX = 875, panelY = 110, panelW = 390, panelH = 175;
+        const bg = this.add.graphics();
+        bg.fillStyle(0x111125, 1);
+        bg.fillRoundedRect(panelX, panelY, panelW, panelH, 5);
+        bg.lineStyle(1, 0x4488cc, 0.7);
+        bg.strokeRoundedRect(panelX, panelY, panelW, panelH, 5);
+
+        const maxSlots = ExpeditionManager.getMaxSlots(gs);
+        this.add.text(panelX + 10, panelY + 8, `📦 서브 파견 ${active.length}/${maxSlots}`, {
+            fontSize: '13px', fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+        });
+        if (pending.length > 0) {
+            this.add.text(panelX + panelW - 10, panelY + 8, `🎁 수령 대기: ${pending.length}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            }).setOrigin(1, 0);
+        }
+
+        // 활성 파견 목록
+        let cy = panelY + 30;
+        active.slice(0, 3).forEach(exp => {
+            const zone = ZONE_DATA[exp.zoneKey];
+            const progress = ExpeditionManager.getProgress(exp);
+            const remainSec = Math.ceil(ExpeditionManager.getRemainingMs(exp) / 1000);
+            const mins = Math.floor(remainSec / 60);
+            const secs = remainSec % 60;
+            const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+            this.add.text(panelX + 10, cy, `${zone.icon} ${zone.name} Lv.${exp.zoneLevel}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: zone.textColor
+            });
+            this.add.text(panelX + panelW - 10, cy, timeStr, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc'
+            }).setOrigin(1, 0);
+            // 진행 바
+            const barX = panelX + 10, barW = panelW - 20;
+            const barBg = this.add.graphics();
+            barBg.fillStyle(0x222244, 1);
+            barBg.fillRoundedRect(barX, cy + 16, barW, 5, 2);
+            barBg.fillStyle(zone.color, 1);
+            barBg.fillRoundedRect(barX, cy + 16, barW * progress, 5, 2);
+            cy += 27;
+        });
+
+        // 수령 버튼
+        if (pending.length > 0) {
+            UIButton.create(this, panelX + panelW / 2, panelY + panelH - 18, 200, 26, `🎁 ${pending.length}건 모두 수령`, {
+                color: 0xaa8844, hoverColor: 0xccaa55, textColor: '#ffffff', fontSize: 12,
+                onClick: () => {
+                    const ids = pending.map(r => r.id);
+                    let totalGold = 0, totalLoot = 0;
+                    ids.forEach(id => {
+                        const r = ExpeditionManager.collectResult(gs, id);
+                        if (r) { totalGold += r.goldEarned; totalLoot += (r.loot || []).length; }
+                    });
+                    SaveManager.save(gs);
+                    UIToast.show(this, `+${totalGold}G, 장비 ${totalLoot}개`, { color: '#ffcc44' });
+                    this.scene.restart();
+                }
+            });
+        }
     }
 
     _drawHeader() {

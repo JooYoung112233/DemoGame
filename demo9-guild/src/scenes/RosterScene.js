@@ -59,15 +59,26 @@ class RosterScene extends Phaser.Scene {
         bg.lineStyle(1, isSelected ? 0x5588aa : rarity.color, isSelected ? 0.9 : 0.3);
         bg.strokeRoundedRect(x, y, w, 60, 3);
 
-        this.add.text(x + 8, y + 6, `${base.icon} ${merc.name}`, {
-            fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+        const injuredTag = merc.injured ? ' 🩹' : '';
+        this.add.text(x + 8, y + 6, `${base.icon} ${merc.name}${injuredTag}`, {
+            fontSize: '12px', fontFamily: 'monospace',
+            color: merc.injured ? '#aa6644' : rarity.textColor,
+            fontStyle: 'bold'
         });
         this.add.text(x + w - 8, y + 6, `Lv.${merc.level} ${base.name}`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#888899'
         }).setOrigin(1, 0);
 
-        this.add.text(x + 8, y + 25, `HP:${merc.currentHp}/${stats.hp} ATK:${stats.atk} DEF:${stats.def}`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
+        let statsLine = `HP:${merc.currentHp}/${stats.hp} ATK:${stats.atk} DEF:${stats.def}`;
+        if (merc.injured && merc.injuredUntilMs) {
+            const remainSec = Math.max(0, Math.ceil((merc.injuredUntilMs - Date.now()) / 1000));
+            const mins = Math.floor(remainSec / 60);
+            const secs = remainSec % 60;
+            statsLine = `🩹 부상 ${mins}:${secs.toString().padStart(2, '0')} 후 회복`;
+        }
+        this.add.text(x + 8, y + 25, statsLine, {
+            fontSize: '10px', fontFamily: 'monospace',
+            color: merc.injured ? '#cc7755' : '#8888aa'
         });
 
         const hpRatio = merc.currentHp / stats.hp;

@@ -166,12 +166,11 @@ class RunResultScene extends Phaser.Scene {
         });
 
         r.casualties.forEach(merc => {
-            merc.alive = false;
-            for (const slot of ['weapon', 'armor', 'accessory']) {
-                merc.equipment[slot] = null;
-            }
-            gs.roster = gs.roster.filter(m => m.id !== merc.id);
-            GuildManager.addMessage(gs, `${merc.name} 영구 사망`);
+            // 사망 보호 (부상 시스템): 영구 사망이 아닌 부상 상태로
+            // alive=true 유지, injured=true, 5분 후 자동 회복
+            merc.setInjured(5 * 60 * 1000);
+            // 장비는 그대로 유지 (영구 사망이 아니므로)
+            GuildManager.addMessage(gs, `${merc.name} 부상 — 5분 후 회복 (신전에서 즉시 치료 가능)`);
         });
 
         this._consignResults = AuctionScene.processConsignments(gs);

@@ -2003,7 +2003,8 @@ class BlackoutBattleScene extends Phaser.Scene {
                 if (!this.casualties.find(c => c.id === merc.id)) {
                     this.casualties.push(merc);
                 }
-                merc.alive = false;
+                // 사망 보호: 부상 상태로
+                merc.setInjured(5 * 60 * 1000);
             }
         });
     }
