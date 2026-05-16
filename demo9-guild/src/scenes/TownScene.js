@@ -8,6 +8,13 @@ class TownScene extends Phaser.Scene {
     create() {
         const gs = this.gameState;
 
+        // === 세이브 마이그레이션 (기존 세이브 호환) ===
+        if (!gs.unlockedFacilities) gs.unlockedFacilities = [];
+        if (!gs.unlockedFacilities.includes('equipment')) {
+            gs.unlockedFacilities.push('equipment');
+            if (typeof SaveManager !== 'undefined') SaveManager.save(gs);
+        }
+
         // 파견 완료 처리 (마을 진입 시)
         if (typeof ExpeditionManager !== 'undefined') {
             const newCompleted = ExpeditionManager.processCompleted(gs);

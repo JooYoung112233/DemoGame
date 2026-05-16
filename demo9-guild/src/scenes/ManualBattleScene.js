@@ -43,14 +43,16 @@ class ManualBattleScene extends Phaser.Scene {
     }
 
     _spawnEnemies() {
-        // BP 적 4마리 생성 — 다양한 종류 섞기
+        // BP 적 4마리 — types 순서대로 position 1,2,3,4 (전열→후열)
+        // melee를 앞(전열), ranged를 뒤(후열)로 배치
         const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
         let types;
-        if (zoneLevel <= 1)      types = ['runner', 'runner', 'spitter', 'bruiser'];
+        // [전열 melee, 전열 melee, 후열 ranged, 후열 ranged] 순서
+        if (zoneLevel <= 1)      types = ['runner', 'bruiser', 'spitter', 'runner'];
         else if (zoneLevel <= 3) types = ['runner', 'bruiser', 'spitter', 'summoner'];
-        else if (zoneLevel <= 6) types = ['bruiser', 'spitter', 'summoner', 'elite_runner'];
+        else if (zoneLevel <= 6) types = ['bruiser', 'elite_runner', 'spitter', 'summoner'];
         else if (zoneLevel < 10) types = ['elite_runner', 'elite_bruiser', 'spitter', 'summoner'];
-        else                     types = ['pitlord', 'elite_bruiser', 'elite_runner', 'summoner'];
+        else                     types = ['pitlord', 'elite_bruiser', 'summoner', 'summoner'];
 
         return types.map((type, i) => {
             const data = ENEMY_DATA[type];

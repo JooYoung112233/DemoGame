@@ -12,10 +12,14 @@
 class DarkestCombat {
     /**
      * 전투 상태 생성.
+     * party 배열 순서:
+     *  - allies[0] = 가장 후열 (DeployScene 좌측), allies[N-1] = 가장 전열 (DeployScene 우측)
+     *  - 즉 allies[i] → position (length - i)
+     * enemies는 적 배열 순서대로 position 1, 2, 3, 4 (전열→후열)
      */
     static createCombat(allies, enemies) {
         return {
-            allies: allies.map((a, i) => DarkestCombat._makeUnit(a, i + 1, 'ally')),
+            allies: allies.map((a, i) => DarkestCombat._makeUnit(a, allies.length - i, 'ally')),
             enemies: enemies.map((e, i) => DarkestCombat._makeUnit(e, i + 1, 'enemy')),
             round: 1,
             turnQueue: [],   // 라운드 시작 시 생성
