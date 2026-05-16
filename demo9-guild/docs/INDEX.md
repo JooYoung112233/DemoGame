@@ -37,6 +37,7 @@
 | — | **구역 전투: Cargo** | [systems/zone-cargo.md](systems/zone-cargo.md) | ✅ 확정 |
 | — | **구역 전투: Blackout** | [systems/zone-blackout.md](systems/zone-blackout.md) | ✅ 확정 |
 | — | 클래스 스킬 (6) | [systems/class-skills.md](systems/class-skills.md) | ✅ 확정 |
+| — | **스킬/액션 아이콘 가이드** | [systems/skill-icons.md](systems/skill-icons.md) | ✅ 제작 레퍼런스 |
 | — | 제작/강화/분해 | [systems/crafting.md](systems/crafting.md) | ✅ 확정 |
 | — | 시간 시스템 (하이브리드) | [systems/time-system.md](systems/time-system.md) | ✅ 확정 |
 | — | 구역 보스 (3보스 × 3페이즈) | [systems/bosses.md](systems/bosses.md) | ✅ 확정 |
