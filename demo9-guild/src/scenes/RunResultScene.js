@@ -140,7 +140,13 @@ class RunResultScene extends Phaser.Scene {
             color: 0xffaa44, hoverColor: 0xffcc66, textColor: '#000000', fontSize: 16,
             onClick: () => {
                 SaveManager.save(gs);
-                this.scene.start('EventScene', { gameState: gs });
+                // 후퇴 시 마을 이벤트 차단 — TownScene 직행
+                if (this.result.retreated || gs._suppressNextTownEvent) {
+                    gs._suppressNextTownEvent = false;
+                    this.scene.start('TownScene', { gameState: gs });
+                } else {
+                    this.scene.start('EventScene', { gameState: gs });
+                }
             }
         });
     }

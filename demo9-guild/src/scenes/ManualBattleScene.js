@@ -83,7 +83,7 @@ class ManualBattleScene extends Phaser.Scene {
         }).setOrigin(0.5);
         UIButton.create(this, 80, 20, 100, 28, '← 후퇴', {
             color: 0x554444, hoverColor: 0x665555, textColor: '#ffaaaa', fontSize: 11,
-            onClick: () => this._endBattle(false)
+            onClick: () => { this._retreated = true; this._endBattle(false); }
         });
     }
 
@@ -120,52 +120,66 @@ class ManualBattleScene extends Phaser.Scene {
 
     _drawUnit(unit, x, y, team) {
         const isAlly = team === 'ally';
-        const gfx = {};
+        const container = this.add.container(x, y);
 
-        // 캐릭터 원형 (간단한 표현)
-        gfx.body = this.add.graphics();
+        // 캐릭터 원형
         const bodyColor = isAlly ? this._getClassColor(unit.classKey) : (ENEMY_DATA[unit.classKey] ? ENEMY_DATA[unit.classKey].color : 0xcc4444);
-        gfx.body.fillStyle(bodyColor, 1);
-        gfx.body.fillCircle(x, y, 38);
-        gfx.body.lineStyle(2, 0xffffff, 0.7);
-        gfx.body.strokeCircle(x, y, 38);
+        const body = this.add.graphics();
+        body.fillStyle(bodyColor, 1);
+        body.fillCircle(0, 0, 38);
+        body.lineStyle(2, 0xffffff, 0.7);
+        body.strokeCircle(0, 0, 38);
+        container.add(body);
 
-        // 클래스/적 아이콘
+        // 캐릭터 아이콘
         const icon = isAlly ? (CLASS_DATA[unit.classKey]?.icon || '?') : '👹';
-        gfx.icon = this.add.text(x, y - 5, icon, { fontSize: '28px' }).setOrigin(0.5);
+        const iconText = this.add.text(0, -5, icon, { fontSize: '32px' }).setOrigin(0.5);
+        container.add(iconText);
 
         // 포지션 번호
-        gfx.posNum = this.add.text(x, y - 60, `[${unit.position}]`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#88aaff', fontStyle: 'bold'
+        const posNum = this.add.text(0, -60, `[${unit.position}]`, {
+            fontSize: '13px', fontFamily: 'monospace', color: '#88aaff', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
+        container.add(posNum);
 
         // 이름
-        gfx.name = this.add.text(x, y + 50, unit.name, {
+        const nameText = this.add.text(0, 50, unit.name, {
             fontSize: '11px', fontFamily: 'monospace', color: '#ccccdd'
         }).setOrigin(0.5);
+        container.add(nameText);
 
         // HP바
-        gfx.hpBg = this.add.rectangle(x, y + 70, 90, 8, 0x331111);
-        gfx.hpFill = this.add.rectangle(x - 45, y + 70, 90 * (unit.hp / unit.maxHp), 8, 0x44ff44).setOrigin(0, 0.5);
-        gfx.hpText = this.add.text(x, y + 70, `${unit.hp}/${unit.maxHp}`, {
-            fontSize: '9px', fontFamily: 'monospace', color: '#ffffff', stroke: '#000', strokeThickness: 1
+        const hpBg = this.add.rectangle(0, 70, 90, 8, 0x331111);
+        const hpFill = this.add.rectangle(-45, 70, 90 * (unit.hp / unit.maxHp), 8, 0x44ff44).setOrigin(0, 0.5);
+        const hpText = this.add.text(0, 70, `${unit.hp}/${unit.maxHp}`, {
+            fontSize: '9px', fontFamily: 'monospace', color: '#ffffff', stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
+        container.add(hpBg);
+        container.add(hpFill);
+        container.add(hpText);
 
-        // 상태 효과 아이콘
-        gfx.statusText = this.add.text(x, y + 88, '', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#ffaa88'
+        // 상태 효과
+        const statusText = this.add.text(0, 88, '', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ffaa88'
         }).setOrigin(0.5);
+        container.add(statusText);
 
-        // 인터랙티브 (타겟 선택용)
-        gfx.hitZone = this.add.zone(x, y + 5, 90, 110).setInteractive({ useHandCursor: true });
-        gfx.hitZone.on('pointerdown', () => this._onUnitClicked(unit));
-        gfx.hitZone.on('pointerover', () => this._onUnitHover(unit, true));
-        gfx.hitZone.on('pointerout', () => this._onUnitHover(unit, false));
+        // 턴 강조 링 (컨테이너 외부 — 컨테이너와 함께 이동시킴)
+        const turnRing = this.add.graphics();
 
-        // 현재 턴 강조
-        gfx.turnRing = this.add.graphics();
+        // 인터랙티브
+        const hitZone = this.add.zone(0, 5, 90, 110).setInteractive({ useHandCursor: true });
+        hitZone.on('pointerdown', () => this._onUnitClicked(unit));
+        hitZone.on('pointerover', () => this._onUnitHover(unit, true));
+        hitZone.on('pointerout', () => this._onUnitHover(unit, false));
+        container.add(hitZone);
 
-        this.unitGfx[unit.id] = { ...gfx, baseX: x, baseY: y };
+        this.unitGfx[unit.id] = {
+            container, body, iconText, posNum, nameText, hpBg, hpFill, hpText, statusText, turnRing, hitZone,
+            bodyColor,
+            baseX: x, baseY: y
+        };
     }
 
     _getClassColor(classKey) {
@@ -266,7 +280,7 @@ class ManualBattleScene extends Phaser.Scene {
     _showEnemyActionLabel(enemy, actionName, icon) {
         const g = this.unitGfx[enemy.id];
         if (!g) return;
-        const label = this.add.text(g.baseX, g.baseY - 90, `${icon || '⚔'} ${actionName}`, {
+        const label = this.add.text(g.container.x, g.container.y - 90, `${icon || '⚔'} ${actionName}`, {
             fontSize: '13px', fontFamily: 'monospace', color: '#ff8866', fontStyle: 'bold',
             stroke: '#000000', strokeThickness: 3
         }).setOrigin(0.5).setDepth(50);
@@ -277,13 +291,16 @@ class ManualBattleScene extends Phaser.Scene {
     }
 
     _highlightCurrentUnit(unit) {
-        // 모든 ring 제거 후 현재만
         Object.values(this.unitGfx).forEach(g => g.turnRing && g.turnRing.clear());
         const g = this.unitGfx[unit.id];
         if (!g) return;
         g.turnRing.clear();
         g.turnRing.lineStyle(3, 0xffcc44, 1);
-        g.turnRing.strokeCircle(g.baseX, g.baseY, 44);
+        g.turnRing.strokeCircle(g.container.x, g.container.y, 44);
+        // 컨테이너 살짝 펄스
+        this.tweens.add({
+            targets: g.container, scale: 1.1, duration: 200, yoyo: true
+        });
     }
 
     _showAllyActionPanel(unit) {
@@ -372,7 +389,7 @@ class ManualBattleScene extends Phaser.Scene {
         // 시각 효과
         const g = this.unitGfx[unit.id];
         if (g) {
-            const label = this.add.text(g.baseX, g.baseY - 70, '⏭ 방어 자세', {
+            const label = this.add.text(g.container.x, g.container.y - 70, '⏭ 방어 자세', {
                 fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold',
                 stroke: '#000', strokeThickness: 3
             }).setOrigin(0.5).setDepth(50);
@@ -413,7 +430,7 @@ class ManualBattleScene extends Phaser.Scene {
                 const g = this.unitGfx[u.id];
                 if (g) {
                     g.turnRing.lineStyle(3, action.targetType.startsWith('enemy') ? 0xff4444 : 0x44ff44, 0.7);
-                    g.turnRing.strokeCircle(g.baseX, g.baseY, 50);
+                    g.turnRing.strokeCircle(g.container.x, g.container.y, 50);
                 }
             }
         });
@@ -452,7 +469,7 @@ class ManualBattleScene extends Phaser.Scene {
 
         const g = this.unitGfx[unit.id];
         if (!g) return;
-        const px = g.baseX, py = g.baseY - 130;
+        const px = g.container.x, py = g.container.y - 130;
         const w = 200, h = 90;
 
         const objs = [];
@@ -631,66 +648,195 @@ class ManualBattleScene extends Phaser.Scene {
         const targetId = result.target;
         const g = this.unitGfx[targetId];
         if (!g) return;
+        const tx = g.container.x, ty = g.container.y;
+
+        // 공격 라인 (캐스터 → 타겟)
+        if (caster && this.unitGfx[caster.id] && result.damage !== undefined) {
+            this._showAttackLine(this.unitGfx[caster.id], g);
+        }
+
+        // 데미지
         if (result.damage !== undefined) {
-            DamagePopup.show(this, g.baseX, g.baseY - 30, result.damage, result.isCrit ? 0xff8844 : 0xff4444, result.isCrit);
-            this.cameras.main.shake(150, 0.003);
+            this._showBigDamage(tx, ty - 30, result.damage, result.isCrit);
+            // 타겟 흔들기
+            this.tweens.add({
+                targets: g.container,
+                x: tx + 8, duration: 50, yoyo: true, repeat: 2,
+                onComplete: () => g.container.x = tx
+            });
+            this.cameras.main.shake(result.isCrit ? 250 : 120, result.isCrit ? 0.006 : 0.003);
         }
         if (result.heal !== undefined) {
-            DamagePopup.show(this, g.baseX, g.baseY - 30, `+${result.heal}`, 0x44ff88, false);
+            this._showHealPopup(tx, ty - 30, result.heal);
         }
         if (result.status) {
-            // 상태 효과 적용 popup
-            const statusNames = { bleed: '출혈', burn: '화상', slow: '둔화' };
-            this.add.text(g.baseX, g.baseY - 50, statusNames[result.status] || result.status, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#ff88aa', fontStyle: 'bold'
+            const statusNames = { bleed: '🩸 출혈', burn: '🔥 화상', slow: '🐌 둔화' };
+            const label = this.add.text(tx, ty - 60, statusNames[result.status] || result.status, {
+                fontSize: '13px', fontFamily: 'monospace', color: '#ff88aa', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 3
             }).setOrigin(0.5).setDepth(50);
+            this.tweens.add({ targets: label, y: ty - 80, alpha: 0, duration: 1000, onComplete: () => label.destroy() });
         }
     }
 
+    _showBigDamage(x, y, damage, isCrit) {
+        const size = isCrit ? '36px' : '24px';
+        const color = isCrit ? '#ffcc44' : '#ff4444';
+        const text = isCrit ? `${damage}!!` : `${damage}`;
+        const dmg = this.add.text(x, y, text, {
+            fontSize: size, fontFamily: 'Arial Black, sans-serif', color, fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: isCrit ? 5 : 3
+        }).setOrigin(0.5).setDepth(60);
+
+        if (isCrit) {
+            // 크리티컬: 큰 폰트 + 펄스
+            dmg.setScale(0.5);
+            this.tweens.add({
+                targets: dmg, scale: 1.4, duration: 200, ease: 'Back.easeOut'
+            });
+            this.tweens.add({
+                targets: dmg, y: y - 60, alpha: 0,
+                duration: 1200, delay: 300,
+                onComplete: () => dmg.destroy()
+            });
+            // CRIT! 텍스트
+            const critLabel = this.add.text(x, y - 35, 'CRIT!', {
+                fontSize: '16px', fontFamily: 'Arial Black, sans-serif', color: '#ffaa00', fontStyle: 'bold',
+                stroke: '#000', strokeThickness: 4
+            }).setOrigin(0.5).setDepth(61);
+            this.tweens.add({ targets: critLabel, y: y - 75, alpha: 0, duration: 1500, onComplete: () => critLabel.destroy() });
+        } else {
+            this.tweens.add({
+                targets: dmg, y: y - 40, alpha: 0,
+                duration: 900,
+                onComplete: () => dmg.destroy()
+            });
+        }
+    }
+
+    _showHealPopup(x, y, heal) {
+        const txt = this.add.text(x, y, `+${heal}`, {
+            fontSize: '24px', fontFamily: 'Arial Black, sans-serif', color: '#44ff88', fontStyle: 'bold',
+            stroke: '#003300', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(60);
+        this.tweens.add({
+            targets: txt, y: y - 40, alpha: 0,
+            duration: 900,
+            onComplete: () => txt.destroy()
+        });
+    }
+
+    _showAttackLine(casterGfx, targetGfx) {
+        const startX = casterGfx.container.x, startY = casterGfx.container.y;
+        const endX = targetGfx.container.x, endY = targetGfx.container.y;
+        // 프로젝타일 (작은 원)
+        const proj = this.add.circle(startX, startY, 6, 0xffcc44).setDepth(55);
+        this.tweens.add({
+            targets: proj,
+            x: endX, y: endY,
+            duration: 200, ease: 'Cubic.easeOut',
+            onComplete: () => {
+                // 임팩트 플래시
+                const flash = this.add.circle(endX, endY, 30, 0xffffff, 0.7).setDepth(54);
+                this.tweens.add({
+                    targets: flash, scale: 2, alpha: 0, duration: 200,
+                    onComplete: () => flash.destroy()
+                });
+                proj.destroy();
+            }
+        });
+    }
+
     _refreshAllUnits() {
+        const slotW = 110;
         [...this.combat.allies, ...this.combat.enemies].forEach(u => {
             const g = this.unitGfx[u.id];
             if (!g) return;
-            // 위치 업데이트
+
+            // 사망 유닛은 컨테이너 숨김
+            if (!u.alive) {
+                if (g.container.visible) {
+                    // 사망 이펙트
+                    const deathX = g.container.x, deathY = g.container.y;
+                    this._createDeathFx(deathX, deathY);
+                    this.tweens.add({
+                        targets: g.container,
+                        alpha: 0, scale: 0.5, duration: 400,
+                        onComplete: () => g.container.setVisible(false)
+                    });
+                    g.turnRing.clear();
+                }
+                return;
+            }
+
+            // 살아있는 유닛 — 새 위치 계산
             let newX;
             if (u.team === 'ally') {
-                newX = 200 + (4 - u.position) * 110;
+                newX = 200 + (4 - u.position) * slotW;
             } else {
-                newX = 720 + (u.position - 1) * 110;
+                newX = 720 + (u.position - 1) * slotW;
             }
-            if (g.baseX !== newX) {
-                g.baseX = newX;
+
+            // 위치 이동 (컨테이너 트윈)
+            if (Math.abs(g.container.x - newX) > 1) {
                 this.tweens.add({
-                    targets: [g.body, g.icon, g.name, g.hpBg, g.hpFill, g.hpText, g.posNum, g.statusText, g.hitZone, g.turnRing],
-                    x: function(target) {
-                        const dx = newX - g.baseX;
-                        return target.x + dx;
-                    },
-                    duration: 300
+                    targets: g.container,
+                    x: newX,
+                    duration: 350, ease: 'Cubic.easeInOut'
                 });
+                g.baseX = newX;
             }
 
             // HP 갱신
             g.hpFill.width = 90 * Math.max(0, u.hp / u.maxHp);
+            const hpColor = (u.hp / u.maxHp) > 0.6 ? 0x44ff44 : (u.hp / u.maxHp) > 0.3 ? 0xffaa44 : 0xff4444;
+            g.hpFill.fillColor = hpColor;
             g.hpText.setText(`${Math.max(0, u.hp)}/${u.maxHp}`);
             g.posNum.setText(`[${u.position}]`);
 
-            // 상태 효과
+            // 상태 효과 아이콘
             const statusIcons = u.statusEffects.map(e => {
                 const map = { bleed: '🩸', burn: '🔥', slow: '🐌', taunt_active: '⚠', buff_atk: '⬆', buff_def: '🛡' };
                 return map[e.type] || '·';
             }).join('');
             g.statusText.setText(statusIcons);
+        });
 
-            // 사망 처리
-            if (!u.alive) {
-                g.body.clear();
-                g.body.fillStyle(0x333333, 0.5);
-                g.body.fillCircle(g.baseX, g.baseY, 38);
-                g.icon.setText('💀');
-                g.icon.setAlpha(0.4);
-                g.name.setAlpha(0.4);
+        // 턴 링도 현재 턴 유닛 위치로
+        const current = DarkestCombat.getCurrentTurnUnit(this.combat);
+        if (current) {
+            const cg = this.unitGfx[current.id];
+            if (cg) {
+                cg.turnRing.clear();
+                cg.turnRing.lineStyle(3, 0xffcc44, 1);
+                cg.turnRing.strokeCircle(cg.container.x, cg.container.y, 44);
             }
+        }
+    }
+
+    _createDeathFx(x, y) {
+        // 폭발 파편
+        const colors = [0xff4444, 0xff8844, 0xffcc44];
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            const dist = 30 + Math.random() * 20;
+            const p = this.add.circle(x, y, 4, colors[i % colors.length]).setDepth(40);
+            this.tweens.add({
+                targets: p,
+                x: x + Math.cos(angle) * dist,
+                y: y + Math.sin(angle) * dist,
+                alpha: 0, scale: 0.2,
+                duration: 600,
+                onComplete: () => p.destroy()
+            });
+        }
+        // 💀 텍스트
+        const skull = this.add.text(x, y, '💀', { fontSize: '32px' }).setOrigin(0.5).setDepth(41);
+        this.tweens.add({
+            targets: skull,
+            y: y - 30, alpha: 0,
+            duration: 800,
+            onComplete: () => skull.destroy()
         });
     }
 
@@ -740,9 +886,12 @@ class ManualBattleScene extends Phaser.Scene {
             xpEarned: this.totalXp,
             casualties, survivors: survivors.map(u => u.ref),
             loot: this.loot,
-            events: [success ? '전투 승리!' : '전투 실패...'],
-            zoneLevelUp: success && (this.currentRound > this.maxRounds)
+            events: [success ? '전투 승리!' : (this._retreated ? '후퇴' : '전투 실패...')],
+            zoneLevelUp: success && (this.currentRound > this.maxRounds),
+            retreated: !!this._retreated     // 후퇴 시 마을 이벤트 발동 차단
         };
+        // 마을 진입 시 이벤트 차단 플래그
+        if (this._retreated) gs._suppressNextTownEvent = true;
 
         this.scene.start('RunResultScene', { gameState: gs, result });
     }

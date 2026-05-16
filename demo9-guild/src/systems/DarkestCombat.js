@@ -282,14 +282,27 @@ class DarkestCombat {
     }
 
     static _shiftUnit(combat, unit, amount) {
-        const newPos = Math.max(1, Math.min(4, unit.position + amount));
+        const team = unit.team === 'ally' ? combat.allies : combat.enemies;
+        const aliveTeam = team.filter(u => u.alive);
+        const minPos = 1, maxPos = aliveTeam.length;  // 살아있는 팀의 실제 범위
+        const newPos = Math.max(minPos, Math.min(maxPos, unit.position + amount));
         if (newPos === unit.position) return;
 
-        // 같은 팀 내 위치 스왑
-        const team = unit.team === 'ally' ? combat.allies : combat.enemies;
-        const other = team.find(u => u.position === newPos && u.alive);
-        if (other) {
-            other.position = unit.position;
+        // 사이의 모든 살아있는 유닛도 1칸씩 시프트
+        if (newPos > unit.position) {
+            // 뒤로 이동 — 그 사이 유닛들이 1칸씩 앞으로
+            for (const u of aliveTeam) {
+                if (u.position > unit.position && u.position <= newPos && u !== unit) {
+                    u.position--;
+                }
+            }
+        } else {
+            // 앞으로 이동 — 그 사이 유닛들이 1칸씩 뒤로
+            for (const u of aliveTeam) {
+                if (u.position >= newPos && u.position < unit.position && u !== unit) {
+                    u.position++;
+                }
+            }
         }
         unit.position = newPos;
     }
