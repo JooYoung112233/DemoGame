@@ -44,7 +44,9 @@ class ManualBattleScene extends Phaser.Scene {
         this.combat = DarkestCombat.createCombat(this.party, enemies);
 
         this.currentRound = 1;
-        this.maxRounds = 3;
+        // 다키스트 스타일 — 라운드 제한은 안전장치 (전멸로 끝나는 게 정상)
+        // 너무 길어지면 자동 후퇴 처리
+        this.maxRounds = 20;
         this.selectedAction = null;
         this.battleEnded = false;
         this.totalGold = 0;
@@ -134,7 +136,7 @@ class ManualBattleScene extends Phaser.Scene {
         hdrBg.fillStyle(0x000000, 0.5);
         hdrBg.fillRect(0, 0, 1280, 44);
 
-        this.headerText = this.add.text(640, 20, `Round ${this.currentRound}/${this.maxRounds}  |  Blood Pit Lv.${gs.zoneLevel[this.zoneKey]}`, {
+        this.headerText = this.add.text(640, 20, `Round ${this.currentRound}  |  Blood Pit Lv.${gs.zoneLevel[this.zoneKey]}`, {
             fontSize: '16px', fontFamily: 'monospace', color: '#ffcc66', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
@@ -1262,15 +1264,18 @@ class ManualBattleScene extends Phaser.Scene {
     }
 
     _endRound() {
-        // 다음 라운드 또는 끝
+        // 다음 라운드 또는 안전장치 발동
         this.currentRound++;
         if (this.currentRound > this.maxRounds) {
-            this._endBattle(true);
+            // 너무 오래 끌면 자동 후퇴 (성공 아님)
+            this._retreated = true;
+            UIToast.show(this, `${this.maxRounds}라운드 초과 — 자동 후퇴`, { color: '#ff8866' });
+            this._endBattle(false);
             return;
         }
-        this.headerText.setText(`Round ${this.currentRound}/${this.maxRounds}  |  Blood Pit Lv.${this.gameState.zoneLevel[this.zoneKey]}`);
+        this.headerText.setText(`Round ${this.currentRound}  |  Blood Pit Lv.${this.gameState.zoneLevel[this.zoneKey]}`);
 
-        // 다음 웨이브 등장 (간소화: 현재 적 그대로 + 추가)
+        // 다음 라운드 — 턴 큐 재생성
         DarkestCombat.startRound(this.combat);
         this._processNextTurn();
     }
@@ -1302,14 +1307,14 @@ class ManualBattleScene extends Phaser.Scene {
 
         const result = {
             success, zoneKey: this.zoneKey,
-            rounds: this.currentRound - (success ? 1 : 0),
+            rounds: this.currentRound,
             goldEarned: this.totalGold,
             xpEarned: this.totalXp,
             casualties, survivors: survivors.map(u => u.ref),
             loot: this.loot,
             events: [success ? '전투 승리!' : (this._retreated ? '후퇴' : '전투 실패...')],
-            zoneLevelUp: success && (this.currentRound > this.maxRounds),
-            retreated: !!this._retreated     // 후퇴 시 마을 이벤트 발동 차단
+            zoneLevelUp: success,  // 적 전멸 = 레벨 업
+            retreated: !!this._retreated
         };
         // 마을 진입 시 이벤트 차단 플래그
         if (this._retreated) gs._suppressNextTownEvent = true;
