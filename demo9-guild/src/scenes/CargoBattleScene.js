@@ -571,24 +571,26 @@ class CargoBattleScene extends Phaser.Scene {
                     if (this.onUnitDeath) this.onUnitDeath(nearestAlly, unit);
                 }
             }
-        } else if (unit.container.y > wallY + 30) {
+        } else {
             // 가장 가까운 살아있는 칸을 향해 이동
             const targetCar = this._getNearestAliveCar(unit.container.x);
-            if (!targetCar) {
-                // 모든 칸 파괴됨 — 대기
-                return;
-            }
-            const speed = unit.moveSpeed * (dt / 1000);
-            unit.container.y -= speed;
-            // X축: 타겟 칸의 중심으로 수렴
+            if (!targetCar) return; // 모든 칸 파괴
+
             const carCenterX = targetCar.x + targetCar.w / 2;
-            const xDiff = carCenterX - unit.container.x;
-            if (Math.abs(xDiff) > 10) {
-                unit.container.x += Math.sign(xDiff) * speed * 0.4;
+            const carBottomY = wallY; // 칸 하단면 (적이 도달해야 하는 Y)
+            const dx = carCenterX - unit.container.x;
+            const dy = carBottomY - unit.container.y;
+            const distToCar = Math.sqrt(dx * dx + dy * dy);
+
+            // 칸에 충분히 가까워야 공격 (40px 이내)
+            if (distToCar <= 40) {
+                this._enemyAttackWall(unit, dt);
+            } else {
+                // 칸을 향해 이동 (X, Y 모두)
+                const speed = unit.moveSpeed * (dt / 1000);
+                unit.container.x += (dx / distToCar) * speed;
+                unit.container.y += (dy / distToCar) * speed;
             }
-        } else {
-            // 벽에 도달 → 가장 가까운 칸 공격
-            this._enemyAttackWall(unit, dt);
         }
 
         // 체력바 위치
