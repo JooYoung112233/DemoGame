@@ -110,22 +110,30 @@ class RosterScene extends Phaser.Scene {
         const stats = merc.getStats();
         const isHurt = merc.currentHp < stats.hp;
 
+        // === 카드를 컨테이너에 묶어서 처리 (UIButton 패턴) ===
+        const container = this.add.container(0, 0);
+
         const bg = this.add.graphics();
-        bg.fillStyle(0x151525, 1);
-        bg.fillRoundedRect(x, y, w, h, 5);
-        bg.lineStyle(2, rarity.color, 0.7);
-        bg.strokeRoundedRect(x, y, w, h, 5);
+        const drawBg = (fill, stroke) => {
+            bg.clear();
+            bg.fillStyle(fill, 1);
+            bg.fillRoundedRect(x, y, w, h, 5);
+            bg.lineStyle(2, stroke, 0.8);
+            bg.strokeRoundedRect(x, y, w, h, 5);
+        };
+        drawBg(0x151525, rarity.color);
+        container.add(bg);
 
         // 헤더
-        this.add.text(x + 10, y + 8, `${base.icon} ${merc.name}`, {
+        container.add(this.add.text(x + 10, y + 8, `${base.icon} ${merc.name}`, {
             fontSize: '13px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
-        });
-        this.add.text(x + w - 10, y + 8, `Lv.${merc.level}`, {
+        }));
+        container.add(this.add.text(x + w - 10, y + 8, `Lv.${merc.level}`, {
             fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
-        }).setOrigin(1, 0);
-        this.add.text(x + 10, y + 26, `${base.name} [${rarity.name}]`, {
+        }).setOrigin(1, 0));
+        container.add(this.add.text(x + 10, y + 26, `${base.name} [${rarity.name}]`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#778899'
-        });
+        }));
 
         // HP바
         const hpRatio = merc.currentHp / stats.hp;
@@ -135,61 +143,57 @@ class RosterScene extends Phaser.Scene {
         const hpColor = hpRatio > 0.6 ? 0x44ff88 : hpRatio > 0.3 ? 0xffaa44 : 0xff4444;
         hpBar.fillStyle(hpColor, 1);
         hpBar.fillRect(x + 10, y + 46, (w - 20) * hpRatio, 6);
-        this.add.text(x + w / 2, y + 49, `HP ${merc.currentHp}/${stats.hp}`, {
+        container.add(hpBar);
+        container.add(this.add.text(x + w / 2, y + 49, `HP ${merc.currentHp}/${stats.hp}`, {
             fontSize: '9px', fontFamily: 'monospace', color: '#ffffff', stroke: '#000', strokeThickness: 1
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
         // 스탯 한줄
-        this.add.text(x + 10, y + 60, `ATK ${stats.atk}  DEF ${stats.def}  SPD ${stats.moveSpeed}`, {
+        container.add(this.add.text(x + 10, y + 60, `ATK ${stats.atk}  DEF ${stats.def}  SPD ${stats.moveSpeed}`, {
             fontSize: '10px', fontFamily: 'monospace', color: '#aaaacc'
-        });
+        }));
 
         // 장착 표시
         const equipCount = ['weapon','armor','accessory'].filter(s => merc.equipment[s]).length;
-        this.add.text(x + 10, y + 78, `🎽 ${equipCount}/3`, {
+        container.add(this.add.text(x + 10, y + 78, `🎽 ${equipCount}/3`, {
             fontSize: '11px', fontFamily: 'monospace', color: equipCount === 3 ? '#88ffcc' : '#aaaaaa'
-        });
+        }));
 
         // 특성 (1-2개만)
         const traitsStr = merc.traits.slice(0, 2).map(t => {
             const sym = t.type === 'positive' ? '✦' : t.type === 'legendary' ? '★' : '✧';
-            const color = t.type === 'positive' ? '✦' : t.type === 'negative' ? '✧' : '★';
             return sym + t.name;
         }).join(' ');
         if (traitsStr) {
-            this.add.text(x + 10, y + 96, traitsStr, {
+            container.add(this.add.text(x + 10, y + 96, traitsStr, {
                 fontSize: '9px', fontFamily: 'monospace', color: '#888899',
                 wordWrap: { width: w - 20 }
-            });
+            }));
         }
 
-        // 클릭 영역 — rectangle (zone보다 안정적)
-        const hit = this.add.rectangle(x + w/2, y + h/2, w, h, 0xffffff, 0.001)
-            .setInteractive({ useHandCursor: true })
-            .setDepth(10);
-        hit.on('pointerdown', () => {
-            this._selectedSlot = 'weapon';
-            this.scene.restart({ gameState: this.gameState, selectedMercId: merc.id });
-        });
-        hit.on('pointerover', () => {
-            bg.clear();
-            bg.fillStyle(0x223344, 1);
-            bg.fillRoundedRect(x, y, w, h, 5);
-            bg.lineStyle(2, 0x88ccff, 0.9);
-            bg.strokeRoundedRect(x, y, w, h, 5);
-        });
-        hit.on('pointerout', () => {
-            bg.clear();
-            bg.fillStyle(0x151525, 1);
-            bg.fillRoundedRect(x, y, w, h, 5);
-            bg.lineStyle(2, rarity.color, 0.7);
-            bg.strokeRoundedRect(x, y, w, h, 5);
-        });
-
         // 하단 클릭 안내
-        this.add.text(x + w/2, y + h - 14, '🖱 클릭', {
+        container.add(this.add.text(x + w/2, y + h - 14, '🖱 클릭', {
             fontSize: '9px', fontFamily: 'monospace', color: '#666677'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
+
+        // === 클릭 영역 — UIButton과 동일하게 zone 사용 ===
+        // 카드 화면 좌표상의 중심 위치 + 정확한 크기로 zone 생성
+        const hitZone = this.add.zone(x + w/2, y + h/2, w, h)
+            .setInteractive({ useHandCursor: true });
+        hitZone.setDepth(1000);  // 다른 모든 요소 위에
+        container.add(hitZone);
+
+        hitZone.on('pointerover', () => drawBg(0x223344, 0x88ccff));
+        hitZone.on('pointerout', () => drawBg(0x151525, rarity.color));
+        hitZone.on('pointerdown', () => {
+            // 시각적 피드백 — 누르는 순간 색 변경
+            drawBg(0xffcc44, 0xffffff);
+        });
+        hitZone.on('pointerup', () => {
+            // 실제 동작 — scene.start (restart 대신, 데이터 전달 안정성↑)
+            this._selectedSlot = 'weapon';
+            this.scene.start('RosterScene', { gameState: this.gameState, selectedMercId: merc.id });
+        });
     }
 
     /** 용병 통합 모달 — 상세/장비/해고 모두 */
