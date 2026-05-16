@@ -1,84 +1,106 @@
-# Demo9 — 작업 계획 (v2 신규 기획 적용)
+# Demo9 — 작업 계획 (v2 기획 완료, 코드 구현 단계)
 
 > **기준 문서**: [OVERVIEW.md](OVERVIEW.md) + [systems/](systems/)
+> **현재 플랫폼**: Phaser 3 (JS, 브라우저) — **기획 검증용 프로토타입**
+> **최종 플랫폼**: **Unity** (C#) — 본 게임 출시
 > **갱신 룰**: 기획 변경 시 해당 시스템 md를 같은 작업에서 동기화.
+> **엔진 독립성**: 모든 기획서는 엔진 독립적으로 작성. Unity 이식 시 [unity-migration.md](systems/unity-migration.md) 참고.
 
-## 1. 현 상태 요약 (2026-05-15 기준)
+## 1. 현 상태 요약 (2026-05-16 기준)
 
-| # | 시스템 | 코드 상태 | 기획 상태 | 주요 파일 |
-|---|---|---|---|---|
-| 1 | 길드 회관 (8×12) | ❌ 미구현 | ✅ 확정 | systems/GuildManager.js |
-| 2 | RunSimulator v2 | 🟡 v1 수준 | ✅ 확정 | systems/RunSimulator.js |
-| 3 | activeExpeditions (다중 파견) | ❌ 미구현 | ✅ 확정 | — |
-| 4 | 피로도 (Stamina) | ❌ 미구현 | ✅ 확정 | entities/Mercenary.js |
-| 5 | 친밀도 / Bond | ❌ 미구현 | ⬜ TODO | — |
-| 6 | NPC 호감도 / 매물 | ❌ 미구현 | ✅ 확정 | data/merchants.js |
-| 7 | 자동화 (장착/판매) | ❌ 미구현 | ✅ 확정 | — |
-| 8 | 친화도 트리 | 🟡 UI만 | ⬜ TODO | scenes/AffinityScene.js |
-| 9 | 카드 23장 | 🟡 17/23 | ⬜ TODO | data/cards.js |
-| 10 | 시너지 14종 | 🟡 12/14 | ⬜ TODO | data/synergies.js |
-| 11 | 마을 이벤트 40+ | 🟡 16/40 | 🟡 골격 | data/events.js |
+### 기획 완료 (모든 시스템 ✅)
 
-## 2. 작업 마일스톤 (제안 순서)
+19개 시스템 + 가이드 1 + 아카이브 = 26개 문서. [INDEX.md](INDEX.md) 참고.
 
-### M1 — 기획 P0 완성 (문서) ✅ 완료
+| 핵심 시스템 | 기획 상태 | 코드 상태 |
+|---|---|---|
+| 길드 회관 (8×12) | ✅ | ❌ 미구현 |
+| RunSimulator v2 | ✅ | 🟡 v1 |
+| activeExpeditions (다중 파견) | ✅ | ❌ |
+| 피로도 (Stamina) | ✅ | ❌ |
+| Bond | ✅ | ❌ |
+| NPC 상인 (타르코프식) | ✅ | 🟡 부분 |
+| 자동화 (장착/판매) | ✅ | ❌ |
+| 친화도 트리 (4트리 60노드) | ✅ | 🟡 일부 |
+| 구역 전투 BP/Cargo/BO | ✅ | 🟡 부분 |
+| 시너지 14종 | ✅ | ✅ 코드 일치 |
+| 마을 이벤트 (NPC 의뢰 중심) | ✅ | 🟡 16개 코드 |
+| 클래스 스킬 (수동 발동) | ✅ | 🟡 1개씩 코드 |
+| 제작/강화/분해 | ✅ | ❌ |
+| 시간 시스템 (하이브리드) | ✅ | ❌ |
+| 길드 평판 | ✅ | ❌ |
+| 보스 3종 × 3페이즈 | ✅ | ❌ |
+| 소문 시스템 | ✅ | ❌ |
+| 특성 라인업 (양20/음12/전설8) | ✅ | 🟡 일부 |
+| 사망/은퇴 | ✅ | ❌ |
+| 영구 진행/뉴게임+ | ✅ | ❌ |
+| 적 구성 (Lv1-10) | ✅ | 🟡 부분 |
+| 구역 특수 장비 (피/증기/저주) | ✅ | ❌ |
 
-1. ✅ **친화도 트리** ([systems/affinity-tree.md](systems/affinity-tree.md)) — 구역별 11 정의 / 9 획득 노드 × 3 = 정의 33, 획득 27
-2. ✅ **Bond 시스템** ([systems/bonds.md](systems/bonds.md)) — 5티어 + 21쌍 페어 스킬(우선 구현 5쌍)
-3. ✅ **카드 23장** ([systems/cards.md](systems/cards.md)) — 공격 6 / 방어 5 / 유틸 5 / 자원 4 / 전설 3 (`twilight_ward` 1장 신규)
-4. ✅ **시너지 14종** ([systems/synergies.md](systems/synergies.md)) — 기존 코드(`data/synergies.js`)와 일치, 문서화만 진행
+## 2. 코드 구현 마일스톤
 
-### M2 — 핵심 시스템 코드 (게임 작동에 필요)
+### M2 — 기반 시스템 (M1 기획 완료 후)
 
-5. **gameState 마이그레이션** — `SaveManager.js`에 신규 필드 추가
-   (`guildHall`, `guildReputation`, `activeExpeditions`, `pendingResults`,
-    `stamina`, `bonds`, `npcFavor`, `npcInventory`, `rumors`, `autoEquipMode`,
-    `autoSellRules`, `lockedItems`)
-6. **길드 회관 시스템** — `systems/GuildHallManager.js` + `scenes/GuildHallScene.js`
-   - 카테고리 8 × 단계 12 데이터 (`data/guildHallUpgrades.js`)
-   - 비용/게이트/효과 조회 API
-   - `getZoneControlBonus(state, zone, key)` 헬퍼 (RunSimulator가 사용)
-7. **RunSimulator v2 재작성** — 기존 단순 확률 → 파워 비율 / 시그모이드 / 부분 성공
-   - `calcPartyPower`, `calcSuccessRate`, `calcRoundsCompleted`,
-     `calcDeathChance`, `calcRewards`, `calcExpeditionTime`
-8. **다중 파견 슬롯 (activeExpeditions)** — 시간 경과형
-   - `systems/ExpeditionManager.js` (Date.now 기반 갱신, 만료 시 결과 반환)
-   - `TownScene` HUD에 진행 바, 결과 알림
-9. **피로도 시스템** — `Mercenary.stamina` + 회복 로직
-   - 마을 자동 회복(분당), 술집/신전 시설, 메인 전투/파견 차감 훅
+1. **gameState 마이그레이션** — `SaveManager.js`에 신규 필드 일괄 추가
+   - [game-state.md](systems/game-state.md) 참고 (전체 필드 정의)
+2. **길드 회관 시스템** — `systems/GuildHallManager.js` + `data/guildHallUpgrades.js` + `scenes/GuildHallScene.js`
+3. **RunSimulator v2 재작성** — 6개 공식 ([run-simulator.md](systems/run-simulator.md))
+4. **다중 파견 슬롯** — `ExpeditionManager.js` + TownScene HUD
+5. **피로도 시스템** — `Mercenary.stamina` + 회복 로직
+6. **시간 시스템** — 실시간/게임내 시간 분리, lastActiveAt 처리
 
-### M3 — UX/풍성함
+### M3 — 전투 시스템
 
-10. **자동화 토글** — 자동 장착 / 자동 판매 / 자동 재파견
-11. **NPC 호감도/매물 시스템** — 호감도 누적, 매물 인벤 로테이션
-12. **친화도 트리 코드 적용** — AffinityScene에 정의된 노드 연결
-13. **카드/시너지 정의 23/14로 확장**
-14. **마을 이벤트 16 → 40+ 보강**
+7. **구역 전투 3종**:
+   - BP: 라운드 3 + 뱀서식 선택지 + 핏게이지
+   - Cargo: 칸 편성 + 덱빌딩 + 칸 HP 시스템
+   - BO: 타일 그리드 + 횃불 + 자발적 저주
+8. **클래스 스킬 (수동 발동)** — 스킬 슬롯 UI + 발동 시스템
+9. **자동전투 잠금해제** — 첫 클리어 후 자동 AI
+10. **보스 3종** — 3페이즈 패턴
 
-### M4 — 통합 시뮬 & 밸런싱
+### M4 — UX/풍성함
 
-15. 클래스 베이스 스탯, 희귀도 풀, 골드/XP 커브 재산출
-16. 12시간 페이싱 정밀 시뮬
+11. **자동화 토글** — 장착/판매/재파견
+12. **NPC 시스템 (타르코프식)** — 의뢰 라인 4단계, 물물교환
+13. **친화도 트리 코드** — 4트리 60노드 (zone 3 + 공통 1)
+14. **Bond 시스템** — 누적, 페어 스킬 (우선 5쌍)
+15. **제작 시스템** — 레시피 + 강화 + 분해
+16. **마을 이벤트 ~70개** — NPC 의뢰 중심 재설계
+17. **구역 특수 장비** — 피/증기/저주 (출혈/과열/공포)
+
+### M5 — 깊이/엔드게임
+
+18. **길드 평판 상세** — 마일스톤 + 정치 이벤트
+19. **소문 시스템** — 소문 인벤 + 사용
+20. **특성 시스템 확장** — 양20/음12/전설8
+21. **사망/은퇴** — 추모비 + 영구사망 모드
+22. **영구 진행/NG+** — 명예 포인트 + 메타 상점
+
+### M6 — 통합 시뮬 & 밸런싱
+
+23. 클래스 베이스 스탯 재산출 ([balance-targets.md](systems/balance-targets.md) §2)
+24. 희귀도 풀 재산출 (§3)
+25. 골드/XP 커브 재산출 (§1)
+26. 12시간 페이싱 정밀 시뮬 (§6, 코드 시뮬 스크립트)
+27. NG+ 난이도 곡선 검증
 
 ## 3. 다음 작업
 
-M1 기획이 끝났으므로 **M2 코드 작업**으로 이동.
+기획 단계 끝. **M2 코드 작업** 시작 권장 순서:
 
-추천 순서:
-1. **gameState 마이그레이션** — 모든 신규 필드 한 번에 추가 (`SaveManager.js`)
-2. **길드 회관** — `GuildHallManager.js` + `data/guildHallUpgrades.js` + `scenes/GuildHallScene.js` + `getZoneControlBonus` 헬퍼
-3. **RunSimulator v2 재작성** — 파워 비율 / 시그모이드 / 부분 성공
-4. **다중 파견 슬롯** — `ExpeditionManager.js` + Town HUD 통합
-5. **피로도** — `Mercenary.stamina` + 시설 회복 훅
-6. **자동화 토글** — 자동 장착/판매/재파견
-7. **NPC 호감도/매물**
-8. **친화도 트리 코드 적용**
-9. **신규 카드 `twilight_ward` 코드 추가**
+1. **gameState 마이그레이션** (모든 신규 필드 한 번에)
+2. **길드 회관** (메타 진행의 척추)
+3. **RunSimulator v2** (서브 파견 엔진)
+4. **다중 파견 슬롯** (실시간 회전)
+5. **피로도** (로테이션 강제)
+6. **시간 시스템** (오프라인 진행)
 
-(M3 풍성함, M4 통합 시뮬은 이후)
+이후 M3 전투 시스템.
 
 ## 4. 룰 재확인
 
-- 기획 md 변경 시 코드 작업과 같은 작업/커밋 안에서 동기화.
-- 시스템 md는 시스템 단위로만 (큰 통합 문서 금지).
-- 새 시스템 추가 시 `INDEX.md`에 한 줄 등록.
+- 기획 md 변경 시 코드 작업과 같은 작업/커밋 안에서 동기화 (drift 금지)
+- 시스템 md는 시스템 단위로만 (큰 통합 문서 금지)
+- 새 시스템 추가 시 `INDEX.md`에 한 줄 등록
+- gameState 신규 필드 추가 시 `game-state.md` 동기화

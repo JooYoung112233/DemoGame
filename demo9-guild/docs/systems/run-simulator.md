@@ -52,9 +52,10 @@ function getZoneRecommendedPower(zone, zoneLevel) {
     * (1 + (zoneLevel - 1) * 0.25)
     * (1 + (zoneLevel - 1) * 0.03);
 
-  // BP:  Lv1=200, Lv3=320, Lv5=480, Lv8=760, Lv10=1000
-  // Cargo: Lv1=300, Lv5=720, Lv10=1500
-  // BO:  Lv1=450, Lv5=1080, Lv10=2250
+  // 실제 산출값:
+  // BP:    Lv1=200, Lv3=326, Lv5=464, Lv8=688, Lv10=825  (보스 시도 가능)
+  // Cargo: Lv1=300, Lv5=696, Lv10=1238
+  // BO:    Lv1=450, Lv5=1044, Lv10=1856
 }
 ```
 

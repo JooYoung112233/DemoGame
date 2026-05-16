@@ -2,7 +2,12 @@
 
 > **플레이타임 목표**: 12시간 (능동 플레이, PC)
 > **핵심 원칙**: "쉴 틈 없이 뭔가 계속 하는 게임"
+> **현재 단계**: Phaser 3 프로토타입 (기획/검증용)
+> **최종 구현**: **Unity** (본 게임 출시)
 > **유지 룰**: 기획 변경은 해당 시스템 md를 같은 작업에서 갱신. 시스템 세부는 `docs/systems/`로 분리.
+
+> ⚠️ 모든 기획서는 **엔진 독립적**으로 작성. Phaser 코드는 디자인 검증용이며 최종은 Unity로 이식.
+> Unity 이식 시 고려사항은 [systems/unity-migration.md](systems/unity-migration.md) 참고.
 
 ---
 
@@ -52,10 +57,12 @@
 
 - **언제**: 새 구역 첫 도전 / 보스전 / 구역 레벨 갱신 도전
 - **인원**: 길드회관 A 트리에 따라 3 → 최대 6-7명
-- **방식**: 기존 BattleScene 직접 전투 (카드 선택 능동 개입)
+- **방식**: 자동전투 + **스킬은 플레이어가 직접 발동** (타이밍/대상 선택이 실력)
 - **소요**: 5-10분 능동 플레이
 - **보상**: 서브 파견의 1.5-2배 (위험 프리미엄)
 - **목적**: **구역 레벨업** (서브 파견 효율 끌어올리기 + 다음 구역 해금)
+- **핵심 차별화**: 스킬 사용 가능 → 서브보다 훨씬 강력
+- **자동전투 잠금해제**: 해당 구역+레벨 첫 클리어 후 자동전투(스킬 AI) 해금. 반복 파밍용 편의 기능
 
 ### 2.2 서브 파견 (자동 회전)
 
@@ -70,6 +77,7 @@
 
 서브로만 굴려도 클리어가 안 되도록:
 
+- **스킬 사용 불가 (서브)** — 서브 파견은 일반공격만. 스킬 없이는 상위 레벨 클리어 불가능
 - **구역 레벨업은 메인만 가능** — 서브 파견으로 구역 레벨 못 올림
 - **보스 처치는 메인만** — 다음 구역 해금에 필수
 - **메인 전용 보상**: 보스 드롭 전설장비, 친화도 트리 핵심 노드 해금 토큰
@@ -142,48 +150,76 @@ Cargo Lv1 (메인) → 클리어 → Cargo Lv1 서브 + BP 계속
 |---|---|---|---|
 | 1 | 길드 회관 시스템 | ✅ | [systems/guild-hall.md](systems/guild-hall.md) |
 | 2 | RunSimulator v2 | ✅ | [systems/run-simulator.md](systems/run-simulator.md) |
-| 3 | 친화도 트리 24-30 노드 | ✅ 27 노드 | [systems/affinity-tree.md](systems/affinity-tree.md) |
-| 4 | 친밀도/Bond 시스템 | ✅ | [systems/bonds.md](systems/bonds.md) |
-| 5 | 카드 23장 정의 | ✅ | [systems/cards.md](systems/cards.md) |
+| 3 | 친화도 트리 (4트리 60노드) | ✅ 재설계 완료 | [systems/affinity-tree.md](systems/affinity-tree.md) |
+| 4 | 친밀도/Bond 시스템 | ✅ 재설계 완료 | [systems/bonds.md](systems/bonds.md) |
+| 5 | 구역별 전투 (BP/Cargo/BO) | ✅ 확정 | [zone-bloodpit](systems/zone-bloodpit.md) / [zone-cargo](systems/zone-cargo.md) / [zone-blackout](systems/zone-blackout.md) |
 | 6 | 시너지 14종 정의 | ✅ 코드 일치 | [systems/synergies.md](systems/synergies.md) |
 
 ### P1 — 중요 (게임 풍성함)
 
 | # | 항목 | 상태 | 문서 |
 |---|---|---|---|
-| 7 | 술집 + 피로도 회복 시설 | ⬜ | [systems/stamina.md](systems/stamina.md) |
-| 8 | 마을 이벤트 40개 + 소문 | ⬜ | [systems/town-events.md](systems/town-events.md) |
-| 9 | NPC 8명 + 호감도 + 매물 | ⬜ | [systems/npc-merchants.md](systems/npc-merchants.md) |
-| 10 | 길드 평판 시스템 상세 | ⬜ | [systems/reputation.md](systems/reputation.md) |
-| 11 | 제작 레시피 12개 + 소재 | ⬜ | (TBD) |
-| 12 | 시간 시스템 (실시간) | ⬜ | (TBD) |
+| 7 | 술집 + 피로도 회복 시설 | ✅ | [systems/stamina.md](systems/stamina.md) |
+| 8 | 마을 이벤트 (NPC 의뢰 중심) | ✅ ~70개 | [systems/town-events.md](systems/town-events.md) |
+| 9 | NPC 8명 + 호감도 + 매물 | ✅ | [systems/npc-merchants.md](systems/npc-merchants.md) |
+| 10 | 길드 평판 시스템 상세 | ✅ | [systems/reputation.md](systems/reputation.md) |
+| 11 | 제작 레시피 + 소재 | ✅ | [systems/crafting.md](systems/crafting.md) |
+| 12 | 시간 시스템 (실시간) | ✅ | [systems/time-system.md](systems/time-system.md) |
 
 ### P2 — 깊이
 
-| # | 항목 | 상태 |
-|---|---|---|
-| 13 | 보스 페이즈 패턴 (4종 × 3페이즈) | ⬜ |
-| 14 | 클래스 스킬 수치 | ⬜ |
-| 15 | 사망/은퇴 시스템 | 🔒 보류 |
-| 16 | 소문 시스템 상세 | ⬜ |
+| # | 항목 | 상태 | 문서 |
+|---|---|---|---|
+| 13 | 보스 페이즈 패턴 (3종 × 3페이즈) | ✅ | [systems/bosses.md](systems/bosses.md) |
+| 14 | 클래스 스킬 수치 | ✅ | [systems/class-skills.md](systems/class-skills.md) |
+| 15 | 사망/은퇴 시스템 | ✅ | [systems/death-retirement.md](systems/death-retirement.md) |
+| 16 | 소문 시스템 상세 | ✅ | [systems/rumors.md](systems/rumors.md) |
 
 ### P3 — 후순위
 
-| # | 항목 | 상태 |
-|---|---|---|
-| 17 | 영구 진행 / 뉴게임+ | ⬜ |
-| 18 | 적 호위병 Lv4-10 구성 | ⬜ |
-| 19 | 음성 특성 상세 (발동 타이밍) | ⬜ |
+| # | 항목 | 상태 | 문서 |
+|---|---|---|---|
+| 17 | 영구 진행 / 뉴게임+ | ✅ | [systems/newgame-plus.md](systems/newgame-plus.md) |
+| 18 | 적 호위병 Lv4-10 구성 | ✅ | [systems/enemy-composition.md](systems/enemy-composition.md) |
+| 19 | 특성 상세 (양/음/전설 + 발동 타이밍) | ✅ | [systems/traits-list.md](systems/traits-list.md) |
 
 ### 통합 — 전체 수치 재산출
 
-| # | 항목 | 상태 |
-|---|---|---|
-| 20 | 클래스 베이스 스탯 재산출 | ⬜ |
-| 21 | 희귀도 풀 재산출 | ⬜ |
-| 22 | 골드/XP 커브 재산출 | ⬜ |
-| 23 | 12시간 페이싱 정밀 시뮬 | ⬜ |
+| # | 항목 | 상태 | 문서 |
+|---|---|---|---|
+| 20 | 클래스 베이스 스탯 재산출 | ✅ 검토 완료 | [systems/balance-config.md](systems/balance-config.md) §2 |
+| 21 | 희귀도 풀 재산출 | ✅ 기존 유지 | [systems/balance-config.md](systems/balance-config.md) RARITY_POOL |
+| 22 | 골드/XP 커브 재산출 | ✅ 조정 완료 | [systems/balance-config.md](systems/balance-config.md) |
+| 23 | 12시간 페이싱 정밀 시뮬 | 🟡 명세 완료 | [systems/simulator-spec.md](systems/simulator-spec.md) (코드 후) |
+| 24 | DEF 처리 방식 결정 | ✅ percent | [systems/balance-config.md](systems/balance-config.md) §3 |
+| 25 | 적 스탯 스케일링 검증 | ✅ 적정 | [systems/balance-config.md](systems/balance-config.md) §4 |
 
 ---
 
-> **다음 작업 순서**: P0 #3 친화도 트리 → #4 친밀도/Bond → #5 카드 23장 → #6 시너지 14종 → P1 순.
+> **다음 작업 순서**: 기획 골격 완료 (#1~19, 사망/은퇴 #15만 보류). 다음은 **코드 구현** + **통합 시뮬레이션(#20~23)**.
+
+## 6. 기획 골격 완료 요약 (2026-05-16 기준)
+
+19개 시스템 기획 완료. 코드 구현 단계로 이동 가능:
+
+### 핵심 (P0)
+- 길드 회관 (8×12 = 96 업그레이드)
+- RunSimulator v2 (6개 공식)
+- 친화도 트리 (4트리 60노드, 구역3 + 공통1)
+- Bond (5티어 + 21쌍 페어 스킬)
+- 구역 전투 3종 (BP 라운드+뱀서식, Cargo 칸+덱빌딩, BO 타일+자발적저주)
+- 시너지 14종
+
+### 중요 (P1)
+- 피로도, 마을 이벤트(~70), NPC 8명(타르코프식), 길드 평판, 제작/강화/분해, 시간 시스템
+
+### 깊이 (P2)
+- 보스 3종 × 3페이즈, 클래스 스킬, 소문 시스템
+
+### 후순위 (P3)
+- 영구 진행/뉴게임+, 적 구성, 특성 라인업
+
+### 추가 시스템
+- 구역 특수 장비 (피/증기/저주 + 트레이드오프)
+- 자동전투 잠금해제 (수동 클리어 후)
+- 메인 vs 서브 차별화 (스킬 수동 발동이 핵심)

@@ -13,7 +13,7 @@ function updateBonds(party, success, sourceType /* 'main' | 'sub' */) {
     for (let j = i + 1; j < party.length; j++) {
       const a = party[i], b = party[j];
       const key = getBondKey(a.id, b.id);
-      let gain = success ? 3 : 1;
+      let gain = success ? 4 : 2;
       if (sourceType === 'main') gain *= 2;   // 메인 직접 전투는 2배
       if (a.hasTrait('lone_wolf') || b.hasTrait('lone_wolf')) gain *= 0.3;
       if (a.hasTrait('jealous')   || b.hasTrait('jealous'))   gain -= 1;
@@ -23,13 +23,19 @@ function updateBonds(party, success, sourceType /* 'main' | 'sub' */) {
   }
 }
 
-// 키 정렬 — id1_id2 형태로 단방향 정규화
 function getBondKey(idA, idB) {
   return idA < idB ? `${idA}_${idB}` : `${idB}_${idA}`;
 }
 ```
 
-서브 파견 1런당 약 1-3, 메인 1전투당 약 6 → Bond 50 도달까지 약 20-30 동반 출전.
+| 상황 | 획득량 |
+|---|---|
+| 서브 파견 성공 | +4 |
+| 서브 파견 실패 | +2 |
+| 메인 전투 성공 | +8 |
+| 메인 전투 실패 | +4 |
+
+약 15~20회 동반 출전 → 티어 4(페어 스킬), 25~30회 → Max(100). 5~6시간에 주력 쌍 Max 도달.
 
 ## 2. 티어 (5단계)
 
@@ -42,48 +48,55 @@ function getBondKey(idA, idB) {
 | 4 | 75-99 | 영혼의 동반자 | 둘 다 +12% 모든 스탯, **페어 스킬 해금** |
 | 5 | 100 | 운명 공동체 | +15% 모든 스탯, 페어 스킬 강화판, 사망 시 동반자 1회 부활(HP 30%) |
 
-티어 효과는 두 사람이 **같은 파티로 출전했을 때만** 적용. 따로 출전 중이면 비활성.
+티어 효과는 두 사람이 **같은 파티로 출전했을 때만** 적용.
 
 ## 3. 페어 스킬 (티어 4+ 해금)
 
-클래스 조합별로 1개씩 정의. 두 캐릭터가 모두 살아 있고 같은 전투/파견에 있을 때 자동 발동(쿨다운 있음).
+클래스 조합별 1개씩 정의. 두 캐릭터가 모두 살아 있고 같은 전투/파견에 있을 때 발동.
 
-| 조합 | 페어 스킬 | 효과 |
-|---|---|---|
-| warrior + warrior | **방패의 벽** | 둘 다 DEF +30%, 받는 피해 10% 상호 분담 (30초 쿨) |
-| warrior + priest | **성기사의 맹세** | priest 힐량 +50% + warrior에 즉시 실드 (40초 쿨) |
-| warrior + rogue | **양동 작전** | rogue 다음 공격 100% 크리 + warrior 도발 1초 (25초 쿨) |
-| warrior + mage | **메테오 슬램** | warrior 위치에 AoE (mage ATK × 3) (45초 쿨) |
-| warrior + archer | **방패 보호** | archer가 warrior 뒤에 있으면 archer 피격 무효 (조건부, 쿨 없음) |
-| warrior + alchemist | **포션 콤보** | alchemist가 warrior에 즉시 회복 포션 사용 (60초 쿨) |
-| rogue + rogue | **이중 암살** | 같은 적에 동시 공격 시 확정 크리 + 다음 1회 회피 (20초 쿨) |
-| rogue + priest | **그림자 가호** | rogue 회피 +30%, priest 힐 시 rogue 스텔스 1초 (35초 쿨) |
-| rogue + mage | **암흑 술책** | mage 다음 스킬 + rogue 출혈 같이 적용 (30초 쿨) |
-| rogue + archer | **연환 사격** | archer 공격 후 rogue 즉시 추격타 (15초 쿨) |
-| rogue + alchemist | **독 비수** | rogue 다음 공격에 독 부여 (강한 DoT) (25초 쿨) |
-| mage + mage | **이중 영창** | 둘 다 다음 스킬 즉시 발동 (1회) (60초 쿨) |
-| mage + priest | **성스러운 폭염** | mage AoE에 priest 힐 부수 효과 (40초 쿨) |
-| mage + archer | **마법화살** | archer 다음 화살이 관통 + 마법 피해 (30초 쿨) |
-| mage + alchemist | **연금 폭발** | alchemist 폭탄이 mage 속성 폭발 (35초 쿨) |
-| archer + archer | **일제 사격** | 둘 다 동시에 같은 적 사격 (확정 크리) (30초 쿨) |
-| archer + priest | **거리 가호** | archer 사거리 +30%, priest 원거리 힐 가능 (패시브) |
-| archer + alchemist | **독화살 강화** | archer 화살에 독 + 폭발 효과 (30초 쿨) |
-| priest + priest | **이중 축복** | 전체 힐 +100% 1회 (90초 쿨) |
-| priest + alchemist | **종합 회복** | 전체 힐 + 디버프 해제 (60초 쿨) |
-| alchemist + alchemist | **이중 폭격** | AoE 폭탄 2회 동시 투하 (45초 쿨) |
+### 같은 클래스 (6쌍)
 
-총 21쌍. **첫 출시에 다 구현은 무리** — 우선 [warrior+priest, rogue+mage, mage+priest, archer+rogue, priest+priest] 5쌍 우선 구현, 나머지는 P2로 미룸.
+| 조합 | 이름 | 타입 | 효과 |
+|---|---|---|---|
+| warrior×2 | 방패의 벽 | 패시브 | 둘 다 DEF +20%, 받는 피해 10% 상호 분담 |
+| rogue×2 | 이중 암살 | 액티브 20s | 같은 적 동시 공격, 확정 크리 + 회피 1회 |
+| mage×2 | 이중 영창 | 액티브 50s | 둘 다 다음 스킬 즉시 발동 + 위력 +30% |
+| archer×2 | 일제 사격 | 액티브 25s | 동시 사격 (확정 크리 + 방어 무시) |
+| priest×2 | 이중 축복 | 액티브 60s | 전체 즉시 힐 + 10s 리젠 |
+| alchemist×2 | 이중 폭격 | 액티브 40s | AoE 폭탄 2연속 + 화상 |
+
+### 다른 클래스 (15쌍)
+
+| 조합 | 이름 | 타입 | 효과 |
+|---|---|---|---|
+| warrior+rogue | 양동 작전 | 액티브 30s | warrior 도발 + rogue 다음 공격 크리 확정 |
+| warrior+mage | 마법 방패 | 액티브 40s | warrior 피해 흡수 + mage 시전 속도 +30% |
+| warrior+archer | 방패 엄호 | 패시브 | archer가 warrior 뒤 위치 시 피격 -50% |
+| warrior+priest | 성기사의 맹세 | 액티브 35s | warrior 즉시 실드 + priest 힐량 +40% |
+| warrior+alchemist | 강화 갑옷 | 액티브 45s | warrior에 방어 물약 (DEF +50%, 10s) |
+| rogue+mage | 암흑 연격 | 액티브 30s | rogue 출혈 + mage 마법 복합 피해 |
+| rogue+archer | 연환 사격 | 액티브 15s | archer 공격 후 rogue 즉시 추격타 |
+| rogue+priest | 그림자 가호 | 패시브 | rogue 회피 +20%, 회피 시 HP 소량 회복 |
+| rogue+alchemist | 독 비수 | 액티브 25s | rogue 공격에 강화 독 (DoT + 둔화) |
+| mage+archer | 마법 화살 | 액티브 30s | archer 화살에 관통 + 스플래시 부여 |
+| mage+priest | 성스러운 폭염 | 액티브 40s | mage AoE에 아군 회복 부수 효과 |
+| mage+alchemist | 연금 폭발 | 액티브 35s | 합동 AoE (양쪽 ATK 합산 피해) |
+| archer+priest | 축복의 화살 | 패시브 | 사거리 +30%, 적중 시 아군 소량 힐 |
+| archer+alchemist | 폭발 화살 | 액티브 30s | 화살에 폭발 효과 (AoE + DoT) |
+| priest+alchemist | 만능 치유 | 액티브 50s | 전체 힐 + 디버프 해제 + 면역 5s |
+
+패시브 3쌍 / 액티브 18쌍. 우선 구현 5쌍: warrior+priest, rogue+mage, mage+priest, archer+rogue, priest+priest. 나머지 16쌍은 P2.
 
 ## 4. 음성 특성 상호작용
 
 | 음성 특성 | 효과 |
 |---|---|
-| `lone_wolf` (고독한 늑대) | Bond 누적 ×0.3, 티어 보너스 받지 않음 (페널티 1.0배) |
-| `jealous` (질투) | Bond 누적 -1 / 매번, 다른 동료가 페어 스킬 발동 시 자신 ATK -5% (10초) |
+| `lone_wolf` (고독한 늑대) | Bond 누적 ×0.3, 티어 보너스 받지 않음 |
+| `jealous` (질투) | Bond 누적 -1 / 매번, 다른 동료 페어 스킬 발동 시 자신 ATK -5% (10초) |
 | `hothead` (성마름) | 50% 확률로 Bond 누적량 -50% |
 | `coward` (겁쟁이) | 동반자 사망 시 자신 30% 패닉 (5초 행동 불가) |
 
-음성 특성 라인업 전체 정의는 [traits.md](traits.md) (TBD).
+음성 특성 전체 정의는 [traits.md](traits.md) 참고.
 
 ## 5. UI
 
@@ -102,8 +115,8 @@ function getBondKey(idA, idB) {
 
 ## 6. 사망 처리
 
-- 한쪽이 사망하면 Bond 값은 **그대로 보존** (영구 기록). 동반자 사망 트리거(티어 3+: ATK +20%, 티어 5: 부활)는 사망 즉시 1회 발동.
-- 사망한 용병과의 Bond는 새로운 용병에게 양도 불가.
+- 한쪽 사망 시 Bond 값 **영구 보존**. 사망 트리거(티어 3+: ATK +20%, 티어 5: 부활)는 즉시 1회 발동.
+- 사망한 용병과의 Bond는 새 용병에게 양도 불가.
 
 ## 7. gameState
 
@@ -121,16 +134,9 @@ pairSkillCooldowns: {
 
 | 시점 | 평균 Bond | 활성 페어 |
 |---|---|---|
-| 1-2시간 | 0-20 | 0 |
-| 3-5시간 | 30-50 (티어 2) | 0 |
-| 6-8시간 | 50-75 (티어 3) | 0-1 |
-| 9-11시간 | 75-100 (티어 4-5) | 2-3 |
-| 11-12시간 | 100 다수 | 4-5 |
+| 1-2시간 | 10-30 (티어 1) | 0 |
+| 3-4시간 | 40-60 (티어 2-3) | 0 |
+| 5-6시간 | 75-100 (티어 4-5) | 2-3 |
+| 7-12시간 | 다수 Max | 4-5+ |
 
-→ 후반에 페어 스킬이 점점 켜지는 게임플레이.
-
-## 9. TODO
-
-- 페어 스킬 5쌍 1회차 구현 후 나머지 16쌍 확장 (P2)
-- 신전 "관계 재정립" — Bond 한 쌍 초기화 (혹시 잘못된 조합 풀고 싶을 때, 비용 비쌈) — 검토
-- Bond 그래프 시각화 (RosterScene)
+→ 중반(5~6시간)부터 페어 스킬이 켜지기 시작.
