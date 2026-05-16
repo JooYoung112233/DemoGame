@@ -24,6 +24,9 @@ class PitGauge {
         // 충전 배율 (F3 = +20%)
         this.chargeMultiplier = fLevel >= 3 ? 1.2 : 1.0;
 
+        // F5: 엘리트 킬 추가 충전 (+10%)
+        this.eliteKillBonus = fLevel >= 5 ? 0.1 : 0;
+
         // 관중 난입 임계점 — 한 라운드에서 같은 임계점은 1회만
         this._thresholds = [33, 66];
         this._triggeredThresholds = new Set();
@@ -77,7 +80,10 @@ class PitGauge {
     onCharge(type, _value) {
         const base = PitGauge.CHARGE_TABLE[type] || 0;
         if (base <= 0) return null;
-        const amount = base * this.chargeMultiplier;
+        let amount = base * this.chargeMultiplier;
+        if ((type === 'kill_elite' || type === 'kill_boss') && this.eliteKillBonus > 0) {
+            amount += this.max * this.eliteKillBonus;
+        }
         const prev = this.gauge;
         this.gauge = Math.min(this.max, this.gauge + amount);
 

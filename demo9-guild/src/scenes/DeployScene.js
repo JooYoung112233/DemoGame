@@ -587,6 +587,11 @@ class DeployScene extends Phaser.Scene {
             if (maxUnlocked === 0) canDepart = false;
         }
 
+        // === 포켓 아이템 슬롯 (BP 전용, F2 해금) ===
+        if (isMain && this.selectedZone === 'bloodpit') {
+            this._drawPocketSlots(gs);
+        }
+
         // === 스테미너 체크 — 0인 용병이 편성에 있으면 차단 ===
         const partyMercs = this.deployedIds.map(id => gs.roster.find(m => m.id === id)).filter(Boolean);
         const exhausted = partyMercs.filter(m => (m.stamina || 0) <= 0);
@@ -664,6 +669,97 @@ class DeployScene extends Phaser.Scene {
             this.add.text(640, 660, hint, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#666677'
             }).setOrigin(0.5);
+        }
+    }
+
+    _drawPocketSlots(gs) {
+        const fLevel = (gs.guildHall && gs.guildHall.pit_control) || 0;
+        if (fLevel < 2) return;
+
+        if (!gs.pocketSlots) gs.pocketSlots = [null, null];
+        const slots = gs.pocketSlots;
+        const shopItems = (typeof POCKET_ITEM_SHOP !== 'undefined') ? POCKET_ITEM_SHOP : {};
+        const itemData = (typeof POCKET_ITEM_DATA !== 'undefined') ? POCKET_ITEM_DATA : {};
+
+        const px = 815, py = 540;
+        UIPanel.create(this, px, py, 457, 150, { title: '🧪 포켓 아이템 (BP 전용)' });
+
+        for (let i = 0; i < slots.length; i++) {
+            const sx = px + 12 + i * 225;
+            const sy = py + 30;
+            const itemKey = slots[i];
+            const item = itemKey ? itemData[itemKey] : null;
+
+            const slotBg = this.add.graphics();
+            slotBg.fillStyle(item ? 0x223344 : 0x181828, 1);
+            slotBg.fillRoundedRect(sx, sy, 210, 44, 5);
+            slotBg.lineStyle(1, item ? 0x4488aa : 0x333344, 0.8);
+            slotBg.strokeRoundedRect(sx, sy, 210, 44, 5);
+
+            if (item) {
+                this.add.text(sx + 8, sy + 6, `${item.icon} ${item.name}`, {
+                    fontSize: '12px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+                });
+                this.add.text(sx + 8, sy + 24, item.desc, {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#aabbcc'
+                });
+                UIButton.create(this, sx + 168, sy + 22, 40, 22, '해제', {
+                    color: 0x553333, hoverColor: 0x664444, textColor: '#ffaaaa', fontSize: 10,
+                    onClick: () => {
+                        gs.pocketSlots[i] = null;
+                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
+                    }
+                });
+            } else {
+                this.add.text(sx + 105, sy + 12, `슬롯 ${i + 1}: 비어있음`, {
+                    fontSize: '11px', fontFamily: 'monospace', color: '#555566'
+                }).setOrigin(0.5);
+                this.add.text(sx + 105, sy + 28, '(아래 목록에서 선택)', {
+                    fontSize: '9px', fontFamily: 'monospace', color: '#444455'
+                }).setOrigin(0.5);
+            }
+        }
+
+        // 구매 가능 목록
+        const emptySlot = slots.indexOf(null);
+        if (emptySlot === -1) return;
+
+        let bx = px + 12;
+        const by = py + 82;
+        this.add.text(bx, by, '구매:', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#8899aa'
+        });
+        bx += 40;
+        for (const [key, shop] of Object.entries(shopItems)) {
+            const data = itemData[key];
+            if (!data) continue;
+            const canBuy = gs.gold >= shop.cost;
+            const alreadyEquipped = slots.includes(key);
+            const chipW = 115, chipH = 24;
+
+            UIButton.create(this, bx, by - 2, chipW, chipH, `${data.icon} ${shop.cost}G`, {
+                color: (canBuy && !alreadyEquipped) ? 0x224433 : 0x222233,
+                hoverColor: 0x336644,
+                textColor: (canBuy && !alreadyEquipped) ? '#88ffaa' : '#555566',
+                fontSize: 10,
+                onClick: () => {
+                    if (alreadyEquipped) { UIToast.show(this, '이미 장착됨', { color: '#ff6644' }); return; }
+                    if (!canBuy) { UIToast.show(this, '골드 부족', { color: '#ff6644' }); return; }
+                    const empty = gs.pocketSlots.indexOf(null);
+                    if (empty === -1) { UIToast.show(this, '슬롯 가득', { color: '#ff6644' }); return; }
+                    gs.gold -= shop.cost;
+                    gs.pocketSlots[empty] = key;
+                    this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode });
+                }
+            });
+
+            // 아이템 이름 툴팁 (호버 대신 아래 텍스트)
+            this.add.text(bx + chipW / 2, by + chipH + 2, data.name, {
+                fontSize: '8px', fontFamily: 'monospace', color: '#666677'
+            }).setOrigin(0.5);
+
+            bx += chipW + 8;
+            if (bx > px + 440) break;
         }
     }
 }

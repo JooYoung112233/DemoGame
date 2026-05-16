@@ -1352,6 +1352,11 @@ class ManualBattleScene extends Phaser.Scene {
                 return;
             }
 
+            // 부활한 유닛 — 그래픽 복원
+            if (!g.container.visible || g.container.alpha < 1) {
+                g.container.setVisible(true).setAlpha(1).setScale(1);
+            }
+
             // 살아있는 유닛 — 새 위치 계산
             let newX;
             if (u.team === 'ally') {
@@ -1516,6 +1521,15 @@ class ManualBattleScene extends Phaser.Scene {
                 const type = (unit && unit.isElite) ? 'kill_elite' : (unit && unit.isBoss) ? 'kill_boss' : 'kill_normal';
                 const t = this.pitGauge.onCharge(type);
                 if (t && !triggered) triggered = t;
+                // F8: 핏 체인 출혈 — 처치 시 인접 적에게 출혈
+                if (unit && unit.team === 'enemy' && this.pitGauge.fLevel >= 8) {
+                    const adj = this.combat.enemies.filter(e => e.alive && Math.abs(e.position - unit.position) === 1);
+                    adj.forEach(e => {
+                        if (!e.statusEffects.some(s => s.type === 'bleed')) {
+                            e.statusEffects.push({ type: 'bleed', duration: 2, value: 0.05 });
+                        }
+                    });
+                }
             }
             if (r.status === 'bleed') {
                 const t = this.pitGauge.onCharge('bleed_apply');

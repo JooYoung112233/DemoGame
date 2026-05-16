@@ -32,6 +32,7 @@ class SaveManager {
             data.bonds = data.bonds || {};
             data.guildHall = data.guildHall || {};
             data.guildReputation = data.guildReputation || 0;
+            data.pocketSlots = data.pocketSlots || [null, null];
             // 기존 세이브에 신규 시설 자동 추가
             data.unlockedFacilities = data.unlockedFacilities || [];
             ['equipment', 'guildHall'].forEach(f => {
