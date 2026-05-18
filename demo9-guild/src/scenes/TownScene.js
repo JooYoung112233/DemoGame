@@ -9,25 +9,20 @@ class TownScene extends Phaser.Scene {
         const gs = this.gameState;
         const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
 
-        // === 세이브 마이그레이션 (기존 세이브 호환) ===
+        // === 세이브 마이그레이션 ===
         if (!gs.unlockedFacilities) gs.unlockedFacilities = [];
-        if (!gs.unlockedFacilities.includes('equipment')) {
-            gs.unlockedFacilities.push('equipment');
-        }
-        if (!gs.unlockedFacilities.includes('guildHall')) {
-            gs.unlockedFacilities.push('guildHall');
-        }
+        if (!gs.unlockedFacilities.includes('equipment')) gs.unlockedFacilities.push('equipment');
+        if (!gs.unlockedFacilities.includes('guildHall')) gs.unlockedFacilities.push('guildHall');
         SaveManager.save(gs);
 
-        // 파견 완료 처리 (마을 진입 시)
+        // 파견 완료 처리
         if (typeof ExpeditionManager !== 'undefined') {
             const newCompleted = ExpeditionManager.processCompleted(gs);
             if (newCompleted.length > 0) {
                 GuildManager.addMessage(gs, `🎁 파견 ${newCompleted.length}건 완료 — 수령 대기`);
             }
         }
-
-        // D8 완전 자동화 (마을 진입 시 실행)
+        // D8 자동화
         if (typeof AutomationManager !== 'undefined') {
             AutomationManager.runFullAuto(gs);
             AutomationManager.runAutoCollect(gs);
@@ -38,11 +33,9 @@ class TownScene extends Phaser.Scene {
         this._drawVignette();
 
         this._drawHeader();
-        this._drawRosterPanel();
-        this._drawExpeditionPanel();
-        this._drawFacilityGrid();
-        this._drawMessageLog();
-        this._drawBottomBar();
+        this._drawZoneCards();
+        this._drawFacilityBar();
+        this._drawSidePanel();
 
         // 1초마다 파견 완료 체크
         this._expTimer = this.time.addEvent({
@@ -62,15 +55,15 @@ class TownScene extends Phaser.Scene {
         });
     }
 
+    // ═══════════════════════════════════════════════════════
+    //  배경 장식
+    // ═══════════════════════════════════════════════════════
     _drawVignette() {
         const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const v = this.add.graphics();
         v.fillStyle(0x000000, 0.15);
-        v.fillRect(0, 0, 1280, 4);
-        v.fillRect(0, 716, 1280, 4);
-        v.fillRect(0, 0, 4, 720);
-        v.fillRect(1276, 0, 4, 720);
-        // 코너 장식
+        v.fillRect(0, 0, 1280, 4); v.fillRect(0, 716, 1280, 4);
+        v.fillRect(0, 0, 4, 720); v.fillRect(1276, 0, 4, 720);
         const c = this.add.graphics();
         c.lineStyle(1, T.ornament || 0x8a7a4a, 0.15);
         c.lineBetween(0, 20, 20, 0); c.lineBetween(0, 30, 30, 0);
@@ -79,396 +72,399 @@ class TownScene extends Phaser.Scene {
         c.lineBetween(1260, 720, 1280, 700); c.lineBetween(1250, 720, 1280, 690);
     }
 
+    // ═══════════════════════════════════════════════════════
+    //  헤더 — 길드 정보 + 골드
+    // ═══════════════════════════════════════════════════════
     _drawHeader() {
         const gs = this.gameState;
         const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
 
-        // 헤더 배경
         const hBg = this.add.graphics();
         hBg.fillStyle(T.headerBg || 0x1e1810, 1);
-        hBg.fillRect(0, 0, 1280, 55);
-        // 장식 하단선
+        hBg.fillRect(0, 0, 1280, 50);
         hBg.lineStyle(1, T.ornament || 0x8a7a4a, 0.4);
-        hBg.lineBetween(0, 55, 1280, 55);
-        hBg.lineStyle(0.5, T.divider || 0x5a4a2a, 0.3);
-        hBg.lineBetween(0, 57, 1280, 57);
+        hBg.lineBetween(0, 50, 1280, 50);
 
         // 길드 레벨
-        this.add.text(20, 12, `⚔ 길드 Lv.${gs.guildLevel}`, {
-            fontSize: '18px', fontFamily: T.fontFamily || 'monospace',
-            color: T.textGold || '#ffcc44', fontStyle: 'bold',
-            stroke: '#000', strokeThickness: 1
+        this.add.text(20, 10, `⚔ 길드 Lv.${gs.guildLevel}`, {
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44', fontStyle: 'bold'
         });
 
         // XP 바
         const xpNeeded = GuildManager.getXpToNextLevel(gs);
         const xpRatio = gs.guildLevel >= 8 ? 1 : gs.guildXp / xpNeeded;
-        const barX = 165, barY = 18, barW = 180, barH = 12;
-
+        const barX = 150, barY = 15, barW = 140, barH = 10;
         const xpBg = this.add.graphics();
         xpBg.fillStyle(0x1a1510, 1);
-        xpBg.fillRoundedRect(barX, barY, barW, barH, 4);
+        xpBg.fillRoundedRect(barX, barY, barW, barH, 3);
         xpBg.fillStyle(T.buttonPrimary || 0x8a6a2a, 0.9);
-        xpBg.fillRoundedRect(barX, barY, barW * xpRatio, barH, 4);
-        xpBg.lineStyle(1, T.panelStroke || 0x5a4a2a, 0.5);
-        xpBg.strokeRoundedRect(barX, barY, barW, barH, 4);
-
+        xpBg.fillRoundedRect(barX, barY, barW * xpRatio, barH, 3);
+        xpBg.lineStyle(1, T.panelStroke || 0x5a4a2a, 0.4);
+        xpBg.strokeRoundedRect(barX, barY, barW, barH, 3);
         const xpLabel = gs.guildLevel >= 8 ? 'MAX' : `${gs.guildXp}/${xpNeeded}`;
-        this.add.text(barX + barW + 8, 14, `XP: ${xpLabel}`, {
-            fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
-            color: T.textSecondary || '#b8a888'
+        this.add.text(barX + barW + 6, 10, xpLabel, {
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
+        });
+
+        // 중앙: 로스터 요약
+        const maxRoster = GuildManager.getMaxRoster(gs);
+        this.add.text(640, 14, `용병 ${gs.roster.length}/${maxRoster}  ·  런 #${gs.runCount}  ·  평판 ${gs.guildReputation || 0}`, {
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
+        }).setOrigin(0.5, 0);
+
+        // 로스터 버튼
+        UIButton.create(this, 640, 38, 90, 20, '📋 로스터', {
+            variant: 'ghost', fontSize: 9,
+            onClick: () => this.scene.start('RosterScene', { gameState: gs })
         });
 
         // 골드
-        this.add.text(1260, 14, `💰 ${gs.gold.toLocaleString()}G`, {
-            fontSize: '18px', fontFamily: T.fontFamily || 'monospace',
+        this.add.text(1260, 10, `💰 ${gs.gold.toLocaleString()}G`, {
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace',
             color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(1, 0);
 
-        // 중앙 정보
-        const maxRoster = GuildManager.getMaxRoster(gs);
-        this.add.text(640, 14, `용병 ${gs.roster.length}/${maxRoster}  ·  런 #${gs.runCount}`, {
-            fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
-            color: T.textMuted || '#887860'
-        }).setOrigin(0.5, 0);
+        // 도감 / 자동화 (헤더 우측)
+        UIButton.create(this, 1180, 38, 70, 20, '📖 도감', {
+            variant: 'ghost', fontSize: 9,
+            onClick: () => this.scene.start('CodexScene', { gameState: gs })
+        });
 
-        this.add.text(640, 34, `${gs.reputation || 0} 평판`, {
-            fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
-            color: T.textMuted || '#887860'
-        }).setOrigin(0.5, 0);
+        if (typeof GuildHallManager !== 'undefined') {
+            GuildHallManager.ensureState(gs);
+            if ((gs.guildHall.automation || 0) >= 1) {
+                UIButton.create(this, 1090, 38, 80, 20, '⚙ 자동화', {
+                    variant: 'ghost', fontSize: 9,
+                    onClick: () => this.scene.start('AutomationScene', { gameState: gs })
+                });
+            }
+        }
     }
 
-    _drawRosterPanel() {
+    // ═══════════════════════════════════════════════════════
+    //  메인 — 3구역 카드 (출발 게이트)
+    // ═══════════════════════════════════════════════════════
+    _drawZoneCards() {
         const gs = this.gameState;
         const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
 
-        UIPanel.create(this, 8, 65, 265, 640, {
-            title: '◆ 로스터 ◆',
-            ornament: true,
-            innerGlow: true,
-        });
+        // 섹션 타이틀
+        this.add.text(640, 62, '◈  출발 게이트  ◈', {
+            fontSize: '14px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44', fontStyle: 'bold'
+        }).setOrigin(0.5);
 
-        if (gs.roster.length === 0) {
-            this.add.text(140, 200, '용병이 없습니다\n모집소에서 고용하세요', {
+        const cardW = 290, cardH = 340, gap = 15;
+        const totalW = 3 * cardW + 2 * gap;
+        const startX = (1280 - totalW) / 2;
+        const startY = 82;
+
+        ZONE_KEYS.forEach((key, idx) => {
+            const x = startX + idx * (cardW + gap);
+            this._drawZoneCard(key, x, startY, cardW, cardH);
+        });
+    }
+
+    _drawZoneCard(zoneKey, x, y, w, h) {
+        const gs = this.gameState;
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const zone = ZONE_DATA[zoneKey];
+        const zoneLevel = gs.zoneLevel[zoneKey] || 0;
+        const isLocked = zoneLevel === 0;
+
+        const bg = this.add.graphics();
+        const drawBg = (fill, strokeC, strokeA) => {
+            bg.clear();
+            bg.fillStyle(fill, 1);
+            bg.fillRoundedRect(x, y, w, h, 8);
+            // 상단 그라데이션 바
+            if (!isLocked) {
+                bg.fillStyle(zone.color, 0.08);
+                bg.fillRect(x + 2, y + 2, w - 4, 50);
+            }
+            bg.lineStyle(2, strokeC, strokeA);
+            bg.strokeRoundedRect(x, y, w, h, 8);
+            // 이중 테두리
+            bg.lineStyle(0.5, strokeC, strokeA * 0.3);
+            bg.strokeRoundedRect(x + 3, y + 3, w - 6, h - 6, 6);
+        };
+
+        if (isLocked) {
+            drawBg(0x151210, T.panelStroke || 0x5a4a2a, 0.3);
+        } else {
+            drawBg(T.cardFill || 0x231e14, zone.color, 0.6);
+        }
+
+        // 아이콘
+        const iconSize = isLocked ? '28px' : '36px';
+        this.add.text(x + w / 2, y + 30, zone.icon, {
+            fontSize: iconSize
+        }).setOrigin(0.5).setAlpha(isLocked ? 0.3 : 1);
+
+        // 구역 이름
+        this.add.text(x + w / 2, y + 60, zone.name, {
+            fontSize: '18px', fontFamily: T.fontFamily || 'monospace',
+            color: isLocked ? (T.textMuted || '#887860') : zone.textColor,
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        // 서브타이틀
+        this.add.text(x + w / 2, y + 82, zone.subtitle, {
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
+        }).setOrigin(0.5);
+
+        if (isLocked) {
+            // 잠긴 상태
+            this.add.text(x + w / 2, y + 130, '🔒', { fontSize: '32px' }).setOrigin(0.5).setAlpha(0.3);
+            this.add.text(x + w / 2, y + 175, `길드 Lv.${zone.unlockLevel} 해금`, {
                 fontSize: '12px', fontFamily: T.fontFamily || 'monospace',
-                color: T.textMuted || '#887860', align: 'center'
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5);
             return;
         }
 
-        // 전체 로스터 버튼
-        UIButton.create(this, 230, 78, 60, 22, '전체', {
-            variant: 'ghost',
-            fontSize: 10,
-            onClick: () => this.scene.start('RosterScene', { gameState: gs })
-        });
-
-        let yOff = 100;
-        gs.roster.forEach((merc, idx) => {
-            if (yOff > 670) return;
-            this._drawMercCard(merc, 18, yOff, 245);
-            yOff += 78;
-        });
-    }
-
-    _drawMercCard(merc, x, y, width) {
-        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
-        const base = merc.getBaseClass();
-        const rarityData = RARITY_DATA[merc.rarity];
-        const rarityTheme = T.rarity && T.rarity[merc.rarity] ? T.rarity[merc.rarity] : { color: rarityData.color, text: rarityData.textColor };
-        const stats = merc.getStats();
-        const hpRatio = merc.currentHp / stats.hp;
-
-        const cardBg = this.add.graphics();
-        const drawCard = (fill, stroke, strokeAlpha) => {
-            cardBg.clear();
-            cardBg.fillStyle(fill, 1);
-            cardBg.fillRoundedRect(x, y, width, 68, 5);
-            // 상단 하이라이트
-            cardBg.fillStyle(0xffffff, 0.03);
-            cardBg.fillRect(x + 2, y + 2, width - 4, 12);
-            // 테두리
-            cardBg.lineStyle(1, stroke, strokeAlpha);
-            cardBg.strokeRoundedRect(x, y, width, 68, 5);
-        };
-        drawCard(T.cardFill || 0x231e14, rarityTheme.color, 0.5);
-
-        // 이름
-        this.add.text(x + 8, y + 6, `${base.icon} ${merc.name}`, {
-            fontSize: '12px', fontFamily: T.fontFamily || 'monospace',
-            color: rarityTheme.text, fontStyle: 'bold'
-        });
-
-        // 레벨
-        this.add.text(x + width - 8, y + 6, `Lv.${merc.level}`, {
-            fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
-            color: T.textSecondary || '#b8a888'
-        }).setOrigin(1, 0);
-
-        // 클래스 + 희귀도
-        const rarityLabel = (T.rarity && T.rarity[merc.rarity]) ? T.rarity[merc.rarity].label : rarityData.name;
-        this.add.text(x + 8, y + 22, `${base.name} · ${rarityLabel}`, {
-            fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
-            color: T.textMuted || '#887860'
-        });
-
-        // 스탯
-        this.add.text(x + 8, y + 36, `HP:${merc.currentHp}/${stats.hp}  ATK:${stats.atk}  DEF:${stats.def}`, {
-            fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
-            color: T.textSecondary || '#b8a888'
-        });
-
-        // HP 바
-        const barW = width - 16, barH = 4, barY2 = y + 52;
-        const hpBar = this.add.graphics();
-        hpBar.fillStyle(0x1a1510, 1);
-        hpBar.fillRoundedRect(x + 8, barY2, barW, barH, 2);
-        const hpColor = hpRatio > 0.6 ? 0x66bb55 : hpRatio > 0.3 ? 0xcc8833 : 0xcc4422;
-        hpBar.fillStyle(hpColor, 0.9);
-        hpBar.fillRoundedRect(x + 8, barY2, barW * hpRatio, barH, 2);
-
-        // 특성 아이콘
-        const traitText = merc.traits.map(t => {
-            return t.type === 'positive' ? '✦' : t.type === 'legendary' ? '★' : '✧';
-        }).join('');
-        if (traitText) {
-            this.add.text(x + width - 8, y + 22, traitText, {
-                fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
-                color: T.textSecondary || '#b8a888'
-            }).setOrigin(1, 0);
-        }
-
-        // 파견 중 표시
-        if (typeof ExpeditionManager !== 'undefined' && ExpeditionManager.isOnExpedition(this.gameState, merc.id)) {
-            const exp = (this.gameState.activeExpeditions || []).find(e => e.partyIds.includes(merc.id));
-            const zoneName = exp ? ZONE_DATA[exp.zoneKey].name : '파견';
-            this.add.text(x + width - 8, y + 56, `📦 ${zoneName}`, {
-                fontSize: '8px', fontFamily: T.fontFamily || 'monospace',
-                color: T.textBlue || '#6699cc'
-            }).setOrigin(1, 0);
-        }
-
-        // 인터랙션
-        const hitZone = this.add.zone(x + width / 2, y + 34, width, 68).setInteractive({ useHandCursor: true });
-        hitZone.on('pointerover', () => {
-            drawCard(T.cardHover || 0x3a3020, rarityTheme.color, 0.9);
-            const lines = [
-                `${base.icon} ${merc.name} [${rarityLabel} ${base.name}]`,
-                `Lv.${merc.level}  XP: ${merc.xp}/${merc.level >= 30 ? 'MAX' : merc.getXpToNextLevel()}`,
-                `HP: ${merc.currentHp}/${stats.hp}`,
-                `ATK: ${stats.atk}  DEF: ${stats.def}  SPD: ${stats.moveSpeed}`,
-                `CRIT: ${Math.floor(stats.critRate * 100)}%  범위: ${stats.range}`,
-                '---',
-                ...merc.traits.map(t => {
-                    const sym = t.type === 'positive' ? '✦' : t.type === 'legendary' ? '★' : '✧';
-                    return `${sym} ${t.name}: ${t.desc}`;
-                })
-            ];
-            if (merc.level >= 5) {
-                lines.push('---', `스킬: ${base.skillName} — ${base.skillDesc}`);
-            }
-            lines.push('---', '클릭 — 상세/장비/해고');
-            UITooltip.show(this, x + width + 5, y, lines);
-        });
-        hitZone.on('pointerout', () => {
-            drawCard(T.cardFill || 0x231e14, rarityTheme.color, 0.5);
-            UITooltip.hide(this);
-        });
-        hitZone.on('pointerdown', () => {
-            UITooltip.hide(this);
-            this.scene.start('RosterScene', { gameState: this.gameState, selectedMercId: merc.id });
-        });
-    }
-
-    _drawExpeditionPanel() {
-        const gs = this.gameState;
-        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
-        const active = gs.activeExpeditions || [];
-        const pending = gs.pendingResults || [];
-        if (active.length === 0 && pending.length === 0) return;
-
-        const panelX = 875, panelY = 110, panelW = 390, panelH = 175;
-        UIPanel.create(this, panelX, panelY, panelW, panelH, {
-            title: '📦 서브 파견',
-            ornament: true,
-        });
-
-        const maxSlots = ExpeditionManager.getMaxSlots(gs);
-        this.add.text(panelX + panelW - 12, panelY + 14, `${active.length}/${maxSlots}`, {
-            fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
-            color: T.textSecondary || '#b8a888'
-        }).setOrigin(1, 0.5);
-
-        if (pending.length > 0) {
-            this.add.text(panelX + panelW - 12, panelY + 30, `🎁 수령 대기: ${pending.length}`, {
-                fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
-                color: T.textGold || '#ffcc44'
-            }).setOrigin(1, 0);
-        }
-
-        // 활성 파견 목록
-        let cy = panelY + 38;
-        active.slice(0, 3).forEach(exp => {
-            const zone = ZONE_DATA[exp.zoneKey];
-            const progress = ExpeditionManager.getProgress(exp);
-            const remainSec = Math.ceil(ExpeditionManager.getRemainingMs(exp) / 1000);
-            const mins = Math.floor(remainSec / 60);
-            const secs = remainSec % 60;
-            const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
-
-            this.add.text(panelX + 12, cy, `${zone.icon} ${zone.name} Lv.${exp.zoneLevel}`, {
-                fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
-                color: zone.textColor || T.textPrimary
-            });
-            this.add.text(panelX + panelW - 12, cy, timeStr, {
-                fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
-                color: T.textSecondary || '#b8a888'
-            }).setOrigin(1, 0);
-
-            // 진행 바
-            const barX2 = panelX + 12, barW = panelW - 24;
-            const barBg = this.add.graphics();
-            barBg.fillStyle(0x1a1510, 1);
-            barBg.fillRoundedRect(barX2, cy + 14, barW, 5, 2);
-            barBg.fillStyle(zone.color || (T.buttonPrimary || 0x8a6a2a), 0.8);
-            barBg.fillRoundedRect(barX2, cy + 14, barW * progress, 5, 2);
-            cy += 27;
-        });
-
-        // 수령 버튼
-        if (pending.length > 0) {
-            UIButton.create(this, panelX + panelW / 2, panelY + panelH - 20, 200, 28, `🎁 ${pending.length}건 모두 수령`, {
-                variant: 'primary',
-                fontSize: 11,
-                onClick: () => {
-                    const ids = pending.map(r => r.id);
-                    let totalGold = 0, totalLoot = 0;
-                    ids.forEach(id => {
-                        const r = ExpeditionManager.collectResult(gs, id);
-                        if (r) { totalGold += r.goldEarned; totalLoot += (r.loot || []).length; }
-                    });
-                    SaveManager.save(gs);
-                    UIToast.show(this, `+${totalGold}G, 장비 ${totalLoot}개`);
-                    this.scene.restart();
-                }
-            });
-        }
-    }
-
-    _drawFacilityGrid() {
-        const gs = this.gameState;
-        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
-
-        const startX = 310;
-        const startY = 85;
-        const cellW = 135;
-        const cellH = 100;
-        const gap = 12;
-        const cols = 3;
-
-        const facilityOrder = ['recruit', 'storage', 'equipment', 'gate', 'forge', 'auction', 'training', 'temple', 'intel', 'eliteRecruit', 'vault', 'guildHall'];
-
-        // 시설 제목
-        this.add.text(startX + (cols * (cellW + gap) - gap) / 2, 68, '◆ 시설 ◆', {
-            fontSize: '12px', fontFamily: T.fontFamily || 'monospace',
-            color: T.textAccent || '#cc8833', fontStyle: 'bold'
+        // 구역 레벨
+        const lvBg = this.add.graphics();
+        lvBg.fillStyle(zone.color, 0.15);
+        lvBg.fillRoundedRect(x + w / 2 - 50, y + 98, 100, 24, 4);
+        lvBg.lineStyle(1, zone.color, 0.3);
+        lvBg.strokeRoundedRect(x + w / 2 - 50, y + 98, 100, 24, 4);
+        this.add.text(x + w / 2, y + 110, `Lv. ${zoneLevel}`, {
+            fontSize: '14px', fontFamily: T.fontFamily || 'monospace',
+            color: zone.textColor, fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        facilityOrder.forEach((key, idx) => {
-            const col = idx % cols;
-            const row = Math.floor(idx / cols);
-            const x = startX + col * (cellW + gap);
-            const y = startY + row * (cellH + gap);
-            this._drawFacilityCell(key, x, y, cellW, cellH);
+        // 설명
+        this.add.text(x + w / 2, y + 140, zone.desc, {
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888', align: 'center',
+            wordWrap: { width: w - 24 }
+        }).setOrigin(0.5);
+
+        // 보상 정보
+        const rewardY = y + 170;
+        const divG = this.add.graphics();
+        divG.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
+        divG.lineBetween(x + 15, rewardY, x + w - 15, rewardY);
+
+        this.add.text(x + 15, rewardY + 8, `💰 ${zone.baseGoldReward}~G`, {
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44'
+        });
+        this.add.text(x + 15, rewardY + 22, `📦 ${zone.lootCount.min}~${zone.lootCount.max}개`, {
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
+        });
+        this.add.text(x + w - 15, rewardY + 8, `⭐ ${zone.baseXpReward} XP`, {
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: '#4488ff'
+        }).setOrigin(1, 0);
+        this.add.text(x + w - 15, rewardY + 22, `☠ ${Math.floor(zone.deathChance * 100)}%`, {
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: '#ff6666'
+        }).setOrigin(1, 0);
+
+        // 특수 재료
+        this.add.text(x + w / 2, rewardY + 42, `특수 소재: ${zone.specialMaterial}`, {
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
+        }).setOrigin(0.5);
+
+        // 활성 레벨 효과
+        const activeEffects = getZoneLevelEffects(zoneKey, zoneLevel);
+        if (activeEffects.length > 0) {
+            const effectY = rewardY + 60;
+            const effG = this.add.graphics();
+            effG.lineStyle(1, zone.color, 0.15);
+            effG.lineBetween(x + 15, effectY, x + w - 15, effectY);
+            activeEffects.slice(-2).forEach((eff, i) => {
+                this.add.text(x + w / 2, effectY + 8 + i * 14, `⚡ ${eff.name}`, {
+                    fontSize: '8px', fontFamily: T.fontFamily || 'monospace',
+                    color: zone.textColor
+                }).setOrigin(0.5).setAlpha(0.7);
+            });
+        }
+
+        // 파견 현황
+        const activeExp = (gs.activeExpeditions || []).filter(e => e.zoneKey === zoneKey);
+        if (activeExp.length > 0) {
+            this.add.text(x + w / 2, y + h - 68, `📦 파견 ${activeExp.length}건 진행 중`, {
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
+                color: T.textBlue || '#6699cc'
+            }).setOrigin(0.5);
+        }
+
+        // ⚔ 출전 버튼 (메인 CTA)
+        UIButton.create(this, x + w / 2, y + h - 38, w - 30, 40, `⚔  ${zone.name} 출전`, {
+            variant: 'primary', fontSize: 14,
+            onClick: () => this.scene.start('DeployScene', {
+                gameState: gs, selectedZone: zoneKey
+            })
+        });
+
+        // 호버
+        const hitZone = this.add.zone(x + w / 2, y + h / 2 - 25, w, h - 50).setInteractive({ useHandCursor: true });
+        hitZone.on('pointerover', () => drawBg(T.cardHover || 0x3a3020, zone.color, 0.9));
+        hitZone.on('pointerout', () => drawBg(T.cardFill || 0x231e14, zone.color, 0.6));
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  하단 — 시설 바 (카테고리별 정리)
+    // ═══════════════════════════════════════════════════════
+    _drawFacilityBar() {
+        const gs = this.gameState;
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const barY = 430;
+
+        // 구분선
+        const divG = this.add.graphics();
+        divG.lineStyle(1, T.ornament || 0x8a7a4a, 0.3);
+        divG.lineBetween(15, barY, 1265, barY);
+        divG.lineStyle(0.5, T.divider || 0x5a4a2a, 0.2);
+        divG.lineBetween(15, barY + 2, 1265, barY + 2);
+
+        // 카테고리 정의
+        const categories = [
+            {
+                label: '⚔ 용병',
+                items: ['recruit', 'eliteRecruit', 'training']
+            },
+            {
+                label: '🎽 장비',
+                items: ['equipment', 'storage', 'forge']
+            },
+            {
+                label: '💰 경제',
+                items: ['auction', 'vault']
+            },
+            {
+                label: '🏛 길드',
+                items: ['temple', 'intel', 'guildHall']
+            }
+        ];
+
+        const totalCats = categories.length;
+        const catGap = 12;
+        const catAreaW = (1280 - 30 - (totalCats - 1) * catGap) / totalCats;
+        let catX = 15;
+
+        categories.forEach((cat, catIdx) => {
+            const cx = catX;
+            const cy = barY + 10;
+
+            // 카테고리 배경
+            const catBg = this.add.graphics();
+            catBg.fillStyle(T.panelFill || 0x2a2218, 0.5);
+            catBg.fillRoundedRect(cx, cy, catAreaW, 170, 6);
+            catBg.lineStyle(1, T.panelStroke || 0x5a4a2a, 0.3);
+            catBg.strokeRoundedRect(cx, cy, catAreaW, 170, 6);
+
+            // 카테고리 레이블
+            this.add.text(cx + catAreaW / 2, cy + 12, cat.label, {
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
+                color: T.textAccent || '#cc8833', fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            // 구분선
+            const sepG = this.add.graphics();
+            sepG.lineStyle(1, T.divider || 0x5a4a2a, 0.2);
+            sepG.lineBetween(cx + 10, cy + 26, cx + catAreaW - 10, cy + 26);
+
+            // 시설 아이템들
+            const itemW = Math.min(90, (catAreaW - 20) / Math.max(cat.items.length, 1));
+            const itemStartX = cx + (catAreaW - cat.items.length * itemW) / 2;
+
+            cat.items.forEach((key, itemIdx) => {
+                const fac = FACILITY_DATA[key];
+                if (!fac) return;
+                const ix = itemStartX + itemIdx * itemW + itemW / 2;
+                const iy = cy + 32;
+                this._drawFacilityIcon(key, fac, ix, iy, itemW - 8);
+            });
+
+            catX += catAreaW + catGap;
         });
     }
 
-    _drawFacilityCell(key, x, y, w, h) {
+    _drawFacilityIcon(key, fac, cx, cy, w) {
         const gs = this.gameState;
         const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
-        const fac = FACILITY_DATA[key];
         const isUnlocked = gs.unlockedFacilities.includes(key);
         const canUnlock = GuildManager.canUnlockFacility(gs, key);
         const levelReached = gs.guildLevel >= fac.unlockLevel;
 
-        const bg = this.add.graphics();
-        const drawCell = (fill, stroke, strokeAlpha) => {
-            bg.clear();
-            bg.fillStyle(fill, 1);
-            bg.fillRoundedRect(x, y, w, h, 6);
-            // 상단 하이라이트
-            if (isUnlocked) {
-                bg.fillStyle(0xffffff, 0.03);
-                bg.fillRect(x + 2, y + 2, w - 4, 16);
-            }
-            bg.lineStyle(1, stroke, strokeAlpha);
-            bg.strokeRoundedRect(x, y, w, h, 6);
+        const iconBg = this.add.graphics();
+        const drawIcon = (fill, strokeC, strokeA) => {
+            iconBg.clear();
+            iconBg.fillStyle(fill, 1);
+            iconBg.fillRoundedRect(cx - w / 2, cy, w, 120, 5);
+            iconBg.lineStyle(1, strokeC, strokeA);
+            iconBg.strokeRoundedRect(cx - w / 2, cy, w, 120, 5);
         };
 
         if (isUnlocked) {
-            drawCell(T.cardFill || 0x231e14, T.panelStroke || 0x5a4a2a, 0.7);
+            drawIcon(T.cardFill || 0x231e14, T.panelStroke || 0x5a4a2a, 0.5);
         } else {
-            drawCell(0x1a1812, 0x3a3428, 0.4);
+            drawIcon(0x1a1812, 0x3a3428, 0.3);
         }
 
         // 아이콘
-        const iconSize = isUnlocked ? '24px' : '20px';
-        this.add.text(x + w / 2, y + 22, fac.icon, {
-            fontSize: iconSize
-        }).setOrigin(0.5).setAlpha(isUnlocked ? 1 : 0.4);
+        this.add.text(cx, cy + 24, fac.icon, {
+            fontSize: isUnlocked ? '22px' : '18px'
+        }).setOrigin(0.5).setAlpha(isUnlocked ? 1 : 0.35);
 
         // 이름
-        this.add.text(x + w / 2, y + 48, fac.name, {
-            fontSize: '12px', fontFamily: T.fontFamily || 'monospace',
+        this.add.text(cx, cy + 50, fac.name, {
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
             color: isUnlocked ? (T.textPrimary || '#e8d8c0') : (T.textMuted || '#887860'),
-            fontStyle: 'bold'
+            fontStyle: 'bold', align: 'center',
+            wordWrap: { width: w - 4 }
         }).setOrigin(0.5);
 
+        // 상태 표시
         if (!isUnlocked) {
             if (canUnlock) {
-                this.add.text(x + w / 2, y + 66, `해금 (${fac.cost}G)`, {
-                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+                this.add.text(cx, cy + 75, `해금`, {
+                    fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
+                    color: T.textGold || '#ffcc44'
+                }).setOrigin(0.5);
+                this.add.text(cx, cy + 88, `${fac.cost}G`, {
+                    fontSize: '8px', fontFamily: T.fontFamily || 'monospace',
                     color: T.textGold || '#ffcc44'
                 }).setOrigin(0.5);
             } else if (levelReached) {
-                this.add.text(x + w / 2, y + 66, `${fac.cost}G 필요`, {
-                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+                this.add.text(cx, cy + 80, `${fac.cost}G`, {
+                    fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
                     color: T.textDanger || '#cc4422'
                 }).setOrigin(0.5);
             } else {
-                this.add.text(x + w / 2, y + 66, `Lv.${fac.unlockLevel} 필요`, {
-                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+                this.add.text(cx, cy + 75, '🔒', { fontSize: '12px' }).setOrigin(0.5).setAlpha(0.25);
+                this.add.text(cx, cy + 95, `Lv.${fac.unlockLevel}`, {
+                    fontSize: '8px', fontFamily: T.fontFamily || 'monospace',
                     color: T.textMuted || '#887860'
                 }).setOrigin(0.5);
             }
-            if (!canUnlock) {
-                this.add.text(x + w / 2, y + h / 2, '🔒', { fontSize: '16px' })
-                    .setOrigin(0.5).setAlpha(0.2);
-            }
         } else {
-            this.add.text(x + w / 2, y + 66, fac.desc, {
-                fontSize: '8px', fontFamily: T.fontFamily || 'monospace',
+            this.add.text(cx, cy + 75, fac.desc, {
+                fontSize: '7px', fontFamily: T.fontFamily || 'monospace',
                 color: T.textMuted || '#887860',
-                wordWrap: { width: w - 14 }, align: 'center'
+                wordWrap: { width: w - 6 }, align: 'center'
             }).setOrigin(0.5);
         }
 
-        // 인터랙션
-        const hitZone = this.add.zone(x + w / 2, y + h / 2, w, h).setInteractive({ useHandCursor: true });
+        // 히트존
+        const hitZone = this.add.zone(cx, cy + 60, w, 120).setInteractive({ useHandCursor: true });
         hitZone.on('pointerdown', () => this._onFacilityClick(key));
-
         hitZone.on('pointerover', () => {
             if (isUnlocked) {
-                drawCell(T.cardHover || 0x3a3020, T.ornament || 0x8a7a4a, 0.9);
+                drawIcon(T.cardHover || 0x3a3020, T.ornament || 0x8a7a4a, 0.8);
             } else if (canUnlock) {
-                drawCell(0x2a2418, T.buttonPrimary || 0x8a6a2a, 0.8);
+                drawIcon(0x2a2418, T.buttonPrimary || 0x8a6a2a, 0.7);
             }
         });
         hitZone.on('pointerout', () => {
             if (isUnlocked) {
-                drawCell(T.cardFill || 0x231e14, T.panelStroke || 0x5a4a2a, 0.7);
+                drawIcon(T.cardFill || 0x231e14, T.panelStroke || 0x5a4a2a, 0.5);
             } else {
-                drawCell(0x1a1812, 0x3a3428, 0.4);
+                drawIcon(0x1a1812, 0x3a3428, 0.3);
             }
         });
     }
@@ -486,7 +482,7 @@ class TownScene extends Phaser.Scene {
             } else if (gs.guildLevel < fac.unlockLevel) {
                 UIToast.show(this, `길드 Lv.${fac.unlockLevel} 필요`, { type: 'danger' });
             } else {
-                UIToast.show(this, `골드가 부족합니다 (${fac.cost}G 필요)`, { type: 'danger' });
+                UIToast.show(this, `골드 부족 (${fac.cost}G 필요)`, { type: 'danger' });
             }
             return;
         }
@@ -498,110 +494,109 @@ class TownScene extends Phaser.Scene {
         }
     }
 
-    _drawBottomBar() {
+    // ═══════════════════════════════════════════════════════
+    //  우측 사이드 — 파견 현황 + 메시지 로그
+    // ═══════════════════════════════════════════════════════
+    _drawSidePanel() {
         const gs = this.gameState;
         const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
 
-        // 하단 바 배경
-        const btm = this.add.graphics();
-        btm.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
-        btm.lineBetween(280, 688, 1000, 688);
+        // 파견 현황 (하단 바 위 오른쪽 영역)
+        const active = gs.activeExpeditions || [];
+        const pending = gs.pendingResults || [];
 
-        // 자동화 버튼
-        if (typeof GuildHallManager !== 'undefined') {
-            GuildHallManager.ensureState(gs);
-            const stage = gs.guildHall.automation || 0;
-            if (stage >= 1) {
-                UIButton.create(this, 580, 703, 140, 26, '⚙ 자동화 설정', {
-                    variant: 'info',
-                    fontSize: 10,
-                    onClick: () => this.scene.start('AutomationScene', { gameState: gs })
-                });
-            }
+        if (active.length > 0 || pending.length > 0) {
+            this._drawExpeditionMini(active, pending);
         }
 
-        // 도감 버튼
-        UIButton.create(this, 740, 703, 100, 26, '📖 도감', {
-            variant: 'ghost',
-            fontSize: 10,
-            onClick: () => this.scene.start('CodexScene', { gameState: gs })
-        });
+        // 메시지 로그 (하단 바 아래)
+        this._drawMessageLogMini();
     }
 
-    _drawMessageLog() {
+    _drawExpeditionMini(active, pending) {
         const gs = this.gameState;
         const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
-        const panelX = 815;
+        const px = 948, py = 612, pw = 322, ph = 100;
 
-        UIPanel.create(this, panelX, 65, 457, 420, {
-            title: '◆ 최근 소식 ◆',
-            ornament: true,
+        const epBg = this.add.graphics();
+        epBg.fillStyle(T.panelFill || 0x2a2218, 0.85);
+        epBg.fillRoundedRect(px, py, pw, ph, 6);
+        epBg.lineStyle(1, T.panelStroke || 0x5a4a2a, 0.4);
+        epBg.strokeRoundedRect(px, py, pw, ph, 6);
+
+        this.add.text(px + 8, py + 5, '📦 서브 파견', {
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textAccent || '#cc8833', fontStyle: 'bold'
+        });
+
+        const maxSlots = ExpeditionManager.getMaxSlots(gs);
+        this.add.text(px + pw - 8, py + 5, `${active.length}/${maxSlots}`, {
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
+        }).setOrigin(1, 0);
+
+        let ey = py + 22;
+        active.slice(0, 2).forEach(exp => {
+            const zone = ZONE_DATA[exp.zoneKey];
+            const remainSec = Math.ceil(ExpeditionManager.getRemainingMs(exp) / 1000);
+            const mins = Math.floor(remainSec / 60);
+            const secs = remainSec % 60;
+            this.add.text(px + 8, ey, `${zone.icon} ${zone.name}`, {
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: zone.textColor
+            });
+            this.add.text(px + pw - 8, ey, `${mins}:${secs.toString().padStart(2, '0')}`, {
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
+            }).setOrigin(1, 0);
+            ey += 16;
+        });
+        if (active.length > 2) {
+            this.add.text(px + 8, ey, `... +${active.length - 2}건`, {
+                fontSize: '8px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
+            });
+        }
+
+        if (pending.length > 0) {
+            UIButton.create(this, px + pw / 2, py + ph - 16, pw - 20, 22, `🎁 ${pending.length}건 수령`, {
+                variant: 'primary', fontSize: 10,
+                onClick: () => {
+                    pending.forEach(r => ExpeditionManager.collectResult(gs, r.id));
+                    SaveManager.save(gs);
+                    this.scene.restart();
+                }
+            });
+        }
+    }
+
+    _drawMessageLogMini() {
+        const gs = this.gameState;
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const px = 10, py = 612, pw = 930, ph = 100;
+
+        const logBg = this.add.graphics();
+        logBg.fillStyle(T.panelFill || 0x2a2218, 0.5);
+        logBg.fillRoundedRect(px, py, pw, ph, 6);
+        logBg.lineStyle(1, T.panelStroke || 0x5a4a2a, 0.2);
+        logBg.strokeRoundedRect(px, py, pw, ph, 6);
+
+        this.add.text(px + 8, py + 5, '◆ 최근 소식', {
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textAccent || '#cc8833', fontStyle: 'bold'
         });
 
         const messages = gs.messages || [];
-        const display = messages.slice(0, 12);
-
+        const display = messages.slice(0, 4);
         display.forEach((msg, idx) => {
-            const alpha = 1 - idx * 0.05;
-            this.add.text(panelX + 12, 98 + idx * 20, `· ${msg}`, {
-                fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+            this.add.text(px + 12, py + 22 + idx * 16, `· ${msg}`, {
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
                 color: T.textSecondary || '#b8a888'
-            }).setAlpha(Math.max(0.3, alpha));
+            }).setAlpha(1 - idx * 0.15);
         });
 
         if (messages.length === 0) {
-            this.add.text(panelX + 228, 250, '아직 소식이 없습니다', {
-                fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
+            this.add.text(px + pw / 2, py + ph / 2, '아직 소식이 없습니다', {
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
                 color: T.textMuted || '#887860'
             }).setOrigin(0.5);
-        }
-
-        // 상인 호감도
-        if (typeof MERCHANT_DATA !== 'undefined') {
-            UIPanel.create(this, panelX, 495, 457, 210, {
-                title: '◆ 상인 호감도 ◆',
-            });
-            if (typeof initMerchantFavor === 'function') initMerchantFavor(gs);
-            let my = 528;
-            for (const [key, data] of Object.entries(MERCHANT_DATA)) {
-                const favor = gs.merchantFavor?.[key] || 0;
-                const tier = typeof getMerchantTier === 'function' ? getMerchantTier(gs, key) : null;
-                const tierName = tier ? tier.name : '?';
-                const barW = 120, barH = 5;
-                const ratio = Math.min(1, favor / 10);
-
-                this.add.text(panelX + 12, my, `${data.icon} ${data.name}`, {
-                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
-                    color: T.textPrimary || '#e8d8c0', fontStyle: 'bold'
-                });
-                this.add.text(panelX + 100, my, `[${tierName}]`, {
-                    fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
-                    color: T.textMuted || '#887860'
-                });
-
-                const barBg = this.add.graphics();
-                barBg.fillStyle(0x1a1510, 1);
-                barBg.fillRoundedRect(panelX + 250, my + 2, barW, barH, 2);
-                if (ratio > 0) {
-                    barBg.fillStyle(T.buttonPrimary || 0x8a6a2a, 0.8);
-                    barBg.fillRoundedRect(panelX + 250, my + 2, barW * ratio, barH, 2);
-                }
-                barBg.lineStyle(0.5, T.panelStroke || 0x5a4a2a, 0.3);
-                barBg.strokeRoundedRect(panelX + 250, my + 2, barW, barH, 2);
-
-                this.add.text(panelX + 250 + barW + 8, my, `${favor}`, {
-                    fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
-                    color: T.textMuted || '#887860'
-                });
-
-                if (tier && tier.perks) {
-                    this.add.text(panelX + 12, my + 15, tier.perks, {
-                        fontSize: '8px', fontFamily: T.fontFamily || 'monospace',
-                        color: T.textSuccess || '#66bb55'
-                    });
-                }
-                my += 36;
-            }
         }
     }
 }
