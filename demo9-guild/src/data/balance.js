@@ -168,6 +168,16 @@ const BALANCE = {
         IDENTIFY_BUTTON_COST: 30
     },
 
+    // === 구역 스케일링 (99단계 밸런스) ===
+    ZONE_SCALE: {
+        // baseMult: ZL1 기준 적 스탯 배율 (해금 시점 고려)
+        // BP=GL1 해금 → 약하게, Cargo=GL3 → 중간, BO=GL5 → 강하게
+        BASE_MULT: { bloodpit: 0.65, cargo: 0.70, blackout: 0.75 },
+        // 레벨당 증가량
+        PER_LEVEL: 0.06,
+        // getZoneScaleMult(zoneKey, zoneLevel) → baseMult + (zl-1) * perLevel
+    },
+
     // === 시간 ===
     TIME_OFFLINE_MAX_HOURS: 4,
     TIME_EVENT_INTERVAL_MIN: 30
@@ -218,6 +228,15 @@ const BalanceHelper = {
     },
     getGuildHallCost(stage) {
         return Math.round(BALANCE.GUILD_HALL_BASE_COST * Math.pow(BALANCE.GUILD_HALL_COST_MULT, stage - 1));
+    },
+    /** 통합 구역 스케일링 배율
+     *  ZL1: baseMult (BP=0.65, Cargo=0.70, BO=0.75)
+     *  ZL2+: baseMult + (zl-1) * 0.06
+     *  ZL99: BP≈6.53, Cargo≈6.58, BO≈6.63 */
+    getZoneScaleMult(zoneKey, zoneLevel) {
+        const zs = BALANCE.ZONE_SCALE;
+        const base = zs.BASE_MULT[zoneKey] || zs.BASE_MULT.bloodpit;
+        return base + (zoneLevel - 1) * zs.PER_LEVEL;
     }
 };
 

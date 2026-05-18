@@ -49,12 +49,12 @@ const ENEMY_DATA = {
     },
     shielder: {
         name: '방패병', role: 'melee', color: 0x6688aa, zone: 'cargo',
-        hp: 300, atk: 10, def: 20, attackSpeed: 2200, range: 50, moveSpeed: 45,
+        hp: 200, atk: 10, def: 14, attackSpeed: 2200, range: 50, moveSpeed: 45,
         critRate: 0.03, critDmg: 1.3
     },
     bomber: {
         name: '폭파병', role: 'ranged', color: 0xff8800, zone: 'cargo',
-        hp: 50, atk: 30, def: 1, attackSpeed: 2500, range: 200, moveSpeed: 90,
+        hp: 50, atk: 20, def: 1, attackSpeed: 2500, range: 200, moveSpeed: 90,
         critRate: 0.20, critDmg: 2.0
     },
     elite_shielder: {
@@ -86,7 +86,7 @@ const ENEMY_DATA = {
     },
     bone_golem: {
         name: '뼈 골렘', role: 'melee', color: 0xccccaa, zone: 'blackout',
-        hp: 400, atk: 18, def: 8, attackSpeed: 2500, range: 55, moveSpeed: 35,
+        hp: 250, atk: 18, def: 8, attackSpeed: 2500, range: 55, moveSpeed: 35,
         critRate: 0.05, critDmg: 1.5
     },
     shade: {
@@ -151,11 +151,11 @@ function getMaxRounds(zoneLevel) {
 function getEnemyComposition(round, zoneLevel, zoneKey) {
     const maxRounds = getMaxRounds(zoneLevel);
     const progress = round / maxRounds;
-    // v2 밸런스: Lv1 0.75배, Lv2 0.90배, Lv3+ 점진 증가, Lv99 약 6.7배
-    let scaleMult;
-    if (zoneLevel === 1) scaleMult = 0.75;
-    else if (zoneLevel === 2) scaleMult = 0.90;
-    else scaleMult = 1 + (zoneLevel - 3) * 0.06;
+    // 통합 구역 스케일링: BALANCE.ZONE_SCALE 기반
+    // BP ZL1=0.65, Cargo ZL1=0.70, BO ZL1=0.75, 이후 레벨당 +0.06
+    const scaleMult = (typeof BalanceHelper !== 'undefined')
+        ? BalanceHelper.getZoneScaleMult(zoneKey || 'bloodpit', zoneLevel)
+        : 0.65 + (zoneLevel - 1) * 0.06;
     let composition;
 
     if (zoneKey === 'cargo') {
