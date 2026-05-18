@@ -531,6 +531,79 @@ class DeployScene extends Phaser.Scene {
         this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode, selectedLevel: this.selectedLevel });
     }
 
+    _drawPocketSlots(panelX, panelY, panelW) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const gs = this.gameState;
+        const fLevel = (gs.guildHall && gs.guildHall.pit_control) || 0;
+        if (fLevel < 2) return 0;   // F2 미해금
+        if (typeof POCKET_ITEM_DATA === 'undefined' || typeof POCKET_ITEM_SHOP === 'undefined') return 0;
+
+        if (!gs.pocketSlots) gs.pocketSlots = [null, null];
+        const slots = gs.pocketSlots;
+
+        const sx = panelX + 10;
+        let cy = panelY;
+
+        this.add.text(sx, cy, '🧪 포켓 아이템 (BP 쉬는 곳 전용)', {
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textHighlight || '#ffcc66', fontStyle: 'bold'
+        });
+        cy += 20;
+
+        // 현재 장착 슬롯
+        for (let i = 0; i < slots.length; i++) {
+            const itemKey = slots[i];
+            const item = itemKey ? POCKET_ITEM_DATA[itemKey] : null;
+            const label = item ? `${item.icon} ${item.name}` : `슬롯 ${i+1}: (비어있음)`;
+            const color = item ? '#88ccee' : '#665544';
+            this.add.text(sx, cy, label, {
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color
+            });
+            if (item) {
+                UIButton.create(this, sx + panelW - 70, cy + 2, 50, 18, '해제', {
+                    color: 0x553333, hoverColor: 0x664444, textColor: '#ffaaaa', fontSize: 9,
+                    onClick: () => {
+                        gs.pocketSlots[i] = null;
+                        gs.gold += Math.floor((POCKET_ITEM_SHOP[itemKey]?.cost || 0) * 0.5);
+                        SaveManager.save(gs);
+                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode, selectedLevel: this.selectedLevel });
+                    }
+                });
+            }
+            cy += 20;
+        }
+        cy += 6;
+
+        // 구매 목록
+        const emptySlotIdx = slots.indexOf(null);
+        Object.entries(POCKET_ITEM_SHOP).forEach(([key, shop]) => {
+            const item = POCKET_ITEM_DATA[key];
+            if (!item) return;
+            const canBuy = emptySlotIdx >= 0 && gs.gold >= shop.cost;
+            const label = `${item.icon} ${item.name} — ${shop.cost}G`;
+            const color = canBuy ? '#aaccaa' : '#665544';
+            this.add.text(sx + 4, cy, label, {
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color
+            });
+            if (canBuy) {
+                UIButton.create(this, sx + panelW - 70, cy + 2, 50, 18, '구매', {
+                    color: 0x335533, hoverColor: 0x446644, textColor: '#88ffaa', fontSize: 9,
+                    onClick: () => {
+                        const slot = gs.pocketSlots.indexOf(null);
+                        if (slot < 0 || gs.gold < shop.cost) return;
+                        gs.gold -= shop.cost;
+                        gs.pocketSlots[slot] = key;
+                        SaveManager.save(gs);
+                        this.scene.restart({ gameState: gs, selectedZone: this.selectedZone, deployedIds: this.deployedIds, deployMode: this.deployMode, selectedLevel: this.selectedLevel });
+                    }
+                });
+            }
+            cy += 18;
+        });
+
+        return cy - panelY; // 사용한 높이 반환
+    }
+
     _drawDepartButton(panelX, panelY, panelW, panelH) {
         const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
@@ -544,6 +617,11 @@ class DeployScene extends Phaser.Scene {
         if (canDepart && !isMain) {
             const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
             if (maxUnlocked === 0) canDepart = false;
+        }
+
+        // BP 메인 전투 시 포켓 아이템 상점 표시
+        if (isMain && zoneKey === 'bloodpit') {
+            this._drawPocketSlots(panelX, panelY + panelH - 230, panelW - 20);
         }
 
         const btnLabel = isMain ? '⚔ 출발 (메인 전투)' : '📦 파견 시작';

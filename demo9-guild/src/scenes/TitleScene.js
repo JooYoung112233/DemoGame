@@ -206,8 +206,11 @@ class TitleScene extends Phaser.Scene {
     _startNewGame() {
         SaveManager.deleteSave();
         const gameState = GuildManager.createDefaultState();
+        // 온보딩: 고정 스타터 파티 4명 (전사+도적+사제+궁수) 즉시 로스터 배치
+        const starterParty = MercenaryManager.generateStarterParty();
+        starterParty.forEach(merc => gameState.roster.push(merc));
         MercenaryManager.generateRecruitPool(gameState);
-        GuildManager.addMessage(gameState, '길드가 설립되었습니다. 용병을 모집하세요!');
+        GuildManager.addMessage(gameState, '길드가 설립되었습니다. 초기 용병 4명이 배치되었습니다!');
         gameState._isNewGame = true;  // 첫 플레이 시퀀스 트리거
         SaveManager.save(gameState);
         this.scene.start('TownScene', { gameState });

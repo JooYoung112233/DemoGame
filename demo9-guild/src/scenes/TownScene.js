@@ -79,7 +79,7 @@ class TownScene extends Phaser.Scene {
         const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7).setDepth(900);
 
         // 환영 메시지 패널
-        const panelW = 500, panelH = 280;
+        const panelW = 500, panelH = 320;
         const px = 640 - panelW / 2, py = 360 - panelH / 2;
 
         const bg = this.add.graphics().setDepth(901);
@@ -97,29 +97,37 @@ class TownScene extends Phaser.Scene {
             color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(902);
 
+        // 스타터 용병 목록 표시
+        const starterNames = gs.roster.map(m => {
+            const base = m.getBaseClass();
+            return `${base.icon} ${m.name} (${base.name})`;
+        });
+
         const lines = [
             '당신은 신생 용병 길드의 길드마스터입니다.',
             '',
-            '용병을 고용하고, 장비를 갖추고,',
-            '위험한 구역에 파견하여 길드를 성장시키세요.',
+            '초기 용병 4명이 배치되었습니다:',
+            ...starterNames,
             '',
-            '먼저 용병 모집소에서 첫 용병을 고용합시다!'
+            '전열(전사·도적)과 후열(사제·궁수)을 배치하고 출격하세요!'
         ];
 
         lines.forEach((line, i) => {
-            this.add.text(640, py + 110 + i * 18, line, {
-                fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
-                color: line === '' ? '#000' : (T.textSecondary || '#b8a888'),
+            const isName = starterNames.includes(line);
+            this.add.text(640, py + 110 + i * 16, line, {
+                fontSize: isName ? '12px' : '11px', fontFamily: T.fontFamily || 'monospace',
+                color: line === '' ? '#000' : isName ? (T.textGold || '#ffcc44') : (T.textSecondary || '#b8a888'),
+                fontStyle: isName ? 'bold' : 'normal',
                 align: 'center'
             }).setOrigin(0.5).setDepth(902);
         });
 
         const allItems = [overlay, bg];
 
-        UIButton.create(this, 640, py + panelH - 35, 200, 40, '▸ 용병 모집소로 이동', {
+        UIButton.create(this, 640, py + panelH - 35, 200, 40, '▸ 편성하러 가기', {
             variant: 'primary', fontSize: 14, depth: 903,
             onClick: () => {
-                this.scene.start('RecruitScene', { gameState: gs });
+                this.scene.start('DeployScene', { gameState: gs });
             }
         });
     }

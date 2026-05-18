@@ -1,6 +1,6 @@
 class MercenaryManager {
     static generateRecruitPool(state) {
-        const baseCount = 3 + Math.floor(Math.random() * 3);
+        const baseCount = 4;
         // 길드 회관 인프라 — 모집 풀 보너스
         const ghBonus = (typeof GuildHallManager !== 'undefined')
             ? (GuildHallManager.getEffects(state).recruitPoolBonus || 0) : 0;
@@ -32,6 +32,22 @@ class MercenaryManager {
             if (roll < cumulative) return rarity;
         }
         return 'common';
+    }
+
+    /** 온보딩 고정 스타터 파티 — 전열(전사+도적) + 후열(사제+궁수) */
+    static generateStarterParty() {
+        const starters = [
+            { classKey: 'warrior', name: generateMercName() },
+            { classKey: 'rogue',   name: generateMercName() },
+            { classKey: 'priest',  name: generateMercName() },
+            { classKey: 'archer',  name: generateMercName() }
+        ];
+        return starters.map(s => {
+            const traits = getRandomTraits('common', s.classKey);
+            const merc = new Mercenary(s.classKey, 'common', s.name, traits);
+            merc.fullHeal();
+            return merc;
+        });
     }
 
     static hire(state, mercId) {
