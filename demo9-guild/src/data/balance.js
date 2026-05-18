@@ -19,10 +19,10 @@ const BALANCE = {
     GUILD_LEVEL_XP: [0, 100, 250, 500, 800, 1200, 1800, 2500],
     GUILD_MAX_LEVEL: 8,
     ROSTER_LIMITS: {
-        1: { max: 4, deploy: 2 }, 2: { max: 4, deploy: 2 },
-        3: { max: 6, deploy: 3 }, 4: { max: 6, deploy: 3 },
-        5: { max: 8, deploy: 4 }, 6: { max: 8, deploy: 4 },
-        7: { max: 10, deploy: 5 }, 8: { max: 10, deploy: 5 }
+        1: { max: 4, deploy: 4 }, 2: { max: 5, deploy: 4 },
+        3: { max: 6, deploy: 4 }, 4: { max: 7, deploy: 4 },
+        5: { max: 8, deploy: 4 }, 6: { max: 9, deploy: 4 },
+        7: { max: 10, deploy: 4 }, 8: { max: 12, deploy: 4 }
     },
 
     // === 길드 회관 ===

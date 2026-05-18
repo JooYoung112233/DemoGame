@@ -16,10 +16,17 @@
 
 ```
 DeployScene → 구역=Blackout 선택 → 출발
-→ BlackoutProtoSelectScene (3개 카드 메뉴)
-→ Grid / Lane / Rune 중 하나 선택 → 해당 전투 씬
+→ BlackoutProtoSelectScene (4개 카드 메뉴)
+   ├─ 🏚 기존 전투 (BlackoutBattleScene)  — 정식 탐색 시스템 + BP 다키스트 엔진
+   ├─ ⭐ Grid (BlackoutGridScene)          — 신규 프로토타입
+   ├─ ⭐ Lane (BlackoutLaneScene)          — 신규 프로토타입
+   └─ ⭐ Rune (BlackoutRuneScene)          — 신규 프로토타입
 → 승리/패배 → 메뉴로 복귀 (또는 TownScene)
 ```
+
+**기존 전투 보존 이유**: 탐색/저주/적응 시스템이 충분히 만들어진 상태라
+신규 엔진 후보 검증과 별개로 정식 플레이가 가능해야 함. 신규 1개 채택 후
+기존 BlackoutBattleScene 내부의 DarkestCombat 호출만 교체할 예정.
 
 ### 0.2 후보 1: 그리드 통합 전투 (`BlackoutGridScene`)
 

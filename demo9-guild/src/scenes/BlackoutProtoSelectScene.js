@@ -1,5 +1,10 @@
 /**
  * Blackout 전투 프로토타입 선택 씬.
+ *
+ *  - 기존 전투  : 저택 탐색 (BlackoutBattleScene) — 정식 흐름
+ *  - Grid       : 마인스위퍼 그리드 위에서 전투 (탐색-전투 통합)
+ *  - Lane       : 빛/어둠 듀얼 트랙 (포지셔닝 게임)
+ *  - Rune       : 룬 시퀀스 봉인 (퍼즐형)
  */
 class BlackoutProtoSelectScene extends Phaser.Scene {
     constructor() { super('BlackoutProtoSelectScene'); }
@@ -30,13 +35,13 @@ class BlackoutProtoSelectScene extends Phaser.Scene {
         hBg.lineStyle(1, 0x6644aa, 0.4);
         hBg.lineBetween(0, 55, 1280, 55);
 
-        this.add.text(640, 27, '◈  🔦 Blackout — 전투 프로토타입  ◈', {
+        this.add.text(640, 27, '◈  🔦 Blackout — 전투 선택  ◈', {
             fontSize: '20px', fontFamily: T.fontFamily || 'monospace',
             color: '#bb88ff', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
 
-        this.add.text(640, 75, '저주받은 저택에서 어떤 전투를 시험해볼지 선택', {
+        this.add.text(640, 75, '정식 전투 (기존) 또는 신규 전투 엔진 프로토타입 3종 중 선택', {
             fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
             color: T.textMuted || '#887860'
         }).setOrigin(0.5);
@@ -44,32 +49,39 @@ class BlackoutProtoSelectScene extends Phaser.Scene {
         // 파티 표시
         this._drawPartyRow(640, 120);
 
-        // 3개 카드
-        this._drawCard(180, 230, '그리드 통합', '🗺',
+        // 4개 카드: 정식 + 3 프로토타입
+        // 1280 폭에 카드 250 × 4 = 1000, 남은 280을 5등분(56씩)으로 배치
+        this._drawCard(56, 230, '기존 전투', '🏚',
+            '저택 탐색 (방 16개), 횃불 자원,\n저주 트랙. BP 다키스트 엔진으로\n전투. 지금까지 만든 시스템.',
+            ['• 마인스위퍼식 방 탐색', '• 저주 누적 & 적응', '• BP 다키스트 전투 재사용'],
+            0x888899,
+            () => this._launch('BlackoutBattleScene'));
+
+        this._drawCard(362, 230, '⭐ 그리드 통합', '🗺',
             '마인스위퍼 그리드 위에서 직접 전투.\n적은 어둠에 숨고, 횃불로 비추는\n셀만 보인다. 위치 잡기가 전부.',
             ['• 5×5 셀, 턴제 SPD', '• 횃불 든 용병 인접 = 빛', '• 어둠 적은 위험 숫자로만'],
             0x4477cc,
             () => this._launch('BlackoutGridScene'));
 
-        this._drawCard(530, 230, '빛/어둠 듀얼', '🌗',
+        this._drawCard(668, 230, '⭐ 빛/어둠 듀얼', '🌗',
             '빛 트랙과 어둠 트랙.\n빛은 표적, 어둠은 잠복.\n트랙 전환과 차징의 게임.',
             ['• 2 트랙 (빛/어둠)', '• 어둠 차징 = 다음 ×2', '• 클래스마다 트랙 적성'],
             0xaa44cc,
             () => this._launch('BlackoutLaneScene'));
 
-        this._drawCard(880, 230, '봉인 의식', '🔮',
+        this._drawCard(974, 230, '⭐ 봉인 의식', '🔮',
             'HP를 깎는 게 아니라\n룬 시퀀스를 순서대로 입력해\n적을 봉인한다. 횃불 카운트.',
             ['• 적마다 룬 시퀀스', '• 클래스 ↔ 룬 종류', '• 횃불 꺼지면 시퀀스 안 보임'],
             0xcc44aa,
             () => this._launch('BlackoutRuneScene'));
 
         // 안내문
-        this.add.text(640, 600, '※ 프로토타입 단계: 보상/저주 누적 없음. 단순히 전투만 시험.', {
+        this.add.text(640, 590, '※ ⭐ = 신규 프로토타입 (전투만 검증, 보상/저주 누적 없음)', {
             fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
             color: T.textMuted || '#887860'
         }).setOrigin(0.5);
 
-        this.add.text(640, 625, '플레이 후 느낌이 가장 좋은 방향으로 정식 전투를 만들 예정.', {
+        this.add.text(640, 612, '왼쪽 「기존 전투」 = 지금까지 만든 탐색 시스템 그대로 (정식).', {
             fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
             color: T.textMuted || '#887860'
         }).setOrigin(0.5).setAlpha(0.7);
@@ -104,7 +116,6 @@ class BlackoutProtoSelectScene extends Phaser.Scene {
         this.party.forEach((merc, i) => {
             const sx = startX + i * slotW;
             const base = merc.getBaseClass();
-            const stats = merc.getStats();
             const rolePos = (merc.classKey === 'warrior' || merc.classKey === 'rogue') ? '전열' : '후열';
 
             this.add.circle(sx, cy - 2, 14, base.color, 0.9);
@@ -169,11 +180,15 @@ class BlackoutProtoSelectScene extends Phaser.Scene {
     }
 
     _launch(sceneKey) {
-        this.party.forEach(m => {
-            m.currentHp = m.getStats().hp;
-            m.alive = true;
-        });
-
+        const isPrototype = sceneKey !== 'BlackoutBattleScene';
+        if (isPrototype) {
+            // 프로토타입은 깨끗하게 시작 (HP 풀)
+            this.party.forEach(m => {
+                m.currentHp = m.getStats().hp;
+                m.alive = true;
+            });
+        }
+        // BlackoutBattleScene은 정식 흐름이라 HP 보존
         this.scene.start(sceneKey, {
             gameState: this.gameState,
             party: this.party,
