@@ -212,6 +212,12 @@ class GuildHallManager {
         }
     };
 
+    /** 평판 추가 — 메인 전투 성공 시 호출 */
+    static addReputation(gs, amount) {
+        if (!gs.guildReputation) gs.guildReputation = 0;
+        gs.guildReputation += amount;
+    }
+
     /**
      * 호환성 레이어 — 기존 코드(MercenaryManager, ExpeditionManager, RunResultScene)에서
      * GuildHallManager.getEffects(gs)로 참조하는 부분 지원.
