@@ -538,6 +538,7 @@ class RosterScene extends Phaser.Scene {
                     UIButton.create(this, x + w - 60, cy + 60, 90, 24, '해제', {
                         variant: 'danger',
                         fontSize: 10,
+                        depth: 5,
                         onClick: () => {
                             const item = merc.unequip(slotInfo.key);
                             if (item) StorageManager.addItem(gs, item);

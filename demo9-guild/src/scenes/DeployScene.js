@@ -18,197 +18,15 @@ class DeployScene extends Phaser.Scene {
         this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
         const gs = this.gameState;
 
-        if (this.selectedZone) {
-            this._drawZoneDetail();
-        } else {
-            this._drawZoneOverview();
+        // 구역 미선택 시 첫 번째 해금된 구역 자동 선택
+        if (!this.selectedZone) {
+            this.selectedZone = ZONE_KEYS.find(k => gs.zoneLevel[k] > 0) || ZONE_KEYS[0];
         }
+        this._drawZoneDetail();
     }
 
     // ═══════════════════════════════════════════════
-    //  구역 개요 — 3구역 카드 + 각각 파견 현황
-    // ═══════════════════════════════════════════════
-
-    _drawZoneOverview() {
-        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
-        const gs = this.gameState;
-
-        // ── 헤더 장식 ──
-        const headerBg = this.add.graphics();
-        headerBg.fillStyle(T.headerBg || 0x1e1810, 1);
-        headerBg.fillRect(0, 0, 1280, T.headerHeight || 55);
-        headerBg.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
-        headerBg.lineBetween(0, (T.headerHeight || 55), 1280, (T.headerHeight || 55));
-
-        this.add.text(640, 25, '◈  출발 게이트  ◈', {
-            fontSize: `${(T.fontSize && T.fontSize.title) || 20}px`, fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
-        }).setOrigin(0.5);
-
-        UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            variant: 'ghost',
-            fontSize: (T.fontSize && T.fontSize.body) || 12,
-            onClick: () => this.scene.start('TownScene', { gameState: gs })
-        });
-
-        const activeExp = (gs.activeExpeditions || []).length;
-        const maxSlots = ExpeditionManager.getMaxSlots(gs);
-        this.add.text(640, 50, `서브 파견 슬롯: ${activeExp}/${maxSlots}`, {
-            fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`, fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
-        }).setOrigin(0.5);
-
-        const cardW = 380, cardH = 590, gap = 20;
-        const totalW = ZONE_KEYS.length * cardW + (ZONE_KEYS.length - 1) * gap;
-        const startX = (1280 - totalW) / 2;
-
-        ZONE_KEYS.forEach((key, idx) => {
-            this._drawZoneOverviewCard(key, startX + idx * (cardW + gap), 70, cardW, cardH);
-        });
-    }
-
-    _drawZoneOverviewCard(zoneKey, x, y, w, h) {
-        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
-        const gs = this.gameState;
-        const zone = ZONE_DATA[zoneKey];
-        const isLocked = gs.zoneLevel[zoneKey] === 0;
-
-        const bg = this.add.graphics();
-        bg.fillStyle(isLocked ? 0x151210 : (T.cardFill || 0x231e14), 1);
-        bg.fillRoundedRect(x, y, w, h, T.borderRadius || 6);
-        bg.lineStyle(2, isLocked ? (T.panelStroke || 0x5a4a2a) : zone.color, isLocked ? 0.3 : 0.6);
-        bg.strokeRoundedRect(x, y, w, h, T.borderRadius || 6);
-
-        // 헤더
-        this.add.text(x + w / 2, y + 25, zone.icon, { fontSize: '32px' }).setOrigin(0.5);
-        this.add.text(x + w / 2, y + 60, zone.name, {
-            fontSize: '16px', fontFamily: T.fontFamily || 'monospace', color: isLocked ? (T.textMuted || '#887860') : zone.textColor, fontStyle: 'bold'
-        }).setOrigin(0.5);
-        this.add.text(x + w / 2, y + 80, zone.subtitle, {
-            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
-        }).setOrigin(0.5);
-
-        if (isLocked) {
-            this.add.text(x + w / 2, y + 120, `🔒 길드 Lv.${zone.unlockLevel} 필요`, {
-                fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
-            }).setOrigin(0.5);
-            return;
-        }
-
-        // 구역 레벨/정보
-        const zLv = gs.zoneLevel[zoneKey];
-        const rounds = getMaxRounds(zLv);
-        this.add.text(x + w / 2, y + 100, `구역 Lv.${zLv}  |  ${rounds}라운드`, {
-            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
-        }).setOrigin(0.5);
-
-        this.add.text(x + w / 2, y + 118, zone.desc, {
-            fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
-        }).setOrigin(0.5);
-
-        // 서브 해금 상태
-        const maxUnlocked = GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
-        const clears = GuildManager.getZoneClearCount(gs, zoneKey, zLv);
-        const needed = GuildManager.SUB_UNLOCK_CLEARS;
-        if (maxUnlocked > 0) {
-            this.add.text(x + w / 2, y + 140, `📦 서브 해금 (최대 Lv.${maxUnlocked})`, {
-                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textBlue || '#6699cc'
-            }).setOrigin(0.5);
-        } else {
-            this.add.text(x + w / 2, y + 140, `🔓 서브 해금까지 ${clears}/${needed}회 클리어`, {
-                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
-            }).setOrigin(0.5);
-        }
-
-        // === 활성 파견 표시 ===
-        const activeExps = (gs.activeExpeditions || []).filter(e => e.zoneKey === zoneKey);
-        const pendingResults = (gs.pendingResults || []).filter(r => r.zoneKey === zoneKey);
-
-        let cy = y + 165;
-        this.add.text(x + 15, cy, '파견 현황', {
-            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textAccent || '#cc8833', fontStyle: 'bold'
-        });
-        cy += 20;
-
-        if (activeExps.length === 0 && pendingResults.length === 0) {
-            this.add.text(x + 15, cy, '진행 중인 파견 없음', {
-                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
-            });
-            cy += 18;
-        }
-
-        activeExps.forEach(exp => {
-            const progress = ExpeditionManager.getProgress(exp);
-            const remainMs = ExpeditionManager.getRemainingMs(exp);
-            const remainSec = Math.ceil(remainMs / 1000);
-            const remainStr = remainSec > 60 ? `${Math.floor(remainSec / 60)}분 ${remainSec % 60}초` : `${remainSec}초`;
-
-            const expBg = this.add.graphics();
-            expBg.fillStyle(T.panelFill || 0x2a2218, 1);
-            expBg.fillRoundedRect(x + 10, cy, w - 20, 55, 3);
-
-            this.add.text(x + 18, cy + 5, `⏳ Lv.${exp.zoneLevel} 파견`, {
-                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textBlue || '#6699cc', fontStyle: 'bold'
-            });
-            this.add.text(x + w - 18, cy + 5, `잔여 ${remainStr}`, {
-                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textAccent || '#cc8833'
-            }).setOrigin(1, 0);
-
-            // 진행률 바
-            const barW = w - 40;
-            this.add.graphics().fillStyle(T.panelFill || 0x2a2218, 1).fillRect(x + 18, cy + 24, barW, 6);
-            this.add.graphics().fillStyle(T.panelStroke || 0x5a4a2a, 1).fillRect(x + 18, cy + 24, barW * progress, 6);
-            this.add.text(x + 18 + barW / 2, cy + 25, `${Math.floor(progress * 100)}%`, {
-                fontSize: '8px', fontFamily: T.fontFamily || 'monospace', color: '#ffffff'
-            }).setOrigin(0.5);
-
-            // 파견된 용병 이름
-            const names = exp.partyIds.map(id => {
-                const m = gs.roster.find(r => r.id === id);
-                return m ? m.name : '?';
-            }).join(', ');
-            this.add.text(x + 18, cy + 36, names, {
-                fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
-            });
-            cy += 60;
-        });
-
-        pendingResults.forEach(result => {
-            const resBg = this.add.graphics();
-            resBg.fillStyle(result.success ? 0x1a2a1a : 0x2a1a1a, 1);
-            resBg.fillRoundedRect(x + 10, cy, w - 20, 40, 3);
-
-            const icon = result.success ? '✅' : '⚠';
-            this.add.text(x + 18, cy + 5, `${icon} Lv.${result.zoneLevel} — ${result.success ? '성공' : '실패'}`, {
-                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: result.success ? (T.textSuccess || '#66bb55') : (T.textDanger || '#cc4422')
-            });
-            this.add.text(x + 18, cy + 22, `+${result.goldEarned}G | 장비 ${result.loot.length}개 — 수령 대기`, {
-                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
-            });
-
-            UIButton.create(this, x + w - 55, cy + 20, 70, 26, '수령', {
-                variant: 'primary',
-                fontSize: 10,
-                onClick: () => {
-                    ExpeditionManager.collectResult(gs, result.id);
-                    SaveManager.save(gs);
-                    this.scene.restart({ gameState: gs });
-                }
-            });
-            cy += 45;
-        });
-
-        // 입장 버튼
-        UIButton.create(this, x + w / 2, y + h - 35, w - 40, 36, `▶ ${zone.name} 입장`, {
-            variant: 'info',
-            fontSize: 14,
-            onClick: () => {
-                this.selectedZone = zoneKey;
-                this.scene.restart({ gameState: gs, selectedZone: zoneKey, deployedIds: this.deployedIds, deployMode: this.deployMode });
-            }
-        });
-    }
-
-    // ═══════════════════════════════════════════════
-    //  구역 상세 — 라운드 선택 + 편성 + 출발
+    //  구역 상세 — 구역탭 + 레벨 선택 + 편성 + 출발
     // ═══════════════════════════════════════════════
 
     _drawZoneDetail() {
@@ -225,24 +43,50 @@ class DeployScene extends Phaser.Scene {
         headerBg.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
         headerBg.lineBetween(0, (T.headerHeight || 55), 1280, (T.headerHeight || 55));
 
-        this.add.text(640, 25, `◈  ${zone.icon} ${zone.name} — ${zone.subtitle}  ◈`, {
-            fontSize: '18px', fontFamily: T.fontFamily || 'monospace', color: zone.textColor, fontStyle: 'bold'
-        }).setOrigin(0.5);
-
-        UIButton.create(this, 80, 25, 110, 30, '← 구역선택', {
+        UIButton.create(this, 60, 25, 80, 30, '← 마을', {
             variant: 'ghost',
             fontSize: (T.fontSize && T.fontSize.body) || 12,
-            onClick: () => this.scene.restart({ gameState: gs, deployedIds: [], deployMode: this.deployMode })
+            onClick: () => this.scene.start('TownScene', { gameState: gs })
+        });
+
+        // ── 구역 탭 (헤더 중앙) ──
+        let tabX = 320;
+        ZONE_KEYS.forEach(key => {
+            const z = ZONE_DATA[key];
+            const isLocked = gs.zoneLevel[key] === 0;
+            const isCurrent = key === zoneKey;
+            const label = `${z.icon} ${z.name}`;
+
+            if (isLocked) {
+                this.add.text(tabX, 16, `🔒 ${z.name}`, {
+                    fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
+                }).setOrigin(0.5);
+            } else {
+                UIButton.create(this, tabX, 16, 130, 26, label, {
+                    variant: isCurrent ? 'primary' : 'ghost',
+                    fontSize: 11,
+                    onClick: () => {
+                        if (!isCurrent) this.scene.restart({ gameState: gs, selectedZone: key, deployedIds: [], deployMode: this.deployMode });
+                    }
+                });
+            }
+            // 구역 레벨 표시
+            if (!isLocked) {
+                this.add.text(tabX, 34, `Lv.${gs.zoneLevel[key]}`, {
+                    fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: isCurrent ? z.textColor : (T.textMuted || '#887860')
+                }).setOrigin(0.5);
+            }
+            tabX += 160;
         });
 
         // 메인/서브 모드
         const isMain = this.deployMode === 'main';
-        UIButton.create(this, 970, 25, 130, 28, '⚔ 메인 도전', {
+        UIButton.create(this, 970, 16, 130, 26, '⚔ 메인 도전', {
             variant: isMain ? 'primary' : 'ghost',
             fontSize: 11,
             onClick: () => { if (!isMain) this.scene.restart({ gameState: gs, selectedZone: zoneKey, deployedIds: this.deployedIds, deployMode: 'main', selectedLevel: this.selectedLevel }); }
         });
-        UIButton.create(this, 1120, 25, 130, 28, '📦 서브 파견', {
+        UIButton.create(this, 1120, 16, 130, 26, '📦 서브 파견', {
             variant: !isMain ? 'primary' : 'ghost',
             fontSize: 11,
             onClick: () => { if (isMain) this.scene.restart({ gameState: gs, selectedZone: zoneKey, deployedIds: this.deployedIds, deployMode: 'sub', selectedLevel: this.selectedLevel }); }
@@ -251,8 +95,8 @@ class DeployScene extends Phaser.Scene {
         const modeDesc = isMain
             ? '메인 도전: 직접 전투. 스킬 발동 가능, 보상 1.5배, 구역 레벨업'
             : '서브 파견: 시간 경과형 자동. 일반공격만, 깬 레벨까지만 파밍';
-        this.add.text(640, 52, modeDesc, {
-            fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: isMain ? (T.textAccent || '#cc8833') : (T.textBlue || '#6699cc')
+        this.add.text(1045, 38, modeDesc, {
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: isMain ? (T.textAccent || '#cc8833') : (T.textBlue || '#6699cc')
         }).setOrigin(0.5);
 
         // 좌: 레벨 선택 + 파견 현황 | 우: 파티 편성

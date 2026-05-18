@@ -19,7 +19,7 @@ const config = {
     height: CANVAS_H,
     parent: 'game-container',
     backgroundColor: '#1a1510',
-    scene: [TitleScene, TownScene, RecruitScene, RosterScene, EquipmentScene, StorageScene, ForgeScene, AuctionScene, TrainingScene, TempleScene, IntelScene, EliteRecruitScene, AffinityScene, DeployScene, PlaceholderBattleScene, BattleScene, ManualBattleScene, CargoFloorSelectScene, CargoBattleScene, BlackoutBattleScene, BlackoutProtoSelectScene, BlackoutGridScene, BlackoutLaneScene, BlackoutRuneScene, EventScene, RunResultScene, GuildHallScene, AutomationScene, CodexScene],
+    scene: [TitleScene, TownScene, RecruitScene, RosterScene, EquipmentScene, StorageScene, ForgeScene, AuctionScene, TrainingScene, TempleScene, IntelScene, EliteRecruitScene, AffinityScene, DeployScene, BattleScene, ManualBattleScene, CargoFloorSelectScene, CargoBattleScene, BlackoutBattleScene, BlackoutProtoSelectScene, BlackoutGridScene, BlackoutLaneScene, BlackoutRuneScene, EventScene, RunResultScene, GuildHallScene, AutomationScene, CodexScene],
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
