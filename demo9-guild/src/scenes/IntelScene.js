@@ -4,24 +4,35 @@ class IntelScene extends Phaser.Scene {
     init(data) { this.gameState = data.gameState; }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
         const gs = this.gameState;
 
-        this.add.text(640, 25, '🔍 정보소', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+        // Header bg
+        this.add.rectangle(640, 27, 1280, 55, T.headerBg || 0x1e1810).setOrigin(0.5);
+
+        // Ornament lines
+        const ornLine = this.add.graphics();
+        ornLine.lineStyle(1, T.ornament || 0x8a7a4a, 0.4);
+        ornLine.lineBetween(0, 54, 1280, 54);
+        ornLine.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
+        ornLine.lineBetween(0, 56, 1280, 56);
+
+        this.add.text(640, 25, '◈ 🔍 정보소 ◈', {
+            fontSize: '20px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.goldText = this.add.text(1260, 25, `${gs.gold}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(1, 0);
 
         UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
+            variant: 'ghost', fontSize: 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
         this.add.text(640, 55, '구역 정보를 확인하고, 미션을 수락할 수 있습니다', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(0.5);
 
         this._drawZoneInfo(gs);
@@ -29,6 +40,7 @@ class IntelScene extends Phaser.Scene {
     }
 
     _drawZoneInfo(gs) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const zones = Object.entries(ZONE_DATA);
         let cx = 40;
 
@@ -37,27 +49,27 @@ class IntelScene extends Phaser.Scene {
             const unlocked = level > 0;
             const maxRounds = unlocked ? getMaxRounds(level) : '?';
 
-            const panel = UIPanel.create(this, cx, 80, 390, 240, { title: `${zone.icon} ${zone.name}` });
+            const panel = UIPanel.create(this, cx, 80, 390, 240, { title: `${zone.icon} ${zone.name}`, ornament: true });
 
-            const color = unlocked ? '#aaaacc' : '#555566';
+            const color = unlocked ? (T.textPrimary || '#e8d8c0') : '#555566';
             this.add.text(cx + 15, 115, unlocked ? `구역 Lv.${level}` : '미해금', {
-                fontSize: '13px', fontFamily: 'monospace', color: unlocked ? '#44aaff' : '#ff4444', fontStyle: 'bold'
+                fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: unlocked ? '#44aaff' : '#ff4444', fontStyle: 'bold'
             });
 
             this.add.text(cx + 15, 138, `${zone.subtitle}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: color
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: color
             });
 
             this.add.text(cx + 15, 158, `최대 라운드: ${maxRounds}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: color
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: color
             });
 
             this.add.text(cx + 15, 178, `기본 보상: ${zone.baseGoldReward}G / ${zone.baseXpReward}XP`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#ffcc44'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44'
             });
 
             this.add.text(cx + 15, 198, `사망 확률: ${Math.floor(zone.deathChance * 100)}%`, {
-                fontSize: '11px', fontFamily: 'monospace', color: zone.deathChance > 0.15 ? '#ff4444' : '#ffaa44'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: zone.deathChance > 0.15 ? '#ff4444' : '#ffaa44'
             });
 
             const { composition } = unlocked
@@ -66,12 +78,12 @@ class IntelScene extends Phaser.Scene {
             if (composition.length > 0) {
                 const enemies = composition.map(c => `${ENEMY_DATA[c.type]?.name || c.type}×${c.count}`).join(', ');
                 this.add.text(cx + 15, 220, `보스전: ${enemies}`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#ff6666'
+                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: '#ff6666'
                 });
             }
 
             this.add.text(cx + 15, 245, zone.desc, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#886666',
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: '#886666',
                 wordWrap: { width: 360 }
             });
 
@@ -80,7 +92,8 @@ class IntelScene extends Phaser.Scene {
     }
 
     _drawMissions(gs) {
-        const panel = UIPanel.create(this, 40, 340, 1200, 340, { title: '의뢰 게시판' });
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const panel = UIPanel.create(this, 40, 340, 1200, 340, { title: '의뢰 게시판', ornament: true });
 
         if (!gs.missions) {
             gs.missions = this._generateMissions(gs);
@@ -89,7 +102,7 @@ class IntelScene extends Phaser.Scene {
 
         if (gs.missions.length === 0) {
             this.add.text(640, 510, '현재 의뢰 없음 — 탐사를 진행하면 새 의뢰가 등록됩니다', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#555566'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: '#555566'
             }).setOrigin(0.5);
             return;
         }
@@ -100,21 +113,21 @@ class IntelScene extends Phaser.Scene {
             const done = this._checkMissionComplete(gs, mission);
 
             const bg = this.add.graphics();
-            bg.fillStyle(done ? 0x1a2a1a : 0x1a1a2e, 1);
+            bg.fillStyle(done ? 0x1a2a1a : (T.cardFill || 0x231e14), 1);
             bg.fillRoundedRect(55, cy, 1170, 50, 3);
-            bg.lineStyle(1, done ? 0x44aa44 : 0x333355, 0.4);
+            bg.lineStyle(1, done ? 0x44aa44 : (T.panelStroke || 0x5a4a2a), 0.4);
             bg.strokeRoundedRect(55, cy, 1170, 50, 3);
 
             this.add.text(70, cy + 8, mission.name, {
-                fontSize: '13px', fontFamily: 'monospace', color: done ? '#44ff88' : '#aaaacc', fontStyle: 'bold'
+                fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: done ? '#44ff88' : (T.textPrimary || '#e8d8c0'), fontStyle: 'bold'
             });
 
             this.add.text(70, cy + 28, mission.desc, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             });
 
             this.add.text(700, cy + 8, `보상: ${mission.reward}G`, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44'
             });
 
             if (done && !mission.claimed) {
@@ -132,11 +145,11 @@ class IntelScene extends Phaser.Scene {
                 });
             } else if (mission.claimed) {
                 this.add.text(1130, cy + 18, '완료', {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#448844'
+                    fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: '#448844'
                 }).setOrigin(0.5);
             } else {
                 this.add.text(1130, cy + 18, '진행 중', {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+                    fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
                 }).setOrigin(0.5);
             }
 

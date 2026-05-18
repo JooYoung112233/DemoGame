@@ -7,11 +7,33 @@ class RosterScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
+
+        // 비네팅 + 코너 장식 (SceneBase._drawBackground 패턴)
+        const vignette = this.add.graphics();
+        vignette.fillStyle(0x000000, 0.15);
+        vignette.fillRect(0, 0, 1280, 4);
+        vignette.fillRect(0, 716, 1280, 4);
+        vignette.fillRect(0, 0, 4, 720);
+        vignette.fillRect(1276, 0, 4, 720);
+
+        const corner = this.add.graphics();
+        corner.lineStyle(1, T.ornament || 0x8a7a4a, 0.15);
+        corner.lineBetween(0, 20, 20, 0);
+        corner.lineBetween(0, 30, 30, 0);
+        corner.lineBetween(1260, 0, 1280, 20);
+        corner.lineBetween(1250, 0, 1280, 30);
+        corner.lineBetween(0, 700, 20, 720);
+        corner.lineBetween(0, 690, 30, 720);
+        corner.lineBetween(1260, 720, 1280, 700);
+        corner.lineBetween(1250, 720, 1280, 690);
+
         this._drawUI();
     }
 
     _drawUI() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
 
         // 선택된 용병 있으면 상세 화면, 없으면 카드 그리드
@@ -24,63 +46,115 @@ class RosterScene extends Phaser.Scene {
         }
 
         // === 카드 그리드 화면 ===
-        this.add.text(640, 25, '로스터 관리', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
-        }).setOrigin(0.5);
-
-        UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
-            onClick: () => this.scene.start('TownScene', { gameState: gs })
+        this._drawHeader('로스터 관리', {
+            backTarget: 'TownScene',
+            backLabel: '← 마을',
         });
-
-        this.add.text(1260, 25, `${gs.gold}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
-        }).setOrigin(1, 0);
 
         const commonCount = gs.roster.filter(m => m.rarity === 'common' && m.alive).length;
         if (commonCount > 0) {
-            UIButton.create(this, 1100, 25, 130, 28, `일반 ${commonCount}명 정리`, {
-                color: 0x664444, hoverColor: 0x885555, textColor: '#ffcccc', fontSize: 11,
+            UIButton.create(this, 1100, 27, 130, 28, `일반 ${commonCount}명 정리`, {
+                variant: 'danger',
+                fontSize: 11,
                 onClick: () => this._confirmBulkDismiss('common', `일반 등급 용병 ${commonCount}명`, m => m.rarity === 'common' && m.alive)
             });
         }
 
         if (gs.roster.length === 0) {
             this.add.text(640, 360, '로스터가 비어있습니다 — 모집소에서 고용하세요', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#555566'
+                fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5);
             return;
         }
 
         this.add.text(640, 60, '용병 카드를 클릭하여 상세 보기 / 장비 착용 / 해고', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#88aacc'
+            fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888'
         }).setOrigin(0.5);
 
         this._drawMercGrid(gs);
     }
 
+    /** 공용 헤더 (SceneBase._drawBase 패턴) */
+    _drawHeader(title, opts = {}) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const gs = this.gameState;
+        const {
+            backTarget = 'TownScene',
+            backLabel = '← 마을',
+            backOnClick = null,
+        } = opts;
+
+        const headerH = T.headerHeight || 55;
+        const headerBg = this.add.graphics();
+        headerBg.fillStyle(T.headerBg || 0x1e1810, 1);
+        headerBg.fillRect(0, 0, 1280, headerH);
+        // 하단 장식선
+        headerBg.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
+        headerBg.lineBetween(0, headerH, 1280, headerH);
+        // 이중선
+        headerBg.lineStyle(0.5, T.divider || 0x5a4a2a, 0.3);
+        headerBg.lineBetween(0, headerH + 2, 1280, headerH + 2);
+
+        // 제목
+        if (title) {
+            this.add.text(640, 27, title, {
+                fontSize: `${(T.fontSize && T.fontSize.title) || 20}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textGold || '#ffcc44',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 2
+            }).setOrigin(0.5);
+
+            const tw = title.length * 12;
+            this.add.text(640 - tw / 2 - 20, 27, '◈', {
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+                color: T.textAccent || '#cc8833'
+            }).setOrigin(0.5);
+            this.add.text(640 + tw / 2 + 20, 27, '◈', {
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+                color: T.textAccent || '#cc8833'
+            }).setOrigin(0.5);
+        }
+
+        // 뒤로가기
+        if (backTarget || backOnClick) {
+            UIButton.create(this, 65, 27, 100, 28, backLabel, {
+                variant: 'ghost',
+                fontSize: (T.fontSize && T.fontSize.body) || 12,
+                onClick: backOnClick || (() => this.scene.start(backTarget, { gameState: gs }))
+            });
+        }
+
+        // 골드
+        this._goldText = this.add.text(1260, 20, `💰 ${(gs.gold || 0).toLocaleString()}G`, {
+            fontSize: `${(T.fontSize && T.fontSize.header) || 16}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
+        }).setOrigin(1, 0);
+    }
+
     /** 용병 상세 화면 — 좌(스탯), 중(장비+슬롯), 우(보관함 후보) */
     _drawMercDetailView(merc) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const base = merc.getBaseClass();
         const rarity = RARITY_DATA[merc.rarity];
 
         // 헤더
-        this.add.text(640, 25, `${base.icon} ${merc.name} — Lv.${merc.level} ${base.name} [${rarity.name}]`, {
-            fontSize: '18px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
-        }).setOrigin(0.5);
-
-        UIButton.create(this, 80, 25, 130, 30, '← 로스터', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
-            onClick: () => {
+        this._drawHeader(`${base.icon} ${merc.name} — Lv.${merc.level} ${base.name} [${rarity.name}]`, {
+            backTarget: null,
+            backLabel: '← 로스터',
+            backOnClick: () => {
                 this.selectedMercId = null;
                 this.scene.restart({ gameState: gs });
             }
         });
-
-        this.add.text(1260, 25, `${gs.gold}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
-        }).setOrigin(1, 0);
 
         // 3패널 레이아웃
         this._drawMercInfoPanel(merc, 20, 65, 400, 640);    // 좌: 스탯/특성/스킬/친화도
@@ -105,6 +179,7 @@ class RosterScene extends Phaser.Scene {
     }
 
     _drawMercCard(merc, x, y, w, h) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const base = merc.getBaseClass();
         const rarity = RARITY_DATA[merc.rarity];
         const stats = merc.getStats();
@@ -121,18 +196,18 @@ class RosterScene extends Phaser.Scene {
             bg.lineStyle(2, stroke, 0.8);
             bg.strokeRoundedRect(x, y, w, h, 5);
         };
-        drawBg(0x151525, rarity.color);
+        drawBg(T.panelFill || 0x2a2218, rarity.color);
         container.add(bg);
 
         // 헤더
         container.add(this.add.text(x + 10, y + 8, `${base.icon} ${merc.name}`, {
-            fontSize: '13px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: rarity.textColor, fontStyle: 'bold'
         }));
         container.add(this.add.text(x + w - 10, y + 8, `Lv.${merc.level}`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
         }).setOrigin(1, 0));
         container.add(this.add.text(x + 10, y + 26, `${base.name} [${rarity.name}]`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#778899'
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }));
 
         // HP바
@@ -145,18 +220,18 @@ class RosterScene extends Phaser.Scene {
         hpBar.fillRect(x + 10, y + 46, (w - 20) * hpRatio, 6);
         container.add(hpBar);
         container.add(this.add.text(x + w / 2, y + 49, `HP ${merc.currentHp}/${stats.hp}`, {
-            fontSize: '9px', fontFamily: 'monospace', color: '#ffffff', stroke: '#000', strokeThickness: 1
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: '#ffffff', stroke: '#000', strokeThickness: 1
         }).setOrigin(0.5));
 
         // 스탯 한줄
         container.add(this.add.text(x + 10, y + 60, `ATK ${stats.atk}  DEF ${stats.def}  SPD ${stats.moveSpeed}`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#aaaacc'
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
         }));
 
         // 장착 표시
         const equipCount = ['weapon','armor','accessory'].filter(s => merc.equipment[s]).length;
         container.add(this.add.text(x + 10, y + 78, `🎽 ${equipCount}/3`, {
-            fontSize: '11px', fontFamily: 'monospace', color: equipCount === 3 ? '#88ffcc' : '#aaaaaa'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: equipCount === 3 ? '#88ffcc' : (T.textSecondary || '#b8a888')
         }));
 
         // 파견 중 표시
@@ -165,7 +240,7 @@ class RosterScene extends Phaser.Scene {
             const exp = (gs.activeExpeditions || []).find(e => e.partyIds.includes(merc.id));
             const zoneName = exp ? ZONE_DATA[exp.zoneKey].name : '파견';
             container.add(this.add.text(x + w - 10, y + 78, `📦 ${zoneName}`, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#88aaff'
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textBlue || '#6699cc'
             }).setOrigin(1, 0));
         }
 
@@ -176,31 +251,28 @@ class RosterScene extends Phaser.Scene {
         }).join(' ');
         if (traitsStr) {
             container.add(this.add.text(x + 10, y + 96, traitsStr, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#888899',
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860',
                 wordWrap: { width: w - 20 }
             }));
         }
 
         // 하단 클릭 안내
         container.add(this.add.text(x + w/2, y + h - 14, '🖱 클릭', {
-            fontSize: '9px', fontFamily: 'monospace', color: '#666677'
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(0.5));
 
         // === 클릭 영역 — UIButton과 동일하게 zone 사용 ===
-        // 카드 화면 좌표상의 중심 위치 + 정확한 크기로 zone 생성
         const hitZone = this.add.zone(x + w/2, y + h/2, w, h)
             .setInteractive({ useHandCursor: true });
-        hitZone.setDepth(1000);  // 다른 모든 요소 위에
+        hitZone.setDepth(1000);
         container.add(hitZone);
 
-        hitZone.on('pointerover', () => drawBg(0x223344, 0x88ccff));
-        hitZone.on('pointerout', () => drawBg(0x151525, rarity.color));
+        hitZone.on('pointerover', () => drawBg(T.cardHover || 0x3a3020, T.ornament || 0x8a7a4a));
+        hitZone.on('pointerout', () => drawBg(T.panelFill || 0x2a2218, rarity.color));
         hitZone.on('pointerdown', () => {
-            // 시각적 피드백 — 누르는 순간 색 변경
             drawBg(0xffcc44, 0xffffff);
         });
         hitZone.on('pointerup', () => {
-            // 실제 동작 — scene.start (restart 대신, 데이터 전달 안정성↑)
             this._selectedSlot = 'weapon';
             this.scene.start('RosterScene', { gameState: this.gameState, selectedMercId: merc.id });
         });
@@ -208,17 +280,18 @@ class RosterScene extends Phaser.Scene {
 
     /** 용병 통합 모달 — 상세/장비/해고 모두 */
     _openMercModal(merc) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         this.selectedMercId = merc.id;
         // 풀스크린 모달
         this._mercModalObjs = [];
-        const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.8).setDepth(80);
+        const overlay = this.add.rectangle(640, 360, 1280, 720, T.modalOverlay || 0x000000, T.modalOverlayAlpha || 0.7).setDepth(80);
         overlay.setInteractive();
         this._mercModalObjs.push(overlay);
 
-        // 큰 박스 1180×640
+        // 큰 박스 1180x640
         const mx = 50, my = 40, mw = 1180, mh = 640;
         const bg = this.add.graphics().setDepth(81);
-        bg.fillStyle(0x101020, 1);
+        bg.fillStyle(T.panelFill || 0x2a2218, 1);
         bg.fillRoundedRect(mx, my, mw, mh, 8);
         const rarity = RARITY_DATA[merc.rarity];
         bg.lineStyle(3, rarity.color, 0.9);
@@ -227,7 +300,8 @@ class RosterScene extends Phaser.Scene {
 
         // 닫기 버튼
         this._mercModalObjs.push(UIButton.create(this, mx + mw - 50, my + 30, 70, 30, '닫기', {
-            color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 12, depth: 82,
+            variant: 'ghost',
+            fontSize: 12, depth: 82,
             onClick: () => this._closeMercModal()
         }));
 
@@ -244,26 +318,27 @@ class RosterScene extends Phaser.Scene {
     }
 
     _drawListItem(merc, x, y, w) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const base = merc.getBaseClass();
         const rarity = RARITY_DATA[merc.rarity];
         const stats = merc.getStats();
         const isSelected = merc.id === this.selectedMercId;
 
         const bg = this.add.graphics();
-        bg.fillStyle(isSelected ? 0x223344 : 0x151525, 1);
+        bg.fillStyle(isSelected ? (T.cardHover || 0x3a3020) : (T.panelFill || 0x2a2218), 1);
         bg.fillRoundedRect(x, y, w, 60, 3);
-        bg.lineStyle(1, isSelected ? 0x5588aa : rarity.color, isSelected ? 0.9 : 0.3);
+        bg.lineStyle(1, isSelected ? (T.ornament || 0x8a7a4a) : rarity.color, isSelected ? 0.9 : 0.3);
         bg.strokeRoundedRect(x, y, w, 60, 3);
 
         this.add.text(x + 8, y + 6, `${base.icon} ${merc.name}`, {
-            fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: rarity.textColor, fontStyle: 'bold'
         });
         this.add.text(x + w - 8, y + 6, `Lv.${merc.level} ${base.name}`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(1, 0);
 
         this.add.text(x + 8, y + 25, `HP:${merc.currentHp}/${stats.hp} ATK:${stats.atk} DEF:${stats.def}`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
         });
 
         const hpRatio = merc.currentHp / stats.hp;
@@ -283,24 +358,28 @@ class RosterScene extends Phaser.Scene {
 
     /** 좌측 패널 — 스탯/특성/스킬/친화도/하단 버튼 (자동장착/치료/해고) */
     _drawMercInfoPanel(merc, x, y, w, h) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const base = merc.getBaseClass();
         const rarity = RARITY_DATA[merc.rarity];
         const stats = merc.getStats();
 
-        UIPanel.create(this, x, y, w, h, { fillColor: 0x151525, strokeColor: 0x446688, title: '상세 정보' });
+        UIPanel.create(this, x, y, w, h, {
+            title: '상세 정보',
+            ornament: true,
+        });
 
         let cy = y + 35;
         // XP
         const xpLabel = merc.level >= 10 ? 'MAX' : `${merc.xp}/${merc.getXpToNextLevel()}`;
         this.add.text(x + 15, cy, `XP: ${xpLabel}`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#6688aa'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textBlue || '#6699cc'
         });
         cy += 22;
 
         // 스탯
         this.add.text(x + 15, cy, '── 스탯 ──', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         });
         cy += 18;
         const statLabels = [
@@ -312,18 +391,20 @@ class RosterScene extends Phaser.Scene {
             const col = i % 2;
             const row = Math.floor(i / 2);
             this.add.text(x + 25 + col * 175, cy + row * 18, `${s[0]}: ${s[1]}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#cccccc'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
             });
         });
         cy += 60;
 
         // 특성
         this.add.text(x + 15, cy, '── 특성 ──', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         });
         cy += 18;
         if (!merc.traits || merc.traits.length === 0) {
-            this.add.text(x + 25, cy, '없음', { fontSize: '11px', fontFamily: 'monospace', color: '#666677' });
+            this.add.text(x + 25, cy, '없음', {
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
+            });
             cy += 16;
         } else {
             merc.traits.forEach(t => {
@@ -331,10 +412,10 @@ class RosterScene extends Phaser.Scene {
                 if (t.type === 'negative') { color = '#ff6666'; sym = '✧'; }
                 if (t.type === 'legendary') { color = '#ffaa00'; sym = '★'; }
                 this.add.text(x + 25, cy, `${sym} ${t.name}`, {
-                    fontSize: '11px', fontFamily: 'monospace', color, fontStyle: 'bold'
+                    fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color, fontStyle: 'bold'
                 });
                 this.add.text(x + 40, cy + 14, t.desc, {
-                    fontSize: '9px', fontFamily: 'monospace', color: '#888899',
+                    fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860',
                     wordWrap: { width: w - 60 }
                 });
                 cy += 32;
@@ -345,14 +426,14 @@ class RosterScene extends Phaser.Scene {
         // 스킬
         if (merc.level >= 5) {
             this.add.text(x + 15, cy, '── 스킬 ──', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
             });
             cy += 18;
             this.add.text(x + 25, cy, base.skillName, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#44aaff', fontStyle: 'bold'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: '#44aaff', fontStyle: 'bold'
             });
             this.add.text(x + 25, cy + 14, base.skillDesc, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#888899',
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860',
                 wordWrap: { width: w - 40 }
             });
             cy += 36;
@@ -360,7 +441,7 @@ class RosterScene extends Phaser.Scene {
 
         // 친화도
         this.add.text(x + 15, cy, '── 친화도 ──', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         });
         cy += 18;
         ZONE_KEYS.forEach(zoneKey => {
@@ -370,13 +451,14 @@ class RosterScene extends Phaser.Scene {
             const aPts = merc.affinityPoints?.[zoneKey] || 0;
             const ptsLabel = aPts > 0 ? ` [${aPts}P!]` : '';
             this.add.text(x + 25, cy, `${zone.icon} ${zone.name}: Lv.${aLv}${ptsLabel}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: aPts > 0 ? '#ffaa44' : zone.textColor
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: aPts > 0 ? (T.textGold || '#ffcc44') : zone.textColor
             });
             cy += 16;
         });
 
         UIButton.create(this, x + w/2, cy + 10, 200, 26, '🌳 친화도 트리', {
-            color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 11,
+            variant: 'info',
+            fontSize: 11,
             onClick: () => this.scene.start('AffinityScene', { gameState: gs, mercId: merc.id })
         });
 
@@ -385,8 +467,8 @@ class RosterScene extends Phaser.Scene {
         const isHurt = merc.currentHp < stats.hp;
 
         UIButton.create(this, x + 80, btnY, 140, 32, '💊 치료 30G', {
-            color: gs.gold >= 30 && isHurt ? 0x44aa44 : 0x333333,
-            hoverColor: 0x55cc55, textColor: gs.gold >= 30 && isHurt ? '#ffffff' : '#666666', fontSize: 11,
+            variant: 'primary',
+            fontSize: 11,
             disabled: gs.gold < 30 || !isHurt,
             onClick: () => {
                 if (GuildManager.spendGold(gs, 30)) {
@@ -401,16 +483,21 @@ class RosterScene extends Phaser.Scene {
         const rarityMult = { common: 1.0, uncommon: 1.2, rare: 1.5, epic: 2.0, legendary: 2.5 }[merc.rarity] || 1.0;
         const severance = Math.floor(50 * merc.level * rarityMult);
         UIButton.create(this, x + w - 100, btnY, 180, 32, `🚪 해고 +${severance}G`, {
-            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffcccc', fontSize: 11,
+            variant: 'danger',
+            fontSize: 11,
             onClick: () => this._confirmDismiss(merc, severance)
         });
     }
 
     /** 중앙 패널 — 장비 슬롯 (선택 가능, 클릭 시 우측 보관함 후보 갱신) */
     _drawMercEquipPanel(merc, x, y, w, h) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
 
-        UIPanel.create(this, x, y, w, h, { fillColor: 0x151525, strokeColor: 0xaa8844, title: '장비' });
+        UIPanel.create(this, x, y, w, h, {
+            title: '장비',
+            ornament: true,
+        });
 
         if (!this._selectedSlot) this._selectedSlot = 'weapon';
 
@@ -425,31 +512,32 @@ class RosterScene extends Phaser.Scene {
             const isSelected = this._selectedSlot === slotInfo.key;
 
             const bg = this.add.graphics();
-            bg.fillStyle(isSelected ? 0x2a3a4a : 0x1a1a2a, 1);
+            bg.fillStyle(isSelected ? (T.cardSelected || 0x4a3a20) : (T.cardFill || 0x231e14), 1);
             bg.fillRoundedRect(x + 10, cy, w - 20, 90, 5);
-            bg.lineStyle(2, isSelected ? 0xffcc44 : 0x444455, isSelected ? 0.9 : 0.6);
+            bg.lineStyle(2, isSelected ? (T.textGold || 0xffcc44) : (T.cardStroke || 0x4a3c28), isSelected ? 0.9 : 0.6);
             bg.strokeRoundedRect(x + 10, cy, w - 20, 90, 5);
 
             this.add.text(x + 20, cy + 8, slotInfo.name, {
-                fontSize: '14px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+                fontSize: '14px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
             });
 
             if (eq) {
                 const ir = ITEM_RARITY[eq.rarity];
                 this.add.text(x + 20, cy + 30, `${eq.name}`, {
-                    fontSize: '12px', fontFamily: 'monospace', color: ir.textColor, fontStyle: 'bold'
+                    fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: ir.textColor, fontStyle: 'bold'
                 });
                 this.add.text(x + 20, cy + 46, `[${ir.name}]`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: ir.textColor
+                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: ir.textColor
                 });
                 const statStr = Object.entries(eq.stats || {}).map(([k,v]) => `${k}+${v}`).join(' ');
                 this.add.text(x + 20, cy + 62, statStr, {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#aaaacc'
+                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
                 });
 
                 if (!eq.cursed) {
                     UIButton.create(this, x + w - 60, cy + 60, 90, 24, '해제', {
-                        color: 0x554444, hoverColor: 0x665555, textColor: '#ffaaaa', fontSize: 10,
+                        variant: 'danger',
+                        fontSize: 10,
                         onClick: () => {
                             const item = merc.unequip(slotInfo.key);
                             if (item) StorageManager.addItem(gs, item);
@@ -459,12 +547,12 @@ class RosterScene extends Phaser.Scene {
                     });
                 } else {
                     this.add.text(x + w - 60, cy + 60, '🔒 저주', {
-                        fontSize: '11px', fontFamily: 'monospace', color: '#cc44ff', fontStyle: 'bold'
+                        fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: '#cc44ff', fontStyle: 'bold'
                     }).setOrigin(0.5);
                 }
             } else {
                 this.add.text(x + 20, cy + 45, '(비어있음 — 오른쪽에서 선택)', {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+                    fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
                 });
             }
 
@@ -479,7 +567,8 @@ class RosterScene extends Phaser.Scene {
 
         // 자동 장착
         UIButton.create(this, x + w/2, y + h - 50, 240, 36, '🤖 최적 장비 자동 장착', {
-            color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 12,
+            variant: 'info',
+            fontSize: 12,
             onClick: () => {
                 let count = 0;
                 ['weapon', 'armor', 'accessory'].forEach(slot => {
@@ -504,7 +593,7 @@ class RosterScene extends Phaser.Scene {
                     UIToast.show(this, `${count}개 슬롯 자동 장착!`, { color: '#88ccff' });
                     this.scene.restart({ gameState: gs, selectedMercId: merc.id });
                 } else {
-                    UIToast.show(this, '더 좋은 장비 없음', { color: '#aaaaaa' });
+                    UIToast.show(this, '더 좋은 장비 없음', { color: T.textSecondary || '#b8a888' });
                 }
             }
         });
@@ -512,19 +601,23 @@ class RosterScene extends Phaser.Scene {
 
     /** 우측 패널 — 선택된 슬롯의 보관함 후보 */
     _drawMercInventoryPanel(merc, x, y, w, h) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const slot = this._selectedSlot || 'weapon';
         const slotNames = { weapon: '무기', armor: '방어구', accessory: '장신구' };
         const items = StorageManager.getEquippableItems(gs, slot);
 
-        UIPanel.create(this, x, y, w, h, { fillColor: 0x151525, strokeColor: 0x66aacc, title: `보관함 ${slotNames[slot]} (${items.length})` });
+        UIPanel.create(this, x, y, w, h, {
+            title: `보관함 ${slotNames[slot]} (${items.length})`,
+            ornament: true,
+        });
 
         if (items.length === 0) {
             this.add.text(x + w/2, y + 100, `${slotNames[slot]} 장비 없음`, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#666677'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             }).setOrigin(0.5);
             this.add.text(x + w/2, y + 130, '좌측 슬롯 클릭으로 다른 슬롯 보기', {
-                fontSize: '10px', fontFamily: 'monospace', color: '#555566'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             }).setOrigin(0.5);
             return;
         }
@@ -544,30 +637,31 @@ class RosterScene extends Phaser.Scene {
             const isUpgrade = sumStats(item) > sumStats(current);
 
             const bg = this.add.graphics();
-            bg.fillStyle(isUpgrade ? 0x1a2a1a : 0x1a1a2a, 1);
+            bg.fillStyle(isUpgrade ? 0x1a2a1a : (T.cardFill || 0x231e14), 1);
             bg.fillRoundedRect(x + 10, cy, w - 20, 48, 4);
             bg.lineStyle(1, ir.color, 0.5);
             bg.strokeRoundedRect(x + 10, cy, w - 20, 48, 4);
 
             this.add.text(x + 18, cy + 4, item.name, {
-                fontSize: '12px', fontFamily: 'monospace', color: ir.textColor, fontStyle: 'bold'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: ir.textColor, fontStyle: 'bold'
             });
             const statStr = Object.entries(item.stats || {}).map(([k,v]) => `${k}+${v}`).join(' ');
             this.add.text(x + 18, cy + 21, `[${ir.name}] ${statStr}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#aaaacc'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
             });
             this.add.text(x + 18, cy + 34, `가치 ${item.value}G`, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#888899'
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             });
 
             if (isUpgrade && current) {
                 this.add.text(x + w - 100, cy + 8, '↑업그레이드', {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#88ff88', fontStyle: 'bold'
+                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textSuccess || '#66bb55', fontStyle: 'bold'
                 });
             }
 
             UIButton.create(this, x + w - 50, cy + 30, 70, 22, '장착', {
-                color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 10,
+                variant: 'primary',
+                fontSize: 10,
                 onClick: () => {
                     StorageManager.removeItem(gs, item.id);
                     const prev = merc.equip(item);
@@ -583,27 +677,28 @@ class RosterScene extends Phaser.Scene {
 
     /** 기존 _drawDetailPanel — 사용 안 함 (제거 대신 stub) */
     _drawDetailPanel(merc, x, y) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const base = merc.getBaseClass();
         const rarity = RARITY_DATA[merc.rarity];
         const stats = merc.getStats();
         const w = 920;
 
-        UIPanel.create(this, x, y, w, 640, { fillColor: 0x151525, strokeColor: 0x446688 });
+        UIPanel.create(this, x, y, w, 640, { ornament: true });
 
         let cy = y + 15;
 
         this.add.text(x + 20, cy, `${base.icon} ${merc.name}`, {
-            fontSize: '18px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: '18px', fontFamily: T.fontFamily || 'monospace', color: rarity.textColor, fontStyle: 'bold'
         });
         this.add.text(x + w - 20, cy, `Lv.${merc.level} ${base.name} [${rarity.name}]`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#888899'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(1, 0);
         cy += 30;
 
         const xpLabel = merc.level >= 10 ? 'MAX' : `${merc.xp}/${merc.getXpToNextLevel()}`;
         this.add.text(x + 20, cy, `XP: ${xpLabel}`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#6688aa'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textBlue || '#6699cc'
         });
         cy += 25;
 
@@ -618,18 +713,18 @@ class RosterScene extends Phaser.Scene {
             const col = i % statCols;
             const row = Math.floor(i / statCols);
             this.add.text(x + 20 + col * 115, cy + row * 20, `${s[0]}: ${s[1]}`, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#aaaacc'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
             });
         });
         cy += 50;
 
         const line1 = this.add.graphics();
-        line1.lineStyle(1, 0x333355, 0.5);
+        line1.lineStyle(1, T.panelStroke || 0x5a4a2a, 0.5);
         line1.lineBetween(x + 15, cy, x + w - 15, cy);
         cy += 12;
 
         this.add.text(x + 20, cy, '특성', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0', fontStyle: 'bold'
         });
         cy += 20;
         merc.traits.forEach(trait => {
@@ -638,7 +733,7 @@ class RosterScene extends Phaser.Scene {
             if (trait.type === 'negative') { color = '#ff6666'; sym = '✧'; }
             if (trait.type === 'legendary') { color = '#ffaa00'; sym = '★'; }
             this.add.text(x + 25, cy, `${sym} ${trait.name} — ${trait.desc}`, {
-                fontSize: '11px', fontFamily: 'monospace', color
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color
             });
             cy += 18;
         });
@@ -646,21 +741,21 @@ class RosterScene extends Phaser.Scene {
 
         if (merc.level >= 5) {
             this.add.text(x + 20, cy, `스킬: ${base.skillName}`, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#44aaff', fontStyle: 'bold'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: '#44aaff', fontStyle: 'bold'
             });
             this.add.text(x + 25, cy + 18, base.skillDesc, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#6688aa'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textBlue || '#6699cc'
             });
             cy += 40;
         }
 
         const line2 = this.add.graphics();
-        line2.lineStyle(1, 0x333355, 0.5);
+        line2.lineStyle(1, T.panelStroke || 0x5a4a2a, 0.5);
         line2.lineBetween(x + 15, cy, x + w - 15, cy);
         cy += 12;
 
         this.add.text(x + 20, cy, '장비', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0', fontStyle: 'bold'
         });
         cy += 22;
 
@@ -668,32 +763,33 @@ class RosterScene extends Phaser.Scene {
             const slotNames = { weapon: '무기', armor: '방어구', accessory: '장신구' };
             const eq = merc.equipment[slot];
             const label = eq ? `${slotNames[slot]}: ${eq.name} [${ITEM_RARITY[eq.rarity].name}]` : `${slotNames[slot]}: (비어있음)`;
-            const color = eq ? ITEM_RARITY[eq.rarity].textColor : '#555566';
+            const color = eq ? ITEM_RARITY[eq.rarity].textColor : (T.textMuted || '#887860');
 
             this.add.text(x + 25, cy, label, {
-                fontSize: '11px', fontFamily: 'monospace', color
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color
             });
 
             if (eq) {
                 const statStr = Object.entries(eq.stats || {}).map(([k, v]) => `${k}+${v}`).join(' ');
                 if (statStr) {
                     this.add.text(x + 25, cy + 14, `  ${statStr}`, {
-                        fontSize: '10px', fontFamily: 'monospace', color: '#667788'
+                        fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
                     });
                 }
 
                 if (eq.cursed) {
                     this.add.text(x + w - 80, cy + 4, '🔒 저주', {
-                        fontSize: '10px', fontFamily: 'monospace', color: '#cc44ff', fontStyle: 'bold'
+                        fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: '#cc44ff', fontStyle: 'bold'
                     });
                     if (eq.curseDebuffDesc) {
                         this.add.text(x + 25, cy + 26, `  ⚠ ${eq.curseDebuffDesc}`, {
-                            fontSize: '9px', fontFamily: 'monospace', color: '#cc4488'
+                            fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: '#cc4488'
                         });
                     }
                 } else {
                     UIButton.create(this, x + w - 80, cy + 8, 60, 22, '해제', {
-                        color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 10,
+                        variant: 'ghost',
+                        fontSize: 10,
                         onClick: () => {
                             const item = merc.unequip(slot);
                             if (item) StorageManager.addItem(gs, item);
@@ -705,18 +801,18 @@ class RosterScene extends Phaser.Scene {
             } else {
                 const equippable = StorageManager.getEquippableItems(gs, slot);
                 if (equippable.length > 0) {
-                    // 스탯 합이 가장 큰 거 우선
                     equippable.sort((a, b) => {
                         const sum = e => Object.values(e.stats || {}).reduce((s, v) => s + (typeof v === 'number' ? v : 0), 0);
                         return sum(b) - sum(a);
                     });
                     UIButton.create(this, x + w - 80, cy + 8, 75, 22, `장착(${equippable.length})`, {
-                        color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 10,
+                        variant: 'primary',
+                        fontSize: 10,
                         onClick: () => this._showEquipMenu(merc, slot, equippable)
                     });
                 } else {
                     this.add.text(x + w - 80, cy + 14, '(보관 없음)', {
-                        fontSize: '9px', fontFamily: 'monospace', color: '#555566'
+                        fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
                     }).setOrigin(0, 0.5);
                 }
             }
@@ -724,12 +820,12 @@ class RosterScene extends Phaser.Scene {
         });
 
         const line3 = this.add.graphics();
-        line3.lineStyle(1, 0x333355, 0.5);
+        line3.lineStyle(1, T.panelStroke || 0x5a4a2a, 0.5);
         line3.lineBetween(x + 15, cy + 5, x + w - 15, cy + 5);
         cy += 15;
 
         this.add.text(x + 20, cy, '구역 친화도', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0', fontStyle: 'bold'
         });
         cy += 20;
         ZONE_KEYS.forEach(zoneKey => {
@@ -741,13 +837,14 @@ class RosterScene extends Phaser.Scene {
             const needed = aLv >= 5 ? 'MAX' : getAffinityXpNeeded(aLv);
             const ptsLabel = aPts > 0 ? ` [${aPts}P 사용가능]` : '';
             this.add.text(x + 25, cy, `${zone.icon} ${zone.name}: Lv.${aLv} (${aLv >= 5 ? 'MAX' : `${aXp}/${needed}`})${ptsLabel}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: aPts > 0 ? '#ffaa44' : zone.textColor
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: aPts > 0 ? (T.textGold || '#ffcc44') : zone.textColor
             });
             cy += 16;
         });
 
         UIButton.create(this, x + w / 2, cy + 14, 200, 28, '🌳 친화도 트리 열기', {
-            color: 0x445566, hoverColor: 0x556677, textColor: '#aaccee', fontSize: 11,
+            variant: 'info',
+            fontSize: 11,
             onClick: () => this.scene.start('AffinityScene', { gameState: gs, mercId: merc.id })
         });
 
@@ -755,7 +852,8 @@ class RosterScene extends Phaser.Scene {
         const btnY = y + 595;
         const isHurt = merc.currentHp < merc.getStats().hp;
         UIButton.create(this, x + 90, btnY, 150, 32, '🤖 자동 장착', {
-            color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 11,
+            variant: 'info',
+            fontSize: 11,
             onClick: () => {
                 let count = 0;
                 ['weapon', 'armor', 'accessory'].forEach(slot => {
@@ -780,14 +878,14 @@ class RosterScene extends Phaser.Scene {
                     UIToast.show(this, `${count}개 슬롯 자동 장착!`, { color: '#88ccff' });
                     this.scene.restart({ gameState: gs });
                 } else {
-                    UIToast.show(this, '더 좋은 장비 없음', { color: '#aaaaaa' });
+                    UIToast.show(this, '더 좋은 장비 없음', { color: T.textSecondary || '#b8a888' });
                 }
             }
         });
 
         UIButton.create(this, x + 270, btnY, 140, 32, `💊 치료 (30G)`, {
-            color: gs.gold >= 30 && isHurt ? 0x44aa44 : 0x333333,
-            hoverColor: 0x55cc55, textColor: gs.gold >= 30 && isHurt ? '#ffffff' : '#666666', fontSize: 11,
+            variant: 'primary',
+            fontSize: 11,
             disabled: gs.gold < 30 || !isHurt,
             onClick: () => {
                 if (GuildManager.spendGold(gs, 30)) {
@@ -802,48 +900,31 @@ class RosterScene extends Phaser.Scene {
         const rarityMult = { common: 1.0, uncommon: 1.2, rare: 1.5, epic: 2.0, legendary: 2.5 }[merc.rarity] || 1.0;
         const severance = Math.floor(50 * merc.level * rarityMult);
         UIButton.create(this, x + w - 110, btnY, 180, 32, `🚪 해고 (+${severance}G)`, {
-            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffcccc', fontSize: 11,
+            variant: 'danger',
+            fontSize: 11,
             onClick: () => this._confirmDismiss(merc, severance)
         });
     }
 
     _confirmDismiss(merc, severance) {
         const gs = this.gameState;
-        const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7).setDepth(100);
-        const modal = [overlay];
-        const w = 460, h = 220, mx = 640 - w/2, my = 360 - h/2;
-        const bg = this.add.graphics().setDepth(101);
-        bg.fillStyle(0x1a1a2a, 1);
-        bg.fillRoundedRect(mx, my, w, h, 6);
-        bg.lineStyle(2, 0x884444, 0.8);
-        bg.strokeRoundedRect(mx, my, w, h, 6);
-        modal.push(bg);
-        modal.push(this.add.text(mx + w/2, my + 25, '해고 확인', {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcccc', fontStyle: 'bold'
-        }).setOrigin(0.5).setDepth(101));
-        modal.push(this.add.text(mx + w/2, my + 65, `${merc.name} (Lv.${merc.level})를 해고합니다`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#ccccdd'
-        }).setOrigin(0.5).setDepth(101));
-        modal.push(this.add.text(mx + w/2, my + 90, `퇴직금: +${severance}G  |  장비는 보관함으로 회수`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
-        }).setOrigin(0.5).setDepth(101));
-        modal.push(this.add.text(mx + w/2, my + 115, '⚠ 영구 해고 — 복구 불가', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#ff8888'
-        }).setOrigin(0.5).setDepth(101));
-
-        modal.push(UIButton.create(this, mx + w/2 - 80, my + h - 35, 130, 32, '해고 확정', {
-            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffffff', fontSize: 12, depth: 101,
-            onClick: () => {
+        UIModal.confirm(this, {
+            title: '해고 확인',
+            message: [
+                `${merc.name} (Lv.${merc.level})를 해고합니다`,
+                `퇴직금: +${severance}G  |  장비는 보관함으로 회수`,
+                '',
+                '⚠ 영구 해고 — 복구 불가'
+            ],
+            confirmLabel: '해고 확정',
+            cancelLabel: '취소',
+            danger: true,
+            onConfirm: () => {
                 MercenaryManager.dismiss(gs, merc.id);
                 this.selectedMercId = null;
-                modal.forEach(o => o.destroy && o.destroy());
                 this.scene.restart({ gameState: gs });
             }
-        }));
-        modal.push(UIButton.create(this, mx + w/2 + 80, my + h - 35, 130, 32, '취소', {
-            color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 12, depth: 101,
-            onClick: () => modal.forEach(o => o.destroy && o.destroy())
-        }));
+        });
     }
 
     _confirmBulkDismiss(key, label, filter) {
@@ -854,68 +935,63 @@ class RosterScene extends Phaser.Scene {
             return s + Math.floor(50 * m.level * mult);
         }, 0);
 
-        const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7).setDepth(100);
-        const modal = [overlay];
-        const w = 480, h = 220, mx = 640 - w/2, my = 360 - h/2;
-        const bg = this.add.graphics().setDepth(101);
-        bg.fillStyle(0x1a1a2a, 1);
-        bg.fillRoundedRect(mx, my, w, h, 6);
-        bg.lineStyle(2, 0x884444, 0.8);
-        bg.strokeRoundedRect(mx, my, w, h, 6);
-        modal.push(bg);
-        modal.push(this.add.text(mx + w/2, my + 25, '일괄 해고', {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcccc', fontStyle: 'bold'
-        }).setOrigin(0.5).setDepth(101));
-        modal.push(this.add.text(mx + w/2, my + 60, `${label}을(를) 모두 해고합니다 (${targets.length}명)`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#ccccdd'
-        }).setOrigin(0.5).setDepth(101));
-        modal.push(this.add.text(mx + w/2, my + 90, `총 퇴직금: +${totalSeverance}G  |  장비는 보관함으로`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
-        }).setOrigin(0.5).setDepth(101));
-        modal.push(this.add.text(mx + w/2, my + 115, '⚠ 영구 해고 — 복구 불가', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#ff8888'
-        }).setOrigin(0.5).setDepth(101));
-
-        modal.push(UIButton.create(this, mx + w/2 - 90, my + h - 35, 150, 32, `전원 해고`, {
-            color: 0x884444, hoverColor: 0xaa5555, textColor: '#ffffff', fontSize: 12, depth: 101,
-            onClick: () => {
+        UIModal.confirm(this, {
+            title: '일괄 해고',
+            message: [
+                `${label}을(를) 모두 해고합니다 (${targets.length}명)`,
+                `총 퇴직금: +${totalSeverance}G  |  장비는 보관함으로`,
+                '',
+                '⚠ 영구 해고 — 복구 불가'
+            ],
+            confirmLabel: '전원 해고',
+            cancelLabel: '취소',
+            danger: true,
+            width: 480,
+            onConfirm: () => {
                 const r = MercenaryManager.dismissAll(gs, filter);
-                modal.forEach(o => o.destroy && o.destroy());
                 UIToast.show(this, `${r.count}명 해고 +${r.totalSeverance}G`, { color: '#ffcc88' });
                 this.scene.restart({ gameState: gs });
             }
-        }));
-        modal.push(UIButton.create(this, mx + w/2 + 90, my + h - 35, 130, 32, '취소', {
-            color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 12, depth: 101,
-            onClick: () => modal.forEach(o => o.destroy && o.destroy())
-        }));
+        });
     }
 
     /**
      * 장비 선택 모달 — 슬롯 클릭 시 장착 가능한 아이템 목록 표시.
      */
     _showEquipMenu(merc, slot, items) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         // 오버레이
-        const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7).setDepth(100);
+        const overlay = this.add.rectangle(640, 360, 1280, 720, T.modalOverlay || 0x000000, T.modalOverlayAlpha || 0.7).setDepth(100);
         const modalW = 600, modalH = Math.min(560, 80 + items.length * 56);
         const modalX = 640 - modalW / 2, modalY = 360 - modalH / 2;
         const modalObjs = [overlay];
 
         const bg = this.add.graphics().setDepth(101);
-        bg.fillStyle(0x151525, 1);
+        bg.fillStyle(T.panelFill || 0x2a2218, 1);
         bg.fillRoundedRect(modalX, modalY, modalW, modalH, 6);
-        bg.lineStyle(2, 0x5588aa, 0.8);
+        // 내부 글로우
+        bg.fillStyle(0xffffff, 0.03);
+        bg.fillRoundedRect(modalX + 2, modalY + 2, modalW - 4, 30, { tl: 4, tr: 4, bl: 0, br: 0 });
+        // 테두리
+        bg.lineStyle(2, T.modalStroke || 0x8a7a4a, 0.8);
         bg.strokeRoundedRect(modalX, modalY, modalW, modalH, 6);
+        // 제목 구분선
+        bg.lineStyle(1, T.divider || 0x5a4a2a, 0.5);
+        bg.lineBetween(modalX + 12, modalY + 42, modalX + modalW - 12, modalY + 42);
         modalObjs.push(bg);
 
         const slotNames = { weapon: '무기', armor: '방어구', accessory: '장신구' };
         modalObjs.push(this.add.text(modalX + modalW / 2, modalY + 20, `${slotNames[slot]} 선택 (${items.length}개)`, {
-            fontSize: '15px', fontFamily: 'monospace', color: '#ccccee', fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.header) || 16}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(101));
 
         modalObjs.push(UIButton.create(this, modalX + modalW - 50, modalY + 20, 60, 24, '닫기', {
-            color: 0x444455, hoverColor: 0x555566, textColor: '#aaaaaa', fontSize: 11, depth: 101,
+            variant: 'ghost',
+            fontSize: 11, depth: 101,
             onClick: () => modalObjs.forEach(o => o.destroy && o.destroy())
         }));
 
@@ -923,22 +999,23 @@ class RosterScene extends Phaser.Scene {
         items.slice(0, 8).forEach(item => {
             const ir = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
             const rowBg = this.add.graphics().setDepth(101);
-            rowBg.fillStyle(0x1a1a2a, 1);
+            rowBg.fillStyle(T.cardFill || 0x231e14, 1);
             rowBg.fillRoundedRect(modalX + 12, cy, modalW - 24, 48, 3);
             rowBg.lineStyle(1, ir.color, 0.4);
             rowBg.strokeRoundedRect(modalX + 12, cy, modalW - 24, 48, 3);
             modalObjs.push(rowBg);
 
             modalObjs.push(this.add.text(modalX + 24, cy + 5, item.name, {
-                fontSize: '12px', fontFamily: 'monospace', color: ir.textColor, fontStyle: 'bold'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: ir.textColor, fontStyle: 'bold'
             }).setDepth(102));
             const statStr = Object.entries(item.stats || {}).map(([k, v]) => `${k}+${v}`).join(' ');
             modalObjs.push(this.add.text(modalX + 24, cy + 24, `[${ir.name}] ${statStr}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             }).setDepth(102));
 
             modalObjs.push(UIButton.create(this, modalX + modalW - 60, cy + 24, 80, 26, '장착', {
-                color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 11, depth: 102,
+                variant: 'primary',
+                fontSize: 11, depth: 102,
                 onClick: () => {
                     StorageManager.removeItem(gs, item.id);
                     const prev = merc.equip(item);
@@ -952,7 +1029,7 @@ class RosterScene extends Phaser.Scene {
         });
         if (items.length > 8) {
             modalObjs.push(this.add.text(modalX + modalW / 2, cy + 8, `... +${items.length - 8}개 더`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#666677'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             }).setOrigin(0.5).setDepth(101));
         }
     }

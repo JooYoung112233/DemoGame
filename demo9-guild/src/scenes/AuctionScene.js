@@ -4,19 +4,40 @@ class AuctionScene extends Phaser.Scene {
     init(data) { this.gameState = data.gameState; }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+
+        // ── 배경 ──
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
+
         const gs = this.gameState;
 
-        this.add.text(640, 25, '🏛 경매장', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+        // ── 헤더 바 ──
+        const headerBg = this.add.graphics();
+        headerBg.fillStyle(T.headerBg || 0x1e1810, 1);
+        headerBg.fillRect(0, 0, 1280, T.headerHeight || 55);
+        // 헤더 하단 장식선
+        headerBg.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
+        headerBg.lineBetween(0, (T.headerHeight || 55) - 1, 1280, (T.headerHeight || 55) - 1);
+        headerBg.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
+        headerBg.lineBetween(0, (T.headerHeight || 55), 1280, (T.headerHeight || 55));
+
+        this.add.text(640, 25, '◈ 경매장 ◈', {
+            fontSize: `${(T.fontSize && T.fontSize.title) || 20}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.goldText = this.add.text(1260, 25, `${gs.gold}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.header) || 16}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(1, 0);
 
         UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
+            variant: 'ghost',
+            fontSize: (T.fontSize && T.fontSize.body) || 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
@@ -35,6 +56,7 @@ class AuctionScene extends Phaser.Scene {
     }
 
     _drawTabs() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         if (this._tabObjs) this._tabObjs.forEach(o => o.destroy && o.destroy());
         this._tabObjs = [];
         const tabs = [
@@ -47,10 +69,10 @@ class AuctionScene extends Phaser.Scene {
         tabs.forEach(t => {
             const active = this.tab === t.key;
             this._tabObjs.push(UIButton.create(this, t.x, 60, 110, 28, t.label, {
-                color: active ? 0x445588 : 0x222233,
-                hoverColor: active ? 0x445588 : 0x333344,
-                textColor: active ? '#ffffff' : '#888899',
-                fontSize: 12,
+                color: active ? (T.buttonPrimary || 0x8a6a2a) : (T.panelFill || 0x2a2218),
+                hoverColor: active ? (T.buttonPrimary || 0x8a6a2a) : (T.cardHover || 0x3a3020),
+                textColor: active ? (T.buttonText || '#f0e8d0') : (T.textMuted || '#887860'),
+                fontSize: (T.fontSize && T.fontSize.body) || 12,
                 onClick: () => {
                     this.tab = t.key;
                     this.scrollOffset = 0;
@@ -137,6 +159,7 @@ class AuctionScene extends Phaser.Scene {
 
     // --- BUY TAB ---
     _drawBuyTab() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
 
         this._drawFilterBar(90);
@@ -145,10 +168,9 @@ class AuctionScene extends Phaser.Scene {
 
         const refreshCost = 80 + gs.guildLevel * 20;
         this._add(UIButton.create(this, 1180, 90, 140, 26, `갱신 (${refreshCost}G)`, {
-            color: gs.gold >= refreshCost ? 0x443322 : 0x333333,
-            hoverColor: gs.gold >= refreshCost ? 0x554433 : 0x333333,
-            textColor: gs.gold >= refreshCost ? '#ffcc88' : '#555555',
-            fontSize: 11,
+            variant: 'primary',
+            fontSize: (T.fontSize && T.fontSize.caption) || 11,
+            disabled: gs.gold < refreshCost,
             onClick: () => {
                 if (gs.gold < refreshCost) { UIToast.show(this, '골드 부족', { color: '#ff6666' }); return; }
                 GuildManager.spendGold(gs, refreshCost);
@@ -161,7 +183,9 @@ class AuctionScene extends Phaser.Scene {
         }));
 
         this._add(this.add.text(200, 90, `매물 ${stock.length}건`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }));
 
         if (gs.marketTrends) {
@@ -177,7 +201,9 @@ class AuctionScene extends Phaser.Scene {
                 const pct = Math.round((t.modifier - 1) * 100);
                 const pctStr = pct >= 0 ? `+${pct}%` : `${pct}%`;
                 this._add(this.add.text(tx, 107, `${catNames[cat]}: ${icon}${pctStr} (${supplyLabels[t.supply]})`, {
-                    fontSize: '9px', fontFamily: 'monospace', color: col
+                    fontSize: `${(T.fontSize && T.fontSize.tiny) || 9}px`,
+                    fontFamily: T.fontFamily || 'monospace',
+                    color: col
                 }));
                 tx += 180;
             }
@@ -185,7 +211,9 @@ class AuctionScene extends Phaser.Scene {
 
         if (stock.length === 0) {
             this._add(this.add.text(640, 400, '해당 조건의 매물이 없습니다', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#555566'
+                fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5));
             return;
         }
@@ -199,6 +227,7 @@ class AuctionScene extends Phaser.Scene {
     }
 
     _drawFilterBar(y) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const filters = [
             { key: 'all', label: '전체' },
             { key: 'equipment', label: '⚔ 장비' },
@@ -209,10 +238,10 @@ class AuctionScene extends Phaser.Scene {
         filters.forEach(f => {
             const active = this.filterType === f.key;
             this._add(UIButton.create(this, fx + 40, y, 80, 22, f.label, {
-                color: active ? 0x334466 : 0x1a1a2e,
-                hoverColor: active ? 0x334466 : 0x222244,
-                textColor: active ? '#aaccff' : '#666688',
-                fontSize: 10,
+                color: active ? (T.buttonPrimary || 0x8a6a2a) : (T.cardFill || 0x231e14),
+                hoverColor: active ? (T.buttonPrimary || 0x8a6a2a) : (T.cardHover || 0x3a3020),
+                textColor: active ? (T.buttonText || '#f0e8d0') : (T.textMuted || '#887860'),
+                fontSize: (T.fontSize && T.fontSize.caption) || 10,
                 onClick: () => {
                     this.filterType = f.key;
                     this._clearContent();
@@ -231,10 +260,10 @@ class AuctionScene extends Phaser.Scene {
         sorts.forEach(s => {
             const active = this.sortBy === s.key;
             this._add(UIButton.create(this, fx + 35, y, 70, 22, s.label, {
-                color: active ? 0x334444 : 0x1a1a2e,
-                hoverColor: active ? 0x334444 : 0x222244,
-                textColor: active ? '#88ccaa' : '#556666',
-                fontSize: 10,
+                color: active ? (T.buttonPrimary || 0x8a6a2a) : (T.cardFill || 0x231e14),
+                hoverColor: active ? (T.buttonPrimary || 0x8a6a2a) : (T.cardHover || 0x3a3020),
+                textColor: active ? (T.buttonText || '#f0e8d0') : (T.textMuted || '#887860'),
+                fontSize: (T.fontSize && T.fontSize.caption) || 10,
                 onClick: () => {
                     this.sortBy = s.key;
                     this._clearContent();
@@ -255,16 +284,17 @@ class AuctionScene extends Phaser.Scene {
     }
 
     _drawBuyRow(item, idx, x, y, w) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
         const cap = GuildManager.getStorageCapacity(gs);
         const canBuy = gs.gold >= item.auctionPrice && gs.storage.length < cap;
 
         const bg = this._add(this.add.graphics());
-        bg.fillStyle(item.isHotDeal ? 0x2a1a1a : 0x1a1a2e, 1);
-        bg.fillRoundedRect(x, y, w, 58, 4);
+        bg.fillStyle(item.isHotDeal ? 0x2a1a14 : (T.cardFill || 0x231e14), 1);
+        bg.fillRoundedRect(x, y, w, 58, T.borderRadius || 4);
         bg.lineStyle(1, item.isHotDeal ? 0xff6644 : rarity.color, item.isHotDeal ? 0.6 : 0.3);
-        bg.strokeRoundedRect(x, y, w, 58, 4);
+        bg.strokeRoundedRect(x, y, w, 58, T.borderRadius || 4);
 
         const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
         this._add(this.add.text(x + 12, y + 8, typeIcons[item.type] || '?', { fontSize: '16px' }));
@@ -272,24 +302,30 @@ class AuctionScene extends Phaser.Scene {
         let nameStr = item.name;
         if (item.isBulk) nameStr += ` ×${item.bulkCount}`;
         this._add(this.add.text(x + 38, y + 8, nameStr, {
-            fontSize: '13px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: rarity.textColor, fontStyle: 'bold'
         }));
 
         const tagX = x + 38;
         let tagOff = 0;
         if (item.isHotDeal) {
             this._add(this.add.text(x + 38 + nameStr.length * 8 + 10, y + 10, '🔥 특가', {
-                fontSize: '10px', fontFamily: 'monospace', color: '#ff6644', fontStyle: 'bold'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: '#ff6644', fontStyle: 'bold'
             }));
         }
         if (item.isBulk) {
             this._add(this.add.text(x + 38 + nameStr.length * 8 + 10 + (item.isHotDeal ? 55 : 0), y + 10, '📦 묶음', {
-                fontSize: '10px', fontFamily: 'monospace', color: '#44aaff'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: '#44aaff'
             }));
         }
 
         this._add(this.add.text(x + 38, y + 30, `[${rarity.name}] ${item.desc || ''}`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#667788'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }));
 
         if (item.stats) {
@@ -297,7 +333,9 @@ class AuctionScene extends Phaser.Scene {
                 typeof v === 'number' && v < 1 ? `${k}+${Math.round(v * 100)}%` : `${k}+${v}`
             ).join('  ');
             this._add(this.add.text(x + 400, y + 10, statStr, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#8888aa'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textSecondary || '#b8a888'
             }));
         }
 
@@ -306,20 +344,21 @@ class AuctionScene extends Phaser.Scene {
         const priceColor = priceRatio <= 0.7 ? '#44ff88' : priceRatio <= 1.0 ? '#ffcc44' : '#ff8866';
 
         this._add(this.add.text(x + w - 220, y + 8, `${item.auctionPrice}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: priceColor, fontStyle: 'bold'
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace', color: priceColor, fontStyle: 'bold'
         }));
 
         const valueLabel = priceRatio <= 0.7 ? '매우 저렴' : priceRatio <= 1.0 ? '적정가' : priceRatio <= 1.5 ? '약간 비쌈' : '비쌈';
         const valueLabelColor = priceRatio <= 0.7 ? '#44ff88' : priceRatio <= 1.0 ? '#aaaa88' : '#ff8866';
         this._add(this.add.text(x + w - 220, y + 32, `시세 대비: ${valueLabel}`, {
-            fontSize: '9px', fontFamily: 'monospace', color: valueLabelColor
+            fontSize: `${(T.fontSize && T.fontSize.tiny) || 9}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: valueLabelColor
         }));
 
         this._add(UIButton.create(this, x + w - 55, y + 30, 90, 28, '구매', {
-            color: canBuy ? 0x446644 : 0x333333,
-            hoverColor: canBuy ? 0x558855 : 0x333333,
-            textColor: canBuy ? '#44ff88' : '#555555',
-            fontSize: 12,
+            variant: 'primary',
+            fontSize: (T.fontSize && T.fontSize.body) || 12,
+            disabled: !canBuy,
             onClick: () => {
                 if (!canBuy) {
                     if (gs.storage.length >= cap) UIToast.show(this, '보관함이 가득 찼습니다', { color: '#ff6666' });
@@ -363,13 +402,16 @@ class AuctionScene extends Phaser.Scene {
 
     // --- SELL TAB ---
     _drawSellTab() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const feeTable = { common: 10, uncommon: 15, rare: 20, epic: 25, legendary: 30 };
 
         this._drawFilterBar(90);
 
         this._add(this.add.text(640, 112, '판매 수수료: 일반 10% | 고급 15% | 희귀 20% | 에픽 25% | 전설 30%', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#666677'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }).setOrigin(0.5));
 
         // --- Bulk sell buttons ---
@@ -393,10 +435,9 @@ class AuctionScene extends Phaser.Scene {
             : `일반 전체 판매 (${commonItems.length}개 / +${commonTotal}G)`;
         const commonEnabled = commonItems.length > 0;
         this._add(UIButton.create(this, 200, 132, 280, 26, commonLabel, {
-            color: commonEnabled ? (this._bulkSellConfirm.common ? 0x884422 : 0x443344) : 0x222233,
-            hoverColor: commonEnabled ? (this._bulkSellConfirm.common ? 0xaa6644 : 0x554455) : 0x222233,
-            textColor: commonEnabled ? (this._bulkSellConfirm.common ? '#ffaa66' : '#ccaacc') : '#444455',
-            fontSize: 10,
+            variant: this._bulkSellConfirm.common ? 'danger' : 'primary',
+            fontSize: (T.fontSize && T.fontSize.caption) || 10,
+            disabled: !commonEnabled,
             onClick: () => {
                 if (!commonEnabled) return;
                 if (!this._bulkSellConfirm.common) {
@@ -437,10 +478,9 @@ class AuctionScene extends Phaser.Scene {
             : `소재 전체 판매 (${materialItems.length}개 / +${materialTotal}G)`;
         const matEnabled = materialItems.length > 0;
         this._add(UIButton.create(this, 500, 132, 280, 26, matLabel, {
-            color: matEnabled ? (this._bulkSellConfirm.material ? 0x884422 : 0x443344) : 0x222233,
-            hoverColor: matEnabled ? (this._bulkSellConfirm.material ? 0xaa6644 : 0x554455) : 0x222233,
-            textColor: matEnabled ? (this._bulkSellConfirm.material ? '#ffaa66' : '#ccaacc') : '#444455',
-            fontSize: 10,
+            variant: this._bulkSellConfirm.material ? 'danger' : 'primary',
+            fontSize: (T.fontSize && T.fontSize.caption) || 10,
+            disabled: !matEnabled,
             onClick: () => {
                 if (!matEnabled) return;
                 if (!this._bulkSellConfirm.material) {
@@ -479,7 +519,9 @@ class AuctionScene extends Phaser.Scene {
 
         if (sellable.length === 0) {
             this._add(this.add.text(640, 400, '판매할 아이템이 없습니다', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#555566'
+                fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5));
             return;
         }
@@ -497,12 +539,15 @@ class AuctionScene extends Phaser.Scene {
             return sum + Math.floor(item.value * (1 - fee / 100));
         }, 0);
         const footerBg = this._add(this.add.graphics());
-        footerBg.fillStyle(0x111122, 1);
-        footerBg.fillRoundedRect(40, 672, 1200, 30, 4);
-        footerBg.lineStyle(1, 0x444466, 0.5);
-        footerBg.strokeRoundedRect(40, 672, 1200, 30, 4);
+        footerBg.fillStyle(T.headerBg || 0x1e1810, 1);
+        footerBg.fillRoundedRect(40, 672, 1200, 30, T.borderRadius || 4);
+        footerBg.lineStyle(1, T.panelStroke || 0x5a4a2a, 0.5);
+        footerBg.strokeRoundedRect(40, 672, 1200, 30, T.borderRadius || 4);
         this._add(this.add.text(640, 687, `보관함 전체 매각 시: ${totalValue}G  (아이템 ${allSellable.length}개)`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(0.5));
     }
 
@@ -517,6 +562,7 @@ class AuctionScene extends Phaser.Scene {
     }
 
     _drawSellRow(item, x, y, w) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
         const feePercent = { common: 10, uncommon: 15, rare: 20, epic: 25, legendary: 30 }[item.rarity] || 10;
@@ -524,33 +570,43 @@ class AuctionScene extends Phaser.Scene {
         const sellPrice = Math.floor(item.value * (1 - feePercent / 100) * marketMod);
 
         const bg = this._add(this.add.graphics());
-        bg.fillStyle(0x1a1a2e, 1);
-        bg.fillRoundedRect(x, y, w, 50, 4);
+        bg.fillStyle(T.cardFill || 0x231e14, 1);
+        bg.fillRoundedRect(x, y, w, 50, T.borderRadius || 4);
         bg.lineStyle(1, rarity.color, 0.3);
-        bg.strokeRoundedRect(x, y, w, 50, 4);
+        bg.strokeRoundedRect(x, y, w, 50, T.borderRadius || 4);
 
         const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
         this._add(this.add.text(x + 12, y + 8, typeIcons[item.type] || '?', { fontSize: '14px' }));
 
         this._add(this.add.text(x + 38, y + 8, `${item.name} [${rarity.name}]`, {
-            fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: rarity.textColor, fontStyle: 'bold'
         }));
 
         this._add(this.add.text(x + 38, y + 28, `${item.desc || ''} ${item.stats ? Object.entries(item.stats).map(([k, v]) => typeof v === 'number' && v < 1 ? `${k}+${Math.round(v * 100)}%` : `${k}+${v}`).join(' ') : ''}`, {
-            fontSize: '9px', fontFamily: 'monospace', color: '#667788'
+            fontSize: `${(T.fontSize && T.fontSize.tiny) || 9}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }));
 
         this._add(this.add.text(x + w - 250, y + 8, `시세: ${item.value}G`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#888866'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }));
 
         this._add(this.add.text(x + w - 250, y + 26, `수수료 ${feePercent}% → +${sellPrice}G`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }));
 
         // Sell button
         this._add(UIButton.create(this, x + w - 55, y + 26, 90, 26, '판매', {
-            color: 0x886644, hoverColor: 0xaa8866, textColor: '#ffeecc', fontSize: 11,
+            variant: 'primary',
+            fontSize: (T.fontSize && T.fontSize.caption) || 11,
             onClick: () => {
                 StorageManager.removeItem(gs, item.id);
                 GuildManager.addGold(gs, sellPrice);
@@ -574,7 +630,8 @@ class AuctionScene extends Phaser.Scene {
         // Haggling button — only for equipment items, once per item
         if (item.type === 'equipment' && !item._haggled) {
             this._add(UIButton.create(this, x + w - 155, y + 26, 80, 26, '흥정', {
-                color: 0x445566, hoverColor: 0x556677, textColor: '#88bbdd', fontSize: 11,
+                variant: 'info',
+                fontSize: (T.fontSize && T.fontSize.caption) || 11,
                 onClick: () => {
                     item._haggled = true;
                     const roll = Math.random();
@@ -612,13 +669,16 @@ class AuctionScene extends Phaser.Scene {
             const haggleLabel = diffG > 0 ? `흥정가 +${diffG}G` : diffG < 0 ? `흥정가 ${diffG}G` : '흥정가 동일';
             const haggleColor = diffG > 0 ? '#44ff88' : diffG < 0 ? '#ff6666' : '#aaaaaa';
             this._add(this.add.text(x + w - 190, y + 30, haggleLabel, {
-                fontSize: '10px', fontFamily: 'monospace', color: haggleColor, fontStyle: 'bold'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: haggleColor, fontStyle: 'bold'
             }));
 
             // Override the sell button price if haggled — re-draw sell button with haggle price
             // We already drew the default sell button above, so we override by adding a new one on top
             this._add(UIButton.create(this, x + w - 55, y + 26, 90, 26, `판매 ${hagglePrice}G`, {
-                color: 0x886644, hoverColor: 0xaa8866, textColor: '#ffeecc', fontSize: 10,
+                variant: 'primary',
+                fontSize: (T.fontSize && T.fontSize.caption) || 10,
                 onClick: () => {
                     StorageManager.removeItem(gs, item.id);
                     GuildManager.addGold(gs, hagglePrice);
@@ -640,17 +700,21 @@ class AuctionScene extends Phaser.Scene {
 
     // --- BID TAB ---
     _drawBidTab() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const bids = gs.auctionBids || [];
         const active = bids.filter(b => !b.resolved);
 
         this._add(this.add.text(640, 95, '입찰 — 경쟁 입찰로 고급 아이템을 저렴하게 획득하세요', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888'
         }).setOrigin(0.5));
 
         if (active.length === 0) {
             this._add(this.add.text(640, 400, '현재 진행 중인 입찰이 없습니다\n구매 탭에서 목록을 갱신하면 새 입찰이 등장합니다', {
-                fontSize: '13px', fontFamily: 'monospace', color: '#555566', align: 'center'
+                fontSize: '13px', fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860', align: 'center'
             }).setOrigin(0.5));
             return;
         }
@@ -663,6 +727,7 @@ class AuctionScene extends Phaser.Scene {
     }
 
     _drawBidCard(gs, bid, idx, x, y, w) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const item = bid.item;
         const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
         const isLeading = bid.playerBid > 0 && bid.playerBid >= bid.currentBid;
@@ -670,20 +735,22 @@ class AuctionScene extends Phaser.Scene {
         const canBid = gs.gold >= minBid;
 
         const bg = this._add(this.add.graphics());
-        bg.fillStyle(isLeading ? 0x1a2a1a : 0x1a1a2e, 1);
-        bg.fillRoundedRect(x, y, w, 125, 6);
+        bg.fillStyle(isLeading ? 0x1a2a1a : (T.cardFill || 0x231e14), 1);
+        bg.fillRoundedRect(x, y, w, 125, T.borderRadius || 6);
         bg.lineStyle(2, isLeading ? 0x44ff88 : rarity.color, 0.5);
-        bg.strokeRoundedRect(x, y, w, 125, 6);
+        bg.strokeRoundedRect(x, y, w, 125, T.borderRadius || 6);
 
         const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
         this._add(this.add.text(x + 15, y + 12, typeIcons[item.type] || '?', { fontSize: '18px' }));
 
         this._add(this.add.text(x + 45, y + 12, item.name, {
-            fontSize: '15px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: '15px', fontFamily: T.fontFamily || 'monospace', color: rarity.textColor, fontStyle: 'bold'
         }));
 
         this._add(this.add.text(x + 45, y + 34, `[${rarity.name}] ${item.desc || ''}`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#667788'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }));
 
         if (item.stats) {
@@ -691,33 +758,41 @@ class AuctionScene extends Phaser.Scene {
                 typeof v === 'number' && v < 1 ? `${k}+${Math.round(v * 100)}%` : `${k}+${v}`
             ).join('  ');
             this._add(this.add.text(x + 45, y + 52, statStr, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#8888aa'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textSecondary || '#b8a888'
             }));
         }
 
         this._add(this.add.text(x + w - 350, y + 12, `현재 입찰가: ${bid.currentBid}G`, {
-            fontSize: '14px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: '14px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }));
 
         this._add(this.add.text(x + w - 350, y + 34, `시세: ${item.value}G  |  경쟁자: ${bid.npcBidders}명  |  남은 라운드: ${bid.roundsLeft}`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888'
         }));
 
         if (isLeading) {
             this._add(this.add.text(x + w - 350, y + 52, '✓ 최고 입찰자', {
-                fontSize: '11px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textSuccess || '#66bb55', fontStyle: 'bold'
             }));
         }
 
         this._add(this.add.text(x + w - 350, y + 70, `최소 입찰: ${minBid}G`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#886666'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textDanger || '#cc4422'
         }));
 
         this._add(UIButton.create(this, x + w - 200, y + 95, 120, 28, `입찰 (${minBid}G)`, {
-            color: canBid ? 0x446644 : 0x333333,
-            hoverColor: canBid ? 0x558855 : 0x333333,
-            textColor: canBid ? '#44ff88' : '#555555',
-            fontSize: 11,
+            variant: 'primary',
+            fontSize: (T.fontSize && T.fontSize.caption) || 11,
+            disabled: !canBid,
             onClick: () => {
                 if (!canBid) { UIToast.show(this, '골드 부족', { color: '#ff6666' }); return; }
                 if (bid.playerBid > 0) {
@@ -738,7 +813,8 @@ class AuctionScene extends Phaser.Scene {
         }));
 
         this._add(UIButton.create(this, x + w - 60, y + 95, 100, 28, '즉시 구매', {
-            color: 0x664422, hoverColor: 0x886644, textColor: '#ffcc88', fontSize: 11,
+            variant: 'primary',
+            fontSize: (T.fontSize && T.fontSize.caption) || 11,
             onClick: () => {
                 const buyoutPrice = Math.floor(item.value * 1.5);
                 const cap = GuildManager.getStorageCapacity(gs);
@@ -761,7 +837,9 @@ class AuctionScene extends Phaser.Scene {
 
         const buyoutPrice = Math.floor(item.value * 1.5);
         this._add(this.add.text(x + w - 60, y + 70, `즉구가: ${buyoutPrice}G`, {
-            fontSize: '9px', fontFamily: 'monospace', color: '#886644'
+            fontSize: `${(T.fontSize && T.fontSize.tiny) || 9}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textAccent || '#cc8833'
         }).setOrigin(0.5));
     }
 
@@ -810,6 +888,7 @@ class AuctionScene extends Phaser.Scene {
 
     // --- CONSIGN TAB ---
     _drawConsignTab() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const maxSlots = gs.autoAuctionSlots || 2;
         const consigned = gs.consignedItems || [];
@@ -817,14 +896,18 @@ class AuctionScene extends Phaser.Scene {
         this._add(UIPanel.create(this, 40, 90, 1200, 600, { title: `위탁 판매 (${consigned.length}/${maxSlots} 슬롯)` }));
 
         this._add(this.add.text(640, 120, '아이템을 등록하면 다음 전투 출발 시 자동으로 판매를 시도합니다', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888'
         }).setOrigin(0.5));
 
         const favorability = gs.merchantFavor?.auction || 0;
         const sellChance = Math.min(90, 50 + favorability * 5);
         const priceAccuracy = Math.min(95, 70 + favorability * 3);
         this._add(this.add.text(640, 138, `판매 확률: ${sellChance}%  |  시세 적중률: ${priceAccuracy}%  |  상인 호감도: ${favorability}`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#66aa88'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textSuccess || '#66bb55'
         }).setOrigin(0.5));
 
         let cy = 160;
@@ -832,22 +915,27 @@ class AuctionScene extends Phaser.Scene {
             if (cy > 430) return;
             const rarity = ITEM_RARITY[entry.item.rarity] || ITEM_RARITY.common;
             const bg = this._add(this.add.graphics());
-            bg.fillStyle(0x1a2a2a, 1);
-            bg.fillRoundedRect(60, cy, 1160, 50, 4);
+            bg.fillStyle(0x1a2a1a, 1);
+            bg.fillRoundedRect(60, cy, 1160, 50, T.borderRadius || 4);
             bg.lineStyle(1, rarity.color, 0.4);
-            bg.strokeRoundedRect(60, cy, 1160, 50, 4);
+            bg.strokeRoundedRect(60, cy, 1160, 50, T.borderRadius || 4);
 
             const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
             this._add(this.add.text(80, cy + 8, typeIcons[entry.item.type] || '?', { fontSize: '14px' }));
             this._add(this.add.text(106, cy + 8, `${entry.item.name} [${rarity.name}]`, {
-                fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+                fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: rarity.textColor, fontStyle: 'bold'
             }));
             this._add(this.add.text(106, cy + 28, `시세: ${entry.item.value}G  |  희망가: ${entry.desiredPrice}G`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textSecondary || '#b8a888'
             }));
 
             this._add(UIButton.create(this, 1160, cy + 25, 80, 26, '회수', {
-                color: 0x664444, hoverColor: 0x886666, textColor: '#ffaaaa', fontSize: 11,
+                variant: 'danger',
+                fontSize: (T.fontSize && T.fontSize.caption) || 11,
                 onClick: () => {
                     gs.consignedItems.splice(idx, 1);
                     StorageManager.addItem(gs, entry.item);
@@ -863,20 +951,26 @@ class AuctionScene extends Phaser.Scene {
 
         if (consigned.length >= maxSlots) {
             this._add(this.add.text(640, cy + 20, '슬롯이 가득 찼습니다 (길드 레벨 UP 또는 이벤트로 확장)', {
-                fontSize: '11px', fontFamily: 'monospace', color: '#886644'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textAccent || '#cc8833'
             }).setOrigin(0.5));
         }
 
         cy = Math.max(cy + 10, 440);
         this._add(this.add.text(640, cy, '── 보관함에서 위탁할 아이템 선택 ──', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#888899'
+            fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888'
         }).setOrigin(0.5));
         cy += 20;
 
         const sellable = gs.storage.filter(i => i.value > 0);
         if (sellable.length === 0) {
             this._add(this.add.text(640, cy + 30, '보관함에 아이템이 없습니다', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#555566'
+                fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5));
             return;
         }
@@ -888,23 +982,26 @@ class AuctionScene extends Phaser.Scene {
             const desiredPrice = Math.floor(item.value * (0.9 + Math.random() * 0.3));
 
             const bg = this._add(this.add.graphics());
-            bg.fillStyle(0x1a1a2e, 1);
+            bg.fillStyle(T.cardFill || 0x231e14, 1);
             bg.fillRoundedRect(60, cy, 1160, 42, 3);
 
             const typeIcons = { equipment: '⚔', material: '🔧', consumable: '🧪' };
             this._add(this.add.text(80, cy + 6, typeIcons[item.type] || '?', { fontSize: '13px' }));
             this._add(this.add.text(106, cy + 6, `${item.name} [${rarity.name}]`, {
-                fontSize: '11px', fontFamily: 'monospace', color: rarity.textColor
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: rarity.textColor
             }));
             this._add(this.add.text(106, cy + 24, `시세: ${item.value}G`, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#888866'
+                fontSize: `${(T.fontSize && T.fontSize.tiny) || 9}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }));
 
             this._add(UIButton.create(this, 1160, cy + 21, 80, 26, '위탁', {
-                color: canConsign ? 0x446644 : 0x333333,
-                hoverColor: canConsign ? 0x558855 : 0x333333,
-                textColor: canConsign ? '#44ff88' : '#555555',
-                fontSize: 11,
+                variant: 'primary',
+                fontSize: (T.fontSize && T.fontSize.caption) || 11,
+                disabled: !canConsign,
                 onClick: () => {
                     if (!canConsign) { UIToast.show(this, '슬롯 부족', { color: '#ff6666' }); return; }
                     StorageManager.removeItem(gs, item.id);
@@ -957,16 +1054,20 @@ class AuctionScene extends Phaser.Scene {
 
     // --- HISTORY TAB ---
     _drawHistoryTab() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const history = gs.auctionHistory || [];
 
         this._add(this.add.text(640, 95, '최근 거래 내역', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#888899'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888'
         }).setOrigin(0.5));
 
         if (history.length === 0) {
             this._add(this.add.text(640, 400, '거래 내역이 없습니다', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#555566'
+                fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5));
             return;
         }
@@ -984,22 +1085,28 @@ class AuctionScene extends Phaser.Scene {
         history.forEach((h, idx) => {
             if (cy > 680) return;
             const bg = this._add(this.add.graphics());
-            bg.fillStyle(idx % 2 === 0 ? 0x151525 : 0x1a1a2e, 1);
+            bg.fillStyle(idx % 2 === 0 ? (T.panelFill || 0x2a2218) : (T.cardFill || 0x231e14), 1);
             bg.fillRect(100, cy, 1080, 28);
 
             const label = actionLabels[h.action] || h.action;
             this._add(this.add.text(120, cy + 6, `[${label}]`, {
-                fontSize: '11px', fontFamily: 'monospace', color: actionColors[h.action] || '#888888', fontStyle: 'bold'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: actionColors[h.action] || '#888888', fontStyle: 'bold'
             }));
 
             this._add(this.add.text(230, cy + 6, h.name, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#cccccc'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textPrimary || '#e8d8c0'
             }));
 
             const sign = h.action === 'sell' ? '+' : '-';
-            const priceCol = h.action === 'sell' ? '#ffcc44' : h.action === 'bid_lose' ? '#ff6666' : '#aaaacc';
+            const priceCol = h.action === 'sell' ? (T.textGold || '#ffcc44') : h.action === 'bid_lose' ? '#ff6666' : (T.textPrimary || '#e8d8c0');
             this._add(this.add.text(700, cy + 6, `${sign}${h.price}G`, {
-                fontSize: '11px', fontFamily: 'monospace', color: priceCol
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 11}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: priceCol
             }));
 
             cy += 32;

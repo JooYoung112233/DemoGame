@@ -6,34 +6,42 @@ class EventScene extends Phaser.Scene {
     }
 
     create() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const eventKey = pickTownEvent(gs.guildLevel);
         this.eventData = TOWN_EVENTS[eventKey];
 
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
 
-        this.add.text(640, 40, '📜 본진 이벤트', {
-            fontSize: '22px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+        // Ornament lines at top
+        const ornLine = this.add.graphics();
+        ornLine.lineStyle(1, T.ornament || 0x8a7a4a, 0.4);
+        ornLine.lineBetween(200, 30, 1080, 30);
+        ornLine.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
+        ornLine.lineBetween(200, 55, 1080, 55);
+
+        this.add.text(640, 40, '◈ 📜 본진 이벤트 ◈', {
+            fontSize: '22px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        const tierColors = { 1: '#aaaacc', 2: '#ffaa44', 3: '#ff44aa' };
+        const tierColors = { 1: T.textPrimary || '#e8d8c0', 2: '#ffaa44', 3: '#ff44aa' };
         const tierLabels = { 1: '일상', 2: '구역 연계', 3: '세계관' };
         this.add.text(640, 70, `[${tierLabels[this.eventData.tier]}]`, {
-            fontSize: '11px', fontFamily: 'monospace', color: tierColors[this.eventData.tier]
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: tierColors[this.eventData.tier]
         }).setOrigin(0.5);
 
         const iconSize = 60;
-        const iconBg = this.add.rectangle(640, 160, iconSize + 20, iconSize + 20, 0x1a1a2a).setStrokeStyle(2, 0x444466);
+        const iconBg = this.add.rectangle(640, 160, iconSize + 20, iconSize + 20, T.cardFill || 0x231e14).setStrokeStyle(2, T.panelStroke || 0x5a4a2a);
         this.add.text(640, 160, this.eventData.icon, {
             fontSize: '36px'
         }).setOrigin(0.5);
 
         this.add.text(640, 220, this.eventData.name, {
-            fontSize: '24px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            fontSize: '24px', fontFamily: T.fontFamily || 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.add.text(640, 260, this.eventData.desc, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc',
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0',
             wordWrap: { width: 600 }, align: 'center'
         }).setOrigin(0.5);
 
@@ -45,22 +53,22 @@ class EventScene extends Phaser.Scene {
 
         // Choice A
         const aBg = this.add.graphics();
-        const aColor = canA ? 0x1a2a3a : 0x1a1a22;
-        const aBorder = canA ? 0x4488ff : 0x333344;
+        const aColor = canA ? 0x1a2a3a : (T.cardFill || 0x231e14);
+        const aBorder = canA ? 0x4488ff : (T.panelStroke || 0x5a4a2a);
         aBg.fillStyle(aColor, 1);
         aBg.fillRoundedRect(640 - btnW - 20, btnY - btnH / 2, btnW, btnH, 6);
         aBg.lineStyle(2, aBorder, 0.8);
         aBg.strokeRoundedRect(640 - btnW - 20, btnY - btnH / 2, btnW, btnH, 6);
 
         this.add.text(640 - btnW / 2 - 20, btnY - 8, this.eventData.choiceA.label, {
-            fontSize: '14px', fontFamily: 'monospace', color: canA ? '#4488ff' : '#555566', fontStyle: 'bold'
+            fontSize: '14px', fontFamily: T.fontFamily || 'monospace', color: canA ? '#4488ff' : '#555566', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         if (canA) {
             const aZone = this.add.zone(640 - btnW / 2 - 20, btnY, btnW, btnH).setInteractive({ useHandCursor: true });
             aZone.on('pointerover', () => {
                 aBg.clear();
-                aBg.fillStyle(0x2a3a4a, 1);
+                aBg.fillStyle(T.cardHover || 0x3a3020, 1);
                 aBg.fillRoundedRect(640 - btnW - 20, btnY - btnH / 2, btnW, btnH, 6);
                 aBg.lineStyle(3, 0x4488ff, 1);
                 aBg.strokeRoundedRect(640 - btnW - 20, btnY - btnH / 2, btnW, btnH, 6);
@@ -77,7 +85,7 @@ class EventScene extends Phaser.Scene {
 
         if (!canA && this.eventData.choiceA.cost) {
             this.add.text(640 - btnW / 2 - 20, btnY + 12, '(자원 부족)', {
-                fontSize: '10px', fontFamily: 'monospace', color: '#664444'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: '#664444'
             }).setOrigin(0.5);
         }
 
@@ -89,7 +97,7 @@ class EventScene extends Phaser.Scene {
         bBg.strokeRoundedRect(640 + 20, btnY - btnH / 2, btnW, btnH, 6);
 
         this.add.text(640 + btnW / 2 + 20, btnY - 8, this.eventData.choiceB.label, {
-            fontSize: '14px', fontFamily: 'monospace', color: '#cc8866', fontStyle: 'bold'
+            fontSize: '14px', fontFamily: T.fontFamily || 'monospace', color: '#cc8866', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         const bZone = this.add.zone(640 + btnW / 2 + 20, btnY, btnW, btnH).setInteractive({ useHandCursor: true });
@@ -110,11 +118,12 @@ class EventScene extends Phaser.Scene {
         bZone.on('pointerdown', () => this._selectChoice('B'));
 
         this.add.text(640, 680, `💰 ${gs.gold}G  |  길드 Lv.${gs.guildLevel}`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#886666'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(0.5);
     }
 
     _selectChoice(choice) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const evt = this.eventData;
         let resultText;
@@ -131,25 +140,25 @@ class EventScene extends Phaser.Scene {
         SaveManager.save(gs);
 
         this.children.removeAll(true);
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
 
         this.add.text(640, 200, evt.icon, { fontSize: '48px' }).setOrigin(0.5);
         this.add.text(640, 270, evt.name, {
-            fontSize: '22px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            fontSize: '22px', fontFamily: T.fontFamily || 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         const choiceLabel = choice === 'A' ? evt.choiceA.label : evt.choiceB.label;
         this.add.text(640, 310, `선택: ${choiceLabel}`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#886688'
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(0.5);
 
         this.add.text(640, 380, resultText, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold',
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold',
             wordWrap: { width: 600 }, align: 'center'
         }).setOrigin(0.5);
 
         UIButton.create(this, 640, 520, 200, 44, '본진으로', {
-            color: 0xffaa44, hoverColor: 0xffcc66, textColor: '#000000', fontSize: 16,
+            variant: 'primary', fontSize: 16,
             onClick: () => {
                 MercenaryManager.generateRecruitPool(gs);
                 SaveManager.save(gs);

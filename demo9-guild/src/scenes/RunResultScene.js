@@ -7,75 +7,83 @@ class RunResultScene extends Phaser.Scene {
     }
 
     create() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const r = this.result;
         const zone = ZONE_DATA[r.zoneKey];
 
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
 
-        const banner = r.success ? '탐사 성공!' : '탐사 실패...';
+        // Ornament lines
+        const ornLine = this.add.graphics();
+        ornLine.lineStyle(1, T.ornament || 0x8a7a4a, 0.4);
+        ornLine.lineBetween(200, 30, 1080, 30);
+        ornLine.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
+        ornLine.lineBetween(200, 55, 1080, 55);
+
+        const banner = r.success ? '◈ 탐사 성공! ◈' : '◈ 탐사 실패... ◈';
         const bannerColor = r.success ? '#44ff88' : '#ff4444';
         this.add.text(640, 40, banner, {
-            fontSize: '28px', fontFamily: 'monospace', color: bannerColor, fontStyle: 'bold'
+            fontSize: '28px', fontFamily: T.fontFamily || 'monospace', color: bannerColor, fontStyle: 'bold'
         }).setOrigin(0.5);
 
         const zoneInfo = r.zoneLevelUp
             ? `${zone.name} — ${r.rounds}라운드  |  구역 레벨 업!`
             : `${zone.name} — ${r.rounds}라운드`;
         this.add.text(640, 75, zoneInfo, {
-            fontSize: '13px', fontFamily: 'monospace', color: r.zoneLevelUp ? '#ffaa44' : '#888899'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: r.zoneLevelUp ? (T.textGold || '#ffcc44') : (T.textMuted || '#887860')
         }).setOrigin(0.5);
 
         let cy = 110;
 
-        const rewardPanel = UIPanel.create(this, 40, cy, 560, 200, { title: '보상' });
+        const rewardPanel = UIPanel.create(this, 40, cy, 560, 200, { title: '보상', ornament: true });
 
         this.add.text(70, cy + 35, `골드: +${r.goldEarned}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         });
         this.add.text(70, cy + 60, `길드 XP: +${r.xpEarned}`, {
-            fontSize: '14px', fontFamily: 'monospace', color: '#4488ff'
+            fontSize: '14px', fontFamily: T.fontFamily || 'monospace', color: '#4488ff'
         });
 
         this.add.text(70, cy + 90, '전리품:', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0', fontStyle: 'bold'
         });
 
         if (r.loot.length === 0) {
             this.add.text(80, cy + 112, '(없음)', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#555566'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: '#555566'
             });
         } else {
             r.loot.forEach((item, idx) => {
                 const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
                 this.add.text(80, cy + 112 + idx * 20, `• ${item.name} [${rarity.name}]`, {
-                    fontSize: '11px', fontFamily: 'monospace', color: rarity.textColor
+                    fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: rarity.textColor
                 });
             });
         }
 
-        const casualtyPanel = UIPanel.create(this, 620, cy, 620, 200, { title: '용병 상태' });
+        const casualtyPanel = UIPanel.create(this, 620, cy, 620, 200, { title: '용병 상태', ornament: true });
 
         if (r.casualties.length > 0) {
             this.add.text(650, cy + 35, '전사자 (영구 사망):', {
-                fontSize: '13px', fontFamily: 'monospace', color: '#ff4444', fontStyle: 'bold'
+                fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: '#ff4444', fontStyle: 'bold'
             });
             r.casualties.forEach((merc, idx) => {
                 const base = merc.getBaseClass();
                 this.add.text(660, cy + 58 + idx * 20, `☠ ${merc.name} (${base.name} Lv.${merc.level})`, {
-                    fontSize: '12px', fontFamily: 'monospace', color: '#ff6666'
+                    fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: '#ff6666'
                 });
             });
         } else {
             this.add.text(930, cy + 100, '전원 생존!', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#44ff88'
+                fontSize: '14px', fontFamily: T.fontFamily || 'monospace', color: '#44ff88'
             }).setOrigin(0.5);
         }
 
         if (r.survivors.length > 0) {
             const survY = cy + 35 + (r.casualties.length > 0 ? r.casualties.length * 20 + 30 : 0);
             this.add.text(650, survY, '생존자:', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#aaaacc'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
             });
             r.survivors.forEach((merc, idx) => {
                 const base = merc.getBaseClass();
@@ -83,13 +91,13 @@ class RunResultScene extends Phaser.Scene {
                 const hpRatio = merc.currentHp / stats.hp;
                 const hpColor = hpRatio > 0.6 ? '#44ff88' : hpRatio > 0.3 ? '#ffaa44' : '#ff4444';
                 this.add.text(660, survY + 20 + idx * 18, `${base.icon} ${merc.name} HP:${merc.currentHp}/${stats.hp}`, {
-                    fontSize: '11px', fontFamily: 'monospace', color: hpColor
+                    fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: hpColor
                 });
             });
         }
 
         cy = 330;
-        const xpPanel = UIPanel.create(this, 40, cy, 1200, 130, { title: '용병 성장' });
+        const xpPanel = UIPanel.create(this, 40, cy, 1200, 130, { title: '용병 성장', ornament: true });
 
         const allParty = [...r.survivors, ...r.casualties];
         let xpX = 60;
@@ -108,8 +116,8 @@ class RunResultScene extends Phaser.Scene {
             if (affinityLeveled) text += ` → 친화 Lv.${merc.affinityLevel[r.zoneKey]}!`;
 
             this.add.text(xpX, cy + 35, text, {
-                fontSize: '11px', fontFamily: 'monospace',
-                color: leveled || affinityLeveled ? '#ffaa44' : '#aaaacc'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
+                color: leveled || affinityLeveled ? (T.textGold || '#ffcc44') : (T.textPrimary || '#e8d8c0')
             });
             xpX = 60;
             cy += 18;
@@ -124,12 +132,12 @@ class RunResultScene extends Phaser.Scene {
             if (sold.length > 0 || unsold.length > 0) {
                 cy = Math.max(cy + 20, 480);
                 const panelH = 30 + this._consignResults.length * 18 + 10;
-                UIPanel.create(this, 40, cy, 1200, Math.min(panelH, 120), { title: `위탁 판매 결과 (+${totalGold}G)` });
+                UIPanel.create(this, 40, cy, 1200, Math.min(panelH, 120), { title: `위탁 판매 결과 (+${totalGold}G)`, ornament: true });
                 let conY = cy + 30;
                 this._consignResults.forEach(cr => {
                     const label = cr.sold ? `✓ ${cr.item.name} → ${cr.price}G` : `✗ ${cr.item.name} — 미판매`;
                     this.add.text(70, conY, label, {
-                        fontSize: '10px', fontFamily: 'monospace', color: cr.sold ? '#88ffaa' : '#886666'
+                        fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: cr.sold ? '#88ffaa' : '#886666'
                     });
                     conY += 18;
                 });
@@ -137,7 +145,7 @@ class RunResultScene extends Phaser.Scene {
         }
 
         UIButton.create(this, 640, 660, 200, 44, '본진 복귀', {
-            color: 0xffaa44, hoverColor: 0xffcc66, textColor: '#000000', fontSize: 16,
+            variant: 'primary', fontSize: 16,
             onClick: () => {
                 SaveManager.save(gs);
                 // 후퇴 시 마을 이벤트 차단 — TownScene 직행

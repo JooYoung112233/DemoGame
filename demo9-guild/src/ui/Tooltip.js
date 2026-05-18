@@ -1,16 +1,16 @@
 class UITooltip {
     static show(scene, x, y, lines) {
         UITooltip.hide(scene);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
 
         const padding = 10;
-        const lineHeight = 16;
-        const maxWidth = 250;
+        const maxWidth = 260;
 
         const textContent = lines.join('\n');
         const text = scene.add.text(0, 0, textContent, {
-            fontSize: '12px',
-            fontFamily: 'monospace',
-            color: '#dddddd',
+            fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textPrimary || '#e8d8c0',
             wordWrap: { width: maxWidth - padding * 2 },
             lineSpacing: 4
         });
@@ -27,10 +27,14 @@ class UITooltip {
         const container = scene.add.container(tx, ty).setDepth(1000);
 
         const bg = scene.add.graphics();
-        bg.fillStyle(0x222244, 0.95);
-        bg.fillRoundedRect(0, 0, w, h, 4);
-        bg.lineStyle(1, 0x6666aa, 0.8);
-        bg.strokeRoundedRect(0, 0, w, h, 4);
+        bg.fillStyle(T.panelFill || 0x2a2218, 0.95);
+        bg.fillRoundedRect(0, 0, w, h, 5);
+        // 내부 글로우
+        bg.fillStyle(0xffffff, 0.03);
+        bg.fillRect(2, 2, w - 4, Math.min(12, h * 0.2));
+        // 테두리
+        bg.lineStyle(1, T.ornament || 0x8a7a4a, 0.7);
+        bg.strokeRoundedRect(0, 0, w, h, 5);
 
         text.setPosition(padding, padding);
 

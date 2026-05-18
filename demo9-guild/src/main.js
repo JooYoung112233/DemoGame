@@ -20,7 +20,7 @@ const config = {
     width: CANVAS_W,                             // backing store 1920×1080
     height: CANVAS_H,
     parent: 'game-container',
-    backgroundColor: '#0a0a1a',
+    backgroundColor: '#1a1510',
     scene: [TitleScene, TownScene, RecruitScene, RosterScene, EquipmentScene, StorageScene, ForgeScene, AuctionScene, TrainingScene, TempleScene, IntelScene, EliteRecruitScene, AffinityScene, DeployScene, PlaceholderBattleScene, BattleScene, ManualBattleScene, CargoBattleScene, BlackoutBattleScene, EventScene, RunResultScene, GuildHallScene, AutomationScene, CodexScene],
     scale: {
         mode: Phaser.Scale.NONE,
