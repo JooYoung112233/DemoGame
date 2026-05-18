@@ -12,20 +12,40 @@ class EquipmentScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
 
+        // ── 배경 ──
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
+
+        // ── 헤더 바 ──
+        const headerBg = this.add.graphics();
+        headerBg.fillStyle(T.headerBg || 0x1e1810, 1);
+        headerBg.fillRect(0, 0, 1280, T.headerHeight || 55);
+        // 헤더 하단 장식선
+        headerBg.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
+        headerBg.lineBetween(0, (T.headerHeight || 55) - 1, 1280, (T.headerHeight || 55) - 1);
+        headerBg.lineStyle(1, T.divider || 0x5a4a2a, T.dividerAlpha || 0.5);
+        headerBg.lineBetween(0, (T.headerHeight || 55), 1280, (T.headerHeight || 55));
+
         this.add.text(640, 25, '⚔ 장비 착용', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.title) || 20}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
         UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
+            variant: 'ghost',
+            fontSize: (T.fontSize && T.fontSize.body) || 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
         this.goldText = this.add.text(1260, 25, `${gs.gold}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.header) || 16}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(1, 0);
 
         this._drawMercList(20, 60, 320, 640);
@@ -35,19 +55,24 @@ class EquipmentScene extends Phaser.Scene {
             this._drawSlotInventory(selected, 840, 60, 420, 640);
         } else {
             this.add.text(640, 360, '왼쪽에서 용병을 선택하세요', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#888899'
+                fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5);
         }
     }
 
     _drawMercList(x, y, w, h) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         UIPanel.create(this, x, y, w, h, { title: `로스터 (${gs.roster.filter(m=>m.alive).length})` });
 
         const alive = gs.roster.filter(m => m.alive);
         if (alive.length === 0) {
             this.add.text(x + w/2, y + 50, '용병이 없습니다', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#666677'
+                fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5);
             return;
         }
@@ -60,21 +85,21 @@ class EquipmentScene extends Phaser.Scene {
             const isSelected = merc.id === this.selectedMercId;
 
             const bg = this.add.graphics();
-            bg.fillStyle(isSelected ? 0x2a3a4a : 0x151525, 1);
+            bg.fillStyle(isSelected ? (T.cardHover || 0x3a3020) : (T.panelFill || 0x2a2218), 1);
             bg.fillRoundedRect(x + 10, cy, w - 20, 50, 3);
-            bg.lineStyle(1, isSelected ? 0x66aacc : rarity.color, isSelected ? 0.9 : 0.4);
+            bg.lineStyle(1, isSelected ? (T.panelStroke || 0x5a4a2a) : rarity.color, isSelected ? 0.9 : 0.4);
             bg.strokeRoundedRect(x + 10, cy, w - 20, 50, 3);
 
             this.add.text(x + 20, cy + 6, `${base.icon} ${merc.name}`, {
-                fontSize: '13px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+                fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: rarity.textColor, fontStyle: 'bold'
             });
             this.add.text(x + 20, cy + 24, `Lv.${merc.level} ${base.name}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             });
             // 장착 카운트
             const equipCount = ['weapon','armor','accessory'].filter(s => merc.equipment[s]).length;
             this.add.text(x + w - 20, cy + 16, `${equipCount}/3`, {
-                fontSize: '11px', fontFamily: 'monospace', color: equipCount === 3 ? '#88ffcc' : '#aaaaaa'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: equipCount === 3 ? '#88ffcc' : (T.textSecondary || '#b8a888')
             }).setOrigin(1, 0);
 
             const hit = this.add.zone(x + w/2, cy + 25, w - 20, 50).setInteractive({ useHandCursor: true });
@@ -87,6 +112,7 @@ class EquipmentScene extends Phaser.Scene {
     }
 
     _drawMercDetail(merc, x, y, w, h) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const base = merc.getBaseClass();
         const rarity = RARITY_DATA[merc.rarity];
@@ -96,11 +122,11 @@ class EquipmentScene extends Phaser.Scene {
 
         let cy = y + 30;
         this.add.text(x + 20, cy, `${base.icon} ${merc.name}`, {
-            fontSize: '16px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace', color: rarity.textColor, fontStyle: 'bold'
         });
         cy += 24;
         this.add.text(x + 20, cy, `Lv.${merc.level} ${base.name} [${rarity.name}]`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#888899'
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         });
         cy += 30;
 
@@ -108,7 +134,7 @@ class EquipmentScene extends Phaser.Scene {
         const statRow = [['HP', `${merc.currentHp}/${stats.hp}`], ['ATK', stats.atk], ['DEF', stats.def], ['CRIT', `${Math.floor(stats.critRate * 100)}%`]];
         statRow.forEach((s, i) => {
             this.add.text(x + 20 + (i % 2) * 220, cy + Math.floor(i / 2) * 22, `${s[0]}: ${s[1]}`, {
-                fontSize: '13px', fontFamily: 'monospace', color: '#aaaacc'
+                fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
             });
         });
         cy += 60;
@@ -121,19 +147,19 @@ class EquipmentScene extends Phaser.Scene {
 
             const slotH = eq && eq.specialDesc ? 72 : 60;
             const bg = this.add.graphics();
-            bg.fillStyle(isSelected ? 0x2a3a4a : 0x1a1a2a, 1);
+            bg.fillStyle(isSelected ? (T.cardHover || 0x3a3020) : (T.cardFill || 0x231e14), 1);
             bg.fillRoundedRect(x + 15, cy, w - 30, slotH, 4);
-            bg.lineStyle(1, isSelected ? 0x66aacc : 0x444455, 0.6);
+            bg.lineStyle(1, isSelected ? (T.panelStroke || 0x5a4a2a) : (T.cardStroke || 0x4a3c28), 0.6);
             bg.strokeRoundedRect(x + 15, cy, w - 30, slotH, 4);
 
             this.add.text(x + 25, cy + 8, slotNames[slot], {
-                fontSize: '13px', fontFamily: 'monospace', color: '#aaccee', fontStyle: 'bold'
+                fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
             });
 
             if (eq) {
                 const ir = ITEM_RARITY[eq.rarity];
                 this.add.text(x + 100, cy + 8, `${eq.name} [${ir.name}]`, {
-                    fontSize: '12px', fontFamily: 'monospace', color: ir.textColor
+                    fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: ir.textColor
                 });
                 const statStr = Object.entries(eq.stats || {}).map(([k,v]) => {
                     if (k === 'critRate') return `CRIT+${Math.round(v*100)}%`;
@@ -145,11 +171,11 @@ class EquipmentScene extends Phaser.Scene {
                     displayStr += ` | ${penStr}`;
                 }
                 this.add.text(x + 100, cy + 28, displayStr, {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
                 });
                 if (eq.specialDesc) {
                     this.add.text(x + 100, cy + 42, `★ ${eq.specialDesc}`, {
-                        fontSize: '9px', fontFamily: 'monospace', color: '#88ccaa'
+                        fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: '#88ccaa'
                     });
                 }
 
@@ -162,7 +188,8 @@ class EquipmentScene extends Phaser.Scene {
 
                 if (!eq.cursed) {
                     UIButton.create(this, x + w - 60, cy + 30, 80, 26, '해제', {
-                        color: 0x664444, hoverColor: 0x885555, textColor: '#ffaaaa', fontSize: 11,
+                        variant: 'danger',
+                        fontSize: 11,
                         depth: 5,
                         onClick: () => {
                             const item = merc.unequip(slot);
@@ -173,12 +200,12 @@ class EquipmentScene extends Phaser.Scene {
                     });
                 } else {
                     this.add.text(x + w - 60, cy + 30, '🔒 저주', {
-                        fontSize: '11px', fontFamily: 'monospace', color: '#cc44ff', fontStyle: 'bold'
+                        fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: '#cc44ff', fontStyle: 'bold'
                     }).setOrigin(0.5);
                 }
             } else {
                 this.add.text(x + 100, cy + 20, '(비어있음 — 오른쪽에서 선택)', {
-                    fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+                    fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
                 });
 
                 // 슬롯 클릭 시 보관함 필터링
@@ -193,7 +220,8 @@ class EquipmentScene extends Phaser.Scene {
 
         // 자동 최적 장착
         UIButton.create(this, x + w/2, cy + 30, 220, 32, '🤖 최적 장비 자동 장착', {
-            color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 12,
+            variant: 'primary',
+            fontSize: 12,
             onClick: () => {
                 let count = 0;
                 ['weapon', 'armor', 'accessory'].forEach(slot => {
@@ -214,13 +242,14 @@ class EquipmentScene extends Phaser.Scene {
                     UIToast.show(this, `${count}개 슬롯 자동 장착!`, { color: '#88ccff' });
                     this.scene.restart({ gameState: gs, selectedMercId: merc.id, selectedSlot: this.selectedSlot });
                 } else {
-                    UIToast.show(this, '더 좋은 장비 없음', { color: '#aaaaaa' });
+                    UIToast.show(this, '더 좋은 장비 없음', { color: T.textSecondary || '#b8a888' });
                 }
             }
         });
     }
 
     _drawSlotInventory(merc, x, y, w, h) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const slot = this.selectedSlot;
         const slotNames = { weapon: '무기', armor: '방어구', accessory: '장신구' };
@@ -231,7 +260,9 @@ class EquipmentScene extends Phaser.Scene {
 
         if (items.length === 0) {
             this.add.text(x + w/2, y + 60, `${slotNames[slot]} 장비 없음`, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#666677'
+                fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5);
             return;
         }
@@ -244,37 +275,38 @@ class EquipmentScene extends Phaser.Scene {
             const isUpgrade = this._sumStats(item) > this._sumStats(current);
 
             const bg = this.add.graphics();
-            bg.fillStyle(isUpgrade ? 0x1a2a1a : 0x1a1a2a, 1);
+            bg.fillStyle(isUpgrade ? 0x1a2a1a : (T.cardFill || 0x231e14), 1);
             bg.fillRoundedRect(x + 10, cy, w - 20, 52, 3);
             bg.lineStyle(1, ir.color, 0.5);
             bg.strokeRoundedRect(x + 10, cy, w - 20, 52, 3);
 
             this.add.text(x + 20, cy + 5, item.name, {
-                fontSize: '12px', fontFamily: 'monospace', color: ir.textColor, fontStyle: 'bold'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: ir.textColor, fontStyle: 'bold'
             });
             const tagParts = [`[${ir.name}]`];
             if (item.isZoneEquipment) tagParts.push('🌍');
             if (item.cursed) tagParts.push('⚠저주');
             if (item.special) tagParts.push(`★${item.special}`);
             this.add.text(x + 20, cy + 22, tagParts.join(' '), {
-                fontSize: '10px', fontFamily: 'monospace', color: ir.textColor
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: ir.textColor
             });
             const statStr = Object.entries(item.stats || {}).map(([k,v]) => {
                 if (k === 'critRate') return `CRIT+${Math.round(v*100)}%`;
                 return `${k.toUpperCase()}+${v}`;
             }).join(' ');
             this.add.text(x + 20, cy + 36, statStr, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#aaaacc'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
             });
 
             if (isUpgrade && current) {
                 this.add.text(x + w - 90, cy + 5, '↑', {
-                    fontSize: '14px', fontFamily: 'monospace', color: '#88ff88', fontStyle: 'bold'
+                    fontSize: '14px', fontFamily: T.fontFamily || 'monospace', color: '#88ff88', fontStyle: 'bold'
                 });
             }
 
             UIButton.create(this, x + w - 60, cy + 27, 80, 24, '장착', {
-                color: 0x446688, hoverColor: 0x5588aa, textColor: '#ccccee', fontSize: 11,
+                variant: 'primary',
+                fontSize: 11,
                 onClick: () => {
                     StorageManager.removeItem(gs, item.id);
                     const prev = merc.equip(item);

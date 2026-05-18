@@ -794,9 +794,15 @@ class BlackoutBattleScene extends Phaser.Scene {
         });
 
         // Determine enemy count & types per floor
-        const enemyCount = Math.min(4, 1 + Math.floor((depth + this.curseLevel) / 3));
+        // ZL1: 적 수 완화 (depth 기여 약화)
+        const depthForCount = this.zoneLevel <= 1 ? Math.floor(depth * 0.6) : depth;
+        const enemyCount = Math.min(4, 1 + Math.floor((depthForCount + this.curseLevel) / 3));
         const adaptHpMult = 1 + this.adaptationCount * 0.1;
-        const scaleMult = (1 + depth * 0.15 + this.curseLevel * 0.10) * this._getCurseEnemyHpMult() * adaptHpMult;
+        // 통합 구역 스케일링 (BALANCE.ZONE_SCALE) + depth/curse 보너스
+        const zoneBase = (typeof BalanceHelper !== 'undefined')
+            ? BalanceHelper.getZoneScaleMult('blackout', this.zoneLevel)
+            : 0.75 + (this.zoneLevel - 1) * 0.06;
+        const scaleMult = zoneBase * (1 + depth * 0.12 + this.curseLevel * 0.08) * this._getCurseEnemyHpMult() * adaptHpMult;
 
         const typePool = this._getEnemyPool();
         const totalWeight = typePool.reduce((s, t) => s + t.weight, 0);
@@ -1816,7 +1822,11 @@ class BlackoutBattleScene extends Phaser.Scene {
         });
 
         const enemyCount = Math.min(4, 2 + Math.floor(this.curseLevel / 2));
-        const scaleMult = 1.2 + this.curseLevel * 0.15;
+        // 보스전도 통합 스케일링 적용
+        const bossZoneBase = (typeof BalanceHelper !== 'undefined')
+            ? BalanceHelper.getZoneScaleMult('blackout', this.zoneLevel)
+            : 0.75 + (this.zoneLevel - 1) * 0.06;
+        const scaleMult = bossZoneBase * (1.2 + this.curseLevel * 0.15);
         const eliteTypes = ['elite_wraith', 'elite_cursed', 'bone_golem', 'shade'];
 
         for (let i = 0; i < enemyCount; i++) {

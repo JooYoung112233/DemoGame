@@ -6,34 +6,46 @@ class AutomationScene extends Phaser.Scene {
     }
 
     create() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         GuildHallManager.ensureState(gs);
         AutomationManager.ensureState(gs);
 
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
 
-        this.add.text(640, 25, '⚙ 자동화 설정', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#aaccff', fontStyle: 'bold'
+        // Header bg
+        this.add.rectangle(640, 27, 1280, 55, T.headerBg || 0x1e1810).setOrigin(0.5);
+
+        // Ornament lines
+        const ornLine = this.add.graphics();
+        ornLine.lineStyle(1, T.ornament || 0x8a7a4a, 0.4);
+        ornLine.lineBetween(0, 54, 1280, 54);
+        ornLine.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
+        ornLine.lineBetween(0, 56, 1280, 56);
+
+        this.add.text(640, 25, '◈ ⚙ 자동화 설정 ◈', {
+            fontSize: '20px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x335577, hoverColor: 0x446688, textColor: '#cceeff', fontSize: 12,
+            variant: 'ghost', fontSize: 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
         this.add.text(1260, 25, `${gs.gold}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(1, 0.5);
 
         const stage = gs.guildHall.automation || 0;
         this.add.text(640, 52, `자동화 단계: D${stage}/8`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#667788'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(0.5);
 
         this._drawContent();
     }
 
     _drawContent() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const settings = gs.automationSettings;
         const stage = gs.guildHall.automation || 0;
@@ -43,7 +55,7 @@ class AutomationScene extends Phaser.Scene {
         const rightX = 680;
 
         // === 좌측 패널: 장비 자동화 ===
-        UIPanel.create(this, leftX - 10, cy - 5, 560, 300, { title: '장비 자동화' });
+        UIPanel.create(this, leftX - 10, cy - 5, 560, 300, { title: '장비 자동화', ornament: true });
         cy += 30;
 
         // D1: 전체 최적화
@@ -58,7 +70,7 @@ class AutomationScene extends Phaser.Scene {
                 UIButton.create(this, bx, cy, 80, 22, label, {
                     color: active ? 0x4488aa : 0x333355,
                     hoverColor: 0x5599bb,
-                    textColor: active ? '#ffffff' : '#888899',
+                    textColor: active ? '#ffffff' : (T.textMuted || '#887860'),
                     fontSize: 9,
                     onClick: () => {
                         settings.autoEquipMode = key;
@@ -74,7 +86,7 @@ class AutomationScene extends Phaser.Scene {
         // 전체 최적화 실행 버튼
         if (stage >= 1) {
             UIButton.create(this, leftX + 200, cy, 200, 30, '🔄 전체 최적화 실행', {
-                color: 0x448844, hoverColor: 0x55aa55, textColor: '#ffffff', fontSize: 12,
+                variant: 'primary', fontSize: 12,
                 onClick: () => {
                     const mode = settings.autoEquipMode || 'class';
                     const changes = AutomationManager.autoEquipAll(gs, mode);
@@ -114,7 +126,7 @@ class AutomationScene extends Phaser.Scene {
             cy += 30;
 
             UIButton.create(this, leftX + 200, cy, 180, 26, '💰 자동 판매 실행', {
-                color: 0x886644, hoverColor: 0xaa8855, textColor: '#ffffff', fontSize: 11,
+                variant: 'primary', fontSize: 11,
                 onClick: () => {
                     const sold = AutomationManager.runAutoSell(gs);
                     const totalGold = sold.reduce((s, r) => s + (r.gold || 0), 0);
@@ -127,7 +139,7 @@ class AutomationScene extends Phaser.Scene {
 
         // === 우측 패널: 파견/관리 자동화 ===
         let ry = 80;
-        UIPanel.create(this, rightX - 10, ry - 5, 560, 300, { title: '파견/관리 자동화' });
+        UIPanel.create(this, rightX - 10, ry - 5, 560, 300, { title: '파견/관리 자동화', ornament: true });
         ry += 30;
 
         // D3: 자동 회수
@@ -161,11 +173,11 @@ class AutomationScene extends Phaser.Scene {
 
         // === 하단: 일괄 작업 ===
         const bottomY = 410;
-        UIPanel.create(this, leftX - 10, bottomY - 5, 1140, 100, { title: '일괄 작업' });
+        UIPanel.create(this, leftX - 10, bottomY - 5, 1140, 100, { title: '일괄 작업', ornament: true });
 
         const btnY = bottomY + 50;
         UIButton.create(this, 180, btnY, 150, 30, '💰 잡템 일괄판매', {
-            color: 0x886644, hoverColor: 0xaa8855, textColor: '#ffffff', fontSize: 11,
+            variant: 'primary', fontSize: 11,
             onClick: () => {
                 let count = 0, gold = 0;
                 for (const item of [...gs.storage]) {
@@ -181,7 +193,7 @@ class AutomationScene extends Phaser.Scene {
         });
 
         UIButton.create(this, 380, btnY, 130, 30, '💚 전원 치유', {
-            color: 0x448866, hoverColor: 0x55aa77, textColor: '#ffffff', fontSize: 11,
+            variant: 'primary', fontSize: 11,
             onClick: () => {
                 let count = 0, totalCost = 0;
                 for (const merc of gs.roster) {
@@ -203,14 +215,14 @@ class AutomationScene extends Phaser.Scene {
         });
 
         UIButton.create(this, 560, btnY, 130, 30, '😴 전원 휴식', {
-            color: 0x445588, hoverColor: 0x5566aa, textColor: '#ffffff', fontSize: 11,
+            variant: 'info', fontSize: 11,
             onClick: () => {
                 UIToast.show(this, '스테미너 시스템 미구현');
             }
         });
 
         UIButton.create(this, 740, btnY, 160, 30, '🔄 자동화 전체 실행', {
-            color: 0x664488, hoverColor: 0x8855aa, textColor: '#ffffff', fontSize: 11,
+            variant: 'primary', fontSize: 11,
             disabled: stage < 8,
             onClick: () => {
                 AutomationManager.runFullAuto(gs);
@@ -221,32 +233,35 @@ class AutomationScene extends Phaser.Scene {
     }
 
     _drawFeatureRow(x, y, tag, label, unlocked, renderExtra) {
-        const color = unlocked ? '#aaccee' : '#555566';
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const color = unlocked ? (T.textPrimary || '#e8d8c0') : '#555566';
         const lockIcon = unlocked ? '' : '🔒 ';
         this.add.text(x, y, `[${tag}] ${lockIcon}${label}`, {
-            fontSize: '12px', fontFamily: 'monospace', color, fontStyle: unlocked ? 'bold' : ''
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color, fontStyle: unlocked ? 'bold' : ''
         });
         if (unlocked && renderExtra) renderExtra();
     }
 
     _drawSectionHeader(x, y, tag, label, unlocked) {
-        const color = unlocked ? '#aaccee' : '#555566';
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const color = unlocked ? (T.textPrimary || '#e8d8c0') : '#555566';
         const lockIcon = unlocked ? '' : '🔒 ';
         this.add.text(x, y, `[${tag}] ${lockIcon}${label}`, {
-            fontSize: '12px', fontFamily: 'monospace', color, fontStyle: unlocked ? 'bold' : ''
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color, fontStyle: unlocked ? 'bold' : ''
         });
         if (!unlocked) {
             this.add.text(x + 300, y, '길드회관에서 해금', {
-                fontSize: '10px', fontFamily: 'monospace', color: '#664444'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: '#664444'
             });
         }
     }
 
     _drawToggleRow(x, y, tag, label, unlocked, currentValue, onChange) {
-        const color = unlocked ? '#aaccee' : '#555566';
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const color = unlocked ? (T.textPrimary || '#e8d8c0') : '#555566';
         const lockIcon = unlocked ? '' : '🔒 ';
         this.add.text(x, y, `[${tag}] ${lockIcon}${label}`, {
-            fontSize: '12px', fontFamily: 'monospace', color
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color
         });
 
         if (unlocked) {
@@ -262,16 +277,17 @@ class AutomationScene extends Phaser.Scene {
             });
         } else {
             this.add.text(x + 420, y, '—', {
-                fontSize: '11px', fontFamily: 'monospace', color: '#444444'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: '#444444'
             });
         }
     }
 
     _drawCheckbox(x, y, label, checked, onChange) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const icon = checked ? '☑' : '☐';
-        const color = checked ? '#88cc88' : '#888899';
+        const color = checked ? '#88cc88' : (T.textMuted || '#887860');
         const text = this.add.text(x, y, `${icon} ${label}`, {
-            fontSize: '11px', fontFamily: 'monospace', color
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color
         });
 
         const hitZone = this.add.zone(x + 150, y + 8, 300, 20).setInteractive({ useHandCursor: true });

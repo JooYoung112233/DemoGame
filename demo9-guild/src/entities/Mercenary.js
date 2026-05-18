@@ -57,8 +57,9 @@ class Mercenary {
     }
 
     getXpToNextLevel() {
-        if (this.level >= 10) return Infinity;
-        return 40 + this.level * 20;
+        if (this.level >= 30) return Infinity;
+        // 50 * lv^1.5 곡선 (balance.js MERC_XP_CURVE 동기)
+        return Math.round(50 * Math.pow(this.level, 1.5));
     }
 
     getStats() {

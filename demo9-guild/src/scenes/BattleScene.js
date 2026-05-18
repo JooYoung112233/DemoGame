@@ -801,7 +801,8 @@ class BattleScene extends Phaser.Scene {
         if (this._rerollCount === undefined) this._rerollCount = 0;
         this._cardUIObjects = [];
 
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a).setDepth(80);
+        const _T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, _T.bg || 0x1a1510).setDepth(80);
 
         this.add.text(640, 60, `라운드 ${this.currentRound} 클리어!`, {
             fontSize: '24px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'

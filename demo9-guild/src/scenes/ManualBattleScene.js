@@ -163,7 +163,11 @@ class ManualBattleScene extends Phaser.Scene {
         const waveScaleBonus = (w - 1) * 0.08;
         return types.map((type, i) => {
             const data = ENEMY_DATA[type];
-            const scaleMult = (zoneLevel === 1 ? 0.75 : 1.0 + (zoneLevel - 2) * 0.08) + waveScaleBonus;
+            // 통합 구역 스케일링 (BALANCE.ZONE_SCALE)
+            const baseScale = (typeof BalanceHelper !== 'undefined')
+                ? BalanceHelper.getZoneScaleMult('bloodpit', zoneLevel)
+                : 0.65 + (zoneLevel - 1) * 0.06;
+            const scaleMult = baseScale + waveScaleBonus;
             const enemyActions = (typeof getEnemyActions === 'function') ? getEnemyActions(type) : [];
             return {
                 id: `enemy_w${w}_${i}`,
@@ -1643,7 +1647,9 @@ class ManualBattleScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(70);
         this.tweens.add({ targets: announce, y: 170, alpha: 0, duration: 2000, onComplete: () => announce.destroy() });
 
-        const scaleMult = zoneLevel === 1 ? 0.75 : 1.0 + (zoneLevel - 2) * 0.08;
+        const scaleMult = (typeof BalanceHelper !== 'undefined')
+            ? BalanceHelper.getZoneScaleMult('bloodpit', zoneLevel)
+            : 0.65 + (zoneLevel - 1) * 0.06;
         rush.enemies.forEach(re => {
             const data = (typeof ENEMY_DATA !== 'undefined') ? ENEMY_DATA[re.key] : null;
             if (!data) return;

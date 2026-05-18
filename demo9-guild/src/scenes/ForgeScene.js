@@ -4,19 +4,37 @@ class ForgeScene extends Phaser.Scene {
     init(data) { this.gameState = data.gameState; }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
         const gs = this.gameState;
 
-        this.add.text(640, 25, '🔨 장비 제작소', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+        // ── 헤더 배경 ──
+        const headerBg = this.add.graphics();
+        headerBg.fillStyle(T.headerBg || 0x1e1810, 1);
+        headerBg.fillRect(0, 0, 1280, T.headerHeight || 55);
+        // 하단 장식선
+        headerBg.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
+        headerBg.lineBetween(0, (T.headerHeight || 55) - 1, 1280, (T.headerHeight || 55) - 1);
+        headerBg.lineStyle(1, T.divider || 0x5a4a2a, T.dividerAlpha || 0.5);
+        headerBg.lineBetween(0, (T.headerHeight || 55), 1280, (T.headerHeight || 55));
+
+        this.add.text(640, 27, '◈  장비 제작소  ◈', {
+            fontSize: `${(T.fontSize && T.fontSize.title) || 20}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.goldText = this.add.text(1260, 25, `${gs.gold}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+        this.goldText = this.add.text(1260, 20, `${gs.gold}G`, {
+            fontSize: `${(T.fontSize && T.fontSize.header) || 16}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(1, 0);
 
-        UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
+        UIButton.create(this, 80, 27, 100, 30, '← 마을', {
+            variant: 'ghost',
+            fontSize: (T.fontSize && T.fontSize.body) || 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
@@ -26,27 +44,29 @@ class ForgeScene extends Phaser.Scene {
     }
 
     _drawTabs() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+
+        // 기존 탭 제거
+        if (this._tabContainer) {
+            this._tabContainer.destroy();
+            this._tabContainer = null;
+        }
+
         const tabs = [
-            { key: 'craft', label: '제작', x: 480 },
-            { key: 'enhance', label: '강화', x: 640 },
-            { key: 'materials', label: '소재 현황', x: 800 }
+            { key: 'craft', label: '제작', icon: '⚒' },
+            { key: 'enhance', label: '강화', icon: '✦' },
+            { key: 'materials', label: '소재 현황', icon: '🔧' }
         ];
-        this._tabObjects = [];
-        tabs.forEach(t => {
-            const active = this.tab === t.key;
-            const btn = UIButton.create(this, t.x, 60, 130, 28, t.label, {
-                color: active ? 0x445588 : 0x222233,
-                hoverColor: active ? 0x445588 : 0x333344,
-                textColor: active ? '#ffffff' : '#888899',
-                fontSize: 12,
-                onClick: () => {
-                    this.tab = t.key;
-                    this._clearContent();
-                    this._drawTabs();
-                    this._drawContent();
-                }
-            });
-            this._tabObjects.push(btn);
+
+        this._tabContainer = UITabs.create(this, 430, (T.headerHeight || 55) + 6, tabs, (key) => {
+            this.tab = key;
+            this._clearContent();
+            this._drawContent();
+        }, {
+            activeKey: this.tab,
+            tabWidth: 130,
+            tabHeight: 28,
+            gap: 4,
         });
     }
 
@@ -74,6 +94,7 @@ class ForgeScene extends Phaser.Scene {
     }
 
     _drawCraftTab() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const matCounts = this._getMaterialCounts();
 
@@ -85,7 +106,10 @@ class ForgeScene extends Phaser.Scene {
 
         categories.forEach(cat => {
             this._addObj(this.add.text(cat.x + 10, 95, cat.label, {
-                fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+                fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textPrimary || '#e8d8c0',
+                fontStyle: 'bold'
             }));
 
             const recipes = RECIPE_DATA.filter(r => r.category === cat.key);
@@ -97,17 +121,23 @@ class ForgeScene extends Phaser.Scene {
     }
 
     _drawRecipeCard(recipe, x, y, w, matCounts) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const canCraft = this._canCraft(recipe, matCounts);
 
         const bg = this._addObj(this.add.graphics());
-        bg.fillStyle(canCraft ? 0x1a2a1a : 0x1a1a2e, 1);
-        bg.fillRoundedRect(x, y, w, 105, 4);
-        bg.lineStyle(1, canCraft ? 0x448844 : 0x333355, 0.5);
-        bg.strokeRoundedRect(x, y, w, 105, 4);
+        const cardFill = canCraft ? 0x1a2a1a : (T.cardFill || 0x231e14);
+        const cardStroke = canCraft ? 0x448844 : (T.panelStroke || 0x5a4a2a);
+        bg.fillStyle(cardFill, 1);
+        bg.fillRoundedRect(x, y, w, 105, T.borderRadius || 6);
+        bg.lineStyle(1, cardStroke, 0.5);
+        bg.strokeRoundedRect(x, y, w, 105, T.borderRadius || 6);
 
         this._addObj(this.add.text(x + 10, y + 8, recipe.name, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            fontSize: '13px',
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textPrimary || '#e8d8c0',
+            fontStyle: 'bold'
         }));
 
         const res = recipe.result;
@@ -119,11 +149,15 @@ class ForgeScene extends Phaser.Scene {
         if (res.moveSpeed) statParts.push(`SPD+${res.moveSpeed}`);
         if (res.lifesteal) statParts.push(`흡혈+${Math.round(res.lifesteal * 100)}%`);
         this._addObj(this.add.text(x + 10, y + 28, statParts.join('  '), {
-            fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
+            fontSize: '10px',
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888'
         }));
 
         this._addObj(this.add.text(x + 10, y + 46, `비용: ${recipe.goldCost}G`, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#ffcc44'
+            fontSize: '10px',
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44'
         }));
 
         let mx = x + 10;
@@ -131,17 +165,17 @@ class ForgeScene extends Phaser.Scene {
             const have = matCounts[matName] || 0;
             const enough = have >= need;
             this._addObj(this.add.text(mx, y + 62, `${matName} ${have}/${need}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: enough ? '#44cc44' : '#ff4444'
+                fontSize: '10px',
+                fontFamily: T.fontFamily || 'monospace',
+                color: enough ? (T.textSuccess || '#66bb55') : (T.textDanger || '#cc4422')
             }));
             mx += 120;
         });
 
-        const btnColor = canCraft ? 0x446644 : 0x333333;
-        const btnHover = canCraft ? 0x558855 : 0x333333;
-        const btnText = canCraft ? '#44ff88' : '#555555';
-
         this._addObj(UIButton.create(this, x + w - 55, y + 80, 90, 26, '제작', {
-            color: btnColor, hoverColor: btnHover, textColor: btnText, fontSize: 11,
+            variant: 'primary',
+            fontSize: 11,
+            disabled: !canCraft,
             onClick: () => {
                 if (!canCraft) return;
                 this._craftItem(recipe);
@@ -150,16 +184,21 @@ class ForgeScene extends Phaser.Scene {
     }
 
     _drawEnhanceTab() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const equipment = gs.storage.filter(i => i.type === 'equipment');
 
         this._addObj(this.add.text(640, 95, '장비를 선택하여 등급을 올립니다 (소재 + 골드 필요)', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#888899'
+            fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }).setOrigin(0.5));
 
         if (equipment.length === 0) {
             this._addObj(this.add.text(640, 360, '강화할 장비가 없습니다', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#555566'
+                fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5));
             return;
         }
@@ -175,6 +214,7 @@ class ForgeScene extends Phaser.Scene {
     }
 
     _drawEnhanceRow(item, x, y, w, matCounts) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const rarity = ITEM_RARITY[item.rarity] || ITEM_RARITY.common;
         const nextRar = getNextRarity(item.rarity);
@@ -182,13 +222,16 @@ class ForgeScene extends Phaser.Scene {
         const cost = getEnhanceCost(rarityIdx);
 
         const bg = this._addObj(this.add.graphics());
-        bg.fillStyle(0x1a1a2e, 1);
-        bg.fillRoundedRect(x, y, w, 58, 3);
+        bg.fillStyle(T.cardFill || 0x231e14, 1);
+        bg.fillRoundedRect(x, y, w, 58, T.borderRadius || 6);
         bg.lineStyle(1, rarity.color, 0.4);
-        bg.strokeRoundedRect(x, y, w, 58, 3);
+        bg.strokeRoundedRect(x, y, w, 58, T.borderRadius || 6);
 
         this._addObj(this.add.text(x + 10, y + 8, `${item.name}`, {
-            fontSize: '12px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: '12px',
+            fontFamily: T.fontFamily || 'monospace',
+            color: rarity.textColor,
+            fontStyle: 'bold'
         }));
 
         if (item.stats) {
@@ -196,17 +239,23 @@ class ForgeScene extends Phaser.Scene {
                 typeof v === 'number' && v < 1 ? `${k}+${Math.round(v * 100)}%` : `${k}+${v}`
             ).join('  ');
             this._addObj(this.add.text(x + 10, y + 28, statStr, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
+                fontSize: '10px',
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textSecondary || '#b8a888'
             }));
         }
 
         this._addObj(this.add.text(x + 300, y + 8, `[${rarity.name}]`, {
-            fontSize: '11px', fontFamily: 'monospace', color: rarity.textColor
+            fontSize: '11px',
+            fontFamily: T.fontFamily || 'monospace',
+            color: rarity.textColor
         }));
 
         if (!nextRar || !cost) {
             this._addObj(this.add.text(x + w - 100, y + 20, '최대 등급', {
-                fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+                fontSize: '11px',
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5));
             return;
         }
@@ -216,21 +265,21 @@ class ForgeScene extends Phaser.Scene {
         const canEnhance = gs.gold >= cost.gold && totalMats >= cost.materials;
 
         this._addObj(this.add.text(x + 400, y + 8, `→ [${nextRarData.name}]`, {
-            fontSize: '11px', fontFamily: 'monospace', color: nextRarData.textColor
+            fontSize: '11px',
+            fontFamily: T.fontFamily || 'monospace',
+            color: nextRarData.textColor
         }));
 
         this._addObj(this.add.text(x + 400, y + 28, `${cost.gold}G + 소재 ${totalMats}/${cost.materials}개`, {
-            fontSize: '10px', fontFamily: 'monospace',
-            color: canEnhance ? '#44cc44' : '#ff4444'
+            fontSize: '10px',
+            fontFamily: T.fontFamily || 'monospace',
+            color: canEnhance ? (T.textSuccess || '#66bb55') : (T.textDanger || '#cc4422')
         }));
 
-        const btnColor = canEnhance ? 0x884466 : 0x333333;
-        const btnHover = canEnhance ? 0xaa5588 : 0x333333;
-
         this._addObj(UIButton.create(this, x + w - 55, y + 30, 90, 26, '강화', {
-            color: btnColor, hoverColor: btnHover,
-            textColor: canEnhance ? '#ffaacc' : '#555555',
+            variant: 'primary',
             fontSize: 11,
+            disabled: !canEnhance,
             onClick: () => {
                 if (!canEnhance) return;
                 this._enhanceItem(item, cost, nextRar);
@@ -239,17 +288,24 @@ class ForgeScene extends Phaser.Scene {
     }
 
     _drawMaterialsTab() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const matCounts = this._getMaterialCounts();
         const matNames = Object.keys(matCounts);
 
         this._addObj(this.add.text(640, 95, '보유 소재 현황', {
-            fontSize: '14px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textPrimary || '#e8d8c0',
+            fontStyle: 'bold'
         }).setOrigin(0.5));
 
         if (matNames.length === 0) {
             this._addObj(this.add.text(640, 360, '보유한 소재가 없습니다\n구역 탐사에서 소재를 획득하세요', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#555566', align: 'center'
+                fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860',
+                align: 'center'
             }).setOrigin(0.5));
             return;
         }
@@ -264,14 +320,21 @@ class ForgeScene extends Phaser.Scene {
             const zoneColor = tmpl ? (zoneColors[tmpl.zone] || '#888888') : '#888888';
 
             this._addObj(this.add.text(320, cy, `🔧 ${name}`, {
-                fontSize: '13px', fontFamily: 'monospace', color: zoneColor, fontStyle: 'bold'
+                fontSize: '13px',
+                fontFamily: T.fontFamily || 'monospace',
+                color: zoneColor,
+                fontStyle: 'bold'
             }));
             this._addObj(this.add.text(520, cy, `× ${count}`, {
-                fontSize: '13px', fontFamily: 'monospace', color: '#ffffff'
+                fontSize: '13px',
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textPrimary || '#e8d8c0'
             }));
             if (tmpl) {
                 this._addObj(this.add.text(580, cy, tmpl.desc, {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#667788'
+                    fontSize: '10px',
+                    fontFamily: T.fontFamily || 'monospace',
+                    color: T.textMuted || '#887860'
                 }));
             }
             cy += 40;

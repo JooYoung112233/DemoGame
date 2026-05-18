@@ -8,26 +8,38 @@ class AffinityScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
         this._drawUI();
     }
 
     _drawUI() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const merc = gs.roster.find(m => m.id === this.mercId);
 
-        this.add.text(640, 20, '구역 친화도 트리', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+        // Header bg
+        this.add.rectangle(640, 22, 1280, 45, T.headerBg || 0x1e1810).setOrigin(0.5);
+
+        // Ornament lines
+        const ornLine = this.add.graphics();
+        ornLine.lineStyle(1, T.ornament || 0x8a7a4a, 0.4);
+        ornLine.lineBetween(0, 44, 1280, 44);
+        ornLine.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
+        ornLine.lineBetween(0, 46, 1280, 46);
+
+        this.add.text(640, 20, '◈ 구역 친화도 트리 ◈', {
+            fontSize: '20px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         UIButton.create(this, 80, 20, 100, 30, '← 로스터', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
+            variant: 'ghost', fontSize: 12,
             onClick: () => this.scene.start('RosterScene', { gameState: gs })
         });
 
         if (!merc) {
             this.add.text(640, 360, '용병을 선택하세요', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#555566'
+                fontSize: '14px', fontFamily: T.fontFamily || 'monospace', color: '#555566'
             }).setOrigin(0.5);
             return;
         }
@@ -35,7 +47,7 @@ class AffinityScene extends Phaser.Scene {
         const base = merc.getBaseClass();
         const rarity = RARITY_DATA[merc.rarity];
         this.add.text(640, 48, `${base.icon} ${merc.name} [${rarity.name} ${base.name}] Lv.${merc.level}`, {
-            fontSize: '13px', fontFamily: 'monospace', color: rarity.textColor
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: rarity.textColor
         }).setOrigin(0.5);
 
         this._drawZoneTabs(merc);
@@ -44,6 +56,7 @@ class AffinityScene extends Phaser.Scene {
     }
 
     _drawZoneTabs(merc) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         let tabX = 200;
         ZONE_KEYS.forEach(key => {
             if (this.gameState.zoneLevel[key] === 0) return;
@@ -58,7 +71,7 @@ class AffinityScene extends Phaser.Scene {
             UIButton.create(this, tabX, 78, 180, 28, label, {
                 color: isSelected ? 0x334466 : 0x222233,
                 hoverColor: 0x445577,
-                textColor: isSelected ? zone.textColor : '#888899',
+                textColor: isSelected ? zone.textColor : (T.textMuted || '#887860'),
                 fontSize: 11,
                 onClick: () => {
                     this.selectedZone = key;
@@ -70,6 +83,7 @@ class AffinityScene extends Phaser.Scene {
     }
 
     _drawTree(merc) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const tree = AFFINITY_TREES[this.selectedZone];
         if (!tree) return;
 
@@ -104,6 +118,7 @@ class AffinityScene extends Phaser.Scene {
     }
 
     _drawNode(merc, nodeId, node, x, y, tree) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const isUnlocked = merc.hasAffinityNode(nodeId);
         const canUnlock = merc.canUnlockAffinityNode(this.selectedZone, nodeId);
         const levelReached = (merc.affinityLevel?.[this.selectedZone] || 0) >= node.level;
@@ -123,24 +138,24 @@ class AffinityScene extends Phaser.Scene {
             bg.lineStyle(2, 0xffaa44, 0.8);
             bg.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 5);
         } else {
-            bg.fillStyle(levelReached ? 0x1a1a2e : 0x141418, 1);
+            bg.fillStyle(levelReached ? (T.cardFill || 0x231e14) : 0x141418, 1);
             bg.fillRoundedRect(x - w / 2, y - h / 2, w, h, 5);
-            bg.lineStyle(1, levelReached ? 0x444466 : 0x222233, 0.5);
+            bg.lineStyle(1, levelReached ? (T.panelStroke || 0x5a4a2a) : 0x222233, 0.5);
             bg.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 5);
         }
 
-        const nameColor = isUnlocked ? '#44ff88' : canUnlock ? '#ffaa44' : levelReached ? '#aaaacc' : '#555566';
+        const nameColor = isUnlocked ? '#44ff88' : canUnlock ? '#ffaa44' : levelReached ? (T.textPrimary || '#e8d8c0') : '#555566';
         this.add.text(x, y - 12, node.name, {
-            fontSize: '11px', fontFamily: 'monospace', color: nameColor, fontStyle: 'bold'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: nameColor, fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.add.text(x, y + 6, node.desc, {
-            fontSize: '8px', fontFamily: 'monospace', color: isUnlocked ? '#88cc88' : '#777788',
+            fontSize: '8px', fontFamily: T.fontFamily || 'monospace', color: isUnlocked ? '#88cc88' : (T.textMuted || '#887860'),
             wordWrap: { width: w - 10 }, align: 'center'
         }).setOrigin(0.5);
 
         this.add.text(x, y + h / 2 - 6, `Lv.${node.level}`, {
-            fontSize: '8px', fontFamily: 'monospace', color: '#666677'
+            fontSize: '8px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(0.5);
 
         if (canUnlock || isUnlocked) {
@@ -179,6 +194,7 @@ class AffinityScene extends Phaser.Scene {
     }
 
     _drawMercAffinityInfo(merc) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const zoneKey = this.selectedZone;
         const zone = ZONE_DATA[zoneKey];
         const lvl = merc.affinityLevel?.[zoneKey] || 0;
@@ -188,14 +204,14 @@ class AffinityScene extends Phaser.Scene {
 
         const panelX = 20;
         const panelY = 600;
-        UIPanel.create(this, panelX, panelY, 500, 100, { fillColor: 0x151525, strokeColor: 0x333355 });
+        UIPanel.create(this, panelX, panelY, 500, 100, { ornament: true });
 
         this.add.text(panelX + 15, panelY + 12, `${zone.icon} ${zone.name} 친화도`, {
-            fontSize: '14px', fontFamily: 'monospace', color: zone.textColor, fontStyle: 'bold'
+            fontSize: '14px', fontFamily: T.fontFamily || 'monospace', color: zone.textColor, fontStyle: 'bold'
         });
 
         this.add.text(panelX + 15, panelY + 35, `레벨: ${lvl}/5   XP: ${lvl >= 5 ? 'MAX' : `${xp}/${needed}`}   포인트: ${pts}`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#aaaacc'
+            fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
         });
 
         if (lvl < 5) {
@@ -218,14 +234,14 @@ class AffinityScene extends Phaser.Scene {
         });
         if (unlockedNodes.length > 0) {
             this.add.text(panelX + 15, panelY + 76, `해금: ${unlockedNodes.map(id => AFFINITY_TREES[zoneKey].nodes[id].name).join(', ')}`, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#44ff88',
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: '#44ff88',
                 wordWrap: { width: 470 }
             });
         }
 
         if (pts > 0) {
             this.add.text(panelX + 300, panelY + 35, '← 노드를 클릭하여 해금', {
-                fontSize: '11px', fontFamily: 'monospace', color: '#ffaa44'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44'
             });
         }
 
@@ -233,9 +249,9 @@ class AffinityScene extends Phaser.Scene {
         if (otherMercs.length > 0) {
             // 다른 용병 패널 — 1260 안에 fit (2줄 wrap)
             const panX = 540, panW = 720;
-            const selectPanel = UIPanel.create(this, panX, panelY, panW, 100, { fillColor: 0x151525, strokeColor: 0x333355 });
+            const selectPanel = UIPanel.create(this, panX, panelY, panW, 100, { ornament: true });
             this.add.text(panX + 15, panelY + 8, '다른 용병 (클릭으로 전환):', {
-                fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             });
             // chip 동적 크기 — 5개씩 wrap
             const btnW = 130;
@@ -260,7 +276,7 @@ class AffinityScene extends Phaser.Scene {
             });
             if (otherMercs.length > chipsPerRow * 2) {
                 this.add.text(panX + panW - 15, panelY + 90, `+${otherMercs.length - chipsPerRow * 2}명 더`, {
-                    fontSize: '9px', fontFamily: 'monospace', color: '#666677'
+                    fontSize: '9px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
                 }).setOrigin(1, 1);
             }
         }
