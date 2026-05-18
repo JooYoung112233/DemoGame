@@ -208,6 +208,7 @@ class TitleScene extends Phaser.Scene {
         const gameState = GuildManager.createDefaultState();
         MercenaryManager.generateRecruitPool(gameState);
         GuildManager.addMessage(gameState, '길드가 설립되었습니다. 용병을 모집하세요!');
+        gameState._isNewGame = true;  // 첫 플레이 시퀀스 트리거
         SaveManager.save(gameState);
         this.scene.start('TownScene', { gameState });
     }

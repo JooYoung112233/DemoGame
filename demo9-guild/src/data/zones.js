@@ -1,8 +1,8 @@
 const ZONE_DATA = {
     bloodpit: {
         name: 'Blood Pit',
-        subtitle: '투기장',
-        desc: '욕심 vs 탈출 — 핏 게이지가 핵심',
+        subtitle: '도시 투기장 운영 계약',
+        desc: '관중을 흥분시켜 수익을 극대화하라 — 도박형 고수익',
         icon: '💀',
         color: 0xff2244,
         textColor: '#ff2244',
@@ -15,12 +15,12 @@ const ZONE_DATA = {
     },
     cargo: {
         name: 'Cargo',
-        subtitle: '기차 방어',
-        desc: '나락식 층 진행 — 5분 방어 RTS',
+        subtitle: '약탈물 호송 계약',
+        desc: '화물을 안전하게 인도하라 — 안정형 수익',
         icon: '🚂',
         color: 0xff8844,
         textColor: '#ff8844',
-        unlockLevel: 3,
+        unlockLevel: 3,   // Lv.3 해금
         baseGoldReward: 140,       // 80→140 (BP의 1.75배, 난이도 대비)
         baseXpReward: 55,          // 35→55
         specialMaterial: '마법 동력석',
@@ -29,12 +29,12 @@ const ZONE_DATA = {
     },
     blackout: {
         name: 'Blackout',
-        subtitle: '저주받은 저택',
-        desc: '탐색 기습형 — 저주 레벨 딜레마',
+        subtitle: '저주 저택 정화 의뢰',
+        desc: '깊이 갈수록 고가 유물 — 저주를 감수할 것인가',
         icon: '🔦',
         color: 0x8844ff,
         textColor: '#8844ff',
-        unlockLevel: 5,
+        unlockLevel: 5,   // Lv.5 해금
         baseGoldReward: 200,       // 100→200 (BP의 2.5배, 높은 위험 대비)
         baseXpReward: 75,          // 40→75
         specialMaterial: '저주 유물',

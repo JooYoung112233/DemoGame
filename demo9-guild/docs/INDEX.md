@@ -32,6 +32,8 @@
 | — | 구역 전투 카드 (재구성) | [systems/cards.md](systems/cards.md) | 🟡 구역별 |
 | — | 시너지 14종 | [systems/synergies.md](systems/synergies.md) | ✅ 확정 (M1, 코드 일치) |
 | — | 길드 평판 | [systems/reputation.md](systems/reputation.md) | 🟡 간이 정의 |
+| — | **온보딩 & UI 단계별 확장** | [systems/onboarding.md](systems/onboarding.md) | ✅ 확정 |
+| — | **세계관 & 구역 서사** | [systems/world-narrative.md](systems/world-narrative.md) | ✅ 확정 |
 | — | gameState 스키마 | [systems/game-state.md](systems/game-state.md) | ✅ 확정 |
 | — | **구역 전투: Blood Pit** | [systems/zone-bloodpit.md](systems/zone-bloodpit.md) | ✅ 확정 (v3 다키스트 적용) |
 | — | **수동 전투: 다키스트 스타일** | [systems/manual-battle-darkest.md](systems/manual-battle-darkest.md) | ✅ 확정 |
