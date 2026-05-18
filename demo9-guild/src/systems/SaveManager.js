@@ -35,7 +35,7 @@ class SaveManager {
             data.pocketSlots = data.pocketSlots || [null, null];
             // 기존 세이브에 신규 시설 자동 추가
             data.unlockedFacilities = data.unlockedFacilities || [];
-            ['equipment', 'guildHall'].forEach(f => {
+            ['guildHall'].forEach(f => {
                 if (!data.unlockedFacilities.includes(f)) data.unlockedFacilities.push(f);
             });
             return data;

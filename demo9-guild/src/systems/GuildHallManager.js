@@ -211,4 +211,59 @@ class GuildHallManager {
             12: '🏆 어둠의 지배자'
         }
     };
+
+    /**
+     * 호환성 레이어 — 기존 코드(MercenaryManager, ExpeditionManager, RunResultScene)에서
+     * GuildHallManager.getEffects(gs)로 참조하는 부분 지원.
+     * 각 카테고리 단계(stage)에서 누적 보너스를 계산해 반환.
+     */
+    static getEffects(gs) {
+        GuildHallManager.ensureState(gs);
+        const h = gs.guildHall;
+
+        // A. operations — 서브 슬롯 보너스
+        const subSlotStages = [1,2,4,5,8,9,11];
+        const subSlotsBonus = subSlotStages.filter(s => (h.operations || 0) >= s).length;
+
+        // B. infrastructure — 보관함/로스터/모집풀 보너스
+        let storageBonus = 0, rosterBonus = 0, recruitPoolBonus = 0;
+        const infra = h.infrastructure || 0;
+        if (infra >= 1) rosterBonus += 2;
+        if (infra >= 2) storageBonus += 4;
+        if (infra >= 3) rosterBonus += 2;
+        if (infra >= 4) recruitPoolBonus += 1;
+        if (infra >= 5) storageBonus += 6;
+        if (infra >= 6) rosterBonus += 3;
+        if (infra >= 8) recruitPoolBonus += 1;
+        if (infra >= 9) rosterBonus += 4;
+        if (infra >= 10) storageBonus += 8;
+        if (infra >= 12) recruitPoolBonus += 1;
+
+        // C. recovery — 스테미너 회복 보너스
+        let staminaRecoveryBonus = 0;
+        const rec = h.recovery || 0;
+        if (rec >= 1) staminaRecoveryBonus += 0.5;
+        if (rec >= 2) staminaRecoveryBonus += 0.5;
+        if (rec >= 5) staminaRecoveryBonus += 1;
+        if (rec >= 8) staminaRecoveryBonus += 2;
+
+        // E. intel — 보상 보너스
+        const intel = h.intel || 0;
+        const subRewardBonus = Math.min(0.5, intel * 0.04);
+        const mainRewardBonus = Math.min(0.5, intel * 0.04);
+
+        // 파견 시간 감소 (A + C 복합)
+        const dispatchTimeReduction = Math.min(0.5, (h.operations || 0) * 0.03 + rec * 0.02);
+
+        return {
+            subSlotsBonus,
+            storageBonus,
+            rosterBonus,
+            recruitPoolBonus,
+            staminaRecoveryBonus,
+            subRewardBonus,
+            mainRewardBonus,
+            dispatchTimeReduction
+        };
+    }
 }
