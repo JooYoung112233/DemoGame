@@ -119,7 +119,7 @@ const ZONE_EQUIPMENT = {
             {
                 id: 'zba02', name: '투기장 전사의 흉갑', minRarity: 'rare',
                 stats: { def: 10, hp: 40, atk: 5 }, penalty: { spd: -12 },
-                special: 'pit_endure', specialDesc: '핏 게이지 MAX 동안 받는 피해 -20%',
+                special: 'pit_endure', specialDesc: '관중 흥분도 MAX 동안 받는 피해 -20%',
                 zoneBonus: 'BP에서 감소량 -30%', flavor: '투기장 챔피언이 입었던 갑옷'
             },
             {

@@ -41,7 +41,7 @@ const POCKET_ITEM_DATA = {
     pot_pit: {
         name: '피의 술잔',
         icon: '🩸',
-        desc: '핏 게이지 즉시 +15%',
+        desc: '관중 흥분도 즉시 +15%',
         targetType: 'none',
         effect: { pitGaugeAdd: 15 }
     }

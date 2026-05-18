@@ -21,7 +21,14 @@ class RunResultScene extends Phaser.Scene {
         ornLine.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
         ornLine.lineBetween(200, 55, 1080, 55);
 
-        const banner = r.success ? '◈ 탐사 성공! ◈' : '◈ 탐사 실패... ◈';
+        // 구역별 결과 배너
+        const bannerTexts = {
+            bloodpit: { success: '◈ 투기장 승리! ◈', fail: '◈ 투기장 패배... ◈' },
+            cargo:    { success: '◈ 호송 완료! ◈',   fail: '◈ 호송 실패... ◈' },
+            blackout: { success: '◈ 정화 성공! ◈',   fail: '◈ 정화 실패... ◈' }
+        };
+        const bt = bannerTexts[r.zoneKey] || { success: '◈ 임무 성공! ◈', fail: '◈ 임무 실패... ◈' };
+        const banner = r.success ? bt.success : bt.fail;
         const bannerColor = r.success ? '#44ff88' : '#ff4444';
         this.add.text(640, 40, banner, {
             fontSize: '28px', fontFamily: T.fontFamily || 'monospace', color: bannerColor, fontStyle: 'bold'
