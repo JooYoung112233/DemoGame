@@ -717,7 +717,7 @@ class DeployScene extends Phaser.Scene {
                 if (isMain) {
                     gs.runCount++;
                     SaveManager.save(gs);
-                    const sceneMap = { bloodpit: 'ManualBattleScene', cargo: 'CargoBattleScene', blackout: 'BlackoutBattleScene' };
+                    const sceneMap = { bloodpit: 'ManualBattleScene', cargo: 'CargoBattleScene', blackout: 'BlackoutProtoSelectScene' };
                     this.scene.start(sceneMap[zoneKey] || 'BattleScene', { gameState: gs, zoneKey, party });
                 } else {
                     const level = this.selectedLevel || GuildManager.getMaxUnlockedSubLevel(gs, zoneKey);
