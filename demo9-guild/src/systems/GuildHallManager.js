@@ -95,6 +95,25 @@ class GuildHallManager {
         return true;
     }
 
+    static getEffects(gs) {
+        GuildHallManager.ensureState(gs);
+        const result = {};
+        if (typeof GUILD_HALL_DATA === 'undefined') return result;
+        for (const catKey of Object.keys(GuildHallManager.CATEGORIES)) {
+            const currentStage = gs.guildHall[catKey] || 0;
+            const catData = GUILD_HALL_DATA[catKey];
+            if (!catData || !catData.stages) continue;
+            for (const s of catData.stages) {
+                if (s.stage > currentStage) break;
+                if (!s.effect) continue;
+                for (const [k, v] of Object.entries(s.effect)) {
+                    result[k] = v;
+                }
+            }
+        }
+        return result;
+    }
+
     static getEffectDescription(catKey, stage) {
         const effects = GuildHallManager.EFFECTS[catKey];
         if (!effects || !effects[stage]) return '';
