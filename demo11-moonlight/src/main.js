@@ -14,7 +14,7 @@ const config = {
     antialias: true,
     audio: { noAudio: true },
     scale: { mode: Phaser.Scale.NONE },
-    scene: [TitleScene, HubScene, ExpeditionScene, ShopScene, InventoryScene, CraftScene],
+    scene: [TitleScene, MorningScene, ShopScene, CommissionScene],
 };
 
 window.game = new Phaser.Game(config);
