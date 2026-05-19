@@ -29,9 +29,11 @@ class CommissionScene extends Phaser.Scene {
             fontSize: '24px', fontFamily: 'monospace', color: '#aaaaff',
             stroke: '#000', strokeThickness: 3,
         }).setOrigin(0.5);
-        this.add.text(cx, 50, `${this.gs.gold}G  |  내일 아침에 결과가 도착합니다`, {
+
+        this.goldLabel = this.add.text(cx, 50, '', {
             fontSize: '12px', fontFamily: 'monospace', color: '#666688',
         }).setOrigin(0.5);
+        this._updateGoldLabel();
 
         this.selectedAdventurer = null;
         this.selectedZone = null;
@@ -41,6 +43,10 @@ class CommissionScene extends Phaser.Scene {
         this._drawZones();
         this._drawCommissionList();
         this._drawButtons();
+    }
+
+    _updateGoldLabel() {
+        this.goldLabel.setText(`${this.gs.gold}G  |  내일 아침에 결과가 도착합니다`);
     }
 
     _drawAdventurers() {
@@ -75,9 +81,9 @@ class CommissionScene extends Phaser.Scene {
             bg.on('pointerover', () => { if (this.selectedAdventurer !== adv) bg.setFillStyle(0x1a1a35); });
             bg.on('pointerout', () => { if (this.selectedAdventurer !== adv) bg.setFillStyle(0x151525); });
             bg.on('pointerdown', () => {
-                this.advButtons.forEach(b => b.bg.setFillStyle(0x151525));
+                this.advButtons.forEach(b => b.bg.setFillStyle(0x151525).setStrokeStyle(1, 0x222240));
                 this.selectedAdventurer = adv;
-                bg.setFillStyle(0x1a2a3a);
+                bg.setFillStyle(0x1a2a3a).setStrokeStyle(2, 0x44aaff);
             });
 
             this.advButtons.push({ bg, adv });
@@ -115,9 +121,12 @@ class CommissionScene extends Phaser.Scene {
                 bg.on('pointerover', () => { if (this.selectedZone !== id) bg.setFillStyle(0x1a1a35); });
                 bg.on('pointerout', () => { if (this.selectedZone !== id) bg.setFillStyle(0x151525); });
                 bg.on('pointerdown', () => {
-                    this.zoneButtons.forEach(b => b.bg.setFillStyle(b.unlocked ? 0x151525 : 0x101018));
+                    this.zoneButtons.forEach(b => {
+                        b.bg.setFillStyle(b.unlocked ? 0x151525 : 0x101018);
+                        b.bg.setStrokeStyle(1, b.unlocked ? 0x222240 : 0x181825);
+                    });
                     this.selectedZone = id;
-                    bg.setFillStyle(0x1a2a3a);
+                    bg.setFillStyle(0x1a2a3a).setStrokeStyle(2, 0x44aaff);
                     this._checkCanAdd();
                 });
             } else {
@@ -135,6 +144,11 @@ class CommissionScene extends Phaser.Scene {
         const panelY = 70 + panelH / 2;
         this.add.rectangle(this.col3X, panelY, this.colW, panelH, 0x10101e, 0.95).setStrokeStyle(1, 0x222240);
         this.add.text(this.col3X, 82, '의뢰 목록', { fontSize: '15px', fontFamily: 'monospace', color: '#aaaaff' }).setOrigin(0.5);
+
+        this.commCountLabel = this.add.text(this.col3X, 100, '', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#666',
+        }).setOrigin(0.5);
+
         this.commListContainer = this.add.container(0, 0);
         this._refreshCommList();
     }
@@ -143,40 +157,61 @@ class CommissionScene extends Phaser.Scene {
         this.commListContainer.removeAll(true);
         const itemW = this.colW - 20;
 
+        this.commCountLabel.setText(`${this.commissions.length} / 3건`);
+
         if (this.commissions.length === 0) {
-            const t = this.add.text(this.col3X, 220, '의뢰 없음\n\n모험가와 구역을\n선택하세요', {
+            const t = this.add.text(this.col3X, 220, '의뢰 없음\n\n모험가와 구역을\n선택 후 추가', {
                 fontSize: '12px', fontFamily: 'monospace', color: '#444', align: 'center',
             }).setOrigin(0.5);
             this.commListContainer.add(t);
             return;
         }
 
-        let y = 105;
+        let y = 115;
         this.commissions.forEach((c, idx) => {
             const zone = ZONE_DATA[c.zoneId];
-            const bg = this.add.rectangle(this.col3X, y + 20, itemW, 42, 0x151525);
-            bg.setStrokeStyle(1, 0x222240);
 
-            const t = this.add.text(this.colLeft3, y + 6, `${c.adventurer.icon} ${c.adventurer.name}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#ccc',
+            const bg = this.add.rectangle(this.col3X, y + 30, itemW, 62, 0x151530, 0.95);
+            bg.setStrokeStyle(1, 0x3344aa);
+
+            const numBadge = this.add.rectangle(this.colLeft3 + 10, y + 15, 22, 22, 0x3344aa);
+            const numText = this.add.text(this.colLeft3 + 10, y + 15, `${idx + 1}`, {
+                fontSize: '12px', fontFamily: 'monospace', color: '#fff',
+            }).setOrigin(0.5);
+
+            const advText = this.add.text(this.colLeft3 + 28, y + 10, `${c.adventurer.icon} ${c.adventurer.name}`, {
+                fontSize: '12px', fontFamily: 'monospace', color: '#ddd',
             });
-            const t2 = this.add.text(this.colLeft3, y + 21, `  ${zone.icon} ${zone.name} | ${c.adventurer.cost}G`, {
+            const zoneText = this.add.text(this.colLeft3 + 28, y + 27, `${zone.icon} ${zone.name}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#aaa',
+            });
+            const costText = this.add.text(this.colLeft3 + 28, y + 43, `${c.adventurer.cost}G | 성공 ${Math.round(c.adventurer.successRate * 100)}%`, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#ffcc44',
             });
 
-            const delBtn = this.add.text(this.col3X + this.colW / 2 - 20, y + 20, '✕', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#ff4444',
+            const delBtn = this.add.text(this.col3X + this.colW / 2 - 22, y + 15, '✕', {
+                fontSize: '16px', fontFamily: 'monospace', color: '#ff4444',
             }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+            delBtn.on('pointerover', () => delBtn.setColor('#ff8888'));
+            delBtn.on('pointerout', () => delBtn.setColor('#ff4444'));
             delBtn.on('pointerdown', () => {
                 this.gs.gold += c.adventurer.cost;
                 this.commissions.splice(idx, 1);
                 this._refreshCommList();
                 this._updateCostLabel();
+                this._updateGoldLabel();
             });
 
-            this.commListContainer.add([bg, t, t2, delBtn]);
-            y += 50;
+            this.commListContainer.add([bg, numBadge, numText, advText, zoneText, costText, delBtn]);
+            y += 70;
         });
+
+        // Total cost summary at bottom of list
+        const total = this.commissions.reduce((s, c) => s + c.adventurer.cost, 0);
+        const summary = this.add.text(this.col3X, y + 15, `총 의뢰비: ${total}G`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44',
+        }).setOrigin(0.5);
+        this.commListContainer.add(summary);
     }
 
     _checkCanAdd() {
@@ -190,7 +225,14 @@ class CommissionScene extends Phaser.Scene {
 
     _drawButtons() {
         const cx = 640;
-        const btnAreaY = 480;
+        const btnAreaY = 478;
+
+        // Back to shop button
+        new UIButton(this, 100, btnAreaY, '가게로 돌아가기', {
+            width: 170, height: 38, bg: 0x222235, hoverBg: 0x333350,
+            textColor: '#aaaacc', fontSize: '12px',
+            onClick: () => this.scene.start('ShopScene'),
+        });
 
         this.addBtn = new UIButton(this, cx, btnAreaY, '의뢰 추가', {
             width: 200, height: 44, bg: 0x1a1a3a, hoverBg: 0x2a2a4a,
@@ -241,6 +283,7 @@ class CommissionScene extends Phaser.Scene {
         Toast.show(this, `의뢰 추가! -${this.selectedAdventurer.cost}G`, { color: '#aaaaff' });
         this._refreshCommList();
         this._updateCostLabel();
+        this._updateGoldLabel();
     }
 
     _updateCostLabel() {

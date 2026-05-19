@@ -12,6 +12,7 @@ class ShopScene extends Phaser.Scene {
         this.currentCustomer = null;
         this.currentSlot = null;
         this.pendingAction = null;
+        this.isCrafting = false;
 
         const MARGIN = 30;
         const GAP = 12;
@@ -68,12 +69,14 @@ class ShopScene extends Phaser.Scene {
         this.customerLabel.setText(this.phase === 'selling' ? `${this.customerIndex}/${this.totalCustomers}` : '');
     }
 
+    // === 제작 패널 ===
     _drawCraftPanel() {
         const px = this.col1X, py = this.panelTop + this.panelH / 2;
         this.add.rectangle(px, py, this.panelW, this.panelH, 0x12121e, 0.95).setStrokeStyle(1, 0x222240);
         this.add.text(px, this.panelTop + 18, '제작', { fontSize: '16px', fontFamily: 'monospace', color: '#ff8844' }).setOrigin(0.5);
 
         this.craftContainer = this.add.container(0, 0);
+        this.craftOverlay = this.add.container(0, 0).setVisible(false).setDepth(5);
         this._refreshCraft();
     }
 
@@ -115,23 +118,188 @@ class ShopScene extends Phaser.Scene {
             });
             this.craftContainer.add([label, ings]);
 
-            if (canCraft && this.phase === 'prep') {
+            if (canCraft && this.phase === 'prep' && !this.isCrafting) {
                 bg.setInteractive({ useHandCursor: true });
                 bg.on('pointerover', () => bg.setFillStyle(0x2a3a2a));
                 bg.on('pointerout', () => bg.setFillStyle(0x1a2a1a));
-                bg.on('pointerdown', () => {
-                    recipe.ingredients.forEach(ing => this.gs.removeItem(ing.id, ing.count));
-                    this.gs.addItems([{ id: recipe.result, qty: 1 }]);
-                    Toast.show(this, `${resultData.icon} ${resultData.name} 제작!`, { color: '#ff8844' });
-                    this._refreshCraft();
-                    this._refreshInventory();
-                });
+                bg.on('pointerdown', () => this._startCrafting(recipe, resultData, recipe.result));
             }
 
             y += 44;
         });
     }
 
+    _startCrafting(recipe, resultData, resultId) {
+        if (this.isCrafting) return;
+        this.isCrafting = true;
+
+        recipe.ingredients.forEach(ing => this.gs.removeItem(ing.id, ing.count));
+        this._refreshCraft();
+        this._refreshInventory();
+
+        this.craftOverlay.removeAll(true);
+        this.craftOverlay.setVisible(true);
+
+        const cx = 640, cy = 360;
+        const ovBg = this.add.rectangle(cx, cy, 1280, 720, 0x000000, 0.6);
+        const panel = this.add.rectangle(cx, cy, 420, 240, 0x12121e, 0.98).setStrokeStyle(2, 0x3a3a60);
+        const title = this.add.text(cx, cy - 90, `${resultData.icon} ${resultData.name} 제작 중...`, {
+            fontSize: '16px', fontFamily: 'monospace', color: '#ff8844',
+        }).setOrigin(0.5);
+
+        const barW = 320, barH = 20;
+        const barBg = this.add.rectangle(cx, cy - 40, barW, barH, 0x222235).setStrokeStyle(1, 0x3a3a60);
+        const barFill = this.add.rectangle(cx - barW / 2, cy - 40, 0, barH - 4, 0xff8844);
+        barFill.setOrigin(0, 0.5);
+
+        const progressText = this.add.text(cx, cy - 15, '', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#888',
+        }).setOrigin(0.5);
+
+        this.craftOverlay.add([ovBg, panel, title, barBg, barFill, progressText]);
+
+        const CRAFT_TIME = 2000;
+        this.tweens.add({
+            targets: barFill,
+            width: barW - 4,
+            duration: CRAFT_TIME,
+            ease: 'Linear',
+            onUpdate: (tween) => {
+                const p = Math.round(tween.progress * 100);
+                progressText.setText(`${p}%`);
+            },
+            onComplete: () => {
+                this._startTimingGame(resultData, resultId);
+            },
+        });
+
+        const skipBtn = new UIButton(this, cx, cy + 40, '자동 제작 (1개)', {
+            width: 180, height: 34, bg: 0x222240, hoverBg: 0x333355,
+            textColor: '#888', fontSize: '12px',
+            onClick: () => {
+                this.tweens.killAll();
+                this._finishCraft(resultData, resultId, 'auto');
+            },
+        });
+        this.craftOverlay.add(skipBtn.container);
+    }
+
+    _startTimingGame(resultData, resultId) {
+        this.craftOverlay.removeAll(true);
+
+        const cx = 640, cy = 360;
+        const ovBg = this.add.rectangle(cx, cy, 1280, 720, 0x000000, 0.6);
+        const panel = this.add.rectangle(cx, cy, 420, 260, 0x12121e, 0.98).setStrokeStyle(2, 0x3a3a60);
+        const title = this.add.text(cx, cy - 100, `${resultData.icon} 타이밍 클릭!`, {
+            fontSize: '18px', fontFamily: 'monospace', color: '#ffcc44',
+        }).setOrigin(0.5);
+        const hint = this.add.text(cx, cy - 75, '노란 구간에서 클릭! 중앙이면 Perfect!', {
+            fontSize: '11px', fontFamily: 'monospace', color: '#888',
+        }).setOrigin(0.5);
+
+        const barW = 340, barH = 30;
+        const barBg = this.add.rectangle(cx, cy - 20, barW, barH, 0x222235).setStrokeStyle(1, 0x3a3a60);
+
+        const goodW = barW * 0.4;
+        const goodZone = this.add.rectangle(cx, cy - 20, goodW, barH - 4, 0x444422, 0.6);
+
+        const perfectW = barW * 0.1;
+        const perfectZone = this.add.rectangle(cx, cy - 20, perfectW, barH - 4, 0x886622, 0.8);
+
+        const cursor = this.add.rectangle(cx - barW / 2, cy - 20, 4, barH + 6, 0xff4444);
+
+        const resultText = this.add.text(cx, cy + 30, '', {
+            fontSize: '20px', fontFamily: 'monospace', color: '#fff',
+        }).setOrigin(0.5);
+
+        this.craftOverlay.add([ovBg, panel, title, hint, barBg, goodZone, perfectZone, cursor, resultText]);
+
+        const speed = 1200;
+        const cursorTween = this.tweens.add({
+            targets: cursor,
+            x: cx + barW / 2,
+            duration: speed,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Linear',
+        });
+
+        let clicked = false;
+
+        const clickZone = this.add.rectangle(cx, cy, 420, 260, 0x000000, 0.01);
+        clickZone.setInteractive({ useHandCursor: true });
+        this.craftOverlay.add(clickZone);
+
+        clickZone.on('pointerdown', () => {
+            if (clicked) return;
+            clicked = true;
+            cursorTween.stop();
+
+            const cursorPos = cursor.x;
+            const dist = Math.abs(cursorPos - cx);
+            const halfGoodW = goodW / 2;
+            const halfPerfW = perfectW / 2;
+
+            let grade;
+            if (dist <= halfPerfW) {
+                grade = 'perfect';
+                cursor.setFillStyle(0xffcc44);
+                resultText.setText('PERFECT!').setColor('#ffcc44');
+            } else if (dist <= halfGoodW) {
+                grade = 'good';
+                cursor.setFillStyle(0x44ff88);
+                resultText.setText('Good!').setColor('#44ff88');
+            } else {
+                grade = 'miss';
+                cursor.setFillStyle(0xff4444);
+                resultText.setText('Miss...').setColor('#ff6666');
+            }
+
+            this.time.delayedCall(800, () => this._finishCraft(resultData, resultId, grade));
+        });
+
+        this.time.delayedCall(5000, () => {
+            if (!clicked) {
+                clicked = true;
+                cursorTween.stop();
+                resultText.setText('자동 제작').setColor('#888888');
+                this.time.delayedCall(500, () => this._finishCraft(resultData, resultId, 'auto'));
+            }
+        });
+    }
+
+    _finishCraft(resultData, resultId, grade) {
+        let qty = 1;
+        let msg = '';
+
+        if (grade === 'perfect') {
+            qty = 2;
+            msg = `${resultData.icon} ${resultData.name} x2 제작!`;
+        } else if (grade === 'good') {
+            qty = 1;
+            msg = `${resultData.icon} ${resultData.name} 제작 완료!`;
+        } else if (grade === 'miss') {
+            qty = 1;
+            msg = `${resultData.icon} ${resultData.name} 제작... (아쉽게 1개)`;
+        } else {
+            qty = 1;
+            msg = `${resultData.icon} ${resultData.name} 자동 제작 1개`;
+        }
+
+        this.gs.addItems([{ id: resultId, qty }]);
+
+        this.craftOverlay.removeAll(true);
+        this.craftOverlay.setVisible(false);
+        this.isCrafting = false;
+
+        const color = grade === 'perfect' ? '#ffcc44' : grade === 'good' ? '#44ff88' : '#aaaaaa';
+        Toast.show(this, msg, { color });
+
+        this._refreshCraft();
+        this._refreshInventory();
+    }
+
+    // === 진열대 ===
     _drawShopDisplay() {
         const px = this.col2X, py = this.panelTop + this.panelH / 2;
         this.add.rectangle(px, py, this.panelW, this.panelH, 0x12121e, 0.95).setStrokeStyle(1, 0x222240);
@@ -157,6 +325,7 @@ class ShopScene extends Phaser.Scene {
         }
     }
 
+    // === 인벤토리 ===
     _drawInventory() {
         const px = this.col3X, py = this.panelTop + this.panelH / 2;
         this.add.rectangle(px, py, this.panelW, this.panelH, 0x12121e, 0.95).setStrokeStyle(1, 0x222240);
@@ -227,6 +396,7 @@ class ShopScene extends Phaser.Scene {
         slot.price.setColor(ratio > 1.3 ? '#ff4444' : ratio > 1.1 ? '#ffcc44' : '#44ff88');
     }
 
+    // === 손님 영역 ===
     _drawCustomerArea() {
         const cx = 640;
         const custW = 1280 - 60;
