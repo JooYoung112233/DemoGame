@@ -44,11 +44,14 @@ class BattleScene extends Phaser.Scene {
         for (let i = 0; i < roundData.count; i++) {
             const id = roundData.pool[Phaser.Math.Between(0, roundData.pool.length - 1)];
             const data = ENEMY_DATA[id];
-            enemies.push({
+            const enemy = {
                 ...data, hp: data.hp, maxHp: data.hp,
-                burn: 0, poison: 0, index: i,
-                cooldownTimer: data.cooldown
-            });
+                burn: 0, poison: 0, block: 0, index: i,
+                cooldownTimer: data.cooldown,
+                nextIntent: null
+            };
+            enemy.nextIntent = this.combatResolver.rollEnemyIntent(enemy);
+            enemies.push(enemy);
         }
         return enemies;
     }
@@ -268,11 +271,10 @@ class BattleScene extends Phaser.Scene {
         }
     }
 
-    _doEnemyTurn(attackers) {
+    _doEnemyTurn(actors) {
         this.turnPhase = 'enemyTurn';
 
-        // flash attacking enemies
-        for (const enemy of attackers) {
+        for (const enemy of actors) {
             const ec = this.enemyContainers[enemy.index];
             if (!ec) continue;
             this.tweens.add({
@@ -283,8 +285,8 @@ class BattleScene extends Phaser.Scene {
         }
 
         this.time.delayedCall(120, () => {
-            const log = this.combatResolver.enemyAttack(attackers, this.playerState);
-            this._showPlayerHitPopups(log);
+            const log = this.combatResolver.enemyAct(actors, this.playerState, this.enemies);
+            this._showEnemyActPopups(log);
             this._updateAllDisplays();
             this._appendLog(log);
 
@@ -336,7 +338,7 @@ class BattleScene extends Phaser.Scene {
         }
     }
 
-    _showPlayerHitPopups(log) {
+    _showEnemyActPopups(log) {
         for (const entry of log) {
             if (entry.type === 'playerHit') {
                 this._popText(230, 545, `💥 -${entry.value}`, '#ff2222', 26);
@@ -352,6 +354,35 @@ class BattleScene extends Phaser.Scene {
                     const ec = this.enemyContainers[idx];
                     this._popText(ec.container.x, ec.container.y - 50, `-${entry.value}`, entry.dotType === 'burn' ? '#ff8800' : '#88ff00', 20);
                 }
+            }
+            if (entry.type === 'enemyDefend') {
+                const idx = entry.targetIdx;
+                if (idx >= 0 && this.enemyContainers[idx]) {
+                    const ec = this.enemyContainers[idx];
+                    this._popText(ec.container.x, ec.container.y - 50, `🛡️+${entry.value}`, '#6688ff', 22);
+                }
+            }
+            if (entry.type === 'enemyBuff') {
+                const idx = entry.targetIdx;
+                if (idx >= 0 && this.enemyContainers[idx]) {
+                    const ec = this.enemyContainers[idx];
+                    this._popText(ec.container.x, ec.container.y - 50, `⬆️ 공격+${entry.value}`, '#ff8844', 20);
+                }
+            }
+            if (entry.type === 'enemyHeal') {
+                const idx = entry.targetIdx;
+                if (idx >= 0 && this.enemyContainers[idx]) {
+                    const ec = this.enemyContainers[idx];
+                    this._popText(ec.container.x, ec.container.y - 50, `💚+${entry.value}`, '#44ff88', 22);
+                }
+            }
+            if (entry.type === 'statusApplied') {
+                const icons = { bleed: '🩸', burn: '🔥' };
+                this._popText(230, 500, `${icons[entry.status] || '⚠️'} ${entry.status} +${entry.value}!`, '#ff6644', 20);
+            }
+            if (entry.type === 'playerDot') {
+                const icons = { bleed: '🩸', burn: '🔥' };
+                this._popText(230, 545, `${icons[entry.dotType] || ''} -${entry.value}`, '#ff6644', 22);
             }
         }
     }
@@ -411,6 +442,15 @@ class BattleScene extends Phaser.Scene {
         }
         this.playerBlockText.setText(ps.block > 0 ? `${ps.block}` : '');
 
+        // Player status effects
+        const playerStatuses = [];
+        if (ps.bleed > 0) playerStatuses.push(`🩸${ps.bleed}`);
+        if (ps.burn > 0) playerStatuses.push(`🔥${ps.burn}`);
+        this.playerBlockText.setText(
+            (ps.block > 0 ? `${ps.block}` : '') +
+            (playerStatuses.length > 0 ? '  ' + playerStatuses.join(' ') : '')
+        );
+
         this.goldLabel.setText(`🪙 ${ps.gold}`);
         this.goldTopLabel.setText(`🪙 ${ps.gold}`);
         this.deckLabel.setText(`덱 ${ps.symbolPool.length}장:`);
@@ -430,6 +470,7 @@ class BattleScene extends Phaser.Scene {
             ec.hpText.setText(`${Math.max(0, enemy.hp)}/${enemy.maxHp}`);
 
             const statuses = [];
+            if (enemy.block > 0) statuses.push(`🛡️${enemy.block}`);
             if (enemy.burn > 0) statuses.push(`🔥${enemy.burn}`);
             if (enemy.poison > 0) statuses.push(`☠️${enemy.poison}`);
             ec.statusText.setText(statuses.join(' '));
@@ -449,15 +490,42 @@ class BattleScene extends Phaser.Scene {
             const ec = this.enemyContainers[i];
             if (!ec || enemy.hp <= 0) continue;
 
+            const intent = enemy.nextIntent || { type: 'attack' };
+            const intentLabel = this._intentLabel(intent, enemy);
+
             if (enemy.cooldownTimer <= 1) {
-                ec.intentText.setText(`⚔️ ${enemy.attack}`);
-                ec.intentText.setColor('#ff4444');
-                ec.intentText.setFontSize(15);
+                ec.intentText.setText(intentLabel);
+                ec.intentText.setColor(this._intentColor(intent));
+                ec.intentText.setFontSize(14);
             } else {
-                ec.intentText.setText(`${enemy.cooldownTimer}턴 ⚔️${enemy.attack}`);
+                ec.intentText.setText(`${enemy.cooldownTimer}턴 ${intentLabel}`);
                 ec.intentText.setColor(enemy.cooldownTimer === 2 ? '#ff8844' : '#888888');
-                ec.intentText.setFontSize(13);
+                ec.intentText.setFontSize(12);
             }
+        }
+    }
+
+    _intentLabel(intent, enemy) {
+        switch (intent.type) {
+            case 'attack': return `⚔️${enemy.attack}`;
+            case 'bleed': return `🩸${Math.floor(enemy.attack * 0.6)}+출혈`;
+            case 'attackBleed': return `⚔️${enemy.attack}+🩸`;
+            case 'attackBurn': return `⚔️${enemy.attack}+🔥`;
+            case 'lifesteal': return `🧛${enemy.attack}`;
+            case 'doubleStrike': return `⚔️⚔️${Math.floor(enemy.attack * 0.6)}×2`;
+            case 'defend': return `🛡️+${intent.block || 8}`;
+            case 'buff': return `⬆️공격+${intent.atkUp || 0}`;
+            case 'healAll': return `💚${intent.heal || 10}`;
+            default: return `⚔️${enemy.attack}`;
+        }
+    }
+
+    _intentColor(intent) {
+        switch (intent.type) {
+            case 'defend': return '#6688ff';
+            case 'buff': return '#ff8844';
+            case 'healAll': return '#44ff88';
+            default: return '#ff4444';
         }
     }
 
@@ -476,6 +544,12 @@ class BattleScene extends Phaser.Scene {
             if (entry.type === 'burn') lines.push(`🔥 ${entry.target} 화상!`);
             if (entry.type === 'poison') lines.push(`☠️ ${entry.target} 독!`);
             if (entry.type === 'slow') lines.push(`❄️ ${entry.target} 둔화!`);
+            if (entry.type === 'enemyDefend') lines.push(`🛡️ ${entry.target} 방어+${entry.value}`);
+            if (entry.type === 'enemyBuff') lines.push(`⬆️ ${entry.target} 공격+${entry.value}`);
+            if (entry.type === 'enemyHeal') lines.push(`💚 ${entry.target} 회복+${entry.value}`);
+            if (entry.type === 'enemyBlocked') lines.push(`🛡️ ${entry.target} 방어로 ${entry.value} 흡수`);
+            if (entry.type === 'statusApplied') lines.push(`${entry.status === 'bleed' ? '🩸' : '🔥'} ${entry.status} +${entry.value}!`);
+            if (entry.type === 'playerDot') lines.push(`${entry.dotType === 'bleed' ? '🩸' : '🔥'} ${entry.dotType} -${entry.value}`);
         }
         this.combatLog = this.combatLog.concat(lines);
         if (this.combatLog.length > 5) this.combatLog = this.combatLog.slice(-5);
