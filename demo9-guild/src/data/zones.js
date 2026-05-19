@@ -1,8 +1,8 @@
 const ZONE_DATA = {
     bloodpit: {
         name: 'Blood Pit',
-        subtitle: '투기장',
-        desc: '욕심 vs 탈출 — 핏 게이지가 핵심',
+        subtitle: '도시 투기장 운영 계약',
+        desc: '관중을 흥분시켜 수익을 극대화하라 — 도박형 고수익',
         icon: '💀',
         color: 0xff2244,
         textColor: '#ff2244',
@@ -15,12 +15,12 @@ const ZONE_DATA = {
     },
     cargo: {
         name: 'Cargo',
-        subtitle: '기차 방어',
-        desc: '나락식 층 진행 — 5분 방어 RTS',
+        subtitle: '약탈물 호송 계약',
+        desc: '화물을 안전하게 인도하라 — 안정형 수익',
         icon: '🚂',
         color: 0xff8844,
         textColor: '#ff8844',
-        unlockLevel: 3,
+        unlockLevel: 3,   // Lv.3 해금
         baseGoldReward: 140,       // 80→140 (BP의 1.75배, 난이도 대비)
         baseXpReward: 55,          // 35→55
         specialMaterial: '마법 동력석',
@@ -29,12 +29,12 @@ const ZONE_DATA = {
     },
     blackout: {
         name: 'Blackout',
-        subtitle: '저주받은 저택',
-        desc: '탐색 기습형 — 저주 레벨 딜레마',
+        subtitle: '저주 저택 정화 의뢰',
+        desc: '깊이 갈수록 고가 유물 — 저주를 감수할 것인가',
         icon: '🔦',
         color: 0x8844ff,
         textColor: '#8844ff',
-        unlockLevel: 5,
+        unlockLevel: 5,   // Lv.5 해금
         baseGoldReward: 200,       // 100→200 (BP의 2.5배, 높은 위험 대비)
         baseXpReward: 75,          // 40→75
         specialMaterial: '저주 유물',
@@ -47,17 +47,17 @@ const ZONE_LEVEL_EFFECTS = {
     bloodpit: {
         5:  { name: '투기장 축소', desc: '전장 범위 -20%, 전투 시간 제한 45초', effect: 'arena_shrink', value: 0.8, timeLimit: 45 },
         7:  { name: '관중의 야유', desc: '공격 실패 시 ATK -3% (중첩), 적 처치 시 ATK +5%', effect: 'crowd_pressure', penaltyMiss: 0.03, bonusKill: 0.05 },
-        10: { name: '핏로드의 분노', desc: '핏 게이지 감소속도 2배, MAX 시 ATK +50%', effect: 'pitlord_rage', decayMult: 2, maxBonus: 0.5 }
+        10: { name: '핏로드의 분노', desc: '관중 흥분도 감소 2배, MAX 시 ATK +50%', effect: 'pitlord_rage', decayMult: 2, maxBonus: 0.5 }
     },
     cargo: {
         5:  { name: '열차 가속', desc: '라운드 시간 제한 50초, 정차 보너스 +50%', effect: 'train_speed', timeLimit: 50, stationBonus: 1.5 },
         7:  { name: '폭풍 지대', desc: '매 10초마다 전체 피해 (적+아군), 칸 HP 감소', effect: 'storm_zone', interval: 10, dmgPercent: 0.05 },
-        10: { name: '최종 화물', desc: '라운드 시작 시 화물칸 폭발 위협, 방어 성공 시 보상 3배', effect: 'final_cargo', rewardMult: 3 }
+        10: { name: '최종 화물', desc: '약탈물 폭주 위협, 호송 성공 시 보수 3배', effect: 'final_cargo', rewardMult: 3 }
     },
     blackout: {
         5:  { name: '완전한 암흑', desc: '시야 -1칸, 저주 레벨 상승 속도 +50%', effect: 'full_dark', fogReduction: 1, curseSpeedMult: 1.5 },
         7:  { name: '미궁의 변형', desc: '탐색한 방이 랜덤으로 재배치, 보스방 위치 변경', effect: 'maze_shift' },
-        10: { name: '저택의 분노', desc: '모든 적 +30% 강화, 보물방 드랍 등급 +2', effect: 'mansion_rage', enemyBuff: 0.3, lootBonus: 2 }
+        10: { name: '저택의 분노', desc: '모든 적 +30% 강화, 유물 등급 +2', effect: 'mansion_rage', enemyBuff: 0.3, lootBonus: 2 }
     }
 };
 
@@ -84,12 +84,12 @@ const AFFINITY_TREES = {
         color: '#ff2244',
         nodes: {
             bp_1: { level: 1, name: '피의 각성', desc: 'Blood Pit 입장 시 전체 ATK +10%', effect: { stat: 'atk', mult: 0.10 }, requires: [], x: 0, y: 0 },
-            bp_2: { level: 2, name: '투기장 적응', desc: '핏 게이지 상승속도 +20%', effect: { special: 'pitGaugeSpeed', value: 0.20 }, requires: ['bp_1'], x: 0, y: 1 },
-            bp_3a: { level: 3, name: '황금 핏 (파밍)', desc: '핏게이지 MAX 시 드랍 3배', effect: { special: 'pitGaugeDrop', value: 3 }, requires: ['bp_2'], x: -1, y: 2, branch: 'A' },
+            bp_2: { level: 2, name: '투기장 적응', desc: '관중 흥분도 상승속도 +20%', effect: { special: 'pitGaugeSpeed', value: 0.20 }, requires: ['bp_1'], x: 0, y: 1 },
+            bp_3a: { level: 3, name: '황금 흥행 (파밍)', desc: '흥분도 MAX 시 드랍 3배', effect: { special: 'pitGaugeDrop', value: 3 }, requires: ['bp_2'], x: -1, y: 2, branch: 'A' },
             bp_3b: { level: 3, name: '광전사의 기운 (전투)', desc: '라운드 시작 시 전체 ATK +15%', effect: { stat: 'atk', mult: 0.15 }, requires: ['bp_2'], x: 1, y: 2, branch: 'B' },
             bp_4a: { level: 4, name: '핏로드의 눈', desc: '핏로드 약점 노출 (피해 +25%)', effect: { special: 'bossWeakness', value: 0.25 }, requires: ['bp_3a'], x: -1, y: 3, branch: 'A' },
             bp_4b: { level: 4, name: '전설의 사냥꾼', desc: '보스 처치 시 전설 드랍 확률 +10%', effect: { special: 'legendaryDrop', value: 0.10 }, requires: ['bp_3b'], x: 1, y: 3, branch: 'B' },
-            bp_5a: { level: 5, name: '피의 군주', desc: '전체 스탯 +8%, 핏게이지 감소 없음', effect: { stat: 'all', mult: 0.08, special: 'noGaugeDecay' }, requires: ['bp_4a'], x: -1, y: 4, branch: 'A' },
+            bp_5a: { level: 5, name: '피의 군주', desc: '전체 스탯 +8%, 흥분도 감소 없음', effect: { stat: 'all', mult: 0.08, special: 'noGaugeDecay' }, requires: ['bp_4a'], x: -1, y: 4, branch: 'A' },
             bp_5b: { level: 5, name: '학살의 화신', desc: '처치 시 ATK +5% 중첩 (최대 5)', effect: { special: 'killStack', value: 0.05, max: 5 }, requires: ['bp_4b'], x: 1, y: 4, branch: 'B' }
         }
     },

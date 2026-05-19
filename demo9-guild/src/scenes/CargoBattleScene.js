@@ -1,6 +1,6 @@
 // ══════════════════════════════════════════════════════════════════
-// CargoBattleScene — 나락식 층 진행 + FTL식 사이드뷰 + 라이트 RTS
-// 5분 생존 방어전. 외벽 HP가 0이 되면 실패.
+// CargoBattleScene — 약탈물 호송 계약
+// 화물칸을 지키며 목적지까지 호송. 화물 안전 인도 = 보수.
 // ══════════════════════════════════════════════════════════════════
 
 class CargoBattleScene extends Phaser.Scene {
@@ -106,7 +106,8 @@ class CargoBattleScene extends Phaser.Scene {
 
         // 웨이브 타이머
         this.waveTimer = 0;
-        this.waveInterval = 8000; // 8초마다 새 웨이브
+        // 초반 층(1-10)은 12초, 이후 점차 빨라짐
+        this.waveInterval = this.floor <= 10 ? 12000 : 8000;
         this.waveNumber = 0;
 
         // 총 드랍
@@ -501,7 +502,9 @@ class CargoBattleScene extends Phaser.Scene {
             this.waveTimer = 0;
             this._spawnWave();
             // 웨이브 간격 점차 줄어듦
-            this.waveInterval = Math.max(3000, this.waveInterval - 200);
+            // 초반 층 최소 간격 완화 (floor 1-10: 4초, 이후: 3초)
+            const minInterval = this.floor <= 10 ? 4000 : 3000;
+            this.waveInterval = Math.max(minInterval, this.waveInterval - 200);
         }
 
         // ─── 유닛 업데이트 ───────────────────────────────────────

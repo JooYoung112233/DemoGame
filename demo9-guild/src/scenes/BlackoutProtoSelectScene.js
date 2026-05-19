@@ -1,12 +1,10 @@
 /**
  * Blackout 전투 프로토타입 선택 씬.
  *
- * 데모 단계: 전투 자체의 재미를 검증하기 위해 3개의 독립 전투 엔진을
- * 골라서 플레이해볼 수 있게 한다. 탐색 시스템과는 분리.
- *
- *  - Grid  : 마인스위퍼 그리드 위에서 전투 (탐색-전투 통합)
- *  - Lane  : 빛/어둠 듀얼 트랙 (포지셔닝 게임)
- *  - Rune  : 룬 시퀀스 봉인 (퍼즐형)
+ *  - 기존 전투  : 저택 탐색 (BlackoutBattleScene) — 정식 흐름
+ *  - Grid       : 마인스위퍼 그리드 위에서 전투 (탐색-전투 통합)
+ *  - Lane       : 빛/어둠 듀얼 트랙 (포지셔닝 게임)
+ *  - Rune       : 룬 시퀀스 봉인 (퍼즐형)
  */
 class BlackoutProtoSelectScene extends Phaser.Scene {
     constructor() { super('BlackoutProtoSelectScene'); }
@@ -18,59 +16,79 @@ class BlackoutProtoSelectScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x05050f);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, 0x0a0810);
 
         // 배경 안개
         const gfx = this.add.graphics();
         for (let i = 0; i < 30; i++) {
             const fx = Phaser.Math.Between(0, 1280);
             const fy = Phaser.Math.Between(0, 720);
-            gfx.fillStyle(0x6644aa, 0.04);
+            gfx.fillStyle(0x6644aa, 0.03);
             gfx.fillCircle(fx, fy, Phaser.Math.Between(40, 120));
         }
 
-        this.add.text(640, 50, '🔦 Blackout — 전투 프로토타입', {
-            fontSize: '24px', fontFamily: 'monospace', color: '#bb88ff', fontStyle: 'bold'
+        // 헤더
+        const hBg = this.add.graphics();
+        hBg.fillStyle(T.headerBg || 0x1e1810, 0.8);
+        hBg.fillRect(0, 0, 1280, 55);
+        hBg.lineStyle(1, 0x6644aa, 0.4);
+        hBg.lineBetween(0, 55, 1280, 55);
+
+        this.add.text(640, 27, '◈  🔦 Blackout — 전투 선택  ◈', {
+            fontSize: '20px', fontFamily: T.fontFamily || 'monospace',
+            color: '#bb88ff', fontStyle: 'bold',
+            stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
 
-        this.add.text(640, 85, '저주받은 저택에서 어떤 전투를 시험해볼지 선택', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#776699'
+        this.add.text(640, 75, '정식 전투 (기존) 또는 신규 전투 엔진 프로토타입 3종 중 선택', {
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }).setOrigin(0.5);
 
         // 파티 표시
-        this._drawPartyRow(640, 130);
+        this._drawPartyRow(640, 120);
 
-        // 3개 카드
-        this._drawCard(180, 250, '그리드 통합', '🗺',
+        // 4개 카드: 정식 + 3 프로토타입
+        // 1280 폭에 카드 250 × 4 = 1000, 남은 280을 5등분(56씩)으로 배치
+        this._drawCard(56, 230, '기존 전투', '🏚',
+            '저택 탐색 (방 16개), 횃불 자원,\n저주 트랙. BP 다키스트 엔진으로\n전투. 지금까지 만든 시스템.',
+            ['• 마인스위퍼식 방 탐색', '• 저주 누적 & 적응', '• BP 다키스트 전투 재사용'],
+            0x888899,
+            () => this._launch('BlackoutBattleScene'));
+
+        this._drawCard(362, 230, '⭐ 그리드 통합', '🗺',
             '마인스위퍼 그리드 위에서 직접 전투.\n적은 어둠에 숨고, 횃불로 비추는\n셀만 보인다. 위치 잡기가 전부.',
             ['• 5×5 셀, 턴제 SPD', '• 횃불 든 용병 인접 = 빛', '• 어둠 적은 위험 숫자로만'],
             0x4477cc,
             () => this._launch('BlackoutGridScene'));
 
-        this._drawCard(530, 250, '빛/어둠 듀얼', '🌗',
+        this._drawCard(668, 230, '⭐ 빛/어둠 듀얼', '🌗',
             '빛 트랙과 어둠 트랙.\n빛은 표적, 어둠은 잠복.\n트랙 전환과 차징의 게임.',
             ['• 2 트랙 (빛/어둠)', '• 어둠 차징 = 다음 ×2', '• 클래스마다 트랙 적성'],
             0xaa44cc,
             () => this._launch('BlackoutLaneScene'));
 
-        this._drawCard(880, 250, '봉인 의식', '🔮',
+        this._drawCard(974, 230, '⭐ 봉인 의식', '🔮',
             'HP를 깎는 게 아니라\n룬 시퀀스를 순서대로 입력해\n적을 봉인한다. 횃불 카운트.',
             ['• 적마다 룬 시퀀스', '• 클래스 ↔ 룬 종류', '• 횃불 꺼지면 시퀀스 안 보임'],
             0xcc44aa,
             () => this._launch('BlackoutRuneScene'));
 
         // 안내문
-        this.add.text(640, 600, '※ 프로토타입 단계: 보상/저주 누적 없음. 단순히 전투만 시험.', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#665577'
+        this.add.text(640, 590, '※ ⭐ = 신규 프로토타입 (전투만 검증, 보상/저주 누적 없음)', {
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }).setOrigin(0.5);
 
-        this.add.text(640, 625, '플레이 후 느낌이 가장 좋은 방향으로 정식 전투를 만들 예정.', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#554466'
-        }).setOrigin(0.5);
+        this.add.text(640, 612, '왼쪽 「기존 전투」 = 지금까지 만든 탐색 시스템 그대로 (정식).', {
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
+        }).setOrigin(0.5).setAlpha(0.7);
 
         // 돌아가기
-        UIButton.create(this, 100, 35, 130, 30, '← 출발 게이트', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaccee', fontSize: 12,
+        UIButton.create(this, 100, 27, 130, 28, '← 출발 게이트', {
+            variant: 'ghost', fontSize: 11,
             onClick: () => this.scene.start('DeployScene', {
                 gameState: this.gameState,
                 selectedZone: this.zoneKey,
@@ -80,10 +98,17 @@ class BlackoutProtoSelectScene extends Phaser.Scene {
     }
 
     _drawPartyRow(cx, cy) {
-        const w = 600, h = 70;
-        this.add.rectangle(cx, cy, w, h, 0x0a0a1a, 0.7).setStrokeStyle(1, 0x332244, 0.5);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const w = 600, h = 65;
+        const bg = this.add.graphics();
+        bg.fillStyle(T.panelFill || 0x2a2218, 0.7);
+        bg.fillRoundedRect(cx - w / 2, cy - h / 2, w, h, 6);
+        bg.lineStyle(1, 0x332244, 0.5);
+        bg.strokeRoundedRect(cx - w / 2, cy - h / 2, w, h, 6);
+
         this.add.text(cx - w / 2 + 10, cy - h / 2 + 6, '편성된 파티', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#776699'
+            fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         });
 
         const slotW = 130;
@@ -91,60 +116,79 @@ class BlackoutProtoSelectScene extends Phaser.Scene {
         this.party.forEach((merc, i) => {
             const sx = startX + i * slotW;
             const base = merc.getBaseClass();
-            const stats = merc.getStats();
-            const hpRatio = merc.currentHp / stats.hp;
             const rolePos = (merc.classKey === 'warrior' || merc.classKey === 'rogue') ? '전열' : '후열';
 
-            this.add.circle(sx, cy, 14, base.color, 0.9);
-            this.add.text(sx, cy, base.icon, { fontSize: '14px' }).setOrigin(0.5);
-            this.add.text(sx, cy + 22, merc.name, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#ccccdd'
+            this.add.circle(sx, cy - 2, 14, base.color, 0.9);
+            this.add.text(sx, cy - 2, base.icon, { fontSize: '14px' }).setOrigin(0.5);
+            this.add.text(sx, cy + 18, merc.name, {
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
+                color: T.textPrimary || '#e8d8c0'
             }).setOrigin(0.5);
-            this.add.text(sx, cy + 35, `${rolePos} Lv.${merc.level}`, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#888899'
+            this.add.text(sx, cy + 30, `${rolePos} Lv.${merc.level}`, {
+                fontSize: '8px', fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5);
         });
     }
 
     _drawCard(x, y, title, icon, desc, bullets, accent, onPick) {
-        const w = 250, h = 310;
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        const w = 250, h = 320;
         const bg = this.add.graphics();
-        bg.fillStyle(0x111122, 1);
-        bg.fillRoundedRect(x, y, w, h, 8);
-        bg.lineStyle(2, accent, 0.7);
-        bg.strokeRoundedRect(x, y, w, h, 8);
+
+        const drawCardBg = (fill, strokeAlpha) => {
+            bg.clear();
+            bg.fillStyle(fill, 1);
+            bg.fillRoundedRect(x, y, w, h, 8);
+            bg.fillStyle(0xffffff, 0.03);
+            bg.fillRect(x + 2, y + 2, w - 4, 20);
+            bg.lineStyle(2, accent, strokeAlpha);
+            bg.strokeRoundedRect(x, y, w, h, 8);
+        };
+        drawCardBg(T.cardFill || 0x231e14, 0.6);
 
         this.add.text(x + w / 2, y + 30, icon, { fontSize: '40px' }).setOrigin(0.5);
         this.add.text(x + w / 2, y + 80, title, {
-            fontSize: '16px', fontFamily: 'monospace',
+            fontSize: '15px', fontFamily: T.fontFamily || 'monospace',
             color: `#${accent.toString(16).padStart(6, '0')}`,
             fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.add.text(x + w / 2, y + 120, desc, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaaabb',
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888',
             align: 'center', wordWrap: { width: w - 30 }
         }).setOrigin(0.5);
 
         bullets.forEach((b, i) => {
-            this.add.text(x + 16, y + 180 + i * 18, b, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#8899aa'
+            this.add.text(x + 16, y + 185 + i * 16, b, {
+                fontSize: '9px', fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             });
         });
 
-        UIButton.create(this, x + w / 2, y + h - 30, w - 30, 36, '플레이', {
-            color: accent, hoverColor: 0xffffff, textColor: '#ffffff', fontSize: 13,
+        UIButton.create(this, x + w / 2, y + h - 30, w - 30, 34, '플레이', {
+            color: accent, hoverColor: 0xffffff, textColor: '#ffffff', fontSize: 12,
             onClick: onPick
         });
+
+        // 카드 호버
+        const hitZone = this.add.zone(x + w / 2, y + h / 2 - 15, w, h - 50).setInteractive({ useHandCursor: true });
+        hitZone.on('pointerover', () => drawCardBg(T.cardHover || 0x3a3020, 1));
+        hitZone.on('pointerout', () => drawCardBg(T.cardFill || 0x231e14, 0.6));
+        hitZone.on('pointerdown', onPick);
     }
 
     _launch(sceneKey) {
-        // 파티 currentHp 풀로 회복 (프로토타입이라 깨끗하게 시작)
-        this.party.forEach(m => {
-            m.currentHp = m.getStats().hp;
-            m.alive = true;
-        });
-
+        const isPrototype = sceneKey !== 'BlackoutBattleScene';
+        if (isPrototype) {
+            // 프로토타입은 깨끗하게 시작 (HP 풀)
+            this.party.forEach(m => {
+                m.currentHp = m.getStats().hp;
+                m.alive = true;
+            });
+        }
+        // BlackoutBattleScene은 정식 흐름이라 HP 보존
         this.scene.start(sceneKey, {
             gameState: this.gameState,
             party: this.party,

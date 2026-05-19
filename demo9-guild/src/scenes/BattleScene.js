@@ -235,7 +235,7 @@ class BattleScene extends Phaser.Scene {
         this._pitGaugeGfx.strokeRoundedRect(barX, barY, barW, barH, 3);
         this._hudElements.push(this._pitGaugeGfx);
 
-        const gaugeLabel = ratio >= 1 ? `🩸 핏 게이지: MAX! (드랍 ${this._pitGaugeDropMult}배)` : `🩸 핏 게이지: ${Math.floor(this.pitGauge)}/${this.pitGaugeMax}`;
+        const gaugeLabel = ratio >= 1 ? `🩸 관중 흥분도: MAX! (드랍 ${this._pitGaugeDropMult}배)` : `🩸 관중 흥분도: ${Math.floor(this.pitGauge)}/${this.pitGaugeMax}`;
         this._pitGaugeLabel = this.add.text(barX + 5, barY + 1, gaugeLabel, {
             fontSize: '10px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setDepth(101);
@@ -264,7 +264,7 @@ class BattleScene extends Phaser.Scene {
         this._pitGaugeGfx.lineStyle(1, 0xff4444, 0.5);
         this._pitGaugeGfx.strokeRoundedRect(barX, barY, barW, barH, 3);
 
-        const label = ratio >= 1 ? `🩸 핏 게이지: MAX! (드랍 ${this._pitGaugeDropMult}배)` : `🩸 핏 게이지: ${Math.floor(this.pitGauge)}/${this.pitGaugeMax}`;
+        const label = ratio >= 1 ? `🩸 관중 흥분도: MAX! (드랍 ${this._pitGaugeDropMult}배)` : `🩸 관중 흥분도: ${Math.floor(this.pitGauge)}/${this.pitGaugeMax}`;
         this._pitGaugeLabel.setText(label);
     }
 
@@ -276,7 +276,7 @@ class BattleScene extends Phaser.Scene {
 
         if (this.pitGauge >= this.pitGaugeMax && !this._pitMaxAnnounced) {
             this._pitMaxAnnounced = true;
-            DamagePopup.show(this, 640, 250, `🩸 핏 게이지 MAX! 다음 라운드 드랍 ${this._pitGaugeDropMult}배!`, 0xff2244, false);
+            DamagePopup.show(this, 640, 250, `🩸 관중 흥분도 MAX! 다음 라운드 드랍 ${this._pitGaugeDropMult}배!`, 0xff2244, false);
             this.cameras.main.shake(100, 0.002);
         }
     }
@@ -537,7 +537,7 @@ class BattleScene extends Phaser.Scene {
                 this.allies.forEach(a => {
                     a.lifesteal += 0.03;
                 });
-                this._zoneLabel = '🩸 핏 게이지: 적 공격력↑, 아군 흡혈 +3%';
+                this._zoneLabel = '🩸 관중 흥분도: 적 공격력↑, 아군 흡혈 +3%';
                 break;
             case 'cargo':
                 this.allies.forEach(a => {
@@ -688,7 +688,7 @@ class BattleScene extends Phaser.Scene {
             // Blood Pit: pit gauge drops on ally death
             if (unit.team === 'ally' && this.zoneKey === 'bloodpit') {
                 this._reducePitGauge(25);
-                DamagePopup.show(this, unit.container.x, unit.container.y - 30, '핏 게이지 -25', 0x882222, false);
+                DamagePopup.show(this, unit.container.x, unit.container.y - 30, '관중 흥분도 -25', 0x882222, false);
             }
 
             this._checkRoundEnd();
@@ -801,7 +801,8 @@ class BattleScene extends Phaser.Scene {
         if (this._rerollCount === undefined) this._rerollCount = 0;
         this._cardUIObjects = [];
 
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a).setDepth(80);
+        const _T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, _T.bg || 0x1a1510).setDepth(80);
 
         this.add.text(640, 60, `라운드 ${this.currentRound} 클리어!`, {
             fontSize: '24px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'
@@ -810,7 +811,7 @@ class BattleScene extends Phaser.Scene {
         let statusLine = `생존: ${this.party.filter(m => m.alive).length}/${this.party.length}  |  💰 ${this.totalGold}G  |  💚 HP 5% 회복`;
         if (this.zoneKey === 'bloodpit') {
             const gaugeLabel = this.pitGauge >= this.pitGaugeMax ? 'MAX!' : `${Math.floor(this.pitGauge)}%`;
-            statusLine += `  |  🩸 핏 게이지 ${gaugeLabel}`;
+            statusLine += `  |  🩸 관중 흥분도 ${gaugeLabel}`;
         }
         if (this.zoneKey === 'cargo' && !this.cargoDestroyed) {
             statusLine += `  |  📦 화물 ${this.cargoHp}%`;

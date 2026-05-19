@@ -4,20 +4,36 @@ class TrainingScene extends Phaser.Scene {
     init(data) { this.gameState = data.gameState; }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
         const gs = this.gameState;
 
-        this.add.text(640, 25, '🏋 훈련소', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+        // ── 헤더 배경 ──
+        const headerBg = this.add.graphics();
+        headerBg.fillStyle(T.headerBg || 0x1e1810, 1);
+        headerBg.fillRect(0, 0, 1280, T.headerHeight || 55);
+        // 하단 장식선
+        headerBg.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
+        headerBg.lineBetween(0, (T.headerHeight || 55) - 1, 1280, (T.headerHeight || 55) - 1);
+        // 상단 미세 금선
+        headerBg.lineStyle(1, T.ornament || 0x8a7a4a, 0.15);
+        headerBg.lineBetween(0, 1, 1280, 1);
+
+        this.add.text(640, 25, '◈  훈련소  ◈', {
+            fontSize: `${(T.fontSize && T.fontSize.title) || 20}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
         UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
+            variant: 'ghost',
+            fontSize: (T.fontSize && T.fontSize.body) || 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
-        this.add.text(640, 55, '길드 레벨업 시 획득한 훈련 포인트로 전체 용병을 영구 강화합니다', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+        this.add.text(640, (T.headerHeight || 55) + 5, '길드 레벨업 시 획득한 훈련 포인트로 전체 용병을 영구 강화합니다', {
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(0.5);
 
         this._drawContent();
@@ -27,33 +43,35 @@ class TrainingScene extends Phaser.Scene {
         if (this._objs) this._objs.forEach(o => o.destroy && o.destroy());
         this._objs = [];
 
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const t = gs.training;
 
         this._objs.push(this.add.text(640, 85, `보유 포인트: ${gs.trainingPoints}`, {
-            fontSize: '16px', fontFamily: 'monospace', color: gs.trainingPoints > 0 ? '#44ff88' : '#ff4444', fontStyle: 'bold'
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace',
+            color: gs.trainingPoints > 0 ? '#44ff88' : '#ff4444', fontStyle: 'bold'
         }).setOrigin(0.5));
 
         const cats = [
             {
                 key: 'hp', name: '체력 단련', icon: '❤',
                 desc: '전체 용병 HP +3% / 포인트',
-                color: 0xff4444, textColor: '#ff6666'
+                color: 0xcc4433, textColor: '#dd6655'
             },
             {
                 key: 'atk', name: '공격 훈련', icon: '⚔',
                 desc: '전체 용병 ATK +3% / 포인트',
-                color: 0xff8844, textColor: '#ffaa66'
+                color: 0xcc7733, textColor: '#ddaa55'
             },
             {
                 key: 'survival', name: '방어 훈련', icon: '🛡',
                 desc: '전체 용병 DEF +2 / 포인트',
-                color: 0x4488ff, textColor: '#6699ff'
+                color: 0x4477aa, textColor: '#6699bb'
             },
             {
                 key: 'recovery', name: '전투 숙련', icon: '⚡',
                 desc: '전체 용병 스킬 쿨다운 -3% / 포인트',
-                color: 0xcc44ff, textColor: '#dd66ff'
+                color: 0x9944aa, textColor: '#bb66cc'
             }
         ];
 
@@ -72,38 +90,43 @@ class TrainingScene extends Phaser.Scene {
     }
 
     _drawTrainingCard(cat, cx, cy, w, training) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const level = training[cat.key] || 0;
         const maxLevel = 10;
         const canTrain = gs.trainingPoints > 0 && level < maxLevel;
 
         const bg = this._addObj(this.add.graphics());
-        bg.fillStyle(0x151525, 1);
-        bg.fillRoundedRect(cx - w / 2, cy - 120, w, 240, 6);
-        bg.lineStyle(2, cat.color, 0.4);
-        bg.strokeRoundedRect(cx - w / 2, cy - 120, w, 240, 6);
+        bg.fillStyle(T.cardFill || 0x231e14, 1);
+        bg.fillRoundedRect(cx - w / 2, cy - 120, w, 240, T.borderRadius || 6);
+        // 상단 미세 글로우
+        bg.fillStyle(0xffffff, 0.03);
+        bg.fillRect(cx - w / 2 + 2, cy - 119, w - 4, 30);
+        // 카테고리 컬러 테두리
+        bg.lineStyle(2, cat.color, 0.5);
+        bg.strokeRoundedRect(cx - w / 2, cy - 120, w, 240, T.borderRadius || 6);
 
         this._addObj(this.add.text(cx, cy - 95, cat.icon, {
             fontSize: '28px'
         }).setOrigin(0.5));
 
         this._addObj(this.add.text(cx, cy - 60, cat.name, {
-            fontSize: '15px', fontFamily: 'monospace', color: cat.textColor, fontStyle: 'bold'
+            fontSize: '15px', fontFamily: T.fontFamily || 'monospace', color: cat.textColor, fontStyle: 'bold'
         }).setOrigin(0.5));
 
         this._addObj(this.add.text(cx, cy - 38, cat.desc, {
-            fontSize: '10px', fontFamily: 'monospace', color: '#888899'
+            fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
         }).setOrigin(0.5));
 
         this._addObj(this.add.text(cx, cy - 10, `Lv. ${level} / ${maxLevel}`, {
-            fontSize: '18px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            fontSize: '18px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0', fontStyle: 'bold'
         }).setOrigin(0.5));
 
         const barW = w - 40;
         const barH = 10;
         const barX = cx - barW / 2;
         const barY = cy + 15;
-        const barBg = this._addObj(this.add.rectangle(cx, barY + barH / 2, barW, barH, 0x222233).setDepth(1));
+        const barBg = this._addObj(this.add.rectangle(cx, barY + barH / 2, barW, barH, T.panelFill || 0x2a2218).setDepth(1));
         if (level > 0) {
             const fillW = (level / maxLevel) * barW;
             this._addObj(this.add.rectangle(barX + fillW / 2, barY + barH / 2, fillW, barH, cat.color).setDepth(2));
@@ -111,19 +134,18 @@ class TrainingScene extends Phaser.Scene {
 
         const bonusText = this._getBonusText(cat.key, level);
         this._addObj(this.add.text(cx, cy + 40, bonusText, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0'
         }).setOrigin(0.5));
 
         if (level >= maxLevel) {
             this._addObj(this.add.text(cx, cy + 80, '최대 레벨', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44'
             }).setOrigin(0.5));
         } else {
             this._addObj(UIButton.create(this, cx, cy + 80, 120, 30, '훈련 (+1)', {
-                color: canTrain ? 0x446644 : 0x333333,
-                hoverColor: canTrain ? 0x558855 : 0x333333,
-                textColor: canTrain ? '#44ff88' : '#555555',
-                fontSize: 12,
+                variant: 'primary',
+                fontSize: (T.fontSize && T.fontSize.body) || 12,
+                disabled: !canTrain,
                 onClick: () => {
                     if (!canTrain) return;
                     gs.trainingPoints--;
@@ -149,11 +171,12 @@ class TrainingScene extends Phaser.Scene {
     }
 
     _drawPreview(gs, cats, x, y) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const panel = this._addObj(UIPanel.create(this, x, y, 1040, 160, { title: '현재 훈련 효과 미리보기' }));
 
         if (gs.roster.length === 0) {
             this._addObj(this.add.text(640, y + 80, '로스터에 용병이 없습니다', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#555566'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             }).setOrigin(0.5));
             return;
         }
@@ -166,14 +189,14 @@ class TrainingScene extends Phaser.Scene {
             const base = merc.getBaseClass();
 
             this._addObj(this.add.text(mx, y + 30, `${base.icon} ${merc.name}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0', fontStyle: 'bold'
             }));
             this._addObj(this.add.text(mx, y + 48, `HP:${stats.hp} ATK:${stats.atk} DEF:${stats.def}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
             }));
             if (stats.skillCooldown) {
                 this._addObj(this.add.text(mx, y + 64, `스킬CD: ${(stats.skillCooldown / 1000).toFixed(1)}초`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#cc88ff'
+                    fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: '#bb88dd'
                 }));
             }
             mx += 200;

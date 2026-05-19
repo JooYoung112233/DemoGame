@@ -4,7 +4,8 @@ class RecruitScene extends Phaser.Scene {
     init(data) { this.gameState = data.gameState; }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
         this._scrollX = 0;
         this._cardContainer = null;
         this._scrollThumb = null;
@@ -12,33 +13,52 @@ class RecruitScene extends Phaser.Scene {
     }
 
     _drawUI() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
 
+        // ── 헤더 배경 ──
+        const headerBg = this.add.graphics();
+        headerBg.fillStyle(T.headerBg || 0x1e1810, 1);
+        headerBg.fillRect(0, 0, 1280, T.headerHeight || 55);
+        // 헤더 하단 장식선
+        const ornLine = this.add.graphics();
+        ornLine.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
+        ornLine.lineBetween(0, (T.headerHeight || 55), 1280, (T.headerHeight || 55));
+        ornLine.lineStyle(0.5, T.divider || 0x5a4a2a, T.dividerAlpha || 0.5);
+        ornLine.lineBetween(0, (T.headerHeight || 55) + 2, 1280, (T.headerHeight || 55) + 2);
+
         this.add.text(640, 25, '용병 모집소', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.title) || 20}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.add.text(1260, 25, `${gs.gold}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: `${(T.fontSize && T.fontSize.header) || 16}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(1, 0);
 
         const maxRoster = GuildManager.getMaxRoster(gs);
         this.add.text(640, 50, `로스터: ${gs.roster.length}/${maxRoster}`, {
-            fontSize: '12px', fontFamily: 'monospace', color: '#888899'
+            fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }).setOrigin(0.5);
 
         UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
+            variant: 'ghost',
+            fontSize: (T.fontSize && T.fontSize.body) || 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
         const rerollCost = 50;
         const canReroll = gs.gold >= rerollCost;
         UIButton.create(this, 1160, 50, 140, 28, `리롤 (${rerollCost}G)`, {
-            color: canReroll ? 0x446688 : 0x333333,
-            hoverColor: 0x5588aa,
-            textColor: canReroll ? '#ccddee' : '#555555',
-            fontSize: 12,
+            variant: 'info',
+            fontSize: (T.fontSize && T.fontSize.body) || 12,
             disabled: !canReroll,
             onClick: () => {
                 if (GuildManager.spendGold(gs, rerollCost)) {
@@ -52,7 +72,10 @@ class RecruitScene extends Phaser.Scene {
 
         if (gs.recruitPool.length === 0) {
             this.add.text(640, 360, '모집 가능한 용병이 없습니다\n런을 진행하면 새로운 용병이 등장합니다', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#555566', align: 'center'
+                fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860',
+                align: 'center'
             }).setOrigin(0.5);
             return;
         }
@@ -89,7 +112,7 @@ class RecruitScene extends Phaser.Scene {
             // 하단 가로 스크롤바 트랙
             const trackY = 645;
             const trackBg = this.add.graphics();
-            trackBg.fillStyle(0x222233, 0.5);
+            trackBg.fillStyle(T.scrollTrack || 0x2a2218, 0.5);
             trackBg.fillRoundedRect(viewX, trackY, viewW, 8, 4);
 
             this._scrollThumb = this.add.graphics();
@@ -101,10 +124,14 @@ class RecruitScene extends Phaser.Scene {
             // 스크롤 힌트 화살표
             if (totalW > viewW) {
                 this.add.text(viewX + viewW + 5, 360, '▶', {
-                    fontSize: '16px', fontFamily: 'monospace', color: '#555566'
+                    fontSize: `${(T.fontSize && T.fontSize.header) || 16}px`,
+                    fontFamily: T.fontFamily || 'monospace',
+                    color: T.textMuted || '#887860'
                 }).setOrigin(0, 0.5);
                 this.add.text(viewX - 5, 360, '◀', {
-                    fontSize: '16px', fontFamily: 'monospace', color: '#555566'
+                    fontSize: `${(T.fontSize && T.fontSize.header) || 16}px`,
+                    fontFamily: T.fontFamily || 'monospace',
+                    color: T.textMuted || '#887860'
                 }).setOrigin(1, 0.5);
             }
 
@@ -147,6 +174,7 @@ class RecruitScene extends Phaser.Scene {
     }
 
     _updateScroll() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         if (this._cardContainer) {
             this._cardContainer.x = -this._scrollX;
         }
@@ -158,12 +186,13 @@ class RecruitScene extends Phaser.Scene {
             const thumbX = this._viewX + scrollRatio * (this._viewW - thumbW);
 
             this._scrollThumb.clear();
-            this._scrollThumb.fillStyle(0xffffff, 0.4);
+            this._scrollThumb.fillStyle(T.scrollThumb || 0x6a5a3a, 0.6);
             this._scrollThumb.fillRoundedRect(thumbX, this._scrollTrackY, thumbW, 8, 4);
         }
     }
 
     _drawRecruitCard(container, merc, x, y, w) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const base = merc.getBaseClass();
         const rarity = RARITY_DATA[merc.rarity];
@@ -172,12 +201,44 @@ class RecruitScene extends Phaser.Scene {
         const canAfford = gs.gold >= cost;
         const rosterFull = gs.roster.length >= GuildManager.getMaxRoster(gs);
 
+        // 희귀도 테마 색상
+        const rarityTheme = (T.rarity && T.rarity[merc.rarity]) || {};
+        const rarityBorderColor = rarityTheme.color || rarity.color;
+        const rarityTextColor = rarityTheme.text || rarity.textColor;
+
+        const cardRadius = T.borderRadius || 6;
+
         const bg = this.add.graphics();
-        bg.fillStyle(0x151525, 1);
-        bg.fillRoundedRect(x, y, w, 530, 5);
-        bg.lineStyle(2, rarity.color, 0.5);
-        bg.strokeRoundedRect(x, y, w, 530, 5);
+        bg.fillStyle(T.cardFill || 0x231e14, 1);
+        bg.fillRoundedRect(x, y, w, 530, cardRadius);
+        // 상단 미세 하이라이트
+        bg.fillStyle(0xffffff, 0.03);
+        bg.fillRoundedRect(x + 2, y + 2, w - 4, 30, { tl: cardRadius - 1, tr: cardRadius - 1, bl: 0, br: 0 });
+        bg.lineStyle(2, rarityBorderColor, 0.5);
+        bg.strokeRoundedRect(x, y, w, 530, cardRadius);
         container.add(bg);
+
+        // 호버 히트존
+        const hoverZone = this.add.zone(x + w / 2, y + 265, w, 530).setInteractive({ useHandCursor: false });
+        hoverZone.on('pointerover', () => {
+            bg.clear();
+            bg.fillStyle(T.cardHover || 0x3a3020, 1);
+            bg.fillRoundedRect(x, y, w, 530, cardRadius);
+            bg.fillStyle(0xffffff, 0.04);
+            bg.fillRoundedRect(x + 2, y + 2, w - 4, 30, { tl: cardRadius - 1, tr: cardRadius - 1, bl: 0, br: 0 });
+            bg.lineStyle(2, rarityBorderColor, 0.7);
+            bg.strokeRoundedRect(x, y, w, 530, cardRadius);
+        });
+        hoverZone.on('pointerout', () => {
+            bg.clear();
+            bg.fillStyle(T.cardFill || 0x231e14, 1);
+            bg.fillRoundedRect(x, y, w, 530, cardRadius);
+            bg.fillStyle(0xffffff, 0.03);
+            bg.fillRoundedRect(x + 2, y + 2, w - 4, 30, { tl: cardRadius - 1, tr: cardRadius - 1, bl: 0, br: 0 });
+            bg.lineStyle(2, rarityBorderColor, 0.5);
+            bg.strokeRoundedRect(x, y, w, 530, cardRadius);
+        });
+        container.add(hoverZone);
 
         let cy = y + 15;
 
@@ -185,17 +246,17 @@ class RecruitScene extends Phaser.Scene {
         cy += 40;
 
         container.add(this.add.text(x + w / 2, cy, merc.name, {
-            fontSize: '13px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace', color: rarityTextColor, fontStyle: 'bold'
         }).setOrigin(0.5));
         cy += 20;
 
         container.add(this.add.text(x + w / 2, cy, `${base.name}  [${rarity.name}]`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#888899'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
         }).setOrigin(0.5));
         cy += 25;
 
         const line = this.add.graphics();
-        line.lineStyle(1, 0x333355, 0.5);
+        line.lineStyle(1, T.divider || 0x5a4a2a, T.dividerAlpha || 0.5);
         line.lineBetween(x + 10, cy, x + w - 10, cy);
         container.add(line);
         cy += 10;
@@ -210,20 +271,20 @@ class RecruitScene extends Phaser.Scene {
         ];
         statLines.forEach(s => {
             container.add(this.add.text(x + 15, cy, s, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
             }));
             cy += 17;
         });
         cy += 5;
 
         const line2 = this.add.graphics();
-        line2.lineStyle(1, 0x333355, 0.5);
+        line2.lineStyle(1, T.divider || 0x5a4a2a, T.dividerAlpha || 0.5);
         line2.lineBetween(x + 10, cy, x + w - 10, cy);
         container.add(line2);
         cy += 10;
 
         container.add(this.add.text(x + 15, cy, '특성:', {
-            fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc', fontStyle: 'bold'
+            fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888', fontStyle: 'bold'
         }));
         cy += 18;
 
@@ -231,13 +292,13 @@ class RecruitScene extends Phaser.Scene {
             let color = '#44cc44';
             let sym = '✦';
             if (trait.type === 'negative') { color = '#ff6666'; sym = '✧'; }
-            if (trait.type === 'legendary') { color = '#ffaa00'; sym = '★'; }
+            if (trait.type === 'legendary') { color = T.textGold || '#ffcc44'; sym = '★'; }
 
             container.add(this.add.text(x + 15, cy, `${sym} ${trait.name}`, {
-                fontSize: '10px', fontFamily: 'monospace', color
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`, fontFamily: T.fontFamily || 'monospace', color
             }));
             container.add(this.add.text(x + 15, cy + 13, `  ${trait.desc}`, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#777788'
+                fontSize: `${(T.fontSize && T.fontSize.tiny) || 9}px`, fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             }));
             cy += 28;
         });
@@ -245,7 +306,7 @@ class RecruitScene extends Phaser.Scene {
         cy = y + 530 - 50;
 
         const line3 = this.add.graphics();
-        line3.lineStyle(1, 0x333355, 0.5);
+        line3.lineStyle(1, T.divider || 0x5a4a2a, T.dividerAlpha || 0.5);
         line3.lineBetween(x + 10, cy, x + w - 10, cy);
         container.add(line3);
         cy += 12;
@@ -256,10 +317,8 @@ class RecruitScene extends Phaser.Scene {
         else if (!canAfford) btnLabel = `${cost}G 필요`;
 
         const btn = UIButton.create(this, x + w / 2, cy + 12, w - 20, 30, btnLabel, {
-            color: disabled ? 0x444444 : 0xffaa44,
-            hoverColor: 0xffcc66,
-            textColor: disabled ? '#666666' : '#000000',
-            fontSize: 12,
+            variant: 'primary',
+            fontSize: (T.fontSize && T.fontSize.body) || 12,
             disabled,
             onClick: () => {
                 const result = MercenaryManager.hire(gs, merc.id);

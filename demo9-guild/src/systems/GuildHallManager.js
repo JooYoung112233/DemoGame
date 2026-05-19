@@ -5,7 +5,7 @@ class GuildHallManager {
         recovery:       { name: '휴식',      code: 'C', icon: '💤', base: 250,  maxStage: 12 },
         automation:     { name: '자동화',    code: 'D', icon: '⚙',  base: 500,  maxStage: 8  },
         intel:          { name: '정보',      code: 'E', icon: '🔍', base: 600,  maxStage: 12 },
-        pit_control:    { name: '핏 통제',   code: 'F', icon: '🩸', base: 800,  maxStage: 12 },
+        pit_control:    { name: '투기장 통제', code: 'F', icon: '🩸', base: 800,  maxStage: 12 },
         cargo_control:  { name: '화물 통제', code: 'G', icon: '🚂', base: 800,  maxStage: 12 },
         dark_control:   { name: '어둠 통제', code: 'H', icon: '🌑', base: 800,  maxStage: 12 }
     };
@@ -188,46 +188,107 @@ class GuildHallManager {
             12: '🏆 전능의 시야'
         },
         pit_control: {
-            1: '핏 게이지 최대 +50%',
-            2: '핏 MAX 드롭률 +35%',
-            3: '핏 감소 속도 -30%',
-            4: '엘리트 처치 시 핏 +50%',
-            5: '핏 오버플로우',
+            1: '관중 흥분도 최대 +50%',
+            2: '흥분도 MAX 드롭률 +35%',
+            3: '흥분도 감소 속도 -30%',
+            4: '엘리트 처치 시 흥분도 +50%',
+            5: '흥분도 오버플로우',
             6: 'BP 라운드 간 HP +10%',
             7: '엘리트 확률 2배',
-            8: '핏 게이지 연쇄',
+            8: '흥분도 연쇄',
             9: '출혈 DoT 데미지 +30%',
-            10: '핏 MAX 유지 보너스 2배',
-            11: '보스 출현 시 핏 풀충전',
-            12: '🏆 혈맹'
+            10: '흥분도 MAX 유지 보너스 2배',
+            11: '보스 출현 시 관중 열광',
+            12: '🏆 투기왕'
         },
         cargo_control: {
-            1: '칸 HP +15%',
+            1: '화물칸 내구도 +15%',
             2: '연료 +1/역',
-            3: '칸 HP +15%',
+            3: '화물칸 내구도 +15%',
             4: '정비공 수리량 +20%',
             5: '보급 크레이트 +50%',
             6: '역 정차 카드 리롤 1회',
-            7: '칸 HP +20%',
+            7: '화물칸 내구도 +20%',
             8: '연료 +2/역',
             9: '카드 장착 +1',
             10: '전설 카드 확률 2배',
-            11: '칸 파괴 시 폭발 피해',
-            12: '🏆 무적 열차'
+            11: '화물 파괴 시 폭발 피해',
+            12: '🏆 무적 호송대'
         },
         dark_control: {
-            1: '저주 슬롯 +1',
-            2: '저주 긍정 효과 +20%',
+            1: '저주 저항 슬롯 +1',
+            2: '정화 보너스 +20%',
             3: '탐색 속도 +15%',
-            4: '저주 슬롯 +1',
-            5: '부정 효과 -25%',
-            6: '타일 시야 +1',
-            7: '저주 슬롯 +1',
-            8: '긍정 효과 +30%',
-            9: '부정 효과 -30%',
-            10: '비밀 타일 감지',
+            4: '저주 저항 슬롯 +1',
+            5: '저주 피해 -25%',
+            6: '탐색 시야 +1',
+            7: '저주 저항 슬롯 +1',
+            8: '정화 보너스 +30%',
+            9: '저주 피해 -30%',
+            10: '숨겨진 유물 감지',
             11: '저주 선택적 해제',
-            12: '🏆 어둠의 지배자'
+            12: '🏆 정화의 대가'
         }
     };
+
+    /** 평판 추가 — 메인 전투 성공 시 호출 */
+    static addReputation(gs, amount) {
+        if (!gs.guildReputation) gs.guildReputation = 0;
+        gs.guildReputation += amount;
+    }
+
+    /**
+     * 호환성 레이어 — 기존 코드(MercenaryManager, ExpeditionManager, RunResultScene)에서
+     * GuildHallManager.getEffects(gs)로 참조하는 부분 지원.
+     * 각 카테고리 단계(stage)에서 누적 보너스를 계산해 반환.
+     */
+    static getEffects(gs) {
+        GuildHallManager.ensureState(gs);
+        const h = gs.guildHall;
+
+        // A. operations — 서브 슬롯 보너스
+        const subSlotStages = [1,2,4,5,8,9,11];
+        const subSlotsBonus = subSlotStages.filter(s => (h.operations || 0) >= s).length;
+
+        // B. infrastructure — 보관함/로스터/모집풀 보너스
+        let storageBonus = 0, rosterBonus = 0, recruitPoolBonus = 0;
+        const infra = h.infrastructure || 0;
+        if (infra >= 1) rosterBonus += 2;
+        if (infra >= 2) storageBonus += 4;
+        if (infra >= 3) rosterBonus += 2;
+        if (infra >= 4) recruitPoolBonus += 1;
+        if (infra >= 5) storageBonus += 6;
+        if (infra >= 6) rosterBonus += 3;
+        if (infra >= 8) recruitPoolBonus += 1;
+        if (infra >= 9) rosterBonus += 4;
+        if (infra >= 10) storageBonus += 8;
+        if (infra >= 12) recruitPoolBonus += 1;
+
+        // C. recovery — 스테미너 회복 보너스
+        let staminaRecoveryBonus = 0;
+        const rec = h.recovery || 0;
+        if (rec >= 1) staminaRecoveryBonus += 0.5;
+        if (rec >= 2) staminaRecoveryBonus += 0.5;
+        if (rec >= 5) staminaRecoveryBonus += 1;
+        if (rec >= 8) staminaRecoveryBonus += 2;
+
+        // E. intel — 보상 보너스
+        const intel = h.intel || 0;
+        const subRewardBonus = Math.min(0.5, intel * 0.04);
+        const mainRewardBonus = Math.min(0.5, intel * 0.04);
+
+        // 파견 시간 감소 (A + C 복합)
+        const dispatchTimeReduction = Math.min(0.5, (h.operations || 0) * 0.03 + rec * 0.02);
+
+        return {
+            subSlotsBonus,
+            storageBonus,
+            rosterBonus,
+            recruitPoolBonus,
+            staminaRecoveryBonus,
+            subRewardBonus,
+            mainRewardBonus,
+            dispatchTimeReduction
+        };
+    }
 }

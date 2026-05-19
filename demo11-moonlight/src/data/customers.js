@@ -1,0 +1,55 @@
+const CUSTOMER_TYPES = {
+    normal: {
+        name: '마을 주민',
+        icon: '👤',
+        budget: { min: 20, max: 60 },
+        priceTolerance: 1.1,
+        haggleChance: 0.3,
+        haggleDiscount: 0.15,
+        preferredCategories: null,
+        weight: 40,
+    },
+    rich: {
+        name: '부유한 상인',
+        icon: '🎩',
+        budget: { min: 80, max: 200 },
+        priceTolerance: 1.3,
+        haggleChance: 0.1,
+        haggleDiscount: 0.1,
+        preferredCategories: ['gem', 'crafted', 'relic'],
+        weight: 15,
+    },
+    cheapskate: {
+        name: '구두쇠',
+        icon: '🤑',
+        budget: { min: 15, max: 40 },
+        priceTolerance: 0.85,
+        haggleChance: 0.7,
+        haggleDiscount: 0.3,
+        preferredCategories: null,
+        weight: 20,
+    },
+    collector: {
+        name: '수집가',
+        icon: '🧐',
+        budget: { min: 50, max: 150 },
+        priceTolerance: 1.5,
+        haggleChance: 0.2,
+        haggleDiscount: 0.1,
+        preferredCategories: ['relic', 'gem'],
+        weight: 10,
+    },
+    adventurer: {
+        name: '모험가',
+        icon: '⚔️',
+        budget: { min: 30, max: 100 },
+        priceTolerance: 1.2,
+        haggleChance: 0.4,
+        haggleDiscount: 0.2,
+        preferredCategories: ['crafted', 'herb'],
+        weight: 15,
+    },
+};
+
+const DEMAND_CYCLE_DAYS = 3;
+const DEMAND_CATEGORIES = ['herb', 'ore', 'hide', 'monster', 'gem', 'relic', 'crafted'];

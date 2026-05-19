@@ -140,6 +140,7 @@ class GuildManager {
                 state.guildLevel++;
                 state.trainingPoints++;
                 leveled = true;
+                state._pendingLevelUp = state.guildLevel;  // TownScene에서 팝업 트리거
                 GuildManager.addMessage(state, `길드 레벨 ${state.guildLevel} 달성!`);
             } else {
                 break;

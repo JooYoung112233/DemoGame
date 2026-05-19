@@ -8,18 +8,42 @@ class CodexScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
         const gs = this.gameState;
 
-        this.add.text(640, 25, '📖 아이템 도감', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffaa44', fontStyle: 'bold'
+        // ── 헤더 배경 ──
+        const headerBg = this.add.graphics();
+        headerBg.fillStyle(T.headerBg || 0x1e1810, 1);
+        headerBg.fillRect(0, 0, 1280, T.headerHeight || 55);
+        // 하단 장식선
+        headerBg.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
+        headerBg.lineBetween(0, (T.headerHeight || 55) - 1, 1280, (T.headerHeight || 55) - 1);
+        headerBg.lineStyle(0.5, T.divider || 0x5a4a2a, T.dividerAlpha || 0.5);
+        headerBg.lineBetween(0, (T.headerHeight || 55), 1280, (T.headerHeight || 55));
+
+        // ── 타이틀 (골드 + ◈ 장식) ──
+        this.add.text(640, 25, '◈  📖 아이템 도감  ◈', {
+            fontSize: `${(T.fontSize && T.fontSize.title) || 20}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textGold || '#ffcc44',
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
+        // 타이틀 좌우 장식 라인
+        const ornLine = this.add.graphics();
+        ornLine.lineStyle(1, T.ornament || 0x8a7a4a, T.ornamentAlpha || 0.4);
+        ornLine.lineBetween(340, 25, 480, 25);
+        ornLine.lineBetween(800, 25, 940, 25);
+
+        // ── 뒤로가기 버튼 (ghost) ──
         UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 12,
+            variant: 'ghost',
+            fontSize: (T.fontSize && T.fontSize.body) || 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
+        // ── 카테고리 탭 ──
         const categories = [
             { key: 'weapon', label: '⚔ 무기' },
             { key: 'armor', label: '🛡 방어구' },
@@ -39,15 +63,16 @@ class CodexScene extends Phaser.Scene {
             const isActive = cat.key === this.category;
             const btnW = cat.label.length * 8 + 20;
             UIButton.create(this, tabX + btnW / 2, 60, btnW, 24, cat.label, {
-                color: isActive ? 0x446688 : 0x222233,
-                hoverColor: 0x445566,
-                textColor: isActive ? '#ffffff' : '#888899',
-                fontSize: 10,
+                color: isActive ? (T.buttonPrimary || 0x8a6a2a) : (T.panelFill || 0x2a2218),
+                hoverColor: T.cardHover || 0x3a3020,
+                textColor: isActive ? (T.buttonText || '#f0e8d0') : (T.textMuted || '#887860'),
+                fontSize: (T.fontSize && T.fontSize.caption) || 10,
                 onClick: () => this.scene.restart({ gameState: gs, category: cat.key, page: 0 })
             });
             tabX += btnW + 4;
         });
 
+        // ── 아이템 목록 ──
         const items = this._getItemsForCategory(this.category);
         const perPage = 8;
         const totalPages = Math.max(1, Math.ceil(items.length / perPage));
@@ -56,27 +81,34 @@ class CodexScene extends Phaser.Scene {
 
         this._drawItemList(pageItems, 30, 90, 1220, 580);
 
+        // ── 페이지네이션 ──
         if (totalPages > 1) {
             this.add.text(640, 695, `${page + 1} / ${totalPages}`, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#888899'
+                fontSize: `${(T.fontSize && T.fontSize.body) || 12}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5);
 
             if (page > 0) {
                 UIButton.create(this, 560, 695, 60, 24, '← 이전', {
-                    color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 11,
+                    variant: 'ghost',
+                    fontSize: (T.fontSize && T.fontSize.body) || 11,
                     onClick: () => this.scene.restart({ gameState: gs, category: this.category, page: page - 1 })
                 });
             }
             if (page < totalPages - 1) {
                 UIButton.create(this, 720, 695, 60, 24, '다음 →', {
-                    color: 0x334455, hoverColor: 0x445566, textColor: '#aaaacc', fontSize: 11,
+                    variant: 'ghost',
+                    fontSize: (T.fontSize && T.fontSize.body) || 11,
                     onClick: () => this.scene.restart({ gameState: gs, category: this.category, page: page + 1 })
                 });
             }
         }
 
         this.add.text(1250, 695, `총 ${items.length}종`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#666677'
+            fontSize: `${(T.fontSize && T.fontSize.body) || 11}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textMuted || '#887860'
         }).setOrigin(1, 0.5);
     }
 
@@ -156,11 +188,14 @@ class CodexScene extends Phaser.Scene {
     }
 
     _drawItemList(items, x, y, w, h) {
-        UIPanel.create(this, x, y, w, h, { title: '' });
+        UIPanel.create(this, x, y, w, h, { title: '', ornament: true });
 
         if (items.length === 0) {
+            const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
             this.add.text(x + w / 2, y + h / 2, '항목 없음', {
-                fontSize: '14px', fontFamily: 'monospace', color: '#666677'
+                fontSize: `${(T.fontSize && T.fontSize.header) || 14}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860'
             }).setOrigin(0.5);
             return;
         }
@@ -173,21 +208,25 @@ class CodexScene extends Phaser.Scene {
     }
 
     _drawCodexRow(item, x, y, w) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
+
         const rarity = item.rarity && ITEM_RARITY[item.rarity]
             ? ITEM_RARITY[item.rarity]
             : { name: '기본', color: 0x555555, textColor: '#aaaaaa' };
 
         const bg = this.add.graphics();
-        bg.fillStyle(item.cursed ? 0x1a0a1a : 0x12121e, 1);
-        bg.fillRoundedRect(x, y, w, 62, 4);
+        const cardFill = item.cursed ? 0x2a1a18 : (T.cardFill || 0x231e14);
+        bg.fillStyle(cardFill, 1);
+        bg.fillRoundedRect(x, y, w, 62, T.borderRadius || 4);
         bg.lineStyle(1, rarity.color, 0.5);
-        bg.strokeRoundedRect(x, y, w, 62, 4);
+        bg.strokeRoundedRect(x, y, w, 62, T.borderRadius || 4);
 
         const slotIcons = { weapon: '⚔', armor: '🛡', accessory: '💍' };
         const slotIcon = item.slot ? (slotIcons[item.slot] || '') : (item.isMaterial ? '🔧' : item.isConsumable ? '🧪' : '');
 
         this.add.text(x + 10, y + 6, `${slotIcon} ${item.name}`, {
-            fontSize: '13px', fontFamily: 'monospace', color: rarity.textColor, fontStyle: 'bold'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace',
+            color: rarity.textColor, fontStyle: 'bold'
         });
 
         const tags = [];
@@ -197,7 +236,9 @@ class CodexScene extends Phaser.Scene {
         if (item.cursed) tags.push('⚠저주');
 
         this.add.text(x + 10, y + 24, tags.join(' · '), {
-            fontSize: '10px', fontFamily: 'monospace', color: '#667788'
+            fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+            fontFamily: T.fontFamily || 'monospace',
+            color: T.textSecondary || '#b8a888'
         });
 
         if (item.stats && Object.keys(item.stats).length > 0) {
@@ -212,25 +253,34 @@ class CodexScene extends Phaser.Scene {
                 displayStr += `  | ${penStr}`;
             }
             this.add.text(x + 10, y + 40, displayStr, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#8888bb'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textBlue || '#6699cc'
             });
         }
 
         if (item.specialDesc) {
             this.add.text(x + 500, y + 8, `★ ${item.specialDesc}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#88ccaa'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textSuccess || '#66bb55'
             });
         }
 
         if (item.zoneBonus) {
             this.add.text(x + 500, y + 24, `🌍 ${item.zoneBonus}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#88aacc'
+                fontSize: `${(T.fontSize && T.fontSize.caption) || 10}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textBlue || '#6699cc'
             });
         }
 
         if (item.flavor) {
             this.add.text(x + w - 10, y + 46, item.flavor, {
-                fontSize: '9px', fontFamily: 'monospace', color: '#555566', fontStyle: 'italic'
+                fontSize: `${(T.fontSize && T.fontSize.tiny) || 9}px`,
+                fontFamily: T.fontFamily || 'monospace',
+                color: T.textMuted || '#887860',
+                fontStyle: 'italic'
             }).setOrigin(1, 0);
         }
     }

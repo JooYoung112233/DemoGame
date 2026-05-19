@@ -69,10 +69,13 @@ const AuctionRound = (function () {
 
     // === 매물 풀 ===
     function generateItemForAuction(gs) {
-        // 길드 레벨에 따라 희귀도 부스트
+        // 경매 전용 장비 풀 사용 (고유효과/세트/유니크)
+        if (typeof generateAuctionItem === 'function') {
+            return generateAuctionItem(gs);
+        }
+        // fallback: 기존 방식
         const boost = Math.random() < 0.25 ? 1 : 0;
         const item = generateItem('common', gs.guildLevel, boost);
-        // id 보장
         if (!item.id) item.id = Date.now() + Math.floor(Math.random() * 1e6);
         return item;
     }

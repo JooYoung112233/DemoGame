@@ -135,9 +135,9 @@ const GUILD_HALL_DATA = {
         textColor: '#ff8888',
         baseCost: 800,
         unlockCondition: 'zone_clear:bloodpit',
-        desc: '[BP 첫 클리어] 핏 게이지 메커니즘',
+        desc: '[BP 첫 클리어] 관중 흥분도 메커니즘',
         stages: [
-            { stage: 1,  name: '핏 게이지 최대 +50%',      desc: 'MAX 증가',              effect: { pitMaxBonus: 0.5 } },
+            { stage: 1,  name: '관중 흥분도 최대 +50%',      desc: 'MAX 증가',              effect: { pitMaxBonus: 0.5 } },
             { stage: 2,  name: '수동 아이템 슬롯 해금',    desc: '파티 공용 2칸',         effect: { pocketSlotUnlock: true } },
             { stage: 3,  name: '핏 충전량 +20%',           desc: '라운드 중 모든 충전',   effect: { pitChargeBonus: 0.2 } },
             { stage: 4,  name: '쉬는 곳 해금',             desc: '라운드 사이 확률 등장', effect: { restRoomUnlock: true } },

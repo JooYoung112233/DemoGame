@@ -87,7 +87,7 @@ class ManualBattleScene extends Phaser.Scene {
         this._eliteKillCount = 0;
         this._bossKilled = false;
 
-        // === BP v4: 핏 게이지 시스템 ===
+        // === BP v4: 관중 흥분도 시스템 ===
         this.pitGauge = (typeof PitGauge !== 'undefined') ? new PitGauge(this.gameState) : null;
         this._crowdRushUnits = [];
         this._isBossRound = false;
@@ -163,7 +163,11 @@ class ManualBattleScene extends Phaser.Scene {
         const waveScaleBonus = (w - 1) * 0.08;
         return types.map((type, i) => {
             const data = ENEMY_DATA[type];
-            const scaleMult = (zoneLevel === 1 ? 0.75 : 1.0 + (zoneLevel - 2) * 0.08) + waveScaleBonus;
+            // 통합 구역 스케일링 (BALANCE.ZONE_SCALE)
+            const baseScale = (typeof BalanceHelper !== 'undefined')
+                ? BalanceHelper.getZoneScaleMult('bloodpit', zoneLevel)
+                : 0.65 + (zoneLevel - 1) * 0.06;
+            const scaleMult = baseScale + waveScaleBonus;
             const enemyActions = (typeof getEnemyActions === 'function') ? getEnemyActions(type) : [];
             return {
                 id: `enemy_w${w}_${i}`,
@@ -234,12 +238,12 @@ class ManualBattleScene extends Phaser.Scene {
             infoBarY += 26;
         }
 
-        // === BP v4: 핏 게이지 바 ===
+        // === BP v4: 관중 흥분도 바 ===
         if (this.pitGauge) {
             const pgBg = this.add.graphics();
             pgBg.fillStyle(0x220808, 0.85);
             pgBg.fillRect(0, infoBarY, 1280, 26);
-            this.add.text(12, infoBarY + 6, '🩸 핏 게이지:', {
+            this.add.text(12, infoBarY + 6, '🩸 관중 흥분도:', {
                 fontSize: '11px', fontFamily: 'monospace', color: '#ff6644', fontStyle: 'bold'
             });
             const barX = 120, barW = 300, barH = 12, barY = infoBarY + 7;
@@ -1225,7 +1229,7 @@ class ManualBattleScene extends Phaser.Scene {
             return;
         }
 
-        // 결과 표시 + 핏 게이지 충전 + 처치 보상
+        // 결과 표시 + 관중 흥분도 충전 + 처치 보상
         if (result.results) {
             result.results.forEach(r => this._showActionResult(r, caster));
             this._chargePitGauge(result.results, action.type === 'skill');
@@ -1643,7 +1647,9 @@ class ManualBattleScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(70);
         this.tweens.add({ targets: announce, y: 170, alpha: 0, duration: 2000, onComplete: () => announce.destroy() });
 
-        const scaleMult = zoneLevel === 1 ? 0.75 : 1.0 + (zoneLevel - 2) * 0.08;
+        const scaleMult = (typeof BalanceHelper !== 'undefined')
+            ? BalanceHelper.getZoneScaleMult('bloodpit', zoneLevel)
+            : 0.65 + (zoneLevel - 1) * 0.06;
         rush.enemies.forEach(re => {
             const data = (typeof ENEMY_DATA !== 'undefined') ? ENEMY_DATA[re.key] : null;
             if (!data) return;
@@ -1812,7 +1818,7 @@ class ManualBattleScene extends Phaser.Scene {
         if (fx.pitGaugeAdd && this.pitGauge) {
             this.pitGauge.gauge = Math.min(this.pitGauge.max, this.pitGauge.gauge + fx.pitGaugeAdd);
             this._updatePitGaugeUI();
-            UIToast.show(this, `${item.icon} 핏 게이지 +${fx.pitGaugeAdd}%!`, { color: '#ff4444' });
+            UIToast.show(this, `${item.icon} 관중 흥분도 +${fx.pitGaugeAdd}%!`, { color: '#ff4444' });
         }
 
         this.gameState.pocketSlots[slotIndex] = null;
@@ -1845,21 +1851,10 @@ class ManualBattleScene extends Phaser.Scene {
             return;
         }
 
-        const startNextRound = () => {
-            this.headerText.setText(`Round ${this.currentRound}  |  Wave ${this.currentWave}/${this.maxWaves}  |  Blood Pit Lv.${this.gameState.zoneLevel[this.zoneKey]}`);
-            DarkestCombat.startRound(this.combat);
-            this._processNextTurn();
-        };
-
-        // 쉬는 곳 체크
-        if (this.pitGauge) {
-            const zoneLevel = this.gameState.zoneLevel[this.zoneKey] || 1;
-            if (this.pitGauge.shouldShowRestRoom(zoneLevel)) {
-                this._showRestRoom(startNextRound);
-                return;
-            }
-        }
-        startNextRound();
+        // 다음 라운드 시작 (쉬는 곳은 웨이브 사이에서만 등장 — _startNextWave 참조)
+        this.headerText.setText(`Round ${this.currentRound}  |  Wave ${this.currentWave}/${this.maxWaves}  |  Blood Pit Lv.${this.gameState.zoneLevel[this.zoneKey]}`);
+        DarkestCombat.startRound(this.combat);
+        this._processNextTurn();
     }
 
     _endBattle(success) {

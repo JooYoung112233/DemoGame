@@ -180,11 +180,15 @@ function pickNegativeModifier() {
 // ─── 층 스케일링 ──────────────────────────────────────────────────
 
 function getCargoFloorScaling(floor) {
-    // 적 스탯 스케일링 (층 높을수록 강해짐)
-    const hpMult = 1 + (floor - 1) * 0.06;    // 층당 6% HP 증가
-    const atkMult = 1 + (floor - 1) * 0.04;   // 층당 4% ATK 증가
+    // 구역 통합 스케일링 적용 (BALANCE.ZONE_SCALE)
+    const zoneBaseMult = (typeof BalanceHelper !== 'undefined')
+        ? BalanceHelper.getZoneScaleMult('cargo', floor)
+        : 0.70 + (floor - 1) * 0.06;
+    const hpMult = zoneBaseMult;
+    const atkMult = zoneBaseMult * 0.85;       // ATK는 HP보다 완만
     const countMult = 1 + (floor - 1) * 0.03; // 층당 3% 적 수 증가
-    const wallHp = 500 + floor * 30;           // 외벽 기본 HP
+    // 외벽 HP 상향: 기본 900 (칸당 300), 층당 +40
+    const wallHp = 900 + floor * 40;
 
     return { hpMult, atkMult, countMult, wallHp };
 }

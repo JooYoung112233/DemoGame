@@ -6,28 +6,40 @@ class GuildHallScene extends Phaser.Scene {
     }
 
     create() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         GuildHallManager.ensureState(gs);
 
-        this.add.rectangle(640, 360, 1280, 720, 0x0a0a1a);
+        this.add.rectangle(640, 360, 1280, 720, T.bg || 0x1a1510);
 
-        this.add.text(640, 25, '🏛 길드 회관', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#ffcc88', fontStyle: 'bold'
+        // Header bg
+        this.add.rectangle(640, 27, 1280, 55, T.headerBg || 0x1e1810).setOrigin(0.5);
+
+        // Ornament lines
+        const ornLine = this.add.graphics();
+        ornLine.lineStyle(1, T.ornament || 0x8a7a4a, 0.4);
+        ornLine.lineBetween(0, 54, 1280, 54);
+        ornLine.lineStyle(1, T.divider || 0x5a4a2a, 0.3);
+        ornLine.lineBetween(0, 56, 1280, 56);
+
+        this.add.text(640, 25, '◈ 🏛 길드 회관 ◈', {
+            fontSize: '20px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         UIButton.create(this, 80, 25, 100, 30, '← 마을', {
-            color: 0x335577, hoverColor: 0x446688, textColor: '#cceeff', fontSize: 12,
+            variant: 'ghost', fontSize: 12,
             onClick: () => this.scene.start('TownScene', { gameState: gs })
         });
 
         this.add.text(1260, 25, `${gs.gold}G`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: '16px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
         }).setOrigin(1, 0.5);
 
         this._drawCategories();
     }
 
     _drawCategories() {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const cats = GuildHallManager.CATEGORIES;
         const keys = Object.keys(cats);
@@ -50,6 +62,7 @@ class GuildHallScene extends Phaser.Scene {
     }
 
     _drawCategoryCard(catKey, x, y, w, h) {
+        const T = (typeof UI_THEME !== 'undefined') ? UI_THEME : {};
         const gs = this.gameState;
         const cat = GuildHallManager.CATEGORIES[catKey];
         const stage = GuildHallManager.getStage(gs, catKey);
@@ -57,19 +70,19 @@ class GuildHallScene extends Phaser.Scene {
         const check = GuildHallManager.canUpgrade(gs, catKey);
 
         const bg = this.add.graphics();
-        bg.fillStyle(0x151530, 1);
+        bg.fillStyle(T.panelFill || 0x2a2218, 1);
         bg.fillRoundedRect(x, y, w, h, 6);
-        bg.lineStyle(1, stage >= maxStage ? 0xffcc44 : 0x334466, 0.8);
+        bg.lineStyle(1, stage >= maxStage ? (T.textGold ? Phaser.Display.Color.HexStringToColor(T.textGold).color : 0xffcc44) : (T.panelStroke || 0x5a4a2a), 0.8);
         bg.strokeRoundedRect(x, y, w, h, 6);
 
         // 헤더
         this.add.text(x + 10, y + 10, `${cat.icon} ${cat.code}. ${cat.name}`, {
-            fontSize: '14px', fontFamily: 'monospace', color: '#ccddff', fontStyle: 'bold'
+            fontSize: '14px', fontFamily: T.fontFamily || 'monospace', color: T.textPrimary || '#e8d8c0', fontStyle: 'bold'
         });
 
         this.add.text(x + w - 10, y + 10, `${stage}/${maxStage}`, {
-            fontSize: '13px', fontFamily: 'monospace',
-            color: stage >= maxStage ? '#ffcc44' : '#8899aa'
+            fontSize: '13px', fontFamily: T.fontFamily || 'monospace',
+            color: stage >= maxStage ? (T.textGold || '#ffcc44') : (T.textMuted || '#887860')
         }).setOrigin(1, 0);
 
         // 진행 바
@@ -84,7 +97,7 @@ class GuildHallScene extends Phaser.Scene {
         const currentEffect = GuildHallManager.getEffectDescription(catKey, stage);
         if (currentEffect) {
             this.add.text(x + 10, y + 44, `현재: ${currentEffect}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#66aa88'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: '#66aa88'
             });
         }
 
@@ -92,20 +105,20 @@ class GuildHallScene extends Phaser.Scene {
         const nextEffect = GuildHallManager.getEffectDescription(catKey, stage + 1);
         if (nextEffect && stage < maxStage) {
             this.add.text(x + 10, y + 60, `다음: ${nextEffect}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#8888aa'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: T.textSecondary || '#b8a888'
             });
         }
 
         // 업그레이드 버튼 or 상태
         if (stage >= maxStage) {
             this.add.text(x + w / 2, y + h - 25, '✅ 완료', {
-                fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+                fontSize: '12px', fontFamily: T.fontFamily || 'monospace', color: T.textGold || '#ffcc44', fontStyle: 'bold'
             }).setOrigin(0.5);
         } else if (check.ok) {
             const cost = GuildHallManager.getUpgradeCost(catKey, stage + 1);
             UIButton.create(this, x + w / 2, y + h - 25, 180, 28,
                 `업그레이드 (${cost}G)`, {
-                    color: 0x448844, hoverColor: 0x55aa55, textColor: '#ffffff', fontSize: 11,
+                    variant: 'primary', fontSize: 11,
                     onClick: () => {
                         GuildHallManager.upgrade(gs, catKey);
                         UIToast.show(this, `${cat.name} ${cat.code}${stage + 1} 해금!`);
@@ -115,10 +128,10 @@ class GuildHallScene extends Phaser.Scene {
         } else {
             const cost = GuildHallManager.getUpgradeCost(catKey, stage + 1);
             this.add.text(x + w / 2, y + h - 35, `${cost}G`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#665544'
+                fontSize: '11px', fontFamily: T.fontFamily || 'monospace', color: T.textMuted || '#887860'
             }).setOrigin(0.5);
             this.add.text(x + w / 2, y + h - 18, `🔒 ${check.reason}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#884444'
+                fontSize: '10px', fontFamily: T.fontFamily || 'monospace', color: '#884444'
             }).setOrigin(0.5);
         }
 
@@ -129,7 +142,7 @@ class GuildHallScene extends Phaser.Scene {
         const dots = this.add.graphics();
         for (let i = 1; i <= maxStage; i++) {
             const dx = dotStartX + (i - 1) * dotSpacing;
-            dots.fillStyle(i <= stage ? 0x44aaff : 0x333355, 1);
+            dots.fillStyle(i <= stage ? 0x44aaff : (T.panelStroke || 0x5a4a2a), 1);
             dots.fillCircle(dx + 4, dotY, 3);
         }
     }
