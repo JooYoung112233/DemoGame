@@ -36,11 +36,11 @@ class HelpScene extends Phaser.Scene {
         const W = 1280;
         const combos = COMBO_DATA;
         const startY = 70;
-        const cardH = 70;
+        const cardH = 60;
 
         for (let i = 0; i < combos.length; i++) {
             const combo = combos[i];
-            const y = startY + i * (cardH + 8);
+            const y = startY + i * (cardH + 6);
             const upgLvl = (this.playerState.comboUpgrades && this.playerState.comboUpgrades[combo.id]) || 0;
 
             const bg = this.add.graphics();
@@ -50,30 +50,30 @@ class HelpScene extends Phaser.Scene {
             bg.strokeRoundedRect(60, y, W - 120, cardH, 8);
             this.listContainer.add(bg);
 
-            const name = this.add.text(80, y + 10, combo.name, {
-                fontSize: '16px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            const name = this.add.text(80, y + 8, combo.name, {
+                fontSize: '15px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
             });
             this.listContainer.add(name);
 
-            const recipe = this.add.text(80, y + 34, `조합: ${combo.recipe || ''}`, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#aaaaaa'
+            const recipe = this.add.text(80, y + 30, `조합: ${combo.recipe || ''}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
             });
             this.listContainer.add(recipe);
 
-            const desc = this.add.text(450, y + 10, combo.desc, {
-                fontSize: '13px', fontFamily: 'monospace', color: '#999999',
+            const desc = this.add.text(400, y + 8, combo.desc, {
+                fontSize: '12px', fontFamily: 'monospace', color: '#999999',
                 wordWrap: { width: 400 }
             });
             this.listContainer.add(desc);
 
             const effectStr = this._effectToString(combo.effect, upgLvl);
-            const effect = this.add.text(450, y + 34, effectStr, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#44ff88'
+            const effect = this.add.text(400, y + 30, effectStr, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#44ff88'
             });
             this.listContainer.add(effect);
 
             if (upgLvl > 0) {
-                const lvl = this.add.text(W - 80, y + 20, `Lv.${upgLvl}`, {
+                const lvl = this.add.text(W - 80, y + cardH / 2, `Lv.${upgLvl}`, {
                     fontSize: '14px', fontFamily: 'monospace', color: '#aa88ff', fontStyle: 'bold'
                 }).setOrigin(0.5);
                 this.listContainer.add(lvl);
@@ -85,33 +85,32 @@ class HelpScene extends Phaser.Scene {
             hitArea.on('pointerdown', () => this._showDetail(combo, upgLvl));
         }
 
-        // 심볼 목록 헤더
-        const symY = startY + combos.length * (cardH + 8) + 20;
+        const symY = startY + combos.length * (cardH + 6) + 20;
         const symHeader = this.add.text(W / 2, symY, '🎰 심볼 목록', {
             fontSize: '18px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.listContainer.add(symHeader);
 
         const symbols = Object.values(SYMBOL_DATA);
-        const cols = 5;
-        const startX = W / 2 - (cols - 1) * 130 / 2;
+        const cols = 6;
+        const startX = W / 2 - (cols - 1) * 110 / 2;
 
         for (let i = 0; i < symbols.length; i++) {
             const sym = symbols[i];
             const col = i % cols;
             const row = Math.floor(i / cols);
-            const sx = startX + col * 130;
-            const sy = symY + 30 + row * 40;
+            const sx = startX + col * 110;
+            const sy = symY + 30 + row * 36;
 
             const text = this.add.text(sx, sy, `${sym.icon} ${sym.name}: ${sym.desc}`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
+                fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
             }).setOrigin(0.5);
             this.listContainer.add(text);
         }
 
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
             this.scrollY -= deltaY * 0.5;
-            this.scrollY = Phaser.Math.Clamp(this.scrollY, -400, 0);
+            this.scrollY = Phaser.Math.Clamp(this.scrollY, -600, 0);
             this.listContainer.y = this.scrollY;
         });
     }
@@ -187,7 +186,9 @@ class HelpScene extends Phaser.Scene {
         if (effect.gold) parts.push(`🪙${Math.floor(effect.gold * mult)}`);
         if (effect.burn) parts.push(`🔥화상${effect.burn}`);
         if (effect.poison) parts.push(`☠️독${effect.poison}`);
+        if (effect.slow) parts.push(`❄️둔화${effect.slow}`);
         if (effect.aoe) parts.push('(전체)');
+        if (effect.hits) parts.push(`(${effect.hits}연타)`);
         return parts.join(' ');
     }
 }
