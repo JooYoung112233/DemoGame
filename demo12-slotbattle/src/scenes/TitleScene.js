@@ -21,8 +21,9 @@ class TitleScene extends Phaser.Scene {
             '🎰 SPIN으로 슬롯 3개를 돌린다',
             '⚡ 심볼 조합에 따라 공격/방어/회복이 결정된다',
             '✨ 같은 심볼 3개 또는 특수 조합 = 콤보!',
-            '🏪 라운드 클리어 시 상점에서 심볼/아이템/조합강화 구매',
-            '🐉 10라운드 보스를 처치하면 승리!',
+            '🗺️ 트리 맵에서 경로를 선택하며 진행',
+            '💎 보물 노드에서 유물을 획득하여 빌드 강화',
+            '🐉 3개 Act의 보스를 처치하면 승리!',
         ];
         for (let i = 0; i < rules.length; i++) {
             this.add.text(W / 2, 340 + i * 28, rules[i], {
@@ -38,7 +39,7 @@ class TitleScene extends Phaser.Scene {
 
         startBtn.on('pointerover', () => startBtn.setColor('#ffffff'));
         startBtn.on('pointerout', () => startBtn.setColor('#ffcc00'));
-        startBtn.on('pointerdown', () => this.scene.start('BattleScene', { round: 1 }));
+        startBtn.on('pointerdown', () => this.scene.start('MapScene', { act: 0 }));
 
         this.tweens.add({
             targets: startBtn, scaleX: 1.05, scaleY: 1.05,

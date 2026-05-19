@@ -4,7 +4,9 @@ class ShopScene extends Phaser.Scene {
     }
 
     init(data) {
-        this.round = data.round;
+        this.round = data.round || 0;
+        this.act = data.act != null ? data.act : 0;
+        this.map = data.map || null;
         this.playerState = data.playerState;
         this.goldReward = data.goldReward || 0;
     }
@@ -38,9 +40,10 @@ class ShopScene extends Phaser.Scene {
     _drawTabs() {
         const W = 1280;
         const tabs = [
-            { key: 'symbols', label: '🎰 심볼', x: W / 2 - 200 },
-            { key: 'items', label: '🧪 아이템', x: W / 2 },
-            { key: 'combos', label: '⚡ 조합 강화', x: W / 2 + 200 },
+            { key: 'symbols', label: '🎰 심볼', x: W / 2 - 280 },
+            { key: 'items', label: '🧪 아이템', x: W / 2 - 90 },
+            { key: 'combos', label: '⚡ 조합', x: W / 2 + 90 },
+            { key: 'relics', label: '💎 유물', x: W / 2 + 280 },
         ];
         this.tabButtons = [];
         for (const tab of tabs) {
@@ -72,6 +75,7 @@ class ShopScene extends Phaser.Scene {
         if (this.activeTab === 'symbols') this._drawSymbolShop();
         else if (this.activeTab === 'items') this._drawItemShop();
         else if (this.activeTab === 'combos') this._drawComboShop();
+        else if (this.activeTab === 'relics') this._drawRelicShop();
     }
 
     _drawSymbolShop() {
@@ -257,6 +261,86 @@ class ShopScene extends Phaser.Scene {
         }
     }
 
+    _drawRelicShop() {
+        const W = 1280, startY = 120;
+        this.add.text(W / 2, startY, '유물 구매 — 영구 패시브 효과', {
+            fontSize: '14px', fontFamily: 'monospace', color: '#888888'
+        }).setOrigin(0.5);
+
+        const ownedIds = this.playerState.relics || [];
+        if (!this._shopRelics) {
+            this._shopRelics = getRelicChoices(3, ownedIds);
+        }
+        const relics = this._shopRelics.filter(r => !ownedIds.includes(r.id));
+        const startX = W / 2 - (relics.length - 1) * 180 / 2;
+
+        for (let i = 0; i < relics.length; i++) {
+            const relic = relics[i];
+            const x = startX + i * 180;
+            const y = startY + 130;
+            const rarityColor = relic.rarity === 'rare' ? 0xffaa00 :
+                                relic.rarity === 'uncommon' ? 0x44aaff : 0x888888;
+
+            const bg = this.add.graphics();
+            bg.fillStyle(0x1a1a35, 1);
+            bg.lineStyle(2, rarityColor, 0.6);
+            bg.fillRoundedRect(x - 70, y - 70, 140, 190, 10);
+            bg.strokeRoundedRect(x - 70, y - 70, 140, 190, 10);
+            this.contentContainer.add(bg);
+
+            const icon = this.add.text(x, y - 40, relic.icon, { fontSize: '32px' }).setOrigin(0.5);
+            const name = this.add.text(x, y, relic.name, {
+                fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            }).setOrigin(0.5);
+            const desc = this.add.text(x, y + 25, relic.desc, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa',
+                wordWrap: { width: 120 }, align: 'center'
+            }).setOrigin(0.5);
+            const cost = this.add.text(x, y + 65, `🪙${relic.shopCost}`, {
+                fontSize: '14px', fontFamily: 'monospace', color: '#ffcc00'
+            }).setOrigin(0.5);
+            this.contentContainer.add([icon, name, desc, cost]);
+
+            const hitArea = this.add.rectangle(x, y + 15, 140, 190, 0x000000, 0)
+                .setInteractive({ useHandCursor: true });
+            this.contentContainer.add(hitArea);
+
+            hitArea.on('pointerover', () => {
+                bg.clear().fillStyle(0x2a2a50, 1).lineStyle(2, 0xffffff, 1)
+                    .fillRoundedRect(x - 70, y - 70, 140, 190, 10)
+                    .strokeRoundedRect(x - 70, y - 70, 140, 190, 10);
+            });
+            hitArea.on('pointerout', () => {
+                bg.clear().fillStyle(0x1a1a35, 1).lineStyle(2, rarityColor, 0.6)
+                    .fillRoundedRect(x - 70, y - 70, 140, 190, 10)
+                    .strokeRoundedRect(x - 70, y - 70, 140, 190, 10);
+            });
+            hitArea.on('pointerdown', () => {
+                if (this.playerState.gold < relic.shopCost) return;
+                this.playerState.gold -= relic.shopCost;
+                if (!this.playerState.relics) this.playerState.relics = [];
+                this.playerState.relics.push(relic.id);
+                this._refresh();
+            });
+        }
+
+        // owned relics display
+        if (ownedIds.length > 0) {
+            const oy = startY + 310;
+            this.add.text(W / 2, oy, '보유 유물:', {
+                fontSize: '13px', fontFamily: 'monospace', color: '#666666'
+            }).setOrigin(0.5);
+            const relicStr = ownedIds.map(id => {
+                const r = RELIC_DATA[id];
+                return r ? `${r.icon} ${r.name}` : id;
+            }).join('  ');
+            const owned = this.add.text(W / 2, oy + 22, relicStr, {
+                fontSize: '14px', fontFamily: 'monospace', color: '#cc88ff'
+            }).setOrigin(0.5);
+            this.contentContainer.add(owned);
+        }
+    }
+
     _buySymbol(symbolId, shopIdx, hitArea) {
         const sym = SYMBOL_DATA[symbolId];
         if (!sym || this.playerState.gold < sym.cost) return;
@@ -358,7 +442,8 @@ class ShopScene extends Phaser.Scene {
             return;
         }
 
-        const nextBtn = this.add.text(W - 30, 580, '다음 라운드 ▶', {
+        const nextLabel = this.map ? '맵으로 ▶' : '다음 라운드 ▶';
+        const nextBtn = this.add.text(W - 30, 580, nextLabel, {
             fontSize: '20px', fontFamily: 'monospace', color: '#ffcc00',
             fontStyle: 'bold', backgroundColor: '#2a2a1a',
             padding: { x: 20, y: 8 }
@@ -366,10 +451,18 @@ class ShopScene extends Phaser.Scene {
         nextBtn.on('pointerover', () => nextBtn.setColor('#ffffff'));
         nextBtn.on('pointerout', () => nextBtn.setColor('#ffcc00'));
         nextBtn.on('pointerdown', () => {
-            this.scene.start('BattleScene', {
-                round: this.round + 1,
-                playerState: this.playerState
-            });
+            if (this.map) {
+                this.scene.start('MapScene', {
+                    act: this.act,
+                    map: this.map,
+                    playerState: this.playerState
+                });
+            } else {
+                this.scene.start('BattleScene', {
+                    round: this.round + 1,
+                    playerState: this.playerState
+                });
+            }
         });
     }
 

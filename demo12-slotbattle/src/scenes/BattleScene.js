@@ -5,14 +5,18 @@ class BattleScene extends Phaser.Scene {
 
     init(data) {
         this.round = data.round || 1;
+        this.act = data.act != null ? data.act : 0;
+        this.map = data.map || null;
+        this.encounter = data.encounter || null;
+        this.encounterType = data.encounterType || 'battle';
         this.playerState = data.playerState || {
             hp: 80, maxHp: 80, block: 0, gold: 10,
             symbolPool: ['sword', 'sword', 'shield', 'shield', 'potion', 'dagger', 'arrow', 'fire', 'coin', 'skull'],
-            codex: {},
-            comboUpgrades: {}
+            codex: {}, comboUpgrades: {}, relics: [], visitedNodes: [], currentFloor: 0
         };
         if (!this.playerState.codex) this.playerState.codex = {};
         if (!this.playerState.comboUpgrades) this.playerState.comboUpgrades = {};
+        if (!this.playerState.relics) this.playerState.relics = [];
         for (const sid of this.playerState.symbolPool) {
             this.playerState.codex[sid] = true;
         }
@@ -39,20 +43,40 @@ class BattleScene extends Phaser.Scene {
     }
 
     _spawnEnemies() {
-        const roundData = ROUND_ENEMIES[Math.min(this.round - 1, ROUND_ENEMIES.length - 1)];
+        let pool, count;
+        if (this.encounter) {
+            pool = this.encounter.pool;
+            count = this.encounter.count;
+        } else {
+            const roundData = ROUND_ENEMIES[Math.min(this.round - 1, ROUND_ENEMIES.length - 1)];
+            pool = roundData.pool;
+            count = roundData.count;
+        }
+
         const enemies = [];
-        for (let i = 0; i < roundData.count; i++) {
-            const id = roundData.pool[Phaser.Math.Between(0, roundData.pool.length - 1)];
+        for (let i = 0; i < count; i++) {
+            const id = pool[i < pool.length ? i : Phaser.Math.Between(0, pool.length - 1)];
             const data = ENEMY_DATA[id];
+            if (!data) continue;
             const enemy = {
                 ...data, hp: data.hp, maxHp: data.hp,
                 burn: 0, poison: 0, block: 0, index: i,
                 cooldownTimer: data.cooldown,
                 nextIntent: null
             };
+            // relic: ice_crystal — enemies start slowed
+            if (this.playerState.relics.includes('ice_crystal')) {
+                enemy.cooldownTimer += 1;
+            }
             enemy.nextIntent = this.combatResolver.rollEnemyIntent(enemy);
             enemies.push(enemy);
         }
+
+        // relic: battle_drum — start with block
+        if (this.playerState.relics.includes('battle_drum')) {
+            this.playerState.block += 5;
+        }
+
         return enemies;
     }
 
@@ -62,7 +86,10 @@ class BattleScene extends Phaser.Scene {
         topBg.fillStyle(0x111128, 1);
         topBg.fillRect(0, 0, W, 50);
 
-        this.add.text(W / 2, 25, `라운드 ${this.round} / 10`, {
+        const encounterLabel = this.encounterType === 'boss' ? '⚠️ BOSS' :
+                               this.encounterType === 'elite' ? '💀 강적' : '⚔️ 전투';
+        const actLabel = this.map ? `Act ${this.act + 1}` : `라운드 ${this.round}/10`;
+        this.add.text(W / 2, 25, `${actLabel}  ${encounterLabel}`, {
             fontSize: '20px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
 
@@ -232,11 +259,64 @@ class BattleScene extends Phaser.Scene {
         this.turnPhase = 'spinning';
         this.spinBtn.setAlpha(0.3);
         this.comboText.setAlpha(0);
+        this.respinUsed = false;
 
         this.slotMachine.spin((results) => {
+            // check for respin relic
+            if (!this.respinUsed && this.playerState.relics &&
+                this.playerState.relics.includes('respin_charm')) {
+                this.turnPhase = 'awaitRespin';
+                this._showRespinButton(results);
+            } else {
+                this.turnPhase = 'resolving';
+                this._doPlayerTurn(results);
+            }
+        });
+    }
+
+    _showRespinButton(results) {
+        const W = 1280;
+        if (this.respinBtn) this.respinBtn.destroy();
+
+        this.respinBtn = this.add.text(W / 2 + 180, 498, '🔄 리스핀', {
+            fontSize: '18px', fontFamily: 'monospace', color: '#44ccff',
+            backgroundColor: '#1a2a3a', padding: { x: 14, y: 8 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(100);
+
+        this.respinBtn.on('pointerover', () => this.respinBtn.setColor('#ffffff'));
+        this.respinBtn.on('pointerout', () => this.respinBtn.setColor('#44ccff'));
+        this.respinBtn.on('pointerdown', () => {
+            this.respinUsed = true;
+            this.respinBtn.destroy();
+            this.respinBtn = null;
+            this._popText(640, 350, '🔄 리스핀!', '#44ccff', 26);
+            this.slotMachine.spin((newResults) => {
+                this.turnPhase = 'resolving';
+                this._doPlayerTurn(newResults);
+            });
+        });
+
+        // also allow confirming current results
+        const confirmBtn = this.add.text(W / 2 - 180, 498, '✔️ 확정', {
+            fontSize: '18px', fontFamily: 'monospace', color: '#44ff88',
+            backgroundColor: '#1a3a2a', padding: { x: 14, y: 8 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(100);
+
+        confirmBtn.on('pointerdown', () => {
+            this.respinBtn.destroy();
+            this.respinBtn = null;
+            confirmBtn.destroy();
             this.turnPhase = 'resolving';
             this._doPlayerTurn(results);
         });
+
+        // store ref to clean up confirm button too
+        this.respinBtn._confirmBtn = confirmBtn;
+        const origDestroy = this.respinBtn.destroy.bind(this.respinBtn);
+        this.respinBtn.destroy = () => {
+            if (confirmBtn && confirmBtn.scene) confirmBtn.destroy();
+            origDestroy();
+        };
     }
 
     _doPlayerTurn(results) {
@@ -244,6 +324,27 @@ class BattleScene extends Phaser.Scene {
         const { log, actions, hasCombo } = this.combatResolver.resolve(
             results, this.playerState, this.enemies, this.slotMachine, comboUpgrades
         );
+
+        // relic: berserk — damage boost at low HP
+        if (this.playerState.relics && this.playerState.relics.includes('berserker_mark')) {
+            if (this.playerState.hp <= this.playerState.maxHp * 0.5) {
+                for (const entry of log) {
+                    if (entry.type === 'damage') {
+                        entry.value = Math.floor(entry.value * 1.5);
+                    }
+                }
+            }
+        }
+
+        // relic: golden_hand — double gold
+        if (this.playerState.relics && this.playerState.relics.includes('golden_hand')) {
+            for (const entry of log) {
+                if (entry.type === 'gold') {
+                    entry.value *= 2;
+                    this.playerState.gold += entry.value / 2;
+                }
+            }
+        }
 
         if (hasCombo) {
             const comboAction = actions.find(a => a.type === 'combo');
@@ -258,6 +359,20 @@ class BattleScene extends Phaser.Scene {
         this._appendLog(log);
 
         if (this._checkBattleEnd(300)) return;
+
+        // relic: overcharge_core — extra spin on combo
+        if (hasCombo && this.playerState.relics &&
+            this.playerState.relics.includes('overcharge_core') && !this._extraSpinUsed) {
+            this._extraSpinUsed = true;
+            this._popText(640, 350, '⚡ 추가 스핀!', '#ffff44', 24);
+            this.time.delayedCall(300, () => {
+                this.slotMachine.spin((extraResults) => {
+                    this._doPlayerTurn(extraResults);
+                });
+            });
+            return;
+        }
+        this._extraSpinUsed = false;
 
         // tick cooldowns → enemy turn
         const attackers = this.combatResolver.tickEnemyCooldowns(this.enemies);
@@ -557,18 +672,66 @@ class BattleScene extends Phaser.Scene {
     }
 
     _onRoundWin() {
-        const goldReward = 5 + this.round * 2;
+        const goldReward = this.encounterType === 'boss' ? 20 :
+                           this.encounterType === 'elite' ? 12 : 5 + (this.act + 1) * 2;
         this.playerState.gold += goldReward;
-        this.scene.start('ShopScene', {
-            round: this.round,
-            playerState: this.playerState,
-            goldReward: goldReward
-        });
+
+        // relic: vampiric_fang — heal on kill
+        if (this.playerState.relics.includes('vampiric_fang')) {
+            const deadCount = this.enemies.filter(e => e.hp <= 0).length;
+            const healAmt = deadCount * 5;
+            this.playerState.hp = Math.min(this.playerState.maxHp, this.playerState.hp + healAmt);
+        }
+
+        if (this.map) {
+            if (this.encounterType === 'boss') {
+                // boss defeated — next act or victory
+                if (this.act >= MAP_CONFIG.acts.length - 1) {
+                    this.scene.start('GameOverScene', {
+                        playerState: this.playerState,
+                        victory: true
+                    });
+                } else {
+                    // show reward popup then next act
+                    this.playerState.currentFloor = 0;
+                    this.playerState.visitedNodes = [];
+                    this.scene.start('MapScene', {
+                        act: this.act + 1,
+                        playerState: this.playerState
+                    });
+                }
+            } else {
+                // return to map
+                this.scene.start('MapScene', {
+                    act: this.act,
+                    map: this.map,
+                    playerState: this.playerState
+                });
+            }
+        } else {
+            // legacy round-based flow
+            this.scene.start('ShopScene', {
+                round: this.round,
+                playerState: this.playerState,
+                goldReward: goldReward
+            });
+        }
     }
 
     _onPlayerDeath() {
+        // relic: phoenix_feather — revive once
+        if (this.playerState.relics.includes('phoenix_feather')) {
+            const idx = this.playerState.relics.indexOf('phoenix_feather');
+            this.playerState.relics.splice(idx, 1);
+            this.playerState.hp = Math.floor(this.playerState.maxHp * 0.3);
+            this._popText(640, 300, '🔥 불사조 부활!', '#ff8800', 32);
+            this._updateAllDisplays();
+            this.time.delayedCall(500, () => this._readyForSpin());
+            return;
+        }
         this.scene.start('GameOverScene', {
             round: this.round,
+            act: this.act,
             playerState: this.playerState
         });
     }

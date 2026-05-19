@@ -92,8 +92,71 @@ const ENEMY_DATA = {
             { type: 'buff', atkUp: 5, weight: 1 },
         ]
     },
+    // ── ACT BOSSES ──
+    goblin_chief: {
+        id: 'goblin_chief', name: '고블린 족장', icon: '👺',
+        hp: 60, attack: 10, defense: 3,
+        color: 0x44aa44, tier: 2,
+        isBoss: true, cooldown: 2,
+        intents: [
+            { type: 'attack', weight: 2 },
+            { type: 'attackBleed', bleed: 4, weight: 1 },
+            { type: 'buff', atkUp: 3, weight: 1 },
+            { type: 'defend', block: 10, weight: 1 },
+        ]
+    },
+    lich: {
+        id: 'lich', name: '리치', icon: '☠️',
+        hp: 80, attack: 15, defense: 5,
+        color: 0x8844cc, tier: 3,
+        isBoss: true, cooldown: 3,
+        intents: [
+            { type: 'attack', weight: 2 },
+            { type: 'attackBurn', burn: 4, weight: 1 },
+            { type: 'healAll', heal: 15, weight: 1 },
+            { type: 'defend', block: 12, weight: 1 },
+        ]
+    },
 };
 
+// ── ACT-BASED ENCOUNTER TABLES ──
+const ACT_ENCOUNTERS = {
+    1: {
+        battle: [
+            { pool: ['slime'], count: 1 },
+            { pool: ['slime', 'rat'], count: 2 },
+            { pool: ['rat', 'bat'], count: 2 },
+            { pool: ['bat', 'slime'], count: 2 },
+        ],
+        elite: [
+            { pool: ['goblin'], count: 1 },
+        ],
+    },
+    2: {
+        battle: [
+            { pool: ['goblin', 'skeleton'], count: 2 },
+            { pool: ['skeleton', 'wolf'], count: 2 },
+            { pool: ['wolf', 'goblin'], count: 2 },
+        ],
+        elite: [
+            { pool: ['orc'], count: 1 },
+            { pool: ['wolf', 'wolf'], count: 2 },
+        ],
+    },
+    3: {
+        battle: [
+            { pool: ['orc', 'skeleton'], count: 2 },
+            { pool: ['mage', 'orc'], count: 2 },
+            { pool: ['orc', 'mage', 'skeleton'], count: 3 },
+        ],
+        elite: [
+            { pool: ['mage'], count: 1 },
+            { pool: ['orc', 'orc'], count: 2 },
+        ],
+    },
+};
+
+// legacy compat
 const ROUND_ENEMIES = [
     { round: 1, pool: ['slime'], count: 1 },
     { round: 2, pool: ['slime', 'rat'], count: 2 },
