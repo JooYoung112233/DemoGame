@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데모 12: 슬롯 배틀</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; }
+        body {
+            background: #0a0a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: auto;
+        }
+        #game-container {
+            border-radius: 4px; overflow: hidden;
+            width: 1280px; height: 720px;
+        }
+        #game-container canvas {
+            display: block;
+            width: 1280px !important;
+            height: 720px !important;
+            image-rendering: auto;
+        }
+        .back-btn {
+            position: fixed; top: 10px; left: 10px; z-index: 9999;
+            background: #333; color: #aaa; border: none; padding: 6px 14px;
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-family: monospace;
+        }
+        .back-btn:hover { background: #555; color: #fff; }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='../'">← 목록</button>
+    <div id="game-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <!-- Data -->
+    <script src="src/data/symbols.js"></script>
+    <script src="src/data/enemies.js"></script>
+    <!-- Systems -->
+    <script src="src/systems/SlotMachine.js"></script>
+    <script src="src/systems/CombatResolver.js"></script>
+    <!-- Scenes -->
+    <script src="src/scenes/TitleScene.js"></script>
+    <script src="src/scenes/BattleScene.js"></script>
+    <script src="src/scenes/RewardScene.js"></script>
+    <script src="src/scenes/GameOverScene.js"></script>
+    <!-- Main -->
+    <script src="src/main.js"></script>
+</body>
+</html>
