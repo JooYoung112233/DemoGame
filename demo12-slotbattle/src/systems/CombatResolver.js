@@ -54,41 +54,49 @@ class CombatResolver {
                 if (e.aoe) {
                     for (const enemy of enemies) {
                         if (enemy.hp <= 0) continue;
-                        const dmg = Math.max(1, e.damage - enemy.defense);
+                        const dmg = e.pierce ? e.damage : Math.max(1, e.damage - enemy.defense);
                         enemy.hp -= dmg;
-                        log.push({ type: 'damage', value: dmg, target: enemy.name, name: action.name });
+                        log.push({ type: 'damage', value: dmg, target: enemy.name, targetIdx: enemy.index, name: action.name });
                     }
                 } else if (e.hits) {
                     const alive = enemies.filter(en => en.hp > 0);
                     for (let h = 0; h < e.hits && alive.length > 0; h++) {
                         const target = alive[Phaser.Math.Between(0, alive.length - 1)];
-                        const dmg = Math.max(1, e.damage - target.defense);
+                        const dmg = e.pierce ? e.damage : Math.max(1, e.damage - target.defense);
                         target.hp -= dmg;
-                        log.push({ type: 'damage', value: dmg, target: target.name, name: action.name });
+                        log.push({ type: 'damage', value: dmg, target: target.name, targetIdx: target.index, name: action.name });
                     }
                 } else {
                     const alive = enemies.filter(en => en.hp > 0);
                     if (alive.length > 0) {
                         const target = alive[0];
-                        const dmg = Math.max(1, e.damage - target.defense);
+                        const dmg = e.pierce ? e.damage : Math.max(1, e.damage - target.defense);
                         target.hp -= dmg;
-                        log.push({ type: 'damage', value: dmg, target: target.name, name: action.name });
+                        log.push({ type: 'damage', value: dmg, target: target.name, targetIdx: target.index, name: action.name });
                     }
                 }
 
                 if (e.burn) {
                     const alive = enemies.filter(en => en.hp > 0);
-                    if (alive.length > 0) {
-                        alive[0].burn = (alive[0].burn || 0) + e.burn;
-                        log.push({ type: 'burn', value: e.burn, target: alive[0].name });
+                    for (const t of (e.aoe ? alive : alive.slice(0, 1))) {
+                        t.burn = (t.burn || 0) + e.burn;
+                        log.push({ type: 'burn', value: e.burn, target: t.name });
                     }
                 }
                 if (e.poison) {
                     const alive = enemies.filter(en => en.hp > 0);
-                    if (alive.length > 0) {
-                        alive[0].poison = (alive[0].poison || 0) + e.poison;
-                        log.push({ type: 'poison', value: e.poison, target: alive[0].name });
+                    for (const t of (e.aoe ? alive : alive.slice(0, 1))) {
+                        t.poison = (t.poison || 0) + e.poison;
+                        log.push({ type: 'poison', value: e.poison, target: t.name });
                     }
+                }
+            }
+
+            if (e.slow) {
+                const alive = enemies.filter(en => en.hp > 0);
+                for (const t of (e.aoe ? alive : alive.slice(0, 1))) {
+                    t.cooldownTimer = (t.cooldownTimer || 0) + e.slow;
+                    log.push({ type: 'slow', value: e.slow, target: t.name });
                 }
             }
 
@@ -105,19 +113,33 @@ class CombatResolver {
         return { log, actions, hasCombo: actions.some(a => a.type === 'combo') };
     }
 
-    enemyAttack(enemies, player) {
-        const log = [];
+    tickEnemyCooldowns(enemies) {
+        const attackers = [];
         for (const enemy of enemies) {
+            if (enemy.hp <= 0) continue;
+            enemy.cooldownTimer--;
+            if (enemy.cooldownTimer <= 0) {
+                attackers.push(enemy);
+                enemy.cooldownTimer = enemy.cooldown;
+            }
+        }
+        return attackers;
+    }
+
+    enemyAttack(attackers, player) {
+        const log = [];
+
+        for (const enemy of attackers) {
             if (enemy.hp <= 0) continue;
 
             if (enemy.burn && enemy.burn > 0) {
                 enemy.hp -= enemy.burn;
-                log.push({ type: 'dot', dotType: 'burn', value: enemy.burn, target: enemy.name });
+                log.push({ type: 'dot', dotType: 'burn', value: enemy.burn, target: enemy.name, targetIdx: enemy.index });
                 enemy.burn--;
             }
             if (enemy.poison && enemy.poison > 0) {
                 enemy.hp -= enemy.poison;
-                log.push({ type: 'dot', dotType: 'poison', value: enemy.poison, target: enemy.name });
+                log.push({ type: 'dot', dotType: 'poison', value: enemy.poison, target: enemy.name, targetIdx: enemy.index });
             }
 
             if (enemy.hp <= 0) continue;
@@ -134,7 +156,6 @@ class CombatResolver {
                 log.push({ type: 'playerHit', value: dmg, from: enemy.name });
             }
         }
-        player.block = 0;
         return log;
     }
 }

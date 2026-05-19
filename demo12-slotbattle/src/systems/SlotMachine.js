@@ -1,4 +1,3 @@
-// 슬롯머신 시스템
 class SlotMachine {
     constructor(scene) {
         this.scene = scene;
@@ -23,57 +22,70 @@ class SlotMachine {
             this.results.push(this.symbolPool[idx]);
         }
 
-        this._animateSpin(callback);
+        this._animateSequential(0, callback);
     }
 
-    _animateSpin(callback) {
-        const scene = this.scene;
-        let completed = 0;
-
-        for (let i = 0; i < this.reelCount; i++) {
-            const reel = this.reelContainers[i];
-            if (!reel) { completed++; continue; }
-
-            const symbolTexts = reel.getAll();
-            const finalSymbol = this.results[i];
-            const delay = i * 200;
-            const spinCycles = 8 + i * 4;
-            let tick = 0;
-
-            scene.time.addEvent({
-                delay: 50,
-                repeat: spinCycles - 1,
-                startAt: delay,
-                callback: () => {
-                    tick++;
-                    const randIdx = Phaser.Math.Between(0, this.symbolPool.length - 1);
-                    const randSym = this.symbolPool[randIdx];
-                    const symData = SYMBOL_DATA[randSym];
-                    if (symbolTexts[0]) symbolTexts[0].setText(symData.icon);
-                    if (symbolTexts[1]) symbolTexts[1].setText(symData.name);
-
-                    if (tick === spinCycles) {
-                        const fData = SYMBOL_DATA[finalSymbol];
-                        symbolTexts[0].setText(fData.icon);
-                        symbolTexts[1].setText(fData.name);
-
-                        scene.tweens.add({
-                            targets: reel,
-                            scaleX: 1.15, scaleY: 1.15,
-                            duration: 80,
-                            yoyo: true,
-                            onComplete: () => {
-                                completed++;
-                                if (completed === this.reelCount) {
-                                    this.spinning = false;
-                                    if (callback) callback(this.results);
-                                }
-                            }
-                        });
-                    }
-                }
-            });
+    _animateSequential(reelIndex, callback) {
+        if (reelIndex >= this.reelCount) {
+            this.spinning = false;
+            if (callback) callback(this.results);
+            return;
         }
+
+        const scene = this.scene;
+        const reel = this.reelContainers[reelIndex];
+        if (!reel) {
+            this._animateSequential(reelIndex + 1, callback);
+            return;
+        }
+
+        const symbolTexts = reel.getAll();
+        const finalSymbol = this.results[reelIndex];
+        const totalTicks = 12 + reelIndex * 4;
+        let tick = 0;
+
+        scene.time.addEvent({
+            delay: 45,
+            repeat: totalTicks - 1,
+            callback: () => {
+                tick++;
+
+                const randIdx = Phaser.Math.Between(0, this.symbolPool.length - 1);
+                const randSym = this.symbolPool[randIdx];
+                const symData = SYMBOL_DATA[randSym];
+                if (symbolTexts[0]) symbolTexts[0].setText(symData.icon);
+                if (symbolTexts[1]) {
+                    symbolTexts[1].setText(symData.name);
+                    symbolTexts[1].setColor('#666666');
+                }
+
+                reel.setScale(1);
+                reel.y += (tick % 2 === 0 ? 2 : -2);
+
+                if (tick === totalTicks) {
+                    const fData = SYMBOL_DATA[finalSymbol];
+                    if (symbolTexts[0]) symbolTexts[0].setText(fData.icon);
+                    if (symbolTexts[1]) {
+                        symbolTexts[1].setText(fData.name);
+                        symbolTexts[1].setColor('#' + fData.color.toString(16).padStart(6, '0'));
+                    }
+
+                    reel.y = reel.getData('originY') || reel.y;
+
+                    scene.tweens.add({
+                        targets: reel, scaleX: 1.2, scaleY: 1.2,
+                        duration: 100, yoyo: true, ease: 'Back.easeOut',
+                        onComplete: () => {
+                            reel.setScale(1);
+                            scene.cameras.main.shake(50, 0.003);
+                            scene.time.delayedCall(200, () => {
+                                this._animateSequential(reelIndex + 1, callback);
+                            });
+                        }
+                    });
+                }
+            }
+        });
     }
 
     evaluateCombo(results) {
@@ -96,7 +108,6 @@ class SlotMachine {
                 continue;
             }
 
-            // exact match (triple)
             const comboSorted = combo.symbols.slice().sort();
             const wildResults = results.map(r => r === 'gem' ? null : r);
 
