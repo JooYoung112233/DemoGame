@@ -101,7 +101,7 @@ class BattleScene extends Phaser.Scene {
         this.partyIds.forEach((id, i) => {
             const data = PARTY_DATA[id];
             if (!data) return;
-            const gx = 1;
+            let gx = 1;
             const gy = 1 + i * 2;
             if (gy >= this.GRID_ROWS) return;
             while (this.battleGrid[gy][gx] === 1 && gx < 3) gx++;
@@ -218,7 +218,8 @@ class BattleScene extends Phaser.Scene {
             return btn;
         };
 
-        const moveRange = Math.min(unit.ap, unit.data.moveRange);
+        const unitMoveRange = unit.data.moveRange || 3;
+        const moveRange = Math.min(unit.ap, unitMoveRange);
         if (moveRange > 0) {
             makeBtn(`🚶 이동 (${moveRange}칸)`, '#44aaff', '#0a1a2a', () => {
                 this.mode = 'select';
@@ -280,7 +281,7 @@ class BattleScene extends Phaser.Scene {
 
     showMoveRange(unit) {
         this.clearHighlights();
-        const range = Math.min(unit.ap, unit.data.moveRange);
+        const range = Math.min(unit.ap, unit.data.moveRange || 3);
         for (let dy = -range; dy <= range; dy++) {
             for (let dx = -range; dx <= range; dx++) {
                 if (Math.abs(dx) + Math.abs(dy) > range || (dx === 0 && dy === 0)) continue;
@@ -380,7 +381,7 @@ class BattleScene extends Phaser.Scene {
     }
 
     isInMoveRange(unit, gx, gy) {
-        const range = Math.min(unit.ap, unit.data.moveRange);
+        const range = Math.min(unit.ap, unit.data.moveRange || 3);
         const dist = Math.abs(unit.gridX - gx) + Math.abs(unit.gridY - gy);
         return dist <= range && dist > 0 &&
                this.battleGrid[gy][gx] !== 1 &&

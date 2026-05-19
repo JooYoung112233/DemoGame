@@ -96,13 +96,11 @@ class MapGenerator {
                 }
             }
         }
-        const doorSide = Math.floor(Math.random() * 4);
-        let dx, dy;
-        if (doorSide === 0) { dx = room.cx; dy = room.y; }
-        else if (doorSide === 1) { dx = room.cx; dy = room.y + room.h - 1; }
-        else if (doorSide === 2) { dx = room.x; dy = room.cy; }
-        else { dx = room.x + room.w - 1; dy = room.cy; }
-        grid[dy][dx] = TILE.DOOR;
+
+        grid[room.y][room.cx] = TILE.DOOR;
+        grid[room.y + room.h - 1][room.cx] = TILE.DOOR;
+        grid[room.cy][room.x] = TILE.DOOR;
+        grid[room.cy][room.x + room.w - 1] = TILE.DOOR;
 
         if (room.w >= 9) {
             const splitX = room.x + Math.floor(room.w / 2);
@@ -127,13 +125,17 @@ class MapGenerator {
             let cx = a.cx, cy = a.cy;
             while (cx !== b.cx) {
                 if (cy >= 0 && cy < H && cx >= 0 && cx < W) {
-                    if (grid[cy][cx] === TILE.GRASS) grid[cy][cx] = TILE.ROAD;
+                    const t = grid[cy][cx];
+                    if (t === TILE.GRASS) grid[cy][cx] = TILE.ROAD;
+                    else if (t === TILE.WALL) grid[cy][cx] = TILE.DOOR;
                 }
                 cx += cx < b.cx ? 1 : -1;
             }
             while (cy !== b.cy) {
                 if (cy >= 0 && cy < H && cx >= 0 && cx < W) {
-                    if (grid[cy][cx] === TILE.GRASS) grid[cy][cx] = TILE.ROAD;
+                    const t = grid[cy][cx];
+                    if (t === TILE.GRASS) grid[cy][cx] = TILE.ROAD;
+                    else if (t === TILE.WALL) grid[cy][cx] = TILE.DOOR;
                 }
                 cy += cy < b.cy ? 1 : -1;
             }

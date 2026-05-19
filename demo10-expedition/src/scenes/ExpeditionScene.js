@@ -43,9 +43,12 @@ class ExpeditionScene extends Phaser.Scene {
         this.isMoving = false;
         this.enemiesDefeated = [];
         this.inventoryOpen = false;
+        this.isSearching = false;
+        this.fullMapOpen = false;
         this.searchPrompt = null;
         this.moveTimer = 0;
         this.MOVE_DELAY = 100;
+        this.confirmingExit = false;
     }
 
     drawMap() {
@@ -179,38 +182,19 @@ class ExpeditionScene extends Phaser.Scene {
     }
 
     setupInput() {
-        this.game.canvas.focus();
+        if (this.game.canvas) {
+            this.game.canvas.setAttribute('tabindex', '0');
+            this.game.canvas.focus();
+        }
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wasd = { W: this.input.keyboard.addKey('W'), A: this.input.keyboard.addKey('A'), S: this.input.keyboard.addKey('S'), D: this.input.keyboard.addKey('D') };
         this.eKey = this.input.keyboard.addKey('E');
         this.tabKey = this.input.keyboard.addKey('TAB');
         this.mKey = this.input.keyboard.addKey('M');
-
-        this.input.keyboard.on('keydown-E', () => {
-            if (this.isSearching) {
-                this.closeLootPopup();
-            } else if (!this.inventoryOpen && !this.fullMapOpen) {
-                this.interact();
-            }
-        });
-        this.input.keyboard.on('keydown-TAB', (e) => {
-            e.preventDefault();
-            if (this.isSearching) return;
-            this.toggleInventory();
-        });
-        this.input.keyboard.on('keydown-ESC', () => {
-            if (this.isSearching) { this.closeLootPopup(); return; }
-            if (this.inventoryOpen) { this.toggleInventory(); return; }
-            if (this.fullMapOpen) { this.toggleFullMap(); return; }
-            this.confirmExit();
-        });
-        this.input.keyboard.on('keydown-M', () => {
-            if (this.isSearching || this.inventoryOpen) return;
-            this.toggleFullMap();
-        });
+        this.escKey = this.input.keyboard.addKey('ESC');
 
         this.input.on('pointerdown', () => {
-            this.game.canvas.focus();
+            if (this.game.canvas) this.game.canvas.focus();
         });
     }
 
@@ -315,6 +299,40 @@ class ExpeditionScene extends Phaser.Scene {
     }
 
     update(time) {
+        if (Phaser.Input.Keyboard.JustDown(this.eKey)) {
+            if (this.isSearching) {
+                this.closeLootPopup();
+            } else if (!this.inventoryOpen && !this.fullMapOpen && !this.isMoving) {
+                this.interact();
+            }
+            return;
+        }
+        if (Phaser.Input.Keyboard.JustDown(this.tabKey)) {
+            if (!this.isSearching) this.toggleInventory();
+            return;
+        }
+        if (Phaser.Input.Keyboard.JustDown(this.escKey)) {
+            if (this.isSearching) { this.closeLootPopup(); return; }
+            if (this.inventoryOpen) { this.toggleInventory(); return; }
+            if (this.fullMapOpen) { this.toggleFullMap(); return; }
+            if (this.confirmingExit) {
+                this.cameras.main.fadeOut(400, 0, 0, 0);
+                const self = this;
+                setTimeout(() => {
+                    self.scene.start('SafeHouseScene', {
+                        inventory: [], stash: self.stash, party: self.party, safe: false
+                    });
+                }, 450);
+            } else {
+                this.confirmExit();
+            }
+            return;
+        }
+        if (Phaser.Input.Keyboard.JustDown(this.mKey)) {
+            if (!this.isSearching && !this.inventoryOpen) this.toggleFullMap();
+            return;
+        }
+
         if (this.isMoving || this.inventoryOpen || this.fullMapOpen || this.isSearching) return;
         if (time - this.moveTimer < this.MOVE_DELAY) return;
 
@@ -334,7 +352,9 @@ class ExpeditionScene extends Phaser.Scene {
         const nx = this.player.gx + dx, ny = this.player.gy + dy;
         if (nx < 0 || ny < 0 || nx >= this.mapW || ny >= this.mapH) return;
         const tile = this.mapGrid[ny][nx];
-        if (tile === TILE.WALL || tile === TILE.WATER || tile === TILE.FURNITURE) return;
+        if (tile === TILE.WALL || tile === TILE.WATER || tile === TILE.FURNITURE ||
+            tile === TILE.BARREL || tile === TILE.LOCKER || tile === TILE.CRATE ||
+            tile === TILE.MEDICAL || tile === TILE.COMPUTER) return;
 
         this.isMoving = true;
         const T = this.TILE_SIZE;
@@ -584,23 +604,9 @@ class ExpeditionScene extends Phaser.Scene {
 
     confirmExit() {
         this.showMessage('⚠️ ESC 한번 더 = 긴급 철수 (전리품 전부 손실!)');
-        this.input.keyboard.removeKey('ESC');
-        const esc2 = this.input.keyboard.addKey('ESC');
-        esc2.once('down', () => {
-            this.cameras.main.fadeOut(400, 0, 0, 0);
-            const self2 = this;
-            setTimeout(() => {
-                self2.scene.start('SafeHouseScene', {
-                    inventory: [], stash: self2.stash, party: self2.party, safe: false
-                });
-            }, 450);
-        });
+        this.confirmingExit = true;
         this.time.delayedCall(3000, () => {
-            this.input.keyboard.removeKey('ESC');
-            this.input.keyboard.addKey('ESC').on('down', () => {
-                if (this.inventoryOpen) this.toggleInventory();
-                else this.confirmExit();
-            });
+            this.confirmingExit = false;
         });
     }
 
@@ -734,8 +740,5 @@ class ExpeditionScene extends Phaser.Scene {
             fontSize: '10px', fontFamily: 'monospace', color: '#666'
         }).setOrigin(0.5).setScrollFactor(0));
 
-        this.input.keyboard.once('keydown-M', () => {
-            if (this.fullMapOpen) this.toggleFullMap();
-        });
     }
 }
