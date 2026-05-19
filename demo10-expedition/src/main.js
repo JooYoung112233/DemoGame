@@ -1,0 +1,18 @@
+const config = {
+    type: Phaser.AUTO,
+    parent: 'game-container',
+    width: 1280,
+    height: 720,
+    backgroundColor: '#0a0a1a',
+    scene: [SafeHouseScene, ExpeditionScene, BattleScene],
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    render: {
+        pixelArt: false,
+        antialias: true
+    }
+};
+
+const game = new Phaser.Game(config);
