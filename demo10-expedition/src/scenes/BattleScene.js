@@ -9,11 +9,17 @@ class BattleScene extends Phaser.Scene {
     }
 
     create() {
+        const cam = this.cameras.main;
+        const W = cam.width, H = cam.height;
         this.GRID_COLS = 12;
         this.GRID_ROWS = 8;
-        this.CELL_SIZE = 64;
-        this.GRID_OFFSET_X = 80;
-        this.GRID_OFFSET_Y = 80;
+        const UI_PANEL_H = 110;
+        const availH = H - UI_PANEL_H - 20;
+        const availW = W - 40;
+        this.CELL_SIZE = Math.floor(Math.min(availW / this.GRID_COLS, availH / this.GRID_ROWS));
+        this.GRID_OFFSET_X = Math.floor((W - this.GRID_COLS * this.CELL_SIZE) / 2);
+        this.GRID_OFFSET_Y = Math.floor((H - UI_PANEL_H - this.GRID_ROWS * this.CELL_SIZE) / 2);
+        this.UI_PANEL_H = UI_PANEL_H;
 
         this.cameras.main.setBackgroundColor(0x0a0a1a);
         this.cameras.main.fadeIn(400);
@@ -121,11 +127,11 @@ class BattleScene extends Phaser.Scene {
         const cam = this.cameras.main;
         const w = cam.width;
         const h = cam.height;
-        const panelY = h - 120;
+        const panelY = h - this.UI_PANEL_H;
 
         const panelBg = this.add.graphics();
-        panelBg.fillStyle(0x111122, 0.9);
-        panelBg.fillRect(0, panelY, w, 120);
+        panelBg.fillStyle(0x111122, 0.95);
+        panelBg.fillRect(0, panelY, w, this.UI_PANEL_H);
         panelBg.lineStyle(1, 0x333366, 0.6);
         panelBg.lineBetween(0, panelY, w, panelY);
         this.uiContainer.add(panelBg);
@@ -181,46 +187,62 @@ class BattleScene extends Phaser.Scene {
 
     updateInfoPanel(unit) {
         this.turnText.setText(
-            `턴 ${this.turnManager.turnNumber}  |  ${unit.isPlayer ? '아군' : '적군'}: ${unit.data.name}`
+            `턴 ${this.turnManager.turnNumber}  |  ${unit.isPlayer ? '🔵 아군' : '🔴 적군'}: ${unit.data.name}`
         );
+        const apPips = '■'.repeat(unit.ap) + '□'.repeat(unit.maxAp - unit.ap);
         this.unitInfoText.setText(
-            `HP: ${unit.hp}/${unit.maxHp}  |  AP: ${unit.ap}/${unit.maxAp}  |  ATK: ${unit.data.atk}  DEF: ${unit.getEffectiveDef()}  범위: ${unit.data.range}`
+            `HP: ${unit.hp}/${unit.maxHp}  |  AP: ${apPips}  |  ATK: ${unit.data.atk}  DEF: ${unit.getEffectiveDef()}  RNG: ${unit.data.range}`
         );
     }
 
     createSkillButtons(unit) {
         this.clearSkillButtons();
         const cam = this.cameras.main;
-        const panelY = cam.height - 120;
-        const startX = 350;
+        const panelY = cam.height - this.UI_PANEL_H;
+        const btnFS = Math.floor(cam.height * 0.017);
+        const descFS = Math.floor(cam.height * 0.013);
+        const btnGap = Math.floor(cam.width * 0.012);
+        let curX = Math.floor(cam.width * 0.22);
 
-        const atkBtn = this.add.text(startX, panelY + 15, '[ ⚔ 기본공격 AP:1 ]', {
-            fontSize: '12px', fontFamily: 'monospace', color: '#ff6666',
-            backgroundColor: '#2a1111', padding: { x: 8, y: 4 }
-        }).setInteractive({ useHandCursor: true });
-        atkBtn.on('pointerdown', () => {
-            this.mode = 'attack';
-            this.selectedSkill = null;
-            this.clearHighlights();
-            this.showAttackRange(unit, unit.data.range);
-            this.actionHint.setText('공격할 적을 클릭하세요');
-        });
-        this.uiContainer.add(atkBtn);
-        this.skillButtons.push(atkBtn);
+        const makeBtn = (label, color, bgColor, onClick) => {
+            const btn = this.add.text(curX, panelY + 12, label, {
+                fontSize: `${btnFS}px`, fontFamily: 'monospace', color,
+                backgroundColor: bgColor, padding: { x: 10, y: 6 }
+            }).setInteractive({ useHandCursor: true });
+            btn.on('pointerdown', onClick);
+            btn.on('pointerover', () => btn.setAlpha(0.8));
+            btn.on('pointerout', () => btn.setAlpha(1));
+            this.uiContainer.add(btn);
+            this.skillButtons.push(btn);
+            curX += btn.width + btnGap;
+            return btn;
+        };
+
+        const moveRange = Math.min(unit.ap, unit.data.moveRange);
+        if (moveRange > 0) {
+            makeBtn(`🚶 이동 (${moveRange}칸)`, '#44aaff', '#0a1a2a', () => {
+                this.mode = 'select';
+                this.clearHighlights();
+                this.showMoveRange(unit);
+                this.actionHint.setText('이동할 칸을 클릭하세요');
+            });
+        }
+
+        if (unit.ap >= 1) {
+            makeBtn(`⚔ 공격 AP:1`, '#ff6666', '#2a0a0a', () => {
+                this.mode = 'attack';
+                this.selectedSkill = null;
+                this.clearHighlights();
+                this.showAttackRange(unit, unit.data.range);
+                this.actionHint.setText('공격할 적을 클릭하세요');
+            });
+        }
 
         if (unit.data.skills) {
-            unit.data.skills.forEach((skill, i) => {
+            unit.data.skills.forEach((skill) => {
                 const canUse = unit.ap >= skill.apCost;
-                const color = canUse ? '#44aaff' : '#555555';
-                const btn = this.add.text(startX + (i + 1) * 170, panelY + 15,
-                    `[ ${skill.name} AP:${skill.apCost} ]`, {
-                    fontSize: '12px', fontFamily: 'monospace', color,
-                    backgroundColor: canUse ? '#111a2a' : '#1a1a1a',
-                    padding: { x: 8, y: 4 }
-                });
                 if (canUse) {
-                    btn.setInteractive({ useHandCursor: true });
-                    btn.on('pointerdown', () => {
+                    const btn = makeBtn(`${skill.name} AP:${skill.apCost}`, '#44aaff', '#0a1a2a', () => {
                         this.selectedSkill = skill;
                         this.clearHighlights();
                         if (skill.type === 'heal' || skill.type === 'buff') {
@@ -233,13 +255,20 @@ class BattleScene extends Phaser.Scene {
                             this.actionHint.setText('대상 적을 클릭하세요');
                         }
                     });
+                    const desc = this.add.text(btn.x, panelY + 12 + btn.height + 4, skill.desc, {
+                        fontSize: `${descFS}px`, fontFamily: 'monospace', color: '#666666'
+                    });
+                    this.uiContainer.add(desc);
+                    this.skillButtons.push(desc);
+                } else {
+                    const btn = this.add.text(curX, panelY + 12, `${skill.name} AP:${skill.apCost}`, {
+                        fontSize: `${btnFS}px`, fontFamily: 'monospace', color: '#555555',
+                        backgroundColor: '#1a1a1a', padding: { x: 10, y: 6 }
+                    });
+                    this.uiContainer.add(btn);
+                    this.skillButtons.push(btn);
+                    curX += btn.width + btnGap;
                 }
-                const desc = this.add.text(startX + (i + 1) * 170, panelY + 42, skill.desc, {
-                    fontSize: '9px', fontFamily: 'monospace', color: '#666666'
-                });
-                this.uiContainer.add(btn);
-                this.uiContainer.add(desc);
-                this.skillButtons.push(btn, desc);
             });
         }
     }
@@ -366,13 +395,21 @@ class BattleScene extends Phaser.Scene {
 
         unit.animateMoveTo(gx, gy, () => {
             this.busy = false;
-            if (unit.ap > 0) {
-                this.showMoveRange(unit);
-                this.updateInfoPanel(unit);
-            } else {
-                this.nextTurn();
-            }
+            this.continueOrEndTurn(unit);
         });
+    }
+
+    continueOrEndTurn(unit) {
+        if (unit.ap > 0 && unit.alive) {
+            this.mode = 'select';
+            this.clearHighlights();
+            this.showMoveRange(unit);
+            this.createSkillButtons(unit);
+            this.updateInfoPanel(unit);
+            this.actionHint.setText('이동할 칸을 클릭하거나 스킬을 선택하세요');
+        } else {
+            this.nextTurn();
+        }
     }
 
     doBasicAttack(unit, gx, gy) {
@@ -390,13 +427,8 @@ class BattleScene extends Phaser.Scene {
 
         this.time.delayedCall(300, () => {
             this.busy = false;
-            this.checkBattleEnd();
-            if (unit.ap > 0 && unit.alive) {
-                this.mode = 'select';
-                this.showMoveRange(unit);
-            } else {
-                this.nextTurn();
-            }
+            if (this.checkBattleEnd()) return;
+            this.continueOrEndTurn(unit);
         });
     }
 
@@ -419,14 +451,8 @@ class BattleScene extends Phaser.Scene {
 
         this.time.delayedCall(400, () => {
             this.busy = false;
-            this.checkBattleEnd();
-            if (unit.ap > 0 && unit.alive) {
-                this.mode = 'select';
-                this.showMoveRange(unit);
-                this.createSkillButtons(unit);
-            } else {
-                this.nextTurn();
-            }
+            if (this.checkBattleEnd()) return;
+            this.continueOrEndTurn(unit);
         });
     }
 
@@ -450,7 +476,7 @@ class BattleScene extends Phaser.Scene {
             DamagePopup.showText(this, target.container.x, target.container.y - 35, skill.name, '#ffcc44');
             if (skill.effect === 'apUp') {
                 target.ap += skill.value;
-                if (target.apText) target.apText.setText(`AP:${target.ap}`);
+                target.drawApPips();
             }
         }
 
@@ -459,13 +485,7 @@ class BattleScene extends Phaser.Scene {
 
         this.time.delayedCall(400, () => {
             this.busy = false;
-            if (unit.ap > 0 && unit.alive) {
-                this.mode = 'select';
-                this.showMoveRange(unit);
-                this.createSkillButtons(unit);
-            } else {
-                this.nextTurn();
-            }
+            this.continueOrEndTurn(unit);
         });
     }
 
@@ -558,9 +578,9 @@ class BattleScene extends Phaser.Scene {
         const cam = this.cameras.main;
         const isVictory = result === 'victory';
 
-        const title = this.add.text(cam.width / 2, cam.height / 2 - 60,
+        const title = this.add.text(cam.width / 2, cam.height * 0.35,
             isVictory ? '⚔ 승리!' : '💀 패배...', {
-            fontSize: '48px', fontFamily: 'monospace',
+            fontSize: `${Math.floor(cam.height * 0.07)}px`, fontFamily: 'monospace',
             color: isVictory ? '#44ff88' : '#ff4444',
             stroke: '#000000', strokeThickness: 4
         }).setOrigin(0.5).setDepth(301);
@@ -583,12 +603,12 @@ class BattleScene extends Phaser.Scene {
             }
         }
 
-        const info = this.add.text(cam.width / 2, cam.height / 2, lootText, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffffff'
+        const info = this.add.text(cam.width / 2, cam.height * 0.5, lootText, {
+            fontSize: `${Math.floor(cam.height * 0.025)}px`, fontFamily: 'monospace', color: '#ffffff'
         }).setOrigin(0.5).setDepth(301);
 
-        const continueBtn = this.add.text(cam.width / 2, cam.height / 2 + 60, '[ 계속 ]', {
-            fontSize: '20px', fontFamily: 'monospace', color: '#44aaff',
+        const continueBtn = this.add.text(cam.width / 2, cam.height * 0.62, '[ 계속 ]', {
+            fontSize: `${Math.floor(cam.height * 0.03)}px`, fontFamily: 'monospace', color: '#44aaff',
             backgroundColor: '#111a2a', padding: { x: 20, y: 10 }
         }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });
 

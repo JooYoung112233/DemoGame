@@ -20,7 +20,8 @@ class BattleUnit {
 
     draw() {
         this.container.removeAll(true);
-        const s = 28;
+        const cellSize = this.scene.CELL_SIZE || 64;
+        const s = Math.floor(cellSize * 0.42);
 
         const body = this.scene.add.graphics();
         const c = this.data.color;
@@ -38,20 +39,46 @@ class BattleUnit {
             stroke: '#000000', strokeThickness: 2
         }).setOrigin(0.5);
 
+        const barW = Math.floor(s * 0.95);
         const hpBarBg = this.scene.add.graphics();
         hpBarBg.fillStyle(0x333333, 0.8);
-        hpBarBg.fillRect(-14, s / 2 + 4, 28, 4);
+        hpBarBg.fillRect(-barW / 2, s / 2 + 4, barW, 4);
 
         this.hpBar = this.scene.add.graphics();
+        this.hpBarWidth = barW;
         this.updateHpBar();
 
-        const apText = this.scene.add.text(0, s / 2 + 12, `AP:${this.ap}`, {
-            fontSize: '8px', fontFamily: 'monospace', color: '#ffcc44',
-            stroke: '#000000', strokeThickness: 2
-        }).setOrigin(0.5);
-        this.apText = apText;
+        this.apPips = this.scene.add.graphics();
+        this.drawApPips();
 
-        this.container.add([shadow, body, hpBarBg, this.hpBar, nameText, apText]);
+        this.container.add([shadow, body, hpBarBg, this.hpBar, nameText, this.apPips]);
+    }
+
+    drawApPips() {
+        if (!this.apPips) return;
+        this.apPips.clear();
+        const cellSize = this.scene.CELL_SIZE || 64;
+        const s = Math.floor(cellSize * 0.42);
+        const pipSize = Math.max(4, Math.floor(cellSize * 0.07));
+        const pipGap = Math.floor(pipSize * 0.5);
+        const totalW = this.maxAp * pipSize + (this.maxAp - 1) * pipGap;
+        const startX = -totalW / 2;
+        const py = s / 2 + 11;
+
+        for (let i = 0; i < this.maxAp; i++) {
+            const px = startX + i * (pipSize + pipGap);
+            if (i < this.ap) {
+                this.apPips.fillStyle(0xffcc44, 1);
+                this.apPips.fillRoundedRect(px, py, pipSize, pipSize, 1);
+                this.apPips.lineStyle(1, 0xffee88, 0.6);
+                this.apPips.strokeRoundedRect(px, py, pipSize, pipSize, 1);
+            } else {
+                this.apPips.fillStyle(0x333333, 0.6);
+                this.apPips.fillRoundedRect(px, py, pipSize, pipSize, 1);
+                this.apPips.lineStyle(1, 0x555555, 0.3);
+                this.apPips.strokeRoundedRect(px, py, pipSize, pipSize, 1);
+            }
+        }
     }
 
     updateHpBar() {
@@ -59,8 +86,11 @@ class BattleUnit {
         this.hpBar.clear();
         const ratio = Math.max(0, this.hp / this.maxHp);
         const color = ratio > 0.5 ? 0x44ff44 : ratio > 0.25 ? 0xffcc44 : 0xff4444;
+        const cellSize = this.scene.CELL_SIZE || 64;
+        const s = Math.floor(cellSize * 0.42);
+        const barW = this.hpBarWidth || 28;
         this.hpBar.fillStyle(color, 1);
-        this.hpBar.fillRect(-14, 18, 28 * ratio, 4);
+        this.hpBar.fillRect(-barW / 2, s / 2 + 4, barW * ratio, 4);
     }
 
     updatePosition() {
@@ -118,12 +148,12 @@ class BattleUnit {
 
     useAP(cost) {
         this.ap = Math.max(0, this.ap - cost);
-        if (this.apText) this.apText.setText(`AP:${this.ap}`);
+        this.drawApPips();
     }
 
     resetAP() {
         this.ap = this.maxAp;
-        if (this.apText) this.apText.setText(`AP:${this.ap}`);
+        this.drawApPips();
         this.buffs = this.buffs.filter(b => {
             if (b.duration !== undefined) {
                 b.duration--;

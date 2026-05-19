@@ -175,56 +175,82 @@ class ExpeditionScene extends Phaser.Scene {
         const T = this.TILE_SIZE;
         this.cameras.main.setBounds(0, 0, this.mapW * T, this.mapH * T);
         this.cameras.main.startFollow(this.player.container, true, 0.12, 0.12);
-        this.cameras.main.setZoom(1.5);
+        this.cameras.main.setZoom(1.2);
     }
 
     setupInput() {
+        this.game.canvas.focus();
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wasd = { W: this.input.keyboard.addKey('W'), A: this.input.keyboard.addKey('A'), S: this.input.keyboard.addKey('S'), D: this.input.keyboard.addKey('D') };
-        this.input.keyboard.addKey('E').on('down', () => this.interact());
-        this.input.keyboard.addKey('TAB').on('down', () => this.toggleInventory());
-        this.input.keyboard.addKey('ESC').on('down', () => {
-            if (this.inventoryOpen) this.toggleInventory();
-            else this.confirmExit();
+        this.eKey = this.input.keyboard.addKey('E');
+        this.tabKey = this.input.keyboard.addKey('TAB');
+        this.mKey = this.input.keyboard.addKey('M');
+
+        this.input.keyboard.on('keydown-E', () => {
+            if (this.isSearching) {
+                this.closeLootPopup();
+            } else if (!this.inventoryOpen && !this.fullMapOpen) {
+                this.interact();
+            }
         });
-        this.input.keyboard.addKey('M').on('down', () => this.toggleFullMap());
+        this.input.keyboard.on('keydown-TAB', (e) => {
+            e.preventDefault();
+            if (this.isSearching) return;
+            this.toggleInventory();
+        });
+        this.input.keyboard.on('keydown-ESC', () => {
+            if (this.isSearching) { this.closeLootPopup(); return; }
+            if (this.inventoryOpen) { this.toggleInventory(); return; }
+            if (this.fullMapOpen) { this.toggleFullMap(); return; }
+            this.confirmExit();
+        });
+        this.input.keyboard.on('keydown-M', () => {
+            if (this.isSearching || this.inventoryOpen) return;
+            this.toggleFullMap();
+        });
+
+        this.input.on('pointerdown', () => {
+            this.game.canvas.focus();
+        });
     }
 
     createUI() {
         const cam = this.cameras.main;
         const w = cam.width, h = cam.height;
+        const fs = Math.floor(h * 0.02);
 
         const topBg = this.add.graphics().setScrollFactor(0).setDepth(100);
         topBg.fillStyle(0x000000, 0.6);
-        topBg.fillRoundedRect(10, 10, 240, 50, 8);
+        topBg.fillRoundedRect(10, 10, Math.floor(w * 0.2), Math.floor(h * 0.07), 8);
         this.uiLayer.add(topBg);
 
-        this.add.text(20, 16, this.zone.name, { fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold' }).setScrollFactor(0).setDepth(101);
-        this.add.text(20, 36, `난이도: ${'★'.repeat(this.zone.difficulty)}${'☆'.repeat(3 - this.zone.difficulty)}`, { fontSize: '11px', fontFamily: 'monospace', color: '#aaa' }).setScrollFactor(0).setDepth(101);
+        this.add.text(20, 16, this.zone.name, { fontSize: `${Math.floor(fs * 1.1)}px`, fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold' }).setScrollFactor(0).setDepth(101);
+        this.add.text(20, 16 + Math.floor(fs * 1.4), `난이도: ${'★'.repeat(this.zone.difficulty)}${'☆'.repeat(3 - this.zone.difficulty)}`, { fontSize: `${Math.floor(fs * 0.85)}px`, fontFamily: 'monospace', color: '#aaa' }).setScrollFactor(0).setDepth(101);
 
+        const invBgW = Math.floor(w * 0.18);
         const invBg = this.add.graphics().setScrollFactor(0).setDepth(100);
         invBg.fillStyle(0x000000, 0.6);
-        invBg.fillRoundedRect(w - 200, 10, 190, 30, 8);
+        invBg.fillRoundedRect(w - invBgW - 10, 10, invBgW, Math.floor(h * 0.045), 8);
         this.uiLayer.add(invBg);
 
-        this.inventoryText = this.add.text(w - 190, 18, '', { fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44' }).setScrollFactor(0).setDepth(101);
+        this.inventoryText = this.add.text(w - invBgW, 18, '', { fontSize: `${fs}px`, fontFamily: 'monospace', color: '#ffcc44' }).setScrollFactor(0).setDepth(101);
         this.updateInventoryCount();
 
         const ctrlBg = this.add.graphics().setScrollFactor(0).setDepth(100);
         ctrlBg.fillStyle(0x000000, 0.5);
-        ctrlBg.fillRoundedRect(10, h - 35, 520, 25, 6);
+        ctrlBg.fillRoundedRect(10, h - Math.floor(h * 0.05), Math.floor(w * 0.45), Math.floor(h * 0.035), 6);
         this.uiLayer.add(ctrlBg);
 
-        this.add.text(20, h - 30, 'WASD:이동  E:수색/탈출  TAB:인벤  M:전체맵  ESC:긴급철수', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#666'
+        this.add.text(20, h - Math.floor(h * 0.045), 'WASD:이동  E:수색/탈출  TAB:인벤  M:전체맵  ESC:긴급철수', {
+            fontSize: `${Math.floor(fs * 0.75)}px`, fontFamily: 'monospace', color: '#666'
         }).setScrollFactor(0).setDepth(101);
 
-        this.msgText = this.add.text(w / 2, h - 60, '', {
-            fontSize: '13px', fontFamily: 'monospace', color: '#fff', stroke: '#000', strokeThickness: 3, align: 'center'
+        this.msgText = this.add.text(w / 2, h - Math.floor(h * 0.09), '', {
+            fontSize: `${Math.floor(fs * 1)}px`, fontFamily: 'monospace', color: '#fff', stroke: '#000', strokeThickness: 3, align: 'center'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(101).setAlpha(0);
 
-        this.searchPromptText = this.add.text(w / 2, h / 2 + 50, '', {
-            fontSize: '14px', fontFamily: 'monospace', color: '#ffcc44', stroke: '#000', strokeThickness: 3, align: 'center'
+        this.searchPromptText = this.add.text(w / 2, h / 2 + Math.floor(h * 0.07), '', {
+            fontSize: `${Math.floor(fs * 1.1)}px`, fontFamily: 'monospace', color: '#ffcc44', stroke: '#000', strokeThickness: 3, align: 'center'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(150).setAlpha(0);
 
         this.drawMinimap();
@@ -240,9 +266,10 @@ class ExpeditionScene extends Phaser.Scene {
 
     drawMinimap() {
         const cam = this.cameras.main;
-        const mmSize = 2;
+        const maxMmW = Math.floor(cam.width * 0.15);
+        const mmSize = Math.max(1, Math.floor(maxMmW / this.mapW));
         const mmX = cam.width - this.mapW * mmSize - 12;
-        const mmY = 50;
+        const mmY = Math.floor(cam.height * 0.08);
 
         const bg = this.add.graphics().setScrollFactor(0).setDepth(100);
         bg.fillStyle(0x000000, 0.7);
@@ -288,7 +315,7 @@ class ExpeditionScene extends Phaser.Scene {
     }
 
     update(time) {
-        if (this.isMoving || this.inventoryOpen || this.fullMapOpen) return;
+        if (this.isMoving || this.inventoryOpen || this.fullMapOpen || this.isSearching) return;
         if (time - this.moveTimer < this.MOVE_DELAY) return;
 
         let dx = 0, dy = 0;
@@ -351,10 +378,34 @@ class ExpeditionScene extends Phaser.Scene {
             this.showMessage(`🚁 탈출 지점! E키로 탈출`);
         }
 
+        let foundSearchable = false;
         const searchable = SEARCHABLE_TILES[tile];
         if (searchable && !this.searched[`${x},${y}`]) {
             this.searchPromptText.setText(`E키: ${searchable.icon} ${searchable.name} 수색`).setAlpha(1);
-        } else {
+            foundSearchable = true;
+        }
+
+        if (!foundSearchable) {
+            const dirs = [[0,-1],[0,1],[-1,0],[1,0]];
+            for (const [dx, dy] of dirs) {
+                const nx = x + dx, ny = y + dy;
+                if (nx < 0 || ny < 0 || nx >= this.mapW || ny >= this.mapH) continue;
+                const adjTile = this.mapGrid[ny][nx];
+                const adjSearch = SEARCHABLE_TILES[adjTile];
+                if (adjSearch && !this.searched[`${nx},${ny}`]) {
+                    this.searchPromptText.setText(`E키: ${adjSearch.icon} ${adjSearch.name} 수색`).setAlpha(1);
+                    foundSearchable = true;
+                    break;
+                }
+                if (adjTile === TILE.EXIT) {
+                    this.searchPromptText.setText(`E키: 🚁 탈출`).setAlpha(1);
+                    foundSearchable = true;
+                    break;
+                }
+            }
+        }
+
+        if (!foundSearchable) {
             this.searchPromptText.setAlpha(0);
         }
 
@@ -374,7 +425,26 @@ class ExpeditionScene extends Phaser.Scene {
         const searchable = SEARCHABLE_TILES[tile];
         if (searchable && !this.searched[`${x},${y}`]) {
             this.searchContainer(x, y, searchable);
+            return;
         }
+
+        const dirs = [[0,-1],[0,1],[-1,0],[1,0]];
+        for (const [dx, dy] of dirs) {
+            const nx = x + dx, ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= this.mapW || ny >= this.mapH) continue;
+            const adjTile = this.mapGrid[ny][nx];
+            const adjSearch = SEARCHABLE_TILES[adjTile];
+            if (adjSearch && !this.searched[`${nx},${ny}`]) {
+                this.searchContainer(nx, ny, adjSearch);
+                return;
+            }
+            if (adjTile === TILE.EXIT) {
+                this.extractSuccess();
+                return;
+            }
+        }
+
+        this.showMessage('주변에 수색할 것이 없다', 1500);
     }
 
     searchContainer(x, y, searchable) {
@@ -391,7 +461,7 @@ class ExpeditionScene extends Phaser.Scene {
         });
 
         if (found.length === 0) {
-            this.showMessage(`${searchable.icon} 비어있다...`);
+            this.showLootPopup(searchable, [], 0);
             return;
         }
 
@@ -400,12 +470,86 @@ class ExpeditionScene extends Phaser.Scene {
             if (this.inventory.length < MAX_INVENTORY) { this.inventory.push(id); added++; }
         });
 
-        const names = found.slice(0, 4).map(id => `${ITEM_DATA[id]?.icon || ''}${ITEM_DATA[id]?.name || id}`).join(', ');
-        const overflow = found.length - added;
-        let msg = `${searchable.icon} 획득: ${names}`;
-        if (overflow > 0) msg += ` (${overflow}개 초과 — 인벤 가득!)`;
-        this.showMessage(msg, 3000);
+        this.showLootPopup(searchable, found, found.length - added);
         this.updateInventoryCount();
+    }
+
+    showLootPopup(searchable, found, overflow) {
+        if (this.lootPopup) this.lootPopup.destroy();
+
+        const cam = this.cameras.main;
+        const w = cam.width, h = cam.height;
+        const pw = Math.floor(w * 0.28);
+        const lineH = Math.floor(h * 0.03);
+        const headerH = Math.floor(h * 0.06);
+        const footerH = Math.floor(h * 0.04);
+        const ph = headerH + Math.max(found.length, 1) * lineH + footerH + 20;
+        const px = Math.floor((w - pw) / 2);
+        const py = Math.floor((h - ph) / 2);
+
+        this.lootPopup = this.add.container(0, 0).setScrollFactor(0).setDepth(250);
+        this.isSearching = true;
+
+        const overlay = this.add.graphics().setScrollFactor(0);
+        overlay.fillStyle(0x000000, 0.4);
+        overlay.fillRect(0, 0, w, h);
+        this.lootPopup.add(overlay);
+
+        const bg = this.add.graphics().setScrollFactor(0);
+        bg.fillStyle(0x111122, 0.95);
+        bg.fillRoundedRect(px, py, pw, ph, 10);
+        bg.lineStyle(2, found.length > 0 ? 0x44ff88 : 0x666666, 0.8);
+        bg.strokeRoundedRect(px, py, pw, ph, 10);
+        this.lootPopup.add(bg);
+
+        const fs = Math.floor(h * 0.02);
+        this.lootPopup.add(this.add.text(px + pw / 2, py + 12, `${searchable.icon} ${searchable.name} 수색`, {
+            fontSize: `${Math.floor(fs * 1.1)}px`, fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0));
+
+        if (found.length === 0) {
+            this.lootPopup.add(this.add.text(px + pw / 2, py + headerH + 10, '비어있다...', {
+                fontSize: `${fs}px`, fontFamily: 'monospace', color: '#666'
+            }).setOrigin(0.5).setScrollFactor(0));
+        } else {
+            const counts = {};
+            found.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+            let row = 0;
+            Object.entries(counts).forEach(([id, count]) => {
+                const item = ITEM_DATA[id];
+                if (!item) return;
+                const iy = py + headerH + row * lineH;
+                this.lootPopup.add(this.add.text(px + 15, iy, `${item.icon} ${item.name} x${count}`, {
+                    fontSize: `${Math.floor(fs * 0.9)}px`, fontFamily: 'monospace', color: '#44ff88'
+                }).setScrollFactor(0));
+                this.lootPopup.add(this.add.text(px + pw - 15, iy, `${item.value * count}G`, {
+                    fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace', color: '#ffcc44'
+                }).setOrigin(1, 0).setScrollFactor(0));
+                row++;
+            });
+
+            if (overflow > 0) {
+                this.lootPopup.add(this.add.text(px + pw / 2, py + headerH + row * lineH + 4, `⚠ ${overflow}개 초과 — 인벤토리 가득!`, {
+                    fontSize: `${Math.floor(fs * 0.75)}px`, fontFamily: 'monospace', color: '#ff6644'
+                }).setOrigin(0.5).setScrollFactor(0));
+            }
+        }
+
+        const closeText = this.add.text(px + pw / 2, py + ph - footerH + 2, '[ E / ESC / 클릭: 닫기 ]', {
+            fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace', color: '#888'
+        }).setOrigin(0.5).setScrollFactor(0);
+        this.lootPopup.add(closeText);
+
+        overlay.setInteractive(new Phaser.Geom.Rectangle(0, 0, w, h), Phaser.Geom.Rectangle.Contains);
+        overlay.on('pointerdown', () => this.closeLootPopup());
+    }
+
+    closeLootPopup() {
+        if (this.lootPopup) {
+            this.lootPopup.destroy();
+            this.lootPopup = null;
+            this.isSearching = false;
+        }
     }
 
     startBattle(enemySprite) {
@@ -469,8 +613,10 @@ class ExpeditionScene extends Phaser.Scene {
         }
         this.inventoryOpen = true;
         const cam = this.cameras.main;
-        const pw = 360, ph = 450;
-        const px = (cam.width - pw) / 2, py = (cam.height - ph) / 2;
+        const pw = Math.floor(cam.width * 0.3);
+        const ph = Math.floor(cam.height * 0.7);
+        const px = Math.floor((cam.width - pw) / 2);
+        const py = Math.floor((cam.height - ph) / 2);
 
         this.inventoryPanel = this.add.container(0, 0).setScrollFactor(0).setDepth(200);
 
@@ -486,14 +632,17 @@ class ExpeditionScene extends Phaser.Scene {
         bg.strokeRoundedRect(px, py, pw, ph, 12);
         this.inventoryPanel.add(bg);
 
+        const ifs = Math.floor(cam.height * 0.022);
+        const rowH = Math.floor(ifs * 1.8);
+
         this.inventoryPanel.add(this.add.text(px + pw / 2, py + 15, `🎒 인벤토리 (${this.inventory.length}/${MAX_INVENTORY})`, {
-            fontSize: '16px', fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+            fontSize: `${Math.floor(ifs * 1.2)}px`, fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
         }).setOrigin(0.5).setScrollFactor(0));
 
         const totalWeight = this.inventory.reduce((s, id) => s + (ITEM_DATA[id]?.weight || 0), 0);
         const totalValue = this.getInventoryValue();
         this.inventoryPanel.add(this.add.text(px + pw / 2, py + 38, `무게: ${totalWeight.toFixed(1)}kg  |  가치: ${totalValue}G`, {
-            fontSize: '11px', fontFamily: 'monospace', color: '#888'
+            fontSize: `${Math.floor(ifs * 0.85)}px`, fontFamily: 'monospace', color: '#888'
         }).setOrigin(0.5).setScrollFactor(0));
 
         const counts = {};
@@ -512,26 +661,26 @@ class ExpeditionScene extends Phaser.Scene {
             if (item.type !== lastType) {
                 lastType = item.type;
                 const typeNames = { material: '재료', consumable: '소모품', ammo: '탄약', equipment: '장비', valuable: '귀중품', key: '열쇠' };
-                this.inventoryPanel.add(this.add.text(px + 15, py + 60 + row * 22, `── ${typeNames[item.type] || item.type} ──`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: '#666'
+                this.inventoryPanel.add(this.add.text(px + 15, py + 60 + row * rowH, `── ${typeNames[item.type] || item.type} ──`, {
+                    fontSize: `${Math.floor(ifs * 0.75)}px`, fontFamily: 'monospace', color: '#666'
                 }).setScrollFactor(0));
                 row++;
             }
-            this.inventoryPanel.add(this.add.text(px + 15, py + 60 + row * 22,
+            this.inventoryPanel.add(this.add.text(px + 15, py + 60 + row * rowH,
                 `${item.icon} ${item.name} x${count}  (${item.value}G)`, {
-                fontSize: '11px', fontFamily: 'monospace', color: '#ccc'
+                fontSize: `${Math.floor(ifs * 0.85)}px`, fontFamily: 'monospace', color: '#ccc'
             }).setScrollFactor(0));
             row++;
         });
 
         if (this.inventory.length === 0) {
             this.inventoryPanel.add(this.add.text(px + pw / 2, py + 80, '비어있음', {
-                fontSize: '13px', fontFamily: 'monospace', color: '#555'
+                fontSize: `${ifs}px`, fontFamily: 'monospace', color: '#555'
             }).setOrigin(0.5).setScrollFactor(0));
         }
 
         this.inventoryPanel.add(this.add.text(px + pw / 2, py + ph - 20, 'TAB / ESC: 닫기', {
-            fontSize: '10px', fontFamily: 'monospace', color: '#666'
+            fontSize: `${Math.floor(ifs * 0.75)}px`, fontFamily: 'monospace', color: '#666'
         }).setOrigin(0.5).setScrollFactor(0));
     }
 
