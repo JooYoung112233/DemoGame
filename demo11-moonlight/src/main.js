@@ -13,7 +13,10 @@ const config = {
     pixelArt: false,
     antialias: true,
     audio: { noAudio: true },
-    scale: { mode: Phaser.Scale.NONE },
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
     scene: [TitleScene, MorningScene, ShopScene, CommissionScene],
 };
 
