@@ -1,35 +1,28 @@
-// 전투 결과 계산
 class CombatResolver {
     constructor() {}
 
-    resolve(slotResults, playerState, enemies, slotMachine) {
+    resolve(slotResults, playerState, enemies, slotMachine, comboUpgrades) {
         const combo = slotMachine.evaluateCombo(slotResults);
         const actions = [];
 
         if (combo) {
+            const upgLvl = (comboUpgrades && comboUpgrades[combo.id]) || 0;
+            const mult = 1 + upgLvl * 0.2;
+            const boosted = {};
+            for (const [k, v] of Object.entries(combo.effect)) {
+                boosted[k] = (typeof v === 'number') ? Math.floor(v * mult) : v;
+            }
             actions.push({
-                type: 'combo',
-                name: combo.name,
-                desc: combo.desc,
-                effect: { ...combo.effect }
+                type: 'combo', name: combo.name, desc: combo.desc,
+                effect: boosted
             });
         } else {
             const individual = slotMachine.getIndividualEffects(slotResults);
-            if (individual.damage > 0) {
-                actions.push({ type: 'attack', effect: { damage: individual.damage } });
-            }
-            if (individual.block > 0) {
-                actions.push({ type: 'defend', effect: { block: individual.block } });
-            }
-            if (individual.heal > 0) {
-                actions.push({ type: 'heal', effect: { heal: individual.heal } });
-            }
-            if (individual.gold > 0) {
-                actions.push({ type: 'gold', effect: { gold: individual.gold } });
-            }
-            if (individual.selfDamage > 0) {
-                actions.push({ type: 'curse', effect: { selfDamage: individual.selfDamage } });
-            }
+            if (individual.damage > 0) actions.push({ type: 'attack', effect: { damage: individual.damage } });
+            if (individual.block > 0) actions.push({ type: 'defend', effect: { block: individual.block } });
+            if (individual.heal > 0) actions.push({ type: 'heal', effect: { heal: individual.heal } });
+            if (individual.gold > 0) actions.push({ type: 'gold', effect: { gold: individual.gold } });
+            if (individual.selfDamage > 0) actions.push({ type: 'curse', effect: { selfDamage: individual.selfDamage } });
         }
 
         return this.applyActions(actions, playerState, enemies);
@@ -37,13 +30,11 @@ class CombatResolver {
 
     applyActions(actions, player, enemies) {
         const log = [];
-        let totalBlock = 0;
 
         for (const action of actions) {
             const e = action.effect;
 
             if (e.block) {
-                totalBlock += e.block;
                 player.block += e.block;
                 log.push({ type: 'block', value: e.block, name: action.name });
             }
@@ -99,6 +90,10 @@ class CombatResolver {
                         log.push({ type: 'poison', value: e.poison, target: alive[0].name });
                     }
                 }
+            }
+
+            if (e.thorns) {
+                log.push({ type: 'thorns', value: e.thorns, name: action.name });
             }
 
             if (e.selfDamage) {
