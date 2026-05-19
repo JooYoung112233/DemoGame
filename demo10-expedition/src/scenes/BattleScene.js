@@ -614,25 +614,29 @@ class BattleScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });
 
         continueBtn.on('pointerdown', () => {
+            let nextScene, nextData;
+            if (this.returnData && isVictory) {
+                nextScene = 'ExpeditionScene';
+                nextData = {
+                    zone: this.returnData.zone,
+                    party: this.returnData.party,
+                    inventory: this.returnData.inventory,
+                    stash: this.returnData.stash
+                };
+            } else {
+                nextScene = 'SafeHouseScene';
+                nextData = {
+                    inventory: [],
+                    stash: this.returnData?.stash || [],
+                    party: this.partyIds,
+                    safe: false
+                };
+            }
             this.cameras.main.fadeOut(400);
-            const self = this;
-            setTimeout(() => {
-                if (self.returnData && isVictory) {
-                    self.scene.start('ExpeditionScene', {
-                        zone: self.returnData.zone,
-                        party: self.returnData.party,
-                        inventory: self.returnData.inventory,
-                        stash: self.returnData.stash
-                    });
-                } else {
-                    self.scene.start('SafeHouseScene', {
-                        inventory: [],
-                        stash: self.returnData?.stash || [],
-                        party: self.partyIds,
-                        safe: false
-                    });
-                }
-            }, 450);
+            this.time.delayedCall(450, () => {
+                game.scene.stop('BattleScene');
+                game.scene.start(nextScene, nextData);
+            });
         });
     }
 }

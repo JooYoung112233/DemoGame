@@ -316,13 +316,12 @@ class ExpeditionScene extends Phaser.Scene {
             if (this.inventoryOpen) { this.toggleInventory(); return; }
             if (this.fullMapOpen) { this.toggleFullMap(); return; }
             if (this.confirmingExit) {
+                const exitData = { inventory: [], stash: this.stash, party: this.party, safe: false };
                 this.cameras.main.fadeOut(400, 0, 0, 0);
-                const self = this;
-                setTimeout(() => {
-                    self.scene.start('SafeHouseScene', {
-                        inventory: [], stash: self.stash, party: self.party, safe: false
-                    });
-                }, 450);
+                this.time.delayedCall(450, () => {
+                    game.scene.stop('ExpeditionScene');
+                    game.scene.start('SafeHouseScene', exitData);
+                });
             } else {
                 this.confirmExit();
             }
@@ -576,30 +575,32 @@ class ExpeditionScene extends Phaser.Scene {
         enemySprite.setVisible(false);
         this.enemiesDefeated.push(enemySprite.enemyIndex);
 
+        const battleData = {
+            party: this.party,
+            enemies: enemySprite.encounter,
+            zone: this.zoneId,
+            returnData: {
+                zone: this.zoneId, party: this.party, inventory: this.inventory, stash: this.stash
+            }
+        };
         this.cameras.main.fadeOut(400, 0, 0, 0);
-        const self = this;
-        setTimeout(() => {
-            self.scene.start('BattleScene', {
-                party: self.party,
-                enemies: enemySprite.encounter,
-                zone: self.zoneId,
-                returnData: {
-                    zone: self.zoneId, party: self.party, inventory: self.inventory, stash: self.stash
-                }
-            });
-        }, 450);
+        this.time.delayedCall(450, () => {
+            game.scene.stop('ExpeditionScene');
+            game.scene.start('BattleScene', battleData);
+        });
     }
 
     extractSuccess() {
         this.showMessage('✅ 탈출 성공! 보급품을 가지고 안전가옥으로 귀환합니다.');
+        const extractData = {
+            inventory: [], stash: [...this.stash, ...this.inventory], party: this.party, safe: true,
+            lootValue: this.getInventoryValue(), extracted: true
+        };
         this.cameras.main.fadeOut(600, 0, 0, 0);
-        const self = this;
-        setTimeout(() => {
-            self.scene.start('SafeHouseScene', {
-                inventory: [], stash: [...self.stash, ...self.inventory], party: self.party, safe: true,
-                lootValue: self.getInventoryValue(), extracted: true
-            });
-        }, 650);
+        this.time.delayedCall(650, () => {
+            game.scene.stop('ExpeditionScene');
+            game.scene.start('SafeHouseScene', extractData);
+        });
     }
 
     confirmExit() {

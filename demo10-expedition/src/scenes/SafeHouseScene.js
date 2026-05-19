@@ -232,12 +232,11 @@ class SafeHouseScene extends Phaser.Scene {
     }
 
     startExpedition(zoneId) {
+        const expData = { zone: zoneId, party: this.party, inventory: [], stash: this.stash };
         this.cameras.main.fadeOut(400, 0, 0, 0);
-        const self = this;
-        setTimeout(() => {
-            self.scene.start('ExpeditionScene', {
-                zone: zoneId, party: self.party, inventory: [], stash: self.stash
-            });
-        }, 450);
+        this.time.delayedCall(450, () => {
+            game.scene.stop('SafeHouseScene');
+            game.scene.start('ExpeditionScene', expData);
+        });
     }
 }
