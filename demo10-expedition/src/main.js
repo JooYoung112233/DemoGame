@@ -16,3 +16,7 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+game.events.on('ready', () => {
+    if (game.canvas) game.canvas.setAttribute('tabindex', '0');
+    setTimeout(() => { if (game.canvas) game.canvas.focus(); }, 100);
+});
