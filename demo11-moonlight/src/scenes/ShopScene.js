@@ -7,19 +7,37 @@ class ShopScene extends Phaser.Scene {
         this.salesLog = [];
         this.customerIndex = 0;
         this.totalCustomers = this.gs.getCustomerCount();
-        this.phase = 'prep'; // prep → selling → done
+        this.phase = 'prep';
         this.haggleCount = 0;
         this.currentCustomer = null;
         this.currentSlot = null;
         this.pendingAction = null;
 
+        const MARGIN = 30;
+        const GAP = 12;
+        const TOTAL_W = 1280 - MARGIN * 2;
+        const TOP_BAR_H = 40;
+        const PANEL_TOP = TOP_BAR_H + 10;
+        const PANEL_H = 310;
+        const CUST_TOP = PANEL_TOP + PANEL_H + 10;
+        const CUST_H = 200;
+
+        const col3W = (TOTAL_W - GAP * 2) / 3;
+        this.panelW = col3W;
+        this.col1X = MARGIN + col3W / 2;
+        this.col2X = MARGIN + col3W + GAP + col3W / 2;
+        this.col3X = MARGIN + (col3W + GAP) * 2 + col3W / 2;
+        this.panelTop = PANEL_TOP;
+        this.panelH = PANEL_H;
+        this.custTop = CUST_TOP;
+        this.custH = CUST_H;
+
         this._drawBg();
-        this._drawInfoBar();
+        this._drawInfoBar(TOP_BAR_H);
         this._drawCraftPanel();
         this._drawShopDisplay();
         this._drawInventory();
         this._drawCustomerArea();
-        this._drawActions();
     }
 
     _drawBg() {
@@ -31,28 +49,29 @@ class ShopScene extends Phaser.Scene {
         }
     }
 
-    _drawInfoBar() {
-        this.add.rectangle(640, 20, 1280, 40, 0x151520);
-        this.goldLabel = this.add.text(15, 8, '', { fontSize: '14px', fontFamily: 'monospace', color: '#ffcc44' });
-        this.repLabel = this.add.text(150, 8, '', { fontSize: '14px', fontFamily: 'monospace', color: '#44ccff' });
-        this.phaseLabel = this.add.text(320, 8, '', { fontSize: '14px', fontFamily: 'monospace', color: '#aaa' });
-        this.customerLabel = this.add.text(550, 8, '', { fontSize: '14px', fontFamily: 'monospace', color: '#888' });
+    _drawInfoBar(barH) {
+        this.add.rectangle(640, barH / 2, 1280, barH, 0x151520);
+        const infoY = barH / 2 - 8;
+        this.goldLabel = this.add.text(40, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#ffcc44' });
+        this.repLabel = this.add.text(200, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#44ccff' });
+        this.phaseLabel = this.add.text(400, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#aaa' });
+        this.customerLabel = this.add.text(600, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#888' });
         const cat = CATEGORIES[this.gs.demandCategory];
-        this.add.text(750, 8, `📈 수요: ${cat ? cat.name : ''}`, { fontSize: '13px', fontFamily: 'monospace', color: '#88aa88' });
+        this.add.text(800, infoY, `수요: ${cat ? cat.name : ''}`, { fontSize: '13px', fontFamily: 'monospace', color: '#88aa88' });
         this._updateInfo();
     }
 
     _updateInfo() {
-        this.goldLabel.setText(`💰 ${this.gs.gold}G`);
-        this.repLabel.setText(`⭐ 평판 ${this.gs.reputation}`);
-        this.phaseLabel.setText(this.phase === 'prep' ? '🔨 준비 중' : this.phase === 'selling' ? '🏪 영업 중' : '🌙 마감');
-        this.customerLabel.setText(this.phase === 'selling' ? `👥 ${this.customerIndex}/${this.totalCustomers}` : '');
+        this.goldLabel.setText(`${this.gs.gold}G`);
+        this.repLabel.setText(`평판 ${this.gs.reputation}`);
+        this.phaseLabel.setText(this.phase === 'prep' ? '준비 중' : this.phase === 'selling' ? '영업 중' : '마감');
+        this.customerLabel.setText(this.phase === 'selling' ? `${this.customerIndex}/${this.totalCustomers}` : '');
     }
 
-    // === 제작 패널 (좌상단) ===
     _drawCraftPanel() {
-        this.add.rectangle(160, 195, 290, 310, 0x12121e, 0.95).setStrokeStyle(1, 0x222240);
-        this.add.text(160, 50, '🔨 제작', { fontSize: '16px', fontFamily: 'monospace', color: '#ff8844' }).setOrigin(0.5);
+        const px = this.col1X, py = this.panelTop + this.panelH / 2;
+        this.add.rectangle(px, py, this.panelW, this.panelH, 0x12121e, 0.95).setStrokeStyle(1, 0x222240);
+        this.add.text(px, this.panelTop + 18, '제작', { fontSize: '16px', fontFamily: 'monospace', color: '#ff8844' }).setOrigin(0.5);
 
         this.craftContainer = this.add.container(0, 0);
         this._refreshCraft();
@@ -61,19 +80,24 @@ class ShopScene extends Phaser.Scene {
     _refreshCraft() {
         this.craftContainer.removeAll(true);
         const recipes = Object.entries(RECIPE_DATA).filter(([, r]) => this.gs.day >= r.unlockDay);
+        const px = this.col1X;
+        const leftEdge = px - this.panelW / 2 + 15;
 
         if (recipes.length === 0) {
-            const t = this.add.text(160, 180, '해금된 레시피 없음', { fontSize: '12px', fontFamily: 'monospace', color: '#555' }).setOrigin(0.5);
+            const t = this.add.text(px, this.panelTop + this.panelH / 2, '해금된 레시피 없음', {
+                fontSize: '12px', fontFamily: 'monospace', color: '#555',
+            }).setOrigin(0.5);
             this.craftContainer.add(t);
             return;
         }
 
-        let y = 72;
+        let y = this.panelTop + 38;
+        const itemW = this.panelW - 20;
         recipes.forEach(([id, recipe]) => {
             const resultData = ITEM_DATA[recipe.result];
             const canCraft = recipe.ingredients.every(ing => this.gs.getItemCount(ing.id) >= ing.count);
 
-            const bg = this.add.rectangle(160, y + 18, 270, 36, canCraft ? 0x1a2a1a : 0x1a1a22, 0.9);
+            const bg = this.add.rectangle(px, y + 18, itemW, 38, canCraft ? 0x1a2a1a : 0x1a1a22, 0.9);
             bg.setStrokeStyle(1, canCraft ? 0x2a4a2a : 0x222235);
             this.craftContainer.add(bg);
 
@@ -83,10 +107,10 @@ class ShopScene extends Phaser.Scene {
                 return `${d.icon}${have}/${ing.count}`;
             }).join(' ');
 
-            const label = this.add.text(35, y + 6, `${resultData.icon} ${resultData.name}`, {
+            const label = this.add.text(leftEdge, y + 6, `${resultData.icon} ${resultData.name}`, {
                 fontSize: '12px', fontFamily: 'monospace', color: canCraft ? '#ddd' : '#666',
             });
-            const ings = this.add.text(35, y + 22, ingStr, {
+            const ings = this.add.text(leftEdge, y + 24, ingStr, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#888',
             });
             this.craftContainer.add([label, ings]);
@@ -98,38 +122,45 @@ class ShopScene extends Phaser.Scene {
                 bg.on('pointerdown', () => {
                     recipe.ingredients.forEach(ing => this.gs.removeItem(ing.id, ing.count));
                     this.gs.addItems([{ id: recipe.result, qty: 1 }]);
-                    Toast.show(this, `${resultData.icon} ${resultData.name} 제작!`, { color: '#ff8844', y: y + 18 });
+                    Toast.show(this, `${resultData.icon} ${resultData.name} 제작!`, { color: '#ff8844' });
                     this._refreshCraft();
                     this._refreshInventory();
                 });
             }
 
-            y += 42;
+            y += 44;
         });
     }
 
-    // === 진열대 (중앙 상단) ===
     _drawShopDisplay() {
-        this.add.rectangle(540, 195, 380, 310, 0x12121e, 0.95).setStrokeStyle(1, 0x222240);
-        this.add.text(540, 50, '🏪 진열대 (인벤에서 클릭하여 진열)', { fontSize: '13px', fontFamily: 'monospace', color: '#ffeebb' }).setOrigin(0.5);
+        const px = this.col2X, py = this.panelTop + this.panelH / 2;
+        this.add.rectangle(px, py, this.panelW, this.panelH, 0x12121e, 0.95).setStrokeStyle(1, 0x222240);
+        this.add.text(px, this.panelTop + 18, '진열대 (인벤에서 클릭)', { fontSize: '13px', fontFamily: 'monospace', color: '#ffeebb' }).setOrigin(0.5);
 
         this.displaySlots = [];
+        const slotW = 105, slotH = 85;
+        const cols = 3;
+        const gridW = cols * slotW + (cols - 1) * 8;
+        const gridLeft = px - gridW / 2;
+
         for (let i = 0; i < this.gs.shopSlots; i++) {
-            const col = i % 3, row = Math.floor(i / 3);
-            const sx = 385 + col * 115, sy = 75 + row * 110;
-            const slot = this.add.rectangle(sx + 42, sy + 38, 100, 85, 0x181830);
+            const col = i % cols, row = Math.floor(i / cols);
+            const sx = gridLeft + col * (slotW + 8) + slotW / 2;
+            const sy = this.panelTop + 50 + row * (slotH + 10) + slotH / 2;
+
+            const slot = this.add.rectangle(sx, sy, slotW, slotH, 0x181830);
             slot.setStrokeStyle(1, 0x2a2a50);
-            const icon = this.add.text(sx + 42, sy + 18, '', { fontSize: '26px' }).setOrigin(0.5);
-            const name = this.add.text(sx + 42, sy + 45, '', { fontSize: '10px', fontFamily: 'monospace', color: '#ccc' }).setOrigin(0.5);
-            const price = this.add.text(sx + 42, sy + 60, '', { fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44' }).setOrigin(0.5);
+            const icon = this.add.text(sx, sy - 18, '', { fontSize: '26px' }).setOrigin(0.5);
+            const name = this.add.text(sx, sy + 10, '', { fontSize: '10px', fontFamily: 'monospace', color: '#ccc' }).setOrigin(0.5);
+            const price = this.add.text(sx, sy + 26, '', { fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44' }).setOrigin(0.5);
             this.displaySlots.push({ bg: slot, icon, name, price, item: null, setPrice: 0 });
         }
     }
 
-    // === 인벤토리 (우측) ===
     _drawInventory() {
-        this.add.rectangle(920, 195, 340, 310, 0x12121e, 0.95).setStrokeStyle(1, 0x222240);
-        this.add.text(920, 50, '🎒 인벤토리', { fontSize: '14px', fontFamily: 'monospace', color: '#44ff88' }).setOrigin(0.5);
+        const px = this.col3X, py = this.panelTop + this.panelH / 2;
+        this.add.rectangle(px, py, this.panelW, this.panelH, 0x12121e, 0.95).setStrokeStyle(1, 0x222240);
+        this.add.text(px, this.panelTop + 18, '인벤토리', { fontSize: '14px', fontFamily: 'monospace', color: '#44ff88' }).setOrigin(0.5);
         this.invContainer = this.add.container(0, 0);
         this._refreshInventory();
     }
@@ -137,16 +168,24 @@ class ShopScene extends Phaser.Scene {
     _refreshInventory() {
         this.invContainer.removeAll(true);
         const items = this.gs.inventory.filter(i => i.qty > 0);
+        const px = this.col3X;
+        const cols = 3;
+        const cellW = (this.panelW - 20) / cols;
+        const gridLeft = px - this.panelW / 2 + 10;
+
         items.forEach((item, idx) => {
             const data = ITEM_DATA[item.id];
             if (!data) return;
-            const col = idx % 3, row = Math.floor(idx / 3);
-            const x = 770 + col * 110, y = 72 + row * 50;
-            const bg = this.add.rectangle(x + 40, y + 16, 100, 38, 0x181830);
+            const col = idx % cols, row = Math.floor(idx / cols);
+            const x = gridLeft + col * cellW;
+            const y = this.panelTop + 38 + row * 48;
+            const cellCx = x + cellW / 2;
+
+            const bg = this.add.rectangle(cellCx, y + 16, cellW - 6, 40, 0x181830);
             bg.setStrokeStyle(1, 0x222240);
             bg.setInteractive({ useHandCursor: true });
-            const t = this.add.text(x + 5, y + 4, `${data.icon}${data.name}`, { fontSize: '10px', fontFamily: 'monospace', color: '#ccc' });
-            const q = this.add.text(x + 5, y + 18, `x${item.qty} (${data.basePrice}G)`, { fontSize: '9px', fontFamily: 'monospace', color: '#888' });
+            const t = this.add.text(x + 4, y + 4, `${data.icon}${data.name}`, { fontSize: '10px', fontFamily: 'monospace', color: '#ccc' });
+            const q = this.add.text(x + 4, y + 20, `x${item.qty} (${data.basePrice}G)`, { fontSize: '9px', fontFamily: 'monospace', color: '#888' });
             bg.on('pointerover', () => bg.setFillStyle(0x222240));
             bg.on('pointerout', () => bg.setFillStyle(0x181830));
             bg.on('pointerdown', () => {
@@ -188,39 +227,43 @@ class ShopScene extends Phaser.Scene {
         slot.price.setColor(ratio > 1.3 ? '#ff4444' : ratio > 1.1 ? '#ffcc44' : '#44ff88');
     }
 
-    // === 손님 영역 (하단) ===
     _drawCustomerArea() {
-        this.add.rectangle(440, 530, 850, 190, 0x10101e, 0.95).setStrokeStyle(1, 0x222240);
-        this.custIcon = this.add.text(60, 460, '', { fontSize: '44px' }).setOrigin(0.5);
-        this.custName = this.add.text(60, 500, '', { fontSize: '13px', fontFamily: 'monospace', color: '#ddd' }).setOrigin(0.5);
-        this.custBudget = this.add.text(60, 518, '', { fontSize: '11px', fontFamily: 'monospace', color: '#888' }).setOrigin(0.5);
-        this.dialogText = this.add.text(440, 470, '', {
-            fontSize: '15px', fontFamily: 'monospace', color: '#eeddcc', wordWrap: { width: 500 }, align: 'center',
-        }).setOrigin(0.5);
-        this.custWant = this.add.text(440, 510, '', { fontSize: '13px', fontFamily: 'monospace', color: '#aaa' }).setOrigin(0.5);
+        const cx = 640;
+        const custW = 1280 - 60;
+        const custCy = this.custTop + this.custH / 2;
 
-        // 영업 시작 버튼
-        this.startBtn = new UIButton(this, 440, 570, '🏪 영업 시작!', {
-            width: 220, height: 44, bg: 0x2a2210, hoverBg: 0x3a3320,
-            textColor: '#ffcc88', fontSize: '16px',
+        this.add.rectangle(cx, custCy, custW, this.custH, 0x10101e, 0.95).setStrokeStyle(1, 0x222240);
+
+        const iconX = cx - custW / 2 + 60;
+        this.custIcon = this.add.text(iconX, custCy - 30, '', { fontSize: '40px' }).setOrigin(0.5);
+        this.custName = this.add.text(iconX, custCy + 6, '', { fontSize: '12px', fontFamily: 'monospace', color: '#ddd' }).setOrigin(0.5);
+        this.custBudget = this.add.text(iconX, custCy + 22, '', { fontSize: '10px', fontFamily: 'monospace', color: '#888' }).setOrigin(0.5);
+
+        this.dialogText = this.add.text(cx + 30, custCy - 20, '', {
+            fontSize: '14px', fontFamily: 'monospace', color: '#eeddcc', wordWrap: { width: 480 }, align: 'center',
+        }).setOrigin(0.5);
+        this.custWant = this.add.text(cx + 30, custCy + 10, '', { fontSize: '12px', fontFamily: 'monospace', color: '#aaa' }).setOrigin(0.5);
+
+        const btnY = custCy + 55;
+        this.startBtn = new UIButton(this, cx, btnY, '영업 시작!', {
+            width: 200, height: 40, bg: 0x2a2210, hoverBg: 0x3a3320,
+            textColor: '#ffcc88', fontSize: '15px',
             onClick: () => this._startSelling(),
         });
 
-        // 판매/거절 버튼
         this.actionContainer = this.add.container(0, 0).setVisible(false);
-        this.acceptBtn = new UIButton(this, 340, 570, '✅ 판매', {
-            width: 130, height: 40, bg: 0x224422, hoverBg: 0x336633,
+        this.acceptBtn = new UIButton(this, cx - 80, btnY, '판매', {
+            width: 120, height: 36, bg: 0x224422, hoverBg: 0x336633,
             textColor: '#44ff88', fontSize: '14px', onClick: () => this._accept(),
         });
-        this.rejectBtn = new UIButton(this, 540, 570, '❌ 거절', {
-            width: 130, height: 40, bg: 0x442222, hoverBg: 0x663333,
+        this.rejectBtn = new UIButton(this, cx + 80, btnY, '거절', {
+            width: 120, height: 36, bg: 0x442222, hoverBg: 0x663333,
             textColor: '#ff4444', fontSize: '14px', onClick: () => this._reject(),
         });
         this.actionContainer.add([this.acceptBtn.container, this.rejectBtn.container]);
 
-        // 밤 의뢰 버튼
-        this.nightBtn = new UIButton(this, 1160, 680, '🌙 의뢰서 작성 →', {
-            width: 200, height: 40, bg: 0x1a1a2a, hoverBg: 0x2a2a3a,
+        this.nightBtn = new UIButton(this, cx + custW / 2 - 120, btnY, '의뢰서 작성', {
+            width: 160, height: 36, bg: 0x1a1a2a, hoverBg: 0x2a2a3a,
             textColor: '#aaaaff', fontSize: '13px',
             onClick: () => {
                 this._returnUnsold();
@@ -228,8 +271,6 @@ class ShopScene extends Phaser.Scene {
             },
         });
     }
-
-    _drawActions() {}
 
     _returnUnsold() {
         this.displaySlots.forEach(s => {
@@ -273,17 +314,17 @@ class ShopScene extends Phaser.Scene {
         this.currentSlot = slot;
         const data = ITEM_DATA[slot.item];
         const result = ShopSystem.evaluateItem(c, slot.item, slot.setPrice, this.gs);
-        this.custWant.setText(`${data.icon} ${data.name} — ${slot.setPrice}G`);
+        this.custWant.setText(`${data.icon} ${data.name} - ${slot.setPrice}G`);
 
         if (result.action === 'buy') {
             this.dialogText.setText(`"${data.name}! ${slot.setPrice}G요? 좋아요, 살게요!"`);
             this.actionContainer.setVisible(true);
-            this.acceptBtn.label.setText(`✅ ${slot.setPrice}G`);
+            this.acceptBtn.label.setText(`${slot.setPrice}G`);
             this.pendingAction = { action: 'buy', price: slot.setPrice };
         } else if (result.action === 'haggle') {
             this.dialogText.setText(`"${slot.setPrice}G는 좀... ${result.offer}G 어때요?"`);
             this.actionContainer.setVisible(true);
-            this.acceptBtn.label.setText(`✅ ${result.offer}G`);
+            this.acceptBtn.label.setText(`${result.offer}G`);
             this.pendingAction = { action: 'haggle', price: result.offer };
         } else {
             this.dialogText.setText(`"${result.reason}..."`);
@@ -330,7 +371,7 @@ class ShopScene extends Phaser.Scene {
             const newOffer = Math.floor(this.pendingAction.price * 1.1);
             this.dialogText.setText(`"그럼... ${newOffer}G. 마지막이에요!"`);
             this.actionContainer.setVisible(true);
-            this.acceptBtn.label.setText(`✅ ${newOffer}G`);
+            this.acceptBtn.label.setText(`${newOffer}G`);
             this.pendingAction = { action: 'haggle', price: newOffer };
             return;
         }
@@ -346,23 +387,24 @@ class ShopScene extends Phaser.Scene {
         const totalSales = this.salesLog.reduce((s, l) => s + l.price, 0);
         this._updateInfo();
 
-        const ov = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7).setDepth(10);
-        const pn = this.add.rectangle(640, 340, 400, 300, 0x12121e, 0.98).setDepth(11).setStrokeStyle(2, 0x3a3a60);
+        const cx = 640;
+        this.add.rectangle(cx, 360, 1280, 720, 0x000000, 0.7).setDepth(10);
+        this.add.rectangle(cx, 340, 420, 300, 0x12121e, 0.98).setDepth(11).setStrokeStyle(2, 0x3a3a60);
 
-        this.add.text(640, 210, '🌙 영업 종료', { fontSize: '22px', fontFamily: 'monospace', color: '#ffeebb' }).setOrigin(0.5).setDepth(11);
+        this.add.text(cx, 210, '영업 종료', { fontSize: '22px', fontFamily: 'monospace', color: '#ffeebb' }).setOrigin(0.5).setDepth(11);
         let y = 250;
         if (!this.salesLog.length) {
-            this.add.text(640, y, '오늘은 판매가 없었습니다.', { fontSize: '13px', fontFamily: 'monospace', color: '#666' }).setOrigin(0.5).setDepth(11);
+            this.add.text(cx, y, '오늘은 판매가 없었습니다.', { fontSize: '13px', fontFamily: 'monospace', color: '#666' }).setOrigin(0.5).setDepth(11);
             y += 25;
         } else {
             this.salesLog.forEach(l => {
-                this.add.text(640, y, `${l.item} — ${l.price}G`, { fontSize: '13px', fontFamily: 'monospace', color: '#ddd' }).setOrigin(0.5).setDepth(11);
+                this.add.text(cx, y, `${l.item} - ${l.price}G`, { fontSize: '13px', fontFamily: 'monospace', color: '#ddd' }).setOrigin(0.5).setDepth(11);
                 y += 22;
             });
         }
-        this.add.text(640, y + 10, `총 매출: ${totalSales}G`, { fontSize: '17px', fontFamily: 'monospace', color: '#ffcc44' }).setOrigin(0.5).setDepth(11);
+        this.add.text(cx, y + 10, `총 매출: ${totalSales}G`, { fontSize: '17px', fontFamily: 'monospace', color: '#ffcc44' }).setOrigin(0.5).setDepth(11);
 
-        new UIButton(this, 640, y + 55, '🌙 의뢰서 작성 →', {
+        new UIButton(this, cx, y + 55, '의뢰서 작성', {
             width: 220, height: 44, bg: 0x1a1a2a, hoverBg: 0x2a2a3a,
             textColor: '#aaaaff', fontSize: '15px',
             onClick: () => this.scene.start('CommissionScene'),
