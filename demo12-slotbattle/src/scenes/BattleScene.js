@@ -36,6 +36,7 @@ class BattleScene extends Phaser.Scene {
         this.combatResolver = new CombatResolver();
         this.enemies = this._spawnEnemies();
         this.turnPhase = 'ready';
+        this.turnCount = 0; // for time_crystal periodic slow
         this.combatLog = [];
         this.combatLogScrollY = 0;
         this.autoScrollLog = true;
@@ -348,11 +349,23 @@ class BattleScene extends Phaser.Scene {
     _onSpin() {
         if (this.turnPhase !== 'ready') return;
         this.turnPhase = 'spinning';
+        this.turnCount++;
         this.spinBtn.setAlpha(0.3);
         this.comboText.setAlpha(0);
         this.actionPreviewText.setAlpha(0);
 
+        // relic: focus_lens — boost pool weighting for symbols owned 3+
+        const focusCount = this._relicCount('focus_lens');
+        if (focusCount > 0) {
+            this._applyFocusLensPool();
+        } else {
+            this.slotMachine.setSymbolPool(this.playerState.symbolPool);
+        }
+
         this.slotMachine.spin((results) => {
+            // Apply post-spin relic effects to results
+            results = this._applyPostSpinRelics(results);
+
             // Check auto-respin from relic (10% per respin_charm, stacking)
             const respinCount = this._relicCount('respin_charm');
             const respinChance = 1 - Math.pow(0.9, respinCount);
@@ -365,6 +378,7 @@ class BattleScene extends Phaser.Scene {
 
                 this.time.delayedCall(600, () => {
                     this.slotMachine.spin((secondResults) => {
+                        secondResults = this._applyPostSpinRelics(secondResults);
                         // Both results apply — combine them
                         this.turnPhase = 'previewing';
                         this._doPlayerTurnDouble(this._firstSpinResults, secondResults);
@@ -375,6 +389,53 @@ class BattleScene extends Phaser.Scene {
                 this._showPreviewThenAct(results);
             }
         });
+    }
+
+    // ── POST-SPIN RELIC EFFECTS ─────────────────────
+
+    _applyFocusLensPool() {
+        // Boost appearance of symbols owned 3+ copies: add extra copies to pool
+        const pool = this.playerState.symbolPool.slice();
+        const counts = {};
+        for (const s of pool) counts[s] = (counts[s] || 0) + 1;
+        for (const [sym, cnt] of Object.entries(counts)) {
+            if (cnt >= 3) {
+                // Add 50% more copies (rounded up)
+                const extra = Math.ceil(cnt * 0.5);
+                for (let i = 0; i < extra; i++) pool.push(sym);
+            }
+        }
+        this.slotMachine.setSymbolPool(pool);
+    }
+
+    _applyPostSpinRelics(results) {
+        // relic: lucky_clover — wild card chance (+10% per copy)
+        const cloverCount = this._relicCount('lucky_clover');
+        if (cloverCount > 0) {
+            const wildChance = 0.1 * cloverCount;
+            for (let i = 0; i < results.length; i++) {
+                if (results[i] !== 'gem' && Math.random() < wildChance) {
+                    results[i] = 'gem';
+                    this._appendLog([{ type: 'info', text: `🍀 행운의 클로버: 슬롯 ${i + 1} → 와일드카드!` }]);
+                }
+            }
+        }
+
+        // relic: resonance_stone — 2 same symbols → trigger 3rd effect
+        if (this._relicCount('resonance_stone') > 0 && results.length === 3) {
+            if (results[0] === results[1] && results[0] !== results[2] && results[0] !== 'skull') {
+                results[2] = results[0];
+                this._appendLog([{ type: 'info', text: `🔗 공명석: ${SYMBOL_DATA[results[0]]?.name || results[0]} 공명 발동!` }]);
+            } else if (results[0] === results[2] && results[0] !== results[1] && results[0] !== 'skull') {
+                results[1] = results[0];
+                this._appendLog([{ type: 'info', text: `🔗 공명석: ${SYMBOL_DATA[results[0]]?.name || results[0]} 공명 발동!` }]);
+            } else if (results[1] === results[2] && results[1] !== results[0] && results[1] !== 'skull') {
+                results[0] = results[1];
+                this._appendLog([{ type: 'info', text: `🔗 공명석: ${SYMBOL_DATA[results[1]]?.name || results[1]} 공명 발동!` }]);
+            }
+        }
+
+        return results;
     }
 
     // ── ACTION PREVIEW ──────────────────────────────
@@ -398,7 +459,7 @@ class BattleScene extends Phaser.Scene {
     _showPreviewThenAct(results) {
         // Event round skull→relic check
         if (this.encounterType === 'event_round' || this._isEventRound) {
-            const skullIdx = results.findIndex(r => r.id === 'skull');
+            const skullIdx = results.findIndex(r => r === 'skull');
             if (skullIdx >= 0) this._skullToRelic(skullIdx, results);
         }
 
@@ -530,12 +591,76 @@ class BattleScene extends Phaser.Scene {
                 }
             }
         }
+
+        // relic: mirror_shield — excess block → damage bonus
+        const mirrorCount = this._relicCount('mirror_shield');
+        if (mirrorCount > 0 && this.playerState.block > this.playerState.maxHp) {
+            const excess = this.playerState.block - this.playerState.maxHp;
+            const bonusDmg = Math.floor(excess * 0.5 * mirrorCount);
+            if (bonusDmg > 0) {
+                // Add bonus damage to existing damage entries
+                const dmgEntries = log.filter(e => e.type === 'damage');
+                if (dmgEntries.length > 0) {
+                    dmgEntries[0].value += bonusDmg;
+                    log.push({ type: 'info', text: `🪞 거울 방패: 초과 방어 → 공격 +${bonusDmg}` });
+                }
+            }
+        }
+
+        // relic: flame_heart — auto burn random enemy per spin (stacking: burn +2 per copy)
+        const flameCount = this._relicCount('flame_heart');
+        if (flameCount > 0) {
+            const alive = this.enemies.filter(e => e.hp > 0);
+            if (alive.length > 0) {
+                const target = alive[Phaser.Math.Between(0, alive.length - 1)];
+                const burnAmt = 2 * flameCount;
+                target.burn = (target.burn || 0) + burnAmt;
+                log.push({ type: 'burn', value: burnAmt, target: target.name });
+                log.push({ type: 'info', text: `🔥 불꽃 심장: ${target.name}에게 화상 ${burnAmt}` });
+            }
+        }
+
+        // relic: chaos_orb — bonus 4th slot effect (random symbol)
+        const chaosCount = this._relicCount('chaos_orb');
+        if (chaosCount > 0) {
+            for (let c = 0; c < chaosCount; c++) {
+                const pool = this.playerState.symbolPool.filter(s => s !== 'skull');
+                if (pool.length === 0) break;
+                const bonusSym = pool[Phaser.Math.Between(0, pool.length - 1)];
+                const symData = SYMBOL_DATA[bonusSym];
+                if (!symData) continue;
+                const e = symData.effect;
+                if (e.damage) {
+                    const alive = this.enemies.filter(en => en.hp > 0);
+                    if (alive.length > 0) {
+                        const t = alive[0];
+                        const dmg = Math.max(1, e.damage - (t.block > 0 ? t.block : t.defense));
+                        t.hp -= dmg;
+                        log.push({ type: 'damage', value: dmg, target: t.name, targetIdx: t.index });
+                    }
+                }
+                if (e.block) {
+                    this.playerState.block += e.block;
+                    log.push({ type: 'block', value: e.block });
+                }
+                if (e.heal) {
+                    const healed = Math.min(e.heal, this.playerState.maxHp - this.playerState.hp);
+                    this.playerState.hp += healed;
+                    log.push({ type: 'heal', value: healed });
+                }
+                if (e.gold) {
+                    this.playerState.gold += e.gold;
+                    log.push({ type: 'gold', value: e.gold });
+                }
+                log.push({ type: 'info', text: `🌀 혼돈의 오브: ${symData.icon} ${symData.name} 추가!` });
+            }
+        }
     }
 
     _doPlayerTurn(results) {
         // Event round skull→relic check
         if (this.encounterType === 'event_round' || this._isEventRound) {
-            const skullIdx = results.findIndex(r => r.id === 'skull');
+            const skullIdx = results.findIndex(r => r === 'skull');
             if (skullIdx >= 0) this._skullToRelic(skullIdx, results);
         }
 
@@ -578,6 +703,21 @@ class BattleScene extends Phaser.Scene {
             return;
         }
         this._extraSpinUsed = false;
+
+        // relic: time_crystal — periodic slow (every 3 turns, stacking reduces interval)
+        const timeCount = this._relicCount('time_crystal');
+        if (timeCount > 0) {
+            const interval = Math.max(1, 3 - (timeCount - 1)); // 3 turns base, 2 with 2 copies, 1 with 3+
+            if (this.turnCount % interval === 0) {
+                const alive = this.enemies.filter(e => e.hp > 0);
+                for (const e of alive) {
+                    e.cooldownTimer++;
+                }
+                this._popText(640, 270, `⏳ 시간 왜곡!`, '#aa88ff', 22);
+                this._appendLog([{ type: 'info', text: `⏳ 시간의 수정: 모든 적 쿨다운 +1` }]);
+                this._updateIntentDisplays();
+            }
+        }
 
         // tick cooldowns → enemy turn (with tempo delay)
         this.time.delayedCall(600, () => {
@@ -637,6 +777,16 @@ class BattleScene extends Phaser.Scene {
     _readyForSpin() {
         this.turnPhase = 'ready';
         this.spinBtn.setAlpha(1);
+
+        // relic: iron_boots — +2 block per turn per copy
+        const bootsCount = this._relicCount('iron_boots');
+        if (bootsCount > 0) {
+            const amt = 2 * bootsCount;
+            this.playerState.block += amt;
+            this._popText(200, 500, `🥾 +${amt} 🛡️`, '#4488ff', 18);
+            this._appendLog([{ type: 'info', text: `🥾 무쇠 장화: 방어 +${amt}` }]);
+            this._updateAllDisplays();
+        }
     }
 
     _checkBattleEnd(delay) {
@@ -948,6 +1098,22 @@ class BattleScene extends Phaser.Scene {
             const deadCount = this.enemies.filter(e => e.hp <= 0).length;
             const healAmt = deadCount * 5 * vampCount;
             this.playerState.hp = Math.min(this.playerState.maxHp, this.playerState.hp + healAmt);
+        }
+
+        // relic: lucky_coin — bonus gold on win (stacking: +3 per copy)
+        const coinCount = this._relicCount('lucky_coin');
+        if (coinCount > 0) {
+            const bonus = 3 * coinCount;
+            this.playerState.gold += bonus;
+        }
+
+        // relic: soul_lantern — +2 maxHP per kill (stacking: +2 per copy)
+        const lanternCount = this._relicCount('soul_lantern');
+        if (lanternCount > 0) {
+            const deadCount = this.enemies.filter(e => e.hp <= 0).length;
+            const maxHpGain = deadCount * 2 * lanternCount;
+            this.playerState.maxHp += maxHpGain;
+            this.playerState.hp += maxHpGain; // also heal the gained amount
         }
 
         if (this.map) {
