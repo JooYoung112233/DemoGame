@@ -28,12 +28,12 @@ const TILE_COLORS = {
 };
 
 const SEARCHABLE_TILES = {
-    [TILE.BARREL]:   { name: '드럼통', lootPool: 'barrel', icon: '🛢️' },
-    [TILE.LOCKER]:   { name: '사물함', lootPool: 'locker', icon: '🗄️' },
-    [TILE.CRATE]:    { name: '보급상자', lootPool: 'crate', icon: '📦' },
-    [TILE.MEDICAL]:  { name: '의료함', lootPool: 'medical', icon: '🏥' },
-    [TILE.COMPUTER]: { name: '컴퓨터', lootPool: 'computer', icon: '💻' },
-    [TILE.LOOT]:     { name: '루트', lootPool: 'common_crate', icon: '📦' }
+    [TILE.BARREL]:   { name: '드럼통', lootPool: 'barrel', icon: '🛢️', slots: 4, searchTime: 3000 },
+    [TILE.LOCKER]:   { name: '사물함', lootPool: 'locker', icon: '🗄️', slots: 6, searchTime: 5000 },
+    [TILE.CRATE]:    { name: '보급상자', lootPool: 'crate', icon: '📦', slots: 6, searchTime: 5000 },
+    [TILE.MEDICAL]:  { name: '의료함', lootPool: 'medical', icon: '🏥', slots: 6, searchTime: 4000 },
+    [TILE.COMPUTER]: { name: '컴퓨터', lootPool: 'computer', icon: '💻', slots: 4, searchTime: 6000 },
+    [TILE.LOOT]:     { name: '루트', lootPool: 'common_crate', icon: '📦', slots: 4, searchTime: 3500 }
 };
 
 const ZONE_DATA = {

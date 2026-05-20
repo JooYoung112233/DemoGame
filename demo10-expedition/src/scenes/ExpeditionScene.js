@@ -1000,6 +1000,11 @@ class ExpeditionScene extends Phaser.Scene {
         }
         this._updatePhaseUI();
 
+        // Search UI slot reveal
+        if (this.isSearching && this._searchActive) {
+            this._updateSearchUI(delta);
+        }
+
         // Key polling
         if (Phaser.Input.Keyboard.JustDown(this.fKey)) {
             if (this.isNight && this.flashlightBattery > 0) {
@@ -1481,124 +1486,385 @@ class ExpeditionScene extends Phaser.Scene {
         // Use night loot tables for night-placed containers
         let poolName = searchable.lootPool;
         if (this.isNight && this.nightTileChanges.some(c => c.x === x && c.y === y)) {
-            // Night-opened containers use night-specific pools
-            const nightPools = {
-                'locker': 'night_shelf',
-                'crate': 'night_safe',
-                'medical': 'night_medical'
-            };
+            const nightPools = { 'locker': 'night_shelf', 'crate': 'night_safe', 'medical': 'night_medical' };
             poolName = nightPools[poolName] || poolName;
         }
 
+        // Generate loot for each slot
         const lootTable = LOOT_TABLE[poolName] || LOOT_TABLE.common_crate;
-        const found = [];
+        const totalSlots = searchable.slots || 4;
+        const searchTime = searchable.searchTime || 4000;
+
+        // Roll all loot first
+        const rolledItems = [];
         lootTable.forEach(entry => {
             if (Math.random() < entry.chance) {
                 const count = entry.min + Math.floor(Math.random() * (entry.max - entry.min + 1));
-                for (let i = 0; i < count; i++) found.push(entry.item);
+                for (let i = 0; i < count; i++) rolledItems.push(entry.item);
             }
         });
 
-        if (found.length === 0) {
-            this.showLootPopup(searchable, [], 0);
-            return;
+        // Distribute items into slots (some slots may be empty)
+        const slots = Array.from({ length: totalSlots }, () => null);
+        // Shuffle slot indices
+        const indices = Array.from({ length: totalSlots }, (_, i) => i);
+        for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
         }
-
-        let added = 0;
-        found.forEach(id => {
-            if (this.inventory.length < MAX_INVENTORY) { this.inventory.push(id); added++; }
+        rolledItems.slice(0, totalSlots).forEach((itemId, i) => {
+            slots[indices[i]] = itemId;
         });
 
-        // Battery items: auto-recharge if found
-        const batteryCount = found.filter(id => id === 'battery').length;
-        if (batteryCount > 0) {
-            this.flashlightBattery = Math.min(this.maxBattery, this.flashlightBattery + batteryCount * 25);
-            this._updateBatteryUI();
-        }
-
-        this.showLootPopup(searchable, found, found.length - added);
-        this.updateInventoryCount();
+        this._showSearchUI(searchable, slots, searchTime);
     }
 
-    showLootPopup(searchable, found, overflow) {
-        if (this.lootPopup) this.lootPopup.destroy();
+    // ── TARKOV-STYLE SLOT SEARCH UI ──
 
+    _showSearchUI(searchable, slots, searchTime) {
+        this.isSearching = true;
+        this._searchObjects = [];
+        this._searchSlots = slots;
+        this._searchRevealed = Array(slots.length).fill(false);
+        this._searchTaken = Array(slots.length).fill(false);
+        this._searchActive = true;
+        this._searchElapsed = 0;
+        this._searchDuration = searchTime;
+        this._searchNextReveal = 0;
+
+        const sa = (obj) => { obj.setScrollFactor(0).setDepth(250); this._searchObjects.push(obj); return obj; };
         const cam = this.cameras.main;
         const w = cam.width, h = cam.height;
-        const pw = Math.floor(w * 0.28);
-        const lineH = Math.floor(h * 0.03);
-        const headerH = Math.floor(h * 0.06);
-        const footerH = Math.floor(h * 0.04);
-        const ph = headerH + Math.max(found.length, 1) * lineH + footerH + 20;
+        const fs = Math.floor(h * 0.018);
+
+        // Layout
+        const cols = slots.length <= 4 ? 2 : 3;
+        const rows = Math.ceil(slots.length / cols);
+        const slotW = Math.floor(w * 0.11);
+        const slotH = Math.floor(h * 0.09);
+        const gap = Math.floor(w * 0.012);
+        const headerH = Math.floor(h * 0.08);
+        const progressH = Math.floor(h * 0.035);
+        const footerH = Math.floor(h * 0.055);
+        const gridW = cols * (slotW + gap) - gap;
+        const gridH = rows * (slotH + gap) - gap;
+        const pw = gridW + Math.floor(w * 0.05);
+        const ph = headerH + gridH + progressH + footerH + Math.floor(h * 0.025);
         const px = Math.floor((w - pw) / 2);
         const py = Math.floor((h - ph) / 2);
 
-        this.lootPopup = this.add.container(0, 0).setScrollFactor(0).setDepth(250);
-        this.isSearching = true;
-
-        const overlay = this.add.graphics().setScrollFactor(0);
-        overlay.fillStyle(0x000000, 0.4);
+        // Dim overlay
+        const overlay = sa(this.add.graphics());
+        overlay.fillStyle(0x000000, 0.5);
         overlay.fillRect(0, 0, w, h);
-        this.lootPopup.add(overlay);
 
-        const bg = this.add.graphics().setScrollFactor(0);
-        bg.fillStyle(0x111122, 0.95);
+        // Panel background
+        const bg = sa(this.add.graphics());
+        bg.fillStyle(0x111122, 0.97);
         bg.fillRoundedRect(px, py, pw, ph, 10);
-        bg.lineStyle(2, found.length > 0 ? 0x44ff88 : 0x666666, 0.8);
+        bg.lineStyle(2, 0x44aaff, 0.6);
         bg.strokeRoundedRect(px, py, pw, ph, 10);
-        this.lootPopup.add(bg);
 
-        const fs = Math.floor(h * 0.02);
-        this.lootPopup.add(this.add.text(px + pw / 2, py + 12,
+        // Header
+        sa(this.add.text(px + pw / 2, py + Math.floor(headerH * 0.3),
             `${searchable.icon} ${searchable.name}`, {
-            fontSize: `${Math.floor(fs * 1.1)}px`, fontFamily: 'monospace',
+            fontSize: `${Math.floor(fs * 1.2)}px`, fontFamily: 'monospace',
             color: '#ffffff', fontStyle: 'bold'
-        }).setOrigin(0.5).setScrollFactor(0));
+        }).setOrigin(0.5));
 
-        if (found.length === 0) {
-            this.lootPopup.add(this.add.text(px + pw / 2, py + headerH + 10, 'Empty...', {
-                fontSize: `${fs}px`, fontFamily: 'monospace', color: '#666'
-            }).setOrigin(0.5).setScrollFactor(0));
-        } else {
-            const counts = {};
-            found.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-            let row = 0;
-            Object.entries(counts).forEach(([id, count]) => {
-                const item = ITEM_DATA[id];
-                if (!item) return;
-                const iy = py + headerH + row * lineH;
-                this.lootPopup.add(this.add.text(px + 15, iy, `${item.icon} ${item.name} x${count}`, {
-                    fontSize: `${Math.floor(fs * 0.9)}px`, fontFamily: 'monospace', color: '#44ff88'
-                }).setScrollFactor(0));
-                this.lootPopup.add(this.add.text(px + pw - 15, iy, `${item.value * count}G`, {
-                    fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace', color: '#ffcc44'
-                }).setOrigin(1, 0).setScrollFactor(0));
-                row++;
-            });
+        sa(this.add.text(px + pw / 2, py + Math.floor(headerH * 0.7),
+            '탐색 중...', {
+            fontSize: `${Math.floor(fs * 0.85)}px`, fontFamily: 'monospace', color: '#888'
+        }).setOrigin(0.5));
+        this._searchStatusText = this._searchObjects[this._searchObjects.length - 1];
 
-            if (overflow > 0) {
-                this.lootPopup.add(this.add.text(px + pw / 2, py + headerH + row * lineH + 4,
-                    `Inventory full! ${overflow} items lost`, {
-                    fontSize: `${Math.floor(fs * 0.75)}px`, fontFamily: 'monospace', color: '#ff6644'
-                }).setOrigin(0.5).setScrollFactor(0));
-            }
+        // Progress bar background
+        const barX = px + Math.floor(pw * 0.06);
+        const barY = py + headerH;
+        const barW = pw - Math.floor(pw * 0.12);
+        const barH = Math.floor(progressH * 0.45);
+        const barBg = sa(this.add.graphics());
+        barBg.fillStyle(0x222244, 1);
+        barBg.fillRoundedRect(barX, barY, barW, barH, 4);
+        barBg.lineStyle(1, 0x444466, 0.5);
+        barBg.strokeRoundedRect(barX, barY, barW, barH, 4);
+
+        // Progress bar fill (updated in update loop)
+        this._searchBarFill = sa(this.add.graphics());
+        this._searchBarX = barX;
+        this._searchBarY = barY;
+        this._searchBarW = barW;
+        this._searchBarH = barH;
+
+        // Slot grid
+        const gridX = px + Math.floor((pw - gridW) / 2);
+        const gridY = barY + progressH;
+        this._slotGraphics = [];
+        this._slotTexts = [];
+        this._slotZones = [];
+
+        for (let i = 0; i < slots.length; i++) {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const sx = gridX + col * (slotW + gap);
+            const sy = gridY + row * (slotH + gap);
+
+            // Slot background (locked state)
+            const slotBg = sa(this.add.graphics());
+            slotBg.fillStyle(0x1a1a2e, 1);
+            slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
+            slotBg.lineStyle(1, 0x333355, 0.6);
+            slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
+            this._slotGraphics.push(slotBg);
+
+            // Lock icon (shown until revealed)
+            const lockText = sa(this.add.text(sx + slotW / 2, sy + slotH / 2, '🔒', {
+                fontSize: `${Math.floor(fs * 1.1)}px`, fontFamily: 'monospace'
+            }).setOrigin(0.5));
+            this._slotTexts.push(lockText);
+
+            // Interactive zone (hidden until revealed, for taking items)
+            const zone = sa(this.add.zone(sx + slotW / 2, sy + slotH / 2, slotW, slotH));
+            zone.slotIndex = i;
+            this._slotZones.push(zone);
         }
 
-        const closeText = this.add.text(px + pw / 2, py + ph - footerH + 2, '[ E / ESC / Click to close ]', {
-            fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace', color: '#888'
-        }).setOrigin(0.5).setScrollFactor(0);
-        this.lootPopup.add(closeText);
+        // Footer
+        sa(this.add.text(px + pw / 2, py + ph - Math.floor(footerH * 0.55),
+            'ESC: 중단  |  열린 칸 클릭: 회수', {
+            fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace', color: '#666'
+        }).setOrigin(0.5));
 
-        overlay.setInteractive(new Phaser.Geom.Rectangle(0, 0, w, h), Phaser.Geom.Rectangle.Contains);
-        overlay.on('pointerdown', () => this.closeLootPopup());
+        // Inventory counter
+        this._searchInvText = sa(this.add.text(px + pw / 2, py + ph - Math.floor(footerH * 0.2),
+            `인벤토리: ${this.inventory.length}/${MAX_INVENTORY}`, {
+            fontSize: `${Math.floor(fs * 0.75)}px`, fontFamily: 'monospace', color: '#888'
+        }).setOrigin(0.5));
+    }
+
+    _updateSearchUI(delta) {
+        if (!this._searchActive) return;
+
+        this._searchElapsed += delta;
+        const progress = Math.min(1, this._searchElapsed / this._searchDuration);
+
+        // Update progress bar
+        this._searchBarFill.clear();
+        const fillColor = progress < 1 ? 0x44aaff : 0x44ff88;
+        this._searchBarFill.fillStyle(fillColor, 1);
+        this._searchBarFill.fillRoundedRect(
+            this._searchBarX + 2, this._searchBarY + 2,
+            Math.floor((this._searchBarW - 4) * progress), this._searchBarH - 4, 3
+        );
+
+        // Reveal slots progressively
+        const totalSlots = this._searchSlots.length;
+        const slotsToReveal = Math.floor(progress * totalSlots);
+
+        while (this._searchNextReveal < slotsToReveal && this._searchNextReveal < totalSlots) {
+            this._revealSlot(this._searchNextReveal);
+            this._searchNextReveal++;
+        }
+
+        // Search complete
+        if (progress >= 1 && this._searchActive) {
+            // Reveal any remaining
+            while (this._searchNextReveal < totalSlots) {
+                this._revealSlot(this._searchNextReveal);
+                this._searchNextReveal++;
+            }
+            this._searchActive = false;
+            if (this._searchStatusText) {
+                this._searchStatusText.setText('탐색 완료!');
+                this._searchStatusText.setColor('#44ff88');
+            }
+        }
+    }
+
+    _revealSlot(index) {
+        if (this._searchRevealed[index]) return;
+        this._searchRevealed[index] = true;
+
+        const itemId = this._searchSlots[index];
+        const fs = Math.floor(this.cameras.main.height * 0.018);
+
+        // Redraw slot background
+        const slotBg = this._slotGraphics[index];
+        const cam = this.cameras.main;
+        const w = cam.width, h = cam.height;
+        const cols = this._searchSlots.length <= 4 ? 2 : 3;
+        const slotW = Math.floor(w * 0.11);
+        const slotH = Math.floor(h * 0.09);
+
+        slotBg.clear();
+        if (itemId) {
+            // Has item — green tint
+            slotBg.fillStyle(0x1a2a1e, 1);
+            slotBg.lineStyle(1, 0x44ff88, 0.6);
+        } else {
+            // Empty — dark grey
+            slotBg.fillStyle(0x1a1a1e, 1);
+            slotBg.lineStyle(1, 0x333344, 0.4);
+        }
+        // Compute slot position from index
+        const gridW = cols * (slotW + Math.floor(w * 0.012)) - Math.floor(w * 0.012);
+        const rows = Math.ceil(this._searchSlots.length / cols);
+        const gap = Math.floor(w * 0.012);
+        const headerH = Math.floor(h * 0.08);
+        const progressH = Math.floor(h * 0.035);
+        const pw = gridW + Math.floor(w * 0.05);
+        const ph = headerH + (rows * (slotH + gap) - gap) + progressH + Math.floor(h * 0.055) + Math.floor(h * 0.025);
+        const px = Math.floor((w - pw) / 2);
+        const py = Math.floor((h - ph) / 2);
+        const gridX = px + Math.floor((pw - gridW) / 2);
+        const barY = py + headerH;
+        const gridY = barY + progressH;
+
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        const sx = gridX + col * (slotW + gap);
+        const sy = gridY + row * (slotH + gap);
+
+        slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
+        slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
+
+        // Update text
+        const lockText = this._slotTexts[index];
+        if (itemId) {
+            const item = ITEM_DATA[itemId];
+            lockText.setText(`${item?.icon || '?'}\n${item?.name || itemId}`);
+            lockText.setStyle({
+                fontSize: `${Math.floor(fs * 0.85)}px`, fontFamily: 'monospace',
+                color: '#44ff88', align: 'center', lineSpacing: 2
+            });
+            lockText.setOrigin(0.5);
+
+            // Make slot clickable to take item
+            const zone = this._slotZones[index];
+            zone.setInteractive({ useHandCursor: true });
+            zone.on('pointerdown', () => this._takeSlotItem(index));
+            zone.on('pointerover', () => {
+                if (!this._searchTaken[index]) {
+                    slotBg.clear();
+                    slotBg.fillStyle(0x2a3a2e, 1);
+                    slotBg.lineStyle(2, 0x66ffaa, 0.8);
+                    slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
+                    slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
+                }
+            });
+            zone.on('pointerout', () => {
+                if (!this._searchTaken[index]) {
+                    slotBg.clear();
+                    slotBg.fillStyle(0x1a2a1e, 1);
+                    slotBg.lineStyle(1, 0x44ff88, 0.6);
+                    slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
+                    slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
+                }
+            });
+        } else {
+            lockText.setText('—');
+            lockText.setStyle({
+                fontSize: `${Math.floor(fs * 0.9)}px`, fontFamily: 'monospace', color: '#444'
+            });
+            lockText.setOrigin(0.5);
+        }
+
+        // Reveal flash tween
+        this.tweens.add({
+            targets: slotBg, alpha: { from: 0.3, to: 1 }, duration: 200
+        });
+    }
+
+    _takeSlotItem(index) {
+        if (this._searchTaken[index]) return;
+        const itemId = this._searchSlots[index];
+        if (!itemId) return;
+
+        if (this.inventory.length >= MAX_INVENTORY) {
+            this.showMessage('인벤토리가 가득 찼습니다!', 1500);
+            return;
+        }
+
+        this._searchTaken[index] = true;
+        this.inventory.push(itemId);
+        this.updateInventoryCount();
+
+        // Battery auto-recharge
+        if (itemId === 'battery') {
+            this.flashlightBattery = Math.min(this.maxBattery, this.flashlightBattery + 25);
+            this._updateBatteryUI();
+        }
+
+        // Visual: mark as taken
+        const fs = Math.floor(this.cameras.main.height * 0.018);
+        const slotBg = this._slotGraphics[index];
+        const lockText = this._slotTexts[index];
+        const cam = this.cameras.main;
+        const w = cam.width, h = cam.height;
+        const cols = this._searchSlots.length <= 4 ? 2 : 3;
+        const slotW = Math.floor(w * 0.11);
+        const slotH = Math.floor(h * 0.09);
+        const gap = Math.floor(w * 0.012);
+        const gridW = cols * (slotW + gap) - gap;
+        const rows = Math.ceil(this._searchSlots.length / cols);
+        const headerH = Math.floor(h * 0.08);
+        const progressH = Math.floor(h * 0.035);
+        const pw = gridW + Math.floor(w * 0.05);
+        const ph_ = headerH + (rows * (slotH + gap) - gap) + progressH + Math.floor(h * 0.055) + Math.floor(h * 0.025);
+        const px_ = Math.floor((w - pw) / 2);
+        const py_ = Math.floor((h - ph_) / 2);
+        const gridX = px_ + Math.floor((pw - gridW) / 2);
+        const barY = py_ + headerH;
+        const gridY = barY + progressH;
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        const sx = gridX + col * (slotW + gap);
+        const sy = gridY + row * (slotH + gap);
+
+        slotBg.clear();
+        slotBg.fillStyle(0x1a1a1e, 0.5);
+        slotBg.lineStyle(1, 0x333344, 0.3);
+        slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
+        slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
+
+        const item = ITEM_DATA[itemId];
+        lockText.setText(`✓ 획득`);
+        lockText.setStyle({
+            fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace', color: '#888'
+        });
+
+        // Remove interactivity
+        this._slotZones[index].disableInteractive();
+
+        // Update inv counter
+        if (this._searchInvText) {
+            this._searchInvText.setText(`인벤토리: ${this.inventory.length}/${MAX_INVENTORY}`);
+        }
+
+        // +1 popup
+        const popup = this.add.text(sx + slotW / 2, sy - 5,
+            `+${item?.icon || ''} ${item?.name || ''}`, {
+            fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace',
+            color: '#44ff88', stroke: '#000', strokeThickness: 2
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(260);
+        this.tweens.add({
+            targets: popup, y: sy - 25, alpha: 0, duration: 800,
+            onComplete: () => popup.destroy()
+        });
+    }
+
+    closeSearchUI() {
+        if (this._searchObjects) {
+            this._searchObjects.forEach(o => { try { o.destroy(); } catch(e) {} });
+            this._searchObjects = [];
+        }
+        this._searchActive = false;
+        this._searchSlots = null;
+        this.isSearching = false;
     }
 
     closeLootPopup() {
-        if (this.lootPopup) {
-            this.lootPopup.destroy();
-            this.lootPopup = null;
-            this.isSearching = false;
-        }
+        this.closeSearchUI();
     }
 
     // ── EXTRACT ────────────────────────────────────────────
