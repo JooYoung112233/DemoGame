@@ -256,8 +256,9 @@ public class FlashlightSceneSetup : EditorWindow
         colorOverLifetime.color = gradient;
 
         var renderer = dustGO.GetComponent<ParticleSystemRenderer>();
-        renderer.material = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
-        renderer.material.SetColor("_BaseColor", new Color(0.7f, 0.65f, 0.55f, 0.3f));
+        var dustMat = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+        dustMat.SetColor("_BaseColor", new Color(0.7f, 0.65f, 0.55f, 0.3f));
+        renderer.sharedMaterial = dustMat;
     }
 
     static GameObject CreateNeonSign(DayNightCycle dnCycle)
