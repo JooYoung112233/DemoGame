@@ -141,7 +141,7 @@ class HelpScene extends Phaser.Scene {
 
         // calculate total content height for scroll
         const totalH = symY + 40 + symbols.length * (symCardH + 8) + 50;
-        const maxScrollDown = Math.max(0, totalH - H + 30);
+        const maxScrollDown = Math.max(0, totalH - 720 + 30);
 
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
             this.scrollY -= deltaY * 0.5;

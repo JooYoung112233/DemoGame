@@ -1,5 +1,5 @@
 // ── MAP GENERATION ─────────────────────────────
-// Slay the Spire-style branching tree per Act
+// Slay the Spire-style branching tree per Act (Horizontal layout)
 
 const MAP_CONFIG = {
     acts: [
@@ -50,11 +50,11 @@ class MapGenerator {
         const map = [];
 
         // floor 0: starting node (single)
-        map.push([{ id: 'start', type: 'start', floor: 0, col: 1, connections: [] }]);
+        map.push([{ id: 'start', type: 'start', floor: 0, col: 0, connections: [] }]);
 
-        // floors 1..(floors-1): branching nodes
+        // floors 1..(floors-1): branching nodes, max 3 per floor
         for (let f = 1; f < floors; f++) {
-            const nodeCount = (f === 1 || f === floors - 1) ? 3 : Phaser.Math.Between(2, 4);
+            const nodeCount = (f === 1 || f === floors - 1) ? 3 : Phaser.Math.Between(2, 3);
             const row = [];
             for (let c = 0; c < nodeCount; c++) {
                 const type = this._pickNodeType(f, floors, act);
@@ -75,21 +75,17 @@ class MapGenerator {
             id: `${actIndex}_boss`,
             type: 'boss',
             floor: floors,
-            col: 1,
+            col: 0,
             connections: [],
             visited: false
         }]);
 
-        // connect floors
         this._connectFloors(map);
-
         return map;
     }
 
     static _pickNodeType(floor, totalFloors, act) {
-        // floor 1 always battle
         if (floor === 1) return 'battle';
-        // floor before boss: varied
         if (floor === totalFloors - 1) {
             const r = Math.random();
             if (r < 0.4) return 'rest';
@@ -98,10 +94,8 @@ class MapGenerator {
         }
 
         const r = Math.random();
-        let cum = 0;
-        // treasure at floor 3 or 5 sometimes
         if ((floor === 3 || floor === 5) && r < 0.2) return 'treasure';
-        cum = 0.2;
+        let cum = 0.2;
         if (r < cum + act.shopFreq) return 'shop';
         cum += act.shopFreq;
         if (r < cum + act.eventFreq) return 'event';
@@ -118,21 +112,12 @@ class MapGenerator {
             const next = map[f + 1];
 
             if (curr.length === 1) {
-                // single node connects to all next
-                for (const n of next) {
-                    curr[0].connections.push(n.id);
-                }
+                for (const n of next) curr[0].connections.push(n.id);
             } else if (next.length === 1) {
-                // all current connect to single next
-                for (const c of curr) {
-                    c.connections.push(next[0].id);
-                }
+                for (const c of curr) c.connections.push(next[0].id);
             } else {
-                // ensure every node has at least 1 connection going forward
-                // and every next node has at least 1 incoming
                 const incoming = new Set();
                 for (let ci = 0; ci < curr.length; ci++) {
-                    // connect to at least 1-2 next nodes
                     const minNext = Math.min(ci, next.length - 1);
                     const maxNext = Math.min(ci + 1, next.length - 1);
                     for (let ni = minNext; ni <= maxNext; ni++) {
@@ -142,7 +127,6 @@ class MapGenerator {
                         }
                     }
                 }
-                // ensure all next nodes reachable
                 for (let ni = 0; ni < next.length; ni++) {
                     if (!incoming.has(ni)) {
                         const ci = Math.min(ni, curr.length - 1);

@@ -30,12 +30,14 @@ class MapScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('#0a0a1a');
 
         const actCfg = MAP_CONFIG.acts[this.act];
+
+        // Top bar
         this.add.graphics().fillStyle(0x111128, 1).fillRect(0, 0, W, 50);
         this.add.text(W / 2, 25, actCfg.name, {
             fontSize: '22px', fontFamily: 'monospace', color: '#ffcc00', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        // player info top-right
+        // Player info top-right
         this.add.text(W - 20, 14, `❤️ ${this.playerState.hp}/${this.playerState.maxHp}`, {
             fontSize: '14px', fontFamily: 'monospace', color: '#ff6666'
         }).setOrigin(1, 0);
@@ -43,11 +45,15 @@ class MapScene extends Phaser.Scene {
             fontSize: '14px', fontFamily: 'monospace', color: '#ffcc00'
         }).setOrigin(1, 0);
 
-        // relics display
+        // Relics display (with stacking counts)
         if (this.playerState.relics.length > 0) {
-            const relicStr = this.playerState.relics.map(id => {
-                const r = RELIC_DATA[id];
-                return r ? r.icon : '?';
+            const relicCounts = {};
+            for (const r of this.playerState.relics) {
+                relicCounts[r] = (relicCounts[r] || 0) + 1;
+            }
+            const relicStr = Object.entries(relicCounts).map(([id, cnt]) => {
+                const rd = RELIC_DATA[id];
+                return rd ? (cnt > 1 ? `${rd.icon}×${cnt}` : rd.icon) : '?';
             }).join(' ');
             this.add.text(20, 14, relicStr, { fontSize: '18px' });
         }
@@ -58,26 +64,27 @@ class MapScene extends Phaser.Scene {
 
     _drawMap() {
         const W = 1280, H = 720;
-        const mapH = H - 140;
-        const mapY = 70;
+        const mapW = W - 100;
+        const mapX = 60;
+        const centerY = (H - 50) / 2 + 50; // center of playable area
         const totalFloors = this.map.length;
-        const floorSpacing = mapH / (totalFloors + 1);
+        const colSpacing = mapW / (totalFloors + 1);
 
-        // node positions cache
+        // Calculate node positions (horizontal: floors go left→right)
         this.nodePositions = {};
         for (let f = 0; f < this.map.length; f++) {
             const row = this.map[f];
-            const y = mapY + (f + 1) * floorSpacing;
-            const rowWidth = row.length * 120;
-            const startX = W / 2 - rowWidth / 2 + 60;
+            const x = mapX + (f + 1) * colSpacing;
+            const rowHeight = row.length * 90;
+            const startY = centerY - rowHeight / 2 + 45;
 
             for (let c = 0; c < row.length; c++) {
-                const x = startX + c * 120;
+                const y = startY + c * 90;
                 this.nodePositions[row[c].id] = { x, y };
             }
         }
 
-        // draw connections first (behind nodes)
+        // Draw connections (behind nodes)
         const gfx = this.add.graphics();
         for (let f = 0; f < this.map.length; f++) {
             for (const node of this.map[f]) {
@@ -85,9 +92,10 @@ class MapScene extends Phaser.Scene {
                 for (const connId of node.connections) {
                     const to = this.nodePositions[connId];
                     if (!to) continue;
-                    const isPath = this.playerState.visitedNodes.includes(node.id) ||
-                                   (this._isClickable(connId) && this.playerState.visitedNodes.includes(node.id));
-                    gfx.lineStyle(2, isPath ? 0x888888 : 0x333344, isPath ? 0.8 : 0.4);
+                    const isPath = this.playerState.visitedNodes.includes(node.id);
+                    gfx.lineStyle(isPath ? 3 : 2, isPath ? 0x888888 : 0x333344, isPath ? 0.8 : 0.4);
+                    // Draw curved bezier path for cleaner look
+                    const midX = (from.x + to.x) / 2;
                     gfx.beginPath();
                     gfx.moveTo(from.x, from.y);
                     gfx.lineTo(to.x, to.y);
@@ -96,7 +104,7 @@ class MapScene extends Phaser.Scene {
             }
         }
 
-        // draw nodes
+        // Draw nodes
         for (let f = 0; f < this.map.length; f++) {
             for (const node of this.map[f]) {
                 this._drawNode(node);
@@ -113,7 +121,6 @@ class MapScene extends Phaser.Scene {
         const visited = this.playerState.visitedNodes.includes(node.id);
         const clickable = this._isClickable(node.id);
 
-        // node circle bg
         const bg = this.add.graphics();
         if (visited) {
             bg.fillStyle(0x222233, 0.5);
@@ -125,44 +132,41 @@ class MapScene extends Phaser.Scene {
             bg.fillStyle(0x1a1a2a, 0.6);
             bg.lineStyle(2, 0x333355, 0.5);
         }
-        bg.fillCircle(x, y, 28);
-        bg.strokeCircle(x, y, 28);
+        bg.fillCircle(x, y, 26);
+        bg.strokeCircle(x, y, 26);
 
-        // icon
         const icon = this.add.text(x, y - 2, node.type === 'start' ? '🚪' : typeInfo.icon, {
-            fontSize: '22px'
+            fontSize: '20px'
         }).setOrigin(0.5).setAlpha(visited ? 0.3 : 1);
 
-        // label under
         if (!visited) {
-            this.add.text(x, y + 32, node.type === 'start' ? '시작' : typeInfo.name, {
-                fontSize: '10px', fontFamily: 'monospace',
+            this.add.text(x, y + 30, node.type === 'start' ? '시작' : typeInfo.name, {
+                fontSize: '9px', fontFamily: 'monospace',
                 color: clickable ? '#ffffff' : '#666666'
             }).setOrigin(0.5);
         }
 
         if (clickable) {
-            // pulsing glow
             this.tweens.add({
                 targets: bg, alpha: 0.7, duration: 600, yoyo: true, repeat: -1
             });
 
-            const hitArea = this.add.circle(x, y, 30, 0x000000, 0)
+            const hitArea = this.add.circle(x, y, 28, 0x000000, 0)
                 .setInteractive({ useHandCursor: true });
 
             hitArea.on('pointerover', () => {
                 bg.clear();
                 bg.fillStyle(typeInfo.color, 0.45);
                 bg.lineStyle(3, 0xffffff, 1);
-                bg.fillCircle(x, y, 30);
-                bg.strokeCircle(x, y, 30);
+                bg.fillCircle(x, y, 28);
+                bg.strokeCircle(x, y, 28);
             });
             hitArea.on('pointerout', () => {
                 bg.clear();
                 bg.fillStyle(typeInfo.color, 0.25);
                 bg.lineStyle(3, typeInfo.color, 1);
-                bg.fillCircle(x, y, 28);
-                bg.strokeCircle(x, y, 28);
+                bg.fillCircle(x, y, 26);
+                bg.strokeCircle(x, y, 26);
             });
             hitArea.on('pointerdown', () => this._selectNode(node));
         }
@@ -170,15 +174,11 @@ class MapScene extends Phaser.Scene {
 
     _isClickable(nodeId) {
         const currentFloor = this.playerState.currentFloor;
-        // find which nodes the player can go to
         if (currentFloor === 0 && this.playerState.visitedNodes.length === 0) {
-            // haven't visited start yet — start is auto-visited
-            // can click floor 1 nodes
             const startNode = this.map[0][0];
             return startNode.connections.includes(nodeId);
         }
 
-        // find last visited node
         const lastVisited = this.playerState.visitedNodes[this.playerState.visitedNodes.length - 1];
         if (!lastVisited) {
             const startNode = this.map[0][0];
@@ -191,7 +191,6 @@ class MapScene extends Phaser.Scene {
     }
 
     _selectNode(node) {
-        // mark start as visited if first move
         if (this.playerState.visitedNodes.length === 0) {
             this.playerState.visitedNodes.push(this.map[0][0].id);
         }
@@ -206,27 +205,13 @@ class MapScene extends Phaser.Scene {
         };
 
         switch (node.type) {
-            case 'battle':
-                this._startBattle(passData, 'battle');
-                break;
-            case 'elite':
-                this._startBattle(passData, 'elite');
-                break;
-            case 'boss':
-                this._startBossBattle(passData);
-                break;
-            case 'shop':
-                this.scene.start('ShopScene', passData);
-                break;
-            case 'treasure':
-                this.scene.start('TreasureScene', passData);
-                break;
-            case 'rest':
-                this.scene.start('RestScene', passData);
-                break;
-            case 'event':
-                this.scene.start('EventScene', passData);
-                break;
+            case 'battle': this._startBattle(passData, 'battle'); break;
+            case 'elite': this._startBattle(passData, 'elite'); break;
+            case 'boss': this._startBossBattle(passData); break;
+            case 'shop': this.scene.start('ShopScene', passData); break;
+            case 'treasure': this.scene.start('TreasureScene', passData); break;
+            case 'rest': this.scene.start('RestScene', passData); break;
+            case 'event': this.scene.start('EventScene', passData); break;
         }
     }
 

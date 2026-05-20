@@ -58,6 +58,14 @@ class TreasureScene extends Phaser.Scene {
                 wordWrap: { width: 140 }, align: 'center'
             }).setOrigin(0.5);
 
+            // Show current stack count if already owned
+            const ownCount = ownedIds.filter(id => id === relic.id).length;
+            if (ownCount > 0) {
+                this.add.text(x + 60, y - 80, `보유 ×${ownCount}`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#44ff88'
+                }).setOrigin(0.5);
+            }
+
             const hitArea = this.add.rectangle(x, y + 15, 160, 220, 0x000000, 0)
                 .setInteractive({ useHandCursor: true });
 
@@ -120,7 +128,12 @@ class TreasureScene extends Phaser.Scene {
             fontSize: '14px', fontFamily: 'monospace', color: '#888888'
         }).setOrigin(0, 0.5);
         if (this.playerState.relics.length > 0) {
-            const relicStr = this.playerState.relics.map(id => (RELIC_DATA[id] || {}).icon || '?').join(' ');
+            const counts = {};
+            for (const r of this.playerState.relics) counts[r] = (counts[r] || 0) + 1;
+            const relicStr = Object.entries(counts).map(([id, cnt]) => {
+                const rd = RELIC_DATA[id];
+                return rd ? (cnt > 1 ? `${rd.icon}×${cnt}` : rd.icon) : '?';
+            }).join(' ');
             this.add.text(W - 20, 680, relicStr, { fontSize: '16px' }).setOrigin(1, 0.5);
         }
     }
