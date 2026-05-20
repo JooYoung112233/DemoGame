@@ -1,6 +1,13 @@
 class ShopSystem {
     static generateCustomer(gameState) {
-        const types = Object.entries(CUSTOMER_TYPES);
+        const types = Object.entries(CUSTOMER_TYPES).map(([id, t]) => {
+            let weight = t.weight;
+            // 이벤트: 상인 행렬 — 부자 손님 출현률 증가
+            if (gameState.dailyEvent?.effect?.richCustomerBoost && id === 'rich') {
+                weight *= 3;
+            }
+            return [id, { ...t, weight }];
+        });
         const totalWeight = types.reduce((s, [, t]) => s + t.weight, 0);
         let roll = Math.random() * totalWeight;
 

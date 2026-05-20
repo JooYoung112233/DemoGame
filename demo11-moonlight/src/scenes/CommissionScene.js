@@ -36,12 +36,27 @@ class CommissionScene extends Phaser.Scene {
         // --- Occasional shooting star ---
         this._spawnShootingStar();
 
+        const weather = this.gs.getWeather();
+        const repTier = this.gs.getReputationTier();
+
         this.add.text(cx, 22, `Day ${this.gs.day} - 밤: 의뢰서 작성`, {
             fontSize: '24px', fontFamily: 'monospace', color: '#aaaaff',
             stroke: '#000', strokeThickness: 3,
         }).setOrigin(0.5);
 
-        this.goldLabel = this.add.text(cx, 50, '', {
+        // Weather + reputation info
+        this.add.text(cx, 46, `${weather.icon} 내일 날씨: ${weather.name}  |  ${repTier.icon} ${repTier.name}`, {
+            fontSize: '11px', fontFamily: 'monospace', color: '#666688',
+        }).setOrigin(0.5);
+
+        // Storm warning
+        if (this.gs.isExpeditionBlocked()) {
+            this.add.text(cx, 62, `⛈️ 폭풍 예보! 내일 원정이 불가능합니다. (비용 환불)`, {
+                fontSize: '11px', fontFamily: 'monospace', color: '#ff8844',
+            }).setOrigin(0.5);
+        }
+
+        this.goldLabel = this.add.text(cx, this.gs.isExpeditionBlocked() ? 76 : 62, '', {
             fontSize: '12px', fontFamily: 'monospace', color: '#666688',
         }).setOrigin(0.5);
         this._updateGoldLabel();

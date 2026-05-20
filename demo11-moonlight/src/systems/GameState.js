@@ -15,6 +15,10 @@ class GameState {
         this.workers = [];
         this.workerCostPerDay = 0;
 
+        // 날씨 & 이벤트
+        this.weather = 'clear';
+        this.dailyEvent = null;
+
         // 모험가 성장 상태
         this.adventurerStates = {};
         ADVENTURER_DATA.forEach(adv => {
@@ -33,6 +37,7 @@ class GameState {
             { id: 'poison_herb', qty: 1 },
         ]);
         this._rollDemand();
+        this._rollWeather();
     }
 
     addItems(items) {
@@ -62,7 +67,114 @@ class GameState {
     }
 
     getDemandMultiplier(category) {
-        return category === this.demandCategory ? 1.5 : 1.0;
+        let mult = category === this.demandCategory ? 1.5 : 1.0;
+
+        // 날씨 수요 부스트
+        const w = WEATHER_DATA[this.weather];
+        if (w && w.demandBoost === category) mult *= 1.3;
+
+        // 이벤트 가격 부스트
+        if (this.dailyEvent?.effect?.priceBoost?.category === category) {
+            mult *= this.dailyEvent.effect.priceBoost.mult;
+        }
+
+        return mult;
+    }
+
+    // === 날씨 시스템 ===
+
+    _rollWeather() {
+        const entries = Object.entries(WEATHER_DATA);
+        const totalWeight = entries.reduce((s, [, w]) => s + w.weight, 0);
+        let roll = Math.random() * totalWeight;
+        for (const [id, w] of entries) {
+            roll -= w.weight;
+            if (roll <= 0) { this.weather = id; return; }
+        }
+        this.weather = 'clear';
+    }
+
+    getWeather() {
+        return WEATHER_DATA[this.weather] || WEATHER_DATA.clear;
+    }
+
+    isExpeditionBlocked() {
+        return !!WEATHER_DATA[this.weather]?.expeditionBlocked;
+    }
+
+    // === 일일 이벤트 ===
+
+    _rollDailyEvent() {
+        if (Math.random() > 0.35) {
+            this.dailyEvent = null;
+            return;
+        }
+        const eligible = DAILY_EVENTS.filter(e => this.day >= (e.minDay || 1));
+        if (eligible.length === 0) { this.dailyEvent = null; return; }
+
+        const totalWeight = eligible.reduce((s, e) => s + e.weight, 0);
+        let roll = Math.random() * totalWeight;
+        for (const evt of eligible) {
+            roll -= evt.weight;
+            if (roll <= 0) { this.dailyEvent = evt; return; }
+        }
+        this.dailyEvent = null;
+    }
+
+    applyDailyEventEffects() {
+        const results = [];
+        if (!this.dailyEvent) return results;
+        const eff = this.dailyEvent.effect;
+
+        // 세금
+        if (eff.taxRate) {
+            const tax = Math.floor(this.gold * eff.taxRate);
+            this.gold -= tax;
+            results.push({ text: `💰 세금 ${tax}G 납부`, color: '#ff6666' });
+        }
+
+        // 부상 치료
+        if (eff.healAllAdventurers) {
+            let healed = 0;
+            Object.values(this.adventurerStates).forEach(state => {
+                if (state.injuredUntil > this.day) {
+                    state.injuredUntil = 0;
+                    healed++;
+                }
+            });
+            if (healed > 0) results.push({ text: `💊 ${healed}명의 모험가 부상 치료!`, color: '#44ff88' });
+            else results.push({ text: `💊 치료할 모험가가 없었다.`, color: '#888888' });
+        }
+
+        // 길드 점검 보상
+        if (eff.guildReward) {
+            const tier = this.getReputationTier();
+            const reward = Math.max(0, this.reputation * 2);
+            if (reward > 0) {
+                this.gold += reward;
+                results.push({ text: `📋 길드 보상: +${reward}G (${tier.name})`, color: '#ffcc44' });
+            } else {
+                results.push({ text: `📋 길드: "아직 실적이 부족합니다."`, color: '#888888' });
+            }
+        }
+
+        // 평판 보너스
+        if (eff.repBonus) {
+            this.reputation = Math.min(this.reputation + eff.repBonus, 50);
+            results.push({ text: `⭐ 평판 +${eff.repBonus}`, color: '#ffcc44' });
+        }
+
+        return results;
+    }
+
+    // === 평판 단계 ===
+
+    getReputationTier() {
+        let result = REPUTATION_TIERS[0];
+        for (const tier of REPUTATION_TIERS) {
+            if (this.reputation >= tier.min) result = tier;
+        }
+        return result;
     }
 
     // === 모험가 시스템 ===
@@ -102,8 +214,22 @@ class GameState {
             if (r.lootMult) lm += r.lootMult;
         }
 
+        // 날씨 보너스
+        const w = WEATHER_DATA[this.weather];
+        if (w) sr += w.successRateBonus;
+
+        // 이벤트: 도적 출현
+        if (this.dailyEvent?.effect?.successRateBonus) {
+            sr += this.dailyEvent.effect.successRateBonus;
+        }
+
+        // 이벤트: 도적 출현 — 전리품 보너스
+        if (this.dailyEvent?.effect?.lootBonus) {
+            lm += this.dailyEvent.effect.lootBonus;
+        }
+
         return {
-            successRate: Math.min(sr, 0.99),
+            successRate: Math.min(Math.max(sr, 0.05), 0.99),
             lootMult: Math.round(lm * 100) / 100,
         };
     }
@@ -162,11 +288,35 @@ class GameState {
         return ADVENTURER_DATA.filter(a => !a.unlockDay || this.day >= a.unlockDay);
     }
 
+    // === 손님 수 계산 ===
+
+    getCustomerCount() {
+        const base = 6;
+        const repTier = this.getReputationTier();
+        const repBonus = repTier.customerBonus;
+        const dayBonus = Math.floor(this.day / 5);
+
+        // 날씨 배율
+        const weatherMult = WEATHER_DATA[this.weather]?.customerMult || 1.0;
+
+        // 이벤트 배율
+        let eventMult = 1.0;
+        if (this.dailyEvent?.effect?.customerMult) {
+            eventMult = this.dailyEvent.effect.customerMult;
+        }
+
+        const raw = (base + repBonus + dayBonus) * weatherMult * eventMult;
+        return Math.min(Math.max(Math.round(raw), 2), 25);
+    }
+
     // === 일반 시스템 ===
 
     advanceDay() {
         this.day++;
         this._rollDemand();
+        this._rollWeather();
+        this._rollDailyEvent();
+
         if (this.workers.length > 0) this.gold -= this.workerCostPerDay;
 
         this.activeOrders = this.activeOrders.filter(o => {
@@ -178,10 +328,28 @@ class GameState {
         });
 
         this.commissionResults = [];
-        this.pendingCommissions.forEach(c => {
-            const result = ExpeditionSystem.run(c.zoneId, c.adventurer, this);
-            this.commissionResults.push(result);
-        });
+        if (!this.isExpeditionBlocked()) {
+            this.pendingCommissions.forEach(c => {
+                const result = ExpeditionSystem.run(c.zoneId, c.adventurer, this);
+                this.commissionResults.push(result);
+            });
+        } else {
+            // 폭풍으로 원정 불가 — 비용 환불
+            this.pendingCommissions.forEach(c => {
+                this.gold += c.adventurer.cost;
+                this.commissionResults.push({
+                    success: false,
+                    items: [],
+                    log: [
+                        { text: `${c.adventurer.icon} ${c.adventurer.name}`, delay: 0 },
+                        { text: `⛈️ 폭풍으로 인해 원정이 취소되었습니다.`, delay: 500, color: '#ff8844' },
+                        { text: `💰 의뢰 비용 ${c.adventurer.cost}G 환불`, delay: 1000, color: '#44ff88' },
+                    ],
+                    gold: 0,
+                    advEvents: [],
+                });
+            });
+        }
         this.pendingCommissions = [];
     }
 
@@ -218,12 +386,5 @@ class GameState {
         return Object.entries(ZONE_DATA)
             .filter(([, z]) => this.day >= z.unlockDay)
             .map(([id, z]) => ({ id, ...z }));
-    }
-
-    getCustomerCount() {
-        const base = 6;
-        const repBonus = Math.floor(this.reputation / 5);
-        const dayBonus = Math.floor(this.day / 5);
-        return Math.min(Math.max(base + repBonus + dayBonus, 3), 18);
     }
 }

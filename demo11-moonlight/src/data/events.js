@@ -1,3 +1,4 @@
+// === 원정 중 랜덤 이벤트 (기존) ===
 const EXPEDITION_EVENTS = [
     {
         id: 'monster_ambush',
@@ -88,4 +89,184 @@ const EXPEDITION_EVENTS = [
             ]},
         ],
     },
+];
+
+// === 날씨 시스템 ===
+const WEATHER_DATA = {
+    clear: {
+        name: '맑음',
+        icon: '☀️',
+        desc: '화창한 날씨. 평범한 하루.',
+        customerMult: 1.0,      // 손님 수 배율
+        successRateBonus: 0.0,  // 원정 성공률 보너스
+        demandBoost: null,      // 특정 카테고리 수요 증가
+        weight: 40,
+    },
+    sunny: {
+        name: '쾌청',
+        icon: '🌤️',
+        desc: '상쾌한 날! 모험하기 좋다.',
+        customerMult: 1.1,
+        successRateBonus: 0.10,
+        demandBoost: null,
+        weight: 20,
+    },
+    rain: {
+        name: '비',
+        icon: '🌧️',
+        desc: '비가 내린다. 손님이 적고 포션 수요 증가.',
+        customerMult: 0.7,
+        successRateBonus: -0.05,
+        demandBoost: 'herb',
+        weight: 20,
+    },
+    fog: {
+        name: '안개',
+        icon: '🌫️',
+        desc: '짙은 안개. 길을 잃기 쉽다.',
+        customerMult: 0.85,
+        successRateBonus: -0.08,
+        demandBoost: null,
+        weight: 10,
+    },
+    storm: {
+        name: '폭풍',
+        icon: '⛈️',
+        desc: '폭풍이 몰아친다! 원정 불가.',
+        customerMult: 0.5,
+        successRateBonus: -1.0, // 사실상 원정 불가
+        demandBoost: null,
+        expeditionBlocked: true,
+        weight: 10,
+    },
+};
+
+// === 일일 랜덤 이벤트 ===
+const DAILY_EVENTS = [
+    {
+        id: 'festival',
+        name: '마을 축제',
+        icon: '🎉',
+        desc: '마을에 축제가 열렸다! 손님이 몰려온다.',
+        effect: {
+            customerMult: 2.0,
+            demandBoost: null,  // 모든 카테고리 수요 증가는 아님
+            repBonus: 1,
+        },
+        weight: 10,
+        minDay: 3,
+    },
+    {
+        id: 'merchant_caravan',
+        name: '상인 행렬',
+        icon: '🐫',
+        desc: '먼 곳에서 상인 행렬이 왔다. 부자 손님이 많다.',
+        effect: {
+            richCustomerBoost: true, // 부자 손님 출현률 증가
+            repBonus: 0,
+        },
+        weight: 12,
+        minDay: 4,
+    },
+    {
+        id: 'bandit_rumor',
+        name: '도적 출현 소문',
+        icon: '🏴‍☠️',
+        desc: '도적이 출현한다는 소문. 원정이 위험하지만 보상도 크다.',
+        effect: {
+            successRateBonus: -0.10,
+            lootBonus: 0.5,
+        },
+        weight: 12,
+        minDay: 3,
+    },
+    {
+        id: 'royal_demand',
+        name: '왕실 납품 요청',
+        icon: '👑',
+        desc: '왕실에서 긴급 납품을 요청했다. 가공품 가격 상승!',
+        effect: {
+            priceBoost: { category: 'crafted', mult: 1.5 },
+        },
+        weight: 8,
+        minDay: 5,
+    },
+    {
+        id: 'gem_rush',
+        name: '보석 열풍',
+        icon: '💎',
+        desc: '보석에 대한 수요가 폭증하고 있다!',
+        effect: {
+            priceBoost: { category: 'gem', mult: 2.0 },
+        },
+        weight: 8,
+        minDay: 7,
+    },
+    {
+        id: 'herb_blight',
+        name: '약초 흉작',
+        icon: '🥀',
+        desc: '올해는 약초가 부족하다. 약초 가격 상승!',
+        effect: {
+            priceBoost: { category: 'herb', mult: 1.8 },
+        },
+        weight: 10,
+        minDay: 4,
+    },
+    {
+        id: 'wandering_healer',
+        name: '떠돌이 치료사',
+        icon: '💊',
+        desc: '치료사가 마을에 왔다. 부상 모험가를 치료해준다.',
+        effect: {
+            healAllAdventurers: true,
+        },
+        weight: 8,
+        minDay: 4,
+    },
+    {
+        id: 'guild_inspection',
+        name: '길드 점검',
+        icon: '📋',
+        desc: '상인 길드에서 점검이 왔다. 평판에 따라 보상.',
+        effect: {
+            guildReward: true,  // 평판 기반 골드 보상
+        },
+        weight: 8,
+        minDay: 5,
+    },
+    {
+        id: 'monster_wave',
+        name: '몬스터 출몰',
+        icon: '👹',
+        desc: '마을 근처에 몬스터가 출몰! 모험가 장비 수요 급증.',
+        effect: {
+            priceBoost: { category: 'crafted', mult: 1.4 },
+            customerMult: 1.3,
+        },
+        weight: 10,
+        minDay: 3,
+    },
+    {
+        id: 'tax_day',
+        name: '세금 징수',
+        icon: '📜',
+        desc: '오늘은 세금 납부일. 보유 골드의 10%를 납부한다.',
+        effect: {
+            taxRate: 0.10,
+        },
+        weight: 8,
+        minDay: 6,
+    },
+];
+
+// === 평판 단계 ===
+const REPUTATION_TIERS = [
+    { min: -20, name: '악덕 상인',     icon: '💀', color: '#ff4444', customerBonus: -3, desc: '가격이 너무 비싸다는 소문' },
+    { min: -5,  name: '무명',          icon: '❔', color: '#666666', customerBonus: 0,  desc: '아직 이름이 알려지지 않았다' },
+    { min: 5,   name: '골목 상점',     icon: '🏪', color: '#aaaaaa', customerBonus: 1,  desc: '동네에서 알아주는 가게' },
+    { min: 15,  name: '인기 가게',     icon: '⭐', color: '#ffcc44', customerBonus: 3,  desc: '손님이 줄을 선다!' },
+    { min: 25,  name: '명문 상점',     icon: '🏆', color: '#ff88ff', customerBonus: 5,  desc: '도시 전체에 소문난 가게' },
+    { min: 35,  name: '왕실 납품처',   icon: '👑', color: '#44ccff', customerBonus: 7,  desc: '왕실의 인정을 받았다' },
+    { min: 45,  name: '전설의 상점',   icon: '🌟', color: '#ffaa00', customerBonus: 10, desc: '대륙에 이름이 알려진 전설' },
 ];

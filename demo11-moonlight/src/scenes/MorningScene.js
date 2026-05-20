@@ -6,46 +6,101 @@ class MorningScene extends Phaser.Scene {
         const cx = 640;
         const MARGIN = 50;
         const CONTENT_W = 1280 - MARGIN * 2;
+        const weather = gs.getWeather();
+        const repTier = gs.getReputationTier();
 
-        this.add.rectangle(cx, 360, 1280, 720, 0x1a1510);
+        // --- Background based on weather ---
+        const bgColors = {
+            clear: 0x1a1510, sunny: 0x1f1a10, rain: 0x10121a,
+            fog: 0x151518, storm: 0x0a0a12,
+        };
+        this.add.rectangle(cx, 360, 1280, 720, bgColors[gs.weather] || 0x1a1510);
 
-        // --- Sunrise glow effect (soft orange gradient at top) ---
-        const sunGlow = this.add.rectangle(cx, 0, 1280, 120, 0xff8833, 0.06).setOrigin(0.5, 0);
-        this.tweens.add({ targets: sunGlow, alpha: 0.12, duration: 3000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-        const sunGlow2 = this.add.rectangle(cx, 0, 1280, 60, 0xffaa44, 0.04).setOrigin(0.5, 0);
-        this.tweens.add({ targets: sunGlow2, alpha: 0.09, duration: 2400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: 500 });
-
-        // --- Floating dust particles ---
-        for (let i = 0; i < 15; i++) {
-            const px = Phaser.Math.Between(50, 1230);
-            const py = Phaser.Math.Between(100, 700);
-            const dot = this.add.circle(px, py, Phaser.Math.Between(1, 2), 0xffddaa, Phaser.Math.FloatBetween(0.08, 0.25));
-            this.tweens.add({
-                targets: dot, y: py - Phaser.Math.Between(80, 200), alpha: 0,
-                duration: Phaser.Math.Between(4000, 8000), delay: Phaser.Math.Between(0, 3000),
-                repeat: -1, onRepeat: () => { dot.setPosition(Phaser.Math.Between(50, 1230), Phaser.Math.Between(400, 700)); dot.setAlpha(Phaser.Math.FloatBetween(0.08, 0.25)); },
-            });
+        // --- Weather-specific atmosphere ---
+        if (gs.weather === 'rain' || gs.weather === 'storm') {
+            this._drawRainEffect(gs.weather === 'storm');
+        } else if (gs.weather === 'fog') {
+            this._drawFogEffect();
+        } else {
+            // --- Sunrise glow effect ---
+            const sunGlow = this.add.rectangle(cx, 0, 1280, 120, 0xff8833, 0.06).setOrigin(0.5, 0);
+            this.tweens.add({ targets: sunGlow, alpha: 0.12, duration: 3000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            const sunGlow2 = this.add.rectangle(cx, 0, 1280, 60, 0xffaa44, 0.04).setOrigin(0.5, 0);
+            this.tweens.add({ targets: sunGlow2, alpha: 0.09, duration: 2400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: 500 });
         }
 
-        // --- Window light rectangle that pulses warmly ---
-        const windowLight = this.add.rectangle(cx, 200, 300, 200, 0xffeecc, 0.04);
-        this.tweens.add({ targets: windowLight, alpha: 0.08, duration: 2500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        // --- Floating dust particles ---
+        if (gs.weather !== 'storm') {
+            for (let i = 0; i < 15; i++) {
+                const px = Phaser.Math.Between(50, 1230);
+                const py = Phaser.Math.Between(100, 700);
+                const dot = this.add.circle(px, py, Phaser.Math.Between(1, 2), 0xffddaa, Phaser.Math.FloatBetween(0.08, 0.25));
+                this.tweens.add({
+                    targets: dot, y: py - Phaser.Math.Between(80, 200), alpha: 0,
+                    duration: Phaser.Math.Between(4000, 8000), delay: Phaser.Math.Between(0, 3000),
+                    repeat: -1, onRepeat: () => { dot.setPosition(Phaser.Math.Between(50, 1230), Phaser.Math.Between(400, 700)); dot.setAlpha(Phaser.Math.FloatBetween(0.08, 0.25)); },
+                });
+            }
+        }
 
+        // --- Header bar ---
         this.add.rectangle(cx, 30, 1280, 60, 0x2a2015, 0.8);
 
-        this.add.text(cx, 18, `Day ${gs.day} - 아침`, {
+        this.add.text(cx, 12, `Day ${gs.day} - 아침`, {
             fontSize: '26px', fontFamily: 'monospace', color: '#ffddaa',
             stroke: '#000', strokeThickness: 3,
         }).setOrigin(0.5);
 
-        this.add.text(cx, 45, `${gs.gold}G  |  평판 ${gs.reputation}`, {
-            fontSize: '13px', fontFamily: 'monospace', color: '#887766',
+        // Weather + Reputation + Gold in header
+        this.add.text(cx, 42, `${weather.icon} ${weather.name}  |  ${gs.gold}G  |  ${repTier.icon} ${repTier.name} (평판 ${gs.reputation})`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#887766',
         }).setOrigin(0.5);
 
         this.scrollY = 0;
         this.contentContainer = this.add.container(0, 0);
-        let y = 80;
+        let y = 70;
 
+        // === Weather announcement ===
+        if (gs.weather !== 'clear') {
+            const wPanel = this.add.rectangle(cx, y + 15, 500, 30, 0x10101e, 0.8);
+            wPanel.setStrokeStyle(1, 0x222240);
+            this.contentContainer.add(wPanel);
+            const wText = this.add.text(cx, y + 15, `${weather.icon} ${weather.desc}`, {
+                fontSize: '12px', fontFamily: 'monospace', color: '#aabbcc',
+            }).setOrigin(0.5);
+            this.contentContainer.add(wText);
+            y += 38;
+        }
+
+        // === Daily event announcement ===
+        if (gs.dailyEvent) {
+            const evt = gs.dailyEvent;
+            const evtPanel = this.add.rectangle(cx, y + 18, 550, 36, 0x1a1a10, 0.9);
+            evtPanel.setStrokeStyle(1, 0x444420);
+            this.contentContainer.add(evtPanel);
+            const evtText = this.add.text(cx, y + 12, `${evt.icon} ${evt.name}`, {
+                fontSize: '14px', fontFamily: 'monospace', color: '#ffcc66',
+            }).setOrigin(0.5);
+            this.contentContainer.add(evtText);
+            const evtDesc = this.add.text(cx, y + 28, evt.desc, {
+                fontSize: '10px', fontFamily: 'monospace', color: '#aa9966',
+            }).setOrigin(0.5);
+            this.contentContainer.add(evtDesc);
+            y += 45;
+
+            // Apply event effects and show results
+            const eventResults = gs.applyDailyEventEffects();
+            eventResults.forEach(r => {
+                const rt = this.add.text(cx, y, r.text, {
+                    fontSize: '11px', fontFamily: 'monospace', color: r.color || '#cccccc',
+                }).setOrigin(0.5);
+                this.contentContainer.add(rt);
+                y += 18;
+            });
+            if (eventResults.length > 0) y += 5;
+        }
+
+        // === Commission results ===
         if (gs.commissionResults.length > 0) {
             // --- Door-knocking effect ---
             const knockText = this.add.text(cx, y + 10, '뚝... 뚝... (문 두드리는 소리)', {
@@ -85,6 +140,65 @@ class MorningScene extends Phaser.Scene {
             textColor: '#ffcc88', fontSize: '17px',
             onClick: () => this.scene.start('ShopScene'),
         });
+    }
+
+    // === Weather effects ===
+
+    _drawRainEffect(isStorm) {
+        const count = isStorm ? 60 : 30;
+        const speed = isStorm ? 600 : 400;
+        for (let i = 0; i < count; i++) {
+            const x = Phaser.Math.Between(0, 1280);
+            const y = Phaser.Math.Between(-200, 0);
+            const len = isStorm ? Phaser.Math.Between(12, 25) : Phaser.Math.Between(6, 14);
+            const drop = this.add.rectangle(x, y, 1, len, 0x6688cc, Phaser.Math.FloatBetween(0.15, 0.4));
+            drop.setAngle(isStorm ? -15 : -5);
+            this.tweens.add({
+                targets: drop,
+                y: 750,
+                x: x - (isStorm ? 60 : 15),
+                duration: Phaser.Math.Between(speed, speed + 400),
+                delay: Phaser.Math.Between(0, 2000),
+                repeat: -1,
+                onRepeat: () => {
+                    drop.setPosition(Phaser.Math.Between(0, 1280), Phaser.Math.Between(-200, -50));
+                },
+            });
+        }
+        if (isStorm) {
+            // Lightning flash
+            const flash = this.add.rectangle(640, 360, 1280, 720, 0xffffff, 0);
+            const doFlash = () => {
+                this.time.delayedCall(Phaser.Math.Between(3000, 8000), () => {
+                    if (!this.scene.isActive()) return;
+                    this.tweens.add({
+                        targets: flash, alpha: 0.15, duration: 80,
+                        yoyo: true, repeat: 1,
+                        onComplete: () => { flash.setAlpha(0); doFlash(); },
+                    });
+                });
+            };
+            doFlash();
+        }
+    }
+
+    _drawFogEffect() {
+        for (let i = 0; i < 8; i++) {
+            const fog = this.add.ellipse(
+                Phaser.Math.Between(0, 1280),
+                Phaser.Math.Between(200, 600),
+                Phaser.Math.Between(200, 500),
+                Phaser.Math.Between(60, 120),
+                0xaabbcc, Phaser.Math.FloatBetween(0.03, 0.08)
+            );
+            this.tweens.add({
+                targets: fog,
+                x: fog.x + Phaser.Math.Between(-100, 100),
+                alpha: Phaser.Math.FloatBetween(0.02, 0.06),
+                duration: Phaser.Math.Between(5000, 10000),
+                yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+            });
+        }
     }
 
     _drawCommissionResults(gs, cx, y, contentW) {

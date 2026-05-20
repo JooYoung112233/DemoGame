@@ -54,17 +54,25 @@ class ShopScene extends Phaser.Scene {
         this.add.rectangle(640, barH / 2, 1280, barH, 0x151520);
         const infoY = barH / 2 - 8;
         this.goldLabel = this.add.text(40, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#ffcc44' });
-        this.repLabel = this.add.text(200, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#44ccff' });
-        this.phaseLabel = this.add.text(400, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#aaa' });
-        this.customerLabel = this.add.text(600, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#888' });
+        const repTier = this.gs.getReputationTier();
+        this.repLabel = this.add.text(180, infoY, '', { fontSize: '13px', fontFamily: 'monospace', color: repTier.color });
+        this.phaseLabel = this.add.text(380, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#aaa' });
+        this.customerLabel = this.add.text(530, infoY, '', { fontSize: '14px', fontFamily: 'monospace', color: '#888' });
         const cat = CATEGORIES[this.gs.demandCategory];
-        this.add.text(800, infoY, `수요: ${cat ? cat.name : ''}`, { fontSize: '13px', fontFamily: 'monospace', color: '#88aa88' });
+        this.add.text(680, infoY, `수요: ${cat ? cat.name : ''}`, { fontSize: '13px', fontFamily: 'monospace', color: cat?.color || '#88aa88' });
+        const weather = this.gs.getWeather();
+        this.add.text(830, infoY, `${weather.icon} ${weather.name}`, { fontSize: '13px', fontFamily: 'monospace', color: '#aabbcc' });
+        // Daily event indicator
+        if (this.gs.dailyEvent) {
+            this.add.text(970, infoY, `${this.gs.dailyEvent.icon} ${this.gs.dailyEvent.name}`, { fontSize: '12px', fontFamily: 'monospace', color: '#ffcc66' });
+        }
         this._updateInfo();
     }
 
     _updateInfo() {
         this.goldLabel.setText(`${this.gs.gold}G`);
-        this.repLabel.setText(`평판 ${this.gs.reputation}`);
+        const repTier = this.gs.getReputationTier();
+        this.repLabel.setText(`${repTier.icon} ${repTier.name} (${this.gs.reputation})`);
         this.phaseLabel.setText(this.phase === 'prep' ? '준비 중' : this.phase === 'selling' ? '영업 중' : '마감');
         this.customerLabel.setText(this.phase === 'selling' ? `${this.customerIndex}/${this.totalCustomers}` : '');
     }
