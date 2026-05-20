@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.Rendering.Universal;
+using System.Reflection;
 
 public class FlashlightSceneSetup : EditorWindow
 {
     const float TILE_W = 1.0f;
     const float TILE_H = 0.5f;
+    const int PPU = 64;
 
     [MenuItem("Tools/Setup Flashlight Prototype Scene")]
     static void SetupScene()
@@ -19,8 +21,8 @@ public class FlashlightSceneSetup : EditorWindow
         var globalLightGO = new GameObject("Global Light 2D");
         var globalLight = globalLightGO.AddComponent<Light2D>();
         globalLight.lightType = Light2D.LightType.Global;
-        globalLight.intensity = 0.08f;
-        globalLight.color = new Color(0.08f, 0.08f, 0.18f);
+        globalLight.intensity = 0.06f;
+        globalLight.color = new Color(0.06f, 0.06f, 0.15f);
         Undo.RegisterCreatedObjectUndo(globalLightGO, "Create Global Light");
 
         // --- Player ---
@@ -55,6 +57,8 @@ public class FlashlightSceneSetup : EditorWindow
         coneLight.intensity = 2f;
         coneLight.color = new Color(1f, 0.93f, 0.75f);
         coneLight.falloffIntensity = 0.6f;
+        coneLight.shadowsEnabled = true;
+        coneLight.shadowIntensity = 0.9f;
 
         var glowGO = new GameObject("AmbientGlow");
         glowGO.transform.SetParent(playerGO.transform);
@@ -65,8 +69,10 @@ public class FlashlightSceneSetup : EditorWindow
         glow.pointLightInnerAngle = 360f;
         glow.pointLightOuterRadius = 2.5f;
         glow.pointLightInnerRadius = 0.8f;
-        glow.intensity = 0.5f;
+        glow.intensity = 0.4f;
         glow.color = new Color(0.7f, 0.75f, 0.9f);
+        glow.shadowsEnabled = true;
+        glow.shadowIntensity = 0.7f;
 
         var flashCtrl = playerGO.AddComponent<FlashlightController>();
         var so = new SerializedObject(flashCtrl);
@@ -87,8 +93,8 @@ public class FlashlightSceneSetup : EditorWindow
             camGO.tag = "MainCamera";
         }
         cam.orthographic = true;
-        cam.orthographicSize = 7;
-        cam.backgroundColor = new Color(0.02f, 0.02f, 0.05f);
+        cam.orthographicSize = 6;
+        cam.backgroundColor = new Color(0.02f, 0.02f, 0.04f);
         cam.transform.position = new Vector3(0, 0, -10);
         var camFollow = cam.gameObject.AddComponent<CameraFollow>();
         var camSO = new SerializedObject(camFollow);
@@ -120,7 +126,7 @@ public class FlashlightSceneSetup : EditorWindow
         hudSO.FindProperty("flashlight").objectReferenceValue = flashCtrl;
         hudSO.ApplyModifiedProperties();
 
-        // --- 건물 (바닥 + 벽) ---
+        // --- 건물 ---
         CreateBuilding();
 
         Debug.Log("[Flashlight Prototype] 씬 생성 완료!");
@@ -128,41 +134,38 @@ public class FlashlightSceneSetup : EditorWindow
 
     static void CreateBuilding()
     {
-        var building = new GameObject("Building");
-        Undo.RegisterCreatedObjectUndo(building, "Create Building");
+        var root = new GameObject("Building");
+        Undo.RegisterCreatedObjectUndo(root, "Create Building");
 
-        int w = 12, h = 10;
-        Sprite floorTile = CreateDiamondSprite(64, new Color(0.28f, 0.26f, 0.22f));
-        Sprite roadTile = CreateDiamondSprite(64, new Color(0.15f, 0.15f, 0.17f));
+        int bw = 12, bh = 10;
 
-        // ---- 바깥 바닥 (도로/아스팔트) ----
-        var outsideFloor = new GameObject("OutsideFloor");
-        outsideFloor.transform.SetParent(building.transform);
-        for (int gx = -6; gx <= w + 6; gx++)
+        // ===== 바깥 바닥 (아스팔트) =====
+        var outsideParent = new GameObject("OutsideGround");
+        outsideParent.transform.SetParent(root.transform);
+        Sprite asphaltTile = CreateAsphaltTile();
+
+        for (int gx = -6; gx <= bw + 6; gx++)
         {
-            for (int gy = -6; gy <= h + 6; gy++)
+            for (int gy = -6; gy <= bh + 6; gy++)
             {
-                if (gx >= 1 && gx < w && gy >= 1 && gy < h) continue;
+                if (gx >= 1 && gx < bw && gy >= 1 && gy < bh) continue;
                 var go = new GameObject($"R_{gx}_{gy}");
-                go.transform.SetParent(outsideFloor.transform);
+                go.transform.SetParent(outsideParent.transform);
                 go.transform.position = GridToWorld(gx, gy);
                 var sr = go.AddComponent<SpriteRenderer>();
-                sr.sprite = roadTile;
+                sr.sprite = asphaltTile;
                 sr.sortingOrder = gx + gy - 15;
-                sr.color = new Color(
-                    0.13f + Random.value * 0.04f,
-                    0.13f + Random.value * 0.04f,
-                    0.15f + Random.value * 0.04f
-                );
             }
         }
 
-        // ---- 건물 내부 바닥 ----
+        // ===== 건물 내부 바닥 (콘크리트) =====
         var floorParent = new GameObject("Floor");
-        floorParent.transform.SetParent(building.transform);
-        for (int gx = 1; gx < w; gx++)
+        floorParent.transform.SetParent(root.transform);
+        Sprite floorTile = CreateConcreteFloorTile();
+
+        for (int gx = 1; gx < bw; gx++)
         {
-            for (int gy = 1; gy < h; gy++)
+            for (int gy = 1; gy < bh; gy++)
             {
                 var go = new GameObject($"F_{gx}_{gy}");
                 go.transform.SetParent(floorParent.transform);
@@ -170,54 +173,75 @@ public class FlashlightSceneSetup : EditorWindow
                 var sr = go.AddComponent<SpriteRenderer>();
                 sr.sprite = floorTile;
                 sr.sortingOrder = gx + gy - 10;
-                sr.color = (gx + gy) % 2 == 0
-                    ? new Color(0.30f, 0.28f, 0.24f)
-                    : new Color(0.25f, 0.23f, 0.19f);
             }
         }
 
-        // ---- 벽 ----
+        // ===== 벽 (그림자 캐스터 포함) =====
         var wallParent = new GameObject("Walls");
-        wallParent.transform.SetParent(building.transform);
-        Color wallColor = new Color(0.35f, 0.30f, 0.25f);
+        wallParent.transform.SetParent(root.transform);
+        Color wallBase = new Color(0.30f, 0.27f, 0.23f);
 
-        // 뒷벽 (위)
-        for (int gx = 0; gx <= w; gx++)
-            CreateWall(wallParent, gx, h, wallColor);
-
+        // 뒷벽
+        for (int gx = 0; gx <= bw; gx++)
+            CreateWall(wallParent, gx, bh, wallBase);
         // 좌벽
-        for (int gy = 0; gy <= h; gy++)
-            CreateWall(wallParent, 0, gy, wallColor);
-
+        for (int gy = 0; gy <= bh; gy++)
+            CreateWall(wallParent, 0, gy, wallBase);
         // 우벽
-        for (int gy = 0; gy <= h; gy++)
-            CreateWall(wallParent, w, gy, wallColor);
-
-        // 앞벽 (출입구 gx 5~7 비움)
-        for (int gx = 0; gx <= w; gx++)
+        for (int gy = 0; gy <= bh; gy++)
+            CreateWall(wallParent, bw, gy, wallBase);
+        // 앞벽 (출입구 5~7 비움)
+        for (int gx = 0; gx <= bw; gx++)
         {
             if (gx >= 5 && gx <= 7) continue;
-            CreateWall(wallParent, gx, 0, wallColor);
+            CreateWall(wallParent, gx, 0, wallBase);
         }
     }
 
-    // ====== 벽 1칸 ======
-    static void CreateWall(GameObject parent, int gx, int gy, Color color)
+    static void CreateWall(GameObject parent, int gx, int gy, Color baseColor)
     {
         Vector3 pos = GridToWorld(gx, gy);
-        float wallH = 0.5f;
 
         var go = new GameObject($"W_{gx}_{gy}");
         go.transform.SetParent(parent.transform);
-        go.transform.position = pos + new Vector3(0, wallH * 0.5f, 0);
+        go.transform.position = pos;
 
+        // 벽 스프라이트 (아이소 벽돌)
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = CreateWallSprite(32, 24, color);
+        sr.sprite = CreateBrickWallSprite(baseColor);
         sr.sortingOrder = (gx + gy) + 30;
 
+        // 콜라이더
         var box = go.AddComponent<BoxCollider2D>();
-        box.size = new Vector2(TILE_W * 0.7f, TILE_H + wallH);
-        box.offset = new Vector2(0, -wallH * 0.2f);
+        box.size = new Vector2(TILE_W * 0.7f, TILE_H * 1.5f);
+        box.offset = new Vector2(0, 0.1f);
+
+        // ShadowCaster2D (빛 차단)
+        var shadow = go.AddComponent<ShadowCaster2D>();
+        shadow.selfShadows = false;
+
+        // ShadowCaster2D 경로를 사각형으로 설정 (리플렉션 필요)
+        SetShadowCasterShape(shadow, new Vector3[]
+        {
+            new(-0.35f, -0.15f, 0),
+            new( 0.35f, -0.15f, 0),
+            new( 0.35f,  0.45f, 0),
+            new(-0.35f,  0.45f, 0),
+        });
+    }
+
+    static void SetShadowCasterShape(ShadowCaster2D caster, Vector3[] path)
+    {
+        // ShadowCaster2D의 내부 필드에 접근 (리플렉션)
+        var shapeField = typeof(ShadowCaster2D).GetField("m_ShapePath",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        if (shapeField != null)
+            shapeField.SetValue(caster, path);
+
+        var hashField = typeof(ShadowCaster2D).GetField("m_ShapePathHash",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        if (hashField != null)
+            hashField.SetValue(caster, Random.Range(int.MinValue, int.MaxValue));
     }
 
     // ====== 좌표 변환 ======
@@ -228,84 +252,159 @@ public class FlashlightSceneSetup : EditorWindow
         return new Vector3(wx, wy, 0);
     }
 
-    // ====== 스프라이트 생성 ======
+    // ================================================================
+    //  스프라이트 생성: 아이소 타일 + 벽돌 벽
+    // ================================================================
 
-    static Sprite CreateDiamondSprite(int size, Color color)
+    // 아스팔트 바닥 타일 (어두운 도로)
+    static Sprite CreateAsphaltTile()
     {
-        var tex = new Texture2D(size, size);
+        int s = PPU;
+        var tex = new Texture2D(s, s);
         tex.filterMode = FilterMode.Point;
-        float half = size * 0.5f;
+        float half = s * 0.5f;
 
-        for (int y = 0; y < size; y++)
-            for (int x = 0; x < size; x++)
+        for (int y = 0; y < s; y++)
+            for (int x = 0; x < s; x++)
             {
                 float dx = Mathf.Abs(x - half + 0.5f) / half;
                 float dy = Mathf.Abs(y - half + 0.5f) / half;
-                float d = dx + dy;
-                if (d <= 1.0f)
-                    tex.SetPixel(x, y, d > 0.92f ? color * 0.6f : color);
+                if (dx + dy <= 1.0f)
+                {
+                    float noise = Mathf.PerlinNoise(x * 0.15f, y * 0.15f) * 0.04f;
+                    float v = 0.14f + noise;
+                    bool line = (dx + dy > 0.94f);
+                    tex.SetPixel(x, y, line
+                        ? new Color(0.18f, 0.17f, 0.16f)
+                        : new Color(v, v, v + 0.01f));
+                }
                 else
                     tex.SetPixel(x, y, Color.clear);
             }
         tex.Apply();
-        return Sprite.Create(tex, new Rect(0, 0, size, size), Vector2.one * 0.5f, size / TILE_W);
+        return Sprite.Create(tex, new Rect(0, 0, s, s), Vector2.one * 0.5f, s / TILE_W);
     }
 
-    static Sprite CreateWallSprite(int w, int h, Color color)
+    // 콘크리트 실내 바닥 타일
+    static Sprite CreateConcreteFloorTile()
     {
-        int texW = w;
-        int texH = h + w / 2;
-        var tex = new Texture2D(texW, texH);
+        int s = PPU;
+        var tex = new Texture2D(s, s);
+        tex.filterMode = FilterMode.Point;
+        float half = s * 0.5f;
+
+        for (int y = 0; y < s; y++)
+            for (int x = 0; x < s; x++)
+            {
+                float dx = Mathf.Abs(x - half + 0.5f) / half;
+                float dy = Mathf.Abs(y - half + 0.5f) / half;
+                if (dx + dy <= 1.0f)
+                {
+                    float noise = Mathf.PerlinNoise(x * 0.2f + 50, y * 0.2f + 50) * 0.06f;
+                    float v = 0.24f + noise;
+                    bool border = (dx + dy > 0.92f);
+                    bool gridLine = (x % 16 == 0 || y % 16 == 0) && (dx + dy < 0.9f);
+                    if (border)
+                        tex.SetPixel(x, y, new Color(0.18f, 0.17f, 0.15f));
+                    else if (gridLine)
+                        tex.SetPixel(x, y, new Color(v - 0.03f, v - 0.03f, v - 0.02f));
+                    else
+                        tex.SetPixel(x, y, new Color(v, v - 0.01f, v - 0.02f));
+                }
+                else
+                    tex.SetPixel(x, y, Color.clear);
+            }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, s, s), Vector2.one * 0.5f, s / TILE_W);
+    }
+
+    // 벽돌 벽 스프라이트 (아이소 큐브: 상단면 + 좌측면 + 우측면)
+    static Sprite CreateBrickWallSprite(Color baseColor)
+    {
+        int w = PPU;
+        int wallH = 40;
+        int topH = w / 2;
+        int texH = wallH + topH;
+        var tex = new Texture2D(w, texH);
         tex.filterMode = FilterMode.Point;
 
-        Color top = color * 1.1f; top.a = 1;
-        Color left = color * 0.7f; left.a = 1;
-        Color right = color * 0.5f; right.a = 1;
-
         for (int y = 0; y < texH; y++)
-            for (int x = 0; x < texW; x++)
+            for (int x = 0; x < w; x++)
                 tex.SetPixel(x, y, Color.clear);
 
-        float halfW = texW * 0.5f;
+        float halfW = w * 0.5f;
 
-        // 상단 다이아몬드면
-        int diaH = texW / 2;
-        int diaStart = h;
-        for (int dy = 0; dy < diaH; dy++)
+        // --- 좌측면 (벽돌 패턴) ---
+        Color leftBase = baseColor * 0.6f; leftBase.a = 1;
+        for (int y = 0; y < wallH; y++)
         {
-            int py = diaStart + dy;
-            if (py >= texH) break;
-            float ratio = (dy < diaH / 2)
-                ? (float)(dy + 1) / (diaH / 2)
-                : (float)(diaH - dy) / (diaH / 2);
-            int span = Mathf.Max(1, (int)(halfW * ratio));
-            int cx = texW / 2;
-            for (int x = cx - span; x <= cx + span; x++)
-                if (x >= 0 && x < texW) tex.SetPixel(x, py, top);
-        }
-
-        // 좌측면
-        for (int y = 0; y < h; y++)
-        {
-            float t = (float)y / h;
+            float t = (float)y / wallH;
             int edgeX = (int)(halfW * (1f - t));
             for (int x = edgeX; x < (int)halfW; x++)
-                if (x >= 0) tex.SetPixel(x, y, left);
+            {
+                // 벽돌 패턴
+                int brickRow = y / 5;
+                int offset = (brickRow % 2 == 0) ? 0 : 4;
+                int brickCol = ((x - edgeX) + offset) % 8;
+                bool mortar = (y % 5 == 0) || (brickCol == 0);
+
+                float noise = Mathf.PerlinNoise(x * 0.3f, y * 0.3f) * 0.05f;
+                Color c = mortar
+                    ? leftBase * 0.7f
+                    : new Color(leftBase.r + noise, leftBase.g + noise * 0.8f, leftBase.b + noise * 0.5f);
+                c.a = 1;
+                tex.SetPixel(x, y, c);
+            }
         }
 
-        // 우측면
-        for (int y = 0; y < h; y++)
+        // --- 우측면 (벽돌 패턴, 더 어둡게) ---
+        Color rightBase = baseColor * 0.4f; rightBase.a = 1;
+        for (int y = 0; y < wallH; y++)
         {
-            float t = (float)y / h;
+            float t = (float)y / wallH;
             int edgeX = (int)(halfW + halfW * t);
             for (int x = (int)halfW; x <= edgeX; x++)
-                if (x < texW) tex.SetPixel(x, y, right);
+            {
+                int brickRow = y / 5;
+                int offset = (brickRow % 2 == 0) ? 0 : 4;
+                int brickCol = ((x - (int)halfW) + offset) % 8;
+                bool mortar = (y % 5 == 0) || (brickCol == 0);
+
+                float noise = Mathf.PerlinNoise(x * 0.3f + 100, y * 0.3f) * 0.04f;
+                Color c = mortar
+                    ? rightBase * 0.7f
+                    : new Color(rightBase.r + noise, rightBase.g + noise * 0.8f, rightBase.b + noise * 0.5f);
+                c.a = 1;
+                tex.SetPixel(x, y, c);
+            }
+        }
+
+        // --- 상단면 (다이아몬드, 밝음) ---
+        Color topColor = baseColor * 0.85f; topColor.a = 1;
+        for (int dy = 0; dy < topH; dy++)
+        {
+            int py = wallH + dy;
+            float halfDia = topH * 0.5f;
+            float ratio = (dy < halfDia)
+                ? (dy + 0.5f) / halfDia
+                : (topH - dy - 0.5f) / halfDia;
+            int span = Mathf.Max(0, (int)(halfW * ratio));
+            int cx = w / 2;
+            for (int x = cx - span; x <= cx + span; x++)
+            {
+                if (x < 0 || x >= w) continue;
+                float noise = Mathf.PerlinNoise(x * 0.2f + 200, dy * 0.2f) * 0.04f;
+                Color c = new Color(topColor.r + noise, topColor.g + noise, topColor.b + noise * 0.5f);
+                c.a = 1;
+                tex.SetPixel(x, py, c);
+            }
         }
 
         tex.Apply();
-        return Sprite.Create(tex, new Rect(0, 0, texW, texH), new Vector2(0.5f, 0.3f), texW / TILE_W);
+        return Sprite.Create(tex, new Rect(0, 0, w, texH), new Vector2(0.5f, 0.38f), PPU / TILE_W);
     }
 
+    // 캐릭터 스프라이트
     static Sprite CreateCharacterSprite()
     {
         int w = 16, h = 24;
