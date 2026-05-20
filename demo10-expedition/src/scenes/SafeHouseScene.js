@@ -24,8 +24,8 @@ class SafeHouseScene extends Phaser.Scene {
             this.gold += sold;
         }
 
+        this._contentObjects = [];
         this.drawChrome();
-        this.contentContainer = this.add.container(0, 0).setDepth(10);
         if (this.extracted) this.showExtractResult();
         else if (!this.safe) this.showFailResult();
         this.showTab('depart');
@@ -33,7 +33,7 @@ class SafeHouseScene extends Phaser.Scene {
 
     /* --- persistent chrome: title, gold, tabs --- */
     drawChrome() {
-        const bg = this.add.graphics();
+        const bg = this.add.graphics().setDepth(1);
         bg.fillStyle(0x151525, 1);
         bg.fillRoundedRect(this.W * 0.02, this.H * 0.11, this.W * 0.96, this.H * 0.87, 12);
         bg.lineStyle(1, 0x333355, 0.4);
@@ -41,11 +41,11 @@ class SafeHouseScene extends Phaser.Scene {
 
         this.add.text(this.W / 2, this.H * 0.035, '\u{1F3E0} 원정꾼 거점', {
             fontSize: `${Math.floor(this.H * 0.038)}px`, fontFamily: 'monospace', color: '#ffffff', stroke: '#000', strokeThickness: 3
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setDepth(5);
 
         this.goldText = this.add.text(this.W / 2, this.H * 0.075, '', {
             fontSize: `${Math.floor(this.H * 0.02)}px`, fontFamily: 'monospace', color: '#ffcc44'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setDepth(5);
         this.refreshGold();
 
         const tabs = [
@@ -62,6 +62,7 @@ class SafeHouseScene extends Phaser.Scene {
                 fontSize: `${Math.floor(this.H * 0.02)}px`, fontFamily: 'monospace', color: '#888',
                 backgroundColor: '#1a1a2e', padding: { x: 12, y: 5 }
             }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+            btn.setDepth(5);
             btn.tabId = t.id;
             btn.on('pointerdown', () => this.showTab(t.id));
             this.tabButtons.push(btn);
@@ -72,7 +73,8 @@ class SafeHouseScene extends Phaser.Scene {
 
     showTab(id) {
         this.activeTab = id;
-        this.contentContainer.removeAll(true);
+        this._contentObjects.forEach(o => { try { o.destroy(); } catch(e) {} });
+        this._contentObjects = [];
         this.tabButtons.forEach(b => {
             b.setColor(b.tabId === id ? '#44aaff' : '#888');
             b.setBackgroundColor(b.tabId === id ? '#222244' : '#1a1a2e');
@@ -88,8 +90,8 @@ class SafeHouseScene extends Phaser.Scene {
         }
     }
 
-    /* helper: add to contentContainer */
-    ct(obj) { this.contentContainer.add(obj); return obj; }
+    /* helper: track content object with explicit depth */
+    ct(obj) { obj.setDepth(10); this._contentObjects.push(obj); return obj; }
     makePanel(x, y, w, h) {
         const g = this.add.graphics();
         g.fillStyle(0x1a1a2e, 0.9); g.fillRoundedRect(x, y, w, h, 8);
@@ -211,27 +213,31 @@ class SafeHouseScene extends Phaser.Scene {
     }
 
     showStashItemMenu(itemId, px, py) {
-        if (this.itemMenu) this.itemMenu.destroy();
-        const menu = this.add.container(0, 0).setDepth(100);
-        this.itemMenu = menu;
-        const bg = this.add.graphics(); bg.fillStyle(0x222244, 1); bg.fillRoundedRect(px, py, 160, 100, 6);
+        if (this._menuObjects) this._menuObjects.forEach(o => { try { o.destroy(); } catch(e) {} });
+        this._menuObjects = [];
+        const ma = (obj) => { obj.setDepth(100); this._menuObjects.push(obj); return obj; };
+        const bg = ma(this.add.graphics());
+        bg.fillStyle(0x222244, 1); bg.fillRoundedRect(px, py, 160, 100, 6);
         bg.lineStyle(1, 0x44aaff, 0.6); bg.strokeRoundedRect(px, py, 160, 100, 6);
-        menu.add(bg);
         const item = ITEM_DATA[itemId] || EQUIPMENT_DATA[itemId];
         const isEquipable = EQUIPMENT_DATA[itemId];
         const btns = [];
         if (isEquipable) btns.push({ label: '장착', fn: () => this.equipFromStash(itemId) });
         btns.push({ label: `판매 (${Math.floor((item?.value || 0) / 2)}G)`, fn: () => this.sellItem(itemId) });
         btns.push({ label: '삭제', fn: () => this.discardItem(itemId) });
+        const destroyMenu = () => {
+            this._menuObjects.forEach(o => { try { o.destroy(); } catch(e) {} });
+            this._menuObjects = [];
+        };
         btns.forEach((b, i) => {
-            const t = this.add.text(px + 10, py + 10 + i * 28, b.label, {
+            const t = ma(this.add.text(px + 10, py + 10 + i * 28, b.label, {
                 fontSize: this.fs(0.016), fontFamily: 'monospace', color: '#44aaff', backgroundColor: '#111', padding: { x: 6, y: 3 }
-            }).setInteractive({ useHandCursor: true });
-            t.on('pointerdown', () => { menu.destroy(); this.itemMenu = null; b.fn(); });
-            menu.add(t);
+            }).setInteractive({ useHandCursor: true }));
+            t.on('pointerdown', () => { destroyMenu(); b.fn(); });
         });
-        const dismiss = this.add.zone(this.W / 2, this.H / 2, this.W, this.H).setInteractive().setDepth(99);
-        dismiss.on('pointerdown', () => { menu.destroy(); dismiss.destroy(); this.itemMenu = null; });
+        const dismiss = ma(this.add.zone(this.W / 2, this.H / 2, this.W, this.H).setInteractive());
+        dismiss.setDepth(99);
+        dismiss.on('pointerdown', () => { destroyMenu(); });
     }
 
     equipFromStash(itemId) {
@@ -492,33 +498,37 @@ class SafeHouseScene extends Phaser.Scene {
 
     /* =========== Overlays =========== */
     showExtractResult() {
-        const panel = this.add.container(0, 0).setDepth(200);
-        const overlay = this.add.graphics();
+        this._overlayObjects = [];
+        const oa = (obj) => { obj.setDepth(200); this._overlayObjects.push(obj); return obj; };
+        const overlay = oa(this.add.graphics());
         overlay.fillStyle(0x000000, 0.7); overlay.fillRect(0, 0, this.W, this.H);
-        panel.add(overlay);
         const fs = this.H * 0.05;
-        panel.add(this.add.text(this.W / 2, this.H * 0.22, '✅ 탈출 성공!', {
+        oa(this.add.text(this.W / 2, this.H * 0.22, '✅ 탈출 성공!', {
             fontSize: `${Math.floor(fs)}px`, fontFamily: 'monospace', color: '#44ff88', stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5));
         const counts = {}; this.stash.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
         const lines = Object.entries(counts).slice(0, 8).map(([id, c]) => {
             const item = ITEM_DATA[id]; return `${item?.icon || ''} ${item?.name || id} x${c}  (${(item?.value || 0) * c}G)`;
         });
-        panel.add(this.add.text(this.W / 2, this.H * 0.32, '-- 회수한 전리품 --', {
+        oa(this.add.text(this.W / 2, this.H * 0.32, '-- 회수한 전리품 --', {
             fontSize: `${Math.floor(fs * 0.4)}px`, fontFamily: 'monospace', color: '#aaa'
         }).setOrigin(0.5));
-        panel.add(this.add.text(this.W / 2, this.H * 0.37, lines.join('\n') || '없음', {
+        oa(this.add.text(this.W / 2, this.H * 0.37, lines.join('\n') || '없음', {
             fontSize: `${Math.floor(fs * 0.35)}px`, fontFamily: 'monospace', color: '#ccc', align: 'center', lineSpacing: 4
         }).setOrigin(0.5, 0));
-        panel.add(this.add.text(this.W / 2, this.H * 0.68, `총 획득: ${this.gold}G`, {
+        oa(this.add.text(this.W / 2, this.H * 0.68, `총 획득: ${this.gold}G`, {
             fontSize: `${Math.floor(fs * 0.5)}px`, fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
         }).setOrigin(0.5));
-        const btn = this.add.text(this.W / 2, this.H * 0.76, '[ 확인 ]', {
+        const btn = oa(this.add.text(this.W / 2, this.H * 0.76, '[ 확인 ]', {
             fontSize: `${Math.floor(fs * 0.45)}px`, fontFamily: 'monospace', color: '#44aaff',
             backgroundColor: '#111a2a', padding: { x: 24, y: 8 }
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        panel.add(btn);
-        btn.on('pointerdown', () => { this.stash = []; panel.destroy(); this.showTab('depart'); });
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true }));
+        btn.on('pointerdown', () => {
+            this._overlayObjects.forEach(o => { try { o.destroy(); } catch(e) {} });
+            this._overlayObjects = [];
+            this.stash = [];
+            this.showTab('depart');
+        });
     }
 
     showFailResult() {
