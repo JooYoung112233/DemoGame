@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEditor;
 
 public class FlashlightSceneSetup : EditorWindow
@@ -99,10 +101,21 @@ public class FlashlightSceneSetup : EditorWindow
         cam.nearClipPlane = 0.1f;
         cam.farClipPlane = 50f;
 
+        // 포스트프로세싱 활성화
+        var camData = cam.gameObject.GetComponent<UniversalAdditionalCameraData>();
+        if (camData == null) camData = cam.gameObject.AddComponent<UniversalAdditionalCameraData>();
+        camData.renderPostProcessing = true;
+
         var camFollow = cam.gameObject.AddComponent<CameraFollow>();
         var camSO = new SerializedObject(camFollow);
         camSO.FindProperty("target").objectReferenceValue = playerGO.transform;
         camSO.ApplyModifiedProperties();
+
+        // ===== 폐허 분위기: 포스트프로세싱 Volume =====
+        CreateAtmosphere();
+
+        // ===== 먼지 파티클 (플레이어 주변) =====
+        CreateDustParticles(playerGO);
 
         // ===== DayNightCycle =====
         var dnGO = new GameObject("DayNightCycle");
@@ -131,10 +144,110 @@ public class FlashlightSceneSetup : EditorWindow
         RenderSettings.skybox = null;
         RenderSettings.subtractiveShadowColor = Color.black;
 
+        // 안개 (거리감 + 폐허 분위기)
+        RenderSettings.fog = true;
+        RenderSettings.fogMode = FogMode.Exponential;
+        RenderSettings.fogColor = new Color(0.02f, 0.02f, 0.03f);
+        RenderSettings.fogDensity = 0.06f;
+
         // ===== 건물 생성 =====
         CreateBuilding();
 
         Debug.Log("[Flashlight Prototype] 3D 쿼터뷰 씬 생성 완료!");
+    }
+
+    static void CreateAtmosphere()
+    {
+        var volumeGO = new GameObject("PostProcessVolume");
+        var volume = volumeGO.AddComponent<Volume>();
+        volume.isGlobal = true;
+        volume.priority = 1;
+        Undo.RegisterCreatedObjectUndo(volumeGO, "Create PostProcess");
+
+        var profile = ScriptableObject.CreateInstance<VolumeProfile>();
+        volume.profile = profile;
+
+        // 비네트 — 화면 가장자리 어둡게 (터널 비전)
+        var vignette = profile.Add<Vignette>();
+        vignette.active = true;
+        vignette.intensity.Override(0.45f);
+        vignette.smoothness.Override(0.35f);
+        vignette.color.Override(Color.black);
+
+        // 색 보정 — 탈색된 차가운 톤 (폐허)
+        var colorAdj = profile.Add<ColorAdjustments>();
+        colorAdj.active = true;
+        colorAdj.saturation.Override(-30f);
+        colorAdj.contrast.Override(15f);
+        colorAdj.colorFilter.Override(new Color(0.85f, 0.9f, 1f));
+
+        // 블룸 — 손전등 빛번짐
+        var bloom = profile.Add<Bloom>();
+        bloom.active = true;
+        bloom.threshold.Override(0.8f);
+        bloom.intensity.Override(0.5f);
+        bloom.scatter.Override(0.6f);
+        bloom.tint.Override(new Color(0.9f, 0.85f, 0.7f));
+
+        // 필름 그레인 — 거친 질감
+        var grain = profile.Add<FilmGrain>();
+        grain.active = true;
+        grain.type.Override(FilmGrainLookup.Medium3);
+        grain.intensity.Override(0.4f);
+        grain.response.Override(0.6f);
+
+        // 리프트 감마 게인 — 어두운 부분 더 짙게, 밝은 부분 약간 노란
+        var lgg = profile.Add<LiftGammaGain>();
+        lgg.active = true;
+        lgg.lift.Override(new Vector4(-0.05f, -0.05f, -0.02f, 0f));
+        lgg.gamma.Override(new Vector4(0f, -0.02f, 0.02f, 0f));
+        lgg.gain.Override(new Vector4(0.05f, 0.02f, -0.03f, 0f));
+    }
+
+    static void CreateDustParticles(GameObject player)
+    {
+        var dustGO = new GameObject("DustParticles");
+        dustGO.transform.SetParent(player.transform);
+        dustGO.transform.localPosition = new Vector3(0, 2f, 0);
+        Undo.RegisterCreatedObjectUndo(dustGO, "Create Dust");
+
+        var ps = dustGO.AddComponent<ParticleSystem>();
+        var main = ps.main;
+        main.maxParticles = 80;
+        main.startLifetime = 6f;
+        main.startSpeed = 0.05f;
+        main.startSize = new ParticleSystem.MinMaxCurve(0.02f, 0.06f);
+        main.startColor = new Color(0.7f, 0.65f, 0.55f, 0.3f);
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.gravityModifier = -0.01f;
+
+        var emission = ps.emission;
+        emission.rateOverTime = 12f;
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Box;
+        shape.scale = new Vector3(8f, 3f, 8f);
+
+        var colorOverLifetime = ps.colorOverLifetime;
+        colorOverLifetime.enabled = true;
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new[] {
+                new GradientColorKey(new Color(0.7f, 0.65f, 0.55f), 0f),
+                new GradientColorKey(new Color(0.7f, 0.65f, 0.55f), 1f)
+            },
+            new[] {
+                new GradientAlphaKey(0f, 0f),
+                new GradientAlphaKey(0.3f, 0.3f),
+                new GradientAlphaKey(0.3f, 0.7f),
+                new GradientAlphaKey(0f, 1f)
+            }
+        );
+        colorOverLifetime.color = gradient;
+
+        var renderer = dustGO.GetComponent<ParticleSystemRenderer>();
+        renderer.material = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+        renderer.material.SetColor("_BaseColor", new Color(0.7f, 0.65f, 0.55f, 0.3f));
     }
 
     static void CreateBuilding()
