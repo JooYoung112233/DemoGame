@@ -231,9 +231,10 @@ class MapGenerator {
         }
     }
 
-    // ── Extract points (map edges, hidden) ────────────────
+    // ── Extract points (far from spawn, map edges) ─────────
 
     static placeExtracts(grid, W, H, count, entities) {
+        const spawn = entities.start;
         const edges = [
             { side: 'top',    genPos: () => ({ x: 5 + Math.floor(Math.random() * (W - 10)), y: 1 }) },
             { side: 'bottom', genPos: () => ({ x: 5 + Math.floor(Math.random() * (W - 10)), y: H - 2 }) },
@@ -241,11 +242,12 @@ class MapGenerator {
             { side: 'right',  genPos: () => ({ x: W - 2, y: 5 + Math.floor(Math.random() * (H - 10)) }) }
         ];
 
-        // Shuffle edges so extract placement varies
-        for (let i = edges.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [edges[i], edges[j]] = [edges[j], edges[i]];
-        }
+        // Sort edges by distance from spawn (farthest first)
+        edges.forEach(e => {
+            const p = e.genPos();
+            e.dist = Math.abs(p.x - spawn.x) + Math.abs(p.y - spawn.y);
+        });
+        edges.sort((a, b) => b.dist - a.dist);
 
         for (let i = 0; i < count; i++) {
             const edge = edges[i % edges.length];
@@ -268,8 +270,7 @@ class MapGenerator {
             entities.extracts.push({
                 x: sx,
                 y: sy,
-                name: `탈출구 ${String.fromCharCode(65 + i)}`,
-                hidden: true
+                name: `탈출구 ${String.fromCharCode(65 + i)}`
             });
         }
     }

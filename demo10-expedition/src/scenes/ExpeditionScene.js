@@ -60,7 +60,6 @@ class ExpeditionScene extends Phaser.Scene {
         this.moveTimer = 0;
         this.MOVE_DELAY = 100;
         this.tilesMoved = 0;
-        this.extractsRevealed = false;
 
         // Combat timing
         this.lastPlayerAttack = -99999;
@@ -245,7 +244,7 @@ class ExpeditionScene extends Phaser.Scene {
                 fontSize: '10px', fontFamily: 'monospace', color: '#4488ff',
                 stroke: '#000', strokeThickness: 2
             }).setOrigin(0.5).setDepth(3);
-            t.setVisible(!ext.hidden);
+            t.setVisible(true);
             this.tileLayer.add(t);
             this.extractMarkers.push({ text: t, data: ext });
         });
@@ -404,11 +403,6 @@ class ExpeditionScene extends Phaser.Scene {
             fontSize: `${Math.floor(fs * 1.1)}px`, fontFamily: 'monospace',
             color: '#ffcc44', stroke: '#000', strokeThickness: 3, align: 'center'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(150).setAlpha(0);
-
-        // Tiles moved counter (top-left, small)
-        this.tilesMovedText = this.add.text(20, Math.floor(h * 0.07) + 14, '', {
-            fontSize: `${Math.floor(fs * 0.65)}px`, fontFamily: 'monospace', color: '#555'
-        }).setScrollFactor(0).setDepth(101);
 
         this.drawMinimap();
     }
@@ -586,8 +580,6 @@ class ExpeditionScene extends Phaser.Scene {
             onComplete: () => {
                 this.revealAround(nx, ny, PLAYER_DATA.visionRadius);
                 this.tilesMoved++;
-                this.tilesMovedText.setText(`\u{1F9ED} ${this.tilesMoved} tiles`);
-                this.checkExtractReveal();
                 this.checkTileEvents(nx, ny);
                 this.updateMinimap();
             }
@@ -597,7 +589,7 @@ class ExpeditionScene extends Phaser.Scene {
     checkTileEvents(x, y) {
         const tile = this.mapGrid[y][x];
 
-        if (tile === TILE.EXIT && this.extractsRevealed) {
+        if (tile === TILE.EXIT) {
             this.showMessage('\u{1F681} Extract point! Press E to extract');
         }
 
@@ -621,7 +613,7 @@ class ExpeditionScene extends Phaser.Scene {
                     foundSearchable = true;
                     break;
                 }
-                if (adjTile === TILE.EXIT && this.extractsRevealed) {
+                if (adjTile === TILE.EXIT) {
                     this.searchPromptText.setText(`E: \u{1F681} Extract`).setAlpha(1);
                     foundSearchable = true;
                     break;
@@ -630,17 +622,6 @@ class ExpeditionScene extends Phaser.Scene {
         }
 
         if (!foundSearchable) this.searchPromptText.setAlpha(0);
-    }
-
-    // ── EXTRACT REVEAL ─────────────────────────────────────
-
-    checkExtractReveal() {
-        if (this.extractsRevealed) return;
-        if (this.tilesMoved >= 500) {
-            this.extractsRevealed = true;
-            this.extractMarkers.forEach(m => m.text.setVisible(true));
-            this.showMessage('\u{1F681} Extract points revealed! Head to an extract to escape.', 4000);
-        }
     }
 
     // ── ENEMY AI ───────────────────────────────────────────
@@ -913,7 +894,7 @@ class ExpeditionScene extends Phaser.Scene {
         const tile = this.mapGrid[y][x];
 
         // Standing on extract
-        if (tile === TILE.EXIT && this.extractsRevealed) {
+        if (tile === TILE.EXIT) {
             this.extractSuccess();
             return;
         }
@@ -936,7 +917,7 @@ class ExpeditionScene extends Phaser.Scene {
                 this.searchContainer(nx, ny, adjSearch);
                 return;
             }
-            if (adjTile === TILE.EXIT && this.extractsRevealed) {
+            if (adjTile === TILE.EXIT) {
                 this.extractSuccess();
                 return;
             }
