@@ -125,13 +125,10 @@ public class IsometricSpriteAnimator : MonoBehaviour
     {
         if (mat == null || sheet.texture == null) return;
 
-        // URP 셰이더는 _BaseMap 사용 (_MainTex 아님)
-        mat.SetTexture("_BaseMap", sheet.texture);
-
-        float frameH = 1f / sheet.frameCount;
-        float y = 1f - (currentFrame + 1) * frameH;
-        mat.SetTextureScale("_BaseMap", new Vector2(1, frameH));
-        mat.SetTextureOffset("_BaseMap", new Vector2(0, y));
+        // Custom/SpriteSheet 셰이더 프로퍼티 직접 제어
+        mat.SetTexture("_MainTex", sheet.texture);
+        mat.SetFloat("_FrameCount", sheet.frameCount);
+        mat.SetFloat("_CurrentFrame", currentFrame);
     }
 
     SpriteSheet[] GetCurrentSheets()

@@ -44,16 +44,13 @@ public class CombatDemoSetup : EditorWindow
             // Quad를 재사용
             var renderer = oldSprite.GetComponent<MeshRenderer>();
 
-            // 머테리얼을 Unlit AlphaTest로 설정
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            // Custom/SpriteSheet 셰이더 사용
+            var shader = Shader.Find("Custom/SpriteSheet");
+            if (shader == null) { Debug.LogError("[Combat] Custom/SpriteSheet 셰이더 없음!"); return; }
+            var mat = new Material(shader);
             mat.name = "SkeletonPlayerMat";
-            mat.SetFloat("_Surface", 1);
-            mat.SetFloat("_AlphaClip", 1);
             mat.SetFloat("_Cutoff", 0.5f);
-            mat.EnableKeyword("_ALPHATEST_ON");
-            mat.renderQueue = 2450;
-            // 플레이어 색상 구분: 살짝 푸른 틴트
-            mat.SetColor("_BaseColor", new Color(0.7f, 0.8f, 1f, 1f));
+            mat.SetColor("_Color", new Color(0.7f, 0.8f, 1f, 1f));
             renderer.sharedMaterial = mat;
 
             // 크기 조정
@@ -154,15 +151,13 @@ public class CombatDemoSetup : EditorWindow
         // 빌보드
         spriteGO.AddComponent<BillboardSprite>();
 
-        // 머테리얼 (적은 붉은 틴트)
-        var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        // Custom/SpriteSheet 셰이더 (적은 붉은 틴트)
+        var shader = Shader.Find("Custom/SpriteSheet");
+        if (shader == null) { Debug.LogError("[Combat] Custom/SpriteSheet 셰이더 없음!"); return; }
+        var mat = new Material(shader);
         mat.name = $"SkeletonEnemyMat_{name}";
-        mat.SetFloat("_Surface", 1);
-        mat.SetFloat("_AlphaClip", 1);
         mat.SetFloat("_Cutoff", 0.5f);
-        mat.EnableKeyword("_ALPHATEST_ON");
-        mat.renderQueue = 2450;
-        mat.SetColor("_BaseColor", new Color(1f, 0.7f, 0.7f, 1f)); // 붉은 틴트
+        mat.SetColor("_Color", new Color(1f, 0.7f, 0.7f, 1f));
         spriteGO.GetComponent<MeshRenderer>().sharedMaterial = mat;
         spriteGO.GetComponent<MeshRenderer>().shadowCastingMode =
             UnityEngine.Rendering.ShadowCastingMode.Off;
