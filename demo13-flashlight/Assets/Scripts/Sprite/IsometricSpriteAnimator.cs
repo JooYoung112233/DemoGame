@@ -35,7 +35,11 @@ public class IsometricSpriteAnimator : MonoBehaviour
     void Start()
     {
         if (targetRenderer != null)
+        {
             mat = targetRenderer.material;
+            // 첫 프레임 즉시 표시
+            Play("idle");
+        }
     }
 
     void Update()
@@ -120,12 +124,14 @@ public class IsometricSpriteAnimator : MonoBehaviour
     void ApplyFrame(SpriteSheet sheet)
     {
         if (mat == null || sheet.texture == null) return;
-        mat.mainTexture = sheet.texture;
+
+        // URP 셰이더는 _BaseMap 사용 (_MainTex 아님)
+        mat.SetTexture("_BaseMap", sheet.texture);
 
         float frameH = 1f / sheet.frameCount;
         float y = 1f - (currentFrame + 1) * frameH;
-        mat.mainTextureScale = new Vector2(1, frameH);
-        mat.mainTextureOffset = new Vector2(0, y);
+        mat.SetTextureScale("_BaseMap", new Vector2(1, frameH));
+        mat.SetTextureOffset("_BaseMap", new Vector2(0, y));
     }
 
     SpriteSheet[] GetCurrentSheets()
