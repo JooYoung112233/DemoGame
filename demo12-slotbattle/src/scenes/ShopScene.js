@@ -9,6 +9,13 @@ class ShopScene extends Phaser.Scene {
         this.map = data.map || null;
         this.playerState = data.playerState;
         this.goldReward = data.goldReward || 0;
+        // P0: progressive discard cost — resets each shop visit
+        this.discardCount = 0;
+        // P1: purchase limits per visit
+        this.boughtItems = {};      // item.id → true
+        this.boughtCombos = {};     // combo.id → true
+        this.boughtRelics = {};     // relic.id → true
+        this.boughtSymbols = {};    // shopIdx → true
     }
 
     create() {
@@ -26,10 +33,17 @@ class ShopScene extends Phaser.Scene {
         this._drawNextButton();
     }
 
+    _getDiscardCost() {
+        return 2 + (this.discardCount + 1); // 1st=3, 2nd=4, 3rd=5...
+    }
+
     _drawHeader() {
         const W = 1280;
         this.add.graphics().fillStyle(0x111128, 1).fillRect(0, 0, W, 60);
-        this.add.text(W / 2, 18, `라운드 ${this.round} 클리어!  +${this.goldReward}G`, {
+        const headerText = this.goldReward > 0
+            ? `라운드 클리어!  +${this.goldReward}G`
+            : '🏪 상점';
+        this.add.text(W / 2, 18, headerText, {
             fontSize: '20px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.goldText = this.add.text(W / 2, 42, `🪙 ${this.playerState.gold}`, {
@@ -92,51 +106,55 @@ class ShopScene extends Phaser.Scene {
             if (!sym) continue;
             const x = startX + i * 130;
             const y = startY + 110;
+            const sold = !!this.boughtSymbols[i];
 
             const bg = this.add.graphics();
-            bg.fillStyle(0x1a1a35, 1);
-            bg.lineStyle(2, sym.color, 0.6);
+            bg.fillStyle(sold ? 0x111118 : 0x1a1a35, 1);
+            bg.lineStyle(2, sold ? 0x333333 : sym.color, sold ? 0.3 : 0.6);
             bg.fillRoundedRect(x - 55, y - 60, 110, 150, 10);
             bg.strokeRoundedRect(x - 55, y - 60, 110, 150, 10);
             this.contentContainer.add(bg);
 
-            const icon = this.add.text(x, y - 30, sym.icon, { fontSize: '32px' }).setOrigin(0.5);
+            const icon = this.add.text(x, y - 30, sym.icon, { fontSize: '32px' }).setOrigin(0.5).setAlpha(sold ? 0.3 : 1);
             const name = this.add.text(x, y + 5, sym.name, {
-                fontSize: '14px', fontFamily: 'monospace', color: '#ffffff'
+                fontSize: '14px', fontFamily: 'monospace', color: sold ? '#555555' : '#ffffff'
             }).setOrigin(0.5);
             const desc = this.add.text(x, y + 25, sym.desc, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#999999',
                 wordWrap: { width: 100 }, align: 'center'
             }).setOrigin(0.5);
-            const cost = this.add.text(x, y + 55, `🪙${sym.cost}`, {
-                fontSize: '14px', fontFamily: 'monospace', color: '#ffcc00'
+            const cost = this.add.text(x, y + 55, sold ? '✔ 구매완료' : `🪙${sym.cost}`, {
+                fontSize: sold ? '11px' : '14px', fontFamily: 'monospace', color: sold ? '#666666' : '#ffcc00'
             }).setOrigin(0.5);
             this.contentContainer.add([icon, name, desc, cost]);
 
-            const hitArea = this.add.rectangle(x, y + 10, 110, 150, 0x000000, 0)
-                .setInteractive({ useHandCursor: true });
-            this.contentContainer.add(hitArea);
+            if (!sold) {
+                const hitArea = this.add.rectangle(x, y + 10, 110, 150, 0x000000, 0)
+                    .setInteractive({ useHandCursor: true });
+                this.contentContainer.add(hitArea);
 
-            hitArea.on('pointerover', () => {
-                bg.clear().fillStyle(0x2a2a50, 1).lineStyle(2, 0xffffff, 1)
-                    .fillRoundedRect(x - 55, y - 60, 110, 150, 10)
-                    .strokeRoundedRect(x - 55, y - 60, 110, 150, 10);
-            });
-            hitArea.on('pointerout', () => {
-                bg.clear().fillStyle(0x1a1a35, 1).lineStyle(2, sym.color, 0.6)
-                    .fillRoundedRect(x - 55, y - 60, 110, 150, 10)
-                    .strokeRoundedRect(x - 55, y - 60, 110, 150, 10);
-            });
-            hitArea.on('pointerdown', () => this._buySymbol(sym.id, i, hitArea));
+                hitArea.on('pointerover', () => {
+                    bg.clear().fillStyle(0x2a2a50, 1).lineStyle(2, 0xffffff, 1)
+                        .fillRoundedRect(x - 55, y - 60, 110, 150, 10)
+                        .strokeRoundedRect(x - 55, y - 60, 110, 150, 10);
+                });
+                hitArea.on('pointerout', () => {
+                    bg.clear().fillStyle(0x1a1a35, 1).lineStyle(2, sym.color, 0.6)
+                        .fillRoundedRect(x - 55, y - 60, 110, 150, 10)
+                        .strokeRoundedRect(x - 55, y - 60, 110, 150, 10);
+                });
+                hitArea.on('pointerdown', () => this._buySymbol(sym.id, i));
+            }
         }
 
-        // 심볼 버리기 섹션
+        // 심볼 버리기 섹션 with progressive cost
         this._drawRemoveSection(startY + 250);
     }
 
     _drawRemoveSection(y) {
         const W = 1280;
-        this.add.text(W / 2, y, `🗑️ 심볼 버리기 (${SYMBOL_REMOVE_COST}G 소모)`, {
+        const cost = this._getDiscardCost();
+        this.add.text(W / 2, y, `🗑️ 심볼 버리기 (${cost}G 소모)`, {
             fontSize: '14px', fontFamily: 'monospace', color: '#ff8844'
         }).setOrigin(0.5);
 
@@ -151,6 +169,7 @@ class ShopScene extends Phaser.Scene {
             const row = Math.floor(i / cols);
             const x = startX + col * 50;
             const sy = y + 35 + row * 50;
+            const isSkull = pool[i] === 'skull';
 
             const btn = this.add.text(x, sy, sym.icon, {
                 fontSize: '24px', backgroundColor: '#1a1a35',
@@ -158,14 +177,43 @@ class ShopScene extends Phaser.Scene {
             }).setOrigin(0.5).setInteractive({ useHandCursor: true });
             this.contentContainer.add(btn);
 
+            // skull lock overlay
+            if (isSkull) {
+                const lock = this.add.text(x + 12, sy - 12, '🔒', { fontSize: '12px' }).setOrigin(0.5);
+                this.contentContainer.add(lock);
+            }
+
             btn.on('pointerdown', () => {
-                if (this.playerState.gold < SYMBOL_REMOVE_COST) return;
+                // P0: skull cannot be discarded
+                if (isSkull) {
+                    this._showWarning('저주받은 심볼은 제거할 수 없습니다.');
+                    return;
+                }
+                const curCost = this._getDiscardCost();
+                if (this.playerState.gold < curCost) {
+                    this._showWarning(`골드가 부족합니다 (필요: ${curCost}G)`);
+                    return;
+                }
                 if (this.playerState.symbolPool.length <= 3) return;
                 this.playerState.symbolPool.splice(i, 1);
-                this.playerState.gold -= SYMBOL_REMOVE_COST;
+                this.playerState.gold -= curCost;
+                this.discardCount++;
                 this._refresh();
             });
         }
+    }
+
+    _showWarning(msg) {
+        const W = 1280;
+        if (this._warningText) this._warningText.destroy();
+        this._warningText = this.add.text(W / 2, 560, msg, {
+            fontSize: '14px', fontFamily: 'monospace', color: '#ff4444',
+            backgroundColor: '#330000', padding: { x: 12, y: 6 },
+            stroke: '#000000', strokeThickness: 2
+        }).setOrigin(0.5).setDepth(300);
+        this.time.delayedCall(1500, () => {
+            if (this._warningText) { this._warningText.destroy(); this._warningText = null; }
+        });
     }
 
     _drawItemShop() {
@@ -181,31 +229,34 @@ class ShopScene extends Phaser.Scene {
             const item = items[i];
             const x = startX + i * 140;
             const y = startY + 120;
+            const bought = !!this.boughtItems[item.id];
 
             const bg = this.add.graphics();
-            bg.fillStyle(0x1a1a35, 1);
-            bg.lineStyle(2, 0x44aa88, 0.6);
+            bg.fillStyle(bought ? 0x111118 : 0x1a1a35, 1);
+            bg.lineStyle(2, bought ? 0x333333 : 0x44aa88, bought ? 0.3 : 0.6);
             bg.fillRoundedRect(x - 60, y - 60, 120, 150, 10);
             bg.strokeRoundedRect(x - 60, y - 60, 120, 150, 10);
             this.contentContainer.add(bg);
 
-            const icon = this.add.text(x, y - 30, item.icon, { fontSize: '28px' }).setOrigin(0.5);
+            const icon = this.add.text(x, y - 30, item.icon, { fontSize: '28px' }).setOrigin(0.5).setAlpha(bought ? 0.3 : 1);
             const name = this.add.text(x, y, item.name, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#ffffff'
+                fontSize: '12px', fontFamily: 'monospace', color: bought ? '#555555' : '#ffffff'
             }).setOrigin(0.5);
             const desc = this.add.text(x, y + 22, item.desc, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#999999',
                 wordWrap: { width: 110 }, align: 'center'
             }).setOrigin(0.5);
-            const cost = this.add.text(x, y + 55, `🪙${item.cost}`, {
-                fontSize: '14px', fontFamily: 'monospace', color: '#ffcc00'
+            const cost = this.add.text(x, y + 55, bought ? '✔ 구매완료' : `🪙${item.cost}`, {
+                fontSize: bought ? '11px' : '14px', fontFamily: 'monospace', color: bought ? '#666666' : '#ffcc00'
             }).setOrigin(0.5);
             this.contentContainer.add([icon, name, desc, cost]);
 
-            const hitArea = this.add.rectangle(x, y + 10, 120, 150, 0x000000, 0)
-                .setInteractive({ useHandCursor: true });
-            this.contentContainer.add(hitArea);
-            hitArea.on('pointerdown', () => this._buyItem(item));
+            if (!bought) {
+                const hitArea = this.add.rectangle(x, y + 10, 120, 150, 0x000000, 0)
+                    .setInteractive({ useHandCursor: true });
+                this.contentContainer.add(hitArea);
+                hitArea.on('pointerdown', () => this._buyItem(item));
+            }
         }
     }
 
@@ -225,16 +276,17 @@ class ShopScene extends Phaser.Scene {
             const cost = 8 + lvl * 4;
             const x = startX + i * 160;
             const y = startY + 130;
+            const bought = !!this.boughtCombos[combo.id];
 
             const bg = this.add.graphics();
-            bg.fillStyle(0x1a1a35, 1);
-            bg.lineStyle(2, 0xaa44ff, 0.6);
+            bg.fillStyle(bought ? 0x111118 : 0x1a1a35, 1);
+            bg.lineStyle(2, bought ? 0x333333 : 0xaa44ff, bought ? 0.3 : 0.6);
             bg.fillRoundedRect(x - 70, y - 70, 140, 180, 10);
             bg.strokeRoundedRect(x - 70, y - 70, 140, 180, 10);
             this.contentContainer.add(bg);
 
-            const name = this.add.text(x, y - 48, combo.name, {
-                fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            const nameT = this.add.text(x, y - 48, combo.name, {
+                fontSize: '14px', fontFamily: 'monospace', color: bought ? '#555555' : '#ffffff', fontStyle: 'bold'
             }).setOrigin(0.5);
             const recipe = this.add.text(x, y - 28, combo.recipe || '', {
                 fontSize: '11px', fontFamily: 'monospace', color: '#aaaaaa'
@@ -249,15 +301,17 @@ class ShopScene extends Phaser.Scene {
             const bonus = this.add.text(x, y + 55, `효과 +${(lvl + 1) * 20}%`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#44ff88'
             }).setOrigin(0.5);
-            const costText = this.add.text(x, y + 78, `🪙${cost}`, {
-                fontSize: '14px', fontFamily: 'monospace', color: '#ffcc00'
+            const costText = this.add.text(x, y + 78, bought ? '✔ 구매완료' : `🪙${cost}`, {
+                fontSize: bought ? '11px' : '14px', fontFamily: 'monospace', color: bought ? '#666666' : '#ffcc00'
             }).setOrigin(0.5);
-            this.contentContainer.add([name, recipe, desc, lvlText, bonus, costText]);
+            this.contentContainer.add([nameT, recipe, desc, lvlText, bonus, costText]);
 
-            const hitArea = this.add.rectangle(x, y + 10, 140, 180, 0x000000, 0)
-                .setInteractive({ useHandCursor: true });
-            this.contentContainer.add(hitArea);
-            hitArea.on('pointerdown', () => this._buyComboUpgrade(combo.id, cost));
+            if (!bought) {
+                const hitArea = this.add.rectangle(x, y + 10, 140, 180, 0x000000, 0)
+                    .setInteractive({ useHandCursor: true });
+                this.contentContainer.add(hitArea);
+                hitArea.on('pointerdown', () => this._buyComboUpgrade(combo.id, cost));
+            }
         }
     }
 
@@ -280,48 +334,51 @@ class ShopScene extends Phaser.Scene {
             const y = startY + 130;
             const rarityColor = relic.rarity === 'rare' ? 0xffaa00 :
                                 relic.rarity === 'uncommon' ? 0x44aaff : 0x888888;
+            const bought = !!this.boughtRelics[relic.id];
 
             const bg = this.add.graphics();
-            bg.fillStyle(0x1a1a35, 1);
-            bg.lineStyle(2, rarityColor, 0.6);
+            bg.fillStyle(bought ? 0x111118 : 0x1a1a35, 1);
+            bg.lineStyle(2, bought ? 0x333333 : rarityColor, bought ? 0.3 : 0.6);
             bg.fillRoundedRect(x - 70, y - 70, 140, 190, 10);
             bg.strokeRoundedRect(x - 70, y - 70, 140, 190, 10);
             this.contentContainer.add(bg);
 
-            const icon = this.add.text(x, y - 40, relic.icon, { fontSize: '32px' }).setOrigin(0.5);
+            const icon = this.add.text(x, y - 40, relic.icon, { fontSize: '32px' }).setOrigin(0.5).setAlpha(bought ? 0.3 : 1);
             const name = this.add.text(x, y, relic.name, {
-                fontSize: '14px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+                fontSize: '14px', fontFamily: 'monospace', color: bought ? '#555555' : '#ffffff', fontStyle: 'bold'
             }).setOrigin(0.5);
             const desc = this.add.text(x, y + 25, relic.desc, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa',
                 wordWrap: { width: 120 }, align: 'center'
             }).setOrigin(0.5);
-            const cost = this.add.text(x, y + 65, `🪙${relic.shopCost}`, {
-                fontSize: '14px', fontFamily: 'monospace', color: '#ffcc00'
+            const cost = this.add.text(x, y + 65, bought ? '✔ 구매완료' : `🪙${relic.shopCost}`, {
+                fontSize: bought ? '11px' : '14px', fontFamily: 'monospace', color: bought ? '#666666' : '#ffcc00'
             }).setOrigin(0.5);
             this.contentContainer.add([icon, name, desc, cost]);
 
-            const hitArea = this.add.rectangle(x, y + 15, 140, 190, 0x000000, 0)
-                .setInteractive({ useHandCursor: true });
-            this.contentContainer.add(hitArea);
-
-            hitArea.on('pointerover', () => {
-                bg.clear().fillStyle(0x2a2a50, 1).lineStyle(2, 0xffffff, 1)
-                    .fillRoundedRect(x - 70, y - 70, 140, 190, 10)
-                    .strokeRoundedRect(x - 70, y - 70, 140, 190, 10);
-            });
-            hitArea.on('pointerout', () => {
-                bg.clear().fillStyle(0x1a1a35, 1).lineStyle(2, rarityColor, 0.6)
-                    .fillRoundedRect(x - 70, y - 70, 140, 190, 10)
-                    .strokeRoundedRect(x - 70, y - 70, 140, 190, 10);
-            });
-            hitArea.on('pointerdown', () => {
-                if (this.playerState.gold < relic.shopCost) return;
-                this.playerState.gold -= relic.shopCost;
-                if (!this.playerState.relics) this.playerState.relics = [];
-                this.playerState.relics.push(relic.id);
-                this._refresh();
-            });
+            if (!bought) {
+                const hitArea = this.add.rectangle(x, y + 15, 140, 190, 0x000000, 0)
+                    .setInteractive({ useHandCursor: true });
+                this.contentContainer.add(hitArea);
+                hitArea.on('pointerover', () => {
+                    bg.clear().fillStyle(0x2a2a50, 1).lineStyle(2, 0xffffff, 1)
+                        .fillRoundedRect(x - 70, y - 70, 140, 190, 10)
+                        .strokeRoundedRect(x - 70, y - 70, 140, 190, 10);
+                });
+                hitArea.on('pointerout', () => {
+                    bg.clear().fillStyle(0x1a1a35, 1).lineStyle(2, rarityColor, 0.6)
+                        .fillRoundedRect(x - 70, y - 70, 140, 190, 10)
+                        .strokeRoundedRect(x - 70, y - 70, 140, 190, 10);
+                });
+                hitArea.on('pointerdown', () => {
+                    if (this.playerState.gold < relic.shopCost) return;
+                    this.playerState.gold -= relic.shopCost;
+                    if (!this.playerState.relics) this.playerState.relics = [];
+                    this.playerState.relics.push(relic.id);
+                    this.boughtRelics[relic.id] = true;
+                    this._refresh();
+                });
+            }
         }
 
         // owned relics display
@@ -341,19 +398,21 @@ class ShopScene extends Phaser.Scene {
         }
     }
 
-    _buySymbol(symbolId, shopIdx, hitArea) {
+    _buySymbol(symbolId, shopIdx) {
         const sym = SYMBOL_DATA[symbolId];
         if (!sym || this.playerState.gold < sym.cost) return;
         this.playerState.gold -= sym.cost;
         this.playerState.symbolPool.push(symbolId);
         this.playerState.codex[symbolId] = true;
-        this.shopSymbols.splice(shopIdx, 1);
+        this.boughtSymbols[shopIdx] = true;
         this._refresh();
     }
 
     _buyItem(item) {
+        if (this.boughtItems[item.id]) return;
         if (this.playerState.gold < item.cost) return;
         this.playerState.gold -= item.cost;
+        this.boughtItems[item.id] = true;
         const e = item.effect;
 
         if (e.heal) {
@@ -381,9 +440,11 @@ class ShopScene extends Phaser.Scene {
     }
 
     _buyComboUpgrade(comboId, cost) {
+        if (this.boughtCombos[comboId]) return;
         if (this.playerState.gold < cost) return;
         this.playerState.gold -= cost;
         this.playerState.comboUpgrades[comboId] = (this.playerState.comboUpgrades[comboId] || 0) + 1;
+        this.boughtCombos[comboId] = true;
         this._refresh();
     }
 
@@ -430,8 +491,8 @@ class ShopScene extends Phaser.Scene {
     _drawNextButton() {
         const W = 1280;
 
-        if (this.round >= 10) {
-            const winText = this.add.text(W / 2, 560, '🐉 승리! 모든 라운드를 돌파했습니다!', {
+        if (this.round >= 10 && !this.map) {
+            const winText = this.add.text(W / 2, 560, '🐉 승리!', {
                 fontSize: '22px', fontFamily: 'monospace', color: '#ffcc00', fontStyle: 'bold'
             }).setOrigin(0.5);
             const retryBtn = this.add.text(W / 2, 595, '[ 처음부터 ]', {

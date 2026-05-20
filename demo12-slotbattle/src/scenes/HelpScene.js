@@ -87,30 +87,65 @@ class HelpScene extends Phaser.Scene {
 
         const symY = startY + combos.length * (cardH + 6) + 20;
         const symHeader = this.add.text(W / 2, symY, '🎰 심볼 목록', {
-            fontSize: '18px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            fontSize: '22px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
         this.listContainer.add(symHeader);
 
         const symbols = Object.values(SYMBOL_DATA);
-        const cols = 6;
-        const startX = W / 2 - (cols - 1) * 110 / 2;
+        const symCardH = 90;
+        const symCardW = W - 120;
 
         for (let i = 0; i < symbols.length; i++) {
             const sym = symbols[i];
-            const col = i % cols;
-            const row = Math.floor(i / cols);
-            const sx = startX + col * 110;
-            const sy = symY + 30 + row * 36;
+            const sy = symY + 40 + i * (symCardH + 8);
 
-            const text = this.add.text(sx, sy, `${sym.icon} ${sym.name}: ${sym.desc}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa'
+            // card background
+            const symBg = this.add.graphics();
+            symBg.fillStyle(0x1a1a35, 1);
+            symBg.lineStyle(1, sym.color || 0x334466, 0.6);
+            symBg.fillRoundedRect(60, sy, symCardW, symCardH, 8);
+            symBg.strokeRoundedRect(60, sy, symCardW, symCardH, 8);
+            this.listContainer.add(symBg);
+
+            // 3x icon
+            const iconText = this.add.text(80, sy + 8, sym.icon, { fontSize: '36px' });
+            this.listContainer.add(iconText);
+
+            // 3x name
+            const nameText = this.add.text(130, sy + 8, sym.name, {
+                fontSize: '24px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
+            });
+            this.listContainer.add(nameText);
+
+            // description
+            const descText = this.add.text(130, sy + 40, sym.desc, {
+                fontSize: '13px', fontFamily: 'monospace', color: '#999999',
+                wordWrap: { width: 500 }
+            });
+            this.listContainer.add(descText);
+
+            // effect
+            const effectStr = this._symEffectStr(sym.effect);
+            const effText = this.add.text(130, sy + 60, effectStr, {
+                fontSize: '13px', fontFamily: 'monospace', color: '#44ff88'
+            });
+            this.listContainer.add(effText);
+
+            // tier badge
+            const tierColors = { 1: '#888888', 2: '#4488ff', 3: '#aa88ff' };
+            const tierText = this.add.text(symCardW + 30, sy + symCardH / 2, `Tier ${sym.tier}`, {
+                fontSize: '12px', fontFamily: 'monospace', color: tierColors[sym.tier] || '#888888'
             }).setOrigin(0.5);
-            this.listContainer.add(text);
+            this.listContainer.add(tierText);
         }
+
+        // calculate total content height for scroll
+        const totalH = symY + 40 + symbols.length * (symCardH + 8) + 50;
+        const maxScrollDown = Math.max(0, totalH - H + 30);
 
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
             this.scrollY -= deltaY * 0.5;
-            this.scrollY = Phaser.Math.Clamp(this.scrollY, -600, 0);
+            this.scrollY = Phaser.Math.Clamp(this.scrollY, -maxScrollDown, 0);
             this.listContainer.y = this.scrollY;
         });
     }
@@ -175,6 +210,22 @@ class HelpScene extends Phaser.Scene {
             this.detailContainer = null;
         });
         this.detailContainer.add(closeBtn);
+    }
+
+    _symEffectStr(effect) {
+        const parts = [];
+        if (effect.damage) parts.push(`⚔️${effect.damage}`);
+        if (effect.block) parts.push(`🛡️${effect.block}`);
+        if (effect.heal) parts.push(`❤️${effect.heal}`);
+        if (effect.gold) parts.push(`🪙${effect.gold}`);
+        if (effect.aoe) parts.push('(전체)');
+        if (effect.hits) parts.push(`(${effect.hits}연타)`);
+        if (effect.pierce) parts.push('(관통)');
+        if (effect.burn) parts.push(`🔥화상${effect.burn}`);
+        if (effect.poison) parts.push(`☠️독${effect.poison}`);
+        if (effect.slow) parts.push(`❄️둔화${effect.slow}`);
+        if (effect.selfDamage) parts.push(`💀자해${effect.selfDamage}`);
+        return parts.join(' ') || '-';
     }
 
     _effectToString(effect, upgLvl) {

@@ -32,6 +32,21 @@ class BattleScene extends Phaser.Scene {
         this.enemies = this._spawnEnemies();
         this.turnPhase = 'ready';
         this.combatLog = [];
+        this.combatLogScrollY = 0;
+        this.autoScrollLog = true;
+
+        // Respin: base 1/round + relic bonus
+        this.respinMax = 1;
+        if (this.playerState.relics && this.playerState.relics.includes('respin_charm')) {
+            this.respinMax += 1;
+        }
+        this.respinLeft = this.respinMax;
+
+        // P2: Event round — ~17% chance on normal battles (avg every 6 rounds)
+        this._isEventRound = false;
+        if (this.encounterType === 'battle' && Math.random() < 0.17) {
+            this._isEventRound = true;
+        }
 
         this._createTopBar();
         this._createEnemyDisplay();
@@ -40,6 +55,11 @@ class BattleScene extends Phaser.Scene {
         this._createCombatLog();
         this._createSideButtons();
         this._updateAllDisplays();
+
+        // show event banner if event round
+        if (this._isEventRound) {
+            this._showEventBanner();
+        }
     }
 
     _spawnEnemies() {
@@ -88,8 +108,9 @@ class BattleScene extends Phaser.Scene {
 
         const encounterLabel = this.encounterType === 'boss' ? '⚠️ BOSS' :
                                this.encounterType === 'elite' ? '💀 강적' : '⚔️ 전투';
+        const eventTag = this._isEventRound ? '  ✨이벤트' : '';
         const actLabel = this.map ? `Act ${this.act + 1}` : `라운드 ${this.round}/10`;
-        this.add.text(W / 2, 25, `${actLabel}  ${encounterLabel}`, {
+        this.add.text(W / 2, 25, `${actLabel}  ${encounterLabel}${eventTag}`, {
             fontSize: '20px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
 
@@ -220,6 +241,7 @@ class BattleScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.goldLabel = this.add.text(420, barY + 6, '', { fontSize: '18px', fontFamily: 'monospace', color: '#ffcc00' });
+        this.respinLabel = this.add.text(600, barY + 6, '', { fontSize: '16px', fontFamily: 'monospace', color: '#44ccff' });
         this.deckLabel = this.add.text(420, barY + 34, '', { fontSize: '13px', fontFamily: 'monospace', color: '#888888' });
         this.deckIconsText = this.add.text(560, barY + 34, '', {
             fontSize: '13px', fontFamily: 'monospace', color: '#666666', wordWrap: { width: 700 }
@@ -227,10 +249,58 @@ class BattleScene extends Phaser.Scene {
     }
 
     _createCombatLog() {
-        this.logText = this.add.text(20, 660, '', {
+        const logY = 650, logH = 65, logW = 900;
+        // mask for scrollable log area
+        const maskShape = this.make.graphics();
+        maskShape.fillRect(20, logY, logW, logH);
+        const mask = maskShape.createGeometryMask();
+
+        this.logContainer = this.add.container(0, 0).setMask(mask);
+        this.logText = this.add.text(20, logY, '', {
             fontSize: '12px', fontFamily: 'monospace', color: '#777777',
-            wordWrap: { width: 900 }, lineSpacing: 2
+            wordWrap: { width: logW }, lineSpacing: 2
         });
+        this.logContainer.add(this.logText);
+
+        // scroll log area with mouse wheel
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            if (pointer.y >= logY && pointer.y <= logY + logH) {
+                this.autoScrollLog = false;
+                this.combatLogScrollY -= deltaY * 0.5;
+                this._clampLogScroll();
+            }
+        });
+
+        // "latest" button (hidden until manual scroll)
+        this.logLatestBtn = this.add.text(logW - 40, logY + logH - 14, '▼ 최신', {
+            fontSize: '10px', fontFamily: 'monospace', color: '#44ccff',
+            backgroundColor: '#1a1a35', padding: { x: 4, y: 2 }
+        }).setInteractive({ useHandCursor: true }).setDepth(200).setAlpha(0);
+        this.logLatestBtn.on('pointerdown', () => {
+            this.autoScrollLog = true;
+            this._scrollLogToBottom();
+        });
+    }
+
+    _clampLogScroll() {
+        const logY = 650, logH = 65;
+        const textHeight = this.logText.height || 0;
+        const maxScroll = 0;
+        const minScroll = Math.min(0, -(textHeight - logH));
+        this.combatLogScrollY = Phaser.Math.Clamp(this.combatLogScrollY, minScroll, maxScroll);
+        this.logText.y = logY + this.combatLogScrollY;
+        // show/hide latest button
+        if (this.logLatestBtn) {
+            this.logLatestBtn.setAlpha(this.combatLogScrollY < minScroll + 5 ? 0 : 1);
+        }
+    }
+
+    _scrollLogToBottom() {
+        const logY = 650, logH = 65;
+        const textHeight = this.logText.height || 0;
+        this.combatLogScrollY = Math.min(0, -(textHeight - logH));
+        this.logText.y = logY + this.combatLogScrollY;
+        if (this.logLatestBtn) this.logLatestBtn.setAlpha(0);
     }
 
     _createSideButtons() {
@@ -259,14 +329,12 @@ class BattleScene extends Phaser.Scene {
         this.turnPhase = 'spinning';
         this.spinBtn.setAlpha(0.3);
         this.comboText.setAlpha(0);
-        this.respinUsed = false;
 
         this.slotMachine.spin((results) => {
-            // check for respin relic
-            if (!this.respinUsed && this.playerState.relics &&
-                this.playerState.relics.includes('respin_charm')) {
+            // always offer respin/confirm if respins remain
+            if (this.respinLeft > 0) {
                 this.turnPhase = 'awaitRespin';
-                this._showRespinButton(results);
+                this._showRespinChoice(results);
             } else {
                 this.turnPhase = 'resolving';
                 this._doPlayerTurn(results);
@@ -274,11 +342,11 @@ class BattleScene extends Phaser.Scene {
         });
     }
 
-    _showRespinButton(results) {
+    _showRespinChoice(results) {
         const W = 1280;
-        if (this.respinBtn) this.respinBtn.destroy();
+        this._cleanupRespinUI();
 
-        this.respinBtn = this.add.text(W / 2 + 180, 498, '🔄 리스핀', {
+        this.respinBtn = this.add.text(W / 2 + 180, 498, `🔄 리스핀 [${this.respinLeft}]`, {
             fontSize: '18px', fontFamily: 'monospace', color: '#44ccff',
             backgroundColor: '#1a2a3a', padding: { x: 14, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(100);
@@ -286,40 +354,47 @@ class BattleScene extends Phaser.Scene {
         this.respinBtn.on('pointerover', () => this.respinBtn.setColor('#ffffff'));
         this.respinBtn.on('pointerout', () => this.respinBtn.setColor('#44ccff'));
         this.respinBtn.on('pointerdown', () => {
-            this.respinUsed = true;
-            this.respinBtn.destroy();
-            this.respinBtn = null;
+            this.respinLeft--;
+            this._cleanupRespinUI();
             this._popText(640, 350, '🔄 리스핀!', '#44ccff', 26);
+            this._updateRespinDisplay();
             this.slotMachine.spin((newResults) => {
-                this.turnPhase = 'resolving';
-                this._doPlayerTurn(newResults);
+                if (this.respinLeft > 0) {
+                    this.turnPhase = 'awaitRespin';
+                    this._showRespinChoice(newResults);
+                } else {
+                    this.turnPhase = 'resolving';
+                    this._doPlayerTurn(newResults);
+                }
             });
         });
 
-        // also allow confirming current results
-        const confirmBtn = this.add.text(W / 2 - 180, 498, '✔️ 확정', {
+        this.confirmBtn = this.add.text(W / 2 - 180, 498, '✔️ 확정', {
             fontSize: '18px', fontFamily: 'monospace', color: '#44ff88',
             backgroundColor: '#1a3a2a', padding: { x: 14, y: 8 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setDepth(100);
 
-        confirmBtn.on('pointerdown', () => {
-            this.respinBtn.destroy();
-            this.respinBtn = null;
-            confirmBtn.destroy();
+        this.confirmBtn.on('pointerdown', () => {
+            this._cleanupRespinUI();
             this.turnPhase = 'resolving';
             this._doPlayerTurn(results);
         });
+    }
 
-        // store ref to clean up confirm button too
-        this.respinBtn._confirmBtn = confirmBtn;
-        const origDestroy = this.respinBtn.destroy.bind(this.respinBtn);
-        this.respinBtn.destroy = () => {
-            if (confirmBtn && confirmBtn.scene) confirmBtn.destroy();
-            origDestroy();
-        };
+    _cleanupRespinUI() {
+        if (this.respinBtn && this.respinBtn.scene) { this.respinBtn.destroy(); this.respinBtn = null; }
+        if (this.confirmBtn && this.confirmBtn.scene) { this.confirmBtn.destroy(); this.confirmBtn = null; }
     }
 
     _doPlayerTurn(results) {
+        // P2: Event round — skull in results triggers random relic
+        if (this.encounterType === 'event_round' || this._isEventRound) {
+            const skullIdx = results.findIndex(r => r.id === 'skull');
+            if (skullIdx >= 0) {
+                this._skullToRelic(skullIdx, results);
+            }
+        }
+
         const comboUpgrades = this.playerState.comboUpgrades || {};
         const { log, actions, hasCombo } = this.combatResolver.resolve(
             results, this.playerState, this.enemies, this.slotMachine, comboUpgrades
@@ -568,6 +643,7 @@ class BattleScene extends Phaser.Scene {
 
         this.goldLabel.setText(`🪙 ${ps.gold}`);
         this.goldTopLabel.setText(`🪙 ${ps.gold}`);
+        this._updateRespinDisplay();
         this.deckLabel.setText(`덱 ${ps.symbolPool.length}장:`);
         this.deckIconsText.setText(ps.symbolPool.map(id => { const s = SYMBOL_DATA[id]; return s ? s.icon : '?'; }).join(''));
 
@@ -620,6 +696,14 @@ class BattleScene extends Phaser.Scene {
         }
     }
 
+    _updateRespinDisplay() {
+        if (this.respinLabel) {
+            const color = this.respinLeft > 0 ? '#44ccff' : '#555555';
+            this.respinLabel.setText(`🔄 리스핀 [${this.respinLeft}/${this.respinMax}]`);
+            this.respinLabel.setColor(color);
+        }
+    }
+
     _intentLabel(intent, enemy) {
         switch (intent.type) {
             case 'attack': return `⚔️${enemy.attack}`;
@@ -667,8 +751,61 @@ class BattleScene extends Phaser.Scene {
             if (entry.type === 'playerDot') lines.push(`${entry.dotType === 'bleed' ? '🩸' : '🔥'} ${entry.dotType} -${entry.value}`);
         }
         this.combatLog = this.combatLog.concat(lines);
-        if (this.combatLog.length > 5) this.combatLog = this.combatLog.slice(-5);
+        if (this.combatLog.length > 50) this.combatLog = this.combatLog.slice(-50);
         this.logText.setText(this.combatLog.join('\n'));
+        if (this.autoScrollLog) {
+            this._scrollLogToBottom();
+        }
+    }
+
+    _showEventBanner() {
+        const W = 1280;
+        const banner = this.add.text(W / 2, 270, '✨ 이벤트 라운드! 해골 → 유물 교체 ✨', {
+            fontSize: '20px', fontFamily: 'monospace', color: '#ffcc00', fontStyle: 'bold',
+            stroke: '#000000', strokeThickness: 4, backgroundColor: '#2a1a3a', padding: { x: 16, y: 8 }
+        }).setOrigin(0.5).setDepth(300).setAlpha(0);
+
+        this.tweens.add({
+            targets: banner, alpha: 1, duration: 300,
+            onComplete: () => {
+                this.tweens.add({
+                    targets: banner, alpha: 0, duration: 500, delay: 2000,
+                    onComplete: () => banner.destroy()
+                });
+            }
+        });
+    }
+
+    _skullToRelic(skullIdx, results) {
+        // Weighted random: common 60%, uncommon 30%, rare 10%
+        const roll = Math.random();
+        let pool;
+        if (roll < 0.6) pool = RELIC_POOLS.common;
+        else if (roll < 0.9) pool = RELIC_POOLS.uncommon;
+        else pool = RELIC_POOLS.rare;
+
+        const owned = this.playerState.relics || [];
+        let candidates = pool.filter(r => !owned.includes(r.id));
+        // fallback: try any pool if empty
+        if (candidates.length === 0) {
+            candidates = Object.values(RELIC_DATA).filter(r => !owned.includes(r.id));
+        }
+        if (candidates.length === 0) return; // all relics owned
+
+        const relic = candidates[Phaser.Math.Between(0, candidates.length - 1)];
+        this.playerState.relics.push(relic.id);
+
+        // Visual: replace skull icon in reel display
+        const reelContainer = this.slotMachine.reelContainers[skullIdx];
+        if (reelContainer) {
+            const iconText = reelContainer.list[0];
+            const nameLabel = reelContainer.list[1];
+            if (iconText) iconText.setText(relic.icon);
+            if (nameLabel) nameLabel.setText(relic.name);
+        }
+
+        this._popText(640, 300, `${relic.icon} ${relic.name} 획득!`, '#aa88ff', 28);
+        this._appendLog([{ type: 'info', text: `✨ 해골 → 유물 [${relic.name}] 획득!` }]);
     }
 
     _onRoundWin() {
