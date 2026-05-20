@@ -137,3 +137,31 @@ const LOOT_TABLE = {
 };
 
 const MAX_INVENTORY = 20;
+const MAX_WEIGHT = 30;   // kg
+
+// Rarity tiers (determines search reveal speed & visual)
+const ITEM_RARITY = {
+    // common (grey)
+    scrap: 'common', cloth: 'common', nails: 'common', wire: 'common',
+    bandage: 'common', water: 'common', canned_food: 'common',
+    ammo_pistol: 'common', ammo_shotgun: 'common',
+    // uncommon (green)
+    duct_tape: 'uncommon', electronics: 'uncommon', chemicals: 'uncommon',
+    painkillers: 'uncommon', energy_drink: 'uncommon', ration: 'uncommon',
+    ammo_rifle: 'uncommon', battery: 'uncommon', lantern_fuel: 'uncommon',
+    lockpick: 'uncommon', medicine: 'uncommon', flashlight_part: 'uncommon',
+    dogtag: 'uncommon', helmet: 'uncommon',
+    // rare (blue)
+    medkit: 'rare', scope: 'rare', armor_plate: 'rare', backpack: 'rare',
+    circuit_board: 'rare', flash_drive: 'rare', city_map: 'rare', old_key: 'rare',
+    // epic (purple)
+    gold_chain: 'epic', tactical_vest: 'epic', intel_folder: 'epic',
+    night_vision: 'epic', rare_material: 'epic'
+};
+
+const RARITY_CONFIG = {
+    common:   { color: '#aaaaaa', border: 0x666666, revealMs: 300,  glow: false },
+    uncommon: { color: '#44ff88', border: 0x44ff88, revealMs: 500,  glow: false },
+    rare:     { color: '#4488ff', border: 0x4488ff, revealMs: 900,  glow: true },
+    epic:     { color: '#aa44ff', border: 0xaa44ff, revealMs: 1400, glow: true }
+};

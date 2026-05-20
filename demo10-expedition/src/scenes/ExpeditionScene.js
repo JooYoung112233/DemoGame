@@ -394,47 +394,65 @@ class ExpeditionScene extends Phaser.Scene {
         return false;
     }
 
-    /** Re-fog tiles not in current vision (night only) */
-    _updateNightFog() {
-        if (!this.isNight) return;
+    /** Fog of war — discovered tiles outside current vision get dimmed.
+     *  Day: explored tiles show as dim (alpha 0.55), current vision = clear (0)
+     *  Night: explored tiles go dark (alpha 0.75), flashlight cone = clear (0)
+     */
+    _updateFogOfWar() {
         const px = this.player.gx, py = this.player.gy;
-        const baseR = PLAYER_DATA.nightVisionRadius;
-        const flRange = (this.flashlightOn && this.flashlightBattery > 0)
+        const dayRadius = PLAYER_DATA.visionRadius;
+        const nightBaseR = PLAYER_DATA.nightVisionRadius;
+        const flRange = (this.isNight && this.flashlightOn && this.flashlightBattery > 0)
             ? PLAYER_DATA.flashlightRange + this.flashlightBonusRange : 0;
-        const maxR = Math.max(baseR, flRange) + 1;
+        const activeR = this.isNight ? Math.max(nightBaseR, flRange) : dayRadius;
+        const scanR = activeR + 5;
         const flArc = PLAYER_DATA.flashlightArc;
         const halfArc = (flArc / 2) * (Math.PI / 180);
         const facingAngle = Math.atan2(this.playerFacing.y, this.playerFacing.x);
+        const dimAlpha = this.isNight ? 0.75 : 0.55;
 
-        // Re-fog previously discovered tiles that are now out of vision
-        for (let dy = -maxR - 4; dy <= maxR + 4; dy++) {
-            for (let dx = -maxR - 4; dx <= maxR + 4; dx++) {
+        for (let dy = -scanR; dy <= scanR; dy++) {
+            for (let dx = -scanR; dx <= scanR; dx++) {
                 const nx = px + dx, ny = py + dy;
                 if (nx < 0 || ny < 0 || nx >= this.mapW || ny >= this.mapH) continue;
                 if (!this.discovered[ny][nx]) continue;
 
                 const dist2 = dx * dx + dy * dy;
+                let inVision = false;
 
-                // In base circle?
-                if (dist2 <= baseR * baseR) continue;
-
-                // In flashlight cone?
-                if (flRange > 0 && dist2 <= flRange * flRange) {
-                    const angle = Math.atan2(dy, dx);
-                    let diff = angle - facingAngle;
-                    while (diff > Math.PI) diff -= 2 * Math.PI;
-                    while (diff < -Math.PI) diff += 2 * Math.PI;
-                    if (Math.abs(diff) <= halfArc && !this._hasWallBetween(px, py, nx, ny)) continue;
+                if (!this.isNight) {
+                    // Day: circular vision
+                    inVision = dist2 <= dayRadius * dayRadius;
+                } else {
+                    // Night: base circle + flashlight cone
+                    if (dist2 <= nightBaseR * nightBaseR) {
+                        inVision = true;
+                    } else if (flRange > 0 && dist2 <= flRange * flRange) {
+                        const angle = Math.atan2(dy, dx);
+                        let diff = angle - facingAngle;
+                        while (diff > Math.PI) diff -= 2 * Math.PI;
+                        while (diff < -Math.PI) diff += 2 * Math.PI;
+                        if (Math.abs(diff) <= halfArc && !this._hasWallBetween(px, py, nx, ny)) {
+                            inVision = true;
+                        }
+                    }
+                    // Streetlight
+                    if (!inVision && this._nearStreetlight(nx, ny)) inVision = true;
                 }
 
-                // Near streetlight?
-                if (this._nearStreetlight(nx, ny)) continue;
-
-                // Re-fog this tile
                 const fg = this.fogTiles[ny][nx];
-                if (fg.alpha < 0.5) {
-                    this.tweens.killTweensOf(fg);
-                    this.tweens.add({ targets: fg, alpha: 0.7, duration: 200 });
+                if (inVision) {
+                    // Visible — clear fog
+                    if (fg.alpha > 0.05) {
+                        this.tweens.killTweensOf(fg);
+                        fg.alpha = 0;
+                    }
+                } else {
+                    // Out of vision but discovered — dim/re-fog
+                    if (fg.alpha < dimAlpha - 0.1) {
+                        this.tweens.killTweensOf(fg);
+                        this.tweens.add({ targets: fg, alpha: dimAlpha, duration: 300 });
+                    }
                 }
             }
         }
@@ -675,7 +693,18 @@ class ExpeditionScene extends Phaser.Scene {
 
     updateInventoryCount() {
         const val = this.inventory.reduce((s, id) => s + (ITEM_DATA[id]?.value || 0), 0);
-        this.inventoryText.setText(`\u{1F392} ${this.inventory.length}/${MAX_INVENTORY}  \u{1F4B0} ${val}`);
+        const wt = this.inventory.reduce((s, id) => s + (ITEM_DATA[id]?.weight || 0), 0);
+        const wtColor = wt > MAX_WEIGHT ? '#ff4444' : wt > MAX_WEIGHT * 0.8 ? '#ffaa44' : '#ccc';
+        this.inventoryText.setText(`\u{1F392} ${this.inventory.length}/${MAX_INVENTORY}  ⚖${wt.toFixed(1)}/${MAX_WEIGHT}kg  \u{1F4B0} ${val}`);
+        this.inventoryText.setColor(wtColor);
+    }
+
+    _getCurrentWeight() {
+        return this.inventory.reduce((s, id) => s + (ITEM_DATA[id]?.weight || 0), 0);
+    }
+
+    _isOverweight() {
+        return this._getCurrentWeight() > MAX_WEIGHT;
     }
 
     // ── MINIMAP ────────────────────────────────────────────
@@ -1050,8 +1079,9 @@ class ExpeditionScene extends Phaser.Scene {
         // Paused states
         if (this.inventoryOpen || this.fullMapOpen || this.isSearching) return;
 
-        // Player movement
-        if (time - this.moveTimer >= this.MOVE_DELAY) {
+        // Player movement (overweight = slower)
+        const moveDelay = this._isOverweight() ? this.MOVE_DELAY * 1.8 : this.MOVE_DELAY;
+        if (time - this.moveTimer >= moveDelay) {
             let dx = 0, dy = 0;
             if (this.cursors.left.isDown || this.wasd.A.isDown) dx = -1;
             else if (this.cursors.right.isDown || this.wasd.D.isDown) dx = 1;
@@ -1065,9 +1095,9 @@ class ExpeditionScene extends Phaser.Scene {
             }
         }
 
-        // Night fog re-application
+        // Fog re-application (day: dim fog on distant tiles, night: full re-fog)
+        this._updateFogOfWar();
         if (this.isNight) {
-            this._updateNightFog();
             this._drawFlashlightCone();
         }
 
@@ -1530,7 +1560,40 @@ class ExpeditionScene extends Phaser.Scene {
         this._searchActive = true;
         this._searchElapsed = 0;
         this._searchDuration = searchTime;
-        this._searchNextReveal = 0;
+        this._searchRevealQueue = [];     // ordered reveal schedule
+        this._searchRevealIdx = 0;
+
+        // Build reveal schedule: each slot has a reveal time
+        // Empty slots & common items reveal fast, rare items reveal later with longer animation
+        const revealTimes = slots.map((itemId, i) => {
+            const rarity = itemId ? (ITEM_RARITY[itemId] || 'common') : 'common';
+            const config = RARITY_CONFIG[rarity] || RARITY_CONFIG.common;
+            return { index: i, itemId, rarity, config };
+        });
+        // Shuffle reveal order (but weight rare items towards the end for drama)
+        const rarityOrder = { common: 0, uncommon: 1, rare: 2, epic: 3 };
+        revealTimes.sort((a, b) => {
+            const ra = a.itemId ? rarityOrder[a.rarity] : -1;
+            const rb = b.itemId ? rarityOrder[b.rarity] : -1;
+            if (ra !== rb) return ra - rb;
+            return Math.random() - 0.5;
+        });
+        // Assign reveal timestamps spread across searchTime
+        let cumTime = 0;
+        revealTimes.forEach((entry, i) => {
+            const baseInterval = searchTime / slots.length;
+            // Rare items take longer to reveal (dramatic pause)
+            const extraDelay = entry.config.revealMs;
+            entry.revealAt = cumTime + baseInterval * 0.3;
+            cumTime = entry.revealAt + extraDelay * 0.3;
+        });
+        // Normalize so last reveal ~= searchTime
+        const maxTime = revealTimes[revealTimes.length - 1].revealAt;
+        if (maxTime > 0) {
+            const scale = searchTime / maxTime;
+            revealTimes.forEach(e => e.revealAt *= scale);
+        }
+        this._searchRevealQueue = revealTimes;
 
         const sa = (obj) => { obj.setScrollFactor(0).setDepth(250); this._searchObjects.push(obj); return obj; };
         const cam = this.cameras.main;
@@ -1540,18 +1603,21 @@ class ExpeditionScene extends Phaser.Scene {
         // Layout
         const cols = slots.length <= 4 ? 2 : 3;
         const rows = Math.ceil(slots.length / cols);
-        const slotW = Math.floor(w * 0.11);
-        const slotH = Math.floor(h * 0.09);
-        const gap = Math.floor(w * 0.012);
+        const slotW = Math.floor(w * 0.12);
+        const slotH = Math.floor(h * 0.1);
+        const gap = Math.floor(w * 0.01);
         const headerH = Math.floor(h * 0.08);
-        const progressH = Math.floor(h * 0.035);
-        const footerH = Math.floor(h * 0.055);
+        const progressH = Math.floor(h * 0.04);
+        const footerH = Math.floor(h * 0.06);
         const gridW = cols * (slotW + gap) - gap;
         const gridH = rows * (slotH + gap) - gap;
         const pw = gridW + Math.floor(w * 0.05);
         const ph = headerH + gridH + progressH + footerH + Math.floor(h * 0.025);
         const px = Math.floor((w - pw) / 2);
         const py = Math.floor((h - ph) / 2);
+
+        // Store layout for reuse
+        this._searchLayout = { cols, slotW, slotH, gap, headerH, progressH, footerH, pw, ph, px, py, gridW, gridH };
 
         // Dim overlay
         const overlay = sa(this.add.graphics());
@@ -1572,35 +1638,32 @@ class ExpeditionScene extends Phaser.Scene {
             color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5));
 
-        sa(this.add.text(px + pw / 2, py + Math.floor(headerH * 0.7),
+        this._searchStatusText = sa(this.add.text(px + pw / 2, py + Math.floor(headerH * 0.7),
             '탐색 중...', {
             fontSize: `${Math.floor(fs * 0.85)}px`, fontFamily: 'monospace', color: '#888'
         }).setOrigin(0.5));
-        this._searchStatusText = this._searchObjects[this._searchObjects.length - 1];
 
-        // Progress bar background
+        // Progress bar
         const barX = px + Math.floor(pw * 0.06);
         const barY = py + headerH;
         const barW = pw - Math.floor(pw * 0.12);
-        const barH = Math.floor(progressH * 0.45);
+        const barH = Math.floor(progressH * 0.4);
         const barBg = sa(this.add.graphics());
         barBg.fillStyle(0x222244, 1);
         barBg.fillRoundedRect(barX, barY, barW, barH, 4);
         barBg.lineStyle(1, 0x444466, 0.5);
         barBg.strokeRoundedRect(barX, barY, barW, barH, 4);
 
-        // Progress bar fill (updated in update loop)
         this._searchBarFill = sa(this.add.graphics());
-        this._searchBarX = barX;
-        this._searchBarY = barY;
-        this._searchBarW = barW;
-        this._searchBarH = barH;
+        this._searchBarX = barX; this._searchBarY = barY;
+        this._searchBarW = barW; this._searchBarH = barH;
 
-        // Slot grid
+        // Slot grid — all slots visible but items hidden (dark empty cells, not locked)
         const gridX = px + Math.floor((pw - gridW) / 2);
         const gridY = barY + progressH;
         this._slotGraphics = [];
         this._slotTexts = [];
+        this._slotGlows = [];
         this._slotZones = [];
 
         for (let i = 0; i < slots.length; i++) {
@@ -1609,37 +1672,56 @@ class ExpeditionScene extends Phaser.Scene {
             const sx = gridX + col * (slotW + gap);
             const sy = gridY + row * (slotH + gap);
 
-            // Slot background (locked state)
+            // Glow layer (behind slot, for rare items)
+            const glow = sa(this.add.graphics());
+            this._slotGlows.push(glow);
+
+            // Slot background — visible but dark (unsearched)
             const slotBg = sa(this.add.graphics());
-            slotBg.fillStyle(0x1a1a2e, 1);
+            slotBg.fillStyle(0x15152a, 1);
             slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
-            slotBg.lineStyle(1, 0x333355, 0.6);
+            slotBg.lineStyle(1, 0x252540, 0.5);
             slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
             this._slotGraphics.push(slotBg);
 
-            // Lock icon (shown until revealed)
-            const lockText = sa(this.add.text(sx + slotW / 2, sy + slotH / 2, '🔒', {
-                fontSize: `${Math.floor(fs * 1.1)}px`, fontFamily: 'monospace'
+            // "?" text — subtle, not a big lock
+            const qText = sa(this.add.text(sx + slotW / 2, sy + slotH / 2, '?', {
+                fontSize: `${Math.floor(fs * 1.0)}px`, fontFamily: 'monospace', color: '#333355'
             }).setOrigin(0.5));
-            this._slotTexts.push(lockText);
+            this._slotTexts.push(qText);
 
-            // Interactive zone (hidden until revealed, for taking items)
+            // Interactive zone
             const zone = sa(this.add.zone(sx + slotW / 2, sy + slotH / 2, slotW, slotH));
             zone.slotIndex = i;
             this._slotZones.push(zone);
         }
 
         // Footer
-        sa(this.add.text(px + pw / 2, py + ph - Math.floor(footerH * 0.55),
-            'ESC: 중단  |  열린 칸 클릭: 회수', {
+        sa(this.add.text(px + pw / 2, py + ph - Math.floor(footerH * 0.6),
+            'ESC: 중단  |  칸 클릭: 회수', {
             fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace', color: '#666'
         }).setOrigin(0.5));
 
-        // Inventory counter
+        const wt = this._getCurrentWeight();
         this._searchInvText = sa(this.add.text(px + pw / 2, py + ph - Math.floor(footerH * 0.2),
-            `인벤토리: ${this.inventory.length}/${MAX_INVENTORY}`, {
+            `인벤: ${this.inventory.length}/${MAX_INVENTORY}  ⚖${wt.toFixed(1)}/${MAX_WEIGHT}kg`, {
             fontSize: `${Math.floor(fs * 0.75)}px`, fontFamily: 'monospace', color: '#888'
         }).setOrigin(0.5));
+    }
+
+    _getSlotPos(index) {
+        const L = this._searchLayout;
+        const cam = this.cameras.main;
+        const w = cam.width, h = cam.height;
+        const gridX = L.px + Math.floor((L.pw - L.gridW) / 2);
+        const gridY = L.py + L.headerH + L.progressH;
+        const col = index % L.cols;
+        const row = Math.floor(index / L.cols);
+        return {
+            x: gridX + col * (L.slotW + L.gap),
+            y: gridY + row * (L.slotH + L.gap),
+            w: L.slotW, h: L.slotH
+        };
     }
 
     _updateSearchUI(delta) {
@@ -1657,21 +1739,23 @@ class ExpeditionScene extends Phaser.Scene {
             Math.floor((this._searchBarW - 4) * progress), this._searchBarH - 4, 3
         );
 
-        // Reveal slots progressively
-        const totalSlots = this._searchSlots.length;
-        const slotsToReveal = Math.floor(progress * totalSlots);
-
-        while (this._searchNextReveal < slotsToReveal && this._searchNextReveal < totalSlots) {
-            this._revealSlot(this._searchNextReveal);
-            this._searchNextReveal++;
+        // Reveal slots based on schedule
+        while (this._searchRevealIdx < this._searchRevealQueue.length) {
+            const entry = this._searchRevealQueue[this._searchRevealIdx];
+            if (this._searchElapsed >= entry.revealAt) {
+                this._revealSlot(entry.index, entry);
+                this._searchRevealIdx++;
+            } else {
+                break;
+            }
         }
 
         // Search complete
         if (progress >= 1 && this._searchActive) {
-            // Reveal any remaining
-            while (this._searchNextReveal < totalSlots) {
-                this._revealSlot(this._searchNextReveal);
-                this._searchNextReveal++;
+            while (this._searchRevealIdx < this._searchRevealQueue.length) {
+                const entry = this._searchRevealQueue[this._searchRevealIdx];
+                this._revealSlot(entry.index, entry);
+                this._searchRevealIdx++;
             }
             this._searchActive = false;
             if (this._searchStatusText) {
@@ -1681,65 +1765,50 @@ class ExpeditionScene extends Phaser.Scene {
         }
     }
 
-    _revealSlot(index) {
+    _revealSlot(index, entry) {
         if (this._searchRevealed[index]) return;
         this._searchRevealed[index] = true;
 
         const itemId = this._searchSlots[index];
         const fs = Math.floor(this.cameras.main.height * 0.018);
-
-        // Redraw slot background
+        const pos = this._getSlotPos(index);
+        const { x: sx, y: sy, w: slotW, h: slotH } = pos;
         const slotBg = this._slotGraphics[index];
-        const cam = this.cameras.main;
-        const w = cam.width, h = cam.height;
-        const cols = this._searchSlots.length <= 4 ? 2 : 3;
-        const slotW = Math.floor(w * 0.11);
-        const slotH = Math.floor(h * 0.09);
+        const lockText = this._slotTexts[index];
+        const rarity = entry ? entry.rarity : 'common';
+        const config = entry ? entry.config : RARITY_CONFIG.common;
 
         slotBg.clear();
         if (itemId) {
-            // Has item — green tint
+            const borderColor = config.border;
             slotBg.fillStyle(0x1a2a1e, 1);
-            slotBg.lineStyle(1, 0x44ff88, 0.6);
-        } else {
-            // Empty — dark grey
-            slotBg.fillStyle(0x1a1a1e, 1);
-            slotBg.lineStyle(1, 0x333344, 0.4);
-        }
-        // Compute slot position from index
-        const gridW = cols * (slotW + Math.floor(w * 0.012)) - Math.floor(w * 0.012);
-        const rows = Math.ceil(this._searchSlots.length / cols);
-        const gap = Math.floor(w * 0.012);
-        const headerH = Math.floor(h * 0.08);
-        const progressH = Math.floor(h * 0.035);
-        const pw = gridW + Math.floor(w * 0.05);
-        const ph = headerH + (rows * (slotH + gap) - gap) + progressH + Math.floor(h * 0.055) + Math.floor(h * 0.025);
-        const px = Math.floor((w - pw) / 2);
-        const py = Math.floor((h - ph) / 2);
-        const gridX = px + Math.floor((pw - gridW) / 2);
-        const barY = py + headerH;
-        const gridY = barY + progressH;
+            slotBg.lineStyle(2, borderColor, 0.8);
+            slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
+            slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
 
-        const col = index % cols;
-        const row = Math.floor(index / cols);
-        const sx = gridX + col * (slotW + gap);
-        const sy = gridY + row * (slotH + gap);
-
-        slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
-        slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
-
-        // Update text
-        const lockText = this._slotTexts[index];
-        if (itemId) {
             const item = ITEM_DATA[itemId];
-            lockText.setText(`${item?.icon || '?'}\n${item?.name || itemId}`);
+            const weight = item?.weight || 0;
+            lockText.setText(`${item?.icon || '?'}\n${item?.name || itemId}\n${weight}kg`);
             lockText.setStyle({
-                fontSize: `${Math.floor(fs * 0.85)}px`, fontFamily: 'monospace',
-                color: '#44ff88', align: 'center', lineSpacing: 2
+                fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace',
+                color: config.color, align: 'center', lineSpacing: 1
             });
             lockText.setOrigin(0.5);
 
-            // Make slot clickable to take item
+            // Glow effect for rare+ items
+            if (config.glow) {
+                const glow = this._slotGlows[index];
+                glow.clear();
+                glow.fillStyle(config.border, 0.15);
+                glow.fillRoundedRect(sx - 3, sy - 3, slotW + 6, slotH + 6, 7);
+                // Pulsing glow
+                this.tweens.add({
+                    targets: glow, alpha: { from: 0.4, to: 1 },
+                    duration: 600, yoyo: true, repeat: 2
+                });
+            }
+
+            // Make slot clickable
             const zone = this._slotZones[index];
             zone.setInteractive({ useHandCursor: true });
             zone.on('pointerdown', () => this._takeSlotItem(index));
@@ -1747,7 +1816,7 @@ class ExpeditionScene extends Phaser.Scene {
                 if (!this._searchTaken[index]) {
                     slotBg.clear();
                     slotBg.fillStyle(0x2a3a2e, 1);
-                    slotBg.lineStyle(2, 0x66ffaa, 0.8);
+                    slotBg.lineStyle(2, 0xffffff, 0.7);
                     slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
                     slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
                 }
@@ -1756,23 +1825,31 @@ class ExpeditionScene extends Phaser.Scene {
                 if (!this._searchTaken[index]) {
                     slotBg.clear();
                     slotBg.fillStyle(0x1a2a1e, 1);
-                    slotBg.lineStyle(1, 0x44ff88, 0.6);
+                    slotBg.lineStyle(2, config.border, 0.8);
                     slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
                     slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
                 }
             });
+
+            // Reveal animation — longer for rare
+            const revealDur = config.revealMs;
+            slotBg.setAlpha(0);
+            lockText.setAlpha(0);
+            this.tweens.add({ targets: slotBg, alpha: 1, duration: revealDur, ease: 'Cubic.easeOut' });
+            this.tweens.add({ targets: lockText, alpha: 1, duration: revealDur, ease: 'Cubic.easeOut' });
         } else {
-            lockText.setText('—');
+            // Empty slot
+            slotBg.fillStyle(0x14141e, 1);
+            slotBg.lineStyle(1, 0x222233, 0.4);
+            slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
+            slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
+            lockText.setText('비어있음');
             lockText.setStyle({
-                fontSize: `${Math.floor(fs * 0.9)}px`, fontFamily: 'monospace', color: '#444'
+                fontSize: `${Math.floor(fs * 0.7)}px`, fontFamily: 'monospace', color: '#333'
             });
             lockText.setOrigin(0.5);
+            this.tweens.add({ targets: slotBg, alpha: { from: 0.3, to: 1 }, duration: 200 });
         }
-
-        // Reveal flash tween
-        this.tweens.add({
-            targets: slotBg, alpha: { from: 0.3, to: 1 }, duration: 200
-        });
     }
 
     _takeSlotItem(index) {
@@ -1780,8 +1857,14 @@ class ExpeditionScene extends Phaser.Scene {
         const itemId = this._searchSlots[index];
         if (!itemId) return;
 
+        // Check both slot count and weight
         if (this.inventory.length >= MAX_INVENTORY) {
             this.showMessage('인벤토리가 가득 찼습니다!', 1500);
+            return;
+        }
+        const itemWeight = ITEM_DATA[itemId]?.weight || 0;
+        if (this._getCurrentWeight() + itemWeight > MAX_WEIGHT) {
+            this.showMessage(`⚖ 무게 초과! (${this._getCurrentWeight().toFixed(1)}+${itemWeight} > ${MAX_WEIGHT}kg)`, 2000);
             return;
         }
 
@@ -1797,29 +1880,10 @@ class ExpeditionScene extends Phaser.Scene {
 
         // Visual: mark as taken
         const fs = Math.floor(this.cameras.main.height * 0.018);
+        const pos = this._getSlotPos(index);
+        const { x: sx, y: sy, w: slotW, h: slotH } = pos;
         const slotBg = this._slotGraphics[index];
         const lockText = this._slotTexts[index];
-        const cam = this.cameras.main;
-        const w = cam.width, h = cam.height;
-        const cols = this._searchSlots.length <= 4 ? 2 : 3;
-        const slotW = Math.floor(w * 0.11);
-        const slotH = Math.floor(h * 0.09);
-        const gap = Math.floor(w * 0.012);
-        const gridW = cols * (slotW + gap) - gap;
-        const rows = Math.ceil(this._searchSlots.length / cols);
-        const headerH = Math.floor(h * 0.08);
-        const progressH = Math.floor(h * 0.035);
-        const pw = gridW + Math.floor(w * 0.05);
-        const ph_ = headerH + (rows * (slotH + gap) - gap) + progressH + Math.floor(h * 0.055) + Math.floor(h * 0.025);
-        const px_ = Math.floor((w - pw) / 2);
-        const py_ = Math.floor((h - ph_) / 2);
-        const gridX = px_ + Math.floor((pw - gridW) / 2);
-        const barY = py_ + headerH;
-        const gridY = barY + progressH;
-        const col = index % cols;
-        const row = Math.floor(index / cols);
-        const sx = gridX + col * (slotW + gap);
-        const sy = gridY + row * (slotH + gap);
 
         slotBg.clear();
         slotBg.fillStyle(0x1a1a1e, 0.5);
@@ -1827,28 +1891,33 @@ class ExpeditionScene extends Phaser.Scene {
         slotBg.fillRoundedRect(sx, sy, slotW, slotH, 5);
         slotBg.strokeRoundedRect(sx, sy, slotW, slotH, 5);
 
+        // Clear glow
+        if (this._slotGlows[index]) this._slotGlows[index].clear();
+
         const item = ITEM_DATA[itemId];
-        lockText.setText(`✓ 획득`);
+        const rarity = ITEM_RARITY[itemId] || 'common';
+        const config = RARITY_CONFIG[rarity];
+        lockText.setText('✓ 획득');
         lockText.setStyle({
-            fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace', color: '#888'
+            fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace', color: '#555'
         });
 
-        // Remove interactivity
         this._slotZones[index].disableInteractive();
 
-        // Update inv counter
+        // Update footer
         if (this._searchInvText) {
-            this._searchInvText.setText(`인벤토리: ${this.inventory.length}/${MAX_INVENTORY}`);
+            const wt = this._getCurrentWeight();
+            this._searchInvText.setText(`인벤: ${this.inventory.length}/${MAX_INVENTORY}  ⚖${wt.toFixed(1)}/${MAX_WEIGHT}kg`);
         }
 
-        // +1 popup
+        // +1 popup with rarity color
         const popup = this.add.text(sx + slotW / 2, sy - 5,
             `+${item?.icon || ''} ${item?.name || ''}`, {
-            fontSize: `${Math.floor(fs * 0.8)}px`, fontFamily: 'monospace',
-            color: '#44ff88', stroke: '#000', strokeThickness: 2
+            fontSize: `${Math.floor(fs * 0.85)}px`, fontFamily: 'monospace',
+            color: config.color, stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5).setScrollFactor(0).setDepth(260);
         this.tweens.add({
-            targets: popup, y: sy - 25, alpha: 0, duration: 800,
+            targets: popup, y: sy - 28, alpha: 0, duration: 900,
             onComplete: () => popup.destroy()
         });
     }
@@ -1860,6 +1929,7 @@ class ExpeditionScene extends Phaser.Scene {
         }
         this._searchActive = false;
         this._searchSlots = null;
+        this._searchLayout = null;
         this.isSearching = false;
     }
 
@@ -1903,115 +1973,136 @@ class ExpeditionScene extends Phaser.Scene {
 
     toggleInventory() {
         if (this.inventoryOpen) {
-            this.inventoryPanel.destroy();
-            this.inventoryPanel = null;
+            if (this._invObjects) this._invObjects.forEach(o => { try { o.destroy(); } catch(e) {} });
+            this._invObjects = [];
             this.inventoryOpen = false;
             return;
         }
         this.inventoryOpen = true;
+        this._invObjects = [];
+        const ia = (obj) => { obj.setScrollFactor(0).setDepth(200); this._invObjects.push(obj); return obj; };
+
         const cam = this.cameras.main;
-        const pw = Math.floor(cam.width * 0.3);
-        const ph = Math.floor(cam.height * 0.7);
+        const pw = Math.floor(cam.width * 0.34);
+        const ph = Math.floor(cam.height * 0.78);
         const px = Math.floor((cam.width - pw) / 2);
         const py = Math.floor((cam.height - ph) / 2);
 
-        this.inventoryPanel = this.add.container(0, 0).setScrollFactor(0).setDepth(200);
-
-        const overlay = this.add.graphics().setScrollFactor(0);
+        const overlay = ia(this.add.graphics());
         overlay.fillStyle(0x000000, 0.6);
         overlay.fillRect(0, 0, cam.width, cam.height);
-        this.inventoryPanel.add(overlay);
 
-        const bg = this.add.graphics().setScrollFactor(0);
+        const bg = ia(this.add.graphics());
         bg.fillStyle(0x111122, 0.95);
         bg.fillRoundedRect(px, py, pw, ph, 12);
         bg.lineStyle(1, 0x444466, 0.6);
         bg.strokeRoundedRect(px, py, pw, ph, 12);
-        this.inventoryPanel.add(bg);
 
         const ifs = Math.floor(cam.height * 0.022);
-        const rowH = Math.floor(ifs * 1.8);
+        const rowH = Math.floor(ifs * 1.7);
 
-        this.inventoryPanel.add(this.add.text(px + pw / 2, py + 15,
-            `\u{1F392} Inventory (${this.inventory.length}/${MAX_INVENTORY})`, {
-            fontSize: `${Math.floor(ifs * 1.2)}px`, fontFamily: 'monospace',
+        ia(this.add.text(px + pw / 2, py + 15,
+            `🎒 인벤토리 (${this.inventory.length}/${MAX_INVENTORY})`, {
+            fontSize: `${Math.floor(ifs * 1.1)}px`, fontFamily: 'monospace',
             color: '#ffcc44', fontStyle: 'bold'
-        }).setOrigin(0.5).setScrollFactor(0));
+        }).setOrigin(0.5));
 
-        const totalWeight = this.inventory.reduce((s, id) => s + (ITEM_DATA[id]?.weight || 0), 0);
+        const totalWeight = this._getCurrentWeight();
         const totalValue = this.inventory.reduce((s, id) => s + (ITEM_DATA[id]?.value || 0), 0);
-        this.inventoryPanel.add(this.add.text(px + pw / 2, py + 38,
-            `Weight: ${totalWeight.toFixed(1)}kg  |  Value: ${totalValue}G`, {
-            fontSize: `${Math.floor(ifs * 0.85)}px`, fontFamily: 'monospace', color: '#888'
-        }).setOrigin(0.5).setScrollFactor(0));
+        const wtColor = totalWeight > MAX_WEIGHT ? '#ff4444' : totalWeight > MAX_WEIGHT * 0.8 ? '#ffaa44' : '#888';
+
+        // Weight bar
+        const barX = px + 15, barY = py + 38, barW = pw - 30, barH = 14;
+        const wtBar = ia(this.add.graphics());
+        wtBar.fillStyle(0x222244, 1);
+        wtBar.fillRoundedRect(barX, barY, barW, barH, 3);
+        const wtRatio = Math.min(1, totalWeight / MAX_WEIGHT);
+        const wtFillColor = totalWeight > MAX_WEIGHT ? 0xff4444 : totalWeight > MAX_WEIGHT * 0.8 ? 0xffaa44 : 0x44aaff;
+        wtBar.fillStyle(wtFillColor, 1);
+        wtBar.fillRoundedRect(barX + 1, barY + 1, Math.floor((barW - 2) * wtRatio), barH - 2, 2);
+
+        ia(this.add.text(px + pw / 2, barY + barH / 2,
+            `⚖ ${totalWeight.toFixed(1)} / ${MAX_WEIGHT}kg  |  💰 ${totalValue}G`, {
+            fontSize: `${Math.floor(ifs * 0.7)}px`, fontFamily: 'monospace', color: '#fff'
+        }).setOrigin(0.5));
+
+        if (totalWeight > MAX_WEIGHT) {
+            ia(this.add.text(px + pw / 2, barY + barH + 6,
+                '⚠ 과적! 이동속도 감소', {
+                fontSize: `${Math.floor(ifs * 0.65)}px`, fontFamily: 'monospace', color: '#ff6644'
+            }).setOrigin(0.5));
+        }
 
         const counts = {};
         this.inventory.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
 
         const sorted = Object.entries(counts).sort((a, b) => {
-            const ta = ITEM_DATA[a[0]]?.type || '', tb = ITEM_DATA[b[0]]?.type || '';
-            return ta.localeCompare(tb) || a[0].localeCompare(b[0]);
+            const ra = ITEM_RARITY[a[0]] || 'common', rb = ITEM_RARITY[b[0]] || 'common';
+            const order = { epic: 0, rare: 1, uncommon: 2, common: 3 };
+            if (order[ra] !== order[rb]) return order[ra] - order[rb];
+            return a[0].localeCompare(b[0]);
         });
 
+        const contentY = barY + barH + (totalWeight > MAX_WEIGHT ? 24 : 10);
         let row = 0;
-        let lastType = '';
         sorted.forEach(([id, count]) => {
             const item = ITEM_DATA[id];
             if (!item) return;
-            if (item.type !== lastType) {
-                lastType = item.type;
-                const typeNames = {
-                    material: 'Materials', consumable: 'Consumables', ammo: 'Ammo',
-                    equipment: 'Equipment', valuable: 'Valuables', key: 'Keys', tool: 'Tools'
-                };
-                this.inventoryPanel.add(this.add.text(px + 15, py + 60 + row * rowH,
-                    `-- ${typeNames[item.type] || item.type} --`, {
-                    fontSize: `${Math.floor(ifs * 0.75)}px`, fontFamily: 'monospace', color: '#666'
-                }).setScrollFactor(0));
-                row++;
-            }
-            this.inventoryPanel.add(this.add.text(px + 15, py + 60 + row * rowH,
-                `${item.icon} ${item.name} x${count}  (${item.value}G)`, {
-                fontSize: `${Math.floor(ifs * 0.85)}px`, fontFamily: 'monospace', color: '#ccc'
-            }).setScrollFactor(0));
+            const rarity = ITEM_RARITY[id] || 'common';
+            const config = RARITY_CONFIG[rarity];
+            const iy = contentY + row * rowH;
+            if (iy + rowH > py + ph - 30) return; // overflow guard
+
+            // Rarity dot
+            const dot = ia(this.add.graphics());
+            dot.fillStyle(config.border, 1);
+            dot.fillCircle(px + 20, iy + Math.floor(ifs * 0.5), 4);
+
+            ia(this.add.text(px + 30, iy,
+                `${item.icon} ${item.name} x${count}`, {
+                fontSize: `${Math.floor(ifs * 0.85)}px`, fontFamily: 'monospace', color: config.color
+            }));
+            ia(this.add.text(px + pw - 15, iy,
+                `${(item.weight * count).toFixed(1)}kg  ${item.value * count}G`, {
+                fontSize: `${Math.floor(ifs * 0.7)}px`, fontFamily: 'monospace', color: '#777'
+            }).setOrigin(1, 0));
             row++;
         });
 
         if (this.inventory.length === 0) {
-            this.inventoryPanel.add(this.add.text(px + pw / 2, py + 80, 'Empty', {
+            ia(this.add.text(px + pw / 2, contentY + 30, '비어있음', {
                 fontSize: `${ifs}px`, fontFamily: 'monospace', color: '#555'
-            }).setOrigin(0.5).setScrollFactor(0));
+            }).setOrigin(0.5));
         }
 
-        this.inventoryPanel.add(this.add.text(px + pw / 2, py + ph - 20, 'TAB / ESC: close', {
+        ia(this.add.text(px + pw / 2, py + ph - 18, 'TAB / ESC: 닫기', {
             fontSize: `${Math.floor(ifs * 0.75)}px`, fontFamily: 'monospace', color: '#666'
-        }).setOrigin(0.5).setScrollFactor(0));
+        }).setOrigin(0.5));
     }
 
     // ── FULL MAP ───────────────────────────────────────────
 
     toggleFullMap() {
         if (this.fullMapOpen) {
-            this.fullMapPanel.destroy();
-            this.fullMapPanel = null;
+            if (this._mapObjects) this._mapObjects.forEach(o => { try { o.destroy(); } catch(e) {} });
+            this._mapObjects = [];
             this.fullMapOpen = false;
             return;
         }
         this.fullMapOpen = true;
+        this._mapObjects = [];
+        const ma = (obj) => { obj.setScrollFactor(0).setDepth(200); this._mapObjects.push(obj); return obj; };
         const cam = this.cameras.main;
 
-        this.fullMapPanel = this.add.container(0, 0).setScrollFactor(0).setDepth(200);
-
-        const overlay = this.add.graphics().setScrollFactor(0);
+        const overlay = ma(this.add.graphics());
         overlay.fillStyle(0x000000, 0.8);
         overlay.fillRect(0, 0, cam.width, cam.height);
-        this.fullMapPanel.add(overlay);
 
         const scale = Math.min((cam.width - 40) / this.mapW, (cam.height - 80) / this.mapH);
         const ox = (cam.width - this.mapW * scale) / 2;
         const oy = (cam.height - this.mapH * scale) / 2 + 15;
 
-        const mg = this.add.graphics().setScrollFactor(0);
+        const mg = ma(this.add.graphics());
         for (let y = 0; y < this.mapH; y++) {
             for (let x = 0; x < this.mapW; x++) {
                 if (!this.discovered[y][x]) continue;
@@ -2029,7 +2120,6 @@ class ExpeditionScene extends Phaser.Scene {
             }
         }
 
-        // Highlight open buildings
         if (this.isNight) {
             mg.lineStyle(2, 0xffcc44, 0.8);
             for (const idx of this.openBuildingIndices) {
@@ -2038,26 +2128,23 @@ class ExpeditionScene extends Phaser.Scene {
             }
         }
 
-        // Enemies on full map
         this.enemies.forEach(e => {
             if (!e.alive || !this.discovered[e.gy]?.[e.gx]) return;
             mg.fillStyle(0xff4444, 1);
             mg.fillCircle(ox + e.gx * scale + scale / 2, oy + e.gy * scale + scale / 2, Math.max(2, scale));
         });
 
-        // Player on full map
         mg.fillStyle(0x44aaff, 1);
         mg.fillCircle(ox + this.player.gx * scale + scale / 2, oy + this.player.gy * scale + scale / 2,
             Math.max(3, scale * 1.5));
-        this.fullMapPanel.add(mg);
 
-        const phaseLabel = this.isNight ? '\u{1F319}' : '\u{2600}\u{FE0F}';
-        this.fullMapPanel.add(this.add.text(cam.width / 2, 15, `${phaseLabel} ${this.zone.name}`, {
+        const phaseLabel = this.isNight ? '🌙' : '☀️';
+        ma(this.add.text(cam.width / 2, 15, `${phaseLabel} ${this.zone.name}`, {
             fontSize: '14px', fontFamily: 'monospace', color: '#fff'
-        }).setOrigin(0.5).setScrollFactor(0));
+        }).setOrigin(0.5));
 
-        this.fullMapPanel.add(this.add.text(cam.width / 2, cam.height - 15, 'M: close', {
+        ma(this.add.text(cam.width / 2, cam.height - 15, 'M: 닫기', {
             fontSize: '10px', fontFamily: 'monospace', color: '#666'
-        }).setOrigin(0.5).setScrollFactor(0));
+        }).setOrigin(0.5));
     }
 }
