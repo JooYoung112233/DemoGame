@@ -464,22 +464,26 @@ public class FlashlightSceneSetup : EditorWindow
         outlineGO.name = "OcclusionOutline";
         outlineGO.transform.SetParent(playerVisual.transform);
         outlineGO.transform.localPosition = Vector3.zero;
-        outlineGO.transform.localScale = new Vector3(1.3f, 1.3f, 1); // 약간 크게
+        outlineGO.transform.localScale = new Vector3(1.3f, 1.3f, 1);
         Object.DestroyImmediate(outlineGO.GetComponent<MeshCollider>());
 
-        // ZTest Always → 벽 뒤에서도 렌더링
-        var outlineMat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-        outlineMat.name = "OutlineMat";
-        Color outlineColor = new Color(0.3f, 0.8f, 1f, 0.4f);
-        outlineMat.SetColor("_BaseColor", outlineColor);
-        outlineMat.SetFloat("_Surface", 1); // Transparent
-        outlineMat.SetOverrideTag("RenderType", "Transparent");
-        outlineMat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        outlineMat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        outlineMat.SetFloat("_ZWrite", 0);
-        outlineMat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
-        outlineMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-        outlineMat.renderQueue = 3100;
+        // 커스텀 셰이더로 ZTest Always 확실하게 적용
+        var shader = Shader.Find("Custom/OcclusionOutline");
+        Material outlineMat;
+        if (shader != null)
+        {
+            outlineMat = new Material(shader);
+            outlineMat.name = "OutlineMat";
+            outlineMat.SetColor("_Color", new Color(0.3f, 0.8f, 1f, 0.4f));
+        }
+        else
+        {
+            // 폴백: URP Unlit
+            Debug.LogWarning("[Flashlight] Custom/OcclusionOutline 셰이더를 찾을 수 없음. 셰이더 컴파일 후 다시 실행해주세요.");
+            outlineMat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            outlineMat.name = "OutlineMat";
+            outlineMat.SetColor("_BaseColor", new Color(0.3f, 0.8f, 1f, 0.4f));
+        }
         outlineGO.GetComponent<MeshRenderer>().sharedMaterial = outlineMat;
         outlineGO.GetComponent<MeshRenderer>().shadowCastingMode =
             UnityEngine.Rendering.ShadowCastingMode.Off;
