@@ -570,52 +570,28 @@ public class FlashlightSceneSetup : EditorWindow
 
     static void CreateWall(GameObject parent, int x, int z, float height, Material mat, WallDir dir)
     {
-        // 벽 비주얼 (Quad, 세워놓음)
+        float wallOverlap = TILE_SIZE + 0.05f;
+        float wallThickness = 0.15f;
+
         var wallGO = new GameObject($"W_{x}_{z}");
         wallGO.transform.SetParent(parent.transform);
+        wallGO.transform.position = new Vector3(x + 0.5f, height * 0.5f, z + 0.5f);
 
-        // Quad 생성
-        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        quad.name = "Visual";
-        quad.transform.SetParent(wallGO.transform);
-        float wallOverlap = TILE_SIZE + 0.05f;
-        quad.transform.localScale = new Vector3(wallOverlap, height, 1);
-        quad.GetComponent<MeshRenderer>().sharedMaterial = mat;
-        quad.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-        quad.GetComponent<MeshRenderer>().receiveShadows = true;
-        Object.DestroyImmediate(quad.GetComponent<MeshCollider>());
-
-        // Shadow caster (얇은 Box, 빛 차단용)
-        var shadowBox = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        shadowBox.name = "ShadowCaster";
-        shadowBox.transform.SetParent(wallGO.transform);
-        shadowBox.transform.localScale = new Vector3(
-            dir == WallDir.ZWall ? wallOverlap : 0.15f,
+        // 얇은 Cube로 벽 비주얼 (모든 면에 정상 법선 → 어디서든 빛 받음)
+        var wallCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wallCube.name = "Visual";
+        wallCube.transform.SetParent(wallGO.transform);
+        wallCube.transform.localPosition = Vector3.zero;
+        wallCube.transform.localScale = new Vector3(
+            dir == WallDir.ZWall ? wallOverlap : wallThickness,
             height,
-            dir == WallDir.XWall ? wallOverlap : 0.15f
+            dir == WallDir.XWall ? wallOverlap : wallThickness
         );
-        var shadowRenderer = shadowBox.GetComponent<MeshRenderer>();
-        shadowRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
-        shadowRenderer.receiveShadows = false;
+        wallCube.GetComponent<MeshRenderer>().sharedMaterial = mat;
+        wallCube.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        wallCube.GetComponent<MeshRenderer>().receiveShadows = true;
 
-        // 콜라이더 (이동 차단)
-        var boxCol = shadowBox.GetComponent<BoxCollider>();
-        // BoxCollider는 Cube에 기본 포함됨
-
-        if (dir == WallDir.ZWall)
-        {
-            wallGO.transform.position = new Vector3(x + 0.5f, height * 0.5f, z + 0.5f);
-            quad.transform.localPosition = Vector3.zero;
-            quad.transform.localRotation = Quaternion.identity;
-            shadowBox.transform.localPosition = Vector3.zero;
-        }
-        else
-        {
-            wallGO.transform.position = new Vector3(x + 0.5f, height * 0.5f, z + 0.5f);
-            quad.transform.localPosition = Vector3.zero;
-            quad.transform.localRotation = Quaternion.Euler(0, 90, 0);
-            shadowBox.transform.localPosition = Vector3.zero;
-        }
+        // BoxCollider는 Cube에 기본 포함 → 이동 차단 + 빛 차단 겸용
     }
 
     // ================================================================
