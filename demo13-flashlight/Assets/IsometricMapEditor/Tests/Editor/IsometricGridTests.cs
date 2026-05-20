@@ -6,15 +6,15 @@ namespace IsometricMapEditor.Tests
 {
     public class IsometricGridTests
     {
-        GridSettings DefaultSettings() => new(128, 64, 64, 64);
+        GridSettings DefaultSettings() => new(1f, 64, 64);
 
         [Test]
         public void GridToWorld_Origin_ReturnsZero()
         {
             var settings = DefaultSettings();
-            Vector2 world = IsometricGrid.GridToWorld(Vector2Int.zero, settings);
+            Vector3 world = IsometricGrid.GridToWorld(Vector2Int.zero, settings);
             Assert.AreEqual(0f, world.x, 0.001f);
-            Assert.AreEqual(0f, world.y, 0.001f);
+            Assert.AreEqual(0f, world.z, 0.001f);
         }
 
         [Test]
@@ -26,7 +26,7 @@ namespace IsometricMapEditor.Tests
                 for (int y = 0; y < 10; y++)
                 {
                     var original = new Vector2Int(x, y);
-                    Vector2 world = IsometricGrid.GridToWorld(original, settings);
+                    Vector3 world = IsometricGrid.GridToWorld(original, settings);
                     Vector2Int result = IsometricGrid.WorldToGrid(world, settings);
                     Assert.AreEqual(original, result, $"Round-trip failed for ({x},{y})");
                 }
@@ -37,14 +37,14 @@ namespace IsometricMapEditor.Tests
         public void RoundTrip_WithOffset_IsIdentity()
         {
             var settings = DefaultSettings();
-            settings.originOffset = new Vector2(5.5f, -3.2f);
+            settings.originOffset = new Vector3(5.5f, 0f, -3.2f);
 
             for (int x = 0; x < 10; x++)
             {
                 for (int y = 0; y < 10; y++)
                 {
                     var original = new Vector2Int(x, y);
-                    Vector2 world = IsometricGrid.GridToWorld(original, settings);
+                    Vector3 world = IsometricGrid.GridToWorld(original, settings);
                     Vector2Int result = IsometricGrid.WorldToGrid(world, settings);
                     Assert.AreEqual(original, result, $"Round-trip with offset failed for ({x},{y})");
                 }
@@ -54,13 +54,13 @@ namespace IsometricMapEditor.Tests
         [Test]
         public void RoundTrip_CustomTileSize_IsIdentity()
         {
-            var settings = new GridSettings(64, 32, 32, 32);
+            var settings = new GridSettings(2f, 32, 32);
             for (int x = 0; x < 10; x++)
             {
                 for (int y = 0; y < 10; y++)
                 {
                     var original = new Vector2Int(x, y);
-                    Vector2 world = IsometricGrid.GridToWorld(original, settings);
+                    Vector3 world = IsometricGrid.GridToWorld(original, settings);
                     Vector2Int result = IsometricGrid.WorldToGrid(world, settings);
                     Assert.AreEqual(original, result, $"Custom tile size round-trip failed for ({x},{y})");
                 }
@@ -122,9 +122,9 @@ namespace IsometricMapEditor.Tests
         public void GetMapWorldBounds_NonZeroArea()
         {
             var settings = DefaultSettings();
-            Rect bounds = IsometricGrid.GetMapWorldBounds(settings);
-            Assert.Greater(bounds.width, 0);
-            Assert.Greater(bounds.height, 0);
+            Bounds bounds = IsometricGrid.GetMapWorldBounds(settings);
+            Assert.Greater(bounds.size.x, 0);
+            Assert.Greater(bounds.size.z, 0);
         }
     }
 }

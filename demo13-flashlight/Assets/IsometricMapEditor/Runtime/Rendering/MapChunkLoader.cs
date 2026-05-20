@@ -19,7 +19,7 @@ namespace IsometricMapEditor
             tileRenderer = renderer;
         }
 
-        public void UpdateChunks(Vector2 playerWorldPos)
+        public void UpdateChunks(Vector3 playerWorldPos)
         {
             if (mapData == null) return;
 

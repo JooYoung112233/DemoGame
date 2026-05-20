@@ -41,7 +41,6 @@ namespace IsometricMapEditor
             {
                 for (int y = 0; y <= settings.mapHeight; y++)
                 {
-                    Vector2 world = IsometricGrid.GridToWorld(new Vector2Int(x, y), settings);
                     Vector3[] corners = IsometricGrid.GetCellWorldCorners(new Vector2Int(x, y), settings);
                     for (int i = 0; i < 4; i++)
                         Gizmos.DrawLine(corners[i], corners[(i + 1) % 4]);
@@ -71,8 +70,8 @@ namespace IsometricMapEditor
                         _ => Color.clear
                     };
 
-                    Vector2 world = IsometricGrid.GridToWorld(pos, settings);
-                    Gizmos.DrawCube(new Vector3(world.x, world.y, 0), Vector3.one * 0.3f);
+                    Vector3 world = IsometricGrid.GridToWorld(pos, settings);
+                    Gizmos.DrawCube(world, new Vector3(0.3f, 0.05f, 0.3f));
                 }
             }
         }
@@ -83,9 +82,9 @@ namespace IsometricMapEditor
             {
                 if (building.buildingDefinition == null || !building.buildingDefinition.isEnterable) continue;
 
-                Vector2 world = IsometricGrid.GridToWorld(building.gridPosition, mapData.gridSettings);
+                Vector3 world = IsometricGrid.GridToWorld(building.gridPosition, mapData.gridSettings);
                 Gizmos.color = Color.cyan;
-                Gizmos.DrawWireSphere(new Vector3(world.x, world.y, 0), 0.3f);
+                Gizmos.DrawWireSphere(world, 0.3f);
             }
         }
     }

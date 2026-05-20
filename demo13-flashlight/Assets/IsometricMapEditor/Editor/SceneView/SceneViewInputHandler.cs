@@ -32,12 +32,21 @@ namespace IsometricMapEditor.Editor
             DrawCursorInfo(sceneView, map);
         }
 
+        static Vector3 GetMouseWorldOnXZPlane(Event e)
+        {
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            Plane xzPlane = new Plane(Vector3.up, Vector3.zero);
+            if (xzPlane.Raycast(ray, out float dist))
+                return ray.GetPoint(dist);
+            return Vector3.zero;
+        }
+
         static void DrawCursorInfo(SceneView sceneView, MapData map)
         {
             Event e = Event.current;
             if (e.type != EventType.Repaint) return;
 
-            Vector2 mouseWorld = HandleUtility.GUIPointToWorldRay(e.mousePosition).origin;
+            Vector3 mouseWorld = GetMouseWorldOnXZPlane(e);
             Vector2Int cell = IsometricGrid.WorldToGrid(mouseWorld, map.gridSettings);
 
             if (!map.gridSettings.IsInBounds(cell)) return;

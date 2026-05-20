@@ -6,10 +6,16 @@
 - **Unity Editor Extension** (EditorWindow + EditorTool + SceneView 오버레이)
 - 별도 앱이 아닌 Unity 에디터 내장 방식
 
-### 좌표 시스템
-- 커스텀 타일 크기 지원 (tileWidth, tileHeight 자유 설정)
-- GridToWorld: `(cell.x - cell.y) * (w/2), -(cell.x + cell.y) * (h/2)`
-- 소팅: `(cell.x + cell.y) * 10 + layerOffset`
+### 좌표 시스템 (3D 공간 + 2D 스프라이트, 좀보이드 스타일)
+- **3D 공간**: 타일은 XZ 평면에 배치, Y축 = 높이
+- 카메라: 3D 오쏘그래픽, `Euler(30, 45, 0)`
+- 빌보드 스프라이트: `Quaternion.Euler(90, 0, 0)` (카메라를 향함)
+- `float tileSize = 1f` (단일 크기, tileWidth/tileHeight 제거)
+- GridToWorld: `Vector3(cell.x * tileSize, 0, cell.y * tileSize) + originOffset`
+- WorldToGrid: XZ 좌표에서 역산
+- 소팅: `(cell.x + cell.y) * 10 + layerOffset + floor * 1000`
+- Scene View 마우스: XZ 평면(Y=0) ray-plane intersection
+- 층(floor) 시스템: API에 예약됨, 추후 구현 예정
 
 ### 건물 상태 전환
 - **범용 상태 시스템** (BuildingVariantSet)
@@ -54,7 +60,7 @@
 - 익스포트: JSON (디버깅 편리, 버전 마이그레이션)
 
 ### 구현 순서
-1. 코어 그리드 + 타일 페인팅 + 연동 기반 (MVP) ← **현재 진행 중**
+1. 코어 그리드 + 타일 페인팅 + 연동 기반 (MVP) ← **완료**
 2. 건물 + 멀티타일
 3. 건물 상태 전환
 4. 도로 오토타일링
@@ -72,3 +78,4 @@
 | 날짜 | 변경 내용 |
 |------|-----------|
 | 2025-05-20 | 초기 기획 결정 기록. Phase 1 구현 시작. |
+| 2026-05-20 | 전체 Phase 1~9 구현 완료. 좌표 시스템을 2D→3D로 전면 리팩터 (좀보이드 스타일: 3D 공간 + 2D 빌보드 스프라이트). tileWidth/tileHeight → float tileSize. Vector2→Vector3. Rect→Bounds. Scene View mouse: ray-plane intersection on XZ. 카메라: 3D orthographic Euler(30,45,0). 층(floor) API 예약. |

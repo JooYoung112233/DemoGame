@@ -81,7 +81,7 @@ namespace IsometricMapEditor
             cameraController = FindAnyObjectByType<IsometricCameraController>();
             if (cameraController != null)
             {
-                Rect bounds = IsometricGrid.GetMapWorldBounds(mapData.gridSettings);
+                Bounds bounds = IsometricGrid.GetMapWorldBounds(mapData.gridSettings);
                 cameraController.SetBounds(bounds);
             }
 

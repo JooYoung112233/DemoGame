@@ -25,7 +25,7 @@ namespace IsometricMapEditor
             return type != WalkableType.Blocked;
         }
 
-        public bool IsWalkableWorld(Vector2 worldPos)
+        public bool IsWalkableWorld(Vector3 worldPos)
         {
             Vector2Int gridPos = IsometricGrid.WorldToGrid(worldPos, _settings);
             return IsWalkable(gridPos);

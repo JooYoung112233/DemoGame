@@ -242,10 +242,10 @@ namespace IsometricMapEditor.Editor
             EditorGUILayout.LabelField("Grid Settings", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
-            activeMap.gridSettings.tileWidth = EditorGUILayout.IntField("Tile Width", activeMap.gridSettings.tileWidth);
-            activeMap.gridSettings.tileHeight = EditorGUILayout.IntField("Tile Height", activeMap.gridSettings.tileHeight);
+            activeMap.gridSettings.tileSize = EditorGUILayout.FloatField("Tile Size", activeMap.gridSettings.tileSize);
             activeMap.gridSettings.mapWidth = EditorGUILayout.IntField("Map Width", activeMap.gridSettings.mapWidth);
             activeMap.gridSettings.mapHeight = EditorGUILayout.IntField("Map Height", activeMap.gridSettings.mapHeight);
+            activeMap.gridSettings.originOffset = EditorGUILayout.Vector3Field("Origin Offset", activeMap.gridSettings.originOffset);
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -259,7 +259,7 @@ namespace IsometricMapEditor.Editor
             EditorGUILayout.Space(8);
             var gs = activeMap.gridSettings;
             EditorGUILayout.LabelField(
-                $"Grid {gs.mapWidth}x{gs.mapHeight} | Tile {gs.tileWidth}x{gs.tileHeight} | Tool: {currentTool} | Layer: {activeLayerName}",
+                $"Grid {gs.mapWidth}x{gs.mapHeight} | Tile Size {gs.tileSize} | Tool: {currentTool} | Layer: {activeLayerName}",
                 EditorStyles.miniLabel
             );
         }
@@ -301,9 +301,18 @@ namespace IsometricMapEditor.Editor
             DrawCursorHighlight(e);
         }
 
+        Vector3 GetMouseWorldOnXZPlane(Event e)
+        {
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            Plane xzPlane = new Plane(Vector3.up, Vector3.zero);
+            if (xzPlane.Raycast(ray, out float dist))
+                return ray.GetPoint(dist);
+            return Vector3.zero;
+        }
+
         void HandleSceneClick(Event e, SceneView sceneView)
         {
-            Vector2 mouseWorld = HandleUtility.GUIPointToWorldRay(e.mousePosition).origin;
+            Vector3 mouseWorld = GetMouseWorldOnXZPlane(e);
             Vector2Int cell = IsometricGrid.WorldToGrid(mouseWorld, activeMap.gridSettings);
 
             if (!activeMap.gridSettings.IsInBounds(cell)) return;
@@ -352,7 +361,7 @@ namespace IsometricMapEditor.Editor
 
         void DrawCursorHighlight(Event e)
         {
-            Vector2 mouseWorld = HandleUtility.GUIPointToWorldRay(e.mousePosition).origin;
+            Vector3 mouseWorld = GetMouseWorldOnXZPlane(e);
             Vector2Int cell = IsometricGrid.WorldToGrid(mouseWorld, activeMap.gridSettings);
 
             if (!activeMap.gridSettings.IsInBounds(cell)) return;

@@ -5,14 +5,11 @@ namespace IsometricMapEditor
     [System.Serializable]
     public class GridSettings
     {
-        [Tooltip("Tile width in pixels (horizontal span of diamond)")]
-        public int tileWidth = 128;
+        [Tooltip("Tile width in world units")]
+        public float tileSize = 1f;
 
-        [Tooltip("Tile height in pixels (vertical span of diamond, typically width/2)")]
-        public int tileHeight = 64;
-
-        [Tooltip("World-space origin offset for grid (0,0)")]
-        public Vector2 originOffset;
+        [Tooltip("World-space origin offset")]
+        public Vector3 originOffset;
 
         [Tooltip("Number of grid columns")]
         public int mapWidth = 64;
@@ -20,15 +17,11 @@ namespace IsometricMapEditor
         [Tooltip("Number of grid rows")]
         public int mapHeight = 64;
 
-        public float TileWorldWidth => tileWidth / 100f;
-        public float TileWorldHeight => tileHeight / 100f;
-
         public GridSettings() { }
 
-        public GridSettings(int tileWidth, int tileHeight, int mapWidth, int mapHeight)
+        public GridSettings(float tileSize, int mapWidth, int mapHeight)
         {
-            this.tileWidth = tileWidth;
-            this.tileHeight = tileHeight;
+            this.tileSize = tileSize;
             this.mapWidth = mapWidth;
             this.mapHeight = mapHeight;
         }

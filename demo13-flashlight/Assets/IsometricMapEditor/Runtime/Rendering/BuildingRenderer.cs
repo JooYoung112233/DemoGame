@@ -26,11 +26,12 @@ namespace IsometricMapEditor
             if (building.buildingDefinition == null) return;
 
             var def = building.buildingDefinition;
-            Vector2 worldPos = IsometricGrid.GridToWorld(building.gridPosition, settings);
+            Vector3 worldPos = IsometricGrid.GridToWorld(building.gridPosition, settings);
 
             var go = new GameObject($"Building_{building.instanceId}");
             go.transform.SetParent(_root);
-            go.transform.position = new Vector3(worldPos.x, worldPos.y, 0);
+            go.transform.position = worldPos;
+            SetupBillboard(go);
 
             var baseSR = go.AddComponent<SpriteRenderer>();
             baseSR.sprite = GetActiveSprite(building, def);
@@ -93,6 +94,12 @@ namespace IsometricMapEditor
                 var roofSR = roofTransform.GetComponent<SpriteRenderer>();
                 if (roofSR != null) roofSR.sprite = GetActiveRoofSprite(building, def);
             }
+        }
+
+        static void SetupBillboard(GameObject go)
+        {
+            // Rotate sprite to face isometric camera (lying on XZ plane tilted toward camera)
+            go.transform.rotation = Quaternion.Euler(90, 0, 0);
         }
 
         public void RemoveBuilding(string instanceId)

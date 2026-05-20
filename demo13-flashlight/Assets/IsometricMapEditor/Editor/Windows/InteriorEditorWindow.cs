@@ -54,10 +54,10 @@ namespace IsometricMapEditor.Editor
         void DrawLayoutTab()
         {
             EditorGUILayout.LabelField("Grid Settings", EditorStyles.boldLabel);
-            interiorData.gridSettings.tileWidth = EditorGUILayout.IntField("Tile Width", interiorData.gridSettings.tileWidth);
-            interiorData.gridSettings.tileHeight = EditorGUILayout.IntField("Tile Height", interiorData.gridSettings.tileHeight);
+            interiorData.gridSettings.tileSize = EditorGUILayout.FloatField("Tile Size", interiorData.gridSettings.tileSize);
             interiorData.gridSettings.mapWidth = EditorGUILayout.IntField("Map Width", interiorData.gridSettings.mapWidth);
             interiorData.gridSettings.mapHeight = EditorGUILayout.IntField("Map Height", interiorData.gridSettings.mapHeight);
+            interiorData.gridSettings.originOffset = EditorGUILayout.Vector3Field("Origin Offset", interiorData.gridSettings.originOffset);
 
             EditorGUILayout.Space(8);
             EditorGUILayout.LabelField($"Layers: {interiorData.layers.Count}", EditorStyles.boldLabel);

@@ -15,12 +15,13 @@ namespace IsometricMapEditor.Editor
 
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-            // 카메라: 2D 아이소메트릭용 오쏘그래픽
+            // 카메라: 3D 아이소메트릭용 오쏘그래픽
             var camGO = new GameObject("Main Camera");
             var cam = camGO.AddComponent<Camera>();
             cam.orthographic = true;
             cam.orthographicSize = 8;
-            cam.transform.position = new Vector3(0, 0, -10);
+            cam.transform.position = new Vector3(0, 10, -10);
+            cam.transform.rotation = Quaternion.Euler(30, 45, 0);
             cam.backgroundColor = new Color(0.15f, 0.15f, 0.2f);
             cam.clearFlags = CameraClearFlags.SolidColor;
             camGO.tag = "MainCamera";
@@ -34,12 +35,12 @@ namespace IsometricMapEditor.Editor
             var bootstrapper = bootstrapperGO.AddComponent<MapRuntimeBootstrapper>();
             bootstrapper.SetMapData(mapData);
 
-            // Scene View를 2D 모드로 전환
+            // Scene View를 3D 아이소메트릭 뷰로 전환
             var sceneView = SceneView.lastActiveSceneView;
             if (sceneView != null)
             {
-                sceneView.in2DMode = true;
-                sceneView.LookAt(Vector3.zero, Quaternion.identity, 15f);
+                sceneView.in2DMode = false;
+                sceneView.LookAt(Vector3.zero, Quaternion.Euler(30, 45, 0), 15f);
             }
 
             // 씬 저장
@@ -59,7 +60,7 @@ namespace IsometricMapEditor.Editor
             // 타일 팔레트도 열기
             TilePaletteWindow.ShowWindow();
 
-            Debug.Log("[MapEditorSetup] 맵 에디터 씬 생성 완료. Scene View를 2D 모드로 전환했습니다.");
+            Debug.Log("[MapEditorSetup] 맵 에디터 씬 생성 완료. Scene View를 3D 아이소메트릭 뷰로 전환했습니다.");
             Debug.Log("[MapEditorSetup] 1) 에디터 창에서 맵을 선택하세요");
             Debug.Log("[MapEditorSetup] 2) TileDefinition 에셋을 만들어 스프라이트를 할당하세요");
             Debug.Log("[MapEditorSetup] 3) Paint 도구로 Scene View에서 타일을 배치하세요");
@@ -79,7 +80,8 @@ namespace IsometricMapEditor.Editor
 
             cam.orthographic = true;
             cam.orthographicSize = 8;
-            cam.transform.position = new Vector3(0, 0, -10);
+            cam.transform.position = new Vector3(0, 10, -10);
+            cam.transform.rotation = Quaternion.Euler(30, 45, 0);
 
             if (cam.GetComponent<IsometricCameraController>() == null)
                 cam.gameObject.AddComponent<IsometricCameraController>();
@@ -96,12 +98,12 @@ namespace IsometricMapEditor.Editor
             MapData mapData = FindOrCreateMap();
             bootstrapper.SetMapData(mapData);
 
-            // Scene View 2D
+            // Scene View 3D 아이소메트릭
             var sceneView = SceneView.lastActiveSceneView;
             if (sceneView != null)
             {
-                sceneView.in2DMode = true;
-                sceneView.LookAt(Vector3.zero, Quaternion.identity, 15f);
+                sceneView.in2DMode = false;
+                sceneView.LookAt(Vector3.zero, Quaternion.Euler(30, 45, 0), 15f);
             }
 
             EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
@@ -198,10 +200,10 @@ namespace IsometricMapEditor.Editor
             map.mapId = System.Guid.NewGuid().ToString("N")[..8];
             map.gridSettings = new GridSettings
             {
-                tileWidth = 128,
-                tileHeight = 64,
+                tileSize = 1f,
                 mapWidth = 16,
-                mapHeight = 16
+                mapHeight = 16,
+                originOffset = Vector3.zero
             };
             map.GetOrCreateLayer("Ground", 0);
             map.GetOrCreateLayer("Objects", 10);

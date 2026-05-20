@@ -13,6 +13,15 @@ namespace IsometricMapEditor.Editor
         public static void Toggle() => isActive = !isActive;
         public static void SetActive(bool active) => isActive = active;
 
+        static Vector3 GetMouseWorldOnXZPlane(Event e)
+        {
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            Plane xzPlane = new Plane(Vector3.up, Vector3.zero);
+            if (xzPlane.Raycast(ray, out float dist))
+                return ray.GetPoint(dist);
+            return Vector3.zero;
+        }
+
         public static void OnSceneGUI(SceneView sceneView, MapData map)
         {
             if (!isActive || map == null) return;
@@ -22,7 +31,7 @@ namespace IsometricMapEditor.Editor
             Event e = Event.current;
             if (e.type == EventType.MouseDown && e.button == 0)
             {
-                Vector2 mouseWorld = HandleUtility.GUIPointToWorldRay(e.mousePosition).origin;
+                Vector3 mouseWorld = GetMouseWorldOnXZPlane(e);
                 Vector2Int cell = IsometricGrid.WorldToGrid(mouseWorld, map.gridSettings);
 
                 var building = FindBuildingAt(map, cell);
@@ -67,10 +76,10 @@ namespace IsometricMapEditor.Editor
             {
                 if (building.buildingDefinition == null || !building.buildingDefinition.isEnterable) continue;
 
-                Vector2 world = IsometricGrid.GridToWorld(building.gridPosition, map.gridSettings);
+                Vector3 world = IsometricGrid.GridToWorld(building.gridPosition, map.gridSettings);
                 bool isSelected = selectedBuilding == building;
                 Handles.color = isSelected ? Color.yellow : Color.cyan;
-                Handles.DrawWireDisc(new Vector3(world.x, world.y, 0), Vector3.forward, 0.3f);
+                Handles.DrawWireDisc(world, Vector3.up, 0.3f);
             }
 
             foreach (var conn in map.interiorConnections)
@@ -82,13 +91,11 @@ namespace IsometricMapEditor.Editor
 
                 if (fromBuilding == null || toBuilding == null) continue;
 
-                Vector2 fromWorld = IsometricGrid.GridToWorld(fromBuilding.gridPosition, map.gridSettings);
-                Vector2 toWorld = IsometricGrid.GridToWorld(toBuilding.gridPosition, map.gridSettings);
+                Vector3 fromWorld = IsometricGrid.GridToWorld(fromBuilding.gridPosition, map.gridSettings);
+                Vector3 toWorld = IsometricGrid.GridToWorld(toBuilding.gridPosition, map.gridSettings);
 
                 Handles.color = Color.green;
-                Handles.DrawLine(
-                    new Vector3(fromWorld.x, fromWorld.y, 0),
-                    new Vector3(toWorld.x, toWorld.y, 0));
+                Handles.DrawLine(fromWorld, toWorld);
             }
         }
 

@@ -9,7 +9,7 @@ namespace IsometricMapEditor
         IsometricCameraController cameraController;
         bool _isTransitioning;
         Vector3 _targetPosition;
-        Rect _targetBounds;
+        Bounds _targetBounds;
         float _transitionElapsed;
         Vector3 _startPosition;
 
@@ -22,8 +22,10 @@ namespace IsometricMapEditor
         {
             if (cameraController == null) return;
 
-            Rect bounds = IsometricGrid.GetMapWorldBounds(interior.gridSettings);
-            Vector3 center = new(bounds.center.x, bounds.center.y, cameraController.transform.position.z);
+            Bounds bounds = IsometricGrid.GetMapWorldBounds(interior.gridSettings);
+            Vector3 center = bounds.center;
+            // Offset camera along its backward direction to look at center from above
+            center = center - cameraController.transform.forward * 20f;
 
             _startPosition = cameraController.transform.position;
             _targetPosition = center;
@@ -36,7 +38,7 @@ namespace IsometricMapEditor
         {
             if (cameraController == null) return;
 
-            Rect bounds = IsometricGrid.GetMapWorldBounds(exteriorSettings);
+            Bounds bounds = IsometricGrid.GetMapWorldBounds(exteriorSettings);
             cameraController.SetBounds(bounds);
         }
 

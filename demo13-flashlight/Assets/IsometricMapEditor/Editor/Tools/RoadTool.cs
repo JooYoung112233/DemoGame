@@ -17,6 +17,15 @@ namespace IsometricMapEditor.Editor
         public static void SetActive(bool active) => isActive = active;
         public static void SetRoad(RoadDefinition road) => activeRoad = road;
 
+        static Vector3 GetMouseWorldOnXZPlane(Event e)
+        {
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            Plane xzPlane = new Plane(Vector3.up, Vector3.zero);
+            if (xzPlane.Raycast(ray, out float dist))
+                return ray.GetPoint(dist);
+            return Vector3.zero;
+        }
+
         public static void OnSceneGUI(SceneView sceneView, MapData map)
         {
             if (!isActive || map == null || activeRoad == null) return;
@@ -26,7 +35,7 @@ namespace IsometricMapEditor.Editor
             {
                 if (e.button == 0)
                 {
-                    Vector2 mouseWorld = HandleUtility.GUIPointToWorldRay(e.mousePosition).origin;
+                    Vector3 mouseWorld = GetMouseWorldOnXZPlane(e);
                     Vector2Int cell = IsometricGrid.WorldToGrid(mouseWorld, map.gridSettings);
 
                     if (map.gridSettings.IsInBounds(cell))

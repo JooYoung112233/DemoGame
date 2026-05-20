@@ -37,7 +37,8 @@ namespace IsometricMapEditor.Editor
             var cam = cameraGO.AddComponent<Camera>();
             cam.orthographic = true;
             cam.orthographicSize = 5;
-            cam.transform.position = new Vector3(0, 0, -10);
+            cam.transform.position = new Vector3(0, 10, -10);
+            cam.transform.rotation = Quaternion.Euler(30, 45, 0);
             cameraGO.AddComponent<IsometricCameraController>();
             cameraGO.tag = "MainCamera";
 
@@ -60,10 +61,10 @@ namespace IsometricMapEditor.Editor
                 {
                     if (tile.tileDefinition == null || tile.tileDefinition.sprite == null) continue;
 
-                    Vector2 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, map.gridSettings);
+                    Vector3 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, map.gridSettings);
                     var go = new GameObject($"Tile_{tile.gridPosition.x}_{tile.gridPosition.y}");
                     go.transform.SetParent(layerRoot.transform);
-                    go.transform.position = new Vector3(worldPos.x, worldPos.y, 0);
+                    go.transform.position = worldPos;
 
                     var sr = go.AddComponent<SpriteRenderer>();
                     sr.sprite = tile.tileDefinition.sprite;
@@ -86,10 +87,10 @@ namespace IsometricMapEditor.Editor
                 if (building.buildingDefinition == null) continue;
                 var def = building.buildingDefinition;
 
-                Vector2 worldPos = IsometricGrid.GridToWorld(building.gridPosition, map.gridSettings);
+                Vector3 worldPos = IsometricGrid.GridToWorld(building.gridPosition, map.gridSettings);
                 var go = new GameObject($"Building_{def.displayName}_{building.instanceId}");
                 go.transform.SetParent(buildingsRoot.transform);
-                go.transform.position = new Vector3(worldPos.x, worldPos.y, 0);
+                go.transform.position = worldPos;
 
                 if (def.baseSprite != null)
                 {
@@ -121,10 +122,10 @@ namespace IsometricMapEditor.Editor
             {
                 if (prop.propDefinition == null || prop.propDefinition.sprite == null) continue;
 
-                Vector2 worldPos = IsometricGrid.GridToWorld(prop.gridPosition, map.gridSettings);
+                Vector3 worldPos = IsometricGrid.GridToWorld(prop.gridPosition, map.gridSettings);
                 var go = new GameObject($"Prop_{prop.propDefinition.displayName}_{prop.instanceId}");
                 go.transform.SetParent(propsRoot.transform);
-                go.transform.position = new Vector3(worldPos.x, worldPos.y, 0);
+                go.transform.position = worldPos;
 
                 var sr = go.AddComponent<SpriteRenderer>();
                 sr.sprite = prop.propDefinition.sprite;

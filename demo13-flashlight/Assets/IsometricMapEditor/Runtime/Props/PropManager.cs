@@ -25,10 +25,11 @@ namespace IsometricMapEditor
         {
             if (prop.propDefinition == null || prop.propDefinition.sprite == null) return;
 
-            Vector2 worldPos = IsometricGrid.GridToWorld(prop.gridPosition, settings);
+            Vector3 worldPos = IsometricGrid.GridToWorld(prop.gridPosition, settings);
             var go = new GameObject($"Prop_{prop.instanceId}");
             go.transform.SetParent(_root);
-            go.transform.position = new Vector3(worldPos.x, worldPos.y, 0);
+            go.transform.position = worldPos;
+            SetupBillboard(go);
 
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = prop.propDefinition.sprite;
@@ -44,6 +45,12 @@ namespace IsometricMapEditor
                 Destroy(go);
                 _propObjects.Remove(instanceId);
             }
+        }
+
+        static void SetupBillboard(GameObject go)
+        {
+            // Rotate sprite to face isometric camera (lying on XZ plane tilted toward camera)
+            go.transform.rotation = Quaternion.Euler(90, 0, 0);
         }
 
         public void ClearAll()

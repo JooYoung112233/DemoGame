@@ -19,13 +19,18 @@ namespace IsometricMapEditor
         [SerializeField] float followSmooth = 5f;
 
         Camera cam;
-        Rect bounds;
+        Bounds bounds;
         bool hasBounds;
 
         void Awake()
         {
             cam = GetComponent<Camera>();
             if (cam == null) cam = Camera.main;
+
+            // Setup 3D orthographic isometric camera
+            cam.orthographic = true;
+            cam.orthographicSize = 10f;
+            transform.rotation = Quaternion.Euler(30, 45, 0);
         }
 
         void LateUpdate()
@@ -33,8 +38,10 @@ namespace IsometricMapEditor
             if (followTarget != null)
             {
                 Vector3 target = followTarget.position;
-                target.z = transform.position.z;
-                transform.position = Vector3.Lerp(transform.position, target, followSmooth * Time.deltaTime);
+                // Maintain camera offset along its forward direction
+                float dist = (transform.position - followTarget.position).magnitude;
+                Vector3 desired = target - transform.forward * dist;
+                transform.position = Vector3.Lerp(transform.position, desired, followSmooth * Time.deltaTime);
             }
             else
             {
@@ -49,11 +56,17 @@ namespace IsometricMapEditor
 
         void HandleKeyboardPan()
         {
+            // Pan along camera-local right (X) and world up projected onto XZ (forward flattened)
+            Vector3 right = transform.right;
+            Vector3 forward = transform.forward;
+            forward.y = 0;
+            forward.Normalize();
+
             Vector3 move = Vector3.zero;
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) move.y += 1;
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) move.y -= 1;
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) move.x -= 1;
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) move.x += 1;
+            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) move += forward;
+            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) move -= forward;
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) move -= right;
+            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) move += right;
 
             transform.position += panSpeed * cam.orthographicSize * 0.1f * Time.deltaTime * move.normalized;
         }
@@ -61,12 +74,16 @@ namespace IsometricMapEditor
         void HandleEdgePan()
         {
             Vector3 mousePos = Input.mousePosition;
-            Vector3 move = Vector3.zero;
+            Vector3 right = transform.right;
+            Vector3 forward = transform.forward;
+            forward.y = 0;
+            forward.Normalize();
 
-            if (mousePos.x < edgePanMargin) move.x -= 1;
-            if (mousePos.x > Screen.width - edgePanMargin) move.x += 1;
-            if (mousePos.y < edgePanMargin) move.y -= 1;
-            if (mousePos.y > Screen.height - edgePanMargin) move.y += 1;
+            Vector3 move = Vector3.zero;
+            if (mousePos.x < edgePanMargin) move -= right;
+            if (mousePos.x > Screen.width - edgePanMargin) move += right;
+            if (mousePos.y < edgePanMargin) move -= forward;
+            if (mousePos.y > Screen.height - edgePanMargin) move += forward;
 
             transform.position += edgePanSpeed * cam.orthographicSize * 0.1f * Time.deltaTime * move.normalized;
         }
@@ -84,13 +101,17 @@ namespace IsometricMapEditor
 
         void ClampToBounds()
         {
+            // Clamp the look-at point (where camera ray hits Y=0) within bounds
             Vector3 pos = transform.position;
-            pos.x = Mathf.Clamp(pos.x, bounds.xMin, bounds.xMax);
-            pos.y = Mathf.Clamp(pos.y, bounds.yMin, bounds.yMax);
+            // Project camera position onto XZ for clamping
+            float clampedX = Mathf.Clamp(pos.x, bounds.min.x, bounds.max.x);
+            float clampedZ = Mathf.Clamp(pos.z, bounds.min.z, bounds.max.z);
+            pos.x = clampedX;
+            pos.z = clampedZ;
             transform.position = pos;
         }
 
-        public void SetBounds(Rect newBounds)
+        public void SetBounds(Bounds newBounds)
         {
             bounds = newBounds;
             hasBounds = true;

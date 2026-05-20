@@ -37,8 +37,8 @@ namespace IsometricMapEditor.Editor
             if (map.gridSettings.mapWidth <= 0 || map.gridSettings.mapHeight <= 0)
                 result.errors.Add("Map dimensions must be positive.");
 
-            if (map.gridSettings.tileWidth <= 0 || map.gridSettings.tileHeight <= 0)
-                result.errors.Add("Tile dimensions must be positive.");
+            if (map.gridSettings.tileSize <= 0)
+                result.errors.Add("Tile size must be positive.");
 
             ValidateBuildings(map, result);
             ValidateConnections(map, result);

@@ -41,11 +41,18 @@ namespace IsometricMapEditor
             _tileObjects.Remove(pos);
         }
 
+        static void SetupBillboard(GameObject go)
+        {
+            // Rotate sprite to face isometric camera (lying on XZ plane tilted toward camera)
+            go.transform.rotation = Quaternion.Euler(90, 0, 0);
+        }
+
         void RenderTile(PlacedTile tile, MapLayer layer, GridSettings settings)
         {
             var go = GetOrCreateTileObject(tile.gridPosition);
-            Vector2 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, settings);
-            go.transform.position = new Vector3(worldPos.x, worldPos.y, 0);
+            Vector3 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, settings);
+            go.transform.position = worldPos;
+            SetupBillboard(go);
 
             var sr = go.GetComponent<SpriteRenderer>();
             sr.sprite = tile.tileDefinition.sprite;

@@ -110,7 +110,7 @@ namespace IsometricMapEditor.Tests
         public void PathfindingHelper_StraightPath()
         {
             var walk = new WalkabilityData(10, 10);
-            var settings = new GridSettings { mapWidth = 10, mapHeight = 10 };
+            var settings = new GridSettings(1f, 10, 10);
 
             var path = PathfindingHelper.FindPath(
                 new Vector2Int(0, 0), new Vector2Int(3, 0), walk, settings);
@@ -125,7 +125,7 @@ namespace IsometricMapEditor.Tests
         {
             var walk = new WalkabilityData(10, 10);
             walk.SetCell(new Vector2Int(3, 0), WalkableType.Blocked);
-            var settings = new GridSettings { mapWidth = 10, mapHeight = 10 };
+            var settings = new GridSettings(1f, 10, 10);
 
             var path = PathfindingHelper.FindPath(
                 new Vector2Int(0, 0), new Vector2Int(3, 0), walk, settings);

@@ -18,11 +18,10 @@ namespace IsometricMapEditor.Editor
             EditorGUILayout.Space(8);
             EditorGUILayout.LabelField("Grid Settings", EditorStyles.boldLabel);
             EditorGUI.BeginChangeCheck();
-            mapData.gridSettings.tileWidth = EditorGUILayout.IntSlider("Tile Width (px)", mapData.gridSettings.tileWidth, 16, 512);
-            mapData.gridSettings.tileHeight = EditorGUILayout.IntSlider("Tile Height (px)", mapData.gridSettings.tileHeight, 8, 256);
+            mapData.gridSettings.tileSize = EditorGUILayout.Slider("Tile Size", mapData.gridSettings.tileSize, 0.1f, 10f);
             mapData.gridSettings.mapWidth = EditorGUILayout.IntSlider("Map Width", mapData.gridSettings.mapWidth, 4, 256);
             mapData.gridSettings.mapHeight = EditorGUILayout.IntSlider("Map Height", mapData.gridSettings.mapHeight, 4, 256);
-            mapData.gridSettings.originOffset = EditorGUILayout.Vector2Field("Origin Offset", mapData.gridSettings.originOffset);
+            mapData.gridSettings.originOffset = EditorGUILayout.Vector3Field("Origin Offset", mapData.gridSettings.originOffset);
             if (EditorGUI.EndChangeCheck())
                 EditorUtility.SetDirty(target);
 

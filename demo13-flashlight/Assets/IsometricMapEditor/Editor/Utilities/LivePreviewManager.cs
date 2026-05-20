@@ -62,11 +62,11 @@ namespace IsometricMapEditor.Editor
                     if (tile.tileDefinition == null || tile.tileDefinition.sprite == null)
                         continue;
 
-                    Vector2 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, map.gridSettings);
+                    Vector3 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, map.gridSettings);
                     var go = new GameObject($"Preview_{tile.gridPosition.x}_{tile.gridPosition.y}");
                     go.hideFlags = HideFlags.DontSave;
                     go.transform.SetParent(previewRoot.transform);
-                    go.transform.position = new Vector3(worldPos.x, worldPos.y, 0);
+                    go.transform.position = worldPos;
 
                     var sr = go.AddComponent<SpriteRenderer>();
                     sr.sprite = tile.tileDefinition.sprite;

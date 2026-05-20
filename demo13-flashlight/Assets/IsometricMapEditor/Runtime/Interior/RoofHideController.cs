@@ -24,15 +24,18 @@ namespace IsometricMapEditor
         {
             if (mapData == null || playerTransform == null) return;
 
-            Vector2 playerPos = playerTransform.position;
+            Vector3 playerPos = playerTransform.position;
 
             foreach (var building in mapData.buildings)
             {
                 if (building.buildingDefinition == null) continue;
                 if (building.buildingDefinition.roofSprite == null) continue;
 
-                Vector2 buildingWorld = IsometricGrid.GridToWorld(building.gridPosition, mapData.gridSettings);
-                float dist = Vector2.Distance(playerPos, buildingWorld);
+                Vector3 buildingWorld = IsometricGrid.GridToWorld(building.gridPosition, mapData.gridSettings);
+                // Distance on XZ plane only (ignore Y height)
+                float dist = Vector2.Distance(
+                    new Vector2(playerPos.x, playerPos.z),
+                    new Vector2(buildingWorld.x, buildingWorld.z));
 
                 bool shouldHide = dist < hideDistance;
                 _roofAlphaTargets[building.instanceId] = shouldHide ? 0f : 1f;

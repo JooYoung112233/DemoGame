@@ -39,10 +39,11 @@ namespace IsometricMapEditor
         {
             if (h.harvestableDefinition.sprite == null) return;
 
-            Vector2 worldPos = IsometricGrid.GridToWorld(h.gridPosition, _settings);
+            Vector3 worldPos = IsometricGrid.GridToWorld(h.gridPosition, _settings);
             var go = new GameObject($"Harvestable_{h.instanceId}");
             go.transform.SetParent(_root);
-            go.transform.position = new Vector3(worldPos.x, worldPos.y, 0);
+            go.transform.position = worldPos;
+            SetupBillboard(go);
 
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = h.harvestableDefinition.sprite;
@@ -106,6 +107,12 @@ namespace IsometricMapEditor
                     if (sr != null) sr.sprite = h.harvestableDefinition.sprite;
                 }
             }
+        }
+
+        static void SetupBillboard(GameObject go)
+        {
+            // Rotate sprite to face isometric camera (lying on XZ plane tilted toward camera)
+            go.transform.rotation = Quaternion.Euler(90, 0, 0);
         }
 
         public void ClearAll()

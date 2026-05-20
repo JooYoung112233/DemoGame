@@ -28,16 +28,15 @@ namespace IsometricMapEditor.Editor
                 if (building.buildingDefinition == null) continue;
                 if (!building.buildingDefinition.isEnterable) continue;
 
-                Vector2 world = IsometricGrid.GridToWorld(building.gridPosition, map.gridSettings);
-                Vector3 pos3 = new(world.x, world.y, 0);
+                Vector3 pos3 = IsometricGrid.GridToWorld(building.gridPosition, map.gridSettings);
 
                 Handles.color = Color.cyan;
-                Handles.DrawWireDisc(pos3, Vector3.forward, 0.25f);
+                Handles.DrawWireDisc(pos3, Vector3.up, 0.25f);
 
                 var entryCell = building.buildingDefinition.entryCell + building.gridPosition;
-                Vector2 entryWorld = IsometricGrid.GridToWorld(entryCell, map.gridSettings);
+                Vector3 entryWorld = IsometricGrid.GridToWorld(entryCell, map.gridSettings);
                 Handles.color = Color.green;
-                Handles.DrawSolidDisc(new Vector3(entryWorld.x, entryWorld.y, 0), Vector3.forward, 0.1f);
+                Handles.DrawSolidDisc(entryWorld, Vector3.up, 0.1f);
 
                 Handles.Label(pos3 + Vector3.up * 0.4f, building.buildingDefinition.displayName,
                     new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = Color.cyan } });
@@ -50,15 +49,13 @@ namespace IsometricMapEditor.Editor
                 var to = map.buildings.Find(b => b.buildingDefinition?.interiorMapId == conn.toMapId);
                 if (from == null || to == null) continue;
 
-                Vector2 fromWorld = IsometricGrid.GridToWorld(from.gridPosition, map.gridSettings);
-                Vector2 toWorld = IsometricGrid.GridToWorld(to.gridPosition, map.gridSettings);
+                Vector3 fromWorld = IsometricGrid.GridToWorld(from.gridPosition, map.gridSettings);
+                Vector3 toWorld = IsometricGrid.GridToWorld(to.gridPosition, map.gridSettings);
 
-                Handles.DrawDottedLine(
-                    new Vector3(fromWorld.x, fromWorld.y, 0),
-                    new Vector3(toWorld.x, toWorld.y, 0), 4f);
+                Handles.DrawDottedLine(fromWorld, toWorld, 4f);
 
-                Vector2 mid = (fromWorld + toWorld) * 0.5f;
-                Handles.Label(new Vector3(mid.x, mid.y + 0.2f, 0), conn.type.ToString(),
+                Vector3 mid = (fromWorld + toWorld) * 0.5f;
+                Handles.Label(mid + Vector3.up * 0.2f, conn.type.ToString(),
                     EditorStyles.miniLabel);
             }
         }

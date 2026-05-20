@@ -10,29 +10,25 @@ namespace IsometricMapEditor.Editor
         {
             Handles.color = new Color(1, 1, 1, 0.12f);
 
+            float halfSize = settings.tileSize * 0.5f;
+
             for (int x = 0; x <= settings.mapWidth; x++)
             {
-                Vector2 start = IsometricGrid.GridToWorld(new Vector2Int(x, 0), settings);
-                Vector2 end = IsometricGrid.GridToWorld(new Vector2Int(x, settings.mapHeight), settings);
+                Vector3 start = IsometricGrid.GridToWorld(new Vector2Int(x, 0), settings);
+                Vector3 end = IsometricGrid.GridToWorld(new Vector2Int(x, settings.mapHeight), settings);
 
-                float hw = settings.TileWorldWidth * 0.5f;
-                float hh = settings.TileWorldHeight * 0.5f;
-
-                Vector3 startPos = new(start.x - hw, start.y, 0);
-                Vector3 endPos = new(end.x - hw, end.y, 0);
+                Vector3 startPos = new(start.x - halfSize, 0, start.z);
+                Vector3 endPos = new(end.x - halfSize, 0, end.z);
                 Handles.DrawLine(startPos, endPos);
             }
 
             for (int y = 0; y <= settings.mapHeight; y++)
             {
-                Vector2 start = IsometricGrid.GridToWorld(new Vector2Int(0, y), settings);
-                Vector2 end = IsometricGrid.GridToWorld(new Vector2Int(settings.mapWidth, y), settings);
+                Vector3 start = IsometricGrid.GridToWorld(new Vector2Int(0, y), settings);
+                Vector3 end = IsometricGrid.GridToWorld(new Vector2Int(settings.mapWidth, y), settings);
 
-                float hw = settings.TileWorldWidth * 0.5f;
-                float hh = settings.TileWorldHeight * 0.5f;
-
-                Vector3 startPos = new(start.x - hw, start.y, 0);
-                Vector3 endPos = new(end.x - hw, end.y, 0);
+                Vector3 startPos = new(start.x - halfSize, 0, start.z);
+                Vector3 endPos = new(end.x - halfSize, 0, end.z);
                 Handles.DrawLine(startPos, endPos);
             }
 
@@ -70,7 +66,6 @@ namespace IsometricMapEditor.Editor
         {
             if (tileDef == null || tileDef.sprite == null) return;
 
-            Vector2 worldPos = IsometricGrid.GridToWorld(cell, settings);
             Handles.color = new Color(1, 1, 1, 0.5f);
             Vector3[] corners = IsometricGrid.GetCellWorldCorners(cell, settings);
             Handles.DrawAAConvexPolygon(corners);
