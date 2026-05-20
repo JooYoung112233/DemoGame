@@ -71,7 +71,7 @@ namespace IsometricMapEditor
                     if (tile.gridPosition.x >= startX && tile.gridPosition.x < startX + chunkSize &&
                         tile.gridPosition.y >= startY && tile.gridPosition.y < startY + chunkSize)
                     {
-                        tileRenderer.RenderSingleTile(tile, mapData.gridSettings, layer.sortingLayerOffset);
+                        tileRenderer.RenderSingleTile(tile, layer, mapData.gridSettings);
                     }
                 }
             }
