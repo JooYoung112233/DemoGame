@@ -512,10 +512,10 @@ class ShopScene extends Phaser.Scene {
             this.acceptBtn.label.setText(`${slot.setPrice}G`);
             this.pendingAction = { action: 'buy', price: slot.setPrice };
         } else if (result.action === 'haggle') {
-            this.dialogText.setText(`"${slot.setPrice}G는 좀... ${result.offer}G 어때요?"`);
+            this.dialogText.setText(`"${slot.setPrice}G는 좀 비싸요... 흥정하시겠어요?"`);
             this.actionContainer.setVisible(true);
-            this.acceptBtn.label.setText(`${result.offer}G`);
-            this.pendingAction = { action: 'haggle', price: result.offer };
+            this.acceptBtn.label.setText('🎲 흥정!');
+            this.pendingAction = { action: 'haggle', originalPrice: slot.setPrice, offer: result.offer, itemId: slot.item };
         } else {
             this.dialogText.setText(`"${result.reason}..."`);
             this.actionContainer.setVisible(false);
@@ -541,7 +541,16 @@ class ShopScene extends Phaser.Scene {
     _accept() {
         if (!this.pendingAction || !this.currentSlot) return;
         this.actionContainer.setVisible(false);
-        const price = this.pendingAction.price;
+
+        if (this.pendingAction.action === 'haggle') {
+            this._startHaggleDice();
+            return;
+        }
+
+        this._completeSale(this.pendingAction.price);
+    }
+
+    _completeSale(price) {
         ShopSystem.completeSale(this.gs, this.currentSlot.item, price);
         const data = ITEM_DATA[this.currentSlot.item];
         this.salesLog.push({ item: data.name, price });
@@ -572,17 +581,145 @@ class ShopScene extends Phaser.Scene {
         this.time.delayedCall(700, () => this._nextCustomer());
     }
 
+    // === 흥정 주사위 미니게임 ===
+    _startHaggleDice() {
+        const cx = 640, cy = 360;
+        const pa = this.pendingAction;
+        const c = this.currentCustomer;
+        const customerScore = c.haggleScore || 40;
+
+        // 보정값: 평판, 아이템 품질
+        const data = ITEM_DATA[pa.itemId];
+        const repTier = this.gs.getReputationTier();
+        const repBonus = Math.max(0, this.gs.reputation) * 0.5;
+        const qualityBonus = data ? (data.basePrice / 10) : 0;
+        const totalMult = 1 + (repBonus + qualityBonus) / 100;
+
+        // Overlay
+        this.diceOverlay = this.add.container(0, 0).setDepth(20);
+        const bg = this.add.rectangle(cx, cy, 1280, 720, 0x000000, 0.75);
+        const panel = this.add.rectangle(cx, cy, 400, 320, 0x12121e, 0.98).setStrokeStyle(2, 0x4444aa);
+        this.diceOverlay.add([bg, panel]);
+
+        // Title
+        const title = this.add.text(cx, cy - 135, '🎲 흥정 주사위!', {
+            fontSize: '20px', fontFamily: 'monospace', color: '#ffcc88',
+        }).setOrigin(0.5);
+        this.diceOverlay.add(title);
+
+        // Customer score display
+        const enemyLabel = this.add.text(cx, cy - 105, `${c.icon} ${c.name}의 흥정력: ${customerScore}`, {
+            fontSize: '12px', fontFamily: 'monospace', color: '#ff8888',
+        }).setOrigin(0.5);
+        this.diceOverlay.add(enemyLabel);
+
+        // Multiplier info
+        const multLabel = this.add.text(cx, cy - 85, `보정: 평판(+${repBonus.toFixed(0)}) + 품질(+${qualityBonus.toFixed(0)}) = x${totalMult.toFixed(2)}`, {
+            fontSize: '10px', fontFamily: 'monospace', color: '#888',
+        }).setOrigin(0.5);
+        this.diceOverlay.add(multLabel);
+
+        // Dice display area
+        const diceTexts = [];
+        const diceValues = [0, 0, 0];
+        const dieFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        for (let i = 0; i < 3; i++) {
+            const dx = cx - 80 + i * 80;
+            const diceBg = this.add.rectangle(dx, cy - 20, 60, 60, 0x1a1a35).setStrokeStyle(1, 0x4444aa);
+            const dt = this.add.text(dx, cy - 20, '⚀', {
+                fontSize: '36px',
+            }).setOrigin(0.5);
+            this.diceOverlay.add([diceBg, dt]);
+            diceTexts.push(dt);
+        }
+
+        // Result text
+        const resultText = this.add.text(cx, cy + 35, '주사위를 굴려라!', {
+            fontSize: '14px', fontFamily: 'monospace', color: '#ffcc44',
+        }).setOrigin(0.5);
+        this.diceOverlay.add(resultText);
+
+        // VS display
+        const vsText = this.add.text(cx, cy + 60, '', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#aaa',
+        }).setOrigin(0.5);
+        this.diceOverlay.add(vsText);
+
+        // Outcome text
+        const outcomeText = this.add.text(cx, cy + 85, '', {
+            fontSize: '16px', fontFamily: 'monospace', color: '#fff',
+        }).setOrigin(0.5);
+        this.diceOverlay.add(outcomeText);
+
+        // Roll button
+        const rollBtn = new UIButton(this, cx, cy + 125, '🎲 굴리기!', {
+            width: 180, height: 44, bg: 0x2a2a5a, hoverBg: 0x3a3a7a,
+            textColor: '#aaaaff', fontSize: '16px',
+            onClick: () => {
+                rollBtn.setVisible(false);
+
+                // Dice rolling animation
+                let rollCount = 0;
+                const rollInterval = this.time.addEvent({
+                    delay: 80,
+                    callback: () => {
+                        rollCount++;
+                        for (let i = 0; i < 3; i++) {
+                            const face = Phaser.Math.Between(0, 5);
+                            diceTexts[i].setText(dieFaces[face]);
+                            diceValues[i] = face + 1;
+                        }
+                        if (rollCount >= 12) {
+                            rollInterval.remove();
+                            // Final values
+                            for (let i = 0; i < 3; i++) {
+                                diceValues[i] = Phaser.Math.Between(1, 6);
+                                diceTexts[i].setText(dieFaces[diceValues[i] - 1]);
+                            }
+
+                            const rawScore = diceValues.reduce((s, v) => s + v, 0);
+                            const finalScore = Math.round(rawScore * totalMult * 10) / 10;
+                            resultText.setText(`주사위: ${diceValues.join(' + ')} = ${rawScore}  x${totalMult.toFixed(2)} = ${finalScore}`);
+                            vsText.setText(`${finalScore} vs ${customerScore}`);
+
+                            const won = finalScore >= customerScore;
+                            if (won) {
+                                outcomeText.setText(`🎉 흥정 성공! 원래 가격 ${pa.originalPrice}G에 판매!`);
+                                outcomeText.setColor('#44ff88');
+                                // Victory dice glow
+                                diceTexts.forEach(dt => {
+                                    this.tweens.add({ targets: dt, scaleX: 1.3, scaleY: 1.3, duration: 200, yoyo: true });
+                                });
+                            } else {
+                                outcomeText.setText(`😤 흥정 실패... ${pa.offer}G에 판매하거나 거절`);
+                                outcomeText.setColor('#ff6666');
+                            }
+
+                            this.time.delayedCall(800, () => {
+                                this.diceOverlay.destroy();
+                                this.diceOverlay = null;
+                                if (won) {
+                                    this.dialogText.setText(`"으... 알겠어요. ${pa.originalPrice}G 드릴게요."`);
+                                    this._completeSale(pa.originalPrice);
+                                } else {
+                                    // Show accept discounted / reject options
+                                    this.dialogText.setText(`"봐요, ${pa.offer}G가 적당해요. 어때요?"`);
+                                    this.actionContainer.setVisible(true);
+                                    this.acceptBtn.label.setText(`${pa.offer}G`);
+                                    this.pendingAction = { action: 'buy', price: pa.offer };
+                                }
+                            });
+                        }
+                    },
+                    loop: true,
+                });
+            },
+        });
+        this.diceOverlay.add(rollBtn.container);
+    }
+
     _reject() {
         this.actionContainer.setVisible(false);
-        if (this.pendingAction?.action === 'haggle' && this.haggleCount < 1) {
-            this.haggleCount++;
-            const newOffer = Math.floor(this.pendingAction.price * 1.1);
-            this.dialogText.setText(`"그럼... ${newOffer}G. 마지막이에요!"`);
-            this.actionContainer.setVisible(true);
-            this.acceptBtn.label.setText(`${newOffer}G`);
-            this.pendingAction = { action: 'haggle', price: newOffer };
-            return;
-        }
         this.dialogText.setText('"아쉽네요..."');
         // --- Subtle shake on dialog text ---
         this._shakeDialog();
