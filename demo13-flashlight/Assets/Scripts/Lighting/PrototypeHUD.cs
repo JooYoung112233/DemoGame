@@ -18,8 +18,7 @@ public class PrototypeHUD : MonoBehaviour
         GUI.Box(panel, "", boxStyle);
 
         GUILayout.BeginArea(new Rect(20, 15, w - 20, h - 10));
-
-        GUILayout.Label("Flashlight Prototype", headerStyle);
+        GUILayout.Label("Flashlight Prototype (3D)", headerStyle);
         GUILayout.Space(5);
 
         if (dayNight != null)
@@ -28,7 +27,6 @@ public class PrototypeHUD : MonoBehaviour
             float remain = dayNight.TimeRemaining;
             GUILayout.Label($"Phase: {phase}  |  Time: {remain:F0}s", labelStyle);
         }
-
         GUILayout.Space(3);
 
         if (flashlight != null)
@@ -53,31 +51,20 @@ public class PrototypeHUD : MonoBehaviour
         GUILayout.Label("F - Toggle flashlight", labelStyle);
         GUILayout.Label("T - Toggle day/night", labelStyle);
         GUILayout.Label("Ctrl - Crouch (slow)", labelStyle);
-
         GUILayout.EndArea();
     }
 
     void InitStyles()
     {
         if (boxStyle != null) return;
-
         boxStyle = new GUIStyle(GUI.skin.box);
         var bgTex = new Texture2D(1, 1);
         bgTex.SetPixel(0, 0, new Color(0, 0, 0, 0.75f));
         bgTex.Apply();
         boxStyle.normal.background = bgTex;
-
-        labelStyle = new GUIStyle(GUI.skin.label)
-        {
-            fontSize = 13,
-            normal = { textColor = Color.white }
-        };
-
-        headerStyle = new GUIStyle(GUI.skin.label)
-        {
-            fontSize = 15,
-            fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(1f, 0.85f, 0.3f) }
-        };
+        labelStyle = new GUIStyle(GUI.skin.label) { fontSize = 13 };
+        labelStyle.normal.textColor = Color.white;
+        headerStyle = new GUIStyle(GUI.skin.label) { fontSize = 15, fontStyle = FontStyle.Bold };
+        headerStyle.normal.textColor = new Color(1f, 0.85f, 0.3f);
     }
 }

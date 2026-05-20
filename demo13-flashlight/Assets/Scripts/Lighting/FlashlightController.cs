@@ -1,15 +1,11 @@
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 public class FlashlightController : MonoBehaviour
 {
     [Header("Flashlight Settings")]
-    [SerializeField] Light2D coneLight;
-    [SerializeField] Light2D ambientGlow;
-    [SerializeField] float coneAngle = 90f;
-    [SerializeField] float coneRange = 7f;
-    [SerializeField] float glowRange = 2f;
-    [SerializeField] float flickerIntensity = 0.05f;
+    [SerializeField] Light spotLight;
+    [SerializeField] Light ambientGlow;
+    [SerializeField] float flickerIntensity = 0.1f;
     [SerializeField] float flickerSpeed = 8f;
 
     [Header("Battery")]
@@ -27,8 +23,8 @@ public class FlashlightController : MonoBehaviour
     void Awake()
     {
         currentBattery = maxBattery;
-        if (coneLight != null)
-            baseIntensity = coneLight.intensity;
+        if (spotLight != null)
+            baseIntensity = spotLight.intensity;
     }
 
     void Update()
@@ -42,50 +38,32 @@ public class FlashlightController : MonoBehaviour
             if (currentBattery <= 0)
             {
                 currentBattery = 0;
-                SetFlashlightActive(false);
+                SetActive(false);
             }
-
             ApplyFlicker();
         }
-
-        UpdateLightParams();
     }
 
     void Toggle()
     {
         if (currentBattery <= 0) return;
         isOn = !isOn;
-        SetFlashlightActive(isOn);
+        SetActive(isOn);
     }
 
-    void SetFlashlightActive(bool active)
+    void SetActive(bool active)
     {
         isOn = active;
-        if (coneLight != null) coneLight.enabled = active;
+        if (spotLight != null) spotLight.enabled = active;
     }
 
     void ApplyFlicker()
     {
-        if (coneLight == null) return;
+        if (spotLight == null) return;
         flickerTimer += Time.deltaTime * flickerSpeed;
         float flicker = Mathf.PerlinNoise(flickerTimer, 0f) * flickerIntensity;
-
         float batteryDim = BatteryPercent < 0.2f ? 0.5f + BatteryPercent * 2.5f : 1f;
-        coneLight.intensity = (baseIntensity + flicker) * batteryDim;
-    }
-
-    void UpdateLightParams()
-    {
-        if (coneLight != null)
-        {
-            coneLight.pointLightOuterAngle = coneAngle;
-            coneLight.pointLightOuterRadius = coneRange;
-        }
-        if (ambientGlow != null)
-        {
-            ambientGlow.pointLightOuterRadius = glowRange;
-            ambientGlow.enabled = true;
-        }
+        spotLight.intensity = (baseIntensity + flicker) * batteryDim;
     }
 
     public void AddBattery(float amount)

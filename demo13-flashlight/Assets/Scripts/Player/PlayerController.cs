@@ -3,41 +3,31 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] float moveSpeed = 3f;
+    [SerializeField] float moveSpeed = 5f;
     [SerializeField] float crouchSpeedMultiplier = 0.4f;
 
     [Header("References")]
     [SerializeField] Transform flashlightPivot;
 
     Camera mainCam;
-    Rigidbody2D rb;
-    Vector2 moveInput;
+    CharacterController cc;
+    Vector3 moveDir;
     bool isCrouching;
 
-    // 쿼터뷰 이동 보정 (화면 기준 WASD → 아이소 좌표)
-    static readonly Vector2 ISO_UP = new Vector2(-0.5f, 0.25f).normalized;
-    static readonly Vector2 ISO_DOWN = new Vector2(0.5f, -0.25f).normalized;
-    static readonly Vector2 ISO_LEFT = new Vector2(-0.5f, -0.25f).normalized;
-    static readonly Vector2 ISO_RIGHT = new Vector2(0.5f, 0.25f).normalized;
-
     public bool IsCrouching => isCrouching;
-    public Vector2 FacingDirection { get; private set; } = Vector2.right;
+    public Vector3 FacingDirection { get; private set; } = Vector3.forward;
 
     void Awake()
     {
-        rb = GetComponent<Rigidbody2D>();
         mainCam = Camera.main;
+        cc = GetComponent<CharacterController>();
     }
 
     void Update()
     {
-        // 쿼터뷰 방향으로 입력 변환
-        moveInput = Vector2.zero;
-        if (Input.GetKey(KeyCode.W)) moveInput += ISO_UP;
-        if (Input.GetKey(KeyCode.S)) moveInput += ISO_DOWN;
-        if (Input.GetKey(KeyCode.A)) moveInput += ISO_LEFT;
-        if (Input.GetKey(KeyCode.D)) moveInput += ISO_RIGHT;
-        moveInput = moveInput.normalized;
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        moveDir = new Vector3(h, 0, v).normalized;
 
         isCrouching = Input.GetKey(KeyCode.LeftControl);
 
@@ -47,20 +37,28 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         float speed = isCrouching ? moveSpeed * crouchSpeedMultiplier : moveSpeed;
-        rb.linearVelocity = moveInput * speed;
+        if (cc != null)
+            cc.Move(moveDir * speed * Time.fixedDeltaTime);
+        else
+            transform.position += moveDir * speed * Time.fixedDeltaTime;
     }
 
     void RotateTowardsMouse()
     {
-        Vector3 mouseWorld = mainCam.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 dir = (mouseWorld - transform.position).normalized;
-        if (dir.sqrMagnitude > 0.01f)
-            FacingDirection = dir;
+        Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        Plane groundPlane = new Plane(Vector3.up, transform.position);
 
-        if (flashlightPivot != null)
+        if (groundPlane.Raycast(ray, out float dist))
         {
-            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            flashlightPivot.rotation = Quaternion.Euler(0, 0, angle);
+            Vector3 hitPoint = ray.GetPoint(dist);
+            Vector3 dir = hitPoint - transform.position;
+            dir.y = 0;
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                FacingDirection = dir.normalized;
+                if (flashlightPivot != null)
+                    flashlightPivot.rotation = Quaternion.LookRotation(dir.normalized);
+            }
         }
     }
 }

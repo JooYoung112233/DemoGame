@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 public class DayNightCycle : MonoBehaviour
 {
@@ -8,18 +7,18 @@ public class DayNightCycle : MonoBehaviour
     [SerializeField] float nightDuration = 300f;
 
     [Header("Lighting")]
-    [SerializeField] Light2D globalLight;
+    [SerializeField] Light directionalLight;
     [SerializeField] float dayIntensity = 1f;
-    [SerializeField] float nightIntensity = 0.05f;
-    [SerializeField] Color dayColor = Color.white;
-    [SerializeField] Color nightColor = new Color(0.05f, 0.05f, 0.15f);
+    [SerializeField] float nightIntensity = 0.02f;
+    [SerializeField] Color dayColor = new Color(1f, 0.95f, 0.9f);
+    [SerializeField] Color nightColor = new Color(0.05f, 0.05f, 0.12f);
     [SerializeField] float transitionDuration = 3f;
 
     [Header("References")]
     [SerializeField] FlashlightController flashlight;
 
     float currentTime;
-    bool isNight;
+    bool isNight = true;
     float transitionProgress;
     bool isTransitioning;
 
@@ -27,9 +26,6 @@ public class DayNightCycle : MonoBehaviour
     public float TimeRemaining => isNight
         ? nightDuration - currentTime
         : dayDuration - currentTime;
-    public float TimePercent => isNight
-        ? currentTime / nightDuration
-        : currentTime / dayDuration;
 
     void Update()
     {
@@ -40,18 +36,12 @@ public class DayNightCycle : MonoBehaviour
         }
 
         currentTime += Time.deltaTime;
-
         float maxTime = isNight ? nightDuration : dayDuration;
-        if (currentTime >= maxTime)
-        {
-            if (!isNight)
-                StartTransition(true);
-        }
+        if (currentTime >= maxTime && !isNight)
+            StartTransition(true);
 
         if (Input.GetKeyDown(KeyCode.T))
             StartTransition(!isNight);
-
-        UpdateUI();
     }
 
     void StartTransition(bool toNight)
@@ -67,25 +57,21 @@ public class DayNightCycle : MonoBehaviour
         transitionProgress += Time.deltaTime / transitionDuration;
         float t = Mathf.SmoothStep(0, 1, transitionProgress);
 
-        if (isNight)
+        if (directionalLight != null)
         {
-            globalLight.intensity = Mathf.Lerp(dayIntensity, nightIntensity, t);
-            globalLight.color = Color.Lerp(dayColor, nightColor, t);
-        }
-        else
-        {
-            globalLight.intensity = Mathf.Lerp(nightIntensity, dayIntensity, t);
-            globalLight.color = Color.Lerp(nightColor, dayColor, t);
+            if (isNight)
+            {
+                directionalLight.intensity = Mathf.Lerp(dayIntensity, nightIntensity, t);
+                directionalLight.color = Color.Lerp(dayColor, nightColor, t);
+            }
+            else
+            {
+                directionalLight.intensity = Mathf.Lerp(nightIntensity, dayIntensity, t);
+                directionalLight.color = Color.Lerp(nightColor, dayColor, t);
+            }
         }
 
         if (transitionProgress >= 1f)
-        {
             isTransitioning = false;
-        }
-    }
-
-    void UpdateUI()
-    {
-        // UI는 별도 HUD에서 처리
     }
 }
