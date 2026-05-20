@@ -468,9 +468,21 @@ class ShopScene extends Phaser.Scene {
 
         this.currentCustomer = ShopSystem.generateCustomer(this.gs);
         const c = this.currentCustomer;
+
+        // --- Customer entrance animation (icon slides in from right) ---
         this.custIcon.setText(c.icon);
+        this.custIcon.setAlpha(0);
+        const origIconX = this.custIcon.x;
+        this.custIcon.setX(origIconX + 120);
+        this.tweens.add({ targets: this.custIcon, x: origIconX, alpha: 1, duration: 400, ease: 'Back.easeOut' });
+
         this.custName.setText(c.name);
+        this.custName.setAlpha(0);
+        this.tweens.add({ targets: this.custName, alpha: 1, duration: 300, delay: 200 });
+
         this.custBudget.setText(`예산: ~${c.budget}G`);
+        this.custBudget.setAlpha(0);
+        this.tweens.add({ targets: this.custBudget, alpha: 1, duration: 300, delay: 300 });
 
         const slot = this._pickWanted(c);
         if (!slot) {
@@ -499,6 +511,8 @@ class ShopScene extends Phaser.Scene {
         } else {
             this.dialogText.setText(`"${result.reason}..."`);
             this.actionContainer.setVisible(false);
+            // --- Subtle shake on dialog text ---
+            this._shakeDialog();
             ShopSystem.failedSale(this.gs);
             this._updateInfo();
             this.time.delayedCall(1000, () => this._nextCustomer());
@@ -525,6 +539,22 @@ class ShopScene extends Phaser.Scene {
         this.salesLog.push({ item: data.name, price });
         Toast.show(this, `+${price}G!`, { color: '#ffcc44', duration: 1200 });
 
+        // --- Coin scatter effect ---
+        const coinX = this.currentSlot.bg.x;
+        const coinY = this.currentSlot.bg.y;
+        for (let i = 0; i < 8; i++) {
+            const coin = this.add.circle(coinX, coinY, Phaser.Math.Between(2, 4), 0xffcc44, 0.9);
+            this.tweens.add({
+                targets: coin,
+                x: coinX + Phaser.Math.Between(-60, 60),
+                y: coinY - Phaser.Math.Between(30, 80),
+                alpha: 0, duration: Phaser.Math.Between(400, 700),
+                delay: Phaser.Math.Between(0, 150),
+                ease: 'Quad.easeOut',
+                onComplete: () => coin.destroy(),
+            });
+        }
+
         this.currentSlot.item = null;
         this.currentSlot.icon.setText('');
         this.currentSlot.name.setText('');
@@ -546,9 +576,19 @@ class ShopScene extends Phaser.Scene {
             return;
         }
         this.dialogText.setText('"아쉽네요..."');
+        // --- Subtle shake on dialog text ---
+        this._shakeDialog();
         ShopSystem.failedSale(this.gs);
         this._updateInfo();
         this.time.delayedCall(800, () => this._nextCustomer());
+    }
+
+    _shakeDialog() {
+        const origX = this.dialogText.x;
+        this.tweens.add({
+            targets: this.dialogText, x: origX + 4, duration: 50, yoyo: true, repeat: 3,
+            onComplete: () => this.dialogText.setX(origX),
+        });
     }
 
     _endSelling() {

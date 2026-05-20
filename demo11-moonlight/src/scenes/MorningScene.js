@@ -8,8 +8,30 @@ class MorningScene extends Phaser.Scene {
         const CONTENT_W = 1280 - MARGIN * 2;
 
         this.add.rectangle(cx, 360, 1280, 720, 0x1a1510);
+
+        // --- Sunrise glow effect (soft orange gradient at top) ---
+        const sunGlow = this.add.rectangle(cx, 0, 1280, 120, 0xff8833, 0.06).setOrigin(0.5, 0);
+        this.tweens.add({ targets: sunGlow, alpha: 0.12, duration: 3000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        const sunGlow2 = this.add.rectangle(cx, 0, 1280, 60, 0xffaa44, 0.04).setOrigin(0.5, 0);
+        this.tweens.add({ targets: sunGlow2, alpha: 0.09, duration: 2400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: 500 });
+
+        // --- Floating dust particles ---
+        for (let i = 0; i < 15; i++) {
+            const px = Phaser.Math.Between(50, 1230);
+            const py = Phaser.Math.Between(100, 700);
+            const dot = this.add.circle(px, py, Phaser.Math.Between(1, 2), 0xffddaa, Phaser.Math.FloatBetween(0.08, 0.25));
+            this.tweens.add({
+                targets: dot, y: py - Phaser.Math.Between(80, 200), alpha: 0,
+                duration: Phaser.Math.Between(4000, 8000), delay: Phaser.Math.Between(0, 3000),
+                repeat: -1, onRepeat: () => { dot.setPosition(Phaser.Math.Between(50, 1230), Phaser.Math.Between(400, 700)); dot.setAlpha(Phaser.Math.FloatBetween(0.08, 0.25)); },
+            });
+        }
+
+        // --- Window light rectangle that pulses warmly ---
+        const windowLight = this.add.rectangle(cx, 200, 300, 200, 0xffeecc, 0.04);
+        this.tweens.add({ targets: windowLight, alpha: 0.08, duration: 2500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
         this.add.rectangle(cx, 30, 1280, 60, 0x2a2015, 0.8);
-        this.add.rectangle(cx, 200, 300, 200, 0xffeecc, 0.04);
 
         this.add.text(cx, 18, `Day ${gs.day} - 아침`, {
             fontSize: '26px', fontFamily: 'monospace', color: '#ffddaa',
@@ -25,6 +47,14 @@ class MorningScene extends Phaser.Scene {
         let y = 80;
 
         if (gs.commissionResults.length > 0) {
+            // --- Door-knocking effect ---
+            const knockText = this.add.text(cx, y + 10, '뚝... 뚝... (문 두드리는 소리)', {
+                fontSize: '14px', fontFamily: 'monospace', color: '#ffddaa',
+            }).setOrigin(0.5).setAlpha(0);
+            this.contentContainer.add(knockText);
+            this.tweens.add({ targets: knockText, alpha: 0.9, duration: 600, delay: 200, yoyo: true, hold: 1200, onComplete: () => knockText.setAlpha(0) });
+            y += 35;
+
             y = this._drawCommissionResults(gs, cx, y, CONTENT_W);
         } else if (gs.day === 1) {
             const t = this.add.text(cx, y + 20, '첫 날입니다. 재료를 가지고 장사를 시작하세요!', {

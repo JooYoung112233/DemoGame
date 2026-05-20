@@ -25,6 +25,17 @@ class CommissionScene extends Phaser.Scene {
         }
         this.add.circle(1100, 80, 30, 0xffeebb, 0.25);
 
+        // --- Candle flicker effect near bottom center ---
+        const candleGlow = this.add.circle(cx, 680, 40, 0xff8833, 0.08);
+        this.tweens.add({ targets: candleGlow, alpha: 0.15, scaleX: 1.15, scaleY: 1.1, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        const candleGlow2 = this.add.circle(cx, 685, 20, 0xffaa44, 0.1);
+        this.tweens.add({ targets: candleGlow2, alpha: 0.2, scaleX: 0.9, scaleY: 1.1, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: 200 });
+        const candleFlame = this.add.circle(cx, 670, 3, 0xffcc66, 0.6);
+        this.tweens.add({ targets: candleFlame, alpha: 0.3, x: cx + 2, duration: 400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+        // --- Occasional shooting star ---
+        this._spawnShootingStar();
+
         this.add.text(cx, 22, `Day ${this.gs.day} - 밤: 의뢰서 작성`, {
             fontSize: '24px', fontFamily: 'monospace', color: '#aaaaff',
             stroke: '#000', strokeThickness: 3,
@@ -281,6 +292,8 @@ class CommissionScene extends Phaser.Scene {
         this.gs.gold -= this.selectedAdventurer.cost;
         this.commissions.push({ zoneId: this.selectedZone, adventurer: { ...this.selectedAdventurer } });
         Toast.show(this, `의뢰 추가! -${this.selectedAdventurer.cost}G`, { color: '#aaaaff' });
+        // --- Quill writing effect ---
+        this._showQuillEffect();
         this._refreshCommList();
         this._updateCostLabel();
         this._updateGoldLabel();
@@ -289,5 +302,33 @@ class CommissionScene extends Phaser.Scene {
     _updateCostLabel() {
         const total = this.commissions.reduce((s, c) => s + c.adventurer.cost, 0);
         this.totalCostLabel.setText(`의뢰 ${this.commissions.length}건 | 총 비용: ${total}G | 잔여: ${this.gs.gold}G`);
+    }
+
+    _spawnShootingStar() {
+        const delay = Phaser.Math.Between(4000, 10000);
+        this.time.delayedCall(delay, () => {
+            if (!this.scene.isActive()) return;
+            const startX = Phaser.Math.Between(200, 900);
+            const startY = Phaser.Math.Between(20, 120);
+            const star = this.add.rectangle(startX, startY, 18, 2, 0xffffff, 0.7).setAngle(-25);
+            this.tweens.add({
+                targets: star,
+                x: startX + 200, y: startY + 100, alpha: 0,
+                duration: 500, ease: 'Quad.easeIn',
+                onComplete: () => { star.destroy(); this._spawnShootingStar(); },
+            });
+        });
+    }
+
+    _showQuillEffect() {
+        const cx = 640;
+        const quill = this.add.text(cx, 455, '사각사각...', {
+            fontSize: '12px', fontFamily: 'monospace', color: '#887766',
+        }).setOrigin(0.5).setAlpha(0);
+        this.tweens.add({
+            targets: quill, alpha: 0.7, duration: 300,
+            yoyo: true, hold: 600,
+            onComplete: () => quill.destroy(),
+        });
     }
 }
