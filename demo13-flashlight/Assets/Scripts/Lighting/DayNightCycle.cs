@@ -9,9 +9,9 @@ public class DayNightCycle : MonoBehaviour
     [Header("Lighting")]
     [SerializeField] Light directionalLight;
     [SerializeField] float dayIntensity = 1f;
-    [SerializeField] float nightIntensity = 0.02f;
+    [SerializeField] float nightIntensity = 0f;
     [SerializeField] Color dayColor = new Color(1f, 0.95f, 0.9f);
-    [SerializeField] Color nightColor = new Color(0.05f, 0.05f, 0.12f);
+    [SerializeField] Color nightColor = Color.black;
     [SerializeField] float transitionDuration = 3f;
 
     [Header("References")]

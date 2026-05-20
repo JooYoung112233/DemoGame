@@ -17,8 +17,8 @@ public class FlashlightSceneSetup : EditorWindow
         var dirLightGO = new GameObject("Directional Light");
         var dirLight = dirLightGO.AddComponent<Light>();
         dirLight.type = LightType.Directional;
-        dirLight.intensity = 0.03f; // 밤 시작
-        dirLight.color = new Color(0.06f, 0.06f, 0.15f);
+        dirLight.intensity = 0f; // 밤: 완전 깜깜
+        dirLight.color = Color.black;
         dirLight.shadows = LightShadows.Soft;
         dirLight.shadowStrength = 0.8f;
         dirLightGO.transform.rotation = Quaternion.Euler(50, -30, 0);
@@ -51,10 +51,10 @@ public class FlashlightSceneSetup : EditorWindow
         spotGO.transform.localPosition = Vector3.zero;
         var spot = spotGO.AddComponent<Light>();
         spot.type = LightType.Spot;
-        spot.spotAngle = 70f;
-        spot.innerSpotAngle = 40f;
-        spot.range = 12f;
-        spot.intensity = 8f;
+        spot.spotAngle = 90f;
+        spot.innerSpotAngle = 50f;
+        spot.range = 25f;
+        spot.intensity = 15f;
         spot.color = new Color(1f, 0.93f, 0.75f);
         spot.shadows = LightShadows.Hard;
         spot.shadowStrength = 0.95f;
@@ -66,8 +66,8 @@ public class FlashlightSceneSetup : EditorWindow
         glowGO.transform.localPosition = new Vector3(0, 0.5f, 0);
         var glow = glowGO.AddComponent<Light>();
         glow.type = LightType.Point;
-        glow.range = 3f;
-        glow.intensity = 0.5f;
+        glow.range = 5f;
+        glow.intensity = 1.5f;
         glow.color = new Color(0.6f, 0.65f, 0.8f);
         glow.shadows = LightShadows.Soft;
 
@@ -92,7 +92,7 @@ public class FlashlightSceneSetup : EditorWindow
         }
         cam.orthographic = true;
         cam.orthographicSize = 7;
-        cam.backgroundColor = new Color(0.01f, 0.01f, 0.03f);
+        cam.backgroundColor = Color.black;
         cam.transform.position = new Vector3(6, 10, 4 - 7); // player(6,0,4) + offset(0,10,-7)
         cam.transform.rotation = Quaternion.Euler(55, 0, 0);
         cam.clearFlags = CameraClearFlags.SolidColor;
