@@ -153,6 +153,15 @@ public class FlashlightSceneSetup : EditorWindow
         // ===== 건물 생성 =====
         CreateBuilding();
 
+        // ===== 네온사인 (입구 위) =====
+        var neonGO = CreateNeonSign(dnCycle);
+
+        // ===== 지붕 (건물 위) =====
+        var roofGO = CreateRoof(playerGO);
+
+        // ===== 벽 뒤 아웃라인 =====
+        CreateWallOutline(playerGO, playerVisual);
+
         Debug.Log("[Flashlight Prototype] 3D 쿼터뷰 씬 생성 완료!");
     }
 
@@ -248,6 +257,241 @@ public class FlashlightSceneSetup : EditorWindow
         var renderer = dustGO.GetComponent<ParticleSystemRenderer>();
         renderer.material = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
         renderer.material.SetColor("_BaseColor", new Color(0.7f, 0.65f, 0.55f, 0.3f));
+    }
+
+    static GameObject CreateNeonSign(DayNightCycle dnCycle)
+    {
+        // 입구 위쪽에 네온사인 Quad
+        var signGO = new GameObject("NeonSign");
+        signGO.transform.position = new Vector3(6.5f, 2.8f, 0.6f);
+        Undo.RegisterCreatedObjectUndo(signGO, "Create NeonSign");
+
+        var signQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        signQuad.name = "SignFace";
+        signQuad.transform.SetParent(signGO.transform);
+        signQuad.transform.localPosition = Vector3.zero;
+        signQuad.transform.localScale = new Vector3(2.5f, 0.6f, 1);
+        Object.DestroyImmediate(signQuad.GetComponent<MeshCollider>());
+
+        // 네온 머테리얼 (Emission)
+        var neonMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        neonMat.name = "NeonMat";
+        Color neonColor = new Color(1f, 0.15f, 0.25f);
+        neonMat.SetColor("_BaseColor", neonColor);
+        neonMat.SetColor("_EmissionColor", neonColor * 2f);
+        neonMat.EnableKeyword("_EMISSION");
+        neonMat.SetFloat("_Smoothness", 0.9f);
+        signQuad.GetComponent<MeshRenderer>().sharedMaterial = neonMat;
+        signQuad.GetComponent<MeshRenderer>().shadowCastingMode =
+            UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        // 두번째 Quad — 글자 "OPEN" 표현
+        var textQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        textQuad.name = "SignText";
+        textQuad.transform.SetParent(signGO.transform);
+        textQuad.transform.localPosition = new Vector3(0, 0, -0.01f);
+        textQuad.transform.localScale = new Vector3(2f, 0.4f, 1);
+        Object.DestroyImmediate(textQuad.GetComponent<MeshCollider>());
+        var textMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        textMat.name = "NeonTextMat";
+        textMat.mainTexture = CreateNeonTexture();
+        textMat.SetColor("_EmissionColor", Color.white * 3f);
+        textMat.EnableKeyword("_EMISSION");
+        textMat.SetFloat("_Surface", 1);
+        textMat.SetFloat("_AlphaClip", 1);
+        textMat.SetFloat("_Cutoff", 0.5f);
+        textMat.EnableKeyword("_ALPHATEST_ON");
+        textMat.renderQueue = 2460;
+        textQuad.GetComponent<MeshRenderer>().sharedMaterial = textMat;
+        textQuad.GetComponent<MeshRenderer>().shadowCastingMode =
+            UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        // 네온 PointLight (붉은 조명)
+        var neonLightGO = new GameObject("NeonLight");
+        neonLightGO.transform.SetParent(signGO.transform);
+        neonLightGO.transform.localPosition = new Vector3(0, -0.5f, -1.5f);
+        var neonLight = neonLightGO.AddComponent<Light>();
+        neonLight.type = LightType.Point;
+        neonLight.range = 8f;
+        neonLight.intensity = 8f;
+        neonLight.color = new Color(1f, 0.2f, 0.3f);
+        neonLight.shadows = LightShadows.Soft;
+
+        // NeonSign 컴포넌트
+        var neonComp = signGO.AddComponent<NeonSign>();
+        var neonSO = new SerializedObject(neonComp);
+        neonSO.FindProperty("neonLight").objectReferenceValue = neonLight;
+        neonSO.FindProperty("signRenderer").objectReferenceValue =
+            signQuad.GetComponent<MeshRenderer>();
+        neonSO.FindProperty("dayNight").objectReferenceValue = dnCycle;
+        neonSO.FindProperty("neonColor").colorValue = new Color(1f, 0.15f, 0.25f);
+        neonSO.FindProperty("baseIntensity").floatValue = 8f;
+        neonSO.ApplyModifiedProperties();
+
+        return signGO;
+    }
+
+    static Texture2D CreateNeonTexture()
+    {
+        int w = 128, h = 32;
+        var tex = new Texture2D(w, h);
+        tex.filterMode = FilterMode.Point;
+        Color clear = new Color(0, 0, 0, 0);
+        Color glow = new Color(1f, 1f, 1f, 1f);
+
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                tex.SetPixel(x, y, clear);
+
+        // "OPEN" 글자를 점으로 찍기 (단순 픽셀 폰트)
+        int[,] letters = {
+            // O (x=10~22, y=8~24)
+            {12,8},{13,8},{14,8},{15,8},{16,8},{17,8},{18,8},{19,8},{20,8},
+            {11,9},{12,9},{20,9},{21,9},
+            {10,10},{11,10},{21,10},{22,10},
+            {10,12},{11,12},{21,12},{22,12},
+            {10,14},{11,14},{21,14},{22,14},
+            {10,16},{11,16},{21,16},{22,16},
+            {10,18},{11,18},{21,18},{22,18},
+            {10,20},{11,20},{21,20},{22,20},
+            {11,21},{12,21},{20,21},{21,21},
+            {12,22},{13,22},{14,22},{15,22},{16,22},{17,22},{18,22},{19,22},{20,22},
+            // P (x=28~40)
+            {28,8},{29,8},{30,8},{31,8},{32,8},{33,8},{34,8},{35,8},{36,8},
+            {28,9},{29,9},{36,9},{37,9},
+            {28,10},{29,10},{37,10},{38,10},
+            {28,12},{29,12},{37,12},{38,12},
+            {28,14},{29,14},{36,14},{37,14},
+            {28,15},{29,15},{30,15},{31,15},{32,15},{33,15},{34,15},{35,15},{36,15},
+            {28,18},{29,18},
+            {28,20},{29,20},
+            {28,22},{29,22},
+            // E (x=44~56)
+            {44,8},{45,8},{46,8},{47,8},{48,8},{49,8},{50,8},{51,8},{52,8},{53,8},{54,8},
+            {44,9},{45,9},
+            {44,10},{45,10},
+            {44,12},{45,12},
+            {44,14},{45,14},{46,14},{47,14},{48,14},{49,14},{50,14},
+            {44,16},{45,16},
+            {44,18},{45,18},
+            {44,20},{45,20},
+            {44,22},{45,22},{46,22},{47,22},{48,22},{49,22},{50,22},{51,22},{52,22},{53,22},{54,22},
+            // N (x=60~74)
+            {60,8},{61,8},{72,8},{73,8},
+            {60,10},{61,10},{62,10},{72,10},{73,10},
+            {60,12},{61,12},{63,12},{64,12},{72,12},{73,12},
+            {60,14},{61,14},{65,14},{66,14},{72,14},{73,14},
+            {60,16},{61,16},{67,16},{68,16},{72,16},{73,16},
+            {60,18},{61,18},{69,18},{70,18},{72,18},{73,18},
+            {60,20},{61,20},{71,20},{72,20},{73,20},
+            {60,22},{61,22},{72,22},{73,22},
+        };
+
+        for (int i = 0; i < letters.GetLength(0); i++)
+        {
+            int px = letters[i, 0], py = letters[i, 1];
+            if (px >= 0 && px < w && py >= 0 && py < h)
+            {
+                tex.SetPixel(px, py, glow);
+                // 약간 두껍게
+                if (px + 1 < w) tex.SetPixel(px + 1, py, glow);
+                if (py + 1 < h) tex.SetPixel(px, py + 1, glow);
+            }
+        }
+
+        tex.Apply();
+        return tex;
+    }
+
+    static GameObject CreateRoof(GameObject player)
+    {
+        int bw = 12, bh = 10;
+        float roofY = 2.7f;
+
+        var roofParent = new GameObject("Roof");
+        Undo.RegisterCreatedObjectUndo(roofParent, "Create Roof");
+
+        // 반투명 가능한 머테리얼
+        var roofMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        roofMat.name = "RoofMat";
+        Color roofColor = new Color(0.15f, 0.13f, 0.12f, 1f);
+        roofMat.SetColor("_BaseColor", roofColor);
+        roofMat.SetFloat("_Surface", 1); // Transparent
+        roofMat.SetFloat("_Blend", 0); // Alpha
+        roofMat.SetOverrideTag("RenderType", "Transparent");
+        roofMat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        roofMat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        roofMat.SetFloat("_ZWrite", 0);
+        roofMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        roofMat.renderQueue = 3000;
+        roofMat.SetFloat("_Smoothness", 0.2f);
+
+        // 지붕 타일
+        for (int x = 0; x <= bw; x++)
+        {
+            for (int z = 0; z <= bh; z++)
+            {
+                var tile = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                tile.name = $"Roof_{x}_{z}";
+                tile.transform.SetParent(roofParent.transform);
+                tile.transform.position = new Vector3(x + 0.5f, roofY, z + 0.5f);
+                tile.transform.rotation = Quaternion.Euler(90, 0, 0);
+                tile.transform.localScale = new Vector3(TILE_SIZE + 0.02f, TILE_SIZE + 0.02f, 1);
+                tile.GetComponent<MeshRenderer>().sharedMaterial = roofMat;
+                tile.GetComponent<MeshRenderer>().shadowCastingMode =
+                    UnityEngine.Rendering.ShadowCastingMode.Off;
+                tile.GetComponent<MeshRenderer>().receiveShadows = false;
+                Object.DestroyImmediate(tile.GetComponent<MeshCollider>());
+            }
+        }
+
+        // RoofController 컴포넌트
+        var roofCtrl = roofParent.AddComponent<RoofController>();
+        var roofSO = new SerializedObject(roofCtrl);
+        roofSO.FindProperty("player").objectReferenceValue = player.transform;
+        roofSO.FindProperty("roofObject").objectReferenceValue = roofParent;
+        roofSO.FindProperty("buildingMin").vector3Value = new Vector3(0.5f, 0, 0.5f);
+        roofSO.FindProperty("buildingMax").vector3Value = new Vector3(bw + 0.5f, 0, bh + 0.5f);
+        roofSO.ApplyModifiedProperties();
+
+        return roofParent;
+    }
+
+    static void CreateWallOutline(GameObject player, GameObject playerVisual)
+    {
+        // 아웃라인용 두번째 Quad (벽 뒤에서만 보임)
+        var outlineGO = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        outlineGO.name = "OcclusionOutline";
+        outlineGO.transform.SetParent(playerVisual.transform);
+        outlineGO.transform.localPosition = Vector3.zero;
+        outlineGO.transform.localScale = new Vector3(1.3f, 1.3f, 1); // 약간 크게
+        Object.DestroyImmediate(outlineGO.GetComponent<MeshCollider>());
+
+        // ZTest Always → 벽 뒤에서도 렌더링
+        var outlineMat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        outlineMat.name = "OutlineMat";
+        Color outlineColor = new Color(0.3f, 0.8f, 1f, 0.4f);
+        outlineMat.SetColor("_BaseColor", outlineColor);
+        outlineMat.SetFloat("_Surface", 1); // Transparent
+        outlineMat.SetOverrideTag("RenderType", "Transparent");
+        outlineMat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        outlineMat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        outlineMat.SetFloat("_ZWrite", 0);
+        outlineMat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
+        outlineMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        outlineMat.renderQueue = 3100;
+        outlineGO.GetComponent<MeshRenderer>().sharedMaterial = outlineMat;
+        outlineGO.GetComponent<MeshRenderer>().shadowCastingMode =
+            UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        // WallOcclusionOutline 컴포넌트
+        var occComp = player.AddComponent<WallOcclusionOutline>();
+        var occSO = new SerializedObject(occComp);
+        occSO.FindProperty("player").objectReferenceValue = player.transform;
+        occSO.FindProperty("outlineRenderer").objectReferenceValue =
+            outlineGO.GetComponent<MeshRenderer>();
+        occSO.FindProperty("outlineColor").colorValue = new Color(0.3f, 0.8f, 1f, 0.4f);
+        occSO.ApplyModifiedProperties();
     }
 
     static void CreateBuilding()
