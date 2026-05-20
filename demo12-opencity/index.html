@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opening City - 루팅 서바이벌 데모</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        canvas { image-rendering: pixelated; }
+    </style>
+</head>
+<body>
+    <script src="../node_modules/phaser/dist/phaser.min.js"></script>
+
+    <!-- Data -->
+    <script src="src/data/tiles.js"></script>
+    <script src="src/data/items.js"></script>
+    <script src="src/data/mapData.js"></script>
+    <script src="src/data/enemies.js"></script>
+
+    <!-- Systems -->
+    <script src="src/systems/TimeSystem.js"></script>
+    <script src="src/systems/VisionSystem.js"></script>
+    <script src="src/systems/InventorySystem.js"></script>
+    <script src="src/systems/LootSystem.js"></script>
+    <script src="src/systems/CombatSystem.js"></script>
+
+    <!-- Entities -->
+    <script src="src/entities/Player.js"></script>
+    <script src="src/entities/Enemy.js"></script>
+
+    <!-- UI -->
+    <script src="src/ui/HUD.js"></script>
+    <script src="src/ui/InventoryUI.js"></script>
+    <script src="src/ui/LootUI.js"></script>
+
+    <!-- Scenes -->
+    <script src="src/scenes/TitleScene.js"></script>
+    <script src="src/scenes/CityScene.js"></script>
+    <script src="src/scenes/ResultScene.js"></script>
+
+    <!-- Main -->
+    <script src="src/main.js"></script>
+</body>
+</html>
