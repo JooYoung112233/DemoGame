@@ -93,8 +93,9 @@ public class FlashlightSceneSetup : EditorWindow
         cam.orthographic = true;
         cam.orthographicSize = 7;
         cam.backgroundColor = new Color(0.01f, 0.01f, 0.03f);
-        cam.transform.position = new Vector3(6, 12, -4);
+        cam.transform.position = new Vector3(6, 10, 4 - 7); // player(6,0,4) + offset(0,10,-7)
         cam.transform.rotation = Quaternion.Euler(55, 0, 0);
+        cam.clearFlags = CameraClearFlags.SolidColor;
         cam.nearClipPlane = 0.1f;
         cam.farClipPlane = 50f;
 
