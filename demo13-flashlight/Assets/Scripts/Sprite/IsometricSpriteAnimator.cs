@@ -20,11 +20,11 @@ public class IsometricSpriteAnimator : MonoBehaviour
     [SerializeField] float spriteScale = 1.5f;
 
     // 방향 순서: 0=Bot, 1=LeftBot, 2=Left, 3=LeftTop, 4=Top, 5=RightTop, 6=Right, 7=RightBot
-    string currentAnim = "idle";
+    string currentAnim = "";
     int currentDir = 0;
     int currentFrame = 0;
     float frameTimer;
-    bool isPlaying = true;
+    bool isPlaying = false;
     bool looping = true;
     Material mat;
     System.Action onAnimComplete;
