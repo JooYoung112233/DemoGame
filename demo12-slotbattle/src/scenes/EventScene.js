@@ -66,8 +66,8 @@ class EventScene extends Phaser.Scene {
             }
         }
         if (e.addSkull) {
-            this.playerState.symbolPool.push('skull');
-            results.push('💀 해골 추가됨');
+            this.playerState.symbolPool.push('dead');
+            results.push('💀 망자 추가됨');
         }
         if (e.block) { this.playerState.block += e.block; results.push(`🛡️ +${e.block} 방어`); }
 
@@ -91,64 +91,64 @@ class EventScene extends Phaser.Scene {
     _getEventPool() {
         return [
             {
-                title: '수상한 상인',
-                desc: '낡은 망토를 쓴 상인이 거래를 제안한다.',
+                title: '떠돌이 소품상',
+                desc: '낡은 망토를 쓴 소품상이 거래를 제안한다.',
                 choices: [
                     { label: '💰 골드를 지불하고 좋은 심볼 획득 (-10G)', color: '#ffcc00',
-                      effect: { gold: -10, addSymbol: 'lightning' } },
-                    { label: '🗡️ 위협하여 공짜로 가져간다 (해골 추가)', color: '#ff4444',
-                      effect: { addSymbol: 'bomb', addSkull: true } },
+                      effect: { gold: -10, addSymbol: 'king' } },
+                    { label: '🗡️ 훔친다 (심볼 + 망자 추가)', color: '#ff4444',
+                      effect: { addSymbol: 'tragedy', addSkull: true } },
                     { label: '무시하고 지나간다', color: '#888888', effect: {} },
                 ]
             },
             {
-                title: '버려진 제단',
-                desc: '고대의 제단에서 신비한 기운이 느껴진다.',
+                title: '잊혀진 제단',
+                desc: '무대 뒤편에 낡은 제단이 놓여 있다.',
                 choices: [
                     { label: '🙏 기도한다 (HP +15)', color: '#44ff88',
                       effect: { hp: 15 } },
-                    { label: '💎 제물을 바친다 (-5G, 최대HP +5)', color: '#ffcc00',
+                    { label: '💎 촛불을 바친다 (-5G, 최대HP +5)', color: '#ffcc00',
                       effect: { gold: -5, maxHp: 5 } },
                     { label: '⚔️ 부순다 (+15G, -10 HP)', color: '#ff4444',
                       effect: { gold: 15, hp: -10 } },
                 ]
             },
             {
-                title: '떠돌이 대장장이',
-                desc: '대장장이가 무기를 하나 만들어주겠다고 한다.',
+                title: '무대 뒤 의상실',
+                desc: '오래된 의상과 소품이 가득하다.',
                 choices: [
-                    { label: '⚔️ 검을 만든다 (검 추가)', color: '#ff4444',
-                      effect: { addSymbol: 'axe' } },
-                    { label: '🛡️ 방패를 만든다 (성벽 추가)', color: '#4488ff',
-                      effect: { addSymbol: 'fortress' } },
-                    { label: '💰 재료를 팔아 골드를 번다 (+12G)', color: '#ffcc00',
+                    { label: '⚔️ 기사 의상 (기사 추가)', color: '#ff4444',
+                      effect: { addSymbol: 'knight' } },
+                    { label: '🌑 그림자 망토 (암전 추가)', color: '#4488ff',
+                      effect: { addSymbol: 'blackout' } },
+                    { label: '💰 의상을 팔아 골드를 번다 (+12G)', color: '#ffcc00',
                       effect: { gold: 12 } },
                 ]
             },
             {
-                title: '저주받은 상자',
-                desc: '검은 기운이 감도는 상자가 놓여 있다.',
+                title: '저주받은 극본',
+                desc: '검은 기운이 감도는 낡은 극본이 놓여 있다.',
                 choices: [
-                    { label: '📦 연다 (랜덤 심볼 + 해골)', color: '#cc88ff',
-                      effect: { addSymbol: 'heart', addSkull: true } },
+                    { label: '📖 읽는다 (장미 + 망자 추가)', color: '#cc88ff',
+                      effect: { addSymbol: 'rose', addSkull: true } },
                     { label: '🔥 불태운다 (+8G)', color: '#ff8800',
                       effect: { gold: 8 } },
                     { label: '지나친다', color: '#888888', effect: {} },
                 ]
             },
             {
-                title: '마법의 샘',
-                desc: '맑은 물이 솟아나는 샘을 발견했다.',
+                title: '무대 뒤 샘',
+                desc: '무대 뒤에 맑은 물이 솟아나는 샘이 있다.',
                 choices: [
                     { label: '💧 마신다 (HP 전부 회복)', color: '#44ff88',
                       effect: { hp: 999 } },
-                    { label: '🧪 물을 담는다 (포션 추가)', color: '#88ff44',
-                      effect: { addSymbol: 'potion' } },
+                    { label: '🌹 장미를 심는다 (장미 추가)', color: '#88ff44',
+                      effect: { addSymbol: 'rose' } },
                 ]
             },
             {
-                title: '도박꾼의 텐트',
-                desc: '"한 판 하겠나?" 도박꾼이 웃으며 말한다.',
+                title: '광대의 도박',
+                desc: '"한 판 하겠나?" 광대가 웃으며 말한다.',
                 choices: [
                     { label: '🎲 건다 (-8G, 50% 확률로 +20G)', color: '#ffcc00',
                       effect: Math.random() < 0.5 ? { gold: 12 } : { gold: -8 } },

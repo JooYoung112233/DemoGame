@@ -13,7 +13,7 @@ class CodexScene extends Phaser.Scene {
 
         this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.85).setInteractive();
 
-        this.add.text(W / 2, 25, '📚 도감', {
+        this.add.text(W / 2, 25, '📚 대본 도감', {
             fontSize: '24px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
 
@@ -23,7 +23,7 @@ class CodexScene extends Phaser.Scene {
             backgroundColor: '#2a2a55', padding: { x: 14, y: 6 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-        this.relicTabBtn = this.add.text(W / 2 + 80, 55, '[ 유물 ]', {
+        this.relicTabBtn = this.add.text(W / 2 + 80, 55, '[ 소품 ]', {
             fontSize: '16px', fontFamily: 'monospace', color: '#888888',
             backgroundColor: '#1a1a35', padding: { x: 14, y: 6 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });

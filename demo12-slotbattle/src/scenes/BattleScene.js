@@ -11,7 +11,7 @@ class BattleScene extends Phaser.Scene {
         this.encounterType = data.encounterType || 'battle';
         this.playerState = data.playerState || {
             hp: 80, maxHp: 80, block: 0, gold: 10,
-            symbolPool: ['sword', 'sword', 'shield', 'shield', 'potion', 'dagger', 'arrow', 'fire', 'coin', 'skull'],
+            symbolPool: ['knight', 'knight', 'blackout', 'blackout', 'priest', 'jester', 'dagger', 'rage', 'festival', 'dead'],
             codex: {}, comboUpgrades: {}, relics: [], visitedNodes: [], currentFloor: 0
         };
         if (!this.playerState.codex) this.playerState.codex = {};
@@ -103,10 +103,10 @@ class BattleScene extends Phaser.Scene {
         topBg.fillStyle(0x111128, 1);
         topBg.fillRect(0, 0, W, 50);
 
-        const encounterLabel = this.encounterType === 'boss' ? '⚠️ BOSS' :
-                               this.encounterType === 'elite' ? '💀 강적' : '⚔️ 전투';
-        const eventTag = this._isEventRound ? '  ✨이벤트' : '';
-        const actLabel = this.map ? `Act ${this.act + 1}` : `라운드 ${this.round}/10`;
+        const encounterLabel = this.encounterType === 'boss' ? '⚠️ 주연' :
+                               this.encounterType === 'elite' ? '💀 비극' : '⚔️ 공연';
+        const eventTag = this._isEventRound ? '  ✨즉흥극' : '';
+        const actLabel = this.map ? `제${this.act + 1}막` : `장면 ${this.round}/10`;
         this.add.text(W / 2, 25, `${actLabel}  ${encounterLabel}${eventTag}`, {
             fontSize: '20px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
@@ -211,14 +211,14 @@ class BattleScene extends Phaser.Scene {
             }).setOrigin(0, 0.5);
         }
 
-        this.spinBtn = this.add.text(W / 2, 478, '[ SPIN! ]', {
-            fontSize: '28px', fontFamily: 'monospace', color: '#ffcc00',
+        this.spinBtn = this.add.text(W / 2, 478, '[ 연출 ]', {
+            fontSize: '28px', fontFamily: 'monospace', color: '#cc8844',
             fontStyle: 'bold', padding: { x: 28, y: 10 },
-            backgroundColor: '#2a2a1a'
+            backgroundColor: '#1a1a10'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-        this.spinBtn.on('pointerover', () => { if (this.turnPhase === 'ready') this.spinBtn.setColor('#ffffff'); });
-        this.spinBtn.on('pointerout', () => this.spinBtn.setColor('#ffcc00'));
+        this.spinBtn.on('pointerover', () => { if (this.turnPhase === 'ready') this.spinBtn.setColor('#ffcc88'); });
+        this.spinBtn.on('pointerout', () => this.spinBtn.setColor('#cc8844'));
         this.spinBtn.on('pointerdown', () => this._onSpin());
 
         this.tweens.add({
@@ -423,13 +423,13 @@ class BattleScene extends Phaser.Scene {
 
         // relic: resonance_stone — 2 same symbols → trigger 3rd effect
         if (this._relicCount('resonance_stone') > 0 && results.length === 3) {
-            if (results[0] === results[1] && results[0] !== results[2] && results[0] !== 'skull') {
+            if (results[0] === results[1] && results[0] !== results[2] && results[0] !== 'dead') {
                 results[2] = results[0];
                 this._appendLog([{ type: 'info', text: `🔗 공명석: ${SYMBOL_DATA[results[0]]?.name || results[0]} 공명 발동!` }]);
-            } else if (results[0] === results[2] && results[0] !== results[1] && results[0] !== 'skull') {
+            } else if (results[0] === results[2] && results[0] !== results[1] && results[0] !== 'dead') {
                 results[1] = results[0];
                 this._appendLog([{ type: 'info', text: `🔗 공명석: ${SYMBOL_DATA[results[0]]?.name || results[0]} 공명 발동!` }]);
-            } else if (results[1] === results[2] && results[1] !== results[0] && results[1] !== 'skull') {
+            } else if (results[1] === results[2] && results[1] !== results[0] && results[1] !== 'dead') {
                 results[0] = results[1];
                 this._appendLog([{ type: 'info', text: `🔗 공명석: ${SYMBOL_DATA[results[1]]?.name || results[1]} 공명 발동!` }]);
             }
@@ -459,7 +459,7 @@ class BattleScene extends Phaser.Scene {
     _showPreviewThenAct(results) {
         // Event round skull→relic check
         if (this.encounterType === 'event_round' || this._isEventRound) {
-            const skullIdx = results.findIndex(r => r === 'skull');
+            const skullIdx = results.findIndex(r => r === 'dead');
             if (skullIdx >= 0) this._skullToRelic(skullIdx, results);
         }
 
@@ -501,9 +501,9 @@ class BattleScene extends Phaser.Scene {
     _doPlayerTurnDouble(firstResults, secondResults) {
         // Both spin results apply — resolve each, combine effects
         if (this._isEventRound) {
-            const skullIdx1 = firstResults.findIndex(r => r.id === 'skull');
+            const skullIdx1 = firstResults.findIndex(r => r.id === 'dead');
             if (skullIdx1 >= 0) this._skullToRelic(skullIdx1, firstResults);
-            const skullIdx2 = secondResults.findIndex(r => r.id === 'skull');
+            const skullIdx2 = secondResults.findIndex(r => r.id === 'dead');
             if (skullIdx2 >= 0) this._skullToRelic(skullIdx2, secondResults);
         }
 
@@ -624,7 +624,7 @@ class BattleScene extends Phaser.Scene {
         const chaosCount = this._relicCount('chaos_orb');
         if (chaosCount > 0) {
             for (let c = 0; c < chaosCount; c++) {
-                const pool = this.playerState.symbolPool.filter(s => s !== 'skull');
+                const pool = this.playerState.symbolPool.filter(s => s !== 'dead');
                 if (pool.length === 0) break;
                 const bonusSym = pool[Phaser.Math.Between(0, pool.length - 1)];
                 const symData = SYMBOL_DATA[bonusSym];
@@ -660,7 +660,7 @@ class BattleScene extends Phaser.Scene {
     _doPlayerTurn(results) {
         // Event round skull→relic check
         if (this.encounterType === 'event_round' || this._isEventRound) {
-            const skullIdx = results.findIndex(r => r === 'skull');
+            const skullIdx = results.findIndex(r => r === 'dead');
             if (skullIdx >= 0) this._skullToRelic(skullIdx, results);
         }
 
@@ -727,7 +727,7 @@ class BattleScene extends Phaser.Scene {
             if (attackers.length > 0) {
                 this.time.delayedCall(500, () => this._doEnemyTurn(attackers));
             } else {
-                this._appendLog([{ type: 'info', text: '적이 공격을 준비 중…' }]);
+                this._appendLog([{ type: 'info', text: '배우가 대사를 준비 중…' }]);
                 this.time.delayedCall(400, () => this._readyForSpin());
             }
         });
@@ -938,7 +938,7 @@ class BattleScene extends Phaser.Scene {
 
         this.goldLabel.setText(`🪙 ${ps.gold}`);
         this.goldTopLabel.setText(`🪙 ${ps.gold}`);
-        this.deckLabel.setText(`덱 ${ps.symbolPool.length}장:`);
+        this.deckLabel.setText(`대본 ${ps.symbolPool.length}장:`);
         this.deckIconsText.setText(ps.symbolPool.map(id => { const s = SYMBOL_DATA[id]; return s ? s.icon : '?'; }).join(''));
 
         for (let i = 0; i < this.enemies.length; i++) {
@@ -1043,7 +1043,7 @@ class BattleScene extends Phaser.Scene {
 
     _showEventBanner() {
         const W = 1280;
-        const banner = this.add.text(W / 2, 270, '✨ 이벤트 라운드! 해골 → 유물 교체 ✨', {
+        const banner = this.add.text(W / 2, 270, '✨ 즉흥극! 망자 → 소품 교체 ✨', {
             fontSize: '20px', fontFamily: 'monospace', color: '#ffcc00', fontStyle: 'bold',
             stroke: '#000000', strokeThickness: 4, backgroundColor: '#2a1a3a', padding: { x: 16, y: 8 }
         }).setOrigin(0.5).setDepth(300).setAlpha(0);
@@ -1084,7 +1084,7 @@ class BattleScene extends Phaser.Scene {
         }
 
         this._popText(640, 300, `${relic.icon} ${relic.name} 획득!`, '#aa88ff', 28);
-        this._appendLog([{ type: 'info', text: `✨ 해골 → 유물 [${relic.name}] 획득!` }]);
+        this._appendLog([{ type: 'info', text: `✨ 망자 → 소품 [${relic.name}] 획득!` }]);
     }
 
     _onRoundWin() {

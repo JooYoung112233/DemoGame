@@ -1,32 +1,23 @@
-// ── MAP GENERATION ─────────────────────────────
-// Slay the Spire-style branching tree per Act (Horizontal layout)
+// ── THE LAST THEATER — MAP GENERATION ─────────────────────
+// 저주받은 극장의 막(Act)을 탐험하는 트리 맵 (Horizontal layout)
 
 const MAP_CONFIG = {
     acts: [
         {
-            id: 1, name: 'Act 1: 어둠의 입구',
+            id: 1, name: '제1막: 버려진 객석',
             floors: 7,
-            enemyPool: ['slime', 'rat', 'bat'],
-            elitePool: ['goblin'],
-            boss: 'goblin_chief',
+            enemyPool: ['audience', 'maskless', 'stage_spider', 'shadow_dancer'],
+            elitePool: ['shadow_dancer'],
+            boss: 'stage_director',
             shopFreq: 0.15,
             eventFreq: 0.12,
         },
         {
-            id: 2, name: 'Act 2: 깊은 지하',
+            id: 2, name: '제2막: 왕의 비극',
             floors: 7,
-            enemyPool: ['goblin', 'skeleton', 'wolf'],
-            elitePool: ['orc'],
-            boss: 'lich',
-            shopFreq: 0.15,
-            eventFreq: 0.12,
-        },
-        {
-            id: 3, name: 'Act 3: 드래곤의 둥지',
-            floors: 7,
-            enemyPool: ['orc', 'mage', 'skeleton'],
-            elitePool: ['mage'],
-            boss: 'dragon',
+            enemyPool: ['mad_king', 'laughing_soldier', 'singing_skull', 'clapping_ghost'],
+            elitePool: ['mad_king'],
+            boss: 'tyrant',
             shopFreq: 0.15,
             eventFreq: 0.12,
         },
@@ -34,13 +25,13 @@ const MAP_CONFIG = {
 };
 
 const NODE_TYPES = {
-    battle:   { icon: '⚔️', name: '전투',   color: 0xff4444 },
-    elite:    { icon: '💀', name: '강적',   color: 0xff8800 },
-    shop:     { icon: '🏪', name: '상점',   color: 0xffcc00 },
-    treasure: { icon: '💎', name: '보물',   color: 0x44ccff },
-    rest:     { icon: '🏕️', name: '휴식',   color: 0x44ff88 },
-    event:    { icon: '❓', name: '이벤트', color: 0xcc88ff },
-    boss:     { icon: '👹', name: '보스',   color: 0xff2222 },
+    battle:   { icon: '⚔️', name: '공연',   color: 0xff4444 },
+    elite:    { icon: '💀', name: '비극',   color: 0xff8800 },
+    shop:     { icon: '🏪', name: '소품실', color: 0xffcc00 },
+    treasure: { icon: '💎', name: '유물',   color: 0x44ccff },
+    rest:     { icon: '🕯️', name: '분장실', color: 0x44ff88 },
+    event:    { icon: '❓', name: '즉흥극', color: 0xcc88ff },
+    boss:     { icon: '👹', name: '주연',   color: 0xff2222 },
 };
 
 class MapGenerator {

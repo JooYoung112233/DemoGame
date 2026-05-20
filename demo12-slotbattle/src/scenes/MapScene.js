@@ -7,7 +7,7 @@ class MapScene extends Phaser.Scene {
         this.act = data.act || 0;
         this.playerState = data.playerState || {
             hp: 80, maxHp: 80, block: 0, gold: 10,
-            symbolPool: ['sword', 'sword', 'shield', 'shield', 'potion', 'dagger', 'arrow', 'fire', 'coin', 'skull'],
+            symbolPool: ['knight', 'knight', 'blackout', 'blackout', 'priest', 'jester', 'dagger', 'rage', 'festival', 'dead'],
             codex: {}, comboUpgrades: {}, relics: [], currentFloor: 0, visitedNodes: []
         };
         if (!this.playerState.relics) this.playerState.relics = [];
@@ -27,7 +27,7 @@ class MapScene extends Phaser.Scene {
 
     create() {
         const W = 1280, H = 720;
-        this.cameras.main.setBackgroundColor('#0a0a1a');
+        this.cameras.main.setBackgroundColor('#0a0a0a');
 
         const actCfg = MAP_CONFIG.acts[this.act];
 
@@ -135,12 +135,12 @@ class MapScene extends Phaser.Scene {
         bg.fillCircle(x, y, 26);
         bg.strokeCircle(x, y, 26);
 
-        const icon = this.add.text(x, y - 2, node.type === 'start' ? '🚪' : typeInfo.icon, {
+        const icon = this.add.text(x, y - 2, node.type === 'start' ? '🎭' : typeInfo.icon, {
             fontSize: '20px'
         }).setOrigin(0.5).setAlpha(visited ? 0.3 : 1);
 
         if (!visited) {
-            this.add.text(x, y + 30, node.type === 'start' ? '시작' : typeInfo.name, {
+            this.add.text(x, y + 30, node.type === 'start' ? '개막' : typeInfo.name, {
                 fontSize: '9px', fontFamily: 'monospace',
                 color: clickable ? '#ffffff' : '#666666'
             }).setOrigin(0.5);
@@ -239,7 +239,7 @@ class MapScene extends Phaser.Scene {
             const s = SYMBOL_DATA[id];
             return s ? s.icon : '?';
         }).join('');
-        this.add.text(20, 692, `덱: ${icons}`, {
+        this.add.text(20, 692, `대본: ${icons}`, {
             fontSize: '13px', fontFamily: 'monospace', color: '#666666'
         }).setOrigin(0, 0.5);
     }

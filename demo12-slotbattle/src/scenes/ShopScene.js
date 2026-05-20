@@ -42,7 +42,7 @@ class ShopScene extends Phaser.Scene {
         this.add.graphics().fillStyle(0x111128, 1).fillRect(0, 0, W, 60);
         const headerText = this.goldReward > 0
             ? `라운드 클리어!  +${this.goldReward}G`
-            : '🏪 상점';
+            : '🏪 소품실';
         this.add.text(W / 2, 18, headerText, {
             fontSize: '20px', fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'
         }).setOrigin(0.5);
@@ -94,7 +94,7 @@ class ShopScene extends Phaser.Scene {
 
     _drawSymbolShop() {
         const W = 1280, startY = 120;
-        this.add.text(W / 2, startY, '심볼 구매 — 덱에 추가', {
+        this.add.text(W / 2, startY, '심볼 구매 — 대본에 추가', {
             fontSize: '14px', fontFamily: 'monospace', color: '#888888'
         }).setOrigin(0.5);
 
@@ -169,7 +169,7 @@ class ShopScene extends Phaser.Scene {
             const row = Math.floor(i / cols);
             const x = startX + col * 50;
             const sy = y + 35 + row * 50;
-            const isSkull = pool[i] === 'skull';
+            const isSkull = pool[i] === 'dead';
 
             const btn = this.add.text(x, sy, sym.icon, {
                 fontSize: '24px', backgroundColor: '#1a1a35',
@@ -423,7 +423,7 @@ class ShopScene extends Phaser.Scene {
             this.playerState.hp += e.maxHpUp;
         }
         if (e.randomSymbol) {
-            const available = Object.keys(SYMBOL_DATA).filter(id => id !== 'skull');
+            const available = Object.keys(SYMBOL_DATA).filter(id => id !== 'dead');
             const pick = available[Phaser.Math.Between(0, available.length - 1)];
             this.playerState.symbolPool.push(pick);
             this.playerState.codex[pick] = true;
@@ -433,7 +433,7 @@ class ShopScene extends Phaser.Scene {
             this.playerState.comboUpgrades[combo.id] = (this.playerState.comboUpgrades[combo.id] || 0) + 1;
         }
         if (e.removeSkull) {
-            const idx = this.playerState.symbolPool.indexOf('skull');
+            const idx = this.playerState.symbolPool.indexOf('dead');
             if (idx !== -1) this.playerState.symbolPool.splice(idx, 1);
         }
         this._refresh();
@@ -476,7 +476,7 @@ class ShopScene extends Phaser.Scene {
         });
         this.infoContainer.add(goldText);
 
-        const deckLabel = this.add.text(20, y + 30, `덱 (${this.playerState.symbolPool.length}장):`, {
+        const deckLabel = this.add.text(20, y + 30, `대본 (${this.playerState.symbolPool.length}장):`, {
             fontSize: '12px', fontFamily: 'monospace', color: '#888888'
         });
         this.infoContainer.add(deckLabel);
@@ -528,7 +528,7 @@ class ShopScene extends Phaser.Scene {
     }
 
     _generateShopSymbols() {
-        const available = Object.keys(SYMBOL_DATA).filter(id => id !== 'skull');
+        const available = Object.keys(SYMBOL_DATA).filter(id => id !== 'dead');
         return Phaser.Utils.Array.Shuffle(available.slice()).slice(0, 5);
     }
 

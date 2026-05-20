@@ -1,204 +1,235 @@
+// ── THE LAST THEATER — SYMBOL & SCENE DATA ─────────────────
+// 심볼 = 연출 재료, Scene = 조합으로 만들어지는 장면
+
 const SYMBOL_DATA = {
-    sword: {
-        id: 'sword', name: '검', icon: '⚔️', tier: 1,
-        color: 0xff4444, type: 'attack',
-        effect: { damage: 8 },
-        desc: '기본 근접 공격', cost: 4
+    // ── 역할 (Role) ──────────────────────────────
+    knight: {
+        id: 'knight', name: '기사', icon: '⚔️', tier: 1,
+        color: 0xff4444, type: 'role', category: '역할',
+        effect: { damage: 5 },
+        desc: '무대 위 충직한 검사', cost: 4
     },
-    arrow: {
-        id: 'arrow', name: '화살', icon: '🏹', tier: 1,
-        color: 0x44ff44, type: 'attack',
-        effect: { damage: 6, pierce: true },
-        desc: '방어 무시 공격', cost: 4
+    king: {
+        id: 'king', name: '왕', icon: '👑', tier: 2,
+        color: 0xffaa00, type: 'role', category: '역할',
+        effect: { damage: 7 },
+        desc: '권좌의 무게를 짊어진 자', cost: 6
     },
-    fire: {
-        id: 'fire', name: '불꽃', icon: '🔥', tier: 1,
-        color: 0xff8800, type: 'attack',
-        effect: { damage: 5, aoe: true },
-        desc: '전체 공격', cost: 5
+    jester: {
+        id: 'jester', name: '광대', icon: '🎭', tier: 1,
+        color: 0xcc44cc, type: 'role', category: '역할',
+        effect: { damage: 3, hits: 2 },
+        desc: '웃음 뒤에 칼날을 숨긴 자', cost: 4
     },
+    priest: {
+        id: 'priest', name: '사제', icon: '🕯️', tier: 1,
+        color: 0x44ff88, type: 'role', category: '역할',
+        effect: { heal: 5 },
+        desc: '촛불로 상처를 어루만지는 자', cost: 4
+    },
+    dead: {
+        id: 'dead', name: '망자', icon: '💀', tier: 1,
+        color: 0x888888, type: 'curse', category: '역할',
+        effect: { selfDamage: 3 },
+        desc: '저주받은 배역 (제거 추천)', cost: 0
+    },
+
+    // ── 감정 (Emotion) ──────────────────────────────
+    rage: {
+        id: 'rage', name: '분노', icon: '🔥', tier: 1,
+        color: 0xff8800, type: 'emotion', category: '감정',
+        effect: { damage: 4, burn: 2 },
+        desc: '무대를 태우는 격정', cost: 5
+    },
+    tragedy: {
+        id: 'tragedy', name: '비극', icon: '🩸', tier: 2,
+        color: 0xcc2244, type: 'emotion', category: '감정',
+        effect: { damage: 6, poison: 2 },
+        desc: '피로 물든 비극의 장면', cost: 6
+    },
+    cold: {
+        id: 'cold', name: '냉기', icon: '❄️', tier: 1,
+        color: 0x88ccff, type: 'emotion', category: '감정',
+        effect: { damage: 3, slow: 1 },
+        desc: '시간을 얼리는 겨울의 감정', cost: 5
+    },
+    fear: {
+        id: 'fear', name: '공포', icon: '👻', tier: 2,
+        color: 0x8844cc, type: 'emotion', category: '감정',
+        effect: { damage: 4, slow: 1 },
+        desc: '관객의 등줄기를 서늘케 하는 공포', cost: 5
+    },
+
+    // ── 무대 (Stage) ──────────────────────────────
+    festival: {
+        id: 'festival', name: '축제', icon: '🎪', tier: 1,
+        color: 0xffcc00, type: 'stage', category: '무대',
+        effect: { gold: 3 },
+        desc: '화려한 축제 장면', cost: 3
+    },
+    blackout: {
+        id: 'blackout', name: '암전', icon: '🌑', tier: 1,
+        color: 0x4466aa, type: 'stage', category: '무대',
+        effect: { block: 6 },
+        desc: '어둠 속에 숨는 장면', cost: 4
+    },
+    mirror: {
+        id: 'mirror', name: '거울', icon: '🪞', tier: 2,
+        color: 0x88aacc, type: 'stage', category: '무대',
+        effect: { block: 4, thorns: 3 },
+        desc: '비춰진 것이 되돌아오는 장면', cost: 5
+    },
+    prison: {
+        id: 'prison', name: '감옥', icon: '⛓️', tier: 2,
+        color: 0x886644, type: 'stage', category: '무대',
+        effect: { damage: 4, slow: 1 },
+        desc: '쇠사슬로 무대를 옥죄는 장면', cost: 5
+    },
+
+    // ── 기타 ──────────────────────────────
     dagger: {
         id: 'dagger', name: '단검', icon: '🗡️', tier: 1,
-        color: 0xcc44cc, type: 'attack',
-        effect: { damage: 4, hits: 2 },
-        desc: '2회 연속 공격', cost: 4
+        color: 0xcc6644, type: 'role', category: '역할',
+        effect: { damage: 4 },
+        desc: '암막 뒤에서 번뜩이는 칼날', cost: 4
     },
-    axe: {
-        id: 'axe', name: '도끼', icon: '🪓', tier: 2,
-        color: 0xbb5533, type: 'attack',
-        effect: { damage: 12 },
-        desc: '높은 단일 데미지', cost: 6
-    },
-    bomb: {
-        id: 'bomb', name: '폭탄', icon: '💣', tier: 2,
-        color: 0xff3333, type: 'attack',
-        effect: { damage: 8, aoe: true },
-        desc: '강력한 전체 공격', cost: 7
-    },
-    lightning: {
-        id: 'lightning', name: '번개', icon: '⚡', tier: 2,
-        color: 0xffff44, type: 'attack',
-        effect: { damage: 5, hits: 3 },
-        desc: '3회 랜덤 공격', cost: 7
-    },
-    ice: {
-        id: 'ice', name: '얼음', icon: '❄️', tier: 2,
-        color: 0x88ccff, type: 'attack',
-        effect: { damage: 6, slow: 1 },
-        desc: '공격 + 적 쿨타임 1 증가', cost: 6
-    },
-    shield: {
-        id: 'shield', name: '방패', icon: '🛡️', tier: 1,
-        color: 0x4488ff, type: 'defense',
-        effect: { block: 8 },
-        desc: '방어막 획득', cost: 4
-    },
-    armor: {
-        id: 'armor', name: '갑옷', icon: '🪖', tier: 1,
-        color: 0x8888aa, type: 'defense',
-        effect: { block: 5, thorns: 3 },
-        desc: '방어 + 반사 데미지', cost: 5
-    },
-    fortress: {
-        id: 'fortress', name: '성벽', icon: '🏰', tier: 2,
-        color: 0x6688cc, type: 'defense',
-        effect: { block: 14 },
-        desc: '높은 방어막', cost: 7
-    },
-    potion: {
-        id: 'potion', name: '포션', icon: '🧪', tier: 1,
-        color: 0x44ff88, type: 'heal',
-        effect: { heal: 8 },
-        desc: 'HP 회복', cost: 4
-    },
-    herb: {
-        id: 'herb', name: '약초', icon: '🌿', tier: 1,
-        color: 0x33cc66, type: 'heal',
-        effect: { heal: 5, block: 3 },
-        desc: '소량 회복 + 방어', cost: 4
-    },
-    heart: {
-        id: 'heart', name: '생명력', icon: '❤️', tier: 2,
-        color: 0xff4488, type: 'heal',
-        effect: { heal: 15 },
-        desc: '대량 HP 회복', cost: 7
-    },
-    coin: {
-        id: 'coin', name: '금화', icon: '🪙', tier: 1,
-        color: 0xffcc00, type: 'gold',
-        effect: { gold: 3 },
-        desc: '골드 획득', cost: 3
-    },
-    crown: {
-        id: 'crown', name: '왕관', icon: '👑', tier: 2,
-        color: 0xffaa00, type: 'gold',
-        effect: { gold: 6 },
-        desc: '대량 골드 획득', cost: 6
+    rose: {
+        id: 'rose', name: '장미', icon: '🌹', tier: 1,
+        color: 0xff4488, type: 'stage', category: '무대',
+        effect: { heal: 4, block: 2 },
+        desc: '아름다운 한 송이, 가시를 품은 회복', cost: 4
     },
     gem: {
         id: 'gem', name: '보석', icon: '💎', tier: 3,
-        color: 0x44ccff, type: 'wild',
+        color: 0x44ccff, type: 'wild', category: '특수',
         effect: {},
-        desc: '와일드카드 (아무 심볼 대체)', cost: 12
-    },
-    skull: {
-        id: 'skull', name: '해골', icon: '💀', tier: 1,
-        color: 0x888888, type: 'curse',
-        effect: { selfDamage: 3 },
-        desc: '자해 데미지 (제거 추천)', cost: 0
+        desc: '와일드카드 — 어떤 배역이든 대체', cost: 12
     },
 };
 
+// ── SCENE DATA (조합 = 장면 연출) ─────────────────────
 const COMBO_DATA = [
+    // ── 트리플 매치 (같은 심볼 3개) ──────────────
     {
-        id: 'triple_sword', name: '검의 폭풍',
-        symbols: ['sword', 'sword', 'sword'],
-        effect: { damage: 30 },
-        desc: '검 3개 — 대폭발 데미지',
+        id: 'knights_oath', name: '「기사의 맹세」',
+        symbols: ['knight', 'knight', 'knight'],
+        effect: { damage: 20 },
+        desc: '기사 ×3 — 맹세의 일격',
         recipe: '⚔️⚔️⚔️'
     },
     {
-        id: 'triple_shield', name: '철벽 방어',
-        symbols: ['shield', 'shield', 'shield'],
-        effect: { block: 30 },
-        desc: '방패 3개 — 완전 방어',
-        recipe: '🛡️🛡️🛡️'
-    },
-    {
-        id: 'fire_sword', name: '화염검',
-        symbols: ['sword', 'fire'], matchType: 'includes',
-        effect: { damage: 20, burn: 3 },
-        desc: '검+불 — 화염 데미지 + 화상',
-        recipe: '⚔️🔥 + 아무거나'
-    },
-    {
-        id: 'poison_dagger', name: '독날',
-        symbols: ['dagger', 'potion'], matchType: 'includes',
-        effect: { damage: 10, poison: 5 },
-        desc: '단검+포션 — 독 데미지',
-        recipe: '🗡️🧪 + 아무거나'
-    },
-    {
-        id: 'shield_potion', name: '보호의 물약',
-        symbols: ['shield', 'potion'], matchType: 'includes',
-        effect: { block: 10, heal: 10 },
-        desc: '방패+포션 — 방어+회복',
-        recipe: '🛡️🧪 + 아무거나'
-    },
-    {
-        id: 'arrow_fire', name: '화살비',
-        symbols: ['arrow', 'fire'], matchType: 'includes',
-        effect: { damage: 15, aoe: true },
-        desc: '화살+불 — 전체 화염 화살',
-        recipe: '🏹🔥 + 아무거나'
-    },
-    {
-        id: 'triple_coin', name: '잭팟',
-        symbols: ['coin', 'coin', 'coin'],
-        effect: { gold: 20 },
-        desc: '금화 3개 — 대박 골드',
-        recipe: '🪙🪙🪙'
-    },
-    {
-        id: 'ice_shield', name: '빙벽',
-        symbols: ['ice', 'shield'], matchType: 'includes',
-        effect: { block: 15, slow: 2 },
-        desc: '얼음+방패 — 방어 + 적 둔화',
-        recipe: '❄️🛡️ + 아무거나'
-    },
-    {
-        id: 'lightning_dagger', name: '뇌전 난무',
-        symbols: ['lightning', 'dagger'], matchType: 'includes',
-        effect: { damage: 8, hits: 5 },
-        desc: '번개+단검 — 5연타',
-        recipe: '⚡🗡️ + 아무거나'
-    },
-    {
-        id: 'bomb_fire', name: '대폭발',
-        symbols: ['bomb', 'fire'], matchType: 'includes',
-        effect: { damage: 25, aoe: true, burn: 2 },
-        desc: '폭탄+불 — 전체 대폭발 + 화상',
-        recipe: '💣🔥 + 아무거나'
-    },
-    {
-        id: 'axe_sword', name: '이중 참격',
-        symbols: ['axe', 'sword'], matchType: 'includes',
+        id: 'kings_soliloquy', name: '「왕의 독백」',
+        symbols: ['king', 'king', 'king'],
         effect: { damage: 28 },
-        desc: '도끼+검 — 초강력 단일 공격',
-        recipe: '🪓⚔️ + 아무거나'
+        desc: '왕 ×3 — 권좌에서 내리치다',
+        recipe: '👑👑👑'
     },
     {
-        id: 'herb_heart', name: '생명의 축복',
-        symbols: ['herb', 'heart'], matchType: 'includes',
-        effect: { heal: 25, block: 8 },
-        desc: '약초+생명력 — 대회복 + 방어',
-        recipe: '🌿❤️ + 아무거나'
+        id: 'jesters_frenzy', name: '「광대의 난무」',
+        symbols: ['jester', 'jester', 'jester'],
+        effect: { damage: 6, hits: 4 },
+        desc: '광대 ×3 — 미친 듯이 휘두르다',
+        recipe: '🎭🎭🎭'
     },
     {
-        id: 'all_different', name: '무지개',
+        id: 'burning_stage', name: '「불타는 무대」',
+        symbols: ['rage', 'rage', 'rage'],
+        effect: { damage: 10, aoe: true, burn: 3 },
+        desc: '분노 ×3 — 무대 전체가 불타오르다',
+        recipe: '🔥🔥🔥'
+    },
+    {
+        id: 'frozen_opera', name: '「얼어붙은 오페라」',
+        symbols: ['cold', 'cold', 'cold'],
+        effect: { damage: 8, aoe: true, slow: 3 },
+        desc: '냉기 ×3 — 무대가 얼어붙다',
+        recipe: '❄️❄️❄️'
+    },
+    {
+        id: 'total_blackout', name: '「완전한 암전」',
+        symbols: ['blackout', 'blackout', 'blackout'],
+        effect: { block: 24 },
+        desc: '암전 ×3 — 어둠 속 절대 방어',
+        recipe: '🌑🌑🌑'
+    },
+    {
+        id: 'act_of_blood', name: '「피의 3막」',
+        symbols: ['tragedy', 'tragedy', 'tragedy'],
+        effect: { damage: 18, poison: 4 },
+        desc: '비극 ×3 — 피로 쓴 대본',
+        recipe: '🩸🩸🩸'
+    },
+    {
+        id: 'triple_festival', name: '「성대한 축연」',
+        symbols: ['festival', 'festival', 'festival'],
+        effect: { gold: 18 },
+        desc: '축제 ×3 — 관객의 환호와 금화의 비',
+        recipe: '🎪🎪🎪'
+    },
+
+    // ── 씬 조합 (2심볼 includes) ──────────────
+    {
+        id: 'kings_execution', name: '「왕의 처형」',
+        symbols: ['king', 'rage'], matchType: 'includes',
+        effect: { damage: 22, burn: 3 },
+        desc: '왕+분노 — 화형에 처하다',
+        recipe: '👑🔥 + 아무거나'
+    },
+    {
+        id: 'bloody_duel', name: '「피의 결투」',
+        symbols: ['knight', 'tragedy'], matchType: 'includes',
+        effect: { damage: 16, poison: 3 },
+        desc: '기사+비극 — 피 흘리며 싸우다',
+        recipe: '⚔️🩸 + 아무거나'
+    },
+    {
+        id: 'sacred_blessing', name: '「성스러운 축복」',
+        symbols: ['priest', 'rose'], matchType: 'includes',
+        effect: { heal: 14, block: 8 },
+        desc: '사제+장미 — 빛의 치유',
+        recipe: '🕯️🌹 + 아무거나'
+    },
+    {
+        id: 'winters_curtain', name: '「겨울의 장막」',
+        symbols: ['cold', 'blackout'], matchType: 'includes',
+        effect: { block: 14, slow: 2 },
+        desc: '냉기+암전 — 서리로 뒤덮인 장막',
+        recipe: '❄️🌑 + 아무거나'
+    },
+    {
+        id: 'horror_puppet', name: '「공포의 인형극」',
+        symbols: ['jester', 'fear'], matchType: 'includes',
+        effect: { damage: 12, aoe: true },
+        desc: '광대+공포 — 관객 모두를 공포에 빠뜨리다',
+        recipe: '🎭👻 + 아무거나'
+    },
+    {
+        id: 'prison_judgment', name: '「감옥의 심판」',
+        symbols: ['prison', 'knight'], matchType: 'includes',
+        effect: { damage: 16, pierce: true },
+        desc: '감옥+기사 — 방어를 무시하는 처형',
+        recipe: '⛓️⚔️ + 아무거나'
+    },
+    {
+        id: 'mirror_tragedy', name: '「거울 속 비극」',
+        symbols: ['mirror', 'tragedy'], matchType: 'includes',
+        effect: { damage: 12, block: 6, poison: 2 },
+        desc: '거울+비극 — 비춰진 고통이 되돌아오다',
+        recipe: '🪞🩸 + 아무거나'
+    },
+    {
+        id: 'grand_finale', name: '「성대한 피날레」',
+        symbols: ['festival', 'king'], matchType: 'includes',
+        effect: { gold: 8, damage: 8 },
+        desc: '축제+왕 — 왕에게 바치는 최후의 축제',
+        recipe: '🎪👑 + 아무거나'
+    },
+    // ── 올디퍼런트 ──────────────
+    {
+        id: 'improvisation', name: '「즉흥 연극」',
         matchType: 'allDifferent',
-        effect: { damage: 5, block: 5, heal: 5, gold: 3 },
-        desc: '모두 다른 심볼 — 만능 효과',
+        effect: { damage: 5, block: 5, heal: 4, gold: 3 },
+        desc: '모두 다른 심볼 — 감독의 즉흥 연출',
         recipe: '전부 다른 심볼'
     },
 ];

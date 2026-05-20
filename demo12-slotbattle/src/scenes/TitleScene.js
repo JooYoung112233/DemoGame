@@ -5,40 +5,40 @@ class TitleScene extends Phaser.Scene {
 
     create() {
         const W = 1280, H = 720;
-        this.cameras.main.setBackgroundColor('#0a0a1a');
+        this.cameras.main.setBackgroundColor('#0a0a0a');
 
-        this.add.text(W / 2, 140, '🎰', { fontSize: '80px' }).setOrigin(0.5);
+        this.add.text(W / 2, 120, '🎭', { fontSize: '80px' }).setOrigin(0.5);
 
-        this.add.text(W / 2, 240, 'SLOT BATTLE', {
-            fontSize: '48px', fontFamily: 'monospace', color: '#ffcc00', fontStyle: 'bold'
+        this.add.text(W / 2, 220, 'THE LAST THEATER', {
+            fontSize: '44px', fontFamily: 'monospace', color: '#cc8844', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.text(W / 2, 290, '슬롯을 돌려 전투하라. 심볼을 모아 빌드를 완성하라.', {
-            fontSize: '15px', fontFamily: 'monospace', color: '#888888'
+        this.add.text(W / 2, 270, '나는 싸우는 게 아니라, 죽음을 연출한다.', {
+            fontSize: '15px', fontFamily: 'monospace', color: '#886644', fontStyle: 'italic'
         }).setOrigin(0.5);
 
         const rules = [
-            '🎰 SPIN으로 슬롯 3개를 돌린다',
-            '⚡ 심볼 조합에 따라 공격/방어/회복이 결정된다',
-            '✨ 같은 심볼 3개 또는 특수 조합 = 콤보!',
-            '🗺️ 트리 맵에서 경로를 선택하며 진행',
-            '💎 보물 노드에서 유물을 획득하여 빌드 강화',
-            '🐉 3개 Act의 보스를 처치하면 승리!',
+            '🎭 감독이 되어 슬롯으로 장면(Scene)을 연출한다',
+            '⚔️ 심볼 조합에 따라 공격/방어/회복이 결정된다',
+            '✨ 같은 심볼 3개 또는 특수 조합 = Scene 발동!',
+            '🗺️ 저주받은 극장의 막(Act)을 탐험한다',
+            '💎 소품과 유물로 연출 스타일을 강화한다',
+            '👑 모든 배역을 끝내면 저주가 풀린다',
         ];
         for (let i = 0; i < rules.length; i++) {
-            this.add.text(W / 2, 340 + i * 28, rules[i], {
-                fontSize: '14px', fontFamily: 'monospace', color: '#666666'
+            this.add.text(W / 2, 320 + i * 28, rules[i], {
+                fontSize: '14px', fontFamily: 'monospace', color: '#666655'
             }).setOrigin(0.5);
         }
 
-        const startBtn = this.add.text(W / 2, 560, '[ 시작 ]', {
-            fontSize: '32px', fontFamily: 'monospace', color: '#ffcc00',
-            fontStyle: 'bold', backgroundColor: '#2a2a1a',
+        const startBtn = this.add.text(W / 2, 540, '[ 개막 ]', {
+            fontSize: '32px', fontFamily: 'monospace', color: '#cc8844',
+            fontStyle: 'bold', backgroundColor: '#1a1a10',
             padding: { x: 40, y: 12 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-        startBtn.on('pointerover', () => startBtn.setColor('#ffffff'));
-        startBtn.on('pointerout', () => startBtn.setColor('#ffcc00'));
+        startBtn.on('pointerover', () => startBtn.setColor('#ffcc88'));
+        startBtn.on('pointerout', () => startBtn.setColor('#cc8844'));
         startBtn.on('pointerdown', () => this.scene.start('MapScene', { act: 0 }));
 
         this.tweens.add({

@@ -13,7 +13,7 @@ class HelpScene extends Phaser.Scene {
         const overlay = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.85)
             .setInteractive();
 
-        this.add.text(W / 2, 30, '📖 도움말 — 조합 목록', {
+        this.add.text(W / 2, 30, '📖 연출 안내 — Scene 목록', {
             fontSize: '24px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
 

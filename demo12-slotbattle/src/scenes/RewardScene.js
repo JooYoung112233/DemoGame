@@ -47,7 +47,7 @@ class RewardScene extends Phaser.Scene {
     }
 
     _generateChoices() {
-        const available = Object.keys(SYMBOL_DATA).filter(id => id !== 'skull');
+        const available = Object.keys(SYMBOL_DATA).filter(id => id !== 'dead');
         const picks = [];
         const shuffled = Phaser.Utils.Array.Shuffle(available.slice());
         for (let i = 0; i < 3 && i < shuffled.length; i++) {

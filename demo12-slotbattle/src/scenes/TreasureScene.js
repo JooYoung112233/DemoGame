@@ -13,11 +13,11 @@ class TreasureScene extends Phaser.Scene {
         const W = 1280, H = 720;
         this.cameras.main.setBackgroundColor('#0a0a1a');
 
-        this.add.text(W / 2, 60, '💎 보물 발견!', {
-            fontSize: '32px', fontFamily: 'monospace', color: '#44ccff', fontStyle: 'bold'
+        this.add.text(W / 2, 60, '💎 소품 발견!', {
+            fontSize: '32px', fontFamily: 'monospace', color: '#cc8844', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.text(W / 2, 100, '유물 하나를 선택하세요', {
+        this.add.text(W / 2, 100, '소품 하나를 선택하세요', {
             fontSize: '16px', fontFamily: 'monospace', color: '#888888'
         }).setOrigin(0.5);
 
