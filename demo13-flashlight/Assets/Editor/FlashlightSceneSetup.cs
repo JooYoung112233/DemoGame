@@ -28,6 +28,7 @@ public class FlashlightSceneSetup : EditorWindow
 
         // ===== Player =====
         var playerGO = new GameObject("Player");
+        playerGO.tag = "Player";
         playerGO.transform.position = new Vector3(6, 0, 4);
         var playerCC = playerGO.AddComponent<CharacterController>();
         playerCC.radius = 0.3f;
