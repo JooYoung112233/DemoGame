@@ -24,8 +24,8 @@ class SafeHouseScene extends Phaser.Scene {
             this.gold += sold;
         }
 
-        this.contentContainer = this.add.container(0, 0);
         this.drawChrome();
+        this.contentContainer = this.add.container(0, 0).setDepth(10);
         if (this.extracted) this.showExtractResult();
         else if (!this.safe) this.showFailResult();
         this.showTab('depart');
