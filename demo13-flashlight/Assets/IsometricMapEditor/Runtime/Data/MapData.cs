@@ -10,6 +10,16 @@ namespace IsometricMapEditor
         public string mapId;
         public GridSettings gridSettings = new();
         public List<MapLayer> layers = new();
+        public List<PlacedBuilding> buildings = new();
+        public List<PlacedProp> props = new();
+        public List<PlacedHarvestable> harvestables = new();
+        public List<InteriorConnection> interiorConnections = new();
+        public WalkabilityData walkability;
+
+        public void InitializeWalkability()
+        {
+            walkability = new WalkabilityData(gridSettings.mapWidth, gridSettings.mapHeight);
+        }
 
         readonly Dictionary<Vector2Int, PlacedTile> _occupancyCache = new();
         bool _cacheDirty = true;

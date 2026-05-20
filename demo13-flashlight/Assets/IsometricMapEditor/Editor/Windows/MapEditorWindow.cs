@@ -20,7 +20,7 @@ namespace IsometricMapEditor.Editor
         public static string ActiveLayerName => activeLayerName;
         public static EditorToolMode CurrentTool => currentTool;
 
-        public enum EditorToolMode { Paint, Erase, Select }
+        public enum EditorToolMode { Paint, Erase, Select, Building, Walkability, Road, Prop, Connection }
 
         [MenuItem("Tools/Isometric Map Editor")]
         public static void ShowWindow()
@@ -96,14 +96,29 @@ namespace IsometricMapEditor.Editor
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
 
             if (GUILayout.Toggle(currentTool == EditorToolMode.Paint, "Paint", EditorStyles.toolbarButton))
-                currentTool = EditorToolMode.Paint;
+                SetTool(EditorToolMode.Paint);
             if (GUILayout.Toggle(currentTool == EditorToolMode.Erase, "Erase", EditorStyles.toolbarButton))
-                currentTool = EditorToolMode.Erase;
+                SetTool(EditorToolMode.Erase);
             if (GUILayout.Toggle(currentTool == EditorToolMode.Select, "Select", EditorStyles.toolbarButton))
-                currentTool = EditorToolMode.Select;
+                SetTool(EditorToolMode.Select);
+            if (GUILayout.Toggle(currentTool == EditorToolMode.Building, "Build", EditorStyles.toolbarButton))
+                SetTool(EditorToolMode.Building);
+            if (GUILayout.Toggle(currentTool == EditorToolMode.Walkability, "Walk", EditorStyles.toolbarButton))
+                SetTool(EditorToolMode.Walkability);
+            if (GUILayout.Toggle(currentTool == EditorToolMode.Prop, "Prop", EditorStyles.toolbarButton))
+                SetTool(EditorToolMode.Prop);
 
             GUILayout.FlexibleSpace();
 
+            if (GUILayout.Button("Export", EditorStyles.toolbarButton))
+                MapExporter.ExportToJson(activeMap);
+            if (GUILayout.Button("Validate", EditorStyles.toolbarButton))
+            {
+                var result = MapValidator.Validate(activeMap);
+                MapValidator.LogResults(result, activeMap.mapName);
+            }
+            if (GUILayout.Button("Scene", EditorStyles.toolbarButton))
+                MapSceneGenerator.GenerateScene(activeMap);
             if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
                 RefreshTilePalette();
 
@@ -214,6 +229,14 @@ namespace IsometricMapEditor.Editor
             EditorGUILayout.EndScrollView();
         }
 
+        void SetTool(EditorToolMode tool)
+        {
+            currentTool = tool;
+            WalkabilityPaintTool.SetActive(tool == EditorToolMode.Walkability);
+            PropPlaceTool.SetActive(tool == EditorToolMode.Prop);
+            ConnectionTool.SetActive(tool == EditorToolMode.Connection);
+        }
+
         void DrawGridSettings()
         {
             EditorGUILayout.LabelField("Grid Settings", EditorStyles.boldLabel);
@@ -303,6 +326,21 @@ namespace IsometricMapEditor.Editor
                 case EditorToolMode.Erase:
                     Undo.RecordObject(activeMap, "Erase Tile");
                     activeMap.RemoveTileAtAllLayers(cell);
+                    EditorUtility.SetDirty(activeMap);
+                    break;
+
+                case EditorToolMode.Building:
+                    var selBuilding = TilePaletteWindow.SelectedBuilding;
+                    if (selBuilding == null) return;
+                    Undo.RecordObject(activeMap, "Place Building");
+                    activeMap.buildings.Add(new PlacedBuilding
+                    {
+                        instanceId = System.Guid.NewGuid().ToString("N")[..8],
+                        gridPosition = cell,
+                        buildingDefinitionId = selBuilding.buildingId,
+                        buildingDefinition = selBuilding,
+                        roofVisible = true
+                    });
                     EditorUtility.SetDirty(activeMap);
                     break;
             }
