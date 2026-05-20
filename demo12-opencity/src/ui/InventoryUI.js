@@ -1,5 +1,5 @@
 // Tarkov-style grid inventory UI
-// Opens with TAB, shows 5x4 grid with item slots
+// Uses individual scrollFactor(0) elements instead of container to fix input bug
 
 class InventoryUI {
     constructor(scene, inventory) {
@@ -8,36 +8,42 @@ class InventoryUI {
         this.isOpen = false;
         this.cellSize = 56;
         this.padding = 4;
-        this.offsetX = 0;
-        this.offsetY = 0;
-
-        // Container (hidden initially)
-        this.container = scene.add.container(0, 0).setScrollFactor(0).setDepth(200).setVisible(false);
-
-        // Dragging state
-        this.dragItem = null;
-        this.dragOrigin = null;
+        this.elements = [];
     }
 
     toggle() {
         this.isOpen = !this.isOpen;
-        this.container.setVisible(this.isOpen);
         if (this.isOpen) this.render();
+        else this._cleanup();
     }
 
     open() {
         this.isOpen = true;
-        this.container.setVisible(true);
         this.render();
     }
 
     close() {
         this.isOpen = false;
-        this.container.setVisible(false);
+        this._cleanup();
+    }
+
+    _cleanup() {
+        for (const el of this.elements) {
+            if (el && el.destroy) el.destroy();
+        }
+        this.elements = [];
+    }
+
+    _addEl(el) {
+        if (el) {
+            el.setScrollFactor(0).setDepth(200);
+            this.elements.push(el);
+        }
+        return el;
     }
 
     render() {
-        this.container.removeAll(true);
+        this._cleanup();
 
         const cols = this.inventory.cols;
         const rows = this.inventory.rows;
@@ -48,42 +54,37 @@ class InventoryUI {
         const gridH = rows * (cs + pad) + pad;
 
         // Position: right side of screen
-        this.offsetX = 1280 - gridW - 20;
-        this.offsetY = 60;
+        const offsetX = 1280 - gridW - 20;
+        const offsetY = 60;
 
         // Panel background
-        const panelBg = this.scene.add.graphics();
+        const panelBg = this._addEl(this.scene.add.graphics());
         panelBg.fillStyle(0x1a1a2a, 0.95);
-        panelBg.fillRoundedRect(this.offsetX - 10, this.offsetY - 40, gridW + 20, gridH + 80, 8);
+        panelBg.fillRoundedRect(offsetX - 10, offsetY - 40, gridW + 20, gridH + 80, 8);
         panelBg.lineStyle(2, 0x444466, 1);
-        panelBg.strokeRoundedRect(this.offsetX - 10, this.offsetY - 40, gridW + 20, gridH + 80, 8);
-        this.container.add(panelBg);
+        panelBg.strokeRoundedRect(offsetX - 10, offsetY - 40, gridW + 20, gridH + 80, 8);
 
         // Title
-        const title = this.scene.add.text(this.offsetX + gridW / 2, this.offsetY - 20, '🎒 인벤토리', {
+        this._addEl(this.scene.add.text(offsetX + gridW / 2, offsetY - 20, '🎒 인벤토리', {
             fontSize: '16px', fontFamily: 'monospace', color: '#cccccc', fontStyle: 'bold'
-        }).setOrigin(0.5);
-        this.container.add(title);
+        }).setOrigin(0.5));
 
         // Weight info
-        const weightInfo = this.scene.add.text(this.offsetX + gridW / 2, this.offsetY + gridH + 10,
+        this._addEl(this.scene.add.text(offsetX + gridW / 2, offsetY + gridH + 10,
             `${this.inventory.currentWeight.toFixed(1)} / ${this.inventory.maxWeight} kg  |  가치: ${this.inventory.getTotalValue()}`, {
             fontSize: '12px', fontFamily: 'monospace', color: '#888888'
-        }).setOrigin(0.5);
-        this.container.add(weightInfo);
+        }).setOrigin(0.5));
 
         // Draw grid cells
+        const gridBg = this._addEl(this.scene.add.graphics());
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
-                const x = this.offsetX + pad + c * (cs + pad);
-                const y = this.offsetY + pad + r * (cs + pad);
-
-                const cellBg = this.scene.add.graphics();
-                cellBg.fillStyle(0x222244, 1);
-                cellBg.lineStyle(1, 0x333355, 1);
-                cellBg.fillRect(x, y, cs, cs);
-                cellBg.strokeRect(x, y, cs, cs);
-                this.container.add(cellBg);
+                const x = offsetX + pad + c * (cs + pad);
+                const y = offsetY + pad + r * (cs + pad);
+                gridBg.fillStyle(0x222244, 1);
+                gridBg.lineStyle(1, 0x333355, 1);
+                gridBg.fillRect(x, y, cs, cs);
+                gridBg.strokeRect(x, y, cs, cs);
             }
         }
 
@@ -93,52 +94,45 @@ class InventoryUI {
             if (drawnItems.has(entry.uid)) continue;
             drawnItems.add(entry.uid);
 
-            const x = this.offsetX + pad + entry.col * (cs + pad);
-            const y = this.offsetY + pad + entry.row * (cs + pad);
+            const x = offsetX + pad + entry.col * (cs + pad);
+            const y = offsetY + pad + entry.row * (cs + pad);
             const w = entry.item.w * cs + (entry.item.w - 1) * pad;
             const h = entry.item.h * cs + (entry.item.h - 1) * pad;
 
-            // Item background
             const rarityColors = { common: 0x445544, uncommon: 0x445566, rare: 0x665544 };
-            const bg = this.scene.add.graphics();
+            const bg = this._addEl(this.scene.add.graphics());
             bg.fillStyle(rarityColors[entry.item.rarity] || 0x444444, 1);
             bg.lineStyle(1, 0x666688, 1);
             bg.fillRect(x, y, w, h);
             bg.strokeRect(x, y, w, h);
-            this.container.add(bg);
 
-            // Item icon
-            const icon = this.scene.add.text(x + w / 2, y + h / 2 - 6, entry.item.icon, {
+            this._addEl(this.scene.add.text(x + w / 2, y + h / 2 - 6, entry.item.icon, {
                 fontSize: `${Math.min(w, h) * 0.5}px`
-            }).setOrigin(0.5);
-            this.container.add(icon);
+            }).setOrigin(0.5));
 
-            // Item name (small)
-            const name = this.scene.add.text(x + w / 2, y + h - 8, entry.item.name, {
+            this._addEl(this.scene.add.text(x + w / 2, y + h - 8, entry.item.name, {
                 fontSize: '9px', fontFamily: 'monospace', color: '#aaaaaa'
-            }).setOrigin(0.5);
-            this.container.add(name);
+            }).setOrigin(0.5));
 
             // Click to drop item
-            const hitArea = this.scene.add.rectangle(x + w / 2, y + h / 2, w, h, 0x000000, 0)
-                .setScrollFactor(0).setDepth(201).setInteractive({ useHandCursor: true });
-            this.container.add(hitArea);
+            const hitArea = this._addEl(this.scene.add.rectangle(x + w / 2, y + h / 2, w, h, 0x000000, 0));
+            hitArea.setDepth(201).setInteractive({ useHandCursor: true });
 
+            const capturedEntry = entry;
             hitArea.on('pointerdown', () => {
-                this.inventory.removeItem(entry);
+                this.inventory.removeItem(capturedEntry);
                 this.render();
             });
         }
 
         // Close hint
-        const closeHint = this.scene.add.text(this.offsetX + gridW / 2, this.offsetY + gridH + 30,
-            '[TAB] 닫기  |  클릭: 아이템 버리기', {
+        this._addEl(this.scene.add.text(offsetX + gridW / 2, offsetY + gridH + 30,
+            '[TAB] 닫기  |  클릭: 버리기', {
             fontSize: '10px', fontFamily: 'monospace', color: '#666666'
-        }).setOrigin(0.5);
-        this.container.add(closeHint);
+        }).setOrigin(0.5));
     }
 
     destroy() {
-        this.container.destroy();
+        this._cleanup();
     }
 }

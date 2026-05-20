@@ -141,15 +141,10 @@ class Enemy {
     }
 
     _canMoveTo(row, col) {
-        const r = 0.25;
-        const checks = [[row - r, col - r], [row - r, col + r], [row + r, col - r], [row + r, col + r]];
-        for (const [cr, cc] of checks) {
-            const tr = Math.floor(cr);
-            const tc = Math.floor(cc);
-            if (tr < 0 || tr >= MAP_HEIGHT || tc < 0 || tc >= MAP_WIDTH) return false;
-            if (!isWalkable(CITY_MAP[tr][tc])) return false;
-        }
-        return true;
+        const tr = Math.floor(row);
+        const tc = Math.floor(col);
+        if (tr < 0 || tr >= MAP_HEIGHT || tc < 0 || tc >= MAP_WIDTH) return false;
+        return isWalkable(CITY_MAP[tr][tc]);
     }
 
     takeDamage(amount) {

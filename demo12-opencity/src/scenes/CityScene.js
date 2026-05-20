@@ -51,7 +51,7 @@ class CityScene extends Phaser.Scene {
         // UI (above everything)
         this.hud = new HUD(this);
         this.inventoryUI = new InventoryUI(this, this.inventory);
-        this.lootUI = new LootUI(this, this.inventory);
+        this.lootUI = new LootUI(this, this.inventory, this.inventoryUI);
 
         // Input handlers
         this.keyTab.on('down', () => {
@@ -60,8 +60,12 @@ class CityScene extends Phaser.Scene {
         });
 
         this.keyEsc.on('down', () => {
-            if (this.lootUI.isOpen) this.lootUI.close();
-            else if (this.inventoryUI.isOpen) this.inventoryUI.close();
+            if (this.lootUI.isOpen) {
+                this.lootUI.close();
+                this.inventoryUI.close();
+            } else if (this.inventoryUI.isOpen) {
+                this.inventoryUI.close();
+            }
         });
 
         this.keyE.on('down', () => this._handleInteraction());
@@ -112,6 +116,7 @@ class CityScene extends Phaser.Scene {
                 const items = this.lootSystem.updateSearch(delta);
                 if (items) {
                     this.lootUI.open(items);
+                    this.inventoryUI.open(); // show inventory alongside loot
                 }
                 // Cancel if player moves
                 if (this.player.isMoving) {
