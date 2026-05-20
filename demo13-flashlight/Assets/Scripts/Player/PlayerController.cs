@@ -14,6 +14,10 @@ public class PlayerController : MonoBehaviour
     Vector3 moveDir;
     bool isCrouching;
 
+    // 카메라 기준 이동 방향 (XZ 평면 투영)
+    Vector3 camForward;
+    Vector3 camRight;
+
     public bool IsCrouching => isCrouching;
     public Vector3 FacingDirection { get; private set; } = Vector3.forward;
 
@@ -23,11 +27,31 @@ public class PlayerController : MonoBehaviour
         cc = GetComponent<CharacterController>();
     }
 
+    void Start()
+    {
+        UpdateCameraAxes();
+    }
+
+    void UpdateCameraAxes()
+    {
+        if (mainCam == null) return;
+        // 카메라의 forward/right를 XZ 평면에 투영
+        camForward = mainCam.transform.forward;
+        camForward.y = 0;
+        camForward.Normalize();
+
+        camRight = mainCam.transform.right;
+        camRight.y = 0;
+        camRight.Normalize();
+    }
+
     void Update()
     {
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
-        moveDir = new Vector3(h, 0, v).normalized;
+
+        // 카메라 기준으로 이동 방향 계산
+        moveDir = (camForward * v + camRight * h).normalized;
 
         isCrouching = Input.GetKey(KeyCode.LeftControl);
 
