@@ -197,9 +197,10 @@ public class FlashlightSceneSetup : EditorWindow
         var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
         go.name = name;
         go.transform.SetParent(parent.transform);
+        float tileOverlap = TILE_SIZE + 0.02f;
         go.transform.position = new Vector3(x + 0.5f, 0, z + 0.5f);
         go.transform.rotation = Quaternion.Euler(90, 0, 0);
-        go.transform.localScale = Vector3.one * TILE_SIZE;
+        go.transform.localScale = new Vector3(tileOverlap, tileOverlap, 1);
         go.GetComponent<MeshRenderer>().sharedMaterial = mat;
         go.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         go.GetComponent<MeshRenderer>().receiveShadows = true;
@@ -216,7 +217,8 @@ public class FlashlightSceneSetup : EditorWindow
         var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
         quad.name = "Visual";
         quad.transform.SetParent(wallGO.transform);
-        quad.transform.localScale = new Vector3(TILE_SIZE, height, 1);
+        float wallOverlap = TILE_SIZE + 0.05f;
+        quad.transform.localScale = new Vector3(wallOverlap, height, 1);
         quad.GetComponent<MeshRenderer>().sharedMaterial = mat;
         quad.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
         quad.GetComponent<MeshRenderer>().receiveShadows = true;
@@ -227,9 +229,9 @@ public class FlashlightSceneSetup : EditorWindow
         shadowBox.name = "ShadowCaster";
         shadowBox.transform.SetParent(wallGO.transform);
         shadowBox.transform.localScale = new Vector3(
-            dir == WallDir.ZWall ? TILE_SIZE : 0.15f,
+            dir == WallDir.ZWall ? wallOverlap : 0.15f,
             height,
-            dir == WallDir.XWall ? TILE_SIZE : 0.15f
+            dir == WallDir.XWall ? wallOverlap : 0.15f
         );
         var shadowRenderer = shadowBox.GetComponent<MeshRenderer>();
         shadowRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
