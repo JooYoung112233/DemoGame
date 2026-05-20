@@ -9,13 +9,14 @@ public class CameraFollow : MonoBehaviour
 
     Vector3 offset;
 
+    [SerializeField] float cameraYaw = 45f;
+
     void Start()
     {
-        float rad = cameraAngle * Mathf.Deg2Rad;
-        offset = new Vector3(0, Mathf.Sin(rad) * cameraDistance, -Mathf.Cos(rad) * cameraDistance);
+        Quaternion rot = Quaternion.Euler(cameraAngle, cameraYaw, 0);
+        offset = rot * new Vector3(0, 0, -cameraDistance);
 
-        // 각도 고정 (한 번만 설정)
-        transform.rotation = Quaternion.Euler(cameraAngle, 0, 0);
+        transform.rotation = rot;
     }
 
     void LateUpdate()
