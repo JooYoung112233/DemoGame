@@ -4,7 +4,7 @@ const config = {
     width: 1280,
     height: 720,
     backgroundColor: '#0a0a1a',
-    scene: [SafeHouseScene, ExpeditionScene, BattleScene],
+    scene: [SafeHouseScene, ExpeditionScene],
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
