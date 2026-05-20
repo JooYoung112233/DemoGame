@@ -26,7 +26,7 @@ public class FlashlightSceneSetup : EditorWindow
 
         // --- Player ---
         var playerGO = new GameObject("Player");
-        playerGO.transform.position = GridToWorld(5, 5);
+        playerGO.transform.position = GridToWorld(5, 2);
         var playerSR = playerGO.AddComponent<SpriteRenderer>();
         playerSR.sprite = CreateCharacterSprite();
         playerSR.sortingOrder = 50;
@@ -199,9 +199,9 @@ public class FlashlightSceneSetup : EditorWindow
         // 도로 위 오브젝트: 차량, 쓰레기통, 우편함
         CreateIsoCube(parent, "Car1", 3, -6, 2.0f, 1.0f, new Color(0.25f, 0.12f, 0.1f), 20);
         CreateIsoCube(parent, "Car2", 12, -7, 2.0f, 1.0f, new Color(0.1f, 0.15f, 0.25f), 20);
-        CreateIsoCube(parent, "Trashcan1", 0, -4, 0.4f, 0.5f, new Color(0.2f, 0.22f, 0.2f), 25);
-        CreateIsoCube(parent, "Trashcan2", 8, -4, 0.4f, 0.5f, new Color(0.2f, 0.22f, 0.2f), 25);
-        CreateIsoCube(parent, "Mailbox", 5, -4, 0.35f, 0.6f, new Color(0.15f, 0.15f, 0.4f), 25);
+        CreateIsoCube(parent, "Trashcan1", 0, -4, 0.4f, 0.5f, new Color(0.2f, 0.22f, 0.2f), 25, false);
+        CreateIsoCube(parent, "Trashcan2", 8, -4, 0.4f, 0.5f, new Color(0.2f, 0.22f, 0.2f), 25, false);
+        CreateIsoCube(parent, "Mailbox", 5, -4, 0.35f, 0.6f, new Color(0.15f, 0.15f, 0.4f), 25, false);
     }
 
     // ====== 편의점 내부 ======
@@ -256,14 +256,12 @@ public class FlashlightSceneSetup : EditorWindow
         var furnitureParent = new GameObject("Furniture");
         furnitureParent.transform.SetParent(parent.transform);
 
-        // ① 선반 (상품 진열) - 세로 3줄
-        for (int gy = 2; gy <= 6; gy++)
+        // ① 선반 (상품 진열) - 세로 2줄 (통로 넓게)
+        for (int gy = 3; gy <= 6; gy++)
         {
-            CreateIsoCube(furnitureParent, $"Shelf1_{gy}", 2, gy, 0.8f, 0.8f,
+            CreateIsoCube(furnitureParent, $"Shelf1_{gy}", 3, gy, 0.7f, 0.7f,
                 new Color(0.4f, 0.32f, 0.2f), 35);
-            CreateIsoCube(furnitureParent, $"Shelf2_{gy}", 5, gy, 0.8f, 0.8f,
-                new Color(0.4f, 0.32f, 0.2f), 35);
-            CreateIsoCube(furnitureParent, $"Shelf3_{gy}", 8, gy, 0.8f, 0.8f,
+            CreateIsoCube(furnitureParent, $"Shelf2_{gy}", 7, gy, 0.7f, 0.7f,
                 new Color(0.38f, 0.30f, 0.2f), 35);
         }
 
@@ -303,21 +301,21 @@ public class FlashlightSceneSetup : EditorWindow
     {
         Color darkBuilding = new Color(0.1f, 0.1f, 0.12f);
 
-        // 좌측 건물
+        // 좌측 건물 (시각용, 콜라이더 없음)
         for (int gy = 0; gy <= 10; gy++)
             for (int gx = -4; gx <= -1; gx++)
-                CreateIsoWall(parent, $"BldgLeft_{gx}_{gy}", gx, gy, darkBuilding, 15);
+                CreateIsoWall(parent, $"BldgLeft_{gx}_{gy}", gx, gy, darkBuilding, 15, false);
 
-        // 우측 건물
+        // 우측 건물 (시각용, 콜라이더 없음)
         for (int gy = 0; gy <= 10; gy++)
             for (int gx = 12; gx <= 15; gx++)
-                CreateIsoWall(parent, $"BldgRight_{gx}_{gy}", gx, gy, darkBuilding, 15);
+                CreateIsoWall(parent, $"BldgRight_{gx}_{gy}", gx, gy, darkBuilding, 15, false);
 
-        // 맞은편 건물 (도로 건너)
+        // 맞은편 건물 (시각용, 콜라이더 없음)
         for (int gx = -4; gx <= 15; gx++)
             for (int gy = -12; gy <= -9; gy++)
                 CreateIsoWall(parent, $"BldgFar_{gx}_{gy}", gx, gy,
-                    darkBuilding * 0.8f, 10);
+                    darkBuilding * 0.8f, 10, false);
     }
 
     // ====== 가로등 ======
@@ -361,12 +359,11 @@ public class FlashlightSceneSetup : EditorWindow
     }
 
     static void CreateIsoWall(GameObject parent, string name, int gx, int gy,
-        Color color, int sortBase)
+        Color color, int sortBase, bool addCollider = true)
     {
         Vector3 pos = GridToWorld(gx, gy);
         float wallH = 0.4f;
 
-        // 벽 본체 (높이감)
         var wall = new GameObject(name);
         wall.transform.SetParent(parent.transform);
         wall.transform.position = pos + new Vector3(0, wallH * 0.5f, 0);
@@ -374,13 +371,16 @@ public class FlashlightSceneSetup : EditorWindow
         sr.sprite = CreateIsoCubeSprite(32, 20, color);
         sr.sortingOrder = IsoSortOrder(gx, gy, sortBase);
 
-        var boxCol = wall.AddComponent<BoxCollider2D>();
-        boxCol.size = new Vector2(TILE_W * 0.8f, TILE_H + wallH);
-        boxCol.offset = new Vector2(0, -wallH * 0.25f);
+        if (addCollider)
+        {
+            var boxCol = wall.AddComponent<BoxCollider2D>();
+            boxCol.size = new Vector2(TILE_W * 0.8f, TILE_H + wallH);
+            boxCol.offset = new Vector2(0, -wallH * 0.25f);
+        }
     }
 
     static void CreateIsoCube(GameObject parent, string name, int gx, int gy,
-        float scaleW, float scaleH, Color color, int sortBase)
+        float scaleW, float scaleH, Color color, int sortBase, bool addCollider = true)
     {
         Vector3 pos = GridToWorld(gx, gy);
 
@@ -394,8 +394,11 @@ public class FlashlightSceneSetup : EditorWindow
         sr.sprite = CreateIsoCubeSprite(sprW, sprH, color);
         sr.sortingOrder = IsoSortOrder(gx, gy, sortBase);
 
-        var boxCol = go.AddComponent<BoxCollider2D>();
-        boxCol.size = new Vector2(TILE_W * scaleW * 0.6f, TILE_H * scaleH + 0.2f);
+        if (addCollider)
+        {
+            var boxCol = go.AddComponent<BoxCollider2D>();
+            boxCol.size = new Vector2(TILE_W * scaleW * 0.6f, TILE_H * scaleH + 0.2f);
+        }
     }
 
     static void CreatePointLight(GameObject parent, string name, int gx, int gy,
