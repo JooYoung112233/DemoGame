@@ -120,6 +120,17 @@ public class FlashlightSceneSetup : EditorWindow
         hudSO.FindProperty("flashlight").objectReferenceValue = flashCtrl;
         hudSO.ApplyModifiedProperties();
 
+        // ===== 환경 조명 완전 제거 (밤에 완전 깜깜하게) =====
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+        RenderSettings.ambientLight = Color.black;
+        RenderSettings.ambientSkyColor = Color.black;
+        RenderSettings.ambientEquatorColor = Color.black;
+        RenderSettings.ambientGroundColor = Color.black;
+        RenderSettings.reflectionIntensity = 0f;
+        RenderSettings.defaultReflectionMode = UnityEngine.Rendering.DefaultReflectionMode.Custom;
+        RenderSettings.skybox = null;
+        RenderSettings.subtractiveShadowColor = Color.black;
+
         // ===== 건물 생성 =====
         CreateBuilding();
 
@@ -278,6 +289,13 @@ public class FlashlightSceneSetup : EditorWindow
         mat.name = name;
         mat.mainTexture = tex;
         mat.SetFloat("_Smoothness", 0.1f);
+        mat.SetColor("_EmissionColor", Color.black);
+        mat.SetFloat("_EnvironmentReflections", 0f);
+        mat.SetFloat("_SpecularHighlights", 0f);
+        mat.DisableKeyword("_EMISSION");
+        mat.DisableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
+        mat.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+        mat.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
         return mat;
     }
 

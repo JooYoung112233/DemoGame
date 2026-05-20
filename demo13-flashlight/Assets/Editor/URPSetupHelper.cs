@@ -36,10 +36,21 @@ public class URPSetupHelper : EditorWindow
         GraphicsSettings.defaultRenderPipeline = urpAsset;
         QualitySettings.renderPipeline = urpAsset;
 
+        // 환경 조명 완전히 제거 (밤에 벽/바닥이 보이는 원인)
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+        RenderSettings.ambientLight = Color.black;
+        RenderSettings.ambientSkyColor = Color.black;
+        RenderSettings.ambientEquatorColor = Color.black;
+        RenderSettings.ambientGroundColor = Color.black;
+        RenderSettings.reflectionIntensity = 0f;
+        RenderSettings.defaultReflectionMode = UnityEngine.Rendering.DefaultReflectionMode.Custom;
+        RenderSettings.skybox = null;
+        RenderSettings.subtractiveShadowColor = Color.black;
+
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log("[URP Setup] 3D Forward Renderer + Shadow 설정 완료!");
+        Debug.Log("[URP Setup] 3D Forward Renderer + Shadow + 환경조명 제거 완료!");
         EditorUtility.DisplayDialog("URP 3D Setup Complete",
             "URP 3D Forward Renderer 설정 완료!\nShadow: Main + Additional Light 모두 활성화\n\nNext: Tools > Setup Flashlight Prototype Scene",
             "OK");
