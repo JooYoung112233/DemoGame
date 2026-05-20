@@ -652,6 +652,7 @@ public class FlashlightSceneSetup : EditorWindow
         mat.name = name;
         mat.mainTexture = tex;
         mat.SetFloat("_Smoothness", 0.1f);
+        mat.SetFloat("_Cull", 0); // 양면 렌더링 (Off)
         mat.SetColor("_EmissionColor", Color.black);
         mat.SetFloat("_EnvironmentReflections", 0f);
         mat.SetFloat("_SpecularHighlights", 0f);
