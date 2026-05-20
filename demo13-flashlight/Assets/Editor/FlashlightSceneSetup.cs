@@ -68,8 +68,8 @@ public class FlashlightSceneSetup : EditorWindow
         glowGO.transform.localPosition = new Vector3(0, 0.5f, 0);
         var glow = glowGO.AddComponent<Light>();
         glow.type = LightType.Point;
-        glow.range = 5f;
-        glow.intensity = 1.5f;
+        glow.range = 6f;
+        glow.intensity = 2.5f;
         glow.color = new Color(0.6f, 0.65f, 0.8f);
         glow.shadows = LightShadows.Soft;
 
@@ -133,22 +133,22 @@ public class FlashlightSceneSetup : EditorWindow
         hudSO.FindProperty("flashlight").objectReferenceValue = flashCtrl;
         hudSO.ApplyModifiedProperties();
 
-        // ===== 환경 조명 완전 제거 (밤에 완전 깜깜하게) =====
+        // ===== 환경 조명 (밤에 윤곽만 살짝 보이게) =====
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-        RenderSettings.ambientLight = Color.black;
-        RenderSettings.ambientSkyColor = Color.black;
-        RenderSettings.ambientEquatorColor = Color.black;
+        RenderSettings.ambientLight = new Color(0.04f, 0.04f, 0.06f); // 미세한 푸른빛
+        RenderSettings.ambientSkyColor = new Color(0.03f, 0.03f, 0.05f);
+        RenderSettings.ambientEquatorColor = new Color(0.02f, 0.02f, 0.03f);
         RenderSettings.ambientGroundColor = Color.black;
         RenderSettings.reflectionIntensity = 0f;
         RenderSettings.defaultReflectionMode = UnityEngine.Rendering.DefaultReflectionMode.Custom;
         RenderSettings.skybox = null;
         RenderSettings.subtractiveShadowColor = Color.black;
 
-        // 안개 (거리감 + 폐허 분위기)
+        // 안개 (거리감 + 폐허 분위기, 밀도 약간 낮춤)
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.Exponential;
         RenderSettings.fogColor = new Color(0.02f, 0.02f, 0.03f);
-        RenderSettings.fogDensity = 0.06f;
+        RenderSettings.fogDensity = 0.04f;
 
         // ===== 건물 생성 =====
         CreateBuilding();
@@ -179,8 +179,8 @@ public class FlashlightSceneSetup : EditorWindow
         // 비네트 — 화면 가장자리 어둡게 (터널 비전)
         var vignette = profile.Add<Vignette>();
         vignette.active = true;
-        vignette.intensity.Override(0.45f);
-        vignette.smoothness.Override(0.35f);
+        vignette.intensity.Override(0.35f);
+        vignette.smoothness.Override(0.3f);
         vignette.color.Override(Color.black);
 
         // 색 보정 — 탈색된 차가운 톤 (폐허)
