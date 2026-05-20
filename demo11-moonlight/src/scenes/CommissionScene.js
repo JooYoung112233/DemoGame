@@ -71,33 +71,87 @@ class CommissionScene extends Phaser.Scene {
         const itemW = this.colW - 20;
 
         advs.forEach((adv, i) => {
-            const y = 105 + i * 50;
-            const bg = this.add.rectangle(this.col1X, y + 18, itemW, 42, 0x151525, 0.95);
-            bg.setStrokeStyle(1, 0x222240);
-            bg.setInteractive({ useHandCursor: true });
+            const y = 105 + i * 58;
+            const injured = this.gs.isAdvInjured(adv.id);
+            const injuryDays = this.gs.getAdvInjuryDays(adv.id);
+            const level = this.gs.getAdvLevel(adv.id);
+            const stats = this.gs.getAdvEffectiveStats(adv);
+            const advState = this.gs.getAdvState(adv.id);
 
+            const bg = this.add.rectangle(this.col1X, y + 22, itemW, 50, injured ? 0x1a1015 : 0x151525, 0.95);
+            bg.setStrokeStyle(1, injured ? 0x3a1525 : 0x222240);
+
+            if (!injured) {
+                bg.setInteractive({ useHandCursor: true });
+                bg.on('pointerover', () => { if (this.selectedAdventurer !== adv) bg.setFillStyle(0x1a1a35); });
+                bg.on('pointerout', () => { if (this.selectedAdventurer !== adv) bg.setFillStyle(0x151525); });
+                bg.on('pointerdown', () => {
+                    this.advButtons.forEach(b => {
+                        if (!b.injured) {
+                            b.bg.setFillStyle(0x151525).setStrokeStyle(1, 0x222240);
+                        }
+                    });
+                    this.selectedAdventurer = adv;
+                    bg.setFillStyle(0x1a2a3a).setStrokeStyle(2, 0x44aaff);
+                    this._refreshZoneAvailability();
+                });
+            }
+
+            // Row 1: Icon, Name, Level badge
+            const nameColor = injured ? '#666' : '#ddd';
             this.add.text(this.colLeft1, y + 5, `${adv.icon} ${adv.name}`, {
-                fontSize: '12px', fontFamily: 'monospace', color: '#ddd',
+                fontSize: '12px', fontFamily: 'monospace', color: nameColor,
             });
-            this.add.text(this.colLeft1, y + 21, `${adv.cost}G | 성공 ${Math.round(adv.successRate * 100)}% | x${adv.lootMult}`, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#888',
+
+            // Level badge
+            const lvColor = level >= 5 ? '#ffcc44' : level >= 3 ? '#44ccff' : '#888';
+            this.add.text(this.col1X + this.colW / 2 - 20, y + 5, `Lv.${level}`, {
+                fontSize: '10px', fontFamily: 'monospace', color: lvColor,
+            }).setOrigin(1, 0);
+
+            // Row 2: Stats (using effective stats with level bonuses)
+            const srPct = Math.round(stats.successRate * 100);
+            const statsColor = injured ? '#555' : '#888';
+            this.add.text(this.colLeft1, y + 20, `${adv.cost}G | 성공 ${srPct}% | x${stats.lootMult}`, {
+                fontSize: '10px', fontFamily: 'monospace', color: statsColor,
             });
-            if (adv.bonusCategory) {
+
+            // Row 3: Quest progress or injury status
+            if (injured) {
+                this.add.text(this.colLeft1, y + 33, `🤕 부상 중 (D-${injuryDays})`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: '#ff6666',
+                });
+            } else if (advState && adv.quest) {
+                if (advState.questComplete) {
+                    this.add.text(this.colLeft1, y + 33, `🏆 ${adv.quest.name} 완료`, {
+                        fontSize: '9px', fontFamily: 'monospace', color: '#ff88ff',
+                    });
+                } else {
+                    // Quest progress bar
+                    const qProgress = advState.questProgress;
+                    const qRequired = adv.quest.required;
+                    const barX = this.colLeft1;
+                    const barY = y + 36;
+                    const barW = 80;
+                    const barH = 6;
+                    this.add.rectangle(barX + barW / 2, barY, barW, barH, 0x222240).setOrigin(0.5);
+                    const fillW = Math.max(1, (qProgress / qRequired) * barW);
+                    this.add.rectangle(barX + fillW / 2, barY, fillW, barH, 0x6644aa).setOrigin(0.5);
+                    this.add.text(barX + barW + 5, barY, `📜 ${qProgress}/${qRequired}`, {
+                        fontSize: '8px', fontFamily: 'monospace', color: '#aaaaff',
+                    }).setOrigin(0, 0.5);
+                }
+            }
+
+            // Bonus category badge
+            if (adv.bonusCategory && !injured) {
                 const catName = CATEGORIES[adv.bonusCategory]?.name || '';
-                this.add.text(this.col1X + this.colW / 2 - 20, y + 5, `+${catName}`, {
-                    fontSize: '10px', fontFamily: 'monospace', color: CATEGORIES[adv.bonusCategory]?.color || '#aaa',
+                this.add.text(this.col1X + this.colW / 2 - 20, y + 20, `+${catName}`, {
+                    fontSize: '9px', fontFamily: 'monospace', color: CATEGORIES[adv.bonusCategory]?.color || '#aaa',
                 }).setOrigin(1, 0);
             }
 
-            bg.on('pointerover', () => { if (this.selectedAdventurer !== adv) bg.setFillStyle(0x1a1a35); });
-            bg.on('pointerout', () => { if (this.selectedAdventurer !== adv) bg.setFillStyle(0x151525); });
-            bg.on('pointerdown', () => {
-                this.advButtons.forEach(b => b.bg.setFillStyle(0x151525).setStrokeStyle(1, 0x222240));
-                this.selectedAdventurer = adv;
-                bg.setFillStyle(0x1a2a3a).setStrokeStyle(2, 0x44aaff);
-            });
-
-            this.advButtons.push({ bg, adv });
+            this.advButtons.push({ bg, adv, injured });
         });
     }
 
@@ -109,6 +163,7 @@ class CommissionScene extends Phaser.Scene {
 
         const allZones = Object.entries(ZONE_DATA);
         this.zoneButtons = [];
+        this.zoneTexts = [];
         const itemW = this.colW - 20;
 
         allZones.forEach(([id, zone], i) => {
@@ -117,28 +172,40 @@ class CommissionScene extends Phaser.Scene {
             const bg = this.add.rectangle(this.col2X, y + 18, itemW, 45, unlocked ? 0x151525 : 0x101018, 0.95);
             bg.setStrokeStyle(1, unlocked ? 0x222240 : 0x181825);
 
-            this.add.text(this.colLeft2, y + 5, `${zone.icon} ${zone.name}`, {
+            const nameText = this.add.text(this.colLeft2, y + 5, `${zone.icon} ${zone.name}`, {
                 fontSize: '12px', fontFamily: 'monospace', color: unlocked ? '#ddd' : '#444',
             });
             const stars = '★'.repeat(zone.difficulty) + '☆'.repeat(4 - zone.difficulty);
-            this.add.text(this.colLeft2, y + 22, stars, {
+            const starsText = this.add.text(this.colLeft2, y + 22, stars, {
                 fontSize: '10px', fontFamily: 'monospace', color: unlocked ? '#888' : '#333',
             });
             const drops = zone.drops.slice(0, 5).map(d => ITEM_DATA[d.id]?.icon || '?').join('');
             this.add.text(this.col2X + this.colW / 2 - 20, y + 12, drops, { fontSize: '11px' }).setOrigin(1, 0);
+
+            // "Can't go" label (hidden by default, shown when adventurer can't access)
+            const cantGoLabel = this.add.text(this.col2X + this.colW / 2 - 20, y + 28, '', {
+                fontSize: '9px', fontFamily: 'monospace', color: '#ff4444',
+            }).setOrigin(1, 0).setAlpha(0);
 
             if (unlocked) {
                 bg.setInteractive({ useHandCursor: true });
                 bg.on('pointerover', () => { if (this.selectedZone !== id) bg.setFillStyle(0x1a1a35); });
                 bg.on('pointerout', () => { if (this.selectedZone !== id) bg.setFillStyle(0x151525); });
                 bg.on('pointerdown', () => {
+                    // Check if selected adventurer can go here
+                    if (this.selectedAdventurer) {
+                        const advZones = this.gs.getAdvZones(this.selectedAdventurer);
+                        if (!advZones.includes(id)) {
+                            Toast.show(this, `${this.selectedAdventurer.name}은(는) ${zone.name}에 갈 수 없습니다!`, { color: '#ff4444' });
+                            return;
+                        }
+                    }
                     this.zoneButtons.forEach(b => {
                         b.bg.setFillStyle(b.unlocked ? 0x151525 : 0x101018);
                         b.bg.setStrokeStyle(1, b.unlocked ? 0x222240 : 0x181825);
                     });
                     this.selectedZone = id;
                     bg.setFillStyle(0x1a2a3a).setStrokeStyle(2, 0x44aaff);
-                    this._checkCanAdd();
                 });
             } else {
                 this.add.text(this.col2X + this.colW / 2 - 20, y + 25, `Day ${zone.unlockDay}+`, {
@@ -146,7 +213,24 @@ class CommissionScene extends Phaser.Scene {
                 }).setOrigin(1, 0);
             }
 
-            this.zoneButtons.push({ bg, id, unlocked });
+            this.zoneButtons.push({ bg, id, unlocked, nameText, starsText, cantGoLabel });
+        });
+    }
+
+    _refreshZoneAvailability() {
+        if (!this.selectedAdventurer) return;
+        const advZones = this.gs.getAdvZones(this.selectedAdventurer);
+
+        this.zoneButtons.forEach(b => {
+            if (!b.unlocked) return;
+            const canGo = advZones.includes(b.id);
+            b.nameText.setColor(canGo ? '#ddd' : '#555');
+            b.starsText.setColor(canGo ? '#888' : '#333');
+            if (!canGo) {
+                b.cantGoLabel.setText('출입 불가').setAlpha(1);
+            } else {
+                b.cantGoLabel.setAlpha(0);
+            }
         });
     }
 
@@ -181,6 +265,8 @@ class CommissionScene extends Phaser.Scene {
         let y = 115;
         this.commissions.forEach((c, idx) => {
             const zone = ZONE_DATA[c.zoneId];
+            const level = this.gs.getAdvLevel(c.adventurer.id);
+            const stats = this.gs.getAdvEffectiveStats(c.adventurer);
 
             const bg = this.add.rectangle(this.col3X, y + 30, itemW, 62, 0x151530, 0.95);
             bg.setStrokeStyle(1, 0x3344aa);
@@ -190,13 +276,13 @@ class CommissionScene extends Phaser.Scene {
                 fontSize: '12px', fontFamily: 'monospace', color: '#fff',
             }).setOrigin(0.5);
 
-            const advText = this.add.text(this.colLeft3 + 28, y + 10, `${c.adventurer.icon} ${c.adventurer.name}`, {
+            const advText = this.add.text(this.colLeft3 + 28, y + 10, `${c.adventurer.icon} ${c.adventurer.name} Lv.${level}`, {
                 fontSize: '12px', fontFamily: 'monospace', color: '#ddd',
             });
             const zoneText = this.add.text(this.colLeft3 + 28, y + 27, `${zone.icon} ${zone.name}`, {
                 fontSize: '11px', fontFamily: 'monospace', color: '#aaa',
             });
-            const costText = this.add.text(this.colLeft3 + 28, y + 43, `${c.adventurer.cost}G | 성공 ${Math.round(c.adventurer.successRate * 100)}%`, {
+            const costText = this.add.text(this.colLeft3 + 28, y + 43, `${c.adventurer.cost}G | 성공 ${Math.round(stats.successRate * 100)}% | x${stats.lootMult}`, {
                 fontSize: '10px', fontFamily: 'monospace', color: '#ffcc44',
             });
 
@@ -223,15 +309,6 @@ class CommissionScene extends Phaser.Scene {
             fontSize: '12px', fontFamily: 'monospace', color: '#ffcc44',
         }).setOrigin(0.5);
         this.commListContainer.add(summary);
-    }
-
-    _checkCanAdd() {
-        if (!this.selectedAdventurer || !this.selectedZone) return false;
-        if (!this.selectedAdventurer.zones.includes(this.selectedZone)) {
-            Toast.show(this, '이 모험가는 해당 구역에 갈 수 없습니다!', { color: '#ff4444' });
-            return false;
-        }
-        return true;
     }
 
     _drawButtons() {
@@ -276,8 +353,14 @@ class CommissionScene extends Phaser.Scene {
             Toast.show(this, '모험가와 구역을 모두 선택하세요!', { color: '#ff4444' });
             return;
         }
-        if (!this.selectedAdventurer.zones.includes(this.selectedZone)) {
+        // Use quest-aware zone list
+        const advZones = this.gs.getAdvZones(this.selectedAdventurer);
+        if (!advZones.includes(this.selectedZone)) {
             Toast.show(this, `${this.selectedAdventurer.name}은(는) 이 구역에 갈 수 없습니다!`, { color: '#ff4444' });
+            return;
+        }
+        if (this.gs.isAdvInjured(this.selectedAdventurer.id)) {
+            Toast.show(this, `${this.selectedAdventurer.name}은(는) 부상 중입니다!`, { color: '#ff4444' });
             return;
         }
         if (this.gs.gold < this.selectedAdventurer.cost) {

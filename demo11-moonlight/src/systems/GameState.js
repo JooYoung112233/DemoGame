@@ -15,6 +15,18 @@ class GameState {
         this.workers = [];
         this.workerCostPerDay = 0;
 
+        // 모험가 성장 상태
+        this.adventurerStates = {};
+        ADVENTURER_DATA.forEach(adv => {
+            this.adventurerStates[adv.id] = {
+                exp: 0,
+                level: 1,
+                injuredUntil: 0,
+                questProgress: 0,
+                questComplete: false,
+            };
+        });
+
         this.addItems([
             { id: 'heal_herb', qty: 3 },
             { id: 'wood', qty: 2 },
@@ -53,6 +65,105 @@ class GameState {
         return category === this.demandCategory ? 1.5 : 1.0;
     }
 
+    // === 모험가 시스템 ===
+
+    getAdvState(advId) {
+        return this.adventurerStates[advId];
+    }
+
+    isAdvInjured(advId) {
+        const state = this.adventurerStates[advId];
+        return state && state.injuredUntil > this.day;
+    }
+
+    getAdvInjuryDays(advId) {
+        const state = this.adventurerStates[advId];
+        if (!state || state.injuredUntil <= this.day) return 0;
+        return state.injuredUntil - this.day;
+    }
+
+    getAdvLevel(advId) {
+        const state = this.adventurerStates[advId];
+        return state ? state.level : 1;
+    }
+
+    getAdvEffectiveStats(adv) {
+        const state = this.adventurerStates[adv.id];
+        if (!state) return { successRate: adv.successRate, lootMult: adv.lootMult };
+
+        const levelData = ADV_LEVEL_TABLE[state.level - 1] || ADV_LEVEL_TABLE[0];
+        let sr = adv.successRate + levelData.srBonus;
+        let lm = adv.lootMult + levelData.lootBonus;
+
+        // 퀘스트 보상 적용
+        if (state.questComplete && adv.quest) {
+            const r = adv.quest.reward;
+            if (r.successRate) sr += r.successRate;
+            if (r.lootMult) lm += r.lootMult;
+        }
+
+        return {
+            successRate: Math.min(sr, 0.99),
+            lootMult: Math.round(lm * 100) / 100,
+        };
+    }
+
+    getAdvZones(adv) {
+        const state = this.adventurerStates[adv.id];
+        let zones = [...adv.zones];
+        if (state && state.questComplete && adv.quest?.reward?.newZone) {
+            if (!zones.includes(adv.quest.reward.newZone)) {
+                zones.push(adv.quest.reward.newZone);
+            }
+        }
+        return zones;
+    }
+
+    addAdvExp(advId, amount) {
+        const state = this.adventurerStates[advId];
+        if (!state) return null;
+
+        state.exp += amount;
+        let leveledUp = false;
+
+        while (state.level < ADV_MAX_LEVEL) {
+            const nextLevel = ADV_LEVEL_TABLE[state.level];
+            if (nextLevel && state.exp >= nextLevel.exp) {
+                state.level++;
+                leveledUp = true;
+            } else break;
+        }
+
+        return leveledUp ? state.level : null;
+    }
+
+    injureAdv(advId, days) {
+        const state = this.adventurerStates[advId];
+        if (state) state.injuredUntil = this.day + days;
+    }
+
+    advanceQuestProgress(advId, zoneId) {
+        const state = this.adventurerStates[advId];
+        const adv = ADVENTURER_DATA.find(a => a.id === advId);
+        if (!state || !adv?.quest || state.questComplete) return null;
+
+        if (zoneId === adv.quest.zone) {
+            state.questProgress++;
+            if (state.questProgress >= adv.quest.required) {
+                state.questComplete = true;
+                return 'complete';
+            }
+            return 'progress';
+        }
+        return null;
+    }
+
+    getAvailableAdventurers() {
+        return ADVENTURER_DATA.filter(a => !a.unlockDay || this.day >= a.unlockDay);
+    }
+
+    // === 일반 시스템 ===
+
     advanceDay() {
         this.day++;
         this._rollDemand();
@@ -68,7 +179,8 @@ class GameState {
 
         this.commissionResults = [];
         this.pendingCommissions.forEach(c => {
-            this.commissionResults.push(ExpeditionSystem.run(c.zoneId, c.adventurer));
+            const result = ExpeditionSystem.run(c.zoneId, c.adventurer, this);
+            this.commissionResults.push(result);
         });
         this.pendingCommissions = [];
     }
@@ -106,10 +218,6 @@ class GameState {
         return Object.entries(ZONE_DATA)
             .filter(([, z]) => this.day >= z.unlockDay)
             .map(([id, z]) => ({ id, ...z }));
-    }
-
-    getAvailableAdventurers() {
-        return ADVENTURER_DATA.filter(a => !a.unlockDay || this.day >= a.unlockDay);
     }
 
     getCustomerCount() {
