@@ -361,6 +361,62 @@ class CommissionScene extends Phaser.Scene {
         this.add.text(cx, btnAreaY + 130, '의뢰 없이 잠들어도 됩니다', {
             fontSize: '11px', fontFamily: 'monospace', color: '#444',
         }).setOrigin(0.5);
+
+        // === 확장/투자 패널 (하단) ===
+        this._drawUpgrades(btnAreaY);
+    }
+
+    _drawUpgrades(btnAreaY) {
+        const panelX = 1100;
+        const panelW = 250;
+        const panelTop = btnAreaY - 30;
+
+        this.add.text(panelX, panelTop, '🔧 투자/확장', {
+            fontSize: '13px', fontFamily: 'monospace', color: '#ffcc88',
+        }).setOrigin(0.5);
+
+        this.upgradeContainer = this.add.container(0, 0);
+        this._refreshUpgrades(panelX, panelW, panelTop + 18);
+    }
+
+    _refreshUpgrades(px, pw, startY) {
+        this.upgradeContainer.removeAll(true);
+        let y = startY;
+
+        Object.entries(UPGRADES).forEach(([id, up]) => {
+            const lv = this.gs.getUpgradeLevel(id);
+            const cost = this.gs.getUpgradeCost(id);
+            const maxed = lv >= up.maxLevel;
+
+            const label = maxed
+                ? `${up.icon} ${up.name} MAX`
+                : `${up.icon} ${up.name} (${cost}G)`;
+            const color = maxed ? '#444' : (this.gs.gold >= cost ? '#ccccaa' : '#664444');
+
+            const bg = this.add.rectangle(px, y + 10, pw - 10, 22, maxed ? 0x101018 : 0x151525, 0.9);
+            bg.setStrokeStyle(1, 0x222240);
+            const text = this.add.text(px, y + 10, label, {
+                fontSize: '10px', fontFamily: 'monospace', color,
+            }).setOrigin(0.5);
+
+            this.upgradeContainer.add([bg, text]);
+
+            if (!maxed && this.gs.gold >= cost) {
+                bg.setInteractive({ useHandCursor: true });
+                bg.on('pointerover', () => bg.setFillStyle(0x1a1a35));
+                bg.on('pointerout', () => bg.setFillStyle(0x151525));
+                bg.on('pointerdown', () => {
+                    if (this.gs.buyUpgrade(id)) {
+                        Toast.show(this, `${up.icon} ${up.name} 업그레이드!`, { color: '#44ff88' });
+                        this._refreshUpgrades(px, pw, startY);
+                        this._updateGoldLabel();
+                        this._updateCostLabel();
+                    }
+                });
+            }
+
+            y += 26;
+        });
     }
 
     _addCommission() {

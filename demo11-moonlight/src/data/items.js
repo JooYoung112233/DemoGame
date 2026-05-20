@@ -32,6 +32,13 @@ const ITEM_DATA = {
     antidote: { name: '해독제', category: 'crafted', basePrice: 25, icon: '💚', desc: '독을 치료하는 약' },
     iron_dagger: { name: '철 단검', category: 'crafted', basePrice: 55, icon: '🗡️', desc: '날카로운 단검' },
     silver_ring: { name: '은반지', category: 'crafted', basePrice: 70, icon: '💍', desc: '정교한 은 반지' },
+
+    // === 연구 가공품 ===
+    mana_potion: { name: '마나 포션', category: 'crafted', basePrice: 45, icon: '💙', desc: '마력을 회복시키는 포션' },
+    enchanted_blade: { name: '마력 칼날', category: 'crafted', basePrice: 85, icon: '⚔️', desc: '룬의 힘이 깃든 칼날' },
+    beast_armor: { name: '야수 갑옷', category: 'crafted', basePrice: 90, icon: '🛡️', desc: '야수 가죽으로 만든 갑옷' },
+    gem_amulet: { name: '보석 부적', category: 'crafted', basePrice: 150, icon: '📿', desc: '강력한 보호의 부적' },
+    elixir: { name: '만능약', category: 'crafted', basePrice: 60, icon: '🧪', desc: '만병통치약' },
 };
 
 const CATEGORIES = {

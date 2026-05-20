@@ -90,9 +90,22 @@ class ShopScene extends Phaser.Scene {
 
     _refreshCraft() {
         this.craftContainer.removeAll(true);
-        const recipes = Object.entries(RECIPE_DATA).filter(([, r]) => this.gs.day >= r.unlockDay);
+        const recipes = this.gs.getAllAvailableRecipes();
         const px = this.col1X;
         const leftEdge = px - this.panelW / 2 + 15;
+
+        // 장인 등급 표시
+        let y = this.panelTop + 35;
+        const artCats = ARTISAN_CATEGORIES.map(cat => {
+            const lv = this.gs.getArtisanLevel(cat);
+            const catNames = { potion: '포션', weapon: '장비', accessory: '장신구' };
+            return `${catNames[cat] || cat}:${lv.name}`;
+        }).join(' ');
+        const artLabel = this.add.text(px, y, artCats, {
+            fontSize: '8px', fontFamily: 'monospace', color: '#666',
+        }).setOrigin(0.5);
+        this.craftContainer.add(artLabel);
+        y += 14;
 
         if (recipes.length === 0) {
             const t = this.add.text(px, this.panelTop + this.panelH / 2, '해금된 레시피 없음', {
@@ -102,13 +115,16 @@ class ShopScene extends Phaser.Scene {
             return;
         }
 
-        let y = this.panelTop + 38;
         const itemW = this.panelW - 20;
         recipes.forEach(([id, recipe]) => {
             const resultData = ITEM_DATA[recipe.result];
             const canCraft = recipe.ingredients.every(ing => this.gs.getItemCount(ing.id) >= ing.count);
 
-            const bg = this.add.rectangle(px, y + 18, itemW, 38, canCraft ? 0x1a2a1a : 0x1a1a22, 0.9);
+            // 장인 등급 보너스: 재료 절약 확률
+            const artisan = recipe.category ? this.gs.getArtisanLevel(recipe.category) : null;
+            const saveMark = (artisan && artisan.saveMaterialChance > 0) ? ' 🍀' : '';
+
+            const bg = this.add.rectangle(px, y + 16, itemW, 34, canCraft ? 0x1a2a1a : 0x1a1a22, 0.9);
             bg.setStrokeStyle(1, canCraft ? 0x2a4a2a : 0x222235);
             this.craftContainer.add(bg);
 
@@ -118,11 +134,11 @@ class ShopScene extends Phaser.Scene {
                 return `${d.icon}${have}/${ing.count}`;
             }).join(' ');
 
-            const label = this.add.text(leftEdge, y + 6, `${resultData.icon} ${resultData.name}`, {
-                fontSize: '12px', fontFamily: 'monospace', color: canCraft ? '#ddd' : '#666',
+            const label = this.add.text(leftEdge, y + 5, `${resultData.icon} ${resultData.name}${saveMark}`, {
+                fontSize: '11px', fontFamily: 'monospace', color: canCraft ? '#ddd' : '#666',
             });
-            const ings = this.add.text(leftEdge, y + 24, ingStr, {
-                fontSize: '10px', fontFamily: 'monospace', color: '#888',
+            const ings = this.add.text(leftEdge, y + 20, ingStr, {
+                fontSize: '9px', fontFamily: 'monospace', color: '#888',
             });
             this.craftContainer.add([label, ings]);
 
@@ -133,15 +149,69 @@ class ShopScene extends Phaser.Scene {
                 bg.on('pointerdown', () => this._startCrafting(recipe, resultData, recipe.result));
             }
 
-            y += 44;
+            y += 38;
         });
+
+        // 연구 버튼 (힌트가 있으면 표시)
+        const hints = this.gs.getResearchHints();
+        if (hints.length > 0 && this.phase === 'prep' && !this.isCrafting) {
+            y += 5;
+            const researchLabel = this.add.text(px, y, '─── 연구 ───', {
+                fontSize: '10px', fontFamily: 'monospace', color: '#886688',
+            }).setOrigin(0.5);
+            this.craftContainer.add(researchLabel);
+            y += 16;
+
+            hints.forEach(h => {
+                const bg = this.add.rectangle(px, y + 12, itemW, 28, h.hasAll ? 0x2a1a2a : 0x1a1a22, 0.9);
+                bg.setStrokeStyle(1, h.hasAll ? 0x4a2a4a : 0x222235);
+                this.craftContainer.add(bg);
+
+                const hintText = this.add.text(leftEdge, y + 6, `🔬 ${h.hint}`, {
+                    fontSize: '10px', fontFamily: 'monospace', color: h.hasAll ? '#cc88cc' : '#666',
+                });
+                this.craftContainer.add(hintText);
+
+                if (h.hasAll) {
+                    bg.setInteractive({ useHandCursor: true });
+                    bg.on('pointerover', () => bg.setFillStyle(0x3a2a3a));
+                    bg.on('pointerout', () => bg.setFillStyle(0x2a1a2a));
+                    bg.on('pointerdown', () => {
+                        const result = this.gs.tryResearch(h.id);
+                        if (result.success) {
+                            const data = ITEM_DATA[result.recipe.result];
+                            Toast.show(this, `🎉 ${data.icon} ${data.name} 레시피 발견!`, { color: '#ff88ff' });
+                        } else {
+                            Toast.show(this, `💨 ${result.reason}`, { color: '#ff6666' });
+                        }
+                        this._refreshCraft();
+                        this._refreshInventory();
+                    });
+                }
+
+                y += 30;
+            });
+        }
     }
 
     _startCrafting(recipe, resultData, resultId) {
         if (this.isCrafting) return;
         this.isCrafting = true;
 
-        recipe.ingredients.forEach(ing => this.gs.removeItem(ing.id, ing.count));
+        // 장인 등급 재료 절약
+        const artisan = recipe.category ? this.gs.getArtisanLevel(recipe.category) : null;
+        let savedMaterial = false;
+        recipe.ingredients.forEach(ing => {
+            let count = ing.count;
+            if (artisan && artisan.saveMaterialChance > 0 && Math.random() < artisan.saveMaterialChance && count > 1) {
+                count--;
+                savedMaterial = true;
+            }
+            this.gs.removeItem(ing.id, count);
+        });
+        if (savedMaterial) {
+            Toast.show(this, '🍀 장인의 솜씨! 재료 절약!', { color: '#44ff88', duration: 1000 });
+        }
         this._refreshCraft();
         this._refreshInventory();
 
@@ -277,6 +347,11 @@ class ShopScene extends Phaser.Scene {
     }
 
     _finishCraft(resultData, resultId, grade) {
+        // 현재 레시피의 카테고리 찾기
+        let recipeCategory = null;
+        const allRecipes = { ...RECIPE_DATA, ...RESEARCH_RECIPES };
+        if (allRecipes[resultId]?.category) recipeCategory = allRecipes[resultId].category;
+
         let qty = 1;
         let msg = '';
 
@@ -295,6 +370,16 @@ class ShopScene extends Phaser.Scene {
         }
 
         this.gs.addItems([{ id: resultId, qty }]);
+
+        // 장인 경험치 획득
+        if (recipeCategory) {
+            const expGain = grade === 'perfect' ? 3 : grade === 'good' ? 2 : 1;
+            const newLevel = this.gs.addArtisanExp(recipeCategory, expGain);
+            if (newLevel) {
+                const catNames = { potion: '포션', weapon: '장비', accessory: '장신구' };
+                Toast.show(this, `⬆️ ${catNames[recipeCategory] || recipeCategory} 장인 등급: ${newLevel.name}!`, { color: newLevel.color, duration: 2000 });
+            }
+        }
 
         this.craftOverlay.removeAll(true);
         this.craftOverlay.setVisible(false);

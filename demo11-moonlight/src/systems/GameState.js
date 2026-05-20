@@ -19,6 +19,17 @@ class GameState {
         this.weather = 'clear';
         this.dailyEvent = null;
 
+        // 장인 등급
+        this.artisanExp = {};
+        ARTISAN_CATEGORIES.forEach(cat => { this.artisanExp[cat] = 0; });
+
+        // 확장/투자 레벨
+        this.upgradeLevels = {};
+        Object.keys(UPGRADES).forEach(k => { this.upgradeLevels[k] = 0; });
+
+        // 발견된 연구 레시피
+        this.discoveredRecipes = {};
+
         // 모험가 성장 상태
         this.adventurerStates = {};
         ADVENTURER_DATA.forEach(adv => {
@@ -286,6 +297,114 @@ class GameState {
 
     getAvailableAdventurers() {
         return ADVENTURER_DATA.filter(a => !a.unlockDay || this.day >= a.unlockDay);
+    }
+
+    // === 장인 등급 ===
+
+    getArtisanLevel(category) {
+        const exp = this.artisanExp[category] || 0;
+        let level = ARTISAN_LEVELS[0];
+        for (const lv of ARTISAN_LEVELS) {
+            if (exp >= lv.exp) level = lv;
+        }
+        return level;
+    }
+
+    getArtisanLevelIndex(category) {
+        const exp = this.artisanExp[category] || 0;
+        let idx = 0;
+        for (let i = 0; i < ARTISAN_LEVELS.length; i++) {
+            if (exp >= ARTISAN_LEVELS[i].exp) idx = i;
+        }
+        return idx;
+    }
+
+    addArtisanExp(category, amount) {
+        if (!this.artisanExp[category] && this.artisanExp[category] !== 0) return null;
+        const oldIdx = this.getArtisanLevelIndex(category);
+        this.artisanExp[category] += amount;
+        const newIdx = this.getArtisanLevelIndex(category);
+        if (newIdx > oldIdx) return ARTISAN_LEVELS[newIdx];
+        return null;
+    }
+
+    // === 확장/투자 ===
+
+    getUpgradeLevel(upgradeId) {
+        return this.upgradeLevels[upgradeId] || 0;
+    }
+
+    getUpgradeCost(upgradeId) {
+        const up = UPGRADES[upgradeId];
+        if (!up) return null;
+        const lv = this.getUpgradeLevel(upgradeId);
+        if (lv >= up.maxLevel) return null;
+        return up.costs[lv];
+    }
+
+    buyUpgrade(upgradeId) {
+        const cost = this.getUpgradeCost(upgradeId);
+        if (cost === null || this.gold < cost) return false;
+        this.gold -= cost;
+        this.upgradeLevels[upgradeId]++;
+
+        // 효과 적용
+        const up = UPGRADES[upgradeId];
+        if (up.effect === 'shopSlots') this.shopSlots++;
+        if (up.effect === 'craftSlots') this.craftSlots++;
+
+        return true;
+    }
+
+    // === 레시피 연구 ===
+
+    isRecipeDiscovered(recipeId) {
+        return !!this.discoveredRecipes[recipeId];
+    }
+
+    getResearchHints() {
+        // 보유 재료 기반으로 힌트 제공
+        const hints = [];
+        Object.entries(RESEARCH_RECIPES).forEach(([id, recipe]) => {
+            if (this.isRecipeDiscovered(id)) return;
+            const hasAll = recipe.ingredients.every(ing => this.getItemCount(ing.id) >= ing.count);
+            const hasSome = recipe.ingredients.some(ing => this.getItemCount(ing.id) > 0);
+            if (hasSome) {
+                hints.push({ id, recipe, hasAll, hint: recipe.hint });
+            }
+        });
+        return hints;
+    }
+
+    tryResearch(recipeId) {
+        const recipe = RESEARCH_RECIPES[recipeId];
+        if (!recipe || this.isRecipeDiscovered(recipeId)) return { success: false, reason: '이미 발견됨' };
+
+        // 재료 확인 및 소비
+        const hasAll = recipe.ingredients.every(ing => this.getItemCount(ing.id) >= ing.count);
+        if (!hasAll) return { success: false, reason: '재료 부족' };
+
+        // 재료 소비
+        recipe.ingredients.forEach(ing => this.removeItem(ing.id, ing.count));
+
+        // 성공/실패 (70% 성공)
+        if (Math.random() < 0.7) {
+            this.discoveredRecipes[recipeId] = true;
+            return { success: true, recipe };
+        } else {
+            return { success: false, reason: '실패... 재료를 낭비했다' };
+        }
+    }
+
+    getAllAvailableRecipes() {
+        const recipes = Object.entries(RECIPE_DATA).filter(([, r]) => this.day >= (r.unlockDay || 1));
+        // 발견된 연구 레시피 추가
+        Object.entries(RESEARCH_RECIPES).forEach(([id, r]) => {
+            if (this.isRecipeDiscovered(id)) {
+                recipes.push([id, r]);
+            }
+        });
+        return recipes;
     }
 
     // === 손님 수 계산 ===
