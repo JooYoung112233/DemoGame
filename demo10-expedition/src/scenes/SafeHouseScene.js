@@ -31,7 +31,7 @@ class SafeHouseScene extends Phaser.Scene {
         this.showTab('depart');
     }
 
-    /* ─── persistent chrome: title, gold, tabs ─── */
+    /* --- persistent chrome: title, gold, tabs --- */
     drawChrome() {
         const bg = this.add.graphics();
         bg.fillStyle(0x151525, 1);
@@ -39,7 +39,7 @@ class SafeHouseScene extends Phaser.Scene {
         bg.lineStyle(1, 0x333355, 0.4);
         bg.strokeRoundedRect(this.W * 0.02, this.H * 0.11, this.W * 0.96, this.H * 0.87, 12);
 
-        this.add.text(this.W / 2, this.H * 0.035, '\u{1F3E0} 안전가옥', {
+        this.add.text(this.W / 2, this.H * 0.035, '\u{1F3E0} 원정꾼 거점', {
             fontSize: `${Math.floor(this.H * 0.038)}px`, fontFamily: 'monospace', color: '#ffffff', stroke: '#000', strokeThickness: 3
         }).setOrigin(0.5);
 
@@ -51,7 +51,7 @@ class SafeHouseScene extends Phaser.Scene {
         const tabs = [
             { id: 'depart', label: '출발' }, { id: 'stash', label: '보관함' },
             { id: 'equip', label: '장비' }, { id: 'trader', label: '상인' },
-            { id: 'quests', label: '의뢰' }, { id: 'craft', label: '작업대' }
+            { id: 'intel', label: '정보' }, { id: 'repair', label: '수리' }
         ];
         const tabW = this.W * 0.13;
         const startX = this.W / 2 - (tabs.length * tabW) / 2;
@@ -68,7 +68,7 @@ class SafeHouseScene extends Phaser.Scene {
         });
     }
 
-    refreshGold() { this.goldText.setText(`💰 보유 골드: ${this.gold}G`); }
+    refreshGold() { this.goldText.setText(`\u{1F4B0} 보유 골드: ${this.gold}G`); }
 
     showTab(id) {
         this.activeTab = id;
@@ -83,8 +83,8 @@ class SafeHouseScene extends Phaser.Scene {
             case 'stash': this.drawStash(area); break;
             case 'equip': this.drawEquip(area); break;
             case 'trader': this.drawTrader(area); break;
-            case 'quests': this.drawPlaceholder(area, '의뢰'); break;
-            case 'craft': this.drawPlaceholder(area, '작업대'); break;
+            case 'intel': this.drawIntel(area); break;
+            case 'repair': this.drawRepair(area); break;
         }
     }
 
@@ -98,17 +98,33 @@ class SafeHouseScene extends Phaser.Scene {
     }
     fs(ratio) { return `${Math.floor(this.H * ratio)}px`; }
 
-    /* ═══════════ TAB: Depart ═══════════ */
+    /* =========== TAB: Depart =========== */
     drawDepart(a) {
         const stats = this.calcStats();
-        const infoH = this.H * 0.1;
+        const infoH = this.H * 0.13;
         this.makePanel(a.x, a.y, a.w, infoH);
-        this.ct(this.add.text(a.x + 15, a.y + 8, '\u{1F464} 탐험가 상태', {
+        this.ct(this.add.text(a.x + 15, a.y + 8, '\u{1F464} 원정꾼 상태', {
             fontSize: this.fs(0.018), fontFamily: 'monospace', color: '#44aaff', fontStyle: 'bold'
         }));
         const wpnName = this.equipment.weapon ? EQUIPMENT_DATA[this.equipment.weapon]?.name : '맨손';
-        this.ct(this.add.text(a.x + 15, a.y + infoH * 0.45, `HP: ${stats.hp}  ATK: ${stats.atk}  DEF: ${stats.def}  무기: ${wpnName}`, {
+        this.ct(this.add.text(a.x + 15, a.y + infoH * 0.35, `HP: ${stats.hp}  ATK: ${stats.atk}  DEF: ${stats.def}  무기: ${wpnName}`, {
             fontSize: this.fs(0.016), fontFamily: 'monospace', color: '#aaa'
+        }));
+        this.ct(this.add.text(a.x + 15, a.y + infoH * 0.62, `\u{1F526} 손전등: 배터리 100%  |  시야: ${stats.flashlightRange}칸  |  소모: ${stats.batteryDrain}/초`, {
+            fontSize: this.fs(0.014), fontFamily: 'monospace', color: '#88aacc'
+        }));
+
+        /* tip bar */
+        const tips = [
+            '\u{1F4A1} 밤에는 손전등이 유일한 빛입니다. 배터리를 아끼세요.',
+            '\u{1F4A1} 배터리는 탐색 중 줍거나 상인에게 구매할 수 있습니다.',
+            '\u{1F4A1} 밤이 되면 건물이 개장 -- 희귀 루트를 노리세요.',
+            '\u{1F4A1} 가로등 근처에서는 손전등 없이도 볼 수 있습니다.',
+            '\u{1F4A1} 밤의 적은 더 강하지만, 보상도 큽니다.'
+        ];
+        const tip = tips[Math.floor(Math.random() * tips.length)];
+        this.ct(this.add.text(a.x + 15, a.y + infoH * 0.85, tip, {
+            fontSize: this.fs(0.013), fontFamily: 'monospace', color: '#666', fontStyle: 'italic'
         }));
 
         const zoneY = a.y + infoH + this.H * 0.02;
@@ -130,19 +146,26 @@ class SafeHouseScene extends Phaser.Scene {
             card.fillStyle(0x222244, 1); card.fillRoundedRect(cx, cy, cardW, ch, 6);
             card.lineStyle(1, 0x444466, 0.5); card.strokeRoundedRect(cx, cy, cardW, ch, 6);
             this.ct(card);
-            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.07, zone.name, {
+            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.06, zone.name, {
                 fontSize: this.fs(0.022), fontFamily: 'monospace', color: '#fff', fontStyle: 'bold'
             }).setOrigin(0.5));
-            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.18, '★'.repeat(zone.difficulty) + '☆'.repeat(3 - zone.difficulty), {
+            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.15, '★'.repeat(zone.difficulty) + '☆'.repeat(3 - zone.difficulty), {
                 fontSize: this.fs(0.02), fontFamily: 'monospace', color: '#ffcc44'
             }).setOrigin(0.5));
-            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.30, zone.desc, {
-                fontSize: this.fs(0.014), fontFamily: 'monospace', color: '#999', wordWrap: { width: cardW - 16 }, align: 'center'
+            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.25, zone.desc, {
+                fontSize: this.fs(0.013), fontFamily: 'monospace', color: '#999', wordWrap: { width: cardW - 16 }, align: 'center'
             }).setOrigin(0.5, 0));
-            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.62, `적: ${zone.enemyCount.min}~${zone.enemyCount.max}  맵: ${zone.mapWidth}x${zone.mapHeight}`, {
+            /* day/night duration info */
+            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.52, `\u{2600}️ 낮: ${zone.dayDuration}초  \u{2192}  \u{1F319} 밤: ${zone.nightDuration}초`, {
+                fontSize: this.fs(0.013), fontFamily: 'monospace', color: '#88aacc'
+            }).setOrigin(0.5));
+            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.60, `적: ${zone.enemyCount.min}~${zone.enemyCount.max} (밤: ${zone.nightEnemyCount.min}~${zone.nightEnemyCount.max})`, {
                 fontSize: this.fs(0.013), fontFamily: 'monospace', color: '#666'
             }).setOrigin(0.5));
-            const btn = this.ct(this.add.text(cx + cardW / 2, cy + ch - ch * 0.1, '[ 출발 ]', {
+            this.ct(this.add.text(cx + cardW / 2, cy + ch * 0.68, `개장 건물: ${zone.openBuildings.min}~${zone.openBuildings.max}`, {
+                fontSize: this.fs(0.012), fontFamily: 'monospace', color: '#777'
+            }).setOrigin(0.5));
+            const btn = this.ct(this.add.text(cx + cardW / 2, cy + ch - ch * 0.08, '[ 출발 ]', {
                 fontSize: this.fs(0.022), fontFamily: 'monospace', color: '#44ff88',
                 backgroundColor: '#1a2a1a', padding: { x: 14, y: 5 }
             }).setOrigin(0.5).setInteractive({ useHandCursor: true }));
@@ -152,7 +175,7 @@ class SafeHouseScene extends Phaser.Scene {
         });
     }
 
-    /* ═══════════ TAB: Stash ═══════════ */
+    /* =========== TAB: Stash =========== */
     drawStash(a) {
         this.makePanel(a.x, a.y, a.w, a.h);
         const counts = {}; this.stash.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
@@ -160,7 +183,7 @@ class SafeHouseScene extends Phaser.Scene {
             fontSize: this.fs(0.02), fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
         }));
         if (this.stash.length === 0) {
-            this.ct(this.add.text(a.x + a.w / 2, a.y + a.h / 2, '비어있음 — 원정에서 전리품을 가져오세요', {
+            this.ct(this.add.text(a.x + a.w / 2, a.y + a.h / 2, '비어있음 -- 원정에서 전리품을 가져오세요', {
                 fontSize: this.fs(0.018), fontFamily: 'monospace', color: '#555'
             }).setOrigin(0.5));
             return;
@@ -239,7 +262,7 @@ class SafeHouseScene extends Phaser.Scene {
         this.showTab('stash');
     }
 
-    /* ═══════════ TAB: Equipment ═══════════ */
+    /* =========== TAB: Equipment =========== */
     drawEquip(a) {
         const stats = this.calcStats();
         const leftW = a.w * 0.4;
@@ -253,7 +276,8 @@ class SafeHouseScene extends Phaser.Scene {
         }).setOrigin(0.5));
         const statLines = [
             `HP: ${stats.hp}/${stats.maxHp}`, `ATK: ${stats.atk}`, `DEF: ${stats.def}`,
-            `Range: ${stats.attackRange}`, `Cooldown: ${stats.attackCooldown}ms`
+            `사거리: ${stats.attackRange}`, `공속: ${stats.attackCooldown}ms`,
+            `\u{1F526} 시야: ${stats.flashlightRange}칸  소모: ${stats.batteryDrain}/초`
         ];
         statLines.forEach((line, i) => {
             this.ct(this.add.text(a.x + 20, sqY + sq + 42 + i * this.H * 0.035, line, {
@@ -303,7 +327,7 @@ class SafeHouseScene extends Phaser.Scene {
         this.showTab('equip');
     }
 
-    /* ═══════════ TAB: Trader ═══════════ */
+    /* =========== TAB: Trader =========== */
     drawTrader(a) {
         const halfW = (a.w - a.w * 0.02) / 2;
 
@@ -341,7 +365,7 @@ class SafeHouseScene extends Phaser.Scene {
         this.ct(this.add.text(bx + 15, a.y + 8, '구매', {
             fontSize: this.fs(0.02), fontFamily: 'monospace', color: '#44ff88', fontStyle: 'bold'
         }));
-        const shopItems = ['pipe', 'bat', 'jacket', 'vest', 'bandage', 'medkit', 'painkillers'];
+        const shopItems = ['pipe', 'bat', 'crowbar', 'jacket', 'vest', 'bandage', 'medkit', 'painkillers', 'battery'];
         shopItems.forEach((id, i) => {
             const eq = EQUIPMENT_DATA[id]; const it = ITEM_DATA[id];
             const data = eq || it; if (!data) return;
@@ -367,18 +391,106 @@ class SafeHouseScene extends Phaser.Scene {
         this.refreshGold();
     }
 
-    /* ═══════════ TAB: Placeholder ═══════════ */
-    drawPlaceholder(a, name) {
+    /* =========== TAB: Intel (was Quests) =========== */
+    drawIntel(a) {
         this.makePanel(a.x, a.y, a.w, a.h);
-        this.ct(this.add.text(a.x + a.w / 2, a.y + a.h * 0.4, `${name} — 준비 중...`, {
-            fontSize: this.fs(0.03), fontFamily: 'monospace', color: '#555'
-        }).setOrigin(0.5));
-        this.ct(this.add.text(a.x + a.w / 2, a.y + a.h * 0.52, '추후 업데이트 예정', {
-            fontSize: this.fs(0.016), fontFamily: 'monospace', color: '#444'
+        this.ct(this.add.text(a.x + 15, a.y + 8, '\u{1F4CB} 오늘의 정보', {
+            fontSize: this.fs(0.02), fontFamily: 'monospace', color: '#44aaff', fontStyle: 'bold'
+        }));
+        this.ct(this.add.text(a.x + 15, a.y + this.H * 0.06, '밤이 되면 도시의 건물이 개장합니다.\n개장 중인 건물에서는 희귀한 물자를 찾을 수 있지만,\n더 강한 적이 출몰합니다.', {
+            fontSize: this.fs(0.016), fontFamily: 'monospace', color: '#aaa', lineSpacing: 6
+        }));
+
+        const zones = Object.values(ZONE_DATA);
+        const cardY = a.y + this.H * 0.18;
+        const cardH = this.H * 0.12;
+        zones.forEach((zone, i) => {
+            const cy = cardY + i * (cardH + this.H * 0.015);
+            const cardG = this.ct(this.add.graphics());
+            cardG.fillStyle(0x222244, 1); cardG.fillRoundedRect(a.x + 15, cy, a.w - 30, cardH, 6);
+            cardG.lineStyle(1, 0x444466, 0.4); cardG.strokeRoundedRect(a.x + 15, cy, a.w - 30, cardH, 6);
+            this.ct(this.add.text(a.x + 30, cy + 8, `${zone.name}  ${'\\u2605'.repeat ? '★'.repeat(zone.difficulty) : ''}`, {
+                fontSize: this.fs(0.018), fontFamily: 'monospace', color: '#fff', fontStyle: 'bold'
+            }));
+            this.ct(this.add.text(a.x + 30, cy + cardH * 0.42, `\u{1F319} 밤 개장 건물: ${zone.openBuildings.min}~${zone.openBuildings.max}개  |  적: ${zone.nightEnemyCount.min}~${zone.nightEnemyCount.max}마리`, {
+                fontSize: this.fs(0.014), fontFamily: 'monospace', color: '#88aacc'
+            }));
+            this.ct(this.add.text(a.x + 30, cy + cardH * 0.72, `낮 ${zone.dayDuration}초 후 밤 전환  →  밤 ${zone.nightDuration}초 동안 탐색 가능`, {
+                fontSize: this.fs(0.013), fontFamily: 'monospace', color: '#777'
+            }));
+        });
+
+        this.ct(this.add.text(a.x + a.w / 2, a.y + a.h - this.H * 0.04, '\u{26A0}️ 손전등 배터리가 바닥나면 밤에 앞이 보이지 않습니다', {
+            fontSize: this.fs(0.014), fontFamily: 'monospace', color: '#ff8844', fontStyle: 'italic'
         }).setOrigin(0.5));
     }
 
-    /* ═══════════ Overlays ═══════════ */
+    /* =========== TAB: Repair (was Craft) =========== */
+    drawRepair(a) {
+        this.makePanel(a.x, a.y, a.w, a.h);
+        this.ct(this.add.text(a.x + 15, a.y + 8, '\u{1F527} 수리 / 정비', {
+            fontSize: this.fs(0.02), fontFamily: 'monospace', color: '#ffcc44', fontStyle: 'bold'
+        }));
+        this.ct(this.add.text(a.x + 15, a.y + this.H * 0.06, '장비 수리와 손전등 정비를 할 수 있습니다.', {
+            fontSize: this.fs(0.016), fontFamily: 'monospace', color: '#aaa'
+        }));
+
+        /* flashlight section */
+        const sectionY = a.y + this.H * 0.12;
+        const sectionG = this.ct(this.add.graphics());
+        sectionG.fillStyle(0x222244, 1); sectionG.fillRoundedRect(a.x + 15, sectionY, a.w - 30, this.H * 0.1, 6);
+        this.ct(this.add.text(a.x + 30, sectionY + 10, '\u{1F526} 손전등 정비', {
+            fontSize: this.fs(0.018), fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+        }));
+        this.ct(this.add.text(a.x + 30, sectionY + this.H * 0.05, '출발 시 배터리는 항상 100%로 충전됩니다.\n손전등 부품을 모아 개량 손전등을 제작할 수 있습니다.', {
+            fontSize: this.fs(0.014), fontFamily: 'monospace', color: '#999', lineSpacing: 4
+        }));
+
+        /* flashlight_mod craft recipe */
+        const craftY = sectionY + this.H * 0.14;
+        const craftG = this.ct(this.add.graphics());
+        craftG.fillStyle(0x222244, 1); craftG.fillRoundedRect(a.x + 15, craftY, a.w - 30, this.H * 0.1, 6);
+        craftG.lineStyle(1, 0x444466, 0.4); craftG.strokeRoundedRect(a.x + 15, craftY, a.w - 30, this.H * 0.1, 6);
+        this.ct(this.add.text(a.x + 30, craftY + 10, '\u{1F526} 개량 손전등  (시야+2, 배터리 소모 감소)', {
+            fontSize: this.fs(0.016), fontFamily: 'monospace', color: '#ccc'
+        }));
+        const hasparts = this.stash.filter(id => id === 'flashlight_part').length;
+        const haselec = this.stash.filter(id => id === 'electronics').length;
+        const canCraft = hasparts >= 2 && haselec >= 1;
+        this.ct(this.add.text(a.x + 30, craftY + this.H * 0.04, `필요: 손전등 부품 x2 (보유: ${hasparts})  전자부품 x1 (보유: ${haselec})`, {
+            fontSize: this.fs(0.014), fontFamily: 'monospace', color: canCraft ? '#88ff88' : '#888'
+        }));
+        const craftBtn = this.ct(this.add.text(a.x + 30, craftY + this.H * 0.07, canCraft ? '[ 제작 ]' : '[ 재료 부족 ]', {
+            fontSize: this.fs(0.016), fontFamily: 'monospace', color: canCraft ? '#44ff88' : '#555',
+            backgroundColor: canCraft ? '#1a2a1a' : '#1a1a1a', padding: { x: 10, y: 4 }
+        }));
+        if (canCraft) {
+            craftBtn.setInteractive({ useHandCursor: true });
+            craftBtn.on('pointerdown', () => {
+                let removed = 0;
+                for (let j = this.stash.length - 1; j >= 0 && removed < 2; j--) {
+                    if (this.stash[j] === 'flashlight_part') { this.stash.splice(j, 1); removed++; }
+                }
+                const eIdx = this.stash.indexOf('electronics');
+                if (eIdx !== -1) this.stash.splice(eIdx, 1);
+                this.stash.push('flashlight_mod');
+                this.showTab('repair');
+            });
+        }
+
+        /* weapon repair placeholder */
+        const repairY = craftY + this.H * 0.14;
+        const repairG = this.ct(this.add.graphics());
+        repairG.fillStyle(0x222244, 1); repairG.fillRoundedRect(a.x + 15, repairY, a.w - 30, this.H * 0.08, 6);
+        this.ct(this.add.text(a.x + 30, repairY + 10, '\u{1FA93} 장비 수리', {
+            fontSize: this.fs(0.018), fontFamily: 'monospace', color: '#88ccff', fontStyle: 'bold'
+        }));
+        this.ct(this.add.text(a.x + 30, repairY + this.H * 0.045, '장비 내구도 시스템 -- 추후 업데이트 예정', {
+            fontSize: this.fs(0.014), fontFamily: 'monospace', color: '#555', fontStyle: 'italic'
+        }));
+    }
+
+    /* =========== Overlays =========== */
     showExtractResult() {
         const panel = this.add.container(0, 0).setDepth(200);
         const overlay = this.add.graphics();
@@ -392,7 +504,7 @@ class SafeHouseScene extends Phaser.Scene {
         const lines = Object.entries(counts).slice(0, 8).map(([id, c]) => {
             const item = ITEM_DATA[id]; return `${item?.icon || ''} ${item?.name || id} x${c}  (${(item?.value || 0) * c}G)`;
         });
-        panel.add(this.add.text(this.W / 2, this.H * 0.32, '── 회수한 전리품 ──', {
+        panel.add(this.add.text(this.W / 2, this.H * 0.32, '-- 회수한 전리품 --', {
             fontSize: `${Math.floor(fs * 0.4)}px`, fontFamily: 'monospace', color: '#aaa'
         }).setOrigin(0.5));
         panel.add(this.add.text(this.W / 2, this.H * 0.37, lines.join('\n') || '없음', {
@@ -411,13 +523,13 @@ class SafeHouseScene extends Phaser.Scene {
 
     showFailResult() {
         const msg = this.add.text(this.W / 2, this.H * 0.95,
-            '⚠ 긴급 철수 — 전리품 전부 소실', {
+            '\u{26A0} 긴급 철수 -- 전리품 전부 소실', {
             fontSize: this.fs(0.02), fontFamily: 'monospace', color: '#ff6644', stroke: '#000', strokeThickness: 2
         }).setOrigin(0.5);
         this.tweens.add({ targets: msg, alpha: 0, delay: 4000, duration: 500 });
     }
 
-    /* ═══════════ Stats / Expedition ═══════════ */
+    /* =========== Stats / Expedition =========== */
     calcStats() {
         const base = PLAYER_DATA;
         const wpn = this.equipment.weapon ? EQUIPMENT_DATA[this.equipment.weapon] : null;
@@ -427,7 +539,9 @@ class SafeHouseScene extends Phaser.Scene {
             atk: base.atk + (wpn?.atk || 0),
             def: base.def + (arm?.def || 0),
             attackRange: wpn?.range || base.attackRange,
-            attackCooldown: wpn?.cooldown || base.attackCooldown
+            attackCooldown: wpn?.cooldown || base.attackCooldown,
+            flashlightRange: base.flashlightRange,
+            batteryDrain: base.batteryDrain
         };
     }
 
@@ -435,7 +549,8 @@ class SafeHouseScene extends Phaser.Scene {
         const stats = this.calcStats();
         const expData = {
             zone: zoneId, inventory: [], stash: this.stash, gold: this.gold,
-            playerState: { ...stats, equipment: { ...this.equipment } }
+            playerState: { ...stats, equipment: { ...this.equipment } },
+            flashlightBattery: 100
         };
         this.cameras.main.fadeOut(400, 0, 0, 0);
         this.time.delayedCall(450, () => {
