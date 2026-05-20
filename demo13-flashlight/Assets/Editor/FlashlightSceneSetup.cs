@@ -133,8 +133,31 @@ public class FlashlightSceneSetup : EditorWindow
 
         int w = 12, h = 10;
         Sprite floorTile = CreateDiamondSprite(64, new Color(0.28f, 0.26f, 0.22f));
+        Sprite roadTile = CreateDiamondSprite(64, new Color(0.15f, 0.15f, 0.17f));
 
-        // ---- 바닥 ----
+        // ---- 바깥 바닥 (도로/아스팔트) ----
+        var outsideFloor = new GameObject("OutsideFloor");
+        outsideFloor.transform.SetParent(building.transform);
+        for (int gx = -6; gx <= w + 6; gx++)
+        {
+            for (int gy = -6; gy <= h + 6; gy++)
+            {
+                if (gx >= 1 && gx < w && gy >= 1 && gy < h) continue;
+                var go = new GameObject($"R_{gx}_{gy}");
+                go.transform.SetParent(outsideFloor.transform);
+                go.transform.position = GridToWorld(gx, gy);
+                var sr = go.AddComponent<SpriteRenderer>();
+                sr.sprite = roadTile;
+                sr.sortingOrder = gx + gy - 15;
+                sr.color = new Color(
+                    0.13f + Random.value * 0.04f,
+                    0.13f + Random.value * 0.04f,
+                    0.15f + Random.value * 0.04f
+                );
+            }
+        }
+
+        // ---- 건물 내부 바닥 ----
         var floorParent = new GameObject("Floor");
         floorParent.transform.SetParent(building.transform);
         for (int gx = 1; gx < w; gx++)
