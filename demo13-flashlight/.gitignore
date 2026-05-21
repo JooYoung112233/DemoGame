@@ -8,7 +8,10 @@
 [Uu]ser[Ss]ettings/
 MemoryCaptures/
 Recordings/
-Assembly-CSharp*.csproj
+
+# IDE
+.vs/
+*.csproj
 *.sln
 *.suo
 *.tmp
