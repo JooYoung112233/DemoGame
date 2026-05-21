@@ -478,8 +478,6 @@ public class DemoSetup : EditorWindow
         // 스탯 결정: EnemyData 우선, 없으면 CombatData 폴백
         float spd = enemyData != null ? enemyData.moveSpeed : combatData.enemy.moveSpeed;
         float hp = enemyData != null ? enemyData.maxHp : combatData.enemy.maxHp;
-        float scale = enemyData != null ? enemyData.scale : 2f;
-        Color tint = enemyData != null ? enemyData.tintColor : new Color(1f, 0.7f, 0.7f, 1f);
 
         // NavMeshAgent
         var agent = enemyGO.AddComponent<NavMeshAgent>();
@@ -493,19 +491,32 @@ public class DemoSetup : EditorWindow
         agent.updateUpAxis = false;
         agent.stoppingDistance = 0.3f;
 
-        var skeleton = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+        // 프리팹 결정: EnemyData.generatedPrefab 우선, 없으면 기본 프리팹
+        GameObject usePrefab = (enemyData != null && enemyData.generatedPrefab != null)
+            ? enemyData.generatedPrefab : prefab;
+        float scale = (enemyData != null && enemyData.generatedPrefab != null)
+            ? 1f  // 생성된 프리팹은 이미 스케일 적용됨
+            : (enemyData != null ? enemyData.scale : 2f);
+        Color tint = enemyData != null ? enemyData.tintColor : new Color(1f, 0.7f, 0.7f, 1f);
+
+        var skeleton = (GameObject)PrefabUtility.InstantiatePrefab(usePrefab);
         skeleton.name = "SkeletonSprite";
         skeleton.transform.SetParent(enemyGO.transform);
         skeleton.transform.localPosition = new Vector3(0, 0.1f, 0);
-        skeleton.transform.localScale = Vector3.one * scale;
 
-        // 적 색상: EnemyData의 tintColor 사용
-        var renderers = skeleton.GetComponentsInChildren<SpriteRenderer>();
-        foreach (var r in renderers)
+        if (enemyData == null || enemyData.generatedPrefab == null)
         {
-            if (r.gameObject.name == "shadow") continue;
-            r.color = tint;
+            // 기본 프리팹 사용 시: 수동으로 색상/크기 적용
+            skeleton.transform.localScale = Vector3.one * scale;
+
+            var renderers = skeleton.GetComponentsInChildren<SpriteRenderer>();
+            foreach (var r in renderers)
+            {
+                if (r.gameObject.name == "shadow") continue;
+                r.color = tint;
+            }
         }
+        // 생성된 프리팹은 이미 색상/글로우/파티클이 적용되어 있음
 
         var animCtrl = skeleton.GetComponent<SkeletonAnimController>();
         if (animCtrl == null) animCtrl = skeleton.AddComponent<SkeletonAnimController>();

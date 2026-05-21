@@ -9,8 +9,20 @@ public class EnemyData : ScriptableObject
 {
     [Header("기본 정보")]
     public string displayName = "New Enemy";
-    public Color tintColor = new Color(1f, 0.7f, 0.7f, 1f);
     public float scale = 2f;
+
+    [Header("비주얼")]
+    public Color tintColor = new Color(1f, 0.7f, 0.7f, 1f);
+    public Color shadowColor = new Color(0f, 0f, 0f, 0.4f);
+    public bool useGlow = false;
+    public Color glowColor = new Color(1f, 0.3f, 0.3f);
+    public float glowIntensity = 3f;
+    public float glowRange = 3f;
+    public bool useTrailParticle = false;
+    public Color trailColor = new Color(1f, 0.5f, 0.5f, 0.5f);
+
+    [Header("프리팹")]
+    public GameObject generatedPrefab; // 자동 생성된 프리팹 참조
 
     [Header("체력")]
     public float maxHp = 60f;

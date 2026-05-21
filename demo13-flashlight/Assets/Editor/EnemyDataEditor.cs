@@ -18,12 +18,14 @@ public class EnemyDataEditor : EditorWindow
     Vector2 listScrollPos;
     Vector2 detailScrollPos;
 
+    bool showVisual = true;
     bool showCombat = true;
     bool showMovement = true;
     bool showDetection = true;
     bool showAI = true;
     bool showReward = true;
     bool showBalance = true;
+    bool showPrefab = true;
 
     CombatData combatData;
 
@@ -201,9 +203,110 @@ public class EnemyDataEditor : EditorWindow
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField("Basic Info", EditorStyles.boldLabel);
         EditorGUILayout.PropertyField(so.FindProperty("displayName"), new GUIContent("Display Name"));
-        EditorGUILayout.PropertyField(so.FindProperty("tintColor"), new GUIContent("Tint Color"));
         DrawSlider(so.FindProperty("scale"), "Scale", 0.5f, 5f);
         EditorGUILayout.EndVertical();
+
+        EditorGUILayout.Space(4);
+
+        // ===== 비주얼 =====
+        showVisual = EditorGUILayout.BeginFoldoutHeaderGroup(showVisual, "VISUAL");
+        if (showVisual)
+        {
+            EditorGUI.indentLevel++;
+
+            EditorGUILayout.PropertyField(so.FindProperty("tintColor"), new GUIContent("Body Tint"));
+            EditorGUILayout.PropertyField(so.FindProperty("shadowColor"), new GUIContent("Shadow Color"));
+
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("Glow Light", EditorStyles.miniLabel);
+            EditorGUILayout.PropertyField(so.FindProperty("useGlow"), new GUIContent("Enable Glow"));
+            if (enemy.useGlow)
+            {
+                EditorGUILayout.PropertyField(so.FindProperty("glowColor"), new GUIContent("  Glow Color"));
+                DrawSlider(so.FindProperty("glowIntensity"), "  Glow Intensity", 0.5f, 15);
+                DrawSlider(so.FindProperty("glowRange"), "  Glow Range", 0.5f, 10);
+            }
+
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("Trail Particle", EditorStyles.miniLabel);
+            EditorGUILayout.PropertyField(so.FindProperty("useTrailParticle"), new GUIContent("Enable Trail"));
+            if (enemy.useTrailParticle)
+            {
+                EditorGUILayout.PropertyField(so.FindProperty("trailColor"), new GUIContent("  Trail Color"));
+            }
+
+            // 색상 미리보기 바
+            EditorGUILayout.Space(4);
+            DrawColorPreview(enemy);
+
+            EditorGUI.indentLevel--;
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+
+        EditorGUILayout.Space(4);
+
+        // ===== 프리팹 =====
+        showPrefab = EditorGUILayout.BeginFoldoutHeaderGroup(showPrefab, "PREFAB");
+        if (showPrefab)
+        {
+            EditorGUI.indentLevel++;
+
+            // 현재 프리팹 상태
+            if (enemy.generatedPrefab != null)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Current Prefab:", GUILayout.Width(100));
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.ObjectField(enemy.generatedPrefab, typeof(GameObject), false);
+                EditorGUI.EndDisabledGroup();
+                EditorGUILayout.EndHorizontal();
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("프리팹 미생성. 아래 버튼으로 생성하세요.", MessageType.Info);
+            }
+
+            EditorGUILayout.Space(2);
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button(
+                enemy.generatedPrefab != null ? "Update Prefab" : "Generate Prefab",
+                GUILayout.Height(24)))
+            {
+                so.ApplyModifiedProperties();
+                if (enemy.generatedPrefab != null)
+                    EnemyPrefabFactory.UpdateExistingPrefab(enemy);
+                else
+                    EnemyPrefabFactory.GeneratePrefab(enemy);
+            }
+
+            if (GUILayout.Button("Preview in Scene", GUILayout.Height(24)))
+            {
+                so.ApplyModifiedProperties();
+                EnemyPrefabFactory.PreviewInScene(enemy);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            // 모든 프리팹 일괄 생성
+            EditorGUILayout.Space(2);
+            if (GUILayout.Button("Generate ALL Prefabs", EditorStyles.miniButton))
+            {
+                so.ApplyModifiedProperties();
+                int count = 0;
+                foreach (var e in enemyList)
+                {
+                    if (e.generatedPrefab != null)
+                        EnemyPrefabFactory.UpdateExistingPrefab(e);
+                    else
+                        EnemyPrefabFactory.GeneratePrefab(e);
+                    count++;
+                }
+                Debug.Log($"[PrefabFactory] {count}개 프리팹 일괄 생성/업데이트 완료!");
+            }
+
+            EditorGUI.indentLevel--;
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
 
         EditorGUILayout.Space(4);
 
@@ -396,8 +499,16 @@ public class EnemyDataEditor : EditorWindow
         var src = enemyList[selectedIndex];
         var dup = CreateNewEnemy(src.displayName + " Copy");
 
-        // 값 복사
+        // 값 복사 — 비주얼
         dup.tintColor = src.tintColor;
+        dup.shadowColor = src.shadowColor;
+        dup.useGlow = src.useGlow;
+        dup.glowColor = src.glowColor;
+        dup.glowIntensity = src.glowIntensity;
+        dup.glowRange = src.glowRange;
+        dup.useTrailParticle = src.useTrailParticle;
+        dup.trailColor = src.trailColor;
+        // 스탯
         dup.scale = src.scale;
         dup.maxHp = src.maxHp;
         dup.attackDamage = src.attackDamage;
@@ -455,6 +566,7 @@ public class EnemyDataEditor : EditorWindow
     {
         var data = CreateNewEnemy("Skeleton Archer");
         data.tintColor = new Color(0.7f, 1f, 0.7f);
+        data.shadowColor = new Color(0f, 0.1f, 0f, 0.5f);
         data.scale = 1.8f;
         data.maxHp = 40f;
         data.attackDamage = 20f;
@@ -474,6 +586,11 @@ public class EnemyDataEditor : EditorWindow
     {
         var data = CreateNewEnemy("Skeleton Guard");
         data.tintColor = new Color(0.7f, 0.7f, 1f);
+        data.shadowColor = new Color(0f, 0f, 0.15f, 0.5f);
+        data.useGlow = true;
+        data.glowColor = new Color(0.4f, 0.4f, 1f);
+        data.glowIntensity = 2f;
+        data.glowRange = 2f;
         data.scale = 2.5f;
         data.maxHp = 150f;
         data.attackDamage = 25f;
@@ -494,6 +611,13 @@ public class EnemyDataEditor : EditorWindow
     {
         var data = CreateNewEnemy("Skeleton King");
         data.tintColor = new Color(1f, 0.4f, 1f);
+        data.shadowColor = new Color(0.2f, 0f, 0.2f, 0.6f);
+        data.useGlow = true;
+        data.glowColor = new Color(1f, 0.3f, 1f);
+        data.glowIntensity = 5f;
+        data.glowRange = 4f;
+        data.useTrailParticle = true;
+        data.trailColor = new Color(1f, 0.3f, 1f, 0.6f);
         data.scale = 3f;
         data.maxHp = 500f;
         data.attackDamage = 40f;
@@ -569,6 +693,43 @@ public class EnemyDataEditor : EditorWindow
     {
         var style = new GUIStyle(EditorStyles.helpBox) { richText = true, fontSize = 11 };
         EditorGUILayout.LabelField(text, style, GUILayout.MinHeight(22));
+    }
+
+    void DrawColorPreview(EnemyData enemy)
+    {
+        EditorGUILayout.LabelField("Color Preview", EditorStyles.miniLabel);
+        Rect r = EditorGUILayout.GetControlRect(false, 24);
+
+        float segWidth = r.width / 3f;
+
+        // Body tint
+        Rect bodyRect = new Rect(r.x, r.y, segWidth - 2, r.height);
+        EditorGUI.DrawRect(bodyRect, enemy.tintColor);
+        var labelStyle = new GUIStyle(EditorStyles.miniLabel)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            normal = { textColor = GetContrastColor(enemy.tintColor) }
+        };
+        EditorGUI.LabelField(bodyRect, "Body", labelStyle);
+
+        // Shadow
+        Rect shadowRect = new Rect(r.x + segWidth, r.y, segWidth - 2, r.height);
+        EditorGUI.DrawRect(shadowRect, enemy.shadowColor);
+        labelStyle.normal.textColor = Color.white;
+        EditorGUI.LabelField(shadowRect, "Shadow", labelStyle);
+
+        // Glow
+        Rect glowRect = new Rect(r.x + segWidth * 2, r.y, segWidth - 2, r.height);
+        Color glowPreview = enemy.useGlow ? enemy.glowColor : new Color(0.2f, 0.2f, 0.2f);
+        EditorGUI.DrawRect(glowRect, glowPreview);
+        labelStyle.normal.textColor = GetContrastColor(glowPreview);
+        EditorGUI.LabelField(glowRect, enemy.useGlow ? "Glow" : "No Glow", labelStyle);
+    }
+
+    static Color GetContrastColor(Color c)
+    {
+        float luma = 0.299f * c.r + 0.587f * c.g + 0.114f * c.b;
+        return luma > 0.5f ? Color.black : Color.white;
     }
 
     void DrawProgressBar(string label, float value, Color color)
