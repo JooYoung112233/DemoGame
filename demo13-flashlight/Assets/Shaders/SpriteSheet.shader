@@ -4,7 +4,8 @@ Shader "Custom/SpriteSheet"
     {
         _MainTex ("Sprite Sheet", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
-        _FrameCount ("Frame Count", Float) = 1
+        _Columns ("Columns", Float) = 2
+        _Rows ("Rows", Float) = 8
         _CurrentFrame ("Current Frame", Float) = 0
         _Cutoff ("Alpha Cutoff", Range(0,1)) = 0.5
     }
@@ -31,7 +32,8 @@ Shader "Custom/SpriteSheet"
             CBUFFER_START(UnityPerMaterial)
                 float4 _MainTex_ST;
                 float4 _Color;
-                float _FrameCount;
+                float _Columns;
+                float _Rows;
                 float _CurrentFrame;
                 float _Cutoff;
             CBUFFER_END
@@ -56,11 +58,19 @@ Shader "Custom/SpriteSheet"
                 Varyings output;
                 output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
 
-                // UV를 현재 프레임으로 슬라이싱
-                float frameH = 1.0 / _FrameCount;
-                float frameY = 1.0 - (_CurrentFrame + 1.0) * frameH;
-                output.uv = float2(input.uv.x, input.uv.y * frameH + frameY);
+                // 그리드 기반 UV 슬라이싱
+                int frame = (int)_CurrentFrame;
+                int col = frame % (int)_Columns;
+                int row = frame / (int)_Columns;
 
+                float cellW = 1.0 / _Columns;
+                float cellH = 1.0 / _Rows;
+
+                // 왼쪽→오른쪽, 위→아래 순서
+                float u = (col + input.uv.x) * cellW;
+                float v = 1.0 - (row + 1.0 - input.uv.y) * cellH;
+
+                output.uv = float2(u, v);
                 return output;
             }
 

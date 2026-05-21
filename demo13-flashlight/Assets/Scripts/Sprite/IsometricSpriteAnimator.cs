@@ -1,9 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// 8방향 스프라이트 시트 애니메이션.
-/// 스프라이트 시트는 세로로 프레임이 나열된 형태.
-/// 방향별로 별도 텍스처를 참조.
+/// 8방향 그리드 스프라이트 시트 애니메이션.
+/// 시트는 columns x rows 그리드, 왼쪽→오른쪽, 위→아래 순서.
 /// </summary>
 public class IsometricSpriteAnimator : MonoBehaviour
 {
@@ -17,9 +16,8 @@ public class IsometricSpriteAnimator : MonoBehaviour
     [Header("Settings")]
     [SerializeField] float frameRate = 10f;
     [SerializeField] MeshRenderer targetRenderer;
-    [SerializeField] float spriteScale = 1.5f;
 
-    // 방향 순서: 0=Bot, 1=LeftBot, 2=Left, 3=LeftTop, 4=Top, 5=RightTop, 6=Right, 7=RightBot
+    // 방향: 0=Bot, 1=LeftBot, 2=Left, 3=LeftTop, 4=Top, 5=RightTop, 6=Right, 7=RightBot
     string currentAnim = "";
     int currentDir = 0;
     int currentFrame = 0;
@@ -37,7 +35,6 @@ public class IsometricSpriteAnimator : MonoBehaviour
         if (targetRenderer != null)
         {
             mat = targetRenderer.material;
-            // 첫 프레임 즉시 표시
             Play("idle");
         }
     }
@@ -78,13 +75,9 @@ public class IsometricSpriteAnimator : MonoBehaviour
     public void SetDirection(Vector3 worldDir)
     {
         if (worldDir.sqrMagnitude < 0.01f) return;
-        // 8방향 각도 계산 (XZ 평면)
         float angle = Mathf.Atan2(worldDir.x, worldDir.z) * Mathf.Rad2Deg;
         if (angle < 0) angle += 360f;
 
-        // 각도 → 8방향 인덱스
-        // 0°=Top(4), 45°=RightTop(5), 90°=Right(6), 135°=RightBot(7)
-        // 180°=Bot(0), 225°=LeftBot(1), 270°=Left(2), 315°=LeftTop(3)
         int dir = Mathf.RoundToInt(angle / 45f) % 8;
         int[] mapping = { 4, 5, 6, 7, 0, 1, 2, 3 };
         currentDir = mapping[dir];
@@ -125,9 +118,9 @@ public class IsometricSpriteAnimator : MonoBehaviour
     {
         if (mat == null || sheet.texture == null) return;
 
-        // Custom/SpriteSheet 셰이더 프로퍼티 직접 제어
         mat.SetTexture("_MainTex", sheet.texture);
-        mat.SetFloat("_FrameCount", sheet.frameCount);
+        mat.SetFloat("_Columns", sheet.columns);
+        mat.SetFloat("_Rows", sheet.rows);
         mat.SetFloat("_CurrentFrame", currentFrame);
     }
 
@@ -148,6 +141,8 @@ public class IsometricSpriteAnimator : MonoBehaviour
     public struct SpriteSheet
     {
         public Texture2D texture;
+        public int columns;
+        public int rows;
         public int frameCount;
     }
 }

@@ -66,11 +66,12 @@ public class CombatDemoSetup : EditorWindow
             animSO.FindProperty("frameRate").floatValue = 10f;
 
             // 8방향 스프라이트 시트 로드
-            SetSpriteSheets(animSO, "idleSheets", "Idle", 16);
-            SetSpriteSheets(animSO, "walkSheets", "Walk", 8);
-            SetSpriteSheets(animSO, "attackSheets", "Attack", 8);
-            SetSpriteSheets(animSO, "deathSheets", "Death", 8);
-            SetSpriteSheets(animSO, "getHitSheets", "GetHit", 4);
+            // columns, rows, frameCount
+            SetSpriteSheets(animSO, "idleSheets", "Idle", 2, 8, 16);
+            SetSpriteSheets(animSO, "walkSheets", "Walk", 2, 4, 8);
+            SetSpriteSheets(animSO, "attackSheets", "Attack", 2, 4, 8);
+            SetSpriteSheets(animSO, "deathSheets", "Death", 4, 4, 8);
+            SetSpriteSheets(animSO, "getHitSheets", "GetHit", 2, 2, 4);
             animSO.ApplyModifiedProperties();
         }
     }
@@ -169,11 +170,11 @@ public class CombatDemoSetup : EditorWindow
             spriteGO.GetComponent<MeshRenderer>();
         animSO.FindProperty("frameRate").floatValue = 10f;
 
-        SetSpriteSheets(animSO, "idleSheets", "Idle", 16);
-        SetSpriteSheets(animSO, "walkSheets", "Walk", 8);
-        SetSpriteSheets(animSO, "attackSheets", "Attack", 8);
-        SetSpriteSheets(animSO, "deathSheets", "Death", 8);
-        SetSpriteSheets(animSO, "getHitSheets", "GetHit", 4);
+        SetSpriteSheets(animSO, "idleSheets", "Idle", 2, 8, 16);
+        SetSpriteSheets(animSO, "walkSheets", "Walk", 2, 4, 8);
+        SetSpriteSheets(animSO, "attackSheets", "Attack", 2, 4, 8);
+        SetSpriteSheets(animSO, "deathSheets", "Death", 4, 4, 8);
+        SetSpriteSheets(animSO, "getHitSheets", "GetHit", 2, 2, 4);
         animSO.ApplyModifiedProperties();
 
         // Health
@@ -205,7 +206,7 @@ public class CombatDemoSetup : EditorWindow
         hpBarSO.ApplyModifiedProperties();
     }
 
-    static void SetSpriteSheets(SerializedObject so, string propName, string animFolder, int defaultFrameCount)
+    static void SetSpriteSheets(SerializedObject so, string propName, string animFolder, int cols, int rows, int frameCount)
     {
         var prop = so.FindProperty(propName);
         prop.arraySize = 8;
@@ -219,16 +220,9 @@ public class CombatDemoSetup : EditorWindow
 
             var element = prop.GetArrayElementAtIndex(i);
             element.FindPropertyRelative("texture").objectReferenceValue = tex;
-
-            // 프레임 수 자동 계산: 텍스처가 있으면 세로/가로 비율로 추정
-            int frames = defaultFrameCount;
-            if (tex != null && tex.width > 0)
-            {
-                // 스프라이트 시트는 세로로 프레임 나열, 각 프레임은 대략 정사각형
-                float ratio = (float)tex.height / tex.width;
-                frames = Mathf.Max(1, Mathf.RoundToInt(ratio));
-            }
-            element.FindPropertyRelative("frameCount").intValue = frames;
+            element.FindPropertyRelative("columns").intValue = cols;
+            element.FindPropertyRelative("rows").intValue = rows;
+            element.FindPropertyRelative("frameCount").intValue = frameCount;
 
             if (tex == null)
                 Debug.LogWarning($"[Combat Demo] 텍스처 없음: {texPath}");
