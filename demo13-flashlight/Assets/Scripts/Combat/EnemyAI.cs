@@ -1,7 +1,9 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
-/// 적 AI 상태머신. CombatData 연결 시 실시간 스탯 반영.
+/// 적 AI 상태머신 + NavMeshAgent 경로탐색.
+/// CombatData 연결 시 실시간 스탯 반영.
 /// </summary>
 public class EnemyAI : MonoBehaviour
 {
@@ -20,7 +22,7 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Combat")]
     [SerializeField] float attackDamage = 15f;
-    [SerializeField] float attackSpeed = 0.67f; // 초당 공격 횟수
+    [SerializeField] float attackSpeed = 0.67f;
 
     [Header("Data")]
     [SerializeField] CombatData combatData;
@@ -32,15 +34,14 @@ public class EnemyAI : MonoBehaviour
     Transform player;
     Health health;
     Health playerHealth;
-    CharacterController cc;
+    NavMeshAgent agent;
 
     Vector3 spawnPos;
-    Vector3 patrolTarget;
     float patrolTimer;
     float attackTimer;
     float hitTimer;
 
-    // CombatData 우선, 없으면 기본값
+    // CombatData 우선
     float Damage => combatData != null ? combatData.enemy.attackDamage : attackDamage;
     float AtkRange => combatData != null ? combatData.enemy.attackRange : attackRange;
     float AtkCooldown => 1f / Mathf.Max(
@@ -54,13 +55,22 @@ public class EnemyAI : MonoBehaviour
     void Awake()
     {
         health = GetComponent<Health>();
-        cc = GetComponent<CharacterController>();
+        agent = GetComponent<NavMeshAgent>();
+
+        if (agent != null)
+        {
+            agent.updateRotation = false;
+            agent.updateUpAxis = false;
+            agent.speed = MoveSpd;
+            agent.acceleration = 50f;
+            agent.angularSpeed = 0f;
+            agent.stoppingDistance = 0.3f;
+        }
     }
 
     void Start()
     {
         spawnPos = transform.position;
-        patrolTarget = GetRandomPatrolPoint();
 
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
@@ -74,12 +84,24 @@ public class EnemyAI : MonoBehaviour
             health.OnDamaged += OnDamaged;
             health.OnDeath += OnDeath;
         }
+
+        // 첫 순찰 지점
+        SetPatrolTarget();
     }
 
     void Update()
     {
         if (state == State.Dead) return;
         attackTimer -= Time.deltaTime;
+
+        // 이동 방향에 따라 애니메이션 방향 설정
+        if (agent != null && agent.velocity.sqrMagnitude > 0.1f)
+        {
+            Vector3 vel = agent.velocity;
+            vel.y = 0;
+            if (vel.sqrMagnitude > 0.01f)
+                animController?.SetDirection(vel.normalized);
+        }
 
         switch (state)
         {
@@ -95,29 +117,26 @@ public class EnemyAI : MonoBehaviour
         if (player != null && DistToPlayer() < DetectRng)
         {
             state = State.Chase;
-            animController?.Play("walk");
             return;
         }
 
-        Vector3 dir = patrolTarget - transform.position;
-        dir.y = 0;
-
-        if (dir.magnitude < 0.5f)
+        if (agent != null && agent.isOnNavMesh)
         {
-            patrolTimer += Time.deltaTime;
-            animController?.Play("idle");
+            agent.speed = PatrolSpd;
 
-            if (patrolTimer >= patrolWaitTime)
+            // 도착 체크
+            if (!agent.pathPending && agent.remainingDistance < 0.5f)
             {
-                patrolTarget = GetRandomPatrolPoint();
-                patrolTimer = 0f;
+                patrolTimer += Time.deltaTime;
+                animController?.Play("idle");
+
+                if (patrolTimer >= patrolWaitTime)
+                    SetPatrolTarget();
             }
-        }
-        else
-        {
-            Move(dir.normalized, PatrolSpd);
-            animController?.Play("walk");
-            animController?.SetDirection(dir.normalized);
+            else
+            {
+                animController?.Play("walk");
+            }
         }
     }
 
@@ -126,6 +145,7 @@ public class EnemyAI : MonoBehaviour
         if (player == null || (playerHealth != null && playerHealth.IsDead))
         {
             state = State.Patrol;
+            StopAgent();
             animController?.Play("idle");
             return;
         }
@@ -135,25 +155,26 @@ public class EnemyAI : MonoBehaviour
         if (dist > LoseRng)
         {
             state = State.Patrol;
-            patrolTarget = GetRandomPatrolPoint();
-            animController?.Play("idle");
+            SetPatrolTarget();
             return;
         }
 
         if (dist <= AtkRange && attackTimer <= 0)
         {
             state = State.Attack;
+            StopAgent();
             DoAttack();
             return;
         }
 
-        Vector3 dir = (player.position - transform.position);
-        dir.y = 0;
-        dir.Normalize();
-
-        Move(dir, MoveSpd);
+        // NavMesh 경로탐색으로 플레이어 추격
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.speed = MoveSpd;
+            agent.stoppingDistance = AtkRange * 0.8f;
+            agent.SetDestination(player.position);
+        }
         animController?.Play("walk");
-        animController?.SetDirection(dir);
     }
 
     void UpdateAttack()
@@ -161,7 +182,6 @@ public class EnemyAI : MonoBehaviour
         if (animController != null && animController.IsAnimComplete)
         {
             state = State.Chase;
-            animController?.Play("walk");
         }
     }
 
@@ -171,7 +191,6 @@ public class EnemyAI : MonoBehaviour
         if (hitTimer <= 0 || (animController != null && animController.IsAnimComplete))
         {
             state = State.Chase;
-            animController?.Play("walk");
         }
     }
 
@@ -179,6 +198,7 @@ public class EnemyAI : MonoBehaviour
     {
         attackTimer = AtkCooldown;
 
+        // 플레이어 방향으로 회전
         Vector3 dir = (player.position - transform.position);
         dir.y = 0;
         animController?.SetDirection(dir.normalized);
@@ -203,34 +223,48 @@ public class EnemyAI : MonoBehaviour
 
         state = State.Hit;
         hitTimer = 0.3f;
+        StopAgent();
         animController?.PlayOneShot("gethit");
     }
 
     void OnDeath()
     {
         state = State.Dead;
+        StopAgent();
+        if (agent != null) agent.enabled = false;
         animController?.PlayOneShot("death");
-        if (cc != null) cc.enabled = false;
         Destroy(gameObject, 3f);
     }
 
-    void Move(Vector3 dir, float speed)
+    void SetPatrolTarget()
     {
-        if (cc != null)
-            cc.Move(dir * speed * Time.deltaTime);
-        else
-            transform.position += dir * speed * Time.deltaTime;
+        patrolTimer = 0f;
+        if (agent != null && agent.isOnNavMesh)
+        {
+            Vector2 rnd = Random.insideUnitCircle * PatrolRad;
+            Vector3 target = spawnPos + new Vector3(rnd.x, 0, rnd.y);
+
+            // NavMesh 위의 유효 위치로 보정
+            if (NavMesh.SamplePosition(target, out NavMeshHit hit, PatrolRad, NavMesh.AllAreas))
+            {
+                agent.stoppingDistance = 0.3f;
+                agent.SetDestination(hit.position);
+            }
+        }
+    }
+
+    void StopAgent()
+    {
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+            agent.velocity = Vector3.zero;
+        }
     }
 
     float DistToPlayer()
     {
         if (player == null) return float.MaxValue;
         return Vector3.Distance(transform.position, player.position);
-    }
-
-    Vector3 GetRandomPatrolPoint()
-    {
-        Vector2 rnd = Random.insideUnitCircle * PatrolRad;
-        return spawnPos + new Vector3(rnd.x, 0, rnd.y);
     }
 }

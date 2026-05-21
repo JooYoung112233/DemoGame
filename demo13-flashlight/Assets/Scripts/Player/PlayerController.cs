@@ -1,7 +1,8 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
-/// 플레이어 이동 + 손전등 방향 제어.
+/// 플레이어 이동 (NavMeshAgent) + 손전등 방향 제어.
 /// 기본: 이동 방향 = 바라보는 방향 = 손전등 방향
 /// Ctrl: 이동은 WASD, 바라보는 방향/손전등은 마우스 (좀보이드 스타일)
 /// </summary>
@@ -15,7 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] CombatData combatData;
 
     Camera mainCam;
-    CharacterController cc;
+    NavMeshAgent agent;
     Vector3 moveDir;
 
     // 카메라 기준 이동 축
@@ -31,7 +32,16 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         mainCam = Camera.main;
-        cc = GetComponent<CharacterController>();
+        agent = GetComponent<NavMeshAgent>();
+
+        if (agent != null)
+        {
+            agent.updateRotation = false;
+            agent.updateUpAxis = false;
+            agent.speed = MoveSpeed;
+            agent.acceleration = 100f;  // 즉각 반응
+            agent.angularSpeed = 0f;    // 회전은 직접 제어
+        }
     }
 
     void Start()
@@ -65,22 +75,25 @@ public class PlayerController : MonoBehaviour
         IsAiming = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
         if (IsAiming)
-            UpdateMouseFacing(); // 마우스 방향
+            UpdateMouseFacing();
         else
-            FacingDirection = lastMoveDir; // 이동 방향
+            FacingDirection = lastMoveDir;
 
         // 손전등 방향 갱신
         if (flashlightPivot != null && FacingDirection.sqrMagnitude > 0.01f)
             flashlightPivot.rotation = Quaternion.LookRotation(FacingDirection);
-    }
 
-    void FixedUpdate()
-    {
-        float speed = MoveSpeed;
-        if (cc != null)
-            cc.Move(moveDir * speed * Time.fixedDeltaTime);
+        // NavMeshAgent 이동
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.speed = MoveSpeed;
+            agent.Move(moveDir * MoveSpeed * Time.deltaTime);
+        }
         else
-            transform.position += moveDir * speed * Time.fixedDeltaTime;
+        {
+            // 폴백: NavMesh 없을 때 직접 이동
+            transform.position += moveDir * MoveSpeed * Time.deltaTime;
+        }
     }
 
     void UpdateMouseFacing()

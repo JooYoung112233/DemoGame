@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c07365b7c65084146a50529669e113d0, type: 3}
+  m_Name: CombatData
+  m_EditorClassIdentifier: Assembly-CSharp::CombatData
+  player:
+    maxHp: 100
+    attackDamage: 25
+    attackRange: 3
+    attackSpeed: 1.2
+    moveSpeed: 5
+  enemy:
+    maxHp: 60
+    attackDamage: 15
+    attackRange: 1.5
+    attackSpeed: 0.67
+    moveSpeed: 2.5
+    patrolSpeed: 1.2
+    detectRange: 8
+    loseRange: 12
+    patrolRadius: 5

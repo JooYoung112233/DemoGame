@@ -1,6 +1,8 @@
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using Unity.AI.Navigation;
 using UnityEditor;
 
 /// <summary>
@@ -46,14 +48,18 @@ public class DemoSetup : EditorWindow
         CreateNeonSign(dnCycle);
         CreateRoof(playerGO);
 
-        // ===== Step 3: CombatData 생성 =====
+        // ===== Step 3: Data 생성 =====
         var combatData = GetOrCreateCombatData();
+        var gameSettings = GetOrCreateGameSettings();
 
-        // ===== Step 4: 전투 셋업 =====
-        SetupPlayerCombat(playerGO, combatData);
-        SpawnEnemies(skeletonPrefab, combatData);
+        // ===== Step 4: NavMesh 베이킹 =====
+        BakeNavMesh();
 
-        // ===== Step 5: 크로스헤어 + 게임매니저 =====
+        // ===== Step 5: 전투 셋업 (NavMeshAgent) =====
+        SetupPlayerCombat(playerGO, combatData, gameSettings);
+        SpawnEnemiesFromZones(skeletonPrefab, combatData, gameSettings);
+
+        // ===== Step 6: 크로스헤어 + 게임매니저 =====
         SetupCrosshairAndManager(playerGO, combatData);
 
         Debug.Log("[Demo Setup] 전투 데모 올인원 셋업 완료!");
@@ -123,10 +129,15 @@ public class DemoSetup : EditorWindow
         playerGO.tag = "Player";
         playerGO.transform.position = new Vector3(6, 0, 4);
 
-        var cc = playerGO.AddComponent<CharacterController>();
-        cc.radius = 0.3f;
-        cc.height = 0.1f;
-        cc.center = new Vector3(0, 0.05f, 0);
+        var playerAgent = playerGO.AddComponent<NavMeshAgent>();
+        playerAgent.radius = 0.3f;
+        playerAgent.height = 1.5f;
+        playerAgent.baseOffset = 0f;
+        playerAgent.speed = 5f;
+        playerAgent.acceleration = 100f;
+        playerAgent.angularSpeed = 0f;
+        playerAgent.updateRotation = false;
+        playerAgent.updateUpAxis = false;
 
         playerGO.AddComponent<PlayerController>();
         Undo.RegisterCreatedObjectUndo(playerGO, "Create Player");
@@ -253,6 +264,65 @@ public class DemoSetup : EditorWindow
     }
 
     // ================================================================
+    //  GameSettings
+    // ================================================================
+    static GameSettings GetOrCreateGameSettings()
+    {
+        const string path = "Assets/Settings/GameSettings.asset";
+        var data = AssetDatabase.LoadAssetAtPath<GameSettings>(path);
+        if (data == null)
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/Settings"))
+                AssetDatabase.CreateFolder("Assets", "Settings");
+            data = ScriptableObject.CreateInstance<GameSettings>();
+            AssetDatabase.CreateAsset(data, path);
+            AssetDatabase.SaveAssets();
+        }
+        return data;
+    }
+
+    // ================================================================
+    //  NavMesh
+    // ================================================================
+    static void BakeNavMesh()
+    {
+        // 기존 NavMesh 오브젝트 제거
+        var oldNav = GameObject.Find("NavMesh");
+        if (oldNav != null) Object.DestroyImmediate(oldNav);
+
+        // NavMesh용 바닥 콜라이더 (비주얼 타일과 별도)
+        var navGO = new GameObject("NavMesh");
+        Undo.RegisterCreatedObjectUndo(navGO, "Create NavMesh");
+
+        // 넓은 바닥 평면 (건물 안팎 모두 커버)
+        var ground = new GameObject("NavGround");
+        ground.transform.SetParent(navGO.transform);
+        ground.transform.position = new Vector3(6, -0.01f, 5);
+        var groundCol = ground.AddComponent<BoxCollider>();
+        groundCol.size = new Vector3(28, 0.02f, 24);
+        // MeshRenderer 없음 → 안 보임, 콜라이더만
+
+        // NavMeshSurface
+        var surface = navGO.AddComponent<NavMeshSurface>();
+        surface.collectObjects = CollectObjects.All;
+        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+
+        // 에이전트 설정
+        var settings = surface.GetBuildSettings();
+        settings.agentRadius = 0.3f;
+        settings.agentHeight = 1.5f;
+        settings.agentSlope = 45f;
+        settings.agentClimb = 0.3f;
+        // BuildSettings는 struct이므로 다시 설정 필요
+        // NavMeshSurface의 overrideVoxelSize 등으로 제어
+        surface.overrideVoxelSize = true;
+        surface.voxelSize = 0.1f;
+
+        surface.BuildNavMesh();
+        Debug.Log("[NavMesh] 베이킹 완료!");
+    }
+
+    // ================================================================
     //  Crosshair + GameManager
     // ================================================================
     static void SetupCrosshairAndManager(GameObject playerGO, CombatData combatData)
@@ -279,7 +349,7 @@ public class DemoSetup : EditorWindow
     // ================================================================
     //  Player Combat
     // ================================================================
-    static void SetupPlayerCombat(GameObject playerGO, CombatData combatData)
+    static void SetupPlayerCombat(GameObject playerGO, CombatData combatData, GameSettings gameSettings)
     {
         // Health
         var health = playerGO.GetComponent<Health>();
@@ -308,6 +378,19 @@ public class DemoSetup : EditorWindow
         playerSO.FindProperty("combatData").objectReferenceValue = combatData;
         playerSO.ApplyModifiedProperties();
 
+        // CameraFollow에 GameSettings 연결
+        var cam = Camera.main;
+        if (cam != null)
+        {
+            var camFollow = cam.GetComponent<CameraFollow>();
+            if (camFollow != null)
+            {
+                var cfSO = new SerializedObject(camFollow);
+                cfSO.FindProperty("gameSettings").objectReferenceValue = gameSettings;
+                cfSO.ApplyModifiedProperties();
+            }
+        }
+
         // HP Bar
         var existingBar = playerGO.transform.Find("PlayerHPBar");
         if (existingBar != null) Object.DestroyImmediate(existingBar.gameObject);
@@ -327,22 +410,60 @@ public class DemoSetup : EditorWindow
     // ================================================================
     //  Enemies
     // ================================================================
-    static void SpawnEnemies(GameObject prefab, CombatData combatData)
+    static void SpawnEnemiesFromZones(GameObject prefab, CombatData combatData, GameSettings gameSettings)
     {
         var oldEnemies = GameObject.Find("Enemies");
         if (oldEnemies != null) Object.DestroyImmediate(oldEnemies);
 
+        var oldZones = GameObject.Find("SpawnZones");
+        if (oldZones != null) Object.DestroyImmediate(oldZones);
+
         var enemyRoot = new GameObject("Enemies");
         Undo.RegisterCreatedObjectUndo(enemyRoot, "Create Enemies");
 
-        Vector3[] positions = {
-            new Vector3(3, 0, 5),
-            new Vector3(8, 0, 7),
-            new Vector3(10, 0, 3),
-        };
+        var zonesRoot = new GameObject("SpawnZones");
+        Undo.RegisterCreatedObjectUndo(zonesRoot, "Create SpawnZones");
 
-        for (int i = 0; i < positions.Length; i++)
-            CreateEnemy(enemyRoot, prefab, $"Skeleton_{i}", positions[i], combatData);
+        if (gameSettings.spawnZones == null || gameSettings.spawnZones.Length == 0)
+        {
+            // 기본 스폰존 사용
+            gameSettings.spawnZones = new GameSettings.SpawnZoneData[]
+            {
+                new GameSettings.SpawnZoneData { position = new Vector3(3, 0, 7), size = new Vector3(4, 0, 4), enemyCount = 2 },
+                new GameSettings.SpawnZoneData { position = new Vector3(10, 0, 4), size = new Vector3(3, 0, 3), enemyCount = 1 },
+            };
+            EditorUtility.SetDirty(gameSettings);
+        }
+
+        int enemyIdx = 0;
+        for (int z = 0; z < gameSettings.spawnZones.Length; z++)
+        {
+            var zoneData = gameSettings.spawnZones[z];
+
+            // SpawnZone 오브젝트 생성
+            var zoneGO = new GameObject($"SpawnZone_{z}");
+            zoneGO.transform.SetParent(zonesRoot.transform);
+            zoneGO.transform.position = zoneData.position;
+            var zone = zoneGO.AddComponent<SpawnZone>();
+            var zoneSO = new SerializedObject(zone);
+            zoneSO.FindProperty("size").vector3Value = zoneData.size;
+            zoneSO.FindProperty("enemyCount").intValue = zoneData.enemyCount;
+            zoneSO.ApplyModifiedProperties();
+
+            // 존 내 적 스폰
+            for (int e = 0; e < zoneData.enemyCount; e++)
+            {
+                Vector3 spawnPos = zoneData.position + new Vector3(
+                    Random.Range(-zoneData.size.x * 0.5f, zoneData.size.x * 0.5f),
+                    0,
+                    Random.Range(-zoneData.size.z * 0.5f, zoneData.size.z * 0.5f)
+                );
+                CreateEnemy(enemyRoot, prefab, $"Skeleton_{enemyIdx}", spawnPos, combatData);
+                enemyIdx++;
+            }
+        }
+
+        Debug.Log($"[Spawn] {gameSettings.spawnZones.Length}개 존에서 적 {enemyIdx}마리 생성!");
     }
 
     static void CreateEnemy(GameObject parent, GameObject prefab, string name, Vector3 position, CombatData combatData)
@@ -351,10 +472,17 @@ public class DemoSetup : EditorWindow
         enemyGO.transform.SetParent(parent.transform);
         enemyGO.transform.position = position;
 
-        var cc = enemyGO.AddComponent<CharacterController>();
-        cc.radius = 0.3f;
-        cc.height = 0.1f;
-        cc.center = new Vector3(0, 0.05f, 0);
+        // NavMeshAgent (CharacterController 대체)
+        var agent = enemyGO.AddComponent<NavMeshAgent>();
+        agent.radius = 0.3f;
+        agent.height = 1.5f;
+        agent.baseOffset = 0f;
+        agent.speed = combatData.enemy.moveSpeed;
+        agent.acceleration = 50f;
+        agent.angularSpeed = 0f;
+        agent.updateRotation = false;
+        agent.updateUpAxis = false;
+        agent.stoppingDistance = 0.3f;
 
         var skeleton = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
         skeleton.name = "SkeletonSprite";
