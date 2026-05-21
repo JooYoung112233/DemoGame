@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// 적 AI 상태머신. CombatData 연결 시 실시간 스탯 반영.
+/// </summary>
 public class EnemyAI : MonoBehaviour
 {
     enum State { Patrol, Chase, Attack, Hit, Dead }
@@ -17,7 +20,10 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Combat")]
     [SerializeField] float attackDamage = 15f;
-    [SerializeField] float attackCooldown = 1.5f;
+    [SerializeField] float attackSpeed = 0.67f; // 초당 공격 횟수
+
+    [Header("Data")]
+    [SerializeField] CombatData combatData;
 
     [Header("References")]
     [SerializeField] SkeletonAnimController animController;
@@ -33,6 +39,17 @@ public class EnemyAI : MonoBehaviour
     float patrolTimer;
     float attackTimer;
     float hitTimer;
+
+    // CombatData 우선, 없으면 기본값
+    float Damage => combatData != null ? combatData.enemy.attackDamage : attackDamage;
+    float AtkRange => combatData != null ? combatData.enemy.attackRange : attackRange;
+    float AtkCooldown => 1f / Mathf.Max(
+        combatData != null ? combatData.enemy.attackSpeed : attackSpeed, 0.1f);
+    float DetectRng => combatData != null ? combatData.enemy.detectRange : detectRange;
+    float LoseRng => combatData != null ? combatData.enemy.loseRange : loseRange;
+    float MoveSpd => combatData != null ? combatData.enemy.moveSpeed : moveSpeed;
+    float PatrolSpd => combatData != null ? combatData.enemy.patrolSpeed : patrolSpeed;
+    float PatrolRad => combatData != null ? combatData.enemy.patrolRadius : patrolRadius;
 
     void Awake()
     {
@@ -75,7 +92,7 @@ public class EnemyAI : MonoBehaviour
 
     void UpdatePatrol()
     {
-        if (player != null && DistToPlayer() < detectRange)
+        if (player != null && DistToPlayer() < DetectRng)
         {
             state = State.Chase;
             animController?.Play("walk");
@@ -98,7 +115,7 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            Move(dir.normalized, patrolSpeed);
+            Move(dir.normalized, PatrolSpd);
             animController?.Play("walk");
             animController?.SetDirection(dir.normalized);
         }
@@ -115,7 +132,7 @@ public class EnemyAI : MonoBehaviour
 
         float dist = DistToPlayer();
 
-        if (dist > loseRange)
+        if (dist > LoseRng)
         {
             state = State.Patrol;
             patrolTarget = GetRandomPatrolPoint();
@@ -123,7 +140,7 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        if (dist <= attackRange && attackTimer <= 0)
+        if (dist <= AtkRange && attackTimer <= 0)
         {
             state = State.Attack;
             DoAttack();
@@ -134,7 +151,7 @@ public class EnemyAI : MonoBehaviour
         dir.y = 0;
         dir.Normalize();
 
-        Move(dir, moveSpeed);
+        Move(dir, MoveSpd);
         animController?.Play("walk");
         animController?.SetDirection(dir);
     }
@@ -160,7 +177,7 @@ public class EnemyAI : MonoBehaviour
 
     void DoAttack()
     {
-        attackTimer = attackCooldown;
+        attackTimer = AtkCooldown;
 
         Vector3 dir = (player.position - transform.position);
         dir.y = 0;
@@ -168,8 +185,8 @@ public class EnemyAI : MonoBehaviour
 
         animController?.PlayOneShot("attack", () =>
         {
-            if (player != null && DistToPlayer() <= attackRange * 1.5f)
-                playerHealth?.TakeDamage(attackDamage);
+            if (player != null && DistToPlayer() <= AtkRange * 1.5f)
+                playerHealth?.TakeDamage(Damage);
         });
     }
 
@@ -187,7 +204,6 @@ public class EnemyAI : MonoBehaviour
         state = State.Hit;
         hitTimer = 0.3f;
         animController?.PlayOneShot("gethit");
-        state = State.Chase;
     }
 
     void OnDeath()
@@ -214,7 +230,7 @@ public class EnemyAI : MonoBehaviour
 
     Vector3 GetRandomPatrolPoint()
     {
-        Vector2 rnd = Random.insideUnitCircle * patrolRadius;
+        Vector2 rnd = Random.insideUnitCircle * PatrolRad;
         return spawnPos + new Vector3(rnd.x, 0, rnd.y);
     }
 }

@@ -46,9 +46,15 @@ public class DemoSetup : EditorWindow
         CreateNeonSign(dnCycle);
         CreateRoof(playerGO);
 
-        // ===== Step 3: 전투 셋업 =====
-        SetupPlayerCombat(playerGO);
-        SpawnEnemies(skeletonPrefab);
+        // ===== Step 3: CombatData 생성 =====
+        var combatData = GetOrCreateCombatData();
+
+        // ===== Step 4: 전투 셋업 =====
+        SetupPlayerCombat(playerGO, combatData);
+        SpawnEnemies(skeletonPrefab, combatData);
+
+        // ===== Step 5: 크로스헤어 + 게임매니저 =====
+        SetupCrosshairAndManager(playerGO, combatData);
 
         Debug.Log("[Demo Setup] 전투 데모 올인원 셋업 완료!");
     }
@@ -229,30 +235,78 @@ public class DemoSetup : EditorWindow
     }
 
     // ================================================================
+    //  CombatData
+    // ================================================================
+    static CombatData GetOrCreateCombatData()
+    {
+        const string path = "Assets/Settings/CombatData.asset";
+        var data = AssetDatabase.LoadAssetAtPath<CombatData>(path);
+        if (data == null)
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/Settings"))
+                AssetDatabase.CreateFolder("Assets", "Settings");
+            data = ScriptableObject.CreateInstance<CombatData>();
+            AssetDatabase.CreateAsset(data, path);
+            AssetDatabase.SaveAssets();
+        }
+        return data;
+    }
+
+    // ================================================================
+    //  Crosshair + GameManager
+    // ================================================================
+    static void SetupCrosshairAndManager(GameObject playerGO, CombatData combatData)
+    {
+        var old = GameObject.Find("GameManager");
+        if (old != null) Object.DestroyImmediate(old);
+
+        var managerGO = new GameObject("GameManager");
+        Undo.RegisterCreatedObjectUndo(managerGO, "Create GameManager");
+
+        // CrosshairUI
+        var crosshair = managerGO.AddComponent<CrosshairUI>();
+
+        // PlayerCombat에 CrosshairUI 연결
+        var combat = playerGO.GetComponent<PlayerCombat>();
+        if (combat != null)
+        {
+            var combatSO = new SerializedObject(combat);
+            combatSO.FindProperty("crosshairUI").objectReferenceValue = crosshair;
+            combatSO.ApplyModifiedProperties();
+        }
+    }
+
+    // ================================================================
     //  Player Combat
     // ================================================================
-    static void SetupPlayerCombat(GameObject playerGO)
+    static void SetupPlayerCombat(GameObject playerGO, CombatData combatData)
     {
         // Health
         var health = playerGO.GetComponent<Health>();
         if (health == null) health = playerGO.AddComponent<Health>();
         var healthSO = new SerializedObject(health);
-        healthSO.FindProperty("maxHp").floatValue = 100f;
+        healthSO.FindProperty("maxHp").floatValue = combatData.player.maxHp;
         healthSO.ApplyModifiedProperties();
 
         // PlayerCombat
         var combat = playerGO.GetComponent<PlayerCombat>();
         if (combat == null) combat = playerGO.AddComponent<PlayerCombat>();
         var combatSO = new SerializedObject(combat);
-        combatSO.FindProperty("attackDamage").floatValue = 25f;
-        combatSO.FindProperty("attackRange").floatValue = 2f;
-        combatSO.FindProperty("attackCooldown").floatValue = 0.8f;
+        combatSO.FindProperty("attackDamage").floatValue = combatData.player.attackDamage;
+        combatSO.FindProperty("attackRange").floatValue = combatData.player.attackRange;
+        combatSO.FindProperty("attackSpeed").floatValue = combatData.player.attackSpeed;
+        combatSO.FindProperty("combatData").objectReferenceValue = combatData;
 
         var animCtrl = playerGO.GetComponentInChildren<SkeletonAnimController>();
         var playerCtrl = playerGO.GetComponent<PlayerController>();
         combatSO.FindProperty("animController").objectReferenceValue = animCtrl;
         combatSO.FindProperty("playerController").objectReferenceValue = playerCtrl;
         combatSO.ApplyModifiedProperties();
+
+        // PlayerController에 CombatData 연결
+        var playerSO = new SerializedObject(playerCtrl);
+        playerSO.FindProperty("combatData").objectReferenceValue = combatData;
+        playerSO.ApplyModifiedProperties();
 
         // HP Bar
         var existingBar = playerGO.transform.Find("PlayerHPBar");
@@ -273,7 +327,7 @@ public class DemoSetup : EditorWindow
     // ================================================================
     //  Enemies
     // ================================================================
-    static void SpawnEnemies(GameObject prefab)
+    static void SpawnEnemies(GameObject prefab, CombatData combatData)
     {
         var oldEnemies = GameObject.Find("Enemies");
         if (oldEnemies != null) Object.DestroyImmediate(oldEnemies);
@@ -288,10 +342,10 @@ public class DemoSetup : EditorWindow
         };
 
         for (int i = 0; i < positions.Length; i++)
-            CreateEnemy(enemyRoot, prefab, $"Skeleton_{i}", positions[i]);
+            CreateEnemy(enemyRoot, prefab, $"Skeleton_{i}", positions[i], combatData);
     }
 
-    static void CreateEnemy(GameObject parent, GameObject prefab, string name, Vector3 position)
+    static void CreateEnemy(GameObject parent, GameObject prefab, string name, Vector3 position, CombatData combatData)
     {
         var enemyGO = new GameObject(name);
         enemyGO.transform.SetParent(parent.transform);
@@ -321,18 +375,24 @@ public class DemoSetup : EditorWindow
 
         var health = enemyGO.AddComponent<Health>();
         var healthSO = new SerializedObject(health);
-        healthSO.FindProperty("maxHp").floatValue = 60f;
+        healthSO.FindProperty("maxHp").floatValue = combatData.enemy.maxHp;
         healthSO.ApplyModifiedProperties();
 
         var ai = enemyGO.AddComponent<EnemyAI>();
         var aiSO = new SerializedObject(ai);
         aiSO.FindProperty("animController").objectReferenceValue = animCtrl;
-        aiSO.FindProperty("detectRange").floatValue = 8f;
-        aiSO.FindProperty("attackRange").floatValue = 1.5f;
-        aiSO.FindProperty("moveSpeed").floatValue = 2.5f;
-        aiSO.FindProperty("attackDamage").floatValue = 15f;
+        aiSO.FindProperty("combatData").objectReferenceValue = combatData;
+        aiSO.FindProperty("detectRange").floatValue = combatData.enemy.detectRange;
+        aiSO.FindProperty("attackRange").floatValue = combatData.enemy.attackRange;
+        aiSO.FindProperty("moveSpeed").floatValue = combatData.enemy.moveSpeed;
+        aiSO.FindProperty("attackDamage").floatValue = combatData.enemy.attackDamage;
+        aiSO.FindProperty("attackSpeed").floatValue = combatData.enemy.attackSpeed;
         aiSO.ApplyModifiedProperties();
 
+        // EnemyOutline
+        enemyGO.AddComponent<EnemyOutline>();
+
+        // HP바
         var hpBarGO = new GameObject("HPBar");
         hpBarGO.transform.SetParent(enemyGO.transform);
         hpBarGO.transform.localPosition = new Vector3(0, 1.5f, 0);

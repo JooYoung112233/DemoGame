@@ -1,24 +1,31 @@
 using UnityEngine;
 
+/// <summary>
+/// 플레이어 이동 + 손전등 방향 제어.
+/// 기본: 이동 방향 = 바라보는 방향 = 손전등 방향
+/// Ctrl: 이동은 WASD, 바라보는 방향/손전등은 마우스 (좀보이드 스타일)
+/// </summary>
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] float moveSpeed = 5f;
-    [SerializeField] float crouchSpeedMultiplier = 0.4f;
 
     [Header("References")]
     [SerializeField] Transform flashlightPivot;
+    [SerializeField] CombatData combatData;
 
     Camera mainCam;
     CharacterController cc;
     Vector3 moveDir;
-    bool isCrouching;
 
-    // 카메라 기준 이동 방향 (XZ 평면 투영)
+    // 카메라 기준 이동 축
     Vector3 camForward;
     Vector3 camRight;
+    Vector3 lastMoveDir = Vector3.forward;
 
-    public bool IsCrouching => isCrouching;
+    float MoveSpeed => combatData != null ? combatData.player.moveSpeed : moveSpeed;
+
+    public bool IsAiming { get; private set; }
     public Vector3 FacingDirection { get; private set; } = Vector3.forward;
 
     void Awake()
@@ -35,7 +42,6 @@ public class PlayerController : MonoBehaviour
     void UpdateCameraAxes()
     {
         if (mainCam == null) return;
-        // 카메라의 forward/right를 XZ 평면에 투영
         camForward = mainCam.transform.forward;
         camForward.y = 0;
         camForward.Normalize();
@@ -49,26 +55,37 @@ public class PlayerController : MonoBehaviour
     {
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
-
-        // 카메라 기준으로 이동 방향 계산
         moveDir = (camForward * v + camRight * h).normalized;
 
-        isCrouching = Input.GetKey(KeyCode.LeftControl);
+        // 마지막 이동 방향 기억
+        if (moveDir.sqrMagnitude > 0.01f)
+            lastMoveDir = moveDir;
 
-        RotateTowardsMouse();
+        // Ctrl = 에이밍 모드 (방향/이동 분리)
+        IsAiming = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+
+        if (IsAiming)
+            UpdateMouseFacing(); // 마우스 방향
+        else
+            FacingDirection = lastMoveDir; // 이동 방향
+
+        // 손전등 방향 갱신
+        if (flashlightPivot != null && FacingDirection.sqrMagnitude > 0.01f)
+            flashlightPivot.rotation = Quaternion.LookRotation(FacingDirection);
     }
 
     void FixedUpdate()
     {
-        float speed = isCrouching ? moveSpeed * crouchSpeedMultiplier : moveSpeed;
+        float speed = MoveSpeed;
         if (cc != null)
             cc.Move(moveDir * speed * Time.fixedDeltaTime);
         else
             transform.position += moveDir * speed * Time.fixedDeltaTime;
     }
 
-    void RotateTowardsMouse()
+    void UpdateMouseFacing()
     {
+        if (mainCam == null) return;
         Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
         Plane groundPlane = new Plane(Vector3.up, transform.position);
 
@@ -78,11 +95,7 @@ public class PlayerController : MonoBehaviour
             Vector3 dir = hitPoint - transform.position;
             dir.y = 0;
             if (dir.sqrMagnitude > 0.01f)
-            {
                 FacingDirection = dir.normalized;
-                if (flashlightPivot != null)
-                    flashlightPivot.rotation = Quaternion.LookRotation(dir.normalized);
-            }
         }
     }
 }

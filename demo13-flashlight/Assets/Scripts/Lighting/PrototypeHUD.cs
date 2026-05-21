@@ -13,12 +13,12 @@ public class PrototypeHUD : MonoBehaviour
     {
         InitStyles();
 
-        float w = 280, h = 200;
+        float w = 300, h = 240;
         Rect panel = new Rect(10, 10, w, h);
         GUI.Box(panel, "", boxStyle);
 
         GUILayout.BeginArea(new Rect(20, 15, w - 20, h - 10));
-        GUILayout.Label("Flashlight Prototype (3D)", headerStyle);
+        GUILayout.Label("Combat Demo", headerStyle);
         GUILayout.Space(5);
 
         if (dayNight != null)
@@ -47,10 +47,10 @@ public class PrototypeHUD : MonoBehaviour
         GUILayout.Space(10);
         GUILayout.Label("Controls:", headerStyle);
         GUILayout.Label("WASD - Move", labelStyle);
-        GUILayout.Label("Mouse - Aim flashlight", labelStyle);
+        GUILayout.Label("LClick - Attack (aim at enemy)", labelStyle);
+        GUILayout.Label("Ctrl - Aim mode (free look)", labelStyle);
         GUILayout.Label("F - Toggle flashlight", labelStyle);
         GUILayout.Label("T - Toggle day/night", labelStyle);
-        GUILayout.Label("Ctrl - Crouch (slow)", labelStyle);
         GUILayout.EndArea();
     }
 

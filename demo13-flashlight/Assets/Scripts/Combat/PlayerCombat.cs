@@ -1,20 +1,33 @@
 using UnityEngine;
 
+/// <summary>
+/// 플레이어 전투. 크로스헤어로 적을 타겟팅해야 공격 가능.
+/// CombatData가 연결되면 실시간으로 스탯 반영.
+/// </summary>
 public class PlayerCombat : MonoBehaviour
 {
-    [Header("Attack")]
+    [Header("Attack (CombatData 없을 때 기본값)")]
     [SerializeField] float attackDamage = 25f;
-    [SerializeField] float attackRange = 2f;
-    [SerializeField] float attackCooldown = 0.8f;
-    [SerializeField] float attackAngle = 90f;
+    [SerializeField] float attackRange = 3f;
+    [SerializeField] float attackSpeed = 1.2f; // 초당 공격 횟수
 
     [Header("References")]
     [SerializeField] SkeletonAnimController animController;
     [SerializeField] PlayerController playerController;
+    [SerializeField] CrosshairUI crosshairUI;
+    [SerializeField] CombatData combatData;
 
     float attackTimer;
     bool isAttacking;
     Health health;
+
+    // CombatData 우선, 없으면 기본값
+    float Damage => combatData != null ? combatData.player.attackDamage : attackDamage;
+    float Range => combatData != null ? combatData.player.attackRange : attackRange;
+    float Speed => combatData != null ? combatData.player.attackSpeed : attackSpeed;
+    float Cooldown => 1f / Mathf.Max(Speed, 0.1f);
+
+    public float GetAttackRange() => Range;
 
     void Awake()
     {
@@ -36,9 +49,15 @@ public class PlayerCombat : MonoBehaviour
         if (animController != null && playerController != null)
             animController.SetDirection(playerController.FacingDirection);
 
+        // 좌클릭 공격 — 크로스헤어 타겟 필수
         if (Input.GetMouseButtonDown(0) && attackTimer <= 0 && !isAttacking)
         {
-            DoAttack();
+            if (crosshairUI != null &&
+                crosshairUI.TargetedEnemy != null &&
+                crosshairUI.IsTargetInRange)
+            {
+                DoAttack(crosshairUI.TargetedEnemy);
+            }
         }
 
         // 공격 중이 아니면 이동 애니메이션
@@ -51,32 +70,24 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
-    void DoAttack()
+    void DoAttack(EnemyAI target)
     {
         isAttacking = true;
-        attackTimer = attackCooldown;
+        attackTimer = Cooldown;
 
+        // 타겟 방향으로 회전
+        Vector3 toTarget = target.transform.position - transform.position;
+        toTarget.y = 0;
+        if (toTarget.sqrMagnitude > 0.01f)
+            animController?.SetDirection(toTarget.normalized);
+
+        // 데미지 즉시 적용 (타겟은 이미 사거리 확인됨)
+        var enemyHealth = target.GetComponent<Health>();
+        if (enemyHealth != null && !enemyHealth.IsDead)
+            enemyHealth.TakeDamage(Damage);
+
+        // 공격 애니메이션
         animController?.PlayOneShot("attack", () => { isAttacking = false; });
-
-        // 부채꼴 범위 내 적 탐색
-        Vector3 facing = playerController != null ? playerController.FacingDirection : transform.forward;
-        var colliders = Physics.OverlapSphere(transform.position, attackRange);
-
-        foreach (var col in colliders)
-        {
-            if (col.transform == transform) continue;
-            if (col.transform.IsChildOf(transform)) continue;
-
-            var enemyHealth = col.GetComponentInParent<Health>();
-            var enemyAI = col.GetComponentInParent<EnemyAI>();
-            if (enemyHealth == null || enemyAI == null) continue;
-
-            Vector3 toEnemy = (col.transform.position - transform.position);
-            toEnemy.y = 0;
-            float angle = Vector3.Angle(facing, toEnemy);
-            if (angle <= attackAngle * 0.5f)
-                enemyHealth.TakeDamage(attackDamage);
-        }
     }
 
     void OnDamaged(float amount)
