@@ -448,6 +448,8 @@ public class DemoSetup : EditorWindow
             var zoneSO = new SerializedObject(zone);
             zoneSO.FindProperty("size").vector3Value = zoneData.size;
             zoneSO.FindProperty("enemyCount").intValue = zoneData.enemyCount;
+            if (zoneData.enemyType != null)
+                zoneSO.FindProperty("enemyType").objectReferenceValue = zoneData.enemyType;
             zoneSO.ApplyModifiedProperties();
 
             // 존 내 적 스폰
@@ -458,7 +460,7 @@ public class DemoSetup : EditorWindow
                     0,
                     Random.Range(-zoneData.size.z * 0.5f, zoneData.size.z * 0.5f)
                 );
-                CreateEnemy(enemyRoot, prefab, $"Skeleton_{enemyIdx}", spawnPos, combatData);
+                CreateEnemy(enemyRoot, prefab, $"Skeleton_{enemyIdx}", spawnPos, combatData, zoneData.enemyType);
                 enemyIdx++;
             }
         }
@@ -466,18 +468,25 @@ public class DemoSetup : EditorWindow
         Debug.Log($"[Spawn] {gameSettings.spawnZones.Length}개 존에서 적 {enemyIdx}마리 생성!");
     }
 
-    static void CreateEnemy(GameObject parent, GameObject prefab, string name, Vector3 position, CombatData combatData)
+    static void CreateEnemy(GameObject parent, GameObject prefab, string name, Vector3 position,
+        CombatData combatData, EnemyData enemyData = null)
     {
         var enemyGO = new GameObject(name);
         enemyGO.transform.SetParent(parent.transform);
         enemyGO.transform.position = position;
 
-        // NavMeshAgent (CharacterController 대체)
+        // 스탯 결정: EnemyData 우선, 없으면 CombatData 폴백
+        float spd = enemyData != null ? enemyData.moveSpeed : combatData.enemy.moveSpeed;
+        float hp = enemyData != null ? enemyData.maxHp : combatData.enemy.maxHp;
+        float scale = enemyData != null ? enemyData.scale : 2f;
+        Color tint = enemyData != null ? enemyData.tintColor : new Color(1f, 0.7f, 0.7f, 1f);
+
+        // NavMeshAgent
         var agent = enemyGO.AddComponent<NavMeshAgent>();
         agent.radius = 0.3f;
         agent.height = 1.5f;
         agent.baseOffset = 0f;
-        agent.speed = combatData.enemy.moveSpeed;
+        agent.speed = spd;
         agent.acceleration = 50f;
         agent.angularSpeed = 0f;
         agent.updateRotation = false;
@@ -488,14 +497,14 @@ public class DemoSetup : EditorWindow
         skeleton.name = "SkeletonSprite";
         skeleton.transform.SetParent(enemyGO.transform);
         skeleton.transform.localPosition = new Vector3(0, 0.1f, 0);
-        skeleton.transform.localScale = Vector3.one * 2f;
+        skeleton.transform.localScale = Vector3.one * scale;
 
-        // 적 색상: 붉은 틴트
+        // 적 색상: EnemyData의 tintColor 사용
         var renderers = skeleton.GetComponentsInChildren<SpriteRenderer>();
         foreach (var r in renderers)
         {
             if (r.gameObject.name == "shadow") continue;
-            r.color = new Color(1f, 0.7f, 0.7f, 1f);
+            r.color = tint;
         }
 
         var animCtrl = skeleton.GetComponent<SkeletonAnimController>();
@@ -503,18 +512,20 @@ public class DemoSetup : EditorWindow
 
         var health = enemyGO.AddComponent<Health>();
         var healthSO = new SerializedObject(health);
-        healthSO.FindProperty("maxHp").floatValue = combatData.enemy.maxHp;
+        healthSO.FindProperty("maxHp").floatValue = hp;
         healthSO.ApplyModifiedProperties();
 
         var ai = enemyGO.AddComponent<EnemyAI>();
         var aiSO = new SerializedObject(ai);
         aiSO.FindProperty("animController").objectReferenceValue = animCtrl;
         aiSO.FindProperty("combatData").objectReferenceValue = combatData;
-        aiSO.FindProperty("detectRange").floatValue = combatData.enemy.detectRange;
-        aiSO.FindProperty("attackRange").floatValue = combatData.enemy.attackRange;
-        aiSO.FindProperty("moveSpeed").floatValue = combatData.enemy.moveSpeed;
-        aiSO.FindProperty("attackDamage").floatValue = combatData.enemy.attackDamage;
-        aiSO.FindProperty("attackSpeed").floatValue = combatData.enemy.attackSpeed;
+        if (enemyData != null)
+            aiSO.FindProperty("enemyData").objectReferenceValue = enemyData;
+        aiSO.FindProperty("detectRange").floatValue = enemyData != null ? enemyData.detectRange : combatData.enemy.detectRange;
+        aiSO.FindProperty("attackRange").floatValue = enemyData != null ? enemyData.attackRange : combatData.enemy.attackRange;
+        aiSO.FindProperty("moveSpeed").floatValue = spd;
+        aiSO.FindProperty("attackDamage").floatValue = enemyData != null ? enemyData.attackDamage : combatData.enemy.attackDamage;
+        aiSO.FindProperty("attackSpeed").floatValue = enemyData != null ? enemyData.attackSpeed : combatData.enemy.attackSpeed;
         aiSO.ApplyModifiedProperties();
 
         // EnemyOutline

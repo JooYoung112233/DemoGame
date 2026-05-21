@@ -25,6 +25,7 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] float attackSpeed = 0.67f;
 
     [Header("Data")]
+    [SerializeField] EnemyData enemyData;
     [SerializeField] CombatData combatData;
 
     [Header("References")]
@@ -41,16 +42,26 @@ public class EnemyAI : MonoBehaviour
     float attackTimer;
     float hitTimer;
 
-    // CombatData 우선
-    float Damage => combatData != null ? combatData.enemy.attackDamage : attackDamage;
-    float AtkRange => combatData != null ? combatData.enemy.attackRange : attackRange;
+    // 우선순위: EnemyData > CombatData > 인스펙터 필드값
+    float Damage => enemyData != null ? enemyData.attackDamage :
+        combatData != null ? combatData.enemy.attackDamage : attackDamage;
+    float AtkRange => enemyData != null ? enemyData.attackRange :
+        combatData != null ? combatData.enemy.attackRange : attackRange;
     float AtkCooldown => 1f / Mathf.Max(
+        enemyData != null ? enemyData.attackSpeed :
         combatData != null ? combatData.enemy.attackSpeed : attackSpeed, 0.1f);
-    float DetectRng => combatData != null ? combatData.enemy.detectRange : detectRange;
-    float LoseRng => combatData != null ? combatData.enemy.loseRange : loseRange;
-    float MoveSpd => combatData != null ? combatData.enemy.moveSpeed : moveSpeed;
-    float PatrolSpd => combatData != null ? combatData.enemy.patrolSpeed : patrolSpeed;
-    float PatrolRad => combatData != null ? combatData.enemy.patrolRadius : patrolRadius;
+    float DetectRng => enemyData != null ? enemyData.detectRange :
+        combatData != null ? combatData.enemy.detectRange : detectRange;
+    float LoseRng => enemyData != null ? enemyData.loseRange :
+        combatData != null ? combatData.enemy.loseRange : loseRange;
+    float MoveSpd => enemyData != null ? enemyData.moveSpeed :
+        combatData != null ? combatData.enemy.moveSpeed : moveSpeed;
+    float PatrolSpd => enemyData != null ? enemyData.patrolSpeed :
+        combatData != null ? combatData.enemy.patrolSpeed : patrolSpeed;
+    float PatrolRad => enemyData != null ? enemyData.patrolRadius :
+        combatData != null ? combatData.enemy.patrolRadius : patrolRadius;
+    float HitStun => enemyData != null ? enemyData.hitStunDuration : 0.3f;
+    float PatrolWait => enemyData != null ? enemyData.patrolWaitTime : patrolWaitTime;
 
     void Awake()
     {
@@ -130,7 +141,7 @@ public class EnemyAI : MonoBehaviour
                 patrolTimer += Time.deltaTime;
                 animController?.Play("idle");
 
-                if (patrolTimer >= patrolWaitTime)
+                if (patrolTimer >= PatrolWait)
                     SetPatrolTarget();
             }
             else
@@ -222,7 +233,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         state = State.Hit;
-        hitTimer = 0.3f;
+        hitTimer = HitStun;
         StopAgent();
         animController?.PlayOneShot("gethit");
     }

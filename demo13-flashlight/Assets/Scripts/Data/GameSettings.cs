@@ -26,5 +26,6 @@ public class GameSettings : ScriptableObject
         public Vector3 position;
         public Vector3 size = new Vector3(4, 0, 4);
         public int enemyCount = 2;
+        public EnemyData enemyType; // null이면 기본 CombatData 사용
     }
 }

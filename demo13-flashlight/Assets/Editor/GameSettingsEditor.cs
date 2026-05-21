@@ -97,6 +97,10 @@ public class GameSettingsEditor : EditorWindow
                 var countProp = zone.FindPropertyRelative("enemyCount");
                 countProp.intValue = EditorGUILayout.IntSlider("Enemy Count", countProp.intValue, 1, 10);
 
+                // Enemy Type 선택
+                var enemyTypeProp = zone.FindPropertyRelative("enemyType");
+                EditorGUILayout.PropertyField(enemyTypeProp, new GUIContent("Enemy Type"));
+
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space(2);
             }
@@ -125,12 +129,17 @@ public class GameSettingsEditor : EditorWindow
 
         // ===== Info =====
         int totalEnemies = 0;
+        int typedEnemies = 0;
         if (data.spawnZones != null)
-            foreach (var z in data.spawnZones) totalEnemies += z.enemyCount;
+            foreach (var z in data.spawnZones)
+            {
+                totalEnemies += z.enemyCount;
+                if (z.enemyType != null) typedEnemies += z.enemyCount;
+            }
 
         DrawInfoBox(
             $"Total spawn zones: {(data.spawnZones != null ? data.spawnZones.Length : 0)}\n" +
-            $"Total enemies: {totalEnemies}\n" +
+            $"Total enemies: {totalEnemies} ({typedEnemies} with EnemyData)\n" +
             $"Camera: {data.orthoSize:F1} ortho, {data.cameraAngle:F0}° angle");
 
         EditorGUILayout.Space(8);
@@ -231,6 +240,8 @@ public class GameSettingsEditor : EditorWindow
             var zoneSO = new SerializedObject(zone);
             zoneSO.FindProperty("size").vector3Value = zd.size;
             zoneSO.FindProperty("enemyCount").intValue = zd.enemyCount;
+            if (zd.enemyType != null)
+                zoneSO.FindProperty("enemyType").objectReferenceValue = zd.enemyType;
             zoneSO.ApplyModifiedProperties();
         }
 
