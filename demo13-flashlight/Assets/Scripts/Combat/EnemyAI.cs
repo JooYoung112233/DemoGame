@@ -20,7 +20,7 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] float attackCooldown = 1.5f;
 
     [Header("References")]
-    [SerializeField] IsometricSpriteAnimator animator;
+    [SerializeField] SkeletonAnimController animController;
 
     State state = State.Patrol;
     Transform player;
@@ -62,7 +62,6 @@ public class EnemyAI : MonoBehaviour
     void Update()
     {
         if (state == State.Dead) return;
-
         attackTimer -= Time.deltaTime;
 
         switch (state)
@@ -79,7 +78,7 @@ public class EnemyAI : MonoBehaviour
         if (player != null && DistToPlayer() < detectRange)
         {
             state = State.Chase;
-            animator?.Play("walk");
+            animController?.Play("walk");
             return;
         }
 
@@ -89,8 +88,7 @@ public class EnemyAI : MonoBehaviour
         if (dir.magnitude < 0.5f)
         {
             patrolTimer += Time.deltaTime;
-            animator?.Play("idle");
-            animator?.SetDirection(dir.magnitude > 0.01f ? dir : Vector3.forward);
+            animController?.Play("idle");
 
             if (patrolTimer >= patrolWaitTime)
             {
@@ -101,17 +99,17 @@ public class EnemyAI : MonoBehaviour
         else
         {
             Move(dir.normalized, patrolSpeed);
-            animator?.Play("walk");
-            animator?.SetDirection(dir.normalized);
+            animController?.Play("walk");
+            animController?.SetDirection(dir.normalized);
         }
     }
 
     void UpdateChase()
     {
-        if (player == null || playerHealth != null && playerHealth.IsDead)
+        if (player == null || (playerHealth != null && playerHealth.IsDead))
         {
             state = State.Patrol;
-            animator?.Play("idle");
+            animController?.Play("idle");
             return;
         }
 
@@ -121,7 +119,7 @@ public class EnemyAI : MonoBehaviour
         {
             state = State.Patrol;
             patrolTarget = GetRandomPatrolPoint();
-            animator?.Play("idle");
+            animController?.Play("idle");
             return;
         }
 
@@ -137,80 +135,75 @@ public class EnemyAI : MonoBehaviour
         dir.Normalize();
 
         Move(dir, moveSpeed);
-        animator?.Play("walk");
-        animator?.SetDirection(dir);
+        animController?.Play("walk");
+        animController?.SetDirection(dir);
     }
 
     void UpdateAttack()
     {
-        if (animator != null && animator.IsAnimComplete)
+        if (animController != null && animController.IsAnimComplete)
         {
             state = State.Chase;
-            animator?.Play("walk");
+            animController?.Play("walk");
         }
     }
 
     void UpdateHit()
     {
         hitTimer -= Time.deltaTime;
-        if (hitTimer <= 0 || (animator != null && animator.IsAnimComplete))
+        if (hitTimer <= 0 || (animController != null && animController.IsAnimComplete))
         {
             state = State.Chase;
-            animator?.Play("walk");
+            animController?.Play("walk");
         }
     }
 
     void DoAttack()
     {
         attackTimer = attackCooldown;
-        animator?.PlayOneShot("attack", () =>
-        {
-            // 공격 애니메이션 중간에 데미지 적용
-            if (player != null && DistToPlayer() <= attackRange * 1.5f)
-                playerHealth?.TakeDamage(attackDamage);
-        });
 
         Vector3 dir = (player.position - transform.position);
         dir.y = 0;
-        animator?.SetDirection(dir.normalized);
+        animController?.SetDirection(dir.normalized);
+
+        animController?.PlayOneShot("attack", () =>
+        {
+            if (player != null && DistToPlayer() <= attackRange * 1.5f)
+                playerHealth?.TakeDamage(attackDamage);
+        });
     }
 
     void OnDamaged(float amount)
     {
         if (state == State.Dead) return;
-        state = State.Hit;
-        hitTimer = 0.3f;
-        animator?.PlayOneShot("gethit");
 
-        // 피격 시 플레이어 방향으로 전환
         if (player != null)
         {
             Vector3 dir = (player.position - transform.position);
             dir.y = 0;
-            animator?.SetDirection(dir.normalized);
-
-            // 아직 감지 못했으면 추적 시작
-            state = State.Chase;
+            animController?.SetDirection(dir.normalized);
         }
+
+        state = State.Hit;
+        hitTimer = 0.3f;
+        animController?.PlayOneShot("gethit");
+        state = State.Chase;
     }
 
     void OnDeath()
     {
         state = State.Dead;
-        animator?.PlayOneShot("death");
+        animController?.PlayOneShot("death");
         if (cc != null) cc.enabled = false;
-
-        // 3초 후 오브젝트 제거
         Destroy(gameObject, 3f);
     }
 
     void Move(Vector3 dir, float speed)
     {
-        Vector3 move = dir * speed * Time.deltaTime;
         if (cc != null)
-            cc.Move(move);
+            cc.Move(dir * speed * Time.deltaTime);
         else
-            transform.position += move;
+            transform.position += dir * speed * Time.deltaTime;
     }
 
     float DistToPlayer()

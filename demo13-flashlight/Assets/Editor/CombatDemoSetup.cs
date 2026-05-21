@@ -1,17 +1,15 @@
 using UnityEngine;
 using UnityEditor;
-using System.IO;
 
 public class CombatDemoSetup : EditorWindow
 {
-    const string SKELETON_PATH = "Assets/PixelArtStudio/SkeletonsPack/CommonSoldier/Textures";
-    static readonly string[] DIRS = { "Bot", "LeftBot", "Left", "LeftTop", "Top", "RightTop", "Right", "RightBot" };
+    const string PREFAB_PATH = "Assets/PixelArtStudio/SkeletonsPack/CommonSoldier/Prefabs/CommonSoldier.prefab";
 
     [MenuItem("Tools/Setup Combat Demo (Skeleton)")]
     static void Setup()
     {
         if (!EditorUtility.DisplayDialog("Combat Demo Setup",
-            "해골 스프라이트로 전투 데모를 셋업합니다.\n" +
+            "해골 프리팹으로 전투 데모를 셋업합니다.\n" +
             "(먼저 'Setup Flashlight Prototype Scene'을 실행해주세요)\n\n계속?",
             "Yes", "Cancel"))
             return;
@@ -23,57 +21,53 @@ public class CombatDemoSetup : EditorWindow
             return;
         }
 
-        // ===== 플레이어 스프라이트 교체 =====
-        SetupPlayerSprite(playerGO);
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PREFAB_PATH);
+        if (prefab == null)
+        {
+            EditorUtility.DisplayDialog("Error", $"프리팹 없음: {PREFAB_PATH}", "OK");
+            return;
+        }
 
-        // ===== 플레이어 전투 컴포넌트 =====
+        // ===== 플레이어 스프라이트 교체 =====
+        SetupPlayerSprite(playerGO, prefab);
+
+        // ===== 플레이어 전투 =====
         SetupPlayerCombat(playerGO);
 
-        // ===== 적 3마리 스폰 =====
-        SpawnEnemies(3);
+        // ===== 적 3마리 =====
+        SpawnEnemies(prefab);
 
         Debug.Log("[Combat Demo] 해골 전투 데모 셋업 완료!");
     }
 
-    static void SetupPlayerSprite(GameObject playerGO)
+    static void SetupPlayerSprite(GameObject playerGO, GameObject prefab)
     {
-        // 기존 PlayerSprite Quad 찾기
+        // 기존 PlayerSprite 제거
         var oldSprite = playerGO.transform.Find("PlayerSprite");
-        if (oldSprite != null)
+        if (oldSprite != null) Object.DestroyImmediate(oldSprite.gameObject);
+
+        // 기존 BillboardSprite 제거 (있으면)
+        var oldBillboard = playerGO.GetComponentInChildren<BillboardSprite>();
+        if (oldBillboard != null) Object.DestroyImmediate(oldBillboard);
+
+        // 프리팹 인스턴스 생성 → 플레이어 자식으로
+        var skeleton = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+        skeleton.name = "SkeletonSprite";
+        skeleton.transform.SetParent(playerGO.transform);
+        skeleton.transform.localPosition = new Vector3(0, 0.1f, 0);
+        skeleton.transform.localScale = Vector3.one * 2f;
+
+        // 플레이어 색상 구분: SpriteRenderer에 푸른 틴트
+        var renderers = skeleton.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var r in renderers)
         {
-            // Quad를 재사용
-            var renderer = oldSprite.GetComponent<MeshRenderer>();
-
-            // Custom/SpriteSheet 셰이더 사용
-            var shader = Shader.Find("Custom/SpriteSheet");
-            if (shader == null) { Debug.LogError("[Combat] Custom/SpriteSheet 셰이더 없음!"); return; }
-            var mat = new Material(shader);
-            mat.name = "SkeletonPlayerMat";
-            mat.SetFloat("_Cutoff", 0.5f);
-            mat.SetColor("_Color", new Color(0.7f, 0.8f, 1f, 1f));
-            renderer.sharedMaterial = mat;
-
-            // 크기 조정
-            oldSprite.localScale = new Vector3(1.2f, 1.2f, 1);
-            oldSprite.localPosition = new Vector3(0, 0.6f, 0);
-
-            // 애니메이터 추가
-            var anim = playerGO.GetComponent<IsometricSpriteAnimator>();
-            if (anim == null) anim = playerGO.AddComponent<IsometricSpriteAnimator>();
-
-            var animSO = new SerializedObject(anim);
-            animSO.FindProperty("targetRenderer").objectReferenceValue = renderer;
-            animSO.FindProperty("frameRate").floatValue = 10f;
-
-            // 8방향 스프라이트 시트 로드
-            // columns, rows, frameCount
-            SetSpriteSheets(animSO, "idleSheets", "Idle", 2, 8, 16);
-            SetSpriteSheets(animSO, "walkSheets", "Walk", 2, 4, 8);
-            SetSpriteSheets(animSO, "attackSheets", "Attack", 2, 4, 8);
-            SetSpriteSheets(animSO, "deathSheets", "Death", 4, 4, 8);
-            SetSpriteSheets(animSO, "getHitSheets", "GetHit", 2, 2, 4);
-            animSO.ApplyModifiedProperties();
+            if (r.gameObject.name == "shadow") continue;
+            r.color = new Color(0.7f, 0.8f, 1f, 1f);
         }
+
+        // SkeletonAnimController 추가
+        var animCtrl = skeleton.GetComponent<SkeletonAnimController>();
+        if (animCtrl == null) animCtrl = skeleton.AddComponent<SkeletonAnimController>();
     }
 
     static void SetupPlayerCombat(GameObject playerGO)
@@ -93,13 +87,16 @@ public class CombatDemoSetup : EditorWindow
         combatSO.FindProperty("attackRange").floatValue = 2f;
         combatSO.FindProperty("attackCooldown").floatValue = 0.8f;
 
-        var animator = playerGO.GetComponent<IsometricSpriteAnimator>();
+        var animCtrl = playerGO.GetComponentInChildren<SkeletonAnimController>();
         var playerCtrl = playerGO.GetComponent<PlayerController>();
-        combatSO.FindProperty("animator").objectReferenceValue = animator;
+        combatSO.FindProperty("animController").objectReferenceValue = animCtrl;
         combatSO.FindProperty("playerController").objectReferenceValue = playerCtrl;
         combatSO.ApplyModifiedProperties();
 
         // HP바
+        var existingBar = playerGO.transform.Find("PlayerHPBar");
+        if (existingBar != null) Object.DestroyImmediate(existingBar.gameObject);
+
         var hpBarGO = new GameObject("PlayerHPBar");
         hpBarGO.transform.SetParent(playerGO.transform);
         hpBarGO.transform.localPosition = new Vector3(0, 1.5f, 0);
@@ -112,24 +109,26 @@ public class CombatDemoSetup : EditorWindow
         hpBarSO.ApplyModifiedProperties();
     }
 
-    static void SpawnEnemies(int count)
+    static void SpawnEnemies(GameObject prefab)
     {
+        // 기존 적 제거
+        var oldEnemies = GameObject.Find("Enemies");
+        if (oldEnemies != null) Object.DestroyImmediate(oldEnemies);
+
         var enemyRoot = new GameObject("Enemies");
         Undo.RegisterCreatedObjectUndo(enemyRoot, "Create Enemies");
 
-        Vector3[] spawnPositions = {
+        Vector3[] positions = {
             new Vector3(3, 0, 5),
             new Vector3(8, 0, 7),
             new Vector3(10, 0, 3),
         };
 
-        for (int i = 0; i < count && i < spawnPositions.Length; i++)
-        {
-            CreateEnemy(enemyRoot, $"Skeleton_{i}", spawnPositions[i]);
-        }
+        for (int i = 0; i < positions.Length; i++)
+            CreateEnemy(enemyRoot, prefab, $"Skeleton_{i}", positions[i]);
     }
 
-    static void CreateEnemy(GameObject parent, string name, Vector3 position)
+    static void CreateEnemy(GameObject parent, GameObject prefab, string name, Vector3 position)
     {
         var enemyGO = new GameObject(name);
         enemyGO.transform.SetParent(parent.transform);
@@ -141,41 +140,24 @@ public class CombatDemoSetup : EditorWindow
         cc.height = 0.1f;
         cc.center = new Vector3(0, 0.05f, 0);
 
-        // 스프라이트 Quad
-        var spriteGO = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        spriteGO.name = "Sprite";
-        spriteGO.transform.SetParent(enemyGO.transform);
-        spriteGO.transform.localPosition = new Vector3(0, 0.6f, 0);
-        spriteGO.transform.localScale = new Vector3(1.2f, 1.2f, 1);
-        Object.DestroyImmediate(spriteGO.GetComponent<MeshCollider>());
+        // 프리팹 인스턴스
+        var skeleton = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+        skeleton.name = "SkeletonSprite";
+        skeleton.transform.SetParent(enemyGO.transform);
+        skeleton.transform.localPosition = new Vector3(0, 0.1f, 0);
+        skeleton.transform.localScale = Vector3.one * 2f;
 
-        // 빌보드
-        spriteGO.AddComponent<BillboardSprite>();
+        // 적 색상: 붉은 틴트
+        var renderers = skeleton.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var r in renderers)
+        {
+            if (r.gameObject.name == "shadow") continue;
+            r.color = new Color(1f, 0.7f, 0.7f, 1f);
+        }
 
-        // Custom/SpriteSheet 셰이더 (적은 붉은 틴트)
-        var shader = Shader.Find("Custom/SpriteSheet");
-        if (shader == null) { Debug.LogError("[Combat] Custom/SpriteSheet 셰이더 없음!"); return; }
-        var mat = new Material(shader);
-        mat.name = $"SkeletonEnemyMat_{name}";
-        mat.SetFloat("_Cutoff", 0.5f);
-        mat.SetColor("_Color", new Color(1f, 0.7f, 0.7f, 1f));
-        spriteGO.GetComponent<MeshRenderer>().sharedMaterial = mat;
-        spriteGO.GetComponent<MeshRenderer>().shadowCastingMode =
-            UnityEngine.Rendering.ShadowCastingMode.Off;
-
-        // IsometricSpriteAnimator
-        var anim = enemyGO.AddComponent<IsometricSpriteAnimator>();
-        var animSO = new SerializedObject(anim);
-        animSO.FindProperty("targetRenderer").objectReferenceValue =
-            spriteGO.GetComponent<MeshRenderer>();
-        animSO.FindProperty("frameRate").floatValue = 10f;
-
-        SetSpriteSheets(animSO, "idleSheets", "Idle", 2, 8, 16);
-        SetSpriteSheets(animSO, "walkSheets", "Walk", 2, 4, 8);
-        SetSpriteSheets(animSO, "attackSheets", "Attack", 2, 4, 8);
-        SetSpriteSheets(animSO, "deathSheets", "Death", 4, 4, 8);
-        SetSpriteSheets(animSO, "getHitSheets", "GetHit", 2, 2, 4);
-        animSO.ApplyModifiedProperties();
+        // SkeletonAnimController
+        var animCtrl = skeleton.GetComponent<SkeletonAnimController>();
+        if (animCtrl == null) animCtrl = skeleton.AddComponent<SkeletonAnimController>();
 
         // Health
         var health = enemyGO.AddComponent<Health>();
@@ -186,7 +168,7 @@ public class CombatDemoSetup : EditorWindow
         // EnemyAI
         var ai = enemyGO.AddComponent<EnemyAI>();
         var aiSO = new SerializedObject(ai);
-        aiSO.FindProperty("animator").objectReferenceValue = anim;
+        aiSO.FindProperty("animController").objectReferenceValue = animCtrl;
         aiSO.FindProperty("detectRange").floatValue = 8f;
         aiSO.FindProperty("attackRange").floatValue = 1.5f;
         aiSO.FindProperty("moveSpeed").floatValue = 2.5f;
@@ -204,28 +186,5 @@ public class CombatDemoSetup : EditorWindow
         hpBarSO.FindProperty("fullColor").colorValue = new Color(1f, 0.3f, 0.3f);
         hpBarSO.FindProperty("lowColor").colorValue = new Color(0.5f, 0f, 0f);
         hpBarSO.ApplyModifiedProperties();
-    }
-
-    static void SetSpriteSheets(SerializedObject so, string propName, string animFolder, int cols, int rows, int frameCount)
-    {
-        var prop = so.FindProperty(propName);
-        prop.arraySize = 8;
-
-        for (int i = 0; i < 8; i++)
-        {
-            string dir = DIRS[i];
-            string texPath = $"{SKELETON_PATH}/{animFolder}/{dir}/{animFolder}.png";
-
-            var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(texPath);
-
-            var element = prop.GetArrayElementAtIndex(i);
-            element.FindPropertyRelative("texture").objectReferenceValue = tex;
-            element.FindPropertyRelative("columns").intValue = cols;
-            element.FindPropertyRelative("rows").intValue = rows;
-            element.FindPropertyRelative("frameCount").intValue = frameCount;
-
-            if (tex == null)
-                Debug.LogWarning($"[Combat Demo] 텍스처 없음: {texPath}");
-        }
     }
 }
