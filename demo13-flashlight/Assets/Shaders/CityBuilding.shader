@@ -33,6 +33,7 @@ Shader "InkCity/CityBuilding"
         _DetailStrength ("Detail Enhance", Range(0, 1)) = 0.3
         _Desaturation ("Desaturation", Range(0, 1)) = 0.0
         _Brightness ("Brightness", Range(0, 2)) = 1.0
+        _LightBoost ("Light Boost", Range(1, 5)) = 2.0
 
         [Header(Height Fade)]
         [Toggle(_HEIGHTFADE_ON)] _HeightFadeToggle ("Height Fade", Float) = 1
@@ -103,6 +104,7 @@ Shader "InkCity/CityBuilding"
                 float _DetailStrength;
                 float _Desaturation;
                 float _Brightness;
+                float _LightBoost;
                 float4 _DirtColor;
                 float _DirtAmount;
                 float _DirtScale;
@@ -267,7 +269,7 @@ Shader "InkCity/CityBuilding"
                 {
                     Light addLight = GetAdditionalLight(i, input.positionWS);
                     float addAtten = addLight.distanceAttenuation;
-                    color += litColor * addAtten * addLight.color;
+                    color += litColor * addAtten * addLight.color * _LightBoost;
                 }
                 #endif
 
