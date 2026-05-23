@@ -13,6 +13,7 @@ public class PlayerCombat : MonoBehaviour
 
     [Header("References")]
     [SerializeField] SkeletonAnimController animController;
+    [SerializeField] PlayerVisual playerVisual;
     [SerializeField] PlayerController playerController;
     [SerializeField] CrosshairUI crosshairUI;
     [SerializeField] CombatData combatData;
@@ -46,8 +47,11 @@ public class PlayerCombat : MonoBehaviour
         attackTimer -= Time.deltaTime;
 
         // 방향 설정
-        if (animController != null && playerController != null)
-            animController.SetDirection(playerController.FacingDirection);
+        if (playerController != null)
+        {
+            animController?.SetDirection(playerController.FacingDirection);
+            playerVisual?.SetDirection(playerController.FacingDirection);
+        }
 
         // 좌클릭 공격 — 크로스헤어 타겟 필수
         if (Input.GetMouseButtonDown(0) && attackTimer <= 0 && !isAttacking)
@@ -61,12 +65,14 @@ public class PlayerCombat : MonoBehaviour
         }
 
         // 공격 중이 아니면 이동 애니메이션
-        if (!isAttacking && animController != null)
+        if (!isAttacking)
         {
             float h = Input.GetAxisRaw("Horizontal");
             float v = Input.GetAxisRaw("Vertical");
             bool moving = Mathf.Abs(h) > 0.01f || Mathf.Abs(v) > 0.01f;
-            animController.Play(moving ? "walk" : "idle");
+            string anim = moving ? "walk" : "idle";
+            animController?.Play(anim);
+            playerVisual?.Play(anim);
         }
     }
 
@@ -79,7 +85,10 @@ public class PlayerCombat : MonoBehaviour
         Vector3 toTarget = target.transform.position - transform.position;
         toTarget.y = 0;
         if (toTarget.sqrMagnitude > 0.01f)
+        {
             animController?.SetDirection(toTarget.normalized);
+            playerVisual?.SetDirection(toTarget.normalized);
+        }
 
         // 데미지 즉시 적용 (타겟은 이미 사거리 확인됨)
         var enemyHealth = target.GetComponent<Health>();
@@ -87,18 +96,28 @@ public class PlayerCombat : MonoBehaviour
             enemyHealth.TakeDamage(Damage);
 
         // 공격 애니메이션
-        animController?.PlayOneShot("attack", () => { isAttacking = false; });
+        System.Action onDone = () => { isAttacking = false; };
+        if (animController != null)
+            animController.PlayOneShot("attack", onDone);
+        else if (playerVisual != null)
+            playerVisual.PlayOneShot("attack", onDone);
+        else
+            isAttacking = false;
     }
 
     void OnDamaged(float amount)
     {
-        if (animController != null && !isAttacking)
-            animController.PlayOneShot("gethit");
+        if (!isAttacking)
+        {
+            animController?.PlayOneShot("gethit");
+            playerVisual?.PlayOneShot("gethit");
+        }
     }
 
     void OnDeath()
     {
         animController?.PlayOneShot("death");
+        playerVisual?.PlayOneShot("death");
         if (playerController != null) playerController.enabled = false;
     }
 }

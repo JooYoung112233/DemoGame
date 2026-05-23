@@ -23,17 +23,17 @@ namespace IsometricMapEditor
 
         public void SpawnProp(PlacedProp prop, GridSettings settings)
         {
-            if (prop.propDefinition == null || prop.propDefinition.sprite == null) return;
+            if (prop.propDefinition == null || prop.propDefinition.prefab == null) return;
 
             Vector3 worldPos = IsometricGrid.GridToWorld(prop.gridPosition, settings);
-            var go = new GameObject($"Prop_{prop.instanceId}");
-            go.transform.SetParent(_root);
-            go.transform.position = worldPos;
-            SetupBillboard(go);
+            var go = Instantiate(prop.propDefinition.prefab, worldPos, Quaternion.identity, _root);
+            go.name = $"Prop_{prop.instanceId}";
 
-            var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = prop.propDefinition.sprite;
-            sr.sortingOrder = IsometricGrid.GetSortingOrder(prop.gridPosition) + prop.propDefinition.sortingOffset;
+            if (prop.freePlace)
+            {
+                go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0);
+                go.transform.localScale = Vector3.one * prop.scale;
+            }
 
             _propObjects[prop.instanceId] = go;
         }
@@ -45,12 +45,6 @@ namespace IsometricMapEditor
                 Destroy(go);
                 _propObjects.Remove(instanceId);
             }
-        }
-
-        static void SetupBillboard(GameObject go)
-        {
-            // Rotate sprite to face isometric camera (lying on XZ plane tilted toward camera)
-            go.transform.rotation = Quaternion.Euler(90, 0, 0);
         }
 
         public void ClearAll()

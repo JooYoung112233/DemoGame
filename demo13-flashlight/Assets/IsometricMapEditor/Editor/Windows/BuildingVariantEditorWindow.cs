@@ -65,10 +65,8 @@ namespace IsometricMapEditor.Editor
                     EditorGUI.indentLevel++;
                     variant.variantId = EditorGUILayout.TextField("ID", variant.variantId);
                     variant.displayName = EditorGUILayout.TextField("Display Name", variant.displayName);
-                    variant.baseSprite = (Sprite)EditorGUILayout.ObjectField(
-                        "Base Sprite", variant.baseSprite, typeof(Sprite), false);
-                    variant.roofSprite = (Sprite)EditorGUILayout.ObjectField(
-                        "Roof Sprite", variant.roofSprite, typeof(Sprite), false);
+                    variant.prefab = (GameObject)EditorGUILayout.ObjectField(
+                        "Prefab", variant.prefab, typeof(GameObject), false);
                     variant.tintColor = EditorGUILayout.ColorField("Tint", variant.tintColor);
                     variant.transitionEffect = (TransitionEffect)EditorGUILayout.EnumPopup(
                         "Transition", variant.transitionEffect);

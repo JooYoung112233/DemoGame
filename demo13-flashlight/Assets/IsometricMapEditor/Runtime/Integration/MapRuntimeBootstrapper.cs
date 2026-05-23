@@ -29,13 +29,7 @@ namespace IsometricMapEditor
 
         void Start()
         {
-            if (mapData == null)
-            {
-                Debug.LogWarning("[MapBootstrapper] No MapData assigned.");
-                return;
-            }
-
-            Bootstrap();
+            // bake된 맵 사용 — 런타임 자동 생성 비활성화
         }
 
         void Bootstrap()

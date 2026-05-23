@@ -57,12 +57,9 @@ namespace IsometricMapEditor.Editor
             var window = EditorWindow.GetWindow<MapEditorWindow>("Map Editor");
             window.Show();
 
-            // 타일 팔레트도 열기
-            TilePaletteWindow.ShowWindow();
-
             Debug.Log("[MapEditorSetup] 맵 에디터 씬 생성 완료. Scene View를 3D 아이소메트릭 뷰로 전환했습니다.");
             Debug.Log("[MapEditorSetup] 1) 에디터 창에서 맵을 선택하세요");
-            Debug.Log("[MapEditorSetup] 2) TileDefinition 에셋을 만들어 스프라이트를 할당하세요");
+            Debug.Log("[MapEditorSetup] 2) Sprites 폴더에 이미지를 넣고 [Sync] 버튼을 누르세요");
             Debug.Log("[MapEditorSetup] 3) Paint 도구로 Scene View에서 타일을 배치하세요");
         }
 

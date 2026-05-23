@@ -2,7 +2,8 @@
     "name": "IsometricMapEditor.Editor",
     "rootNamespace": "IsometricMapEditor.Editor",
     "references": [
-        "IsometricMapEditor.Runtime"
+        "IsometricMapEditor.Runtime",
+        "Game.Scripts"
     ],
     "includePlatforms": [
         "Editor"

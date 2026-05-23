@@ -15,7 +15,7 @@ namespace IsometricMapEditor.Editor
         static void OnSceneGUI(SceneView sceneView)
         {
             var map = MapEditorWindow.ActiveMap;
-            if (map == null) return;
+            if (map == null || !MapEditorWindow.EditorEnabled) return;
 
             if (WalkabilityPaintTool.IsActive)
                 WalkabilityPaintTool.OnSceneGUI(sceneView, map);
@@ -25,6 +25,9 @@ namespace IsometricMapEditor.Editor
 
             if (PropPlaceTool.IsActive)
                 PropPlaceTool.OnSceneGUI(sceneView, map);
+
+            if (BuildingPlaceTool.IsActive)
+                BuildingPlaceTool.OnSceneGUI(sceneView, map);
 
             if (ConnectionTool.IsActive)
                 ConnectionTool.OnSceneGUI(sceneView, map);

@@ -67,7 +67,23 @@ namespace IsometricMapEditor
         public void PlaceTile(PlacedTile tile, string layerName)
         {
             var layer = GetOrCreateLayer(layerName);
-            layer.tiles.RemoveAll(t => t.gridPosition == tile.gridPosition);
+
+            if (tile.tileDefinition != null && tile.tileDefinition.IsWall)
+            {
+                // Walls: one per edge (rotation) per cell — replace only the same edge
+                layer.tiles.RemoveAll(t =>
+                    t.gridPosition == tile.gridPosition
+                    && t.tileDefinition != null && t.tileDefinition.IsWall
+                    && t.rotation == tile.rotation);
+            }
+            else
+            {
+                // Regular tiles: one per cell — replace existing non-wall tile
+                layer.tiles.RemoveAll(t =>
+                    t.gridPosition == tile.gridPosition
+                    && (t.tileDefinition == null || !t.tileDefinition.IsWall));
+            }
+
             layer.tiles.Add(tile);
             _cacheDirty = true;
         }
@@ -82,11 +98,60 @@ namespace IsometricMapEditor
             return removed > 0;
         }
 
+        /// <summary>
+        /// Remove a specific wall edge at the given cell/rotation across all layers.
+        /// </summary>
+        public bool RemoveWallEdge(Vector2Int pos, int rotation)
+        {
+            bool any = false;
+            foreach (var layer in layers)
+            {
+                int removed = layer.tiles.RemoveAll(t =>
+                    t.gridPosition == pos
+                    && t.tileDefinition != null && t.tileDefinition.IsWall
+                    && t.rotation == rotation);
+                if (removed > 0) any = true;
+            }
+            if (any) _cacheDirty = true;
+            return any;
+        }
+
         public void RemoveTileAtAllLayers(Vector2Int pos)
         {
             foreach (var layer in layers)
                 layer.tiles.RemoveAll(t => t.gridPosition == pos);
             _cacheDirty = true;
+        }
+
+        /// <summary>
+        /// Repaint: replace existing tiles at this position with the new definition.
+        /// Only affects cells that already have tiles — empty cells are skipped.
+        /// Searches all layers, replaces in-place keeping the same layer.
+        /// </summary>
+        public bool RepaintTile(Vector2Int pos, TileDefinition newDef, Material materialOverride)
+        {
+            bool any = false;
+            foreach (var layer in layers)
+            {
+                for (int i = 0; i < layer.tiles.Count; i++)
+                {
+                    var t = layer.tiles[i];
+                    if (t.gridPosition != pos) continue;
+
+                    // Skip walls if new tile is not a wall (and vice versa)
+                    bool oldIsWall = t.tileDefinition != null && t.tileDefinition.IsWall;
+                    bool newIsWall = newDef != null && newDef.IsWall;
+                    if (oldIsWall != newIsWall) continue;
+
+                    // Replace definition, keep position and rotation
+                    t.tileDefinitionId = newDef.tileId;
+                    t.tileDefinition = newDef;
+                    t.materialOverride = materialOverride;
+                    any = true;
+                }
+            }
+            if (any) _cacheDirty = true;
+            return any;
         }
 
         void OnValidate()

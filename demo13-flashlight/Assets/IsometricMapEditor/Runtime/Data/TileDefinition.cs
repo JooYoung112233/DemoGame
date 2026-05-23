@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace IsometricMapEditor
 {
@@ -11,6 +11,23 @@ namespace IsometricMapEditor
         public bool isWalkable = true;
         public Vector2Int size = Vector2Int.one;
         public int sortingOffset;
+
+        [Header("Material")]
+        [Tooltip("Default material for this tile. Applied to SpriteRenderer (floor) or MeshRenderer (wall).")]
+        public Material material;
+
+        [Header("Wall Settings (category=Wall only)")]
+        public float wallHeight = 2f;
+        public float wallThickness = 0.08f;
+
+        public bool IsWall => category == TileCategory.Wall;
+
+        // Legacy alias so existing code referencing wallMaterial still compiles
+        public Material wallMaterial
+        {
+            get => material;
+            set => material = value;
+        }
 
         void OnValidate()
         {

@@ -3,16 +3,17 @@ using UnityEngine.AI;
 
 /// <summary>
 /// 플레이어 이동 (NavMeshAgent) + 손전등 방향 제어.
-/// 기본: 이동 방향 = 바라보는 방향 = 손전등 방향
-/// Ctrl: 이동은 WASD, 바라보는 방향/손전등은 마우스 (좀보이드 스타일)
+/// 이동은 WASD, 바라보는 방향/손전등은 항상 마우스 (좀보이드 스타일)
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] float moveSpeed = 5f;
 
-    [Header("References")]
+    [Header("Flashlight")]
     [SerializeField] Transform flashlightPivot;
+
+    [Header("References")]
     [SerializeField] CombatData combatData;
 
     Camera mainCam;
@@ -26,8 +27,8 @@ public class PlayerController : MonoBehaviour
 
     float MoveSpeed => combatData != null ? combatData.player.moveSpeed : moveSpeed;
 
-    public bool IsAiming { get; private set; }
     public Vector3 FacingDirection { get; private set; } = Vector3.forward;
+    public Vector3 MouseWorldPos { get; private set; }
 
     void Awake()
     {
@@ -63,6 +64,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // 카메라 축 매 프레임 갱신 (카메라 이동/회전 대응)
+        UpdateCameraAxes();
+
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
         moveDir = (camForward * v + camRight * h).normalized;
@@ -71,17 +75,15 @@ public class PlayerController : MonoBehaviour
         if (moveDir.sqrMagnitude > 0.01f)
             lastMoveDir = moveDir;
 
-        // Ctrl = 에이밍 모드 (방향/이동 분리)
-        IsAiming = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        UpdateMouseFacing();
 
-        if (IsAiming)
-            UpdateMouseFacing();
-        else
-            FacingDirection = lastMoveDir;
-
-        // 손전등 방향 갱신
-        if (flashlightPivot != null && FacingDirection.sqrMagnitude > 0.01f)
-            flashlightPivot.rotation = Quaternion.LookRotation(FacingDirection);
+        // 손전등 방향 갱신 — 마우스 바닥 지점을 직접 조준
+        if (flashlightPivot != null)
+        {
+            Vector3 toMouse = MouseWorldPos - flashlightPivot.position;
+            if (toMouse.sqrMagnitude > 0.1f)
+                flashlightPivot.rotation = Quaternion.LookRotation(toMouse.normalized);
+        }
 
         // NavMeshAgent 이동
         if (agent != null && agent.isOnNavMesh)
@@ -105,6 +107,7 @@ public class PlayerController : MonoBehaviour
         if (groundPlane.Raycast(ray, out float dist))
         {
             Vector3 hitPoint = ray.GetPoint(dist);
+            MouseWorldPos = hitPoint;
             Vector3 dir = hitPoint - transform.position;
             dir.y = 0;
             if (dir.sqrMagnitude > 0.01f)

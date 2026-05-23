@@ -29,6 +29,18 @@ namespace IsometricMapEditor
                 return;
             cells[pos.y * width + pos.x] = type;
         }
+
+        /// <summary>
+        /// Copy data from another WalkabilityData. Resizes if needed.
+        /// </summary>
+        public void CopyFrom(WalkabilityData source)
+        {
+            if (source == null) return;
+            width = source.width;
+            height = source.height;
+            cells = new WalkableType[source.cells.Length];
+            System.Array.Copy(source.cells, cells, source.cells.Length);
+        }
     }
 
     public enum WalkableType

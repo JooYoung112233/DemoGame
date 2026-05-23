@@ -7,7 +7,72 @@ namespace IsometricMapEditor.Editor
 {
     public static class MapSceneGenerator
     {
-        public static void GenerateScene(MapData map, string scenePath = null)
+        const string BakedRootPrefix = "__Baked_Map_";
+
+        // ─── Bake: generate persistent objects in current scene ───────────
+
+        /// <summary>
+        /// Bake MapData into permanent GameObjects in the current scene.
+        /// Replaces any previous bake for this map.
+        /// </summary>
+        public static GameObject BakeToScene(MapData map)
+        {
+            if (map == null)
+            {
+                Debug.LogError("[MapSceneGenerator] No map data.");
+                return null;
+            }
+
+            // Remove previous bake for this map
+            ClearBakedMap(map);
+
+            // Hide preview so baked objects are the only visible ones
+            LivePreviewManager.ClearPreview();
+
+            var root = new GameObject($"{BakedRootPrefix}{map.mapName}__");
+            // Use auto-created map root, or manual parentRoot override
+            var mapRoot = MapEditorWindow.GetOrCreateMapRoot();
+            if (mapRoot != null)
+                root.transform.SetParent(mapRoot, false);
+
+            // MapRuntimeBootstrapper 제거 — bake된 프리팹은 런타임 간섭 없이 그대로 사용
+
+            BakeTiles(map, root.transform);
+            BakeBuildings(map, root.transform);
+            BakeProps(map, root.transform);
+
+            Undo.RegisterCreatedObjectUndo(root, "Bake Map");
+            EditorSceneManager.MarkSceneDirty(root.scene);
+
+            Debug.Log($"[MapSceneGenerator] Baked \"{map.mapName}\" into scene ({root.transform.childCount} groups)");
+            return root;
+        }
+
+        /// <summary>
+        /// Remove previously baked objects for this map from the scene.
+        /// </summary>
+        public static void ClearBakedMap(MapData map)
+        {
+            if (map == null) return;
+            string target = $"{BakedRootPrefix}{map.mapName}__";
+            foreach (var rootGO in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+                FindAndDestroy(rootGO.transform, target);
+        }
+
+        static void FindAndDestroy(Transform t, string name)
+        {
+            if (t.name == name)
+            {
+                Undo.DestroyObjectImmediate(t.gameObject);
+                return;
+            }
+            for (int i = t.childCount - 1; i >= 0; i--)
+                FindAndDestroy(t.GetChild(i), name);
+        }
+
+        // ─── Save as Prefab ──────────────────────────────────────────────
+
+        public static void SaveAsPrefab(MapData map)
         {
             if (map == null)
             {
@@ -15,121 +80,167 @@ namespace IsometricMapEditor.Editor
                 return;
             }
 
-            if (string.IsNullOrEmpty(scenePath))
-            {
-                scenePath = EditorUtility.SaveFilePanel("Save Scene", "Assets", map.mapName, "unity");
-                if (string.IsNullOrEmpty(scenePath)) return;
-                scenePath = "Assets" + scenePath[Application.dataPath.Length..];
-            }
+            string defaultFolder = "Assets/IsometricMapEditor/Prefabs";
+            EnsureFolderExists(defaultFolder);
 
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            string path = EditorUtility.SaveFilePanel("Save Map Prefab", defaultFolder, map.mapName, "prefab");
+            if (string.IsNullOrEmpty(path)) return;
+            path = "Assets" + path[Application.dataPath.Length..];
 
-            var mapRoot = new GameObject($"Map_{map.mapName}");
+            // Bake into scene temporarily
+            var root = BakeToScene(map);
+            if (root == null) return;
 
-            GenerateTiles(map, mapRoot.transform);
-            GenerateBuildings(map, mapRoot.transform);
-            GenerateProps(map, mapRoot.transform);
+            // MapData 참조 저장 — Load Prefab 시 복원용
+            var link = root.AddComponent<MapPrefabLink>();
+            link.sourceMapData = map;
 
-            var bootstrapper = mapRoot.AddComponent<MapRuntimeBootstrapper>();
-            bootstrapper.SetMapData(map);
-
-            var cameraGO = new GameObject("Main Camera");
-            var cam = cameraGO.AddComponent<Camera>();
-            cam.orthographic = true;
-            cam.orthographicSize = 5;
-            cam.transform.position = new Vector3(0, 10, -10);
-            cam.transform.rotation = Quaternion.Euler(30, 45, 0);
-            cameraGO.AddComponent<IsometricCameraController>();
-            cameraGO.tag = "MainCamera";
-
-            EditorSceneManager.SaveScene(scene, scenePath);
+            // Save as prefab
+            PrefabUtility.SaveAsPrefabAssetAndConnect(root, path, InteractionMode.UserAction);
             AssetDatabase.Refresh();
-            Debug.Log($"[MapSceneGenerator] Scene saved to {scenePath}");
+
+            // 임시 씬 오브젝트 제거 — 프리팹만 남김
+            Object.DestroyImmediate(root);
+
+            Debug.Log($"[MapSceneGenerator] Prefab saved to {path}");
         }
 
-        static void GenerateTiles(MapData map, Transform parent)
-        {
-            var tilesRoot = new GameObject("Tiles");
-            tilesRoot.transform.SetParent(parent);
+        // ─── Load from Prefab ───────────────────────────────────────────
 
+        /// <summary>
+        /// 프리팹에서 MapData를 찾아 맵 에디터에 로드.
+        /// MapPrefabLink 컴포넌트에 저장된 참조를 사용.
+        /// </summary>
+        public static MapData LoadFromPrefab()
+        {
+            string path = EditorUtility.OpenFilePanel("Load Map Prefab", "Assets/IsometricMapEditor/Prefabs", "prefab");
+            if (string.IsNullOrEmpty(path)) return null;
+
+            // 절대 경로 → 상대 경로
+            string dataPath = Application.dataPath;
+            if (path.StartsWith(dataPath))
+                path = "Assets" + path[dataPath.Length..];
+
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (prefab == null)
+            {
+                Debug.LogError("[MapSceneGenerator] Failed to load prefab at: " + path);
+                return null;
+            }
+
+            var link = prefab.GetComponent<MapPrefabLink>();
+            if (link == null || link.sourceMapData == null)
+            {
+                Debug.LogError("[MapSceneGenerator] Prefab has no MapPrefabLink or MapData reference. " +
+                               "This prefab was not saved from the map editor.");
+                return null;
+            }
+
+            Debug.Log($"[MapSceneGenerator] Loaded MapData \"{link.sourceMapData.mapName}\" from prefab.");
+            return link.sourceMapData;
+        }
+
+        // ─── Shared generation logic ─────────────────────────────────────
+
+        static void BakeTiles(MapData map, Transform root)
+        {
             foreach (var layer in map.layers)
             {
+                if (layer.tiles.Count == 0) continue;
+
                 var layerRoot = new GameObject(layer.layerName);
-                layerRoot.transform.SetParent(tilesRoot.transform);
+                layerRoot.transform.SetParent(root, false);
+                int unityLayer = layer.unityLayer >= 0 ? layer.unityLayer : 0;
 
                 foreach (var tile in layer.tiles)
                 {
-                    if (tile.tileDefinition == null || tile.tileDefinition.sprite == null) continue;
+                    if (tile.tileDefinition == null) continue;
+
+                    if (tile.tileDefinition.IsWall)
+                    {
+                        var wallGO = WallBuilder.CreateWallCube(tile, map.gridSettings, layerRoot.transform, editorPreview: false);
+                        if (wallGO != null) SetLayerRecursive(wallGO.transform, unityLayer);
+                        continue;
+                    }
+
+                    if (tile.tileDefinition.sprite == null) continue;
 
                     Vector3 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, map.gridSettings);
-                    var go = new GameObject($"Tile_{tile.gridPosition.x}_{tile.gridPosition.y}");
-                    go.transform.SetParent(layerRoot.transform);
-                    go.transform.position = worldPos;
-
-                    var sr = go.AddComponent<SpriteRenderer>();
-                    sr.sprite = tile.tileDefinition.sprite;
-                    sr.flipX = tile.flipX;
-                    sr.sortingOrder = IsometricGrid.GetSortingOrder(tile.gridPosition, layer.sortingLayerOffset)
-                                      + tile.tileDefinition.sortingOffset;
+                    var tileGO = QuadFactory.CreateFloorQuad(
+                        $"Tile_{tile.gridPosition.x}_{tile.gridPosition.y}",
+                        worldPos, tile, map.gridSettings, layerRoot.transform, false);
+                    if (tileGO != null) tileGO.layer = unityLayer;
                 }
             }
         }
 
-        static void GenerateBuildings(MapData map, Transform parent)
+        static void BakeBuildings(MapData map, Transform root)
         {
             if (map.buildings.Count == 0) return;
 
             var buildingsRoot = new GameObject("Buildings");
-            buildingsRoot.transform.SetParent(parent);
+            buildingsRoot.transform.SetParent(root, false);
 
             foreach (var building in map.buildings)
             {
                 if (building.buildingDefinition == null) continue;
                 var def = building.buildingDefinition;
+                if (def.prefab == null) continue;
 
-                Vector3 worldPos = IsometricGrid.GridToWorld(building.gridPosition, map.gridSettings);
-                var go = new GameObject($"Building_{def.displayName}_{building.instanceId}");
-                go.transform.SetParent(buildingsRoot.transform);
+                Vector3 worldPos = building.GetWorldPosition(map.gridSettings);
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(def.prefab, buildingsRoot.transform);
+                go.name = $"Building_{def.displayName}_{building.instanceId}";
                 go.transform.position = worldPos;
-
-                if (def.baseSprite != null)
-                {
-                    var sr = go.AddComponent<SpriteRenderer>();
-                    sr.sprite = def.baseSprite;
-                    sr.sortingOrder = def.GetFrontSortingOrder(building.gridPosition) + def.sortingOffset;
-                }
-
-                if (def.roofSprite != null)
-                {
-                    var roofGO = new GameObject("Roof");
-                    roofGO.transform.SetParent(go.transform);
-                    roofGO.transform.localPosition = Vector3.zero;
-                    var roofSR = roofGO.AddComponent<SpriteRenderer>();
-                    roofSR.sprite = def.roofSprite;
-                    roofSR.sortingOrder = def.GetFrontSortingOrder(building.gridPosition) + def.sortingOffset + 1;
-                }
+                go.transform.rotation = Quaternion.Euler(0, building.yRotation, 0);
+                go.transform.localScale = Vector3.one * building.scale;
             }
         }
 
-        static void GenerateProps(MapData map, Transform parent)
+        static void BakeProps(MapData map, Transform root)
         {
             if (map.props.Count == 0) return;
 
             var propsRoot = new GameObject("Props");
-            propsRoot.transform.SetParent(parent);
+            propsRoot.transform.SetParent(root, false);
 
             foreach (var prop in map.props)
             {
-                if (prop.propDefinition == null || prop.propDefinition.sprite == null) continue;
+                if (prop.propDefinition == null) continue;
+                var def = prop.propDefinition;
+                if (def.prefab == null) continue;
 
-                Vector3 worldPos = IsometricGrid.GridToWorld(prop.gridPosition, map.gridSettings);
-                var go = new GameObject($"Prop_{prop.propDefinition.displayName}_{prop.instanceId}");
-                go.transform.SetParent(propsRoot.transform);
+                Vector3 worldPos = prop.freePlace
+                    ? prop.worldPosition
+                    : IsometricGrid.GridToWorld(prop.gridPosition, map.gridSettings);
+
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(def.prefab, propsRoot.transform);
+                go.name = $"Prop_{def.displayName}_{prop.instanceId}";
                 go.transform.position = worldPos;
+                go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0);
+                go.transform.localScale = Vector3.one * prop.scale;
+            }
+        }
 
-                var sr = go.AddComponent<SpriteRenderer>();
-                sr.sprite = prop.propDefinition.sprite;
-                sr.sortingOrder = IsometricGrid.GetSortingOrder(prop.gridPosition) + prop.propDefinition.sortingOffset;
+        // ─── Utility ─────────────────────────────────────────────────────
+
+        static void SetLayerRecursive(Transform t, int layer)
+        {
+            t.gameObject.layer = layer;
+            for (int i = 0; i < t.childCount; i++)
+                SetLayerRecursive(t.GetChild(i), layer);
+        }
+
+        static void EnsureFolderExists(string folderPath)
+        {
+            if (AssetDatabase.IsValidFolder(folderPath)) return;
+            string[] parts = folderPath.Split('/');
+            string current = parts[0];
+            for (int i = 1; i < parts.Length; i++)
+            {
+                string next = current + "/" + parts[i];
+                if (!AssetDatabase.IsValidFolder(next))
+                    AssetDatabase.CreateFolder(current, parts[i]);
+                current = next;
             }
         }
     }

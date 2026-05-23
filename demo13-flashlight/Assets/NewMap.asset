@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: NewMap
   m_EditorClassIdentifier: IsometricMapEditor.Runtime::IsometricMapEditor.MapData
   mapName: NewMap
-  mapId: 7f0cda54
+  mapId: 571c31d4
   gridSettings:
     tileSize: 1
     originOffset: {x: 0, y: 0, z: 0}
@@ -25,11 +25,7 @@ MonoBehaviour:
     isVisible: 1
     isLocked: 0
     tiles: []
-  - layerName: Layer_1
-    sortingLayerOffset: 10
-    isVisible: 0
-    isLocked: 0
-    tiles: []
+    unityLayer: -1
   buildings: []
   props: []
   harvestables: []

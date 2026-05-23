@@ -24,7 +24,9 @@ public class NeonSign : MonoBehaviour
         if (dayNight != null)
         {
             dayNight.OnPhaseChanged += OnPhaseChanged;
-            OnPhaseChanged(dayNight.IsNight);
+            // 에디터 설정 유지 — 즉시 적용하지 않음
+            // Light/Emission 상태는 에디터에서 설정한 그대로 시작
+            isActive = dayNight.IsNight;
         }
     }
 

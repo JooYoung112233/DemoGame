@@ -8,14 +8,20 @@ namespace IsometricMapEditor
     {
         public string buildingId;
         public string displayName;
-        public Sprite baseSprite;
-        public Sprite roofSprite;
         public Vector2Int footprint = new(2, 2);
         public int sortingOffset;
         public bool isEnterable;
         public string interiorMapId;
         public Vector2Int entryCell;
         public BuildingVariantSet variantSet;
+
+        [Header("Prefab")]
+        [Tooltip("The prefab to instantiate when this building is placed on the map.")]
+        public GameObject prefab;
+
+        [Header("Editor Preview")]
+        [Tooltip("Optional icon sprite shown in the palette. If null, uses prefab preview.")]
+        public Sprite icon;
 
         public bool IsMultiTile => footprint.x > 1 || footprint.y > 1;
 

@@ -28,7 +28,7 @@ public class DayNightCycle : MonoBehaviour
 
     void Start()
     {
-        ApplyLighting();
+        // 에디터 설정 유지 — 시작 시 라이팅 덮어쓰지 않음
     }
 
     void Update()

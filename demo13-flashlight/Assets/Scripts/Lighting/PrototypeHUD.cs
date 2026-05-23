@@ -48,7 +48,6 @@ public class PrototypeHUD : MonoBehaviour
         GUILayout.Label("Controls:", headerStyle);
         GUILayout.Label("WASD - Move", labelStyle);
         GUILayout.Label("LClick - Attack (aim at enemy)", labelStyle);
-        GUILayout.Label("Ctrl - Aim mode (free look)", labelStyle);
         GUILayout.Label("F - Toggle flashlight", labelStyle);
         GUILayout.Label("T - Toggle day/night", labelStyle);
         GUILayout.EndArea();

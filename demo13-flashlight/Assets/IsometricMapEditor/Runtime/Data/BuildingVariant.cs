@@ -8,9 +8,7 @@ namespace IsometricMapEditor
     {
         public string variantId;
         public string displayName;
-        public Sprite baseSprite;
-        public Sprite roofSprite;
-        public Material materialOverride;
+        public GameObject prefab;
         public Color tintColor = Color.white;
         public TransitionEffect transitionEffect = TransitionEffect.Instant;
         public float transitionDuration = 0.5f;

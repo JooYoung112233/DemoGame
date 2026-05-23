@@ -57,7 +57,10 @@ namespace IsometricMapEditor
         {
             _currentStates[building.instanceId] = variantId;
             building.activeVariantId = variantId;
-            buildingRenderer.UpdateBuildingVariant(building, building.buildingDefinition);
+
+            // Re-instantiate: remove old, place new prefab variant
+            buildingRenderer.RemoveBuilding(building.instanceId);
+            buildingRenderer.RenderBuilding(building, mapData.gridSettings);
         }
 
         public string GetCurrentState(string instanceId)

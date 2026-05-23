@@ -53,12 +53,18 @@ namespace IsometricMapEditor
             Vector3 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, settings);
             go.transform.position = worldPos;
             SetupBillboard(go);
+            go.transform.localScale = IsometricGrid.GetTileScale(tile.tileDefinition.sprite, settings);
 
             var sr = go.GetComponent<SpriteRenderer>();
             sr.sprite = tile.tileDefinition.sprite;
             sr.flipX = tile.flipX;
             sr.sortingOrder = IsometricGrid.GetSortingOrder(tile.gridPosition, layer.sortingLayerOffset)
                               + tile.tileDefinition.sortingOffset;
+
+            // Apply material (per-instance override > definition default)
+            var mat = tile.EffectiveMaterial;
+            if (mat != null)
+                sr.sharedMaterial = mat;
 
             go.SetActive(true);
             _tileObjects[tile.gridPosition] = go;
@@ -78,7 +84,8 @@ namespace IsometricMapEditor
 
             var go = new GameObject($"Tile_{pos.x}_{pos.y}");
             go.transform.SetParent(transform);
-            go.AddComponent<SpriteRenderer>();
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingLayerName = "Ground";
             return go;
         }
 

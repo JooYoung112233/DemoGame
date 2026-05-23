@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace IsometricMapEditor
 {
+    /// <summary>
+    /// Runtime building renderer — instantiates prefabs from BuildingDefinition.
+    /// </summary>
     public class BuildingRenderer : MonoBehaviour
     {
         readonly Dictionary<string, GameObject> _buildingObjects = new();
@@ -24,82 +27,29 @@ namespace IsometricMapEditor
         public void RenderBuilding(PlacedBuilding building, GridSettings settings)
         {
             if (building.buildingDefinition == null) return;
-
             var def = building.buildingDefinition;
-            Vector3 worldPos = IsometricGrid.GridToWorld(building.gridPosition, settings);
 
-            var go = new GameObject($"Building_{building.instanceId}");
-            go.transform.SetParent(_root);
-            go.transform.position = worldPos;
-            SetupBillboard(go);
+            // Resolve prefab: check active variant first, then fallback to definition
+            GameObject prefab = GetActivePrefab(building, def);
+            if (prefab == null) return;
 
-            var baseSR = go.AddComponent<SpriteRenderer>();
-            baseSR.sprite = GetActiveSprite(building, def);
-            baseSR.sortingOrder = def.GetFrontSortingOrder(building.gridPosition) + def.sortingOffset;
+            Vector3 worldPos = building.GetWorldPosition(settings);
 
-            if (def.roofSprite != null)
-            {
-                var roofGO = new GameObject("Roof");
-                roofGO.transform.SetParent(go.transform);
-                roofGO.transform.localPosition = Vector3.zero;
-                var roofSR = roofGO.AddComponent<SpriteRenderer>();
-                roofSR.sprite = GetActiveRoofSprite(building, def);
-                roofSR.sortingOrder = baseSR.sortingOrder + 1;
-                roofSR.enabled = building.roofVisible;
-            }
+            var go = Instantiate(prefab, worldPos, Quaternion.Euler(0, building.yRotation, 0), _root);
+            go.name = $"Building_{building.instanceId}";
+            go.transform.localScale = Vector3.one * building.scale;
 
             _buildingObjects[building.instanceId] = go;
         }
 
-        Sprite GetActiveSprite(PlacedBuilding building, BuildingDefinition def)
+        static GameObject GetActivePrefab(PlacedBuilding building, BuildingDefinition def)
         {
             if (def.variantSet != null && !string.IsNullOrEmpty(building.activeVariantId))
             {
                 var variant = def.variantSet.GetVariant(building.activeVariantId);
-                if (variant?.baseSprite != null) return variant.baseSprite;
+                if (variant?.prefab != null) return variant.prefab;
             }
-            return def.baseSprite;
-        }
-
-        Sprite GetActiveRoofSprite(PlacedBuilding building, BuildingDefinition def)
-        {
-            if (def.variantSet != null && !string.IsNullOrEmpty(building.activeVariantId))
-            {
-                var variant = def.variantSet.GetVariant(building.activeVariantId);
-                if (variant?.roofSprite != null) return variant.roofSprite;
-            }
-            return def.roofSprite;
-        }
-
-        public void SetRoofVisible(string instanceId, bool visible)
-        {
-            if (!_buildingObjects.TryGetValue(instanceId, out var go)) return;
-            var roofTransform = go.transform.Find("Roof");
-            if (roofTransform != null)
-            {
-                var sr = roofTransform.GetComponent<SpriteRenderer>();
-                if (sr != null) sr.enabled = visible;
-            }
-        }
-
-        public void UpdateBuildingVariant(PlacedBuilding building, BuildingDefinition def)
-        {
-            if (!_buildingObjects.TryGetValue(building.instanceId, out var go)) return;
-            var sr = go.GetComponent<SpriteRenderer>();
-            if (sr != null) sr.sprite = GetActiveSprite(building, def);
-
-            var roofTransform = go.transform.Find("Roof");
-            if (roofTransform != null)
-            {
-                var roofSR = roofTransform.GetComponent<SpriteRenderer>();
-                if (roofSR != null) roofSR.sprite = GetActiveRoofSprite(building, def);
-            }
-        }
-
-        static void SetupBillboard(GameObject go)
-        {
-            // Rotate sprite to face isometric camera (lying on XZ plane tilted toward camera)
-            go.transform.rotation = Quaternion.Euler(90, 0, 0);
+            return def.prefab;
         }
 
         public void RemoveBuilding(string instanceId)
