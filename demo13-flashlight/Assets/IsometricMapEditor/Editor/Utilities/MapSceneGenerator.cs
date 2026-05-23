@@ -113,10 +113,9 @@ namespace IsometricMapEditor.Editor
         /// </summary>
         public static MapData LoadFromPrefab()
         {
-            string path = EditorUtility.OpenFilePanel("Load Map Prefab", "Assets/IsometricMapEditor/Prefabs", "prefab");
+            string path = EditorUtility.OpenFilePanel("Load Map Prefab", "Assets/IsometricMapEditor", "prefab");
             if (string.IsNullOrEmpty(path)) return null;
 
-            // 절대 경로 → 상대 경로
             string dataPath = Application.dataPath;
             if (path.StartsWith(dataPath))
                 path = "Assets" + path[dataPath.Length..];
@@ -128,16 +127,21 @@ namespace IsometricMapEditor.Editor
                 return null;
             }
 
+            // 1. MapPrefabLink가 있으면 MapData 직접 반환
             var link = prefab.GetComponent<MapPrefabLink>();
-            if (link == null || link.sourceMapData == null)
+            if (link != null && link.sourceMapData != null)
             {
-                Debug.LogError("[MapSceneGenerator] Prefab has no MapPrefabLink or MapData reference. " +
-                               "This prefab was not saved from the map editor.");
-                return null;
+                Debug.Log($"[MapSceneGenerator] Loaded MapData \"{link.sourceMapData.mapName}\" from prefab link.");
+                return link.sourceMapData;
             }
 
-            Debug.Log($"[MapSceneGenerator] Loaded MapData \"{link.sourceMapData.mapName}\" from prefab.");
-            return link.sourceMapData;
+            // 2. MapPrefabLink 없는 기존 프리팹 → 씬에 배치
+            var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            instance.transform.position = Vector3.zero;
+            Undo.RegisterCreatedObjectUndo(instance, "Load Map Prefab");
+            Debug.Log($"[MapSceneGenerator] Placed prefab \"{prefab.name}\" into scene.");
+
+            return null;
         }
 
         // ─── Shared generation logic ─────────────────────────────────────

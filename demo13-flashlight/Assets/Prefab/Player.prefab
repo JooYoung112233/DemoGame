@@ -283,6 +283,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 5
   flashlightPivot: {fileID: 4685841069163394499}
+  flashlightPitch: 0
   combatData: {fileID: 0}
 --- !u!114 &244856515741293238
 MonoBehaviour:
@@ -359,8 +360,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7245482579714919919}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.5}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.00000064075, y: -0.2760004, z: 0.42000067}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -377,10 +378,10 @@ Light:
   serializedVersion: 12
   m_Type: 0
   m_Color: {r: 1, g: 0.9005012, b: 0.6462264, a: 1}
-  m_Intensity: 3
-  m_Range: 15
-  m_SpotAngle: 112.59124
-  m_InnerSpotAngle: 78.87794
+  m_Intensity: 1
+  m_Range: 25
+  m_SpotAngle: 90
+  m_InnerSpotAngle: 65
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
     m_Type: 0
@@ -513,7 +514,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8204734236205525167
 Transform:
   m_ObjectHideFlags: 0
@@ -647,11 +648,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9094299036847294044}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.05, y: -0.14, z: -0}
+  m_LocalRotation: {x: 0, y: 0.60702914, z: 0, w: 0.79467964}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7228479686449943326}
   m_Father: {fileID: 1296678044284410111}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 74.75, z: 0}

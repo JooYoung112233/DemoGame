@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Flashlight")]
     [SerializeField] Transform flashlightPivot;
+    [SerializeField] float flashlightPitch = 10f; // 아래로 기울이는 고정 각도 (작을수록 정면)
 
     [Header("References")]
     [SerializeField] CombatData combatData;
@@ -77,12 +78,12 @@ public class PlayerController : MonoBehaviour
 
         UpdateMouseFacing();
 
-        // 손전등 방향 갱신 — 마우스 바닥 지점을 직접 조준
-        if (flashlightPivot != null)
+        // 손전등 방향 갱신 — 마우스 방향(yaw)만 따라가고, 아래 각도(pitch)는 고정
+        if (flashlightPivot != null && FacingDirection.sqrMagnitude > 0.01f)
         {
-            Vector3 toMouse = MouseWorldPos - flashlightPivot.position;
-            if (toMouse.sqrMagnitude > 0.1f)
-                flashlightPivot.rotation = Quaternion.LookRotation(toMouse.normalized);
+            Quaternion yaw = Quaternion.LookRotation(FacingDirection);
+            Quaternion pitch = Quaternion.Euler(flashlightPitch, 0, 0);
+            flashlightPivot.rotation = yaw * pitch;
         }
 
         // NavMeshAgent 이동

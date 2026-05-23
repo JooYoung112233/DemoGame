@@ -1,18 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-918914644386950611
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
-  version: 10
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -27,6 +14,7 @@ Material:
   m_ValidKeywords:
   - _ALPHATEST_ON
   - _GLOW_ON
+  - _HEIGHTFADE_ON
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -66,28 +54,26 @@ Material:
     - _AlphaToMask: 1
     - _Blend: 0
     - _BlendOp: 0
-    - _Brightness: 0.31
+    - _Brightness: 1
     - _BumpScale: 1
     - _Cull: 2
     - _Cutoff: 0.5
     - _Desaturation: 0
-    - _DetailStrength: 0
+    - _DetailStrength: 0.3
     - _DirtAmount: 0.3
     - _DirtScale: 6
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _FlickerAmount: 0.163
-    - _FlickerSpeed: 10
+    - _FlickerAmount: 0.15
+    - _FlickerSpeed: 3
     - _FlickerToggle: 0
     - _GlowIntensity: 1
-    - _GlowMin: 1
-    - _GlowSpread: 4.2
-    - _GlowSpreadIntensity: 1
+    - _GlowMin: 0.6
+    - _GlowSpread: 8
+    - _GlowSpreadIntensity: 0.3
     - _GlowToggle: 1
-    - _HeightFadeAmount: 0
-    - _HeightFadeEnd: 0.544
-    - _HeightFadeStart: 0.222
-    - _HeightFadeToggle: 0
+    - _HeightFadeAmount: 0.6
+    - _HeightFadeToggle: 1
     - _MoistureBottom: 0.3
     - _MoistureHeight: 0.25
     - _NormalMapToggle: 0
@@ -106,8 +92,21 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DirtColor: {r: 0.25, g: 0.22, b: 0.18, a: 1}
-    - _GlowColor: {r: 1, g: 0.8902648, b: 0.6745283, a: 1}
-    - _HeightFadeColor: {r: 0, g: 0, b: 0, a: 1}
+    - _GlowColor: {r: 1, g: 0.85, b: 0.5, a: 1}
+    - _HeightFadeColor: {r: 0.02, g: 0.02, b: 0.04, a: 1}
     - _StainColor: {r: 0.15, g: 0.12, b: 0.1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
+--- !u!114 &4981402759165006866
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
+  version: 10

@@ -254,18 +254,20 @@ Shader "InkCity/CityBuilding"
                 // ---- lighting: no NdotL (Quad/billboard mesh has flat normal) ----
                 half3 baseColor = color;
                 half3 ambient = baseColor * 0.4;
+                // 손전등용: Brightness 적용 전 원본 색
+                half3 litColor = mainTex.rgb * _Color.rgb;
 
                 Light mainLight = GetMainLight();
                 color = ambient + baseColor * mainLight.color;
 
-                // additional lights (flashlight) — distance attenuation only
+                // additional lights (flashlight) — 원본 색 기준
                 #ifdef _ADDITIONAL_LIGHTS
                 uint lightCount = GetAdditionalLightsCount();
                 for (uint i = 0; i < lightCount; i++)
                 {
                     Light addLight = GetAdditionalLight(i, input.positionWS);
                     float addAtten = addLight.distanceAttenuation;
-                    color += baseColor * addAtten * addLight.color;
+                    color += litColor * addAtten * addLight.color;
                 }
                 #endif
 
