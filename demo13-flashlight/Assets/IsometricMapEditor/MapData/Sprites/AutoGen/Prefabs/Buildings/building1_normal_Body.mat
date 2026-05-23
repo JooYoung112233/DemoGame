@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: building1_normal_Mat
+  m_Name: building1_normal_Body
   m_Shader: {fileID: 4800000, guid: 811a1d39301ba7046a11934499f394b5, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -44,7 +44,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 49ef1d8f1eadb1945b8fe144fe260d93, type: 3}
+        m_Texture: {fileID: 2800000, guid: 58c8d2c743d9c37439c197a599d257f6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -74,6 +74,7 @@ Material:
     - _GlowToggle: 1
     - _HeightFadeAmount: 0.6
     - _HeightFadeToggle: 1
+    - _LightBoost: 2
     - _MoistureBottom: 0.3
     - _MoistureHeight: 0.25
     - _NormalMapToggle: 0

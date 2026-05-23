@@ -64,13 +64,6 @@ Shader "InkCity/CityBuilding"
             ZWrite On
             Blend SrcAlpha OneMinusSrcAlpha
 
-            Stencil
-            {
-                Ref 1
-                Comp Always
-                Pass Replace
-            }
-
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag

@@ -4,6 +4,7 @@ using UnityEngine;
 /// 건물 Quad(MeshRenderer)의 sorting 속성을 설정해서
 /// SpriteRenderer와 같은 정렬 파이프라인에 넣음.
 /// </summary>
+[ExecuteAlways]
 [RequireComponent(typeof(MeshRenderer))]
 public class BuildingSortingSetup : MonoBehaviour
 {

@@ -40,12 +40,6 @@ Shader "InkCity/RuinFloor"
 
             ZWrite Off
 
-            Stencil
-            {
-                Ref 1
-                Comp NotEqual
-            }
-
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag

@@ -7,6 +7,11 @@ public class FlashlightController : MonoBehaviour
     [SerializeField] float flickerIntensity = 0.1f;
     [SerializeField] float flickerSpeed = 8f;
 
+    [Header("Distance Falloff (가까이서 눈부심 방지)")]
+    [SerializeField] float falloffStartDist = 3f;   // 이 거리 이내에서 감쇠
+    [SerializeField] float falloffMinIntensity = 0.3f; // 최소 밝기 비율 (0~1)
+    [SerializeField] PlayerController playerRef;     // 마우스 거리 참조
+
     [Header("Ambient Glow (주변 라이트)")]
     [SerializeField] Light ambientGlow;
     [SerializeField] float glowRange = 10f;
@@ -47,6 +52,10 @@ public class FlashlightController : MonoBehaviour
 
     void Start()
     {
+        // PlayerController 자동 탐색
+        if (playerRef == null)
+            playerRef = FindFirstObjectByType<PlayerController>();
+
         // 낮/밤 전환 구독 — 낮이면 자동 OFF
         dayNight = FindFirstObjectByType<DayNightCycle>();
         if (dayNight != null)
@@ -108,8 +117,21 @@ public class FlashlightController : MonoBehaviour
         float flicker = Mathf.PerlinNoise(flickerTimer, 0f) * flickerIntensity;
         float batteryDim = BatteryPercent < 0.2f ? 0.5f + BatteryPercent * 2.5f : 1f;
 
+        // 가까이 비출수록 밝기 감쇠 (플레이어↔마우스 거리 기반)
+        float distDim = 1f;
+        if (playerRef != null && falloffStartDist > 0f)
+        {
+            Vector3 mousePos = playerRef.MouseWorldPos;
+            float mouseDist = Vector3.Distance(playerRef.transform.position, mousePos);
+            if (mouseDist < falloffStartDist)
+            {
+                float ratio = mouseDist / falloffStartDist;
+                distDim = Mathf.Lerp(falloffMinIntensity, 1f, ratio);
+            }
+        }
+
         if (spotLight != null)
-            spotLight.intensity = (baseIntensity + flicker) * batteryDim;
+            spotLight.intensity = (baseIntensity + flicker) * batteryDim * distDim;
 
         // 주변 라이트도 배터리 연동 (미세 플리커)
         if (ambientGlow != null && !glowAlwaysOn)

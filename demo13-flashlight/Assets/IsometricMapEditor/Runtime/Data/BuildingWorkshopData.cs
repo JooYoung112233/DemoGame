@@ -26,6 +26,9 @@ namespace IsometricMapEditor
         public List<PlacedTile> roofTiles = new List<PlacedTile>();
         public bool roofVisible = true;
 
+        [Header("Buildings (prefab placement)")]
+        public List<PlacedBuilding> buildings = new List<PlacedBuilding>();
+
         [Header("External Appearance")]
         [Tooltip("Icon sprite shown in the map editor palette.")]
         public Sprite externalIcon;
@@ -112,6 +115,18 @@ namespace IsometricMapEditor
             props.RemoveAll(p => p.gridPosition == pos);
         }
 
+        public void PlaceBuilding(PlacedBuilding building)
+        {
+            // Replace existing at same position
+            buildings.RemoveAll(b => b.gridPosition == building.gridPosition);
+            buildings.Add(building);
+        }
+
+        public void RemoveBuildingAt(Vector2Int pos)
+        {
+            buildings.RemoveAll(b => b.gridPosition == pos);
+        }
+
         /// <summary>
         /// Get the bounding box of all placed tiles (for prefab export).
         /// </summary>
@@ -128,6 +143,13 @@ namespace IsometricMapEditor
             {
                 if (t.gridPosition.x + 1 > maxX) maxX = t.gridPosition.x + 1;
                 if (t.gridPosition.y + 1 > maxY) maxY = t.gridPosition.y + 1;
+            }
+            foreach (var b in buildings)
+            {
+                int bw = b.buildingDefinition != null ? b.buildingDefinition.footprint.x : 1;
+                int bh = b.buildingDefinition != null ? b.buildingDefinition.footprint.y : 1;
+                if (b.gridPosition.x + bw > maxX) maxX = b.gridPosition.x + bw;
+                if (b.gridPosition.y + bh > maxY) maxY = b.gridPosition.y + bh;
             }
             return new Vector2Int(maxX, maxY);
         }
