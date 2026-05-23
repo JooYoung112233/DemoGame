@@ -17,7 +17,7 @@ public class DayNightCycle : MonoBehaviour
     [SerializeField] FlashlightController flashlight;
 
     float currentTime;
-    bool isNight = true;
+    bool isNight = false;
 
     public bool IsNight => isNight;
     public float TimeRemaining => isNight

@@ -286,23 +286,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0179e5e84085964499fb38f9c51514c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PostProcessController
+  dayMood: 0
+  nightMood: 1
   transitionSpeed: 2
-  dayVignette: 0.2
-  nightVignette: 0.45
-  dayChromaticAberration: 0
-  nightChromaticAberration: 0.15
-  dayGrain: 0
-  nightGrain: 0.35
-  dayBloomIntensity: 0.3
-  nightBloomIntensity: 1.2
-  dayBloomThreshold: 1.5
-  nightBloomThreshold: 0.8
-  dayTemperature: 10
-  nightTemperature: -20
-  dayContrast: 5
-  nightContrast: 20
-  daySaturation: 0
-  nightSaturation: -25
+  maxTransitionDuration: 10
+  pulseDuration: 1.5
+  pulseChromatic: 0.6
+  pulseVignette: 0.7
+  pulseBloom: 4
+  pulseGrain: 0.35
+  pulseSaturation: -80
+  glitchFrequency: 12
+  glitchChromaShake: 0.8
+  glitchExposureKick: 1.5
+  glitchDistortionRange: 0.6
 --- !u!1 &506814001
 GameObject:
   m_ObjectHideFlags: 0
@@ -668,8 +665,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 1
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_Intensity: 0
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208

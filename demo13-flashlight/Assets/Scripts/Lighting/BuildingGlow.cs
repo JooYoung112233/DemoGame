@@ -45,12 +45,9 @@ public class BuildingGlow : MonoBehaviour
             targetIntensity = nightIntensity;
         }
 
-        // 현재 셰이더 값을 읽어서 currentIntensity 초기화
-        if (buildingRenderers.Length > 0 && buildingRenderers[0] != null)
-        {
-            buildingRenderers[0].GetPropertyBlock(propBlock);
-            currentIntensity = propBlock.GetFloat(GlowIntensityID);
-        }
+        // 낮 시작이면 glow 즉시 꺼짐, 밤이면 즉시 켜짐
+        currentIntensity = targetIntensity;
+        ApplyGlow();
     }
 
     void OnDestroy()
