@@ -22,6 +22,11 @@ public class Health : MonoBehaviour
     public void TakeDamage(float amount)
     {
         if (isDead) return;
+
+        // 플레이어 무적 체크 (구르기 중)
+        var playerCombat = GetComponent<PlayerController>();
+        if (playerCombat != null && playerCombat.IsInvincible) return;
+
         currentHp = Mathf.Max(0, currentHp - amount);
         OnDamaged?.Invoke(amount);
 

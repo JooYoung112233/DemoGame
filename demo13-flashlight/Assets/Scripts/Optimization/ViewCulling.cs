@@ -72,7 +72,7 @@ public class ViewCulling : MonoBehaviour
             if (r is ParticleSystemRenderer) continue;
 
             // HP바 등 UI 요소는 부모와 함께 움직이므로 최상위만
-            if (r.GetComponentInParent<HealthBar3D>() != null)
+            if (r.GetComponentInParent<EnemyController>() != null)
                 continue;
 
             targets.Add(new CullTarget
@@ -104,7 +104,7 @@ public class ViewCulling : MonoBehaviour
 
     void CollectAI()
     {
-        foreach (var ai in FindObjectsOfType<EnemyAI>(true))
+        foreach (var ai in FindObjectsOfType<EnemyController>(true))
         {
             targets.Add(new CullTarget
             {
@@ -293,7 +293,7 @@ public class ViewCulling : MonoBehaviour
             });
         }
 
-        var ai = go.GetComponent<EnemyAI>();
+        var ai = go.GetComponent<EnemyController>();
         if (ai != null)
         {
             targets.Add(new CullTarget

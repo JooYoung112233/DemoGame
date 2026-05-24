@@ -21,12 +21,12 @@ public class CrosshairUI : MonoBehaviour
     Texture2D pixel;
     Transform playerTransform;
 
-    EnemyAI targetedEnemy;
+    EnemyController targetedEnemy;
     EnemyOutline currentOutline;
     bool isTargetInRange;
     float attackRange;
 
-    public EnemyAI TargetedEnemy => targetedEnemy;
+    public EnemyController TargetedEnemy => targetedEnemy;
     public bool IsTargetInRange => isTargetInRange;
     public Vector3 MouseWorldPos { get; private set; }
 
@@ -56,7 +56,7 @@ public class CrosshairUI : MonoBehaviour
         // 공격 사거리 갱신
         if (playerTransform != null)
         {
-            var combat = playerTransform.GetComponent<PlayerCombat>();
+            var combat = playerTransform.GetComponent<PlayerController>();
             if (combat != null) attackRange = combat.GetAttackRange();
         }
 
@@ -66,8 +66,8 @@ public class CrosshairUI : MonoBehaviour
     void UpdateTarget()
     {
         // 가장 가까운 적 찾기
-        var enemies = FindObjectsOfType<EnemyAI>();
-        EnemyAI closest = null;
+        var enemies = FindObjectsOfType<EnemyController>();
+        EnemyController closest = null;
         float closestDist = selectRadius;
 
         Vector3 mouseFlat = MouseWorldPos;
