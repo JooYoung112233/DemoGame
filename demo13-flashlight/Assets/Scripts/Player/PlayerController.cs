@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 플레이어 통합 컨트롤러.
@@ -7,6 +8,12 @@ using UnityEngine.AI;
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
+    #region ===== 싱글톤 (DontDestroyOnLoad) =====
+
+    public static PlayerController Instance { get; private set; }
+
+    #endregion
+
     #region ===== 열거형 & 필드 =====
 
     // ---------- 전투 상태 ----------
@@ -212,6 +219,18 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
+        // 싱글톤 + DontDestroyOnLoad
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        // 씬 로드 시 카메라 등 재연결
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
         // 자동 레퍼런스 검색
         health = GetComponent<Health>();
         agent = GetComponent<NavMeshAgent>();
@@ -263,6 +282,27 @@ public class PlayerController : MonoBehaviour
         UpdateCameraAxes();
         CreateStaminaBar();
         CreateChargeBar();
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 새 씬의 카메라 재연결
+        mainCam = Camera.main;
+
+        // NavMeshAgent가 새 NavMesh 위에 있도록 보장
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+        }
+
+        // 전투 상태 초기화 (씬 전환 중 공격 중이면 리셋)
+        state = CombatState.Idle;
+        canMove = true;
     }
 
     void Update()

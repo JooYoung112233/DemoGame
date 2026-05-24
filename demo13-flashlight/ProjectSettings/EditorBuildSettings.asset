@@ -4,6 +4,12 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Safehouse.unity
+    guid: 12209de8cacda9644b79d182365bad8c
+  - enabled: 1
+    path: Assets/Scenes/InGameScene.unity
+    guid: e725fa032cb55224ab64b33c717fc293
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

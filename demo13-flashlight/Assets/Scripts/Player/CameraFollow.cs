@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 카메라 추적. 에디터에서 설정한 위치/회전/orthoSize를 그대로 유지.
 /// Play 시 플레이어와의 오프셋만 계산해서 따라감.
+/// 씬 전환 후에도 DontDestroyOnLoad 플레이어를 자동 재탐색.
 /// </summary>
 public class CameraFollow : MonoBehaviour
 {
@@ -11,12 +13,28 @@ public class CameraFollow : MonoBehaviour
 
     Vector3 offset;
     Camera cam;
+    bool offsetInitialized;
 
     void Start()
     {
         cam = GetComponent<Camera>();
+        FindTarget();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
 
-        // target 없으면 Player 태그로 자동 탐색
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 씬 전환 후 타겟 재탐색
+        FindTarget();
+    }
+
+    void FindTarget()
+    {
         if (target == null)
         {
             var playerGO = GameObject.FindGameObjectWithTag("Player");
@@ -24,14 +42,21 @@ public class CameraFollow : MonoBehaviour
                 target = playerGO.transform;
         }
 
-        // 에디터에서 설정한 현재 위치 기준으로 오프셋 계산
-        if (target != null)
+        if (target != null && !offsetInitialized)
+        {
             offset = transform.position - target.position;
+            offsetInitialized = true;
+        }
     }
 
     void LateUpdate()
     {
-        if (target == null) return;
+        if (target == null)
+        {
+            // 런타임 중 타겟 소실 시 재탐색
+            FindTarget();
+            if (target == null) return;
+        }
 
         Vector3 desired = target.position + offset;
         transform.position = Vector3.Lerp(transform.position, desired, smoothSpeed * Time.deltaTime);

@@ -107,6 +107,7 @@ GameObject:
   - component: {fileID: 6828899472155113923}
   - component: {fileID: 2649674261472264544}
   - component: {fileID: 7712938401025567891}
+  - component: {fileID: 4067913335408413285}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -293,13 +294,29 @@ MonoBehaviour:
     m_RotationOrder: 4
   knockbackDist: 0.15
   knockbackDuration: 0.1
-  freezeDuration: 0.05
   lightLungeDist: 0.3
   lightLungeDuration: 0.08
   lightReturnDuration: 0.12
   heavyLungeDist: 0.6
   heavyLungeDuration: 0.06
   heavyReturnDuration: 0.18
+--- !u!114 &4067913335408413285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4109182075124165649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a09fd274d6481e54a91b4abcc821e806, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::InteractionSystem
+  interactKey: 101
+  maxDetectRadius: 3
+  fontSize: 16
+  textColor: {r: 1, g: 0.9, b: 0.4, a: 1}
+  bgColor: {r: 0, g: 0, b: 0, a: 0.75}
 --- !u!1 &7245482579714919919
 GameObject:
   m_ObjectHideFlags: 0
