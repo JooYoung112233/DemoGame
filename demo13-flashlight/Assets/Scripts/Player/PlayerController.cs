@@ -47,6 +47,7 @@ public class PlayerController : MonoBehaviour
     Health health;
     CombatFeedback feedback;
     SkeletonAnimController animController;
+    PlayerMedicalSystem medical;
     SpriteRenderer spriteRenderer;
     Renderer[] renderers;
     Color originalColor = Color.white;
@@ -118,7 +119,16 @@ public class PlayerController : MonoBehaviour
     #region ===== 프로퍼티: CombatData 접근 =====
 
     // --- 이동 ---
-    float MoveSpeed => combatData != null ? combatData.player.moveSpeed : moveSpeed;
+    float BaseMoveSpeed => combatData != null ? combatData.player.moveSpeed : moveSpeed;
+    float MoveSpeed
+    {
+        get
+        {
+            float speed = BaseMoveSpeed;
+            if (medical != null) speed *= medical.MoveSpeedMultiplier;
+            return speed;
+        }
+    }
 
     // --- 약공격 ---
     float LightDmg(int step)
@@ -187,6 +197,7 @@ public class PlayerController : MonoBehaviour
     public Vector3 MouseWorldPos { get; private set; }
 
     // 전투
+    public bool CombatEnabled { get; set; } = true;
     public bool IsInvincible => state == CombatState.Dodge && dodgeInvTimer > 0;
     public bool IsAttacking => state == CombatState.LightAttack || state == CombatState.HeavyRelease;
     public CombatState CurrentState => state;
@@ -217,6 +228,34 @@ public class PlayerController : MonoBehaviour
 
     #region ===== Unity 라이프사이클 =====
 
+    /// <summary>어떤 씬에서 Play 해도 Player가 존재하도록 자동 생성.
+    /// 씬에 배치된 Player가 있으면 그걸 사용.</summary>
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void Bootstrap()
+    {
+        if (Instance != null) return;
+
+        // 씬에 이미 Player가 있으면 스킵 (Awake에서 Instance 됨)
+        if (FindObjectOfType<PlayerController>(true) != null) return;
+
+        // 없으면 Resources/Player 프리팹에서 생성
+        var prefab = Resources.Load<GameObject>("Player");
+        if (prefab != null)
+        {
+            var go = Instantiate(prefab);
+            go.name = "Player";
+
+            // SpawnPoint 있으면 거기에, 없으면 원점
+            var sp = FindObjectOfType<SpawnPoint>();
+            if (sp != null)
+                go.transform.position = sp.transform.position;
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerController] Resources/Player 프리팹을 찾을 수 없습니다. Assets/Resources/ 에 Player 프리팹을 넣어주세요.");
+        }
+    }
+
     void Awake()
     {
         // 싱글톤 + DontDestroyOnLoad
@@ -235,6 +274,7 @@ public class PlayerController : MonoBehaviour
         health = GetComponent<Health>();
         agent = GetComponent<NavMeshAgent>();
         feedback = GetComponent<CombatFeedback>();
+        medical = GetComponent<PlayerMedicalSystem>();
         animController = GetComponentInChildren<SkeletonAnimController>();
         mainCam = Camera.main;
 
@@ -303,7 +343,13 @@ public class PlayerController : MonoBehaviour
         // 전투 상태 초기화 (씬 전환 중 공격 중이면 리셋)
         state = CombatState.Idle;
         canMove = true;
+
+        // 안전가옥에서는 전투 비활성화
+        CombatEnabled = (scene.name != "Safehouse");
     }
+
+    /// <summary>UI가 열려있어서 플레이어 입력을 차단해야 하는지</summary>
+    bool IsUIBlocking => UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
 
     void Update()
     {
@@ -311,6 +357,14 @@ public class PlayerController : MonoBehaviour
 
         // 카메라 축 갱신
         UpdateCameraAxes();
+
+        // UI가 열려있으면 이동/전투/조준 모두 차단
+        if (IsUIBlocking)
+        {
+            moveDir = Vector3.zero;
+            animController?.Play("idle");
+            return;
+        }
 
         // 스태미너 업데이트
         UpdateStamina();
@@ -340,11 +394,12 @@ public class PlayerController : MonoBehaviour
             flashlightPivot.rotation = yaw * pitch;
         }
 
-        // 쿨다운 감소
-        lightCooldownTimer -= Time.deltaTime;
-        heavyCooldownTimer -= Time.deltaTime;
-        dodgeCooldownTimer -= Time.deltaTime;
-        attackFlashTimer -= Time.deltaTime;
+        // 쿨다운 감소 (unscaled — timeScale=0에서도 작동)
+        float udt = Time.unscaledDeltaTime;
+        lightCooldownTimer -= udt;
+        heavyCooldownTimer -= udt;
+        dodgeCooldownTimer -= udt;
+        attackFlashTimer -= udt;
 
         // 전투 상태 업데이트
         switch (state)
@@ -360,7 +415,7 @@ public class PlayerController : MonoBehaviour
         // 콤보 윈도우 타임아웃
         if (comboTimer > 0)
         {
-            comboTimer -= Time.deltaTime;
+            comboTimer -= udt;
             if (comboTimer <= 0) comboStep = 0;
         }
 
@@ -387,16 +442,18 @@ public class PlayerController : MonoBehaviour
         }
 
         // 이동 처리 (canMove일 때만)
+        // unscaledDeltaTime 사용 → 안전가옥(timeScale=0)에서도 이동 가능
+        float dt = Time.unscaledDeltaTime;
         if (canMove)
         {
             if (agent != null && agent.isOnNavMesh)
             {
                 agent.speed = MoveSpeed;
-                agent.Move(moveDir * MoveSpeed * Time.deltaTime);
+                agent.Move(moveDir * MoveSpeed * dt);
             }
             else
             {
-                transform.position += moveDir * MoveSpeed * Time.deltaTime;
+                transform.position += moveDir * MoveSpeed * dt;
             }
         }
     }
@@ -418,7 +475,7 @@ public class PlayerController : MonoBehaviour
         // 원샷 타이머
         if (oneShotTimer > 0)
         {
-            oneShotTimer -= Time.deltaTime;
+            oneShotTimer -= Time.unscaledDeltaTime;
             if (oneShotTimer <= 0)
             {
                 oneShotCallback?.Invoke();
@@ -473,6 +530,8 @@ public class PlayerController : MonoBehaviour
 
     void UpdateIdle()
     {
+        if (!CombatEnabled) return;
+
         // 구르기 — Space (최우선)
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -551,18 +610,19 @@ public class PlayerController : MonoBehaviour
 
     void UpdateDodge()
     {
-        dodgeTimer -= Time.deltaTime;
-        dodgeInvTimer -= Time.deltaTime;
+        float dt = Time.unscaledDeltaTime;
+        dodgeTimer -= dt;
+        dodgeInvTimer -= dt;
 
         // 대시 이동
         float speed = DodgeDist / DodgeDur;
         if (agent != null && agent.isOnNavMesh)
         {
-            agent.Move(dodgeDir * speed * Time.deltaTime);
+            agent.Move(dodgeDir * speed * dt);
         }
         else
         {
-            transform.position += dodgeDir * speed * Time.deltaTime;
+            transform.position += dodgeDir * speed * dt;
         }
 
         // 무적 중 반투명
@@ -582,7 +642,7 @@ public class PlayerController : MonoBehaviour
 
     void UpdateExhausted()
     {
-        exhaustionTimer -= Time.deltaTime;
+        exhaustionTimer -= Time.unscaledDeltaTime;
         // 탈진 중 깜빡임
         float blink = Mathf.Sin(Time.time * 8f) > 0 ? 0.6f : 1f;
         SetAlpha(blink);
@@ -802,10 +862,12 @@ public class PlayerController : MonoBehaviour
 
     void UpdateStamina()
     {
+        float dt = Time.unscaledDeltaTime;
+
         // 탈진 상태 처리
         if (isExhausted)
         {
-            staminaExhaustionTimer -= Time.deltaTime;
+            staminaExhaustionTimer -= dt;
             if (staminaExhaustionTimer <= 0)
             {
                 isExhausted = false;
@@ -815,11 +877,11 @@ public class PlayerController : MonoBehaviour
         // 회복 딜레이 후 자동 회복
         if (staminaRegenDelayTimer > 0)
         {
-            staminaRegenDelayTimer -= Time.deltaTime;
+            staminaRegenDelayTimer -= dt;
         }
         else if (staminaCurrent < MaxStam)
         {
-            staminaCurrent = Mathf.Min(staminaCurrent + StamRegenRate * Time.deltaTime, MaxStam);
+            staminaCurrent = Mathf.Min(staminaCurrent + StamRegenRate * dt, MaxStam);
 
             // 탈진 해제 후 최소 스태미너 확보
             if (isExhausted && staminaCurrent >= MaxStam * 0.2f)
@@ -1151,6 +1213,10 @@ public class PlayerController : MonoBehaviour
             SetTint(new Color(1f, 0.3f, 0.3f));
 
             animController?.PlayOneShot("gethit");
+
+            // 의료 시스템 연동 — 피격 시 부상 판정
+            if (medical != null && health != null)
+                medical.OnDamageTaken(amount, health.MaxHp);
         }
     }
 

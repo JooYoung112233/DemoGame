@@ -79,6 +79,10 @@ public class FlashlightController : MonoBehaviour
 
     void Update()
     {
+        // UI가 열려있으면 손전등 조작 차단
+        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen())
+            return;
+
         if (Input.GetKeyDown(KeyCode.F))
             Toggle();
 
@@ -140,6 +144,6 @@ public class FlashlightController : MonoBehaviour
 
     public void AddBattery(float amount)
     {
-        currentBattery = Mathf.Min(currentBattery + amount, maxBattery);
+        currentBattery = Mathf.Clamp(currentBattery + amount, 0f, maxBattery);
     }
 }

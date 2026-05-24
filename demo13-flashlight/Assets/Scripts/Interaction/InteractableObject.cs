@@ -135,7 +135,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
                 HandleContainer(player);
                 break;
             case InteractType.MapBoard:
-                HandleExit(player);   // 지도판도 씬 전환 (출전)
+                HandleMapBoard(player);
                 break;
             default:
                 Debug.Log($"[Interact] {type}: {promptText}");
@@ -159,9 +159,9 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
         if (exitWaitTime > 0)
         {
-            // 탈출 대기 (기획서: 8초 대기)
+            // 탈출 대기 (기획서: 8초 대기, 거리 이탈 시 취소)
             Debug.Log($"[ExitPoint] 탈출 대기 {exitWaitTime}초...");
-            SceneTransitionManager.Instance.TransitionWithDelay(targetScene, spawnPointId, exitWaitTime);
+            SceneTransitionManager.Instance.TransitionWithDelay(targetScene, spawnPointId, exitWaitTime, transform, interactRange * 2f);
         }
         else
         {
@@ -187,6 +187,18 @@ public class InteractableObject : MonoBehaviour, IInteractable
     {
         Debug.Log($"[Container] {promptText} 열기");
         // TODO: 루팅 UI 열기
+    }
+
+    void HandleMapBoard(PlayerController player)
+    {
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowMapSelect();
+        }
+        else
+        {
+            Debug.LogWarning("[MapBoard] UIManager가 없습니다.");
+        }
     }
 
     #endregion

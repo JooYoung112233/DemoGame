@@ -26,10 +26,25 @@ public class SceneTransitionManager : MonoBehaviour
     Texture2D fadeTex;
     bool isTransitioning;
 
-    // 탈출 카운트다운 UI
+    // 탈출 카운트���운 UI
     float exitCountdown;
     float exitCountdownMax;
     bool isCountingDown;
+
+    // 탈출 취소용
+    Transform exitSource;       // 탈출구 Transform
+    float exitCancelRange;      // 이 거리 이상 벗어나면 취소
+    Coroutine transitionCoroutine;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void Bootstrap()
+    {
+        if (Instance != null) return;
+        if (FindObjectOfType<SceneTransitionManager>(true) != null) return;
+
+        var go = new GameObject("[SceneTransitionManager]");
+        go.AddComponent<SceneTransitionManager>();
+    }
 
     void Awake()
     {
@@ -59,23 +74,44 @@ public class SceneTransitionManager : MonoBehaviour
     public void TransitionTo(string sceneName, string spawnPointId = "")
     {
         if (isTransitioning) return;
+        // timeScale=0(안전가옥)에서 출전 시 복구
+        Time.timeScale = 1f;
         PendingSpawnPointId = spawnPointId;
-        StartCoroutine(TransitionRoutine(sceneName, 0f));
+        transitionCoroutine = StartCoroutine(TransitionRoutine(sceneName, 0f));
     }
 
     /// <summary>씬 전환 요청 (대기 시간 포함, 탈출구용).</summary>
-    public void TransitionWithDelay(string sceneName, string spawnPointId, float waitTime)
+    /// <param name="source">탈출구 Transform. 플레이어가 여기서 cancelRange 이상 벗어나면 취소</param>
+    /// <param name="cancelRange">취소 거리 (기본 3m)</param>
+    public void TransitionWithDelay(string sceneName, string spawnPointId, float waitTime, Transform source = null, float cancelRange = 3f)
     {
         if (isTransitioning) return;
         PendingSpawnPointId = spawnPointId;
-        StartCoroutine(TransitionRoutine(sceneName, waitTime));
+        exitSource = source;
+        exitCancelRange = cancelRange;
+        transitionCoroutine = StartCoroutine(TransitionRoutine(sceneName, waitTime));
+    }
+
+    /// <summary>탈출 취소 (거리 이탈 또는 외부 호출)</summary>
+    public void CancelTransition()
+    {
+        if (!isCountingDown) return;
+
+        if (transitionCoroutine != null)
+            StopCoroutine(transitionCoroutine);
+
+        isCountingDown = false;
+        isTransitioning = false;
+        exitSource = null;
+        transitionCoroutine = null;
+        Debug.Log("[SceneTransition] 탈출 취소됨");
     }
 
     IEnumerator TransitionRoutine(string sceneName, float waitTime)
     {
         isTransitioning = true;
 
-        // 탈출 대기 (카운트다운 UI 표시)
+        // 탈출 대기 (카운트다운 UI 표시 + 거리 이탈 시 취소)
         if (waitTime > 0)
         {
             Debug.Log($"[SceneTransition] {waitTime}초 대기 중...");
@@ -83,13 +119,27 @@ public class SceneTransitionManager : MonoBehaviour
             exitCountdown = waitTime;
             isCountingDown = true;
 
+            Transform playerT = GameObject.FindGameObjectWithTag("Player")?.transform;
+
             while (exitCountdown > 0)
             {
+                // 거리 체크 — 탈출구에서 너무 멀어지면 취소
+                if (exitSource != null && playerT != null)
+                {
+                    float dist = Vector3.Distance(playerT.position, exitSource.position);
+                    if (dist > exitCancelRange)
+                    {
+                        CancelTransition();
+                        yield break;
+                    }
+                }
+
                 exitCountdown -= Time.deltaTime;
                 yield return null;
             }
 
             isCountingDown = false;
+            exitSource = null;
         }
 
         // 페이드 아웃

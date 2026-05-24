@@ -29,7 +29,9 @@ public class CameraFollow : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // 씬 전환 후 타겟 재탐색
+        // 씬 전환 시 오프셋 재계산 허용
+        offsetInitialized = false;
+        target = null;
         FindTarget();
     }
 
@@ -46,6 +48,9 @@ public class CameraFollow : MonoBehaviour
         {
             offset = transform.position - target.position;
             offsetInitialized = true;
+
+            // 씬 전환 직후 즉시 스냅 (Lerp 지연 없이)
+            transform.position = target.position + offset;
         }
     }
 
@@ -53,12 +58,11 @@ public class CameraFollow : MonoBehaviour
     {
         if (target == null)
         {
-            // 런타임 중 타겟 소실 시 재탐색
             FindTarget();
             if (target == null) return;
         }
 
         Vector3 desired = target.position + offset;
-        transform.position = Vector3.Lerp(transform.position, desired, smoothSpeed * Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, desired, smoothSpeed * Time.unscaledDeltaTime);
     }
 }

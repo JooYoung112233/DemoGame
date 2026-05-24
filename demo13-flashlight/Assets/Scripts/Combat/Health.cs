@@ -21,14 +21,30 @@ public class Health : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
+        TakeDamage(amount, null, false);
+    }
+
+    /// <summary>
+    /// 데미지 적용.
+    /// </summary>
+    /// <param name="amount">데미지량</param>
+    /// <param name="source">데미지 원인 (null 가능)</param>
+    /// <param name="silent">true면 OnDamaged 이벤트 미발행 (출혈 등 DoT용)</param>
+    public void TakeDamage(float amount, GameObject source, bool silent)
+    {
         if (isDead) return;
 
-        // 플레이어 무적 체크 (구르기 중)
-        var playerCombat = GetComponent<PlayerController>();
-        if (playerCombat != null && playerCombat.IsInvincible) return;
+        // 플레이어 무적 체크 (구르기 중) — silent 데미지는 무적 무시 안 함
+        if (!silent)
+        {
+            var playerCombat = GetComponent<PlayerController>();
+            if (playerCombat != null && playerCombat.IsInvincible) return;
+        }
 
         currentHp = Mathf.Max(0, currentHp - amount);
-        OnDamaged?.Invoke(amount);
+
+        if (!silent)
+            OnDamaged?.Invoke(amount);
 
         if (currentHp <= 0)
         {

@@ -53,18 +53,22 @@ public class InteractionSystem : MonoBehaviour
         // 사망 시 상호작용 불가
         if (playerHealth != null && playerHealth.IsDead) return;
 
-        // 전투/구르기 중 상호작용 불가
+        // UI가 열려있으면 상호작용 차단
+        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return;
+
+        // 감지는 항상 수행 (UI 표시용)
+        UpdateDetection();
+
+        // 전투/구르기 중엔 입력만 차단
         if (player != null && player.CurrentState != PlayerController.CombatState.Idle)
             return;
-
-        UpdateDetection();
 
         // E키 입력
         if (currentTarget != null && Input.GetKeyDown(interactKey))
         {
             currentTarget.Interact(player);
 
-            // 일회용 오브젝트가 비활성화되었으면 타겟 해제
+            // 일회용 오브���트가 비활성화되었으면 타겟 해제
             if (!currentTarget.gameObject.activeInHierarchy || !currentTarget.CanInteract)
             {
                 currentTarget.SetHighlight(false);
@@ -117,10 +121,6 @@ public class InteractionSystem : MonoBehaviour
     void OnGUI()
     {
         if (currentTarget == null || mainCam == null) return;
-
-        // 전투 중이면 표시 안 함
-        if (player != null && player.CurrentState != PlayerController.CombatState.Idle)
-            return;
 
         InitStyles();
 

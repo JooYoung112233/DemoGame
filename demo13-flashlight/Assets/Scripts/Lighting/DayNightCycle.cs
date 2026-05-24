@@ -2,10 +2,6 @@ using UnityEngine;
 
 public class DayNightCycle : MonoBehaviour
 {
-    [Header("Time Settings")]
-    [SerializeField] float dayDuration = 120f;
-    [SerializeField] float nightDuration = 300f;
-
     [Header("Lighting")]
     [SerializeField] Light directionalLight;
     [SerializeField] float dayIntensity = 1f;
@@ -16,38 +12,72 @@ public class DayNightCycle : MonoBehaviour
     [Header("References")]
     [SerializeField] FlashlightController flashlight;
 
-    float currentTime;
     bool isNight = false;
+    bool lastSyncedNight = false;
 
     public bool IsNight => isNight;
-    public float TimeRemaining => isNight
-        ? nightDuration - currentTime
-        : dayDuration - currentTime;
+    public float TimeRemaining
+    {
+        get
+        {
+            if (RegionTimeManager.Instance == null) return 0;
+            var rt = RegionTimeManager.Instance.GetRegion(RegionTimeManager.Instance.ActiveRegionId);
+            if (rt == null) return 0;
+            float max = rt.isNight ? RegionTimeManager.Instance.NightDuration : RegionTimeManager.Instance.DayDuration;
+            return max - rt.elapsed;
+        }
+    }
 
     public event System.Action<bool> OnPhaseChanged;
 
     void Start()
     {
-        // 에디터 설정 유지 — 시작 시 라이팅 덮어쓰지 않음
+        SyncFromRegionTime();
     }
 
     void Update()
     {
-        currentTime += Time.deltaTime;
-        float maxTime = isNight ? nightDuration : dayDuration;
-        if (currentTime >= maxTime && !isNight)
-            SetPhase(true);
+        // RegionTimeManager에서 현재 지역 시간 읽기
+        SyncFromRegionTime();
 
         if (Input.GetKeyDown(KeyCode.T))
-            SetPhase(!isNight);
+            ForceToggle();
     }
 
-    void SetPhase(bool toNight)
+    /// <summary>RegionTimeManager의 활성 지역 시간에 동기화</summary>
+    void SyncFromRegionTime()
     {
-        isNight = toNight;
-        currentTime = 0f;
-        ApplyLighting();
-        OnPhaseChanged?.Invoke(isNight);
+        if (RegionTimeManager.Instance == null) return;
+        var regionId = RegionTimeManager.Instance.ActiveRegionId;
+        if (string.IsNullOrEmpty(regionId)) return;
+
+        var rt = RegionTimeManager.Instance.GetRegion(regionId);
+        if (rt == null) return;
+
+        isNight = rt.isNight;
+
+        // 페이즈가 바뀌었으면 이벤트 발행 + 라이팅 적용
+        if (isNight != lastSyncedNight)
+        {
+            lastSyncedNight = isNight;
+            ApplyLighting();
+            OnPhaseChanged?.Invoke(isNight);
+        }
+    }
+
+    /// <summary>디버그용 강제 토글 (T키)</summary>
+    void ForceToggle()
+    {
+        if (RegionTimeManager.Instance == null) return;
+        var regionId = RegionTimeManager.Instance.ActiveRegionId;
+        if (string.IsNullOrEmpty(regionId)) return;
+
+        var rt = RegionTimeManager.Instance.GetRegion(regionId);
+        if (rt == null) return;
+
+        // 강제로 페이즈 전환
+        rt.isNight = !rt.isNight;
+        rt.elapsed = 0f;
     }
 
     void ApplyLighting()

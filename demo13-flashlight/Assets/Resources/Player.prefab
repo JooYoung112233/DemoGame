@@ -108,6 +108,8 @@ GameObject:
   - component: {fileID: 2649674261472264544}
   - component: {fileID: 7712938401025567891}
   - component: {fileID: 4067913335408413285}
+  - component: {fileID: 544281348422148459}
+  - component: {fileID: 6326109580961781787}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -317,6 +319,37 @@ MonoBehaviour:
   fontSize: 16
   textColor: {r: 1, g: 0.9, b: 0.4, a: 1}
   bgColor: {r: 0, g: 0, b: 0, a: 0.75}
+--- !u!114 &544281348422148459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4109182075124165649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3908de66427b5f4b9c5cddd78f294eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::PlayerMedicalSystem
+  bleedDamagePerSec: 3
+  legFractureMoveDebuff: 0.5
+  armFractureAtkDebuff: 0.4
+  painStaminaDebuff: 0.5
+  painDefaultDuration: 60
+  immobileDuringHeal: 1
+--- !u!114 &6326109580961781787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4109182075124165649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac9a980bf01b17249bb063e6c949794d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::MedicalHUD
+  toggleKey: 9
 --- !u!1 &7245482579714919919
 GameObject:
   m_ObjectHideFlags: 0
