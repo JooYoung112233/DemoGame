@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
+  m_Name: IfakInjury
+  m_EditorClassIdentifier: Game.Scripts::ItemData
+  itemId: ifak_injury
+  displayName: "\uBD80\uC0C1 IFAK"
+  description: "\uCD9C\uD608\xB7\uD1B5\uC99D \uC751\uAE09\uCC98\uCE58. 5\uD68C."
+  icon: {fileID: 0}
+  gridWidth: 2
+  gridHeight: 2
+  category: 1
+  rarity: 1
+  primaryRegionId: 
+  maxStack: 1
+  weight: 0.8
+  sellPrice: 40
+  buyPrice: 90
+  isUsable: 1
+  useEffect: 2
+  effectValue: 0
+  hasDurability: 1
+  maxDurability: 300
+  durabilityCostPerUse: 60
+  medicalData: {fileID: 11400000, guid: 53baaa206771c904ba6bc78dacb3c34c, type: 2}
+  worldDropPrefab: {fileID: 0}

@@ -30,9 +30,9 @@ public class CameraFollow : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // 씬 전환 시 오프셋 재계산 허용
+        // FindTarget은 LateUpdate에서 실행 (SceneTransitionManager 스폰 완료 후)
         offsetInitialized = false;
         target = null;
-        FindTarget();
     }
 
     void FindTarget()
@@ -46,11 +46,12 @@ public class CameraFollow : MonoBehaviour
 
         if (target != null && !offsetInitialized)
         {
+            // 카메라 뷰 중앙에 플레이어가 오도록 오프셋 보정
+            // (에디터에서 카메라/스폰 위치가 약간 안맞아도 자동 정렬)
+            Vector3 localP = transform.InverseTransformPoint(target.position);
+            transform.position += transform.right * localP.x + transform.up * localP.y;
             offset = transform.position - target.position;
             offsetInitialized = true;
-
-            // 씬 전환 직후 즉시 스냅 (Lerp 지연 없이)
-            transform.position = target.position + offset;
         }
     }
 

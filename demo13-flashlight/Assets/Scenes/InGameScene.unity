@@ -201,8 +201,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38f50b88d91b4c74eb9851a39c5aada6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DayNightCycle
-  dayDuration: 120
-  nightDuration: 300
   directionalLight: {fileID: 1577578456}
   dayIntensity: 1
   nightIntensity: 0
@@ -707,6 +705,63 @@ Transform:
   - {fileID: 173937668}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1071138269
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342759343158547007, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4904712988360923923, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
+      propertyPath: m_Name
+      value: ScrapMarket_Greybox
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7c485b5d8581aad4686f92af6a0ddf83, type: 3}
 --- !u!1 &1187632557
 GameObject:
   m_ObjectHideFlags: 0
@@ -1369,6 +1424,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Zone 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2092982790521054428, guid: ce9c4674efa10a44fbb8e7a207789a9f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4813909936715077258, guid: ce9c4674efa10a44fbb8e7a207789a9f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1424,6 +1483,7 @@ SceneRoots:
   - {fileID: 1010536435}
   - {fileID: 1331859482}
   - {fileID: 667569500}
+  - {fileID: 1071138269}
   - {fileID: 2088612852}
   - {fileID: 2040165972}
   - {fileID: 1240814873}

@@ -1,0 +1,83 @@
+# 제작 · 레시피 (RecipeData)
+
+> **현 상태 = 진실.** 런타임은 `CraftingSystem` + `Resources/Data/Recipes/` 의 `RecipeData` SO.
+
+## RecipeData 만들기 (Unity 에디터)
+
+1. **`Assets/Resources/Data/Recipes/`** 폴더에서 우클릭
+2. **Create → Night City → Recipe Data**
+3. 아래 필드 설정 후 저장 (파일명은 자유, `recipeId`가 코드 기준 ID)
+
+| 필드 | 설명 |
+|------|------|
+| **recipeId** | 고유 ID (`CraftingSystem.UnlockRecipe` / `IsUnlocked` 기준). 결과물 ID와 같아도 됨 |
+| **displayName** | UI 표시명 |
+| **description** | 짧은 설명 |
+| **station** | `Workbench` / `MedicalBench` / `CookingBench` |
+| **ingredients** | `itemId` + `count` (ItemDatabase ID) |
+| **resultItemId** | 완성 아이템 ID |
+| **resultCount** | 완성 수량 (기본 1) |
+| **unlockedByDefault** | 체크 = 새 게임부터 조리/제작 가능 (**의료대 기본 레시피**) |
+| **unlockRecipeItemId** | 레시피 **문서 아이템** `itemId`. 우클릭 사용 시 이 레시피 영구 해금 (비우면 문서 해금 없음) |
+
+### 해금 규칙
+
+| 유형 | unlockedByDefault | unlockRecipeItemId | 예 |
+|------|:---------------:|-------------------|-----|
+| 기본 제작 (의료대) | ✅ | (비움) | 붕대 = `cloth_rag`×2 |
+| 문서 해금 (조리대·작업대) | ❌ | `recipe_stew` 등 | 맵에서 `recipe_*` 루팅 → 인벤 우클릭 |
+| 이미 해금된 문서 재사용 | — | — | **소모 안 함** (NPC 판매용 중복만) |
+
+레시피 문서 아이템: `Assets/Resources/Items/Key/`, `ItemData.isUsable = true` → `PlayerInventory` → `CraftingSystem.TryUnlockFromItem`.
+
+---
+
+## 구현된 레시피 목록
+
+### 조리대 (`CookingBench`) — 5종
+
+| recipeId | unlockRecipeItemId | 재료 | 결과 |
+|----------|-------------------|------|------|
+| `cooked_stew` | `recipe_stew` | 고기+채소+소금 | `cooked_stew` |
+| `cooked_bread` | `recipe_bread` | 밀가루+설탕 | `cooked_bread` |
+| `herbal_tea` | `recipe_tea` | 허브+물병 | `herbal_tea` |
+| `energy_soup` | `recipe_soup` | 채소+소금+물병 | `energy_soup` |
+| `special_meal` | `recipe_special` | 고기+허브+채소+소금 | `special_meal` |
+
+### 의료대 (`MedicalBench`) — 5종, 전부 기본 해금
+
+| recipeId | 재료 | 결과 |
+|----------|------|------|
+| `bandage` | `cloth_rag`×2 | `bandage` |
+| `splint` | `wood_plank`×1 + `cloth_rag`×1 | `splint` |
+| `gauze_roll` | `cloth_rag`×1 | `gauze_roll` |
+| `painkiller` | `chemical_flask`×1 | `painkiller` |
+| `disinfectant` | `chemical_flask`×1 + `water_bottle`×1 | `disinfectant` |
+
+고급 의료(구급상자·수술 키트 등)는 **RecipeData 없음** — NPC 구매만 (`docs/items.md` §11-B).
+
+---
+
+## 코드 · 데이터 경로
+
+| 항목 | 경로 |
+|------|------|
+| SO 정의 | `Assets/Scripts/Crafting/RecipeData.cs` |
+| 싱글톤 | `Assets/Scripts/Crafting/CraftingSystem.cs` — `Resources.LoadAll<RecipeData>("Data/Recipes")` |
+| CSV 일괄 생성 (조리) | `tools/cooking_recipes.csv` → `tools/GenerateCookingRecipes.ps1` |
+| CSV 일괄 생성 (의료) | `tools/medical_recipes.csv` → `tools/GenerateMedicalRecipes.ps1` |
+
+| UI | `CraftingUI` — `UIManager.ShowCrafting(station)` / 시설 상호작용(E) |
+| Safehouse 시설 | Interactable Creator로 `Workbench` / `MedicalBench` / `CookingBench` 수동 배치 |
+| 디버그 | DebugTestUI(H) → 아이템 탭 → 의료대/조리대/작업대 버튼 |
+
+`CraftingUI`: 좌측 해금 레시피 목록, 우측 재료·결과, **제작/조리** 버튼. 작업대만 **수리** 탭. ESC 닫기. Tab·이동 차단(`IsAnyUIOpen`).
+
+---
+
+## 변경 로그
+
+| 날짜 | 내용 |
+|------|------|
+| 2026-05-26 | RecipeData 에디터 워크플로 문서화. 조리 5 + 의료 5 SO. `unlockRecipeItemId` / `unlockedByDefault` 규칙 정리. |
+| 2026-05-26 | `CraftingUI` 연동 완료. Safehouse 시설 부트스트랩. `InteractType` enum 순서 수정(MapBoard=8 유지). |

@@ -1,0 +1,6 @@
+recipeId,displayName,description,unlockItem,resultId,resultCount,ingredients
+cooked_stew,고기 스튜,고기+채소+소금,recipe_stew,cooked_stew,1,ingredient_meat:1|ingredient_vegetable:1|ingredient_salt:1
+cooked_bread,구운 빵,밀가루+설탕,recipe_bread,cooked_bread,1,ingredient_flour:1|ingredient_sugar:1
+herbal_tea,허브차,허브+물병,recipe_tea,herbal_tea,1,ingredient_herb:1|water_bottle:1
+energy_soup,활력 수프,채소+소금+물병,recipe_soup,energy_soup,1,ingredient_vegetable:1|ingredient_salt:1|water_bottle:1
+special_meal,특제 요리,고급 재료 조합,recipe_special,special_meal,1,ingredient_meat:1|ingredient_herb:1|ingredient_vegetable:1|ingredient_salt:1

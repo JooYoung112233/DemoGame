@@ -8,8 +8,6 @@ using UnityEngine.UI;
 /// </summary>
 public class MedicalHUD : MonoBehaviour
 {
-    [SerializeField] KeyCode toggleKey = KeyCode.Tab;
-
     bool isOpen;
     PlayerMedicalSystem medical;
 
@@ -31,24 +29,28 @@ public class MedicalHUD : MonoBehaviour
     {
         medical = GetComponent<PlayerMedicalSystem>();
         if (medical == null)
-            medical = FindObjectOfType<PlayerMedicalSystem>();
+            medical = FindFirstObjectByType<PlayerMedicalSystem>();
 
         BuildUI();
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(toggleKey))
-        {
-            isOpen = !isOpen;
-            if (panelRoot != null)
-                panelRoot.SetActive(isOpen);
-        }
+        // Tab 토글은 UIManager → CharacterPanelUI로 이전됨.
+        // MedicalHUD는 미니 경고만 담당.
 
         UpdateWarning();
 
         if (!isOpen || medical == null) return;
         UpdatePanel();
+    }
+
+    /// <summary>외부에서 패널 열기/닫기 (CharacterPanelUI가 직접 관리하므로 비활성)</summary>
+    public void SetOpen(bool open)
+    {
+        isOpen = open;
+        if (panelRoot != null)
+            panelRoot.SetActive(isOpen);
     }
 
     void BuildUI()

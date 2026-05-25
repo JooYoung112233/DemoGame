@@ -9,7 +9,6 @@ namespace IsometricMapEditor.Editor
         MapData mapData;
         Vector2 scrollPos;
         Vector2 graphOffset;
-        float graphZoom = 1f;
 
         [MenuItem("Window/Isometric Map/Connection Editor")]
         public static void ShowWindow()

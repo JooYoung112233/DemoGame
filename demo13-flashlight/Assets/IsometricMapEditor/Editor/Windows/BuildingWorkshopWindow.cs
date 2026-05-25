@@ -24,7 +24,6 @@ namespace IsometricMapEditor.Editor
         Vector2 paletteScroll;
         Vector2 inspectorScroll;
         string searchFilter = "";
-        string newAssetName = "";
 
         TileDefinition[] cachedTiles;
         BuildingDefinition[] cachedBuildings;

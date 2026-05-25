@@ -1,0 +1,6 @@
+recipeId,displayName,description,unlockItem,resultId,resultCount,ingredients
+bandage,붕대 제작,천 조각으로 붕대,,bandage,1,cloth_rag:2
+splint,부목 제작,판자와 천으로 부목,,splint,1,wood_plank:1|cloth_rag:1
+gauze_roll,거즈 롤 제작,천 조각으로 거즈,,gauze_roll,1,cloth_rag:1
+painkiller,진통제 제작,화학 플라스크로 조제,,painkiller,1,chemical_flask:1
+disinfectant,소독약 제작,플라스크와 물병,,disinfectant,1,chemical_flask:1|water_bottle:1

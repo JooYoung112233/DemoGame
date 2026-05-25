@@ -28,8 +28,10 @@ public class InteractableObject : MonoBehaviour, IInteractable
         Note,           // 쪽지/문서 (읽기)
         Pickup,         // 바닥 아이템 (줍기)
         Bed,            // 침대 (휴식/저장)
-        Workbench,      // 작업대 (제작)
-        MapBoard,       // 지도판 (출전 선택)
+        Workbench,      // 작업대 (무기 제작/수리)
+        MapBoard,       // 지도판 (출전 선택) — 값 8 유지 (기존 씬 직렬화)
+        MedicalBench,   // 의료대 (일회용 치료템 제작)
+        CookingBench,   // 조리대 (버프 음식 제작)
     }
 
     #endregion
@@ -106,6 +108,67 @@ public class InteractableObject : MonoBehaviour, IInteractable
             originalColor = spriteRenderer.color;
     }
 
+    void Start()
+    {
+        // 씬 배치 Pickup인데 WorldItem이 없으면 (인스펙터 설정) 이름 라벨 생성
+        if (type == InteractType.Pickup && GetComponent<WorldItem>() == null && !string.IsNullOrEmpty(itemId))
+        {
+            var data = ItemDatabase.Get(itemId);
+            if (data != null)
+            {
+                string name = itemCount > 1 ? $"{data.displayName} x{itemCount}" : data.displayName;
+                promptText = $"줍기: {name}";
+                // 이름 라벨
+                CreatePickupLabel(data.displayName, data.RarityColor);
+            }
+        }
+    }
+
+    void CreatePickupLabel(string labelName, Color color)
+    {
+        var labelGO = new GameObject("PickupLabel");
+        labelGO.transform.SetParent(transform, false);
+        labelGO.transform.localPosition = new Vector3(0, 0.5f, 0);
+
+        var canvas = labelGO.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
+        canvas.sortingOrder = 5;
+
+        var canvasRT = labelGO.GetComponent<RectTransform>();
+        canvasRT.sizeDelta = new Vector2(2f, 0.4f);
+        canvasRT.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+
+        var bgGO = new GameObject("Bg");
+        bgGO.transform.SetParent(canvasRT, false);
+        var bgRT = bgGO.AddComponent<RectTransform>();
+        bgRT.anchorMin = Vector2.zero;
+        bgRT.anchorMax = Vector2.one;
+        bgRT.offsetMin = Vector2.zero;
+        bgRT.offsetMax = Vector2.zero;
+        bgGO.AddComponent<UnityEngine.UI.Image>().color = new Color(0.05f, 0.05f, 0.1f, 0.75f);
+
+        var textGO = new GameObject("Name");
+        textGO.transform.SetParent(canvasRT, false);
+        var textRT = textGO.AddComponent<RectTransform>();
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.offsetMin = new Vector2(4, 0);
+        textRT.offsetMax = new Vector2(-4, 0);
+
+        var txt = textGO.AddComponent<UnityEngine.UI.Text>();
+        txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.fontSize = 18;
+        txt.fontStyle = FontStyle.Bold;
+        txt.color = color;
+        txt.text = labelName;
+        txt.alignment = TextAnchor.MiddleCenter;
+        txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+        txt.verticalOverflow = VerticalWrapMode.Overflow;
+
+        textGO.AddComponent<UnityEngine.UI.Shadow>().effectColor = Color.black;
+        labelGO.AddComponent<WorldLabelBillboard>();
+    }
+
     #endregion
 
     #region 상호작용 실행
@@ -134,8 +197,20 @@ public class InteractableObject : MonoBehaviour, IInteractable
             case InteractType.Container:
                 HandleContainer(player);
                 break;
+            case InteractType.Workbench:
+                HandleCrafting(CraftingStation.Workbench);
+                break;
+            case InteractType.MedicalBench:
+                HandleCrafting(CraftingStation.MedicalBench);
+                break;
+            case InteractType.CookingBench:
+                HandleCrafting(CraftingStation.CookingBench);
+                break;
             case InteractType.MapBoard:
                 HandleMapBoard(player);
+                break;
+            case InteractType.NPC:
+                HandleNPC(player);
                 break;
             default:
                 Debug.Log($"[Interact] {type}: {promptText}");
@@ -157,9 +232,12 @@ public class InteractableObject : MonoBehaviour, IInteractable
             return;
         }
 
+        // RaidManager에 탈출 성공 알림
+        if (RaidManager.Instance != null)
+            RaidManager.Instance.OnExtractSuccess();
+
         if (exitWaitTime > 0)
         {
-            // 탈출 대기 (기획서: 8초 대기, 거리 이탈 시 취소)
             Debug.Log($"[ExitPoint] 탈출 대기 {exitWaitTime}초...");
             SceneTransitionManager.Instance.TransitionWithDelay(targetScene, spawnPointId, exitWaitTime, transform, interactRange * 2f);
         }
@@ -177,16 +255,89 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
     void HandlePickup(PlayerController player)
     {
-        Debug.Log($"[Pickup] {itemId} x{itemCount}");
-        // TODO: 인벤토리에 추가
-        if (oneShot)
-            gameObject.SetActive(false);
+        // WorldItem이 있으면 인벤토리 연동
+        var worldItem = GetComponent<WorldItem>();
+        if (worldItem != null)
+        {
+            if (worldItem.TryPickup(player))
+                return; // 성공 시 WorldItem이 Destroy 처리
+            else
+                return; // 공간 부족
+        }
+
+        // WorldItem 없으면 ItemDatabase에서 생성
+        var data = ItemDatabase.Get(itemId);
+        if (data != null)
+        {
+            var inventory = player.GetComponent<PlayerInventory>();
+            if (inventory != null)
+            {
+                var item = new ItemInstance(data, itemCount);
+                if (inventory.TryPickup(item))
+                {
+                    // RaidManager에 루트 기록
+                    if (RaidManager.Instance != null)
+                        RaidManager.Instance.TrackLoot(item);
+
+                    // 퀘스트 목표 갱신
+                    if (QuestManager.Instance != null)
+                        QuestManager.Instance.UpdateObjective(ObjectiveType.CollectItem, data.itemId, itemCount);
+
+                    Debug.Log($"[Pickup] {data.displayName} x{itemCount} 획득");
+                    if (oneShot) gameObject.SetActive(false);
+                }
+                else
+                {
+                    Debug.Log("[Pickup] 인벤토리 공간 부족");
+                }
+            }
+        }
+        else
+        {
+            Debug.Log($"[Pickup] {itemId} x{itemCount} (ItemDatabase 미등록)");
+            if (oneShot) gameObject.SetActive(false);
+        }
     }
 
     void HandleContainer(PlayerController player)
     {
-        Debug.Log($"[Container] {promptText} 열기");
-        // TODO: 루팅 UI 열기
+        // 안전가옥 창고 우선 체크
+        var storage = GetComponent<SafehouseStorage>();
+        if (storage != null)
+        {
+            storage.Open();
+            return;
+        }
+
+        // 일반 루팅 상자
+        var container = GetComponent<LootContainer>();
+        if (container != null)
+        {
+            container.Open(player);
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowCharacterPanelWithContainer(container);
+        }
+        else
+        {
+            Debug.Log($"[Container] {promptText} (LootContainer/SafehouseStorage 없음)");
+        }
+    }
+
+    void HandleCrafting(CraftingStation station)
+    {
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowCrafting(station);
+        else
+            Debug.LogWarning($"[{station}] UIManager가 없습니다.");
+    }
+
+    void HandleNPC(PlayerController player)
+    {
+        var npc = GetComponent<NPCController>();
+        if (npc != null)
+            npc.Talk(player);
+        else
+            Debug.Log($"[NPC] {promptText} (NPCController 없음)");
     }
 
     void HandleMapBoard(PlayerController player)
@@ -199,6 +350,30 @@ public class InteractableObject : MonoBehaviour, IInteractable
         {
             Debug.LogWarning("[MapBoard] UIManager가 없습니다.");
         }
+    }
+
+    #endregion
+
+    #region 외부 설정
+
+    /// <summary>런타임/부트스트랩에서 타입·프롬프트 설정</summary>
+    public void Configure(InteractType interactType, string prompt, float range = 1.5f, bool once = false)
+    {
+        type = interactType;
+        promptText = prompt;
+        interactRange = range;
+        oneShot = once;
+    }
+
+    /// <summary>코드에서 Pickup 타입으로 설정 (WorldItem.Drop에서 사용)</summary>
+    public void SetupAsPickup(string id, int count, string prompt)
+    {
+        type = InteractType.Pickup;
+        itemId = id;
+        itemCount = count;
+        promptText = prompt;
+        oneShot = true;
+        interactRange = 1.5f;
     }
 
     #endregion

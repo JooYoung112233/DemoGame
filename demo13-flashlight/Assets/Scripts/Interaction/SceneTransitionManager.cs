@@ -40,7 +40,7 @@ public class SceneTransitionManager : MonoBehaviour
     static void Bootstrap()
     {
         if (Instance != null) return;
-        if (FindObjectOfType<SceneTransitionManager>(true) != null) return;
+        if (FindFirstObjectByType<SceneTransitionManager>(FindObjectsInactive.Include) != null) return;
 
         var go = new GameObject("[SceneTransitionManager]");
         go.AddComponent<SceneTransitionManager>();
@@ -236,7 +236,7 @@ public class SceneTransitionManager : MonoBehaviour
         // 스폰 포인트로 플레이어 이동
         if (string.IsNullOrEmpty(PendingSpawnPointId)) return;
 
-        var spawnPoints = FindObjectsOfType<SpawnPoint>();
+        var spawnPoints = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
         foreach (var sp in spawnPoints)
         {
             if (sp.PointId == PendingSpawnPointId)

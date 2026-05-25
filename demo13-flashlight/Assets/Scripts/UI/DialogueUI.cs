@@ -1,0 +1,603 @@
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
+
+public class DialogueUI : MonoBehaviour
+{
+    public static DialogueUI Instance { get; private set; }
+
+    public bool IsShowing => isShowing;
+
+    bool isShowing;
+    NPCData currentNPC;
+    PlayerController currentPlayer;
+
+    // 대화 상태
+    string[] currentLines;
+    int lineIndex;
+    bool waitingForChoice;
+    DialogueChoice[] currentChoices;
+    System.Action<int> choiceCallback;
+
+    // 타이핑 연출
+    Coroutine typingCoroutine;
+    bool isTyping;
+    string fullLineText;
+
+    // uGUI
+    Canvas canvas;
+    GameObject panelRoot;
+    Text nameText;
+    Text dialogueText;
+    Text relationLabel;
+    GameObject choicePanel;
+    Button[] choiceButtons;
+    Text[] choiceTexts;
+    Text continueHint;
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        BuildUI();
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    public void StartDialogue(NPCData npc, PlayerController player)
+    {
+        currentNPC = npc;
+        currentPlayer = player;
+
+        var rel = NPCRelationshipManager.Instance != null
+            ? NPCRelationshipManager.Instance.GetRelationship(npc.npcId)
+            : null;
+
+        // 1. 보고 가능한 퀘스트 체크
+        if (QuestManager.Instance != null)
+        {
+            var reportable = QuestManager.Instance.GetReportableQuest(npc.npcId);
+            if (reportable != null)
+            {
+                ShowQuestReport(reportable);
+                return;
+            }
+        }
+
+        // 2. 이벤트 대화 체크
+        var eventDlg = FindEventDialogue(npc, rel);
+        if (eventDlg != null)
+        {
+            ShowEventDialogue(eventDlg, rel);
+            return;
+        }
+
+        // 3. 신규 퀘스트 체크
+        if (QuestManager.Instance != null && npc.availableQuests != null)
+        {
+            var available = QuestManager.Instance.GetAvailableQuests(npc.npcId, npc.availableQuests);
+            if (available.Count > 0)
+            {
+                ShowQuestOffer(available[0]);
+                return;
+            }
+        }
+
+        // 4. 일반 대화
+        var defaultDlg = FindDefaultDialogue(npc, rel);
+        if (defaultDlg != null)
+        {
+            ShowLines(npc.displayName, defaultDlg.lines, rel);
+        }
+        else
+        {
+            ShowLines(npc.displayName, new[] { "..." }, rel);
+        }
+    }
+
+    EventDialogue FindEventDialogue(NPCData npc, NPCRelationship rel)
+    {
+        if (npc.eventDialogues == null) return null;
+
+        foreach (var evt in npc.eventDialogues)
+        {
+            if (evt.oneShot && rel != null && rel.completedEvents.Contains(evt.id))
+                continue;
+            if (!CheckCondition(evt.triggerCondition, rel))
+                continue;
+            return evt;
+        }
+        return null;
+    }
+
+    DialogueEntry FindDefaultDialogue(NPCData npc, NPCRelationship rel)
+    {
+        if (npc.defaultDialogues == null || npc.defaultDialogues.Length == 0)
+            return null;
+
+        DialogueEntry best = null;
+        int bestPriority = -1;
+        var candidates = new List<DialogueEntry>();
+
+        foreach (var d in npc.defaultDialogues)
+        {
+            if (!CheckCondition(d.conditions, rel)) continue;
+            if (d.priority > bestPriority)
+            {
+                bestPriority = d.priority;
+                candidates.Clear();
+                candidates.Add(d);
+            }
+            else if (d.priority == bestPriority)
+            {
+                candidates.Add(d);
+            }
+        }
+
+        if (candidates.Count > 0)
+            best = candidates[Random.Range(0, candidates.Count)];
+
+        return best;
+    }
+
+    bool CheckCondition(DialogueCondition cond, NPCRelationship rel)
+    {
+        if (cond == null) return true;
+        if (rel == null) return cond.minAffinity <= 0 && cond.minTrust <= 0 && cond.minFear <= 0;
+
+        if (rel.affinity < cond.minAffinity) return false;
+        if (rel.trust < cond.minTrust) return false;
+        if (rel.fear < cond.minFear) return false;
+
+        if (!string.IsNullOrEmpty(cond.requiredQuest))
+        {
+            if (QuestManager.Instance == null || !QuestManager.Instance.CompletedQuestIds.Contains(cond.requiredQuest))
+                return false;
+        }
+
+        if (!string.IsNullOrEmpty(cond.requiredFlag))
+        {
+            if (rel.flags == null || !rel.flags.ContainsKey(cond.requiredFlag) || !rel.flags[cond.requiredFlag])
+                return false;
+        }
+
+        return true;
+    }
+
+    void ShowEventDialogue(EventDialogue evt, NPCRelationship rel)
+    {
+        ShowLines(currentNPC.displayName, evt.npcLines, rel, () =>
+        {
+            if (evt.choices != null && evt.choices.Length > 0)
+            {
+                ShowChoices(evt.choices, (choiceIdx) =>
+                {
+                    var choice = evt.choices[choiceIdx];
+                    ApplyChoiceEffects(choice, rel);
+
+                    if (evt.oneShot && rel != null)
+                        rel.completedEvents.Add(evt.id);
+
+                    ShowLines(currentNPC.displayName, choice.resultLines, rel);
+                });
+            }
+        });
+    }
+
+    void ApplyChoiceEffects(DialogueChoice choice, NPCRelationship rel)
+    {
+        if (NPCRelationshipManager.Instance == null || currentNPC == null) return;
+
+        if (choice.affinityChange != 0)
+            NPCRelationshipManager.Instance.ModifyAffinity(currentNPC.npcId, choice.affinityChange);
+        if (choice.trustChange != 0)
+            NPCRelationshipManager.Instance.ModifyTrust(currentNPC.npcId, choice.trustChange);
+        if (choice.fearChange != 0)
+            NPCRelationshipManager.Instance.ModifyFear(currentNPC.npcId, choice.fearChange);
+
+        if (!string.IsNullOrEmpty(choice.setFlag) && rel != null)
+            rel.flags[choice.setFlag] = true;
+
+        if (!string.IsNullOrEmpty(choice.triggerQuest) && QuestManager.Instance != null)
+        {
+            if (currentNPC.availableQuests != null)
+            {
+                foreach (var q in currentNPC.availableQuests)
+                {
+                    if (q.questId == choice.triggerQuest)
+                    {
+                        QuestManager.Instance.AcceptQuest(q);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    void ShowQuestOffer(QuestData quest)
+    {
+        var rel = NPCRelationshipManager.Instance?.GetRelationship(currentNPC.npcId);
+        string[] offerLines = new[]
+        {
+            $"의뢰가 있어.",
+            $"<color=#FFD700>{quest.title}</color>",
+            quest.description
+        };
+
+        ShowLines(currentNPC.displayName, offerLines, rel, () =>
+        {
+            var choices = new DialogueChoice[]
+            {
+                new DialogueChoice { text = "수락한다", resultLines = new[] { "좋아, 기다리고 있지." } },
+                new DialogueChoice { text = "거절한다", resultLines = new[] { "...그래, 어쩔 수 없지." } },
+            };
+
+            ShowChoices(choices, (idx) =>
+            {
+                if (idx == 0 && QuestManager.Instance != null)
+                    QuestManager.Instance.AcceptQuest(quest);
+
+                ShowLines(currentNPC.displayName, choices[idx].resultLines, rel);
+            });
+        });
+    }
+
+    void ShowQuestReport(QuestInstance quest)
+    {
+        var rel = NPCRelationshipManager.Instance?.GetRelationship(currentNPC.npcId);
+        string[] reportLines = new[]
+        {
+            $"<color=#FFD700>{quest.data.title}</color> — 완료했구나.",
+            "수고했어. 여기 보상이야."
+        };
+
+        ShowLines(currentNPC.displayName, reportLines, rel, () =>
+        {
+            QuestManager.Instance.CompleteQuest(quest.data.questId);
+
+            string rewardText = "보상 수령 완료.";
+            foreach (var r in quest.data.rewards)
+            {
+                switch (r.type)
+                {
+                    case QuestRewardType.Item:
+                        var item = ItemDatabase.Get(r.itemId);
+                        rewardText += $"\n  ✦ {(item != null ? item.displayName : r.itemId)} x{r.amount}";
+                        break;
+                    case QuestRewardType.Currency:
+                        rewardText += $"\n  ✦ {r.amount} 루디";
+                        break;
+                    case QuestRewardType.Affinity:
+                        rewardText += $"\n  ✦ 호감도 +{r.amount}";
+                        break;
+                    case QuestRewardType.Trust:
+                        rewardText += $"\n  ✦ 신뢰도 +{r.amount}";
+                        break;
+                }
+            }
+            ShowLines(currentNPC.displayName, new[] { rewardText }, rel);
+        });
+    }
+
+    // ════════════════════════════════════════
+    //  Lines & Choices
+    // ════════════════════════════════════════
+
+    void ShowLines(string npcName, string[] lines, NPCRelationship rel, System.Action onComplete = null)
+    {
+        isShowing = true;
+        panelRoot.SetActive(true);
+        choicePanel.SetActive(false);
+
+        nameText.text = npcName;
+
+        if (rel != null && NPCRelationshipManager.Instance != null)
+        {
+            string label = NPCRelationshipManager.Instance.GetAffinityLabel(rel.affinity);
+            relationLabel.text = $"[{label}]";
+            relationLabel.gameObject.SetActive(true);
+        }
+        else
+        {
+            relationLabel.gameObject.SetActive(false);
+        }
+
+        currentLines = lines;
+        lineIndex = 0;
+        waitingForChoice = false;
+        choiceCallback = null;
+
+        ShowCurrentLine(onComplete);
+    }
+
+    void ShowCurrentLine(System.Action onComplete)
+    {
+        if (lineIndex >= currentLines.Length)
+        {
+            if (onComplete != null)
+                onComplete();
+            else
+                Hide();
+            return;
+        }
+
+        fullLineText = currentLines[lineIndex];
+        continueHint.gameObject.SetActive(false);
+
+        if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+        typingCoroutine = StartCoroutine(TypeText(fullLineText, onComplete));
+    }
+
+    IEnumerator TypeText(string text, System.Action onComplete)
+    {
+        isTyping = true;
+        dialogueText.supportRichText = true;
+        dialogueText.text = "";
+
+        bool inTag = false;
+        string visibleText = "";
+
+        for (int i = 0; i < text.Length; i++)
+        {
+            char c = text[i];
+
+            if (c == '<') inTag = true;
+            if (inTag)
+            {
+                visibleText += c;
+                if (c == '>') inTag = false;
+            }
+            else
+            {
+                visibleText += c;
+            }
+
+            dialogueText.text = visibleText;
+
+            if (!inTag)
+                yield return new WaitForSecondsRealtime(0.03f);
+        }
+
+        isTyping = false;
+        continueHint.gameObject.SetActive(true);
+
+        // 클릭/키 대기
+        yield return WaitForInput();
+        lineIndex++;
+        ShowCurrentLine(onComplete);
+    }
+
+    IEnumerator WaitForInput()
+    {
+        yield return null;
+        while (true)
+        {
+            if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return) ||
+                Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+                yield break;
+            yield return null;
+        }
+    }
+
+    void ShowChoices(DialogueChoice[] choices, System.Action<int> callback)
+    {
+        waitingForChoice = true;
+        currentChoices = choices;
+        choiceCallback = callback;
+        choicePanel.SetActive(true);
+        continueHint.gameObject.SetActive(false);
+
+        for (int i = 0; i < choiceButtons.Length; i++)
+        {
+            if (i < choices.Length)
+            {
+                choiceButtons[i].gameObject.SetActive(true);
+                choiceTexts[i].text = $"  {i + 1}. {choices[i].text}";
+                int idx = i;
+                choiceButtons[i].onClick.RemoveAllListeners();
+                choiceButtons[i].onClick.AddListener(() => OnChoiceSelected(idx));
+            }
+            else
+            {
+                choiceButtons[i].gameObject.SetActive(false);
+            }
+        }
+    }
+
+    void OnChoiceSelected(int index)
+    {
+        waitingForChoice = false;
+        choicePanel.SetActive(false);
+        choiceCallback?.Invoke(index);
+    }
+
+    void Update()
+    {
+        if (!isShowing) return;
+
+        // 타이핑 중 클릭/키 → 즉시 완성
+        if (isTyping && (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return) ||
+            Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)))
+        {
+            if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+            dialogueText.text = fullLineText;
+            isTyping = false;
+            continueHint.gameObject.SetActive(true);
+        }
+
+        // 선택지 키보드 선택
+        if (waitingForChoice && currentChoices != null)
+        {
+            for (int i = 0; i < currentChoices.Length; i++)
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                {
+                    OnChoiceSelected(i);
+                    break;
+                }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape) && !waitingForChoice)
+            Hide();
+    }
+
+    public void Hide()
+    {
+        isShowing = false;
+        if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+        panelRoot.SetActive(false);
+    }
+
+    // ════════════════════════════════════════
+    //  UI 구축
+    // ════════════════════════════════════════
+
+    void BuildUI()
+    {
+        var canvasGO = new GameObject("Dialogue_Canvas");
+        canvasGO.transform.SetParent(transform, false);
+
+        canvas = canvasGO.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 90;
+
+        var scaler = canvasGO.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.matchWidthOrHeight = 0.5f;
+
+        canvasGO.AddComponent<GraphicRaycaster>();
+
+        panelRoot = new GameObject("PanelRoot");
+        panelRoot.transform.SetParent(canvasGO.transform, false);
+        var rootRT = panelRoot.AddComponent<RectTransform>();
+        rootRT.anchorMin = Vector2.zero;
+        rootRT.anchorMax = Vector2.one;
+        rootRT.offsetMin = Vector2.zero;
+        rootRT.offsetMax = Vector2.zero;
+
+        // 하단 대화창 배경
+        var dialogueBG = new GameObject("DialogueBG");
+        dialogueBG.transform.SetParent(panelRoot.transform, false);
+        var bgRT = dialogueBG.AddComponent<RectTransform>();
+        bgRT.anchorMin = new Vector2(0, 0);
+        bgRT.anchorMax = new Vector2(1, 0);
+        bgRT.pivot = new Vector2(0.5f, 0);
+        bgRT.offsetMin = new Vector2(60, 20);
+        bgRT.offsetMax = new Vector2(-60, 260);
+        var bgImg = dialogueBG.AddComponent<Image>();
+        bgImg.color = new Color(0.05f, 0.05f, 0.1f, 0.92f);
+
+        // NPC 이름
+        nameText = MakeText(dialogueBG.transform, "NPCName", "", 20, TextAnchor.MiddleLeft);
+        var nameRT = nameText.GetComponent<RectTransform>();
+        nameRT.anchorMin = new Vector2(0, 1);
+        nameRT.anchorMax = new Vector2(0.5f, 1);
+        nameRT.pivot = new Vector2(0, 1);
+        nameRT.offsetMin = new Vector2(20, -40);
+        nameRT.offsetMax = new Vector2(300, -8);
+        nameText.color = new Color(1f, 0.85f, 0.3f);
+        nameText.fontStyle = FontStyle.Bold;
+
+        // 관계 라벨
+        relationLabel = MakeText(dialogueBG.transform, "Relation", "", 16, TextAnchor.MiddleLeft);
+        var relRT = relationLabel.GetComponent<RectTransform>();
+        relRT.anchorMin = new Vector2(0, 1);
+        relRT.anchorMax = new Vector2(1, 1);
+        relRT.pivot = new Vector2(0, 1);
+        relRT.offsetMin = new Vector2(220, -40);
+        relRT.offsetMax = new Vector2(400, -12);
+        relationLabel.color = new Color(0.6f, 0.8f, 0.6f);
+
+        // 대사 텍스트
+        dialogueText = MakeText(dialogueBG.transform, "Dialogue", "", 18, TextAnchor.UpperLeft);
+        var dlgRT = dialogueText.GetComponent<RectTransform>();
+        dlgRT.anchorMin = new Vector2(0, 0);
+        dlgRT.anchorMax = new Vector2(1, 1);
+        dlgRT.offsetMin = new Vector2(24, 40);
+        dlgRT.offsetMax = new Vector2(-24, -48);
+        dialogueText.color = new Color(0.92f, 0.92f, 0.95f);
+
+        // 계속 힌트
+        continueHint = MakeText(dialogueBG.transform, "ContinueHint", "▶ 계속", 14, TextAnchor.MiddleRight);
+        var hintRT = continueHint.GetComponent<RectTransform>();
+        hintRT.anchorMin = new Vector2(1, 0);
+        hintRT.anchorMax = new Vector2(1, 0);
+        hintRT.pivot = new Vector2(1, 0);
+        hintRT.offsetMin = new Vector2(-160, 8);
+        hintRT.offsetMax = new Vector2(-16, 32);
+        continueHint.color = new Color(0.7f, 0.7f, 0.7f);
+
+        // 선택지 패널
+        choicePanel = new GameObject("ChoicePanel");
+        choicePanel.transform.SetParent(panelRoot.transform, false);
+        var cpRT = choicePanel.AddComponent<RectTransform>();
+        cpRT.anchorMin = new Vector2(0, 0);
+        cpRT.anchorMax = new Vector2(1, 0);
+        cpRT.pivot = new Vector2(0.5f, 0);
+        cpRT.offsetMin = new Vector2(60, 270);
+        cpRT.offsetMax = new Vector2(-60, 430);
+        var cpBg = choicePanel.AddComponent<Image>();
+        cpBg.color = new Color(0.08f, 0.08f, 0.12f, 0.88f);
+
+        choiceButtons = new Button[3];
+        choiceTexts = new Text[3];
+        for (int i = 0; i < 3; i++)
+        {
+            var btnGO = new GameObject($"Choice{i}");
+            btnGO.transform.SetParent(choicePanel.transform, false);
+            var btnRT = btnGO.AddComponent<RectTransform>();
+            btnRT.anchorMin = new Vector2(0, 1);
+            btnRT.anchorMax = new Vector2(1, 1);
+            btnRT.pivot = new Vector2(0.5f, 1);
+            btnRT.offsetMin = new Vector2(12, -(i + 1) * 48);
+            btnRT.offsetMax = new Vector2(-12, -i * 48 - 8);
+
+            var btnImg = btnGO.AddComponent<Image>();
+            btnImg.color = new Color(0.15f, 0.15f, 0.2f, 0.7f);
+
+            choiceButtons[i] = btnGO.AddComponent<Button>();
+            var colors = choiceButtons[i].colors;
+            colors.highlightedColor = new Color(0.3f, 0.3f, 0.4f);
+            colors.pressedColor = new Color(0.2f, 0.2f, 0.3f);
+            choiceButtons[i].colors = colors;
+
+            choiceTexts[i] = MakeText(btnGO.transform, "Text", "", 16, TextAnchor.MiddleLeft);
+            var txtRT = choiceTexts[i].GetComponent<RectTransform>();
+            txtRT.anchorMin = Vector2.zero;
+            txtRT.anchorMax = Vector2.one;
+            txtRT.offsetMin = new Vector2(8, 0);
+            txtRT.offsetMax = new Vector2(-8, 0);
+            choiceTexts[i].color = new Color(0.9f, 0.9f, 0.95f);
+        }
+
+        choicePanel.SetActive(false);
+        panelRoot.SetActive(false);
+    }
+
+    Text MakeText(Transform parent, string name, string content, int fontSize, TextAnchor align)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.AddComponent<RectTransform>();
+
+        var txt = go.AddComponent<Text>();
+        txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.fontSize = fontSize;
+        txt.text = content;
+        txt.alignment = align;
+        txt.horizontalOverflow = HorizontalWrapMode.Wrap;
+        txt.verticalOverflow = VerticalWrapMode.Overflow;
+        txt.supportRichText = true;
+        return txt;
+    }
+}

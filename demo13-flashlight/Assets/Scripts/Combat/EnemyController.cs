@@ -829,6 +829,10 @@ public class EnemyController : MonoBehaviour
         if (hpBarBg != null) hpBarBg.SetActive(false);
         if (hpBarFill != null) hpBarFill.SetActive(false);
 
+        // 퀘스트 목표 갱신
+        if (QuestManager.Instance != null && enemyData != null)
+            QuestManager.Instance.UpdateObjective(ObjectiveType.KillEnemy, enemyData.name, 1);
+
         Destroy(gameObject, 3f);
     }
 

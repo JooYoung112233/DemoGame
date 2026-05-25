@@ -110,6 +110,7 @@ GameObject:
   - component: {fileID: 4067913335408413285}
   - component: {fileID: 544281348422148459}
   - component: {fileID: 6326109580961781787}
+  - component: {fileID: 4885699473058726603}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -350,6 +351,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::MedicalHUD
   toggleKey: 9
+--- !u!114 &4885699473058726603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4109182075124165649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46e94c7c38d4661428d4657758eca852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::PlayerInventory
+  bagWidth: 5
+  bagHeight: 8
+  maxWeight: 30
 --- !u!1 &7245482579714919919
 GameObject:
   m_ObjectHideFlags: 0

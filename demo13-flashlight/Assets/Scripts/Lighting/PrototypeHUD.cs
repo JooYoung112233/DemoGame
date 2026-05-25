@@ -21,8 +21,8 @@ public class PrototypeHUD : MonoBehaviour
             playerCtrl = playerGO.GetComponent<PlayerController>();
             if (playerHealth == null) playerHealth = playerGO.GetComponent<Health>();
         }
-        if (dayNight == null) dayNight = FindObjectOfType<DayNightCycle>();
-        if (flashlight == null) flashlight = FindObjectOfType<FlashlightController>();
+        if (dayNight == null) dayNight = FindFirstObjectByType<DayNightCycle>();
+        if (flashlight == null) flashlight = FindFirstObjectByType<FlashlightController>();
     }
 
     void OnGUI()

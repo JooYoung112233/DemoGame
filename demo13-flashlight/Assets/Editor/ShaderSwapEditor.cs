@@ -58,7 +58,7 @@ public class ShaderSwapEditor : EditorWindow
 
         var allRenderers = includeInactive
             ? Resources.FindObjectsOfTypeAll<Renderer>()
-            : Object.FindObjectsOfType<Renderer>();
+            : Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None);
 
         var slotList = new List<(Renderer r, int idx, Material mat)>();
         var countedRenderers = new HashSet<Renderer>();

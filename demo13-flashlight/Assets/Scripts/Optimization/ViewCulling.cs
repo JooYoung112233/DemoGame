@@ -64,7 +64,7 @@ public class ViewCulling : MonoBehaviour
 
     void CollectRenderers()
     {
-        foreach (var r in FindObjectsOfType<Renderer>(true))
+        foreach (var r in FindObjectsByType<Renderer>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             if (IsPlayer(r.transform)) continue;
             if (IsChild(r.transform, "PrototypeHUD")) continue;
@@ -87,7 +87,7 @@ public class ViewCulling : MonoBehaviour
 
     void CollectLights()
     {
-        foreach (var l in FindObjectsOfType<Light>(true))
+        foreach (var l in FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             if (IsPlayer(l.transform)) continue;
             if (l.type == LightType.Directional) continue;
@@ -104,7 +104,7 @@ public class ViewCulling : MonoBehaviour
 
     void CollectAI()
     {
-        foreach (var ai in FindObjectsOfType<EnemyController>(true))
+        foreach (var ai in FindObjectsByType<EnemyController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             targets.Add(new CullTarget
             {
@@ -118,7 +118,7 @@ public class ViewCulling : MonoBehaviour
 
     void CollectParticles()
     {
-        foreach (var ps in FindObjectsOfType<ParticleSystem>(true))
+        foreach (var ps in FindObjectsByType<ParticleSystem>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             if (IsPlayer(ps.transform)) continue;
 

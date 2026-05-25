@@ -24,6 +24,13 @@ public class InteractableCreator : EditorWindow
     string itemId = "";
     int itemCount = 1;
 
+    // Container
+    bool isStorage = false; // true=안전가옥 창고, false=루팅 상자
+    int containerWidth = 4;
+    int containerHeight = 5;
+    string containerName = "상자";
+    FurnitureData furnitureDataRef; // 창고용 FurnitureData SO
+
     // Visual
     Color spriteColor = Color.white;
     Sprite objSprite;
@@ -35,7 +42,11 @@ public class InteractableCreator : EditorWindow
 
     // 프리셋
     int presetIndex = 0;
-    string[] presetNames = { "커스텀", "탈출구", "상자", "NPC", "쪽지", "바닥 아이템", "침대", "작업대", "지도판" };
+    string[] presetNames = {
+        "커스텀", "탈출구", "루팅 상자", "NPC", "쪽지", "바닥 아이템", "침대", "작업대", "지도판",
+        "창고 (범용)", "의료대", "조리대",
+        "── 가구 ──", "냉장고", "서랍장", "무기거치대", "책장", "재료함", "금고"
+    };
 
     [MenuItem("Tools/Night City/Interactable Creator")]
     static void Open()
@@ -88,6 +99,34 @@ public class InteractableCreator : EditorWindow
                 itemId = EditorGUILayout.TextField("아이템 ID", itemId);
                 itemCount = EditorGUILayout.IntField("수량", itemCount);
                 break;
+
+            case InteractableObject.InteractType.Container:
+                EditorGUILayout.LabelField("상자/창고 설정", EditorStyles.boldLabel);
+                isStorage = EditorGUILayout.Toggle("안전가옥 가구 창고", isStorage);
+                if (isStorage)
+                {
+                    furnitureDataRef = (FurnitureData)EditorGUILayout.ObjectField(
+                        "가구 데이터", furnitureDataRef, typeof(FurnitureData), false);
+                    if (furnitureDataRef != null)
+                    {
+                        EditorGUILayout.HelpBox(
+                            $"[{furnitureDataRef.displayName}] {furnitureDataRef.gridWidth}x{furnitureDataRef.gridHeight}\n" +
+                            $"허용: {furnitureDataRef.AllowedCategorySummary}\n" +
+                            $"가격: {furnitureDataRef.buyPriceRudy} 루디",
+                            MessageType.Info);
+                    }
+                    else
+                    {
+                        EditorGUILayout.HelpBox("FurnitureData SO를 할당하세요.\n비어있으면 기본 범용 상자(4x4)로 생성됩니다.", MessageType.Warning);
+                    }
+                }
+                else
+                {
+                    containerName = EditorGUILayout.TextField("상자 이름", containerName);
+                    containerWidth = EditorGUILayout.IntField("격자 가로", containerWidth);
+                    containerHeight = EditorGUILayout.IntField("격자 세로", containerHeight);
+                }
+                break;
         }
 
         EditorGUILayout.Space(5);
@@ -123,12 +162,16 @@ public class InteractableCreator : EditorWindow
                 interactRange = 2f;
                 oneShot = false;
                 break;
-            case 2: // 상자
-                objName = "Container";
+            case 2: // 루팅 상자
+                objName = "LootBox";
                 type = InteractableObject.InteractType.Container;
                 promptText = "뒤지기";
                 interactRange = 1.5f;
                 oneShot = false;
+                isStorage = false;
+                containerName = "상자";
+                containerWidth = 4;
+                containerHeight = 5;
                 break;
             case 3: // NPC
                 objName = "NPC";
@@ -173,7 +216,68 @@ public class InteractableCreator : EditorWindow
                 interactRange = 2f;
                 oneShot = false;
                 break;
+            case 9: // 창고
+                objName = "Storage";
+                type = InteractableObject.InteractType.Container;
+                promptText = "창고 열기";
+                interactRange = 2f;
+                oneShot = false;
+                isStorage = true;
+                break;
+            case 10: // 의료대
+                objName = "MedicalBench";
+                type = InteractableObject.InteractType.MedicalBench;
+                promptText = "치료품 제작";
+                interactRange = 1.6f;
+                oneShot = false;
+                break;
+            case 11: // 조리대
+                objName = "CookingBench";
+                type = InteractableObject.InteractType.CookingBench;
+                promptText = "요리하기";
+                interactRange = 1.6f;
+                oneShot = false;
+                break;
+            case 12: // ── 가구 ── (구분선, 무시)
+                presetIndex = 0;
+                break;
+            case 13: // 냉장고
+                ApplyFurniturePreset("Fridge", "냉장고 열기", "fridge");
+                break;
+            case 14: // 서랍장
+                ApplyFurniturePreset("Drawer", "서랍 열기", "drawer");
+                break;
+            case 15: // 무기거치대
+                ApplyFurniturePreset("WeaponRack", "무기 꺼내기", "weapon_rack");
+                break;
+            case 16: // 책장
+                ApplyFurniturePreset("Bookshelf", "책장 열기", "bookshelf");
+                break;
+            case 17: // 재료함
+                ApplyFurniturePreset("MaterialBin", "재료함 열기", "material_bin");
+                break;
+            case 18: // 금고
+                ApplyFurniturePreset("Safe", "금고 열기", "safe");
+                break;
         }
+    }
+
+    void ApplyFurniturePreset(string name, string prompt, string furnitureAssetName)
+    {
+        objName = name;
+        type = InteractableObject.InteractType.Container;
+        promptText = prompt;
+        interactRange = 1.5f;
+        oneShot = false;
+        isStorage = true;
+
+        // Resources/Data/Furniture/ 에서 SO 자동 로드
+        string path = $"Assets/Resources/Data/Furniture/{furnitureAssetName}.asset";
+        var loaded = AssetDatabase.LoadAssetAtPath<FurnitureData>(path);
+        if (loaded != null)
+            furnitureDataRef = loaded;
+        else
+            Debug.LogWarning($"FurnitureData 에셋 없음: {path}");
     }
 
     void CreateInteractable()
@@ -203,6 +307,22 @@ public class InteractableCreator : EditorWindow
         {
             SetField(interactable, "itemId", itemId);
             SetField(interactable, "itemCount", itemCount);
+        }
+        else if (type == InteractableObject.InteractType.Container)
+        {
+            if (isStorage)
+            {
+                var storage = root.AddComponent<SafehouseStorage>();
+                if (furnitureDataRef != null)
+                    SetField(storage, "furnitureData", furnitureDataRef);
+            }
+            else
+            {
+                var loot = root.AddComponent<LootContainer>();
+                SetField(loot, "gridWidth", containerWidth);
+                SetField(loot, "gridHeight", containerHeight);
+                SetField(loot, "containerName", containerName);
+            }
         }
 
         // IsometricDepthSorter

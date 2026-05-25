@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 /// <summary>
 /// 귀환 정산 UI (Canvas/uGUI).
 /// UIManager 자식으로 배치.
 /// 필드→안전가옥 복귀 시 자동 표시.
-/// TODO: 실제 데이터 연동.
+/// PlayerInventory + RaidManager 실데이터 연동.
 /// </summary>
 public class RaidResultUI : MonoBehaviour
 {
@@ -19,11 +20,11 @@ public class RaidResultUI : MonoBehaviour
     bool isShowing;
     float showTimer;
 
-    // 더미 데이터
-    string[] dummyItems = { "철 파이프 x2", "붕대 x3", "통조림 x1", "고철 x5", "진통제 x1" };
-    int dummyExp = 120;
-    int dummyMoney = 45;
-    float dummySurvivalTime = 487f;
+    // 실제 데이터 (Show 시 캡처)
+    List<string> itemLines = new List<string>();
+    float survivalTime;
+    int totalItemCount;
+    float totalWeight;
 
     // uGUI
     Canvas canvas;
@@ -50,17 +51,132 @@ public class RaidResultUI : MonoBehaviour
     {
         if (scene.name == safehouseScene && !string.IsNullOrEmpty(SceneTransitionManager.PendingSpawnPointId))
         {
-            Show();
+            CaptureRaidData();
             RefillBattery();
+
+            // PostRaidEvent 먼저 체크 → 이벤트 끝나면 정산 표시
+            if (PostRaidEventManager.Instance != null && PostRaidEventUI.Instance != null)
+            {
+                var evt = PostRaidEventManager.Instance.TryGetEvent();
+                if (evt != null)
+                {
+                    PostRaidEventUI.Instance.ShowEvent(evt, () => Show());
+                    return;
+                }
+            }
+
+            Show();
         }
+    }
+
+    /// <summary>정산 데이터 캡처 (씬 전환 직후, UI 표시 전)</summary>
+    void CaptureRaidData()
+    {
+        itemLines.Clear();
+        totalItemCount = 0;
+        totalWeight = 0f;
+        survivalTime = 0f;
+
+        // RaidManager에서 생존 시간 가져오기
+        if (RaidManager.Instance != null)
+        {
+            survivalTime = RaidManager.Instance.ElapsedTime;
+
+            // 루트 추적 아이템 사용
+            var looted = RaidManager.Instance.LootedItems;
+            if (looted != null && looted.Count > 0)
+            {
+                for (int i = 0; i < looted.Count; i++)
+                {
+                    var item = looted[i];
+                    if (item == null || item.data == null) continue;
+
+                    string rarityColor = ColorToHex(item.data.RarityColor);
+                    string line = item.stackCount > 1
+                        ? $"  <color={rarityColor}>{item.data.displayName}</color> x{item.stackCount}"
+                        : $"  <color={rarityColor}>{item.data.displayName}</color>";
+                    itemLines.Add(line);
+                    totalItemCount += item.stackCount;
+                    totalWeight += item.TotalWeight;
+                }
+            }
+        }
+
+        // RaidManager 없으면 현재 인벤토리에서 가져오기 (폴백)
+        if (itemLines.Count == 0)
+        {
+            var player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                var inventory = player.GetComponent<PlayerInventory>();
+                if (inventory != null && inventory.Grid != null)
+                {
+                    var allItems = inventory.Grid.GetAll();
+                    for (int i = 0; i < allItems.Count; i++)
+                    {
+                        var item = allItems[i].item;
+                        if (item == null || item.data == null) continue;
+
+                        string line = item.stackCount > 1
+                            ? $"  {item.data.displayName} x{item.stackCount}"
+                            : $"  {item.data.displayName}";
+                        itemLines.Add(line);
+                        totalItemCount += item.stackCount;
+                        totalWeight += item.TotalWeight;
+                    }
+                }
+            }
+        }
+
+        if (itemLines.Count == 0)
+            itemLines.Add("  (획득 아이템 없음)");
+    }
+
+    string ColorToHex(Color c)
+    {
+        return $"#{ColorUtility.ToHtmlStringRGB(c)}";
     }
 
     public void Show()
     {
         isShowing = true;
         showTimer = 0;
+        UpdateTexts();
         if (panelRoot != null)
             panelRoot.SetActive(true);
+    }
+
+    /// <summary>캡처된 데이터로 UI 텍스트 갱신</summary>
+    void UpdateTexts()
+    {
+        if (timeText != null)
+        {
+            int min = (int)(survivalTime / 60);
+            int sec = (int)(survivalTime % 60);
+            timeText.text = $"생존 시간: {min}분 {sec}초";
+        }
+
+        if (itemsText != null)
+        {
+            string header = $"[ 획득 아이템 — {totalItemCount}개, {totalWeight:F1}kg ]\n";
+            itemsText.text = header + string.Join("\n", itemLines);
+            itemsText.supportRichText = true;
+        }
+
+        if (rewardsText != null)
+        {
+            // 보상 계산: 아이템 가치 합산
+            int totalValue = 0;
+            if (RaidManager.Instance != null)
+            {
+                foreach (var item in RaidManager.Instance.LootedItems)
+                {
+                    if (item != null && item.data != null)
+                        totalValue += item.data.sellPrice * item.stackCount;
+                }
+            }
+            rewardsText.text = $"아이템 가치: {totalValue} 루디";
+        }
     }
 
     /// <summary>안전가옥 귀환 시 배터리 자동 충전</summary>
@@ -144,29 +260,23 @@ public class RaidResultUI : MonoBehaviour
             new Vector2(0, -20), new Vector2(400, 40), 24, new Color(1f, 0.85f, 0.3f), TextAnchor.MiddleCenter);
         titleText.fontStyle = FontStyle.Bold;
 
-        // 생존 시간
-        int min = (int)(dummySurvivalTime / 60);
-        int sec = (int)(dummySurvivalTime % 60);
-        timeText = MakeText(panel.transform, "Time", $"생존 시간: {min}분 {sec}초",
+        // 생존 시간 (Show에서 갱신)
+        timeText = MakeText(panel.transform, "Time", "생존 시간: --",
             new Vector2(0, -70), new Vector2(400, 25), 16, new Color(0.7f, 1f, 0.8f), TextAnchor.MiddleCenter);
         timeText.fontStyle = FontStyle.Bold;
 
         // 구분선
         MakeLine(panel.transform, -100);
 
-        // 획득 아이템
-        string itemStr = "[ 획득 아이템 ]\n";
-        for (int i = 0; i < dummyItems.Length; i++)
-            itemStr += $"  • {dummyItems[i]}\n";
-        itemsText = MakeText(panel.transform, "Items", itemStr,
+        // 획득 아이템 (Show에서 갱신)
+        itemsText = MakeText(panel.transform, "Items", "[ 획득 아이템 ]",
             new Vector2(20, -115), new Vector2(400, 140), 15, new Color(0.9f, 0.95f, 1f), TextAnchor.UpperLeft);
 
         // 구분선
         MakeLine(panel.transform, -260);
 
-        // 보상
-        rewardsText = MakeText(panel.transform, "Rewards",
-            $"경험치: +{dummyExp} EXP\n루디(화폐): +{dummyMoney}",
+        // 보상 (Show에서 갱신)
+        rewardsText = MakeText(panel.transform, "Rewards", "",
             new Vector2(0, -275), new Vector2(400, 55), 16, new Color(0.7f, 1f, 0.8f), TextAnchor.MiddleCenter);
         rewardsText.fontStyle = FontStyle.Bold;
 

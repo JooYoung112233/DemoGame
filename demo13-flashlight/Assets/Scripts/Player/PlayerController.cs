@@ -236,7 +236,7 @@ public class PlayerController : MonoBehaviour
         if (Instance != null) return;
 
         // 씬에 이미 Player가 있으면 스킵 (Awake에서 Instance 됨)
-        if (FindObjectOfType<PlayerController>(true) != null) return;
+        if (FindFirstObjectByType<PlayerController>(FindObjectsInactive.Include) != null) return;
 
         // 없으면 Resources/Player 프리팹에서 생성
         var prefab = Resources.Load<GameObject>("Player");
@@ -246,7 +246,7 @@ public class PlayerController : MonoBehaviour
             go.name = "Player";
 
             // SpawnPoint 있으면 거기에, 없으면 원점
-            var sp = FindObjectOfType<SpawnPoint>();
+            var sp = FindFirstObjectByType<SpawnPoint>();
             if (sp != null)
                 go.transform.position = sp.transform.position;
         }
@@ -275,6 +275,10 @@ public class PlayerController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         feedback = GetComponent<CombatFeedback>();
         medical = GetComponent<PlayerMedicalSystem>();
+
+        // PlayerInventory 자동 보장 (없으면 추가)
+        if (GetComponent<PlayerInventory>() == null)
+            gameObject.AddComponent<PlayerInventory>();
         animController = GetComponentInChildren<SkeletonAnimController>();
         mainCam = Camera.main;
 
@@ -785,8 +789,7 @@ public class PlayerController : MonoBehaviour
     void HitEnemiesInRange(float range, float damage, float groggyAmount, float angle, bool isHeavy = false)
     {
         Vector3 forward = FacingDirection;
-        var enemies = FindObjectsOfType<EnemyController>();
-        bool hitAny = false;
+        var enemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
 
         foreach (var enemy in enemies)
         {
@@ -805,7 +808,6 @@ public class PlayerController : MonoBehaviour
 
             // 데미지 적용
             hp.TakeDamage(damage);
-            hitAny = true;
 
             // 데미지 팝업 + 그로기 + 캔슬 — EnemyController 통합 참조
             var ec = enemy.GetComponent<EnemyController>();

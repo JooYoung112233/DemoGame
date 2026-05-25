@@ -15,7 +15,7 @@
 | **1** | 캐릭터 이동 + 상호작용 | ✅ 완료 |
 | **2** | 안전가옥 컨테이너 맵 (시설 오브젝트 배치) | 🔄 진행 중 |
 | **3** | 기본 인벤토리 (아이템 줍기/보관/꺼내기) | ⬜ 대기 |
-| **4** | 폐상가 낮 맵 + 파밍 오브젝트 | ⬜ 대기 |
+| **4** | 폐상가 낮 맵 + 파밍 오브젝트 | 🔄 그레이박스 프리팹·빌더 추가 |
 | **5** | 15분 타이머 + 탈출구 | ⬜ 대기 |
 | **5.5** | 부위별 의료/치료 시스템 | ⬜ 대기 |
 | **6** | 근접 전투 기본 (약공/강공/구르기/스태미너) | ⬜ 대기 |
@@ -115,3 +115,8 @@
 | 2026-05-24 | 씬 전환 시스템 구현. SceneTransitionManager(페이드+스폰), SpawnPoint, ExitPoint 연결. |
 | 2026-05-24 | Player DontDestroyOnLoad 싱글톤 구현. 씬 전환 시 카메라/NavMesh 재연결. InteractionSystem도 씬 로드 대응. |
 | 2026-05-25 | 귀환 정산 더미 UI (RaidResultUI) 구현. 부위별 의료 시스템 기획 확정 (5부위/3부상/키트+전용). docs/medical.md 생성. |
+| 2026-05-25 | 배터리 HUD, 안전가옥 충전, EventSystem 자동생성, UI 열림 시 입력차단, 안전가옥 timeScale=0 구현. |
+| 2026-05-25 | 월드맵 7지구 이름·낮/밤 특성을 지도판에 반영 (`WorldRegionCatalog`, `MapSelectUI`). 1차 출전: 폐상가 교역만. |
+| 2026-05-25 | 지역별 독립 시간 시스템 (RegionTimeManager) 구현. 맵보드 UI에 낮/밤 실시간 표시. |
+| 2026-05-25 | 지역별 루트 테이블·전용 아이템 (`RegionLootCatalog`, `docs/region-loot.md`). |
+| 2026-05-25 | Stage 3 인벤토리 기반 구축: ItemData SO, ItemDatabase, ItemInstance, InventoryGrid, PlayerInventory, WorldItem, SpawnTable, ItemSpawnPoint, LootContainer. docs/inventory.md 생성. |

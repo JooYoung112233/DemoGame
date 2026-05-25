@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
+  m_Name: Screw
+  m_EditorClassIdentifier: Game.Scripts::ItemData
+  itemId: screw
+  displayName: "\uB098\uC0AC"
+  description: "\uACF5\uAD6C\xB7\uC218\uB9AC \uBD80\uD488."
+  icon: {fileID: 0}
+  gridWidth: 1
+  gridHeight: 1
+  category: 3
+  rarity: 0
+  maxStack: 20
+  weight: 0.02
+  sellPrice: 4
+  buyPrice: 10
+  isUsable: 0
+  useEffect: 0
+  effectValue: 0
+  hasDurability: 0
+  maxDurability: 100
+  durabilityCostPerUse: 50
+  medicalData: {fileID: 0}
+  worldDropPrefab: {fileID: 0}

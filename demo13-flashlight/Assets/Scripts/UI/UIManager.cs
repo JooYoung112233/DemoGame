@@ -21,13 +21,24 @@ public class UIManager : MonoBehaviour
     [Tooltip("지역 선택 UI (지도판)")]
     [SerializeField] MapSelectUI mapSelectUI;
 
+    [Tooltip("통합 캐릭터 패널 (인벤토리/의료/정보 탭)")]
+    [SerializeField] CharacterPanelUI characterPanelUI;
+
+    [Tooltip("제작/수리 UI (작업대/의료대/조리대)")]
+    [SerializeField] CraftingUI craftingUI;
+
+    [Tooltip("NPC 대화 UI")]
+    [SerializeField] DialogueUI dialogueUI;
+
+    [Tooltip("레이드 후 이벤트 UI")]
+    [SerializeField] PostRaidEventUI postRaidEventUI;
+
+    [Tooltip("퀘스트 HUD")]
+    [SerializeField] QuestHUD questHUD;
+
     /// <summary>현재 안전가옥인지 (timeScale=0 상태)</summary>
     public bool IsSafehouse => isSafehouse;
     bool isSafehouse;
-
-    // 향후 추가될 UI들
-    // [SerializeField] InventoryUI inventoryUI;
-    // [SerializeField] MedicalUI medicalUI;
 
     /// <summary>
     /// 어떤 씬에서 Play 해도 자동 부트스트래핑.
@@ -40,7 +51,7 @@ public class UIManager : MonoBehaviour
         if (Instance != null) return;
 
         // 씬에 비활성 상태로라도 있는지 한번 더 확인
-        var existing = FindObjectOfType<UIManager>(true);
+        var existing = FindFirstObjectByType<UIManager>(FindObjectsInactive.Include);
         if (existing != null) return;
 
         // 없으면 자동 생성
@@ -83,12 +94,25 @@ public class UIManager : MonoBehaviour
         // 안전가옥 귀환 시 활성 지역 해제
         if (isSafehouse && RegionTimeManager.Instance != null)
             RegionTimeManager.Instance.ActiveRegionId = null;
+
+        // 캐릭터 패널 레퍼런스 리셋 (Player가 새로 로드되므로)
+        if (characterPanelUI != null)
+        {
+            characterPanelUI.ResetRefs();
+            characterPanelUI.Hide();
+        }
+
+        if (craftingUI != null)
+        {
+            craftingUI.ResetRefs();
+            craftingUI.Hide();
+        }
     }
 
     /// <summary>EventSystem이 씬에 없으면 자동 생성 (uGUI 클릭 필수)</summary>
     void EnsureEventSystem()
     {
-        if (FindObjectOfType<EventSystem>() == null)
+        if (FindFirstObjectByType<EventSystem>() == null)
         {
             var esGO = new GameObject("[EventSystem]");
             esGO.AddComponent<EventSystem>();
@@ -129,6 +153,115 @@ public class UIManager : MonoBehaviour
             map.transform.SetParent(transform);
             mapSelectUI = map.AddComponent<MapSelectUI>();
         }
+
+        // CharacterPanelUI
+        if (characterPanelUI == null)
+            characterPanelUI = GetComponentInChildren<CharacterPanelUI>(true);
+        if (characterPanelUI == null)
+        {
+            var charPanel = new GameObject("CharacterPanelUI");
+            charPanel.transform.SetParent(transform);
+            characterPanelUI = charPanel.AddComponent<CharacterPanelUI>();
+        }
+
+        // CraftingUI
+        if (craftingUI == null)
+            craftingUI = GetComponentInChildren<CraftingUI>(true);
+        if (craftingUI == null)
+        {
+            var craftGO = new GameObject("CraftingUI");
+            craftGO.transform.SetParent(transform);
+            craftingUI = craftGO.AddComponent<CraftingUI>();
+        }
+
+        // DialogueUI
+        if (dialogueUI == null)
+            dialogueUI = GetComponentInChildren<DialogueUI>(true);
+        if (dialogueUI == null)
+        {
+            var dlgGO = new GameObject("DialogueUI");
+            dlgGO.transform.SetParent(transform);
+            dialogueUI = dlgGO.AddComponent<DialogueUI>();
+        }
+
+        // PostRaidEventUI
+        if (postRaidEventUI == null)
+            postRaidEventUI = GetComponentInChildren<PostRaidEventUI>(true);
+        if (postRaidEventUI == null)
+        {
+            var preGO = new GameObject("PostRaidEventUI");
+            preGO.transform.SetParent(transform);
+            postRaidEventUI = preGO.AddComponent<PostRaidEventUI>();
+        }
+
+        // QuestHUD
+        if (questHUD == null)
+            questHUD = GetComponentInChildren<QuestHUD>(true);
+        if (questHUD == null)
+        {
+            var qhGO = new GameObject("QuestHUD");
+            qhGO.transform.SetParent(transform);
+            questHUD = qhGO.AddComponent<QuestHUD>();
+        }
+    }
+
+    void Update()
+    {
+        // ESC 키: 열린 UI 닫기 (우선순위: 캐릭터패널 > 맵선택 > 정산)
+        // 각 패널이 자체 Update()에서도 ESC 처리하지만,
+        // UIManager가 중앙에서 한 번 더 잡아주면 누락 없이 안전.
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (craftingUI != null && craftingUI.IsShowing)
+            {
+                // CraftingUI.Update()가 처리
+            }
+            else if (characterPanelUI != null && characterPanelUI.IsShowing)
+            {
+                // CharacterPanelUI.Update()가 처리 — 여기선 스킵
+            }
+            else if (mapSelectUI != null && mapSelectUI.IsShowing)
+            {
+                mapSelectUI.Hide();
+            }
+            // RaidResultUI는 showTimer > 1f 조건이 있으므로 자체 처리에 맡김
+        }
+
+        // Tab 키: 캐릭터 패널 토글 (제작 UI 열림 시 무시)
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            if (craftingUI != null && craftingUI.IsShowing)
+                return;
+
+            if (characterPanelUI != null)
+            {
+                if (characterPanelUI.IsShowing)
+                    characterPanelUI.Hide();
+                else
+                    ShowCharacterPanel();
+            }
+        }
+    }
+
+    /// <summary>캐릭터 패널 표시 (인벤토리/의료/정보 탭)</summary>
+    public void ShowCharacterPanel()
+    {
+        if (characterPanelUI != null)
+            characterPanelUI.Show();
+    }
+
+    /// <summary>캐릭터 패널 + 루팅 상자 표시</summary>
+    public void ShowCharacterPanelWithContainer(LootContainer container)
+    {
+        if (characterPanelUI != null)
+            characterPanelUI.ShowWithContainer(container);
+    }
+
+    /// <summary>캐릭터 패널 + 안전가옥 창고 표시</summary>
+    public void ShowCharacterPanelWithStorage(SafehouseStorage storage)
+    {
+        if (characterPanelUI != null)
+            characterPanelUI.ShowWithStorage(storage);
     }
 
     /// <summary>귀환 정산 UI 표시</summary>
@@ -145,6 +278,16 @@ public class UIManager : MonoBehaviour
             mapSelectUI.Show();
     }
 
+    /// <summary>제작 UI 표시 (작업대/의료대/조리대)</summary>
+    public void ShowCrafting(CraftingStation station)
+    {
+        if (characterPanelUI != null && characterPanelUI.IsShowing)
+            characterPanelUI.Hide();
+
+        if (craftingUI != null)
+            craftingUI.Show(station);
+    }
+
     /// <summary>모든 UI 닫기</summary>
     public void CloseAll()
     {
@@ -152,6 +295,12 @@ public class UIManager : MonoBehaviour
             raidResultUI.Hide();
         if (mapSelectUI != null)
             mapSelectUI.Hide();
+        if (characterPanelUI != null)
+            characterPanelUI.Hide();
+        if (craftingUI != null)
+            craftingUI.Hide();
+        if (dialogueUI != null)
+            dialogueUI.Hide();
     }
 
     /// <summary>현재 어떤 UI든 열려있는지</summary>
@@ -159,6 +308,10 @@ public class UIManager : MonoBehaviour
     {
         if (raidResultUI != null && raidResultUI.IsShowing) return true;
         if (mapSelectUI != null && mapSelectUI.IsShowing) return true;
+        if (characterPanelUI != null && characterPanelUI.IsShowing) return true;
+        if (craftingUI != null && craftingUI.IsShowing) return true;
+        if (dialogueUI != null && dialogueUI.IsShowing) return true;
+        if (postRaidEventUI != null && postRaidEventUI.IsShowing) return true;
         return false;
     }
 }

@@ -79,6 +79,7 @@ public class PlayerMedicalSystem : MonoBehaviour
 
     /// <summary>치료 중인지</summary>
     public bool IsHealing => isHealing;
+    public bool BlocksMovementWhileHealing => immobileDuringHeal && isHealing;
 
     /// <summary>치료 진행률 (0~1)</summary>
     public float HealProgress => isHealing ? Mathf.Clamp01(healTimer / healDuration) : 0f;

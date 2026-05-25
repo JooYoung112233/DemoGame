@@ -26,7 +26,6 @@ public class RegionTimeManager : MonoBehaviour
         {
             regionId = id;
             displayName = name;
-            // 시작 오프셋으로 지역마다 시간 다르게
             isNight = false;
             elapsed = startOffset % dayDur;
         }
@@ -44,7 +43,7 @@ public class RegionTimeManager : MonoBehaviour
     static void Bootstrap()
     {
         if (Instance != null) return;
-        if (FindObjectOfType<RegionTimeManager>(true) != null) return;
+        if (FindFirstObjectByType<RegionTimeManager>(FindObjectsInactive.Include) != null) return;
 
         var go = new GameObject("[RegionTimeManager]");
         go.AddComponent<RegionTimeManager>();
@@ -65,26 +64,14 @@ public class RegionTimeManager : MonoBehaviour
 
     void InitRegions()
     {
-        // 지역별 시작 시간 오프셋 (서로 다른 시간대)
-        regions = new RegionTime[]
-        {
-            new RegionTime("street",    "폐상가 거리", 0f,      dayDuration, nightDuration),
-            new RegionTime("apartment", "붕괴 아파트", 60f,     dayDuration, nightDuration),
-            new RegionTime("underground","지하 상가",  200f,    dayDuration, nightDuration),
-        };
+        var defs = WorldRegionCatalog.All;
+        regions = new RegionTime[defs.Length];
 
-        // 시작 오프셋 적용: 큰 오프셋이면 이미 밤일 수 있음
-        for (int i = 0; i < regions.Length; i++)
+        for (int i = 0; i < defs.Length; i++)
         {
-            float offset = 0f;
-            switch (i)
-            {
-                case 0: offset = 0f; break;
-                case 1: offset = 60f; break;
-                case 2: offset = 200f; break;
-            }
-            // 오프셋만큼 시간을 시뮬레이션
-            SimulateTime(regions[i], offset);
+            var d = defs[i];
+            regions[i] = new RegionTime(d.regionId, d.displayName, d.timeOffsetSeconds, dayDuration, nightDuration);
+            SimulateTime(regions[i], d.timeOffsetSeconds);
         }
     }
 
@@ -112,7 +99,6 @@ public class RegionTimeManager : MonoBehaviour
 
     void Update()
     {
-        // unscaledDeltaTime → timeScale=0(안전가옥)에서도 시간 흐름
         float dt = Time.unscaledDeltaTime;
 
         for (int i = 0; i < regions.Length; i++)
@@ -129,7 +115,6 @@ public class RegionTimeManager : MonoBehaviour
         }
     }
 
-    /// <summary>지역 ID로 시간 정보 가져오기</summary>
     public RegionTime GetRegion(string regionId)
     {
         if (regions == null) return null;
@@ -139,17 +124,14 @@ public class RegionTimeManager : MonoBehaviour
         return null;
     }
 
-    /// <summary>지역 인덱스로 시간 정보 가져오기</summary>
     public RegionTime GetRegionByIndex(int index)
     {
         if (regions == null || index < 0 || index >= regions.Length) return null;
         return regions[index];
     }
 
-    /// <summary>등록된 지역 수</summary>
     public int RegionCount => regions != null ? regions.Length : 0;
 
-    /// <summary>현재 페이즈의 남은 시간</summary>
     public float GetTimeRemaining(string regionId)
     {
         var rt = GetRegion(regionId);
@@ -158,7 +140,6 @@ public class RegionTimeManager : MonoBehaviour
         return maxTime - rt.elapsed;
     }
 
-    /// <summary>현재 페이즈 진행률 (0~1)</summary>
     public float GetPhaseProgress(string regionId)
     {
         var rt = GetRegion(regionId);

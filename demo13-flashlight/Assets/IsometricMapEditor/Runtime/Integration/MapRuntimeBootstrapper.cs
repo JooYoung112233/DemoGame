@@ -5,7 +5,6 @@ namespace IsometricMapEditor
     public class MapRuntimeBootstrapper : MonoBehaviour
     {
         [SerializeField] MapData mapData;
-        [SerializeField] MapLoadMode loadMode = MapLoadMode.ScriptableObject;
 
         MapLoader mapLoader;
         BuildingRenderer buildingRenderer;
@@ -19,8 +18,6 @@ namespace IsometricMapEditor
         InteriorTransitionManager interiorTransition;
         MapDebugOverlay debugOverlay;
         IsometricCameraController cameraController;
-
-        public enum MapLoadMode { ScriptableObject, JSON, Addressable }
 
         public void SetMapData(MapData data)
         {

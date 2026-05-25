@@ -66,7 +66,7 @@ public class CrosshairUI : MonoBehaviour
     void UpdateTarget()
     {
         // 가장 가까운 적 찾기
-        var enemies = FindObjectsOfType<EnemyController>();
+        var enemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         EnemyController closest = null;
         float closestDist = selectRadius;
 

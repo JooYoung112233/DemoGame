@@ -48,7 +48,7 @@ public class DebugTestUI : MonoBehaviour
     static void Bootstrap()
     {
         if (instance != null) return;
-        if (FindObjectOfType<DebugTestUI>(true) != null) return;
+        if (FindFirstObjectByType<DebugTestUI>(FindObjectsInactive.Include) != null) return;
 
         var go = new GameObject("[DebugTestUI]");
         DontDestroyOnLoad(go);
@@ -377,16 +377,150 @@ public class DebugTestUI : MonoBehaviour
 
     #region 탭: 아이템
 
+    PlayerInventory inventory;
+
     void DrawItemTab()
     {
-        GUILayout.Label("── 아이템 (미구현) ──", headerStyle);
+        if (inventory == null && player != null)
+            inventory = player.GetComponent<PlayerInventory>();
+
+        if (inventory == null)
+        {
+            GUILayout.Label("PlayerInventory를 찾을 수 없음", labelStyle);
+            return;
+        }
+
+        GUILayout.Label("── 인벤토리 상태 ──", headerStyle);
+        GUILayout.Label($"아이템: {inventory.Grid.ItemCount}개  |  무게: {inventory.CurrentWeight:F1} / {inventory.MaxWeight:F0} kg", labelStyle);
         GUILayout.Space(5);
-        GUILayout.Label("인벤토리 시스템 구현 후 활성화", labelStyle);
+
+        // 격자 내 아이템 목록
+        var items = inventory.Grid.GetAll();
+        for (int i = 0; i < items.Count; i++)
+        {
+            GUILayout.BeginHorizontal();
+            string durInfo = items[i].item.HasDurability
+                ? $" ({items[i].item.durability:F0}/{items[i].item.data.maxDurability:F0})"
+                : "";
+            GUILayout.Label($"  [{items[i].gridX},{items[i].gridY}] {items[i].item.DisplayName}{durInfo}", labelStyle, GUILayout.Width(250));
+            if (items[i].item.data != null && items[i].item.data.isUsable)
+            {
+                if (GUILayout.Button("사용", btnStyle, GUILayout.Width(50)))
+                    inventory.UseItem(items[i]);
+            }
+            if (GUILayout.Button("버리기", btnStyle, GUILayout.Width(55)))
+                inventory.DropItem(items[i]);
+            GUILayout.EndHorizontal();
+        }
+
         GUILayout.Space(10);
-        GUILayout.Label("예정 기능:", labelStyle);
-        GUILayout.Label("• 아이템 지급", labelStyle);
-        GUILayout.Label("• 인벤토리 초기화", labelStyle);
-        GUILayout.Label("• 치료 아이템 사용 테스트", labelStyle);
+        GUILayout.Label("── 아이템 지급 ──", headerStyle);
+        GUILayout.Space(5);
+
+        var allItems = ItemDatabase.GetAll();
+        if (allItems.Length == 0)
+        {
+            GUILayout.Label("ItemDatabase에 아이템이 없음 (Resources/Items/ 확인)", labelStyle);
+        }
+        else
+        {
+            for (int i = 0; i < allItems.Length; i++)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"{allItems[i].displayName} ({allItems[i].gridWidth}x{allItems[i].gridHeight})", labelStyle, GUILayout.Width(200));
+                if (GUILayout.Button("+1", btnStyle, GUILayout.Width(40)))
+                {
+                    var item = new ItemInstance(allItems[i], 1);
+                    if (!inventory.TryPickup(item))
+                        Debug.Log("[Debug] 인벤토리 공간 부족");
+                }
+                if (allItems[i].maxStack > 1)
+                {
+                    if (GUILayout.Button($"+{allItems[i].maxStack}", btnStyle, GUILayout.Width(50)))
+                    {
+                        var item = new ItemInstance(allItems[i], allItems[i].maxStack);
+                        if (!inventory.TryPickup(item))
+                            Debug.Log("[Debug] 인벤토리 공간 부족");
+                    }
+                }
+                GUILayout.EndHorizontal();
+            }
+        }
+
+        GUILayout.Space(10);
+        if (GUILayout.Button("인벤토리 전체 비우기", btnStyle, GUILayout.Height(28)))
+            inventory.Grid.Clear();
+
+        GUILayout.Space(10);
+        GUILayout.Label("── 제작 UI (CraftingUI) ──", headerStyle);
+        if (UIManager.Instance != null)
+        {
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("의료대", btnStyle, GUILayout.Height(25)))
+                UIManager.Instance.ShowCrafting(CraftingStation.MedicalBench);
+            if (GUILayout.Button("조리대", btnStyle, GUILayout.Height(25)))
+                UIManager.Instance.ShowCrafting(CraftingStation.CookingBench);
+            if (GUILayout.Button("작업대", btnStyle, GUILayout.Height(25)))
+                UIManager.Instance.ShowCrafting(CraftingStation.Workbench);
+            GUILayout.EndHorizontal();
+        }
+        else
+            GUILayout.Label("UIManager 없음", labelStyle);
+
+        GUILayout.Space(10);
+        GUILayout.Label("── 지역 루트 (RegionLootCatalog) ──", headerStyle);
+        string activeRegion = RegionLootCatalog.GetActiveRegionId();
+        bool regionNight = RegionLootCatalog.IsNightInRegion(activeRegion);
+        GUILayout.Label($"활성 지역: {activeRegion}  |  {(regionNight ? "밤" : "낮")}", labelStyle);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("지역 상자 루트", btnStyle, GUILayout.Height(25)))
+            DropRegionLoot(RegionLootTier.ContainerDay);
+        if (GUILayout.Button("지역 바닥 루트", btnStyle, GUILayout.Height(25)))
+            DropRegionLoot(RegionLootTier.GroundDay);
+        GUILayout.EndHorizontal();
+        var regionOnly = ItemDatabase.GetByPrimaryRegion(activeRegion);
+        if (regionOnly.Count > 0)
+            GUILayout.Label($"지역 전용 SO: {regionOnly.Count}종", labelStyle);
+
+        GUILayout.Space(10);
+        GUILayout.Label("── 월드 드롭 테스트 ──", headerStyle);
+        GUILayout.Space(3);
+
+        if (allItems.Length > 0)
+        {
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("앞에 아이템 드롭 (랜덤)", btnStyle, GUILayout.Height(25)))
+            {
+                var data = allItems[Random.Range(0, allItems.Length)];
+                var item = new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1));
+                Vector3 dropPos = player.transform.position + player.transform.forward * 1.5f;
+                WorldItem.Drop(item, dropPos);
+            }
+            if (GUILayout.Button("주변 5개 드롭", btnStyle, GUILayout.Height(25)))
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    var data = allItems[Random.Range(0, allItems.Length)];
+                    var item = new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1));
+                    Vector3 offset = new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f));
+                    WorldItem.Drop(item, player.transform.position + offset);
+                }
+            }
+            GUILayout.EndHorizontal();
+        }
+    }
+
+    void DropRegionLoot(RegionLootTier tier)
+    {
+        if (player == null) return;
+        var items = RegionLootCatalog.RollForActiveRegion(tier);
+        Vector3 basePos = player.transform.position + player.transform.forward * 1.5f;
+        for (int i = 0; i < items.Length; i++)
+        {
+            Vector3 pos = basePos + new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f) + i * 0.2f);
+            WorldItem.Drop(items[i], pos);
+        }
+        Debug.Log($"[Debug] 지역 루트 {tier} → {items.Length}개 드롭");
     }
 
     #endregion

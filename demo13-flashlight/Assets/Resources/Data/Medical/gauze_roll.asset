@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6daa59ed7363264cac5edd4d20bb1a7, type: 3}
+  m_Name: gauze_roll
+  m_EditorClassIdentifier: Game.Scripts::MedicalItemData
+  itemId: gauze_roll
+  displayName: "\uAC70\uC988 \uB864"
+  description: "\uB113\uC740 \uBD80\uC704\uC758 \uCD9C\uD608\uC5D0 \uC0AC\uC6A9."
+  targetInjuries: 00000000
+  isUniversal: 0
+  useTime: 3
+  healAmount: 0.8
+  effectDuration: 0
