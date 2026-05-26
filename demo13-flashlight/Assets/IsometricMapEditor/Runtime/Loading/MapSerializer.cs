@@ -14,6 +14,7 @@ namespace IsometricMapEditor
             public SerializableBuilding[] buildings;
             public SerializableProp[] props;
             public SerializableHarvestable[] harvestables;
+            public SerializableMapObject[] mapObjects;
             public int[] walkabilityCells;
             public int walkabilityWidth;
             public int walkabilityHeight;
@@ -54,6 +55,10 @@ namespace IsometricMapEditor
             public int x, y;
             public string propDefinitionId;
             public int rotation;
+            public bool freePlace;
+            public float worldX, worldY, worldZ;
+            public float yRotation;
+            public float scale;
         }
 
         [System.Serializable]
@@ -63,6 +68,19 @@ namespace IsometricMapEditor
             public int x, y;
             public string harvestableDefinitionId;
             public string overrideSpawnCondition;
+        }
+
+        [System.Serializable]
+        class SerializableMapObject
+        {
+            public string instanceId;
+            public int objectType;
+            public int x, y;
+            public bool freePlace;
+            public float worldX, worldY, worldZ;
+            public float yRotation;
+            public string label;
+            public string customData;
         }
 
         public static string Serialize(MapData map)
@@ -75,7 +93,8 @@ namespace IsometricMapEditor
                 layers = new SerializableLayer[map.layers.Count],
                 buildings = new SerializableBuilding[map.buildings.Count],
                 props = new SerializableProp[map.props.Count],
-                harvestables = new SerializableHarvestable[map.harvestables.Count]
+                harvestables = new SerializableHarvestable[map.harvestables.Count],
+                mapObjects = new SerializableMapObject[map.mapObjects.Count]
             };
 
             for (int i = 0; i < map.layers.Count; i++)
@@ -126,7 +145,13 @@ namespace IsometricMapEditor
                     x = p.gridPosition.x,
                     y = p.gridPosition.y,
                     propDefinitionId = p.propDefinitionId,
-                    rotation = p.rotation
+                    rotation = p.rotation,
+                    freePlace = p.freePlace,
+                    worldX = p.worldPosition.x,
+                    worldY = p.worldPosition.y,
+                    worldZ = p.worldPosition.z,
+                    yRotation = p.yRotation,
+                    scale = p.scale
                 };
             }
 
@@ -140,6 +165,25 @@ namespace IsometricMapEditor
                     y = h.gridPosition.y,
                     harvestableDefinitionId = h.harvestableDefinitionId,
                     overrideSpawnCondition = h.overrideSpawnCondition
+                };
+            }
+
+            for (int i = 0; i < map.mapObjects.Count; i++)
+            {
+                var mo = map.mapObjects[i];
+                json.mapObjects[i] = new SerializableMapObject
+                {
+                    instanceId = mo.instanceId,
+                    objectType = (int)mo.objectType,
+                    x = mo.gridPosition.x,
+                    y = mo.gridPosition.y,
+                    freePlace = mo.freePlace,
+                    worldX = mo.worldPosition.x,
+                    worldY = mo.worldPosition.y,
+                    worldZ = mo.worldPosition.z,
+                    yRotation = mo.yRotation,
+                    label = mo.label,
+                    customData = mo.customData
                 };
             }
 
@@ -187,6 +231,44 @@ namespace IsometricMapEditor
                         }
                     }
                     target.layers.Add(layer);
+                }
+            }
+
+            target.props.Clear();
+            if (json.props != null)
+            {
+                foreach (var sp in json.props)
+                {
+                    target.props.Add(new PlacedProp
+                    {
+                        instanceId = sp.instanceId,
+                        gridPosition = new Vector2Int(sp.x, sp.y),
+                        propDefinitionId = sp.propDefinitionId,
+                        rotation = sp.rotation,
+                        freePlace = sp.freePlace,
+                        worldPosition = new Vector3(sp.worldX, sp.worldY, sp.worldZ),
+                        yRotation = sp.yRotation,
+                        scale = sp.scale > 0 ? sp.scale : 1f
+                    });
+                }
+            }
+
+            target.mapObjects.Clear();
+            if (json.mapObjects != null)
+            {
+                foreach (var smo in json.mapObjects)
+                {
+                    target.mapObjects.Add(new PlacedMapObject
+                    {
+                        instanceId = smo.instanceId,
+                        objectType = (MapObjectType)smo.objectType,
+                        gridPosition = new Vector2Int(smo.x, smo.y),
+                        freePlace = smo.freePlace,
+                        worldPosition = new Vector3(smo.worldX, smo.worldY, smo.worldZ),
+                        yRotation = smo.yRotation,
+                        label = smo.label,
+                        customData = smo.customData
+                    });
                 }
             }
 

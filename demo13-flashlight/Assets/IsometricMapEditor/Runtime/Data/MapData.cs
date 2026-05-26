@@ -13,6 +13,7 @@ namespace IsometricMapEditor
         public List<PlacedBuilding> buildings = new();
         public List<PlacedProp> props = new();
         public List<PlacedHarvestable> harvestables = new();
+        public List<PlacedMapObject> mapObjects = new();
         public List<InteriorConnection> interiorConnections = new();
         public WalkabilityData walkability;
 

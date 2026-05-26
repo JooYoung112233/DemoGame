@@ -3,7 +3,6 @@
     "rootNamespace": "IsometricMapEditor.Tests",
     "references": [
         "IsometricMapEditor.Runtime",
-        "IsometricMapEditor.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

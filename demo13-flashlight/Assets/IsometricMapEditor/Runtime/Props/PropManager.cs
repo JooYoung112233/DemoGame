@@ -25,7 +25,7 @@ namespace IsometricMapEditor
         {
             if (prop.propDefinition == null || prop.propDefinition.prefab == null) return;
 
-            Vector3 worldPos = IsometricGrid.GridToWorld(prop.gridPosition, settings);
+            Vector3 worldPos = prop.GetWorldPosition(settings);
             var go = Instantiate(prop.propDefinition.prefab, worldPos, Quaternion.identity, _root);
             go.name = $"Prop_{prop.instanceId}";
 
