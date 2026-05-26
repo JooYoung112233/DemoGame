@@ -14,12 +14,14 @@ public class DayNightCycle : MonoBehaviour
 
     bool isNight = false;
     bool lastSyncedNight = false;
+    bool useStandalone = false; // RegionTimeManager 없을 때 독립 모드
 
     public bool IsNight => isNight;
     public float TimeRemaining
     {
         get
         {
+            if (useStandalone) return 0;
             if (RegionTimeManager.Instance == null) return 0;
             var rt = RegionTimeManager.Instance.GetRegion(RegionTimeManager.Instance.ActiveRegionId);
             if (rt == null) return 0;
@@ -32,13 +34,35 @@ public class DayNightCycle : MonoBehaviour
 
     void Start()
     {
-        SyncFromRegionTime();
+        // RegionTimeManager가 없거나 ActiveRegionId가 비어있으면 독립 모드
+        if (RegionTimeManager.Instance == null ||
+            string.IsNullOrEmpty(RegionTimeManager.Instance.ActiveRegionId))
+        {
+            useStandalone = true;
+            // 시작 시 현재 상태 적용
+            ApplyLighting();
+        }
+        else
+        {
+            SyncFromRegionTime();
+        }
     }
 
     void Update()
     {
-        // RegionTimeManager에서 현재 지역 시간 읽기
-        SyncFromRegionTime();
+        if (!useStandalone)
+        {
+            // RegionTimeManager 연결 확인 (런타임 중 ActiveRegionId 비게 될 수 있음)
+            if (RegionTimeManager.Instance == null ||
+                string.IsNullOrEmpty(RegionTimeManager.Instance.ActiveRegionId))
+            {
+                useStandalone = true;
+            }
+            else
+            {
+                SyncFromRegionTime();
+            }
+        }
 
         if (Input.GetKeyDown(KeyCode.T))
             ForceToggle();
@@ -68,6 +92,18 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>디버그용 강제 토글 (T키)</summary>
     void ForceToggle()
     {
+        if (useStandalone)
+        {
+            // 독립 모드: 직접 토글
+            isNight = !isNight;
+            lastSyncedNight = isNight;
+            ApplyLighting();
+            OnPhaseChanged?.Invoke(isNight);
+            Debug.Log($"[DayNight] T키: {(isNight ? "밤" : "낮")} 전환");
+            return;
+        }
+
+        // RegionTimeManager 연동 모드
         if (RegionTimeManager.Instance == null) return;
         var regionId = RegionTimeManager.Instance.ActiveRegionId;
         if (string.IsNullOrEmpty(regionId)) return;
@@ -75,7 +111,6 @@ public class DayNightCycle : MonoBehaviour
         var rt = RegionTimeManager.Instance.GetRegion(regionId);
         if (rt == null) return;
 
-        // 강제로 페이즈 전환
         rt.isNight = !rt.isNight;
         rt.elapsed = 0f;
     }
