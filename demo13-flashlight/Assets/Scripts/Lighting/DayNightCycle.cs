@@ -12,6 +12,9 @@ public class DayNightCycle : MonoBehaviour
     [Header("References")]
     [SerializeField] FlashlightController flashlight;
 
+    [Header("Data")]
+    [SerializeField] WeatherData weatherData;
+
     bool isNight = false;
     bool lastSyncedNight = false;
     bool useStandalone = false; // RegionTimeManager 없을 때 독립 모드
@@ -118,7 +121,32 @@ public class DayNightCycle : MonoBehaviour
     void ApplyLighting()
     {
         if (directionalLight == null) return;
-        directionalLight.intensity = isNight ? nightIntensity : dayIntensity;
-        directionalLight.color = isNight ? nightColor : dayColor;
+
+        if (weatherData != null)
+        {
+            // WeatherData에서 읽기
+            directionalLight.intensity = isNight ? weatherData.nightIntensity : weatherData.dayIntensity;
+            directionalLight.color = isNight ? weatherData.nightLightColor : weatherData.dayLightColor;
+            directionalLight.transform.rotation = Quaternion.Euler(
+                isNight ? weatherData.nightSunAngle : weatherData.daySunAngle);
+
+            // 앰비언트
+            RenderSettings.ambientLight = isNight ? weatherData.nightAmbientColor : weatherData.dayAmbientColor;
+
+            // 안개
+            bool useFog = isNight ? weatherData.nightFog : weatherData.dayFog;
+            RenderSettings.fog = useFog;
+            if (useFog)
+            {
+                RenderSettings.fogColor = isNight ? weatherData.nightFogColor : weatherData.dayFogColor;
+                RenderSettings.fogDensity = isNight ? weatherData.nightFogDensity : weatherData.dayFogDensity;
+            }
+        }
+        else
+        {
+            // 폴백: 인스펙터 값 사용
+            directionalLight.intensity = isNight ? nightIntensity : dayIntensity;
+            directionalLight.color = isNight ? nightColor : dayColor;
+        }
     }
 }
