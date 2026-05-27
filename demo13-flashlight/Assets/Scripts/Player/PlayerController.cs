@@ -49,6 +49,7 @@ public class PlayerController : MonoBehaviour
     Health health;
     CombatFeedback feedback;
     SkeletonAnimController animController;
+    SpriteFrameAnimator frameAnimator;
     PlayerMedicalSystem medical;
     SpriteRenderer spriteRenderer;
     Renderer[] renderers;
@@ -306,6 +307,7 @@ public class PlayerController : MonoBehaviour
         if (GetComponent<PlayerInventory>() == null)
             gameObject.AddComponent<PlayerInventory>();
         animController = GetComponentInChildren<SkeletonAnimController>();
+        frameAnimator = GetComponentInChildren<SpriteFrameAnimator>();
         mainCam = Camera.main;
 
         // 스프라이트 렌더러
@@ -394,6 +396,7 @@ public class PlayerController : MonoBehaviour
         {
             moveDir = Vector3.zero;
             animController?.Play("idle");
+            frameAnimator?.Play("idle");
             return;
         }
 
@@ -418,6 +421,7 @@ public class PlayerController : MonoBehaviour
         if (FacingDirection.sqrMagnitude > 0.01f)
         {
             animController?.SetDirection(FacingDirection);
+            frameAnimator?.SetDirection(FacingDirection);
         }
 
         // 손전등 방향 갱신
@@ -481,6 +485,7 @@ public class PlayerController : MonoBehaviour
             else
                 anim = "walk";
             animController?.Play(anim);
+            frameAnimator?.Play(anim);
         }
 
         // 이동 처리 (canMove일 때만)
@@ -503,15 +508,19 @@ public class PlayerController : MonoBehaviour
     void LateUpdate()
     {
         // 빌보드: 스프라이트가 카메라를 향하도록
-        if (mainCam != null && spriteRenderer != null)
-            spriteRenderer.transform.rotation = mainCam.transform.rotation;
-
-        // 스프라이트 좌우 플립 (마우스 방향 기준)
-        if (spriteRenderer != null && mainCam != null && FacingDirection.sqrMagnitude > 0.01f)
+        // frameAnimator가 있으면 자체 LateUpdate에서 빌보드+플립 처리
+        if (frameAnimator == null)
         {
-            Vector3 cr = mainCam.transform.right;
-            cr.y = 0;
-            spriteRenderer.flipX = Vector3.Dot(FacingDirection, cr.normalized) < 0;
+            if (mainCam != null && spriteRenderer != null)
+                spriteRenderer.transform.rotation = mainCam.transform.rotation;
+
+            // 스프라이트 좌우 플립 (마우스 방향 기준)
+            if (spriteRenderer != null && mainCam != null && FacingDirection.sqrMagnitude > 0.01f)
+            {
+                Vector3 cr = mainCam.transform.right;
+                cr.y = 0;
+                spriteRenderer.flipX = Vector3.Dot(FacingDirection, cr.normalized) < 0;
+            }
         }
 
         // 원샷 타이머
@@ -768,6 +777,7 @@ public class PlayerController : MonoBehaviour
 
         // 마우스 방향으로 갱신
         animController?.SetDirection(FacingDirection);
+        frameAnimator?.SetDirection(FacingDirection);
 
         // 공격 판정 — 전방 부채꼴 범위
         HitEnemiesInRange(LightRange, damage, groggy, 90f);
@@ -786,6 +796,10 @@ public class PlayerController : MonoBehaviour
         if (animController != null)
         {
             animController.PlayOneShot("attack", onDone);
+        }
+        else if (frameAnimator != null)
+        {
+            frameAnimator.PlayOneShot("attack", onDone);
         }
         else
         {
@@ -1299,6 +1313,7 @@ public class PlayerController : MonoBehaviour
             SetTint(new Color(1f, 0.3f, 0.3f));
 
             animController?.PlayOneShot("gethit");
+            frameAnimator?.PlayOneShot("gethit");
 
             // 의료 시스템 연동 — 피격 시 부상 판정
             if (medical != null && health != null)
@@ -1311,6 +1326,7 @@ public class PlayerController : MonoBehaviour
         state = CombatState.Idle;
         canMove = false;
         animController?.PlayOneShot("death");
+        frameAnimator?.PlayOneShot("death");
     }
 
     void ReturnToIdle()
