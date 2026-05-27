@@ -58,8 +58,7 @@ public class EnemyDummyCreator : EditorWindow
     string[] presetNames = { "커스텀", "밴딧 (약)", "밴딧 (강)", "몬스터", "낮 배회자" };
 
     // 참조
-    CombatData combatData;
-    EnemyData enemyData;
+    string unitKey = ""; // StatDB 유닛 키
     Sprite enemySprite;
     Material spriteMaterial;
     bool savePrefab = true;
@@ -162,8 +161,39 @@ public class EnemyDummyCreator : EditorWindow
 
         // ---- 참조 ----
         EditorGUILayout.LabelField("데이터 참조 (선택)", EditorStyles.boldLabel);
-        combatData = (CombatData)EditorGUILayout.ObjectField("CombatData", combatData, typeof(CombatData), false);
-        enemyData = (EnemyData)EditorGUILayout.ObjectField("EnemyData", enemyData, typeof(EnemyData), false);
+        unitKey = EditorGUILayout.TextField("StatDB Unit Key", unitKey);
+
+        // StatDB에서 키로 불러오기 버튼
+        if (!string.IsNullOrEmpty(unitKey) && GUILayout.Button("Load from StatDB"))
+        {
+            var db = AssetDatabase.LoadAssetAtPath<StatDB>("Assets/Resources/Data/StatDB.asset");
+            if (db != null)
+            {
+                var unit = db.GetUnit(unitKey);
+                if (unit != null)
+                {
+                    enemyName = unit.displayName;
+                    maxHp = unit.maxHp;
+                    attackDamage = unit.attackDamage;
+                    attackRange = unit.attackRange;
+                    attackSpeed = unit.attackSpeed;
+                    attackWindup = unit.attackWindup;
+                    moveSpeed = unit.moveSpeed;
+                    patrolSpeed = unit.patrolSpeed;
+                    detectRange = unit.detectRange;
+                    loseRange = unit.loseRange;
+                    patrolRadius = unit.patrolRadius;
+                    patrolWaitTime = unit.patrolWaitTime;
+                    maxGroggy = unit.maxGroggy;
+                    groggyDecay = unit.groggyDecay;
+                    groggyStunDuration = unit.groggyStunDuration;
+                    bodyColor = unit.tintColor;
+                    Debug.Log($"[EnemyDummy] StatDB '{unitKey}' 데이터 로드 완료");
+                }
+                else Debug.LogWarning($"[EnemyDummy] StatDB에 '{unitKey}' 키 없음");
+            }
+        }
+
         savePrefab = EditorGUILayout.Toggle("프리팹으로 저장", savePrefab);
 
         EditorGUILayout.Space(15);
@@ -257,8 +287,8 @@ public class EnemyDummyCreator : EditorWindow
         SetField(enemy, "maxGroggy", maxGroggy);
         SetField(enemy, "groggyDecay", groggyDecay);
         SetField(enemy, "groggyStunDuration", groggyStunDuration);
-        if (enemyData != null) SetField(enemy, "enemyData", enemyData);
-        if (combatData != null) SetField(enemy, "combatData", combatData);
+        if (!string.IsNullOrEmpty(unitKey))
+            SetField(enemy, "unitKey", unitKey);
 
         // EnemyOutline
         var outline = root.AddComponent<EnemyOutline>();

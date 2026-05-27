@@ -2,23 +2,24 @@ using UnityEngine;
 
 /// <summary>
 /// 적 스폰 영역. 씬에서 Gizmo로 영역 표시.
+/// unitKey로 StatDB에서 유닛 데이터 참조.
 /// </summary>
 public class SpawnZone : MonoBehaviour
 {
     [SerializeField] Vector3 size = new Vector3(4, 0, 4);
     [SerializeField] int enemyCount = 2;
-    [SerializeField] EnemyData enemyType;
+    [SerializeField] string unitKey; // StatDB 유닛 키
     [SerializeField] Color gizmoColor = new Color(1f, 0.3f, 0.3f, 0.3f);
 
     public Vector3 Size => size;
     public int EnemyCount => enemyCount;
-    public EnemyData EnemyType => enemyType;
+    public string UnitKey => unitKey;
 
-    public void Setup(Vector3 zoneSize, int count, EnemyData type = null)
+    public void Setup(Vector3 zoneSize, int count, string key = null)
     {
         size = zoneSize;
         enemyCount = count;
-        enemyType = type;
+        unitKey = key;
     }
 
     /// <summary>영역 내 랜덤 위치 반환</summary>
@@ -33,9 +34,15 @@ public class SpawnZone : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Color baseColor = enemyType != null ?
-            new Color(enemyType.tintColor.r, enemyType.tintColor.g, enemyType.tintColor.b, 0.3f) :
-            gizmoColor;
+        Color baseColor = gizmoColor;
+
+        // StatDB에서 유닛 색상 가져오기
+        if (!string.IsNullOrEmpty(unitKey) && StatDB.Instance != null)
+        {
+            var unit = StatDB.Instance.GetUnit(unitKey);
+            if (unit != null)
+                baseColor = new Color(unit.tintColor.r, unit.tintColor.g, unit.tintColor.b, 0.3f);
+        }
 
         Gizmos.color = baseColor;
         Gizmos.DrawCube(transform.position + Vector3.up * 0.1f,
@@ -49,11 +56,13 @@ public class SpawnZone : MonoBehaviour
 #if UNITY_EDITOR
     void OnDrawGizmosSelected()
     {
-        if (enemyType != null)
+        if (!string.IsNullOrEmpty(unitKey) && StatDB.Instance != null)
         {
+            var unit = StatDB.Instance.GetUnit(unitKey);
+            string label = unit != null ? unit.displayName : unitKey;
             UnityEditor.Handles.Label(
                 transform.position + Vector3.up * 0.5f,
-                $"{enemyType.displayName} x{enemyCount}");
+                $"{label} x{enemyCount}");
         }
     }
 #endif

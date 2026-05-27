@@ -34,8 +34,8 @@ public class EnemyController : MonoBehaviour
     [SerializeField] float groggyStunDuration = 2.0f;
 
     [Header("Data")]
-    [SerializeField] EnemyData enemyData;
-    [SerializeField] CombatData combatData;
+    [SerializeField] string unitKey; // StatDB 키
+    UnitStatData unitStat; // 런타임 캐시
 
     [Header("References")]
     [SerializeField] SkeletonAnimController animController;
@@ -98,35 +98,25 @@ public class EnemyController : MonoBehaviour
 
     #endregion
 
-    #region 프로퍼티 (EnemyData/CombatData 접근자)
+    #region 프로퍼티 (UnitStatData > 인스펙터 필드값)
 
-    // 우선순위: EnemyData > CombatData > 인스펙터 필드값
-    float Damage => enemyData != null ? enemyData.attackDamage :
-        combatData != null ? combatData.enemy.attackDamage : attackDamage;
-    float AtkRange => enemyData != null ? enemyData.attackRange :
-        combatData != null ? combatData.enemy.attackRange : attackRange;
+    float Damage => unitStat != null ? unitStat.attackDamage : attackDamage;
+    float AtkRange => unitStat != null ? unitStat.attackRange : attackRange;
     float AtkCooldown => 1f / Mathf.Max(
-        enemyData != null ? enemyData.attackSpeed :
-        combatData != null ? combatData.enemy.attackSpeed : attackSpeed, 0.1f);
-    float DetectRng => enemyData != null ? enemyData.detectRange :
-        combatData != null ? combatData.enemy.detectRange : detectRange;
-    float LoseRng => enemyData != null ? enemyData.loseRange :
-        combatData != null ? combatData.enemy.loseRange : loseRange;
-    float MoveSpd => enemyData != null ? enemyData.moveSpeed :
-        combatData != null ? combatData.enemy.moveSpeed : moveSpeed;
-    float PatrolSpd => enemyData != null ? enemyData.patrolSpeed :
-        combatData != null ? combatData.enemy.patrolSpeed : patrolSpeed;
-    float PatrolRad => enemyData != null ? enemyData.patrolRadius :
-        combatData != null ? combatData.enemy.patrolRadius : patrolRadius;
-    float HitStun => enemyData != null ? enemyData.hitStunDuration : 0.3f;
-    float PatrolWait => enemyData != null ? enemyData.patrolWaitTime : patrolWaitTime;
-    float Windup => combatData != null ? combatData.enemy.attackWindup : attackWindup;
-    bool CanBeCancelled => combatData != null ? combatData.enemy.canBeCancelled : true;
+        unitStat != null ? unitStat.attackSpeed : attackSpeed, 0.1f);
+    float DetectRng => unitStat != null ? unitStat.detectRange : detectRange;
+    float LoseRng => unitStat != null ? unitStat.loseRange : loseRange;
+    float MoveSpd => unitStat != null ? unitStat.moveSpeed : moveSpeed;
+    float PatrolSpd => unitStat != null ? unitStat.patrolSpeed : patrolSpeed;
+    float PatrolRad => unitStat != null ? unitStat.patrolRadius : patrolRadius;
+    float HitStun => unitStat != null ? unitStat.hitStunDuration : 0.3f;
+    float PatrolWait => unitStat != null ? unitStat.patrolWaitTime : patrolWaitTime;
+    float Windup => unitStat != null ? unitStat.attackWindup : attackWindup;
+    bool CanBeCancelled => unitStat != null ? unitStat.canBeCancelled : true;
 
-    float MaxGroggy => combatData != null ? combatData.enemy.maxGroggy :
-                       enemyData != null ? 100f : maxGroggy;
-    float GroggyDecayRate => combatData != null ? combatData.enemy.groggyDecay : groggyDecay;
-    float StunDuration => combatData != null ? combatData.enemy.groggyStunDuration : groggyStunDuration;
+    float MaxGroggy => unitStat != null ? unitStat.maxGroggy : maxGroggy;
+    float GroggyDecayRate => unitStat != null ? unitStat.groggyDecay : groggyDecay;
+    float StunDuration => unitStat != null ? unitStat.groggyStunDuration : groggyStunDuration;
 
     public State CurrentState => state;
 
@@ -143,8 +133,20 @@ public class EnemyController : MonoBehaviour
 
     #region 유니티 라이프사이클
 
+    /// <summary>외부에서 유닛 키 지정 (스폰 시스템 등)</summary>
+    public void SetUnitKey(string key)
+    {
+        unitKey = key;
+        if (StatDB.Instance != null)
+            unitStat = StatDB.Instance.GetUnit(unitKey);
+    }
+
     void Awake()
     {
+        // StatDB에서 유닛 스탯 로드
+        if (!string.IsNullOrEmpty(unitKey) && StatDB.Instance != null)
+            unitStat = StatDB.Instance.GetUnit(unitKey);
+
         health = GetComponent<Health>();
         agent = GetComponent<NavMeshAgent>();
         feedback = GetComponent<CombatFeedback>();
@@ -830,8 +832,8 @@ public class EnemyController : MonoBehaviour
         if (hpBarFill != null) hpBarFill.SetActive(false);
 
         // 퀘스트 목표 갱신
-        if (QuestManager.Instance != null && enemyData != null)
-            QuestManager.Instance.UpdateObjective(ObjectiveType.KillEnemy, enemyData.name, 1);
+        if (QuestManager.Instance != null && !string.IsNullOrEmpty(unitKey))
+            QuestManager.Instance.UpdateObjective(ObjectiveType.KillEnemy, unitKey, 1);
 
         Destroy(gameObject, 3f);
     }

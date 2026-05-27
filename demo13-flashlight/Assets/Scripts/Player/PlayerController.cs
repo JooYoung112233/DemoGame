@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform flashlightPivot;
     [SerializeField] float flashlightPitch = 10f;
 
-    [Header("Stamina (기본값, CombatData 없을 때)")]
+    [Header("Stamina (기본값, StatDB 없을 때)")]
     [SerializeField] float maxStamina = 100f;
     [SerializeField] float staminaRegenRate = 15f;
     [SerializeField] float staminaRegenDelay = 1.0f;
@@ -38,8 +38,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform visualRoot;
 
     [Header("References")]
-    [SerializeField] CombatData combatData;
     [SerializeField] CrosshairUI crosshairUI;
+
+    // --- StatDB ---
+    PlayerStatData stat;
 
     // --- 자동 검색 레퍼런스 ---
     Camera mainCam;
@@ -122,14 +124,14 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
-    #region ===== 프로퍼티: CombatData 접근 =====
+    #region ===== 프로퍼티: StatDB 접근 =====
 
     // --- 이동 ---
-    float BaseMoveSpeed => combatData != null ? combatData.player.moveSpeed : moveSpeed;
-    float SprintMultiplier => combatData != null ? combatData.player.sprintSpeedMultiplier : 1.6f;
-    float CrouchMultiplier => combatData != null ? combatData.player.crouchSpeedMultiplier : 0.5f;
-    float SprintStaminaCost => combatData != null ? combatData.player.sprintStaminaCost : 12f;
-    float SprintMinStamina => combatData != null ? combatData.player.sprintMinStamina : 10f;
+    float BaseMoveSpeed => stat != null ? stat.moveSpeed : moveSpeed;
+    float SprintMultiplier => stat != null ? stat.sprintSpeedMultiplier : 1.6f;
+    float CrouchMultiplier => stat != null ? stat.crouchSpeedMultiplier : 0.5f;
+    float SprintStaminaCost => stat != null ? stat.sprintStaminaCost : 12f;
+    float SprintMinStamina => stat != null ? stat.sprintMinStamina : 10f;
 
     float MoveSpeed
     {
@@ -146,60 +148,60 @@ public class PlayerController : MonoBehaviour
     // --- 약공격 ---
     float LightDmg(int step)
     {
-        if (combatData == null) return 8f;
+        if (stat == null) return 8f;
         switch (step)
         {
-            case 0: return combatData.player.lightDamage;
-            case 1: return combatData.player.lightCombo2Damage;
-            case 2: return combatData.player.lightCombo3Damage;
-            default: return combatData.player.lightDamage;
+            case 0: return stat.lightDamage;
+            case 1: return stat.lightCombo2Damage;
+            case 2: return stat.lightCombo3Damage;
+            default: return stat.lightDamage;
         }
     }
     float LightGroggy(int step)
     {
-        if (combatData == null) return 5f;
+        if (stat == null) return 5f;
         switch (step)
         {
-            case 0: return combatData.player.lightGroggy;
-            case 1: return combatData.player.lightCombo2Groggy;
-            case 2: return combatData.player.lightCombo3Groggy;
-            default: return combatData.player.lightGroggy;
+            case 0: return stat.lightGroggy;
+            case 1: return stat.lightCombo2Groggy;
+            case 2: return stat.lightCombo3Groggy;
+            default: return stat.lightGroggy;
         }
     }
     float LightStamina(int step)
     {
-        if (combatData == null) return 6f;
-        return step >= 2 && combatData != null ? combatData.player.lightCombo3StaminaCost : combatData.player.lightStaminaCost;
+        if (stat == null) return 6f;
+        return step >= 2 ? stat.lightCombo3StaminaCost : stat.lightStaminaCost;
     }
-    float LightRange => combatData != null ? combatData.player.lightRange : 2f;
-    float LightCooldown => combatData != null ? combatData.player.lightCooldown : 0.4f;
-    int ComboMax => combatData != null ? combatData.player.lightComboMax : 3;
-    float ComboWindow => combatData != null ? combatData.player.lightComboWindow : 0.6f;
+    float LightRange => stat != null ? stat.lightRange : 2f;
+    float LightCooldown => stat != null ? stat.lightCooldown : 0.4f;
+    int ComboMax => stat != null ? stat.lightComboMax : 3;
+    float ComboWindow => stat != null ? stat.lightComboWindow : 0.6f;
 
     // --- 강공격 ---
-    float HeavyDmg => combatData != null ? combatData.player.heavyDamage : 20f;
-    float HeavyFullDmg => combatData != null ? combatData.player.heavyFullDamage : 32f;
-    float HeavyRange => combatData != null ? combatData.player.heavyRange : 2.5f;
-    float HeavyStaminaCost => combatData != null ? combatData.player.heavyStaminaCost : 22f;
-    float HeavyFullStaminaCost => combatData != null ? combatData.player.heavyFullStaminaCost : 35f;
-    float HeavyGroggyVal => combatData != null ? combatData.player.heavyGroggy : 25f;
-    float HeavyFullGroggyVal => combatData != null ? combatData.player.heavyFullGroggy : 45f;
-    float HeavyChargeTime => combatData != null ? combatData.player.heavyChargeTime : 0.6f;
-    float HeavyMaxCharge => combatData != null ? combatData.player.heavyMaxCharge : 1.5f;
-    float HeavyCooldown => combatData != null ? combatData.player.heavyCooldown : 0.8f;
+    float HeavyDmg => stat != null ? stat.heavyDamage : 20f;
+    float HeavyFullDmg => stat != null ? stat.heavyFullDamage : 32f;
+    float HeavyRange => stat != null ? stat.heavyRange : 2.5f;
+    float HeavyStaminaCost => stat != null ? stat.heavyStaminaCost : 22f;
+    float HeavyFullStaminaCost => stat != null ? stat.heavyFullStaminaCost : 35f;
+    float HeavyGroggyVal => stat != null ? stat.heavyGroggy : 25f;
+    float HeavyFullGroggyVal => stat != null ? stat.heavyFullGroggy : 45f;
+    float HeavyChargeTime => stat != null ? stat.heavyChargeTime : 0.6f;
+    float HeavyMaxCharge => stat != null ? stat.heavyMaxCharge : 1.5f;
+    float HeavyCooldown => stat != null ? stat.heavyCooldown : 0.8f;
 
     // --- 구르기 ---
-    float DodgeStaminaCost => combatData != null ? combatData.player.dodgeStaminaCost : 15f;
-    float DodgeDist => combatData != null ? combatData.player.dodgeDistance : 3f;
-    float DodgeDur => combatData != null ? combatData.player.dodgeDuration : 0.3f;
-    float DodgeInvDur => combatData != null ? combatData.player.dodgeInvincibleDuration : 0.2f;
-    float DodgeCooldown => combatData != null ? combatData.player.dodgeCooldown : 0.5f;
+    float DodgeStaminaCost => stat != null ? stat.dodgeStaminaCost : 15f;
+    float DodgeDist => stat != null ? stat.dodgeDistance : 3f;
+    float DodgeDur => stat != null ? stat.dodgeDuration : 0.3f;
+    float DodgeInvDur => stat != null ? stat.dodgeInvincibleDuration : 0.2f;
+    float DodgeCooldown => stat != null ? stat.dodgeCooldown : 0.5f;
 
     // --- 스태미너 ---
-    float MaxStam => combatData != null ? combatData.player.maxStamina : maxStamina;
-    float StamRegenRate => combatData != null ? combatData.player.staminaRegen : staminaRegenRate;
-    float StamRegenDelay => combatData != null ? combatData.player.staminaRegenDelay : staminaRegenDelay;
-    float ExhaustDur => combatData != null ? combatData.player.exhaustionDuration : 0.8f;
+    float MaxStam => stat != null ? stat.maxStamina : maxStamina;
+    float StamRegenRate => stat != null ? stat.staminaRegen : staminaRegenRate;
+    float StamRegenDelay => stat != null ? stat.staminaRegenDelay : staminaRegenDelay;
+    float ExhaustDur => stat != null ? stat.exhaustionDuration : 0.8f;
 
     #endregion
 
@@ -289,6 +291,10 @@ public class PlayerController : MonoBehaviour
 
         // 씬 로드 시 카메라 등 재연결
         SceneManager.sceneLoaded += OnSceneLoaded;
+
+        // StatDB에서 플레이어 스탯 로드
+        if (StatDB.Instance != null)
+            stat = StatDB.Instance.playerStat;
 
         // 자동 레퍼런스 검색
         health = GetComponent<Health>();
