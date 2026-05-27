@@ -59,6 +59,11 @@ public class PlayerController : MonoBehaviour
     Vector3 lastMoveDir = Vector3.forward;
     bool canMove = true;
 
+    // --- 달리기 / 앉기 ---
+    bool isSprinting;
+    bool isCrouching;
+    float sprintStaminaDrainTimer; // 스태미너 소모 누적용
+
     // --- 전투 상태머신 ---
     CombatState state = CombatState.Idle;
 
@@ -97,6 +102,7 @@ public class PlayerController : MonoBehaviour
     // --- 워크 바운스 ---
     Vector3 bounceBaseLocalPos;
     Vector3 bounceBaseLocalScale;
+    Vector3 bounceOriginalScale; // 원본 스케일 (앉기 토글 기준)
     float bounceTimer;
     float currentBounce;
     bool wasMoving;
@@ -120,11 +126,18 @@ public class PlayerController : MonoBehaviour
 
     // --- 이동 ---
     float BaseMoveSpeed => combatData != null ? combatData.player.moveSpeed : moveSpeed;
+    float SprintMultiplier => combatData != null ? combatData.player.sprintSpeedMultiplier : 1.6f;
+    float CrouchMultiplier => combatData != null ? combatData.player.crouchSpeedMultiplier : 0.5f;
+    float SprintStaminaCost => combatData != null ? combatData.player.sprintStaminaCost : 12f;
+    float SprintMinStamina => combatData != null ? combatData.player.sprintMinStamina : 10f;
+
     float MoveSpeed
     {
         get
         {
             float speed = BaseMoveSpeed;
+            if (isSprinting) speed *= SprintMultiplier;
+            if (isCrouching) speed *= CrouchMultiplier;
             if (medical != null) speed *= medical.MoveSpeedMultiplier;
             return speed;
         }
@@ -210,6 +223,10 @@ public class PlayerController : MonoBehaviour
     public float StaminaPercent => staminaCurrent / MaxStam;
     public bool IsExhausted => isExhausted;
 
+    // 달리기 / 앉기
+    public bool IsSprinting => isSprinting;
+    public bool IsCrouching => isCrouching;
+
     /// <summary>HUD 표시용 상태 문자열</summary>
     public string GetStateText()
     {
@@ -220,7 +237,10 @@ public class PlayerController : MonoBehaviour
             case CombatState.HeavyRelease: return "Heavy!";
             case CombatState.Dodge: return "Dodge";
             case CombatState.Exhausted: return "EXHAUSTED";
-            default: return "Idle";
+            default:
+                if (isSprinting) return "Sprint";
+                if (isCrouching) return "Crouch";
+                return "Idle";
         }
     }
 
@@ -316,6 +336,7 @@ public class PlayerController : MonoBehaviour
         {
             bounceBaseLocalPos = visualRoot.localPosition;
             bounceBaseLocalScale = visualRoot.localScale;
+            bounceOriginalScale = visualRoot.localScale;
         }
 
         lastPosition = transform.position;
@@ -381,6 +402,9 @@ public class PlayerController : MonoBehaviour
         if (moveDir.sqrMagnitude > 0.01f)
             lastMoveDir = moveDir;
 
+        // 달리기 / 앉기 입력 (moveDir 이후에 처리)
+        UpdateSprintCrouch();
+
         // 마우스 방향 갱신
         UpdateMouseFacing();
 
@@ -441,7 +465,15 @@ public class PlayerController : MonoBehaviour
         if (state == CombatState.Idle)
         {
             bool moving = Mathf.Abs(h) > 0.01f || Mathf.Abs(v) > 0.01f;
-            string anim = moving ? "walk" : "idle";
+            string anim;
+            if (!moving)
+                anim = isCrouching ? "crouch_idle" : "idle";
+            else if (isSprinting)
+                anim = "run";
+            else if (isCrouching)
+                anim = "crouch_walk";
+            else
+                anim = "walk";
             animController?.Play(anim);
         }
 
@@ -525,6 +557,50 @@ public class PlayerController : MonoBehaviour
             dir.y = 0;
             if (dir.sqrMagnitude > 0.01f)
                 FacingDirection = dir.normalized;
+        }
+    }
+
+    void UpdateSprintCrouch()
+    {
+        // Ctrl 토글 → 앉기
+        if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl))
+        {
+            isCrouching = !isCrouching;
+            if (isCrouching) isSprinting = false; // 앉으면 달리기 해제
+
+            // 앉기 시 visualRoot 스케일 조정 (원본 기준)
+            if (visualRoot != null)
+            {
+                bounceBaseLocalScale = isCrouching
+                    ? new Vector3(bounceOriginalScale.x * 1.05f, bounceOriginalScale.y * 0.7f, bounceOriginalScale.z)
+                    : bounceOriginalScale;
+            }
+        }
+
+        // Shift 홀드 → 달리기
+        bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool hasInput = moveDir.sqrMagnitude > 0.01f;
+
+        if (shiftHeld && hasInput && !isCrouching && !isExhausted && staminaCurrent > SprintMinStamina)
+        {
+            isSprinting = true;
+
+            // 달리기 스태미너 소모
+            float dt = Time.unscaledDeltaTime;
+            staminaCurrent -= SprintStaminaCost * dt;
+            staminaRegenDelayTimer = StamRegenDelay;
+
+            if (staminaCurrent <= 0)
+            {
+                staminaCurrent = 0;
+                isSprinting = false;
+                isExhausted = true;
+                staminaExhaustionTimer = ExhaustDur;
+            }
+        }
+        else
+        {
+            isSprinting = false;
         }
     }
 
@@ -908,11 +984,13 @@ public class PlayerController : MonoBehaviour
 
         if (moving)
         {
-            bounceTimer += Time.deltaTime * bounceSpeed;
+            float speedMod = isSprinting ? 1.4f : (isCrouching ? 0.6f : 1f);
+            bounceTimer += Time.deltaTime * bounceSpeed * speedMod;
 
             // 절대값 사인 → 바닥에서 위로만 튕김 (통통 느낌)
             float raw = Mathf.Sin(bounceTimer);
-            float bounce = Mathf.Abs(raw) * bounceHeight;
+            float heightMod = isCrouching ? 0.3f : (isSprinting ? 1.3f : 1f);
+            float bounce = Mathf.Abs(raw) * bounceHeight * heightMod;
 
             // 착지 순간 (사인파가 0을 지날 때) 살짝 납작
             float squash = 1f;

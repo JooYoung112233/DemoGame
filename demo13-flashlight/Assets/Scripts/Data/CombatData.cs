@@ -53,6 +53,12 @@ public class CombatData : ScriptableObject
 
         [Header("이동")]
         public float moveSpeed = 5f;
+        public float sprintSpeedMultiplier = 1.6f;   // 달리기 속도 배율
+        public float crouchSpeedMultiplier = 0.5f;    // 앉기 속도 배율
+
+        [Header("달리기")]
+        public float sprintStaminaCost = 12f;          // 초당 스태미너 소모
+        public float sprintMinStamina = 10f;           // 달리기 시작 최소 스태미너
 
         [Header("구버전 호환 (사용하지 않음)")]
         public float attackDamage = 25f;

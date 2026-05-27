@@ -49,9 +49,12 @@ public class SkeletonAnimController : MonoBehaviour
         switch (animName)
         {
             case "idle":
-                // 기본 상태 (모든 bool false)
+            case "crouch_idle":
+                // 기본 상태 (모든 bool false) — 앉기 idle도 같은 모션 (애니 추가 시 분리)
                 break;
             case "walk":
+            case "crouch_walk":
+                // 앉기 걷기도 walk 사용 (애니 추가 시 분리)
                 animator.SetBool("Walk", true);
                 break;
             case "run":
