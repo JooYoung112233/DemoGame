@@ -2,7 +2,6 @@ using UnityEngine;
 
 /// <summary>
 /// 플레이어 전투/이동 스탯. StatDB에 포함.
-/// 기존 CombatData.PlayerStats를 대체.
 /// </summary>
 [System.Serializable]
 public class PlayerStatData

@@ -33,8 +33,10 @@ PlayerController owns movement (NavMeshAgent + WASD), mouse-facing, flashlight p
 - **FlashlightController** — Battery-based, auto-off at daytime via DayNightCycle event.
 
 ### Combat
-- **EnemyController** — State machine AI (Patrol/Chase/AttackWindup/Attack/Hit/Stunned/Dead). Groggy system for stun-on-max. Spine animation.
-- **CombatData** (ScriptableObject) — Centralized balance: player stats (HP 100, light/heavy attack, dodge, stamina) and enemy stats.
+- **EnemyController** — State machine AI (Patrol/Chase/AttackWindup/Attack/Hit/Stunned/Dead). Groggy system for stun-on-max. Spine animation. Uses `unitKey` to load stats from StatDB.
+- **StatDB** (ScriptableObject, `Resources/Data/StatDB.asset`) — Central stat database. `StatDB.Instance.GetUnit(key)` for unit stats, `StatDB.Instance.playerStat` for player stats.
+- **PlayerStatData** — Player combat/movement stats (light/heavy attack, dodge, stamina, sprint, crouch).
+- **UnitStatData** — Per-unit stats (combat, visual, groggy, movement, detection, AI, rewards). Accessed by string key.
 
 ### Inventory & Items
 - **ItemData** (ScriptableObject) — Categories: Weapon/Medical/Consumable/Material/Valuable/Key/Misc. Rarity tiers. Grid footprint (1x1 to 3x3). Stacking.
@@ -62,7 +64,8 @@ All lighting scripts subscribe to `DayNightCycle.OnPhaseChanged` event:
 `SceneTransitionManager.TransitionWithDelay()` handles extraction: countdown UI, distance-based cancel if player leaves trigger range. Fade in/out with async scene loading. `SpawnPoint` components mark where player appears after transition.
 
 ### Data Layer
-- **CombatData** — Player/enemy balance numbers.
+- **StatDB** (`Resources/Data/StatDB.asset`) — Central stat database. PlayerStatData + UnitStatData list. Key-based access: `StatDB.Instance.GetUnit("bandit_melee")`.
+- **WeatherData** (`Assets/Settings/WeatherData.asset`) — Day/night lighting, fog, rain settings. Used by DayNightCycle and RainController.
 - **WorldRegionCatalog** — 7 districts with day/night characteristics.
 - **RegionTimeManager** — Per-region independent day/night cycles (unscaledDeltaTime).
 - **RegionLootCatalog/RegionLootTier/RegionLootBootstrap** — Loot distribution per region.

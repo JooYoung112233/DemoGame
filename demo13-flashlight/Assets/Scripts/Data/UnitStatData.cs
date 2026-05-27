@@ -2,7 +2,6 @@ using UnityEngine;
 
 /// <summary>
 /// 유닛(적/NPC) 통합 스탯. StatDB.units 리스트에 포함.
-/// 기존 CombatData.EnemyStats + EnemyData 통합.
 /// id(키)로 조회: StatDB.Instance.GetUnit("bandit_melee")
 /// </summary>
 [System.Serializable]
