@@ -22,7 +22,7 @@ namespace IsometricMapEditor
         float _currentDistance;
         Vector3 _focusPoint;
         bool _middleDragging;
-        Vector3 _lastMouseWorld;
+        Vector3 _lastMousePos;
 
         void Awake()
         {
@@ -30,6 +30,8 @@ namespace IsometricMapEditor
             if (_cam == null) _cam = gameObject.AddComponent<Camera>();
             _cam.orthographic = true;
             _cam.orthographicSize = initialDistance;
+            _cam.nearClipPlane = 0.01f;
+            _cam.farClipPlane = 500f;
             _currentDistance = initialDistance;
         }
 
@@ -72,7 +74,7 @@ namespace IsometricMapEditor
             if (Input.GetMouseButtonDown(2))
             {
                 _middleDragging = true;
-                _lastMouseWorld = GetMouseWorldXZ();
+                _lastMousePos = Input.mousePosition;
             }
 
             if (Input.GetMouseButtonUp(2))
@@ -80,10 +82,17 @@ namespace IsometricMapEditor
 
             if (_middleDragging)
             {
-                Vector3 current = GetMouseWorldXZ();
-                Vector3 delta = _lastMouseWorld - current;
-                _focusPoint += delta;
-                _lastMouseWorld = GetMouseWorldXZ();
+                Vector3 mouseDelta = Input.mousePosition - _lastMousePos;
+                _lastMousePos = Input.mousePosition;
+
+                // 스크린 픽셀 → 월드 단위 변환 (orthographic)
+                float worldPerPixel = (_cam.orthographicSize * 2f) / Screen.height;
+
+                // 카메라 로컬 축 기준으로 이동
+                Vector3 right = transform.right;
+                Vector3 up = Vector3.ProjectOnPlane(transform.up, Vector3.up).normalized;
+
+                _focusPoint -= (right * mouseDelta.x + up * mouseDelta.y) * worldPerPixel;
             }
         }
 

@@ -75,6 +75,7 @@ namespace IsometricMapEditor
 
             if (Input.GetKeyDown(KeyCode.Q)) _manager.RotateSelection(-1);
             if (Input.GetKeyDown(KeyCode.E)) _manager.RotateSelection(1);
+            if (Input.GetKeyDown(KeyCode.G)) _manager.ToggleSnapToGrid();
 
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.S))
                 _manager.UI.ShowSaveDialog();

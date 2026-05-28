@@ -12,13 +12,20 @@ namespace IsometricMapEditor
 
         // Toolbar
         Button[] _toolButtons;
-        Text _statusText;
         Text _rotationText;
 
         // Palette
         RectTransform _palettePanel;
         RectTransform _paletteContent;
         ScrollRect _paletteScroll;
+
+        // Snap label
+        Text _snapText;
+
+        // Hierarchy
+        RectTransform _hierarchyPanel;
+        RectTransform _hierarchyContent;
+        ScrollRect _hierarchyScroll;
 
         // Dialog
         RectTransform _dialogPanel;
@@ -38,6 +45,23 @@ namespace IsometricMapEditor
         static readonly Color BTN_HOVER = new(0.35f, 0.35f, 0.4f, 1f);
         static readonly Color PANEL_BG = new(0.15f, 0.15f, 0.18f, 0.95f);
 
+        static Font _cachedFont;
+        static bool _fontResolved;
+        static Font DefaultFont
+        {
+            get
+            {
+                if (_fontResolved) return _cachedFont;
+                _fontResolved = true;
+                _cachedFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                if (_cachedFont == null)
+                    _cachedFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+                if (_cachedFont == null)
+                    _cachedFont = Font.CreateDynamicFontFromOSFont("Arial", 14);
+                return _cachedFont;
+            }
+        }
+
         public void Initialize(MapBuilderManager manager)
         {
             _manager = manager;
@@ -53,7 +77,7 @@ namespace IsometricMapEditor
 
             var scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.referenceResolution = new Vector2(960, 540);
             scaler.matchWidthOrHeight = 0.5f;
 
             canvasGo.AddComponent<GraphicRaycaster>();
@@ -61,7 +85,7 @@ namespace IsometricMapEditor
 
             BuildTopToolbar();
             BuildPalettePanel();
-            BuildStatusBar();
+            BuildHierarchyPanel();
             BuildSaveLoadDialog();
             BuildNewMapDialog();
         }
@@ -72,12 +96,12 @@ namespace IsometricMapEditor
         {
             var bar = CreatePanel(_root, "Toolbar", BG);
             SetAnchors(bar, new Vector2(0, 1), new Vector2(1, 1));
-            bar.offsetMin = new Vector2(0, -50);
+            bar.offsetMin = new Vector2(0, -48);
             bar.offsetMax = Vector2.zero;
 
             var layout = bar.gameObject.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(10, 10, 5, 5);
-            layout.spacing = 8;
+            layout.padding = new RectOffset(10, 10, 4, 4);
+            layout.spacing = 6;
             layout.childAlignment = TextAnchor.MiddleLeft;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
@@ -89,17 +113,18 @@ namespace IsometricMapEditor
             for (int i = 0; i < toolNames.Length; i++)
             {
                 int idx = i;
-                var btn = CreateButton(bar, toolNames[i], 100, () => _manager.SetToolMode(modes[idx]));
+                var btn = CreateButton(bar, toolNames[i], 80, () => _manager.SetToolMode(modes[idx]));
                 _toolButtons[i] = btn;
             }
 
-            CreateSpacer(bar, 30);
-            CreateButton(bar, "New (Ctrl+N)", 130, () => ShowNewMapDialog());
-            CreateButton(bar, "Save (Ctrl+S)", 130, () => ShowSaveDialog());
-            CreateButton(bar, "Load (Ctrl+L)", 130, () => ShowLoadDialog());
+            CreateSpacer(bar, 16);
+            CreateButton(bar, "New", 50, () => ShowNewMapDialog());
+            CreateButton(bar, "Save", 50, () => ShowSaveDialog());
+            CreateButton(bar, "Load", 50, () => ShowLoadDialog());
 
-            CreateSpacer(bar, 30);
-            _rotationText = CreateLabel(bar, "Rot: N", 70);
+            CreateSpacer(bar, 16);
+            _rotationText = CreateLabel(bar, "Rot: N", 55);
+            _snapText = CreateLabel(bar, "Free", 50);
         }
 
         // ======== PALETTE PANEL ========
@@ -108,16 +133,23 @@ namespace IsometricMapEditor
         {
             _palettePanel = CreatePanel(_root, "Palette", PANEL_BG);
             SetAnchors(_palettePanel, new Vector2(0, 0), new Vector2(0, 1));
-            _palettePanel.offsetMin = new Vector2(0, 40);
-            _palettePanel.offsetMax = new Vector2(200, -50);
+            _palettePanel.offsetMin = new Vector2(0, 0);
+            _palettePanel.offsetMax = new Vector2(180, -48);
 
             var titleBar = CreatePanel(_palettePanel, "PaletteTitle", new Color(0.1f, 0.1f, 0.13f, 1f));
             SetAnchors(titleBar, new Vector2(0, 1), new Vector2(1, 1));
             titleBar.offsetMin = new Vector2(0, -30);
             titleBar.offsetMax = Vector2.zero;
-            var titleLabel = titleBar.gameObject.AddComponent<Text>();
+
+            var titleTextGo = new GameObject("TitleText");
+            titleTextGo.transform.SetParent(titleBar, false);
+            var titleRt = titleTextGo.AddComponent<RectTransform>();
+            SetAnchors(titleRt, Vector2.zero, Vector2.one);
+            titleRt.offsetMin = Vector2.zero;
+            titleRt.offsetMax = Vector2.zero;
+            var titleLabel = titleTextGo.AddComponent<Text>();
             titleLabel.text = "  Palette";
-            titleLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            titleLabel.font = DefaultFont;
             titleLabel.fontSize = 14;
             titleLabel.color = Color.white;
             titleLabel.alignment = TextAnchor.MiddleLeft;
@@ -236,7 +268,7 @@ namespace IsometricMapEditor
 
             var txt = go.AddComponent<Text>();
             txt.text = text;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.font = DefaultFont;
             txt.fontSize = 13;
             txt.fontStyle = FontStyle.Bold;
             txt.color = new Color(0.8f, 0.8f, 0.8f);
@@ -288,7 +320,7 @@ namespace IsometricMapEditor
             txtGo.transform.SetParent(go.transform, false);
             var txt = txtGo.AddComponent<Text>();
             txt.text = label;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.font = DefaultFont;
             txt.fontSize = 12;
             txt.color = Color.white;
             txt.alignment = TextAnchor.MiddleLeft;
@@ -305,29 +337,191 @@ namespace IsometricMapEditor
 
             var txt = go.AddComponent<Text>();
             txt.text = text;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.font = DefaultFont;
             txt.fontSize = 12;
             txt.color = new Color(0.6f, 0.6f, 0.6f);
             txt.alignment = TextAnchor.MiddleCenter;
         }
 
-        // ======== STATUS BAR ========
+        // ======== HIERARCHY PANEL ========
 
-        void BuildStatusBar()
+        void BuildHierarchyPanel()
         {
-            var bar = CreatePanel(_root, "StatusBar", BG);
-            SetAnchors(bar, Vector2.zero, new Vector2(1, 0));
-            bar.offsetMin = Vector2.zero;
-            bar.offsetMax = new Vector2(0, 35);
+            _hierarchyPanel = CreatePanel(_root, "Hierarchy", PANEL_BG);
+            SetAnchors(_hierarchyPanel, new Vector2(1, 0), new Vector2(1, 1));
+            _hierarchyPanel.offsetMin = new Vector2(-200, 0);
+            _hierarchyPanel.offsetMax = new Vector2(0, -48);
 
-            _statusText = bar.gameObject.AddComponent<Text>();
-            _statusText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _statusText.fontSize = 13;
-            _statusText.color = new Color(0.7f, 0.7f, 0.7f);
-            _statusText.alignment = TextAnchor.MiddleLeft;
+            var titleBar = CreatePanel(_hierarchyPanel, "HierarchyTitle", new Color(0.1f, 0.1f, 0.13f, 1f));
+            SetAnchors(titleBar, new Vector2(0, 1), new Vector2(1, 1));
+            titleBar.offsetMin = new Vector2(0, -30);
+            titleBar.offsetMax = Vector2.zero;
 
-            var padding = bar.gameObject.AddComponent<HorizontalLayoutGroup>();
-            padding.padding = new RectOffset(215, 10, 0, 0);
+            var titleTextGo = new GameObject("TitleText");
+            titleTextGo.transform.SetParent(titleBar, false);
+            var titleRt = titleTextGo.AddComponent<RectTransform>();
+            SetAnchors(titleRt, Vector2.zero, Vector2.one);
+            titleRt.offsetMin = Vector2.zero;
+            titleRt.offsetMax = Vector2.zero;
+            var titleLabel = titleTextGo.AddComponent<Text>();
+            titleLabel.text = "  Hierarchy";
+            titleLabel.font = DefaultFont;
+            titleLabel.fontSize = 14;
+            titleLabel.color = Color.white;
+            titleLabel.alignment = TextAnchor.MiddleLeft;
+
+            var scrollArea = CreatePanel(_hierarchyPanel, "ScrollArea", Color.clear);
+            SetAnchors(scrollArea, Vector2.zero, Vector2.one);
+            scrollArea.offsetMin = new Vector2(5, 5);
+            scrollArea.offsetMax = new Vector2(-5, -35);
+
+            var scrollGo = scrollArea.gameObject;
+            _hierarchyScroll = scrollGo.AddComponent<ScrollRect>();
+            _hierarchyScroll.horizontal = false;
+            _hierarchyScroll.vertical = true;
+            scrollGo.AddComponent<RectMask2D>();
+
+            _hierarchyContent = new GameObject("Content").AddComponent<RectTransform>();
+            _hierarchyContent.SetParent(scrollArea, false);
+            SetAnchors(_hierarchyContent, new Vector2(0, 1), new Vector2(1, 1));
+            _hierarchyContent.pivot = new Vector2(0.5f, 1f);
+            _hierarchyContent.offsetMin = Vector2.zero;
+            _hierarchyContent.offsetMax = Vector2.zero;
+
+            var vlg = _hierarchyContent.gameObject.AddComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(2, 2, 2, 2);
+            vlg.spacing = 2;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            var csf = _hierarchyContent.gameObject.AddComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            _hierarchyScroll.content = _hierarchyContent;
+        }
+
+        void PopulateHierarchy()
+        {
+            if (_hierarchyContent == null) return;
+
+            foreach (Transform child in _hierarchyContent)
+                Destroy(child.gameObject);
+
+            if (_manager.EditingMap == null) return;
+
+            // Buildings
+            if (_manager.EditingMap.buildings.Count > 0)
+            {
+                AddHierarchyHeader("Buildings");
+                foreach (var b in _manager.EditingMap.buildings)
+                {
+                    string label = b.buildingDefinition != null
+                        ? b.buildingDefinition.displayName ?? b.buildingDefinitionId
+                        : b.buildingDefinitionId;
+                    AddHierarchyItem($"{label} [{b.instanceId}]", b.instanceId);
+                }
+            }
+
+            // Props
+            if (_manager.EditingMap.props.Count > 0)
+            {
+                AddHierarchyHeader("Props");
+                foreach (var p in _manager.EditingMap.props)
+                {
+                    string label = p.propDefinition != null
+                        ? p.propDefinition.displayName ?? p.propDefinitionId
+                        : p.propDefinitionId;
+                    AddHierarchyItem($"{label} [{p.instanceId}]", p.instanceId);
+                }
+            }
+
+            // Map Objects
+            if (_manager.EditingMap.mapObjects.Count > 0)
+            {
+                AddHierarchyHeader("Map Objects");
+                foreach (var o in _manager.EditingMap.mapObjects)
+                {
+                    string label = string.IsNullOrEmpty(o.label) ? o.objectType.ToString() : o.label;
+                    AddHierarchyItem($"{label} [{o.instanceId}]", o.instanceId);
+                }
+            }
+        }
+
+        void AddHierarchyHeader(string text)
+        {
+            var go = new GameObject("Header");
+            go.transform.SetParent(_hierarchyContent, false);
+            var le = go.AddComponent<LayoutElement>();
+            le.preferredHeight = 22;
+
+            var txt = go.AddComponent<Text>();
+            txt.text = text;
+            txt.font = DefaultFont;
+            txt.fontSize = 12;
+            txt.fontStyle = FontStyle.Bold;
+            txt.color = new Color(0.8f, 0.8f, 0.8f);
+            txt.alignment = TextAnchor.MiddleLeft;
+        }
+
+        void AddHierarchyItem(string label, string instanceId)
+        {
+            var go = new GameObject(label);
+            go.transform.SetParent(_hierarchyContent, false);
+
+            var img = go.AddComponent<Image>();
+            img.color = BTN_NORMAL;
+
+            var le = go.AddComponent<LayoutElement>();
+            le.preferredHeight = 26;
+
+            var layout = go.AddComponent<HorizontalLayoutGroup>();
+            layout.padding = new RectOffset(4, 2, 1, 1);
+            layout.spacing = 2;
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = true;
+
+            // Clickable label (select + focus camera)
+            var labelGo = new GameObject("Label");
+            labelGo.transform.SetParent(go.transform, false);
+            var labelTxt = labelGo.AddComponent<Text>();
+            labelTxt.text = label;
+            labelTxt.font = DefaultFont;
+            labelTxt.fontSize = 11;
+            labelTxt.color = Color.white;
+            labelTxt.alignment = TextAnchor.MiddleLeft;
+            var labelLe = labelGo.AddComponent<LayoutElement>();
+            labelLe.flexibleWidth = 1;
+
+            // Add a transparent Image as raycast target for the button
+            var labelImg = labelGo.AddComponent<Image>();
+            labelImg.color = Color.clear;
+
+            var labelBtn = labelGo.AddComponent<Button>();
+            labelBtn.targetGraphic = labelImg;
+            var labelColors = labelBtn.colors;
+            labelColors.normalColor = Color.clear;
+            labelColors.highlightedColor = new Color(1, 1, 1, 0.1f);
+            labelColors.pressedColor = new Color(1, 1, 1, 0.2f);
+            labelBtn.colors = labelColors;
+            string selectId = instanceId;
+            labelBtn.onClick.AddListener(() => _manager.SelectPlacedObject(selectId));
+
+            // Delete button
+            string deleteId = instanceId;
+            var delBtn = CreateButton(go.GetComponent<RectTransform>(), "X", 20, () => _manager.DeletePlacedObject(deleteId));
+            var delLe = delBtn.GetComponent<LayoutElement>();
+            delLe.preferredWidth = 20;
+            delLe.preferredHeight = 22;
+
+            // Make delete button red-ish
+            var delImg = delBtn.GetComponent<Image>();
+            delImg.color = new Color(0.5f, 0.2f, 0.2f, 1f);
+            var delColors = delBtn.colors;
+            delColors.normalColor = new Color(0.5f, 0.2f, 0.2f, 1f);
+            delColors.highlightedColor = new Color(0.7f, 0.25f, 0.25f, 1f);
+            delColors.pressedColor = new Color(0.9f, 0.3f, 0.3f, 1f);
+            delBtn.colors = delColors;
         }
 
         // ======== SAVE/LOAD DIALOG ========
@@ -435,7 +629,7 @@ namespace IsometricMapEditor
                 txtRt.offsetMin = new Vector2(10, 0);
                 txtRt.offsetMax = Vector2.zero;
                 txt.text = fname;
-                txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                txt.font = DefaultFont;
                 txt.fontSize = 13;
                 txt.color = Color.white;
                 txt.alignment = TextAnchor.MiddleLeft;
@@ -483,12 +677,12 @@ namespace IsometricMapEditor
 
             var wRow = CreateRow(center, 30);
             CreateTextObj(wRow, "WLabel", "Width:", 14, FontStyle.Normal);
-            _widthInput = CreateInputField(wRow, "32");
+            _widthInput = CreateInputField(wRow, "64");
             _widthInput.contentType = InputField.ContentType.IntegerNumber;
 
             var hRow = CreateRow(center, 30);
             CreateTextObj(hRow, "HLabel", "Height:", 14, FontStyle.Normal);
-            _heightInput = CreateInputField(hRow, "32");
+            _heightInput = CreateInputField(hRow, "64");
             _heightInput.contentType = InputField.ContentType.IntegerNumber;
 
             var btnRow = CreateRow(center, 35);
@@ -496,8 +690,8 @@ namespace IsometricMapEditor
             {
                 int.TryParse(_widthInput.text, out int w);
                 int.TryParse(_heightInput.text, out int h);
-                w = Mathf.Clamp(w, 4, 256);
-                h = Mathf.Clamp(h, 4, 256);
+                w = Mathf.Clamp(w, 4, 512);
+                h = Mathf.Clamp(h, 4, 512);
                 _manager.NewMap(w, h);
                 _newMapPanel.gameObject.SetActive(false);
             });
@@ -519,14 +713,17 @@ namespace IsometricMapEditor
         {
             RefreshToolbar();
             PopulatePalette();
+            PopulateHierarchy();
             RefreshStatus();
         }
 
         public void RefreshToolbar()
         {
+            if (_toolButtons == null) return;
             ToolMode[] modes = { ToolMode.Tile, ToolMode.Wall, ToolMode.Prop, ToolMode.Building, ToolMode.MapObject, ToolMode.Eraser };
             for (int i = 0; i < _toolButtons.Length && i < modes.Length; i++)
             {
+                if (_toolButtons[i] == null) continue;
                 var img = _toolButtons[i].GetComponent<Image>();
                 img.color = _manager.CurrentTool == modes[i] ? BTN_ACTIVE : BTN_NORMAL;
             }
@@ -537,27 +734,22 @@ namespace IsometricMapEditor
 
         public void RefreshStatus()
         {
-            string[] dirs = { "N", "E", "S", "W" };
-            _rotationText.text = $"Rot: {dirs[_manager.CurrentRotation]}";
-
-            if (_manager.EditingMap != null)
+            if (_rotationText != null)
             {
-                var gs = _manager.EditingMap.gridSettings;
-                int tileCount = 0;
-                foreach (var layer in _manager.EditingMap.layers)
-                    tileCount += layer.tiles.Count;
+                string[] dirs = { "N", "E", "S", "W" };
+                int rot = Mathf.Clamp(_manager.CurrentRotation, 0, 3);
+                _rotationText.text = $"Rot: {dirs[rot]}";
+            }
 
-                _statusText.text = $"Map: {_manager.EditingMap.mapName} | " +
-                    $"Size: {gs.mapWidth}x{gs.mapHeight} | " +
-                    $"Tiles: {tileCount} | " +
-                    $"Props: {_manager.EditingMap.props.Count} | " +
-                    $"Objects: {_manager.EditingMap.mapObjects.Count} | " +
-                    $"Tool: {_manager.CurrentTool}";
+            if (_snapText != null)
+            {
+                _snapText.text = _manager.SnapToGrid ? "Snap" : "Free";
             }
         }
 
         void Update()
         {
+            if (_manager == null) return;
             RefreshStatus();
         }
 
@@ -589,7 +781,7 @@ namespace IsometricMapEditor
 
             var le = go.AddComponent<LayoutElement>();
             le.preferredWidth = width;
-            le.preferredHeight = 32;
+            le.preferredHeight = 34;
 
             var btn = go.AddComponent<Button>();
             var colors = btn.colors;
@@ -608,8 +800,8 @@ namespace IsometricMapEditor
 
             var txt = txtGo.AddComponent<Text>();
             txt.text = label;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = 13;
+            txt.font = DefaultFont;
+            txt.fontSize = 14;
             txt.color = Color.white;
             txt.alignment = TextAnchor.MiddleCenter;
 
@@ -625,7 +817,7 @@ namespace IsometricMapEditor
 
             var txt = go.AddComponent<Text>();
             txt.text = text;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.font = DefaultFont;
             txt.fontSize = 13;
             txt.color = Color.white;
             txt.alignment = TextAnchor.MiddleCenter;
@@ -647,7 +839,7 @@ namespace IsometricMapEditor
 
             var txt = go.AddComponent<Text>();
             txt.text = text;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.font = DefaultFont;
             txt.fontSize = fontSize;
             txt.fontStyle = style;
             txt.color = Color.white;
@@ -697,7 +889,7 @@ namespace IsometricMapEditor
             txtRt.offsetMax = new Vector2(-8, -2);
 
             var txt = txtGo.AddComponent<Text>();
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.font = DefaultFont;
             txt.fontSize = 14;
             txt.color = Color.white;
             txt.supportRichText = false;
@@ -711,7 +903,7 @@ namespace IsometricMapEditor
 
             var ph = phGo.AddComponent<Text>();
             ph.text = placeholder;
-            ph.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            ph.font = DefaultFont;
             ph.fontSize = 14;
             ph.fontStyle = FontStyle.Italic;
             ph.color = new Color(0.5f, 0.5f, 0.5f);

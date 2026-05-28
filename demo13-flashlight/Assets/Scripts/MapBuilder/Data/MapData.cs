@@ -125,6 +125,19 @@ namespace IsometricMapEditor
         }
 
         /// <summary>
+        /// Remove only non-wall tiles at the given position (ground/floor tiles only).
+        /// Walls are preserved.
+        /// </summary>
+        public void RemoveNonWallTilesAt(Vector2Int pos)
+        {
+            foreach (var layer in layers)
+                layer.tiles.RemoveAll(t =>
+                    t.gridPosition == pos
+                    && (t.tileDefinition == null || !t.tileDefinition.IsWall));
+            _cacheDirty = true;
+        }
+
+        /// <summary>
         /// Repaint: replace existing tiles at this position with the new definition.
         /// Only affects cells that already have tiles — empty cells are skipped.
         /// Searches all layers, replaces in-place keeping the same layer.

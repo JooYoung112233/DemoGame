@@ -291,93 +291,140 @@ Strict 2:1 pixel ratio.
 
 ---
 
-## 프롬프트 6: 미니맵 / 배치 레퍼런스 (탑다운 플로어플랜)
+## 프롬프트 6: 전체 배치도 (격자 기반 아이소메트릭, 레퍼 화풍)
+
+> **사용법**: 이 프롬프트 + 첨부 레퍼런스 이미지(게임 스크린샷 또는 컨셉아트)를 함께 전달.
+> "STRICT STYLE LOCK"으로 레퍼 화풍을 강제함.
+> **핵심**: 모든 오브젝트·벽·펜스가 아이소메트릭 격자 라인 위에 정렬됨.
 
 ```
-Top-down 2D floor plan / minimap diagram of a safehouse compound 
-for a 2.5D isometric survival looting game. 
-This is a BLUEPRINT / LAYOUT REFERENCE for placing objects in Unity,
-not a pretty illustration.
+[레퍼런스 이미지 첨부]
 
-OUTPUT: clean top-down diagram on dark background. 
-Output image size: 1920x1080 pixels.
+STRICT STYLE LOCK — match the attached reference image EXACTLY. 
+Same art style, same color palette, same level of detail, 
+same outline thickness, same lighting mood. 
+Do NOT deviate from the reference style in any way.
 
-=== GRID ===
-Show a visible 16x12 grid (16 columns, 12 rows). 
-Each cell is a square with thin dotted lines. 
-Grid cells labeled along edges: columns 1-16 (left to right), 
-rows A-L (top to bottom).
+=== CRITICAL: GRID-ALIGNED ISOMETRIC ===
 
-=== PERIMETER ===
-A thick orange outline marks the chain-link fence boundary. 
-The fence follows the grid edge with 1-cell margin on all sides.
-Bottom-center: a wide GATE opening (3 cells wide), marked in RED.
+This is a TILE-BASED GAME. Every single element must snap to 
+an isometric grid:
 
-=== SLOT ZONES ===
-Each slot is a colored rectangle on the grid with a label inside.
-Use distinct colors per slot status:
+- The ground is a visible isometric TILE GRID (diamond-shaped tiles).
+- ALL fences run along grid lines (diagonal lines in screen space).
+- ALL containers, structures, objects are axis-aligned to the grid.
+- NO rotated or free-placed objects — everything aligns to 
+  the two isometric axes (NE-SW and NW-SE diagonals).
+- The fence perimeter follows the grid edge EXACTLY — 
+  straight lines along isometric axes, 90° corners only.
+- Think of it like a chess board rotated 45° — 
+  every piece sits in a cell.
 
-ACTIVE (filled, bright):
-- [A1] PAWNSHOP — top-left area, ~5x3 cells, YELLOW fill
-  Label: "A1: 전당포 (5x3)"
-- [A2] CONTAINERS — mid-left area, ~6x3 cells (L-shape), BLUE fill
-  Label: "A2: 컨테이너 창고 (6x3)"
+=== OUTPUT ===
 
-LOCKED (empty, dim outline only):
-- [B1] — top-right area, ~4x3 cells, GRAY dashed outline
-  Label: "B1: (수리점) 4x3"
-- [B2] — mid-right area, ~4x3 cells, GRAY dashed outline
-  Label: "B2: (가구점) 4x3"
-- [A3] — bottom-left area, ~4x3 cells, GRAY dashed outline
-  Label: "A3: (블랙마켓) 4x3"
-- [B3] — bottom-right area, ~4x3 cells, GRAY dashed outline
-  Label: "B3: (의료소) 4x3"
+Isometric pixel art full-view layout of a safehouse compound.
+Camera pulled back to show the ENTIRE compound in one image.
+This is a placement reference for building the scene in Unity.
 
-=== FIXED OBJECTS ===
-Mark these with simple ICONS or labeled dots on the grid:
+CAMERA: 2:1 isometric projection (26.57° from horizontal), 
+camera facing front-left corner, top-left lighting.
+Output image size: 2560x1440 pixels minimum.
 
-- 📋 BULLETIN BOARD — 1x1, bottom area near the gate, LEFT side. 
-  GREEN dot, label "게시판"
-- 🚪 GATE — 3-cell wide opening at bottom-center fence. 
-  RED rectangle, label "철창문 (출구)"
-- 🔥 DRUM FIRE — 1x1, center yard. ORANGE dot, label "드럼통"
-- 💡 UTILITY POLE — 1x1, center yard. WHITE dot, label "가로등"
-- ⚡ GENERATOR — 1x1, near containers. CYAN dot, label "발전기"
+=== GROUND GRID ===
 
-=== OPEN YARD ===
-The center area (roughly 6x6 cells) should be clearly EMPTY — 
-label it "공터 (이동 공간)" in white text. 
-This is where the player walks freely.
+The compound floor is a 16x12 isometric tile grid.
+Each tile is a diamond shape. The grid lines should be 
+subtly visible on the ground (cracked asphalt with faded 
+parking lot lines that happen to align with the grid).
+This helps the viewer understand the tile layout.
 
-=== ARROWS / FLOW ===
-Draw thin white arrows showing the intended player flow:
-Gate → Center yard → Pawnshop (loop)
-Gate → Center yard → Containers (loop)
-Label the arrow path: "플레이어 동선"
+=== FENCE PERIMETER (grid-aligned) ===
 
-=== LEGEND ===
-Bottom or side of the image, a simple legend:
-- Yellow fill = Active facility
-- Blue fill = Storage
-- Gray dashed = Locked slot (future)
-- Red = Exit gate
-- Green = Interactable object
-- Orange outline = Fence perimeter
+A chain-link fence runs along the OUTER EDGE of the 16x12 grid.
+The fence is made of STRAIGHT SEGMENTS along isometric axes:
+- Back-left edge: 16 tiles long, running NW-SE
+- Back-right edge: 12 tiles long, running NE-SW  
+- Front-left edge: 16 tiles long, running NW-SE
+- Front-right edge: 12 tiles long, running NE-SW
+- All corners are sharp 90° isometric corners
 
-=== COMPASS ===
-Top-right corner: show isometric compass rose.
-Mark which direction is "camera facing" in the actual game:
-- N (top-right in iso) 
-- Arrow labeled "카메라 방향 ↗"
+Fence appearance: rusted chain-link mesh on metal poles, 
+barbed wire on top, some sections patched with corrugated 
+metal or tarp. Through the fence: ruined city visible.
 
-=== STYLE ===
-Clean, flat, diagrammatic. Dark navy/charcoal background (#1a1a2e).
-Bright colored fills and outlines for contrast.
-Monospace or clean sans-serif font for all labels.
-Korean text for labels.
-Grid lines: thin, dotted, subtle gray (#333).
-NO perspective, NO isometric — pure top-down orthographic.
-NO textures, NO shadows, NO pixel art — this is a DIAGRAM.
+GATE: A 3-tile-wide opening in the FRONT fence (bottom of screen).
+Heavy chain-link double gate with chain and padlock.
+
+=== TILE-ALIGNED OBJECT PLACEMENT ===
+
+All objects occupy exact grid cells. Listed as (column, row) 
+from the back-left corner of the 16x12 grid.
+
+BACK-LEFT AREA — PAWNSHOP [A1] (occupies ~cols 2-6, rows 2-4):
+- Tarp canopy structure, 5x3 tiles footprint
+- Aligned to grid edges, rectangular in isometric view
+- Counter, shelving, hanging bulb, NPC behind counter
+
+BACK-RIGHT AREA — EMPTY SLOT [B1] (occupies ~cols 10-13, rows 2-4):
+- 4x3 tile area, mostly empty ground
+- A tarp-covered junk pile (1x1), loose crates (1x1 each)
+- Grid cells clearly visible on empty ground
+
+MID-LEFT — CONTAINERS [A2] (occupies ~cols 2-7, rows 5-8):
+- 2-3 shipping containers in L-shape
+- Each container is exactly 3x1 or 3x2 tiles
+- Containers aligned to grid axes (not rotated!)
+- Crates beside them (1x1 tiles each)
+
+MID-RIGHT — EMPTY SLOT [B2] (occupies ~cols 10-13, rows 6-8):
+- 4x3 tile area, pallet platform (2x2), empty crates
+- Grid visible
+
+FRONT-LEFT — EMPTY SLOT [A3] (occupies ~cols 2-5, rows 9-11):
+- 4x3 tile area, drum barrel (1x1), tattered tarp
+
+FRONT-RIGHT — EMPTY SLOT [B3] (occupies ~cols 10-13, rows 9-11):
+- 4x3 tile area, folding table (1x1), chair (1x1)
+
+FRONT-CENTER — EXIT ZONE (cols 7-9, row 12):
+- Bulletin board (1x1 tile) at col 6, row 11
+- Gate opening (3 tiles wide) in the front fence
+- Beyond gate: road into dark ruined city
+
+CENTER YARD (cols 7-9, rows 5-9):
+- Open empty tiles — at least 4x4 clear walking space
+- Drum barrel fire (1x1) at roughly center
+- Utility pole (1x1) with working light
+- Scattered small objects: each exactly 1x1 tile
+
+=== ATMOSPHERE ===
+- Time: dusk/early evening, open sky above
+- Sunset gradient: deep blue-orange
+- Warm yellow from pawnshop + barrel fire
+- Cold white from utility pole light
+- Distant orange glow beyond fence
+- Shantytown / 달동네 mood
+
+=== MINIMAP OVERLAY ===
+Top-right corner of the image: a small semi-transparent 
+minimap diagram showing:
+- Grid outline (16x12 diamond)
+- Fence perimeter (white border)
+- Slot positions labeled A1, A2, A3, B1, B2, B3
+- Active slots: yellow dots (A1, A2)
+- Empty slots: gray dots (B1, B2, A3, B3)
+- Gate: red mark at bottom
+- Player: green dot at center
+
+=== STYLE NOTES ===
+- Every object edge aligns to the isometric grid
+- The grid itself should be faintly visible on the ground
+- The overall look should feel like a GAME SCREEN, 
+  not a painting — clean, readable, tile-based
+- Character should look small — this is a zoomed-out overview
+
+Match the attached reference EXACTLY in art style.
+Strict 2:1 pixel ratio on all isometric edges.
 ```
 
 ---

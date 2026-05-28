@@ -8,8 +8,8 @@ namespace IsometricMapEditor
         public MapBuilderCatalog catalog;
 
         [Header("Initial Map Size")]
-        public int mapWidth = 32;
-        public int mapHeight = 32;
+        public int mapWidth = 64;
+        public int mapHeight = 64;
 
         void Awake()
         {
@@ -19,6 +19,10 @@ namespace IsometricMapEditor
                 Debug.LogWarning("[MapBuilder] Manager already exists, skipping bootstrap.");
                 return;
             }
+
+            // Inspector에 카탈로그가 안 물려있으면 Resources에서 자동 로드
+            if (catalog == null)
+                catalog = Resources.Load<MapBuilderCatalog>("MapBuilder/MapBuilderCatalog");
 
             var go = new GameObject("MapBuilderManager");
             var manager = go.AddComponent<MapBuilderManager>();

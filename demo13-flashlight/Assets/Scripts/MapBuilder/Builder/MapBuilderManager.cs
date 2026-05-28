@@ -20,8 +20,8 @@ namespace IsometricMapEditor
         public MapBuilderCatalog catalog;
 
         [Header("Map Settings")]
-        public int defaultMapWidth = 32;
-        public int defaultMapHeight = 32;
+        public int defaultMapWidth = 64;
+        public int defaultMapHeight = 64;
 
         public MapData EditingMap { get; private set; }
         public ToolMode CurrentTool { get; private set; } = ToolMode.Tile;
@@ -31,6 +31,7 @@ namespace IsometricMapEditor
         public BuildingDefinition SelectedBuilding { get; private set; }
         public MapObjectType SelectedObjectType { get; private set; } = MapObjectType.SpawnPoint;
         public int CurrentRotation { get; private set; }
+        public bool SnapToGrid { get; set; }
 
         public MapBuilderUI UI { get; private set; }
         public MapBuilderGridOverlay GridOverlay { get; private set; }
@@ -51,6 +52,13 @@ namespace IsometricMapEditor
 
         void Start()
         {
+            if (catalog == null)
+            {
+                catalog = Resources.Load<MapBuilderCatalog>("MapBuilder/MapBuilderCatalog");
+                if (catalog == null)
+                    Debug.LogWarning("[MapBuilder] Catalog이 없습니다. Tools > Dev Tools > Map > Open Map Builder로 생성하세요.");
+            }
+
             SetupScene();
             NewMap(defaultMapWidth, defaultMapHeight);
         }
@@ -91,6 +99,10 @@ namespace IsometricMapEditor
             // Input
             var input = gameObject.AddComponent<MapBuilderInput>();
             input.Initialize(this, BuilderCamera);
+
+            // 기존 게임 UI/HUD 모두 비활성화
+            foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+                canvas.gameObject.SetActive(false);
 
             // UI
             UI = gameObject.AddComponent<MapBuilderUI>();
@@ -222,7 +234,7 @@ namespace IsometricMapEditor
                     PlaceProp(worldPos);
                     break;
                 case ToolMode.Building:
-                    PlaceBuilding(cell);
+                    PlaceBuildingAt(cell, worldPos);
                     break;
                 case ToolMode.MapObject:
                     PlaceMapObject(cell, worldPos);
@@ -285,24 +297,34 @@ namespace IsometricMapEditor
             if (SelectedProp == null || SelectedProp.prefab == null) return;
             SaveUndoSnapshot();
 
+            var cell = IsometricGrid.WorldToGrid(worldPos, EditingMap.gridSettings);
+            bool free = !SnapToGrid;
+            Vector3 finalPos = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+
             var prop = new PlacedProp
             {
                 instanceId = System.Guid.NewGuid().ToString("N")[..8],
-                gridPosition = IsometricGrid.WorldToGrid(worldPos, EditingMap.gridSettings),
+                gridPosition = cell,
                 propDefinitionId = SelectedProp.propId,
                 propDefinition = SelectedProp,
                 rotation = CurrentRotation,
-                freePlace = true,
-                worldPosition = worldPos,
+                freePlace = free,
+                worldPosition = finalPos,
                 yRotation = CurrentRotation * 90f,
                 scale = 1f
             };
 
             EditingMap.props.Add(prop);
             SpawnPropVisual(prop);
+            UI.RefreshAll();
         }
 
         void PlaceBuilding(Vector2Int cell)
+        {
+            PlaceBuildingAt(cell, IsometricGrid.GridToWorld(cell, EditingMap.gridSettings));
+        }
+
+        void PlaceBuildingAt(Vector2Int cell, Vector3 worldPos)
         {
             if (SelectedBuilding == null) return;
 
@@ -313,17 +335,23 @@ namespace IsometricMapEditor
 
             SaveUndoSnapshot();
 
+            bool free = !SnapToGrid;
             var building = new PlacedBuilding
             {
                 instanceId = System.Guid.NewGuid().ToString("N")[..8],
                 gridPosition = cell,
                 buildingDefinitionId = SelectedBuilding.buildingId,
                 buildingDefinition = SelectedBuilding,
-                rotation = CurrentRotation
+                rotation = CurrentRotation,
+                freePlace = free,
+                worldPosition = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings),
+                yRotation = CurrentRotation * 90f,
+                scale = 1f
             };
 
             EditingMap.buildings.Add(building);
             SpawnBuildingVisual(building);
+            UI.RefreshAll();
         }
 
         void PlaceMapObject(Vector2Int cell, Vector3 worldPos)
@@ -343,6 +371,7 @@ namespace IsometricMapEditor
 
             EditingMap.mapObjects.Add(obj);
             SpawnObjectMarker(obj);
+            UI.RefreshAll();
         }
 
         // --- Erase ---
@@ -361,11 +390,13 @@ namespace IsometricMapEditor
             switch (CurrentTool)
             {
                 case ToolMode.Tile:
-                case ToolMode.Eraser:
-                    EditingMap.RemoveTileAtAllLayers(cell);
+                    // Only erase tiles (not walls, not objects)
+                    EditingMap.RemoveNonWallTilesAt(cell);
                     _tileRenderer.RemoveTileObject(cell);
-                    RemoveWallsAtCell(cell);
-                    RemoveMapObjectsAtCell(cell);
+                    break;
+                case ToolMode.Eraser:
+                    // Erase the nearest object of ANY type at that cell
+                    EraseNearestAtCell(cell);
                     break;
                 case ToolMode.Wall:
                     string key = $"{cell.x}_{cell.y}_E{CurrentRotation}";
@@ -462,6 +493,225 @@ namespace IsometricMapEditor
             }
         }
 
+        void EraseNearestAtCell(Vector2Int cell)
+        {
+            Vector3 cellWorld = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+            float bestDist = float.MaxValue;
+            int bestType = -1; // 0=tile, 1=wall, 2=prop, 3=building, 4=mapObject
+            int bestIndex = -1;
+            int bestRotation = 0;
+
+            // Check tiles (non-wall) at cell
+            foreach (var layer in EditingMap.layers)
+            {
+                for (int i = 0; i < layer.tiles.Count; i++)
+                {
+                    var t = layer.tiles[i];
+                    if (t.gridPosition != cell) continue;
+                    if (t.tileDefinition != null && t.tileDefinition.IsWall) continue;
+                    // Tiles are exactly at cell center, distance = 0
+                    if (0f < bestDist) { bestDist = 0f; bestType = 0; }
+                }
+            }
+
+            // Check walls at cell
+            for (int r = 0; r < 4; r++)
+            {
+                string key = $"{cell.x}_{cell.y}_E{r}";
+                if (_wallObjects.ContainsKey(key))
+                {
+                    if (0f < bestDist) { bestDist = 0f; bestType = 1; bestRotation = r; }
+                }
+            }
+
+            // Check props
+            for (int i = 0; i < EditingMap.props.Count; i++)
+            {
+                var p = EditingMap.props[i];
+                float dist = Vector3.Distance(p.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    bestType = 2;
+                    bestIndex = i;
+                }
+            }
+
+            // Check buildings
+            for (int i = 0; i < EditingMap.buildings.Count; i++)
+            {
+                var b = EditingMap.buildings[i];
+                if (b.buildingDefinition == null) continue;
+                var occupied = b.buildingDefinition.GetOccupiedCells(b.gridPosition);
+                if (occupied.Contains(cell))
+                {
+                    float dist = Vector3.Distance(b.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        bestType = 3;
+                        bestIndex = i;
+                    }
+                }
+            }
+
+            // Check map objects
+            for (int i = 0; i < EditingMap.mapObjects.Count; i++)
+            {
+                var obj = EditingMap.mapObjects[i];
+                if (obj.gridPosition == cell)
+                {
+                    float dist = Vector3.Distance(obj.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        bestType = 4;
+                        bestIndex = i;
+                    }
+                }
+            }
+
+            // Execute erase for nearest
+            switch (bestType)
+            {
+                case 0:
+                    EditingMap.RemoveNonWallTilesAt(cell);
+                    _tileRenderer.RemoveTileObject(cell);
+                    break;
+                case 1:
+                    string wKey = $"{cell.x}_{cell.y}_E{bestRotation}";
+                    EditingMap.RemoveWallEdge(cell, bestRotation);
+                    if (_wallObjects.TryGetValue(wKey, out var wallGo))
+                    {
+                        Destroy(wallGo);
+                        _wallObjects.Remove(wKey);
+                    }
+                    break;
+                case 2:
+                    var prop = EditingMap.props[bestIndex];
+                    EditingMap.props.RemoveAt(bestIndex);
+                    if (_propObjects.TryGetValue(prop.instanceId, out var propGo))
+                    {
+                        Destroy(propGo);
+                        _propObjects.Remove(prop.instanceId);
+                    }
+                    break;
+                case 3:
+                    var building = EditingMap.buildings[bestIndex];
+                    if (_buildingObjects.TryGetValue(building.instanceId, out var buildGo))
+                    {
+                        Destroy(buildGo);
+                        _buildingObjects.Remove(building.instanceId);
+                    }
+                    EditingMap.buildings.RemoveAt(bestIndex);
+                    break;
+                case 4:
+                    var mObj = EditingMap.mapObjects[bestIndex];
+                    if (_objectMarkers.TryGetValue(mObj.instanceId, out var markerGo))
+                    {
+                        Destroy(markerGo);
+                        _objectMarkers.Remove(mObj.instanceId);
+                    }
+                    EditingMap.mapObjects.RemoveAt(bestIndex);
+                    break;
+            }
+
+            UI.RefreshAll();
+        }
+
+        // --- Hierarchy Actions ---
+
+        public void SelectPlacedObject(string instanceId)
+        {
+            if (EditingMap == null) return;
+
+            // Search buildings
+            foreach (var b in EditingMap.buildings)
+            {
+                if (b.instanceId == instanceId)
+                {
+                    BuilderCamera.SetFocusPoint(b.GetWorldPosition(EditingMap.gridSettings));
+                    return;
+                }
+            }
+            // Search props
+            foreach (var p in EditingMap.props)
+            {
+                if (p.instanceId == instanceId)
+                {
+                    BuilderCamera.SetFocusPoint(p.GetWorldPosition(EditingMap.gridSettings));
+                    return;
+                }
+            }
+            // Search map objects
+            foreach (var o in EditingMap.mapObjects)
+            {
+                if (o.instanceId == instanceId)
+                {
+                    BuilderCamera.SetFocusPoint(o.GetWorldPosition(EditingMap.gridSettings));
+                    return;
+                }
+            }
+        }
+
+        public void DeletePlacedObject(string instanceId)
+        {
+            if (EditingMap == null) return;
+            SaveUndoSnapshot();
+
+            // Search buildings
+            for (int i = EditingMap.buildings.Count - 1; i >= 0; i--)
+            {
+                if (EditingMap.buildings[i].instanceId == instanceId)
+                {
+                    if (_buildingObjects.TryGetValue(instanceId, out var go))
+                    {
+                        Destroy(go);
+                        _buildingObjects.Remove(instanceId);
+                    }
+                    EditingMap.buildings.RemoveAt(i);
+                    UI.RefreshAll();
+                    return;
+                }
+            }
+            // Search props
+            for (int i = EditingMap.props.Count - 1; i >= 0; i--)
+            {
+                if (EditingMap.props[i].instanceId == instanceId)
+                {
+                    if (_propObjects.TryGetValue(instanceId, out var go))
+                    {
+                        Destroy(go);
+                        _propObjects.Remove(instanceId);
+                    }
+                    EditingMap.props.RemoveAt(i);
+                    UI.RefreshAll();
+                    return;
+                }
+            }
+            // Search map objects
+            for (int i = EditingMap.mapObjects.Count - 1; i >= 0; i--)
+            {
+                if (EditingMap.mapObjects[i].instanceId == instanceId)
+                {
+                    if (_objectMarkers.TryGetValue(instanceId, out var go))
+                    {
+                        Destroy(go);
+                        _objectMarkers.Remove(instanceId);
+                    }
+                    EditingMap.mapObjects.RemoveAt(i);
+                    UI.RefreshAll();
+                    return;
+                }
+            }
+        }
+
+        public void ToggleSnapToGrid()
+        {
+            SnapToGrid = !SnapToGrid;
+            UI.RefreshStatus();
+        }
+
         // --- Visuals ---
 
         void SpawnPropVisual(PlacedProp prop)
@@ -481,7 +731,7 @@ namespace IsometricMapEditor
             var def = building.buildingDefinition;
             if (def == null) return;
 
-            Vector3 worldPos = IsometricGrid.GridToWorld(building.gridPosition, EditingMap.gridSettings);
+            Vector3 worldPos = building.GetWorldPosition(EditingMap.gridSettings);
             GameObject go;
 
             if (def.prefab != null)
