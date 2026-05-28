@@ -711,7 +711,7 @@ public class SpawnCreator : EditorWindow
         var visualRoot = new GameObject("Root");
         visualRoot.transform.SetParent(root.transform);
         visualRoot.transform.localPosition = new Vector3(0, 0.4f, 0);
-        visualRoot.transform.localRotation = Quaternion.Euler(26f, 42f, 0f);
+        visualRoot.transform.localRotation = Quaternion.Euler(35.264f, 45f, 0f);
 
         var spriteObj = new GameObject("EnemySprite");
         spriteObj.transform.SetParent(visualRoot.transform);
@@ -822,7 +822,7 @@ public class SpawnCreator : EditorWindow
         var visualRoot = new GameObject("Root");
         visualRoot.transform.SetParent(root.transform);
         visualRoot.transform.localPosition = new Vector3(0, 0.3f, 0);
-        visualRoot.transform.localRotation = Quaternion.Euler(26f, 42f, 0f);
+        visualRoot.transform.localRotation = Quaternion.Euler(35.264f, 45f, 0f);
 
         var spriteObj = new GameObject("Sprite");
         spriteObj.transform.SetParent(visualRoot.transform);
@@ -1018,7 +1018,7 @@ public class SpawnCreator : EditorWindow
             var visualRoot = new GameObject("Root");
             visualRoot.transform.SetParent(root.transform);
             visualRoot.transform.localPosition = new Vector3(0, 0.4f, 0);
-            visualRoot.transform.localRotation = Quaternion.Euler(26f, 42f, 0f);
+            visualRoot.transform.localRotation = Quaternion.Euler(35.264f, 45f, 0f);
 
             var spriteObj = new GameObject("NPCSprite");
             spriteObj.transform.SetParent(visualRoot.transform);

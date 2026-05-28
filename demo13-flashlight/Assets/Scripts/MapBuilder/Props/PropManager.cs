@@ -31,7 +31,9 @@ namespace IsometricMapEditor
 
             if (prop.freePlace)
             {
-                go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0);
+                // Y회전을 프리팹 Root 회전에 곱함 (Root의 카메라 맞춤 회전 유지)
+                if (Mathf.Abs(prop.yRotation) > 0.01f)
+                    go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0) * go.transform.rotation;
                 go.transform.localScale = Vector3.one * prop.scale;
             }
 

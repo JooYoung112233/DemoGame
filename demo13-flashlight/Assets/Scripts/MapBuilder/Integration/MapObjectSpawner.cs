@@ -44,7 +44,10 @@ namespace IsometricMapEditor
             var go = new GameObject($"MapObj_{obj.objectType}_{obj.instanceId}");
             go.transform.SetParent(_root);
             go.transform.position = worldPos;
-            go.transform.rotation = Quaternion.Euler(0, obj.yRotation, 0);
+            // Y회전을 기본 아이소메트릭 Root 회전에 곱함
+            go.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
+            if (Mathf.Abs(obj.yRotation) > 0.01f)
+                go.transform.rotation = Quaternion.Euler(0, obj.yRotation, 0) * go.transform.rotation;
 
             // InteractableObject 타입이면 컴포넌트 부착
             if (obj.IsInteractable)

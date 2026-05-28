@@ -112,7 +112,7 @@ namespace IsometricMapEditor
         static void SetupBillboard(GameObject go)
         {
             // Rotate sprite to face isometric camera (lying on XZ plane tilted toward camera)
-            go.transform.rotation = Quaternion.Euler(90, 0, 0);
+            go.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
         }
 
         public void ClearAll()

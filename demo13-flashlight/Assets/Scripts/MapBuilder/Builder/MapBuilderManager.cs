@@ -1219,7 +1219,7 @@ namespace IsometricMapEditor
                 case 1: // TextureQuad
                 {
                     go = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                    go.transform.localRotation = Quaternion.Euler(90f, 0, 0);
+                    go.transform.localRotation = Quaternion.Euler(35.264f, 45f, 0);
                     go.transform.localScale = Vector3.one * scale;
                     var meshCol = go.GetComponent<MeshCollider>();
                     if (meshCol) Destroy(meshCol);

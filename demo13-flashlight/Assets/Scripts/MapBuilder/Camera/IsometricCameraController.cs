@@ -30,7 +30,7 @@ namespace IsometricMapEditor
             // Setup 3D orthographic isometric camera
             cam.orthographic = true;
             cam.orthographicSize = 10f;
-            transform.rotation = Quaternion.Euler(30, 45, 0);
+            transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
         }
 
         void LateUpdate()

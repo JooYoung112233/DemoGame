@@ -14,7 +14,7 @@ namespace IsometricMapEditor
         public float maxZoom = 40f;
 
         [Header("Isometric")]
-        public float cameraAngleX = 45f;
+        public float cameraAngleX = 35.264f;
         public float cameraAngleY = 45f;
         public float initialDistance = 20f;
 
