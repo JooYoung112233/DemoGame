@@ -17,6 +17,9 @@ public class ItemSpawnPoint : MonoBehaviour
     [Tooltip("스폰 타입")]
     [SerializeField] SpawnType spawnType = SpawnType.Ground;
 
+    /// <summary>외부에서 스폰 타입 조회</summary>
+    public SpawnType Type => spawnType;
+
     [Tooltip("스폰 테이블 (Ground/Container용). 비우고 지역 루트 사용 가능")]
     [SerializeField] SpawnTable spawnTable;
 
@@ -48,10 +51,18 @@ public class ItemSpawnPoint : MonoBehaviour
 
     float respawnTimer;
 
+    /// <summary>MapSpawnController가 관리 중이면 자체 스폰 스킵</summary>
+    [HideInInspector] public bool managedByController;
+
     void Start()
     {
-        if (!hasSpawned)
-            DoSpawn();
+        if (hasSpawned) return;
+
+        // MapSpawnController가 있으면 Fixed만 자체 스폰, 나머지는 컨트롤러가 분배
+        if (managedByController && spawnType != SpawnType.Fixed)
+            return;
+
+        DoSpawn();
     }
 
     void Update()

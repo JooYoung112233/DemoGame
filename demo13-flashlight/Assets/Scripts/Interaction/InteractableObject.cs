@@ -32,6 +32,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
         MapBoard,       // 지도판 (출전 선택) — 값 8 유지 (기존 씬 직렬화)
         MedicalBench,   // 의료대 (일회용 치료템 제작)
         CookingBench,   // 조리대 (버프 음식 제작)
+        Door,           // 문 (잠금/열쇠/조건부)
     }
 
     #endregion
@@ -45,8 +46,8 @@ public class InteractableObject : MonoBehaviour, IInteractable
     [Tooltip("플레이어에게 표시될 프롬프트 텍스트 (예: 조사하기, 줍기, 탈출하기)")]
     [SerializeField] string promptText = "조사하기";
 
-    [Tooltip("플레이어가 이 거리 안에 있어야 상호작용 가능 (단위: 미터)")]
-    [SerializeField] float interactRange = 1.5f;
+    [Tooltip("플레이어가 이 거리 안에 있어야 상호작용 가능 (단위: 미터, XZ 평면)")]
+    [SerializeField] float interactRange = 2f;
 
     [Tooltip("true면 한 번만 사용 가능 (줍기, 쪽지 등). false면 반복 사용")]
     [SerializeField] bool oneShot = false;
@@ -68,6 +69,13 @@ public class InteractableObject : MonoBehaviour, IInteractable
     [Header("── 쪽지 (Note 전용) ──")]
     [Tooltip("읽을 때 표시될 쪽지 내용")]
     [SerializeField] [TextArea(3, 10)] string noteContent;
+
+    [Tooltip("이 쪽지에 연결된 스토리 씬 ID (비어있으면 noteContent를 직접 표시)")]
+    [SerializeField] string noteStorySceneId;
+
+    [Header("── NPC (스토리 연동) ──")]
+    [Tooltip("스토리 트리거에 사용할 NPC ID (pawnshop, merchant 등)")]
+    [SerializeField] string storyNpcId;
 
     [Header("── 줍기 (Pickup 전용) ──")]
     [Tooltip("인벤토리에 추가될 아이템 ID (ItemDatabase 기준)")]
@@ -212,6 +220,12 @@ public class InteractableObject : MonoBehaviour, IInteractable
             case InteractType.NPC:
                 HandleNPC(player);
                 break;
+            case InteractType.Bed:
+                HandleBed(player);
+                break;
+            case InteractType.Door:
+                HandleDoor(player);
+                break;
             default:
                 Debug.Log($"[Interact] {type}: {promptText}");
                 break;
@@ -249,8 +263,33 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
     void HandleNote(PlayerController player)
     {
-        Debug.Log($"[Note] {noteContent}");
-        // TODO: 노트 UI 표시
+        if (StoryTriggerManager.Instance != null)
+        {
+            StoryTriggerManager.Instance.OnNoteRead(noteContent, noteStorySceneId);
+        }
+        else if (DialogueUI.Instance != null)
+        {
+            DialogueUI.Instance.ShowStoryDialogue("", new[] { noteContent }, null);
+        }
+        else
+        {
+            Debug.Log($"[Note] {noteContent}");
+        }
+    }
+
+    void HandleBed(PlayerController player)
+    {
+        if (StoryTriggerManager.Instance != null)
+        {
+            StoryTriggerManager.Instance.OnBedRest();
+        }
+        else
+        {
+            // 폴백: HP만 회복
+            var health = player.GetComponent<Health>();
+            if (health != null) health.Heal(health.MaxHp);
+            Debug.Log("[Bed] 휴식 완료 (HP 회복)");
+        }
     }
 
     void HandlePickup(PlayerController player)
@@ -284,6 +323,15 @@ public class InteractableObject : MonoBehaviour, IInteractable
                         QuestManager.Instance.UpdateObjective(ObjectiveType.CollectItem, data.itemId, itemCount);
 
                     Debug.Log($"[Pickup] {data.displayName} x{itemCount} 획득");
+
+                    // 스토리 트리거: 첫 파밍, 루디 획득
+                    if (StoryTriggerManager.Instance != null)
+                    {
+                        StoryTriggerManager.Instance.OnItemLooted();
+                        if (data.itemId == "rudi_shard" || data.itemId == "rudi")
+                            StoryTriggerManager.Instance.OnRudiPickup();
+                    }
+
                     if (oneShot) gameObject.SetActive(false);
                 }
                 else
@@ -338,6 +386,15 @@ public class InteractableObject : MonoBehaviour, IInteractable
             npc.Talk(player);
         else
             Debug.Log($"[NPC] {promptText} (NPCController 없음)");
+    }
+
+    void HandleDoor(PlayerController player)
+    {
+        var door = GetComponent<DoorController>();
+        if (door != null)
+            door.TryOpen(player);
+        else
+            Debug.Log($"[Door] {promptText} (DoorController 없음)");
     }
 
     void HandleMapBoard(PlayerController player)

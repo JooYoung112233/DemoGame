@@ -2,14 +2,14 @@ using UnityEngine;
 
 /// <summary>
 /// 디버그 테스트 UI.
-/// H키로 토글. 탭 구분으로 여러 시스템 테스트 가능.
+/// F1키로 토글. 탭 구분으로 여러 시스템 테스트 가능.
 /// 인게임에서만 사용 (빌드 시 제거 또는 #if UNITY_EDITOR).
 /// </summary>
 public class DebugTestUI : MonoBehaviour
 {
     static DebugTestUI instance;
 
-    [SerializeField] KeyCode toggleKey = KeyCode.H;
+    [SerializeField] KeyCode toggleKey = KeyCode.F1;
 
     [Header("치료 아이템 (테스트용)")]
     [SerializeField] MedicalItemData[] testMedicalItems;

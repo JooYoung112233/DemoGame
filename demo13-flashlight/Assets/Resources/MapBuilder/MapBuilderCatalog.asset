@@ -16,4 +16,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8eec898b1387a0b468e6ca534f86ffa7, type: 2}
   walls: []
   props: []
-  buildings: []
+  buildings:
+  - {fileID: 0}
+  - {fileID: 11400000, guid: 10e66f108119e7a4caf86f05727b06ea, type: 2}
+  npcs: []

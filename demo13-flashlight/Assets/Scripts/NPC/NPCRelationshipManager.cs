@@ -58,4 +58,47 @@ public class NPCRelationshipManager : MonoBehaviour
         if (affinity >= 20) return "중립";
         return "경계";
     }
+
+    // ═══════════════════════════
+    //  세이브/로드
+    // ═══════════════════════════
+
+    public List<NPCRelationshipSaveEntry> GetAllSaveData()
+    {
+        var list = new List<NPCRelationshipSaveEntry>();
+        foreach (var kvp in relationships)
+        {
+            var rel = kvp.Value;
+            var entry = new NPCRelationshipSaveEntry
+            {
+                npcId = rel.npcId,
+                affinity = rel.affinity,
+                trust = rel.trust,
+                fear = rel.fear,
+                completedEvents = new List<string>(rel.completedEvents),
+                flags = new List<FlagEntry>(),
+            };
+            foreach (var f in rel.flags)
+                entry.flags.Add(new FlagEntry { key = f.Key, value = f.Value });
+            list.Add(entry);
+        }
+        return list;
+    }
+
+    public void LoadAllSaveData(List<NPCRelationshipSaveEntry> data)
+    {
+        if (data == null) return;
+        relationships.Clear();
+        foreach (var entry in data)
+        {
+            var rel = new NPCRelationship(entry.npcId, entry.affinity, entry.trust);
+            rel.fear = entry.fear;
+            if (entry.completedEvents != null)
+                rel.completedEvents = new HashSet<string>(entry.completedEvents);
+            if (entry.flags != null)
+                foreach (var f in entry.flags)
+                    rel.flags[f.key] = f.value;
+            relationships[entry.npcId] = rel;
+        }
+    }
 }

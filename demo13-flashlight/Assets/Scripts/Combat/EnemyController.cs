@@ -266,6 +266,11 @@ public class EnemyController : MonoBehaviour
         if (player != null && DistToPlayer() < DetectRng)
         {
             state = State.Chase;
+
+            // 스토리: 첫 전투 조우 트리거
+            if (StoryTriggerManager.Instance != null)
+                StoryTriggerManager.Instance.OnFirstCombatEncounter();
+
             return;
         }
 

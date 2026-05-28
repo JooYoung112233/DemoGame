@@ -5,10 +5,15 @@ using UnityEngine.UI;
 /// 지역 선택 UI (Canvas/uGUI).
 /// 지도판(MapBoard) 상호작용 시 표시.
 /// 지역 데이터: WorldRegionCatalog (docs/world-map.md).
+///
+/// Editor-time 사용:
+///   Inspector에서 Generate UI / Clear UI 버튼으로 Canvas 생성/삭제.
+///   런타임: Awake()에서 미생성 시 자동 GenerateUI() + BindEvents().
 /// </summary>
 public class MapSelectUI : MonoBehaviour
 {
     public bool IsShowing => isShowing;
+    public bool IsGenerated => canvas != null;
 
     const float BtnHeight = 38f;
     const float BtnSpacing = 42f;
@@ -18,53 +23,32 @@ public class MapSelectUI : MonoBehaviour
 
     bool isShowing;
 
-    Canvas canvas;
-    GameObject panelRoot;
-    Image dimBg;
-    Text titleText;
-    Button[] regionButtons;
-    Text selectedInfoText;
-    Button confirmBtn;
-    Button cancelBtn;
-    Text confirmText;
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] Image dimBg;
+    [SerializeField] Text titleText;
+    [SerializeField] Text selectedInfoText;
+    [SerializeField] Button confirmBtn;
+    [SerializeField] Button cancelBtn;
+    [SerializeField] Text confirmText;
+    [SerializeField] Button[] regionButtons;
+    [SerializeField] Text[] regionBtnTexts;
 
     static WorldRegionCatalog.RegionDefinition[] Regions => WorldRegionCatalog.All;
 
     int selectedRegion = -1;
-    Text[] regionBtnTexts;
 
     void Awake()
     {
-        BuildUI();
+        if (!IsGenerated) GenerateUI();
+        BindEvents();
     }
 
-    public void Show()
-    {
-        isShowing = true;
-        selectedRegion = -1;
-        if (panelRoot != null)
-            panelRoot.SetActive(true);
-        UpdateSelection();
-    }
+    // ══════════════════════════════════════
+    // UI 생성 / 바인딩 / 제거
+    // ══════════════════════════════════════
 
-    public void Hide()
-    {
-        isShowing = false;
-        if (panelRoot != null)
-            panelRoot.SetActive(false);
-    }
-
-    void Update()
-    {
-        if (!isShowing) return;
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-            Hide();
-
-        UpdateRegionTimeDisplay();
-    }
-
-    void BuildUI()
+    public void GenerateUI()
     {
         int count = Regions.Length;
         float listHeight = count * BtnSpacing + 20f;
@@ -114,7 +98,6 @@ public class MapSelectUI : MonoBehaviour
         regionBtnTexts = new Text[count];
         for (int i = 0; i < count; i++)
         {
-            int idx = i;
             var r = Regions[i];
 
             var btnGO = new GameObject($"Region_{r.regionId}");
@@ -139,7 +122,6 @@ public class MapSelectUI : MonoBehaviour
             }
             else
             {
-                btn.onClick.AddListener(() => SelectRegion(idx));
                 var colors = btn.colors;
                 colors.highlightedColor = WorldRegionCatalog.GetButtonColor(r, true);
                 colors.pressedColor = WorldRegionCatalog.GetButtonColor(r, true) * 0.85f;
@@ -191,7 +173,6 @@ public class MapSelectUI : MonoBehaviour
 
         confirmBtn = confirmGO.AddComponent<Button>();
         confirmBtn.targetGraphic = confirmImg;
-        confirmBtn.onClick.AddListener(OnConfirm);
         confirmBtn.interactable = false;
 
         var cColors = confirmBtn.colors;
@@ -216,7 +197,6 @@ public class MapSelectUI : MonoBehaviour
 
         cancelBtn = cancelGO.AddComponent<Button>();
         cancelBtn.targetGraphic = cancelImg;
-        cancelBtn.onClick.AddListener(Hide);
 
         var xColors = cancelBtn.colors;
         xColors.highlightedColor = new Color(0.6f, 0.2f, 0.2f);
@@ -230,6 +210,83 @@ public class MapSelectUI : MonoBehaviour
 
         panelRoot.SetActive(false);
     }
+
+    public void BindEvents()
+    {
+        if (confirmBtn != null)
+            confirmBtn.onClick.AddListener(OnConfirm);
+
+        if (cancelBtn != null)
+            cancelBtn.onClick.AddListener(Hide);
+
+        if (regionButtons != null)
+        {
+            for (int i = 0; i < regionButtons.Length; i++)
+            {
+                if (regionButtons[i] == null) continue;
+                if (!regionButtons[i].interactable) continue;
+                int idx = i;
+                regionButtons[i].onClick.AddListener(() => SelectRegion(idx));
+            }
+        }
+    }
+
+    public void ClearGeneratedUI()
+    {
+        var child = transform.Find("MapSelect_Canvas");
+        if (child != null)
+        {
+            if (Application.isPlaying)
+                Destroy(child.gameObject);
+            else
+                DestroyImmediate(child.gameObject);
+        }
+
+        canvas = null;
+        panelRoot = null;
+        dimBg = null;
+        titleText = null;
+        selectedInfoText = null;
+        confirmBtn = null;
+        cancelBtn = null;
+        confirmText = null;
+        regionButtons = null;
+        regionBtnTexts = null;
+    }
+
+    // ══════════════════════════════════════
+    // Show / Hide
+    // ══════════════════════════════════════
+
+    public void Show()
+    {
+        isShowing = true;
+        selectedRegion = -1;
+        if (panelRoot != null)
+            panelRoot.SetActive(true);
+        UpdateSelection();
+    }
+
+    public void Hide()
+    {
+        isShowing = false;
+        if (panelRoot != null)
+            panelRoot.SetActive(false);
+    }
+
+    void Update()
+    {
+        if (!isShowing) return;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Hide();
+
+        UpdateRegionTimeDisplay();
+    }
+
+    // ══════════════════════════════════════
+    // 선택 / 확인
+    // ══════════════════════════════════════
 
     static string FormatButtonLabel(in WorldRegionCatalog.RegionDefinition r)
     {
@@ -257,7 +314,18 @@ public class MapSelectUI : MonoBehaviour
         {
             var r = Regions[selectedRegion];
             string timeInfo = GetRegionTimeText(r.regionId);
-            selectedInfoText.text = $"<b><color=#{ColorToHex(r.accentColor)}>{r.displayName}</color></b>\n{timeInfo}\n\n{WorldRegionCatalog.BuildDescription(r)}";
+            string desc = WorldRegionCatalog.BuildDescription(r);
+
+            // 잠금 지역이면 잠금 안내 추가
+            if (!r.IsPlayable)
+            {
+                string lockMsg = StoryLocale.Instance != null
+                    ? StoryLocale.Instance.Get("UI_MAP_LOCKED")
+                    : "아직 갈 수 없습니다.";
+                desc = $"<color=#FF6666>🔒 {lockMsg}</color>\n\n{desc}";
+            }
+
+            selectedInfoText.text = $"<b><color=#{ColorToHex(r.accentColor)}>{r.displayName}</color></b>\n{timeInfo}\n\n{desc}";
             confirmBtn.interactable = r.IsPlayable;
         }
         else
@@ -281,6 +349,30 @@ public class MapSelectUI : MonoBehaviour
 
         Hide();
 
+        // 밤 레이드인지 체크
+        bool isNight = false;
+        if (RegionTimeManager.Instance != null)
+        {
+            var rt = RegionTimeManager.Instance.GetRegion(r.regionId);
+            if (rt != null) isNight = rt.isNight;
+        }
+
+        // 밤 첫 출전 시 스토리 씬 재생 후 전환
+        if (isNight && StoryTriggerManager.Instance != null)
+        {
+            StoryTriggerManager.Instance.OnNightGateSelected(() =>
+            {
+                DoTransition(r);
+            });
+        }
+        else
+        {
+            DoTransition(r);
+        }
+    }
+
+    void DoTransition(WorldRegionCatalog.RegionDefinition r)
+    {
         if (RegionTimeManager.Instance != null)
             RegionTimeManager.Instance.ActiveRegionId = r.regionId;
 

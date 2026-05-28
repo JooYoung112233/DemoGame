@@ -1,0 +1,167 @@
+{
+  "scenes": [
+    {
+      "id": "S-000",
+      "title": "프롤로그 — 암전",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_out", "floatParam": 0.01 },
+        { "type": "effect", "effect": "wait", "floatParam": 2.0 },
+        { "type": "narration", "textKeys": ["S000_N01", "S000_N02"] },
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.5 },
+        { "type": "tutorial", "textKey": "TUT_HELP", "duration": 5, "tutId": "help_hint" }
+      ]
+    },
+
+    {
+      "id": "S-002",
+      "title": "전당포 — 첫 대면",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D01", "S002_D02"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S002_D03"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D04"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S002_D05"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D06"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S002_D07"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D08", "S002_D09", "S002_D10"]
+        }
+      ]
+    },
+
+    {
+      "id": "S-003",
+      "title": "전당포 — 제안",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S003_D01"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S003_D02"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S003_D03", "S003_D04", "S003_D05", "S003_D06"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S003_D07", "S003_D08"]
+        },
+        {
+          "type": "choice",
+          "choiceId": "pawnshop_proposal",
+          "options": [
+            {
+              "textKey": "S003_C01",
+              "responseKeys": ["S003_R01"],
+              "effects": [
+                { "type": "affinity", "target": "pawnshop", "value": 1 },
+                { "type": "trust", "target": "pawnshop", "value": 1 }
+              ]
+            },
+            {
+              "textKey": "S003_C02",
+              "responseKeys": ["S003_R02", "S003_R03"],
+              "effects": [
+                { "type": "trust", "target": "pawnshop", "value": 2 }
+              ]
+            }
+          ]
+        },
+        { "type": "system", "action": "quest_accept", "param": "MQ-001" }
+      ]
+    },
+
+    {
+      "id": "S-004",
+      "title": "안전가옥 — 도착",
+      "triggerFlag": "safehouse_first_arrival",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_out", "floatParam": 0.8 },
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        {
+          "type": "narration",
+          "textKeys": ["UI_SAFEHOUSE_ARRIVE"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S004_D01", "S004_D02", "S004_D03"]
+        },
+        { "type": "system", "action": "give_item", "param": "rusty_pipe", "intParam": 1 },
+        { "type": "system", "action": "give_item", "param": "bandage", "intParam": 2 },
+        { "type": "tutorial", "textKey": "TUT_REST", "duration": 5, "tutId": "rest" },
+        { "type": "system", "action": "set_flag", "param": "safehouse_unlocked" }
+      ]
+    },
+
+    {
+      "id": "S-005",
+      "title": "안전가옥 — 첫 휴식 후",
+      "triggerFlag": "first_rest_done",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "narration",
+          "textKeys": ["UI_HP_RECOVERED"]
+        },
+        {
+          "type": "narration",
+          "textKeys": ["S005_N01", "S005_N02"]
+        },
+        { "type": "tutorial", "textKey": "TUT_EQUIP", "duration": 6, "tutId": "equip" },
+        { "type": "system", "action": "set_flag", "param": "map_board_unlocked" }
+      ]
+    }
+  ]
+}

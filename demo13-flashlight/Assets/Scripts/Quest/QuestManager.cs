@@ -198,4 +198,20 @@ public class QuestManager : MonoBehaviour
     {
         return flags.ContainsKey(flag) && flags[flag];
     }
+
+    /// <summary>
+    /// 세이브용: 모든 플래그 키 목록 반환.
+    /// </summary>
+    public IEnumerable<string> GetAllFlagKeys()
+    {
+        return flags.Keys;
+    }
+
+    /// <summary>
+    /// 세이브용: 모든 플래그를 딕셔너리로 반환.
+    /// </summary>
+    public Dictionary<string, bool> GetAllFlags()
+    {
+        return new Dictionary<string, bool>(flags);
+    }
 }

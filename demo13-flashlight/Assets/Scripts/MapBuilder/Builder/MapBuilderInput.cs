@@ -22,11 +22,36 @@ namespace IsometricMapEditor
         void Update()
         {
             if (_manager == null || _camera == null) return;
-            if (IsPointerOverUI()) return;
+
+            if (IsPointerOverUI())
+            {
+                _manager.ClearEraseHover();
+                return;
+            }
 
             UpdateMousePosition();
+            UpdateEraseHover();
             HandleMouseInput();
             HandleKeyboardShortcuts();
+        }
+
+        void UpdateEraseHover()
+        {
+            if (_manager.ResizeMode)
+            {
+                _manager.ClearEraseHover();
+                _manager.UpdateResizeHover(_lastGridCell, CurrentWorldPos);
+            }
+            else if (_manager.CurrentTool == ToolMode.Eraser)
+            {
+                _manager.ClearResizeHover();
+                _manager.UpdateEraseHover(_lastGridCell, CurrentWorldPos);
+            }
+            else
+            {
+                _manager.ClearEraseHover();
+                _manager.ClearResizeHover();
+            }
         }
 
         void UpdateMousePosition()
@@ -36,12 +61,30 @@ namespace IsometricMapEditor
             if (grid != null)
             {
                 _lastGridCell = IsometricGrid.WorldToGrid(CurrentWorldPos, grid);
-                _manager.GridOverlay.SetHighlightCell(_lastGridCell, grid.IsInBounds(_lastGridCell));
+                bool inBounds = grid.IsInBounds(_lastGridCell);
+
+                if (!_manager.SnapToGrid)
+                    _manager.GridOverlay.SetFreeHighlight(CurrentWorldPos, _lastGridCell, inBounds);
+                else
+                    _manager.GridOverlay.SetHighlightCell(_lastGridCell, inBounds);
             }
         }
 
         void HandleMouseInput()
         {
+            // Resize mode: scroll wheel adjusts scale
+            if (_manager.ResizeMode)
+            {
+                float scroll = Input.mouseScrollDelta.y;
+                if (Mathf.Abs(scroll) > 0.01f)
+                    _manager.AdjustResizeScale(scroll * 0.1f);
+
+                // ESC exits resize mode
+                if (Input.GetKeyDown(KeyCode.Escape))
+                    _manager.ToggleResizeMode();
+                return; // block placement in resize mode
+            }
+
             if (Input.GetMouseButtonDown(0))
             {
                 _isDragging = true;
@@ -76,6 +119,7 @@ namespace IsometricMapEditor
             if (Input.GetKeyDown(KeyCode.Q)) _manager.RotateSelection(-1);
             if (Input.GetKeyDown(KeyCode.E)) _manager.RotateSelection(1);
             if (Input.GetKeyDown(KeyCode.G)) _manager.ToggleSnapToGrid();
+            if (Input.GetKeyDown(KeyCode.R)) _manager.ToggleResizeMode();
 
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.S))
                 _manager.UI.ShowSaveDialog();
@@ -85,6 +129,11 @@ namespace IsometricMapEditor
                 _manager.UI.ShowNewMapDialog();
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Z))
                 _manager.Undo();
+
+            if (Input.GetKeyDown(KeyCode.F1)) _manager.UI.ToggleHelp();
+
+            if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace))
+                _manager.DeleteSelectedObject();
         }
 
         bool IsPointerOverUI()

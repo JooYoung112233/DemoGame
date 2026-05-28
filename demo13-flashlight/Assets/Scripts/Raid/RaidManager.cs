@@ -116,7 +116,30 @@ public class RaidManager : MonoBehaviour
         float elapsed = Time.time - raidStartTime;
         Debug.Log($"[RaidManager] 탈출 성공! 생존시간: {elapsed:F0}초, 획득 아이템: {lootedItems.Count}개");
 
-        // RaidResultUI에 데이터 전달은 씬 로드 후 처리 (RaidResultUI.OnSceneLoaded)
+        // 스토리 트리거: 탈출 성공 → 플래그 설정
+        if (StoryTriggerManager.Instance != null)
+        {
+            bool wasNight = false;
+            if (RegionTimeManager.Instance != null)
+            {
+                string activeId = RegionTimeManager.Instance.ActiveRegionId;
+                if (!string.IsNullOrEmpty(activeId))
+                {
+                    var rt = RegionTimeManager.Instance.GetRegion(activeId);
+                    if (rt != null) wasNight = rt.isNight;
+                }
+            }
+            else
+            {
+                var dnc = FindFirstObjectByType<DayNightCycle>();
+                if (dnc != null) wasNight = dnc.IsNight;
+            }
+
+            bool hasRudi = lootedItems.Exists(i =>
+                i.data != null && (i.data.itemId == "rudi_shard" || i.data.itemId == "rudi"));
+
+            StoryTriggerManager.Instance.OnRaidExtract(wasNight, hasRudi);
+        }
     }
 
     /// <summary>시간초과</summary>

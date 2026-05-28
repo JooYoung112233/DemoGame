@@ -26,6 +26,9 @@ Shader "InkCity/CityWall"
         _MoistureHeight ("Moisture Height", Range(0, 1)) = 0.25
         _StainColor ("Stain Color", Color) = (0.15, 0.12, 0.10, 1)
         _StainAmount ("Stain Amount", Range(0, 1)) = 0.2
+
+        [Header(Occlusion Fade)]
+        _Alpha ("Alpha", Range(0, 1)) = 1.0
     }
     SubShader
     {
@@ -35,6 +38,8 @@ Shader "InkCity/CityWall"
         {
             Name "CityWall"
             Tags { "LightMode"="UniversalForward" }
+
+            Blend SrcAlpha OneMinusSrcAlpha
 
             Stencil
             {
@@ -68,6 +73,7 @@ Shader "InkCity/CityWall"
                 float _MoistureHeight;
                 float4 _StainColor;
                 float _StainAmount;
+                float _Alpha;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);
@@ -204,7 +210,7 @@ Shader "InkCity/CityWall"
                 }
                 #endif
 
-                return half4(color, 1.0);
+                return half4(color, _Alpha);
             }
             ENDHLSL
         }

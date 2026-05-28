@@ -17,6 +17,26 @@ namespace IsometricMapEditor
         [Header("Buildings")]
         public BuildingDefinition[] buildings = new BuildingDefinition[0];
 
+        [Header("Map Objects")]
+        public MapObjectDefinition[] mapObjectDefs = new MapObjectDefinition[0];
+
+        [Header("NPCs")]
+        public NPCData[] npcs = new NPCData[0];
+
+        public MapObjectDefinition GetMapObjectDef(string id)
+        {
+            foreach (var d in mapObjectDefs)
+                if (d != null && d.objectId == id) return d;
+            return null;
+        }
+
+        public MapObjectDefinition GetMapObjectDefByType(MapObjectType type)
+        {
+            foreach (var d in mapObjectDefs)
+                if (d != null && d.objectType == type) return d;
+            return null;
+        }
+
         public TileDefinition GetTile(string id)
         {
             foreach (var t in tiles)
@@ -37,6 +57,13 @@ namespace IsometricMapEditor
         {
             foreach (var b in buildings)
                 if (b != null && b.buildingId == id) return b;
+            return null;
+        }
+
+        public NPCData GetNPC(string id)
+        {
+            foreach (var n in npcs)
+                if (n != null && n.npcId == id) return n;
             return null;
         }
     }

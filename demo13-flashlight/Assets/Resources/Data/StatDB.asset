@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a3315c986ef6a549b547df56d90831e, type: 3}
+  m_Name: StatDB
+  m_EditorClassIdentifier: Game.Scripts::StatDB
+  playerStat:
+    maxHp: 100
+    moveSpeed: 5
+    sprintSpeedMultiplier: 1.6
+    crouchSpeedMultiplier: 0.5
+    sprintStaminaCost: 12
+    sprintMinStamina: 10
+    lightDamage: 8
+    lightRange: 2
+    lightStaminaCost: 6
+    lightGroggy: 5
+    lightCooldown: 0.4
+    lightComboMax: 3
+    lightComboWindow: 0.6
+    lightCombo2Damage: 9
+    lightCombo2Groggy: 6
+    lightCombo3Damage: 12
+    lightCombo3Groggy: 8
+    lightCombo3StaminaCost: 8
+    heavyDamage: 20
+    heavyRange: 2.5
+    heavyStaminaCost: 22
+    heavyGroggy: 25
+    heavyChargeTime: 0.6
+    heavyMaxCharge: 1.5
+    heavyFullDamage: 32
+    heavyFullStaminaCost: 35
+    heavyFullGroggy: 45
+    heavyCooldown: 0.8
+    dodgeStaminaCost: 15
+    dodgeDistance: 3
+    dodgeDuration: 0.3
+    dodgeInvincibleDuration: 0.2
+    dodgeCooldown: 0.5
+    maxStamina: 100
+    staminaRegen: 15
+    staminaRegenDelay: 1
+    exhaustionDuration: 0.8
+  units: []

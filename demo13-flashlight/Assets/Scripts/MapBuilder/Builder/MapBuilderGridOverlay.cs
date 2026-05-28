@@ -13,10 +13,23 @@ namespace IsometricMapEditor
         Vector2Int _highlightCell = new(-1, -1);
         bool _showHighlight;
 
+        // Free mode cursor
+        bool _freeMode;
+        Vector3 _freeWorldPos;
+
         public void SetHighlightCell(Vector2Int cell, bool show)
         {
             _highlightCell = cell;
             _showHighlight = show;
+            _freeMode = false;
+        }
+
+        public void SetFreeHighlight(Vector3 worldPos, Vector2Int cell, bool inBounds)
+        {
+            _freeWorldPos = worldPos;
+            _highlightCell = cell;
+            _showHighlight = inBounds;
+            _freeMode = true;
         }
 
         void CreateLineMaterial()
@@ -82,19 +95,49 @@ namespace IsometricMapEditor
             GL.Vertex(tl); GL.Vertex(bl);
             GL.End();
 
-            // Highlight cell
+            // Highlight
             if (_showHighlight && gridSettings.IsInBounds(_highlightCell))
             {
-                GL.Begin(GL.QUADS);
-                GL.Color(highlightColor);
-                float cx = _highlightCell.x * ts + origin.x;
-                float cz = _highlightCell.y * ts + origin.z;
-                float y = 0.02f;
-                GL.Vertex3(cx, y, cz);
-                GL.Vertex3(cx + ts, y, cz);
-                GL.Vertex3(cx + ts, y, cz + ts);
-                GL.Vertex3(cx, y, cz + ts);
-                GL.End();
+                if (_freeMode)
+                {
+                    // Free mode: crosshair + small diamond at exact world position
+                    float size = ts * 0.3f;
+                    float y = 0.03f;
+                    float px = _freeWorldPos.x;
+                    float pz = _freeWorldPos.z;
+
+                    // Diamond
+                    GL.Begin(GL.QUADS);
+                    GL.Color(new Color(1f, 0.6f, 0.2f, 0.5f));
+                    GL.Vertex3(px, y, pz - size);
+                    GL.Vertex3(px + size, y, pz);
+                    GL.Vertex3(px, y, pz + size);
+                    GL.Vertex3(px - size, y, pz);
+                    GL.End();
+
+                    // Crosshair lines
+                    GL.Begin(GL.LINES);
+                    GL.Color(new Color(1f, 0.6f, 0.2f, 0.8f));
+                    GL.Vertex3(px - size * 1.5f, y, pz);
+                    GL.Vertex3(px + size * 1.5f, y, pz);
+                    GL.Vertex3(px, y, pz - size * 1.5f);
+                    GL.Vertex3(px, y, pz + size * 1.5f);
+                    GL.End();
+                }
+                else
+                {
+                    // Snap mode: full cell highlight
+                    GL.Begin(GL.QUADS);
+                    GL.Color(highlightColor);
+                    float cx = _highlightCell.x * ts + origin.x;
+                    float cz = _highlightCell.y * ts + origin.z;
+                    float y = 0.02f;
+                    GL.Vertex3(cx, y, cz);
+                    GL.Vertex3(cx + ts, y, cz);
+                    GL.Vertex3(cx + ts, y, cz + ts);
+                    GL.Vertex3(cx, y, cz + ts);
+                    GL.End();
+                }
             }
 
             GL.PopMatrix();

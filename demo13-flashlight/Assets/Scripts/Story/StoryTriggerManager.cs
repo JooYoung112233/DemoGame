@@ -1,0 +1,471 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+/// <summary>
+/// 게임 이벤트 → 스토리 플래그 → 자동 트리거 연결 매니저.
+/// 씬 전환, 퀘스트 완료, 첫 행동 등에 반응해 StoryPlayer를 가동.
+///
+/// GameBootstrap에서 싱글톤으로 생성.
+/// </summary>
+public class StoryTriggerManager : MonoBehaviour
+{
+    public static StoryTriggerManager Instance { get; private set; }
+
+    // ── 씬 이름 상수 ──
+    const string SCENE_SAFEHOUSE = "Safehouse";
+    const string SCENE_INGAME = "InGameScene";
+
+    // ── 첫 행동 추적 (세이브 로드 시 복원은 플래그로 대체) ──
+    bool prologuePlayed;
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+
+        if (Instance == this) Instance = null;
+    }
+
+    // ═══════════════════════════
+    //  씬 로드 훅
+    // ═══════════════════════════
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 약간의 딜레이 — 씬 오브젝트 초기화 대기
+        StartCoroutine(DelayedSceneInit(scene.name));
+    }
+
+    System.Collections.IEnumerator DelayedSceneInit(string sceneName)
+    {
+        yield return null; // 1프레임 대기 (Start() 호출 보장)
+
+        if (sceneName == SCENE_SAFEHOUSE || sceneName.Contains("Safehouse"))
+        {
+            OnSafehouseLoaded();
+        }
+        else if (sceneName == SCENE_INGAME || sceneName.Contains("InGame"))
+        {
+            OnRaidSceneLoaded();
+        }
+
+        // 범용 자동 트리거 체크
+        CheckAutoTriggers();
+    }
+
+    // ═══════════════════════════
+    //  안전가옥 진입
+    // ═══════════════════════════
+
+    void OnSafehouseLoaded()
+    {
+        var qm = QuestManager.Instance;
+        if (qm == null) return;
+
+        // 첫 안전가옥 도착 (S-003 완료 후 전환 시)
+        if (!qm.GetFlag("safehouse_arrived") && qm.GetFlag("pawnshop_intro_done"))
+        {
+            qm.SetFlag("safehouse_first_arrival");
+            qm.SetFlag("safehouse_arrived");
+        }
+    }
+
+    // ═══════════════════════════
+    //  레이드 씬 진입
+    // ═══════════════════════════
+
+    void OnRaidSceneLoaded()
+    {
+        var qm = QuestManager.Instance;
+        if (qm == null) return;
+
+        // 낮/밤 판별
+        bool isNight = false;
+        if (RegionTimeManager.Instance != null)
+        {
+            string activeId = RegionTimeManager.Instance.ActiveRegionId;
+            if (!string.IsNullOrEmpty(activeId))
+            {
+                var rt = RegionTimeManager.Instance.GetRegion(activeId);
+                if (rt != null) isNight = rt.isNight;
+            }
+        }
+        else
+        {
+            var dnc = FindFirstObjectByType<DayNightCycle>();
+            if (dnc != null) isNight = dnc.IsNight;
+        }
+
+        if (isNight)
+        {
+            if (!qm.GetFlag("entered_night_ever"))
+            {
+                qm.SetFlag("entered_ruined_mall_night");
+                qm.SetFlag("entered_night_ever");
+            }
+        }
+        else
+        {
+            if (!qm.GetFlag("entered_day_ever"))
+            {
+                qm.SetFlag("entered_ruined_mall_day");
+                qm.SetFlag("entered_day_ever");
+            }
+        }
+    }
+
+    // ═══════════════════════════
+    //  프롤로그 (게임 최초 시작)
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 게임 최초 시작 시 호출. 프롤로그 씬 S-000 재생.
+    /// 게임 시작 스크립트에서 직접 호출.
+    /// </summary>
+    /// <summary>
+    /// 자동 프롤로그 (GameStartHandler에서 호출, 1회만).
+    /// </summary>
+    public void PlayPrologueAuto()
+    {
+        if (prologuePlayed) return;
+        prologuePlayed = true;
+
+        PlayPrologue();
+    }
+
+    /// <summary>
+    /// 프롤로그 재생. H키 튜토리얼 패널에서도 호출 가능.
+    /// </summary>
+    public void PlayPrologue()
+    {
+        if (StoryPlayer.Instance == null) return;
+        if (StoryPlayer.Instance.IsPlaying) return;
+
+        StoryPlayer.Instance.PlayScene("S-000", () =>
+        {
+            // 프롤로그 후 H키 안내 프롬프트 표시
+            if (TutorialPrompt.Instance != null)
+            {
+                string helpText = StoryLocale.Instance != null
+                    ? StoryLocale.Instance.Get("TUT_HELP")
+                    : "H — 조작법 보기";
+                TutorialPrompt.Instance.Show(helpText, 5f, null);
+            }
+        });
+    }
+
+    // ═══════════════════════════
+    //  NPC 대화 — 스토리 씬 우선 체크
+    // ═══════════════════════════
+
+    /// <summary>
+    /// NPC 상호작용 전에 호출.
+    /// 스토리 씬이 있으면 재생하고 true 반환. 없으면 false (일반 대화 진행).
+    /// </summary>
+    public bool TryPlayNPCStoryScene(string npcId, System.Action onComplete = null)
+    {
+        var qm = QuestManager.Instance;
+        var sp = StoryPlayer.Instance;
+        if (qm == null || sp == null || sp.IsPlaying) return false;
+
+        // 전당포 주인 — 최초 대면
+        if (npcId == "pawnshop" && !qm.GetFlag("pawnshop_intro_done"))
+        {
+            sp.PlayScene("S-002", () =>
+            {
+                sp.PlayScene("S-003", () =>
+                {
+                    qm.SetFlag("pawnshop_intro_done");
+                    onComplete?.Invoke();
+                });
+            });
+            return true;
+        }
+
+        // 떠돌이 상인 — 최초 조우
+        if (npcId == "merchant" && !qm.GetFlag("merchant_met"))
+        {
+            sp.PlayScene("S-012", () =>
+            {
+                onComplete?.Invoke();
+            });
+            return true;
+        }
+
+        return false;
+    }
+
+    // ═══════════════════════════
+    //  침대 휴식
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 침대 상호작용 시 호출.
+    /// 페이드 아웃 → HP 회복 → 페이드 인 → 스토리 체크.
+    /// </summary>
+    public void OnBedRest()
+    {
+        StartCoroutine(BedRestRoutine());
+    }
+
+    System.Collections.IEnumerator BedRestRoutine()
+    {
+        var qm = QuestManager.Instance;
+
+        // 페이드 아웃
+        if (ScreenEffectManager.Instance != null)
+            yield return ScreenEffectManager.Instance.FadeOut(0.8f);
+        else
+            yield return new WaitForSecondsRealtime(0.5f);
+
+        // HP 회복
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            var health = player.GetComponent<Health>();
+            if (health != null)
+                health.Heal(health.MaxHp);
+        }
+
+        // 시간 경과 (짧은 대기)
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        // 페이드 인
+        if (ScreenEffectManager.Instance != null)
+            yield return ScreenEffectManager.Instance.FadeIn(1.0f);
+
+        // 첫 휴식 플래그
+        if (qm != null && !qm.GetFlag("first_rest_done") && qm.GetFlag("safehouse_arrived"))
+        {
+            qm.SetFlag("first_rest_done");
+        }
+
+        // MQ-002 완료 후 첫 휴식 → 에필로그
+        if (qm != null && qm.CompletedQuestIds.Contains("MQ-002") && !qm.GetFlag("mq002_complete_rested"))
+        {
+            qm.SetFlag("mq002_complete_rested");
+        }
+
+        // 오토세이브
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.AutoSave();
+
+        // 자동 트리거 체크
+        CheckAutoTriggers();
+    }
+
+    // ═══════════════════════════
+    //  첫 파밍
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 파밍/줍기 성공 시 호출 (첫 1회만 스토리 트리거).
+    /// </summary>
+    public void OnItemLooted()
+    {
+        var qm = QuestManager.Instance;
+        if (qm == null) return;
+
+        if (!qm.GetFlag("first_loot_done"))
+        {
+            qm.SetFlag("first_loot_done");
+            CheckAutoTriggers();
+        }
+    }
+
+    // ═══════════════════════════
+    //  쪽지 발견
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 쪽지 오브젝트 상호작용 시 호출.
+    /// storySceneId가 있으면 해당 스토리 씬 재생, 없으면 DialogueUI로 표시.
+    /// </summary>
+    public void OnNoteRead(string noteContent, string storySceneId = null)
+    {
+        if (!string.IsNullOrEmpty(storySceneId) && StoryPlayer.Instance != null)
+        {
+            var qm = QuestManager.Instance;
+            // found_note 플래그 설정 (S-014용)
+            if (storySceneId == "S-014" && qm != null)
+                qm.SetFlag("found_note");
+
+            StoryPlayer.Instance.PlayScene(storySceneId);
+            return;
+        }
+
+        // 폴백: DialogueUI로 표시
+        if (DialogueUI.Instance != null)
+        {
+            DialogueUI.Instance.ShowStoryDialogue("", new[] { noteContent }, null);
+        }
+    }
+
+    // ═══════════════════════════
+    //  전투 (첫 전투)
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 밴딧 조우 시 호출 (첫 1회만 S-013 재생).
+    /// </summary>
+    public void OnFirstCombatEncounter()
+    {
+        var qm = QuestManager.Instance;
+        if (qm == null || qm.GetFlag("first_combat_done")) return;
+
+        qm.SetFlag("first_combat_done");
+
+        if (StoryPlayer.Instance != null)
+            StoryPlayer.Instance.PlayScene("S-013");
+    }
+
+    // ═══════════════════════════
+    //  루디 획득
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 루디 아이템 획득 시 호출.
+    /// 첫 획득이면 시계 이상현상 이벤트 트리거.
+    /// </summary>
+    public void OnRudiPickup()
+    {
+        var qm = QuestManager.Instance;
+        if (qm == null) return;
+
+        if (!qm.GetFlag("first_rudi_pickup"))
+        {
+            qm.SetFlag("first_rudi_pickup");
+            CheckAutoTriggers();
+        }
+    }
+
+    // ═══════════════════════════
+    //  탈출/귀환
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 레이드 탈출 성공 시 호출. RaidManager.OnExtractSuccess 에서 호출.
+    /// 현재 상태에 따라 적절한 플래그 설정.
+    /// </summary>
+    public void OnRaidExtract(bool wasNight, bool hasRudi)
+    {
+        var qm = QuestManager.Instance;
+        if (qm == null) return;
+
+        // 업적
+        AchievementManager.Instance?.AddStat("raids_complete", 1);
+        if (wasNight)
+            AchievementManager.Instance?.AddStat("night_raids", 1);
+
+        // 낮 레이드 첫 귀환
+        if (!wasNight && !qm.GetFlag("day_raid_returned") && qm.GetFlag("entered_day_ever"))
+        {
+            qm.SetFlag("day_raid_returned");
+        }
+
+        // 밤 레이드 + 루디 소지 귀환
+        if (wasNight && hasRudi && !qm.GetFlag("night_raid_returned_with_rudi"))
+        {
+            qm.SetFlag("night_raid_returned_with_rudi");
+        }
+
+        // 오토세이브는 Safehouse 로드 시 처리
+    }
+
+    // ═══════════════════════════
+    //  밤 출전 게이트
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 지도판에서 밤 레이드 선택 시 호출.
+    /// 첫 밤 출전이면 S-020 재생 후 콜백.
+    /// </summary>
+    public void OnNightGateSelected(System.Action onComplete)
+    {
+        var qm = QuestManager.Instance;
+        var sp = StoryPlayer.Instance;
+        if (qm == null || sp == null)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+
+        if (!qm.GetFlag("night_gate_first_played"))
+        {
+            qm.SetFlag("night_gate_first");
+            qm.SetFlag("night_gate_first_played");
+
+            sp.PlayScene("S-020", () =>
+            {
+                onComplete?.Invoke();
+            });
+        }
+        else
+        {
+            onComplete?.Invoke();
+        }
+    }
+
+    // ═══════════════════════════
+    //  지하창고 진입
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 지하창고 영역 진입 시 호출.
+    /// </summary>
+    public void OnBasementEnter()
+    {
+        var qm = QuestManager.Instance;
+        if (qm == null || qm.GetFlag("basement_entered")) return;
+
+        qm.SetFlag("enter_basement");
+        qm.SetFlag("basement_entered");
+        CheckAutoTriggers();
+    }
+
+    // ═══════════════════════════
+    //  NPC 퀘스트 마커 지원
+    // ═══════════════════════════
+
+    /// <summary>
+    /// 해당 NPC에 아직 재생되지 않은 스토리 씬이 있는지 확인.
+    /// NPCQuestMarker에서 호출하여 스토리 아이콘 표시 여부 결정.
+    /// </summary>
+    public bool HasPendingNPCScene(string npcId)
+    {
+        var qm = QuestManager.Instance;
+        if (qm == null) return false;
+
+        // 전당포 주인 — 최초 대면 미완료
+        if (npcId == "pawnshop" && !qm.GetFlag("pawnshop_intro_done"))
+            return true;
+
+        // 떠돌이 상인 — 미조우
+        if (npcId == "merchant" && !qm.GetFlag("merchant_met"))
+            return true;
+
+        return false;
+    }
+
+    // ═══════════════════════════
+    //  유틸리티
+    // ═══════════════════════════
+
+    void CheckAutoTriggers()
+    {
+        if (StoryPlayer.Instance != null && !StoryPlayer.Instance.IsPlaying)
+            StoryPlayer.Instance.CheckAutoTriggers();
+    }
+}

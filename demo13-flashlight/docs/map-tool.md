@@ -79,3 +79,5 @@
 |------|-----------|
 | 2025-05-20 | 초기 기획 결정 기록. Phase 1 구현 시작. |
 | 2026-05-20 | 전체 Phase 1~9 구현 완료. 좌표 시스템을 2D→3D로 전면 리팩터 (좀보이드 스타일: 3D 공간 + 2D 빌보드 스프라이트). tileWidth/tileHeight → float tileSize. Vector2→Vector3. Rect→Bounds. Scene View mouse: ray-plane intersection on XZ. 카메라: 3D orthographic Euler(30,45,0). 층(floor) API 예약. |
+| 2026-05-29 | 건물 조립 방식 결정: 건물은 단일 프리팹이 아니라 **바닥/윗벽/아랫벽/천장** 등의 파트를 Quad로 개별 배치하여 조립. 각 파트는 Quad + InkCity/CityBuilding 셰이더 자동 적용. 맵툴 런타임 UI에 Free 배치 모드(G키), R키 리사이즈 모드(스크롤 크기조절) 추가. 하이어라키 패널 제거, 삭제 모드 호버 프리뷰(빨간 하이라이트+툴팁) 추가. |
+| 2026-05-29 | MapObject 비주얼 모드 4종 결정: **TextureQuad**(이미지), **Sphere**(색상 구체, 기본), **Invisible**(콜라이더만), **EffectPrefab**(파티클/이펙트 프리팹). 회전 단위 15도(Q/E)로 세분화. F1 도움말 오버레이 추가. 카탈로그 에디터 전 탭 인라인 편집 기능 추가. BuildingDefinition에서 icon 필드 제거(프리팹 텍스처로 대체). |

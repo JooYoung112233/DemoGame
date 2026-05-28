@@ -10,6 +10,7 @@ using UnityEngine.UI;
 public class CharacterPanelUI : MonoBehaviour
 {
     public bool IsShowing => isShowing;
+    public bool IsGenerated => canvas != null;
 
     bool isShowing;
     int currentTab; // 0=인벤토리, 1=의료, 2=정보
@@ -32,40 +33,41 @@ public class CharacterPanelUI : MonoBehaviour
         : openStorage != null ? openStorage.Grid
         : null;
 
-    // ── uGUI 요소 ──
-    Canvas canvas;
-    GameObject panelRoot;
+    // ── uGUI 요소 (구조적 요소만 SerializeField) ──
+    [SerializeField] Canvas canvas;
+    [SerializeField] RectTransform canvasRT; // 캔버스 RectTransform (고스트 부모)
+    [SerializeField] GameObject panelRoot;
 
     // 우측 메인 패널
-    RectTransform rightPanel;
-    Image rightPanelBg;
-    Button[] tabButtons;
-    Text[] tabTexts;
-    Image[] tabBgs;
-    GameObject[] tabContents; // 각 탭의 콘텐츠 루트
+    [SerializeField] RectTransform rightPanel;
+    [SerializeField] Image rightPanelBg;
+    [SerializeField] Button[] tabButtons;
+    [SerializeField] Text[] tabTexts;
+    [SerializeField] Image[] tabBgs;
+    [SerializeField] GameObject[] tabContents; // 각 탭의 콘텐츠 루트
 
     // 좌측 상자 패널
-    RectTransform leftPanel;
-    Image leftPanelBg;
-    Text leftTitleText;
-    GameObject leftPanelRoot; // 숨김/표시용
+    [SerializeField] RectTransform leftPanel;
+    [SerializeField] Image leftPanelBg;
+    [SerializeField] Text leftTitleText;
+    [SerializeField] GameObject leftPanelRoot; // 숨김/표시용
 
     // ── 인벤토리 탭 ──
-    RectTransform invGridRoot;
+    [SerializeField] RectTransform invGridRoot;
     Image[,] invSlotImages;
     Image[] invItemImages;      // 배치된 아이템 아이콘들
-    Text invWeightText;
+    [SerializeField] Text invWeightText;
 
     // ── 의료 탭 ──
-    Text[] medPartTexts;
-    Text medDebuffText;
-    Text medHealingText;
+    [SerializeField] Text[] medPartTexts;
+    [SerializeField] Text medDebuffText;
+    [SerializeField] Text medHealingText;
 
     // ── 정보 탭 ──
-    Text infoText;
+    [SerializeField] Text infoText;
 
     // ── 좌측 상자 격자 ──
-    RectTransform containerGridRoot;
+    [SerializeField] RectTransform containerGridRoot;
     Image[,] containerSlotImages;
 
     // 설정
@@ -87,7 +89,6 @@ public class CharacterPanelUI : MonoBehaviour
     GameObject highlightGO;
     RectTransform highlightRT;
     Image highlightImage;
-    RectTransform canvasRT; // 캔버스 RectTransform (고스트 부모)
 
     // ── 우클릭 컨텍스트 메뉴 ──
     GameObject contextMenuGO;
@@ -107,11 +108,12 @@ public class CharacterPanelUI : MonoBehaviour
     int totalSearchItems;
     int revealedCount;
     bool leftPanelSearchEnabled; // true=루팅상자(수색), false=창고(즉시)
-    Text searchStatusText; // "수색 중... 3/7"
+    [SerializeField] Text searchStatusText; // "수색 중... 3/7"
 
     void Awake()
     {
-        BuildUI();
+        if (!IsGenerated) GenerateUI();
+        BindEvents();
     }
 
     void Update()
@@ -250,7 +252,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     #region UI 빌드
 
-    void BuildUI()
+    public void GenerateUI()
     {
         // Canvas
         var canvasGO = new GameObject("CharPanel_Canvas");
@@ -290,6 +292,55 @@ public class CharacterPanelUI : MonoBehaviour
         panelRoot.SetActive(false);
     }
 
+    /// <summary>탭 버튼 onClick 리스너 연결</summary>
+    public void BindEvents()
+    {
+        if (tabButtons == null) return;
+        for (int i = 0; i < tabButtons.Length; i++)
+        {
+            if (tabButtons[i] == null) continue;
+            int idx = i;
+            tabButtons[i].onClick.RemoveAllListeners();
+            tabButtons[i].onClick.AddListener(() => SelectTab(idx));
+        }
+    }
+
+    /// <summary>생성된 UI 구조 제거 및 모든 직렬화 레퍼런스 초기화</summary>
+    public void ClearGeneratedUI()
+    {
+        // CharPanel_Canvas 자식 찾아서 제거
+        var canvasTr = transform.Find("CharPanel_Canvas");
+        if (canvasTr != null)
+        {
+            if (Application.isPlaying)
+                Destroy(canvasTr.gameObject);
+            else
+                DestroyImmediate(canvasTr.gameObject);
+        }
+
+        canvas = null;
+        canvasRT = null;
+        panelRoot = null;
+        rightPanel = null;
+        rightPanelBg = null;
+        tabButtons = null;
+        tabTexts = null;
+        tabBgs = null;
+        tabContents = null;
+        leftPanel = null;
+        leftPanelBg = null;
+        leftTitleText = null;
+        leftPanelRoot = null;
+        invGridRoot = null;
+        invWeightText = null;
+        medPartTexts = null;
+        medDebuffText = null;
+        medHealingText = null;
+        infoText = null;
+        containerGridRoot = null;
+        searchStatusText = null;
+    }
+
     void BuildRightPanel(Transform parent)
     {
         var go = new GameObject("RightPanel");
@@ -312,7 +363,6 @@ public class CharacterPanelUI : MonoBehaviour
         float tabW = PANEL_WIDTH / TAB_NAMES.Length;
         for (int i = 0; i < TAB_NAMES.Length; i++)
         {
-            int idx = i;
             var tabGO = new GameObject($"Tab_{i}");
             tabGO.transform.SetParent(rightPanel, false);
 
@@ -328,7 +378,6 @@ public class CharacterPanelUI : MonoBehaviour
 
             tabButtons[i] = tabGO.AddComponent<Button>();
             tabButtons[i].targetGraphic = tabBgs[i];
-            tabButtons[i].onClick.AddListener(() => SelectTab(idx));
 
             tabTexts[i] = MakeChildText(tabGO.transform, TAB_NAMES[i], 14, Color.white);
         }

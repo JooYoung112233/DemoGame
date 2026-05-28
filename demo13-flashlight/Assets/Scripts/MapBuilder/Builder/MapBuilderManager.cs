@@ -30,6 +30,44 @@ namespace IsometricMapEditor
         public PropDefinition SelectedProp { get; private set; }
         public BuildingDefinition SelectedBuilding { get; private set; }
         public MapObjectType SelectedObjectType { get; private set; } = MapObjectType.SpawnPoint;
+        // Eraser hover
+        readonly List<(Renderer rend, Color origColor)> _eraseHoverRenderers = new();
+        string _eraseHoverInstanceId;
+        public string EraseHoverInfo { get; private set; }
+
+        // Resize mode
+        public bool ResizeMode { get; set; }
+        readonly List<(Renderer rend, Color origColor)> _resizeHoverRenderers = new();
+        string _resizeHoverInstanceId;
+        public string ResizeHoverInfo { get; private set; }
+
+        // Visibility toggles
+        public bool ShowTiles { get; set; } = true;
+        public bool ShowWalls { get; set; } = true;
+        public bool ShowProps { get; set; } = true;
+        public bool ShowBuildings { get; set; } = true;
+        public bool ShowMapObjects { get; set; } = true;
+
+        // Spawn config properties (for MapObject placement)
+        public bool SpawnUseRegionLoot { get; set; } = true;
+        public int SpawnContainerWidth { get; set; } = 4;
+        public int SpawnContainerHeight { get; set; } = 5;
+        public string SpawnContainerName { get; set; } = "";
+        public string SpawnEnemyUnitKey { get; set; } = "";
+        public int SpawnEnemyCount { get; set; } = 1;
+        public string SpawnFixedItemId { get; set; } = "";
+        public int SpawnFixedItemCount { get; set; } = 1;
+        public int SpawnDoorLockType { get; set; } = 0;
+        public string SpawnDoorKeyId { get; set; } = "";
+        public bool SpawnDoorConsumeKey { get; set; } = true;
+        public string SpawnDoorQuestId { get; set; } = "";
+        public string SpawnNpcId { get; set; } = "";
+        public string SpawnNpcDisplayName { get; set; } = "";
+        public int SpawnVisualMode { get; set; }
+        public string SpawnVisualTexturePath { get; set; } = "";
+        public string SpawnEffectPrefabPath { get; set; } = "";
+        public float SpawnVisualScale { get; set; } = 1f;
+
         public int CurrentRotation { get; private set; }
         public bool SnapToGrid { get; set; }
 
@@ -188,16 +226,38 @@ namespace IsometricMapEditor
             UI.RefreshToolbar();
         }
 
+        public MapObjectDefinition SelectedObjectDef { get; private set; }
+
         public void SelectObjectType(MapObjectType type)
         {
             SelectedObjectType = type;
+            SelectedObjectDef = null;
             CurrentTool = ToolMode.MapObject;
             UI.RefreshToolbar();
         }
 
+        public void SelectObjectDef(MapObjectDefinition def)
+        {
+            if (def == null) return;
+            SelectedObjectDef = def;
+            SelectedObjectType = def.objectType;
+            SpawnVisualMode = def.visualMode;
+            SpawnVisualTexturePath = def.visualTexture != null ? def.visualTexture.name : "";
+            SpawnEffectPrefabPath = def.effectPrefab != null ? def.effectPrefab.name : "";
+            SpawnVisualScale = def.visualScale;
+            CurrentTool = ToolMode.MapObject;
+            UI.RefreshToolbar();
+        }
+
+        public void SetTileVisibility(bool v) { ShowTiles = v; if (_tileRenderer) _tileRenderer.gameObject.SetActive(v); UI.RefreshAll(); }
+        public void SetWallVisibility(bool v) { ShowWalls = v; if (_wallRoot) _wallRoot.gameObject.SetActive(v); UI.RefreshAll(); }
+        public void SetPropVisibility(bool v) { ShowProps = v; if (_propRoot) _propRoot.gameObject.SetActive(v); UI.RefreshAll(); }
+        public void SetBuildingVisibility(bool v) { ShowBuildings = v; if (_buildingRoot) _buildingRoot.gameObject.SetActive(v); UI.RefreshAll(); }
+        public void SetMapObjectVisibility(bool v) { ShowMapObjects = v; if (_objectRoot) _objectRoot.gameObject.SetActive(v); UI.RefreshAll(); }
+
         public void RotateSelection(int direction)
         {
-            CurrentRotation = (CurrentRotation + direction + 4) % 4;
+            CurrentRotation = (CurrentRotation + direction + 24) % 24;
             UI.RefreshStatus();
         }
 
@@ -218,7 +278,7 @@ namespace IsometricMapEditor
         void PlaceAt(Vector2Int cell, Vector3 worldPos)
         {
             if (EditingMap == null) return;
-            if (!EditingMap.gridSettings.IsInBounds(cell) && CurrentTool != ToolMode.Prop) return;
+            if (!EditingMap.gridSettings.IsInBounds(cell)) return;
 
             _lastDragCell = cell;
 
@@ -310,7 +370,7 @@ namespace IsometricMapEditor
                 rotation = CurrentRotation,
                 freePlace = free,
                 worldPosition = finalPos,
-                yRotation = CurrentRotation * 90f,
+                yRotation = CurrentRotation * 15f,
                 scale = 1f
             };
 
@@ -345,7 +405,7 @@ namespace IsometricMapEditor
                 rotation = CurrentRotation,
                 freePlace = free,
                 worldPosition = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings),
-                yRotation = CurrentRotation * 90f,
+                yRotation = CurrentRotation * 15f,
                 scale = 1f
             };
 
@@ -358,16 +418,60 @@ namespace IsometricMapEditor
         {
             SaveUndoSnapshot();
 
+            bool free = !SnapToGrid;
             var obj = new PlacedMapObject
             {
                 instanceId = System.Guid.NewGuid().ToString("N")[..8],
                 objectType = SelectedObjectType,
                 gridPosition = cell,
-                freePlace = false,
-                worldPosition = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings),
-                yRotation = CurrentRotation * 90f,
-                label = SelectedObjectType.ToString()
+                freePlace = free,
+                worldPosition = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings),
+                yRotation = CurrentRotation * 15f,
+                label = SelectedObjectType.ToString(),
+                interactRange = GetDefaultInteractRange(SelectedObjectType),
+                promptText = GetDefaultPromptText(SelectedObjectType),
+                // Spawn config
+                spawnPointType = 0,
+                useRegionLoot = SpawnUseRegionLoot,
+                containerGridWidth = SpawnContainerWidth,
+                containerGridHeight = SpawnContainerHeight,
+                containerName = SpawnContainerName,
+                enemyUnitKey = SpawnEnemyUnitKey,
+                enemyCount = SpawnEnemyCount,
+                fixedItemId = SpawnFixedItemId,
+                fixedItemCount = SpawnFixedItemCount,
+                doorLockType = SpawnDoorLockType,
+                doorKeyId = SpawnDoorKeyId,
+                doorConsumeKey = SpawnDoorConsumeKey,
+                doorQuestId = SpawnDoorQuestId,
+                npcId = SpawnNpcId,
+                npcDisplayName = SpawnNpcDisplayName,
+                // Visual mode
+                visualMode = SpawnVisualMode,
+                visualTexturePath = SpawnVisualTexturePath,
+                effectPrefabPath = SpawnEffectPrefabPath,
+                visualScale = SpawnVisualScale,
             };
+
+            // Type-specific label
+            switch (SelectedObjectType)
+            {
+                case MapObjectType.NPC:
+                    obj.customData = SpawnNpcId;
+                    obj.label = !string.IsNullOrEmpty(SpawnNpcDisplayName) ? SpawnNpcDisplayName
+                        : (!string.IsNullOrEmpty(SpawnNpcId) ? $"NPC:{SpawnNpcId}" : "NPC");
+                    break;
+                case MapObjectType.Door:
+                    string[] lockNames = { "열림", "열쇠", "퀘스트", "스위치" };
+                    obj.label = $"Door ({lockNames[Mathf.Clamp(SpawnDoorLockType, 0, 3)]})";
+                    break;
+                case MapObjectType.LootContainer:
+                    obj.label = !string.IsNullOrEmpty(SpawnContainerName) ? SpawnContainerName : "LootContainer";
+                    break;
+                case MapObjectType.EnemySpawn:
+                    obj.label = !string.IsNullOrEmpty(SpawnEnemyUnitKey) ? SpawnEnemyUnitKey : "EnemySpawn";
+                    break;
+            }
 
             EditingMap.mapObjects.Add(obj);
             SpawnObjectMarker(obj);
@@ -385,6 +489,7 @@ namespace IsometricMapEditor
         void EraseAt(Vector2Int cell)
         {
             if (EditingMap == null) return;
+            ClearEraseHover();
             SaveUndoSnapshot();
 
             switch (CurrentTool)
@@ -706,6 +811,313 @@ namespace IsometricMapEditor
             }
         }
 
+        /// <summary>선택된 오브젝트 삭제 (Delete/Backspace 키)</summary>
+        public void DeleteSelectedObject()
+        {
+            if (EditingMap == null) return;
+            // 현재 호버 중인 대상 삭제
+            if (!string.IsNullOrEmpty(_eraseHoverInstanceId))
+            {
+                string id = _eraseHoverInstanceId;
+                ClearEraseHover();
+                DeletePlacedObject(id);
+                return;
+            }
+            // Fallback: delete last MapObject
+            if (EditingMap.mapObjects.Count > 0)
+            {
+                var last = EditingMap.mapObjects[^1];
+                DeletePlacedObject(last.instanceId);
+            }
+        }
+
+        // --- Eraser Hover ---
+
+        public void UpdateEraseHover(Vector2Int cell, Vector3 worldPos)
+        {
+            if (EditingMap == null) { ClearEraseHover(); return; }
+
+            Vector3 cellWorld = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+            float bestDist = float.MaxValue;
+            int bestType = -1; // 0=tile, 1=wall, 2=prop, 3=building, 4=mapObject
+            int bestIndex = -1;
+            int bestRotation = 0;
+            string info = null;
+
+            // Check tiles
+            foreach (var layer in EditingMap.layers)
+            {
+                for (int i = 0; i < layer.tiles.Count; i++)
+                {
+                    var t = layer.tiles[i];
+                    if (t.gridPosition != cell) continue;
+                    if (t.tileDefinition != null && t.tileDefinition.IsWall) continue;
+                    if (0f < bestDist) { bestDist = 0f; bestType = 0; info = $"타일: {t.tileDefinitionId}"; }
+                }
+            }
+
+            // Check walls
+            for (int r = 0; r < 4; r++)
+            {
+                string key = $"{cell.x}_{cell.y}_E{r}";
+                if (_wallObjects.ContainsKey(key))
+                {
+                    if (0f < bestDist)
+                    {
+                        bestDist = 0f; bestType = 1; bestRotation = r;
+                        // find wall tile definition
+                        foreach (var layer in EditingMap.layers)
+                            foreach (var t in layer.tiles)
+                                if (t.gridPosition == cell && t.rotation == r && t.tileDefinition != null && t.tileDefinition.IsWall)
+                                    info = $"벽: {t.tileDefinitionId}";
+                        if (info == null) info = "벽";
+                    }
+                }
+            }
+
+            // Check props
+            for (int i = 0; i < EditingMap.props.Count; i++)
+            {
+                var p = EditingMap.props[i];
+                float dist = Vector3.Distance(p.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    bestType = 2;
+                    bestIndex = i;
+                    string name = p.propDefinition != null ? (p.propDefinition.displayName ?? p.propDefinitionId) : p.propDefinitionId;
+                    info = $"프롭: {name}";
+                }
+            }
+
+            // Check buildings
+            for (int i = 0; i < EditingMap.buildings.Count; i++)
+            {
+                var b = EditingMap.buildings[i];
+                if (b.buildingDefinition == null) continue;
+                var occupied = b.buildingDefinition.GetOccupiedCells(b.gridPosition);
+                if (occupied.Contains(cell))
+                {
+                    float dist = Vector3.Distance(b.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        bestType = 3;
+                        bestIndex = i;
+                        string name = b.buildingDefinition.displayName ?? b.buildingDefinitionId;
+                        info = $"건물: {name}";
+                    }
+                }
+            }
+
+            // Check map objects
+            for (int i = 0; i < EditingMap.mapObjects.Count; i++)
+            {
+                var obj = EditingMap.mapObjects[i];
+                if (obj.gridPosition == cell)
+                {
+                    float dist = Vector3.Distance(obj.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        bestType = 4;
+                        bestIndex = i;
+                        info = $"{obj.objectType}: {obj.label}";
+                    }
+                }
+            }
+
+            // Determine the target instanceId for highlighting
+            string targetId = null;
+            switch (bestType)
+            {
+                case 2: targetId = EditingMap.props[bestIndex].instanceId; break;
+                case 3: targetId = EditingMap.buildings[bestIndex].instanceId; break;
+                case 4: targetId = EditingMap.mapObjects[bestIndex].instanceId; break;
+            }
+
+            // Skip if same target
+            if (targetId == _eraseHoverInstanceId && EraseHoverInfo == info) { EraseHoverInfo = info; return; }
+
+            ClearEraseHover();
+            EraseHoverInfo = info;
+            _eraseHoverInstanceId = targetId;
+
+            // Highlight 3D object with red tint
+            GameObject targetGo = null;
+            if (targetId != null)
+            {
+                if (bestType == 2) _propObjects.TryGetValue(targetId, out targetGo);
+                else if (bestType == 3) _buildingObjects.TryGetValue(targetId, out targetGo);
+                else if (bestType == 4) _objectMarkers.TryGetValue(targetId, out targetGo);
+            }
+            else if (bestType == 1)
+            {
+                string wKey = $"{cell.x}_{cell.y}_E{bestRotation}";
+                _wallObjects.TryGetValue(wKey, out targetGo);
+            }
+
+            if (targetGo != null)
+            {
+                var renderers = targetGo.GetComponentsInChildren<Renderer>();
+                foreach (var r in renderers)
+                {
+                    if (r.material == null) continue;
+                    _eraseHoverRenderers.Add((r, r.material.color));
+                    r.material.color = new Color(1f, 0.25f, 0.25f, 0.9f);
+                }
+            }
+        }
+
+        public void ClearEraseHover()
+        {
+            foreach (var (rend, orig) in _eraseHoverRenderers)
+            {
+                if (rend != null && rend.material != null)
+                    rend.material.color = orig;
+            }
+            _eraseHoverRenderers.Clear();
+            _eraseHoverInstanceId = null;
+            EraseHoverInfo = null;
+        }
+
+        // --- Resize Mode ---
+
+        public void ToggleResizeMode()
+        {
+            ResizeMode = !ResizeMode;
+            if (!ResizeMode) ClearResizeHover();
+            UI.RefreshAll();
+        }
+
+        public void UpdateResizeHover(Vector2Int cell, Vector3 worldPos)
+        {
+            if (EditingMap == null) { ClearResizeHover(); return; }
+
+            Vector3 cellWorld = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+            float bestDist = 2f;
+            string targetId = null;
+            string info = null;
+            int targetType = -1; // 0=prop, 1=building, 2=mapObject
+
+            // Props
+            for (int i = 0; i < EditingMap.props.Count; i++)
+            {
+                var p = EditingMap.props[i];
+                float dist = Vector3.Distance(p.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    targetId = p.instanceId;
+                    string name = p.propDefinition != null ? (p.propDefinition.displayName ?? p.propDefinitionId) : p.propDefinitionId;
+                    info = $"프롭: {name}  (x{p.scale:F2})";
+                    targetType = 0;
+                }
+            }
+
+            // Buildings
+            for (int i = 0; i < EditingMap.buildings.Count; i++)
+            {
+                var b = EditingMap.buildings[i];
+                float dist = Vector3.Distance(b.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    targetId = b.instanceId;
+                    string name = b.buildingDefinition != null ? (b.buildingDefinition.displayName ?? b.buildingDefinitionId) : b.buildingDefinitionId;
+                    info = $"건물: {name}  (x{b.scale:F2})";
+                    targetType = 1;
+                }
+            }
+
+            // MapObject markers (sphere markers have no meaningful scale, skip for now)
+
+            if (targetId == _resizeHoverInstanceId) { ResizeHoverInfo = info; return; }
+
+            ClearResizeHover();
+            _resizeHoverInstanceId = targetId;
+            ResizeHoverInfo = info;
+
+            // Highlight with blue tint
+            GameObject targetGo = null;
+            if (targetType == 0 && targetId != null) _propObjects.TryGetValue(targetId, out targetGo);
+            else if (targetType == 1 && targetId != null) _buildingObjects.TryGetValue(targetId, out targetGo);
+
+            if (targetGo != null)
+            {
+                var renderers = targetGo.GetComponentsInChildren<Renderer>();
+                foreach (var r in renderers)
+                {
+                    if (r.material == null) continue;
+                    _resizeHoverRenderers.Add((r, r.material.color));
+                    r.material.color = new Color(0.3f, 0.6f, 1f, 0.9f);
+                }
+            }
+        }
+
+        public void ClearResizeHover()
+        {
+            foreach (var (rend, orig) in _resizeHoverRenderers)
+            {
+                if (rend != null && rend.material != null)
+                    rend.material.color = orig;
+            }
+            _resizeHoverRenderers.Clear();
+            _resizeHoverInstanceId = null;
+            ResizeHoverInfo = null;
+        }
+
+        public void AdjustResizeScale(float delta)
+        {
+            if (EditingMap == null || string.IsNullOrEmpty(_resizeHoverInstanceId)) return;
+
+            SaveUndoSnapshot();
+
+            // Props
+            foreach (var p in EditingMap.props)
+            {
+                if (p.instanceId == _resizeHoverInstanceId)
+                {
+                    p.scale = Mathf.Max(0.1f, p.scale + delta);
+                    if (_propObjects.TryGetValue(p.instanceId, out var go))
+                        go.transform.localScale = Vector3.one * p.scale;
+                    ResizeHoverInfo = $"프롭: {(p.propDefinition?.displayName ?? p.propDefinitionId)}  (x{p.scale:F2})";
+                    return;
+                }
+            }
+
+            // Buildings
+            foreach (var b in EditingMap.buildings)
+            {
+                if (b.instanceId == _resizeHoverInstanceId)
+                {
+                    b.scale = Mathf.Max(0.1f, b.scale + delta);
+                    if (_buildingObjects.TryGetValue(b.instanceId, out var go))
+                        go.transform.localScale = Vector3.one * b.scale;
+                    ResizeHoverInfo = $"건물: {(b.buildingDefinition?.displayName ?? b.buildingDefinitionId)}  (x{b.scale:F2})";
+                    return;
+                }
+            }
+        }
+
+        /// <summary>MapObjectType → InteractableObject.InteractType 매핑</summary>
+        public static int MapObjectTypeToInteractType(MapObjectType type) => type switch
+        {
+            MapObjectType.EscapePoint => 1,      // InteractType.ExitPoint
+            MapObjectType.LootContainer => 2,     // InteractType.Container
+            MapObjectType.NPC => 3,               // InteractType.NPC
+            MapObjectType.Note => 4,              // InteractType.Note
+            MapObjectType.ItemDrop => 5,           // InteractType.Pickup
+            MapObjectType.Bed => 6,               // InteractType.Bed
+            MapObjectType.Workbench => 7,          // InteractType.Workbench
+            MapObjectType.MapBoard => 8,           // InteractType.MapBoard
+            MapObjectType.MedicalBench => 9,       // InteractType.MedicalBench
+            MapObjectType.CookingBench => 10,      // InteractType.CookingBench
+            MapObjectType.Door => 11,              // InteractType.Door
+            MapObjectType.GenericInteract => 0,    // InteractType.Generic
+            _ => 0
+        };
+
         public void ToggleSnapToGrid()
         {
             SnapToGrid = !SnapToGrid;
@@ -721,7 +1133,9 @@ namespace IsometricMapEditor
             var go = Instantiate(prop.propDefinition.prefab, _propRoot);
             go.name = $"Prop_{prop.propDefinitionId}_{prop.instanceId}";
             go.transform.position = prop.GetWorldPosition(EditingMap.gridSettings);
-            go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0);
+            // Y회전을 프리팹 Root 회전에 곱함 (Root의 카메라 맞춤 회전 유지)
+            if (Mathf.Abs(prop.yRotation) > 0.01f)
+                go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0) * go.transform.rotation;
             go.transform.localScale = Vector3.one * prop.scale;
             _propObjects[prop.instanceId] = go;
         }
@@ -738,7 +1152,9 @@ namespace IsometricMapEditor
             {
                 go = Instantiate(def.prefab, _buildingRoot);
                 go.transform.position = worldPos;
-                go.transform.rotation = Quaternion.Euler(0, building.rotation * 90f, 0);
+                // Y회전을 프리팹 Root 회전에 곱함 (Root의 카메라 맞춤 회전 유지)
+                if (Mathf.Abs(building.yRotation) > 0.01f)
+                    go.transform.rotation = Quaternion.Euler(0, building.yRotation, 0) * go.transform.rotation;
             }
             else
             {
@@ -746,6 +1162,8 @@ namespace IsometricMapEditor
                 go = new GameObject($"Building_{def.buildingId}_{building.instanceId}");
                 go.transform.SetParent(_buildingRoot);
                 go.transform.position = worldPos;
+                if (Mathf.Abs(building.yRotation) > 0.01f)
+                    go.transform.rotation = Quaternion.Euler(0, building.yRotation, 0);
 
                 float ts = EditingMap.gridSettings.tileSize;
                 var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -792,27 +1210,102 @@ namespace IsometricMapEditor
 
         void SpawnObjectMarker(PlacedMapObject obj)
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            GameObject go;
+            Vector3 pos = obj.GetWorldPosition(EditingMap.gridSettings);
+            float scale = obj.visualScale > 0.01f ? obj.visualScale : 1f;
+
+            switch (obj.visualMode)
+            {
+                case 1: // TextureQuad
+                {
+                    go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                    go.transform.localRotation = Quaternion.Euler(90f, 0, 0);
+                    go.transform.localScale = Vector3.one * scale;
+                    var meshCol = go.GetComponent<MeshCollider>();
+                    if (meshCol) Destroy(meshCol);
+                    var quadRenderer = go.GetComponent<Renderer>();
+                    var quadMat = new Material(Shader.Find("InkCity/CityBuilding") ?? Shader.Find("Universal Render Pipeline/Unlit"));
+                    Texture2D quadTex = null;
+                    if (catalog != null)
+                    {
+                        var def = catalog.GetMapObjectDefByType(obj.objectType);
+                        if (def != null && def.visualTexture != null) quadTex = def.visualTexture;
+                    }
+                    if (quadTex == null && !string.IsNullOrEmpty(obj.visualTexturePath))
+                        quadTex = Resources.Load<Texture2D>(obj.visualTexturePath);
+                    if (quadTex != null)
+                    {
+                        quadMat.mainTexture = quadTex;
+                        float aspect = (float)quadTex.width / quadTex.height;
+                        go.transform.localScale = new Vector3(scale * (aspect > 1 ? 1 : aspect), scale * (aspect > 1 ? 1f / aspect : 1), 1f);
+                    }
+                    quadMat.SetFloat("_Cutoff", 0.5f);
+                    quadMat.EnableKeyword("_MAGENTA_CLIP");
+                    quadMat.SetFloat("_MagentaClip", 1f);
+                    quadRenderer.sharedMaterial = quadMat;
+                    go.transform.position = pos;
+                    break;
+                }
+
+                case 2: // Invisible
+                {
+                    go = new GameObject();
+                    go.transform.position = pos + Vector3.up * 0.5f;
+                    var boxCol = go.AddComponent<BoxCollider>();
+                    boxCol.size = Vector3.one * 0.4f;
+                    boxCol.isTrigger = true;
+                    break;
+                }
+
+                case 3: // EffectPrefab
+                {
+                    go = new GameObject();
+                    go.transform.position = pos;
+                    GameObject effectSrc = null;
+                    if (catalog != null)
+                    {
+                        var def = catalog.GetMapObjectDefByType(obj.objectType);
+                        if (def != null && def.effectPrefab != null) effectSrc = def.effectPrefab;
+                    }
+                    if (effectSrc == null && !string.IsNullOrEmpty(obj.effectPrefabPath))
+                        effectSrc = Resources.Load<GameObject>(obj.effectPrefabPath);
+                    if (effectSrc != null)
+                    {
+                        var effect = Instantiate(effectSrc, go.transform);
+                        effect.transform.localPosition = Vector3.zero;
+                        effect.transform.localScale = Vector3.one * scale;
+                    }
+                    break;
+                }
+
+                default: // 0 = Sphere
+                {
+                    go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    go.transform.position = pos + Vector3.up * 0.5f;
+                    go.transform.localScale = Vector3.one * 0.4f;
+                    var col = go.GetComponent<Collider>();
+                    if (col != null) Destroy(col);
+                    var renderer = go.GetComponent<Renderer>();
+                    var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                    if (mat.shader.name == "Hidden/InternalErrorShader")
+                        mat = new Material(Shader.Find("Standard"));
+                    mat.color = GetObjectTypeColor(obj.objectType);
+                    renderer.sharedMaterial = mat;
+                    break;
+                }
+            }
+
             go.name = $"Marker_{obj.objectType}_{obj.instanceId}";
             go.transform.SetParent(_objectRoot);
-            go.transform.position = obj.GetWorldPosition(EditingMap.gridSettings) + Vector3.up * 0.5f;
-            go.transform.localScale = Vector3.one * 0.4f;
 
-            var collider = go.GetComponent<Collider>();
-            if (collider != null) Destroy(collider);
+            // Apply Y rotation
+            if (Mathf.Abs(obj.yRotation) > 0.01f)
+                go.transform.rotation = Quaternion.Euler(0, obj.yRotation, 0) * go.transform.rotation;
 
-            var renderer = go.GetComponent<Renderer>();
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            if (mat.shader.name == "Hidden/InternalErrorShader")
-                mat = new Material(Shader.Find("Standard"));
-
-            mat.color = GetObjectTypeColor(obj.objectType);
-            renderer.sharedMaterial = mat;
-
-            // Label
+            // Label (always show for all modes)
             var labelGo = new GameObject("Label");
             labelGo.transform.SetParent(go.transform);
-            labelGo.transform.localPosition = Vector3.up * 1f;
+            labelGo.transform.localPosition = obj.visualMode == 1 ? Vector3.up * (scale * 0.6f) : Vector3.up * 1f;
 
             var tm = labelGo.AddComponent<TextMesh>();
             tm.text = string.IsNullOrEmpty(obj.label) ? obj.objectType.ToString() : obj.label;
@@ -825,15 +1318,48 @@ namespace IsometricMapEditor
             _objectMarkers[obj.instanceId] = go;
         }
 
-        static Color GetObjectTypeColor(MapObjectType type) => type switch
+        static float GetDefaultInteractRange(MapObjectType type) => type switch
+        {
+            MapObjectType.EscapePoint => 3f,
+            MapObjectType.Door => 2f,
+            _ => 2f
+        };
+
+        static string GetDefaultPromptText(MapObjectType type) => type switch
+        {
+            MapObjectType.EscapePoint => "탈출",
+            MapObjectType.LootContainer => "뒤지기",
+            MapObjectType.NPC => "대화하기",
+            MapObjectType.Note => "읽기",
+            MapObjectType.ItemDrop => "줍기",
+            MapObjectType.Bed => "쉬기",
+            MapObjectType.Workbench => "제작하기",
+            MapObjectType.MapBoard => "출전 준비",
+            MapObjectType.MedicalBench => "치료품 제작",
+            MapObjectType.CookingBench => "요리하기",
+            MapObjectType.Door => "문 열기",
+            MapObjectType.GenericInteract => "조사하기",
+            _ => ""
+        };
+
+        public static Color GetObjectTypeColor(MapObjectType type) => type switch
         {
             MapObjectType.SpawnPoint => Color.green,
             MapObjectType.EscapePoint => Color.cyan,
-            MapObjectType.LootContainer => new Color(1f, 0.7f, 0f),
+            MapObjectType.LootContainer => Color.yellow,
             MapObjectType.EnemySpawn => Color.red,
-            MapObjectType.ItemDrop => new Color(0.8f, 0.5f, 1f),
-            MapObjectType.Trigger => Color.yellow,
-            MapObjectType.Custom => Color.white,
+            MapObjectType.ItemDrop => new Color(1f, 0.6f, 0f),
+            MapObjectType.Trigger => Color.magenta,
+            MapObjectType.Custom => Color.gray,
+            MapObjectType.NPC => new Color(0.5f, 0.8f, 1f),
+            MapObjectType.Note => new Color(1f, 1f, 0.6f),
+            MapObjectType.Bed => new Color(0.6f, 0.4f, 0.8f),
+            MapObjectType.Workbench => new Color(0.8f, 0.6f, 0.3f),
+            MapObjectType.MapBoard => new Color(0.3f, 0.8f, 0.6f),
+            MapObjectType.MedicalBench => new Color(1f, 0.4f, 0.4f),
+            MapObjectType.CookingBench => new Color(1f, 0.7f, 0.3f),
+            MapObjectType.GenericInteract => new Color(0.7f, 0.7f, 0.7f),
+            MapObjectType.Door => new Color(0.6f, 0.4f, 0.25f),
             _ => Color.white
         };
 

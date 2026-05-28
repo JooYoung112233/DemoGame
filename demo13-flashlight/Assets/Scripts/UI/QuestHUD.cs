@@ -4,22 +4,18 @@ using System.Collections.Generic;
 
 public class QuestHUD : MonoBehaviour
 {
-    Canvas canvas;
-    GameObject panelRoot;
-    Text questListText;
-    Text notificationText;
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] Text questListText;
+    [SerializeField] Text notificationText;
     float notificationTimer;
+
+    public bool IsGenerated => canvas != null;
 
     void Start()
     {
-        BuildUI();
-
-        if (QuestManager.Instance != null)
-        {
-            QuestManager.Instance.OnObjectiveUpdated += OnObjectiveUpdated;
-            QuestManager.Instance.OnQuestAccepted += OnQuestAccepted;
-            QuestManager.Instance.OnQuestCompleted += OnQuestCompleted;
-        }
+        if (!IsGenerated) GenerateUI();
+        BindEvents();
     }
 
     void OnDestroy()
@@ -119,7 +115,17 @@ public class QuestHUD : MonoBehaviour
         notificationTimer = 3f;
     }
 
-    void BuildUI()
+    public void BindEvents()
+    {
+        if (QuestManager.Instance != null)
+        {
+            QuestManager.Instance.OnObjectiveUpdated += OnObjectiveUpdated;
+            QuestManager.Instance.OnQuestAccepted += OnQuestAccepted;
+            QuestManager.Instance.OnQuestCompleted += OnQuestCompleted;
+        }
+    }
+
+    public void GenerateUI()
     {
         var canvasGO = new GameObject("QuestHUD_Canvas");
         canvasGO.transform.SetParent(transform, false);
@@ -166,6 +172,23 @@ public class QuestHUD : MonoBehaviour
         notificationText.gameObject.SetActive(false);
 
         panelRoot.SetActive(false);
+    }
+
+    public void ClearGeneratedUI()
+    {
+        var child = transform.Find("QuestHUD_Canvas");
+        if (child != null)
+        {
+            if (Application.isPlaying)
+                Destroy(child.gameObject);
+            else
+                DestroyImmediate(child.gameObject);
+        }
+
+        canvas = null;
+        panelRoot = null;
+        questListText = null;
+        notificationText = null;
     }
 
     Text MakeText(Transform parent, string name, string content, int fontSize, TextAnchor align)

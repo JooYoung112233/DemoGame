@@ -199,3 +199,44 @@ NPCRelationship
   - **결정**: 호감도 — 나쁜 선택 시 하락 / 신뢰도 — 실패·배신 시 하락 / 두려움 — 하락 없음 (영구 축적)
 - **질문**: 두려움(Fear) 효과 방식?
   - **결정**: 복종형 — 단기 이득(할인·정보) but 호감도/신뢰도 콘텐츠 잠김
+
+---
+
+## 7. NPC 퀘스트 마커 (NPCQuestMarker)
+
+### 7-1. 개요
+NPC 머리 위에 3D 마커를 표시하여 퀘스트/대화 상태를 시각적으로 전달.
+QuestManager 이벤트를 구독하여 자동 갱신.
+
+### 7-2. 마커 상태 (우선순위 순)
+
+| 우선순위 | 상태 | 시각 | 의미 |
+|---------|------|------|------|
+| 1 | ReadyToReport | ❗ 금색 느낌표 | 완료된 퀘스트 보고 가능 |
+| 2 | Available | ❓ 금색 물음표 | 수주 가능한 퀘스트 있음 |
+| 3 | InProgress | ... 회색 | 퀘스트 진행 중 |
+| 4 | Story | 💬 하늘색 다이아몬드 | 스토리 씬 대기 |
+| 5 | Talk | 회색 점 | 일반 대화 가능 |
+| 6 | None | 없음 | 숨김 |
+
+### 7-3. 비주얼
+- 3D TextMesh (❗/❓/...) + 그림자 텍스트
+- 프리미티브 도형 (Story=다이아몬드, Talk=구)
+- Y축 빌보드 + sin 웨이브 위아래 흔들림
+- NPCController.Start()에서 자동 부착
+
+### 7-4. 갱신 트리거
+- QuestManager.OnQuestAccepted / OnQuestCompleted / OnObjectiveUpdated
+- DialogueUI 닫힘 후 (DelayedMarkerRefresh 코루틴)
+- StoryTriggerManager 스토리 씬 완료 콜백
+
+### 7-5. 맵 빌더 연동
+- MapObjectType.NPC → 스폰 설정 패널에서 NPC ID / 표시 이름 입력
+- PlacedMapObject.npcId → Resources/Data/NPC/{npcId}에서 NPCData SO 로드
+- MapObjectSpawner가 NPCController + NPCQuestMarker 자동 부착
+
+### 2025-05-28
+- **질문**: NPC 머리 위 퀘스트 마커 방식?
+  - **결정**: 3D TextMesh/프리미티브 기반 마커. QuestManager 이벤트 구독으로 자동 갱신.
+  - **상태 우선순위**: ReadyToReport > Available > InProgress > Story > Talk > None
+  - **비주얼**: 금색 ❗/❓, 회색 진행중, 하늘색 스토리, 회색 대화

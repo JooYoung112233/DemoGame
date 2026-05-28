@@ -10,6 +10,7 @@ using System.Collections.Generic;
 public class CraftingUI : MonoBehaviour
 {
     public bool IsShowing => isShowing;
+    public bool IsGenerated => canvas != null;
 
     bool isShowing;
     CraftingStation currentStation;
@@ -18,43 +19,48 @@ public class CraftingUI : MonoBehaviour
     PlayerInventory playerInventory;
 
     // uGUI
-    Canvas canvas;
-    GameObject panelRoot;
-    RectTransform panelRT;
-    Text titleText;
-    Text descText;
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] RectTransform panelRT;
+    [SerializeField] Text titleText;
+    [SerializeField] Text descText;
 
     // 탭 (제작 / 수리)
-    GameObject craftTab;
-    GameObject repairTab;
-    Button craftTabBtn, repairTabBtn;
-    Image craftTabBg, repairTabBg;
+    [SerializeField] GameObject craftTab;
+    [SerializeField] GameObject repairTab;
+    [SerializeField] Button craftTabBtn;
+    [SerializeField] Button repairTabBtn;
+    [SerializeField] Image craftTabBg;
+    [SerializeField] Image repairTabBg;
     bool showingRepairTab;
 
     // 제작 목록
-    RectTransform recipeListRoot;
+    [SerializeField] RectTransform recipeListRoot;
     List<RecipeData> currentRecipes = new List<RecipeData>();
     int selectedRecipeIndex = -1;
 
     // 선택된 레시피 상세
-    Text selectedNameText;
-    Text selectedIngredientsText;
-    Text selectedResultText;
-    Button craftButton;
-    Text craftButtonText;
+    [SerializeField] Text selectedNameText;
+    [SerializeField] Text selectedIngredientsText;
+    [SerializeField] Text selectedResultText;
+    [SerializeField] Button craftButton;
+    [SerializeField] Text craftButtonText;
     string craftActionLabel = "제작";
 
     // 수리 목록
-    RectTransform repairListRoot;
+    [SerializeField] RectTransform repairListRoot;
     List<InventoryGrid.PlacedItem> repairableItems = new List<InventoryGrid.PlacedItem>();
     int selectedRepairIndex = -1;
 
     // 수리 상세
-    Text repairNameText;
-    Text repairCostText;
-    Text repairDurText;
-    Button repairButton;
-    Text repairButtonText;
+    [SerializeField] Text repairNameText;
+    [SerializeField] Text repairCostText;
+    [SerializeField] Text repairDurText;
+    [SerializeField] Button repairButton;
+    [SerializeField] Text repairButtonText;
+
+    // 닫기
+    [SerializeField] Button closeBtn;
 
     static readonly float PANEL_W = 520f;
     static readonly float PANEL_H = 480f;
@@ -63,7 +69,8 @@ public class CraftingUI : MonoBehaviour
 
     void Awake()
     {
-        BuildUI();
+        if (!IsGenerated) GenerateUI();
+        BindEvents();
     }
 
     void Update()
@@ -154,9 +161,27 @@ public class CraftingUI : MonoBehaviour
 
     #endregion
 
+    #region Events
+
+    public void BindEvents()
+    {
+        if (craftTabBtn != null)
+            craftTabBtn.onClick.AddListener(() => SelectTab(false));
+        if (repairTabBtn != null)
+            repairTabBtn.onClick.AddListener(() => SelectTab(true));
+        if (craftButton != null)
+            craftButton.onClick.AddListener(OnCraftClicked);
+        if (repairButton != null)
+            repairButton.onClick.AddListener(OnRepairClicked);
+        if (closeBtn != null)
+            closeBtn.onClick.AddListener(Hide);
+    }
+
+    #endregion
+
     #region UI Build
 
-    void BuildUI()
+    public void GenerateUI()
     {
         var canvasGO = new GameObject("CraftingUI_Canvas");
         canvasGO.transform.SetParent(transform, false);
@@ -212,17 +237,14 @@ public class CraftingUI : MonoBehaviour
         closeBtnRT.sizeDelta = new Vector2(28, 28);
         var closeBg = closeBtnGO.AddComponent<Image>();
         closeBg.color = new Color(0.3f, 0.15f, 0.15f);
-        var closeBtn = closeBtnGO.AddComponent<Button>();
+        closeBtn = closeBtnGO.AddComponent<Button>();
         closeBtn.targetGraphic = closeBg;
-        closeBtn.onClick.AddListener(Hide);
         MakeChildText(closeBtnGO.transform, "X", 16, Color.white);
 
         // 탭 버튼
         float tabY = -58f;
         craftTabBtn = MakeTabButton(panelRT, "제작", new Vector2(15, tabY), out craftTabBg);
-        craftTabBtn.onClick.AddListener(() => SelectTab(false));
         repairTabBtn = MakeTabButton(panelRT, "수리", new Vector2(80, tabY), out repairTabBg);
-        repairTabBtn.onClick.AddListener(() => SelectTab(true));
 
         // 제작 탭 콘텐츠
         craftTab = new GameObject("CraftContent");
@@ -291,7 +313,6 @@ public class CraftingUI : MonoBehaviour
         btnBg.color = new Color(0.15f, 0.35f, 0.2f);
         craftButton = btnGO.AddComponent<Button>();
         craftButton.targetGraphic = btnBg;
-        craftButton.onClick.AddListener(OnCraftClicked);
         craftButtonText = MakeChildText(btnGO.transform, craftActionLabel, 15, Color.white);
     }
 
@@ -339,8 +360,44 @@ public class CraftingUI : MonoBehaviour
         btnBg.color = new Color(0.15f, 0.25f, 0.4f);
         repairButton = btnGO.AddComponent<Button>();
         repairButton.targetGraphic = btnBg;
-        repairButton.onClick.AddListener(OnRepairClicked);
         repairButtonText = MakeChildText(btnGO.transform, "수리", 15, Color.white);
+    }
+
+    public void ClearGeneratedUI()
+    {
+        var child = transform.Find("CraftingUI_Canvas");
+        if (child != null)
+        {
+            if (Application.isPlaying)
+                Destroy(child.gameObject);
+            else
+                DestroyImmediate(child.gameObject);
+        }
+
+        canvas = null;
+        panelRoot = null;
+        panelRT = null;
+        titleText = null;
+        descText = null;
+        craftTab = null;
+        repairTab = null;
+        craftTabBtn = null;
+        repairTabBtn = null;
+        craftTabBg = null;
+        repairTabBg = null;
+        recipeListRoot = null;
+        selectedNameText = null;
+        selectedIngredientsText = null;
+        selectedResultText = null;
+        craftButton = null;
+        craftButtonText = null;
+        repairListRoot = null;
+        repairNameText = null;
+        repairCostText = null;
+        repairDurText = null;
+        repairButton = null;
+        repairButtonText = null;
+        closeBtn = null;
     }
 
     #endregion

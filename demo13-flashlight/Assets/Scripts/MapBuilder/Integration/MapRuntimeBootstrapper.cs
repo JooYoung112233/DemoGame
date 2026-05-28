@@ -12,6 +12,7 @@ namespace IsometricMapEditor
         BuildingStateManager stateManager;
         PropManager propManager;
         HarvestableManager harvestableManager;
+        MapObjectSpawner mapObjectSpawner;
         WalkabilityMap walkabilityMap;
         EscapePointManager escapeManager;
         InteriorMapLoader interiorLoader;
@@ -54,6 +55,14 @@ namespace IsometricMapEditor
             harvestableManager = CreateChild<HarvestableManager>("HarvestableManager");
             harvestableManager.Initialize(transform);
             harvestableManager.SpawnHarvestables(mapData.harvestables, mapData.gridSettings);
+
+            // Map objects (SpawnPoint, InteractableObject 등)
+            if (mapData.mapObjects.Count > 0)
+            {
+                mapObjectSpawner = CreateChild<MapObjectSpawner>("MapObjectSpawner");
+                mapObjectSpawner.Initialize(transform);
+                mapObjectSpawner.SpawnMapObjects(mapData.mapObjects, mapData.gridSettings);
+            }
 
             if (mapData.walkability != null)
             {

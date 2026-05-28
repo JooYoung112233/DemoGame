@@ -46,6 +46,10 @@ namespace IsometricMapEditor
             public string buildingDefinitionId;
             public int rotation;
             public string activeVariantId;
+            public bool freePlace;
+            public float worldX, worldY, worldZ;
+            public float yRotation;
+            public float scale;
         }
 
         [System.Serializable]
@@ -81,6 +85,35 @@ namespace IsometricMapEditor
             public float yRotation;
             public string label;
             public string customData;
+            public float interactRange;
+            public string promptText;
+
+            // 스폰 설정
+            public int spawnPointType;
+            public bool useRegionLoot;
+            public int containerGridWidth;
+            public int containerGridHeight;
+            public string containerName;
+            public string enemyUnitKey;
+            public int enemyCount;
+            public string fixedItemId;
+            public int fixedItemCount;
+
+            // 문 설정
+            public int doorLockType;
+            public string doorKeyId;
+            public bool doorConsumeKey;
+            public string doorQuestId;
+
+            // NPC 설정
+            public string npcId;
+            public string npcDisplayName;
+
+            // 비주얼 모드
+            public int visualMode;
+            public string visualTexturePath;
+            public string effectPrefabPath;
+            public float visualScale;
         }
 
         public static string Serialize(MapData map)
@@ -132,7 +165,13 @@ namespace IsometricMapEditor
                     y = b.gridPosition.y,
                     buildingDefinitionId = b.buildingDefinitionId,
                     rotation = b.rotation,
-                    activeVariantId = b.activeVariantId
+                    activeVariantId = b.activeVariantId,
+                    freePlace = b.freePlace,
+                    worldX = b.worldPosition.x,
+                    worldY = b.worldPosition.y,
+                    worldZ = b.worldPosition.z,
+                    yRotation = b.yRotation,
+                    scale = b.scale
                 };
             }
 
@@ -183,7 +222,32 @@ namespace IsometricMapEditor
                     worldZ = mo.worldPosition.z,
                     yRotation = mo.yRotation,
                     label = mo.label,
-                    customData = mo.customData
+                    customData = mo.customData,
+                    interactRange = mo.interactRange,
+                    promptText = mo.promptText,
+                    // 스폰 설정
+                    spawnPointType = mo.spawnPointType,
+                    useRegionLoot = mo.useRegionLoot,
+                    containerGridWidth = mo.containerGridWidth,
+                    containerGridHeight = mo.containerGridHeight,
+                    containerName = mo.containerName,
+                    enemyUnitKey = mo.enemyUnitKey,
+                    enemyCount = mo.enemyCount,
+                    fixedItemId = mo.fixedItemId,
+                    fixedItemCount = mo.fixedItemCount,
+                    // 문 설정
+                    doorLockType = mo.doorLockType,
+                    doorKeyId = mo.doorKeyId,
+                    doorConsumeKey = mo.doorConsumeKey,
+                    doorQuestId = mo.doorQuestId,
+                    // NPC 설정
+                    npcId = mo.npcId,
+                    npcDisplayName = mo.npcDisplayName,
+                    // 비주얼 모드
+                    visualMode = mo.visualMode,
+                    visualTexturePath = mo.visualTexturePath,
+                    effectPrefabPath = mo.effectPrefabPath,
+                    visualScale = mo.visualScale
                 };
             }
 
@@ -234,6 +298,26 @@ namespace IsometricMapEditor
                 }
             }
 
+            target.buildings.Clear();
+            if (json.buildings != null)
+            {
+                foreach (var sb in json.buildings)
+                {
+                    target.buildings.Add(new PlacedBuilding
+                    {
+                        instanceId = sb.instanceId,
+                        gridPosition = new Vector2Int(sb.x, sb.y),
+                        buildingDefinitionId = sb.buildingDefinitionId,
+                        rotation = sb.rotation,
+                        activeVariantId = sb.activeVariantId,
+                        freePlace = sb.freePlace,
+                        worldPosition = new Vector3(sb.worldX, sb.worldY, sb.worldZ),
+                        yRotation = sb.yRotation,
+                        scale = sb.scale > 0 ? sb.scale : 1f
+                    });
+                }
+            }
+
             target.props.Clear();
             if (json.props != null)
             {
@@ -253,6 +337,21 @@ namespace IsometricMapEditor
                 }
             }
 
+            target.harvestables.Clear();
+            if (json.harvestables != null)
+            {
+                foreach (var sh in json.harvestables)
+                {
+                    target.harvestables.Add(new PlacedHarvestable
+                    {
+                        instanceId = sh.instanceId,
+                        gridPosition = new Vector2Int(sh.x, sh.y),
+                        harvestableDefinitionId = sh.harvestableDefinitionId,
+                        overrideSpawnCondition = sh.overrideSpawnCondition
+                    });
+                }
+            }
+
             target.mapObjects.Clear();
             if (json.mapObjects != null)
             {
@@ -267,7 +366,32 @@ namespace IsometricMapEditor
                         worldPosition = new Vector3(smo.worldX, smo.worldY, smo.worldZ),
                         yRotation = smo.yRotation,
                         label = smo.label,
-                        customData = smo.customData
+                        customData = smo.customData,
+                        interactRange = smo.interactRange > 0 ? smo.interactRange : 2f,
+                        promptText = smo.promptText,
+                        // 스폰 설정
+                        spawnPointType = smo.spawnPointType,
+                        useRegionLoot = smo.useRegionLoot,
+                        containerGridWidth = smo.containerGridWidth > 0 ? smo.containerGridWidth : 4,
+                        containerGridHeight = smo.containerGridHeight > 0 ? smo.containerGridHeight : 5,
+                        containerName = smo.containerName,
+                        enemyUnitKey = smo.enemyUnitKey,
+                        enemyCount = smo.enemyCount > 0 ? smo.enemyCount : 1,
+                        fixedItemId = smo.fixedItemId,
+                        fixedItemCount = smo.fixedItemCount > 0 ? smo.fixedItemCount : 1,
+                        // 문 설정
+                        doorLockType = smo.doorLockType,
+                        doorKeyId = smo.doorKeyId,
+                        doorConsumeKey = smo.doorConsumeKey,
+                        doorQuestId = smo.doorQuestId,
+                        // NPC 설정
+                        npcId = smo.npcId,
+                        npcDisplayName = smo.npcDisplayName,
+                        // 비주얼 모드
+                        visualMode = smo.visualMode,
+                        visualTexturePath = smo.visualTexturePath,
+                        effectPrefabPath = smo.effectPrefabPath,
+                        visualScale = smo.visualScale > 0.01f ? smo.visualScale : 1f
                     });
                 }
             }

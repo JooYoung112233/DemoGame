@@ -7,26 +7,26 @@ public class PostRaidEventUI : MonoBehaviour
     public static PostRaidEventUI Instance { get; private set; }
 
     public bool IsShowing => isShowing;
+    public bool IsGenerated => canvas != null;
 
     bool isShowing;
     PostRaidEventData currentEvent;
     System.Action onDismissed;
 
     // uGUI
-    Canvas canvas;
-    GameObject panelRoot;
-    Text titleText;
-    Text descText;
-    GameObject choicePanel;
-    Button[] choiceButtons;
-    Text[] choiceTexts;
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] Text titleText;
+    [SerializeField] Text descText;
+    [SerializeField] GameObject choicePanel;
+    [SerializeField] Button[] choiceButtons;
+    [SerializeField] Text[] choiceTexts;
 
     // 결과 표시
-    GameObject resultPanel;
-    Text resultText;
-    Text rewardText;
-    Button continueButton;
-    Text continueLabel;
+    [SerializeField] GameObject resultPanel;
+    [SerializeField] Text resultText;
+    [SerializeField] Text rewardText;
+    [SerializeField] Text continueLabel;
 
     void Awake()
     {
@@ -36,12 +36,18 @@ public class PostRaidEventUI : MonoBehaviour
             return;
         }
         Instance = this;
-        BuildUI();
+        if (!IsGenerated) GenerateUI();
+        BindEvents();
     }
 
     void OnDestroy()
     {
         if (Instance == this) Instance = null;
+    }
+
+    public void BindEvents()
+    {
+        // Choice button onClick listeners are set dynamically in ShowEvent()
     }
 
     public void ShowEvent(PostRaidEventData evt, System.Action onDone = null)
@@ -253,7 +259,7 @@ public class PostRaidEventUI : MonoBehaviour
         }
     }
 
-    void BuildUI()
+    public void GenerateUI()
     {
         var canvasGO = new GameObject("PostRaidEvent_Canvas");
         canvasGO.transform.SetParent(transform, false);
@@ -393,6 +399,29 @@ public class PostRaidEventUI : MonoBehaviour
 
         resultPanel.SetActive(false);
         panelRoot.SetActive(false);
+    }
+
+    public void ClearGeneratedUI()
+    {
+        var child = transform.Find("PostRaidEvent_Canvas");
+        if (child != null)
+        {
+            if (Application.isPlaying)
+                Destroy(child.gameObject);
+            else
+                DestroyImmediate(child.gameObject);
+        }
+        canvas = null;
+        panelRoot = null;
+        titleText = null;
+        descText = null;
+        choicePanel = null;
+        choiceButtons = null;
+        choiceTexts = null;
+        resultPanel = null;
+        resultText = null;
+        rewardText = null;
+        continueLabel = null;
     }
 
     Text MakeText(Transform parent, string name, string content, int fontSize, TextAnchor align)

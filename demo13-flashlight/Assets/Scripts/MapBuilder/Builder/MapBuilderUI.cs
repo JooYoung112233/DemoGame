@@ -19,13 +19,23 @@ namespace IsometricMapEditor
         RectTransform _paletteContent;
         ScrollRect _paletteScroll;
 
-        // Snap label
+        // Snap toggle
         Text _snapText;
+        Button _snapButton;
 
-        // Hierarchy
-        RectTransform _hierarchyPanel;
-        RectTransform _hierarchyContent;
-        ScrollRect _hierarchyScroll;
+        // Hover tooltip (eraser preview)
+        RectTransform _hoverTooltip;
+        Text _hoverTooltipText;
+
+        // Filter toggles
+        RectTransform _filterPanel;
+        Button[] _filterButtons;
+
+        // Spawn Config
+        RectTransform _spawnConfigPanel;
+
+        // Help panel
+        RectTransform _helpPanel;
 
         // Dialog
         RectTransform _dialogPanel;
@@ -85,9 +95,12 @@ namespace IsometricMapEditor
 
             BuildTopToolbar();
             BuildPalettePanel();
-            BuildHierarchyPanel();
+            BuildFilterPanel();
+            BuildSpawnConfigPanel();
+            BuildHoverTooltip();
             BuildSaveLoadDialog();
             BuildNewMapDialog();
+            BuildHelpPanel();
         }
 
         // ======== TOP TOOLBAR ========
@@ -106,7 +119,7 @@ namespace IsometricMapEditor
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
-            string[] toolNames = { "1.Tile", "2.Wall", "3.Prop", "4.Building", "5.Object", "6.Eraser" };
+            string[] toolNames = { "1.Tile", "2.Wall", "3.Prop", "4.Building", "5.Object", "6.Del" };
             ToolMode[] modes = { ToolMode.Tile, ToolMode.Wall, ToolMode.Prop, ToolMode.Building, ToolMode.MapObject, ToolMode.Eraser };
             _toolButtons = new Button[toolNames.Length];
 
@@ -123,8 +136,15 @@ namespace IsometricMapEditor
             CreateButton(bar, "Load", 50, () => ShowLoadDialog());
 
             CreateSpacer(bar, 16);
-            _rotationText = CreateLabel(bar, "Rot: N", 55);
-            _snapText = CreateLabel(bar, "Free", 50);
+            _rotationText = CreateLabel(bar, "Rot: 0°", 65);
+
+            // Snap/Free toggle button
+            _snapButton = CreateButton(bar, "Free", 60, () =>
+            {
+                _manager.ToggleSnapToGrid();
+                RefreshStatus();
+            });
+            _snapText = _snapButton.GetComponentInChildren<Text>();
         }
 
         // ======== PALETTE PANEL ========
@@ -236,24 +256,47 @@ namespace IsometricMapEditor
                             var b = building;
                             bool active = _manager.SelectedBuilding == b;
                             string label = $"{building.displayName ?? building.buildingId} ({building.footprint.x}x{building.footprint.y})";
-                            AddPaletteItem(label, building.icon, active, () => _manager.SelectBuilding(b));
+                            Texture tex = GetPrefabMainTexture(building.prefab);
+                            AddPaletteItem(label, tex, active, () => _manager.SelectBuilding(b));
                         }
                     }
                     break;
 
                 case ToolMode.MapObject:
-                    AddPaletteHeader("Map Objects");
+                    // 카탈로그에 등록된 MapObject 정의
+                    if (_manager.catalog != null && _manager.catalog.mapObjectDefs != null && _manager.catalog.mapObjectDefs.Length > 0)
+                    {
+                        AddPaletteHeader("등록된 오브젝트");
+                        foreach (var def in _manager.catalog.mapObjectDefs)
+                        {
+                            if (def == null) continue;
+                            var d = def;
+                            bool active = _manager.SelectedObjectDef == d;
+                            string label = def.displayName ?? def.objectId;
+                            if (def.visualTexture != null)
+                                AddPaletteItem(label, (Texture)def.visualTexture, active, () => { _manager.SelectObjectDef(d); RefreshSpawnConfig(); });
+                            else
+                                AddPaletteItem(label, (Sprite)null, active, () => { _manager.SelectObjectDef(d); RefreshSpawnConfig(); });
+                        }
+                    }
+
+                    AddPaletteHeader("기본 타입");
                     foreach (MapObjectType type in Enum.GetValues(typeof(MapObjectType)))
                     {
                         var t = type;
-                        bool active = _manager.SelectedObjectType == t;
-                        AddPaletteItem(type.ToString(), null, active, () => _manager.SelectObjectType(t));
+                        bool active = _manager.SelectedObjectDef == null && _manager.SelectedObjectType == t;
+                        string displayName = GetMapObjectDisplayName(type);
+                        AddPaletteItem($"{displayName} ({type})", (Sprite)null, active, () =>
+                        {
+                            _manager.SelectObjectType(t);
+                            RefreshSpawnConfig();
+                        });
                     }
                     break;
 
                 case ToolMode.Eraser:
-                    AddPaletteHeader("Eraser");
-                    AddPaletteLabel("Right-click or\nLMB to erase at cursor");
+                    AddPaletteHeader("Del");
+                    AddPaletteLabel("LMB: 커서 위치 삭제\n우클릭: 다른 모드에서도 삭제\n\n마우스 오버 시\n삭제 대상 빨간색 표시");
                     break;
             }
         }
@@ -273,6 +316,24 @@ namespace IsometricMapEditor
             txt.fontStyle = FontStyle.Bold;
             txt.color = new Color(0.8f, 0.8f, 0.8f);
             txt.alignment = TextAnchor.MiddleLeft;
+        }
+
+        Texture GetPrefabMainTexture(GameObject prefab)
+        {
+            if (prefab == null) return null;
+            var r = prefab.GetComponentInChildren<Renderer>();
+            if (r == null || r.sharedMaterial == null) return null;
+            return r.sharedMaterial.mainTexture;
+        }
+
+        void AddPaletteItem(string label, Texture texture, bool active, Action onClick)
+        {
+            Sprite sprite = null;
+            if (texture is Texture2D tex2d)
+            {
+                sprite = Sprite.Create(tex2d, new Rect(0, 0, tex2d.width, tex2d.height), new Vector2(0.5f, 0.5f));
+            }
+            AddPaletteItem(label, sprite, active, onClick);
         }
 
         void AddPaletteItem(string label, Sprite icon, bool active, Action onClick)
@@ -343,147 +404,345 @@ namespace IsometricMapEditor
             txt.alignment = TextAnchor.MiddleCenter;
         }
 
-        // ======== HIERARCHY PANEL ========
+        // ======== FILTER PANEL ========
 
-        void BuildHierarchyPanel()
+        void BuildFilterPanel()
         {
-            _hierarchyPanel = CreatePanel(_root, "Hierarchy", PANEL_BG);
-            SetAnchors(_hierarchyPanel, new Vector2(1, 0), new Vector2(1, 1));
-            _hierarchyPanel.offsetMin = new Vector2(-200, 0);
-            _hierarchyPanel.offsetMax = new Vector2(0, -48);
+            _filterPanel = CreatePanel(_root, "FilterPanel", new Color(0.12f, 0.12f, 0.15f, 0.9f));
+            SetAnchors(_filterPanel, new Vector2(0, 1), new Vector2(0, 1));
+            _filterPanel.pivot = new Vector2(0, 1);
+            _filterPanel.anchoredPosition = new Vector2(185, -52);
+            _filterPanel.sizeDelta = new Vector2(200, 30);
 
-            var titleBar = CreatePanel(_hierarchyPanel, "HierarchyTitle", new Color(0.1f, 0.1f, 0.13f, 1f));
-            SetAnchors(titleBar, new Vector2(0, 1), new Vector2(1, 1));
-            titleBar.offsetMin = new Vector2(0, -30);
-            titleBar.offsetMax = Vector2.zero;
-
-            var titleTextGo = new GameObject("TitleText");
-            titleTextGo.transform.SetParent(titleBar, false);
-            var titleRt = titleTextGo.AddComponent<RectTransform>();
-            SetAnchors(titleRt, Vector2.zero, Vector2.one);
-            titleRt.offsetMin = Vector2.zero;
-            titleRt.offsetMax = Vector2.zero;
-            var titleLabel = titleTextGo.AddComponent<Text>();
-            titleLabel.text = "  Hierarchy";
-            titleLabel.font = DefaultFont;
-            titleLabel.fontSize = 14;
-            titleLabel.color = Color.white;
-            titleLabel.alignment = TextAnchor.MiddleLeft;
-
-            var scrollArea = CreatePanel(_hierarchyPanel, "ScrollArea", Color.clear);
-            SetAnchors(scrollArea, Vector2.zero, Vector2.one);
-            scrollArea.offsetMin = new Vector2(5, 5);
-            scrollArea.offsetMax = new Vector2(-5, -35);
-
-            var scrollGo = scrollArea.gameObject;
-            _hierarchyScroll = scrollGo.AddComponent<ScrollRect>();
-            _hierarchyScroll.horizontal = false;
-            _hierarchyScroll.vertical = true;
-            scrollGo.AddComponent<RectMask2D>();
-
-            _hierarchyContent = new GameObject("Content").AddComponent<RectTransform>();
-            _hierarchyContent.SetParent(scrollArea, false);
-            SetAnchors(_hierarchyContent, new Vector2(0, 1), new Vector2(1, 1));
-            _hierarchyContent.pivot = new Vector2(0.5f, 1f);
-            _hierarchyContent.offsetMin = Vector2.zero;
-            _hierarchyContent.offsetMax = Vector2.zero;
-
-            var vlg = _hierarchyContent.gameObject.AddComponent<VerticalLayoutGroup>();
-            vlg.padding = new RectOffset(2, 2, 2, 2);
-            vlg.spacing = 2;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-
-            var csf = _hierarchyContent.gameObject.AddComponent<ContentSizeFitter>();
-            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            _hierarchyScroll.content = _hierarchyContent;
-        }
-
-        void PopulateHierarchy()
-        {
-            if (_hierarchyContent == null) return;
-
-            foreach (Transform child in _hierarchyContent)
-                Destroy(child.gameObject);
-
-            if (_manager.EditingMap == null) return;
-
-            // Buildings
-            if (_manager.EditingMap.buildings.Count > 0)
-            {
-                AddHierarchyHeader("Buildings");
-                foreach (var b in _manager.EditingMap.buildings)
-                {
-                    string label = b.buildingDefinition != null
-                        ? b.buildingDefinition.displayName ?? b.buildingDefinitionId
-                        : b.buildingDefinitionId;
-                    AddHierarchyItem($"{label} [{b.instanceId}]", b.instanceId);
-                }
-            }
-
-            // Props
-            if (_manager.EditingMap.props.Count > 0)
-            {
-                AddHierarchyHeader("Props");
-                foreach (var p in _manager.EditingMap.props)
-                {
-                    string label = p.propDefinition != null
-                        ? p.propDefinition.displayName ?? p.propDefinitionId
-                        : p.propDefinitionId;
-                    AddHierarchyItem($"{label} [{p.instanceId}]", p.instanceId);
-                }
-            }
-
-            // Map Objects
-            if (_manager.EditingMap.mapObjects.Count > 0)
-            {
-                AddHierarchyHeader("Map Objects");
-                foreach (var o in _manager.EditingMap.mapObjects)
-                {
-                    string label = string.IsNullOrEmpty(o.label) ? o.objectType.ToString() : o.label;
-                    AddHierarchyItem($"{label} [{o.instanceId}]", o.instanceId);
-                }
-            }
-        }
-
-        void AddHierarchyHeader(string text)
-        {
-            var go = new GameObject("Header");
-            go.transform.SetParent(_hierarchyContent, false);
-            var le = go.AddComponent<LayoutElement>();
-            le.preferredHeight = 22;
-
-            var txt = go.AddComponent<Text>();
-            txt.text = text;
-            txt.font = DefaultFont;
-            txt.fontSize = 12;
-            txt.fontStyle = FontStyle.Bold;
-            txt.color = new Color(0.8f, 0.8f, 0.8f);
-            txt.alignment = TextAnchor.MiddleLeft;
-        }
-
-        void AddHierarchyItem(string label, string instanceId)
-        {
-            var go = new GameObject(label);
-            go.transform.SetParent(_hierarchyContent, false);
-
-            var img = go.AddComponent<Image>();
-            img.color = BTN_NORMAL;
-
-            var le = go.AddComponent<LayoutElement>();
-            le.preferredHeight = 26;
-
-            var layout = go.AddComponent<HorizontalLayoutGroup>();
-            layout.padding = new RectOffset(4, 2, 1, 1);
-            layout.spacing = 2;
-            layout.childAlignment = TextAnchor.MiddleLeft;
+            var layout = _filterPanel.gameObject.AddComponent<HorizontalLayoutGroup>();
+            layout.padding = new RectOffset(4, 4, 2, 2);
+            layout.spacing = 3;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
-            // Clickable label (select + focus camera)
+            string[] labels = { "T", "W", "P", "B", "O" };
+            _filterButtons = new Button[5];
+            for (int i = 0; i < 5; i++)
+            {
+                int idx = i;
+                var btnGo = new GameObject(labels[i]);
+                btnGo.transform.SetParent(_filterPanel, false);
+                var btnImg = btnGo.AddComponent<Image>();
+                var btnLe = btnGo.AddComponent<LayoutElement>();
+                btnLe.preferredWidth = 32;
+
+                var txtGo = new GameObject("Text");
+                txtGo.transform.SetParent(btnGo.transform, false);
+                var txtRt = txtGo.AddComponent<RectTransform>();
+                SetAnchors(txtRt, Vector2.zero, Vector2.one);
+                txtRt.offsetMin = Vector2.zero;
+                txtRt.offsetMax = Vector2.zero;
+                var txt = txtGo.AddComponent<Text>();
+                txt.text = labels[i];
+                txt.font = DefaultFont;
+                txt.fontSize = 13;
+                txt.fontStyle = FontStyle.Bold;
+                txt.color = Color.white;
+                txt.alignment = TextAnchor.MiddleCenter;
+
+                var btn = btnGo.AddComponent<Button>();
+                btn.targetGraphic = btnImg;
+                _filterButtons[i] = btn;
+                btn.onClick.AddListener(() =>
+                {
+                    switch (idx)
+                    {
+                        case 0: _manager.SetTileVisibility(!_manager.ShowTiles); break;
+                        case 1: _manager.SetWallVisibility(!_manager.ShowWalls); break;
+                        case 2: _manager.SetPropVisibility(!_manager.ShowProps); break;
+                        case 3: _manager.SetBuildingVisibility(!_manager.ShowBuildings); break;
+                        case 4: _manager.SetMapObjectVisibility(!_manager.ShowMapObjects); break;
+                    }
+                });
+            }
+            RefreshFilterToggles();
+        }
+
+        void RefreshFilterToggles()
+        {
+            if (_filterButtons == null) return;
+            bool[] states = { _manager.ShowTiles, _manager.ShowWalls, _manager.ShowProps, _manager.ShowBuildings, _manager.ShowMapObjects };
+            for (int i = 0; i < _filterButtons.Length; i++)
+            {
+                if (_filterButtons[i] == null) continue;
+                var img = _filterButtons[i].GetComponent<Image>();
+                img.color = states[i] ? new Color(0.2f, 0.7f, 0.3f, 1f) : new Color(0.7f, 0.2f, 0.2f, 1f);
+            }
+        }
+
+        // ======== SPAWN CONFIG PANEL ========
+
+        void BuildSpawnConfigPanel()
+        {
+            _spawnConfigPanel = CreatePanel(_root, "SpawnConfig", PANEL_BG);
+            SetAnchors(_spawnConfigPanel, new Vector2(0, 0), new Vector2(0, 0));
+            _spawnConfigPanel.pivot = new Vector2(0, 0);
+            _spawnConfigPanel.anchoredPosition = new Vector2(185, 0);
+            _spawnConfigPanel.sizeDelta = new Vector2(250, 0);
+            _spawnConfigPanel.gameObject.SetActive(false);
+        }
+
+        void RefreshSpawnConfig()
+        {
+            if (_spawnConfigPanel == null) return;
+
+            foreach (Transform child in _spawnConfigPanel)
+                Destroy(child.gameObject);
+
+            bool show = _manager.CurrentTool == ToolMode.MapObject;
+
+            _spawnConfigPanel.gameObject.SetActive(show);
+            if (!show) return;
+
+            var vlg = _spawnConfigPanel.gameObject.GetComponent<VerticalLayoutGroup>();
+            if (vlg == null)
+            {
+                vlg = _spawnConfigPanel.gameObject.AddComponent<VerticalLayoutGroup>();
+                vlg.padding = new RectOffset(8, 8, 8, 8);
+                vlg.spacing = 4;
+                vlg.childForceExpandWidth = true;
+                vlg.childForceExpandHeight = false;
+            }
+
+            var csf = _spawnConfigPanel.gameObject.GetComponent<ContentSizeFitter>();
+            if (csf == null)
+            {
+                csf = _spawnConfigPanel.gameObject.AddComponent<ContentSizeFitter>();
+                csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            }
+
+            // ── Visual mode selection (all MapObject types) ──
+            AddConfigHeader("비주얼 모드");
+            string[] visualModeNames = { "구체", "텍스처", "투명", "이펙트" };
+            var modeRow = new GameObject("VisualModeRow");
+            modeRow.transform.SetParent(_spawnConfigPanel, false);
+            var modeLayout = modeRow.AddComponent<HorizontalLayoutGroup>();
+            modeLayout.spacing = 3;
+            modeLayout.childForceExpandWidth = true;
+            modeLayout.childForceExpandHeight = true;
+            var modeLe = modeRow.AddComponent<LayoutElement>();
+            modeLe.preferredHeight = 28;
+
+            for (int i = 0; i < 4; i++)
+            {
+                int modeIdx = i;
+                bool isActive = _manager.SpawnVisualMode == modeIdx;
+                var btnGo = new GameObject(visualModeNames[i]);
+                btnGo.transform.SetParent(modeRow.transform, false);
+                var btnImg = btnGo.AddComponent<Image>();
+                btnImg.color = isActive ? BTN_ACTIVE : BTN_NORMAL;
+
+                var txtGo = new GameObject("Text");
+                txtGo.transform.SetParent(btnGo.transform, false);
+                var txtRt = txtGo.AddComponent<RectTransform>();
+                SetAnchors(txtRt, Vector2.zero, Vector2.one);
+                txtRt.offsetMin = Vector2.zero;
+                txtRt.offsetMax = Vector2.zero;
+                var txt = txtGo.AddComponent<Text>();
+                txt.text = visualModeNames[modeIdx];
+                txt.font = DefaultFont;
+                txt.fontSize = 11;
+                txt.color = Color.white;
+                txt.alignment = TextAnchor.MiddleCenter;
+
+                var btn = btnGo.AddComponent<Button>();
+                btn.targetGraphic = btnImg;
+                btn.onClick.AddListener(() => { _manager.SpawnVisualMode = modeIdx; RefreshSpawnConfig(); });
+            }
+
+            // Visual-mode-specific fields
+            if (_manager.SpawnVisualMode == 1) // TextureQuad
+            {
+                AddConfigInput("텍스처 경로:", _manager.SpawnVisualTexturePath, v => _manager.SpawnVisualTexturePath = v);
+            }
+            else if (_manager.SpawnVisualMode == 3) // EffectPrefab
+            {
+                AddConfigInput("이펙트 경로:", _manager.SpawnEffectPrefabPath, v => _manager.SpawnEffectPrefabPath = v);
+            }
+
+            // Scale (for TextureQuad and EffectPrefab)
+            if (_manager.SpawnVisualMode == 1 || _manager.SpawnVisualMode == 3)
+            {
+                AddConfigInput("스케일:", _manager.SpawnVisualScale.ToString("F1"), v =>
+                {
+                    if (float.TryParse(v, out float f)) _manager.SpawnVisualScale = Mathf.Max(0.1f, f);
+                });
+            }
+
+            // ── Type-specific config ──
+            switch (_manager.SelectedObjectType)
+            {
+                case MapObjectType.LootContainer:
+                    AddConfigHeader("루팅 상자 설정");
+                    AddConfigInput("이름:", _manager.SpawnContainerName, v => _manager.SpawnContainerName = v);
+                    AddConfigIntRow("가로 칸:", _manager.SpawnContainerWidth, 1, 8, v => _manager.SpawnContainerWidth = v);
+                    AddConfigIntRow("세로 칸:", _manager.SpawnContainerHeight, 1, 8, v => _manager.SpawnContainerHeight = v);
+                    AddConfigToggle("지역 루트:", _manager.SpawnUseRegionLoot, v => _manager.SpawnUseRegionLoot = v);
+                    AddConfigInput("고정 아이템 ID:", _manager.SpawnFixedItemId, v => _manager.SpawnFixedItemId = v);
+                    if (!string.IsNullOrEmpty(_manager.SpawnFixedItemId))
+                        AddConfigIntRow("수량:", _manager.SpawnFixedItemCount, 1, 99, v => _manager.SpawnFixedItemCount = v);
+                    break;
+
+                case MapObjectType.ItemDrop:
+                    AddConfigHeader("바닥 아이템 설정");
+                    AddConfigToggle("지역 루트:", _manager.SpawnUseRegionLoot, v => _manager.SpawnUseRegionLoot = v);
+                    AddConfigInput("고정 아이템 ID:", _manager.SpawnFixedItemId, v => _manager.SpawnFixedItemId = v);
+                    if (!string.IsNullOrEmpty(_manager.SpawnFixedItemId))
+                        AddConfigIntRow("수량:", _manager.SpawnFixedItemCount, 1, 99, v => _manager.SpawnFixedItemCount = v);
+                    break;
+
+                case MapObjectType.EnemySpawn:
+                    AddConfigHeader("적 스폰 설정");
+                    AddConfigInput("유닛 키:", _manager.SpawnEnemyUnitKey, v => _manager.SpawnEnemyUnitKey = v);
+                    AddConfigIntRow("수량:", _manager.SpawnEnemyCount, 1, 10, v => _manager.SpawnEnemyCount = v);
+                    break;
+
+                case MapObjectType.Door:
+                    AddConfigHeader("문 설정");
+                    AddConfigDoorLockButtons();
+                    break;
+
+                case MapObjectType.NPC:
+                    AddConfigHeader("NPC 설정");
+                    AddConfigInput("NPC ID:", _manager.SpawnNpcId, v => _manager.SpawnNpcId = v);
+                    AddConfigInput("표시 이름:", _manager.SpawnNpcDisplayName, v => _manager.SpawnNpcDisplayName = v);
+                    // 카탈로그 NPC 빠른 선택
+                    if (_manager.catalog != null && _manager.catalog.npcs != null && _manager.catalog.npcs.Length > 0)
+                    {
+                        AddConfigHeader("카탈로그 NPC");
+                        foreach (var npc in _manager.catalog.npcs)
+                        {
+                            if (npc == null) continue;
+                            bool isActive = _manager.SpawnNpcId == npc.npcId;
+                            string btnLabel = !string.IsNullOrEmpty(npc.displayName) ? $"{npc.displayName} ({npc.npcId})" : npc.npcId;
+
+                            var row = new GameObject("NPC_" + npc.npcId);
+                            row.transform.SetParent(_spawnConfigPanel, false);
+                            var rowImg = row.AddComponent<Image>();
+                            rowImg.color = isActive ? BTN_ACTIVE : BTN_NORMAL;
+                            var rowLe = row.AddComponent<LayoutElement>();
+                            rowLe.preferredHeight = 26;
+
+                            var rowTxtGo = new GameObject("Text");
+                            rowTxtGo.transform.SetParent(row.transform, false);
+                            var rowRt = rowTxtGo.AddComponent<RectTransform>();
+                            SetAnchors(rowRt, Vector2.zero, Vector2.one);
+                            rowRt.offsetMin = new Vector2(6, 0);
+                            rowRt.offsetMax = new Vector2(-6, 0);
+                            var rowTxt = rowTxtGo.AddComponent<Text>();
+                            rowTxt.text = btnLabel;
+                            rowTxt.font = DefaultFont;
+                            rowTxt.fontSize = 11;
+                            rowTxt.color = isActive ? Color.black : Color.white;
+                            rowTxt.alignment = TextAnchor.MiddleLeft;
+
+                            var npcRef = npc;
+                            var btn = row.AddComponent<Button>();
+                            btn.targetGraphic = rowImg;
+                            btn.onClick.AddListener(() =>
+                            {
+                                _manager.SpawnNpcId = npcRef.npcId;
+                                _manager.SpawnNpcDisplayName = npcRef.displayName ?? "";
+                                RefreshSpawnConfig();
+                            });
+                        }
+                    }
+                    break;
+            }
+        }
+
+        void AddConfigDoorLockButtons()
+        {
+            string[] lockNames = { "없음", "열쇠", "퀘스트", "스위치" };
+            var lockRow = new GameObject("LockRow");
+            lockRow.transform.SetParent(_spawnConfigPanel, false);
+            var lockLayout = lockRow.AddComponent<HorizontalLayoutGroup>();
+            lockLayout.spacing = 3;
+            lockLayout.childForceExpandWidth = true;
+            lockLayout.childForceExpandHeight = true;
+            var lockLe = lockRow.AddComponent<LayoutElement>();
+            lockLe.preferredHeight = 28;
+
+            for (int i = 0; i < 4; i++)
+            {
+                int lockIdx = i;
+                bool isActive = _manager.SpawnDoorLockType == lockIdx;
+                var btnGo = new GameObject(lockNames[i]);
+                btnGo.transform.SetParent(lockRow.transform, false);
+                var btnImg = btnGo.AddComponent<Image>();
+                btnImg.color = isActive ? BTN_ACTIVE : BTN_NORMAL;
+
+                var txtGo = new GameObject("Text");
+                txtGo.transform.SetParent(btnGo.transform, false);
+                var txtRt = txtGo.AddComponent<RectTransform>();
+                SetAnchors(txtRt, Vector2.zero, Vector2.one);
+                txtRt.offsetMin = Vector2.zero;
+                txtRt.offsetMax = Vector2.zero;
+                var txt = txtGo.AddComponent<Text>();
+                txt.text = lockNames[lockIdx];
+                txt.font = DefaultFont;
+                txt.fontSize = 11;
+                txt.color = Color.white;
+                txt.alignment = TextAnchor.MiddleCenter;
+
+                var btn = btnGo.AddComponent<Button>();
+                btn.onClick.AddListener(() => { _manager.SpawnDoorLockType = lockIdx; RefreshSpawnConfig(); });
+            }
+
+            switch (_manager.SpawnDoorLockType)
+            {
+                case 1: // Key
+                    AddConfigInput("열쇠 ID:", _manager.SpawnDoorKeyId, v => _manager.SpawnDoorKeyId = v);
+                    AddConfigToggle("열쇠 소모:", _manager.SpawnDoorConsumeKey, v => _manager.SpawnDoorConsumeKey = v);
+                    break;
+                case 2: // Quest
+                    AddConfigInput("퀘스트 ID:", _manager.SpawnDoorQuestId, v => _manager.SpawnDoorQuestId = v);
+                    break;
+            }
+        }
+
+        void AddConfigHeader(string text)
+        {
+            var go = new GameObject("ConfigHeader");
+            go.transform.SetParent(_spawnConfigPanel, false);
+            var le = go.AddComponent<LayoutElement>();
+            le.preferredHeight = 22;
+            var img = go.AddComponent<Image>();
+            img.color = new Color(0.2f, 0.2f, 0.25f, 1f);
+
+            // Text는 Image와 같은 GO에 둘 수 없음 (둘 다 Graphic)
+            var txtGo = new GameObject("Text");
+            txtGo.transform.SetParent(go.transform, false);
+            var txtRt = txtGo.AddComponent<RectTransform>();
+            SetAnchors(txtRt, Vector2.zero, Vector2.one);
+            txtRt.offsetMin = Vector2.zero;
+            txtRt.offsetMax = Vector2.zero;
+            var txt = txtGo.AddComponent<Text>();
+            txt.text = $"  {text}";
+            txt.font = DefaultFont;
+            txt.fontSize = 12;
+            txt.fontStyle = FontStyle.Bold;
+            txt.color = Color.white;
+            txt.alignment = TextAnchor.MiddleLeft;
+        }
+
+        void AddConfigInput(string label, string value, Action<string> onChange)
+        {
+            var row = new GameObject("InputRow");
+            row.transform.SetParent(_spawnConfigPanel, false);
+            var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
+            rowLayout.spacing = 4;
+            rowLayout.childForceExpandHeight = true;
+            var rowLe = row.AddComponent<LayoutElement>();
+            rowLe.preferredHeight = 24;
+
             var labelGo = new GameObject("Label");
-            labelGo.transform.SetParent(go.transform, false);
+            labelGo.transform.SetParent(row.transform, false);
             var labelTxt = labelGo.AddComponent<Text>();
             labelTxt.text = label;
             labelTxt.font = DefaultFont;
@@ -491,37 +750,245 @@ namespace IsometricMapEditor
             labelTxt.color = Color.white;
             labelTxt.alignment = TextAnchor.MiddleLeft;
             var labelLe = labelGo.AddComponent<LayoutElement>();
-            labelLe.flexibleWidth = 1;
+            labelLe.preferredWidth = 90;
 
-            // Add a transparent Image as raycast target for the button
-            var labelImg = labelGo.AddComponent<Image>();
-            labelImg.color = Color.clear;
+            var inputGo = new GameObject("Input");
+            inputGo.transform.SetParent(row.transform, false);
+            var inputImg = inputGo.AddComponent<Image>();
+            inputImg.color = new Color(0.2f, 0.2f, 0.22f, 1f);
+            var inputLe = inputGo.AddComponent<LayoutElement>();
+            inputLe.flexibleWidth = 1;
 
-            var labelBtn = labelGo.AddComponent<Button>();
-            labelBtn.targetGraphic = labelImg;
-            var labelColors = labelBtn.colors;
-            labelColors.normalColor = Color.clear;
-            labelColors.highlightedColor = new Color(1, 1, 1, 0.1f);
-            labelColors.pressedColor = new Color(1, 1, 1, 0.2f);
-            labelBtn.colors = labelColors;
-            string selectId = instanceId;
-            labelBtn.onClick.AddListener(() => _manager.SelectPlacedObject(selectId));
+            var inputTxtGo = new GameObject("Text");
+            inputTxtGo.transform.SetParent(inputGo.transform, false);
+            var inputRt = inputTxtGo.AddComponent<RectTransform>();
+            SetAnchors(inputRt, Vector2.zero, Vector2.one);
+            inputRt.offsetMin = new Vector2(4, 0);
+            inputRt.offsetMax = new Vector2(-4, 0);
+            var inputTxt = inputTxtGo.AddComponent<Text>();
+            inputTxt.font = DefaultFont;
+            inputTxt.fontSize = 11;
+            inputTxt.color = Color.white;
+            inputTxt.alignment = TextAnchor.MiddleLeft;
+            inputTxt.supportRichText = false;
 
-            // Delete button
-            string deleteId = instanceId;
-            var delBtn = CreateButton(go.GetComponent<RectTransform>(), "X", 20, () => _manager.DeletePlacedObject(deleteId));
-            var delLe = delBtn.GetComponent<LayoutElement>();
-            delLe.preferredWidth = 20;
-            delLe.preferredHeight = 22;
+            var input = inputGo.AddComponent<InputField>();
+            input.textComponent = inputTxt;
+            input.text = value ?? "";
+            input.onEndEdit.AddListener(v => onChange?.Invoke(v));
+        }
 
-            // Make delete button red-ish
-            var delImg = delBtn.GetComponent<Image>();
-            delImg.color = new Color(0.5f, 0.2f, 0.2f, 1f);
-            var delColors = delBtn.colors;
-            delColors.normalColor = new Color(0.5f, 0.2f, 0.2f, 1f);
-            delColors.highlightedColor = new Color(0.7f, 0.25f, 0.25f, 1f);
-            delColors.pressedColor = new Color(0.9f, 0.3f, 0.3f, 1f);
-            delBtn.colors = delColors;
+        void AddConfigIntRow(string label, int value, int min, int max, Action<int> onChange)
+        {
+            var row = new GameObject("IntRow");
+            row.transform.SetParent(_spawnConfigPanel, false);
+            var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
+            rowLayout.spacing = 4;
+            rowLayout.childForceExpandHeight = true;
+            var rowLe = row.AddComponent<LayoutElement>();
+            rowLe.preferredHeight = 24;
+
+            var labelGo = new GameObject("Label");
+            labelGo.transform.SetParent(row.transform, false);
+            var labelTxt = labelGo.AddComponent<Text>();
+            labelTxt.text = label;
+            labelTxt.font = DefaultFont;
+            labelTxt.fontSize = 11;
+            labelTxt.color = Color.white;
+            var labelLe = labelGo.AddComponent<LayoutElement>();
+            labelLe.preferredWidth = 90;
+
+            int current = value;
+            var valGo = new GameObject("Value");
+            valGo.transform.SetParent(row.transform, false);
+            var valTxt = valGo.AddComponent<Text>();
+            valTxt.text = current.ToString();
+            valTxt.font = DefaultFont;
+            valTxt.fontSize = 12;
+            valTxt.color = Color.white;
+            valTxt.alignment = TextAnchor.MiddleCenter;
+            var valLe = valGo.AddComponent<LayoutElement>();
+            valLe.preferredWidth = 30;
+
+            CreateSmallButton(row.transform, "-", () => { current = Mathf.Max(min, current - 1); valTxt.text = current.ToString(); onChange?.Invoke(current); });
+            CreateSmallButton(row.transform, "+", () => { current = Mathf.Min(max, current + 1); valTxt.text = current.ToString(); onChange?.Invoke(current); });
+        }
+
+        void AddConfigToggle(string label, bool value, Action<bool> onChange)
+        {
+            var row = new GameObject("ToggleRow");
+            row.transform.SetParent(_spawnConfigPanel, false);
+            var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
+            rowLayout.spacing = 4;
+            rowLayout.childForceExpandHeight = true;
+            var rowLe = row.AddComponent<LayoutElement>();
+            rowLe.preferredHeight = 24;
+
+            var labelGo = new GameObject("Label");
+            labelGo.transform.SetParent(row.transform, false);
+            var labelTxt = labelGo.AddComponent<Text>();
+            labelTxt.text = label;
+            labelTxt.font = DefaultFont;
+            labelTxt.fontSize = 11;
+            labelTxt.color = Color.white;
+            var labelLe = labelGo.AddComponent<LayoutElement>();
+            labelLe.preferredWidth = 90;
+
+            bool current = value;
+            var btnGo = new GameObject("Toggle");
+            btnGo.transform.SetParent(row.transform, false);
+            var btnImg = btnGo.AddComponent<Image>();
+            btnImg.color = current ? new Color(0.2f, 0.7f, 0.3f) : new Color(0.5f, 0.2f, 0.2f);
+            var btnLe = btnGo.AddComponent<LayoutElement>();
+            btnLe.preferredWidth = 40;
+
+            var btnTxtGo = new GameObject("Text");
+            btnTxtGo.transform.SetParent(btnGo.transform, false);
+            var btnRt = btnTxtGo.AddComponent<RectTransform>();
+            SetAnchors(btnRt, Vector2.zero, Vector2.one);
+            btnRt.offsetMin = Vector2.zero;
+            btnRt.offsetMax = Vector2.zero;
+            var btnTxt = btnTxtGo.AddComponent<Text>();
+            btnTxt.text = current ? "ON" : "OFF";
+            btnTxt.font = DefaultFont;
+            btnTxt.fontSize = 11;
+            btnTxt.color = Color.white;
+            btnTxt.alignment = TextAnchor.MiddleCenter;
+
+            var btn = btnGo.AddComponent<Button>();
+            btn.targetGraphic = btnImg;
+            btn.onClick.AddListener(() =>
+            {
+                current = !current;
+                btnImg.color = current ? new Color(0.2f, 0.7f, 0.3f) : new Color(0.5f, 0.2f, 0.2f);
+                btnTxt.text = current ? "ON" : "OFF";
+                onChange?.Invoke(current);
+            });
+        }
+
+        void CreateSmallButton(Transform parent, string label, Action onClick)
+        {
+            var go = new GameObject(label);
+            go.transform.SetParent(parent, false);
+            var img = go.AddComponent<Image>();
+            img.color = BTN_NORMAL;
+            var le = go.AddComponent<LayoutElement>();
+            le.preferredWidth = 24;
+
+            var txtGo = new GameObject("Text");
+            txtGo.transform.SetParent(go.transform, false);
+            var txtRt = txtGo.AddComponent<RectTransform>();
+            SetAnchors(txtRt, Vector2.zero, Vector2.one);
+            txtRt.offsetMin = Vector2.zero;
+            txtRt.offsetMax = Vector2.zero;
+            var txt = txtGo.AddComponent<Text>();
+            txt.text = label;
+            txt.font = DefaultFont;
+            txt.fontSize = 13;
+            txt.fontStyle = FontStyle.Bold;
+            txt.color = Color.white;
+            txt.alignment = TextAnchor.MiddleCenter;
+
+            var btn = go.AddComponent<Button>();
+            btn.targetGraphic = img;
+            btn.onClick.AddListener(() => onClick?.Invoke());
+        }
+
+        static string GetMapObjectDisplayName(MapObjectType type) => type switch
+        {
+            MapObjectType.SpawnPoint => "스폰 포인트",
+            MapObjectType.EscapePoint => "탈출구",
+            MapObjectType.LootContainer => "루팅 상자",
+            MapObjectType.EnemySpawn => "적 스폰",
+            MapObjectType.ItemDrop => "바닥 아이템",
+            MapObjectType.Trigger => "트리거",
+            MapObjectType.Custom => "커스텀",
+            MapObjectType.NPC => "NPC",
+            MapObjectType.Note => "쪽지",
+            MapObjectType.Bed => "침대",
+            MapObjectType.Workbench => "작업대",
+            MapObjectType.MapBoard => "지도판",
+            MapObjectType.MedicalBench => "의료대",
+            MapObjectType.CookingBench => "조리대",
+            MapObjectType.GenericInteract => "상호작용",
+            MapObjectType.Door => "문",
+            _ => type.ToString()
+        };
+
+        // ======== HOVER TOOLTIP (Eraser Preview) ========
+
+        void BuildHoverTooltip()
+        {
+            var go = new GameObject("HoverTooltip");
+            go.transform.SetParent(_root, false);
+            _hoverTooltip = go.AddComponent<RectTransform>();
+            _hoverTooltip.pivot = new Vector2(0, 1);
+            _hoverTooltip.sizeDelta = new Vector2(200, 28);
+
+            var bg = go.AddComponent<Image>();
+            bg.color = new Color(0.8f, 0.15f, 0.15f, 0.85f);
+            bg.raycastTarget = false;
+
+            var txtGo = new GameObject("Text");
+            txtGo.transform.SetParent(go.transform, false);
+            var txtRt = txtGo.AddComponent<RectTransform>();
+            SetAnchors(txtRt, Vector2.zero, Vector2.one);
+            txtRt.offsetMin = new Vector2(8, 2);
+            txtRt.offsetMax = new Vector2(-8, -2);
+            _hoverTooltipText = txtGo.AddComponent<Text>();
+            _hoverTooltipText.font = DefaultFont;
+            _hoverTooltipText.fontSize = 12;
+            _hoverTooltipText.fontStyle = FontStyle.Bold;
+            _hoverTooltipText.color = Color.white;
+            _hoverTooltipText.alignment = TextAnchor.MiddleLeft;
+            _hoverTooltipText.raycastTarget = false;
+
+            var csf = go.AddComponent<ContentSizeFitter>();
+            csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var hlg = go.AddComponent<HorizontalLayoutGroup>();
+            hlg.padding = new RectOffset(10, 10, 4, 4);
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
+
+            // ContentSizeFitter needs a LayoutElement on the text child
+            var txtLe = txtGo.AddComponent<LayoutElement>();
+            txtLe.preferredHeight = 20;
+
+            _hoverTooltip.gameObject.SetActive(false);
+        }
+
+        void UpdateHoverTooltip()
+        {
+            string info = null;
+            Color bgColor = default;
+
+            if (_manager.ResizeMode && !string.IsNullOrEmpty(_manager.ResizeHoverInfo))
+            {
+                info = $"크기: {_manager.ResizeHoverInfo}  [스크롤: 조절]";
+                bgColor = new Color(0.15f, 0.4f, 0.8f, 0.85f);
+            }
+            else if (!string.IsNullOrEmpty(_manager.EraseHoverInfo))
+            {
+                info = $"삭제: {_manager.EraseHoverInfo}";
+                bgColor = new Color(0.8f, 0.15f, 0.15f, 0.85f);
+            }
+
+            if (string.IsNullOrEmpty(info))
+            {
+                _hoverTooltip.gameObject.SetActive(false);
+                return;
+            }
+
+            _hoverTooltip.gameObject.SetActive(true);
+            _hoverTooltipText.text = info;
+            _hoverTooltip.GetComponent<Image>().color = bgColor;
+
+            // Follow mouse position (convert screen to canvas space)
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _root, Input.mousePosition, null, out var localPos);
+            _hoverTooltip.anchoredPosition = localPos + new Vector2(15, 10);
         }
 
         // ======== SAVE/LOAD DIALOG ========
@@ -707,13 +1174,91 @@ namespace IsometricMapEditor
             _newMapPanel.gameObject.SetActive(true);
         }
 
+        // ======== HELP PANEL ========
+
+        void BuildHelpPanel()
+        {
+            _helpPanel = CreatePanel(_root, "HelpPanel", new Color(0, 0, 0, 0.7f));
+            SetAnchors(_helpPanel, Vector2.zero, Vector2.one);
+            _helpPanel.offsetMin = Vector2.zero;
+            _helpPanel.offsetMax = Vector2.zero;
+
+            var center = CreatePanel(_helpPanel, "HelpCenter", new Color(0.12f, 0.12f, 0.15f, 0.95f));
+            center.anchorMin = new Vector2(0.5f, 0.5f);
+            center.anchorMax = new Vector2(0.5f, 0.5f);
+            center.pivot = new Vector2(0.5f, 0.5f);
+            center.sizeDelta = new Vector2(500, 400);
+
+            var vlg = center.gameObject.AddComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(20, 20, 15, 15);
+            vlg.spacing = 6;
+            vlg.childForceExpandHeight = false;
+            vlg.childForceExpandWidth = true;
+
+            string helpText =
+                "=== 맵툴 도움말 (F1) ===\n\n" +
+                "[도구 선택]\n" +
+                "1 - 타일    2 - 벽     3 - 프롭\n" +
+                "4 - 빌딩    5 - 오브젝트  6 - 지우개\n\n" +
+                "[배치/조작]\n" +
+                "LMB - 배치/드래그    RMB - 지우기\n" +
+                "Q/E - 회전 (15°)    G - Snap/Free 전환\n" +
+                "R - 리사이즈 모드    스크롤 - 크기 조절(R모드)\n" +
+                "Delete - 호버 대상 삭제\n\n" +
+                "[파일]\n" +
+                "Ctrl+S - 저장    Ctrl+L - 불러오기\n" +
+                "Ctrl+N - 새 맵   Ctrl+Z - 되돌리기\n\n" +
+                "[표시]\n" +
+                "F1 - 이 도움말 토글\n" +
+                "ESC - 리사이즈 모드 종료";
+
+            var txtGo = new GameObject("HelpText");
+            txtGo.transform.SetParent(center, false);
+            var txtRt = txtGo.AddComponent<RectTransform>();
+            SetAnchors(txtRt, Vector2.zero, Vector2.one);
+            txtRt.offsetMin = new Vector2(20, 15);
+            txtRt.offsetMax = new Vector2(-20, -15);
+            var txt = txtGo.AddComponent<Text>();
+            txt.text = helpText;
+            txt.font = DefaultFont;
+            txt.fontSize = 13;
+            txt.color = Color.white;
+            txt.alignment = TextAnchor.UpperLeft;
+            txt.lineSpacing = 1.2f;
+
+            // Close hint at bottom
+            var closeGo = new GameObject("CloseHint");
+            closeGo.transform.SetParent(center, false);
+            var closeRt = closeGo.AddComponent<RectTransform>();
+            closeRt.anchorMin = new Vector2(0, 0);
+            closeRt.anchorMax = new Vector2(1, 0);
+            closeRt.pivot = new Vector2(0.5f, 0);
+            closeRt.offsetMin = new Vector2(0, 5);
+            closeRt.offsetMax = new Vector2(0, 25);
+            var closeTxt = closeGo.AddComponent<Text>();
+            closeTxt.text = "F1 또는 아무 키를 눌러 닫기";
+            closeTxt.font = DefaultFont;
+            closeTxt.fontSize = 11;
+            closeTxt.color = new Color(0.6f, 0.6f, 0.6f);
+            closeTxt.alignment = TextAnchor.MiddleCenter;
+
+            _helpPanel.gameObject.SetActive(false);
+        }
+
+        public void ToggleHelp()
+        {
+            if (_helpPanel == null) return;
+            _helpPanel.gameObject.SetActive(!_helpPanel.gameObject.activeSelf);
+        }
+
         // ======== REFRESH ========
 
         public void RefreshAll()
         {
             RefreshToolbar();
             PopulatePalette();
-            PopulateHierarchy();
+            RefreshFilterToggles();
+            RefreshSpawnConfig();
             RefreshStatus();
         }
 
@@ -729,6 +1274,8 @@ namespace IsometricMapEditor
             }
 
             PopulatePalette();
+            RefreshSpawnConfig();
+            RefreshFilterToggles();
             RefreshStatus();
         }
 
@@ -736,14 +1283,19 @@ namespace IsometricMapEditor
         {
             if (_rotationText != null)
             {
-                string[] dirs = { "N", "E", "S", "W" };
-                int rot = Mathf.Clamp(_manager.CurrentRotation, 0, 3);
-                _rotationText.text = $"Rot: {dirs[rot]}";
+                int angle = _manager.CurrentRotation * 15;
+                _rotationText.text = $"Rot: {angle}°";
             }
 
-            if (_snapText != null)
+            if (_snapButton != null)
             {
-                _snapText.text = _manager.SnapToGrid ? "Snap" : "Free";
+                var img = _snapButton.GetComponent<Image>();
+                if (_manager.ResizeMode)
+                    img.color = new Color(0.3f, 0.5f, 0.9f, 1f);
+                else
+                    img.color = _manager.SnapToGrid ? new Color(0.2f, 0.7f, 0.3f, 1f) : new Color(0.7f, 0.4f, 0.2f, 1f);
+
+                _snapText.text = _manager.ResizeMode ? "Resize" : (_manager.SnapToGrid ? "Snap" : "Free");
             }
         }
 
@@ -751,6 +1303,7 @@ namespace IsometricMapEditor
         {
             if (_manager == null) return;
             RefreshStatus();
+            UpdateHoverTooltip();
         }
 
         // ======== HELPERS ========

@@ -1,0 +1,367 @@
+{
+  "scenes": [
+    {
+      "id": "S-010",
+      "title": "폐상가 (낮) — 진입",
+      "triggerFlag": "entered_ruined_mall_day",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        {
+          "type": "narration",
+          "textKeys": ["S010_N01", "S010_N02"]
+        }
+      ]
+    },
+
+    {
+      "id": "S-011",
+      "title": "폐상가 (낮) — 첫 파밍",
+      "triggerFlag": "first_loot_done",
+      "oneShot": true,
+      "nodes": [
+        { "type": "tutorial", "textKey": "TUT_SEARCH", "duration": 4, "tutId": "search" },
+        {
+          "type": "narration",
+          "textKeys": ["S011_N01"]
+        }
+      ]
+    },
+
+    {
+      "id": "S-012",
+      "title": "폐상가 (낮) — 떠돌이 상인 조우",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "dialogue",
+          "speaker": "merchant",
+          "speakerKey": "NPC_MERCHANT",
+          "textKeys": ["S012_D01", "S012_D02"]
+        },
+        {
+          "type": "choice",
+          "choiceId": "merchant_first",
+          "options": [
+            {
+              "textKey": "S012_C01",
+              "responseKeys": ["S012_R01", "S012_R02"],
+              "effects": [
+                { "type": "affinity", "target": "merchant", "value": 1 }
+              ]
+            },
+            {
+              "textKey": "S012_C02",
+              "responseKeys": ["S012_R03", "S012_R04", "S012_R05"],
+              "effects": [
+                { "type": "trust", "target": "merchant", "value": 1 }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "merchant",
+          "speakerKey": "NPC_MERCHANT",
+          "textKeys": ["S012_D03", "S012_D04"]
+        },
+        { "type": "system", "action": "set_flag", "param": "merchant_met" }
+      ]
+    },
+
+    {
+      "id": "S-013",
+      "title": "폐상가 (낮) — 첫 전투",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "dialogue",
+          "speaker": "bandit",
+          "speakerKey": "NPC_BANDIT",
+          "textKeys": ["S013_D01"]
+        },
+        { "type": "tutorial", "textKey": "TUT_COMBAT", "duration": 6, "tutId": "combat" },
+        {
+          "type": "narration",
+          "textKeys": ["S013_N01"]
+        }
+      ]
+    },
+
+    {
+      "id": "S-014",
+      "title": "폐상가 (낮) — 쪽지 발견",
+      "triggerFlag": "found_note",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "dialogue",
+          "speaker": "",
+          "speakerKey": "",
+          "textKeys": ["S014_NOTE"]
+        },
+        {
+          "type": "narration",
+          "textKeys": ["S014_N01", "S014_N02"]
+        },
+        { "type": "system", "action": "set_flag", "param": "night_basement_hint" },
+        { "type": "system", "action": "set_flag", "param": "backdoor_exit_hint" }
+      ]
+    },
+
+    {
+      "id": "S-015",
+      "title": "폐상가 (낮) — 귀환",
+      "triggerFlag": "day_raid_returned",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S015_D01"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S015_D02"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S015_D03", "S015_D04", "S015_D05"]
+        },
+        { "type": "system", "action": "quest_complete", "param": "MQ-001" },
+        { "type": "system", "action": "quest_accept", "param": "MQ-002" },
+        { "type": "system", "action": "set_flag", "param": "night_raid_unlocked" },
+        { "type": "system", "action": "auto_save" }
+      ]
+    },
+
+    {
+      "id": "S-020",
+      "title": "폐상가 (밤) — 출전 전 대화",
+      "triggerFlag": "night_gate_first",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S020_D01", "S020_D02", "S020_D03"]
+        },
+        {
+          "type": "choice",
+          "choiceId": "gate_night_first",
+          "options": [
+            {
+              "textKey": "S020_C01",
+              "responseKeys": ["S020_R01"],
+              "effects": []
+            },
+            {
+              "textKey": "S020_C02",
+              "responseKeys": ["S020_R02", "S020_R03"],
+              "effects": [
+                { "type": "trust", "target": "pawnshop", "value": 1 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "S-021",
+      "title": "폐상가 (밤) — 진입",
+      "triggerFlag": "entered_ruined_mall_night",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        { "type": "tutorial", "textKey": "TUT_FLASHLIGHT", "duration": 4, "tutId": "flashlight" },
+        {
+          "type": "narration",
+          "textKeys": ["S021_N01"]
+        }
+      ]
+    },
+
+    {
+      "id": "S-022",
+      "title": "폐상가 (밤) — 지하창고",
+      "triggerFlag": "enter_basement",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "condition",
+          "flag": "night_basement_hint",
+          "ifTrueGoto": 1,
+          "ifFalseGoto": -1,
+          "skipIfFalse": false
+        },
+        {
+          "type": "narration",
+          "textKeys": ["S022_N01"]
+        }
+      ]
+    },
+
+    {
+      "id": "S-023",
+      "title": "폐상가 (밤) — 시계 이상현상",
+      "triggerFlag": "first_rudi_pickup",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "narration",
+          "textKeys": ["UI_RUDI_GET"]
+        },
+        { "type": "effect", "effect": "chromatic", "floatParam": 1.5, "floatParam2": 2.0 },
+        { "type": "effect", "effect": "freeze", "floatParam": 0.5 },
+        {
+          "type": "narration",
+          "textKeys": ["S023_N01", "S023_N02"]
+        },
+        { "type": "effect", "effect": "flash", "floatParam": 0.2 },
+        { "type": "effect", "effect": "wait", "floatParam": 1.5 },
+        {
+          "type": "narration",
+          "textKeys": ["S023_N03"]
+        },
+        { "type": "effect", "effect": "wait", "floatParam": 1.5 },
+        {
+          "type": "narration",
+          "textKeys": ["S023_N04", "S023_N05"]
+        },
+        { "type": "system", "action": "set_flag", "param": "watch_anomaly_seen" },
+        { "type": "system", "action": "add_stat", "param": "rudi_delivered", "intParam": 0 }
+      ]
+    },
+
+    {
+      "id": "S-030",
+      "title": "귀환 — 첫 루디 납품",
+      "triggerFlag": "night_raid_returned_with_rudi",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S030_D01"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S030_D02"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S030_D03"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S030_D04"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S030_D05"]
+        },
+        {
+          "type": "choice",
+          "choiceId": "report_first_raid",
+          "options": [
+            {
+              "textKey": "S030_C01",
+              "responseKeys": ["S030_R01", "S030_R02", "S030_R03"],
+              "effects": [
+                { "type": "trust", "target": "pawnshop", "value": 1 }
+              ]
+            },
+            {
+              "textKey": "S030_C02",
+              "responseKeys": ["S030_R04", "S030_R05"],
+              "effects": [
+                { "type": "trust", "target": "pawnshop", "value": 2 }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S030_D06", "S030_D07", "S030_D08"]
+        },
+        { "type": "system", "action": "quest_complete", "param": "MQ-002" },
+        { "type": "system", "action": "set_flag", "param": "shop_full_unlocked" },
+        { "type": "system", "action": "set_flag", "param": "daily_quest_unlocked" },
+        { "type": "system", "action": "add_stat", "param": "rudi_delivered", "intParam": 1 },
+        { "type": "system", "action": "auto_save" }
+      ]
+    },
+
+    {
+      "id": "S-031",
+      "title": "안전가옥 — 잠든 사이 (에필로그)",
+      "triggerFlag": "mq002_complete_rested",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_out", "floatParam": 1.0 },
+        {
+          "type": "narration",
+          "textKeys": ["S031_N01", "S031_N02", "S031_N03", "S031_N04"]
+        },
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.5 },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S031_D01"]
+        },
+        { "type": "effect", "effect": "shake", "floatParam": 0.1, "floatParam2": 0.2 },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S031_D02", "S031_D03"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S031_D04"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S031_D05", "S031_D06", "S031_D07", "S031_D08"]
+        },
+        {
+          "type": "narration",
+          "textKeys": ["S031_N05", "S031_N06", "S031_N07"]
+        },
+        { "type": "system", "action": "set_flag", "param": "prologue_complete" },
+        {
+          "type": "narration",
+          "textKeys": ["UI_DAILY_UNLOCKED"]
+        },
+        { "type": "system", "action": "auto_save" }
+      ]
+    }
+  ]
+}

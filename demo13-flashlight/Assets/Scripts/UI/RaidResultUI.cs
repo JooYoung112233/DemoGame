@@ -15,6 +15,17 @@ public class RaidResultUI : MonoBehaviour
     [SerializeField] string safehouseScene = "Safehouse";
     [SerializeField] KeyCode closeKey = KeyCode.Return;
 
+    [Header("Generated UI References")]
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] Image dimBg;
+    [SerializeField] Text titleText;
+    [SerializeField] Text timeText;
+    [SerializeField] Text itemsText;
+    [SerializeField] Text rewardsText;
+    [SerializeField] Text closeHintText;
+
+    public bool IsGenerated => canvas != null;
     public bool IsShowing => isShowing;
 
     bool isShowing;
@@ -26,15 +37,9 @@ public class RaidResultUI : MonoBehaviour
     int totalItemCount;
     float totalWeight;
 
-    // uGUI
-    Canvas canvas;
-    GameObject panelRoot;
-    Image dimBg;
-    Text titleText, timeText, itemsText, rewardsText, closeHintText;
-
     void Awake()
     {
-        BuildUI();
+        if (!IsGenerated) GenerateUI();
     }
 
     void OnEnable()
@@ -213,7 +218,7 @@ public class RaidResultUI : MonoBehaviour
             Hide();
     }
 
-    void BuildUI()
+    public void GenerateUI()
     {
         // Canvas
         var canvasGO = new GameObject("RaidResult_Canvas");
@@ -285,6 +290,27 @@ public class RaidResultUI : MonoBehaviour
             new Vector2(0, -345), new Vector2(400, 25), 14, new Color(0.8f, 0.8f, 0.8f), TextAnchor.MiddleCenter);
 
         panelRoot.SetActive(false);
+    }
+
+    public void ClearGeneratedUI()
+    {
+        var child = transform.Find("RaidResult_Canvas");
+        if (child != null)
+        {
+            if (Application.isPlaying)
+                Destroy(child.gameObject);
+            else
+                DestroyImmediate(child.gameObject);
+        }
+
+        canvas = null;
+        panelRoot = null;
+        dimBg = null;
+        titleText = null;
+        timeText = null;
+        itemsText = null;
+        rewardsText = null;
+        closeHintText = null;
     }
 
     Text MakeText(Transform parent, string name, string content,

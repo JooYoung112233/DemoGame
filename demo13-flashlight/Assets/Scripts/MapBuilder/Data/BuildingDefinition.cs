@@ -23,10 +23,6 @@ namespace IsometricMapEditor
         [Tooltip("셰이더 설정 프리셋. 지정하면 프리팹의 텍스처는 유지하고 셰이더 파라미터만 덮어씁니다.")]
         public Material materialPreset;
 
-        [Header("Editor Preview")]
-        [Tooltip("Optional icon sprite shown in the palette. If null, uses prefab preview.")]
-        public Sprite icon;
-
         public bool IsMultiTile => footprint.x > 1 || footprint.y > 1;
 
         public List<Vector2Int> GetOccupiedCells(Vector2Int origin)

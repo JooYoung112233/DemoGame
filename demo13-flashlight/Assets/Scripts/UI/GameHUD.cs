@@ -36,16 +36,17 @@ public class GameHUD : MonoBehaviour
     FlashlightController flashlight;
 
     // uGUI 요소
-    Canvas canvas;
-    CanvasScaler scaler;
-    RectTransform hpBarBg, hpBarFill;
-    RectTransform stBarBg, stBarFill;
-    RectTransform batBarBg, batBarFill;
-    Text hpText, batText;
-    Image hpFillImage, stFillImage, batFillImage;
-    Text batIcon;
-    RectTransform injuryPanel;
-    Text[] injuryIcons;
+    [Header("uGUI References (auto-filled by GenerateUI)")]
+    [SerializeField] Canvas canvas;
+    [SerializeField] CanvasScaler scaler;
+    [SerializeField] RectTransform hpBarBg, hpBarFill;
+    [SerializeField] RectTransform stBarBg, stBarFill;
+    [SerializeField] RectTransform batBarBg, batBarFill;
+    [SerializeField] Text hpText, batText;
+    [SerializeField] Image hpFillImage, stFillImage, batFillImage;
+    [SerializeField] Text batIcon;
+    [SerializeField] RectTransform injuryPanel;
+    [SerializeField] Text[] injuryIcons;
 
     // 상태
     float prevHpPct = 1f;
@@ -53,9 +54,11 @@ public class GameHUD : MonoBehaviour
     float hpShakeIntensity;
     Vector2 hpBarBasePos;
 
+    public bool IsGenerated => canvas != null;
+
     void Awake()
     {
-        BuildUI();
+        if (!IsGenerated) GenerateUI();
     }
 
     void Update()
@@ -82,7 +85,7 @@ public class GameHUD : MonoBehaviour
 
     #region UI 빌드
 
-    void BuildUI()
+    public void GenerateUI()
     {
         // 이미 Canvas가 있으면 스킵
         canvas = GetComponentInChildren<Canvas>();
@@ -165,6 +168,35 @@ public class GameHUD : MonoBehaviour
             injuryIcons[i] = txt;
             iconGO.SetActive(false);
         }
+    }
+
+    public void ClearGeneratedUI()
+    {
+        var hudCanvas = transform.Find("HUD_Canvas");
+        if (hudCanvas != null)
+        {
+            if (Application.isPlaying)
+                Destroy(hudCanvas.gameObject);
+            else
+                DestroyImmediate(hudCanvas.gameObject);
+        }
+
+        canvas = null;
+        scaler = null;
+        hpBarBg = null;
+        hpBarFill = null;
+        stBarBg = null;
+        stBarFill = null;
+        batBarBg = null;
+        batBarFill = null;
+        hpText = null;
+        batText = null;
+        hpFillImage = null;
+        stFillImage = null;
+        batFillImage = null;
+        batIcon = null;
+        injuryPanel = null;
+        injuryIcons = null;
     }
 
     void BuildBar(RectTransform parent, string label, float yOffset, float width, float height,

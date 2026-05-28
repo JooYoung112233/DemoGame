@@ -102,6 +102,74 @@
 3. 출전 지역은 `MapSelectUI` → `RegionTimeManager.ActiveRegionId`
 4. 테스트: `H` → 아이템 탭 → 「지역 상자/바닥 루트」
 
+## 5. 맵 스폰 컨트롤러 (MapSpawnController)
+
+맵 단위로 아이템 스폰 총량·희귀도·카테고리를 통제하는 시스템.
+
+### 구조
+
+| 컴포넌트 | 역할 |
+|----------|------|
+| `MapSpawnProfile` (SO) | 맵별 스폰 설정 (예산, 희귀도 분포, 카테고리 쿼터, 난이도 배율) |
+| `MapSpawnController` (씬) | 런타임에 프로파일 기반으로 아이템 생성·분배 |
+| `MapSpawnProfileEditor` | 인스펙터에서 분포 시각화 + 시뮬레이션 |
+
+### 흐름
+1. 맵 진입 → `MapSpawnController.Start()`
+2. 씬의 모든 `ItemSpawnPoint` 수집, `managedByController = true` 설정
+3. Fixed 포인트는 자체 스폰 (열쇠 등)
+4. 프로파일에서 예산 산정 (낮/밤 보정 적용)
+5. 카테고리 가중치 → 희귀도 가중치 → ItemDatabase에서 후보 선택
+6. Ground 포인트에 균등 분배 (WorldItem.Drop)
+7. Container 포인트에 분배 (LootContainer.Grid.TryAutoPlace)
+8. 통계 로그 출력
+
+### 프로파일 설정
+
+| 설정 | 설명 |
+|------|------|
+| 총량 예산 | Ground/Container 각각 min~max 범위 |
+| spawnMultiplier | 전체 스폰량 배율 (0.1~3) |
+| qualityMultiplier | 고급 아이템 확률 배율 (1 기본) |
+| 희귀도 가중치 | Common~Legendary 각각 설정 |
+| 카테고리 가중치 | Weapon~Misc 각각 설정 |
+| nightSpawnMultiplier | 밤 스폰량 배율 (기본 1.2) |
+| nightQualityMultiplier | 밤 품질 배율 (기본 1.5) |
+
+### 기존 시스템과의 관계
+- **MapSpawnController 있음**: 프로파일 기반 스폰. ItemSpawnPoint는 위치 제공만.
+- **MapSpawnController 없음**: 기존 방식 유지 (각 ItemSpawnPoint가 자체 SpawnTable/RegionLoot 사용).
+- **SpawnTable SO**: 프로파일과 별개로 특수 상자에 직접 지정 가능.
+
+### 기획 결정
+- 날짜: 2026-05-26
+- 질문: 맵 스폰 통제 범위?
+- 결정: 총량 예산 + 희귀도 곡선 + 카테고리 쿼터 + 난이도 배율 전부 통제. 배치는 혼합 (핵심 고정 + 나머지 랜덤).
+- 근거: 맵 밸런싱을 중앙에서 조절 가능. 지역별 프로파일 SO로 관리.
+
+## 6. 맵 빌더 연동
+
+맵 빌더 도구에서 스폰 포인트를 배치·설정하면 런타임에 자동으로 시스템이 구성된다.
+
+### 배치 시 설정 (MapBuilderUI 좌하단 스폰 패널)
+
+| 오브젝트 | 설정 항목 |
+|----------|-----------|
+| **루팅 상자** (LootContainer) | 상자 이름, 격자 가로×세로, 지역 루트 사용 여부, 고정 아이템 ID/수량 |
+| **바닥 아이템** (ItemDrop) | 지역 루트 사용 여부, 고정 아이템 ID/수량 |
+| **적 스폰** (EnemySpawn) | 유닛 키(StatDB), 수량 |
+
+### 런타임 변환 (MapObjectSpawner)
+
+| 맵 빌더 오브젝트 | 생성되는 컴포넌트 |
+|------------------|-------------------|
+| LootContainer | `InteractableObject(Container)` + `LootContainer` + `ItemSpawnPoint(Container)` |
+| ItemDrop | `InteractableObject(Pickup)` + `ItemSpawnPoint(Ground)` 또는 `ItemSpawnPoint(Fixed)` |
+| EnemySpawn | 마커 (EnemySpawnManager가 읽어서 처리) |
+
+- **MapSpawnController 자동 생성**: 맵에 ItemSpawnPoint가 하나라도 있으면 자동으로 `MapSpawnController` 생성. 현재 활성 지역(`RegionTimeManager.ActiveRegionId`)에 맞는 프로파일을 `Resources/Data/MapSpawn/{regionId}.asset`에서 자동 로드.
+- **PlacedMapObject 직렬화**: 스폰 설정(격자 크기, 지역루트 여부, 고정아이템 등)은 맵 JSON에 함께 저장/로드.
+
 ---
 
 ## 변경 로그
@@ -109,3 +177,5 @@
 | 날짜 | 내용 |
 |------|------|
 | 2026-05-25 | 7지구 지역 전용 아이템 14종·`region_loot.csv` 드롭 테이블·`RegionLootCatalog`·ItemSpawnPoint 연동. |
+| 2026-05-26 | **맵 스폰 컨트롤러 구현.** MapSpawnProfile(SO) + MapSpawnController(씬). 총량 예산·희귀도 분포·카테고리 쿼터·낮밤 보정. 7개 지역 프리셋 자동 생성(Tools > Night City > Generate Map Spawn Profiles). ItemSpawnPoint에 managedByController 가드 추가. |
+| 2026-05-28 | **맵 빌더 스폰 연동.** PlacedMapObject에 스폰 필드 추가. MapObjectSpawner에서 LootContainer/ItemDrop/EnemySpawn → ItemSpawnPoint+LootContainer 자동 부착. MapSpawnController 자동 생성. MapBuilderUI에 스폰 설정 패널 추가. MapSerializer 직렬화 대응. |

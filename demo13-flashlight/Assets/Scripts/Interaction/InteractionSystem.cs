@@ -10,7 +10,7 @@ public class InteractionSystem : MonoBehaviour
 {
     [Header("Detection")]
     [SerializeField] KeyCode interactKey = KeyCode.E;
-    [SerializeField] float maxDetectRadius = 3f;
+    [SerializeField] float maxDetectRadius = 4f;
 
     [Header("Prompt Style")]
     [SerializeField] int fontSize = 16;
@@ -82,6 +82,8 @@ public class InteractionSystem : MonoBehaviour
         InteractableObject closest = null;
         float closestDist = float.MaxValue;
 
+        Vector3 playerPos = transform.position;
+
         // 정적 리스트에서 탐색 (FindObjectsOfType 대신)
         for (int i = InteractableObject.All.Count - 1; i >= 0; i--)
         {
@@ -89,7 +91,10 @@ public class InteractionSystem : MonoBehaviour
             if (obj == null) continue;
             if (!obj.CanInteract) continue;
 
-            float dist = Vector3.Distance(transform.position, obj.transform.position);
+            // XZ 평면 거리 (Y축 높이 차이 무시 — 아이소메트릭 대응)
+            Vector3 diff = obj.transform.position - playerPos;
+            diff.y = 0f;
+            float dist = diff.magnitude;
 
             // 히스테리시스: 현재 타겟은 이탈 범위(1.3배)로, 새 타겟은 진입 범위로 판정
             float range = Mathf.Min(obj.InteractRange, maxDetectRadius);

@@ -100,6 +100,18 @@ UI is built procedurally in code (uGUI), not scene-placed. GameHUD, RaidResultUI
 - **QuestManager** (Singleton, DontDestroyOnLoad) — Tracks active/completed quests, objective progress.
 - **QuestHUD** — Right-side active quest tracker + notification popup.
 
+### Story System
+- **StoryData** — JSON serialization classes: StoryScript → StoryScene → StoryNode. Node types: narration, dialogue, choice, tutorial, effect, system, condition.
+- **StoryLocale** (Singleton) — Multi-language text loader. `Resources/Story/Locale/{lang}.json`. Key-value pairs.
+- **StoryPlayer** (Singleton) — Scene playback orchestrator. Loads `Resources/Story/Scripts/*.json`. `PlayScene(id)`, `CheckAutoTriggers()`.
+- **StoryTriggerManager** (Singleton) — Game event → flag → auto-trigger wiring. Subscribes to SceneManager.sceneLoaded. Handles: prologue, NPC story scenes, bed rest, first loot/combat, rudi pickup, extraction, night gate, basement entry.
+- **StoryAreaTrigger** — Generic trigger zone component. Types: Basement, CustomFlag, PlayScene.
+- **GameStartHandler** — Scene component for game start. Loads save or plays prologue.
+- **NarrationUI** (Singleton) — Internal monologue display. Italic, semi-transparent.
+- **TutorialPrompt** (Singleton) — Contextual hints with one-shot tracking.
+- **ScreenEffectManager** (Singleton) — FadeIn/Out, ChromaticPulse, ScreenShake, FreezeFrame, WhiteFlash.
+- Flow: Game events → StoryTriggerManager.SetFlag → StoryPlayer.CheckAutoTriggers → auto-play matching scene.
+
 ### Post-Raid Event System
 - **PostRaidEventData** (ScriptableObject) — Random event definitions with choices, rewards, penalties.
 - **PostRaidEventManager** (Singleton, DontDestroyOnLoad) — 40% chance trigger after extraction, weighted random selection.

@@ -12,18 +12,20 @@ public class MedicalHUD : MonoBehaviour
     PlayerMedicalSystem medical;
 
     // uGUI
-    Canvas canvas;
-    GameObject panelRoot;
-    Text[] partTexts;
-    Text debuffText;
-    Text healingText;
-    Text titleText;
-    Image panelBg;
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] Text[] partTexts;
+    [SerializeField] Text debuffText;
+    [SerializeField] Text healingText;
+    [SerializeField] Text titleText;
+    [SerializeField] Image panelBg;
 
     // 미니 경고 (캔버스 밖, OnGUI 대신 별도 Text)
-    Text warningText;
+    [SerializeField] Text warningText;
 
     string[] partNames = { "머 리", "몸 통", "양 팔", "왼다리", "오른다리" };
+
+    public bool IsGenerated => canvas != null;
 
     void Start()
     {
@@ -31,7 +33,7 @@ public class MedicalHUD : MonoBehaviour
         if (medical == null)
             medical = FindFirstObjectByType<PlayerMedicalSystem>();
 
-        BuildUI();
+        if (!IsGenerated) GenerateUI();
     }
 
     void Update()
@@ -53,7 +55,7 @@ public class MedicalHUD : MonoBehaviour
             panelRoot.SetActive(isOpen);
     }
 
-    void BuildUI()
+    public void GenerateUI()
     {
         // Canvas
         var canvasGO = new GameObject("MedicalHUD_Canvas");
@@ -119,6 +121,27 @@ public class MedicalHUD : MonoBehaviour
         warnRT.anchorMin = new Vector2(0, 1);
         warnRT.anchorMax = new Vector2(0, 1);
         warnRT.pivot = new Vector2(0, 1);
+    }
+
+    public void ClearGeneratedUI()
+    {
+        var child = transform.Find("MedicalHUD_Canvas");
+        if (child != null)
+        {
+            if (Application.isPlaying)
+                Destroy(child.gameObject);
+            else
+                DestroyImmediate(child.gameObject);
+        }
+
+        canvas = null;
+        panelRoot = null;
+        titleText = null;
+        partTexts = null;
+        debuffText = null;
+        healingText = null;
+        warningText = null;
+        panelBg = null;
     }
 
     void UpdatePanel()

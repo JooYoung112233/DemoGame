@@ -8,6 +8,7 @@ public class DialogueUI : MonoBehaviour
     public static DialogueUI Instance { get; private set; }
 
     public bool IsShowing => isShowing;
+    public bool IsGenerated => canvas != null;
 
     bool isShowing;
     NPCData currentNPC;
@@ -26,15 +27,15 @@ public class DialogueUI : MonoBehaviour
     string fullLineText;
 
     // uGUI
-    Canvas canvas;
-    GameObject panelRoot;
-    Text nameText;
-    Text dialogueText;
-    Text relationLabel;
-    GameObject choicePanel;
-    Button[] choiceButtons;
-    Text[] choiceTexts;
-    Text continueHint;
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] Text nameText;
+    [SerializeField] Text dialogueText;
+    [SerializeField] Text relationLabel;
+    [SerializeField] GameObject choicePanel;
+    [SerializeField] Button[] choiceButtons;
+    [SerializeField] Text[] choiceTexts;
+    [SerializeField] Text continueHint;
 
     void Awake()
     {
@@ -44,12 +45,18 @@ public class DialogueUI : MonoBehaviour
             return;
         }
         Instance = this;
-        BuildUI();
+        if (!IsGenerated) GenerateUI();
+        BindEvents();
     }
 
     void OnDestroy()
     {
         if (Instance == this) Instance = null;
+    }
+
+    public void BindEvents()
+    {
+        // choice button onClick are wired dynamically in ShowChoices/ShowStoryChoices
     }
 
     public void StartDialogue(NPCData npc, PlayerController player)
@@ -458,10 +465,102 @@ public class DialogueUI : MonoBehaviour
     }
 
     // ════════════════════════════════════════
+    //  스토리 모드 (StoryPlayer 연동)
+    // ════════════════════════════════════════
+
+    System.Action storyOnComplete;
+
+    /// <summary>
+    /// StoryPlayer에서 호출. NPC 대사를 표시. NPCData 없이 직접 텍스트 전달.
+    /// </summary>
+    public void ShowStoryDialogue(string speakerName, string[] lines, System.Action onComplete)
+    {
+        currentNPC = null;
+        currentPlayer = null;
+        storyOnComplete = onComplete;
+
+        isShowing = true;
+        panelRoot.SetActive(true);
+        choicePanel.SetActive(false);
+
+        nameText.text = speakerName ?? "";
+        relationLabel.gameObject.SetActive(false);
+
+        currentLines = lines;
+        lineIndex = 0;
+        waitingForChoice = false;
+        choiceCallback = null;
+
+        ShowCurrentLine(() =>
+        {
+            Hide();
+            var cb = storyOnComplete;
+            storyOnComplete = null;
+            cb?.Invoke();
+        });
+    }
+
+    /// <summary>
+    /// StoryPlayer에서 호출. 선택지만 표시하고 선택 콜백 반환.
+    /// </summary>
+    public void ShowStoryChoices(string[] choiceTextsArray, System.Action<int> onChoice)
+    {
+        isShowing = true;
+        panelRoot.SetActive(true);
+        choicePanel.SetActive(true);
+        continueHint.gameObject.SetActive(false);
+
+        // 대사 영역 숨기기
+        dialogueText.text = "";
+        nameText.text = "";
+        relationLabel.gameObject.SetActive(false);
+
+        waitingForChoice = true;
+
+        // DialogueChoice 배열로 변환
+        var tempChoices = new DialogueChoice[choiceTextsArray.Length];
+        for (int i = 0; i < choiceTextsArray.Length; i++)
+        {
+            tempChoices[i] = new DialogueChoice { text = choiceTextsArray[i] };
+        }
+        currentChoices = tempChoices;
+
+        for (int i = 0; i < choiceButtons.Length; i++)
+        {
+            if (i < choiceTextsArray.Length)
+            {
+                choiceButtons[i].gameObject.SetActive(true);
+                this.choiceTexts[i].text = $"  {i + 1}. {choiceTextsArray[i]}";
+                int idx = i;
+                choiceButtons[i].onClick.RemoveAllListeners();
+                choiceButtons[i].onClick.AddListener(() =>
+                {
+                    waitingForChoice = false;
+                    choicePanel.SetActive(false);
+                    Hide();
+                    onChoice?.Invoke(idx);
+                });
+            }
+            else
+            {
+                choiceButtons[i].gameObject.SetActive(false);
+            }
+        }
+
+        choiceCallback = (idx) =>
+        {
+            waitingForChoice = false;
+            choicePanel.SetActive(false);
+            Hide();
+            onChoice?.Invoke(idx);
+        };
+    }
+
+    // ════════════════════════════════════════
     //  UI 구축
     // ════════════════════════════════════════
 
-    void BuildUI()
+    public void GenerateUI()
     {
         var canvasGO = new GameObject("Dialogue_Canvas");
         canvasGO.transform.SetParent(transform, false);
@@ -582,6 +681,28 @@ public class DialogueUI : MonoBehaviour
 
         choicePanel.SetActive(false);
         panelRoot.SetActive(false);
+    }
+
+    public void ClearGeneratedUI()
+    {
+        var child = transform.Find("Dialogue_Canvas");
+        if (child != null)
+        {
+            if (Application.isPlaying)
+                Destroy(child.gameObject);
+            else
+                DestroyImmediate(child.gameObject);
+        }
+
+        canvas = null;
+        panelRoot = null;
+        nameText = null;
+        dialogueText = null;
+        relationLabel = null;
+        choicePanel = null;
+        choiceButtons = null;
+        choiceTexts = null;
+        continueHint = null;
     }
 
     Text MakeText(Transform parent, string name, string content, int fontSize, TextAnchor align)
