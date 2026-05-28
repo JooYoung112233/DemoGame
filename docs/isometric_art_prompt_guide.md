@@ -44,11 +44,12 @@ AI 이미지 생성용 프롬프트 가이드. 모든 건물/소품 에셋에 �
 
 | 건물 | 벽 재질 | 바닥 재질 | 프롬프트 키워드 |
 |------|---------|-----------|----------------|
+| ★ 편의점 거점 (8×5) | 콘크리트 + 타일 | 밝은 리놀륨 | concrete with tile accent, light linoleum |
 | 전당포 (7×4) | 콘크리트 | 콘크리트 타일 | weathered concrete, concrete tile |
-| 수리점 (3×4) | 적갈색 벽돌 | 기름때 콘크리트 | exposed red-brown brick, oil-stained concrete |
+| 수리점 (4×4) | 적갈색 벽돌 | 기름때 콘크리트 | aged red-brown brick, oil-stained concrete |
 | 블랙마켓 (3×3) | 합판 + 방수포 | 팔레트 나무 | plywood boards, tarp, pallet wood floor |
-| 의료소 (5×4) | 흰색 타일벽 | 밝은 리놀륨 | cracked white tile, light linoleum |
-| 가구점 (6×5, 2층) | 목재 패널 | 나무 마루 | wood panel wall, hardwood plank floor |
+| 의료소 (6×4) | 흰색 타일벽 | 밝은 리놀륨 | cracked white tile, light linoleum |
+| 가구점 (5×5, 2층) | 목재 패널 | 나무 마루 | wood panel wall, hardwood plank floor |
 
 ---
 
