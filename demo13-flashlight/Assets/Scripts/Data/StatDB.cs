@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// 전투/유닛 스탯 중앙 데이터베이스.
 /// Resources/Data/StatDB.asset 에 저장. 키 기반으로 데이터 접근.
 /// </summary>
-[CreateAssetMenu(fileName = "StatDB", menuName = "Demo/Stat DB")]
+[CreateAssetMenu(fileName = "StatDB", menuName = "Dev Tools/Data/Stat DB")]
 public class StatDB : ScriptableObject
 {
     [Header("Player")]

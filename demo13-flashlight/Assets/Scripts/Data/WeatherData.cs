@@ -4,7 +4,7 @@ using UnityEngine;
 /// 낮/밤 라이팅 + 날씨 설정. ScriptableObject.
 /// Weather Editor에서 편집, DayNightCycle/RainController가 런타임에 참조.
 /// </summary>
-[CreateAssetMenu(fileName = "WeatherData", menuName = "Demo/Weather Data")]
+[CreateAssetMenu(fileName = "WeatherData", menuName = "Dev Tools/Data/Weather Data")]
 public class WeatherData : ScriptableObject
 {
     // ===== 낮 =====

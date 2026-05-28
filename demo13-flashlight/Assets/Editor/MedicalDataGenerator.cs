@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// MedicalItemData SO 일괄 생성 + ItemData.medicalData 자동 연결.
-/// 메뉴: Tools > Night City > Generate Medical Data
+/// 메뉴: Tools > Dev Tools > Data > Generate Medical Data
 /// </summary>
 public class MedicalDataGenerator
 {
@@ -27,7 +27,7 @@ public class MedicalDataGenerator
         }
     }
 
-    [MenuItem("Tools/Night City/Generate Medical Data")]
+    [MenuItem("Tools/Dev Tools/Data/Generate Medical Data")]
     static void Generate()
     {
         // 폴더 확보

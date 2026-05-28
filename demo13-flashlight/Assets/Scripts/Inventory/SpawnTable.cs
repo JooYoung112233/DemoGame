@@ -4,7 +4,7 @@ using UnityEngine;
 /// 아이템 스폰 테이블 ScriptableObject.
 /// 루팅 상자, 바닥 스폰 등에서 사용.
 /// </summary>
-[CreateAssetMenu(fileName = "NewSpawnTable", menuName = "Night City/Spawn Table")]
+[CreateAssetMenu(fileName = "NewSpawnTable", menuName = "Dev Tools/Item/Spawn Table")]
 public class SpawnTable : ScriptableObject
 {
     [Tooltip("테이블 ID")]

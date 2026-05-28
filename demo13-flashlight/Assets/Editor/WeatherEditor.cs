@@ -20,7 +20,7 @@ public class WeatherEditor : EditorWindow
     bool showRain = true;
     bool showRainFog = false;
 
-    [MenuItem("Tools/Weather & Lighting Editor")]
+    [MenuItem("Tools/Dev Tools/Visual/Weather & Lighting Editor")]
     static void Open()
     {
         var win = GetWindow<WeatherEditor>("Weather & Lighting");

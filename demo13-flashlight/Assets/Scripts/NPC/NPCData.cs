@@ -46,7 +46,7 @@ public class EventDialogue
     public bool oneShot;
 }
 
-[CreateAssetMenu(fileName = "NewNPC", menuName = "Night City/NPC Data")]
+[CreateAssetMenu(fileName = "NewNPC", menuName = "Dev Tools/Content/NPC Data")]
 public class NPCData : ScriptableObject
 {
     [Header("기본 정보")]

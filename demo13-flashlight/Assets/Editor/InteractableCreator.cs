@@ -3,7 +3,7 @@ using UnityEditor;
 
 /// <summary>
 /// 상호작용 오브젝트 생성 에디터.
-/// 메뉴: Tools > Night City > Interactable Creator
+/// 메뉴: Tools > Dev Tools > Spawn > Interactable Creator
 /// </summary>
 public class InteractableCreator : EditorWindow
 {
@@ -48,7 +48,7 @@ public class InteractableCreator : EditorWindow
         "── 가구 ──", "냉장고", "서랍장", "무기거치대", "책장", "재료함", "금고"
     };
 
-    [MenuItem("Tools/Night City/Interactable Creator")]
+    [MenuItem("Tools/Dev Tools/Spawn/Interactable Creator")]
     static void Open()
     {
         var window = GetWindow<InteractableCreator>("Interactable Creator");

@@ -15,11 +15,11 @@ public static class ScrapMarketGreyboxBuilder
     const float WallHeight = 2.4f;
     const float WallThickness = 0.2f;
 
-    static readonly string MatAsphalt = "Assets/IsometricMapEditor/MapData/Mat/Asphalt_Floor.mat";
-    static readonly string MatBuilding = "Assets/IsometricMapEditor/MapData/Mat/CityBuilding.mat";
-    static readonly string MatProps = "Assets/IsometricMapEditor/MapData/Mat/props.mat";
+    static readonly string MatAsphalt = "Assets/Resources/MapBuilder/Mat/Asphalt_Floor.mat";
+    static readonly string MatBuilding = "Assets/Resources/MapBuilder/Mat/CityBuilding.mat";
+    static readonly string MatProps = "Assets/Resources/MapBuilder/Mat/props.mat";
 
-    [MenuItem("Tools/Night City/Build Scrap Market Greybox Prefab")]
+    [MenuItem("Tools/Dev Tools/Map/Build Scrap Market Greybox Prefab")]
     public static void BuildPrefab()
     {
         var root = BuildMapHierarchy();
@@ -43,7 +43,7 @@ public static class ScrapMarketGreyboxBuilder
         }
     }
 
-    [MenuItem("Tools/Night City/Place Scrap Market Greybox In Scene")]
+    [MenuItem("Tools/Dev Tools/Map/Place Scrap Market Greybox In Scene")]
     public static void PlaceInScene()
     {
         var existing = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);

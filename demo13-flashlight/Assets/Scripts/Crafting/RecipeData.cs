@@ -18,7 +18,7 @@ public struct RecipeIngredient
     public int count;
 }
 
-[CreateAssetMenu(fileName = "NewRecipe", menuName = "Night City/Recipe Data")]
+[CreateAssetMenu(fileName = "NewRecipe", menuName = "Dev Tools/Item/Recipe Data")]
 public class RecipeData : ScriptableObject
 {
     [Header("기본 정보")]

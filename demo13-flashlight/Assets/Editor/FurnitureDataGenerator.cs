@@ -4,7 +4,7 @@ using System.IO;
 
 /// <summary>
 /// 기본 FurnitureData SO 에셋 일괄 생성.
-/// 메뉴: Tools > Night City > Generate Default Furniture
+/// 메뉴: Tools > Dev Tools > Data > Generate Default Furniture
 /// </summary>
 public class FurnitureDataGenerator
 {
@@ -23,7 +23,7 @@ public class FurnitureDataGenerator
         }
     }
 
-    [MenuItem("Tools/Night City/Generate Default Furniture")]
+    [MenuItem("Tools/Dev Tools/Data/Generate Default Furniture")]
     static void Generate()
     {
         // 폴더 확보

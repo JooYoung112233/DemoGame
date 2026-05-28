@@ -68,7 +68,7 @@ public class QuestCondition
     public string requiredFlag;
 }
 
-[CreateAssetMenu(fileName = "NewQuest", menuName = "Night City/Quest Data")]
+[CreateAssetMenu(fileName = "NewQuest", menuName = "Dev Tools/Content/Quest Data")]
 public class QuestData : ScriptableObject
 {
     [Header("기본 정보")]

@@ -57,7 +57,7 @@ public class EventCondition
     public bool nightOnly;
 }
 
-[CreateAssetMenu(fileName = "NewPostRaidEvent", menuName = "Night City/Post Raid Event")]
+[CreateAssetMenu(fileName = "NewPostRaidEvent", menuName = "Dev Tools/Content/Post Raid Event")]
 public class PostRaidEventData : ScriptableObject
 {
     [Header("기본 정보")]

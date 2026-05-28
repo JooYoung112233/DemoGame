@@ -4,7 +4,7 @@ using UnityEngine;
 /// 치료 아이템 정의 (ScriptableObject).
 /// Assets/Data/MedicalItems/ 에 생성.
 /// </summary>
-[CreateAssetMenu(fileName = "NewMedicalItem", menuName = "Night City/Medical Item")]
+[CreateAssetMenu(fileName = "NewMedicalItem", menuName = "Dev Tools/Item/Medical Item")]
 public class MedicalItemData : ScriptableObject
 {
     [Header("기본 정보")]

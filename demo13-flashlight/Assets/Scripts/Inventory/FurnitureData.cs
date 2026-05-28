@@ -5,7 +5,7 @@ using UnityEngine;
 /// 각 가구는 카테고리별 전용 격자 창고.
 /// 예: 냉장고(음식), 무기거치대(무기), 일반상자(범용).
 /// </summary>
-[CreateAssetMenu(fileName = "NewFurniture", menuName = "Night City/Furniture Data")]
+[CreateAssetMenu(fileName = "NewFurniture", menuName = "Dev Tools/Item/Furniture Data")]
 public class FurnitureData : ScriptableObject
 {
     [Header("기본 정보")]

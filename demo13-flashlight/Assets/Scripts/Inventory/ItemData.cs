@@ -44,7 +44,7 @@ public enum ItemUseEffect
 /// 모든 아이템의 원본 데이터. 인스턴스는 ItemInstance로 생성.
 /// Assets/Data/Items/ 에 SO 파일로 관리.
 /// </summary>
-[CreateAssetMenu(fileName = "NewItem", menuName = "Night City/Item Data")]
+[CreateAssetMenu(fileName = "NewItem", menuName = "Dev Tools/Item/Item Data")]
 public class ItemData : ScriptableObject
 {
     [Header("기본 정보")]

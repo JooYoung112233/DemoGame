@@ -5,7 +5,7 @@ using UnityEditor;
 /// <summary>
 /// 적 더미 프리팹 생성 에디터.
 /// Bandit_Weak 1.prefab 구조를 기준으로 생성.
-/// 메뉴: Tools > Night City > Enemy Dummy Creator
+/// 메뉴: Tools > Dev Tools > Spawn > Enemy Dummy Creator
 /// </summary>
 public class EnemyDummyCreator : EditorWindow
 {
@@ -67,7 +67,7 @@ public class EnemyDummyCreator : EditorWindow
     bool showHitFeedback = false;
     bool showAttackLunge = false;
 
-    [MenuItem("Tools/Night City/Enemy Dummy Creator")]
+    [MenuItem("Tools/Dev Tools/Spawn/Enemy Dummy Creator")]
     static void Open()
     {
         var window = GetWindow<EnemyDummyCreator>("Enemy Dummy Creator");
