@@ -5,7 +5,7 @@ using UnityEngine;
 /// 맵 단위 아이템 스폰의 총량, 희귀도 분포, 카테고리 쿼터, 난이도를 정의.
 /// MapSpawnController에서 참조.
 /// </summary>
-[CreateAssetMenu(fileName = "NewMapSpawnProfile", menuName = "Night City/Map Spawn Profile")]
+[CreateAssetMenu(fileName = "NewMapSpawnProfile", menuName = "Dev Tools/Item/Map Spawn Profile")]
 public class MapSpawnProfile : ScriptableObject
 {
     [Header("기본 정보")]

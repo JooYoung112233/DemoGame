@@ -4,7 +4,7 @@
 > 거시 월드맵은 `world-map.md` 참고.
 
 **소스**: 컨셉 아트 3종 (2026-05-25)  
-**프로젝트 정합**: `Night_City_System_Draft_v2.md`, `dev-roadmap.md`, `combat.md`
+**프로젝트 정합**: `gdd-core.md` / `gdd-progression.md`, `dev-roadmap.md`, `combat.md`
 
 ---
 

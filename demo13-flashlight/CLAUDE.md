@@ -49,7 +49,7 @@ PlayerController owns movement (NavMeshAgent + WASD), mouse-facing, flashlight p
 ### Lighting & Atmosphere
 All lighting scripts subscribe to `DayNightCycle.OnPhaseChanged` event:
 - **DayNightCycle** — Day/night toggle (T key). `isNight` flag, `OnPhaseChanged` event.
-- **PostProcessController** — Mood presets (NightCity/DesolateRuin/Anomaly) with day/night variants. Anomaly pulse + glitch effects on transition. **Does NOT apply values on Start()** — preserves editor state. Effects only activate on T-key phase change.
+- **PostProcessController** — Mood presets (NeonNight/DesolateRuin/Anomaly) with day/night variants. Anomaly pulse + glitch effects on transition. **Does NOT apply values on Start()** — preserves editor state. Effects only activate on T-key phase change.
 - **BuildingGlow** — Window glow via MaterialPropertyBlock `_GlowIntensity`. Applies immediately on Start based on current phase.
 - **InkWorldController**, **NeonSign** — Same pattern: subscribe to phase change, don't override editor state on Start.
 - **FlashlightBeam** — Procedural cone mesh, follows pivot yaw only (stays flat).
@@ -124,4 +124,4 @@ Current state: Stage 2 (Safehouse container map). See `docs/dev-roadmap.md` for 
 ## Design Documentation
 All game design decisions are recorded in `docs/` as system-specific markdown files. When a design decision is made, record it immediately in the appropriate file with date, question, and decision. See parent `CLAUDE.md` for full recording rules.
 
-Key docs: `combat.md`, `medical.md`, `inventory.md`, `items.md`, `crafting.md`, `world-map.md`, `safehouse.md`, `rendering.md`, `shader-system.md`, `npc-dialogue.md`, `quest.md`, `post-raid-event.md`, `story.md`, `story-script.md`, `Night_City_System_Draft_v2.md`.
+Key docs: start with **`docs/MASTER.md`** (index). GDD master split into `gdd-core.md` / `gdd-progression.md` / `gdd-demo.md`. System docs: `combat.md`, `medical.md`, `inventory.md`, `items.md` (+ `items-crafting-farming.md`), `crafting.md`, `world-map.md`, `safehouse.md`, `rendering.md`, `shader-system.md`, `npc-dialogue.md`, `quest.md` (+ `quests-region1.md`), `post-raid-event.md`, `story.md`, `story-script.md`. Incomplete/TODO items tracked in `dev-roadmap.md`.

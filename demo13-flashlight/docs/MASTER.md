@@ -10,6 +10,7 @@
 | 항목 | 내용 |
 |------|------|
 | **제목** | 다녀올게 (Be Right Back) |
+| **프로젝트명** | **BRB** (Be Right Back). 구 "Night City / 밤의 도시" 코드네임 폐기 |
 | **장르** | 2.5D 아이소메트릭 근접 생존 루팅 액션 |
 | **엔진** | Unity 2022+ (URP) |
 | **언어** | C# |
@@ -47,8 +48,8 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`Night_City_System_Draft_v2.md`](Night_City_System_Draft_v2.md) | **기획서 마스터.** 게임 전체 설계 — 전투·루팅·낮밤·안전가옥·NPC·스토리·엔딩 분기·데모 범위. 가장 먼저 읽을 것 | 확정 |
-| [`dev-roadmap.md`](dev-roadmap.md) | 10단계 개발 로드맵 + 각 단계 상세. 현재 Stage 2 | 진행 중 |
+| **기획서 마스터 (3분할, 가장 먼저 읽을 것)** | 게임 전체 설계. ① [`gdd-core.md`](gdd-core.md) 코어 시스템(전투·루팅·낮밤·세계관) · ② [`gdd-progression.md`](gdd-progression.md) 진행·스토리(안전가옥·NPC·메인스토리·엔딩·월드) · ③ [`gdd-demo.md`](gdd-demo.md) 데모 범위·우선순위 | 확정 |
+| [`dev-roadmap.md`](dev-roadmap.md) | 10단계 개발 로드맵 + 단계 상세 + **미구현/마무리 필요 목록**. 현재 Stage 2 | 진행 중 |
 | [`concept-art-reference.md`](concept-art-reference.md) | 컨셉 아트 3종(피치/맵모듈/적) 해석·정리 | 참고 |
 
 ### ⚔️ 전투
@@ -64,7 +65,8 @@
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | [`inventory.md`](inventory.md) | 격자 인벤토리 — 컨테이너 크기, 아이템 크기, ItemData SO 구조, 가격 체계, 내구도/스택 규칙 | 기획 확정, 코드 구현 |
-| [`items.md`](items.md) | 아이템 전체 목록 (~172종 SO) — 치료·소비·무기·방어·재료·루디·귀중품·정보·잡템·이상현상. 우선순위(P0~P3) 태깅 | 확정, SO 생성 완료 |
+| [`items.md`](items.md) | 아이템 **목록/데이터** (~172종 SO) — 치료·소비·무기·방어·재료·루디·귀중품·정보·잡템·이상현상. 우선순위(P0~P3) 태깅 | 확정, SO 생성 완료 |
+| [`items-crafting-farming.md`](items-crafting-farming.md) | 아이템 **제작·획득** — 음식/조리·의료대 레시피·파밍 오브젝트 매핑·데모 구현 순서 (items.md에서 분리) | 확정 |
 | [`crafting.md`](crafting.md) | RecipeData SO 구조, 해금 규칙(기본/문서), 조리대·작업대·의료대 레시피 목록, 무기 수리 규칙 | 확정, 코드 구현 |
 | [`region-loot.md`](region-loot.md) | 7지구별 드롭 테이블, 지역 전용 아이템(14종), CSV→SO 파이프라인 | 확정 |
 
@@ -105,6 +107,7 @@
 |------|------|------|
 | [`npc-dialogue.md`](npc-dialogue.md) | 3축 호감도(Affinity/Trust/Fear), 혼합형 대화 시스템, NPC 6명 설정 | 기획 확정, 코드 구현 |
 | [`quest.md`](quest.md) | 퀘스트 유형(수집/처치/탐색/배달), QuestData SO 구조, QuestManager 싱글톤 | 기획 확정, 코드 구현 |
+| [`quests-region1.md`](quests-region1.md) | 1지역(폐상가) 전용 퀘스트 — MQ-001/002 + 반복 의뢰 8종 | 확정 |
 
 핵심 코드: `NPCController.cs`, `NPCData` SO, `NPCRelationshipManager.cs`, `DialogueUI.cs`, `QuestManager.cs`, `QuestHUD.cs`
 
@@ -112,8 +115,8 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`story.md`](story.md) | 메인 스토리라인 — 세계관, Act 1~3 구조, 전당포 주인 관계, 동생 3분기 엔딩 조건 | 확정 |
-| [`story-script.md`](story-script.md) | 상세 스크립트 — Chapter 0(깨어남) 대사·연출·분기를 구현 수준으로 기술 | 작성 중 |
+| [`story.md`](story.md) | **스토리 설계**("무엇/왜") — 세계관, 지역 아크, 동생 3분기 엔딩 조건, 단서 시스템 | 확정 |
+| [`story-script.md`](story-script.md) | **구현 스크립트**("어떻게") — 1지역 씬별(S-000~) 대사·연출·분기 | 작성 중 |
 
 엔딩 3종: A(입양/생존) · B(사망/진실) · C(구출/희망) — 복수 엔딩, NPC 호감도+단서 수집으로 분기
 
@@ -174,3 +177,5 @@ Safehouse (timeScale=0, 안전 허브)
 | 날짜 | 내용 |
 |------|------|
 | 2026-05-28 | 마스터 문서 생성. 게임 제목 확정: 다녀올게 (Be Right Back) |
+| 2026-05-29 | 문서 정리: `Night_City_System_Draft_v2.md`(1203줄) → `gdd-core`/`gdd-progression`/`gdd-demo` 3분할. `items.md` → `items-crafting-farming.md` 분리. story/story-script 역할 명시 + 오프닝 중복 제거. `quests-region1.md` 인덱스 추가. dev-roadmap에 미구현 목록 정리. |
+| 2026-05-29 | **프로젝트명 BRB 확정.** "Night City / 밤의 도시" 표현 전면 정리 — 기획서 제목 → "BRB 기획서", 인게임 출전 화면 타이틀 → "다녀올게", `Mood.NightCity` → `Mood.NeonNight`, Unity 메뉴 `Tools/Night City/*` 3건 → `Tools/Dev Tools/*` 관례 통일 + 문서의 stale 메뉴 경로 교정. 한글 제목은 "다녀올게" 유지. |

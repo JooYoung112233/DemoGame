@@ -1,6 +1,10 @@
 # 개발 로드맵
 
-## 현재 상태: 1단계 진행 중
+## 현재 상태: 2단계 진행 중 (안전가옥 컨테이너 맵)
+
+> 단계 표는 "루프 완성" 기준 계획선이다. 실제 코드는 일부 단계를 앞질러 골격이 들어와 있다
+> (스토리/NPC/퀘스트/제작/의료/레이드/맵빌더 시스템 구현됨, 마무리·연동 미완).
+> 미완성 항목은 아래 [미구현 / 마무리 필요](#미구현--마무리-필요-2026-05-29-코드-점검) 참조.
 
 ## 개발 원칙
 
@@ -106,6 +110,47 @@
 
 ---
 
+## 미구현 / 마무리 필요 (2026-05-29 코드 점검)
+
+전체 165개 C# 스크립트 점검 결과. 핵심 시스템(전투·의료·제작·스토리·맵빌더)은 골격 완성, 주변 연동이 미흡하다.
+
+### 🔴 높음 — 기능 동작에 직접 영향
+
+| 항목 | 위치 | 내용 |
+|------|------|------|
+| 화폐(재화) 시스템 부재 | `Quest/QuestManager.cs:113`, `Systems/AchievementManager.cs:146` | 퀘스트·업적 보상에서 재화 지급부가 `// TODO: 화폐 시스템 연동` 주석만. 중앙 Currency/Wallet 관리자 자체가 없음 → 보상 루프 미완 |
+| 소비 아이템 스태미너 회복 미구현 | `Inventory/PlayerInventory.cs:99` | `// 임시: ConsumeStamina 음수로는 안되니까 TODO` — RestoreStamina 경로 없음 |
+| 레이드 후 이벤트 조건 필터 미구현 | `Raid/PostRaidEventManager.cs:98` | `// TODO: region, nightOnly 조건 체크` — 지역/밤 조건 무시하고 랜덤 발동 |
+
+### 🟡 중간 — UX·코드 품질
+
+| 항목 | 위치 | 내용 |
+|------|------|------|
+| 아이템 검사 패널 UI 없음 | `UI/CharacterPanelUI.cs:1782` | `// TODO: 전용 검사 패널 UI (향후)` — 현재 콘솔 로그만 |
+| 문 상호작용 피드백 토스트 없음 | `Interaction/DoorController.cs:258` | `// TODO: 화면에 토스트 메시지 표시 (현재는 콘솔만)` — 공용 토스트/알림 UI 부재 |
+| 리플렉션으로 private 필드 접근 | `Interaction/DoorController.cs:245`, `NPC/NPCQuestMarker.cs:166`, `MapBuilder/Integration/MapObjectSpawner.cs:103,305` | `GetField(... NonPublic)` — 취약·리네임 시 무성 실패. 공개 Setter 권장 |
+| `goto` 제어 흐름 | `Inventory/PlayerInventory.cs:87` | `goto doneHeal;` — `break`/조건문으로 정리 권장 |
+| WorldItem 임시 큐브 렌더 | `Inventory/WorldItem.cs:40` | `// 기본 큐브 (임시)` — 스프라이트/프리팹 미연결 |
+
+### ⚪ 낮음 — 정리 대상
+
+| 항목 | 위치 | 내용 |
+|------|------|------|
+| ~~Deprecated 빈 스텁~~ | ~~`MapBuilder/Rendering/BuildingCubeBuilder.cs`~~ | ✅ 2026-05-29 삭제 완료 (전역 `Building/RoofController.cs` 중복본, 빈 폴더 `Visual/`·`Safehouse/`도 함께 정리) |
+| 미사용 FOW 시스템 | `FogOfWar/FogOfWarSystem.cs` | 완전한 시야/안개 시스템이나 참조·씬 부착 0건. 시야 기획 확정 시 연결, 아니면 삭제 |
+| 파일명 공백 | `Resources/UI/RaidResultUI .prefab` | 이름에 공백. 런타임은 `AddComponent`로 생성(프리팹 미로드) → 미사용 아티팩트로 보임. 확인 후 삭제/리네임 |
+
+### 서브시스템 완성도 요약
+
+| 시스템 | 완성도 | 비고 |
+|--------|:---:|------|
+| Combat / Medical / Crafting / Story / MapBuilder / Lighting | 골격 완성 | 이벤트 기반 구조 양호, Editor State Preservation 규칙 준수 |
+| Inventory | 부분 | 그리드 자료구조·UI 완성, 소비(스태미너 회복)·검사 패널 미완 |
+| NPC / Quest / Raid | 부분 | 진행·추적 로직 구현, **화폐 보상 연동·이벤트 조건 미완** |
+| UI 피드백 | 부분 | 공용 토스트/알림 UI 부재로 콘솔 로그 의존 |
+
+---
+
 ## 변경 로그
 
 | 날짜 | 내용 |
@@ -120,3 +165,5 @@
 | 2026-05-25 | 지역별 독립 시간 시스템 (RegionTimeManager) 구현. 맵보드 UI에 낮/밤 실시간 표시. |
 | 2026-05-25 | 지역별 루트 테이블·전용 아이템 (`RegionLootCatalog`, `docs/region-loot.md`). |
 | 2026-05-25 | Stage 3 인벤토리 기반 구축: ItemData SO, ItemDatabase, ItemInstance, InventoryGrid, PlayerInventory, WorldItem, SpawnTable, ItemSpawnPoint, LootContainer. docs/inventory.md 생성. |
+| 2026-05-29 | 165개 스크립트 전수 점검. 미구현/마무리 항목 위 섹션에 정리(화폐 시스템·소비 스태미너·이벤트 조건·토스트 UI 등). 상태선 2단계로 정정. |
+| 2026-05-29 | 죽은 코드 정리: `BuildingCubeBuilder.cs`(deprecated 스텁), `Building/RoofController.cs`(미사용 중복 — 실사용은 `IsometricMapEditor.RoofController` 스텁), 빈 폴더 `Visual/`·`Safehouse/` 삭제. GUID 검증으로 ViewCulling/ScrapMarketMapMetadata는 씬·프리팹 부착 확인 후 보존. |

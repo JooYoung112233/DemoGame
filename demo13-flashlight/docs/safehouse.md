@@ -168,7 +168,7 @@
 
 ### 가구 종류
 
-**SO 경로**: `Assets/Resources/Data/Furniture/` — `Tools > Night City > Generate Default Furniture` 로 재생성 가능.
+**SO 경로**: `Assets/Resources/Data/Furniture/` — `Tools > Dev Tools > Data > Generate Default Furniture` 로 재생성 가능.
 
 **Interactable Creator 프리셋** (창고 + `SafehouseStorage` + FurnitureData 자동 연결):
 
@@ -234,7 +234,7 @@ SafehouseStorage (리팩터링 필요)
 
 ## 제작 시스템
 
-**레시피 SO · 에디터 절차**: [`crafting.md`](crafting.md) — `Assets/Resources/Data/Recipes/` → Create → Night City → Recipe Data.
+**레시피 SO · 에디터 절차**: [`crafting.md`](crafting.md) — `Assets/Resources/Data/Recipes/` → Create → Dev Tools → Item → Recipe Data.
 
 **제작 UI (구현됨)**: `MedicalBench` / `CookingBench` / `Workbench` 타입 `InteractableObject`에 **E** → `CraftingUI`. 씬·Creator로 직접 배치.
 

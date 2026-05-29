@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 밤의 도시 월드맵 지구 정의 (docs/world-map.md).
+/// BRB 월드맵 지구 정의 (docs/world-map.md).
 /// 지도판(MapSelectUI) · RegionTimeManager 공통 데이터.
 /// </summary>
 public static class WorldRegionCatalog

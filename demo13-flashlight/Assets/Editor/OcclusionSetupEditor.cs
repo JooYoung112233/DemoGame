@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// 벽 가림 처리(Occlusion) 통합 셋업 에디터.
-/// 메뉴: Tools > Night City > Occlusion Setup
+/// 메뉴: Tools > Dev Tools > Visual > Occlusion Setup
 ///
 /// 기능:
 /// 1. 선택한 플레이어/적에 WallOcclusionOutline 자동 부착
@@ -28,7 +28,7 @@ public class OcclusionSetupEditor : EditorWindow
     float fadeAlpha = 0.15f;
     float fadeSpeed = 5f;
 
-    [MenuItem("Tools/Night City/Occlusion Setup")]
+    [MenuItem("Tools/Dev Tools/Visual/Occlusion Setup")]
     static void Open()
     {
         var window = GetWindow<OcclusionSetupEditor>("Occlusion Setup");

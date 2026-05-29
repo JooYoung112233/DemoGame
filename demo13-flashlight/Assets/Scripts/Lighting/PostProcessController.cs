@@ -12,13 +12,13 @@ public class PostProcessController : MonoBehaviour
 {
     public enum Mood
     {
-        NightCity,      // 네온 불빛 도시 밤거리
+        NeonNight,      // 네온 불빛 도시 밤거리
         DesolateRuin,   // 폐허, 손전등 하나만 의지
         Anomaly,        // 이상현상, 뒤틀린 세계
     }
 
     [Header("Preset")]
-    [SerializeField] Mood dayMood = Mood.NightCity;
+    [SerializeField] Mood dayMood = Mood.NeonNight;
     [SerializeField] Mood nightMood = Mood.DesolateRuin;
 
     [Header("Transition")]
@@ -85,8 +85,8 @@ public class PostProcessController : MonoBehaviour
     {
         switch (mood)
         {
-            // ── 1. Night City: 네온 도시 밤거리 ──
-            case Mood.NightCity:
+            // ── 1. NeonNight: 네온 도시 밤거리 ──
+            case Mood.NeonNight:
                 return new MoodData
                 {
                     dayVignette = 0.28f,        nightVignette = 0.4f,
@@ -134,7 +134,7 @@ public class PostProcessController : MonoBehaviour
                 };
 
             default:
-                return GetMoodData(Mood.NightCity);
+                return GetMoodData(Mood.NeonNight);
         }
     }
 

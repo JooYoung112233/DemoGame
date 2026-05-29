@@ -8,7 +8,7 @@
 |---|---|---|
 | 바닥(Floor) | 2D Plane (Sprite, Rotation 90°) | 평면 타일, 2D 텍스처로 충분 |
 | 벽(Wall) | 3D Cube (WallBuilder) | 플래시라이트 빛 차단 + 그림자 캐스팅 필요 |
-| 건물(Building) | 3D Cube (BuildingCubeBuilder) | 빛 차단 + 입체감 |
+| 건물(Building) | 3D 프리팹 직접 배치 | 빛 차단 + 입체감 (구 BuildingCubeBuilder 절차 생성 폐기, 2026-05-29) |
 | 프랍(Prop) | 2D Sprite | 장식물은 2D로 충분 |
 | 지붕(Roof) | 2D Sprite (상위 RoofController) | ON/OFF 토글 필요 |
 

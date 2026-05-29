@@ -281,4 +281,4 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 | 2026-05-26 | **루팅 상자 수색 연출 구현.** 타르코프/덕코프 스타일 — 아이템이 1개씩 순서대로 공개. 희귀도별 딜레이(Common 0.4s → Legendary 1.8s). 미공개 아이템은 "?" 표시, 수색 중 아이템은 펄스+프로그레스 바. 미공개 아이템 드래그 불가 가드 추가. 안전가옥 창고는 즉시 전체 공개. |
 | 2026-05-26 | **우클릭 컨텍스트 메뉴 구현.** 사용(초록)/검사(파랑)/버리기(주황) 3종. 마우스 위치에 팝업. 검사 시 정보 탭으로 상세 표시(카테고리·크기·무게·가격·내구도·효과). 좌측 격자(상자/창고)에서도 검사 가능. 미공개 아이템은 메뉴 불가. |
 | 2026-05-26 | **재화 이름 통일.** "스크랩 코인" → "루디(Rudy)" 전면 변경 (docs, UI 코드, ItemData 헤더, tools). |
-| 2026-05-26 | **MedicalData 생성 스크립트.** `Tools > Night City > Generate Medical Data` — 13종 MedicalItemData SO 자동 생성 + ItemData.medicalData 자동 연결. |
+| 2026-05-26 | **MedicalData 생성 스크립트.** `Tools > Dev Tools > Data > Generate Medical Data` — 13종 MedicalItemData SO 자동 생성 + ItemData.medicalData 자동 연결. |

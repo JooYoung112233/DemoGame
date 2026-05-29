@@ -166,11 +166,11 @@ public class MapSpawnProfileEditor : Editor
 
 /// <summary>
 /// 맵 스폰 프로파일 프리셋 생성기.
-/// 메뉴: Tools > Night City > Generate Map Spawn Profiles
+/// 메뉴: Tools > Dev Tools > Data > Generate Map Spawn Profiles
 /// </summary>
 public class MapSpawnProfileGenerator
 {
-    [MenuItem("Tools/Night City/Generate Map Spawn Profiles")]
+    [MenuItem("Tools/Dev Tools/Data/Generate Map Spawn Profiles")]
     static void Generate()
     {
         string folder = "Assets/Resources/Data/MapSpawn";

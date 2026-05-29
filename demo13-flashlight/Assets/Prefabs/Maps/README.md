@@ -2,7 +2,7 @@
 
 ## ScrapMarket_Greybox
 
-**생성**: Unity 메뉴 `Tools > Night City > Build Scrap Market Greybox Prefab`
+**생성**: Unity 메뉴 `Tools > Dev Tools > Map > Build Scrap Market Greybox Prefab`
 
 ### 구성
 
@@ -16,7 +16,7 @@
 ### 씬에 넣기
 
 1. `InGameScene` 열기
-2. `Tools > Night City > Place Scrap Market Greybox In Scene`  
+2. `Tools > Dev Tools > Map > Place Scrap Market Greybox In Scene`  
    또는 `ScrapMarket_Greybox.prefab`을 `Map_NewMap` 자식으로 드래그
 3. **NavMesh** 오브젝트 선택 → Bake (벽 Obstacle 반영)
 4. 기존 `NavGround`/`ExitPoint`가 겹치면 비활성화

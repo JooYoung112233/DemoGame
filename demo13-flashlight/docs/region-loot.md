@@ -177,5 +177,5 @@
 | 날짜 | 내용 |
 |------|------|
 | 2026-05-25 | 7지구 지역 전용 아이템 14종·`region_loot.csv` 드롭 테이블·`RegionLootCatalog`·ItemSpawnPoint 연동. |
-| 2026-05-26 | **맵 스폰 컨트롤러 구현.** MapSpawnProfile(SO) + MapSpawnController(씬). 총량 예산·희귀도 분포·카테고리 쿼터·낮밤 보정. 7개 지역 프리셋 자동 생성(Tools > Night City > Generate Map Spawn Profiles). ItemSpawnPoint에 managedByController 가드 추가. |
+| 2026-05-26 | **맵 스폰 컨트롤러 구현.** MapSpawnProfile(SO) + MapSpawnController(씬). 총량 예산·희귀도 분포·카테고리 쿼터·낮밤 보정. 7개 지역 프리셋 자동 생성(Tools > Dev Tools > Data > Generate Map Spawn Profiles). ItemSpawnPoint에 managedByController 가드 추가. |
 | 2026-05-28 | **맵 빌더 스폰 연동.** PlacedMapObject에 스폰 필드 추가. MapObjectSpawner에서 LootContainer/ItemDrop/EnemySpawn → ItemSpawnPoint+LootContainer 자동 부착. MapSpawnController 자동 생성. MapBuilderUI에 스폰 설정 패널 추가. MapSerializer 직렬화 대응. |

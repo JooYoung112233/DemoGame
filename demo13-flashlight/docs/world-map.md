@@ -1,14 +1,14 @@
-# 월드맵 — 밤의 도시 / CITY OF NIGHT
+# 월드맵 — Be Right Back (BRB)
 
 > **현 상태 = 진실.** 컨셉 아트 기준 월드 구조. 플레이 가능 맵·씬과 1:1 대응은 아직 없음.
 
 ## 문서 목적
 
-「밤의 도시 / CITY OF NIGHT」 **거시 월드맵 컨셉 아트**를 기록한다.  
+BRB 세계의 **거시 월드맵 컨셉 아트**를 기록한다.  
 중앙 「영야」 코어 + 6개 외곽 지구 + 헥사 고속환형·지하철·탈출·위험 구역 범례를 개발·기획 참고용으로 고정한다.
 
 **소스**: 컨셉 아트 (2026-05-25)  
-**관련**: `Night_City_System_Draft_v2.md` §20 전체맵 후보, `dev-roadmap.md` 4단계 폐상가
+**관련**: `gdd-progression.md` §20 전체맵 후보, `dev-roadmap.md` 4단계 폐상가
 
 ---
 
@@ -33,7 +33,7 @@
 | **비주얼** | 거대한 검은 첨탑, 보라색 에너지·낙뢰, 크레이터형 고리, **헥사곤 링 도로** |
 | **게임 역할 (추정)** | 최고 위험·스토리 클라이맥스·「방역/개장 현상」 불가 예측 경고의 중심 |
 
-`Night_City_System_Draft_v2` §20의 **중앙광장(후반 고위험)** 과 동일 축으로 본다.
+`gdd-progression.md` §20의 **중앙광장(후반 고위험)** 과 동일 축으로 본다.
 
 ---
 
@@ -149,7 +149,7 @@ world-map (6지구 + 중앙)
 | 지역 시간 | `Assets/Scripts/Data/RegionTimeManager.cs` |
 | 1차 출전 가능 | `scrap_market` (폐상가 교역 지구) → `InGameScene` |
 | regionId 목록 | `silence_living`, `scrap_market`, `industrial`, `entertainment`, `railway_scrap`, `sanctuary_memorial`, `eternal_night_core` |
-| 그레이박스 프리팹 | `Assets/Prefabs/Maps/ScrapMarket_Greybox.prefab` — 메뉴 `Tools > Night City > Build Scrap Market Greybox Prefab` |
+| 그레이박스 프리팹 | `Assets/Prefabs/Maps/ScrapMarket_Greybox.prefab` — 메뉴 `Tools > Dev Tools > Map > Build Scrap Market Greybox Prefab` |
 | 지역 루트·전용 아이템 | `docs/region-loot.md`, `RegionLootCatalog`, `Items/Regional/` |
 
 ---

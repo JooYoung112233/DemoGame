@@ -5,7 +5,7 @@
 ## RecipeData 만들기 (Unity 에디터)
 
 1. **`Assets/Resources/Data/Recipes/`** 폴더에서 우클릭
-2. **Create → Night City → Recipe Data**
+2. **Create → Dev Tools → Item → Recipe Data**
 3. 아래 필드 설정 후 저장 (파일명은 자유, `recipeId`가 코드 기준 ID)
 
 | 필드 | 설명 |

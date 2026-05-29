@@ -85,7 +85,7 @@ public class MapSelectUI : MonoBehaviour
         var panelImg = panel.gameObject.AddComponent<Image>();
         panelImg.color = new Color(0.08f, 0.08f, 0.12f, 0.95f);
 
-        titleText = MakeText(panel, "Title", "◈ 밤의 도시 — 출전 지역 ◈",
+        titleText = MakeText(panel, "Title", "◈ 다녀올게 — 출전 지역 ◈",
             new Vector2(0, -12), new Vector2(580, 32), 20, new Color(1f, 0.85f, 0.3f), TextAnchor.MiddleCenter);
         titleText.fontStyle = FontStyle.Bold;
 
