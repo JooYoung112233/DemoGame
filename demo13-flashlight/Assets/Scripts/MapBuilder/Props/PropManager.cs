@@ -37,6 +37,9 @@ namespace IsometricMapEditor
                 go.transform.localScale = Vector3.one * prop.scale;
             }
 
+            // 빛 차폐 그림자 프록시 박스 (벽/컨테이너 등). 런타임은 ShadowsOnly.
+            ShadowProxyBuilder.Build(prop.propDefinition, go.transform, editorPreview: false);
+
             _propObjects[prop.instanceId] = go;
         }
 

@@ -1137,6 +1137,10 @@ namespace IsometricMapEditor
             if (Mathf.Abs(prop.yRotation) > 0.01f)
                 go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0) * go.transform.rotation;
             go.transform.localScale = Vector3.one * prop.scale;
+
+            // 빛 차폐 그림자 프록시 박스 (벽/컨테이너 등). prop의 회전/스케일을 상속.
+            ShadowProxyBuilder.Build(prop.propDefinition, go.transform, editorPreview: !Application.isPlaying);
+
             _propObjects[prop.instanceId] = go;
         }
 

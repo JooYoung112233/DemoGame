@@ -39,6 +39,12 @@ public class MapCatalogEditor : EditorWindow
     float newWallThickness = 0.08f;
     bool newBlocksWalk;
     bool newEnterable;
+
+    // Prop 빛 차폐(그림자 박스) 폼
+    bool newCastsShadow;
+    int newShadowPreset; // 0=직선,1=대각선,2=ㅅ자,3=V자,4=직접편집
+    List<ShadowBox> newShadowBoxes = new();
+    static readonly string[] SHADOW_PRESET_NAMES = { "직선", "대각선", "ㅅ자(Peak)", "V자(Valley)", "직접 편집" };
     Texture2D newBuildingTexture;
     float newBuildingScale = 3f;
 
@@ -234,7 +240,8 @@ public class MapCatalogEditor : EditorWindow
 
             EditorGUILayout.BeginVertical();
             EditorGUILayout.LabelField(p.displayName ?? p.propId, EditorStyles.boldLabel);
-            string info = $"풋프린트: {p.footprint.x}x{p.footprint.y}  차단: {(p.blocksWalkability ? "O" : "X")}  프리팹: {(p.prefab != null ? "O" : "X")}";
+            int shadowCount = p.castsShadow && p.shadowBoxes != null ? p.shadowBoxes.Length : 0;
+        string info = $"풋프린트: {p.footprint.x}x{p.footprint.y}  차단: {(p.blocksWalkability ? "O" : "X")}  프리팹: {(p.prefab != null ? "O" : "X")}  빛차폐: {(p.castsShadow ? $"O({shadowCount})" : "X")}";
             EditorGUILayout.LabelField(info, EditorStyles.miniLabel);
             EditorGUILayout.EndVertical();
 
@@ -268,6 +275,9 @@ public class MapCatalogEditor : EditorWindow
         newIcon = p.icon;
         newFootprint = p.footprint;
         newBlocksWalk = p.blocksWalkability;
+        newCastsShadow = p.castsShadow;
+        newShadowBoxes = p.shadowBoxes != null ? new List<ShadowBox>(p.shadowBoxes) : new List<ShadowBox>();
+        newShadowPreset = SHADOW_PRESET_NAMES.Length - 1; // 기존 값 로드 → 직접 편집
     }
 
     void SaveEditedProp()
@@ -284,6 +294,8 @@ public class MapCatalogEditor : EditorWindow
         prop.icon = newIcon;
         prop.footprint = newFootprint;
         prop.blocksWalkability = newBlocksWalk;
+        prop.castsShadow = newCastsShadow;
+        prop.shadowBoxes = newCastsShadow ? newShadowBoxes.ToArray() : new ShadowBox[0];
 
         EditorUtility.SetDirty(prop);
         AssetDatabase.SaveAssets();
@@ -610,6 +622,9 @@ public class MapCatalogEditor : EditorWindow
         newWallThickness = 0.08f;
         newBlocksWalk = false;
         newEnterable = false;
+        newCastsShadow = false;
+        newShadowBoxes = new List<ShadowBox>();
+        newShadowPreset = 0;
         newBuildingTexture = null;
         newBuildingScale = 3f;
         newObjectType = MapObjectType.SpawnPoint;
@@ -640,6 +655,68 @@ public class MapCatalogEditor : EditorWindow
                 default: return "  + 새 에셋 생성 & 등록";
             }
         }
+    }
+
+    // ===== Prop 빛 차폐(그림자 박스) 폼 =====
+    void DrawShadowSection()
+    {
+        EditorGUILayout.Space(4);
+        newCastsShadow = EditorGUILayout.Toggle(
+            new GUIContent("벽(빛 차폐)", "체크 시 플래시라이트 빛을 막는 그림자 전용 박스를 함께 배치 (솔리드 벽/컨테이너용)"),
+            newCastsShadow);
+
+        if (!newCastsShadow) return;
+
+        EditorGUI.indentLevel++;
+
+        // 형태 프리셋: 직접 편집(마지막) 외 항목 선택 시 박스를 자동 생성
+        int prev = newShadowPreset;
+        newShadowPreset = EditorGUILayout.Popup("형태 프리셋", newShadowPreset, SHADOW_PRESET_NAMES);
+        bool isCustom = newShadowPreset == SHADOW_PRESET_NAMES.Length - 1;
+        if (newShadowPreset != prev && !isCustom)
+            newShadowBoxes = new List<ShadowBox>(
+                ShadowProxyBuilder.GetPreset((ShadowProxyBuilder.ShadowShape)newShadowPreset));
+
+        // 토글 켰는데 박스가 비어있으면 직선 1개로 초기화
+        if (newShadowBoxes.Count == 0 && !isCustom)
+            newShadowBoxes = new List<ShadowBox>(
+                ShadowProxyBuilder.GetPreset((ShadowProxyBuilder.ShadowShape)newShadowPreset));
+
+        EditorGUILayout.HelpBox("대각선 벽=1박스(yaw 45), ㅅ/V자=2박스. 박스를 직접 수정하면 '직접 편집' 모드가 됩니다.", MessageType.None);
+
+        for (int b = 0; b < newShadowBoxes.Count; b++)
+        {
+            var box = newShadowBoxes[b];
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField($"박스 {b + 1}", EditorStyles.boldLabel);
+            if (GUILayout.Button("삭제", GUILayout.Width(50)))
+            {
+                newShadowBoxes.RemoveAt(b);
+                newShadowPreset = SHADOW_PRESET_NAMES.Length - 1;
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+                break;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUI.BeginChangeCheck();
+            box.size = EditorGUILayout.Vector3Field("크기(길이,높이,두께)", box.size);
+            box.offset = EditorGUILayout.Vector3Field("오프셋", box.offset);
+            box.yaw = EditorGUILayout.FloatField("Y회전(대각선)", box.yaw);
+            if (EditorGUI.EndChangeCheck())
+                newShadowPreset = SHADOW_PRESET_NAMES.Length - 1; // 직접 편집으로 전환
+            newShadowBoxes[b] = box;
+            EditorGUILayout.EndVertical();
+        }
+
+        if (GUILayout.Button("+ 박스 추가"))
+        {
+            newShadowBoxes.Add(new ShadowBox { size = new Vector3(1f, 2.4f, 0.1f), offset = new Vector3(0, 1.2f, 0) });
+            newShadowPreset = SHADOW_PRESET_NAMES.Length - 1;
+        }
+
+        EditorGUI.indentLevel--;
     }
 
     void DrawCreateForm()
@@ -696,6 +773,7 @@ public class MapCatalogEditor : EditorWindow
                 newIcon = (Sprite)EditorGUILayout.ObjectField("아이콘", newIcon, typeof(Sprite), false);
                 newFootprint = EditorGUILayout.Vector2IntField("풋프린트", newFootprint);
                 newBlocksWalk = EditorGUILayout.Toggle("이동 차단", newBlocksWalk);
+                DrawShadowSection();
                 break;
 
             case 3: // Building
@@ -842,6 +920,8 @@ public class MapCatalogEditor : EditorWindow
         prop.icon = newIcon;
         prop.footprint = newFootprint;
         prop.blocksWalkability = newBlocksWalk;
+        prop.castsShadow = newCastsShadow;
+        prop.shadowBoxes = newCastsShadow ? newShadowBoxes.ToArray() : new ShadowBox[0];
 
         string path = $"{folder}/{newId}.asset";
         AssetDatabase.CreateAsset(prop, path);

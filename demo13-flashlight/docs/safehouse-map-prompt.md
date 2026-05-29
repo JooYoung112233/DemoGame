@@ -429,11 +429,209 @@ Strict 2:1 pixel ratio on all isometric edges.
 
 ---
 
+## 프롬프트 7: 철창 펜스 모듈 (제작용 — 낱장)
+
+> **방침**: 컨셉아트(프롬프트 1)는 비전 확정용. 실제 Unity 배치는 **타일+프랍 분리**.
+> 펜스는 타일이 아니라 **엣지 프랍** — 타일 경계선 위에 얹힘. 반투명 메쉬라 통짜 금지.
+> **모듈을 낱장으로** 뽑아 Unity에서 셀 경계마다 prefab 반복 배치.
+> 각 프롬프트에 **컨셉아트 + 격자 이미지를 레퍼런스로 첨부**하고 STRICT STYLE LOCK.
+
+### 공통 헤더 (모든 펜스 모듈에 붙임)
+
+```
+[레퍼런스 이미지 #1: 안전가옥 컨셉아트 첨부]
+[레퍼런스 이미지 #2: 아이소메트릭 격자 첨부]
+
+STRICT STYLE LOCK — match reference #1 EXACTLY:
+same chain-link fence look, same rust, same color palette,
+same 1-2px dark outline, same flat cel-shaded detail level.
+
+ISOMETRIC GRID — reference #2 is the absolute authority for angles.
+2:1 projection (26.57°), 120° between axes. TRACE the grid lines exactly.
+
+Single isolated asset, transparent background (PNG) — or solid
+magenta #FF00FF fill if transparent unavailable.
+NO ground, NO other objects, NO city background. JUST the fence piece.
+Flat diagram style — ZERO cast shadows on the ground.
+The chain-link MESH must read as semi-transparent (you can see
+through the gaps) — draw the mesh as a fine cross-hatch pattern,
+NOT a solid panel.
+```
+
+### 모듈 목록 (각각 낱장으로 생성)
+
+**① fence_straight_NE** — ↗ 방향 직선 1세그먼트
+```
+[공통 헤더]
+A single straight chain-link fence segment, 1 tile long (128px base),
+running along the NE-SW isometric axis (going up-right / ↗).
+Two metal posts at each end, chain-link mesh stretched between,
+a coil of barbed wire along the top, one small patch of rust.
+Post height: about 1.2x the tile width. Mesh is see-through.
+Output: 256x256px, segment centered, 25% margin.
+```
+
+**② fence_straight_NW** — ↘ 방향 직선 (①의 미러로 대체 가능)
+```
+[공통 헤더]
+Same as the NE segment but running along the NW-SE isometric axis
+(going down-right / ↘). Mirror of the NE segment.
+Output: 256x256px, segment centered, 25% margin.
+```
+
+**③ fence_corner** — 90° 코너 (회전/미러로 4코너 커버)
+```
+[공통 헤더]
+A 90° isometric corner of chain-link fence — two segments meeting
+at one corner post, forming a sharp right angle in iso space
+(one wing going ↗ NE, one wing going ↘ NW).
+One taller corner post at the joint, mesh on both wings,
+barbed wire continuous over the top.
+Output: 320x320px, corner centered, 20% margin.
+```
+
+**④ fence_post** — 기둥 단독 (세그먼트 사이 반복 / 길이 조절용)
+```
+[공통 헤더]
+A single standalone chain-link fence post — one vertical metal pole,
+rusted, with a short stub of mesh and barbed wire on each side
+so it tiles seamlessly between straight segments.
+Output: 128x256px, post centered.
+```
+
+**⑤ gate_closed** — 게이트 (닫힘)
+```
+[공통 헤더]
+A heavy chain-link DOUBLE GATE, closed, 3 tiles wide (384px base),
+set into the front fence. Two swinging gate panels meeting in the
+middle, heavy chain wrapped around the center with a padlock.
+Thicker steel frame than the regular fence, barbed wire on top.
+Mesh see-through. This is THE raid exit.
+Output: 512x384px, gate centered, 15% margin.
+```
+
+**⑥ gate_open** — 게이트 (열림, ⑤와 동일 프레임)
+```
+[공통 헤더]
+Same double gate as the closed version, but both panels swung
+OPEN inward, chain hanging loose from one side, padlock dangling.
+The opening is clear (transparent gap) to walk through.
+Keep the frame and posts IDENTICAL to the closed version.
+Output: 512x384px, gate centered, 15% margin.
+```
+
+**⑦ fence_patch (오버레이 3종)** — 보강 패치
+```
+[공통 헤더]
+A small makeshift reinforcement patch sized to cover ONE fence
+segment, drawn as a flat overlay to place ON TOP of a fence piece.
+Make THREE separate variants:
+  (a) blue tarp lashed over the mesh
+  (b) corrugated metal sheet wired on
+  (c) plywood board nailed across
+Each fills roughly 1 tile, ragged improvised edges.
+Output each: 256x256px, patch centered.
+```
+
+### Unity 배치 규칙
+
+- 펜스는 **타일 경계선(엣지)** 에 배치, 바닥 타일 위 depth
+- 둘레 = 직선(①②) 반복 + 코너(③) 4개(회전/미러) + 기둥(④)으로 길이 미세조정
+- 게이트(⑤⑥)는 전면 펜스 3타일 구간 교체, 상호작용 시 스프라이트 스왑
+- 패치(⑦)는 무작위 세그먼트에 오버레이로 얹어 "패치워크 달동네" 느낌
+- 펜스 너머 폐도시는 **별도 배경 레이어**(스카이박스/페럴럭스)로 처리 — 펜스 프랍에 포함 X
+
+## 프롬프트 8: 바닥 타일 (제작용 — 낱장)
+
+> **방침**: 바닥은 단일 아이소 다이아몬드(128×64) 1셀 단위로 낱장 생성.
+> Unity에서 타일맵처럼 깔아 16×12 바닥을 구성. 변형 타일을 섞어 단조로움 방지.
+> 컨셉아트 + 격자 첨부, STRICT STYLE LOCK.
+
+### 공통 헤더 (모든 바닥 타일에 붙임)
+
+```
+[레퍼런스 이미지 #1: 안전가옥 컨셉아트 첨부]
+[레퍼런스 이미지 #2: 아이소메트릭 격자 첨부]
+
+STRICT STYLE LOCK — match reference #1 ground EXACTLY:
+same cracked asphalt look, same dirt color, same palette,
+same 1-2px outline, same flat cel-shaded detail level.
+
+ISOMETRIC TILE — a SINGLE diamond floor tile, 2:1 ratio,
+exactly 128px wide x 64px tall. The tile is a perfect rhombus
+that TILES SEAMLESSLY — edges must match neighboring tiles
+(no border, no outline around the diamond, content bleeds to edge).
+
+Top-down-ish flat floor only — NO walls, NO objects, NO props,
+NO shadows, NO height. Just the ground surface.
+Transparent background outside the diamond (PNG),
+or magenta #FF00FF fill. Output: 128x64px exact.
+```
+
+### 타일 목록 (각각 낱장 / 시밍리스)
+
+**① floor_asphalt_plain** — 기본 갈라진 아스팔트
+```
+[공통 헤더]
+Worn cracked asphalt, dark gray, a few hairline cracks,
+muted and weathered. The most common base tile.
+```
+
+**② floor_asphalt_crack** — 큰 균열 변형
+```
+[공통 헤더]
+Same asphalt but with one larger crack and a small pothole,
+weeds poking through. Variation tile to break up repetition.
+```
+
+**③ floor_dirt** — 흙/맨땅
+```
+[공통 헤더]
+Packed dirt / bare earth, brown, a few small stones and
+scrubby weeds. For patches where asphalt has worn away.
+```
+
+**④ floor_asphalt_dirt_blend** — 아스팔트↔흙 전환
+```
+[공통 헤더]
+Half cracked asphalt, half packed dirt, blended across the
+diamond — a transition tile between asphalt and dirt areas.
+```
+
+**⑤ floor_parking_line** — 주차선 (바랜 페인트)
+```
+[공통 헤더]
+Cracked asphalt with one faded painted parking-lot line
+(yellow or white, worn and peeling) crossing the tile.
+Make it align to the isometric axis so lines connect across tiles.
+```
+
+**⑥ floor_puddle** — 물웅덩이
+```
+[공통 헤더]
+Cracked asphalt with a shallow rain puddle reflecting a dim
+blue-gray sky. Wet sheen, subtle. Accent tile, used sparingly.
+```
+
+### Unity 배치 규칙
+
+- 기본은 ①으로 깔고, ②③④⑤⑥을 **10~20% 비율로 무작위 섞어** 단조로움 제거
+- ⑤ 주차선은 축 방향이 이어지도록 같은 라인끼리 연결 배치
+- 바닥은 depth 최하단, 그 위에 펜스(엣지)·오브젝트(Y정렬) 순서
+- 슬롯 영역도 같은 바닥 위 — 빈 슬롯엔 흙(③) 비율 높여 "정리 안 된" 느낌
+
+---
+
 ## 사용 순서
 
-1. **프롬프트 6** (미니맵) → 그리드 좌표 기반 배치 레퍼런스 먼저
-2. **프롬프트 1** (전체 조감도) → 맵 전체 분위기 + 레이아웃 확인
-3. **프롬프트 4** (철창문) → 출구 분위기 확인
-4. **프롬프트 5** (전당포) → 주요 시설 디테일 확인
-5. 필요시 **프롬프트 3** (확장 후) → 최종 비전 공유용
-6. 개별 건물 모듈은 `isometric_art_prompt_guide.md` 템플릿으로 별도 생성
+### 비전 확정 (컨셉)
+1. **프롬프트 1** (전체 조감도) → 맵 전체 분위기 + 레이아웃 확인 ✅ 완료
+2. **프롬프트 6** (격자 배치도) → 그리드 좌표 기반 배치 레퍼런스
+3. 필요시 **프롬프트 3** (확장 후) → 최종 비전 공유용
+
+### 제작 (Unity 에셋) — 타일+프랍 분리
+4. **프롬프트 8** (바닥 타일) → 바닥부터 깔기. 낱장 6종 시밍리스 ★현재 단계
+5. **프롬프트 7** (펜스 모듈) → 둘레. 가장 까다로움, 낱장 모듈로 ★현재 단계
+6. (예정) 오브젝트 프랍 → 컨테이너/드럼통/의자/게시판/지도판 등 개별
+7. **프롬프트 5** (전당포 천막) → 주요 시설 디테일
+8. 개별 건물 모듈은 `isometric_art_prompt_guide.md` 템플릿으로 별도 생성

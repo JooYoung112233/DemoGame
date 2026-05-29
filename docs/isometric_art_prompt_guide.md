@@ -11,8 +11,8 @@ AI 이미지 생성용 프롬프트 가이드. 모든 건물/소품 에셋에 �
 | 투영 | True isometric (30° from horizontal, 120° between all axes) |
 | 카메라 | front-left corner를 바라봄 |
 | 타일 비율 | 2:1 (가로:세로, 128×64px 다이아몬드) |
-| 배경 | 마젠타 단색 (#FF00FF) → 후처리 투명화 |
-| 렌더링 | Clean pixel art, bold 1-2px outlines, 3-4 color steps per material |
+| 배경 | 흰색 (#FFFFFF) — 굵은 외곽선(2-3px)으로 분리 용이 |
+| 렌더링 | Clean pixel art, bold 2-3px outlines, 3-4 color steps per material |
 | 그림자 | 완전 금지 — flat diagram style |
 
 ---
@@ -21,7 +21,7 @@ AI 이미지 생성용 프롬프트 가이드. 모든 건물/소품 에셋에 �
 
 | DO | DON'T |
 |----|-------|
-| 굵은 외곽선 (1-2px dark outline) | 외곽선 없는 부드러운 렌더링 |
+| 굵은 외곽선 (2-3px outer, 1-2px inner) | 외곽선 없는 부드러운 렌더링 |
 | 면 단위 채색 (flat, 3-4 steps) | 그라데이션, 디더링 과다 |
 | 큰 단위 디테일 | 미세한 크랙/먼지 입자 |
 | 실루엣만으로 인식 가능 | 확대해야 보이는 디테일 |
@@ -92,6 +92,14 @@ Environment tone: abandoned and weathered — NOT clean, NOT new, NOT maintained
 1. **내부 추출**: 앞벽 2개 지우기 → 가려졌던 바닥/벽 부분을 AI에게 보완 요청
 2. **외벽 추출**: 뒷벽 + 바닥 지우기 → V자 앞벽만 남김
 
+### 배경 제거 후처리
+
+흰색 배경(#FFFFFF)에서 오브젝트 분리:
+1. **포토샵**: Select → Color Range → 흰색 선택 → Delete
+2. **외곽선이 2-3px로 굵기 때문에** 배경 분리가 용이
+3. **유리/투명 오브젝트**: 흰색 배경이므로 마젠타 블리딩 문제 없음
+4. 필요시 Magic Wand(W) + Tolerance 10~20으로 외곽 영역만 선택 삭제
+
 ---
 
 ## 성공한 프롬프트 템플릿
@@ -138,7 +146,7 @@ Isometric pixel art of an abandoned [건물명] building — COMPLETE 4-WALL BOX
 
 *** DOOR OPTION (choose one) ***
 [A — NO DOOR]: NO door, NO door frame. All walls solid.
-[B — WITH DOOR]: One empty door frame on the [FRONT-LEFT/FRONT-RIGHT] wall. 128px base width, 154px tall. Empty hole showing magenta.
+[B — WITH DOOR]: One empty door frame on the [FRONT-LEFT/FRONT-RIGHT] wall. 128px base width, 154px tall. Empty hole showing white background.
 
 STRICT STYLE LOCK — NOT photorealistic, NOT painterly, NOT hyper-detailed.
 Color palette: muted concrete grays, cream-beige walls, oxidized brown, dark teal-black.
@@ -155,7 +163,7 @@ Environment tone: abandoned and weathered — NOT clean, NOT new, NOT maintained
 
 Output image size: [W]×[H] pixels. Building centered with 20% margin on all sides. NOTHING may be cropped.
 
-Solid magenta background (#FF00FF). Fill ALL empty space with flat #FF00FF magenta — no gradients, no shadows on background.
+White background (#FFFFFF). Bold 2-3px outlines on all edges for easy background removal.
 ```
 
 ### 전당포 (7×4) — 검증 완료
@@ -199,7 +207,7 @@ Isometric pixel art of an abandoned pawnshop building — COMPLETE 4-WALL BOX, n
 
 *** DOOR — FRONT-LEFT WALL ONLY ***
 - One empty door frame on the FRONT-LEFT wall (long wall facing camera).
-- Door frame: 128px base width, 154px tall. Empty hole showing magenta through it.
+- Door frame: 128px base width, 154px tall. Empty hole showing white background through it.
 - NO door on any other wall. All other walls are solid.
 
 STRICT STYLE LOCK — NOT photorealistic, NOT painterly, NOT hyper-detailed.
@@ -217,7 +225,78 @@ Environment tone: abandoned and weathered — NOT clean, NOT new, NOT maintained
 
 Output image size: 1280×720 pixels. Building centered with 20% margin on all sides. NOTHING may be cropped.
 
-Solid magenta background (#FF00FF). Fill ALL empty space with flat #FF00FF magenta — no gradients, no shadows on background.
+White background (#FFFFFF). Bold 2-3px outlines on all edges for easy background removal.
+```
+
+---
+
+## 기존 마젠타 이미지 → 흰색 배경 변환 프롬프트
+
+마젠타(#FF00FF) 배경으로 생성된 기존 이미지를 흰색 배경 + 아파트 화풍으로 재생성할 때:
+
+```
+Edit this sprite sheet image.
+
+*** REFERENCE IMAGE #1 — "grid.png" ISOMETRIC GRID ***
+- Correct every object's angle to match this grid exactly.
+- TRUE ISOMETRIC: 30° from horizontal, 120° between axes.
+
+*** REFERENCE IMAGE #2 — ART STYLE (Korean apartment pixel art) ***
+- Match this art style EXACTLY.
+- Bold 2-3px dark outlines on all outer edges.
+- Inner detail lines 1-2px.
+- Flat cel-shaded coloring, 3-4 color steps per material.
+- Same level of detail as reference — not more, not less.
+
+*** TASKS ***
+1. Replace ALL magenta (#FF00FF) with pure white (#FFFFFF).
+2. Clean all object edges — no magenta fringe, no pink halo.
+3. Thicken outlines to 2-3px outer, 1-2px inner.
+4. Fix any angles that don't match the isometric grid.
+5. Match art style to apartment reference exactly.
+
+*** DO NOT ***
+- Do NOT add or remove objects.
+- Do NOT change layout or positions.
+
+White background (#FFFFFF). Match apartment reference style.
+```
+
+첨부: 수정할 시트 + grid.png + 아파트 레퍼런스
+
+---
+
+## 소품 스프라이트 시트 템플릿
+
+```
+Isometric pixel art SPRITE SHEET — [건물명/용도] props.
+
+*** REFERENCE IMAGE #1 — ISOMETRIC GRID (MOST IMPORTANT) ***
+- The attached isometric grid is the ABSOLUTE AUTHORITY for all angles.
+- EVERY object MUST follow this grid's angles. No exceptions.
+- TRUE ISOMETRIC: 30° from horizontal, 120° between axes.
+
+*** REFERENCE IMAGE #2 — ART STYLE (Korean apartment pixel art) ***
+- Match this art style EXACTLY: crisp pixel art, bold 2-3px dark outlines, flat cel-shaded.
+- 3-4 color steps per material. Do NOT add more detail than the reference.
+
+*** REFERENCE IMAGE #3 — BUILDING BOX (size reference) ***
+- All props must fit INSIDE this building. Use wall height and floor tiles as scale.
+
+*** ITEMS ***
+[카테고리별 아이템 목록]
+
+*** RULES ***
+- White background (#FFFFFF).
+- ALL objects same isometric angle as grid.
+- Camera faces front-left corner.
+- Each item SEPARATE with clear white space around it.
+- NO text, NO Korean characters.
+- Bold 2-3px outer outlines, 1-2px inner lines.
+- EVERYTHING old, dusty, abandoned.
+- ABSOLUTELY NO LIGHTING OR SHADOW. Each face ONE flat color.
+
+Output: 3840×2160 pixels. NOTHING cropped.
 ```
 
 ---
@@ -237,7 +316,7 @@ Solid magenta background (#FF00FF). Fill ALL empty space with flat #FF00FF magen
 | 9 | 그림자 금지 | `ZERO shadows`, `ONE flat color`, `No light source` |
 | 10 | 문 옵션 | 있음/없음 명시 + 위치 + 크기(128×154) |
 | 11 | 폐허 톤 | `abandoned and weathered — NOT clean, NOT new` |
-| 12 | 마젠타 배경 | `#FF00FF`, `no gradients, no shadows on background` |
+| 12 | 흰색 배경 | `White background (#FFFFFF)` |
 | 13 | 출력 사이즈 | `Output image size: WxH pixels` |
 | 14 | 크롭 금지 | `NOTHING may be cropped`, `margin` |
 | 15 | 텍스트 금지 | `NO text, NO signs, NO Korean characters` |
