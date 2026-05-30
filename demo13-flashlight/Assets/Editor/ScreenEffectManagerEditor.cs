@@ -17,8 +17,14 @@ public class ScreenEffectManagerEditor : Editor
             EditorGUILayout.HelpBox("UI structure exists.", MessageType.Info);
             if (GUILayout.Button("Clear Generated UI"))
             {
-                Undo.RegisterFullObjectHierarchyUndo(mgr.gameObject, "Clear ScreenEffect UI");
-                mgr.ClearGeneratedUI();
+                var target = mgr;
+                EditorApplication.delayCall += () =>
+                {
+                    if (target == null) return;
+                    Undo.RegisterFullObjectHierarchyUndo(target.gameObject, "Clear ScreenEffect UI");
+                    target.ClearGeneratedUI();
+                };
+                GUIUtility.ExitGUI();
             }
         }
         else
@@ -26,9 +32,15 @@ public class ScreenEffectManagerEditor : Editor
             EditorGUILayout.HelpBox("No UI generated. Click to create.", MessageType.Warning);
             if (GUILayout.Button("Generate UI Structure"))
             {
-                Undo.RegisterFullObjectHierarchyUndo(mgr.gameObject, "Generate ScreenEffect UI");
-                mgr.GenerateUI();
-                EditorUtility.SetDirty(mgr);
+                var target = mgr;
+                EditorApplication.delayCall += () =>
+                {
+                    if (target == null) return;
+                    Undo.RegisterFullObjectHierarchyUndo(target.gameObject, "Generate ScreenEffect UI");
+                    target.GenerateUI();
+                    EditorUtility.SetDirty(target);
+                };
+                GUIUtility.ExitGUI();
             }
         }
     }

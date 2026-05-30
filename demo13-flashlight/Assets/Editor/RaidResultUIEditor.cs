@@ -15,8 +15,14 @@ public class RaidResultUIEditor : Editor
             EditorGUILayout.HelpBox("UI structure exists.", MessageType.Info);
             if (GUILayout.Button("Clear Generated UI"))
             {
-                Undo.RegisterFullObjectHierarchyUndo(ui.gameObject, "Clear RaidResultUI");
-                ui.ClearGeneratedUI();
+                var target = ui;
+                EditorApplication.delayCall += () =>
+                {
+                    if (target == null) return;
+                    Undo.RegisterFullObjectHierarchyUndo(target.gameObject, "Clear RaidResultUI");
+                    target.ClearGeneratedUI();
+                };
+                GUIUtility.ExitGUI();
             }
         }
         else
@@ -24,9 +30,15 @@ public class RaidResultUIEditor : Editor
             EditorGUILayout.HelpBox("No UI generated.", MessageType.Warning);
             if (GUILayout.Button("Generate UI Structure"))
             {
-                Undo.RegisterFullObjectHierarchyUndo(ui.gameObject, "Generate RaidResultUI");
-                ui.GenerateUI();
-                EditorUtility.SetDirty(ui);
+                var target = ui;
+                EditorApplication.delayCall += () =>
+                {
+                    if (target == null) return;
+                    Undo.RegisterFullObjectHierarchyUndo(target.gameObject, "Generate RaidResultUI");
+                    target.GenerateUI();
+                    EditorUtility.SetDirty(target);
+                };
+                GUIUtility.ExitGUI();
             }
         }
     }

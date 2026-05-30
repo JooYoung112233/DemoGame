@@ -87,6 +87,10 @@ namespace IsometricMapEditor
                 if (collider != null) Object.DestroyImmediate(collider);
             }
 
+            // 빛 차폐 그림자 프록시 (커스텀 ShadowBox가 있을 때)
+            if (def.castsShadow && def.shadowBoxes != null && def.shadowBoxes.Length > 0)
+                ShadowProxyBuilder.Build(def.shadowBoxes, go.transform, editorPreview);
+
             return go;
         }
     }

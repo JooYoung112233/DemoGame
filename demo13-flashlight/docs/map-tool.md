@@ -9,9 +9,10 @@
 ### 좌표 시스템 (3D 공간 + 2D 스프라이트, 좀보이드 스타일)
 - **3D 공간**: 타일은 XZ 평면에 배치, Y축 = 높이
 - 카메라: 3D 오쏘그래픽, `Euler(35.264, 45, 0)` — 정석 아이소메트릭 (arctan(1/√2), 3축 120° 등각)
-- 오브젝트/건물/프랍 Root 회전: `Quaternion.Euler(35.264, 45, 0)` (카메라와 동일)
-- 바닥 타일: `Quaternion.Euler(90, 0, 0)` (XZ 평면에 눕힘, 변경 안 함)
-- 벽: 수직으로 세워서 동서남북 배치 (변경 안 함)
+- **카메라 향 오브젝트** (NPC, 적, 인터랙터블 등) Root: `Quaternion.Euler(35.264, 45, 0)` (카메라와 동일)
+- **바닥에 깔리는 것** (타일, 하베스터블 스프라이트, TextureQuad 맵오브젝트): `Quaternion.Euler(90, 0, 0)` (XZ 평면에 눕힘)
+- **프랍/빌딩**: 프리팹 자체에 Root 회전이 세팅됨. 바닥 쿼드 프리팹은 `(90,0,0)`, 서있는 오브젝트 프리팹은 `(35.264,45,0)`
+- **벽**: 수직으로 세워서 동서남북 배치 (변경 안 함)
 - Y회전(Q/E 15도 단위): 프리팹 Root 회전에 **곱셈** (덮어쓰기 X) — `Euler(0, yRot, 0) * existingRotation`
 - `float tileSize = 1f` (단일 크기, tileWidth/tileHeight 제거)
 - GridToWorld: `Vector3(cell.x * tileSize, 0, cell.y * tileSize) + originOffset`

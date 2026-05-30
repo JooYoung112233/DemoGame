@@ -1223,7 +1223,8 @@ namespace IsometricMapEditor
                 case 1: // TextureQuad
                 {
                     go = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                    go.transform.localRotation = Quaternion.Euler(35.264f, 45f, 0);
+                    // 바닥에 깔리는 텍스처 쿼드 — 타일과 동일하게 XZ 평면에 눕힘
+                    go.transform.localRotation = Quaternion.Euler(90f, 0, 0);
                     go.transform.localScale = Vector3.one * scale;
                     var meshCol = go.GetComponent<MeshCollider>();
                     if (meshCol) Destroy(meshCol);

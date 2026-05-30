@@ -20,6 +20,12 @@ namespace IsometricMapEditor
         public float wallHeight = 2f;
         public float wallThickness = 0.08f;
 
+        [Header("Light Occlusion (빛 차폐)")]
+        [Tooltip("체크하면 벽이 플래시라이트 빛을 막는 그림자 전용 박스를 함께 배치한다.")]
+        public bool castsShadow;
+        [Tooltip("그림자 차폐 박스 목록. 커스텀 형태의 빛 차폐가 필요할 때 사용.")]
+        public ShadowBox[] shadowBoxes;
+
         public bool IsWall => category == TileCategory.Wall;
 
         // Legacy alias so existing code referencing wallMaterial still compiles

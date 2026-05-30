@@ -39,8 +39,9 @@ public class MapCatalogEditor : EditorWindow
     float newWallThickness = 0.08f;
     bool newBlocksWalk;
     bool newEnterable;
+    bool newOccludesInterior;
 
-    // Prop 빛 차폐(그림자 박스) 폼
+    // 빛 차폐(그림자 박스) 폼 (Prop/Wall/Building 공용)
     bool newCastsShadow;
     int newShadowPreset; // 0=직선,1=대각선,2=ㅅ자,3=V자,4=직접편집
     List<ShadowBox> newShadowBoxes = new();
@@ -185,6 +186,8 @@ public class MapCatalogEditor : EditorWindow
         newBlocksWalk = !t.isWalkable;
         newWallHeight = t.wallHeight;
         newWallThickness = t.wallThickness;
+        newCastsShadow = t.castsShadow;
+        newShadowBoxes = t.shadowBoxes != null ? new List<ShadowBox>(t.shadowBoxes) : new List<ShadowBox>();
     }
 
     void SaveEditedTile(bool wallMode)
@@ -206,6 +209,8 @@ public class MapCatalogEditor : EditorWindow
         {
             tile.wallHeight = newWallHeight;
             tile.wallThickness = newWallThickness;
+            tile.castsShadow = newCastsShadow;
+            tile.shadowBoxes = newCastsShadow ? newShadowBoxes.ToArray() : new ShadowBox[0];
         }
 
         EditorUtility.SetDirty(tile);
@@ -369,6 +374,9 @@ public class MapCatalogEditor : EditorWindow
         newName = b.displayName ?? "";
         newFootprint = b.footprint;
         newEnterable = b.isEnterable;
+        newOccludesInterior = b.occludesInterior;
+        newCastsShadow = b.castsShadow;
+        newShadowBoxes = b.shadowBoxes != null ? new List<ShadowBox>(b.shadowBoxes) : new List<ShadowBox>();
         newMaterial = b.materialPreset;
 
         newBuildingTexture = null;
@@ -761,6 +769,7 @@ public class MapCatalogEditor : EditorWindow
                 newMaterial = (Material)EditorGUILayout.ObjectField("머티리얼", newMaterial, typeof(Material), false);
                 newWallHeight = EditorGUILayout.FloatField("벽 높이", newWallHeight);
                 newWallThickness = EditorGUILayout.FloatField("벽 두께", newWallThickness);
+                DrawShadowSection();
                 if (newSprite != null)
                 {
                     var rect = GUILayoutUtility.GetRect(64, 64, GUILayout.ExpandWidth(false));
@@ -782,6 +791,8 @@ public class MapCatalogEditor : EditorWindow
                 newBuildingScale = EditorGUILayout.FloatField("스케일", newBuildingScale);
                 newFootprint = EditorGUILayout.Vector2IntField("풋프린트", newFootprint);
                 newEnterable = EditorGUILayout.Toggle("진입 가능", newEnterable);
+                newOccludesInterior = EditorGUILayout.Toggle("투명 전환 (윗벽/천장)", newOccludesInterior);
+                DrawShadowSection();
                 if (newBuildingTexture != null)
                 {
                     var rect = GUILayoutUtility.GetRect(80, 80, GUILayout.ExpandWidth(false));
@@ -888,6 +899,8 @@ public class MapCatalogEditor : EditorWindow
         {
             tile.wallHeight = newWallHeight;
             tile.wallThickness = newWallThickness;
+            tile.castsShadow = newCastsShadow;
+            tile.shadowBoxes = newCastsShadow ? newShadowBoxes.ToArray() : new ShadowBox[0];
         }
 
         string path = $"{folder}/{newId}.asset";

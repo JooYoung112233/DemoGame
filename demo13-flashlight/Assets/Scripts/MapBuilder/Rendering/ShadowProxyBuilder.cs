@@ -20,8 +20,17 @@ namespace IsometricMapEditor
         public static void Build(PropDefinition def, Transform parent, bool editorPreview = false)
         {
             if (def == null || !def.castsShadow || def.shadowBoxes == null) return;
-            for (int i = 0; i < def.shadowBoxes.Length; i++)
-                CreateBox(def.shadowBoxes[i], parent, i, editorPreview);
+            Build(def.shadowBoxes, parent, editorPreview);
+        }
+
+        /// <summary>
+        /// 타일(벽) 등 PropDefinition이 아닌 곳에서도 그림자 박스를 생성할 수 있는 범용 오버로드.
+        /// </summary>
+        public static void Build(ShadowBox[] boxes, Transform parent, bool editorPreview = false)
+        {
+            if (boxes == null) return;
+            for (int i = 0; i < boxes.Length; i++)
+                CreateBox(boxes[i], parent, i, editorPreview);
         }
 
         public static GameObject CreateBox(ShadowBox box, Transform parent, int index = 0, bool editorPreview = false)

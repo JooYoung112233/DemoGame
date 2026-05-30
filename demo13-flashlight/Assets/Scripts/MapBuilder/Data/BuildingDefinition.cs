@@ -23,6 +23,16 @@ namespace IsometricMapEditor
         [Tooltip("셰이더 설정 프리셋. 지정하면 프리팹의 텍스처는 유지하고 셰이더 파라미터만 덮어씁니다.")]
         public Material materialPreset;
 
+        [Header("Interior Occlusion (투명 전환)")]
+        [Tooltip("플레이어가 건물 내부에 있을 때 이 파트를 투명하게 만든다. (윗벽/아랫벽/천장 등)")]
+        public bool occludesInterior;
+
+        [Header("Light Occlusion (빛 차폐)")]
+        [Tooltip("체크하면 플래시라이트 빛을 막는 그림자 전용 박스를 함께 배치한다.")]
+        public bool castsShadow;
+        [Tooltip("그림자 차폐 박스 목록.")]
+        public ShadowBox[] shadowBoxes;
+
         public bool IsMultiTile => footprint.x > 1 || footprint.y > 1;
 
         public List<Vector2Int> GetOccupiedCells(Vector2Int origin)

@@ -30,10 +30,16 @@ public class MapSelectUIEditor : Editor
         {
             if (GUILayout.Button("Generate UI", GUILayout.Height(30)))
             {
-                Undo.RegisterCompleteObjectUndo(ui, "Generate MapSelectUI");
-                ui.GenerateUI();
-                EditorUtility.SetDirty(ui);
-                Debug.Log("<color=green>[MapSelectUI]</color> UI 생성 완료");
+                var target = ui;
+                EditorApplication.delayCall += () =>
+                {
+                    if (target == null) return;
+                    Undo.RegisterCompleteObjectUndo(target, "Generate MapSelectUI");
+                    target.GenerateUI();
+                    EditorUtility.SetDirty(target);
+                    Debug.Log("<color=green>[MapSelectUI]</color> UI 생성 완료");
+                };
+                GUIUtility.ExitGUI();
             }
         }
         GUI.backgroundColor = Color.white;
@@ -45,10 +51,16 @@ public class MapSelectUIEditor : Editor
         {
             if (GUILayout.Button("Clear UI", GUILayout.Height(28)))
             {
-                Undo.RegisterCompleteObjectUndo(ui, "Clear MapSelectUI");
-                ui.ClearGeneratedUI();
-                EditorUtility.SetDirty(ui);
-                Debug.Log("<color=orange>[MapSelectUI]</color> UI 제거 완료");
+                var target = ui;
+                EditorApplication.delayCall += () =>
+                {
+                    if (target == null) return;
+                    Undo.RegisterCompleteObjectUndo(target, "Clear MapSelectUI");
+                    target.ClearGeneratedUI();
+                    EditorUtility.SetDirty(target);
+                    Debug.Log("<color=orange>[MapSelectUI]</color> UI 제거 완료");
+                };
+                GUIUtility.ExitGUI();
             }
         }
         GUI.backgroundColor = Color.white;
