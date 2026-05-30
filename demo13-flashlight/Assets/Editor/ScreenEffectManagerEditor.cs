@@ -17,12 +17,14 @@ public class ScreenEffectManagerEditor : Editor
             EditorGUILayout.HelpBox("UI structure exists.", MessageType.Info);
             if (GUILayout.Button("Clear Generated UI"))
             {
-                var target = mgr;
+                var t = mgr;
                 EditorApplication.delayCall += () =>
                 {
-                    if (target == null) return;
-                    Undo.RegisterFullObjectHierarchyUndo(target.gameObject, "Clear ScreenEffect UI");
-                    target.ClearGeneratedUI();
+                    if (t == null) return;
+                    Undo.RegisterFullObjectHierarchyUndo(t.gameObject, "Clear ScreenEffect UI");
+                    t.ClearGeneratedUI();
+                    EditorUtility.SetDirty(t);
+                    ForceInspectorRefresh(t.gameObject);
                 };
                 GUIUtility.ExitGUI();
             }
@@ -32,16 +34,23 @@ public class ScreenEffectManagerEditor : Editor
             EditorGUILayout.HelpBox("No UI generated. Click to create.", MessageType.Warning);
             if (GUILayout.Button("Generate UI Structure"))
             {
-                var target = mgr;
+                var t = mgr;
                 EditorApplication.delayCall += () =>
                 {
-                    if (target == null) return;
-                    Undo.RegisterFullObjectHierarchyUndo(target.gameObject, "Generate ScreenEffect UI");
-                    target.GenerateUI();
-                    EditorUtility.SetDirty(target);
+                    if (t == null) return;
+                    Undo.RegisterFullObjectHierarchyUndo(t.gameObject, "Generate ScreenEffect UI");
+                    t.GenerateUI();
+                    EditorUtility.SetDirty(t);
+                    ForceInspectorRefresh(t.gameObject);
                 };
                 GUIUtility.ExitGUI();
             }
         }
+    }
+
+    static void ForceInspectorRefresh(GameObject go)
+    {
+        Selection.activeGameObject = null;
+        EditorApplication.delayCall += () => Selection.activeGameObject = go;
     }
 }

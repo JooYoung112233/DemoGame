@@ -118,8 +118,8 @@
 
 | 항목 | 위치 | 내용 |
 |------|------|------|
-| 화폐(재화) 시스템 부재 | `Quest/QuestManager.cs:113`, `Systems/AchievementManager.cs:146` | 퀘스트·업적 보상에서 재화 지급부가 `// TODO: 화폐 시스템 연동` 주석만. 중앙 Currency/Wallet 관리자 자체가 없음 → 보상 루프 미완 |
-| 소비 아이템 스태미너 회복 미구현 | `Inventory/PlayerInventory.cs:99` | `// 임시: ConsumeStamina 음수로는 안되니까 TODO` — RestoreStamina 경로 없음 |
+| ~~화폐(재화) 시스템 부재~~ | ~~`Quest/QuestManager.cs:113`, `Systems/AchievementManager.cs:146`~~ | ✅ 2026-05-30 해결 — `Systems/CurrencyManager.cs` 신설. 퀘스트·업적·레이드 이벤트 보상/페널티 연동 + 세이브 + HUD(우상단 ◈) + 토스트. `docs/economy.md` |
+| ~~소비 아이템 스태미너 회복 미구현~~ | ~~`Inventory/PlayerInventory.cs`~~ | ❌ 2026-05-30 **기획 제거** — 스태미너 회복 소비 아이템 불필요 결정. 핸들링·`RestoreStamina()` 삭제, Coffee/EnergySoup/StimInjector 효과 None 전환. enum 값만 인덱스 보존용 유지 |
 | 레이드 후 이벤트 조건 필터 미구현 | `Raid/PostRaidEventManager.cs:98` | `// TODO: region, nightOnly 조건 체크` — 지역/밤 조건 무시하고 랜덤 발동 |
 
 ### 🟡 중간 — UX·코드 품질
@@ -127,7 +127,7 @@
 | 항목 | 위치 | 내용 |
 |------|------|------|
 | 아이템 검사 패널 UI 없음 | `UI/CharacterPanelUI.cs:1782` | `// TODO: 전용 검사 패널 UI (향후)` — 현재 콘솔 로그만 |
-| 문 상호작용 피드백 토스트 없음 | `Interaction/DoorController.cs:258` | `// TODO: 화면에 토스트 메시지 표시 (현재는 콘솔만)` — 공용 토스트/알림 UI 부재 |
+| ~~문 상호작용 피드백 토스트 없음~~ | ~~`Interaction/DoorController.cs:258`~~ | ✅ 2026-05-30 해결 — `UI/ToastManager.cs` 공용 토스트 신설(`ToastManager.Show`). 문 잠김/화폐 변동 등 연동 |
 | 리플렉션으로 private 필드 접근 | `Interaction/DoorController.cs:245`, `NPC/NPCQuestMarker.cs:166`, `MapBuilder/Integration/MapObjectSpawner.cs:103,305` | `GetField(... NonPublic)` — 취약·리네임 시 무성 실패. 공개 Setter 권장 |
 | `goto` 제어 흐름 | `Inventory/PlayerInventory.cs:87` | `goto doneHeal;` — `break`/조건문으로 정리 권장 |
 | WorldItem 임시 큐브 렌더 | `Inventory/WorldItem.cs:40` | `// 기본 큐브 (임시)` — 스프라이트/프리팹 미연결 |
@@ -145,9 +145,9 @@
 | 시스템 | 완성도 | 비고 |
 |--------|:---:|------|
 | Combat / Medical / Crafting / Story / MapBuilder / Lighting | 골격 완성 | 이벤트 기반 구조 양호, Editor State Preservation 규칙 준수 |
-| Inventory | 부분 | 그리드 자료구조·UI 완성, 소비(스태미너 회복)·검사 패널 미완 |
-| NPC / Quest / Raid | 부분 | 진행·추적 로직 구현, **화폐 보상 연동·이벤트 조건 미완** |
-| UI 피드백 | 부분 | 공용 토스트/알림 UI 부재로 콘솔 로그 의존 |
+| Inventory | 부분 | 그리드 자료구조·UI 완성, 스태미너 회복 아이템은 기획 제거, 검사 패널 UI만 미완 |
+| NPC / Quest / Raid | 부분 | 진행·추적 로직 구현, 화폐 보상 연동 ✅, **레이드 이벤트 조건 필터 미완** |
+| UI 피드백 | 부분 | 공용 토스트(`ToastManager`) ✅, 아이템 검사 패널 미완 |
 
 ---
 
@@ -167,3 +167,5 @@
 | 2026-05-25 | Stage 3 인벤토리 기반 구축: ItemData SO, ItemDatabase, ItemInstance, InventoryGrid, PlayerInventory, WorldItem, SpawnTable, ItemSpawnPoint, LootContainer. docs/inventory.md 생성. |
 | 2026-05-29 | 165개 스크립트 전수 점검. 미구현/마무리 항목 위 섹션에 정리(화폐 시스템·소비 스태미너·이벤트 조건·토스트 UI 등). 상태선 2단계로 정정. |
 | 2026-05-29 | 죽은 코드 정리: `BuildingCubeBuilder.cs`(deprecated 스텁), `Building/RoofController.cs`(미사용 중복 — 실사용은 `IsometricMapEditor.RoofController` 스텁), 빈 폴더 `Visual/`·`Safehouse/` 삭제. GUID 검증으로 ViewCulling/ScrapMarketMapMetadata는 씬·프리팹 부착 확인 후 보존. |
+| 2026-05-30 | 미완 항목 처리: ① **화폐 시스템**(`CurrencyManager` + 퀘스트/업적/이벤트 보상·페널티 연동 + 세이브 + HUD ◈ + `docs/economy.md`), ② **공용 토스트 UI**(`ToastManager`, 문 피드백·화폐 변동 연동). |
+| 2026-05-30 | **스태미너 회복 소비 아이템 기획 제거.** 불필요 결정 → 핸들링·`PlayerController.RestoreStamina()` 삭제, Coffee/EnergySoup/StimInjector `useEffect` None 전환. `ItemUseEffect.RestoreStamina` enum 값은 직렬화 인덱스 보존 위해 deprecated로 유지. |

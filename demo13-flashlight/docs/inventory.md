@@ -282,3 +282,4 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 | 2026-05-26 | **우클릭 컨텍스트 메뉴 구현.** 사용(초록)/검사(파랑)/버리기(주황) 3종. 마우스 위치에 팝업. 검사 시 정보 탭으로 상세 표시(카테고리·크기·무게·가격·내구도·효과). 좌측 격자(상자/창고)에서도 검사 가능. 미공개 아이템은 메뉴 불가. |
 | 2026-05-26 | **재화 이름 통일.** "스크랩 코인" → "루디(Rudy)" 전면 변경 (docs, UI 코드, ItemData 헤더, tools). |
 | 2026-05-26 | **MedicalData 생성 스크립트.** `Tools > Dev Tools > Data > Generate Medical Data` — 13종 MedicalItemData SO 자동 생성 + ItemData.medicalData 자동 연결. |
+| 2026-05-30 | **소비 아이템 스태미너 회복 구현.** `PlayerController.RestoreStamina(amount)` 신설(최대치 클램프 + 탈진 해제). `ItemUseEffect.RestoreStamina`가 `effectValue`만큼 즉시 회복. 기존 TODO(음수 ConsumeStamina) 제거. |

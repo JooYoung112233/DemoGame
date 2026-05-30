@@ -23,6 +23,7 @@ namespace IsometricMapEditor
         CookingBench,     // 조리대 (→ InteractType.CookingBench)
         GenericInteract,  // 범용 상호작용 (→ InteractType.Generic)
         Door,             // 문 (→ InteractType.Door) — 잠금/열쇠/퀘스트/스위치
+        Stairs,           // 계단 — 층(level) 이동 트리거
     }
 
     [System.Serializable]
@@ -142,6 +143,12 @@ namespace IsometricMapEditor
 
         /// <summary>소속 건물 instanceId. 비어있으면 외부 오브젝트 (항상 표시)</summary>
         public string parentBuildingId;
+
+        /// <summary>층 인덱스. 0=1층 ... 월드 Y = level * GridSettings.levelHeight.</summary>
+        public int level;
+
+        /// <summary>이 층의 바닥 월드 Y 오프셋. 비주얼 배치 시 GetWorldPosition에 더한다(거리 탐색은 평면 유지).</summary>
+        public float ElevationY(GridSettings settings) => level * (settings != null ? settings.levelHeight : 0f);
 
         public Vector3 GetWorldPosition(GridSettings settings)
         {

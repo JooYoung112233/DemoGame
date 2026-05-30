@@ -23,6 +23,14 @@ namespace IsometricMapEditor
         {
             if (_manager == null || _camera == null) return;
 
+            // 도움말이 열려 있으면 아무 키/클릭으로 닫고, 다른 입력은 무시.
+            // (도움말 패널이 전체 화면 레이캐스트를 막아 아래 IsPointerOverUI에서 막히기 전에 처리)
+            if (_manager.UI.IsHelpOpen)
+            {
+                if (Input.anyKeyDown) _manager.UI.CloseHelp();
+                return;
+            }
+
             if (IsPointerOverUI())
             {
                 _manager.ClearEraseHover();
@@ -153,10 +161,14 @@ namespace IsometricMapEditor
             if (Input.GetKeyDown(KeyCode.Alpha7)) _manager.SetToolMode(ToolMode.Move);
 
             // Q/E: ±15° (1스텝), Shift+Q/E: ±1° (미세 조절)
+            // 벽 + 스냅 모드일 땐 동서남북(N/E/S/W) 90°씩 회전 (6스텝 = 90°).
             bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            float rotStep = shift ? (1f / 15f) : 1f; // 1/15 스텝 = 1도
+            bool wallSnap = _manager.CurrentTool == ToolMode.Wall && _manager.SnapToGrid;
+            float rotStep = wallSnap ? 6f : (shift ? (1f / 15f) : 1f); // 6스텝=90°, 1/15스텝=1도
             if (Input.GetKeyDown(KeyCode.Q)) _manager.RotateSelection(-rotStep);
             if (Input.GetKeyDown(KeyCode.E)) _manager.RotateSelection(rotStep);
+            if (Input.GetKeyDown(KeyCode.F)) _manager.ToggleFlipX();
+            if (Input.GetKeyDown(KeyCode.B)) _manager.ToggleWallMount();
             if (Input.GetKeyDown(KeyCode.G)) _manager.ToggleSnapToGrid();
             if (Input.GetKeyDown(KeyCode.R)) _manager.ToggleResizeMode();
 
@@ -164,16 +176,54 @@ namespace IsometricMapEditor
             if (Input.GetKeyDown(KeyCode.LeftBracket)) _manager.NudgeHoverSortOffset(-1);
             if (Input.GetKeyDown(KeyCode.RightBracket)) _manager.NudgeHoverSortOffset(+1);
 
+            // 프롭 접지 오프셋(XYZ) 미세조정 — "방향키 = 화면 이동" 규약.
+            // 배치 중(고스트) 또는 Move(7)로 집은 상태에서만 동작.
+            //   ←/→ = 좌우(X), ↑/↓ = 위아래(Y, 높이), PageUp/PageDown = 깊이(Z), Home = 리셋.
+            //   Shift = 미세(0.01). 방향키는 이 상태에서 카메라 패닝 대신 프롭을 민다(카메라는 WASD).
+            // 예외: 벽 부착 컨텍스트에서는 PageUp/Down이 Z 오프셋 대신 벽 부착 높이를 조절.
+            float offStep = shift ? 0.01f : 0.05f;
+            if (_manager.ActiveGroundOffset.HasValue)
+            {
+                if (Input.GetKeyDown(KeyCode.LeftArrow)) _manager.AdjustGroundOffset(new Vector3(-offStep, 0f, 0f));
+                if (Input.GetKeyDown(KeyCode.RightArrow)) _manager.AdjustGroundOffset(new Vector3(offStep, 0f, 0f));
+                if (Input.GetKeyDown(KeyCode.UpArrow)) _manager.AdjustGroundOffset(new Vector3(0f, offStep, 0f));
+                if (Input.GetKeyDown(KeyCode.DownArrow)) _manager.AdjustGroundOffset(new Vector3(0f, -offStep, 0f));
+                if (Input.GetKeyDown(KeyCode.Home)) _manager.ResetGroundOffset();
+            }
+
+            // PageUp/PageDown: 벽 부착 컨텍스트면 부착 높이, 아니면 깊이(Z) 오프셋.
+            if (_manager.IsWallMountContext)
+            {
+                float heightStep = shift ? 0.02f : 0.1f;
+                if (Input.GetKeyDown(KeyCode.PageUp)) _manager.AdjustMountHeight(heightStep);
+                if (Input.GetKeyDown(KeyCode.PageDown)) _manager.AdjustMountHeight(-heightStep);
+            }
+            else if (_manager.ActiveGroundOffset.HasValue)
+            {
+                if (Input.GetKeyDown(KeyCode.PageUp)) _manager.AdjustGroundOffset(new Vector3(0f, 0f, offStep));
+                if (Input.GetKeyDown(KeyCode.PageDown)) _manager.AdjustGroundOffset(new Vector3(0f, 0f, -offStep));
+            }
+
+            // , / . : 편집 층(level) 내리기/올리기 (Zomboid식 층 쌓기)
+            if (Input.GetKeyDown(KeyCode.Period)) _manager.ChangeLevel(+1);
+            if (Input.GetKeyDown(KeyCode.Comma)) _manager.ChangeLevel(-1);
+            // V : 층 컷어웨이(위층 숨김) 토글
+            if (Input.GetKeyDown(KeyCode.V)) _manager.ToggleLevelCutaway();
+
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.S))
                 _manager.UI.ShowSaveDialog();
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.L))
                 _manager.UI.ShowLoadDialog();
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.N))
                 _manager.UI.ShowNewMapDialog();
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Z))
-                _manager.Undo();
+            // Undo는 상단 UI의 "Undo" 버튼으로. (플레이모드에서 Ctrl+Z는 Unity 에디터 undo와 충돌)
 
             if (Input.GetKeyDown(KeyCode.F1)) _manager.UI.ToggleHelp();
+
+            // ESC: 배치 모드 취소 (리사이즈/이동 모드는 각자 ESC 처리가 따로 있음)
+            if (Input.GetKeyDown(KeyCode.Escape) && !_manager.ResizeMode
+                && _manager.CurrentTool != ToolMode.Move && _manager.HasActivePlacement)
+                _manager.CancelPlacement();
 
             if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace))
                 _manager.DeleteSelectedObject();

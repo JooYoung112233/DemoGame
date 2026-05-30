@@ -3,6 +3,9 @@ Shader "InkCity/RuinFloor"
     Properties
     {
         _MainTex ("Base Texture", 2D) = "white" {}
+        _Color ("Tint", Color) = (1,1,1,1)
+        _Brightness ("Brightness", Range(0, 2)) = 1.0
+        _LightBoost ("Light Boost", Range(1, 5)) = 2.0
 
         [Header(Normal Map)]
         [Toggle(_NORMALMAP)] _NormalMapToggle ("Use Normal Map", Float) = 0
@@ -54,6 +57,9 @@ Shader "InkCity/RuinFloor"
                 float4 _MainTex_ST;
                 float4 _BumpMap_ST;
                 float _BumpScale;
+                float4 _Color;
+                float _Brightness;
+                float _LightBoost;
                 float _DustAmount;
                 float4 _DustColor;
                 float _DustScale;
@@ -192,7 +198,7 @@ Shader "InkCity/RuinFloor"
             half4 frag(Varyings input) : SV_Target
             {
                 half3 baseTex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).rgb;
-                half3 color = baseTex;
+                half3 color = baseTex * _Color.rgb * _Brightness;
 
                 #ifdef _RUIN_ON
                     float2 uv = input.uv;
@@ -235,17 +241,20 @@ Shader "InkCity/RuinFloor"
                 half3 baseColor = color;
                 half3 ambient = baseColor * 0.4;
 
+                // litColor: 손전등용 — Brightness 무시한 원본 텍스쳐 (CityBuilding과 동일 패턴)
+                half3 litColor = baseTex * _Color.rgb;
+
                 Light mainLight = GetMainLight();
                 color = ambient + baseColor * mainLight.color;
 
-                // additional lights (flashlight) — distance attenuation only
+                // additional lights (flashlight) — LightBoost로 건물과 반응 일치
                 #ifdef _ADDITIONAL_LIGHTS
                 uint lightCount = GetAdditionalLightsCount();
                 for (uint i = 0; i < lightCount; i++)
                 {
                     Light addLight = GetAdditionalLight(i, input.positionWS);
                     float addAtten = addLight.distanceAttenuation;
-                    color += baseColor * addAtten * addLight.color;
+                    color += litColor * addAtten * addLight.color * _LightBoost;
                 }
                 #endif
 

@@ -143,8 +143,8 @@ public class AchievementManager : MonoBehaviour
     {
         if (def.currencyReward > 0)
         {
-            // TODO: 화폐 시스템 연동
-            Debug.Log($"[Achievement] 보상: {def.currencyReward} 화폐");
+            if (CurrencyManager.Instance != null)
+                CurrencyManager.Instance.Add(def.currencyReward, $"업적: {def.name}");
         }
     }
 

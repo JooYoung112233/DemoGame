@@ -255,8 +255,8 @@ public class DoorController : MonoBehaviour
 
     void ShowMessage(string msg)
     {
-        // TODO: 화면에 토스트 메시지 표시 (현재는 콘솔만)
         Debug.Log($"[Door] {msg}");
+        ToastManager.Show(msg, ToastManager.ToastType.Warning);
     }
 
     #region 기즈모

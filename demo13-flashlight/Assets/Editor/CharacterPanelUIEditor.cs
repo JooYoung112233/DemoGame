@@ -15,12 +15,14 @@ public class CharacterPanelUIEditor : Editor
             EditorGUILayout.HelpBox("UI structure exists.", MessageType.Info);
             if (GUILayout.Button("Clear Generated UI"))
             {
-                var target = ui;
+                var t = ui;
                 EditorApplication.delayCall += () =>
                 {
-                    if (target == null) return;
-                    Undo.RegisterFullObjectHierarchyUndo(target.gameObject, "Clear CharacterPanelUI");
-                    target.ClearGeneratedUI();
+                    if (t == null) return;
+                    Undo.RegisterFullObjectHierarchyUndo(t.gameObject, "Clear CharacterPanelUI");
+                    t.ClearGeneratedUI();
+                    EditorUtility.SetDirty(t);
+                    ForceInspectorRefresh(t.gameObject);
                 };
                 GUIUtility.ExitGUI();
             }
@@ -30,16 +32,23 @@ public class CharacterPanelUIEditor : Editor
             EditorGUILayout.HelpBox("No UI generated.", MessageType.Warning);
             if (GUILayout.Button("Generate UI Structure"))
             {
-                var target = ui;
+                var t = ui;
                 EditorApplication.delayCall += () =>
                 {
-                    if (target == null) return;
-                    Undo.RegisterFullObjectHierarchyUndo(target.gameObject, "Generate CharacterPanelUI");
-                    target.GenerateUI();
-                    EditorUtility.SetDirty(target);
+                    if (t == null) return;
+                    Undo.RegisterFullObjectHierarchyUndo(t.gameObject, "Generate CharacterPanelUI");
+                    t.GenerateUI();
+                    EditorUtility.SetDirty(t);
+                    ForceInspectorRefresh(t.gameObject);
                 };
                 GUIUtility.ExitGUI();
             }
         }
+    }
+
+    static void ForceInspectorRefresh(GameObject go)
+    {
+        Selection.activeGameObject = null;
+        EditorApplication.delayCall += () => Selection.activeGameObject = go;
     }
 }

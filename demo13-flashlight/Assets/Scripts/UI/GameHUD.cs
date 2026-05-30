@@ -47,6 +47,11 @@ public class GameHUD : MonoBehaviour
     [SerializeField] Text batIcon;
     [SerializeField] RectTransform injuryPanel;
     [SerializeField] Text[] injuryIcons;
+    [SerializeField] Text rudiText;
+
+    // 화폐 표시 상태
+    bool currencyBound;
+    float rudiFlash;
 
     // 상태
     float prevHpPct = 1f;
@@ -63,6 +68,9 @@ public class GameHUD : MonoBehaviour
 
     void Update()
     {
+        if (!currencyBound) TryBindCurrency();
+        UpdateRudiFlash();
+
         if (player == null) FindPlayer();
         if (health == null) return;
 
@@ -71,6 +79,45 @@ public class GameHUD : MonoBehaviour
         UpdateBatteryBar();
         UpdateInjuryIcons();
         UpdateHPShake();
+    }
+
+    void OnDestroy()
+    {
+        if (CurrencyManager.Instance != null)
+            CurrencyManager.Instance.OnBalanceChanged -= OnRudiChanged;
+    }
+
+    void TryBindCurrency()
+    {
+        if (CurrencyManager.Instance == null) return;
+        CurrencyManager.Instance.OnBalanceChanged -= OnRudiChanged;
+        CurrencyManager.Instance.OnBalanceChanged += OnRudiChanged;
+        currencyBound = true;
+        OnRudiChanged(CurrencyManager.Instance.Balance, 0);
+    }
+
+    void OnRudiChanged(int newBalance, int delta)
+    {
+        if (rudiText != null)
+            rudiText.text = $"◈ {newBalance:N0}";
+        if (delta != 0)
+            rudiFlash = 1f; // 변동 시 반짝임
+    }
+
+    void UpdateRudiFlash()
+    {
+        if (rudiText == null) return;
+        if (rudiFlash > 0f)
+        {
+            rudiFlash -= Time.unscaledDeltaTime * 2f;
+            Color baseC = new Color(1f, 0.85f, 0.3f);
+            Color flashC = Color.white;
+            rudiText.color = Color.Lerp(baseC, flashC, Mathf.Clamp01(rudiFlash));
+        }
+        else
+        {
+            rudiText.color = new Color(1f, 0.85f, 0.3f);
+        }
     }
 
     void FindPlayer()
@@ -168,6 +215,44 @@ public class GameHUD : MonoBehaviour
             injuryIcons[i] = txt;
             iconGO.SetActive(false);
         }
+
+        // ── 루디 카운터 (우상단) ──
+        BuildRudiCounter(canvasRT);
+    }
+
+    void BuildRudiCounter(RectTransform canvasRT)
+    {
+        var panelGO = new GameObject("Rudi_Panel");
+        panelGO.transform.SetParent(canvasRT, false);
+        var panelRT = panelGO.AddComponent<RectTransform>();
+        panelRT.anchorMin = new Vector2(1, 1);
+        panelRT.anchorMax = new Vector2(1, 1);
+        panelRT.pivot = new Vector2(1, 1);
+        panelRT.anchoredPosition = new Vector2(-30, -25);
+        panelRT.sizeDelta = new Vector2(180, 36);
+
+        var bg = panelGO.AddComponent<Image>();
+        bg.color = barBgColor;
+
+        var txtGO = new GameObject("Rudi_Text");
+        txtGO.transform.SetParent(panelGO.transform, false);
+        var txtRT = txtGO.AddComponent<RectTransform>();
+        txtRT.anchorMin = Vector2.zero;
+        txtRT.anchorMax = Vector2.one;
+        txtRT.offsetMin = new Vector2(10, 0);
+        txtRT.offsetMax = new Vector2(-10, 0);
+
+        rudiText = txtGO.AddComponent<Text>();
+        rudiText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        rudiText.fontSize = 18;
+        rudiText.fontStyle = FontStyle.Bold;
+        rudiText.color = new Color(1f, 0.85f, 0.3f);
+        rudiText.alignment = TextAnchor.MiddleRight;
+        rudiText.text = "◈ 0";
+
+        var shadow = txtGO.AddComponent<Shadow>();
+        shadow.effectColor = new Color(0, 0, 0, 0.8f);
+        shadow.effectDistance = new Vector2(1, -1);
     }
 
     public void ClearGeneratedUI()
@@ -197,6 +282,8 @@ public class GameHUD : MonoBehaviour
         batIcon = null;
         injuryPanel = null;
         injuryIcons = null;
+        rudiText = null;
+        currencyBound = false;
     }
 
     void BuildBar(RectTransform parent, string label, float yOffset, float width, float height,
@@ -272,6 +359,7 @@ public class GameHUD : MonoBehaviour
         batText = FindChild<Text>("Bat_Text");
         batIcon = FindChild<Text>("Bat_Icon");
         injuryPanel = FindChild<RectTransform>("InjuryIcons");
+        rudiText = FindChild<Text>("Rudi_Text");
 
         if (hpBarBg != null)
             hpBarBasePos = hpBarBg.anchoredPosition;

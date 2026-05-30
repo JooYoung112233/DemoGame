@@ -26,6 +26,7 @@ namespace IsometricMapEditor
         [Header("Map Settings")]
         public int defaultMapWidth = 64;
         public int defaultMapHeight = 64;
+        public float defaultTileSize = 1f;
 
         public MapData EditingMap { get; private set; }
         public ToolMode CurrentTool { get; private set; } = ToolMode.Tile;
@@ -35,28 +36,61 @@ namespace IsometricMapEditor
         public BuildingDefinition SelectedBuilding { get; private set; }
         public MapObjectType SelectedObjectType { get; private set; } = MapObjectType.SpawnPoint;
         // Eraser hover
-        readonly List<(Renderer rend, Color origColor)> _eraseHoverRenderers = new();
+        readonly List<(Renderer rend, string prop, Color origColor)> _eraseHoverRenderers = new();
+
+        // 셰이더마다 색 프로퍼티 이름이 달라서(_Color/_BaseColor/_Tint) 안전하게 찾는 헬퍼
+        static string GetColorPropName(Material m)
+        {
+            if (m == null) return null;
+            if (m.HasProperty("_BaseColor")) return "_BaseColor";
+            if (m.HasProperty("_Color")) return "_Color";
+            if (m.HasProperty("_Tint")) return "_Tint";
+            return null;
+        }
         string _eraseHoverInstanceId;
         public string EraseHoverInfo { get; private set; }
 
-        // 정렬 조절 대상 (마지막으로 가리킨 프랍/건물). UI 위로 마우스가 가도 유지됨.
-        public string SortTargetId { get; private set; }
-        public string SortTargetLabel { get; private set; }
-        public bool HasSortTarget => !string.IsNullOrEmpty(SortTargetId);
+        // 그림 순서(정렬) 조절 대상:
+        //  - 이동(Move) 모드에서 프랍/건물을 집은 상태  → 그 오브젝트
+        //  - 배치(Prop/Building) 모드             → 다음에 놓을 오브젝트(_placementSortOffset)
+        int _placementSortOffset; // 배치 모드에서 다음 프랍/건물에 적용할 정렬 오프셋
+
+        bool IsMoveSortTarget => _moveGrabbed && (_moveType == 2 || _moveType == 3);
+        bool IsPlacementSortTarget => CurrentTool == ToolMode.Prop || CurrentTool == ToolMode.Building;
+
+        public bool HasSortTarget => IsMoveSortTarget || IsPlacementSortTarget;
+
+        public string SortTargetLabel
+        {
+            get
+            {
+                if (IsMoveSortTarget) return "그림순서 (이동 중)";
+                if (IsPlacementSortTarget) return "그림순서 (배치)";
+                return null;
+            }
+        }
+
         public int SortTargetOffset
         {
             get
             {
-                if (EditingMap == null || string.IsNullOrEmpty(SortTargetId)) return 0;
-                foreach (var p in EditingMap.props) if (p.instanceId == SortTargetId) return p.sortingOffsetOverride;
-                foreach (var b in EditingMap.buildings) if (b.instanceId == SortTargetId) return b.sortingOffsetOverride;
-                return 0;
+                if (_moveGrabbed && _moveType == 2)
+                {
+                    var p = EditingMap?.props.Find(x => x.instanceId == _moveInstanceId);
+                    if (p != null) return p.sortingOffsetOverride;
+                }
+                if (_moveGrabbed && _moveType == 3)
+                {
+                    var b = EditingMap?.buildings.Find(x => x.instanceId == _moveInstanceId);
+                    if (b != null) return b.sortingOffsetOverride;
+                }
+                return _placementSortOffset;
             }
         }
 
         // Resize mode
         public bool ResizeMode { get; set; }
-        readonly List<(Renderer rend, Color origColor)> _resizeHoverRenderers = new();
+        readonly List<(Renderer rend, string prop, Color origColor)> _resizeHoverRenderers = new();
         string _resizeHoverInstanceId;
         public string ResizeHoverInfo { get; private set; }
 
@@ -66,7 +100,7 @@ namespace IsometricMapEditor
         string _moveInstanceId;
         int _moveType = -1; // 0=tile, 1=wall, 2=prop, 3=building, 4=mapObject
         int _moveWallRotation;
-        readonly List<(Renderer rend, Color origColor)> _moveHoverRenderers = new();
+        readonly List<(Renderer rend, string prop, Color origColor)> _moveHoverRenderers = new();
         string _moveHoverInstanceId;
         public string MoveHoverInfo { get; private set; }
 
@@ -76,6 +110,14 @@ namespace IsometricMapEditor
         public bool ShowProps { get; set; } = true;
         public bool ShowBuildings { get; set; } = true;
         public bool ShowMapObjects { get; set; } = true;
+
+        // 개별 건물 숨김 (에디터 편집 전용 — 저장 데이터엔 영향 없음. 내부에 프랍 배치할 때 사용)
+        readonly HashSet<string> _hiddenBuildingIds = new();
+        public bool InteriorViewActive { get; private set; }
+
+        /// <summary>모든 벽을 숨기는 편집용 토글. 벽으로 직접 쌓은 구조물 내부에 프랍을 놓을 때 사용.
+        /// (프리팹 건물의 "내부 보기"와 별개 — 이쪽은 Wall 도구로 깐 개별 벽 전체 대상.)</summary>
+        public bool WallsHidden { get; private set; }
 
         // Spawn config properties (for MapObject placement)
         public bool SpawnUseRegionLoot { get; set; } = true;
@@ -118,7 +160,28 @@ namespace IsometricMapEditor
         public string SelectedParentBuildingId { get; set; } = "";
 
         public float CurrentRotation { get; private set; }
+        public bool CurrentFlipX { get; private set; }
+        /// <summary>다음에 놓을 프롭을 벽 부착 모드로 둘지. (B 키로 토글)</summary>
+        public bool CurrentWallMount { get; private set; }
+        /// <summary>벽 부착 시 바닥에서 띄울 높이(m). (PageUp/Down으로 조절)</summary>
+        public float CurrentMountHeight { get; private set; } = 1.2f;
+        /// <summary>다음에 놓을 프롭의 인스턴스별 접지 오프셋(XYZ, 넘패드로 조절). 배치 시 groundOffsetOverride로 박힌다.</summary>
+        public Vector3 CurrentGroundOffset { get; private set; }
         public bool SnapToGrid { get; set; }
+
+        /// <summary>현재 편집 중인 층(level). 0=1층. 새로 놓는 타일/벽은 이 층에 배치된다. (PageUp/Down 또는 UI로 변경)</summary>
+        public int CurrentLevel { get; private set; }
+        public const int MAX_LEVEL = 9;
+
+        public void SetCurrentLevel(int level)
+        {
+            CurrentLevel = Mathf.Clamp(level, 0, MAX_LEVEL);
+            ApplyLevelCutaway();
+            UI?.RefreshAll();
+        }
+
+        /// <summary>편집 층을 delta만큼 올리거나 내린다. (UI/키 입력 공통 진입점)</summary>
+        public void ChangeLevel(int delta) => SetCurrentLevel(CurrentLevel + delta);
 
         // 타일 브러시 크기 (1~5). 클릭한 칸을 중심으로 WxH 범위에 배치.
         public int BrushWidth { get; private set; } = 1;
@@ -172,7 +235,7 @@ namespace IsometricMapEditor
             }
 
             SetupScene();
-            NewMap(defaultMapWidth, defaultMapHeight);
+            NewMap(defaultMapWidth, defaultMapHeight, defaultTileSize);
         }
 
         void SetupScene()
@@ -180,6 +243,7 @@ namespace IsometricMapEditor
             // Camera
             var camGo = new GameObject("MapBuilderCamera");
             BuilderCamera = camGo.AddComponent<MapBuilderCamera>();
+            BuilderCamera.manager = this;
             camGo.AddComponent<AudioListener>();
             BuilderCamera.GetComponent<Camera>().clearFlags = CameraClearFlags.SolidColor;
             BuilderCamera.GetComponent<Camera>().backgroundColor = new Color(0.15f, 0.15f, 0.18f);
@@ -283,14 +347,14 @@ namespace IsometricMapEditor
             HideExternalObjects();
         }
 
-        public void NewMap(int width, int height)
+        public void NewMap(int width, int height, float tileSize = 1f)
         {
             EditingMap = ScriptableObject.CreateInstance<MapData>();
             EditingMap.mapName = "NewMap";
             EditingMap.mapId = System.Guid.NewGuid().ToString("N")[..8];
             EditingMap.gridSettings = new GridSettings
             {
-                tileSize = 1f,
+                tileSize = tileSize <= 0f ? 1f : tileSize,
                 originOffset = Vector3.zero,
                 mapWidth = width,
                 mapHeight = height
@@ -314,6 +378,8 @@ namespace IsometricMapEditor
             ClearMoveHover();
             CurrentTool = mode;
             CurrentRotation = 0;
+            CurrentFlipX = false;
+            CurrentWallMount = false;
             MoveMode = mode == ToolMode.Move;
             RebuildGhost();
             UI.RefreshToolbar();
@@ -339,6 +405,10 @@ namespace IsometricMapEditor
         {
             SelectedProp = prop;
             CurrentTool = ToolMode.Prop;
+            // 벽 부착 가능한 프롭이면 기본값을 켜고 정의된 높이를 채운다.
+            CurrentWallMount = prop != null && prop.wallMountable;
+            if (prop != null && prop.wallMountable && prop.defaultMountHeight > 0f)
+                CurrentMountHeight = prop.defaultMountHeight;
             RebuildGhost();
             UI.RefreshToolbar();
         }
@@ -380,6 +450,129 @@ namespace IsometricMapEditor
         public void SetBuildingVisibility(bool v) { ShowBuildings = v; if (_buildingRoot) _buildingRoot.gameObject.SetActive(v); UI.RefreshAll(); }
         public void SetMapObjectVisibility(bool v) { ShowMapObjects = v; if (_objectRoot) _objectRoot.gameObject.SetActive(v); UI.RefreshAll(); }
 
+        // ── 개별 건물 숨김 (내부 프랍 배치용) ──
+
+        /// <summary>현재 맵에 배치된 건물 목록 (UI 리스트용).</summary>
+        public IReadOnlyList<PlacedBuilding> PlacedBuildings =>
+            EditingMap != null ? EditingMap.buildings : System.Array.Empty<PlacedBuilding>();
+
+        public bool IsBuildingHidden(string instanceId) => _hiddenBuildingIds.Contains(instanceId);
+
+        /// <summary>특정 건물 인스턴스를 숨기거나 표시한다. (에디터 편집 전용)</summary>
+        public void SetBuildingHidden(string instanceId, bool hidden)
+        {
+            if (string.IsNullOrEmpty(instanceId)) return;
+            if (hidden) _hiddenBuildingIds.Add(instanceId);
+            else _hiddenBuildingIds.Remove(instanceId);
+            if (_buildingObjects.TryGetValue(instanceId, out var go) && go != null)
+                go.SetActive(!hidden);
+            UI.RefreshStatus();
+        }
+
+        /// <summary>리렌더 후 숨김 상태 재적용 (RebuildAllVisuals 끝에서 호출).</summary>
+        void ApplyBuildingHiddenState()
+        {
+            foreach (var id in _hiddenBuildingIds)
+                if (_buildingObjects.TryGetValue(id, out var go) && go != null)
+                    go.SetActive(false);
+        }
+
+        /// <summary>층 컷어웨이 활성 여부. 켜면 현재 편집 층보다 위층 오브젝트를 숨겨 아래층이 잘 보인다. (V 키/UI로 토글)</summary>
+        public bool LevelCutawayEnabled { get; private set; } = true;
+
+        public void ToggleLevelCutaway()
+        {
+            LevelCutawayEnabled = !LevelCutawayEnabled;
+            ApplyLevelCutaway();
+            UI?.RefreshStatus();
+        }
+
+        /// <summary>
+        /// 현재 편집 층(CurrentLevel)보다 위층의 타일/벽/프롭/건물/오브젝트를 숨긴다.
+        /// (컷어웨이 비활성 시 모두 표시) 층 변경·리렌더·토글 시 호출.
+        /// </summary>
+        void ApplyLevelCutaway()
+        {
+            if (EditingMap == null) return;
+            bool on = LevelCutawayEnabled;
+
+            // 바닥 타일 (TileRenderer가 층별 키 보유)
+            _tileRenderer.ApplyLevelCutaway(CurrentLevel, on);
+
+            // 벽 (IsWall 타일)
+            foreach (var layer in EditingMap.layers)
+            {
+                foreach (var tile in layer.tiles)
+                {
+                    if (tile.tileDefinition == null || !tile.tileDefinition.IsWall) continue;
+                    if (_wallObjects.TryGetValue(WallKeyFor(tile), out var go) && go != null)
+                    {
+                        // 전체 벽 숨김 토글이 켜져 있으면 무조건 숨김, 아니면 층 컷어웨이 규칙.
+                        bool show = !WallsHidden && (!on || tile.level <= CurrentLevel);
+                        if (go.activeSelf != show) go.SetActive(show);
+                    }
+                }
+            }
+
+            // 프롭
+            foreach (var p in EditingMap.props)
+                if (_propObjects.TryGetValue(p.instanceId, out var go) && go != null)
+                {
+                    bool show = !on || p.level <= CurrentLevel;
+                    if (go.activeSelf != show) go.SetActive(show);
+                }
+
+            // 건물 (내부 보기 등으로 따로 숨긴 건 계속 숨김 유지)
+            foreach (var b in EditingMap.buildings)
+                if (_buildingObjects.TryGetValue(b.instanceId, out var go) && go != null)
+                {
+                    bool show = (!on || b.level <= CurrentLevel) && !_hiddenBuildingIds.Contains(b.instanceId);
+                    if (go.activeSelf != show) go.SetActive(show);
+                }
+
+            // 맵 오브젝트 마커
+            foreach (var o in EditingMap.mapObjects)
+                if (_objectMarkers.TryGetValue(o.instanceId, out var go) && go != null)
+                {
+                    bool show = !on || o.level <= CurrentLevel;
+                    if (go.activeSelf != show) go.SetActive(show);
+                }
+        }
+
+        /// <summary>"내부 보기" 토글 — occludesInterior(윗벽/천장) 파트를 한 번에 켜고 끈다.</summary>
+        public void ToggleInteriorView()
+        {
+            InteriorViewActive = !InteriorViewActive;
+            if (EditingMap != null)
+            {
+                foreach (var b in EditingMap.buildings)
+                {
+                    if (b.buildingDefinition != null && b.buildingDefinition.occludesInterior)
+                        SetBuildingHidden(b.instanceId, InteriorViewActive);
+                }
+            }
+            UI.RefreshStatus();
+        }
+
+        /// <summary>모든 건물을 다시 표시한다.</summary>
+        public void ShowAllBuildings()
+        {
+            InteriorViewActive = false;
+            var ids = new List<string>(_hiddenBuildingIds);
+            foreach (var id in ids)
+                SetBuildingHidden(id, false);
+            UI.RefreshStatus();
+        }
+
+        /// <summary>모든 벽 숨김 토글. 벽으로 쌓은 구조물 내부에 프랍을 놓을 때 사용.
+        /// 벽 가시성의 단일 출처인 ApplyLevelCutaway를 다시 돌려 (층 컷어웨이와 AND) 반영.</summary>
+        public void ToggleWallsHidden()
+        {
+            WallsHidden = !WallsHidden;
+            ApplyLevelCutaway();
+            UI?.RefreshStatus();
+        }
+
         public void RotateSelection(float delta)
         {
             CurrentRotation = ((CurrentRotation + delta) % 24f + 24f) % 24f;
@@ -387,6 +580,149 @@ namespace IsometricMapEditor
 
             // 이동 모드에서 집은 오브젝트의 각도도 실시간 갱신
             if (_moveGrabbed) ApplyMoveRotation();
+        }
+
+        /// <summary>프롭(빌보드 스프라이트)의 좌우 반전 토글. 배치 고스트/이동 중 오브젝트에 즉시 반영.</summary>
+        public void ToggleFlipX()
+        {
+            CurrentFlipX = !CurrentFlipX;
+
+            // 배치 고스트가 프롭이면 반영
+            if (CurrentTool == ToolMode.Prop)
+                PropQuadBuilder.ApplyFlip(_placementGhost, CurrentFlipX);
+
+            // 이동 모드에서 집은 프롭이면 실시간 반영
+            if (_moveGrabbed && _moveType == 2
+                && _propObjects.TryGetValue(_moveInstanceId, out var moveGo))
+                PropQuadBuilder.ApplyFlip(moveGo, CurrentFlipX);
+
+            UI.RefreshStatus();
+        }
+
+        /// <summary>프롭 벽 부착 모드 토글. 고스트/이동 중 프롭에 즉시 반영.</summary>
+        public void ToggleWallMount()
+        {
+            if (CurrentTool != ToolMode.Prop) return;
+            CurrentWallMount = !CurrentWallMount;
+            RefreshPropGhostMount();
+
+            // 이동 모드에서 집은 프롭이면 데이터+비주얼 즉시 반영
+            if (_moveGrabbed && _moveType == 2)
+            {
+                var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                if (p != null) { p.wallMounted = CurrentWallMount; p.mountHeight = CurrentMountHeight; }
+                ApplyMoveRotation();
+                ApplyMovePropMountHeight();
+            }
+            UI.RefreshStatus();
+        }
+
+        /// <summary>벽 부착 높이 조절(±). 벽 부착 모드일 때만 의미 있음.</summary>
+        public void AdjustMountHeight(float delta)
+        {
+            if (CurrentTool != ToolMode.Prop) return;
+            CurrentMountHeight = Mathf.Clamp(CurrentMountHeight + delta, 0f, 10f);
+            RefreshPropGhostMount();
+
+            if (_moveGrabbed && _moveType == 2)
+            {
+                var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                if (p != null) p.mountHeight = CurrentMountHeight;
+                ApplyMovePropMountHeight();
+            }
+            UI.RefreshStatus();
+        }
+
+        /// <summary>지금 접지 오프셋(XYZ)을 보여줄 대상값을 반환. Move로 프롭을 집었으면 그 인스턴스,
+        /// 아니면 프롭 배치 모드의 CurrentGroundOffset. 둘 다 아니면 null.</summary>
+        public Vector3? ActiveGroundOffset
+        {
+            get
+            {
+                if (_moveGrabbed && _moveType == 2)
+                {
+                    var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                    return p != null ? p.groundOffsetOverride : (Vector3?)null;
+                }
+                if (CurrentTool == ToolMode.Prop && SelectedProp != null) return CurrentGroundOffset;
+                return null;
+            }
+        }
+
+        /// <summary>벽 부착 높이를 조절하는 컨텍스트인가. 집은 프롭이 벽 부착 상태이거나,
+        /// 프롭 배치 모드에서 벽 부착이 켜진 경우. PageUp/Down 라우팅에 사용(높이 vs 깊이Z).</summary>
+        public bool IsWallMountContext
+        {
+            get
+            {
+                if (_moveGrabbed && _moveType == 2)
+                {
+                    var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                    return p != null && p.wallMounted;
+                }
+                return CurrentTool == ToolMode.Prop && SelectedProp != null && CurrentWallMount;
+            }
+        }
+
+        /// <summary>접지 오프셋(XYZ) 누적 조정. Move로 프롭을 집었으면 그 인스턴스에, 아니면 다음 배치용
+        /// CurrentGroundOffset에 적용(고스트에 즉시 반영). 데이터+비주얼 즉시 반영.</summary>
+        public void AdjustGroundOffset(Vector3 delta)
+        {
+            if (_moveGrabbed && _moveType == 2)
+            {
+                var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                if (p == null) return;
+                p.groundOffsetOverride += delta;
+                ApplyMovePropMountHeight();
+                UI.RefreshStatus();
+                return;
+            }
+            if (CurrentTool != ToolMode.Prop || SelectedProp == null) return;
+            CurrentGroundOffset += delta;
+            UI.RefreshStatus();
+        }
+
+        /// <summary>접지 오프셋을 0으로 리셋. 집은 프롭이 있으면 그 인스턴스, 아니면 배치용 CurrentGroundOffset.</summary>
+        public void ResetGroundOffset()
+        {
+            if (_moveGrabbed && _moveType == 2)
+            {
+                var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                if (p == null) return;
+                p.groundOffsetOverride = Vector3.zero;
+                ApplyMovePropMountHeight();
+                UI.RefreshStatus();
+                return;
+            }
+            if (CurrentTool != ToolMode.Prop) return;
+            CurrentGroundOffset = Vector3.zero;
+            UI.RefreshStatus();
+        }
+
+        /// <summary>배치 고스트가 프롭이면 벽 부착 회전을 다시 적용 (위치는 UpdateGhostPosition이 갱신).</summary>
+        void RefreshPropGhostMount()
+        {
+            if (CurrentTool == ToolMode.Prop && _placementGhost != null)
+            {
+                float yRot = CurrentRotation * 15f;
+                _placementGhost.transform.rotation = PropQuadBuilder.RootRotation(yRot, CurrentWallMount);
+            }
+        }
+
+        /// <summary>이동 중 집은 프롭의 월드 Y를 벽 부착 높이에 맞춰 갱신.</summary>
+        void ApplyMovePropMountHeight()
+        {
+            if (!_moveGrabbed || _moveType != 2) return;
+            if (!_propObjects.TryGetValue(_moveInstanceId, out var go) || go == null) return;
+            var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+            if (p == null) return;
+            Vector3 basePos = p.GetWorldPosition(EditingMap.gridSettings);
+            basePos.y += p.ElevationY(EditingMap.gridSettings);
+            if (p.wallMounted) basePos += Vector3.up * p.mountHeight;
+            // 스프라이트 프롭은 sortingOrder로 정렬 — 시선축 위치 오프셋 없이 바닥에 그대로(띄움 방지).
+            go.transform.position = basePos;
+            // 접지 보정은 root가 아니라 내부 Content(이미지+콜라이더)에 적용.
+            PropQuadBuilder.ApplyGroundOffset(go, p.GroundOffsetVec);
         }
 
         // --- Placement ---
@@ -416,7 +752,7 @@ namespace IsometricMapEditor
                     PlaceTile(cell);
                     break;
                 case ToolMode.Wall:
-                    PlaceWall(cell);
+                    PlaceWall(cell, worldPos);
                     break;
                 case ToolMode.Prop:
                     PlaceProp(worldPos);
@@ -451,7 +787,8 @@ namespace IsometricMapEditor
                     tileDefinitionId = SelectedTile.tileId,
                     tileDefinition = SelectedTile,
                     rotation = rot,
-                    flipX = false
+                    flipX = false,
+                    level = CurrentLevel
                 };
 
                 EditingMap.PlaceTile(tile, "Ground");
@@ -459,43 +796,114 @@ namespace IsometricMapEditor
             }
         }
 
-        void PlaceWall(Vector2Int cell)
+        void PlaceWall(Vector2Int cell, Vector3 worldPos)
         {
             if (SelectedWall == null) return;
             SaveUndoSnapshot();
 
-            int wallRot = Mathf.RoundToInt(CurrentRotation);
-            var tile = new PlacedTile
+            bool free = !SnapToGrid;
+            PlacedTile tile;
+            string key;
+
+            if (free)
             {
-                gridPosition = cell,
-                tileDefinitionId = SelectedWall.tileId,
-                tileDefinition = SelectedWall,
-                rotation = wallRot,
-                flipX = false
-            };
+                // 자유 배치: 커서 월드 위치 + 자유 Y회전. 모서리 스냅/중복 제거 안 함.
+                tile = new PlacedTile
+                {
+                    gridPosition = cell,
+                    tileDefinitionId = SelectedWall.tileId,
+                    tileDefinition = SelectedWall,
+                    rotation = 0,
+                    flipX = false,
+                    freePlace = true,
+                    worldPosition = worldPos,
+                    yRotation = CurrentRotation * 15f,
+                    id = System.Guid.NewGuid().ToString("N"),
+                    level = CurrentLevel
+                };
+                key = WallKeyFor(tile);
+            }
+            else
+            {
+                // 스냅 배치: 동서남북(N/E/S/W) 4방향. CurrentRotation(15° 단위)을 90°로 양자화.
+                int wallRot = Mathf.RoundToInt(CurrentRotation / 6f) % 4;
+                tile = new PlacedTile
+                {
+                    gridPosition = cell,
+                    tileDefinitionId = SelectedWall.tileId,
+                    tileDefinition = SelectedWall,
+                    rotation = wallRot,
+                    flipX = false,
+                    level = CurrentLevel
+                };
+                key = WallKeyFor(tile);
+                // 같은 모서리에 이미 벽이 있으면 교체
+                if (_wallObjects.TryGetValue(key, out var old))
+                {
+                    Destroy(old);
+                    _wallObjects.Remove(key);
+                }
+            }
 
             EditingMap.PlaceTile(tile, "Walls");
-
-            string key = $"{cell.x}_{cell.y}_E{wallRot}";
-            if (_wallObjects.TryGetValue(key, out var old))
-            {
-                Destroy(old);
-                _wallObjects.Remove(key);
-            }
 
             var wallGo = WallBuilder.CreateWallCube(tile, EditingMap.gridSettings, _wallRoot);
             if (wallGo != null)
                 _wallObjects[key] = wallGo;
         }
 
+        /// <summary>벽 GameObject 딕셔너리 키. 자유 배치는 고유 id, 스냅은 "x_y_L{level}_Er".</summary>
+        static string WallKeyFor(PlacedTile t)
+            => t.freePlace ? $"F{t.id}" : $"{t.gridPosition.x}_{t.gridPosition.y}_L{t.level}_E{t.rotation}";
+
+        /// <summary>
+        /// 주어진 셀들에 이미 겹쳐 있는 프랍/건물 중 가장 앞(최대 sortOrder)을 찾아,
+        /// 새 오브젝트가 그 바로 앞에 오도록 필요한 override 값을 돌려준다. (겹치는 게 없으면 0)
+        /// → 프리뷰에서 "앞"으로 보이던 게 설치 후에도 "앞"이 되도록 z-fighting 타이를 깬다.
+        /// </summary>
+        int ComputeFrontSortOverride(IList<Vector2Int> cells, int defSortingOffset, Vector2Int anchorCell)
+        {
+            if (EditingMap == null || cells == null || cells.Count == 0) return 0;
+            var cellSet = new HashSet<Vector2Int>(cells);
+            int baseSort = IsometricGrid.GetSortingOrder(anchorCell, IsometricGrid.OBJECT_SORT_BASE) + defSortingOffset;
+            int maxOther = int.MinValue;
+
+            foreach (var p in EditingMap.props)
+            {
+                if (p.level != CurrentLevel) continue;
+                if (!cellSet.Contains(p.gridPosition)) continue;
+                int s = IsometricGrid.GetSortingOrder(p.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                        + (p.propDefinition != null ? p.propDefinition.sortingOffset : 0) + p.sortingOffsetOverride;
+                if (s > maxOther) maxOther = s;
+            }
+            foreach (var b in EditingMap.buildings)
+            {
+                if (b.buildingDefinition == null) continue;
+                if (b.level != CurrentLevel) continue;
+                bool overlap = false;
+                foreach (var c in b.buildingDefinition.GetOccupiedCells(b.gridPosition))
+                    if (cellSet.Contains(c)) { overlap = true; break; }
+                if (!overlap) continue;
+                int s = IsometricGrid.GetSortingOrder(b.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                        + b.buildingDefinition.sortingOffset + b.sortingOffsetOverride;
+                if (s > maxOther) maxOther = s;
+            }
+
+            if (maxOther == int.MinValue) return 0; // 겹치는 것 없음
+            return Mathf.Max(0, (maxOther + 1) - baseSort);
+        }
+
         void PlaceProp(Vector3 worldPos)
         {
-            if (SelectedProp == null || SelectedProp.prefab == null) return;
+            if (SelectedProp == null || SelectedProp.sprite == null) return;
             SaveUndoSnapshot();
 
             var cell = IsometricGrid.WorldToGrid(worldPos, EditingMap.gridSettings);
             bool free = !SnapToGrid;
             Vector3 finalPos = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+
+            // 겹친 것 앞으로 보내는 기본 오프셋 + 사용자 상대 보정
+            int autoFront = ComputeFrontSortOverride(new[] { cell }, SelectedProp.sortingOffset, cell);
 
             var prop = new PlacedProp
             {
@@ -508,7 +916,13 @@ namespace IsometricMapEditor
                 worldPosition = finalPos,
                 yRotation = CurrentRotation * 15f,
                 scale = 1f,
-                parentBuildingId = SelectedParentBuildingId
+                flipX = CurrentFlipX,
+                wallMounted = CurrentWallMount,
+                mountHeight = CurrentWallMount ? CurrentMountHeight : 0f,
+                groundOffsetOverride = CurrentGroundOffset,
+                sortingOffsetOverride = autoFront + _placementSortOffset,
+                parentBuildingId = SelectedParentBuildingId,
+                level = CurrentLevel
             };
 
             EditingMap.props.Add(prop);
@@ -543,7 +957,9 @@ namespace IsometricMapEditor
                 freePlace = free,
                 worldPosition = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings),
                 yRotation = CurrentRotation * 15f,
-                scale = 1f
+                scale = 1f,
+                sortingOffsetOverride = ComputeFrontSortOverride(occupied, SelectedBuilding.sortingOffset, cell) + _placementSortOffset,
+                level = CurrentLevel
             };
 
             EditingMap.buildings.Add(building);
@@ -605,6 +1021,7 @@ namespace IsometricMapEditor
                 teleportYRot = SpawnTeleportYRot,
                 triggerStorySceneId = SpawnTriggerStorySceneId,
                 parentBuildingId = SelectedParentBuildingId,
+                level = CurrentLevel,
             };
 
             // Type-specific label
@@ -655,23 +1072,26 @@ namespace IsometricMapEditor
             switch (CurrentTool)
             {
                 case ToolMode.Tile:
-                    // Only erase tiles (not walls, not objects)
-                    EditingMap.RemoveNonWallTilesAt(cell);
-                    _tileRenderer.RemoveTileObject(cell);
+                    // Only erase tiles (not walls, not objects) — 현재 층만
+                    EditingMap.RemoveNonWallTilesAt(cell, CurrentLevel);
+                    _tileRenderer.RemoveTileObject(cell, CurrentLevel);
                     break;
                 case ToolMode.Eraser:
                     // Erase the nearest object of ANY type at that cell
                     EraseNearestAtCell(cell);
                     break;
                 case ToolMode.Wall:
-                    int eraseWallRot = Mathf.RoundToInt(CurrentRotation);
-                    string key = $"{cell.x}_{cell.y}_E{eraseWallRot}";
-                    EditingMap.RemoveWallEdge(cell, eraseWallRot);
+                    // 스냅 모서리 벽(양자화된 방향) 제거 — 현재 층만
+                    int eraseWallRot = Mathf.RoundToInt(CurrentRotation / 6f) % 4;
+                    string key = $"{cell.x}_{cell.y}_L{CurrentLevel}_E{eraseWallRot}";
+                    EditingMap.RemoveWallEdge(cell, eraseWallRot, CurrentLevel);
                     if (_wallObjects.TryGetValue(key, out var wallGo))
                     {
                         Destroy(wallGo);
                         _wallObjects.Remove(key);
                     }
+                    // 이 셀에 배치된 자유 벽도 함께 제거
+                    RemoveFreeWallsAtCell(cell);
                     break;
                 case ToolMode.Prop:
                     RemoveNearestProp(IsometricGrid.GridToWorld(cell, EditingMap.gridSettings));
@@ -687,13 +1107,40 @@ namespace IsometricMapEditor
 
         void RemoveWallsAtCell(Vector2Int cell)
         {
-            for (int r = 0; r < 4; r++)
+            // 모든 층의 스냅 벽 제거
+            for (int lv = 0; lv <= MAX_LEVEL; lv++)
+                for (int r = 0; r < 4; r++)
+                {
+                    string key = $"{cell.x}_{cell.y}_L{lv}_E{r}";
+                    if (_wallObjects.TryGetValue(key, out var go))
+                    {
+                        Destroy(go);
+                        _wallObjects.Remove(key);
+                    }
+                }
+            RemoveFreeWallsAtCell(cell);
+        }
+
+        /// <summary>해당 셀에 배치된(gridPosition 기준) 자유 배치 벽을 데이터+비주얼에서 제거.</summary>
+        void RemoveFreeWallsAtCell(Vector2Int cell)
+        {
+            var ids = new List<string>();
+            foreach (var layer in EditingMap.layers)
+                foreach (var t in layer.tiles)
+                    if (t.freePlace && t.gridPosition == cell
+                        && t.tileDefinition != null && t.tileDefinition.IsWall
+                        && !string.IsNullOrEmpty(t.id))
+                        ids.Add(t.id);
+
+            foreach (var id in ids)
             {
-                string key = $"{cell.x}_{cell.y}_E{r}";
-                if (_wallObjects.TryGetValue(key, out var go))
+                foreach (var layer in EditingMap.layers)
+                    layer.tiles.RemoveAll(t => t.freePlace && t.id == id);
+                string fk = $"F{id}";
+                if (_wallObjects.TryGetValue(fk, out var go))
                 {
                     Destroy(go);
-                    _wallObjects.Remove(key);
+                    _wallObjects.Remove(fk);
                 }
             }
         }
@@ -704,6 +1151,7 @@ namespace IsometricMapEditor
             PlacedProp bestProp = null;
             foreach (var p in EditingMap.props)
             {
+                if (p.level != CurrentLevel) continue;
                 float dist = Vector3.Distance(p.GetWorldPosition(EditingMap.gridSettings), worldPos);
                 if (dist < bestDist)
                 {
@@ -728,6 +1176,7 @@ namespace IsometricMapEditor
                 var b = EditingMap.buildings[i];
                 var def = b.buildingDefinition;
                 if (def == null) continue;
+                if (b.level != CurrentLevel) continue;
 
                 var occupied = def.GetOccupiedCells(b.gridPosition);
                 if (occupied.Contains(cell))
@@ -747,6 +1196,7 @@ namespace IsometricMapEditor
             for (int i = EditingMap.mapObjects.Count - 1; i >= 0; i--)
             {
                 var obj = EditingMap.mapObjects[i];
+                if (obj.level != CurrentLevel) continue;
                 if (obj.gridPosition == cell)
                 {
                     if (_objectMarkers.TryGetValue(obj.instanceId, out var go))
@@ -767,33 +1217,35 @@ namespace IsometricMapEditor
             int bestIndex = -1;
             int bestRotation = 0;
 
-            // Check tiles (non-wall) at cell
+            // 타일은 바닥 레이어 → 다른 모든 것(벽/프랍/건물/오브젝트)이 없을 때만 지운다.
+            // 여기선 존재 여부만 기록하고, 우선순위 판정은 맨 마지막에.
+            bool hasTile = false;
             foreach (var layer in EditingMap.layers)
             {
                 for (int i = 0; i < layer.tiles.Count; i++)
                 {
                     var t = layer.tiles[i];
-                    if (t.gridPosition != cell) continue;
+                    if (t.gridPosition != cell || t.level != CurrentLevel) continue;
                     if (t.tileDefinition != null && t.tileDefinition.IsWall) continue;
-                    // Tiles are exactly at cell center, distance = 0
-                    if (0f < bestDist) { bestDist = 0f; bestType = 0; }
+                    hasTile = true;
                 }
             }
 
-            // Check walls at cell
+            // Check walls at cell (현재 층)
             for (int r = 0; r < 4; r++)
             {
-                string key = $"{cell.x}_{cell.y}_E{r}";
+                string key = $"{cell.x}_{cell.y}_L{CurrentLevel}_E{r}";
                 if (_wallObjects.ContainsKey(key))
                 {
                     if (0f < bestDist) { bestDist = 0f; bestType = 1; bestRotation = r; }
                 }
             }
 
-            // Check props
+            // Check props (현재 층)
             for (int i = 0; i < EditingMap.props.Count; i++)
             {
                 var p = EditingMap.props[i];
+                if (p.level != CurrentLevel) continue;
                 float dist = Vector3.Distance(p.GetWorldPosition(EditingMap.gridSettings), cellWorld);
                 if (dist < bestDist)
                 {
@@ -803,11 +1255,12 @@ namespace IsometricMapEditor
                 }
             }
 
-            // Check buildings
+            // Check buildings (현재 층)
             for (int i = 0; i < EditingMap.buildings.Count; i++)
             {
                 var b = EditingMap.buildings[i];
                 if (b.buildingDefinition == null) continue;
+                if (b.level != CurrentLevel) continue;
                 var occupied = b.buildingDefinition.GetOccupiedCells(b.gridPosition);
                 if (occupied.Contains(cell))
                 {
@@ -821,10 +1274,11 @@ namespace IsometricMapEditor
                 }
             }
 
-            // Check map objects
+            // Check map objects (현재 층)
             for (int i = 0; i < EditingMap.mapObjects.Count; i++)
             {
                 var obj = EditingMap.mapObjects[i];
+                if (obj.level != CurrentLevel) continue;
                 if (obj.gridPosition == cell)
                 {
                     float dist = Vector3.Distance(obj.GetWorldPosition(EditingMap.gridSettings), cellWorld);
@@ -837,16 +1291,19 @@ namespace IsometricMapEditor
                 }
             }
 
+            // 다른 대상이 없을 때만 타일을 지운다 (타일 = 최하위 우선순위)
+            if (bestType == -1 && hasTile) bestType = 0;
+
             // Execute erase for nearest
             switch (bestType)
             {
                 case 0:
-                    EditingMap.RemoveNonWallTilesAt(cell);
-                    _tileRenderer.RemoveTileObject(cell);
+                    EditingMap.RemoveNonWallTilesAt(cell, CurrentLevel);
+                    _tileRenderer.RemoveTileObject(cell, CurrentLevel);
                     break;
                 case 1:
-                    string wKey = $"{cell.x}_{cell.y}_E{bestRotation}";
-                    EditingMap.RemoveWallEdge(cell, bestRotation);
+                    string wKey = $"{cell.x}_{cell.y}_L{CurrentLevel}_E{bestRotation}";
+                    EditingMap.RemoveWallEdge(cell, bestRotation, CurrentLevel);
                     if (_wallObjects.TryGetValue(wKey, out var wallGo))
                     {
                         Destroy(wallGo);
@@ -900,10 +1357,11 @@ namespace IsometricMapEditor
             string info = null;
             string targetId = null;
 
-            // Props
+            // Props (현재 층)
             for (int i = 0; i < EditingMap.props.Count; i++)
             {
                 var p = EditingMap.props[i];
+                if (p.level != CurrentLevel) continue;
                 float dist = Vector3.Distance(p.GetWorldPosition(EditingMap.gridSettings), cellWorld);
                 if (dist < bestDist)
                 {
@@ -914,11 +1372,12 @@ namespace IsometricMapEditor
                     info = $"프롭: {name}";
                 }
             }
-            // Buildings
+            // Buildings (현재 층)
             for (int i = 0; i < EditingMap.buildings.Count; i++)
             {
                 var b = EditingMap.buildings[i];
                 if (b.buildingDefinition == null) continue;
+                if (b.level != CurrentLevel) continue;
                 var occupied = b.buildingDefinition.GetOccupiedCells(b.gridPosition);
                 if (occupied.Contains(cell))
                 {
@@ -932,10 +1391,11 @@ namespace IsometricMapEditor
                     }
                 }
             }
-            // Map Objects
+            // Map Objects (현재 층)
             for (int i = 0; i < EditingMap.mapObjects.Count; i++)
             {
                 var obj = EditingMap.mapObjects[i];
+                if (obj.level != CurrentLevel) continue;
                 float dist = Vector3.Distance(obj.GetWorldPosition(EditingMap.gridSettings), cellWorld);
                 if (dist < bestDist)
                 {
@@ -945,16 +1405,24 @@ namespace IsometricMapEditor
                     info = $"{obj.objectType}: {obj.label}";
                 }
             }
-            // Walls
+            // Walls (스냅 모서리) — 현재 층
             for (int r = 0; r < 4; r++)
             {
-                string wKey = $"{cell.x}_{cell.y}_E{r}";
+                string wKey = $"{cell.x}_{cell.y}_L{CurrentLevel}_E{r}";
                 if (_wallObjects.ContainsKey(wKey) && 0f < bestDist)
                 {
                     bestDist = 0f; bestType = 1; bestRotation = r;
                     targetId = wKey;
                     info = "벽";
                 }
+            }
+            // 자유 배치 벽 (커서 근처 월드 거리)
+            var mFreeWall = FindFreeWallNear(worldPos, EditingMap.gridSettings.tileSize * 0.6f, out var mFreeKey);
+            if (mFreeWall != null && bestDist > 0f)
+            {
+                bestDist = 0f; bestType = 1; bestRotation = 0;
+                targetId = mFreeKey;
+                info = "벽(자유)";
             }
 
             if (targetId == _moveHoverInstanceId) { MoveHoverInfo = info; return; }
@@ -975,18 +1443,20 @@ namespace IsometricMapEditor
                 foreach (var r in targetGo.GetComponentsInChildren<Renderer>())
                 {
                     if (r.material == null) continue;
-                    _moveHoverRenderers.Add((r, r.material.color));
-                    r.material.color = new Color(0.2f, 1f, 0.3f, 0.9f);
+                    string prop = GetColorPropName(r.material);
+                    if (prop == null) continue;
+                    _moveHoverRenderers.Add((r, prop, r.material.GetColor(prop)));
+                    r.material.SetColor(prop, new Color(0.2f, 1f, 0.3f, 0.9f));
                 }
             }
         }
 
         public void ClearMoveHover()
         {
-            foreach (var (rend, orig) in _moveHoverRenderers)
+            foreach (var (rend, prop, orig) in _moveHoverRenderers)
             {
-                if (rend != null && rend.material != null)
-                    rend.material.color = orig;
+                if (rend != null && rend.material != null && rend.material.HasProperty(prop))
+                    rend.material.SetColor(prop, orig);
             }
             _moveHoverRenderers.Clear();
             _moveHoverInstanceId = null;
@@ -1019,7 +1489,13 @@ namespace IsometricMapEditor
             {
                 case 2: // Prop
                     var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
-                    if (p != null) CurrentRotation = p.yRotation / 15f;
+                    if (p != null)
+                    {
+                        CurrentRotation = p.yRotation / 15f;
+                        CurrentFlipX = p.flipX;
+                        CurrentWallMount = p.wallMounted;
+                        if (p.wallMounted && p.mountHeight > 0f) CurrentMountHeight = p.mountHeight;
+                    }
                     break;
                 case 3: // Building
                     var b = EditingMap.buildings.Find(x => x.instanceId == _moveInstanceId);
@@ -1030,13 +1506,22 @@ namespace IsometricMapEditor
                     if (o != null) CurrentRotation = o.yRotation / 15f;
                     break;
                 case 1: // Wall
-                    _moveWallRotation = 0;
-                    foreach (var layer in EditingMap.layers)
-                        foreach (var t in layer.tiles)
-                            if (t.gridPosition == cell && t.tileDefinition != null && t.tileDefinition.IsWall)
-                            { _moveWallRotation = t.rotation; break; }
-                    CurrentRotation = _moveWallRotation;
+                {
+                    var wt = FindWallTileByKey(_moveInstanceId);
+                    if (wt != null && wt.freePlace)
+                    {
+                        // 자유 벽: 자유 Y회전 복원 (15° 단위 CurrentRotation으로 환산)
+                        _moveWallRotation = 0;
+                        CurrentRotation = wt.yRotation / 15f;
+                    }
+                    else
+                    {
+                        // 스냅 벽: 모서리 회전(0~3)을 90°(6스텝) 단위 CurrentRotation으로 환산
+                        _moveWallRotation = wt != null ? wt.rotation : 0;
+                        CurrentRotation = _moveWallRotation * 6f;
+                    }
                     break;
+                }
             }
 
             ClearMoveHover();
@@ -1064,17 +1549,66 @@ namespace IsometricMapEditor
 
             if (go != null)
             {
+                // 이동 중에도 해당 항목의 층(level) 높이를 유지한다.
+                float levelElev = 0f;
+                switch (_moveType)
+                {
+                    case 2: { var mp = EditingMap.props.Find(x => x.instanceId == _moveInstanceId); if (mp != null) levelElev = mp.ElevationY(EditingMap.gridSettings); break; }
+                    case 3: { var mb = EditingMap.buildings.Find(x => x.instanceId == _moveInstanceId); if (mb != null) levelElev = mb.ElevationY(EditingMap.gridSettings); break; }
+                    case 4: { var mo = EditingMap.mapObjects.Find(x => x.instanceId == _moveInstanceId); if (mo != null) levelElev = mo.ElevationY(EditingMap.gridSettings); break; }
+                }
                 float yOffset = _moveType == 1
                     ? go.transform.position.y  // 벽은 Y축 유지
-                    : (_moveType == 4 && go.transform.childCount > 0 ? go.transform.position.y : 0f);
-                go.transform.position = new Vector3(finalPos.x, _moveType == 1 ? yOffset : 0f, finalPos.z);
+                    : (_moveType == 4 && go.transform.childCount > 0 ? go.transform.position.y : levelElev);
+                // 벽 부착 프롭은 드래그 중에도 높이 유지 + 층 높이
+                float propY = levelElev;
+                Vector3 propOffset = Vector3.zero; // 프롭 접지 보정(내부 Content에 적용)
+                if (_moveType == 2)
+                {
+                    var mp = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                    if (mp != null)
+                    {
+                        if (mp.wallMounted) propY += mp.mountHeight;
+                        propOffset = mp.GroundOffsetVec;
+                    }
+                }
+                go.transform.position = new Vector3(finalPos.x, _moveType == 1 ? yOffset : propY, finalPos.z);
+                // 접지 보정은 root가 아니라 내부 Content(이미지+콜라이더)에 적용 — root는 셀 바닥점 유지.
+                if (_moveType == 2) PropQuadBuilder.ApplyGroundOffset(go, propOffset);
 
                 // 벽은 높이 보정
                 if (_moveType == 1)
                 {
-                    var wallChild = go.transform.Find("WallVisual") ?? (go.transform.childCount > 0 ? go.transform.GetChild(0) : null);
+                    var wallChild = go.transform.Find("WallCube") ?? go.transform.Find("WallVisual")
+                        ?? (go.transform.childCount > 0 ? go.transform.GetChild(0) : null);
                     if (wallChild != null)
-                        go.transform.position = new Vector3(finalPos.x, wallChild.localScale.y * 0.5f, finalPos.z);
+                    {
+                        var wtTile = FindWallTileByKey(_moveInstanceId);
+                        float wallLevelY = wtTile != null ? wtTile.level * EditingMap.gridSettings.levelHeight : 0f;
+                        go.transform.position = new Vector3(finalPos.x, wallLevelY + wallChild.localScale.y * 0.5f, finalPos.z);
+                    }
+                }
+
+                // 프랍/건물: 그림 순서(정렬)를 실시간 반영 — sortingOrder + 시선축 깊이 오프셋
+                if (_moveType == 2 || _moveType == 3)
+                {
+                    int defOffset = 0, overrideOffset = 0;
+                    if (_moveType == 2)
+                    {
+                        var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                        if (p != null) { defOffset = p.propDefinition != null ? p.propDefinition.sortingOffset : 0; overrideOffset = p.sortingOffsetOverride; }
+                    }
+                    else
+                    {
+                        var b = EditingMap.buildings.Find(x => x.instanceId == _moveInstanceId);
+                        if (b != null) { defOffset = b.buildingDefinition != null ? b.buildingDefinition.sortingOffset : 0; overrideOffset = b.sortingOffsetOverride; }
+                    }
+                    int sortOrder = IsometricGrid.GetSortingOrder(cell, IsometricGrid.OBJECT_SORT_BASE) + defOffset + overrideOffset;
+                    foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>()) sr.sortingOrder = sortOrder;
+                    foreach (var mr in go.GetComponentsInChildren<MeshRenderer>()) mr.sortingOrder = sortOrder;
+                    // 불투명 메시(건물)만 시선축 깊이 오프셋. 스프라이트 프롭은 sortingOrder로 정렬돼 오프셋 불필요(띄움 방지).
+                    if (_moveType == 3)
+                        go.transform.position += IsometricGrid.SortDepthOffset(sortOrder);
                 }
             }
         }
@@ -1087,6 +1621,7 @@ namespace IsometricMapEditor
             GameObject go = null;
             switch (_moveType)
             {
+                case 1: _wallObjects.TryGetValue(_moveInstanceId, out go); break;
                 case 2: _propObjects.TryGetValue(_moveInstanceId, out go); break;
                 case 3: _buildingObjects.TryGetValue(_moveInstanceId, out go); break;
                 case 4: _objectMarkers.TryGetValue(_moveInstanceId, out go); break;
@@ -1096,15 +1631,22 @@ namespace IsometricMapEditor
             // 프리팹 원본 회전에 yRotation을 곱함
             switch (_moveType)
             {
-                case 2:
-                    var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
-                    if (p?.propDefinition?.prefab != null)
-                    {
-                        var baseRot = p.propDefinition.prefab.transform.rotation;
-                        go.transform.rotation = Quaternion.Euler(0, yRot, 0) * baseRot;
-                    }
-                    else go.transform.rotation = Quaternion.Euler(0, yRot, 0);
+                case 1:
+                {
+                    // 자유 벽만 이동 중 회전 반영 (스냅 벽은 모서리 고정).
+                    var wt = FindWallTileByKey(_moveInstanceId);
+                    if (wt != null && wt.freePlace)
+                        go.transform.rotation = Quaternion.Euler(0, yRot, 0);
                     break;
+                }
+                case 2:
+                {
+                    // 프롭 회전: 벽 부착이면 빌보드 끄고 yaw만, 아니면 빌보드×yaw.
+                    var mp = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                    bool mounted = mp != null ? mp.wallMounted : CurrentWallMount;
+                    go.transform.rotation = PropQuadBuilder.RootRotation(yRot, mounted);
+                    break;
+                }
                 case 3:
                     var b = EditingMap.buildings.Find(x => x.instanceId == _moveInstanceId);
                     if (b?.buildingDefinition?.prefab != null)
@@ -1140,6 +1682,9 @@ namespace IsometricMapEditor
                         p.freePlace = !SnapToGrid;
                         p.yRotation = yRot;
                         p.rotation = Mathf.RoundToInt(CurrentRotation);
+                        p.flipX = CurrentFlipX;
+                        p.wallMounted = CurrentWallMount;
+                        p.mountHeight = CurrentWallMount ? CurrentMountHeight : 0f;
                     }
                     break;
                 }
@@ -1170,7 +1715,7 @@ namespace IsometricMapEditor
                 }
                 case 1: // Wall — 원래 위치의 벽 데이터 삭제 후 새 위치에 재배치
                 {
-                    // 원래 벽 데이터 찾아서 제거
+                    // 원래 벽 데이터 찾아서 제거 (스냅/자유 키 모두 지원)
                     PlacedTile wallTile = null;
                     string layerName = null;
                     foreach (var layer in EditingMap.layers)
@@ -1178,16 +1723,13 @@ namespace IsometricMapEditor
                         for (int i = layer.tiles.Count - 1; i >= 0; i--)
                         {
                             var t = layer.tiles[i];
-                            if (t.tileDefinition != null && t.tileDefinition.IsWall)
+                            if (t.tileDefinition != null && t.tileDefinition.IsWall
+                                && WallKeyFor(t) == _moveInstanceId)
                             {
-                                string wKey = $"{t.gridPosition.x}_{t.gridPosition.y}_E{t.rotation}";
-                                if (wKey == _moveInstanceId)
-                                {
-                                    wallTile = t;
-                                    layerName = layer.layerName;
-                                    layer.tiles.RemoveAt(i);
-                                    break;
-                                }
+                                wallTile = t;
+                                layerName = layer.layerName;
+                                layer.tiles.RemoveAt(i);
+                                break;
                             }
                         }
                         if (wallTile != null) break;
@@ -1202,16 +1744,28 @@ namespace IsometricMapEditor
 
                     if (wallTile != null)
                     {
-                        int newRot = Mathf.RoundToInt(CurrentRotation) % 4;
-                        wallTile.gridPosition = cell;
-                        wallTile.rotation = newRot;
+                        if (!SnapToGrid)
+                        {
+                            // 자유 배치: 월드 위치 + 자유 Y회전
+                            wallTile.freePlace = true;
+                            wallTile.gridPosition = cell;
+                            wallTile.worldPosition = finalPos;
+                            wallTile.yRotation = yRot;
+                            wallTile.rotation = 0;
+                            if (string.IsNullOrEmpty(wallTile.id))
+                                wallTile.id = System.Guid.NewGuid().ToString("N");
+                        }
+                        else
+                        {
+                            // 스냅 배치: 셀 모서리 (동서남북)
+                            wallTile.freePlace = false;
+                            wallTile.gridPosition = cell;
+                            wallTile.rotation = Mathf.RoundToInt(CurrentRotation / 6f) % 4;
+                        }
                         EditingMap.PlaceTile(wallTile, layerName ?? "Walls");
                         var wallGo = WallBuilder.CreateWallCube(wallTile, EditingMap.gridSettings, _wallRoot);
                         if (wallGo != null)
-                        {
-                            string newKey = $"{cell.x}_{cell.y}_E{newRot}";
-                            _wallObjects[newKey] = wallGo;
-                        }
+                            _wallObjects[WallKeyFor(wallTile)] = wallGo;
                     }
                     break;
                 }
@@ -1345,53 +1899,49 @@ namespace IsometricMapEditor
         }
 
         /// <summary>
-        /// 현재 마우스가 가리키는(호버) 프랍/건물의 정렬 오프셋을 미세조정한다. ([ / ] 키)
-        /// 스프라이트는 sortingOrder 가 즉시 먹고, 불투명 3D 메시는 깊이 정렬이라 효과가 없을 수 있다.
+        /// 그림 순서(정렬 오프셋)를 조절한다. ([ / ] 키, 화면 -/+ 버튼)
+        ///  - 이동 모드에서 프랍/건물을 집은 상태: 그 오브젝트의 오프셋을 즉시 변경(미리보기 반영)
+        ///  - 배치(Prop/Building) 모드: 다음에 놓을 오브젝트의 오프셋(_placementSortOffset)을 변경
+        /// 불투명 3D 메시는 시선축 깊이 오프셋으로 변환되어 같은 셀에 겹친 조각의 앞뒤가 바뀐다.
         /// </summary>
         public void NudgeHoverSortOffset(int delta)
         {
-            if (EditingMap == null || string.IsNullOrEmpty(SortTargetId)) return;
+            if (EditingMap == null) return;
 
-            // 프랍
-            for (int i = 0; i < EditingMap.props.Count; i++)
+            // 1) 이동 모드: 집은 프랍/건물의 오프셋을 직접 변경
+            if (_moveGrabbed && _moveType == 2)
             {
-                var p = EditingMap.props[i];
-                if (p.instanceId != SortTargetId) continue;
-
-                p.sortingOffsetOverride += delta;
-
-                if (_propObjects.TryGetValue(p.instanceId, out var old) && old != null)
-                    Destroy(old);
-                _propObjects.Remove(p.instanceId);
-                SpawnPropVisual(p);
-
-                UI?.RefreshStatus();
+                var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                if (p != null)
+                {
+                    p.sortingOffsetOverride += delta;
+                    UI?.RefreshStatus();
+                }
+                return;
+            }
+            if (_moveGrabbed && _moveType == 3)
+            {
+                var b = EditingMap.buildings.Find(x => x.instanceId == _moveInstanceId);
+                if (b != null)
+                {
+                    b.sortingOffsetOverride += delta;
+                    UI?.RefreshStatus();
+                }
                 return;
             }
 
-            // 건물
-            for (int i = 0; i < EditingMap.buildings.Count; i++)
+            // 2) 배치 모드: 다음에 놓을 오브젝트의 오프셋만 조정
+            if (IsPlacementSortTarget)
             {
-                var b = EditingMap.buildings[i];
-                if (b.instanceId != SortTargetId) continue;
-
-                b.sortingOffsetOverride += delta;
-
-                if (_buildingObjects.TryGetValue(b.instanceId, out var old) && old != null)
-                    Destroy(old);
-                _buildingObjects.Remove(b.instanceId);
-                SpawnBuildingVisual(b);
-
+                _placementSortOffset += delta;
                 UI?.RefreshStatus();
-                return;
             }
         }
 
-        /// <summary>정렬 조절 대상 해제 (X 버튼)</summary>
+        /// <summary>배치용 정렬 오프셋 초기화 (X 버튼)</summary>
         public void ClearSortTarget()
         {
-            SortTargetId = null;
-            SortTargetLabel = null;
+            _placementSortOffset = 0;
             UI?.RefreshStatus();
         }
 
@@ -1408,22 +1958,25 @@ namespace IsometricMapEditor
             int bestRotation = 0;
             string info = null;
 
-            // Check tiles
+            // 타일은 바닥 레이어 → 최하위 우선순위. 존재 여부/표시명만 기록.
+            bool hasTile = false;
+            string tileInfo = null;
             foreach (var layer in EditingMap.layers)
             {
                 for (int i = 0; i < layer.tiles.Count; i++)
                 {
                     var t = layer.tiles[i];
-                    if (t.gridPosition != cell) continue;
+                    if (t.gridPosition != cell || t.level != CurrentLevel) continue;
                     if (t.tileDefinition != null && t.tileDefinition.IsWall) continue;
-                    if (0f < bestDist) { bestDist = 0f; bestType = 0; info = $"타일: {t.tileDefinitionId}"; }
+                    hasTile = true;
+                    if (tileInfo == null) tileInfo = $"타일: {t.tileDefinitionId}";
                 }
             }
 
-            // Check walls
+            // Check walls — 현재 층
             for (int r = 0; r < 4; r++)
             {
-                string key = $"{cell.x}_{cell.y}_E{r}";
+                string key = $"{cell.x}_{cell.y}_L{CurrentLevel}_E{r}";
                 if (_wallObjects.ContainsKey(key))
                 {
                     if (0f < bestDist)
@@ -1432,17 +1985,18 @@ namespace IsometricMapEditor
                         // find wall tile definition
                         foreach (var layer in EditingMap.layers)
                             foreach (var t in layer.tiles)
-                                if (t.gridPosition == cell && t.rotation == r && t.tileDefinition != null && t.tileDefinition.IsWall)
+                                if (t.gridPosition == cell && t.level == CurrentLevel && t.rotation == r && t.tileDefinition != null && t.tileDefinition.IsWall)
                                     info = $"벽: {t.tileDefinitionId}";
                         if (info == null) info = "벽";
                     }
                 }
             }
 
-            // Check props
+            // Check props (현재 층)
             for (int i = 0; i < EditingMap.props.Count; i++)
             {
                 var p = EditingMap.props[i];
+                if (p.level != CurrentLevel) continue;
                 float dist = Vector3.Distance(p.GetWorldPosition(EditingMap.gridSettings), cellWorld);
                 if (dist < bestDist)
                 {
@@ -1454,11 +2008,12 @@ namespace IsometricMapEditor
                 }
             }
 
-            // Check buildings
+            // Check buildings (현재 층)
             for (int i = 0; i < EditingMap.buildings.Count; i++)
             {
                 var b = EditingMap.buildings[i];
                 if (b.buildingDefinition == null) continue;
+                if (b.level != CurrentLevel) continue;
                 var occupied = b.buildingDefinition.GetOccupiedCells(b.gridPosition);
                 if (occupied.Contains(cell))
                 {
@@ -1474,10 +2029,11 @@ namespace IsometricMapEditor
                 }
             }
 
-            // Check map objects
+            // Check map objects (현재 층)
             for (int i = 0; i < EditingMap.mapObjects.Count; i++)
             {
                 var obj = EditingMap.mapObjects[i];
+                if (obj.level != CurrentLevel) continue;
                 if (obj.gridPosition == cell)
                 {
                     float dist = Vector3.Distance(obj.GetWorldPosition(EditingMap.gridSettings), cellWorld);
@@ -1491,6 +2047,9 @@ namespace IsometricMapEditor
                 }
             }
 
+            // 다른 대상이 없을 때만 타일을 하이라이트 (타일 = 최하위 우선순위)
+            if (bestType == -1 && hasTile) { bestType = 0; info = tileInfo; }
+
             // Determine the target instanceId for highlighting
             string targetId = null;
             switch (bestType)
@@ -1498,17 +2057,6 @@ namespace IsometricMapEditor
                 case 2: targetId = EditingMap.props[bestIndex].instanceId; break;
                 case 3: targetId = EditingMap.buildings[bestIndex].instanceId; break;
                 case 4: targetId = EditingMap.mapObjects[bestIndex].instanceId; break;
-            }
-
-            // 프랍/건물을 가리켰으면 정렬 조절 대상으로 고정 (UI 클릭하러 가도 유지)
-            if (bestType == 2 || bestType == 3)
-            {
-                if (SortTargetId != targetId)
-                {
-                    SortTargetId = targetId;
-                    SortTargetLabel = info;
-                    UI?.RefreshStatus();
-                }
             }
 
             // Skip if same target
@@ -1528,7 +2076,7 @@ namespace IsometricMapEditor
             }
             else if (bestType == 1)
             {
-                string wKey = $"{cell.x}_{cell.y}_E{bestRotation}";
+                string wKey = $"{cell.x}_{cell.y}_L{CurrentLevel}_E{bestRotation}";
                 _wallObjects.TryGetValue(wKey, out targetGo);
             }
 
@@ -1538,18 +2086,20 @@ namespace IsometricMapEditor
                 foreach (var r in renderers)
                 {
                     if (r.material == null) continue;
-                    _eraseHoverRenderers.Add((r, r.material.color));
-                    r.material.color = new Color(1f, 0.25f, 0.25f, 0.9f);
+                    string prop = GetColorPropName(r.material);
+                    if (prop == null) continue; // 색 프로퍼티 없는 셰이더는 건너뜀
+                    _eraseHoverRenderers.Add((r, prop, r.material.GetColor(prop)));
+                    r.material.SetColor(prop, new Color(1f, 0.25f, 0.25f, 0.9f));
                 }
             }
         }
 
         public void ClearEraseHover()
         {
-            foreach (var (rend, orig) in _eraseHoverRenderers)
+            foreach (var (rend, prop, orig) in _eraseHoverRenderers)
             {
-                if (rend != null && rend.material != null)
-                    rend.material.color = orig;
+                if (rend != null && rend.material != null && rend.material.HasProperty(prop))
+                    rend.material.SetColor(prop, orig);
             }
             _eraseHoverRenderers.Clear();
             _eraseHoverInstanceId = null;
@@ -1575,10 +2125,11 @@ namespace IsometricMapEditor
             string info = null;
             int targetType = -1; // 0=prop, 1=building, 2=mapObject
 
-            // Props
+            // Props (현재 층)
             for (int i = 0; i < EditingMap.props.Count; i++)
             {
                 var p = EditingMap.props[i];
+                if (p.level != CurrentLevel) continue;
                 float dist = Vector3.Distance(p.GetWorldPosition(EditingMap.gridSettings), cellWorld);
                 if (dist < bestDist)
                 {
@@ -1590,10 +2141,11 @@ namespace IsometricMapEditor
                 }
             }
 
-            // Buildings
+            // Buildings (현재 층)
             for (int i = 0; i < EditingMap.buildings.Count; i++)
             {
                 var b = EditingMap.buildings[i];
+                if (b.level != CurrentLevel) continue;
                 float dist = Vector3.Distance(b.GetWorldPosition(EditingMap.gridSettings), cellWorld);
                 if (dist < bestDist)
                 {
@@ -1603,6 +2155,32 @@ namespace IsometricMapEditor
                     info = $"건물: {name}  (x{b.scale:F2})";
                     targetType = 1;
                 }
+            }
+
+            // Walls (호버한 셀의 모서리 벽) — 비율 배율로 크기 조절 (현재 층)
+            for (int r = 0; r < 4; r++)
+            {
+                string wKey = $"{cell.x}_{cell.y}_L{CurrentLevel}_E{r}";
+                if (_wallObjects.ContainsKey(wKey) && 0f < bestDist)
+                {
+                    bestDist = 0f;
+                    targetId = wKey;
+                    var wt = FindWallTile(cell, r, CurrentLevel);
+                    float ws = wt != null ? (wt.wallScale <= 0f ? 1f : wt.wallScale) : 1f;
+                    info = $"벽  (x{ws:F2})";
+                    targetType = 3;
+                }
+            }
+
+            // 자유 배치 벽 — 커서 근처(월드 거리)로 검출
+            var freeWall = FindFreeWallNear(worldPos, EditingMap.gridSettings.tileSize * 0.6f, out var freeKey);
+            if (freeWall != null && bestDist > 0f)
+            {
+                bestDist = 0f;
+                targetId = freeKey;
+                float ws = freeWall.wallScale <= 0f ? 1f : freeWall.wallScale;
+                info = $"벽(자유)  (x{ws:F2})";
+                targetType = 3;
             }
 
             // MapObject markers (sphere markers have no meaningful scale, skip for now)
@@ -1617,6 +2195,7 @@ namespace IsometricMapEditor
             GameObject targetGo = null;
             if (targetType == 0 && targetId != null) _propObjects.TryGetValue(targetId, out targetGo);
             else if (targetType == 1 && targetId != null) _buildingObjects.TryGetValue(targetId, out targetGo);
+            else if (targetType == 3 && targetId != null) _wallObjects.TryGetValue(targetId, out targetGo);
 
             if (targetGo != null)
             {
@@ -1624,18 +2203,20 @@ namespace IsometricMapEditor
                 foreach (var r in renderers)
                 {
                     if (r.material == null) continue;
-                    _resizeHoverRenderers.Add((r, r.material.color));
-                    r.material.color = new Color(0.3f, 0.6f, 1f, 0.9f);
+                    string prop = GetColorPropName(r.material);
+                    if (prop == null) continue;
+                    _resizeHoverRenderers.Add((r, prop, r.material.GetColor(prop)));
+                    r.material.SetColor(prop, new Color(0.3f, 0.6f, 1f, 0.9f));
                 }
             }
         }
 
         public void ClearResizeHover()
         {
-            foreach (var (rend, orig) in _resizeHoverRenderers)
+            foreach (var (rend, prop, orig) in _resizeHoverRenderers)
             {
-                if (rend != null && rend.material != null)
-                    rend.material.color = orig;
+                if (rend != null && rend.material != null && rend.material.HasProperty(prop))
+                    rend.material.SetColor(prop, orig);
             }
             _resizeHoverRenderers.Clear();
             _resizeHoverInstanceId = null;
@@ -1673,6 +2254,102 @@ namespace IsometricMapEditor
                     return;
                 }
             }
+
+            // Walls — 비율 배율(길이+높이, 두께 제외)로 크기 조절
+            if (_wallObjects.TryGetValue(_resizeHoverInstanceId, out var wallGo))
+            {
+                var wt = FindWallTileByKey(_resizeHoverInstanceId);
+                if (wt != null)
+                {
+                    float cur = wt.wallScale <= 0f ? 1f : wt.wallScale;
+                    wt.wallScale = Mathf.Max(0.1f, cur + delta);
+                    ApplyWallScaleToGo(wallGo, wt);
+                    ResizeHoverInfo = (wt.freePlace ? "벽(자유)" : "벽") + $"  (x{wt.wallScale:F2})";
+                }
+            }
+        }
+
+        /// <summary>벽 키 "x_y_Er" → (셀, 회전) 파싱.</summary>
+        // 스냅 벽 키 형식: "x_y_L{level}_E{rot}"
+        static (Vector2Int cell, int rot, int level) ParseWallKey(string key)
+        {
+            var parts = key.Split('_');
+            int x = int.Parse(parts[0]);
+            int y = int.Parse(parts[1]);
+            int level = int.Parse(parts[2].Substring(1)); // 'L' 제거
+            int rot = int.Parse(parts[3].Substring(1));    // 'E' 제거
+            return (new Vector2Int(x, y), rot, level);
+        }
+
+        /// <summary>벽 딕셔너리 키로 PlacedTile을 찾는다. 자유 벽("Fid")은 id로, 스냅 벽은 셀+회전으로.</summary>
+        PlacedTile FindWallTileByKey(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return null;
+            if (key.Length > 0 && key[0] == 'F')
+            {
+                string id = key.Substring(1);
+                foreach (var layer in EditingMap.layers)
+                    foreach (var t in layer.tiles)
+                        if (t.freePlace && t.id == id
+                            && t.tileDefinition != null && t.tileDefinition.IsWall)
+                            return t;
+                return null;
+            }
+            var (cell, rot, level) = ParseWallKey(key);
+            return FindWallTile(cell, rot, level);
+        }
+
+        /// <summary>커서 월드 위치(XZ)에서 maxDist 안의 가장 가까운 자유 배치 벽을 찾는다.</summary>
+        PlacedTile FindFreeWallNear(Vector3 worldPos, float maxDist, out string key)
+        {
+            key = null;
+            PlacedTile best = null;
+            float bestD = maxDist;
+            var cursor = new Vector2(worldPos.x, worldPos.z);
+            foreach (var layer in EditingMap.layers)
+                foreach (var t in layer.tiles)
+                {
+                    if (!t.freePlace || t.tileDefinition == null || !t.tileDefinition.IsWall) continue;
+                    float d = Vector2.Distance(cursor, new Vector2(t.worldPosition.x, t.worldPosition.z));
+                    if (d < bestD) { bestD = d; best = t; key = WallKeyFor(t); }
+                }
+            return best;
+        }
+
+        /// <summary>주어진 셀+회전+층의 (스냅) 벽 PlacedTile을 모든 레이어에서 찾는다.</summary>
+        PlacedTile FindWallTile(Vector2Int cell, int rot, int level = 0)
+        {
+            foreach (var layer in EditingMap.layers)
+                foreach (var t in layer.tiles)
+                    if (!t.freePlace && t.gridPosition == cell && t.rotation == rot && t.level == level
+                        && t.tileDefinition != null && t.tileDefinition.IsWall)
+                        return t;
+            return null;
+        }
+
+        /// <summary>벽 GameObject에 wallScale을 즉시 반영 (자식 큐브 스케일 + 바닥 정렬 Y). WallBuilder와 동일 공식.</summary>
+        void ApplyWallScaleToGo(GameObject go, PlacedTile tile)
+        {
+            var def = tile.tileDefinition;
+            if (def == null || go == null) return;
+
+            float floorY = tile.level * EditingMap.gridSettings.levelHeight;
+            float tileSize = EditingMap.gridSettings.tileSize;
+            float thickness = def.wallThickness;
+            float s = tile.wallScale <= 0f ? 1f : tile.wallScale;
+            float scaledHeight = def.wallHeight * s;
+            float baseLength = def.wallLength > 0f ? def.wallLength : tileSize;
+            float scaledLength = baseLength * s;
+
+            var child = go.transform.Find("WallCube")
+                ?? (go.transform.childCount > 0 ? go.transform.GetChild(0) : null);
+            if (child != null)
+                child.localScale = (tile.freePlace || tile.rotation == 0 || tile.rotation == 2)
+                    ? new Vector3(scaledLength, scaledHeight, thickness)
+                    : new Vector3(thickness, scaledHeight, scaledLength);
+
+            Vector3 p = go.transform.position;
+            go.transform.position = new Vector3(p.x, floorY + scaledHeight * 0.5f, p.z);
         }
 
         /// <summary>MapObjectType → InteractableObject.InteractType 매핑</summary>
@@ -1703,15 +2380,24 @@ namespace IsometricMapEditor
 
         void SpawnPropVisual(PlacedProp prop)
         {
-            if (prop.propDefinition?.prefab == null) return;
+            var def = prop.propDefinition;
+            if (def == null) return;
+            // 프롭은 빌보드 쿼드 전용. 스프라이트가 없으면 비주얼이 없으므로 스킵.
+            if (!PropQuadBuilder.UsesQuad(def)) return;
 
-            var go = Instantiate(prop.propDefinition.prefab, _propRoot);
+            // 스프라이트 프롭은 빌보드 쿼드로 생성. (에디터 미리보기에선 nav 콜라이더 불필요)
+            var go = PropQuadBuilder.Build(def, EditingMap.gridSettings, addNavCollider: false);
+            go.transform.SetParent(_propRoot);
             go.name = $"Prop_{prop.propDefinitionId}_{prop.instanceId}";
-            go.transform.position = prop.GetWorldPosition(EditingMap.gridSettings);
-            // Y회전을 프리팹 Root 회전에 곱함 (Root의 카메라 맞춤 회전 유지)
-            if (Mathf.Abs(prop.yRotation) > 0.01f)
-                go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0) * go.transform.rotation;
+            Vector3 basePos = prop.GetWorldPosition(EditingMap.gridSettings);
+            basePos.y += prop.ElevationY(EditingMap.gridSettings);
+            if (prop.wallMounted) basePos += Vector3.up * prop.mountHeight;
+            go.transform.position = basePos;
+            // 회전: 벽 부착이면 빌보드 끄고 yaw만, 아니면 빌보드×yaw.
+            go.transform.rotation = PropQuadBuilder.RootRotation(prop.yRotation, prop.wallMounted);
             go.transform.localScale = Vector3.one * prop.scale;
+            PropQuadBuilder.ApplyFlip(go, prop.flipX);
+            PropQuadBuilder.ApplyGroundOffset(go, prop.GroundOffsetVec); // 접지 보정 — 내부 Content(이미지+콜라이더)만
 
             // 스프라이트 정렬 순서 (바닥보다 위에) + 인스턴스별 미세조정
             int sortOrder = IsometricGrid.GetSortingOrder(prop.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
@@ -1719,12 +2405,17 @@ namespace IsometricMapEditor
                             + prop.sortingOffsetOverride;
             foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
                 sr.sortingOrder = sortOrder;
+            foreach (var mr in go.GetComponentsInChildren<MeshRenderer>())
+                mr.sortingOrder = sortOrder;
+
+            // 스프라이트 프롭은 sr.sortingOrder로 정렬되므로 시선축 위치 오프셋을 쓰지 않는다.
+            // (오프셋은 셀에 비례한 +Y 성분이 있어 root를 띄운다 → 원근 씬뷰/접지 마커가 떠 보임.
+            //  런타임 PropManager도 오프셋 없이 바닥에 정확히 붙음. 불투명 메시(건물)만 오프셋 사용.)
 
             // 접지 위치 마커
             AttachPlacedGroundMarker(go);
 
-            // 빛 차폐 그림자 프록시 박스 (벽/컨테이너 등). prop의 회전/스케일을 상속.
-            ShadowProxyBuilder.Build(prop.propDefinition, go.transform, editorPreview: !Application.isPlaying);
+            // 쿼드(스프라이트) 프롭은 빛 차폐를 쓰지 않는다 (ShadowProxy 없음).
 
             // 건물 소속 표시 (에디터 라벨)
             if (!string.IsNullOrEmpty(prop.parentBuildingId))
@@ -1750,6 +2441,7 @@ namespace IsometricMapEditor
             if (def == null) return;
 
             Vector3 worldPos = building.GetWorldPosition(EditingMap.gridSettings);
+            worldPos.y += building.ElevationY(EditingMap.gridSettings);
             GameObject go;
 
             if (def.prefab != null)
@@ -1820,6 +2512,10 @@ namespace IsometricMapEditor
             foreach (var mr in go.GetComponentsInChildren<MeshRenderer>())
                 mr.sortingOrder = sortOrder;
 
+            // 불투명 메시(CityBuilding 등)는 sortingOrder를 무시하고 깊이로 정렬되므로,
+            // sortingOrder를 시선축 깊이 오프셋으로 변환해 같은 셀에 겹친 바닥/벽/천장의 앞뒤를 확정한다.
+            go.transform.position = worldPos + IsometricGrid.SortDepthOffset(sortOrder);
+
             // 접지 위치 마커
             float markerScale = Mathf.Max(def.footprint.x, def.footprint.y);
             AttachPlacedGroundMarker(go, markerScale);
@@ -1831,6 +2527,7 @@ namespace IsometricMapEditor
         {
             GameObject go;
             Vector3 pos = obj.GetWorldPosition(EditingMap.gridSettings);
+            pos.y += obj.ElevationY(EditingMap.gridSettings);
             float scale = obj.visualScale > 0.01f ? obj.visualScale : 1f;
 
             switch (obj.visualMode)
@@ -1993,8 +2690,9 @@ namespace IsometricMapEditor
             switch (CurrentTool)
             {
                 case ToolMode.Prop:
-                    if (SelectedProp?.prefab == null) return;
-                    _placementGhost = Instantiate(SelectedProp.prefab);
+                    if (SelectedProp == null || !PropQuadBuilder.UsesQuad(SelectedProp)) return;
+                    _placementGhost = PropQuadBuilder.Build(SelectedProp, EditingMap?.gridSettings, addNavCollider: false);
+                    PropQuadBuilder.ApplyFlip(_placementGhost, CurrentFlipX);
                     break;
                 case ToolMode.Building:
                     if (SelectedBuilding == null) return;
@@ -2081,9 +2779,10 @@ namespace IsometricMapEditor
                             var c = gm.GetColor("_Color");
                             gm.SetColor("_Color", new Color(c.r, c.g, c.b, 0.45f));
                         }
-                        else
+                        else if (gm.HasProperty("_Tint"))
                         {
-                            gm.color = new Color(gm.color.r, gm.color.g, gm.color.b, 0.45f);
+                            var c = gm.GetColor("_Tint");
+                            gm.SetColor("_Tint", new Color(c.r, c.g, c.b, 0.45f));
                         }
 
                         // Alpha도 별도 프로퍼티가 있으면 설정
@@ -2111,46 +2810,97 @@ namespace IsometricMapEditor
                 ? IsometricGrid.GridToWorld(cell, EditingMap.gridSettings)
                 : worldPos;
 
+            // 현재 층 높이 (Stage 2: 타일/벽뿐 아니라 프롭/건물/오브젝트도 층을 가진다.)
+            float levelY = CurrentLevel * EditingMap.gridSettings.levelHeight;
+
             float yRot = CurrentRotation * 15f;
 
             switch (CurrentTool)
             {
                 case ToolMode.Prop:
-                    _placementGhost.transform.position = finalPos;
-                    if (Mathf.Abs(yRot) > 0.01f && SelectedProp?.prefab != null)
-                        _placementGhost.transform.rotation = Quaternion.Euler(0, yRot, 0) * SelectedProp.prefab.transform.rotation;
-                    else if (SelectedProp?.prefab != null)
-                        _placementGhost.transform.rotation = SelectedProp.prefab.transform.rotation;
+                {
+                    // 회전: 벽 부착이면 빌보드 끄고 yaw만, 아니면 빌보드×yaw.
+                    _placementGhost.transform.rotation = PropQuadBuilder.RootRotation(yRot, CurrentWallMount);
+                    Vector3 propPos = finalPos + new Vector3(0, levelY, 0);
+                    if (CurrentWallMount) propPos += Vector3.up * CurrentMountHeight;
+                    // 스프라이트 프롭은 시선축 오프셋 없이 바닥에 그대로 (놓을 때와 동일, 띄움 방지).
+                    _placementGhost.transform.position = propPos;
+                    // 접지 보정은 root가 아니라 내부 Content에 적용 — 미리보기도 박을 때와 동일하게.
+                    // 정의값(카탈로그 기본) + 배치용 인스턴스 오프셋(J/L·I/K·U/O로 조절).
+                    Vector3 ghostOffset = (SelectedProp != null ? SelectedProp.GroundOffsetVec : Vector3.zero) + CurrentGroundOffset;
+                    PropQuadBuilder.ApplyGroundOffset(_placementGhost, ghostOffset);
                     break;
+                }
                 case ToolMode.Building:
-                    _placementGhost.transform.position = finalPos;
+                {
                     if (SelectedBuilding?.prefab != null)
                         _placementGhost.transform.rotation = Quaternion.Euler(0, yRot, 0) * SelectedBuilding.prefab.transform.rotation;
                     else
                         _placementGhost.transform.rotation = Quaternion.Euler(0, yRot, 0);
+                    int bDef = SelectedBuilding != null ? SelectedBuilding.sortingOffset : 0;
+                    int bAuto = SelectedBuilding != null
+                        ? ComputeFrontSortOverride(SelectedBuilding.GetOccupiedCells(cell), bDef, cell) : 0;
+                    int bSort = IsometricGrid.GetSortingOrder(cell, IsometricGrid.OBJECT_SORT_BASE)
+                                + bDef + bAuto + _placementSortOffset;
+                    _placementGhost.transform.position = finalPos + new Vector3(0, levelY, 0) + IsometricGrid.SortDepthOffset(bSort);
                     break;
+                }
                 case ToolMode.Wall:
-                    int wallRot = Mathf.RoundToInt(CurrentRotation) % 4;
-                    Vector3 cellCenter = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
-                    float halfTile = EditingMap.gridSettings.tileSize * 0.5f;
-                    Vector3 edgeOff = wallRot switch
-                    {
-                        0 => new Vector3(0, 0, halfTile),
-                        1 => new Vector3(halfTile, 0, 0),
-                        2 => new Vector3(0, 0, -halfTile),
-                        3 => new Vector3(-halfTile, 0, 0),
-                        _ => Vector3.zero
-                    };
+                {
                     float wh = SelectedWall?.wallHeight ?? 2.4f;
-                    _placementGhost.transform.position = cellCenter + edgeOff + new Vector3(0, wh * 0.5f, 0);
-                    // 벽 방향에 따라 큐브 스케일 변경
+                    float wt = SelectedWall?.wallThickness ?? 0.08f;
+                    float ts = EditingMap.gridSettings.tileSize;
+                    // 벽 길이: 정의값(>0)이면 그걸, 없으면 타일 한 칸. (모서리 오프셋엔 ts 그대로 사용)
+                    float wlen = (SelectedWall != null && SelectedWall.wallLength > 0f)
+                        ? SelectedWall.wallLength : ts;
                     var wallChild = _placementGhost.transform.childCount > 0
                         ? _placementGhost.transform.GetChild(0) : _placementGhost.transform;
-                    float wt = SelectedWall?.wallThickness ?? 0.08f;
-                    wallChild.localScale = (wallRot == 0 || wallRot == 2)
-                        ? new Vector3(EditingMap.gridSettings.tileSize, wh, wt)
-                        : new Vector3(wt, wh, EditingMap.gridSettings.tileSize);
+
+                    if (!SnapToGrid)
+                    {
+                        // 자유 배치 미리보기: 커서 월드 위치 + 자유 Y회전, 길이는 로컬 X축.
+                        _placementGhost.transform.position = worldPos + new Vector3(0, levelY + wh * 0.5f, 0);
+                        _placementGhost.transform.rotation = Quaternion.Euler(0, yRot, 0);
+                        wallChild.localScale = new Vector3(wlen, wh, wt);
+                    }
+                    else
+                    {
+                        // 스냅 미리보기: 동서남북 모서리. CurrentRotation을 90°로 양자화.
+                        int wallRot = Mathf.RoundToInt(CurrentRotation / 6f) % 4;
+                        Vector3 cellCenter = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+                        float halfTile = ts * 0.5f;
+                        Vector3 edgeOff = wallRot switch
+                        {
+                            0 => new Vector3(0, 0, halfTile),
+                            1 => new Vector3(halfTile, 0, 0),
+                            2 => new Vector3(0, 0, -halfTile),
+                            3 => new Vector3(-halfTile, 0, 0),
+                            _ => Vector3.zero
+                        };
+                        // 긴 벽도 그리드 라인에 끝이 맞도록 길이축 보정 (WallBuilder와 동일 공식)
+                        float gAlign = WallBuilder.GridAlignShift(wlen, ts);
+                        Vector3 alignOff = (wallRot == 0 || wallRot == 2)
+                            ? new Vector3(gAlign, 0, 0)
+                            : new Vector3(0, 0, gAlign);
+                        _placementGhost.transform.position = cellCenter + edgeOff + alignOff + new Vector3(0, levelY + wh * 0.5f, 0);
+                        _placementGhost.transform.rotation = Quaternion.identity;
+                        wallChild.localScale = (wallRot == 0 || wallRot == 2)
+                            ? new Vector3(wlen, wh, wt)
+                            : new Vector3(wt, wh, wlen);
+                    }
                     break;
+                }
+            }
+
+            // 고스트 접지 마커는 부모(아이소 틸트/yaw)를 따라 매 프레임 기울어진다 →
+            // 배치된 초록 마커처럼 항상 바닥에 평평하게(월드 기준) 다시 고정한다.
+            // (월드 회전·Y를 매 프레임 덮어써서 부모 회전과 무관하게 평면 유지.)
+            var ghostMarker = _placementGhost.transform.Find("GroundMarker");
+            if (ghostMarker != null)
+            {
+                var gp = _placementGhost.transform.position;
+                ghostMarker.position = new Vector3(gp.x, levelY + 0.01f, gp.z);
+                ghostMarker.rotation = Quaternion.Euler(90f, 0f, 0f);
             }
         }
 
@@ -2162,6 +2912,29 @@ namespace IsometricMapEditor
                 _placementGhost = null;
             }
         }
+
+        /// <summary>배치 모드 취소 (ESC) — 현재 선택/고스트를 해제해 더 이상 배치되지 않게 한다.</summary>
+        public void CancelPlacement()
+        {
+            DestroyGhost();
+            SelectedTile = null;
+            SelectedWall = null;
+            SelectedProp = null;
+            SelectedBuilding = null;
+            _placementSortOffset = 0;
+            CurrentRotation = 0;
+            CurrentFlipX = false;
+            CurrentWallMount = false;
+            UI.RefreshToolbar();
+        }
+
+        /// <summary>현재 배치 가능한 대상이 선택돼 있는지 (ESC 취소 대상 판단용)</summary>
+        public bool HasActivePlacement =>
+            (CurrentTool == ToolMode.Tile && SelectedTile != null)
+            || (CurrentTool == ToolMode.Wall && SelectedWall != null)
+            || (CurrentTool == ToolMode.Prop && SelectedProp != null)
+            || (CurrentTool == ToolMode.Building && SelectedBuilding != null)
+            || CurrentTool == ToolMode.MapObject;
 
         /// <summary>접지 위치 표시용 링(circle) 마커를 GO 아래에 추가</summary>
         static void AttachGroundMarker(GameObject parent, float radiusScale = 1f)
@@ -2260,7 +3033,7 @@ namespace IsometricMapEditor
                 {
                     if (tile.tileDefinition != null && tile.tileDefinition.IsWall)
                     {
-                        string key = $"{tile.gridPosition.x}_{tile.gridPosition.y}_E{tile.rotation}";
+                        string key = WallKeyFor(tile);
                         var wallGo = WallBuilder.CreateWallCube(tile, EditingMap.gridSettings, _wallRoot);
                         if (wallGo != null)
                             _wallObjects[key] = wallGo;
@@ -2276,6 +3049,12 @@ namespace IsometricMapEditor
 
             foreach (var obj in EditingMap.mapObjects)
                 SpawnObjectMarker(obj);
+
+            // 숨김 처리된 건물 상태 재적용 (편집 중 내부 보기 유지)
+            ApplyBuildingHiddenState();
+
+            // 층 컷어웨이 재적용 (위층 숨김)
+            ApplyLevelCutaway();
         }
 
         // --- Save / Load ---
@@ -2358,7 +3137,8 @@ namespace IsometricMapEditor
                             tileGo.transform.SetParent(layerGo.transform);
 
                             Vector3 pos = IsometricGrid.GridToWorld(tile.gridPosition, EditingMap.gridSettings);
-                            pos.y -= 0.05f; // 3D 벽이 깊이 테스트에서 이기도록 바닥을 살짝 내림
+                            // 바닥 타일 Y = 해당 층 바닥 높이 (0층=0)
+                            pos.y = tile.level * EditingMap.gridSettings.levelHeight;
                             tileGo.transform.position = pos;
                             tileGo.transform.rotation = Quaternion.Euler(90, 0, 0); // XZ 평면에 눕힘
                             tileGo.transform.localScale = IsometricGrid.GetTileScale(tile.tileDefinition.sprite, EditingMap.gridSettings);
@@ -2382,29 +3162,44 @@ namespace IsometricMapEditor
 
                 foreach (var prop in EditingMap.props)
                 {
-                    if (prop.propDefinition?.prefab == null) continue;
+                    var pdef = prop.propDefinition;
+                    if (pdef == null) continue;
+                    // 프롭은 빌보드 쿼드 전용. 스프라이트 없으면 스킵.
+                    if (!PropQuadBuilder.UsesQuad(pdef)) continue;
 
-                    var go = (GameObject)PrefabUtility.InstantiatePrefab(prop.propDefinition.prefab, propRoot.transform);
+                    // 스프라이트 프롭은 빌보드 쿼드(+nav 박스)로 베이크.
+                    GameObject go = PropQuadBuilder.Build(pdef, EditingMap.gridSettings, addNavCollider: true);
                     if (go == null) continue;
+                    go.transform.SetParent(propRoot.transform);
 
                     go.name = $"Prop_{prop.propDefinitionId}_{prop.instanceId}";
-                    go.transform.position = prop.GetWorldPosition(EditingMap.gridSettings);
-                    if (Mathf.Abs(prop.yRotation) > 0.01f)
-                        go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0) * go.transform.rotation;
+                    Vector3 basePos = prop.GetWorldPosition(EditingMap.gridSettings);
+                    basePos.y += prop.ElevationY(EditingMap.gridSettings);
+                    if (prop.wallMounted) basePos += Vector3.up * prop.mountHeight;
+                    go.transform.position = basePos;
+                    go.transform.rotation = PropQuadBuilder.RootRotation(prop.yRotation, prop.wallMounted);
                     go.transform.localScale = Vector3.one * prop.scale;
+                    PropQuadBuilder.ApplyFlip(go, prop.flipX);
+                    PropQuadBuilder.ApplyGroundOffset(go, prop.GroundOffsetVec); // 접지 보정 — 내부 Content(이미지+콜라이더)만
 
                     int sortOrder = IsometricGrid.GetSortingOrder(prop.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
-                                    + prop.propDefinition.sortingOffset
+                                    + pdef.sortingOffset
                                     + prop.sortingOffsetOverride;
                     foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
                         sr.sortingOrder = sortOrder;
+                    foreach (var mr in go.GetComponentsInChildren<MeshRenderer>())
+                        mr.sortingOrder = sortOrder;
+                    // 스프라이트 프롭은 sortingOrder로 정렬 — 시선축 위치 오프셋 없이 바닥에 그대로(런타임과 동일).
 
-                    ShadowProxyBuilder.Build(prop.propDefinition, go.transform, editorPreview: false);
+                    // 쿼드(스프라이트) 프롭은 빛 차폐를 쓰지 않는다.
                 }
 
                 // ── Buildings ──
                 var buildRoot = new GameObject("Buildings");
                 buildRoot.transform.SetParent(root.transform);
+
+                // 내부 오브젝트(parentBuildingId) 라우팅용 instanceId→GameObject
+                var bakedBuildings = new System.Collections.Generic.Dictionary<string, GameObject>();
 
                 foreach (var building in EditingMap.buildings)
                 {
@@ -2412,6 +3207,7 @@ namespace IsometricMapEditor
                     if (def == null) continue;
 
                     Vector3 worldPos = building.GetWorldPosition(EditingMap.gridSettings);
+                    worldPos.y += building.ElevationY(EditingMap.gridSettings);
                     GameObject go;
 
                     if (def.prefab != null)
@@ -2433,6 +3229,8 @@ namespace IsometricMapEditor
 
                     go.name = $"Building_{building.buildingDefinitionId}_{building.instanceId}";
                     go.transform.localScale = Vector3.one * building.scale;
+                    if (!string.IsNullOrEmpty(building.instanceId))
+                        bakedBuildings[building.instanceId] = go;
 
                     int sortOrder = IsometricGrid.GetSortingOrder(building.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
                                     + def.sortingOffset
@@ -2441,43 +3239,53 @@ namespace IsometricMapEditor
                         sr.sortingOrder = sortOrder;
                     foreach (var mr in go.GetComponentsInChildren<MeshRenderer>())
                         mr.sortingOrder = sortOrder;
+                    go.transform.position = worldPos + IsometricGrid.SortDepthOffset(sortOrder);
                 }
 
-                // ── MapObjects ──
+                // ── MapObjects (SpawnPoint, MapBoard 등 — 기능 컴포넌트 포함) ──
                 var objRoot = new GameObject("MapObjects");
                 objRoot.transform.SetParent(root.transform);
 
-                foreach (var obj in EditingMap.mapObjects)
+                // 런타임 스폰과 동일한 MapObjectSpawner로 InteractableObject/SpawnPoint/LootContainer 등
+                // 기능 컴포넌트를 그대로 부착해 프리팹에 직렬화한다.
+                // (이전엔 빈 GameObject만 만들어 스폰포인트/지도판 등의 기능이 저장 안 됐음.)
+                var bakeSpawnerGo = new GameObject("__BakeMapObjectSpawner");
+                try
                 {
-                    Vector3 pos = obj.freePlace ? obj.worldPosition
-                        : IsometricGrid.GridToWorld(obj.gridPosition, EditingMap.gridSettings);
+                    var bakeSpawner = bakeSpawnerGo.AddComponent<MapObjectSpawner>();
+                    bakeSpawner.Initialize(objRoot.transform);
+                    bakeSpawner.SetBuildingObjects(bakedBuildings);
 
-                    var go = new GameObject($"MapObj_{obj.objectType}_{obj.instanceId}");
-                    go.transform.SetParent(objRoot.transform);
-                    go.transform.position = pos;
-                    if (Mathf.Abs(obj.yRotation) > 0.01f)
-                        go.transform.rotation = Quaternion.Euler(0, obj.yRotation, 0);
-
-                    // 이펙트 프리팹 모드면 프리팹 배치
-                    if (obj.visualMode == 3)
+                    foreach (var obj in EditingMap.mapObjects)
                     {
-                        GameObject effectSrc = null;
-                        var moDef = catalog?.GetMapObjectDefByType(obj.objectType);
-                        if (moDef != null && moDef.effectPrefab != null)
-                            effectSrc = moDef.effectPrefab;
-                        if (effectSrc == null && !string.IsNullOrEmpty(obj.effectPrefabPath))
-                            effectSrc = Resources.Load<GameObject>(obj.effectPrefabPath);
-                        if (effectSrc != null)
+                        var go = bakeSpawner.SpawnSingle(obj, EditingMap.gridSettings);
+                        if (go == null) continue;
+
+                        // 이펙트 프리팹 비주얼(visualMode==3)은 스포너가 다루지 않으므로 여기서 부착.
+                        if (obj.visualMode == 3)
                         {
-                            var effect = (GameObject)PrefabUtility.InstantiatePrefab(effectSrc, go.transform);
-                            if (effect != null)
+                            GameObject effectSrc = null;
+                            var moDef = catalog?.GetMapObjectDefByType(obj.objectType);
+                            if (moDef != null && moDef.effectPrefab != null)
+                                effectSrc = moDef.effectPrefab;
+                            if (effectSrc == null && !string.IsNullOrEmpty(obj.effectPrefabPath))
+                                effectSrc = Resources.Load<GameObject>(obj.effectPrefabPath);
+                            if (effectSrc != null)
                             {
-                                effect.transform.localPosition = Vector3.zero;
-                                float s = obj.visualScale > 0.01f ? obj.visualScale : 1f;
-                                effect.transform.localScale = Vector3.one * s;
+                                var effect = (GameObject)PrefabUtility.InstantiatePrefab(effectSrc, go.transform);
+                                if (effect != null)
+                                {
+                                    effect.transform.localPosition = Vector3.zero;
+                                    float s = obj.visualScale > 0.01f ? obj.visualScale : 1f;
+                                    effect.transform.localScale = Vector3.one * s;
+                                }
                             }
                         }
                     }
+                }
+                finally
+                {
+                    DestroyImmediate(bakeSpawnerGo);
                 }
 
                 // ── 맵 데이터 컴포넌트 부착 ──
@@ -2486,6 +3294,11 @@ namespace IsometricMapEditor
                 mapRef.mapId = EditingMap.mapId;
                 mapRef.jsonFileName = filename;
                 mapRef.gridSettings = EditingMap.gridSettings;
+
+                // 생성된 비-에셋 메시/머티리얼(벽 큐브, 건물 폴백 등)을 디스크 에셋으로 영속화.
+                // 안 하면 SaveAsPrefabAsset이 메모리상 메시/머티리얼을 직렬화하지 못해
+                // 프리팹을 다시 열 때 참조가 null이 되어 벽이 사라진다.
+                PersistGeneratedAssets(root, prefabDir, filename);
 
                 // 프리팹 저장
                 string prefabPath = $"{prefabDir}/Map_{filename}.prefab";
@@ -2499,6 +3312,66 @@ namespace IsometricMapEditor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
+
+        /// <summary>
+        /// 프리팹 베이크 시 코드로 생성된(=에셋이 아닌) 메시/머티리얼을 디스크 에셋으로 저장하고
+        /// 계층 내 참조를 그 에셋으로 바꾼다. 이렇게 해야 SaveAsPrefabAsset이 정상 직렬화한다.
+        ///   - 벽 큐브: WallBuilder의 공유 절차적 메시(_uprightBox) + 런타임 머티리얼.
+        ///   - 건물 폴백 큐브 등: new Material(...)로 만든 런타임 머티리얼.
+        /// 동일 인스턴스는 한 번만 저장하고 재사용(레퍼런스로 디듀프).
+        /// 에셋은 {prefabDir}/Map_{filename}_Assets/ 폴더에 모은다(프리팹 삭제 시 함께 정리하기 쉬움).
+        /// </summary>
+        void PersistGeneratedAssets(GameObject root, string prefabDir, string filename)
+        {
+            string assetDir = $"{prefabDir}/Map_{filename}_Assets";
+            // 이전 베이크 잔여물 제거(참조 깨짐 방지 + 깔끔한 재생성)
+            if (AssetDatabase.IsValidFolder(assetDir))
+                AssetDatabase.DeleteAsset(assetDir);
+            AssetDatabase.CreateFolder(prefabDir, $"Map_{filename}_Assets");
+
+            var meshMap = new System.Collections.Generic.Dictionary<Mesh, Mesh>();
+            var matMap = new System.Collections.Generic.Dictionary<Material, Material>();
+            int meshIdx = 0, matIdx = 0;
+
+            // ── 메시 ──
+            foreach (var mf in root.GetComponentsInChildren<MeshFilter>(true))
+            {
+                var mesh = mf.sharedMesh;
+                if (mesh == null || AssetDatabase.Contains(mesh)) continue;
+                if (!meshMap.TryGetValue(mesh, out var saved))
+                {
+                    // 원본(런타임 공유 싱글톤)을 소비하지 않도록 복사본을 저장한다.
+                    saved = Object.Instantiate(mesh);
+                    saved.name = $"{mesh.name}_{meshIdx++}";
+                    AssetDatabase.CreateAsset(saved, $"{assetDir}/{saved.name}.asset");
+                    meshMap[mesh] = saved;
+                }
+                mf.sharedMesh = saved;
+            }
+
+            // ── 머티리얼 ──
+            foreach (var rend in root.GetComponentsInChildren<Renderer>(true))
+            {
+                var mats = rend.sharedMaterials;
+                bool changed = false;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    var mat = mats[i];
+                    if (mat == null || AssetDatabase.Contains(mat)) continue;
+                    if (!matMap.TryGetValue(mat, out var saved))
+                    {
+                        saved = new Material(mat) { name = $"{mat.name}_{matIdx++}" };
+                        AssetDatabase.CreateAsset(saved, $"{assetDir}/{saved.name}.mat");
+                        matMap[mat] = saved;
+                    }
+                    mats[i] = saved;
+                    changed = true;
+                }
+                if (changed) rend.sharedMaterials = mats;
+            }
+
+            AssetDatabase.SaveAssets();
         }
 #endif
 

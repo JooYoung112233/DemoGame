@@ -182,7 +182,8 @@ public class PostRaidEventUI : MonoBehaviour
                         NPCRelationshipManager.Instance.ModifyTrust(r.npcId, r.amount);
                     break;
                 case EventRewardType.Currency:
-                    Debug.Log($"[PostRaidEvent] 화폐 보상: {r.amount} 루디");
+                    if (CurrencyManager.Instance != null)
+                        CurrencyManager.Instance.Add(r.amount, "레이드 후 이벤트");
                     break;
             }
         }
@@ -205,7 +206,8 @@ public class PostRaidEventUI : MonoBehaviour
                     }
                     break;
                 case EventPenaltyType.LoseCurrency:
-                    Debug.Log($"[PostRaidEvent] 화폐 손실: {p.amount} 루디");
+                    if (CurrencyManager.Instance != null)
+                        CurrencyManager.Instance.Lose(p.amount, "레이드 후 이벤트");
                     break;
                 case EventPenaltyType.LoseItem:
                     if (player != null)

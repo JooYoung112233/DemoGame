@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 053ce7cc3762c0b4085876e7178ee66e, type: 3}
+  m_Name: tile_0002
+  m_EditorClassIdentifier: Game.Scripts::IsometricMapEditor.TileDefinition
+  tileId: tile_0002
+  sprite: {fileID: 21300000, guid: f31fd78f0ae6c484eac0f2faaae83d67, type: 3}
+  category: 0
+  isWalkable: 1
+  size: {x: 1, y: 1}
+  sortingOffset: 0
+  material: {fileID: 2100000, guid: 8f6a147ce98ebdb4f91e56b7c10dec05, type: 2}
+  wallHeight: 2
+  wallThickness: 0.08
+  castsShadow: 0
+  shadowBoxes: []

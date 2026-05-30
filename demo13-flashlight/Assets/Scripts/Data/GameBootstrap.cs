@@ -11,6 +11,7 @@ public static class GameBootstrap
         EnsureSingleton<PostRaidEventManager>("PostRaidEventManager");
 
         // 스토리/UI 시스템
+        EnsureSingleton<ToastManager>("ToastManager");
         EnsureSingleton<NarrationUI>("NarrationUI");
         EnsureSingleton<TutorialPrompt>("TutorialPrompt");
         EnsureSingleton<ScreenEffectManager>("ScreenEffectManager");
@@ -18,6 +19,9 @@ public static class GameBootstrap
         // 반복 콘텐츠 시스템
         EnsureSingleton<DailyQuestManager>("DailyQuestManager");
         EnsureSingleton<AchievementManager>("AchievementManager");
+
+        // 경제 시스템
+        EnsureSingleton<CurrencyManager>("CurrencyManager");
 
         // 세이브 시스템
         EnsureSingleton<SaveManager>("SaveManager");

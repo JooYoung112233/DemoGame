@@ -45,9 +45,14 @@ namespace IsometricMapEditor
             Debug.Log($"[MapObjectSpawner] Spawned {_spawnedObjects.Count} map objects");
         }
 
-        GameObject SpawnSingle(PlacedMapObject obj, GridSettings gridSettings)
+        /// <summary>
+        /// PlacedMapObject 하나를 GameObject로 빌드(기능 컴포넌트 부착 포함).
+        /// 런타임 스폰과 프리팹 베이크가 동일 경로를 쓰도록 public. (베이크는 에디터에서 호출)
+        /// </summary>
+        public GameObject SpawnSingle(PlacedMapObject obj, GridSettings gridSettings)
         {
             Vector3 worldPos = obj.GetWorldPosition(gridSettings);
+            worldPos.y += obj.ElevationY(gridSettings);
 
             // 소속 건물이 있으면 건물 하위 Interior에 배치
             Transform parent = _root;
@@ -224,7 +229,7 @@ namespace IsometricMapEditor
 
             // 비주얼 콜라이더 제거 (blocker가 대신)
             var visualCol = visual.GetComponent<Collider>();
-            if (visualCol != null) Destroy(visualCol);
+            if (visualCol != null) DestroyObj(visualCol);
 
             // 잠금 타입에 따른 비주얼 색상
             var renderer = visual.GetComponent<Renderer>();
@@ -353,6 +358,16 @@ namespace IsometricMapEditor
             var col = cube.GetComponent<Collider>();
             if (col is BoxCollider box)
                 box.isTrigger = true;
+        }
+
+        /// <summary>에디터(베이크)에선 DestroyImmediate, 플레이 중엔 Destroy.</summary>
+        static void DestroyObj(Object o)
+        {
+            if (o == null) return;
+#if UNITY_EDITOR
+            if (!Application.isPlaying) { Object.DestroyImmediate(o); return; }
+#endif
+            Object.Destroy(o);
         }
 
         /// <summary>리플렉션으로 SerializeField에 값 설정</summary>

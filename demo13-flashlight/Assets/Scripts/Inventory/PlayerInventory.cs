@@ -92,14 +92,7 @@ public class PlayerInventory : MonoBehaviour
                 }
                 break;
 
-            case ItemUseEffect.RestoreStamina:
-                if (playerCtrl != null)
-                {
-                    // 스태미너 직접 회복 — PlayerController에 메서드 필요
-                    // 임시: ConsumeStamina 음수로는 안되니까 TODO
-                    used = true;
-                }
-                break;
+            // RestoreStamina: 스태미너 회복 소비 아이템 미사용 (2026-05-30 기획 제거). enum 값은 직렬화 인덱스 보존 위해 유지.
 
             case ItemUseEffect.AddBattery:
                 if (flashlight != null)

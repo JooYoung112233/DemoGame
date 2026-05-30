@@ -30,13 +30,14 @@ public class MapSelectUIEditor : Editor
         {
             if (GUILayout.Button("Generate UI", GUILayout.Height(30)))
             {
-                var target = ui;
+                var t = ui;
                 EditorApplication.delayCall += () =>
                 {
-                    if (target == null) return;
-                    Undo.RegisterCompleteObjectUndo(target, "Generate MapSelectUI");
-                    target.GenerateUI();
-                    EditorUtility.SetDirty(target);
+                    if (t == null) return;
+                    Undo.RegisterCompleteObjectUndo(t, "Generate MapSelectUI");
+                    t.GenerateUI();
+                    EditorUtility.SetDirty(t);
+                    ForceInspectorRefresh(t.gameObject);
                     Debug.Log("<color=green>[MapSelectUI]</color> UI 생성 완료");
                 };
                 GUIUtility.ExitGUI();
@@ -51,18 +52,25 @@ public class MapSelectUIEditor : Editor
         {
             if (GUILayout.Button("Clear UI", GUILayout.Height(28)))
             {
-                var target = ui;
+                var t = ui;
                 EditorApplication.delayCall += () =>
                 {
-                    if (target == null) return;
-                    Undo.RegisterCompleteObjectUndo(target, "Clear MapSelectUI");
-                    target.ClearGeneratedUI();
-                    EditorUtility.SetDirty(target);
+                    if (t == null) return;
+                    Undo.RegisterCompleteObjectUndo(t, "Clear MapSelectUI");
+                    t.ClearGeneratedUI();
+                    EditorUtility.SetDirty(t);
+                    ForceInspectorRefresh(t.gameObject);
                     Debug.Log("<color=orange>[MapSelectUI]</color> UI 제거 완료");
                 };
                 GUIUtility.ExitGUI();
             }
         }
         GUI.backgroundColor = Color.white;
+    }
+
+    static void ForceInspectorRefresh(GameObject go)
+    {
+        Selection.activeGameObject = null;
+        EditorApplication.delayCall += () => Selection.activeGameObject = go;
     }
 }

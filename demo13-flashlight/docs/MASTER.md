@@ -72,6 +72,14 @@
 
 핵심 코드: `PlayerInventory.cs`, `InventoryGrid.cs`, `ItemData` SO, `ItemDatabase.cs`, `CraftingSystem.cs`, `LootContainer.cs`
 
+### 💰 경제 · 화폐
+
+| 문서 | 내용 | 상태 |
+|------|------|------|
+| [`economy.md`](economy.md) | 루디(Rudi) 화폐 시스템 — `CurrencyManager` 싱글톤 중앙 관리, 퀘스트·업적·레이드 이벤트 보상/페널티 연동, 세이브·HUD(우상단 ◈) 표시 | 기획 확정, 코드 구현 |
+
+핵심 코드: `CurrencyManager.cs`, `GameBootstrap.cs`(자동 생성), `SaveManager.cs`(영속화), `GameHUD.cs`(표시)
+
 ### 🏥 의료
 
 | 문서 | 내용 | 상태 |
@@ -180,3 +188,5 @@ Safehouse (timeScale=0, 안전 허브)
 | 2026-05-28 | 마스터 문서 생성. 게임 제목 확정: 다녀올게 (Be Right Back) |
 | 2026-05-29 | 문서 정리: `Night_City_System_Draft_v2.md`(1203줄) → `gdd-core`/`gdd-progression`/`gdd-demo` 3분할. `items.md` → `items-crafting-farming.md` 분리. story/story-script 역할 명시 + 오프닝 중복 제거. `quests-region1.md` 인덱스 추가. dev-roadmap에 미구현 목록 정리. |
 | 2026-05-29 | **프로젝트명 BRB 확정.** "Night City / 밤의 도시" 표현 전면 정리 — 기획서 제목 → "BRB 기획서", 인게임 출전 화면 타이틀 → "다녀올게", `Mood.NightCity` → `Mood.NeonNight`, Unity 메뉴 `Tools/Night City/*` 3건 → `Tools/Dev Tools/*` 관례 통일 + 문서의 stale 메뉴 경로 교정. 한글 제목은 "다녀올게" 유지. |
+| 2026-05-30 | 미완 시스템 구현 + 문서화: ① **화폐 시스템**(`CurrencyManager`, `docs/economy.md` 신설) ② **공용 토스트 UI**(`ToastManager`). dev-roadmap 미구현 목록 ✅ 처리. `economy.md`를 문서 맵에 등재(인덱스 누락 교정). + **스태미너 회복 소비 아이템 기획 제거**(불필요 결정, 3개 아이템 효과 None 전환). |
+| 2026-05-30 | **건물 입장 트리거 시스템** 구현(`BuildingEntryTrigger` + 맵빌더 Trigger 오브젝트 4종 모드: 씬전환/로컬이동/스토리/커스텀). `map-tool-guide.md`에 맵 오브젝트 설정 가이드 추가. |

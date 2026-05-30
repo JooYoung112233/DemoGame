@@ -10,6 +10,8 @@ namespace IsometricMapEditor
         [Header("Initial Map Size")]
         public int mapWidth = 64;
         public int mapHeight = 64;
+        [Tooltip("타일 한 칸의 월드 크기(m). 작게 하면 그리드가 촘촘해짐.")]
+        public float tileSize = 1f;
 
         void Awake()
         {
@@ -29,6 +31,7 @@ namespace IsometricMapEditor
             manager.catalog = catalog;
             manager.defaultMapWidth = mapWidth;
             manager.defaultMapHeight = mapHeight;
+            manager.defaultTileSize = tileSize;
         }
     }
 }

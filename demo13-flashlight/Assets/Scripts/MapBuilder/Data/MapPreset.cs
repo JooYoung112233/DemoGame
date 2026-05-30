@@ -53,10 +53,16 @@ namespace IsometricMapEditor
                 {
                     PlacedTile copy = new PlacedTile();
                     copy.gridPosition = t.gridPosition;
+                    copy.level = t.level;
                     copy.tileDefinitionId = t.tileDefinitionId;
                     copy.tileDefinition = t.tileDefinition;
                     copy.rotation = t.rotation;
                     copy.flipX = t.flipX;
+                    copy.wallScale = t.wallScale;
+                    copy.freePlace = t.freePlace;
+                    copy.worldPosition = t.worldPosition;
+                    copy.yRotation = t.yRotation;
+                    copy.id = t.id;
                     copy.materialOverride = t.materialOverride;
                     pl.tiles.Add(copy);
                 }
@@ -79,6 +85,7 @@ namespace IsometricMapEditor
                 copy.worldPosition = b.worldPosition;
                 copy.yRotation = b.yRotation;
                 copy.scale = b.scale;
+                copy.level = b.level;
                 buildings.Add(copy);
             }
 
@@ -97,6 +104,11 @@ namespace IsometricMapEditor
                 copy.worldPosition = p.worldPosition;
                 copy.yRotation = p.yRotation;
                 copy.scale = p.scale;
+                copy.flipX = p.flipX;
+                copy.wallMounted = p.wallMounted;
+                copy.mountHeight = p.mountHeight;
+                copy.groundOffsetOverride = p.groundOffsetOverride;
+                copy.level = p.level;
                 props.Add(copy);
             }
 
@@ -138,10 +150,16 @@ namespace IsometricMapEditor
                 {
                     PlacedTile copy = new PlacedTile();
                     copy.gridPosition = t.gridPosition;
+                    copy.level = t.level;
                     copy.tileDefinitionId = t.tileDefinitionId;
                     copy.tileDefinition = t.tileDefinition;
                     copy.rotation = t.rotation;
                     copy.flipX = t.flipX;
+                    copy.wallScale = t.wallScale;
+                    copy.freePlace = t.freePlace;
+                    copy.worldPosition = t.worldPosition;
+                    copy.yRotation = t.yRotation;
+                    copy.id = t.id;
                     copy.materialOverride = t.materialOverride;
                     ml.tiles.Add(copy);
                 }
@@ -182,6 +200,10 @@ namespace IsometricMapEditor
                 copy.worldPosition = p.worldPosition;
                 copy.yRotation = p.yRotation;
                 copy.scale = p.scale;
+                copy.flipX = p.flipX;
+                copy.wallMounted = p.wallMounted;
+                copy.mountHeight = p.mountHeight;
+                copy.groundOffsetOverride = p.groundOffsetOverride;
                 target.props.Add(copy);
             }
 

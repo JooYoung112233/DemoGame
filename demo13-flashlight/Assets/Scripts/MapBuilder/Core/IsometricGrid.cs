@@ -43,6 +43,25 @@ namespace IsometricMapEditor
         }
 
         /// <summary>
+        /// 트루 아이소 카메라(Euler 35.264, 45, 0)의 정규화된 시선 방향.
+        /// 직교 카메라에서는 이 축을 따라 이동해도 화면 위치는 변하지 않고 '깊이'만 바뀐다.
+        /// </summary>
+        public static readonly Vector3 IsoViewDir = new Vector3(1f, -1f, 1f).normalized;
+
+        /// <summary>sortingOrder 1단위당 변환되는 깊이 오프셋(월드 단위).</summary>
+        public const float SORT_DEPTH_EPS = 0.003f;
+
+        /// <summary>
+        /// sortingOrder를 시선축 깊이 오프셋으로 변환한다. 불투명 메시(건물/벽 큐브 등)는
+        /// sortingOrder를 무시하고 깊이 버퍼로 정렬되므로, 같은 셀에 겹친 코플래너 조각
+        /// (바닥/벽/천장)의 앞뒤를 이 미세 깊이 차이로 확정한다. 값이 클수록 카메라에 가깝게(앞) 그려진다.
+        /// </summary>
+        public static Vector3 SortDepthOffset(int sortingOrder)
+        {
+            return -IsoViewDir * (sortingOrder * SORT_DEPTH_EPS);
+        }
+
+        /// <summary>
         /// Returns 4 corners of a cell on the XZ plane (Y=0).
         /// </summary>
         public static Vector3[] GetCellWorldCorners(Vector2Int cell, GridSettings settings)

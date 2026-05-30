@@ -384,6 +384,28 @@ public class PlayerController : MonoBehaviour
 
         // 안전가옥에서는 전투 비활성화
         CombatEnabled = (scene.name != "Safehouse");
+
+        // 안전가옥에 들어오면 스폰포인트로 이동.
+        // (씬 전환이 명시적 스폰포인트를 지정한 경우엔 SceneTransitionManager가 처리하므로 건너뜀)
+        if (scene.name == "Safehouse" && string.IsNullOrEmpty(SceneTransitionManager.PendingSpawnPointId))
+            MoveToSpawnPoint();
+    }
+
+    /// <summary>씬의 SpawnPoint로 플레이어를 이동(pointId "default" 우선, 없으면 첫 번째).</summary>
+    void MoveToSpawnPoint()
+    {
+        var points = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
+        if (points.Length == 0) return;
+
+        SpawnPoint target = null;
+        foreach (var p in points)
+            if (p.PointId == "default") { target = p; break; }
+        if (target == null) target = points[0];
+
+        if (agent != null && agent.isOnNavMesh)
+            agent.Warp(target.transform.position);
+        else
+            transform.position = target.transform.position;
     }
 
     /// <summary>UI가 열려있어서 플레이어 입력을 차단해야 하는지</summary>

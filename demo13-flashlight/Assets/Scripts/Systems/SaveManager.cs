@@ -83,6 +83,12 @@ public class SaveManager : MonoBehaviour
             data.achievements = AchievementManager.Instance.GetSaveData();
         }
 
+        // 화폐(루디)
+        if (CurrencyManager.Instance != null)
+        {
+            data.currency = CurrencyManager.Instance.GetSaveData();
+        }
+
         // 일일 의뢰
         if (DailyQuestManager.Instance != null)
         {
@@ -158,6 +164,12 @@ public class SaveManager : MonoBehaviour
         if (AchievementManager.Instance != null && data.achievements != null)
         {
             AchievementManager.Instance.LoadSaveData(data.achievements);
+        }
+
+        // 화폐(루디)
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.LoadSaveData(data.currency);
         }
 
         // 일일 의뢰
@@ -261,6 +273,9 @@ public class GameSaveData
 
     // 업적
     public AchievementManager.AchievementSaveData achievements;
+
+    // 화폐(루디)
+    public int currency;
 
     // 일일 의뢰
     public DailyQuestManager.DailyQuestSaveData dailyQuest;

@@ -29,6 +29,11 @@ Shader "InkCity/CityWall"
 
         [Header(Occlusion Fade)]
         _Alpha ("Alpha", Range(0, 1)) = 1.0
+
+        [Header(Doorway Cutout)]
+        [Toggle(_WHITE_CUTOUT)] _WhiteCutoutToggle ("흰색 투명화 (문 뚫기)", Float) = 0
+        _WhiteThreshold ("White Threshold", Range(0.5, 1)) = 0.9
+        _WhiteSoftness ("White Edge Softness", Range(0, 0.3)) = 0.05
     }
     SubShader
     {
@@ -53,6 +58,7 @@ Shader "InkCity/CityWall"
             #pragma fragment frag
             #pragma shader_feature_local _NORMALMAP
             #pragma shader_feature_local _WEATHER_ON
+            #pragma shader_feature_local _WHITE_CUTOUT
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -74,6 +80,8 @@ Shader "InkCity/CityWall"
                 float4 _StainColor;
                 float _StainAmount;
                 float _Alpha;
+                float _WhiteThreshold;
+                float _WhiteSoftness;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);
@@ -154,8 +162,18 @@ Shader "InkCity/CityWall"
             half4 frag(Varyings input) : SV_Target
             {
                 float2 uv = input.uv;
-                half3 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).rgb;
+                half3 rawTex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).rgb;
+                half3 color = rawTex;
                 color *= _Tint.rgb * _Brightness;
+
+                // ---- white doorway cutout ----
+                float cutoutAlpha = 1.0;
+                #ifdef _WHITE_CUTOUT
+                    // 흰색에 가까울수록(모든 채널이 높을수록) 투명
+                    float whiteness = min(rawTex.r, min(rawTex.g, rawTex.b));
+                    cutoutAlpha = 1.0 - smoothstep(_WhiteThreshold - _WhiteSoftness, _WhiteThreshold, whiteness);
+                    clip(cutoutAlpha - 0.01);
+                #endif
 
                 #ifdef _WEATHER_ON
                     // ---- dirt / grime patches ----
@@ -210,7 +228,7 @@ Shader "InkCity/CityWall"
                 }
                 #endif
 
-                return half4(color, _Alpha);
+                return half4(color, _Alpha * cutoutAlpha);
             }
             ENDHLSL
         }

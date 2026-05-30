@@ -33,9 +33,16 @@ namespace IsometricMapEditor
         class SerializableTile
         {
             public int x, y;
+            public int level;
             public string tileDefinitionId;
             public int rotation;
             public bool flipX;
+            public float wallScale = 1f;
+            // 자유 배치 벽 (스냅 OFF)
+            public bool freePlace;
+            public float wpx, wpy, wpz;
+            public float yRotation;
+            public string id;
         }
 
         [System.Serializable]
@@ -50,6 +57,7 @@ namespace IsometricMapEditor
             public float worldX, worldY, worldZ;
             public float yRotation;
             public float scale;
+            public int level;
         }
 
         [System.Serializable]
@@ -63,7 +71,12 @@ namespace IsometricMapEditor
             public float worldX, worldY, worldZ;
             public float yRotation;
             public float scale;
+            public bool flipX;
+            public bool wallMounted;
+            public float mountHeight;
+            public float groundOffX, groundOffY, groundOffZ;
             public string parentBuildingId;
+            public int level;
         }
 
         [System.Serializable]
@@ -73,6 +86,7 @@ namespace IsometricMapEditor
             public int x, y;
             public string harvestableDefinitionId;
             public string overrideSpawnCondition;
+            public int level;
         }
 
         [System.Serializable]
@@ -132,6 +146,9 @@ namespace IsometricMapEditor
 
             // 건물 소속
             public string parentBuildingId;
+
+            // 층
+            public int level;
         }
 
         public static string Serialize(MapData map)
@@ -165,9 +182,17 @@ namespace IsometricMapEditor
                     {
                         x = tile.gridPosition.x,
                         y = tile.gridPosition.y,
+                        level = tile.level,
                         tileDefinitionId = tile.tileDefinitionId,
                         rotation = tile.rotation,
-                        flipX = tile.flipX
+                        flipX = tile.flipX,
+                        wallScale = tile.wallScale,
+                        freePlace = tile.freePlace,
+                        wpx = tile.worldPosition.x,
+                        wpy = tile.worldPosition.y,
+                        wpz = tile.worldPosition.z,
+                        yRotation = tile.yRotation,
+                        id = tile.id
                     };
                 }
                 json.layers[i] = sl;
@@ -189,7 +214,8 @@ namespace IsometricMapEditor
                     worldY = b.worldPosition.y,
                     worldZ = b.worldPosition.z,
                     yRotation = b.yRotation,
-                    scale = b.scale
+                    scale = b.scale,
+                    level = b.level
                 };
             }
 
@@ -209,7 +235,14 @@ namespace IsometricMapEditor
                     worldZ = p.worldPosition.z,
                     yRotation = p.yRotation,
                     scale = p.scale,
-                    parentBuildingId = p.parentBuildingId
+                    flipX = p.flipX,
+                    wallMounted = p.wallMounted,
+                    mountHeight = p.mountHeight,
+                    groundOffX = p.groundOffsetOverride.x,
+                    groundOffY = p.groundOffsetOverride.y,
+                    groundOffZ = p.groundOffsetOverride.z,
+                    parentBuildingId = p.parentBuildingId,
+                    level = p.level
                 };
             }
 
@@ -222,7 +255,8 @@ namespace IsometricMapEditor
                     x = h.gridPosition.x,
                     y = h.gridPosition.y,
                     harvestableDefinitionId = h.harvestableDefinitionId,
-                    overrideSpawnCondition = h.overrideSpawnCondition
+                    overrideSpawnCondition = h.overrideSpawnCondition,
+                    level = h.level
                 };
             }
 
@@ -282,7 +316,8 @@ namespace IsometricMapEditor
                     visualTexturePath = mo.visualTexturePath,
                     effectPrefabPath = mo.effectPrefabPath,
                     visualScale = mo.visualScale,
-                    parentBuildingId = mo.parentBuildingId
+                    parentBuildingId = mo.parentBuildingId,
+                    level = mo.level
                 };
             }
 
@@ -323,9 +358,15 @@ namespace IsometricMapEditor
                             layer.tiles.Add(new PlacedTile
                             {
                                 gridPosition = new Vector2Int(st.x, st.y),
+                                level = st.level,
                                 tileDefinitionId = st.tileDefinitionId,
                                 rotation = st.rotation,
-                                flipX = st.flipX
+                                flipX = st.flipX,
+                                wallScale = st.wallScale <= 0f ? 1f : st.wallScale,
+                                freePlace = st.freePlace,
+                                worldPosition = new Vector3(st.wpx, st.wpy, st.wpz),
+                                yRotation = st.yRotation,
+                                id = st.id
                             });
                         }
                     }
@@ -348,7 +389,8 @@ namespace IsometricMapEditor
                         freePlace = sb.freePlace,
                         worldPosition = new Vector3(sb.worldX, sb.worldY, sb.worldZ),
                         yRotation = sb.yRotation,
-                        scale = sb.scale > 0 ? sb.scale : 1f
+                        scale = sb.scale > 0 ? sb.scale : 1f,
+                        level = sb.level
                     });
                 }
             }
@@ -368,7 +410,12 @@ namespace IsometricMapEditor
                         worldPosition = new Vector3(sp.worldX, sp.worldY, sp.worldZ),
                         yRotation = sp.yRotation,
                         scale = sp.scale > 0 ? sp.scale : 1f,
-                        parentBuildingId = sp.parentBuildingId
+                        flipX = sp.flipX,
+                        wallMounted = sp.wallMounted,
+                        mountHeight = sp.mountHeight,
+                        groundOffsetOverride = new Vector3(sp.groundOffX, sp.groundOffY, sp.groundOffZ),
+                        parentBuildingId = sp.parentBuildingId,
+                        level = sp.level
                     });
                 }
             }
@@ -383,7 +430,8 @@ namespace IsometricMapEditor
                         instanceId = sh.instanceId,
                         gridPosition = new Vector2Int(sh.x, sh.y),
                         harvestableDefinitionId = sh.harvestableDefinitionId,
-                        overrideSpawnCondition = sh.overrideSpawnCondition
+                        overrideSpawnCondition = sh.overrideSpawnCondition,
+                        level = sh.level
                     });
                 }
             }
@@ -443,7 +491,8 @@ namespace IsometricMapEditor
                         visualTexturePath = smo.visualTexturePath,
                         effectPrefabPath = smo.effectPrefabPath,
                         visualScale = smo.visualScale > 0.01f ? smo.visualScale : 1f,
-                        parentBuildingId = smo.parentBuildingId
+                        parentBuildingId = smo.parentBuildingId,
+                        level = smo.level
                     });
                 }
             }

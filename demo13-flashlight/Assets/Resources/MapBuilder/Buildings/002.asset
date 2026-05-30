@@ -15,13 +15,13 @@ MonoBehaviour:
   buildingId: 002
   displayName: "\uC804\uB2F9\uD3EC \uBCBD \uC624"
   footprint: {x: 2, y: 2}
-  sortingOffset: 0
+  sortingOffset: 1
   isEnterable: 0
   interiorMapId: 
   entryCell: {x: 0, y: 0}
   variantSet: {fileID: 0}
   prefab: {fileID: 4928543672036990111, guid: f50af65bdcadc114a97c687f59aab183, type: 3}
-  materialPreset: {fileID: 0}
+  materialPreset: {fileID: 2100000, guid: 6cc0bc2abc360484abd7f2a899e5acab, type: 2}
   occludesInterior: 0
   castsShadow: 0
   shadowBoxes: []

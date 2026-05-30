@@ -22,8 +22,11 @@ namespace IsometricMapEditor
             walkability = new WalkabilityData(gridSettings.mapWidth, gridSettings.mapHeight);
         }
 
-        readonly Dictionary<Vector2Int, PlacedTile> _occupancyCache = new();
+        // 키 = (x, y, level). z 성분에 층 인덱스를 담아 같은 칸의 여러 층을 구분한다.
+        readonly Dictionary<Vector3Int, PlacedTile> _occupancyCache = new();
         bool _cacheDirty = true;
+
+        static Vector3Int CacheKey(Vector2Int pos, int level) => new(pos.x, pos.y, level);
 
         void OnEnable() => _cacheDirty = true;
 
@@ -34,20 +37,20 @@ namespace IsometricMapEditor
             _occupancyCache.Clear();
             foreach (var layer in layers)
                 foreach (var tile in layer.tiles)
-                    _occupancyCache[tile.gridPosition] = tile;
+                    _occupancyCache[CacheKey(tile.gridPosition, tile.level)] = tile;
             _cacheDirty = false;
         }
 
-        public PlacedTile GetTileAt(Vector2Int pos)
+        public PlacedTile GetTileAt(Vector2Int pos, int level = 0)
         {
             if (_cacheDirty) RebuildCache();
-            return _occupancyCache.GetValueOrDefault(pos);
+            return _occupancyCache.GetValueOrDefault(CacheKey(pos, level));
         }
 
-        public bool IsCellOccupied(Vector2Int pos)
+        public bool IsCellOccupied(Vector2Int pos, int level = 0)
         {
             if (_cacheDirty) RebuildCache();
-            return _occupancyCache.ContainsKey(pos);
+            return _occupancyCache.ContainsKey(CacheKey(pos, level));
         }
 
         public MapLayer GetOrCreateLayer(string layerName, int sortingOffset = 0)
@@ -71,17 +74,28 @@ namespace IsometricMapEditor
 
             if (tile.tileDefinition != null && tile.tileDefinition.IsWall)
             {
-                // Walls: one per edge (rotation) per cell — replace only the same edge
-                layer.tiles.RemoveAll(t =>
-                    t.gridPosition == tile.gridPosition
-                    && t.tileDefinition != null && t.tileDefinition.IsWall
-                    && t.rotation == tile.rotation);
+                if (tile.freePlace)
+                {
+                    // 자유 배치 벽: id로만 식별. 같은 id가 있으면 교체(이동 시), 없으면 그냥 추가(여러 개 공존 허용).
+                    if (!string.IsNullOrEmpty(tile.id))
+                        layer.tiles.RemoveAll(t =>
+                            t.tileDefinition != null && t.tileDefinition.IsWall
+                            && t.freePlace && t.id == tile.id);
+                }
+                else
+                {
+                    // 스냅 벽: 셀+모서리+층당 1개 — 같은 층 같은 모서리의 스냅 벽만 교체 (자유 배치 벽은 보존)
+                    layer.tiles.RemoveAll(t =>
+                        t.gridPosition == tile.gridPosition && t.level == tile.level
+                        && t.tileDefinition != null && t.tileDefinition.IsWall
+                        && !t.freePlace && t.rotation == tile.rotation);
+                }
             }
             else
             {
-                // Regular tiles: one per cell — replace existing non-wall tile
+                // Regular tiles: 셀+층당 1개 — 같은 층의 비-벽 타일만 교체
                 layer.tiles.RemoveAll(t =>
-                    t.gridPosition == tile.gridPosition
+                    t.gridPosition == tile.gridPosition && t.level == tile.level
                     && (t.tileDefinition == null || !t.tileDefinition.IsWall));
             }
 
@@ -102,13 +116,13 @@ namespace IsometricMapEditor
         /// <summary>
         /// Remove a specific wall edge at the given cell/rotation across all layers.
         /// </summary>
-        public bool RemoveWallEdge(Vector2Int pos, int rotation)
+        public bool RemoveWallEdge(Vector2Int pos, int rotation, int level = 0)
         {
             bool any = false;
             foreach (var layer in layers)
             {
                 int removed = layer.tiles.RemoveAll(t =>
-                    t.gridPosition == pos
+                    t.gridPosition == pos && t.level == level
                     && t.tileDefinition != null && t.tileDefinition.IsWall
                     && t.rotation == rotation);
                 if (removed > 0) any = true;
@@ -128,11 +142,11 @@ namespace IsometricMapEditor
         /// Remove only non-wall tiles at the given position (ground/floor tiles only).
         /// Walls are preserved.
         /// </summary>
-        public void RemoveNonWallTilesAt(Vector2Int pos)
+        public void RemoveNonWallTilesAt(Vector2Int pos, int level = 0)
         {
             foreach (var layer in layers)
                 layer.tiles.RemoveAll(t =>
-                    t.gridPosition == pos
+                    t.gridPosition == pos && t.level == level
                     && (t.tileDefinition == null || !t.tileDefinition.IsWall));
             _cacheDirty = true;
         }

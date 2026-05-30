@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 디버그 테스트 UI.
@@ -15,6 +16,8 @@ public class DebugTestUI : MonoBehaviour
     [SerializeField] MedicalItemData[] testMedicalItems;
 
     bool isOpen;
+    // 맵툴 씬에서는 게임용 디버그 UI를 띄우지 않는다 (맵툴 자체 F1 도움말과 충돌 방지)
+    bool inMapTool;
     int currentTab;
     string[] tabNames = { "의료", "전투", "아이템", "씬" };
 
@@ -64,6 +67,22 @@ public class DebugTestUI : MonoBehaviour
         }
         instance = this;
         DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        RefreshMapToolState();
+    }
+
+    void OnDestroy()
+    {
+        if (instance == this)
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode) => RefreshMapToolState();
+
+    void RefreshMapToolState()
+    {
+        inMapTool = FindFirstObjectByType<IsometricMapEditor.MapBuilderManager>() != null;
+        if (inMapTool) isOpen = false;
     }
 
     void Start()
@@ -89,6 +108,9 @@ public class DebugTestUI : MonoBehaviour
 
     void Update()
     {
+        // 맵툴 씬에서는 비활성 (맵툴 F1 도움말이 대신 뜬다)
+        if (inMapTool) return;
+
         // Player 재탐색 (씬 전환 후)
         if (player == null) FindPlayer();
 
@@ -98,7 +120,7 @@ public class DebugTestUI : MonoBehaviour
 
     void OnGUI()
     {
-        if (!isOpen) return;
+        if (inMapTool || !isOpen) return;
 
         InitStyles();
 

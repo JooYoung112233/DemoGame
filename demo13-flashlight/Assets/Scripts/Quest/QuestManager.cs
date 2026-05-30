@@ -110,8 +110,8 @@ public class QuestManager : MonoBehaviour
                     }
                     break;
                 case QuestRewardType.Currency:
-                    // TODO: 화폐 시스템 연동
-                    Debug.Log($"[QuestManager] 보상: {reward.amount} 루디");
+                    if (CurrencyManager.Instance != null)
+                        CurrencyManager.Instance.Add(reward.amount, $"퀘스트: {quest.data.title}");
                     break;
                 case QuestRewardType.Affinity:
                 case QuestRewardType.Trust:

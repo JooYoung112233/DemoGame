@@ -84,7 +84,8 @@ namespace IsometricMapEditor
 
             for (int x = startX; x < startX + chunkSize; x++)
                 for (int y = startY; y < startY + chunkSize; y++)
-                    tileRenderer.RemoveTileObject(new Vector2Int(x, y));
+                    for (int lv = 0; lv <= TileRenderer.MAX_LEVEL; lv++)
+                        tileRenderer.RemoveTileObject(new Vector2Int(x, y), lv);
         }
 
         public void ClearAll()

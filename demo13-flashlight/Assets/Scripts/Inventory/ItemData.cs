@@ -34,7 +34,7 @@ public enum ItemUseEffect
     None,
     HealHP,          // HP 회복
     HealInjury,      // 부상 치료 (MedicalItemData 연동)
-    RestoreStamina,  // 스태미너 회복
+    RestoreStamina,  // [미사용/deprecated] 스태미너 회복 — 2026-05-30 제거. enum 인덱스 보존용으로만 유지(삭제 시 AddBattery/Food SO 깨짐)
     AddBattery,      // 배터리 충전
     Food,            // 포만감 (향후)
 }

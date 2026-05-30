@@ -10,13 +10,15 @@ namespace IsometricMapEditor
 
         [Header("Zoom")]
         public float zoomSpeed = 5f;
-        public float minZoom = 3f;
-        public float maxZoom = 40f;
+        public float minZoom = 1f;
+        public float maxZoom = 120f;
 
         [Header("Isometric")]
         public float cameraAngleX = 35.264f;
         public float cameraAngleY = 45f;
         public float initialDistance = 20f;
+
+        [HideInInspector] public MapBuilderManager manager;
 
         Camera _cam;
         float _currentDistance;
@@ -51,11 +53,14 @@ namespace IsometricMapEditor
 
         void HandleKeyboardPan()
         {
+            // 프롭 접지 오프셋 조정 중이면 방향키는 프롭을 밀므로 카메라 패닝에서 제외(WASD만).
+            bool arrowsForOffset = manager != null && manager.ActiveGroundOffset.HasValue;
+
             float h = 0f, v = 0f;
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) v = 1f;
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) v = -1f;
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) h = -1f;
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) h = 1f;
+            if (Input.GetKey(KeyCode.W) || (!arrowsForOffset && Input.GetKey(KeyCode.UpArrow))) v = 1f;
+            if (Input.GetKey(KeyCode.S) || (!arrowsForOffset && Input.GetKey(KeyCode.DownArrow))) v = -1f;
+            if (Input.GetKey(KeyCode.A) || (!arrowsForOffset && Input.GetKey(KeyCode.LeftArrow))) h = -1f;
+            if (Input.GetKey(KeyCode.D) || (!arrowsForOffset && Input.GetKey(KeyCode.RightArrow))) h = 1f;
 
             if (h == 0f && v == 0f) return;
 
@@ -98,10 +103,16 @@ namespace IsometricMapEditor
 
         void HandleScrollZoom()
         {
+            // 리사이즈 모드에서는 스크롤이 크기 조절에 쓰이므로 카메라 줌을 막는다.
+            if (manager != null && manager.ResizeMode) return;
+
             float scroll = Input.mouseScrollDelta.y;
             if (Mathf.Abs(scroll) < 0.01f) return;
 
-            _currentDistance -= scroll * zoomSpeed;
+            // 줌 단계를 현재 거리에 비례시켜 가까울 땐 미세하게, 멀 땐 크게 움직인다.
+            // (넓어진 범위 1~120에서도 스크롤 횟수가 일정하게 느껴지도록)
+            float step = zoomSpeed * (_currentDistance / 20f);
+            _currentDistance -= scroll * step;
             _currentDistance = Mathf.Clamp(_currentDistance, minZoom, maxZoom);
             _cam.orthographicSize = _currentDistance;
         }

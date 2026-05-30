@@ -527,8 +527,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 506814001}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.21000992, y: 0.34918302, z: -0.08061525, w: 0.9096528}
-  m_LocalPosition: {x: 1.348, y: 4.26, z: 1.444}
+  m_LocalRotation: {x: 0.27984518, y: 0.3647056, z: -0.11591566, w: 0.88047725}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -622,6 +622,8 @@ MonoBehaviour:
   spawnPointId: 
   exitWaitTime: 0
   noteContent: 
+  noteStorySceneId: 
+  storyNpcId: 
   itemId: 
   itemCount: 1
 --- !u!4 &667569500
@@ -1399,6 +1401,8 @@ MonoBehaviour:
   spawnPointId: house
   exitWaitTime: 10
   noteContent: 
+  noteStorySceneId: 
+  storyNpcId: 
   itemId: 
   itemCount: 1
 --- !u!4 &2040165972

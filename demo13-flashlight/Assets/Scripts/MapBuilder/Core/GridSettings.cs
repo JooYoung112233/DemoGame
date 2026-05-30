@@ -17,6 +17,9 @@ namespace IsometricMapEditor
         [Tooltip("Number of grid rows")]
         public int mapHeight = 64;
 
+        [Tooltip("층(level) 하나의 높이(월드 단위). 2층 = level 1 = Y가 levelHeight만큼 올라감.")]
+        public float levelHeight = 3f;
+
         public GridSettings() { }
 
         public GridSettings(float tileSize, int mapWidth, int mapHeight)

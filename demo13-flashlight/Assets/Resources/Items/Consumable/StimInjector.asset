@@ -25,7 +25,7 @@ MonoBehaviour:
   sellPrice: 35
   buyPrice: 75
   isUsable: 1
-  useEffect: 3
+  useEffect: 0
   effectValue: 40
   medicalData: {fileID: 0}
   worldDropPrefab: {fileID: 0}

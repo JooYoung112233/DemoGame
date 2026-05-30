@@ -19,6 +19,8 @@ namespace IsometricMapEditor
         [Header("Wall Settings (category=Wall only)")]
         public float wallHeight = 2f;
         public float wallThickness = 0.08f;
+        [Tooltip("벽 길이(m). 0이면 타일 한 칸 크기(tileSize)에 자동으로 맞춤.")]
+        public float wallLength = 0f;
 
         [Header("Light Occlusion (빛 차폐)")]
         [Tooltip("체크하면 벽이 플래시라이트 빛을 막는 그림자 전용 박스를 함께 배치한다.")]
@@ -49,6 +51,7 @@ namespace IsometricMapEditor
         Decoration,
         Wall,
         Water,
+        Ceiling,
         Custom
     }
 }

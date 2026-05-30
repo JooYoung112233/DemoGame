@@ -39,9 +39,13 @@ namespace IsometricMapEditor
 
         public void SpawnProp(PlacedProp prop, GridSettings settings)
         {
-            if (prop.propDefinition == null || prop.propDefinition.prefab == null) return;
+            var def = prop.propDefinition;
+            if (def == null) return;
+            // 프롭은 스프라이트 기반 쿼드 전용. 스프라이트가 없으면 비주얼이 없으므로 스킵.
+            if (!PropQuadBuilder.UsesQuad(def)) return;
 
             Vector3 worldPos = prop.GetWorldPosition(settings);
+            worldPos.y += prop.ElevationY(settings);
 
             // 소속 건물이 있으면 건물 하위 Interior 루트에 배치
             Transform parent = _root;
@@ -50,19 +54,20 @@ namespace IsometricMapEditor
                 parent = GetOrCreateInteriorRoot(prop.parentBuildingId);
             }
 
-            var go = Instantiate(prop.propDefinition.prefab, worldPos, Quaternion.identity, parent);
+            // 스프라이트 프롭: 빌보드 쿼드 + 풋프린트 nav 박스(이동 차단). 빛 차폐 없음.
+            var go = PropQuadBuilder.Build(def, settings, addNavCollider: true);
+            go.transform.SetParent(parent);
+            // 벽 부착이면 높이만큼 띄운다. (접지 보정은 root가 아니라 내부 Content에 적용)
+            if (prop.wallMounted)
+                worldPos += Vector3.up * prop.mountHeight;
+            go.transform.position = worldPos;
             go.name = $"Prop_{prop.instanceId}";
 
-            if (prop.freePlace)
-            {
-                // Y회전을 프리팹 Root 회전에 곱함 (Root의 카메라 맞춤 회전 유지)
-                if (Mathf.Abs(prop.yRotation) > 0.01f)
-                    go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0) * go.transform.rotation;
-                go.transform.localScale = Vector3.one * prop.scale;
-            }
-
-            // 빛 차폐 그림자 프록시 박스 (벽/컨테이너 등). 런타임은 ShadowsOnly.
-            ShadowProxyBuilder.Build(prop.propDefinition, go.transform, editorPreview: false);
+            // 회전: 벽 부착이면 빌보드 끄고 yaw만, 아니면 빌보드×yaw.
+            go.transform.rotation = PropQuadBuilder.RootRotation(prop.yRotation, prop.wallMounted);
+            go.transform.localScale = Vector3.one * prop.scale;
+            PropQuadBuilder.ApplyFlip(go, prop.flipX);
+            PropQuadBuilder.ApplyGroundOffset(go, prop.GroundOffsetVec); // 접지 보정 — 내부 이미지+콜라이더만
 
             _propObjects[prop.instanceId] = go;
         }
