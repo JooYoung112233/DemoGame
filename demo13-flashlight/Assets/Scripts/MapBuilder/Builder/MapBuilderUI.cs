@@ -23,6 +23,16 @@ namespace IsometricMapEditor
         Text _snapText;
         Button _snapButton;
 
+        // Brush size (Tile tool)
+        Text _brushWText;
+        Text _brushHText;
+        RectTransform _brushGroup;
+
+        // 정렬 조절 그룹
+        RectTransform _sortGroup;
+        Text _sortLabel;
+        Text _sortValue;
+
         // Hover tooltip (eraser preview)
         RectTransform _hoverTooltip;
         Text _hoverTooltipText;
@@ -119,8 +129,8 @@ namespace IsometricMapEditor
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
 
-            string[] toolNames = { "1.Tile", "2.Wall", "3.Prop", "4.Building", "5.Object", "6.Del" };
-            ToolMode[] modes = { ToolMode.Tile, ToolMode.Wall, ToolMode.Prop, ToolMode.Building, ToolMode.MapObject, ToolMode.Eraser };
+            string[] toolNames = { "1.Tile", "2.Wall", "3.Prop", "4.Building", "5.Object", "6.Del", "7.Move" };
+            ToolMode[] modes = { ToolMode.Tile, ToolMode.Wall, ToolMode.Prop, ToolMode.Building, ToolMode.MapObject, ToolMode.Eraser, ToolMode.Move };
             _toolButtons = new Button[toolNames.Length];
 
             for (int i = 0; i < toolNames.Length; i++)
@@ -145,6 +155,48 @@ namespace IsometricMapEditor
                 RefreshStatus();
             });
             _snapText = _snapButton.GetComponentInChildren<Text>();
+
+            // ── 브러시 크기 (타일 모드) ──
+            CreateSpacer(bar, 10);
+            var brushGo = new GameObject("BrushGroup");
+            brushGo.transform.SetParent(bar, false);
+            _brushGroup = brushGo.AddComponent<RectTransform>();
+            var brushLayout = brushGo.AddComponent<HorizontalLayoutGroup>();
+            brushLayout.spacing = 2;
+            brushLayout.childForceExpandWidth = false;
+            brushLayout.childForceExpandHeight = true;
+            brushLayout.childAlignment = TextAnchor.MiddleCenter;
+            var brushLe = brushGo.AddComponent<LayoutElement>();
+            brushLe.preferredWidth = 178;
+
+            CreateLabel(_brushGroup, "Brush", 42);
+            CreateButton(_brushGroup, "-", 22, () => _manager.SetBrushSize(_manager.BrushWidth - 1, _manager.BrushHeight));
+            _brushWText = CreateLabel(_brushGroup, "1", 16);
+            CreateButton(_brushGroup, "+", 22, () => _manager.SetBrushSize(_manager.BrushWidth + 1, _manager.BrushHeight));
+            CreateLabel(_brushGroup, "x", 10);
+            CreateButton(_brushGroup, "-", 22, () => _manager.SetBrushSize(_manager.BrushWidth, _manager.BrushHeight - 1));
+            _brushHText = CreateLabel(_brushGroup, "1", 16);
+            CreateButton(_brushGroup, "+", 22, () => _manager.SetBrushSize(_manager.BrushWidth, _manager.BrushHeight + 1));
+
+            // ── 정렬 조절 (지우개 모드에서 프랍/건물을 가리키면 표시) ──
+            CreateSpacer(bar, 10);
+            var sortGo = new GameObject("SortGroup");
+            sortGo.transform.SetParent(bar, false);
+            _sortGroup = sortGo.AddComponent<RectTransform>();
+            var sortLayout = sortGo.AddComponent<HorizontalLayoutGroup>();
+            sortLayout.spacing = 3;
+            sortLayout.childForceExpandWidth = false;
+            sortLayout.childForceExpandHeight = true;
+            sortLayout.childAlignment = TextAnchor.MiddleCenter;
+            var sortLe = sortGo.AddComponent<LayoutElement>();
+            sortLe.preferredWidth = 230;
+
+            _sortLabel = CreateLabel(_sortGroup, "정렬", 90);
+            _sortLabel.alignment = TextAnchor.MiddleRight;
+            CreateButton(_sortGroup, "-", 24, () => _manager.NudgeHoverSortOffset(-1));
+            _sortValue = CreateLabel(_sortGroup, "0", 28);
+            CreateButton(_sortGroup, "+", 24, () => _manager.NudgeHoverSortOffset(+1));
+            CreateButton(_sortGroup, "X", 22, () => _manager.ClearSortTarget());
         }
 
         // ======== PALETTE PANEL ========
@@ -297,6 +349,11 @@ namespace IsometricMapEditor
                 case ToolMode.Eraser:
                     AddPaletteHeader("Del");
                     AddPaletteLabel("LMB: 커서 위치 삭제\n우클릭: 다른 모드에서도 삭제\n\n마우스 오버 시\n삭제 대상 빨간색 표시");
+                    break;
+
+                case ToolMode.Move:
+                    AddPaletteHeader("Move");
+                    AddPaletteLabel("LMB: 오브젝트 집기/놓기\nRMB/ESC: 취소\nQ/E: 회전 (집은 상태)\nShift+Q/E: 미세 회전 (1°)\n\n마우스 오버 시\n이동 대상 초록색 표시");
                     break;
             }
         }
@@ -494,7 +551,9 @@ namespace IsometricMapEditor
             foreach (Transform child in _spawnConfigPanel)
                 Destroy(child.gameObject);
 
-            bool show = _manager.CurrentTool == ToolMode.MapObject;
+            bool showMapObj = _manager.CurrentTool == ToolMode.MapObject;
+            bool showProp = _manager.CurrentTool == ToolMode.Prop;
+            bool show = showMapObj || showProp;
 
             _spawnConfigPanel.gameObject.SetActive(show);
             if (!show) return;
@@ -515,6 +574,9 @@ namespace IsometricMapEditor
                 csf = _spawnConfigPanel.gameObject.AddComponent<ContentSizeFitter>();
                 csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             }
+
+            // Prop 모드면 추가 설정 없음
+            if (showProp) return;
 
             // ── Visual mode selection (all MapObject types) ──
             AddConfigHeader("비주얼 모드");
@@ -605,6 +667,10 @@ namespace IsometricMapEditor
                 case MapObjectType.Door:
                     AddConfigHeader("문 설정");
                     AddConfigDoorLockButtons();
+                    break;
+
+                case MapObjectType.Trigger:
+                    AddConfigTriggerPanel();
                     break;
 
                 case MapObjectType.NPC:
@@ -704,6 +770,117 @@ namespace IsometricMapEditor
                     AddConfigInput("퀘스트 ID:", _manager.SpawnDoorQuestId, v => _manager.SpawnDoorQuestId = v);
                     break;
             }
+        }
+
+        void AddConfigTriggerPanel()
+        {
+            AddConfigHeader("트리거 설정");
+
+            // Mode buttons
+            string[] modeNames = { "씬전환", "로컬이동", "스토리", "커스텀" };
+            var modeRow = new GameObject("TriggerModeRow");
+            modeRow.transform.SetParent(_spawnConfigPanel, false);
+            var modeLayout = modeRow.AddComponent<HorizontalLayoutGroup>();
+            modeLayout.spacing = 3;
+            modeLayout.childForceExpandWidth = true;
+            modeLayout.childForceExpandHeight = true;
+            var modeLe = modeRow.AddComponent<LayoutElement>();
+            modeLe.preferredHeight = 28;
+
+            for (int i = 0; i < 4; i++)
+            {
+                int modeIdx = i;
+                bool isActive = _manager.SpawnTriggerMode == modeIdx;
+                var btnGo = new GameObject(modeNames[i]);
+                btnGo.transform.SetParent(modeRow.transform, false);
+                var btnImg = btnGo.AddComponent<Image>();
+                btnImg.color = isActive ? BTN_ACTIVE : BTN_NORMAL;
+
+                var txtGo = new GameObject("Text");
+                txtGo.transform.SetParent(btnGo.transform, false);
+                var txtRt = txtGo.AddComponent<RectTransform>();
+                SetAnchors(txtRt, Vector2.zero, Vector2.one);
+                txtRt.offsetMin = Vector2.zero;
+                txtRt.offsetMax = Vector2.zero;
+                var txt = txtGo.AddComponent<Text>();
+                txt.text = modeNames[modeIdx];
+                txt.font = DefaultFont;
+                txt.fontSize = 11;
+                txt.color = Color.white;
+                txt.alignment = TextAnchor.MiddleCenter;
+
+                var btn = btnGo.AddComponent<Button>();
+                btn.targetGraphic = btnImg;
+                btn.onClick.AddListener(() => { _manager.SpawnTriggerMode = modeIdx; RefreshSpawnConfig(); });
+            }
+
+            // Common trigger settings
+            AddConfigToggle("자동 입장:", _manager.SpawnTriggerAutoEnter, v => _manager.SpawnTriggerAutoEnter = v);
+            AddConfigToggle("1회 발동:", _manager.SpawnTriggerOneShot, v => _manager.SpawnTriggerOneShot = v);
+            AddConfigInput("지연 시간:", _manager.SpawnTriggerDelay.ToString("F1"), v =>
+            {
+                if (float.TryParse(v, out float f)) _manager.SpawnTriggerDelay = Mathf.Max(0f, f);
+            });
+
+            // Collider size
+            AddConfigHeader("콜라이더 크기");
+            AddConfigInput("X:", _manager.SpawnTriggerSizeX.ToString("F1"), v =>
+            {
+                if (float.TryParse(v, out float f)) _manager.SpawnTriggerSizeX = Mathf.Max(0.1f, f);
+            });
+            AddConfigInput("Y:", _manager.SpawnTriggerSizeY.ToString("F1"), v =>
+            {
+                if (float.TryParse(v, out float f)) _manager.SpawnTriggerSizeY = Mathf.Max(0.1f, f);
+            });
+            AddConfigInput("Z:", _manager.SpawnTriggerSizeZ.ToString("F1"), v =>
+            {
+                if (float.TryParse(v, out float f)) _manager.SpawnTriggerSizeZ = Mathf.Max(0.1f, f);
+            });
+
+            // Mode-specific fields
+            switch (_manager.SpawnTriggerMode)
+            {
+                case 0: // SceneTransition
+                    AddConfigHeader("씬 전환");
+                    AddConfigInput("대상 씬:", _manager.SpawnTriggerTargetScene, v => _manager.SpawnTriggerTargetScene = v);
+                    AddConfigInput("스폰 ID:", _manager.SpawnTriggerTargetSpawnId, v => _manager.SpawnTriggerTargetSpawnId = v);
+                    break;
+
+                case 1: // LocalTeleport
+                    AddConfigHeader("로컬 텔레포트");
+                    AddConfigInput("X:", _manager.SpawnTeleportX.ToString("F1"), v =>
+                    {
+                        if (float.TryParse(v, out float f)) _manager.SpawnTeleportX = f;
+                    });
+                    AddConfigInput("Y:", _manager.SpawnTeleportY.ToString("F1"), v =>
+                    {
+                        if (float.TryParse(v, out float f)) _manager.SpawnTeleportY = f;
+                    });
+                    AddConfigInput("Z:", _manager.SpawnTeleportZ.ToString("F1"), v =>
+                    {
+                        if (float.TryParse(v, out float f)) _manager.SpawnTeleportZ = f;
+                    });
+                    AddConfigInput("Y 회전:", _manager.SpawnTeleportYRot.ToString("F0"), v =>
+                    {
+                        if (float.TryParse(v, out float f)) _manager.SpawnTeleportYRot = f;
+                    });
+                    break;
+
+                case 2: // StoryTrigger
+                    AddConfigHeader("스토리 트리거");
+                    AddConfigInput("스토리 씬 ID:", _manager.SpawnTriggerStorySceneId, v => _manager.SpawnTriggerStorySceneId = v);
+                    break;
+
+                case 3: // CustomEvent
+                    AddConfigHeader("커스텀 이벤트");
+                    AddConfigInput("커스텀 데이터:", _manager.SpawnTriggerCustomData, v => _manager.SpawnTriggerCustomData = v);
+                    break;
+            }
+
+            // Condition settings (shared with door)
+            AddConfigHeader("조건");
+            AddConfigInput("필요 아이템:", _manager.SpawnDoorKeyId, v => _manager.SpawnDoorKeyId = v);
+            AddConfigInput("필요 퀘스트:", _manager.SpawnDoorQuestId, v => _manager.SpawnDoorQuestId = v);
         }
 
         void AddConfigHeader(string text)
@@ -894,6 +1071,125 @@ namespace IsometricMapEditor
             btn.onClick.AddListener(() => onClick?.Invoke());
         }
 
+        // ── 건물 소속 선택기 (Prop + MapObject 공통) ──
+
+        void BuildParentBuildingSelector()
+        {
+            if (_manager.EditingMap == null) return;
+            var buildings = _manager.EditingMap.buildings;
+
+            AddConfigHeader("건물 소속 (내부 프랍)");
+
+            // "없음" + 건물 목록 버튼 행
+            var row = new GameObject("BuildingRow");
+            row.transform.SetParent(_spawnConfigPanel, false);
+            var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
+            rowLayout.spacing = 3;
+            rowLayout.childForceExpandWidth = false;
+            rowLayout.childForceExpandHeight = true;
+            var rowLe = row.AddComponent<LayoutElement>();
+            rowLe.preferredHeight = 26;
+
+            // "없음" 버튼
+            bool noneSelected = string.IsNullOrEmpty(_manager.SelectedParentBuildingId);
+            var noneBtnGo = new GameObject("None");
+            noneBtnGo.transform.SetParent(row.transform, false);
+            var noneImg = noneBtnGo.AddComponent<Image>();
+            noneImg.color = noneSelected ? new Color(0.3f, 0.6f, 1f, 1f) : BTN_NORMAL;
+            var noneLe = noneBtnGo.AddComponent<LayoutElement>();
+            noneLe.preferredWidth = 45;
+
+            var noneTxtGo = new GameObject("Text");
+            noneTxtGo.transform.SetParent(noneBtnGo.transform, false);
+            var noneRt = noneTxtGo.AddComponent<RectTransform>();
+            SetAnchors(noneRt, Vector2.zero, Vector2.one);
+            noneRt.offsetMin = Vector2.zero;
+            noneRt.offsetMax = Vector2.zero;
+            var noneTxt = noneTxtGo.AddComponent<Text>();
+            noneTxt.text = "없음";
+            noneTxt.font = DefaultFont;
+            noneTxt.fontSize = 11;
+            noneTxt.color = Color.white;
+            noneTxt.alignment = TextAnchor.MiddleCenter;
+
+            var noneBtn = noneBtnGo.AddComponent<Button>();
+            noneBtn.targetGraphic = noneImg;
+            noneBtn.onClick.AddListener(() =>
+            {
+                _manager.SelectedParentBuildingId = "";
+                RefreshSpawnConfig();
+            });
+
+            if (buildings.Count == 0)
+            {
+                // 건물이 없으면 안내 텍스트
+                var infoGo = new GameObject("Info");
+                infoGo.transform.SetParent(_spawnConfigPanel, false);
+                var infoLe = infoGo.AddComponent<LayoutElement>();
+                infoLe.preferredHeight = 20;
+                var infoTxt = infoGo.AddComponent<Text>();
+                infoTxt.text = "  (맵에 건물을 먼저 배치하세요)";
+                infoTxt.font = DefaultFont;
+                infoTxt.fontSize = 10;
+                infoTxt.color = new Color(0.5f, 0.5f, 0.5f);
+                infoTxt.alignment = TextAnchor.MiddleLeft;
+                return;
+            }
+
+            // 건물 목록 (스크롤 가능한 버튼 리스트)
+            foreach (var building in buildings)
+            {
+                bool isSelected = _manager.SelectedParentBuildingId == building.instanceId;
+                string displayName = building.buildingDefinition != null
+                    ? building.buildingDefinition.displayName
+                    : building.buildingDefinitionId;
+                if (string.IsNullOrEmpty(displayName))
+                    displayName = building.instanceId;
+
+                // 건물 이름을 축약 (너무 길면)
+                string shortName = displayName.Length > 12
+                    ? displayName[..10] + ".."
+                    : displayName;
+
+                var bRow = new GameObject("Building");
+                bRow.transform.SetParent(_spawnConfigPanel, false);
+                var bRowLayout = bRow.AddComponent<HorizontalLayoutGroup>();
+                bRowLayout.spacing = 4;
+                bRowLayout.childForceExpandHeight = true;
+                var bRowLe = bRow.AddComponent<LayoutElement>();
+                bRowLe.preferredHeight = 24;
+
+                var bBtnGo = new GameObject("Btn");
+                bBtnGo.transform.SetParent(bRow.transform, false);
+                var bImg = bBtnGo.AddComponent<Image>();
+                bImg.color = isSelected ? new Color(0.3f, 0.6f, 1f, 1f) : BTN_NORMAL;
+                var bBtnLe = bBtnGo.AddComponent<LayoutElement>();
+                bBtnLe.flexibleWidth = 1;
+
+                var bTxtGo = new GameObject("Text");
+                bTxtGo.transform.SetParent(bBtnGo.transform, false);
+                var bTxtRt = bTxtGo.AddComponent<RectTransform>();
+                SetAnchors(bTxtRt, Vector2.zero, Vector2.one);
+                bTxtRt.offsetMin = new Vector2(4, 0);
+                bTxtRt.offsetMax = new Vector2(-4, 0);
+                var bTxt = bTxtGo.AddComponent<Text>();
+                bTxt.text = $"{shortName} [{building.instanceId}]";
+                bTxt.font = DefaultFont;
+                bTxt.fontSize = 10;
+                bTxt.color = Color.white;
+                bTxt.alignment = TextAnchor.MiddleLeft;
+
+                string bid = building.instanceId;
+                var bBtn = bBtnGo.AddComponent<Button>();
+                bBtn.targetGraphic = bImg;
+                bBtn.onClick.AddListener(() =>
+                {
+                    _manager.SelectedParentBuildingId = bid;
+                    RefreshSpawnConfig();
+                });
+            }
+        }
+
         static string GetMapObjectDisplayName(MapObjectType type) => type switch
         {
             MapObjectType.SpawnPoint => "스폰 포인트",
@@ -969,6 +1265,13 @@ namespace IsometricMapEditor
                 info = $"크기: {_manager.ResizeHoverInfo}  [스크롤: 조절]";
                 bgColor = new Color(0.15f, 0.4f, 0.8f, 0.85f);
             }
+            else if (_manager.CurrentTool == ToolMode.Move && !string.IsNullOrEmpty(_manager.MoveHoverInfo))
+            {
+                info = _manager.IsMovingObject
+                    ? $"이동: {_manager.MoveHoverInfo}"
+                    : $"이동: {_manager.MoveHoverInfo}  [클릭: 집기]";
+                bgColor = new Color(0.1f, 0.6f, 0.2f, 0.85f);
+            }
             else if (!string.IsNullOrEmpty(_manager.EraseHoverInfo))
             {
                 info = $"삭제: {_manager.EraseHoverInfo}";
@@ -1000,30 +1303,34 @@ namespace IsometricMapEditor
             _dialogPanel.offsetMin = Vector2.zero;
             _dialogPanel.offsetMax = Vector2.zero;
 
+            // 고정 크기 + 화면 중앙 (분수 앵커는 화면비에 따라 잘려서 픽셀 고정)
             var center = CreatePanel(_dialogPanel, "DialogCenter", PANEL_BG);
-            center.anchorMin = new Vector2(0.3f, 0.2f);
-            center.anchorMax = new Vector2(0.7f, 0.8f);
-            center.offsetMin = Vector2.zero;
-            center.offsetMax = Vector2.zero;
+            center.anchorMin = new Vector2(0.5f, 0.5f);
+            center.anchorMax = new Vector2(0.5f, 0.5f);
+            center.pivot = new Vector2(0.5f, 0.5f);
+            center.sizeDelta = new Vector2(480, 560);
+            center.anchoredPosition = Vector2.zero;
 
             var vlg = center.gameObject.AddComponent<VerticalLayoutGroup>();
-            vlg.padding = new RectOffset(15, 15, 15, 15);
-            vlg.spacing = 10;
+            vlg.padding = new RectOffset(16, 16, 14, 14);
+            vlg.spacing = 8;
             vlg.childForceExpandHeight = false;
+            vlg.childForceExpandWidth = true;
 
-            _dialogTitle = CreateTextObj(center, "Title", "Save Map", 18, FontStyle.Bold);
-            var titleLe = _dialogTitle.gameObject.AddComponent<LayoutElement>();
-            titleLe.preferredHeight = 30;
+            _dialogTitle = CreateTextObj(center, "Title", "Save Map", 17, FontStyle.Bold);
+            var titleLe = _dialogTitle.gameObject.GetComponent<LayoutElement>();
+            titleLe.preferredHeight = 26;
 
-            // Filename input
-            var inputRow = CreateRow(center, 35);
-            CreateTextObj(inputRow, "Label", "Filename:", 14, FontStyle.Normal);
+            // Filename input (작게)
+            var inputRow = CreateRow(center, 26);
+            CreateTextObj(inputRow, "Label", "Filename:", 13, FontStyle.Normal);
             _dialogInput = CreateInputField(inputRow, "map_name");
 
-            // File list (for load)
+            // File list (for load) — 남는 공간 전부 차지해서 많이 보이게
             var listArea = CreatePanel(center, "FileList", new Color(0.1f, 0.1f, 0.12f, 1f));
             var listLe = listArea.gameObject.AddComponent<LayoutElement>();
             listLe.flexibleHeight = 1;
+            listLe.minHeight = 320;
 
             var listScroll = listArea.gameObject.AddComponent<ScrollRect>();
             listScroll.horizontal = false;
@@ -1045,10 +1352,12 @@ namespace IsometricMapEditor
 
             listScroll.content = _fileListContent;
 
-            // Buttons row
-            var btnRow = CreateRow(center, 35);
-            CreateButton(btnRow, "OK", 100, OnDialogOK);
-            CreateButton(btnRow, "Cancel", 100, () => _dialogPanel.gameObject.SetActive(false));
+            // Buttons row (작게, 가운데 정렬)
+            var btnRow = CreateRow(center, 30);
+            var btnHlg = btnRow.GetComponent<HorizontalLayoutGroup>();
+            if (btnHlg != null) btnHlg.childAlignment = TextAnchor.MiddleCenter;
+            CreateButton(btnRow, "OK", 90, OnDialogOK);
+            CreateButton(btnRow, "Cancel", 90, () => _dialogPanel.gameObject.SetActive(false));
 
             _dialogPanel.gameObject.SetActive(false);
         }
@@ -1187,7 +1496,7 @@ namespace IsometricMapEditor
             center.anchorMin = new Vector2(0.5f, 0.5f);
             center.anchorMax = new Vector2(0.5f, 0.5f);
             center.pivot = new Vector2(0.5f, 0.5f);
-            center.sizeDelta = new Vector2(500, 400);
+            center.sizeDelta = new Vector2(500, 480);
 
             var vlg = center.gameObject.AddComponent<VerticalLayoutGroup>();
             vlg.padding = new RectOffset(20, 20, 15, 15);
@@ -1199,18 +1508,23 @@ namespace IsometricMapEditor
                 "=== 맵툴 도움말 (F1) ===\n\n" +
                 "[도구 선택]\n" +
                 "1 - 타일    2 - 벽     3 - 프롭\n" +
-                "4 - 빌딩    5 - 오브젝트  6 - 지우개\n\n" +
+                "4 - 빌딩    5 - 오브젝트  6 - 지우개  7 - 이동\n\n" +
                 "[배치/조작]\n" +
                 "LMB - 배치/드래그    RMB - 지우기\n" +
-                "Q/E - 회전 (15°)    G - Snap/Free 전환\n" +
+                "Q/E - 회전 (15°)    Shift+Q/E - 미세 회전 (1°)\n" +
+                "G - Snap/Free 전환\n" +
                 "R - 리사이즈 모드    스크롤 - 크기 조절(R모드)\n" +
+                "[ / ] - 가리킨 프랍/건물 정렬순서 -/+ (지우개 모드)\n" +
                 "Delete - 호버 대상 삭제\n\n" +
+                "[이동 모드 (7)]\n" +
+                "LMB - 집기/놓기    RMB/ESC - 취소\n" +
+                "Q/E - 집은 상태에서 회전\n\n" +
                 "[파일]\n" +
                 "Ctrl+S - 저장    Ctrl+L - 불러오기\n" +
                 "Ctrl+N - 새 맵   Ctrl+Z - 되돌리기\n\n" +
                 "[표시]\n" +
                 "F1 - 이 도움말 토글\n" +
-                "ESC - 리사이즈 모드 종료";
+                "ESC - 리사이즈/이동 모드 종료";
 
             var txtGo = new GameObject("HelpText");
             txtGo.transform.SetParent(center, false);
@@ -1265,7 +1579,7 @@ namespace IsometricMapEditor
         public void RefreshToolbar()
         {
             if (_toolButtons == null) return;
-            ToolMode[] modes = { ToolMode.Tile, ToolMode.Wall, ToolMode.Prop, ToolMode.Building, ToolMode.MapObject, ToolMode.Eraser };
+            ToolMode[] modes = { ToolMode.Tile, ToolMode.Wall, ToolMode.Prop, ToolMode.Building, ToolMode.MapObject, ToolMode.Eraser, ToolMode.Move };
             for (int i = 0; i < _toolButtons.Length && i < modes.Length; i++)
             {
                 if (_toolButtons[i] == null) continue;
@@ -1283,8 +1597,11 @@ namespace IsometricMapEditor
         {
             if (_rotationText != null)
             {
-                int angle = _manager.CurrentRotation * 15;
-                _rotationText.text = $"Rot: {angle}°";
+                float angle = _manager.CurrentRotation * 15f;
+                // 정수면 소수점 생략, 아니면 1자리
+                _rotationText.text = Mathf.Approximately(angle % 1f, 0f)
+                    ? $"Rot: {(int)angle}°"
+                    : $"Rot: {angle:F1}°";
             }
 
             if (_snapButton != null)
@@ -1295,7 +1612,35 @@ namespace IsometricMapEditor
                 else
                     img.color = _manager.SnapToGrid ? new Color(0.2f, 0.7f, 0.3f, 1f) : new Color(0.7f, 0.4f, 0.2f, 1f);
 
-                _snapText.text = _manager.ResizeMode ? "Resize" : (_manager.SnapToGrid ? "Snap" : "Free");
+                // 항상 스냅 상태(Snap/Free)를 표시. (Move 모드여도 스냅 토글 버튼임)
+                _snapText.text = _manager.ResizeMode ? "Resize"
+                    : (_manager.SnapToGrid ? "Snap" : "Free");
+            }
+
+            // 브러시 크기 표시 (타일 모드에서만 노출)
+            if (_brushGroup != null)
+            {
+                bool showBrush = _manager.CurrentTool == ToolMode.Tile;
+                if (_brushGroup.gameObject.activeSelf != showBrush)
+                    _brushGroup.gameObject.SetActive(showBrush);
+                if (showBrush)
+                {
+                    if (_brushWText != null) _brushWText.text = _manager.BrushWidth.ToString();
+                    if (_brushHText != null) _brushHText.text = _manager.BrushHeight.ToString();
+                }
+            }
+
+            // 정렬 조절 UI: 프랍/건물을 가리켜 정렬 대상이 잡혔을 때만 노출
+            if (_sortGroup != null)
+            {
+                bool showSort = _manager.HasSortTarget;
+                if (_sortGroup.gameObject.activeSelf != showSort)
+                    _sortGroup.gameObject.SetActive(showSort);
+                if (showSort)
+                {
+                    if (_sortLabel != null) _sortLabel.text = _manager.SortTargetLabel ?? "정렬";
+                    if (_sortValue != null) _sortValue.text = _manager.SortTargetOffset.ToString();
+                }
             }
         }
 

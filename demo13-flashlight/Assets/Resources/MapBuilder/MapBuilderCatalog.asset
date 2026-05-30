@@ -14,10 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::IsometricMapEditor.MapBuilderCatalog
   tiles:
   - {fileID: 11400000, guid: 8eec898b1387a0b468e6ca534f86ffa7, type: 2}
-  walls:
-  - {fileID: 11400000, guid: 3fe20452689b97241839bcf4a3fa1cf0, type: 2}
+  - {fileID: 11400000, guid: 03b6ba5132138704a898b141b9ce21f7, type: 2}
+  walls: []
   props: []
   buildings:
   - {fileID: 0}
+  - {fileID: 11400000, guid: 5f17a0a0226fa7943bd3ca7dee101c04, type: 2}
+  - {fileID: 11400000, guid: 10e66f108119e7a4caf86f05727b06ea, type: 2}
+  - {fileID: 11400000, guid: f68deab3c48a30240bd9f5ffad7712ac, type: 2}
+  - {fileID: 11400000, guid: cbdc05e0162e9a7478a2e029b976f3ed, type: 2}
+  - {fileID: 11400000, guid: ff696b604b7e12f4b909edabfcb5d831, type: 2}
+  - {fileID: 11400000, guid: 68a5584f59793ef4ca875c01979507c2, type: 2}
   mapObjectDefs: []
   npcs: []
+  nextId: 2

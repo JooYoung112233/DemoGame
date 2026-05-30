@@ -30,7 +30,7 @@ namespace IsometricMapEditor
             if (_cam == null) _cam = gameObject.AddComponent<Camera>();
             _cam.orthographic = true;
             _cam.orthographicSize = initialDistance;
-            _cam.nearClipPlane = 0.01f;
+            _cam.nearClipPlane = -100f;
             _cam.farClipPlane = 500f;
             _currentDistance = initialDistance;
         }

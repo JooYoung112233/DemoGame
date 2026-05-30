@@ -17,6 +17,16 @@ namespace IsometricMapEditor
         bool _freeMode;
         Vector3 _freeWorldPos;
 
+        // 브러시 크기 (타일 모드에서 WxH 영역 미리보기)
+        int _brushW = 1;
+        int _brushH = 1;
+
+        public void SetBrushSize(int w, int h)
+        {
+            _brushW = Mathf.Max(1, w);
+            _brushH = Mathf.Max(1, h);
+        }
+
         public void SetHighlightCell(Vector2Int cell, bool show)
         {
             _highlightCell = cell;
@@ -126,16 +136,27 @@ namespace IsometricMapEditor
                 }
                 else
                 {
-                    // Snap mode: full cell highlight
+                    // Snap mode: 브러시 영역 전체 하이라이트 (WxH, anchor 중심)
+                    float y = 0.02f;
+                    int offX = (_brushW - 1) / 2;
+                    int offY = (_brushH - 1) / 2;
                     GL.Begin(GL.QUADS);
                     GL.Color(highlightColor);
-                    float cx = _highlightCell.x * ts + origin.x;
-                    float cz = _highlightCell.y * ts + origin.z;
-                    float y = 0.02f;
-                    GL.Vertex3(cx, y, cz);
-                    GL.Vertex3(cx + ts, y, cz);
-                    GL.Vertex3(cx + ts, y, cz + ts);
-                    GL.Vertex3(cx, y, cz + ts);
+                    for (int dx = 0; dx < _brushW; dx++)
+                    {
+                        for (int dy = 0; dy < _brushH; dy++)
+                        {
+                            int gx = _highlightCell.x - offX + dx;
+                            int gy = _highlightCell.y - offY + dy;
+                            if (gx < 0 || gx >= w || gy < 0 || gy >= h) continue;
+                            float cx = gx * ts + origin.x;
+                            float cz = gy * ts + origin.z;
+                            GL.Vertex3(cx, y, cz);
+                            GL.Vertex3(cx + ts, y, cz);
+                            GL.Vertex3(cx + ts, y, cz + ts);
+                            GL.Vertex3(cx, y, cz + ts);
+                        }
+                    }
                     GL.End();
                 }
             }

@@ -80,6 +80,14 @@ namespace IsometricMapEditor
                     fallback.hideFlags = HideFlags.DontSave;
             }
 
+            // 벽이 바닥 타일 위에 렌더링되도록 sortingOrder 설정
+            int wallSortOrder = IsometricGrid.GetSortingOrder(tile.gridPosition, IsometricGrid.OBJECT_SORT_BASE);
+            renderer.sortingOrder = wallSortOrder;
+
+            // 빛 차폐 그림자 프록시 (ShadowProxy)
+            if (def.castsShadow && def.shadowBoxes != null && def.shadowBoxes.Length > 0)
+                ShadowProxyBuilder.Build(def.shadowBoxes, go.transform, editorPreview);
+
             // Remove collider in editor preview
             if (editorPreview)
             {
@@ -87,9 +95,6 @@ namespace IsometricMapEditor
                 if (collider != null) Object.DestroyImmediate(collider);
             }
 
-            // 빛 차폐 그림자 프록시 (커스텀 ShadowBox가 있을 때)
-            if (def.castsShadow && def.shadowBoxes != null && def.shadowBoxes.Length > 0)
-                ShadowProxyBuilder.Build(def.shadowBoxes, go.transform, editorPreview);
 
             return go;
         }

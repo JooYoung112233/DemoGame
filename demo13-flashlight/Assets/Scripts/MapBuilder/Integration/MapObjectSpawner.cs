@@ -14,10 +14,18 @@ namespace IsometricMapEditor
     {
         Transform _root;
         readonly List<GameObject> _spawnedObjects = new();
+        Dictionary<string, GameObject> _buildingObjects;
+        readonly Dictionary<string, Transform> _buildingInteriorRoots = new();
 
         public void Initialize(Transform parent)
         {
             _root = parent;
+        }
+
+        /// <summary>건물 오브젝트 딕셔너리 연결 (내부 오브젝트 배치용)</summary>
+        public void SetBuildingObjects(Dictionary<string, GameObject> buildingObjects)
+        {
+            _buildingObjects = buildingObjects;
         }
 
         public void SpawnMapObjects(List<PlacedMapObject> mapObjects, GridSettings gridSettings)
@@ -41,8 +49,13 @@ namespace IsometricMapEditor
         {
             Vector3 worldPos = obj.GetWorldPosition(gridSettings);
 
+            // 소속 건물이 있으면 건물 하위 Interior에 배치
+            Transform parent = _root;
+            if (!string.IsNullOrEmpty(obj.parentBuildingId))
+                parent = GetOrCreateInteriorRoot(obj.parentBuildingId);
+
             var go = new GameObject($"MapObj_{obj.objectType}_{obj.instanceId}");
-            go.transform.SetParent(_root);
+            go.transform.SetParent(parent);
             go.transform.position = worldPos;
             // Y회전을 기본 아이소메트릭 Root 회전에 곱함
             go.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
@@ -89,6 +102,10 @@ namespace IsometricMapEditor
 
                 case MapObjectType.Door:
                     SetupDoor(go, obj);
+                    break;
+
+                case MapObjectType.Trigger:
+                    SetupTrigger(go, obj);
                     break;
             }
 
@@ -256,6 +273,45 @@ namespace IsometricMapEditor
             }
         }
 
+        /// <summary>트리거 (건물 입장 등) 설정</summary>
+        void SetupTrigger(GameObject go, PlacedMapObject obj)
+        {
+            var trigger = go.AddComponent<BuildingEntryTrigger>();
+
+            var triggerMode = (BuildingEntryTrigger.TriggerMode)obj.triggerMode;
+            string prompt = !string.IsNullOrEmpty(obj.promptText) ? obj.promptText : "E — 입장";
+            var size = new Vector3(
+                obj.triggerSizeX > 0 ? obj.triggerSizeX : 1.5f,
+                obj.triggerSizeY > 0 ? obj.triggerSizeY : 2f,
+                obj.triggerSizeZ > 0 ? obj.triggerSizeZ : 1.5f);
+
+            trigger.Configure(triggerMode, prompt, obj.triggerAutoEnter,
+                obj.triggerDelay, size, new Vector3(0, size.y * 0.5f, 0));
+
+            switch (triggerMode)
+            {
+                case BuildingEntryTrigger.TriggerMode.SceneTransition:
+                    trigger.SetSceneTarget(obj.triggerTargetScene, obj.triggerTargetSpawnId);
+                    break;
+
+                case BuildingEntryTrigger.TriggerMode.LocalTeleport:
+                    trigger.SetTeleportTarget(
+                        new Vector3(obj.teleportX, obj.teleportY, obj.teleportZ),
+                        obj.teleportYRot);
+                    break;
+
+                case BuildingEntryTrigger.TriggerMode.StoryTrigger:
+                    trigger.SetStoryTarget(obj.triggerStorySceneId);
+                    break;
+
+                case BuildingEntryTrigger.TriggerMode.CustomEvent:
+                    trigger.SetCustomData(obj.customData);
+                    break;
+            }
+
+            trigger.SetConditions(obj.triggerOneShot, obj.doorKeyId, obj.doorQuestId);
+        }
+
         /// <summary>맵에 스폰 포인트가 있으면 MapSpawnController 자동 생성</summary>
         void TryCreateMapSpawnController()
         {
@@ -323,6 +379,43 @@ namespace IsometricMapEditor
                     return item;
             }
             return null;
+        }
+
+        /// <summary>건물 하위 Interior 루트를 가져오거나 생성</summary>
+        Transform GetOrCreateInteriorRoot(string buildingId)
+        {
+            if (_buildingInteriorRoots.TryGetValue(buildingId, out var existing) && existing != null)
+                return existing;
+
+            Transform buildingTransform = null;
+            if (_buildingObjects != null && _buildingObjects.TryGetValue(buildingId, out var buildingGo) && buildingGo != null)
+                buildingTransform = buildingGo.transform;
+
+            if (buildingTransform == null)
+            {
+                // 건물을 못 찾으면 루트에 그룹 생성
+                var fallbackGo = new GameObject($"Interior_{buildingId}");
+                fallbackGo.transform.SetParent(_root);
+                _buildingInteriorRoots[buildingId] = fallbackGo.transform;
+                return fallbackGo.transform;
+            }
+
+            // 기존 Interior 루트 탐색
+            for (int i = 0; i < buildingTransform.childCount; i++)
+            {
+                var child = buildingTransform.GetChild(i);
+                if (child.name.Contains("Interior"))
+                {
+                    _buildingInteriorRoots[buildingId] = child;
+                    return child;
+                }
+            }
+
+            var interiorGo = new GameObject("Interior");
+            interiorGo.transform.SetParent(buildingTransform, false);
+            interiorGo.transform.localPosition = Vector3.zero;
+            _buildingInteriorRoots[buildingId] = interiorGo.transform;
+            return interiorGo.transform;
         }
 
         public void ClearAll()

@@ -98,6 +98,38 @@ namespace IsometricMapEditor
         /// <summary>비주얼 스케일</summary>
         public float visualScale = 1f;
 
+        // ── 트리거 설정 (Trigger 전용) ──
+
+        /// <summary>트리거 모드 (0=SceneTransition, 1=LocalTeleport, 2=StoryTrigger, 3=CustomEvent)</summary>
+        public int triggerMode;
+
+        /// <summary>전환 대상 씬 이름 (SceneTransition)</summary>
+        public string triggerTargetScene;
+
+        /// <summary>전환 대상 스폰 포인트 ID (SceneTransition)</summary>
+        public string triggerTargetSpawnId;
+
+        /// <summary>자동 입장 여부 (true면 E키 없이 즉시)</summary>
+        public bool triggerAutoEnter;
+
+        /// <summary>전환 지연 시간 (0이면 즉시)</summary>
+        public float triggerDelay;
+
+        /// <summary>1회만 발동</summary>
+        public bool triggerOneShot;
+
+        /// <summary>트리거 콜라이더 크기</summary>
+        public float triggerSizeX = 1.5f;
+        public float triggerSizeY = 2f;
+        public float triggerSizeZ = 1.5f;
+
+        /// <summary>텔레포트 대상 좌표 (LocalTeleport)</summary>
+        public float teleportX, teleportY, teleportZ;
+        public float teleportYRot;
+
+        /// <summary>스토리 씬 ID (StoryTrigger)</summary>
+        public string triggerStorySceneId;
+
         // ── NPC 설정 (NPC 전용) ──
 
         /// <summary>NPCData.npcId (Resources/Data/NPC/{npcId} 로드용)</summary>
@@ -105,6 +137,11 @@ namespace IsometricMapEditor
 
         /// <summary>NPC 표시 이름 (NPCData가 없을 때 폴백)</summary>
         public string npcDisplayName;
+
+        // ── 건물 소속 ──
+
+        /// <summary>소속 건물 instanceId. 비어있으면 외부 오브젝트 (항상 표시)</summary>
+        public string parentBuildingId;
 
         public Vector3 GetWorldPosition(GridSettings settings)
         {

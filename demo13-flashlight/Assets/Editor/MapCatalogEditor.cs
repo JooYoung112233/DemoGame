@@ -25,6 +25,10 @@ public class MapCatalogEditor : EditorWindow
     // 편집 모드: -1이면 새로 생성, 0 이상이면 해당 인덱스의 기존 에셋 수정
     int editingIndex = -1;
 
+    // 목록 접기/펼치기 + 검색
+    bool listFoldout = true;
+    string searchFilter = "";
+
     // 에셋 생성/수정 폼
     bool showCreateForm;
     string newId = "";
@@ -43,11 +47,12 @@ public class MapCatalogEditor : EditorWindow
 
     // 빛 차폐(그림자 박스) 폼 (Prop/Wall/Building 공용)
     bool newCastsShadow;
-    int newShadowPreset; // 0=직선,1=대각선,2=ㅅ자,3=V자,4=직접편집
+    int newShadowPreset = 1; // 0=직선,1=대각선(기본),2=ㅅ자,3=V자,4=직접편집
     List<ShadowBox> newShadowBoxes = new();
     static readonly string[] SHADOW_PRESET_NAMES = { "직선", "대각선", "ㅅ자(Peak)", "V자(Valley)", "직접 편집" };
     Texture2D newBuildingTexture;
-    float newBuildingScale = 3f;
+    float newBuildingScale = 5f;
+    int newSortingOffset;
 
     // MapObject fields
     MapObjectType newObjectType;
@@ -60,6 +65,10 @@ public class MapCatalogEditor : EditorWindow
 
     static readonly Color HEADER_BG = new(0.2f, 0.2f, 0.25f, 1f);
 
+    // ===== Scene Preview =====
+    GameObject _preview;
+    bool _previewDirty;  // form → scene 동기화 필요 여부
+
     [MenuItem("Tools/Dev Tools/Map/Catalog Editor")]
     static void Open()
     {
@@ -69,13 +78,36 @@ public class MapCatalogEditor : EditorWindow
         Debug.Log($"[MapCatalog] Editor opened. Tabs: {win.tabNames.Length} ({string.Join(", ", win.tabNames)})");
     }
 
-    void OnEnable() => LoadCatalog();
+    void OnEnable()
+    {
+        LoadCatalog();
+        EditorApplication.update += OnEditorUpdate;
+        SceneView.duringSceneGui += OnSceneGUI;
+    }
+
+    void OnDisable()
+    {
+        DestroyPreview();
+        EditorApplication.update -= OnEditorUpdate;
+        SceneView.duringSceneGui -= OnSceneGUI;
+    }
 
     void LoadCatalog()
     {
         catalog = AssetDatabase.LoadAssetAtPath<MapBuilderCatalog>(CATALOG_PATH);
         if (catalog != null)
+        {
             so = new SerializedObject(catalog);
+            // nextId가 0이면 기존 항목 수 기반으로 초기화
+            if (catalog.nextId <= 0)
+            {
+                int total = catalog.tiles.Length + catalog.walls.Length
+                          + catalog.props.Length + catalog.buildings.Length
+                          + catalog.mapObjectDefs.Length;
+                catalog.nextId = total + 1;
+                EditorUtility.SetDirty(catalog);
+            }
+        }
     }
 
     void OnGUI()
@@ -96,7 +128,7 @@ public class MapCatalogEditor : EditorWindow
         // 탭
         int prevTab = tab;
         tab = GUILayout.Toolbar(tab, tabNames, GUILayout.Height(28));
-        if (tab != prevTab) { editingIndex = -1; ResetForm(); }
+        if (tab != prevTab) { editingIndex = -1; ResetForm(); DestroyPreview(); searchFilter = ""; listFoldout = true; }
         EditorGUILayout.Space(4);
 
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
@@ -129,11 +161,26 @@ public class MapCatalogEditor : EditorWindow
         var arr = wallMode ? catalog.walls : catalog.tiles;
         string label = wallMode ? "Walls" : "Tiles";
 
-        EditorGUILayout.LabelField($"등록된 {label}: {arr.Length}개", EditorStyles.boldLabel);
+        listFoldout = EditorGUILayout.Foldout(listFoldout, $"등록된 {label}: {arr.Length}개", true, EditorStyles.foldoutHeader);
+        if (!listFoldout) return;
+
+        // 검색 바
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("🔍", GUILayout.Width(20));
+        searchFilter = EditorGUILayout.TextField(searchFilter);
+        if (!string.IsNullOrEmpty(searchFilter) && GUILayout.Button("✕", GUILayout.Width(22)))
+            searchFilter = "";
+        EditorGUILayout.EndHorizontal();
+
+        string filter = searchFilter?.ToLowerInvariant() ?? "";
 
         for (int i = 0; i < arr.Length; i++)
         {
             if (arr[i] == null) continue;
+            // 검색 필터 적용
+            if (!string.IsNullOrEmpty(filter) && !arr[i].tileId.ToLowerInvariant().Contains(filter))
+                continue;
+
             bool isEditing = editingIndex == i;
             var boxStyle = isEditing ? "selectionRect" : "box";
             EditorGUILayout.BeginHorizontal(boxStyle);
@@ -209,8 +256,6 @@ public class MapCatalogEditor : EditorWindow
         {
             tile.wallHeight = newWallHeight;
             tile.wallThickness = newWallThickness;
-            tile.castsShadow = newCastsShadow;
-            tile.shadowBoxes = newCastsShadow ? newShadowBoxes.ToArray() : new ShadowBox[0];
         }
 
         EditorUtility.SetDirty(tile);
@@ -227,12 +272,27 @@ public class MapCatalogEditor : EditorWindow
 
     void DrawPropList()
     {
-        EditorGUILayout.LabelField($"등록된 Props: {catalog.props.Length}개", EditorStyles.boldLabel);
+        listFoldout = EditorGUILayout.Foldout(listFoldout, $"등록된 Props: {catalog.props.Length}개", true, EditorStyles.foldoutHeader);
+        if (!listFoldout) return;
+
+        // 검색 바
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("🔍", GUILayout.Width(20));
+        searchFilter = EditorGUILayout.TextField(searchFilter);
+        if (!string.IsNullOrEmpty(searchFilter) && GUILayout.Button("✕", GUILayout.Width(22)))
+            searchFilter = "";
+        EditorGUILayout.EndHorizontal();
+
+        string filter = searchFilter?.ToLowerInvariant() ?? "";
 
         for (int i = 0; i < catalog.props.Length; i++)
         {
             if (catalog.props[i] == null) continue;
             var p = catalog.props[i];
+            // 검색 필터 적용
+            string searchTarget = (p.displayName ?? p.propId).ToLowerInvariant() + " " + p.propId.ToLowerInvariant();
+            if (!string.IsNullOrEmpty(filter) && !searchTarget.Contains(filter))
+                continue;
             bool isEditing = editingIndex == i;
             var boxStyle = isEditing ? "selectionRect" : "box";
             EditorGUILayout.BeginHorizontal(boxStyle);
@@ -316,12 +376,27 @@ public class MapCatalogEditor : EditorWindow
 
     void DrawBuildingList()
     {
-        EditorGUILayout.LabelField($"등록된 Buildings: {catalog.buildings.Length}개", EditorStyles.boldLabel);
+        listFoldout = EditorGUILayout.Foldout(listFoldout, $"등록된 Buildings: {catalog.buildings.Length}개", true, EditorStyles.foldoutHeader);
+        if (!listFoldout) return;
+
+        // 검색 바
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("🔍", GUILayout.Width(20));
+        searchFilter = EditorGUILayout.TextField(searchFilter);
+        if (!string.IsNullOrEmpty(searchFilter) && GUILayout.Button("✕", GUILayout.Width(22)))
+            searchFilter = "";
+        EditorGUILayout.EndHorizontal();
+
+        string filter = searchFilter?.ToLowerInvariant() ?? "";
 
         for (int i = 0; i < catalog.buildings.Length; i++)
         {
             if (catalog.buildings[i] == null) continue;
             var b = catalog.buildings[i];
+            // 검색 필터 적용
+            string searchTarget = (b.displayName ?? b.buildingId).ToLowerInvariant() + " " + b.buildingId.ToLowerInvariant();
+            if (!string.IsNullOrEmpty(filter) && !searchTarget.Contains(filter))
+                continue;
             bool isEditing = editingIndex == i;
 
             var boxStyle = isEditing ? "selectionRect" : "box";
@@ -342,7 +417,8 @@ public class MapCatalogEditor : EditorWindow
 
             EditorGUILayout.BeginVertical();
             EditorGUILayout.LabelField(b.displayName ?? b.buildingId, EditorStyles.boldLabel);
-            string info = $"풋프린트: {b.footprint.x}x{b.footprint.y}  진입: {(b.isEnterable ? "O" : "X")}  프리팹: {(b.prefab != null ? "O" : "X")}";
+            string info = $"풋프린트: {b.footprint.x}x{b.footprint.y}  진입: {(b.isEnterable ? "O" : "X")}  프리팹: {(b.prefab != null ? "O" : "X")}"
+                + (b.occludesInterior ? "  투명" : "");
             EditorGUILayout.LabelField(info, EditorStyles.miniLabel);
             EditorGUILayout.EndVertical();
 
@@ -375,17 +451,22 @@ public class MapCatalogEditor : EditorWindow
         newFootprint = b.footprint;
         newEnterable = b.isEnterable;
         newOccludesInterior = b.occludesInterior;
-        newCastsShadow = b.castsShadow;
-        newShadowBoxes = b.shadowBoxes != null ? new List<ShadowBox>(b.shadowBoxes) : new List<ShadowBox>();
+        newSortingOffset = b.sortingOffset;
         newMaterial = b.materialPreset;
 
         newBuildingTexture = null;
-        newBuildingScale = 3f;
+        newBuildingScale = 5f;
         if (b.prefab != null)
         {
             var r = b.prefab.GetComponentInChildren<Renderer>();
             if (r != null && r.sharedMaterial != null)
+            {
                 newBuildingTexture = r.sharedMaterial.mainTexture as Texture2D;
+                // materialPreset이 비어있으면 실제 프리팹 머티리얼로 폼을 채워서
+                // 편집 후 저장 시 머티리얼 연결이 풀리지 않도록 한다.
+                if (newMaterial == null)
+                    newMaterial = r.sharedMaterial;
+            }
 
             var visual = b.prefab.transform.Find("Visual");
             if (visual != null)
@@ -409,6 +490,8 @@ public class MapCatalogEditor : EditorWindow
         building.displayName = string.IsNullOrEmpty(newName) ? newId : newName;
         building.footprint = newFootprint;
         building.isEnterable = newEnterable;
+        building.occludesInterior = newOccludesInterior;
+        building.sortingOffset = newSortingOffset;
         building.materialPreset = newMaterial;
 
         bool needsRebuild = false;
@@ -449,11 +532,12 @@ public class MapCatalogEditor : EditorWindow
             : null;
 
         var root = new GameObject(building.buildingId);
+        root.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
         var quadObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
         quadObj.name = "Visual";
         quadObj.transform.SetParent(root.transform);
         quadObj.transform.localPosition = Vector3.zero;
-        quadObj.transform.localRotation = Quaternion.Euler(90f, 0, 0);
+        quadObj.transform.localRotation = Quaternion.identity;
 
         float sx = newBuildingScale, sy = newBuildingScale;
         if (newBuildingTexture != null && newBuildingTexture.width > 0 && newBuildingTexture.height > 0)
@@ -528,12 +612,27 @@ public class MapCatalogEditor : EditorWindow
 
     void DrawMapObjectList()
     {
-        EditorGUILayout.LabelField($"등록된 MapObjects: {catalog.mapObjectDefs.Length}개", EditorStyles.boldLabel);
+        listFoldout = EditorGUILayout.Foldout(listFoldout, $"등록된 MapObjects: {catalog.mapObjectDefs.Length}개", true, EditorStyles.foldoutHeader);
+        if (!listFoldout) return;
+
+        // 검색 바
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("🔍", GUILayout.Width(20));
+        searchFilter = EditorGUILayout.TextField(searchFilter);
+        if (!string.IsNullOrEmpty(searchFilter) && GUILayout.Button("✕", GUILayout.Width(22)))
+            searchFilter = "";
+        EditorGUILayout.EndHorizontal();
+
+        string filter = searchFilter?.ToLowerInvariant() ?? "";
 
         for (int i = 0; i < catalog.mapObjectDefs.Length; i++)
         {
             if (catalog.mapObjectDefs[i] == null) continue;
             var d = catalog.mapObjectDefs[i];
+            // 검색 필터 적용
+            string searchTarget = (d.displayName ?? d.objectId).ToLowerInvariant() + " " + d.objectId.ToLowerInvariant();
+            if (!string.IsNullOrEmpty(filter) && !searchTarget.Contains(filter))
+                continue;
             bool isEditing = editingIndex == i;
             var boxStyle = isEditing ? "selectionRect" : "box";
             EditorGUILayout.BeginHorizontal(boxStyle);
@@ -618,6 +717,7 @@ public class MapCatalogEditor : EditorWindow
 
     void ResetForm()
     {
+        DestroyPreview();
         newId = "";
         newName = "";
         newSprite = null;
@@ -630,11 +730,13 @@ public class MapCatalogEditor : EditorWindow
         newWallThickness = 0.08f;
         newBlocksWalk = false;
         newEnterable = false;
+        newOccludesInterior = false;
         newCastsShadow = false;
         newShadowBoxes = new List<ShadowBox>();
         newShadowPreset = 0;
         newBuildingTexture = null;
-        newBuildingScale = 3f;
+        newBuildingScale = 5f;
+        newSortingOffset = 0;
         newObjectType = MapObjectType.SpawnPoint;
         newVisualMode = 0;
         newVisualTexture = null;
@@ -642,6 +744,354 @@ public class MapCatalogEditor : EditorWindow
         newVisualScale = 1f;
         newInteractRange = 2f;
         newPromptText = "";
+    }
+
+    // ===== Scene Preview 시스템 =====
+
+    void OnEditorUpdate()
+    {
+        if (_preview == null) return;
+        SyncSceneToForm();
+    }
+
+    void OnSceneGUI(SceneView sv)
+    {
+        if (_preview == null) return;
+        // Scene View에 안내 라벨 표시
+        Handles.BeginGUI();
+        var style = new GUIStyle(EditorStyles.helpBox) { fontSize = 12, fontStyle = FontStyle.Bold };
+        style.normal.textColor = Color.yellow;
+        GUILayout.BeginArea(new Rect(10, 10, 300, 28));
+        GUILayout.Label($"[카탈로그 미리보기] {newId}", style);
+        GUILayout.EndArea();
+        Handles.EndGUI();
+    }
+
+    /// <summary>현재 탭/폼 상태에 맞는 프리뷰 오브젝트를 씬에 생성하거나 갱신한다.</summary>
+    void SpawnOrUpdatePreview()
+    {
+        if (_preview == null)
+        {
+            _preview = new GameObject($"__CatalogPreview_{tab}__");
+            _preview.hideFlags = HideFlags.DontSave;
+            _preview.tag = "EditorOnly";
+            _preview.transform.position = Vector3.zero;
+        }
+
+        UpdatePreviewVisual();
+
+        // 씬 뷰 카메라를 프리뷰에 포커스
+        Selection.activeGameObject = _preview;
+        if (SceneView.lastActiveSceneView != null)
+            SceneView.lastActiveSceneView.FrameSelected();
+    }
+
+    void UpdatePreviewVisual()
+    {
+        if (_preview == null) return;
+
+        // 자식 비주얼 모두 제거 후 재생성
+        for (int i = _preview.transform.childCount - 1; i >= 0; i--)
+            DestroyImmediate(_preview.transform.GetChild(i).gameObject);
+
+        // 기존 컴포넌트 제거 (SpriteRenderer 등)
+        foreach (var c in _preview.GetComponents<Component>())
+        {
+            if (c is Transform) continue;
+            DestroyImmediate(c);
+        }
+
+        // Root 회전 초기화
+        // 바닥에 깔리는 것: 타일(0), Object TextureQuad(tab4+mode1) → (90,0,0)
+        // 3D 직립: 벽(1) → identity (큐브가 Y축 직립)
+        // 카메라 향: 프랍/건물/Object 기타 → (35.264,45,0)
+        if (tab == 0 || (tab == 4 && newVisualMode == 1))
+            _preview.transform.rotation = Quaternion.Euler(90, 0, 0);
+        else if (tab == 1)
+            _preview.transform.rotation = Quaternion.identity;
+        else
+            _preview.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
+        _preview.transform.localScale = Vector3.one;
+
+        switch (tab)
+        {
+            case 0: BuildTilePreview(); break;
+            case 1: BuildWallPreview(); break;
+            case 2: BuildPropPreview(); break;
+            case 3: BuildBuildingPreview(); break;
+            case 4: BuildObjectPreview(); break;
+        }
+
+        // ShadowProxy 미리보기 (프랍만 — 벽/건물은 3D 메시라 자체 차폐)
+        if (newCastsShadow && newShadowBoxes.Count > 0 && tab == 2)
+            ShadowProxyBuilder.Build(newShadowBoxes.ToArray(), _preview.transform, editorPreview: true);
+
+        Selection.activeGameObject = _preview;
+    }
+
+    void BuildTilePreview()
+    {
+        if (newSprite == null) return;
+        var sr = _preview.AddComponent<SpriteRenderer>();
+        sr.sprite = newSprite;
+        // root rotation은 UpdatePreviewVisual에서 Euler(90,0,0)으로 설정됨
+        _preview.transform.localScale = new Vector3(newSize.x, newSize.y, 1f);
+    }
+
+    void BuildWallPreview()
+    {
+        float height = newWallHeight;
+        float thickness = newWallThickness;
+
+        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cube.name = "WallVisual";
+        cube.hideFlags = HideFlags.DontSave;
+        cube.transform.SetParent(_preview.transform, false);
+        cube.transform.localPosition = new Vector3(0, height * 0.5f, 0);
+        cube.transform.localScale = new Vector3(1f, height, thickness);
+
+        var col = cube.GetComponent<Collider>();
+        if (col) DestroyImmediate(col);
+
+        var renderer = cube.GetComponent<Renderer>();
+        Material mat = null;
+        if (newMaterial != null)
+        {
+            mat = new Material(newMaterial);
+        }
+        else if (newSprite != null)
+        {
+            mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+            mat.mainTexture = newSprite.texture;
+        }
+        else
+        {
+            mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+            mat.color = new Color(0.6f, 0.6f, 0.65f, 1f);
+        }
+        mat.hideFlags = HideFlags.DontSave;
+        renderer.sharedMaterial = mat;
+    }
+
+    void BuildPropPreview()
+    {
+        if (newPrefab != null)
+        {
+            var child = (GameObject)PrefabUtility.InstantiatePrefab(newPrefab, _preview.transform);
+            if (child != null)
+            {
+                child.hideFlags = HideFlags.DontSave;
+                child.transform.localPosition = Vector3.zero;
+                child.transform.localRotation = Quaternion.identity;
+            }
+        }
+        else if (newIcon != null)
+        {
+            var sr = _preview.AddComponent<SpriteRenderer>();
+            sr.sprite = newIcon;
+            // root rotation은 UpdatePreviewVisual에서 Euler(35.264,45,0) 설정됨
+        }
+    }
+
+    void BuildBuildingPreview()
+    {
+        // Root는 UpdatePreviewVisual에서 Euler(35.264,45,0) 설정됨 — 카메라 향
+        var quadObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        quadObj.name = "Visual";
+        quadObj.hideFlags = HideFlags.DontSave;
+        quadObj.transform.SetParent(_preview.transform, false);
+        quadObj.transform.localPosition = Vector3.zero;
+        quadObj.transform.localRotation = Quaternion.identity;
+
+        float sx = newBuildingScale, sy = newBuildingScale;
+        if (newBuildingTexture != null && newBuildingTexture.width > 0 && newBuildingTexture.height > 0)
+        {
+            float a = (float)newBuildingTexture.width / newBuildingTexture.height;
+            if (a > 1f) sy = newBuildingScale / a; else sx = newBuildingScale * a;
+        }
+        quadObj.transform.localScale = new Vector3(sx, sy, 1f);
+
+        var meshCol = quadObj.GetComponent<MeshCollider>();
+        if (meshCol) DestroyImmediate(meshCol);
+
+        var renderer = quadObj.GetComponent<MeshRenderer>();
+        Material mat;
+        if (newMaterial != null)
+        {
+            mat = new Material(newMaterial);
+            if (newBuildingTexture) mat.SetTexture("_MainTex", newBuildingTexture);
+        }
+        else
+        {
+            var shader = Shader.Find("InkCity/CityBuilding") ?? Shader.Find("Universal Render Pipeline/Lit");
+            mat = new Material(shader);
+            if (newBuildingTexture) mat.SetTexture("_MainTex", newBuildingTexture);
+            mat.SetFloat("_Cutoff", 0.5f);
+            if (mat.HasProperty("_MagentaClip")) { mat.EnableKeyword("_MAGENTA_CLIP"); mat.SetFloat("_MagentaClip", 1f); }
+            if (mat.HasProperty("_GlowToggle")) { mat.EnableKeyword("_GLOW_ON"); mat.SetFloat("_GlowToggle", 1f); }
+            if (mat.HasProperty("_HeightFadeToggle")) { mat.EnableKeyword("_HEIGHTFADE_ON"); mat.SetFloat("_HeightFadeToggle", 1f); }
+        }
+        mat.hideFlags = HideFlags.DontSave;
+        renderer.sharedMaterial = mat;
+    }
+
+    void BuildObjectPreview()
+    {
+        switch (newVisualMode)
+        {
+            case 0: // Sphere
+                var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                sphere.name = "SphereVisual";
+                sphere.hideFlags = HideFlags.DontSave;
+                sphere.transform.SetParent(_preview.transform, false);
+                sphere.transform.localScale = Vector3.one * newVisualScale;
+                var col0 = sphere.GetComponent<Collider>();
+                if (col0) DestroyImmediate(col0);
+                break;
+            case 1: // TextureQuad (바닥 데칼 — root가 Euler(90,0,0)이므로 child는 identity)
+                var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                quad.name = "QuadVisual";
+                quad.hideFlags = HideFlags.DontSave;
+                quad.transform.SetParent(_preview.transform, false);
+                quad.transform.localRotation = Quaternion.identity;
+                quad.transform.localScale = Vector3.one * newVisualScale;
+                var col1 = quad.GetComponent<MeshCollider>();
+                if (col1) DestroyImmediate(col1);
+                if (newVisualTexture != null)
+                {
+                    var r = quad.GetComponent<Renderer>();
+                    var m = new Material(Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Standard"));
+                    m.mainTexture = newVisualTexture;
+                    m.hideFlags = HideFlags.DontSave;
+                    r.sharedMaterial = m;
+                }
+                break;
+            case 3: // EffectPrefab
+                if (newEffectPrefab != null)
+                {
+                    var fx = (GameObject)PrefabUtility.InstantiatePrefab(newEffectPrefab, _preview.transform);
+                    if (fx != null)
+                    {
+                        fx.hideFlags = HideFlags.DontSave;
+                        fx.transform.localPosition = Vector3.zero;
+                        fx.transform.localScale = Vector3.one * newVisualScale;
+                    }
+                }
+                break;
+        }
+    }
+
+    /// <summary>씬에서 수정된 프리뷰 오브젝트의 변경사항을 폼에 반영한다.</summary>
+    void SyncSceneToForm()
+    {
+        if (_preview == null) return;
+
+        bool changed = false;
+
+        switch (tab)
+        {
+            case 1: // Wall — 자식 큐브에서 높이/두께 역산
+            {
+                var wallVis = _preview.transform.Find("WallVisual");
+                if (wallVis != null)
+                {
+                    float h = wallVis.localScale.y;
+                    float t = wallVis.localScale.z;
+                    if (Mathf.Abs(h - newWallHeight) > 0.001f) { newWallHeight = h; changed = true; }
+                    if (Mathf.Abs(t - newWallThickness) > 0.001f) { newWallThickness = t; changed = true; }
+                }
+                break;
+            }
+            case 3: // Building — 자식 Visual 쿼드에서 스케일 역산
+            {
+                var visual = _preview.transform.Find("Visual");
+                if (visual != null)
+                {
+                    float sx = visual.localScale.x;
+                    float sy = visual.localScale.y;
+                    float maxS = Mathf.Max(sx, sy);
+                    if (Mathf.Abs(maxS - newBuildingScale) > 0.01f) { newBuildingScale = maxS; changed = true; }
+                }
+                break;
+            }
+            case 4: // Object — 자식에서 스케일
+            {
+                if (_preview.transform.childCount > 0)
+                {
+                    var child = _preview.transform.GetChild(0);
+                    float s = Mathf.Max(child.localScale.x, child.localScale.y);
+                    if (Mathf.Abs(s - newVisualScale) > 0.01f) { newVisualScale = s; changed = true; }
+                }
+                break;
+            }
+        }
+
+        if (changed) Repaint();
+    }
+
+    void DestroyPreview()
+    {
+        if (_preview != null)
+        {
+            DestroyImmediate(_preview);
+            _preview = null;
+            SceneView.RepaintAll();
+        }
+    }
+
+    /// <summary>프리뷰 GO를 프리팹으로 저장하고 반환한다. 카테고리별 Create에서 사용.</summary>
+    GameObject SavePreviewAsPrefab(string prefabFolder, string prefabName)
+    {
+        if (_preview == null) return null;
+        if (string.IsNullOrWhiteSpace(prefabFolder) || string.IsNullOrWhiteSpace(prefabName))
+        {
+            Debug.LogError("[Catalog] prefabFolder 또는 prefabName이 비어있습니다.");
+            return null;
+        }
+
+        EnsureFolder(prefabFolder);
+
+        // hideFlags 제거해서 프리팹 저장 가능하게
+        _preview.hideFlags = HideFlags.None;
+        _preview.name = prefabName;
+        foreach (Transform child in _preview.GetComponentsInChildren<Transform>(true))
+            child.gameObject.hideFlags = HideFlags.None;
+
+        // 머티리얼 에셋 저장 (인스턴스 머티리얼 → 에셋)
+        EnsureFolder("Assets/Materials/Catalog");
+        foreach (var r in _preview.GetComponentsInChildren<Renderer>(true))
+        {
+            if (r.sharedMaterial != null && !AssetDatabase.Contains(r.sharedMaterial))
+            {
+                var mat = r.sharedMaterial;
+                mat.hideFlags = HideFlags.None;
+                string matPath = AssetDatabase.GenerateUniqueAssetPath($"Assets/Materials/Catalog/{prefabName}_{mat.name}.mat");
+                AssetDatabase.CreateAsset(mat, matPath);
+                r.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+            }
+        }
+
+        // 에디터전용 ShadowProxy 제거 (런타임에서 재생성됨)
+        var toDestroy = new List<GameObject>();
+        foreach (Transform child in _preview.GetComponentsInChildren<Transform>(true))
+        {
+            if (child != null && child.name.StartsWith("ShadowProxy_"))
+                toDestroy.Add(child.gameObject);
+        }
+        foreach (var go in toDestroy)
+            DestroyImmediate(go);
+
+        // 프리뷰 위치 리셋 (프리팹은 원점 기준)
+        _preview.transform.position = Vector3.zero;
+
+        string path = AssetDatabase.GenerateUniqueAssetPath($"{prefabFolder}/{prefabName}.prefab");
+        var prefab = PrefabUtility.SaveAsPrefabAsset(_preview, path);
+        Debug.Log($"<color=green>[Catalog]</color> Prefab 생성: {path}");
+
+        DestroyImmediate(_preview);
+        _preview = null;
+
+        return prefab;
     }
 
     // ===== 생성/수정 폼 =====
@@ -734,21 +1184,48 @@ public class MapCatalogEditor : EditorWindow
 
         EditorGUILayout.BeginVertical("box");
 
-        // ID — 편집 모드에서는 읽기전용
+        // ID — 자동 생성 (편집 모드에서는 기존 ID 표시)
+        GUI.enabled = false;
         if (IsEditing)
         {
-            GUI.enabled = false;
             EditorGUILayout.TextField("ID", newId);
-            GUI.enabled = true;
         }
         else
         {
-            newId = EditorGUILayout.TextField("ID", newId);
+            newId = GenerateNextId();
+            EditorGUILayout.TextField("ID", newId);
         }
+        GUI.enabled = true;
 
         // 표시 이름 (Prop/Building만)
         if (tab >= 2)
             newName = EditorGUILayout.TextField("표시 이름", newName);
+
+        // === 프리뷰 버튼 ===
+        EditorGUILayout.BeginHorizontal();
+        if (_preview != null)
+        {
+            GUI.backgroundColor = Color.yellow;
+            if (GUILayout.Button("● 미리보기 ON", GUILayout.Height(22), GUILayout.Width(130)))
+                DestroyPreview();
+            GUI.backgroundColor = Color.white;
+            if (GUILayout.Button("↻ 새로고침", GUILayout.Height(22), GUILayout.Width(80)))
+                SpawnOrUpdatePreview();
+            if (GUILayout.Button("포커스", GUILayout.Height(22), GUILayout.Width(50)))
+            {
+                Selection.activeGameObject = _preview;
+                SceneView.lastActiveSceneView?.FrameSelected();
+            }
+        }
+        else
+        {
+            if (GUILayout.Button("씬 미리보기", GUILayout.Height(22), GUILayout.Width(130)))
+                SpawnOrUpdatePreview();
+        }
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.Space(2);
+
+        EditorGUI.BeginChangeCheck();
 
         switch (tab)
         {
@@ -764,12 +1241,11 @@ public class MapCatalogEditor : EditorWindow
                 }
                 break;
 
-            case 1: // Wall
+            case 1: // Wall (3D 큐브 — 자체 빛 차폐, ShadowProxy 불필요)
                 newSprite = (Sprite)EditorGUILayout.ObjectField("스프라이트", newSprite, typeof(Sprite), false);
                 newMaterial = (Material)EditorGUILayout.ObjectField("머티리얼", newMaterial, typeof(Material), false);
                 newWallHeight = EditorGUILayout.FloatField("벽 높이", newWallHeight);
                 newWallThickness = EditorGUILayout.FloatField("벽 두께", newWallThickness);
-                DrawShadowSection();
                 if (newSprite != null)
                 {
                     var rect = GUILayoutUtility.GetRect(64, 64, GUILayout.ExpandWidth(false));
@@ -785,14 +1261,16 @@ public class MapCatalogEditor : EditorWindow
                 DrawShadowSection();
                 break;
 
-            case 3: // Building
+            case 3: // Building (3D 쿼드 — 자체 빛 차폐, ShadowProxy 불필요)
                 newBuildingTexture = (Texture2D)EditorGUILayout.ObjectField("텍스쳐 (Quad 생성)", newBuildingTexture, typeof(Texture2D), false);
                 newMaterial = (Material)EditorGUILayout.ObjectField("머티리얼 (선택)", newMaterial, typeof(Material), false);
                 newBuildingScale = EditorGUILayout.FloatField("스케일", newBuildingScale);
                 newFootprint = EditorGUILayout.Vector2IntField("풋프린트", newFootprint);
+                newSortingOffset = EditorGUILayout.IntField(
+                    new GUIContent("이미지 뎁스 (정렬 오프셋)", "값이 클수록 앞에 그려짐. 다른 프랍/바닥에 묻힐 때 +로 올린다. (스프라이트 기반에만 적용)"),
+                    newSortingOffset);
                 newEnterable = EditorGUILayout.Toggle("진입 가능", newEnterable);
                 newOccludesInterior = EditorGUILayout.Toggle("투명 전환 (윗벽/천장)", newOccludesInterior);
-                DrawShadowSection();
                 if (newBuildingTexture != null)
                 {
                     var rect = GUILayoutUtility.GetRect(80, 80, GUILayout.ExpandWidth(false));
@@ -825,24 +1303,32 @@ public class MapCatalogEditor : EditorWindow
                 break;
         }
 
+        // 폼 변경 → 프리뷰 자동 갱신
+        if (EditorGUI.EndChangeCheck() && _preview != null)
+            SpawnOrUpdatePreview();
+
         EditorGUILayout.Space(4);
 
-        bool valid = !string.IsNullOrEmpty(newId);
-        GUI.enabled = valid;
+        GUI.enabled = true;
 
         if (IsEditing)
         {
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("수정 저장", GUILayout.Height(30)))
             {
-                switch (tab)
+                int capturedTab = tab;
+                EditorApplication.delayCall += () =>
                 {
-                    case 0: SaveEditedTile(false); break;
-                    case 1: SaveEditedTile(true); break;
-                    case 2: SaveEditedProp(); break;
-                    case 3: SaveEditedBuilding(); break;
-                    case 4: SaveEditedMapObject(); break;
-                }
+                    switch (capturedTab)
+                    {
+                        case 0: SaveEditedTile(false); break;
+                        case 1: SaveEditedTile(true); break;
+                        case 2: SaveEditedProp(); break;
+                        case 3: SaveEditedBuilding(); break;
+                        case 4: SaveEditedMapObject(); break;
+                    }
+                };
+                GUIUtility.ExitGUI();
             }
             if (GUILayout.Button("편집 취소", GUILayout.Height(30), GUILayout.Width(80)))
             {
@@ -855,17 +1341,20 @@ public class MapCatalogEditor : EditorWindow
         {
             if (GUILayout.Button("생성 & 카탈로그에 등록", GUILayout.Height(30)))
             {
-                CreateAndRegister();
+                EditorApplication.delayCall += CreateAndRegister;
+                GUIUtility.ExitGUI();
             }
         }
-
-        GUI.enabled = true;
 
         EditorGUILayout.EndVertical();
     }
 
     void CreateAndRegister()
     {
+        // ID 자동 생성 (혹시 비어있으면 재생성)
+        if (string.IsNullOrWhiteSpace(newId))
+            newId = GenerateNextId();
+
         switch (tab)
         {
             case 0: CreateTile(false); break;
@@ -875,6 +1364,7 @@ public class MapCatalogEditor : EditorWindow
             case 4: CreateMapObject(); break;
         }
 
+        ConsumeNextId();
         so = new SerializedObject(catalog);
         AssetDatabase.SaveAssets();
         Repaint();
@@ -886,6 +1376,13 @@ public class MapCatalogEditor : EditorWindow
     {
         string folder = isWall ? $"{ASSET_ROOT}/Walls" : $"{ASSET_ROOT}/Tiles";
         EnsureFolder(folder);
+
+        // 프리뷰가 있으면 프리팹으로 저장
+        if (_preview != null)
+        {
+            string pfFolder = isWall ? "Assets/Prefab/Walls" : "Assets/Prefab/Tiles";
+            SavePreviewAsPrefab(pfFolder, newId);
+        }
 
         var tile = CreateInstance<TileDefinition>();
         tile.tileId = newId;
@@ -899,8 +1396,6 @@ public class MapCatalogEditor : EditorWindow
         {
             tile.wallHeight = newWallHeight;
             tile.wallThickness = newWallThickness;
-            tile.castsShadow = newCastsShadow;
-            tile.shadowBoxes = newCastsShadow ? newShadowBoxes.ToArray() : new ShadowBox[0];
         }
 
         string path = $"{folder}/{newId}.asset";
@@ -926,10 +1421,15 @@ public class MapCatalogEditor : EditorWindow
         string folder = $"{ASSET_ROOT}/Props";
         EnsureFolder(folder);
 
+        // 프리뷰가 있으면 프리팹으로 저장
+        GameObject prefab = newPrefab;
+        if (_preview != null)
+            prefab = SavePreviewAsPrefab("Assets/Prefab/Props", newId);
+
         var prop = CreateInstance<PropDefinition>();
         prop.propId = newId;
         prop.displayName = string.IsNullOrEmpty(newName) ? newId : newName;
-        prop.prefab = newPrefab;
+        prop.prefab = prefab;
         prop.icon = newIcon;
         prop.footprint = newFootprint;
         prop.blocksWalkability = newBlocksWalk;
@@ -952,14 +1452,22 @@ public class MapCatalogEditor : EditorWindow
         EnsureFolder(folder);
 
         GameObject prefab = null;
-        if (newBuildingTexture != null || newMaterial != null)
+
+        // 프리뷰가 있으면 그대로 프리팹으로 저장
+        if (_preview != null)
         {
+            prefab = SavePreviewAsPrefab("Assets/Prefab/Buildings", newId);
+        }
+        else if (newBuildingTexture != null || newMaterial != null)
+        {
+            // 프리뷰 없이 생성하는 폴백
             var root = new GameObject(newId);
+            root.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
             var quadObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
             quadObj.name = "Visual";
             quadObj.transform.SetParent(root.transform);
             quadObj.transform.localPosition = Vector3.zero;
-            quadObj.transform.localRotation = Quaternion.Euler(90f, 0, 0);
+            quadObj.transform.localRotation = Quaternion.identity;
 
             float sx = newBuildingScale, sy = newBuildingScale;
             if (newBuildingTexture != null && newBuildingTexture.width > 0 && newBuildingTexture.height > 0)
@@ -996,10 +1504,6 @@ public class MapCatalogEditor : EditorWindow
             AssetDatabase.CreateAsset(mat, matPath);
             renderer.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(matPath);
 
-            var box = root.AddComponent<BoxCollider>();
-            box.size = new Vector3(sx * 0.9f, sy * 0.9f, 0.3f);
-            box.center = new Vector3(0, sy * 0.5f, 0);
-
             EnsureFolder("Assets/Prefab/Buildings");
             string prefabPath = AssetDatabase.GenerateUniqueAssetPath($"Assets/Prefab/Buildings/{newId}.prefab");
             prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
@@ -1014,6 +1518,9 @@ public class MapCatalogEditor : EditorWindow
         building.prefab = prefab;
         building.footprint = newFootprint;
         building.isEnterable = newEnterable;
+        building.occludesInterior = newOccludesInterior;
+        building.sortingOffset = newSortingOffset;
+        building.materialPreset = newMaterial;
 
         string path = $"{folder}/{newId}.asset";
         AssetDatabase.CreateAsset(building, path);
@@ -1029,6 +1536,17 @@ public class MapCatalogEditor : EditorWindow
     {
         string folder = $"{ASSET_ROOT}/MapObjects";
         EnsureFolder(folder);
+
+        // 프리뷰가 있으면 이펙트 프리팹으로 저장
+        if (_preview != null && newVisualMode == 3)
+        {
+            var savedPrefab = SavePreviewAsPrefab("Assets/Prefab/MapObjects", newId);
+            if (savedPrefab != null) newEffectPrefab = savedPrefab;
+        }
+        else
+        {
+            DestroyPreview();
+        }
 
         var def = CreateInstance<MapObjectDefinition>();
         def.objectId = newId;
@@ -1058,6 +1576,28 @@ public class MapCatalogEditor : EditorWindow
         var sp = so.FindProperty(propName);
         sp.DeleteArrayElementAtIndex(index);
         so.ApplyModifiedProperties();
+        EditorUtility.SetDirty(catalog);
+    }
+
+    /// <summary>현재 탭 접두어 + 전역 카운터로 ID를 자동 생성한다.</summary>
+    string GenerateNextId()
+    {
+        string prefix = tab switch
+        {
+            0 => "tile",
+            1 => "wall",
+            2 => "prop",
+            3 => "bld",
+            4 => "obj",
+            _ => "item"
+        };
+        return $"{prefix}_{catalog.nextId:D4}";
+    }
+
+    /// <summary>전역 ID 카운터를 증가시키고 저장한다.</summary>
+    void ConsumeNextId()
+    {
+        catalog.nextId++;
         EditorUtility.SetDirty(catalog);
     }
 

@@ -94,6 +94,35 @@
 ### Object (맵 오브젝트)
 - SpawnPoint, ExtractionPoint 등 게임 로직 마커
 - 시각적으로 색깔 큐브로 표시
+- 좌측 패널에서 타입 선택 → 하단 **스폰 설정 패널**에서 타입별 세부 옵션 입력 (아래 표)
+- 런타임에 `MapObjectSpawner`가 각 마커를 실제 컴포넌트로 변환
+
+#### 맵 오브젝트 타입별 설정
+
+| 타입 | 설정 항목 | 런타임 변환 |
+|------|-----------|-------------|
+| **SpawnPoint** | (없음) — `customData`/`label`을 spawnId로 사용 | `SpawnPoint` |
+| **LootContainer** | 이름, 격자 가로/세로, 지역 루트 사용, 고정 아이템 ID/수량 | `LootContainer` + `ItemSpawnPoint` |
+| **ItemDrop** | 지역 루트 사용, 고정 아이템 ID/수량 | `ItemSpawnPoint`(Ground/Fixed) |
+| **EnemySpawn** | 유닛 키, 수량 | 마커(런타임 EnemySpawnManager가 읽음) |
+| **Door** | 잠금 타입(없음/열쇠/퀘스트/스위치), 열쇠 ID·소모 여부, 퀘스트 ID | `DoorController` + 차단 콜라이더 |
+| **NPC** | NPC ID, 표시 이름 (카탈로그 NPC 빠른 선택 가능) | `NPCController` (`Resources/Data/NPC/{id}`) |
+| **Trigger** | (아래 트리거 상세 참조) | `BuildingEntryTrigger` |
+
+#### Trigger (건물 입장 트리거)
+
+플레이어가 영역에 들어오면 프롬프트를 띄우고 E키(또는 자동)로 발동. 4가지 모드:
+
+| 모드 | 동작 | 전용 설정 |
+|------|------|-----------|
+| **씬전환** (SceneTransition) | 다른 씬으로 전환 (건물 내부 등) | 대상 씬 이름, 스폰 포인트 ID |
+| **로컬이동** (LocalTeleport) | 같은 씬 내 좌표로 순간이동 | 텔레포트 X/Y/Z, Y 회전 |
+| **스토리** (StoryTrigger) | 스토리 씬 재생 | 스토리 씬 ID |
+| **커스텀** (CustomEvent) | customData를 스토리 씬 ID로 재생 | 커스텀 데이터 |
+
+**공통 설정**: 자동 입장(E키 불필요), 1회 발동, 지연 시간, 콜라이더 크기(X/Y/Z), 조건(필요 아이템 ID·필요 퀘스트 ID)
+
+> 조건이 설정되면 해당 아이템 보유/퀘스트 완료 시에만 발동. JSON 저장/불러오기로 모든 설정이 영속화됨.
 
 ### Eraser (지우개)
 - 좌클릭/우클릭으로 커서 위치의 **가장 가까운** 오브젝트 1개 삭제 (종류 무관)

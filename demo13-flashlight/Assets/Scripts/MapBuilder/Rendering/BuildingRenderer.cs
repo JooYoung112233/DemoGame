@@ -11,6 +11,9 @@ namespace IsometricMapEditor
         readonly Dictionary<string, GameObject> _buildingObjects = new();
         Transform _root;
 
+        /// <summary>건물 instanceId → GameObject 딕셔너리 (PropManager 연동용)</summary>
+        public Dictionary<string, GameObject> BuildingObjects => _buildingObjects;
+
         public void Initialize(Transform parent)
         {
             _root = new GameObject("Buildings").transform;
@@ -42,6 +45,10 @@ namespace IsometricMapEditor
             // Material Preset 적용: 텍스처는 유지, 셰이더 파라미터만 덮어쓰기
             if (def.materialPreset != null)
                 ApplyMaterialPreset(go, def.materialPreset);
+
+            // 내부 투명 전환: BuildingInterior 자동 부착
+            if (def.occludesInterior)
+                SetupBuildingInterior(go, def, settings);
 
             _buildingObjects[building.instanceId] = go;
         }
@@ -93,6 +100,89 @@ namespace IsometricMapEditor
                 }
                 renderer.sharedMaterials = mats;
             }
+        }
+
+        /// <summary>
+        /// BuildingInterior 자동 부착 — 플레이어 진입 시 벽 페이드 + 내부 프랍 표시.
+        /// 프리팹 내 자식 구조를 분석해 벽/프랍을 자동 분류.
+        /// </summary>
+        static void SetupBuildingInterior(GameObject buildingGo, BuildingDefinition def, GridSettings settings)
+        {
+            // 이미 프리팹에 BuildingInterior가 있으면 스킵
+            if (buildingGo.GetComponentInChildren<BuildingInterior>() != null) return;
+
+            // 트리거 영역 생성
+            var triggerGo = new GameObject("InteriorTrigger");
+            triggerGo.transform.SetParent(buildingGo.transform, false);
+
+            // 건물 footprint 기반 트리거 크기 계산
+            float tileSize = settings.tileSize;
+            float width = def.footprint.x * tileSize;
+            float depth = def.footprint.y * tileSize;
+
+            var box = triggerGo.AddComponent<BoxCollider>();
+            box.isTrigger = true;
+            box.center = new Vector3(0, 1.5f, 0);
+            box.size = new Vector3(width, 3f, depth);
+
+            var interior = triggerGo.AddComponent<BuildingInterior>();
+
+            // ── 벽 렌더러 자동 수집 ──
+            // 이름에 "Wall", "Roof", "Ceiling", "Front", "Facade" 포함된 자식
+            var wallRenderers = new System.Collections.Generic.List<Renderer>();
+            var propRoot = (Transform)null;
+
+            foreach (Transform child in buildingGo.transform)
+            {
+                string name = child.name.ToLower();
+
+                // 트리거 자체는 건너뛰기
+                if (child == triggerGo.transform) continue;
+
+                // 내부 프랍 루트 탐색
+                if (name.Contains("interior") || name.Contains("props")
+                    || name.Contains("furniture") || name.Contains("inside"))
+                {
+                    propRoot = child;
+                    continue;
+                }
+
+                // 벽/천장/지붕 → 페이드 대상
+                if (name.Contains("wall") || name.Contains("roof") || name.Contains("ceiling")
+                    || name.Contains("front") || name.Contains("facade") || name.Contains("top"))
+                {
+                    var renderers = child.GetComponentsInChildren<Renderer>();
+                    wallRenderers.AddRange(renderers);
+                }
+            }
+
+            // 벽 렌더러가 없으면 전체 렌더러를 대상으로 (프리팹 구조가 단순한 경우)
+            if (wallRenderers.Count == 0)
+            {
+                // 건물 루트의 직접 렌더러만 (자식 프랍은 제외)
+                var rootRenderer = buildingGo.GetComponent<Renderer>();
+                if (rootRenderer != null)
+                    wallRenderers.Add(rootRenderer);
+            }
+
+            // 리플렉션으로 SerializeField 설정
+            SetField(interior, "fadeRenderers", wallRenderers.ToArray());
+
+            if (propRoot != null)
+                SetField(interior, "interiorPropRoot", propRoot);
+
+            // 캐시 재구축
+            interior.RebuildPropCache();
+        }
+
+        static void SetField(object target, string fieldName, object value)
+        {
+            var field = target.GetType().GetField(fieldName,
+                System.Reflection.BindingFlags.NonPublic |
+                System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.Instance);
+            if (field != null)
+                field.SetValue(target, value);
         }
 
         public void RemoveBuilding(string instanceId)

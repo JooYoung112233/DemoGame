@@ -20,6 +20,9 @@ namespace IsometricMapEditor
                 {
                     if (tile.tileDefinition == null || tile.tileDefinition.sprite == null)
                         continue;
+                    // 벽은 3D 큐브로만 그린다 (평면 스프라이트 중복 방지)
+                    if (tile.tileDefinition.IsWall)
+                        continue;
 
                     RenderTile(tile, layer, mapData.gridSettings);
                 }
@@ -29,7 +32,9 @@ namespace IsometricMapEditor
         public void RenderSingleTile(PlacedTile tile, MapLayer layer, GridSettings settings)
         {
             RemoveTileObject(tile.gridPosition);
-            if (tile.tileDefinition != null && tile.tileDefinition.sprite != null)
+            // 벽은 3D 큐브(WallBuilder)로 그리므로 평면 스프라이트로 중복 렌더하지 않는다.
+            if (tile.tileDefinition != null && tile.tileDefinition.sprite != null
+                && !tile.tileDefinition.IsWall)
                 RenderTile(tile, layer, settings);
         }
 
@@ -51,6 +56,9 @@ namespace IsometricMapEditor
         {
             var go = GetOrCreateTileObject(tile.gridPosition);
             Vector3 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, settings);
+            // 바닥을 Y=0 보다 살짝 아래로 내려 3D 벽(밑동 Y=0)이 깊이 테스트에서
+            // 항상 이기도록 한다. (스프라이트 ZTest LEqual + 벽이 더 가까움 → 벽 우선)
+            worldPos.y -= 0.05f;
             go.transform.position = worldPos;
             SetupBillboard(go);
             go.transform.localScale = IsometricGrid.GetTileScale(tile.tileDefinition.sprite, settings);

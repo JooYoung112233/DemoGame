@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 053ce7cc3762c0b4085876e7178ee66e, type: 3}
-  m_Name: 001
+  m_Name: tile_0001
   m_EditorClassIdentifier: Game.Scripts::IsometricMapEditor.TileDefinition
-  tileId: 001
-  sprite: {fileID: 21300000, guid: 68ea8d6641a99d945bdabc8b264340c2, type: 3}
+  tileId: tile_0001
+  sprite: {fileID: 21300000, guid: eb5a37866c5819d4281c1b7536b59d7d, type: 3}
   category: 0
   isWalkable: 1
   size: {x: 1, y: 1}
@@ -21,3 +21,5 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 8f6a147ce98ebdb4f91e56b7c10dec05, type: 2}
   wallHeight: 2
   wallThickness: 0.08
+  castsShadow: 0
+  shadowBoxes: []

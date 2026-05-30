@@ -63,6 +63,7 @@ namespace IsometricMapEditor
             public float worldX, worldY, worldZ;
             public float yRotation;
             public float scale;
+            public string parentBuildingId;
         }
 
         [System.Serializable]
@@ -105,6 +106,20 @@ namespace IsometricMapEditor
             public bool doorConsumeKey;
             public string doorQuestId;
 
+            // 트리거 설정
+            public int triggerMode;
+            public string triggerTargetScene;
+            public string triggerTargetSpawnId;
+            public bool triggerAutoEnter;
+            public float triggerDelay;
+            public bool triggerOneShot;
+            public float triggerSizeX;
+            public float triggerSizeY;
+            public float triggerSizeZ;
+            public float teleportX, teleportY, teleportZ;
+            public float teleportYRot;
+            public string triggerStorySceneId;
+
             // NPC 설정
             public string npcId;
             public string npcDisplayName;
@@ -114,6 +129,9 @@ namespace IsometricMapEditor
             public string visualTexturePath;
             public string effectPrefabPath;
             public float visualScale;
+
+            // 건물 소속
+            public string parentBuildingId;
         }
 
         public static string Serialize(MapData map)
@@ -190,7 +208,8 @@ namespace IsometricMapEditor
                     worldY = p.worldPosition.y,
                     worldZ = p.worldPosition.z,
                     yRotation = p.yRotation,
-                    scale = p.scale
+                    scale = p.scale,
+                    parentBuildingId = p.parentBuildingId
                 };
             }
 
@@ -240,6 +259,21 @@ namespace IsometricMapEditor
                     doorKeyId = mo.doorKeyId,
                     doorConsumeKey = mo.doorConsumeKey,
                     doorQuestId = mo.doorQuestId,
+                    // 트리거 설정
+                    triggerMode = mo.triggerMode,
+                    triggerTargetScene = mo.triggerTargetScene,
+                    triggerTargetSpawnId = mo.triggerTargetSpawnId,
+                    triggerAutoEnter = mo.triggerAutoEnter,
+                    triggerDelay = mo.triggerDelay,
+                    triggerOneShot = mo.triggerOneShot,
+                    triggerSizeX = mo.triggerSizeX,
+                    triggerSizeY = mo.triggerSizeY,
+                    triggerSizeZ = mo.triggerSizeZ,
+                    teleportX = mo.teleportX,
+                    teleportY = mo.teleportY,
+                    teleportZ = mo.teleportZ,
+                    teleportYRot = mo.teleportYRot,
+                    triggerStorySceneId = mo.triggerStorySceneId,
                     // NPC 설정
                     npcId = mo.npcId,
                     npcDisplayName = mo.npcDisplayName,
@@ -247,7 +281,8 @@ namespace IsometricMapEditor
                     visualMode = mo.visualMode,
                     visualTexturePath = mo.visualTexturePath,
                     effectPrefabPath = mo.effectPrefabPath,
-                    visualScale = mo.visualScale
+                    visualScale = mo.visualScale,
+                    parentBuildingId = mo.parentBuildingId
                 };
             }
 
@@ -332,7 +367,8 @@ namespace IsometricMapEditor
                         freePlace = sp.freePlace,
                         worldPosition = new Vector3(sp.worldX, sp.worldY, sp.worldZ),
                         yRotation = sp.yRotation,
-                        scale = sp.scale > 0 ? sp.scale : 1f
+                        scale = sp.scale > 0 ? sp.scale : 1f,
+                        parentBuildingId = sp.parentBuildingId
                     });
                 }
             }
@@ -385,13 +421,29 @@ namespace IsometricMapEditor
                         doorConsumeKey = smo.doorConsumeKey,
                         doorQuestId = smo.doorQuestId,
                         // NPC 설정
+                        // 트리거 설정
+                        triggerMode = smo.triggerMode,
+                        triggerTargetScene = smo.triggerTargetScene,
+                        triggerTargetSpawnId = smo.triggerTargetSpawnId,
+                        triggerAutoEnter = smo.triggerAutoEnter,
+                        triggerDelay = smo.triggerDelay,
+                        triggerOneShot = smo.triggerOneShot,
+                        triggerSizeX = smo.triggerSizeX > 0 ? smo.triggerSizeX : 1.5f,
+                        triggerSizeY = smo.triggerSizeY > 0 ? smo.triggerSizeY : 2f,
+                        triggerSizeZ = smo.triggerSizeZ > 0 ? smo.triggerSizeZ : 1.5f,
+                        teleportX = smo.teleportX,
+                        teleportY = smo.teleportY,
+                        teleportZ = smo.teleportZ,
+                        teleportYRot = smo.teleportYRot,
+                        triggerStorySceneId = smo.triggerStorySceneId,
                         npcId = smo.npcId,
                         npcDisplayName = smo.npcDisplayName,
                         // 비주얼 모드
                         visualMode = smo.visualMode,
                         visualTexturePath = smo.visualTexturePath,
                         effectPrefabPath = smo.effectPrefabPath,
-                        visualScale = smo.visualScale > 0.01f ? smo.visualScale : 1f
+                        visualScale = smo.visualScale > 0.01f ? smo.visualScale : 1f,
+                        parentBuildingId = smo.parentBuildingId
                     });
                 }
             }

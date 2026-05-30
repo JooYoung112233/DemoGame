@@ -50,6 +50,7 @@ namespace IsometricMapEditor
 
             propManager = CreateChild<PropManager>("PropManager");
             propManager.Initialize(transform);
+            propManager.SetBuildingObjects(buildingRenderer.BuildingObjects);
             propManager.SpawnProps(mapData.props, mapData.gridSettings);
 
             harvestableManager = CreateChild<HarvestableManager>("HarvestableManager");
@@ -61,6 +62,7 @@ namespace IsometricMapEditor
             {
                 mapObjectSpawner = CreateChild<MapObjectSpawner>("MapObjectSpawner");
                 mapObjectSpawner.Initialize(transform);
+                mapObjectSpawner.SetBuildingObjects(buildingRenderer.BuildingObjects);
                 mapObjectSpawner.SpawnMapObjects(mapData.mapObjects, mapData.gridSettings);
             }
 

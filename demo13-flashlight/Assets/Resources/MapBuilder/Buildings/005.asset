@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9e83b19b8c9264383d0812c3487196, type: 3}
+  m_Name: 005
+  m_EditorClassIdentifier: Game.Scripts::IsometricMapEditor.BuildingDefinition
+  buildingId: 005
+  displayName: "\uC804\uB2F9\uD3EC \uBC14\uB2E5 \uBCBD \uC624"
+  footprint: {x: 2, y: 2}
+  sortingOffset: 0
+  isEnterable: 0
+  interiorMapId: 
+  entryCell: {x: 0, y: 0}
+  variantSet: {fileID: 0}
+  prefab: {fileID: 975655097908327271, guid: f4f97dcb1dd4963428d7066998da6006, type: 3}
+  materialPreset: {fileID: 0}
+  occludesInterior: 1
+  castsShadow: 0
+  shadowBoxes: []

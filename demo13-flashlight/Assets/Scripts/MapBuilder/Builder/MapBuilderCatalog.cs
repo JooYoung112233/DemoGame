@@ -23,6 +23,9 @@ namespace IsometricMapEditor
         [Header("NPCs")]
         public NPCData[] npcs = new NPCData[0];
 
+        [Header("Auto ID")]
+        public int nextId = 1;
+
         public MapObjectDefinition GetMapObjectDef(string id)
         {
             foreach (var d in mapObjectDefs)

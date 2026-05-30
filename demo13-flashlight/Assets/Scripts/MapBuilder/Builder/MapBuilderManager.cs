@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace IsometricMapEditor
 {
@@ -11,7 +14,8 @@ namespace IsometricMapEditor
         Prop,
         Building,
         MapObject,
-        Eraser
+        Eraser,
+        Move
     }
 
     public class MapBuilderManager : MonoBehaviour
@@ -35,11 +39,36 @@ namespace IsometricMapEditor
         string _eraseHoverInstanceId;
         public string EraseHoverInfo { get; private set; }
 
+        // 정렬 조절 대상 (마지막으로 가리킨 프랍/건물). UI 위로 마우스가 가도 유지됨.
+        public string SortTargetId { get; private set; }
+        public string SortTargetLabel { get; private set; }
+        public bool HasSortTarget => !string.IsNullOrEmpty(SortTargetId);
+        public int SortTargetOffset
+        {
+            get
+            {
+                if (EditingMap == null || string.IsNullOrEmpty(SortTargetId)) return 0;
+                foreach (var p in EditingMap.props) if (p.instanceId == SortTargetId) return p.sortingOffsetOverride;
+                foreach (var b in EditingMap.buildings) if (b.instanceId == SortTargetId) return b.sortingOffsetOverride;
+                return 0;
+            }
+        }
+
         // Resize mode
         public bool ResizeMode { get; set; }
         readonly List<(Renderer rend, Color origColor)> _resizeHoverRenderers = new();
         string _resizeHoverInstanceId;
         public string ResizeHoverInfo { get; private set; }
+
+        // Move mode
+        public bool MoveMode { get; private set; }
+        bool _moveGrabbed; // 오브젝트를 집었는가
+        string _moveInstanceId;
+        int _moveType = -1; // 0=tile, 1=wall, 2=prop, 3=building, 4=mapObject
+        int _moveWallRotation;
+        readonly List<(Renderer rend, Color origColor)> _moveHoverRenderers = new();
+        string _moveHoverInstanceId;
+        public string MoveHoverInfo { get; private set; }
 
         // Visibility toggles
         public bool ShowTiles { get; set; } = true;
@@ -68,8 +97,50 @@ namespace IsometricMapEditor
         public string SpawnEffectPrefabPath { get; set; } = "";
         public float SpawnVisualScale { get; set; } = 1f;
 
-        public int CurrentRotation { get; private set; }
+        // Trigger config properties (for Trigger placement)
+        public int SpawnTriggerMode { get; set; }              // 0=SceneTransition, 1=LocalTeleport, 2=StoryTrigger, 3=CustomEvent
+        public string SpawnTriggerTargetScene { get; set; } = "";
+        public string SpawnTriggerTargetSpawnId { get; set; } = "";
+        public bool SpawnTriggerAutoEnter { get; set; }
+        public float SpawnTriggerDelay { get; set; }
+        public bool SpawnTriggerOneShot { get; set; }
+        public float SpawnTriggerSizeX { get; set; } = 1.5f;
+        public float SpawnTriggerSizeY { get; set; } = 2f;
+        public float SpawnTriggerSizeZ { get; set; } = 1.5f;
+        public float SpawnTeleportX { get; set; }
+        public float SpawnTeleportY { get; set; }
+        public float SpawnTeleportZ { get; set; }
+        public float SpawnTeleportYRot { get; set; }
+        public string SpawnTriggerStorySceneId { get; set; } = "";
+        public string SpawnTriggerCustomData { get; set; } = "";
+
+        // 건물 소속 (Prop + MapObject 공통)
+        public string SelectedParentBuildingId { get; set; } = "";
+
+        public float CurrentRotation { get; private set; }
         public bool SnapToGrid { get; set; }
+
+        // 타일 브러시 크기 (1~5). 클릭한 칸을 중심으로 WxH 범위에 배치.
+        public int BrushWidth { get; private set; } = 1;
+        public int BrushHeight { get; private set; } = 1;
+        public const int MAX_BRUSH = 5;
+
+        public void SetBrushSize(int w, int h)
+        {
+            BrushWidth = Mathf.Clamp(w, 1, MAX_BRUSH);
+            BrushHeight = Mathf.Clamp(h, 1, MAX_BRUSH);
+            UI?.RefreshStatus();
+        }
+
+        /// <summary>브러시 범위 셀 목록. anchor를 중심으로 BrushWidth x BrushHeight.</summary>
+        public IEnumerable<Vector2Int> GetBrushCells(Vector2Int anchor)
+        {
+            int offX = (BrushWidth - 1) / 2;
+            int offY = (BrushHeight - 1) / 2;
+            for (int dx = 0; dx < BrushWidth; dx++)
+                for (int dy = 0; dy < BrushHeight; dy++)
+                    yield return new Vector2Int(anchor.x - offX + dx, anchor.y - offY + dy);
+        }
 
         public MapBuilderUI UI { get; private set; }
         public MapBuilderGridOverlay GridOverlay { get; private set; }
@@ -87,6 +158,9 @@ namespace IsometricMapEditor
         readonly List<string> _undoSnapshots = new();
         const int MAX_UNDO = 30;
         Vector2Int _lastDragCell = new(-1, -1);
+
+        // 배치 미리보기 (고스트)
+        GameObject _placementGhost;
 
         void Start()
         {
@@ -138,13 +212,14 @@ namespace IsometricMapEditor
             var input = gameObject.AddComponent<MapBuilderInput>();
             input.Initialize(this, BuilderCamera);
 
-            // 기존 게임 UI/HUD 모두 비활성화
-            foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
-                canvas.gameObject.SetActive(false);
-
             // UI
             UI = gameObject.AddComponent<MapBuilderUI>();
             UI.Initialize(this);
+
+            // 기존 게임 UI/HUD 캔버스 + 게임 카메라 비활성화 (빌더 것 제외).
+            // GameBootstrap/UIManager/PlayerController 싱글톤이 DontDestroyOnLoad로
+            // 넘어오거나 늦게(Start) 캔버스를 만들 수 있어 매 프레임 정리한다.
+            HideExternalObjects(true);
 
             // EventSystem
             if (FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
@@ -163,6 +238,49 @@ namespace IsometricMapEditor
                 light.intensity = 1f;
                 lightGo.transform.rotation = Quaternion.Euler(50, -30, 0);
             }
+        }
+
+        /// <summary>
+        /// 빌더 것을 제외한 모든 외부 Canvas/Camera 를 비활성화한다.
+        /// DontDestroyOnLoad 싱글톤(GameHUD/QuestHUD/PlayerController 카메라 등)이
+        /// 맵 빌더 씬에 남거나 늦게 생성되는 것을 매 프레임 정리한다.
+        /// </summary>
+        void HideExternalObjects(bool log = false)
+        {
+            // --- Canvas ---
+            var canvases = FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var canvas in canvases)
+            {
+                if (canvas == null) continue;
+                if (canvas.gameObject.name == "MapBuilderCanvas") continue;
+                if (canvas.transform.IsChildOf(transform)) continue;
+                // Canvas 컴포넌트 자체를 끈다 (GameObject는 살려 싱글톤 로직 깨지지 않게)
+                if (canvas.enabled)
+                {
+                    canvas.enabled = false;
+                    if (log) Debug.Log($"[MapBuilder] Disabled external Canvas: {canvas.name}");
+                }
+            }
+
+            // --- Camera (빌더 카메라 외 전부 끔) ---
+            var builderCam = BuilderCamera != null ? BuilderCamera.GetComponent<Camera>() : null;
+            var cameras = FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var cam in cameras)
+            {
+                if (cam == null || cam == builderCam) continue;
+                if (cam.transform.IsChildOf(transform)) continue;
+                if (cam.enabled)
+                {
+                    cam.enabled = false;
+                    if (log) Debug.Log($"[MapBuilder] Disabled external Camera: {cam.name}");
+                }
+            }
+        }
+
+        // 싱글톤들이 늦게(Start/이후 프레임) 캔버스·카메라를 켤 수 있어 계속 정리한다.
+        void LateUpdate()
+        {
+            HideExternalObjects();
         }
 
         public void NewMap(int width, int height)
@@ -192,8 +310,12 @@ namespace IsometricMapEditor
 
         public void SetToolMode(ToolMode mode)
         {
+            if (MoveMode && _moveGrabbed) CancelMove();
+            ClearMoveHover();
             CurrentTool = mode;
             CurrentRotation = 0;
+            MoveMode = mode == ToolMode.Move;
+            RebuildGhost();
             UI.RefreshToolbar();
         }
 
@@ -209,6 +331,7 @@ namespace IsometricMapEditor
             SelectedWall = wall;
             CurrentTool = ToolMode.Wall;
             CurrentRotation = 0;
+            RebuildGhost();
             UI.RefreshToolbar();
         }
 
@@ -216,6 +339,7 @@ namespace IsometricMapEditor
         {
             SelectedProp = prop;
             CurrentTool = ToolMode.Prop;
+            RebuildGhost();
             UI.RefreshToolbar();
         }
 
@@ -223,6 +347,7 @@ namespace IsometricMapEditor
         {
             SelectedBuilding = building;
             CurrentTool = ToolMode.Building;
+            RebuildGhost();
             UI.RefreshToolbar();
         }
 
@@ -255,10 +380,13 @@ namespace IsometricMapEditor
         public void SetBuildingVisibility(bool v) { ShowBuildings = v; if (_buildingRoot) _buildingRoot.gameObject.SetActive(v); UI.RefreshAll(); }
         public void SetMapObjectVisibility(bool v) { ShowMapObjects = v; if (_objectRoot) _objectRoot.gameObject.SetActive(v); UI.RefreshAll(); }
 
-        public void RotateSelection(int direction)
+        public void RotateSelection(float delta)
         {
-            CurrentRotation = (CurrentRotation + direction + 24) % 24;
+            CurrentRotation = ((CurrentRotation + delta) % 24f + 24f) % 24f;
             UI.RefreshStatus();
+
+            // 이동 모드에서 집은 오브젝트의 각도도 실시간 갱신
+            if (_moveGrabbed) ApplyMoveRotation();
         }
 
         // --- Placement ---
@@ -310,18 +438,25 @@ namespace IsometricMapEditor
             if (SelectedTile == null) return;
             SaveUndoSnapshot();
 
-            var tile = new PlacedTile
-            {
-                gridPosition = cell,
-                tileDefinitionId = SelectedTile.tileId,
-                tileDefinition = SelectedTile,
-                rotation = CurrentRotation,
-                flipX = false
-            };
-
-            EditingMap.PlaceTile(tile, "Ground");
             var layer = EditingMap.GetOrCreateLayer("Ground");
-            _tileRenderer.RenderSingleTile(tile, layer, EditingMap.gridSettings);
+            int rot = Mathf.RoundToInt(CurrentRotation);
+
+            foreach (var c in GetBrushCells(cell))
+            {
+                if (!EditingMap.gridSettings.IsInBounds(c)) continue;
+
+                var tile = new PlacedTile
+                {
+                    gridPosition = c,
+                    tileDefinitionId = SelectedTile.tileId,
+                    tileDefinition = SelectedTile,
+                    rotation = rot,
+                    flipX = false
+                };
+
+                EditingMap.PlaceTile(tile, "Ground");
+                _tileRenderer.RenderSingleTile(tile, layer, EditingMap.gridSettings);
+            }
         }
 
         void PlaceWall(Vector2Int cell)
@@ -329,18 +464,19 @@ namespace IsometricMapEditor
             if (SelectedWall == null) return;
             SaveUndoSnapshot();
 
+            int wallRot = Mathf.RoundToInt(CurrentRotation);
             var tile = new PlacedTile
             {
                 gridPosition = cell,
                 tileDefinitionId = SelectedWall.tileId,
                 tileDefinition = SelectedWall,
-                rotation = CurrentRotation,
+                rotation = wallRot,
                 flipX = false
             };
 
             EditingMap.PlaceTile(tile, "Walls");
 
-            string key = $"{cell.x}_{cell.y}_E{CurrentRotation}";
+            string key = $"{cell.x}_{cell.y}_E{wallRot}";
             if (_wallObjects.TryGetValue(key, out var old))
             {
                 Destroy(old);
@@ -367,11 +503,12 @@ namespace IsometricMapEditor
                 gridPosition = cell,
                 propDefinitionId = SelectedProp.propId,
                 propDefinition = SelectedProp,
-                rotation = CurrentRotation,
+                rotation = Mathf.RoundToInt(CurrentRotation),
                 freePlace = free,
                 worldPosition = finalPos,
                 yRotation = CurrentRotation * 15f,
-                scale = 1f
+                scale = 1f,
+                parentBuildingId = SelectedParentBuildingId
             };
 
             EditingMap.props.Add(prop);
@@ -402,7 +539,7 @@ namespace IsometricMapEditor
                 gridPosition = cell,
                 buildingDefinitionId = SelectedBuilding.buildingId,
                 buildingDefinition = SelectedBuilding,
-                rotation = CurrentRotation,
+                rotation = Mathf.RoundToInt(CurrentRotation),
                 freePlace = free,
                 worldPosition = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings),
                 yRotation = CurrentRotation * 15f,
@@ -419,6 +556,7 @@ namespace IsometricMapEditor
             SaveUndoSnapshot();
 
             bool free = !SnapToGrid;
+            int objRot = Mathf.RoundToInt(CurrentRotation);
             var obj = new PlacedMapObject
             {
                 instanceId = System.Guid.NewGuid().ToString("N")[..8],
@@ -426,7 +564,7 @@ namespace IsometricMapEditor
                 gridPosition = cell,
                 freePlace = free,
                 worldPosition = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings),
-                yRotation = CurrentRotation * 15f,
+                yRotation = objRot * 15f,
                 label = SelectedObjectType.ToString(),
                 interactRange = GetDefaultInteractRange(SelectedObjectType),
                 promptText = GetDefaultPromptText(SelectedObjectType),
@@ -451,6 +589,22 @@ namespace IsometricMapEditor
                 visualTexturePath = SpawnVisualTexturePath,
                 effectPrefabPath = SpawnEffectPrefabPath,
                 visualScale = SpawnVisualScale,
+                // Trigger config
+                triggerMode = SpawnTriggerMode,
+                triggerTargetScene = SpawnTriggerTargetScene,
+                triggerTargetSpawnId = SpawnTriggerTargetSpawnId,
+                triggerAutoEnter = SpawnTriggerAutoEnter,
+                triggerDelay = SpawnTriggerDelay,
+                triggerOneShot = SpawnTriggerOneShot,
+                triggerSizeX = SpawnTriggerSizeX,
+                triggerSizeY = SpawnTriggerSizeY,
+                triggerSizeZ = SpawnTriggerSizeZ,
+                teleportX = SpawnTeleportX,
+                teleportY = SpawnTeleportY,
+                teleportZ = SpawnTeleportZ,
+                teleportYRot = SpawnTeleportYRot,
+                triggerStorySceneId = SpawnTriggerStorySceneId,
+                parentBuildingId = SelectedParentBuildingId,
             };
 
             // Type-specific label
@@ -470,6 +624,12 @@ namespace IsometricMapEditor
                     break;
                 case MapObjectType.EnemySpawn:
                     obj.label = !string.IsNullOrEmpty(SpawnEnemyUnitKey) ? SpawnEnemyUnitKey : "EnemySpawn";
+                    break;
+                case MapObjectType.Trigger:
+                    string[] triggerModeNames = { "씬전환", "로컬이동", "스토리", "커스텀" };
+                    obj.label = $"Trigger ({triggerModeNames[Mathf.Clamp(SpawnTriggerMode, 0, 3)]})";
+                    if (SpawnTriggerMode == 3) // CustomEvent
+                        obj.customData = SpawnTriggerCustomData;
                     break;
             }
 
@@ -504,8 +664,9 @@ namespace IsometricMapEditor
                     EraseNearestAtCell(cell);
                     break;
                 case ToolMode.Wall:
-                    string key = $"{cell.x}_{cell.y}_E{CurrentRotation}";
-                    EditingMap.RemoveWallEdge(cell, CurrentRotation);
+                    int eraseWallRot = Mathf.RoundToInt(CurrentRotation);
+                    string key = $"{cell.x}_{cell.y}_E{eraseWallRot}";
+                    EditingMap.RemoveWallEdge(cell, eraseWallRot);
                     if (_wallObjects.TryGetValue(key, out var wallGo))
                     {
                         Destroy(wallGo);
@@ -724,6 +885,358 @@ namespace IsometricMapEditor
             UI.RefreshAll();
         }
 
+        // --- Move Mode ---
+
+        public void UpdateMoveHover(Vector2Int cell, Vector3 worldPos)
+        {
+            if (EditingMap == null) { ClearMoveHover(); return; }
+            if (_moveGrabbed) return; // 이미 집은 상태면 호버 불필요
+
+            Vector3 cellWorld = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+            float bestDist = float.MaxValue;
+            int bestType = -1;
+            int bestIndex = -1;
+            int bestRotation = 0;
+            string info = null;
+            string targetId = null;
+
+            // Props
+            for (int i = 0; i < EditingMap.props.Count; i++)
+            {
+                var p = EditingMap.props[i];
+                float dist = Vector3.Distance(p.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    bestType = 2; bestIndex = i;
+                    targetId = p.instanceId;
+                    string name = p.propDefinition != null ? (p.propDefinition.displayName ?? p.propDefinitionId) : p.propDefinitionId;
+                    info = $"프롭: {name}";
+                }
+            }
+            // Buildings
+            for (int i = 0; i < EditingMap.buildings.Count; i++)
+            {
+                var b = EditingMap.buildings[i];
+                if (b.buildingDefinition == null) continue;
+                var occupied = b.buildingDefinition.GetOccupiedCells(b.gridPosition);
+                if (occupied.Contains(cell))
+                {
+                    float dist = Vector3.Distance(b.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        bestType = 3; bestIndex = i;
+                        targetId = b.instanceId;
+                        info = $"건물: {(b.buildingDefinition.displayName ?? b.buildingDefinitionId)}";
+                    }
+                }
+            }
+            // Map Objects
+            for (int i = 0; i < EditingMap.mapObjects.Count; i++)
+            {
+                var obj = EditingMap.mapObjects[i];
+                float dist = Vector3.Distance(obj.GetWorldPosition(EditingMap.gridSettings), cellWorld);
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    bestType = 4; bestIndex = i;
+                    targetId = obj.instanceId;
+                    info = $"{obj.objectType}: {obj.label}";
+                }
+            }
+            // Walls
+            for (int r = 0; r < 4; r++)
+            {
+                string wKey = $"{cell.x}_{cell.y}_E{r}";
+                if (_wallObjects.ContainsKey(wKey) && 0f < bestDist)
+                {
+                    bestDist = 0f; bestType = 1; bestRotation = r;
+                    targetId = wKey;
+                    info = "벽";
+                }
+            }
+
+            if (targetId == _moveHoverInstanceId) { MoveHoverInfo = info; return; }
+            ClearMoveHover();
+            _moveHoverInstanceId = targetId;
+            _moveType = bestType;
+            MoveHoverInfo = info;
+
+            // 초록색 하이라이트
+            GameObject targetGo = null;
+            if (bestType == 1) _wallObjects.TryGetValue(targetId, out targetGo);
+            else if (bestType == 2 && targetId != null) _propObjects.TryGetValue(targetId, out targetGo);
+            else if (bestType == 3 && targetId != null) _buildingObjects.TryGetValue(targetId, out targetGo);
+            else if (bestType == 4 && targetId != null) _objectMarkers.TryGetValue(targetId, out targetGo);
+
+            if (targetGo != null)
+            {
+                foreach (var r in targetGo.GetComponentsInChildren<Renderer>())
+                {
+                    if (r.material == null) continue;
+                    _moveHoverRenderers.Add((r, r.material.color));
+                    r.material.color = new Color(0.2f, 1f, 0.3f, 0.9f);
+                }
+            }
+        }
+
+        public void ClearMoveHover()
+        {
+            foreach (var (rend, orig) in _moveHoverRenderers)
+            {
+                if (rend != null && rend.material != null)
+                    rend.material.color = orig;
+            }
+            _moveHoverRenderers.Clear();
+            _moveHoverInstanceId = null;
+            MoveHoverInfo = null;
+        }
+
+        /// <summary>이동 모드에서 클릭 — 집기 또는 놓기</summary>
+        public void OnMoveClick(Vector2Int cell, Vector3 worldPos)
+        {
+            if (_moveGrabbed)
+            {
+                // 놓기: 현재 위치에 데이터 확정
+                DropMove(cell, worldPos);
+            }
+            else if (!string.IsNullOrEmpty(_moveHoverInstanceId))
+            {
+                // 집기
+                GrabMove(cell);
+            }
+        }
+
+        void GrabMove(Vector2Int cell)
+        {
+            SaveUndoSnapshot();
+            _moveGrabbed = true;
+            _moveInstanceId = _moveHoverInstanceId;
+
+            // 집은 오브젝트의 현재 각도를 CurrentRotation에 반영
+            switch (_moveType)
+            {
+                case 2: // Prop
+                    var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                    if (p != null) CurrentRotation = p.yRotation / 15f;
+                    break;
+                case 3: // Building
+                    var b = EditingMap.buildings.Find(x => x.instanceId == _moveInstanceId);
+                    if (b != null) CurrentRotation = b.yRotation / 15f;
+                    break;
+                case 4: // MapObject
+                    var o = EditingMap.mapObjects.Find(x => x.instanceId == _moveInstanceId);
+                    if (o != null) CurrentRotation = o.yRotation / 15f;
+                    break;
+                case 1: // Wall
+                    _moveWallRotation = 0;
+                    foreach (var layer in EditingMap.layers)
+                        foreach (var t in layer.tiles)
+                            if (t.gridPosition == cell && t.tileDefinition != null && t.tileDefinition.IsWall)
+                            { _moveWallRotation = t.rotation; break; }
+                    CurrentRotation = _moveWallRotation;
+                    break;
+            }
+
+            ClearMoveHover();
+            MoveHoverInfo = "이동 중… (클릭: 놓기, ESC: 취소, Q/E: 회전)";
+            UI.RefreshStatus();
+        }
+
+        /// <summary>이동 중 매 프레임 마우스 위치로 오브젝트 비주얼 이동</summary>
+        public void UpdateMovePosition(Vector2Int cell, Vector3 worldPos)
+        {
+            if (!_moveGrabbed) return;
+
+            Vector3 finalPos = SnapToGrid
+                ? IsometricGrid.GridToWorld(cell, EditingMap.gridSettings)
+                : worldPos;
+
+            GameObject go = null;
+            switch (_moveType)
+            {
+                case 1: _wallObjects.TryGetValue(_moveInstanceId, out go); break;
+                case 2: _propObjects.TryGetValue(_moveInstanceId, out go); break;
+                case 3: _buildingObjects.TryGetValue(_moveInstanceId, out go); break;
+                case 4: _objectMarkers.TryGetValue(_moveInstanceId, out go); break;
+            }
+
+            if (go != null)
+            {
+                float yOffset = _moveType == 1
+                    ? go.transform.position.y  // 벽은 Y축 유지
+                    : (_moveType == 4 && go.transform.childCount > 0 ? go.transform.position.y : 0f);
+                go.transform.position = new Vector3(finalPos.x, _moveType == 1 ? yOffset : 0f, finalPos.z);
+
+                // 벽은 높이 보정
+                if (_moveType == 1)
+                {
+                    var wallChild = go.transform.Find("WallVisual") ?? (go.transform.childCount > 0 ? go.transform.GetChild(0) : null);
+                    if (wallChild != null)
+                        go.transform.position = new Vector3(finalPos.x, wallChild.localScale.y * 0.5f, finalPos.z);
+                }
+            }
+        }
+
+        void ApplyMoveRotation()
+        {
+            if (!_moveGrabbed) return;
+            float yRot = CurrentRotation * 15f;
+
+            GameObject go = null;
+            switch (_moveType)
+            {
+                case 2: _propObjects.TryGetValue(_moveInstanceId, out go); break;
+                case 3: _buildingObjects.TryGetValue(_moveInstanceId, out go); break;
+                case 4: _objectMarkers.TryGetValue(_moveInstanceId, out go); break;
+            }
+            if (go == null) return;
+
+            // 프리팹 원본 회전에 yRotation을 곱함
+            switch (_moveType)
+            {
+                case 2:
+                    var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                    if (p?.propDefinition?.prefab != null)
+                    {
+                        var baseRot = p.propDefinition.prefab.transform.rotation;
+                        go.transform.rotation = Quaternion.Euler(0, yRot, 0) * baseRot;
+                    }
+                    else go.transform.rotation = Quaternion.Euler(0, yRot, 0);
+                    break;
+                case 3:
+                    var b = EditingMap.buildings.Find(x => x.instanceId == _moveInstanceId);
+                    if (b?.buildingDefinition?.prefab != null)
+                    {
+                        var baseRot = b.buildingDefinition.prefab.transform.rotation;
+                        go.transform.rotation = Quaternion.Euler(0, yRot, 0) * baseRot;
+                    }
+                    else go.transform.rotation = Quaternion.Euler(0, yRot, 0);
+                    break;
+                case 4:
+                    go.transform.rotation = Quaternion.Euler(0, yRot, 0);
+                    break;
+            }
+        }
+
+        void DropMove(Vector2Int cell, Vector3 worldPos)
+        {
+            Vector3 finalPos = SnapToGrid
+                ? IsometricGrid.GridToWorld(cell, EditingMap.gridSettings)
+                : worldPos;
+
+            float yRot = CurrentRotation * 15f;
+
+            switch (_moveType)
+            {
+                case 2: // Prop
+                {
+                    var p = EditingMap.props.Find(x => x.instanceId == _moveInstanceId);
+                    if (p != null)
+                    {
+                        p.gridPosition = cell;
+                        p.worldPosition = finalPos;
+                        p.freePlace = !SnapToGrid;
+                        p.yRotation = yRot;
+                        p.rotation = Mathf.RoundToInt(CurrentRotation);
+                    }
+                    break;
+                }
+                case 3: // Building
+                {
+                    var b = EditingMap.buildings.Find(x => x.instanceId == _moveInstanceId);
+                    if (b != null)
+                    {
+                        b.gridPosition = cell;
+                        b.worldPosition = finalPos;
+                        b.freePlace = !SnapToGrid;
+                        b.yRotation = yRot;
+                        b.rotation = Mathf.RoundToInt(CurrentRotation);
+                    }
+                    break;
+                }
+                case 4: // MapObject
+                {
+                    var o = EditingMap.mapObjects.Find(x => x.instanceId == _moveInstanceId);
+                    if (o != null)
+                    {
+                        o.gridPosition = cell;
+                        o.worldPosition = finalPos;
+                        o.freePlace = !SnapToGrid;
+                        o.yRotation = yRot;
+                    }
+                    break;
+                }
+                case 1: // Wall — 원래 위치의 벽 데이터 삭제 후 새 위치에 재배치
+                {
+                    // 원래 벽 데이터 찾아서 제거
+                    PlacedTile wallTile = null;
+                    string layerName = null;
+                    foreach (var layer in EditingMap.layers)
+                    {
+                        for (int i = layer.tiles.Count - 1; i >= 0; i--)
+                        {
+                            var t = layer.tiles[i];
+                            if (t.tileDefinition != null && t.tileDefinition.IsWall)
+                            {
+                                string wKey = $"{t.gridPosition.x}_{t.gridPosition.y}_E{t.rotation}";
+                                if (wKey == _moveInstanceId)
+                                {
+                                    wallTile = t;
+                                    layerName = layer.layerName;
+                                    layer.tiles.RemoveAt(i);
+                                    break;
+                                }
+                            }
+                        }
+                        if (wallTile != null) break;
+                    }
+
+                    // 비주얼 제거
+                    if (_wallObjects.TryGetValue(_moveInstanceId, out var oldGo))
+                    {
+                        Destroy(oldGo);
+                        _wallObjects.Remove(_moveInstanceId);
+                    }
+
+                    if (wallTile != null)
+                    {
+                        int newRot = Mathf.RoundToInt(CurrentRotation) % 4;
+                        wallTile.gridPosition = cell;
+                        wallTile.rotation = newRot;
+                        EditingMap.PlaceTile(wallTile, layerName ?? "Walls");
+                        var wallGo = WallBuilder.CreateWallCube(wallTile, EditingMap.gridSettings, _wallRoot);
+                        if (wallGo != null)
+                        {
+                            string newKey = $"{cell.x}_{cell.y}_E{newRot}";
+                            _wallObjects[newKey] = wallGo;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            _moveGrabbed = false;
+            _moveInstanceId = null;
+            _moveType = -1;
+            MoveHoverInfo = null;
+            UI.RefreshAll();
+        }
+
+        public void CancelMove()
+        {
+            if (!_moveGrabbed) return;
+            // Undo로 복원
+            Undo();
+            _moveGrabbed = false;
+            _moveInstanceId = null;
+            _moveType = -1;
+            MoveHoverInfo = null;
+        }
+
+        public bool IsMovingObject => _moveGrabbed;
+
         // --- Hierarchy Actions ---
 
         public void SelectPlacedObject(string instanceId)
@@ -831,6 +1344,57 @@ namespace IsometricMapEditor
             }
         }
 
+        /// <summary>
+        /// 현재 마우스가 가리키는(호버) 프랍/건물의 정렬 오프셋을 미세조정한다. ([ / ] 키)
+        /// 스프라이트는 sortingOrder 가 즉시 먹고, 불투명 3D 메시는 깊이 정렬이라 효과가 없을 수 있다.
+        /// </summary>
+        public void NudgeHoverSortOffset(int delta)
+        {
+            if (EditingMap == null || string.IsNullOrEmpty(SortTargetId)) return;
+
+            // 프랍
+            for (int i = 0; i < EditingMap.props.Count; i++)
+            {
+                var p = EditingMap.props[i];
+                if (p.instanceId != SortTargetId) continue;
+
+                p.sortingOffsetOverride += delta;
+
+                if (_propObjects.TryGetValue(p.instanceId, out var old) && old != null)
+                    Destroy(old);
+                _propObjects.Remove(p.instanceId);
+                SpawnPropVisual(p);
+
+                UI?.RefreshStatus();
+                return;
+            }
+
+            // 건물
+            for (int i = 0; i < EditingMap.buildings.Count; i++)
+            {
+                var b = EditingMap.buildings[i];
+                if (b.instanceId != SortTargetId) continue;
+
+                b.sortingOffsetOverride += delta;
+
+                if (_buildingObjects.TryGetValue(b.instanceId, out var old) && old != null)
+                    Destroy(old);
+                _buildingObjects.Remove(b.instanceId);
+                SpawnBuildingVisual(b);
+
+                UI?.RefreshStatus();
+                return;
+            }
+        }
+
+        /// <summary>정렬 조절 대상 해제 (X 버튼)</summary>
+        public void ClearSortTarget()
+        {
+            SortTargetId = null;
+            SortTargetLabel = null;
+            UI?.RefreshStatus();
+        }
+
         // --- Eraser Hover ---
 
         public void UpdateEraseHover(Vector2Int cell, Vector3 worldPos)
@@ -934,6 +1498,17 @@ namespace IsometricMapEditor
                 case 2: targetId = EditingMap.props[bestIndex].instanceId; break;
                 case 3: targetId = EditingMap.buildings[bestIndex].instanceId; break;
                 case 4: targetId = EditingMap.mapObjects[bestIndex].instanceId; break;
+            }
+
+            // 프랍/건물을 가리켰으면 정렬 조절 대상으로 고정 (UI 클릭하러 가도 유지)
+            if (bestType == 2 || bestType == 3)
+            {
+                if (SortTargetId != targetId)
+                {
+                    SortTargetId = targetId;
+                    SortTargetLabel = info;
+                    UI?.RefreshStatus();
+                }
             }
 
             // Skip if same target
@@ -1138,8 +1713,33 @@ namespace IsometricMapEditor
                 go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0) * go.transform.rotation;
             go.transform.localScale = Vector3.one * prop.scale;
 
+            // 스프라이트 정렬 순서 (바닥보다 위에) + 인스턴스별 미세조정
+            int sortOrder = IsometricGrid.GetSortingOrder(prop.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                            + prop.propDefinition.sortingOffset
+                            + prop.sortingOffsetOverride;
+            foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
+                sr.sortingOrder = sortOrder;
+
+            // 접지 위치 마커
+            AttachPlacedGroundMarker(go);
+
             // 빛 차폐 그림자 프록시 박스 (벽/컨테이너 등). prop의 회전/스케일을 상속.
             ShadowProxyBuilder.Build(prop.propDefinition, go.transform, editorPreview: !Application.isPlaying);
+
+            // 건물 소속 표시 (에디터 라벨)
+            if (!string.IsNullOrEmpty(prop.parentBuildingId))
+            {
+                var labelGo = new GameObject("BuildingLabel");
+                labelGo.transform.SetParent(go.transform);
+                labelGo.transform.localPosition = Vector3.up * 0.8f;
+                var tm = labelGo.AddComponent<TextMesh>();
+                tm.text = $"[건물:{prop.parentBuildingId}]";
+                tm.fontSize = 20;
+                tm.characterSize = 0.06f;
+                tm.anchor = TextAnchor.MiddleCenter;
+                tm.alignment = TextAlignment.Center;
+                tm.color = new Color(0.3f, 0.8f, 1f, 0.7f);
+            }
 
             _propObjects[prop.instanceId] = go;
         }
@@ -1209,6 +1809,21 @@ namespace IsometricMapEditor
             }
 
             go.name = $"Building_{def.buildingId}_{building.instanceId}";
+
+            // 정렬 순서 (SpriteRenderer + MeshRenderer 모두)
+            // = 그리드 기본 + 정의별 기본 오프셋(건물끼리 order) + 인스턴스 미세조정
+            int sortOrder = IsometricGrid.GetSortingOrder(building.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                            + def.sortingOffset
+                            + building.sortingOffsetOverride;
+            foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
+                sr.sortingOrder = sortOrder;
+            foreach (var mr in go.GetComponentsInChildren<MeshRenderer>())
+                mr.sortingOrder = sortOrder;
+
+            // 접지 위치 마커
+            float markerScale = Mathf.Max(def.footprint.x, def.footprint.y);
+            AttachPlacedGroundMarker(go, markerScale);
+
             _buildingObjects[building.instanceId] = go;
         }
 
@@ -1368,8 +1983,251 @@ namespace IsometricMapEditor
             _ => Color.white
         };
 
+        // --- 배치 고스트 프리뷰 ---
+
+        /// <summary>현재 도구+선택에 맞는 고스트를 생성한다. 이미 있으면 제거 후 재생성.</summary>
+        void RebuildGhost()
+        {
+            DestroyGhost();
+
+            switch (CurrentTool)
+            {
+                case ToolMode.Prop:
+                    if (SelectedProp?.prefab == null) return;
+                    _placementGhost = Instantiate(SelectedProp.prefab);
+                    break;
+                case ToolMode.Building:
+                    if (SelectedBuilding == null) return;
+                    if (SelectedBuilding.prefab != null)
+                        _placementGhost = Instantiate(SelectedBuilding.prefab);
+                    else
+                    {
+                        _placementGhost = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        float ts = EditingMap?.gridSettings.tileSize ?? 1f;
+                        _placementGhost.transform.localScale = new Vector3(
+                            SelectedBuilding.footprint.x * ts * 0.95f, 2.4f,
+                            SelectedBuilding.footprint.y * ts * 0.95f);
+                    }
+                    break;
+                case ToolMode.Wall:
+                    if (SelectedWall == null) return;
+                    var wallTile = new PlacedTile
+                    {
+                        gridPosition = Vector2Int.zero,
+                        tileDefinition = SelectedWall,
+                        rotation = 0,
+                    };
+                    var gs = EditingMap?.gridSettings ?? new GridSettings { tileSize = 1f };
+                    _placementGhost = WallBuilder.CreateWallCube(wallTile, gs, null);
+                    break;
+                default:
+                    return;
+            }
+
+            if (_placementGhost == null) return;
+            _placementGhost.name = "__PlacementGhost__";
+
+            // 반투명 처리
+            ApplyGhostMaterial(_placementGhost);
+
+            // 콜라이더 제거 (레이캐스트 방해 방지)
+            foreach (var col in _placementGhost.GetComponentsInChildren<Collider>())
+                Destroy(col);
+
+            // 그라운드 마커 추가
+            AttachGroundMarker(_placementGhost, CurrentTool == ToolMode.Building
+                ? Mathf.Max(SelectedBuilding?.footprint.x ?? 1, SelectedBuilding?.footprint.y ?? 1)
+                : 1f);
+
+            _placementGhost.SetActive(false);
+        }
+
+        void ApplyGhostMaterial(GameObject go)
+        {
+            foreach (var r in go.GetComponentsInChildren<Renderer>())
+            {
+                if (r is SpriteRenderer sr)
+                {
+                    // SpriteRenderer: color.a로 반투명
+                    sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 0.4f);
+                }
+                else
+                {
+                    // MeshRenderer: 원본 머티리얼 복제 후 투명 처리 (텍스처 유지)
+                    var origMats = r.sharedMaterials;
+                    var ghostMats = new Material[origMats.Length];
+                    for (int i = 0; i < origMats.Length; i++)
+                    {
+                        var src = origMats[i];
+                        var gm = src != null ? new Material(src) : new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+
+                        // URP 투명 설정
+                        gm.SetFloat("_Surface", 1); // Transparent
+                        gm.SetOverrideTag("RenderType", "Transparent");
+                        gm.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        gm.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                        gm.SetInt("_ZWrite", 0);
+                        gm.renderQueue = 3000;
+                        gm.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+
+                        // 알파값 조절 (원본 색상 유지, 반투명)
+                        if (gm.HasProperty("_BaseColor"))
+                        {
+                            var c = gm.GetColor("_BaseColor");
+                            gm.SetColor("_BaseColor", new Color(c.r, c.g, c.b, 0.45f));
+                        }
+                        else if (gm.HasProperty("_Color"))
+                        {
+                            var c = gm.GetColor("_Color");
+                            gm.SetColor("_Color", new Color(c.r, c.g, c.b, 0.45f));
+                        }
+                        else
+                        {
+                            gm.color = new Color(gm.color.r, gm.color.g, gm.color.b, 0.45f);
+                        }
+
+                        // Alpha도 별도 프로퍼티가 있으면 설정
+                        if (gm.HasProperty("_Alpha"))
+                            gm.SetFloat("_Alpha", 0.45f);
+
+                        ghostMats[i] = gm;
+                    }
+                    r.sharedMaterials = ghostMats;
+                }
+            }
+        }
+
+        /// <summary>고스트 위치/회전을 마우스 커서에 맞춰 갱신한다.</summary>
+        public void UpdateGhostPosition(Vector2Int cell, Vector3 worldPos)
+        {
+            if (_placementGhost == null) return;
+            if (EditingMap == null) return;
+
+            bool inBounds = EditingMap.gridSettings.IsInBounds(cell);
+            _placementGhost.SetActive(inBounds);
+            if (!inBounds) return;
+
+            Vector3 finalPos = SnapToGrid
+                ? IsometricGrid.GridToWorld(cell, EditingMap.gridSettings)
+                : worldPos;
+
+            float yRot = CurrentRotation * 15f;
+
+            switch (CurrentTool)
+            {
+                case ToolMode.Prop:
+                    _placementGhost.transform.position = finalPos;
+                    if (Mathf.Abs(yRot) > 0.01f && SelectedProp?.prefab != null)
+                        _placementGhost.transform.rotation = Quaternion.Euler(0, yRot, 0) * SelectedProp.prefab.transform.rotation;
+                    else if (SelectedProp?.prefab != null)
+                        _placementGhost.transform.rotation = SelectedProp.prefab.transform.rotation;
+                    break;
+                case ToolMode.Building:
+                    _placementGhost.transform.position = finalPos;
+                    if (SelectedBuilding?.prefab != null)
+                        _placementGhost.transform.rotation = Quaternion.Euler(0, yRot, 0) * SelectedBuilding.prefab.transform.rotation;
+                    else
+                        _placementGhost.transform.rotation = Quaternion.Euler(0, yRot, 0);
+                    break;
+                case ToolMode.Wall:
+                    int wallRot = Mathf.RoundToInt(CurrentRotation) % 4;
+                    Vector3 cellCenter = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+                    float halfTile = EditingMap.gridSettings.tileSize * 0.5f;
+                    Vector3 edgeOff = wallRot switch
+                    {
+                        0 => new Vector3(0, 0, halfTile),
+                        1 => new Vector3(halfTile, 0, 0),
+                        2 => new Vector3(0, 0, -halfTile),
+                        3 => new Vector3(-halfTile, 0, 0),
+                        _ => Vector3.zero
+                    };
+                    float wh = SelectedWall?.wallHeight ?? 2.4f;
+                    _placementGhost.transform.position = cellCenter + edgeOff + new Vector3(0, wh * 0.5f, 0);
+                    // 벽 방향에 따라 큐브 스케일 변경
+                    var wallChild = _placementGhost.transform.childCount > 0
+                        ? _placementGhost.transform.GetChild(0) : _placementGhost.transform;
+                    float wt = SelectedWall?.wallThickness ?? 0.08f;
+                    wallChild.localScale = (wallRot == 0 || wallRot == 2)
+                        ? new Vector3(EditingMap.gridSettings.tileSize, wh, wt)
+                        : new Vector3(wt, wh, EditingMap.gridSettings.tileSize);
+                    break;
+            }
+        }
+
+        void DestroyGhost()
+        {
+            if (_placementGhost != null)
+            {
+                Destroy(_placementGhost);
+                _placementGhost = null;
+            }
+        }
+
+        /// <summary>접지 위치 표시용 링(circle) 마커를 GO 아래에 추가</summary>
+        static void AttachGroundMarker(GameObject parent, float radiusScale = 1f)
+        {
+            var markerGo = new GameObject("GroundMarker");
+            markerGo.transform.SetParent(parent.transform, false);
+            // 월드 기준 바닥에 위치 (parent의 로컬 기준)
+            markerGo.transform.localPosition = Vector3.zero;
+            // XZ 평면에 눕힘
+            markerGo.transform.localRotation = Quaternion.Euler(90, 0, 0);
+
+            var lr = markerGo.AddComponent<LineRenderer>();
+            lr.useWorldSpace = false;
+            lr.loop = true;
+            lr.widthMultiplier = 0.03f;
+
+            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color"));
+            mat.color = new Color(1f, 1f, 0f, 0.8f);
+            lr.sharedMaterial = mat;
+
+            // 원형 포인트 생성
+            int segments = 24;
+            float radius = 0.35f * radiusScale;
+            lr.positionCount = segments;
+            for (int i = 0; i < segments; i++)
+            {
+                float angle = (float)i / segments * Mathf.PI * 2f;
+                lr.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0));
+            }
+
+            lr.sortingOrder = 9999; // 항상 맨 위에 표시
+        }
+
+        /// <summary>배치된 프롭/건물 비주얼 아래에도 접지 마커를 붙인다.</summary>
+        static void AttachPlacedGroundMarker(GameObject go, float radiusScale = 1f)
+        {
+            var markerGo = new GameObject("GroundMarker");
+            markerGo.transform.SetParent(go.transform, false);
+            // 부모가 회전되어 있어도 월드 기준으로 바닥에 깔기
+            markerGo.transform.position = new Vector3(go.transform.position.x, 0.01f, go.transform.position.z);
+            markerGo.transform.rotation = Quaternion.Euler(90, 0, 0);
+
+            var lr = markerGo.AddComponent<LineRenderer>();
+            lr.useWorldSpace = false;
+            lr.loop = true;
+            lr.widthMultiplier = 0.025f;
+
+            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color"));
+            mat.color = new Color(0f, 1f, 0.5f, 0.6f);
+            lr.sharedMaterial = mat;
+
+            int segments = 24;
+            float radius = 0.3f * radiusScale;
+            lr.positionCount = segments;
+            for (int i = 0; i < segments; i++)
+            {
+                float angle = (float)i / segments * Mathf.PI * 2f;
+                lr.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0));
+            }
+
+            lr.sortingOrder = 9999;
+        }
+
         void ClearAllVisuals()
         {
+            DestroyGhost();
             _tileRenderer.ClearAll();
 
             foreach (var kvp in _wallObjects)
@@ -1422,19 +2280,227 @@ namespace IsometricMapEditor
 
         // --- Save / Load ---
 
-        public string GetSavePath() => Path.Combine(Application.persistentDataPath, "Maps");
+        const string MAP_SAVE_FOLDER = "Assets/Maps";
 
-        public void SaveMap(string filename)
+        public string GetSavePath()
+        {
+#if UNITY_EDITOR
+            return Path.Combine(Application.dataPath, "../", MAP_SAVE_FOLDER).Replace("\\", "/");
+#else
+            return Path.Combine(Application.persistentDataPath, "Maps");
+#endif
+        }
+
+        void EnsureSaveFolder()
         {
             string dir = GetSavePath();
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
+        }
 
+        public void SaveMap(string filename)
+        {
+            EnsureSaveFolder();
+
+            string dir = GetSavePath();
             string path = Path.Combine(dir, filename + ".json");
             string json = MapSerializer.Serialize(EditingMap);
             File.WriteAllText(path, json);
-            Debug.Log($"[MapBuilder] Saved: {path}");
+            Debug.Log($"[MapBuilder] JSON Saved: {path}");
+
+#if UNITY_EDITOR
+            // JSON을 AssetDatabase에 반영
+            AssetDatabase.Refresh();
+
+            // 프리팹 생성
+            SaveMapPrefab(filename);
+#endif
         }
+
+#if UNITY_EDITOR
+        void SaveMapPrefab(string filename)
+        {
+            string prefabDir = $"{MAP_SAVE_FOLDER}/Prefabs";
+            if (!AssetDatabase.IsValidFolder(prefabDir))
+            {
+                if (!AssetDatabase.IsValidFolder(MAP_SAVE_FOLDER))
+                    AssetDatabase.CreateFolder("Assets", "Maps");
+                AssetDatabase.CreateFolder(MAP_SAVE_FOLDER, "Prefabs");
+            }
+
+            // 루트 오브젝트 생성
+            var root = new GameObject($"Map_{filename}");
+
+            try
+            {
+                // ── Tiles ──
+                var tileRoot = new GameObject("Tiles");
+                tileRoot.transform.SetParent(root.transform);
+
+                foreach (var layer in EditingMap.layers)
+                {
+                    var layerGo = new GameObject(layer.layerName);
+                    layerGo.transform.SetParent(tileRoot.transform);
+
+                    foreach (var tile in layer.tiles)
+                    {
+                        if (tile.tileDefinition == null) continue;
+
+                        if (tile.tileDefinition.IsWall)
+                        {
+                            var wallGo = WallBuilder.CreateWallCube(tile, EditingMap.gridSettings, layerGo.transform);
+                            if (wallGo != null)
+                                wallGo.name = $"Wall_{tile.tileDefinitionId}_{tile.gridPosition.x}_{tile.gridPosition.y}";
+                        }
+                        else if (tile.tileDefinition.sprite != null)
+                        {
+                            var tileGo = new GameObject($"Tile_{tile.tileDefinitionId}_{tile.gridPosition.x}_{tile.gridPosition.y}");
+                            tileGo.transform.SetParent(layerGo.transform);
+
+                            Vector3 pos = IsometricGrid.GridToWorld(tile.gridPosition, EditingMap.gridSettings);
+                            pos.y -= 0.05f; // 3D 벽이 깊이 테스트에서 이기도록 바닥을 살짝 내림
+                            tileGo.transform.position = pos;
+                            tileGo.transform.rotation = Quaternion.Euler(90, 0, 0); // XZ 평면에 눕힘
+                            tileGo.transform.localScale = IsometricGrid.GetTileScale(tile.tileDefinition.sprite, EditingMap.gridSettings);
+
+                            var sr = tileGo.AddComponent<SpriteRenderer>();
+                            sr.sprite = tile.tileDefinition.sprite;
+                            sr.flipX = tile.flipX;
+                            sr.sortingOrder = IsometricGrid.GetSortingOrder(tile.gridPosition, layer.sortingLayerOffset)
+                                              + tile.tileDefinition.sortingOffset;
+
+                            var mat = tile.EffectiveMaterial;
+                            if (mat != null)
+                                sr.sharedMaterial = mat;
+                        }
+                    }
+                }
+
+                // ── Props ──
+                var propRoot = new GameObject("Props");
+                propRoot.transform.SetParent(root.transform);
+
+                foreach (var prop in EditingMap.props)
+                {
+                    if (prop.propDefinition?.prefab == null) continue;
+
+                    var go = (GameObject)PrefabUtility.InstantiatePrefab(prop.propDefinition.prefab, propRoot.transform);
+                    if (go == null) continue;
+
+                    go.name = $"Prop_{prop.propDefinitionId}_{prop.instanceId}";
+                    go.transform.position = prop.GetWorldPosition(EditingMap.gridSettings);
+                    if (Mathf.Abs(prop.yRotation) > 0.01f)
+                        go.transform.rotation = Quaternion.Euler(0, prop.yRotation, 0) * go.transform.rotation;
+                    go.transform.localScale = Vector3.one * prop.scale;
+
+                    int sortOrder = IsometricGrid.GetSortingOrder(prop.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                                    + prop.propDefinition.sortingOffset
+                                    + prop.sortingOffsetOverride;
+                    foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
+                        sr.sortingOrder = sortOrder;
+
+                    ShadowProxyBuilder.Build(prop.propDefinition, go.transform, editorPreview: false);
+                }
+
+                // ── Buildings ──
+                var buildRoot = new GameObject("Buildings");
+                buildRoot.transform.SetParent(root.transform);
+
+                foreach (var building in EditingMap.buildings)
+                {
+                    var def = building.buildingDefinition;
+                    if (def == null) continue;
+
+                    Vector3 worldPos = building.GetWorldPosition(EditingMap.gridSettings);
+                    GameObject go;
+
+                    if (def.prefab != null)
+                    {
+                        go = (GameObject)PrefabUtility.InstantiatePrefab(def.prefab, buildRoot.transform);
+                        if (go == null) continue;
+                        go.transform.position = worldPos;
+                        if (Mathf.Abs(building.yRotation) > 0.01f)
+                            go.transform.rotation = Quaternion.Euler(0, building.yRotation, 0) * go.transform.rotation;
+                    }
+                    else
+                    {
+                        go = new GameObject($"Building_{def.buildingId}_{building.instanceId}");
+                        go.transform.SetParent(buildRoot.transform);
+                        go.transform.position = worldPos;
+                        if (Mathf.Abs(building.yRotation) > 0.01f)
+                            go.transform.rotation = Quaternion.Euler(0, building.yRotation, 0);
+                    }
+
+                    go.name = $"Building_{building.buildingDefinitionId}_{building.instanceId}";
+                    go.transform.localScale = Vector3.one * building.scale;
+
+                    int sortOrder = IsometricGrid.GetSortingOrder(building.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                                    + def.sortingOffset
+                                    + building.sortingOffsetOverride;
+                    foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
+                        sr.sortingOrder = sortOrder;
+                    foreach (var mr in go.GetComponentsInChildren<MeshRenderer>())
+                        mr.sortingOrder = sortOrder;
+                }
+
+                // ── MapObjects ──
+                var objRoot = new GameObject("MapObjects");
+                objRoot.transform.SetParent(root.transform);
+
+                foreach (var obj in EditingMap.mapObjects)
+                {
+                    Vector3 pos = obj.freePlace ? obj.worldPosition
+                        : IsometricGrid.GridToWorld(obj.gridPosition, EditingMap.gridSettings);
+
+                    var go = new GameObject($"MapObj_{obj.objectType}_{obj.instanceId}");
+                    go.transform.SetParent(objRoot.transform);
+                    go.transform.position = pos;
+                    if (Mathf.Abs(obj.yRotation) > 0.01f)
+                        go.transform.rotation = Quaternion.Euler(0, obj.yRotation, 0);
+
+                    // 이펙트 프리팹 모드면 프리팹 배치
+                    if (obj.visualMode == 3)
+                    {
+                        GameObject effectSrc = null;
+                        var moDef = catalog?.GetMapObjectDefByType(obj.objectType);
+                        if (moDef != null && moDef.effectPrefab != null)
+                            effectSrc = moDef.effectPrefab;
+                        if (effectSrc == null && !string.IsNullOrEmpty(obj.effectPrefabPath))
+                            effectSrc = Resources.Load<GameObject>(obj.effectPrefabPath);
+                        if (effectSrc != null)
+                        {
+                            var effect = (GameObject)PrefabUtility.InstantiatePrefab(effectSrc, go.transform);
+                            if (effect != null)
+                            {
+                                effect.transform.localPosition = Vector3.zero;
+                                float s = obj.visualScale > 0.01f ? obj.visualScale : 1f;
+                                effect.transform.localScale = Vector3.one * s;
+                            }
+                        }
+                    }
+                }
+
+                // ── 맵 데이터 컴포넌트 부착 ──
+                var mapRef = root.AddComponent<MapDataReference>();
+                mapRef.mapName = EditingMap.mapName;
+                mapRef.mapId = EditingMap.mapId;
+                mapRef.jsonFileName = filename;
+                mapRef.gridSettings = EditingMap.gridSettings;
+
+                // 프리팹 저장
+                string prefabPath = $"{prefabDir}/Map_{filename}.prefab";
+                PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+                Debug.Log($"[MapBuilder] Prefab Saved: {prefabPath}");
+            }
+            finally
+            {
+                DestroyImmediate(root);
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+#endif
 
         public void LoadMap(string filename)
         {
