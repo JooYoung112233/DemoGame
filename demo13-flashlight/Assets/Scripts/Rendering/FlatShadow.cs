@@ -1,27 +1,33 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal; // Light2D
 
 /// <summary>
 /// 순수 2D(정사영) 탑다운 모듈에 방향성 투영 그림자를 붙인다. 월드 = XY 평면.
-/// 모듈 GameObject(MeshFilter+MeshRenderer 쿼드)에 추가하면
-/// 자식으로 그림자 메시를 생성하고, 라이트 위치에 따라 빛 반대쪽(XY)으로 늘려 그린다.
+/// 모듈에 SpriteRenderer 또는 MeshRenderer(+MeshFilter 쿼드)가 있으면 자동 감지해
+/// 자식으로 그림자(같은 스프라이트/메시 + BRB/ShadowProjector 머티리얼)를 만들고,
+/// 2D 점광(Light2D) 위치에 따라 빛 반대쪽(XY)으로 늘려 그린다.
 /// 라이트가 사방 어디에 있어도 매 프레임 방향이 갱신된다.
 /// 깊이는 sortingOrder로 모듈 뒤에 깔린다(정사영이라 Z 위치는 화면에 안 보임).
 /// 셰이더: BRB/ShadowProjector
 /// </summary>
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+[DisallowMultipleComponent]
 public class FlatShadow : MonoBehaviour
 {
-    [Header("Light")]
-    [Tooltip("그림자를 만들 광원. 비우면 씬의 메인 라이트를 자동 사용.")]
-    public Light lightSource;
+    [Header("Light (2D)")]
+    [Tooltip("그림자를 드리울 2D 점광(Light2D). 비우면 씬에서 가장 가까운 Point Light2D 자동 사용.")]
+    public Light2D lightSource;
+    [Tooltip("라이트 대신 고정 방향(태양)을 쓸 때 체크. 방향은 ManualDirection.")]
+    public bool useManualDirection = false;
+    [Tooltip("고정 그림자 방향(XY, 빛 반대쪽).")]
+    public Vector2 manualDirection = new Vector2(0f, -1f);
 
     [Header("Shadow Look")]
     [Range(0f, 1f)] public float strength = 0.55f;
     [Range(0f, 1f)] public float tipFade = 0.35f;
     [Tooltip("그림자 최대 길이(월드 단위).")]
     public float maxLength = 1.4f;
-    [Tooltip("점광/스팟이 가까울수록 그림자가 길어지는 배수(거리 0에서 적용).")]
-    public float angleStretch = 1.5f;
+    [Tooltip("점광이 가까울수록 그림자가 길어지는 배수(거리 0에서 적용).")]
+    public float proximityStretch = 1.5f;
     public Color shadowColor = Color.black;
     [Tooltip("스프라이트 위/아래가 반대로 투영되면 체크.")]
     public bool flipV = false;
@@ -35,7 +41,6 @@ public class FlatShadow : MonoBehaviour
     static readonly int IdLength = Shader.PropertyToID("_ShadowLength");
 
     GameObject _shadowGo;
-    MeshRenderer _shadowRend;
     Material _shadowMat;
 
     void Start()
@@ -45,70 +50,98 @@ public class FlatShadow : MonoBehaviour
 
     void BuildShadow()
     {
-        var srcFilter = GetComponent<MeshFilter>();
-        var srcRend = GetComponent<MeshRenderer>();
-        if (srcFilter == null || srcRend == null) return;
+        var shader = Shader.Find("BRB/ShadowProjector");
+        if (shader == null)
+        {
+            Debug.LogWarning("[FlatShadow] BRB/ShadowProjector 셰이더를 찾을 수 없음.");
+            return;
+        }
+        _shadowMat = new Material(shader);
 
         _shadowGo = new GameObject("Shadow");
         _shadowGo.transform.SetParent(transform, false);
-        // 부모와 동일 위치/회전/스케일, 바닥쪽으로 살짝
-        _shadowGo.transform.localPosition = new Vector3(0f, 0f, 0f);
+        _shadowGo.transform.localPosition = Vector3.zero;
         _shadowGo.transform.localRotation = Quaternion.identity;
         _shadowGo.transform.localScale = Vector3.one;
 
-        var mf = _shadowGo.AddComponent<MeshFilter>();
-        mf.sharedMesh = srcFilter.sharedMesh;
+        Texture tex = null;
+        var srcSR = GetComponent<SpriteRenderer>();
+        var srcMR = GetComponent<MeshRenderer>();
+        var srcMF = GetComponent<MeshFilter>();
 
-        _shadowRend = _shadowGo.AddComponent<MeshRenderer>();
-        _shadowRend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        _shadowRend.receiveShadows = false;
+        if (srcSR != null)
+        {
+            // 스프라이트 모듈: 같은 스프라이트로 그림자 SpriteRenderer 생성
+            // ※ 스프라이트 Mesh Type = Full Rect 권장(Tight면 uv.y가 지오메트리와 안 맞아 shear가 틀어짐)
+            var sr = _shadowGo.AddComponent<SpriteRenderer>();
+            sr.sprite = srcSR.sprite;
+            sr.flipX = srcSR.flipX;
+            sr.flipY = srcSR.flipY;
+            sr.sortingLayerID = srcSR.sortingLayerID;
+            sr.sortingOrder = srcSR.sortingOrder - 1; // 모듈 뒤
+            sr.sharedMaterial = _shadowMat;
+            // SpriteRenderer는 스프라이트 텍스처를 _MainTex로 자동 바인딩
+        }
+        else if (srcMF != null && srcMR != null)
+        {
+            var mf = _shadowGo.AddComponent<MeshFilter>();
+            mf.sharedMesh = srcMF.sharedMesh;
+            var mr = _shadowGo.AddComponent<MeshRenderer>();
+            mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            mr.receiveShadows = false;
+            mr.sortingLayerID = srcMR.sortingLayerID;
+            mr.sortingOrder = srcMR.sortingOrder - 1;
+            mr.sharedMaterial = _shadowMat;
 
-        var shader = Shader.Find("BRB/ShadowProjector");
-        _shadowMat = new Material(shader);
+            var sm = srcMR.sharedMaterial;
+            if (sm != null && sm.HasProperty(IdMainTex))
+                tex = sm.GetTexture(IdMainTex);
+        }
+        else
+        {
+            Debug.LogWarning("[FlatShadow] SpriteRenderer나 MeshFilter+MeshRenderer가 필요함.", this);
+            Destroy(_shadowGo);
+            _shadowGo = null;
+            return;
+        }
 
-        // 모듈 텍스처 그대로 사용 (실루엣 모양 일치)
-        var srcMat = srcRend.sharedMaterial;
-        if (srcMat != null && srcMat.HasProperty(IdMainTex))
-            _shadowMat.SetTexture(IdMainTex, srcMat.GetTexture(IdMainTex));
+        if (tex != null && _shadowMat.HasProperty(IdMainTex))
+            _shadowMat.SetTexture(IdMainTex, tex);
 
         _shadowMat.SetColor(IdShadowColor, shadowColor);
         _shadowMat.SetFloat(IdStrength, strength);
         _shadowMat.SetFloat(IdTipFade, tipFade);
         _shadowMat.SetFloat(IdFlipV, flipV ? 1f : 0f);
-        _shadowRend.sharedMaterial = _shadowMat;
-
-        // 모듈보다 먼저 그리도록 (셰이더 Queue가 Transparent-10이라 자동이지만 안전하게)
-        _shadowRend.sortingOrder = srcRend.sortingOrder - 1;
     }
 
     void LateUpdate()
     {
         if (_shadowMat == null) return;
 
-        Light lt = lightSource != null ? lightSource : ResolveMainLight();
-
-        // 바닥 평면(XZ) 기준, 빛에서 오브젝트로 향하는 방향 = 그림자가 뻗는 방향
+        // 순수 2D: 월드 = XY 평면. 그림자는 빛 반대 방향(빛→오브젝트)으로 XY에서 뻗는다.
         Vector2 dir;
         float lengthScale = 1f;
 
-        // 순수 2D: 월드 = XY 평면. 그림자는 빛 반대 방향(빛→오브젝트)으로 XY에서 뻗는다.
-        if (lt == null)
+        if (useManualDirection)
         {
-            dir = new Vector2(0f, -1f); // 기본: 화면 아래쪽
-        }
-        else if (lt.type == LightType.Directional)
-        {
-            // 디렉셔널: forward의 XY 성분이 곧 그림자 방향
-            Vector3 f = lt.transform.forward;
-            dir = new Vector2(f.x, f.y);
+            dir = manualDirection;
         }
         else
         {
-            // 점광/스팟: 광원→오브젝트 방향 (XY), 가까울수록 길게(드라마틱)
-            Vector3 d = transform.position - lt.transform.position;
-            dir = new Vector2(d.x, d.y);
-            float dist = dir.magnitude;
-            lengthScale = Mathf.Lerp(angleStretch, 1f, Mathf.Clamp01(dist / Mathf.Max(0.001f, lt.range)));
+            Light2D lt = lightSource != null ? lightSource : ResolveNearestPointLight();
+            if (lt == null)
+            {
+                dir = manualDirection;
+            }
+            else
+            {
+                Vector3 d = transform.position - lt.transform.position;
+                dir = new Vector2(d.x, d.y);
+                float dist = dir.magnitude;
+                float range = Mathf.Max(0.001f, lt.pointLightOuterRadius);
+                // 가까울수록(dist 작을수록) 길게
+                lengthScale = Mathf.Lerp(proximityStretch, 1f, Mathf.Clamp01(dist / range));
+            }
         }
 
         if (dir.sqrMagnitude < 1e-5f) dir = new Vector2(0f, -1f);
@@ -118,17 +151,20 @@ public class FlatShadow : MonoBehaviour
         _shadowMat.SetFloat(IdLength, maxLength * lengthScale);
     }
 
-    Light _cachedMain;
-    Light ResolveMainLight()
+    Light2D _cached;
+    Light2D ResolveNearestPointLight()
     {
-        if (_cachedMain != null) return _cachedMain;
-        // 디렉셔널 우선, 없으면 아무 라이트
-        foreach (var l in FindObjectsByType<Light>(FindObjectsSortMode.None))
+        // 가장 가까운 Point Light2D
+        float best = float.MaxValue;
+        Light2D found = null;
+        foreach (var l in FindObjectsByType<Light2D>(FindObjectsSortMode.None))
         {
-            if (l.type == LightType.Directional) { _cachedMain = l; break; }
-            if (_cachedMain == null) _cachedMain = l;
+            if (l.lightType != Light2D.LightType.Point) continue;
+            float dsq = (l.transform.position - transform.position).sqrMagnitude;
+            if (dsq < best) { best = dsq; found = l; }
         }
-        return _cachedMain;
+        _cached = found;
+        return found;
     }
 
     void OnDestroy()

@@ -11,8 +11,7 @@ public class CameraSortSetup : MonoBehaviour
     {
         var cam = GetComponent<Camera>();
         cam.transparencySortMode = TransparencySortMode.CustomAxis;
-        // 탑다운: 같은 sortingOrder 스프라이트는 카메라 시선 깊이로 정렬.
-        // (iso 시절엔 세워진 빌보드라 (0,1,0) Y축으로 정렬했음.)
-        cam.transparencySortAxis = TopDownMapEditor.TopDownGrid.ViewDir;
+        // 탑다운 2D: Y축(화면 상하)으로 정렬 — Y가 낮을수록 앞(화면 아래 = 카메라에 가까운 쪽).
+        cam.transparencySortAxis = new Vector3(0f, 1f, 0f);
     }
 }

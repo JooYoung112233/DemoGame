@@ -81,7 +81,7 @@ public class DebugTestUI : MonoBehaviour
 
     void RefreshMapToolState()
     {
-        inMapTool = FindFirstObjectByType<TopDownMapEditor.MapBuilderManager>() != null;
+        inMapTool = false; // 맵빌더 제거됨
         if (inMapTool) isOpen = false;
     }
 

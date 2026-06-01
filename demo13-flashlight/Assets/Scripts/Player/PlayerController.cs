@@ -258,11 +258,6 @@ public class PlayerController : MonoBehaviour
     {
         if (Instance != null) return;
 
-        // 맵 빌더 씬에서는 플레이어 생성 스킵
-        if (FindFirstObjectByType<TopDownMapEditor.MapBuilderBootstrap>() != null ||
-            FindFirstObjectByType<TopDownMapEditor.MapBuilderManager>() != null)
-            return;
-
         // 씬에 이미 Player가 있으면 스킵 (Awake에서 Instance 됨)
         if (FindFirstObjectByType<PlayerController>(FindObjectsInactive.Include) != null) return;
 

@@ -21,7 +21,7 @@
 - **셰이더 패스 규칙**: URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. `UniversalForward` 전용 셰이더는 **안 보임**. 신규/유지 셰이더는 반드시 Universal2D 패스를 포함할 것.
   - `BRB/Pixelated`, `BRB/ShadowProjector` — Universal2D 패스 보유(2D에서 정상 렌더). ※ ShadowProjector는 Forward+2D 두 패스 다 가짐.
   - `BRB/PlayerSprite`, `BRB/SpriteBillboard`, `BRB/FlashlightBeam`, `BRB/SpineLitURP`, `BRB/OcclusionOutline`, `BRB/SpriteSheet` — 유지하되, 2D에서 안 그려지면 Universal2D 패스 추가 필요(미점검).
-- **조명**: 사방 라이트 + 손전등은 URP **2D Light**(Light2D)로 전환 대상. 기존 3D 스팟라이트/그림자박스 차폐 방식은 2D Light + ShadowCaster2D로 재설계 검토(미정).
+- **조명 = Light2D로 전환 확정 (2026-06-02)**: 사방 라이트 + 손전등 모두 URP **2D Light**(Light2D) 사용. `FlatShadow.cs`는 가장 가까운 **Point Light2D** 위치로 그림자 방향(XY)을 계산(`pointLightOuterRadius`로 거리 감쇠). 기존 3D 스팟라이트/그림자박스 차폐 방식은 폐기 → Light2D 기반으로 재설계.
 
 ## 카메라 / 좌표계 = 순수 2D 정사영 + 아트에 원근 베이크 (확정, 2026-06-02)
 
@@ -29,8 +29,8 @@
 
 - **좌표계**: 월드 = **XY 평면**, 깊이 = **sortingOrder/Z**(정사영이라 Z 위치는 화면에 안 보이고 정렬용). 더 이상 "바닥에 눕힌 XZ 평면 + 90° 회전 쿼드"가 아님.
 - **함의**: 모든 위치/투영/그림자 계산은 **XY 기준**. 3D 바닥평면(XZ) 전제로 짠 것들(예: 초기 ShadowProjector의 XZ shear)은 XY로 수정해야 함.
-  - `BRB/ShadowProjector` + `FlatShadow.cs`: 그림자 투영을 **XY 화면 평면**으로 수정함(빛 반대 방향으로 스프라이트 세로를 XY에서 shear). 스프라이트 바닥(uv.y=0)=접지 고정, 위쪽이 투영됨. 깊이는 sortingOrder로 모듈 뒤에 깔림.
-- 이전 "벽=3D 큐브 + 카메라 각도" (2026-05-29) 및 "3D 스팟라이트 차폐"(2026-06-01) 전제는 순수 2D로 대체 — 조명도 Light2D 계열로 가야 함(검토 중).
+  - `BRB/ShadowProjector` + `FlatShadow.cs`: 그림자 투영을 **XY 화면 평면**으로 수정함(빛 반대 방향으로 스프라이트 세로를 XY에서 shear). 스프라이트 바닥(uv.y=0)=접지 고정, 위쪽이 투영됨. 깊이는 sortingOrder로 모듈 뒤에 깔림. `FlatShadow`는 **SpriteRenderer/MeshRenderer 자동 감지**(스프라이트 모듈 지원), **Light2D 점광** 기반.
+- 이전 "벽=3D 큐브 + 카메라 각도" (2026-05-29) 및 "3D 스팟라이트 차폐"(2026-06-01) 전제는 순수 2D + Light2D로 대체(확정).
 
 ## 셰이더 네임스페이스 = BRB (확정, 2026-06-02)
 
