@@ -103,7 +103,8 @@ public class InteractableObject : MonoBehaviour, IInteractable
     public int ItemCount => itemCount;
 
     /// <summary>상호작용 시 외부에서 구독 가능한 이벤트</summary>
-    public event System.Action<PlayerController> OnInteracted;
+    // TODO(TopDownPlayer): public event System.Action<PlayerController> OnInteracted;
+    public event System.Action<GameObject> OnInteracted;
 
     #endregion
 
@@ -181,29 +182,30 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
     #region 상호작용 실행
 
-    public void Interact(PlayerController player)
+    // TODO(TopDownPlayer): public void Interact(PlayerController player)
+    public void Interact(GameObject playerGO)
     {
         if (!CanInteract) return;
 
         if (oneShot) used = true;
 
         // 이벤트 발행
-        OnInteracted?.Invoke(player);
+        OnInteracted?.Invoke(playerGO);
 
         // 타입별 기본 처리
         switch (type)
         {
             case InteractType.ExitPoint:
-                HandleExit(player);
+                HandleExit(playerGO);
                 break;
             case InteractType.Note:
-                HandleNote(player);
+                HandleNote(playerGO);
                 break;
             case InteractType.Pickup:
-                HandlePickup(player);
+                HandlePickup(playerGO);
                 break;
             case InteractType.Container:
-                HandleContainer(player);
+                HandleContainer(playerGO);
                 break;
             case InteractType.Workbench:
                 HandleCrafting(CraftingStation.Workbench);
@@ -215,16 +217,16 @@ public class InteractableObject : MonoBehaviour, IInteractable
                 HandleCrafting(CraftingStation.CookingBench);
                 break;
             case InteractType.MapBoard:
-                HandleMapBoard(player);
+                HandleMapBoard(playerGO);
                 break;
             case InteractType.NPC:
-                HandleNPC(player);
+                HandleNPC(playerGO);
                 break;
             case InteractType.Bed:
-                HandleBed(player);
+                HandleBed(playerGO);
                 break;
             case InteractType.Door:
-                HandleDoor(player);
+                HandleDoor(playerGO);
                 break;
             default:
                 Debug.Log($"[Interact] {type}: {promptText}");
@@ -232,7 +234,8 @@ public class InteractableObject : MonoBehaviour, IInteractable
         }
     }
 
-    void HandleExit(PlayerController player)
+    // TODO(TopDownPlayer): void HandleExit(PlayerController player)
+    void HandleExit(GameObject playerGO)
     {
         if (string.IsNullOrEmpty(targetScene))
         {
@@ -261,7 +264,8 @@ public class InteractableObject : MonoBehaviour, IInteractable
         }
     }
 
-    void HandleNote(PlayerController player)
+    // TODO(TopDownPlayer): void HandleNote(PlayerController player)
+    void HandleNote(GameObject playerGO)
     {
         if (StoryTriggerManager.Instance != null)
         {
@@ -277,7 +281,8 @@ public class InteractableObject : MonoBehaviour, IInteractable
         }
     }
 
-    void HandleBed(PlayerController player)
+    // TODO(TopDownPlayer): void HandleBed(PlayerController player)
+    void HandleBed(GameObject playerGO)
     {
         if (StoryTriggerManager.Instance != null)
         {
@@ -286,19 +291,20 @@ public class InteractableObject : MonoBehaviour, IInteractable
         else
         {
             // 폴백: HP만 회복
-            var health = player.GetComponent<Health>();
+            var health = playerGO.GetComponent<Health>();
             if (health != null) health.Heal(health.MaxHp);
             Debug.Log("[Bed] 휴식 완료 (HP 회복)");
         }
     }
 
-    void HandlePickup(PlayerController player)
+    // TODO(TopDownPlayer): void HandlePickup(PlayerController player)
+    void HandlePickup(GameObject playerGO)
     {
         // WorldItem이 있으면 인벤토리 연동
         var worldItem = GetComponent<WorldItem>();
         if (worldItem != null)
         {
-            if (worldItem.TryPickup(player))
+            if (worldItem.TryPickup(playerGO))
                 return; // 성공 시 WorldItem이 Destroy 처리
             else
                 return; // 공간 부족
@@ -308,7 +314,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
         var data = ItemDatabase.Get(itemId);
         if (data != null)
         {
-            var inventory = player.GetComponent<PlayerInventory>();
+            var inventory = playerGO.GetComponent<PlayerInventory>();
             if (inventory != null)
             {
                 var item = new ItemInstance(data, itemCount);
@@ -347,7 +353,8 @@ public class InteractableObject : MonoBehaviour, IInteractable
         }
     }
 
-    void HandleContainer(PlayerController player)
+    // TODO(TopDownPlayer): void HandleContainer(PlayerController player)
+    void HandleContainer(GameObject playerGO)
     {
         // 안전가옥 창고 우선 체크
         var storage = GetComponent<SafehouseStorage>();
@@ -361,7 +368,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
         var container = GetComponent<LootContainer>();
         if (container != null)
         {
-            container.Open(player);
+            container.Open(playerGO);
             if (UIManager.Instance != null)
                 UIManager.Instance.ShowCharacterPanelWithContainer(container);
         }
@@ -379,25 +386,28 @@ public class InteractableObject : MonoBehaviour, IInteractable
             Debug.LogWarning($"[{station}] UIManager가 없습니다.");
     }
 
-    void HandleNPC(PlayerController player)
+    // TODO(TopDownPlayer): void HandleNPC(PlayerController player)
+    void HandleNPC(GameObject playerGO)
     {
         var npc = GetComponent<NPCController>();
         if (npc != null)
-            npc.Talk(player);
+            npc.Talk(playerGO);
         else
             Debug.Log($"[NPC] {promptText} (NPCController 없음)");
     }
 
-    void HandleDoor(PlayerController player)
+    // TODO(TopDownPlayer): void HandleDoor(PlayerController player)
+    void HandleDoor(GameObject playerGO)
     {
         var door = GetComponent<DoorController>();
         if (door != null)
-            door.TryOpen(player);
+            door.TryOpen(playerGO);
         else
             Debug.Log($"[Door] {promptText} (DoorController 없음)");
     }
 
-    void HandleMapBoard(PlayerController player)
+    // TODO(TopDownPlayer): void HandleMapBoard(PlayerController player)
+    void HandleMapBoard(GameObject playerGO)
     {
         if (UIManager.Instance != null)
         {

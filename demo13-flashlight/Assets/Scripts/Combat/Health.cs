@@ -13,6 +13,8 @@ public class Health : MonoBehaviour
 
     public event System.Action<float> OnDamaged;   // damage amount
     public event System.Action OnDeath;
+    /// <summary>OnDeath의 별칭 — 코드 가독성용</summary>
+    public event System.Action OnDied { add => OnDeath += value; remove => OnDeath -= value; }
 
     void Awake()
     {
@@ -37,8 +39,8 @@ public class Health : MonoBehaviour
         // 플레이어 무적 체크 (구르기 중) — silent 데미지는 무적 무시 안 함
         if (!silent)
         {
-            var playerCombat = GetComponent<PlayerController>();
-            if (playerCombat != null && playerCombat.IsInvincible) return;
+            // TODO(TopDownPlayer): var playerCombat = GetComponent<PlayerController>();
+            // TODO(TopDownPlayer): if (playerCombat != null && playerCombat.IsInvincible) return;
         }
 
         currentHp = Mathf.Max(0, currentHp - amount);
@@ -57,5 +59,17 @@ public class Health : MonoBehaviour
     {
         if (isDead) return;
         currentHp = Mathf.Min(currentHp + amount, maxHp);
+    }
+
+    public void FullHeal()
+    {
+        isDead = false;
+        currentHp = maxHp;
+    }
+
+    public void SetMaxHp(float newMax)
+    {
+        maxHp = Mathf.Max(1f, newMax);
+        currentHp = Mathf.Min(currentHp, maxHp);
     }
 }

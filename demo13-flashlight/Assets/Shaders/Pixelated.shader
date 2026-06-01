@@ -168,6 +168,10 @@ Shader "BRB/Pixelated"
             #pragma shader_feature_local _QUANTIZE_ON
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/InputData2D.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/SurfaceData2D.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/ShapeLightShared.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/CombinedShapeLightShared.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _MainTex_ST;
@@ -196,6 +200,7 @@ Shader "BRB/Pixelated"
                 float4 positionCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 float4 color : COLOR;
+                half2 lightingUV : TEXCOORD1;
             };
 
             float2 PixelateUV2D(float2 uv, float density)
@@ -210,6 +215,7 @@ Shader "BRB/Pixelated"
                 output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.color = input.color;
+                output.lightingUV = half2(ComputeScreenPos(output.positionCS / output.positionCS.w).xy);
                 return output;
             }
 
@@ -230,8 +236,14 @@ Shader "BRB/Pixelated"
                 #endif
 
                 // SpriteRenderer 정점 컬러 틴트 × 머티리얼 틴트 × 밝기
-                half3 color = rgb * _Color.rgb * input.color.rgb * _Brightness;
-                return half4(color, mainTex.a * input.color.a);
+                half3 albedo = rgb * _Color.rgb * input.color.rgb * _Brightness;
+
+                // 2D 라이트(손전등) 적용
+                SurfaceData2D sd;
+                InputData2D id;
+                InitializeSurfaceData(albedo, mainTex.a * input.color.a, half4(1,1,1,1), sd);
+                InitializeInputData(puv, input.lightingUV, id);
+                return CombinedShapeLightShared(sd, id);
             }
             ENDHLSL
         }

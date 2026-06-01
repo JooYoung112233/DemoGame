@@ -74,7 +74,8 @@ public class LootContainer : MonoBehaviour
     }
 
     /// <summary>상자 열기 → CharacterPanelUI에서 드래그앤드롭으로 루팅</summary>
-    public void Open(PlayerController player)
+    // TODO(TopDownPlayer): public void Open(PlayerController player)
+    public void Open(GameObject playerGO)
     {
         IsOpen = true;
 

@@ -74,11 +74,12 @@ public class WorldItem : MonoBehaviour
     }
 
     /// <summary>플레이어가 줍기 시도</summary>
-    public bool TryPickup(PlayerController player)
+    // TODO(TopDownPlayer): public bool TryPickup(PlayerController player)
+    public bool TryPickup(GameObject playerGO)
     {
         if (Item == null) return false;
 
-        var inventory = player.GetComponent<PlayerInventory>();
+        var inventory = playerGO.GetComponent<PlayerInventory>();
         if (inventory == null)
         {
             Debug.LogWarning("[WorldItem] PlayerInventory를 찾을 수 없음");

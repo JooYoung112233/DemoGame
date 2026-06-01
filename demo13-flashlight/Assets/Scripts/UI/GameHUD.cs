@@ -30,7 +30,7 @@ public class GameHUD : MonoBehaviour
     [SerializeField] float batteryBarHeight = 10f;
 
     // 레퍼런스
-    PlayerController player;
+    // TODO(TopDownPlayer): PlayerController player;
     Health health;
     PlayerMedicalSystem medical;
     FlashlightController flashlight;
@@ -71,7 +71,7 @@ public class GameHUD : MonoBehaviour
         if (!currencyBound) TryBindCurrency();
         UpdateRudiFlash();
 
-        if (player == null) FindPlayer();
+        if (health == null) FindPlayer();
         if (health == null) return;
 
         UpdateHPBar();
@@ -124,7 +124,7 @@ public class GameHUD : MonoBehaviour
     {
         var go = GameObject.FindGameObjectWithTag("Player");
         if (go == null) return;
-        player = go.GetComponent<PlayerController>();
+        // TODO(TopDownPlayer): player = go.GetComponent<PlayerController>();
         health = go.GetComponent<Health>();
         medical = go.GetComponent<PlayerMedicalSystem>();
         flashlight = go.GetComponentInChildren<FlashlightController>();
@@ -556,21 +556,18 @@ public class GameHUD : MonoBehaviour
 
     void UpdateStaminaBar()
     {
-        if (stFillImage == null || stBarFill == null || player == null) return;
+        if (stFillImage == null || stBarFill == null) return;
+        var p = TopDownPlayer.Instance;
+        if (p == null) { if (stBarBg != null) stBarBg.gameObject.SetActive(false); return; }
 
-        float pct = player.StaminaPercent;
-
-        // 풀이면 숨기기
+        float pct = p.StaminaPercent;
         bool show = pct < 0.99f;
         stBarBg.gameObject.SetActive(show);
         if (!show) return;
 
-        // 크기
         stBarFill.sizeDelta = new Vector2(staminaBarWidth * pct, 0);
-
-        // 색상
         Color c;
-        if (player.IsExhausted)
+        if (p.IsExhausted)
         {
             float blink = Mathf.PingPong(Time.unscaledTime * 4f, 1f);
             c = Color.Lerp(exhaustedColor, exhaustedColor * 1.3f, blink);
@@ -579,7 +576,6 @@ public class GameHUD : MonoBehaviour
         {
             c = Color.Lerp(staminaLowColor, staminaFullColor, pct);
         }
-
         stFillImage.color = c;
     }
 

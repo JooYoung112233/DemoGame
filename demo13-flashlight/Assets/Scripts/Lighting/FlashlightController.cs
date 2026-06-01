@@ -1,25 +1,25 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
+/// <summary>
+/// 2D 손전등 컨트롤러.
+/// Light2D(Spot) 기반. 배터리 소모, F키 토글, 깜빡임.
+/// TopDownPlayer 자식 flashlightPivot에 Light2D와 함께 붙임.
+/// </summary>
 public class FlashlightController : MonoBehaviour
 {
-    [Header("Flashlight Settings")]
-    [SerializeField] Light spotLight;
-    [SerializeField] float flickerIntensity = 0.1f;
+    [Header("Light2D")]
+    [SerializeField] Light2D spotLight;
+    [SerializeField] float flickerIntensity = 0.08f;
     [SerializeField] float flickerSpeed = 8f;
 
-    [Header("Distance Falloff (가까이서 눈부심 방지)")]
-    [SerializeField] float falloffStartDist = 3f;   // 이 거리 이내에서 감쇠
-    [SerializeField] float falloffMinIntensity = 0.3f; // 최소 밝기 비율 (0~1)
-    [SerializeField] PlayerController playerRef;     // 마우스 거리 참조
-
-    [Header("Ambient Glow (주변 라이트)")]
-    [SerializeField] Light ambientGlow;
-    [SerializeField] float glowRange = 10f;
-    [SerializeField] float glowIntensity = 2.5f;
+    [Header("주변 조명 (Point Light)")]
+    [SerializeField] Light2D ambientGlow;
+    [SerializeField] float glowIntensity = 0.6f;
     [SerializeField] Color glowColor = new Color(0.6f, 0.65f, 0.8f);
-    [SerializeField] bool glowAlwaysOn = true; // 손전등 꺼도 유지
+    [SerializeField] bool glowAlwaysOn = true;
 
-    [Header("Battery")]
+    [Header("배터리")]
     [SerializeField] float maxBattery = 90f;
     [SerializeField] float drainRate = 1f;
 
@@ -37,26 +37,19 @@ public class FlashlightController : MonoBehaviour
     {
         currentBattery = maxBattery;
 
-        // 에디터 설정 유지 — Light 컴포넌트 값을 덮어쓰지 않고 읽기만
         if (spotLight != null)
             baseIntensity = spotLight.intensity;
 
         if (ambientGlow != null)
         {
-            ambientGlow.range = glowRange;
-            ambientGlow.intensity = glowIntensity;
             ambientGlow.color = glowColor;
+            ambientGlow.intensity = glowIntensity;
             baseGlowIntensity = glowIntensity;
         }
     }
 
     void Start()
     {
-        // PlayerController 자동 탐색
-        if (playerRef == null)
-            playerRef = FindFirstObjectByType<PlayerController>();
-
-        // 낮/밤 전환 구독 — 낮이면 자동 OFF
         dayNight = FindFirstObjectByType<DayNightCycle>();
         if (dayNight != null)
             dayNight.OnPhaseChanged += OnPhaseChanged;
@@ -70,21 +63,14 @@ public class FlashlightController : MonoBehaviour
 
     void OnPhaseChanged(bool isNight)
     {
-        if (!isNight && isOn)
-        {
-            // 아침 → 손전등 자동 OFF
-            SetActive(false);
-        }
+        if (!isNight && isOn) SetActive(false);
     }
 
     void Update()
     {
-        // UI가 열려있으면 손전등 조작 차단
-        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen())
-            return;
+        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return;
 
-        if (Input.GetKeyDown(KeyCode.F))
-            Toggle();
+        if (Input.GetKeyDown(KeyCode.F)) Toggle();
 
         if (isOn && currentBattery > 0)
         {
@@ -109,10 +95,7 @@ public class FlashlightController : MonoBehaviour
     {
         isOn = active;
         if (spotLight != null) spotLight.enabled = active;
-
-        // 주변 라이트: glowAlwaysOn이면 손전등 꺼도 유지
-        if (ambientGlow != null && !glowAlwaysOn)
-            ambientGlow.enabled = active;
+        if (ambientGlow != null && !glowAlwaysOn) ambientGlow.enabled = active;
     }
 
     void ApplyFlicker()
@@ -121,23 +104,9 @@ public class FlashlightController : MonoBehaviour
         float flicker = Mathf.PerlinNoise(flickerTimer, 0f) * flickerIntensity;
         float batteryDim = BatteryPercent < 0.2f ? 0.5f + BatteryPercent * 2.5f : 1f;
 
-        // 가까이 비출수록 밝기 감쇠 (플레이어↔마우스 거리 기반)
-        float distDim = 1f;
-        if (playerRef != null && falloffStartDist > 0f)
-        {
-            Vector3 mousePos = playerRef.MouseWorldPos;
-            float mouseDist = Vector3.Distance(playerRef.transform.position, mousePos);
-            if (mouseDist < falloffStartDist)
-            {
-                float ratio = mouseDist / falloffStartDist;
-                distDim = Mathf.Lerp(falloffMinIntensity, 1f, ratio);
-            }
-        }
-
         if (spotLight != null)
-            spotLight.intensity = (baseIntensity + flicker) * batteryDim * distDim;
+            spotLight.intensity = (baseIntensity + flicker) * batteryDim;
 
-        // 주변 라이트도 배터리 연동 (미세 플리커)
         if (ambientGlow != null && !glowAlwaysOn)
             ambientGlow.intensity = baseGlowIntensity * batteryDim;
     }

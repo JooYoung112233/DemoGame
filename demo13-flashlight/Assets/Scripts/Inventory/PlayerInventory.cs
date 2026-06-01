@@ -5,7 +5,7 @@ using UnityEngine;
 /// Player에 부착. InventoryGrid를 소유하고 아이템 사용 로직 처리.
 /// PlayerController가 있는 GO에 자동 부착됨.
 /// </summary>
-[RequireComponent(typeof(PlayerController))]
+// TODO(TopDownPlayer): [RequireComponent(typeof(PlayerController))]
 public class PlayerInventory : MonoBehaviour
 {
     [Header("가방 설정")]
@@ -25,7 +25,7 @@ public class PlayerInventory : MonoBehaviour
     Health health;
     PlayerMedicalSystem medical;
     FlashlightController flashlight;
-    PlayerController playerCtrl;
+    // TODO(TopDownPlayer): PlayerController playerCtrl;
 
     void Awake()
     {
@@ -34,7 +34,7 @@ public class PlayerInventory : MonoBehaviour
         health = GetComponent<Health>();
         medical = GetComponent<PlayerMedicalSystem>();
         flashlight = GetComponentInChildren<FlashlightController>();
-        playerCtrl = GetComponent<PlayerController>();
+        // TODO(TopDownPlayer): playerCtrl = GetComponent<PlayerController>();
     }
 
     /// <summary>아이템 줍기 시도. 성공하면 true.</summary>

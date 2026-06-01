@@ -19,7 +19,8 @@ public class CharacterPanelUI : MonoBehaviour
     PlayerInventory playerInventory;
     PlayerMedicalSystem medical;
     Health health;
-    PlayerController player;
+    // TODO(TopDownPlayer): PlayerController player;
+    GameObject playerGO; // TODO(TopDownPlayer): PlayerController 대체
     FlashlightController flashlight;
 
     // 루팅 중인 상자 또는 창고
@@ -229,7 +230,8 @@ public class CharacterPanelUI : MonoBehaviour
         openStorage = null;
         openFurniture = null;
 
-        player = null;
+        // TODO(TopDownPlayer): player = null;
+        playerGO = null;
         health = null;
         medical = null;
         playerInventory = null;
@@ -238,10 +240,12 @@ public class CharacterPanelUI : MonoBehaviour
 
     void FindRefs()
     {
-        if (player != null) return;
+        // TODO(TopDownPlayer): if (player != null) return;
+        if (playerGO != null) return;
         var go = GameObject.FindGameObjectWithTag("Player");
         if (go == null) return;
-        player = go.GetComponent<PlayerController>();
+        // TODO(TopDownPlayer): player = go.GetComponent<PlayerController>();
+        playerGO = go;
         health = go.GetComponent<Health>();
         medical = go.GetComponent<PlayerMedicalSystem>();
         playerInventory = go.GetComponent<PlayerInventory>();
@@ -710,8 +714,8 @@ public class CharacterPanelUI : MonoBehaviour
         string info = "";
         if (health != null)
             info += $"HP: {health.CurrentHp:F0} / {health.MaxHp:F0}\n";
-        if (player != null)
-            info += $"스태미너: {player.StaminaCurrent:F0} / {player.StaminaMax:F0}\n";
+        // TODO(TopDownPlayer): if (player != null)
+        //     info += $"스태미너: {player.StaminaCurrent:F0} / {player.StaminaMax:F0}\n";
         if (flashlight != null)
             info += $"배터리: {flashlight.BatteryPercent * 100:F0}%  {(flashlight.IsOn ? "ON" : "OFF")}\n";
 
@@ -736,8 +740,8 @@ public class CharacterPanelUI : MonoBehaviour
 
         info += "\n";
 
-        if (player != null)
-            info += $"전투: {(player.CombatEnabled ? "활성" : "비활성")}\n";
+        // TODO(TopDownPlayer): if (player != null)
+        //     info += $"전투: {(player.CombatEnabled ? "활성" : "비활성")}\n";
         if (medical != null)
             info += $"부상: {(medical.HasAnyInjury ? "있음" : "없음")}\n";
 
@@ -1553,9 +1557,10 @@ public class CharacterPanelUI : MonoBehaviour
 
     void DropDraggedToWorld()
     {
-        if (dragItem != null && player != null)
+        // TODO(TopDownPlayer): if (dragItem != null && player != null)
+        if (dragItem != null && playerGO != null)
         {
-            WorldItem.Drop(dragItem, player.transform.position + player.transform.right * 0.8f);
+            WorldItem.Drop(dragItem, playerGO.transform.position + playerGO.transform.right * 0.8f);
             Debug.Log($"[Inventory] {dragItem.DisplayName} 월드 드롭");
         }
         EndDrag();
@@ -1659,8 +1664,9 @@ public class CharacterPanelUI : MonoBehaviour
             {
                 var item = contextTarget.item;
                 grid.Remove(contextTarget);
-                if (player != null)
-                    WorldItem.Drop(item, player.transform.position + player.transform.right * 0.8f);
+                // TODO(TopDownPlayer): if (player != null)
+                if (playerGO != null)
+                    WorldItem.Drop(item, playerGO.transform.position + playerGO.transform.right * 0.8f);
                 HideContextMenu();
                 RefreshAllGrids();
             });

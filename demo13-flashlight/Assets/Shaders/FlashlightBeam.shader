@@ -68,6 +68,51 @@ Shader "BRB/FlashlightBeam"
             }
             ENDHLSL
         }
+
+        // ============ URP 2D 렌더러 패스 (unlit, 동일) ============
+        Pass
+        {
+            Name "FlashlightBeam2D"
+            Tags { "LightMode"="Universal2D" }
+
+            Cull Off
+            ZWrite Off
+            ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
+
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _Color;
+                float _EdgeFade;
+            CBUFFER_END
+
+            struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; };
+            struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; };
+
+            Varyings vert(Attributes input)
+            {
+                Varyings output;
+                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                output.uv = input.uv;
+                return output;
+            }
+
+            half4 frag(Varyings input) : SV_Target
+            {
+                float2 uv = input.uv;
+                float lengthFade = smoothstep(0.0, 0.15, uv.y) * smoothstep(1.0, 0.7, uv.y);
+                float centerDist = abs(uv.x - 0.5) * 2.0;
+                float widthFade = smoothstep(1.0, 1.0 - _EdgeFade, centerDist);
+                float alpha = _Color.a * lengthFade * widthFade;
+                return half4(_Color.rgb, alpha);
+            }
+            ENDHLSL
+        }
     }
     FallBack Off
 }

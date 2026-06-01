@@ -209,6 +209,83 @@ Shader "BRB/SpineLitURP"
             }
             ENDHLSL
         }
+
+        // ============ URP 2D 렌더러 패스 (Light2D 반응) ============
+        Pass
+        {
+            Name "SpineLit2D"
+            Tags { "LightMode"="Universal2D" }
+
+            ZWrite Off
+            Cull Off
+            Blend One OneMinusSrcAlpha   // premultiplied alpha
+
+            HLSLPROGRAM
+            #pragma vertex vert2d
+            #pragma fragment frag2d
+            #pragma shader_feature_local _STRAIGHT_ALPHA_INPUT
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/InputData2D.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/SurfaceData2D.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/ShapeLightShared.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/CombinedShapeLightShared.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _Color;
+                float _Cutoff;
+                float _AmbientMin;
+                float _LightInfluence;
+                float4 _OcclusionColor;
+                float _OcclusionOutlineWidth;
+            CBUFFER_END
+
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+
+            struct Attributes2D
+            {
+                float4 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
+                float4 color : COLOR;
+            };
+            struct Varyings2D
+            {
+                float4 positionCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float4 color : COLOR;
+                half2 lightingUV : TEXCOORD1;
+            };
+
+            Varyings2D vert2d(Attributes2D input)
+            {
+                Varyings2D o;
+                o.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                o.uv = input.uv;
+                o.color = input.color;
+                o.lightingUV = half2(ComputeScreenPos(o.positionCS / o.positionCS.w).xy);
+                return o;
+            }
+
+            half4 frag2d(Varyings2D input) : SV_Target
+            {
+                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * input.color * _Color;
+
+                #ifdef _STRAIGHT_ALPHA_INPUT
+                    col.rgb *= col.a;   // premultiply
+                #endif
+
+                if (col.a < 0.01) discard;
+
+                // 이미 premultiplied 된 rgb를 albedo로 → 2D 라이트 적용
+                SurfaceData2D sd;
+                InputData2D id;
+                InitializeSurfaceData(col.rgb, col.a, half4(1,1,1,1), sd);
+                InitializeInputData(input.uv, input.lightingUV, id);
+                return CombinedShapeLightShared(sd, id);
+            }
+            ENDHLSL
+        }
     }
     FallBack Off
 }

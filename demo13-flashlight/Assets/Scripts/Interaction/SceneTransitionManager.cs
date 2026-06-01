@@ -244,15 +244,7 @@ public class SceneTransitionManager : MonoBehaviour
                 var playerGO = GameObject.FindGameObjectWithTag("Player");
                 if (playerGO != null)
                 {
-                    var agent = playerGO.GetComponent<UnityEngine.AI.NavMeshAgent>();
-                    if (agent != null && agent.isOnNavMesh)
-                    {
-                        agent.Warp(sp.transform.position);
-                    }
-                    else
-                    {
-                        playerGO.transform.position = sp.transform.position;
-                    }
+                    playerGO.transform.position = sp.transform.position;
 
                     Debug.Log($"[SceneTransition] 스폰: {PendingSpawnPointId} → {sp.transform.position}");
                 }

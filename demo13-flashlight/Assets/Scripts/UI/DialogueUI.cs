@@ -12,7 +12,8 @@ public class DialogueUI : MonoBehaviour
 
     bool isShowing;
     NPCData currentNPC;
-    PlayerController currentPlayer;
+    // TODO(TopDownPlayer): PlayerController currentPlayer;
+    GameObject currentPlayerGO;
 
     // 대화 상태
     string[] currentLines;
@@ -59,10 +60,12 @@ public class DialogueUI : MonoBehaviour
         // choice button onClick are wired dynamically in ShowChoices/ShowStoryChoices
     }
 
-    public void StartDialogue(NPCData npc, PlayerController player)
+    // TODO(TopDownPlayer): public void StartDialogue(NPCData npc, PlayerController player)
+    public void StartDialogue(NPCData npc, GameObject playerGO)
     {
         currentNPC = npc;
-        currentPlayer = player;
+        // TODO(TopDownPlayer): currentPlayer = player;
+        currentPlayerGO = playerGO;
 
         var rel = NPCRelationshipManager.Instance != null
             ? NPCRelationshipManager.Instance.GetRelationship(npc.npcId)
@@ -476,7 +479,8 @@ public class DialogueUI : MonoBehaviour
     public void ShowStoryDialogue(string speakerName, string[] lines, System.Action onComplete)
     {
         currentNPC = null;
-        currentPlayer = null;
+        // TODO(TopDownPlayer): currentPlayer = null;
+        currentPlayerGO = null;
         storyOnComplete = onComplete;
 
         isShowing = true;

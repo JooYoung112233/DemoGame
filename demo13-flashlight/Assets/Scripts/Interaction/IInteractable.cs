@@ -14,5 +14,6 @@ public interface IInteractable
     float InteractRange { get; }
 
     /// <summary>상호작용 실행</summary>
-    void Interact(PlayerController player);
+    // TODO(TopDownPlayer): void Interact(PlayerController player);
+    void Interact(GameObject playerGO);
 }

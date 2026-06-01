@@ -38,7 +38,7 @@ public class DoorController : MonoBehaviour
 
     [Header("문 물리")]
     [Tooltip("통과 차단용 콜라이더 (문 자체 또는 별도 오브젝트)")]
-    [SerializeField] Collider doorCollider;
+    [SerializeField] Collider2D doorCollider;
     [Tooltip("열릴 때 비활성화할 비주얼 오브젝트 (문짝 메쉬/스프라이트)")]
     [SerializeField] GameObject doorVisual;
 
@@ -75,9 +75,8 @@ public class DoorController : MonoBehaviour
         // 콜라이더 자동 탐색
         if (doorCollider == null)
         {
-            doorCollider = GetComponent<Collider>();
-            // trigger 아닌 콜라이더 우선
-            var cols = GetComponents<Collider>();
+            // trigger 아닌 Collider2D 우선
+            var cols = GetComponents<Collider2D>();
             foreach (var c in cols)
             {
                 if (!c.isTrigger)
@@ -86,12 +85,17 @@ public class DoorController : MonoBehaviour
                     break;
                 }
             }
+            if (doorCollider == null)
+                doorCollider = GetComponent<Collider2D>();
         }
     }
 
     /// <summary>플레이어가 문을 열려고 시도</summary>
-    public void TryOpen(PlayerController player)
+    // TODO(TopDownPlayer): public void TryOpen(PlayerController player)
+    public void TryOpen(GameObject playerGO)
     {
+        // TODO(TopDownPlayer): PlayerController player 대신 GameObject playerGO 사용
+        var player = playerGO; // placeholder
         if (state == DoorState.Open)
         {
             Debug.Log("[Door] 이미 열려 있음");
@@ -110,7 +114,8 @@ public class DoorController : MonoBehaviour
     }
 
     /// <summary>잠금 해제 시도. 성공하면 true.</summary>
-    bool TryUnlock(PlayerController player)
+    // TODO(TopDownPlayer): bool TryUnlock(PlayerController player)
+    bool TryUnlock(GameObject playerGO)
     {
         switch (lockType)
         {
@@ -119,7 +124,7 @@ public class DoorController : MonoBehaviour
                 return true;
 
             case LockType.Key:
-                return TryUnlockWithKey(player);
+                return TryUnlockWithKey(playerGO);
 
             case LockType.Quest:
                 return TryUnlockWithQuest();
@@ -134,7 +139,8 @@ public class DoorController : MonoBehaviour
         }
     }
 
-    bool TryUnlockWithKey(PlayerController player)
+    // TODO(TopDownPlayer): bool TryUnlockWithKey(PlayerController player)
+    bool TryUnlockWithKey(GameObject playerGO)
     {
         if (string.IsNullOrEmpty(requiredKeyId))
         {
@@ -143,7 +149,7 @@ public class DoorController : MonoBehaviour
             return true;
         }
 
-        var inventory = player.GetComponent<PlayerInventory>();
+        var inventory = playerGO.GetComponent<PlayerInventory>();
         if (inventory == null)
         {
             ShowMessage(needKeyMessage);

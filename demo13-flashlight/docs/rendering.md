@@ -19,8 +19,11 @@
 **렌더러를 URP 2D(Renderer2D)로 확정.** 비주얼이 전부 2D 평면 모듈이므로 2D 렌더러가 자연스러운 선택.
 
 - **셰이더 패스 규칙**: URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. `UniversalForward` 전용 셰이더는 **안 보임**. 신규/유지 셰이더는 반드시 Universal2D 패스를 포함할 것.
-  - `BRB/Pixelated`, `BRB/ShadowProjector` — Universal2D 패스 보유(2D에서 정상 렌더). ※ ShadowProjector는 Forward+2D 두 패스 다 가짐.
-  - `BRB/PlayerSprite`, `BRB/SpriteBillboard`, `BRB/FlashlightBeam`, `BRB/SpineLitURP`, `BRB/OcclusionOutline`, `BRB/SpriteSheet` — 유지하되, 2D에서 안 그려지면 Universal2D 패스 추가 필요(미점검).
+- **2D 패스 추가 완료 (2026-06-02)**: 유지 셰이더 8개 모두 Universal2D 패스 보유.
+  - **Light2D 반응(lit, `CombinedShapeLightShared`)**: `BRB/Pixelated`(맵 모듈), `BRB/PlayerSprite`(시트UV+컷아웃+아웃라인), `BRB/SpriteBillboard`(정점컬러+컷아웃+아웃라인), `BRB/SpriteSheet`(시트UV), `BRB/SpineLitURP`(premultiplied 알파+정점컬러). → 손전등/사방 Light2D에 반응.
+  - **Unlit**: `BRB/ShadowProjector`(그림자, Forward+2D), `BRB/FlashlightBeam`(빔 페이드 — Light2D로 대체 예정), `BRB/OcclusionOutline`(깊이 가림 — 순수 2D에선 의미 약함).
+  - 2D-lit 패스 구조: `#include InputData2D + SurfaceData2D`, `#include_with_pragmas ShapeLightShared.hlsl`(USE_SHAPE_LIGHT 키워드), `#include CombinedShapeLightShared.hlsl`. vertex에서 `ComputeScreenPos`로 lightingUV 계산 → frag에서 `InitializeSurfaceData`/`InitializeInputData` 후 `CombinedShapeLightShared` 반환.
+  - ⚠️ 스프라이트 임포트: **Mesh Type = Full Rect** 권장(Tight면 시트UV/shear 틀어짐). URP 17.3 / Unity 6 기준.
 - **조명 = Light2D로 전환 확정 (2026-06-02)**: 사방 라이트 + 손전등 모두 URP **2D Light**(Light2D) 사용. `FlatShadow.cs`는 가장 가까운 **Point Light2D** 위치로 그림자 방향(XY)을 계산(`pointLightOuterRadius`로 거리 감쇠). 기존 3D 스팟라이트/그림자박스 차폐 방식은 폐기 → Light2D 기반으로 재설계.
 
 ## 카메라 / 좌표계 = 순수 2D 정사영 + 아트에 원근 베이크 (확정, 2026-06-02)

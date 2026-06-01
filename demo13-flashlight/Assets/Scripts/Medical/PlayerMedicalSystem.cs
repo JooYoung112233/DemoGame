@@ -62,7 +62,7 @@ public class PlayerMedicalSystem : MonoBehaviour
 
     // 레퍼런스
     Health health;
-    PlayerController playerController;
+    // TODO(TopDownPlayer): PlayerController playerController;
 
     #endregion
 
@@ -102,7 +102,7 @@ public class PlayerMedicalSystem : MonoBehaviour
     void Awake()
     {
         health = GetComponent<Health>();
-        playerController = GetComponent<PlayerController>();
+        // TODO(TopDownPlayer): playerController = GetComponent<PlayerController>();
 
         // 5부위 생성
         Head = new BodyPart(BodyPartType.Head);

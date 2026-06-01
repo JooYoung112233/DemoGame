@@ -109,5 +109,87 @@ Shader "BRB/OcclusionOutline"
             }
             ENDHLSL
         }
+
+        // ============ URP 2D 렌더러 패스 (unlit, 동일) ============
+        // ※ 깊이 기반 가림(ZTest Greater)은 순수 2D에선 의미가 약함 — 렌더만 보장
+        Pass
+        {
+            Name "OcclusionOutline2D"
+            Tags { "LightMode"="Universal2D" }
+
+            ZTest Greater
+            ZWrite Off
+            Blend SrcAlpha OneMinusSrcAlpha
+            Cull Off
+
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _MainTex_ST;
+                float4 _MainTex_TexelSize;
+                float4 _Color;
+                float _OutlineWidth;
+                float _Cutoff;
+                float _Columns;
+                float _Rows;
+                float _CurrentFrame;
+            CBUFFER_END
+
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+
+            struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; };
+            struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; };
+
+            float2 calcSheetUV(float2 uv)
+            {
+                uint frame = (uint)_CurrentFrame;
+                uint cols = (uint)_Columns;
+                uint col = frame % cols;
+                uint row = frame / cols;
+                float cellW = 1.0 / _Columns;
+                float cellH = 1.0 / _Rows;
+                float u = (col + uv.x) * cellW;
+                float v = 1.0 - (row + 1.0 - uv.y) * cellH;
+                return float2(u, v);
+            }
+
+            Varyings vert(Attributes input)
+            {
+                Varyings output;
+                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                output.uv = calcSheetUV(input.uv);
+                return output;
+            }
+
+            half4 frag(Varyings input) : SV_Target
+            {
+                float centerAlpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a;
+                if (centerAlpha >= _Cutoff)
+                    return half4(_Color.rgb, _Color.a * 0.3);
+
+                float2 texelSize = _MainTex_TexelSize.xy * _OutlineWidth;
+                float2 offsets[8] = {
+                    float2(-1, 0), float2(1, 0), float2(0, -1), float2(0, 1),
+                    float2(-1, -1), float2(-1, 1), float2(1, -1), float2(1, 1)
+                };
+                float maxAlpha = 0;
+                for (int i = 0; i < 8; i++)
+                {
+                    float2 sampleUV = input.uv + offsets[i] * texelSize;
+                    maxAlpha = max(maxAlpha, SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, sampleUV, 0).a);
+                }
+                if (maxAlpha >= _Cutoff)
+                    return _Color;
+
+                clip(-1);
+                return half4(0, 0, 0, 0);
+            }
+            ENDHLSL
+        }
     }
 }

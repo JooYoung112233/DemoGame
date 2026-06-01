@@ -89,8 +89,8 @@ public class CombatFeedback : MonoBehaviour
     void OnHit(float damage)
     {
         // 무적 체크 (구르기 중)
-        var player = GetComponent<PlayerController>();
-        if (player != null && player.IsInvincible) return;
+        // TODO(TopDownPlayer): var player = GetComponent<PlayerController>();
+        // TODO(TopDownPlayer): if (player != null && player.IsInvincible) return;
 
         // 플래시
         if (flashRoutine != null) StopCoroutine(flashRoutine);
@@ -168,8 +168,8 @@ public class CombatFeedback : MonoBehaviour
 
         // 적이 맞은 경우만 넉백 (플레이어 자신은 약하게)
         float dist = knockbackDist;
-        if (GetComponent<PlayerController>() != null)
-            dist *= 0.5f;
+        // TODO(TopDownPlayer): if (GetComponent<PlayerController>() != null)
+        //     dist *= 0.5f;
 
         Vector3 dir = (transform.position - playerGO.transform.position);
         dir.y = 0;

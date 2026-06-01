@@ -233,6 +233,104 @@ Shader "BRB/SpriteBillboard"
             }
             ENDHLSL
         }
+
+        // ============ URP 2D 렌더러 패스 (Light2D 반응) ============
+        Pass
+        {
+            Name "SpriteBillboard2D"
+            Tags { "LightMode"="Universal2D" }
+
+            Cull Off
+            ZWrite On
+            Blend SrcAlpha OneMinusSrcAlpha
+
+            HLSLPROGRAM
+            #pragma vertex vert2d
+            #pragma fragment frag2d
+            #pragma shader_feature_local _OUTLINE_ON
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/InputData2D.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/SurfaceData2D.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/ShapeLightShared.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/CombinedShapeLightShared.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+                float4 _MainTex_ST;
+                float4 _MainTex_TexelSize;
+                float4 _Color;
+                float4 _Flip;
+                float _Cutoff;
+                float _AmbientMin;
+                float4 _OutlineColor;
+                float _OutlineSize;
+                float _EnableExternalAlpha;
+            CBUFFER_END
+
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+
+            struct Attributes2D
+            {
+                float4 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
+                float4 color : COLOR;
+            };
+            struct Varyings2D
+            {
+                float4 positionCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float4 vertexColor : COLOR;
+                half2 lightingUV : TEXCOORD1;
+            };
+
+            Varyings2D vert2d(Attributes2D input)
+            {
+                Varyings2D o;
+                o.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                o.uv = TRANSFORM_TEX(input.uv, _MainTex);
+                o.vertexColor = input.color;
+                o.lightingUV = half2(ComputeScreenPos(o.positionCS / o.positionCS.w).xy);
+                return o;
+            }
+
+            half4 light2d(half3 albedo, half alpha, float2 uv, half2 lightingUV)
+            {
+                SurfaceData2D sd;
+                InputData2D id;
+                InitializeSurfaceData(albedo, alpha, half4(1,1,1,1), sd);
+                InitializeInputData(uv, lightingUV, id);
+                return CombinedShapeLightShared(sd, id);
+            }
+
+            half4 frag2d(Varyings2D input) : SV_Target
+            {
+                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color * input.vertexColor;
+
+                if (col.a >= _Cutoff)
+                    return light2d(col.rgb, col.a, input.uv, input.lightingUV);
+
+                #ifdef _OUTLINE_ON
+                    float2 texelSize = _MainTex_TexelSize.xy * _OutlineSize;
+                    float2 offsets[8] = {
+                        float2(-1, 0), float2(1, 0), float2(0, -1), float2(0, 1),
+                        float2(-1,-1), float2(-1, 1), float2(1, -1), float2(1, 1)
+                    };
+                    float maxAlpha = 0;
+                    for (int j = 0; j < 8; j++)
+                    {
+                        float2 sampleUV = input.uv + offsets[j] * texelSize;
+                        maxAlpha = max(maxAlpha, SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, sampleUV, 0).a);
+                    }
+                    if (maxAlpha >= _Cutoff)
+                        return light2d(_OutlineColor.rgb, _OutlineColor.a, input.uv, input.lightingUV);
+                #endif
+
+                clip(-1);
+                return half4(0, 0, 0, 0);
+            }
+            ENDHLSL
+        }
     }
     FallBack Off
 }
