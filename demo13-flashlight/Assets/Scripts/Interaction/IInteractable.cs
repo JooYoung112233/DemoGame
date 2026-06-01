@@ -1,3 +1,5 @@
+using UnityEngine;
+
 /// <summary>
 /// 상호작용 가능한 오브젝트 공통 인터페이스.
 /// InteractableObject가 기본 구현.
@@ -14,6 +16,5 @@ public interface IInteractable
     float InteractRange { get; }
 
     /// <summary>상호작용 실행</summary>
-    // TODO(TopDownPlayer): void Interact(PlayerController player);
     void Interact(GameObject playerGO);
 }

@@ -19,8 +19,7 @@ public class CharacterPanelUI : MonoBehaviour
     PlayerInventory playerInventory;
     PlayerMedicalSystem medical;
     Health health;
-    // TODO(TopDownPlayer): PlayerController player;
-    GameObject playerGO; // TODO(TopDownPlayer): PlayerController 대체
+    GameObject playerGO; // 플레이어 GO 참조 (컴포넌트는 GetComponent로 접근)
     FlashlightController flashlight;
 
     // 루팅 중인 상자 또는 창고
@@ -230,7 +229,6 @@ public class CharacterPanelUI : MonoBehaviour
         openStorage = null;
         openFurniture = null;
 
-        // TODO(TopDownPlayer): player = null;
         playerGO = null;
         health = null;
         medical = null;
@@ -240,11 +238,9 @@ public class CharacterPanelUI : MonoBehaviour
 
     void FindRefs()
     {
-        // TODO(TopDownPlayer): if (player != null) return;
         if (playerGO != null) return;
         var go = GameObject.FindGameObjectWithTag("Player");
         if (go == null) return;
-        // TODO(TopDownPlayer): player = go.GetComponent<PlayerController>();
         playerGO = go;
         health = go.GetComponent<Health>();
         medical = go.GetComponent<PlayerMedicalSystem>();
@@ -714,7 +710,6 @@ public class CharacterPanelUI : MonoBehaviour
         string info = "";
         if (health != null)
             info += $"HP: {health.CurrentHp:F0} / {health.MaxHp:F0}\n";
-        // TODO(TopDownPlayer): if (player != null)
         //     info += $"스태미너: {player.StaminaCurrent:F0} / {player.StaminaMax:F0}\n";
         if (flashlight != null)
             info += $"배터리: {flashlight.BatteryPercent * 100:F0}%  {(flashlight.IsOn ? "ON" : "OFF")}\n";
@@ -740,7 +735,6 @@ public class CharacterPanelUI : MonoBehaviour
 
         info += "\n";
 
-        // TODO(TopDownPlayer): if (player != null)
         //     info += $"전투: {(player.CombatEnabled ? "활성" : "비활성")}\n";
         if (medical != null)
             info += $"부상: {(medical.HasAnyInjury ? "있음" : "없음")}\n";
@@ -1557,7 +1551,6 @@ public class CharacterPanelUI : MonoBehaviour
 
     void DropDraggedToWorld()
     {
-        // TODO(TopDownPlayer): if (dragItem != null && player != null)
         if (dragItem != null && playerGO != null)
         {
             WorldItem.Drop(dragItem, playerGO.transform.position + playerGO.transform.right * 0.8f);
@@ -1664,7 +1657,6 @@ public class CharacterPanelUI : MonoBehaviour
             {
                 var item = contextTarget.item;
                 grid.Remove(contextTarget);
-                // TODO(TopDownPlayer): if (player != null)
                 if (playerGO != null)
                     WorldItem.Drop(item, playerGO.transform.position + playerGO.transform.right * 0.8f);
                 HideContextMenu();

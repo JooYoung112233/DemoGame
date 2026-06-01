@@ -103,7 +103,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
     public int ItemCount => itemCount;
 
     /// <summary>상호작용 시 외부에서 구독 가능한 이벤트</summary>
-    // TODO(TopDownPlayer): public event System.Action<PlayerController> OnInteracted;
     public event System.Action<GameObject> OnInteracted;
 
     #endregion
@@ -182,7 +181,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
     #region 상호작용 실행
 
-    // TODO(TopDownPlayer): public void Interact(PlayerController player)
     public void Interact(GameObject playerGO)
     {
         if (!CanInteract) return;
@@ -234,7 +232,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
         }
     }
 
-    // TODO(TopDownPlayer): void HandleExit(PlayerController player)
     void HandleExit(GameObject playerGO)
     {
         if (string.IsNullOrEmpty(targetScene))
@@ -264,7 +261,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
         }
     }
 
-    // TODO(TopDownPlayer): void HandleNote(PlayerController player)
     void HandleNote(GameObject playerGO)
     {
         if (StoryTriggerManager.Instance != null)
@@ -281,7 +277,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
         }
     }
 
-    // TODO(TopDownPlayer): void HandleBed(PlayerController player)
     void HandleBed(GameObject playerGO)
     {
         if (StoryTriggerManager.Instance != null)
@@ -297,7 +292,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
         }
     }
 
-    // TODO(TopDownPlayer): void HandlePickup(PlayerController player)
     void HandlePickup(GameObject playerGO)
     {
         // WorldItem이 있으면 인벤토리 연동
@@ -353,7 +347,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
         }
     }
 
-    // TODO(TopDownPlayer): void HandleContainer(PlayerController player)
     void HandleContainer(GameObject playerGO)
     {
         // 안전가옥 창고 우선 체크
@@ -386,7 +379,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
             Debug.LogWarning($"[{station}] UIManager가 없습니다.");
     }
 
-    // TODO(TopDownPlayer): void HandleNPC(PlayerController player)
     void HandleNPC(GameObject playerGO)
     {
         var npc = GetComponent<NPCController>();
@@ -396,7 +388,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
             Debug.Log($"[NPC] {promptText} (NPCController 없음)");
     }
 
-    // TODO(TopDownPlayer): void HandleDoor(PlayerController player)
     void HandleDoor(GameObject playerGO)
     {
         var door = GetComponent<DoorController>();
@@ -406,7 +397,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
             Debug.Log($"[Door] {promptText} (DoorController 없음)");
     }
 
-    // TODO(TopDownPlayer): void HandleMapBoard(PlayerController player)
     void HandleMapBoard(GameObject playerGO)
     {
         if (UIManager.Instance != null)

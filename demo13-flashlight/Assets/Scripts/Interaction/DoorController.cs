@@ -91,10 +91,8 @@ public class DoorController : MonoBehaviour
     }
 
     /// <summary>플레이어가 문을 열려고 시도</summary>
-    // TODO(TopDownPlayer): public void TryOpen(PlayerController player)
     public void TryOpen(GameObject playerGO)
     {
-        // TODO(TopDownPlayer): PlayerController player 대신 GameObject playerGO 사용
         var player = playerGO; // placeholder
         if (state == DoorState.Open)
         {
@@ -114,7 +112,6 @@ public class DoorController : MonoBehaviour
     }
 
     /// <summary>잠금 해제 시도. 성공하면 true.</summary>
-    // TODO(TopDownPlayer): bool TryUnlock(PlayerController player)
     bool TryUnlock(GameObject playerGO)
     {
         switch (lockType)
@@ -139,7 +136,6 @@ public class DoorController : MonoBehaviour
         }
     }
 
-    // TODO(TopDownPlayer): bool TryUnlockWithKey(PlayerController player)
     bool TryUnlockWithKey(GameObject playerGO)
     {
         if (string.IsNullOrEmpty(requiredKeyId))
@@ -277,8 +273,10 @@ public class DoorController : MonoBehaviour
         if (doorCollider != null)
         {
             Gizmos.matrix = doorCollider.transform.localToWorldMatrix;
-            if (doorCollider is BoxCollider box)
-                Gizmos.DrawWireCube(box.center, box.size);
+            if (doorCollider is BoxCollider2D box2d)
+                Gizmos.DrawWireCube(box2d.offset, box2d.size);
+            else
+                Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
         }
         else
         {

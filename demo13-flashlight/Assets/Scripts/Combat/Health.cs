@@ -36,11 +36,11 @@ public class Health : MonoBehaviour
     {
         if (isDead) return;
 
-        // 플레이어 무적 체크 (구르기 중) — silent 데미지는 무적 무시 안 함
+        // 플레이어 무적 체크 (구르기 중) — silent 데미지(DoT)는 무적 무시
         if (!silent)
         {
-            // TODO(TopDownPlayer): var playerCombat = GetComponent<PlayerController>();
-            // TODO(TopDownPlayer): if (playerCombat != null && playerCombat.IsInvincible) return;
+            var playerCombat = GetComponent<TopDownPlayer>();
+            if (playerCombat != null && playerCombat.IsInvincible) return;
         }
 
         currentHp = Mathf.Max(0, currentHp - amount);

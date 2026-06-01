@@ -20,7 +20,6 @@ public class NPCController : MonoBehaviour
             questMarker = gameObject.AddComponent<NPCQuestMarker>();
     }
 
-    // TODO(TopDownPlayer): public void Talk(PlayerController player)
     public void Talk(GameObject playerGO)
     {
         if (npcData == null)
@@ -43,7 +42,6 @@ public class NPCController : MonoBehaviour
         }
 
         if (DialogueUI.Instance != null)
-            // TODO(TopDownPlayer): DialogueUI.Instance.StartDialogue(npcData, player);
             DialogueUI.Instance.StartDialogue(npcData, playerGO);
 
         // 대화 후 마커 갱신 (퀘스트 수주 등으로 상태 변경 가능)

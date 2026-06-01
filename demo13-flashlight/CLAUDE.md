@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Unity 3D isometric action game (Tarkov/Zomboid-style). 3D cube world with 2D billboard sprites (Spine animation). URP pipeline with custom shaders. The core loop: leave safehouse → raid a map → loot → extract → return.
+Unity **top-down 2D** action game (Tarkov/Zomboid-style). 2D sprites with near-overhead perspective baked into the art (Spine animation). URP **2D Renderer** with 2D lighting (Light2D). The core loop: leave safehouse → raid a map → loot → extract → return.
 
-**Engine:** Unity 2022+ with URP (Universal Render Pipeline)
+> **2026-06-02: migrated isometric (2.5D hybrid 3D) → pure top-down 2D.** Camera is 2D Orthographic; world is XY plane with sortingOrder depth; movement is Rigidbody2D + Collider2D; lighting is Light2D; maps are Tilemap + Prop2D. See `docs/topdown-migration.md` and `docs/rendering.md`. Removed: PlayerController, NavMesh, 3D cube walls, stencil shaders, IsometricDepthSorter, custom MapBuilder, 3D spot-light flashlight.
+
+**Engine:** Unity 6 with URP 2D Renderer
 **Language:** C#
 **Assembly:** `Game.Scripts.asmdef` references `Unity.RenderPipelines.Universal.Runtime` and `Unity.RenderPipelines.Core.Runtime`
 
@@ -21,19 +23,19 @@ Safehouse (timeScale=0, hub) → MapSelectUI → InGameScene (raid) → Extract 
 - **MapScene** — World map (legacy/alternate entry).
 
 ### Singletons (DontDestroyOnLoad)
-- **PlayerController** — Auto-spawns from `Resources/Player` prefab. Persists across scenes.
+- **TopDownPlayer** — Auto-spawns from `Resources/TopDownPlayer` prefab (`Bootstrap` via RuntimeInitializeOnLoadMethod). Persists across scenes. (Replaces the old `PlayerController`.)
 - **SceneTransitionManager** — Bootstrap singleton. Handles fade, async scene loading, spawn point routing, extraction countdown with distance-cancel.
 - **UIManager** — UI state management, blocks player input when UI is open.
 
 ### Player System Stack
-PlayerController owns movement (NavMeshAgent + WASD), mouse-facing, flashlight pivot, combat state machine (Idle/LightAttack/HeavyCharge/Dodge/Exhausted), stamina, and sprite billboarding. Components on the same GameObject:
-- **PlayerInventory** — Grid-based inventory (5x8, 30kg max). `[RequireComponent(typeof(PlayerController))]`.
+**TopDownPlayer** owns movement (Rigidbody2D + WASD 8-direction), mouse-facing, sprite flip, sprint, and flashlight pivot rotation (Light2D). Combat state machine / stamina are stubs pending re-port. Game-logic components on the same GameObject (view-agnostic):
+- **PlayerInventory** — Grid-based inventory (5x8, 30kg max).
 - **PlayerMedicalSystem** — 5 body parts, 3 injury types (Bleeding/Fracture/Pain).
 - **Health** — HP tracking, damage/heal/death.
 - **FlashlightController** — Battery-based, auto-off at daytime via DayNightCycle event.
 
 ### Combat
-- **EnemyController** — State machine AI (Patrol/Chase/AttackWindup/Attack/Hit/Stunned/Dead). Groggy system for stun-on-max. Spine animation. Uses `unitKey` to load stats from StatDB.
+- **EnemyController** — State machine AI (Patrol/Chase/AttackWindup/Attack/Hit/Stunned/Dead). **Rigidbody2D-based movement** (NavMesh removed). Groggy system for stun-on-max. HP/groggy bars are SpriteRenderer-based. Uses `unitKey` to load stats from StatDB.
 - **StatDB** (ScriptableObject, `Resources/Data/StatDB.asset`) — Central stat database. `StatDB.Instance.GetUnit(key)` for unit stats, `StatDB.Instance.playerStat` for player stats.
 - **PlayerStatData** — Player combat/movement stats (light/heavy attack, dodge, stamina, sprint, crouch).
 - **UnitStatData** — Per-unit stats (combat, visual, groggy, movement, detection, AI, rewards). Accessed by string key.
@@ -51,14 +53,15 @@ All lighting scripts subscribe to `DayNightCycle.OnPhaseChanged` event:
 - **DayNightCycle** — Day/night toggle (T key). `isNight` flag, `OnPhaseChanged` event.
 - **PostProcessController** — Mood presets (NeonNight/DesolateRuin/Anomaly) with day/night variants. Anomaly pulse + glitch effects on transition. **Does NOT apply values on Start()** — preserves editor state. Effects only activate on T-key phase change.
 - **BuildingGlow** — Window glow via MaterialPropertyBlock `_GlowIntensity`. Applies immediately on Start based on current phase.
-- **InkWorldController**, **NeonSign** — Same pattern: subscribe to phase change, don't override editor state on Start.
-- **FlashlightBeam** — Procedural cone mesh, follows pivot yaw only (stays flat).
+- **NeonSign** — Same pattern: subscribe to phase change, don't override editor state on Start.
+- **FlashlightController** — Battery-based flashlight (Light2D), auto-off at daytime via DayNightCycle event.
 
-### Rendering & Shaders
-- **Stencil system** — Buildings (CityBuilding.shader, CityWall.shader) write stencil Ref=1. Ground shaders (RuinFloor, RoadFloor) skip where stencil=1. Ground uses ZWrite Off + FallBack Off.
-- **IsometricDepthSorter** — Runtime depth sorting for isometric view.
-- **SpriteBillboard.shader** — Billboard facing for 2D sprites in 3D world.
-- Custom shaders: CityBuilding (glow, height fade), FlashlightBeam (transparent cone), OcclusionOutline, PlayerSprite, SpineLitURP.
+### Rendering & Shaders (top-down 2D)
+- **Pipeline:** URP **2D Renderer**. Camera 2D Orthographic; depth via `sortingOrder` (CameraSortSetup sets TransparencySortMode.CustomAxis `(0,1,0)` — lower Y = front).
+- **Lighting:** Light2D — a global light (night ambient) + flashlight point/spot. `ShadowCaster2D` on walls for occlusion.
+- **Maps:** Unity Tilemap (floor/walls) + TilemapCollider2D/CompositeCollider2D; props via Prop2D catalog (SpriteRenderer + Collider2D).
+- **Shaders (`BRB/` namespace, 8):** Pixelated, PlayerSprite, SpriteSheet, SpriteBillboard, SpineLitURP (Light2D-reactive); ShadowProjector, FlashlightBeam, OcclusionOutline (unlit, partly vestigial). All have a `Universal2D` pass. See `docs/rendering.md`.
+- Removed in migration: stencil shaders (City*/Ruin*/Road*), InkCity/* shaders, IsometricDepthSorter, 3D-world billboard setup.
 
 ### Scene Transition & Extraction
 `SceneTransitionManager.TransitionWithDelay()` handles extraction: countdown UI, distance-based cancel if player leaves trigger range. Fade in/out with async scene loading. `SpawnPoint` components mark where player appears after transition.
@@ -124,4 +127,4 @@ Current state: Stage 2 (Safehouse container map). See `docs/dev-roadmap.md` for 
 ## Design Documentation
 All game design decisions are recorded in `docs/` as system-specific markdown files. When a design decision is made, record it immediately in the appropriate file with date, question, and decision. See parent `CLAUDE.md` for full recording rules.
 
-Key docs: start with **`docs/MASTER.md`** (index). GDD master split into `gdd-core.md` / `gdd-progression.md` / `gdd-demo.md`. System docs: `combat.md`, `medical.md`, `inventory.md`, `items.md` (+ `items-crafting-farming.md`), `crafting.md`, `world-map.md`, `safehouse.md`, `rendering.md`, `shader-system.md`, `npc-dialogue.md`, `quest.md` (+ `quests-region1.md`), `post-raid-event.md`, `story.md`, `story-script.md`. Incomplete/TODO items tracked in `dev-roadmap.md`.
+Key docs: start with **`docs/MASTER.md`** (index). GDD master split into `gdd-core.md` / `gdd-progression.md` / `gdd-demo.md`. System docs: `combat.md`, `medical.md`, `inventory.md`, `items.md` (+ `items-crafting-farming.md`), `crafting.md`, `world-map.md`, `safehouse.md`, `rendering.md` (+ `topdown-migration.md` / `topdown-art-spec.md` / `map-tool.md`), `npc-dialogue.md`, `quest.md` (+ `quests-region1.md`), `post-raid-event.md`, `story.md`, `story-script.md`. Incomplete/TODO items tracked in `dev-roadmap.md`.

@@ -29,17 +29,18 @@
 | | OcclusionOutline·WallOcclusionOutline | TilemapCollider2D |
 
 ## 단계별 계획
-- [~] **1. 탑다운 토대** — URP-2D 전환, 2D 카메라(정탑다운), 새 씬에 플레이어(Rigidbody2D+Collider2D+WASD) + 마우스 페이싱. **검증**
+- [x] **1. 탑다운 토대** — URP-2D 전환, 2D 카메라(정탑다운).
   - [x] 전역 렌더 파이프라인 URP-3D → URP-2D 전환 (GraphicsSettings.asset + QualitySettings.asset, 2026-06-02)
-  - [x] 2D 투명 정렬축 설정 (TransparencySortMode=CustomAxis, axis=(0,1,0) — Y 낮을수록 앞)
-  - [x] TopDownPlayer2D.cs (Rigidbody2D+WASD+마우스 페이싱), TopDownFlashlight2D.cs 작성 완료
-  - [ ] (에디터 작업) 탑다운 테스트 씬에 2D Orthographic 카메라 + Player(Rigidbody2D+Collider2D+SpriteRenderer+TopDownPlayer2D) 배치 후 이동/페이싱 **검증**
-- [ ] **2. 2D 손전등** — URP 2D Spot Light, 플레이어 자식, 마우스 방향. 밤 앰비언트(글로벌 2D Light)
-- [ ] **3. 맵 = Tilemap** — Unity Tilemap으로 바닥/벽 페인트 + TilemapCollider2D. (커스텀 맵빌더 대체)
-- [ ] **4. 플레이어/적 탑다운화** — 기존 PlayerController/EnemyController의 이동·비주얼을 2D로 교체(로직 훅 유지). NavMesh→Rigidbody2D
-- [ ] **5. 게임 로직 재연결** — 상호작용/루팅/문/NPC를 2D 트리거(Collider2D)로
-- [ ] **6. 아이소 렌더 제거** — 위 🔴 목록 삭제 (검증 후)
-- [ ] **7. 씬 재구성** — Safehouse/InGame을 탑다운 Tilemap으로
+  - [x] 2D 투명 정렬축 설정 (TransparencySortMode=CustomAxis, axis=(0,1,0) — Y 낮을수록 앞. `CameraSortSetup`)
+  - [x] `TopDownPlayer.cs` (Rigidbody2D+WASD+마우스 페이싱+손전등) — 구 TopDownPlayer2D/Flashlight2D 통합·대체. `CameraFollow`.
+- [x] **2. 2D 손전등** — 플레이어 자식 Light2D, 마우스 방향. 글로벌 Light2D(밤 앰비언트). `FlashlightController`.
+- [~] **3. 맵 = Tilemap** — `GameSceneBuilder`가 Grid+Floor/Walls Tilemap(+Tilemap/Composite Collider2D) 생성. 프롭은 `Prop2D` 카탈로그. 실제 맵 페인팅은 진행 중.
+- [x] **4. 플레이어/적 탑다운화** — `TopDownPlayer`(신규), `EnemyController` Rigidbody2D 재작성(NavMesh 제거, HP/그로기 바 SpriteRenderer화). 로직 훅 유지.
+- [~] **5. 게임 로직 재연결** — 상호작용/문/루팅을 Collider2D로. `IInteractable.Interact(GameObject)` 시그니처 전환. 21개 의존 파일 `// TODO(TopDownPlayer):`로 표시 → TopDownPlayer 재연결 진행 중.
+- [x] **6. 아이소 렌더 제거** — 🔴 목록 삭제 완료(MapBuilder/3D 큐브/스텐실 셰이더/스팟라이트/오클루전/BlobShadow/IsometricDepthSorter). 아이소 식별자 0개.
+- [~] **7. 씬 재구성** — `GameSceneBuilder`로 InGame/Safehouse 골격 생성기 마련. 콘텐츠 재구성 진행 중.
+
+> **남은 일**: `Resources/TopDownPlayer` 프리팹 생성, `// TODO(TopDownPlayer):` 주석 21곳 재연결, 컴파일 정리, 씬 콘텐츠 채우기.
 
 ## 환경
 - Unity 6 / URP 17.3. `URP-2D.asset`(Renderer2D) 존재 → 전환만 하면 됨. 2D 패키지(sprite/tilemap/animation, physics2D) 설치됨.

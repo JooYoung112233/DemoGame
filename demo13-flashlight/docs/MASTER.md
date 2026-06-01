@@ -11,10 +11,10 @@
 |------|------|
 | **제목** | 다녀올게 (Be Right Back) |
 | **프로젝트명** | **BRB** (Be Right Back). 구 "Night City / 밤의 도시" 코드네임 폐기 |
-| **장르** | 2.5D 아이소메트릭 근접 생존 루팅 액션 |
-| **엔진** | Unity 2022+ (URP) |
+| **장르** | 탑다운 2D 근접 생존 루팅 액션 |
+| **엔진** | Unity 6 (URP **2D** Renderer) |
 | **언어** | C# |
-| **아트** | 3D 큐브 월드 + 2D 빌보드 스프라이트 (Spine) |
+| **아트** | 탑다운 2D 스프라이트 (near-overhead 원근을 아트에 베이크), Spine 애니. 카메라는 2D Orthographic |
 | **핵심 루프** | 안전가옥 → 지역 선택 → 15분 레이드(파밍/전투) → 탈출 → 정산 → 안전가옥 성장 |
 | **핵심 감정** | "한 번만 더 들어갈까?" / "지금 나갈까, 한 개 더 주울까?" |
 
@@ -58,7 +58,7 @@
 |------|------|------|
 | [`combat.md`](combat.md) | 근접 전투 시스템 — 약공(3타 콤보)/강공(차징)/구르기/스태미너/그로기/적 캔슬. 수치 확정 | 프로토타입 완료 |
 
-핵심 코드: `EnemyController.cs`, `PlayerController.cs` (전투 상태머신), `StatDB` (스탯 DB)
+핵심 코드: `TopDownPlayer.cs` (이동·조준·손전등), `EnemyController.cs` (Rigidbody2D AI 상태머신), `StatDB` (스탯 DB)
 
 ### 🎒 인벤토리 · 아이템 · 제작
 
@@ -129,19 +129,19 @@
 
 엔딩 3종: A(입양/생존) · B(사망/진실) · C(구출/희망) — 복수 엔딩, NPC 호감도+단서 수집으로 분기
 
-### 🎨 렌더링 · 셰이더
+### 🎨 렌더링 · 뷰
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`rendering.md`](rendering.md) | 하이브리드 2D+3D — 바닥 2D Plane, 벽/건물 3D Cube, 라이팅(URP 3D Spot Light), 스텐실 시스템 | 확정, 구현 완료 |
-| [`shader-system.md`](shader-system.md) | 잉크 아트 스타일 셰이더 8종(외곽선/그림자/밤오버레이/디졸브/빌보드 등), 머티리얼 네이밍 | 구현 완료 |
+| [`topdown-migration.md`](topdown-migration.md) | **아이소 → 탑다운 2D 전환** 배경·유지/제거/신규 목록·단계 계획 | 진행 중 |
+| [`rendering.md`](rendering.md) | 순수 탑다운 2D — URP 2D Renderer, 2D Orthographic 카메라, Light2D, Tilemap, Prop2D, BRB/ 셰이더 8종 | 확정 |
+| [`topdown-art-spec.md`](topdown-art-spec.md) | AI 이미지 생성 스펙 — near-overhead 시점, 마젠타 배경, 플랫 라이팅, 엔진 조명값 | 작성 완료 |
 
 ### 🔧 맵 도구
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`map-tool.md`](map-tool.md) | 아이소메트릭 맵툴 기획 — Unity Editor Extension, 좌표계, 건물 상태 전환 | 기획 확정 |
-| [`map-tool-guide.md`](map-tool-guide.md) | 런타임 맵 빌더 사용 가이드 — 타일/벽/프롭/건물 배치, JSON 저장/불러오기 | 사용 가능 |
+| [`map-tool.md`](map-tool.md) | 탑다운 2D 맵 도구 — Tilemap(바닥/벽) + Prop2D 카탈로그 + 씬 빌더(GameSceneBuilder) | 사용 가능 |
 
 ---
 
@@ -162,7 +162,7 @@ Safehouse (timeScale=0, 안전 허브)
 
 | 싱글톤 | 역할 |
 |--------|------|
-| PlayerController | 이동, 전투, 손전등, 스프라이트. Resources/Player 프리팹 자동 스폰 |
+| TopDownPlayer | 이동(Rigidbody2D), 마우스 조준, 손전등(Light2D). Resources/TopDownPlayer 프리팹 자동 스폰 |
 | SceneTransitionManager | 씬 전환, 페이드, 탈출 카운트다운 |
 | UIManager | UI 상태 관리, 플레이어 입력 차단 |
 | NPCRelationshipManager | NPC 3축 호감도 추적 |
@@ -189,4 +189,5 @@ Safehouse (timeScale=0, 안전 허브)
 | 2026-05-29 | 문서 정리: `Night_City_System_Draft_v2.md`(1203줄) → `gdd-core`/`gdd-progression`/`gdd-demo` 3분할. `items.md` → `items-crafting-farming.md` 분리. story/story-script 역할 명시 + 오프닝 중복 제거. `quests-region1.md` 인덱스 추가. dev-roadmap에 미구현 목록 정리. |
 | 2026-05-29 | **프로젝트명 BRB 확정.** "Night City / 밤의 도시" 표현 전면 정리 — 기획서 제목 → "BRB 기획서", 인게임 출전 화면 타이틀 → "다녀올게", `Mood.NightCity` → `Mood.NeonNight`, Unity 메뉴 `Tools/Night City/*` 3건 → `Tools/Dev Tools/*` 관례 통일 + 문서의 stale 메뉴 경로 교정. 한글 제목은 "다녀올게" 유지. |
 | 2026-05-30 | 미완 시스템 구현 + 문서화: ① **화폐 시스템**(`CurrencyManager`, `docs/economy.md` 신설) ② **공용 토스트 UI**(`ToastManager`). dev-roadmap 미구현 목록 ✅ 처리. `economy.md`를 문서 맵에 등재(인덱스 누락 교정). + **스태미너 회복 소비 아이템 기획 제거**(불필요 결정, 3개 아이템 효과 None 전환). |
-| 2026-05-30 | **건물 입장 트리거 시스템** 구현(`BuildingEntryTrigger` + 맵빌더 Trigger 오브젝트 4종 모드: 씬전환/로컬이동/스토리/커스텀). `map-tool-guide.md`에 맵 오브젝트 설정 가이드 추가. |
+| 2026-05-30 | **건물 입장 트리거 시스템** 구현(`BuildingEntryTrigger` + 맵빌더 Trigger 오브젝트 4종 모드: 씬전환/로컬이동/스토리/커스텀). |
+| 2026-06-02 | **아이소메트릭 → 탑다운 2D 전환.** 렌더 파이프라인 URP-3D→URP-2D, 카메라 2D Orthographic, 좌표계 XY+sortingOrder, 이동 NavMesh→Rigidbody2D, 조명 3D 스팟라이트→Light2D, 맵 커스텀 MapBuilder→Tilemap+Prop2D. 플레이어 `PlayerController`→`TopDownPlayer`, 적 Rigidbody2D 재작성. **문서 정리**: `rendering.md` 순수 2D로 재작성, `map-tool.md` 탑다운 도구로 교체, `topdown-migration.md`/`topdown-art-spec.md` 등재. **삭제**: `shader-system.md`(구 InkCity 셰이더 — 전부 삭제됨), `map-tool-guide.md`(구 런타임 빌더), `safehouse-map-prompt.md`(아이소 프롬프트 — `safehouse-tile-prompt.md`로 대체). |

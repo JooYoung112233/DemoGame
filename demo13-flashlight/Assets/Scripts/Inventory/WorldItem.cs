@@ -74,7 +74,6 @@ public class WorldItem : MonoBehaviour
     }
 
     /// <summary>플레이어가 줍기 시도</summary>
-    // TODO(TopDownPlayer): public bool TryPickup(PlayerController player)
     public bool TryPickup(GameObject playerGO)
     {
         if (Item == null) return false;

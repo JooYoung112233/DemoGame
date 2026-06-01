@@ -40,7 +40,9 @@ public class Prop2DCatalogEditor : EditorWindow
             .Where(p => p != null)
             .OrderBy(p => p.displayName + p.propId)
             .ToList();
-        if (_selected == null && _props.Count > 0) _selected = _props[0];
+        // 선택은 항상 현재 탭 항목으로 유지(탭과 무관한 항목이 폼에 뜨던 버그 방지).
+        if (_selected == null || !_props.Contains(_selected) || _selected.category != _tab)
+            _selected = _props.FirstOrDefault(p => p.category == _tab);
     }
 
     void OnGUI()
@@ -59,7 +61,11 @@ public class Prop2DCatalogEditor : EditorWindow
 
         // 카테고리 탭
         int newTab = GUILayout.Toolbar((int)_tab, TabNames);
-        if (newTab != (int)_tab) { _tab = (Prop2DDefinition.Category)newTab; _selected = null; }
+        if (newTab != (int)_tab)
+        {
+            _tab = (Prop2DDefinition.Category)newTab;
+            _selected = _props.FirstOrDefault(p => p != null && p.category == _tab); // 새 탭의 첫 항목(없으면 null)
+        }
 
         int count = _props.Count(p => p != null && p.category == _tab);
         EditorGUILayout.LabelField($"{TabNames[(int)_tab]} ({count})", EditorStyles.boldLabel);
@@ -111,12 +117,14 @@ public class Prop2DCatalogEditor : EditorWindow
 
         if (_selected == null)
         {
-            EditorGUILayout.HelpBox("프롭을 선택하거나 '＋ 새 프롭'으로 만드세요.", MessageType.Info);
+            EditorGUILayout.HelpBox("왼쪽 목록에서 항목을 클릭하면 여기서 편집합니다. 없으면 '＋ 새 항목'.", MessageType.Info);
             EditorGUILayout.EndVertical();
             return;
         }
 
         var def = _selected;
+        EditorGUILayout.LabelField($"✏ 편집 중: {(string.IsNullOrEmpty(def.displayName) ? def.propId : def.displayName)}",
+            EditorStyles.boldLabel);
         _formScroll = EditorGUILayout.BeginScrollView(_formScroll);
         EditorGUI.BeginChangeCheck();
 
@@ -165,7 +173,9 @@ public class Prop2DCatalogEditor : EditorWindow
         EditorGUILayout.Space(6);
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("저장")) AssetDatabase.SaveAssets();
-        if (GUILayout.Button("삭제", GUILayout.Width(60))) DeleteSelected();
+        if (GUILayout.Button("복제", GUILayout.Width(56))) DuplicateSelected();
+        if (GUILayout.Button("포커스", GUILayout.Width(56))) EditorGUIUtility.PingObject(_selected);
+        if (GUILayout.Button("삭제", GUILayout.Width(56))) DeleteSelected();
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.EndScrollView();
@@ -412,6 +422,21 @@ public class Prop2DCatalogEditor : EditorWindow
     {
         foreach (var c in System.IO.Path.GetInvalidFileNameChars()) s = s.Replace(c, '_');
         return s;
+    }
+
+    /// <summary>선택 항목을 복제(같은 카테고리 유지). 옛 카탈로그 "복제" 기능.</summary>
+    void DuplicateSelected()
+    {
+        if (_selected == null) return;
+        EnsureFolder();
+        var copy = Instantiate(_selected);
+        copy.propId = _selected.propId + "_copy";
+        copy.displayName = (_selected.displayName ?? _selected.propId) + " (복제)";
+        string path = AssetDatabase.GenerateUniqueAssetPath($"{PropFolder}/{MakeSafe(copy.propId)}.asset");
+        AssetDatabase.CreateAsset(copy, path);
+        AssetDatabase.SaveAssets();
+        Refresh();
+        _selected = copy;
     }
 
     void DeleteSelected()

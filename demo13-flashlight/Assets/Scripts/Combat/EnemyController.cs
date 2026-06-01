@@ -1,104 +1,164 @@
 using UnityEngine;
 
 /// <summary>
-/// 탑다운 2D 적 컨트롤러.
-/// Rigidbody2D 기반 이동 + 상태머신 (Patrol/Chase/AttackWindup/Attack/Hit/Stunned/Dead).
-/// NavMesh 없음. StatDB에서 스탯 로드.
+/// 적 통합 컨트롤러 — 탑다운 2D (Rigidbody2D 기반, NavMesh 없음).
+/// AI 상태머신(순찰/추격/예비동작/공격/피격/스턴/사망) + 그로기 시스템.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Collider2D))]
 public class EnemyController : MonoBehaviour
 {
-    // ─────────────────────── 열거형 ────────────────────────────────
+    #region 열거형 & 필드
+
     public enum State { Patrol, Chase, AttackWindup, Attack, Hit, Stunned, Dead }
 
-    // ─────────────────────── 인스펙터 ──────────────────────────────
-    [Header("감지")]
-    [SerializeField] float detectRange  = 8f;
-    [SerializeField] float attackRange  = 1.2f;
-    [SerializeField] float loseRange    = 12f;
+    [Header("Detection")]
+    [SerializeField] float detectRange    = 8f;
+    [SerializeField] float attackRange    = 1.2f;
+    [SerializeField] float loseRange      = 12f;
 
-    [Header("이동")]
-    [SerializeField] float moveSpeed    = 3f;
-    [SerializeField] float patrolRadius = 4f;
-    [SerializeField] float patrolWaitMin = 1f;
-    [SerializeField] float patrolWaitMax = 3f;
+    [Header("Movement")]
+    [SerializeField] float moveSpeed      = 2.5f;
+    [SerializeField] float patrolSpeed    = 1.2f;
+    [SerializeField] float patrolRadius   = 5f;
+    [SerializeField] float patrolWaitTime = 2f;
 
-    [Header("공격")]
-    [SerializeField] float attackDamage  = 10f;
-    [SerializeField] float attackWindup  = 0.4f;
-    [SerializeField] float attackCooldown = 1.2f;
+    [Header("Combat")]
+    [SerializeField] float attackDamage   = 15f;
+    [SerializeField] float attackSpeed    = 0.67f;
+    [SerializeField] float attackWindup   = 0.8f;
 
-    [Header("그로기 (누적 → 스턴)")]
-    [SerializeField] float maxGroggy     = 100f;
-    [SerializeField] float groggyDecay   = 20f;
-    [SerializeField] float stunDuration  = 1.8f;
+    [Header("Groggy")]
+    [SerializeField] float maxGroggy           = 100f;
+    [SerializeField] float groggyDecay         = 8f;
+    [SerializeField] float groggyStunDuration  = 2.0f;
 
-    [Header("StatDB 키 (비어있으면 인스펙터 값 사용)")]
+    [Header("Data")]
     [SerializeField] string unitKey;
+    UnitStatData unitStat;
 
-    [Header("비주얼")]
-    [SerializeField] SpriteRenderer spriteRenderer;
+    [Header("References")]
+    [SerializeField] SkeletonAnimController animController;
 
-    // ─────────────────────── 내부 상태 ─────────────────────────────
-    Rigidbody2D _rb;
-    Health      _health;
-    State       _state = State.Patrol;
+    // 런타임
+    State          state = State.Patrol;
+    Transform      player;
+    Health         health;
+    Health         playerHealth;
+    Rigidbody2D    _rb;
+    CombatFeedback feedback;
+    SpriteRenderer spriteRenderer;
+    Renderer[]     renderers;
+    Color          originalColor = Color.white;
 
-    Vector2 _patrolTarget;
-    float   _patrolWaitTimer;
-    bool    _patrolWaiting;
+    Vector2 spawnPos;
+    Vector2 patrolTarget;
+    float   patrolTimer;
+    float   attackTimer;
+    float   hitTimer;
+    float   windupTimer;
+    float   windupFlashTimer;
 
-    float _attackTimer;
-    float _windupTimer;
-    float _stunTimer;
-    float _hitTimer;
-    float _groggy;
+    // 그로기
+    float currentGroggy;
+    float stunTimer;
+    bool  isStunned;
 
-    Transform _playerTransform;
+    // HP바
+    GameObject hpBarBg, hpBarFill;
+    Material   hpFillMat;
+    const float BAR_W = 0.8f, BAR_H = 0.08f;
 
-    Color _originalColor;
-    float _flashTimer;
+    // 그로기바
+    GameObject groggyBarBg, groggyBarFill;
+    Material   groggyFillMat;
+    const float GROG_W = 0.6f, GROG_H = 0.06f;
 
-    // ─────────────────────── 프로퍼티 ──────────────────────────────
-    public State CurrentState => _state;
-    public bool  IsDead       => _state == State.Dead;
+    #endregion
 
-    // ─────────────────────── Unity ─────────────────────────────────
+    #region 프로퍼티
+
+    float Damage          => unitStat != null ? unitStat.attackDamage        : attackDamage;
+    float AtkRange        => unitStat != null ? unitStat.attackRange         : attackRange;
+    float AtkCooldown     => 1f / Mathf.Max(unitStat != null ? unitStat.attackSpeed : attackSpeed, 0.1f);
+    float DetectRng       => unitStat != null ? unitStat.detectRange         : detectRange;
+    float LoseRng         => unitStat != null ? unitStat.loseRange           : loseRange;
+    float MoveSpd         => unitStat != null ? unitStat.moveSpeed           : moveSpeed;
+    float PatrolSpd       => unitStat != null ? unitStat.patrolSpeed         : patrolSpeed;
+    float PatrolRad       => unitStat != null ? unitStat.patrolRadius        : patrolRadius;
+    float HitStun         => unitStat != null ? unitStat.hitStunDuration     : 0.3f;
+    float PatrolWait      => unitStat != null ? unitStat.patrolWaitTime      : patrolWaitTime;
+    float Windup          => unitStat != null ? unitStat.attackWindup        : attackWindup;
+    bool  CanBeCancelled  => unitStat != null ? unitStat.canBeCancelled      : true;
+    float MaxGroggy       => unitStat != null ? unitStat.maxGroggy           : maxGroggy;
+    float GroggyDecayRate => unitStat != null ? unitStat.groggyDecay         : groggyDecay;
+    float StunDuration    => unitStat != null ? unitStat.groggyStunDuration  : groggyStunDuration;
+
+    public State CurrentState  => state;
+    public bool  IsInWindup    => state == State.AttackWindup;
+    public bool  IsStunned     => isStunned;
+    public bool  IsDead        => state == State.Dead;
+    public float GroggyPercent => currentGroggy / MaxGroggy;
+
+    #endregion
+
+    #region 유니티 생명주기
+
+    public void SetUnitKey(string key)
+    {
+        unitKey = key;
+        if (StatDB.Instance != null) unitStat = StatDB.Instance.GetUnit(unitKey);
+    }
+
     void Awake()
     {
-        _rb = GetComponent<Rigidbody2D>();
+        if (!string.IsNullOrEmpty(unitKey) && StatDB.Instance != null)
+            unitStat = StatDB.Instance.GetUnit(unitKey);
+
+        _rb                = GetComponent<Rigidbody2D>();
         _rb.gravityScale   = 0f;
         _rb.freezeRotation = true;
 
-        _health = GetComponent<Health>();
-        if (_health != null) _health.OnDied += OnDied;
+        health    = GetComponent<Health>();
+        feedback  = GetComponent<CombatFeedback>();
 
-        if (spriteRenderer == null)
-            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        if (spriteRenderer != null)
-            _originalColor = spriteRenderer.color;
+        if (animController == null)
+            animController = GetComponentInChildren<SkeletonAnimController>();
+
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        renderers      = GetComponentsInChildren<Renderer>();
     }
 
     void Start()
     {
-        LoadStats();
-        PickPatrolTarget();
-    }
+        spawnPos = transform.position;
 
-    void OnDestroy()
-    {
-        if (_health != null) _health.OnDied -= OnDied;
+        var playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO != null)
+        {
+            player       = playerGO.transform;
+            playerHealth = playerGO.GetComponent<Health>();
+        }
+
+        if (health != null)
+        {
+            health.OnDamaged += OnDamaged;
+            health.OnDeath   += OnDeath;
+        }
+
+        if (spriteRenderer != null) originalColor = spriteRenderer.color;
+
+        CreateHPBar();
+        CreateGroggyBar();
+        SetPatrolTarget();
     }
 
     void Update()
     {
-        if (_state == State.Dead) return;
-        FindPlayer();
-        UpdateGroggy();
-        UpdateColorFlash();
+        if (state == State.Dead) return;
+        attackTimer -= Time.deltaTime;
 
-        switch (_state)
+        switch (state)
         {
             case State.Patrol:       UpdatePatrol();       break;
             case State.Chase:        UpdateChase();        break;
@@ -107,209 +167,343 @@ public class EnemyController : MonoBehaviour
             case State.Hit:          UpdateHit();          break;
             case State.Stunned:      UpdateStunned();      break;
         }
+
+        UpdateGroggy();
+        UpdateGroggyBar();
+        UpdateHPBar();
     }
 
-    // ─────────────────────── 상태별 업데이트 ───────────────────────
+    #endregion
+
+    #region AI 상태
 
     void UpdatePatrol()
     {
-        if (_playerTransform != null && DistToPlayer() <= detectRange)
+        if (player != null && DistToPlayer() < DetectRng)
         {
-            SetState(State.Chase);
+            state = State.Chase;
+            StoryTriggerManager.Instance?.OnFirstCombatEncounter();
             return;
         }
 
-        if (_patrolWaiting)
+        Vector2 toTarget = patrolTarget - (Vector2)transform.position;
+        if (toTarget.magnitude < 0.4f)
         {
-            _patrolWaitTimer -= Time.deltaTime;
-            if (_patrolWaitTimer <= 0f) { _patrolWaiting = false; PickPatrolTarget(); }
-            StopMove();
-            return;
-        }
-
-        if (((Vector2)transform.position - _patrolTarget).magnitude < 0.25f)
-        {
-            StopMove();
-            _patrolWaiting = true;
-            _patrolWaitTimer = Random.Range(patrolWaitMin, patrolWaitMax);
+            SetVelocity(Vector2.zero);
+            animController?.Play("idle");
+            patrolTimer += Time.deltaTime;
+            if (patrolTimer >= PatrolWait) SetPatrolTarget();
         }
         else
         {
-            MoveToward(_patrolTarget);
+            Vector2 dir = toTarget.normalized;
+            SetVelocity(dir * PatrolSpd);
+            FlipSprite(dir);
+            animController?.Play("walk");
         }
     }
 
     void UpdateChase()
     {
-        if (_playerTransform == null || DistToPlayer() > loseRange)
+        if (player == null || (playerHealth != null && playerHealth.IsDead))
         {
-            SetState(State.Patrol);
+            state = State.Patrol;
+            SetVelocity(Vector2.zero);
+            animController?.Play("idle");
             return;
         }
-        if (DistToPlayer() <= attackRange && _attackTimer <= 0f)
+
+        float dist = DistToPlayer();
+
+        if (dist > LoseRng) { state = State.Patrol; SetPatrolTarget(); return; }
+
+        if (dist <= AtkRange && attackTimer <= 0)
         {
-            SetState(State.AttackWindup);
+            state = State.AttackWindup;
+            windupTimer = Windup;
+            windupFlashTimer = 0;
+            SetVelocity(Vector2.zero);
+            FacePlayer();
             return;
         }
-        MoveToward(_playerTransform.position);
-        _attackTimer -= Time.deltaTime;
+
+        Vector2 d = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        SetVelocity(d * MoveSpd);
+        FlipSprite(d);
+        animController?.Play("walk");
     }
 
     void UpdateAttackWindup()
     {
-        StopMove();
-        _windupTimer -= Time.deltaTime;
-        if (_windupTimer <= 0f) SetState(State.Attack);
+        windupTimer -= Time.deltaTime;
+        SetVelocity(Vector2.zero);
+        windupFlashTimer += Time.deltaTime;
+        SetTint(Mathf.Sin(windupFlashTimer * 15f) > 0 ? new Color(1f, 0.2f, 0.2f) : originalColor);
+        if (windupTimer <= 0) { RestoreTint(); DoAttack(); }
     }
 
     void UpdateAttack()
     {
-        StopMove();
-        if (_playerTransform != null)
-        {
-            var h = _playerTransform.GetComponent<Health>();
-            if (h != null) h.TakeDamage(attackDamage);
-        }
-        _attackTimer = attackCooldown;
-        SetState(State.Chase);
+        if (animController == null || animController.IsAnimComplete)
+            state = State.Chase;
     }
 
     void UpdateHit()
     {
-        _hitTimer -= Time.deltaTime;
-        if (_hitTimer <= 0f) SetState(State.Chase);
+        hitTimer -= Time.deltaTime;
+        SetVelocity(Vector2.zero);
+        if (hitTimer <= 0 || (animController != null && animController.IsAnimComplete))
+        {
+            RestoreTint();
+            state = State.Chase;
+        }
     }
 
     void UpdateStunned()
     {
-        StopMove();
-        _stunTimer -= Time.deltaTime;
-        if (_stunTimer <= 0f) SetState(State.Chase);
+        SetVelocity(Vector2.zero);
+        SetTint(Mathf.Sin(Time.time * 6f) > 0 ? new Color(1f, 1f, 0.2f) : new Color(0.6f, 0.6f, 0.1f));
+        animController?.Play("idle");
     }
 
-    // ─────────────────────── 공개 API ──────────────────────────────
+    #endregion
 
-    /// <summary>플레이어 공격이 명중했을 때 호출.</summary>
-    public void TakeHit(float damage, float groggyAmount, Vector2 knockbackDir = default)
+    #region 공격
+
+    void DoAttack()
     {
-        if (_state == State.Dead) return;
+        state       = State.Attack;
+        attackTimer = AtkCooldown;
+        windupFlashTimer = 0;
+        FacePlayer();
 
-        if (_health != null) _health.TakeDamage(damage);
-
-        _groggy += groggyAmount;
-        if (_groggy >= maxGroggy)
+        if (feedback != null && player != null)
         {
-            _groggy = 0f;
-            ApplyStun();
-            return;
+            Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+            feedback.DoLightLunge(dir);
         }
 
-        if (knockbackDir != Vector2.zero)
-            _rb.AddForce(knockbackDir.normalized * 4f, ForceMode2D.Impulse);
+        animController?.PlayOneShot("attack", () =>
+        {
+            if (player != null && DistToPlayer() <= AtkRange * 1.5f)
+            {
+                playerHealth?.TakeDamage(Damage);
+                DamagePopup.Create(player.position, Damage, DamagePopup.DamageType.Normal);
+            }
+        });
 
-        FlashRed();
-        SetState(State.Hit);
-        _hitTimer = 0.15f;
+        if (animController == null)
+        {
+            if (player != null && DistToPlayer() <= AtkRange * 1.5f)
+            {
+                playerHealth?.TakeDamage(Damage);
+                DamagePopup.Create(player.position, Damage, DamagePopup.DamageType.Normal);
+            }
+            state = State.Chase;
+        }
     }
 
-    // ─────────────────────── 내부 ──────────────────────────────────
-
-    void OnDied()
+    public void TryCancelAttack()
     {
-        SetState(State.Dead);
-        StopMove();
-        _rb.simulated = false;
-        if (spriteRenderer != null)
-            spriteRenderer.color = new Color(0.35f, 0.35f, 0.35f);
-        Debug.Log($"[Enemy] {gameObject.name} 사망");
+        if (!CanBeCancelled || state != State.AttackWindup) return;
+        state    = State.Hit;
+        hitTimer = HitStun * 1.5f;
+        SetVelocity(Vector2.zero);
+        RestoreTint();
+        SetTint(new Color(1f, 1f, 0.5f));
+        animController?.PlayOneShot("gethit");
     }
 
-    void SetState(State next)
+    #endregion
+
+    #region 그로기
+
+    public void AddGroggy(float amount)
     {
-        _state = next;
-        if (next == State.AttackWindup) _windupTimer = attackWindup;
-        if (next == State.Patrol)       PickPatrolTarget();
+        if (isStunned) return;
+        currentGroggy = Mathf.Min(currentGroggy + amount, MaxGroggy);
+        if (currentGroggy >= MaxGroggy) { isStunned = true; stunTimer = StunDuration; OnGroggyTriggered(); }
     }
 
-    void MoveToward(Vector2 target)
+    /// <summary>플레이어 근접 공격 명중 — 데미지 + 그로기 + 넉백 + 팝업.
+    /// (Health.TakeDamage가 OnDamaged 콜백으로 Hit 상태 전환/연출을 처리)</summary>
+    public void TakeHit(float damage, float groggy, Vector2 knockbackDir = default)
     {
-        Vector2 dir = ((Vector2)target - (Vector2)transform.position).normalized;
-        _rb.linearVelocity = dir * moveSpeed;
-        if (spriteRenderer != null && Mathf.Abs(dir.x) > 0.01f)
-            spriteRenderer.flipX = dir.x < 0f;
-    }
+        if (state == State.Dead) return;
 
-    void StopMove() => _rb.linearVelocity = Vector2.zero;
+        // windup 중이면 캔슬 시도 (성공 시 Hit 상태로)
+        if (state == State.AttackWindup) TryCancelAttack();
 
-    void PickPatrolTarget()
-    {
-        float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-        float dist  = Random.Range(patrolRadius * 0.3f, patrolRadius);
-        _patrolTarget = (Vector2)transform.position + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * dist;
-    }
+        if (health != null) health.TakeDamage(damage);
+        AddGroggy(groggy);
 
-    void FindPlayer()
-    {
-        if (_playerTransform != null) return;
-        var go = GameObject.FindGameObjectWithTag("Player");
-        if (go != null) _playerTransform = go.transform;
-    }
+        DamagePopup.Create(transform.position, damage, DamagePopup.DamageType.Normal);
 
-    float DistToPlayer()
-    {
-        if (_playerTransform == null) return float.MaxValue;
-        return Vector2.Distance(transform.position, _playerTransform.position);
-    }
-
-    void LoadStats()
-    {
-        if (string.IsNullOrEmpty(unitKey)) return;
-        var stat = StatDB.Instance?.GetUnit(unitKey);
-        if (stat == null) return;
-
-        moveSpeed     = stat.moveSpeed;
-        detectRange   = stat.detectionRange;
-        attackRange   = stat.attackRange;
-        attackDamage  = stat.attackDamage;
-        attackCooldown= stat.attackCooldown;
-        maxGroggy     = stat.groggyMax;
-        groggyDecay   = stat.groggyDecay;
-        stunDuration  = stat.stunDuration;
-
-        if (_health != null) { _health.SetMaxHp(stat.maxHp); _health.FullHeal(); }
-    }
-
-    void ApplyStun()
-    {
-        SetState(State.Stunned);
-        _stunTimer = stunDuration;
-        FlashWhite();
+        if (knockbackDir != Vector2.zero && _rb != null)
+            _rb.AddForce(knockbackDir.normalized * 3f, ForceMode2D.Impulse);
     }
 
     void UpdateGroggy()
     {
-        if (_groggy > 0f)
-            _groggy = Mathf.Max(0f, _groggy - groggyDecay * Time.deltaTime);
-    }
-
-    void FlashRed()  { if (spriteRenderer) spriteRenderer.color = new Color(1f, 0.3f, 0.3f); _flashTimer = 0.12f; }
-    void FlashWhite(){ if (spriteRenderer) spriteRenderer.color = Color.white;                _flashTimer = 0.25f; }
-
-    void UpdateColorFlash()
-    {
-        if (_flashTimer > 0f)
+        if (isStunned)
         {
-            _flashTimer -= Time.deltaTime;
-            if (_flashTimer <= 0f && spriteRenderer != null)
-                spriteRenderer.color = _originalColor;
+            stunTimer -= Time.deltaTime;
+            if (stunTimer <= 0) { isStunned = false; currentGroggy = 0; OnGroggyRecovered(); }
+        }
+        else if (currentGroggy > 0)
+        {
+            currentGroggy = Mathf.Max(0, currentGroggy - GroggyDecayRate * Time.deltaTime);
         }
     }
 
-    void OnDrawGizmosSelected()
+    #endregion
+
+    #region HP바 / 그로기바 (2D SpriteRenderer)
+
+    void CreateHPBar()
     {
-        Gizmos.color = new Color(1f, 0f, 0f, 0.15f);
-        Gizmos.DrawWireSphere(transform.position, detectRange);
-        Gizmos.color = new Color(1f, 0.5f, 0f, 0.35f);
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        var c = new GameObject("HPBar");
+        c.transform.SetParent(transform);
+        c.transform.localPosition = new Vector3(0, 0.7f, 0);
+        hpBarBg   = MakeBar("HPBar_BG",   c.transform, new Color(0.1f, 0.1f, 0.1f, 0.8f), 0, BAR_W, BAR_H);
+        hpBarFill = MakeBar("HPBar_Fill", c.transform, Color.green, 1, BAR_W, BAR_H);
+        hpFillMat = hpBarFill.GetComponent<SpriteRenderer>().material;
     }
+
+    void UpdateHPBar()
+    {
+        if (health == null || hpBarBg == null) return;
+        bool show = health.Percent < 0.99f && state != State.Dead;
+        hpBarBg.SetActive(show); hpBarFill.SetActive(show);
+        if (!show) return;
+        float pct = health.Percent;
+        hpBarFill.transform.localScale    = new Vector3(BAR_W * pct, BAR_H, 1);
+        hpBarFill.transform.localPosition = new Vector3(-BAR_W * (1 - pct) * 0.5f, 0, 0);
+        if (hpFillMat != null) hpFillMat.color = Color.Lerp(Color.red, Color.green, pct);
+    }
+
+    void CreateGroggyBar()
+    {
+        var c = new GameObject("GroggyBar");
+        c.transform.SetParent(transform);
+        c.transform.localPosition = new Vector3(0, 0.85f, 0);
+        groggyBarBg   = MakeBar("GroggyBar_BG",   c.transform, new Color(0.15f, 0.15f, 0.15f, 0.7f), 0, GROG_W, GROG_H);
+        groggyBarFill = MakeBar("GroggyBar_Fill",  c.transform, new Color(1f, 0.6f, 0f, 0.9f), 1, 0, GROG_H);
+        groggyFillMat = groggyBarFill.GetComponent<SpriteRenderer>().material;
+        groggyBarBg.SetActive(false); groggyBarFill.SetActive(false);
+    }
+
+    void UpdateGroggyBar()
+    {
+        if (groggyBarBg == null) return;
+        bool show = currentGroggy > 0.1f || isStunned;
+        groggyBarBg.SetActive(show); groggyBarFill.SetActive(show);
+        if (!show) return;
+        float pct = currentGroggy / MaxGroggy;
+        groggyBarFill.transform.localScale    = new Vector3(GROG_W * pct, GROG_H, 1);
+        groggyBarFill.transform.localPosition = new Vector3(-GROG_W * (1 - pct) * 0.5f, 0, 0);
+        if (groggyFillMat != null)
+            groggyFillMat.color = isStunned
+                ? new Color(1f, 0.1f, 0.1f, Mathf.Sin(Time.time * 10f) > 0 ? 1f : 0.4f)
+                : new Color(1f, 0.6f, 0f, 0.9f);
+    }
+
+    static Sprite _whiteSprite;
+    static Sprite WhiteSprite()
+    {
+        if (_whiteSprite != null) return _whiteSprite;
+        var t = new Texture2D(1, 1); t.SetPixel(0, 0, Color.white); t.Apply();
+        return _whiteSprite = Sprite.Create(t, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1);
+    }
+
+    static GameObject MakeBar(string name, Transform parent, Color color, int order, float w, float h)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localScale    = new Vector3(w, h, 1);
+        go.transform.localPosition = Vector3.zero;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite       = WhiteSprite();
+        sr.color        = color;
+        sr.sortingOrder = 100 + order;
+        sr.material     = new Material(sr.material); // 인스턴스 머티리얼 (색 변경용)
+        return go;
+    }
+
+    #endregion
+
+    #region 콜백
+
+    void OnDamaged(float amount)
+    {
+        if (state == State.Dead) return;
+        FacePlayer();
+        if (state == State.AttackWindup) windupFlashTimer = 0;
+        state    = State.Hit;
+        hitTimer = HitStun;
+        SetVelocity(Vector2.zero);
+        SetTint(new Color(1f, 0.5f, 0.5f));
+        animController?.PlayOneShot("gethit");
+    }
+
+    void OnDeath()
+    {
+        state         = State.Dead;
+        _rb.simulated = false;
+        RestoreTint();
+        animController?.PlayOneShot("death");
+        if (hpBarBg   != null) hpBarBg.SetActive(false);
+        if (hpBarFill != null) hpBarFill.SetActive(false);
+
+        if (QuestManager.Instance != null && !string.IsNullOrEmpty(unitKey))
+            QuestManager.Instance.UpdateObjective(ObjectiveType.KillEnemy, unitKey, 1);
+
+        Destroy(gameObject, 3f);
+    }
+
+    void OnGroggyTriggered() { state = State.Stunned; SetVelocity(Vector2.zero); }
+
+    void OnGroggyRecovered()
+    {
+        if (state == State.Stunned) { RestoreTint(); state = State.Chase; }
+    }
+
+    #endregion
+
+    #region 유틸리티
+
+    void SetPatrolTarget()
+    {
+        patrolTimer  = 0f;
+        patrolTarget = spawnPos + Random.insideUnitCircle * PatrolRad;
+    }
+
+    void SetVelocity(Vector2 v) { if (_rb != null) _rb.linearVelocity = v; }
+
+    float DistToPlayer()
+        => player == null ? float.MaxValue : Vector2.Distance(transform.position, player.position);
+
+    void FacePlayer()
+    {
+        if (player == null) return;
+        Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        animController?.SetDirection(dir);
+        FlipSprite(dir);
+    }
+
+    void FlipSprite(Vector2 dir)
+    {
+        if (spriteRenderer != null && Mathf.Abs(dir.x) > 0.01f)
+            spriteRenderer.flipX = dir.x < 0f;
+    }
+
+    void SetTint(Color c)
+    {
+        if (spriteRenderer != null) spriteRenderer.color = c;
+        foreach (var r in renderers) if (r is SpriteRenderer sr) sr.color = c;
+    }
+
+    void RestoreTint() => SetTint(originalColor);
+
+    #endregion
 }

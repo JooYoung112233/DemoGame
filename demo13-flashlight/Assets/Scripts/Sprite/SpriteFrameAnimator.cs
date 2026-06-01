@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 스프라이트 프레임 애니메이션 컨트롤러.
 /// Resources/Charater/ 에서 스프라이트를 로드하여 프레임 애니메이션 재생.
-/// SkeletonAnimController 대신 사용 가능 — PlayerController와 동일 인터페이스.
+/// SkeletonAnimController 대신 사용 가능 — 동일 인터페이스(Play/PlayOneShot/SetDirection).
 /// </summary>
 public class SpriteFrameAnimator : MonoBehaviour
 {

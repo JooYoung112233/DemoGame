@@ -225,9 +225,8 @@ public class InjuryVFX : MonoBehaviour
         float fractureSeverity = GetTotalSeverity(InjuryType.Fracture);
         if (fractureSeverity <= 0 || cam == null) return;
 
-        // TODO(TopDownPlayer): 이동 중에만 흔들림
-        // if (medical.GetComponent<PlayerController>()?.CurrentState != PlayerController.CombatState.Idle)
-        //     return;
+        // 이동 중에만 흔들림 (골절 — 걸을 때 통증)
+        if (TopDownPlayer.Instance != null && !TopDownPlayer.Instance.IsMoving) return;
 
         shakeTimer += dt * fractureShakeSpeed;
         float intensity = fractureShakeIntensity * fractureSeverity;

@@ -30,7 +30,6 @@ public class GameHUD : MonoBehaviour
     [SerializeField] float batteryBarHeight = 10f;
 
     // 레퍼런스
-    // TODO(TopDownPlayer): PlayerController player;
     Health health;
     PlayerMedicalSystem medical;
     FlashlightController flashlight;
@@ -124,7 +123,6 @@ public class GameHUD : MonoBehaviour
     {
         var go = GameObject.FindGameObjectWithTag("Player");
         if (go == null) return;
-        // TODO(TopDownPlayer): player = go.GetComponent<PlayerController>();
         health = go.GetComponent<Health>();
         medical = go.GetComponent<PlayerMedicalSystem>();
         flashlight = go.GetComponentInChildren<FlashlightController>();

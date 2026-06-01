@@ -18,7 +18,6 @@ public class InteractionSystem : MonoBehaviour
     [SerializeField] Color bgColor = new Color(0, 0, 0, 0.75f);
 
     InteractableObject currentTarget;
-    // TODO(TopDownPlayer): PlayerController player;
     Health playerHealth;
 
     // UI
@@ -28,7 +27,6 @@ public class InteractionSystem : MonoBehaviour
 
     void Awake()
     {
-        // TODO(TopDownPlayer): player = GetComponent<PlayerController>();
         playerHealth = GetComponent<Health>();
     }
 
@@ -59,9 +57,9 @@ public class InteractionSystem : MonoBehaviour
         // 감지는 항상 수행 (UI 표시용)
         UpdateDetection();
 
-        // TODO(TopDownPlayer): 전투/구르기 중엔 입력만 차단
-        // if (player != null && player.CurrentState != PlayerController.CombatState.Idle)
-        //     return;
+        // 전투/구르기 중엔 상호작용 입력 차단 (감지는 위에서 수행됨)
+        if (TopDownPlayer.Instance != null && TopDownPlayer.Instance.CurrentState != TopDownPlayer.CombatState.Idle)
+            return;
 
         // E키 입력
         if (currentTarget != null && Input.GetKeyDown(interactKey))

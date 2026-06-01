@@ -24,7 +24,6 @@ public class DebugTestUI : MonoBehaviour
     // 레퍼런스
     PlayerMedicalSystem medical;
     Health health;
-    // TODO(TopDownPlayer): PlayerController player;
     FlashlightController flashlight;
 
     // 의료 탭 - 치료 선택
@@ -101,7 +100,6 @@ public class DebugTestUI : MonoBehaviour
         {
             medical = playerGO.GetComponent<PlayerMedicalSystem>();
             health = playerGO.GetComponent<Health>();
-            // TODO(TopDownPlayer): player = playerGO.GetComponent<PlayerController>();
             flashlight = playerGO.GetComponentInChildren<FlashlightController>();
         }
     }
@@ -111,7 +109,6 @@ public class DebugTestUI : MonoBehaviour
         // 맵툴 씬에서는 비활성 (맵툴 F1 도움말이 대신 뜬다)
         if (inMapTool) return;
 
-        // TODO(TopDownPlayer): Player 재탐색 (씬 전환 후)
         // if (player == null) FindPlayer();
 
         if (Input.GetKeyDown(toggleKey))
@@ -359,15 +356,23 @@ public class DebugTestUI : MonoBehaviour
 
         GUILayout.Space(10);
         GUILayout.Label("── 상태 ──", headerStyle);
-        // TODO(TopDownPlayer): GUILayout.Label($"전투 상태: {player.CurrentState}", labelStyle);
-        // TODO(TopDownPlayer): GUILayout.Label($"스태미너: {player.StaminaCurrent:F0} / {player.StaminaMax:F0}", labelStyle);
-        // TODO(TopDownPlayer): GUILayout.Label($"전투 활성화: {player.CombatEnabled}", labelStyle);
+        var tdp = TopDownPlayer.Instance;
+        if (tdp != null)
+        {
+            GUILayout.Label($"전투 상태: {tdp.CurrentState}", labelStyle);
+            GUILayout.Label($"스태미너: {tdp.StaminaCurrent:F0} / {tdp.StaminaMax:F0}", labelStyle);
+            GUILayout.Label($"전투 활성화: {tdp.CombatEnabled}", labelStyle);
 
-        GUILayout.Space(5);
-        GUILayout.BeginHorizontal();
-        // TODO(TopDownPlayer): if (GUILayout.Button("전투 ON", btnStyle)) player.CombatEnabled = true;
-        // TODO(TopDownPlayer): if (GUILayout.Button("전투 OFF", btnStyle)) player.CombatEnabled = false;
-        GUILayout.EndHorizontal();
+            GUILayout.Space(5);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("전투 ON", btnStyle)) tdp.CombatEnabled = true;
+            if (GUILayout.Button("전투 OFF", btnStyle)) tdp.CombatEnabled = false;
+            GUILayout.EndHorizontal();
+        }
+        else
+        {
+            GUILayout.Label("TopDownPlayer 없음", labelStyle);
+        }
 
         GUILayout.Space(10);
         GUILayout.Label("── 손전등 / 배터리 ──", headerStyle);
@@ -403,7 +408,6 @@ public class DebugTestUI : MonoBehaviour
 
     void DrawItemTab()
     {
-        // TODO(TopDownPlayer): if (inventory == null && player != null)
         //     inventory = player.GetComponent<PlayerInventory>();
 
         if (inventory == null)
@@ -508,40 +512,39 @@ public class DebugTestUI : MonoBehaviour
         GUILayout.Label("── 월드 드롭 테스트 ──", headerStyle);
         GUILayout.Space(3);
 
-        if (allItems.Length > 0)
+        var p = TopDownPlayer.Instance;
+        if (allItems.Length > 0 && p != null)
         {
-            // TODO(TopDownPlayer): 월드 드롭 테스트 (player 참조 필요)
-            // GUILayout.BeginHorizontal();
-            // if (GUILayout.Button("앞에 아이템 드롭 (랜덤)", btnStyle, GUILayout.Height(25)))
-            // {
-            //     var data = allItems[Random.Range(0, allItems.Length)];
-            //     var item = new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1));
-            //     Vector3 dropPos = player.transform.position + player.transform.forward * 1.5f;
-            //     WorldItem.Drop(item, dropPos);
-            // }
-            // if (GUILayout.Button("주변 5개 드롭", btnStyle, GUILayout.Height(25)))
-            // {
-            //     for (int i = 0; i < 5; i++)
-            //     {
-            //         var data = allItems[Random.Range(0, allItems.Length)];
-            //         var item = new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1));
-            //         Vector3 offset = new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f));
-            //         WorldItem.Drop(item, player.transform.position + offset);
-            //     }
-            // }
-            // GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("앞에 아이템 드롭 (랜덤)", btnStyle, GUILayout.Height(25)))
+            {
+                var data = allItems[Random.Range(0, allItems.Length)];
+                var item = new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1));
+                Vector3 dropPos = p.transform.position + (Vector3)(p.FacingDirection * 1.5f);
+                WorldItem.Drop(item, dropPos);
+            }
+            if (GUILayout.Button("주변 5개 드롭", btnStyle, GUILayout.Height(25)))
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    var data = allItems[Random.Range(0, allItems.Length)];
+                    var item = new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1));
+                    Vector3 offset = new Vector3(Random.Range(-2f, 2f), Random.Range(-2f, 2f), 0);
+                    WorldItem.Drop(item, p.transform.position + offset);
+                }
+            }
+            GUILayout.EndHorizontal();
         }
     }
 
     void DropRegionLoot(RegionLootTier tier)
     {
-        // TODO(TopDownPlayer): if (player == null) return;
+        var p = TopDownPlayer.Instance;
         var items = RegionLootCatalog.RollForActiveRegion(tier);
-        // TODO(TopDownPlayer): Vector3 basePos = player.transform.position + player.transform.forward * 1.5f;
-        Vector3 basePos = Vector3.zero;
+        Vector3 basePos = p != null ? p.transform.position + (Vector3)(p.FacingDirection * 1.5f) : Vector3.zero;
         for (int i = 0; i < items.Length; i++)
         {
-            Vector3 pos = basePos + new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f) + i * 0.2f);
+            Vector3 pos = basePos + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f) + i * 0.2f, 0);
             WorldItem.Drop(items[i], pos);
         }
         Debug.Log($"[Debug] 지역 루트 {tier} → {items.Length}개 드롭");

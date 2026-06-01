@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::Prop2DDefinition
   propId: prop_0001
   displayName: prop_0001
-  sprite: {fileID: 21300000, guid: f31fd78f0ae6c484eac0f2faaae83d67, type: 3}
+  category: 2
+  sprite: {fileID: 21300000, guid: 29a12946902f1314f8874a058631cc2d, type: 3}
   material: {fileID: 2100000, guid: 8f1cf44743a69da4e8f6c70e2fbd2362, type: 2}
   sortingOffset: 0
   colliderMode: 1
