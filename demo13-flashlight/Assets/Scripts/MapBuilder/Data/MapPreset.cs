@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// A snapshot/template of a MapData that can be saved and loaded as a preset.
     /// Used for region templates: e.g. "Village", "Forest", "Desert" presets
     /// that can be applied to any MapData to quickly set up a region.
     /// </summary>
-    [CreateAssetMenu(menuName = "Isometric Map/Map Preset")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Map Preset")]
     public class MapPreset : ScriptableObject
     {
         [Header("Preset Info")]

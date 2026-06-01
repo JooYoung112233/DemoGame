@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// 2D 스프라이트 구조물(벽/컨테이너)이 실제 스포트라이트(플래시라이트) 빛을 막도록,

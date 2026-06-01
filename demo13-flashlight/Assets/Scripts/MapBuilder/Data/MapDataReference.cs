@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// 맵 프리팹에 부착되는 참조 컴포넌트.

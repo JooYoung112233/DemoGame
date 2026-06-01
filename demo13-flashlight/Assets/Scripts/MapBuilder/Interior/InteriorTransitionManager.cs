@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class InteriorTransitionManager : MonoBehaviour
     {

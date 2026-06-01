@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public enum MapObjectType
     {
@@ -152,7 +152,7 @@ namespace IsometricMapEditor
 
         public Vector3 GetWorldPosition(GridSettings settings)
         {
-            return freePlace ? worldPosition : IsometricGrid.GridToWorld(gridPosition, settings);
+            return freePlace ? worldPosition : TopDownGrid.GridToWorld(gridPosition, settings);
         }
 
         /// <summary>이 타입이 InteractableObject로 변환 가능한지</summary>

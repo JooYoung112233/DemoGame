@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class WalkabilityMap : MonoBehaviour
     {
@@ -27,7 +27,7 @@ namespace IsometricMapEditor
 
         public bool IsWalkableWorld(Vector3 worldPos)
         {
-            Vector2Int gridPos = IsometricGrid.WorldToGrid(worldPos, _settings);
+            Vector2Int gridPos = TopDownGrid.WorldToGrid(worldPos, _settings);
             return IsWalkable(gridPos);
         }
 

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class InteriorMapLoader : MonoBehaviour
     {
@@ -32,7 +32,7 @@ namespace IsometricMapEditor
                 {
                     if (tile.tileDefinition == null || tile.tileDefinition.sprite == null) continue;
 
-                    Vector3 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, data.gridSettings);
+                    Vector3 worldPos = TopDownGrid.GridToWorld(tile.gridPosition, data.gridSettings);
                     var go = new GameObject($"Tile_{tile.gridPosition.x}_{tile.gridPosition.y}");
                     go.transform.SetParent(root.transform);
                     go.transform.position = worldPos;
@@ -40,7 +40,7 @@ namespace IsometricMapEditor
 
                     var sr = go.AddComponent<SpriteRenderer>();
                     sr.sprite = tile.tileDefinition.sprite;
-                    sr.sortingOrder = IsometricGrid.GetSortingOrder(tile.gridPosition, layer.sortingLayerOffset);
+                    sr.sortingOrder = TopDownGrid.GetSortingOrder(tile.gridPosition, layer.sortingLayerOffset);
                 }
             }
 

@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// Builds wall cubes on the edges of a tile cell.
@@ -123,7 +123,7 @@ namespace IsometricMapEditor
             }
             else
             {
-                Vector3 cellCenter = IsometricGrid.GridToWorld(tile.gridPosition, settings);
+                Vector3 cellCenter = TopDownGrid.GridToWorld(tile.gridPosition, settings);
 
                 // Offset wall to the edge of the cell based on rotation
                 // 0=North(+Z), 1=East(+X), 2=South(-Z), 3=West(-X)
@@ -210,7 +210,7 @@ namespace IsometricMapEditor
             }
 
             // 벽이 바닥 타일 위에 렌더링되도록 sortingOrder 설정
-            int wallSortOrder = IsometricGrid.GetSortingOrder(tile.gridPosition, IsometricGrid.OBJECT_SORT_BASE);
+            int wallSortOrder = TopDownGrid.GetSortingOrder(tile.gridPosition, TopDownGrid.OBJECT_SORT_BASE);
             renderer.sortingOrder = wallSortOrder;
 
             // 빛 차폐 그림자 프록시 (ShadowProxy)

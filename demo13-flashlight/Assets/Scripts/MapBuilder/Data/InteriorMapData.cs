@@ -1,9 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    [CreateAssetMenu(menuName = "Isometric Map/Interior Map Data")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Interior Map Data")]
     public class InteriorMapData : ScriptableObject
     {
         public string interiorId;

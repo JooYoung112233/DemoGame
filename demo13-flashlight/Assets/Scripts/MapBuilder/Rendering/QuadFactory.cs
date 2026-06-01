@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// Factory for creating 3D Quad meshes (MeshRenderer) from sprites.

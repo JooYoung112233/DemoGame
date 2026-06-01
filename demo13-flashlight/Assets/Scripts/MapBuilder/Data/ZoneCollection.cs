@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// A collection of zones (MapData assets) that make up a world/region.
     /// Use this to organize multiple map zones and switch between them in the editor.
     /// </summary>
-    [CreateAssetMenu(menuName = "Isometric Map/Zone Collection")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Zone Collection")]
     public class ZoneCollection : ScriptableObject
     {
         public string worldName = "New World";

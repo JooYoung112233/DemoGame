@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class HarvestableManager : MonoBehaviour
     {
@@ -39,7 +39,7 @@ namespace IsometricMapEditor
         {
             if (h.harvestableDefinition.sprite == null) return;
 
-            Vector3 worldPos = IsometricGrid.GridToWorld(h.gridPosition, _settings);
+            Vector3 worldPos = TopDownGrid.GridToWorld(h.gridPosition, _settings);
             var go = new GameObject($"Harvestable_{h.instanceId}");
             go.transform.SetParent(_root);
             go.transform.position = worldPos;
@@ -47,7 +47,7 @@ namespace IsometricMapEditor
 
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = h.harvestableDefinition.sprite;
-            sr.sortingOrder = IsometricGrid.GetSortingOrder(h.gridPosition) + h.harvestableDefinition.sortingOffset;
+            sr.sortingOrder = TopDownGrid.GetSortingOrder(h.gridPosition) + h.harvestableDefinition.sortingOffset;
 
             _harvestableObjects[h.instanceId] = go;
             _depletedState[h.instanceId] = false;
@@ -111,8 +111,7 @@ namespace IsometricMapEditor
 
         static void SetupBillboard(GameObject go)
         {
-            // Rotate sprite to face isometric camera (lying on XZ plane tilted toward camera)
-            // 바닥에 깔리는 스프라이트 — 타일과 동일하게 XZ 평면에 눕힘
+            // 바닥에 깔리는 스프라이트 — 타일과 동일하게 XZ 평면에 눕힘 (탑다운)
             go.transform.rotation = Quaternion.Euler(90, 0, 0);
         }
 

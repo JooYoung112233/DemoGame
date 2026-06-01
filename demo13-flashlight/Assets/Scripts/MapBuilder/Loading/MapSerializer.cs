@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public static class MapSerializer
     {

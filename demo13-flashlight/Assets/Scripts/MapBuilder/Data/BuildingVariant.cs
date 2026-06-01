@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     [System.Serializable]
     public class BuildingVariant

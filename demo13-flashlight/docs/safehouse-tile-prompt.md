@@ -1,7 +1,29 @@
 # 안전가옥 타일/펜스/프랍 — 에셋 생성 프롬프트
 
+> **시점 (2026-06-02 확정)**: 2:1 아이소메트릭 → **탑다운 80° baked-in**
+> - 카메라 = **2D 직교(orthographic) 평면 뷰** (3D 틸트 카메라 아님)
+> - **틸트(80°)는 그림 자체에 미리 그려넣음** — 모든 에셋이 80° 눕힌 시점으로 렌더
+> - 맵 = **타일 조립식** (바닥 타일 격자 + 위에 스프라이트 배치)
 > **사용법**: 각 프롬프트 + 컨셉아트 레퍼런스 이미지를 함께 첨부.
-> 바닥은 **정면 정사각형 (top-down)**, 펜스/벽은 **아이소메트릭 방향별** 생성.
+
+---
+
+## 시점 정의 (중요 — 전체 통일)
+
+```
+- 모든 에셋(바닥/벽/펜스/프랍/캐릭터)은 동일한 80° 탑다운 시점으로 그린다.
+- 80° = 거의 위에서 내려다보되 살짝 눕힌 각도.
+  → 오브젝트의 윗면이 주로 보이고, 카메라 쪽(화면 아래=남쪽) 정면이 약간 보임.
+  → 높이/두께는 낮게 압축 (살짝의 입체감만).
+- 바닥도 80°이므로 정사각 타일이 세로(깊이축)로 살짝만 눌린 정사각형으로 보임.
+  (완전 직하 90°가 아님 — 전체 아트 일관성을 위해 80°로 통일)
+- 그리드는 정사각형 (아이소메트릭 다이아몬드 아님).
+- 벽 방향:
+    북벽(N) = 화면 위쪽 가로벽 (윗면 + 바깥쪽이 약간 보임)
+    남벽(S) = 화면 아래쪽 가로벽 (윗면 + 안쪽 정면이 보임, 카메라에 가장 가까움)
+    동벽(E) = 화면 오른쪽 세로벽 (윗면 + 왼쪽 안쪽면 약간)
+    서벽(W) = 화면 왼쪽 세로벽 (윗면 + 오른쪽 안쪽면 약간)
+```
 
 ---
 
@@ -14,7 +36,7 @@ STRICT STYLE LOCK — match the attached reference image EXACTLY.
 Same art style, same color palette, same outline thickness,
 same level of detail. Do NOT deviate from the reference style.
 
-Art style: crisp readable pixel art.
+Art style: crisp readable pixel art for a top-down game.
 Bold 1-2px dark outlines on all structural edges.
 Flat cel-shaded surfaces with only 3-4 color steps per material.
 NOT photorealistic, NOT painterly, NOT hyper-detailed.
@@ -25,48 +47,47 @@ Transparent background (PNG).
 
 ---
 
-## 1. 바닥 타일 (Floor Tiles) — 정면 정사각형
+## 1. 바닥 타일 (Floor Tiles) — 80° 탑다운 (전체 통일)
 
-> 바닥은 Unity 3D 평면에 텍스처로 깔리므로 **top-down 정사각형** 으로 생성.
-> 게임 내에서 아이소메트릭 카메라가 알아서 다이아몬드로 보이게 함.
+> 바닥도 80° 틸트로 그림 (전체 일관성). 2D 직교 카메라에 타일로 깔림.
+> 정사각 타일이 세로축으로 살짝만 눌린 정사각형. 서로 이음새 없이 반복.
 
 ### 프롬프트 1-1: 균열 아스팔트 타일 세트
 
 ```
 [공통 스타일 블록]
 
-Top-down view, perfectly square tile, viewed from DIRECTLY ABOVE.
-NO perspective, NO isometric angle — pure orthographic top-down.
+Top-down 80° view ground tile — viewed from high above with a slight
+forward tilt (NOT a flat 90° straight-down, NOT isometric).
+The tile is a square seen at 80°, so it reads as a square only slightly
+compressed along the vertical (depth) axis. Almost flat, faint top-down tilt.
 
 Generate a TILE SHEET of 4 seamless ground tile variations,
 arranged in a 2x2 grid. Each tile is 256x256 pixels.
 Total output: 512x512 pixels.
 
-All 4 tiles must tile seamlessly with each other in any combination.
+All 4 tiles must tile seamlessly with each other in any combination
+(edges wrap so they can repeat infinitely).
 
 TILE 1 (top-left): Cracked asphalt — basic.
 Gray-brown asphalt with subtle cracks and wear.
 Faded white parking line fragment crossing one corner.
 
 TILE 2 (top-right): Cracked asphalt — heavy damage.
-Larger cracks, chunks missing, darker stains.
-Bits of gravel visible in cracks.
+Larger cracks, chunks missing, darker stains, gravel in cracks.
 
 TILE 3 (bottom-left): Asphalt with weeds.
-Same asphalt base but small green weeds/grass
-growing through cracks. 2-3 small tufts.
+Same asphalt base but small green weeds growing through cracks.
+2-3 small tufts.
 
 TILE 4 (bottom-right): Asphalt with puddle.
-Shallow water puddle on cracked asphalt surface.
-Puddle is roughly circular, subtle blue-gray reflection.
+Shallow water puddle on cracked asphalt, roughly circular,
+subtle blue-gray reflection.
 
 Palette: dark gray asphalt base, lighter gray crack lines,
-faded white/yellow for old road markings,
-muted green for weeds, blue-gray for puddle.
+faded white/yellow road markings, muted green weeds, blue-gray puddle.
 
-These tiles will be placed on a 3D ground plane in Unity.
-The isometric camera will handle the perspective — 
-draw them FLAT, top-down only.
+The 80° tilt is baked into the art (2D orthographic camera, no 3D tilt).
 ```
 
 ### 프롬프트 1-2: 흙바닥 / 특수 타일 세트
@@ -74,243 +95,186 @@ draw them FLAT, top-down only.
 ```
 [공통 스타일 블록]
 
-Top-down view, perfectly square tiles, viewed from DIRECTLY ABOVE.
-NO perspective — pure orthographic top-down.
+Top-down 80° view ground tiles — high above with a slight forward tilt
+(NOT flat 90°, NOT isometric). Squares slightly compressed along depth axis.
 
-Generate a TILE SHEET of 4 seamless ground tile variations,
-arranged in a 2x2 grid. Each tile is 256x256 pixels.
-Total output: 512x512 pixels.
+Generate a TILE SHEET of 4 seamless ground tiles in a 2x2 grid.
+Each tile 256x256 pixels. Total 512x512 pixels.
 
 TILE 1 (top-left): Packed dirt ground.
-Brown packed earth, dry and flat. Small pebbles scattered.
-Subtle footprint impressions.
+Brown packed earth, dry and flat, small pebbles, subtle footprints.
 
 TILE 2 (top-right): Dirt-to-asphalt transition.
-Left half is packed dirt, right half is cracked asphalt.
-Rough irregular edge where asphalt has broken away.
+Left half packed dirt, right half cracked asphalt,
+rough irregular broken edge between them.
 
 TILE 3 (bottom-left): Rubber floor mat.
-Dark gray industrial rubber mat with diamond plate texture.
-Slightly worn. Used behind pawnshop counter.
+Dark gray industrial rubber mat, diamond-plate texture, worn.
 
 TILE 4 (bottom-right): Road asphalt (exterior).
-Darker, smoother asphalt than interior tiles.
-Yellow center line marking. For outside the fence.
+Darker smoother asphalt, yellow center line. For outside the fence.
 
-Palette: warm brown earth, gray-brown asphalt,
-dark gray rubber, yellow road marking.
+Palette: warm brown earth, gray-brown asphalt, dark gray rubber,
+yellow road marking.
+The 80° tilt is baked into the art (2D orthographic camera).
 ```
 
 ---
 
-## 2. 펜스 (Fence) — 아이소메트릭 4방향
+## 2. 펜스 (Chain-link Fence) — 탑다운 80°, 동서남북 4방향
 
-> Unity 3D에서 Quad/Sprite로 배치. 아이소메트릭 카메라 기준 
-> **좌벽(NW-SE)** 과 **우벽(NE-SW)** 2가지 각도가 핵심.
-> 뒷면(S, W)은 앞면 좌우반전으로 대체 가능.
+> Unity에서 격자 모서리에 Sprite로 배치. 약간 기울인 탑다운이라 
+> 펜스의 윗면(가시철사 코일)이 주로 보이고 한쪽 면이 살짝 보임.
 
-### 프롬프트 2-1: 체인링크 펜스 — 좌벽 (NW→SE 방향)
+### 프롬프트 2-1: 체인링크 펜스 4방향 직선 세트
 
 ```
 [공통 스타일 블록]
 
-Isometric pixel art fence segment.
-2:1 isometric projection (26.57° from horizontal).
+Top-down 80° view chain-link fence segments for a top-down game.
+Slight downward tilt — you see mostly the TOP of the fence
+(barbed wire coil running along it) and a thin sliver of one face.
+NOT isometric, NOT side-view — near top-down.
 
-This fence runs along the NW-SE axis (going from upper-left 
-to lower-right in screen space). It is viewed from the 
-standard isometric camera facing the front-left corner.
+Generate 4 fence direction variants in a 2x2 grid.
+Each segment is 3 tiles long. Each cell 384x192 pixels.
+Total output: 768x384 pixels.
 
-The fence is 3 TILES LONG (one seamless segment).
-Output size: 512x384 pixels.
+The fence: rusted chain-link mesh on metal poles (one pole per tile),
+barbed wire coil along the top edge, gray-silver mesh with rust spots.
+Keep height LOW/compressed (this is near top-down).
 
-Fence structure:
-- Chain-link mesh on vertical metal poles (one pole per tile)
-- Poles are rusted steel tubes, slightly leaning
-- Barbed wire coil running along the top
-- Mesh is gray-silver with rust spots
-- Bottom of fence touches ground level (include ~16px of ground shadow)
+TILE-CELL LAYOUT:
+TOP-LEFT — NORTH wall (horizontal, runs left-right across screen).
+  This wall is at the TOP/far side. You see its top + a sliver of
+  the OUTER face. Barbed wire coil along the top.
 
-The fence faces the CAMERA (you can see through the mesh).
-Behind the fence: leave transparent — assets will be layered in Unity.
+TOP-RIGHT — SOUTH wall (horizontal, runs left-right).
+  This wall is at the BOTTOM/near side (closest to camera).
+  You see its top + a sliver of the INNER face. Mesh more visible.
 
-Height: roughly 1.5x a character tile height (~100px from ground to barbed wire top in isometric).
+BOTTOM-LEFT — WEST wall (vertical, runs up-down on the left).
+  You see its top + a sliver of the right (inner) face.
 
-Seamless edges: left and right edges of the segment must tile 
-perfectly when placed next to another copy of this fence.
+BOTTOM-RIGHT — EAST wall (vertical, runs up-down on the right).
+  You see its top + a sliver of the left (inner) face.
 
+Each segment must tile seamlessly end-to-end with copies of itself.
+Through the mesh: transparent (city layered separately in Unity).
 Transparent background (PNG).
 ```
 
-### 프롬프트 2-2: 체인링크 펜스 — 우벽 (NE→SW 방향)
+### 프롬프트 2-2: 펜스 코너 4종
 
 ```
 [공통 스타일 블록]
 
-Isometric pixel art fence segment.
-2:1 isometric projection (26.57° from horizontal).
+Top-down 80° view chain-link fence CORNER pieces.
+Same near-top-down tilt and materials as the straight segments.
 
-This fence runs along the NE-SW axis (going from upper-right 
-to lower-left in screen space). It is viewed from the 
-standard isometric camera facing the front-left corner.
+Generate 4 corners in a 2x2 grid. Each cell 192x192 pixels.
+Total output: 384x384 pixels.
 
-The fence is 3 TILES LONG (one seamless segment).
-Output size: 512x384 pixels.
+All corners are 90° turns of chain-link fence with barbed wire on top,
+rusted poles with one reinforced corner pole (diagonal brace).
 
-Fence structure:
-- Chain-link mesh on vertical metal poles (one pole per tile)
-- Poles are rusted steel tubes
-- Barbed wire coil along the top
-- Gray-silver mesh with rust spots
-- Ground shadow at base (~16px)
+TOP-LEFT — NW corner: connects NORTH wall to WEST wall (top-left of compound).
+TOP-RIGHT — NE corner: connects NORTH wall to EAST wall (top-right).
+BOTTOM-LEFT — SW corner: connects SOUTH wall to WEST wall (bottom-left).
+BOTTOM-RIGHT — SE corner: connects SOUTH wall to EAST wall (bottom-right,
+  nearest camera).
 
-This wall recedes away from camera — you see it at an angle.
-The mesh pattern appears more compressed/foreshortened 
-compared to the NW-SE version.
-
-Seamless tiling on left and right edges.
+Each corner aligns seamlessly with the matching straight segments.
 Transparent background (PNG).
 ```
 
-### 프롬프트 2-3: 펜스 코너 (4종)
+### 프롬프트 2-3: 펜스 패치 변형 3종 (가로벽 기준)
 
 ```
 [공통 스타일 블록]
 
-Isometric pixel art fence CORNER pieces.
-2:1 isometric projection (26.57° from horizontal).
+Top-down 80° view PATCHED chain-link fence segments.
+Horizontal orientation (south/north wall, runs left-right).
+Same tilt and base as plain fence.
 
-Generate 4 corner pieces arranged in a 2x2 grid.
-Each corner piece: 256x256 pixels.
-Total output: 512x512 pixels.
-
-All corners are 90° turns of chain-link fence with barbed wire.
-Same materials as straight segments: rusted poles, chain-link mesh, 
-barbed wire on top.
-
-TOP-LEFT: Corner turning from NW-SE wall → NE-SW wall (back-left corner).
-Camera sees the outside of both fence faces.
-
-TOP-RIGHT: Corner turning from NE-SW wall → NW-SE wall (back-right corner).
-Camera sees one face head-on, other receding.
-
-BOTTOM-LEFT: Corner turning from NW-SE wall → NE-SW wall (front-left corner).
-Camera sees the inside of both fence faces.
-
-BOTTOM-RIGHT: Corner turning from NE-SW wall → NW-SE wall (front-right corner).
-This is the corner nearest the camera.
-
-Each corner has ONE reinforced corner pole (thicker, with diagonal brace).
-Transparent background (PNG).
-```
-
-### 프롬프트 2-4: 펜스 변형 — 패치 세그먼트 (좌벽 NW-SE)
-
-```
-[공통 스타일 블록]
-
-Isometric pixel art PATCHED fence segments (NW-SE direction).
-2:1 isometric projection (26.57° from horizontal).
-
-Generate 3 patched fence variations in a 1x3 vertical strip.
-Each segment: 512x384 pixels (3 tiles long).
-Total output: 512x1152 pixels.
-
-These are chain-link fence segments where parts have been 
-covered or patched by survivors:
+Generate 3 patched variations in a 1x3 vertical strip.
+Each segment 3 tiles long, 384x192 pixels.
+Total output: 384x576 pixels.
 
 VARIATION 1 (top): Corrugated metal patch.
-Rusted corrugated metal sheet bolted/wired over the lower 2/3 
-of the chain-link. Barbed wire still visible on top.
-Orange-brown rust color.
+Rusted corrugated metal sheet wired over lower part of the chain-link.
+Barbed wire still on top. Orange-brown rust.
 
 VARIATION 2 (middle): Blue tarp patch.
-Blue plastic tarp/tarpaulin stretched over the fence, 
-tied with rope at corners. Wrinkled, weathered.
-Some chain-link visible above and below tarp.
+Blue plastic tarp stretched over the fence, tied with rope,
+wrinkled and weathered. Chain-link visible above/below.
 
 VARIATION 3 (bottom): Plywood patch.
-Raw plywood boards nailed over the fence section.
-Some boards cracked or water-stained. 
-Nails and wire visible. Light wood brown color.
+Plywood boards nailed over the section, some cracked/water-stained,
+nails and wire visible. Light wood brown.
 
-All three must tile seamlessly with the plain chain-link 
-fence segment (prompt 2-1) on both ends.
+All tile seamlessly with the plain horizontal fence (2-1).
 Transparent background (PNG).
 ```
 
-### 프롬프트 2-5: 메인 게이트 (3타일 폭)
+### 프롬프트 2-4: 메인 게이트 (3타일 폭, 남벽)
 
 ```
 [공통 스타일 블록]
 
-Isometric pixel art main gate for a safehouse compound.
-2:1 isometric projection (26.57° from horizontal).
+Top-down 80° view main gate for a safehouse compound.
+The gate is on the SOUTH wall (bottom of screen, nearest camera),
+horizontal orientation. Same near-top-down tilt.
 
-The gate faces the CAMERA (front fence, NW-SE direction).
-Output size: 768x512 pixels.
+Output size: 576x256 pixels. 3 tiles wide.
 
-Gate structure (3 tiles wide):
+Gate structure:
 - Double-door chain-link gate, each door ~1.5 tiles wide
-- Heavy steel frame (thicker than fence poles)
-- Chain-link mesh on both doors
-- Barbed wire coil on top frame rail
-- A thick CHAIN and PADLOCK holding the two doors together 
-  at center seam (important visual detail — shiny lock)
-- Gate can swing open outward (toward camera)
+- Heavy steel frame (thicker poles than fence), concrete bases
+- Chain-link mesh on both doors, barbed wire coil on top rail
+- A thick CHAIN and shiny PADLOCK at the center seam where the two
+  doors meet (key visual detail)
+- Doors closed in this sprite
 
-FLANKING ELEMENTS:
-- Left side: connects to regular fence or plywood patch
-- Right side: connects to regular fence
-- Gate frame poles are beefier than regular fence poles
-  (concrete base visible at ground level)
+Connects to regular fence / patch on both ends.
+Show a thin strip of cracked asphalt under the gate
+with a faded "STOP" marking barely visible.
 
-GROUND: cracked asphalt directly under and in front of gate.
-Faded "STOP" text or road marking barely visible on asphalt.
-
-Beyond the gate (visible through mesh):
-Dark road leading away, slight fog. Keep it minimal — 
-just enough to suggest "outside is dangerous."
-
+Through the mesh: transparent.
 Transparent background (PNG).
 ```
 
 ---
 
-## 3. 펜스 기둥 / 연결 부품
+## 3. 펜스 기둥 / 전봇대
 
-### 프롬프트 3-1: 펜스 기둥 세트
+### 프롬프트 3-1: 기둥 세트 4종
 
 ```
 [공통 스타일 블록]
 
-Isometric pixel art fence POLES / posts.
-2:1 isometric projection (26.57° from horizontal).
+Top-down 80° view fence POLES / posts for a top-down game.
+Near top-down tilt — you see the top of each pole and a short
+compressed shaft (not a tall side-view pole).
 
-Generate a SPRITE SHEET of 4 pole types in a 2x2 grid.
-Each pole: 128x256 pixels.
-Total output: 256x512 pixels.
+Generate 4 pole types in a 2x2 grid. Each cell 128x192 pixels.
+Total output: 256x384 pixels.
 
 POLE 1 (top-left): Standard fence pole.
-Rusted steel tube, ~2m tall. Simple top cap.
-Bolted to cracked concrete base block.
+Rusted steel tube with top cap, cracked concrete base block.
 
 POLE 2 (top-right): Corner reinforced pole.
-Thicker pole with diagonal brace strut welded on.
-Heavier concrete base. Used at fence corners.
+Thicker, with diagonal brace strut, heavier concrete base.
 
 POLE 3 (bottom-left): Gate frame pole.
-Heaviest pole. Square steel profile instead of round.
-Concrete base is larger. Hinge hardware on one side.
-Used at gate frame.
+Heaviest, square steel profile, large concrete base, hinge hardware.
 
 POLE 4 (bottom-right): Utility pole with light.
-Wooden utility pole (taller than fence).
-One working light fixture on top (cold white glow).
-Tangled wires. This goes INSIDE the compound near center.
+Taller wooden utility pole, one working light on top
+(cold white glow pool on ground beneath it), tangled wires.
+Goes inside the compound near center.
 
-All poles are standalone sprites — no fence mesh attached.
-They will be overlaid on fence segments in Unity.
+Standalone sprites — no mesh attached, overlaid on fence in Unity.
 Transparent background (PNG).
 ```
 
@@ -323,30 +287,21 @@ Transparent background (PNG).
 ```
 [공통 스타일 블록]
 
-Isometric pixel art bulletin boards for a safehouse compound.
-2:1 isometric projection (26.57° from horizontal).
+Top-down 80° view bulletin boards for a safehouse compound.
+Near top-down tilt — slight angle showing the board face.
 
-Generate 2 boards side by side.
-Output size: 512x384 pixels.
+Generate 2 boards side by side. Output 512x320 pixels.
 
-LEFT — Notice bulletin board (1x1 tile footprint):
-- Weathered wooden frame on two posts stuck in ground
-- Cork/plywood backing
-- Several pinned papers/notices (colored rectangles — 
-  cream, white, yellow — NO readable text)
-- A rough hand-drawn map sketch pinned at center
-- Some papers curling at edges, one pin missing
-- Push pins and tape visible
+LEFT — Notice bulletin board (1 tile footprint):
+Weathered wooden frame on two posts, cork backing,
+several pinned papers (cream/white/yellow rectangles, NO text),
+a rough hand-drawn map sketch pinned at center, curling edges, push pins.
 
-RIGHT — Map board (1x1 tile footprint):
-- Larger standing frame (like a display easel)
-- A detailed-looking MAP inside (bird's eye city layout sketch)
-- Compass rose / directional marker in corner of map
-- Red circle or pin marking on the map (target location)
-- Frame is welded scrap metal, functional not pretty
+RIGHT — Map board (1 tile footprint):
+Larger easel-style frame (welded scrap metal), a detailed city map inside,
+compass rose in a corner, a red circle/pin marking a target.
 
-Both are freestanding objects, not attached to any wall.
-They sit on cracked asphalt ground.
+Both freestanding on cracked asphalt.
 Transparent background (PNG).
 ```
 
@@ -354,14 +309,13 @@ Transparent background (PNG).
 
 ## 생성 순서 체크리스트
 
-1. [ ] **1-1** 균열 아스팔트 타일 세트 (4종)
-2. [ ] **1-2** 흙바닥/특수 타일 세트 (4종)
-3. [ ] **2-1** 체인링크 펜스 좌벽 NW-SE
-4. [ ] **2-2** 체인링크 펜스 우벽 NE-SW
-5. [ ] **2-3** 펜스 코너 4종
-6. [ ] **2-4** 펜스 패치 변형 3종
-7. [ ] **2-5** 메인 게이트
-8. [ ] **3-1** 펜스 기둥 세트 4종
-9. [ ] **4-1** 게시판 + 지도판
+1. [ ] **1-1** 균열 아스팔트 타일 세트 (4종) — 80° 탑다운
+2. [ ] **1-2** 흙바닥/특수 타일 세트 (4종) — 80° 탑다운
+3. [ ] **2-1** 펜스 4방향 직선 (N/S/E/W) — 80° 탑다운
+4. [ ] **2-2** 펜스 코너 4종 (NW/NE/SW/SE)
+5. [ ] **2-3** 펜스 패치 변형 3종
+6. [ ] **2-4** 메인 게이트 (남벽)
+7. [ ] **3-1** 펜스 기둥 세트 4종
+8. [ ] **4-1** 게시판 + 지도판
 
-> 바닥(1) → 펜스 직선(2-1,2-2) → 코너(2-3) → 게이트(2-5) → 패치(2-4) → 기둥(3-1) → 프랍(4-1)
+> 바닥(1) → 펜스 직선(2-1) → 코너(2-2) → 게이트(2-4) → 패치(2-3) → 기둥(3-1) → 프랍(4-1)

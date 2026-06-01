@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class MapChunkLoader : MonoBehaviour
     {
@@ -23,7 +23,7 @@ namespace IsometricMapEditor
         {
             if (mapData == null) return;
 
-            Vector2Int playerGrid = IsometricGrid.WorldToGrid(playerWorldPos, mapData.gridSettings);
+            Vector2Int playerGrid = TopDownGrid.WorldToGrid(playerWorldPos, mapData.gridSettings);
             Vector2Int currentChunk = new(playerGrid.x / chunkSize, playerGrid.y / chunkSize);
 
             if (currentChunk == _lastChunk) return;

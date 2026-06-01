@@ -1,19 +1,19 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class CameraTransitionHandler : MonoBehaviour
     {
         public float transitionDuration = 0.5f;
 
-        IsometricCameraController cameraController;
+        TopDownCameraController cameraController;
         bool _isTransitioning;
         Vector3 _targetPosition;
         Bounds _targetBounds;
         float _transitionElapsed;
         Vector3 _startPosition;
 
-        public void Initialize(IsometricCameraController camera)
+        public void Initialize(TopDownCameraController camera)
         {
             cameraController = camera;
         }
@@ -22,7 +22,7 @@ namespace IsometricMapEditor
         {
             if (cameraController == null) return;
 
-            Bounds bounds = IsometricGrid.GetMapWorldBounds(interior.gridSettings);
+            Bounds bounds = TopDownGrid.GetMapWorldBounds(interior.gridSettings);
             Vector3 center = bounds.center;
             // Offset camera along its backward direction to look at center from above
             center = center - cameraController.transform.forward * 20f;
@@ -38,7 +38,7 @@ namespace IsometricMapEditor
         {
             if (cameraController == null) return;
 
-            Bounds bounds = IsometricGrid.GetMapWorldBounds(exteriorSettings);
+            Bounds bounds = TopDownGrid.GetMapWorldBounds(exteriorSettings);
             cameraController.SetBounds(bounds);
         }
 

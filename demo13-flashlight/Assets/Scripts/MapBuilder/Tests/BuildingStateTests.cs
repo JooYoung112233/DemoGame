@@ -1,9 +1,9 @@
 using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
-using IsometricMapEditor;
+using TopDownMapEditor;
 
-namespace IsometricMapEditor.Tests
+namespace TopDownMapEditor.Tests
 {
     public class BuildingStateTests
     {

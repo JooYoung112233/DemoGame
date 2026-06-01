@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class TileRenderer : MonoBehaviour
     {
@@ -55,24 +55,24 @@ namespace IsometricMapEditor
 
         static void SetupBillboard(GameObject go)
         {
-            // Rotate sprite to face isometric camera (lying on XZ plane tilted toward camera)
+            // 바닥에 깔리는 스프라이트 — XZ 평면에 눕혀 윗면을 보여줌 (탑다운)
             go.transform.rotation = Quaternion.Euler(90, 0, 0);
         }
 
         void RenderTile(PlacedTile tile, MapLayer layer, GridSettings settings)
         {
             var go = GetOrCreateTileObject(tile.gridPosition, tile.level);
-            Vector3 worldPos = IsometricGrid.GridToWorld(tile.gridPosition, settings);
+            Vector3 worldPos = TopDownGrid.GridToWorld(tile.gridPosition, settings);
             // 바닥 타일 Y = 해당 층 바닥 높이 (0층=0). 벽 밑동도 같은 높이라 바닥에 딱 맞음.
             worldPos.y = tile.level * settings.levelHeight;
             go.transform.position = worldPos;
             SetupBillboard(go);
-            go.transform.localScale = IsometricGrid.GetTileScale(tile.tileDefinition.sprite, settings);
+            go.transform.localScale = TopDownGrid.GetTileScale(tile.tileDefinition.sprite, settings);
 
             var sr = go.GetComponent<SpriteRenderer>();
             sr.sprite = tile.tileDefinition.sprite;
             sr.flipX = tile.flipX;
-            sr.sortingOrder = IsometricGrid.GetSortingOrder(tile.gridPosition, layer.sortingLayerOffset)
+            sr.sortingOrder = TopDownGrid.GetSortingOrder(tile.gridPosition, layer.sortingLayerOffset)
                               + tile.tileDefinition.sortingOffset;
 
             // Apply material (per-instance override > definition default)

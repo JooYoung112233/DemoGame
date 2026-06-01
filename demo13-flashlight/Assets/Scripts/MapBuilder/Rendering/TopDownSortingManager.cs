@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    public class IsometricSortingManager : MonoBehaviour
+    public class TopDownSortingManager : MonoBehaviour
     {
         public void AssignSortingOrders(MapData mapData)
         {
@@ -19,7 +19,7 @@ namespace IsometricMapEditor
                     var sr = tileGO.GetComponent<SpriteRenderer>();
                     if (sr != null)
                     {
-                        sr.sortingOrder = IsometricGrid.GetSortingOrder(
+                        sr.sortingOrder = TopDownGrid.GetSortingOrder(
                             tile.gridPosition,
                             layer.sortingLayerOffset
                         ) + tile.tileDefinition.sortingOffset;

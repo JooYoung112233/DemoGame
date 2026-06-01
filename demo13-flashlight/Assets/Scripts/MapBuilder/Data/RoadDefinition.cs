@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    [CreateAssetMenu(menuName = "Isometric Map/Road Definition")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Road Definition")]
     public class RoadDefinition : ScriptableObject
     {
         public string roadId;

@@ -1,9 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    [CreateAssetMenu(menuName = "Isometric Map/Building Definition")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Building Definition")]
     public class BuildingDefinition : ScriptableObject
     {
         public string buildingId;
@@ -48,7 +48,7 @@ namespace IsometricMapEditor
         {
             int frontX = origin.x + footprint.x - 1;
             int frontY = origin.y + footprint.y - 1;
-            return IsometricGrid.GetSortingOrder(new Vector2Int(frontX, frontY));
+            return TopDownGrid.GetSortingOrder(new Vector2Int(frontX, frontY));
         }
     }
 }

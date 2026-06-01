@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class SpawnConditionEvaluator
     {

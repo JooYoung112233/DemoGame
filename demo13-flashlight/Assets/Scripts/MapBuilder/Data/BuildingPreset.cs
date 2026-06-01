@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// A preset/template for BuildingWorkshopData.
     /// Save a building design and load it into any workshop data.
     /// </summary>
-    [CreateAssetMenu(menuName = "Isometric Map/Building Preset")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Building Preset")]
     public class BuildingPreset : ScriptableObject
     {
         [Header("Preset Info")]

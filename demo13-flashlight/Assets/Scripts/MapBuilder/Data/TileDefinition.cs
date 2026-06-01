@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    [CreateAssetMenu(menuName = "Isometric Map/Tile Definition")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Tile Definition")]
     public class TileDefinition : ScriptableObject
     {
         public string tileId;

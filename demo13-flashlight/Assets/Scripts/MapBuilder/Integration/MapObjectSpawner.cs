@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// MapData의 PlacedMapObject를 런타임 GameObject로 변환.
@@ -62,8 +62,9 @@ namespace IsometricMapEditor
             var go = new GameObject($"MapObj_{obj.objectType}_{obj.instanceId}");
             go.transform.SetParent(parent);
             go.transform.position = worldPos;
-            // Y회전을 기본 아이소메트릭 Root 회전에 곱함
-            go.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
+            // 맵 오브젝트(스폰포인트/문/트리거/이펙트 등)는 로직 마커라 똑바로 세운다(yaw만).
+            // (탑다운 전환 전엔 아이소 빌보드 Euler(35.264,45,0)였음.)
+            go.transform.rotation = Quaternion.identity;
             if (Mathf.Abs(obj.yRotation) > 0.01f)
                 go.transform.rotation = Quaternion.Euler(0, obj.yRotation, 0) * go.transform.rotation;
 

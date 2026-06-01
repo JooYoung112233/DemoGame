@@ -81,7 +81,7 @@ public class DebugTestUI : MonoBehaviour
 
     void RefreshMapToolState()
     {
-        inMapTool = FindFirstObjectByType<IsometricMapEditor.MapBuilderManager>() != null;
+        inMapTool = FindFirstObjectByType<TopDownMapEditor.MapBuilderManager>() != null;
         if (inMapTool) isOpen = false;
     }
 

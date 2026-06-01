@@ -1,9 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    [CreateAssetMenu(menuName = "Isometric Map/Harvestable Definition")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Harvestable Definition")]
     public class HarvestableDefinition : ScriptableObject
     {
         public string harvestableId;

@@ -1,4 +1,4 @@
-Shader "InkCity/PlayerSprite"
+Shader "BRB/PlayerSprite"
 {
     Properties
     {

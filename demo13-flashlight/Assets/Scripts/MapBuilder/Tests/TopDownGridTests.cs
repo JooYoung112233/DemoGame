@@ -1,10 +1,10 @@
 using NUnit.Framework;
 using UnityEngine;
-using IsometricMapEditor;
+using TopDownMapEditor;
 
-namespace IsometricMapEditor.Tests
+namespace TopDownMapEditor.Tests
 {
-    public class IsometricGridTests
+    public class TopDownGridTests
     {
         GridSettings DefaultSettings() => new(1f, 64, 64);
 
@@ -12,7 +12,7 @@ namespace IsometricMapEditor.Tests
         public void GridToWorld_Origin_ReturnsZero()
         {
             var settings = DefaultSettings();
-            Vector3 world = IsometricGrid.GridToWorld(Vector2Int.zero, settings);
+            Vector3 world = TopDownGrid.GridToWorld(Vector2Int.zero, settings);
             Assert.AreEqual(0f, world.x, 0.001f);
             Assert.AreEqual(0f, world.z, 0.001f);
         }
@@ -26,8 +26,8 @@ namespace IsometricMapEditor.Tests
                 for (int y = 0; y < 10; y++)
                 {
                     var original = new Vector2Int(x, y);
-                    Vector3 world = IsometricGrid.GridToWorld(original, settings);
-                    Vector2Int result = IsometricGrid.WorldToGrid(world, settings);
+                    Vector3 world = TopDownGrid.GridToWorld(original, settings);
+                    Vector2Int result = TopDownGrid.WorldToGrid(world, settings);
                     Assert.AreEqual(original, result, $"Round-trip failed for ({x},{y})");
                 }
             }
@@ -44,8 +44,8 @@ namespace IsometricMapEditor.Tests
                 for (int y = 0; y < 10; y++)
                 {
                     var original = new Vector2Int(x, y);
-                    Vector3 world = IsometricGrid.GridToWorld(original, settings);
-                    Vector2Int result = IsometricGrid.WorldToGrid(world, settings);
+                    Vector3 world = TopDownGrid.GridToWorld(original, settings);
+                    Vector2Int result = TopDownGrid.WorldToGrid(world, settings);
                     Assert.AreEqual(original, result, $"Round-trip with offset failed for ({x},{y})");
                 }
             }
@@ -60,8 +60,8 @@ namespace IsometricMapEditor.Tests
                 for (int y = 0; y < 10; y++)
                 {
                     var original = new Vector2Int(x, y);
-                    Vector3 world = IsometricGrid.GridToWorld(original, settings);
-                    Vector2Int result = IsometricGrid.WorldToGrid(world, settings);
+                    Vector3 world = TopDownGrid.GridToWorld(original, settings);
+                    Vector2Int result = TopDownGrid.WorldToGrid(world, settings);
                     Assert.AreEqual(original, result, $"Custom tile size round-trip failed for ({x},{y})");
                 }
             }
@@ -70,24 +70,24 @@ namespace IsometricMapEditor.Tests
         [Test]
         public void SortingOrder_BackToFront()
         {
-            int behindOrder = IsometricGrid.GetSortingOrder(new Vector2Int(0, 0));
-            int frontOrder = IsometricGrid.GetSortingOrder(new Vector2Int(5, 5));
+            int behindOrder = TopDownGrid.GetSortingOrder(new Vector2Int(0, 0));
+            int frontOrder = TopDownGrid.GetSortingOrder(new Vector2Int(5, 5));
             Assert.Greater(frontOrder, behindOrder);
         }
 
         [Test]
         public void SortingOrder_LayerOffset()
         {
-            int ground = IsometricGrid.GetSortingOrder(new Vector2Int(3, 3), 0);
-            int objects = IsometricGrid.GetSortingOrder(new Vector2Int(3, 3), 5);
+            int ground = TopDownGrid.GetSortingOrder(new Vector2Int(3, 3), 0);
+            int objects = TopDownGrid.GetSortingOrder(new Vector2Int(3, 3), 5);
             Assert.Greater(objects, ground);
         }
 
         [Test]
         public void SortingOrder_SameDiagonal_SameOrder()
         {
-            int a = IsometricGrid.GetSortingOrder(new Vector2Int(2, 3));
-            int b = IsometricGrid.GetSortingOrder(new Vector2Int(3, 2));
+            int a = TopDownGrid.GetSortingOrder(new Vector2Int(2, 3));
+            int b = TopDownGrid.GetSortingOrder(new Vector2Int(3, 2));
             Assert.AreEqual(a, b);
         }
 
@@ -114,7 +114,7 @@ namespace IsometricMapEditor.Tests
         public void GetCellWorldCorners_ReturnsFourCorners()
         {
             var settings = DefaultSettings();
-            Vector3[] corners = IsometricGrid.GetCellWorldCorners(new Vector2Int(5, 5), settings);
+            Vector3[] corners = TopDownGrid.GetCellWorldCorners(new Vector2Int(5, 5), settings);
             Assert.AreEqual(4, corners.Length);
         }
 
@@ -122,7 +122,7 @@ namespace IsometricMapEditor.Tests
         public void GetMapWorldBounds_NonZeroArea()
         {
             var settings = DefaultSettings();
-            Bounds bounds = IsometricGrid.GetMapWorldBounds(settings);
+            Bounds bounds = TopDownGrid.GetMapWorldBounds(settings);
             Assert.Greater(bounds.size.x, 0);
             Assert.Greater(bounds.size.z, 0);
         }

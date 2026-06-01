@@ -1,4 +1,4 @@
-Shader "Custom/OcclusionOutline"
+Shader "BRB/OcclusionOutline"
 {
     Properties
     {

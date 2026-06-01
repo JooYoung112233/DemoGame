@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// 스프라이트 기반 프롭을 런타임에 빌보드 쿼드로 생성한다. 프리팹 불필요.
@@ -22,12 +22,11 @@ namespace IsometricMapEditor
     public static class PropQuadBuilder
     {
         /// <summary>
-        /// 프롭 스프라이트의 고정 루트 회전 = 트루 아이소 카메라와 동일한 Euler(35.264, 45, 0).
-        /// 쿼드 노멀이 카메라 시선과 정렬돼 스프라이트가 카메라 정면으로 평평하게 보인다
-        /// (다른 맵 오브젝트 root와 동일 규약). 카메라를 따라 돌지 않는 **고정** 각도.
-        /// (이전: Y축 수평 빌보드 → 2026-05-30 사용자 결정으로 고정 아이소 각도로 변경.)
+        /// 프롭 스프라이트의 고정 루트 회전 = 바닥에 눕히는 top-down 회전(TopDownGrid.SpriteFlatRotation).
+        /// 스프라이트를 XZ 바닥 평면에 평평하게 깔아 윗면을 보여준다(타일과 동일 규약). 카메라가 위에서 내려다봄.
+        /// (이전: Euler(35.264,45,0) 아이소 빌보드 → 2026-06-02 탑다운 결정으로 바닥 눕힘.)
         /// </summary>
-        public static Quaternion BillboardRotation => Quaternion.Euler(35.264f, 45f, 0f);
+        public static Quaternion BillboardRotation => TopDownGrid.SpriteFlatRotation;
 
         /// <summary>스프라이트 프롭이면 true (prefab 대신 쿼드로 그린다).</summary>
         public static bool UsesQuad(PropDefinition def) => def != null && def.sprite != null;
@@ -78,12 +77,11 @@ namespace IsometricMapEditor
                 float s = size.x > 0.0001f ? (fx * tileSize) / size.x : 1f;
                 visual.transform.localScale = new Vector3(s, s, 1f);
 
-                // 접지(grounding): 스프라이트 rect 하단(bounds.min.y, 피벗 기준)을 루트 원점
-                // (=셀 바닥점)에 올린다. 이 점은 회전 불변(원점)이라 어떤 yaw/빌보드 각도에도
-                // 항상 바닥 평면에 닿는다. (예측 가능한 기준점 — 자동 추정 없음.)
-                // ※ 미세 보정(groundOffset)은 여기서 하지 않고, ApplyGroundOffset이 Content를
-                //   월드 오프셋만큼 옮긴다(이미지+콜라이더 함께). 순수 월드 XYZ.
-                visual.transform.localPosition = new Vector3(0f, -def.sprite.bounds.min.y * s, 0f);
+                // top-down(바닥 눕힘): 스프라이트를 셀 원점에 중심 정렬한다(피벗 기준 그대로).
+                // 바닥에 깔린 평면이라 '서 있는' 접지(하단을 바닥에 올리는) 개념이 없고,
+                // 풋프린트 = 셀 중심에 놓인 윗면이다. (iso 시절엔 rect 하단을 셀 바닥점에 올렸음.)
+                // ※ 미세 보정(groundOffset/Z)은 ApplyGroundOffset이 Content를 월드 오프셋만큼 옮긴다.
+                visual.transform.localPosition = Vector3.zero;
             }
 
             // ── NavBlocker (선택) ──

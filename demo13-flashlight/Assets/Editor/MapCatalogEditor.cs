@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEditor;
-using IsometricMapEditor;
+using TopDownMapEditor;
 using System.IO;
 using System.Collections.Generic;
 
@@ -605,7 +605,7 @@ public class MapCatalogEditor : EditorWindow
             : null;
 
         var root = new GameObject(building.buildingId);
-        root.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
+        root.transform.rotation = TopDownMapEditor.TopDownGrid.CameraRotation;
         var quadObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
         quadObj.name = "Visual";
         quadObj.transform.SetParent(root.transform);
@@ -887,16 +887,16 @@ public class MapCatalogEditor : EditorWindow
             DestroyImmediate(c);
         }
 
-        // Root 회전 초기화
-        // 바닥에 깔리는 것: 타일(0), Object TextureQuad(tab4+mode1) → (90,0,0)
+        // Root 회전 초기화 (탑다운)
+        // 바닥에 깔리는 것: 타일(0), Object TextureQuad(tab4+mode1), 프랍(스프라이트) → (90,0,0) 눕힘
         // 3D 직립: 벽(1) → identity (큐브가 Y축 직립)
-        // 카메라 향: 프랍/건물/Object 기타 → (35.264,45,0)
-        if (tab == 0 || (tab == 4 && newVisualMode == 1))
-            _preview.transform.rotation = Quaternion.Euler(90, 0, 0);
+        // 그 외(건물 등 3D): 카메라 각도로 미리보기 → CameraRotation
+        if (tab == 0 || (tab == 4 && newVisualMode == 1) || tab == 2)
+            _preview.transform.rotation = TopDownMapEditor.TopDownGrid.SpriteFlatRotation;
         else if (tab == 1)
             _preview.transform.rotation = Quaternion.identity;
         else
-            _preview.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
+            _preview.transform.rotation = TopDownMapEditor.TopDownGrid.CameraRotation;
         _preview.transform.localScale = Vector3.one;
 
         switch (tab)
@@ -946,7 +946,7 @@ public class MapCatalogEditor : EditorWindow
         cube.transform.SetParent(_preview.transform, false);
         cube.transform.localPosition = new Vector3(0, height * 0.5f, 0);
         cube.transform.localScale = new Vector3(length, height, thickness);
-        cube.AddComponent<MeshFilter>().sharedMesh = IsometricMapEditor.WallBuilder.GetUprightBoxMesh();
+        cube.AddComponent<MeshFilter>().sharedMesh = TopDownMapEditor.WallBuilder.GetUprightBoxMesh();
 
         var renderer = cube.AddComponent<MeshRenderer>();
         Material mat;
@@ -972,7 +972,7 @@ public class MapCatalogEditor : EditorWindow
 
     void BuildPropPreview()
     {
-        // 프롭은 스프라이트(쿼드) 전용. root는 UpdatePreviewVisual에서 카메라 향(35.264,45,0)으로 설정됨.
+        // 프롭은 스프라이트(쿼드) 전용. root는 UpdatePreviewVisual에서 SpriteFlatRotation(바닥 눕힘)으로 설정됨.
         if (newSprite != null)
         {
             var sr = _preview.AddComponent<SpriteRenderer>();
@@ -983,7 +983,7 @@ public class MapCatalogEditor : EditorWindow
 
     void BuildBuildingPreview()
     {
-        // Root는 UpdatePreviewVisual에서 Euler(35.264,45,0) 설정됨 — 카메라 향
+        // Root는 UpdatePreviewVisual에서 CameraRotation(카메라 각도)로 설정됨 — 건물 3D 미리보기
         var quadObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
         quadObj.name = "Visual";
         quadObj.hideFlags = HideFlags.DontSave;
@@ -1740,7 +1740,7 @@ public class MapCatalogEditor : EditorWindow
         {
             // 프리뷰 없이 생성하는 폴백
             var root = new GameObject(newId);
-            root.transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
+            root.transform.rotation = TopDownMapEditor.TopDownGrid.CameraRotation;
             var quadObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
             quadObj.name = "Visual";
             quadObj.transform.SetParent(root.transform);

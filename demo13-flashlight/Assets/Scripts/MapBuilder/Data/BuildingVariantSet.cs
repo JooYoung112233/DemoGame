@@ -1,9 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    [CreateAssetMenu(menuName = "Isometric Map/Building Variant Set")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Building Variant Set")]
     public class BuildingVariantSet : ScriptableObject
     {
         public string defaultVariantId;

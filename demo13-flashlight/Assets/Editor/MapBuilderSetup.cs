@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using IsometricMapEditor;
+using TopDownMapEditor;
 using System.IO;
 
 /// <summary>

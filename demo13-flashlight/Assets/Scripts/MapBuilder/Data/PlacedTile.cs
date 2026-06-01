@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     [System.Serializable]
     public class PlacedTile

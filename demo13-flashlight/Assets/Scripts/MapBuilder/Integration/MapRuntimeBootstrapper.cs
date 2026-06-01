@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class MapRuntimeBootstrapper : MonoBehaviour
     {
@@ -18,7 +18,7 @@ namespace IsometricMapEditor
         InteriorMapLoader interiorLoader;
         InteriorTransitionManager interiorTransition;
         MapDebugOverlay debugOverlay;
-        IsometricCameraController cameraController;
+        TopDownCameraController cameraController;
 
         public void SetMapData(MapData data)
         {
@@ -80,10 +80,10 @@ namespace IsometricMapEditor
             debugOverlay = CreateChild<MapDebugOverlay>("DebugOverlay");
             debugOverlay.Initialize(mapData);
 
-            cameraController = FindAnyObjectByType<IsometricCameraController>();
+            cameraController = FindAnyObjectByType<TopDownCameraController>();
             if (cameraController != null)
             {
-                Bounds bounds = IsometricGrid.GetMapWorldBounds(mapData.gridSettings);
+                Bounds bounds = TopDownGrid.GetMapWorldBounds(mapData.gridSettings);
                 cameraController.SetBounds(bounds);
             }
 

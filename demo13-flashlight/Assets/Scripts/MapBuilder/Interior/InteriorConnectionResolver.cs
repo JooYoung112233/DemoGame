@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class InteriorConnectionResolver
     {

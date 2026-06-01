@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class MapBuilderUI : MonoBehaviour
     {

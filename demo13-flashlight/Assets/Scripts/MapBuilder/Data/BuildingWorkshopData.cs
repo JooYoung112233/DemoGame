@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// Data asset for constructing a single building in the Building Workshop.
     /// Works like a mini MapData but focused on one building structure.
     /// </summary>
-    [CreateAssetMenu(menuName = "Isometric Map/Building Workshop Data")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Building Workshop Data")]
     public class BuildingWorkshopData : ScriptableObject
     {
         public string buildingName = "New Building";

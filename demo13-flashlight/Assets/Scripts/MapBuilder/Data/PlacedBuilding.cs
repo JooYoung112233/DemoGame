@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     [System.Serializable]
     public class PlacedBuilding
@@ -29,7 +29,7 @@ namespace IsometricMapEditor
 
         public Vector3 GetWorldPosition(GridSettings settings)
         {
-            return freePlace ? worldPosition : IsometricGrid.GridToWorld(gridPosition, settings);
+            return freePlace ? worldPosition : TopDownGrid.GridToWorld(gridPosition, settings);
         }
     }
 }

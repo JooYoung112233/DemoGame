@@ -4,7 +4,7 @@ using UnityEngine;
 /// Y좌표 기반으로 sortingOrder를 동적 갱신.
 /// SpriteRenderer, MeshRenderer 모두 지원.
 /// </summary>
-public class IsometricDepthSorter : MonoBehaviour
+public class TopDownDepthSorter : MonoBehaviour
 {
     [SerializeField] int sortingPrecision = 100;
     [SerializeField] int sortingOffset = 0;

@@ -1,4 +1,4 @@
-Shader "Custom/SpriteSheet"
+Shader "BRB/SpriteSheet"
 {
     Properties
     {

@@ -271,7 +271,7 @@ public static class ScrapMarketGreyboxBuilder
         root.transform.SetParent(parent, false);
         root.transform.position = pos;
         root.AddComponent<InteractableObject>();
-        root.AddComponent<IsometricDepthSorter>();
+        root.AddComponent<TopDownDepthSorter>();
 
         var col = root.AddComponent<BoxCollider>();
         col.isTrigger = true;

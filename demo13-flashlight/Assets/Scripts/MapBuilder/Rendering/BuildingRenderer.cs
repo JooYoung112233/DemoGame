@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// Runtime building renderer — instantiates prefabs from BuildingDefinition.
@@ -45,14 +45,14 @@ namespace IsometricMapEditor
 
             // 정렬: 정의별 기본 오프셋 + 인스턴스 오버라이드.
             // 불투명 메시는 sortingOrder를 무시하고 깊이로 정렬되므로 시선축 깊이 오프셋도 함께 적용.
-            int sortOrder = IsometricGrid.GetSortingOrder(building.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+            int sortOrder = TopDownGrid.GetSortingOrder(building.gridPosition, TopDownGrid.OBJECT_SORT_BASE)
                             + def.sortingOffset
                             + building.sortingOffsetOverride;
             foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
                 sr.sortingOrder = sortOrder;
             foreach (var mr in go.GetComponentsInChildren<MeshRenderer>())
                 mr.sortingOrder = sortOrder;
-            go.transform.position = worldPos + IsometricGrid.SortDepthOffset(sortOrder);
+            go.transform.position = worldPos + TopDownGrid.SortDepthOffset(sortOrder);
 
             // Material Preset 적용: 텍스처는 유지, 셰이더 파라미터만 덮어쓰기
             if (def.materialPreset != null)

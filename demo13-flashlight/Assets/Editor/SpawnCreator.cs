@@ -705,13 +705,13 @@ public class SpawnCreator : EditorWindow
         SetField(cfb, "lightReturnDuration", enemy_lightReturnDuration); SetField(cfb, "heavyLungeDist", enemy_heavyLungeDist);
         SetField(cfb, "heavyLungeDuration", enemy_heavyLungeDuration); SetField(cfb, "heavyReturnDuration", enemy_heavyReturnDuration);
 
-        root.AddComponent<IsometricDepthSorter>();
+        root.AddComponent<TopDownDepthSorter>();
 
         // Visual root
         var visualRoot = new GameObject("Root");
         visualRoot.transform.SetParent(root.transform);
         visualRoot.transform.localPosition = new Vector3(0, 0.4f, 0);
-        visualRoot.transform.localRotation = Quaternion.Euler(35.264f, 45f, 0f);
+        visualRoot.transform.localRotation = TopDownMapEditor.TopDownGrid.SpriteFlatRotation;
 
         var spriteObj = new GameObject("EnemySprite");
         spriteObj.transform.SetParent(visualRoot.transform);
@@ -816,13 +816,13 @@ public class SpawnCreator : EditorWindow
             else { var lc = root.AddComponent<LootContainer>(); SetField(lc, "gridWidth", inter_containerWidth); SetField(lc, "gridHeight", inter_containerHeight); SetField(lc, "containerName", inter_containerName); }
         }
 
-        root.AddComponent<IsometricDepthSorter>();
+        root.AddComponent<TopDownDepthSorter>();
 
         // Visual
         var visualRoot = new GameObject("Root");
         visualRoot.transform.SetParent(root.transform);
         visualRoot.transform.localPosition = new Vector3(0, 0.3f, 0);
-        visualRoot.transform.localRotation = Quaternion.Euler(35.264f, 45f, 0f);
+        visualRoot.transform.localRotation = TopDownMapEditor.TopDownGrid.SpriteFlatRotation;
 
         var spriteObj = new GameObject("Sprite");
         spriteObj.transform.SetParent(visualRoot.transform);
@@ -984,7 +984,7 @@ public class SpawnCreator : EditorWindow
         // 2) 맵 빌더 카탈로그 등록
         if (npc_registerToCatalog)
         {
-            var catalog = AssetDatabase.LoadAssetAtPath<IsometricMapEditor.MapBuilderCatalog>(
+            var catalog = AssetDatabase.LoadAssetAtPath<TopDownMapEditor.MapBuilderCatalog>(
                 "Assets/Resources/MapBuilder/MapBuilderCatalog.asset");
             if (catalog != null)
             {
@@ -1011,14 +1011,14 @@ public class SpawnCreator : EditorWindow
             var npcCtrl = root.AddComponent<NPCController>();
             SetField(npcCtrl, "npcData", npcData);
 
-            // IsometricDepthSorter
-            root.AddComponent<IsometricDepthSorter>();
+            // TopDownDepthSorter
+            root.AddComponent<TopDownDepthSorter>();
 
             // Visual
             var visualRoot = new GameObject("Root");
             visualRoot.transform.SetParent(root.transform);
             visualRoot.transform.localPosition = new Vector3(0, 0.4f, 0);
-            visualRoot.transform.localRotation = Quaternion.Euler(35.264f, 45f, 0f);
+            visualRoot.transform.localRotation = TopDownMapEditor.TopDownGrid.SpriteFlatRotation;
 
             var spriteObj = new GameObject("NPCSprite");
             spriteObj.transform.SetParent(visualRoot.transform);
@@ -1302,13 +1302,13 @@ public class SpawnCreator : EditorWindow
         // Register to MapBuilderCatalog
         if (bld_registerToCatalog)
         {
-            var catalog = AssetDatabase.LoadAssetAtPath<IsometricMapEditor.MapBuilderCatalog>(
+            var catalog = AssetDatabase.LoadAssetAtPath<TopDownMapEditor.MapBuilderCatalog>(
                 "Assets/Resources/MapBuilder/MapBuilderCatalog.asset");
             if (catalog != null)
             {
                 // BuildingDefinition SO 생성
                 EnsureFolder("Assets/Resources/MapBuilder/Buildings");
-                var bDef = ScriptableObject.CreateInstance<IsometricMapEditor.BuildingDefinition>();
+                var bDef = ScriptableObject.CreateInstance<TopDownMapEditor.BuildingDefinition>();
                 bDef.buildingId = bld_name;
                 bDef.displayName = bld_name;
                 bDef.footprint = bld_footprint;
@@ -1325,7 +1325,7 @@ public class SpawnCreator : EditorWindow
                 string defPath = AssetDatabase.GenerateUniqueAssetPath($"Assets/Resources/MapBuilder/Buildings/{bld_name}.asset");
                 AssetDatabase.CreateAsset(bDef, defPath);
 
-                var list = new List<IsometricMapEditor.BuildingDefinition>(catalog.buildings) { bDef };
+                var list = new List<TopDownMapEditor.BuildingDefinition>(catalog.buildings) { bDef };
                 catalog.buildings = list.ToArray();
                 EditorUtility.SetDirty(catalog);
                 AssetDatabase.SaveAssets();

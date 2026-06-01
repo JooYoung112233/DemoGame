@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    [CreateAssetMenu(menuName = "Isometric Map/Map Data")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Map Data")]
     public class MapData : ScriptableObject
     {
         public string mapName;

@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    public class IsometricCameraController : MonoBehaviour
+    public class TopDownCameraController : MonoBehaviour
     {
         [Header("Pan")]
         [SerializeField] float panSpeed = 10f;
@@ -27,10 +27,10 @@ namespace IsometricMapEditor
             cam = GetComponent<Camera>();
             if (cam == null) cam = Camera.main;
 
-            // Setup 3D orthographic isometric camera
+            // Setup 3D orthographic top-down camera (각도는 TopDownGrid 중앙 설정)
             cam.orthographic = true;
             cam.orthographicSize = 10f;
-            transform.rotation = Quaternion.Euler(35.264f, 45f, 0);
+            transform.rotation = TopDownGrid.CameraRotation;
         }
 
         void LateUpdate()

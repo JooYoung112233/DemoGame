@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
-    [CreateAssetMenu(menuName = "Isometric Map/Map Builder Catalog")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Map Builder Catalog")]
     public class MapBuilderCatalog : ScriptableObject
     {
         [Header("Tiles")]

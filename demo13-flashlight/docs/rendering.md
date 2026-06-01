@@ -1,16 +1,51 @@
 # Rendering System
 
-## 렌더링 방식 (확정)
+## 렌더링 방식 (확정, 2026-06-01 갱신)
 
-하이브리드 2D+3D 구조. 바닥은 2D, 벽/건물은 3D 큐브.
+**"보이는 건 2D 평면, 빛 막는 건 안 보이는 3D 박스"** — 하이브리드 2D+3D 구조.
 
-| 요소 | 렌더 방식 | 이유 |
-|---|---|---|
-| 바닥(Floor) | 2D Plane (Sprite, Rotation 90°) | 평면 타일, 2D 텍스처로 충분 |
-| 벽(Wall) | 3D Cube (WallBuilder) | 플래시라이트 빛 차단 + 그림자 캐스팅 필요 |
-| 건물(Building) | 3D 프리팹 직접 배치 | 빛 차단 + 입체감 (구 BuildingCubeBuilder 절차 생성 폐기, 2026-05-29) |
-| 프랍(Prop) | 2D Sprite | 장식물은 2D로 충분 |
-| 지붕(Roof) | 2D Sprite (상위 RoofController) | ON/OFF 토글 필요 |
+~80° 탑다운 뷰에서 가장 안정적인 조합. 벽/건물을 3D 큐브로 세워서 보여주는 대신, **비주얼은 전부 2D 평면 탑다운 모듈**로 그리고, **빛 차단만 보이지 않는 3D 그림자박스(ShadowsOnly)**가 담당. 이렇게 하면 각도/정렬/떠 보임 문제가 전부 사라지면서 손전등 그림자는 그대로 살아있음.
+
+| 요소 | 비주얼 (보이는 것) | 빛 차폐 (그림자) | 비고 |
+|---|---|---|---|
+| 바닥(Floor) | 2D Plane (Sprite, Rotation 90°) | — | 기존과 동일 |
+| 벽(Wall) | **2D 평면 탑다운 모듈** | **안 보이는 3D 박스 (`ShadowsOnly`)** | ~~3D Cube 비주얼 폐기~~ → 비주얼은 평면, 그림자만 박스 |
+| 건물(Building) | **2D 평면 탑다운 모듈** | **안 보이는 3D 박스 (`ShadowsOnly`)** | ~~3D 프리팹 비주얼 폐기~~ → 동일 패턴 |
+| 프랍(Prop) | 2D Sprite (탑다운) | 키 큰 프랍만 `castsShadow` → 그림자박스 | 기존과 동일 |
+| 지붕(Roof) | 2D Sprite (상위 RoofController) | — | ON/OFF 토글 |
+
+## 렌더 파이프라인 = URP 2D Renderer (확정, 2026-06-02)
+
+**렌더러를 URP 2D(Renderer2D)로 확정.** 비주얼이 전부 2D 평면 모듈이므로 2D 렌더러가 자연스러운 선택.
+
+- **셰이더 패스 규칙**: URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. `UniversalForward` 전용 셰이더는 **안 보임**. 신규/유지 셰이더는 반드시 Universal2D 패스를 포함할 것.
+  - `BRB/Pixelated`, `BRB/ShadowProjector` — Universal2D 패스 보유(2D에서 정상 렌더). ※ ShadowProjector는 Forward+2D 두 패스 다 가짐.
+  - `BRB/PlayerSprite`, `BRB/SpriteBillboard`, `BRB/FlashlightBeam`, `BRB/SpineLitURP`, `BRB/OcclusionOutline`, `BRB/SpriteSheet` — 유지하되, 2D에서 안 그려지면 Universal2D 패스 추가 필요(미점검).
+- **조명**: 사방 라이트 + 손전등은 URP **2D Light**(Light2D)로 전환 대상. 기존 3D 스팟라이트/그림자박스 차폐 방식은 2D Light + ShadowCaster2D로 재설계 검토(미정).
+
+## 카메라 / 좌표계 = 순수 2D 정사영 + 아트에 원근 베이크 (확정, 2026-06-02)
+
+**카메라를 3D로 기울이지 않는다.** 카메라 = **2D 정사영(Orthographic), Z축 정면 직시** (표준 2D 셋업). ~80° 탑다운 원근감은 **스프라이트 이미지 자체에 그려져** 있음(레퍼런스 타일셋처럼 모듈이 이미 비스듬히 그려진 상태).
+
+- **좌표계**: 월드 = **XY 평면**, 깊이 = **sortingOrder/Z**(정사영이라 Z 위치는 화면에 안 보이고 정렬용). 더 이상 "바닥에 눕힌 XZ 평면 + 90° 회전 쿼드"가 아님.
+- **함의**: 모든 위치/투영/그림자 계산은 **XY 기준**. 3D 바닥평면(XZ) 전제로 짠 것들(예: 초기 ShadowProjector의 XZ shear)은 XY로 수정해야 함.
+  - `BRB/ShadowProjector` + `FlatShadow.cs`: 그림자 투영을 **XY 화면 평면**으로 수정함(빛 반대 방향으로 스프라이트 세로를 XY에서 shear). 스프라이트 바닥(uv.y=0)=접지 고정, 위쪽이 투영됨. 깊이는 sortingOrder로 모듈 뒤에 깔림.
+- 이전 "벽=3D 큐브 + 카메라 각도" (2026-05-29) 및 "3D 스팟라이트 차폐"(2026-06-01) 전제는 순수 2D로 대체 — 조명도 Light2D 계열로 가야 함(검토 중).
+
+## 셰이더 네임스페이스 = BRB (확정, 2026-06-02)
+
+**모든 커스텀 셰이더 상위 네임스페이스를 `InkCity/`·`Custom/` → `BRB/`로 통일.** (Unity 머티리얼은 셰이더를 GUID로 참조하므로 Shader "..." 경로명만 바꿔도 기존 바인딩은 안 깨짐. `Shader.Find` 호출은 문자열이라 코드도 함께 갱신함.)
+
+### 셰이더 정리 (2026-06-02)
+- **유지(8개)**: `BRB/Pixelated`(도트), `BRB/ShadowProjector`(방향성 투영 그림자), `BRB/PlayerSprite`, `BRB/SpriteBillboard`, `BRB/SpineLitURP`, `BRB/FlashlightBeam`, `BRB/OcclusionOutline`, `BRB/SpriteSheet`(캐릭터·조명 관련).
+- **삭제**: `CityBuilding`, `CityWall`, `RuinFloor`, `RoadFloor`, `WetFloor`, `Prop`(환경/맵 3D Forward 전용 — URP2D에서 무용) + `RuinPixel`(Pixelated로 충분).
+- 코드 참조 갱신: `FlatShadow.cs`, `Lighting/FlashlightBeam.cs`, `Player/WallOcclusionOutline.cs`, `MapBuilderManager.cs`(삭제된 CityBuilding 폴백 → `BRB/Pixelated`→URP2D Sprite-Lit→Sprites/Default 체인).
+- ⚠️ 삭제 셰이더를 쓰던 기존 머티리얼/맵 프리팹은 핑크가 됨 — URP2D 재구축 전제라 의도된 것.
+
+### 왜 이 조합인가 (2026-06-01 확정)
+- **비주얼 = 2D 평면**: 벽을 3D로 세우지 않음. ~80° 탑다운에서 3D 벽은 각도/정렬/뜨는 문제가 계속 생김. 2D 평면 모듈은 이런 문제가 원천 없음.
+- **라이팅 = 실제 3D 스팟라이트 + 안 보이는 그림자박스**: 기존 스팟라이트 시스템 그대로 유지. 벽/건물 위치에 `ShadowCastingMode.ShadowsOnly` 3D 박스를 두면 렌더는 안 되고 그림자만 던짐 → 손전등이 벽 뒤를 못 비추는 핵심 메커니즘 유지.
+- **정리**: 보이는 건 전부 2D, 빛 막는 건 안 보이는 박스. 가장 단순하고 안정적.
 
 ## 뷰 / 카메라 (2026-05-29 전환 — iso 폐기)
 
@@ -35,9 +70,9 @@
 | 비주얼 | 평면 탑다운 스프라이트, 바닥 위 정렬 | iso 대신 탑다운으로 그림(더 쉬움) |
 | 빛 차단 | 키 큰 프랍만 `castsShadow` → 그림자박스(`ShadowsOnly`) | 기존 `ShadowProxyBuilder`/`PropDefinition` 재활용 |
 | 이동 차단 | `blocksWalkability` | 기존 그대로 |
-| **정렬** | 낮은 프랍(러그·잔해)=항상 플레이어 아래 / 키 큰 프랍(옷장·선반)=플레이어와 Y정렬 | 거의-수직이라 겹침 적음. 초기엔 프랍 낮게+옷장급만 Y정렬로 충분. `IsometricDepthSorter` 전용 |
+| **정렬** | 낮은 프랍(러그·잔해)=항상 플레이어 아래 / 키 큰 프랍(옷장·선반)=플레이어와 Y정렬 | 거의-수직이라 겹침 적음. 초기엔 프랍 낮게+옷장급만 Y정렬로 충분. `TopDownDepthSorter` 전용 |
 
-- **맵툴 자체**(`MapBuilderManager`/`IsometricGrid`/`MapCatalogEditor` Props 탭)는 격자 기반이라 대부분 재활용. 바뀌는 건 카메라 각도·렌더뿐.
+- **맵툴 자체**(`MapBuilderManager`/`TopDownGrid`/`MapCatalogEditor` Props 탭)는 격자 기반이라 대부분 재활용. 바뀌는 건 카메라 각도·렌더뿐.
 
 ## 핵심 원칙
 
@@ -176,6 +211,7 @@
 | 2026-05-31 | 접지 보정을 root 말고 내부 이미지로, nav 콜라이더도 따라오게 | **오프셋을 root가 아닌 내부 `Content` 컨테이너에 적용해 이미지+콜라이더가 함께 이동.** `PropQuadBuilder.Build` 계층을 `root → Content → (Visual + NavBlocker)`로 바꿔 Visual과 NavBlocker를 Content 자식으로 묶음. `ApplyGroundOffset(root, worldOffset)`는 `Content.localPosition = root.InverseTransformVector(worldOffset)`(회전·스케일 상쇄 → 순수 월드 XYZ, 절대값이라 멱등·비누적)로 설정 → 이미지와 nav 박스가 함께 월드 오프셋만큼 이동. **root는 제자리**(셀 바닥점 = 그린 접지 마커·sortingOrder 정렬 기준 고정). `GroundMarker`는 root 직속이라 오프셋 영향 없음. 적용 6경로(SpawnPropVisual·ApplyMovePropMountHeight·이동 드래그·고스트·프리팹 베이크·런타임 PropManager)가 `pos += GroundOffsetVec` 대신 `position=basePos; ApplyGroundOffset(go, GroundOffsetVec)`로 변경(반드시 root 회전·스케일 확정 후 호출). | "보정은 root 말고 내부 이미지로, nav 막으면 콜라이더도 잘 따라와야 한다" 요청. root를 옮기면 정렬 기준점·접지 마커가 같이 흔들려 어디 앉는지 가늠 불가 → root는 셀에 고정하고 보이는 것(이미지)+막는 것(콜라이더)만 함께 민다. InverseTransformVector로 root 틸트와 무관하게 순수 월드 XYZ 보장. |
 | 2026-05-31 | 접지 보정 키가 어렵고 일관성 없음 → "방향키 = 화면 이동" | **IJKL/UO/P 클러스터를 방향키 기반으로 교체.** `←/→`=좌우(X∓), `↑/↓`=위아래(Y, 높이 ±), `PageUp/PageDown`=깊이(Z ±), `Home`=리셋, Shift=미세(0.01 vs 0.05). 화면을 보며 "왼쪽/오른쪽/위/아래"로 직관적으로 미는 멘탈 모델. **방향키는 접지 보정 컨텍스트(`ActiveGroundOffset.HasValue`: 프롭 배치 중 또는 Move로 집은 상태)에서만 프롭을 밀고, 그 외엔 카메라 패닝** — `MapBuilderCamera.HandleKeyboardPan`이 그 컨텍스트일 때 방향키를 패닝에서 제외(WASD 패닝은 항상 유지). **PageUp/Down 라우팅**: 벽 부착 컨텍스트(`IsWallMountContext`: 집은 프롭이 wallMounted거나 배치모드+CurrentWallMount)면 부착 높이(`AdjustMountHeight`), 아니면 Z 오프셋. 상태바 `⊹Off(x,y,z)`·F1 도움말 갱신. | "키가 너무 어려운데 일관성 있게" 요청 → 객관식에서 사용자가 "방향키=화면 이동" 선택. 임의 글자키보다 방향키 공간 매핑이 학습 비용 0. PageUp/Down은 기존 벽 부착 높이 키를 흡수(겹치지 않게 컨텍스트로 분기). 카메라 패닝과의 충돌은 보정 활성 시에만 방향키를 가로채 해소(WASD는 그대로라 카메라도 계속 움직임). |
 | 2026-05-31 | 프롭 풋프린트를 소수로 — 작은 소품을 미리 작게 | **`PropDefinition.footprint`을 `Vector2Int`→`Vector2`(소수 허용)로 변경.** 프롭 풋프린트는 그리드 점유 검사엔 안 쓰이고 순수 비주얼(스프라이트 fit-scale = `footprint.x×tileSize`, nav 박스 크기)에만 쓰여 안전. `PropQuadBuilder.Build`의 `Mathf.Max(1, ...)` 정수 클램프가 1 미만을 막아 소수의 의미를 없애므로 `Mathf.Max(0.05f, ...)` float 클램프로 교체(0/음수만 차단). 카탈로그 에디터: 프롭용 `Vector2 newPropFootprint`/`batchFootprint`를 건물용 `Vector2Int newFootprint`와 분리하고 프롭 폼·일괄등록 필드를 `Vector2Field`로(건물 폼은 정수 유지). 기존 정수 풋프린트 에셋은 `{x,y}` YAML 표현이 동일해 값 보존(1→1.0). | "작은 건 미리 작게" — 인스턴스 scale(R+스크롤)과 별개로 카탈로그 기본 크기를 0.3~0.6처럼 줄여두고 싶음. 건물은 정수 그리드 점유라 그대로, 프롭만 자유 크기로 분리. |
+| 2026-06-02 | 맵툴+인게임 시점을 iso → 탑다운(2D 평면 뷰 + 80° 아트)으로 전환 | **시점 설정을 `TopDownGrid`(구 IsometricGrid, 네임스페이스 `TopDownMapEditor`로 리네임) 한 곳에 중앙화.** 확정 방식(safehouse.md "구현 방식 확정"): **카메라 = 2D 직교 평면 뷰(바닥을 수직으로 내려다봄, 3D 틸트 아님)**, 입체 **틸트(≈80°)는 카메라가 아니라 아트 텍스처에 미리 그려넣음**(타일/프랍/펜스/캐릭터 모두 같은 80° 시점), **맵 = 타일 조립식**. 월드는 평면 XZ 그리드(`GridToWorld`)라 불변. **중앙 설정**: `CameraPitch=90`(정직하 — 카메라를 기울이면 아트와 이중 틸트), `CameraYaw=0`, `CameraRotation`(=Euler(90,0,0)), `SpriteFlatRotation`(=Euler(90,0,0), 바닥 눕힘), `ViewDir`. **카메라**: `MapBuilderCamera` 기본각 + `TopDownCameraController.Awake`가 중앙값 사용. 인게임 씬 카메라(Safehouse/InGameScene)도 회전을 Euler(90,0,0)로 직접 교체. **스프라이트(프롭/오브젝트)**: `PropQuadBuilder.BillboardRotation`→`SpriteFlatRotation`, grounding을 **셀 중심 정렬**(`localPosition=0`)로. `MapObjectSpawner` 마커=직립(yaw만). **정렬**: `GetSortingOrder` `(x+y)`→`-cell.y*10`(정직하라 코플래너 → sortingOrder가 깊이 전담; 남쪽=화면아래=앞. 부호는 Unity에서 뒤집히면 +로). `CameraSortSetup.transparencySortAxis`→`ViewDir`. **에디터 프리뷰**: 프롭/캐릭터=`SpriteFlatRotation`, 건물=`CameraRotation`. | safehouse.md(2026-06-02) 결정의 코드 구현. 포인트: 카메라는 단순 평면 뷰로 두고 입체감은 전적으로 아트가 담당 → 카메라/스프라이트 회전은 "바닥 정면"으로 고정. **Unity 검증/주의**: ①정직하 카메라라 **3D 벽 큐브(WallBuilder)는 윗면만 보임** → 벽/펜스는 80° 아트 스프라이트(바닥 데칼)로 가야 자연스러움(3D 큐브 벽은 이 시점과 안 맞음). ②`GetSortingOrder` 부호(앞뒤) ③프롭 중심정렬 위치감 ④캐릭터(플레이어/적)는 `spriteRenderer.rotation = 카메라회전`이라 정직하 카메라에서 자동으로 바닥에 눕음(=80° top-down 캐릭터 아트가 정면으로 보임) — 별도 코드 변경 불필요. |
 | 2026-05-31 | 플레이모드 Ctrl+Z가 Unity 에디터 undo까지 같이 먹음 | **맵툴 Undo를 키 단축키(Ctrl+Z)에서 상단 UI [Undo] 버튼으로 이전.** 플레이모드에서 Ctrl+Z는 Unity 에디터가 전역으로 가로채(씬/오브젝트 undo) 코드로 막을 수 없음 → 맵툴 내 단축키를 제거하고 New/Save/Load 옆에 `Undo` 버튼 추가(`_manager.Undo()`). `MapBuilderInput`의 Ctrl+Z 핸들러 삭제, F1 도움말 갱신. | "맵툴 기능이 아닌 것 같으니 차라리 맵툴(버튼)에 넣자"는 사용자 제안. 에디터 전역 단축키 충돌은 회피 불가 → 입력 채널을 버튼으로 분리하는 게 유일하게 깔끔한 해법. |
 | 2026-05-31 | 벽으로 직접 쌓은 구조물 내부에 프랍을 못 놓음(벽에 가림) — "건물 표시"엔 안 뜸 | **전체 벽 숨김 토글 추가.** 기존 "건물 표시" 패널의 "내부 보기"는 프리팹 건물(`PlacedBuilding`, occludesInterior 파트)만 대상 → Wall 도구로 깐 개별 벽은 대상이 아니라 가릴 수 없었음. `MapBuilderManager.WallsHidden` 플래그 + `ToggleWallsHidden()` 추가, 패널에 **"벽 숨김" 버튼**(활성 시 하이라이트). 벽 가시성의 단일 출처는 `ApplyLevelCutaway` — 벽 블록을 `show = !WallsHidden && (!on || tile.level<=CurrentLevel)`로 바꿔 층 컷어웨이와 AND. 토글은 `ApplyLevelCutaway` 재실행으로 반영되고 RebuildAllVisuals 끝에서도 재적용돼 리빌드 후 유지. 천장은 "윗층 바닥"이라 기존 V키 층 컷어웨이로 숨김(중복 기능 안 만듦). | 사용자가 프리팹 건물이 아니라 벽+천장 타일로 방을 직접 만들어 내부 프랍을 놓고 싶어 함. 객관식에서 "전체 벽 숨김 토글" 선택(현재층/방향별 대신 단순·명확). 벽 가시성 규칙을 한 곳(ApplyLevelCutaway)에 모아 컷어웨이와 충돌 없이 AND 결합. |
 | 2026-05-31 | 맵오브젝트(스폰포인트·지도판 등)가 프리팹에 기능 없이 저장됨 | **베이크의 MapObjects 루프를 런타임 `MapObjectSpawner.SpawnSingle` 재사용으로 통일.** 원인: `MapRuntimeBootstrapper.Start()`가 비어 있어(=베이크 프리팹 사용, 런타임 자동 생성 비활성) 런타임 스폰 경로를 안 타는데, `SaveMapPrefab`의 MapObjects 루프는 **빈 GameObject(+이펙트 프리팹)만** 만들고 SpawnPoint/InteractableObject(MapBoard 등)/LootContainer/Door/NPC/Trigger **기능 컴포넌트를 붙이지 않아** 베이크 프리팹에 기능이 직렬화되지 않았음. **해결**: `MapObjectSpawner.SpawnSingle`을 public으로 올리고, 베이크에서 임시 `MapObjectSpawner`(`__BakeMapObjectSpawner`)를 만들어 각 오브젝트를 `SpawnSingle`로 빌드 → 런타임과 동일한 컴포넌트가 붙은 채 프리팹에 직렬화. 내부 오브젝트(`parentBuildingId`) 라우팅용으로 건물 베이크 시 `instanceId→GameObject` 딕셔너리를 채워 `SetBuildingObjects`로 전달. 이펙트 프리팹(visualMode==3) 비주얼은 스포너가 안 다루므로 베이크에서 추가 부착(기존 로직 유지). 스포너의 런타임 전용 `Destroy`(Door 비주얼 콜라이더)는 `DestroyObj`(에디터=DestroyImmediate) 헬퍼로 교체. 임시 스포너 GO는 `finally`에서 `DestroyImmediate`. 도어 비주얼의 `new Material`은 직전 단계 `PersistGeneratedAssets`가 에셋화. | "스폰포인트·지도판이 저장 안 됨" — 베이크가 비주얼만 굽고 로직 컴포넌트는 누락. 검증된 런타임 스폰 코드를 단일 출처로 재사용해 베이크=런타임 동작 일치(중복 구현·드리프트 방지). JSON은 Resources 밖(Assets/Maps)이라 런타임 로드 불가 → 프리팹에 굽는 게 유일한 경로. (loot용 MapSpawnController 자동생성은 베이크에서 제외 — 추후 과제.) |
@@ -183,3 +219,5 @@
 | 2026-05-30 | F키 플립이 안 먹힘(그림 좌우 반전 안 됨) | **`sr.flipX` 대신 트랜스폼 X스케일 부호로 미러링.** 원인: props.mat의 커스텀 `InkCity/Prop` 셰이더(Prop.shader)가 `TransformObjectToHClip(positionOS)`만 하고 빌트인 sprite의 `_Flip` 벡터를 안 봐서 `SpriteRenderer.flipX`가 무시됨. `PropQuadBuilder.ApplyFlip`을 재작성: `sr.flipX=false`로 끄고 Visual 트랜스폼의 `localScale.x` 부호를 뒤집어 **지오메트리 레벨**에서 반전(셰이더 무관). `Mathf.Abs`로 멱등(여러 번 호출해도 안정). 맵툴 F키→`ToggleFlipX`→고스트/이동중 프롭/배치 프롭(`prop.flipX`)에 적용. | 커스텀 셰이더라 sr.flipX가 화면에 반영 안 됨. 트랜스폼 스케일 반전은 어떤 셰이더에도 통하고 접지 오프셋(localPosition.y)과 독립적이라 안전. |
 | 2026-05-29 | AI로 아이소 에셋이 각도 일관되게 안 나와 제작 불가. 뷰를 바꿔야 하나? | **iso 폐기 → 탑다운(near-overhead) 확정** (Darkwood/Hotline Miami). 벽/건물은 3D큐브 유지하고 카메라 각도만 변경, 텍스처는 평면. 다층=층 전환(동시표시X). 프랍=박스가구+평면데칼+소형빌보드. AI는 평면텍스처·데칼·무드원화만, 통짜/모듈 아이소 스프라이트 생성 금지. | AI 아이소 모듈은 투영각 드리프트로 2인 제작 비현실. 3D큐브+카메라+평면텍스처면 각도 일관성 문제 자체가 소멸. 기존 iso 전제 결정은 재검토 필요. |
 | 2026-05-29 | 탑다운 각도와 프랍 파이프라인 확정? | **각도 = 거의 순수 탑다운 ~80°** (컨셉 원화로 확정, 1F/2F 평면+계단). 높이감보단 명료함·제작 용이 우선, 분위기는 손전등+어둠+밀도가 담당. **프랍 = 평면 탑다운 스프라이트 + 기존 그림자박스/blocksWalkability/Y정렬 시스템 그대로 전용.** 캐릭터는 3/4 빌보드 유지(관행). 맵툴(MapBuilder)도 격자 기반이라 재활용. | 탑다운이라 프랍 스프라이트가 각도 하나라 더 쉬움(드리프트0). 기존 프랍/그림자 시스템이 iso용이었지만 탑다운에 그대로 맞음 — 신규 작업 최소. |
+| 2026-06-01 | 벽/건물 비주얼도 2D 평면으로 하고 빛 차단만 안 보이는 3D 박스로 할까? | **확정: 비주얼 = 2D 평면 탑다운 모듈 (벽 안 세움), 라이팅 = 실제 3D 스팟라이트 + 안 보이는 그림자박스(ShadowsOnly) 유지.** 벽/건물의 3D 큐브 비주얼 폐기 → 전부 2D 평면으로 통일. 빛 차단용 3D 박스는 렌더 안 되고 그림자만 던짐. | ~80° 탑다운에서 3D 벽 비주얼은 각도/정렬/떠보임 문제가 반복됨. 2D 평면으로 바꾸면 이 문제가 원천 소멸하고, 안 보이는 그림자박스로 손전등 차폐는 그대로 유지. "보이는 건 2D, 빛 막는 건 안 보이는 박스" — 가장 단순·안정적. 기존 iso 전제의 3D 벽 비주얼 결정을 대체. |
+| 2026-06-02 | 모듈별 그림자 셰이더 가능? (라이트 사방에서 비출 때) | **방향성 투영 그림자로 확정.** 바닥에 눕힌(탑다운) 2D 모듈마다 스프라이트 실루엣을 바닥 평면(XZ)에서 빛 반대쪽으로 비스듬히 늘려 어둡게 그림. 셰이더 `InkCity/ShadowProjector`(vertex에서 텍스처 세로 uv.y를 높이로 보고 `_ShadowDirWS`×`_ShadowLength`만큼 XZ로 shear, frag은 텍스처 알파 실루엣을 `_ShadowColor`로 출력 + 끝으로 갈수록 `_TipFade`로 옅게) + 컴포넌트 `FlatShadow.cs`(모듈 자식으로 그림자 메시 생성, 매 프레임 라이트 위치→바닥 방향 계산해 머티리얼에 먹임. 디렉셔널=forward, 점광/스팟=광원→오브젝트 방향, 광원이 낮을수록 길어짐). 멀티라이트 다중그림자/URP2D 실제 ShadowCaster2D는 비용·셋업 부담으로 미채택. | 메인 라이트 1개 방향에만 반응해도 "비추는 느낌"은 충분하고 드로우콜이 모듈당 1개로 저렴. 빛 차단용 안 보이는 3D 박스(2026-06-01)는 손전등 차폐 담당, 이 투영 그림자는 모듈 발밑의 시각적 그림자 담당으로 역할 분리. |

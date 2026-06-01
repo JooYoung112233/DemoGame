@@ -1,4 +1,4 @@
-Shader "InkCity/FlashlightBeam"
+Shader "BRB/FlashlightBeam"
 {
     Properties
     {

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class MapBuilderInput : MonoBehaviour
     {
@@ -82,7 +82,7 @@ namespace IsometricMapEditor
             var grid = _manager.EditingMap?.gridSettings;
             if (grid != null)
             {
-                _lastGridCell = IsometricGrid.WorldToGrid(CurrentWorldPos, grid);
+                _lastGridCell = TopDownGrid.WorldToGrid(CurrentWorldPos, grid);
                 bool inBounds = grid.IsInBounds(_lastGridCell);
 
                 // 브러시 미리보기는 타일 모드에서만 WxH, 그 외엔 1x1

@@ -1,13 +1,13 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class MapLoader : MonoBehaviour
     {
         [SerializeField] MapData mapData;
 
         TileRenderer tileRenderer;
-        IsometricSortingManager sortingManager;
+        TopDownSortingManager sortingManager;
 
         public MapData CurrentMap => mapData;
 
@@ -37,7 +37,7 @@ namespace IsometricMapEditor
             }
 
             if (sortingManager == null)
-                sortingManager = gameObject.AddComponent<IsometricSortingManager>();
+                sortingManager = gameObject.AddComponent<TopDownSortingManager>();
         }
 
         public void UnloadMap()

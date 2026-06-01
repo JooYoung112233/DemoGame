@@ -1,4 +1,4 @@
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     [System.Serializable]
     public class InteriorConnection

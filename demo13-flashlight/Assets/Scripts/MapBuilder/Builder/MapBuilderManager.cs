@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public enum ToolMode
     {
@@ -364,7 +364,7 @@ namespace IsometricMapEditor
             GridOverlay.gridSettings = EditingMap.gridSettings;
             ClearAllVisuals();
 
-            Vector3 center = IsometricGrid.GridToWorld(
+            Vector3 center = TopDownGrid.GridToWorld(
                 new Vector2Int(width / 2, height / 2), EditingMap.gridSettings);
             BuilderCamera.SetFocusPoint(center);
 
@@ -865,14 +865,14 @@ namespace IsometricMapEditor
         {
             if (EditingMap == null || cells == null || cells.Count == 0) return 0;
             var cellSet = new HashSet<Vector2Int>(cells);
-            int baseSort = IsometricGrid.GetSortingOrder(anchorCell, IsometricGrid.OBJECT_SORT_BASE) + defSortingOffset;
+            int baseSort = TopDownGrid.GetSortingOrder(anchorCell, TopDownGrid.OBJECT_SORT_BASE) + defSortingOffset;
             int maxOther = int.MinValue;
 
             foreach (var p in EditingMap.props)
             {
                 if (p.level != CurrentLevel) continue;
                 if (!cellSet.Contains(p.gridPosition)) continue;
-                int s = IsometricGrid.GetSortingOrder(p.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                int s = TopDownGrid.GetSortingOrder(p.gridPosition, TopDownGrid.OBJECT_SORT_BASE)
                         + (p.propDefinition != null ? p.propDefinition.sortingOffset : 0) + p.sortingOffsetOverride;
                 if (s > maxOther) maxOther = s;
             }
@@ -884,7 +884,7 @@ namespace IsometricMapEditor
                 foreach (var c in b.buildingDefinition.GetOccupiedCells(b.gridPosition))
                     if (cellSet.Contains(c)) { overlap = true; break; }
                 if (!overlap) continue;
-                int s = IsometricGrid.GetSortingOrder(b.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                int s = TopDownGrid.GetSortingOrder(b.gridPosition, TopDownGrid.OBJECT_SORT_BASE)
                         + b.buildingDefinition.sortingOffset + b.sortingOffsetOverride;
                 if (s > maxOther) maxOther = s;
             }
@@ -898,9 +898,9 @@ namespace IsometricMapEditor
             if (SelectedProp == null || SelectedProp.sprite == null) return;
             SaveUndoSnapshot();
 
-            var cell = IsometricGrid.WorldToGrid(worldPos, EditingMap.gridSettings);
+            var cell = TopDownGrid.WorldToGrid(worldPos, EditingMap.gridSettings);
             bool free = !SnapToGrid;
-            Vector3 finalPos = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+            Vector3 finalPos = free ? worldPos : TopDownGrid.GridToWorld(cell, EditingMap.gridSettings);
 
             // 겹친 것 앞으로 보내는 기본 오프셋 + 사용자 상대 보정
             int autoFront = ComputeFrontSortOverride(new[] { cell }, SelectedProp.sortingOffset, cell);
@@ -932,7 +932,7 @@ namespace IsometricMapEditor
 
         void PlaceBuilding(Vector2Int cell)
         {
-            PlaceBuildingAt(cell, IsometricGrid.GridToWorld(cell, EditingMap.gridSettings));
+            PlaceBuildingAt(cell, TopDownGrid.GridToWorld(cell, EditingMap.gridSettings));
         }
 
         void PlaceBuildingAt(Vector2Int cell, Vector3 worldPos)
@@ -955,7 +955,7 @@ namespace IsometricMapEditor
                 buildingDefinition = SelectedBuilding,
                 rotation = Mathf.RoundToInt(CurrentRotation),
                 freePlace = free,
-                worldPosition = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings),
+                worldPosition = free ? worldPos : TopDownGrid.GridToWorld(cell, EditingMap.gridSettings),
                 yRotation = CurrentRotation * 15f,
                 scale = 1f,
                 sortingOffsetOverride = ComputeFrontSortOverride(occupied, SelectedBuilding.sortingOffset, cell) + _placementSortOffset,
@@ -979,7 +979,7 @@ namespace IsometricMapEditor
                 objectType = SelectedObjectType,
                 gridPosition = cell,
                 freePlace = free,
-                worldPosition = free ? worldPos : IsometricGrid.GridToWorld(cell, EditingMap.gridSettings),
+                worldPosition = free ? worldPos : TopDownGrid.GridToWorld(cell, EditingMap.gridSettings),
                 yRotation = objRot * 15f,
                 label = SelectedObjectType.ToString(),
                 interactRange = GetDefaultInteractRange(SelectedObjectType),
@@ -1094,7 +1094,7 @@ namespace IsometricMapEditor
                     RemoveFreeWallsAtCell(cell);
                     break;
                 case ToolMode.Prop:
-                    RemoveNearestProp(IsometricGrid.GridToWorld(cell, EditingMap.gridSettings));
+                    RemoveNearestProp(TopDownGrid.GridToWorld(cell, EditingMap.gridSettings));
                     break;
                 case ToolMode.Building:
                     RemoveBuildingAtCell(cell);
@@ -1211,7 +1211,7 @@ namespace IsometricMapEditor
 
         void EraseNearestAtCell(Vector2Int cell)
         {
-            Vector3 cellWorld = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+            Vector3 cellWorld = TopDownGrid.GridToWorld(cell, EditingMap.gridSettings);
             float bestDist = float.MaxValue;
             int bestType = -1; // 0=tile, 1=wall, 2=prop, 3=building, 4=mapObject
             int bestIndex = -1;
@@ -1349,7 +1349,7 @@ namespace IsometricMapEditor
             if (EditingMap == null) { ClearMoveHover(); return; }
             if (_moveGrabbed) return; // 이미 집은 상태면 호버 불필요
 
-            Vector3 cellWorld = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+            Vector3 cellWorld = TopDownGrid.GridToWorld(cell, EditingMap.gridSettings);
             float bestDist = float.MaxValue;
             int bestType = -1;
             int bestIndex = -1;
@@ -1535,7 +1535,7 @@ namespace IsometricMapEditor
             if (!_moveGrabbed) return;
 
             Vector3 finalPos = SnapToGrid
-                ? IsometricGrid.GridToWorld(cell, EditingMap.gridSettings)
+                ? TopDownGrid.GridToWorld(cell, EditingMap.gridSettings)
                 : worldPos;
 
             GameObject go = null;
@@ -1603,12 +1603,12 @@ namespace IsometricMapEditor
                         var b = EditingMap.buildings.Find(x => x.instanceId == _moveInstanceId);
                         if (b != null) { defOffset = b.buildingDefinition != null ? b.buildingDefinition.sortingOffset : 0; overrideOffset = b.sortingOffsetOverride; }
                     }
-                    int sortOrder = IsometricGrid.GetSortingOrder(cell, IsometricGrid.OBJECT_SORT_BASE) + defOffset + overrideOffset;
+                    int sortOrder = TopDownGrid.GetSortingOrder(cell, TopDownGrid.OBJECT_SORT_BASE) + defOffset + overrideOffset;
                     foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>()) sr.sortingOrder = sortOrder;
                     foreach (var mr in go.GetComponentsInChildren<MeshRenderer>()) mr.sortingOrder = sortOrder;
                     // 불투명 메시(건물)만 시선축 깊이 오프셋. 스프라이트 프롭은 sortingOrder로 정렬돼 오프셋 불필요(띄움 방지).
                     if (_moveType == 3)
-                        go.transform.position += IsometricGrid.SortDepthOffset(sortOrder);
+                        go.transform.position += TopDownGrid.SortDepthOffset(sortOrder);
                 }
             }
         }
@@ -1665,7 +1665,7 @@ namespace IsometricMapEditor
         void DropMove(Vector2Int cell, Vector3 worldPos)
         {
             Vector3 finalPos = SnapToGrid
-                ? IsometricGrid.GridToWorld(cell, EditingMap.gridSettings)
+                ? TopDownGrid.GridToWorld(cell, EditingMap.gridSettings)
                 : worldPos;
 
             float yRot = CurrentRotation * 15f;
@@ -1951,7 +1951,7 @@ namespace IsometricMapEditor
         {
             if (EditingMap == null) { ClearEraseHover(); return; }
 
-            Vector3 cellWorld = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+            Vector3 cellWorld = TopDownGrid.GridToWorld(cell, EditingMap.gridSettings);
             float bestDist = float.MaxValue;
             int bestType = -1; // 0=tile, 1=wall, 2=prop, 3=building, 4=mapObject
             int bestIndex = -1;
@@ -2119,7 +2119,7 @@ namespace IsometricMapEditor
         {
             if (EditingMap == null) { ClearResizeHover(); return; }
 
-            Vector3 cellWorld = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+            Vector3 cellWorld = TopDownGrid.GridToWorld(cell, EditingMap.gridSettings);
             float bestDist = 2f;
             string targetId = null;
             string info = null;
@@ -2400,7 +2400,7 @@ namespace IsometricMapEditor
             PropQuadBuilder.ApplyGroundOffset(go, prop.GroundOffsetVec); // 접지 보정 — 내부 Content(이미지+콜라이더)만
 
             // 스프라이트 정렬 순서 (바닥보다 위에) + 인스턴스별 미세조정
-            int sortOrder = IsometricGrid.GetSortingOrder(prop.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+            int sortOrder = TopDownGrid.GetSortingOrder(prop.gridPosition, TopDownGrid.OBJECT_SORT_BASE)
                             + prop.propDefinition.sortingOffset
                             + prop.sortingOffsetOverride;
             foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
@@ -2504,7 +2504,7 @@ namespace IsometricMapEditor
 
             // 정렬 순서 (SpriteRenderer + MeshRenderer 모두)
             // = 그리드 기본 + 정의별 기본 오프셋(건물끼리 order) + 인스턴스 미세조정
-            int sortOrder = IsometricGrid.GetSortingOrder(building.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+            int sortOrder = TopDownGrid.GetSortingOrder(building.gridPosition, TopDownGrid.OBJECT_SORT_BASE)
                             + def.sortingOffset
                             + building.sortingOffsetOverride;
             foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
@@ -2514,7 +2514,7 @@ namespace IsometricMapEditor
 
             // 불투명 메시(CityBuilding 등)는 sortingOrder를 무시하고 깊이로 정렬되므로,
             // sortingOrder를 시선축 깊이 오프셋으로 변환해 같은 셀에 겹친 바닥/벽/천장의 앞뒤를 확정한다.
-            go.transform.position = worldPos + IsometricGrid.SortDepthOffset(sortOrder);
+            go.transform.position = worldPos + TopDownGrid.SortDepthOffset(sortOrder);
 
             // 접지 위치 마커
             float markerScale = Mathf.Max(def.footprint.x, def.footprint.y);
@@ -2541,7 +2541,7 @@ namespace IsometricMapEditor
                     var meshCol = go.GetComponent<MeshCollider>();
                     if (meshCol) Destroy(meshCol);
                     var quadRenderer = go.GetComponent<Renderer>();
-                    var quadMat = new Material(Shader.Find("InkCity/CityBuilding") ?? Shader.Find("Universal Render Pipeline/Unlit"));
+                    var quadMat = new Material(Shader.Find("BRB/Pixelated") ?? Shader.Find("Universal Render Pipeline/2D/Sprite-Lit-Default") ?? Shader.Find("Sprites/Default"));
                     Texture2D quadTex = null;
                     if (catalog != null)
                     {
@@ -2807,7 +2807,7 @@ namespace IsometricMapEditor
             if (!inBounds) return;
 
             Vector3 finalPos = SnapToGrid
-                ? IsometricGrid.GridToWorld(cell, EditingMap.gridSettings)
+                ? TopDownGrid.GridToWorld(cell, EditingMap.gridSettings)
                 : worldPos;
 
             // 현재 층 높이 (Stage 2: 타일/벽뿐 아니라 프롭/건물/오브젝트도 층을 가진다.)
@@ -2840,9 +2840,9 @@ namespace IsometricMapEditor
                     int bDef = SelectedBuilding != null ? SelectedBuilding.sortingOffset : 0;
                     int bAuto = SelectedBuilding != null
                         ? ComputeFrontSortOverride(SelectedBuilding.GetOccupiedCells(cell), bDef, cell) : 0;
-                    int bSort = IsometricGrid.GetSortingOrder(cell, IsometricGrid.OBJECT_SORT_BASE)
+                    int bSort = TopDownGrid.GetSortingOrder(cell, TopDownGrid.OBJECT_SORT_BASE)
                                 + bDef + bAuto + _placementSortOffset;
-                    _placementGhost.transform.position = finalPos + new Vector3(0, levelY, 0) + IsometricGrid.SortDepthOffset(bSort);
+                    _placementGhost.transform.position = finalPos + new Vector3(0, levelY, 0) + TopDownGrid.SortDepthOffset(bSort);
                     break;
                 }
                 case ToolMode.Wall:
@@ -2867,7 +2867,7 @@ namespace IsometricMapEditor
                     {
                         // 스냅 미리보기: 동서남북 모서리. CurrentRotation을 90°로 양자화.
                         int wallRot = Mathf.RoundToInt(CurrentRotation / 6f) % 4;
-                        Vector3 cellCenter = IsometricGrid.GridToWorld(cell, EditingMap.gridSettings);
+                        Vector3 cellCenter = TopDownGrid.GridToWorld(cell, EditingMap.gridSettings);
                         float halfTile = ts * 0.5f;
                         Vector3 edgeOff = wallRot switch
                         {
@@ -3136,17 +3136,17 @@ namespace IsometricMapEditor
                             var tileGo = new GameObject($"Tile_{tile.tileDefinitionId}_{tile.gridPosition.x}_{tile.gridPosition.y}");
                             tileGo.transform.SetParent(layerGo.transform);
 
-                            Vector3 pos = IsometricGrid.GridToWorld(tile.gridPosition, EditingMap.gridSettings);
+                            Vector3 pos = TopDownGrid.GridToWorld(tile.gridPosition, EditingMap.gridSettings);
                             // 바닥 타일 Y = 해당 층 바닥 높이 (0층=0)
                             pos.y = tile.level * EditingMap.gridSettings.levelHeight;
                             tileGo.transform.position = pos;
                             tileGo.transform.rotation = Quaternion.Euler(90, 0, 0); // XZ 평면에 눕힘
-                            tileGo.transform.localScale = IsometricGrid.GetTileScale(tile.tileDefinition.sprite, EditingMap.gridSettings);
+                            tileGo.transform.localScale = TopDownGrid.GetTileScale(tile.tileDefinition.sprite, EditingMap.gridSettings);
 
                             var sr = tileGo.AddComponent<SpriteRenderer>();
                             sr.sprite = tile.tileDefinition.sprite;
                             sr.flipX = tile.flipX;
-                            sr.sortingOrder = IsometricGrid.GetSortingOrder(tile.gridPosition, layer.sortingLayerOffset)
+                            sr.sortingOrder = TopDownGrid.GetSortingOrder(tile.gridPosition, layer.sortingLayerOffset)
                                               + tile.tileDefinition.sortingOffset;
 
                             var mat = tile.EffectiveMaterial;
@@ -3182,7 +3182,7 @@ namespace IsometricMapEditor
                     PropQuadBuilder.ApplyFlip(go, prop.flipX);
                     PropQuadBuilder.ApplyGroundOffset(go, prop.GroundOffsetVec); // 접지 보정 — 내부 Content(이미지+콜라이더)만
 
-                    int sortOrder = IsometricGrid.GetSortingOrder(prop.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                    int sortOrder = TopDownGrid.GetSortingOrder(prop.gridPosition, TopDownGrid.OBJECT_SORT_BASE)
                                     + pdef.sortingOffset
                                     + prop.sortingOffsetOverride;
                     foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
@@ -3232,14 +3232,14 @@ namespace IsometricMapEditor
                     if (!string.IsNullOrEmpty(building.instanceId))
                         bakedBuildings[building.instanceId] = go;
 
-                    int sortOrder = IsometricGrid.GetSortingOrder(building.gridPosition, IsometricGrid.OBJECT_SORT_BASE)
+                    int sortOrder = TopDownGrid.GetSortingOrder(building.gridPosition, TopDownGrid.OBJECT_SORT_BASE)
                                     + def.sortingOffset
                                     + building.sortingOffsetOverride;
                     foreach (var sr in go.GetComponentsInChildren<SpriteRenderer>())
                         sr.sortingOrder = sortOrder;
                     foreach (var mr in go.GetComponentsInChildren<MeshRenderer>())
                         mr.sortingOrder = sortOrder;
-                    go.transform.position = worldPos + IsometricGrid.SortDepthOffset(sortOrder);
+                    go.transform.position = worldPos + TopDownGrid.SortDepthOffset(sortOrder);
                 }
 
                 // ── MapObjects (SpawnPoint, MapBoard 등 — 기능 컴포넌트 포함) ──
@@ -3393,7 +3393,7 @@ namespace IsometricMapEditor
             GridOverlay.gridSettings = EditingMap.gridSettings;
             RebuildAllVisuals();
 
-            Vector3 center = IsometricGrid.GridToWorld(
+            Vector3 center = TopDownGrid.GridToWorld(
                 new Vector2Int(EditingMap.gridSettings.mapWidth / 2,
                                EditingMap.gridSettings.mapHeight / 2),
                 EditingMap.gridSettings);

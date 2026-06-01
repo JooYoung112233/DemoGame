@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     public class MapBuilderCamera : MonoBehaviour
     {
@@ -13,9 +13,10 @@ namespace IsometricMapEditor
         public float minZoom = 1f;
         public float maxZoom = 120f;
 
-        [Header("Isometric")]
-        public float cameraAngleX = 35.264f;
-        public float cameraAngleY = 45f;
+        [Header("View Angle (탑다운)")]
+        // 기본값은 중앙 설정(TopDownGrid)에서 — iso→탑다운 전환의 단일 출처.
+        public float cameraAngleX = TopDownGrid.CameraPitch;
+        public float cameraAngleY = TopDownGrid.CameraYaw;
         public float initialDistance = 20f;
 
         [HideInInspector] public MapBuilderManager manager;

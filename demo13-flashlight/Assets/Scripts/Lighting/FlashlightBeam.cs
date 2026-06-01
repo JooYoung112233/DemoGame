@@ -50,7 +50,7 @@ public class FlashlightBeam : MonoBehaviour
             meshRenderer.sharedMaterial = beamMaterial;
         else
         {
-            var shader = Shader.Find("InkCity/FlashlightBeam");
+            var shader = Shader.Find("BRB/FlashlightBeam");
             if (shader != null)
             {
                 var mat = new Material(shader);

@@ -1,4 +1,4 @@
-Shader "InkCity/SpineLitURP"
+Shader "BRB/SpineLitURP"
 {
     Properties
     {

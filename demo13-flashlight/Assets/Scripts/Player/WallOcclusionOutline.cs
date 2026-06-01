@@ -161,7 +161,7 @@ public class WallOcclusionOutline : MonoBehaviour
         quadGO.transform.localScale = sourceSpriteRenderer.transform.localScale;
 
         // 머티리얼 생성
-        var shader = Shader.Find("Custom/OcclusionOutline");
+        var shader = Shader.Find("BRB/OcclusionOutline");
         if (shader == null)
         {
             Debug.LogWarning("[WallOcclusionOutline] Custom/OcclusionOutline 셰이더를 찾을 수 없음");

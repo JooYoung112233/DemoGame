@@ -1,12 +1,12 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// MapObject 비주얼 프리셋 정의.
     /// 카탈로그에 등록해두면 배치 시 비주얼 설정이 자동 적용됨.
     /// </summary>
-    [CreateAssetMenu(menuName = "Isometric Map/MapObject Definition")]
+    [CreateAssetMenu(menuName = "Top-Down Map/MapObject Definition")]
     public class MapObjectDefinition : ScriptableObject
     {
         public string objectId;

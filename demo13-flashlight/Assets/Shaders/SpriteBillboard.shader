@@ -1,4 +1,4 @@
-Shader "InkCity/SpriteBillboard"
+Shader "BRB/SpriteBillboard"
 {
     // SpriteRenderer 전용 빌보드 셰이더.
     // 3D 큐브 벽과 깊이 처리(ZWrite On + AlphaCutout).

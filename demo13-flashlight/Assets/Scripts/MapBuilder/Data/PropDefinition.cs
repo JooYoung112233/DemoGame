@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace IsometricMapEditor
+namespace TopDownMapEditor
 {
     /// <summary>
     /// 빛 차폐용 그림자 프록시 박스 하나의 사양.
@@ -19,7 +19,7 @@ namespace IsometricMapEditor
         public float yaw;
     }
 
-    [CreateAssetMenu(menuName = "Isometric Map/Prop Definition")]
+    [CreateAssetMenu(menuName = "Top-Down Map/Prop Definition")]
     public class PropDefinition : ScriptableObject
     {
         public string propId;
