@@ -13,15 +13,16 @@
 | **오브젝트 배치** | 타일·프롭·캐릭터 모두 **회전 (0,0,0)** (순수 2D, 스프라이트가 카메라 정면. 빌보드/눕힘 없음) |
 | **좌표계** | 월드 = **XY 평면**, 깊이 = **sortingOrder** (정사영이라 Z는 화면에 안 보이고 정렬용) |
 | **이동/충돌** | **Rigidbody2D + Collider2D** (NavMesh 폐기) |
-| **조명** | URP **2D Light**(Light2D) — 글로벌(밤 앰비언트) + 손전등(Point/Spot) |
-| **빛 차폐** | **ShadowCaster2D** (벽/구조물에 부착, Light2D 차단) |
+| **조명** | URP **2D Light**(Light2D) — 글로벌(앰비언트) + 시야 콘(플레이어 FOV) |
+| **가시성** | **좀보이드식 시야(FOV)** — 적은 플레이어 바라보는 부채꼴 밖이면 안 보임/어둑. 손전등 폐기 |
+| **빛 차폐** | **ShadowCaster2D** (벽/구조물에 부착, Light2D·시야 차단) |
 | **맵** | **Unity Tilemap**(바닥/벽) + TilemapCollider2D + CompositeCollider2D, 프롭은 **Prop2D 카탈로그** |
 
 ## 왜 탑다운 2D인가
 
 - 아이소(2.5D 하이브리드)는 깊이정렬·접지·2D-in-3D 이질감을 오래 싸웠고, AI로 아이소 모듈 스프라이트를 뽑으면 투영각이 매번 달라 맞물리지 않음(2인 제작 비현실).
 - 탑다운 2D는 Unity 네이티브 2D(Sprite/Rigidbody2D/Tilemap/Light2D)로 단순·견고. 각도/정렬/떠보임 문제가 원천 소멸.
-- 입체감/높이감은 약간 포기하고 **명료함·제작 용이**를 택함. 분위기는 **손전등 콘 + 어둠 + 밀도**가 책임(밤 룩으로 검증).
+- 입체감/높이감은 약간 포기하고 **명료함·제작 용이**를 택함. 분위기는 **시야 콘 + 어둠 + 밀도**가 책임.
 
 ## 카메라 / 좌표계
 
@@ -30,12 +31,20 @@
 - **모든 스프라이트(타일/프롭/캐릭터)는 회전 (0,0,0)** — 카메라 정면을 향하는 순수 2D. 원근은 아트가 담당하므로 트랜스폼 회전·빌보드 불필요.
 - 플레이어 추적: `CameraFollow`.
 
-## 조명
+## 조명 / 가시성 (시야 FOV) — 2026-06-02 전환
 
-- **글로벌 Light2D**: 밤 앰비언트. intensity ≈ 0.04(거의 암흑), 차가운 색(≈0.3,0.35,0.4). → 손전등 콘이 사실상 유일한 주광원.
-- **손전등 Light2D**: 플레이어 자식 피벗에 부착, 마우스 방향으로 회전(`TopDownPlayer.UpdateFlashlight`). 따뜻한 색(≈1.0,0.92,0.75). inner ≈20° / outer ≈50°. 배터리 기반 on/off: `FlashlightController`(낮에는 `DayNightCycle` 이벤트로 자동 off).
-- **그림자**: 빛을 막아야 하는 벽/구조물에 **ShadowCaster2D** 부착. (3D 스팟라이트 + ShadowsOnly 3D 박스 방식은 폐기.)
+> **손전등(주광원) 개념 폐기 → 좀보이드식 시야(FOV).** 기존 손전등 코드(`FlashlightController`/`FlashlightBeam` 셰이더/손전등 Light2D)는 **완전 제거 후 시야 시스템 신규 작성**.
+
+- **가시성 모델 = 하이브리드** (확정):
+  - 평소엔 적당히 보이되, **멀거나 그늘·실내·밤**은 어둑.
+  - 플레이어가 **바라보는 방향 부채꼴(시야 콘) 밖의 적은 안 보임/어둑** — "어디서 적이 튀어나오나"의 긴장.
+  - 가시성은 **지역/시간대별로 다름**(`WorldRegionCatalog`/`RegionTimeManager`/`DayNightCycle` 연동).
+- **시야 콘 구현 방향**: 플레이어 facing(마우스 방향) 기준 부채꼴 Light2D(또는 시야 마스크). `TopDownPlayer.FacingDirection`으로 회전. 적 가시성은 시야 콘 안/밖 판정으로 sprite 알파·표시 토글.
+- **글로벌 Light2D**: 앰비언트(밤·실내는 어둑, 낮·야외는 밝게). 하이브리드라 intensity는 지역/시간대별 가변.
+- **그림자/차폐**: 벽·구조물에 **ShadowCaster2D** → 시야 콘과 빛을 막음(벽 뒤는 안 보임). (3D 스팟라이트 + ShadowsOnly 박스 방식 폐기.)
 - 낮/밤 반응 컴포넌트(`DayNightCycle.OnPhaseChanged` 구독): `PostProcessController`, `NeonSign`, `RainController` 등. **Editor State Preservation** 규칙 유지 — `Start()`에서 값을 적용하지 않고 이벤트로만 변경.
+
+> ⚠️ 데모 폴더명 `demo13-flashlight`는 역사적 이름. 손전등 메커니즘은 폐기됨(시야 FOV로 대체).
 
 ## 맵 / 프롭
 
@@ -57,12 +66,13 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | `BRB/SpriteBillboard` | SpriteRenderer용(정점컬러+컷아웃+아웃라인) | Light2D 반응 |
 | `BRB/SpineLitURP` | Spine(premultiplied 알파+정점컬러) | Light2D 반응 |
 | `BRB/ShadowProjector` | 방향성 투영 그림자 | Unlit |
-| `BRB/FlashlightBeam` | 빔 페이드 | Unlit (Light2D로 대체 가능) |
 | `BRB/OcclusionOutline` | 깊이 가림 외곽선 | Unlit (순수 2D에선 의미 약함) |
+| ~~`BRB/FlashlightBeam`~~ | (삭제 예정 — 손전등 폐기) | — |
 
+- **타격감용 추가 예정**: 캐릭터 스프라이트 셰이더(`SpriteBillboard`/`PlayerSprite`/`SpriteSheet`)에 **`_FlashColor`/`_FlashAmount`** 프로퍼티 → 적중 시 흰색 깜빡(피격 플래시). `SpriteRenderer.color` 대신 셰이더 레벨이라 베이스 색·조명과 무관.
 - **삭제됨**: `CityBuilding`/`CityWall`/`RuinFloor`/`RoadFloor`/`WetFloor`/`Prop`(3D Forward 전용), `RuinPixel`, 구 `InkCity/*`(SpriteOutline/InkShadow/NightOverlay/PanelWiggle/InkDissolve/InkFloor/DotFloor).
 - ⚠️ 스프라이트 임포트: **Mesh Type = Full Rect** 권장(Tight면 시트UV/shear 틀어짐). URP 17.3 / Unity 6.
-- ⚠️ `ShadowProjector`/`FlashlightBeam`/`OcclusionOutline`은 iso 시절 잔재 — 순수 2D + Light2D + ShadowCaster2D 전제에선 대부분 불필요. 정리 예정.
+- ⚠️ `ShadowProjector`/`OcclusionOutline`은 iso 시절 잔재 — 순수 2D 전제에선 대부분 불필요. `FlashlightBeam`은 손전등 폐기로 삭제 예정.
 
 ## 변경 로그
 
@@ -73,3 +83,4 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | 2026-06-02 | **탑다운 2D 전환 확정.** 렌더 파이프라인 URP-3D→URP-2D, 카메라 2D Orthographic, 좌표계 XY, 조명 Light2D, 맵 Tilemap, 이동 Rigidbody2D. 아이소 식별자 전면 정리(`Isometric*`→`TopDown*`), 3D 큐브/스텐실/스팟라이트/오클루전/MapBuilder 제거. | [`topdown-migration.md`](topdown-migration.md) 참고. |
 | 2026-06-02 | 셰이더 네임스페이스 `InkCity/`·`Custom/`→`BRB/` 통일, 3D Forward 전용 셰이더 삭제, 유지 8개에 Universal2D 패스 추가. | URP 2D 렌더러는 Universal2D 패스만 그림. |
 | 2026-06-02 | **아트 각도·배치 회전 확정.** 아트에 **~80° 틸트 베이크**(카메라는 2D 정면, 안 기울임), 타일·모든 오브젝트는 **회전 (0,0,0)** 배치(순수 2D, 빌보드/눕힘 없음). | [`topdown-art-spec.md`](topdown-art-spec.md) 참고. 카메라·트랜스폼은 단순 유지, 입체감은 아트가 전담. |
+| 2026-06-02 | **손전등 폐기 → 좀보이드식 시야(FOV).** 적은 플레이어 바라보는 부채꼴 시야 밖이면 안 보임/어둑. 어둠=하이브리드(지역/시간대별 가변). 손전등 코드(FlashlightController/FlashlightBeam/손전등 Light2D) 완전 제거 후 시야 시스템 신규. | 손전등 단일 주광원보다 FOV 가시성이 긴장감·전투 무대로 더 강함. 타격감 설계와 연동([`combat.md`](combat.md)). |

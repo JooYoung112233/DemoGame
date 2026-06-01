@@ -27,8 +27,8 @@ public class TopDownPlayer : MonoBehaviour
     [SerializeField] LayerMask enemyMask = ~0;
 
     [Header("공격 데이터 (비우면 StatDB 기반 자동 생성)")]
-    [Tooltip("약공격 콤보별 AttackData (0=1타, 1=2타, 2=3타)")]
-    [SerializeField] AttackData[] lightAttacks;
+    [Tooltip("약공격 콤보 체인 (연속 공격)")]
+    [SerializeField] AttackComboData lightCombo;
     [SerializeField] AttackData heavyAttack;
     [SerializeField] AttackData heavyFullAttack;
 
@@ -70,8 +70,6 @@ public class TopDownPlayer : MonoBehaviour
     float ExhaustDur     => Stat.exhaustionDuration;
     float LightRange     => Stat.lightRange;
     float LightCooldown  => Stat.lightCooldown;
-    int   ComboMax       => Stat.lightComboMax;
-    float ComboWindow    => Stat.lightComboWindow;
     float HeavyRange     => Stat.heavyRange;
     float HeavyChargeTime=> Stat.heavyChargeTime;
     float HeavyMaxCharge => Stat.heavyMaxCharge;
@@ -95,9 +93,10 @@ public class TopDownPlayer : MonoBehaviour
 
     // 약공격 콤보
     int   _comboStep;
-    float _comboTimer;
     float _lightCooldownTimer;
     float _attackStateTimer;
+    bool  _comboBuffered;   // 다음 단계 선입력 예약
+    float _comboBufferTimer;
 
     // 강공격
     float _chargeTimer;
@@ -141,33 +140,37 @@ public class TopDownPlayer : MonoBehaviour
         EnsureDefaultAttacks();
     }
 
-    /// <summary>인스펙터에 AttackData가 비어있으면 StatDB 수치로 기본 생성.</summary>
+    /// <summary>인스펙터에 데이터가 비어있으면 StatDB 수치로 프레임 기반 기본 생성.</summary>
     void EnsureDefaultAttacks()
     {
-        if (lightAttacks == null || lightAttacks.Length < 3)
+        if (lightCombo == null || lightCombo.StepCount == 0)
         {
-            lightAttacks = new[]
+            lightCombo = ScriptableObject.CreateInstance<AttackComboData>();
+            lightCombo.comboId = "light";
+            lightCombo.steps = new System.Collections.Generic.List<AttackData>
             {
-                MakeAttack("light1", LightCooldown + 0.1f, Stat.lightDamage,       Stat.lightGroggy,       LightRange),
-                MakeAttack("light2", LightCooldown + 0.1f, Stat.lightCombo2Damage, Stat.lightCombo2Groggy, LightRange),
-                MakeAttack("light3", LightCooldown + 0.15f, Stat.lightCombo3Damage, Stat.lightCombo3Groggy, LightRange * 1.1f),
+                MakeAttack("light1", 6, Stat.lightDamage,       Stat.lightGroggy,       LightRange,        2, 3),
+                MakeAttack("light2", 6, Stat.lightCombo2Damage, Stat.lightCombo2Groggy, LightRange,        2, 3),
+                MakeAttack("light3", 8, Stat.lightCombo3Damage, Stat.lightCombo3Groggy, LightRange * 1.1f, 3, 5),
             };
         }
         if (heavyAttack == null)
-            heavyAttack = MakeAttack("heavy", 0.35f, Stat.heavyDamage, Stat.heavyGroggy, HeavyRange);
+            heavyAttack = MakeAttack("heavy", 7, Stat.heavyDamage, Stat.heavyGroggy, HeavyRange, 3, 5);
         if (heavyFullAttack == null)
-            heavyFullAttack = MakeAttack("heavyFull", 0.4f, Stat.heavyFullDamage, Stat.heavyFullGroggy, HeavyRange * 1.2f);
+            heavyFullAttack = MakeAttack("heavyFull", 9, Stat.heavyFullDamage, Stat.heavyFullGroggy, HeavyRange * 1.2f, 4, 6);
     }
 
-    static AttackData MakeAttack(string id, float dur, float dmg, float grog, float range)
+    static AttackData MakeAttack(string id, int frames, float dmg, float grog, float range, int hitStart, int hitEnd)
     {
         var a = ScriptableObject.CreateInstance<AttackData>();
-        a.attackId = id; a.duration = dur; a.damage = dmg; a.groggy = grog;
+        a.attackId = id; a.fps = 12; a.totalFrames = frames;
+        a.cancelFromFrame = Mathf.Max(1, hitEnd);
+        a.damage = dmg; a.groggy = grog;
         a.windows = new System.Collections.Generic.List<HitWindow>
         {
             new HitWindow
             {
-                label = "hit", startNorm = 0.15f, endNorm = 0.5f, shape = HitboxShape.Box,
+                label = "hit", startFrame = hitStart, endFrame = hitEnd, shape = HitboxShape.Box,
                 offset = new Vector2(range * 0.5f, 0f),
                 boxSize = new Vector2(range, range * 0.75f),
             }
@@ -285,11 +288,20 @@ public class TopDownPlayer : MonoBehaviour
 
         if (_state != CombatState.Idle && _state != CombatState.HeavyCharge) return;
 
-        // 약공격 (좌클릭)
-        if (Input.GetMouseButtonDown(0) && _lightCooldownTimer <= 0f && _state == CombatState.Idle)
+        // 약공격 (좌클릭) — 콤보 체인
+        if (Input.GetMouseButtonDown(0))
         {
-            DoLightAttack();
-            return;
+            if (_state == CombatState.Idle && _lightCooldownTimer <= 0f)
+            {
+                StartLightCombo();
+                return;
+            }
+            if (_state == CombatState.LightAttack)
+            {
+                // 다음 단계 선입력 예약 (캔슬 가능 시점에 발동)
+                _comboBuffered = true;
+                _comboBufferTimer = lightCombo != null ? lightCombo.bufferTime : 0.25f;
+            }
         }
 
         // 강공격 (우클릭 차징 → 떼면 발동)
@@ -306,21 +318,38 @@ public class TopDownPlayer : MonoBehaviour
         }
     }
 
-    void DoLightAttack()
+    void StartLightCombo()
     {
+        _comboStep = 0;
+        PerformComboStep();
+    }
+
+    void AdvanceCombo()
+    {
+        _comboStep++;
+        PerformComboStep();
+    }
+
+    void PerformComboStep()
+    {
+        var atk = lightCombo != null ? lightCombo.GetStep(_comboStep) : null;
+        if (atk == null) { EndLightCombo(); return; }
+
         float cost = _comboStep >= 2 ? Stat.lightCombo3StaminaCost : Stat.lightStaminaCost;
-        if (!ConsumeStamina(cost)) return;
+        if (!ConsumeStamina(cost)) { EndLightCombo(); return; }
 
         _state = CombatState.LightAttack;
-        int idx = Mathf.Clamp(_comboStep, 0, lightAttacks.Length - 1);
-        var atk = lightAttacks[idx];
-        _attackStateTimer = atk != null ? atk.duration : 0.18f;
-        _lightCooldownTimer = LightCooldown;
-
+        _attackStateTimer = atk.Duration;
         _performer.Perform(atk);
+        _comboBuffered = false;
+    }
 
-        _comboStep = (_comboStep + 1) % Mathf.Max(1, ComboMax);
-        _comboTimer = ComboWindow;
+    void EndLightCombo()
+    {
+        _comboStep = 0;
+        _comboBuffered = false;
+        _lightCooldownTimer = LightCooldown;
+        if (_state == CombatState.LightAttack) _state = CombatState.Idle;
     }
 
     void DoHeavyAttack()
@@ -331,7 +360,7 @@ public class TopDownPlayer : MonoBehaviour
 
         _state = CombatState.HeavyRelease;
         var atk = full ? heavyFullAttack : heavyAttack;
-        _attackStateTimer = atk != null ? atk.duration : 0.25f;
+        _attackStateTimer = atk != null ? atk.Duration : 0.25f;
         _heavyCooldownTimer = HeavyCooldown;
 
         _performer.Perform(atk);
@@ -345,7 +374,9 @@ public class TopDownPlayer : MonoBehaviour
         _dodgeTimer = DodgeDur;
         _dodgeInvTimer = DodgeInvDur;
         _dodgeCooldownTimer = DodgeCooldown;
-        _performer.Cancel(); // 구르기 시 진행 중 공격 취소
+        _performer.Cancel();           // 진행 중 공격 취소
+        _comboStep = 0;                // 콤보 끊김
+        _comboBuffered = false;
     }
 
     // ── 타이머 / 상태 ────────────────────────────────────────────────
@@ -358,12 +389,22 @@ public class TopDownPlayer : MonoBehaviour
         if (_dodgeCooldownTimer > 0) _dodgeCooldownTimer -= dt;
         if (_dodgeInvTimer > 0)      _dodgeInvTimer -= dt;
 
-        // 콤보 윈도우 만료 → 콤보 리셋
-        if (_comboTimer > 0) { _comboTimer -= dt; if (_comboTimer <= 0) _comboStep = 0; }
+        // 선입력 버퍼 만료
+        if (_comboBuffered) { _comboBufferTimer -= dt; if (_comboBufferTimer <= 0f) _comboBuffered = false; }
 
         switch (_state)
         {
             case CombatState.LightAttack:
+                // 캔슬 가능 시점 + 선입력 → 다음 콤보 단계
+                int lastStep = (lightCombo != null ? lightCombo.StepCount : 0) - 1;
+                if (_comboBuffered && _performer.CanCancel && _comboStep < lastStep)
+                {
+                    AdvanceCombo();
+                    break;
+                }
+                _attackStateTimer -= dt;
+                if (_attackStateTimer <= 0) EndLightCombo();
+                break;
             case CombatState.HeavyRelease:
                 _attackStateTimer -= dt;
                 if (_attackStateTimer <= 0) _state = CombatState.Idle;

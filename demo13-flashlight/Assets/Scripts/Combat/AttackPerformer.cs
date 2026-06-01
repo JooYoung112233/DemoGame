@@ -21,8 +21,16 @@ public class AttackPerformer : MonoBehaviour
 
     public bool IsPerforming => _performing;
     public AttackData Current => _current;
+
+    /// <summary>현재 재생 프레임.</summary>
+    public int CurrentFrame => _current != null ? _current.FrameAtTime(_timer) : 0;
+
+    /// <summary>다음 콤보로 캔슬 입력을 받을 수 있는 시점인지.</summary>
+    public bool CanCancel =>
+        _current != null && _current.cancelFromFrame >= 0 && CurrentFrame >= _current.cancelFromFrame;
+
     public float NormalizedTime =>
-        (_current != null && _current.duration > 0f) ? Mathf.Clamp01(_timer / _current.duration) : 0f;
+        (_current != null && _current.Duration > 0f) ? Mathf.Clamp01(_timer / _current.Duration) : 0f;
 
     /// <summary>레이어 마스크와 공격 방향 공급자 설정. (TopDownPlayer/EnemyController가 호출)</summary>
     public void Configure(LayerMask mask, Func<Vector2> facingProvider)
@@ -51,16 +59,16 @@ public class AttackPerformer : MonoBehaviour
         if (!_performing || _current == null) return;
 
         _timer += Time.deltaTime;
-        float norm = NormalizedTime;
+        int frame = CurrentFrame;
 
         var windows = _current.windows;
         for (int i = 0; i < windows.Count; i++)
         {
             var w = windows[i];
-            if (w != null && w.IsActiveAt(norm)) ScanWindow(w);
+            if (w != null && w.IsActiveAtFrame(frame)) ScanWindow(w);
         }
 
-        if (_timer >= _current.duration) Cancel();
+        if (_timer >= _current.Duration) Cancel();
     }
 
     void ScanWindow(HitWindow w)

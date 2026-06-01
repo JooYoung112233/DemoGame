@@ -54,7 +54,7 @@ All lighting scripts subscribe to `DayNightCycle.OnPhaseChanged` event:
 - **PostProcessController** — Mood presets (NeonNight/DesolateRuin/Anomaly) with day/night variants. Anomaly pulse + glitch effects on transition. **Does NOT apply values on Start()** — preserves editor state. Effects only activate on T-key phase change.
 - **BuildingGlow** — Window glow via MaterialPropertyBlock `_GlowIntensity`. Applies immediately on Start based on current phase.
 - **NeonSign** — Same pattern: subscribe to phase change, don't override editor state on Start.
-- **FlashlightController** — Battery-based flashlight (Light2D), auto-off at daytime via DayNightCycle event.
+- **Visibility (FOV):** flashlight-as-primary-light is being **removed** in favor of a Zomboid-style vision cone (enemies hidden outside the player's facing arc; hybrid darkness per region/time). Old flashlight code (`FlashlightController`, `FlashlightBeam` shader, flashlight Light2D) is slated for full removal + a new vision system. See `docs/rendering.md` (가시성) and `docs/combat.md` (타격감).
 
 ### Rendering & Shaders (top-down 2D)
 - **Pipeline:** URP **2D Renderer**. Camera 2D Orthographic; depth via `sortingOrder` (CameraSortSetup sets TransparencySortMode.CustomAxis `(0,1,0)` — lower Y = front).

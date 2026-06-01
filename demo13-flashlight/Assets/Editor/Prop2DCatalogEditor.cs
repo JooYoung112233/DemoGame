@@ -47,17 +47,17 @@ public class Prop2DCatalogEditor : EditorWindow
 
     void OnGUI()
     {
-        EditorGUILayout.BeginHorizontal();
+        // 세로 레이아웃: 목록(위) → 구분선 → 편집 폼(아래). (가로 분할 시 목록이 좁아 버튼이 잘림)
         DrawList();
-        DrawDivider();
+        var sep = GUILayoutUtility.GetRect(1, 2, GUILayout.ExpandWidth(true));
+        EditorGUI.DrawRect(sep, new Color(0, 0, 0, 0.3f));
         DrawForm();
-        EditorGUILayout.EndHorizontal();
     }
 
-    // ───────────────────────── 좌측: 목록 ─────────────────────────
+    // ───────────────────────── 위: 목록 ─────────────────────────
     void DrawList()
     {
-        EditorGUILayout.BeginVertical(GUILayout.Width(300));
+        EditorGUILayout.BeginVertical();
 
         // 카테고리 탭
         int newTab = GUILayout.Toolbar((int)_tab, TabNames);
@@ -81,7 +81,8 @@ public class Prop2DCatalogEditor : EditorWindow
         _search = EditorGUILayout.TextField("검색", _search);
 
         EditorGUILayout.Space(4);
-        _listScroll = EditorGUILayout.BeginScrollView(_listScroll);
+        // 목록은 높이 제한(최대 ~200px) — 아래 편집 폼이 가려지지 않도록.
+        _listScroll = EditorGUILayout.BeginScrollView(_listScroll, GUILayout.Height(200));
         Prop2DDefinition toDuplicate = null, toDelete = null;
         foreach (var p in _props)
         {
