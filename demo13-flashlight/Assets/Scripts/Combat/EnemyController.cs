@@ -37,6 +37,12 @@ public class EnemyController : MonoBehaviour
     [SerializeField] string unitKey;
     UnitStatData unitStat;
 
+    [Header("Attack Hitbox")]
+    [Tooltip("적 공격의 히트박스 타임라인 (비우면 즉시 데미지 폴백)")]
+    [SerializeField] AttackData attackData;
+    [Tooltip("타격 대상 레이어 (Player)")]
+    [SerializeField] LayerMask playerMask = 1 << 6;
+
     [Header("References")]
     [SerializeField] SkeletonAnimController animController;
 
@@ -47,6 +53,8 @@ public class EnemyController : MonoBehaviour
     Health         playerHealth;
     Rigidbody2D    _rb;
     CombatFeedback feedback;
+    AttackPerformer _performer;
+    Vector2        _attackDir = Vector2.right;
     SpriteRenderer spriteRenderer;
     Renderer[]     renderers;
     Color          originalColor = Color.white;
@@ -121,6 +129,10 @@ public class EnemyController : MonoBehaviour
 
         health    = GetComponent<Health>();
         feedback  = GetComponent<CombatFeedback>();
+
+        _performer = GetComponent<AttackPerformer>();
+        if (_performer == null) _performer = gameObject.AddComponent<AttackPerformer>();
+        _performer.Configure(playerMask, () => _attackDir);
 
         if (animController == null)
             animController = GetComponentInChildren<SkeletonAnimController>();
@@ -277,29 +289,38 @@ public class EnemyController : MonoBehaviour
         windupFlashTimer = 0;
         FacePlayer();
 
-        if (feedback != null && player != null)
+        Vector2 dir = player != null
+            ? ((Vector2)player.position - (Vector2)transform.position).normalized
+            : _attackDir;
+        _attackDir = dir;
+
+        if (feedback != null) feedback.DoLightLunge(dir);
+
+        // 히트박스 타임라인이 있으면 프레임 기반 판정, 없으면 즉시 데미지 폴백
+        if (attackData != null)
         {
-            Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
-            feedback.DoLightLunge(dir);
+            _performer.Perform(attackData);
+            animController?.PlayOneShot("attack");
+            if (animController == null) state = State.Chase;
         }
-
-        animController?.PlayOneShot("attack", () =>
+        else
         {
-            if (player != null && DistToPlayer() <= AtkRange * 1.5f)
+            animController?.PlayOneShot("attack", () => ImmediateMeleeHit());
+            if (animController == null)
             {
-                playerHealth?.TakeDamage(Damage);
-                DamagePopup.Create(player.position, Damage, DamagePopup.DamageType.Normal);
+                ImmediateMeleeHit();
+                state = State.Chase;
             }
-        });
+        }
+    }
 
-        if (animController == null)
+    /// <summary>AttackData 없을 때의 즉시 근접 판정 폴백.</summary>
+    void ImmediateMeleeHit()
+    {
+        if (player != null && DistToPlayer() <= AtkRange * 1.5f)
         {
-            if (player != null && DistToPlayer() <= AtkRange * 1.5f)
-            {
-                playerHealth?.TakeDamage(Damage);
-                DamagePopup.Create(player.position, Damage, DamagePopup.DamageType.Normal);
-            }
-            state = State.Chase;
+            playerHealth?.TakeDamage(Damage);
+            DamagePopup.Create(player.position, Damage, DamagePopup.DamageType.Normal);
         }
     }
 

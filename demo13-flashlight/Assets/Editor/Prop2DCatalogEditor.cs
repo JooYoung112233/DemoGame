@@ -57,7 +57,7 @@ public class Prop2DCatalogEditor : EditorWindow
     // ───────────────────────── 좌측: 목록 ─────────────────────────
     void DrawList()
     {
-        EditorGUILayout.BeginVertical(GUILayout.Width(220));
+        EditorGUILayout.BeginVertical(GUILayout.Width(300));
 
         // 카테고리 탭
         int newTab = GUILayout.Toolbar((int)_tab, TabNames);
@@ -82,6 +82,7 @@ public class Prop2DCatalogEditor : EditorWindow
 
         EditorGUILayout.Space(4);
         _listScroll = EditorGUILayout.BeginScrollView(_listScroll);
+        Prop2DDefinition toDuplicate = null, toDelete = null;
         foreach (var p in _props)
         {
             if (p == null || p.category != _tab) continue;
@@ -90,12 +91,35 @@ public class Prop2DCatalogEditor : EditorWindow
                 label.IndexOf(_search, System.StringComparison.OrdinalIgnoreCase) < 0)
                 continue;
             bool sel = p == _selected;
-            EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button(sel ? "편집중" : "편집", GUILayout.Width(50))) _selected = p;
+            EditorGUILayout.BeginHorizontal(sel ? "selectionRect" : "box");
+
+            // 썸네일
+            var thumb = GUILayoutUtility.GetRect(28, 28, GUILayout.Width(28), GUILayout.Height(28));
+            if (p.sprite != null && p.sprite.texture != null)
+            {
+                var trc = p.sprite.textureRect; var tx = p.sprite.texture;
+                GUI.DrawTextureWithTexCoords(thumb, tx,
+                    new Rect(trc.x / tx.width, trc.y / tx.height, trc.width / tx.width, trc.height / tx.height), true);
+            }
+
+            // 이름 + 정보(클릭=선택)
+            EditorGUILayout.BeginVertical();
             if (GUILayout.Button(label, sel ? EditorStyles.boldLabel : EditorStyles.label)) _selected = p;
+            bool blocks = p.colliderMode != Prop2DDefinition.ColliderMode.None && !p.isTrigger;
+            EditorGUILayout.LabelField($"{p.colliderMode}  막힘:{(blocks ? "O" : "X")}", EditorStyles.miniLabel);
+            EditorGUILayout.EndVertical();
+
+            if (GUILayout.Button(sel ? "편집중" : "편집", GUILayout.Width(46))) _selected = p;
+            if (GUILayout.Button("복제", GUILayout.Width(38))) toDuplicate = p;
+            if (GUILayout.Button("X", GUILayout.Width(22))) toDelete = p;
+
             EditorGUILayout.EndHorizontal();
         }
         EditorGUILayout.EndScrollView();
+
+        // 루프 밖에서 처리(컬렉션 변경 안전)
+        if (toDuplicate != null) { _selected = toDuplicate; DuplicateSelected(); }
+        if (toDelete != null) { _selected = toDelete; DeleteSelected(); }
         EditorGUILayout.EndVertical();
     }
 

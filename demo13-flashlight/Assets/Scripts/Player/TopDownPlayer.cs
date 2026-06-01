@@ -26,6 +26,12 @@ public class TopDownPlayer : MonoBehaviour
     [Tooltip("공격 판정 대상 레이어 (적). 비워두면 EnemyController 컴포넌트로 판별)")]
     [SerializeField] LayerMask enemyMask = ~0;
 
+    [Header("공격 데이터 (비우면 StatDB 기반 자동 생성)")]
+    [Tooltip("약공격 콤보별 AttackData (0=1타, 1=2타, 2=3타)")]
+    [SerializeField] AttackData[] lightAttacks;
+    [SerializeField] AttackData heavyAttack;
+    [SerializeField] AttackData heavyFullAttack;
+
     [Header("기본값 (StatDB 없을 때)")]
     [SerializeField] float fallbackMoveSpeed = 5f;
 
@@ -103,6 +109,10 @@ public class TopDownPlayer : MonoBehaviour
     float _dodgeInvTimer;
     Vector2 _dodgeDir;
 
+    // 히트박스 / 허트박스
+    AttackPerformer _performer;
+    Hurtbox _hurtbox;
+
     // ── Unity 생명주기 ───────────────────────────────────────────────
 
     void Awake()
@@ -120,6 +130,49 @@ public class TopDownPlayer : MonoBehaviour
         _cam = Camera.main;
 
         _stamina = MaxStam;
+
+        // 공격 판정기 (적 레이어 타격)
+        _performer = GetComponent<AttackPerformer>();
+        if (_performer == null) _performer = gameObject.AddComponent<AttackPerformer>();
+        _performer.Configure(enemyMask, () => FacingDirection);
+
+        _hurtbox = GetComponentInChildren<Hurtbox>();
+
+        EnsureDefaultAttacks();
+    }
+
+    /// <summary>인스펙터에 AttackData가 비어있으면 StatDB 수치로 기본 생성.</summary>
+    void EnsureDefaultAttacks()
+    {
+        if (lightAttacks == null || lightAttacks.Length < 3)
+        {
+            lightAttacks = new[]
+            {
+                MakeAttack("light1", LightCooldown + 0.1f, Stat.lightDamage,       Stat.lightGroggy,       LightRange),
+                MakeAttack("light2", LightCooldown + 0.1f, Stat.lightCombo2Damage, Stat.lightCombo2Groggy, LightRange),
+                MakeAttack("light3", LightCooldown + 0.15f, Stat.lightCombo3Damage, Stat.lightCombo3Groggy, LightRange * 1.1f),
+            };
+        }
+        if (heavyAttack == null)
+            heavyAttack = MakeAttack("heavy", 0.35f, Stat.heavyDamage, Stat.heavyGroggy, HeavyRange);
+        if (heavyFullAttack == null)
+            heavyFullAttack = MakeAttack("heavyFull", 0.4f, Stat.heavyFullDamage, Stat.heavyFullGroggy, HeavyRange * 1.2f);
+    }
+
+    static AttackData MakeAttack(string id, float dur, float dmg, float grog, float range)
+    {
+        var a = ScriptableObject.CreateInstance<AttackData>();
+        a.attackId = id; a.duration = dur; a.damage = dmg; a.groggy = grog;
+        a.windows = new System.Collections.Generic.List<HitWindow>
+        {
+            new HitWindow
+            {
+                label = "hit", startNorm = 0.15f, endNorm = 0.5f, shape = HitboxShape.Box,
+                offset = new Vector2(range * 0.5f, 0f),
+                boxSize = new Vector2(range, range * 0.75f),
+            }
+        };
+        return a;
     }
 
     void OnDestroy()
@@ -141,6 +194,9 @@ public class TopDownPlayer : MonoBehaviour
         UpdateCombatTimers();
         UpdateStamina();
         UpdateSprint(uiOpen);
+
+        // 구르기 무적 → 허트박스 비활성 (피격 안 됨)
+        if (_hurtbox != null) _hurtbox.SetActive(!IsInvincible);
     }
 
     void FixedUpdate()
@@ -255,24 +311,13 @@ public class TopDownPlayer : MonoBehaviour
         float cost = _comboStep >= 2 ? Stat.lightCombo3StaminaCost : Stat.lightStaminaCost;
         if (!ConsumeStamina(cost)) return;
 
-        float dmg = _comboStep switch
-        {
-            0 => Stat.lightDamage,
-            1 => Stat.lightCombo2Damage,
-            _ => Stat.lightCombo3Damage,
-        };
-        float groggy = _comboStep switch
-        {
-            0 => Stat.lightGroggy,
-            1 => Stat.lightCombo2Groggy,
-            _ => Stat.lightCombo3Groggy,
-        };
-
         _state = CombatState.LightAttack;
-        _attackStateTimer = 0.18f;
+        int idx = Mathf.Clamp(_comboStep, 0, lightAttacks.Length - 1);
+        var atk = lightAttacks[idx];
+        _attackStateTimer = atk != null ? atk.duration : 0.18f;
         _lightCooldownTimer = LightCooldown;
 
-        DealDamageInArc(LightRange, dmg, groggy);
+        _performer.Perform(atk);
 
         _comboStep = (_comboStep + 1) % Mathf.Max(1, ComboMax);
         _comboTimer = ComboWindow;
@@ -284,14 +329,12 @@ public class TopDownPlayer : MonoBehaviour
         float cost = full ? Stat.heavyFullStaminaCost : Stat.heavyStaminaCost;
         if (!ConsumeStamina(cost)) { _state = CombatState.Idle; return; }
 
-        float dmg    = full ? Stat.heavyFullDamage : Stat.heavyDamage;
-        float groggy = full ? Stat.heavyFullGroggy : Stat.heavyGroggy;
-
         _state = CombatState.HeavyRelease;
-        _attackStateTimer = 0.25f;
+        var atk = full ? heavyFullAttack : heavyAttack;
+        _attackStateTimer = atk != null ? atk.duration : 0.25f;
         _heavyCooldownTimer = HeavyCooldown;
 
-        DealDamageInArc(HeavyRange, dmg, groggy);
+        _performer.Perform(atk);
     }
 
     void TryDodge()
@@ -302,19 +345,7 @@ public class TopDownPlayer : MonoBehaviour
         _dodgeTimer = DodgeDur;
         _dodgeInvTimer = DodgeInvDur;
         _dodgeCooldownTimer = DodgeCooldown;
-    }
-
-    /// <summary>FacingDirection 방향 부채꼴(원형 근사)로 적에게 데미지 + 그로기.</summary>
-    void DealDamageInArc(float range, float damage, float groggy)
-    {
-        Vector2 center = (Vector2)transform.position + FacingDirection * (range * 0.5f);
-        var hits = Physics2D.OverlapCircleAll(center, range * 0.6f, enemyMask);
-        foreach (var col in hits)
-        {
-            var enemy = col.GetComponentInParent<EnemyController>();
-            if (enemy == null || enemy.IsDead) continue;
-            enemy.TakeHit(damage, groggy, FacingDirection);
-        }
+        _performer.Cancel(); // 구르기 시 진행 중 공격 취소
     }
 
     // ── 타이머 / 상태 ────────────────────────────────────────────────

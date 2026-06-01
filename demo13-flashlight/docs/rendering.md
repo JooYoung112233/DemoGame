@@ -9,7 +9,8 @@
 |---|---|
 | **렌더 파이프라인** | URP **2D Renderer**(Renderer2D). `URP-2D.asset` |
 | **카메라** | **2D Orthographic, Z축 정면 직시** (3D 틸트 없음) |
-| **원근감** | 카메라가 아니라 **스프라이트 아트에 미리 베이크**(near-overhead 시점, 레퍼: Darkwood/Hotline Miami) |
+| **원근감** | 카메라가 아니라 **스프라이트 아트에 ~80° 틸트를 베이크**(near-overhead, 레퍼: Darkwood). 정면/측면이 살짝 보임 |
+| **오브젝트 배치** | 타일·프롭·캐릭터 모두 **회전 (0,0,0)** (순수 2D, 스프라이트가 카메라 정면. 빌보드/눕힘 없음) |
 | **좌표계** | 월드 = **XY 평면**, 깊이 = **sortingOrder** (정사영이라 Z는 화면에 안 보이고 정렬용) |
 | **이동/충돌** | **Rigidbody2D + Collider2D** (NavMesh 폐기) |
 | **조명** | URP **2D Light**(Light2D) — 글로벌(밤 앰비언트) + 손전등(Point/Spot) |
@@ -26,6 +27,7 @@
 
 - 카메라 = 표준 2D 셋업. `CameraSortSetup`이 `TransparencySortMode.CustomAxis`, 정렬축 `(0,1,0)` 설정 → **Y가 낮을수록(화면 아래) 앞**.
 - 모든 위치/투영/그림자 계산은 **XY 기준**. (구 "XZ 바닥평면 + 90° 눕힌 쿼드" 전제는 폐기.)
+- **모든 스프라이트(타일/프롭/캐릭터)는 회전 (0,0,0)** — 카메라 정면을 향하는 순수 2D. 원근은 아트가 담당하므로 트랜스폼 회전·빌보드 불필요.
 - 플레이어 추적: `CameraFollow`.
 
 ## 조명
@@ -70,3 +72,4 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | 2026-06-01 | (폐기) 비주얼 = 2D 평면, 빛 차폐 = 안 보이는 3D 박스(ShadowsOnly) 하이브리드. | URP 2D 렌더러 + Light2D 전환으로 ShadowCaster2D가 대체. |
 | 2026-06-02 | **탑다운 2D 전환 확정.** 렌더 파이프라인 URP-3D→URP-2D, 카메라 2D Orthographic, 좌표계 XY, 조명 Light2D, 맵 Tilemap, 이동 Rigidbody2D. 아이소 식별자 전면 정리(`Isometric*`→`TopDown*`), 3D 큐브/스텐실/스팟라이트/오클루전/MapBuilder 제거. | [`topdown-migration.md`](topdown-migration.md) 참고. |
 | 2026-06-02 | 셰이더 네임스페이스 `InkCity/`·`Custom/`→`BRB/` 통일, 3D Forward 전용 셰이더 삭제, 유지 8개에 Universal2D 패스 추가. | URP 2D 렌더러는 Universal2D 패스만 그림. |
+| 2026-06-02 | **아트 각도·배치 회전 확정.** 아트에 **~80° 틸트 베이크**(카메라는 2D 정면, 안 기울임), 타일·모든 오브젝트는 **회전 (0,0,0)** 배치(순수 2D, 빌보드/눕힘 없음). | [`topdown-art-spec.md`](topdown-art-spec.md) 참고. 카메라·트랜스폼은 단순 유지, 입체감은 아트가 전담. |
