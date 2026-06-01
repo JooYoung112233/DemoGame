@@ -12,6 +12,33 @@
 | 프랍(Prop) | 2D Sprite | 장식물은 2D로 충분 |
 | 지붕(Roof) | 2D Sprite (상위 RoofController) | ON/OFF 토글 필요 |
 
+## 뷰 / 카메라 (2026-05-29 전환 — iso 폐기)
+
+**확정: 거의 순수 탑다운 (near-overhead ~80°), iso 폐기.** 레퍼런스 = Darkwood / Hotline Miami. 컨셉 원화로 룩 확정(1층/2층 평면도 + 계단 연결, 밤 손전등 버전).
+
+- **iso를 버린 이유**: AI로 아이소 **모듈/통짜 스프라이트**를 뽑을 때 투영각이 매번 달라져 모듈이 안 맞물림 → 프롬프트로 해결 불가 (2인 제작 비현실).
+- **각도 = 카메라 설정값.** 벽/건물은 **3D 큐브 유지**(WallBuilder), 텍스처는 **평면**. 카메라만 탑다운으로 → 각도 일관성 문제 영영 없음(스프라이트가 아니라 큐브+카메라+평면텍스처라서).
+- **다층 = 층 전환** (계단 밟으면 보이는 층 맵 교체, 위층 가면 아래층 렌더 끔). 탑다운은 한 화면에 여러 층을 못 쌓음(그게 버린 iso 컷어웨이). `RoofController`/`BuildingInterior` 활용.
+  - **높이감**: ~80°라 거의 납작(깨끗·읽기 쉬움·제작 쉬움이 우선). 벽 두께만 살짝 보임. 분위기는 **손전등 콘+어둠+밀도**가 책임(밤 원화에서 검증). 높이감 약간 포기 = 단순함 획득(2인 트레이드).
+  - **각도 다이얼**: 높이감 더 원하면 ~75°, 드라마틱 ~65° (각도↑ = 높이감↑ but 앞벽 가림↑, BuildingInterior 페이드 의존↑). 현재 선택 = ~80°.
+- **프랍/데코 3분류**: 박스 가구(3D큐브+평면텍스처, 70%) / 평면 데코(바닥·벽 데칼) / 소형 유기 프랍(정면 빌보드, 고정카메라라 한 각도만).
+- **AI 역할 한정**: 평면 텍스처 · 데칼 · 정면/소형 스프라이트 · 무드 원화만. **통짜 아이소·모듈 스프라이트 생성 금지.**
+- **캐릭터**: 3/4 빌보드(기존 스프라이트). 거의-수직 바닥에선 살짝 안 맞지만 다수 탑다운겜 관행이라 잘 읽힘. 신경쓰이면 캐릭터만 더 위에서 본 느낌으로.
+- ⚠️ **영향**: 기존 "2D 아이소 스프라이트" 전제 결정(그림자 프록시 워크플로 등) 재검토 필요. 핵심 시스템(3D큐브 벽, 스포트라이트 차폐, 오클루전)은 탑다운에서도 그대로 유효.
+
+### 프랍 파이프라인 (탑다운, 2026-05-29)
+
+탑다운이라 프랍이 **더 쉬워짐** — 위에서 본 모습 1장이면 끝(각도 하나, 드리프트 0, AI 일관 생성). 기존 맵툴 프랍 시스템 그대로 전용.
+
+| 항목 | 처리 | 비고 |
+|------|------|------|
+| 비주얼 | 평면 탑다운 스프라이트, 바닥 위 정렬 | iso 대신 탑다운으로 그림(더 쉬움) |
+| 빛 차단 | 키 큰 프랍만 `castsShadow` → 그림자박스(`ShadowsOnly`) | 기존 `ShadowProxyBuilder`/`PropDefinition` 재활용 |
+| 이동 차단 | `blocksWalkability` | 기존 그대로 |
+| **정렬** | 낮은 프랍(러그·잔해)=항상 플레이어 아래 / 키 큰 프랍(옷장·선반)=플레이어와 Y정렬 | 거의-수직이라 겹침 적음. 초기엔 프랍 낮게+옷장급만 Y정렬로 충분. `IsometricDepthSorter` 전용 |
+
+- **맵툴 자체**(`MapBuilderManager`/`IsometricGrid`/`MapCatalogEditor` Props 탭)는 격자 기반이라 대부분 재활용. 바뀌는 건 카메라 각도·렌더뿐.
+
 ## 핵심 원칙
 
 - **벽/건물 큐브는 얇게** — 너무 두껍거나 투박하면 어색함. 자연스러운 두께 유지
@@ -154,3 +181,5 @@
 | 2026-05-31 | 맵오브젝트(스폰포인트·지도판 등)가 프리팹에 기능 없이 저장됨 | **베이크의 MapObjects 루프를 런타임 `MapObjectSpawner.SpawnSingle` 재사용으로 통일.** 원인: `MapRuntimeBootstrapper.Start()`가 비어 있어(=베이크 프리팹 사용, 런타임 자동 생성 비활성) 런타임 스폰 경로를 안 타는데, `SaveMapPrefab`의 MapObjects 루프는 **빈 GameObject(+이펙트 프리팹)만** 만들고 SpawnPoint/InteractableObject(MapBoard 등)/LootContainer/Door/NPC/Trigger **기능 컴포넌트를 붙이지 않아** 베이크 프리팹에 기능이 직렬화되지 않았음. **해결**: `MapObjectSpawner.SpawnSingle`을 public으로 올리고, 베이크에서 임시 `MapObjectSpawner`(`__BakeMapObjectSpawner`)를 만들어 각 오브젝트를 `SpawnSingle`로 빌드 → 런타임과 동일한 컴포넌트가 붙은 채 프리팹에 직렬화. 내부 오브젝트(`parentBuildingId`) 라우팅용으로 건물 베이크 시 `instanceId→GameObject` 딕셔너리를 채워 `SetBuildingObjects`로 전달. 이펙트 프리팹(visualMode==3) 비주얼은 스포너가 안 다루므로 베이크에서 추가 부착(기존 로직 유지). 스포너의 런타임 전용 `Destroy`(Door 비주얼 콜라이더)는 `DestroyObj`(에디터=DestroyImmediate) 헬퍼로 교체. 임시 스포너 GO는 `finally`에서 `DestroyImmediate`. 도어 비주얼의 `new Material`은 직전 단계 `PersistGeneratedAssets`가 에셋화. | "스폰포인트·지도판이 저장 안 됨" — 베이크가 비주얼만 굽고 로직 컴포넌트는 누락. 검증된 런타임 스폰 코드를 단일 출처로 재사용해 베이크=런타임 동작 일치(중복 구현·드리프트 방지). JSON은 Resources 밖(Assets/Maps)이라 런타임 로드 불가 → 프리팹에 굽는 게 유일한 경로. (loot용 MapSpawnController 자동생성은 베이크에서 제외 — 추후 과제.) |
 | 2026-05-31 | 벽이 프리팹에 저장 안 됨(베이크 후 다시 열면 사라짐) | **베이크 시 코드로 생성한 비-에셋 메시/머티리얼을 디스크 에셋으로 영속화한 뒤 참조 교체.** 원인: 벽 큐브는 `WallBuilder`의 절차적 공유 메시(`_uprightBox = new Mesh{...}`)와 런타임 머티리얼(`new Material(...)`), 건물 폴백 큐브도 런타임 머티리얼을 쓰는데, 이들은 **에셋이 아니라 메모리상 객체**라 `PrefabUtility.SaveAsPrefabAsset`이 직렬화하지 못함 → 프리팹을 다시 열면 메시/머티리얼 참조가 null이 되어 벽이 안 보임(스프라이트 타일/프롭은 에셋 스프라이트라 멀쩡). **해결**: `SaveMapPrefab`에서 `SaveAsPrefabAsset` **직전에** `PersistGeneratedAssets(root, prefabDir, filename)` 호출 — 계층의 모든 `MeshFilter.sharedMesh`/`Renderer.sharedMaterials`를 훑어 `AssetDatabase.Contains(x)==false`인 것만 `{prefabDir}/Map_{filename}_Assets/` 폴더에 `.asset`/`.mat`으로 저장하고 참조를 그 에셋으로 교체. 동일 인스턴스는 레퍼런스로 디듀프(공유 벽 메시는 1개만 저장). **메시는 원본을 소비하지 않게 `Object.Instantiate` 복사본을 저장**(런타임 싱글톤 `_uprightBox` 보존). 폴더는 매 베이크 시 `DeleteAsset`으로 비우고 재생성. | 절차적 메시/런타임 머티리얼은 디스크 에셋이 아니면 프리팹에 직렬화 안 됨(에셋 스프라이트와 차이). 벽 전용이 아니라 건물 폴백 등 모든 비-에셋 렌더 리소스를 범용 헬퍼로 한 번에 처리. 복사본 저장으로 다음 베이크의 공유 싱글톤이 첫 프리팹에 묶이는 사고 방지. |
 | 2026-05-30 | F키 플립이 안 먹힘(그림 좌우 반전 안 됨) | **`sr.flipX` 대신 트랜스폼 X스케일 부호로 미러링.** 원인: props.mat의 커스텀 `InkCity/Prop` 셰이더(Prop.shader)가 `TransformObjectToHClip(positionOS)`만 하고 빌트인 sprite의 `_Flip` 벡터를 안 봐서 `SpriteRenderer.flipX`가 무시됨. `PropQuadBuilder.ApplyFlip`을 재작성: `sr.flipX=false`로 끄고 Visual 트랜스폼의 `localScale.x` 부호를 뒤집어 **지오메트리 레벨**에서 반전(셰이더 무관). `Mathf.Abs`로 멱등(여러 번 호출해도 안정). 맵툴 F키→`ToggleFlipX`→고스트/이동중 프롭/배치 프롭(`prop.flipX`)에 적용. | 커스텀 셰이더라 sr.flipX가 화면에 반영 안 됨. 트랜스폼 스케일 반전은 어떤 셰이더에도 통하고 접지 오프셋(localPosition.y)과 독립적이라 안전. |
+| 2026-05-29 | AI로 아이소 에셋이 각도 일관되게 안 나와 제작 불가. 뷰를 바꿔야 하나? | **iso 폐기 → 탑다운(near-overhead) 확정** (Darkwood/Hotline Miami). 벽/건물은 3D큐브 유지하고 카메라 각도만 변경, 텍스처는 평면. 다층=층 전환(동시표시X). 프랍=박스가구+평면데칼+소형빌보드. AI는 평면텍스처·데칼·무드원화만, 통짜/모듈 아이소 스프라이트 생성 금지. | AI 아이소 모듈은 투영각 드리프트로 2인 제작 비현실. 3D큐브+카메라+평면텍스처면 각도 일관성 문제 자체가 소멸. 기존 iso 전제 결정은 재검토 필요. |
+| 2026-05-29 | 탑다운 각도와 프랍 파이프라인 확정? | **각도 = 거의 순수 탑다운 ~80°** (컨셉 원화로 확정, 1F/2F 평면+계단). 높이감보단 명료함·제작 용이 우선, 분위기는 손전등+어둠+밀도가 담당. **프랍 = 평면 탑다운 스프라이트 + 기존 그림자박스/blocksWalkability/Y정렬 시스템 그대로 전용.** 캐릭터는 3/4 빌보드 유지(관행). 맵툴(MapBuilder)도 격자 기반이라 재활용. | 탑다운이라 프랍 스프라이트가 각도 하나라 더 쉬움(드리프트0). 기존 프랍/그림자 시스템이 iso용이었지만 탑다운에 그대로 맞음 — 신규 작업 최소. |
