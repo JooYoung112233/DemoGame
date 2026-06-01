@@ -89,8 +89,11 @@ public class Prop2DCatalogEditor : EditorWindow
             if (!string.IsNullOrEmpty(_search) &&
                 label.IndexOf(_search, System.StringComparison.OrdinalIgnoreCase) < 0)
                 continue;
-            var style = p == _selected ? EditorStyles.boldLabel : EditorStyles.label;
-            if (GUILayout.Button(label, style)) _selected = p;
+            bool sel = p == _selected;
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button(sel ? "편집중" : "편집", GUILayout.Width(50))) _selected = p;
+            if (GUILayout.Button(label, sel ? EditorStyles.boldLabel : EditorStyles.label)) _selected = p;
+            EditorGUILayout.EndHorizontal();
         }
         EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();
@@ -129,7 +132,9 @@ public class Prop2DCatalogEditor : EditorWindow
         EditorGUI.BeginChangeCheck();
 
         EditorGUILayout.LabelField("Identity", EditorStyles.boldLabel);
-        def.propId = EditorGUILayout.TextField("Prop ID", def.propId);
+        // ID는 자동 생성(수동 입력 X). 편집 시 읽기전용 표시.
+        using (new EditorGUI.DisabledScope(true))
+            EditorGUILayout.TextField("Prop ID (자동)", def.propId);
         def.displayName = EditorGUILayout.TextField("표시 이름", def.displayName);
         def.category = (Prop2DDefinition.Category)EditorGUILayout.EnumPopup("카테고리(탭)", def.category);
 
@@ -166,10 +171,7 @@ public class Prop2DCatalogEditor : EditorWindow
             EditorUtility.SetDirty(def);
         }
 
-        EditorGUILayout.Space(8);
-        EditorGUILayout.LabelField("미리보기 (콜라이더 = 빨강)", EditorStyles.boldLabel);
-        DrawPreview(def);
-
+        // 액션 버튼 — 미리보기 위에 둬서 항상 보이게(큰 미리보기에 가려지지 않도록).
         EditorGUILayout.Space(6);
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("저장")) AssetDatabase.SaveAssets();
@@ -177,6 +179,10 @@ public class Prop2DCatalogEditor : EditorWindow
         if (GUILayout.Button("포커스", GUILayout.Width(56))) EditorGUIUtility.PingObject(_selected);
         if (GUILayout.Button("삭제", GUILayout.Width(56))) DeleteSelected();
         EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.Space(8);
+        EditorGUILayout.LabelField("미리보기 (콜라이더 = 빨강)", EditorStyles.boldLabel);
+        DrawPreview(def);
 
         EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();

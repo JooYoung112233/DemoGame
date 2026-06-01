@@ -98,18 +98,11 @@ public class NPCQuestMarker : MonoBehaviour
     {
         if (markerRoot == null) return;
 
-        // 위아래 흔들림
+        // 위아래 흔들림 (탑다운 2D: 화면 Y축 = 월드 Y)
         float bob = Mathf.Sin(Time.time * bobSpeed) * bobAmplitude;
         markerRoot.transform.localPosition = new Vector3(0, heightOffset + bob, 0);
 
-        // 카메라 빌보드 (Y축만)
-        if (camTransform != null)
-        {
-            Vector3 dir = camTransform.position - markerRoot.transform.position;
-            dir.y = 0;
-            if (dir.sqrMagnitude > 0.001f)
-                markerRoot.transform.rotation = Quaternion.LookRotation(dir);
-        }
+        // 탑다운 2D: 카메라 고정이라 빌보드 회전 불필요
     }
 
     /// <summary>현재 NPC의 퀘스트 상태를 평가하고 마커를 갱신</summary>
@@ -295,40 +288,24 @@ public class NPCQuestMarker : MonoBehaviour
         go.transform.localPosition = Vector3.zero;
         go.transform.localScale = Vector3.one * markerScale;
 
+        var iconGO = new GameObject("Icon");
+        iconGO.transform.SetParent(go.transform, false);
+        var sr = iconGO.AddComponent<SpriteRenderer>();
+        sr.color = color;
+        sr.sortingOrder = 20;
+
         if (shape == MarkerShape.Diamond)
         {
-            // 다이아몬드 (45도 회전 큐브)
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.transform.SetParent(go.transform, false);
-            cube.transform.localScale = Vector3.one * 0.35f;
-            cube.transform.localRotation = Quaternion.Euler(0, 0, 45);
-
-            var col = cube.GetComponent<Collider>();
-            if (col != null) Destroy(col);
-
-            var renderer = cube.GetComponent<Renderer>();
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-            if (mat.shader.name == "Hidden/InternalErrorShader")
-                mat = new Material(Shader.Find("Unlit/Color"));
-            mat.color = color;
-            renderer.sharedMaterial = mat;
+            // 다이아몬드 (45도 회전 사각 스프라이트)
+            sr.sprite = PlaceholderSprite.Square;
+            iconGO.transform.localScale = Vector3.one * 0.35f;
+            iconGO.transform.localRotation = Quaternion.Euler(0, 0, 45);
         }
         else
         {
-            // 작은 점
-            var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.transform.SetParent(go.transform, false);
-            sphere.transform.localScale = Vector3.one * 0.2f;
-
-            var col = sphere.GetComponent<Collider>();
-            if (col != null) Destroy(col);
-
-            var renderer = sphere.GetComponent<Renderer>();
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-            if (mat.shader.name == "Hidden/InternalErrorShader")
-                mat = new Material(Shader.Find("Unlit/Color"));
-            mat.color = color;
-            renderer.sharedMaterial = mat;
+            // 작은 점 (원 스프라이트)
+            sr.sprite = PlaceholderSprite.Circle;
+            iconGO.transform.localScale = Vector3.one * 0.2f;
         }
 
         return go;

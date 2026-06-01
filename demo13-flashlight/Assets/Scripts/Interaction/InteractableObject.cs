@@ -174,7 +174,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
         txt.verticalOverflow = VerticalWrapMode.Overflow;
 
         textGO.AddComponent<UnityEngine.UI.Shadow>().effectColor = Color.black;
-        labelGO.AddComponent<WorldLabelBillboard>();
+        // 탑다운 2D: 카메라 고정이라 빌보드 불필요
     }
 
     #endregion

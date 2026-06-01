@@ -146,28 +146,15 @@ public class InjuryVFX : MonoBehaviour
         // 심플한 피 방울 — 작은 오브젝트 생성 후 자동 파괴
         var drop = new GameObject("BloodDrop");
         drop.transform.position = transform.position + new Vector3(
-            Random.Range(-0.2f, 0.2f), 0.1f, Random.Range(-0.2f, 0.2f));
+            Random.Range(-0.2f, 0.2f), Random.Range(-0.1f, 0.2f), 0f);
 
+        // 2D 피 방울 — 작은 원 스프라이트
         var sr = drop.AddComponent<SpriteRenderer>();
+        sr.sprite = PlaceholderSprite.Circle;
         sr.color = bleedParticleColor;
-        // 기본 스프라이트 없으면 머티리얼 색만 보임 — 작은 쿼드로 대체
-        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        quad.transform.SetParent(drop.transform);
-        quad.transform.localScale = Vector3.one * 0.08f;
-        quad.transform.localRotation = Quaternion.Euler(90, 0, 0);
+        sr.sortingOrder = 15;
+        drop.transform.localScale = Vector3.one * 0.08f;
 
-        var quadRenderer = quad.GetComponent<MeshRenderer>();
-        if (quadRenderer != null)
-        {
-            quadRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            quadRenderer.material.color = bleedParticleColor;
-        }
-
-        // 콜라이더 제거
-        var col = quad.GetComponent<Collider>();
-        if (col != null) Destroy(col);
-
-        Destroy(sr); // SpriteRenderer는 불필요
         Destroy(drop, 1.5f); // 1.5초 후 자동 파괴
 
         // 간단한 낙하 — Rigidbody 없이 코루틴 대신 별도 스크립트

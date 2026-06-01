@@ -37,19 +37,15 @@ public class WorldItem : MonoBehaviour
         }
         else
         {
-            // 기본 큐브 (임시)
-            go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            // 임시 2D 스프라이트 (사각, 희귀도 색). 추후 worldDropPrefab으로 교체
+            go = new GameObject();
             go.transform.position = position;
-            go.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            go.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
 
-            // 희귀도 색상
-            var renderer = go.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                var mat = new Material(Shader.Find("Sprites/Default"));
-                mat.color = item.data.RarityColor;
-                renderer.material = mat;
-            }
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = PlaceholderSprite.Square;
+            sr.color = item.data.RarityColor;
+            sr.sortingOrder = 3;
         }
 
         go.name = $"WorldItem_{item.data.itemId}";
@@ -149,32 +145,6 @@ public class WorldItem : MonoBehaviour
         shadow.effectColor = Color.black;
         shadow.effectDistance = new Vector2(1, -1);
 
-        // 빌보드 컴포넌트 추가
-        labelGO.AddComponent<WorldLabelBillboard>();
-    }
-}
-
-/// <summary>
-/// 월드 라벨이 항상 카메라를 향하도록 하는 빌보드 컴포넌트.
-/// </summary>
-public class WorldLabelBillboard : MonoBehaviour
-{
-    Camera cam;
-
-    void Start()
-    {
-        cam = Camera.main;
-    }
-
-    void LateUpdate()
-    {
-        if (cam == null)
-        {
-            cam = Camera.main;
-            if (cam == null) return;
-        }
-
-        // 카메라를 바라보되 Y축 회전만 (기울어지지 않게)
-        transform.rotation = cam.transform.rotation;
+        // 탑다운 2D: 카메라가 고정 정면이라 빌보드 불필요 (라벨이 화면에 평평하게 보임)
     }
 }
