@@ -328,7 +328,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
                     if (StoryTriggerManager.Instance != null)
                     {
                         StoryTriggerManager.Instance.OnItemLooted();
-                        if (data.itemId == "rudi_shard" || data.itemId == "rudi")
+                        if (data.itemId == "ruby_shard" || data.itemId == "rudi_shard" || data.itemId == "rudi")
                             StoryTriggerManager.Instance.OnRudiPickup();
                     }
 

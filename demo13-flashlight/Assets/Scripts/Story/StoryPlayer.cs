@@ -343,7 +343,8 @@ public class StoryPlayer : MonoBehaviour
                     Debug.LogWarning($"[StoryPlayer] 퀘스트 없음: {node.param}");
                 break;
             case "quest_complete":
-                QuestManager.Instance?.CompleteQuest(node.param);
+                // 스토리 주도 완료: 목표 진행도와 무관하게 강제 완료 (내러티브 확정)
+                QuestManager.Instance?.CompleteQuest(node.param, true);
                 break;
             case "give_item":
                 var itemData = ItemDatabase.Get(node.param);

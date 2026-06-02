@@ -204,6 +204,16 @@ public class StoryTriggerManager : MonoBehaviour
             return true;
         }
 
+        // 밴딧 협상꾼 — 최초 조우
+        if (npcId == "bandit_negotiator" && !qm.GetFlag("negotiator_met"))
+        {
+            sp.PlayScene("S-017", () =>
+            {
+                onComplete?.Invoke();
+            });
+            return true;
+        }
+
         return false;
     }
 
@@ -454,6 +464,10 @@ public class StoryTriggerManager : MonoBehaviour
 
         // 떠돌이 상인 — 미조우
         if (npcId == "merchant" && !qm.GetFlag("merchant_met"))
+            return true;
+
+        // 밴딧 협상꾼 — 미조우
+        if (npcId == "bandit_negotiator" && !qm.GetFlag("negotiator_met"))
             return true;
 
         return false;

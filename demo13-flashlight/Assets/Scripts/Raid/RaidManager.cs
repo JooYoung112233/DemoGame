@@ -163,7 +163,7 @@ public class RaidManager : MonoBehaviour
             }
 
             bool hasRudi = lootedItems.Exists(i =>
-                i.data != null && (i.data.itemId == "rudi_shard" || i.data.itemId == "rudi"));
+                i.data != null && (i.data.itemId == "ruby_shard" || i.data.itemId == "rudi_shard" || i.data.itemId == "rudi"));
 
             StoryTriggerManager.Instance.OnRaidExtract(wasNight, hasRudi);
         }

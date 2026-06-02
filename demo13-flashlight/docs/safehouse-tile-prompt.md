@@ -46,17 +46,25 @@
 
 ## 공통 스타일 블록 (모든 프롬프트에 붙여넣기)
 
+> **스타일 결정 (2026-06-02)**: 1차 프랍 생성물이 너무 페인터리·고디테일이라
+> 평면도 레퍼처럼 **플랫 + 도트(pixel) 느낌**으로 톤다운. 아래 강화 블록 사용.
+
 ```
 [레퍼런스 이미지 첨부]
 
-STRICT STYLE LOCK — match the attached reference image EXACTLY.
-Same art style, same color palette, same outline thickness,
-same level of detail. Do NOT deviate from the reference style.
+STRICT STYLE LOCK — match the attached top-down floorplan reference's
+FLATNESS and simplicity. Do NOT make it more detailed than the reference.
 
-Art style: crisp readable pixel art for a top-down game.
-Bold 1-2px dark outlines on all structural edges.
-Flat cel-shaded surfaces with only 3-4 color steps per material.
-NOT photorealistic, NOT painterly, NOT hyper-detailed.
+Art style: FLAT, simple PIXEL ART for a top-down game.
+- LOW detail. Large readable shapes only. Simplify every surface.
+- Flat cel-shading: only 3-4 solid color steps per material, HARD edges
+  between shades. NO smooth gradients, NO soft airbrush shading.
+- Bold dark 1-2px outline around each object silhouette.
+- Visible chunky pixels, limited palette — looks hand-placed pixel art,
+  coarse pixel grid, NOT a high-resolution painting.
+- NO fine surface noise, NO grime speckling, NO painterly rendering,
+  NO photorealism, NO 3D-render look.
+- If in doubt, use FEWER details and FLATTER colors.
 Prioritize silhouette clarity over surface detail.
 
 FLAT SHADING (셰이더 후처리 전제): no baked directional shadows,
@@ -65,6 +73,9 @@ and dot/grain texture are applied later via shader. Keep surfaces flat.
 
 Transparent background (PNG).
 ```
+
+> **핵심 키워드**: FLAT, low detail, 3-4 color steps, hard-edge cel shading,
+> chunky pixels, NO gradients, NO noise, NO painterly. (1차 화풍 톤다운용)
 
 > **스타일 레퍼런스 (확정 2026-06-02)**: D&D 배틀맵풍 80° 탑다운 실내 레퍼 이미지를 첨부해 화풍 락.
 > - 이 레퍼는 **렌더링 화풍·디테일·각도(80°)의 기준** — 내용물(실내 마루)이 아니라 "룩"만 가져옴

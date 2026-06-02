@@ -151,6 +151,9 @@ public class TopDownPlayer : MonoBehaviour
         // 장비 컴포넌트 보장 (무기 장착)
         if (GetComponent<PlayerEquipment>() == null) gameObject.AddComponent<PlayerEquipment>();
 
+        // 피격 화면 연출 보장 (위험 비례)
+        if (GetComponent<PlayerHitReaction>() == null) gameObject.AddComponent<PlayerHitReaction>();
+
         EnsureDefaultAttacks();
     }
 
@@ -169,17 +172,18 @@ public class TopDownPlayer : MonoBehaviour
             };
         }
         if (heavyAttack == null)
-            heavyAttack = MakeAttack("heavy", 7, Stat.heavyDamage, Stat.heavyGroggy, HeavyRange, 3, 5);
+            heavyAttack = MakeAttack("heavy", 7, Stat.heavyDamage, Stat.heavyGroggy, HeavyRange, 3, 5, hitstop: 0.05f);
         if (heavyFullAttack == null)
-            heavyFullAttack = MakeAttack("heavyFull", 9, Stat.heavyFullDamage, Stat.heavyFullGroggy, HeavyRange * 1.2f, 4, 6);
+            heavyFullAttack = MakeAttack("heavyFull", 9, Stat.heavyFullDamage, Stat.heavyFullGroggy, HeavyRange * 1.2f, 4, 6, hitstop: 0.06f);
     }
 
-    static AttackData MakeAttack(string id, int frames, float dmg, float grog, float range, int hitStart, int hitEnd)
+    static AttackData MakeAttack(string id, int frames, float dmg, float grog, float range, int hitStart, int hitEnd, float hitstop = 0f)
     {
         var a = ScriptableObject.CreateInstance<AttackData>();
         a.attackId = id; a.fps = 12; a.totalFrames = frames;
         a.cancelFromFrame = Mathf.Max(1, hitEnd);
         a.damage = dmg; a.groggy = grog;
+        a.hitstop = hitstop > 0f; a.hitstopDuration = hitstop > 0f ? hitstop : 0.05f;
         a.windows = new System.Collections.Generic.List<HitWindow>
         {
             new HitWindow

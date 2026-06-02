@@ -7,10 +7,12 @@ using System.Collections;
 /// </summary>
 public class CombatFeedback : MonoBehaviour
 {
-    // ─── 피격 플래시 ───
-    [Header("Hit Flash")]
-    [SerializeField] Color flashColor = new Color(1f, 0.15f, 0.15f, 1f);
-    [SerializeField] float flashDuration = 0.12f;
+    // ─── 피격 흰 플래시 (셰이더 _FlashAmount — HitFlash에 위임) ───
+    [Header("Hit Flash (셰이더 흰 플래시)")]
+    [SerializeField] float lightFlashDuration   = 0.06f;
+    [SerializeField] float heavyFlashDuration   = 0.12f;
+    [Tooltip("이 데미지 이상이면 강공 플래시(길게)")]
+    [SerializeField] float heavyDamageThreshold = 18f;
 
     // ─── 스케일 펀치 ───
     [Header("Scale Punch")]
@@ -41,13 +43,11 @@ public class CombatFeedback : MonoBehaviour
 
     // 내부 참조
     Health health;
+    HitFlash hitFlash;
     Transform visualRoot;
-    SpriteRenderer[] sprites;
-    Color[] originalColors;
     Vector3 originalScale;
 
     // 코루틴 핸들
-    Coroutine flashRoutine;
     Coroutine punchRoutine;
     Coroutine knockbackRoutine;
     Coroutine lungeRoutine;
@@ -62,11 +62,9 @@ public class CombatFeedback : MonoBehaviour
         visualRoot = root != null ? root : transform;
         originalScale = visualRoot.localScale;
 
-        // 스프라이트 캐시
-        sprites = GetComponentsInChildren<SpriteRenderer>();
-        originalColors = new Color[sprites.Length];
-        for (int i = 0; i < sprites.Length; i++)
-            originalColors[i] = sprites[i].color;
+        // 흰 플래시 — HitFlash 컴포넌트 (없으면 자동 부착)
+        hitFlash = GetComponent<HitFlash>();
+        if (hitFlash == null) hitFlash = gameObject.AddComponent<HitFlash>();
     }
 
     void OnEnable()
@@ -92,9 +90,9 @@ public class CombatFeedback : MonoBehaviour
         var player = GetComponent<TopDownPlayer>();
         if (player != null && player.IsInvincible) return;
 
-        // 플래시
-        if (flashRoutine != null) StopCoroutine(flashRoutine);
-        flashRoutine = StartCoroutine(FlashRoutine());
+        // 흰 플래시 (셰이더, 강공일수록 길게)
+        float flashDur = damage >= heavyDamageThreshold ? heavyFlashDuration : lightFlashDuration;
+        hitFlash?.Flash(1f, flashDur);
 
         // 스케일 펀치
         if (punchRoutine != null) StopCoroutine(punchRoutine);
@@ -104,30 +102,7 @@ public class CombatFeedback : MonoBehaviour
         if (knockbackRoutine != null) StopCoroutine(knockbackRoutine);
         knockbackRoutine = StartCoroutine(KnockbackRoutine());
 
-        // 히트스탑 제거 — Time.timeScale 전역 조작은 버그 유발
-        // 플래시 + 스케일 펀치 + 넉백으로 타격감 충분
-    }
-
-    IEnumerator FlashRoutine()
-    {
-        // 빨간색으로 즉시 전환
-        SetAllSpritesColor(flashColor);
-
-        float t = 0;
-        while (t < flashDuration)
-        {
-            t += Time.deltaTime;
-            float pct = t / flashDuration;
-            // 빨간색 → 원래색 보간
-            for (int i = 0; i < sprites.Length; i++)
-            {
-                if (sprites[i] == null) continue;
-                sprites[i].color = Color.Lerp(flashColor, originalColors[i], pct);
-            }
-            yield return null;
-        }
-
-        RestoreColors();
+        // 히트스탑은 공격 측에서 처리 — AttackPerformer가 강공 적중 시 Hitstop.Do() 호출(안전 재도입).
     }
 
     IEnumerator PunchRoutine()
@@ -245,47 +220,15 @@ public class CombatFeedback : MonoBehaviour
         lungeRoutine = null;
     }
 
-    // ────────────────────────────────────────
-    // 유틸리티
-    // ────────────────────────────────────────
-
-    void SetAllSpritesColor(Color color)
-    {
-        foreach (var sr in sprites)
-        {
-            if (sr != null)
-                sr.color = color;
-        }
-    }
-
-    void RestoreColors()
-    {
-        for (int i = 0; i < sprites.Length; i++)
-        {
-            if (sprites[i] != null)
-                sprites[i].color = originalColors[i];
-        }
-    }
-
-    /// <summary>원본 색상 갱신 (외부에서 색상이 변경된 경우)</summary>
-    public void RefreshOriginalColors()
-    {
-        for (int i = 0; i < sprites.Length; i++)
-        {
-            if (sprites[i] != null)
-                originalColors[i] = sprites[i].color;
-        }
-    }
 }
 
 // ════════════════════════════════════════════
-// 데미지 팝업 — 3D 월드 플로팅 텍스트
+// 데미지 팝업 — 2D 월드 플로팅 텍스트
 // ════════════════════════════════════════════
 
 /// <summary>
-/// 3D 월드에 데미지 숫자 팝업 표시.
-/// 위로 떠오르면서 페이드 아웃.
-/// 강공격/그로기 시 크게 표시.
+/// 2D 월드(XY)에 데미지 숫자 팝업. 화면 위(+Y)로 떠오르며 페이드 아웃.
+/// 강공격/그로기 시 크게. 카메라가 고정된 2D라 빌보드는 생성 시 1회만.
 /// </summary>
 public class DamagePopup : MonoBehaviour
 {
@@ -310,10 +253,8 @@ public class DamagePopup : MonoBehaviour
     public static DamagePopup Create(Vector3 worldPos, float damage, DamageType type = DamageType.Normal)
     {
         var go = new GameObject("DmgPopup");
-        go.transform.position = worldPos + new Vector3(
-            Random.Range(-0.2f, 0.2f),
-            1.5f,
-            Random.Range(-0.1f, 0.1f));
+        // 2D: XY 평면. 엔티티 위(+Y)로 살짝, 좌우 랜덤. Z(깊이)는 건드리지 않음.
+        go.transform.position = worldPos + new Vector3(Random.Range(-0.2f, 0.2f), 0.9f, 0f);
 
         var popup = go.AddComponent<DamagePopup>();
         popup.Init(damage, type);
@@ -381,8 +322,11 @@ public class DamagePopup : MonoBehaviour
         transform.localScale = Vector3.one * startScale;
         lifetime = maxLifetime;
 
-        // 살짝 랜덤 방향으로 튀기
-        velocity = new Vector3(Random.Range(-0.3f, 0.3f), floatSpeed, 0);
+        // 살짝 랜덤 방향으로 튀기 (XY, Z=0)
+        velocity = new Vector3(Random.Range(-0.3f, 0.3f), floatSpeed, 0f);
+
+        // 카메라가 고정된 2D — 빌보드는 생성 시 1회만 (매 프레임 갱신 불필요)
+        if (mainCam != null) transform.rotation = mainCam.transform.rotation;
 
         // 크리티컬/강공은 처음에 크게 시작해서 줄어드는 효과
         if (type == DamageType.Critical || type == DamageType.Heavy)
@@ -413,9 +357,5 @@ public class DamagePopup : MonoBehaviour
         // 스케일 — 처음에 팍 커졌다가 원래로
         float scalePct = Mathf.Lerp(startScale * 0.6f, startScale, Mathf.Pow(pct, 0.5f));
         transform.localScale = Vector3.one * scalePct;
-
-        // 빌보드 (카메라 방향)
-        if (mainCam != null)
-            transform.rotation = mainCam.transform.rotation;
     }
 }

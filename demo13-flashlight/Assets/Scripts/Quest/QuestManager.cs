@@ -73,10 +73,17 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    public bool CompleteQuest(string questId)
+    /// <summary>
+    /// 퀘스트 완료 처리.
+    /// force=true면 목표 진행도(ReadyToReport)와 무관하게 강제 완료한다 —
+    /// 스토리 스크립트(StoryPlayer)가 내러티브상 완료를 확정하는 경우용.
+    /// NPC 보고 흐름은 force=false(기본)로 ReadyToReport 게이트를 유지.
+    /// </summary>
+    public bool CompleteQuest(string questId, bool force = false)
     {
         var quest = activeQuests.Find(q => q.data.questId == questId);
-        if (quest == null || quest.state != QuestState.ReadyToReport) return false;
+        if (quest == null) return false;
+        if (!force && quest.state != QuestState.ReadyToReport) return false;
 
         quest.state = QuestState.Completed;
         GiveRewards(quest);

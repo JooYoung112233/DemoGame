@@ -25,6 +25,12 @@ public class AttackData : ScriptableObject
     public float damage = 8f;
     public float groggy = 5f;
 
+    [Header("타격감")]
+    [Tooltip("적중 시 히트스탑(짧은 전역 정지). 강공에 권장")]
+    public bool hitstop = false;
+    [Tooltip("히트스탑 지속(초) — 0.04~0.06 권장")]
+    [Min(0f)] public float hitstopDuration = 0.05f;
+
     public List<HitWindow> windows = new List<HitWindow> { new HitWindow() };
 
     /// <summary>공격 전체 길이(초).</summary>

@@ -83,6 +83,7 @@ public class AttackPerformer : MonoBehaviour
             ? Physics2D.OverlapBoxNonAlloc(center, w.boxSize, facingAngle + w.angle, _buf, targetMask)
             : Physics2D.OverlapCircleNonAlloc(center, w.radius, _buf, targetMask);
 
+        bool landed = false;
         for (int i = 0; i < count; i++)
         {
             var col = _buf[i];
@@ -92,6 +93,18 @@ public class AttackPerformer : MonoBehaviour
 
             _hitThisAttack.Add(hb);
             hb.ReceiveHit(_current.damage * w.damageMult, _current.groggy * w.groggyMult, facing);
+            landed = true;
+        }
+
+        // 강공(데이터 플래그) 적중 시 히트스탑 + 카메라 셰이크/줌 — 한 번만
+        if (landed && _current.hitstop)
+        {
+            Hitstop.Do(_current.hitstopDuration);
+            if (CameraFollow.Instance != null)
+            {
+                CameraFollow.Instance.Shake(0.14f, 0.18f);
+                CameraFollow.Instance.ZoomPunch(0.05f, 0.18f);
+            }
         }
     }
 

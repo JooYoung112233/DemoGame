@@ -31,6 +31,7 @@ public class ScreenEffectManager : MonoBehaviour
     Vector3 originalCamPos;
     Coroutine shakeCoroutine;
     Coroutine chromaticCoroutine;
+    Coroutine vignetteCoroutine;
 
     void Awake()
     {
@@ -139,6 +140,48 @@ public class ScreenEffectManager : MonoBehaviour
     }
 
     // ═══════════════════════════════
+    //  비네트 펄스 (피격)
+    // ═══════════════════════════════
+
+    /// <summary>
+    /// 비네트를 잠깐 강하게 올렸다가 복귀. 플레이어 피격 시 가장자리 붉은 펄스.
+    /// color 지정 시 펄스 동안 비네트 색을 덮었다가 원복.
+    /// </summary>
+    public void VignettePulse(float intensity = 0.4f, float duration = 0.5f, Color? color = null)
+    {
+        if (vignette == null) CacheVolume();
+        if (vignette == null) return;
+
+        if (vignetteCoroutine != null) StopCoroutine(vignetteCoroutine);
+        vignetteCoroutine = StartCoroutine(VignettePulseRoutine(intensity, duration, color));
+    }
+
+    IEnumerator VignettePulseRoutine(float intensity, float duration, Color? color)
+    {
+        float origIntensity = vignette.intensity.value;
+        Color origColor     = vignette.color.value;
+
+        float peak = Mathf.Max(origIntensity, intensity);
+        if (color.HasValue) vignette.color.Override(color.Value);
+        vignette.intensity.Override(peak);
+
+        float half = duration * 0.25f; // 빠르게 올라가고 천천히 내려옴
+        yield return new WaitForSecondsRealtime(half);
+
+        float t = 0f;
+        float remaining = duration - half;
+        while (t < remaining)
+        {
+            t += Time.unscaledDeltaTime;
+            vignette.intensity.Override(Mathf.Lerp(peak, origIntensity, t / remaining));
+            yield return null;
+        }
+        vignette.intensity.Override(origIntensity);
+        if (color.HasValue) vignette.color.Override(origColor);
+        vignetteCoroutine = null;
+    }
+
+    // ═══════════════════════════════
     //  화면 쉐이크
     // ═══════════════════════════════
 
@@ -147,6 +190,10 @@ public class ScreenEffectManager : MonoBehaviour
     /// </summary>
     public void ScreenShake(float intensity = 0.15f, float duration = 0.3f)
     {
+        // CameraFollow가 있으면 오프셋 레이어로 위임(카메라 추적과 충돌 방지)
+        if (CameraFollow.Instance != null) { CameraFollow.Instance.Shake(intensity, duration); return; }
+
+        // 폴백: 추적 카메라가 없을 때만 localPosition 직접 흔들기
         if (mainCamera == null) mainCamera = Camera.main;
         if (mainCamera == null) return;
 
