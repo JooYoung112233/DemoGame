@@ -31,17 +31,15 @@ public static class Prop2DBuilder
 
         ApplyColliders(go, def);
 
-        // 그림자 (FlatShadow가 런타임/에디터에서 그림자 자식 생성)
-        // 벽·프롭 동일: 정적 발밑 그림자 + 동적 투영 그림자 둘 다 ON.
+        // 그림자 = ① URP 2D 네이티브 ShadowCaster2D(동적 캐스트, Light2D가 빛 반대편에 계산)
+        //          + ② GroundShadow2D(정적 발밑 접지 — 빛 없어도 떠 보이지 않게).
         if (def.castShadow)
         {
-            var fs = go.AddComponent<FlatShadow>();
-            fs.groundShadow = true;       // 발밑 고정 그림자
-            fs.projectedShadow = true;    // 빛 따라 늘어나는 그림자
-            fs.directionMode = def.shadowDirMode;
-            fs.baseContact = def.shadowBaseContact;
-            fs.maxLength = def.shadowMaxLength;
-            fs.strength = def.shadowStrength;
+            var sc = go.AddComponent<UnityEngine.Rendering.Universal.ShadowCaster2D>();
+            sc.castsShadows = true;
+            sc.selfShadows = false; // 자기 스프라이트는 안 어둡게(빛 반대편 바닥에만 그림자)
+
+            go.AddComponent<GroundShadow2D>(); // 정적 발밑 접지 그림자
         }
 
         return go;

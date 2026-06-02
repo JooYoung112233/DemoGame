@@ -526,6 +526,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerRig
       objectReference: {fileID: 0}
+    - target: {fileID: 8118394434070430730, guid: 63d2af2c6a15930469b99602e6936da9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.46700403
+      objectReference: {fileID: 0}
+    - target: {fileID: 8118394434070430730, guid: 63d2af2c6a15930469b99602e6936da9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.88425523
+      objectReference: {fileID: 0}
+    - target: {fileID: 8118394434070430730, guid: 63d2af2c6a15930469b99602e6936da9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -124.32
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -584,8 +596,24 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
+      propertyPath: flipV
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
+      propertyPath: strength
+      value: 0.439
+      objectReference: {fileID: 0}
+    - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
+      propertyPath: autoFlipV
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
+      propertyPath: maxLength
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
       propertyPath: lightRange
-      value: 5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
       propertyPath: baseContact
@@ -605,7 +633,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
       propertyPath: directionMode
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
       propertyPath: groundOffset.x
@@ -619,7 +647,24 @@ PrefabInstance:
       propertyPath: groundStrength
       value: 0.374
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
+      propertyPath: projectedShadow
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
+      propertyPath: proximityStretch
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
+      propertyPath: manualDirection.x
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
+      propertyPath: manualDirection.y
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 8178597994168420649, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -845,11 +890,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9145493002356355710, guid: f034366195a219d458ae95bc9a96e6ee, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.19
+      value: 7.4
       objectReference: {fileID: 0}
     - target: {fileID: 9145493002356355710, guid: f034366195a219d458ae95bc9a96e6ee, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.83
+      value: -2.79
       objectReference: {fileID: 0}
     - target: {fileID: 9145493002356355710, guid: f034366195a219d458ae95bc9a96e6ee, type: 3}
       propertyPath: m_LocalPosition.z
@@ -883,54 +928,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6194939068877261134, guid: f034366195a219d458ae95bc9a96e6ee, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 9130236718512966346, guid: f034366195a219d458ae95bc9a96e6ee, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1535820130}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f034366195a219d458ae95bc9a96e6ee, type: 3}
 --- !u!4 &1535820128 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9145493002356355710, guid: f034366195a219d458ae95bc9a96e6ee, type: 3}
   m_PrefabInstance: {fileID: 1535820127}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1535820129 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 9130236718512966346, guid: f034366195a219d458ae95bc9a96e6ee, type: 3}
-  m_PrefabInstance: {fileID: 1535820127}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1535820130
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1535820129}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e426422ee867beb4e86186e2613c5824, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Scripts::FlatShadow
-  directionMode: 1
-  lightSource: {fileID: 0}
-  manualDirection: {x: 0, y: -1}
-  lightRange: 5
-  groundShadow: 1
-  groundStrength: 0.439
-  groundLength: 0.19
-  groundOffset: {x: 0, y: 0.02}
-  projectedShadow: 1
-  strength: 0.57
-  tipFade: 0.35
-  maxLength: 1.4
-  proximityStretch: 1.5
-  distanceFade: 0.5
-  baseContact: 0
-  shadowColor: {r: 0, g: 0, b: 0, a: 1}
-  autoFlipV: 0
-  flipV: 0
 --- !u!1 &1743900380
 GameObject:
   m_ObjectHideFlags: 0

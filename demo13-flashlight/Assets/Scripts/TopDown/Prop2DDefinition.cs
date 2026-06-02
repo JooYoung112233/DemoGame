@@ -75,16 +75,7 @@ public class Prop2DDefinition : ScriptableObject
     [Tooltip("박스 여러 개(로컬 단위). 각진/오목 모양을 박스 2~3개로 합성.")]
     public List<ColliderBox> compositeBoxes = new();
 
-    [Header("Shadow (투영 그림자)")]
-    [Tooltip("켜면 FlatShadow로 그림자(정적 발밑 + 동적 투영)를 드리움. 벽/프롭에 권장.")]
+    [Header("Shadow (그림자)")]
+    [Tooltip("켜면 ShadowCaster2D 부착 → Light2D가 실제 캐스트 그림자를 드리움(빛 반대편). 벽/프롭 권장. 방향·길이는 라이트가 결정.")]
     public bool castShadow = false;
-    [Tooltip("동적 투영 방향 기준. Player=플레이어 따라(권장), NearestLight=최근접 점광, Manual=고정 방향.")]
-    public FlatShadow.DirMode shadowDirMode = FlatShadow.DirMode.Player;
-    [Tooltip("(레거시) 그림자는 항상 WallPixel(_SHADOW_MODE)로 통일돼서 현재 효과 없음.")]
-    public bool shadowBaseContact = true;
-    [Tooltip("그림자 최대 길이(월드 단위).")]
-    public float shadowMaxLength = 1.4f;
-    [Range(0f, 1f)]
-    [Tooltip("투영 그림자 진하기.")]
-    public float shadowStrength = 0.55f;
 }

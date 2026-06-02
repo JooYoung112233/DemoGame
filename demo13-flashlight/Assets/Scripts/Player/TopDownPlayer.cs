@@ -42,6 +42,8 @@ public class TopDownPlayer : MonoBehaviour
 
     // ── 퍼블릭 API ───────────────────────────────────────────────────
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
+    /// <summary>콘 라이트(시야) Transform — 그림자 방향 등에서 실제 비추는 방향 참조용.</summary>
+    public Transform LightPivot => lightPivot;
     public Vector2 MoveDirection   { get; private set; }
     public Vector3 MouseWorldPos   { get; private set; }
     public bool    IsSprinting     { get; private set; }

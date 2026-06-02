@@ -328,12 +328,8 @@ public class Prop2DCatalogEditor : EditorWindow
             def.castShadow = EditorGUILayout.Toggle("그림자 드리움", def.castShadow);
             if (def.castShadow)
             {
-                def.shadowDirMode = (FlatShadow.DirMode)EditorGUILayout.EnumPopup("방향 기준", def.shadowDirMode);
-                def.shadowBaseContact = EditorGUILayout.Toggle("밑동 접지(벽/건물)", def.shadowBaseContact);
-                def.shadowMaxLength = EditorGUILayout.FloatField("최대 길이", def.shadowMaxLength);
-                def.shadowStrength = EditorGUILayout.Slider("진하기", def.shadowStrength, 0f, 1f);
-                EditorGUILayout.HelpBox("배치 시 FlatShadow 자동 부착(정적 발밑 + 동적 투영). " +
-                    "방향 기준 Player면 플레이어가 늦게 스폰돼도 FlatShadowDirector가 자동 연결. 벽·프롭 기본 ON.",
+                EditorGUILayout.HelpBox("배치 시 ShadowCaster2D 자동 부착 → Light2D(플레이어 등)가 실제 캐스트 그림자를 빛 반대편에 그림. " +
+                    "방향·길이는 라이트 위치가 결정. 벽·프롭 기본 ON. (그림자가 보이려면 씬 Light2D에 Shadows 켜야 함.)",
                     MessageType.None);
             }
         }

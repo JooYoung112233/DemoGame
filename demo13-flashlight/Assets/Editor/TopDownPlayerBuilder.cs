@@ -86,6 +86,9 @@ public static class TopDownPlayerBuilder
         light.pointLightOuterRadius = 6.5f;
         light.pointLightInnerAngle = 35f;
         light.pointLightOuterAngle = 80f;
+        light.shadowsEnabled = true;        // ShadowCaster2D 그림자 드리움(진짜 캐스트)
+        light.shadowIntensity = 0.75f;
+        light.shadowSoftness = 0.3f;
         SceneLightingBuilder.ApplyAllSortingLayers(light);
 
         // 게임 로직 컴포넌트

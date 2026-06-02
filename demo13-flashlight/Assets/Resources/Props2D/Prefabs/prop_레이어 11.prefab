@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 9145493002356355710}
   - component: {fileID: 1389753528192391681}
   - component: {fileID: 3740336141858092454}
-  - component: {fileID: 6194939068877261134}
+  - component: {fileID: 3436214055787773733}
+  - component: {fileID: 5271772043632779876}
   m_Layer: 0
   m_Name: "prop_\uB808\uC774\uC5B4 11"
   m_TagString: Untagged
@@ -149,7 +150,7 @@ PolygonCollider2D:
       - {x: -1.8399999, y: -1.53}
       - {x: 1.8399999, y: -1.53}
   m_UseDelaunayMesh: 1
---- !u!114 &6194939068877261134
+--- !u!114 &3436214055787773733
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -158,20 +159,62 @@ MonoBehaviour:
   m_GameObject: {fileID: 9130236718512966346}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e426422ee867beb4e86186e2613c5824, type: 3}
+  m_Script: {fileID: 11500000, guid: 7db70e0ea77f5ac47a8f4565a9406397, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Game.Scripts::FlatShadow
-  lightSource: {fileID: 0}
-  useManualDirection: 0
-  manualDirection: {x: 0, y: -1}
-  groundShadow: 1
-  groundStrength: 0.6
-  groundOffset: {x: 0, y: -0.06}
-  projectedShadow: 1
-  strength: 0.55
-  tipFade: 0.35
-  maxLength: 1.4
-  proximityStretch: 1.5
-  baseContact: 1
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.ShadowCaster2D
+  m_ShadowGroup: 0
+  m_Priority: 0
+  m_ComponentVersion: 5
+  m_HasRenderer: 0
+  m_UseRendererSilhouette: 1
+  m_CastsShadows: 1
+  m_SelfShadows: 0
+  m_AlphaCutoff: 0.1
+  m_ApplyToSortingLayers: 94f7cad3000000001b1bf901
+  m_ShapePath:
+  - {x: -2.56, y: -2.56, z: 0}
+  - {x: -2.56, y: 2.56, z: 0}
+  - {x: 2.56, y: 2.56, z: 0}
+  - {x: 2.56, y: -2.56, z: 0}
+  m_ShapePathHash: 0
+  m_InstanceId: 0
+  m_ShadowShape2DComponent: {fileID: 1389753528192391681}
+  m_ShadowShape2DProvider:
+    rid: 3714221810447286343
+  m_ShadowCastingSource: 2
+  m_ShadowMesh:
+    m_Mesh: {fileID: 0}
+    m_LocalBounds:
+      m_Center: {x: 0, y: -0.0049972534, z: 0}
+      m_Extent: {x: 1.6499939, y: 1.3349991, z: 0}
+    m_EdgeProcessing: 1
+    m_TrimEdge: 0.2
+    m_FlipX: 0
+    m_FlipY: 0
+    m_InitialTrim: 0.2
+  m_CastingOption: 1
+  m_PreviousTrimEdge: 0
+  m_PreviousEdgeProcessing: -1
+  m_PreviousShadowCastingSource: -1
+  m_PreviousShadowShape2DSource: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: 3714221810447286343
+      type: {class: ShadowShape2DProvider_SpriteRenderer, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
+      data: 
+--- !u!114 &5271772043632779876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9130236718512966346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cda0e2ddf264f434d904c812ac69087c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::GroundShadow2D
   shadowColor: {r: 0, g: 0, b: 0, a: 1}
-  flipV: 0
+  strength: 0.45
+  offsetY: -0.08

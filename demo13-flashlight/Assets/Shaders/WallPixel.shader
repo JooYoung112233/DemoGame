@@ -117,25 +117,15 @@ Shader "BRB/WallPixel"
             {
                 Varyings output;
                 float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
-                float h = (_ShadowFlipV > 0.5) ? (1.0 - input.uv.y) : input.uv.y;
+                float h = input.uv.y; // 0=발밑(접지선), 1=꼭대기
                 #ifdef _SHADOW_MODE
-                    if (_ShadowHeight > 0.0001)
-                    {
-                        // 빛 수직성분(abs dir.y)에 따라 블렌딩:
-                        //   위/아래 빛 → 발밑으로 모아 length만큼 길게(밑/위로 쭉), 옆 빛 → 원래 형태 유지해 기울임.
-                        //   → 모든 방향에서 부드럽고 자연스러움(플립/스냅/납작선 없음).
-                        float vertical = abs(_ShadowDirWS.y);
-                        float baseY = posWS.y - h * _ShadowHeight;     // 발밑 라인
-                        float keptY = lerp(posWS.y, baseY, vertical);  // 옆빛=원래Y, 수직빛=발밑
-                        posWS.x += _ShadowDirWS.x * h * _ShadowLength;
-                        posWS.y  = keptY + _ShadowDirWS.y * h * _ShadowLength;
-                    }
-                    else
-                    {
-                        // offset 모드(정적 발밑 그림자용): 원위치에 그대로 더함
-                        posWS.x += _ShadowDirWS.x * h * _ShadowLength;
-                        posWS.y += _ShadowDirWS.y * h * _ShadowLength;
-                    }
+                    // 3D 캐스트 그림자: 발밑(h=0)은 고정, 위쪽일수록 빛 반대로 투영(서 있는 물체).
+                    //   빛 수직성분에 따라 블렌딩 — 위/아래 빛=발밑으로 모아 길게, 옆 빛=형태 유지해 기울임.
+                    float vertical = abs(_ShadowDirWS.y);
+                    float baseY = posWS.y - h * _ShadowHeight;     // 발밑 라인
+                    float keptY = lerp(posWS.y, baseY, vertical);
+                    posWS.x += _ShadowDirWS.x * h * _ShadowLength;
+                    posWS.y  = keptY + _ShadowDirWS.y * h * _ShadowLength;
                 #endif
                 output.positionWS = posWS;
                 output.positionCS = TransformWorldToHClip(posWS);
@@ -166,10 +156,9 @@ Shader "BRB/WallPixel"
 
                 // ===== 그림자 모드 =====
                 #ifdef _SHADOW_MODE
-                    float h = saturate(input.height);
-                    float proj = _ShadowStrength * lerp(1.0, _TipFade, h);
-                    float contact = _ContactStrength * (1.0 - smoothstep(0.0, _ContactHeight, h));
-                    return half4(_ShadowColor.rgb, mainTex.a * cutoutAlpha * max(proj, contact));
+                    float sh = saturate(input.height);            // 0=발밑, 1=끝
+                    float fade = lerp(1.0, _TipFade, sh);         // 끝으로 갈수록 옅게(소프트)
+                    return half4(_ShadowColor.rgb, mainTex.a * cutoutAlpha * _ShadowStrength * fade);
                 #else
 
                 #ifdef _QUANTIZE_ON
@@ -284,25 +273,15 @@ Shader "BRB/WallPixel"
             {
                 Varyings2D output;
                 float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
-                float h = (_ShadowFlipV > 0.5) ? (1.0 - input.uv.y) : input.uv.y;
+                float h = input.uv.y; // 0=발밑(접지선), 1=꼭대기
                 #ifdef _SHADOW_MODE
-                    if (_ShadowHeight > 0.0001)
-                    {
-                        // 빛 수직성분(abs dir.y)에 따라 블렌딩:
-                        //   위/아래 빛 → 발밑으로 모아 length만큼 길게(밑/위로 쭉), 옆 빛 → 원래 형태 유지해 기울임.
-                        //   → 모든 방향에서 부드럽고 자연스러움(플립/스냅/납작선 없음).
-                        float vertical = abs(_ShadowDirWS.y);
-                        float baseY = posWS.y - h * _ShadowHeight;     // 발밑 라인
-                        float keptY = lerp(posWS.y, baseY, vertical);  // 옆빛=원래Y, 수직빛=발밑
-                        posWS.x += _ShadowDirWS.x * h * _ShadowLength;
-                        posWS.y  = keptY + _ShadowDirWS.y * h * _ShadowLength;
-                    }
-                    else
-                    {
-                        // offset 모드(정적 발밑 그림자용): 원위치에 그대로 더함
-                        posWS.x += _ShadowDirWS.x * h * _ShadowLength;
-                        posWS.y += _ShadowDirWS.y * h * _ShadowLength;
-                    }
+                    // 3D 캐스트 그림자: 발밑(h=0)은 고정, 위쪽일수록 빛 반대로 투영(서 있는 물체).
+                    //   빛 수직성분에 따라 블렌딩 — 위/아래 빛=발밑으로 모아 길게, 옆 빛=형태 유지해 기울임.
+                    float vertical = abs(_ShadowDirWS.y);
+                    float baseY = posWS.y - h * _ShadowHeight;     // 발밑 라인
+                    float keptY = lerp(posWS.y, baseY, vertical);
+                    posWS.x += _ShadowDirWS.x * h * _ShadowLength;
+                    posWS.y  = keptY + _ShadowDirWS.y * h * _ShadowLength;
                 #endif
                 output.positionCS = TransformWorldToHClip(posWS);
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
@@ -333,10 +312,9 @@ Shader "BRB/WallPixel"
 
                 // ===== 그림자 모드 =====
                 #ifdef _SHADOW_MODE
-                    float h = saturate(input.height);
-                    float proj = _ShadowStrength * lerp(1.0, _TipFade, h);
-                    float contact = _ContactStrength * (1.0 - smoothstep(0.0, _ContactHeight, h));
-                    return half4(_ShadowColor.rgb, mainTex.a * cutoutAlpha * max(proj, contact));
+                    float sh = saturate(input.height);            // 0=발밑, 1=끝
+                    float fade = lerp(1.0, _TipFade, sh);         // 끝으로 갈수록 옅게(소프트)
+                    return half4(_ShadowColor.rgb, mainTex.a * cutoutAlpha * _ShadowStrength * fade);
                 #else
 
                 #ifdef _QUANTIZE_ON
