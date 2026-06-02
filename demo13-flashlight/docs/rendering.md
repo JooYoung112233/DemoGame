@@ -70,17 +70,19 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | `BRB/SpriteSheet` | 스프라이트 시트 UV | Light2D 반응 |
 | `BRB/SpriteBillboard` | SpriteRenderer용(정점컬러+컷아웃+아웃라인) | Light2D 반응 |
 | `BRB/SpineLitURP` | Spine(premultiplied 알파+정점컬러) | Light2D 반응 |
-| ~~`BRB/ShadowProjector`~~ | (미사용) URP 2D에서 안 그려짐 — 그림자는 `WallPixel(_SHADOW_MODE)`로 통일 | — |
+| ~~`BRB/ShadowProjector`~~ | **삭제됨** — URP 2D에서 안 그려져서 폐기, 그림자는 `WallPixel(_SHADOW_MODE)`로 통일 | — |
 | `BRB/OcclusionOutline` | 깊이 가림 외곽선 | Unlit (순수 2D에선 의미 약함) |
 | ~~`BRB/FlashlightBeam`~~ | (삭제 예정 — 손전등 폐기) | — |
 
 - **모듈 그림자(✅ 2026-06-02)**: 드라이버 `FlatShadow.cs`(모듈에 부착)가 자식 그림자(SpriteRenderer/MeshRenderer 자동감지)를 만든다. **2종 독립 토글**:
   - **셰이더 = `WallPixel(_SHADOW_MODE)` 통일 (✅ 중요)**: `BRB/ShadowProjector`는 **URP 2D 렌더러에서 안 그려진다**(Universal2D 패스에 2D 셰이프라이트 multi_compile 키워드가 없어 패스 매칭 실패로 추정). `WallPixel`의 2D 패스는 `ShapeLightShared` include로 그 키워드를 갖고 있어 정상 렌더 → **정적·동적 그림자 모두 `WallPixel(_SHADOW_MODE)`** 사용. (`baseContact` 필드는 레거시·무효.)
   - **① 정적 발밑 그림자(`groundShadow`)**: 실루엣을 **통째로 아래로 offset**(`groundLength`)해서 발밑에 깔리게. **빛과 무관 고정**. shear가 아니라 offset이라 텍스처 여백과 무관하게 불투명부가 아래로 삐져나옴. `sortingOrder−2`.
-  - **② 동적 투영 그림자(`projectedShadow`)**: 매 프레임 방향(XY)·길이 갱신, 빛 반대쪽으로 **늘어나는 반응형**. `sortingOrder−1`.
+  - **② 동적 투영 그림자(`projectedShadow`)**: 매 프레임 방향(XY)·길이 갱신, 빛 반대쪽으로 **늘어나는 반응형**. `sortingOrder−1`. **발밑 피벗 투영**: 셰이더가 `_ShadowHeight`(스프라이트 월드 높이, FlatShadow가 주입)로 빛 수직성분(`abs(dir.y)`)에 따라 **lerp** — 위/아래 빛이면 발밑으로 모아 `length`만큼 길게(밑으로도 쭉), 옆 빛이면 원래 형태 유지해 기울임. → **플립/스냅 없이 모든 방향에서 부드럽게 회전**, 옆빛에서도 납작선 안 됨.
+  - **거리 기반 진하기/길이**: 빛에 가까울수록 그림자가 **길고(`proximityStretch`) 진하게**, 멀수록 **짧고 옅게(`distanceFade`)**. `lengthScale`·`strengthScale`을 거리(`dist/range`)로 lerp해 매 프레임 적용.
   - **방향 기준(`directionMode`)**: `Player`(기본, `FlatShadowDirector.Source`=플레이어 따라) / `NearestLight`(최근접 Point Light2D) / `SpecificLight`(지정 `lightSource`) / `Manual`(`manualDirection` 월드 고정). 프롭마다 카탈로그 "Shadow" 섹션에서 선택.
+  - **겹치는 라이트(맵 라이트 + 플레이어 라이트) 정책**: 현재 **단일 지배광**(directionMode가 고르는 1개)만 그림자 방향·강도 결정. 진짜 다중 그림자(라이트마다 별도 그림자 자식)는 비용 N배라 미채택. 필요 시 **가중 평균 방향**(주변 라이트 1/거리² 합 → 합력 반대쪽 1개 그림자)으로 확장 가능(미구현). 강도는 지배광 거리로 `distanceFade` 처리.
   - **`FlatShadowDirector`(정적 매니저)**: 그림자 방향 공용 기준. **맵이 먼저 생기고 플레이어가 늦게 스폰**돼도 `TopDownPlayer.Instance`를 **지연 참조**(폴링/FindObjects 없음)하므로, Player 모드 프롭들이 플레이어 생성 즉시 자동 연결. 소스 없을 동안은 `manualDirection`으로 임시 표시. `FlatShadowDirector.SetSource(t)`로 다른 기준(횃불 등) 수동 지정 가능.
-  - **autoFlipV (기본 OFF)**: 빛이 오브젝트 수평선을 넘을 때 앵커를 반전 → **'탁' 뒤집힘(세로 미러 스냅)** 발생. 그래서 기본 OFF. OFF면 shear가 연속이라 빛이 돌아도 **부드럽게 회전**(대칭 프롭은 flip 차이 거의 안 보임). 정밀한 항상-정방향이 필요하면 회전기반 그림자(미구현, 추후)로.
+  - **autoFlipV (기본 OFF, 이제 거의 불필요)**: 발밑 피벗 투영(위 ②)이 모든 방향을 부드럽게 처리하므로 보통 OFF로 둠. (autoFlipV ON은 수평선 넘을 때 '탁' 세로 미러 스냅이 생겨 비권장.) `flipV`는 아트의 발밑 방향 보정용 고정값.
   - 둘 다 켜면: 발밑 고정 그림자 + 빛 따라 늘어나는 그림자가 겹쳐 그려짐.
   - **기본값 버튼**(`FlatShadowEditor`): "현재값을 기본값으로 저장"(EditorPrefs) → 새 FlatShadow 추가(`Reset`) 시 자동 적용. "기본값으로 리셋"/"코드 기본값으로"/"저장된 기본값 삭제".
   - **부착 방법**: ① Prop2D는 `Prop2DDefinition.castShadow` ON → `Prop2DBuilder`가 자동으로 `FlatShadow` 부착(베이크된 프리팹에 포함). **맵툴 카탈로그는 `Wall`·`Prop` 카테고리 신규 항목에 `castShadow` 기본 ON**(`DefaultCastShadow`, 바닥/오브젝트마커는 OFF) → 벽·프롭 모두 정적 발밑 + 동적 투영 그림자가 동일하게 들어감. 폼의 "Shadow" 섹션에서 토글·길이·진하기 조절. ② 수동 배치 오브젝트는 `FlatShadow` 컴포넌트 직접 추가. **머티리얼에 Shadow Mode 값만 넣어선 안 생김** — 그림자는 FlatShadow가 만드는 별도 자식임.
@@ -106,3 +108,4 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | 2026-06-02 | **플레이어 상시 라이트 + 글로벌 어둠 (FOV 전 단계).** 손전등 컨트롤러 제거 → 플레이어 자식 `PlayerLight`(Point Light2D, 상시, 반경 0.6~4.5, 따뜻한 흰색)가 주변 상시 밝힘. 씬엔 어두운 `Global Light 2D`(intensity 0.22, 차가운 밤색)로 대비 → "주변만 밝고 나머지 어둠"(Darkwood 룩). 두 라이트 모두 **모든 Sorting Layer 타겟**. 빌더: `TopDownPlayerBuilder`(PlayerLight 상시, FlashlightController 미부착·PlayerEquipment 추가), `SceneLightingBuilder`(Tools▸TopDown 2D▸Setup Scene Lighting). | 사용자 요청(이미지 레퍼). FOV 시야 콘 전까지 원형 주변광으로 분위기 확보. FlashlightController 컴포넌트는 프리팹에서 제외(클래스는 GameHUD 배터리바 호환 위해 잔존). |
 | 2026-06-02 | **플레이어 라이트 2종(다크우드식): 주변 원형 + 앞 부채꼴.** 단일 원형을 2개로 분리 — ①`PlayerAmbientLight`(Point 360°, intensity 0.6, 반경 0.2~2.3, 중심 고정): 본인 바로 주변 은은하게. ②`PlayerConeLight`(Point 부채꼴 inner 35°/outer 80°, intensity 1.3, 반경 0.4~6.5): 마우스 방향으로 회전 + 원점 앞 오프셋(`lightForwardOffset` 0.45)으로 앞을 멀리·밝게. `TopDownPlayer.lightPivot`=콘(회전 대상), 원형은 고정. 콘 방향 안 맞으면 `lightAngleOffset` 조정. | 다크우드는 "주변 약한 원형 + 앞 부채꼴" 둘 다임. 부채꼴만 두면 본인 주변이 너무 깜깜. |
 | 2026-06-02 | **PlayerRig 한 세트 프리팹 + 다크우드 후처리(결정 변경).** 카메라 "씬 자동 장착" → **카메라+플레이어+라이트+Volume을 `Resources/PlayerRig.prefab` 한 세트**로 묶어 DontDestroyOnLoad(Bootstrap 1개 스폰). `CameraFollow`가 씬 로드 시 다른 Camera/AudioListener 비활성(충돌 방지). 카메라 `allowHDR` + ConeLight intensity 1.6(HDR). **후처리 Volume**(`PlayerRigVolume.asset`): Bloom(threshold 0.5/intensity 1.3/scatter/warm tint) + Vignette 0.42 + ColorAdjustments(따뜻·대비) + FilmGrain — "빛이 번지는 맛". `TopDownPlayer.DontDestroyOnLoad(transform.root)`. | 사용자 결정: 3개 한 세트 일관 동작. "맛없는 빛"은 bloom 미적용(threshold 높음·HDR off)이 원인 → 프리팹에 다크우드 Volume 내장으로 모든 씬 일관. |
+| 2026-06-02 | **낮/밤 2D 조명 연동 + 에디터 전환 버튼.** `DayNightCycle`이 3D `directionalLight`/`RenderSettings.fog`만 제어 → **2D `Global Light2D`(intensity·color) 제어 추가**(낮 1.0/밤 0.18, 밤=차가운 파랑). `SetNight(bool)`/`ToggleDayNight()` public(에디터·런타임 공용 — 글로벌 라이트 즉시 적용 + OnPhaseChanged + RegionTime 동기화). `DayNightCycleEditor`(커스텀 인스펙터): ☀낮/🌙밤/⟳토글 버튼 — 씬(에디터)·플레이 둘 다 즉시 미리보기. 수치는 인스펙터에서 조절. `SceneLightingBuilder`가 Global Light2D 생성 시 `DayNightCycle` 부착+연결. T키 유지. | 맵툴/테스트에서 낮↔밤을 씬·인게임 둘 다 즉석 전환·튜닝하려는 사용자 요청. 글로벌 2개(DayNightCycle+RegionTimeManager) 중 시각 적용은 DayNightCycle 담당. |
