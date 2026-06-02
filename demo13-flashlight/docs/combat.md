@@ -93,6 +93,39 @@
 
 ---
 
+## 공격 중 이동 잠금 + 애니메이션 구조 (2026-06-02)
+
+### 공격 시 이동 잠금 (다크소울식)
+- 공격 애니메이션 재생 중 **이동 불가** (애니 끝나야 다시 이동)
+- 효과: 무게감/리스크 → 거리 재기·회피 타이밍 = 신중한 전투
+- 기존 구르기 캔슬(`AttackPerformer.CanCancel`)과 결합 → 공격 후 회피로 끊어 답답함 완화
+
+### 상하체 애니 분리 불필요
+- 공격 중 이동을 잠그므로 "걸으면서 때리기" 조합이 없음
+- → 상체/하체 애니 분리(2트랙 블렌딩) **불필요**, 통짜 전신 모션으로 제작
+- Spine 스켈레톤도 허리 분리 없이 전신 단일 애니로 구성
+
+### 애니메이션 세트
+| 분류 | 애니 | 이동 잠금 |
+|---|---|---|
+| 이동계 | idle / walk / run | - |
+| 행동계 | attack(약공 콤보/강공) / hit / dodge | O |
+
+### 무기 그립별 walk (확정)
+- 무기는 손 본(hand bone) 어태치먼트 → walk 애니가 자동으로 무기를 움직임
+- 단, 그립 자세가 다른 무기군은 walk 변형 필요. **3종으로 분류**:
+
+| 그립 클래스 | 예시 무기 | 자세 |
+|---|---|---|
+| 한손 (one-hand) | 단검, 한손 도구 | 한 손에 무기, 팔 자연스럽게 내림 |
+| 양손 (two-hand) | 야구방망이, 장검 | 양손 그립, 어깨 쪽에 들고 |
+| 총 (gun) | 라이플 | 양손, 총을 앞으로 든 준비 자세 |
+
+- 무기 하나하나마다 walk 만들지 않음 → 그립 클래스 3종만 제작, 같은 클래스 무기는 어태치먼트만 교체
+- 맨손 walk = 한손 walk에서 무기 슬롯 비우거나 별도 1종
+
+---
+
 ## 변경 로그
 
 | 날짜 | 내용 |
@@ -102,4 +135,6 @@
 | 2026-06-02 | **타격감 연출 설계 확정.** 강공 히트스탑(0.04~0.06s, 안전 구현), 적중=적 셰이더 흰 플래시(`_FlashAmount`), 플레이어 피격=위험 비례 화면 연출(평소 절제→저체력/부상 풀세트), 카메라 셰이크/줌은 CameraFollow 오프셋 레이어. 약공/강공 차등 레이어 표 추가. `DamagePopup`은 3D 시절 유물(빌보드+Y/Z오프셋)이라 2D 리워크 필요. |
 | 2026-06-02 | **가시성 전환: 손전등 폐기 → 좀보이드식 시야(FOV).** 적은 플레이어가 바라보는 부채꼴 시야 밖이면 안 보임/어둑. 어둠=하이브리드(지역/시간대별). 손전등 코드(`FlashlightController`/`FlashlightBeam`/손전등 Light2D) 완전 제거 후 시야 시스템 신규 작성. 상세 `rendering.md`. |
 | 2026-06-02 | **프레임 기반 히트박스/허트박스 시스템 + 에디터 툴.** `AttackData`(SO): 공격 1종의 `duration`(초) + `HitWindow[]`(정규화 0~1 활성구간, Box/Circle, facing기준 offset(전방x/좌y), 크기/반경, 회전, damage·groggy 배율). `AttackPerformer`: 시간진행하며 활성 윈도우를 `OverlapBox/CircleNonAlloc(targetMask)`로 스캔 → `Hurtbox.ReceiveHit`(중복 1회). `Hurtbox`(trigger Collider2D): 피격 판정, 적이면 `EnemyController.TakeHit`·아니면 `Health.TakeDamage`. **구르기 무적 = 허트박스 콜라이더 off**(`SetActive(!IsInvincible)`). 플레이어 콤보별/강공 AttackData, 적 `attackData`(없으면 즉시 데미지 폴백). 팀 구분=레이어(Player=6/Enemy=9). **에디터**: `AttackDataEditorWindow`(Tools▸TopDown Combat▸Attack Editor) — 타임라인 스크러버(윈도우 막대), 2D 탑다운 프리뷰(facing→우, 활성 윈도우 진하게, 중심 핸들 드래그), 윈도우 추가/삭제·속성 편집. |
+| 2026-06-02 | **무기 그립별 walk 3종 확정.** 무기=손 본 어태치먼트라 walk가 자동 적용되나 그립 자세가 다른 무기군은 변형 필요 → 한손/양손/총 3종 walk 제작. 무기별 개별 walk는 만들지 않고 그립 클래스 단위로 어태치먼트 교체. |
+| 2026-06-02 | **공격 중 이동 잠금 확정 + 상하체 애니 분리 불필요.** 공격 애니 재생 중 이동 불가(다크소울식) → "걸으면서 때리기" 조합이 없으므로 상체/하체 2트랙 분리 불필요, 통짜 전신 모션으로 제작. 구르기 캔슬과 결합해 답답함 완화. 애니 세트: 이동계(idle/walk/run) + 행동계(attack/hit/dodge, 이동 잠금). |
 | 2026-06-02 | **프레임 기반 전환 + 연속 공격(콤보) 구조.** ①타이밍 정규화(0~1)→**프레임**: `AttackData.fps`+`totalFrames`, `HitWindow.startFrame/endFrame`. `AttackPerformer`가 `CurrentFrame`으로 윈도우 활성 판정. ②**콤보 체인** `AttackComboData`(SO): 순서대로 이어지는 `AttackData[] steps` + `bufferTime`(선입력). `AttackData.cancelFromFrame`(이 프레임 이후 다음 단계 캔슬 입력 허용), `AttackPerformer.CanCancel`. ③`TopDownPlayer.lightCombo`: 공격 중 캔슬 윈도우에 입력하면 다음 단계 연결 + 선입력 버퍼, 구르기 시 콤보 끊김. ④**에디터** 개편: 단일/콤보 모드 토글, 콤보는 [1타][2타]… 단계 탭, **프레임 그리드 타임라인**(칸=프레임, 윈도우 막대, 캔슬 프레임 마커, 프레임 스크러버), 윈도우 시작/끝 프레임 IntSlider. |

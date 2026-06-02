@@ -27,6 +27,23 @@
 
 ---
 
+## 벽 렌더링 방식: 하이브리드 (확정 2026-06-02)
+
+80° 베이크 원근은 정면 띠 방향이 한쪽(남향)일 때만 성립 → 사방 분기(T/십자/세로/코너)는 깨짐.
+그래서 벽을 **하이브리드**로 통일:
+
+| 벽 종류 | 표현 |
+|---|---|
+| **가로벽 (남향, 카메라쪽 면)** | 80° — 윗면 캡 + **정면 띠(facade band)** |
+| **세로벽 / 북향 / 코너 / T / 십자 / 엔드캡 / 개구부** | **윗면(탑캡)만** (정면 띠 없음, 평면 90°) |
+
+- **핵심 일관성 규칙**: 윗면(탑캡) 재질·색·두께는 **모든 조각이 동일**해야 함.
+  정면 띠는 남향 가로벽에만 "추가로" 붙는 요소.
+- 즉 방을 만들면: 아래쪽(남) 벽만 정면 띠가 보이고, 좌/우/위 벽과 모든 분기는 윗면만 → 배틀맵 룩.
+- 입체감 보완은 런타임 셰이더 라이팅/그림자가 담당.
+
+---
+
 ## 공통 스타일 블록 (모든 프롬프트에 붙여넣기)
 
 ```
@@ -42,8 +59,18 @@ Flat cel-shaded surfaces with only 3-4 color steps per material.
 NOT photorealistic, NOT painterly, NOT hyper-detailed.
 Prioritize silhouette clarity over surface detail.
 
+FLAT SHADING (셰이더 후처리 전제): no baked directional shadows,
+no gradients, no dithering. Even flat lighting only — runtime 2D Light
+and dot/grain texture are applied later via shader. Keep surfaces flat.
+
 Transparent background (PNG).
 ```
+
+> **스타일 레퍼런스 (확정 2026-06-02)**: D&D 배틀맵풍 80° 탑다운 실내 레퍼 이미지를 첨부해 화풍 락.
+> - 이 레퍼는 **렌더링 화풍·디테일·각도(80°)의 기준** — 내용물(실내 마루)이 아니라 "룩"만 가져옴
+> - 우리 안전구역은 **야외 공터**(아스팔트/흙 바닥 + 철조망 펜스)이므로 내용은 다르게
+> - 레퍼엔 그림자가 약하게 구워져 있으나, 런타임 라이팅(시야 콘/낮밤)과 충돌 방지 위해
+>   **방향 그림자는 약하게/균일하게** 유지 (오브젝트 근처 약한 접지 그림자 정도만)
 
 ---
 
