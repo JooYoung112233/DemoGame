@@ -11,6 +11,9 @@ public class CameraFollow : MonoBehaviour
 {
     public static CameraFollow Instance { get; private set; }
 
+    // 카메라는 PlayerRig 프리팹에 포함되어 DontDestroyOnLoad로 모든 씬 공유.
+    // 씬마다 있는 다른 카메라(메인/AudioListener)는 충돌하므로 씬 로드 시 비활성화한다.
+
     [SerializeField] Transform target;
     [SerializeField] float smoothSpeed = 8f;
 
@@ -35,6 +38,7 @@ public class CameraFollow : MonoBehaviour
         cam = GetComponent<Camera>();
         if (cam != null && cam.orthographic) baseOrthoSize = cam.orthographicSize;
         FindTarget();
+        DisableOtherCameras();
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -46,8 +50,21 @@ public class CameraFollow : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        offsetInitialized = false;
-        target = null;
+        // target은 DontDestroyOnLoad 플레이어라 유지. 새 씬의 다른 카메라만 비활성.
+        DisableOtherCameras();
+    }
+
+    /// <summary>이 카메라(PlayerRig) 외 씬의 다른 Camera/AudioListener를 비활성 (2개 충돌 방지).</summary>
+    void DisableOtherCameras()
+    {
+        var cams = FindObjectsByType<Camera>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var c in cams)
+        {
+            if (c == null || c.gameObject == gameObject) continue;
+            c.enabled = false;
+            var al = c.GetComponent<AudioListener>();
+            if (al != null) al.enabled = false;
+        }
     }
 
     void FindTarget()

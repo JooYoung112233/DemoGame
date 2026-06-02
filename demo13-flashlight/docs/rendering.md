@@ -29,8 +29,9 @@
 - 카메라 = 표준 2D 셋업. `CameraSortSetup`이 `TransparencySortMode.CustomAxis`, 정렬축 `(0,1,0)` 설정 → **Y가 낮을수록(화면 아래) 앞**.
 - 모든 위치/투영/그림자 계산은 **XY 기준**. (구 "XZ 바닥평면 + 90° 눕힌 쿼드" 전제는 폐기.)
 - **모든 스프라이트(타일/프롭/캐릭터)는 회전 (0,0,0)** — 카메라 정면을 향하는 순수 2D. 원근은 아트가 담당하므로 트랜스폼 회전·빌보드 불필요.
-- **플레이어 카메라 = 어느 씬이든 한 세트(자동 장착).** 플레이어가 카메라를 물리적으로 들고 다니지 않고(그러면 씬 카메라와 2개 충돌), `CameraFollow`가 런타임에 그 씬의 메인 카메라(없으면 첫 Camera)를 플레이어 카메라로 **자동 장착**: ①`CameraFollow`(추적+셰이크/줌) ②후처리 ON ③피격 연출 Volume(비네트/색수차) 보장. 이미 장착된 씬(InGame/Safehouse/Sandbox)은 중복 스킵.
-  - → 맵툴 씬(`MapTool2D`)에서 Play 시 맵 카메라가 플레이어를 따라가 **이동 테스트 + 피격 연출까지 동일하게** 동작(씬 재생성·수정 불필요).
+- **플레이어 카메라 = PlayerRig 프리팹에 포함, 한 세트(2026-06-02 결정 변경).** ~~씬 카메라 자동 장착~~ → **카메라+플레이어+라이트+후처리(Volume)를 `Resources/PlayerRig.prefab` 한 세트로 묶어 DontDestroyOnLoad**로 모든 씬 공유. Bootstrap이 1개만 스폰. `CameraFollow`가 씬 로드 시 **자기(PlayerRig 카메라) 외 다른 Camera/AudioListener를 비활성**해 2개 충돌을 막음. (추적+셰이크/줌·후처리·피격 Volume 모두 프리팹 카메라에 내장.)
+  - 빌더 `TopDownPlayerBuilder`(메뉴 Build Player Prefab)가 PlayerRig 전체를 코드 조립.
+  - → 어느 씬(InGame/Safehouse/MapTool2D)에서 Play해도 동일한 카메라·조명·후처리로 동작.
 
 ## 조명 / 가시성 (시야 FOV) — 2026-06-02 전환
 
@@ -69,16 +70,17 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | `BRB/SpriteSheet` | 스프라이트 시트 UV | Light2D 반응 |
 | `BRB/SpriteBillboard` | SpriteRenderer용(정점컬러+컷아웃+아웃라인) | Light2D 반응 |
 | `BRB/SpineLitURP` | Spine(premultiplied 알파+정점컬러) | Light2D 반응 |
-| `BRB/ShadowProjector` | 일반 모듈 방향성 투영 그림자(반응형) | Unlit |
+| ~~`BRB/ShadowProjector`~~ | (미사용) URP 2D에서 안 그려짐 — 그림자는 `WallPixel(_SHADOW_MODE)`로 통일 | — |
 | `BRB/OcclusionOutline` | 깊이 가림 외곽선 | Unlit (순수 2D에선 의미 약함) |
 | ~~`BRB/FlashlightBeam`~~ | (삭제 예정 — 손전등 폐기) | — |
 
 - **모듈 그림자(✅ 2026-06-02)**: 드라이버 `FlatShadow.cs`(모듈에 부착)가 자식 그림자(SpriteRenderer/MeshRenderer 자동감지)를 만든다. **2종 독립 토글**:
-  - **① 정적 발밑 그림자(`groundShadow`)**: 이미지 발밑에 고정되는 드롭 섀도우. **빛과 무관하게 항상 같은 자리**(LateUpdate에서 안 건드림). ShadowProjector를 **화면 아래(앞) 고정 방향 + `groundLength`만큼 짧게 투영**해 발밑에 깔리게 함. `sortingOrder−2`. ⚠️ `groundLength=0`이면 스프라이트 뒤에 완전히 가려 안 보임(초기 버그 원인) — 0.3~0.5 권장.
-  - **② 동적 투영 그림자(`projectedShadow`)**: 매 프레임 Light2D 위치로 방향(XY)·길이 갱신, 빛 반대쪽으로 **늘어나는 반응형**. 벽은 `baseContact` ON → `WallPixel(_SHADOW_MODE)`, 일반은 `ShadowProjector`. `sortingOrder−1`.
+  - **셰이더 = `WallPixel(_SHADOW_MODE)` 통일 (✅ 중요)**: `BRB/ShadowProjector`는 **URP 2D 렌더러에서 안 그려진다**(Universal2D 패스에 2D 셰이프라이트 multi_compile 키워드가 없어 패스 매칭 실패로 추정). `WallPixel`의 2D 패스는 `ShapeLightShared` include로 그 키워드를 갖고 있어 정상 렌더 → **정적·동적 그림자 모두 `WallPixel(_SHADOW_MODE)`** 사용. (`baseContact` 필드는 레거시·무효.)
+  - **① 정적 발밑 그림자(`groundShadow`)**: 실루엣을 **통째로 아래로 offset**(`groundLength`)해서 발밑에 깔리게. **빛과 무관 고정**. shear가 아니라 offset이라 텍스처 여백과 무관하게 불투명부가 아래로 삐져나옴. `sortingOrder−2`.
+  - **② 동적 투영 그림자(`projectedShadow`)**: 매 프레임 방향(XY)·길이 갱신, 빛 반대쪽으로 **늘어나는 반응형**. `sortingOrder−1`.
   - **방향 기준(`directionMode`)**: `Player`(기본, `FlatShadowDirector.Source`=플레이어 따라) / `NearestLight`(최근접 Point Light2D) / `SpecificLight`(지정 `lightSource`) / `Manual`(`manualDirection` 월드 고정). 프롭마다 카탈로그 "Shadow" 섹션에서 선택.
   - **`FlatShadowDirector`(정적 매니저)**: 그림자 방향 공용 기준. **맵이 먼저 생기고 플레이어가 늦게 스폰**돼도 `TopDownPlayer.Instance`를 **지연 참조**(폴링/FindObjects 없음)하므로, Player 모드 프롭들이 플레이어 생성 즉시 자동 연결. 소스 없을 동안은 `manualDirection`으로 임시 표시. `FlatShadowDirector.SetSource(t)`로 다른 기준(횃불 등) 수동 지정 가능.
-  - **autoFlipV**: 동적 투영의 위/아래 앵커를 **라이트(플레이어) 위치로 자동 결정**(라이트가 위→그림자 아래로, 아래→위로). 수동 flipV 안 만져도 플레이어 방향 따라 자연스러움. OFF면 수동 flipV.
+  - **autoFlipV (기본 OFF)**: 빛이 오브젝트 수평선을 넘을 때 앵커를 반전 → **'탁' 뒤집힘(세로 미러 스냅)** 발생. 그래서 기본 OFF. OFF면 shear가 연속이라 빛이 돌아도 **부드럽게 회전**(대칭 프롭은 flip 차이 거의 안 보임). 정밀한 항상-정방향이 필요하면 회전기반 그림자(미구현, 추후)로.
   - 둘 다 켜면: 발밑 고정 그림자 + 빛 따라 늘어나는 그림자가 겹쳐 그려짐.
   - **기본값 버튼**(`FlatShadowEditor`): "현재값을 기본값으로 저장"(EditorPrefs) → 새 FlatShadow 추가(`Reset`) 시 자동 적용. "기본값으로 리셋"/"코드 기본값으로"/"저장된 기본값 삭제".
   - **부착 방법**: ① Prop2D는 `Prop2DDefinition.castShadow` ON → `Prop2DBuilder`가 자동으로 `FlatShadow` 부착(베이크된 프리팹에 포함). **맵툴 카탈로그는 `Wall`·`Prop` 카테고리 신규 항목에 `castShadow` 기본 ON**(`DefaultCastShadow`, 바닥/오브젝트마커는 OFF) → 벽·프롭 모두 정적 발밑 + 동적 투영 그림자가 동일하게 들어감. 폼의 "Shadow" 섹션에서 토글·길이·진하기 조절. ② 수동 배치 오브젝트는 `FlatShadow` 컴포넌트 직접 추가. **머티리얼에 Shadow Mode 값만 넣어선 안 생김** — 그림자는 FlatShadow가 만드는 별도 자식임.
@@ -103,3 +105,4 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | 2026-06-02 | **손전등 폐기 → 좀보이드식 시야(FOV).** 적은 플레이어 바라보는 부채꼴 시야 밖이면 안 보임/어둑. 어둠=하이브리드(지역/시간대별 가변). 손전등 코드(FlashlightController/FlashlightBeam/손전등 Light2D) 완전 제거 후 시야 시스템 신규. | 손전등 단일 주광원보다 FOV 가시성이 긴장감·전투 무대로 더 강함. 타격감 설계와 연동([`combat.md`](combat.md)). |
 | 2026-06-02 | **플레이어 상시 라이트 + 글로벌 어둠 (FOV 전 단계).** 손전등 컨트롤러 제거 → 플레이어 자식 `PlayerLight`(Point Light2D, 상시, 반경 0.6~4.5, 따뜻한 흰색)가 주변 상시 밝힘. 씬엔 어두운 `Global Light 2D`(intensity 0.22, 차가운 밤색)로 대비 → "주변만 밝고 나머지 어둠"(Darkwood 룩). 두 라이트 모두 **모든 Sorting Layer 타겟**. 빌더: `TopDownPlayerBuilder`(PlayerLight 상시, FlashlightController 미부착·PlayerEquipment 추가), `SceneLightingBuilder`(Tools▸TopDown 2D▸Setup Scene Lighting). | 사용자 요청(이미지 레퍼). FOV 시야 콘 전까지 원형 주변광으로 분위기 확보. FlashlightController 컴포넌트는 프리팹에서 제외(클래스는 GameHUD 배터리바 호환 위해 잔존). |
 | 2026-06-02 | **플레이어 라이트 2종(다크우드식): 주변 원형 + 앞 부채꼴.** 단일 원형을 2개로 분리 — ①`PlayerAmbientLight`(Point 360°, intensity 0.6, 반경 0.2~2.3, 중심 고정): 본인 바로 주변 은은하게. ②`PlayerConeLight`(Point 부채꼴 inner 35°/outer 80°, intensity 1.3, 반경 0.4~6.5): 마우스 방향으로 회전 + 원점 앞 오프셋(`lightForwardOffset` 0.45)으로 앞을 멀리·밝게. `TopDownPlayer.lightPivot`=콘(회전 대상), 원형은 고정. 콘 방향 안 맞으면 `lightAngleOffset` 조정. | 다크우드는 "주변 약한 원형 + 앞 부채꼴" 둘 다임. 부채꼴만 두면 본인 주변이 너무 깜깜. |
+| 2026-06-02 | **PlayerRig 한 세트 프리팹 + 다크우드 후처리(결정 변경).** 카메라 "씬 자동 장착" → **카메라+플레이어+라이트+Volume을 `Resources/PlayerRig.prefab` 한 세트**로 묶어 DontDestroyOnLoad(Bootstrap 1개 스폰). `CameraFollow`가 씬 로드 시 다른 Camera/AudioListener 비활성(충돌 방지). 카메라 `allowHDR` + ConeLight intensity 1.6(HDR). **후처리 Volume**(`PlayerRigVolume.asset`): Bloom(threshold 0.5/intensity 1.3/scatter/warm tint) + Vignette 0.42 + ColorAdjustments(따뜻·대비) + FilmGrain — "빛이 번지는 맛". `TopDownPlayer.DontDestroyOnLoad(transform.root)`. | 사용자 결정: 3개 한 세트 일관 동작. "맛없는 빛"은 bloom 미적용(threshold 높음·HDR off)이 원인 → 프리팹에 다크우드 Volume 내장으로 모든 씬 일관. |

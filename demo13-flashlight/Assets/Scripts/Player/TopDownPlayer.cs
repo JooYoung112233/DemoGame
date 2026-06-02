@@ -132,13 +132,17 @@ public class TopDownPlayer : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        // PlayerRig(카메라+플레이어+라이트 한 세트)의 루트를 보존/중복제거
+        if (Instance != null && Instance != this) { Destroy(transform.root.gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        DontDestroyOnLoad(transform.root.gameObject);
 
         _rb = GetComponent<Rigidbody2D>();
+        _rb.bodyType       = RigidbodyType2D.Dynamic;       // 벽에 막히려면 Dynamic (Kinematic이면 뚫음)
         _rb.gravityScale   = 0f;
         _rb.freezeRotation = true;
+        _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // 빠른 이동·대시 터널링 방지
+        _rb.interpolation  = RigidbodyInterpolation2D.Interpolate;        // 부드러운 이동
 
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -490,17 +494,19 @@ public class TopDownPlayer : MonoBehaviour
         if (Instance != null) return;
         if (FindFirstObjectByType<TopDownPlayer>(FindObjectsInactive.Include) != null) return;
 
-        var prefab = Resources.Load<GameObject>("TopDownPlayer");
+        // PlayerRig = 카메라 + 플레이어 + 라이트 한 세트 프리팹 (DontDestroyOnLoad)
+        var prefab = Resources.Load<GameObject>("PlayerRig");
         if (prefab != null)
         {
             var go = Instantiate(prefab);
-            go.name = "TopDownPlayer";
+            go.name = "PlayerRig";
             var sp = FindFirstObjectByType<SpawnPoint>();
             if (sp != null) go.transform.position = sp.transform.position;
         }
         else
         {
-            Debug.LogWarning("[TopDownPlayer] Resources/TopDownPlayer 프리팹 없음. 씬에 직접 배치하거나 프리팹 생성 필요.");
+            Debug.LogWarning("[TopDownPlayer] Resources/PlayerRig 프리팹 없음. " +
+                             "'Tools > TopDown 2D > Build Player Prefab'으로 생성하세요.");
         }
     }
 
