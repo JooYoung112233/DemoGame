@@ -23,6 +23,13 @@ public class RaidManager : MonoBehaviour
     [Tooltip("시간초과 시 아이템 손실 비율 (0=손실없음, 1=전부)")]
     [SerializeField] float timeOverLossRate = 0.5f;
 
+    [Header("Death (사망 페널티)")]
+    [Tooltip("사망 시 가방 아이템 손실 비율 (1=전부)")]
+    [SerializeField] float deathLossRate = 1f;
+    [Tooltip("사망 후 복귀할 씬")]
+    [SerializeField] string deathExitScene = "Safehouse";
+    [SerializeField] string deathSpawnPointId = "raid_death";
+
     [Header("HUD Style")]
     [SerializeField] int timerFontSize = 22;
     [SerializeField] Color timerNormalColor = new Color(0.9f, 0.95f, 1f);
@@ -35,6 +42,8 @@ public class RaidManager : MonoBehaviour
     float remainingTime;
     bool raidActive;
     bool raidEnded;
+    Health _playerHealth;
+    bool _deathHandled;
 
     // 획득 아이템 추적
     List<ItemInstance> lootedItems = new List<ItemInstance>();
@@ -68,17 +77,35 @@ public class RaidManager : MonoBehaviour
         raidStartTime = Time.time;
         raidActive = true;
         raidEnded = false;
+        TryBindPlayerHealth();
         Debug.Log($"[RaidManager] 레이드 시작! 제한시간: {raidDuration}초");
     }
 
     void OnDestroy()
     {
+        if (_playerHealth != null) _playerHealth.OnDeath -= OnPlayerDeath;
         if (Instance == this)
             Instance = null;
     }
 
+    /// <summary>플레이어 Health 사망 이벤트 구독 (지연 바인딩 대응).</summary>
+    void TryBindPlayerHealth()
+    {
+        if (_playerHealth != null) return;
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
+        _playerHealth = player.GetComponent<Health>();
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnDeath -= OnPlayerDeath;
+            _playerHealth.OnDeath += OnPlayerDeath;
+        }
+    }
+
     void Update()
     {
+        if (_playerHealth == null) TryBindPlayerHealth();
+
         if (!raidActive || !enableTimer || raidEnded) return;
 
         remainingTime -= Time.deltaTime;
@@ -167,6 +194,45 @@ public class RaidManager : MonoBehaviour
         {
             SceneTransitionManager.Instance.TransitionTo(failExitScene, failSpawnPointId);
         }
+    }
+
+    /// <summary>플레이어 사망 — 레이드 실패. 가방 손실 + 안전가옥에서 부활.</summary>
+    void OnPlayerDeath()
+    {
+        if (raidEnded || _deathHandled) return;
+        _deathHandled = true;
+        raidEnded = true;
+        raidActive = false;
+
+        Debug.Log("[RaidManager] 플레이어 사망 — 레이드 실패");
+
+        // 가방 손실
+        var inventory = FindPlayerInventory();
+        if (inventory != null)
+        {
+            int lost = ApplyItemLoss(inventory, deathLossRate);
+            Debug.Log($"[RaidManager] 사망 아이템 손실: {lost}개");
+        }
+
+        // 사망 연출 (붉은 플래시 + 셰이크)
+        if (ScreenEffectManager.Instance != null)
+        {
+            ScreenEffectManager.Instance.Flash(new Color(0.7f, 0.05f, 0.05f), 0.8f);
+            ScreenEffectManager.Instance.ScreenShake(0.3f, 0.5f);
+        }
+        ToastManager.Show("사망 — 가방을 잃었다", ToastManager.ToastType.Warning, 3f);
+
+        // 안전가옥에서 부활 (풀회복)
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            player.GetComponent<Health>()?.FullHeal();
+            player.GetComponent<PlayerMedicalSystem>()?.HealAll();
+        }
+
+        // 강제 귀환
+        if (SceneTransitionManager.Instance != null)
+            SceneTransitionManager.Instance.TransitionTo(deathExitScene, deathSpawnPointId);
     }
 
     /// <summary>인벤토리에서 일부 아이템 랜덤 손실</summary>

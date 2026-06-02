@@ -38,3 +38,4 @@
 | 날짜 | 내용 |
 |---|---|
 | 2026-05-25 | 레이드 시스템 v1 구현. RaidManager(타이머+루트추적), LootContainer(initialLoot+자동루팅), RaidResultUI(실데이터 연동), InteractableObject(탈출 시 RaidManager 알림, Pickup 시 루트 추적). |
+| 2026-06-02 | **플레이어 사망 → 레이드 실패 처리.** `RaidManager`가 플레이어 `Health.OnDeath` 구독(지연 바인딩). 사망 시: **가방 아이템 전부 손실**(`deathLossRate=1`, 창고는 안전), 붉은 화면 플래시 + 셰이크 연출, 토스트("사망 — 가방을 잃었다"), **안전가옥에서 풀회복 부활**(Health.FullHeal + Medical.HealAll), `deathSpawnPointId="raid_death"`로 강제 귀환. 사망은 정산(PostRaidEvent/RaidResultUI) 스킵. 장착 무기는 유지(가방만 손실) — 추후 조정 가능. | 생존 게임의 긴장("죽으면 가방 다 잃음") 핵심. 시간초과(일부 손실)보다 가혹. |

@@ -24,8 +24,8 @@ public class Prop2DCatalogEditor : EditorWindow
     float _snap = 1f;
     Prop2DDefinition.Category _tab = Prop2DDefinition.Category.Prop;
     static readonly string[] TabNames = { "바닥", "벽", "프롭", "오브젝트" };
-    // 폼 섹션 접기/펴기
-    bool _foldVisual = true, _foldCollider = true, _foldPreview = true;
+    // 섹션 접기/펴기 (목록 + 폼)
+    bool _foldList = true, _foldVisual = true, _foldCollider = true, _foldPreview = true;
 
     void OnEnable()
     {
@@ -70,7 +70,9 @@ public class Prop2DCatalogEditor : EditorWindow
         }
 
         int count = _props.Count(p => p != null && p.category == _tab);
-        EditorGUILayout.LabelField($"{TabNames[(int)_tab]} ({count})", EditorStyles.boldLabel);
+        // 목록 접기/펴기 — 접으면 폼만 크게 본다. (탭은 항상 보임)
+        _foldList = EditorGUILayout.Foldout(_foldList, $"{TabNames[(int)_tab]} 목록 ({count})", true);
+        if (!_foldList) { EditorGUILayout.EndVertical(); return; }
 
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("＋ 새 항목")) CreateNewProp();
