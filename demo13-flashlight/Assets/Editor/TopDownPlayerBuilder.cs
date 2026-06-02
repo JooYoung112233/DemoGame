@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using System.IO;
@@ -147,16 +148,37 @@ public static class TopDownPlayerBuilder
         if (ok)
         {
             AssetDatabase.SaveAssets();
-            Selection.activeObject = prefab;
-            EditorGUIUtility.PingObject(prefab);
-            Debug.Log($"<color=cyan>[PlayerRig]</color> 생성 완료: {PREFAB_PATH}\n" +
+
+            // ── 현재 씬에 인스턴스 배치 (씬뷰에서 바로 보이게) ──
+            // 이미 PlayerRig/플레이어가 있으면 스킵(중복 방지). Play 시 Bootstrap도 중복 스킵.
+            bool placed = false;
+            if (!Application.isBatchMode &&
+                Object.FindFirstObjectByType<TopDownPlayer>(FindObjectsInactive.Include) == null)
+            {
+                var inst = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                inst.name = "PlayerRig";
+                Undo.RegisterCreatedObjectUndo(inst, "Place PlayerRig");
+                Selection.activeObject = inst;
+                EditorGUIUtility.PingObject(inst);
+                EditorSceneManager.MarkSceneDirty(inst.scene);
+                placed = true;
+            }
+            else
+            {
+                Selection.activeObject = prefab;
+                EditorGUIUtility.PingObject(prefab);
+            }
+
+            Debug.Log($"<color=cyan>[PlayerRig]</color> 생성 완료: {PREFAB_PATH}" +
+                      (placed ? " + 현재 씬에 배치됨" : "") + "\n" +
                       "PlayerRig = Player(+Sprite/Hurtbox/Lights) + Main Camera(+CameraFollow/Volume).\n" +
                       "Bootstrap이 1개 스폰 → DontDestroyOnLoad로 모든 씬 공유. 씬의 다른 카메라는 자동 비활성.");
             if (!Application.isBatchMode)
                 EditorUtility.DisplayDialog("PlayerRig",
-                    "Resources/PlayerRig.prefab 생성 완료.\n\n" +
+                    "Resources/PlayerRig.prefab 생성 완료" + (placed ? " + 현재 씬에 배치" : "") + ".\n\n" +
                     "카메라+플레이어+라이트+후처리(Volume)가 한 세트입니다.\n" +
-                    "Play 시 1개만 스폰되어 모든 씬에서 동일하게 동작합니다.\n\n" +
+                    (placed ? "씬뷰에서 바로 보입니다(라이트). Bloom 등 후처리는 게임뷰에서 보여요.\n\n"
+                            : "씬에 이미 플레이어가 있어 배치는 스킵했습니다.\n\n") +
                     "빛 느낌은 PlayerRig Volume(Bloom/Vignette/Color) + Light 값으로 조정하세요.", "확인");
         }
         else Debug.LogError("[PlayerRig] 프리팹 저장 실패");
