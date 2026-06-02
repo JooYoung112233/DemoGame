@@ -24,6 +24,7 @@ public class PlayerInventory : MonoBehaviour
     Health health;
     PlayerMedicalSystem medical;
     FlashlightController flashlight;
+    PlayerEquipment equipment;
 
     void Awake()
     {
@@ -32,6 +33,7 @@ public class PlayerInventory : MonoBehaviour
         health = GetComponent<Health>();
         medical = GetComponent<PlayerMedicalSystem>();
         flashlight = GetComponentInChildren<FlashlightController>();
+        equipment = GetComponent<PlayerEquipment>();
     }
 
     /// <summary>아이템 줍기 시도. 성공하면 true.</summary>
@@ -48,7 +50,16 @@ public class PlayerInventory : MonoBehaviour
     {
         if (placed == null) return false;
         var item = placed.item;
-        if (item.data == null || !item.data.isUsable) return false;
+        if (item.data == null) return false;
+
+        // 무기는 장착(토글). 아이템 소모 없음.
+        if (item.data.category == ItemCategory.Weapon)
+        {
+            if (equipment == null) equipment = GetComponent<PlayerEquipment>();
+            return equipment != null && equipment.EquipWeapon(item.data);
+        }
+
+        if (!item.data.isUsable) return false;
 
         bool used = false;
 

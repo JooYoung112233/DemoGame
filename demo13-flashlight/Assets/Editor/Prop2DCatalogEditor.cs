@@ -24,6 +24,8 @@ public class Prop2DCatalogEditor : EditorWindow
     float _snap = 1f;
     Prop2DDefinition.Category _tab = Prop2DDefinition.Category.Prop;
     static readonly string[] TabNames = { "바닥", "벽", "프롭", "오브젝트" };
+    // 폼 섹션 접기/펴기
+    bool _foldVisual = true, _foldCollider = true, _foldPreview = true;
 
     void OnEnable()
     {
@@ -164,30 +166,36 @@ public class Prop2DCatalogEditor : EditorWindow
         def.category = (Prop2DDefinition.Category)EditorGUILayout.EnumPopup("카테고리(탭)", def.category);
 
         EditorGUILayout.Space(6);
-        EditorGUILayout.LabelField("Visual", EditorStyles.boldLabel);
-        def.sprite = (Sprite)EditorGUILayout.ObjectField("스프라이트", def.sprite, typeof(Sprite), false);
-        def.material = (Material)EditorGUILayout.ObjectField("머티리얼(선택)", def.material, typeof(Material), false);
-        def.sortingOffset = EditorGUILayout.IntField("정렬 오프셋", def.sortingOffset);
+        _foldVisual = EditorGUILayout.Foldout(_foldVisual, "Visual (스프라이트)", true);
+        if (_foldVisual)
+        {
+            def.sprite = (Sprite)EditorGUILayout.ObjectField("스프라이트", def.sprite, typeof(Sprite), false);
+            def.material = (Material)EditorGUILayout.ObjectField("머티리얼(선택)", def.material, typeof(Material), false);
+            def.sortingOffset = EditorGUILayout.IntField("정렬 오프셋", def.sortingOffset);
+        }
 
         EditorGUILayout.Space(6);
-        EditorGUILayout.LabelField("Collider (막힘 영역)", EditorStyles.boldLabel);
-        def.colliderMode = (Prop2DDefinition.ColliderMode)
-            EditorGUILayout.EnumPopup("모드", def.colliderMode);
-        def.isTrigger = EditorGUILayout.Toggle("트리거(통과 가능)", def.isTrigger);
-
-        switch (def.colliderMode)
+        _foldCollider = EditorGUILayout.Foldout(_foldCollider, "Collider (막힘 영역)", true);
+        if (_foldCollider)
         {
-            case Prop2DDefinition.ColliderMode.Box:
-                def.boxSizeScale = EditorGUILayout.Vector2Field("크기 배율(1=그림크기)", def.boxSizeScale);
-                def.boxOffset = EditorGUILayout.Vector2Field("중심 오프셋", def.boxOffset);
-                break;
-            case Prop2DDefinition.ColliderMode.Polygon:
-                EditorGUILayout.HelpBox("스프라이트 외곽선(physics shape)을 따라 자동 생성됩니다. " +
-                    "Sprite Editor의 Custom Physics Shape로 외곽을 다듬을 수 있습니다.", MessageType.Info);
-                break;
-            case Prop2DDefinition.ColliderMode.Composite:
-                DrawCompositeList(def);
-                break;
+            def.colliderMode = (Prop2DDefinition.ColliderMode)
+                EditorGUILayout.EnumPopup("모드", def.colliderMode);
+            def.isTrigger = EditorGUILayout.Toggle("트리거(통과 가능)", def.isTrigger);
+
+            switch (def.colliderMode)
+            {
+                case Prop2DDefinition.ColliderMode.Box:
+                    def.boxSizeScale = EditorGUILayout.Vector2Field("크기 배율(1=그림크기)", def.boxSizeScale);
+                    def.boxOffset = EditorGUILayout.Vector2Field("중심 오프셋", def.boxOffset);
+                    break;
+                case Prop2DDefinition.ColliderMode.Polygon:
+                    EditorGUILayout.HelpBox("스프라이트 외곽선(physics shape)을 따라 자동 생성됩니다. " +
+                        "Sprite Editor의 Custom Physics Shape로 외곽을 다듬을 수 있습니다.", MessageType.Info);
+                    break;
+                case Prop2DDefinition.ColliderMode.Composite:
+                    DrawCompositeList(def);
+                    break;
+            }
         }
 
         if (EditorGUI.EndChangeCheck())
@@ -206,8 +214,8 @@ public class Prop2DCatalogEditor : EditorWindow
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.Space(8);
-        EditorGUILayout.LabelField("미리보기 (콜라이더 = 빨강)", EditorStyles.boldLabel);
-        DrawPreview(def);
+        _foldPreview = EditorGUILayout.Foldout(_foldPreview, "미리보기 (콜라이더 = 빨강)", true);
+        if (_foldPreview) DrawPreview(def);
 
         EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();

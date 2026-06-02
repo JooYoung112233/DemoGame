@@ -114,6 +114,8 @@
 
 전체 165개 C# 스크립트 점검 결과. 핵심 시스템(전투·의료·제작·스토리·맵빌더)은 골격 완성, 주변 연동이 미흡하다.
 
+> ⚠️ **이 점검은 2026-06-02 탑다운 전환 이전 기준.** 탑다운 전환으로 생긴 남은 작업(맵 페인팅·**시야 FOV 시스템**·**타격감 연출**·손전등 제거 등)은 [`topdown-migration.md`](topdown-migration.md) "남은 일" 참조.
+
 ### 🔴 높음 — 기능 동작에 직접 영향
 
 | 항목 | 위치 | 내용 |
@@ -130,15 +132,15 @@
 | ~~문 상호작용 피드백 토스트 없음~~ | ~~`Interaction/DoorController.cs:258`~~ | ✅ 2026-05-30 해결 — `UI/ToastManager.cs` 공용 토스트 신설(`ToastManager.Show`). 문 잠김/화폐 변동 등 연동 |
 | 리플렉션으로 private 필드 접근 | `Interaction/DoorController.cs:245`, `NPC/NPCQuestMarker.cs:166`, `MapBuilder/Integration/MapObjectSpawner.cs:103,305` | `GetField(... NonPublic)` — 취약·리네임 시 무성 실패. 공개 Setter 권장 |
 | `goto` 제어 흐름 | `Inventory/PlayerInventory.cs:87` | `goto doneHeal;` — `break`/조건문으로 정리 권장 |
-| WorldItem 임시 큐브 렌더 | `Inventory/WorldItem.cs:40` | `// 기본 큐브 (임시)` — 스프라이트/프리팹 미연결 |
+| WorldItem 임시 스프라이트 | `Inventory/WorldItem.cs:40` | 🔸 2026-06-02 탑다운 전환으로 3D 큐브→2D `PlaceholderSprite.Square`(희귀도 색)로 개선. 최종 `worldDropPrefab`/아이템 아이콘 연결만 미완 |
 
 ### ⚪ 낮음 — 정리 대상
 
 | 항목 | 위치 | 내용 |
 |------|------|------|
 | ~~Deprecated 빈 스텁~~ | ~~`MapBuilder/Rendering/BuildingCubeBuilder.cs`~~ | ✅ 2026-05-29 삭제 완료 (전역 `Building/RoofController.cs` 중복본, 빈 폴더 `Visual/`·`Safehouse/`도 함께 정리) |
-| 미사용 FOW 시스템 | `FogOfWar/FogOfWarSystem.cs` | 완전한 시야/안개 시스템이나 참조·씬 부착 0건. 시야 기획 확정 시 연결, 아니면 삭제 |
-| 파일명 공백 | `Resources/UI/RaidResultUI .prefab` | 이름에 공백. 런타임은 `AddComponent`로 생성(프리팹 미로드) → 미사용 아티팩트로 보임. 확인 후 삭제/리네임 |
+| ~~미사용 FOW 시스템~~ | ~~`FogOfWar/FogOfWarSystem.cs`~~ | ✅ 2026-06-02 삭제됨(탑다운 전환). ⚠️ 단 **시야 FOV 기획이 새로 확정**(좀보이드식, 손전등 폐기) → 신규 시스템으로 재구현 예정. `rendering.md`/`combat.md` |
+| ~~파일명 공백~~ | ~~`Resources/UI/RaidResultUI .prefab`~~ | ✅ 2026-06-02 삭제됨 |
 
 ### 서브시스템 완성도 요약
 

@@ -123,6 +123,10 @@ public class ItemData : ScriptableObject
     [Tooltip("치료 아이템 SO (Medical 카테고리일 때)")]
     public MedicalItemData medicalData;
 
+    [Header("무기 연동 (Weapon 전용)")]
+    [Tooltip("무기 전투 데이터 SO (Weapon 카테고리일 때). 장착 시 콤보·스탯 교체")]
+    public WeaponData weaponData;
+
     [Header("바닥 드롭")]
     [Tooltip("월드에 떨어졌을 때 사용할 프리팹 (없으면 기본 큐브)")]
     public GameObject worldDropPrefab;

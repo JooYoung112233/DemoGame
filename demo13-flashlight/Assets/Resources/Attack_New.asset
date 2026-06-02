@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce1660046064aab44811087048683b72, type: 3}
+  m_Name: Attack_New
+  m_EditorClassIdentifier: Game.Scripts::AttackData
+  attackId: light1
+  fps: 12
+  totalFrames: 6
+  cancelFromFrame: 3
+  damage: 8
+  groggy: 5
+  windows:
+  - label: hit
+    startFrame: 1
+    endFrame: 3
+    shape: 0
+    offset: {x: 1, y: 0}
+    boxSize: {x: 1.2, y: 0.9}
+    angle: 0
+    radius: 0.6
+    damageMult: 1
+    groggyMult: 1

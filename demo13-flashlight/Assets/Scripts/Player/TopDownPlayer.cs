@@ -60,7 +60,7 @@ public class TopDownPlayer : MonoBehaviour
     PlayerStatData _stat;
     PlayerStatData Stat => _stat ??= (StatDB.Instance != null ? StatDB.Instance.playerStat : null) ?? new PlayerStatData();
 
-    float MoveSpd        => Stat != null ? Stat.moveSpeed : fallbackMoveSpeed;
+    float MoveSpd        => (Stat != null ? Stat.moveSpeed : fallbackMoveSpeed) * WeaponMoveMult;
     float SprintMult     => Stat.sprintSpeedMultiplier;
     float SprintCost     => Stat.sprintStaminaCost;
     float SprintMinStam  => Stat.sprintMinStamina;
@@ -112,6 +112,17 @@ public class TopDownPlayer : MonoBehaviour
     AttackPerformer _performer;
     Hurtbox _hurtbox;
 
+    // 장착 무기 (null=맨손, 인스펙터 기본값 사용)
+    WeaponData _weapon;
+    AttackComboData CurrentLightCombo => (_weapon != null && _weapon.lightCombo != null) ? _weapon.lightCombo : lightCombo;
+    AttackData CurrentHeavy           => (_weapon != null && _weapon.heavyAttack != null) ? _weapon.heavyAttack : heavyAttack;
+    AttackData CurrentHeavyFull       => (_weapon != null && _weapon.heavyFullAttack != null) ? _weapon.heavyFullAttack : heavyFullAttack;
+    float WeaponMoveMult  => _weapon != null ? _weapon.moveSpeedMult : 1f;
+    float WeaponStamMult  => _weapon != null ? _weapon.staminaCostMult : 1f;
+
+    /// <summary>무기 장착 반영 (PlayerEquipment가 호출). null=맨손.</summary>
+    public void SetWeapon(WeaponData weapon) => _weapon = weapon;
+
     // ── Unity 생명주기 ───────────────────────────────────────────────
 
     void Awake()
@@ -136,6 +147,9 @@ public class TopDownPlayer : MonoBehaviour
         _performer.Configure(enemyMask, () => FacingDirection);
 
         _hurtbox = GetComponentInChildren<Hurtbox>();
+
+        // 장비 컴포넌트 보장 (무기 장착)
+        if (GetComponent<PlayerEquipment>() == null) gameObject.AddComponent<PlayerEquipment>();
 
         EnsureDefaultAttacks();
     }
@@ -300,7 +314,7 @@ public class TopDownPlayer : MonoBehaviour
             {
                 // 다음 단계 선입력 예약 (캔슬 가능 시점에 발동)
                 _comboBuffered = true;
-                _comboBufferTimer = lightCombo != null ? lightCombo.bufferTime : 0.25f;
+                _comboBufferTimer = CurrentLightCombo != null ? CurrentLightCombo.bufferTime : 0.25f;
             }
         }
 
@@ -332,10 +346,11 @@ public class TopDownPlayer : MonoBehaviour
 
     void PerformComboStep()
     {
-        var atk = lightCombo != null ? lightCombo.GetStep(_comboStep) : null;
+        var combo = CurrentLightCombo;
+        var atk = combo != null ? combo.GetStep(_comboStep) : null;
         if (atk == null) { EndLightCombo(); return; }
 
-        float cost = _comboStep >= 2 ? Stat.lightCombo3StaminaCost : Stat.lightStaminaCost;
+        float cost = (_comboStep >= 2 ? Stat.lightCombo3StaminaCost : Stat.lightStaminaCost) * WeaponStamMult;
         if (!ConsumeStamina(cost)) { EndLightCombo(); return; }
 
         _state = CombatState.LightAttack;
@@ -355,11 +370,11 @@ public class TopDownPlayer : MonoBehaviour
     void DoHeavyAttack()
     {
         bool full = _chargeTimer >= HeavyChargeTime;
-        float cost = full ? Stat.heavyFullStaminaCost : Stat.heavyStaminaCost;
+        float cost = (full ? Stat.heavyFullStaminaCost : Stat.heavyStaminaCost) * WeaponStamMult;
         if (!ConsumeStamina(cost)) { _state = CombatState.Idle; return; }
 
         _state = CombatState.HeavyRelease;
-        var atk = full ? heavyFullAttack : heavyAttack;
+        var atk = full ? CurrentHeavyFull : CurrentHeavy;
         _attackStateTimer = atk != null ? atk.Duration : 0.25f;
         _heavyCooldownTimer = HeavyCooldown;
 
@@ -396,7 +411,7 @@ public class TopDownPlayer : MonoBehaviour
         {
             case CombatState.LightAttack:
                 // 캔슬 가능 시점 + 선입력 → 다음 콤보 단계
-                int lastStep = (lightCombo != null ? lightCombo.StepCount : 0) - 1;
+                int lastStep = (CurrentLightCombo != null ? CurrentLightCombo.StepCount : 0) - 1;
                 if (_comboBuffered && _performer.CanCancel && _comboStep < lastStep)
                 {
                     AdvanceCombo();
