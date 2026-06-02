@@ -283,3 +283,4 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 | 2026-05-26 | **재화 이름 통일.** "스크랩 코인" → "루디(Rudy)" 전면 변경 (docs, UI 코드, ItemData 헤더, tools). |
 | 2026-05-26 | **MedicalData 생성 스크립트.** `Tools > Dev Tools > Data > Generate Medical Data` — 13종 MedicalItemData SO 자동 생성 + ItemData.medicalData 자동 연결. |
 | 2026-05-30 | **소비 아이템 스태미너 회복 구현.** `PlayerController.RestoreStamina(amount)` 신설(최대치 클램프 + 탈진 해제). `ItemUseEffect.RestoreStamina`가 `effectValue`만큼 즉시 회복. 기존 TODO(음수 ConsumeStamina) 제거. |
+| 2026-06-02 | **인벤토리·창고·장착무기 세이브 영속화.** 루팅한 전리품이 저장되도록 `SaveManager` 확장. `InventoryGrid.GetSaveData/LoadSaveData`(공용) — `GridItemEntry`(itemId·count·durability·격자위치·회전), 로드 시 저장 위치 우선 복원→실패 시 자동배치. 저장 대상: **가방**(`PlayerInventory.Grid`), **창고**(`SafehouseStorage.AllFurniture` static 목록을 uid 매칭으로 각 `FurnitureInstance.grid` 복원), **장착 무기**(`PlayerEquipment.GetSaveData`=itemId). ※ 게임 시작 직후 로드 시 창고 가구가 아직 인스턴스화 전이면 매칭 누락 가능(안전가옥 진입 후 저장/로드는 정상) — 알려진 한계. |

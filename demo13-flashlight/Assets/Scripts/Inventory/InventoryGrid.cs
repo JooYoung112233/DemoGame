@@ -332,6 +332,41 @@ public class InventoryGrid
         OnChanged?.Invoke();
     }
 
+    // ── 세이브/로드 (인벤·창고 공용) ──
+
+    /// <summary>격자 내용을 직렬화 가능한 엔트리 목록으로.</summary>
+    public List<GridItemEntry> GetSaveData()
+    {
+        var list = new List<GridItemEntry>();
+        foreach (var p in items)
+        {
+            if (p.item == null || p.item.data == null) continue;
+            list.Add(new GridItemEntry
+            {
+                itemId = p.item.data.itemId,
+                count = p.item.stackCount,
+                durability = p.item.durability,
+                x = p.gridX, y = p.gridY, rotated = p.rotated,
+            });
+        }
+        return list;
+    }
+
+    /// <summary>엔트리 목록으로 격자 복원 (저장 위치 우선, 실패 시 자동 배치).</summary>
+    public void LoadSaveData(List<GridItemEntry> entries)
+    {
+        Clear();
+        if (entries == null) return;
+        foreach (var e in entries)
+        {
+            var data = ItemDatabase.Get(e.itemId);
+            if (data == null) continue;
+            var inst = new ItemInstance(data, e.count);
+            if (data.hasDurability) inst.durability = e.durability;
+            if (!TryPlace(inst, e.x, e.y, e.rotated)) TryAutoPlace(inst);
+        }
+    }
+
     /// <summary>특정 itemId를 가진 아이템 찾기 (첫 번째)</summary>
     public PlacedItem FindItem(string itemId)
     {

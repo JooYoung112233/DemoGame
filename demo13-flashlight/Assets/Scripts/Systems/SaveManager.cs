@@ -89,6 +89,24 @@ public class SaveManager : MonoBehaviour
             data.currency = CurrencyManager.Instance.GetSaveData();
         }
 
+        // 인벤토리(가방) + 장착 무기
+        var playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO != null)
+        {
+            var inv = playerGO.GetComponent<PlayerInventory>();
+            if (inv != null && inv.Grid != null) data.bagItems = inv.Grid.GetSaveData();
+            var eq = playerGO.GetComponent<PlayerEquipment>();
+            if (eq != null) data.equippedWeapon = eq.GetSaveData();
+        }
+
+        // 창고 (안전가옥 가구 — static 목록)
+        data.storageUnits = new List<StorageUnitEntry>();
+        foreach (var f in SafehouseStorage.AllFurniture)
+        {
+            if (f == null || f.grid == null) continue;
+            data.storageUnits.Add(new StorageUnitEntry { uid = f.uid, items = f.grid.GetSaveData() });
+        }
+
         // 일일 의뢰
         if (DailyQuestManager.Instance != null)
         {
@@ -170,6 +188,27 @@ public class SaveManager : MonoBehaviour
         if (CurrencyManager.Instance != null)
         {
             CurrencyManager.Instance.LoadSaveData(data.currency);
+        }
+
+        // 인벤토리(가방) + 장착 무기
+        var playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO != null)
+        {
+            var inv = playerGO.GetComponent<PlayerInventory>();
+            if (inv != null && inv.Grid != null && data.bagItems != null)
+                inv.Grid.LoadSaveData(data.bagItems);
+            var eq = playerGO.GetComponent<PlayerEquipment>();
+            if (eq != null) eq.LoadSaveData(data.equippedWeapon);
+        }
+
+        // 창고 (uid 매칭)
+        if (data.storageUnits != null)
+        {
+            foreach (var e in data.storageUnits)
+            {
+                var f = SafehouseStorage.AllFurniture.FirstOrDefault(x => x != null && x.uid == e.uid);
+                if (f != null && f.grid != null) f.grid.LoadSaveData(e.items);
+            }
         }
 
         // 일일 의뢰
@@ -277,6 +316,13 @@ public class GameSaveData
     // 화폐(루디)
     public int currency;
 
+    // 인벤토리(가방) + 장착 무기
+    public List<GridItemEntry> bagItems = new List<GridItemEntry>();
+    public string equippedWeapon;
+
+    // 창고 (안전가옥 가구)
+    public List<StorageUnitEntry> storageUnits = new List<StorageUnitEntry>();
+
     // 일일 의뢰
     public DailyQuestManager.DailyQuestSaveData dailyQuest;
 
@@ -285,6 +331,24 @@ public class GameSaveData
 
     // 스토리
     public List<string> playedScenes = new List<string>();
+}
+
+[System.Serializable]
+public class GridItemEntry
+{
+    public string itemId;
+    public int count;
+    public float durability;
+    public int x;
+    public int y;
+    public bool rotated;
+}
+
+[System.Serializable]
+public class StorageUnitEntry
+{
+    public int uid;
+    public List<GridItemEntry> items = new List<GridItemEntry>();
 }
 
 [System.Serializable]
