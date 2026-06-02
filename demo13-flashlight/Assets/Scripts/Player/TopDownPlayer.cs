@@ -19,8 +19,13 @@ public class TopDownPlayer : MonoBehaviour
     [SerializeField] SpriteRenderer spriteRenderer;
     [SerializeField] bool flipByMouse = true;
 
-    [Header("손전등")]
-    [SerializeField] Transform flashlightPivot; // 자식 오브젝트 — Light2D 붙음
+    [Header("시야 라이트 (부채꼴, 앞 방향)")]
+    [Tooltip("PlayerLight(Light2D) Transform. 마우스 방향으로 회전 + 앞으로 오프셋")]
+    [SerializeField] Transform lightPivot;
+    [Tooltip("라이트 원점을 앞으로 미는 거리 (본인 주변 어둡게, 앞을 밝게)")]
+    [SerializeField] float lightForwardOffset = 0.45f;
+    [Tooltip("라이트 콘 회전 보정(도). 콘 방향이 안 맞으면 조정 (-90/90/0/180)")]
+    [SerializeField] float lightAngleOffset = -90f;
 
     [Header("전투")]
     [Tooltip("공격 판정 대상 레이어 (적). 비워두면 EnemyController 컴포넌트로 판별)")]
@@ -207,7 +212,7 @@ public class TopDownPlayer : MonoBehaviour
 
         UpdateMouseFacing();
         UpdateFlip();
-        UpdateFlashlight();
+        UpdateVisionLight();
 
         bool uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
         if (!uiOpen) HandleCombatInput();
@@ -270,11 +275,14 @@ public class TopDownPlayer : MonoBehaviour
             spriteRenderer.flipX = FacingDirection.x < 0f;
     }
 
-    void UpdateFlashlight()
+    void UpdateVisionLight()
     {
-        if (flashlightPivot == null) return;
+        if (lightPivot == null) return;
+        // 마우스 방향으로 콘 회전
         float angle = Mathf.Atan2(FacingDirection.y, FacingDirection.x) * Mathf.Rad2Deg;
-        flashlightPivot.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
+        lightPivot.localRotation = Quaternion.Euler(0f, 0f, angle + lightAngleOffset);
+        // 콘 원점을 앞으로 → 본인 주변은 어둑, 앞이 부채꼴로 밝음 (다크우드식)
+        lightPivot.localPosition = (Vector3)(FacingDirection * lightForwardOffset);
     }
 
     void UpdateSprint(bool uiOpen)

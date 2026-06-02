@@ -55,16 +55,19 @@ public static class TopDownPlayerBuilder
         hbCol.size = new Vector2(0.6f, 0.9f);
         hurtGo.AddComponent<Hurtbox>();
 
-        // ── 자식: 플레이어 라이트 (Light2D Point, 상시 켜짐) ────
-        // 손전등(FlashlightController) 폐기 — 플레이어 주변을 항상 밝히는 시야광.
+        // ── 자식: 플레이어 시야 라이트 (Light2D Point, 부채꼴, 상시) ────
+        // 손전등(FlashlightController) 폐기 — 다크우드식 "앞 부채꼴" 시야광.
+        // 원점을 살짝 앞에 두고(런타임 오프셋) 콘을 앞으로 펼쳐 → 본인 주변은 어둑, 앞이 밝음.
         var lightGo = new GameObject("PlayerLight");
         lightGo.transform.SetParent(root.transform, false);
         var light = lightGo.AddComponent<Light2D>();
         light.lightType = Light2D.LightType.Point;
-        light.intensity = 1.2f;
-        light.color = new Color(1f, 0.95f, 0.82f);  // 따뜻한 흰색
-        light.pointLightInnerRadius = 0.6f;          // 중심 풀밝기 반경
-        light.pointLightOuterRadius = 4.5f;          // 부드럽게 사라지는 외곽
+        light.intensity = 1.3f;
+        light.color = new Color(1f, 0.95f, 0.82f);   // 따뜻한 흰색
+        light.pointLightInnerRadius = 0.4f;
+        light.pointLightOuterRadius = 6.5f;          // 앞으로 길게
+        light.pointLightInnerAngle = 35f;            // 부채꼴 — 안쪽(풀밝기) 각
+        light.pointLightOuterAngle = 80f;            // 부채꼴 — 바깥(페이드) 각
         SceneLightingBuilder.ApplyAllSortingLayers(light);  // 모든 스프라이트가 라이트 받게
 
         // ── 게임 로직 컴포넌트 ─────────────────────────────────
@@ -80,7 +83,7 @@ public static class TopDownPlayerBuilder
         // ── 직렬화 필드 와이어링 ───────────────────────────────
         var pSo = new SerializedObject(player);
         SetRef(pSo, "spriteRenderer", sr);
-        // flashlightPivot 미연결 — 손전등 폐기(Point 라이트는 회전 불필요)
+        SetRef(pSo, "lightPivot", lightGo.transform);  // 부채꼴 라이트를 마우스 방향으로 회전
         var enemyMaskProp = pSo.FindProperty("enemyMask");
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         if (enemyMaskProp != null && enemyLayer >= 0)
