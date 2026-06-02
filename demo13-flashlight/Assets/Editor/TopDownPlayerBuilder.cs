@@ -55,15 +55,17 @@ public static class TopDownPlayerBuilder
         hbCol.size = new Vector2(0.6f, 0.9f);
         hurtGo.AddComponent<Hurtbox>();
 
-        // ── 자식: 손전등 피벗 (Light2D) ────────────────────────
-        var pivotGo = new GameObject("FlashlightPivot");
-        pivotGo.transform.SetParent(root.transform, false);
-        var light = pivotGo.AddComponent<Light2D>();
+        // ── 자식: 플레이어 라이트 (Light2D Point, 상시 켜짐) ────
+        // 손전등(FlashlightController) 폐기 — 플레이어 주변을 항상 밝히는 시야광.
+        var lightGo = new GameObject("PlayerLight");
+        lightGo.transform.SetParent(root.transform, false);
+        var light = lightGo.AddComponent<Light2D>();
         light.lightType = Light2D.LightType.Point;
-        light.intensity = 1f;
-        light.color = new Color(1f, 0.96f, 0.85f);
-        light.pointLightInnerRadius = 1f;
-        light.pointLightOuterRadius = 6f;
+        light.intensity = 1.2f;
+        light.color = new Color(1f, 0.95f, 0.82f);  // 따뜻한 흰색
+        light.pointLightInnerRadius = 0.6f;          // 중심 풀밝기 반경
+        light.pointLightOuterRadius = 4.5f;          // 부드럽게 사라지는 외곽
+        SceneLightingBuilder.ApplyAllSortingLayers(light);  // 모든 스프라이트가 라이트 받게
 
         // ── 게임 로직 컴포넌트 ─────────────────────────────────
         var player = root.AddComponent<TopDownPlayer>();
@@ -73,21 +75,17 @@ public static class TopDownPlayerBuilder
         root.AddComponent<InteractionSystem>();
         root.AddComponent<CombatFeedback>();
         root.AddComponent<MedicalHUD>();
-        var flashlight = root.AddComponent<FlashlightController>();
+        root.AddComponent<PlayerEquipment>();   // 무기 장착
 
         // ── 직렬화 필드 와이어링 ───────────────────────────────
         var pSo = new SerializedObject(player);
         SetRef(pSo, "spriteRenderer", sr);
-        SetRef(pSo, "flashlightPivot", pivotGo.transform);
+        // flashlightPivot 미연결 — 손전등 폐기(Point 라이트는 회전 불필요)
         var enemyMaskProp = pSo.FindProperty("enemyMask");
         int enemyLayer = LayerMask.NameToLayer("Enemy");
         if (enemyMaskProp != null && enemyLayer >= 0)
             enemyMaskProp.intValue = 1 << enemyLayer;
         pSo.ApplyModifiedPropertiesWithoutUndo();
-
-        var fSo = new SerializedObject(flashlight);
-        SetRef(fSo, "spotLight", light);
-        fSo.ApplyModifiedPropertiesWithoutUndo();
 
         // ── 프리팹 저장 ───────────────────────────────────────
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, PREFAB_PATH, out bool ok);
@@ -100,13 +98,13 @@ public static class TopDownPlayerBuilder
             EditorGUIUtility.PingObject(prefab);
             Debug.Log($"<color=cyan>[TopDownPlayer]</color> 프리팹 생성 완료: {PREFAB_PATH}\n" +
                       "컴포넌트: Rigidbody2D, CircleCollider2D, TopDownPlayer, Health, PlayerInventory, " +
-                      "PlayerMedicalSystem, InteractionSystem, CombatFeedback, MedicalHUD, FlashlightController\n" +
-                      "자식: PlayerSprite, Hurtbox(trigger), FlashlightPivot(Light2D)");
+                      "PlayerMedicalSystem, InteractionSystem, CombatFeedback, MedicalHUD, PlayerEquipment\n" +
+                      "자식: PlayerSprite, Hurtbox(trigger), PlayerLight(Light2D Point, 상시)");
             if (!Application.isBatchMode)
                 EditorUtility.DisplayDialog("TopDownPlayer",
                     "Resources/TopDownPlayer.prefab 생성 완료.\n\n" +
-                    "이제 Play 하면 자동 스폰됩니다.\n" +
-                    "스프라이트/콜라이더 크기는 인스펙터에서 조정하세요.", "확인");
+                    "PlayerLight(Point Light2D)가 상시 켜져 플레이어 주변을 밝힙니다.\n" +
+                    "어두운 분위기는 'Tools > TopDown 2D > Setup Scene Lighting'으로 글로벌 어둠을 추가하세요.", "확인");
         }
         else
         {
