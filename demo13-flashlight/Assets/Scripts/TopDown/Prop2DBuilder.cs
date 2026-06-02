@@ -17,7 +17,17 @@ public static class Prop2DBuilder
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = def.sprite;
         if (def.material != null) sr.sharedMaterial = def.material;
+        if (!string.IsNullOrEmpty(def.sortingLayer))
+            sr.sortingLayerName = def.sortingLayer;
         sr.sortingOrder = def.sortingOffset;
+
+        // Draw mode (벽 타일링 등). Tiled/Sliced는 size 지정.
+        sr.drawMode = def.drawMode;
+        if (def.drawMode != SpriteDrawMode.Simple)
+        {
+            sr.tileMode = def.tileMode;
+            sr.size = def.tiledSize == Vector2.zero ? Vector2.one : def.tiledSize;
+        }
 
         ApplyColliders(go, def);
         return go;
@@ -43,7 +53,14 @@ public static class Prop2DBuilder
             {
                 var box = go.AddComponent<BoxCollider2D>();
                 box.isTrigger = def.isTrigger;
-                if (def.sprite != null)
+                if (def.drawMode != SpriteDrawMode.Simple)
+                {
+                    // Tiled/Sliced: 콜라이더를 실제 렌더 크기(tiledSize)에 맞춤 (벽 길이 전체).
+                    var s = def.tiledSize == Vector2.zero ? Vector2.one : def.tiledSize;
+                    box.size = Vector2.Scale(s, def.boxSizeScale);
+                    box.offset = def.boxOffset;
+                }
+                else if (def.sprite != null)
                 {
                     var b = def.sprite.bounds; // 월드 단위(PixelsPerUnit 반영)
                     box.size = Vector2.Scale(b.size, def.boxSizeScale);

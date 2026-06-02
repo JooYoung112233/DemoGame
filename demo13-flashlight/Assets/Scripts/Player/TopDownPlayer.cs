@@ -477,6 +477,8 @@ public class TopDownPlayer : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
+        // 맵툴 씬에선 플레이어 자동 스폰 안 함 — 맵 편집/미리보기 전용.
+        if (MapToolScene.IsActive) return;
         if (Instance != null) return;
         if (FindFirstObjectByType<TopDownPlayer>(FindObjectsInactive.Include) != null) return;
 

@@ -47,6 +47,9 @@ public class UIManager : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
+        // 맵툴 씬에선 게임 HUD(체력/재화 등) 자동 생성 안 함 — 맵 편집/미리보기 전용.
+        if (MapToolScene.IsActive) return;
+
         // 씬에 배치된 게 Awake에서 이미 Instance가 됐으면 스킵
         if (Instance != null) return;
 

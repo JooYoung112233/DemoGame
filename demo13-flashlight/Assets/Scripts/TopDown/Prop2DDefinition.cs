@@ -42,8 +42,23 @@ public class Prop2DDefinition : ScriptableObject
     public Sprite sprite;
     [Tooltip("스프라이트 머티리얼(선택). 비우면 SpriteRenderer 기본.")]
     public Material material;
-    [Tooltip("정렬 오프셋 — 같은 위치 스프라이트의 앞뒤. 클수록 앞에 그려짐.")]
+    [Tooltip("Sorting Layer 이름 (SpriteRenderer.sortingLayerName). 예: Ground/Wall/Object.")]
+    public string sortingLayer = "Default";
+    [Tooltip("Order in Layer — 같은 Sorting Layer 내 앞뒤. 클수록 앞에 그려짐.")]
     public int sortingOffset;
+
+    [Header("Draw Mode (벽 타일링 등)")]
+    [Tooltip("Simple=원본 1장. Tiled=Size만큼 스프라이트 반복(벽을 길게). Sliced=9-slice. " +
+             "Tiled/Sliced는 스프라이트 임포트 Mesh Type=Full Rect 필요.")]
+    public SpriteDrawMode drawMode = SpriteDrawMode.Simple;
+    [Tooltip("Tiled/Sliced일 때 렌더 크기(월드 단위). 예: 벽 길이×두께.")]
+    public Vector2 tiledSize = new(1f, 1f);
+    [Tooltip("Tiled일 때 반복 방식. Continuous=가장자리 잘림, Adaptive=정수배로 늘려 안 잘림.")]
+    public SpriteTileMode tileMode = SpriteTileMode.Continuous;
+
+    [Header("Auto Prefab")]
+    [Tooltip("카탈로그가 자동 생성/갱신하는 프리팹(SpriteRenderer+Collider2D). 씬 배치 시 이걸 인스턴스화.")]
+    public GameObject prefab;
 
     [Header("Collider (막힘 영역)")]
     public ColliderMode colliderMode = ColliderMode.Box;

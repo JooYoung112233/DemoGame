@@ -61,14 +61,19 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | 셰이더 | 용도 | 조명 |
 |---|---|---|
 | `BRB/Pixelated` | 도트/맵 모듈 | Light2D 반응 |
+| `BRB/WallPixel` | 벽(Pixelated 동일 픽셀 + 문 흰색뚫기 `_WHITE_CUTOUT` + 오클루전 페이드 `_Alpha`). `_SHADOW_MODE` 켜면 같은 셰이더가 벽 그림자(투영+밑동접지)로도 동작 | Light2D 반응 / 그림자모드 Unlit |
 | `BRB/PlayerSprite` | 플레이어(시트UV+컷아웃+아웃라인) | Light2D 반응 |
 | `BRB/SpriteSheet` | 스프라이트 시트 UV | Light2D 반응 |
 | `BRB/SpriteBillboard` | SpriteRenderer용(정점컬러+컷아웃+아웃라인) | Light2D 반응 |
 | `BRB/SpineLitURP` | Spine(premultiplied 알파+정점컬러) | Light2D 반응 |
-| `BRB/ShadowProjector` | 방향성 투영 그림자 | Unlit |
+| `BRB/ShadowProjector` | 일반 모듈 방향성 투영 그림자(반응형) | Unlit |
 | `BRB/OcclusionOutline` | 깊이 가림 외곽선 | Unlit (순수 2D에선 의미 약함) |
 | ~~`BRB/FlashlightBeam`~~ | (삭제 예정 — 손전등 폐기) | — |
 
+- **모듈 그림자(✅ 2026-06-02)**: 드라이버 `FlatShadow.cs`(모듈에 부착)가 자식 그림자(SpriteRenderer/MeshRenderer 자동감지)를 만들고 매 프레임 Light2D 위치로 그림자 방향(XY)·길이를 셰이더에 먹임. 빛 반대쪽으로 늘어나는 **반응형 투영**. `sortingOrder−1`로 모듈 뒤에 렌더.
+  - **벽/건물**: `baseContact` 옵션 ON → 그림자 자식이 **`BRB/WallPixel`을 `_SHADOW_MODE`로 재사용**(별도 그림자 셰이더 폐기, 벽 셰이더에 통합) → 그림자가 길게 뻗어도 **밑동은 상시 접지 그림자**(`_ContactStrength`/`_ContactHeight`)가 깔려 떠 보이지 않음. 원본 벽의 `_Cutoff`/`_WHITE_CUTOUT`을 복사해 문 구멍은 그림자도 안 드리움.
+  - **일반 모듈**: `baseContact` OFF → `BRB/ShadowProjector`.
+  - ※ URP 2D는 머티리얼당 Universal2D 패스 1개만 그려서, 그림자는 벽 본체 셰이더에 "패스 추가"로는 못 넣고 **별도 오브젝트 + `_SHADOW_MODE` 키워드 변형**으로 그림.
 - **타격감 흰 플래시(✅ 2026-06-02)**: 전용 **`BRB/SpriteFlash`**(URP 2D sprite-lit + `_FlashColor`/`_FlashAmount`) 신설. `HitFlash.cs`가 바디 스프라이트에 머티리얼 자가설치 후 `_FlashAmount`로 적중 시 흰색 깜빡. `SpriteRenderer.color` 대신 셰이더 레벨이라 베이스 색·조명·틴트와 무관. (기존 BRB 셰이더는 캐릭터가 안 쓰므로 미수정.) ⚠️ 빌드 시 `Shader.Find` 위해 Always Included Shaders 등록 필요.
 - **삭제됨**: `CityBuilding`/`CityWall`/`RuinFloor`/`RoadFloor`/`WetFloor`/`Prop`(3D Forward 전용), `RuinPixel`, 구 `InkCity/*`(SpriteOutline/InkShadow/NightOverlay/PanelWiggle/InkDissolve/InkFloor/DotFloor).
 - ⚠️ 스프라이트 임포트: **Mesh Type = Full Rect** 권장(Tight면 시트UV/shear 틀어짐). URP 17.3 / Unity 6.

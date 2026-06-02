@@ -32,3 +32,7 @@
 | 2026-06-02 | 아이소 맵빌더(커스텀 EditorWindow + 3D 큐브 벽 + 빌보드 프롭 + JSON 베이크) 전면 폐기. |
 | 2026-06-02 | 탑다운 맵 = Tilemap(바닥/벽) + Prop2D 카탈로그(프롭). 막힘 = 비-트리거 Collider2D 규칙. |
 | 2026-06-02 | Prop2D 콜라이더 전략 = "프롭마다 선택"(None/Box/Polygon/Composite). |
+| 2026-06-03 | **Prop 카탈로그 UX 정비.** 탭(바닥/벽/프롭/오브젝트, ID 접두어 `floor_/wall_/prop_/object_` 자동) + 세로 레이아웃(목록 위·스크롤/접기, 폼 아래·섹션 접기). **새 항목 = 드래프트 방식**(이미지·머티리얼 등록 후 '생성 & 등록', 즉시 빈 에셋 X). 항목 행에 썸네일/정보/편집·복제·X. |
+| 2026-06-03 | **카탈로그 생성 시 프리팹 자동 생성.** `Prop2DDefinition.prefab`(SpriteRenderer+Collider2D)을 `Resources/Props2D/Prefabs/{id}.prefab`로 생성/갱신(생성·저장 시). 씬 배치는 그 프리팹을 `InstantiatePrefab`(링크 유지), 없으면 즉석 빌드. 배치는 **Play가 아니라 Scene 뷰(에디트 모드)** — `SceneView.duringSceneGui` 클릭. |
+| 2026-06-03 | **벽 Tiled draw mode 지원.** `Prop2DDefinition`에 `drawMode`(Simple/Tiled/Sliced)·`tiledSize`·`tileMode` 추가. `Prop2DBuilder`가 `SpriteRenderer.drawMode/size/tileMode` 적용, Box 콜라이더도 Tiled면 `tiledSize`에 맞춤(벽 길이 전체). 카탈로그에 "스프라이트 Full Rect로 설정" 버튼(Tiled 정상 렌더용 임포트 수정). |
+| 2026-06-03 | **맵툴 씬에선 게임 HUD/플레이어 자동 스폰 스킵.** 씬 이름에 "MapTool" 포함 시(`MapToolScene.IsActive`) `UIManager`(체력/재화 HUD)·`TopDownPlayer` 자동 생성 안 함 — 맵 편집/미리보기 전용. |
