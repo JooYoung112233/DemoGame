@@ -54,6 +54,7 @@ public class EnemyController : MonoBehaviour
     Rigidbody2D    _rb;
     CombatFeedback feedback;
     AttackPerformer _performer;
+    NavAgent       _nav;          // 격자 A* 길찾기 (추격 시)
     Vector2        _attackDir = Vector2.right;
     SpriteRenderer spriteRenderer;
     Renderer[]     renderers;
@@ -124,11 +125,16 @@ public class EnemyController : MonoBehaviour
             unitStat = StatDB.Instance.GetUnit(unitKey);
 
         _rb                = GetComponent<Rigidbody2D>();
+        _rb.bodyType       = RigidbodyType2D.Dynamic;       // 벽에 막히려면 Dynamic
         _rb.gravityScale   = 0f;
         _rb.freezeRotation = true;
+        _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
         health    = GetComponent<Health>();
         feedback  = GetComponent<CombatFeedback>();
+
+        _nav = GetComponent<NavAgent>();
+        if (_nav == null) _nav = gameObject.AddComponent<NavAgent>();
 
         _performer = GetComponent<AttackPerformer>();
         if (_performer == null) _performer = gameObject.AddComponent<AttackPerformer>();
@@ -220,6 +226,7 @@ public class EnemyController : MonoBehaviour
         if (player == null || (playerHealth != null && playerHealth.IsDead))
         {
             state = State.Patrol;
+            _nav?.Stop();
             SetVelocity(Vector2.zero);
             animController?.Play("idle");
             return;
@@ -227,11 +234,12 @@ public class EnemyController : MonoBehaviour
 
         float dist = DistToPlayer();
 
-        if (dist > LoseRng) { state = State.Patrol; SetPatrolTarget(); return; }
+        if (dist > LoseRng) { state = State.Patrol; _nav?.Stop(); SetPatrolTarget(); return; }
 
         if (dist <= AtkRange && attackTimer <= 0)
         {
             state = State.AttackWindup;
+            _nav?.Stop();
             windupTimer = Windup;
             windupFlashTimer = 0;
             SetVelocity(Vector2.zero);
@@ -239,7 +247,20 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        Vector2 d = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        // 길찾기 방향(벽 우회). 경로 없으면 직진 폴백.
+        Vector2 d;
+        if (_nav != null)
+        {
+            _nav.SetDestination(player.position);
+            d = _nav.DesiredDirection;
+            if (d.sqrMagnitude < 0.0001f)
+                d = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        }
+        else
+        {
+            d = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        }
+
         SetVelocity(d * MoveSpd);
         FlipSprite(d);
         animController?.Play("walk");

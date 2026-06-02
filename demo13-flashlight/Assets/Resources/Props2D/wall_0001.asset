@@ -17,9 +17,19 @@ MonoBehaviour:
   category: 1
   sprite: {fileID: 21300000, guid: aec335d9ab8d5394daf07de3610812df, type: 3}
   material: {fileID: 2100000, guid: 71c0055dd73b9af499d481f3b59ba697, type: 2}
+  sortingLayer: Ground
   sortingOffset: 0
+  drawMode: 2
+  tiledSize: {x: 30, y: 1.8}
+  tileMode: 0
+  prefab: {fileID: 2972787940707943317, guid: 936f4d888b2b87443b685bbc584e2383, type: 3}
   colliderMode: 1
   isTrigger: 0
   boxSizeScale: {x: 1, y: 1}
   boxOffset: {x: 0, y: 0}
   compositeBoxes: []
+  castShadow: 1
+  shadowDirMode: 0
+  shadowBaseContact: 1
+  shadowMaxLength: 1.4
+  shadowStrength: 0.55

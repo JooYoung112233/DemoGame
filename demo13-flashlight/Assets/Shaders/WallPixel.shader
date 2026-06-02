@@ -33,7 +33,7 @@ Shader "BRB/WallPixel"
         [Header(Occlusion Fade)]
         _Alpha ("Alpha (오클루전 페이드)", Range(0, 1)) = 1.0
 
-        [Header(Shadow Mode (그림자 자식용))]
+        [Header(Shadow Mode for child object)]
         _ShadowColor ("Shadow Color", Color) = (0,0,0,1)
         _ShadowStrength ("Shadow Strength", Range(0,1)) = 0.55
         _TipFade ("Tip Fade", Range(0,1)) = 0.35
@@ -42,6 +42,7 @@ Shader "BRB/WallPixel"
         [Toggle] _ShadowFlipV ("Shadow Flip V", Float) = 0
         _ShadowDirWS ("Shadow Dir WS (xy)", Vector) = (1,0,0,0)
         _ShadowLength ("Shadow Length", Range(0,5)) = 1.2
+        _ShadowHeight ("Shadow Height (발밑 투영, 0=offset모드)", Float) = 0
     }
     SubShader
     {
@@ -91,6 +92,7 @@ Shader "BRB/WallPixel"
                 float _ShadowFlipV;
                 float4 _ShadowDirWS;
                 float _ShadowLength;
+                float _ShadowHeight;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);
@@ -117,8 +119,23 @@ Shader "BRB/WallPixel"
                 float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
                 float h = (_ShadowFlipV > 0.5) ? (1.0 - input.uv.y) : input.uv.y;
                 #ifdef _SHADOW_MODE
-                    posWS.x += _ShadowDirWS.x * h * _ShadowLength;
-                    posWS.y += _ShadowDirWS.y * h * _ShadowLength;
+                    if (_ShadowHeight > 0.0001)
+                    {
+                        // 빛 수직성분(abs dir.y)에 따라 블렌딩:
+                        //   위/아래 빛 → 발밑으로 모아 length만큼 길게(밑/위로 쭉), 옆 빛 → 원래 형태 유지해 기울임.
+                        //   → 모든 방향에서 부드럽고 자연스러움(플립/스냅/납작선 없음).
+                        float vertical = abs(_ShadowDirWS.y);
+                        float baseY = posWS.y - h * _ShadowHeight;     // 발밑 라인
+                        float keptY = lerp(posWS.y, baseY, vertical);  // 옆빛=원래Y, 수직빛=발밑
+                        posWS.x += _ShadowDirWS.x * h * _ShadowLength;
+                        posWS.y  = keptY + _ShadowDirWS.y * h * _ShadowLength;
+                    }
+                    else
+                    {
+                        // offset 모드(정적 발밑 그림자용): 원위치에 그대로 더함
+                        posWS.x += _ShadowDirWS.x * h * _ShadowLength;
+                        posWS.y += _ShadowDirWS.y * h * _ShadowLength;
+                    }
                 #endif
                 output.positionWS = posWS;
                 output.positionCS = TransformWorldToHClip(posWS);
@@ -241,6 +258,7 @@ Shader "BRB/WallPixel"
                 float _ShadowFlipV;
                 float4 _ShadowDirWS;
                 float _ShadowLength;
+                float _ShadowHeight;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);
@@ -268,8 +286,23 @@ Shader "BRB/WallPixel"
                 float3 posWS = TransformObjectToWorld(input.positionOS.xyz);
                 float h = (_ShadowFlipV > 0.5) ? (1.0 - input.uv.y) : input.uv.y;
                 #ifdef _SHADOW_MODE
-                    posWS.x += _ShadowDirWS.x * h * _ShadowLength;
-                    posWS.y += _ShadowDirWS.y * h * _ShadowLength;
+                    if (_ShadowHeight > 0.0001)
+                    {
+                        // 빛 수직성분(abs dir.y)에 따라 블렌딩:
+                        //   위/아래 빛 → 발밑으로 모아 length만큼 길게(밑/위로 쭉), 옆 빛 → 원래 형태 유지해 기울임.
+                        //   → 모든 방향에서 부드럽고 자연스러움(플립/스냅/납작선 없음).
+                        float vertical = abs(_ShadowDirWS.y);
+                        float baseY = posWS.y - h * _ShadowHeight;     // 발밑 라인
+                        float keptY = lerp(posWS.y, baseY, vertical);  // 옆빛=원래Y, 수직빛=발밑
+                        posWS.x += _ShadowDirWS.x * h * _ShadowLength;
+                        posWS.y  = keptY + _ShadowDirWS.y * h * _ShadowLength;
+                    }
+                    else
+                    {
+                        // offset 모드(정적 발밑 그림자용): 원위치에 그대로 더함
+                        posWS.x += _ShadowDirWS.x * h * _ShadowLength;
+                        posWS.y += _ShadowDirWS.y * h * _ShadowLength;
+                    }
                 #endif
                 output.positionCS = TransformWorldToHClip(posWS);
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);

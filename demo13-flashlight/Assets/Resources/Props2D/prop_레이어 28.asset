@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c1a4c71717c7e24c98ddaff2395df52, type: 3}
+  m_Name: "prop_\uB808\uC774\uC5B4 28"
+  m_EditorClassIdentifier: Game.Scripts::Prop2DDefinition
+  propId: "prop_\uB808\uC774\uC5B4 28"
+  displayName: "\uB808\uC774\uC5B4 28"
+  category: 2
+  sprite: {fileID: 21300000, guid: 735b9f6800609f64899e1ba490827797, type: 3}
+  material: {fileID: 2100000, guid: 6e3507385d67ee942abbfa82a3893324, type: 2}
+  sortingLayer: Ground
+  sortingOffset: 0
+  drawMode: 0
+  tiledSize: {x: 1, y: 1}
+  tileMode: 0
+  prefab: {fileID: 1895170156267608915, guid: a51c07f2199cf25409462ae809fc6292, type: 3}
+  colliderMode: 1
+  isTrigger: 0
+  boxSizeScale: {x: 1, y: 1}
+  boxOffset: {x: 0, y: 0}
+  compositeBoxes: []
+  castShadow: 0
+  shadowBaseContact: 1
+  shadowMaxLength: 1.4
+  shadowStrength: 0.55

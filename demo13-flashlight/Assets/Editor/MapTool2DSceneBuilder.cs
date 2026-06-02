@@ -45,8 +45,8 @@ public static class MapTool2DSceneBuilder
         CreateTilemap("Ground", gridGo.transform, sortingOrder: 0, withCollider: false);
         CreateTilemap("Walls", gridGo.transform, sortingOrder: 10, withCollider: true);
 
-        // 배치된 프롭 정리용 루트
-        new GameObject("Props");
+        // 맵 부모 오브젝트(배치된 프롭이 이 하위로) — 카탈로그 '맵 저장'이 이걸 프리팹으로 저장.
+        new GameObject("Map");
 
         if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
             AssetDatabase.CreateFolder("Assets", "Scenes");

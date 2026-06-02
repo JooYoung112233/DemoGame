@@ -30,6 +30,20 @@ public static class Prop2DBuilder
         }
 
         ApplyColliders(go, def);
+
+        // 그림자 (FlatShadow가 런타임/에디터에서 그림자 자식 생성)
+        // 벽·프롭 동일: 정적 발밑 그림자 + 동적 투영 그림자 둘 다 ON.
+        if (def.castShadow)
+        {
+            var fs = go.AddComponent<FlatShadow>();
+            fs.groundShadow = true;       // 발밑 고정 그림자
+            fs.projectedShadow = true;    // 빛 따라 늘어나는 그림자
+            fs.directionMode = def.shadowDirMode;
+            fs.baseContact = def.shadowBaseContact;
+            fs.maxLength = def.shadowMaxLength;
+            fs.strength = def.shadowStrength;
+        }
+
         return go;
     }
 
@@ -58,7 +72,17 @@ public static class Prop2DBuilder
                     // Tiled/Sliced: 콜라이더를 실제 렌더 크기(tiledSize)에 맞춤 (벽 길이 전체).
                     var s = def.tiledSize == Vector2.zero ? Vector2.one : def.tiledSize;
                     box.size = Vector2.Scale(s, def.boxSizeScale);
-                    box.offset = def.boxOffset;
+                    // 타일 렌더 영역의 중심은 스프라이트 피벗만큼 원점에서 이동한다.
+                    // (center 피벗=0, 좌하단 피벗 등은 영역이 한쪽으로 뻗음) → 그만큼 콜라이더도 보정.
+                    Vector2 frac = Vector2.zero;
+                    if (def.sprite != null)
+                    {
+                        var sb = def.sprite.bounds; // center = (0.5-pivot)·size
+                        frac = new Vector2(
+                            sb.size.x > 1e-5f ? sb.center.x / sb.size.x : 0f,
+                            sb.size.y > 1e-5f ? sb.center.y / sb.size.y : 0f);
+                    }
+                    box.offset = Vector2.Scale(s, frac) + def.boxOffset;
                 }
                 else if (def.sprite != null)
                 {

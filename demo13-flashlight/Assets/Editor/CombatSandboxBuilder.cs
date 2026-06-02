@@ -158,6 +158,14 @@ public static class CombatSandboxBuilder
         }
         else Debug.LogWarning("[Sandbox] Enemy.prefab 로드 실패 — 적 미배치");
 
+        // ── 길찾기 격자 + 장애물(우회 테스트용) ──────────────
+        var navGo = new GameObject("NavGrid");
+        navGo.AddComponent<NavGrid>();   // 기본 60x60 / cell 0.5 / agentRadius 0.35, Start에서 베이크
+
+        // 플레이어(원점)와 적(앞쪽) 사이에 벽 2개 → 적이 우회해야 함
+        MakeObstacle(new Vector3(2.2f, 0.9f, 0f), new Vector2(0.5f, 2.6f));
+        MakeObstacle(new Vector3(4.5f, -1.2f, 0f), new Vector2(0.5f, 2.6f));
+
         // ── 저장 ────────────────────────────────────────────
         EnsureFolder("Assets/Scenes");
         EditorSceneManager.SaveScene(scene, SCENE_PATH);
@@ -198,6 +206,22 @@ public static class CombatSandboxBuilder
         var vol = volGo.AddComponent<Volume>();
         vol.isGlobal = true;
         vol.profile = profile;
+    }
+
+    /// <summary>벽 장애물(비-트리거 BoxCollider2D + 어두운 스프라이트). 길찾기·물리 모두 차단.</summary>
+    static void MakeObstacle(Vector3 pos, Vector2 size)
+    {
+        var go = new GameObject("Obstacle");
+        go.transform.position = pos;
+        go.transform.localScale = new Vector3(size.x, size.y, 1f);
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.color = new Color(0.18f, 0.18f, 0.22f);
+        sr.sortingOrder = -1;
+        var path = AssetDatabase.GUIDToAssetPath(SPRITE_GUID);
+        if (!string.IsNullOrEmpty(path)) sr.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+
+        go.AddComponent<BoxCollider2D>(); // 스프라이트 bounds 자동 → 스케일로 월드 크기 결정. Default 레이어=장애물
     }
 
     static void EnsureFolder(string path)

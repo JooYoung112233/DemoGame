@@ -132,12 +132,37 @@
 
 ---
 
+## 적 AI 길찾기 (Pathfinding) — 2026-06-02
+
+> 결정: **Tilemap 그리드 A\*** (자체 구현, 외부 에셋·NavMesh 의존성 0). 맵이 Tilemap+Collider2D라 가장 자연스러움.
+> 플레이어는 **WASD 직접 이동 유지**(길찾기 미사용) + 전신 콜라이더만, **적만** 길찾기. 그리드는 플레이어를 장애물로 안 치고 추격 타겟으로만 취급.
+
+### 파이프라인
+`NavGrid`(격자 베이크) → `AStarPathfinder`(8방향 A*) → `NavAgent`(경로 추종) → `EnemyController.UpdateChase`
+
+- **`NavGrid`**: 영역을 cellSize(0.5) 격자로 나눠 셀별 막힘 베이크. 막힘 = **비-트리거 Collider2D** 겹침(Player/Enemy 레이어 제외). **에이전트 바디 반경만큼 dilate** → 전신이 벽에 안 끼는 경로만. 씬에 1개, `Instance` 조회, `Rebuild()`로 재베이크.
+- **`AStarPathfinder`**: 막힘 격자 위 8방향 A*, octile 휴리스틱, **코너 끼임 방지**(대각 이동 시 양옆 walkable 필수), 이진 최소힙. 월드 웨이포인트 반환.
+- **`NavAgent`**(적): `SetDestination(player)` → 경로 추종 `DesiredDirection` 제공. 주기 리패스(0.4s, 에이전트별 스태거), **LOS skip-ahead**(직선으로 보이는 먼 웨이포인트로 당겨 부드럽게). NavGrid/경로 없으면 **직진 폴백**.
+- **`EnemyController.UpdateChase`**: 직진 스티어링 → `NavAgent` 경로 방향으로 교체(폴백 직진 유지). 추격 종료 시 `Stop()`.
+
+### 전신 차단 ("탑다운이라 몸통을 막아야")
+- **물리**: 플레이어·적 바디 `Collider2D`(원, 비-트리거) + 벽/프롭 Collider2D → 몸통 단위 차단.
+- **길찾기**: 그리드 dilate로 경로 중심이 벽에서 바디 반경만큼 떨어짐 → 모서리 끼임 없음.
+
+### 비고
+- 순찰(`UpdatePatrol`)은 직진 유지(국소 배회). 길찾기는 추격 전용.
+- `NavGrid`는 씬당 1개 필요. **`CombatSandbox` 빌더가 자동 배치**(+ 우회 테스트용 벽 2개). 다른 씬은 NavGrid 오브젝트 1개 두면 됨(없으면 적은 직진 폴백). 적 `NavAgent`는 `EnemyController`가 **자동 부착**.
+- `com.unity.ai.navigation`(3D NavMesh) 패키지는 **미사용**(이 시스템과 무관).
+
+---
+
 ## 변경 로그
 
 | 날짜 | 내용 |
 |---|---|
 | 2026-05-24 | 전투 프로토타입 구현. 약공(콤보)/강공(차징)/구르기/스태미너/그로기/적 캔슬 시스템. 스톤샤드 참고하되 턴제 제외 확정. |
 | 2026-06-02 | **탑다운 2D 전투 이식.** 구 `PlayerController`(NavMesh/3D) 폐기 → `TopDownPlayer`(Rigidbody2D)에 전투 전면 재구현: 약공(콤보)·강공(차징)·구르기(무적)·스태미너·탈진을 `StatDB.playerStat` 기반으로. 공격 판정은 `Physics2D.OverlapCircleAll`로 FacingDirection 방향 → `EnemyController.TakeHit(dmg, groggy, knockback)`. `EnemyController`도 Rigidbody2D 상태머신(NavMesh 제거), `TakeHit`/`IsDead` 추가. 무적 체크(Health/CombatFeedback)·전투 중 상호작용 차단(InteractionSystem)·HUD 스태미너 바 연결. 상호작용 계층(Interact/Talk/Open/Pickup)은 `GameObject` 인터페이스로 확정. |
+| 2026-06-02 | **적 길찾기(Tilemap 그리드 A\*) 추가.** `NavGrid`(격자 베이크, 막힘=비-트리거 Collider2D, 바디 반경 dilate)→`AStarPathfinder`(8방향, 코너 끼임 방지, 최소힙)→`NavAgent`(경로 추종, 리패스, LOS 스킵, 직진 폴백)→`EnemyController.UpdateChase` 연동. 플레이어는 WASD 유지·길찾기 미부착(전신 콜라이더만). 적 `NavAgent` 자동 부착, `NavGrid`는 빌더가 배치(샌드박스에 우회 벽 2개). 외부 에셋·NavMesh 의존성 0. |
 | 2026-06-02 | **전투 샌드박스 + 적 프리팹 빌더.** `Editor/CombatSandboxBuilder.cs` — ①`Resources/Enemy.prefab` 생성기(바디 스프라이트+Hurtbox(trigger,Enemy레이어)+Health+CombatFeedback+EnemyController, playerMask=Player): "적을 코드로 스폰하는 곳이 없어 바디 스프라이트가 없던" 공백 해소. ②전투 샌드박스 씬 생성기(`Tools▸BRB▸Build Scene▸Combat Sandbox`): 2D카메라+CameraFollow+post-process Volume(비네트/색수차)+밝은 Global Light2D+SpawnPoint+적 3기. 타격감/히트박스 에디터 테스트용 아레나. |
 | 2026-06-02 | **타격감 연출 구현(5종).** ①흰 플래시: `BRB/SpriteFlash` 셰이더 + `HitFlash.cs`(머티리얼 자가설치, `_FlashAmount`), `CombatFeedback`이 `.color` 빨강 플래시 제거 후 위임. ②히트스탑: `Hitstop.cs`(안전 싱글톤) + `AttackData.hitstop` 플래그 + `AttackPerformer` 적중 트리거, 강공 런타임 기본값에 켜짐. ③카메라: `CameraFollow`에 가산 셰이크/줌 레이어, `AttackPerformer` 강공 적중 시 호출, `ScreenEffectManager.ScreenShake`도 위임. ④플레이어 피격: `PlayerHitReaction.cs`(위험 비례) + `ScreenEffectManager.VignettePulse` 신규. ⑤`DamagePopup` 2D화(+Z·매프레임 빌보드 제거). |
 | 2026-06-02 | **타격감 연출 설계 확정.** 강공 히트스탑(0.04~0.06s, 안전 구현), 적중=적 셰이더 흰 플래시(`_FlashAmount`), 플레이어 피격=위험 비례 화면 연출(평소 절제→저체력/부상 풀세트), 카메라 셰이크/줌은 CameraFollow 오프셋 레이어. 약공/강공 차등 레이어 표 추가. `DamagePopup`은 3D 시절 유물(빌보드+Y/Z오프셋)이라 2D 리워크 필요. |

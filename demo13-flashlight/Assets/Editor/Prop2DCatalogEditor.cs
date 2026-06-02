@@ -32,7 +32,9 @@ public class Prop2DCatalogEditor : EditorWindow
     Prop2DDefinition.Category _tab = Prop2DDefinition.Category.Prop;
     static readonly string[] TabNames = { "바닥", "벽", "프롭", "오브젝트" };
     // 섹션 접기/펴기 (목록 + 폼)
-    bool _foldList = true, _foldVisual = true, _foldCollider = true, _foldPreview = true;
+    bool _foldList = true, _foldVisual = true, _foldCollider = true, _foldShadow, _foldPreview = true;
+    bool _foldBatch;            // 일괄 등록 설정 접이식(기본 접힘)
+    GUIStyle _cellNameStyle;    // 팔레트 셀 이름 스타일(지연 생성)
 
     void OnEnable()
     {
@@ -61,6 +63,32 @@ public class Prop2DCatalogEditor : EditorWindow
 
     void OnGUI()
     {
+        // 창에 포커스가 있을 때 ESC = 배치 취소 (씬뷰 포커스가 아닐 때 대비)
+        if (_placeMode && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+        {
+            _placeMode = false;
+            DestroyGhost();
+            Event.current.Use();
+        }
+
+        // ── 최상단 바: 맵 생성 / 맵 저장 / 스냅 / 배치 상태 ──
+        EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+        if (GUILayout.Button("＋ 맵 생성", EditorStyles.toolbarButton, GUILayout.Width(80)))
+        {
+            var t = MapRoot(true);
+            Selection.activeGameObject = t != null ? t.gameObject : null;
+        }
+        if (GUILayout.Button("맵 저장(프리팹)", EditorStyles.toolbarButton, GUILayout.Width(110)))
+            SaveMapPrefab();
+        GUILayout.Space(10);
+        GUILayout.Label("스냅", GUILayout.Width(30));
+        _snap = EditorGUILayout.FloatField(_snap, GUILayout.Width(40));
+        GUILayout.FlexibleSpace();
+        if (_placeMode)
+            GUILayout.Label($"● 배치: {(_selected != null ? _selected.displayName : "")}  (좌클릭/드래그=배치, ESC=취소)",
+                EditorStyles.miniLabel);
+        EditorGUILayout.EndHorizontal();
+
         // 세로 레이아웃: 목록(위) → 구분선 → 편집 폼(아래). (가로 분할 시 목록이 좁아 버튼이 잘림)
         DrawList();
         var sep = GUILayoutUtility.GetRect(1, 2, GUILayout.ExpandWidth(true));
@@ -83,91 +111,127 @@ public class Prop2DCatalogEditor : EditorWindow
 
         int count = _props.Count(p => p != null && p.category == _tab);
         // 목록 접기/펴기 — 접으면 폼만 크게 본다. (탭은 항상 보임)
-        _foldList = EditorGUILayout.Foldout(_foldList, $"{TabNames[(int)_tab]} 목록 ({count})", true);
+        _foldList = EditorGUILayout.Foldout(_foldList, $"{TabNames[(int)_tab]} 팔레트 ({count})", true);
         if (!_foldList) { EditorGUILayout.EndVertical(); return; }
 
+        // 헤더: 배치 토글 + 새 항목 + 새로고침
         EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("＋ 새 항목")) CreateNewProp();
-        if (GUILayout.Button("새로고침", GUILayout.Width(64))) Refresh();
+        var prevBg = GUI.backgroundColor;
+        if (_placeMode) GUI.backgroundColor = new Color(0.4f, 1f, 0.55f);
+        bool wasPlacing = _placeMode;
+        _placeMode = GUILayout.Toggle(_placeMode,
+            _placeMode ? "● 배치 중 (ESC 종료)" : "배치 모드", "Button", GUILayout.Height(22));
+        if (_placeMode && !wasPlacing) SceneView.lastActiveSceneView?.Focus(); // ESC·클릭이 씬뷰로 가도록
+        GUI.backgroundColor = prevBg;
+        if (GUILayout.Button("＋ 새 항목", GUILayout.Width(90), GUILayout.Height(22))) CreateNewProp();
+        if (GUILayout.Button("↻", GUILayout.Width(26), GUILayout.Height(22))) Refresh();
         EditorGUILayout.EndHorizontal();
-
-        // 일괄 등록 설정 (선택 스프라이트들에 공통 적용)
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        EditorGUILayout.LabelField("일괄 등록 설정 (공통 적용)", EditorStyles.miniBoldLabel);
-        _batchMaterial = (Material)EditorGUILayout.ObjectField("머티리얼", _batchMaterial, typeof(Material), false);
-        _batchSortingLayer = SortingLayerPopup("Sorting Layer", _batchSortingLayer);
-        _batchDrawMode = (SpriteDrawMode)EditorGUILayout.EnumPopup("Draw Mode", _batchDrawMode);
-        if (GUILayout.Button("선택 스프라이트 일괄 등록"))
-            BatchImportSelectedSprites();
-        EditorGUILayout.EndVertical();
 
         _search = EditorGUILayout.TextField("검색", _search);
 
-        EditorGUILayout.Space(4);
-        // 목록은 높이 제한(최대 ~200px) — 아래 편집 폼이 가려지지 않도록.
-        _listScroll = EditorGUILayout.BeginScrollView(_listScroll, GUILayout.Height(200));
-        Prop2DDefinition toDuplicate = null, toDelete = null;
-        foreach (var p in _props)
+        // 일괄 등록 (접이식)
+        _foldBatch = EditorGUILayout.Foldout(_foldBatch, "일괄 등록 (선택 스프라이트 → 항목 생성)", true);
+        if (_foldBatch)
         {
-            if (p == null || p.category != _tab) continue;
-            string label = !string.IsNullOrEmpty(p.displayName) ? p.displayName : p.propId;
-            if (!string.IsNullOrEmpty(_search) &&
-                label.IndexOf(_search, System.StringComparison.OrdinalIgnoreCase) < 0)
-                continue;
-            bool sel = p == _selected;
-            EditorGUILayout.BeginHorizontal(sel ? "selectionRect" : "box");
-
-            // 썸네일
-            var thumb = GUILayoutUtility.GetRect(28, 28, GUILayout.Width(28), GUILayout.Height(28));
-            if (p.sprite != null && p.sprite.texture != null)
-            {
-                var trc = p.sprite.textureRect; var tx = p.sprite.texture;
-                GUI.DrawTextureWithTexCoords(thumb, tx,
-                    new Rect(trc.x / tx.width, trc.y / tx.height, trc.width / tx.width, trc.height / tx.height), true);
-            }
-
-            // 이름 + 정보(클릭=선택)
-            EditorGUILayout.BeginVertical();
-            if (GUILayout.Button(label, sel ? EditorStyles.boldLabel : EditorStyles.label)) _selected = p;
-            bool blocks = p.colliderMode != Prop2DDefinition.ColliderMode.None && !p.isTrigger;
-            EditorGUILayout.LabelField($"{p.colliderMode}  막힘:{(blocks ? "O" : "X")}", EditorStyles.miniLabel);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            _batchMaterial = (Material)EditorGUILayout.ObjectField("머티리얼", _batchMaterial, typeof(Material), false);
+            _batchSortingLayer = SortingLayerPopup("Sorting Layer", _batchSortingLayer);
+            _batchDrawMode = (SpriteDrawMode)EditorGUILayout.EnumPopup("Draw Mode", _batchDrawMode);
+            if (GUILayout.Button("선택 스프라이트 일괄 등록")) BatchImportSelectedSprites();
             EditorGUILayout.EndVertical();
-
-            if (GUILayout.Button(sel ? "편집중" : "편집", GUILayout.Width(46))) _selected = p;
-            if (GUILayout.Button("복제", GUILayout.Width(38))) toDuplicate = p;
-            if (GUILayout.Button("X", GUILayout.Width(22))) toDelete = p;
-
-            EditorGUILayout.EndHorizontal();
         }
-        EditorGUILayout.EndScrollView();
 
-        // 루프 밖에서 처리(컬렉션 변경 안전)
-        if (toDuplicate != null) { _selected = toDuplicate; DuplicateSelected(); }
-        if (toDelete != null) { _selected = toDelete; DeleteSelected(); }
+        // 팔레트 그리드 (썸네일 — 클릭=선택/브러시, 우클릭=메뉴)
+        var items = _props.Where(p => p != null && p.category == _tab &&
+                (string.IsNullOrEmpty(_search) ||
+                 (p.displayName ?? p.propId).IndexOf(_search, System.StringComparison.OrdinalIgnoreCase) >= 0))
+            .ToList();
+        EditorGUILayout.Space(2);
+        _listScroll = EditorGUILayout.BeginScrollView(_listScroll, GUILayout.Height(190));
+        DrawPaletteGrid(items);
+        EditorGUILayout.EndScrollView();
+        EditorGUILayout.LabelField("클릭=선택(브러시) · 우클릭=메뉴(복제/삭제) · 편집은 아래 폼", EditorStyles.miniLabel);
+
         EditorGUILayout.EndVertical();
     }
 
-    void DrawDivider()
+    // ── 팔레트 그리드 ──
+    void DrawPaletteGrid(List<Prop2DDefinition> items)
     {
-        var r = GUILayoutUtility.GetRect(1, 1, GUILayout.Width(1), GUILayout.ExpandHeight(true));
-        EditorGUI.DrawRect(r, new Color(0, 0, 0, 0.3f));
+        if (items.Count == 0)
+        {
+            EditorGUILayout.LabelField("항목 없음 — '＋ 새 항목' 또는 일괄 등록으로 추가", EditorStyles.miniLabel);
+            return;
+        }
+        const float cell = 62f;
+        float avail = EditorGUIUtility.currentViewWidth - 26f;
+        int cols = Mathf.Max(1, Mathf.FloorToInt(avail / cell));
+        int i = 0;
+        while (i < items.Count)
+        {
+            EditorGUILayout.BeginHorizontal();
+            for (int c = 0; c < cols && i < items.Count; c++, i++)
+                DrawPaletteCell(items[i], cell - 4f);
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+        }
+    }
+
+    void DrawPaletteCell(Prop2DDefinition p, float size)
+    {
+        var rect = GUILayoutUtility.GetRect(size, size, GUILayout.Width(size), GUILayout.Height(size));
+        bool sel = p == _selected;
+
+        EditorGUI.DrawRect(rect, sel ? new Color(0.22f, 0.42f, 0.85f) : new Color(0.2f, 0.2f, 0.2f));
+        // 썸네일(종횡비 맞춤)
+        var inner = new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 16);
+        if (p.sprite != null && p.sprite.texture != null)
+        {
+            var bs = p.sprite.bounds.size;
+            float aspect = bs.y > 0.0001f ? bs.x / bs.y : 1f;
+            float w = inner.width, h = inner.height;
+            if (aspect >= 1f) h = inner.width / Mathf.Max(0.01f, aspect); else w = inner.height * aspect;
+            var fit = new Rect(inner.x + (inner.width - w) * 0.5f, inner.y + (inner.height - h) * 0.5f, w, h);
+            var trc = p.sprite.textureRect; var tx = p.sprite.texture;
+            GUI.DrawTextureWithTexCoords(fit, tx,
+                new Rect(trc.x / tx.width, trc.y / tx.height, trc.width / tx.width, trc.height / tx.height), true);
+        }
+        GUI.Label(new Rect(rect.x + 1, rect.yMax - 13, rect.width - 2, 12),
+            p.displayName ?? p.propId, CellNameStyle);
+        if (_placeMode && sel) DrawRectOutline(rect, new Color(0.4f, 1f, 0.5f)); // 브러시 표시
+
+        var e = Event.current;
+        if (e.type == EventType.MouseDown && rect.Contains(e.mousePosition))
+        {
+            if (e.button == 0) { _selected = p; GUI.FocusControl(null); e.Use(); Repaint(); }
+            else if (e.button == 1) { ShowCellMenu(p); e.Use(); }
+        }
+    }
+
+    GUIStyle CellNameStyle => _cellNameStyle ??= new GUIStyle(EditorStyles.miniLabel)
+    {
+        alignment = TextAnchor.MiddleCenter,
+        fontSize = 9,
+        clipping = TextClipping.Clip,
+        normal = { textColor = Color.white }
+    };
+
+    void ShowCellMenu(Prop2DDefinition p)
+    {
+        var m = new GenericMenu();
+        m.AddItem(new GUIContent("배치 (브러시)"), false, () => { _selected = p; _placeMode = true; SceneView.lastActiveSceneView?.Focus(); });
+        m.AddItem(new GUIContent("편집 (선택)"), false, () => { _selected = p; });
+        m.AddItem(new GUIContent("복제"), false, () => { _selected = p; DuplicateSelected(); });
+        m.AddItem(new GUIContent("삭제"), false, () => { _selected = p; DeleteSelected(); });
+        m.AddSeparator("");
+        m.AddItem(new GUIContent("프로젝트에서 보기"), false, () => EditorGUIUtility.PingObject(p));
+        m.ShowAsContext();
     }
 
     // ───────────────────────── 우측: 폼 + 미리보기 ─────────────────────────
     void DrawForm()
     {
         EditorGUILayout.BeginVertical();
-
-        // 씬 배치/저장 도구바
-        EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-        _placeMode = GUILayout.Toggle(_placeMode, " 씬 배치", "Button", GUILayout.Width(70));
-        GUILayout.Label("스냅", GUILayout.Width(28));
-        _snap = EditorGUILayout.FloatField(_snap, GUILayout.Width(36));
-        if (GUILayout.Button("맵 저장(프리팹)", GUILayout.Width(110))) SaveMapPrefab();
-        GUILayout.FlexibleSpace();
-        EditorGUILayout.EndHorizontal();
-        if (_placeMode)
-            EditorGUILayout.LabelField("Scene뷰: 좌클릭/드래그=배치, 우클릭=지우개", EditorStyles.miniLabel);
 
         var def = _draft != null ? _draft : _selected;
         bool creating = _draft != null;
@@ -207,12 +271,26 @@ public class Prop2DCatalogEditor : EditorWindow
             def.sortingLayer = SortingLayerPopup("Sorting Layer", def.sortingLayer);
             def.sortingOffset = EditorGUILayout.IntField("Order in Layer", def.sortingOffset);
 
-            def.drawMode = (SpriteDrawMode)EditorGUILayout.EnumPopup("Draw Mode", def.drawMode);
+            var newDraw = (SpriteDrawMode)EditorGUILayout.EnumPopup("Draw Mode", def.drawMode);
+            if (newDraw != def.drawMode)
+            {
+                def.drawMode = newDraw;
+                // Tiled/Sliced로 전환 시 크기 기본값을 스프라이트 크기로 자동 채움(미설정/기본값일 때).
+                if (newDraw != SpriteDrawMode.Simple && def.sprite != null &&
+                    (def.tiledSize == Vector2.zero || def.tiledSize == Vector2.one))
+                    def.tiledSize = def.sprite.bounds.size;
+            }
             if (def.drawMode != SpriteDrawMode.Simple)
             {
+                // 안전망: 크기가 0이면 스프라이트 크기(없으면 1)로.
+                if (def.tiledSize == Vector2.zero)
+                    def.tiledSize = def.sprite != null ? (Vector2)def.sprite.bounds.size : Vector2.one;
+
                 def.tiledSize = EditorGUILayout.Vector2Field("크기(Tiled, 월드단위)", def.tiledSize);
                 if (def.drawMode == SpriteDrawMode.Tiled)
                     def.tileMode = (SpriteTileMode)EditorGUILayout.EnumPopup("Tile Mode", def.tileMode);
+                if (def.sprite != null && GUILayout.Button("크기를 스프라이트 1장 크기로 리셋"))
+                    def.tiledSize = def.sprite.bounds.size;
                 EditorGUILayout.HelpBox("Tiled/Sliced는 스프라이트 임포트 Mesh Type = Full Rect 필요.", MessageType.Info);
                 if (def.sprite != null && GUILayout.Button("스프라이트 Full Rect로 설정"))
                     SetSpriteFullRect(def.sprite);
@@ -240,6 +318,23 @@ public class Prop2DCatalogEditor : EditorWindow
                 case Prop2DDefinition.ColliderMode.Composite:
                     DrawCompositeList(def);
                     break;
+            }
+        }
+
+        EditorGUILayout.Space(6);
+        _foldShadow = EditorGUILayout.Foldout(_foldShadow, "Shadow (투영 그림자)", true);
+        if (_foldShadow)
+        {
+            def.castShadow = EditorGUILayout.Toggle("그림자 드리움", def.castShadow);
+            if (def.castShadow)
+            {
+                def.shadowDirMode = (FlatShadow.DirMode)EditorGUILayout.EnumPopup("방향 기준", def.shadowDirMode);
+                def.shadowBaseContact = EditorGUILayout.Toggle("밑동 접지(벽/건물)", def.shadowBaseContact);
+                def.shadowMaxLength = EditorGUILayout.FloatField("최대 길이", def.shadowMaxLength);
+                def.shadowStrength = EditorGUILayout.Slider("진하기", def.shadowStrength, 0f, 1f);
+                EditorGUILayout.HelpBox("배치 시 FlatShadow 자동 부착(정적 발밑 + 동적 투영). " +
+                    "방향 기준 Player면 플레이어가 늦게 스폰돼도 FlatShadowDirector가 자동 연결. 벽·프롭 기본 ON.",
+                    MessageType.None);
             }
         }
 
@@ -401,6 +496,16 @@ public class Prop2DCatalogEditor : EditorWindow
         if (!_placeMode || _selected == null) { DestroyGhost(); return; }
         var e = Event.current;
 
+        // ESC = 배치 모드 취소
+        if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+        {
+            _placeMode = false;
+            DestroyGhost();
+            e.Use();
+            Repaint();
+            return;
+        }
+
         // 커서 → z=0 평면 월드좌표 + 스냅
         Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
         Vector3 p = ray.origin;
@@ -420,24 +525,16 @@ public class Prop2DCatalogEditor : EditorWindow
         // 클릭이 씬 선택으로 새지 않도록 가로채기
         HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
 
-        // 좌클릭/드래그 = 배치(연속), 우클릭/드래그 = 지우개
-        if (!e.alt && (e.type == EventType.MouseDown || e.type == EventType.MouseDrag))
+        // 좌클릭/드래그 = 배치(연속). (삭제는 씬에서 직접 — 우클릭은 가로채지 않음)
+        if (!e.alt && e.button == 0 && (e.type == EventType.MouseDown || e.type == EventType.MouseDrag))
         {
-            if (e.button == 0)
+            float spacing = Mathf.Max(0.05f, _snap);
+            if (e.type == EventType.MouseDown || Vector3.Distance(p, _lastPaintPos) >= spacing)
             {
-                float spacing = Mathf.Max(0.05f, _snap);
-                if (e.type == EventType.MouseDown || Vector3.Distance(p, _lastPaintPos) >= spacing)
-                {
-                    PlaceAt(p);
-                    _lastPaintPos = p;
-                }
-                e.Use();
+                PlaceAt(p);
+                _lastPaintPos = p;
             }
-            else if (e.button == 1)
-            {
-                EraseNear(p);
-                e.Use();
-            }
+            e.Use();
         }
         sv.Repaint();
     }
@@ -467,21 +564,6 @@ public class Prop2DCatalogEditor : EditorWindow
         _ghostDef = null;
     }
 
-    // ── 지우개: 커서 근처 배치된 프롭 삭제 (Props 자식 대상) ──
-    void EraseNear(Vector3 pos)
-    {
-        var props = GameObject.Find("Props");
-        if (props == null) return;
-        GameObject nearest = null;
-        float best = Mathf.Max(0.5f, _snap);
-        foreach (Transform ch in props.transform)
-        {
-            float d = Vector2.Distance(ch.position, pos);
-            if (d <= best) { best = d; nearest = ch.gameObject; }
-        }
-        if (nearest != null) Undo.DestroyObjectImmediate(nearest);
-    }
-
     void PlaceAt(Vector3 pos)
     {
         // 프리팹이 있으면 인스턴스화(링크 유지), 없으면 즉석 빌드.
@@ -489,10 +571,22 @@ public class Prop2DCatalogEditor : EditorWindow
             ? (GameObject)PrefabUtility.InstantiatePrefab(_selected.prefab)
             : Prop2DBuilder.Build(_selected);
         go.transform.position = pos;
-        var props = GameObject.Find("Props");
-        if (props != null) go.transform.SetParent(props.transform);
+        go.transform.SetParent(MapRoot(true), true);  // 맵 부모 하위로
         Undo.RegisterCreatedObjectUndo(go, "Place Prop2D");
         Selection.activeGameObject = go;
+    }
+
+    /// <summary>맵 부모 오브젝트. "Map"(없으면 기존 "Props" 호환) 사용, create면 없을 때 "Map" 생성.</summary>
+    Transform MapRoot(bool create)
+    {
+        var go = GameObject.Find("Map");
+        if (go == null) go = GameObject.Find("Props"); // 기존 맵툴 씬 호환
+        if (go == null && create)
+        {
+            go = new GameObject("Map");
+            Undo.RegisterCreatedObjectUndo(go, "Create Map Root");
+        }
+        return go != null ? go.transform : null;
     }
 
     // ───────────────────────── 에셋/프리팹 생성·갱신 ─────────────────────────
@@ -528,8 +622,7 @@ public class Prop2DCatalogEditor : EditorWindow
     void SaveMapPrefab()
     {
         var root = Selection.activeGameObject;
-        if (root == null) root = GameObject.Find("Map");
-        if (root == null) root = GameObject.Find("Props");
+        if (root == null) { var t = MapRoot(false); root = t != null ? t.gameObject : null; }
         if (root == null)
         {
             EditorUtility.DisplayDialog("맵 저장",
@@ -572,6 +665,7 @@ public class Prop2DCatalogEditor : EditorWindow
         _draft.displayName = _draft.propId;
         _draft.category = _tab;
         _draft.colliderMode = DefaultCollider(_tab);
+        _draft.castShadow = DefaultCastShadow(_tab); // 벽·프롭은 그림자 기본 ON
         _selected = null;
     }
 
@@ -643,6 +737,7 @@ public class Prop2DCatalogEditor : EditorWindow
             def.sprite = sp;
             def.category = _tab;                       // 현재 탭으로 분류
             def.colliderMode = DefaultCollider(_tab);  // 카테고리별 기본 콜라이더
+            def.castShadow = DefaultCastShadow(_tab);  // 벽·프롭은 그림자 기본 ON
             def.material = _batchMaterial;             // 일괄 설정 머티리얼
             def.sortingLayer = _batchSortingLayer;     // 일괄 설정 Sorting Layer
             def.drawMode = _batchDrawMode;             // 일괄 설정 Draw Mode
@@ -664,6 +759,10 @@ public class Prop2DCatalogEditor : EditorWindow
         => cat == Prop2DDefinition.Category.Floor
             ? Prop2DDefinition.ColliderMode.None
             : Prop2DDefinition.ColliderMode.Box;
+
+    /// <summary>카테고리별 기본 그림자: 벽·프롭=ON(발밑 고정 + 투영). 바닥/오브젝트마커=OFF.</summary>
+    static bool DefaultCastShadow(Prop2DDefinition.Category cat)
+        => cat == Prop2DDefinition.Category.Wall || cat == Prop2DDefinition.Category.Prop;
 
     static string MakeSafe(string s)
     {
