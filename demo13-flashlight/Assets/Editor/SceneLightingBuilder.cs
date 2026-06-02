@@ -37,7 +37,15 @@ public static class SceneLightingBuilder
             if (l.lightType == Light2D.LightType.Point)
                 ApplyAllSortingLayers(l);
 
-        Debug.Log("[SceneLighting] 어두운 Global Light2D 설정 (intensity 0.22) + 전 Sorting Layer 타겟.");
+        // DayNightCycle 컴포넌트 보장 + globalLight 연결 (인스펙터 낮/밤 버튼 바로 사용)
+        var dn = Object.FindFirstObjectByType<DayNightCycle>();
+        if (dn == null) dn = global.gameObject.AddComponent<DayNightCycle>();
+        var so = new SerializedObject(dn);
+        var glProp = so.FindProperty("globalLight");
+        if (glProp != null) { glProp.objectReferenceValue = global; so.ApplyModifiedPropertiesWithoutUndo(); }
+        EditorUtility.SetDirty(dn);
+
+        Debug.Log("[SceneLighting] 어두운 Global Light2D + DayNightCycle 설정 (전 Sorting Layer 타겟). 인스펙터에서 낮/밤 전환 가능.");
         if (!Application.isBatchMode)
             EditorUtility.DisplayDialog("Scene Lighting",
                 "어두운 Global Light2D 설정 완료 (intensity 0.22).\n\n" +

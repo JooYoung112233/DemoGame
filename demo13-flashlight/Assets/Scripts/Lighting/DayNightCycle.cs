@@ -1,16 +1,22 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class DayNightCycle : MonoBehaviour
 {
-    [Header("Lighting")]
+    [Header("2D Global Light (탑다운 주 조명)")]
+    [Tooltip("비우면 씬의 Global Light2D 자동 탐색")]
+    [SerializeField] Light2D globalLight;
+    [SerializeField] float dayGlobalIntensity = 1f;
+    [SerializeField] float nightGlobalIntensity = 0.18f;
+    [SerializeField] Color dayGlobalColor = new Color(1f, 0.97f, 0.9f);
+    [SerializeField] Color nightGlobalColor = new Color(0.35f, 0.42f, 0.62f);
+
+    [Header("3D Lighting (레거시 — 2D에선 보통 미사용)")]
     [SerializeField] Light directionalLight;
     [SerializeField] float dayIntensity = 1f;
     [SerializeField] float nightIntensity = 0f;
     [SerializeField] Color dayColor = new Color(1f, 0.95f, 0.9f);
     [SerializeField] Color nightColor = Color.black;
-
-    [Header("References")]
-    [SerializeField] FlashlightController flashlight;
 
     [Header("Data")]
     [SerializeField] WeatherData weatherData;
@@ -34,6 +40,38 @@ public class DayNightCycle : MonoBehaviour
     }
 
     public event System.Action<bool> OnPhaseChanged;
+
+    /// <summary>낮/밤 직접 설정 (에디터 버튼·런타임 공용). 조명 즉시 적용 + 이벤트 + 지역시간 동기화.</summary>
+    public void SetNight(bool night)
+    {
+        isNight = night;
+        lastSyncedNight = night;
+        ApplyLighting();
+        OnPhaseChanged?.Invoke(isNight);
+
+        // RegionTimeManager 연동 모드면 지역 시간도 맞춤
+        if (Application.isPlaying && RegionTimeManager.Instance != null)
+        {
+            var regionId = RegionTimeManager.Instance.ActiveRegionId;
+            if (!string.IsNullOrEmpty(regionId))
+            {
+                var rt = RegionTimeManager.Instance.GetRegion(regionId);
+                if (rt != null) { rt.isNight = night; rt.elapsed = 0f; }
+            }
+        }
+    }
+
+    /// <summary>낮↔밤 토글.</summary>
+    public void ToggleDayNight() => SetNight(!isNight);
+
+    /// <summary>씬의 Global Light2D 자동 탐색.</summary>
+    Light2D FindGlobalLight()
+    {
+        var all = FindObjectsByType<Light2D>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var l in all)
+            if (l.lightType == Light2D.LightType.Global) return l;
+        return null;
+    }
 
     void Start()
     {
@@ -98,10 +136,7 @@ public class DayNightCycle : MonoBehaviour
         if (useStandalone)
         {
             // 독립 모드: 직접 토글
-            isNight = !isNight;
-            lastSyncedNight = isNight;
-            ApplyLighting();
-            OnPhaseChanged?.Invoke(isNight);
+            SetNight(!isNight);
             Debug.Log($"[DayNight] T키: {(isNight ? "밤" : "낮")} 전환");
             return;
         }
@@ -120,6 +155,15 @@ public class DayNightCycle : MonoBehaviour
 
     void ApplyLighting()
     {
+        // ── 2D 글로벌 라이트 (탑다운 주 조명) ──
+        if (globalLight == null) globalLight = FindGlobalLight();
+        if (globalLight != null)
+        {
+            globalLight.intensity = isNight ? nightGlobalIntensity : dayGlobalIntensity;
+            globalLight.color     = isNight ? nightGlobalColor : dayGlobalColor;
+        }
+
+        // ── 3D 라이트 (레거시, 있을 때만) ──
         if (directionalLight == null) return;
 
         if (weatherData != null)
