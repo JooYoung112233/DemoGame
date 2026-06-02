@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// 히트박스 타임라인 에디터 (Tools ▸ TopDown Combat ▸ Attack Editor).
+/// 히트박스 타임라인 에디터 (Tools ▸ TopDown ▸ Combat ▸ Attack Editor).
 /// 프레임 단위로 히트박스를 배치/편집. 연속 공격(AttackComboData)은 단계별 탭으로 편집.
 /// - 프레임 그리드: 칸 = 1프레임. 윈도우를 startFrame~endFrame 막대로. 스크러버로 프레임 이동.
 /// - 2D 프리뷰: facing=오른쪽. 현재 프레임 활성 윈도우 진하게. 중심 핸들 드래그로 offset.
@@ -25,7 +25,7 @@ public class AttackDataEditorWindow : EditorWindow
 
     const float PPU = 60f;
 
-    [MenuItem("Tools/TopDown Combat/Attack Editor")]
+    [MenuItem("Tools/TopDown/Combat/Attack Editor")]
     static void Open() => GetWindow<AttackDataEditorWindow>("Attack Editor").minSize = new Vector2(440, 640);
 
     void OnGUI()

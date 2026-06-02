@@ -50,6 +50,7 @@
 |------|------|------|
 | **기획서 마스터 (3분할, 가장 먼저 읽을 것)** | 게임 전체 설계. ① [`gdd-core.md`](gdd-core.md) 코어 시스템(전투·루팅·낮밤·세계관) · ② [`gdd-progression.md`](gdd-progression.md) 진행·스토리(안전가옥·NPC·메인스토리·엔딩·월드) · ③ [`gdd-demo.md`](gdd-demo.md) 데모 범위·우선순위 | 확정 |
 | [`dev-roadmap.md`](dev-roadmap.md) | 10단계 개발 로드맵 + 단계 상세 + **미구현/마무리 필요 목록**. 현재 Stage 2 | 진행 중 |
+| [`tooling.md`](tooling.md) | **에디터 도구 인덱스** — 모든 커스텀 메뉴를 `Tools/TopDown/`(Build/Combat/Map/Data/Utility)로 통합. Attack Editor 상세 | 참고 |
 | [`concept-art-reference.md`](concept-art-reference.md) | 컨셉 아트 3종(피치/맵모듈/적) 해석·정리 | 참고 |
 
 ### ⚔️ 전투

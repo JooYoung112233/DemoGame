@@ -7,13 +7,13 @@ using UnityEngine;
 /// 탑다운 2D 프롭 카탈로그 에디터.
 /// Prop2DDefinition 에셋 등록/편집/미리보기 + 콜라이더(막힘) 시각 편집.
 /// 편의기능: 검색, 스프라이트 일괄 등록, 씬 클릭 배치.
-/// 메뉴: Tools ▸ TopDown 2D ▸ Prop Catalog
+/// 메뉴: Tools ▸ TopDown ▸ Map ▸ Prop Catalog
 /// </summary>
 public class Prop2DCatalogEditor : EditorWindow
 {
     const string PropFolder = "Assets/Resources/Props2D";
 
-    [MenuItem("Tools/TopDown 2D/Prop Catalog")]
+    [MenuItem("Tools/TopDown/Map/Prop Catalog")]
     static void Open() => GetWindow<Prop2DCatalogEditor>("2D Prop Catalog");
 
     List<Prop2DDefinition> _props = new();
@@ -32,7 +32,7 @@ public class Prop2DCatalogEditor : EditorWindow
     Prop2DDefinition.Category _tab = Prop2DDefinition.Category.Prop;
     static readonly string[] TabNames = { "바닥", "벽", "프롭", "오브젝트" };
     // 섹션 접기/펴기 (목록 + 폼)
-    bool _foldList = true, _foldVisual = true, _foldCollider = true, _foldShadow, _foldPreview = true;
+    bool _foldList = true, _foldVisual = true, _foldCollider = true, _foldShadow, _foldFunction, _foldPreview = true;
     bool _foldBatch;            // 일괄 등록 설정 접이식(기본 접힘)
     GUIStyle _cellNameStyle;    // 팔레트 셀 이름 스타일(지연 생성)
 
@@ -331,6 +331,68 @@ public class Prop2DCatalogEditor : EditorWindow
                 EditorGUILayout.HelpBox("배치 시 ShadowCaster2D 자동 부착 → Light2D(플레이어 등)가 실제 캐스트 그림자를 빛 반대편에 그림. " +
                     "방향·길이는 라이트 위치가 결정. 벽·프롭 기본 ON. (그림자가 보이려면 씬 Light2D에 Shadows 켜야 함.)",
                     MessageType.None);
+            }
+        }
+
+        EditorGUILayout.Space(6);
+        _foldFunction = EditorGUILayout.Foldout(_foldFunction, "Function (기능 — 스폰/탈출/지도판/수색 등)", true);
+        if (_foldFunction)
+        {
+            def.function = (Prop2DDefinition.Function)EditorGUILayout.EnumPopup("기능", def.function);
+            if (def.function != Prop2DDefinition.Function.None)
+                def.noVisual = EditorGUILayout.Toggle("투명 마커(비주얼 없음)", def.noVisual);
+            switch (def.function)
+            {
+                case Prop2DDefinition.Function.None:
+                    EditorGUILayout.HelpBox("기능 없음 — 장식/막힘 전용 프롭.", MessageType.None);
+                    break;
+                case Prop2DDefinition.Function.SpawnPoint:
+                    def.spawnPointId = EditorGUILayout.TextField("Spawn Point ID", def.spawnPointId);
+                    EditorGUILayout.HelpBox("씬 전환 도착 지점. 보통 '투명 마커'로 사용.", MessageType.None);
+                    break;
+                case Prop2DDefinition.Function.Interactable:
+                    def.interactType = (InteractableObject.InteractType)
+                        EditorGUILayout.EnumPopup("상호작용 종류", def.interactType);
+                    def.functionPrompt = EditorGUILayout.TextField("프롬프트(비우면 기본)", def.functionPrompt);
+                    def.interactRange = EditorGUILayout.FloatField("인식 범위(m)", def.interactRange);
+                    EditorGUILayout.HelpBox("탈출구=ExitPoint, 지도판=MapBoard, 침대/작업대 등. (NPC/문은 전용 기능 사용)", MessageType.None);
+                    break;
+                case Prop2DDefinition.Function.LootContainer:
+                    def.lootGridWidth = EditorGUILayout.IntField("격자 가로", def.lootGridWidth);
+                    def.lootGridHeight = EditorGUILayout.IntField("격자 세로", def.lootGridHeight);
+                    def.lootUseRegionLoot = EditorGUILayout.Toggle("지역 루트 사용", def.lootUseRegionLoot);
+                    def.functionPrompt = EditorGUILayout.TextField("프롬프트(비우면 '수색')", def.functionPrompt);
+                    def.interactRange = EditorGUILayout.FloatField("인식 범위(m)", def.interactRange);
+                    EditorGUILayout.HelpBox("수색 가능 컨테이너 — LootContainer+상호작용 자동 부착. 일반 프랍에도 부여 가능.", MessageType.None);
+                    break;
+                case Prop2DDefinition.Function.ItemDrop:
+                    def.itemId = EditorGUILayout.TextField("아이템 ID(비우면 지역루트)", def.itemId);
+                    def.itemCount = EditorGUILayout.IntField("수량", def.itemCount);
+                    EditorGUILayout.HelpBox("바닥에 아이템 스폰(ItemSpawnPoint). ID 지정=Fixed, 비우면 지역 루트 Ground.", MessageType.None);
+                    break;
+                case Prop2DDefinition.Function.NPC:
+                    def.npcId = EditorGUILayout.TextField("NPC ID (Resources/Data/NPC/)", def.npcId);
+                    def.functionPrompt = EditorGUILayout.TextField("프롬프트(비우면 '대화')", def.functionPrompt);
+                    def.interactRange = EditorGUILayout.FloatField("인식 범위(m)", def.interactRange);
+                    EditorGUILayout.HelpBox("NPCController + 상호작용(NPC) 부착. npcId로 NPCData 자동 로드.", MessageType.None);
+                    break;
+                case Prop2DDefinition.Function.Door:
+                    def.doorLockType = (DoorController.LockType)EditorGUILayout.EnumPopup("잠금", def.doorLockType);
+                    if (def.doorLockType == DoorController.LockType.Key)
+                        def.doorKeyId = EditorGUILayout.TextField("필요 열쇠 ID", def.doorKeyId);
+                    else if (def.doorLockType == DoorController.LockType.Quest)
+                        def.doorQuestId = EditorGUILayout.TextField("필요 퀘스트 ID", def.doorQuestId);
+                    def.functionPrompt = EditorGUILayout.TextField("프롬프트(비우면 '문')", def.functionPrompt);
+                    def.interactRange = EditorGUILayout.FloatField("인식 범위(m)", def.interactRange);
+                    EditorGUILayout.HelpBox("DoorController + 상호작용(Door). 프롭의 콜라이더가 문 차단/판정에 쓰임.", MessageType.None);
+                    break;
+                case Prop2DDefinition.Function.Trigger:
+                    def.triggerTargetScene = EditorGUILayout.TextField("전환 씬", def.triggerTargetScene);
+                    def.triggerTargetSpawnId = EditorGUILayout.TextField("도착 Spawn ID", def.triggerTargetSpawnId);
+                    def.triggerSize = EditorGUILayout.Vector2Field("영역 크기", def.triggerSize);
+                    def.triggerAutoEnter = EditorGUILayout.Toggle("즉시 전환", def.triggerAutoEnter);
+                    EditorGUILayout.HelpBox("플레이어가 영역에 들어오면 씬 전환(MapTriggerZone2D). 보통 '투명 마커'.", MessageType.None);
+                    break;
             }
         }
 
@@ -662,6 +724,12 @@ public class Prop2DCatalogEditor : EditorWindow
         _draft.category = _tab;
         _draft.colliderMode = DefaultCollider(_tab);
         _draft.castShadow = DefaultCastShadow(_tab); // 벽·프롭은 그림자 기본 ON
+        // 오브젝트 탭은 기능 항목이 기본 — Interactable로 시작하고 Function 섹션을 펼쳐 보여줌.
+        if (_tab == Prop2DDefinition.Category.Object)
+        {
+            _draft.function = Prop2DDefinition.Function.Interactable;
+            _foldFunction = true;
+        }
         _selected = null;
     }
 

@@ -12,7 +12,7 @@ using UnityEngine.EventSystems;
 /// 싱글톤·플레이어는 GameBootstrap/PlayerController.Bootstrap이 자동 생성하므로 씬에 넣지 않음.
 /// 씬에 직접 필요한 것만: 카메라, 2D 라이팅, EventSystem, Tilemap, SpawnPoint.
 ///
-/// Tools > BRB > Build Scene > InGame Scene (또는 Safehouse Scene)
+/// Tools > TopDown > Build > InGame Scene (또는 Safehouse Scene)
 /// </summary>
 public static class GameSceneBuilder
 {
@@ -20,10 +20,10 @@ public static class GameSceneBuilder
 
     // ── 공통: 씬 어느 타입이든 동일하게 들어가는 것 ──────────────────
 
-    [MenuItem("Tools/BRB/Build Scene/InGame Scene")]
+    [MenuItem("Tools/TopDown/Build/InGame Scene")]
     static void BuildInGame() => BuildScene("InGameScene", SceneType.InGame);
 
-    [MenuItem("Tools/BRB/Build Scene/Safehouse Scene")]
+    [MenuItem("Tools/TopDown/Build/Safehouse Scene")]
     static void BuildSafehouse() => BuildScene("SafehouseScene", SceneType.Safehouse);
 
     // ─────────────────────────────────────────────────────────────────
@@ -37,22 +37,9 @@ public static class GameSceneBuilder
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-        // ── 1. 카메라 ────────────────────────────────────────────────
-        var camGo = new GameObject("Main Camera");
-        camGo.tag = "MainCamera";
-        var cam = camGo.AddComponent<Camera>();
-        cam.orthographic = true;
-        cam.orthographicSize = 8f;
-        cam.transform.position = new Vector3(0, 0, -10);
-        cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = new Color(0.05f, 0.05f, 0.06f);
-        // Y축 정렬 — 화면 아래쪽(Y 작은) 스프라이트가 앞으로
-        cam.transparencySortMode = TransparencySortMode.CustomAxis;
-        cam.transparencySortAxis = new Vector3(0, 1, 0);
-        camGo.AddComponent<AudioListener>();
-
-        // 플레이어 추적 (플레이어 스폰 후 자동 재탐색)
-        camGo.AddComponent<CameraFollow>();
+        // ── 1. 카메라 없음 ───────────────────────────────────────────
+        //    PlayerRig(자동 스폰)가 카메라 + CameraFollow + 2D 정렬축(CameraSortSetup) + AudioListener를
+        //    한 세트로 들고 옴. 씬에 또 두면 충돌하므로 만들지 않는다.
 
         // ── 2. EventSystem ────────────────────────────────────────────
         var esGo = new GameObject("EventSystem");
@@ -131,7 +118,7 @@ public static class GameSceneBuilder
         EditorSceneManager.SaveScene(scene, path);
 
         Debug.Log($"[GameSceneBuilder] 생성 완료: {path}");
-        Debug.Log($"[GameSceneBuilder] 포함: 카메라(CameraFollow2D), EventSystem, GlobalLight2D(어둠), Grid(바닥+벽 Tilemap), SpawnPoint");
+        Debug.Log($"[GameSceneBuilder] 포함: EventSystem, GlobalLight2D(어둠), Grid(바닥+벽 Tilemap), SpawnPoint. 카메라는 PlayerRig가 제공(글로벌 라이트는 씬 담당).");
         Debug.Log($"[GameSceneBuilder] 자동 생성(코드): Player(Resources/Player), GameBootstrap 싱글톤 14개");
         Debug.Log($"[GameSceneBuilder] 다음 할 일: ① Tilemap에 타일 배치 ② SpawnPoint 위치 조정 ③ Player 프리팹 확인");
     }

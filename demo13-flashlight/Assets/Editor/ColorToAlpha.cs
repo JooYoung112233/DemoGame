@@ -5,7 +5,7 @@ using System.IO;
 /// <summary>
 /// 지정 색상(기본 흰색)을 알파 투명으로 변환하는 텍스쳐 전처리 도구.
 /// Project 창에서 텍스쳐 선택 → 우클릭 "Color → Alpha" 또는
-/// 메뉴: Tools > Dev Tools > Color to Alpha
+/// 메뉴: Tools > TopDown > Utility > Color to Alpha
 /// </summary>
 public class ColorToAlpha : EditorWindow
 {
@@ -17,7 +17,7 @@ public class ColorToAlpha : EditorWindow
     string suffix = "_alpha";
     Vector2 scrollPos;
 
-    [MenuItem("Tools/Dev Tools/Color to Alpha")]
+    [MenuItem("Tools/TopDown/Utility/Color to Alpha")]
     static void Open()
     {
         var window = GetWindow<ColorToAlpha>("Color to Alpha");

@@ -39,7 +39,7 @@ public class StatDBEditor : EditorWindow
     bool showPDodge = false;
     bool showPStamina = true;
 
-    [MenuItem("Tools/Dev Tools/Data/Stat DB Editor")]
+    [MenuItem("Tools/TopDown/Data/Stat DB Editor")]
     static void Open()
     {
         var win = GetWindow<StatDBEditor>("Stat DB");

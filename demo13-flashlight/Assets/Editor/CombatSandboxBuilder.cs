@@ -11,14 +11,14 @@ using System.IO;
 /// 전투 샌드박스(타격감/히트박스 테스트) 씬 + 적 프리팹 생성기.
 /// - Build Enemy Prefab: Resources/Enemy.prefab (바디 스프라이트+Hurtbox+Health+CombatFeedback+EnemyController)
 ///   → "적을 코드로 스폰하는 곳이 없어 바디 스프라이트가 없던" 공백을 메움.
-/// - Build Combat Sandbox: 카메라/조명/Volume/SpawnPoint + 적 3기를 앞에 둔 아레나 씬.
-/// 메뉴: Tools ▸ TopDown 2D ▸ Build Enemy Prefab / Tools ▸ BRB ▸ Build Scene ▸ Combat Sandbox
+/// - Build Combat Sandbox: 순수 hit 테스트 아레나 — SpawnPoint + 적 3기 + NavGrid + 우회벽 + 약한 전역광.
+///   카메라·플레이어 라이트·후처리(Volume)는 PlayerRig(자동 스폰)가 한 세트로 들고 오므로 씬에 안 둠.
+/// 메뉴: Tools ▸ TopDown ▸ Build ▸ Enemy Prefab / Combat Sandbox Scene
 /// </summary>
 public static class CombatSandboxBuilder
 {
     const string ENEMY_PREFAB_PATH = "Assets/Resources/Enemy.prefab";
     const string SCENE_PATH        = "Assets/Scenes/CombatSandbox.unity";
-    const string VOLUME_PROFILE    = "Assets/Settings/SandboxVolume.asset";
     // 플레이어와 동일 스프라이트 재사용(빨간 틴트로 구분)
     const string SPRITE_GUID = "f8bd92d6d061f7143986c16a0ea86602";
 
@@ -26,7 +26,7 @@ public static class CombatSandboxBuilder
     //  적 프리팹
     // ══════════════════════════════════════════════════════════
 
-    [MenuItem("Tools/TopDown 2D/Build Enemy Prefab")]
+    [MenuItem("Tools/TopDown/Build/Enemy Prefab")]
     public static void BuildEnemyPrefab()
     {
         EnsureFolder("Assets/Resources");
@@ -95,7 +95,7 @@ public static class CombatSandboxBuilder
     //  샌드박스 씬
     // ══════════════════════════════════════════════════════════
 
-    [MenuItem("Tools/BRB/Build Scene/Combat Sandbox")]
+    [MenuItem("Tools/TopDown/Build/Combat Sandbox Scene")]
     public static void BuildSandbox()
     {
         // 적 프리팹 보장
@@ -108,38 +108,24 @@ public static class CombatSandboxBuilder
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-        // ── 카메라 ──────────────────────────────────────────
-        var camGo = new GameObject("Main Camera");
-        camGo.tag = "MainCamera";
-        var cam = camGo.AddComponent<Camera>();
-        cam.orthographic = true;
-        cam.orthographicSize = 5f;
-        cam.transform.position = new Vector3(0, 0, -10);
-        cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = new Color(0.06f, 0.06f, 0.08f);
-        cam.transparencySortMode = TransparencySortMode.CustomAxis;
-        cam.transparencySortAxis = new Vector3(0, 1, 0);
-        var camData = cam.GetUniversalAdditionalCameraData();
-        if (camData != null) camData.renderPostProcessing = true;
-        camGo.AddComponent<CameraFollow>();
+        // ⚠️ 카메라·라이트·후처리(Volume)는 만들지 않는다 — PlayerRig(자동 스폰)가 한 세트로 들고 옴.
+        //    (씬에 카메라/Volume을 또 두면 PlayerRig 것과 충돌.)
 
-        // ── 전역 조명(밝게 — 테스트용) ──────────────────────
+        // ── 전역 조명: 테스트 가시성용 약한 앰비언트만 ───────
+        //    PlayerRig가 플레이어 주변광을 들고 오므로, 여긴 멀리 있는 적도 보이게 약하게만.
         var lightGo = new GameObject("Global Light2D");
         var gl = lightGo.AddComponent<Light2D>();
         gl.lightType = Light2D.LightType.Global;
-        gl.intensity = 1f;
-        gl.color = Color.white;
+        gl.intensity = 0.5f;
+        gl.color = new Color(0.7f, 0.72f, 0.8f);
 
-        // ── EventSystem ─────────────────────────────────────
+        // ── EventSystem (UI 입력) ───────────────────────────
         if (Object.FindFirstObjectByType<EventSystem>() == null)
         {
             var es = new GameObject("EventSystem");
             es.AddComponent<EventSystem>();
             es.AddComponent<StandaloneInputModule>();
         }
-
-        // ── post-process Volume(피격 비네트/색수차) ─────────
-        CreateSandboxVolume();
 
         // ── SpawnPoint(플레이어 자동 스폰) ──────────────────
         var spawnGo = new GameObject("SpawnPoint");
@@ -171,41 +157,7 @@ public static class CombatSandboxBuilder
         EditorSceneManager.SaveScene(scene, SCENE_PATH);
         AssetDatabase.SaveAssets();
 
-        Debug.Log($"<color=cyan>[Sandbox]</color> 전투 샌드박스 생성: {SCENE_PATH}\n" +
-                  "Play 하면 플레이어 자동 스폰 + 적 3기. 좌클릭=약공, 우클릭홀드=강공, Space=구르기.");
-        if (!Application.isBatchMode)
-            EditorUtility.DisplayDialog("Combat Sandbox",
-                "전투 샌드박스 씬 생성 완료.\n\n" +
-                "Play → 플레이어 자동 스폰, 적 3기.\n" +
-                "강공으로 적 때리면 흰 플래시+히트스탑+카메라 셰이크,\n" +
-                "적에게 맞으면 화면 연출이 나옵니다.", "확인");
-    }
-
-    static void CreateSandboxVolume()
-    {
-        EnsureFolder("Assets/Settings");
-
-        var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VOLUME_PROFILE);
-        if (profile == null)
-        {
-            profile = ScriptableObject.CreateInstance<VolumeProfile>();
-            AssetDatabase.CreateAsset(profile, VOLUME_PROFILE);
-
-            var vig = profile.Add<Vignette>(true);
-            vig.intensity.Override(0f);     // 평소 0 → PlayerHitReaction이 펄스
-            vig.color.Override(new Color(0.6f, 0f, 0f));
-
-            var ca = profile.Add<ChromaticAberration>(true);
-            ca.intensity.Override(0f);
-
-            EditorUtility.SetDirty(profile);
-            AssetDatabase.SaveAssets();
-        }
-
-        var volGo = new GameObject("PostProcess Volume");
-        var vol = volGo.AddComponent<Volume>();
-        vol.isGlobal = true;
-        vol.profile = profile;
+        Debug.Log($"<color=cyan>[Sandbox]</color> 전투 샌드박스 생성: {SCENE_PATH} — Play 시 PlayerRig 자동 스폰 + 적 3기. 좌클릭=약공, 우클릭홀드=강공, Space=구르기.");
     }
 
     /// <summary>벽 장애물(비-트리거 BoxCollider2D + 어두운 스프라이트). 길찾기·물리 모두 차단.</summary>

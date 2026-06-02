@@ -30,8 +30,9 @@
 - 모든 위치/투영/그림자 계산은 **XY 기준**. (구 "XZ 바닥평면 + 90° 눕힌 쿼드" 전제는 폐기.)
 - **모든 스프라이트(타일/프롭/캐릭터)는 회전 (0,0,0)** — 카메라 정면을 향하는 순수 2D. 원근은 아트가 담당하므로 트랜스폼 회전·빌보드 불필요.
 - **플레이어 카메라 = PlayerRig 프리팹에 포함, 한 세트(2026-06-02 결정 변경).** ~~씬 카메라 자동 장착~~ → **카메라+플레이어+라이트+후처리(Volume)를 `Resources/PlayerRig.prefab` 한 세트로 묶어 DontDestroyOnLoad**로 모든 씬 공유. Bootstrap이 1개만 스폰. `CameraFollow`가 씬 로드 시 **자기(PlayerRig 카메라) 외 다른 Camera/AudioListener를 비활성**해 2개 충돌을 막음. (추적+셰이크/줌·후처리·피격 Volume 모두 프리팹 카메라에 내장.)
-  - 빌더 `TopDownPlayerBuilder`(메뉴 Build Player Prefab)가 PlayerRig 전체를 코드 조립.
+  - 빌더 `TopDownPlayerBuilder`(메뉴 `Tools ▸ TopDown ▸ Build ▸ Player Rig`)가 PlayerRig 전체를 코드 조립.
   - → 어느 씬(InGame/Safehouse/MapTool2D)에서 Play해도 동일한 카메라·조명·후처리로 동작.
+  - **씬 빌더는 카메라를 안 만든다**(PlayerRig가 제공). 2D 정렬축은 **PlayerRig 카메라의 `CameraSortSetup`**(CustomAxis (0,1,0))이 담당. ⚠️ 단 **글로벌 Light2D는 씬이 둔다** — PlayerRig는 플레이어 주변 점광(point)만 들고 오므로, 글로벌 앰비언트가 없으면 URP 2D가 빛 반경 밖을 **새까맣게** 렌더. (게임 씬=어두운 글로벌(darkwood), 맵툴=밝은 글로벌.)
 
 ## 조명 / 가시성 (시야 FOV) — 2026-06-02 전환
 
@@ -60,19 +61,23 @@
 
 URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유지 셰이더는 모두 Universal2D 패스 보유(2026-06-02).
 
+**맵 (사용 중)** — 픽셀화 + 색단계 + Light2D. (픽셀 외곽선 기능은 2026-06-02 전부 제거)
 | 셰이더 | 용도 | 조명 |
 |---|---|---|
-| `BRB/Pixelated` | 도트/맵 모듈(범용) | Light2D 반응 |
-| `BRB/FloorPixel` | 바닥(Tilemap/스프라이트) — Pixelated 동일 픽셀, 불투명·컷아웃 없음, 정점컬러 지원 | Light2D 반응 |
-| `BRB/WallPixel` | 벽(Pixelated 동일 픽셀 + 문 흰색뚫기 `_WHITE_CUTOUT` + 오클루전 페이드 `_Alpha`). `_SHADOW_MODE` 켜면 같은 셰이더가 벽 그림자(투영+밑동접지)로도 동작 | Light2D 반응 / 그림자모드 Unlit |
-| `BRB/PropPixel` | 프롭(픽셀+색단계+외곽선+알파 컷아웃) | Light2D 반응 |
+| `BRB/FloorPixel` | 바닥(타일) — 불투명·컷아웃 없음, 정점컬러 | Light2D 반응 |
+| `BRB/WallPixel` | 벽 — 알파 컷아웃 + 문 흰색뚫기 `_WHITE_CUTOUT` + 오클루전 페이드 `_Alpha`. `_SHADOW_MODE`는 `GroundShadow2D`(정적 발밑)가 재사용 | Light2D 반응 / 그림자모드 Unlit |
+| `BRB/PropPixel` | 프롭·오브젝트 — 알파 컷아웃 | Light2D 반응 |
+
+**캐릭터/이펙트 (사용 중)**
+| 셰이더 | 용도 | 조명 |
+|---|---|---|
 | `BRB/PlayerSprite` | 플레이어(시트UV+컷아웃+아웃라인) | Light2D 반응 |
 | `BRB/SpriteSheet` | 스프라이트 시트 UV | Light2D 반응 |
-| `BRB/SpriteBillboard` | SpriteRenderer용(정점컬러+컷아웃+아웃라인) | Light2D 반응 |
-| `BRB/SpineLitURP` | Spine(premultiplied 알파+정점컬러) | Light2D 반응 |
-| ~~`BRB/ShadowProjector`~~ | **삭제됨** — URP 2D에서 안 그려져서 폐기, 그림자는 `WallPixel(_SHADOW_MODE)`로 통일 | — |
-| `BRB/OcclusionOutline` | 깊이 가림 외곽선 | Unlit (순수 2D에선 의미 약함) |
-| ~~`BRB/FlashlightBeam`~~ | (삭제 예정 — 손전등 폐기) | — |
+| `BRB/SpriteBillboard` | SpriteRenderer용 | Light2D 반응 |
+| `BRB/SpineLitURP` | Spine(premultiplied 알파) | Light2D 반응 |
+| `BRB/SpriteFlash` | 타격감 흰 플래시(HitFlash 런타임 설치) | Light2D 반응 |
+
+**삭제됨(2026-06-02)**: `Pixelated`(PropPixel/FloorPixel로 대체), `OcclusionOutline`(iso 잔재), `FlashlightBeam`(손전등 폐기), `ShadowProjector`(2D 미렌더). 0 참조 확인 후 제거.
 
 - **모듈 그림자(✅ 2026-06-02, 네이티브 전환)**: 가짜 `FlatShadow`(스프라이트 복제/기울임) 폐기 → **URP 2D 네이티브 동적 캐스트 + 정적 발밑**의 2겹.
   - **① 동적 캐스트 = `ShadowCaster2D` + `Light2D` 그림자**: 엔진이 **실제로** 계산 — 물체가 빛을 막아 빛 반대편에 그림자 영역. 방향·길이는 라이트 위치가 결정, 여러 라이트 각각, 진짜 3D식(좀보이드/다크우드). 프롭/벽에 `ShadowCaster2D`(castsShadows=true, selfShadows=false). 에디터 `[ExecuteInEditMode]` Awake가 Collider2D/SpriteRenderer로 shadow shape 자동 설정→프리팹 직렬화. **플레이어 `PlayerConeLight`에 `shadowsEnabled`+`shadowIntensity`** 켜야 보임(빌더에 설정).

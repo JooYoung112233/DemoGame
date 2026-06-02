@@ -3,14 +3,14 @@ using UnityEditor;
 using UnityEngine.Rendering.Universal;
 
 /// <summary>
-/// 탑다운 2D 씬 조명 셋업기. (Tools ▸ TopDown 2D ▸ Setup Scene Lighting)
+/// 탑다운 2D 씬 조명 셋업기. (Tools ▸ TopDown ▸ Map ▸ Setup Scene Lighting)
 /// 어두운 Global Light2D를 현재 씬에 추가/갱신 → 플레이어 PlayerLight와 대비되어
 /// "주변만 밝고 나머지는 어둠" (Darkwood 느낌)이 됨.
 /// 모든 Sorting Layer를 비추도록 설정해 스프라이트가 라이트를 받게 한다.
 /// </summary>
 public static class SceneLightingBuilder
 {
-    [MenuItem("Tools/TopDown 2D/Setup Scene Lighting")]
+    [MenuItem("Tools/TopDown/Map/Setup Scene Lighting")]
     public static void SetupSceneLighting()
     {
         // 기존 Global Light2D 탐색 (중복 생성 방지)

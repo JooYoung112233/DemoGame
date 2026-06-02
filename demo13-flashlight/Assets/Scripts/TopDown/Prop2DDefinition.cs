@@ -78,4 +78,56 @@ public class Prop2DDefinition : ScriptableObject
     [Header("Shadow (그림자)")]
     [Tooltip("켜면 ShadowCaster2D 부착 → Light2D가 실제 캐스트 그림자를 드리움(빛 반대편). 벽/프롭 권장. 방향·길이는 라이트가 결정.")]
     public bool castShadow = false;
+
+    // ── 기능(Function) — 오브젝트(스폰/탈출/지도판)·수색 가능 프롭 등 ──
+    /// <summary>배치 시 부여할 게임플레이 기능. None=장식/막힘만.</summary>
+    public enum Function { None, SpawnPoint, Interactable, LootContainer, ItemDrop, NPC, Door, Trigger }
+
+    [Header("Function (기능)")]
+    [Tooltip("배치 시 자동 부여할 기능. None=장식/막힘. SpawnPoint=플레이어 스폰. " +
+             "Interactable=상호작용(탈출/지도판/침대 등 종류 선택). LootContainer=수색 가능 컨테이너.")]
+    public Function function = Function.None;
+    [Tooltip("Interactable 종류 — 탈출(ExitPoint)/지도판(MapBoard)/침대/작업대/NPC/문/범용(Generic) 등.")]
+    public InteractableObject.InteractType interactType = InteractableObject.InteractType.Generic;
+    [Tooltip("상호작용 프롬프트(비우면 종류 이름).")]
+    public string functionPrompt = "";
+    [Tooltip("상호작용 인식 범위(m).")]
+    public float interactRange = 1.5f;
+    [Tooltip("SpawnPoint면 pointId(씬 전환 도착 지점 식별). 비우면 default.")]
+    public string spawnPointId = "default";
+    [Tooltip("LootContainer 격자 가로/세로.")]
+    public int lootGridWidth = 4;
+    public int lootGridHeight = 5;
+    [Tooltip("LootContainer가 지역 루트 테이블을 쓸지.")]
+    public bool lootUseRegionLoot = true;
+
+    [Tooltip("투명 마커 — SpriteRenderer 없이 기능만(스폰/트리거 등). 씬에선 기즈모로 표시.")]
+    public bool noVisual = false;
+
+    [Header("ItemDrop (바닥 아이템)")]
+    [Tooltip("바닥에 스폰할 고정 아이템 ID. 비우면 지역 루트(Ground)로 스폰.")]
+    public string itemId = "";
+    [Tooltip("고정 아이템 수량.")]
+    public int itemCount = 1;
+
+    [Header("NPC")]
+    [Tooltip("NPCData id (Resources/Data/NPC/{id}). 비우면 빈 NPC.")]
+    public string npcId = "";
+
+    [Header("Door")]
+    public DoorController.LockType doorLockType = DoorController.LockType.None;
+    [Tooltip("Key 잠금일 때 필요 열쇠 아이템 ID.")]
+    public string doorKeyId = "";
+    [Tooltip("Quest 잠금일 때 필요 퀘스트 ID.")]
+    public string doorQuestId = "";
+
+    [Header("Trigger (영역 → 씬 전환)")]
+    [Tooltip("전환할 씬 이름.")]
+    public string triggerTargetScene = "";
+    [Tooltip("도착 씬 SpawnPoint ID.")]
+    public string triggerTargetSpawnId = "";
+    [Tooltip("트리거 영역 크기(월드 단위).")]
+    public Vector2 triggerSize = new(2f, 2f);
+    [Tooltip("들어오는 즉시 전환할지.")]
+    public bool triggerAutoEnter = true;
 }

@@ -20,11 +20,6 @@ Shader "BRB/WallPixel"
         [Toggle(_QUANTIZE_ON)] _QuantizeToggle ("색 단계화 (포스터라이즈)", Float) = 1
         _ColorLevels ("Color Levels", Range(2, 32)) = 8
 
-        [Header(Outline)]
-        [Toggle(_OUTLINE_ON)] _OutlineToggle ("픽셀 외곽선", Float) = 0
-        _OutlineColor ("Outline Color", Color) = (0,0,0,1)
-        _OutlineThreshold ("Outline Threshold", Range(0, 1)) = 0.5
-
         [Header(Doorway Cutout)]
         [Toggle(_WHITE_CUTOUT)] _WhiteCutoutToggle ("흰색 투명화 (문 뚫기)", Float) = 0
         _WhiteThreshold ("White Threshold", Range(0.5, 1)) = 0.85
@@ -63,7 +58,6 @@ Shader "BRB/WallPixel"
             #pragma fragment frag
             #pragma shader_feature_local _PIXELATE_ON
             #pragma shader_feature_local _QUANTIZE_ON
-            #pragma shader_feature_local _OUTLINE_ON
             #pragma shader_feature_local _WHITE_CUTOUT
             #pragma multi_compile_local _ _SHADOW_MODE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
@@ -79,8 +73,6 @@ Shader "BRB/WallPixel"
                 float _Cutoff;
                 float _PixelDensity;
                 float _ColorLevels;
-                float4 _OutlineColor;
-                float _OutlineThreshold;
                 float _WhiteThreshold;
                 float _WhiteSoftness;
                 float _Alpha;
@@ -168,17 +160,6 @@ Shader "BRB/WallPixel"
 
                 half3 color = rgb * _Color.rgb * _Brightness;
 
-                #ifdef _OUTLINE_ON
-                    float2 texel = 1.0 / float2(_PixelDensity, _PixelDensity);
-                    float aL = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, PixelateUV(input.uv + float2(-texel.x, 0), _PixelDensity)).a;
-                    float aR = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, PixelateUV(input.uv + float2( texel.x, 0), _PixelDensity)).a;
-                    float aD = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, PixelateUV(input.uv + float2(0, -texel.y), _PixelDensity)).a;
-                    float aU = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, PixelateUV(input.uv + float2(0,  texel.y), _PixelDensity)).a;
-                    float minNeighbor = min(min(aL, aR), min(aD, aU));
-                    float edge = step(minNeighbor, _OutlineThreshold) * step(_Cutoff, mainTex.a);
-                    color = lerp(color, _OutlineColor.rgb, edge);
-                #endif
-
                 half3 baseColor = color;
                 half3 ambient = baseColor * 0.4;
                 half3 litColor = rgb * _Color.rgb;
@@ -234,8 +215,6 @@ Shader "BRB/WallPixel"
                 float _Cutoff;
                 float _PixelDensity;
                 float _ColorLevels;
-                float4 _OutlineColor;
-                float _OutlineThreshold;
                 float _WhiteThreshold;
                 float _WhiteSoftness;
                 float _Alpha;

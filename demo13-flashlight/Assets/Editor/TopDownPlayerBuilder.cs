@@ -9,7 +9,7 @@ using System.IO;
 /// Resources/PlayerRig.prefab 자동 생성기.
 /// 카메라 + 플레이어 + 라이트 + 후처리(Volume)를 한 세트로 묶은 PlayerRig.
 /// Bootstrap이 1개만 스폰 → DontDestroyOnLoad로 모든 씬 공유(씬마다 카메라/플레이어 따로 안 둠).
-/// 메뉴: Tools > TopDown 2D > Build Player Prefab
+/// 메뉴: Tools > TopDown > Build > Player Rig
 /// </summary>
 public static class TopDownPlayerBuilder
 {
@@ -18,7 +18,7 @@ public static class TopDownPlayerBuilder
     const string OLD_PREFAB    = "Assets/Resources/TopDownPlayer.prefab";
     const string PLAYER_SPRITE_GUID = "f8bd92d6d061f7143986c16a0ea86602";
 
-    [MenuItem("Tools/TopDown 2D/Build Player Prefab")]
+    [MenuItem("Tools/TopDown/Build/Player Rig")]
     public static void BuildPlayerPrefab()
     {
         EnsureFolder("Assets/Resources");
@@ -121,6 +121,7 @@ public static class TopDownPlayerBuilder
         cam.backgroundColor = Color.black;
         cam.allowHDR = true;                         // bloom 위해
         camGo.AddComponent<AudioListener>();
+        camGo.AddComponent<CameraSortSetup>();       // 2D Y정렬축(CustomAxis) — PlayerRig 카메라가 유일 카메라이므로 필수
 
         var camData = camGo.GetComponent<UniversalAdditionalCameraData>();
         if (camData == null) camData = camGo.AddComponent<UniversalAdditionalCameraData>();

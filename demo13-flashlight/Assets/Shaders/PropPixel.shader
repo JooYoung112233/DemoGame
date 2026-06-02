@@ -1,7 +1,7 @@
 Shader "BRB/PropPixel"
 {
-    // 프롭용 픽셀 셰이더. 픽셀화/색단계/외곽선/알파 컷아웃 + Light2D 반응.
-    // 그림자는 FlatShadow 컴포넌트(정적 발밑 + 동적 투영)로 별도 처리.
+    // 프롭/오브젝트용 픽셀 셰이더. 픽셀화/색단계/알파 컷아웃 + Light2D 반응.
+    // 그림자는 ShadowCaster2D(동적) + GroundShadow2D(정적 발밑)로 별도 처리.
     Properties
     {
         _MainTex ("Base Texture", 2D) = "white" {}
@@ -16,11 +16,6 @@ Shader "BRB/PropPixel"
         [Header(Color Quantize)]
         [Toggle(_QUANTIZE_ON)] _QuantizeToggle ("색 단계화 (포스터라이즈)", Float) = 1
         _ColorLevels ("Color Levels", Range(2, 32)) = 8
-
-        [Header(Outline)]
-        [Toggle(_OUTLINE_ON)] _OutlineToggle ("픽셀 외곽선", Float) = 0
-        _OutlineColor ("Outline Color", Color) = (0,0,0,1)
-        _OutlineThreshold ("Outline Threshold", Range(0, 1)) = 0.5
     }
     SubShader
     {
@@ -38,7 +33,6 @@ Shader "BRB/PropPixel"
             #pragma fragment frag
             #pragma shader_feature_local _PIXELATE_ON
             #pragma shader_feature_local _QUANTIZE_ON
-            #pragma shader_feature_local _OUTLINE_ON
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -51,8 +45,6 @@ Shader "BRB/PropPixel"
                 float _Cutoff;
                 float _PixelDensity;
                 float _ColorLevels;
-                float4 _OutlineColor;
-                float _OutlineThreshold;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);
@@ -94,17 +86,6 @@ Shader "BRB/PropPixel"
                 #endif
 
                 half3 color = rgb * _Color.rgb * input.color.rgb * _Brightness;
-
-                #ifdef _OUTLINE_ON
-                    float2 texel = 1.0 / float2(_PixelDensity, _PixelDensity);
-                    float aL = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, PixelateUV(input.uv + float2(-texel.x, 0), _PixelDensity)).a;
-                    float aR = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, PixelateUV(input.uv + float2( texel.x, 0), _PixelDensity)).a;
-                    float aD = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, PixelateUV(input.uv + float2(0, -texel.y), _PixelDensity)).a;
-                    float aU = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, PixelateUV(input.uv + float2(0,  texel.y), _PixelDensity)).a;
-                    float minNeighbor = min(min(aL, aR), min(aD, aU));
-                    float edge = step(minNeighbor, _OutlineThreshold) * step(_Cutoff, mainTex.a);
-                    color = lerp(color, _OutlineColor.rgb, edge);
-                #endif
 
                 half3 litColor = rgb * _Color.rgb * input.color.rgb;
                 half3 ambient = color * 0.4;
@@ -151,8 +132,6 @@ Shader "BRB/PropPixel"
                 float _Cutoff;
                 float _PixelDensity;
                 float _ColorLevels;
-                float4 _OutlineColor;
-                float _OutlineThreshold;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);

@@ -8,30 +8,23 @@ using UnityEngine.Tilemaps;
 /// 탑다운 2D 맵 편집용 씬을 생성한다.
 /// 구성: 2D Orthographic 카메라 + URP Global Light 2D + Grid(Ground/Walls Tilemap).
 /// Walls Tilemap엔 TilemapCollider2D(+정적 Rigidbody2D)가 붙어 "못 가는 곳"이 된다.
-/// 프롭은 Prop Catalog(Tools ▸ TopDown 2D ▸ Prop Catalog)의 '씬에 배치'로 찍는다.
-/// 메뉴: Tools ▸ TopDown 2D ▸ Create Map Tool Scene
+/// 프롭은 Prop Catalog(Tools ▸ TopDown ▸ Map ▸ Prop Catalog)의 '씬에 배치'로 찍는다.
+/// 메뉴: Tools ▸ TopDown ▸ Build ▸ Map Tool Scene
 /// </summary>
 public static class MapTool2DSceneBuilder
 {
     const string ScenePath = "Assets/Scenes/MapTool2D.unity";
 
-    [MenuItem("Tools/TopDown 2D/Create Map Tool Scene")]
+    [MenuItem("Tools/TopDown/Build/Map Tool Scene")]
     public static void CreateMapToolScene()
     {
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-        // ── 카메라 (2D 직교) ──
-        var camGo = new GameObject("Main Camera");
-        camGo.tag = "MainCamera";
-        var cam = camGo.AddComponent<Camera>();
-        cam.orthographic = true;
-        cam.orthographicSize = 8f;
-        cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = new Color(0.12f, 0.12f, 0.14f, 1f);
-        camGo.transform.position = new Vector3(0f, 0f, -10f);
-        camGo.AddComponent<UniversalAdditionalCameraData>();
+        // ── 카메라 없음 — PlayerRig(자동 스폰)가 한 세트로 들고 옴 ──
+        //    편집은 씬뷰에서 하므로 게임 카메라 불필요. Play 시 PlayerRig 카메라가 따라옴.
 
-        // ── URP Global Light 2D (없으면 스프라이트가 까맣게 나옴) ──
+        // ── URP Global Light 2D (라이트는 씬 담당! 없으면 스프라이트가 까맣게 나옴) ──
+        //    PlayerRig는 플레이어 주변 점광만 들고 옴 → 글로벌 앰비언트는 씬이 둬야 함.
         var lightGo = new GameObject("Global Light 2D");
         var light = lightGo.AddComponent<Light2D>();
         light.lightType = Light2D.LightType.Global;
