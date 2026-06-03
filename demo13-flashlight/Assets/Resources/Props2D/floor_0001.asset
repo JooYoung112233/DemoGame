@@ -19,8 +19,8 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 8f1cf44743a69da4e8f6c70e2fbd2362, type: 2}
   sortingLayer: Ground
   sortingOffset: -5
-  drawMode: 0
-  tiledSize: {x: 1, y: 1}
+  drawMode: 2
+  tiledSize: {x: 64, y: 64}
   tileMode: 0
   prefab: {fileID: 5150069028411347808, guid: 7248630dd433d0145a3ea3660d40db52, type: 3}
   colliderMode: 0
@@ -28,3 +28,25 @@ MonoBehaviour:
   boxSizeScale: {x: 1, y: 1}
   boxOffset: {x: 0, y: 0}
   compositeBoxes: []
+  castShadow: 0
+  shadowCasting: 0
+  shadowAlphaCutoff: 0.1
+  function: 0
+  interactType: 0
+  functionPrompt: 
+  interactRange: 1.5
+  spawnPointId: default
+  lootGridWidth: 4
+  lootGridHeight: 5
+  lootUseRegionLoot: 1
+  noVisual: 0
+  itemId: 
+  itemCount: 1
+  npcId: 
+  doorLockType: 0
+  doorKeyId: 
+  doorQuestId: 
+  triggerTargetScene: 
+  triggerTargetSpawnId: 
+  triggerSize: {x: 2, y: 2}
+  triggerAutoEnter: 1

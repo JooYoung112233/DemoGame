@@ -15,20 +15,52 @@ MonoBehaviour:
   propId: "prop_\uB808\uC774\uC5B4 31"
   displayName: "\uB808\uC774\uC5B4 31"
   category: 2
+  group: "\uC804\uB2F9\uD3EC"
   sprite: {fileID: 21300000, guid: f6ca26ee1e70a1047bffa28566cc987d, type: 3}
   material: {fileID: 2100000, guid: 6e3507385d67ee942abbfa82a3893324, type: 2}
   sortingLayer: Ground
-  sortingOffset: 0
+  sortingOffset: 1
   drawMode: 0
   tiledSize: {x: 1, y: 1}
   tileMode: 0
   prefab: {fileID: 1629687767850576550, guid: 5c0e6712c424cdc46810906dbd9f6dde, type: 3}
-  colliderMode: 1
+  colliderMode: 2
   isTrigger: 0
   boxSizeScale: {x: 1, y: 1}
   boxOffset: {x: 0, y: 0}
   compositeBoxes: []
   castShadow: 0
-  shadowBaseContact: 1
-  shadowMaxLength: 1.4
-  shadowStrength: 0.55
+  shadowCasting: 3
+  shadowAlphaCutoff: 0.1
+  breakable: 0
+  breakStages: 3
+  breakHp: 24
+  breakDestroy: 1
+  breakRubbleSprite: {fileID: 0}
+  breakHittable: 1
+  breakOverlayIntensity: 1
+  breakCrackColor: {r: 0.02, g: 0.02, b: 0.03, a: 1}
+  breakGrimeColor: {r: 0.15, g: 0.13, b: 0.1, a: 1}
+  breakDrop: 0
+  breakDropItemId: 
+  breakDropCount: 1
+  breakDropRegionLoot: 0
+  function: 0
+  interactType: 0
+  functionPrompt: 
+  interactRange: 1.5
+  spawnPointId: default
+  lootGridWidth: 4
+  lootGridHeight: 5
+  lootUseRegionLoot: 1
+  noVisual: 0
+  itemId: 
+  itemCount: 1
+  npcId: 
+  doorLockType: 0
+  doorKeyId: 
+  doorQuestId: 
+  triggerTargetScene: 
+  triggerTargetSpawnId: 
+  triggerSize: {x: 2, y: 2}
+  triggerAutoEnter: 1

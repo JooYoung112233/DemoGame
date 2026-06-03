@@ -89,7 +89,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 2
-  m_Size: {x: 30, y: 1.8}
+  m_Size: {x: 15, y: 1.8}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -128,17 +128,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 2.51276, y: -0.024579821}
+  m_Offset: {x: 1.25638, y: -0.024579821}
   m_SpriteTilingProperty:
     border: {x: 0.26, y: 0, z: 1.15, w: 0}
     pivot: {x: 0.41624135, y: 0.5136554}
     oldSize: {x: 6.33, y: 1.82}
-    newSize: {x: 30, y: 1.8}
+    newSize: {x: 15, y: 1.8}
     adaptiveTilingThreshold: 0.5
     drawMode: 2
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 30, y: 1.8}
+  m_Size: {x: 15, y: 1.8}
   m_EdgeRadius: 0
 --- !u!114 &1358058114582814666
 MonoBehaviour:
@@ -159,30 +159,30 @@ MonoBehaviour:
   m_UseRendererSilhouette: 1
   m_CastsShadows: 1
   m_SelfShadows: 0
-  m_AlphaCutoff: 0.1
-  m_ApplyToSortingLayers: 94f7cad3000000001b1bf901
+  m_AlphaCutoff: 0
+  m_ApplyToSortingLayers: 94f7cad3000000001b1bf901f19aeb0b
   m_ShapePath:
-  - {x: -12.48724, y: -0.92457974, z: 0}
-  - {x: -12.48724, y: 0.8754202, z: 0}
-  - {x: 17.51276, y: 0.8754202, z: 0}
-  - {x: 17.51276, y: -0.92457974, z: 0}
+  - {x: -6.24362, y: -0.92457974, z: 0}
+  - {x: -6.24362, y: 0.8754202, z: 0}
+  - {x: 8.75638, y: 0.8754202, z: 0}
+  - {x: 8.75638, y: -0.92457974, z: 0}
   m_ShapePathHash: 0
   m_InstanceId: 0
   m_ShadowShape2DComponent: {fileID: 5374777212314686281}
   m_ShadowShape2DProvider:
-    rid: 3714221810447286344
+    rid: 3714221819079426192
   m_ShadowCastingSource: 2
   m_ShadowMesh:
     m_Mesh: {fileID: 0}
     m_LocalBounds:
-      m_Center: {x: 2.512764, y: -0.02458191, z: 0}
-      m_Extent: {x: 14.909996, y: 0.80999756, z: 0}
+      m_Center: {x: 1.2563858, y: -0.02458191, z: 0}
+      m_Extent: {x: 7.409996, y: 0.80999756, z: 0}
     m_EdgeProcessing: 1
     m_TrimEdge: 0.09
     m_FlipX: 0
     m_FlipY: 0
     m_InitialTrim: 0.09
-  m_CastingOption: 1
+  m_CastingOption: 2
   m_PreviousTrimEdge: 0
   m_PreviousEdgeProcessing: -1
   m_PreviousShadowCastingSource: -1
@@ -190,7 +190,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 3714221810447286344
+    - rid: 3714221819079426192
       type: {class: ShadowShape2DProvider_SpriteRenderer, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
       data: 
 --- !u!114 &5890188266524999505

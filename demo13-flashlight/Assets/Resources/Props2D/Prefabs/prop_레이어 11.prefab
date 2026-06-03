@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9145493002356355710}
   - component: {fileID: 1389753528192391681}
-  - component: {fileID: 3740336141858092454}
+  - component: {fileID: 2602689930050858080}
   - component: {fileID: 3436214055787773733}
   - component: {fileID: 5271772043632779876}
   m_Layer: 0
@@ -82,7 +82,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -741673068
   m_SortingLayer: -1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 3e851efdaea6a9f4688282061c649e07, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -94,7 +94,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!60 &3740336141858092454
+--- !u!60 &2602689930050858080
 PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -180,7 +180,7 @@ MonoBehaviour:
   m_InstanceId: 0
   m_ShadowShape2DComponent: {fileID: 1389753528192391681}
   m_ShadowShape2DProvider:
-    rid: 3714221810447286343
+    rid: 3714221819079426145
   m_ShadowCastingSource: 2
   m_ShadowMesh:
     m_Mesh: {fileID: 0}
@@ -192,7 +192,7 @@ MonoBehaviour:
     m_FlipX: 0
     m_FlipY: 0
     m_InitialTrim: 0.2
-  m_CastingOption: 1
+  m_CastingOption: 2
   m_PreviousTrimEdge: 0
   m_PreviousEdgeProcessing: -1
   m_PreviousShadowCastingSource: -1
@@ -200,7 +200,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 3714221810447286343
+    - rid: 3714221819079426145
       type: {class: ShadowShape2DProvider_SpriteRenderer, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
       data: 
 --- !u!114 &5271772043632779876

@@ -28,14 +28,27 @@ public class GroundShadow2D : MonoBehaviour
 
     GameObject _go;
     Material _mat;
+    SpriteRenderer _srcSR, _dstSR;
+    // 라이브 동기화 캐시 — 씬에서 SpriteRenderer를 편집하면 그림자가 따라가게(변경 시에만 갱신)
+    Sprite _cSprite; bool _cFX, _cFY; SpriteDrawMode _cDraw; Vector2 _cSize; int _cOrder, _cLayer; float _cCutoff;
 
     void OnEnable()
     {
         if (!gameObject.scene.IsValid()) return;
         Build();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.update -= EditorSync;
+        UnityEditor.EditorApplication.update += EditorSync;   // 매 에디터 틱 라이브 동기화(Update보다 확실)
+#endif
     }
 
-    void OnDisable() => Cleanup();
+    void OnDisable()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.update -= EditorSync;
+#endif
+        Cleanup();
+    }
 
     void OnValidate()
     {
@@ -82,15 +95,10 @@ public class GroundShadow2D : MonoBehaviour
 
         if (srcSR != null)
         {
-            var sr = _go.AddComponent<SpriteRenderer>();
-            sr.sprite = srcSR.sprite;
-            sr.flipX = srcSR.flipX; sr.flipY = srcSR.flipY;
-            sr.drawMode = srcSR.drawMode;
-            if (srcSR.drawMode != SpriteDrawMode.Simple) { sr.tileMode = srcSR.tileMode; sr.size = srcSR.size; }
-            sr.sortingLayerID = srcSR.sortingLayerID;
-            sr.sortingOrder = srcSR.sortingOrder - 2;       // 본체 뒤(캐스트 그림자보다도 아래)
-            sr.sharedMaterial = _mat;
-            CopyCutout(srcSR.sharedMaterial);
+            _srcSR = srcSR;
+            _dstSR = _go.AddComponent<SpriteRenderer>();
+            _dstSR.sharedMaterial = _mat;
+            ApplyFromSource();   // sprite/flip/draw/size/sorting/cutout 복사 + 시그니처 캐시
         }
         else if (srcMF != null && srcMR != null)
         {
@@ -114,13 +122,70 @@ public class GroundShadow2D : MonoBehaviour
             _mat.SetFloat(IdCutoff, src.GetFloat(IdCutoff));
     }
 
-    void OnDestroy() => Cleanup();
+    // ── 라이브 동기화: 씬에서 SpriteRenderer 편집 → 그림자 자식이 따라가게(에디트 모드) ──
+
+    void ApplyFromSource()
+    {
+        if (_srcSR == null || _dstSR == null) return;
+        _dstSR.sprite = _srcSR.sprite;
+        _dstSR.flipX = _srcSR.flipX; _dstSR.flipY = _srcSR.flipY;
+        _dstSR.drawMode = _srcSR.drawMode;
+        if (_srcSR.drawMode != SpriteDrawMode.Simple) { _dstSR.tileMode = _srcSR.tileMode; _dstSR.size = _srcSR.size; }
+        _dstSR.sortingLayerID = _srcSR.sortingLayerID;
+        _dstSR.sortingOrder = _srcSR.sortingOrder - 2;   // 본체 뒤
+        CopyCutout(_srcSR.sharedMaterial);
+        CacheSignature();
+    }
+
+    void CacheSignature()
+    {
+        _cSprite = _srcSR.sprite; _cFX = _srcSR.flipX; _cFY = _srcSR.flipY; _cDraw = _srcSR.drawMode;
+        _cSize = _srcSR.size; _cOrder = _srcSR.sortingOrder; _cLayer = _srcSR.sortingLayerID;
+        _cCutoff = (_srcSR.sharedMaterial != null && _srcSR.sharedMaterial.HasProperty(IdCutoff))
+            ? _srcSR.sharedMaterial.GetFloat(IdCutoff) : -1f;
+    }
+
+    bool Changed()
+    {
+        float cut = (_srcSR.sharedMaterial != null && _srcSR.sharedMaterial.HasProperty(IdCutoff))
+            ? _srcSR.sharedMaterial.GetFloat(IdCutoff) : -1f;
+        return _cSprite != _srcSR.sprite || _cFX != _srcSR.flipX || _cFY != _srcSR.flipY
+            || _cDraw != _srcSR.drawMode || _cSize != _srcSR.size
+            || _cOrder != _srcSR.sortingOrder || _cLayer != _srcSR.sortingLayerID || _cCutoff != cut;
+    }
+
+#if UNITY_EDITOR
+    // 에디트 모드에서 매 틱 호출 — 베이스 SpriteRenderer가 바뀌면 그림자 자식 재동기화(변경 시에만, 런타임 비용 0).
+    void EditorSync()
+    {
+        if (this == null) { UnityEditor.EditorApplication.update -= EditorSync; return; }
+        if (Application.isPlaying) return;
+        if (!isActiveAndEnabled || !gameObject.scene.IsValid()) return;
+        if (_srcSR == null) _srcSR = GetComponent<SpriteRenderer>();
+        if (_srcSR == null) return;                   // 메시 기반 등은 라이브 동기화 생략
+        if (_go == null || _dstSR == null)            // 자식 없음(스프라이트 나중 지정 등) → 재생성
+        {
+            if (_srcSR.sprite != null) { Cleanup(); Build(); }
+            return;
+        }
+        if (_srcSR.sprite == null) { Cleanup(); return; }
+        if (Changed()) ApplyFromSource();
+    }
+#endif
+
+    void OnDestroy()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.update -= EditorSync;
+#endif
+        Cleanup();
+    }
 
     void Cleanup()
     {
         if (_go != null) DestroySafe(_go);
         if (_mat != null) DestroySafe(_mat);
-        _go = null; _mat = null;
+        _go = null; _mat = null; _dstSR = null;
     }
 
     static void DestroySafe(Object o)

@@ -62,33 +62,38 @@ public static class TopDownPlayerBuilder
 
         var warm = new Color(1f, 0.95f, 0.82f);
 
-        // 주변 원형광 (중심 고정)
+        // 텍스쳐(쿠키) 라이트 — Point/Spot의 수학적 딱딱한 경계 대신 부드러운 그라데이션
+        // 스프라이트를 투사(다크우드 룩). 쿠키는 LightCookieGenerator가 절차적으로 생성.
+        LightCookieGenerator.EnsureCookies();
+        var radialCookie = AssetDatabase.LoadAssetAtPath<Sprite>(LightCookieGenerator.RadialPath);
+        var coneCookie   = AssetDatabase.LoadAssetAtPath<Sprite>(LightCookieGenerator.ConePath);
+
+        // 주변 원형광 (중심 고정) — Sprite 라디얼 쿠키
         var ambGo = new GameObject("PlayerAmbientLight");
         ambGo.transform.SetParent(root.transform, false);
         var amb = ambGo.AddComponent<Light2D>();
-        amb.lightType = Light2D.LightType.Point;
+        amb.lightType = Light2D.LightType.Sprite;
         amb.intensity = 0.7f;
         amb.color = warm;
-        amb.pointLightInnerRadius = 0.2f;
-        amb.pointLightOuterRadius = 2.3f;
-        amb.pointLightInnerAngle = 360f;
-        amb.pointLightOuterAngle = 360f;
+        amb.shadowsEnabled = true;          // 주변광도 벽 뒤 완전 차단
+        amb.shadowIntensity = 1f;
+        SetCookie(amb, radialCookie);
+        ambGo.transform.localScale = new Vector3(4.6f, 4.6f, 1f);   // 반경 ≈ 2.3
         SceneLightingBuilder.ApplyAllSortingLayers(amb);
 
-        // 앞 부채꼴광 (마우스 방향 회전 — lightPivot)
+        // 앞 부채꼴광 (마우스 방향 회전 — lightPivot) — Sprite 콘 쿠키(+Y 기준, 피벗 하단=꼭지)
+        // 회전은 TopDownPlayer.UpdateVisionLight가 매 프레임 적용(lightAngleOffset=-90로 +Y→facing).
         var lightGo = new GameObject("PlayerConeLight");
         lightGo.transform.SetParent(root.transform, false);
         var light = lightGo.AddComponent<Light2D>();
-        light.lightType = Light2D.LightType.Point;
+        light.lightType = Light2D.LightType.Sprite;
         light.intensity = 1.6f;                      // HDR 범위 → bloom 잘 걸림
         light.color = warm;
-        light.pointLightInnerRadius = 0.4f;
-        light.pointLightOuterRadius = 6.5f;
-        light.pointLightInnerAngle = 35f;
-        light.pointLightOuterAngle = 80f;
         light.shadowsEnabled = true;        // ShadowCaster2D 그림자 드리움(진짜 캐스트)
-        light.shadowIntensity = 0.75f;
+        light.shadowIntensity = 1f;         // 1.0 = 벽 너머 빛 완전 차단
         light.shadowSoftness = 0.3f;
+        SetCookie(light, coneCookie);
+        lightGo.transform.localScale = new Vector3(6f, 6.5f, 1f);   // 너비×길이(≈6.5 도달)
         SceneLightingBuilder.ApplyAllSortingLayers(light);
 
         // 게임 로직 컴포넌트
@@ -106,7 +111,11 @@ public static class TopDownPlayerBuilder
         SetRef(pSo, "lightPivot", lightGo.transform);
         var enemyMaskProp = pSo.FindProperty("enemyMask");
         int enemyLayer = LayerMask.NameToLayer("Enemy");
-        if (enemyMaskProp != null && enemyLayer >= 0) enemyMaskProp.intValue = 1 << enemyLayer;
+        int destructibleLayer = GameLayers.EnsureDestructible();   // 파괴 오브젝트도 공격으로 때릴 수 있게
+        int mask = 0;
+        if (enemyLayer >= 0) mask |= 1 << enemyLayer;
+        if (destructibleLayer >= 0) mask |= 1 << destructibleLayer;
+        if (enemyMaskProp != null && mask != 0) enemyMaskProp.intValue = mask;
         pSo.ApplyModifiedPropertiesWithoutUndo();
 
         // ════ Main Camera (한 세트) ════
@@ -235,6 +244,17 @@ public static class TopDownPlayerBuilder
         var prop = so.FindProperty(field);
         if (prop != null) prop.objectReferenceValue = value;
         else Debug.LogWarning($"[PlayerRig] 직렬화 필드 못찾음: {field}");
+    }
+
+    /// <summary>Light2D 쿠키 스프라이트 설정(URP 공개 setter `lightCookieSprite` = m_LightCookieSprite).</summary>
+    static void SetCookie(Light2D light, Sprite cookie)
+    {
+        if (cookie == null)
+        {
+            Debug.LogWarning("[PlayerRig] 라이트 쿠키 없음 — 'Tools/TopDown/Map/Generate Light Cookies' 먼저 실행하세요.");
+            return;
+        }
+        light.lightCookieSprite = cookie;
     }
 
     static void EnsureFolder(string path)

@@ -35,16 +35,80 @@ public static class Prop2DBuilder
 
         ApplyColliders(go, def);
 
+        // 천장(지붕) — footprint 트리거 + CeilingFader(플레이어 건물 진입 시 알파 페이드).
+        if (def.category == Prop2DDefinition.Category.Ceiling && !def.noVisual)
+            ApplyCeiling(go, def);
+
         // 그림자 = ① URP 2D 네이티브 ShadowCaster2D(동적 캐스트, Light2D가 빛 반대편에 계산)
         //          + ② GroundShadow2D(정적 발밑 접지 — 빛 없어도 떠 보이지 않게).
         if (def.castShadow && !def.noVisual)
         {
             var sc = go.AddComponent<UnityEngine.Rendering.Universal.ShadowCaster2D>();
-            sc.castsShadows = true;
-            sc.selfShadows = false; // 자기 스프라이트는 안 어둡게(빛 반대편 바닥에만 그림자)
+            sc.castingOption = def.shadowCasting switch
+            {
+                Prop2DDefinition.ShadowCast.NoShadow => UnityEngine.Rendering.Universal.ShadowCaster2D.ShadowCastingOptions.NoShadow,
+                Prop2DDefinition.ShadowCast.SelfShadow => UnityEngine.Rendering.Universal.ShadowCaster2D.ShadowCastingOptions.SelfShadow,
+                Prop2DDefinition.ShadowCast.CastAndSelfShadow => UnityEngine.Rendering.Universal.ShadowCaster2D.ShadowCastingOptions.CastAndSelfShadow,
+                _ => UnityEngine.Rendering.Universal.ShadowCaster2D.ShadowCastingOptions.CastShadow,
+            };
+            sc.alphaCutoff = def.shadowAlphaCutoff;   // 낮은 알파(창문/반투명)는 빛 통과
 
             go.AddComponent<GroundShadow2D>(); // 정적 발밑 접지 그림자
         }
+
+        // 파괴 가능 — 때리면 단계별로 부서지고 마지막에 파괴. 손상 비주얼은 오버레이(셰이더 무관).
+        if (def.breakable && !def.noVisual)
+        {
+            var br = go.AddComponent<Breakable>();
+            br.stageCount = Mathf.Max(1, def.breakStages);
+            br.maxHp = Mathf.Max(0.01f, def.breakHp);
+            br.destroyOnBreak = def.breakDestroy;
+            br.rubbleSprite = def.breakRubbleSprite;
+            br.overlayIntensity = def.breakOverlayIntensity;
+            br.crackColor = def.breakCrackColor;
+            br.grimeColor = def.breakGrimeColor;
+
+            if (def.breakDrop)
+            {
+                br.dropItem = LoadItemData(def.breakDropItemId);
+                br.dropCount = Mathf.Max(1, def.breakDropCount);
+                br.dropRegionLoot = def.breakDropRegionLoot;
+            }
+
+            // 때려서 부수기: Health(내구도) + 자식 Hurtbox(트리거, Destructible 레이어).
+            // 기존 타격 파이프라인(AttackPerformer→Hurtbox→Health)에 그대로 연결.
+            if (def.breakHittable)
+            {
+                var hp = go.GetComponent<Health>();
+                if (hp == null) hp = go.AddComponent<Health>();
+                SetPrivate(hp, "maxHp", Mathf.Max(1f, def.breakHp));
+                br.syncWithHealth = true;
+
+                var hurt = new GameObject("Hurtbox");
+                hurt.transform.SetParent(go.transform, false);
+                int dl = LayerMask.NameToLayer("Destructible");   // 에디터: 카탈로그/플레이어 빌더가 보장
+                if (dl >= 0) hurt.layer = dl;
+                var hc = hurt.AddComponent<BoxCollider2D>();
+                hc.isTrigger = true;
+                if (def.sprite != null)
+                {
+                    var b = def.sprite.bounds;
+                    hc.size = b.size;
+                    hc.offset = b.center;
+                }
+                hurt.AddComponent<Hurtbox>();
+            }
+        }
+
+        // 정적 풍화(낡음/녹/폐허) — 부서짐과 별개, 항상 표시. 절차적(이미지 0장).
+        if (def.weathered && !def.noVisual)
+        {
+            var w = go.AddComponent<Weathered>();
+            w.amount = def.weatherAmount;
+            w.tint = def.weatherTint;
+        }
+
+        ApplyLight(go, def);    // 발광(Light2D Sprite 쿠키) — 램프/창문/네온 등 동적 조명
 
         ApplyFunction(go, def); // 스폰/탈출/지도판/수색 등 게임플레이 기능 부착
 
@@ -160,6 +224,54 @@ public static class Prop2DBuilder
         }
     }
 
+    /// <summary>천장(지붕)에 컷어웨이 트리거 + CeilingFader 부착. 트리거 크기 = 스프라이트/타일 footprint.</summary>
+    static void ApplyCeiling(GameObject go, Prop2DDefinition def)
+    {
+        var trig = go.AddComponent<BoxCollider2D>();
+        trig.isTrigger = true;
+
+        Vector2 size, offset;
+        if (def.ceilingTriggerSize != Vector2.zero)
+        {
+            // 수동 override — 입구/밑둥까지 덮도록 키운 트리거(80° 틸트 앞면 대응).
+            size = def.ceilingTriggerSize;
+            offset = def.ceilingTriggerOffset;
+        }
+        else if (def.drawMode != SpriteDrawMode.Simple)
+        {
+            // Tiled: 실제 렌더 크기(tiledSize) + 피벗 보정 + 오프셋.
+            var s = def.tiledSize == Vector2.zero ? Vector2.one : def.tiledSize;
+            size = s;
+            Vector2 frac = Vector2.zero;
+            if (def.sprite != null)
+            {
+                var sb = def.sprite.bounds;
+                frac = new Vector2(
+                    sb.size.x > 1e-5f ? sb.center.x / sb.size.x : 0f,
+                    sb.size.y > 1e-5f ? sb.center.y / sb.size.y : 0f);
+            }
+            offset = Vector2.Scale(s, frac) + def.ceilingTriggerOffset;
+        }
+        else if (def.sprite != null)
+        {
+            var b = def.sprite.bounds;
+            size = b.size;
+            offset = (Vector2)b.center + def.ceilingTriggerOffset;
+        }
+        else
+        {
+            size = Vector2.one;
+            offset = def.ceilingTriggerOffset;
+        }
+        trig.size = size;
+        trig.offset = offset;
+
+        var fader = go.AddComponent<CeilingFader>();
+        fader.groupId = def.ceilingGroupId ?? "";
+        fader.hiddenAlpha = Mathf.Clamp01(def.ceilingHiddenAlpha);
+        fader.fadeSpeed = Mathf.Max(0.1f, def.ceilingFadeSpeed);
+    }
+
     /// <summary>Resources/Items 하위에서 itemId로 ItemData 검색.</summary>
     static ItemData LoadItemData(string itemId)
     {
@@ -167,6 +279,55 @@ public static class Prop2DBuilder
         foreach (var item in Resources.LoadAll<ItemData>("Items"))
             if (item != null && item.itemId == itemId) return item;
         return null;
+    }
+
+    /// <summary>발광(Light2D 자식, Sprite 쿠키) 부착 — 텍스쳐 라이트. 런타임/에디터 공용.
+    /// 쿠키는 공개 setter(lightCookieSprite), 타겟 정렬레이어는 공개 setter가 없어 reflection으로.
+    /// 쿠키 스프라이트는 Resources/LightCookies/(LightCookieGenerator 산출)에서 로드.</summary>
+    static void ApplyLight(GameObject go, Prop2DDefinition def)
+    {
+        if (!def.emitsLight) return;
+
+        var lgo = new GameObject("PropLight");
+        lgo.transform.SetParent(go.transform, false);
+        lgo.transform.localPosition = def.lightOffset;
+
+        var light = lgo.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
+        light.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Sprite;
+        light.color = def.lightColor;
+        light.intensity = def.lightIntensity;
+        light.shadowsEnabled = def.lightCastsShadows;
+        light.shadowIntensity = 1f;
+
+        bool cone = def.lightShape == Prop2DDefinition.LightShape.Cone;
+        var cookie = Resources.Load<Sprite>(cone ? "LightCookies/cookie_cone" : "LightCookies/cookie_radial");
+        if (cookie != null) light.lightCookieSprite = cookie;   // URP 공개 setter(= m_LightCookieSprite)
+        ApplyAllSortingLayersRuntime(light);                    // 정렬레이어는 공개 setter 없어 reflection
+
+        float r = Mathf.Max(0.1f, def.lightRadius);
+        if (cone)
+        {
+            lgo.transform.localScale = new Vector3(r, r, 1f);                              // 길이 ≈ r
+            lgo.transform.localRotation = Quaternion.Euler(0f, 0f, def.lightAngle - 90f);  // 쿠키 +Y 기준 → 각도 보정
+        }
+        else
+        {
+            lgo.transform.localScale = new Vector3(2f * r, 2f * r, 1f);                    // 반경 ≈ r
+        }
+
+        // 쿠키 반영(메시 즉시 재생성) 위해 컴포넌트 토글.
+        if (cookie != null) { light.enabled = false; light.enabled = true; }
+
+        if (def.lightNightOnly) lgo.AddComponent<PropLight2D>().nightOnly = true;
+    }
+
+    /// <summary>Light2D가 모든 Sorting Layer를 비추도록 m_ApplyToSortingLayers를 reflection으로 채움(런타임).</summary>
+    static void ApplyAllSortingLayersRuntime(UnityEngine.Rendering.Universal.Light2D light)
+    {
+        var layers = SortingLayer.layers;
+        int[] ids = new int[layers.Length];
+        for (int i = 0; i < layers.Length; i++) ids[i] = layers[i].id;
+        SetPrivate(light, "m_ApplyToSortingLayers", ids);
     }
 
     /// <summary>리플렉션으로 private [SerializeField] 값 설정(런타임/에디터 공용).</summary>

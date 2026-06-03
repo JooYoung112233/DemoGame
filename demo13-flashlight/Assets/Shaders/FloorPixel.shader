@@ -1,13 +1,19 @@
 Shader "BRB/FloorPixel"
 {
-    // 바닥(Tilemap/스프라이트)용 픽셀 셰이더. Pixelated와 동일한 도트/색단계/Light2D 처리.
+    // 바닥(Tilemap/스프라이트)용 픽셀 셰이더. 도트/색단계/Light2D 처리.
     // 바닥은 불투명이라 알파 컷아웃 없음. Tilemap 정점컬러 지원.
+    // 타일 반복 깨기(_BREAKUP_ON): 월드 좌표 대형 노이즈로 명암을 변주 → 같은 타일이 깔려도 격자감 사라짐.
     Properties
     {
         _MainTex ("Base Texture", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
         _Brightness ("Brightness", Range(0, 2)) = 1.0
         _LightBoost ("Light Boost", Range(1, 5)) = 2.0
+
+        [Header(Tiling Breakup)]
+        [Toggle(_BREAKUP_ON)] _BreakupToggle ("타일 반복 깨기 ON", Float) = 0
+        _BreakupScale ("Breakup Scale (월드 빈도)", Range(0.05, 4)) = 0.6
+        _BreakupAmount ("Breakup Amount (세기)", Range(0, 1)) = 0.35
 
         [Header(Pixelation)]
         [Toggle(_PIXELATE_ON)] _PixelateToggle ("픽셀화 ON", Float) = 1
@@ -34,6 +40,7 @@ Shader "BRB/FloorPixel"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma shader_feature_local _BREAKUP_ON
             #pragma shader_feature_local _PIXELATE_ON
             #pragma shader_feature_local _QUANTIZE_ON
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
@@ -46,12 +53,37 @@ Shader "BRB/FloorPixel"
                 float4 _Color;
                 float _Brightness;
                 float _LightBoost;
+                float _BreakupScale;
+                float _BreakupAmount;
                 float _PixelDensity;
                 float _ColorLevels;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
+
+            float Hash21(float2 p)
+            {
+                p = frac(p * float2(123.34, 345.45));
+                p += dot(p, p + 34.345);
+                return frac(p.x * p.y);
+            }
+            float VNoise(float2 p)
+            {
+                float2 i = floor(p); float2 f = frac(p);
+                f = f * f * (3.0 - 2.0 * f);
+                float a = Hash21(i);
+                float b = Hash21(i + float2(1, 0));
+                float c = Hash21(i + float2(0, 1));
+                float d = Hash21(i + float2(1, 1));
+                return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
+            }
+            float Fbm(float2 p)
+            {
+                float s = 0.0, a = 0.5;
+                [unroll] for (int i = 0; i < 4; i++) { s += a * VNoise(p); p *= 2.0; a *= 0.5; }
+                return s;
+            }
 
             struct Attributes
             {
@@ -98,6 +130,12 @@ Shader "BRB/FloorPixel"
                     rgb = floor(rgb * levels + 0.5) / levels;
                 #endif
 
+                #ifdef _BREAKUP_ON
+                    // 월드 좌표 노이즈로 명암 변주(타일 반복 깨기). 타일 경계와 무관하게 연속.
+                    float bn = Fbm(input.positionWS.xy * _BreakupScale);
+                    rgb *= lerp(1.0, 0.55 + 0.9 * bn, _BreakupAmount);
+                #endif
+
                 half3 color = rgb * _Color.rgb * input.color.rgb * _Brightness;
 
                 half3 baseColor = color;
@@ -135,6 +173,7 @@ Shader "BRB/FloorPixel"
             HLSLPROGRAM
             #pragma vertex vert2d
             #pragma fragment frag2d
+            #pragma shader_feature_local _BREAKUP_ON
             #pragma shader_feature_local _PIXELATE_ON
             #pragma shader_feature_local _QUANTIZE_ON
 
@@ -149,12 +188,37 @@ Shader "BRB/FloorPixel"
                 float4 _Color;
                 float _Brightness;
                 float _LightBoost;
+                float _BreakupScale;
+                float _BreakupAmount;
                 float _PixelDensity;
                 float _ColorLevels;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
+
+            float Hash21(float2 p)
+            {
+                p = frac(p * float2(123.34, 345.45));
+                p += dot(p, p + 34.345);
+                return frac(p.x * p.y);
+            }
+            float VNoise(float2 p)
+            {
+                float2 i = floor(p); float2 f = frac(p);
+                f = f * f * (3.0 - 2.0 * f);
+                float a = Hash21(i);
+                float b = Hash21(i + float2(1, 0));
+                float c = Hash21(i + float2(0, 1));
+                float d = Hash21(i + float2(1, 1));
+                return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
+            }
+            float Fbm(float2 p)
+            {
+                float s = 0.0, a = 0.5;
+                [unroll] for (int i = 0; i < 4; i++) { s += a * VNoise(p); p *= 2.0; a *= 0.5; }
+                return s;
+            }
 
             struct Attributes2D { float4 positionOS : POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; };
             struct Varyings2D
@@ -163,6 +227,7 @@ Shader "BRB/FloorPixel"
                 float2 uv : TEXCOORD0;
                 float4 color : COLOR;
                 half2 lightingUV : TEXCOORD1;
+                float2 worldXY : TEXCOORD2;
             };
 
             float2 PixelateUV2D(float2 uv, float density)
@@ -178,6 +243,7 @@ Shader "BRB/FloorPixel"
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.color = input.color;
                 output.lightingUV = half2(ComputeScreenPos(output.positionCS / output.positionCS.w).xy);
+                output.worldXY = TransformObjectToWorld(input.positionOS.xyz).xy;
                 return output;
             }
 
@@ -194,6 +260,12 @@ Shader "BRB/FloorPixel"
                 #ifdef _QUANTIZE_ON
                     float levels = max(_ColorLevels, 2.0);
                     rgb = floor(rgb * levels + 0.5) / levels;
+                #endif
+
+                #ifdef _BREAKUP_ON
+                    // 월드 좌표 노이즈로 명암 변주(타일 반복 깨기). 화면이 아니라 월드 기준이라 카메라 이동에도 안정.
+                    float bn = Fbm(input.worldXY * _BreakupScale);
+                    rgb *= lerp(1.0, 0.55 + 0.9 * bn, _BreakupAmount);
                 #endif
 
                 half3 albedo = rgb * _Color.rgb * input.color.rgb * _Brightness;
