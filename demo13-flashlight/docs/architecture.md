@@ -72,10 +72,32 @@ Grid/Tilemap, SpawnPoint, 프롭, 인터랙터블, 탈출존, 씬별 마커.
 4. 전체 게임 테스트: **Systems 씬을 열고 Play**(GameBoot이 Safehouse를 엶).
    게임플레이 씬에서 바로 Play해도 Systems가 자동 additive 로드됨.
 
+## 게임 루프 (안전가옥 ↔ 레이드)
+
+세이프하우스 → 맵보드 → 레이드 → 파밍 → 탈출 → 보상 → 세이프하우스.
+모든 단계가 이미 코드로 연결돼 있고, 씬엔 '맵 콘텐츠' 오브젝트만 배치하면 동작한다(`GameSceneBuilder`가 생성).
+
+| 단계 | 트리거 | 코드 |
+|------|--------|------|
+| 세이프하우스 | 걸어다니는 허브(timeScale=1) | — |
+| → 맵보드 | `InteractableObject(MapBoard)` 상호작용 | `UIManager.ShowMapSelect()` → `MapSelectUI` |
+| → 레이드 | 지역 선택(현재 scrap_market→InGameScene) | `SceneTransitionManager.TransitionTo(sceneName, spawnId)` |
+| 레이드 | `RaidManager`(타이머/사망/시간초과) | InGameScene 배치, Start에서 `PendingResult=true` |
+| 파밍 | `InteractableObject(Pickup/Container)` | `PlayerInventory` + `RaidManager.TrackLoot` |
+| → 탈출 | `InteractableObject(ExitPoint, exitWaitTime>0)` | `OnExtractSuccess` + `TransitionWithDelay`(거리 이탈 시 취소) |
+| → 보상 | 안전가옥 로드 + `RaidManager.PendingResult` | `RaidResultUI` 자동 표시(루트/생존시간/가치) |
+| → 세이프하우스 | 정산 닫기 | 루프 완료 |
+
+- **정산 트리거**: `RaidManager.PendingResult`(static)로 "레이드를 실제로 다녀왔는지" 판정 → 부팅 직후 진입에서 정산창 오발 방지.
+  additive 로드 순서상 안전가옥 로드 시점엔 InGameScene이 아직 살아있어 `LootedItems` 캡처 가능.
+- **맵 콘텐츠**: `Tools/TopDown/Build/Safehouse|InGame Scene`가 스폰/MapBoard/Bed/Workbench(안전가옥),
+  스폰/RaidManager/줍기5/ExitPoint(인게임)를 배치. 타일맵 바닥/벽 아트는 이후 직접 그림(현재 마커는 빌트인 스프라이트 플레이스홀더).
+
 ## 변경 로그
 
 | 날짜 | 질문 | 결정 | 근거 |
 |------|------|------|------|
 | 2026-06-03 | 흩어진 자동 부트스트랩(RuntimeInitializeOnLoadMethod + DontDestroyOnLoad)으로 매니저/플레이어/라이트/카메라/UI가 코드 스폰됨 — 한 곳에서 보고 관리하기 어렵고 상점 등 UI를 씬에서 미리 배치하고 싶음 | **영속 "Systems" 부트 씬 + additive 게임플레이** 채택. Systems에 매니저+UIManager(+모든 UI, 상점 포함)+PlayerRig+글로벌조명+GameBoot 배치. 게임플레이 씬은 additive로 교체 로드(Systems 유지). 기존 부트스트랩은 `SystemsScene.ProvidesSystems` 가드로 폴백 전환. `Editor/SystemsSceneBuilder`로 1발 생성 | 모든 시스템을 한 씬에서 보고 편집/관리(특히 UI를 씬 배치). 씬마다 재생성 없이 한 세트 유지. 폴백 가드로 점진 도입(빌더 전에도 동작). |
 | 2026-06-03 | 코드는 `"Safehouse"` 씬을 로드하는데 실제 파일은 `SafehouseScene.unity`(씬 이름 불일치) → `LoadScene("Safehouse")` 및 `scene.name=="Safehouse"`(timeScale 정지) 동작 안 함 | 씬 파일을 **`Safehouse.unity`로 리네임**(meta GUID 보존, git mv). RaidManager/RaidResultUI/StoryTrigger/Debug 등 모든 `"Safehouse"` 참조와 일치 | 귀환 루프(레이드→안전가옥)의 잠재 버그 수정. additive 부트 흐름의 기본 진입 씬 이름과 정합. |
-```
+| 2026-06-03 | 핵심 게임 루프(안전가옥→맵보드→레이드→파밍→탈출→보상) 골격 | 루프 시스템은 이미 연결돼 있어, 빈 게임플레이 씬에 `GameSceneBuilder`로 루프 오브젝트(스폰/MapBoard/RaidManager/줍기5/ExitPoint) 자동 배치. `RaidResultUI`는 `RaidManager.PendingResult`(static)로 트리거 — 부팅 직후 오발 방지 | "나갔다 돌아오는 루프 먼저" 원칙. 시스템 재사용 + 씬 콘텐츠만 추가. |
+| 2026-06-03 | 안전가옥 timeScale=0이면 Rigidbody2D 이동(FixedUpdate)이 얼어 맵보드까지 못 감 | 안전가옥도 **timeScale=1**(걸어다니는 허브). 낮/밤·지역시계는 `ActiveRegionId=null`+이벤트(T키)로 정지하므로 timeScale과 무관 | 루프 전 단계가 걸어다니는 모델 — 일관성. |

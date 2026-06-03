@@ -93,10 +93,11 @@ public class UIManager : MonoBehaviour
         // 씬 전환 후 EventSystem이 없으면 다시 확보
         EnsureEventSystem();
 
-        // 안전가옥: 게임 시간 정지 (낮밤, 배터리 소모 등 멈춤)
-        // 전투 지역: 정상 흐름
+        // 안전가옥도 '걸어다니는 허브' → 물리/이동(FixedUpdate)을 위해 timeScale=1 유지.
+        //   (timeScale=0이면 Rigidbody2D 이동이 얼어 맵보드/침대까지 못 감)
+        //   낮/밤·지역시계는 아래 ActiveRegionId=null + 이벤트 기반(T키)이라 timeScale과 무관하게 정지됨.
         isSafehouse = (scene.name == "Safehouse");
-        Time.timeScale = isSafehouse ? 0f : 1f;
+        Time.timeScale = 1f;
 
         // 안전가옥 귀환 시 활성 지역 해제
         if (isSafehouse && RegionTimeManager.Instance != null)

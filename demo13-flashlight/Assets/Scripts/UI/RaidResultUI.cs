@@ -54,8 +54,10 @@ public class RaidResultUI : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == safehouseScene && !string.IsNullOrEmpty(SceneTransitionManager.PendingSpawnPointId))
+        // 레이드를 실제로 다녀온 경우에만 정산(부팅 직후 안전가옥 진입에선 RaidManager.PendingResult=false).
+        if (scene.name == safehouseScene && RaidManager.PendingResult)
         {
+            RaidManager.PendingResult = false;   // 1회 소비
             CaptureRaidData();
             RefillBattery();
 

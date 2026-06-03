@@ -67,38 +67,56 @@ public static class GameSceneBuilder
         var wallRb = wallGo.GetComponent<Rigidbody2D>();
         wallRb.bodyType = RigidbodyType2D.Static;
 
-        // ── 5. SpawnPoint (플레이어 스폰 위치) ───────────────────────
-        var spawnGo = new GameObject("SpawnPoint_Default");
-        spawnGo.AddComponent<SpawnPoint>();
-        spawnGo.transform.position = type == SceneType.Safehouse
-            ? new Vector3(0, 0, 0)
-            : new Vector3(0, -2, 0); // InGame은 입구 쪽
-
-        // ── 6. 씬 타입별 추가 ────────────────────────────────────────
-        if (type == SceneType.InGame)
-        {
-            // 탈출 트리거 플레이스홀더
-            var exitGo = new GameObject("ExitTrigger_Placeholder");
-            exitGo.transform.position = new Vector3(0, 6, 0);
-            var exitCol = exitGo.AddComponent<BoxCollider2D>();
-            exitCol.isTrigger = true;
-            exitCol.size = new Vector2(2, 0.5f);
-            // EscapePoint 컴포넌트는 별도 추가 필요 (현재 미구현)
-
-            // 레이드 타이머용 빈 오브젝트
-            new GameObject("RaidManager_Placeholder");
-        }
-
+        // ── 스폰 포인트 ──────────────────────────────────────────────
         if (type == SceneType.Safehouse)
         {
-            // 안전가옥은 timeScale=0 (코드에서 처리) — 메모 오브젝트
-            var infoGo = new GameObject("__SafehouseInfo");
-            // 별도 맵보드(MapBoard) 트리거 추가 위치 — 실제 배치는 Tilemap에서
+            // 부팅(default) / 귀환(raid_return) / 시간초과(raid_fail) / 사망(raid_death) 복귀 지점
+            MakeSpawn("default",     new Vector3(0, 0, 0));
+            MakeSpawn("raid_return", new Vector3(1.5f, 0, 0));
+            MakeSpawn("raid_fail",   new Vector3(-1.5f, 0, 0));
+            MakeSpawn("raid_death",  new Vector3(0, -1.5f, 0));
+        }
+        else
+        {
+            // 레이드 진입 스폰 (scrap_market 지역 spawnId = "default")
+            MakeSpawn("default", new Vector3(0, -2, 0));
         }
 
-        // ── 7. 씬 정보 마커 ──────────────────────────────────────────
-        var infoObj = new GameObject($"__SceneInfo_{sceneName}");
-        // 씬 이름을 찾기 쉽게 최상단에 배치
+        // ── 씬 타입별 루프 콘텐츠 ────────────────────────────────────
+        if (type == SceneType.InGame)
+        {
+            // 레이드 매니저 (타이머 / 사망 / 시간초과 + 루트 추적)
+            new GameObject("RaidManager").AddComponent<RaidManager>();
+
+            // 파밍 — 줍기 아이템 흩뿌림 (ItemDatabase에 존재하는 ID)
+            MakePickup("Loot_Knife",      new Vector3(-3, 1, 0),    "knife",       1);
+            MakePickup("Loot_CannedFood", new Vector3(3, 1, 0),     "canned_food", 1);
+            MakePickup("Loot_ScrapMetal", new Vector3(-2, 3, 0),    "scrap_metal", 2);
+            MakePickup("Loot_CoinScrap",  new Vector3(2, 3, 0),     "coin_scrap",  3);
+            MakePickup("Loot_RubyShard",  new Vector3(0, 4.5f, 0),  "ruby_shard",  1);
+
+            // 탈출구 — 상호작용 후 5초 대기(거리 이탈 시 취소) → 안전가옥 raid_return
+            var exit = MakeInteractable("ExitPoint", new Vector3(0, 6, 0), new Color(0.3f, 1f, 0.45f), 0.7f);
+            SetIO(exit, InteractableObject.InteractType.ExitPoint, "탈출하기", 2f, false,
+                targetScene: "Safehouse", spawnId: "raid_return", exitWait: 5f);
+        }
+        else // Safehouse
+        {
+            // 지도판 — 출전 선택 (MapSelectUI)
+            var board = MakeInteractable("MapBoard", new Vector3(3, 0, 0), new Color(0.4f, 0.8f, 1f), 0.8f);
+            SetIO(board, InteractableObject.InteractType.MapBoard, "지도판 — 출전 선택", 2f, false);
+
+            // 침대 — 휴식
+            var bed = MakeInteractable("Bed", new Vector3(-3, 0, 0), new Color(0.8f, 0.7f, 0.5f), 0.8f);
+            SetIO(bed, InteractableObject.InteractType.Bed, "휴식", 2f, false);
+
+            // 작업대 — 제작/수리
+            var bench = MakeInteractable("Workbench", new Vector3(-3, 2, 0), new Color(0.7f, 0.6f, 0.4f), 0.8f);
+            SetIO(bench, InteractableObject.InteractType.Workbench, "작업대", 2f, false);
+        }
+
+        // ── 씬 정보 마커 ──────────────────────────────────────────────
+        new GameObject($"__SceneInfo_{sceneName}");
 
         // ── 저장 ─────────────────────────────────────────────────────
         Selection.activeObject = null;
@@ -106,9 +124,65 @@ public static class GameSceneBuilder
         EditorSceneManager.SaveScene(scene, path);
 
         Debug.Log($"[GameSceneBuilder] 생성 완료(맵 콘텐츠만): {path}");
-        Debug.Log($"[GameSceneBuilder] 포함: Grid(바닥+벽 Tilemap), SpawnPoint" + (type == SceneType.InGame ? ", ExitTrigger/RaidManager 플레이스홀더" : "") + ".");
-        Debug.Log($"[GameSceneBuilder] 카메라/조명/EventSystem/매니저/플레이어는 Systems 부트 씬이 additive로 공급(docs/architecture.md). Systems 씬을 열고 Play하면 이 맵을 로드.");
-        Debug.Log($"[GameSceneBuilder] 다음 할 일: ① Tilemap에 타일 배치 ② SpawnPoint 위치 조정 ③ 'Tools/TopDown/Build/Systems Scene' 확인");
+        if (type == SceneType.InGame)
+            Debug.Log("[GameSceneBuilder] InGame: Grid + Spawn(default) + RaidManager + 줍기5(knife/canned_food/scrap_metal/coin_scrap/ruby_shard) + ExitPoint(→Safehouse/raid_return, 5초).");
+        else
+            Debug.Log("[GameSceneBuilder] Safehouse: Grid + Spawn(default/raid_return/raid_fail/raid_death) + MapBoard + Bed + Workbench.");
+        Debug.Log("[GameSceneBuilder] 카메라/조명/EventSystem/매니저/플레이어는 Systems 부트 씬이 additive로 공급(docs/architecture.md). Systems 씬을 열고 Play.");
+        Debug.Log("[GameSceneBuilder] 다음 할 일: ① Tilemap에 바닥/벽 타일 배치 ② 오브젝트 위치 조정 ③ 'Tools/TopDown/Build/Systems Scene' 확인");
+    }
+
+    // ── 빌드 헬퍼 ────────────────────────────────────────────────────
+
+    /// <summary>이름붙은 SpawnPoint 생성 (pointId 직렬화 설정).</summary>
+    static SpawnPoint MakeSpawn(string id, Vector3 pos)
+    {
+        var go = new GameObject($"Spawn_{id}");
+        go.transform.position = pos;
+        var sp = go.AddComponent<SpawnPoint>();
+        var so = new SerializedObject(sp);
+        var p = so.FindProperty("pointId");
+        if (p != null) { p.stringValue = id; so.ApplyModifiedPropertiesWithoutUndo(); }
+        return sp;
+    }
+
+    /// <summary>가시용 스프라이트(빌트인) + InteractableObject를 가진 마커 생성.</summary>
+    static InteractableObject MakeInteractable(string name, Vector3 pos, Color color, float scale)
+    {
+        var go = new GameObject(name);
+        go.transform.position = pos;
+        go.transform.localScale = Vector3.one * scale;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/UISprite.psd"); // 임시 플레이스홀더 비주얼
+        sr.color = color;
+        sr.sortingOrder = 5;
+        return go.AddComponent<InteractableObject>();
+    }
+
+    /// <summary>줍기(Pickup) 마커 생성 (itemId/수량 설정).</summary>
+    static void MakePickup(string name, Vector3 pos, string itemId, int count)
+    {
+        var io = MakeInteractable(name, pos, new Color(1f, 0.9f, 0.4f), 0.5f);
+        SetIO(io, InteractableObject.InteractType.Pickup, $"줍기: {itemId}", 1.5f, true,
+            itemId: itemId, itemCount: count);
+    }
+
+    /// <summary>InteractableObject의 private 직렬화 필드를 한 번에 설정.</summary>
+    static void SetIO(InteractableObject io, InteractableObject.InteractType type, string prompt,
+        float range, bool oneShot, string targetScene = null, string spawnId = null,
+        float exitWait = 0f, string itemId = null, int itemCount = 1)
+    {
+        var so = new SerializedObject(io);
+        var t = so.FindProperty("type");           if (t != null) t.enumValueIndex = (int)type;
+        var pr = so.FindProperty("promptText");     if (pr != null) pr.stringValue = prompt;
+        var rg = so.FindProperty("interactRange");  if (rg != null) rg.floatValue = range;
+        var os = so.FindProperty("oneShot");        if (os != null) os.boolValue = oneShot;
+        var ew = so.FindProperty("exitWaitTime");   if (ew != null) ew.floatValue = exitWait;
+        var ic = so.FindProperty("itemCount");      if (ic != null) ic.intValue = itemCount;
+        if (targetScene != null) { var p = so.FindProperty("targetScene");  if (p != null) p.stringValue = targetScene; }
+        if (spawnId != null)     { var p = so.FindProperty("spawnPointId"); if (p != null) p.stringValue = spawnId; }
+        if (itemId != null)      { var p = so.FindProperty("itemId");       if (p != null) p.stringValue = itemId; }
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
 }
 #endif

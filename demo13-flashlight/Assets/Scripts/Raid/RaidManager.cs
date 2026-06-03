@@ -11,6 +11,11 @@ public class RaidManager : MonoBehaviour
 {
     public static RaidManager Instance { get; private set; }
 
+    /// <summary>레이드가 한 번이라도 시작됐고 아직 정산 안 했는지(귀환 정산 UI 트리거용).
+    /// RaidManager.Start에서 true, RaidResultUI가 정산 표시 시 false로 소비. static이라 씬 언로드 후에도 유지.
+    /// (게임 부팅 직후 안전가옥 진입에서 정산창이 잘못 뜨는 것 방지)</summary>
+    public static bool PendingResult;
+
     [Header("Raid Timer")]
     [Tooltip("레이드 제한 시간(초). 0이면 무제한")]
     [SerializeField] float raidDuration = 900f; // 15분
@@ -77,6 +82,7 @@ public class RaidManager : MonoBehaviour
         raidStartTime = Time.time;
         raidActive = true;
         raidEnded = false;
+        PendingResult = true;   // 레이드 시작 → 귀환 시 정산 표시 대상
         TryBindPlayerHealth();
         Debug.Log($"[RaidManager] 레이드 시작! 제한시간: {raidDuration}초");
     }
