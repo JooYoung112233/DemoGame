@@ -35,6 +35,33 @@
   - **씬 빌더는 카메라를 안 만든다**(PlayerRig가 제공). 2D 정렬축은 **PlayerRig 카메라의 `CameraSortSetup`**(CustomAxis (0,1,0))이 담당.
   - **글로벌 Light2D의 주인 = Systems 부트 씬**(0.22 어둠). PlayerRig는 플레이어 점광(point)만 들고 오므로 글로벌 앰비언트가 없으면 URP 2D가 빛 반경 밖을 **새까맣게** 렌더 → 글로벌이 필요하지만, **게임플레이 씬(InGame/Safehouse)은 글로벌을 안 만든다**(Systems가 공급, 씬은 맵/프롭/스폰만). **자체 글로벌을 갖는 씬은 Systems + MapTool(밝게) + CombatSandbox(테스트)뿐.** 글로벌이 2개 이상 활성이면 URP가 `More than one global light on layer ...` 경고 → **런타임은 `SystemsSceneEnforcer`, 에디트 모드는 `SystemsGlobalLightEditorEnforcer`**(Systems 로드 시 그 글로벌만 남기고 나머지 비활성)가 중복을 막는다.
 
+## 정렬 (깊이) — 액터 기준 Y정렬  ※계획(미구현, 2026-06-04)
+
+> **목표**: 플레이어/NPC를 기준으로 사물이 앞뒤로 자연스럽게 겹쳐 "3D처럼" 보이는 깊이감.
+> **원리**: 새 매-프레임 order 관리 시스템을 짜지 않고, **이미 있는 `TransparencySortMode.CustomAxis (0,1,0)` 자동정렬**이 제대로 작동하도록 레이어·피벗·프롭 offset을 바로잡는다.
+
+**정렬 단위 = `Default 레이어 + sortingOrder 0 + 발밑 피벗`** — 이 셋이면 플레이어/NPC/가구/램프가 Y로 자동 앞뒤정렬(Y 낮을수록 앞). 코드 매-프레임 관리 불필요.
+
+자동정렬 성립 3조건:
+1. 같은 Sorting Layer + 같은 order(0) — Y로만 비교됨. (order가 Y보다 우선이라 임의 offset 금지)
+2. 정렬 기준점 = 스프라이트 위치(=피벗) → 월드 스프라이트는 **발밑(바닥 접점) 피벗**.
+3. 정렬 안 시킬 것만 별도 레이어(Ground=항상 뒤 / Front·Ceiling=항상 앞).
+
+현재 깨지는 지점(2026-06-04 점검):
+- Prop2D가 정적 `sortingOffset`을 박아 Default 프롭이 Y와 무관하게 고정 → **가장 큰 원인**.
+- 피벗 규칙 없음(중앙피벗이면 발이 아닌 몸통 기준으로 정렬돼 어긋남).
+- 벽이 Tilemap(Chunk 모드) → 캐릭터와 Y정렬 안 됨(벽 뒤로 못 감).
+- Sorting Layer 순서 `Ground→Player→Default→Front→Ceiling`에서 **"Player"가 Default보다 뒤** = 함정(현재 플레이어 스프라이트는 Default를 써서 무사).
+
+작업 계획(페이즈):
+- **P0 토대**: 레이어 `Ground→Default→Front(→Ceiling)` 정리 + "Player" 레이어 재배치. 규칙 박제.
+- **P1 피벗**(최대 효과): 에디터 도구 `Set Pivot→Bottom`(선택 스프라이트/텍스처 일괄 발밑) + 플레이어/NPC/적/가구 적용. 예외용 **`YSorter`**(피벗≠정렬선인 큰 물체·멀티스프라이트용, 기준점 오프셋 지정) 컴포넌트.
+- **P2 프롭/빌더**: `Prop2D.sortingLayer` enum(Ground/Default/Front) + Default offset **0**. Prop2DBuilder/GameSceneBuilder가 가구·NPC·아이템을 Default/0+발밑으로 생성.
+- **P3 벽**: Walls `TilemapRenderer.Mode = Individual` + Default/0 → 캐릭터가 벽 뒤/앞 자연 통과. (성능 시 벽 상/하단 분리 대안)
+- **P4 검증**: 발밑 정렬선 디버그 기즈모 + 카운터 앞뒤·벽 뒤·램프 옆 이동하며 육안 검증.
+
+추천 순서 **P0→P1**(여기까지면 캐릭터↔가구 자연 정렬 체감)→**P3**(벽)→P2/P4. **구현 보류 — 계획만 기록(사용자 지시 2026-06-04).**
+
 ## 조명 / 가시성 (시야 FOV) — 2026-06-02 전환
 
 > **손전등(주광원) 개념 폐기 → 좀보이드식 시야(FOV).** 기존 손전등 코드(`FlashlightController`/`FlashlightBeam` 셰이더/손전등 Light2D)는 **완전 제거 후 시야 시스템 신규 작성**.
@@ -131,3 +158,4 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | 2026-06-04 | **텍스쳐(쿠키) 라이트 전환 — 플레이어 + 프롭 발광.** Point/Spot 파라미터 라이트의 딱딱한 콘 → URP 2D **Sprite 라이트 + 절차적 쿠키**(부드러운 그라데이션, 다크우드 룩). `LightCookieGenerator`(Tools▸TopDown▸Map▸Generate Light Cookies)가 `Resources/LightCookies/`에 cookie_radial(중앙 피벗)·cookie_cone(+Y·하단 피벗=꼭지) PNG 절차 생성(흰색+알파, 색은 Light2D.color, PPU=256→1유닛·스케일로 크기). PlayerRig 빌더: 주변광=라디얼·콘=콘 쿠키로 교체(회전·그림자 유지, lightAngleOffset=-90로 +Y→facing). 프롭=Prop2D 카탈로그 통합: `Prop2DDefinition`에 emitsLight/shape/color/intensity/radius/offset/angle/castsShadows/nightOnly 추가, `Prop2DBuilder.ApplyLight`가 Sprite Light2D 자식 부착(쿠키·정렬레이어는 URP 공개 setter 없어 reflection으로, 넣은 뒤 enable 토글로 메시 갱신), 밤전용은 `PropLight2D`(DayNightCycle 연동). | 사용자: 콘이 딱딱해 다크우드 느낌 안 남 + 램프/창문 발광 '기능' 필요. 텍스쳐 라이트가 2D 분위기 조명 표준. 절차 생성이라 무에셋·튜닝·스왑(직접 그린 PNG로 교체) 가능. |
 | 2026-06-04 | **천장 컷어웨이 트리거 크기/오프셋 override.** 80° 틸트 아트라 건물 **밑둥(앞면)이 아래로 길어** 입구로 들어와도 지붕 footprint 트리거 밖이라 페이드가 늦음 → `Prop2DDefinition.ceilingTriggerSize`(0,0=footprint 자동)·`ceilingTriggerOffset` 추가. 세로를 키우거나 Y-오프셋을 음수로 내려 입구/밑둥까지 덮으면 **진입 즉시 페이드**. `CeilingFader.OnDrawGizmosSelected`가 트리거 영역을 청록 박스로 표시(시각 튜닝). 배치본의 BoxCollider2D를 씬에서 직접 늘려도 됨. | 사용자: 밑둥이 길어 입구 진입 시 바로 천장 투명 원함. |
 | 2026-06-03 | **천장(지붕) 컷어웨이 시스템 신설.** 옛 3D `BuildingInterior 알파 페이드`는 탑다운 전환 때 삭제됐고 현재 없음 → 새로 구축. **새 `Ceiling` 카테고리**(카탈로그 천장 탭, enum 끝에 추가, ID `ceiling_`): 콜라이더 None(막힘X)·그림자 OFF·**최상단 정렬(`Ceiling` Sorting Layer)**. 빌더가 천장 프롭에 **트리거 콜라이더(스프라이트/타일 footprint)** + `CeilingFader` 자동 부착. 동작: 플레이어가 건물 안(트리거)에 들어오면 지붕 알파 **1→0 부드럽게 페이드아웃**, 나가면 복귀. **건물 단위 그룹화**(`ceilingGroupId` 같은 조각들이 한꺼번에 페이드 — 한 조각 트리거에만 들어와도 그룹 전체). 정렬은 데칼(엔티티 아래)과 정반대(엔티티 위)라 전용 레이어. | 사용자 결정(질문 3): 새 천장 탭 / 진입 시 부드러운 페이드아웃 / 건물 단위. 좀보이드·타르코프식 실내 진입 가시성. FOV "실내 어둑"과 상보적(추후 연동). |
+| 2026-06-04 | **(계획·미구현) 액터 기준 Y정렬 깊이 시스템.** 플레이어/NPC가 사물과 앞뒤로 자연스럽게 겹치는 3D 같은 깊이감. 새 order 관리 시스템 대신 **기존 `TransparencySortMode.CustomAxis` 자동정렬을 살리는** 방향: 정렬 단위=`Default+order0+발밑 피벗`. 깨지는 지점=Prop2D 정적 offset·피벗 규칙 부재·벽 타일맵 Chunk·"Player" 레이어 순서. 페이즈 P0(레이어/규칙)→P1(피벗+YSorter)→P2(프롭/빌더)→P3(벽 Individual)→P4(검증). 상세는 위 '정렬(깊이)' 섹션. | 사용자 지시 "계획만 기록". 구현은 보류 — 실제 겹침 문제가 보일 때 P0→P1부터 착수. |
