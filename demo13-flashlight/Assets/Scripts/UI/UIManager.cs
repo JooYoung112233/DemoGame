@@ -26,6 +26,7 @@ public class UIManager : MonoBehaviour
 
     [Tooltip("제작/수리 UI (작업대/의료대/조리대)")]
     [SerializeField] CraftingUI craftingUI;
+    [SerializeField] ShopUI shopUI;
 
     [Tooltip("NPC 대화 UI")]
     [SerializeField] DialogueUI dialogueUI;
@@ -177,6 +178,16 @@ public class UIManager : MonoBehaviour
             craftingUI = craftGO.AddComponent<CraftingUI>();
         }
 
+        // ShopUI
+        if (shopUI == null)
+            shopUI = GetComponentInChildren<ShopUI>(true);
+        if (shopUI == null)
+        {
+            var shopGO = new GameObject("ShopUI");
+            shopGO.transform.SetParent(transform);
+            shopUI = shopGO.AddComponent<ShopUI>();
+        }
+
         // DialogueUI
         if (dialogueUI == null)
             dialogueUI = GetComponentInChildren<DialogueUI>(true);
@@ -291,6 +302,17 @@ public class UIManager : MonoBehaviour
             craftingUI.Show(station);
     }
 
+    /// <summary>상점(전당포) 거래 UI 열기.</summary>
+    public void ShowShop(ShopData shop)
+    {
+        if (shop == null || shopUI == null) return;
+        if (dialogueUI != null && dialogueUI.IsShowing) dialogueUI.Hide();
+
+        var playerGO = GameObject.FindGameObjectWithTag("Player");
+        var inv = playerGO != null ? playerGO.GetComponent<PlayerInventory>() : null;
+        shopUI.Open(shop, inv);
+    }
+
     /// <summary>모든 UI 닫기</summary>
     public void CloseAll()
     {
@@ -302,6 +324,8 @@ public class UIManager : MonoBehaviour
             characterPanelUI.Hide();
         if (craftingUI != null)
             craftingUI.Hide();
+        if (shopUI != null)
+            shopUI.Close();
         if (dialogueUI != null)
             dialogueUI.Hide();
     }
@@ -313,6 +337,7 @@ public class UIManager : MonoBehaviour
         if (mapSelectUI != null && mapSelectUI.IsShowing) return true;
         if (characterPanelUI != null && characterPanelUI.IsShowing) return true;
         if (craftingUI != null && craftingUI.IsShowing) return true;
+        if (shopUI != null && shopUI.IsShowing) return true;
         if (dialogueUI != null && dialogueUI.IsShowing) return true;
         if (postRaidEventUI != null && postRaidEventUI.IsShowing) return true;
         return false;

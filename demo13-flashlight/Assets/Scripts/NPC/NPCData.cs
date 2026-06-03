@@ -32,6 +32,8 @@ public class DialogueChoice
     [Tooltip("선택 시 수주할 퀘스트 ID")]
     public string triggerQuest;
     public string setFlag;
+    [Tooltip("선택 시 이 NPC의 상점(거래) 열기")]
+    public bool openShop;
 }
 
 [System.Serializable]
@@ -57,6 +59,10 @@ public class NPCData : ScriptableObject
     [Header("대화")]
     public DialogueEntry[] defaultDialogues;
     public EventDialogue[] eventDialogues;
+
+    [Header("상점 (거래)")]
+    [Tooltip("이 NPC가 상점이면 ShopData 할당 (전당포 등). 대화 선택지 openShop으로 진입")]
+    public ShopData shopData;
 
     [Header("퀘스트")]
     [Tooltip("이 NPC가 제공 가능한 퀘스트 목록")]

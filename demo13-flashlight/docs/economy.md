@@ -38,3 +38,4 @@
 | 날짜 | 질문 | 결정 | 근거 |
 |------|------|------|------|
 | 2026-05-30 | 화폐 시스템이 없어 퀘스트/업적/레이드 이벤트 보상이 전부 Debug.Log만 찍고 실제로 안 들어감 | **`CurrencyManager` 싱글톤 신설**로 루디 잔액 중앙 관리. 3개 보상 지점 + 세이브 + HUD(우상단 ◈ 카운터) 연동 | 보상 루프가 끊겨 있던 가장 시급한 미완 시스템. 중앙 매니저 하나로 흐름 일원화, 이후 상점/거래도 `Spend`로 확장 |
+| 2026-06-02 | 루디 경제가 보상만 있고 쓸 곳(거래)이 없음 | **상점(전당포) 거래 시스템 신설.** `ShopData`(SO): 판매 목록(`stock`) + 가격 배율(`buyRate`/`sellRate`, 전당포는 sellRate 0.6으로 후려침). `ShopUI`(코드 생성 Canvas, UIManager 자식): 좌=팔기(내 가방, sellPrice>0)/우=사기(상점 stock), 상단 루디 잔액. 팔기=`CurrencyManager.Add`+`Grid.Remove`, 사기=`Spend` 성공 시 인벤 추가(공간 부족 시 환불). **진입: NPC 대화 선택지** — `DialogueChoice.openShop` + `NPCData.shopData` → `DialogueUI.TryOpenShop` → `UIManager.ShowShop`. | 루팅한 잡템·귀중품을 팔아 루디를 얻고, 보급품을 사는 핵심 경제 순환. 대화에서 자연스럽게 거래 진입. |

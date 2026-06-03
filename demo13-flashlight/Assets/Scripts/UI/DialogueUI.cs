@@ -193,10 +193,22 @@ public class DialogueUI : MonoBehaviour
                     if (evt.oneShot && rel != null)
                         rel.completedEvents.Add(evt.id);
 
+                    if (TryOpenShop(choice)) return; // 상점 진입 시 대화 종료
                     ShowLines(currentNPC.displayName, choice.resultLines, rel);
                 });
             }
         });
+    }
+
+    /// <summary>선택지가 상점 진입이면 대화를 닫고 상점을 연다. (열었으면 true)</summary>
+    bool TryOpenShop(DialogueChoice choice)
+    {
+        if (choice == null || !choice.openShop) return false;
+        if (currentNPC == null || currentNPC.shopData == null) return false;
+        var shop = currentNPC.shopData;
+        Hide();
+        if (UIManager.Instance != null) UIManager.Instance.ShowShop(shop);
+        return true;
     }
 
     void ApplyChoiceEffects(DialogueChoice choice, NPCRelationship rel)
