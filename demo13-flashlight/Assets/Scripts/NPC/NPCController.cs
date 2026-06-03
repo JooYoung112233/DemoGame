@@ -14,6 +14,11 @@ public class NPCController : MonoBehaviour
 
     void Start()
     {
+        // 관계 초기값 시드 (첫 대면 시 1회 — 이미 있으면 무시)
+        if (npcData != null && NPCRelationshipManager.Instance != null)
+            NPCRelationshipManager.Instance.SeedRelationship(
+                npcData.npcId, npcData.initialAffinity, npcData.initialTrust, npcData.initialFear);
+
         // 퀘스트 마커 자동 부착
         questMarker = GetComponent<NPCQuestMarker>();
         if (questMarker == null)

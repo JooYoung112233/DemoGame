@@ -56,6 +56,11 @@ public class NPCData : ScriptableObject
     public string displayName;
     public string role;
 
+    [Header("관계 초기값 (첫 대면 시 1회 시드)")]
+    [Range(0, 100)] public int initialAffinity = 20;
+    [Range(0, 100)] public int initialTrust = 10;
+    [Range(0, 100)] public int initialFear = 0;
+
     [Header("대화")]
     public DialogueEntry[] defaultDialogues;
     public EventDialogue[] eventDialogues;

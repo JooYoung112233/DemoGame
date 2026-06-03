@@ -106,9 +106,11 @@ NPCData
 ├── npcId: string
 ├── displayName: string
 ├── role: string (예: "전당포 주인", "의사")
+├── initialAffinity/Trust/Fear: int       // 첫 대면 시 1회 시드 (NPCController→SeedRelationship). §5 '초기 호감도' 데이터화
 ├── defaultDialogues: DialogueEntry[]     // 상태 기반 기본 대사
 ├── eventDialogues: EventDialogue[]       // 이벤트/선택지 대화
-└── shopInventory: ItemData[] (optional)
+├── shopData: ShopData (optional)         // 거래 — 선택지 openShop으로 진입
+└── availableQuests: QuestData[] · shopInventory: ItemData[] (optional)
 ```
 
 ### 4-2. DialogueEntry
@@ -138,7 +140,8 @@ EventDialogue
 │   ├── fearChange: int
 │   ├── resultLines: string[]             // 선택 후 NPC 반응
 │   ├── triggerQuest: string (optional)
-│   └── setFlag: string (optional)
+│   ├── setFlag: string (optional)
+│   └── openShop: bool                    // 이 선택지로 연결된 ShopData 열기
 └── oneShot: bool                         // true면 1회만 발생
 ```
 
@@ -240,3 +243,8 @@ QuestManager 이벤트를 구독하여 자동 갱신.
   - **결정**: 3D TextMesh/프리미티브 기반 마커. QuestManager 이벤트 구독으로 자동 갱신.
   - **상태 우선순위**: ReadyToReport > Available > InProgress > Story > Talk > None
   - **비주얼**: 금색 ❗/❓, 회색 진행중, 하늘색 스토리, 회색 대화
+
+### 2026-06-04
+- **NPC 메이커 추가** (`Tools/TopDown/Content/NPC Maker`): NPCData(대사/이벤트분기/선택지/조건/관계 초기값) + 연결 ShopData를 한 창에서 편집. 버튼: '전당포 프리셋'(ShopData 생성·연결 + sellRate 0.6 + openShop 선택지), 'openShop 선택지 추가', '현재 씬에 NPC 배치'(InteractableObject(NPC)+NPCController+스프라이트, npcData 연결).
+- **관계 초기값 데이터화**: `NPCData.initialAffinity/Trust/Fear` 추가 → `NPCController.Start`에서 `NPCRelationshipManager.SeedRelationship`로 첫 대면 1회 시드(이미 있으면 무시). 위 §5의 NPC별 '초기 호감도'(전당포 주인 30 등)를 실제 데이터로 연결.
+- 비고: 마커는 빌트인 스프라이트 플레이스홀더(스프라인 아트는 추후). 대화 트리 편집은 SerializedProperty 기본 드로어로 전체 중첩 편집.

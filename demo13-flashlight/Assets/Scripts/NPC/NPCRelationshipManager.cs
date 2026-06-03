@@ -32,6 +32,16 @@ public class NPCRelationshipManager : MonoBehaviour
         return relationships[npcId];
     }
 
+    /// <summary>관계가 아직 없을 때만 초기값으로 생성(첫 대면 시드). 이미 있으면(세이브 로드 등) 무시.</summary>
+    public void SeedRelationship(string npcId, int affinity, int trust, int fear)
+    {
+        if (string.IsNullOrEmpty(npcId)) return;
+        if (relationships.ContainsKey(npcId)) return;
+        var rel = new NPCRelationship(npcId, Mathf.Clamp(affinity, 0, 100), Mathf.Clamp(trust, 0, 100));
+        rel.fear = Mathf.Clamp(fear, 0, 100);
+        relationships[npcId] = rel;
+    }
+
     public void ModifyAffinity(string npcId, int delta)
     {
         var rel = GetRelationship(npcId);
