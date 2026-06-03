@@ -58,10 +58,18 @@ Systems 미빌드 시엔 기존 단일(Single) 로드 + DontDestroyOnLoad로 폴
 | `Editor/SystemsSceneBuilder.cs` | `Tools/TopDown/Build/Systems Scene` — Systems.unity 1발 생성 + 빌드세팅 |
 | `Interaction/SceneTransitionManager.cs` | additive 교체 로드(Systems 유지)로 변경 |
 
+### 게임플레이 씬 = 맵 콘텐츠 전용
+Safehouse / InGameScene / CombatSandbox 등 게임플레이 씬은 **시스템 오브젝트를 두지 않는다**
+(카메라/조명/EventSystem/매니저/플레이어는 전부 Systems가 공급). 게임플레이 씬엔 **맵 콘텐츠만**:
+Grid/Tilemap, SpawnPoint, 프롭, 인터랙터블, 탈출존, 씬별 마커.
+`Tools/TopDown/Build/InGame|Safehouse Scene`(GameSceneBuilder)는 이제 EventSystem/Global Light를
+만들지 않고 맵 콘텐츠 골격만 생성한다. (2026-06-03 기준 Safehouse/InGameScene은 비어 있어 맵 제작 필요)
+
 ### 셋업 방법
 1. (PlayerRig 없으면) `Tools/TopDown/Build/Player Rig` 먼저 실행.
 2. `Tools/TopDown/Build/Systems Scene` 실행 → `Assets/Scenes/Systems.unity` 생성 + 빌드세팅 등록.
-3. 전체 게임 테스트: **Systems 씬을 열고 Play**(GameBoot이 Safehouse를 엶).
+3. 맵 콘텐츠 제작: `Tools/TopDown/Build/Safehouse|InGame Scene`로 골격 생성 후 Tilemap/스폰 배치.
+4. 전체 게임 테스트: **Systems 씬을 열고 Play**(GameBoot이 Safehouse를 엶).
    게임플레이 씬에서 바로 Play해도 Systems가 자동 additive 로드됨.
 
 ## 변경 로그

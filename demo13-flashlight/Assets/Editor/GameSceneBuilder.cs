@@ -3,14 +3,12 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.Tilemaps;
-using UnityEngine.EventSystems;
 
 /// <summary>
-/// 게임 시스템 씬 빌더 — 탑다운 2D 기반 플레이 씬 골격 생성.
-/// 싱글톤·플레이어는 GameBootstrap/PlayerController.Bootstrap이 자동 생성하므로 씬에 넣지 않음.
-/// 씬에 직접 필요한 것만: 카메라, 2D 라이팅, EventSystem, Tilemap, SpawnPoint.
+/// 게임플레이(맵 콘텐츠) 씬 빌더 — 탑다운 2D 맵 골격 생성.
+/// 카메라·조명·EventSystem·매니저·플레이어는 모두 Systems 부트 씬이 additive로 공급하므로 넣지 않음.
+/// 게임플레이 씬엔 '맵 콘텐츠'만: Grid/Tilemap, SpawnPoint(+ 씬별 마커). (docs/architecture.md)
 ///
 /// Tools > TopDown > Build > InGame Scene (또는 Safehouse Scene)
 /// </summary>
@@ -37,23 +35,13 @@ public static class GameSceneBuilder
 
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-        // ── 1. 카메라 없음 ───────────────────────────────────────────
-        //    PlayerRig(자동 스폰)가 카메라 + CameraFollow + 2D 정렬축(CameraSortSetup) + AudioListener를
-        //    한 세트로 들고 옴. 씬에 또 두면 충돌하므로 만들지 않는다.
+        // ── 시스템 없음: Systems 부트 씬이 전부 공급 ──────────────────
+        //    카메라 / 2D 글로벌 조명 / EventSystem / 매니저 / 플레이어는 모두 Systems 씬에 있고,
+        //    게임플레이 씬은 그 위에 additive로 로드된다(docs/architecture.md).
+        //    → 여기엔 '맵 콘텐츠'만 만든다: Grid/Tilemap + SpawnPoint(+ 씬별 마커).
+        //    (Systems가 빌드세팅에 없을 때만 기존 코드 폴백이 카메라/조명/UI를 스폰)
 
-        // ── 2. EventSystem ────────────────────────────────────────────
-        var esGo = new GameObject("EventSystem");
-        esGo.AddComponent<EventSystem>();
-        esGo.AddComponent<StandaloneInputModule>();
-
-        // ── 3. 글로벌 라이팅 (밤 앰비언트) ───────────────────────────
-        var lightRoot = new GameObject("Lighting");
-        var gl = lightRoot.AddComponent<Light2D>();
-        gl.lightType = Light2D.LightType.Global;
-        gl.intensity = 0.04f;
-        gl.color = new Color(0.3f, 0.35f, 0.4f);
-
-        // ── 4. Tilemap 루트 ───────────────────────────────────────────
+        // ── Tilemap 루트 ───────────────────────────────────────────────
         var gridGo = new GameObject("Grid");
         var grid = gridGo.AddComponent<Grid>();
         grid.cellSize = Vector3.one;
@@ -117,10 +105,10 @@ public static class GameSceneBuilder
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, path);
 
-        Debug.Log($"[GameSceneBuilder] 생성 완료: {path}");
-        Debug.Log($"[GameSceneBuilder] 포함: EventSystem, GlobalLight2D(어둠), Grid(바닥+벽 Tilemap), SpawnPoint. 카메라는 PlayerRig가 제공(글로벌 라이트는 씬 담당).");
-        Debug.Log($"[GameSceneBuilder] 자동 생성(코드): Player(Resources/Player), GameBootstrap 싱글톤 14개");
-        Debug.Log($"[GameSceneBuilder] 다음 할 일: ① Tilemap에 타일 배치 ② SpawnPoint 위치 조정 ③ Player 프리팹 확인");
+        Debug.Log($"[GameSceneBuilder] 생성 완료(맵 콘텐츠만): {path}");
+        Debug.Log($"[GameSceneBuilder] 포함: Grid(바닥+벽 Tilemap), SpawnPoint" + (type == SceneType.InGame ? ", ExitTrigger/RaidManager 플레이스홀더" : "") + ".");
+        Debug.Log($"[GameSceneBuilder] 카메라/조명/EventSystem/매니저/플레이어는 Systems 부트 씬이 additive로 공급(docs/architecture.md). Systems 씬을 열고 Play하면 이 맵을 로드.");
+        Debug.Log($"[GameSceneBuilder] 다음 할 일: ① Tilemap에 타일 배치 ② SpawnPoint 위치 조정 ③ 'Tools/TopDown/Build/Systems Scene' 확인");
     }
 }
 #endif
