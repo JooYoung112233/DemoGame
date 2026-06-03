@@ -5,6 +5,10 @@ public static class GameBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Init()
     {
+        // Systems 씬이 매니저를 전부 공급하면(=정상 플레이) 코드 스폰 폴백을 건너뛴다.
+        // 맵툴 씬 / Systems 미빌드 시에는 ProvidesSystems=false → 기존대로 코드 스폰.
+        if (SystemsScene.ProvidesSystems) return;
+
         // 기존 시스템
         EnsureSingleton<QuestManager>("QuestManager");
         EnsureSingleton<NPCRelationshipManager>("NPCRelationshipManager");

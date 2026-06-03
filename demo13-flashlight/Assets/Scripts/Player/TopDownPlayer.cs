@@ -493,6 +493,8 @@ public class TopDownPlayer : MonoBehaviour
     {
         // 맵툴 씬에선 플레이어 자동 스폰 안 함 — 맵 편집/미리보기 전용.
         if (MapToolScene.IsActive) return;
+        // Systems 씬이 PlayerRig를 배치 공급하면 코드 스폰 폴백을 건너뛴다.
+        if (SystemsScene.ProvidesSystems) return;
         if (Instance != null) return;
         if (FindFirstObjectByType<TopDownPlayer>(FindObjectsInactive.Include) != null) return;
 

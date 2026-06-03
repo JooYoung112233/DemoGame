@@ -39,6 +39,8 @@ public class SceneTransitionManager : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
+        // Systems 씬이 SceneTransitionManager를 배치 공급하면 코드 스폰 폴백을 건너뛴다.
+        if (SystemsScene.ProvidesSystems) return;
         if (Instance != null) return;
         if (FindFirstObjectByType<SceneTransitionManager>(FindObjectsInactive.Include) != null) return;
 
@@ -146,11 +148,44 @@ public class SceneTransitionManager : MonoBehaviour
         yield return StartCoroutine(FadeRoutine(0f, 1f));
 
         // 씬 로드
-        AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
-        if (op != null)
+        if (SystemsScene.Available)
         {
-            while (!op.isDone)
-                yield return null;
+            // Systems(부트) 씬은 유지하고, 게임플레이 콘텐츠 씬만 additive로 교체한다.
+            // 1) 현재 게임플레이 씬 기억 → 2) 새 씬 additive 로드 → 3) 새 씬을 Active로 →
+            // 4) 이전 게임플레이 씬 언로드 (Systems는 절대 언로드 안 함).
+            Scene prev = SceneManager.GetActiveScene();
+            bool prevIsGameplay = SystemsScene.IsGameplayScene(prev) && prev.isLoaded;
+
+            AsyncOperation op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            if (op != null)
+            {
+                while (!op.isDone)
+                    yield return null;
+            }
+
+            Scene loaded = SceneManager.GetSceneByName(sceneName);
+            if (loaded.IsValid())
+                SceneManager.SetActiveScene(loaded);
+
+            if (prevIsGameplay && prev.IsValid() && prev != loaded)
+            {
+                AsyncOperation un = SceneManager.UnloadSceneAsync(prev);
+                if (un != null)
+                {
+                    while (!un.isDone)
+                        yield return null;
+                }
+            }
+        }
+        else
+        {
+            // 폴백(Systems 미빌드): 기존 단일(Single) 로드 — DontDestroyOnLoad로 영속 객체 유지.
+            AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
+            if (op != null)
+            {
+                while (!op.isDone)
+                    yield return null;
+            }
         }
 
         // 페이드 인 (OnSceneLoaded에서 스폰 처리 후)

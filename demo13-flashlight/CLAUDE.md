@@ -22,10 +22,14 @@ Safehouse (timeScale=0, hub) → MapSelectUI → InGameScene (raid) → Extract 
 - **InGameScene** — Active raid map. Combat, looting, day/night cycle, extraction timer.
 - **MapScene** — World map (legacy/alternate entry).
 
+### Systems Boot Scene (persistent additive) — 2026-06-03
+The canonical runtime layout is a persistent **`Systems` scene** (`Assets/Scenes/Systems.unity`, built by `Tools/TopDown/Build/Systems Scene`) holding **all managers + UIManager(+every UI panel, incl. ShopUI) + PlayerRig (camera/lights/Volume) + global lighting + GameBoot**. Gameplay scenes (Safehouse/InGameScene/CombatSandbox = map/props/spawns only) are loaded **additively on top** and swapped via `SceneTransitionManager` (Systems is never unloaded). The old auto-bootstraps below now early-return when `SystemsScene.ProvidesSystems` (and act as a fallback only when Systems isn't built / in MapTool scenes). **See `docs/architecture.md`.**
+
 ### Singletons (DontDestroyOnLoad)
-- **TopDownPlayer** — Auto-spawns from `Resources/TopDownPlayer` prefab (`Bootstrap` via RuntimeInitializeOnLoadMethod). Persists across scenes. (Replaces the old `PlayerController`.)
-- **SceneTransitionManager** — Bootstrap singleton. Handles fade, async scene loading, spawn point routing, extraction countdown with distance-cancel.
-- **UIManager** — UI state management, blocks player input when UI is open.
+> Placed in the `Systems` scene (above). Auto-bootstrap is a fallback when Systems isn't built.
+- **TopDownPlayer** — Lives in the `PlayerRig` (`Resources/PlayerRig.prefab`). Fallback auto-spawns it via `Bootstrap` (RuntimeInitializeOnLoadMethod). Persists across scenes. (Replaces the old `PlayerController`.)
+- **SceneTransitionManager** — Fade, **additive** scene loading (keeps Systems, swaps gameplay scene), spawn point routing, extraction countdown with distance-cancel.
+- **UIManager** — UI state management, blocks player input when UI is open. UI panels are placed under it in the Systems scene.
 
 ### Player System Stack
 **TopDownPlayer** owns movement (Rigidbody2D + WASD 8-direction), mouse-facing, sprite flip, sprint, and flashlight pivot rotation (Light2D). Combat state machine / stamina are stubs pending re-port. Game-logic components on the same GameObject (view-agnostic):

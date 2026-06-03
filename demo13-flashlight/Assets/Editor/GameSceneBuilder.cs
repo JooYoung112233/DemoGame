@@ -24,7 +24,7 @@ public static class GameSceneBuilder
     static void BuildInGame() => BuildScene("InGameScene", SceneType.InGame);
 
     [MenuItem("Tools/TopDown/Build/Safehouse Scene")]
-    static void BuildSafehouse() => BuildScene("SafehouseScene", SceneType.Safehouse);
+    static void BuildSafehouse() => BuildScene("Safehouse", SceneType.Safehouse);
 
     // ─────────────────────────────────────────────────────────────────
 
