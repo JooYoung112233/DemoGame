@@ -143,7 +143,8 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`map-tool.md`](map-tool.md) | 탑다운 2D 맵 도구 — Tilemap(바닥/벽) + Prop2D 카탈로그 + 씬 빌더(GameSceneBuilder) | 사용 가능 |
+| [`map-tool.md`](map-tool.md) | 탑다운 2D 맵 도구 **사양·결정 로그** — Prop2D 카탈로그 + 씬 빌더 | 사용 가능 |
+| [`map-tool-guide.md`](map-tool-guide.md) | 맵툴 **사용 설명서**(신규 사용자용) — 셋업→등록→배치→기능→저장→테스트 단계별 | 작성 완료 |
 
 ---
 
