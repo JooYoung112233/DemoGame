@@ -99,6 +99,9 @@ public static class GameSceneBuilder
             var exit = MakeInteractable("ExitPoint", new Vector3(0, 6, 0), new Color(0.3f, 1f, 0.45f), 0.7f);
             SetIO(exit, InteractableObject.InteractType.ExitPoint, "탈출하기", 2f, false,
                 targetScene: "Safehouse", spawnId: "raid_return", exitWait: 5f);
+
+            // 내비게이션 — 기본 맵 구역(미니맵 fog 대상). 디자이너가 구역별로 더 쪼개면 됨. (docs/navigation.md §3.1)
+            MakeMapZone("MapZone_All", new Vector3(0, 2, 0), new Vector2(28, 24), "scrap_market", "상가골목");
         }
         else // Safehouse
         {
@@ -125,7 +128,7 @@ public static class GameSceneBuilder
 
         Debug.Log($"[GameSceneBuilder] 생성 완료(맵 콘텐츠만): {path}");
         if (type == SceneType.InGame)
-            Debug.Log("[GameSceneBuilder] InGame: Grid + Spawn(default) + RaidManager + 줍기5(knife/canned_food/scrap_metal/coin_scrap/ruby_shard) + ExitPoint(→Safehouse/raid_return, 5초).");
+            Debug.Log("[GameSceneBuilder] InGame: Grid + Spawn(default) + RaidManager + 줍기5(knife/canned_food/scrap_metal/coin_scrap/ruby_shard) + ExitPoint(→Safehouse/raid_return, 5초) + MapZone(상가골목, 미니맵 fog).");
         else
             Debug.Log("[GameSceneBuilder] Safehouse: Grid + Spawn(default/raid_return/raid_fail/raid_death) + MapBoard + Bed + Workbench.");
         Debug.Log("[GameSceneBuilder] 카메라/조명/EventSystem/매니저/플레이어는 Systems 부트 씬이 additive로 공급(docs/architecture.md). Systems 씬을 열고 Play.");
@@ -144,6 +147,19 @@ public static class GameSceneBuilder
         var p = so.FindProperty("pointId");
         if (p != null) { p.stringValue = id; so.ApplyModifiedPropertiesWithoutUndo(); }
         return sp;
+    }
+
+    /// <summary>기본 맵 구역(MapZoneVolume) 생성 — 미니맵 fog 대상. 콜라이더 없이 size로 영역 지정(물리 간섭 X). (docs/navigation.md §3.1)</summary>
+    static void MakeMapZone(string name, Vector3 center, Vector2 size, string zoneId, string displayName)
+    {
+        var go = new GameObject(name);
+        go.transform.position = center;
+        var mz = go.AddComponent<MapZoneVolume>();
+        var so = new SerializedObject(mz);
+        var zid = so.FindProperty("zoneId");      if (zid != null) zid.stringValue = zoneId;
+        var dn  = so.FindProperty("displayName"); if (dn  != null) dn.stringValue = displayName;
+        var sz  = so.FindProperty("size");        if (sz  != null) sz.vector2Value = size;
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
 
     /// <summary>가시용 스프라이트(빌트인) + InteractableObject를 가진 마커 생성.</summary>

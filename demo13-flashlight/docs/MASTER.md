@@ -105,11 +105,20 @@
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | [`world-map.md`](world-map.md) | 중앙 영야 코어 + 6개 외곽 지구 구조, 컨셉 아트 기반 거시 월드맵 | 컨셉 확정 |
+| [`level-scrapmarket.md`](level-scrapmarket.md) | 폐상가 **레벨 디자인** — 상가골목(낮) 데모 구역 v1(구역6·동선·리스크리워드) + 전체 지역1 통합 관계 | 초안 (검토 중) |
 | [`raid.md`](raid.md) | 15분 타이머, 탈출 시스템, 루팅 흐름, 귀환 정산(RaidResultUI), 시간초과 페널티 | 기획 확정, 코드 구현 |
 | [`post-raid-event.md`](post-raid-event.md) | 레이드 후 랜덤 이벤트 — 40% 확률, 텍스트 선택지, 보상/페널티 | 기획 확정, 코드 구현 |
 | [`replayability.md`](replayability.md) | 반복성·엔드게임 progression — 장비 부품 모딩, 지역 격상, 밴딧 생태계, Co-op 멀티 | 검토 중 (확정 전) |
 
 핵심 코드: `RaidManager.cs`, `SceneTransitionManager.cs`, `PostRaidEventManager.cs`, `WorldRegionCatalog.cs`
+
+### 🧭 내비게이션 · 길찾기
+
+| 문서 | 내용 | 상태 |
+|------|------|------|
+| [`navigation.md`](navigation.md) | **시계 나침반 + 미니맵/맵 시스템** — 시계 3역할(나침반·공명·시간역행 암시) 통합, RaidMap+fog, 통로 주석(사일런트힐식), 지도 아이템 해금 | 기반 구현(검토 중) |
+
+핵심 코드: `RaidMapManager.cs`, `NavigationHUD.cs`, `MapZoneVolume.cs`, `PassageMarker.cs`, `CompassTarget.cs`, `MapFragmentReveal.cs` (`Assets/Scripts/Navigation/`)
 
 ### 👥 NPC · 퀘스트
 
@@ -143,7 +152,8 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`map-tool.md`](map-tool.md) | 탑다운 2D 맵 도구 — Tilemap(바닥/벽) + Prop2D 카탈로그 + 씬 빌더(GameSceneBuilder) | 사용 가능 |
+| [`map-tool.md`](map-tool.md) | 탑다운 2D 맵 도구 **사양·결정 로그** — Prop2D 카탈로그 + 씬 빌더 | 사용 가능 |
+| [`map-tool-guide.md`](map-tool-guide.md) | 맵툴 **사용 설명서**(신규 사용자용) — 셋업→등록→배치→기능→저장→테스트 단계별 | 작성 완료 |
 
 ---
 
@@ -193,3 +203,5 @@ Safehouse (timeScale=0, 안전 허브)
 | 2026-05-30 | 미완 시스템 구현 + 문서화: ① **화폐 시스템**(`CurrencyManager`, `docs/economy.md` 신설) ② **공용 토스트 UI**(`ToastManager`). dev-roadmap 미구현 목록 ✅ 처리. `economy.md`를 문서 맵에 등재(인덱스 누락 교정). + **스태미너 회복 소비 아이템 기획 제거**(불필요 결정, 3개 아이템 효과 None 전환). |
 | 2026-05-30 | **건물 입장 트리거 시스템** 구현(`BuildingEntryTrigger` + 맵빌더 Trigger 오브젝트 4종 모드: 씬전환/로컬이동/스토리/커스텀). |
 | 2026-06-02 | **아이소메트릭 → 탑다운 2D 전환.** 렌더 파이프라인 URP-3D→URP-2D, 카메라 2D Orthographic, 좌표계 XY+sortingOrder, 이동 NavMesh→Rigidbody2D, 조명 3D 스팟라이트→Light2D, 맵 커스텀 MapBuilder→Tilemap+Prop2D. 플레이어 `PlayerController`→`TopDownPlayer`, 적 Rigidbody2D 재작성. **문서 정리**: `rendering.md` 순수 2D로 재작성, `map-tool.md` 탑다운 도구로 교체, `topdown-migration.md`/`topdown-art-spec.md` 등재. **삭제**: `shader-system.md`(구 InkCity 셰이더 — 전부 삭제됨), `map-tool-guide.md`(구 런타임 빌더), `safehouse-map-prompt.md`(아이소 프롬프트 — `safehouse-tile-prompt.md`로 대체). |
+| 2026-06-05 | **내비게이션 설계 신설(`navigation.md`).** 레이드부터 시계를 디제틱 도구로 — 나침반(튜토리얼/퀘스트 방향)·공명(이상현상)·**시간역행 암시(사망 연출)** 3역할 통합. 미니맵/맵 시스템 기반(RaidMap+fog+지도 아이템 해금) 초안. 사망=시간역행 서사 결정은 `story.md` 2026-06-05에 기록. 모두 **제안/검토 중**(구현 전). |
+| 2026-06-05 | **내비게이션 기반 구현.** `Assets/Scripts/Navigation/` 7파일 — `RaidMapManager`(자동 스폰, 지역별 영속 발견/주석), `NavigationHUD`(하단중앙 나침반 + M홀드 미니맵 + 사망 역행 암시), `MapZoneVolume`/`PassageMarker`(잠김 자동·막힘 확률)/`CompassTarget`/`MapFragmentReveal`. 나침반은 탈출구 폴백으로 즉시 작동. 검사키 Tab→M(인벤 선점). 세이브 영속·아트 후속. |

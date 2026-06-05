@@ -37,6 +37,9 @@ public class UIManager : MonoBehaviour
     [Tooltip("퀘스트 HUD")]
     [SerializeField] QuestHUD questHUD;
 
+    [Tooltip("내비게이션 HUD (시계 나침반 + 미니맵)")]
+    [SerializeField] NavigationHUD navigationHUD;
+
     /// <summary>현재 안전가옥인지 (timeScale=0 상태)</summary>
     public bool IsSafehouse => isSafehouse;
     bool isSafehouse;
@@ -220,6 +223,16 @@ public class UIManager : MonoBehaviour
             var qhGO = new GameObject("QuestHUD");
             qhGO.transform.SetParent(transform);
             questHUD = qhGO.AddComponent<QuestHUD>();
+        }
+
+        // NavigationHUD (시계 나침반 + 미니맵)
+        if (navigationHUD == null)
+            navigationHUD = GetComponentInChildren<NavigationHUD>(true);
+        if (navigationHUD == null)
+        {
+            var navGO = new GameObject("NavigationHUD");
+            navGO.transform.SetParent(transform);
+            navigationHUD = navGO.AddComponent<NavigationHUD>();
         }
     }
 

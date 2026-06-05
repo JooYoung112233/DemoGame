@@ -121,15 +121,16 @@
 
 ## 2. 소비·유틸 (Consumable)
 
-손전등·스태미너·탈출 15분 루프와 직결.
+랜턴(시야)·스태미너·탈출 15분 루프와 직결.
 
 | 우선 | itemId | 표시명 | 격자 | 스택 | 무게 | 희귀 | useEffect | 비고 |
 |:---:|---|---|:---:|:---:|:---:|---|---|---|
-| P0 | `battery_aa` | 건전지 | 1×1 | 5 | 0.05 | Common | AddBattery | 손전등 충전 |
-| P0 | `canned_food` | 통조림 | 1×1 | 3 | 0.3 | Common | Food | 포만감(추후), 당장은 사용 플래그만 |
-| P0 | `water_bottle` | 물병 | 1×2 | 2 | 0.5 | Common | Food | 갈증(추후) |
+| P0 | `battery_aa` | 건전지 | 1×1 | 5 | 0.05 | Common | AddBattery | 장비 전력 (랜턴 연료는 추후 옵션) |
+| P0 | `lantern_basic` | 랜턴 | 1×2 | - | 0.8 | Common | Equip(Light) | 착용 시 시야(주변광+콘) 확대·증광. 토글X·상시. → rendering.md |
+| P0 | `canned_food` | 통조림 | 1×1 | 3 | 0.3 | Common | Eat | 허기 +40. → survival.md |
+| P0 | `water_bottle` | 물병 | 1×2 | 2 | 0.5 | Common | Drink | 수분 +45. → survival.md |
 | P1 | `energy_bar` | 에너지바 | 1×1 | 4 | 0.1 | Common | Food + RestoreStamina | 약한 회복 복합 |
-| P1 | `flashlight_bulb` | 손전등 전구 | 1×1 | 2 | 0.1 | Uncommon | None | 작업대 수리 재료 |
+| P1 | `flashlight_bulb` | 전구 (랜턴 부품) | 1×1 | 2 | 0.1 | Uncommon | None | 랜턴/작업대 수리 재료 |
 | P1 | `smoke_bomb` | 연막탄 | 1×1 | 2 | 0.2 | Uncommon | None | 3초 시야 차단(추후 전투) |
 | P2 | `coffee` | 커피 | 1×1 | 3 | 0.1 | Common | RestoreStamina | 스태미너 회복↑, 수면 디버프↓ |
 | P2 | `antidote` | 해독제 | 1×1 | 2 | 0.15 | Rare | HealInjury | 오염/이상현상 디버프(추후) |

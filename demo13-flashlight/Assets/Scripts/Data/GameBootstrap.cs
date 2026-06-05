@@ -27,6 +27,9 @@ public static class GameBootstrap
         // 경제 시스템
         EnsureSingleton<CurrencyManager>("CurrencyManager");
 
+        // 내비게이션 (레이드 맵 상태 + 지역별 영속 지식; NavigationHUD는 자체 RuntimeInit 폴백)
+        EnsureSingleton<RaidMapManager>("RaidMapManager");
+
         // 세이브 시스템
         EnsureSingleton<SaveManager>("SaveManager");
 

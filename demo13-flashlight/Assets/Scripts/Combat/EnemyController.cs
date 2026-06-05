@@ -145,6 +145,10 @@ public class EnemyController : MonoBehaviour
 
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         renderers      = GetComponentsInChildren<Renderer>();
+
+        // 적 은신 + 머리 위 말풍선 (가시성 실험) — 자동 부착
+        if (GetComponent<EnemySpeechBubble>() == null)
+            gameObject.AddComponent<EnemySpeechBubble>();
     }
 
     void Start()

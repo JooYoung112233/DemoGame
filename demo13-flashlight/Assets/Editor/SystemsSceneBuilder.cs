@@ -51,6 +51,7 @@ public static class SystemsSceneBuilder
         typeof(StoryLocale),
         typeof(StoryPlayer),
         typeof(StoryTriggerManager),
+        typeof(RaidMapManager),        // 내비게이션: 레이드 맵 상태 + 지역별 영속 지식(지도판 누적)
         typeof(SceneTransitionManager),
     };
 
@@ -66,6 +67,7 @@ public static class SystemsSceneBuilder
         ("dialogueUI",       typeof(DialogueUI)),
         ("postRaidEventUI",  typeof(PostRaidEventUI)),
         ("questHUD",         typeof(QuestHUD)),
+        ("navigationHUD",    typeof(NavigationHUD)),   // 시계 나침반 + 미니맵 (UI)
     };
 
     [MenuItem("Tools/TopDown/Build/Systems Scene")]
@@ -148,7 +150,7 @@ public static class SystemsSceneBuilder
         AssetDatabase.SaveAssets();
 
         Debug.Log("<color=cyan>[SystemsScene]</color> 생성 완료: " + SCENE_PATH +
-                  "\n  • 매니저 " + ManagerTypes.Length + "개 + UIManager(+UI " + UiPanels.Length + "개, 상점 포함)" +
+                  "\n  • 매니저 " + ManagerTypes.Length + "개 + UIManager(+UI " + UiPanels.Length + "개, 상점·나침반 포함)" +
                   (rigPrefab != null ? " + PlayerRig" : " (PlayerRig 누락!)") +
                   " + 글로벌조명 + GameBoot" +
                   "\n  • 빌드세팅 등록(Systems 맨 앞). 게임플레이 씬은 additive로 교체 로드됩니다.");

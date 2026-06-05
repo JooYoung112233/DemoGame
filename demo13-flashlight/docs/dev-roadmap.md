@@ -110,11 +110,49 @@
 
 ---
 
+## 남은 작업 종합 (2026-06-04, 탑다운 2D + Systems 씬 기준)
+
+> 탑다운 2D 전환(2026-06-02)·Systems 부트 씬(2026-06-03) 이후 최신 점검.
+> 시스템·게임 루프·씬 골격은 모두 연결됨 — **실제로 부족한 건 "맵 콘텐츠"와 "전투 체감"**.
+> 상세 출처: [`topdown-migration.md`](topdown-migration.md), [`architecture.md`](architecture.md), [`combat.md`](combat.md), [`rendering.md`](rendering.md).
+
+### 🔴 핵심 — 게임이 실제로 "플레이"되려면
+| 작업 | 상태 | 출처 |
+|------|------|------|
+| **맵 콘텐츠 제작** | 시스템·루프·씬 골격 연결 완료. Safehouse/InGameScene 타일맵 바닥·벽이 비어있음(플레이스홀더 마커만) → 직접 페인팅 | architecture/migration |
+| **FOV 시야 시스템** 신규 + 손전등 완전 제거 | 좀보이드식 부채꼴 시야 전환 **결정 완료, 구현 0**. 손전등 코드 임시 잔존 | combat/rendering |
+| **타격감 연출** 구현 | 설계 확정·구현 미완: 히트스탑(강공)·적 흰 플래시(셰이더 `_FlashAmount` 추가)·피격 화면연출(위험비례)·카메라 셰이크/줌(CameraFollow 오프셋)·**DamagePopup 2D 리워크** | combat |
+
+### 🟡 기능 연동 미완
+| 작업 | 위치 |
+|------|------|
+| 레이드 후 이벤트 조건 필터(region/nightOnly 무시 중) | `Raid/PostRaidEventManager.cs:98` |
+| 아이템 검사 패널 UI(콘솔 로그만) | `UI/CharacterPanelUI.cs:1780` |
+| WorldItem 최종 아이콘/드롭 프리팹(placeholder 사각형) | `Inventory/WorldItem.cs:40` |
+| 인벤토리 줍기/보관 마무리 | 로드맵 3단계 |
+| 지도판 지역선택 팝업 + 귀환정산 실데이터 연동 | 로드맵 2단계 [예정] |
+
+### ⚪ 정리 / 품질
+- 리플렉션 private 접근 → 공개 Setter (`DoorController:245`, `NPCQuestMarker:166`, `MapObjectSpawner:103,305`)
+- `Inventory/PlayerInventory.cs:87` `goto` 정리
+- 셰이더 정리: `FlashlightBeam` 삭제(손전등 폐기 시), `ShadowProjector`/`OcclusionOutline` vestigial 검토
+- 플레이스홀더 스프라이트 → 실제 아트 (WorldItem/InjuryVFX/NPCQuestMarker)
+
+### 🗺️ 콘텐츠 설계 (world-map STEP 2)
+- 간선도로 설계 / 밀도 배치(잠긴 방·숨겨진 방) / 열쇠→문 매핑 테이블
+
+### 📋 기획 결정 대기 (구현 선행 필요)
+- **게임 최종 목표** (A 서사 / B 거점성장 / C 수집 / 혼합) — 가장 큰 뿌리. [`replayability.md`](replayability.md)
+- 모딩 강화 **상한 유무**, 모딩+격상 **1순위 구현 확정**
+- 소규모: 가드/패링 데모 포함?, 안전가옥 강화 비용표, 엔딩 분기 조건, 수상한 아이 정체
+
+---
+
 ## 미구현 / 마무리 필요 (2026-05-29 코드 점검)
 
 전체 165개 C# 스크립트 점검 결과. 핵심 시스템(전투·의료·제작·스토리·맵빌더)은 골격 완성, 주변 연동이 미흡하다.
 
-> ⚠️ **이 점검은 2026-06-02 탑다운 전환 이전 기준.** 탑다운 전환으로 생긴 남은 작업(맵 페인팅·**시야 FOV 시스템**·**타격감 연출**·손전등 제거 등)은 [`topdown-migration.md`](topdown-migration.md) "남은 일" 참조.
+> ⚠️ **이 점검은 2026-06-02 탑다운 전환 이전 기준.** 최신 종합은 위 [남은 작업 종합 (2026-06-04)](#남은-작업-종합-2026-06-04-탑다운-2d--systems-씬-기준) 참조.
 
 ### 🔴 높음 — 기능 동작에 직접 영향
 
@@ -171,3 +209,4 @@
 | 2026-05-29 | 죽은 코드 정리: `BuildingCubeBuilder.cs`(deprecated 스텁), `Building/RoofController.cs`(미사용 중복 — 실사용은 `IsometricMapEditor.RoofController` 스텁), 빈 폴더 `Visual/`·`Safehouse/` 삭제. GUID 검증으로 ViewCulling/ScrapMarketMapMetadata는 씬·프리팹 부착 확인 후 보존. |
 | 2026-05-30 | 미완 항목 처리: ① **화폐 시스템**(`CurrencyManager` + 퀘스트/업적/이벤트 보상·페널티 연동 + 세이브 + HUD ◈ + `docs/economy.md`), ② **공용 토스트 UI**(`ToastManager`, 문 피드백·화폐 변동 연동). |
 | 2026-05-30 | **스태미너 회복 소비 아이템 기획 제거.** 불필요 결정 → 핸들링·`PlayerController.RestoreStamina()` 삭제, Coffee/EnergySoup/StimInjector `useEffect` None 전환. `ItemUseEffect.RestoreStamina` enum 값은 직렬화 인덱스 보존 위해 deprecated로 유지. |
+| 2026-06-04 | **남은 작업 종합 재점검(탑다운+Systems 기준).** 상단에 [남은 작업 종합 (2026-06-04)] 섹션 신설 — 🔴핵심(맵 콘텐츠 제작·FOV 시야·타격감 연출) / 🟡연동 미완 / ⚪정리 / 🗺️콘텐츠 / 📋기획 결정 대기로 분류. 2026-05-29 점검은 탑다운 전환 이전 기준으로 명시. 정리: obsolete `TopDownPlayerBuilder.cs` 삭제(PlayerRig 전환으로 불필요), 구 `Player.prefab` 삭제 완료. |
