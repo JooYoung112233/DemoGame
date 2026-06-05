@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c1a4c71717c7e24c98ddaff2395df52, type: 3}
+  m_Name: gb_roof
+  m_EditorClassIdentifier: Game.Scripts::Prop2DDefinition
+  propId: gb_roof
+  displayName: "\uC9C0\uBD95"
+  category: 5
+  group: "\uADF8\uB808\uC774\uBC15\uC2A4"
+  sprite: {fileID: 21300000, guid: 5c60eb44670718c4ba0ba2f2035b95a4, type: 2}
+  material: {fileID: 0}
+  sortingLayer: Ceiling
+  sortingOffset: 0
+  drawMode: 0
+  tiledSize: {x: 1, y: 1}
+  tileMode: 0
+  prefab: {fileID: 0}
+  colliderMode: 0
+  isTrigger: 0
+  boxSizeScale: {x: 1, y: 1}
+  boxOffset: {x: 0, y: 0}
+  compositeBoxes: []
+  castShadow: 0
+  shadowCasting: 0
+  shadowAlphaCutoff: 0.1
+  breakable: 0
+  breakStages: 3
+  breakHp: 24
+  breakDestroy: 1
+  breakRubbleSprite: {fileID: 0}
+  breakHittable: 1
+  breakOverlayIntensity: 1
+  breakCrackColor: {r: 0.02, g: 0.02, b: 0.03, a: 1}
+  breakGrimeColor: {r: 0.15, g: 0.13, b: 0.1, a: 1}
+  breakDrop: 0
+  breakDropItemId: 
+  breakDropCount: 1
+  breakDropRegionLoot: 0
+  weathered: 0
+  weatherAmount: 0.5
+  weatherTint: {r: 0.32, g: 0.22, b: 0.12, a: 1}
+  emitsLight: 0
+  lightShape: 0
+  lightColor: {r: 1, g: 0.85, b: 0.55, a: 1}
+  lightIntensity: 1.3
+  lightRadius: 2.5
+  lightOffset: {x: 0, y: 0}
+  lightAngle: -90
+  lightCastsShadows: 1
+  lightNightOnly: 0
+  function: 0
+  interactType: 0
+  functionPrompt: 
+  interactRange: 1.5
+  spawnPointId: default
+  lootGridWidth: 4
+  lootGridHeight: 5
+  lootUseRegionLoot: 1
+  noVisual: 0
+  itemId: 
+  itemCount: 1
+  npcId: 
+  doorLockType: 0
+  doorKeyId: 
+  doorQuestId: 
+  triggerTargetScene: 
+  triggerTargetSpawnId: 
+  triggerSize: {x: 2, y: 2}
+  triggerAutoEnter: 1
+  ceilingGroupId: gb
+  ceilingHiddenAlpha: 0.25
+  ceilingFadeSpeed: 6
+  ceilingTriggerSize: {x: 0, y: 0}
+  ceilingTriggerOffset: {x: 0, y: 0}
