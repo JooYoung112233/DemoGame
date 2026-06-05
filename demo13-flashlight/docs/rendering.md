@@ -48,8 +48,27 @@
 - **라이트 모양 = 텍스쳐 쿠키(Sprite 라이트).** 플레이어 주변광/콘·프롭 발광 모두 **절차 생성 쿠키**(`LightCookieGenerator` → `Resources/LightCookies/cookie_radial`·`cookie_cone`)를 **Sprite Light2D**에 물려 부드럽게(다크우드). Point/Spot 파라미터 콘(딱딱한 경계)은 폐기. 쿠키는 흰색+알파(모양), 빛 색은 `Light2D.color`로 틴트. 콘 쿠키는 +Y 기준·피벗 하단(꼭지)이라 `lightAngleOffset=-90`로 facing에 맞춤. 프롭 발광은 Prop2D 카탈로그(`emitsLight`)로 프롭별 설정(램프/창문/네온), `lightNightOnly`면 밤에만(`PropLight2D`+DayNightCycle).
 - **그림자/차폐**: 벽·구조물에 **ShadowCaster2D** → 시야 콘과 빛을 막음(벽 뒤는 안 보임). (3D 스팟라이트 + ShadowsOnly 박스 방식 폐기.)
 - 낮/밤 반응 컴포넌트(`DayNightCycle.OnPhaseChanged` 구독): `PostProcessController`, `NeonSign`, `RainController` 등. **Editor State Preservation** 규칙 유지 — `Start()`에서 값을 적용하지 않고 이벤트로만 변경.
+- **랜턴 (장비 기반 시야 강화) — 2026-06-05**: 시야(주변광·콘)의 **크기·밝기를 착용 광원 장비로 가변**.
+  - **기본(랜턴 미착용)**: 좁은 주변광(원형 쿠키, ~2칸) + 약한/없는 콘 — 밤엔 코앞만 보임.
+  - **랜턴 착용**: 주변광 반경↑·밝기↑(예: 4~5칸) + **콘 쿠키 길이·각도·밝기↑**(facing 부채꼴). 주변광·콘 둘 다 동시 강화.
+  - **장비 슬롯**: 랜턴 = 착용 장비(장비창 1슬롯). **토글 아님 — 차고 있으면 상시 점등**(구 손전등 F토글/단일 빔 메커니즘 폐기 계승).
+  - **등급**: 약한 랜턴 → 밝은 랜턴(반경·콘·밝기 차등) = 시야 성장 축.
+  - **구현**: 착용 랜턴 등급 파라미터로 `TopDownPlayer`의 주변광/콘 `Light2D`(쿠키) `radius/intensity/cone angle`을 세팅(LanternModifier). 미착용 시 기본값으로 복귀.
+  - **연료(옵션, 추후)**: 기름·배터리 소모형으로 자원 압박을 줄지 추후 결정(현재 가안 = 착용 패시브 상시 점등).
+  - **빛 = 노출(추후)**: 밝을수록 멀리·넓게 보지만 적에게도 들키기 쉬운 트레이드오프 여지(§적 은신). 추후.
 
-> ⚠️ 데모 폴더명 `demo13-flashlight`는 역사적 이름. 손전등 메커니즘은 폐기됨(시야 FOV로 대체).
+> ⚠️ 데모 폴더명 `demo13-flashlight`는 역사적 이름. **손전등(F토글 단일 빔) 메커니즘은 폐기** — 빛은 시야 FOV + **착용 랜턴**(위)으로 대체.
+
+### 적 은신 + 머리 위 말풍선 (2026-06-05, 실험 토글)
+
+> 시야 콘을 "적을 드러내는" 장치로 쓰지 않고, **적은 항상 안 보이게(몸체 숨김) 하되 "말할 때"만 머리 위 말풍선으로 존재를 흘리는** 방향 실험.
+
+- **몸체 = 항상 숨김**: 적(밴딧/몬스터) `EnemySprite` 렌더러를 끔 → 플레이어는 적 몸을 못 봄.
+- **말풍선 = "말할 때만"**: 콘 안/밖과 무관하게 적이 말하는 순간에만 머리 위에 뜸. **플레이어를 "만나는"(발견 = 순찰→추격) 순간에만 또렷한 대사**(`encounterLines`), 그 외 평소엔 **순찰 중 근접 혼잣말 중얼거림**(`mutterLines`, 멀면 침묵 → 위치 노출 방지)만. 공격/피격/스턴/사망 전용 대사는 두지 않음.
+- **내용 = 콘 의존**: 플레이어 시야 콘 **안**이면 **대사 전문**, **밖**이면 **"..."** 만. 말하는 도중 콘 안/밖이 바뀌면 실시간 갱신.
+- **on/off 토글**: 전역 `EnemySpeechBubble.Enabled`(기본 ON). 디버그 키 **B**(DebugTestUI가 단독 폴링) + 전투 탭 버튼. OFF면 몸체 보이고 말풍선 끔.
+- **구현**: `EnemySpeechBubble`(적별 컴포넌트, `EnemyController.Awake`가 자동 부착 → 프리팹/씬 수정 불필요). 콘 판정은 **게임플레이용 별도 파라미터**(`ConeHalfAngleDeg=45`, `ConeRange=8`)로 `TopDownPlayer.FacingDirection` 기준 — 실제 라이트 렌더(콘 쿠키)와 분리. 대사는 컴포넌트 SerializeField 풀(데이터화, 적별 교체 가능; 추후 `UnitStatData`/`NPCData`로 이관 여지). 한글은 프로젝트 표준 `LegacyRuntime.ttf`(`TextMesh`+동적폰트 머티리얼).
+- ⚠️ 미구현/후속: 벽 차폐(LoS) 미적용 — 콘 안이면 벽 너머도 전문 표시됨, 추후 ShadowCaster/레이캐스트 보강. 콘 판정값을 실제 콘 라이트 각도와 동기화할지 추후 결정. HP/그로기 바는 은신과 무관하게 유지(피격 시에만 노출).
 
 ## 맵 / 프롭
 
@@ -129,5 +148,7 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | 2026-06-03 | **파괴 시스템 `Breakable` + `BRB/DamageOverlay` 신설.** 상자 등을 때리면 1→2→3 단계로 부서지고 마지막에 파괴(파편). 손상 비주얼 = 베이스 위 **자식 오버레이**(균열·그을음 절차적) → 베이스 셰이더 안 건드림 = **모든 셰이더 호환**. Health 있으면 자동 연동, 없으면 `Hit()`/`ApplyDamage()`. 카탈로그(`Prop2DDefinition.breakable`)에서 프롭별 ON. 상세 [`destructible.md`](destructible.md). | 사용자 요청("모든 셰이더에 같이 쓸 수 있게 부서짐/폐허 효과, 단계별로"). 오버레이 방식이라 셰이더별 수정 불필요. 절차적이라 아트 없이도 동작. |
 | 2026-06-03 | **글로벌 Light2D 주인 = Systems 씬으로 확정 + 에디터 중복 경고 해결.** "글로벌은 씬이 둔다"(이전 메모) 정정 → **Systems 부트 씬이 글로벌을 단독 소유**, 게임플레이 씬(InGame/Safehouse) 빌더는 글로벌을 안 만듦(이미 그러함). 자체 글로벌은 Systems + MapTool + CombatSandbox(단독 실행용)만. 글로벌 2개↑ 활성 시 URP `More than one global light on layer ...` 경고 → 런타임 `SystemsSceneEnforcer`에 더해 **에디트 모드용 `SystemsGlobalLightEditorEnforcer`(신규, `[InitializeOnLoad]`)** 추가: Systems 로드 시 그 글로벌만 남기고 다른 씬 글로벌을 에디터에서도 비활성(Systems 언로드 시 복구, 강제 저장 안 함). | 에디터에서 Systems+게임플레이/샌드박스 씬을 함께 열면 enforcer(런타임 전용)가 안 돌아 씬뷰 repaint마다 경고. PlayerRig는 점광만 가져오므로 글로벌 owner는 PlayerRig가 아니라 Systems 씬. |
 | 2026-06-04 | **텍스쳐(쿠키) 라이트 전환 — 플레이어 + 프롭 발광.** Point/Spot 파라미터 라이트의 딱딱한 콘 → URP 2D **Sprite 라이트 + 절차적 쿠키**(부드러운 그라데이션, 다크우드 룩). `LightCookieGenerator`(Tools▸TopDown▸Map▸Generate Light Cookies)가 `Resources/LightCookies/`에 cookie_radial(중앙 피벗)·cookie_cone(+Y·하단 피벗=꼭지) PNG 절차 생성(흰색+알파, 색은 Light2D.color, PPU=256→1유닛·스케일로 크기). PlayerRig 빌더: 주변광=라디얼·콘=콘 쿠키로 교체(회전·그림자 유지, lightAngleOffset=-90로 +Y→facing). 프롭=Prop2D 카탈로그 통합: `Prop2DDefinition`에 emitsLight/shape/color/intensity/radius/offset/angle/castsShadows/nightOnly 추가, `Prop2DBuilder.ApplyLight`가 Sprite Light2D 자식 부착(쿠키·정렬레이어는 URP 공개 setter 없어 reflection으로, 넣은 뒤 enable 토글로 메시 갱신), 밤전용은 `PropLight2D`(DayNightCycle 연동). | 사용자: 콘이 딱딱해 다크우드 느낌 안 남 + 램프/창문 발광 '기능' 필요. 텍스쳐 라이트가 2D 분위기 조명 표준. 절차 생성이라 무에셋·튜닝·스왑(직접 그린 PNG로 교체) 가능. |
+| 2026-06-05 | **적 은신 + 머리 위 말풍선(실험 토글).** 시야 콘이 적을 "드러내는" 대신, 적 몸체(`EnemySprite`)는 항상 숨기고 적이 "말할 때"만 머리 위 말풍선. 콘 안=대사 전문 / 콘 밖="..."(말하는 중 실시간 갱신). 플레이어를 "만나는"(발견=순찰→추격) 순간에만 또렷한 대사, 그 외 평소엔 순찰 중 근접 혼잣말 중얼거림만(공격/피격/스턴/사망 전용 대사 없음 — 2026-06-05 결정). 전역 `EnemySpeechBubble.Enabled`(기본 ON, 디버그 B키/전투탭 토글). `EnemyController.Awake` 자동 부착, 콘 판정은 게임플레이용 별도 파라미터(라이트 렌더와 분리). | 사용자 요청: 적을 못 보게 하고 말풍선으로만 존재를 흘리는 긴장감. 콘은 "무슨 말인지 알아듣는" 범위로 의미. 나중에 on/off 원함. 벽 차폐(LoS)는 후속. |
 | 2026-06-04 | **천장 컷어웨이 트리거 크기/오프셋 override.** 80° 틸트 아트라 건물 **밑둥(앞면)이 아래로 길어** 입구로 들어와도 지붕 footprint 트리거 밖이라 페이드가 늦음 → `Prop2DDefinition.ceilingTriggerSize`(0,0=footprint 자동)·`ceilingTriggerOffset` 추가. 세로를 키우거나 Y-오프셋을 음수로 내려 입구/밑둥까지 덮으면 **진입 즉시 페이드**. `CeilingFader.OnDrawGizmosSelected`가 트리거 영역을 청록 박스로 표시(시각 튜닝). 배치본의 BoxCollider2D를 씬에서 직접 늘려도 됨. | 사용자: 밑둥이 길어 입구 진입 시 바로 천장 투명 원함. |
 | 2026-06-03 | **천장(지붕) 컷어웨이 시스템 신설.** 옛 3D `BuildingInterior 알파 페이드`는 탑다운 전환 때 삭제됐고 현재 없음 → 새로 구축. **새 `Ceiling` 카테고리**(카탈로그 천장 탭, enum 끝에 추가, ID `ceiling_`): 콜라이더 None(막힘X)·그림자 OFF·**최상단 정렬(`Ceiling` Sorting Layer)**. 빌더가 천장 프롭에 **트리거 콜라이더(스프라이트/타일 footprint)** + `CeilingFader` 자동 부착. 동작: 플레이어가 건물 안(트리거)에 들어오면 지붕 알파 **1→0 부드럽게 페이드아웃**, 나가면 복귀. **건물 단위 그룹화**(`ceilingGroupId` 같은 조각들이 한꺼번에 페이드 — 한 조각 트리거에만 들어와도 그룹 전체). 정렬은 데칼(엔티티 아래)과 정반대(엔티티 위)라 전용 레이어. | 사용자 결정(질문 3): 새 천장 탭 / 진입 시 부드러운 페이드아웃 / 건물 단위. 좀보이드·타르코프식 실내 진입 가시성. FOV "실내 어둑"과 상보적(추후 연동). |
+| 2026-06-05 | **랜턴(장비 기반 시야 강화) 도입.** 손전등 F토글/단일 빔 폐기 계승. 시야(주변광 원형 + facing 콘)의 **반경·각도·밝기를 착용 랜턴 등급으로 가변** — 미착용=좁은 주변광(코앞)/착용=주변광·콘 동시 확대·증광. 토글 아닌 착용 패시브(상시 점등). 연료 소모·'빛=노출' 트레이드오프는 추후 옵션. | 사용자 결정: '손전등 폐기, 랜턴 차면 라이트·콘 커지고 밝아짐'. 시야가 장비 성장 축이 됨. 구현은 PlayerRig 주변광/콘 Light2D(쿠키) 파라미터를 LanternModifier로 조절. [→ items.md 랜턴, story-script S-013/S-020] |

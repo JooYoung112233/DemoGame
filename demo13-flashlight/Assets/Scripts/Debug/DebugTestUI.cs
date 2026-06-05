@@ -113,6 +113,10 @@ public class DebugTestUI : MonoBehaviour
 
         if (Input.GetKeyDown(toggleKey))
             isOpen = !isOpen;
+
+        // 적 은신/말풍선 토글 — 단독 폴러(적 컴포넌트들이 동시에 키를 먹지 않도록 여기서만).
+        if (Input.GetKeyDown(KeyCode.B))
+            EnemySpeechBubble.Enabled = !EnemySpeechBubble.Enabled;
     }
 
     void OnGUI()
@@ -398,6 +402,15 @@ public class DebugTestUI : MonoBehaviour
         {
             GUILayout.Label("FlashlightController를 찾을 수 없음", labelStyle);
         }
+
+        GUILayout.Space(10);
+        GUILayout.Label("── 적 은신 / 말풍선 ──", headerStyle);
+        GUILayout.Label($"상태: {(EnemySpeechBubble.Enabled ? "ON (몸체 숨김 + 말풍선)" : "OFF (몸체 보임)")}", labelStyle);
+        GUILayout.Label("[B] 토글 · 콘 안=대사 전문 / 콘 밖=...", labelStyle);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("은신 ON", btnStyle))  EnemySpeechBubble.Enabled = true;
+        if (GUILayout.Button("은신 OFF", btnStyle)) EnemySpeechBubble.Enabled = false;
+        GUILayout.EndHorizontal();
     }
 
     #endregion
