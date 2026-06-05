@@ -352,6 +352,15 @@ public class Breakable : MonoBehaviour
             _baseBrightness = 1f;
     }
 
+    /// <summary>손상 오버레이 자식을 강제로 다시 만든다(맵 저장 후 DontSave 자식이 떨어졌을 때 등).</summary>
+    public void RebuildOverlay()
+    {
+        if (!gameObject.scene.IsValid()) return;
+        if (_baseSR == null) _baseSR = GetComponent<SpriteRenderer>();
+        if (useOverlay) BuildOverlay();
+        RefreshVisual();
+    }
+
     void BuildOverlay()
     {
         if (_baseSR == null || _baseSR.sprite == null) return;

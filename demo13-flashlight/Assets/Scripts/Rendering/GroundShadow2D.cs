@@ -62,6 +62,9 @@ public class GroundShadow2D : MonoBehaviour
 #endif
     }
 
+    /// <summary>그림자 자식을 강제로 다시 만든다(맵 저장 후 DontSave 자식이 떨어졌을 때 등).</summary>
+    public void Rebuild() { if (gameObject.scene.IsValid()) Build(); }
+
     void Build()
     {
         // 재컴파일/중복 대비: 기존 고아 자식 제거

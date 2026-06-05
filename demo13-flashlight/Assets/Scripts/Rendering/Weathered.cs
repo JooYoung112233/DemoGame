@@ -52,6 +52,9 @@ public class Weathered : MonoBehaviour
 
     void OnDestroy() => Cleanup();
 
+    /// <summary>풍화 오버레이 자식을 강제로 다시 만든다(맵 저장 후 DontSave 자식이 떨어졌을 때 등).</summary>
+    public void Rebuild() { if (gameObject.scene.IsValid()) Build(); }
+
     void Build()
     {
         if (_baseSR == null || _baseSR.sprite == null) return;

@@ -188,10 +188,11 @@ public class Prop2DCatalogEditor : EditorWindow
 
     void OnGUI()
     {
-        // 창에 포커스가 있을 때 ESC = 배치 취소 (씬뷰 포커스가 아닐 때 대비)
-        if (_placeMode && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+        // 창에 포커스가 있을 때 ESC = 배치/크기조절 취소 (씬뷰 포커스가 아닐 때 대비)
+        if ((_placeMode || _resizeMode) && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
         {
             _placeMode = false;
+            _resizeMode = false;
             DestroyGhost();
             Event.current.Use();
         }
@@ -954,8 +955,19 @@ public class Prop2DCatalogEditor : EditorWindow
     // ───────────────────────── 씬 클릭 배치 ─────────────────────────
     void OnSceneGUI(SceneView sv)
     {
-        if (!_placeMode || _selected == null) { DestroyGhost(); return; }
         var e = Event.current;
+
+        // 크기조절 모드: 선택 프롭을 가장자리 핸들로 앵커(반대쪽 고정) 리사이즈.
+        if (_resizeMode)
+        {
+            if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
+            { _resizeMode = false; e.Use(); Repaint(); return; }
+            DrawResizeHandles();
+            sv.Repaint();
+            return;
+        }
+
+        if (!_placeMode || _selected == null) { DestroyGhost(); return; }
 
         // ESC = 배치 모드 취소
         if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape)
@@ -998,6 +1010,86 @@ public class Prop2DCatalogEditor : EditorWindow
             e.Use();
         }
         sv.Repaint();
+    }
+
+    // ── 크기조절 (앵커=반대쪽 고정 에지 드래그) ──
+    void DrawResizeHandles()
+    {
+        var go = Selection.activeGameObject;
+        var sr = go != null ? go.GetComponent<SpriteRenderer>() : null;
+        if (sr == null || sr.sprite == null)
+        {
+            Handles.BeginGUI();
+            GUILayout.BeginArea(new Rect(8, 8, 300, 24), EditorStyles.helpBox);
+            GUILayout.Label("크기조절: 씬에서 프롭(SpriteRenderer)을 선택하세요.", EditorStyles.miniLabel);
+            GUILayout.EndArea();
+            Handles.EndGUI();
+            return;
+        }
+
+        Bounds b = sr.bounds;                       // 월드 AABB(피벗·스케일 반영)
+        float hs = HandleUtility.GetHandleSize(b.center) * 0.13f;
+        bool sym = Event.current.shift;             // Shift=양쪽 대칭(중심 고정)
+
+        // 4 에지 — 드래그하면 반대쪽(또는 중심) 고정하고 그 축만 늘림.
+        DrawEdge(sr, new Vector3(b.max.x, b.center.y, 0f), Vector3.right, 0, true,  hs, sym);
+        DrawEdge(sr, new Vector3(b.min.x, b.center.y, 0f), Vector3.right, 0, false, hs, sym);
+        DrawEdge(sr, new Vector3(b.center.x, b.max.y, 0f), Vector3.up,    1, true,  hs, sym);
+        DrawEdge(sr, new Vector3(b.center.x, b.min.y, 0f), Vector3.up,    1, false, hs, sym);
+
+        Handles.color = new Color(0.3f, 0.8f, 1f, 0.9f);
+        Handles.DrawWireCube(b.center, new Vector3(b.size.x, b.size.y, 0.001f));
+    }
+
+    void DrawEdge(SpriteRenderer sr, Vector3 pos, Vector3 dir, int axis, bool maxEdge, float hs, bool sym)
+    {
+        Handles.color = new Color(0.3f, 0.95f, 1f, 1f);
+        EditorGUI.BeginChangeCheck();
+        Vector3 np = Handles.Slider(pos, dir, hs, Handles.CubeHandleCap, 0f);
+        if (EditorGUI.EndChangeCheck())
+            ResizeEdge(sr, axis, maxEdge, np[axis], sym);
+    }
+
+    /// <summary>axis(0=x,1=y)의 한 에지를 newWorldCoord로 옮기되 반대 에지(또는 중심)를 고정한 채 리사이즈.
+    /// Tiled/Sliced=sr.size 변경, 그 외=transform.localScale. sym=양쪽 대칭.</summary>
+    void ResizeEdge(SpriteRenderer sr, int axis, bool maxEdge, float newWorldCoord, bool sym)
+    {
+        var t = sr.transform;
+        Bounds b = sr.bounds;
+        float oldSize = b.size[axis];
+        if (oldSize < 1e-4f) return;
+
+        float anchor, newSize;
+        if (sym)                       // 중심 고정 — 양쪽 대칭
+        {
+            anchor = b.center[axis];
+            newSize = Mathf.Max(0.05f, Mathf.Abs(newWorldCoord - anchor) * 2f);
+        }
+        else                           // 반대 에지 고정(피벗)
+        {
+            anchor = maxEdge ? b.min[axis] : b.max[axis];
+            newSize = Mathf.Max(0.05f, maxEdge ? (newWorldCoord - anchor) : (anchor - newWorldCoord));
+        }
+        float factor = newSize / oldSize;
+
+        Undo.RecordObject(t, "Resize Prop");
+        if (sr.drawMode != SpriteDrawMode.Simple)
+        {
+            Undo.RecordObject(sr, "Resize Prop");
+            var sz = sr.size; sz[axis] = Mathf.Max(0.05f, sz[axis] * factor); sr.size = sz;
+        }
+        else
+        {
+            var ls = t.localScale; ls[axis] *= factor; t.localScale = ls;
+        }
+
+        // 고정 좌표 복원(반대 에지 또는 중심이 제자리에 있도록 위치 보정).
+        Bounds nb = sr.bounds;
+        float newAnchor = sym ? nb.center[axis] : (maxEdge ? nb.min[axis] : nb.max[axis]);
+        var p = t.position; p[axis] += anchor - newAnchor; t.position = p;
+
+        EditorUtility.SetDirty(t);
+        EditorUtility.SetDirty(sr);
     }
 
     // ── 고스트 미리보기 ──
@@ -1111,6 +1203,16 @@ public class Prop2DCatalogEditor : EditorWindow
         AssetDatabase.SaveAssets();
         if (wasXray) SetCeilingAlpha(_ceilingXrayAlpha);
         Debug.Log($"[Prop Catalog] 맵 프리팹 저장: {path} (루트 '{root.name}')");
+
+        // 저장 시 DontSave 런타임 자식(발밑 그림자·손상/풍화 오버레이)이 떨어져 에디터에서 사라짐 → 강제 재생성.
+        var savedRoot = root;
+        EditorApplication.delayCall += () =>
+        {
+            if (savedRoot == null) return;
+            foreach (var g in savedRoot.GetComponentsInChildren<GroundShadow2D>(true)) if (g != null) g.Rebuild();
+            foreach (var w in savedRoot.GetComponentsInChildren<Weathered>(true)) if (w != null) w.Rebuild();
+            foreach (var b in savedRoot.GetComponentsInChildren<Breakable>(true)) if (b != null) b.RebuildOverlay();
+        };
     }
 
     /// <summary>root 하위에서 SpriteRenderer + BoxCollider2D를 가진 프롭에 ColliderAutoFit을 부착(없을 때만).
@@ -1121,11 +1223,36 @@ public class Prop2DCatalogEditor : EditorWindow
         int n = 0;
         foreach (var sr in root.GetComponentsInChildren<SpriteRenderer>(true))
         {
-            if (sr == null) continue;
+            if (sr == null || sr.sprite == null) continue;
             var go = sr.gameObject;
-            if (go.GetComponent<BoxCollider2D>() == null) continue;     // Box 전용
+            var box = go.GetComponent<BoxCollider2D>();
+            if (box == null) continue;                                  // Box 전용
             if (go.GetComponent<ColliderAutoFit>() != null) continue;   // 이미 있음
-            go.AddComponent<ColliderAutoFit>();
+
+            // 현재 콜라이더를 보존하도록 scale/offset 역산(이후 스프라이트 변경엔 비례 추종).
+            Vector2 prevSize = box.size, prevOffset = box.offset;
+            Vector2 baseSize, center;
+            if (sr.drawMode != SpriteDrawMode.Simple)
+            {
+                baseSize = sr.size;
+                var sb = sr.sprite.bounds;
+                center = new Vector2(
+                    sb.size.x > 1e-5f ? baseSize.x * (sb.center.x / sb.size.x) : 0f,
+                    sb.size.y > 1e-5f ? baseSize.y * (sb.center.y / sb.size.y) : 0f);
+            }
+            else
+            {
+                var b = sr.sprite.bounds;
+                baseSize = b.size;
+                center = b.center;
+            }
+
+            var fit = go.AddComponent<ColliderAutoFit>();   // OnEnable이 기본값(1,0)으로 한 번 맞춤 → 아래서 보정
+            fit.sizeScale = new Vector2(
+                baseSize.x > 1e-5f ? prevSize.x / baseSize.x : 1f,
+                baseSize.y > 1e-5f ? prevSize.y / baseSize.y : 1f);
+            fit.offset = prevOffset - center;
+            fit.Refit();                                    // 보존 값으로 즉시 재맞춤(원래 콜라이더 복원)
             n++;
         }
         return n;
