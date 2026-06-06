@@ -11,7 +11,7 @@ using UnityEngine;
 ///   ※ 루프가 로드하는 씬에 바로 채워 "빈 안전가옥" 문제를 해소. 모든 그레이박스는 'Map' 루트 하위.
 ///
 /// 배치(ScrapMarket과 동일):
-///   • XY 평면, Z=0, 1u=1m. 맵 30(W)×24(H), 중심 (15,12).
+///   • XY 평면, Z=0, 1u=1m. 맵 22(W)×14(H), 중심 (11,7) — 컴팩트(파밍 없는 마을 골목).
 ///   • 벽 = gb_wall을 (lenX, thickY, 1)로 스케일한 바. 바닥 = gb_floor 1개 전체 스케일.
 ///   • 시설/NPC/스폰 = 스케일 1 마커. 스폰은 pointId 직렬화 설정(default/raid_return/raid_fail/raid_death).
 ///   • 멱등: 같은 경로로 저장하면 덮어씀. 프리팹은 InstantiatePrefab(링크 유지).
@@ -23,7 +23,7 @@ public static class SafehouseGreyboxLayout
     const string ScenePath  = "Assets/Scenes/Safehouse.unity";
     const string PrefabRoot = "Props2D/Prefabs/";
 
-    const float MapW = 30f, MapH = 24f;
+    const float MapW = 22f, MapH = 14f;   // 컴팩트한 마을 골목(파밍 없음 — 여백 최소)
 
     static readonly string[] RequiredPrefabIds =
     {
@@ -40,36 +40,35 @@ public static class SafehouseGreyboxLayout
 
         EnsureGreyboxPalette();
 
-        // ── 바닥 + 외곽 벽 ──
-        n += Floor(map, "Floor", 15f, 12f, MapW, MapH);
-        n += Wall(map, "Wall_S", 15f,  0.5f, 30f, 1f);
-        n += Wall(map, "Wall_N", 15f, 23.5f, 30f, 1f);
-        n += Wall(map, "Wall_W",  0.5f,12f,   1f,24f);
-        n += Wall(map, "Wall_E", 29.5f,12f,   1f,24f);
+        // ── 바닥 + 외곽 벽 (22×14, 컴팩트) ──
+        n += Floor(map, "Floor", 11f, 7f, MapW, MapH);
+        n += Wall(map, "Wall_S", 11f,  0.5f, 22f, 1f);
+        n += Wall(map, "Wall_N", 11f, 13.5f, 22f, 1f);
+        n += Wall(map, "Wall_W",  0.5f, 7f,   1f,14f);
+        n += Wall(map, "Wall_E", 21.5f, 7f,   1f,14f);
 
-        // ── 잠금 건물(곁가지) 막이 + 방호벽(게이트) : 분위기/게이팅 (바리케이드=막힘, 추후 해금) ──
-        n += Barricade(map, "Furniture_Locked", 3.5f, 19f, 5f, 1f);  // 좌상 가구점🔒
-        n += Barricade(map, "Repair_Locked",    3.5f,  5f, 5f, 1f);  // 좌하 수리점🔒
-        n += Barricade(map, "Gate_Barrier_N",  28f,  17f, 2f, 6f);   // 우측 방호벽(게이트 너머 폐도시)
-        n += Barricade(map, "Gate_Barrier_S",  28f,   7f, 2f, 6f);
+        // ── 잠금 건물(곁가지) + 방호벽(게이트) : 바리케이드=막힘(추후 해금) ──
+        n += Barricade(map, "Furniture_Locked", 4f, 11.5f, 4f, 1f);  // 좌상 가구점🔒
+        n += Barricade(map, "Repair_Locked",    4f,  2.5f, 4f, 1f);  // 좌하 수리점🔒
+        n += Barricade(map, "Gate_Barrier_N",  20f, 10.5f, 1f, 5f);  // 우측 방호벽(폐도시 경계)
+        n += Barricade(map, "Gate_Barrier_S",  20f,  3.5f, 1f, 5f);
 
-        // ── 은신처(컨테이너) 입구 — 마당 서측. 실내(Hideout.unity)로 씬 전환 진입(ExitPoint). ──
-        //    침대/작업대/조리대/의료대는 컨테이너 실내(Hideout.unity, HideoutGreyboxLayout)로 이전(story S-011).
-        n += Exit (map, "Hideout_Entrance", 6f, 16f, "Hideout", "default");  // 은신처 입구(→Hideout)
-        n += Spawn(map, "default",      7f, 12f);   // 부팅/기본
-        n += Spawn(map, "raid_return",  8.5f,12f);  // 탈출 귀환
-        n += Spawn(map, "raid_fail",    5.5f,12f);  // 시간초과
-        n += Spawn(map, "raid_death",   7f, 10.5f); // 사망
-        n += Spawn(map, "from_hideout", 6f, 14.5f); // 컨테이너에서 복귀 시 입구 옆
+        // ── 은신처(컨테이너) 입구 — 서측. 실내(Hideout.unity)로 씬 전환(ExitPoint). 시설은 컨테이너 안(S-011). ──
+        n += Exit (map, "Hideout_Entrance", 4f, 10f, "Hideout", "default");
+        n += Spawn(map, "default",      5.5f, 7f);   // 부팅/기본
+        n += Spawn(map, "raid_return",  7f,   7f);   // 탈출 귀환
+        n += Spawn(map, "raid_fail",    4f,   7f);   // 시간초과
+        n += Spawn(map, "raid_death",   5.5f, 5.5f); // 사망
+        n += Spawn(map, "from_hideout", 4f,   9f);   // 컨테이너 복귀 시 입구 옆
 
-        // ── 출발 클러스터(마당 동측) — 스토리 S-002~S-004 동선: 전당포 → (우측)회수꾼+게시판 → 레이드 문 ──
-        n += Npc(map, "NPC_Pawnshop", "pawnshop",          23f, 13f);   // 전당포 주인(강무진), 본래 실내(별도 씬)
-        n += Npc(map, "NPC_Veteran",  "veteran_scavenger", 25.5f,13f);  // 베테랑 회수꾼 — 전당포 우측 길바닥 상주
-        n += Marker(map, "gb_mapboard","Board_Quest",      26f, 15.5f); // 게시판(의뢰 보드) — 회수꾼 옆. ※코드는 MapBoard→MapSelectUI
-        n += Marker(map, "gb_door",    "Gate_RaidDoor",    27.5f,10f);  // 레이드 문(게이트, 출격)
+        // ── 출발 클러스터(동측) — 스토리 S-002~004: 전당포 → (우측)회수꾼+게시판 → 레이드 문 ──
+        n += Npc(map, "NPC_Pawnshop", "pawnshop",          16f, 7f);   // 전당포 주인(강무진)
+        n += Npc(map, "NPC_Veteran",  "veteran_scavenger", 18f, 7f);   // 회수꾼 — 전당포 우측
+        n += Marker(map, "gb_mapboard","Board_Quest",      18f, 9.5f); // 게시판(의뢰). ※코드는 MapBoard→MapSelectUI
+        n += Marker(map, "gb_door",    "Gate_RaidDoor",    19f, 4.5f); // 레이드 문(게이트)
 
-        // ── 구역 관리인(거처 배정, S-010) — 마당 ──
-        n += Npc(map, "NPC_Warden", "district_warden", 16f, 19f);
+        // ── 구역 관리인(S-010) — 마당 중앙북 ──
+        n += Npc(map, "NPC_Warden", "district_warden", 11f, 11f);
 
         // ── 저장(덮어쓰기) ──
         Selection.activeObject = null;
