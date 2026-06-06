@@ -18,6 +18,8 @@ public static class WorldRegionCatalog
         public int difficulty;
         public Color accentColor;
         public float timeOffsetSeconds;
+        /// <summary>짙은 현상 기본 침식도(0~1, 시간 무관). DenseAnomalyController가 fog+어둠 강도로 사용.</summary>
+        public float anomaly;
 
         public bool IsPlayable => !string.IsNullOrEmpty(sceneName);
 
@@ -52,7 +54,7 @@ public static class WorldRegionCatalog
             regionId = "scrap_market",
             displayName = "폐상가 교역 지구",
             subzone = "무너진 상가 / 검문소",
-            sceneName = "InGameScene",
+            sceneName = "ScrapMarket_GB",
             spawnId = "default",
             dayFeature = "기본 파밍·NPC·쪽지 (1차 데모)",
             nightFeature = "밴딧·몬스터 혼합·네온 골목",
@@ -72,6 +74,7 @@ public static class WorldRegionCatalog
             difficulty = 3,
             accentColor = new Color(0.35f, 0.85f, 0.45f),
             timeOffsetSeconds = 90f,
+            anomaly = 0.2f,           // 기계 이상현상
         },
         new RegionDefinition
         {
@@ -85,6 +88,7 @@ public static class WorldRegionCatalog
             difficulty = 4,
             accentColor = new Color(0.75f, 0.35f, 0.95f),
             timeOffsetSeconds = 150f,
+            anomaly = 0.35f,          // 보스·괴현상
         },
         new RegionDefinition
         {
@@ -111,6 +115,7 @@ public static class WorldRegionCatalog
             difficulty = 3,
             accentColor = new Color(0.35f, 0.9f, 0.85f),
             timeOffsetSeconds = 280f,
+            anomaly = 0.7f,           // 성역 = 짙은 현상 핵심 지역
         },
         new RegionDefinition
         {
@@ -124,6 +129,7 @@ public static class WorldRegionCatalog
             difficulty = 5,
             accentColor = new Color(0.55f, 0.25f, 0.85f),
             timeOffsetSeconds = 360f,
+            anomaly = 0.9f,           // 중앙 영야 = 최고 침식
         },
     };
 
