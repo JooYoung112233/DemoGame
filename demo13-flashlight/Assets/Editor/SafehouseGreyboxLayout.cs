@@ -80,8 +80,8 @@ public static class SafehouseGreyboxLayout
         // ── 컨테이너 지역(우하): 집/은신처 = 컨테이너 외관 + 입구(→Hideout 씬, 타르코프식) + 관리인 + 집앞 스폰 ──
         n += Wall(map, "Container_Home", 32f, 5f, 8f, 5f, "집 (은신처)");      // 사는 컨테이너 외관(솔리드) — 내부는 Hideout 씬
         n += Exit (map, "Hideout_Entrance", 27.5f, 5f, "Hideout", "default"); // 입구 → 별도 실내 씬(Hideout.unity)
-        n += Npc (map, "NPC_Warden",  "district_warden",  26f, 6.5f);        // 구역 관리인 — 컨테이너 지역(집 배정, S-010)
-        n += Spawn(map, "default",     26f, 3.5f);                           // ① 최초 시작 / 은신처 귀환 — 집 앞
+        n += Spawn(map, "default",     26.5f, 5f);                           // ① 최초 시작 + 은신처 귀환 — 집 문 앞(Hideout 출구가 default로 복귀)
+        n += Npc (map, "NPC_Warden",  "district_warden",  26f, 6.8f);        // 구역 관리인 — 컨테이너 지역(집 배정, S-010)
         n += Wall(map, "Container_D1", 27f, 8.3f, 3f, 0.8f, "컨테이너");      // 지역 더미
         n += Wall(map, "Container_D2", 34f, 8.3f, 4f, 0.8f, "컨테이너");      // 지역 더미
 
