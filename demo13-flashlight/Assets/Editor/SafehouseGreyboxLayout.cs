@@ -27,8 +27,8 @@ public static class SafehouseGreyboxLayout
 
     static readonly string[] RequiredPrefabIds =
     {
-        "gb_floor", "gb_wall", "gb_barricade", "gb_spawn", "gb_npc", "gb_door",
-        "gb_bed", "gb_mapboard", "gb_workbench", "gb_medbench", "gb_cookbench",
+        "gb_floor", "gb_wall", "gb_barricade", "gb_spawn", "gb_npc", "gb_door", "gb_exit",
+        "gb_mapboard",
     };
 
     [MenuItem("Tools/TopDown/Map/Build Safehouse Greybox Layout")]
@@ -53,19 +53,14 @@ public static class SafehouseGreyboxLayout
         n += Barricade(map, "Gate_Barrier_N",  28f,  17f, 2f, 6f);   // 우측 방호벽(게이트 너머 폐도시)
         n += Barricade(map, "Gate_Barrier_S",  28f,   7f, 2f, 6f);
 
-        // ── 은신처(집/컨테이너) — 마당 서측. 스폰(부팅/귀환/실패/사망 복귀) ──
-        //    ※ 본래 컨테이너 은신처는 실내(별도 씬, S-010 획득). v1 그레이박스는 입구 마커 + 마당 스폰으로 단순화.
-        n += Marker(map, "gb_door", "Hideout_Door", 6f, 16f);   // 컨테이너 은신처 입구
-        n += Spawn(map, "default",     7f, 12f);
-        n += Spawn(map, "raid_return", 8.5f,12f);
-        n += Spawn(map, "raid_fail",   5.5f,12f);
-        n += Spawn(map, "raid_death",  7f, 10.5f);
-
-        // ── 은신처 내부 시설(본래 컨테이너 실내 — S-011. v1은 마당에 노출해 테스트) ──
-        n += Marker(map, "gb_bed",       "Bed",          4f, 14f);
-        n += Marker(map, "gb_workbench", "Workbench",    4f,  9f);
-        n += Marker(map, "gb_medbench",  "MedicalBench",10f, 14f);
-        n += Marker(map, "gb_cookbench", "CookingBench",10f,  9f);
+        // ── 은신처(컨테이너) 입구 — 마당 서측. 실내(Hideout.unity)로 씬 전환 진입(ExitPoint). ──
+        //    침대/작업대/조리대/의료대는 컨테이너 실내(Hideout.unity, HideoutGreyboxLayout)로 이전(story S-011).
+        n += Exit (map, "Hideout_Entrance", 6f, 16f, "Hideout", "default");  // 은신처 입구(→Hideout)
+        n += Spawn(map, "default",      7f, 12f);   // 부팅/기본
+        n += Spawn(map, "raid_return",  8.5f,12f);  // 탈출 귀환
+        n += Spawn(map, "raid_fail",    5.5f,12f);  // 시간초과
+        n += Spawn(map, "raid_death",   7f, 10.5f); // 사망
+        n += Spawn(map, "from_hideout", 6f, 14.5f); // 컨테이너에서 복귀 시 입구 옆
 
         // ── 출발 클러스터(마당 동측) — 스토리 S-002~S-004 동선: 전당포 → (우측)회수꾼+게시판 → 레이드 문 ──
         n += Npc(map, "NPC_Pawnshop", "pawnshop",          23f, 13f);   // 전당포 주인(강무진), 본래 실내(별도 씬)
@@ -156,6 +151,24 @@ public static class SafehouseGreyboxLayout
             var so = new SerializedObject(sp);
             var p = so.FindProperty("pointId");
             if (p != null) { p.stringValue = pointId; so.ApplyModifiedPropertiesWithoutUndo(); }
+        }
+        return 1;
+    }
+
+    /// <summary>ExitPoint(씬 전환) 마커 — targetScene/spawnPointId/대기 설정. 건물 진입은 즉시(wait 0).</summary>
+    static int Exit(GameObject parent, string name, float x, float y, string targetScene, string spawnId)
+    {
+        var go = Inst("gb_exit", name, parent);
+        if (go == null) return 0;
+        go.transform.localPosition = new Vector3(x, y, 0f);
+        var io = go.GetComponentInChildren<InteractableObject>();
+        if (io != null)
+        {
+            var so = new SerializedObject(io);
+            var ts = so.FindProperty("targetScene");  if (ts != null) ts.stringValue = targetScene;
+            var sp = so.FindProperty("spawnPointId");  if (sp != null) sp.stringValue = spawnId;
+            var ew = so.FindProperty("exitWaitTime");  if (ew != null) ew.floatValue = 0f;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
         return 1;
     }
