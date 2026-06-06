@@ -27,7 +27,7 @@ public static class SafehouseGreyboxLayout
 
     static readonly string[] RequiredPrefabIds =
     {
-        "gb_floor", "gb_wall", "gb_barricade", "gb_spawn", "gb_npc",
+        "gb_floor", "gb_wall", "gb_barricade", "gb_spawn", "gb_npc", "gb_door",
         "gb_bed", "gb_mapboard", "gb_workbench", "gb_medbench", "gb_cookbench",
     };
 
@@ -53,27 +53,28 @@ public static class SafehouseGreyboxLayout
         n += Barricade(map, "Gate_Barrier_N",  28f,  17f, 2f, 6f);   // 우측 방호벽(게이트 너머 폐도시)
         n += Barricade(map, "Gate_Barrier_S",  28f,   7f, 2f, 6f);
 
-        // ── 스폰(집/허브 중앙) : 부팅/귀환/시간초과/사망 복귀 ──
-        n += Spawn(map, "default",     15f, 12f);
-        n += Spawn(map, "raid_return", 16.5f,12f);
-        n += Spawn(map, "raid_fail",   13.5f,12f);
-        n += Spawn(map, "raid_death",  15f, 10.5f);
+        // ── 은신처(집/컨테이너) — 마당 서측. 스폰(부팅/귀환/실패/사망 복귀) ──
+        //    ※ 본래 컨테이너 은신처는 실내(별도 씬, S-010 획득). v1 그레이박스는 입구 마커 + 마당 스폰으로 단순화.
+        n += Marker(map, "gb_door", "Hideout_Door", 6f, 16f);   // 컨테이너 은신처 입구
+        n += Spawn(map, "default",     7f, 12f);
+        n += Spawn(map, "raid_return", 8.5f,12f);
+        n += Spawn(map, "raid_fail",   5.5f,12f);
+        n += Spawn(map, "raid_death",  7f, 10.5f);
 
-        // ── 집 안 시설(허브 주변) ──
-        n += Marker(map, "gb_bed",       "Bed",         10f, 15f);
-        n += Marker(map, "gb_workbench", "Workbench",   10f,  9f);
-        n += Marker(map, "gb_medbench",  "MedicalBench",20f, 15f);
-        n += Marker(map, "gb_cookbench", "CookingBench",20f,  9f);
+        // ── 은신처 내부 시설(본래 컨테이너 실내 — S-011. v1은 마당에 노출해 테스트) ──
+        n += Marker(map, "gb_bed",       "Bed",          4f, 14f);
+        n += Marker(map, "gb_workbench", "Workbench",    4f,  9f);
+        n += Marker(map, "gb_medbench",  "MedicalBench",10f, 14f);
+        n += Marker(map, "gb_cookbench", "CookingBench",10f,  9f);
 
-        // ── 우측 출발 클러스터 : 지도판(출전) + 베테랑 회수꾼 ──
-        n += Marker(map, "gb_mapboard", "MapBoard",   26f, 12f);
-        n += Marker(map, "gb_npc",      "NPC_Veteran",24f,  9f);  // 베테랑 회수꾼(첫 일거리)
+        // ── 출발 클러스터(마당 동측) — 스토리 S-002~S-004 동선: 전당포 → (우측)회수꾼+게시판 → 레이드 문 ──
+        n += Npc(map, "NPC_Pawnshop", "pawnshop",          23f, 13f);   // 전당포 주인(강무진), 본래 실내(별도 씬)
+        n += Npc(map, "NPC_Veteran",  "veteran_scavenger", 25.5f,13f);  // 베테랑 회수꾼 — 전당포 우측 길바닥 상주
+        n += Marker(map, "gb_mapboard","Board_Quest",      26f, 15.5f); // 게시판(의뢰 보드) — 회수꾼 옆. ※코드는 MapBoard→MapSelectUI
+        n += Marker(map, "gb_door",    "Gate_RaidDoor",    27.5f,10f);  // 레이드 문(게이트, 출격)
 
-        // ── 하단: 전당포 NPC (집 바로 아래) ──
-        n += Marker(map, "gb_npc", "NPC_Pawnshop", 15f, 3.5f);
-
-        // ── 좌측: 구역 관리인 NPC ──
-        n += Marker(map, "gb_npc", "NPC_Warden", 4.5f, 12f);
+        // ── 구역 관리인(거처 배정, S-010) — 마당 ──
+        n += Npc(map, "NPC_Warden", "district_warden", 16f, 19f);
 
         // ── 저장(덮어쓰기) ──
         Selection.activeObject = null;
@@ -155,6 +156,22 @@ public static class SafehouseGreyboxLayout
             var so = new SerializedObject(sp);
             var p = so.FindProperty("pointId");
             if (p != null) { p.stringValue = pointId; so.ApplyModifiedPropertiesWithoutUndo(); }
+        }
+        return 1;
+    }
+
+    /// <summary>NPC 마커 + storyNpcId 직렬화(대화/상점은 NPC Maker로 NPCData 별도 연결).</summary>
+    static int Npc(GameObject parent, string name, string storyNpcId, float x, float y)
+    {
+        var go = Inst("gb_npc", name, parent);
+        if (go == null) return 0;
+        go.transform.localPosition = new Vector3(x, y, 0f);
+        var npc = go.GetComponentInChildren<NPCController>();
+        if (npc != null)
+        {
+            var so = new SerializedObject(npc);
+            var p = so.FindProperty("storyNpcId");
+            if (p != null) { p.stringValue = storyNpcId; so.ApplyModifiedPropertiesWithoutUndo(); }
         }
         return 1;
     }
