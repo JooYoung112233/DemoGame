@@ -5,9 +5,10 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 /// <summary>
-/// 컨테이너 은신처 '실내' 그레이박스 씬(Hideout.unity). (docs/safehouse.md 실내 / story-script S-011)
-///   박스 침상(수면) + 부서진 작업대 + 시설 슬롯(조리대/의료대) + 안전가옥으로 나가는 출구.
-/// 안전가옥(Safehouse)의 은신처 입구(ExitPoint→"Hideout")에서 씬 전환으로 진입, 출구로 복귀(→"Safehouse"/from_hideout).
+/// 컨테이너 은신처 '실내' 그레이박스 씬(Hideout.unity) — 타르코프식 화면. (docs/safehouse.md 실내 / story-script S-011)
+///   박스 침상(수면) + 부서진 작업대 + 시설 슬롯(조리대/의료대). 캐릭터로 걷지 않고 HideoutController가
+///   플레이어를 숨기고 카메라를 방에 고정 → 시설을 '클릭'하면 각 UI(제작/휴식 등)가 열림. '나가기' 버튼/ESC로 복귀.
+/// 안전가옥(Safehouse)의 은신처 입구(ExitPoint→"Hideout")에서 씬 전환으로 진입, 나가기 → "Safehouse"/default(집 문 앞).
 /// 콘텐츠 전용(Systems가 카메라/조명/매니저/플레이어 공급). 빌드세팅에 Hideout 자동 등록.
 ///
 /// 메뉴: Tools ▸ TopDown ▸ Map ▸ Build Hideout Greybox Layout
@@ -24,7 +25,7 @@ public static class HideoutGreyboxLayout
         "gb_bed", "gb_workbench", "gb_medbench", "gb_cookbench",
     };
 
-    [MenuItem("Tools/TopDown/Map/Build Hideout Greybox Layout")]
+    [MenuItem("Tools/TopDown/맵/은신처 그레이박스")]
     public static void Build()
     {
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -44,11 +45,16 @@ public static class HideoutGreyboxLayout
         n += Spawn(map, "default", 3f, 4.5f);
         n += Exit (map, "Exit_ToSafehouse", 1.5f, 4.5f, "Safehouse", "default");
 
-        // 시설: 박스 침상 + 부서진 작업대 + 슬롯(조리대/의료대)
+        // 시설: 박스 침상 + 부서진 작업대 + 슬롯(조리대/의료대) — 클릭하면 각 UI(타르코프식)
         n += Marker(map, "gb_bed",       "Bed_BoxCot",      5f, 6.5f);
         n += Marker(map, "gb_workbench", "Workbench_Broken",9f, 6.5f);
         n += Marker(map, "gb_cookbench", "CookingBench",   11f, 2.5f);
         n += Marker(map, "gb_medbench",  "MedicalBench",    5f, 2.5f);
+
+        // 타르코프식 화면 컨트롤러: 캐릭터 숨김 + 카메라 고정(방 중심 7,4.5 / size 5) + 클릭 상호작용 + 나가기 버튼/ESC.
+        var hc = new GameObject("HideoutController").AddComponent<HideoutController>();
+        hc.transform.SetParent(map.transform);
+        n += 1;
 
         Selection.activeObject = null;
         EditorSceneManager.MarkSceneDirty(scene);
