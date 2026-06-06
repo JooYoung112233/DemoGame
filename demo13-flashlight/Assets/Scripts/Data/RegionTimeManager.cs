@@ -11,7 +11,7 @@ public class RegionTimeManager : MonoBehaviour
 
     [Header("Cycle Settings (전 지역 공통)")]
     [SerializeField] float dayDuration = 120f;
-    [SerializeField] float nightDuration = 300f;
+    [SerializeField] float nightDuration = 600f; // 짙은 현상 1회 지속 ≈ 10분
 
     /// <summary>지역 하나의 시간 상태</summary>
     [System.Serializable]
@@ -64,6 +64,11 @@ public class RegionTimeManager : MonoBehaviour
 
     void InitRegions()
     {
+        if (GameTuning.Instance != null)
+        {
+            dayDuration = GameTuning.Instance.dayDuration;
+            nightDuration = GameTuning.Instance.nightDuration;
+        }
         var defs = WorldRegionCatalog.All;
         regions = new RegionTime[defs.Length];
 

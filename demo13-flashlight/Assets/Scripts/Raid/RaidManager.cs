@@ -18,7 +18,7 @@ public class RaidManager : MonoBehaviour
 
     [Header("Raid Timer")]
     [Tooltip("레이드 제한 시간(초). 0이면 무제한")]
-    [SerializeField] float raidDuration = 900f; // 15분
+    [SerializeField] float raidDuration = 1200f; // 20분
     [SerializeField] bool enableTimer = true;
 
     [Header("Time Over")]
@@ -78,6 +78,7 @@ public class RaidManager : MonoBehaviour
 
     void Start()
     {
+        if (GameTuning.Instance != null) raidDuration = GameTuning.Instance.raidDuration;
         remainingTime = raidDuration;
         raidStartTime = Time.time;
         raidActive = true;

@@ -1093,7 +1093,8 @@ public class CharacterPanelUI : MonoBehaviour
             case ItemRarity.Legendary: baseDelay = 1.8f; break;
             default: baseDelay = 0.5f; break;
         }
-        return baseDelay + Random.Range(-0.1f, 0.1f);
+        float mult = GameTuning.Instance != null ? GameTuning.Instance.searchSpeedMult : 1f;
+        return (baseDelay + Random.Range(-0.1f, 0.1f)) * mult;
     }
 
     void UpdateSearchStatusText()

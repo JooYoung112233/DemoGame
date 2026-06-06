@@ -26,7 +26,9 @@ public class RegionLootBootstrap : MonoBehaviour
     static void DropTier(Vector3 origin, string region, RegionLootTier tier, int times, float radius)
     {
         tier = RegionLootCatalog.ResolveTier(tier, region);
-        for (int t = 0; t < times; t++)
+        float mult = GameTuning.Instance != null ? GameTuning.Instance.lootCountMult : 1f;
+        int rolls = Mathf.Max(0, Mathf.RoundToInt(times * mult));
+        for (int t = 0; t < rolls; t++)
         {
             var items = RegionLootCatalog.Roll(region, tier);
             for (int i = 0; i < items.Length; i++)
