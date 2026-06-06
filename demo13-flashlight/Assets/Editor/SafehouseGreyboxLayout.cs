@@ -5,7 +5,7 @@ using UnityEngine;
 
 /// <summary>
 /// 안전가옥 그레이박스 레이아웃을 gb_* 프리팹으로 Safehouse.unity에 배치(지역1=ScrapMarket과 동일 기법).
-/// (docs/safehouse.md '# 격자 골목' — 전당포(상중,내부+주인장) / 광장(중앙) / 컨테이너지역(우하,관리인+집 내부) / 떠돌이상인(중하) / 잠금건물=벽)
+/// (docs/safehouse.md '# 격자 골목' + '실내 맵(별도 씬)' — 전당포(상중,내부 방+주인장) / 광장(중앙) / 컨테이너지역(우하,관리인+집 입구→Hideout 씬) / 떠돌이상인(중하) / 잠금건물=벽)
 ///
 /// 생성물: Assets/Scenes/Safehouse.unity — '맵 콘텐츠'만(카메라/조명/매니저/플레이어는 Systems 부트 씬이 공급).
 ///   ※ 루프가 로드하는 씬에 바로 채워 "빈 안전가옥" 문제를 해소. 모든 그레이박스는 'Map' 루트 하위.
@@ -14,7 +14,8 @@ using UnityEngine;
 ///   • XY 평면, Z=0, 1u=1m. 맵 38(W)×27(H), 중심 (19,13.5). 골목이 #자(가로2+세로2)로 교차 → 3×3 = 9칸.
 ///     세로골목 X9~12·X22~25, 가로골목 Y9~12·Y17~20.
 ///   • 칸: 상단=수리점벽/전당포(내부+주인장)/의료소벽 · 중단=가구점벽/광장(허브,열림)/게시판+게이트 · 하단=블랙마켓벽/떠돌이상인/컨테이너지역(관리인+집).
-///   • '내부 보임' 건물 = 벽 4면 + 한 면 문틈 + 내부 가구/NPC(지붕 없음). 전당포(강무진+카운터), 집/은신처(침대·작업대·의료대·조리대·창고 — 옛 Hideout 씬 흡수).
+///   • 전당포(상중) = '내부 보임' 방(벽 4면 + 문틈 + 강무진 + 카운터, 지붕 없음).
+///   • 집/은신처(우하) = 컨테이너 외관(솔리드) + 입구(Exit→Hideout 씬). 들어가면 타르코프식 별도 실내 씬 전환 — 침대·작업대 등은 Hideout.unity(HideoutGreyboxLayout). docs/safehouse.md '실내 맵(별도 씬)'.
 ///   • 동쪽 = 세로 방호벽 게이트(개구부 Y13~16 = 게시판 바로 우측) → 폐도시(출전은 게시판 의뢰로). 잠금건물(벽) 입구는 셔터.
 ///   • 벽/블록/방 = gb_wall, 셔터/방호벽 = gb_barricade. 스폰 2개: default(집 앞) / raid_return(중앙 광장).
 ///   • 멱등: 같은 경로로 저장하면 덮어씀. 프리팹은 InstantiatePrefab(링크 유지).
@@ -30,8 +31,7 @@ public static class SafehouseGreyboxLayout
 
     static readonly string[] RequiredPrefabIds =
     {
-        "gb_floor", "gb_wall", "gb_barricade", "gb_spawn", "gb_npc", "gb_mapboard",
-        "gb_bed", "gb_workbench", "gb_medbench", "gb_cookbench", "gb_crate",   // 집(은신처) 내부 시설
+        "gb_floor", "gb_wall", "gb_barricade", "gb_spawn", "gb_npc", "gb_mapboard", "gb_exit",
     };
 
     [MenuItem("Tools/TopDown/맵/안전가옥 그레이박스")]
@@ -77,16 +77,13 @@ public static class SafehouseGreyboxLayout
         // ── 떠돌이 상인(중하, 옛 집자리) ──
         n += Npc (map, "NPC_Merchant", "wandering_merchant", 17f, 5f);  // 떠돌이 상인 — 옛 집 자리
 
-        // ── 컨테이너 지역(우하): 집/은신처(내부 보임 = 옛 Hideout 흡수) + 관리인 + 집앞 스폰 + 컨테이너 ──
-        n += Room(map, "Home", 32.5f, 5f, 8f, 6f, "W", 2.5f);          // 방 X28.5~36.5 Y2~8, 서 문 Y3.75~6.25
-        n += Marker(map, "gb_bed",       "Home_Bed",       30.5f, 6.5f); // 침대
-        n += Marker(map, "gb_crate",     "Home_Storage",   32.5f, 6.5f); // 창고(보관함)
-        n += Marker(map, "gb_workbench", "Home_Workbench", 34.5f, 6.5f); // 작업대
-        n += Marker(map, "gb_medbench",  "Home_MedBench",  30.5f, 3.5f); // 의료대
-        n += Marker(map, "gb_cookbench", "Home_CookBench", 34.5f, 3.5f); // 조리대
-        n += Npc (map, "NPC_Warden",   "district_warden",  26.5f, 6.5f);// 구역 관리인 — 컨테이너 지역(집 배정)
-        n += Spawn(map, "default",     26.5f, 3.5f);                    // ① 최초 시작 — 집 앞
-        n += Wall(map, "Container_D1", 26.5f, 8f, 3f, 0.9f, "컨테이너"); // 지역 더미
+        // ── 컨테이너 지역(우하): 집/은신처 = 컨테이너 외관 + 입구(→Hideout 씬, 타르코프식) + 관리인 + 집앞 스폰 ──
+        n += Wall(map, "Container_Home", 32f, 5f, 8f, 5f, "집 (은신처)");      // 사는 컨테이너 외관(솔리드) — 내부는 Hideout 씬
+        n += Exit (map, "Hideout_Entrance", 27.5f, 5f, "Hideout", "default"); // 입구 → 별도 실내 씬(Hideout.unity)
+        n += Npc (map, "NPC_Warden",  "district_warden",  26f, 6.5f);        // 구역 관리인 — 컨테이너 지역(집 배정, S-010)
+        n += Spawn(map, "default",     26f, 3.5f);                           // ① 최초 시작 / 은신처 귀환 — 집 앞
+        n += Wall(map, "Container_D1", 27f, 8.3f, 3f, 0.8f, "컨테이너");      // 지역 더미
+        n += Wall(map, "Container_D2", 34f, 8.3f, 4f, 0.8f, "컨테이너");      // 지역 더미
 
         // ── 저장(덮어쓰기) ──
         Selection.activeObject = null;
@@ -101,18 +98,18 @@ public static class SafehouseGreyboxLayout
 
         Debug.Log($"<color=cyan>[SafehouseGB]</color> 생성 완료: {ScenePath} — Map 하위 그레이박스 {n}개.\n" +
                   "  • # 격자(38×27): 골목 가로2(Y9~12·Y17~20)+세로2(X9~12·X22~25) → 3×3 9칸.\n" +
-                  "  • 상단=수리점벽/전당포(내부+강무진)/의료소벽 · 중단=가구점벽/광장(허브+raid_return스폰)/게시판+회수꾼+게이트 · 하단=블랙마켓벽/떠돌이상인/컨테이너지역(관리인+집).\n" +
-                  "  • 집/은신처=내부 보이는 방(침대·창고·작업대·의료대·조리대 = 옛 Hideout 흡수) + 관리인 + 집앞 default스폰. 전당포도 내부 방+강무진+카운터.\n" +
+                  "  • 상단=수리점벽/전당포(내부 방+강무진)/의료소벽 · 중단=가구점벽/광장(허브+raid_return스폰)/게시판+회수꾼+게이트 · 하단=블랙마켓벽/떠돌이상인/컨테이너지역(관리인+집 입구).\n" +
+                  "  • 집/은신처=컨테이너 외관 + 입구(Hideout_Entrance → Hideout 씬, 타르코프식 전환). 침대·작업대 등 내부는 Hideout.unity. 같은 지역에 관리인 + 집앞 default스폰.\n" +
                   "  • 동쪽 방호벽 게이트(개구부 Y13~16 = 게시판 바로 우측) → 폐도시(출격은 게시판 의뢰로). 잠금건물=솔리드 벽+셔터.\n" +
                   "  • NPC는 storyNpcId로 NPCData 자동연결(SafehouseNpcBuilder 선행). 전당포=ShopData. 떠돌이상인(wandering_merchant)은 NPCData 없으면 빈 마커.");
 
         if (!Application.isBatchMode && !ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("Safehouse Greybox",
-                $"{ScenePath} 생성 완료 — # 격자 + 내부 보이는 건물(38×27).\n\nMap 루트 하위 그레이박스 {n}개:\n" +
-                "  • 전당포(상중, 내부+강무진+카운터) · 광장(중앙, raid_return 스폰)\n" +
-                "  • 집/은신처(우하 컨테이너 지역, 내부 침대·창고·작업대·의료대·조리대) + 관리인 + 집앞 스폰\n" +
+                $"{ScenePath} 생성 완료 — # 격자(38×27). 집=별도 씬 진입.\n\nMap 루트 하위 그레이박스 {n}개:\n" +
+                "  • 전당포(상중, 내부 방+강무진+카운터) · 광장(중앙, raid_return 스폰)\n" +
+                "  • 집/은신처(우하 컨테이너) = 입구→Hideout 씬(타르코프식). 같은 지역에 관리인 + 집앞 default 스폰\n" +
                 "  • 떠돌이상인(중하 옛 집자리) · 게시판+회수꾼+게이트(중우) · 잠금건물 4=벽\n\n" +
-                "옛 Hideout 씬 내용은 집 내부로 흡수(씬 전환 없음). 전당포=ShopData 자동연결.\n" +
+                "집 내부(침대/작업대 등)는 Hideout.unity(별도 씬). 전당포=ShopData 자동연결.\n" +
                 "Systems 부트 씬이 카메라/조명/매니저/플레이어를 공급합니다.", "확인");
     }
 
