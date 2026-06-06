@@ -42,7 +42,7 @@ public static class HideoutGreyboxLayout
 
         // 진입 스폰(안전가옥→여기) + 출구(여기→안전가옥/from_hideout)
         n += Spawn(map, "default", 3f, 4.5f);
-        n += Exit (map, "Exit_ToSafehouse", 1.5f, 4.5f, "Safehouse", "from_hideout");
+        n += Exit (map, "Exit_ToSafehouse", 1.5f, 4.5f, "Safehouse", "default");
 
         // 시설: 박스 침상 + 부서진 작업대 + 슬롯(조리대/의료대)
         n += Marker(map, "gb_bed",       "Bed_BoxCot",      5f, 6.5f);

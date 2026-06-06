@@ -24,7 +24,7 @@ public class RaidManager : MonoBehaviour
     [Header("Time Over")]
     [Tooltip("시간초과 시 자동 탈출할 씬")]
     [SerializeField] string failExitScene = "Safehouse";
-    [SerializeField] string failSpawnPointId = "raid_fail";
+    [SerializeField] string failSpawnPointId = "raid_return";   // 안전구역 스폰 2개로 통합(귀환 1곳)
     [Tooltip("시간초과 시 아이템 손실 비율 (0=손실없음, 1=전부)")]
     [SerializeField] float timeOverLossRate = 0.5f;
 
@@ -33,7 +33,7 @@ public class RaidManager : MonoBehaviour
     [SerializeField] float deathLossRate = 1f;
     [Tooltip("사망 후 복귀할 씬")]
     [SerializeField] string deathExitScene = "Safehouse";
-    [SerializeField] string deathSpawnPointId = "raid_death";
+    [SerializeField] string deathSpawnPointId = "raid_return";  // 안전구역 스폰 2개로 통합(귀환 1곳)
 
     [Header("HUD Style")]
     [SerializeField] int timerFontSize = 22;
