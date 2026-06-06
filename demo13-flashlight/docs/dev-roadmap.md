@@ -130,7 +130,7 @@
 | 아이템 검사 패널 UI(콘솔 로그만) | `UI/CharacterPanelUI.cs:1780` |
 | WorldItem 최종 아이콘/드롭 프리팹(placeholder 사각형) | `Inventory/WorldItem.cs:40` |
 | 인벤토리 줍기/보관 마무리 | 로드맵 3단계 |
-| 지도판 지역선택 팝업 + 귀환정산 실데이터 연동 | 로드맵 2단계 [예정] |
+| ~~지도판 팝업 + 귀환정산 실데이터 연동~~ ✅ 2026-06-05 | 루프 배선 — MapBoard→`MapSelectUI`, `RaidResultUI`+`RaidManager.PendingResult`(다녀왔을 때만 정산) |
 
 ### ⚪ 정리 / 품질
 - 리플렉션 private 접근 → 공개 Setter (`DoorController:245`, `NPCQuestMarker:166`, `MapObjectSpawner:103,305`)
@@ -147,6 +147,23 @@
 - 소규모: 가드/패링 데모 포함?, 안전가옥 강화 비용표, 엔딩 분기 조건, 수상한 아이 정체
 
 ---
+
+## 어디서부터 — 시작 순서 (2026-06-05)
+
+> 토대(시스템·게임 루프·Systems 부트씬·NPC/내비)는 **연결 완료**. 부족한 건 ①미검증 ②맵 콘텐츠 ③전투 체감.
+> 이번 세션 ✅: **Systems 부트씬**(additive 영속) · **게임 루프 배선**(안전가옥→지도판→레이드→파밍→탈출→정산→복귀) · **NPC 메이커**(NPCData 저작 윈도우 + 관계 초기값 시드) · **내비게이션**(RaidMapManager/NavigationHUD) · **적 은신**(EnemySpeechBubble).
+> 계획만 기록(코드 0): **Y정렬 깊이**(`rendering.md`), **랜턴**(`rendering.md`).
+
+| 순위 | 할 일 | 비고 |
+|---|---|---|
+| **0. 검증(게이트)** | 컴파일 0 에러 + Systems 씬 Play로 루프 1바퀴 | 깨지면 그게 즉시 1순위 |
+| **1. 플레이 가능한 한 판** | 폐상가 맵 바닥/벽 타일 + 파밍 오브젝트 + 탈출구 / 안전가옥 시설 + **전당포 NPC 배치** | 가장 큰 덩어리 = 맵 콘텐츠 |
+| **2. 체감(설계됨·구현0)** | FOV 시야 + 타격감 연출(히트스탑·흰 플래시·셰이크·DamagePopup 2D) + 랜턴 | `combat.md`/`rendering.md` |
+| **3. 연동 마무리** | 레이드이벤트 조건필터 · 아이템 검사패널 · WorldItem 아이콘 · 내비 세이브영속 · 적은신 LoS | 짬짬이 |
+| **4. 정리/품질** | 리플렉션→Setter · goto · 폐기 셰이더 · 플레이스홀더 아트 · Y정렬 P0~P1 | 겹침 거슬릴 때 |
+| **5. 기획 뿌리** | 게임 최종 목표(A 서사 / B 거점성장 / C 수집 / 혼합) 확정 | `replayability.md` — 안 정하면 방향 흔들림 |
+
+**추천: 0 → 1(폐상가 한 곳) → 2 중 하나.** 한 줄 요약: **"돈다 → 한 판 만든다 → 손맛 입힌다."**
 
 ## 미구현 / 마무리 필요 (2026-05-29 코드 점검)
 
@@ -210,3 +227,4 @@
 | 2026-05-30 | 미완 항목 처리: ① **화폐 시스템**(`CurrencyManager` + 퀘스트/업적/이벤트 보상·페널티 연동 + 세이브 + HUD ◈ + `docs/economy.md`), ② **공용 토스트 UI**(`ToastManager`, 문 피드백·화폐 변동 연동). |
 | 2026-05-30 | **스태미너 회복 소비 아이템 기획 제거.** 불필요 결정 → 핸들링·`PlayerController.RestoreStamina()` 삭제, Coffee/EnergySoup/StimInjector `useEffect` None 전환. `ItemUseEffect.RestoreStamina` enum 값은 직렬화 인덱스 보존 위해 deprecated로 유지. |
 | 2026-06-04 | **남은 작업 종합 재점검(탑다운+Systems 기준).** 상단에 [남은 작업 종합 (2026-06-04)] 섹션 신설 — 🔴핵심(맵 콘텐츠 제작·FOV 시야·타격감 연출) / 🟡연동 미완 / ⚪정리 / 🗺️콘텐츠 / 📋기획 결정 대기로 분류. 2026-05-29 점검은 탑다운 전환 이전 기준으로 명시. 정리: obsolete `TopDownPlayerBuilder.cs` 삭제(PlayerRig 전환으로 불필요), 구 `Player.prefab` 삭제 완료. |
+| 2026-06-05 | **세션 진행분 + 우선순위 정리.** ✅ Systems 부트씬(additive 영속)·게임 루프 배선(안전가옥→지도판→레이드→파밍→탈출→정산)·NPC 메이커(NPCData 저작 윈도우 + 관계 시드)·내비게이션(RaidMapManager/NavigationHUD)·적 은신(EnemySpeechBubble). 계획 기록(코드 0): Y정렬 깊이·랜턴(`rendering.md`). **'어디서부터 — 시작 순서' 섹션 신설**(0검증→1콘텐츠→2체감→3연동→4정리→5기획뿌리). 지도판 팝업+귀환정산 실데이터 ✅(루프 배선). |
