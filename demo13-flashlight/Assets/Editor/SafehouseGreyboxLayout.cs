@@ -170,8 +170,13 @@ public static class SafehouseGreyboxLayout
         if (npc != null)
         {
             var so = new SerializedObject(npc);
-            var p = so.FindProperty("storyNpcId");
-            if (p != null) { p.stringValue = storyNpcId; so.ApplyModifiedPropertiesWithoutUndo(); }
+            var sid = so.FindProperty("storyNpcId");
+            if (sid != null) sid.stringValue = storyNpcId;
+            // NPCData 자동 연결(SafehouseNpcBuilder로 만들어 둔 게 있으면)
+            var data = AssetDatabase.LoadAssetAtPath<NPCData>($"Assets/Resources/Data/NPC/{storyNpcId}.asset");
+            var dp = so.FindProperty("npcData");
+            if (dp != null && data != null) dp.objectReferenceValue = data;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
         return 1;
     }
