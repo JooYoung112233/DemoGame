@@ -152,28 +152,39 @@ public class HideoutController : MonoBehaviour
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -28f), new Vector2(600f, 60f),
             new Color(0.95f, 0.95f, 0.9f, 1f));
         // 안내
-        MakeText("Hint", "시설을 클릭해 사용  ·  ESC 또는 아래 버튼으로 나가기", 22, TextAnchor.UpperCenter,
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -78f), new Vector2(900f, 36f),
+        MakeText("Hint", "시설을 클릭해 사용  ·  인벤토리/창고 = 아래 버튼(또는 Tab)  ·  ESC로 나가기", 22, TextAnchor.UpperCenter,
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -78f), new Vector2(1100f, 36f),
             new Color(0.8f, 0.82f, 0.85f, 0.9f));
 
-        // 나가기 버튼(좌하단)
-        var btnGO = new GameObject("ExitButton");
+        // 좌하단 버튼: 나가기 + 인벤토리/창고
+        MakeButton("ExitButton",      "← 안전구역으로 나가기", new Vector2(40f, 40f),  new Vector2(320f, 64f), ExitHideout);
+        MakeButton("InventoryButton", "인벤토리 / 창고",        new Vector2(376f, 40f), new Vector2(260f, 64f), OpenInventory);
+    }
+
+    void OpenInventory()
+    {
+        if (UIManager.Instance != null) UIManager.Instance.ShowCharacterPanel();   // Tab 인벤토리(창고 = 인벤토리 버튼)
+    }
+
+    void MakeButton(string name, string label, Vector2 anchoredPos, Vector2 size, UnityEngine.Events.UnityAction onClick)
+    {
+        var btnGO = new GameObject(name);
         btnGO.transform.SetParent(_uiRoot.transform, false);
         var img = btnGO.AddComponent<Image>();
         img.color = new Color(0.15f, 0.16f, 0.2f, 0.92f);
         var brt = btnGO.GetComponent<RectTransform>();
         brt.anchorMin = brt.anchorMax = new Vector2(0f, 0f);
         brt.pivot = new Vector2(0f, 0f);
-        brt.anchoredPosition = new Vector2(40f, 40f);
-        brt.sizeDelta = new Vector2(320f, 64f);
+        brt.anchoredPosition = anchoredPos;
+        brt.sizeDelta = size;
         var btn = btnGO.AddComponent<Button>();
-        btn.onClick.AddListener(ExitHideout);
+        btn.onClick.AddListener(onClick);
         var lblGO = new GameObject("Label");
         lblGO.transform.SetParent(btnGO.transform, false);
         var lbl = lblGO.AddComponent<Text>();
-        lbl.text = "← 안전구역으로 나가기";
+        lbl.text = label;
         lbl.font = _krFont;
-        lbl.fontSize = 24;
+        lbl.fontSize = 22;
         lbl.alignment = TextAnchor.MiddleCenter;
         lbl.color = new Color(0.95f, 0.95f, 0.95f, 1f);
         var lrt = lbl.GetComponent<RectTransform>();
