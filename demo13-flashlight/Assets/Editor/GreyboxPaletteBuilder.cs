@@ -123,7 +123,7 @@ public static class GreyboxPaletteBuilder
     }
 
     // ─────────────────────────────────────────────────────────────────────
-    // 11종 사양
+    // 12종 사양 (gb_note 추가 — 쪽지/단서)
     // ─────────────────────────────────────────────────────────────────────
     static List<Spec> BuildSpecs()
     {
@@ -190,6 +190,15 @@ public static class GreyboxPaletteBuilder
                 lootW = 6, lootH = 2, lootUseRegion = true,
                 sortingLayer = "Ground", sortingOffset = 2, labelDark = true,
             },
+            // 쪽지/단서 — Interactable(Note=읽기). 통과(콜라이더 None, 트리거). 종이색.
+            new Spec {
+                id = "gb_note", label = "쪽지", color = Opaque(0.93f, 0.90f, 0.62f),
+                category = Prop2DDefinition.Category.Object,
+                colliderMode = Prop2DDefinition.ColliderMode.None, isTrigger = true,
+                function = Prop2DDefinition.Function.Interactable,
+                interactType = InteractableObject.InteractType.Note,
+                sortingLayer = "Ground", sortingOffset = 5, labelDark = true,
+            },
             // 스폰 — SpawnPoint(통과 트리거 마커, 반투명).
             new Spec {
                 id = "gb_spawn", label = "스폰", color = Marker(0.25f, 0.70f, 0.30f),
@@ -223,6 +232,53 @@ public static class GreyboxPaletteBuilder
                 colliderMode = Prop2DDefinition.ColliderMode.None, isTrigger = true,
                 function = Prop2DDefinition.Function.NPC,
                 sortingLayer = "Ground", sortingOffset = 5, labelDark = false,
+            },
+
+            // ── 안전가옥 시설(Interactable, 막힘 박스) — 다가가 E ──
+            // 침대 — 휴식(Bed).
+            new Spec {
+                id = "gb_bed", label = "침대", color = Opaque(0.45f, 0.55f, 0.78f),
+                category = Prop2DDefinition.Category.Object,
+                colliderMode = Prop2DDefinition.ColliderMode.Box, isTrigger = false,
+                function = Prop2DDefinition.Function.Interactable,
+                interactType = InteractableObject.InteractType.Bed,
+                sortingLayer = "Ground", sortingOffset = 2, labelDark = false,
+            },
+            // 지도판 — 출전 선택(MapBoard → MapSelectUI).
+            new Spec {
+                id = "gb_mapboard", label = "지도판", color = Opaque(0.28f, 0.55f, 0.88f),
+                category = Prop2DDefinition.Category.Object,
+                colliderMode = Prop2DDefinition.ColliderMode.Box, isTrigger = false,
+                function = Prop2DDefinition.Function.Interactable,
+                interactType = InteractableObject.InteractType.MapBoard,
+                sortingLayer = "Ground", sortingOffset = 2, labelDark = false,
+            },
+            // 작업대 — 제작/수리(Workbench → CraftingUI).
+            new Spec {
+                id = "gb_workbench", label = "작업대", color = Opaque(0.60f, 0.50f, 0.34f),
+                category = Prop2DDefinition.Category.Object,
+                colliderMode = Prop2DDefinition.ColliderMode.Box, isTrigger = false,
+                function = Prop2DDefinition.Function.Interactable,
+                interactType = InteractableObject.InteractType.Workbench,
+                sortingLayer = "Ground", sortingOffset = 2, labelDark = true,
+            },
+            // 의료대 — 일회용 치료템 제작(MedicalBench).
+            new Spec {
+                id = "gb_medbench", label = "의료대", color = Opaque(0.80f, 0.32f, 0.32f),
+                category = Prop2DDefinition.Category.Object,
+                colliderMode = Prop2DDefinition.ColliderMode.Box, isTrigger = false,
+                function = Prop2DDefinition.Function.Interactable,
+                interactType = InteractableObject.InteractType.MedicalBench,
+                sortingLayer = "Ground", sortingOffset = 2, labelDark = false,
+            },
+            // 조리대 — 버프 음식 제작(CookingBench).
+            new Spec {
+                id = "gb_cookbench", label = "조리대", color = Opaque(0.55f, 0.70f, 0.34f),
+                category = Prop2DDefinition.Category.Object,
+                colliderMode = Prop2DDefinition.ColliderMode.Box, isTrigger = false,
+                function = Prop2DDefinition.Function.Interactable,
+                interactType = InteractableObject.InteractType.CookingBench,
+                sortingLayer = "Ground", sortingOffset = 2, labelDark = true,
             },
         };
         return list;
