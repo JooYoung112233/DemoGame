@@ -62,7 +62,7 @@ public static class HideoutGreyboxLayout
 
         Debug.Log($"<color=cyan>[HideoutGB]</color> 생성 완료: {ScenePath} — 그레이박스 {n}개(침상/작업대/슬롯/스폰/출구). 빌드세팅 등록.\n" +
                   "  • 안전가옥 은신처 입구(ExitPoint→Hideout)로 진입, 출구로 복귀(→Safehouse/from_hideout).");
-        if (!Application.isBatchMode)
+        if (!Application.isBatchMode && !ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("Hideout Greybox",
                 $"{ScenePath} 생성 + 빌드세팅 등록 완료.\n\n박스 침상 + 부서진 작업대 + 조리대/의료대 슬롯 + 진입 스폰 + 출구(→Safehouse).\n" +
                 "안전가옥 그레이박스의 은신처 입구가 여기로 씬 전환합니다.", "확인");

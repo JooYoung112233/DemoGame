@@ -184,7 +184,7 @@ public static class ScrapMarketGreyboxLayout
                   "  • 바리케이드 = 통합 연결점: 맨홀 공터 북단→약국(SQ-002), 창고 동측→밤 지하창고(루디).\n" +
                   "  • Systems 씬을 additive로 올린 뒤 Play하거나, MapTool 카탈로그 '맵 저장'으로 프리팹화 가능.");
 
-        if (!Application.isBatchMode)
+        if (!Application.isBatchMode && !ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("ScrapMarket Greybox",
                 $"{ScenePath} 생성 완료(v6).\n\nMap 루트 하위에 그레이박스 {placed}개 배치.\n" +
                 "파밍을 '들어가는 건물' 안으로 + 창고도 막다른 건물(셔터 1입구).\n" +

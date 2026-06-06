@@ -64,7 +64,7 @@ public static class SafehouseNpcBuilder
         Debug.Log("<color=cyan>[SafehouseNPC]</color> NPCData 3 + ShopData 1 생성/갱신.\n" +
                   "  • pawnshop(강무진)+ShopData(전당포, 거래선택지) · veteran_scavenger · district_warden.\n" +
                   "  • 'Build Safehouse Greybox Layout'을 (다시) 실행하면 storyNpcId로 자동 연결됩니다.");
-        if (!Application.isBatchMode)
+        if (!Application.isBatchMode && !ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("Safehouse NPCs",
                 "NPCData 3 + ShopData 1 생성/갱신 완료.\n\n" +
                 "이제 'Tools▸TopDown▸Map▸Build Safehouse Greybox Layout'을 다시 실행하면\n" +
