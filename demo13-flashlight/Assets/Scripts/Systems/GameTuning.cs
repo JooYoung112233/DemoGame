@@ -43,4 +43,23 @@ public class GameTuning : ScriptableObject
     [Header("드랍 (맵 전체)")]
     [Tooltip("지역 루트 수량 배율. 1=기본, 0.5=절반, 2=두 배. RegionLootBootstrap가 읽음.")]
     [Range(0f, 3f)] public float lootCountMult = 1f;
+
+    // ── 짙은현상 (구간 현상) ──────────────────────────────────────────
+    [Header("짙은현상 (구간)")]
+    [Tooltip("현상 활성 지속(초). 이 안에 루트 회수. AnomalyZone이 읽음.")]
+    public float anomalyActiveDuration = 180f;
+    [Tooltip("징조(텔레그래프) 시간(초) — 안개 모이고 예고.")]
+    public float anomalyTelegraph = 8f;
+    [Tooltip("종료 경고 시간(초) — 활성 끝 이만큼 전부터 '빨리 챙겨'.")]
+    public float anomalyWarning = 30f;
+    [Tooltip("붕괴(미회수 증발) 연출 시간(초).")]
+    public float anomalyCollapse = 5f;
+    [Tooltip("자동 발생 랜덤 간격 최소(초). AnomalyManager가 읽음.")]
+    public float anomalyIntervalMin = 90f;
+    [Tooltip("자동 발생 랜덤 간격 최대(초).")]
+    public float anomalyIntervalMax = 180f;
+    [Tooltip("동시 활성 최대 개수.")]
+    public int anomalyMaxConcurrent = 1;
+    [Tooltip("몬스터 최소 스폰 거리(m) — 플레이어 옆 즉시 스폰 방지. (Phase 2)")]
+    public float anomalyMonsterMinDist = 6f;
 }
