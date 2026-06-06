@@ -10,10 +10,10 @@ using UnityEngine;
 /// 생성물: Assets/Scenes/Safehouse.unity — '맵 콘텐츠'만(카메라/조명/매니저/플레이어는 Systems 부트 씬이 공급).
 ///   ※ 루프가 로드하는 씬에 바로 채워 "빈 안전가옥" 문제를 해소. 모든 그레이박스는 'Map' 루트 하위.
 ///
-/// 배치(십자 허브):
-///   • XY 평면, Z=0, 1u=1m. 맵 24(W)×20(H), 중심 (12,10). 십자(+) 골목 — 중앙 집 허브 + 사방 골목(N/S/E/W).
-///     모서리 4블록(8.5×8) = 잠금건물(수리점/의료소/블랙마켓)·영구벽으로 십자 사이를 메움. 통행로: 가로 Y8~12, 세로 X9.5~14.5.
-///   • 동쪽 = 세로 방호벽 게이트(개구부 Y8~12 = 가로 골목 동쪽 출구) → 폐도시(출전). 곁가지 입구는 셔터/바리케이드(해금 게이팅).
+/// 배치(가로로 긴 골목):
+///   • XY 평면, Z=0, 1u=1m. 맵 38(W)×14(H), 중심 (19,7). 가로로 긴 골목 — 넓은 가로 골목(메인) + 짧은 세로 곁가지.
+///     위아래 4블록(15.5×4, 납작)이 골목 변을 메움 = 잠금건물(수리점/의료소/가구점/블랙마켓). 통행로: 가로 Y4.5~9.5(폭5), 세로 X16.5~21.5(폭5).
+///   • 동쪽 = 세로 방호벽 게이트(개구부 Y5~9 = 가로 골목 동쪽 출구) → 폐도시(출전). 곁가지/건물 입구는 셔터(해금 게이팅).
 ///   • 벽/블록 = gb_wall, 셔터/방호벽 = gb_barricade를 (lenX, thickY, 1)로 스케일. 바닥 = gb_floor 1개 전체 스케일.
 ///   • NPC/스폰 = 스케일 1 마커. 스폰 2개만(레이드 지역 아님): default(최초 시작) / raid_return(레이드 귀환 — 성공·실패·사망 공통).
 ///   • 멱등: 같은 경로로 저장하면 덮어씀. 프리팹은 InstantiatePrefab(링크 유지).
@@ -25,7 +25,7 @@ public static class SafehouseGreyboxLayout
     const string ScenePath  = "Assets/Scenes/Safehouse.unity";
     const string PrefabRoot = "Props2D/Prefabs/";
 
-    const float MapW = 24f, MapH = 20f;   // 십자(+) 골목: 중앙 집 허브 + 사방 골목, 모서리 = 건물/영구벽
+    const float MapW = 38f, MapH = 14f;   // 가로로 긴 골목: 넓은 가로 골목(메인) + 짧은 세로 곁가지, 위아래 납작 블록
 
     static readonly string[] RequiredPrefabIds =
     {
@@ -42,37 +42,37 @@ public static class SafehouseGreyboxLayout
 
         EnsureGreyboxPalette();
 
-        // ── 바닥(24×20) + 외곽 3면 벽(S/N/W). 동쪽 = 세로 방호벽 게이트(개구부 Y8~12) → 폐도시. ──
-        n += Floor(map, "Floor", 12f, 10f, MapW, MapH);
-        n += Wall(map, "Wall_S", 12f,  0.5f, 24f, 1f);
-        n += Wall(map, "Wall_N", 12f, 19.5f, 24f, 1f);
-        n += Wall(map, "Wall_W",  0.5f,10f,   1f,20f);
-        n += Barricade(map, "Gate_Wall_N", 23.5f, 16f, 1f, 8f, "게이트");  // 우측 세로 방호벽 상 Y12~20
-        n += Barricade(map, "Gate_Wall_S", 23.5f,  4f, 1f, 8f, "폐도시 방면"); // 우측 세로 방호벽 하 Y0~8
-        //  개구부 = X23.5 Y8~12(가로 골목 동쪽 끝) → 폐도시. 출격은 게시판 의뢰로, 게이트는 경계/출구 비주얼.
+        // ── 바닥(38×14, 가로로 긴 골목) + 외곽 3면 벽(S/N/W). 동쪽 = 세로 방호벽 게이트(개구부 Y5~9) → 폐도시. ──
+        n += Floor(map, "Floor", 19f, 7f, MapW, MapH);
+        n += Wall(map, "Wall_S", 19f,  0.5f, 38f, 1f);
+        n += Wall(map, "Wall_N", 19f, 13.5f, 38f, 1f);
+        n += Wall(map, "Wall_W",  0.5f, 7f,   1f,14f);
+        n += Barricade(map, "Gate_Wall_N", 37.5f, 11.5f, 1f, 5f, "게이트");    // 우측 세로 방호벽 상 Y9~14
+        n += Barricade(map, "Gate_Wall_S", 37.5f,  2.5f, 1f, 5f, "폐도시 방면"); // 우측 세로 방호벽 하 Y0~5
+        //  개구부 = X37.5 Y5~9(가로 골목 동쪽 끝) → 폐도시. 출격은 게시판 의뢰로, 게이트는 경계/출구 비주얼.
 
-        // ── 모서리 4블록 = 십자 사이를 메우는 벽(잠금 건물 / 영구벽). 통행로: 가로 Y8~12, 세로 X9.5~14.5만. ──
-        n += Wall(map, "Block_NW_Repair",   5.25f, 16f, 8.5f, 8f, "수리점\n(잠금)");   // 북서 — 수리점(實·잠금)
-        n += Wall(map, "Block_NE_Med",     18.75f, 16f, 8.5f, 8f, "의료소\n(잠금)");   // 북동 — 의료소(잠금)
-        n += Wall(map, "Block_SW_Wall",     5.25f,  4f, 8.5f, 8f, "벽\n(막다른)");     // 남서 — 영구벽(막다른)
-        n += Wall(map, "Block_SE_Black",   18.75f,  4f, 8.5f, 8f, "블랙마켓\n(잠금)"); // 남동 — 블랙마켓(잠금)
+        // ── 위아래 4블록(15.5×4, 납작) = 가로 골목 변의 잠금 건물 정면. 통행로: 가로 Y4.5~9.5, 세로 X16.5~21.5. ──
+        n += Wall(map, "Block_NW_Repair",   8.75f, 11.5f, 15.5f, 4f, "수리점 (잠금)");   // 북서 — 수리점(實·잠금)
+        n += Wall(map, "Block_NE_Med",     29.25f, 11.5f, 15.5f, 4f, "의료소 (잠금)");   // 북동 — 의료소(잠금)
+        n += Wall(map, "Block_SW_Furn",     8.75f,  2.5f, 15.5f, 4f, "가구점 (잠금)");   // 남서 — 가구점(잠금)
+        n += Wall(map, "Block_SE_Black",   29.25f,  2.5f, 15.5f, 4f, "블랙마켓 (잠금)"); // 남동 — 블랙마켓(잠금)
 
-        // ── 잠금 게이팅(〰): 곁가지 골목 입구에 셔터/바리케이드(해금 시 제거) ──
-        n += Barricade(map, "Repair_Shutter",  5.25f, 11.75f, 4f, 1f, "셔터");  // 수리점 입구(가로 골목 서쪽 북면)
-        n += Barricade(map, "Med_Shutter",    18.75f, 11.75f, 4f, 1f, "셔터");  // 의료소 입구(가로 골목 동쪽 북면)
-        n += Barricade(map, "Black_Shutter",  18.75f,  8.25f, 4f, 1f, "셔터");  // 블랙마켓 입구(가로 골목 동쪽 남면)
-        n += Barricade(map, "Furniture_Gate",  2f, 10f, 1f, 4f, "가구점\n(잠금)"); // 가구점 — 가로 골목 서쪽 끝 막음
+        // ── 잠금 게이팅(〰): 건물 입구마다 셔터(해금 시 제거) ──
+        n += Barricade(map, "Repair_Shutter",  8.75f, 9.5f, 4f, 1f, "셔터");  // 수리점 입구(가로 골목 북면 서)
+        n += Barricade(map, "Med_Shutter",    29.25f, 9.5f, 4f, 1f, "셔터");  // 의료소 입구(가로 골목 북면 동)
+        n += Barricade(map, "Furn_Shutter",    8.75f, 4.5f, 4f, 1f, "셔터");  // 가구점 입구(가로 골목 남면 서)
+        n += Barricade(map, "Black_Shutter",  29.25f, 4.5f, 4f, 1f, "셔터");  // 블랙마켓 입구(가로 골목 남면 동)
 
-        // ── 중앙 허브(집 = 컨테이너 은신처 입구 + 스폰 2개) ──
-        n += Exit (map, "Hideout_Entrance", 12f, 11.5f, "Hideout", "default"); // 집(實) → 은신처 실내 씬
-        n += Spawn(map, "default",     11.5f, 9.5f);  // ① 최초 게임 시작
-        n += Spawn(map, "raid_return", 12.5f, 9.5f);  // ② 레이드 귀환(성공/실패/사망 공통)
+        // ── 중앙 허브(집 = 컨테이너 은신처 입구 + 스폰 2개) — 가로·세로 골목 교차점 ──
+        n += Exit (map, "Hideout_Entrance", 19f, 8f, "Hideout", "default"); // 집(實) → 은신처 실내 씬
+        n += Spawn(map, "default",     18f, 6.5f);  // ① 최초 게임 시작
+        n += Spawn(map, "raid_return", 20f, 6.5f);  // ② 레이드 귀환(성공/실패/사망 공통)
 
         // ── NPC + 게시판 (스토리 S-001~007 동선) ──
-        n += Npc (map, "NPC_Pawnshop", "pawnshop",          12f, 3.5f); // 전당포 강무진 — 집 바로 아래(남 골목)
-        n += Marker(map, "gb_mapboard","Board_Quest",       20f, 10f);  // 게시판(의뢰 수령) — 동 골목, 게이트 옆 ※코드는 MapBoard→MapSelectUI
-        n += Npc (map, "NPC_Veteran",  "veteran_scavenger", 18f, 10f);  // 베테랑 회수꾼 — 게시판 옆
-        n += Npc (map, "NPC_Warden",   "district_warden",   12f, 15f);  // 구역 관리인 — 북 골목
+        n += Npc (map, "NPC_Pawnshop", "pawnshop",          19f, 2.5f); // 전당포 강무진 — 집 바로 아래(남 곁가지)
+        n += Marker(map, "gb_mapboard","Board_Quest",       31f, 7f);   // 게시판(의뢰 수령) — 동 골목, 게이트 옆 ※코드는 MapBoard→MapSelectUI
+        n += Npc (map, "NPC_Veteran",  "veteran_scavenger", 29f, 7f);   // 베테랑 회수꾼 — 게시판 옆
+        n += Npc (map, "NPC_Warden",   "district_warden",   19f, 11.5f);// 구역 관리인 — 북 곁가지
 
         // ── 저장(덮어쓰기) ──
         Selection.activeObject = null;
@@ -86,16 +86,16 @@ public static class SafehouseGreyboxLayout
         AssetDatabase.SaveAssets();
 
         Debug.Log($"<color=cyan>[SafehouseGB]</color> 생성 완료: {ScenePath} — Map 하위 그레이박스 {n}개.\n" +
-                  "  • 십자(+) 허브: 중앙 집(은신처 입구)+스폰2 / 남=전당포 / 동=게시판·회수꾼·게이트(출전) / 북=관리인 / 모서리=잠금건물·영구벽.\n" +
-                  "  • 통행로: 가로 골목 Y8~12, 세로 골목 X9.5~14.5. 곁가지 입구는 셔터/바리케이드(해금 게이팅).\n" +
+                  "  • 가로로 긴 골목(38×14): 중앙 집(은신처 입구)+스폰2 / 남=전당포 / 동=게시판·회수꾼·게이트(출전) / 북=관리인 / 위아래=잠금건물 정면.\n" +
+                  "  • 통행로: 넓은 가로 골목 Y4.5~9.5(폭5) + 짧은 세로 곁가지 X16.5~21.5(폭5). 건물 입구는 셔터(해금 게이팅).\n" +
                   "  • NPC는 storyNpcId로 NPCData 자동연결(SafehouseNpcBuilder 선행). 전당포=ShopData. 시설(침대/작업대)은 은신처 실내(Hideout)에 있음.\n" +
                   "  • Systems 씬을 열고 Play하면 GameBoot이 이 Safehouse를 로드 → 게시판으로 출전.");
 
         if (!Application.isBatchMode && !ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("Safehouse Greybox",
-                $"{ScenePath} 생성 완료 — 십자 허브.\n\nMap 루트 하위 그레이박스 {n}개:\n" +
+                $"{ScenePath} 생성 완료 — 가로로 긴 골목(38×14).\n\nMap 루트 하위 그레이박스 {n}개:\n" +
                 "  • 중앙 집(은신처 입구)+스폰2  • 남 전당포  • 동 게시판/회수꾼/게이트(출전)  • 북 관리인\n" +
-                "  • 모서리 4블록=잠금건물(수리점/의료소/블랙마켓)·영구벽, 셔터로 게이팅\n\n" +
+                "  • 위아래 4블록=잠금건물(수리점/의료소/가구점/블랙마켓), 셔터로 게이팅\n\n" +
                 "NPC는 SafehouseNpcBuilder의 NPCData가 있으면 자동연결(전당포=ShopData).\n" +
                 "Systems 부트 씬이 카메라/조명/매니저/플레이어를 공급합니다.", "확인");
     }
