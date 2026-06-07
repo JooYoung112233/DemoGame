@@ -37,7 +37,7 @@ public static class SafehouseGreyboxLayout
     [MenuItem("Tools/TopDown/맵/안전가옥 그레이박스")]
     public static void Build()
     {
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        var scene = EditorSceneBuildUtil.NewDetachedScene(out var prevActive);  // 현재 씬 유지(폴더에만 생성)
         var map = new GameObject("Map");
         int n = 0;
 
@@ -87,8 +87,7 @@ public static class SafehouseGreyboxLayout
 
         // ── 저장(덮어쓰기) ──
         Selection.activeObject = null;
-        EditorSceneManager.MarkSceneDirty(scene);
-        bool saved = EditorSceneManager.SaveScene(scene, ScenePath);
+        bool saved = EditorSceneBuildUtil.SaveAndClose(scene, ScenePath, prevActive);  // 저장 후 닫기(현재 씬 유지)
         if (!saved)
         {
             Debug.LogError("[SafehouseGB] 씬 저장 실패: " + ScenePath);

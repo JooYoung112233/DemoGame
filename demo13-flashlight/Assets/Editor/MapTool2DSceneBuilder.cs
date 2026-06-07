@@ -15,10 +15,10 @@ public static class MapTool2DSceneBuilder
 {
     const string ScenePath = "Assets/Scenes/MapTool2D.unity";
 
-    [MenuItem("Tools/TopDown/Build/Map Tool Scene")]
+    [MenuItem("Tools/TopDown/빌드/맵 편집 씬")]
     public static void CreateMapToolScene()
     {
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        var scene = EditorSceneBuildUtil.NewDetachedScene(out var prevActive);  // 현재 씬 유지(폴더에만 생성)
 
         // ── 카메라 없음 — PlayerRig(자동 스폰)가 한 세트로 들고 옴 ──
         //    편집은 씬뷰에서 하므로 게임 카메라 불필요. Play 시 PlayerRig 카메라가 따라옴.
@@ -43,7 +43,7 @@ public static class MapTool2DSceneBuilder
 
         if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
             AssetDatabase.CreateFolder("Assets", "Scenes");
-        EditorSceneManager.SaveScene(scene, ScenePath);
+        EditorSceneBuildUtil.SaveAndClose(scene, ScenePath, prevActive);  // 저장 후 닫기(현재 씬 유지)
         Debug.Log($"[MapTool2D] 맵툴 씬 생성: {ScenePath}");
     }
 

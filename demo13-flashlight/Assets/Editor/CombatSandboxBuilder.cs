@@ -26,7 +26,7 @@ public static class CombatSandboxBuilder
     //  적 프리팹
     // ══════════════════════════════════════════════════════════
 
-    [MenuItem("Tools/TopDown/Build/Enemy Prefab")]
+    [MenuItem("Tools/TopDown/빌드/적 프리팹")]
     public static void BuildEnemyPrefab()
     {
         EnsureFolder("Assets/Resources");
@@ -95,7 +95,7 @@ public static class CombatSandboxBuilder
     //  샌드박스 씬
     // ══════════════════════════════════════════════════════════
 
-    [MenuItem("Tools/TopDown/Build/Combat Sandbox Scene")]
+    [MenuItem("Tools/TopDown/빌드/전투 샌드박스 씬")]
     public static void BuildSandbox()
     {
         // 적 프리팹 보장
@@ -106,7 +106,7 @@ public static class CombatSandboxBuilder
             enemyPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ENEMY_PREFAB_PATH);
         }
 
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        var scene = EditorSceneBuildUtil.NewDetachedScene(out var prevActive);  // 현재 씬 유지(폴더에만 생성)
 
         // ⚠️ 카메라·라이트·후처리(Volume)는 만들지 않는다 — PlayerRig(자동 스폰)가 한 세트로 들고 옴.
         //    (씬에 카메라/Volume을 또 두면 PlayerRig 것과 충돌.)
@@ -154,7 +154,7 @@ public static class CombatSandboxBuilder
 
         // ── 저장 ────────────────────────────────────────────
         EnsureFolder("Assets/Scenes");
-        EditorSceneManager.SaveScene(scene, SCENE_PATH);
+        EditorSceneBuildUtil.SaveAndClose(scene, SCENE_PATH, prevActive);  // 저장 후 닫기(현재 씬 유지)
         AssetDatabase.SaveAssets();
 
         Debug.Log($"<color=cyan>[Sandbox]</color> 전투 샌드박스 생성: {SCENE_PATH} — Play 시 PlayerRig 자동 스폰 + 적 3기. 좌클릭=약공, 우클릭홀드=강공, Space=구르기.");

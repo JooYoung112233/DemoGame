@@ -18,10 +18,10 @@ public static class GameSceneBuilder
 
     // ── 공통: 씬 어느 타입이든 동일하게 들어가는 것 ──────────────────
 
-    [MenuItem("Tools/TopDown/Build/InGame Scene")]
+    [MenuItem("Tools/TopDown/빌드/인게임 씬")]
     static void BuildInGame() => BuildScene("InGameScene", SceneType.InGame);
 
-    [MenuItem("Tools/TopDown/Build/Safehouse Scene")]
+    [MenuItem("Tools/TopDown/빌드/안전가옥 씬")]
     static void BuildSafehouse() => BuildScene("Safehouse", SceneType.Safehouse);
 
     // ─────────────────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ public static class GameSceneBuilder
         Directory.CreateDirectory(SCENE_DIR);
         string path = $"{SCENE_DIR}/{sceneName}.unity";
 
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        var scene = EditorSceneBuildUtil.NewDetachedScene(out var prevActive);  // 현재 씬 유지(폴더에만 생성)
 
         // ── 시스템 없음: Systems 부트 씬이 전부 공급 ──────────────────
         //    카메라 / 2D 글로벌 조명 / EventSystem / 매니저 / 플레이어는 모두 Systems 씬에 있고,
@@ -123,8 +123,7 @@ public static class GameSceneBuilder
 
         // ── 저장 ─────────────────────────────────────────────────────
         Selection.activeObject = null;
-        EditorSceneManager.MarkSceneDirty(scene);
-        EditorSceneManager.SaveScene(scene, path);
+        EditorSceneBuildUtil.SaveAndClose(scene, path, prevActive);  // 저장 후 닫기(현재 씬 유지)
 
         Debug.Log($"[GameSceneBuilder] 생성 완료(맵 콘텐츠만): {path}");
         if (type == SceneType.InGame)

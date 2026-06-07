@@ -28,7 +28,7 @@ public static class HideoutGreyboxLayout
     [MenuItem("Tools/TopDown/맵/은신처 그레이박스")]
     public static void Build()
     {
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        var scene = EditorSceneBuildUtil.NewDetachedScene(out var prevActive);  // 현재 씬 유지(폴더에만 생성)
         var map = new GameObject("Map");
         int n = 0;
 
@@ -57,8 +57,7 @@ public static class HideoutGreyboxLayout
         n += 1;
 
         Selection.activeObject = null;
-        EditorSceneManager.MarkSceneDirty(scene);
-        if (!EditorSceneManager.SaveScene(scene, ScenePath))
+        if (!EditorSceneBuildUtil.SaveAndClose(scene, ScenePath, prevActive))  // 저장 후 닫기(현재 씬 유지)
         {
             Debug.LogError("[HideoutGB] 씬 저장 실패: " + ScenePath);
             return;

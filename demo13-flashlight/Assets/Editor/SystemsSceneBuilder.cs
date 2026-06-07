@@ -42,6 +42,7 @@ public static class SystemsSceneBuilder
         typeof(PostRaidEventManager),
         typeof(ToastManager),
         typeof(NarrationUI),
+        typeof(NoteUI),
         typeof(TutorialPrompt),
         typeof(ScreenEffectManager),
         typeof(DailyQuestManager),
@@ -70,13 +71,11 @@ public static class SystemsSceneBuilder
         ("navigationHUD",    typeof(NavigationHUD)),   // 시계 나침반 + 미니맵 (UI)
     };
 
-    [MenuItem("Tools/TopDown/Build/Systems Scene")]
+    [MenuItem("Tools/TopDown/빌드/시스템 씬")]
     public static void BuildSystemsScene()
     {
-        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-            return; // 사용자가 저장 취소 → 중단
-
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        // additive로 만들어 현재 열린 씬을 닫지 않으므로 저장 프롬프트 불필요.
+        var scene = EditorSceneBuildUtil.NewDetachedScene(out var prevActive);  // 현재 씬 유지(폴더에만 생성)
 
         // ── [매니저들] (각각 루트 GO — DontDestroyOnLoad는 루트 GO에서만 동작) ──
         foreach (var t in ManagerTypes)
@@ -136,9 +135,8 @@ public static class SystemsSceneBuilder
         SetString(bootSo, "defaultSpawn", "default");
         bootSo.ApplyModifiedPropertiesWithoutUndo();
 
-        // ── 저장 ──
-        EditorSceneManager.MarkSceneDirty(scene);
-        bool saved = EditorSceneManager.SaveScene(scene, SCENE_PATH);
+        // ── 저장 ── (저장 후 닫기 — 현재 씬 유지)
+        bool saved = EditorSceneBuildUtil.SaveAndClose(scene, SCENE_PATH, prevActive);
 
         if (!saved)
         {
