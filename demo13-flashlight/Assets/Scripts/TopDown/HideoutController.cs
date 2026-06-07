@@ -26,10 +26,12 @@ public class HideoutController : MonoBehaviour
 
     // ── 복원용 상태 ──
     TopDownPlayer _player;
-    Camera _cam;
+    Camera _cam;            // 클릭 레이캐스트에 쓸 현재 카메라(=하이드아웃 전용)
+    Camera _rigCam;         // PlayerRig 카메라(은신처 동안 렌더 끔)
+    Camera _hideoutCam;     // 하이드아웃 전용 카메라(런타임 생성)
     bool _hadPlayer, _prevCanMove;
     bool _hadFollow, _prevFollowEnabled;
-    float _prevCamSize;
+    bool _prevRigCamEnabled;
     InteractionSystem _interaction;
     bool _prevInteractionEnabled;
     readonly List<SpriteRenderer> _hiddenSprites = new List<SpriteRenderer>();
@@ -65,22 +67,40 @@ public class HideoutController : MonoBehaviour
         _interaction = FindFirstObjectByType<InteractionSystem>();
         if (_interaction != null) { _prevInteractionEnabled = _interaction.enabled; _interaction.enabled = false; }
 
+        // 기존(PlayerRig) 카메라: 추적 끄고 렌더만 끔(같은 GO의 AudioListener는 유지 → 경고 없음).
         if (CameraFollow.Instance != null)
         {
             _hadFollow = true;
             _prevFollowEnabled = CameraFollow.Instance.enabled;
             CameraFollow.Instance.enabled = false;          // 추적 정지
-            _cam = CameraFollow.Instance.GetComponent<Camera>();
+            _rigCam = CameraFollow.Instance.GetComponent<Camera>();
         }
-        if (_cam == null) _cam = Camera.main;
+        if (_rigCam == null) _rigCam = Camera.main;
+        if (_rigCam != null) { _prevRigCamEnabled = _rigCam.enabled; _rigCam.enabled = false; }
 
-        if (_cam != null)
-        {
-            _prevCamSize = _cam.orthographicSize;
-            var p = _cam.transform.position;
-            _cam.transform.position = new Vector3(cameraCenter.x, cameraCenter.y, p.z);
-            _cam.orthographicSize = cameraSize;
-        }
+        // 하이드아웃 전용 카메라(런타임 생성). CameraFollow.DisableOtherCameras는 sceneLoaded 때 이미 실행됐으므로
+        // Start 시점에 만든 이 카메라는 살아남는다. PlayerRig 카메라가 꺼져도 방이 보임.
+        _hideoutCam = CreateHideoutCamera(_rigCam);
+        _cam = _hideoutCam != null ? _hideoutCam : _rigCam;
+    }
+
+    Camera CreateHideoutCamera(Camera src)
+    {
+        var go = new GameObject("HideoutCamera");
+        var c = go.AddComponent<Camera>();
+        c.orthographic       = true;
+        c.orthographicSize   = cameraSize;
+        c.clearFlags         = src != null ? src.clearFlags : CameraClearFlags.SolidColor;
+        c.backgroundColor    = src != null ? src.backgroundColor : new Color(0.05f, 0.05f, 0.06f, 1f);
+        c.cullingMask        = src != null ? src.cullingMask : ~0;
+        c.nearClipPlane      = src != null ? src.nearClipPlane : 0.3f;
+        c.farClipPlane       = src != null ? src.farClipPlane : 1000f;
+        c.depth              = src != null ? src.depth : 0f;
+        c.transparencySortMode = TransparencySortMode.CustomAxis;   // 탑다운 2D Y정렬(아래가 앞)
+        c.transparencySortAxis = new Vector3(0f, 1f, 0f);
+        float z = src != null ? src.transform.position.z : -10f;
+        go.transform.position = new Vector3(cameraCenter.x, cameraCenter.y, z);
+        return c;
     }
 
     void OnDestroy()
@@ -89,12 +109,10 @@ public class HideoutController : MonoBehaviour
         foreach (var sr in _hiddenSprites) if (sr != null) sr.enabled = true;
         foreach (var lt in _hiddenLights) if (lt != null) lt.enabled = true;
         if (_interaction != null) _interaction.enabled = _prevInteractionEnabled;
+        if (_hideoutCam != null) Destroy(_hideoutCam.gameObject);
+        if (_rigCam != null) _rigCam.enabled = _prevRigCamEnabled;      // PlayerRig 카메라 렌더 복구
         if (_hadFollow && CameraFollow.Instance != null)
-        {
-            CameraFollow.Instance.enabled = _prevFollowEnabled; // 추적 재개 → 안전구역에서 플레이어로 스냅
-            var c = CameraFollow.Instance.GetComponent<Camera>();
-            if (c != null) c.orthographicSize = _prevCamSize;
-        }
+            CameraFollow.Instance.enabled = _prevFollowEnabled;        // 추적 재개 → 안전구역에서 플레이어로 스냅
         if (_uiRoot != null) Destroy(_uiRoot);
     }
 
