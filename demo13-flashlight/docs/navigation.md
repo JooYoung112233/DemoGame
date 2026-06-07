@@ -183,3 +183,19 @@
   - **결정**: **`GameSceneBuilder`(InGame)에 기본 `MapZoneVolume` 1개 자동 배치**(`MapZone_All`, 상가골목 28×24, 콜라이더 없이 size 지정 → 물리 간섭 X). 모든 빌드 레이드 맵이 미니맵 구역을 기본 보유. 잠긴문/지도조각/퀘스트 타겟은 레벨별이라 제외(디자이너가 얹음).
 - **질문**: 나침반·미니맵은 UI니까 Systems의 UI(UIManager) 쪽에 넣어줘.
   - **결정**: `NavigationHUD`를 **UIManager UI 패널로 편입** — GameHUD·QuestHUD와 동일하게 UIManager `navigationHUD` 필드 + `EnsureChildren` 폴백 + `SystemsSceneBuilder.UiPanels` 등록. 루트 GO/자체 `RuntimeInitialize` 자동스폰·`DontDestroyOnLoad` 제거(UIManager가 생성·영속 담당). `RaidMapManager`는 UI 아님(맵 상태/영속 데이터) → **매니저로 유지**.
+
+---
+
+## 4. 현상 계측기 (phenom_meter) — 현상 사전 감지 도구
+
+> 시계(상시·디제틱·후반 본물)와 별개의 **초반용 일회성 소비 도구.** S-013에서 회수꾼이 첫 현상 출격 전 1개 지급.
+
+- **역할**: 지역이 **짙은 현상에 먹히기 전**에 미리 반응 → 플레이어가 "곧 현상이 온다"를 사전 인지하고 대비/탈출.
+- **표현(계획)**: 현상이 가까워질수록 **인벤토리 아이콘이 점멸**(가까울수록 빠르게) + (후순위) 삑삑 SE. **점멸 연출은 추후 구현** — 현재는 아이템만 존재(`Resources/Items/Misc/PhenomMeter.asset`, category=Consumable, isUsable, useEffect=None).
+- **일회성**: 사용/소비 1회. 신중히 쓰도록 유도.
+- **시계와의 구분**: 계측기 = 초반 소비형 *사전 경보*(현상 접근). 시계 = 상시 *방향/거리* + 후반 "현상 측정기" 정체 공개. 역할 겹치지 않게.
+- **TODO(코드)**: 현상 접근도(RegionTime night 임박) → 아이콘 점멸 주기 매핑, 사용 시 소비 처리.
+
+### 기획 결정 로그 — 2026-06-06
+- **질문**: 첫 현상 출격 시 '밤 주의' 대신 무엇을 주나?
+  - **결정**: **현상 계측기(일회성) 지급 + 현상 경고로 재프레이밍.** "밤"이 아니라 "짙은 현상"을 마주치는 개념(→ [raid.md](raid.md) 2026-06-06). 계측기로 지역이 현상화되기 전을 체크. 점멸 연출은 일단 보류(개념만 확정). [→ story-script.md S-013]

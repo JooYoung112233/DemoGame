@@ -45,6 +45,12 @@
   - 가시성은 **지역/시간대별로 다름**(`WorldRegionCatalog`/`RegionTimeManager`/`DayNightCycle` 연동).
 - **시야 콘 구현 방향**: 플레이어 facing(마우스 방향) 기준 부채꼴 Light2D(또는 시야 마스크). `TopDownPlayer.FacingDirection`으로 회전. 적 가시성은 시야 콘 안/밖 판정으로 sprite 알파·표시 토글.
 - **글로벌 Light2D**: 앰비언트(밤·실내는 어둑, 낮·야외는 밝게). 하이브리드라 intensity는 지역/시간대별 가변.
+- **짙은 현상 ≠ 낮/밤 (✅ 2026-06-04, 풀스크린 오버레이)**: 짙은현상([gdd-core §5.1](gdd-core.md))은 **시간 무관** 빛·공간 침식("어두움 = 시간대가 아니라 침식 정도", 낮에도 밤처럼). **낮/밤과 완전 독립**으로 구현:
+  - **`DenseAnomalyController`**(싱글톤) → 카메라 앞 **풀스크린 fog 쿼드**(`BRB/AnomalyFog`) 생성. 화면 위에 어둠+안개를 알파로 덧씌움 → `DayNightCycle`의 글로벌 Light2D를 **안 건드림**(충돌 0, 최종 화면 = 낮밤 × 현상). **낮에도 밤처럼** 어두워짐.
+  - 셰이더: **노이즈 주도 패치 안개**(2겹 fbm 드리프트, 월드 앵커) — 방사형 원이 아니라 불규칙 결이라 "동그란 vignette"로 안 보임. 플레이어(`_ClearCenter`) 주변 소프트 클리어를 **노이즈로 경계 깸**(원 안 보이게) + 멀수록 살짝 더. **어두운 톤**(밝은 원반 X) + 미세 밝은 wisp 결(밤엔 움직임으로 인지). `_Density`로 강도, `_FogColor`/`_HazeStrength`/`_NearClear`/`_FarFull`/`_NoiseScale` 튜닝. ⚠️ 옛 방사형 거리 falloff(`_ClearRadius`·edge항·`_EdgeDark`)는 원/도넛 링으로 보여 폐기.
+  - 강도 = 수동(`SetIntensity`/이벤트) **max** 지역 기본 침식도(`WorldRegionCatalog.anomaly` 0~1: 성역 0.7·중앙영야 0.9·오락 0.35·공업 0.2·나머지 0). 부드럽게 lerp. 테스트 토글키 `G`.
+  - 범위 = **지역/씬 단위**(활성 지역 anomaly) **+ 구간(`AnomalyZone`)**: 트리거 영역에 플레이어가 들어가면 그 강도로 현상 발동 → 전체 맵이 아니라 골목·건물 등 **구간별 지정**(겹치면 max, `DenseAnomalyController._zones`). 메뉴 `Tools▸TopDown▸Map▸Create Anomaly Zone`(6×6 트리거 생성).
+  - 참고(레거시): `WeatherData`의 fog는 `RenderSettings.fog`(3D)라 2D 미적용=死, `PostProcessController.Anomaly`는 후처리 룩(시간에 묶임)이라 현상과 별개.
 - **라이트 모양 = 텍스쳐 쿠키(Sprite 라이트).** 플레이어 주변광/콘·프롭 발광 모두 **절차 생성 쿠키**(`LightCookieGenerator` → `Resources/LightCookies/cookie_radial`·`cookie_cone`)를 **Sprite Light2D**에 물려 부드럽게(다크우드). Point/Spot 파라미터 콘(딱딱한 경계)은 폐기. 쿠키는 흰색+알파(모양), 빛 색은 `Light2D.color`로 틴트. 콘 쿠키는 +Y 기준·피벗 하단(꼭지)이라 `lightAngleOffset=-90`로 facing에 맞춤. 프롭 발광은 Prop2D 카탈로그(`emitsLight`)로 프롭별 설정(램프/창문/네온), `lightNightOnly`면 밤에만(`PropLight2D`+DayNightCycle).
 - **그림자/차폐**: 벽·구조물에 **ShadowCaster2D** → 시야 콘과 빛을 막음(벽 뒤는 안 보임). (3D 스팟라이트 + ShadowsOnly 박스 방식 폐기.)
 - 낮/밤 반응 컴포넌트(`DayNightCycle.OnPhaseChanged` 구독): `PostProcessController`, `NeonSign`, `RainController` 등. **Editor State Preservation** 규칙 유지 — `Start()`에서 값을 적용하지 않고 이벤트로만 변경.
@@ -90,11 +96,12 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | `BRB/PropPixel` | 프롭·오브젝트 — 알파 컷아웃 | Light2D 반응 |
 | `BRB/DecalPixel` | 데칼(바닥 오버레이) — 핏자국·그을음·발자국·금·포스터·발광. Transparent 큐, sortingOrder로 앞뒤. 블렌드 프리셋 Alpha/Multiply/Additive(`DecalPixelGUI` 원클릭) + `_Alpha`·정점컬러로 페이드 | Light2D 반응(토글) |
 | `BRB/DamageOverlay` | 파괴/폐허 오버레이 — 베이스 위에 덧씌우는 균열·그을음(절차적, 아트 불필요). `_Damage`(0~1)로 단계별 진해짐, 베이스 알파로 마스킹. `Breakable`(부서짐)·`Weathered`(상시 낡음/녹) 둘 다 자식 오버레이로 자동 설치 → **모든 베이스 셰이더 호환** | Light2D 반응(토글) |
+| `BRB/AnomalyFog` | 짙은 현상 전체화면 오버레이 — 카메라 앞 풀스크린 fog+어둠(`DenseAnomalyController`가 생성). 시간 무관 침식, 낮/밤 글로벌 라이트와 독립. 애니 노이즈+중앙 클리어+가장자리 짙음 | 언릿(화면 최상단) |
 
 **캐릭터/이펙트 (사용 중)**
 | 셰이더 | 용도 | 조명 |
 |---|---|---|
-| `BRB/PlayerSprite` | 플레이어(시트UV+컷아웃+아웃라인) | Light2D 반응 |
+| `BRB/PlayerSprite` | 플레이어/캐릭터(표준 SpriteRenderer) — 외곽선 + 최소광(어둠 가독성) + 픽셀화/색단계(옵션) + `_FlashAmount`(HitFlash 연동). 수동 시트UV 제거 | Light2D 반응 |
 | `BRB/SpriteSheet` | 스프라이트 시트 UV | Light2D 반응 |
 | `BRB/SpriteBillboard` | SpriteRenderer용 | Light2D 반응 |
 | `BRB/SpineLitURP` | Spine(premultiplied 알파) | Light2D 반응 |
@@ -142,6 +149,8 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | 2026-06-02 | **프롭/벽 그림자 방향 = 플레이어 시선(콘) 반대로(`Facing` 모드).** 기존 위치 기반(`Player`/`NearestLight`)은 라이트 "위치"(=플레이어, 보통 아래) 반대로 깔려서, 콘이 위를 비추는데 그림자가 위로 가는 "빛이 아래 있는 듯" 버그. → `FlatShadow.DirMode.Facing` 신설(기본): `dir = -FlatShadowDirector.Facing`(=`TopDownPlayer.FacingDirection` 반대). 밝은 콘 쪽 반대에 그림자. 거리 길이/진하기(`proximityStretch`/`distanceFade`)는 플레이어 거리로. 위치 기반 모드도 옵션 유지. | 콘은 "위치(플레이어)"와 "비추는 방향(시선)"이 달라서, 위치 기반이면 직관과 반대. 사용자가 "콘 비추는 쪽 기준" 선택. |
 | 2026-06-02 | **그림자 = URP 2D 네이티브 ShadowCaster2D로 전환(가짜 FlatShadow 폐기).** FlatShadow(스프라이트 복제/기울임)는 탑다운에서 진짜 3D 그림자가 안 됨(쌍둥이/스냅/벽 갇힘) → ① `ShadowCaster2D`+`Light2D`(동적 캐스트, 엔진 계산) ② `GroundShadow2D`(정적 발밑 접지)로 분리. Prop2DBuilder가 castShadow면 둘 다 부착. PlayerConeLight에 shadowsEnabled+shadowIntensity. `FlatShadow`/`FlatShadowDirector`/`FlatShadowEditor`·`ShadowProjector` 삭제, Prop2DDefinition 그림자 필드도 castShadow만 남김. | 사용자: "이건 3D 그림자가 아니다". 네이티브가 방향·길이·다중라이트 전부 정확. 정적 발밑은 빛 없을 때 접지감 유지용으로 별도 유지. |
 | 2026-06-03 | **데칼 전용 셰이더 `BRB/DecalPixel` 신설(별개).** 바닥 오버레이(핏자국·그을음·발자국·금·포스터·발광). Transparent 큐 + sortingOrder. 블렌드 프리셋 Alpha/Multiply/Additive를 `DecalPixelGUI` 인스펙터 드롭다운으로 원클릭(`_SrcBlend`/`_DstBlend`/`_MULTIPLY_ON` 동시 세팅). Multiply는 알파 인식(흰색 lerp) 언릿, Additive는 보통 언릿. `_Alpha`+정점컬러로 페이드, `_LIT_ON` 토글. 픽셀화/색단계 BRB 공통. | 사용자 요청("데칼용 셰이더 별개로 필요"). 프롭/바닥과 분리해 블렌드·페이드·발광을 데칼 전용으로. 배치 자동화/런타임 스포너는 추후. |
+| 2026-06-04 | **짙은 현상 = 낮/밤과 독립 레이어 구현(풀스크린 fog 오버레이).** `DenseAnomalyController`(싱글톤)가 카메라 앞 풀스크린 쿼드(`BRB/AnomalyFog`)로 화면에 어둠+안개를 덧씌움 → `DayNightCycle` 글로벌 Light2D 안 건드림(충돌 0, "낮에도 밤처럼"). 애니 노이즈+중앙 클리어 버블+가장자리 짙음, 월드 앵커. 강도 = 수동(`SetIntensity`)·이벤트 max 지역 침식도(`WorldRegionCatalog.anomaly` 신규 필드, 성역 0.7/중앙영야 0.9 등). 범위=지역/씬 단위, 테스트키 G. | 사용자 결정: 짙은현상은 시간 무관(낮밤과 별개) fog+어둠. 글로벌 라이트와 충돌 피하려 화면 오버레이(곱 합성)로. gdd-core §5.1. |
+| 2026-06-04 | **플레이어 셰이더 `BRB/PlayerSprite` 재작성.** 옛 버전은 수동 스프라이트시트 UV(`_Columns/_Rows/_CurrentFrame`)라 일반 SpriteRenderer에 쓰면 텍스처 한 칸만 잘려 사실상 못 씀 → **표준 SpriteRenderer**(단일 스프라이트·유니티 애니 호환)로 재작성. Light2D 2D 패스 + 외곽선(어둠 속 가독성) + `_MinLight`(어두워도 최소 가시) + 픽셀화/색단계(옵션·기본 OFF) + `_FlashColor/_FlashAmount`(HitFlash가 SpriteFlash 교체 없이 그대로 사용). 정점색 곱(틴트/페이드). 메뉴 `Tools▸TopDown▸Setup▸Create & Assign Player Material`로 머티리얼 생성+PlayerRig 프리팹 PlayerSprite에 적용. | 플레이어가 전용 셰이더 없이(또는 깨진 시트UV로) 렌더돼 "셰이더 없음" 상태였음. |
 | 2026-06-03 | **바닥 타일 반복 깨기 `FloorPixel._BREAKUP_ON`.** 월드 좌표 fbm 노이즈로 바닥 명암을 변주 → 같은 타일이 깔려도 격자 반복감이 사라짐(`_BreakupScale`/`_BreakupAmount`). 화면이 아닌 **월드 기준**이라 카메라 이동에도 안정. 2D 패스에 worldXY 배리잉 추가. + 데칼 스캐터 브러시(`DecalScatterBrush`)·가장자리 자동 디테일은 [`map-tool.md`](map-tool.md). | 통짜로 그린 참조 맵의 불규칙 바닥을 Tilemap에서도. 스플랫맵은 무거워 제외, 노이즈+데칼 조합 채택. |
 | 2026-06-03 | **상시 풍화 `Weathered` 신설 — 이미지 0장 낡음/녹/폐허.** 부서짐과 별개로, 부서지지 않아도 항상 절차적 녹·그을음을 덧씌우는 컴포넌트(`BRB/DamageOverlay` 재사용, `_Damage` 고정 + `tint`). 색만 바꿔 녹(주황갈)/이끼(초록)/그을음(검정)/물때(갈색). 카탈로그 "Aged · 낡음/녹/폐허" 섹션(`Prop2DDefinition.weathered`). | 사용자가 "이미지 없이 녹슨·폐허"를 원함. 텍스처(DecalPixel 마스크) 없이도 분위기 확보 — 셰이더가 이미 색 입힘. 텍스처 마스크와 공존(나중에 업그레이드). |
 | 2026-06-03 | **데칼 마스크 모드(`_MASK_MODE`) 추가 — 텍스처 기반 낡음/녹/폐허.** 사용자가 텍스처로 작화하기로 결정. 작화 컨벤션 3종(①흑백 마스크+셰이더 틴트 ②컬러 베이크+Alpha ③검정 배경+Additive/Screen) 중 **①을 표준 채택**(회색조 1장→Tint 색만 바꿔 녹·이끼·그을음 재활용). `DecalPixel`에 `_MASK_MODE`(루미넌스=세기, 색=Tint) + GUI에 Screen 프리셋 추가. 권장 = 마스크 모드 + Multiply. | 색별 텍스처를 따로 안 그려도 됨(리컬러 자유·에셋 최소). 별도 셰이더 안 만들고 데칼에 통합 — 데칼 하나로 핏자국·그을음·녹·이끼·폐허 전부. |

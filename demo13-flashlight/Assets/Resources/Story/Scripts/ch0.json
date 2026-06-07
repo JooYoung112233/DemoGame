@@ -8,73 +8,108 @@
       "nodes": [
         { "type": "effect", "effect": "fade_out", "floatParam": 0.01 },
         { "type": "effect", "effect": "wait", "floatParam": 2.0 },
-        { "type": "narration", "textKeys": ["S000_N01", "S000_N02"] },
+        { "type": "narration", "textKeys": ["S000_N01"] },
         { "type": "effect", "effect": "fade_in", "floatParam": 1.5 },
-        { "type": "tutorial", "textKey": "TUT_HELP", "duration": 5, "tutId": "help_hint" }
+        { "type": "narration", "textKeys": ["S000_N02", "S000_N03"] }
+      ]
+    },
+
+    {
+      "id": "S-001",
+      "title": "골목 — 첫 이동",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S001_N01", "S001_N02"] },
+        { "type": "tutorial", "textKey": "TUT_MOVE", "duration": 3, "tutId": "move" },
+        { "type": "narration", "textKeys": ["S001_N03", "S001_N04"] },
+        { "type": "tutorial", "textKey": "TUT_INVENTORY", "duration": 3, "tutId": "inventory" }
       ]
     },
 
     {
       "id": "S-002",
-      "title": "전당포 — 첫 대면",
+      "title": "전당포 — 입장 & 첫 대면",
       "triggerFlag": "",
       "oneShot": true,
       "nodes": [
+        { "type": "narration", "textKeys": ["S002_N01"] },
         {
           "type": "dialogue",
           "speaker": "pawnshop",
           "speakerKey": "NPC_PAWNSHOP",
-          "textKeys": ["S002_D01", "S002_D02"]
+          "textKeys": ["S002_D01"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D02", "S002_D03"]
         },
         {
           "type": "dialogue",
           "speaker": "player",
           "speakerKey": "NPC_PLAYER",
-          "textKeys": ["S002_D03"]
-        },
-        {
-          "type": "dialogue",
-          "speaker": "pawnshop",
-          "speakerKey": "NPC_PAWNSHOP",
           "textKeys": ["S002_D04"]
         },
         {
           "type": "dialogue",
-          "speaker": "player",
-          "speakerKey": "NPC_PLAYER",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
           "textKeys": ["S002_D05"]
         },
         {
           "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S002_D06"]
+        },
+        {
+          "type": "dialogue",
           "speaker": "pawnshop",
           "speakerKey": "NPC_PAWNSHOP",
-          "textKeys": ["S002_D06"]
+          "textKeys": ["S002_D07"]
         },
         {
           "type": "dialogue",
           "speaker": "player",
           "speakerKey": "NPC_PLAYER",
-          "textKeys": ["S002_D07"]
+          "textKeys": ["S002_D08"]
         },
         {
           "type": "dialogue",
           "speaker": "pawnshop",
           "speakerKey": "NPC_PAWNSHOP",
-          "textKeys": ["S002_D08", "S002_D09", "S002_D10"]
-        }
+          "textKeys": ["S002_D09", "S002_D10"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S002_D11"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D12"]
+        },
+        { "type": "system", "action": "set_flag", "param": "met_pawnshop" },
+        { "type": "system", "action": "set_flag", "param": "got_password_dawn" }
       ]
     },
 
     {
       "id": "S-003",
-      "title": "전당포 — 제안",
+      "title": "전당포 우측 — 베테랑 회수꾼 (암구호 새벽)",
       "triggerFlag": "",
       "oneShot": true,
       "nodes": [
+        { "type": "narration", "textKeys": ["S003_N01"] },
         {
           "type": "dialogue",
-          "speaker": "pawnshop",
-          "speakerKey": "NPC_PAWNSHOP",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
           "textKeys": ["S003_D01"]
         },
         {
@@ -85,82 +120,89 @@
         },
         {
           "type": "dialogue",
-          "speaker": "pawnshop",
-          "speakerKey": "NPC_PAWNSHOP",
-          "textKeys": ["S003_D03", "S003_D04", "S003_D05", "S003_D06"]
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S003_D03", "S003_D04"]
         },
         {
           "type": "dialogue",
-          "speaker": "pawnshop",
-          "speakerKey": "NPC_PAWNSHOP",
-          "textKeys": ["S003_D07", "S003_D08"]
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S003_D05"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S003_D06", "S003_D07", "S003_D08"]
         },
         {
           "type": "choice",
-          "choiceId": "pawnshop_proposal",
+          "choiceId": "veteran_intro",
           "options": [
             {
               "textKey": "S003_C01",
-              "responseKeys": ["S003_R01"],
-              "effects": [
-                { "type": "affinity", "target": "pawnshop", "value": 1 },
-                { "type": "trust", "target": "pawnshop", "value": 1 }
-              ]
+              "responseKeys": ["S003_R01", "S003_R02", "S003_R03", "S003_R04", "S003_R05"],
+              "effects": []
             },
             {
               "textKey": "S003_C02",
-              "responseKeys": ["S003_R02", "S003_R03"],
-              "effects": [
-                { "type": "trust", "target": "pawnshop", "value": 2 }
-              ]
+              "responseKeys": ["S003_R06", "S003_R07", "S003_R08"],
+              "effects": []
+            },
+            {
+              "textKey": "S003_C03",
+              "responseKeys": ["S003_R09", "S003_R10", "S003_R11"],
+              "effects": []
             }
           ]
         },
-        { "type": "system", "action": "quest_accept", "param": "MQ-001" }
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S003_D09"]
+        },
+        { "type": "system", "action": "set_flag", "param": "veteran_met" }
       ]
     },
 
     {
       "id": "S-004",
-      "title": "안전가옥 — 도착",
-      "triggerFlag": "safehouse_first_arrival",
+      "title": "첫 출발 — 의뢰 수령 & 출격",
+      "triggerFlag": "",
       "oneShot": true,
       "nodes": [
-        { "type": "effect", "effect": "fade_out", "floatParam": 0.8 },
-        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
         {
-          "type": "narration",
-          "textKeys": ["UI_SAFEHOUSE_ARRIVE"]
+          "type": "dialogue",
+          "speaker": "",
+          "speakerKey": "",
+          "textKeys": ["S004_NOTE"]
+        },
+        { "type": "system", "action": "quest_accept", "param": "MQ-001" },
+        { "type": "narration", "textKeys": ["S004_N01"] },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S004_D01", "S004_D02"]
         },
         {
           "type": "dialogue",
-          "speaker": "pawnshop",
-          "speakerKey": "NPC_PAWNSHOP",
-          "textKeys": ["S004_D01", "S004_D02", "S004_D03"]
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S004_D03", "S004_D04", "S004_D05"]
         },
-        { "type": "system", "action": "give_item", "param": "rusty_pipe", "intParam": 1 },
+        { "type": "system", "action": "give_item", "param": "wood_club", "intParam": 1 },
         { "type": "system", "action": "give_item", "param": "bandage", "intParam": 2 },
-        { "type": "tutorial", "textKey": "TUT_REST", "duration": 5, "tutId": "rest" },
-        { "type": "system", "action": "set_flag", "param": "safehouse_unlocked" }
-      ]
-    },
-
-    {
-      "id": "S-005",
-      "title": "안전가옥 — 첫 휴식 후",
-      "triggerFlag": "first_rest_done",
-      "oneShot": true,
-      "nodes": [
+        { "type": "tutorial", "textKey": "TUT_HOTKEY", "duration": 5, "tutId": "hotkey" },
         {
-          "type": "narration",
-          "textKeys": ["UI_HP_RECOVERED"]
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S004_D06", "S004_D07"]
         },
-        {
-          "type": "narration",
-          "textKeys": ["S005_N01", "S005_N02"]
-        },
-        { "type": "tutorial", "textKey": "TUT_EQUIP", "duration": 6, "tutId": "equip" },
-        { "type": "system", "action": "set_flag", "param": "map_board_unlocked" }
+        { "type": "system", "action": "set_flag", "param": "mq001_briefed" }
       ]
     }
   ]

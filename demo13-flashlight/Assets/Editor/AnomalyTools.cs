@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>짙은현상 구간 배치 도구. (Tools ▸ TopDown ▸ Build ▸ Anomaly Zone)</summary>
 public static class AnomalyTools
 {
-    [MenuItem("Tools/TopDown/Build/Anomaly Zone")]
+    [MenuItem("Tools/TopDown/빌드/이상현상 구역 배치")]
     static void PlaceZone()
     {
         var go = new GameObject("AnomalyZone");

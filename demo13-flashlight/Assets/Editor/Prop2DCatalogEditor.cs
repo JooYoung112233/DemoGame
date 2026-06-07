@@ -15,7 +15,7 @@ public class Prop2DCatalogEditor : EditorWindow
 {
     const string PropFolder = "Assets/Resources/Props2D";
 
-    [MenuItem("Tools/TopDown/Map/Prop Catalog")]
+    [MenuItem("Tools/TopDown/맵/프롭 카탈로그")]
     static void Open() => GetWindow<Prop2DCatalogEditor>("2D Prop Catalog");
 
     List<Prop2DDefinition> _props = new();
@@ -1227,6 +1227,8 @@ public class Prop2DCatalogEditor : EditorWindow
             var go = sr.gameObject;
             var box = go.GetComponent<BoxCollider2D>();
             if (box == null) continue;                                  // Box 전용
+            if (box.isTrigger) continue;                                // 트리거(천장 컷어웨이/씬전환 등)는 의도된 영역 — 자동맞춤 제외
+            if (go.GetComponent<CeilingFader>() != null) continue;      // 천장 컷어웨이 트리거 보호
             if (go.GetComponent<ColliderAutoFit>() != null) continue;   // 이미 있음
 
             // 현재 콜라이더를 보존하도록 scale/offset 역산(이후 스프라이트 변경엔 비례 추종).
@@ -1437,7 +1439,7 @@ public class Prop2DCatalogEditor : EditorWindow
 
     /// <summary>기존 Prop2D 정의 중 ID가 인덱스 형식({prefix}_숫자)이 아닌 것을 인덱스로 정규화.
     /// propId + .asset 파일명 + 연결 프리팹(.prefab) 파일명을 함께 변경(GUID/참조 보존).</summary>
-    [MenuItem("Tools/TopDown/Map/Prop ID 인덱스로 정규화")]
+    [MenuItem("Tools/TopDown/맵/프롭 ID 정규화")]
     static void NormalizePropIds()
     {
         var all = AssetDatabase.FindAssets("t:Prop2DDefinition")

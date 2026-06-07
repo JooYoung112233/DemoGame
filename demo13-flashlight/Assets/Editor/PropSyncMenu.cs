@@ -9,9 +9,9 @@ using UnityEngine;
 /// </summary>
 public static class PropSyncMenu
 {
-    const string Root = "Tools/TopDown/Map/";
+    const string Root = "Tools/TopDown/맵/";
 
-    [MenuItem(Root + "선택에 Collider Auto-Fit 부착", false, 200)]
+    [MenuItem(Root + "선택에 콜라이더 자동맞춤", false, 200)]
     static void AddColliderAutoFit()
     {
         int n = 0;
@@ -31,7 +31,7 @@ public static class PropSyncMenu
         Debug.Log($"[PropSync] ColliderAutoFit {n}개 부착.");
     }
 
-    [MenuItem(Root + "선택에 GroundShadow 부착", false, 201)]
+    [MenuItem(Root + "선택에 바닥그림자 부착", false, 201)]
     static void AddGroundShadow()
     {
         int n = 0;
@@ -45,7 +45,7 @@ public static class PropSyncMenu
         Debug.Log($"[PropSync] GroundShadow2D {n}개 부착(자체 라이브 동기화).");
     }
 
-    [MenuItem(Root + "선택에 Collider Auto-Fit 부착", true)]
-    [MenuItem(Root + "선택에 GroundShadow 부착", true)]
+    [MenuItem(Root + "선택에 콜라이더 자동맞춤", true)]
+    [MenuItem(Root + "선택에 바닥그림자 부착", true)]
     static bool ValidateHasSelection() => Selection.gameObjects.Length > 0;
 }

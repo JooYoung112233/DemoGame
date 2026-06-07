@@ -73,6 +73,9 @@ public class InteractableObject : MonoBehaviour, IInteractable
     [Tooltip("이 쪽지에 연결된 스토리 씬 ID (비어있으면 noteContent를 직접 표시)")]
     [SerializeField] string noteStorySceneId;
 
+    [Tooltip("쪽지 UI 상단 제목 (비어있으면 '쪽지')")]
+    [SerializeField] string noteTitle;
+
     [Header("── NPC (스토리 연동) ──")]
     [Tooltip("스토리 트리거에 사용할 NPC ID (pawnshop, merchant 등)")]
     [SerializeField] string storyNpcId;
@@ -263,18 +266,15 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
     void HandleNote(GameObject playerGO)
     {
-        if (StoryTriggerManager.Instance != null)
+        // 스토리 씬에 연결된 쪽지 → 스크립트 씬 재생(StoryPlayer 경유).
+        if (!string.IsNullOrEmpty(noteStorySceneId) && StoryTriggerManager.Instance != null)
         {
             StoryTriggerManager.Instance.OnNoteRead(noteContent, noteStorySceneId);
+            return;
         }
-        else if (DialogueUI.Instance != null)
-        {
-            DialogueUI.Instance.ShowStoryDialogue("", new[] { noteContent }, null);
-        }
-        else
-        {
-            Debug.Log($"[Note] {noteContent}");
-        }
+
+        // 일반 쪽지 → 전체 화면 노트 UI(없으면 자동 생성).
+        NoteUI.Ensure().Show(noteContent, noteTitle);
     }
 
     void HandleBed(GameObject playerGO)
@@ -431,6 +431,17 @@ public class InteractableObject : MonoBehaviour, IInteractable
         promptText = prompt;
         oneShot = true;
         interactRange = 1.5f;
+    }
+
+    /// <summary>코드에서 Note(쪽지) 타입으로 설정 (그레이박스 레이아웃 등에서 쪽지 내용 주입).</summary>
+    public void SetNote(string content, string title = "", string prompt = "읽기")
+    {
+        type = InteractType.Note;
+        noteContent = content;
+        noteTitle = title;
+        noteStorySceneId = "";
+        promptText = prompt;
+        if (interactRange < 0.5f) interactRange = 1.5f;
     }
 
     #endregion

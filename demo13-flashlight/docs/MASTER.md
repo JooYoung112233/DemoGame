@@ -105,7 +105,9 @@
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | [`world-map.md`](world-map.md) | 중앙 영야 코어 + 6개 외곽 지구 구조, 컨셉 아트 기반 거시 월드맵 | 컨셉 확정 |
-| [`level-scrapmarket.md`](level-scrapmarket.md) | 폐상가 **레벨 디자인** — 상가골목(낮) 데모 구역 v1(구역6·동선·리스크리워드) + 전체 지역1 통합 관계 | 초안 (검토 중) |
+| [`level-scrapmarket.md`](level-scrapmarket.md) | 폐상가 **레벨 디자인** — 상가골목(낮) 튜토 v6(건물기반 그레이박스) + 약국 조각 + 전체 지역1(1000×900) 통합 관계 | 진행 |
+| [`level-apartment.md`](level-apartment.md) | **폐아파트** 레벨 디자인 — 랜드마크#2, 수직 4층 side-by-side 그레이박스 + 열쇠 체인 | 설계 |
+| [`level-tower.md`](level-tower.md) | **유리 R&D 타워** 레벨 디자인 — 랜드마크#3, 저층→상층 R&D(카드키 게이트), 현상 빈발 | 설계 |
 | [`raid.md`](raid.md) | 15분 타이머, 탈출 시스템, 루팅 흐름, 귀환 정산(RaidResultUI), 시간초과 페널티 | 기획 확정, 코드 구현 |
 | [`post-raid-event.md`](post-raid-event.md) | 레이드 후 랜덤 이벤트 — 40% 확률, 텍스트 선택지, 보상/페널티 | 기획 확정, 코드 구현 |
 | [`replayability.md`](replayability.md) | 반복성·엔드게임 progression — 장비 부품 모딩, 지역 격상, 밴딧 생태계, Co-op 멀티 | 검토 중 (확정 전) |

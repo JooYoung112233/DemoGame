@@ -123,7 +123,9 @@ public class StoryPlayer : MonoBehaviour
             if (scene.oneShot && playedScenes.Contains(scene.id)) continue;
             if (!QuestManager.Instance.GetFlag(scene.triggerFlag)) continue;
 
-            PlayScene(scene.id);
+            // 완료 후 재귀 체크 — 연속된 자동 씬(S-007→S-008 등)을 끊김 없이 연쇄.
+            // 모든 자동 씬은 oneShot이라 playedScenes 가드로 무한 루프 방지.
+            PlayScene(scene.id, CheckAutoTriggers);
             return; // 한 번에 하나만
         }
     }

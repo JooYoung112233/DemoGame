@@ -15,7 +15,7 @@ public class GameControlPanel : EditorWindow
 {
     const string TUNING_PATH = "Assets/Resources/Data/GameTuning.asset";
 
-    [MenuItem("Tools/TopDown/Control Panel")]
+    [MenuItem("Tools/TopDown/컨트롤 패널")]
     static void Open()
     {
         var w = GetWindow<GameControlPanel>("Control Panel");

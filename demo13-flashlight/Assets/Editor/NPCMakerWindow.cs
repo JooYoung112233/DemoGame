@@ -13,7 +13,7 @@ using UnityEngine;
 /// </summary>
 public class NPCMakerWindow : EditorWindow
 {
-    [MenuItem("Tools/TopDown/Content/NPC Maker")]
+    [MenuItem("Tools/TopDown/콘텐츠/NPC 메이커")]
     static void Open()
     {
         var w = GetWindow<NPCMakerWindow>("NPC Maker");

@@ -17,7 +17,7 @@ public class ColorToAlpha : EditorWindow
     string suffix = "_alpha";
     Vector2 scrollPos;
 
-    [MenuItem("Tools/TopDown/Utility/Color to Alpha")]
+    [MenuItem("Tools/TopDown/유틸/색상→투명 변환")]
     static void Open()
     {
         var window = GetWindow<ColorToAlpha>("Color to Alpha");

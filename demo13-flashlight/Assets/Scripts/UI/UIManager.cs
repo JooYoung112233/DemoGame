@@ -357,6 +357,7 @@ public class UIManager : MonoBehaviour
         if (shopUI != null && shopUI.IsShowing) return true;
         if (dialogueUI != null && dialogueUI.IsShowing) return true;
         if (postRaidEventUI != null && postRaidEventUI.IsShowing) return true;
+        if (NoteUI.Instance != null && NoteUI.Instance.IsShowing) return true;
         return false;
     }
 }

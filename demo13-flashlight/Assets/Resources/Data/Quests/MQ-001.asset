@@ -13,16 +13,20 @@ MonoBehaviour:
   m_Name: MQ-001
   m_EditorClassIdentifier: Game.Scripts::QuestData
   questId: MQ-001
-  title: "첫 탐색"
-  description: "폐상가 교역 지구(낮)에 진입해 탈출구로 무사히 귀환하라."
+  title: "민이를 찾아 주세요"
+  description: "폐상가 교역 지구(낮)에서 '민이'의 흔적을 찾아 회수꾼에게 보고하라."
   questType: 2
-  giverNpcId: pawnshop
+  giverNpcId: veteran_scavenger
   objectives:
   - type: 2
-    targetId: ruined_mall_day_extract
+    targetId: mq001_trace
     requiredCount: 1
-    description: "폐상가(낮) 레이드 완료"
-  rewards: []
+    description: "폐상가 창고에서 민이의 흔적 발견"
+  rewards:
+  - type: 1
+    itemId:
+    amount: 10
+    npcId:
   unlockCondition:
     requiredAffinity: 0
     requiredTrust: 0

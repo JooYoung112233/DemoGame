@@ -34,7 +34,7 @@ public class DecalScatterBrush : EditorWindow
     bool _hasLast;
     Vector2 _scroll;
 
-    [MenuItem("Tools/TopDown/Map/Decal Scatter Brush")]
+    [MenuItem("Tools/TopDown/맵/데칼 브러시")]
     static void Open() => GetWindow<DecalScatterBrush>("Decal Scatter");
 
     void OnEnable() => SceneView.duringSceneGui += OnScene;

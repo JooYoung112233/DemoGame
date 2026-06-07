@@ -10,7 +10,7 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public static class SceneLightingBuilder
 {
-    [MenuItem("Tools/TopDown/Map/Setup Scene Lighting")]
+    [MenuItem("Tools/TopDown/맵/씬 조명 셋업")]
     public static void SetupSceneLighting()
     {
         // 기존 Global Light2D 탐색 (중복 생성 방지)

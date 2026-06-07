@@ -1,36 +1,50 @@
 Shader "BRB/PlayerSprite"
 {
+    // 플레이어/캐릭터용 스프라이트 셰이더 (표준 SpriteRenderer — 단일 스프라이트·유니티 애니메이션 호환).
+    // Light2D 반응 + 외곽선(어둠 속 가독성) + 최소광(어두워도 안 보이지 않게) + 픽셀화/색단계(옵션) + 히트 플래시.
+    //   ※ 옛 버전의 수동 스프라이트시트 UV(_Columns/_Rows/_CurrentFrame)는 제거 — 프레임 UV는 SpriteRenderer가 공급.
+    // HitFlash.cs는 _FlashAmount 프로퍼티가 있으면 이 머티리얼을 그대로 써서 적중 시 흰색 깜빡(SpriteFlash 교체 안 함).
     Properties
     {
-        _MainTex ("Sprite Sheet", 2D) = "white" {}
+        _MainTex ("Sprite", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
-        _Columns ("Columns", Float) = 2
-        _Rows ("Rows", Float) = 8
-        _CurrentFrame ("Current Frame", Float) = 0
-        _Cutoff ("Alpha Cutoff", Range(0,1)) = 0.5
+        _Cutoff ("Alpha Cutoff", Range(0,1)) = 0.1
+        _MinLight ("Min Light (어둠 속 최소 가시성)", Range(0,1)) = 0.12
 
         [Header(Outline)]
-        [Toggle(_OUTLINE_ON)] _OutlineToggle ("Outline", Float) = 1
-        _OutlineColor ("Outline Color", Color) = (0.02, 0.02, 0.02, 1)
-        _OutlineSize ("Outline Size", Range(0, 5)) = 1.5
+        [Toggle(_OUTLINE_ON)] _OutlineToggle ("외곽선 ON", Float) = 1
+        _OutlineColor ("Outline Color", Color) = (0.02, 0.02, 0.03, 1)
+        _OutlineSize ("Outline Size (texel)", Range(0, 5)) = 1.5
+
+        [Header(Pixelation)]
+        [Toggle(_PIXELATE_ON)] _PixelateToggle ("픽셀화 ON", Float) = 0
+        _PixelDensity ("Pixel Density (격자 수)", Range(8, 1024)) = 128
+
+        [Header(Color Quantize)]
+        [Toggle(_QUANTIZE_ON)] _QuantizeToggle ("색 단계화", Float) = 0
+        _ColorLevels ("Color Levels", Range(2, 32)) = 12
+
+        [Header(Hit Flash)]
+        _FlashColor ("Flash Color", Color) = (1,1,1,1)
+        _FlashAmount ("Flash Amount", Range(0,1)) = 0
     }
     SubShader
     {
-        Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" "RenderPipeline"="UniversalPipeline" }
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline"="UniversalPipeline" "PreviewType"="Plane" }
 
+        // ============ 3D URP Forward 패스 (폴백/프리뷰) ============
         Pass
         {
-            Name "PlayerSprite"
+            Name "PlayerSpriteForward"
             Tags { "LightMode"="UniversalForward" }
-
-            Cull Off
-            ZWrite On
-            Blend SrcAlpha OneMinusSrcAlpha
+            Cull Off  ZWrite Off  Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #pragma shader_feature_local _OUTLINE_ON
+            #pragma shader_feature_local _PIXELATE_ON
+            #pragma shader_feature_local _QUANTIZE_ON
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -40,112 +54,87 @@ Shader "BRB/PlayerSprite"
                 float4 _MainTex_ST;
                 float4 _MainTex_TexelSize;
                 float4 _Color;
-                float _Columns;
-                float _Rows;
-                float _CurrentFrame;
                 float _Cutoff;
+                float _MinLight;
                 float4 _OutlineColor;
                 float _OutlineSize;
+                float _PixelDensity;
+                float _ColorLevels;
+                float4 _FlashColor;
+                float _FlashAmount;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
 
-            struct Attributes
+            struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; };
+            struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; float3 positionWS : TEXCOORD1; };
+
+            float2 PixelateUV(float2 uv, float d) { float2 g = float2(d, d); return (floor(uv * g) + 0.5) / g; }
+            float OutlineAlpha(float2 uv)
             {
-                float4 positionOS : POSITION;
-                float2 uv : TEXCOORD0;
-                float3 normalOS : NORMAL;
-            };
-
-            struct Varyings
-            {
-                float4 positionCS : SV_POSITION;
-                float2 uv : TEXCOORD0;
-                float2 rawUV : TEXCOORD1;
-                float3 positionWS : TEXCOORD2;
-                float3 normalWS : TEXCOORD3;
-            };
-
-            // sprite sheet UV calculation
-            float2 calcSheetUV(float2 uv)
-            {
-                uint frame = (uint)_CurrentFrame;
-                uint cols = (uint)_Columns;
-                uint col = frame % cols;
-                uint row = frame / cols;
-
-                float cellW = 1.0 / _Columns;
-                float cellH = 1.0 / _Rows;
-
-                float u = (col + uv.x) * cellW;
-                float v = 1.0 - (row + 1.0 - uv.y) * cellH;
-
-                return float2(u, v);
+                float2 ts = _MainTex_TexelSize.xy * _OutlineSize;
+                float m = 0;
+                float2 o[8] = { float2(-1,0), float2(1,0), float2(0,-1), float2(0,1), float2(-1,-1), float2(-1,1), float2(1,-1), float2(1,1) };
+                [unroll] for (int j = 0; j < 8; j++)
+                    m = max(m, SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uv + o[j] * ts, 0).a);
+                return m;
             }
 
             Varyings vert(Attributes input)
             {
-                Varyings output;
-                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-                output.rawUV = input.uv;
-                output.uv = calcSheetUV(input.uv);
-                output.positionWS = TransformObjectToWorld(input.positionOS.xyz).xyz;
-                output.normalWS = normalize(TransformObjectToWorldNormal(input.normalOS));
-                return output;
+                Varyings o;
+                o.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                o.uv = TRANSFORM_TEX(input.uv, _MainTex);
+                o.color = input.color;
+                o.positionWS = TransformObjectToWorld(input.positionOS.xyz).xyz;
+                return o;
+            }
+
+            half3 Lit(half3 albedo, float3 posWS)
+            {
+                half3 ambient = albedo * 0.4;
+                Light mainLight = GetMainLight();
+                half3 c = ambient + albedo * mainLight.color;
+                #ifdef _ADDITIONAL_LIGHTS
+                uint lc = GetAdditionalLightsCount();
+                for (uint i = 0; i < lc; i++)
+                {
+                    Light l = GetAdditionalLight(i, posWS);
+                    c += albedo * l.distanceAttenuation * l.color * 2.0;
+                }
+                #endif
+                return max(c, albedo * _MinLight);
             }
 
             half4 frag(Varyings input) : SV_Target
             {
-                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
-                col *= _Color;
-
-                // lighting: no NdotL (billboard sprite)
-                Light mainLight = GetMainLight();
-                half3 lighting = half3(0.4, 0.4, 0.4) + mainLight.color;
-
-                #ifdef _ADDITIONAL_LIGHTS
-                uint lightCount = GetAdditionalLightsCount();
-                for (uint i = 0; i < lightCount; i++)
-                {
-                    Light addLight = GetAdditionalLight(i, input.positionWS);
-                    float addAtten = addLight.distanceAttenuation;
-                    lighting += addAtten * addLight.color;
-                }
+                float2 puv = input.uv;
+                #ifdef _PIXELATE_ON
+                    puv = PixelateUV(input.uv, _PixelDensity);
+                #endif
+                half4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, puv) * _Color * input.color;
+                half3 rgb = tex.rgb;
+                #ifdef _QUANTIZE_ON
+                    float levels = max(_ColorLevels, 2.0);
+                    rgb = floor(rgb * levels + 0.5) / levels;
                 #endif
 
-                // visible pixel: apply lighting and return
-                if (col.a >= _Cutoff)
+                half3 albedo; half outA;
+                if (tex.a >= _Cutoff) { albedo = rgb; outA = tex.a; }
+                else
                 {
-                    col.rgb *= lighting;
-                    return col;
+                    #ifdef _OUTLINE_ON
+                        if (OutlineAlpha(input.uv) >= _Cutoff) { albedo = _OutlineColor.rgb; outA = _OutlineColor.a; }
+                        else { clip(-1); return 0; }
+                    #else
+                        clip(-1); return 0;
+                    #endif
                 }
 
-                // outline check
-                #ifdef _OUTLINE_ON
-                    float2 texelSize = _MainTex_TexelSize.xy * _OutlineSize;
-                    float2 offsets[8] = {
-                        float2(-1, 0), float2(1, 0), float2(0, -1), float2(0, 1),
-                        float2(-1, -1), float2(-1, 1), float2(1, -1), float2(1, 1)
-                    };
-
-                    float maxAlpha = 0;
-                    for (int j = 0; j < 8; j++)
-                    {
-                        float2 sampleUV = input.uv + offsets[j] * texelSize;
-                        maxAlpha = max(maxAlpha, SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, sampleUV, 0).a);
-                    }
-
-                    if (maxAlpha >= _Cutoff)
-                    {
-                        half4 outline = _OutlineColor;
-                        outline.rgb *= lighting;
-                        return outline;
-                    }
-                #endif
-
-                clip(-1);
-                return half4(0, 0, 0, 0);
+                half3 outc = Lit(albedo, input.positionWS);
+                outc = lerp(outc, _FlashColor.rgb, _FlashAmount);
+                return half4(outc, outA);
             }
             ENDHLSL
         }
@@ -155,15 +144,14 @@ Shader "BRB/PlayerSprite"
         {
             Name "PlayerSprite2D"
             Tags { "LightMode"="Universal2D" }
-
-            Cull Off
-            ZWrite On
-            Blend SrcAlpha OneMinusSrcAlpha
+            Cull Off  ZWrite Off  Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex vert2d
             #pragma fragment frag2d
             #pragma shader_feature_local _OUTLINE_ON
+            #pragma shader_feature_local _PIXELATE_ON
+            #pragma shader_feature_local _QUANTIZE_ON
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/InputData2D.hlsl"
@@ -175,88 +163,80 @@ Shader "BRB/PlayerSprite"
                 float4 _MainTex_ST;
                 float4 _MainTex_TexelSize;
                 float4 _Color;
-                float _Columns;
-                float _Rows;
-                float _CurrentFrame;
                 float _Cutoff;
+                float _MinLight;
                 float4 _OutlineColor;
                 float _OutlineSize;
+                float _PixelDensity;
+                float _ColorLevels;
+                float4 _FlashColor;
+                float _FlashAmount;
             CBUFFER_END
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
 
-            struct Attributes2D
-            {
-                float4 positionOS : POSITION;
-                float2 uv : TEXCOORD0;
-            };
-            struct Varyings2D
-            {
-                float4 positionCS : SV_POSITION;
-                float2 uv : TEXCOORD0;
-                half2 lightingUV : TEXCOORD1;
-            };
+            struct Attributes2D { float4 positionOS : POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; };
+            struct Varyings2D { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; half2 lightingUV : TEXCOORD1; };
 
-            float2 calcSheetUV2D(float2 uv)
+            float2 PixelateUV2D(float2 uv, float d) { float2 g = float2(d, d); return (floor(uv * g) + 0.5) / g; }
+            float OutlineAlpha2D(float2 uv)
             {
-                uint frame = (uint)_CurrentFrame;
-                uint cols = (uint)_Columns;
-                uint col = frame % cols;
-                uint row = frame / cols;
-                float cellW = 1.0 / _Columns;
-                float cellH = 1.0 / _Rows;
-                float u = (col + uv.x) * cellW;
-                float v = 1.0 - (row + 1.0 - uv.y) * cellH;
-                return float2(u, v);
+                float2 ts = _MainTex_TexelSize.xy * _OutlineSize;
+                float m = 0;
+                float2 o[8] = { float2(-1,0), float2(1,0), float2(0,-1), float2(0,1), float2(-1,-1), float2(-1,1), float2(1,-1), float2(1,1) };
+                [unroll] for (int j = 0; j < 8; j++)
+                    m = max(m, SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uv + o[j] * ts, 0).a);
+                return m;
             }
 
             Varyings2D vert2d(Attributes2D input)
             {
                 Varyings2D o;
                 o.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-                o.uv = calcSheetUV2D(input.uv);
+                o.uv = TRANSFORM_TEX(input.uv, _MainTex);
+                o.color = input.color;
                 o.lightingUV = half2(ComputeScreenPos(o.positionCS / o.positionCS.w).xy);
                 return o;
             }
 
-            half4 light2d(half3 albedo, half alpha, float2 uv, half2 lightingUV)
-            {
-                SurfaceData2D sd;
-                InputData2D id;
-                InitializeSurfaceData(albedo, alpha, half4(1,1,1,1), sd);
-                InitializeInputData(uv, lightingUV, id);
-                return CombinedShapeLightShared(sd, id);
-            }
-
             half4 frag2d(Varyings2D input) : SV_Target
             {
-                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
-
-                if (col.a >= _Cutoff)
-                    return light2d(col.rgb, col.a, input.uv, input.lightingUV);
-
-                #ifdef _OUTLINE_ON
-                    float2 texelSize = _MainTex_TexelSize.xy * _OutlineSize;
-                    float2 offsets[8] = {
-                        float2(-1, 0), float2(1, 0), float2(0, -1), float2(0, 1),
-                        float2(-1, -1), float2(-1, 1), float2(1, -1), float2(1, 1)
-                    };
-                    float maxAlpha = 0;
-                    for (int j = 0; j < 8; j++)
-                    {
-                        float2 sampleUV = input.uv + offsets[j] * texelSize;
-                        maxAlpha = max(maxAlpha, SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, sampleUV, 0).a);
-                    }
-                    if (maxAlpha >= _Cutoff)
-                        return light2d(_OutlineColor.rgb, _OutlineColor.a, input.uv, input.lightingUV);
+                float2 puv = input.uv;
+                #ifdef _PIXELATE_ON
+                    puv = PixelateUV2D(input.uv, _PixelDensity);
+                #endif
+                half4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, puv) * _Color * input.color;
+                half3 rgb = tex.rgb;
+                #ifdef _QUANTIZE_ON
+                    float levels = max(_ColorLevels, 2.0);
+                    rgb = floor(rgb * levels + 0.5) / levels;
                 #endif
 
-                clip(-1);
-                return half4(0, 0, 0, 0);
+                half3 albedo; half outA;
+                if (tex.a >= _Cutoff) { albedo = rgb; outA = tex.a; }
+                else
+                {
+                    #ifdef _OUTLINE_ON
+                        if (OutlineAlpha2D(input.uv) >= _Cutoff) { albedo = _OutlineColor.rgb; outA = _OutlineColor.a; }
+                        else { clip(-1); return 0; }
+                    #else
+                        clip(-1); return 0;
+                    #endif
+                }
+
+                SurfaceData2D sd;
+                InputData2D id;
+                InitializeSurfaceData(albedo, outA, half4(1,1,1,1), sd);
+                InitializeInputData(puv, input.lightingUV, id);
+                half4 lit = CombinedShapeLightShared(sd, id);
+
+                lit.rgb = max(lit.rgb, albedo * _MinLight);          // 어둠 속 최소 가시성
+                lit.rgb = lerp(lit.rgb, _FlashColor.rgb, _FlashAmount); // 히트 플래시
+                return lit;
             }
             ENDHLSL
         }
     }
-    FallBack Off
+    FallBack "Universal Render Pipeline/Lit"
 }

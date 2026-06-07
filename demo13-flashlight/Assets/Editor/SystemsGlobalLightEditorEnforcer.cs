@@ -38,25 +38,37 @@ static class SystemsGlobalLightEditorEnforcer
 
         _disabled.RemoveWhere(l => l == null);
 
-        var systems = SceneManager.GetSceneByName(SystemsScene.SceneName);
-        bool systemsLoaded = systems.IsValid() && systems.isLoaded;
-        if (!systemsLoaded) { Restore(); return; }   // Systems 없으면 단독 씬 존중 → 우리가 껐던 것 복구
-
         var all = Object.FindObjectsByType<Light2D>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
-        // Systems 씬의 글로벌 = owner (이것만 살린다)
+        var systems = SceneManager.GetSceneByName(SystemsScene.SceneName);
+        bool systemsLoaded = systems.IsValid() && systems.isLoaded;
+
+        // 유지할 단 하나의 글로벌(owner) 선정 — 우선순위:
+        //  1) Systems 씬의 글로벌(있으면)  2) 현재 활성 글로벌  3) 비활성 포함 첫 글로벌
+        // Systems가 없어도 단독 씬에 글로벌이 2개 이상이면 1개만 남겨 "More than one global light" 경고를 막는다.
         Light2D owner = null;
-        foreach (var l in all)
-            if (l != null && l.lightType == Light2D.LightType.Global && l.gameObject.scene == systems)
-            { owner = l; break; }
-        if (owner == null) return;                   // Systems에 글로벌이 없으면 손대지 않음
+        if (systemsLoaded)
+            foreach (var l in all)
+                if (IsGlobal(l) && l.gameObject.scene == systems) { owner = l; break; }
+        if (owner == null)
+            foreach (var l in all)
+                if (IsGlobal(l) && l.enabled) { owner = l; break; }
+        if (owner == null)
+            foreach (var l in all)
+                if (IsGlobal(l)) { owner = l; break; }
+        if (owner == null) { Restore(); return; }    // 글로벌이 아예 없음 → 우리가 껐던 것 복구
+
+        if (!owner.enabled) owner.enabled = true;     // owner는 항상 켜둠
+        _disabled.Remove(owner);
 
         foreach (var l in all)
         {
-            if (l == null || l.lightType != Light2D.LightType.Global || l == owner) continue;
-            if (l.enabled) { l.enabled = false; _disabled.Add(l); }   // 이미 꺼져 있으면 재차 안 건드림 → 안정
+            if (!IsGlobal(l) || l == owner) continue;
+            if (l.enabled) { l.enabled = false; _disabled.Add(l); }   // 나머지 글로벌은 끔(경고 방지)
         }
     }
+
+    static bool IsGlobal(Light2D l) => l != null && l.lightType == Light2D.LightType.Global;
 
     static void Restore()
     {

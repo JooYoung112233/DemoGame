@@ -74,12 +74,10 @@ public class StoryTriggerManager : MonoBehaviour
         var qm = QuestManager.Instance;
         if (qm == null) return;
 
-        // 첫 안전가옥 도착 (S-003 완료 후 전환 시)
-        if (!qm.GetFlag("safehouse_arrived") && qm.GetFlag("pawnshop_intro_done"))
-        {
-            qm.SetFlag("safehouse_first_arrival");
+        // 안전가옥 진입 시 자동 트리거 체크(귀환 보고 S-007, 거처 S-010 등)는
+        // DelayedSceneInit 끝의 CheckAutoTriggers()에서 일괄 처리.
+        if (!qm.GetFlag("safehouse_arrived"))
             qm.SetFlag("safehouse_arrived");
-        }
     }
 
     // ═══════════════════════════
@@ -147,6 +145,7 @@ public class StoryTriggerManager : MonoBehaviour
 
     /// <summary>
     /// 프롤로그 재생. H키 튜토리얼 패널에서도 호출 가능.
+    /// S-000(깨어남) → S-001(골목 첫 이동) 연쇄 후 H키 안내.
     /// </summary>
     public void PlayPrologue()
     {
@@ -155,14 +154,17 @@ public class StoryTriggerManager : MonoBehaviour
 
         StoryPlayer.Instance.PlayScene("S-000", () =>
         {
-            // 프롤로그 후 H키 안내 프롬프트 표시
-            if (TutorialPrompt.Instance != null)
+            StoryPlayer.Instance.PlayScene("S-001", () =>
             {
-                string helpText = StoryLocale.Instance != null
-                    ? StoryLocale.Instance.Get("TUT_HELP")
-                    : "H — 조작법 보기";
-                TutorialPrompt.Instance.Show(helpText, 5f, null);
-            }
+                // 프롤로그 후 H키 안내 프롬프트 표시
+                if (TutorialPrompt.Instance != null)
+                {
+                    string helpText = StoryLocale.Instance != null
+                        ? StoryLocale.Instance.Get("TUT_HELP")
+                        : "H — 조작법 보기";
+                    TutorialPrompt.Instance.Show(helpText, 5f, null);
+                }
+            });
         });
     }
 
@@ -180,37 +182,40 @@ public class StoryTriggerManager : MonoBehaviour
         var sp = StoryPlayer.Instance;
         if (qm == null || sp == null || sp.IsPlaying) return false;
 
-        // 전당포 주인 — 최초 대면
-        if (npcId == "pawnshop" && !qm.GetFlag("pawnshop_intro_done"))
+        // 전당포 주인 — 최초 대면 (S-002: 시계 거절 + 암구호 '새벽')
+        if (npcId == "pawnshop" && !qm.GetFlag("met_pawnshop"))
         {
-            sp.PlayScene("S-002", () =>
+            sp.PlayScene("S-002", () => onComplete?.Invoke());
+            return true;
+        }
+
+        // 베테랑 회수꾼 — 암구호 '새벽' 확보 후 최초 대화
+        // S-003(소개·정보) → S-004(게시판 의뢰 MQ-001 수령 + 장비 지급) 연쇄.
+        if (npcId == "veteran_scavenger" && qm.GetFlag("got_password_dawn")
+            && !qm.GetFlag("veteran_intro_done"))
+        {
+            sp.PlayScene("S-003", () =>
             {
-                sp.PlayScene("S-003", () =>
+                sp.PlayScene("S-004", () =>
                 {
-                    qm.SetFlag("pawnshop_intro_done");
+                    qm.SetFlag("veteran_intro_done");
                     onComplete?.Invoke();
                 });
             });
             return true;
         }
 
-        // 떠돌이 상인 — 최초 조우
+        // 떠돌이 상인 — 최초 조우 (보급)
         if (npcId == "merchant" && !qm.GetFlag("merchant_met"))
         {
-            sp.PlayScene("S-012", () =>
-            {
-                onComplete?.Invoke();
-            });
+            sp.PlayScene("S-012", () => onComplete?.Invoke());
             return true;
         }
 
         // 밴딧 협상꾼 — 최초 조우
         if (npcId == "bandit_negotiator" && !qm.GetFlag("negotiator_met"))
         {
-            sp.PlayScene("S-017", () =>
-            {
-                onComplete?.Invoke();
-            });
+            sp.PlayScene("S-017", () => onComplete?.Invoke());
             return true;
         }
 
@@ -256,10 +261,10 @@ public class StoryTriggerManager : MonoBehaviour
         if (ScreenEffectManager.Instance != null)
             yield return ScreenEffectManager.Instance.FadeIn(1.0f);
 
-        // 첫 휴식 플래그
-        if (qm != null && !qm.GetFlag("first_rest_done") && qm.GetFlag("safehouse_arrived"))
+        // 첫 수면 플래그 — 거처(컨테이너) 획득 후 첫 휴식 (S-011_WAKE: 생존 스탯 안내)
+        if (qm != null && !qm.GetFlag("first_sleep_done") && qm.GetFlag("home_unlocked"))
         {
-            qm.SetFlag("first_rest_done");
+            qm.SetFlag("first_sleep_done");
         }
 
         // MQ-002 완료 후 첫 휴식 → 에필로그
@@ -307,20 +312,14 @@ public class StoryTriggerManager : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(storySceneId) && StoryPlayer.Instance != null)
         {
-            var qm = QuestManager.Instance;
-            // found_note 플래그 설정 (S-014용)
-            if (storySceneId == "S-014" && qm != null)
-                qm.SetFlag("found_note");
-
+            // 단서 씬(예: S-005_WAREHOUSE 민이 흔적, S-009_BOX 철제 상자)을 재생.
+            // 진행 플래그(mq001_trace_found, sq002_box_found 등)는 각 씬 내부 system 노드에서 설정.
             StoryPlayer.Instance.PlayScene(storySceneId);
             return;
         }
 
-        // 폴백: DialogueUI로 표시
-        if (DialogueUI.Instance != null)
-        {
-            DialogueUI.Instance.ShowStoryDialogue("", new[] { noteContent }, null);
-        }
+        // 일반 쪽지 → 전체 화면 노트 UI(없으면 자동 생성).
+        NoteUI.Ensure().Show(noteContent);
     }
 
     // ═══════════════════════════
@@ -328,7 +327,7 @@ public class StoryTriggerManager : MonoBehaviour
     // ═══════════════════════════
 
     /// <summary>
-    /// 밴딧 조우 시 호출 (첫 1회만 S-013 재생).
+    /// 적대 탐색꾼 조우 시 호출 (첫 1회만 S-005_COMBAT 전투 튜토리얼 재생).
     /// </summary>
     public void OnFirstCombatEncounter()
     {
@@ -338,7 +337,7 @@ public class StoryTriggerManager : MonoBehaviour
         qm.SetFlag("first_combat_done");
 
         if (StoryPlayer.Instance != null)
-            StoryPlayer.Instance.PlayScene("S-013");
+            StoryPlayer.Instance.PlayScene("S-005_COMBAT");
     }
 
     // ═══════════════════════════
@@ -379,13 +378,19 @@ public class StoryTriggerManager : MonoBehaviour
         if (wasNight)
             AchievementManager.Instance?.AddStat("night_raids", 1);
 
-        // 낮 레이드 첫 귀환
+        // 낮 레이드 첫 귀환 → 회수꾼 보고 (S-007, MQ-001)
         if (!wasNight && !qm.GetFlag("day_raid_returned") && qm.GetFlag("entered_day_ever"))
         {
             qm.SetFlag("day_raid_returned");
         }
 
-        // 밤 레이드 + 루디 소지 귀환
+        // SQ-002: 약국에서 철제 상자 회수 후 귀환 → 상자 전달 & 거처 알선 (S-010)
+        if (!wasNight && qm.GetFlag("sq002_box_found") && !qm.GetFlag("sq002_returned"))
+        {
+            qm.SetFlag("sq002_returned");
+        }
+
+        // 밤 레이드 + 루디 소지 귀환 → 첫 루디 납품 (S-030, MQ-002)
         if (wasNight && hasRudi && !qm.GetFlag("night_raid_returned_with_rudi"))
         {
             qm.SetFlag("night_raid_returned_with_rudi");
@@ -399,33 +404,14 @@ public class StoryTriggerManager : MonoBehaviour
     // ═══════════════════════════
 
     /// <summary>
-    /// 지도판에서 밤 레이드 선택 시 호출.
-    /// 첫 밤 출전이면 S-020 재생 후 콜백.
+    /// 밤 출격 게이트 선택 시 호출.
+    /// 도입부 재설계(2026-06-05): 밤 주의사항 브리핑은 회수꾼(S-013)에서 처리하고,
+    /// 밤 진입 연출(S-020)은 폐상가(밤) 씬 로드 시 자동 트리거(entered_ruined_mall_night)로 재생.
+    /// 따라서 여기서는 별도 씬 없이 콜백만 호출한다. (호환용 유지)
     /// </summary>
     public void OnNightGateSelected(System.Action onComplete)
     {
-        var qm = QuestManager.Instance;
-        var sp = StoryPlayer.Instance;
-        if (qm == null || sp == null)
-        {
-            onComplete?.Invoke();
-            return;
-        }
-
-        if (!qm.GetFlag("night_gate_first_played"))
-        {
-            qm.SetFlag("night_gate_first");
-            qm.SetFlag("night_gate_first_played");
-
-            sp.PlayScene("S-020", () =>
-            {
-                onComplete?.Invoke();
-            });
-        }
-        else
-        {
-            onComplete?.Invoke();
-        }
+        onComplete?.Invoke();
     }
 
     // ═══════════════════════════
@@ -459,7 +445,12 @@ public class StoryTriggerManager : MonoBehaviour
         if (qm == null) return false;
 
         // 전당포 주인 — 최초 대면 미완료
-        if (npcId == "pawnshop" && !qm.GetFlag("pawnshop_intro_done"))
+        if (npcId == "pawnshop" && !qm.GetFlag("met_pawnshop"))
+            return true;
+
+        // 베테랑 회수꾼 — 암구호 확보 후 소개 미완료
+        if (npcId == "veteran_scavenger" && qm.GetFlag("got_password_dawn")
+            && !qm.GetFlag("veteran_intro_done"))
             return true;
 
         // 떠돌이 상인 — 미조우

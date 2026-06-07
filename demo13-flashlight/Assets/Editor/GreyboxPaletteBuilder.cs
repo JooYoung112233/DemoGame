@@ -78,7 +78,7 @@ public static class GreyboxPaletteBuilder
         public float  ceilingFadeSpeed;
     }
 
-    [MenuItem("Tools/TopDown/Map/Generate Greybox Palette")]
+    [MenuItem("Tools/TopDown/맵/그레이박스 팔레트 생성")]
     public static void Generate()
     {
         // 지붕은 최상단 'Ceiling' 정렬 레이어가 있어야 위로 그려짐(없으면 보장/복구).

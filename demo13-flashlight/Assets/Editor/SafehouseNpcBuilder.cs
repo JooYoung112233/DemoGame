@@ -20,7 +20,7 @@ public static class SafehouseNpcBuilder
     const string NpcDir  = "Assets/Resources/Data/NPC";
     const string ShopDir = "Assets/Resources/Data/Shops";
 
-    [MenuItem("Tools/TopDown/Content/Build Safehouse NPCs")]
+    [MenuItem("Tools/TopDown/콘텐츠/안전가옥 NPC 빌드")]
     public static void Build()
     {
         EnsureFolder(NpcDir);

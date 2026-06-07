@@ -17,6 +17,7 @@ public static class GameBootstrap
         // 스토리/UI 시스템
         EnsureSingleton<ToastManager>("ToastManager");
         EnsureSingleton<NarrationUI>("NarrationUI");
+        EnsureSingleton<NoteUI>("NoteUI");
         EnsureSingleton<TutorialPrompt>("TutorialPrompt");
         EnsureSingleton<ScreenEffectManager>("ScreenEffectManager");
 

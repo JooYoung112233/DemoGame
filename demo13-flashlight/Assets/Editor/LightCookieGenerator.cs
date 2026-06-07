@@ -26,7 +26,7 @@ public static class LightCookieGenerator
     public const string RadialResource = "LightCookies/cookie_radial";
     public const string ConeResource   = "LightCookies/cookie_cone";
 
-    [MenuItem("Tools/TopDown/Map/Generate Light Cookies")]
+    [MenuItem("Tools/TopDown/맵/조명 쿠키 생성")]
     public static void Generate()
     {
         int S = COOKIE_SIZE;

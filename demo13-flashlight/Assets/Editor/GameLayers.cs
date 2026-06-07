@@ -10,7 +10,7 @@ public static class GameLayers
 {
     public const string Destructible = "Destructible";
 
-    [MenuItem("Tools/TopDown/Setup/Ensure 'Destructible' Layer")]
+    [MenuItem("Tools/TopDown/초기설정/Destructible 레이어 보장")]
     public static int EnsureDestructible() => EnsureLayer(Destructible);
 
     /// <summary>레이어 이름을 보장하고 인덱스를 반환. 실패 시 -1.</summary>
@@ -46,7 +46,7 @@ public static class GameLayers
         return -1;
     }
 
-    [MenuItem("Tools/TopDown/Setup/Ensure 'Ceiling' Sorting Layer")]
+    [MenuItem("Tools/TopDown/초기설정/Ceiling 정렬레이어 보장")]
     public static void EnsureCeilingSortingLayer() => EnsureSortingLayer("Ceiling");
 
     /// <summary>Sorting Layer 이름 보장(없으면 맨 끝에 추가 = 최상단 렌더). 천장 등 최상위 정렬용.

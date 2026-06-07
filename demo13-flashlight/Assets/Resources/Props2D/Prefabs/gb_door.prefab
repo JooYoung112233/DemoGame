@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &4624672751334215643
+--- !u!1 &9149666922791706018
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,11 +8,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1127915699726148262}
-  - component: {fileID: 7766059983699953244}
-  - component: {fileID: 2203605909941469376}
-  - component: {fileID: 11796242938082273}
-  - component: {fileID: 7931249268521778546}
+  - component: {fileID: 1759393049517484474}
+  - component: {fileID: 522047717091666921}
+  - component: {fileID: 3557339296723861654}
+  - component: {fileID: 6085031910004099852}
+  - component: {fileID: 180480030726215255}
   m_Layer: 0
   m_Name: gb_door
   m_TagString: Untagged
@@ -20,30 +20,30 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1127915699726148262
+--- !u!4 &1759393049517484474
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4624672751334215643}
+  m_GameObject: {fileID: 9149666922791706018}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5076892046261526907}
+  - {fileID: 490962233539465071}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &7766059983699953244
+--- !u!212 &522047717091666921
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4624672751334215643}
+  m_GameObject: {fileID: 9149666922791706018}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -95,13 +95,13 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!61 &2203605909941469376
+--- !u!61 &3557339296723861654
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4624672751334215643}
+  m_GameObject: {fileID: 9149666922791706018}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -141,13 +141,13 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &11796242938082273
+--- !u!114 &6085031910004099852
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4624672751334215643}
+  m_GameObject: {fileID: 9149666922791706018}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8bd5a4862c1bae34d9fd965dfb80da55, type: 3}
@@ -157,7 +157,7 @@ MonoBehaviour:
   requiredKeyId: 
   consumeKey: 1
   requiredQuestId: 
-  doorCollider: {fileID: 2203605909941469376}
+  doorCollider: {fileID: 3557339296723861654}
   doorVisual: {fileID: 0}
   activateOnOpen: []
   deactivateOnOpen: []
@@ -165,13 +165,13 @@ MonoBehaviour:
   needKeyMessage: "\uC5F4\uC1E0\uAC00 \uD544\uC694\uD558\uB2E4"
   needQuestMessage: "\uC544\uC9C1 \uC5F4 \uC218 \uC5C6\uB2E4"
   openMessage: "\uBB38\uC744 \uC5F4\uC5C8\uB2E4"
---- !u!114 &7931249268521778546
+--- !u!114 &180480030726215255
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4624672751334215643}
+  m_GameObject: {fileID: 9149666922791706018}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 43f2a216c91f63c48b750a6450df9e3d, type: 3}
@@ -187,10 +187,11 @@ MonoBehaviour:
   exitWaitTime: 0
   noteContent: 
   noteStorySceneId: 
+  noteTitle: 
   storyNpcId: 
   itemId: 
   itemCount: 1
---- !u!1 &7238214369852123082
+--- !u!1 &9172584701638413246
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -198,9 +199,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5076892046261526907}
-  - component: {fileID: 1913220420525800697}
-  - component: {fileID: 1518499996535936787}
+  - component: {fileID: 490962233539465071}
+  - component: {fileID: 8872451110336379239}
+  - component: {fileID: 5311383775246157513}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -208,28 +209,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5076892046261526907
+--- !u!4 &490962233539465071
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7238214369852123082}
+  m_GameObject: {fileID: 9172584701638413246}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1127915699726148262}
+  m_Father: {fileID: 1759393049517484474}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &1913220420525800697
+--- !u!23 &8872451110336379239
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7238214369852123082}
+  m_GameObject: {fileID: 9172584701638413246}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -272,14 +273,14 @@ MeshRenderer:
   m_SortingOrder: 3
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!102 &1518499996535936787
+--- !u!102 &5311383775246157513
 TextMesh:
   serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7238214369852123082}
+  m_GameObject: {fileID: 9172584701638413246}
   m_Text: "\uBB38"
   m_OffsetZ: 0
   m_CharacterSize: 0.05

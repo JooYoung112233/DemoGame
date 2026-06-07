@@ -1,36 +1,367 @@
 {
   "scenes": [
     {
-      "id": "S-010",
-      "title": "폐상가 (낮) — 진입",
+      "id": "S-005",
+      "title": "폐상가 (낮) — 첫 레이드 진입",
       "triggerFlag": "entered_ruined_mall_day",
       "oneShot": true,
       "nodes": [
         { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        { "type": "narration", "textKeys": ["S005_N01", "S005_N02"] },
+        { "type": "tutorial", "textKey": "TUT_SEARCH", "duration": 4, "tutId": "search" }
+      ]
+    },
+
+    {
+      "id": "S-005_LOOT",
+      "title": "폐상가 (낮) — 첫 파밍 / 무게",
+      "triggerFlag": "first_loot_done",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S005_N03"] },
+        { "type": "tutorial", "textKey": "TUT_WEIGHT", "duration": 4, "tutId": "weight" },
+        { "type": "narration", "textKeys": ["S005_N04"] }
+      ]
+    },
+
+    {
+      "id": "S-005_COMBAT",
+      "title": "폐상가 (낮) — 탐색꾼 전투",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
         {
-          "type": "narration",
-          "textKeys": ["S010_N01", "S010_N02"]
-        }
+          "type": "dialogue",
+          "speaker": "hostile",
+          "speakerKey": "NPC_HOSTILE",
+          "textKeys": ["S005_B01", "S005_B02"]
+        },
+        { "type": "tutorial", "textKey": "TUT_COMBAT", "duration": 6, "tutId": "combat" },
+        { "type": "narration", "textKeys": ["S005_N05", "S005_N06"] }
+      ]
+    },
+
+    {
+      "id": "S-005_WAREHOUSE",
+      "title": "폐상가 (낮) — 창고: 민이의 흔적",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S005_N07", "S005_N08"] },
+        {
+          "type": "dialogue",
+          "speaker": "",
+          "speakerKey": "",
+          "textKeys": ["S005_NOTE"]
+        },
+        { "type": "narration", "textKeys": ["S005_N09", "S005_N10"] },
+        { "type": "system", "action": "set_flag", "param": "mq001_trace_found" }
+      ]
+    },
+
+    {
+      "id": "S-006",
+      "title": "폐상가 (낮) — 맨홀 임시 탈출",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S006_N01", "S006_N02"] }
+      ]
+    },
+
+    {
+      "id": "S-007",
+      "title": "귀환 — 회수꾼에게 의뢰 보고",
+      "triggerFlag": "day_raid_returned",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S007_D01", "S007_D02"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S007_D03", "S007_D04"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S007_D05", "S007_D06"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S007_D07", "S007_D08"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S007_D09", "S007_D10", "S007_D11"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S007_D12", "S007_D13"]
+        },
+        { "type": "system", "action": "quest_complete", "param": "MQ-001" },
+        { "type": "narration", "textKeys": ["UI_REPUTATION_GET"] },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S007_D14"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S007_D15"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S007_D16", "S007_D17"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S007_D18"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S007_D19"]
+        },
+        { "type": "system", "action": "set_flag", "param": "mq001_reported" },
+        { "type": "system", "action": "set_flag", "param": "called_dawn" }
+      ]
+    },
+
+    {
+      "id": "S-008",
+      "title": "안전가옥 — 회수꾼의 개인 의뢰 (거처 알선)",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S008_D01"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S008_D02"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S008_D03", "S008_D04"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S008_D05", "S008_D06", "S008_D07"]
+        },
+        {
+          "type": "choice",
+          "choiceId": "veteran_personal_quest",
+          "options": [
+            {
+              "textKey": "S008_C01",
+              "responseKeys": ["S008_R01"],
+              "effects": [
+                { "type": "trust", "target": "veteran_scavenger", "value": 1 }
+              ]
+            },
+            {
+              "textKey": "S008_C02",
+              "responseKeys": ["S008_R02", "S008_R03"],
+              "effects": []
+            }
+          ]
+        },
+        { "type": "system", "action": "quest_accept", "param": "SQ-002" },
+        { "type": "system", "action": "set_flag", "param": "sq002_briefed" },
+        { "type": "system", "action": "auto_save" }
+      ]
+    },
+
+    {
+      "id": "S-009",
+      "title": "폐상가 (낮) — 회수꾼의 상자",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S009_N01"] }
+      ]
+    },
+
+    {
+      "id": "S-009_BOX",
+      "title": "폐상가 (낮) — 철제 상자 회수",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S009_N02"] },
+        { "type": "system", "action": "set_flag", "param": "sq002_box_found" }
+      ]
+    },
+
+    {
+      "id": "S-010",
+      "title": "안전가옥 — 상자 전달 & 거처 (구역 관리인)",
+      "triggerFlag": "sq002_returned",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S010_D01"]
+        },
+        { "type": "effect", "effect": "wait", "floatParam": 0.6 },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S010_D02", "S010_D03"]
+        },
+        { "type": "system", "action": "quest_complete", "param": "SQ-002" },
+        {
+          "type": "choice",
+          "choiceId": "box_handover",
+          "options": [
+            {
+              "textKey": "S010_C01",
+              "responseKeys": ["S010_R01"],
+              "effects": []
+            },
+            {
+              "textKey": "S010_C02",
+              "responseKeys": ["S010_R02", "S010_R03"],
+              "effects": []
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S010_D04", "S010_D05", "S010_D06", "S010_D07"]
+        },
+        { "type": "system", "action": "set_flag", "param": "manager_introduced" },
+        {
+          "type": "dialogue",
+          "speaker": "manager",
+          "speakerKey": "NPC_MANAGER",
+          "textKeys": ["S010_D08"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S010_D09"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "manager",
+          "speakerKey": "NPC_MANAGER",
+          "textKeys": ["S010_D10", "S010_D11"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "manager",
+          "speakerKey": "NPC_MANAGER",
+          "textKeys": ["S010_D12", "S010_D13"]
+        },
+        {
+          "type": "choice",
+          "choiceId": "manager_first",
+          "options": [
+            {
+              "textKey": "S010_C03",
+              "responseKeys": ["S010_R04", "S010_R05"],
+              "effects": []
+            },
+            {
+              "textKey": "S010_C04",
+              "responseKeys": ["S010_R06", "S010_R07"],
+              "effects": []
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "manager",
+          "speakerKey": "NPC_MANAGER",
+          "textKeys": ["S010_D14", "S010_D15"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S010_D16"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "manager",
+          "speakerKey": "NPC_MANAGER",
+          "textKeys": ["S010_D17"]
+        },
+        { "type": "system", "action": "set_flag", "param": "home_unlocked" },
+        { "type": "narration", "textKeys": ["UI_HOME_UNLOCKED"] },
+        { "type": "narration", "textKeys": ["S010_N01", "S010_N02"] },
+        { "type": "system", "action": "auto_save" }
       ]
     },
 
     {
       "id": "S-011",
-      "title": "폐상가 (낮) — 첫 파밍",
-      "triggerFlag": "first_loot_done",
+      "title": "컨테이너 — 첫 귀가 (정리 · 수면 · 저장)",
+      "triggerFlag": "home_unlocked",
       "oneShot": true,
       "nodes": [
-        { "type": "tutorial", "textKey": "TUT_SEARCH", "duration": 4, "tutId": "search" },
-        {
-          "type": "narration",
-          "textKeys": ["S011_N01"]
-        }
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        { "type": "narration", "textKeys": ["S011_N01"] },
+        { "type": "tutorial", "textKey": "TUT_STASH", "duration": 6, "tutId": "stash" },
+        { "type": "narration", "textKeys": ["S011_N02"] },
+        { "type": "tutorial", "textKey": "TUT_REST", "duration": 5, "tutId": "rest" }
+      ]
+    },
+
+    {
+      "id": "S-011_WAKE",
+      "title": "컨테이너 — 수면 후 (생존 스탯)",
+      "triggerFlag": "first_sleep_done",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["UI_HP_RECOVERED"] },
+        { "type": "narration", "textKeys": ["S011_N03", "S011_N04"] },
+        { "type": "tutorial", "textKey": "TUT_SURVIVAL", "duration": 6, "tutId": "survival" }
       ]
     },
 
     {
       "id": "S-012",
-      "title": "폐상가 (낮) — 떠돌이 상인 조우",
+      "title": "안전가옥 인근 — 떠돌이 상인 (보급)",
       "triggerFlag": "",
       "oneShot": true,
       "nodes": [
@@ -41,21 +372,31 @@
           "textKeys": ["S012_D01", "S012_D02"]
         },
         {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S012_D03"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "merchant",
+          "speakerKey": "NPC_MERCHANT",
+          "textKeys": ["S012_D04", "S012_D05"]
+        },
+        {
           "type": "choice",
           "choiceId": "merchant_first",
           "options": [
             {
               "textKey": "S012_C01",
               "responseKeys": ["S012_R01", "S012_R02"],
-              "effects": [
-                { "type": "affinity", "target": "merchant", "value": 1 }
-              ]
+              "effects": []
             },
             {
               "textKey": "S012_C02",
-              "responseKeys": ["S012_R03", "S012_R04", "S012_R05"],
+              "responseKeys": ["S012_R03", "S012_R04"],
               "effects": [
-                { "type": "trust", "target": "merchant", "value": 1 }
+                { "type": "affinity", "target": "wandering_merchant", "value": 1 }
               ]
             }
           ]
@@ -64,88 +405,110 @@
           "type": "dialogue",
           "speaker": "merchant",
           "speakerKey": "NPC_MERCHANT",
-          "textKeys": ["S012_D03", "S012_D04"]
+          "textKeys": ["S012_D06", "S012_D07"]
         },
-        { "type": "system", "action": "set_flag", "param": "merchant_met" }
+        { "type": "tutorial", "textKey": "TUT_SHOP", "duration": 5, "tutId": "shop" },
+        { "type": "narration", "textKeys": ["S012_N01", "S012_N02"] },
+        {
+          "type": "dialogue",
+          "speaker": "merchant",
+          "speakerKey": "NPC_MERCHANT",
+          "textKeys": ["S012_D08"]
+        },
+        { "type": "system", "action": "set_flag", "param": "merchant_met" },
+        { "type": "system", "action": "set_flag", "param": "first_supply_done" }
       ]
     },
 
     {
       "id": "S-013",
-      "title": "폐상가 (낮) — 첫 전투",
-      "triggerFlag": "",
+      "title": "안전가옥 — 새 의뢰 (현상 출격 준비)",
+      "triggerFlag": "first_supply_done",
       "oneShot": true,
       "nodes": [
         {
           "type": "dialogue",
-          "speaker": "bandit",
-          "speakerKey": "NPC_BANDIT",
-          "textKeys": ["S013_D01"]
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S013_D01", "S013_D02"]
         },
-        { "type": "tutorial", "textKey": "TUT_COMBAT", "duration": 6, "tutId": "combat" },
-        {
-          "type": "narration",
-          "textKeys": ["S013_N01"]
-        }
-      ]
-    },
-
-    {
-      "id": "S-014",
-      "title": "폐상가 (낮) — 쪽지 발견",
-      "triggerFlag": "found_note",
-      "oneShot": true,
-      "nodes": [
         {
           "type": "dialogue",
           "speaker": "",
           "speakerKey": "",
-          "textKeys": ["S014_NOTE"]
+          "textKeys": ["S013_NOTE"]
+        },
+        { "type": "system", "action": "quest_accept", "param": "MQ-002" },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S013_D03", "S013_D04", "S013_D05"]
         },
         {
-          "type": "narration",
-          "textKeys": ["S014_N01", "S014_N02"]
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S013_D06", "S013_D07"]
         },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S013_D08", "S013_D09", "S013_D10"]
+        },
+        { "type": "system", "action": "give_item", "param": "phenom_meter", "intParam": 1 },
+        {
+          "type": "choice",
+          "choiceId": "phenomenon_briefing",
+          "options": [
+            {
+              "textKey": "S013_C01",
+              "responseKeys": ["S013_R01", "S013_R02"],
+              "effects": []
+            },
+            {
+              "textKey": "S013_C02",
+              "responseKeys": ["S013_R03", "S013_R04", "S013_R05", "S013_R06"],
+              "effects": []
+            },
+            {
+              "textKey": "S013_C03",
+              "responseKeys": ["S013_R07", "S013_R08", "S013_R09", "S013_R10"],
+              "effects": []
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S013_D11", "S013_D12"]
+        },
+        { "type": "narration", "textKeys": ["S013_N06", "S013_N07"] },
+        { "type": "system", "action": "set_flag", "param": "mq002_accepted" },
+        { "type": "system", "action": "set_flag", "param": "night_raid_unlocked" }
+      ]
+    },
+
+    {
+      "id": "S-020",
+      "title": "폐상가 (밤) — 진입",
+      "triggerFlag": "entered_ruined_mall_night",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
+        { "type": "narration", "textKeys": ["S020_N01", "S020_N02"] },
+        { "type": "tutorial", "textKey": "TUT_FLASHLIGHT", "duration": 5, "tutId": "flashlight" },
+        { "type": "narration", "textKeys": ["S020_N03"] },
         { "type": "system", "action": "set_flag", "param": "night_basement_hint" },
         { "type": "system", "action": "set_flag", "param": "backdoor_exit_hint" }
       ]
     },
 
     {
-      "id": "S-015",
-      "title": "폐상가 (낮) — 귀환",
-      "triggerFlag": "day_raid_returned",
-      "oneShot": true,
-      "nodes": [
-        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
-        {
-          "type": "dialogue",
-          "speaker": "pawnshop",
-          "speakerKey": "NPC_PAWNSHOP",
-          "textKeys": ["S015_D01"]
-        },
-        {
-          "type": "dialogue",
-          "speaker": "player",
-          "speakerKey": "NPC_PLAYER",
-          "textKeys": ["S015_D02"]
-        },
-        {
-          "type": "dialogue",
-          "speaker": "pawnshop",
-          "speakerKey": "NPC_PAWNSHOP",
-          "textKeys": ["S015_D03", "S015_D04", "S015_D05"]
-        },
-        { "type": "system", "action": "quest_complete", "param": "MQ-001" },
-        { "type": "system", "action": "quest_accept", "param": "MQ-002" },
-        { "type": "system", "action": "set_flag", "param": "night_raid_unlocked" },
-        { "type": "system", "action": "auto_save" }
-      ]
-    },
-
-    {
       "id": "S-016",
-      "title": "폐상가 (낮) — 갇힌 생존자",
+      "title": "폐상가 (낮) — 갇힌 생존자 (SQ-001)",
       "triggerFlag": "survivor_found",
       "oneShot": true,
       "nodes": [
@@ -227,54 +590,6 @@
     },
 
     {
-      "id": "S-020",
-      "title": "폐상가 (밤) — 출전 전 대화",
-      "triggerFlag": "night_gate_first",
-      "oneShot": true,
-      "nodes": [
-        {
-          "type": "dialogue",
-          "speaker": "pawnshop",
-          "speakerKey": "NPC_PAWNSHOP",
-          "textKeys": ["S020_D01", "S020_D02", "S020_D03"]
-        },
-        {
-          "type": "choice",
-          "choiceId": "gate_night_first",
-          "options": [
-            {
-              "textKey": "S020_C01",
-              "responseKeys": ["S020_R01"],
-              "effects": []
-            },
-            {
-              "textKey": "S020_C02",
-              "responseKeys": ["S020_R02", "S020_R03"],
-              "effects": [
-                { "type": "trust", "target": "pawnshop", "value": 1 }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-
-    {
-      "id": "S-021",
-      "title": "폐상가 (밤) — 진입",
-      "triggerFlag": "entered_ruined_mall_night",
-      "oneShot": true,
-      "nodes": [
-        { "type": "effect", "effect": "fade_in", "floatParam": 1.0 },
-        { "type": "tutorial", "textKey": "TUT_FLASHLIGHT", "duration": 4, "tutId": "flashlight" },
-        {
-          "type": "narration",
-          "textKeys": ["S021_N01"]
-        }
-      ]
-    },
-
-    {
       "id": "S-022",
       "title": "폐상가 (밤) — 지하창고",
       "triggerFlag": "enter_basement",
@@ -287,10 +602,7 @@
           "ifFalseGoto": -1,
           "skipIfFalse": false
         },
-        {
-          "type": "narration",
-          "textKeys": ["S022_N01"]
-        }
+        { "type": "narration", "textKeys": ["S022_N01"] }
       ]
     },
 
@@ -300,29 +612,26 @@
       "triggerFlag": "first_rudi_pickup",
       "oneShot": true,
       "nodes": [
-        {
-          "type": "narration",
-          "textKeys": ["UI_RUDI_GET"]
-        },
+        { "type": "narration", "textKeys": ["UI_RUDI_GET"] },
         { "type": "effect", "effect": "chromatic", "floatParam": 1.5, "floatParam2": 2.0 },
         { "type": "effect", "effect": "freeze", "floatParam": 0.5 },
-        {
-          "type": "narration",
-          "textKeys": ["S023_N01", "S023_N02"]
-        },
+        { "type": "narration", "textKeys": ["S023_N01", "S023_N02"] },
         { "type": "effect", "effect": "flash", "floatParam": 0.2 },
         { "type": "effect", "effect": "wait", "floatParam": 1.5 },
-        {
-          "type": "narration",
-          "textKeys": ["S023_N03"]
-        },
+        { "type": "narration", "textKeys": ["S023_N03"] },
         { "type": "effect", "effect": "wait", "floatParam": 1.5 },
-        {
-          "type": "narration",
-          "textKeys": ["S023_N04", "S023_N05"]
-        },
-        { "type": "system", "action": "set_flag", "param": "watch_anomaly_seen" },
-        { "type": "system", "action": "add_stat", "param": "rudi_delivered", "intParam": 0 }
+        { "type": "narration", "textKeys": ["S023_N04", "S023_N05"] },
+        { "type": "system", "action": "set_flag", "param": "watch_anomaly_seen" }
+      ]
+    },
+
+    {
+      "id": "S-024",
+      "title": "폐상가 (밤) — 탈출",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S024_N01"] }
       ]
     },
 
@@ -404,10 +713,7 @@
       "oneShot": true,
       "nodes": [
         { "type": "effect", "effect": "fade_out", "floatParam": 1.0 },
-        {
-          "type": "narration",
-          "textKeys": ["S031_N01", "S031_N02", "S031_N03", "S031_N04"]
-        },
+        { "type": "narration", "textKeys": ["S031_N01", "S031_N02", "S031_N03", "S031_N04"] },
         { "type": "effect", "effect": "fade_in", "floatParam": 1.5 },
         {
           "type": "dialogue",
@@ -434,15 +740,9 @@
           "speakerKey": "NPC_PAWNSHOP",
           "textKeys": ["S031_D05", "S031_D06", "S031_D07", "S031_D08"]
         },
-        {
-          "type": "narration",
-          "textKeys": ["S031_N05", "S031_N06", "S031_N07"]
-        },
+        { "type": "narration", "textKeys": ["S031_N05", "S031_N06", "S031_N07"] },
         { "type": "system", "action": "set_flag", "param": "prologue_complete" },
-        {
-          "type": "narration",
-          "textKeys": ["UI_DAILY_UNLOCKED"]
-        },
+        { "type": "narration", "textKeys": ["UI_DAILY_UNLOCKED"] },
         { "type": "system", "action": "auto_save" }
       ]
     }

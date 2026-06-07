@@ -25,7 +25,7 @@ public class AttackDataEditorWindow : EditorWindow
 
     const float PPU = 60f;
 
-    [MenuItem("Tools/TopDown/Combat/Attack Editor")]
+    [MenuItem("Tools/TopDown/전투/공격 에디터")]
     static void Open() => GetWindow<AttackDataEditorWindow>("Attack Editor").minSize = new Vector2(440, 640);
 
     void OnGUI()
