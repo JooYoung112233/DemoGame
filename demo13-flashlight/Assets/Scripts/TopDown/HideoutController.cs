@@ -29,6 +29,7 @@ public class HideoutController : MonoBehaviour
     Camera _cam;            // 클릭 레이캐스트에 쓸 현재 카메라(=하이드아웃 전용)
     Camera _rigCam;         // PlayerRig 카메라(은신처 동안 렌더 끔)
     Camera _hideoutCam;     // 하이드아웃 전용 카메라(런타임 생성)
+    Light2D _hideoutLight;  // 은신처 전용 글로벌 라이트(밤/낮 무관 풀 조명)
     bool _hadPlayer, _prevCanMove;
     bool _hadFollow, _prevFollowEnabled;
     bool _prevRigCamEnabled;
@@ -82,6 +83,13 @@ public class HideoutController : MonoBehaviour
         // Start 시점에 만든 이 카메라는 살아남는다. PlayerRig 카메라가 꺼져도 방이 보임.
         _hideoutCam = CreateHideoutCamera(_rigCam);
         _cam = _hideoutCam != null ? _hideoutCam : _rigCam;
+
+        // 은신처는 밤/낮 영향 없이 항상 환하게 — 전용 글로벌 라이트(나갈 때 제거).
+        var lightGo = new GameObject("HideoutLight");
+        _hideoutLight = lightGo.AddComponent<Light2D>();
+        _hideoutLight.lightType = Light2D.LightType.Global;
+        _hideoutLight.intensity = 1.1f;
+        _hideoutLight.color = Color.white;
     }
 
     Camera CreateHideoutCamera(Camera src)
@@ -110,6 +118,7 @@ public class HideoutController : MonoBehaviour
         foreach (var lt in _hiddenLights) if (lt != null) lt.enabled = true;
         if (_interaction != null) _interaction.enabled = _prevInteractionEnabled;
         if (_hideoutCam != null) Destroy(_hideoutCam.gameObject);
+        if (_hideoutLight != null) Destroy(_hideoutLight.gameObject);
         if (_rigCam != null) _rigCam.enabled = _prevRigCamEnabled;      // PlayerRig 카메라 렌더 복구
         if (_hadFollow && CameraFollow.Instance != null)
             CameraFollow.Instance.enabled = _prevFollowEnabled;        // 추적 재개 → 안전구역에서 플레이어로 스냅
@@ -121,6 +130,13 @@ public class HideoutController : MonoBehaviour
     // ─────────────────────────────────────────────
     void Update()
     {
+        // CameraFollow.DisableOtherCameras가 씬 로드 타이밍에 전용 카메라를 꺼도 매 프레임 되살림.
+        if (_hideoutCam != null)
+        {
+            if (!_hideoutCam.enabled) _hideoutCam.enabled = true;
+            if (_rigCam != null && _rigCam.enabled) _rigCam.enabled = false;
+        }
+
         bool uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
 
         if (Input.GetKeyDown(KeyCode.Escape) && !uiOpen) { ExitHideout(); return; }
