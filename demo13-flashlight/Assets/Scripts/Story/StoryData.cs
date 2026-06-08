@@ -72,7 +72,7 @@ public class StoryNode
     public string tutId;
 
     // ── effect 전용 ──
-    /// <summary>이펙트 종류: fade_in, fade_out, shake, chromatic, freeze, flash</summary>
+    /// <summary>이펙트 종류: fade_in, fade_out, shake, chromatic, freeze, flash, grayscale_on, grayscale_off</summary>
     public string effect;
     public float floatParam;
     public float floatParam2;

@@ -19,6 +19,9 @@ public class ScreenEffectManager : MonoBehaviour
     Volume volume;
     ChromaticAberration chromatic;
     Vignette vignette;
+    ColorAdjustments colorAdjustments;
+    float savedSaturation = 0f;
+    bool grayscaleActive;
     Camera mainCamera;
 
     // 페이드용
@@ -61,8 +64,29 @@ public class ScreenEffectManager : MonoBehaviour
         {
             volume.profile.TryGet(out chromatic);
             volume.profile.TryGet(out vignette);
+            volume.profile.TryGet(out colorAdjustments);
         }
         mainCamera = Camera.main;
+    }
+
+    /// <summary>S-018 등 — 화면 흑백(과거/기억 연출).</summary>
+    public void SetGrayscale(bool on)
+    {
+        if (colorAdjustments == null) CacheVolume();
+        if (colorAdjustments == null) return;
+
+        if (on)
+        {
+            if (!grayscaleActive)
+                savedSaturation = colorAdjustments.saturation.value;
+            colorAdjustments.saturation.Override(-100f);
+            grayscaleActive = true;
+        }
+        else if (grayscaleActive)
+        {
+            colorAdjustments.saturation.Override(savedSaturation);
+            grayscaleActive = false;
+        }
     }
 
     public void GenerateUI()
@@ -108,7 +132,7 @@ public class ScreenEffectManager : MonoBehaviour
 
     /// <summary>
     /// 색수차를 잠깐 강하게 올렸다가 원래대로 복귀.
-    /// S-023 시계 이상현상에 사용.
+    /// S-015_WATCH 시계 이상현상에 사용.
     /// </summary>
     public void ChromaticPulse(float intensity = 1f, float duration = 1.5f)
     {
@@ -186,7 +210,7 @@ public class ScreenEffectManager : MonoBehaviour
     // ═══════════════════════════════
 
     /// <summary>
-    /// 카메라 쉐이크. S-022 루디 획득 순간 등에 사용.
+    /// 카메라 쉐이크. S-015 루디 획득 순간 등에 사용.
     /// </summary>
     public void ScreenShake(float intensity = 0.15f, float duration = 0.3f)
     {
@@ -225,7 +249,7 @@ public class ScreenEffectManager : MonoBehaviour
     // ═══════════════════════════════
 
     /// <summary>
-    /// 짧은 시간 정지 효과. S-023 시계 멈춤에 사용.
+    /// 짧은 시간 정지 효과. S-015_WATCH 시계 멈춤에 사용.
     /// unscaledDeltaTime 사용하므로 timeScale=0에서도 동작.
     /// </summary>
     public void FreezeFrame(float duration = 0.5f)

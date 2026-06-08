@@ -61,6 +61,7 @@
   - **등급**: 약한 랜턴 → 밝은 랜턴(반경·콘·밝기 차등) = 시야 성장 축.
   - **구현**: 착용 랜턴 등급 파라미터로 `TopDownPlayer`의 주변광/콘 `Light2D`(쿠키) `radius/intensity/cone angle`을 세팅(LanternModifier). 미착용 시 기본값으로 복귀.
   - **연료(옵션, 추후)**: 기름·배터리 소모형으로 자원 압박을 줄지 추후 결정(현재 가안 = 착용 패시브 상시 점등).
+  - **현상 예고 점멸 (✅ 2026-06-08 기획)**: 짙은 현상 구간 접근 시 착용 랜턴 `Light2D` intensity **펄스**(가까울수록 빠름). 별도 `phenom_meter` 아이템 **폐기**. `DenseAnomalyController`/구간 거리 → `LanternModifier`. S-013·S-020 튜토리얼. [→ navigation.md §4, story-script.md S-013]
   - **빛 = 노출(추후)**: 밝을수록 멀리·넓게 보지만 적에게도 들키기 쉬운 트레이드오프 여지(§적 은신). 추후.
 
 > ⚠️ 데모 폴더명 `demo13-flashlight`는 역사적 이름. **손전등(F토글 단일 빔) 메커니즘은 폐기** — 빛은 시야 FOV + **착용 랜턴**(위)으로 대체.

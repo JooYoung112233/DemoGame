@@ -36,7 +36,7 @@ public class FurnitureData : ScriptableObject
     public ItemCategory[] allowedCategories;
 
     [Header("구매 비용")]
-    [Tooltip("루디 가격")]
+    [Tooltip("스크랩 가격")]
     public int buyPriceRudy;
     [Tooltip("필요 재료")]
     public MaterialCost[] materialCost;

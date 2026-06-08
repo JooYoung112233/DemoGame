@@ -730,7 +730,7 @@ public class CharacterPanelUI : MonoBehaviour
                     totalValue += allItems[i].item.data.sellPrice * allItems[i].item.stackCount;
             }
             if (totalValue > 0)
-                info += $"판매가치: {totalValue} 루디\n";
+                info += $"판매가치: {totalValue} 스크랩\n";
         }
 
         info += "\n";
@@ -1785,9 +1785,9 @@ public class CharacterPanelUI : MonoBehaviour
         info += $"크기: {d.gridWidth}x{d.gridHeight}  무게: {d.weight:F1}kg\n";
 
         if (d.sellPrice > 0)
-            info += $"판매가: {d.sellPrice} 루디\n";
+            info += $"판매가: {d.sellPrice} 스크랩\n";
         if (d.buyPrice > 0)
-            info += $"구매가: {d.buyPrice} 루디\n";
+            info += $"구매가: {d.buyPrice} 스크랩\n";
 
         if (item.HasDurability)
             info += $"내구도: {item.durability:F0}/{d.maxDurability:F0}\n";

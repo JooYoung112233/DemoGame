@@ -214,7 +214,7 @@ public class GameHUD : MonoBehaviour
             iconGO.SetActive(false);
         }
 
-        // ── 루디 카운터 (우상단) ──
+        // ── 스크랩 카운터 (우상단) ──
         BuildRudiCounter(canvasRT);
     }
 

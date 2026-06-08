@@ -110,7 +110,7 @@ public class PostRaidEventUI : MonoBehaviour
                         rewardStr += $"\n  ✦ 획득: {(item != null ? item.displayName : r.itemId)} x{r.amount}";
                         break;
                     case EventRewardType.Currency:
-                        rewardStr += $"\n  ✦ {r.amount} 루디";
+                        rewardStr += $"\n  ✦ {r.amount} 스크랩";
                         break;
                     case EventRewardType.Heal:
                         rewardStr += $"\n  ✦ HP +{r.amount}";
@@ -134,7 +134,7 @@ public class PostRaidEventUI : MonoBehaviour
                         rewardStr += $"\n  ▾ HP -{p.amount}";
                         break;
                     case EventPenaltyType.LoseCurrency:
-                        rewardStr += $"\n  ▾ -{p.amount} 루디";
+                        rewardStr += $"\n  ▾ -{p.amount} 스크랩";
                         break;
                     case EventPenaltyType.LoseItem:
                         rewardStr += $"\n  ▾ 아이템 일부 손실";

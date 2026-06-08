@@ -77,7 +77,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`economy.md`](economy.md) | 루디(Rudi) 화폐 시스템 — `CurrencyManager` 싱글톤 중앙 관리, 퀘스트·업적·레이드 이벤트 보상/페널티 연동, 세이브·HUD(우상단 ◈) 표시 | 기획 확정, 코드 구현 |
+| [`economy.md`](economy.md) | **이원 경제** — 스크랩(일상 화폐, `CurrencyManager`) + 루디(`ruby_shard` 특수 자원). 퀘스트·상점·HUD(◈) 연동 | 기획 확정, 코드 구현 |
 
 핵심 코드: `CurrencyManager.cs`, `GameBootstrap.cs`(자동 생성), `SaveManager.cs`(영속화), `GameHUD.cs`(표시)
 
@@ -126,7 +126,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`npc-dialogue.md`](npc-dialogue.md) | 3축 호감도(Affinity/Trust/Fear), 혼합형 대화 시스템, NPC 6명 설정 | 기획 확정, 코드 구현 |
+| [`npc-dialogue.md`](npc-dialogue.md) | 3축 호감도, 대화 시스템, **§5.5 NPC 배경·성격 프로필**(대사 작성 참조) | 기획 확정, 코드 구현 |
 | [`quest.md`](quest.md) | 퀘스트 유형(수집/처치/탐색/배달), QuestData SO 구조, QuestManager 싱글톤 | 기획 확정, 코드 구현 |
 | [`quests-region1.md`](quests-region1.md) | 1지역(폐상가) 전용 퀘스트 — MQ-001/002 + 반복 의뢰 8종 | 확정 |
 

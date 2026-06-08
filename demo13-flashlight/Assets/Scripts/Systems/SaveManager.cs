@@ -83,7 +83,7 @@ public class SaveManager : MonoBehaviour
             data.achievements = AchievementManager.Instance.GetSaveData();
         }
 
-        // 화폐(루디)
+        // 화폐(스크랩)
         if (CurrencyManager.Instance != null)
         {
             data.currency = CurrencyManager.Instance.GetSaveData();
@@ -184,7 +184,7 @@ public class SaveManager : MonoBehaviour
             AchievementManager.Instance.LoadSaveData(data.achievements);
         }
 
-        // 화폐(루디)
+        // 화폐(스크랩)
         if (CurrencyManager.Instance != null)
         {
             CurrencyManager.Instance.LoadSaveData(data.currency);
@@ -313,7 +313,7 @@ public class GameSaveData
     // 업적
     public AchievementManager.AchievementSaveData achievements;
 
-    // 화폐(루디)
+    // 화폐(스크랩)
     public int currency;
 
     // 인벤토리(가방) + 장착 무기

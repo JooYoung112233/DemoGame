@@ -95,13 +95,13 @@
           "textKeys": ["S002_D12"]
         },
         { "type": "system", "action": "set_flag", "param": "met_pawnshop" },
-        { "type": "system", "action": "set_flag", "param": "got_password_dawn" }
+        { "type": "system", "action": "set_flag", "param": "got_password_ember" }
       ]
     },
 
     {
       "id": "S-003",
-      "title": "전당포 우측 — 베테랑 회수꾼 (암구호 새벽)",
+      "title": "전당포 우측 — 베테랑 회수꾼 (암구호 불씨)",
       "triggerFlag": "",
       "oneShot": true,
       "nodes": [
@@ -141,13 +141,8 @@
           "choiceId": "veteran_intro",
           "options": [
             {
-              "textKey": "S003_C01",
-              "responseKeys": ["S003_R01", "S003_R02", "S003_R03", "S003_R04", "S003_R05"],
-              "effects": []
-            },
-            {
               "textKey": "S003_C02",
-              "responseKeys": ["S003_R06", "S003_R07", "S003_R08"],
+              "responseKeys": ["S003_R06", "S003_R07"],
               "effects": []
             },
             {
@@ -161,7 +156,7 @@
           "type": "dialogue",
           "speaker": "veteran",
           "speakerKey": "NPC_VETERAN",
-          "textKeys": ["S003_D09"]
+          "textKeys": ["S003_D09", "S003_D10"]
         },
         { "type": "system", "action": "set_flag", "param": "veteran_met" }
       ]

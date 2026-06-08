@@ -182,16 +182,16 @@ public class StoryTriggerManager : MonoBehaviour
         var sp = StoryPlayer.Instance;
         if (qm == null || sp == null || sp.IsPlaying) return false;
 
-        // 전당포 주인 — 최초 대면 (S-002: 시계 거절 + 암구호 '새벽')
+        // 전당포 주인 — 최초 대면 (S-002: 시계 거절 + 암구호 '불씨')
         if (npcId == "pawnshop" && !qm.GetFlag("met_pawnshop"))
         {
             sp.PlayScene("S-002", () => onComplete?.Invoke());
             return true;
         }
 
-        // 베테랑 회수꾼 — 암구호 '새벽' 확보 후 최초 대화
+        // 베테랑 회수꾼 — 암구호 '불씨' 확보 후 최초 대화
         // S-003(소개·정보) → S-004(게시판 의뢰 MQ-001 수령 + 장비 지급) 연쇄.
-        if (npcId == "veteran_scavenger" && qm.GetFlag("got_password_dawn")
+        if (npcId == "veteran_scavenger" && qm.GetFlag("got_password_ember")
             && !qm.GetFlag("veteran_intro_done"))
         {
             sp.PlayScene("S-003", () =>
@@ -212,10 +212,26 @@ public class StoryTriggerManager : MonoBehaviour
             return true;
         }
 
+        // 회수꾼 — 짙은 현상 귀환 보고 (S-016, MQ-002)
+        if (npcId == "veteran_scavenger" && qm.GetFlag("night_raid_returned_with_rudi")
+            && !qm.GetFlag("mq002_veteran_reported"))
+        {
+            sp.PlayScene("S-016", () => onComplete?.Invoke());
+            return true;
+        }
+
+        // 전당포 — 루디 납품 · 1차 마무리 (S-017, MQ-002)
+        if (npcId == "pawnshop" && qm.GetFlag("met_pawnshop")
+            && qm.GetFlag("mq002_veteran_reported") && !qm.GetFlag("mq002_complete"))
+        {
+            sp.PlayScene("S-017", () => onComplete?.Invoke());
+            return true;
+        }
+
         // 밴딧 협상꾼 — 최초 조우
         if (npcId == "bandit_negotiator" && !qm.GetFlag("negotiator_met"))
         {
-            sp.PlayScene("S-017", () => onComplete?.Invoke());
+            sp.PlayScene("SX-002", () => onComplete?.Invoke());
             return true;
         }
 
@@ -390,7 +406,7 @@ public class StoryTriggerManager : MonoBehaviour
             qm.SetFlag("sq002_returned");
         }
 
-        // 밤 레이드 + 루디 소지 귀환 → 첫 루디 납품 (S-030, MQ-002)
+        // 짙은 현상 레이드 + 루디 소지 귀환 → 회수꾼 보고 대기 (S-016, MQ-002)
         if (wasNight && hasRudi && !qm.GetFlag("night_raid_returned_with_rudi"))
         {
             qm.SetFlag("night_raid_returned_with_rudi");
@@ -404,13 +420,15 @@ public class StoryTriggerManager : MonoBehaviour
     // ═══════════════════════════
 
     /// <summary>
-    /// 밤 출격 게이트 선택 시 호출.
-    /// 도입부 재설계(2026-06-05): 밤 주의사항 브리핑은 회수꾼(S-013)에서 처리하고,
-    /// 밤 진입 연출(S-020)은 폐상가(밤) 씬 로드 시 자동 트리거(entered_ruined_mall_night)로 재생.
-    /// 따라서 여기서는 별도 씬 없이 콜백만 호출한다. (호환용 유지)
+    /// 짙은 현상 출격 게이트 확인 시 호출.
+    /// S-013 브리핑 후 S-014(회수꾼 말풍선) → 폐상가 로드 시 S-015(탐지등 튜토리얼).
     /// </summary>
     public void OnNightGateSelected(System.Action onComplete)
     {
+        var qm = QuestManager.Instance;
+        if (qm != null)
+            qm.SetFlag("gate_anomaly_depart");
+        CheckAutoTriggers();
         onComplete?.Invoke();
     }
 
@@ -449,12 +467,22 @@ public class StoryTriggerManager : MonoBehaviour
             return true;
 
         // 베테랑 회수꾼 — 암구호 확보 후 소개 미완료
-        if (npcId == "veteran_scavenger" && qm.GetFlag("got_password_dawn")
+        if (npcId == "veteran_scavenger" && qm.GetFlag("got_password_ember")
             && !qm.GetFlag("veteran_intro_done"))
             return true;
 
         // 떠돌이 상인 — 미조우
         if (npcId == "merchant" && !qm.GetFlag("merchant_met"))
+            return true;
+
+        // 회수꾼 — 짙은 현상 귀환 보고 대기
+        if (npcId == "veteran_scavenger" && qm.GetFlag("night_raid_returned_with_rudi")
+            && !qm.GetFlag("mq002_veteran_reported"))
+            return true;
+
+        // 전당포 — 루디 납품 대기
+        if (npcId == "pawnshop" && qm.GetFlag("met_pawnshop")
+            && qm.GetFlag("mq002_veteran_reported") && !qm.GetFlag("mq002_complete"))
             return true;
 
         // 밴딧 협상꾼 — 미조우

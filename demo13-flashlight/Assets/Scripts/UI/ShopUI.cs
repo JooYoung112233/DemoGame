@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 상점(전당포) 거래 UI. 코드 생성(Canvas/uGUI). UIManager가 ShowShop으로 연다.
-/// 좌: 팔기(플레이어 인벤, sellPrice>0) / 우: 사기(상점 stock). 상단: 루디 잔액.
+/// 좌: 팔기(플레이어 인벤, sellPrice>0) / 우: 사기(상점 stock). 상단: 스크랩 잔액.
 /// </summary>
 public class ShopUI : MonoBehaviour
 {
@@ -102,7 +102,7 @@ public class ShopUI : MonoBehaviour
         if (price <= 0) return;
         if (CurrencyManager.Instance == null || !CurrencyManager.Instance.Spend(price, $"구매: {it.displayName}"))
         {
-            ToastManager.Show("루디가 부족하다", ToastManager.ToastType.Warning);
+            ToastManager.Show("스크랩이 부족하다", ToastManager.ToastType.Warning);
             return;
         }
         if (!inv.TryPickup(new ItemInstance(it, 1)))
@@ -138,7 +138,7 @@ public class ShopUI : MonoBehaviour
         winRT.sizeDelta = new Vector2(1000, 640);
         win.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.13f, 0.98f);
 
-        // 상단 바: 타이틀 + 루디 + 닫기
+        // 상단 바: 타이틀 + 스크랩 + 닫기
         titleText = MakeText(win.transform, "전당포", 28, TextAnchor.MiddleLeft,
             new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -16), new Vector2(400, 40));
         titleText.fontStyle = FontStyle.Bold;

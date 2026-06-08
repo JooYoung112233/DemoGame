@@ -182,7 +182,7 @@ public class RaidResultUI : MonoBehaviour
                         totalValue += item.data.sellPrice * item.stackCount;
                 }
             }
-            rewardsText.text = $"아이템 가치: {totalValue} 루디";
+            rewardsText.text = $"아이템 가치: {totalValue} 스크랩";
         }
     }
 

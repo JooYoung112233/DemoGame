@@ -292,7 +292,7 @@ public class DialogueUI : MonoBehaviour
                         rewardText += $"\n  ✦ {(item != null ? item.displayName : r.itemId)} x{r.amount}";
                         break;
                     case QuestRewardType.Currency:
-                        rewardText += $"\n  ✦ {r.amount} 루디";
+                        rewardText += $"\n  ✦ {r.amount} 스크랩";
                         break;
                     case QuestRewardType.Affinity:
                         rewardText += $"\n  ✦ 호감도 +{r.amount}";

@@ -8,7 +8,7 @@ using UnityEngine;
 /// 사용 예:
 ///   - 지하창고 진입 → triggerType = Basement
 ///   - 특정 구역 진입 → triggerType = CustomFlag, customFlagName = "some_flag"
-///   - 직접 씬 재생 → triggerType = PlayScene, storySceneId = "S-022"
+///   - 직접 씬 재생 → triggerType = PlayScene, storySceneId = "S-015_BASEMENT"
 /// </summary>
 [RequireComponent(typeof(Collider))]
 public class StoryAreaTrigger : MonoBehaviour

@@ -321,6 +321,12 @@ public class StoryPlayer : MonoBehaviour
             case "flash":
                 sem.WhiteFlash(p1 > 0 ? p1 : 0.3f);
                 break;
+            case "grayscale_on":
+                sem.SetGrayscale(true);
+                break;
+            case "grayscale_off":
+                sem.SetGrayscale(false);
+                break;
             case "wait":
                 yield return new WaitForSecondsRealtime(p1 > 0 ? p1 : 1f);
                 break;

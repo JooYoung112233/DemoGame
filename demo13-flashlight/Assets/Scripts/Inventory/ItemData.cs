@@ -88,7 +88,7 @@ public class ItemData : ScriptableObject
     [Min(0)]
     public float weight = 0.1f;
 
-    [Header("가격 (루디 기준)")]
+    [Header("가격 (스크랩 기준)")]
     [Tooltip("전당포 판매가 (0이면 판매 불가)")]
     [Min(0)]
     public int sellPrice;
