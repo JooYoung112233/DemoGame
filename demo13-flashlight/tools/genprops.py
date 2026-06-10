@@ -1,0 +1,206 @@
+# -*- coding: utf-8 -*-
+import csv
+from collections import Counter
+
+P = []
+def add(area, ko, pid, mats, grid, func, broken, prio, note=""):
+    P.append(dict(area=area, ko=ko, id=pid, mats=mats if mats else ["-"],
+                  grid=grid, func=func, broken=broken, prio=prio, note=note))
+
+# 좌석류
+add("좌석","의자","prop_chair",["나무","철제","플라스틱","사무용(바퀴)"],"1x1","-","Y","P1")
+add("좌석","스툴","prop_stool",["나무","철제","플라스틱"],"1x1","-","N","P2")
+add("좌석","안락의자","prop_armchair",["패브릭","가죽"],"1x1","루팅(소형)","N","P2")
+add("좌석","소파","prop_sofa",["패브릭","가죽"],"2x1","루팅","Y","P1")
+add("좌석","벤치","prop_bench",["나무","철제"],"2x1","-","N","P2")
+# 테이블/책상
+add("책상","식탁","prop_dining_table",["나무","철제"],"2x2","-","Y","P1")
+add("책상","커피테이블","prop_coffee_table",["나무","유리"],"2x1","-","N","P2")
+add("책상","책상","prop_desk",["나무","철제"],"2x1","루팅(서랍)","Y","P1")
+add("책상","사무책상","prop_office_desk",["철제"],"2x2","루팅","N","P2")
+add("책상","협탁","prop_nightstand",["나무"],"1x1","루팅","N","P2")
+# 수납
+add("수납","서랍장","prop_drawer",["나무","철제"],"1x1","루팅","Y","P1")
+add("수납","옷장","prop_wardrobe",["나무"],"1x2","루팅","Y","P2")
+add("수납","책장","prop_bookshelf",["나무","철제"],"1x2","루팅(정보/잡화)","N","P1")
+add("수납","진열장","prop_display_cabinet",["나무유리"],"1x2","루팅(귀중)","Y","P2")
+add("수납","서류캐비닛","prop_file_cabinet",["철제"],"1x1","루팅(정보)","N","P1")
+add("수납","사물함","prop_locker",["철제"],"1x1","루팅(잡화/열쇠)","Y","P1")
+add("수납","산업선반","prop_shelf_rack",["철제"],"2x2","루팅(재료)","N","P1")
+add("수납","신발장","prop_shoe_rack",["나무","플라스틱"],"1x1","-","N","P3")
+# 침실
+add("침실","침대","prop_bed",["나무","철제"],"1x2","휴식/루팅","Y","P1")
+add("침실","매트리스(단독)","prop_mattress",[],"1x2","-","Y","P2")
+add("침실","화장대","prop_vanity",["나무"],"1x1","루팅","N","P3")
+add("침실","전신거울","prop_mirror_full",[],"1x1","-","Y","P3")
+add("침실","이불더미","prop_bedding_pile",[],"1x1","-","N","P3")
+# 주방/가전
+add("주방","냉장고","prop_fridge",[],"1x1","루팅(식료)","Y","P1")
+add("주방","가스레인지","prop_stove",[],"1x1","-","N","P2")
+add("주방","싱크대","prop_kitchen_sink",[],"2x1","루팅","N","P2")
+add("주방","찬장","prop_cupboard",["나무"],"1x1","루팅(식료)","N","P2")
+add("주방","전자레인지","prop_microwave",[],"1x1","-","N","P3")
+add("주방","식기더미","prop_dishes",[],"1x1","-","N","P3")
+add("주방","워터쿨러","prop_water_cooler",[],"1x1","루팅(음료)","N","P3")
+# 욕실
+add("욕실","변기","prop_toilet",[],"1x1","-","Y","P2")
+add("욕실","세면대","prop_washbasin",[],"1x1","-","N","P2")
+add("욕실","욕조","prop_bathtub",[],"2x1","-","N","P3")
+add("욕실","세탁기","prop_washer",[],"1x1","루팅","N","P3")
+add("욕실","욕실수납장","prop_bath_cabinet",[],"1x1","루팅(의료)","N","P2")
+# 가전 공통
+add("가전","TV","prop_tv",[],"1x1","-","Y","P2")
+add("가전","컴퓨터(모니터)","prop_pc",[],"1x1","루팅(전자)","N","P2")
+add("가전","복사기","prop_copier",[],"1x1","-","N","P3")
+add("가전","선풍기","prop_fan",[],"1x1","-","N","P3")
+# 사무/상업
+add("상업","금전등록기","prop_register",[],"1x1","루팅(현금)","N","P2")
+add("상업","진열대(상점)","prop_store_shelf",["철제","나무"],"2x1","루팅","N","P1")
+add("상업","계산대/카운터","prop_counter",["나무","철제"],"2x1","-","N","P1")
+add("상업","화이트보드","prop_whiteboard",[],"1x1","-","N","P3")
+add("상업","서류더미","prop_paper_stack",[],"1x1","루팅(정보)","N","P2")
+add("상업","마네킹","prop_mannequin",[],"1x1","-","Y","P3")
+# 병원/약국
+add("의료","진료베드","prop_medical_bed",[],"2x1","-","N","P2")
+add("의료","약품 캐비닛","prop_medicine_cabinet",[],"1x1","루팅(의료)","Y","P1")
+add("의료","수액걸이","prop_iv_stand",[],"1x1","-","N","P3")
+add("의료","의료카트","prop_medical_cart",[],"1x1","루팅(의료)","N","P2")
+add("의료","접수데스크","prop_reception_desk",[],"2x1","-","N","P3")
+# 창고/공업
+add("공업","드럼통","prop_drum",["철제","불피운"],"1x1","루팅/조명","Y","P1")
+add("공업","팰릿","prop_pallet",["나무"],"1x1","-","N","P1")
+add("공업","나무박스","prop_wood_crate",["나무"],"1x1","루팅(범용)","Y","P1")
+add("공업","플라스틱 컨테이너","prop_plastic_bin",["플라스틱"],"1x1","루팅","N","P1")
+add("공업","공구대","prop_tool_bench",["철제"],"2x1","루팅(재료)","N","P2")
+add("공업","배전반","prop_electric_panel",[],"1x1","-","N","P2")
+add("공업","파이프더미","prop_pipes",[],"1x1","-","N","P3")
+add("공업","지게차","prop_forklift",[],"2x2","-","N","P3")
+add("공업","가스통","prop_gas_cylinder",[],"1x1","-","N","P2")
+add("공업","타이어더미","prop_tire_stack",[],"1x1","-","N","P2")
+# 학교
+add("학교","학생책상","prop_school_desk",[],"1x1","-","N","P3")
+add("학교","칠판","prop_blackboard",[],"2x1","-","N","P3")
+add("학교","실험대","prop_lab_bench",[],"2x1","루팅","N","P3")
+# 조명/전기(배치형)
+add("조명","전기스탠드","prop_lamp",[],"1x1","조명","N","P2")
+add("조명","가로등","prop_streetlight",[],"1x1","조명","N","P1")
+add("조명","랜턴(배치)","prop_lantern_placed",[],"1x1","조명","N","P2")
+add("조명","네온사인","prop_neon_sign",["켜짐","꺼짐"],"1x1","발광","N","P2")
+# 천장
+add("천장","형광등","ceiling_fluorescent",["켜짐","꺼짐/깨짐"],"1x1","조명","N","P2")
+add("천장","샹들리에","ceiling_chandelier",[],"1x1","조명","N","P3")
+add("천장","천장팬","ceiling_fan",[],"1x1","-","N","P3")
+add("천장","노출배관","ceiling_pipes",[],"1x1","-","N","P3")
+add("천장","붕괴구멍","ceiling_hole",[],"1x1","-","N","P3")
+# 벽 부착물/장식
+add("벽장식","액자","prop_frame",[],"1x1","-","N","P3")
+add("벽장식","벽시계","prop_wall_clock",[],"1x1","-","N","P3")
+add("벽장식","달력","prop_calendar",[],"1x1","-","N","P3")
+add("벽장식","포스터","prop_poster",[],"1x1","-","N","P3")
+add("벽장식","게시판","prop_bulletin",[],"1x1","-","N","P2")
+add("벽장식","스위치/콘센트","prop_switch",[],"1x1","-","N","P3")
+add("벽장식","환풍구","prop_vent",[],"1x1","-","N","P3")
+add("벽장식","소화기","prop_extinguisher",[],"1x1","-","N","P3")
+add("벽장식","간판(실내)","prop_indoor_sign",[],"1x1","-","N","P3")
+# 문/창
+add("문/창","실내문","prop_door",["나무","철제"],"1x1","통행","Y","P1")
+add("문/창","유리문","prop_glass_door",[],"1x1","통행","Y","P2")
+add("문/창","미닫이문","prop_sliding_door",[],"1x1","통행","N","P3")
+add("문/창","창문","prop_window",["멀쩡","깨짐","판자","커튼/블라인드"],"1x1","-","N","P1")
+add("문/창","셔터","prop_shutter",["닫힘","반쯤","부서짐"],"2x1","-","N","P1")
+# 옥상
+add("옥상","물탱크","roof_water_tank",[],"2x2","-","N","P2")
+add("옥상","실외기(군집)","roof_ac_units",[],"1x1","-","N","P2")
+add("옥상","환기구덕트","roof_vent_duct",[],"1x1","-","N","P2")
+add("옥상","안테나/위성접시","roof_antenna",[],"1x1","-","N","P2")
+add("옥상","굴뚝","roof_chimney",[],"1x1","-","N","P3")
+add("옥상","옥상난간","roof_railing",["콘크리트","철제"],"2x1","경계","N","P1")
+add("옥상","사다리/비상계단","roof_ladder",[],"1x1","통행","N","P2")
+add("옥상","빨래줄","roof_clothesline",[],"2x1","-","N","P3")
+add("옥상","텃밭화분","roof_planter",[],"1x1","-","N","P3")
+add("옥상","파라솔/돗자리","roof_parasol",[],"1x1","-","N","P3")
+add("옥상","태양광패널","roof_solar",[],"2x1","-","N","P3")
+add("옥상","옥탑방","roof_shack",[],"2x2","통행","N","P2")
+add("옥상","경광등","roof_beacon",[],"1x1","발광","N","P3")
+# 외벽
+add("외벽","실외기(벽)","facade_ac",[],"1x1","-","N","P2")
+add("외벽","배수관/우수관","facade_drainpipe",[],"1x1","-","N","P2")
+add("외벽","케이블다발","facade_cables",[],"1x1","-","N","P2")
+add("외벽","배전함","facade_junction",[],"1x1","-","N","P3")
+add("외벽","가스배관","facade_gas_pipe",[],"1x1","-","N","P3")
+add("외벽","소화전","facade_hydrant",[],"1x1","-","N","P3")
+add("외벽","돌출간판","facade_sign",["켜짐","꺼짐"],"1x1","-","N","P2")
+add("외벽","현수막","facade_banner",[],"1x2","-","N","P3")
+add("외벽","발코니","facade_balcony",[],"2x1","-","N","P2")
+add("외벽","방범창","facade_security_bars",[],"1x1","-","N","P3")
+add("외벽","차양/어닝","facade_awning",[],"2x1","-","N","P3")
+add("외벽","입구계단/경사로","facade_steps",[],"2x1","통행","N","P2")
+add("외벽","전봇대","facade_pole",[],"1x1","-","N","P2")
+add("외벽","가로수","facade_tree",[],"1x1","-","N","P2")
+# 잡동사니/소품
+add("소품","쓰레기봉투","prop_trash_bag",[],"1x1","-","N","P2")
+add("소품","쓰레기통","prop_trash_can",["철제","플라스틱"],"1x1","루팅(잡)","N","P2")
+add("소품","박스더미","prop_box_pile",[],"1x1","루팅","N","P1")
+add("소품","전선뭉치","prop_wire_bundle",[],"1x1","-","N","P3")
+add("소품","신문/잡지더미","prop_paper_pile",[],"1x1","-","N","P3")
+add("소품","병/캔더미","prop_bottle_pile",[],"1x1","루팅","N","P3")
+add("소품","옷더미","prop_cloth_pile",[],"1x1","-","N","P3")
+add("소품","벽돌/콘크리트잔해","prop_rubble",[],"1x1","엄폐","N","P1")
+add("소품","모래주머니","prop_sandbag",[],"1x1","바리케이드","N","P1")
+add("소품","깨진유리조각","prop_glass_shards",[],"1x1","데칼/소품","N","P3")
+add("소품","드럼통(쓰러진)","prop_drum_fallen",[],"1x1","-","N","P3")
+# 식물/자연
+add("자연","화분","prop_potted_plant",["멀쩡","말라죽음"],"1x1","-","N","P2")
+add("자연","잡초/풀","prop_weeds",[],"1x1","데칼/소품","N","P1")
+add("자연","덩굴","prop_vines",[],"1x1","-","N","P2")
+add("자연","죽은나무","prop_dead_tree",[],"1x1","-","N","P3")
+add("자연","물웅덩이","decal_puddle",[],"1x1","데칼","N","P2")
+# 데칼(시트형)
+add("데칼","핏자국","decal_blood",[],"-","오염","N","P2","시트")
+add("데칼","그을음","decal_soot",[],"-","오염","N","P2","시트")
+add("데칼","균열","decal_crack",[],"-","손상","N","P1","시트")
+add("데칼","낙서/그래피티","decal_graffiti",[],"-","장식","N","P2","시트")
+add("데칼","이끼","decal_moss",[],"-","오염","N","P1","시트")
+add("데칼","물때/곰팡이","decal_mold",[],"-","오염","N","P1","시트")
+add("데칼","기름얼룩","decal_oil",[],"-","오염","N","P3","시트")
+add("데칼","흙/먼지","decal_dirt",[],"-","오염","N","P1","시트")
+add("데칼","타이어자국","decal_tiremark",[],"-","장식","N","P3","시트")
+# 인텔/상호작용
+add("인텔","잠긴금고","object_safe_locked",[],"1x1","인텔게이트","N","P2","잠김↔개방")
+add("인텔","잠긴문","object_locked_door",[],"1x1","인텔게이트","N","P2")
+add("인텔","지하해치","object_hatch",[],"1x1","인텔게이트","N","P2")
+add("인텔","가려진통로","object_hidden_passage",[],"1x1","인텔게이트","N","P3")
+add("인텔","뜯긴환풍구","object_broken_vent",[],"1x1","인텔게이트","N","P3")
+add("인텔","쪽지","object_note",[],"1x1","단서","N","P2")
+add("인텔","사진","object_photo",[],"1x1","단서","N","P2")
+add("인텔","일기/문서","object_diary",[],"1x1","단서","N","P3")
+add("인텔","녹음기","object_recorder",[],"1x1","단서","N","P3")
+
+rows = []
+total_sprites = 0
+broken_extra = 0
+for e in P:
+    for m in e["mats"]:
+        rows.append([e["area"], e["ko"], e["id"], m, e["grid"], e["func"], e["broken"], e["prio"], e["note"]])
+        if e["note"] != "시트":
+            total_sprites += 1
+    if e["broken"] == "Y":
+        broken_extra += 1
+
+with open("D:/Demo/demo13-flashlight/docs/prop-list.csv","w",newline="",encoding="utf-8-sig") as f:
+    w = csv.writer(f)
+    w.writerow(["영역","기본프랍","prop_id","재질/변형","격자","기능","파괴최종형","우선순위","비고"])
+    w.writerows(rows)
+
+area_c = Counter(r[0] for r in rows)
+prio_c = Counter(r[7] for r in rows)
+print("기본 프랍 종류:", len(P))
+print("재질/변형 펼친 스프라이트(시트 제외):", total_sprites)
+print("파괴 최종형 별도 필요 프랍:", broken_extra)
+print("총 CSV 행:", len(rows))
+print("--- 영역별 ---")
+for a,c in sorted(area_c.items(), key=lambda x:-x[1]):
+    print("  %s: %d" % (a,c))
+print("--- 우선순위별(행 기준) ---")
+for p in ["P1","P2","P3"]:
+    print("  %s: %d" % (p, prio_c.get(p,0)))

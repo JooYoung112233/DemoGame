@@ -52,7 +52,9 @@
 | [`dev-roadmap.md`](dev-roadmap.md) | 10단계 개발 로드맵 + 단계 상세 + **미구현/마무리 필요 목록**. 현재 Stage 2 | 진행 중 |
 | [`tooling.md`](tooling.md) | **에디터 도구 인덱스** — 모든 커스텀 메뉴를 `Tools/TopDown/`(Build/Combat/Map/Data/Utility)로 통합. Attack Editor 상세 | 참고 |
 | [`concept-art-reference.md`](concept-art-reference.md) | 컨셉 아트 3종(피치/맵모듈/적) 해석·정리 | 참고 |
-| [`art-needs.md`](art-needs.md) | **아트(VIEW) 필요 목록** — 시스템별 아트 에셋 집계(캐릭터/VFX/아이콘/맵/HUD), 스타일 기준선, P1~P6 제작 로드맵, 완료/필요 현황 | 정리 (2026-06-10) |
+| [`art-needs.md`](art-needs.md) | **아트(VIEW) 필요 목록** — 시스템별 아트 에셋 집계(캐릭터/VFX/아이콘/맵/HUD), 스타일 기준선, 프랍/UI 카탈로그, P1~P6 제작 로드맵, 완료/필요 현황 | 정리 (2026-06-10) |
+| [`prop-catalog.md`](prop-catalog.md) | **프랍 변형 카탈로그** — 실내/옥상/외벽 꾸미기 프랍을 기본147종×재질변형으로 전부 펼침. 손그림 vs 셰이더 처리 원칙 + [`prop-list.csv`](prop-list.csv)(177행 작업 리스트) | 정리 (2026-06-10) |
+| **아트 작업 체크리스트(CSV)** | [`item-icon-checklist.csv`](item-icon-checklist.csv) 아이템 아이콘 204종 · [`prop-list.csv`](prop-list.csv) 프랍 177행 | 생성됨 |
 
 ### ⚔️ 전투
 
@@ -209,5 +211,6 @@ Safehouse (timeScale=0, 안전 허브)
 | 2026-06-02 | **아이소메트릭 → 탑다운 2D 전환.** 렌더 파이프라인 URP-3D→URP-2D, 카메라 2D Orthographic, 좌표계 XY+sortingOrder, 이동 NavMesh→Rigidbody2D, 조명 3D 스팟라이트→Light2D, 맵 커스텀 MapBuilder→Tilemap+Prop2D. 플레이어 `PlayerController`→`TopDownPlayer`, 적 Rigidbody2D 재작성. **문서 정리**: `rendering.md` 순수 2D로 재작성, `map-tool.md` 탑다운 도구로 교체, `topdown-migration.md`/`topdown-art-spec.md` 등재. **삭제**: `shader-system.md`(구 InkCity 셰이더 — 전부 삭제됨), `map-tool-guide.md`(구 런타임 빌더), `safehouse-map-prompt.md`(아이소 프롬프트 — `safehouse-tile-prompt.md`로 대체). |
 | 2026-06-05 | **내비게이션 설계 신설(`navigation.md`).** 레이드부터 시계를 디제틱 도구로 — 나침반(튜토리얼/퀘스트 방향)·공명(이상현상)·**시간역행 암시(사망 연출)** 3역할 통합. 미니맵/맵 시스템 기반(RaidMap+fog+지도 아이템 해금) 초안. 사망=시간역행 서사 결정은 `story.md` 2026-06-05에 기록. 모두 **제안/검토 중**(구현 전). |
 | 2026-06-05 | **내비게이션 기반 구현.** `Assets/Scripts/Navigation/` 7파일 — `RaidMapManager`(자동 스폰, 지역별 영속 발견/주석), `NavigationHUD`(하단중앙 나침반 + M홀드 미니맵 + 사망 역행 암시), `MapZoneVolume`/`PassageMarker`(잠김 자동·막힘 확률)/`CompassTarget`/`MapFragmentReveal`. 나침반은 탈출구 폴백으로 즉시 작동. 검사키 Tab→M(인벤 선점). 세이브 영속·아트 후속. |
+| 2026-06-10 | **프랍 변형 카탈로그 신설(`prop-catalog.md` + `prop-list.csv`).** 인게임 꾸미기 프랍을 기본 147종 × 재질/변형으로 전부 펼침(177행). 원칙: 재질·의미토글만 손그림, 금간/오염 손상은 DamageOverlay 셰이더 자동 → 손그림 ~188 스프라이트 + 9데칼시트. 우선순위 P1 50/P2 68/P3 59. 추가로 `art-needs.md`에 §12 프랍 카탈로그·§13 UI 화면 전체 리스트, §5 라디오/파견 UI 상세화. |
 | 2026-06-10 | **아트(VIEW) 필요 목록 정리(`art-needs.md`).** 전 시스템 문서에 흩어진 아트 요구사항을 시스템별(캐릭터/전투VFX/아이템아이콘/안전가옥/실내/라디오·인텔/레이드레벨/현상/HUD/스토리)로 집계. 스타일 기준선(80°/60°·탈채도·플랫·Prop2D 파이프라인) + `Assets/GPT/` 진행 현황 + P1~P6 제작 로드맵. 상세는 기존 전용 문서로 링크(중복 사양은 옮기지 않고 인덱스 역할). |
 | 2026-06-10 | **안전가옥 확장 기획 신설(`safehouse-intel.md`).** 원칙 = 자원 생산 ❌ / 탐사 확장 ⭕ (농사·자동생산 금지). NPC 랜드마크 파견 + 라디오 + 랜드마크 재방문 확장의 3시스템 — 모두 "정보(인텔) → 월드에 새 탐사 목표 생성" 구조. Phase A~E 작업 계획 포함, Stage 9 이후 구현 권장. `safehouse.md` 시설 목록(라디오 보류→확정, NPC 파견 추가)·결정 사항 갱신. |
