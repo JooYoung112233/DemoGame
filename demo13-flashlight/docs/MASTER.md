@@ -53,9 +53,9 @@
 | [`tooling.md`](tooling.md) | **에디터 도구 인덱스** — 모든 커스텀 메뉴를 `Tools/TopDown/`(Build/Combat/Map/Data/Utility)로 통합. Attack Editor 상세 | 참고 |
 | [`concept-art-reference.md`](concept-art-reference.md) | 컨셉 아트 3종(피치/맵모듈/적) 해석·정리 | 참고 |
 | [`art-needs.md`](art-needs.md) | **아트(VIEW) 필요 목록** — 시스템별 아트 에셋 집계(캐릭터/VFX/아이콘/맵/HUD), 스타일 기준선, 프랍/UI 카탈로그, P1~P6 제작 로드맵, 완료/필요 현황 | 정리 (2026-06-10) |
-| [`prop-catalog.md`](prop-catalog.md) | **프랍 변형 카탈로그** — 실내/옥상/외벽 꾸미기 프랍을 기본147종×재질변형으로 전부 펼침. 손그림 vs 셰이더 처리 원칙 + [`prop-list.csv`](prop-list.csv)(177행 작업 리스트) | 정리 (2026-06-10) |
+| [`prop-catalog.md`](prop-catalog.md) | **프랍 변형 카탈로그** — 실내/옥상/외벽 꾸미기 프랍을 기본158종×재질변형으로 전부 펼침. 손그림 vs 셰이더 처리 원칙 + [`prop-list.csv`](prop-list.csv)(196행 작업 리스트) | 정리 (2026-06-10) |
 | [`char-art.md`](char-art.md) | **캐릭터·적 애니메이션 리스트** — 플레이어/적/NPC 모션을 전부 펼침. 인간형 리그공유+스킨교체 원칙 + [`char-anim-list.csv`](char-anim-list.csv)(46행) | 정리 (2026-06-10) |
-| **아트 작업 체크리스트(CSV)** | [`item-icon-checklist.csv`](item-icon-checklist.csv) 아이템 204종 · [`prop-list.csv`](prop-list.csv) 프랍 177행 · [`char-anim-list.csv`](char-anim-list.csv) 캐릭터 46행 | 생성됨 |
+| **아트 작업 체크리스트(CSV)** | [`item-icon-checklist.csv`](item-icon-checklist.csv) 아이템 204종 · [`prop-list.csv`](prop-list.csv) 프랍 196행 · [`char-anim-list.csv`](char-anim-list.csv) 캐릭터 46행 | 생성됨 |
 
 ### ⚔️ 전투
 
