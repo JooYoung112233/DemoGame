@@ -189,12 +189,85 @@ add("인텔","사진","object_photo",[],"1x1","단서","N","P2")
 add("인텔","일기/문서","object_diary",[],"1x1","단서","N","P3")
 add("인텔","녹음기","object_recorder",[],"1x1","단서","N","P3")
 
+# ===== 도로/도시 (Street/City) =====
+add("도로","도로 바닥(아스팔트)","floor_road",["멀쩡","균열","차선"],"1x1","바닥타일","N","P1","시밍리스")
+add("도로","횡단보도","floor_crosswalk",[],"1x1","바닥타일","N","P1")
+add("도로","인도/보도블록","floor_sidewalk",["멀쩡","깨짐"],"1x1","바닥타일","N","P1")
+add("도로","연석(curb)","prop_curb",[],"1x1","경계","N","P2")
+add("도로","맨홀뚜껑","prop_manhole",[],"1x1","-","N","P2")
+add("도로","신호등","prop_traffic_light",["차량용","보행자용"],"1x1","발광","N","P1")
+add("도로","도로표지판","prop_road_sign",["정지","방향","지명(글자없음)"],"1x1","-","N","P2")
+add("도로","버스정류장","prop_bus_stop",[],"2x1","-","N","P2")
+add("도로","가드레일/중앙분리대","prop_guardrail",[],"2x1","경계/엄폐","N","P1")
+add("도로","볼라드","prop_bollard",[],"1x1","경계","N","P3")
+add("도로","우체통","prop_mailbox",[],"1x1","-","N","P3")
+add("도로","공중전화부스","prop_phone_booth",[],"1x1","-","N","P3")
+add("도로","자판기","prop_vending_machine",["멀쩡","꺼짐/넘어짐"],"1x1","-","Y","P2")
+add("도로","가판대/노점","prop_market_stall",[],"2x1","-","N","P2")
+add("도로","화단/스트리트 플랜터","prop_street_planter",[],"1x1","-","N","P3")
+add("도로","분수대","prop_fountain",[],"2x2","-","N","P3")
+add("도로","라바콘","prop_traffic_cone",[],"1x1","-","N","P2")
+add("도로","공사 바리케이드","prop_road_barrier",[],"1x1","바리케이드","N","P2")
+add("도로","공사 천막/안전펜스","prop_construction_fence",[],"2x1","경계","N","P3")
+
+# ===== 차량 (Vehicles) — 방향: 가로(동서, 좌우플립)/세로(남북). 대각은 선택 =====
+add("차량","승용차","vehicle_sedan",["가로","세로"],"2x1","엄폐","N","P1")
+add("차량","SUV","vehicle_suv",["가로","세로"],"2x1","엄폐","N","P2")
+add("차량","승합/밴","vehicle_van",["가로","세로"],"2x1","엄폐","N","P2")
+add("차량","택시","vehicle_taxi",["가로","세로"],"2x1","엄폐","N","P2")
+add("차량","경찰차","vehicle_police",["가로","세로"],"2x1","엄폐","N","P3")
+add("차량","구급차","vehicle_ambulance",["가로","세로"],"2x1","엄폐","N","P3")
+add("차량","트럭","vehicle_truck",["가로","세로"],"3x1","엄폐","N","P2")
+add("차량","버스","vehicle_bus",["가로","세로"],"3x1","엄폐/막힘","N","P2")
+add("차량","불탄차/잔해","vehicle_wreck",["승용차","트럭"],"2x1","엄폐/장애","Y","P1")
+add("차량","뒤집힌 차","vehicle_flipped",[],"2x1","엄폐/바리케이드","N","P2")
+add("차량","오토바이/스쿠터","vehicle_motorcycle",[],"1x1","-","N","P3")
+add("차량","자전거","prop_bicycle",[],"1x1","-","N","P3")
+add("차량","쇼핑카트","prop_shopping_cart",[],"1x1","-","N","P3")
+
+# ===== 랜드마크 구성 프랍 (지역1 5개) =====
+# LM1 상가 골목 — 상업/도로 프랍 재사용 + 노점
+add("LM1상가","아케이드 차양","lm_arcade_awning",[],"2x1","-","N","P2")
+add("LM1상가","간판 군집(글자없음)","lm_shop_signs",["켜짐","꺼짐"],"1x1","-","N","P2")
+# LM2 폐아파트
+add("LM2아파트","우편함 벽","lm_mailbox_wall",[],"1x1","-","N","P2")
+add("LM2아파트","경비실 부스","lm_guard_booth",[],"1x1","-","N","P2")
+add("LM2아파트","엘리베이터 문","lm_elevator_door",["닫힘","열림/정지"],"1x1","통행(정지)","N","P2")
+add("LM2아파트","복도 비상등","lm_emergency_light",[],"1x1","발광","N","P3")
+add("LM2아파트","계단 난간","lm_stair_rail",[],"1x1","-","N","P2")
+add("LM2아파트","화단/조경","lm_apt_garden",[],"1x1","-","N","P3")
+# LM3 유리 R&D 타워
+add("LM3타워","카드키 게이트","lm_cardkey_gate",[],"1x1","인텔게이트/통행","N","P2","key_tower_card")
+add("LM3타워","안내데스크","lm_info_desk",[],"2x1","-","N","P2")
+add("LM3타워","서버랙","lm_server_rack",[],"1x1","-","N","P2")
+add("LM3타워","회의 테이블","lm_conference_table",[],"2x2","-","N","P3")
+add("LM3타워","유리 칸막이","lm_glass_partition",["멀쩡","깨짐"],"1x1","-","N","P2")
+add("LM3타워","실험 기자재","lm_lab_equipment",[],"1x1","-","N","P3")
+# LM4 식물원 돔 + 습지
+add("LM4식물원","유리 돔 골조","lm_dome_frame",["멀쩡","깨짐"],"2x2","-","N","P2")
+add("LM4식물원","대형 온실식물","lm_greenhouse_plant",["관엽","넝쿨","고사"],"1x1","-","N","P2")
+add("LM4식물원","캣워크/철제 통로","lm_catwalk",[],"2x1","통행","N","P3")
+add("LM4식물원","제어실 콘솔","lm_control_console",[],"2x1","인텔/단서","N","P3","key_dome_code 금고 연계")
+add("LM4식물원","습지 바닥(물/진흙)","floor_wetland",["물","진흙","수초"],"1x1","바닥타일","N","P2")
+add("LM4식물원","갈대/수초 더미","lm_reeds",[],"1x1","-","N","P3")
+add("LM4식물원","나무 데크","lm_wood_deck",["멀쩡","썩음"],"1x1","바닥타일/통행","N","P3")
+# LM5 강변 부두
+add("LM5강변","부두 데크","floor_dock",["멀쩡","썩음"],"1x1","바닥타일","N","P2")
+add("LM5강변","계류 기둥","lm_mooring_post",[],"1x1","-","N","P3")
+add("LM5강변","보트/소형선박","vehicle_boat",["멀쩡","좌초/파손"],"2x2","엄폐","N","P3")
+add("LM5강변","항만 크레인","lm_dock_crane",[],"2x2","-","N","P3")
+add("LM5강변","어망/통발 더미","lm_fishing_net",[],"1x1","-","N","P3")
+add("LM5강변","부표","lm_buoy",[],"1x1","-","N","P3")
+add("LM5강변","방파제 블록","lm_breakwater",[],"1x1","경계/엄폐","N","P3")
+add("LM5강변","선적 컨테이너","lm_shipping_container",["성함","녹슴"],"2x1","엄폐/막힘","N","P2")
+
 rows = []
 total_sprites = 0
 broken_extra = 0
 for e in P:
+    func = "-" if "루팅" in e["func"] else e["func"]   # 루팅 표기 제거(루팅은 LootContainer로 별도 처리)
     for m in e["mats"]:
-        rows.append([e["area"], e["ko"], e["id"], m, e["grid"], e["func"], e["broken"], e["prio"], e["note"]])
+        rows.append([e["area"], e["ko"], e["id"], m, e["grid"], func, e["broken"], e["prio"], e["note"]])
         if e["note"] != "시트":
             total_sprites += 1
     if e["broken"] == "Y":
