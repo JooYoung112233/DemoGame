@@ -1,0 +1,85 @@
+# -*- coding: utf-8 -*-
+import csv
+from collections import Counter
+
+rows = []
+def add(target, char, group, state, variant, frames, prio, note=""):
+    rows.append([target, char, group, state, variant, frames, prio, note])
+
+# ===== 플레이어 (측면 동/서 1방향 제작 → 좌우 플립. 상/하/대각은 2차) =====
+PL="플레이어"
+grips=["맨손","한손","양손","총"]
+for g in grips:
+    add(PL,"주인공","이동","Idle",g,"~4(루프)","P1","그립별 대기 자세")
+for g in grips:
+    add(PL,"주인공","이동","Walk",g,"~8(루프)","P1","손 본 무기 어태치")
+add(PL,"주인공","이동","Run","공용","~8(루프)","P1","질주")
+add(PL,"주인공","행동","약공1(Light1)","-","6","P1","데미지8/판정 프레임 정의")
+add(PL,"주인공","행동","약공2(Light2)","-","6","P1","콤보 2타")
+add(PL,"주인공","행동","약공3(Light3)","-","8","P1","콤보 3타(마무리)")
+add(PL,"주인공","행동","강공(Heavy)","-","7","P1","차징 릴리즈/히트스탑0.05")
+add(PL,"주인공","행동","강공풀차지(HeavyFull)","-","9","P1","풀차지/히트스탑0.06")
+add(PL,"주인공","행동","차징 루프","-","~4(루프)","P2","노랑→빨강 그라데 비주얼")
+add(PL,"주인공","행동","구르기(Dodge)","-","~5","P1","0.2초 무적·반투명")
+add(PL,"주인공","행동","피격(Hit)","-","~3","P1","경직+넉백")
+add(PL,"주인공","행동","사망/다운(Dead)","-","~6","P1","중상 다운 연출")
+
+# ===== 적: 인간형 공용 리그 (Spine 스켈레톤 1개 + 스킨 교체) =====
+EN="적"
+add(EN,"인간형 공용리그","AI","Idle/배회","-","~4(루프)","P1","Spine 리그 공유, 스킨만 교체")
+add(EN,"인간형 공용리그","AI","Walk/Chase","-","~8(루프)","P1","추격")
+add(EN,"인간형 공용리그","AI","공격예비(Windup)","-","~6","P1","0.8초·빨강 깜빡")
+add(EN,"인간형 공용리그","AI","공격(Attack)","-","~6","P1","히트윈도우 정의")
+add(EN,"인간형 공용리그","AI","피격(Hit)","-","~3","P1","경직")
+add(EN,"인간형 공용리그","AI","그로기(Stunned)","-","~4","P1","무방비·휘청")
+add(EN,"인간형 공용리그","AI","사망(Dead)","-","~6","P1","쓰러짐")
+# 무기 클래스별 추가 모션
+add(EN,"인간형 공용리그","AI","조준(Aim)","원거리","~4","P2","밴딧 원거리 전용")
+add(EN,"인간형 공용리그","AI","발사/투척(Shoot)","원거리","~5","P2","밴딧 원거리 전용")
+add(EN,"인간형 공용리그","AI","방패자세(Block)","탱크","~4","P2","밴딧 탱크 전용·캔슬불가")
+
+# ===== 적: 인간형 스킨/텍스처 세트 (각 타입 = 리그 공유, 외형만) =====
+def skin(name, prio, note):
+    add(EN, name, "스킨", "텍스처 세트(전 모션 적용)","-","-",prio,note)
+skin("배회자(낮)","P2","느린 기본 적·학습용")
+skin("약탈꾼 잔당(낮)","P1","폐상가 약한 인간형")
+skin("잠복자(낮)","P2","기습형")
+skin("밴딧 근접","P1","단검/파이프·콤보(폐상가 핵심)")
+skin("밴딧 원거리","P2","활/투척·조준+발사 모션 사용")
+skin("밴딧 탱크","P2","방패·대형(scale↑)·방패자세 사용")
+skin("밴딧 협상꾼","P2","스토리 NPC형·idle+전투(npc-dialogue)")
+skin("오염 변종(밤)","P2","밴딧 리컬러+발광/현상 이펙트")
+
+# ===== 적: 이상체 (비인간형 — 전용 리그) =====
+add(EN,"이상체(밤)","전용","Idle/부유","-","~4(루프)","P3","비정상 외형·전용 스켈레톤")
+add(EN,"이상체(밤)","전용","이동","-","~8(루프)","P3","비정상 보행/부유")
+add(EN,"이상체(밤)","전용","공격","-","~6","P3","비정상 패턴")
+add(EN,"이상체(밤)","전용","피격","-","~3","P3","")
+add(EN,"이상체(밤)","전용","그로기","-","~4","P3","")
+add(EN,"이상체(밤)","전용","소멸/회귀(Despawn)","-","~6","P3","현상으로 회귀 디졸브")
+add(EN,"이상체(밤)","전용","변종 스킨","-","-","P3","지역별 외형(기계형/철도형/영혼형 등)")
+
+# ===== NPC (대부분 정적 — 상세는 art-needs §1 / 포트레이트) =====
+NP="NPC"
+add(NP,"NPC 공용","정적","대기(Idle)","-","~4(루프)","P2","고정 상주·고개 끄덕임")
+add(NP,"NPC 공용","정적","대화 제스처","-","~4","P3","선택")
+add(NP,"NPC 공용","포트레이트","표정 시트","-","6표정","P1","중립/호의/분노/슬픔/놀람/의심 — art-needs §1")
+
+with open("D:/Demo/demo13-flashlight/docs/char-anim-list.csv","w",newline="",encoding="utf-8-sig") as f:
+    w=csv.writer(f)
+    w.writerow(["대상","캐릭터","분류","상태/모션","그립/변형","프레임(대략)","우선순위","비고"])
+    w.writerows(rows)
+
+tc=Counter(r[0] for r in rows)
+pc=Counter(r[6] for r in rows)
+print("총 행:", len(rows))
+print("--- 대상별 ---")
+for k,v in tc.items(): print("  %s: %d"%(k,v))
+print("--- 우선순위별 ---")
+for p in ["P1","P2","P3"]: print("  %s: %d"%(p,pc.get(p,0)))
+# clip counts
+player_clips=sum(1 for r in rows if r[0]==PL)
+enemy_rig=sum(1 for r in rows if r[1]=="인간형 공용리그")
+enemy_skins=sum(1 for r in rows if r[2]=="스킨")
+anom=sum(1 for r in rows if r[1].startswith("이상체"))
+print("플레이어 클립:", player_clips, "/ 인간형 공용모션:", enemy_rig, "/ 인간형 스킨:", enemy_skins, "/ 이상체:", anom)

@@ -31,6 +31,9 @@
 
 상세: [`combat.md`](combat.md)(애니), [`npc-dialogue.md`](npc-dialogue.md)(NPC), [`topdown-art-spec.md`](topdown-art-spec.md)(스타일)
 
+> **▶ 캐릭터/적 애니메이션 전체 펼친 리스트: [`char-art.md`](char-art.md) + [`char-anim-list.csv`](char-anim-list.csv) (46행)**
+> 플레이어 18클립 + 인간형 적 공용리그 10클립 + 스킨 8종 + 이상체 7. 인간형은 Spine 리그 공유·스킨만 교체, 측면 1방향+좌우플립.
+
 | 대상 | 필요 에셋 | 상태 |
 |---|---|---|
 | **플레이어 본체** | 3등신 SD, 측면(동/서) 우선 → 좌우 플립 | 🔄 레퍼 확정 |
