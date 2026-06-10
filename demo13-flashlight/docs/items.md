@@ -41,7 +41,7 @@
 | §9 잡템 | 38 |
 | §10 이상현상·스토리 | 5 |
 | **합계 (기획)** | **~147** |
-| **합계 (SO 구현)** | **~172** (`Assets/Resources/Items/` 하위 분류 폴더) |
+| **합계 (SO 구현)** | **204** (`Assets/Resources/Items/` 하위 분류 폴더, 2026-06-10 실측) — 아이콘 0/204 할당. 카테고리별: Misc 69·Valuable 59·Consumable 24·Material 17·Medical 13·Key 12·Weapon 10. 아이콘 작업 목록 [`item-icon-checklist.csv`](item-icon-checklist.csv), 현황 [`art-needs.md`](art-needs.md) |
 
 ---
 
