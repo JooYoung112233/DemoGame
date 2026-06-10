@@ -134,6 +134,8 @@
 | P1 | `smoke_bomb` | 연막탄 | 1×1 | 2 | 0.2 | Uncommon | None | 3초 시야 차단(추후 전투) |
 | P2 | `coffee` | 커피 | 1×1 | 3 | 0.1 | Common | RestoreStamina | 스태미너 회복↑, 수면 디버프↓ |
 | P2 | `antidote` | 해독제 | 1×1 | 2 | 0.15 | Rare | HealInjury | 오염/이상현상 디버프(추후) |
+| P2 | `repair_kit` | 수리 키트 | 2×2 | - | 1.0 | Uncommon | RepairEquipment | **무기·방어구 내구도 현장 회복**. 내구 100/25(4회), 작업대 없이 1회 +durability. ⚠️ 장비 내구도 시스템 연동 필요 |
+| P3 | `ammo_rounds` | 탄약 | 1×1 | 30 | 0.02 | Uncommon | None | **거래/판매 전용(총기 미구현)**. 추후 총기 추가 시 소비 전환. 밴딧 노획·물물교환 가치 |
 
 ---
 
@@ -317,6 +319,8 @@
 | P2 | `code_paper` | 암호 메모 | 1×1 | Uncommon | 금고 비밀번호 |
 | P2 | `badge_guard` | 경비 배지 | 1×1 | Uncommon | NPC 호의도·문 개방 |
 | P3 | `photo_brother` | 흐릿한 사진 | 1×1 | Epic | 스토리, 손실 방지 |
+| P2 | `note_nameplate` | 이름 적힌 명패 | 1×1 | Uncommon | **BD-19 회수 대상**. 폐상가에서 죽은 자의 분실물(의뢰인 안 나타남). 회수꾼 동료 테마와 간접 공명 |
+| P2 | `pkg_marked` | 표식 봉투 | 1×1 | Uncommon | **BD-20 회수 대상**(익명 의뢰). 내용물 불명, 전달처마다 표식(▲) 다름. 떡밥용 |
 
 ---
 
