@@ -90,7 +90,7 @@
 ## 4. 제작 워크플로
 
 1. **재질 변형(멀쩡)만 그린다** — CSV의 `재질/변형` 열 한 행 = 스프라이트 1장
-2. 같은 시점(60° high 3/4)·탈채도·플랫 셰이딩으로 통일 ([`topdown-art-spec.md`](topdown-art-spec.md))
+2. 같은 시점(**70°** high 3/4, 2026-06-10 상향)·탈채도·플랫 셰이딩으로 통일 ([`topdown-art-spec.md`](topdown-art-spec.md))
 3. Unity에서 Prop2D 카탈로그 등록 (탭: 프랍/오브젝트/데칼/천장) → 콜라이더·그림자·기능 부여 ([`map-tool.md`](map-tool.md))
 4. **금간/오염은 안 그림** — 배치 후 `Breakable`+`DamageOverlay`로 단계 손상 자동
 5. **파괴최종형 Y** 프랍(20종)만 부서진 최종 스프라이트 1장 추가 → Breakable 마지막 단계
