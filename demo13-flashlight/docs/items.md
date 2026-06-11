@@ -231,7 +231,7 @@
 | P1 | `coin_military` | 군수화 | 1×1 | 20 | 0.02 | Uncommon | C | 밤 밴딧 |
 | P1 | `token_subway` | 지하철 토큰 | 1×1 | 10 | 0.03 | Common | D | 수집용, D×3 판매 |
 | P1 | `coupon_faded` | 바랜 쿠폰 | 1×1 | 20 | 0.01 | Common | D | 잡템과 혼동 가능 |
-| P2 | `val_chip_credit` | 신용 칩 | 1×1 | 5 | 0.02 | Rare | B | 정부 붕괴 전 유물 |
+| P2 | `val_chip_credit` | 신용 칩 | 1×1 | 5 | 0.02 | Rare | B | 도시 봉쇄 전 유물 |
 
 ### 7-B. 악세·귀금속
 
@@ -451,6 +451,80 @@ Unity 재생 시 **202종** 아이템 + **10종** `RecipeData` (`Data/Recipes/`)
 | 밤 15분 | 루디 3~8 / 귀중 B이상 0~2 / 잡템은 출구 근처에서 버리기 유도 |
 
 ---
+
+## 총기·탄약·파츠 (미래 확장, 2026-06-10)
+
+> **현 데모 = 근접 전투만** (총기 미사용). 아래는 **후반 확장 대비 개념/아이콘 선제작**용. 밸런스·구현 미정.
+
+### 탄약 (Ammo)
+| itemId | 표시명 | 격자 | 비고 |
+|---|---|:---:|---|
+| `ammo_pistol` | 권총탄 | 1×1 | 낱발/스택 |
+| `ammo_rifle` | 소총탄 | 1×1 | |
+| `ammo_shotgun` | 산탄 | 1×1 | |
+| `ammobox_pistol` | 권총탄 상자 | 1×1 | 박스(다량) |
+| `ammobox_rifle` | 소총탄 상자 | 1×1 | |
+| `ammobox_shotgun` | 산탄 상자 | 1×1 | |
+
+### 총기 파츠 (Gun Parts — 개념만)
+| itemId | 표시명 | 격자 |
+|---|---|:---:|
+| `part_barrel` | 총열 | 2×1 |
+| `part_magazine` | 탄창 | 1×2 |
+| `part_stock` | 개머리판 | 2×1 |
+| `part_grip` | 손잡이 | 1×1 |
+| `part_scope` | 조준경 | 2×1 |
+| `part_receiver` | 리시버/노리쇠 | 2×1 |
+| `part_suppressor` | 소음기 | 2×1 |
+| `part_trigger` | 방아쇠 뭉치 | 1×1 |
+| `part_barrel_short` | 단총열 | 1×1 |
+| `part_mag_drum` | 드럼 탄창 | 2×2 |
+| `part_mag_ext` | 확장 탄창 | 1×2 |
+| `part_tube_ext` | 산탄 튜브연장 | 1×2 |
+| `part_reddot` | 도트 사이트 | 1×1 |
+| `part_holo` | 홀로 사이트 | 1×1 |
+| `part_scope_hunt` | 사냥 조준경 | 2×1 |
+| `part_ironsight` | 기계식 조준기 | 1×1 |
+| `part_foregrip` | 수직 손잡이 | 1×1 |
+| `part_bipod` | 양각대 | 2×1 |
+| `part_muzzle_brake` | 머즐 브레이크 | 1×1 |
+| `part_flashhider` | 소염기 | 1×1 |
+| `part_stock_fold` | 접이식 개머리판 | 2×1 |
+| `part_handguard` | 핸드가드/레일 | 2×1 |
+| `part_laser` | 택티컬 레이저/라이트 | 1×1 |
+| `part_cleaning_kit` | 총기 청소 키트 | 1×2 |
+
+> 아이콘만 선제작. 실제 총기 시스템 도입 시 밸런스·제작·조립 룰 별도 설계.
+
+### 무기 로스터 (세계관 재정비, 2026-06-10)
+> 판타지(장검·창) 폐기 → **현대 폐도시 = 즉석 근접 + 실총기**. 아이콘 선제작, 데모 구현은 단계적.
+
+**근접 (즉석/현실)**
+| itemId | 표시명 | 격자 |
+|---|---|:---:|
+| `knife` | 나이프 | 2×1 |
+| `pipe` | 쇠파이프 | 2×1 |
+| `wood_plank` | 나무 각목 | 2×1 |
+| `machete` | 마체테 | 3×1 |
+| `crowbar` | 쇠지렛대 | 3×1 |
+| `hatchet` | 손도끼 | 2×2 |
+| `cleaver` | 식칼/정육도 | 2×1 |
+| `wrench_big` | 큰 렌치 | 2×1 |
+| `bat` | 야구방망이 | 3×1 |
+| `fire_axe` | 소방도끼 | 2×3 |
+
+**총기 (스캐빈저식)**
+| itemId | 표시명 | 격자 |
+|---|---|:---:|
+| `gun_pistol` | 권총 | 2×1 |
+| `gun_revolver` | 리볼버 | 2×1 |
+| `gun_smg` | 기관단총 | 3×2 |
+| `gun_shotgun` | 펌프 산탄총 | 4×2 |
+| `gun_rifle_hunt` | 사냥용 소총 | 5×2 |
+| `gun_rifle_assault` | 돌격소총 | 5×2 |
+| `gun_pipe` | 즉석 파이프건 | 3×1 |
+
+> 판타지 무기(`long_sword`·`spear`·`axe`·`anomaly_blade`) = 보류/재검토. `anomaly_blade`만 현상 제작 무기로 디자인 현대화 후 유지 검토.
 
 ## 아이템 아이콘 아트 (확정 2026-06-05)
 
