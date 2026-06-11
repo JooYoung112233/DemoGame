@@ -2,7 +2,7 @@ id,feature,category,status,priority,depends_on,doc
 I01,ReputationManager(평판 수치·등급 F~A),시스템,신규,P0,-,quests-region1 §9.2
 I02,ShopCatalogData+해금필터(신뢰도+평판),시스템/데이터,신규,P0,I01·NPCRelationshipManager,quests-region1 §9.7
 I03,BoardQuestSystem(BD/BQ 수령·보고·갱신·평판잠금),시스템,신규,P0,QuestManager·I01,quests-region1 §9.3
-I04,QuestData SO(BD20·BQ13·NQ32·DQ9·SQ-003),데이터,신규,P1,I03,quests-region1 §3·§9
+I04,QuestData SO(소스=tools/quests.csv ~85의뢰)+생성기,데이터/도구,신규,P1,I03,tools/quests.csv
 I05,ItemData 컨테이너 4필드+ItemInstance.containerGrid,시스템,신규,P1,InventoryGrid,inventory.md
 I06,cont_* 보관함 9종 SO,데이터,신규,P1,I05,inventory.md
 I07,ContainerGrid 중첩 인벤 동작(카테고리 검사),시스템,신규,P1,I05,inventory.md

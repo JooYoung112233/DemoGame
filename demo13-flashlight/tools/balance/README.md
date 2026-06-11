@@ -23,8 +23,9 @@
 |------|----------|
 | `../items.csv` + `../ItemPrices.ps1`(Get-ItemPricesScaled) | **아이템 가격**(sell/buy·루디 5만·잭팟 20만~500만) → `../UpdateItemPrices.ps1` |
 | `../region_loot.csv` | **지역×티어 루트**(weight·roll_count·min/max) → `../GenerateRegionItems.ps1` |
+| `../quests.csv` | **의뢰 내용 전체**(MQ/SQ/BD/BQ/DQ/NQ ~85) — 목표·해금·보상(등급은 quest_rewards.csv 참조) → QuestData SO 생성(backlog) |
 
-→ 이 폴더 + 위 둘 = **전체 경제 단일 진실원.**
+→ 이 폴더 + 위 셋 = **전체 경제·콘텐츠 단일 진실원.**
 
 ## 재료 표기 규칙
 `materials` / `in*` 컬럼 = `itemId:qty` (복수는 `;`). 예: `tool_part:3;circuit_board:1`. `junk_*`·`val_*` = 와일드카드(카테고리/접두 묶음).
