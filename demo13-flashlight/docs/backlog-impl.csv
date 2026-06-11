@@ -1,0 +1,28 @@
+id,feature,category,status,priority,depends_on,doc
+I01,ReputationManager(평판 수치·등급 F~A),시스템,신규,P0,-,quests-region1 §9.2
+I02,ShopCatalogData+해금필터(신뢰도+평판),시스템/데이터,신규,P0,I01·NPCRelationshipManager,quests-region1 §9.7
+I03,BoardQuestSystem(BD/BQ 수령·보고·갱신·평판잠금),시스템,신규,P0,QuestManager·I01,quests-region1 §9.3
+I04,QuestData SO(BD20·BQ13·NQ32·DQ9·SQ-003),데이터,신규,P1,I03,quests-region1 §3·§9
+I05,ItemData 컨테이너 4필드+ItemInstance.containerGrid,시스템,신규,P1,InventoryGrid,inventory.md
+I06,cont_* 보관함 9종 SO,데이터,신규,P1,I05,inventory.md
+I07,ContainerGrid 중첩 인벤 동작(카테고리 검사),시스템,신규,P1,I05,inventory.md
+I08,BarterSystem(아이템 교환 회전),시스템,신규,P1,I02,quests-region1 §9.7
+I09,HideoutModule 시스템(Lv·비용·NQ-M 도면 해금·효과),시스템,신규,P1,I01·NPCRelationshipManager,quests-region1 §9.7
+I10,DispatchSystem(인력·팀2·장비·성공률·실시간타이머·결과인텔),시스템,신규,P1,I09·I12,quests-region1 §9.7 G
+I11,RadioSystem(소식 풀 RN·채널·리드→파견지/POI),시스템,신규,P2,I10·I12,safehouse-intel.md
+I12,IntelManager+파견지/POI 해금(탐사타일/map_fragment),시스템,신규,P1,-,safehouse-intel.md
+I13,인텔 게이트 오브젝트(잠긴 금고/문/지하·인텔 보유시 활성),씬/시스템,신규,P2,I12,safehouse-intel.md
+I14,자릿세 시스템(평판↑ 감소),시스템,신규,P2,I01,quests-region1 §7
+I15,발전기 전력·연료(Lv 소모·라디오/파견 가동전제),시스템,신규,P2,I09,quests-region1 §9.7
+I16,파견 인력=SQ-001 구출 연동,연동,신규,P2,I10·QuestManager,quests-region1 §9.7
+I17,SQ-003 지하철(부품 회수·수리 완료 플래그),퀘스트,신규,P2,I03,quests-region1 §6-2
+I18,8x6 특수 운반 룰(가방 불가 아이템),시스템,신규,P2,-,items.md
+I19,전력셀 전당포 최고가 매입 연동,연동,신규,P2,I02,items.md
+I20,NewspaperData SO+발행 8호,데이터,신규,P1,I22,onboarding.md
+I21,온보딩 해금 트리거 wiring(8 시스템→소식지),연동,신규,P1,I20·StoryTriggerManager,onboarding.md
+I22,NewspaperUI 트리거/원샷 기록(TutorialPrompt 패턴),시스템,신규,P1,-,onboarding.md
+I23,region_loot.csv 지역별 티어 추가(루트 밸런스),밸런스,도구존재,P1,-,tools/region_loot.csv
+I24,income/h 검증(루트 결과 vs 20h 곡선),밸런스,신규,P2,I23,quests-region1 §7
+I25,비전/FOV 콘 시스템(시야 유지·손전등 정리),시스템,진행중,P1,-,rendering.md
+I26,코어 전투·타격감,시스템,보류(리소스),P0-후,-,combat.md
+I27,맵 컴팩트 재구성(랜드마크3·~600x550),씬,신규,P1,-,world-map.md
