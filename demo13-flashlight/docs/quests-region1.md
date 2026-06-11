@@ -296,14 +296,15 @@
 | 아이템 | itemId | 구매가 | 분류 |
 |--------|--------|--------|------|
 | 붕대 | `bandage` | 35 | 소모품(지혈) |
-| 배터리 | (TBD) | 55 | 손전등 |
-| 통조림 | (TBD) | 22 | 식량 |
-| 수리 키트 | (TBD) | 120 | 장비 내구도 |
-| 탄약 | (TBD) | — | 무기 시스템 구현 후 |
+| 건전지 | `battery_aa` | 55 | 탐지등 |
+| 통조림 | `canned_food` | 22 | 식량 |
+| 물병 | `water_bottle` | 30 | 수분 |
+| 수리 키트 | `repair_kit` | 120 | 장비 내구도 |
+| 탄약 | `ammo_rounds` | — | 거래용(총기 미구현) |
 
 - 매입(판매): 고철·잡템 위주, 매입가 낮음.
 - 거래 실적(AM-041) 누적 10회 → 5% 할인.
-- ⚠️ TBD itemId는 해당 아이템 SO 생성/연결 필요 (`items.md` 참조).
+- ✅ itemId 전부 확정(items.md §1·§2). 가격은 placeholder.
 
 ---
 
@@ -1102,6 +1103,51 @@ NQ-W03 (정착 예고):
 - 할인 = 신뢰도 T → 가격 배수(0.95/0.90/0.85).
 - ⚠️ 의존: ReputationManager(미구현), 창고 슬롯 확장(관리인), 장비 내구도(repair_kit).
 
+### 판매 물품 마스터 (가격 정의 대상 · SKU 세트)
+
+> 위 카탈로그에서 파는 **고유 아이템 전부**를 한 곳에 정리 — **가격(구매가/판매가) 정의의 대상 목록.** itemId는 items.md 실측 기준 전부 유효. 판매처: **전**=전당포 · **회**=회수꾼 · **떠**=떠돌이 · **노**=노점상.
+
+| 표시명 | itemId | 분류 | 전 | 회 | 떠 | 노 |
+|--------|--------|------|:--:|:--:|:--:|:--:|
+| 붕대 | `bandage` | Medical | ● | ● |  | ● |
+| 진통제 | `painkiller` | Medical | ● |  |  |  |
+| 지혈대 | `tourniquet` | Medical |  | ● |  |  |
+| 지혈 분말 | `hemostatic_powder` | Medical |  | ● | ● |  |
+| 모르핀 앰플 | `morphine_ampule` | Medical |  |  | ● |  |
+| 건전지 | `battery_aa` | Consumable |  | ● |  | ● |
+| 통조림 | `canned_food` | Consumable |  | ● |  | ● |
+| 물병 | `water_bottle` | Consumable |  |  | ● | ● |
+| 에너지바 | `energy_bar` | Consumable |  |  | ● |  |
+| 커피 | `coffee` | Consumable |  |  | ● |  |
+| 전구 | `flashlight_bulb` | Consumable | ● | ● |  |  |
+| 연막탄 | `smoke_bomb` | Consumable |  |  | ● |  |
+| 수리 키트 | `repair_kit` | Consumable |  | ● |  | ● |
+| 탄약(거래용) | `ammo_rounds` | Misc |  |  |  | ● |
+| 나이프 | `knife` | Weapon | ● | ● |  |  |
+| 파이프 | `pipe` | Weapon |  | ● |  |  |
+| 낡은 코트 | `coat_light` | Armor | ● | ● |  |  |
+| 작업 장갑 | `gloves_work` | Armor |  | ● |  |  |
+| 고무장화 | `boots_rubber` | Armor |  |  | ● |  |
+| 고철 조끼 | `vest_scrap` | Armor |  | ● | ● |  |
+| 양동이 헬멧 | `helmet_bucket` | Armor |  |  | ● |  |
+| 밤순찰 방어구 | `armor_night` | Armor |  | ● | ● |  |
+| 전선 | `wire` | Material | ● | ● |  |  |
+| 회로 기판 | `circuit_board` | Material |  | ● |  |  |
+| 지도 조각 | `map_fragment` | Key | ● | ● |  |  |
+| 암호 메모 | `code_paper` | Key | ● |  |  |  |
+| 회중시계 | `val_watch_pocket` | Valuable | ● |  |  |  |
+| 필름 카메라 | `val_camera_film` | Valuable | ● |  |  |  |
+| 루디 조각 | `ruby_shard` | Valuable | ●환전 | ●연료 |  |  |
+| 루디 결정 | `ruby_crystal` | Valuable |  |  | ● |  |
+| 오염 칼날 | `anomaly_blade` | Weapon |  |  | ● |  |
+| 멈춘 시계 부품 | `clock_part` | Misc | ●NQ |  |  |  |
+| 현상 잔해 | `anomaly_residue` | Misc | ●NQ |  |  |  |
+| 잡템 떨이 | `junk_*` | Misc | ●떨이 |  |  |  |
+| 고급 귀중품(회전) | `val_*` | Valuable |  |  | ● |  |
+
+> **전당포 매입(플레이어 판매)**: 모든 `val_*` · `ruby_*` · `clock_part` · `anomaly_residue` · `junk_*`(D~C) — §9.7 ① 매입 특화. 매입가는 §7 판매 등급(D~S) 기준 + 평판 보정.
+> **다음 단계(가격 정의)**: 각 SKU에 **구매가/판매가** 부여 → 아이템 일반 판매가 대비 정합(§7·§14 anchor). 신뢰도 할인·평판 정가는 배수로 적용.
+
 ---
 
 ## 10. 구현 우선순위 (1지역 엔드 콘텐츠)
@@ -1142,6 +1188,10 @@ NQ-W03 (정착 예고):
   - **디테일(B-1~3)**: 동시 3방송(Lv↑ 최대 5), 수면 갱신·유효 1~3일, 유형 가중(기회40·위험30·현상15·리드15). **1지역 소식 풀 RN-01~10**(구역별 기회/위험/현상/리드, 효과 수치). 반응 = 기회(가서 보상)/위험(무시 vs 처리)/현상(타이밍)/리드(추적→파견지 해금). 전부 회전 메시지 풀 + modifier로 구현.
   - **Lv**: Lv1(신뢰60+발전기) → Lv2(신뢰75+평판C) → Lv3(신뢰90+평판B). **전력(발전기·`fuel_can`) 가동 전제**, 끊기면 off = idle 유지 비용.
   - **근거**: 라디오가 BD-16·whisper_tape·2지역 떡밥·구조 파견을 한 채널 시스템으로 묶음. 거점에 "세상이 들어오는 창" + 기획자가 큰 복선 흘리는 자리.
+
+### 2026-06-10 — 판매 물품 정리 (가격 정의 전 SKU 확정)
+- **결정**: 가격 정의 전에 **판매 가능 물품부터 확정**. §6-3 노점상 TBD itemId 해결(배터리=`battery_aa`·통조림=`canned_food`·물병=`water_bottle`·수리키트=`repair_kit`·탄약=`ammo_rounds`). §9.7 끝에 **판매 물품 마스터(SKU 세트)** 신설 — 4 상점이 파는 고유 아이템 전부를 한 표로, 판매처(전/회/떠/노) 표기. itemId는 items.md 실측 전부 유효.
+- **다음**: 각 SKU에 구매가/판매가 부여(§7·§14 anchor 기준), 신뢰도 할인·평판 정가는 배수 적용.
 
 ### 2026-06-10 — NQ 마일스톤 → 상점 물품 해금 (해금 3층)
 - **질문**: NPC 핵심 퀘스트(서사 NQ)에 **물품 해금**을 보상으로 추가할까?
