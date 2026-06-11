@@ -32,7 +32,7 @@
 | **라이팅** | **플랫/균일** — 방향 그림자 없음. 런타임 2D Light가 조명 |
 | **색감** | **Desaturated(탈채도)** 기본. 시야 콘 안에서 살짝 밝게 |
 | **PPU** | 전 에셋 통일 (예: 64~128 PPU) |
-| **표면 질감** | **노이즈/그레인/점박이(stipple) 텍스처 금지 — 필수.** 바닥/벽/지붕/건물 표면은 매끈한 면 + 큰 단위 얼룩·균열만. 자갈/돌블록/큐브 패턴도 금지. (모든 건물·구조물 프롬프트에 항상 `NO noise/grain/stipple, NO cobblestone/cube texture, smooth surfaces` 포함) |
+| **표면 질감** | **완전 매끈한 단색 면 — 모든 표면 텍스처 전면 금지(필수).** 그레인·노이즈·점박이(stipple)·모틀링·흩뿌린 도트·모래알/거친 질감·가짜 픽셀 텍스처 전부 금지. 바닥/벽/지붕/건물 = 매끈한 단색 면 + **큰 단위 얼룩·선 균열만**(잔 텍스처 X). 자갈/돌블록/큐브 패턴도 금지. (프롬프트에 항상 `completely smooth flat color fills, NO grain/noise/speckle/stipple/mottling/dots/fake texture, only a few large grime patches + clean cracks` 포함.) ⚠️ AI가 자꾸 얹음 → 게임 크기로 판단 + 남으면 posterize+약블러. |
 
 ## 1-1. 실내/건물 모듈 구조 (맵툴 배치, 확정 2026-06-05)
 
