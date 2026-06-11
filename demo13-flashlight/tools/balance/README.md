@@ -30,6 +30,12 @@
 ## 재료 표기 규칙
 `materials` / `in*` 컬럼 = `itemId:qty` (복수는 `;`). 예: `tool_part:3;circuit_board:1`. `junk_*`·`val_*` = 와일드카드(카테고리/접두 묶음).
 
+## 유니티 내 편집 (엑셀 없이도)
+
+- **`Tools ▸ TopDown ▸ 밸런스 ▸ 밸런스 에디터`** (`Assets/Editor/BalanceEditorWindow.cs`) — 위 CSV 전부(items·quests·region_loot + balance/*)를 **유니티 안에서 격자로 편집·저장**. 같은 CSV 파일을 읽고 쓰므로 엑셀과 양방향 동기.
+- 셀 콤마 금지(구분자), 복수값 `;`/`|`/`·`. 저장 후 SO 반영은 생성기 실행.
+- 아이템 SO는 기존대로 Inspector에서도 직접 수정 가능(`Assets/Resources/Items/*.asset`).
+
 ## 적용 상태
 - ✅ **아이템 가격**: ItemPrices.ps1 + UpdateItemPrices.ps1로 SO 적용 완료(2026-06-10).
 - ✅ **루트**: region_loot.csv 편집 가능(생성기 존재).
