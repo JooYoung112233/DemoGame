@@ -1,0 +1,17 @@
+key,value,note
+rent_base,3000,주 단위 기본 자릿세(스크랩)
+rent_F,100,평판 F 자릿세%
+rent_E,100,평판 E 자릿세%
+rent_D,80,평판 D(-20%)
+rent_C,60,평판 C(-40%)
+rent_B,40,평판 B(-60%)
+rent_A,20,평판 A(-80%)
+fuel_per_can_hours,4,연료 1통 가동시간(Lv1)
+fuel_lv1,100,발전기 Lv1 연료소모%
+fuel_lv2,75,발전기 Lv2(-25%)
+fuel_lv3,50,발전기 Lv3(-50%)
+shop_discount_t1,5,신뢰도 T1 할인%
+shop_discount_t2,10,신뢰도 T2 할인%
+shop_discount_t3,15,신뢰도 T3 할인%
+buyprice_markup,2.5,판매전용 아이템 상점 구매가 배수(sell×)
+buyprice_cap_pct,15,매입가 보정 합산 상한%

@@ -1,0 +1,13 @@
+action,rep,note
+MQ-001_report,10,일회
+SQ-002_done,5,일회
+MQ-002_done,15,일회
+SQ-001_rescue,5,일회
+BQ-E_done,1,반복
+BQ-D_done,2,반복
+BQ-C_done,3,반복
+BQ-B_done,4,반복
+BQ-A_done,5,반복
+rudi_deliver,1,반복
+BD_general,0,평판 미부여
+DQ_general,0,평판 미부여

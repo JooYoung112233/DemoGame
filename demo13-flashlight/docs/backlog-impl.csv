@@ -26,3 +26,6 @@ I24,income/h 검증(루트 결과 vs 20h 곡선),밸런스,신규,P2,I23,quests-
 I25,비전/FOV 콘 시스템(시야 유지·손전등 정리),시스템,진행중,P1,-,rendering.md
 I26,코어 전투·타격감,시스템,보류(리소스),P0-후,-,combat.md
 I27,맵 컴팩트 재구성(랜드마크3·~600x550),씬,신규,P1,-,world-map.md
+I28,ApplyBalance.ps1(balance/*.csv→Resources/SO 반영),도구,신규,P1,-,tools/balance/README.md
+I29,BalanceConfig 런타임 로더(모듈/바터/평판/신뢰/파견/자릿세),시스템,신규,P1,I28,tools/balance
+I30,BalanceEditor Unity EditorWindow(GUI 밸런스 편집창),도구,신규,P2,I28,tools/balance/README.md

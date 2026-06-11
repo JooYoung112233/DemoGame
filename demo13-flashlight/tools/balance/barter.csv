@@ -1,0 +1,8 @@
+npc,unlock,in1,in1_qty,in2,in2_qty,out,out_qty,note
+wandering_merchant,신뢰0,scrap_metal,20,wire,5,cont_weapon,1,잡템묶음→무기케이스
+wandering_merchant,신뢰30,junk_*,15,,0,hemostatic_powder,2,잡템→희귀소모품
+wandering_merchant,신뢰30,ruby_shard,3,,0,vest_scrap,1,루디→장비
+wandering_merchant,신뢰60,ruby_shard,5,val_*,1,armor_night,1,루디+귀중→희귀장비
+wandering_merchant,신뢰60,ruby_crystal,1,,0,cont_safe,1,루디결정→금고
+pawnshop,신뢰40,val_power_cell_drained,1,tool_part,5,val_power_bank,1,방전셀+부품→충전셀(떡밥)
+pawnshop,신뢰70,ruby_shard,10,,0,map_fragment,3,루디→지도정보
