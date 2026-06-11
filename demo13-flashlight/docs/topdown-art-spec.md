@@ -151,6 +151,24 @@ Canvas: 128×128. Pivot: bottom-center.
 
 ---
 
+## 2-1. 지역 무드 — 봉쇄구역(현상) 야외 (2026-06-10)
+
+레이드 폐허·현상 지역 외부 에셋(바닥·외벽·건물·랜드마크) 전용 분위기. **안전구역(전당포·하이드아웃)엔 적용 X** — 거긴 멀쩡한 거점.
+
+> 로어: 현상으로 **시간이 다르게 흐르는 봉쇄구역** → 과잉 부패·잠식·정적.
+
+프롬프트에 붙일 무드 문단:
+```
+ATMOSPHERE (sealed anomaly zone where time flows differently): heavy decay — cracked
+concrete, crumbling brick, shattered empty windows, thick climbing vines and overgrowth
+creeping over surfaces, weeds breaking through the floor, scattered rubble and fallen
+debris, rust streaks, an eerie "frozen in time" stillness. Cold desaturated palette with
+muted green overgrowth.
+BUT keep the established TOP-DOWN ~70–80° baked perspective + flat cel-shaded painterly
+style. NOT isometric, NOT pixel art.
+```
+- ⚠️ 무드 레퍼(아이소·픽셀 폐허 이미지)는 **분위기 어휘만** 차용 — 각도/렌더 앵커로 첨부 금지(아이소·픽셀로 끌려감).
+
 ## 3. 라이팅 / 가시성 (엔진 설정)
 
 > **손전등(주광원) 폐기 → 좀보이드식 시야 콘(FOV).** 어둠=하이브리드(지역/시간대별 가변). 상세 [`rendering.md`](rendering.md).
