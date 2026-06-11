@@ -56,7 +56,7 @@ public class DenseAnomalyZone : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    [MenuItem("Tools/TopDown/Map/Create Anomaly Zone")]
+    [MenuItem("Tools/TopDown/맵/이상현상 구역 생성")]
     static void CreateZone()
     {
         var go = new GameObject("AnomalyZone");
