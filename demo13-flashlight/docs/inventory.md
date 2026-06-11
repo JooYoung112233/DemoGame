@@ -276,6 +276,34 @@ ItemSpawnPoint
 - **밸런스 의도**: 금고는 내부 가장 작지만(24) 귀중품이 1×1~2×2라 충분 + **의도적 압박**(다 못 넣음 → 팔아라). 무기·음식은 부피 커서 넓은 내부(56). 전용함 효율(>범용)이 "분류 정리"의 보상.
 - 가격(가안, §9.7 관리인 판매): 서랍 5만 · 재료함 8만 · 의료함 8만 · 냉장고 12만 · 무기 케이스 15만 · 금고 30만. **비싸게**(거점 정리 = 사치 QoL).
 
+#### 보관함 데이터 구조 — **B: ItemData + 컨테이너 필드 (확정 2026-06-10)**
+
+> 방식 결정: **보관함 = 일반 ItemData**(루팅·판매·인벤·이동 가능)이면서 **자기만의 내부 격자**를 갖는다(타르코프 케이스). 별도 `FurnitureData`(옛 가구 방식)는 **폐기·흡수.**
+
+**ItemData에 추가 필드**
+```
+isContainer        : bool                // 컨테이너 여부
+internalWidth      : int                 // 내부 격자 가로 (예: 냉장고 8)
+internalHeight     : int                 // 내부 격자 세로 (예: 냉장고 7)
+allowedCategories  : ItemCategory[]      // 빈 배열=전체(범용 상자), 아니면 전용
+```
+- **외부 footprint** = 기존 `gridWidth/Height`(창고에서 차지하는 칸). **내부** = 위 `internalWidth/Height`. (외부<내부 = 공간 이득)
+
+**런타임**
+- 보관함 **인스턴스마다 `InventoryGrid` 1개**(internalW×H). `ItemInstance`에 `containerGrid` 보유(컨테이너일 때만).
+- 창고(stash)에 놓인 보관함을 **열면 내부 격자 패널**(중첩 격자). 카테고리 불일치 = **배치 불가**(`allowedCategories` 검사).
+- 보관함을 창고에서 빼면 내부 내용물째 이동(레이드 반출 룰은 별도). 같은 종류 복수 보유 가능.
+
+**마이그레이션**
+- 기존 `FurnitureData` SO/`SafehouseStorage` 가구 인스턴스 → **컨테이너 ItemData로 일원화**(2026-05-26 가구 기획 대체 마무리).
+- `cont_*` 9종(§보관함 사양) = 위 필드 채운 ItemData로 생성 — **필드 추가가 SO 생성의 선행 작업**(현재 미생성 사유).
+
+**구현 순서**
+1. `ItemData`에 4필드 + `ItemInstance.containerGrid` 추가.
+2. 중첩 InventoryGrid UI(보관함 열기).
+3. `cont_*` 9종 SO 생성(칸수·카테고리=§보관함 사양 그대로).
+4. 관리인 판매 + 레이드 저확률 드랍 + 의뢰 1개 연결(§9.7).
+
 ## 구현 우선순위
 
 1. **ItemData SO** + ItemDatabase
