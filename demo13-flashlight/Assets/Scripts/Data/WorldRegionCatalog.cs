@@ -13,8 +13,8 @@ public static class WorldRegionCatalog
         public string subzone;
         public string sceneName;
         public string spawnId;
-        public string dayFeature;
-        public string nightFeature;
+        public string safeFeature;
+        public string anomalyFeature;
         public int difficulty;
         public Color accentColor;
         public float timeOffsetSeconds;
@@ -33,103 +33,83 @@ public static class WorldRegionCatalog
         }
     }
 
-    /// <summary>시계 방향(상단부터) + 중앙 코어. 1차 데모: scrap_market만 출전 가능.</summary>
+    /// <summary>
+    /// 5지역 본선(지역1→5 진행 순서). 1차 데모: scrap_market만 출전 가능.
+    /// 7→5 압축(2026-06-11, docs/story.md §4): 공업설비+철도 → 묻힌 정비창(industrial),
+    /// 공연오락+성역추모 → 기억의 극장(entertainment). regionId는 병합 부모(industrial/entertainment) 유지.
+    /// safeFeature/anomalyFeature = 한 레이드 내 '안전 구간 / 짙은 현상 구간' 특징(낮/밤 폐기, docs/story.md §4·raid.md). anomaly = 지역 기본 침식도, 중심에 가까울수록↑.
+    /// </summary>
     public static readonly RegionDefinition[] All =
     {
         new RegionDefinition
         {
-            regionId = "silence_living",
-            displayName = "침묵 생활 지구",
-            subzone = "외곽 주거지 / 생존자 시장",
-            sceneName = "",
-            spawnId = "",
-            dayFeature = "NPC·쪽지·정보 수집에 유리",
-            nightFeature = "밴딧 약탈·생존자 시장 위험",
-            difficulty = 2,
-            accentColor = new Color(0.35f, 0.55f, 0.95f),
-            timeOffsetSeconds = 30f,
-        },
-        new RegionDefinition
-        {
             regionId = "scrap_market",
-            displayName = "폐상가 교역 지구",
+            displayName = "폐상가 교역 지구",     // 지역1
             subzone = "무너진 상가 / 검문소",
             sceneName = "ScrapMarket_GB",
             spawnId = "default",
-            dayFeature = "기본 파밍·NPC·쪽지 (1차 데모)",
-            nightFeature = "밴딧·몬스터 혼합·네온 골목",
+            safeFeature = "기본 파밍·회수꾼 허브·오르골 떡밥 (1차 데모)",
+            anomalyFeature = "밴딧·몬스터 혼합·짙은 현상 첫 체험",
             difficulty = 2,
             accentColor = new Color(0.95f, 0.55f, 0.2f),
             timeOffsetSeconds = 0f,
+            anomaly = 0.1f,
+        },
+        new RegionDefinition
+        {
+            regionId = "silence_living",
+            displayName = "침묵 생활 지구",       // 지역2
+            subzone = "밀집 폐아파트 단지",
+            sceneName = "",
+            spawnId = "",
+            safeFeature = "의사·전직 공무원·동생 첫 단서(사진)",
+            anomalyFeature = "약탈 갱단·지하 현상 시드",
+            difficulty = 2,
+            accentColor = new Color(0.35f, 0.55f, 0.95f),
+            timeOffsetSeconds = 60f,
+            anomaly = 0.2f,
         },
         new RegionDefinition
         {
             regionId = "industrial",
-            displayName = "공업 설비 지구",
-            subzone = "발전소 / 정제 시설",
+            displayName = "묻힌 정비창",          // 지역3 (공업설비 + 철도 병합)
+            subzone = "지하 산업·화물 복합체 (공업+철도)",
             sceneName = "",
             spawnId = "",
-            dayFeature = "부품·재료·루디 단서",
-            nightFeature = "강한 밴딧·기계 이상현상",
+            safeFeature = "수리공·상인 정착·정부 채굴 물증·시계 정체",
+            anomalyFeature = "봉인 정부 구역·현상 전용종·시간 왜곡",
             difficulty = 3,
             accentColor = new Color(0.35f, 0.85f, 0.45f),
-            timeOffsetSeconds = 90f,
-            anomaly = 0.2f,           // 기계 이상현상
+            timeOffsetSeconds = 120f,
+            anomaly = 0.4f,
         },
         new RegionDefinition
         {
             regionId = "entertainment",
-            displayName = "공연 오락 지구",
-            subzone = "폐극장가 / 네온 거리",
+            displayName = "기억의 극장 지구",     // 지역4 (공연오락 + 성역추모 병합)
+            subzone = "폐극장 지하 본부 / 대성당 추모",
             sceneName = "",
             spawnId = "",
-            dayFeature = "스토리·쪽지·미스터리 단서",
-            nightFeature = "보스·괴현상·LUNA 네온 거리",
+            safeFeature = "연구소 본부·기억 재현·동생 생존 반전·블랙마켓",
+            anomalyFeature = "강무진 정체·시계 공명·괴현상",
             difficulty = 4,
             accentColor = new Color(0.75f, 0.35f, 0.95f),
-            timeOffsetSeconds = 150f,
-            anomaly = 0.35f,          // 보스·괴현상
-        },
-        new RegionDefinition
-        {
-            regionId = "railway_scrap",
-            displayName = "철도 폐기 지구",
-            subzone = "폐철도 / 스크랩 야드",
-            sceneName = "",
-            spawnId = "",
-            dayFeature = "스크랩·기계 부품·탈출 루트 힌트",
-            nightFeature = "기차 노선 이벤트·밀수·고철 야드",
-            difficulty = 3,
-            accentColor = new Color(0.95f, 0.85f, 0.25f),
-            timeOffsetSeconds = 220f,
-        },
-        new RegionDefinition
-        {
-            regionId = "sanctuary_memorial",
-            displayName = "성역 추모 지구",
-            subzone = "대성당 / 추모 공원",
-            sceneName = "",
-            spawnId = "",
-            dayFeature = "종교·추모·동생 단서 후보",
-            nightFeature = "짙은 현상·미스터리 이벤트",
-            difficulty = 3,
-            accentColor = new Color(0.35f, 0.9f, 0.85f),
-            timeOffsetSeconds = 280f,
-            anomaly = 0.7f,           // 성역 = 짙은 현상 핵심 지역
+            timeOffsetSeconds = 200f,
+            anomaly = 0.65f,
         },
         new RegionDefinition
         {
             regionId = "eternal_night_core",
-            displayName = "중앙 영야 심장",
-            subzone = "흑월 첨탑 / 붕괴 관측소",
+            displayName = "중앙 영야 심장",       // 지역5
+            subzone = "흑월 첨탑 / 잔영 3",
             sceneName = "",
             spawnId = "",
-            dayFeature = "정부 붕괴 흔적·스토리 클라이맥스",
-            nightFeature = "최고 위험·방역 현상 불가 예측",
+            safeFeature = "도시 봉쇄 흔적·스토리 클라이맥스",
+            anomalyFeature = "최고 위험·강무진 희생·엔딩 분기",
             difficulty = 5,
             accentColor = new Color(0.55f, 0.25f, 0.85f),
             timeOffsetSeconds = 360f,
-            anomaly = 0.9f,           // 중앙 영야 = 최고 침식
+            anomaly = 0.95f,          // 중앙 영야 = 최고 침식
         },
     };
 
@@ -153,7 +133,7 @@ public static class WorldRegionCatalog
     public static string BuildDescription(in RegionDefinition r)
     {
         var lines = $"난이도: {r.DifficultyStars}\n{r.subzone}\n\n" +
-                    $"☀ 낮: {r.dayFeature}\n☾ 밤: {r.nightFeature}";
+                    $"○ 안전 구간: {r.safeFeature}\n● 짙은 현상: {r.anomalyFeature}";
 
         if (r.IsPlayable)
             lines += "\n\n<color=#88FFAA>▶ 1차 데모 출전 가능</color>";

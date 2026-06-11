@@ -1,6 +1,6 @@
 # 지역별 루트 · 전용 아이템
 
-> **현 상태 = 진실.** 7지구(`WorldRegionCatalog`)마다 드롭 테이블·지역 전용 SO 분리.
+> **현 상태 = 진실.** **5지역**(`WorldRegionCatalog`, 7→5 병합 2026-06-11)마다 드롭 테이블·지역 전용 SO 분리. 병합: railway 루트→industrial(묻힌 정비창), sanctuary 루트→entertainment(기억의 극장). 전용 SO(RailwayScrap/SanctuaryMemorial 폴더)는 itemId로 그대로 사용.
 
 ## 개요
 

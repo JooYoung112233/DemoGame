@@ -400,7 +400,7 @@ public class MapSelectUI : MonoBehaviour
                 continue;
             }
 
-            string icon = rt.isNight ? "☾" : "☀";
+            string icon = rt.isNight ? "●" : "○";   // ● 짙은 현상 / ○ 안전 구간 (낮/밤 폐기)
             float remaining = rt.isNight
                 ? RegionTimeManager.Instance.NightDuration - rt.elapsed
                 : RegionTimeManager.Instance.DayDuration - rt.elapsed;
@@ -426,13 +426,13 @@ public class MapSelectUI : MonoBehaviour
         var rt = RegionTimeManager.Instance.GetRegion(regionId);
         if (rt == null) return "";
 
-        string phase = rt.isNight ? "☾ 밤" : "☀ 낮";
+        string phase = rt.isNight ? "● 짙은 현상" : "○ 안전 구간";
         float remaining = rt.isNight
             ? RegionTimeManager.Instance.NightDuration - rt.elapsed
             : RegionTimeManager.Instance.DayDuration - rt.elapsed;
         int min = (int)(remaining / 60);
         int sec = (int)(remaining % 60);
-        string nextPhase = rt.isNight ? "일출" : "일몰";
+        string nextPhase = rt.isNight ? "현상 걷힘" : "현상 짙어짐";
 
         return $"<color={(rt.isNight ? "#8899FF" : "#FFE844")}>{phase}</color>  |  {nextPhase}까지 {min}:{sec:D2}";
     }

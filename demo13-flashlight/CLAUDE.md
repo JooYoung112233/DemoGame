@@ -73,7 +73,7 @@ All lighting scripts subscribe to `DayNightCycle.OnPhaseChanged` event:
 ### Data Layer
 - **StatDB** (`Resources/Data/StatDB.asset`) — Central stat database. PlayerStatData + UnitStatData list. Key-based access: `StatDB.Instance.GetUnit("bandit_melee")`.
 - **WeatherData** (`Assets/Settings/WeatherData.asset`) — Day/night lighting, fog, rain settings. Used by DayNightCycle and RainController.
-- **WorldRegionCatalog** — 7 districts with day/night characteristics.
+- **WorldRegionCatalog** — 5 districts (7→5 merged 2026-06-11; see docs/story.md §4). Region order = 지역1~5 progression.
 - **RegionTimeManager** — Per-region independent day/night cycles (unscaledDeltaTime).
 - **RegionLootCatalog/RegionLootTier/RegionLootBootstrap** — Loot distribution per region.
 
