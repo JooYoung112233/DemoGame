@@ -23,8 +23,8 @@ MonoBehaviour:
   primaryRegionId: 
   maxStack: 5
   weight: 0.08
-  sellPrice: 3
-  buyPrice: 8
+  sellPrice: 300
+  buyPrice: 800
   isUsable: 1
   useEffect: 2
   effectValue: 0

@@ -23,7 +23,7 @@ MonoBehaviour:
   primaryRegionId: industrial
   maxStack: 4
   weight: 0.5
-  sellPrice: 10
+  sellPrice: 1000
   buyPrice: 0
   isUsable: 0
   useEffect: 0

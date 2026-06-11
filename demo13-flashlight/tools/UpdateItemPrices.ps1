@@ -51,7 +51,7 @@ $updated = 0
 Get-ChildItem $itemsDir -Filter "*.asset" -Recurse -File | ForEach-Object {
     $f = Read-AssetFields $_.FullName
     if (-not $f.id) { return }
-    $prices = Get-ItemPrices -Id $f.id -Cat $f.cat -Rar $f.rar -Dur $f.dur -Fx $f.fx -Val $f.val
+    $prices = Get-ItemPricesScaled -Id $f.id -Cat $f.cat -Rar $f.rar -Dur $f.dur -Fx $f.fx -Val $f.val
     $newText = Set-PriceLines $f.text $prices[0] $prices[1]
     if ($newText -ne $f.text) {
         [IO.File]::WriteAllText($_.FullName, $newText, $utf8)

@@ -142,3 +142,44 @@ function Get-ItemPrices {
         default { return @(0, 0) }
     }
 }
+
+# 2026-06-10 새 스케일: 기본 ×100 + 루디/전력셀/잭팟 명시 오버라이드 (잭팟 20만~500만)
+function Get-ItemPricesScaled {
+    param([string]$Id, [int]$Cat, [int]$Rar, [int]$Dur = 0, [int]$Fx = 0, [double]$Val = 0)
+
+    # 루디 + 전력셀 + legendary 잭팟 = 최종값(×100 미적용, 직접 지정)
+    $jack = @{
+        ruby_dust              = @(5000, 0)
+        ruby_shard             = @(50000, 0)
+        ruby_crystal           = @(180000, 0)
+        ruby_core              = @(600000, 0)
+        ruby_corrupted         = @(250000, 0)
+        val_power_cell         = @(4000000, 0)
+        val_power_core         = @(1500000, 0)
+        val_power_bank         = @(80000, 0)
+        val_power_cell_drained = @(5000, 0)
+        val_gold_bar           = @(1500000, 0)
+        val_diamond_ring       = @(1200000, 0)
+        val_antique_vase       = @(800000, 0)
+        val_platinum_chain     = @(700000, 0)
+        val_emerald_brooch     = @(600000, 0)
+        val_opal_ring          = @(700000, 0)
+        val_ring_wedding       = @(900000, 0)
+        val_id_government      = @(500000, 0)
+        val_ruby_set           = @(5000000, 0)
+    }
+    if ($jack.ContainsKey($Id)) { return , $jack[$Id] }
+
+    $base = @(Get-ItemPrices -Id $Id -Cat $Cat -Rar $Rar -Dur $Dur -Fx $Fx -Val $Val)
+    [int]$sell = $base[0]
+    [int]$buy = $base[1]
+
+    # 귀중품 Epic/Legendary = 잭팟 기준선(이름 없는 것도 보장)
+    if ($Cat -eq 4 -and $sell -gt 0) {
+        if ($Rar -ge 4) { return , @(1000000, 0) }
+        if ($Rar -eq 3) { return , @(250000, 0) }
+    }
+    [int]$rsell = $sell * 100
+    [int]$rbuy = $buy * 100
+    return , @($rsell, $rbuy)
+}

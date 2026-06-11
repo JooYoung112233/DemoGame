@@ -22,8 +22,8 @@ MonoBehaviour:
   rarity: 0
   maxStack: 2
   weight: 0.3
-  sellPrice: 14
-  buyPrice: 30
+  sellPrice: 1400
+  buyPrice: 3000
   isUsable: 1
   useEffect: 0
   effectValue: 25
