@@ -445,8 +445,8 @@
 
 | 항목 | 상태 |
 |------|------|
-| **가격 ×100 미적용** | 문서=새 스케일(루디 5만·잭팟 20만~500만), `ItemPrices.ps1`·SO=옛 ×1 → **스크립트 ×100 + 루디/잭팟 오버라이드 후 재생성** |
-| **신규 SO 미생성 (~20+)** | `repair_kit`·`ammo_rounds`·`note_nameplate`·`pkg_marked`·`cont_*`(9 보관함)·`subway_*`(5)·`val_power_*`(4) + `battery_aa` 리네임 |
+| **가격 ×100** | ✅ **적용 완료(2026-06-10)** — `ItemPrices.ps1` Get-ItemPricesScaled(×100+루디/잭팟), SO 204+13종 갱신 |
+| **신규 SO** | 🟡 **13종 생성**(`repair_kit`·`ammo_rounds`·`note_nameplate`·`pkg_marked`·`subway_*`5·`val_power_*`4). **잔여**: `cont_*`(9 보관함 — 컨테이너 격자 구조 필요, ItemData론 부족) · `battery_aa` 리네임(코드 참조 점검 후) |
 | **하이드아웃 모듈 Lv별 비용표** | 경제 척추(~600만)인데 모듈×Lv 수치 공백 — 작성 필요 |
 | **QuestData SO** | BD·BQ·NQ·SQ-003·DQ 대부분 미작성 (§10 구현 우선순위) |
 | **income/h 미확정** | 50h 역산 핵심 다이얼 — 레이드 루트테이블 실수익과 연동 필요 |
