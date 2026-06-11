@@ -15,7 +15,7 @@ function Get-ItemPrices {
     $fixed = @{
         first_aid_kit    = @(35, 80)
         ifak_injury      = @(40, 90)
-        battery          = @(5, 12)
+        battery_aa       = @(5, 12)
         canned_food      = @(8, 15)
         coin_scrap       = @(1, 0)
         coin_old         = @(3, 0)

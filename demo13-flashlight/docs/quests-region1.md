@@ -439,14 +439,14 @@
 | 구역 관리인 npcId | `zone_manager`(문서) vs `district_warden`/`manager`(그레이박스) → **`zone_manager` 통일** |
 | 노점상 itemId | ✅ 해결(§6-3 battery/canned/repair/ammo 확정) |
 | 짙은 현상 통칭 | 거리인들 부르는 이름 **미정** (story-script 결정 로그) |
-| `battery` vs `battery_aa` | 표준=`battery_aa`, SO/ItemPrices=`battery` → **SO 리네임 필요**(items.md §2) |
+| `battery` vs `battery_aa` | ✅ 해결(2026-06-10) — SO itemId `battery_aa` 통일, ItemPrices 키 정합 |
 
 ### 데이터·가격 빚 (2026-06-10 정합 점검 — 구현 전 청산)
 
 | 항목 | 상태 |
 |------|------|
 | **가격 ×100** | ✅ **적용 완료(2026-06-10)** — `ItemPrices.ps1` Get-ItemPricesScaled(×100+루디/잭팟), SO 204+13종 갱신 |
-| **신규 SO** | 🟡 **13종 생성**(`repair_kit`·`ammo_rounds`·`note_nameplate`·`pkg_marked`·`subway_*`5·`val_power_*`4). **잔여**: `cont_*`(9 보관함 — 컨테이너 격자 구조 필요, ItemData론 부족) · `battery_aa` 리네임(코드 참조 점검 후) |
+| **신규 SO** | 🟡 **13종 생성 + `battery_aa` 통일**. **잔여**: `cont_*`(9 보관함 — 컨테이너 격자 구조 필요, ItemData론 부족 → 별도 시스템) |
 | **하이드아웃 모듈 Lv별 비용표** | ✅ **작성 완료(2026-06-10)** — 8모듈×Lv1~3, 소계 43만/195만/535만(§9.7 ③) |
 | **QuestData SO** | BD·BQ·NQ·SQ-003·DQ 대부분 미작성 (§10 구현 우선순위) |
 | **income/h 미확정** | 50h 역산 핵심 다이얼 — 레이드 루트테이블 실수익과 연동 필요 |

@@ -125,7 +125,7 @@
 
 | 우선 | itemId | 표시명 | 격자 | 스택 | 무게 | 희귀 | useEffect | 비고 |
 |:---:|---|---|:---:|:---:|:---:|---|---|---|
-| P0 | `battery_aa` | 건전지 | 1×1 | 5 | 0.05 | Common | AddBattery | 장비 전력. ⚠️ **id 정합(2026-06-10)**: 표준=`battery_aa`(문서·아이콘 기준). 현 SO `Battery.asset`/ItemPrices.ps1은 `battery` → **리네임 필요**(데이터 작업) |
+| P0 | `battery_aa` | 건전지 | 1×1 | 5 | 0.05 | Common | AddBattery | 장비 전력. ✅ id 정합 완료(2026-06-10): SO `Battery.asset` itemId=`battery_aa`로 통일 |
 | P0 | `lantern_basic` | 탐지등 | 1×2 | - | 0.8 | Common | Equip(Light) | 회수꾼 소싯적 양도(S-013). 착용 시 시야(주변광+콘) 확대·증광·현상 근접 시 점멸. 토글X·상시. 루디 충전. → rendering.md |
 | P0 | `canned_food` | 통조림 | 1×1 | 3 | 0.3 | Common | Eat | 허기 +40. → survival.md |
 | P0 | `water_bottle` | 물병 | 1×2 | 2 | 0.5 | Common | Drink | 수분 +45. → survival.md |

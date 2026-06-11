@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
   m_Name: Battery
   m_EditorClassIdentifier: Game.Scripts::ItemData
-  itemId: battery
+  itemId: battery_aa
   displayName: "건전지"
   description: "손전등용 건전지. 배터리를 30% 충전한다."
   icon: {fileID: 0}
