@@ -134,6 +134,7 @@
 ### 레이드 구간 (낮/밤 폐기)
 
 > **낮/밤 구분은 설계에서 폐기.** 통칭으로 쓰이던 「밤」= 실제로는 **짙은 현상 구역** 침식. [→ raid.md](raid.md) 2026-06-06
+> **단, 시각적 ambient 낮↔밤 사이클은 부활(2026-06-10)** — **게임플레이 위협은 여전히 현상 구역(불변)**, 낮↔밤은 순수 **분위기 조명**만 부드럽게 전환. 구현 = `DayNightLightDriver`(글로벌 Light2D를 WeatherData 낮/밤 ambient 값 사이로 lerp). "낮/밤 폐기"는 **게임 프레이밍 한정**, 비주얼 시간대 흐름은 허용.
 
 | 구간 | 의미 | 1지역 예 |
 |------|------|----------|
@@ -1166,8 +1167,8 @@
 - **질문**: 지역을 총 5개로 잡는다. 기존 7지역 아크(①~⑦)를 어떻게 정리?
   - **결정**: **7지역 → 5지역 압축(병합).** 지역1(데모 폐상가) 유지. 후반 6개를 병합: **지역2=②**(사람들), **지역3=③+④**(기록과 흔적: 공업+철도), **지역4=⑤+⑥**(재생되는 진실: 공연오락+성역), **지역5=⑦**(중앙 영야). 기존 스토리 기둥(의사·수리공·상인·정보브로커, 연구소·시계 정체·동생 단서·전당포 정체·생존 반전·희생)은 모두 보존하며 위치만 재배치.
   - **근거**: 본선 길이를 5지역으로 줄이되 서사 손실 0. 인접 테마끼리 병합(공업+철도=산업/기록, 공연+성역=극장가/추모) → 지역 정체성 더 또렷. 새 세계관 훅(정부 채굴 물증=지역3, 비선형 시간 심화=지역3→4→5 점증)을 자연스럽게 끼움.
-  - **반영**: §4 전면 재작성(지역2~5 + 7→5 매핑표), §7 해금표·§8 NPC 첫등장·§10 강무진 단계 조건·§11 단서 위치·§12 흐름도 모두 5지역 라벨로 갱신. **코드 반영 완료(2026-06-11)**: `WorldRegionCatalog.cs` 5지역(industrial=공업+철도 병합 / entertainment=공연+성역 병합, 1~5 순서, anomaly 그라데이션) · `region_loot.txt`/`tools/region_loot.csv` 병합 지역 루트를 부모로 remap(railway→industrial, sanctuary→entertainment) · CLAUDE.md·region-loot.md·rendering.md anomaly 값 갱신. **잔여(무해)**: `MapSpawn/railway_scrap.asset`·`sanctuary_memorial.asset` 고아 에셋(미참조, 추후 삭제 가능).
-  - **추가 정리(2026-06-11)**: 낮/밤 폐기 반영 — `WorldRegionCatalog` 필드 `dayFeature/nightFeature` → **`safeFeature/anomalyFeature`**, 설명 라벨 "☀낮/☾밤" → **"○ 안전 구간 / ● 짙은 현상"**. `MapSelectUI` 지역 표시도 안전/현상(`●/○`, 일출·일몰 → 현상 걷힘·짙어짐). **런타임 day/night 사이클(RegionTimeManager·루트 GroundDay/Night 티어)은 유지** — 표시 레이어만 정리. (DayNightCycle 전역 토글 dev 에디터 라벨은 미변경.)
+  - **반영**: §4 전면 재작성(지역2~5 + 7→5 매핑표), §7 해금표·§8 NPC 첫등장·§10 강무진 단계 조건·§11 단서 위치·§12 흐름도 모두 5지역 라벨로 갱신. **코드 반영 완료(2026-06-11)**: `WorldRegionCatalog.cs` 5지역(industrial=공업+철도 병합 / entertainment=공연+성역 병합, 1~5 순서, anomaly 그라데이션) · `region_loot.txt`/`tools/region_loot.csv` 병합 지역 루트를 부모로 remap(railway→industrial, sanctuary→entertainment) · CLAUDE.md·region-loot.md·rendering.md anomaly 값 갱신. **고아 에셋 삭제 완료**: `MapSpawn/railway_scrap.asset`·`sanctuary_memorial.asset`(+`.meta`) 제거(GUID 참조 0 확인) → MapSpawn = 5지역 일치.
+  - **추가 정리(2026-06-11)**: 낮/밤 폐기 반영 — `WorldRegionCatalog` 필드 `dayFeature/nightFeature` → **`safeFeature/anomalyFeature`**, 설명 라벨 "☀낮/☾밤" → **"○ 안전 구간 / ● 짙은 현상"**. `MapSelectUI` 지역 표시도 안전/현상(`●/○`, 일출·일몰 → 현상 걷힘·짙어짐). `DayNightCycleEditor` dev 라벨도 안전/현상으로 정리. **런타임 day/night 사이클(RegionTimeManager·루트 GroundDay/Night 티어)·API(IsNight/SetNight)는 유지** — 표시 레이어만 정리.
 
 - **질문**: 엔딩 분기 구동축과 지역별 선택 연동?
   - **결정**: **현행 3변수(단서 수집률·호감도·시계 공명) 유지 + 지역별 선택을 2축(유대·추적)으로 누적.** 유대=사람 구함/신뢰, 추적=정부 은폐·진실 파기. 2축→3엔딩: A(둘 다 중하)·B(추적 상·유대 하, 폭로)·C(둘 다 상+단서 full+시계공명, 진엔딩). §5.0 신설.
