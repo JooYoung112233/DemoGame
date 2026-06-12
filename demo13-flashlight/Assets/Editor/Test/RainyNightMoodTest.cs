@@ -11,7 +11,7 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public static class RainyNightMoodTest
 {
-    [MenuItem("Tools/TopDown/맵/비오는 밤 무드 테스트")]
+    [MenuItem("Tools/TopDown/테스트/비오는 밤 무드")]
     static void Build()
     {
         var root = new GameObject("RainyNightMood_Test");
