@@ -37,6 +37,7 @@
 | 맵 ▸ 그레이박스(안전가옥/고철시장/1구역/은신처) | 레이아웃 그레이박스 빌더 | *GreyboxLayout 4종 |
 | 맵 ▸ 이상현상 구역 생성 | 현상 존 생성 | DenseAnomalyZone |
 | 맵 ▸ 낮밤 라이트 드라이버 부착 | 낮↔밤 ambient 부드러운 전환(WeatherData lerp) | DayNightLightDriver |
+| 맵 ▸ 비오는 밤 무드 테스트 | 어두운 PP+가로등+네온+젖은바닥+비 조합 씬에 추가 | RainyNightMoodTest |
 
 ## ⚙️ 초기설정 (1회성 셋업)
 
