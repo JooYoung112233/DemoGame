@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEditor;
 
 /// <summary>
-/// DayNightCycle 인스펙터에 낮/밤 전환 버튼 추가.
+/// DayNightCycle 인스펙터에 안전 구간/짙은 현상 전환 버튼 추가. (낮/밤 폐기 — docs/story.md §4)
 /// 에디터(씬 편집)·플레이(인게임) 둘 다 즉시 적용 — 글로벌 Light2D가 바로 바뀌어 미리보기 가능.
-/// 낮/밤 수치(intensity/color)는 기본 인스펙터에서 조절.
+/// 강도/색(intensity/color)은 기본 인스펙터에서 조절. (런타임 API는 IsNight/SetNight 유지 = '현상' 상태)
 /// </summary>
 [CustomEditor(typeof(DayNightCycle))]
 public class DayNightCycleEditor : Editor
@@ -16,14 +16,14 @@ public class DayNightCycleEditor : Editor
         var dn = (DayNightCycle)target;
 
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("낮/밤 전환 (에디터·런타임 공용)", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField("현재 상태", dn.IsNight ? "🌙 밤" : "☀ 낮");
+        EditorGUILayout.LabelField("안전 구간 / 짙은 현상 전환 (에디터·런타임 공용)", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("현재 상태", dn.IsNight ? "● 짙은 현상" : "○ 안전 구간");
 
         EditorGUILayout.BeginHorizontal();
         GUI.backgroundColor = dn.IsNight ? Color.white : new Color(1f, 0.9f, 0.5f);
-        if (GUILayout.Button("☀ 낮으로", GUILayout.Height(30))) Apply(dn, false);
+        if (GUILayout.Button("○ 안전 구간으로", GUILayout.Height(30))) Apply(dn, false);
         GUI.backgroundColor = dn.IsNight ? new Color(0.5f, 0.6f, 1f) : Color.white;
-        if (GUILayout.Button("🌙 밤으로", GUILayout.Height(30))) Apply(dn, true);
+        if (GUILayout.Button("● 짙은 현상으로", GUILayout.Height(30))) Apply(dn, true);
         GUI.backgroundColor = Color.white;
         EditorGUILayout.EndHorizontal();
 
