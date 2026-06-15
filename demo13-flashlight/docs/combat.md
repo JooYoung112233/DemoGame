@@ -121,11 +121,11 @@
 - 무기는 손 본(hand bone) 어태치먼트 → walk 애니가 자동으로 무기를 움직임
 - 단, 그립 자세가 다른 무기군은 walk 변형 필요. **3종으로 분류**:
 
-| 그립 클래스 | 예시 무기 | 자세 |
-|---|---|---|
-| 한손 (one-hand) | 단검, 한손 도구 | 한 손에 무기, 팔 자연스럽게 내림 |
-| 양손 (two-hand) | 야구방망이, 장검 | 양손 그립, 어깨 쪽에 들고 |
-| 총 (gun) | 라이플 | 양손, 총을 앞으로 든 준비 자세 |
+| 그립 클래스 | 예시 무기 | 데모 무기(2026-06-15) | 자세 |
+|---|---|---|---|
+| 한손 (one-hand) | 단검, 한손 도구 | **단검(knife), 몽둥이(나무 각목/wood_plank)** | 한 손에 무기, 팔 자연스럽게 내림 |
+| 양손 (two-hand) | 야구방망이, 장검 | **도끼(axe/hatchet)** | 양손 그립, 어깨 쪽에 들고 |
+| 총 (gun) | 라이플 | - | 양손, 총을 앞으로 든 준비 자세 |
 
 - 무기 하나하나마다 walk 만들지 않음 → 그립 클래스 3종만 제작, 같은 클래스 무기는 어태치먼트만 교체
 - 맨손 walk = 한손 walk에서 무기 슬롯 비우거나 별도 1종
@@ -160,6 +160,7 @@
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-06-15 | **데모 무기 그립 분류 확정.** 단검(knife)=한손, 몽둥이(나무 각목/wood_plank)=한손, 도끼(axe/hatchet)=양손. 무기 그립 테이블 "데모 무기" 열에 반영. (캐릭터 무기 장착 스프라이트 제작 기준 — 한손은 한 손 그립, 도끼는 양손 그립으로 에셋 제작) |
 | 2026-05-24 | 전투 프로토타입 구현. 약공(콤보)/강공(차징)/구르기/스태미너/그로기/적 캔슬 시스템. 스톤샤드 참고하되 턴제 제외 확정. |
 | 2026-06-02 | **탑다운 2D 전투 이식.** 구 `PlayerController`(NavMesh/3D) 폐기 → `TopDownPlayer`(Rigidbody2D)에 전투 전면 재구현: 약공(콤보)·강공(차징)·구르기(무적)·스태미너·탈진을 `StatDB.playerStat` 기반으로. 공격 판정은 `Physics2D.OverlapCircleAll`로 FacingDirection 방향 → `EnemyController.TakeHit(dmg, groggy, knockback)`. `EnemyController`도 Rigidbody2D 상태머신(NavMesh 제거), `TakeHit`/`IsDead` 추가. 무적 체크(Health/CombatFeedback)·전투 중 상호작용 차단(InteractionSystem)·HUD 스태미너 바 연결. 상호작용 계층(Interact/Talk/Open/Pickup)은 `GameObject` 인터페이스로 확정. |
 | 2026-06-02 | **적 길찾기(Tilemap 그리드 A\*) 추가.** `NavGrid`(격자 베이크, 막힘=비-트리거 Collider2D, 바디 반경 dilate)→`AStarPathfinder`(8방향, 코너 끼임 방지, 최소힙)→`NavAgent`(경로 추종, 리패스, LOS 스킵, 직진 폴백)→`EnemyController.UpdateChase` 연동. 플레이어는 WASD 유지·길찾기 미부착(전신 콜라이더만). 적 `NavAgent` 자동 부착, `NavGrid`는 빌더가 배치(샌드박스에 우회 벽 2개). 외부 에셋·NavMesh 의존성 0. |
