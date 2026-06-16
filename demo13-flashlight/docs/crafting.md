@@ -58,6 +58,18 @@
 
 ---
 
+## 루디 충전/가공대 (RudiBench) — 기획 개념 〔미구현 · 수치 TBD〕
+
+> 루디 = 충전·방전·마모 활성 자원([→ gdd-core §5.3](gdd-core.md)). 거점에서 죽은/방전 루디를 **부분 충전**(현상 노드 대비 느림·안전)하고 **가공**하는 스테이션. [→ safehouse.md](safehouse.md)
+
+- **충전**: 방전·죽은 루디 → 충전량 부분 회복(전부는 아님). 안전가옥 강화로 효율↑.
+- **가공 레시피 개념**:
+  - **소형 루디 합성**: `ruby_shard`/`ruby_dust` 여러 개 → `ruby_crystal` 소폭 보충(큰 루디 용량 채우기).
+  - **안정화**: 반복 충전으로 줄어드는 최대 용량(마모)을 늦추는 강화.
+- **확인 필요(구현 판단 대기)**: 신규 `station = RudiBench`(StationType enum 추가)로 둘지 작업대 탭으로 통합할지, 충전·가공을 RecipeData로 표현할지 별도 시스템으로 둘지 = 미정. 충전 속도·합성 비율·마모 지연율 = `GameTuning` TBD.
+
+---
+
 ## 코드 · 데이터 경로
 
 | 항목 | 경로 |
@@ -79,5 +91,6 @@
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-06-16 | **루디 충전/가공대(RudiBench) 기획 개념 섹션 추가(gdd-core §5.3 캐논 정합).** 부분 충전 + 소형 루디 합성 + 안정화(마모 지연) 개념. 미구현 — station/RecipeData 표현 방식 확인 필요, 수치 TBD. 구현된 레시피 표(조리5·의료5)는 변경 없음. | [→ gdd-core §5.3](gdd-core.md), safehouse.md. |
 | 2026-05-26 | RecipeData 에디터 워크플로 문서화. 조리 5 + 의료 5 SO. `unlockRecipeItemId` / `unlockedByDefault` 규칙 정리. |
 | 2026-05-26 | `CraftingUI` 연동 완료. Safehouse 시설 부트스트랩. `InteractType` enum 순서 수정(MapBoard=8 유지). |

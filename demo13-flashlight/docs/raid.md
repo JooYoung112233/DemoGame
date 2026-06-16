@@ -22,6 +22,14 @@
 - 모든 아이템 획득 시 IsLooted = true (재상호작용 시 "비어있음" 표시)
 - 획득한 아이템은 RaidManager에 추적 기록
 
+### 광원 운용 — 빛의 역설 〔확정 방향 · 수치 TBD〕
+
+> 세계관 = [gdd-core §5.2/§5.3](gdd-core.md). 레이드 중 광원 선택이 위험·보상에 직결.
+
+- **탐지등(루디 광원) = 기본·안전**(빛의 역설 예외). 레이드 중 **약하게 방전** → 여분 루디로 교체하며 운용(가혹하지 않은 광원 관리 긴장). 방전 속도·여분 용량 = `GameTuning`.
+- **비루디 광원**(플레어·횃불·발견 전등·화염 무기)은 즉효(넓은 시야·온기·화염 전투)지만 그 자리에 **침식 게이지**를 쌓는 양날 — 불 계열 가중치 최대. "지금 밝힐까 vs 아껴둘까". → [navigation.md §4](navigation.md)(랜턴 점멸 예고), [anomaly.md](anomaly.md)
+- **루디 회수 + 충전 재진입 동기**: 루디는 현상에서만 회수되고 마모로 소진되므로, 레이드는 「회수」뿐 아니라 「현상 노드에서 충전」(빠름·위험)이라는 재진입 이유도 가진다. [→ gdd-core §5.3](gdd-core.md), [anomaly.md](anomaly.md)
+
 ### 귀환 정산 (RaidResultUI)
 - Safehouse 씬 로드 시 자동 표시
 - 실제 데이터 표시:
@@ -37,6 +45,7 @@
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-06-16 | **빛의 역설/루디 활성 자원 캐논 정합(gdd-core §5.2/§5.3).** '광원 운용' 섹션 추가: 탐지등=루디 광원(안전)·약방전·여분 교체, 비루디 광원=침식 양날(불=최악), 루디 **회수+현상 노드 충전** 재진입 동기. 수치 TBD. | [→ gdd-core §5.2/§5.3](gdd-core.md), navigation.md §4, anomaly.md. |
 | 2026-05-25 | 레이드 시스템 v1 구현. RaidManager(타이머+루트추적), LootContainer(initialLoot+자동루팅), RaidResultUI(실데이터 연동), InteractableObject(탈출 시 RaidManager 알림, Pickup 시 루트 추적). |
 | 2026-06-02 | **플레이어 사망 → 레이드 실패 처리.** `RaidManager`가 플레이어 `Health.OnDeath` 구독(지연 바인딩). 사망 시: **가방 아이템 전부 손실**(`deathLossRate=1`, 창고는 안전), 붉은 화면 플래시 + 셰이크 연출, 토스트("사망 — 가방을 잃었다"), **안전가옥에서 풀회복 부활**(Health.FullHeal + Medical.HealAll), `deathSpawnPointId="raid_death"`로 강제 귀환. 사망은 정산(PostRaidEvent/RaidResultUI) 스킵. 장착 무기는 유지(가방만 손실) — 추후 조정 가능. | 생존 게임의 긴장("죽으면 가방 다 잃음") 핵심. 시간초과(일부 손실)보다 가혹. |
 | 2026-06-06 | **레이드 제한 15→20분** (`RaidManager`/`GameTuning.raidDuration`/InGameScene 직렬화 = 1200). **짙은 현상(밤) 1회 지속 5→≈10분** (`RegionTimeManager`/`GameTuning.nightDuration` = 600). | '밤'을 '짙은 현상' 조우로 재정의(아래 결정 로그). 한 레이드(20분) 안에 현상(10분) 창에서 루디 회수. |

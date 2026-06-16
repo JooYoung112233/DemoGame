@@ -49,6 +49,7 @@
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | **기획서 마스터 (3분할, 가장 먼저 읽을 것)** | 게임 전체 설계. ① [`gdd-core.md`](gdd-core.md) 코어 시스템(전투·루팅·낮밤·세계관) · ② [`gdd-progression.md`](gdd-progression.md) 진행·스토리(안전가옥·NPC·메인스토리·엔딩·월드) · ③ [`gdd-demo.md`](gdd-demo.md) 데모 범위·우선순위 | 확정 |
+| 🌐 **세계관 SSOT** | 세계 설정·로어의 **단일 출처 = [`gdd-core.md §5`](gdd-core.md)** (시대·무대 / 짙은현상 / **빛의역설** / **루디=충전·방전·마모 활성 자원** / 시간왜곡). 타 문서는 재서술 금지·링크만. story.md §2=스토리 사건 순서, anomaly.md=현상 메커닉, world-map.md=지리 컨셉(모두 §5로 위임) | 확정 |
 | [`dev-roadmap.md`](dev-roadmap.md) | 10단계 개발 로드맵 + 단계 상세 + **미구현/마무리 필요 목록**. 현재 Stage 2 | 진행 중 |
 | [`backlog-ui.csv`](backlog-ui.csv) | **UI 제작 백로그** — 신규/확장/기존 UI 18종(우선순위·시스템·문서) | 2026-06-10 |
 | [`backlog-impl.csv`](backlog-impl.csv) | **구현/테스트 백로그** — 시스템·데이터·밸런스 27건(의존·우선순위·문서) | 2026-06-10 |
@@ -209,6 +210,8 @@ Safehouse (timeScale=0, 안전 허브)
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-06-16 | **빛의 역설/루디 활성 자원 캐논 정합(gdd-core §5.2/§5.3).** SSOT 색인 행의 「불의역설」→「빛의역설」 교정 + 「루디=충전·방전·마모 활성 자원」 명기. 대상 문서(economy/items/items-crafting-farming은 미해당·safehouse/safehouse-intel/raid/crafting/navigation/anomaly)에 루디 충전·방전·마모·순도·죽은 루디·루디 충전/가공대·비루디 광원 침식 반영 + SSOT 링크 추가. 새 수치 미생성(GameTuning TBD). | gdd-core §5 본문은 이미 캐논(진실). |
+| 2026-06-16 | **세계관 통합 정리 — gdd-core §5를 단일 출처(SSOT)로 확정.** §5 상단에 SSOT 배너+하위 색인(5.0~5.4) 추가. 흩어진 로어 재서술 제거: story.md §2 "봉쇄 이후"의 자원작전·불의역설·회수꾼·루디 정의 → 스토리 사건만 남기고 §5로 위임 / world-map.md 상단에 로어 SSOT 위임 노트 + §1 "영구적 밤·붕괴한 날·밤 개장" 옛 표현을 캐논(봉쇄+짙은현상=시간 무관) 용어로 교정. anomaly.md는 이미 §5.1/§5.4 위임(유지). |
 | 2026-05-28 | 마스터 문서 생성. 게임 제목 확정: 다녀올게 (Be Right Back) |
 | 2026-05-29 | 문서 정리: `Night_City_System_Draft_v2.md`(1203줄) → `gdd-core`/`gdd-progression`/`gdd-demo` 3분할. `items.md` → `items-crafting-farming.md` 분리. story/story-script 역할 명시 + 오프닝 중복 제거. `quests-region1.md` 인덱스 추가. dev-roadmap에 미구현 목록 정리. |
 | 2026-05-29 | **프로젝트명 BRB 확정.** "Night City / 밤의 도시" 표현 전면 정리 — 기획서 제목 → "BRB 기획서", 인게임 출전 화면 타이틀 → "다녀올게", `Mood.NightCity` → `Mood.NeonNight`, Unity 메뉴 `Tools/Night City/*` 3건 → `Tools/Dev Tools/*` 관례 통일 + 문서의 stale 메뉴 경로 교정. 한글 제목은 "다녀올게" 유지. |

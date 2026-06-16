@@ -68,7 +68,7 @@ ItemData (ScriptableObject)
 ├── category      : ItemCategory (enum)
 ├── maxStack      : int (최대 스택 수, 1이면 스택 불가)
 ├── weight        : float (무게, kg)
-├── sellPrice     : int (전당포 판매가, 루디. 0=판매 불가)
+├── sellPrice     : int (전당포 판매가, 스크랩. 0=판매 불가)
 ├── buyPrice      : int (상점 구매가. 0=구매 불가)
 ├── rarity        : ItemRarity (enum)
 ├── isUsable      : bool (우클릭 사용 가능 여부)
@@ -88,7 +88,9 @@ ItemCategory
 └── Misc        : 기타
 ```
 
-### 가격 (루디)
+### 가격 (스크랩)
+
+> 화폐 = **스크랩**(일상 화폐). 루디는 화폐가 아니라 특수 자원(납품 시 스크랩 보상). [→ economy.md](economy.md)
 
 - **판매가** `sellPrice`: 전당포·정보 탭 「총 판매가치」 합산에 사용.
 - **구매가** `buyPrice`: 상점/NPC 구매용 (미구현 시에도 SO에 선반영).
@@ -361,7 +363,8 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 | 2026-05-25 | 전 ItemData SO(172종)에 sellPrice/buyPrice 일괄 반영. `tools/ItemPrices.ps1` 규칙 + `UpdateItemPrices.ps1`. 신규 SO는 `GenerateFromCsv.ps1`에서 동일 규칙 적용. |
 | 2026-05-26 | **루팅 상자 수색 연출 구현.** 타르코프/덕코프 스타일 — 아이템이 1개씩 순서대로 공개. 희귀도별 딜레이(Common 0.4s → Legendary 1.8s). 미공개 아이템은 "?" 표시, 수색 중 아이템은 펄스+프로그레스 바. 미공개 아이템 드래그 불가 가드 추가. 안전가옥 창고는 즉시 전체 공개. |
 | 2026-05-26 | **우클릭 컨텍스트 메뉴 구현.** 사용(초록)/검사(파랑)/버리기(주황) 3종. 마우스 위치에 팝업. 검사 시 정보 탭으로 상세 표시(카테고리·크기·무게·가격·내구도·효과). 좌측 격자(상자/창고)에서도 검사 가능. 미공개 아이템은 메뉴 불가. |
-| 2026-05-26 | **재화 이름 통일.** "스크랩 코인" → "루디(Rudy)" 전면 변경 (docs, UI 코드, ItemData 헤더, tools). |
+| 2026-05-26 | **재화 이름 통일.** "스크랩 코인" → "루디(Rudy)" 전면 변경 (docs, UI 코드, ItemData 헤더, tools). ⚠️ **2026-06-08 이원 경제로 번복됨 — 아래 2026-06-16 참조.** |
+| 2026-06-16 | **화폐 단위 정합 — sellPrice/buyPrice = 스크랩.** 2026-06-08 이원 경제(스크랩=일상 화폐 / 루디=특수 자원)에 맞춰 inventory.md의 옛 "루디 기준" 서술을 **스크랩**으로 정정(필드 주석·§가격 헤더). 루디는 화폐 아님(납품 시 스크랩 보상). [→ economy.md](economy.md) |
 | 2026-05-26 | **MedicalData 생성 스크립트.** `Tools > Dev Tools > Data > Generate Medical Data` — 13종 MedicalItemData SO 자동 생성 + ItemData.medicalData 자동 연결. |
 | 2026-05-30 | **소비 아이템 스태미너 회복 구현.** `PlayerController.RestoreStamina(amount)` 신설(최대치 클램프 + 탈진 해제). `ItemUseEffect.RestoreStamina`가 `effectValue`만큼 즉시 회복. 기존 TODO(음수 ConsumeStamina) 제거. |
 | 2026-06-10 | **백팩 = 휴대 격자 제공 아이템 확정.** 장착한 백팩이 레이드 중 격자 칸 수 결정(슬링4×4~택티컬7×9). 가방 없으면 포켓 2×2만. 좋은 가방 루팅/장착이 곧 적재량 업그레이드 → 루팅 루프 동기 강화. 백팩 5종 아이콘 제작 예정. |

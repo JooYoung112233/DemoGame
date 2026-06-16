@@ -136,10 +136,10 @@ anom.forEach((c,i)=>{
   s.addText(c[2], { x:x+0.45, y:cyy+2.05, w:cw-0.85, h:1.1, fontFace:F, fontSize:14, color:MUTE, valign:"top", lineSpacingMultiple:1.2, margin:0 });
 });
 
-// ============================================================ 5. 불의 역설 vs 루디
+// ============================================================ 5. 빛의 역설 vs 루디
 s = pres.addSlide(); slideBg(s);
 eyebrow(s, 0.9, 0.7, "핵심 장치 ②");
-title(s, 0.9, 1.12, "불의 역설, 그리고 루디", 29);
+title(s, 0.9, 1.12, "빛의 역설, 그리고 루디", 29);
 s.addText("전기는 죽었다. 빛이 필요하지만 — 빛을 잘못 쓰면 어둠이 더 짙어진다.",
   { x:0.9, y:1.95, w:11.5, h:0.5, fontFace:F, fontSize:15, color:MUTE, margin:0 });
 
@@ -147,13 +147,13 @@ const colY=2.9, colH=3.7, colW=5.55;
 // 불 (left, danger)
 card(s, 0.9, colY, colW, colH, PANEL);
 s.addShape(pres.shapes.RECTANGLE, { x:0.9, y:colY, w:0.1, h:colH, fill:{color:RED}, line:{type:"none"} });
-s.addText("일반 불 (횃불·모닥불)", { x:1.3, y:colY+0.4, w:colW-0.7, h:0.45, fontFace:F, fontSize:20, color:RED, bold:true, margin:0 });
-s.addText("위험한 빛", { x:1.3, y:colY+0.9, w:colW-0.7, h:0.3, fontFace:F, fontSize:12, color:MUTE, charSpacing:2, margin:0 });
+s.addText("루디 외 모든 빛", { x:1.3, y:colY+0.4, w:colW-0.7, h:0.45, fontFace:F, fontSize:20, color:RED, bold:true, margin:0 });
+s.addText("위험한 빛 (불=최악)", { x:1.3, y:colY+0.9, w:colW-0.7, h:0.3, fontFace:F, fontSize:12, color:MUTE, charSpacing:2, margin:0 });
 s.addText([
-  {text:"열·연기·흔들리는 불빛이 현상 잔재를 자극", options:{bullet:true, breakLine:true}},
-  {text:"같은 곳에서 반복하면 빛이 약해지고…", options:{bullet:true, breakLine:true}},
-  {text:"낮에도 밤 같은 짙은 구역으로 침식 가속", options:{bullet:true, breakLine:true}},
-  {text:"밝힐수록, 진짜 어둠이 가까워진다", options:{bullet:true, color:RED, bold:true}},
+  {text:"전등·랜턴·플레어 — 평범한 빛이 현상을 유인", options:{bullet:true, breakLine:true}},
+  {text:"불은 그중 최악 (열·연기·출렁임 = 신호 최강)", options:{bullet:true, breakLine:true}},
+  {text:"밝게·반복하면 침식 가속 → 영구 짙은 구역", options:{bullet:true, breakLine:true}},
+  {text:"빛으로 밀어낼수록, 진짜 어둠이 가까워진다", options:{bullet:true, color:RED, bold:true}},
 ], { x:1.35, y:colY+1.45, w:colW-0.85, h:2.0, fontFace:F, fontSize:14.5, color:TXT, valign:"top", paraSpaceAfter:9, margin:0 });
 
 // 루디 (right, hope)
@@ -178,7 +178,7 @@ s.addText("정부는 무대에 직접 없다(흔적만). 봉쇄는 격리가 아
 
 const flow = [
   [AMBER,  "독점 채굴", "정부가 도시를 봉쇄·은폐하고 루디를 독점하려 한다."],
-  [RED,    "불빛의 벽", "하지만 불의 역설 탓에 정부조차 불을 못 쓴다 → 어둠 속 저광량 채굴뿐, 느리고 비효율."],
+  [RED,    "빛의 벽", "하지만 빛의 역설 탓에 정부조차 루디 외 빛을 못 쓴다 → 어둠 속 저광량 채굴뿐, 느리고 비효율."],
   [COLD,   "그래서 회수꾼", "어둠을 직접 누비는 인간의 손이 더 유효 → 회수꾼이 필요해진다."],
   [VIOLET, "암시장", "회수꾼·전당포가 캐 온 루디가 독점의 틈을 빼먹는 비공식 공급망으로 흐른다."],
 ];
