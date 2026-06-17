@@ -9,10 +9,10 @@ EditorBuildSettings:
     path: Assets/Scenes/Systems.unity
     guid: 55428cbdf230eed4ca37c8aa6c5b41d8
   - enabled: 1
-    path: Assets/Scenes/Hideout.unity
-    guid: 55bc25745b9117343a28f79880c510d1
-  - enabled: 1
     path: Assets/Scenes/Safehouse.unity
     guid: 8db3e97e237324a47bfe37fba622c4cd
+  - enabled: 1
+    path: Assets/Scenes/Hideout.unity
+    guid: 55bc25745b9117343a28f79880c510d1
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

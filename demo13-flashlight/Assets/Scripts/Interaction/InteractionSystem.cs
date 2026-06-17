@@ -51,8 +51,16 @@ public class InteractionSystem : MonoBehaviour
         // 사망 시 상호작용 불가
         if (playerHealth != null && playerHealth.IsDead) return;
 
-        // UI가 열려있으면 상호작용 차단
-        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return;
+        // UI가 열려있으면 상호작용·프롬프트 차단 (타겟·하이라이트 해제 → OnGUI 프롬프트도 사라짐)
+        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen())
+        {
+            if (currentTarget != null)
+            {
+                currentTarget.SetHighlight(false);
+                currentTarget = null;
+            }
+            return;
+        }
 
         // 감지는 항상 수행 (UI 표시용)
         UpdateDetection();
@@ -124,6 +132,8 @@ public class InteractionSystem : MonoBehaviour
     void OnGUI()
     {
         if (currentTarget == null || mainCam == null) return;
+        // UI 열려있으면 프롬프트 숨김 (인벤 등 위로 뚫고 나오는 것 방지)
+        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return;
 
         InitStyles();
 

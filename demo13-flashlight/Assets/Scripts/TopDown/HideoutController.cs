@@ -12,8 +12,12 @@ using UnityEngine.Rendering.Universal;
 ///   • 화면의 '나가기' 버튼(또는 ESC) → 안전구역으로 복귀(SceneTransition).
 /// Hideout.unity에 1개 배치(HideoutGreyboxLayout이 생성). 씬 언로드 시 OnDestroy에서 원상복구.
 /// </summary>
+[DefaultExecutionOrder(-60)]   // ESC를 UIManager(-50)보다 먼저 잡아 'UI 닫기 → 다음 ESC에 나가기 확인' 순서 보장
 public class HideoutController : MonoBehaviour
 {
+    /// <summary>하이드아웃 실내 화면이 떠 있는 동안 true. UIManager가 ESC=PauseMenu를 양보(여기서 처리).</summary>
+    public static bool IsActive { get; private set; }
+
     [Header("고정 카메라(은신처 프레이밍)")]
     [Tooltip("카메라가 바라볼 방 중심(월드 XY)")]
     [SerializeField] Vector2 cameraCenter = new Vector2(7f, 4.5f);
@@ -26,20 +30,29 @@ public class HideoutController : MonoBehaviour
 
     // ── 복원용 상태 ──
     TopDownPlayer _player;
-    Camera _cam;            // 클릭 레이캐스트에 쓸 현재 카메라(=하이드아웃 전용)
-    Camera _rigCam;         // PlayerRig 카메라(은신처 동안 렌더 끔)
-    Camera _hideoutCam;     // 하이드아웃 전용 카메라(런타임 생성)
-    Light2D _hideoutLight;  // 은신처 전용 글로벌 라이트(밤/낮 무관 풀 조명)
+    Camera _cam;            // 클릭 레이캐스트용(= PlayerRig 카메라 그대로 사용)
+    Camera _rigCam;         // PlayerRig 카메라 — 은신처 동안 방 중심으로 이동·리사이즈해 그대로 렌더
+    Light2D _systemsGlobal; // 하이드아웃 동안 밝게 덮어쓸 기존 Systems 글로벌 라이트
+    float _prevGlobalIntensity;
+    Color _prevGlobalColor;
+    // 카메라 원복용
+    bool _hadCam;
+    Vector3 _prevCamPos;
+    bool _prevCamOrtho;
+    float _prevCamSize;
     bool _hadPlayer, _prevCanMove;
     bool _hadFollow, _prevFollowEnabled;
-    bool _prevRigCamEnabled;
     InteractionSystem _interaction;
     bool _prevInteractionEnabled;
     readonly List<SpriteRenderer> _hiddenSprites = new List<SpriteRenderer>();
     readonly List<Light2D> _hiddenLights = new List<Light2D>();
 
     GameObject _uiRoot;
+    GameObject _confirmRoot;   // 나가기 확인창 패널
+    bool _confirmShowing;
     static Font _krFont;
+
+    void Awake() => IsActive = true;
 
     void Start()
     {
@@ -68,58 +81,94 @@ public class HideoutController : MonoBehaviour
         _interaction = FindFirstObjectByType<InteractionSystem>();
         if (_interaction != null) { _prevInteractionEnabled = _interaction.enabled; _interaction.enabled = false; }
 
-        // 기존(PlayerRig) 카메라: 추적 끄고 렌더만 끔(같은 GO의 AudioListener는 유지 → 경고 없음).
+        // 카메라: 별도 카메라를 만들지 않고 검증된 PlayerRig 카메라를 그대로 쓴다.
+        //   추적(CameraFollow)만 끄고, 카메라를 방 중심으로 이동 + 정사영 크기만 맞춘다.
+        //   (런타임 생성 카메라는 'No cameras rendering'으로 무력화되는 문제가 있어 폐기.)
         if (CameraFollow.Instance != null)
         {
             _hadFollow = true;
             _prevFollowEnabled = CameraFollow.Instance.enabled;
-            CameraFollow.Instance.enabled = false;          // 추적 정지
+            CameraFollow.Instance.enabled = false;          // 추적 정지(플레이어 따라가지 않음)
             _rigCam = CameraFollow.Instance.GetComponent<Camera>();
         }
         if (_rigCam == null) _rigCam = Camera.main;
-        if (_rigCam != null) { _prevRigCamEnabled = _rigCam.enabled; _rigCam.enabled = false; }
+        _cam = _rigCam;
 
-        // 하이드아웃 전용 카메라(런타임 생성). CameraFollow.DisableOtherCameras는 sceneLoaded 때 이미 실행됐으므로
-        // Start 시점에 만든 이 카메라는 살아남는다. PlayerRig 카메라가 꺼져도 방이 보임.
-        _hideoutCam = CreateHideoutCamera(_rigCam);
-        _cam = _hideoutCam != null ? _hideoutCam : _rigCam;
+        if (_rigCam != null)
+        {
+            _hadCam = true;
+            _prevCamPos   = _rigCam.transform.position;
+            _prevCamOrtho = _rigCam.orthographic;
+            _prevCamSize  = _rigCam.orthographicSize;
 
-        // 은신처는 밤/낮 영향 없이 항상 환하게 — 전용 글로벌 라이트(나갈 때 제거).
-        var lightGo = new GameObject("HideoutLight");
-        _hideoutLight = lightGo.AddComponent<Light2D>();
-        _hideoutLight.lightType = Light2D.LightType.Global;
-        _hideoutLight.intensity = 1.1f;
-        _hideoutLight.color = Color.white;
+            _rigCam.enabled = true;                          // 확실히 켜둠(렌더 유지)
+            _rigCam.orthographic = true;
+            _rigCam.orthographicSize = cameraSize;
+            _rigCam.transform.position = new Vector3(cameraCenter.x, cameraCenter.y, _prevCamPos.z);
+        }
+
+        // 은신처는 밤/낮 영향 없이 항상 환하게.
+        // ★ 새 글로벌 라이트를 만들면 기존 Systems 글로벌과 겹쳐 "More than one global light" 에러가 난다.
+        //   → 새로 만들지 말고, 이미 모든 레이어를 비추는 Systems 글로벌을 잠시 밝게 덮어쓰고 OnDestroy에서 복원.
+        _systemsGlobal = FindActiveGlobalLight();
+        if (_systemsGlobal != null)
+        {
+            _prevGlobalIntensity = _systemsGlobal.intensity;
+            _prevGlobalColor     = _systemsGlobal.color;
+            _systemsGlobal.intensity = 1.1f;
+            _systemsGlobal.color     = Color.white;
+        }
+        else
+        {
+            Debug.LogWarning("[Hideout] 활성 글로벌 라이트를 못 찾음 — 방이 어두울 수 있음.");
+        }
+
+        Debug.Log($"<color=lime>[Hideout]</color> 카메라 준비 완료 — rigCam={(_rigCam != null)} " +
+                  $"위치={(_rigCam != null ? _rigCam.transform.position.ToString() : "없음")}, orthoSize={cameraSize}, " +
+                  $"player={(_player != null)}, 활성카메라수={Camera.allCamerasCount}, 글로벌라이트={(_systemsGlobal != null)}");
     }
 
-    Camera CreateHideoutCamera(Camera src)
+    /// <summary>현재 활성(enabled) 글로벌 Light2D 1개를 찾는다 — Systems 씬이 소유한 글로벌(SystemsSceneEnforcer가 유일하게 켜둠).</summary>
+    static Light2D FindActiveGlobalLight()
     {
-        var go = new GameObject("HideoutCamera");
-        var c = go.AddComponent<Camera>();
-        c.orthographic       = true;
-        c.orthographicSize   = cameraSize;
-        c.clearFlags         = src != null ? src.clearFlags : CameraClearFlags.SolidColor;
-        c.backgroundColor    = src != null ? src.backgroundColor : new Color(0.05f, 0.05f, 0.06f, 1f);
-        c.cullingMask        = src != null ? src.cullingMask : ~0;
-        c.nearClipPlane      = src != null ? src.nearClipPlane : 0.3f;
-        c.farClipPlane       = src != null ? src.farClipPlane : 1000f;
-        c.depth              = src != null ? src.depth : 0f;
-        c.transparencySortMode = TransparencySortMode.CustomAxis;   // 탑다운 2D Y정렬(아래가 앞)
-        c.transparencySortAxis = new Vector3(0f, 1f, 0f);
-        float z = src != null ? src.transform.position.z : -10f;
-        go.transform.position = new Vector3(cameraCenter.x, cameraCenter.y, z);
-        return c;
+        foreach (var l in FindObjectsByType<Light2D>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            if (l != null && l.enabled && l.lightType == Light2D.LightType.Global)
+                return l;
+        return null;
+    }
+
+    /// <summary>은신처 카메라 상태 유지 — 추적이 되살아나거나 카메라가 꺼지면 매 프레임 되돌린다.</summary>
+    void KeepHideoutCamera()
+    {
+        if (_hadFollow && CameraFollow.Instance != null && CameraFollow.Instance.enabled)
+            CameraFollow.Instance.enabled = false;          // 추적 재활성 방지
+        if (_rigCam != null)
+        {
+            if (!_rigCam.enabled) _rigCam.enabled = true;   // 누가 꺼도 다시 켬
+            // 위치가 흐트러지면 방 중심으로 재고정
+            var p = _rigCam.transform.position;
+            if (Mathf.Abs(p.x - cameraCenter.x) > 0.01f || Mathf.Abs(p.y - cameraCenter.y) > 0.01f)
+                _rigCam.transform.position = new Vector3(cameraCenter.x, cameraCenter.y, p.z);
+        }
     }
 
     void OnDestroy()
     {
+        IsActive = false;
         if (_hadPlayer && _player != null) _player.SetCanMove(_prevCanMove);
         foreach (var sr in _hiddenSprites) if (sr != null) sr.enabled = true;
         foreach (var lt in _hiddenLights) if (lt != null) lt.enabled = true;
         if (_interaction != null) _interaction.enabled = _prevInteractionEnabled;
-        if (_hideoutCam != null) Destroy(_hideoutCam.gameObject);
-        if (_hideoutLight != null) Destroy(_hideoutLight.gameObject);
-        if (_rigCam != null) _rigCam.enabled = _prevRigCamEnabled;      // PlayerRig 카메라 렌더 복구
+        if (_systemsGlobal != null)                                    // 글로벌 라이트 원복(밝기/색)
+        {
+            _systemsGlobal.intensity = _prevGlobalIntensity;
+            _systemsGlobal.color     = _prevGlobalColor;
+        }
+        if (_hadCam && _rigCam != null)                                // 카메라 정사영/크기 원복(위치는 CameraFollow가 스냅)
+        {
+            _rigCam.orthographic     = _prevCamOrtho;
+            _rigCam.orthographicSize = _prevCamSize;
+        }
         if (_hadFollow && CameraFollow.Instance != null)
             CameraFollow.Instance.enabled = _prevFollowEnabled;        // 추적 재개 → 안전구역에서 플레이어로 스냅
         if (_uiRoot != null) Destroy(_uiRoot);
@@ -130,16 +179,21 @@ public class HideoutController : MonoBehaviour
     // ─────────────────────────────────────────────
     void Update()
     {
-        // CameraFollow.DisableOtherCameras가 씬 로드 타이밍에 전용 카메라를 꺼도 매 프레임 되살림.
-        if (_hideoutCam != null)
-        {
-            if (!_hideoutCam.enabled) _hideoutCam.enabled = true;
-            if (_rigCam != null && _rigCam.enabled) _rigCam.enabled = false;
-        }
+        // 은신처 카메라(=rig 카메라) 상태 유지(추적 재활성/꺼짐/이동 방지).
+        KeepHideoutCamera();
 
+        // 이 컴포넌트는 UIManager(-50)보다 먼저 실행(-60)되므로, 여기서 본 uiOpen은 'UIManager가 닫기 전' 상태다.
         bool uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
 
-        if (Input.GetKeyDown(KeyCode.Escape) && !uiOpen) { ExitHideout(); return; }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (uiOpen) return;                                 // 열린 UI는 UIManager가 닫음 — 여기선 나가지 않음
+            if (_confirmShowing) { HideExitConfirm(); return; } // 확인창 떠 있으면 ESC=취소
+            ShowExitConfirm();                                  // UI 없을 때만 '나가기 확인창'
+            return;
+        }
+
+        if (_confirmShowing) return;                            // 확인창 떠 있으면 시설 클릭 차단
 
         if (!Input.GetMouseButtonDown(0)) return;
         if (uiOpen) return;                                                  // 시설 UI가 열려 있으면 무시
@@ -190,14 +244,66 @@ public class HideoutController : MonoBehaviour
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -78f), new Vector2(1100f, 36f),
             new Color(0.8f, 0.82f, 0.85f, 0.9f));
 
-        // 좌하단 버튼: 나가기 + 인벤토리/창고
-        MakeButton("ExitButton",      "← 안전구역으로 나가기", new Vector2(40f, 40f),  new Vector2(320f, 64f), ExitHideout);
+        // 좌하단 버튼: 나가기(확인창 경유) + 인벤토리/창고 + 시설 관리(업그레이드)
+        MakeButton("ExitButton",      "← 안전구역으로 나가기", new Vector2(40f, 40f),  new Vector2(320f, 64f), ShowExitConfirm);
         MakeButton("InventoryButton", "인벤토리 / 창고",        new Vector2(376f, 40f), new Vector2(260f, 64f), OpenInventory);
+        MakeButton("HideoutModButton","시설 관리 (업그레이드)",  new Vector2(652f, 40f), new Vector2(280f, 64f), OpenHideoutModules);
+
+        BuildConfirmDialog();
+    }
+
+    // ── 나가기 확인창 ──
+    void BuildConfirmDialog()
+    {
+        _confirmRoot = new GameObject("ExitConfirm");
+        _confirmRoot.transform.SetParent(_uiRoot.transform, false);
+        var rt = _confirmRoot.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
+        _confirmRoot.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);  // 화면 딤(클릭 차단)
+
+        // 중앙 박스
+        var box = new GameObject("Box");
+        box.transform.SetParent(_confirmRoot.transform, false);
+        var boxRT = box.AddComponent<RectTransform>();
+        boxRT.anchorMin = boxRT.anchorMax = boxRT.pivot = new Vector2(0.5f, 0.5f);
+        boxRT.sizeDelta = new Vector2(560f, 240f);
+        box.AddComponent<Image>().color = new Color(0.12f, 0.12f, 0.16f, 0.98f);
+
+        MakeTextIn(box.transform, "Msg", "안전구역으로 나가시겠습니까?", 26, TextAnchor.MiddleCenter,
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -54f), new Vector2(520f, 50f),
+            new Color(0.95f, 0.95f, 0.92f, 1f));
+
+        MakeButtonIn(box.transform, "Yes", "나가기", new Vector2(0.5f, 0f), new Vector2(-150f, 40f),
+            new Vector2(220f, 64f), new Color(0.5f, 0.22f, 0.22f, 0.95f), ExitHideout);
+        MakeButtonIn(box.transform, "No",  "취소",   new Vector2(0.5f, 0f), new Vector2(150f, 40f),
+            new Vector2(220f, 64f), new Color(0.18f, 0.2f, 0.26f, 0.95f), HideExitConfirm);
+
+        _confirmRoot.SetActive(false);
+    }
+
+    void ShowExitConfirm()
+    {
+        if (_confirmRoot == null) return;
+        _confirmShowing = true;
+        _confirmRoot.SetActive(true);
+    }
+
+    void HideExitConfirm()
+    {
+        _confirmShowing = false;
+        if (_confirmRoot != null) _confirmRoot.SetActive(false);
     }
 
     void OpenInventory()
     {
         if (UIManager.Instance != null) UIManager.Instance.ShowCharacterPanel();   // Tab 인벤토리(창고 = 인벤토리 버튼)
+    }
+
+    /// <summary>하이드아웃 시설 모듈 업그레이드 UI — 하이드아웃 안에서만 진입.</summary>
+    void OpenHideoutModules()
+    {
+        HideoutUI.Show();
     }
 
     void MakeButton(string name, string label, Vector2 anchoredPos, Vector2 size, UnityEngine.Events.UnityAction onClick)
@@ -238,6 +344,44 @@ public class HideoutController : MonoBehaviour
         t.fontStyle = FontStyle.Bold;
         t.alignment = anchor;
         t.color = color;
+        t.horizontalOverflow = HorizontalWrapMode.Overflow;
+        var rt = t.GetComponent<RectTransform>();
+        rt.anchorMin = aMin; rt.anchorMax = aMax; rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = pos; rt.sizeDelta = sizeDelta;
+    }
+
+    void MakeButtonIn(Transform parent, string name, string label, Vector2 anchor, Vector2 anchoredPos,
+        Vector2 size, Color bg, UnityEngine.Events.UnityAction onClick)
+    {
+        var btnGO = new GameObject(name);
+        btnGO.transform.SetParent(parent, false);
+        var img = btnGO.AddComponent<Image>();
+        img.color = bg;
+        var brt = btnGO.GetComponent<RectTransform>();
+        brt.anchorMin = brt.anchorMax = brt.pivot = anchor;
+        brt.anchoredPosition = anchoredPos;
+        brt.sizeDelta = size;
+        var btn = btnGO.AddComponent<Button>();
+        btn.onClick.AddListener(onClick);
+        var lblGO = new GameObject("Label");
+        lblGO.transform.SetParent(btnGO.transform, false);
+        var lbl = lblGO.AddComponent<Text>();
+        lbl.text = label; lbl.font = _krFont; lbl.fontSize = 22;
+        lbl.alignment = TextAnchor.MiddleCenter;
+        lbl.color = new Color(0.95f, 0.95f, 0.95f, 1f);
+        var lrt = lbl.GetComponent<RectTransform>();
+        lrt.anchorMin = Vector2.zero; lrt.anchorMax = Vector2.one;
+        lrt.offsetMin = Vector2.zero; lrt.offsetMax = Vector2.zero;
+    }
+
+    void MakeTextIn(Transform parent, string name, string text, int size, TextAnchor anchor,
+        Vector2 aMin, Vector2 aMax, Vector2 pos, Vector2 sizeDelta, Color color)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        var t = go.AddComponent<Text>();
+        t.text = text; t.font = _krFont; t.fontSize = size; t.fontStyle = FontStyle.Bold;
+        t.alignment = anchor; t.color = color;
         t.horizontalOverflow = HorizontalWrapMode.Overflow;
         var rt = t.GetComponent<RectTransform>();
         rt.anchorMin = aMin; rt.anchorMax = aMax; rt.pivot = new Vector2(0.5f, 1f);

@@ -26,12 +26,13 @@ public class CharacterPanelUI : MonoBehaviour
     LootContainer openContainer;
     SafehouseStorage openStorage; // 안전가옥 창고 (LootContainer와 별도)
     FurnitureInstance openFurniture; // 현재 열린 가구 인스턴스 (카테고리 필터용)
+    InventoryGrid openStashGrid;  // 메인 창고(MainStash) — 안전구역 인벤 우측 열
 
-    /// <summary>현재 열린 좌측 격자 (상자 또는 창고)</summary>
+    /// <summary>현재 열린 우측 격자 (상자/가구창고/메인창고)</summary>
     InventoryGrid LeftGrid =>
         openContainer != null ? openContainer.Grid
         : openStorage != null ? openStorage.Grid
-        : null;
+        : openStashGrid;
 
     // ── uGUI 요소 (구조적 요소만 SerializeField) ──
     [SerializeField] Canvas canvas;
@@ -51,6 +52,7 @@ public class CharacterPanelUI : MonoBehaviour
     [SerializeField] Image leftPanelBg;
     [SerializeField] Text leftTitleText;
     [SerializeField] GameObject leftPanelRoot; // 숨김/표시용
+    [SerializeField] GameObject leftPlaceholder; // 우측 열 빈칸 안내 (창고/상자 미오픈 시)
 
     // ── 인벤토리 탭 ──
     [SerializeField] RectTransform invGridRoot;
@@ -68,6 +70,10 @@ public class CharacterPanelUI : MonoBehaviour
 
     // ── 좌측 캐릭터/장비 패널 (타르코프식 3열 좌측) ──
     [SerializeField] RectTransform charPanel;
+    [SerializeField] Text charHpText;
+    [SerializeField] Text charStaminaText;
+    [SerializeField] Text charWaterText;
+    [SerializeField] Text charFoodText;
     [SerializeField] Text charWeaponText;
     [SerializeField] Text charWeightText;
     [SerializeField] Text[] charBodyTexts;
@@ -169,6 +175,29 @@ public class CharacterPanelUI : MonoBehaviour
             panelRoot.SetActive(true);
         SelectTab(currentTab);
         RefreshInventoryGrid();
+
+        // 안전구역(안전가옥/하이드아웃)이면 우측에 메인 창고를 항상 표시.
+        // 레이드 중에는 표시 안 함(상자에 다가가 E로 파밍할 때만 우측이 채워짐).
+        if (IsSafeArea() && openContainer == null && openStorage == null)
+            ShowStash();
+
+        SyncLeftPlaceholder();
+    }
+
+    /// <summary>레이드(지역 활성) 중이 아니면 안전구역으로 간주.</summary>
+    bool IsSafeArea()
+    {
+        return RegionTimeManager.Instance == null
+            || string.IsNullOrEmpty(RegionTimeManager.Instance.ActiveRegionId);
+    }
+
+    /// <summary>우측 열에 메인 창고 표시.</summary>
+    void ShowStash()
+    {
+        var stash = MainStash.Ensure();
+        if (stash == null) return;
+        openStashGrid = stash.GetGrid();
+        ShowLeftPanel(openStashGrid, "창고", false);   // 수색 연출 없이 즉시 공개
     }
 
     public void Hide()
@@ -179,6 +208,17 @@ public class CharacterPanelUI : MonoBehaviour
         if (panelRoot != null)
             panelRoot.SetActive(false);
         CloseContainer();
+    }
+
+    /// <summary>창고 시설 클릭 → 인벤 + 우측 메인 창고 강제 표시 (지역 무관).</summary>
+    public void ShowWithStash()
+    {
+        openContainer = null;
+        openStorage = null;
+        openFurniture = null;
+        Show();          // 안전구역이면 Show 안에서 이미 창고 표시
+        SelectTab(0);
+        ShowStash();     // 명시적으로 한 번 더 보장
     }
 
     public void ShowWithContainer(LootContainer container)
@@ -219,8 +259,10 @@ public class CharacterPanelUI : MonoBehaviour
         }
         openStorage = null;
         openFurniture = null;
+        openStashGrid = null;
         if (leftPanelRoot != null)
             leftPanelRoot.SetActive(false);
+        SyncLeftPlaceholder();
     }
 
     #endregion
@@ -236,6 +278,7 @@ public class CharacterPanelUI : MonoBehaviour
         openContainer = null;
         openStorage = null;
         openFurniture = null;
+        openStashGrid = null;
 
         playerGO = null;
         health = null;
@@ -287,9 +330,9 @@ public class CharacterPanelUI : MonoBehaviour
         rootRT.offsetMin = Vector2.zero;
         rootRT.offsetMax = Vector2.zero;
 
-        // 반투명 배경 (클릭 차단)
+        // 불투명 배경 (전체화면 모달 — 게임 화면 완전히 가림)
         var dimBg = panelRoot.AddComponent<Image>();
-        dimBg.color = new Color(0.02f, 0.02f, 0.04f, 0.93f);   // 전체화면 모달(게임 가림)
+        dimBg.color = new Color(0.02f, 0.02f, 0.04f, 1f);
 
         // ── 타르코프식 3열: 좌=캐릭터/장비 · 중=내 가방(탭) · 우=창고/파밍 ──
         BuildRightPanel(panelRoot.transform);      // 중앙 = 내 가방
@@ -338,6 +381,7 @@ public class CharacterPanelUI : MonoBehaviour
         leftPanelBg = null;
         leftTitleText = null;
         leftPanelRoot = null;
+        leftPlaceholder = null;
         invGridRoot = null;
         invWeightText = null;
         medPartTexts = null;
@@ -347,6 +391,10 @@ public class CharacterPanelUI : MonoBehaviour
         containerGridRoot = null;
         searchStatusText = null;
         charPanel = null;
+        charHpText = null;
+        charStaminaText = null;
+        charWaterText = null;
+        charFoodText = null;
         charWeaponText = null;
         charWeightText = null;
         charBodyTexts = null;
@@ -445,6 +493,28 @@ public class CharacterPanelUI : MonoBehaviour
         containerGridRoot.sizeDelta = new Vector2(PANEL_WIDTH - 20, 400);
 
         leftPanelRoot.SetActive(false);
+
+        // ── 우측 열 placeholder (창고/상자 미오픈 시 빈 칸 대신 안내) ──
+        leftPlaceholder = new GameObject("LeftPlaceholder", typeof(RectTransform));
+        leftPlaceholder.transform.SetParent(parent, false);
+        var phRT = leftPlaceholder.GetComponent<RectTransform>();
+        phRT.anchorMin = new Vector2(0.67f, 0.07f);   // leftPanel과 동일 영역
+        phRT.anchorMax = new Vector2(0.965f, 0.93f);
+        phRT.offsetMin = Vector2.zero;
+        phRT.offsetMax = Vector2.zero;
+        leftPlaceholder.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.08f, 0.95f);
+        var phTxt = MakeChildText(leftPlaceholder.transform,
+            "파밍\n\n상자에 다가가 [E]\n수색하면 여기에 표시됩니다",
+            14, new Color(0.45f, 0.5f, 0.62f));
+        phTxt.alignment = TextAnchor.MiddleCenter;
+    }
+
+    /// <summary>우측 열 표시 상태 동기화: 창고/상자 열려있지 않으면 placeholder를 보인다.</summary>
+    void SyncLeftPlaceholder()
+    {
+        if (leftPlaceholder == null) return;
+        bool panelOpen = leftPanelRoot != null && leftPanelRoot.activeSelf;
+        leftPlaceholder.SetActive(!panelOpen);
     }
 
     void BuildCharacterPanel(Transform parent)
@@ -462,23 +532,68 @@ public class CharacterPanelUI : MonoBehaviour
             new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, new Color(0.8f, 0.85f, 1f), TextAnchor.MiddleCenter);
         title.fontStyle = FontStyle.Bold;
 
+        charHpText = MakeText(charPanel, "CharHp", "HP: 100 / 100",
+            new Vector2(14, -48), new Vector2(PANEL_WIDTH - 28, 24), 15, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
+        charHpText.fontStyle = FontStyle.Bold;
+
+        charStaminaText = MakeText(charPanel, "CharStamina", "스태미너: 100 / 100",
+            new Vector2(14, -74), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.4f, 0.85f, 0.95f), TextAnchor.MiddleLeft);
+
+        charWaterText = MakeText(charPanel, "CharWater", "수분: 100 / 100",
+            new Vector2(14, -100), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.4f, 0.7f, 1f), TextAnchor.MiddleLeft);
+
+        charFoodText = MakeText(charPanel, "CharFood", "포만감: 100 / 100",
+            new Vector2(14, -124), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.95f, 0.75f, 0.45f), TextAnchor.MiddleLeft);
+
         charWeaponText = MakeText(charPanel, "Weapon", "무기: 맨손",
-            new Vector2(14, -48), new Vector2(PANEL_WIDTH - 28, 24), 14, Color.white, TextAnchor.MiddleLeft);
+            new Vector2(14, -156), new Vector2(PANEL_WIDTH - 28, 24), 14, Color.white, TextAnchor.MiddleLeft);
 
         charWeightText = MakeText(charPanel, "CharWeight", "무게: 0 / 30 kg",
-            new Vector2(14, -76), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.7f, 0.8f, 0.9f), TextAnchor.MiddleLeft);
+            new Vector2(14, -184), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.7f, 0.8f, 0.9f), TextAnchor.MiddleLeft);
 
         MakeText(charPanel, "BodyHdr", "── 부위 상태 ──",
-            new Vector2(14, -112), new Vector2(PANEL_WIDTH - 28, 22), 13, new Color(0.6f, 0.65f, 0.78f), TextAnchor.MiddleLeft);
+            new Vector2(14, -220), new Vector2(PANEL_WIDTH - 28, 22), 13, new Color(0.6f, 0.65f, 0.78f), TextAnchor.MiddleLeft);
 
         charBodyTexts = new Text[PART_NAMES.Length];
         for (int i = 0; i < PART_NAMES.Length; i++)
             charBodyTexts[i] = MakeText(charPanel, $"Body_{i}", $"{PART_NAMES[i]}: 정상",
-                new Vector2(22, -138 - i * 26), new Vector2(PANEL_WIDTH - 40, 22), 13, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
+                new Vector2(22, -246 - i * 26), new Vector2(PANEL_WIDTH - 40, 22), 13, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
     }
 
     void UpdateCharacterPanel()
     {
+        if (charHpText != null && health != null)
+        {
+            charHpText.text = $"HP: {health.CurrentHp:F0} / {health.MaxHp:F0}";
+            float hpPct = health.MaxHp > 0 ? health.CurrentHp / health.MaxHp : 0f;
+            charHpText.color = hpPct > 0.6f ? new Color(0.4f, 1f, 0.5f)
+                : hpPct > 0.3f ? new Color(1f, 0.85f, 0.3f) : new Color(1f, 0.35f, 0.3f);
+        }
+        if (charStaminaText != null)
+        {
+            var p = TopDownPlayer.Instance;
+            if (p != null) charStaminaText.text = $"스태미너: {p.StaminaPercent * 100f:F0} / 100";
+        }
+        if (charWaterText != null || charFoodText != null)
+        {
+            var s = SurvivalStats.Get();
+            if (s != null)
+            {
+                if (charWaterText != null)
+                {
+                    charWaterText.text = $"수분: {s.Water:F0} / 100";
+                    charWaterText.color = s.Water <= 0f ? new Color(1f, 0.35f, 0.3f)
+                        : s.Water <= 20f ? new Color(1f, 0.85f, 0.3f) : new Color(0.4f, 0.7f, 1f);
+                }
+                if (charFoodText != null)
+                {
+                    charFoodText.text = $"포만감: {s.Satiety:F0} / 100";
+                    charFoodText.color = s.Satiety <= 0f ? new Color(1f, 0.35f, 0.3f)
+                        : s.Satiety <= 20f ? new Color(1f, 0.85f, 0.3f) : new Color(0.95f, 0.75f, 0.45f);
+                }
+            }
+        }
+
         if (charWeaponText != null)
         {
             string w = "맨손";
@@ -835,6 +950,7 @@ public class CharacterPanelUI : MonoBehaviour
         leftPanelRoot.SetActive(true);
         leftTitleText.text = title;
         leftPanelSearchEnabled = withSearch;
+        SyncLeftPlaceholder();   // 패널 열렸으니 안내 숨김
 
         RefreshLeftGrid(grid);
 

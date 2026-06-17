@@ -45,11 +45,12 @@ public static class HideoutGreyboxLayout
         n += Spawn(map, "default", 3f, 4.5f);
         n += Exit (map, "Exit_ToSafehouse", 1.5f, 4.5f, "Safehouse", "default");
 
-        // 시설: 박스 침상 + 부서진 작업대 + 슬롯(조리대/의료대) — 클릭하면 각 UI(타르코프식)
+        // 시설: 박스 침상 + 부서진 작업대 + 슬롯(조리대/의료대) + 창고 — 클릭하면 각 UI(타르코프식)
         n += Marker(map, "gb_bed",       "Bed_BoxCot",      5f, 6.5f);
         n += Marker(map, "gb_workbench", "Workbench_Broken",9f, 6.5f);
         n += Marker(map, "gb_cookbench", "CookingBench",   11f, 2.5f);
         n += Marker(map, "gb_medbench",  "MedicalBench",    5f, 2.5f);
+        n += StashFacility(map, "Stash_창고", 11f, 6.5f);  // 창고 시설(메인 보관함) — 클릭 시 인벤 우측에 창고
 
         // 타르코프식 화면 컨트롤러: 캐릭터 숨김 + 카메라 고정(방 중심 7,4.5 / size 5) + 클릭 상호작용 + 나가기 버튼/ESC.
         var hc = new GameObject("HideoutController").AddComponent<HideoutController>();
@@ -113,6 +114,38 @@ public static class HideoutGreyboxLayout
         var go = Inst(prefabId, name, parent);
         if (go == null) return 0;
         go.transform.localPosition = new Vector3(x, y, 0f);
+        return 1;
+    }
+
+    /// <summary>창고 시설 — 기존 시설 프리팹(gb_workbench) 구조를 재사용하되 색/라벨/타입을 '창고(Stash)'로 덮어쓴다.
+    /// (팔레트 재생성 없이 새 시설 추가. InteractType.Stash → 클릭 시 인벤 우측 메인 창고.)</summary>
+    static int StashFacility(GameObject parent, string name, float x, float y)
+    {
+        var go = Inst("gb_workbench", name, parent);
+        if (go == null) return 0;
+        go.transform.localPosition = new Vector3(x, y, 0f);
+
+        // 색: 창고(청록)로 구분
+        var sr = go.GetComponentInChildren<SpriteRenderer>();
+        if (sr != null) sr.color = new Color(0.30f, 0.62f, 0.55f);
+
+        // 라벨 텍스트 "창고" (자식 TextMesh "Label")
+        var label = go.transform.Find("Label");
+        if (label != null)
+        {
+            var tm = label.GetComponent<TextMesh>();
+            if (tm != null) tm.text = "창고";
+        }
+
+        // InteractableObject → Stash 타입 + 프롬프트
+        var io = go.GetComponentInChildren<InteractableObject>();
+        if (io != null)
+        {
+            var so = new SerializedObject(io);
+            var t  = so.FindProperty("type");        if (t  != null) t.enumValueIndex = (int)InteractableObject.InteractType.Stash;
+            var pt = so.FindProperty("promptText");  if (pt != null) pt.stringValue = "창고";
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
         return 1;
     }
 

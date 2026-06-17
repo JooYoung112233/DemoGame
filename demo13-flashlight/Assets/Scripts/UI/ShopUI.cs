@@ -3,7 +3,8 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 상점(전당포) 거래 UI. 코드 생성(Canvas/uGUI). UIManager가 ShowShop으로 연다.
-/// 좌: 팔기(플레이어 인벤, sellPrice>0) / 우: 사기(상점 stock). 상단: 스크랩 잔액.
+/// 참조 레이아웃(docs 04 상점): 상단 = 상인 정보(이름 + 신뢰도) + 잔액 + 닫기 /
+/// 탭 = 구매 / 판매 / 위탁 / 본문 = 칸(그리드). 한 화면에 한 탭만 표시.
 /// </summary>
 public class ShopUI : MonoBehaviour
 {
@@ -13,8 +14,15 @@ public class ShopUI : MonoBehaviour
 
     Canvas canvas;
     GameObject panel;
-    Text titleText, rudiText;
-    RectTransform sellContent, buyContent;
+    Text titleText, rudiText, traderNameText, trustText;
+    RectTransform gridContent;
+    Text emptyHint;
+    Button[] tabButtons;
+    Image[] tabBgs;
+    Text[] tabTexts;
+    int currentTab;   // 0 구매, 1 판매, 2 위탁
+
+    static readonly string[] TABS = { "구매", "판매", "위탁" };
 
     ShopData shop;
     PlayerInventory inv;
@@ -31,7 +39,7 @@ public class ShopUI : MonoBehaviour
         shop = shopData;
         inv = inventory;
         panel.SetActive(true);
-        Refresh();
+        SelectTab(0);
     }
 
     public void Close()
@@ -39,13 +47,25 @@ public class ShopUI : MonoBehaviour
         if (panel != null) panel.SetActive(false);
     }
 
+    // ── 탭 ────────────────────────────────────────────────
+    void SelectTab(int i)
+    {
+        currentTab = i;
+        if (tabBgs != null)
+            for (int t = 0; t < tabBgs.Length; t++)
+                if (tabBgs[t] != null)
+                    tabBgs[t].color = (t == i) ? new Color(0.30f, 0.42f, 0.62f) : new Color(0.14f, 0.14f, 0.2f);
+        Refresh();
+    }
+
     // ── 갱신 ──────────────────────────────────────────────
     void Refresh()
     {
         if (titleText != null) titleText.text = shop != null ? shop.shopName : "상점";
+        if (traderNameText != null) traderNameText.text = shop != null ? shop.shopName : "상인";
         UpdateRudi();
-        BuildSellList();
-        BuildBuyList();
+        UpdateTrust();
+        BuildGrid();
     }
 
     void UpdateRudi()
@@ -54,33 +74,57 @@ public class ShopUI : MonoBehaviour
         if (rudiText != null) rudiText.text = $"◈ {bal:N0}";
     }
 
-    void BuildSellList()
+    void UpdateTrust()
     {
-        ClearChildren(sellContent);
-        if (inv == null || inv.Grid == null || shop == null) return;
-        foreach (var p in inv.Grid.GetAll())
-        {
-            if (p.item?.data == null) continue;
-            int unit = shop.SellPrice(p.item.data);
-            if (unit <= 0) continue;
-            int total = unit * p.item.stackCount;
-            var captured = p;
-            string cnt = p.item.stackCount > 1 ? $"x{p.item.stackCount}" : "";
-            AddCell(sellContent, p.item.data, cnt, total, () => Sell(captured));
-        }
+        if (trustText == null) return;
+        if (ReputationManager.Instance != null)
+            trustText.text = $"신뢰도 {ReputationManager.Instance.Reputation}";
+        else
+            trustText.text = "신뢰도 -";
     }
 
-    void BuildBuyList()
+    void BuildGrid()
     {
-        ClearChildren(buyContent);
-        if (shop == null || shop.stock == null) return;
-        foreach (var it in shop.stock)
+        ClearChildren(gridContent);
+        int count = 0;
+
+        if (currentTab == 0)            // 구매 (상점 재고)
         {
-            if (it == null) continue;
-            int price = shop.BuyPrice(it);
-            if (price <= 0) continue;
-            var captured = it;
-            AddCell(buyContent, it, "", price, () => Buy(captured));
+            if (shop != null && shop.stock != null)
+                foreach (var it in shop.stock)
+                {
+                    if (it == null) continue;
+                    int price = shop.BuyPrice(it);
+                    if (price <= 0) continue;
+                    var captured = it;
+                    AddCell(gridContent, it, "", price, () => Buy(captured));
+                    count++;
+                }
+        }
+        else if (currentTab == 1)       // 판매 (내 가방)
+        {
+            if (inv != null && inv.Grid != null && shop != null)
+                foreach (var p in inv.Grid.GetAll())
+                {
+                    if (p.item?.data == null) continue;
+                    int unit = shop.SellPrice(p.item.data);
+                    if (unit <= 0) continue;
+                    int total = unit * p.item.stackCount;
+                    var captured = p;
+                    string cnt = p.item.stackCount > 1 ? $"x{p.item.stackCount}" : "";
+                    AddCell(gridContent, p.item.data, cnt, total, () => Sell(captured));
+                    count++;
+                }
+        }
+        // currentTab == 2 (위탁): 준비 중 — 칸 없음
+
+        if (emptyHint != null)
+        {
+            emptyHint.gameObject.SetActive(count == 0);
+            emptyHint.text =
+                currentTab == 2 ? "위탁 거래는 준비 중입니다."
+              : currentTab == 1 ? "팔 수 있는 물건이 없습니다.\n(가방에 판매 가능한 아이템이 없음)"
+              :                   "판매 중인 물건이 없습니다.";
         }
     }
 
@@ -127,39 +171,104 @@ public class ShopUI : MonoBehaviour
         scaler.matchWidthOrHeight = 0.5f;
         canvasGO.AddComponent<GraphicRaycaster>();
 
-        // 어두운 배경
+        // 불투명 배경 (전체화면 모달)
         panel = CreateRect("Panel", canvasGO.transform, Vector2.zero, Vector2.one);
-        var bg = panel.AddComponent<Image>();
-        bg.color = new Color(0, 0, 0, 0.75f);
+        panel.AddComponent<Image>().color = new Color(0.02f, 0.02f, 0.04f, 0.97f);
 
         // 중앙 창
         var win = CreateRect("Window", panel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
         var winRT = win.GetComponent<RectTransform>();
-        winRT.sizeDelta = new Vector2(1000, 640);
-        win.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.13f, 0.98f);
+        winRT.sizeDelta = new Vector2(1040, 700);
+        win.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.13f, 1f);
 
-        // 상단 바: 타이틀 + 스크랩 + 닫기
-        titleText = MakeText(win.transform, "전당포", 28, TextAnchor.MiddleLeft,
-            new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -16), new Vector2(400, 40));
+        // ── 상단 바: 타이틀 + 잔액 + 닫기 ──
+        titleText = MakeText(win.transform, "전당포", 26, TextAnchor.MiddleLeft,
+            new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -14), new Vector2(420, 38));
         titleText.fontStyle = FontStyle.Bold;
 
         rudiText = MakeText(win.transform, "◈ 0", 22, TextAnchor.MiddleRight,
-            new Vector2(1, 1), new Vector2(1, 1), new Vector2(-90, -18), new Vector2(220, 36));
+            new Vector2(1, 1), new Vector2(1, 1), new Vector2(-92, -16), new Vector2(240, 34));
         rudiText.color = new Color(1f, 0.85f, 0.3f);
 
-        var closeBtn = MakeButton(win.transform, "✕", new Vector2(1, 1), new Vector2(-40, -18),
-            new Vector2(48, 36), new Color(0.5f, 0.2f, 0.2f), Close);
+        MakeButton(win.transform, "✕", new Vector2(1, 1), new Vector2(-40, -16),
+            new Vector2(44, 34), new Color(0.5f, 0.2f, 0.2f), Close);
 
-        // 좌: 팔기 / 우: 사기
-        MakeColumnLabel(win.transform, "팔기 (내 가방)", 0f);
-        MakeColumnLabel(win.transform, "사기 (상점)", 0.5f);
-        sellContent = MakeScrollColumn(win.transform, 0f);
-        buyContent  = MakeScrollColumn(win.transform, 0.5f);
+        // ── 상인 정보 행: 초상화 + 이름 + 신뢰도 ──
+        var portrait = CreateRect("Portrait", win.transform, new Vector2(0, 1), new Vector2(0, 1));
+        var pRT = portrait.GetComponent<RectTransform>();
+        pRT.pivot = new Vector2(0, 1);
+        pRT.anchoredPosition = new Vector2(24, -62);
+        pRT.sizeDelta = new Vector2(72, 72);
+        portrait.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.26f);
+        MakeChildText(portrait.transform, "상\n인", 14, TextAnchor.MiddleCenter).color = new Color(0.6f, 0.62f, 0.7f);
+
+        traderNameText = MakeText(win.transform, "상인", 18, TextAnchor.MiddleLeft,
+            new Vector2(0, 1), new Vector2(0, 1), new Vector2(108, -64), new Vector2(420, 26));
+        traderNameText.fontStyle = FontStyle.Bold;
+
+        trustText = MakeText(win.transform, "신뢰도 -", 14, TextAnchor.MiddleLeft,
+            new Vector2(0, 1), new Vector2(0, 1), new Vector2(108, -92), new Vector2(420, 24));
+        trustText.color = new Color(0.55f, 0.85f, 0.6f);
+
+        // ── 탭: 구매 / 판매 / 위탁 ──
+        tabButtons = new Button[TABS.Length];
+        tabBgs = new Image[TABS.Length];
+        tabTexts = new Text[TABS.Length];
+        float tabW = 150f, tabH = 38f, tabY = -150f;
+        for (int i = 0; i < TABS.Length; i++)
+        {
+            var tab = CreateRect($"Tab_{i}", win.transform, new Vector2(0, 1), new Vector2(0, 1));
+            var trt = tab.GetComponent<RectTransform>();
+            trt.pivot = new Vector2(0, 1);
+            trt.anchoredPosition = new Vector2(24 + i * (tabW + 4), tabY);
+            trt.sizeDelta = new Vector2(tabW, tabH);
+            tabBgs[i] = tab.AddComponent<Image>();
+            tabBgs[i].color = new Color(0.14f, 0.14f, 0.2f);
+            tabButtons[i] = tab.AddComponent<Button>();
+            tabButtons[i].targetGraphic = tabBgs[i];
+            int idx = i;
+            tabButtons[i].onClick.AddListener(() => SelectTab(idx));
+            tabTexts[i] = MakeChildText(tab.transform, TABS[i], 16, TextAnchor.MiddleCenter);
+            tabTexts[i].fontStyle = FontStyle.Bold;
+        }
+
+        // ── 본문: 칸(그리드) 스크롤 ──
+        var area = CreateRect("Scroll", win.transform, new Vector2(0, 0), new Vector2(1, 1));
+        var areaRT = area.GetComponent<RectTransform>();
+        areaRT.offsetMin = new Vector2(24, 24);
+        areaRT.offsetMax = new Vector2(-24, -196);
+        var sr = area.AddComponent<ScrollRect>();
+        sr.horizontal = false;
+        area.AddComponent<Image>().color = new Color(0, 0, 0, 0.25f);
+        area.AddComponent<Mask>().showMaskGraphic = true;
+
+        var content = new GameObject("Content");
+        content.transform.SetParent(area.transform, false);
+        gridContent = content.AddComponent<RectTransform>();
+        gridContent.anchorMin = new Vector2(0, 1);
+        gridContent.anchorMax = new Vector2(1, 1);
+        gridContent.pivot = new Vector2(0.5f, 1);
+        gridContent.offsetMin = Vector2.zero;
+        gridContent.offsetMax = Vector2.zero;
+        var glg = content.AddComponent<GridLayoutGroup>();
+        glg.cellSize = new Vector2(92, 92);
+        glg.spacing = new Vector2(8, 8);
+        glg.padding = new RectOffset(10, 10, 10, 10);
+        glg.childAlignment = TextAnchor.UpperLeft;
+        var csf = content.AddComponent<ContentSizeFitter>();
+        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        sr.content = gridContent;
+
+        // 빈 목록 안내 (가운데)
+        emptyHint = MakeText(area.transform, "", 16, TextAnchor.MiddleCenter,
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 0), new Vector2(600, 80));
+        emptyHint.color = new Color(0.55f, 0.58f, 0.66f);
+        emptyHint.gameObject.SetActive(false);
 
         panel.SetActive(false);
     }
 
-    /// <summary>타르코프식 정사각 칸. 아이콘(없으면 이름) + 수량(우상단) + 가격(하단). 셀 전체 클릭 = 거래.</summary>
+    /// <summary>정사각 칸. 아이콘(없으면 이름) + 수량(우상단) + 가격(하단). 셀 전체 클릭 = 거래.</summary>
     void AddCell(RectTransform parent, ItemData data, string topRight, int price, System.Action onClick)
     {
         if (parent == null) return;
@@ -175,29 +284,26 @@ public class ShopUI : MonoBehaviour
         btn.colors = cb;
         btn.onClick.AddListener(() => onClick?.Invoke());
 
-        // 아이콘 또는 이름(아이콘 없을 때)
         if (data != null && data.icon != null)
         {
-            var icon = CellChild("Icon", cell.transform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(6, 18), new Vector2(-6, -6));
+            var icon = CellChild("Icon", cell.transform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(6, 20), new Vector2(-6, -6));
             var img = icon.AddComponent<Image>();
             img.sprite = data.icon; img.preserveAspect = true;
         }
         else
         {
-            var nameGO = CellChild("Name", cell.transform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(3, 16), new Vector2(-3, -3));
+            var nameGO = CellChild("Name", cell.transform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(3, 18), new Vector2(-3, -3));
             var nt = CellText(nameGO, data != null ? data.displayName : "?", 12, TextAnchor.MiddleCenter, new Color(0.9f, 0.9f, 0.95f));
             nt.horizontalOverflow = HorizontalWrapMode.Wrap;
         }
 
-        // 수량(우상단)
         if (!string.IsNullOrEmpty(topRight))
         {
             var cntGO = CellChild("Cnt", cell.transform, new Vector2(0.35f, 0.72f), new Vector2(1, 1), new Vector2(0, 0), new Vector2(-3, -2));
             CellText(cntGO, topRight, 12, TextAnchor.UpperRight, Color.white).fontStyle = FontStyle.Bold;
         }
 
-        // 가격(하단)
-        var priceGO = CellChild("Price", cell.transform, new Vector2(0, 0), new Vector2(1, 0.24f), new Vector2(2, 1), new Vector2(-2, 0));
+        var priceGO = CellChild("Price", cell.transform, new Vector2(0, 0), new Vector2(1, 0.22f), new Vector2(2, 1), new Vector2(-2, 0));
         CellText(priceGO, $"◈{price:N0}", 12, TextAnchor.MiddleCenter, new Color(1f, 0.85f, 0.3f));
     }
 
@@ -231,42 +337,6 @@ public class ShopUI : MonoBehaviour
         return go;
     }
 
-    void MakeColumnLabel(Transform win, string text, float xFrac)
-    {
-        var t = MakeText(win, text, 18, TextAnchor.MiddleLeft,
-            new Vector2(xFrac, 1), new Vector2(xFrac, 1), new Vector2(28 + xFrac * 480, -62), new Vector2(440, 30));
-        t.fontStyle = FontStyle.Bold;
-        t.color = new Color(0.8f, 0.85f, 1f);
-    }
-
-    RectTransform MakeScrollColumn(Transform win, float xFrac)
-    {
-        var area = CreateRect("Scroll", win, new Vector2(xFrac, 0), new Vector2(xFrac + 0.5f, 1));
-        var areaRT = area.GetComponent<RectTransform>();
-        areaRT.offsetMin = new Vector2(20, 24);
-        areaRT.offsetMax = new Vector2(-20, -96);
-        var sr = area.AddComponent<ScrollRect>();
-        sr.horizontal = false;
-        area.AddComponent<Image>().color = new Color(0, 0, 0, 0.25f);
-        area.AddComponent<Mask>().showMaskGraphic = true;
-
-        var content = new GameObject("Content");
-        content.transform.SetParent(area.transform, false);
-        var cRT = content.AddComponent<RectTransform>();
-        cRT.anchorMin = new Vector2(0, 1); cRT.anchorMax = new Vector2(1, 1);
-        cRT.pivot = new Vector2(0.5f, 1);
-        cRT.offsetMin = Vector2.zero; cRT.offsetMax = Vector2.zero;
-        var glg = content.AddComponent<GridLayoutGroup>();
-        glg.cellSize = new Vector2(80, 80);
-        glg.spacing = new Vector2(6, 6);
-        glg.padding = new RectOffset(6, 6, 6, 6);
-        glg.childAlignment = TextAnchor.UpperLeft;
-        var csf = content.AddComponent<ContentSizeFitter>();
-        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-        sr.content = cRT;
-        return cRT;
-    }
-
     static Text MakeText(Transform parent, string text, int size, TextAnchor anchor,
         Vector2 aMin, Vector2 aMax, Vector2 anchoredPos, Vector2 sizeDelta)
     {
@@ -279,6 +349,7 @@ public class ShopUI : MonoBehaviour
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         t.fontSize = size; t.alignment = anchor; t.color = Color.white;
         t.text = text;
+        t.horizontalOverflow = HorizontalWrapMode.Overflow;
         return t;
     }
 
@@ -286,8 +357,9 @@ public class ShopUI : MonoBehaviour
     {
         var go = new GameObject("T");
         go.transform.SetParent(parent, false);
-        go.AddComponent<RectTransform>();
-        go.AddComponent<LayoutElement>();
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
         var t = go.AddComponent<Text>();
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         t.fontSize = size; t.alignment = anchor; t.color = Color.white;

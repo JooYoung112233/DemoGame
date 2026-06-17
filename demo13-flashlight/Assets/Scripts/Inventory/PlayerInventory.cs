@@ -111,9 +111,17 @@ public class PlayerInventory : MonoBehaviour
                 break;
 
             case ItemUseEffect.Food:
-                // 향후 포만감 시스템
+            {
+                var survival = SurvivalStats.Get();
+                if (survival != null)
+                {
+                    survival.AddSatiety(item.data.effectValue);
+                    // 음료성(물/주스 등)도 Food로 운용 — 소량 수분도 함께 회복(그레이박스).
+                    survival.AddWater(item.data.effectValue * 0.5f);
+                }
                 used = true;
                 break;
+            }
         }
 
         // 사용 성공 시 소모 처리

@@ -223,4 +223,15 @@ public class NarrationUI : MonoBehaviour
         onComplete = null;
         callback?.Invoke();
     }
+
+    /// <summary>외부에서 강제로 내레이션을 닫는다(모달 UI 진입 시). onComplete는 호출하지 않음(중단 처리).</summary>
+    public void Dismiss()
+    {
+        if (!isShowing) return;
+        if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+        isShowing = false;
+        if (panelRoot != null) panelRoot.SetActive(false);
+        currentLines = null;
+        onComplete = null;
+    }
 }

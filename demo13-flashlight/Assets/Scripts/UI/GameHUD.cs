@@ -94,11 +94,10 @@ public class GameHUD : MonoBehaviour
         if (health == null) FindPlayer();
         if (health == null) return;
 
-        UpdateHPBar();
+        // HP 바는 HUD에서 제거됨(캐릭터 패널에서 표시). 스태미너/배터리/부상만 HUD에 유지.
         UpdateStaminaBar();
         UpdateBatteryBar();
         UpdateInjuryIcons();
-        UpdateHPShake();
     }
 
     void OnDestroy()
@@ -190,17 +189,14 @@ public class GameHUD : MonoBehaviour
         anchorRT.anchoredPosition = new Vector2(30, 25);
         anchorRT.sizeDelta = new Vector2(300, 120);
 
-        // ── HP 바 ──
-        BuildBar(anchorRT, "HP", 0, hpBarWidth, hpBarHeight,
-            out hpBarBg, out hpBarFill, out hpFillImage, out hpText);
-        hpBarBasePos = hpBarBg.anchoredPosition;
+        // ── HP 바: HUD에서 제거(2026-06-17). HP는 캐릭터 패널 "01 캐릭터 상태"에서 표시 ──
 
         // ── 스태미너 바 ──
-        BuildBar(anchorRT, "Stamina", hpBarHeight + 6, staminaBarWidth, staminaBarHeight,
+        BuildBar(anchorRT, "Stamina", 0, staminaBarWidth, staminaBarHeight,
             out stBarBg, out stBarFill, out stFillImage, out _);
 
         // ── 배터리 바 ──
-        float batYOffset = hpBarHeight + 6 + staminaBarHeight + 6;
+        float batYOffset = staminaBarHeight + 6;
         BuildBatteryBar(anchorRT, batYOffset);
 
         // ── 부상 아이콘 패널 ──

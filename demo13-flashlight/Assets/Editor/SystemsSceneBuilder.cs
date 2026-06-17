@@ -50,6 +50,7 @@ public static class SystemsSceneBuilder
         typeof(CurrencyManager),
         typeof(ReputationManager),
         typeof(HideoutModuleManager),
+        typeof(MainStash),
         typeof(SaveManager),
         typeof(StoryLocale),
         typeof(StoryPlayer),

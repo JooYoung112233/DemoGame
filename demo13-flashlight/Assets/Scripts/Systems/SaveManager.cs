@@ -101,6 +101,12 @@ public class SaveManager : MonoBehaviour
             data.hideoutModules = HideoutModuleManager.Instance.GetSaveData();
         }
 
+        // 메인 창고(보관함)
+        if (MainStash.Instance != null)
+        {
+            data.mainStash = MainStash.Instance.GetSaveData();
+        }
+
         // 인벤토리(가방) + 장착 무기
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
@@ -109,6 +115,8 @@ public class SaveManager : MonoBehaviour
             if (inv != null && inv.Grid != null) data.bagItems = inv.Grid.GetSaveData();
             var eq = playerGO.GetComponent<PlayerEquipment>();
             if (eq != null) data.equippedWeapon = eq.GetSaveData();
+            var survival = SurvivalStats.Get();
+            if (survival != null) data.survival = survival.GetSaveData();
         }
 
         // 창고 (안전가옥 가구 — static 목록)
@@ -214,6 +222,12 @@ public class SaveManager : MonoBehaviour
             HideoutModuleManager.Instance.LoadSaveData(data.hideoutModules);
         }
 
+        // 메인 창고(보관함)
+        if (data.mainStash != null)
+        {
+            MainStash.Ensure().LoadSaveData(data.mainStash);
+        }
+
         // 인벤토리(가방) + 장착 무기
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
@@ -223,6 +237,7 @@ public class SaveManager : MonoBehaviour
                 inv.Grid.LoadSaveData(data.bagItems);
             var eq = playerGO.GetComponent<PlayerEquipment>();
             if (eq != null) eq.LoadSaveData(data.equippedWeapon);
+            if (data.survival != null) SurvivalStats.Get()?.LoadSaveData(data.survival);
         }
 
         // 창고 (uid 매칭)
@@ -346,9 +361,15 @@ public class GameSaveData
     // 하이드아웃 모듈 레벨
     public List<HideoutModuleSaveEntry> hideoutModules;
 
+    // 메인 창고(보관함)
+    public List<GridItemEntry> mainStash;
+
     // 인벤토리(가방) + 장착 무기
     public List<GridItemEntry> bagItems = new List<GridItemEntry>();
     public string equippedWeapon;
+
+    // 생존 스탯 (수분/포만감)
+    public SurvivalSaveData survival;
 
     // 창고 (안전가옥 가구)
     public List<StorageUnitEntry> storageUnits = new List<StorageUnitEntry>();

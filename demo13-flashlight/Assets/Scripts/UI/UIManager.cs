@@ -243,7 +243,7 @@ public class UIManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (IsAnyUIOpen()) CloseAll();
-            else PauseMenu.Show();
+            else if (!HideoutController.IsActive) PauseMenu.Show();   // 하이드아웃에선 HideoutController가 ESC=나가기확인 처리
             return;
         }
 
@@ -256,14 +256,8 @@ public class UIManager : MonoBehaviour
                 ShowCharacterPanel();
         }
 
-        // [임시 테스트] H: 하이드아웃 업그레이드 UI (추후 관리인/시설 클릭으로 연결)
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            if (HideoutUI.Instance != null && HideoutUI.Instance.IsShowing)
-                HideoutUI.Instance.Close();
-            else if (!IsAnyUIOpen())
-                HideoutUI.Show();
-        }
+        // 하이드아웃 모듈 업그레이드 UI(HideoutUI)는 전역 단축키로 열지 않는다.
+        // → 하이드아웃 실내(HideoutController)의 '시설 관리' 버튼으로만 진입(하이드아웃 안에서만).
     }
 
     /// <summary>캐릭터 패널 표시 (인벤토리/의료/정보 탭)</summary>
@@ -285,6 +279,13 @@ public class UIManager : MonoBehaviour
     {
         if (characterPanelUI != null)
             characterPanelUI.ShowWithStorage(storage);
+    }
+
+    /// <summary>캐릭터 패널 + 메인 창고(보관함) 표시 — 하이드아웃 창고 시설용</summary>
+    public void ShowCharacterPanelWithStash()
+    {
+        if (characterPanelUI != null)
+            characterPanelUI.ShowWithStash();
     }
 
     /// <summary>귀환 정산 UI 표시</summary>
@@ -316,6 +317,7 @@ public class UIManager : MonoBehaviour
     {
         if (shop == null || shopUI == null) return;
         if (dialogueUI != null && dialogueUI.IsShowing) dialogueUI.Hide();
+        if (NarrationUI.Instance != null && NarrationUI.Instance.IsShowing) NarrationUI.Instance.Dismiss();  // 하단 독백 잔류 방지
 
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         var inv = playerGO != null ? playerGO.GetComponent<PlayerInventory>() : null;
@@ -341,6 +343,8 @@ public class UIManager : MonoBehaviour
             PauseMenu.Instance.Hide();
         if (HideoutUI.Instance != null)
             HideoutUI.Instance.Close();
+        if (SleepUI.Instance != null)
+            SleepUI.Instance.Close();
     }
 
     /// <summary>현재 어떤 UI든 열려있는지</summary>
@@ -356,6 +360,7 @@ public class UIManager : MonoBehaviour
         if (NoteUI.Instance != null && NoteUI.Instance.IsShowing) return true;
         if (PauseMenu.Instance != null && PauseMenu.Instance.IsShowing) return true;
         if (HideoutUI.Instance != null && HideoutUI.Instance.IsShowing) return true;
+        if (SleepUI.Instance != null && SleepUI.Instance.IsShowing) return true;
         return false;
     }
 }

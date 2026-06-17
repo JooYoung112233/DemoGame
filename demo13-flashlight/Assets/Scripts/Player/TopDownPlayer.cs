@@ -63,6 +63,9 @@ public class TopDownPlayer : MonoBehaviour
     public float StaminaPercent => _stamina / MaxStam;
     public bool  IsExhausted    => _exhausted;
 
+    /// <summary>스태미너 완전 회복 + 탈진 해제 (수면 등에서 호출).</summary>
+    public void RefillStamina() { _stamina = MaxStam; _exhausted = false; }
+
     // ── 스탯 접근 (StatDB.playerStat → 폴백) ─────────────────────────
     PlayerStatData _stat;
     PlayerStatData Stat => _stat ??= (StatDB.Instance != null ? StatDB.Instance.playerStat : null) ?? new PlayerStatData();

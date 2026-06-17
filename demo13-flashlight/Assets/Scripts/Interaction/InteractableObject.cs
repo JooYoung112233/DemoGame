@@ -33,6 +33,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
         MedicalBench,   // 의료대 (일회용 치료템 제작)
         CookingBench,   // 조리대 (버프 음식 제작)
         Door,           // 문 (잠금/열쇠/조건부)
+        Stash,          // 창고 (메인 보관함 — 인벤 우측 열) ※ 끝에 추가(기존 직렬화 인덱스 보존)
     }
 
     #endregion
@@ -229,6 +230,9 @@ public class InteractableObject : MonoBehaviour, IInteractable
             case InteractType.Door:
                 HandleDoor(playerGO);
                 break;
+            case InteractType.Stash:
+                HandleStash(playerGO);
+                break;
             default:
                 Debug.Log($"[Interact] {type}: {promptText}");
                 break;
@@ -279,17 +283,9 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
     void HandleBed(GameObject playerGO)
     {
-        if (StoryTriggerManager.Instance != null)
-        {
-            StoryTriggerManager.Instance.OnBedRest();
-        }
-        else
-        {
-            // 폴백: HP만 회복
-            var health = playerGO.GetComponent<Health>();
-            if (health != null) health.Heal(health.MaxHp);
-            Debug.Log("[Bed] 휴식 완료 (HP 회복)");
-        }
+        // 침대 → 수면 UI(시간 선택 + HP·스태미너 회복 + 수분/포만감 차감).
+        // 확인 시 SleepUI가 회복·차감 + StoryTriggerManager.OnBedRest()까지 처리.
+        SleepUI.Show();
     }
 
     void HandlePickup(GameObject playerGO)
@@ -395,6 +391,15 @@ public class InteractableObject : MonoBehaviour, IInteractable
             door.TryOpen(playerGO);
         else
             Debug.Log($"[Door] {promptText} (DoorController 없음)");
+    }
+
+    void HandleStash(GameObject playerGO)
+    {
+        // 창고 시설 클릭 → 인벤토리 + 우측 메인 창고 표시.
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowCharacterPanelWithStash();
+        else
+            Debug.LogWarning("[Stash] UIManager가 없습니다.");
     }
 
     void HandleMapBoard(GameObject playerGO)
