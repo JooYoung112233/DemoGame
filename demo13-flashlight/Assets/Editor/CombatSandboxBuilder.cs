@@ -26,7 +26,7 @@ public static class CombatSandboxBuilder
     //  적 프리팹
     // ══════════════════════════════════════════════════════════
 
-    [MenuItem("Tools/TopDown/빌드/적 프리팹")]
+    [MenuItem("Tools/TopDown/개발/적 프리팹")]
     public static void BuildEnemyPrefab()
     {
         EnsureFolder("Assets/Resources");
@@ -95,7 +95,7 @@ public static class CombatSandboxBuilder
     //  샌드박스 씬
     // ══════════════════════════════════════════════════════════
 
-    [MenuItem("Tools/TopDown/빌드/전투 샌드박스 씬")]
+    [MenuItem("Tools/TopDown/개발/전투 샌드박스 씬")]
     public static void BuildSandbox()
     {
         // 적 프리팹 보장

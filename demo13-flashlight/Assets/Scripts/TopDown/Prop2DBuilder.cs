@@ -35,10 +35,6 @@ public static class Prop2DBuilder
 
         ApplyColliders(go, def);
 
-        // 천장(지붕) — footprint 트리거 + CeilingFader(플레이어 건물 진입 시 알파 페이드).
-        if (def.category == Prop2DDefinition.Category.Ceiling && !def.noVisual)
-            ApplyCeiling(go, def);
-
         // 그림자 = ① URP 2D 네이티브 ShadowCaster2D(동적 캐스트, Light2D가 빛 반대편에 계산)
         //          + ② GroundShadow2D(정적 발밑 접지 — 빛 없어도 떠 보이지 않게).
         if (def.castShadow && !def.noVisual)
@@ -215,6 +211,7 @@ public static class Prop2DBuilder
                 var box = go.AddComponent<BoxCollider2D>();
                 box.isTrigger = true;
                 box.size = def.triggerSize == Vector2.zero ? Vector2.one : def.triggerSize;
+                box.offset = def.triggerOffset;
                 var tz = go.AddComponent<MapTriggerZone2D>();
                 tz.targetScene = def.triggerTargetScene;
                 tz.spawnPointId = def.triggerTargetSpawnId;
@@ -222,54 +219,6 @@ public static class Prop2DBuilder
                 break;
             }
         }
-    }
-
-    /// <summary>천장(지붕)에 컷어웨이 트리거 + CeilingFader 부착. 트리거 크기 = 스프라이트/타일 footprint.</summary>
-    static void ApplyCeiling(GameObject go, Prop2DDefinition def)
-    {
-        var trig = go.AddComponent<BoxCollider2D>();
-        trig.isTrigger = true;
-
-        Vector2 size, offset;
-        if (def.ceilingTriggerSize != Vector2.zero)
-        {
-            // 수동 override — 입구/밑둥까지 덮도록 키운 트리거(80° 틸트 앞면 대응).
-            size = def.ceilingTriggerSize;
-            offset = def.ceilingTriggerOffset;
-        }
-        else if (def.drawMode != SpriteDrawMode.Simple)
-        {
-            // Tiled: 실제 렌더 크기(tiledSize) + 피벗 보정 + 오프셋.
-            var s = def.tiledSize == Vector2.zero ? Vector2.one : def.tiledSize;
-            size = s;
-            Vector2 frac = Vector2.zero;
-            if (def.sprite != null)
-            {
-                var sb = def.sprite.bounds;
-                frac = new Vector2(
-                    sb.size.x > 1e-5f ? sb.center.x / sb.size.x : 0f,
-                    sb.size.y > 1e-5f ? sb.center.y / sb.size.y : 0f);
-            }
-            offset = Vector2.Scale(s, frac) + def.ceilingTriggerOffset;
-        }
-        else if (def.sprite != null)
-        {
-            var b = def.sprite.bounds;
-            size = b.size;
-            offset = (Vector2)b.center + def.ceilingTriggerOffset;
-        }
-        else
-        {
-            size = Vector2.one;
-            offset = def.ceilingTriggerOffset;
-        }
-        trig.size = size;
-        trig.offset = offset;
-
-        var fader = go.AddComponent<CeilingFader>();
-        fader.groupId = def.ceilingGroupId ?? "";
-        fader.hiddenAlpha = Mathf.Clamp01(def.ceilingHiddenAlpha);
-        fader.fadeSpeed = Mathf.Max(0.1f, def.ceilingFadeSpeed);
     }
 
     /// <summary>Resources/Items 하위에서 itemId로 ItemData 검색.</summary>

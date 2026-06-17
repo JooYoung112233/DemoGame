@@ -319,9 +319,7 @@ public class UIManager : MonoBehaviour
         if (dialogueUI != null && dialogueUI.IsShowing) dialogueUI.Hide();
         if (NarrationUI.Instance != null && NarrationUI.Instance.IsShowing) NarrationUI.Instance.Dismiss();  // 하단 독백 잔류 방지
 
-        var playerGO = GameObject.FindGameObjectWithTag("Player");
-        var inv = playerGO != null ? playerGO.GetComponent<PlayerInventory>() : null;
-        shopUI.Open(shop, inv);
+        shopUI.Open(shop);
     }
 
     /// <summary>모든 UI 닫기</summary>
@@ -345,6 +343,10 @@ public class UIManager : MonoBehaviour
             HideoutUI.Instance.Close();
         if (SleepUI.Instance != null)
             SleepUI.Instance.Close();
+        if (RadioUI.IsShowing) RadioUI.Hide();
+        if (DispatchUI.IsShowing) DispatchUI.Hide();
+        if (QuestLogUI.IsShowing) QuestLogUI.Hide();
+        if (RaidMapUI.IsShowing) RaidMapUI.Hide();
     }
 
     /// <summary>현재 어떤 UI든 열려있는지</summary>
@@ -361,6 +363,10 @@ public class UIManager : MonoBehaviour
         if (PauseMenu.Instance != null && PauseMenu.Instance.IsShowing) return true;
         if (HideoutUI.Instance != null && HideoutUI.Instance.IsShowing) return true;
         if (SleepUI.Instance != null && SleepUI.Instance.IsShowing) return true;
+        if (RadioUI.IsShowing) return true;
+        if (DispatchUI.IsShowing) return true;
+        if (QuestLogUI.IsShowing) return true;
+        if (RaidMapUI.IsShowing) return true;
         return false;
     }
 }

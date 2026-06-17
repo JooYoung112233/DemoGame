@@ -41,7 +41,7 @@ public static class ScrapMarketGreyboxLayout
         "gb_shelf", "gb_note", "gb_spawn", "gb_exit", "gb_enemy",
     };
 
-    [MenuItem("Tools/TopDown/맵/고철시장 그레이박스")]
+    [MenuItem("Tools/TopDown/개발/고철시장 그레이박스(단독)")]
     public static void Build()
     {
         // ── 빈 씬 새로 시작(멱등: 같은 경로로 저장하면 기존 씬 덮어씀) ──

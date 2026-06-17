@@ -15,7 +15,7 @@ public static class MapTool2DSceneBuilder
 {
     const string ScenePath = "Assets/Scenes/MapTool2D.unity";
 
-    [MenuItem("Tools/TopDown/빌드/맵 편집 씬")]
+    [MenuItem("Tools/TopDown/개발/맵 편집 씬")]
     public static void CreateMapToolScene()
     {
         var scene = EditorSceneBuildUtil.NewDetachedScene(out var prevActive);  // 현재 씬 유지(폴더에만 생성)

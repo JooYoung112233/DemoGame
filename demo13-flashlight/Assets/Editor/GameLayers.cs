@@ -46,10 +46,7 @@ public static class GameLayers
         return -1;
     }
 
-    [MenuItem("Tools/TopDown/초기설정/Ceiling 정렬레이어 보장")]
-    public static void EnsureCeilingSortingLayer() => EnsureSortingLayer("Ceiling");
-
-    /// <summary>Sorting Layer 이름 보장(없으면 맨 끝에 추가 = 최상단 렌더). 천장 등 최상위 정렬용.
+    /// <summary>Sorting Layer 이름 보장(없으면 맨 끝에 추가 = 최상단 렌더). 최상위 정렬용 범용 유틸.
     /// uniqueID는 비-0 필수(0은 빌트인 Default와 충돌해 드롭다운에 안 뜸). 깨진(0) 항목은 복구.</summary>
     public static void EnsureSortingLayer(string name)
     {

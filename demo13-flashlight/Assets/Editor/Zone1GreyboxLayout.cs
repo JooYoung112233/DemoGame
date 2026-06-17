@@ -25,7 +25,7 @@ public static class Zone1GreyboxLayout
     static readonly float[] WS = { 8f, 10f, 12f, 15f, 18f, 23f };
     static readonly float[] DS = { 9f, 11f, 13f, 16f, 20f };
 
-    [MenuItem("Tools/TopDown/맵/1구역 그레이박스")]
+    [MenuItem("Tools/TopDown/빌드/지역1", priority = -98)]
     public static void Build()
     {
         var map = GreyboxBuild.BeginScene(out var scene);

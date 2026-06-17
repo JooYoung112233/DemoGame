@@ -60,6 +60,17 @@ public class NPCRelationshipManager : MonoBehaviour
         rel.fear = Mathf.Clamp(rel.fear + delta, 0, 100);
     }
 
+    /// <summary>전체 관계 목록 반환 (디버그 UI용).</summary>
+    public Dictionary<string, NPCRelationship> GetAllRelationships() => new Dictionary<string, NPCRelationship>(relationships);
+
+    /// <summary>호감/신뢰/공포 일괄 변경.</summary>
+    public void ModifyRelationship(string npcId, int affinityDelta, int trustDelta, int fearDelta)
+    {
+        if (affinityDelta != 0) ModifyAffinity(npcId, affinityDelta);
+        if (trustDelta != 0) ModifyTrust(npcId, trustDelta);
+        if (fearDelta != 0) ModifyFear(npcId, fearDelta);
+    }
+
     public string GetAffinityLabel(int affinity)
     {
         if (affinity >= 80) return "신뢰";

@@ -89,7 +89,9 @@ public class WorldItem : MonoBehaviour
         }
         else
         {
-            Debug.Log("[WorldItem] 인벤토리 공간 부족");
+            string reason = inventory.HasBackpack ? "인벤토리 공간 부족" : "가방을 장착하세요";
+            Debug.Log($"[WorldItem] {reason}");
+            ToastManager.Show(reason, ToastManager.ToastType.Warning);
             return false;
         }
     }

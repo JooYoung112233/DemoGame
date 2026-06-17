@@ -26,7 +26,7 @@ public class HideoutController : MonoBehaviour
 
     [Header("복귀")]
     [SerializeField] string safehouseScene = "Safehouse";
-    [SerializeField] string safehouseSpawn = "default";   // 집 문 앞
+    [SerializeField] string safehouseSpawn = "from_hideout";   // 은신처 입구 문 바로 앞(트리거 밖). SafehouseGreyboxLayout이 (26.2,5)에 구움
 
     // ── 복원용 상태 ──
     TopDownPlayer _player;
@@ -240,14 +240,13 @@ public class HideoutController : MonoBehaviour
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -28f), new Vector2(600f, 60f),
             new Color(0.95f, 0.95f, 0.9f, 1f));
         // 안내
-        MakeText("Hint", "시설을 클릭해 사용  ·  인벤토리/창고 = 아래 버튼(또는 Tab)  ·  ESC로 나가기", 22, TextAnchor.UpperCenter,
+        MakeText("Hint", "시설 클릭 = 건설 · 업그레이드 · 사용  ·  인벤토리 = Tab/버튼  ·  ESC로 나가기", 22, TextAnchor.UpperCenter,
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -78f), new Vector2(1100f, 36f),
             new Color(0.8f, 0.82f, 0.85f, 0.9f));
 
-        // 좌하단 버튼: 나가기(확인창 경유) + 인벤토리/창고 + 시설 관리(업그레이드)
-        MakeButton("ExitButton",      "← 안전구역으로 나가기", new Vector2(40f, 40f),  new Vector2(320f, 64f), ShowExitConfirm);
-        MakeButton("InventoryButton", "인벤토리 / 창고",        new Vector2(376f, 40f), new Vector2(260f, 64f), OpenInventory);
-        MakeButton("HideoutModButton","시설 관리 (업그레이드)",  new Vector2(652f, 40f), new Vector2(280f, 64f), OpenHideoutModules);
+        // 좌하단 버튼: 나가기 + 인벤토리만(시설은 방 안 타일을 클릭).
+        MakeButton("ExitButton",      "← 나가기",  new Vector2(40f, 40f),  new Vector2(200f, 64f), ShowExitConfirm);
+        MakeButton("InventoryButton", "인벤토리",  new Vector2(250f, 40f), new Vector2(200f, 64f), OpenInventory);
 
         BuildConfirmDialog();
     }
@@ -300,11 +299,6 @@ public class HideoutController : MonoBehaviour
         if (UIManager.Instance != null) UIManager.Instance.ShowCharacterPanel();   // Tab 인벤토리(창고 = 인벤토리 버튼)
     }
 
-    /// <summary>하이드아웃 시설 모듈 업그레이드 UI — 하이드아웃 안에서만 진입.</summary>
-    void OpenHideoutModules()
-    {
-        HideoutUI.Show();
-    }
 
     void MakeButton(string name, string label, Vector2 anchoredPos, Vector2 size, UnityEngine.Events.UnityAction onClick)
     {

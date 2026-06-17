@@ -39,8 +39,18 @@ public class SaveManager : MonoBehaviour
 
     /// <summary>
     /// 전체 게임 상태를 파일에 저장.
+    /// (= WriteToDisk(BuildSaveData()) — 기존 호출부 호환용 래퍼)
     /// </summary>
     public void Save()
+    {
+        WriteToDisk(BuildSaveData());
+    }
+
+    /// <summary>
+    /// 현재 게임 상태를 스냅샷(GameSaveData)으로 수집한다. 디스크에 쓰지 않는다.
+    /// SaveCheckpoints의 인메모리 스냅샷(Record) 및 일반 저장(Commit) 양쪽이 이걸 쓴다.
+    /// </summary>
+    public GameSaveData BuildSaveData()
     {
         var data = new GameSaveData();
         data.version = SAVE_VERSION;
@@ -145,8 +155,26 @@ public class SaveManager : MonoBehaviour
             data.playedScenes = StoryPlayer.Instance.GetPlayedScenes().ToList();
         }
 
-        // 직렬화 & 저장
-        string json = JsonUtility.ToJson(data, true);
+        return data;
+    }
+
+    /// <summary>GameSaveData → JSON 문자열 (직렬화만; 디스크 X). 스냅샷 보관용.</summary>
+    public string ToJson(GameSaveData data)
+    {
+        return JsonUtility.ToJson(data, true);
+    }
+
+    /// <summary>스냅샷(GameSaveData)을 직렬화하여 디스크에 기록.</summary>
+    public void WriteToDisk(GameSaveData data)
+    {
+        WriteJson(ToJson(data));
+    }
+
+    /// <summary>이미 직렬화된 JSON 문자열을 그대로 디스크에 기록.
+    /// (크래시 복구 등에서 보관해 둔 스냅샷 JSON을 재수집 없이 그대로 커밋할 때 사용)</summary>
+    public void WriteJson(string json)
+    {
+        if (string.IsNullOrEmpty(json)) return;
         File.WriteAllText(SavePath, json);
         Debug.Log($"[Save] 저장 완료: {SavePath}");
     }
@@ -232,11 +260,15 @@ public class SaveManager : MonoBehaviour
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
         {
+            // ★ 장비(가방)를 먼저 복원해야 가방 격자가 그 크기로 확장된다.
+            //   (가방 아이템을 먼저 넣으면 0x0 격자라 공간 부족으로 사라지는 버그.)
+            var eq = playerGO.GetComponent<PlayerEquipment>();
+            if (eq != null) eq.LoadSaveData(data.equippedWeapon);
+
             var inv = playerGO.GetComponent<PlayerInventory>();
             if (inv != null && inv.Grid != null && data.bagItems != null)
                 inv.Grid.LoadSaveData(data.bagItems);
-            var eq = playerGO.GetComponent<PlayerEquipment>();
-            if (eq != null) eq.LoadSaveData(data.equippedWeapon);
+
             if (data.survival != null) SurvivalStats.Get()?.LoadSaveData(data.survival);
         }
 

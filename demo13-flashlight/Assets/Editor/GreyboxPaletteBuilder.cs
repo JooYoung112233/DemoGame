@@ -10,10 +10,10 @@ using UnityEngine;
 /// 단색 박스 스프라이트 + 한글 라벨(자식 TextMesh)을 가진 프롭들을 만들고,
 /// 기존 Prop2D 카탈로그(Resources/Props2D/*.asset)에 등록한다.
 /// → 기존 "2D Prop Catalog" 창(Tools ▸ TopDown ▸ Map ▸ Prop Catalog)의
-///   각 탭(바닥/벽/오브젝트/천장)에 바로 떠서 클릭 배치로 레이아웃을 시험할 수 있다.
+///   각 탭(바닥/벽/오브젝트)에 바로 떠서 클릭 배치로 레이아웃을 시험할 수 있다.
 ///
 /// 아트는 중요하지 않다 — 색/라벨/정렬/콜라이더·기능만 맞춘다.
-///   • 바닥/지붕  = 통과(콜라이더 None)
+///   • 바닥        = 통과(콜라이더 None)
 ///   • 벽/막힘    = 막힘(Box 콜라이더, 비-트리거)
 ///   • 문         = Door 기능(DoorController)
 ///   • 상자/선반  = LootContainer(수색)
@@ -71,19 +71,11 @@ public static class GreyboxPaletteBuilder
         public string spawnPointId;
         public int    lootW, lootH;
         public bool   lootUseRegion;
-
-        // 천장 컷어웨이(지붕)
-        public string ceilingGroupId;
-        public float  ceilingHiddenAlpha;
-        public float  ceilingFadeSpeed;
     }
 
     [MenuItem("Tools/TopDown/맵/그레이박스 팔레트 생성")]
     public static void Generate()
     {
-        // 지붕은 최상단 'Ceiling' 정렬 레이어가 있어야 위로 그려짐(없으면 보장/복구).
-        GameLayers.EnsureSortingLayer("Ceiling");
-
         var specs = BuildSpecs();
 
         EnsureFolder(SpriteFolder);
@@ -116,7 +108,7 @@ public static class GreyboxPaletteBuilder
                      $"스프라이트: {SpriteFolder}/gb_*.png\n" +
                      $"프리팹: {PrefabFolder}/gb_*.prefab\n" +
                      $"정의: {PropFolder}/gb_*.asset\n\n" +
-                     "Tools ▸ TopDown ▸ Map ▸ Prop Catalog 의 바닥/벽/오브젝트/천장 탭에서 클릭 배치하세요.";
+                     "Tools ▸ TopDown ▸ Map ▸ Prop Catalog 의 바닥/벽/오브젝트 탭에서 클릭 배치하세요.";
         Debug.Log("<color=cyan>[Greybox]</color> " + msg.Replace("\n", " "));
         if (!Application.isBatchMode)
             EditorUtility.DisplayDialog("그레이박스 팔레트", msg, "확인");
@@ -127,7 +119,7 @@ public static class GreyboxPaletteBuilder
     // ─────────────────────────────────────────────────────────────────────
     static List<Spec> BuildSpecs()
     {
-        // 정렬: 바닥 최하단(Ground -10) → 벽/오브젝트(Ground 0~2) → 마커 약간 위(Ground 5) → 지붕(Ceiling).
+        // 정렬: 바닥 최하단(Ground -10) → 벽/오브젝트(Ground 0~2) → 마커 약간 위(Ground 5).
         var list = new List<Spec>
         {
             // 바닥 — 통과, 최하단.
@@ -137,15 +129,6 @@ public static class GreyboxPaletteBuilder
                 colliderMode = Prop2DDefinition.ColliderMode.None, isTrigger = false,
                 function = Prop2DDefinition.Function.None,
                 sortingLayer = "Ground", sortingOffset = -10, labelDark = true,
-            },
-            // 지붕 — 천장 컷어웨이(진입 시 페이드), 통과, 최상단 'Ceiling' 레이어.
-            new Spec {
-                id = "gb_roof", label = "지붕", color = Opaque(0.30f, 0.30f, 0.34f),
-                category = Prop2DDefinition.Category.Ceiling,
-                colliderMode = Prop2DDefinition.ColliderMode.None, isTrigger = false,
-                function = Prop2DDefinition.Function.None,
-                sortingLayer = "Ceiling", sortingOffset = 0, labelDark = false,
-                ceilingGroupId = "gb", ceilingHiddenAlpha = 0.25f, ceilingFadeSpeed = 6f,
             },
             // 벽 — 막힘(Box, 비-트리거).
             new Spec {
@@ -386,14 +369,6 @@ public static class GreyboxPaletteBuilder
                 def.npcId         = "";        // 빈 NPC(추후 지정)
                 def.interactRange = 1.5f;
                 break;
-        }
-
-        // 천장(지붕) 컷어웨이 파라미터.
-        if (s.category == Prop2DDefinition.Category.Ceiling)
-        {
-            def.ceilingGroupId     = s.ceilingGroupId ?? "";
-            def.ceilingHiddenAlpha = Mathf.Clamp01(s.ceilingHiddenAlpha);
-            def.ceilingFadeSpeed   = Mathf.Max(0.1f, s.ceilingFadeSpeed);
         }
     }
 

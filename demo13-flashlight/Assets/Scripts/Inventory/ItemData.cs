@@ -14,6 +14,18 @@ public enum ItemCategory
     Misc,        // 기타
 }
 
+public enum EquipSlot
+{
+    None = 0,
+    Head,
+    Armor,
+    Rig,
+    Backpack,
+    PrimaryWeapon,
+    SecondaryWeapon,
+    Melee,
+}
+
 /// <summary>
 /// 아이템 희귀도.
 /// </summary>
@@ -122,6 +134,18 @@ public class ItemData : ScriptableObject
     [Header("의료 연동 (HealInjury 전용)")]
     [Tooltip("치료 아이템 SO (Medical 카테고리일 때)")]
     public MedicalItemData medicalData;
+
+    [Header("장비 슬롯")]
+    [Tooltip("장착 가능 슬롯 (None이면 장착 불가)")]
+    public EquipSlot equipSlot;
+
+    [Tooltip("가방/조끼 장착 시 제공하는 격자 가로 칸")]
+    [Min(0)]
+    public int containerWidth;
+
+    [Tooltip("가방/조끼 장착 시 제공하는 격자 세로 칸")]
+    [Min(0)]
+    public int containerHeight;
 
     [Header("무기 연동 (Weapon 전용)")]
     [Tooltip("무기 전투 데이터 SO (Weapon 카테고리일 때). 장착 시 콤보·스탯 교체")]

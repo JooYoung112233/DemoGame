@@ -18,10 +18,10 @@ public static class GameSceneBuilder
 
     // ── 공통: 씬 어느 타입이든 동일하게 들어가는 것 ──────────────────
 
-    [MenuItem("Tools/TopDown/빌드/인게임 씬")]
+    [MenuItem("Tools/TopDown/개발/인게임 씬")]
     static void BuildInGame() => BuildScene("InGameScene", SceneType.InGame);
 
-    [MenuItem("Tools/TopDown/빌드/안전가옥 씬")]
+    [MenuItem("Tools/TopDown/개발/안전가옥 씬(구)")]
     static void BuildSafehouse() => BuildScene("Safehouse", SceneType.Safehouse);
 
     // ─────────────────────────────────────────────────────────────────

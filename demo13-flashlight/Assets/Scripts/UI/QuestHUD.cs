@@ -152,6 +152,11 @@ public class QuestHUD : MonoBehaviour
         var bg = panelRoot.AddComponent<Image>();
         bg.color = new Color(0, 0, 0, 0.4f);
 
+        // 패널 클릭 → 전체화면 의뢰/통신 로그(QuestLogUI) 열기 (J 키와 동일 진입점)
+        var openBtn = panelRoot.AddComponent<Button>();
+        openBtn.targetGraphic = bg;
+        openBtn.onClick.AddListener(QuestLogUI.Show);
+
         questListText = MakeText(panelRoot.transform, "QuestList", "", 14, TextAnchor.UpperLeft);
         var listRT = questListText.GetComponent<RectTransform>();
         listRT.anchorMin = Vector2.zero;
@@ -159,6 +164,7 @@ public class QuestHUD : MonoBehaviour
         listRT.offsetMin = new Vector2(8, 4);
         listRT.offsetMax = new Vector2(-8, -4);
         questListText.color = new Color(0.9f, 0.9f, 0.95f);
+        questListText.raycastTarget = false;   // 클릭이 패널 버튼으로 통과되게
 
         // 알림 텍스트 (상단 중앙)
         notificationText = MakeText(canvasGO.transform, "Notification", "", 20, TextAnchor.MiddleCenter);

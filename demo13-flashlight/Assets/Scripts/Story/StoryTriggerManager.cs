@@ -13,7 +13,8 @@ public class StoryTriggerManager : MonoBehaviour
 
     // ── 씬 이름 상수 ──
     const string SCENE_SAFEHOUSE = "Safehouse";
-    const string SCENE_INGAME = "InGameScene";
+    const string SCENE_HIDEOUT = "Hideout";
+    const string SCENE_SYSTEMS = "Systems";
 
     // ── 첫 행동 추적 (세이브 로드 시 복원은 플래그로 대체) ──
     bool prologuePlayed;
@@ -56,7 +57,8 @@ public class StoryTriggerManager : MonoBehaviour
         {
             OnSafehouseLoaded();
         }
-        else if (sceneName == SCENE_INGAME || sceneName.Contains("InGame"))
+        // 안전 실내 씬(은신처/전당포)은 레이드가 아님 — 레이드 스토리 트리거 제외.
+        else if (sceneName != SCENE_SYSTEMS && sceneName != SCENE_HIDEOUT && sceneName != "Pawnshop")
         {
             OnRaidSceneLoaded();
         }
@@ -182,12 +184,7 @@ public class StoryTriggerManager : MonoBehaviour
         var sp = StoryPlayer.Instance;
         if (qm == null || sp == null || sp.IsPlaying) return false;
 
-        // 전당포 주인 — 최초 대면 (S-002: 시계 거절 + 암구호 '불씨')
-        if (npcId == "pawnshop" && !qm.GetFlag("met_pawnshop") && sp.HasScene("S-002"))
-        {
-            sp.PlayScene("S-002", () => onComplete?.Invoke());
-            return true;
-        }
+        // 전당포 주인 — 스토리 비활성 (그레이박스 테스트: 바로 일반 대화로)
 
         // 베테랑 회수꾼 — 암구호 '불씨' 확보 후 최초 대화
         // S-003(소개·정보) → S-004(게시판 의뢰 MQ-001 수령 + 장비 지급) 연쇄.
@@ -220,13 +217,7 @@ public class StoryTriggerManager : MonoBehaviour
             return true;
         }
 
-        // 전당포 — 루디 납품 · 1차 마무리 (S-017, MQ-002)
-        if (npcId == "pawnshop" && qm.GetFlag("met_pawnshop")
-            && qm.GetFlag("mq002_veteran_reported") && !qm.GetFlag("mq002_complete") && sp.HasScene("S-017"))
-        {
-            sp.PlayScene("S-017", () => onComplete?.Invoke());
-            return true;
-        }
+        // 전당포 — 루디 납품 스토리 비활성 (그레이박스 테스트)
 
         // 밴딧 협상꾼 — 최초 조우
         if (npcId == "bandit_negotiator" && !qm.GetFlag("negotiator_met") && sp.HasScene("SX-002"))
@@ -462,10 +453,6 @@ public class StoryTriggerManager : MonoBehaviour
         var qm = QuestManager.Instance;
         if (qm == null) return false;
 
-        // 전당포 주인 — 최초 대면 미완료
-        if (npcId == "pawnshop" && !qm.GetFlag("met_pawnshop"))
-            return true;
-
         // 베테랑 회수꾼 — 암구호 확보 후 소개 미완료
         if (npcId == "veteran_scavenger" && qm.GetFlag("got_password_ember")
             && !qm.GetFlag("veteran_intro_done"))
@@ -478,11 +465,6 @@ public class StoryTriggerManager : MonoBehaviour
         // 회수꾼 — 짙은 현상 귀환 보고 대기
         if (npcId == "veteran_scavenger" && qm.GetFlag("night_raid_returned_with_rudi")
             && !qm.GetFlag("mq002_veteran_reported"))
-            return true;
-
-        // 전당포 — 루디 납품 대기
-        if (npcId == "pawnshop" && qm.GetFlag("met_pawnshop")
-            && qm.GetFlag("mq002_veteran_reported") && !qm.GetFlag("mq002_complete"))
             return true;
 
         // 밴딧 협상꾼 — 미조우

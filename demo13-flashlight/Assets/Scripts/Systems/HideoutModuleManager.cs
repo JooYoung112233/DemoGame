@@ -40,8 +40,17 @@ public class HideoutModuleManager : MonoBehaviour
 
     Dictionary<string, int> levels = new Dictionary<string, int>();
 
+    // ── 발전기 전력 (런타임 전용 — 세이브 안 함, 시작 OFF) ──
+    bool generatorPowered;
+
+    /// <summary>발전기 전력 ON 여부. 발전기 모듈 Lv>=1 + 전력 켜짐일 때만 true.</summary>
+    public bool GeneratorPowered => generatorPowered && GetLevel("generator") >= 1;
+
     /// <summary>모듈 업그레이드 완료 (module, newLevel). UI·효과 구독.</summary>
     public event System.Action<string, int> OnModuleUpgraded;
+
+    /// <summary>발전기 전력 상태 변경 (powered). UI 구독.</summary>
+    public event System.Action<bool> OnPowerChanged;
 
     void Awake()
     {
@@ -72,9 +81,13 @@ public class HideoutModuleManager : MonoBehaviour
         if (c == null) { reason = "최대 레벨"; return false; }
         if (CurrencyManager.Instance == null || !CurrencyManager.Instance.CanAfford(c.Value.scrap))
         { reason = "스크랩 부족"; return false; }
-        var grid = PlayerGrid();
         foreach (var (id, qty) in c.Value.mats)
-            if (grid == null || grid.CountItem(id) < qty) { reason = $"재료 부족 ({id} x{qty})"; return false; }
+            if (CountMaterial(id) < qty)
+            {
+                var data = ItemDatabase.Get(id);
+                reason = $"재료 부족 ({(data != null ? data.displayName : id)} x{qty})";
+                return false;
+            }
         return true;
     }
 
@@ -88,8 +101,7 @@ public class HideoutModuleManager : MonoBehaviour
         }
         var c = NextCost(m).Value;
         CurrencyManager.Instance.Spend(c.scrap, $"하이드아웃: {DisplayName(m)}");
-        var grid = PlayerGrid();
-        foreach (var (id, qty) in c.mats) grid?.ConsumeItem(id, qty);
+        foreach (var (id, qty) in c.mats) ConsumeMaterial(id, qty);
 
         int nl = GetLevel(m) + 1;
         levels[m] = nl;
@@ -99,11 +111,79 @@ public class HideoutModuleManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>디버그용: 비용 소비 없이 레벨 강제 설정.</summary>
+    public void ForceSetLevel(string m, int level)
+    {
+        level = Mathf.Clamp(level, 0, MaxLevel);
+        levels[m] = level;
+        Debug.Log($"[Hideout] {DisplayName(m)} → Lv{level} (디버그)");
+        OnModuleUpgraded?.Invoke(m, level);
+    }
+
+    // ═══════════════════════════
+    //  발전기 전력 (런타임 전용)
+    // ═══════════════════════════
+
+    /// <summary>발전기 전력 토글. ON 전환 시 fuel_can 1개 소비(없으면 실패), OFF는 무료.
+    /// 반환: 성공 여부. reason = 실패 사유(성공 시 null).</summary>
+    public bool ToggleGeneratorPower(out string reason)
+    {
+        reason = null;
+        if (GetLevel("generator") < 1) { reason = "발전기 미건설"; return false; }
+
+        if (!generatorPowered)
+        {
+            // ON 전환 → 연료 소비 (가방 + 창고 합산)
+            if (CountMaterial("fuel_can") < 1)
+            {
+                reason = "연료(fuel_can) 필요";
+                return false;
+            }
+            ConsumeMaterial("fuel_can", 1);
+            generatorPowered = true;
+        }
+        else
+        {
+            // OFF 전환 → 무료
+            generatorPowered = false;
+        }
+
+        Debug.Log($"[Hideout] 발전기 전력 → {(generatorPowered ? "ON" : "OFF")}");
+        OnPowerChanged?.Invoke(GeneratorPowered);
+        return true;
+    }
+
     static InventoryGrid PlayerGrid()
     {
         var pgo = GameObject.FindGameObjectWithTag("Player");
         var inv = pgo != null ? pgo.GetComponent<PlayerInventory>() : null;
         return inv != null ? inv.Grid : null;
+    }
+
+    /// <summary>건설/업그레이드/연료 재료 보유량 = 가방(주머니) + 메인 창고 합산.
+    /// (집에서 짓는 자재이므로 창고에 둔 재료도 함께 인정.)</summary>
+    public static int CountMaterial(string id)
+    {
+        int n = 0;
+        var bag = PlayerGrid();
+        if (bag != null) n += bag.CountItem(id);
+        if (MainStash.Instance != null && MainStash.Instance.Grid != null)
+            n += MainStash.Instance.Grid.CountItem(id);
+        return n;
+    }
+
+    /// <summary>재료 소비 — 창고 먼저, 부족분은 가방에서.</summary>
+    static void ConsumeMaterial(string id, int qty)
+    {
+        if (qty <= 0) return;
+        var stash = (MainStash.Instance != null) ? MainStash.Instance.Grid : null;
+        if (stash != null)
+        {
+            int take = Mathf.Min(stash.CountItem(id), qty);
+            if (take > 0) { stash.ConsumeItem(id, take); qty -= take; }
+        }
+        if (qty <= 0) return;
+        PlayerGrid()?.ConsumeItem(id, qty);
     }
 
     // ═══════════════════════════

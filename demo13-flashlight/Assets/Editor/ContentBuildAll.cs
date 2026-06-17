@@ -18,7 +18,7 @@ public static class ContentBuildAll
     /// <summary>true면 개별 빌더가 완료 다이얼로그를 띄우지 않음(일괄 빌드 중).</summary>
     public static bool Quiet;
 
-    [MenuItem("Tools/TopDown/빌드/▶ 안전구역 일괄 빌드", priority = -100)]
+    [MenuItem("Tools/TopDown/빌드/안전구역", priority = -100)]
     public static void BuildAll()
     {
         // 빌더들이 additive로 씬을 만들어 현재 열린 씬을 닫지 않으므로(폴더에만 생성) 저장 프롬프트 불필요.

@@ -670,16 +670,15 @@ public class CraftingUI : MonoBehaviour
 
     #region 유틸
 
+    /// <summary>재료 보유량 표시 = 가방 + 메인 창고(MainStash) 합산 (제작/수리 소모 기준과 일치).</summary>
     int CountInInventory(string itemId)
     {
-        if (playerInventory == null || playerInventory.Grid == null) return 0;
+        if (string.IsNullOrEmpty(itemId)) return 0;
         int total = 0;
-        var all = playerInventory.Grid.GetAll();
-        for (int i = 0; i < all.Count; i++)
-        {
-            if (all[i].item.data != null && all[i].item.data.itemId == itemId)
-                total += all[i].item.stackCount;
-        }
+        if (playerInventory != null && playerInventory.Grid != null)
+            total += playerInventory.Grid.CountItem(itemId);
+        if (MainStash.Instance != null && MainStash.Instance.Grid != null)
+            total += MainStash.Instance.Grid.CountItem(itemId);
         return total;
     }
 

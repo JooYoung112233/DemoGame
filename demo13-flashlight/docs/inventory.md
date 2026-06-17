@@ -13,30 +13,30 @@
 | 컨테이너 | 격자 크기 | 비고 |
 |---|---|---|
 | 플레이어 휴대 격자 | **장착 백팩이 결정** | 백팩 = 격자 제공 아이템 (아래) |
-| (백팩 없음 = 포켓만) | 2x2~2x3 최소 | 가방 안 메면 소량만 |
+| (백팩 없음 = 포켓만) | 2x4 | 가방 안 메면 주머니만 (→ §장비 시스템) |
 | 안전가옥 메인 창고(`MainStash`) | 10x14 (그레이박스 고정) | 안전구역 Tab 우측 상시 표시. 추후 stash 모듈 레벨 비례 확장 |
 | 루팅 상자 (소) | 3x3 | 파밍 오브젝트 |
 | 루팅 상자 (중) | 4x5 | |
 | 루팅 상자 (대) | 5x6 | 레어 |
 | 바닥 드롭 | 3x3 | 아이템을 땅에 버릴 때 생성 |
 
-### 백팩 = 휴대 격자 제공 아이템 (확정 2026-06-10)
+### 백팩 = 휴대 격자 제공 아이템 (확정 2026-06-10, 장비 슬롯 통합 2026-06-17)
 
-타르코프식 — **장착한 백팩이 레이드 중 휴대 격자(칸 수)를 결정**. 더 좋은 가방 = 더 많은 칸.
+타르코프식 — **Backpack 장비 슬롯에 장착한 백팩이 레이드 중 휴대 격자(칸 수)를 결정**. 더 좋은 가방 = 더 많은 칸. 가방 미장착 시 주머니(2x4)만 사용.
 
-| 백팩 itemId | 표시명 | 제공 격자 | 등급 |
+| 백팩 itemId | 표시명 | `containerWidth x containerHeight` | 등급 |
 |---|---|:---:|---|
-| (없음) | 맨몸 포켓 | 2×2 | - |
+| (없음) | 맨몸 포켓 | 2×4 | - |
 | `backpack_sling` | 슬링백 | 4×4 | Common |
 | `backpack_school` | 학생 가방 | 5×5 | Common |
 | `backpack_hiking` | 등산 배낭 | 5×7 | Uncommon |
 | `backpack_military` | 군용 배낭 | 6×8 | Rare |
 | `backpack_tactical` | 택티컬 러크 | 7×9 | Epic |
 
-- 백팩 자체는 **장비 슬롯(백팩)**에 장착 → 그 격자가 메인 인벤이 됨
-- 가방 교체 시 안에 든 게 안 들어가면 바닥/창고로 밀려남
+- 백팩 자체는 **Backpack 장비 슬롯**에 장착 → 그 `containerWidth x containerHeight`가 메인 인벤 격자가 됨 (→ §장비 시스템)
+- 가방 교체/해제 시 넘치는 아이템 → 메인 창고(MainStash) → 월드 드롭 (→ §장비 시스템 넘침 처리)
 - 안전가옥 창고(stash)는 별도·대형, 백팩과 무관
-- (옵션) 체스트리그/포켓류 = 추가 소형 격자 — 추후
+- 조끼(Rig 슬롯)도 `containerWidth/Height`로 추가 소형 격자 제공 가능 — 추후
 
 ### 아이템 크기
 - 모든 아이템은 **가로 x 세로** 격자 점유
@@ -73,7 +73,10 @@ ItemData (ScriptableObject)
 ├── rarity        : ItemRarity (enum)
 ├── isUsable      : bool (우클릭 사용 가능 여부)
 ├── useEffect     : ItemUseEffect (enum, 사용 시 효과 타입)
-└── effectValue   : float (효과 수치)
+├── effectValue   : float (효과 수치)
+├── equipSlot     : EquipSlot (enum, 장착 슬롯. None=장착 불가)
+├── containerWidth  : int (장착 시 제공하는 격자 가로, 가방/조끼용)
+└── containerHeight : int (장착 시 제공하는 격자 세로, 가방/조끼용)
 ```
 
 ### 카테고리
@@ -320,6 +323,72 @@ allowedCategories  : ItemCategory[]      // 빈 배열=전체(범용 상자), �
 3. `cont_*` 9종 SO 생성(칸수·카테고리=§보관함 사양 그대로).
 4. 관리인 판매 + 레이드 저확률 드랍 + 의뢰 1개 연결(§9.7).
 
+## 장비 시스템 (타르코프식 장비 슬롯)
+
+> 2026-06-17 확정. 타르코프식 7슬롯 장비 시스템.
+
+### 장비 슬롯 (EquipSlot enum)
+
+| 슬롯 | enum 값 | 설명 |
+|---|---|---|
+| None | 0 | 장착 불가 (일반 아이템) |
+| Head | 1 | 헬멧 |
+| Armor | 2 | 방탄복 |
+| Rig | 3 | 조끼 (택티컬 리그) |
+| Backpack | 4 | 가방 |
+| PrimaryWeapon | 5 | 주무기 |
+| SecondaryWeapon | 6 | 보조무기 |
+| Melee | 7 | 근접 무기 |
+
+### ItemData 장비 관련 필드
+
+```
+equipSlot        : EquipSlot   // 장착 가능 슬롯 (None=장착 불가)
+containerWidth   : int         // 장착 시 제공하는 격자 가로 (가방/조끼용, 0=제공 안 함)
+containerHeight  : int         // 장착 시 제공하는 격자 세로 (가방/조끼용, 0=제공 안 함)
+```
+
+### 인벤토리 격자와 가방의 관계
+
+- **가방 미장착** 시 인벤토리 = **주머니(2x4)** 만 사용 가능
+- **가방 장착** 시 해당 가방의 `containerWidth x containerHeight`로 인벤토리 격자 확장
+- 조끼(Rig)도 `containerWidth/Height`를 가질 수 있음 (추가 소형 격자 제공, 추후)
+
+| 상태 | 인벤토리 격자 |
+|---|---|
+| 가방 없음 (주머니) | 2x4 |
+| 슬링백 장착 | 4x4 |
+| 학생 가방 장착 | 5x5 |
+| 등산 배낭 장착 | 5x7 |
+| 군용 배낭 장착 | 6x8 |
+| 택티컬 러크 장착 | 7x9 |
+
+### 무게 합산
+
+장비 슬롯에 장착된 아이템의 무게는 `PlayerInventory` 총 무게에 합산된다.
+
+### 가방 해제 시 넘침 처리
+
+가방을 해제하면 격자가 축소되어 아이템이 넘칠 수 있다. 처리 순서:
+1. 넘치는 아이템을 **메인 창고(MainStash)** 로 자동 이동
+2. 메인 창고에도 공간이 없으면 **월드 드롭** (바닥에 떨어뜨림)
+
+### 상점 UI 우측 컬럼 변경
+
+상점 UI 우측 컬럼: **가방(기존)** → **창고(MainStash)** 로 변경.
+플레이어가 상점에서 아이템을 구매/판매할 때 우측에 표시되는 것은 메인 창고 격자.
+
+### PlayerEquipment 세이브 포맷
+
+```
+"slotInt:itemId|slotInt:itemId"
+```
+예: `"1:helmet_steel|4:backpack_military|7:knife_combat"`
+
+구 포맷과 하위호환 유지.
+
+---
+
 ## 구현 우선순위
 
 1. **ItemData SO** + ItemDatabase
@@ -371,6 +440,7 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-06-17 | **타르코프식 장비 슬롯 시스템 도입.** 질문: 장비 장착을 어떻게 구현할 것인가(슬롯 종류, 데이터 구조, 가방-인벤 연동, 세이브). **결정: 7슬롯(Head/Armor/Rig/Backpack/PrimaryWeapon/SecondaryWeapon/Melee) 도입. ItemData에 `equipSlot`(EquipSlot enum) + `containerWidth/containerHeight`(가방·조끼가 제공하는 격자) 필드 추가. 가방 미장착 시 인벤=주머니 2x4, 장착 시 가방의 격자로 확장. 장비 무게는 총 무게 합산. 가방 해제 넘침→MainStash→월드 드롭. 상점 UI 우측을 가방→창고(MainStash)로 변경. PlayerEquipment 세이브="slotInt:itemId\|slotInt:itemId"(구 포맷 하위호환).** 근거: 타르코프 장비 시스템 참고, 가방=격자 제공 기존 기획과 통합. §장비 시스템 신설 + ItemData SO 구조·백팩 표·컨테이너 표 갱신. |
 | 2026-06-17 | **HP 바를 상시 HUD에서 제거 → 캐릭터 패널 "01 캐릭터 상태"로 이동.** 질문: 항상 떠 있는 좌하단 HUD(`GameHUD`)에 HP 바를 둘지. **결정: HP는 상시 HUD에서 빼고 캐릭터 패널 "01 캐릭터 상태" 좌측 열에 표시(HP + 스태미너 텍스트). HUD에는 스태미너(상황표시)/배터리/부상아이콘/루디(◈)만 유지.** §UI 레이아웃 좌측 설명에 'HP는 여기에만' 명시 + 「상시 HUD 구성 — HP 제외」 표 신설(HP 바 제거 명시). 수분/무게도 같은 캐릭터 패널 집약 방향(수분은 허기·수분 시스템 생기면 추가). | 근거: 화면 깔끔 + 스탯을 캐릭터 패널에 집약(양피지 6패널 레퍼런스 정합). 코드 이미 구현. [→ safehouse.md] |
 | 2025-05-25 | 인벤토리 시스템 초기 기획 확정. 타르코프 스타일 격자, 세로형 패널, 드래그앤드롭, 바닥 드롭, 스폰 시스템. |
 | 2025-05-25 | 내구도 시스템 추가. 구급상자 등 고급 의료 아이템은 durability 기반 다회 사용. |
@@ -383,5 +453,5 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 | 2026-06-16 | **화폐 단위 정합 — sellPrice/buyPrice = 스크랩.** 2026-06-08 이원 경제(스크랩=일상 화폐 / 루디=특수 자원)에 맞춰 inventory.md의 옛 "루디 기준" 서술을 **스크랩**으로 정정(필드 주석·§가격 헤더). 루디는 화폐 아님(납품 시 스크랩 보상). [→ economy.md](economy.md) |
 | 2026-05-26 | **MedicalData 생성 스크립트.** `Tools > Dev Tools > Data > Generate Medical Data` — 13종 MedicalItemData SO 자동 생성 + ItemData.medicalData 자동 연결. |
 | 2026-05-30 | **소비 아이템 스태미너 회복 구현.** `PlayerController.RestoreStamina(amount)` 신설(최대치 클램프 + 탈진 해제). `ItemUseEffect.RestoreStamina`가 `effectValue`만큼 즉시 회복. 기존 TODO(음수 ConsumeStamina) 제거. |
-| 2026-06-10 | **백팩 = 휴대 격자 제공 아이템 확정.** 장착한 백팩이 레이드 중 격자 칸 수 결정(슬링4×4~택티컬7×9). 가방 없으면 포켓 2×2만. 좋은 가방 루팅/장착이 곧 적재량 업그레이드 → 루팅 루프 동기 강화. 백팩 5종 아이콘 제작 예정. |
+| 2026-06-10 | **백팩 = 휴대 격자 제공 아이템 확정.** 장착한 백팩이 레이드 중 격자 칸 수 결정(슬링4×4~택티컬7×9). 가방 없으면 포켓 2×2만(→2026-06-17 장비 슬롯 도입 시 2×4로 변경). 좋은 가방 루팅/장착이 곧 적재량 업그레이드 → 루팅 루프 동기 강화. 백팩 5종 아이콘 제작 예정. |
 | 2026-06-02 | **인벤토리·창고·장착무기 세이브 영속화.** 루팅한 전리품이 저장되도록 `SaveManager` 확장. `InventoryGrid.GetSaveData/LoadSaveData`(공용) — `GridItemEntry`(itemId·count·durability·격자위치·회전), 로드 시 저장 위치 우선 복원→실패 시 자동배치. 저장 대상: **가방**(`PlayerInventory.Grid`), **창고**(`SafehouseStorage.AllFurniture` static 목록을 uid 매칭으로 각 `FurnitureInstance.grid` 복원), **장착 무기**(`PlayerEquipment.GetSaveData`=itemId). ※ 게임 시작 직후 로드 시 창고 가구가 아직 인스턴스화 전이면 매칭 누락 가능(안전가옥 진입 후 저장/로드는 정상) — 알려진 한계. |

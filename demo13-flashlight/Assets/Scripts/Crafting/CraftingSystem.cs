@@ -209,45 +209,41 @@ public class CraftingSystem : MonoBehaviour
 
     #region 유틸
 
-    int CountItem(InventoryGrid grid, string itemId)
+    /// <summary>재료 보유량 = 가방(bag) + 메인 창고(MainStash) 합산.
+    /// (집에서 제작/수리하므로 창고에 둔 재료도 함께 인정 — HideoutModuleManager와 동일 규칙.)</summary>
+    int CountItem(InventoryGrid bag, string itemId)
     {
-        if (grid == null || string.IsNullOrEmpty(itemId)) return 0;
+        if (string.IsNullOrEmpty(itemId)) return 0;
 
         int total = 0;
-        var all = grid.GetAll();
-        for (int i = 0; i < all.Count; i++)
-        {
-            if (all[i].item.data != null && all[i].item.data.itemId == itemId)
-                total += all[i].item.stackCount;
-        }
+        if (bag != null) total += bag.CountItem(itemId);
+
+        var stash = (MainStash.Instance != null) ? MainStash.Instance.Grid : null;
+        if (stash != null) total += stash.CountItem(itemId);
+
         return total;
     }
 
-    void ConsumeItem(InventoryGrid grid, string itemId, int amount)
+    /// <summary>재료 소모 — 창고 먼저, 부족분은 가방에서. 둘 다 NotifyChanged.</summary>
+    void ConsumeItem(InventoryGrid bag, string itemId, int amount)
     {
-        if (grid == null || amount <= 0) return;
+        if (amount <= 0 || string.IsNullOrEmpty(itemId)) return;
 
         int remaining = amount;
-        var all = grid.GetAll();
 
-        for (int i = all.Count - 1; i >= 0 && remaining > 0; i--)
+        var stash = (MainStash.Instance != null) ? MainStash.Instance.Grid : null;
+        if (stash != null)
         {
-            var p = all[i];
-            if (p.item.data == null || p.item.data.itemId != itemId) continue;
-
-            if (p.item.stackCount <= remaining)
+            int take = Mathf.Min(stash.CountItem(itemId), remaining);
+            if (take > 0)
             {
-                remaining -= p.item.stackCount;
-                grid.Remove(p);
-            }
-            else
-            {
-                p.item.stackCount -= remaining;
-                remaining = 0;
+                stash.ConsumeItem(itemId, take); // 내부에서 OnChanged 발생
+                remaining -= take;
             }
         }
 
-        grid.NotifyChanged();
+        if (remaining > 0 && bag != null)
+            bag.ConsumeItem(itemId, remaining); // 내부에서 OnChanged 발생
     }
 
     #endregion

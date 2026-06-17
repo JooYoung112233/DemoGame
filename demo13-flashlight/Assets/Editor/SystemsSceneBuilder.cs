@@ -74,7 +74,7 @@ public static class SystemsSceneBuilder
         ("navigationHUD",    typeof(NavigationHUD)),   // 시계 나침반 + 미니맵 (UI)
     };
 
-    [MenuItem("Tools/TopDown/빌드/시스템 씬")]
+    [MenuItem("Tools/TopDown/개발/시스템 씬")]
     public static void BuildSystemsScene()
     {
         // additive로 만들어 현재 열린 씬을 닫지 않으므로 저장 프롬프트 불필요.

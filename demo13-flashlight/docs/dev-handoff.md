@@ -1,34 +1,156 @@
 # 개발 핸드오프 (이어서 작업)
 
-> 다른 PC에서 이어서 작업할 때 **여기부터** 읽기. `/resume` 슬래시 명령으로 자동 로드됨.
-> 최신 갱신: 2026-06-16
+> 다른 PC에서 이어서 작업할 때 **여기부터** 읽기. `/build`로 이어서 진행.
+> 최신 갱신: 2026-06-18
 
-## 지금 위치
-**코어 루프 빌드 — Phase 0(타이틀) 완료, Phase 1(안전가옥) 진행 중.**
-빌드 순서 전체 = [dev-roadmap.md](dev-roadmap.md) "빌드 순서 — 코어 루프부터 1단계씩" 표.
+## 지금 위치 (2026-06-18 커밋 시점)
+**하이드아웃 + 안전구역 전 기능을 그레이박스로 일괄 구현 완료 → 사용자 Unity 테스트 대기.**
+이번 세션(6/18) 작업이 **이 커밋에 모두 포함**됨. 아래 "6/18 세션 (1)~(3)" 변경 섹션 + 맨 끝 변경들 참조.
 
-**스코프**: 리소스(아트/스프라이트/실맵/사운드)만 제외, 그 외 **전 게임 시스템을 그레이박스로 한 단계씩** 제작+테스트.
+- **완료(코드)**: 전체화면 UI 5종(라디오/파견/지역출전/의뢰통신/레이드지도) · 하이드아웃 시설 단일패널 + 발전기 전력 · 상점 위탁 · 작업대 레시피/수리 · 저장 체크포인트(스커밍 방지/크래시 복구) · 건물 트리거 전환(전당포 실내씬) · **이어하기 로드 버그 수정** · 인벤 드래그앤드롭+정렬 · 제작/건설 재료 가방+창고 합산 · 수면 페이드+완료 · 하이드아웃 복귀 스폰 보정.
+- **⚠️ Unity 미실행(정적 감사만)**: 컴파일·플레이 검증은 사용자 차례.
+- **다음 세션 할 일**: 아래 "## 사용자 확인 필요 (Unity)" 의 재빌드(안전구역/은신처) → "테스트 체크리스트" 순서대로 기능별 검증 → 버그 보고받아 수정.
 
-## 이번 세션에 만든 것 (코드 = 정적 컴파일 감사 통과 / Unity 실행 검증은 사용자)
-- **게임 시작 화면**: `TitleScreen`(새게임/이어하기/종료) + `GameBoot` 타이틀 게이트(`showTitleOnBoot`)
-- **HP바 깜빡임 제거**: `GameHUD`는 게임플레이 씬 활성 시에만 표시(타이틀=숨김)
-- **전환 폴리시**: `SceneTransition` 즉시커버→셋업→reveal + 스폰 시 `CameraFollow.SnapToTarget`(슬라이드 제거)
-- **손전등 무드 라이트**: 따뜻·부드러움 + origin 캐릭터 부착(뾰족함 제거). 값은 `FlashlightController` Inspector 라이브 튜닝. (끝처리 더 부드럽게 = 라이트 쿠키, **보류**)
-- **평판 시스템(Phase 7 선제작)**: `ReputationManager`(F~A)+영속화+자가검증(`Tools ▸ 테스트 ▸ 평판 시스템 자가검증`)
-- **밸런스**: `region_loot` 1지역 짙은현상 `container_anomaly`/`ground_anomaly` 티어 신설(루디 소득원) + `RegionLootTier` enum 2값
+**스코프**: 리소스(아트/스프라이트/실맵/사운드)만 제외, 그 외 **전 게임 시스템을 그레이박스로** 제작+테스트.
 
-## 다음 할 일 — NPC 대화 테스트 (사용자 차례, Unity)
-1. `Tools ▸ TopDown ▸ 빌드 ▸ ▶ 안전구역 일괄 빌드` → **NPCData 생성 + NPC 자동 배치**(전당포·회수꾼·관리인·떠돌이상인 4마커, NPCController+NPCData 자동연결)
-2. Build Settings에 **Systems + Safehouse** 등록 → **Systems만** Play → 새 게임 → 안전가옥
-3. NPC(전당포/회수꾼/관리인)에 **E** → `DialogueUI` 인사 대사 뜨는지 확인
-   - ⚠️ **떠돌이 상인 = 빈 마커**(wandering_merchant NPCData 미생성). 나머지 3명만 대화됨.
+### 진행 중이던 워크플로 (커밋 시점)
+UX 5트랙(인벤 드래그·정렬 / 제작 창고연동 / 수면 페이드 / 라디오 레이아웃 / 복귀 스폰) — 빌드 트랙은 **파일 작성 완료**(이 커밋에 포함), unity-reviewer 리뷰만 마무리 단계였음. 다음 세션에서 리뷰 결과/컴파일 에러 확인 권장.
+
+## Phase 1 이후 추가된 것 (6/16 세션 이후 커밋)
+- **대화/상점/UI 시스템 일괄** (`5e4d6ae`): DialogueUI, ShopUI, NPC 상호작용 통합
+- **하이드아웃 모듈 업그레이드** (`78ed0d0`): `HideoutModuleManager`, `HideoutUI`, 인벤 3열 레이아웃
+- **허기·수분+수면 시스템** (`217c6e0`): `SurvivalStats`, `SleepUI`, `MainStash`(메인창고), 하이드아웃 카메라/ESC, 상점 UI 재구성
+
+## Phase 2 준비 상태
+| 항목 | 상태 |
+|---|---|
+| `SceneTransitionManager` (페이드+additive 전환) | ✅ 범용, 씬이름 동적 |
+| `MapSelectUI` → Region1 `sceneName="ScrapMarket_GB"` | ✅ 연결됨 |
+| `RaidManager` (타이머+사망+시간초과+정산) | ✅ 씬 배치만 하면 자동 시작 |
+| `ScrapMarketGreyboxLayout` (에디터 빌더) | ✅ 준비 — 씬+RaidManager+스폰+출구+루트+적 배치 |
+| `StoryTriggerManager` 레이드 씬 인식 | ✅ 수정됨 (제외식: Systems/Hideout가 아니면 레이드) |
+| `DebugTestUI` 레이드 버튼 | ✅ `ScrapMarket_GB`로 갱신 |
+| `SystemsScene.IsGameplayScene` | ✅ Systems/MapTool 아닌 모든 씬 = 게임플레이 |
+| **ScrapMarket_GB.unity (레이드 씬)** | ❌ **미빌드 — 사용자가 에디터에서 실행해야 함** |
+| Build Settings에 ScrapMarket_GB 등록 | ❌ 빌더 실행 시 자동 등록됨 |
+
+## 다음 할 일 — 레이드 씬 빌드 + 루프 테스트 (사용자 차례, Unity)
+1. **`Tools ▸ TopDown ▸ 맵 ▸ 고철시장 그레이박스`** 실행 → `ScrapMarket_GB.unity` 생성 + Build Settings 자동 등록
+2. **Build Settings 확인**: Systems / Safehouse / Hideout / ScrapMarket_GB 4개 등록 확인
+3. **Systems 씬만 열고 Play**:
+   - 새 게임 → 안전가옥 스폰 확인
+   - 지도판(E) → 폐상가(Region1) 선택 → 출전
+   - **ScrapMarket_GB 로드 + 걸어다니기 + 20분 타이머 HUD** 확인
+   - 맨홀(Manhole_Exit)에서 E → 5초 대기 → 안전가옥 귀환
+   - **RaidResultUI 정산창** 뜨는지 확인
+4. ⚠️ 확인 사항:
+   - 씬 전환 시 페이드 끊김 없는지
+   - 레이드 타이머 정상 동작(HUD 상단)
+   - 루트 박스(gb_crate/gb_shelf) 상호작용(E)
+   - 쪽지(gb_note) 읽기
 
 ## 테스트 방식 (고정)
 - 정식 실행 = **Systems 씬만** 열고 Play (타이틀→새게임→Safehouse가 additive로 로드).
 - 코드는 Claude가 작성+정적 감사 → **Unity 실행/테스트는 사용자** → 결과(특히 컴파일 에러) 받고 다음 단계.
 
+## 6/17 세션 2차 변경사항
+- **CharacterPanelUI 탭 제거 완료**: 인벤토리/의료/정보 탭 → 단일 "가방" 레이아웃 (Tarkov 스타일)
+- **GameHUD 대폭 정리**: 스태미너 바·돈·배터리 바·HP 바 모두 제거, 부상 아이콘 + 하이드아웃 나가기 버튼만 남김
+- **InteractionSystem 2D 거리 수정**: `diff.y=0` (구 이소메트릭) → `Vector2` 거리 (XY 평면)
+- **전당포 NPC 스토리 비활성**: `StoryTriggerManager`에서 pawnshop S-002/S-017 체크 비활성 → 바로 일반 대화
+- **ShopUI NullRef 수정**: `defaultFont` 제거 + Image+Text 같은 GO 충돌 해소 (모두 자식 GO로 분리)
+
+## 6/17 세션 3차 변경사항
+- **장비 슬롯 시스템 신설 (타르코프식)**: 7슬롯 (Head/Armor/Rig/Backpack/PrimaryWeapon/SecondaryWeapon/Melee)
+  - `EquipSlot` enum + `ItemData.equipSlot/containerWidth/containerHeight` 추가
+  - `PlayerEquipment` 전면 재작성: 멀티슬롯 Dictionary, 하위호환 세이브
+  - `PlayerInventory` 가방 연동: 미장착=격자 0x0(인벤 없음), 장착 시 가방 크기로 동적 확장
+  - `InventoryGrid.Resize()` 메서드 추가 (넘치는 아이템 → 창고/월드드롭)
+  - 장비 무게 → CurrentWeight 합산
+- **CharacterPanelUI 장비 UI**: 좌측 패널에 7개 장비 슬롯 시각화 (아이콘+라벨+클릭 해제)
+  - 우클릭 컨텍스트 메뉴에 "장착" 옵션 추가
+- **상점 우측 컬럼**: 가방 → 창고(MainStash, 10x14)로 변경
+- **가방 미장착 시 인벤 숨김**: 중앙 패널에 "가방 미장착" 안내 표시, 격자·무게 텍스트 숨김. 아이템 줍기도 차단 + 토스트 "가방을 장착하세요"
+
+## 6/17 세션 4차 변경사항
+- **가방 미장착 시 인벤토리 숨김**: `PlayerInventory` pocketWidth/Height 기본=0, `HasBackpack` 프로퍼티. `CharacterPanelUI` 격자 대신 "가방 미장착" 플레이스홀더. `WorldItem`/`InteractableObject` 줍기 차단+토스트.
+- **F1 DebugTestUI 전면 재작성**: 5탭(플레이어/경제·평판/아이템/하이드아웃/씬). 스크랩 충전(1k~1M), 평판 티어 세팅, NPC 호감도, 하이드아웃 모듈 레벨 조작, 서바이벌 스탯 조절.
+- **RadioUI 신규**: 은신처 라디오 시설 UI. 4채널(소식/시장/구조/세계관), 레벨별 해금, 랜덤 메시지 수신+로그.
+- **DispatchUI 신규**: 은신처 파견 보드 UI. 슬롯 2개(Lv2에서 해금), 목적지 4곳(레벨별 해금), 30초 그레이박스 타이머, 인텔 결과 풀.
+- **HideoutController 버튼 추가**: 하단에 "라디오"·"파견 보드" 버튼 추가 (5개 버튼 레이아웃).
+- **UIManager 통합**: `IsAnyUIOpen()`·`CloseAll()`에 RadioUI/DispatchUI 추가.
+- **HideoutModuleManager.ForceSetLevel** 추가 (디버그용 비용 무시 레벨 설정).
+- **NPCRelationshipManager** 디버그 메서드 추가 (`GetAllRelationships`, `ModifyRelationship`).
+- **NPC 상점 확장**: veteran_scavenger + district_warden에 ShopData 연결 + 거래 대화 추가
+  - `Shop_scavenger.asset`: 생존물자 8종(buyRate 1.2, sellRate 0.4)
+  - `Shop_warden.asset`: 프리미엄 보급 6종(buyRate 0.9, sellRate 0.5), 진입 조건 호감도 30
+- **평판 기반 상점 필터링**: ShopUI에서 아이템 희귀도↔평판 티어 매핑. Common/Uncommon=F등급, Rare=D등급, Epic=B등급, Legendary=A등급. 미달 아이템은 "잠김" 표시+필요 티어 안내.
+- **ShopUI 상단바 평판 표시 개선**: "신뢰도 N" → "평판 N [호칭 등급]" 형식.
+
+## 6/17 세션 5차 변경사항
+- **하이드아웃에 라디오·파견 시설 타일 추가**: `HideoutGreyboxLayout`에 `라디오`(7,6.5)·`파견`(8,2.5) 시설 타일 배치. 다른 시설처럼 **클릭 = UI 열림**.
+  - `InteractableObject.InteractType`에 `Radio`/`Dispatch` 추가(끝에 추가 — 직렬화 인덱스 보존), 클릭 시 `RadioUI.Show()`/`DispatchUI.Show()`.
+  - `StashFacility` → 범용 `FacilityOverride(라벨/색/타입)`로 일반화(창고·라디오·파견 공용).
+  - ⚠️ **은신처 그레이박스 재빌드 필요**(아래) — 타일은 씬에 구워지므로 빌더 재실행해야 보임.
+- **에디터 메뉴 정리** (Tools ▸ TopDown):
+  - **빌드** = `안전구역`/`은신처`/`지역1` **3개만** (각각 ContentBuildAll·Hideout·Zone1 빌더).
+  - **맵** = 기능 툴만 남김(팔레트·데칼·조명 셋업·조명 쿠키·프롭 카탈로그/ID·낮밤 드라이버·이상현상 구역 생성). 씬 제작 항목 제거.
+  - **개발**(신설) = 인프라/단독 빌더 이동(시스템 씬·맵 편집 씬·인게임/안전가옥 씬·전투 샌드박스·적 프리팹·이상현상 배치·안전가옥/고철시장 그레이박스 단독).
+
+## 6/17 세션 6차 변경사항 — 하이드아웃 시설 UX 통합
+- **시설 = 시설별 단일 패널**(타르코프식). 별도 "시설 관리" 목록 UI 폐지.
+  - `HideoutUI` 재작성: 모듈 목록형 → `Show(module)` **단일 시설 패널**. Lv0=건설 비용+버튼 / Lv1~=업그레이드 비용+버튼 **+ 기능 버튼** / MAX=기능만. 재료 보유량 색표시.
+  - `InteractableObject` 시설 타입(Bed/Workbench/MedicalBench/CookingBench/Stash/Radio/Dispatch) 클릭 → `HideoutUI.Show(moduleKey)` 라우팅(기존 직접 CraftingUI/SleepUI 호출 대체).
+  - 기능 버튼: 작업대/의료대/조리대=제작, 창고=열기, 라디오=듣기, 파견=보내기, 침대=휴식. **건설(Lv≥1) 후에만 활성**.
+  - `HideoutController` 하단바 정리: "시설 관리/라디오/파견 보드" 버튼 제거 → 나가기+인벤토리만.
+  - ⚠️ 시설 전부 **Lv0 시작** → 클릭 시 건설 UI. 테스트는 F1→하이드아웃 탭에서 레벨 세팅 또는 스크랩+재료 지급 후 건설.
+
+## 6/18 세션 — 전체화면 UI 5종 + 하이드아웃/안전구역 기능 완성
+- **전체화면 UI 5종**(전부 한글 폰트 Malgun Gothic, 1920x1080, ESC 닫기):
+  - `RadioUI` 재작성 = 레트로 무전 콘솔(상단 주파수/우측 수신/좌측 힌트), `DispatchUI` 재작성 = 위성맵+좌측 정보패널, `MapSelectUI` 재작성 = 일러스트 도시맵+노드 마커.
+  - `QuestLogUI` 신규 = 메신저(좌측 발신자 목록/우측 스레드), `RaidMapUI` 신규 = 위성 전술맵(마커 현위치●·탈출◆·POI◇).
+  - `UIManager.IsAnyUIOpen/CloseAll`에 QuestLogUI/RaidMapUI 등록. `DebugTestUI` 하이드아웃 탭에 "예시 UI 미리보기" 버튼 5개(ShowPreview). `QuestHUD` 우측 패널 클릭 → QuestLogUI.
+  - 키: QuestLogUI=J, RaidMapUI=N (F1은 디버그 전용 — 충돌 제거). 둘 다 다른 UI 위엔 안 겹침. **최초 개방은 F1 미리보기 버튼/QuestHUD 클릭 후 키 토글 가능**.
+- **발전기 전력 시스템**(그레이박스): 은신처에 발전기 타일. `HideoutModuleManager.GeneratorPowered`/`ToggleGeneratorPower`(ON 시 `fuel_can` 1 소비, 런타임 전용·세이브 안 함). 발전기 패널에서 ON/OFF. **라디오/파견은 전력 ON 전제**(미점등 시 토스트). `InteractType.Generator` 추가.
+- **상점 위탁(consignment)**: ShopUI 상단 "거래/위탁" 탭. 위탁가=직접판매가×1.5, 슬롯 3개, 30초 후 정산(런타임 전용). 구매/판매 탭 그대로.
+- **작업대**: 무기 레시피 5종 전부 기본 해금(파이프·나무몽둥이·칼·배트·도끼). 수리 탭 이미 완성·연동 확인(작업대 한정, 내구도<max 무기 → 비용 소비 30% 복구). 퀘스트 보고 흐름(NPC 대화→CompleteQuest) 정상 확인.
+- **떠돌이 상인**: `wandering_merchant` NPCData + `Shop_merchant` ShopData(생필품 7종, buyRate 1.4/sellRate 0.45).
+
+## 6/18 세션 (2) — 저장 체크포인트 + 건물 트리거 전환
+- **저장 모델**(`docs/save.md`): `SaveCheckpoints` 신규. 디스크 커밋 = 레이드 시작/종료·안전맥락 이벤트(건물·의뢰)·침대 수면(수동). 레이드 중 이벤트(전투 시작/종료·건물·의뢰)는 **인메모리 Record만** → **크래시(LogType.Exception)** 시 1회 디스크 복구 커밋 / **강제종료·전원(OnApplicationQuit no-op)** 시 미커밋 → 다음 로드 = **레이드 시작 복귀**(세이브 스커밍 차단).
+  - `SaveManager` 리팩터: `BuildSaveData()`/`ToJson()`/`WriteToDisk()`/`WriteJson()` 분리(기존 `Save()`/`AutoSave()` 호환).
+  - `CombatStateTracker` 신규: 레이드 씬 0.5초 폴링, `EnemyController.IsEngagingPlayer` 기반 전투 시작 / 단절 30초 후 종료.
+  - 훅: QuestManager(수주/완료), SleepUI(BedSleepSave), RaidManager(시작/종료). GameBootstrap 폴백 등록.
+  - **리뷰 치명 수정 적용**: SafeHub 씬 = {Safehouse, Hideout, Pawnshop}. `ScrapMarket_GB`(레이드맵)를 안전허브에서 제거·`Pawnshop` 추가. `StoryTriggerManager`도 Pawnshop를 레이드에서 제외.
+- **건물 트리거 전환**(`docs/safehouse.md`): `BuildingEntrance`(Collider2D 트리거) — 플레이어 진입 시 자동 `SceneTransitionManager.TransitionTo`(페이드+additive, 캐릭터·Systems 유지). E키 안 씀.
+  - **전당포 실내 씬** `Pawnshop.unity` 신규(캐릭터 진입, 강무진+카운터, 출구 트리거→Safehouse/from_pawnshop).
+  - 안전가옥: 전당포 방→건물 외관+입구 트리거(→Pawnshop), 은신처 입구 Exit(E)→트리거(→Hideout). 복귀 스폰 from_pawnshop 추가.
+  - **하이드아웃만 예외**: 캐릭터 없음 + 퇴장은 UI 나가기/ESC만(트리거 퇴장 없음). 걸어나가는 출구 제거.
+
+## 6/18 세션 (3) — 버그 2건 수정 + 라디오/의뢰/파견 기능
+- **버그 수정**:
+  - 건설 재료가 가방만 인정하던 문제 → **가방+창고 합산**(`HideoutModuleManager.CountMaterial/ConsumeMaterial`, 발전기 연료 포함, 창고 우선 소비). HideoutUI 보유표시도 합산.
+  - 하이드아웃 퇴장 시 엉뚱한 위치 스폰 → `SceneTransitionManager`가 전환 중 옛 씬의 동명 스폰("default")을 잡던 문제. **목적지 씬 스폰만** 후보 한정 + 폴백(default→첫 스폰) + 경고 로그.
+  - **이어하기 시 아이템/스크랩/창고 전부 사라지던 치명 버그** → 원인 ①`GameStartHandler`(유일하게 Load() 호출)가 그레이박스 재빌드된 안전가옥에 없어서 **Load()가 아예 안 됨** ②Load가 가방 아이템을 장비(가방)보다 **먼저** 넣어 0x0 격자로 유실. 수정: `GameStartHandler`를 **영속 자가 부트스트랩 + 세션 1회 가드**(씬 배치 불필요·재빌드에도 생존·레이드 귀환 시 재로드 안 함)로 재작성, `SaveManager.Load` 순서를 **장비→가방**으로 교정, `TitleScreen` 새게임/이어하기에서 `ResetSession()`. **이 수정은 재빌드 불필요(재컴파일만).**
+- **라디오 주파수 다이얼**: 슬라이더(88~108MHz) 드래그 동조. 채널 틱(89.1/94.5/100.3/106.7), ±0.5 동조 시 수신 활성·밖이면 "치지직", 잠금채널 표시. 소리 TODO.
+- **예시 의뢰 2개**: `ex_q01`(통조림 회수/회수꾼/수집), `ex_q02`(점포 정리/관리인/처치). 통신함(QuestLogUI)이 Resources/Data/Quests를 가용의뢰로 자동 로드 → 발신자별 스레드 표시(코드 수정 없음).
+- **파견 고용**: DispatchUI "파견/고용" 탭. `DispatchRoster`(런타임) — 회수꾼 랜덤 풀 3명 + 계약(스크랩 견습500/숙련1500/베테랑4000) → 고정 파티 roster.
+
+## 사용자 확인 필요 (Unity) — ⚠️ 테스트 전 준비
+1. **안전구역 재빌드 필수**: `Tools ▸ TopDown ▸ 빌드 ▸ 안전구역` → Safehouse 갱신 + **`Pawnshop.unity` 자동 생성·빌드세팅 등록**(끝에서 PawnshopGreyboxLayout 호출). ⚠️ 이거 안 하면 전당포 진입 트리거가 빈 씬 로드 실패.
+2. **은신처 재빌드 필수**: `Tools ▸ TopDown ▸ 빌드 ▸ 은신처` → 라디오/파견/**발전기** 타일 + 입구 트리거.
+3. **MapSelectUI 갱신**: Systems 씬 구버전 MapSelect 직렬화면 인스펙터 Clear→Generate(또는 시스템 씬 재빌드).
+4. **컴파일 확인**: unity-reviewer 정적감사 = 치명 이슈(저장 씬분류) 수정 완료. 실제 플레이 검증은 사용자.
+5. 시설 전부 **Lv0 시작** → F1 디버그로 레벨/스크랩/재료 지급 후 건설·기능 테스트.
+6. **저장 테스트**: 레이드 진입(저장됨) → 전투/루팅 → Alt+F4 강제종료 → 재실행 시 레이드 시작으로 복귀(루팅 사라짐) 확인. 안전가옥 의뢰 수주/건물 진입은 즉시 저장 확인.
+
+→ 기능별 1개씩 테스트 순서는 채팅의 "테스트 체크리스트" 참조.
+
+## 미해결·후속(이번 세션 발견)
+- **StoryPlayer `auto_save` 노드**가 `SaveManager.AutoSave()` 직접 호출 → 레이드 씬 스토리에서 쓰이면 세이브 스커밍 모델 우회. 스토리 스크립트에서 레이드 중 auto_save 사용처 점검 필요(현재 확인 안 됨).
+
 ## 미해결·백로그
-- 떠돌이 상인 NPCData(대화) 미생성 → 채우려면 요청
 - **I32**: 타이틀↔`GameStartHandler` 프롤로그/세이브로드 배선(세이브/인트로 단계)
-- 손전등 끝처리 쿠키(보류) · 다음 큰 단계 = **Phase 2 레이드 맵 + 씬전환 루프**
+- 손전등 끝처리 쿠키(보류) — 손전등 개념 자체 삭제 예정
 - 평판 적립 연동·HUD(Phase 7) — 코어 루프 후
+- Phase 3 이후: 인벤토리·루팅 UI 바인딩 마무리, LootContainer 열기, WorldItem 아이콘

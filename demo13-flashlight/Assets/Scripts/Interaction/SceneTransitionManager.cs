@@ -282,21 +282,36 @@ public class SceneTransitionManager : MonoBehaviour
         // 스폰 포인트로 플레이어 이동
         if (string.IsNullOrEmpty(PendingSpawnPointId)) return;
 
+        var playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO == null) { PendingSpawnPointId = ""; return; }
+
+        // ★ 방금 로드된 '목적지 씬'의 스폰만 후보로 한정한다.
+        //   (건물 전환 중 옛 씬이 아직 안 내려가 같은 id "default"가 둘 존재하면
+        //    엉뚱한 씬의 스폰으로 순간이동하던 버그 방지.)
         var spawnPoints = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
+        SpawnPoint match = null, fallbackDefault = null, anyInScene = null;
         foreach (var sp in spawnPoints)
         {
-            if (sp.PointId == PendingSpawnPointId)
-            {
-                var playerGO = GameObject.FindGameObjectWithTag("Player");
-                if (playerGO != null)
-                {
-                    playerGO.transform.position = sp.transform.position;
-                    CameraFollow.Instance?.SnapToTarget();   // 카메라도 즉시 스냅 → 슬라이드 방지
+            if (sp == null) continue;
+            if (sp.gameObject.scene != scene) continue;   // 목적지 씬만
+            if (anyInScene == null) anyInScene = sp;
+            if (sp.PointId == PendingSpawnPointId) { match = sp; break; }
+            if (sp.PointId == "default") fallbackDefault = sp;
+        }
 
-                    Debug.Log($"[SceneTransition] 스폰: {PendingSpawnPointId} → {sp.transform.position}");
-                }
-                break;
-            }
+        var target = match ?? fallbackDefault ?? anyInScene;
+        if (target != null)
+        {
+            playerGO.transform.position = target.transform.position;
+            CameraFollow.Instance?.SnapToTarget();   // 카메라도 즉시 스냅 → 슬라이드 방지
+            if (match == null)
+                Debug.LogWarning($"[SceneTransition] 스폰 '{PendingSpawnPointId}' 미발견 → 대체 '{target.PointId}' 사용 (씬 {scene.name}).");
+            else
+                Debug.Log($"[SceneTransition] 스폰: {PendingSpawnPointId} → {target.transform.position}");
+        }
+        else
+        {
+            Debug.LogWarning($"[SceneTransition] 씬 '{scene.name}'에 스폰포인트 없음 — 플레이어 위치 유지.");
         }
 
         PendingSpawnPointId = "";

@@ -30,7 +30,38 @@ MonoBehaviour:
       requiredQuest: 
       requiredFlag: 
     priority: 0
-  eventDialogues: []
-  shopData: {fileID: 0}
+  eventDialogues:
+  - id: trade
+    triggerCondition:
+      minAffinity: 30
+      minTrust: 0
+      minFear: 0
+      requiredQuest: 
+      requiredFlag: 
+    npcLines:
+    - "...\uC790\uB124\uD55C\uD14C\uB9CC \uD2B9\uBCC4\uD788. \uBCF4\uAE09\uD488 \uC880
+      \uC788\uC5B4."
+    choices:
+    - text: "\uBCF4\uAE09\uD488 \uBCF4\uAE30"
+      affinityChange: 0
+      trustChange: 0
+      fearChange: 0
+      reputationChange: 0
+      resultLines: []
+      triggerQuest: 
+      setFlag: 
+      openShop: 1
+    - text: "\uB2E4\uC74C\uC5D0"
+      affinityChange: 0
+      trustChange: 0
+      fearChange: 0
+      reputationChange: 0
+      resultLines:
+      - "\uAE09\uD558\uC9C0 \uC54A\uC73C\uBA74 \uB2E4\uC74C\uC5D0."
+      triggerQuest: 
+      setFlag: 
+      openShop: 0
+    oneShot: 0
+  shopData: {fileID: 11400000, guid: 8b4e2c3d5f6a7b8091a2b3c4d5e6f7a9, type: 2}
   availableQuests: []
   shopInventory: []

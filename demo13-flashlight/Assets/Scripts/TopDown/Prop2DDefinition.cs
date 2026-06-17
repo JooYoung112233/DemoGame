@@ -21,9 +21,8 @@ public class Prop2DDefinition : ScriptableObject
 
     /// <summary>카탈로그 탭 분류. 데이터는 동일(스프라이트+콜라이더)하고 탭 정리·기본값에만 쓰인다.
     /// Floor=바닥(보통 콜라이더 없음), Wall=벽(막힘), Prop=장식/오브젝트, Object=스폰/상호작용 마커,
-    /// Decal=바닥/벽 위에 얹는 장식 오버레이(핏자국·그을음·균열·낙서 — 콜라이더·그림자 없음, 바닥보다 위에 그림),
-    /// Ceiling=천장/지붕(최상단 정렬, 콜라이더 없음 + 컷어웨이 트리거 — 플레이어 건물 진입 시 페이드아웃).</summary>
-    public enum Category { Floor, Wall, Prop, Object, Decal, Ceiling }
+    /// Decal=바닥/벽 위에 얹는 장식 오버레이(핏자국·그을음·균열·낙서 — 콜라이더·그림자 없음, 바닥보다 위에 그림).</summary>
+    public enum Category { Floor, Wall, Prop, Object, Decal }
 
     /// <summary>로컬 단위 박스 하나(Composite 모드). 월드 단위 = 픽셀/PixelsPerUnit.</summary>
     [System.Serializable]
@@ -206,20 +205,8 @@ public class Prop2DDefinition : ScriptableObject
     public string triggerTargetSpawnId = "";
     [Tooltip("트리거 영역 크기(월드 단위).")]
     public Vector2 triggerSize = new(2f, 2f);
+    [Tooltip("전환 영역 중심 오프셋(월드 단위). 입구가 아래쪽(80° 틸트 밑둥)이면 Y를 음수로 내려 입구에 맞춤.")]
+    public Vector2 triggerOffset = Vector2.zero;
     [Tooltip("들어오는 즉시 전환할지.")]
     public bool triggerAutoEnter = true;
-
-    [Header("Ceiling (천장 컷어웨이)")]
-    [Tooltip("건물 그룹 ID — 같은 ID 천장 조각들이 한 건물로 묶여 함께 페이드(플레이어가 한 조각 안에만 들어와도 전체). 비우면 조각 단독.")]
-    public string ceilingGroupId = "";
-    [Range(0f, 1f)]
-    [Tooltip("플레이어가 건물 안에 있을 때 지붕 알파(0=완전 투명, 0.3=반투명 유지).")]
-    public float ceilingHiddenAlpha = 0f;
-    [Tooltip("페이드 속도(알파/초). 클수록 빠르게 사라짐/복귀.")]
-    public float ceilingFadeSpeed = 6f;
-    [Tooltip("컷어웨이 트리거 크기 override(월드 단위). (0,0)=스프라이트 footprint 자동. " +
-             "80° 틸트로 밑둥(앞면)이 길면 세로를 키워 입구/밑둥까지 덮으면 진입 즉시 페이드.")]
-    public Vector2 ceilingTriggerSize = Vector2.zero;
-    [Tooltip("컷어웨이 트리거 중심 오프셋(월드 단위). 입구가 아래쪽이면 -Y로 내려 밑둥/입구를 덮음.")]
-    public Vector2 ceilingTriggerOffset = Vector2.zero;
 }

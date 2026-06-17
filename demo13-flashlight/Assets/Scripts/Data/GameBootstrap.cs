@@ -33,6 +33,8 @@ public static class GameBootstrap
 
         // 세이브 시스템
         EnsureSingleton<SaveManager>("SaveManager");
+        EnsureSingleton<SaveCheckpoints>("SaveCheckpoints");
+        EnsureSingleton<CombatStateTracker>("CombatStateTracker");
 
         // 스토리 시스템
         EnsureSingleton<StoryLocale>("StoryLocale");

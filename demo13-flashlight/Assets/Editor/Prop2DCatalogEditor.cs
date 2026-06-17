@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 탑다운 2D 프롭 카탈로그 에디터.
@@ -26,8 +24,6 @@ public class Prop2DCatalogEditor : EditorWindow
     bool _placeMode;
     bool _resizeMode;             // 씬에서 선택 프롭을 에지 드래그로 리사이즈(앵커=반대쪽)
     float _snap = 1f;
-    bool _ceilingXray;            // 천장 반투명(에디터 화면 전용 — 저장/플레이 영향 없음)
-    float _ceilingXrayAlpha = 0.3f;
     GameObject _ghost;          // 씬 배치 고스트 미리보기(HideAndDontSave)
     Prop2DDefinition _ghostDef; // 고스트가 만들어진 정의
     Vector3 _lastPaintPos;      // 드래그 연속 배치 간격 기준
@@ -41,10 +37,9 @@ public class Prop2DCatalogEditor : EditorWindow
     string _groupFilter = null;  // 팔레트 분류 필터. null=전체, ""=(미분류), 그 외=분류명
     [SerializeField] Prop2DDefinition.Category _tab = Prop2DDefinition.Category.Prop; // 활성 탭도 리로드 후 유지
     [SerializeField] TabState[] _tabStates; // 탭별 마지막 값(일괄 등록 설정 + 선택). 도메인 리로드/창 유지 시 보존.
-    static readonly string[] TabNames = { "바닥", "벽", "프롭", "오브젝트", "데칼", "천장" };
+    static readonly string[] TabNames = { "바닥", "벽", "프롭", "오브젝트", "데칼" };
     // 섹션 접기/펴기 (목록 + 폼)
     bool _foldList = true, _foldVisual = true, _foldCollider = true, _foldShadow, _foldBreak, _foldAged, _foldFunction, _foldPreview = true;
-    bool _foldCeiling = true;   // 천장 섹션(카테고리=천장일 때만 표시)
     bool _foldLight;            // 발광 섹션
     bool _foldBatch;            // 일괄 등록 설정 접이식(기본 접힘)
     GUIStyle _cellNameStyle;    // 팔레트 셀 이름 스타일(지연 생성)
@@ -60,55 +55,22 @@ public class Prop2DCatalogEditor : EditorWindow
     static readonly Color ColFunction = new(0.21f, 0.40f, 0.24f);
     static readonly Color ColPreview  = new(0.27f, 0.27f, 0.30f);
     static readonly Color ColBatch    = new(0.34f, 0.30f, 0.15f);
-    static readonly Color ColCeiling  = new(0.18f, 0.30f, 0.36f);
     static readonly Color ColLight    = new(0.44f, 0.40f, 0.16f);   // 발광(따뜻한 노랑)
 
     void OnEnable()
     {
-        GameLayers.EnsureSortingLayer("Ceiling"); // 천장 최상단 레이어 보장/복구(0 uniqueID 깨짐 수리)
         EnsureTabStates();
         LoadTabState(_tab);   // 마지막 탭 값 복원(도메인 리로드/재오픈 후)
         Refresh();
         SceneView.duringSceneGui += OnSceneGUI;
-        // 저장 시 천장 반투명이 씬/프리팹에 구워지지 않게 가드.
-        EditorSceneManager.sceneSaving += OnSceneSavingGuard;
-        EditorSceneManager.sceneSaved += OnSceneSavedGuard;
     }
 
     void OnDisable()
     {
         SaveTabState(_tab);   // 현재 탭 값 저장(리로드/닫기 전)
-        SetCeilingAlpha(1f);  // 닫기/리로드 전 천장 불투명 복원(반투명이 남지 않게)
         SceneView.duringSceneGui -= OnSceneGUI;
-        EditorSceneManager.sceneSaving -= OnSceneSavingGuard;
-        EditorSceneManager.sceneSaved -= OnSceneSavedGuard;
         CancelDraft();  // 미저장 드래프트 정리
         DestroyGhost(); // 고스트 미리보기 정리
-    }
-
-    // 씬 저장 직전 천장 불투명 복원 → 저장 후 반투명 재적용(반투명이 파일에 구워지는 것 방지).
-    void OnSceneSavingGuard(Scene scene, string path) { if (_ceilingXray) SetCeilingAlpha(1f); }
-    void OnSceneSavedGuard(Scene scene) { if (_ceilingXray) SetCeilingAlpha(_ceilingXrayAlpha); }
-
-    /// <summary>열린 씬의 모든 천장(SortingLayer=Ceiling) 스프라이트 알파를 a로 설정(에디터 화면 전용).
-    /// 값이 같으면 건너뛰어 불필요한 더티 방지.</summary>
-    void SetCeilingAlpha(float a)
-    {
-        foreach (var sr in FindCeilingRenderers())
-        {
-            if (Mathf.Approximately(sr.color.a, a)) continue;
-            var c = sr.color; c.a = a; sr.color = c;
-        }
-        SceneView.RepaintAll();
-    }
-
-    /// <summary>열린 씬의 천장 SpriteRenderer(SortingLayer=Ceiling, 고스트 제외) 열거.</summary>
-    static IEnumerable<SpriteRenderer> FindCeilingRenderers()
-    {
-        foreach (var sr in Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
-            if (sr != null && sr.sortingLayerName == "Ceiling"
-                && !sr.gameObject.hideFlags.HasFlag(HideFlags.HideAndDontSave))
-                yield return sr;
     }
 
     void Refresh()
@@ -177,13 +139,6 @@ public class Prop2DCatalogEditor : EditorWindow
         _batchShadowCasting = s.batchShadowCasting;
         _batchGroup = s.batchGroup ?? "";
         _selected = s.selected;
-
-        // 천장 탭은 최상단 'Ceiling' 정렬 레이어가 기본(미설정 시) — 보이게 시딩 + 레이어 보장.
-        if (cat == Prop2DDefinition.Category.Ceiling && _batchSortingLayer == "Default")
-        {
-            GameLayers.EnsureSortingLayer("Ceiling");
-            _batchSortingLayer = "Ceiling";
-        }
     }
 
     void OnGUI()
@@ -216,21 +171,6 @@ public class Prop2DCatalogEditor : EditorWindow
             "배치 격자 크기(월드 단위). 배치 모드에서 프롭이 이 격자에 맞춰 놓이고, 드래그 연속배치 간격·고스트 칸 크기도 이 값. 0=자유 배치."),
             BarLabel, GUILayout.Width(36));
         _snap = EditorGUILayout.FloatField(_snap, GUILayout.Width(50), GUILayout.Height(20));
-
-        // 천장 반투명(에디터 화면만) — 바닥/배치가 천장에 가릴 때.
-        GUILayout.Space(14);
-        var prevXrayBg = GUI.backgroundColor;
-        if (_ceilingXray) GUI.backgroundColor = new Color(0.5f, 0.8f, 1f);
-        bool xrayNow = GUILayout.Toggle(_ceilingXray, new GUIContent("천장 반투명",
-            "맵 편집 중 천장을 반투명하게(에디터 화면만 — 저장/플레이엔 영향 없음). 천장에 바닥이 가릴 때 켜기."),
-            "Button", GUILayout.Height(22), GUILayout.Width(86));
-        GUI.backgroundColor = prevXrayBg;
-        if (xrayNow != _ceilingXray) { _ceilingXray = xrayNow; SetCeilingAlpha(_ceilingXray ? _ceilingXrayAlpha : 1f); }
-        if (_ceilingXray)
-        {
-            float a = EditorGUILayout.Slider(_ceilingXrayAlpha, 0f, 1f, GUILayout.Width(90));
-            if (!Mathf.Approximately(a, _ceilingXrayAlpha)) { _ceilingXrayAlpha = a; SetCeilingAlpha(a); }
-        }
 
         GUILayout.FlexibleSpace();
         if (_placeMode)
@@ -699,38 +639,6 @@ public class Prop2DCatalogEditor : EditorWindow
             EditorGUI.indentLevel--;
         }
 
-        // 천장 컷어웨이 — 카테고리=천장일 때만.
-        if (def.category == Prop2DDefinition.Category.Ceiling)
-        {
-            _foldCeiling = SectionHeader("Ceiling · 천장 컷어웨이", _foldCeiling, ColCeiling);
-            if (_foldCeiling)
-            {
-                EditorGUI.indentLevel++;
-                def.ceilingGroupId = EditorGUILayout.TextField(
-                    new GUIContent("건물 그룹 ID", "같은 ID 천장 조각들이 한 건물로 묶여 함께 페이드. 비우면 조각 단독."),
-                    def.ceilingGroupId ?? "");
-                def.ceilingHiddenAlpha = EditorGUILayout.Slider(
-                    new GUIContent("숨김 알파", "플레이어가 안에 있을 때 지붕 알파(0=투명, 0.3=반투명 유지)."),
-                    def.ceilingHiddenAlpha, 0f, 1f);
-                def.ceilingFadeSpeed = EditorGUILayout.FloatField(
-                    new GUIContent("페이드 속도", "알파/초. 클수록 빠르게 사라짐/복귀."), def.ceilingFadeSpeed);
-
-                EditorGUILayout.Space(2);
-                def.ceilingTriggerSize = EditorGUILayout.Vector2Field(
-                    new GUIContent("트리거 크기(0=자동)", "컷어웨이 감지 영역 크기. (0,0)=스프라이트 footprint. " +
-                        "80° 틸트로 밑둥(앞면)이 길면 세로를 키워 입구까지 덮으면 진입 즉시 페이드."), def.ceilingTriggerSize);
-                def.ceilingTriggerOffset = EditorGUILayout.Vector2Field(
-                    new GUIContent("트리거 오프셋", "감지 영역 중심 이동. 입구가 아래쪽이면 Y를 음수로 내려 밑둥/입구를 덮음."),
-                    def.ceilingTriggerOffset);
-
-                if (def.sortingLayer != "Ceiling")
-                    EditorGUILayout.HelpBox("천장은 최상단 정렬 권장 — Visual의 Sorting Layer를 'Ceiling'으로.", MessageType.Warning);
-                EditorGUILayout.HelpBox("배치 시 빌더가 트리거 + CeilingFader 자동 부착. 플레이어 진입 → 부드럽게 페이드아웃.\n" +
-                    "입구(밑둥)에서 바로 사라지게 하려면 트리거 크기 세로↑ + 오프셋 Y↓(또는 씬에서 배치본의 BoxCollider2D를 직접 늘려도 됨).", MessageType.None);
-                EditorGUI.indentLevel--;
-            }
-        }
-
         _foldFunction = SectionHeader("Function · 기능 (스폰/탈출/지도판/수색 등)", _foldFunction, ColFunction);
         if (_foldFunction)
         {
@@ -787,8 +695,11 @@ public class Prop2DCatalogEditor : EditorWindow
                     def.triggerTargetScene = EditorGUILayout.TextField("전환 씬", def.triggerTargetScene);
                     def.triggerTargetSpawnId = EditorGUILayout.TextField("도착 Spawn ID", def.triggerTargetSpawnId);
                     def.triggerSize = EditorGUILayout.Vector2Field("영역 크기", def.triggerSize);
+                    def.triggerOffset = EditorGUILayout.Vector2Field(
+                        new GUIContent("영역 오프셋", "입구가 아래(밑둥)면 Y를 음수로 내려 입구에 맞춤."), def.triggerOffset);
                     def.triggerAutoEnter = EditorGUILayout.Toggle("즉시 전환", def.triggerAutoEnter);
-                    EditorGUILayout.HelpBox("플레이어가 영역에 들어오면 씬 전환(MapTriggerZone2D). 보통 '투명 마커'.", MessageType.None);
+                    EditorGUILayout.HelpBox("플레이어가 영역에 들어오면 씬 전환(MapTriggerZone2D). 보통 '투명 마커'. " +
+                        "건물 입구: 영역을 입구(밑둥)로 내려두면 들어올 때 자동 전환.", MessageType.None);
                     break;
             }
             EditorGUI.indentLevel--;
@@ -1195,13 +1106,9 @@ public class Prop2DCatalogEditor : EditorWindow
         int autoFit = AttachColliderAutoFitUnder(root);
         if (autoFit > 0) Debug.Log($"[Prop Catalog] ColliderAutoFit {autoFit}개 자동 부착(맵 저장).");
 
-        // 천장 반투명이 켜져 있으면 저장 전 불투명 복원(프리팹에 반투명 구워지지 않게), 저장 후 재적용.
-        bool wasXray = _ceilingXray;
-        if (wasXray) SetCeilingAlpha(1f);
         // 씬 오브젝트를 프리팹으로 저장하고 인스턴스로 연결(중첩 프리팹 참조 유지).
         PrefabUtility.SaveAsPrefabAssetAndConnect(root, path, InteractionMode.UserAction);
         AssetDatabase.SaveAssets();
-        if (wasXray) SetCeilingAlpha(_ceilingXrayAlpha);
         Debug.Log($"[Prop Catalog] 맵 프리팹 저장: {path} (루트 '{root.name}')");
 
         // 저장 시 DontSave 런타임 자식(발밑 그림자·손상/풍화 오버레이)이 떨어져 에디터에서 사라짐 → 강제 재생성.
@@ -1227,8 +1134,7 @@ public class Prop2DCatalogEditor : EditorWindow
             var go = sr.gameObject;
             var box = go.GetComponent<BoxCollider2D>();
             if (box == null) continue;                                  // Box 전용
-            if (box.isTrigger) continue;                                // 트리거(천장 컷어웨이/씬전환 등)는 의도된 영역 — 자동맞춤 제외
-            if (go.GetComponent<CeilingFader>() != null) continue;      // 천장 컷어웨이 트리거 보호
+            if (box.isTrigger) continue;                                // 트리거(씬전환 등)는 의도된 영역 — 자동맞춤 제외
             if (go.GetComponent<ColliderAutoFit>() != null) continue;   // 이미 있음
 
             // 현재 콜라이더를 보존하도록 scale/offset 역산(이후 스프라이트 변경엔 비례 추종).
@@ -1290,13 +1196,6 @@ public class Prop2DCatalogEditor : EditorWindow
         {
             _draft.function = Prop2DDefinition.Function.Interactable;
             _foldFunction = true;
-        }
-        // 천장 탭은 최상단 'Ceiling' 정렬 레이어 기본 + 천장 섹션 펼침.
-        if (_tab == Prop2DDefinition.Category.Ceiling)
-        {
-            GameLayers.EnsureSortingLayer("Ceiling");
-            _draft.sortingLayer = "Ceiling";
-            _foldCeiling = true;
         }
         _selected = null;
     }
@@ -1498,12 +1397,10 @@ public class Prop2DCatalogEditor : EditorWindow
             renamed > 0 ? $"{renamed}개를 인덱스 형식으로 변경했습니다.\n(목록은 Console)" : "이미 모두 인덱스 형식입니다.", "확인");
     }
 
-    /// <summary>카테고리별 기본 콜라이더: 바닥·데칼·천장=없음(통과), 그 외=Box(막힘).
-    /// (천장은 막힘 없음 — 컷어웨이 트리거는 빌더가 따로 부착.)</summary>
+    /// <summary>카테고리별 기본 콜라이더: 바닥·데칼=없음(통과), 그 외=Box(막힘).</summary>
     static Prop2DDefinition.ColliderMode DefaultCollider(Prop2DDefinition.Category cat)
         => (cat == Prop2DDefinition.Category.Floor
-            || cat == Prop2DDefinition.Category.Decal
-            || cat == Prop2DDefinition.Category.Ceiling)
+            || cat == Prop2DDefinition.Category.Decal)
             ? Prop2DDefinition.ColliderMode.None
             : Prop2DDefinition.ColliderMode.Box;
 

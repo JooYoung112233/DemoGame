@@ -2,24 +2,24 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 지역 선택 UI (Canvas/uGUI).
+/// 지역 선택 UI (전체화면 Canvas/uGUI).
 /// 지도판(MapBoard) 상호작용 시 표시.
-/// 지역 데이터: WorldRegionCatalog (docs/world-map.md).
+/// 디자인: 양식화된 일러스트 도시 맵(그레이박스: 어두운 도시 실루엣) 위에
+/// 지역/랜드마크 노드 마커 → 마커 선택 시 우측 정보 패널 + 출전.
+/// (docs/world-map.md §9-A · 지역 데이터: WorldRegionCatalog)
 ///
 /// Editor-time 사용:
-///   Inspector에서 Generate UI / Clear UI 버튼으로 Canvas 생성/삭제.
+///   Inspector에서 Generate UI / Clear UI 로 Canvas 생성/삭제.
 ///   런타임: Awake()에서 미생성 시 자동 GenerateUI() + BindEvents().
+///
+/// 주의: Systems 씬에서 UIManager 자식으로 살고 [SerializeField] 참조를 가진다.
+///       Systems 프리팹에 구버전 캔버스가 직렬화돼 있으면 인스펙터에서
+///       Clear → Generate 로 재생성해야 한다.
 /// </summary>
 public class MapSelectUI : MonoBehaviour
 {
     public bool IsShowing => isShowing;
     public bool IsGenerated => canvas != null;
-
-    const float BtnHeight = 38f;
-    const float BtnSpacing = 42f;
-    const float ListTop = -58f;
-    const float ListLeft = 16f;
-    const float BtnWidth = 248f;
 
     bool isShowing;
 
@@ -31,12 +31,42 @@ public class MapSelectUI : MonoBehaviour
     [SerializeField] Button confirmBtn;
     [SerializeField] Button cancelBtn;
     [SerializeField] Text confirmText;
-    [SerializeField] Button[] regionButtons;
-    [SerializeField] Text[] regionBtnTexts;
+    [SerializeField] Button[] regionButtons;   // 맵 위 노드 마커 버튼
+    [SerializeField] Text[] regionBtnTexts;     // 마커 하단 라벨(지역명 + 시간)
+    [SerializeField] Text infoTimeText;         // 우측 정보 패널 시간대 라인
 
     static WorldRegionCatalog.RegionDefinition[] Regions => WorldRegionCatalog.All;
 
     int selectedRegion = -1;
+
+    // ── 한글 폰트 로더 ──────────────────────────
+    static Font _kr;
+    static Font KR
+    {
+        get
+        {
+            if (_kr == null)
+                _kr = Font.CreateDynamicFontFromOSFont(
+                    new[] { "Malgun Gothic", "맑은 고딕", "Gulim", "Dotum", "Arial" }, 16);
+            return _kr != null ? _kr : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        }
+    }
+
+    // ── 색 팔레트(어두운 전술 톤) ────────────────
+    static readonly Color DimBg = new Color(0.05f, 0.06f, 0.08f, 0.96f);
+    static readonly Color Panel = new Color(0.11f, 0.12f, 0.15f, 0.98f);
+    static readonly Color Panel2 = new Color(0.07f, 0.08f, 0.11f, 0.98f);
+    static readonly Color Gold = new Color(0.95f, 0.85f, 0.30f);
+    static readonly Color BodyText = new Color(0.93f, 0.93f, 0.92f);
+    static readonly Color FaintText = new Color(0.55f, 0.58f, 0.66f);
+    static readonly Color Line = new Color(1f, 1f, 1f, 0.12f);
+    static readonly Color BtnCol = new Color(0.16f, 0.18f, 0.24f, 0.95f);
+    static readonly Color Danger = new Color(0.5f, 0.22f, 0.22f);
+    static readonly Color Good = new Color(0.45f, 0.85f, 0.45f);
+    static readonly Color Warn = new Color(1f, 0.55f, 0.45f);
+
+    const float HeaderH = 64f;
+    const float InfoPanelW = 380f;
 
     void Awake()
     {
@@ -51,8 +81,6 @@ public class MapSelectUI : MonoBehaviour
     public void GenerateUI()
     {
         int count = Regions.Length;
-        float listHeight = count * BtnSpacing + 20f;
-        float panelH = Mathf.Max(480f, listHeight + 120f);
 
         var canvasGO = new GameObject("MapSelect_Canvas");
         canvasGO.transform.SetParent(transform, false);
@@ -69,6 +97,7 @@ public class MapSelectUI : MonoBehaviour
         canvasGO.AddComponent<GraphicRaycaster>();
         var canvasRT = canvasGO.GetComponent<RectTransform>();
 
+        // ── 루트: 전체화면 딤 배경 ──
         panelRoot = new GameObject("PanelRoot");
         panelRoot.transform.SetParent(canvasRT, false);
         var rootRT = panelRoot.AddComponent<RectTransform>();
@@ -78,137 +107,233 @@ public class MapSelectUI : MonoBehaviour
         rootRT.offsetMax = Vector2.zero;
 
         dimBg = panelRoot.AddComponent<Image>();
-        dimBg.color = new Color(0, 0, 0, 0.75f);
+        dimBg.color = DimBg;
 
-        var panel = CreateRect(panelRoot.transform, "CenterPanel",
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(620, panelH));
-        var panelImg = panel.gameObject.AddComponent<Image>();
-        panelImg.color = new Color(0.08f, 0.08f, 0.12f, 0.95f);
+        // ── 상단 헤더바 ──
+        BuildHeader(rootRT);
 
-        titleText = MakeText(panel, "Title", "◈ 다녀올게 — 출전 지역 ◈",
-            new Vector2(0, -12), new Vector2(580, 32), 20, new Color(1f, 0.85f, 0.3f), TextAnchor.MiddleCenter);
-        titleText.fontStyle = FontStyle.Bold;
+        // ── 본문 영역(헤더 아래 ~ 화면 하단) ──
+        var body = CreateStretch(panelRoot.transform, "Body");
+        body.offsetMin = new Vector2(40, 40);     // 좌·하 여백
+        body.offsetMax = new Vector2(-40, -(HeaderH + 16)); // 우·상 여백(헤더 아래)
 
-        MakeText(panel, "Subtitle", "지구를 선택하세요 (낮/밤은 지역마다 독립 진행)",
-            new Vector2(0, -38), new Vector2(580, 22), 12, new Color(0.55f, 0.6f, 0.7f), TextAnchor.MiddleCenter);
+        // 우측 정보 패널
+        BuildInfoPanel(body);
 
-        MakeLine(panel, -52);
+        // 좌측 일러스트 맵 영역(우측 패널 폭 + 간격만큼 비움)
+        var mapArea = CreateStretch(body, "MapArea");
+        mapArea.offsetMin = Vector2.zero;
+        mapArea.offsetMax = new Vector2(-(InfoPanelW + 24), 0);
+        BuildMapBackdrop(mapArea);
 
+        // ── 노드 마커 배치 ──
         regionButtons = new Button[count];
         regionBtnTexts = new Text[count];
+
         for (int i = 0; i < count; i++)
-        {
-            var r = Regions[i];
-
-            var btnGO = new GameObject($"Region_{r.regionId}");
-            btnGO.transform.SetParent(panel, false);
-
-            var btnRT = btnGO.AddComponent<RectTransform>();
-            btnRT.anchorMin = new Vector2(0, 1);
-            btnRT.anchorMax = new Vector2(0, 1);
-            btnRT.pivot = new Vector2(0, 1);
-            btnRT.anchoredPosition = new Vector2(ListLeft, ListTop - i * BtnSpacing);
-            btnRT.sizeDelta = new Vector2(BtnWidth, BtnHeight);
-
-            var btnImg = btnGO.AddComponent<Image>();
-            btnImg.color = WorldRegionCatalog.GetButtonColor(r, false);
-
-            var btn = btnGO.AddComponent<Button>();
-            btn.targetGraphic = btnImg;
-
-            if (!r.IsPlayable)
-            {
-                btn.interactable = false;
-            }
-            else
-            {
-                var colors = btn.colors;
-                colors.highlightedColor = WorldRegionCatalog.GetButtonColor(r, true);
-                colors.pressedColor = WorldRegionCatalog.GetButtonColor(r, true) * 0.85f;
-                btn.colors = colors;
-            }
-
-            var txtGO = new GameObject("Text");
-            txtGO.transform.SetParent(btnGO.transform, false);
-            var txtRT = txtGO.AddComponent<RectTransform>();
-            txtRT.anchorMin = Vector2.zero;
-            txtRT.anchorMax = Vector2.one;
-            txtRT.offsetMin = new Vector2(8, 0);
-            txtRT.offsetMax = new Vector2(-4, 0);
-
-            var txt = txtGO.AddComponent<Text>();
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = 14;
-            txt.fontStyle = FontStyle.Bold;
-            txt.color = r.IsPlayable ? Color.white : new Color(0.45f, 0.45f, 0.5f);
-            txt.text = FormatButtonLabel(r);
-            txt.alignment = TextAnchor.MiddleLeft;
-
-            regionButtons[i] = btn;
-            regionBtnTexts[i] = txt;
-        }
-
-        float infoH = Mathf.Min(panelH - 80f, 340f);
-        var infoPanel = CreateRect(panel, "InfoPanel",
-            new Vector2(1, 1), new Vector2(1, 1), new Vector2(300, infoH));
-        infoPanel.pivot = new Vector2(1, 1);
-        infoPanel.anchoredPosition = new Vector2(-14, -56);
-        var infoBg = infoPanel.gameObject.AddComponent<Image>();
-        infoBg.color = new Color(0.05f, 0.05f, 0.08f, 0.85f);
-
-        selectedInfoText = MakeText(infoPanel, "InfoText", "지역을 선택하세요",
-            new Vector2(10, -8), new Vector2(280, infoH - 16), 13, new Color(0.8f, 0.85f, 0.9f), TextAnchor.UpperLeft);
-
-        var confirmGO = new GameObject("ConfirmBtn");
-        confirmGO.transform.SetParent(panel, false);
-        var confirmRT = confirmGO.AddComponent<RectTransform>();
-        confirmRT.anchorMin = new Vector2(1, 0);
-        confirmRT.anchorMax = new Vector2(1, 0);
-        confirmRT.pivot = new Vector2(1, 0);
-        confirmRT.anchoredPosition = new Vector2(-14, 16);
-        confirmRT.sizeDelta = new Vector2(140, 38);
-
-        var confirmImg = confirmGO.AddComponent<Image>();
-        confirmImg.color = new Color(0.15f, 0.5f, 0.2f);
-
-        confirmBtn = confirmGO.AddComponent<Button>();
-        confirmBtn.targetGraphic = confirmImg;
-        confirmBtn.interactable = false;
-
-        var cColors = confirmBtn.colors;
-        cColors.highlightedColor = new Color(0.2f, 0.7f, 0.3f);
-        cColors.pressedColor = new Color(0.1f, 0.4f, 0.15f);
-        cColors.disabledColor = new Color(0.2f, 0.2f, 0.2f);
-        confirmBtn.colors = cColors;
-
-        confirmText = MakeChildText(confirmGO.transform, "출전", 16, Color.white);
-
-        var cancelGO = new GameObject("CancelBtn");
-        cancelGO.transform.SetParent(panel, false);
-        var cancelRT = cancelGO.AddComponent<RectTransform>();
-        cancelRT.anchorMin = new Vector2(0, 0);
-        cancelRT.anchorMax = new Vector2(0, 0);
-        cancelRT.pivot = new Vector2(0, 0);
-        cancelRT.anchoredPosition = new Vector2(16, 16);
-        cancelRT.sizeDelta = new Vector2(100, 38);
-
-        var cancelImg = cancelGO.AddComponent<Image>();
-        cancelImg.color = new Color(0.4f, 0.15f, 0.15f);
-
-        cancelBtn = cancelGO.AddComponent<Button>();
-        cancelBtn.targetGraphic = cancelImg;
-
-        var xColors = cancelBtn.colors;
-        xColors.highlightedColor = new Color(0.6f, 0.2f, 0.2f);
-        xColors.pressedColor = new Color(0.3f, 0.1f, 0.1f);
-        cancelBtn.colors = xColors;
-
-        MakeChildText(cancelGO.transform, "취소", 14, Color.white);
-
-        MakeText(panel, "EscHint", "[ESC] 닫기",
-            new Vector2(130, 18), new Vector2(200, 28), 12, new Color(0.5f, 0.5f, 0.5f), TextAnchor.MiddleLeft);
+            BuildRegionMarker(mapArea, i);
 
         panelRoot.SetActive(false);
+    }
+
+    void BuildHeader(Transform parent)
+    {
+        var header = CreateRect(parent, "Header", new Vector2(0, 1), new Vector2(1, 1), Vector2.zero);
+        header.pivot = new Vector2(0.5f, 1f);
+        header.anchoredPosition = Vector2.zero;
+        header.sizeDelta = new Vector2(0, HeaderH);
+        var hbg = header.gameObject.AddComponent<Image>();
+        hbg.color = Panel2;
+
+        titleText = MakeText(header, "Title", "출전 지역 — 다녀올게",
+            new Vector2(28, 0), new Vector2(900, HeaderH), 26, Gold, TextAnchor.MiddleLeft);
+        var ttRT = titleText.rectTransform;
+        ttRT.anchorMin = new Vector2(0, 0);
+        ttRT.anchorMax = new Vector2(0, 1);
+        ttRT.pivot = new Vector2(0, 0.5f);
+        ttRT.anchoredPosition = new Vector2(28, 0);
+        titleText.fontStyle = FontStyle.Bold;
+
+        // 닫기 ✕ 버튼 (우측 끝, 48x40)
+        var closeRT = CreateRect(header, "CloseBtn", new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(48, 40));
+        closeRT.pivot = new Vector2(1, 0.5f);
+        closeRT.anchoredPosition = new Vector2(-12, 0);
+        var closeImg = closeRT.gameObject.AddComponent<Image>();
+        closeImg.color = Danger;
+        cancelBtn = closeRT.gameObject.AddComponent<Button>();
+        cancelBtn.targetGraphic = closeImg;
+        var xColors = cancelBtn.colors;
+        xColors.highlightedColor = new Color(0.65f, 0.28f, 0.28f);
+        xColors.pressedColor = new Color(0.35f, 0.14f, 0.14f);
+        cancelBtn.colors = xColors;
+        MakeChildText(closeRT, "✕", 22, BodyText);
+
+        // 헤더 아래 1px 구분선
+        var lineRT = CreateRect(parent, "HeaderLine", new Vector2(0, 1), new Vector2(1, 1), Vector2.zero);
+        lineRT.pivot = new Vector2(0.5f, 1f);
+        lineRT.anchoredPosition = new Vector2(0, -HeaderH);
+        lineRT.sizeDelta = new Vector2(0, 1);
+        lineRT.gameObject.AddComponent<Image>().color = Line;
+    }
+
+    void BuildMapBackdrop(Transform mapArea)
+    {
+        // 맵 배경 패널
+        var bg = mapArea.gameObject.AddComponent<Image>();
+        bg.color = Panel2;
+
+        // 어두운 도시 실루엣(그레이박스) — 하단에 빌딩 블록 몇 개
+        var skyline = CreateStretch(mapArea, "Skyline");
+        skyline.anchorMin = new Vector2(0, 0);
+        skyline.anchorMax = new Vector2(1, 0);
+        skyline.pivot = new Vector2(0.5f, 0);
+        skyline.anchoredPosition = Vector2.zero;
+        skyline.sizeDelta = new Vector2(0, 220);
+
+        // 빌딩 실루엣 블록(절차적)
+        float[] widths = { 70, 110, 60, 140, 90, 120, 80, 100, 130, 70 };
+        float[] heights = { 90, 150, 70, 200, 120, 170, 100, 140, 190, 80 };
+        float x = 12f;
+        for (int i = 0; i < widths.Length; i++)
+        {
+            var b = CreateRect(skyline, $"Bldg{i}", new Vector2(0, 0), new Vector2(0, 0), new Vector2(widths[i], heights[i]));
+            b.pivot = new Vector2(0, 0);
+            b.anchoredPosition = new Vector2(x, 0);
+            var img = b.gameObject.AddComponent<Image>();
+            float shade = 0.10f + (i % 3) * 0.025f;
+            img.color = new Color(shade, shade + 0.01f, shade + 0.03f, 0.9f);
+            x += widths[i] + 18f;
+        }
+
+        // 안내 라벨
+        var hint = MakeText(mapArea, "MapHint", "도시 구역 — 마커를 선택해 정찰/출전 지역을 고르세요",
+            new Vector2(16, -12), new Vector2(640, 26), 14, FaintText, TextAnchor.UpperLeft);
+        hint.fontStyle = FontStyle.Italic;
+    }
+
+    void BuildRegionMarker(Transform mapArea, int i)
+    {
+        var r = Regions[i];
+
+        // 노드 위치(절차적 양식화 배치) — 좌상~우하로 흩어진 도시 노드
+        Vector2[] anchors =
+        {
+            new Vector2(0.16f, 0.66f),
+            new Vector2(0.38f, 0.42f),
+            new Vector2(0.56f, 0.70f),
+            new Vector2(0.72f, 0.40f),
+            new Vector2(0.86f, 0.62f),
+        };
+        Vector2 a = i < anchors.Length ? anchors[i] : new Vector2(0.5f, 0.5f);
+
+        var btnRT = CreateRect(mapArea, $"Marker_{r.regionId}", a, a, new Vector2(56, 56));
+        btnRT.pivot = new Vector2(0.5f, 0.5f);
+        btnRT.anchoredPosition = Vector2.zero;
+
+        var btnImg = btnRT.gameObject.AddComponent<Image>();
+        btnImg.color = WorldRegionCatalog.GetButtonColor(r, false);
+
+        var btn = btnRT.gameObject.AddComponent<Button>();
+        btn.targetGraphic = btnImg;
+
+        if (!r.IsPlayable)
+        {
+            btn.interactable = false;
+        }
+        else
+        {
+            var colors = btn.colors;
+            colors.highlightedColor = WorldRegionCatalog.GetButtonColor(r, true);
+            colors.pressedColor = WorldRegionCatalog.GetButtonColor(r, true) * 0.85f;
+            btn.colors = colors;
+        }
+
+        // 마커 아이콘(잠금/난이도)
+        var icon = MakeChildText(btnRT, r.IsPlayable ? "◈" : "🔒", 22,
+            r.IsPlayable ? BodyText : new Color(0.45f, 0.45f, 0.5f));
+        icon.name = "Icon";
+
+        // 마커 하단 지역명 라벨(+ 시간; UpdateRegionTimeDisplay가 갱신)
+        var label = MakeText(btnRT, "Label", FormatButtonLabel(r),
+            new Vector2(0, 0), new Vector2(170, 36), 13,
+            r.IsPlayable ? BodyText : FaintText, TextAnchor.UpperCenter);
+        var labelRT = label.rectTransform;
+        labelRT.anchorMin = new Vector2(0.5f, 0);
+        labelRT.anchorMax = new Vector2(0.5f, 0);
+        labelRT.pivot = new Vector2(0.5f, 1f);
+        labelRT.anchoredPosition = new Vector2(0, -6);
+        label.fontStyle = FontStyle.Bold;
+        label.horizontalOverflow = HorizontalWrapMode.Overflow;
+
+        regionButtons[i] = btn;
+        regionBtnTexts[i] = label;
+    }
+
+    void BuildInfoPanel(Transform body)
+    {
+        var infoPanelRT = CreateRect(body, "InfoPanel", new Vector2(1, 0), new Vector2(1, 1), Vector2.zero);
+        infoPanelRT.pivot = new Vector2(1, 0.5f);
+        infoPanelRT.anchorMin = new Vector2(1, 0);
+        infoPanelRT.anchorMax = new Vector2(1, 1);
+        infoPanelRT.offsetMin = new Vector2(-InfoPanelW, 0);
+        infoPanelRT.offsetMax = new Vector2(0, 0);
+        var bg = infoPanelRT.gameObject.AddComponent<Image>();
+        bg.color = Panel;
+
+        // 제목 라인(지역명) — 상단 좌우 스트레치, 높이 34
+        var titleRT = CreateRect(infoPanelRT, "InfoTitle", new Vector2(0, 1), new Vector2(1, 1), Vector2.zero);
+        titleRT.pivot = new Vector2(0.5f, 1f);
+        titleRT.offsetMin = new Vector2(20, -54);  // y: 1 - 20(top margin) - 34(height)
+        titleRT.offsetMax = new Vector2(-20, -20);
+        var infoTitle = titleRT.gameObject.AddComponent<Text>();
+        ApplyTextStyle(infoTitle, 20, Gold, TextAnchor.UpperLeft);
+        infoTitle.fontStyle = FontStyle.Bold;
+        infoTitle.text = "지역 정보";
+        infoTitle.name = "InfoTitleText";
+
+        // 시간대 라인
+        infoTimeText = MakeText(infoPanelRT, "InfoTime", "",
+            new Vector2(20, -58), new Vector2(InfoPanelW - 40, 24), 14, FaintText, TextAnchor.UpperLeft);
+
+        MakeLine(infoPanelRT, -88, InfoPanelW - 40);
+
+        // 설명 본문(스크롤 없이 길게)
+        selectedInfoText = MakeText(infoPanelRT, "InfoText", "지역을 선택하세요",
+            new Vector2(20, -100), new Vector2(InfoPanelW - 40, 600), 15, BodyText, TextAnchor.UpperLeft);
+
+        // 하단 출전 버튼 (좌우 스트레치, 하단 기준 — offset이 rect를 완전 정의)
+        var confirmRT = CreateRect(infoPanelRT, "ConfirmBtn", new Vector2(0, 0), new Vector2(1, 0), Vector2.zero);
+        confirmRT.pivot = new Vector2(0.5f, 0);
+        confirmRT.offsetMin = new Vector2(20, 72);
+        confirmRT.offsetMax = new Vector2(-20, 72 + 52);
+        var confirmImg = confirmRT.gameObject.AddComponent<Image>();
+        confirmImg.color = new Color(Good.r * 0.35f, Good.g * 0.35f, Good.b * 0.35f, 0.95f);
+        confirmBtn = confirmRT.gameObject.AddComponent<Button>();
+        confirmBtn.targetGraphic = confirmImg;
+        confirmBtn.interactable = false;
+        var cColors = confirmBtn.colors;
+        cColors.highlightedColor = new Color(Good.r * 0.5f, Good.g * 0.5f, Good.b * 0.5f, 1f);
+        cColors.pressedColor = new Color(Good.r * 0.28f, Good.g * 0.28f, Good.b * 0.28f, 1f);
+        cColors.disabledColor = new Color(0.2f, 0.2f, 0.22f, 0.9f);
+        confirmBtn.colors = cColors;
+        confirmText = MakeChildText(confirmRT, "출전", 18, BodyText);
+        confirmText.fontStyle = FontStyle.Bold;
+
+        // 하단 취소 버튼
+        var cancel2RT = CreateRect(infoPanelRT, "CancelBtn2", new Vector2(0, 0), new Vector2(1, 0), Vector2.zero);
+        cancel2RT.pivot = new Vector2(0.5f, 0);
+        cancel2RT.offsetMin = new Vector2(20, 16);
+        cancel2RT.offsetMax = new Vector2(-20, 16 + 44);
+        var cancel2Img = cancel2RT.gameObject.AddComponent<Image>();
+        cancel2Img.color = BtnCol;
+        var cancel2Btn = cancel2RT.gameObject.AddComponent<Button>();
+        cancel2Btn.targetGraphic = cancel2Img;
+        var c2Colors = cancel2Btn.colors;
+        c2Colors.highlightedColor = new Color(0.22f, 0.24f, 0.3f, 1f);
+        c2Colors.pressedColor = new Color(0.12f, 0.14f, 0.18f, 1f);
+        cancel2Btn.colors = c2Colors;
+        MakeChildText(cancel2RT, "취소  [ESC]", 15, FaintText);
+        cancel2Btn.onClick.AddListener(Hide);
     }
 
     public void BindEvents()
@@ -252,6 +377,7 @@ public class MapSelectUI : MonoBehaviour
         confirmText = null;
         regionButtons = null;
         regionBtnTexts = null;
+        infoTimeText = null;
     }
 
     // ══════════════════════════════════════
@@ -290,8 +416,7 @@ public class MapSelectUI : MonoBehaviour
 
     static string FormatButtonLabel(in WorldRegionCatalog.RegionDefinition r)
     {
-        string lockMark = r.IsPlayable ? "" : "🔒 ";
-        return $"{lockMark}{r.displayName}";
+        return r.displayName;
     }
 
     void SelectRegion(int idx)
@@ -302,37 +427,50 @@ public class MapSelectUI : MonoBehaviour
 
     void UpdateSelection()
     {
+        if (regionButtons == null) return;
+
         for (int i = 0; i < regionButtons.Length; i++)
         {
             if (regionButtons[i] == null) continue;
             var r = Regions[i];
             var img = regionButtons[i].GetComponent<Image>();
-            img.color = WorldRegionCatalog.GetButtonColor(r, i == selectedRegion);
+            if (img != null)
+                img.color = WorldRegionCatalog.GetButtonColor(r, i == selectedRegion);
         }
 
         if (selectedRegion >= 0 && selectedRegion < Regions.Length)
         {
-            var r = Regions[selectedRegion];
-            string timeInfo = GetRegionTimeText(r.regionId);
-            string desc = WorldRegionCatalog.BuildDescription(r);
-
-            // 잠금 지역이면 잠금 안내 추가
-            if (!r.IsPlayable)
-            {
-                string lockMsg = StoryLocale.Instance != null
-                    ? StoryLocale.Instance.Get("UI_MAP_LOCKED")
-                    : "아직 갈 수 없습니다.";
-                desc = $"<color=#FF6666>🔒 {lockMsg}</color>\n\n{desc}";
-            }
-
-            selectedInfoText.text = $"<b><color=#{ColorToHex(r.accentColor)}>{r.displayName}</color></b>\n{timeInfo}\n\n{desc}";
-            confirmBtn.interactable = r.IsPlayable;
+            RenderInfoPanel(Regions[selectedRegion]);
+            confirmBtn.interactable = Regions[selectedRegion].IsPlayable;
         }
         else
         {
-            selectedInfoText.text = "지역을 선택하세요";
-            confirmBtn.interactable = false;
+            if (infoTimeText != null) infoTimeText.text = "";
+            if (selectedInfoText != null)
+                selectedInfoText.text = "<color=#8C95A8>맵에서 지역 마커를 선택하세요.</color>";
+            if (confirmBtn != null) confirmBtn.interactable = false;
         }
+    }
+
+    void RenderInfoPanel(in WorldRegionCatalog.RegionDefinition r)
+    {
+        string timeInfo = GetRegionTimeText(r.regionId);
+        string desc = WorldRegionCatalog.BuildDescription(r);
+
+        if (!r.IsPlayable)
+        {
+            string lockMsg = StoryLocale.Instance != null
+                ? StoryLocale.Instance.Get("UI_MAP_LOCKED")
+                : "아직 갈 수 없습니다.";
+            desc = $"<color=#FF8C74>🔒 {lockMsg}</color>\n\n{desc}";
+        }
+
+        if (infoTimeText != null)
+            infoTimeText.text = timeInfo;
+
+        if (selectedInfoText != null)
+            selectedInfoText.text =
+                $"<b><color=#{ColorToHex(r.accentColor)}>{r.displayName}</color></b>\n{desc}";
     }
 
     static string ColorToHex(Color c)
@@ -400,22 +538,19 @@ public class MapSelectUI : MonoBehaviour
                 continue;
             }
 
-            string icon = rt.isNight ? "●" : "○";   // ● 짙은 현상 / ○ 안전 구간 (낮/밤 폐기)
+            string icon = rt.isNight ? "●" : "○";   // ● 짙은 현상 / ○ 안전 구간
             float remaining = rt.isNight
                 ? RegionTimeManager.Instance.NightDuration - rt.elapsed
                 : RegionTimeManager.Instance.DayDuration - rt.elapsed;
             int min = (int)(remaining / 60);
             int sec = (int)(remaining % 60);
 
-            regionBtnTexts[i].text = $"{FormatButtonLabel(r)}  {icon}{min}:{sec:D2}";
+            regionBtnTexts[i].text = $"{FormatButtonLabel(r)}\n{icon} {min}:{sec:D2}";
         }
 
-        if (selectedRegion >= 0 && selectedRegion < Regions.Length)
-        {
-            var r = Regions[selectedRegion];
-            string timeInfo = GetRegionTimeText(r.regionId);
-            selectedInfoText.text = $"<b><color=#{ColorToHex(r.accentColor)}>{r.displayName}</color></b>\n{timeInfo}\n\n{WorldRegionCatalog.BuildDescription(r)}";
-        }
+        // 선택된 지역의 정보 패널 시간 라인 갱신
+        if (selectedRegion >= 0 && selectedRegion < Regions.Length && infoTimeText != null)
+            infoTimeText.text = GetRegionTimeText(Regions[selectedRegion].regionId);
     }
 
     string GetRegionTimeText(string regionId)
@@ -452,6 +587,30 @@ public class MapSelectUI : MonoBehaviour
         return rt;
     }
 
+    /// <summary>부모를 꽉 채우는 RectTransform 생성(offset은 호출측 조정).</summary>
+    RectTransform CreateStretch(Transform parent, string name)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+        return rt;
+    }
+
+    void ApplyTextStyle(Text txt, int fontSize, Color color, TextAnchor align)
+    {
+        txt.font = KR;
+        txt.fontSize = fontSize;
+        txt.color = color;
+        txt.alignment = align;
+        txt.supportRichText = true;
+        txt.horizontalOverflow = HorizontalWrapMode.Wrap;
+        txt.verticalOverflow = VerticalWrapMode.Overflow;
+    }
+
     Text MakeText(Transform parent, string name, string content,
         Vector2 pos, Vector2 size, int fontSize, Color color, TextAnchor align)
     {
@@ -465,15 +624,8 @@ public class MapSelectUI : MonoBehaviour
         rt.sizeDelta = size;
 
         var txt = go.AddComponent<Text>();
-        txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        txt.fontSize = fontSize;
-        txt.color = color;
+        ApplyTextStyle(txt, fontSize, color, align);
         txt.text = content;
-        txt.alignment = align;
-        txt.supportRichText = true;
-        txt.horizontalOverflow = HorizontalWrapMode.Wrap;
-        txt.verticalOverflow = VerticalWrapMode.Overflow;
-
         return txt;
     }
 
@@ -488,17 +640,17 @@ public class MapSelectUI : MonoBehaviour
         rt.offsetMax = Vector2.zero;
 
         var txt = go.AddComponent<Text>();
-        txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = KR;
         txt.fontSize = fontSize;
         txt.fontStyle = FontStyle.Bold;
         txt.color = color;
         txt.text = content;
         txt.alignment = TextAnchor.MiddleCenter;
-
+        txt.supportRichText = true;
         return txt;
     }
 
-    void MakeLine(Transform parent, float yPos)
+    void MakeLine(Transform parent, float yPos, float width)
     {
         var go = new GameObject("Line");
         go.transform.SetParent(parent, false);
@@ -507,9 +659,8 @@ public class MapSelectUI : MonoBehaviour
         rt.anchorMax = new Vector2(0.5f, 1);
         rt.pivot = new Vector2(0.5f, 1);
         rt.anchoredPosition = new Vector2(0, yPos);
-        rt.sizeDelta = new Vector2(580, 1);
-        var img = go.AddComponent<Image>();
-        img.color = new Color(1, 1, 1, 0.2f);
+        rt.sizeDelta = new Vector2(width, 1);
+        go.AddComponent<Image>().color = Line;
     }
 
     #endregion

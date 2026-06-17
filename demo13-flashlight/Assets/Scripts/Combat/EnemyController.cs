@@ -109,6 +109,14 @@ public class EnemyController : MonoBehaviour
     public bool  IsDead        => state == State.Dead;
     public float GroggyPercent => currentGroggy / MaxGroggy;
 
+    /// <summary>이 적이 지금 플레이어와 교전 중인가(추격/예비동작/공격).
+    /// 이 상태들은 플레이어를 탐지했을 때만 진입하므로 player가 살아있고 비어있지 않을 때만 true.
+    /// (CombatStateTracker의 전투 감지용 읽기 전용 프로퍼티)</summary>
+    public bool IsEngagingPlayer =>
+        player != null &&
+        (playerHealth == null || !playerHealth.IsDead) &&
+        (state == State.Chase || state == State.AttackWindup || state == State.Attack);
+
     #endregion
 
     #region 유니티 생명주기

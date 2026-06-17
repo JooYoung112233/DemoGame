@@ -34,6 +34,9 @@ public class InteractableObject : MonoBehaviour, IInteractable
         CookingBench,   // 조리대 (버프 음식 제작)
         Door,           // 문 (잠금/열쇠/조건부)
         Stash,          // 창고 (메인 보관함 — 인벤 우측 열) ※ 끝에 추가(기존 직렬화 인덱스 보존)
+        Radio,          // 라디오 (정보 수신 — RadioUI) ※ 끝에 추가
+        Dispatch,       // 파견 보드 (NPC 출전 — DispatchUI) ※ 끝에 추가
+        Generator,      // 발전기 (전력 ON/OFF — HideoutUI generator) ※ 끝에 추가(직렬화 인덱스 보존)
     }
 
     #endregion
@@ -209,14 +212,15 @@ public class InteractableObject : MonoBehaviour, IInteractable
             case InteractType.Container:
                 HandleContainer(playerGO);
                 break;
+            // 하이드아웃 시설 = 단일 패널(건설/업그레이드 + 기능). HideoutUI가 레벨 따라 분기.
             case InteractType.Workbench:
-                HandleCrafting(CraftingStation.Workbench);
+                HideoutUI.Show("workbench");
                 break;
             case InteractType.MedicalBench:
-                HandleCrafting(CraftingStation.MedicalBench);
+                HideoutUI.Show("medbench");
                 break;
             case InteractType.CookingBench:
-                HandleCrafting(CraftingStation.CookingBench);
+                HideoutUI.Show("cooking");
                 break;
             case InteractType.MapBoard:
                 HandleMapBoard(playerGO);
@@ -225,13 +229,22 @@ public class InteractableObject : MonoBehaviour, IInteractable
                 HandleNPC(playerGO);
                 break;
             case InteractType.Bed:
-                HandleBed(playerGO);
+                HideoutUI.Show("quarters");
                 break;
             case InteractType.Door:
                 HandleDoor(playerGO);
                 break;
             case InteractType.Stash:
-                HandleStash(playerGO);
+                HideoutUI.Show("stash");
+                break;
+            case InteractType.Radio:
+                HideoutUI.Show("radio");
+                break;
+            case InteractType.Dispatch:
+                HideoutUI.Show("dispatch");
+                break;
+            case InteractType.Generator:
+                HideoutUI.Show("generator");
                 break;
             default:
                 Debug.Log($"[Interact] {type}: {promptText}");
@@ -332,7 +345,9 @@ public class InteractableObject : MonoBehaviour, IInteractable
                 }
                 else
                 {
-                    Debug.Log("[Pickup] 인벤토리 공간 부족");
+                    string reason = inventory.HasBackpack ? "인벤토리 공간 부족" : "가방을 장착하세요";
+                    Debug.Log($"[Pickup] {reason}");
+                    ToastManager.Show(reason, ToastManager.ToastType.Warning);
                 }
             }
         }

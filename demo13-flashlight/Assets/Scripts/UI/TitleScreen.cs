@@ -94,6 +94,7 @@ public class TitleScreen : MonoBehaviour
         // 새 게임 = 기존 세이브 삭제 → Safehouse 진입 시 GameStartHandler가 프롤로그(S-000) 재생
         if (SaveManager.Instance != null && SaveManager.Instance.HasSave())
             SaveManager.Instance.DeleteSave();
+        GameStartHandler.ResetSession();   // 안전가옥 진입 시 시작 분기 1회 재실행
         Debug.Log("[Title] 새 게임 → Safehouse");
         Hide();
         GoToSafehouse();
@@ -102,6 +103,7 @@ public class TitleScreen : MonoBehaviour
     void OnContinue()
     {
         // 이어하기 = 세이브 보존 → Safehouse 진입 시 GameStartHandler가 로드
+        GameStartHandler.ResetSession();   // 안전가옥 진입 시 Load() 1회 재실행
         Debug.Log("[Title] 이어하기 → Safehouse");
         Hide();
         GoToSafehouse();

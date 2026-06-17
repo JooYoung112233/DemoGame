@@ -4,7 +4,6 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// 디버그 테스트 UI.
 /// F1키로 토글. 탭 구분으로 여러 시스템 테스트 가능.
-/// 인게임에서만 사용 (빌드 시 제거 또는 #if UNITY_EDITOR).
 /// </summary>
 public class DebugTestUI : MonoBehaviour
 {
@@ -12,23 +11,17 @@ public class DebugTestUI : MonoBehaviour
 
     [SerializeField] KeyCode toggleKey = KeyCode.F1;
 
-    [Header("치료 아이템 (테스트용)")]
-    [SerializeField] MedicalItemData[] testMedicalItems;
-
     bool isOpen;
-    // 맵툴 씬에서는 게임용 디버그 UI를 띄우지 않는다 (맵툴 자체 F1 도움말과 충돌 방지)
     bool inMapTool;
     int currentTab;
-    string[] tabNames = { "의료", "전투", "아이템", "씬" };
+    string[] tabNames = { "플레이어", "경제/평판", "아이템", "하이드아웃", "씬" };
 
     // 레퍼런스
     PlayerMedicalSystem medical;
     Health health;
+    PlayerInventory inventory;
+    PlayerEquipment equipment;
     FlashlightController flashlight;
-
-    // 의료 탭 - 치료 선택
-    int selectedHealPart = 0;
-    int selectedHealItem = 0;
 
     // 드래그 이동
     Rect windowRect;
@@ -39,12 +32,21 @@ public class DebugTestUI : MonoBehaviour
     GUIStyle headerStyle;
     GUIStyle btnStyle;
     GUIStyle labelStyle;
+    GUIStyle smallBtnStyle;
     Texture2D bgTex;
     Texture2D tabActiveTex;
     Texture2D tabInactiveTex;
     bool stylesInit;
 
     Vector2 scrollPos;
+
+    // 경제 탭
+    int moneyInputAmount = 10000;
+    int repInputAmount = 10;
+
+    // 아이템 탭
+    int itemSubTab;
+    string[] itemSubTabNames = { "장비", "무기", "의료", "소비", "재료", "귀중품", "특수" };
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
@@ -67,7 +69,6 @@ public class DebugTestUI : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += OnSceneLoaded;
-        RefreshMapToolState();
     }
 
     void OnDestroy()
@@ -76,21 +77,10 @@ public class DebugTestUI : MonoBehaviour
             SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode) => RefreshMapToolState();
-
-    void RefreshMapToolState()
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        inMapTool = false; // 맵빌더 제거됨
-        if (inMapTool) isOpen = false;
-    }
-
-    void Start()
-    {
-        FindPlayer();
-
-        // 치료 아이템 SO 자동 로드 (Assets/Resources/MedicalItems/)
-        if (testMedicalItems == null || testMedicalItems.Length == 0)
-            testMedicalItems = Resources.LoadAll<MedicalItemData>("MedicalItems");
+        // 씬 전환 시 레퍼런스 리셋
+        medical = null; health = null; inventory = null; equipment = null; flashlight = null;
     }
 
     void FindPlayer()
@@ -100,23 +90,17 @@ public class DebugTestUI : MonoBehaviour
         {
             medical = playerGO.GetComponent<PlayerMedicalSystem>();
             health = playerGO.GetComponent<Health>();
+            inventory = playerGO.GetComponent<PlayerInventory>();
+            equipment = playerGO.GetComponent<PlayerEquipment>();
             flashlight = playerGO.GetComponentInChildren<FlashlightController>();
         }
     }
 
     void Update()
     {
-        // 맵툴 씬에서는 비활성 (맵툴 F1 도움말이 대신 뜬다)
         if (inMapTool) return;
-
-        // if (player == null) FindPlayer();
-
         if (Input.GetKeyDown(toggleKey))
             isOpen = !isOpen;
-
-        // 적 은신/말풍선 토글 — 단독 폴러(적 컴포넌트들이 동시에 키를 먹지 않도록 여기서만).
-        if (Input.GetKeyDown(KeyCode.B))
-            EnemySpeechBubble.Enabled = !EnemySpeechBubble.Enabled;
     }
 
     void OnGUI()
@@ -125,39 +109,34 @@ public class DebugTestUI : MonoBehaviour
 
         InitStyles();
 
-        float panelW = 400f;
-        float panelH = 450f;
+        float panelW = 440f;
+        float panelH = 520f;
 
-        // 초기 위치: 화면 중앙
         if (!windowRectInit)
         {
             windowRect = new Rect((Screen.width - panelW) * 0.5f, (Screen.height - panelH) * 0.5f, panelW, panelH);
             windowRectInit = true;
         }
 
-        // 드래그 가능한 윈도우
         windowRect = GUI.Window(9999, windowRect, DrawWindow, "", GUIStyle.none);
-
-        // 화면 밖으로 나가지 않도록 클램프
         windowRect.x = Mathf.Clamp(windowRect.x, -panelW + 50, Screen.width - 50);
         windowRect.y = Mathf.Clamp(windowRect.y, 0, Screen.height - 50);
     }
 
     void DrawWindow(int windowID)
     {
+        if (medical == null) FindPlayer();
+
         float panelW = windowRect.width;
         float panelH = windowRect.height;
 
-        // 배경
         GUI.color = new Color(0.05f, 0.05f, 0.1f, 0.95f);
         GUI.DrawTexture(new Rect(0, 0, panelW, panelH), bgTex);
         GUI.color = Color.white;
 
-        // 제목 바 (드래그 영역)
-        GUI.Label(new Rect(10, 5, panelW - 20, 25), "[ DEBUG TEST UI ]  (드래그로 이동 / H: 닫기)", headerStyle);
+        GUI.Label(new Rect(10, 5, panelW - 20, 25), "[ DEBUG ]  F1 닫기", headerStyle);
         GUI.DragWindow(new Rect(0, 0, panelW, 28));
 
-        // 탭 버튼
         float tabY = 30;
         float tabW = panelW / tabNames.Length;
         for (int i = 0; i < tabNames.Length; i++)
@@ -167,7 +146,6 @@ public class DebugTestUI : MonoBehaviour
                 currentTab = i;
         }
 
-        // 콘텐츠 영역
         float contentY = tabY + 35;
         float contentH = panelH - 70;
         Rect contentRect = new Rect(10, contentY, panelW - 20, contentH);
@@ -177,309 +155,277 @@ public class DebugTestUI : MonoBehaviour
 
         switch (currentTab)
         {
-            case 0: DrawMedicalTab(); break;
-            case 1: DrawCombatTab(); break;
+            case 0: DrawPlayerTab(); break;
+            case 1: DrawEconomyTab(); break;
             case 2: DrawItemTab(); break;
-            case 3: DrawSceneTab(); break;
+            case 3: DrawHideoutTab(); break;
+            case 4: DrawSceneTab(); break;
         }
 
         GUILayout.EndScrollView();
         GUILayout.EndArea();
     }
 
-    #region 탭: 의료
+    #region 탭: 플레이어 (HP/스태미너/의료/생존)
 
-    void DrawMedicalTab()
+    void DrawPlayerTab()
     {
-        if (medical == null)
+        // ── HP ──
+        GUILayout.Label("── HP ──", headerStyle);
+        if (health != null)
         {
-            GUILayout.Label("PlayerMedicalSystem을 찾을 수 없음", labelStyle);
-            return;
-        }
-
-        GUILayout.Label("── 부상 추가 ──", headerStyle);
-        GUILayout.Space(5);
-
-        GUILayout.Label("부위 선택 후 부상 적용:", labelStyle);
-        GUILayout.Space(3);
-
-        // 부위별 버튼
-        string[] partNames = { "머리", "몸통", "양팔", "왼다리", "오른다리" };
-        BodyPartType[] parts = { BodyPartType.Head, BodyPartType.Torso, BodyPartType.Arms, BodyPartType.LeftLeg, BodyPartType.RightLeg };
-
-        for (int i = 0; i < parts.Length; i++)
-        {
+            GUILayout.Label($"HP: {health.CurrentHp:F0} / {health.MaxHp:F0}", labelStyle);
             GUILayout.BeginHorizontal();
-            GUILayout.Label(partNames[i], labelStyle, GUILayout.Width(60));
-
-            if (GUILayout.Button("출혈", btnStyle, GUILayout.Width(55)))
-                medical.InflictInjury(parts[i], InjuryType.Bleeding, 0.7f);
-            if (GUILayout.Button("골절", btnStyle, GUILayout.Width(55)))
-                medical.InflictInjury(parts[i], InjuryType.Fracture, 0.8f);
-            if (GUILayout.Button("통증", btnStyle, GUILayout.Width(55)))
-                medical.InflictInjury(parts[i], InjuryType.Pain, 0.5f);
-
+            if (GUILayout.Button("데미지 20", btnStyle)) health.TakeDamage(20f);
+            if (GUILayout.Button("데미지 50", btnStyle)) health.TakeDamage(50f);
+            if (GUILayout.Button("풀힐", btnStyle)) health.Heal(health.MaxHp);
             GUILayout.EndHorizontal();
         }
+        else GUILayout.Label("Player 없음", labelStyle);
 
-        GUILayout.Space(10);
-        GUILayout.Label("── 일괄 처리 ──", headerStyle);
-        GUILayout.Space(5);
+        GUILayout.Space(8);
 
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("전체 치료 (침대)", btnStyle, GUILayout.Height(30)))
-            medical.HealAll();
-        if (GUILayout.Button("랜덤 부상 x3", btnStyle, GUILayout.Height(30)))
-        {
-            medical.InflictRandomInjury(InjuryType.Bleeding, Random.Range(0.3f, 0.9f));
-            medical.InflictRandomInjury(InjuryType.Pain, Random.Range(0.3f, 0.7f));
-            medical.InflictRandomInjury(InjuryType.Fracture, Random.Range(0.5f, 1f));
-        }
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(10);
-        GUILayout.Label("── 치료 아이템 사용 ──", headerStyle);
-        GUILayout.Space(5);
-
-        if (testMedicalItems == null || testMedicalItems.Length == 0)
-        {
-            GUILayout.Label("testMedicalItems에 SO를 할당하세요", labelStyle);
-        }
-        else
-        {
-            // 아이템 선택
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("아이템:", labelStyle, GUILayout.Width(50));
-            for (int i = 0; i < testMedicalItems.Length; i++)
-            {
-                if (testMedicalItems[i] == null) continue;
-                GUIStyle style = (i == selectedHealItem) ? tabActiveStyle : btnStyle;
-                if (GUILayout.Button(testMedicalItems[i].displayName, style, GUILayout.Height(22)))
-                    selectedHealItem = i;
-            }
-            GUILayout.EndHorizontal();
-
-            // 부위 선택
-            string[] healPartNames = { "머리", "몸통", "양팔", "왼다리", "오른다리" };
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("부위:", labelStyle, GUILayout.Width(50));
-            for (int i = 0; i < healPartNames.Length; i++)
-            {
-                GUIStyle style = (i == selectedHealPart) ? tabActiveStyle : btnStyle;
-                if (GUILayout.Button(healPartNames[i], style, GUILayout.Height(22)))
-                    selectedHealPart = i;
-            }
-            GUILayout.EndHorizontal();
-
-            GUILayout.Space(5);
-
-            // 치료 실행
-            MedicalItemData selectedItem = testMedicalItems[Mathf.Clamp(selectedHealItem, 0, testMedicalItems.Length - 1)];
-            BodyPartType targetPart = (BodyPartType)selectedHealPart;
-            BodyPart bp = medical.GetPart(targetPart);
-
-            // 현재 선택 부위의 부상 표시
-            if (bp != null && bp.IsInjured)
-            {
-                string injuries = "";
-                for (int i = 0; i < bp.injuries.Count; i++)
-                    injuries += $"{bp.injuries[i].type}({bp.injuries[i].severity:F1}) ";
-                GUILayout.Label($"  → {healPartNames[selectedHealPart]} 부상: {injuries}", labelStyle);
-            }
-            else
-            {
-                GUILayout.Label($"  → {healPartNames[selectedHealPart]}: 정상 (부상 없음)", labelStyle);
-            }
-
-            GUILayout.Space(3);
-
-            if (medical.IsHealing)
-            {
-                GUILayout.Label($"치료 진행 중... {medical.HealProgress * 100:F0}%", labelStyle);
-                if (GUILayout.Button("치료 취소", btnStyle, GUILayout.Height(25)))
-                    medical.CancelHealing();
-            }
-            else
-            {
-                // 치료 가능한 부상 찾아서 버튼 표시
-                if (bp != null && bp.IsInjured && selectedItem != null)
-                {
-                    GUILayout.BeginHorizontal();
-                    for (int i = 0; i < bp.injuries.Count; i++)
-                    {
-                        InjuryType injType = bp.injuries[i].type;
-                        bool canTreat = selectedItem.CanTreat(injType);
-                        GUI.enabled = canTreat;
-                        if (GUILayout.Button($"치료: {injType}", btnStyle, GUILayout.Height(28)))
-                        {
-                            medical.StartHealing(targetPart, injType, selectedItem);
-                        }
-                        GUI.enabled = true;
-                    }
-                    GUILayout.EndHorizontal();
-                }
-            }
-        }
-
-        GUILayout.Space(10);
-        GUILayout.Label("── 현재 디버프 ──", headerStyle);
-        GUILayout.Label($"이동속도: {medical.MoveSpeedMultiplier * 100:F0}%", labelStyle);
-        GUILayout.Label($"공격속도: {medical.AttackSpeedMultiplier * 100:F0}%", labelStyle);
-        GUILayout.Label($"스태미너회복: {medical.StaminaRegenMultiplier * 100:F0}%", labelStyle);
-    }
-
-    #endregion
-
-    #region 탭: 전투
-
-    void DrawCombatTab()
-    {
-        if (health == null)
-        {
-            GUILayout.Label("Player를 찾을 수 없음", labelStyle);
-            return;
-        }
-
-        GUILayout.Label("── HP 조작 ──", headerStyle);
-        GUILayout.Space(5);
-
-        GUILayout.Label($"HP: {health.CurrentHp:F0} / {health.MaxHp:F0}", labelStyle);
-        GUILayout.Space(3);
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("데미지 10", btnStyle)) health.TakeDamage(10f);
-        if (GUILayout.Button("데미지 30", btnStyle)) health.TakeDamage(30f);
-        if (GUILayout.Button("데미지 50", btnStyle)) health.TakeDamage(50f);
-        GUILayout.EndHorizontal();
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("힐 20", btnStyle)) health.Heal(20f);
-        if (GUILayout.Button("힐 50", btnStyle)) health.Heal(50f);
-        if (GUILayout.Button("풀힐", btnStyle)) health.Heal(health.MaxHp);
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(10);
-        GUILayout.Label("── 상태 ──", headerStyle);
+        // ── 스태미너/전투 ──
         var tdp = TopDownPlayer.Instance;
         if (tdp != null)
         {
-            GUILayout.Label($"전투 상태: {tdp.CurrentState}", labelStyle);
-            GUILayout.Label($"스태미너: {tdp.StaminaCurrent:F0} / {tdp.StaminaMax:F0}", labelStyle);
-            GUILayout.Label($"전투 활성화: {tdp.CombatEnabled}", labelStyle);
-
-            GUILayout.Space(5);
+            GUILayout.Label("── 전투 ──", headerStyle);
+            GUILayout.Label($"스태미너: {tdp.StaminaCurrent:F0}/{tdp.StaminaMax:F0}  |  전투: {(tdp.CombatEnabled ? "ON" : "OFF")}", labelStyle);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("전투 ON", btnStyle)) tdp.CombatEnabled = true;
             if (GUILayout.Button("전투 OFF", btnStyle)) tdp.CombatEnabled = false;
             GUILayout.EndHorizontal();
         }
-        else
+
+        GUILayout.Space(8);
+
+        // ── 생존 (허기/수분) ──
+        GUILayout.Label("── 생존 스탯 ──", headerStyle);
+        var survival = SurvivalStats.Get();
+        if (survival != null)
         {
-            GUILayout.Label("TopDownPlayer 없음", labelStyle);
+            GUILayout.Label($"포만감: {survival.Satiety:F0}/100  |  수분: {survival.Water:F0}/100", labelStyle);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("포만감 MAX", btnStyle)) survival.AddSatiety(100f);
+            if (GUILayout.Button("수분 MAX", btnStyle)) survival.AddWater(100f);
+            if (GUILayout.Button("전부 MAX", btnStyle)) { survival.AddSatiety(100f); survival.AddWater(100f); }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("포만감 0", btnStyle)) survival.AddSatiety(-200f);
+            if (GUILayout.Button("수분 0", btnStyle)) survival.AddWater(-200f);
+            GUILayout.EndHorizontal();
         }
+        else GUILayout.Label("SurvivalStats 없음", labelStyle);
 
-        GUILayout.Space(10);
-        GUILayout.Label("── 손전등 / 배터리 ──", headerStyle);
+        GUILayout.Space(8);
 
-        if (flashlight != null)
+        // ── 의료 (간략) ──
+        GUILayout.Label("── 의료 (부상) ──", headerStyle);
+        if (medical != null)
         {
-            GUILayout.Label($"배터리: {flashlight.BatteryPercent * 100:F0}%  |  {(flashlight.IsOn ? "ON" : "OFF")}", labelStyle);
-            GUILayout.Space(3);
+            BodyPartType[] parts = { BodyPartType.Head, BodyPartType.Torso, BodyPartType.Arms, BodyPartType.LeftLeg, BodyPartType.RightLeg };
+            string[] partNames = { "머리", "몸통", "양팔", "왼다리", "오른다리" };
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(partNames[i], labelStyle, GUILayout.Width(55));
+                if (GUILayout.Button("출혈", smallBtnStyle, GUILayout.Width(45)))
+                    medical.InflictInjury(parts[i], InjuryType.Bleeding, 0.7f);
+                if (GUILayout.Button("골절", smallBtnStyle, GUILayout.Width(45)))
+                    medical.InflictInjury(parts[i], InjuryType.Fracture, 0.8f);
+                if (GUILayout.Button("통증", smallBtnStyle, GUILayout.Width(45)))
+                    medical.InflictInjury(parts[i], InjuryType.Pain, 0.5f);
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.Space(4);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("전체 치료", btnStyle)) medical.HealAll();
+            if (GUILayout.Button("랜덤 부상 x3", btnStyle))
+            {
+                medical.InflictRandomInjury(InjuryType.Bleeding, Random.Range(0.3f, 0.9f));
+                medical.InflictRandomInjury(InjuryType.Pain, Random.Range(0.3f, 0.7f));
+                medical.InflictRandomInjury(InjuryType.Fracture, Random.Range(0.5f, 1f));
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label($"이속: {medical.MoveSpeedMultiplier * 100:F0}%  공속: {medical.AttackSpeedMultiplier * 100:F0}%", labelStyle);
+        }
+        else GUILayout.Label("의료 시스템 없음", labelStyle);
+    }
+
+    #endregion
+
+    #region 탭: 경제/평판
+
+    void DrawEconomyTab()
+    {
+        // ── 스크랩(돈) ──
+        GUILayout.Label("── 스크랩 (◈) ──", headerStyle);
+        var currency = CurrencyManager.Instance;
+        if (currency != null)
+        {
+            GUILayout.Label($"잔액: ◈ {currency.Balance:N0}", labelStyle);
+            GUILayout.Space(4);
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("충전 25%", btnStyle)) flashlight.AddBattery(flashlight.BatteryPercent > 0 ? 22.5f : 22.5f);
-            if (GUILayout.Button("충전 50%", btnStyle)) flashlight.AddBattery(45f);
-            if (GUILayout.Button("풀 충전", btnStyle)) flashlight.AddBattery(9999f);
+            if (GUILayout.Button("-", smallBtnStyle, GUILayout.Width(30)))
+                moneyInputAmount = Mathf.Max(100, moneyInputAmount / 2);
+            GUILayout.Label($"{moneyInputAmount:N0}", labelStyle, GUILayout.Width(80));
+            if (GUILayout.Button("+", smallBtnStyle, GUILayout.Width(30)))
+                moneyInputAmount = Mathf.Min(1000000, moneyInputAmount * 2);
+            if (GUILayout.Button($"지급 +{moneyInputAmount:N0}", btnStyle))
+                currency.Add(moneyInputAmount, "디버그");
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("소모 25%", btnStyle)) flashlight.AddBattery(-22.5f);
-            if (GUILayout.Button("소모 50%", btnStyle)) flashlight.AddBattery(-45f);
-            if (GUILayout.Button("방전", btnStyle)) flashlight.AddBattery(-9999f);
+            if (GUILayout.Button("1천", smallBtnStyle)) currency.Add(1000, "디버그");
+            if (GUILayout.Button("1만", smallBtnStyle)) currency.Add(10000, "디버그");
+            if (GUILayout.Button("10만", smallBtnStyle)) currency.Add(100000, "디버그");
+            if (GUILayout.Button("100만", smallBtnStyle)) currency.Add(1000000, "디버그");
             GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("잔액 초기화 (0)", btnStyle))
+                currency.Lose(currency.Balance, "디버그 리셋");
         }
-        else
-        {
-            GUILayout.Label("FlashlightController를 찾을 수 없음", labelStyle);
-        }
+        else GUILayout.Label("CurrencyManager 없음", labelStyle);
 
         GUILayout.Space(10);
-        GUILayout.Label("── 적 은신 / 말풍선 ──", headerStyle);
-        GUILayout.Label($"상태: {(EnemySpeechBubble.Enabled ? "ON (몸체 숨김 + 말풍선)" : "OFF (몸체 보임)")}", labelStyle);
-        GUILayout.Label("[B] 토글 · 콘 안=대사 전문 / 콘 밖=...", labelStyle);
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("은신 ON", btnStyle))  EnemySpeechBubble.Enabled = true;
-        if (GUILayout.Button("은신 OFF", btnStyle)) EnemySpeechBubble.Enabled = false;
-        GUILayout.EndHorizontal();
+
+        // ── 평판 ──
+        GUILayout.Label("── 평판 ──", headerStyle);
+        var rep = ReputationManager.Instance;
+        if (rep != null)
+        {
+            GUILayout.Label($"평판: {rep.Reputation}  [{rep.TierName} ({rep.Tier})]  다음까지: {rep.ToNextTier}", labelStyle);
+            GUILayout.Space(4);
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("-", smallBtnStyle, GUILayout.Width(30)))
+                repInputAmount = Mathf.Max(1, repInputAmount / 2);
+            GUILayout.Label($"{repInputAmount}", labelStyle, GUILayout.Width(50));
+            if (GUILayout.Button("+", smallBtnStyle, GUILayout.Width(30)))
+                repInputAmount = Mathf.Min(1000, repInputAmount * 2);
+            if (GUILayout.Button($"+{repInputAmount}", btnStyle)) rep.Add(repInputAmount, "디버그");
+            if (GUILayout.Button($"-{repInputAmount}", btnStyle)) rep.Add(-repInputAmount, "디버그");
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("F (0)", smallBtnStyle)) SetReputation(0);
+            if (GUILayout.Button("E (10)", smallBtnStyle)) SetReputation(10);
+            if (GUILayout.Button("D (30)", smallBtnStyle)) SetReputation(30);
+            if (GUILayout.Button("C (60)", smallBtnStyle)) SetReputation(60);
+            if (GUILayout.Button("B (100)", smallBtnStyle)) SetReputation(100);
+            if (GUILayout.Button("A (150)", smallBtnStyle)) SetReputation(150);
+            GUILayout.EndHorizontal();
+        }
+        else GUILayout.Label("ReputationManager 없음", labelStyle);
+
+        GUILayout.Space(10);
+
+        // ── NPC 호감도 ──
+        GUILayout.Label("── NPC 관계도 ──", headerStyle);
+        var npcRel = NPCRelationshipManager.Instance;
+        if (npcRel != null)
+        {
+            var allRels = npcRel.GetAllRelationships();
+            if (allRels != null && allRels.Count > 0)
+            {
+                foreach (var kv in allRels)
+                {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label($"{kv.Key}: 호감{kv.Value.affinity} 신뢰{kv.Value.trust} 공포{kv.Value.fear}", labelStyle, GUILayout.Width(260));
+                    if (GUILayout.Button("+호감", smallBtnStyle, GUILayout.Width(50)))
+                        npcRel.ModifyRelationship(kv.Key, 10, 0, 0);
+                    if (GUILayout.Button("+신뢰", smallBtnStyle, GUILayout.Width(50)))
+                        npcRel.ModifyRelationship(kv.Key, 0, 10, 0);
+                    GUILayout.EndHorizontal();
+                }
+            }
+            else
+            {
+                GUILayout.Label("NPC 만남 기록 없음 (NPC와 대화하세요)", labelStyle);
+            }
+        }
+        else GUILayout.Label("NPCRelationshipManager 없음", labelStyle);
+    }
+
+    void SetReputation(int target)
+    {
+        var rep = ReputationManager.Instance;
+        if (rep == null) return;
+        int delta = target - rep.Reputation;
+        if (delta != 0) rep.Add(delta, "디버그 등급 설정");
     }
 
     #endregion
 
     #region 탭: 아이템
 
-    PlayerInventory inventory;
-
     void DrawItemTab()
     {
-        //     inventory = player.GetComponent<PlayerInventory>();
-
         if (inventory == null)
         {
-            GUILayout.Label("PlayerInventory를 찾을 수 없음", labelStyle);
+            GUILayout.Label("PlayerInventory 없음", labelStyle);
             return;
         }
 
-        GUILayout.Label("── 인벤토리 상태 ──", headerStyle);
-        GUILayout.Label($"아이템: {inventory.Grid.ItemCount}개  |  무게: {inventory.CurrentWeight:F1} / {inventory.MaxWeight:F0} kg", labelStyle);
-        GUILayout.Space(5);
+        GUILayout.Label($"── 인벤토리 ({inventory.Grid.width}x{inventory.Grid.height}) ──", headerStyle);
+        GUILayout.Label($"아이템: {inventory.Grid.ItemCount}개  |  무게: {inventory.CurrentWeight:F1}/{inventory.MaxWeight:F0} kg  |  가방: {(inventory.HasBackpack ? "O" : "X")}", labelStyle);
 
-        // 격자 내 아이템 목록
-        var items = inventory.Grid.GetAll();
-        for (int i = 0; i < items.Count; i++)
+        GUILayout.Space(5);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("인벤 비우기", btnStyle)) inventory.Grid.Clear();
+        if (GUILayout.Button("창고 비우기", btnStyle))
         {
-            GUILayout.BeginHorizontal();
-            string durInfo = items[i].item.HasDurability
-                ? $" ({items[i].item.durability:F0}/{items[i].item.data.maxDurability:F0})"
-                : "";
-            GUILayout.Label($"  [{items[i].gridX},{items[i].gridY}] {items[i].item.DisplayName}{durInfo}", labelStyle, GUILayout.Width(250));
-            if (items[i].item.data != null && items[i].item.data.isUsable)
-            {
-                if (GUILayout.Button("사용", btnStyle, GUILayout.Width(50)))
-                    inventory.UseItem(items[i]);
-            }
-            if (GUILayout.Button("버리기", btnStyle, GUILayout.Width(55)))
-                inventory.DropItem(items[i]);
-            GUILayout.EndHorizontal();
+            var stash = MainStash.Ensure();
+            if (stash != null) stash.GetGrid().Clear();
         }
+        GUILayout.EndHorizontal();
 
-        GUILayout.Space(10);
+        GUILayout.Space(8);
         GUILayout.Label("── 아이템 지급 ──", headerStyle);
-        GUILayout.Space(5);
+
+        // 서브탭
+        GUILayout.BeginHorizontal();
+        for (int t = 0; t < itemSubTabNames.Length; t++)
+        {
+            var style = t == itemSubTab ? tabActiveStyle : tabInactiveStyle;
+            if (GUILayout.Button(itemSubTabNames[t], style, GUILayout.Height(22)))
+                itemSubTab = t;
+        }
+        GUILayout.EndHorizontal();
+        GUILayout.Space(4);
 
         var allItems = ItemDatabase.GetAll();
         if (allItems.Length == 0)
         {
-            GUILayout.Label("ItemDatabase에 아이템이 없음 (Resources/Items/ 확인)", labelStyle);
+            GUILayout.Label("ItemDatabase 비어있음", labelStyle);
         }
         else
         {
             for (int i = 0; i < allItems.Length; i++)
             {
+                if (!MatchesItemSubTab(allItems[i], itemSubTab)) continue;
+
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"{allItems[i].displayName} ({allItems[i].gridWidth}x{allItems[i].gridHeight})", labelStyle, GUILayout.Width(200));
-                if (GUILayout.Button("+1", btnStyle, GUILayout.Width(40)))
+                string equipInfo = allItems[i].equipSlot != EquipSlot.None ? $" [{allItems[i].equipSlot}]" : "";
+                GUILayout.Label($"{allItems[i].displayName} ({allItems[i].gridWidth}x{allItems[i].gridHeight}){equipInfo}", labelStyle, GUILayout.Width(220));
+                if (GUILayout.Button("+인벤", smallBtnStyle, GUILayout.Width(50)))
                 {
                     var item = new ItemInstance(allItems[i], 1);
                     if (!inventory.TryPickup(item))
-                        Debug.Log("[Debug] 인벤토리 공간 부족");
+                        ToastManager.Show("인벤 공간 부족", ToastManager.ToastType.Warning);
                 }
-                if (allItems[i].maxStack > 1)
+                if (GUILayout.Button("+창고", smallBtnStyle, GUILayout.Width(50)))
                 {
-                    if (GUILayout.Button($"+{allItems[i].maxStack}", btnStyle, GUILayout.Width(50)))
+                    var stash = MainStash.Ensure();
+                    if (stash != null)
                     {
-                        var item = new ItemInstance(allItems[i], allItems[i].maxStack);
-                        if (!inventory.TryPickup(item))
-                            Debug.Log("[Debug] 인벤토리 공간 부족");
+                        var item = new ItemInstance(allItems[i], 1);
+                        if (!stash.GetGrid().TryAutoPlace(item))
+                            ToastManager.Show("창고 공간 부족", ToastManager.ToastType.Warning);
                     }
                 }
                 GUILayout.EndHorizontal();
@@ -487,80 +433,158 @@ public class DebugTestUI : MonoBehaviour
         }
 
         GUILayout.Space(10);
-        if (GUILayout.Button("인벤토리 전체 비우기", btnStyle, GUILayout.Height(28)))
-            inventory.Grid.Clear();
-
-        GUILayout.Space(10);
-        GUILayout.Label("── 제작 UI (CraftingUI) ──", headerStyle);
-        if (UIManager.Instance != null)
-        {
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("의료대", btnStyle, GUILayout.Height(25)))
-                UIManager.Instance.ShowCrafting(CraftingStation.MedicalBench);
-            if (GUILayout.Button("조리대", btnStyle, GUILayout.Height(25)))
-                UIManager.Instance.ShowCrafting(CraftingStation.CookingBench);
-            if (GUILayout.Button("작업대", btnStyle, GUILayout.Height(25)))
-                UIManager.Instance.ShowCrafting(CraftingStation.Workbench);
-            GUILayout.EndHorizontal();
-        }
-        else
-            GUILayout.Label("UIManager 없음", labelStyle);
-
-        GUILayout.Space(10);
-        GUILayout.Label("── 지역 루트 (RegionLootCatalog) ──", headerStyle);
-        string activeRegion = RegionLootCatalog.GetActiveRegionId();
-        bool regionNight = RegionLootCatalog.IsNightInRegion(activeRegion);
-        GUILayout.Label($"활성 지역: {activeRegion}  |  {(regionNight ? "밤" : "낮")}", labelStyle);
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("지역 상자 루트", btnStyle, GUILayout.Height(25)))
-            DropRegionLoot(RegionLootTier.ContainerDay);
-        if (GUILayout.Button("지역 바닥 루트", btnStyle, GUILayout.Height(25)))
-            DropRegionLoot(RegionLootTier.GroundDay);
-        GUILayout.EndHorizontal();
-        var regionOnly = ItemDatabase.GetByPrimaryRegion(activeRegion);
-        if (regionOnly.Count > 0)
-            GUILayout.Label($"지역 전용 SO: {regionOnly.Count}종", labelStyle);
-
-        GUILayout.Space(10);
-        GUILayout.Label("── 월드 드롭 테스트 ──", headerStyle);
-        GUILayout.Space(3);
-
+        GUILayout.Label("── 월드 드롭 ──", headerStyle);
         var p = TopDownPlayer.Instance;
         if (allItems.Length > 0 && p != null)
         {
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("앞에 아이템 드롭 (랜덤)", btnStyle, GUILayout.Height(25)))
+            if (GUILayout.Button("앞에 랜덤 드롭", btnStyle))
             {
                 var data = allItems[Random.Range(0, allItems.Length)];
                 var item = new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1));
-                Vector3 dropPos = p.transform.position + (Vector3)(p.FacingDirection * 1.5f);
-                WorldItem.Drop(item, dropPos);
+                WorldItem.Drop(item, p.transform.position + (Vector3)(p.FacingDirection * 1.5f));
             }
-            if (GUILayout.Button("주변 5개 드롭", btnStyle, GUILayout.Height(25)))
+            if (GUILayout.Button("주변 5개", btnStyle))
             {
-                for (int i = 0; i < 5; i++)
+                for (int j = 0; j < 5; j++)
                 {
                     var data = allItems[Random.Range(0, allItems.Length)];
                     var item = new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1));
-                    Vector3 offset = new Vector3(Random.Range(-2f, 2f), Random.Range(-2f, 2f), 0);
-                    WorldItem.Drop(item, p.transform.position + offset);
+                    WorldItem.Drop(item, p.transform.position + new Vector3(Random.Range(-2f, 2f), Random.Range(-2f, 2f), 0));
                 }
             }
             GUILayout.EndHorizontal();
         }
     }
 
-    void DropRegionLoot(RegionLootTier tier)
+    static bool MatchesItemSubTab(ItemData item, int tab)
     {
-        var p = TopDownPlayer.Instance;
-        var items = RegionLootCatalog.RollForActiveRegion(tier);
-        Vector3 basePos = p != null ? p.transform.position + (Vector3)(p.FacingDirection * 1.5f) : Vector3.zero;
-        for (int i = 0; i < items.Length; i++)
+        switch (tab)
         {
-            Vector3 pos = basePos + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f) + i * 0.2f, 0);
-            WorldItem.Drop(items[i], pos);
+            case 0: // 장비 (가방/방어구/헬멧 등 — EquipSlot이 있되 무기 제외)
+                return item.equipSlot != EquipSlot.None
+                    && item.equipSlot != EquipSlot.PrimaryWeapon
+                    && item.equipSlot != EquipSlot.SecondaryWeapon
+                    && item.equipSlot != EquipSlot.Melee
+                    && item.category != ItemCategory.Weapon;
+            case 1: // 무기
+                return item.category == ItemCategory.Weapon
+                    || item.equipSlot == EquipSlot.PrimaryWeapon
+                    || item.equipSlot == EquipSlot.SecondaryWeapon
+                    || item.equipSlot == EquipSlot.Melee;
+            case 2: // 의료
+                return item.category == ItemCategory.Medical;
+            case 3: // 소비 (음식/음료/배터리/자극제 등)
+                return item.category == ItemCategory.Consumable;
+            case 4: // 재료
+                return item.category == ItemCategory.Material;
+            case 5: // 귀중품 (판매용 잡템 포함)
+                return item.category == ItemCategory.Valuable
+                    || item.category == ItemCategory.Misc;
+            case 6: // 특수 (열쇠/스토리/지역)
+                return item.category == ItemCategory.Key;
+            default:
+                return true;
         }
-        Debug.Log($"[Debug] 지역 루트 {tier} → {items.Length}개 드롭");
+    }
+
+    #endregion
+
+    #region 탭: 하이드아웃
+
+    void DrawHideoutTab()
+    {
+        GUILayout.Label("── 시설 모듈 레벨 ──", headerStyle);
+        var hm = HideoutModuleManager.Instance;
+        if (hm != null)
+        {
+            for (int i = 0; i < HideoutModuleManager.Modules.Length; i++)
+            {
+                string m = HideoutModuleManager.Modules[i];
+                int lv = hm.GetLevel(m);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"{HideoutModuleManager.DisplayName(m)}: Lv{lv}/{HideoutModuleManager.MaxLevel}", labelStyle, GUILayout.Width(140));
+                if (lv < HideoutModuleManager.MaxLevel)
+                {
+                    if (GUILayout.Button("+1", smallBtnStyle, GUILayout.Width(35)))
+                        ForceUpgradeModule(m);
+                }
+                if (lv > 0)
+                {
+                    if (GUILayout.Button("리셋", smallBtnStyle, GUILayout.Width(45)))
+                        ForceSetModuleLevel(m, 0);
+                }
+                if (GUILayout.Button("MAX", smallBtnStyle, GUILayout.Width(40)))
+                    ForceSetModuleLevel(m, HideoutModuleManager.MaxLevel);
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.Space(5);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("전부 MAX", btnStyle))
+            {
+                for (int i = 0; i < HideoutModuleManager.Modules.Length; i++)
+                    ForceSetModuleLevel(HideoutModuleManager.Modules[i], HideoutModuleManager.MaxLevel);
+            }
+            if (GUILayout.Button("전부 리셋", btnStyle))
+            {
+                for (int i = 0; i < HideoutModuleManager.Modules.Length; i++)
+                    ForceSetModuleLevel(HideoutModuleManager.Modules[i], 0);
+            }
+            GUILayout.EndHorizontal();
+        }
+        else GUILayout.Label("HideoutModuleManager 없음", labelStyle);
+
+        GUILayout.Space(10);
+
+        // ── 하이드아웃 UI 바로가기 ──
+        GUILayout.Label("── 바로가기 ──", headerStyle);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("시설 관리 UI", btnStyle)) HideoutUI.Show();
+        if (GUILayout.Button("라디오 UI", btnStyle)) RadioUI.Show();
+        if (GUILayout.Button("파견 UI", btnStyle)) DispatchUI.Show();
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(5);
+        if (UIManager.Instance != null)
+        {
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("작업대", btnStyle)) UIManager.Instance.ShowCrafting(CraftingStation.Workbench);
+            if (GUILayout.Button("의료대", btnStyle)) UIManager.Instance.ShowCrafting(CraftingStation.MedicalBench);
+            if (GUILayout.Button("조리대", btnStyle)) UIManager.Instance.ShowCrafting(CraftingStation.CookingBench);
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.Space(12);
+
+        // ── 예시 UI 미리보기 (그레이박스 전체화면 UI 5종) ──
+        GUILayout.Label("── 예시 UI 미리보기 ──", headerStyle);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("레이드 지도", btnStyle)) RaidMapUI.ShowPreview();
+        if (GUILayout.Button("지역 출전", btnStyle))
+        {
+            if (UIManager.Instance != null) UIManager.Instance.ShowMapSelect();
+        }
+        if (GUILayout.Button("의뢰/통신", btnStyle)) QuestLogUI.ShowPreview();
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("파견", btnStyle)) DispatchUI.ShowPreview();
+        if (GUILayout.Button("라디오", btnStyle)) RadioUI.ShowPreview();
+        GUILayout.EndHorizontal();
+    }
+
+    void ForceUpgradeModule(string module)
+    {
+        var hm = HideoutModuleManager.Instance;
+        if (hm == null) return;
+        hm.ForceSetLevel(module, hm.GetLevel(module) + 1);
+    }
+
+    void ForceSetModuleLevel(string module, int level)
+    {
+        var hm = HideoutModuleManager.Instance;
+        if (hm == null) return;
+        hm.ForceSetLevel(module, level);
     }
 
     #endregion
@@ -570,17 +594,23 @@ public class DebugTestUI : MonoBehaviour
     void DrawSceneTab()
     {
         GUILayout.Label("── 씬 전환 ──", headerStyle);
-        GUILayout.Space(5);
-
+        GUILayout.BeginHorizontal();
         if (GUILayout.Button("→ Safehouse", btnStyle, GUILayout.Height(28)))
         {
             if (SceneTransitionManager.Instance != null)
                 SceneTransitionManager.Instance.TransitionTo("Safehouse", "default");
         }
-        if (GUILayout.Button("→ InGameScene", btnStyle, GUILayout.Height(28)))
+        if (GUILayout.Button("→ Hideout", btnStyle, GUILayout.Height(28)))
         {
             if (SceneTransitionManager.Instance != null)
-                SceneTransitionManager.Instance.TransitionTo("InGameScene", "default");
+                SceneTransitionManager.Instance.TransitionTo("Hideout", "default");
+        }
+        GUILayout.EndHorizontal();
+
+        if (GUILayout.Button("→ ScrapMarket (레이드)", btnStyle, GUILayout.Height(28)))
+        {
+            if (SceneTransitionManager.Instance != null)
+                SceneTransitionManager.Instance.TransitionTo("ScrapMarket_GB", "Gate_Spawn");
         }
 
         GUILayout.Space(10);
@@ -593,6 +623,52 @@ public class DebugTestUI : MonoBehaviour
         if (GUILayout.Button("x2", btnStyle)) Time.timeScale = 2f;
         if (GUILayout.Button("x5", btnStyle)) Time.timeScale = 5f;
         GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+        GUILayout.Label("── 밤/낮 ──", headerStyle);
+        var dnc = FindFirstObjectByType<DayNightCycle>();
+        if (dnc != null)
+        {
+            GUILayout.Label($"현재: {(dnc.IsNight ? "밤" : "낮")}", labelStyle);
+            if (GUILayout.Button("밤/낮 전환 (T)", btnStyle))
+                dnc.ToggleDayNight();
+        }
+
+        GUILayout.Space(10);
+        GUILayout.Label("── 세이브 ──", headerStyle);
+        var sm = SaveManager.Instance;
+        if (sm != null)
+        {
+            bool hasSave = sm.HasSave();
+            GUILayout.Label($"세이브 파일: {(hasSave ? "있음" : "없음")}", labelStyle);
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("저장", btnStyle, GUILayout.Height(32)))
+            {
+                sm.Save();
+                ToastManager.Show("저장 완료", ToastManager.ToastType.Success);
+            }
+            if (GUILayout.Button("불러오기", btnStyle, GUILayout.Height(32)))
+            {
+                if (sm.Load())
+                    ToastManager.Show("로드 완료", ToastManager.ToastType.Success);
+                else
+                    ToastManager.Show("세이브 없음", ToastManager.ToastType.Warning);
+            }
+            GUILayout.EndHorizontal();
+
+            GUI.backgroundColor = new Color(0.8f, 0.2f, 0.2f);
+            if (GUILayout.Button("세이브 삭제 (초기화)", btnStyle, GUILayout.Height(32)))
+            {
+                sm.DeleteSave();
+                ToastManager.Show("세이브 삭제됨", ToastManager.ToastType.Warning);
+            }
+            GUI.backgroundColor = Color.white;
+        }
+        else
+        {
+            GUILayout.Label("SaveManager 없음", labelStyle);
+        }
     }
 
     #endregion
@@ -615,19 +691,23 @@ public class DebugTestUI : MonoBehaviour
         labelStyle = new GUIStyle(GUI.skin.label);
         labelStyle.fontSize = 13;
         labelStyle.normal.textColor = new Color(0.9f, 0.9f, 0.95f);
+        labelStyle.richText = true;
 
         btnStyle = new GUIStyle(GUI.skin.button);
         btnStyle.fontSize = 12;
         btnStyle.fontStyle = FontStyle.Bold;
 
+        smallBtnStyle = new GUIStyle(GUI.skin.button);
+        smallBtnStyle.fontSize = 11;
+
         tabActiveStyle = new GUIStyle(GUI.skin.button);
-        tabActiveStyle.fontSize = 13;
+        tabActiveStyle.fontSize = 12;
         tabActiveStyle.fontStyle = FontStyle.Bold;
         tabActiveStyle.normal.background = tabActiveTex;
         tabActiveStyle.normal.textColor = Color.white;
 
         tabInactiveStyle = new GUIStyle(GUI.skin.button);
-        tabInactiveStyle.fontSize = 13;
+        tabInactiveStyle.fontSize = 12;
         tabInactiveStyle.normal.background = tabInactiveTex;
         tabInactiveStyle.normal.textColor = new Color(0.6f, 0.6f, 0.7f);
 

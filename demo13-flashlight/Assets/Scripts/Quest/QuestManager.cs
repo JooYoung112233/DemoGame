@@ -44,6 +44,7 @@ public class QuestManager : MonoBehaviour
         activeQuests.Add(instance);
         OnQuestAccepted?.Invoke(instance);
         Debug.Log($"[QuestManager] 퀘스트 수주: {data.title}");
+        SaveCheckpoints.Instance?.QuestAccepted();
         return true;
     }
 
@@ -91,6 +92,7 @@ public class QuestManager : MonoBehaviour
         activeQuests.Remove(quest);
         OnQuestCompleted?.Invoke(quest);
         Debug.Log($"[QuestManager] 퀘스트 완료: {quest.data.title}");
+        SaveCheckpoints.Instance?.QuestCompleted();
         return true;
     }
 

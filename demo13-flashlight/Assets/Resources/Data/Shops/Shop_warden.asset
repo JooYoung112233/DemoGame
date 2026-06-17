@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60d7863c3de5f054fac23b83dab5f1fb, type: 3}
+  m_Name: Shop_warden
+  m_EditorClassIdentifier: Game.Scripts::ShopData
+  shopId: warden
+  shopName: "관리인 보급"
+  stock:
+  - {fileID: 11400000, guid: 2537b09121bd442b87356d82af65a371, type: 2}
+  - {fileID: 11400000, guid: c11a27e48f0444f195a6fed68e069bc3, type: 2}
+  - {fileID: 11400000, guid: 5fe976a3fbf1445ba198565f81e0eb86, type: 2}
+  - {fileID: 11400000, guid: b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7, type: 2}
+  - {fileID: 11400000, guid: 9ab7696b00764c8bb46424a2e05eb24e, type: 2}
+  - {fileID: 11400000, guid: 3d30c80e555c4971ac893cacc39f99cd, type: 2}
+  buyRate: 0.9
+  sellRate: 0.5

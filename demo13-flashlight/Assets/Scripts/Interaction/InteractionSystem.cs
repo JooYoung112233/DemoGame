@@ -97,9 +97,8 @@ public class InteractionSystem : MonoBehaviour
             if (obj == null) continue;
             if (!obj.CanInteract) continue;
 
-            // XZ 평면 거리 (Y축 높이 차이 무시 — 아이소메트릭 대응)
-            Vector3 diff = obj.transform.position - playerPos;
-            diff.y = 0f;
+            // XY 평면 거리 (top-down 2D)
+            Vector2 diff = (Vector2)obj.transform.position - (Vector2)playerPos;
             float dist = diff.magnitude;
 
             // 히스테리시스: 현재 타겟은 이탈 범위(1.3배)로, 새 타겟은 진입 범위로 판정

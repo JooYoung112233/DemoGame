@@ -85,6 +85,7 @@ public class RaidManager : MonoBehaviour
         raidEnded = false;
         PendingResult = true;   // 레이드 시작 → 귀환 시 정산 표시 대상
         TryBindPlayerHealth();
+        SaveCheckpoints.Instance?.RaidStarted();   // 레이드 시작 = 복귀 기준점 커밋
         Debug.Log($"[RaidManager] 레이드 시작! 제한시간: {raidDuration}초");
     }
 
@@ -149,6 +150,9 @@ public class RaidManager : MonoBehaviour
 
         float elapsed = Time.time - raidStartTime;
         Debug.Log($"[RaidManager] 탈출 성공! 생존시간: {elapsed:F0}초, 획득 아이템: {lootedItems.Count}개");
+
+        // 탈출 정산 = 체크포인트 커밋(레이드 종료). 인벤/정산 결과를 디스크에 확정.
+        SaveCheckpoints.Instance?.RaidEnded();
 
         // 스토리 트리거: 탈출 성공 → 플래그 설정
         if (StoryTriggerManager.Instance != null)

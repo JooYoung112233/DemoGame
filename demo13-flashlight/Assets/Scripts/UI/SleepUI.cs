@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,6 +26,8 @@ public class SleepUI : MonoBehaviour
     GameObject panel;
     Text statusText;
     Font font;
+    Image fadeOverlay;   // 폴백 페이드용(ScreenEffectManager 부재 시)
+    bool sleeping;        // 휴식 처리 중복 방지
 
     void Awake() { if (Instance == null) Instance = this; }
 
@@ -66,6 +69,29 @@ public class SleepUI : MonoBehaviour
 
     void DoSleep(Option o)
     {
+        if (sleeping) return;
+        sleeping = true;
+        StartCoroutine(SleepRoutine(o));
+    }
+
+    IEnumerator SleepRoutine(Option o)
+    {
+        const float fadeDur = 0.4f;
+
+        // ── 페이드 아웃 ──
+        var sem = ScreenEffectManager.Instance;
+        if (sem != null && sem.IsGenerated)
+        {
+            bool done = false;
+            sem.FadeOut(fadeDur, () => done = true);
+            while (!done) yield return null;
+        }
+        else
+        {
+            yield return Fade(0f, 1f, fadeDur); // 폴백
+        }
+
+        // ── 수면 처리(회복/차감/스토리/세이브) ──
         var go = GameObject.FindGameObjectWithTag("Player");
         var health = go != null ? go.GetComponent<Health>() : null;
         if (health != null) health.Heal(health.MaxHp * o.hpPct);
@@ -74,11 +100,67 @@ public class SleepUI : MonoBehaviour
 
         // 침대 휴식 스토리 트리거 유지
         if (StoryTriggerManager.Instance != null) StoryTriggerManager.Instance.OnBedRest();
-        if (SaveManager.Instance != null) SaveManager.Instance.AutoSave();
+        // 침대 수면 = 수동 저장 체크포인트(안전가옥 시설이므로 항상 Commit).
+        // SaveCheckpoints가 없으면 기존 직접 저장으로 폴백.
+        if (SaveCheckpoints.Instance != null) SaveCheckpoints.Instance.BedSleepSave();
+        else if (SaveManager.Instance != null) SaveManager.Instance.AutoSave();
 
-        ToastManager.Show($"{o.label} — 휴식 완료", ToastManager.ToastType.Success);
         RefreshStatus();
+
+        // ── 페이드 인 ──
+        if (sem != null && sem.IsGenerated)
+        {
+            bool done = false;
+            sem.FadeIn(fadeDur, () => done = true);
+            while (!done) yield return null;
+        }
+        else
+        {
+            yield return Fade(1f, 0f, fadeDur); // 폴백
+        }
+
+        // ── 휴식 완료 표시(회복 요약) ──
+        ToastManager.Show(
+            $"휴식 완료 — HP +{o.hpPct * 100:F0}%, 스태미너 회복",
+            ToastManager.ToastType.Success);
+
+        sleeping = false;
         Close();
+    }
+
+    // ScreenEffectManager 부재 시 자체 검은 오버레이 페이드(0→1→0)
+    IEnumerator Fade(float from, float to, float duration)
+    {
+        EnsureFadeOverlay();
+        var fadeGO = fadeOverlay.gameObject;
+        fadeGO.SetActive(true);
+        fadeOverlay.raycastTarget = true;
+
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;
+            float a = Mathf.Lerp(from, to, t / duration);
+            fadeOverlay.color = new Color(0f, 0f, 0f, a);
+            yield return null;
+        }
+        fadeOverlay.color = new Color(0f, 0f, 0f, to);
+
+        if (to <= 0f)
+        {
+            fadeOverlay.raycastTarget = false;
+            fadeGO.SetActive(false);
+        }
+    }
+
+    void EnsureFadeOverlay()
+    {
+        if (fadeOverlay != null) return;
+        // 패널 위(자식)로 전체 화면을 덮는 검은 이미지. 같은 캔버스 내 마지막 자식 = 최상단.
+        var fadeGO = NewRect("Fade", panel.transform, Vector2.zero, Vector2.one);
+        fadeOverlay = fadeGO.AddComponent<Image>();
+        fadeOverlay.color = new Color(0f, 0f, 0f, 0f);
+        fadeGO.SetActive(false);
     }
 
     // ── UI 빌드 ───────────────────────────────────────────

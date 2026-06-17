@@ -68,6 +68,29 @@ public class InventoryGrid
         grid = new PlacedItem[width, height];
     }
 
+    /// <summary>격자 크기 변경. 기존 아이템을 자동 재배치하고, 넘치는 아이템은 overflow로 반환.</summary>
+    public List<ItemInstance> Resize(int newWidth, int newHeight)
+    {
+        var overflow = new List<ItemInstance>();
+        var oldItems = new List<PlacedItem>(items);
+
+        // 격자 초기화
+        items.Clear();
+        width = newWidth;
+        height = newHeight;
+        grid = new PlacedItem[newWidth, newHeight];
+
+        // 기존 아이템을 순서대로 재배치 시도
+        for (int i = 0; i < oldItems.Count; i++)
+        {
+            if (!TryAutoPlace(oldItems[i].item))
+                overflow.Add(oldItems[i].item);
+        }
+
+        OnChanged?.Invoke();
+        return overflow;
+    }
+
     #region 조회
 
     /// <summary>해당 칸의 아이템 (없으면 null)</summary>
@@ -330,6 +353,104 @@ public class InventoryGrid
         items.Clear();
         grid = new PlacedItem[width, height];
         OnChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// 자동 정렬(재배치). 모든 아이템을 회수 → 큰 것 우선·희귀도 높은 순으로 정렬 →
+    /// 빈틈 없이 다시 자동 배치. 재배치 실패분은 원래 위치로 복원.
+    /// </summary>
+    public void AutoSort()
+    {
+        if (width <= 0 || height <= 0) return;
+
+        // 현재 배치 스냅샷 (원위치 복원용)
+        var snapshot = new List<PlacedItem>(items);
+        if (snapshot.Count == 0) return;
+
+        // 정렬: 면적 큰 것 먼저, 같으면 희귀도 높은 순, 그 다음 itemId
+        var ordered = new List<PlacedItem>(snapshot);
+        ordered.Sort((a, b) =>
+        {
+            int areaA = a.item != null && a.item.data != null ? a.item.data.gridWidth * a.item.data.gridHeight : 0;
+            int areaB = b.item != null && b.item.data != null ? b.item.data.gridWidth * b.item.data.gridHeight : 0;
+            if (areaA != areaB) return areaB.CompareTo(areaA); // 큰 면적 먼저
+
+            int rarA = a.item != null && a.item.data != null ? (int)a.item.data.rarity : 0;
+            int rarB = b.item != null && b.item.data != null ? (int)b.item.data.rarity : 0;
+            if (rarA != rarB) return rarB.CompareTo(rarA); // 희귀도 높은 순
+
+            string idA = a.item != null && a.item.data != null ? a.item.data.itemId : "";
+            string idB = b.item != null && b.item.data != null ? b.item.data.itemId : "";
+            return string.CompareOrdinal(idA, idB);
+        });
+
+        // 전부 회수 후 순서대로 재배치
+        items.Clear();
+        grid = new PlacedItem[width, height];
+
+        bool allPlaced = true;
+        for (int i = 0; i < ordered.Count; i++)
+        {
+            // OnChanged 폭주 방지: 내부에서는 조용히 재배치
+            if (!PlaceQuietly(ordered[i].item))
+            {
+                allPlaced = false;
+                break;
+            }
+        }
+
+        // 실패 시 원래 배치로 복원
+        if (!allPlaced)
+        {
+            items.Clear();
+            grid = new PlacedItem[width, height];
+            for (int i = 0; i < snapshot.Count; i++)
+            {
+                var s = snapshot[i];
+                if (!PlaceAtQuietly(s.item, s.gridX, s.gridY, s.rotated))
+                    PlaceQuietly(s.item); // 최후 보루
+            }
+        }
+
+        OnChanged?.Invoke();
+    }
+
+    /// <summary>OnChanged 발행 없이 자동 배치(AutoSort 내부 전용).</summary>
+    bool PlaceQuietly(ItemInstance item)
+    {
+        if (item == null || item.data == null) return false;
+
+        int w = item.data.gridWidth;
+        int h = item.data.gridHeight;
+        for (int gy = 0; gy <= height - h; gy++)
+            for (int gx = 0; gx <= width - w; gx++)
+                if (CanPlace(item, gx, gy, false))
+                    return PlaceAtQuietly(item, gx, gy, false);
+
+        if (w != h)
+        {
+            int rw = h, rh = w;
+            for (int gy = 0; gy <= height - rh; gy++)
+                for (int gx = 0; gx <= width - rw; gx++)
+                    if (CanPlace(item, gx, gy, true))
+                        return PlaceAtQuietly(item, gx, gy, true);
+        }
+        return false;
+    }
+
+    /// <summary>OnChanged 발행 없이 지정 위치 배치(AutoSort 내부 전용).</summary>
+    bool PlaceAtQuietly(ItemInstance item, int x, int y, bool rotated)
+    {
+        if (!CanPlace(item, x, y, rotated)) return false;
+
+        var placed = new PlacedItem(item, x, y, rotated);
+        items.Add(placed);
+        int w = placed.EffectiveWidth;
+        int h = placed.EffectiveHeight;
+        for (int gx = x; gx < x + w; gx++)
+            for (int gy = y; gy < y + h; gy++)
+                grid[gx, gy] = placed;
+        return true;
     }
 
     // ── 세이브/로드 (인벤·창고 공용) ──

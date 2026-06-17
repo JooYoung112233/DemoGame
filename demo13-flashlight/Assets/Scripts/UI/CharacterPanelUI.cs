@@ -1,10 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 통합 캐릭터 패널 (Tab 키).
-/// 우측 고정 패널 + 상단 탭(인벤토리/의료/정보).
-/// 루팅 상자 열면 좌측에 상자 격자 추가.
+/// 통합 캐릭터 패널 (Tab 키). 타르코프식 3열 레이아웃.
+/// 좌=캐릭터/장비 상태, 중=가방(인벤토리 격자), 우=창고/파밍.
 /// UIManager 자식으로 배치.
 /// </summary>
 public class CharacterPanelUI : MonoBehaviour
@@ -13,7 +13,6 @@ public class CharacterPanelUI : MonoBehaviour
     public bool IsGenerated => canvas != null;
 
     bool isShowing;
-    int currentTab; // 0=인벤토리, 1=의료, 2=정보
 
     // 레퍼런스 (자동 탐색)
     PlayerInventory playerInventory;
@@ -42,10 +41,6 @@ public class CharacterPanelUI : MonoBehaviour
     // 우측 메인 패널
     [SerializeField] RectTransform rightPanel;
     [SerializeField] Image rightPanelBg;
-    [SerializeField] Button[] tabButtons;
-    [SerializeField] Text[] tabTexts;
-    [SerializeField] Image[] tabBgs;
-    [SerializeField] GameObject[] tabContents; // 각 탭의 콘텐츠 루트
 
     // 좌측 상자 패널
     [SerializeField] RectTransform leftPanel;
@@ -60,23 +55,20 @@ public class CharacterPanelUI : MonoBehaviour
     Image[] invItemImages;      // 배치된 아이템 아이콘들
     [SerializeField] Text invWeightText;
 
-    // ── 의료 탭 ──
-    [SerializeField] Text[] medPartTexts;
-    [SerializeField] Text medDebuffText;
-    [SerializeField] Text medHealingText;
-
-    // ── 정보 탭 ──
-    [SerializeField] Text infoText;
-
     // ── 좌측 캐릭터/장비 패널 (타르코프식 3열 좌측) ──
     [SerializeField] RectTransform charPanel;
     [SerializeField] Text charHpText;
     [SerializeField] Text charStaminaText;
     [SerializeField] Text charWaterText;
     [SerializeField] Text charFoodText;
-    [SerializeField] Text charWeaponText;
     [SerializeField] Text charWeightText;
     [SerializeField] Text[] charBodyTexts;
+
+    // ── 장비 슬롯 UI ──
+    PlayerEquipment playerEquipment;
+    Dictionary<EquipSlot, Image> equipSlotBgs;
+    Dictionary<EquipSlot, Image> equipSlotIcons;
+    Dictionary<EquipSlot, Text> equipSlotLabels;
 
     // ── 좌측 상자 격자 ──
     [SerializeField] RectTransform containerGridRoot;
@@ -86,7 +78,6 @@ public class CharacterPanelUI : MonoBehaviour
     static readonly int CELL_SIZE = 48;
     static readonly int CELL_GAP = 2;
     static readonly float PANEL_WIDTH = 360f;
-    static readonly string[] TAB_NAMES = { "인벤토리", "의료", "정보" };
     static readonly string[] PART_NAMES = { "머 리", "몸 통", "양 팔", "왼다리", "오른다리" };
 
     // ── 드래그 앤 드롭 ──
@@ -101,6 +92,10 @@ public class CharacterPanelUI : MonoBehaviour
     GameObject highlightGO;
     RectTransform highlightRT;
     Image highlightImage;
+
+    // ── 가방 미장착 안내 ──
+    GameObject invPlaceholder; // 중앙열: 가방 미장착 시 안내
+    Text bagHeaderText;        // "가방" 헤더 텍스트 (동적 갱신용)
 
     // ── 우클릭 컨텍스트 메뉴 ──
     GameObject contextMenuGO;
@@ -146,23 +141,13 @@ public class CharacterPanelUI : MonoBehaviour
             return;
         }
 
-        // 탭 내용 실시간 갱신
-        switch (currentTab)
-        {
-            case 0: UpdateInventoryTab(); break;
-            case 1: UpdateMedicalTab(); break;
-            case 2: UpdateInfoTab(); break;
-        }
-
+        UpdateInventoryTab();
         UpdateCharacterPanel();
 
-        // 우측 격자 갱신 (상자 또는 창고)
         if (LeftGrid != null)
             UpdateContainerGrid();
 
-        // 드래그 앤 드롭 (인벤토리 탭일 때만)
-        if (currentTab == 0)
-            HandleDragAndDrop();
+        HandleDragAndDrop();
     }
 
     #region Show / Hide
@@ -173,7 +158,6 @@ public class CharacterPanelUI : MonoBehaviour
         isShowing = true;
         if (panelRoot != null)
             panelRoot.SetActive(true);
-        SelectTab(currentTab);
         RefreshInventoryGrid();
 
         // 안전구역(안전가옥/하이드아웃)이면 우측에 메인 창고를 항상 표시.
@@ -217,7 +201,6 @@ public class CharacterPanelUI : MonoBehaviour
         openStorage = null;
         openFurniture = null;
         Show();          // 안전구역이면 Show 안에서 이미 창고 표시
-        SelectTab(0);
         ShowStash();     // 명시적으로 한 번 더 보장
     }
 
@@ -227,7 +210,6 @@ public class CharacterPanelUI : MonoBehaviour
         openStorage = null;
         openFurniture = null;
         Show();
-        SelectTab(0);
         // 이미 수색 완료된 상자는 즉시 공개
         bool needSearch = !container.HasBeenSearched;
         ShowLeftPanel(container.Grid, container.ContainerName, needSearch);
@@ -239,7 +221,6 @@ public class CharacterPanelUI : MonoBehaviour
         openFurniture = storage.LinkedInstance;
         openContainer = null;
         Show();
-        SelectTab(0);
 
         // 제목에 허용 카테고리 표시
         string title = storage.StorageName;
@@ -284,6 +265,7 @@ public class CharacterPanelUI : MonoBehaviour
         health = null;
         medical = null;
         playerInventory = null;
+        playerEquipment = null;
         flashlight = null;
     }
 
@@ -296,6 +278,7 @@ public class CharacterPanelUI : MonoBehaviour
         health = go.GetComponent<Health>();
         medical = go.GetComponent<PlayerMedicalSystem>();
         playerInventory = go.GetComponent<PlayerInventory>();
+        playerEquipment = go.GetComponent<PlayerEquipment>();
         flashlight = go.GetComponentInChildren<FlashlightController>();
     }
 
@@ -342,17 +325,8 @@ public class CharacterPanelUI : MonoBehaviour
         panelRoot.SetActive(false);
     }
 
-    /// <summary>탭 버튼 onClick 리스너 연결</summary>
     public void BindEvents()
     {
-        if (tabButtons == null) return;
-        for (int i = 0; i < tabButtons.Length; i++)
-        {
-            if (tabButtons[i] == null) continue;
-            int idx = i;
-            tabButtons[i].onClick.RemoveAllListeners();
-            tabButtons[i].onClick.AddListener(() => SelectTab(idx));
-        }
     }
 
     /// <summary>생성된 UI 구조 제거 및 모든 직렬화 레퍼런스 초기화</summary>
@@ -373,10 +347,6 @@ public class CharacterPanelUI : MonoBehaviour
         panelRoot = null;
         rightPanel = null;
         rightPanelBg = null;
-        tabButtons = null;
-        tabTexts = null;
-        tabBgs = null;
-        tabContents = null;
         leftPanel = null;
         leftPanelBg = null;
         leftTitleText = null;
@@ -384,10 +354,6 @@ public class CharacterPanelUI : MonoBehaviour
         leftPlaceholder = null;
         invGridRoot = null;
         invWeightText = null;
-        medPartTexts = null;
-        medDebuffText = null;
-        medHealingText = null;
-        infoText = null;
         containerGridRoot = null;
         searchStatusText = null;
         charPanel = null;
@@ -395,9 +361,13 @@ public class CharacterPanelUI : MonoBehaviour
         charStaminaText = null;
         charWaterText = null;
         charFoodText = null;
-        charWeaponText = null;
         charWeightText = null;
         charBodyTexts = null;
+        equipSlotBgs = null;
+        equipSlotIcons = null;
+        equipSlotLabels = null;
+        invPlaceholder = null;
+        bagHeaderText = null;
     }
 
     void BuildRightPanel(Transform parent)
@@ -405,7 +375,7 @@ public class CharacterPanelUI : MonoBehaviour
         var go = new GameObject("RightPanel");
         go.transform.SetParent(parent, false);
         rightPanel = go.AddComponent<RectTransform>();
-        rightPanel.anchorMin = new Vector2(0.355f, 0.07f);   // 중앙 열 = 내 가방 (화면 비율 stretch)
+        rightPanel.anchorMin = new Vector2(0.355f, 0.07f);
         rightPanel.anchorMax = new Vector2(0.645f, 0.93f);
         rightPanel.offsetMin = Vector2.zero;
         rightPanel.offsetMax = Vector2.zero;
@@ -413,51 +383,35 @@ public class CharacterPanelUI : MonoBehaviour
         rightPanelBg = go.AddComponent<Image>();
         rightPanelBg.color = new Color(0.06f, 0.06f, 0.1f, 0.95f);
 
-        // ── 상단 탭 버튼 ──
-        tabButtons = new Button[TAB_NAMES.Length];
-        tabTexts = new Text[TAB_NAMES.Length];
-        tabBgs = new Image[TAB_NAMES.Length];
+        // 상단 헤더 ("가방")
+        bagHeaderText = MakeText(rightPanel, "BagHeader", "가방",
+            new Vector2(10, -6), new Vector2(200, 28), 16, new Color(0.85f, 0.8f, 0.6f), TextAnchor.MiddleLeft);
+        bagHeaderText.fontStyle = FontStyle.Bold;
 
-        float frac = 1f / TAB_NAMES.Length;
-        for (int i = 0; i < TAB_NAMES.Length; i++)
-        {
-            var tabGO = new GameObject($"Tab_{i}");
-            tabGO.transform.SetParent(rightPanel, false);
+        // 인벤토리 콘텐츠 영역
+        var contentGO = new GameObject("InvContent");
+        contentGO.transform.SetParent(rightPanel, false);
+        var cRT = contentGO.AddComponent<RectTransform>();
+        cRT.anchorMin = new Vector2(0, 0);
+        cRT.anchorMax = new Vector2(1, 1);
+        cRT.offsetMin = new Vector2(8, 8);
+        cRT.offsetMax = new Vector2(-8, -36);
 
-            // 탭이 패널 폭을 1/N씩 채우도록 비율 앵커
-            var tabRT = tabGO.AddComponent<RectTransform>();
-            tabRT.anchorMin = new Vector2(frac * i, 1);
-            tabRT.anchorMax = new Vector2(frac * (i + 1), 1);
-            tabRT.pivot = new Vector2(0.5f, 1);
-            tabRT.offsetMin = new Vector2(1, -34);
-            tabRT.offsetMax = new Vector2(-1, -2);
+        BuildInventoryTabContent(contentGO.transform);
 
-            tabBgs[i] = tabGO.AddComponent<Image>();
-            tabBgs[i].color = new Color(0.12f, 0.12f, 0.18f);
-
-            tabButtons[i] = tabGO.AddComponent<Button>();
-            tabButtons[i].targetGraphic = tabBgs[i];
-
-            tabTexts[i] = MakeChildText(tabGO.transform, TAB_NAMES[i], 14, Color.white);
-        }
-
-        // ── 탭 콘텐츠 영역 ──
-        tabContents = new GameObject[TAB_NAMES.Length];
-        for (int i = 0; i < TAB_NAMES.Length; i++)
-        {
-            var contentGO = new GameObject($"Content_{i}");
-            contentGO.transform.SetParent(rightPanel, false);
-            var cRT = contentGO.AddComponent<RectTransform>();
-            cRT.anchorMin = new Vector2(0, 0);
-            cRT.anchorMax = new Vector2(1, 1);
-            cRT.offsetMin = new Vector2(8, 8);
-            cRT.offsetMax = new Vector2(-8, -40);
-            tabContents[i] = contentGO;
-        }
-
-        BuildInventoryTabContent(tabContents[0].transform);
-        BuildMedicalTabContent(tabContents[1].transform);
-        BuildInfoTabContent(tabContents[2].transform);
+        // 가방 미장착 안내 (인벤 콘텐츠와 같은 위치에 오버레이)
+        invPlaceholder = new GameObject("InvPlaceholder", typeof(RectTransform));
+        invPlaceholder.transform.SetParent(rightPanel, false);
+        var phRT = invPlaceholder.GetComponent<RectTransform>();
+        phRT.anchorMin = new Vector2(0, 0);
+        phRT.anchorMax = new Vector2(1, 1);
+        phRT.offsetMin = new Vector2(8, 8);
+        phRT.offsetMax = new Vector2(-8, -36);
+        var phTxt = MakeChildText(invPlaceholder.transform,
+            "가방 미장착\n\n가방을 장착하면\n인벤토리가 열립니다",
+            14, new Color(0.45f, 0.5f, 0.62f));
+        phTxt.alignment = TextAnchor.MiddleCenter;
+        invPlaceholder.SetActive(false);
     }
 
     void BuildLeftPanel(Transform parent)
@@ -522,7 +476,7 @@ public class CharacterPanelUI : MonoBehaviour
         var go = new GameObject("CharacterPanel");
         go.transform.SetParent(parent, false);
         charPanel = go.AddComponent<RectTransform>();
-        charPanel.anchorMin = new Vector2(0.035f, 0.07f);   // 좌측 열 = 캐릭터/장비 (화면 비율 stretch)
+        charPanel.anchorMin = new Vector2(0.035f, 0.07f);
         charPanel.anchorMax = new Vector2(0.325f, 0.93f);
         charPanel.offsetMin = Vector2.zero;
         charPanel.offsetMax = Vector2.zero;
@@ -532,32 +486,142 @@ public class CharacterPanelUI : MonoBehaviour
             new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, new Color(0.8f, 0.85f, 1f), TextAnchor.MiddleCenter);
         title.fontStyle = FontStyle.Bold;
 
+        // ── 스탯 텍스트 ──
+        float y = -48f;
         charHpText = MakeText(charPanel, "CharHp", "HP: 100 / 100",
-            new Vector2(14, -48), new Vector2(PANEL_WIDTH - 28, 24), 15, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 22), 14, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
         charHpText.fontStyle = FontStyle.Bold;
+        y -= 24f;
 
         charStaminaText = MakeText(charPanel, "CharStamina", "스태미너: 100 / 100",
-            new Vector2(14, -74), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.4f, 0.85f, 0.95f), TextAnchor.MiddleLeft);
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 20), 12, new Color(0.4f, 0.85f, 0.95f), TextAnchor.MiddleLeft);
+        y -= 22f;
 
         charWaterText = MakeText(charPanel, "CharWater", "수분: 100 / 100",
-            new Vector2(14, -100), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.4f, 0.7f, 1f), TextAnchor.MiddleLeft);
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 20), 12, new Color(0.4f, 0.7f, 1f), TextAnchor.MiddleLeft);
+        y -= 22f;
 
         charFoodText = MakeText(charPanel, "CharFood", "포만감: 100 / 100",
-            new Vector2(14, -124), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.95f, 0.75f, 0.45f), TextAnchor.MiddleLeft);
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 20), 12, new Color(0.95f, 0.75f, 0.45f), TextAnchor.MiddleLeft);
+        y -= 22f;
 
-        charWeaponText = MakeText(charPanel, "Weapon", "무기: 맨손",
-            new Vector2(14, -156), new Vector2(PANEL_WIDTH - 28, 24), 14, Color.white, TextAnchor.MiddleLeft);
+        charWeightText = MakeText(charPanel, "CharWeight", "무게: 0.0 / 30 kg",
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 20), 12, new Color(0.7f, 0.8f, 0.9f), TextAnchor.MiddleLeft);
+        y -= 30f;
 
-        charWeightText = MakeText(charPanel, "CharWeight", "무게: 0 / 30 kg",
-            new Vector2(14, -184), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.7f, 0.8f, 0.9f), TextAnchor.MiddleLeft);
+        // ── 장비 슬롯 (타르코프식) ──
+        MakeText(charPanel, "EquipHdr", "── 장비 ──",
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 22), 13, new Color(0.6f, 0.65f, 0.78f), TextAnchor.MiddleCenter);
+        y -= 28f;
 
+        equipSlotBgs = new Dictionary<EquipSlot, Image>();
+        equipSlotIcons = new Dictionary<EquipSlot, Image>();
+        equipSlotLabels = new Dictionary<EquipSlot, Text>();
+
+        // 슬롯 레이아웃: 3열 상단(Head/Armor/Rig), 3열 중단(Weapon1/Backpack/Weapon2), 1열 하단(Melee)
+        float slotSize = 64f;
+        float slotGap = 6f;
+        float totalW = slotSize * 3 + slotGap * 2;
+        float startX = (PANEL_WIDTH - totalW) * 0.5f;
+
+        // 1행: Head / Armor / Rig
+        BuildEquipSlot(charPanel, EquipSlot.Head, "헬멧", startX, y, slotSize);
+        BuildEquipSlot(charPanel, EquipSlot.Armor, "방탄복", startX + slotSize + slotGap, y, slotSize);
+        BuildEquipSlot(charPanel, EquipSlot.Rig, "조끼", startX + (slotSize + slotGap) * 2, y, slotSize);
+        y -= slotSize + slotGap;
+
+        // 2행: PrimaryWeapon / Backpack / SecondaryWeapon
+        BuildEquipSlot(charPanel, EquipSlot.PrimaryWeapon, "주무기", startX, y, slotSize);
+        BuildEquipSlot(charPanel, EquipSlot.Backpack, "가방", startX + slotSize + slotGap, y, slotSize);
+        BuildEquipSlot(charPanel, EquipSlot.SecondaryWeapon, "보조", startX + (slotSize + slotGap) * 2, y, slotSize);
+        y -= slotSize + slotGap;
+
+        // 3행: Melee (가운데)
+        BuildEquipSlot(charPanel, EquipSlot.Melee, "근접", startX + slotSize + slotGap, y, slotSize);
+        y -= slotSize + 10f;
+
+        // ── 부위 상태 ──
         MakeText(charPanel, "BodyHdr", "── 부위 상태 ──",
-            new Vector2(14, -220), new Vector2(PANEL_WIDTH - 28, 22), 13, new Color(0.6f, 0.65f, 0.78f), TextAnchor.MiddleLeft);
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 22), 13, new Color(0.6f, 0.65f, 0.78f), TextAnchor.MiddleLeft);
+        y -= 26f;
 
         charBodyTexts = new Text[PART_NAMES.Length];
         for (int i = 0; i < PART_NAMES.Length; i++)
+        {
             charBodyTexts[i] = MakeText(charPanel, $"Body_{i}", $"{PART_NAMES[i]}: 정상",
-                new Vector2(22, -246 - i * 26), new Vector2(PANEL_WIDTH - 40, 22), 13, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
+                new Vector2(22, y), new Vector2(PANEL_WIDTH - 40, 20), 12, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
+            y -= 22f;
+        }
+    }
+
+    void BuildEquipSlot(RectTransform parent, EquipSlot slot, string label, float x, float y, float size)
+    {
+        var go = new GameObject($"Slot_{slot}");
+        go.transform.SetParent(parent, false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0, 1);
+        rt.anchorMax = new Vector2(0, 1);
+        rt.pivot = new Vector2(0, 1);
+        rt.anchoredPosition = new Vector2(x, y);
+        rt.sizeDelta = new Vector2(size, size);
+
+        var bg = go.AddComponent<Image>();
+        bg.color = new Color(0.1f, 0.1f, 0.15f, 0.9f);
+        equipSlotBgs[slot] = bg;
+
+        // 아이콘 (장착 시 표시)
+        var iconGO = new GameObject("Icon");
+        iconGO.transform.SetParent(go.transform, false);
+        var iconRT = iconGO.AddComponent<RectTransform>();
+        iconRT.anchorMin = Vector2.zero;
+        iconRT.anchorMax = Vector2.one;
+        iconRT.offsetMin = new Vector2(4, 12);
+        iconRT.offsetMax = new Vector2(-4, -4);
+        var icon = iconGO.AddComponent<Image>();
+        icon.preserveAspect = true;
+        icon.enabled = false;
+        equipSlotIcons[slot] = icon;
+
+        // 슬롯 라벨 (하단)
+        var lblTxt = MakeText(rt, $"Lbl_{slot}", label,
+            new Vector2(0, 2), new Vector2(size, 14), 10, new Color(0.5f, 0.55f, 0.65f), TextAnchor.LowerCenter);
+        lblTxt.alignment = TextAnchor.LowerCenter;
+        var lblRT = lblTxt.GetComponent<RectTransform>();
+        lblRT.anchorMin = new Vector2(0, 0);
+        lblRT.anchorMax = new Vector2(1, 0);
+        lblRT.pivot = new Vector2(0.5f, 0);
+        lblRT.anchoredPosition = new Vector2(0, 2);
+        lblRT.sizeDelta = new Vector2(0, 14);
+        equipSlotLabels[slot] = lblTxt;
+
+        // 클릭 → 해제
+        var btn = go.AddComponent<Button>();
+        btn.targetGraphic = bg;
+        var colors = btn.colors;
+        colors.normalColor = bg.color;
+        colors.highlightedColor = new Color(0.18f, 0.22f, 0.32f, 0.95f);
+        colors.pressedColor = new Color(0.08f, 0.08f, 0.12f, 0.95f);
+        btn.colors = colors;
+        var capturedSlot = slot;
+        btn.onClick.AddListener(() => OnEquipSlotClicked(capturedSlot));
+    }
+
+    void OnEquipSlotClicked(EquipSlot slot)
+    {
+        if (playerEquipment == null) return;
+        var equipped = playerEquipment.GetSlot(slot);
+        if (equipped == null) return;
+
+        // 인벤토리에 공간 있으면 해제 → 인벤으로
+        if (playerInventory != null && playerInventory.Grid.TryAutoPlace(new ItemInstance(equipped, 1)))
+        {
+            playerEquipment.Unequip(slot);
+            RefreshAllGrids();
+        }
+        else
+        {
+            ToastManager.Show("인벤토리 공간 부족", ToastManager.ToastType.Warning);
+        }
     }
 
     void UpdateCharacterPanel()
@@ -594,20 +658,13 @@ public class CharacterPanelUI : MonoBehaviour
             }
         }
 
-        if (charWeaponText != null)
-        {
-            string w = "맨손";
-            if (playerGO != null)
-            {
-                var eq = playerGO.GetComponent<PlayerEquipment>();
-                if (eq != null && eq.EquippedWeapon != null) w = eq.EquippedWeapon.displayName;
-            }
-            charWeaponText.text = $"무기: {w}";
-        }
         if (charWeightText != null && playerInventory != null)
             charWeightText.text = $"무게: {playerInventory.CurrentWeight:F1} / {playerInventory.MaxWeight:F0} kg";
 
-        // 부위별 의료 상태 (의료 탭과 동일)
+        // 장비 슬롯 시각 갱신
+        UpdateEquipSlots();
+
+        // 부위별 의료 상태
         if (charBodyTexts != null && medical != null)
         {
             var parts = medical.GetAllParts();
@@ -616,11 +673,11 @@ public class CharacterPanelUI : MonoBehaviour
                 if (charBodyTexts[i] == null) continue;
                 if (parts[i].IsInjured)
                 {
-                    string s = "";
-                    if (parts[i].HasInjury(InjuryType.Bleeding)) s += "출혈 ";
-                    if (parts[i].HasInjury(InjuryType.Fracture)) s += "골절 ";
-                    if (parts[i].HasInjury(InjuryType.Pain)) s += "통증 ";
-                    charBodyTexts[i].text = $"{PART_NAMES[i]}: {s.TrimEnd()}";
+                    string st = "";
+                    if (parts[i].HasInjury(InjuryType.Bleeding)) st += "출혈 ";
+                    if (parts[i].HasInjury(InjuryType.Fracture)) st += "골절 ";
+                    if (parts[i].HasInjury(InjuryType.Pain)) st += "통증 ";
+                    charBodyTexts[i].text = $"{PART_NAMES[i]}: {st.TrimEnd()}";
                     charBodyTexts[i].color = parts[i].HasInjury(InjuryType.Fracture) ? new Color(1f, 0.2f, 0.2f)
                         : parts[i].HasInjury(InjuryType.Bleeding) ? new Color(1f, 0.5f, 0.2f)
                         : new Color(1f, 1f, 0.3f);
@@ -629,6 +686,59 @@ public class CharacterPanelUI : MonoBehaviour
                 {
                     charBodyTexts[i].text = $"{PART_NAMES[i]}: 정상";
                     charBodyTexts[i].color = new Color(0.4f, 1f, 0.5f);
+                }
+            }
+        }
+    }
+
+    void UpdateEquipSlots()
+    {
+        if (equipSlotBgs == null || equipSlotIcons == null) return;
+
+        foreach (var kv in equipSlotBgs)
+        {
+            var slot = kv.Key;
+            var bg = kv.Value;
+            Image icon;
+            Text lbl;
+            equipSlotIcons.TryGetValue(slot, out icon);
+            equipSlotLabels.TryGetValue(slot, out lbl);
+
+            var equipped = playerEquipment != null ? playerEquipment.GetSlot(slot) : null;
+            bool hasItem = equipped != null;
+
+            // 배경색: 장착됨이면 밝게
+            bg.color = hasItem
+                ? new Color(0.15f, 0.18f, 0.25f, 0.95f)
+                : new Color(0.1f, 0.1f, 0.15f, 0.9f);
+
+            // 아이콘
+            if (icon != null)
+            {
+                if (hasItem && equipped.icon != null)
+                {
+                    icon.sprite = equipped.icon;
+                    icon.color = Color.white;
+                    icon.enabled = true;
+                }
+                else
+                {
+                    icon.enabled = false;
+                }
+            }
+
+            // 라벨: 장착됨이면 아이템 이름, 아니면 슬롯 이름
+            if (lbl != null)
+            {
+                if (hasItem)
+                {
+                    lbl.text = equipped.displayName;
+                    lbl.color = equipped.RarityColor;
+                }
+                else
+                {
+                    lbl.color = new Color(0.5f, 0.55f, 0.65f);
+                    // 기본 라벨은 빌드 시 설정된 것 유지
                 }
             }
         }
@@ -666,6 +776,31 @@ public class CharacterPanelUI : MonoBehaviour
         if (playerInventory == null || playerInventory.Grid == null) return;
 
         var grid = playerInventory.Grid;
+
+        // 가방 미장착 (격자 0x0) → 안내 표시
+        bool hasBackpack = grid.width > 0 && grid.height > 0;
+        if (invPlaceholder != null) invPlaceholder.SetActive(!hasBackpack);
+        invGridRoot.gameObject.SetActive(hasBackpack);
+        if (invWeightText != null) invWeightText.gameObject.SetActive(hasBackpack);
+
+        // 헤더 갱신
+        if (bagHeaderText != null)
+        {
+            if (!hasBackpack)
+            {
+                bagHeaderText.text = "가방 미장착";
+                bagHeaderText.color = new Color(0.5f, 0.5f, 0.55f);
+            }
+            else
+            {
+                var bp = playerEquipment != null ? playerEquipment.GetSlot(EquipSlot.Backpack) : null;
+                bagHeaderText.text = bp != null ? bp.displayName : "주머니";
+                bagHeaderText.color = new Color(0.85f, 0.8f, 0.6f);
+            }
+        }
+
+        if (!hasBackpack) return;
+
         int cellTotal = CELL_SIZE + CELL_GAP;
 
         // 빈 칸 슬롯 생성
@@ -821,122 +956,6 @@ public class CharacterPanelUI : MonoBehaviour
             invWeightText.color = wc;
             invWeightText.text = $"무게: {cur:F1} / {max:F0} kg  |  아이템: {playerInventory.Grid.ItemCount}개";
         }
-    }
-
-    #endregion
-
-    #region 의료 탭 빌드
-
-    void BuildMedicalTabContent(Transform parent)
-    {
-        medPartTexts = new Text[5];
-        for (int i = 0; i < 5; i++)
-        {
-            medPartTexts[i] = MakeText(parent, $"Part_{i}", $"{PART_NAMES[i]}: 정상",
-                new Vector2(5, -i * 30), new Vector2(270, 26), 15, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
-            medPartTexts[i].fontStyle = FontStyle.Bold;
-        }
-
-        medHealingText = MakeText(parent, "Healing", "",
-            new Vector2(5, -165), new Vector2(270, 22), 14, new Color(0.4f, 1f, 0.8f), TextAnchor.MiddleLeft);
-
-        medDebuffText = MakeText(parent, "Debuffs", "",
-            new Vector2(5, -195), new Vector2(270, 80), 13, new Color(1f, 0.6f, 0.4f), TextAnchor.UpperLeft);
-    }
-
-    void UpdateMedicalTab()
-    {
-        if (medical == null || medPartTexts == null) return;
-
-        var parts = medical.GetAllParts();
-        for (int i = 0; i < parts.Length && i < medPartTexts.Length; i++)
-        {
-            if (parts[i].IsInjured)
-            {
-                string summary = "";
-                if (parts[i].HasInjury(InjuryType.Bleeding)) summary += "출혈 ";
-                if (parts[i].HasInjury(InjuryType.Fracture)) summary += "골절 ";
-                if (parts[i].HasInjury(InjuryType.Pain)) summary += "통증 ";
-                medPartTexts[i].text = $"{PART_NAMES[i]}: {summary.TrimEnd()}";
-
-                if (parts[i].HasInjury(InjuryType.Fracture))
-                    medPartTexts[i].color = new Color(1f, 0.2f, 0.2f);
-                else if (parts[i].HasInjury(InjuryType.Bleeding))
-                    medPartTexts[i].color = new Color(1f, 0.5f, 0.2f);
-                else
-                    medPartTexts[i].color = new Color(1f, 1f, 0.3f);
-            }
-            else
-            {
-                medPartTexts[i].text = $"{PART_NAMES[i]}: 정상";
-                medPartTexts[i].color = new Color(0.4f, 1f, 0.5f);
-            }
-        }
-
-        // 치료 진행
-        if (medical.IsHealing)
-            medHealingText.text = $"치료 중... {medical.HealProgress * 100:F0}%";
-        else
-            medHealingText.text = "";
-
-        // 디버프
-        string debuffs = "";
-        if (medical.MoveSpeedMultiplier < 1f)
-            debuffs += $"이동속도: {medical.MoveSpeedMultiplier * 100:F0}%\n";
-        if (medical.AttackSpeedMultiplier < 1f)
-            debuffs += $"공격속도: {medical.AttackSpeedMultiplier * 100:F0}%\n";
-        if (medical.StaminaRegenMultiplier < 1f)
-            debuffs += $"스태미너회복: {medical.StaminaRegenMultiplier * 100:F0}%";
-        medDebuffText.text = debuffs;
-    }
-
-    #endregion
-
-    #region 정보 탭 빌드
-
-    void BuildInfoTabContent(Transform parent)
-    {
-        infoText = MakeText(parent, "Info", "",
-            new Vector2(5, 0), new Vector2(270, 400), 14, new Color(0.8f, 0.85f, 0.9f), TextAnchor.UpperLeft);
-    }
-
-    void UpdateInfoTab()
-    {
-        if (infoText == null) return;
-
-        string info = "";
-        if (health != null)
-            info += $"HP: {health.CurrentHp:F0} / {health.MaxHp:F0}\n";
-        //     info += $"스태미너: {player.StaminaCurrent:F0} / {player.StaminaMax:F0}\n";
-        if (flashlight != null)
-            info += $"배터리: {flashlight.BatteryPercent * 100:F0}%  {(flashlight.IsOn ? "ON" : "OFF")}\n";
-
-        info += "\n";
-
-        if (playerInventory != null)
-        {
-            info += $"가방: {playerInventory.Grid.ItemCount}개\n";
-            info += $"무게: {playerInventory.CurrentWeight:F1} / {playerInventory.MaxWeight:F0} kg\n";
-
-            // 총 판매가치
-            int totalValue = 0;
-            var allItems = playerInventory.Grid.GetAll();
-            for (int i = 0; i < allItems.Count; i++)
-            {
-                if (allItems[i].item.data != null)
-                    totalValue += allItems[i].item.data.sellPrice * allItems[i].item.stackCount;
-            }
-            if (totalValue > 0)
-                info += $"판매가치: {totalValue} 스크랩\n";
-        }
-
-        info += "\n";
-
-        //     info += $"전투: {(player.CombatEnabled ? "활성" : "비활성")}\n";
-        if (medical != null)
-            info += $"부상: {(medical.HasAnyInjury ? "있음" : "없음")}\n";
-
-        infoText.text = info;
     }
 
     #endregion
@@ -1319,17 +1338,23 @@ public class CharacterPanelUI : MonoBehaviour
     {
         if (isDragging)
         {
+            // 1제스처 드래그: 누른 상태로 끌고, 떼면 놓는다.
             UpdateGhostPosition();
             UpdateHighlight();
 
             if (Input.GetKeyDown(KeyCode.R))
                 ToggleDragRotation();
 
-            if (Input.GetMouseButtonDown(0))
-                TryPlaceDragged();
-
+            // 우클릭은 드래그 취소(원위치 복귀)
             if (Input.GetMouseButtonDown(1))
+            {
                 CancelDrag();
+                return;
+            }
+
+            // 마우스 버튼을 떼는 순간 = 놓기
+            if (Input.GetMouseButtonUp(0))
+                TryPlaceDragged();
         }
         else
         {
@@ -1340,7 +1365,7 @@ public class CharacterPanelUI : MonoBehaviour
                 else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
                     TryQuickTransfer();
                 else
-                    TryPickupItem();
+                    TryPickupItem(); // 아이템 칸이면 StartDrag → 이후 떼면 놓기
             }
 
             // 우클릭 컨텍스트 메뉴
@@ -1684,32 +1709,37 @@ public class CharacterPanelUI : MonoBehaviour
             return false;
         }
 
-        // 스왑 시도: 대상 아이템을 빼고, 새 아이템 배치, 이전 아이템을 드래그로
+        // 스왑 시도: 대상 아이템을 빼고, 새 아이템 배치, 이전 아이템은 드래그 시작 위치로.
+        // (1제스처 드래그이므로 떼는 즉시 스왑 완료 — 들고 다니지 않는다.)
         var oldItem = target.item;
         bool oldRotated = target.rotated;
         int oldX = target.gridX;
         int oldY = target.gridY;
+        var sourceGrid = dragSourceGrid; // dragItem이 빠져나온 격자 (그 칸은 현재 비어있음)
         grid.Remove(target);
 
         if (grid.CanPlace(dragItem, x, y, dragRotated))
         {
             grid.TryPlace(dragItem, x, y, dragRotated);
-            // 이전 아이템을 새 드래그 대상으로
-            dragItem = oldItem;
-            dragRotated = oldRotated;
-            dragSourceGrid = grid;
-            dragOrigX = oldX;
-            dragOrigY = oldY;
-            dragOrigRotated = oldRotated;
-            // 고스트 갱신
-            if (ghostGO != null) Destroy(ghostGO);
-            CreateGhost();
-            RefreshAllGrids();
-            return false; // 계속 드래그
+
+            // 빠진 아이템을 드래그 출발지로 되돌린다.
+            bool placedOld = false;
+            if (sourceGrid != null)
+            {
+                placedOld = sourceGrid.TryPlace(oldItem, dragOrigX, dragOrigY, dragOrigRotated)
+                            || sourceGrid.TryAutoPlace(oldItem);
+            }
+            if (!placedOld)
+                placedOld = grid.TryAutoPlace(oldItem);
+            if (!placedOld && playerGO != null)
+                WorldItem.Drop(oldItem, playerGO.transform.position + playerGO.transform.right * 0.8f);
+
+            EndDrag();
+            return true; // 스왑 완료
         }
         else
         {
-            // 배치 불가 → 기존 아이템 복원
+            // 배치 불가 → 기존 아이템 복원 (드래그 아이템은 호출부에서 원위치)
             grid.TryPlace(oldItem, oldX, oldY, oldRotated);
             return false;
         }
@@ -1828,6 +1858,33 @@ public class CharacterPanelUI : MonoBehaviour
 
         float y = -28f;
         bool isPlayerGrid = (grid == playerInventory?.Grid);
+
+        // 장착 (equipSlot != None + 플레이어 인벤토리만)
+        if (data.equipSlot != EquipSlot.None && isPlayerGrid)
+        {
+            AddContextButton("장착", new Color(0.4f, 0.8f, 1f), y, () =>
+            {
+                if (playerEquipment != null)
+                {
+                    playerEquipment.Equip(data);
+                    grid.Remove(contextTarget);
+                    RefreshAllGrids();
+                }
+                HideContextMenu();
+            });
+            y -= 26f;
+        }
+        // 무기 장착 (구형 equipSlot=None 무기)
+        else if (data.category == ItemCategory.Weapon && isPlayerGrid)
+        {
+            AddContextButton("장착", new Color(0.4f, 0.8f, 1f), y, () =>
+            {
+                playerInventory.UseItem(contextTarget);
+                HideContextMenu();
+                RefreshAllGrids();
+            });
+            y -= 26f;
+        }
 
         // 사용 (isUsable + 플레이어 인벤토리만)
         if (data.isUsable && isPlayerGrid)
@@ -2000,12 +2057,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         Debug.Log($"[검사] {d.displayName}\n{info}");
 
-        // infoText가 있으면 정보 탭에 표시
-        if (infoText != null)
-        {
-            SelectTab(2); // 정보 탭
-            infoText.text = info;
-        }
+        ToastManager.Show(info, ToastManager.ToastType.Info, 4f);
     }
 
     static string GetCategoryName(ItemCategory cat)
@@ -2053,30 +2105,6 @@ public class CharacterPanelUI : MonoBehaviour
         var leftGrid = LeftGrid;
         if (leftGrid != null && leftPanelRoot != null && leftPanelRoot.activeSelf)
             RefreshLeftGrid(leftGrid);
-    }
-
-    #endregion
-
-    #region 탭 전환
-
-    void SelectTab(int idx)
-    {
-        currentTab = idx;
-
-        for (int i = 0; i < tabContents.Length; i++)
-        {
-            tabContents[i].SetActive(i == idx);
-            tabBgs[i].color = (i == idx)
-                ? new Color(0.2f, 0.35f, 0.55f)
-                : new Color(0.12f, 0.12f, 0.18f);
-            tabTexts[i].color = (i == idx)
-                ? Color.white
-                : new Color(0.5f, 0.5f, 0.6f);
-        }
-
-        // 인벤토리 탭 선택 시 격자 새로고침
-        if (idx == 0)
-            RefreshInventoryGrid();
     }
 
     #endregion
