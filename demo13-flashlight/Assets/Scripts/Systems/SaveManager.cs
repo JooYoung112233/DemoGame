@@ -95,6 +95,12 @@ public class SaveManager : MonoBehaviour
             data.reputation = ReputationManager.Instance.GetSaveData();
         }
 
+        // 하이드아웃 모듈 레벨
+        if (HideoutModuleManager.Instance != null)
+        {
+            data.hideoutModules = HideoutModuleManager.Instance.GetSaveData();
+        }
+
         // 인벤토리(가방) + 장착 무기
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
@@ -200,6 +206,12 @@ public class SaveManager : MonoBehaviour
         if (ReputationManager.Instance != null)
         {
             ReputationManager.Instance.LoadSaveData(data.reputation);
+        }
+
+        // 하이드아웃 모듈 레벨
+        if (HideoutModuleManager.Instance != null)
+        {
+            HideoutModuleManager.Instance.LoadSaveData(data.hideoutModules);
         }
 
         // 인벤토리(가방) + 장착 무기
@@ -330,6 +342,9 @@ public class GameSaveData
 
     // 평판(전역 명성)
     public int reputation;
+
+    // 하이드아웃 모듈 레벨
+    public List<HideoutModuleSaveEntry> hideoutModules;
 
     // 인벤토리(가방) + 장착 무기
     public List<GridItemEntry> bagItems = new List<GridItemEntry>();

@@ -66,6 +66,12 @@ public class CharacterPanelUI : MonoBehaviour
     // ── 정보 탭 ──
     [SerializeField] Text infoText;
 
+    // ── 좌측 캐릭터/장비 패널 (타르코프식 3열 좌측) ──
+    [SerializeField] RectTransform charPanel;
+    [SerializeField] Text charWeaponText;
+    [SerializeField] Text charWeightText;
+    [SerializeField] Text[] charBodyTexts;
+
     // ── 좌측 상자 격자 ──
     [SerializeField] RectTransform containerGridRoot;
     Image[,] containerSlotImages;
@@ -73,7 +79,7 @@ public class CharacterPanelUI : MonoBehaviour
     // 설정
     static readonly int CELL_SIZE = 48;
     static readonly int CELL_GAP = 2;
-    static readonly float PANEL_WIDTH = 300f;
+    static readonly float PANEL_WIDTH = 360f;
     static readonly string[] TAB_NAMES = { "인벤토리", "의료", "정보" };
     static readonly string[] PART_NAMES = { "머 리", "몸 통", "양 팔", "왼다리", "오른다리" };
 
@@ -142,7 +148,9 @@ public class CharacterPanelUI : MonoBehaviour
             case 2: UpdateInfoTab(); break;
         }
 
-        // 좌측 격자 갱신 (상자 또는 창고)
+        UpdateCharacterPanel();
+
+        // 우측 격자 갱신 (상자 또는 창고)
         if (LeftGrid != null)
             UpdateContainerGrid();
 
@@ -281,13 +289,12 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 반투명 배경 (클릭 차단)
         var dimBg = panelRoot.AddComponent<Image>();
-        dimBg.color = new Color(0, 0, 0, 0.4f);
+        dimBg.color = new Color(0.02f, 0.02f, 0.04f, 0.93f);   // 전체화면 모달(게임 가림)
 
-        // ── 우측 메인 패널 ──
-        BuildRightPanel(panelRoot.transform);
-
-        // ── 좌측 상자 패널 ──
-        BuildLeftPanel(panelRoot.transform);
+        // ── 타르코프식 3열: 좌=캐릭터/장비 · 중=내 가방(탭) · 우=창고/파밍 ──
+        BuildRightPanel(panelRoot.transform);      // 중앙 = 내 가방
+        BuildLeftPanel(panelRoot.transform);       // 우측 = 창고/파밍
+        BuildCharacterPanel(panelRoot.transform);  // 좌측 = 캐릭터/장비
 
         panelRoot.SetActive(false);
     }
@@ -339,6 +346,10 @@ public class CharacterPanelUI : MonoBehaviour
         infoText = null;
         containerGridRoot = null;
         searchStatusText = null;
+        charPanel = null;
+        charWeaponText = null;
+        charWeightText = null;
+        charBodyTexts = null;
     }
 
     void BuildRightPanel(Transform parent)
@@ -346,11 +357,10 @@ public class CharacterPanelUI : MonoBehaviour
         var go = new GameObject("RightPanel");
         go.transform.SetParent(parent, false);
         rightPanel = go.AddComponent<RectTransform>();
-        rightPanel.anchorMin = new Vector2(1, 0);
-        rightPanel.anchorMax = new Vector2(1, 1);
-        rightPanel.pivot = new Vector2(1, 0.5f);
-        rightPanel.anchoredPosition = new Vector2(-15, 0);
-        rightPanel.sizeDelta = new Vector2(PANEL_WIDTH, -30);
+        rightPanel.anchorMin = new Vector2(0.355f, 0.07f);   // 중앙 열 = 내 가방 (화면 비율 stretch)
+        rightPanel.anchorMax = new Vector2(0.645f, 0.93f);
+        rightPanel.offsetMin = Vector2.zero;
+        rightPanel.offsetMax = Vector2.zero;
 
         rightPanelBg = go.AddComponent<Image>();
         rightPanelBg.color = new Color(0.06f, 0.06f, 0.1f, 0.95f);
@@ -360,18 +370,19 @@ public class CharacterPanelUI : MonoBehaviour
         tabTexts = new Text[TAB_NAMES.Length];
         tabBgs = new Image[TAB_NAMES.Length];
 
-        float tabW = PANEL_WIDTH / TAB_NAMES.Length;
+        float frac = 1f / TAB_NAMES.Length;
         for (int i = 0; i < TAB_NAMES.Length; i++)
         {
             var tabGO = new GameObject($"Tab_{i}");
             tabGO.transform.SetParent(rightPanel, false);
 
+            // 탭이 패널 폭을 1/N씩 채우도록 비율 앵커
             var tabRT = tabGO.AddComponent<RectTransform>();
-            tabRT.anchorMin = new Vector2(0, 1);
-            tabRT.anchorMax = new Vector2(0, 1);
-            tabRT.pivot = new Vector2(0, 1);
-            tabRT.anchoredPosition = new Vector2(tabW * i, 0);
-            tabRT.sizeDelta = new Vector2(tabW, 32);
+            tabRT.anchorMin = new Vector2(frac * i, 1);
+            tabRT.anchorMax = new Vector2(frac * (i + 1), 1);
+            tabRT.pivot = new Vector2(0.5f, 1);
+            tabRT.offsetMin = new Vector2(1, -34);
+            tabRT.offsetMax = new Vector2(-1, -2);
 
             tabBgs[i] = tabGO.AddComponent<Image>();
             tabBgs[i].color = new Color(0.12f, 0.12f, 0.18f);
@@ -406,11 +417,10 @@ public class CharacterPanelUI : MonoBehaviour
         leftPanelRoot = new GameObject("LeftPanel");
         leftPanelRoot.transform.SetParent(parent, false);
         leftPanel = leftPanelRoot.AddComponent<RectTransform>();
-        leftPanel.anchorMin = new Vector2(1, 0);
-        leftPanel.anchorMax = new Vector2(1, 1);
-        leftPanel.pivot = new Vector2(1, 0.5f);
-        leftPanel.anchoredPosition = new Vector2(-15 - PANEL_WIDTH - 10, 0);
-        leftPanel.sizeDelta = new Vector2(PANEL_WIDTH, -30);
+        leftPanel.anchorMin = new Vector2(0.67f, 0.07f);    // 우측 열 = 창고/파밍 (화면 비율 stretch)
+        leftPanel.anchorMax = new Vector2(0.965f, 0.93f);
+        leftPanel.offsetMin = Vector2.zero;
+        leftPanel.offsetMax = Vector2.zero;
 
         leftPanelBg = leftPanelRoot.AddComponent<Image>();
         leftPanelBg.color = new Color(0.06f, 0.06f, 0.1f, 0.95f);
@@ -435,6 +445,78 @@ public class CharacterPanelUI : MonoBehaviour
         containerGridRoot.sizeDelta = new Vector2(PANEL_WIDTH - 20, 400);
 
         leftPanelRoot.SetActive(false);
+    }
+
+    void BuildCharacterPanel(Transform parent)
+    {
+        var go = new GameObject("CharacterPanel");
+        go.transform.SetParent(parent, false);
+        charPanel = go.AddComponent<RectTransform>();
+        charPanel.anchorMin = new Vector2(0.035f, 0.07f);   // 좌측 열 = 캐릭터/장비 (화면 비율 stretch)
+        charPanel.anchorMax = new Vector2(0.325f, 0.93f);
+        charPanel.offsetMin = Vector2.zero;
+        charPanel.offsetMax = Vector2.zero;
+        go.AddComponent<Image>().color = new Color(0.06f, 0.06f, 0.1f, 0.95f);
+
+        var title = MakeText(charPanel, "CharTitle", "캐릭터 상태",
+            new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, new Color(0.8f, 0.85f, 1f), TextAnchor.MiddleCenter);
+        title.fontStyle = FontStyle.Bold;
+
+        charWeaponText = MakeText(charPanel, "Weapon", "무기: 맨손",
+            new Vector2(14, -48), new Vector2(PANEL_WIDTH - 28, 24), 14, Color.white, TextAnchor.MiddleLeft);
+
+        charWeightText = MakeText(charPanel, "CharWeight", "무게: 0 / 30 kg",
+            new Vector2(14, -76), new Vector2(PANEL_WIDTH - 28, 24), 13, new Color(0.7f, 0.8f, 0.9f), TextAnchor.MiddleLeft);
+
+        MakeText(charPanel, "BodyHdr", "── 부위 상태 ──",
+            new Vector2(14, -112), new Vector2(PANEL_WIDTH - 28, 22), 13, new Color(0.6f, 0.65f, 0.78f), TextAnchor.MiddleLeft);
+
+        charBodyTexts = new Text[PART_NAMES.Length];
+        for (int i = 0; i < PART_NAMES.Length; i++)
+            charBodyTexts[i] = MakeText(charPanel, $"Body_{i}", $"{PART_NAMES[i]}: 정상",
+                new Vector2(22, -138 - i * 26), new Vector2(PANEL_WIDTH - 40, 22), 13, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
+    }
+
+    void UpdateCharacterPanel()
+    {
+        if (charWeaponText != null)
+        {
+            string w = "맨손";
+            if (playerGO != null)
+            {
+                var eq = playerGO.GetComponent<PlayerEquipment>();
+                if (eq != null && eq.EquippedWeapon != null) w = eq.EquippedWeapon.displayName;
+            }
+            charWeaponText.text = $"무기: {w}";
+        }
+        if (charWeightText != null && playerInventory != null)
+            charWeightText.text = $"무게: {playerInventory.CurrentWeight:F1} / {playerInventory.MaxWeight:F0} kg";
+
+        // 부위별 의료 상태 (의료 탭과 동일)
+        if (charBodyTexts != null && medical != null)
+        {
+            var parts = medical.GetAllParts();
+            for (int i = 0; i < parts.Length && i < charBodyTexts.Length; i++)
+            {
+                if (charBodyTexts[i] == null) continue;
+                if (parts[i].IsInjured)
+                {
+                    string s = "";
+                    if (parts[i].HasInjury(InjuryType.Bleeding)) s += "출혈 ";
+                    if (parts[i].HasInjury(InjuryType.Fracture)) s += "골절 ";
+                    if (parts[i].HasInjury(InjuryType.Pain)) s += "통증 ";
+                    charBodyTexts[i].text = $"{PART_NAMES[i]}: {s.TrimEnd()}";
+                    charBodyTexts[i].color = parts[i].HasInjury(InjuryType.Fracture) ? new Color(1f, 0.2f, 0.2f)
+                        : parts[i].HasInjury(InjuryType.Bleeding) ? new Color(1f, 0.5f, 0.2f)
+                        : new Color(1f, 1f, 0.3f);
+                }
+                else
+                {
+                    charBodyTexts[i].text = $"{PART_NAMES[i]}: 정상";
+                    charBodyTexts[i].color = new Color(0.4f, 1f, 0.5f);
+                }
+            }
+        }
     }
 
     #endregion

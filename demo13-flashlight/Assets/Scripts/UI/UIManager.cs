@@ -255,6 +255,15 @@ public class UIManager : MonoBehaviour
             else if (!IsAnyUIOpen() && characterPanelUI != null)
                 ShowCharacterPanel();
         }
+
+        // [임시 테스트] H: 하이드아웃 업그레이드 UI (추후 관리인/시설 클릭으로 연결)
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            if (HideoutUI.Instance != null && HideoutUI.Instance.IsShowing)
+                HideoutUI.Instance.Close();
+            else if (!IsAnyUIOpen())
+                HideoutUI.Show();
+        }
     }
 
     /// <summary>캐릭터 패널 표시 (인벤토리/의료/정보 탭)</summary>
@@ -330,6 +339,8 @@ public class UIManager : MonoBehaviour
             dialogueUI.Hide();
         if (PauseMenu.Instance != null)
             PauseMenu.Instance.Hide();
+        if (HideoutUI.Instance != null)
+            HideoutUI.Instance.Close();
     }
 
     /// <summary>현재 어떤 UI든 열려있는지</summary>
@@ -344,6 +355,7 @@ public class UIManager : MonoBehaviour
         if (postRaidEventUI != null && postRaidEventUI.IsShowing) return true;
         if (NoteUI.Instance != null && NoteUI.Instance.IsShowing) return true;
         if (PauseMenu.Instance != null && PauseMenu.Instance.IsShowing) return true;
+        if (HideoutUI.Instance != null && HideoutUI.Instance.IsShowing) return true;
         return false;
     }
 }

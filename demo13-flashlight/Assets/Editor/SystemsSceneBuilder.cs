@@ -49,6 +49,7 @@ public static class SystemsSceneBuilder
         typeof(AchievementManager),
         typeof(CurrencyManager),
         typeof(ReputationManager),
+        typeof(HideoutModuleManager),
         typeof(SaveManager),
         typeof(StoryLocale),
         typeof(StoryPlayer),
