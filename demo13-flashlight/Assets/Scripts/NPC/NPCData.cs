@@ -27,6 +27,8 @@ public class DialogueChoice
     public int affinityChange;
     public int trustChange;
     public int fearChange;
+    [Tooltip("전역 평판(ReputationManager) 변동")]
+    public int reputationChange;
     [TextArea(1, 3)]
     public string[] resultLines;
     [Tooltip("선택 시 수주할 퀘스트 ID")]

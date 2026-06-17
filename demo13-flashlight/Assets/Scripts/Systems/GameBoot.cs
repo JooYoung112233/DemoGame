@@ -13,6 +13,8 @@ public class GameBoot : MonoBehaviour
     [SerializeField] string defaultScene = "Safehouse";
     [Tooltip("기본 스폰 포인트 ID")]
     [SerializeField] string defaultSpawn = "default";
+    [Tooltip("true면 부팅 시 타이틀 화면을 먼저 띄운다. false면 곧장 게임플레이 씬으로(개발용).")]
+    [SerializeField] bool showTitleOnBoot = true;
 
     IEnumerator Start()
     {
@@ -27,6 +29,27 @@ public class GameBoot : MonoBehaviour
                 SnapPlayerToSpawn();
                 yield break;
             }
+
+        // ── 타이틀 화면: 부팅 시 메인 메뉴를 먼저(새 게임/이어하기/종료) ──
+        //    검게 덮은 채 타이틀을 띄우고 페이드로 드러낸다 → 부팅 직후 HUD(HP바) 깜빡임 차단.
+        //    버튼이 직접 Safehouse로 전환하므로 여기서 자동 전환하지 않는다.
+        if (showTitleOnBoot)
+        {
+            // SceneTransitionManager 준비 대기(페이드 커버용, 최대 3초)
+            float tw = 0f;
+            while (SceneTransitionManager.Instance == null && tw < 3f)
+            {
+                tw += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            var stm = SceneTransitionManager.Instance;
+            if (stm != null) stm.CoverInstant();   // 즉시 검게 덮기
+            TitleScreen.Show();
+            yield return null;                      // 타이틀 1프레임 렌더 대기
+            if (stm != null) yield return stm.RevealRoutine();  // 타이틀을 페이드로 드러냄
+            yield break;
+        }
 
         // SceneTransitionManager 준비 대기 (최대 3초)
         float t = 0f;
@@ -56,6 +79,9 @@ public class GameBoot : MonoBehaviour
             if (sp != null && sp.PointId == defaultSpawn) { target = sp; break; }
 
         if (target != null)
+        {
             playerGO.transform.position = target.transform.position;
+            CameraFollow.Instance?.SnapToTarget();   // 카메라 즉시 스냅 → 슬라이드 방지
+        }
     }
 }

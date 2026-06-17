@@ -65,8 +65,8 @@ public class ShopUI : MonoBehaviour
             if (unit <= 0) continue;
             int total = unit * p.item.stackCount;
             var captured = p;
-            string label = p.item.stackCount > 1 ? $"{p.item.DisplayName} x{p.item.stackCount}" : p.item.DisplayName;
-            AddRow(sellContent, label, total, "팔기", new Color(0.3f, 0.7f, 0.4f), () => Sell(captured));
+            string cnt = p.item.stackCount > 1 ? $"x{p.item.stackCount}" : "";
+            AddCell(sellContent, p.item.data, cnt, total, () => Sell(captured));
         }
     }
 
@@ -80,7 +80,7 @@ public class ShopUI : MonoBehaviour
             int price = shop.BuyPrice(it);
             if (price <= 0) continue;
             var captured = it;
-            AddRow(buyContent, it.displayName, price, "사기", new Color(0.8f, 0.7f, 0.3f), () => Buy(captured));
+            AddCell(buyContent, it, "", price, () => Buy(captured));
         }
     }
 
@@ -159,38 +159,65 @@ public class ShopUI : MonoBehaviour
         panel.SetActive(false);
     }
 
-    void AddRow(RectTransform parent, string name, int price, string btnLabel, Color btnColor, System.Action onClick)
+    /// <summary>타르코프식 정사각 칸. 아이콘(없으면 이름) + 수량(우상단) + 가격(하단). 셀 전체 클릭 = 거래.</summary>
+    void AddCell(RectTransform parent, ItemData data, string topRight, int price, System.Action onClick)
     {
         if (parent == null) return;
-        var row = new GameObject("Row");
-        row.transform.SetParent(parent, false);
-        var rt = row.AddComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(0, 40);
-        var le = row.AddComponent<LayoutElement>();
-        le.minHeight = 40;
-        row.AddComponent<Image>().color = new Color(1, 1, 1, 0.04f);
-        var hl = row.AddComponent<HorizontalLayoutGroup>();
-        hl.padding = new RectOffset(8, 8, 4, 4);
-        hl.spacing = 6;
-        hl.childControlWidth = true; hl.childForceExpandWidth = false;
-        hl.childAlignment = TextAnchor.MiddleLeft;
-
-        var nameT = MakeChildText(row.transform, name, 16, TextAnchor.MiddleLeft);
-        nameT.GetComponent<LayoutElement>().flexibleWidth = 1;
-
-        var priceT = MakeChildText(row.transform, $"◈ {price:N0}", 16, TextAnchor.MiddleRight);
-        priceT.color = new Color(1f, 0.85f, 0.3f);
-        priceT.GetComponent<LayoutElement>().minWidth = 90;
-
-        var btnGO = new GameObject("Btn");
-        btnGO.transform.SetParent(row.transform, false);
-        btnGO.AddComponent<RectTransform>();
-        var btnLE = btnGO.AddComponent<LayoutElement>(); btnLE.minWidth = 64;
-        btnGO.AddComponent<Image>().color = btnColor;
-        var btn = btnGO.AddComponent<Button>();
+        var cell = new GameObject("Cell", typeof(RectTransform));
+        cell.transform.SetParent(parent, false);
+        var bg = cell.AddComponent<Image>();
+        bg.color = new Color(0.16f, 0.16f, 0.21f, 1f);
+        var btn = cell.AddComponent<Button>();
+        btn.targetGraphic = bg;
+        var cb = btn.colors;
+        cb.highlightedColor = new Color(0.3f, 0.36f, 0.48f);
+        cb.pressedColor = new Color(0.22f, 0.27f, 0.38f);
+        btn.colors = cb;
         btn.onClick.AddListener(() => onClick?.Invoke());
-        var bt = MakeChildText(btnGO.transform, btnLabel, 15, TextAnchor.MiddleCenter);
-        bt.fontStyle = FontStyle.Bold;
+
+        // 아이콘 또는 이름(아이콘 없을 때)
+        if (data != null && data.icon != null)
+        {
+            var icon = CellChild("Icon", cell.transform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(6, 18), new Vector2(-6, -6));
+            var img = icon.AddComponent<Image>();
+            img.sprite = data.icon; img.preserveAspect = true;
+        }
+        else
+        {
+            var nameGO = CellChild("Name", cell.transform, new Vector2(0, 0), new Vector2(1, 1), new Vector2(3, 16), new Vector2(-3, -3));
+            var nt = CellText(nameGO, data != null ? data.displayName : "?", 12, TextAnchor.MiddleCenter, new Color(0.9f, 0.9f, 0.95f));
+            nt.horizontalOverflow = HorizontalWrapMode.Wrap;
+        }
+
+        // 수량(우상단)
+        if (!string.IsNullOrEmpty(topRight))
+        {
+            var cntGO = CellChild("Cnt", cell.transform, new Vector2(0.35f, 0.72f), new Vector2(1, 1), new Vector2(0, 0), new Vector2(-3, -2));
+            CellText(cntGO, topRight, 12, TextAnchor.UpperRight, Color.white).fontStyle = FontStyle.Bold;
+        }
+
+        // 가격(하단)
+        var priceGO = CellChild("Price", cell.transform, new Vector2(0, 0), new Vector2(1, 0.24f), new Vector2(2, 1), new Vector2(-2, 0));
+        CellText(priceGO, $"◈{price:N0}", 12, TextAnchor.MiddleCenter, new Color(1f, 0.85f, 0.3f));
+    }
+
+    static GameObject CellChild(string name, Transform parent, Vector2 aMin, Vector2 aMax, Vector2 offMin, Vector2 offMax)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = aMin; rt.anchorMax = aMax; rt.offsetMin = offMin; rt.offsetMax = offMax;
+        return go;
+    }
+
+    static Text CellText(GameObject go, string text, int size, TextAnchor anchor, Color color)
+    {
+        var t = go.AddComponent<Text>();
+        t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        t.fontSize = size; t.alignment = anchor; t.color = color; t.text = text;
+        t.horizontalOverflow = HorizontalWrapMode.Overflow;
+        t.verticalOverflow = VerticalWrapMode.Overflow;
+        return t;
     }
 
     // ── UI 헬퍼 ────────────────────────────────────────────
@@ -229,10 +256,11 @@ public class ShopUI : MonoBehaviour
         cRT.anchorMin = new Vector2(0, 1); cRT.anchorMax = new Vector2(1, 1);
         cRT.pivot = new Vector2(0.5f, 1);
         cRT.offsetMin = Vector2.zero; cRT.offsetMax = Vector2.zero;
-        var vlg = content.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing = 4; vlg.padding = new RectOffset(6, 6, 6, 6);
-        vlg.childControlHeight = false; vlg.childForceExpandHeight = false;
-        vlg.childControlWidth = true; vlg.childForceExpandWidth = true;
+        var glg = content.AddComponent<GridLayoutGroup>();
+        glg.cellSize = new Vector2(80, 80);
+        glg.spacing = new Vector2(6, 6);
+        glg.padding = new RectOffset(6, 6, 6, 6);
+        glg.childAlignment = TextAnchor.UpperLeft;
         var csf = content.AddComponent<ContentSizeFitter>();
         csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         sr.content = cRT;

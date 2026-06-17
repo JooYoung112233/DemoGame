@@ -183,7 +183,7 @@ public class StoryTriggerManager : MonoBehaviour
         if (qm == null || sp == null || sp.IsPlaying) return false;
 
         // 전당포 주인 — 최초 대면 (S-002: 시계 거절 + 암구호 '불씨')
-        if (npcId == "pawnshop" && !qm.GetFlag("met_pawnshop"))
+        if (npcId == "pawnshop" && !qm.GetFlag("met_pawnshop") && sp.HasScene("S-002"))
         {
             sp.PlayScene("S-002", () => onComplete?.Invoke());
             return true;
@@ -192,7 +192,7 @@ public class StoryTriggerManager : MonoBehaviour
         // 베테랑 회수꾼 — 암구호 '불씨' 확보 후 최초 대화
         // S-003(소개·정보) → S-004(게시판 의뢰 MQ-001 수령 + 장비 지급) 연쇄.
         if (npcId == "veteran_scavenger" && qm.GetFlag("got_password_ember")
-            && !qm.GetFlag("veteran_intro_done"))
+            && !qm.GetFlag("veteran_intro_done") && sp.HasScene("S-003"))
         {
             sp.PlayScene("S-003", () =>
             {
@@ -206,7 +206,7 @@ public class StoryTriggerManager : MonoBehaviour
         }
 
         // 떠돌이 상인 — 최초 조우 (보급)
-        if (npcId == "merchant" && !qm.GetFlag("merchant_met"))
+        if (npcId == "merchant" && !qm.GetFlag("merchant_met") && sp.HasScene("S-012"))
         {
             sp.PlayScene("S-012", () => onComplete?.Invoke());
             return true;
@@ -214,7 +214,7 @@ public class StoryTriggerManager : MonoBehaviour
 
         // 회수꾼 — 짙은 현상 귀환 보고 (S-016, MQ-002)
         if (npcId == "veteran_scavenger" && qm.GetFlag("night_raid_returned_with_rudi")
-            && !qm.GetFlag("mq002_veteran_reported"))
+            && !qm.GetFlag("mq002_veteran_reported") && sp.HasScene("S-016"))
         {
             sp.PlayScene("S-016", () => onComplete?.Invoke());
             return true;
@@ -222,14 +222,14 @@ public class StoryTriggerManager : MonoBehaviour
 
         // 전당포 — 루디 납품 · 1차 마무리 (S-017, MQ-002)
         if (npcId == "pawnshop" && qm.GetFlag("met_pawnshop")
-            && qm.GetFlag("mq002_veteran_reported") && !qm.GetFlag("mq002_complete"))
+            && qm.GetFlag("mq002_veteran_reported") && !qm.GetFlag("mq002_complete") && sp.HasScene("S-017"))
         {
             sp.PlayScene("S-017", () => onComplete?.Invoke());
             return true;
         }
 
         // 밴딧 협상꾼 — 최초 조우
-        if (npcId == "bandit_negotiator" && !qm.GetFlag("negotiator_met"))
+        if (npcId == "bandit_negotiator" && !qm.GetFlag("negotiator_met") && sp.HasScene("SX-002"))
         {
             sp.PlayScene("SX-002", () => onComplete?.Invoke());
             return true;

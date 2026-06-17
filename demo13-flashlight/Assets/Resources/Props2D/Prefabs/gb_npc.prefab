@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5211848516599466399}
   - component: {fileID: 5910840071347477517}
-  - component: {fileID: 3555226167749232344}
   - component: {fileID: 1592486652001025814}
   - component: {fileID: 3916696107163786574}
   m_Layer: 0
@@ -95,32 +94,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &3555226167749232344
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3628748994123919798}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43f2a216c91f63c48b750a6450df9e3d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Scripts::InteractableObject
-  type: 0
-  promptText: "\uC870\uC0AC\uD558\uAE30"
-  interactRange: 2
-  oneShot: 0
-  highlightColor: {r: 1, g: 1, b: 0.5, a: 1}
-  targetScene: 
-  spawnPointId: 
-  exitWaitTime: 0
-  noteContent: 
-  noteStorySceneId: 
-  noteTitle: 
-  storyNpcId: 
-  itemId: 
-  itemCount: 1
 --- !u!114 &1592486652001025814
 MonoBehaviour:
   m_ObjectHideFlags: 0

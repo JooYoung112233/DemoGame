@@ -19,11 +19,13 @@ public class DialogueUI : MonoBehaviour
     int lineIndex;
     bool waitingForChoice;
     DialogueChoice[] currentChoices;
+    int choiceHighlight;
     System.Action<int> choiceCallback;
 
     // 타이핑 연출
     Coroutine typingCoroutine;
     bool isTyping;
+    bool _skipTyping;
     string fullLineText;
 
     // uGUI
@@ -213,6 +215,11 @@ public class DialogueUI : MonoBehaviour
 
     void ApplyChoiceEffects(DialogueChoice choice, NPCRelationship rel)
     {
+        // 전역 평판 (NPCRelationshipManager 유무와 무관하게 적용)
+        if (choice.reputationChange != 0 && ReputationManager.Instance != null)
+            ReputationManager.Instance.Add(choice.reputationChange,
+                currentNPC != null ? $"{currentNPC.displayName} 대화" : "대화");
+
         if (NPCRelationshipManager.Instance == null || currentNPC == null) return;
 
         if (choice.affinityChange != 0)
@@ -358,6 +365,7 @@ public class DialogueUI : MonoBehaviour
     IEnumerator TypeText(string text, System.Action onComplete)
     {
         isTyping = true;
+        _skipTyping = false;
         dialogueText.supportRichText = true;
         dialogueText.text = "";
 
@@ -366,6 +374,8 @@ public class DialogueUI : MonoBehaviour
 
         for (int i = 0; i < text.Length; i++)
         {
+            if (_skipTyping) { dialogueText.text = text; break; }   // 스킵 → 전체 즉시 표시(코루틴은 계속 → 입력 대기로)
+
             char c = text[i];
 
             if (c == '<') inTag = true;
@@ -399,8 +409,7 @@ public class DialogueUI : MonoBehaviour
         yield return null;
         while (true)
         {
-            if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return) ||
-                Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+            if (Input.GetKeyDown(KeyCode.E))   // 대화 진행 = E 단일키
                 yield break;
             yield return null;
         }
@@ -429,6 +438,9 @@ public class DialogueUI : MonoBehaviour
                 choiceButtons[i].gameObject.SetActive(false);
             }
         }
+
+        choiceHighlight = 0;
+        UpdateChoiceHighlight();
     }
 
     void OnChoiceSelected(int index)
@@ -438,35 +450,51 @@ public class DialogueUI : MonoBehaviour
         choiceCallback?.Invoke(index);
     }
 
+    /// <summary>현재 하이라이트된 선택지를 강조(색+▶). 키보드 W/S 이동, E 확정용.</summary>
+    void UpdateChoiceHighlight()
+    {
+        if (currentChoices == null || choiceButtons == null) return;
+        int n = Mathf.Min(currentChoices.Length, choiceButtons.Length);
+        if (n <= 0) return;
+        choiceHighlight = Mathf.Clamp(choiceHighlight, 0, n - 1);
+
+        for (int i = 0; i < n; i++)
+        {
+            bool sel = (i == choiceHighlight);
+            var img = choiceButtons[i].GetComponent<Image>();
+            if (img != null)
+                img.color = sel ? new Color(0.28f, 0.34f, 0.5f, 0.95f)
+                                : new Color(0.15f, 0.15f, 0.2f, 0.7f);
+            if (choiceTexts[i] != null)
+                choiceTexts[i].text = $"  {(sel ? "▶" : "  ")} {i + 1}. {currentChoices[i].text}";
+        }
+    }
+
     void Update()
     {
         if (!isShowing) return;
 
-        // 타이핑 중 클릭/키 → 즉시 완성
-        if (isTyping && (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return) ||
-            Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)))
+        // 타이핑 중 E → 즉시 완성
+        if (isTyping && Input.GetKeyDown(KeyCode.E))
         {
-            if (typingCoroutine != null) StopCoroutine(typingCoroutine);
-            dialogueText.text = fullLineText;
-            isTyping = false;
-            continueHint.gameObject.SetActive(true);
+            _skipTyping = true;   // 코루틴 유지(전체 표시 후 입력 대기로 이어짐) — StopCoroutine 시 E 먹통 버그 수정
         }
 
-        // 선택지 키보드 선택
+        // 선택지: W/S 이동 · E 확정 (대화 진행과 동일한 E)
         if (waitingForChoice && currentChoices != null)
         {
-            for (int i = 0; i < currentChoices.Length; i++)
+            int n = Mathf.Min(currentChoices.Length, choiceButtons.Length);
+            if (n > 0)
             {
-                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
-                {
-                    OnChoiceSelected(i);
-                    break;
-                }
+                if (Input.GetKeyDown(KeyCode.W))
+                { choiceHighlight = (choiceHighlight - 1 + n) % n; UpdateChoiceHighlight(); }
+                else if (Input.GetKeyDown(KeyCode.S))
+                { choiceHighlight = (choiceHighlight + 1) % n; UpdateChoiceHighlight(); }
+                else if (Input.GetKeyDown(KeyCode.E))
+                { OnChoiceSelected(choiceHighlight); }
             }
         }
-
-        if (Input.GetKeyDown(KeyCode.Escape) && !waitingForChoice)
-            Hide();
+        // ESC(닫기)는 UIManager가 전역 처리(CloseAll) — 여기선 안 잡음
     }
 
     public void Hide()
@@ -559,6 +587,9 @@ public class DialogueUI : MonoBehaviour
             }
         }
 
+        choiceHighlight = 0;
+        UpdateChoiceHighlight();
+
         choiceCallback = (idx) =>
         {
             waitingForChoice = false;
@@ -606,7 +637,7 @@ public class DialogueUI : MonoBehaviour
         bgRT.offsetMin = new Vector2(60, 20);
         bgRT.offsetMax = new Vector2(-60, 260);
         var bgImg = dialogueBG.AddComponent<Image>();
-        bgImg.color = new Color(0.05f, 0.05f, 0.1f, 0.92f);
+        bgImg.color = new Color(0.05f, 0.05f, 0.1f, 1f);   // 불투명 — 뒤 맵 글자 비침 방지
 
         // NPC 이름
         nameText = MakeText(dialogueBG.transform, "NPCName", "", 20, TextAnchor.MiddleLeft);
@@ -639,7 +670,7 @@ public class DialogueUI : MonoBehaviour
         dialogueText.color = new Color(0.92f, 0.92f, 0.95f);
 
         // 계속 힌트
-        continueHint = MakeText(dialogueBG.transform, "ContinueHint", "▶ 계속", 14, TextAnchor.MiddleRight);
+        continueHint = MakeText(dialogueBG.transform, "ContinueHint", "[E] 계속 ▶", 14, TextAnchor.MiddleRight);
         var hintRT = continueHint.GetComponent<RectTransform>();
         hintRT.anchorMin = new Vector2(1, 0);
         hintRT.anchorMax = new Vector2(1, 0);
@@ -658,7 +689,7 @@ public class DialogueUI : MonoBehaviour
         cpRT.offsetMin = new Vector2(60, 270);
         cpRT.offsetMax = new Vector2(-60, 430);
         var cpBg = choicePanel.AddComponent<Image>();
-        cpBg.color = new Color(0.08f, 0.08f, 0.12f, 0.88f);
+        cpBg.color = new Color(0.08f, 0.08f, 0.12f, 1f);   // 불투명
 
         choiceButtons = new Button[3];
         choiceTexts = new Text[3];

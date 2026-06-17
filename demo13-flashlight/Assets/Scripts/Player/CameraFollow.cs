@@ -86,6 +86,15 @@ public class CameraFollow : MonoBehaviour
         }
     }
 
+    /// <summary>카메라를 타깃 위치로 즉시 스냅(스무딩 건너뜀). 스폰/순간이동 직후 호출 — "슉~" 슬라이드 방지.</summary>
+    public void SnapToTarget()
+    {
+        if (target == null || !offsetInitialized) FindTarget();
+        if (target == null) return;
+        _basePos = target.position + offset;
+        transform.position = _basePos;   // 셰이크 가산 없이 즉시
+    }
+
     void LateUpdate()
     {
         if (target == null)

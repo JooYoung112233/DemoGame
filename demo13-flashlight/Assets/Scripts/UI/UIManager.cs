@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 /// 모든 게임 UI 패널을 중앙 관리.
 /// 어떤 씬에서 Play 해도 자동 생성됨 (RuntimeInitializeOnLoadMethod).
 /// </summary>
+[DefaultExecutionOrder(-50)]   // ESC를 per-UI보다 먼저 잡아 중첩/일시정지 충돌 방지
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
@@ -238,39 +239,21 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
-        // ESC 키: 열린 UI 닫기 (우선순위: 캐릭터패널 > 맵선택 > 정산)
-        // 각 패널이 자체 Update()에서도 ESC 처리하지만,
-        // UIManager가 중앙에서 한 번 더 잡아주면 누락 없이 안전.
+        // ── ESC: 열린 UI 있으면 전부 닫기, 없으면 일시정지 메뉴 (중앙 권위) ──
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (craftingUI != null && craftingUI.IsShowing)
-            {
-                // CraftingUI.Update()가 처리
-            }
-            else if (characterPanelUI != null && characterPanelUI.IsShowing)
-            {
-                // CharacterPanelUI.Update()가 처리 — 여기선 스킵
-            }
-            else if (mapSelectUI != null && mapSelectUI.IsShowing)
-            {
-                mapSelectUI.Hide();
-            }
-            // RaidResultUI는 showTimer > 1f 조건이 있으므로 자체 처리에 맡김
+            if (IsAnyUIOpen()) CloseAll();
+            else PauseMenu.Show();
+            return;
         }
 
-        // Tab 키: 캐릭터 패널 토글 (제작 UI 열림 시 무시)
+        // ── Tab: 캐릭터 패널 토글 — 다른 UI 열려있으면 무시(중첩 금지) ──
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            if (craftingUI != null && craftingUI.IsShowing)
-                return;
-
-            if (characterPanelUI != null)
-            {
-                if (characterPanelUI.IsShowing)
-                    characterPanelUI.Hide();
-                else
-                    ShowCharacterPanel();
-            }
+            if (characterPanelUI != null && characterPanelUI.IsShowing)
+                characterPanelUI.Hide();
+            else if (!IsAnyUIOpen() && characterPanelUI != null)
+                ShowCharacterPanel();
         }
     }
 
@@ -345,6 +328,8 @@ public class UIManager : MonoBehaviour
             shopUI.Close();
         if (dialogueUI != null)
             dialogueUI.Hide();
+        if (PauseMenu.Instance != null)
+            PauseMenu.Instance.Hide();
     }
 
     /// <summary>현재 어떤 UI든 열려있는지</summary>
@@ -358,6 +343,7 @@ public class UIManager : MonoBehaviour
         if (dialogueUI != null && dialogueUI.IsShowing) return true;
         if (postRaidEventUI != null && postRaidEventUI.IsShowing) return true;
         if (NoteUI.Instance != null && NoteUI.Instance.IsShowing) return true;
+        if (PauseMenu.Instance != null && PauseMenu.Instance.IsShowing) return true;
         return false;
     }
 }

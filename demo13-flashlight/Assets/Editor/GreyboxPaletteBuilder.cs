@@ -132,7 +132,7 @@ public static class GreyboxPaletteBuilder
         {
             // 바닥 — 통과, 최하단.
             new Spec {
-                id = "gb_floor", label = "바닥", color = Opaque(0.55f, 0.55f, 0.55f),
+                id = "gb_floor", label = "바닥", color = Opaque(0.22f, 0.22f, 0.26f),   // 어둡게(무드)
                 category = Prop2DDefinition.Category.Floor,
                 colliderMode = Prop2DDefinition.ColliderMode.None, isTrigger = false,
                 function = Prop2DDefinition.Function.None,

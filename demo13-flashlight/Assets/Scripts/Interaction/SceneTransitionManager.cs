@@ -73,14 +73,22 @@ public class SceneTransitionManager : MonoBehaviour
     }
 
     /// <summary>씬 전환 요청 (즉시).</summary>
-    public void TransitionTo(string sceneName, string spawnPointId = "")
+    /// <param name="instantCover">true면 페이드 없이 화면을 즉시 검게 덮은 채 로드(부팅/새게임 셋업 중 HUD 깜빡임 차단). 로드 후 reveal.</param>
+    public void TransitionTo(string sceneName, string spawnPointId = "", bool instantCover = false)
     {
         if (isTransitioning) return;
         // timeScale=0(안전가옥)에서 출전 시 복구
         Time.timeScale = 1f;
         PendingSpawnPointId = spawnPointId;
-        transitionCoroutine = StartCoroutine(TransitionRoutine(sceneName, 0f));
+        if (instantCover) fadeAlpha = 1f;
+        transitionCoroutine = StartCoroutine(TransitionRoutine(sceneName, 0f, instantCover));
     }
+
+    /// <summary>즉시 화면을 검게 덮는다(페이드 없이). 부팅/새게임 셋업 중 HUD(HP바 등) 깜빡임 차단용.</summary>
+    public void CoverInstant() { fadeAlpha = 1f; }
+
+    /// <summary>덮인 화면을 페이드로 드러낸다(reveal). 셋업 완료 후 호출.</summary>
+    public IEnumerator RevealRoutine() { yield return StartCoroutine(FadeRoutine(fadeAlpha, 0f)); }
 
     /// <summary>씬 전환 요청 (대기 시간 포함, 탈출구용).</summary>
     /// <param name="source">탈출구 Transform. 플레이어가 여기서 cancelRange 이상 벗어나면 취소</param>
@@ -109,7 +117,7 @@ public class SceneTransitionManager : MonoBehaviour
         Debug.Log("[SceneTransition] 탈출 취소됨");
     }
 
-    IEnumerator TransitionRoutine(string sceneName, float waitTime)
+    IEnumerator TransitionRoutine(string sceneName, float waitTime, bool startCovered = false)
     {
         isTransitioning = true;
 
@@ -144,8 +152,11 @@ public class SceneTransitionManager : MonoBehaviour
             exitSource = null;
         }
 
-        // 페이드 아웃
-        yield return StartCoroutine(FadeRoutine(0f, 1f));
+        // 페이드 아웃 (이미 즉시 커버됐으면 건너뜀 — HUD 깜빡임 없이 바로 검정)
+        if (startCovered)
+            fadeAlpha = 1f;
+        else
+            yield return StartCoroutine(FadeRoutine(0f, 1f));
 
         // 씬 로드
         if (SystemsScene.Available)
@@ -280,6 +291,7 @@ public class SceneTransitionManager : MonoBehaviour
                 if (playerGO != null)
                 {
                     playerGO.transform.position = sp.transform.position;
+                    CameraFollow.Instance?.SnapToTarget();   // 카메라도 즉시 스냅 → 슬라이드 방지
 
                     Debug.Log($"[SceneTransition] 스폰: {PendingSpawnPointId} → {sp.transform.position}");
                 }

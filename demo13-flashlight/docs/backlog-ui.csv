@@ -6,7 +6,7 @@ U04,BarterUI,물물교환(아이템 묶음→아이템) 별도 슬롯,신규,P1,
 U05,BoardUI,게시판 BD/BQ 의뢰 목록·수령·평판 잠금,확장(MapSelectUI),P0,의뢰,quests-region1 §9.3
 U06,ReputationHUD,평판 수치·등급(F~A) 표시,신규,P1,평판,quests-region1 §9.2
 U07,RelationshipUI,NPC 신뢰도/두려움 표시(대화·상점 내),신규,P2,관계,npc-dialogue.md
-U08,HideoutUI,모듈 트리·업그레이드(Lv·비용·도면 잠금),신규,P1,하이드아웃,quests-region1 §9.7
+U08,HideoutUI,시설 아이콘 뷰(타르코프식) → 아이콘 클릭 시 우측 패널 = 업그레이드(Lv업 비용·재료·현→다음Lv 효과) 또는 제작(레시피 목록). 모듈 트리·도면 잠금,신규,P1,하이드아웃,safehouse.md §하이드아웃 UI · quests-region1 §9.7
 U09,DispatchUI,파견 편성(인력·팀2·장비3슬롯·파견지·결과),신규,P1,파견,quests-region1 §9.7 G
 U10,RadioUI,채널(소식/시장/구조)·리드 수신,신규,P2,라디오,safehouse-intel.md
 U11,ContainerUI,보관함 내부 격자(중첩 인벤 패널),신규,P1,인벤,inventory.md

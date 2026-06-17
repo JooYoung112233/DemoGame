@@ -89,6 +89,12 @@ public class SaveManager : MonoBehaviour
             data.currency = CurrencyManager.Instance.GetSaveData();
         }
 
+        // 평판(전역 명성)
+        if (ReputationManager.Instance != null)
+        {
+            data.reputation = ReputationManager.Instance.GetSaveData();
+        }
+
         // 인벤토리(가방) + 장착 무기
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
@@ -188,6 +194,12 @@ public class SaveManager : MonoBehaviour
         if (CurrencyManager.Instance != null)
         {
             CurrencyManager.Instance.LoadSaveData(data.currency);
+        }
+
+        // 평판(전역 명성)
+        if (ReputationManager.Instance != null)
+        {
+            ReputationManager.Instance.LoadSaveData(data.reputation);
         }
 
         // 인벤토리(가방) + 장착 무기
@@ -315,6 +327,9 @@ public class GameSaveData
 
     // 화폐(스크랩)
     public int currency;
+
+    // 평판(전역 명성)
+    public int reputation;
 
     // 인벤토리(가방) + 장착 무기
     public List<GridItemEntry> bagItems = new List<GridItemEntry>();

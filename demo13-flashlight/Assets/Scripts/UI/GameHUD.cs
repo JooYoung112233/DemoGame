@@ -1,10 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 메인 게임 HUD (Canvas/uGUI).
 /// HP 바, 스태미너 바, 부상 아이콘.
 /// UIManager 자식으로 배치. 에디터 씬 뷰에서도 레이아웃 확인 가능.
+/// **가시성**: 게임플레이 씬(안전가옥/레이드)이 로드돼 있을 때만 표시. 타이틀(Systems 단독)에선 숨김 → HP바 깜빡임 없음.
 /// </summary>
 public class GameHUD : MonoBehaviour
 {
@@ -63,6 +65,25 @@ public class GameHUD : MonoBehaviour
     void Awake()
     {
         if (!IsGenerated) GenerateUI();
+        SceneManager.sceneLoaded += OnSceneLoadedHUD;
+        SceneManager.sceneUnloaded += OnSceneUnloadedHUD;
+        ApplyVisibility();   // 부팅 시점엔 게임플레이 씬 없음 → 숨김
+    }
+
+    void OnSceneLoadedHUD(Scene scene, LoadSceneMode mode) => ApplyVisibility();
+    void OnSceneUnloadedHUD(Scene scene) => ApplyVisibility();
+
+    /// <summary>게임플레이 씬이 하나라도 로드돼 있으면 HUD 표시, 아니면 숨김(타이틀/Systems 단독).</summary>
+    void ApplyVisibility()
+    {
+        if (canvas == null) return;
+        bool inGameplay = false;
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            var s = SceneManager.GetSceneAt(i);
+            if (s.isLoaded && SystemsScene.IsGameplayScene(s)) { inGameplay = true; break; }
+        }
+        canvas.enabled = inGameplay;
     }
 
     void Update()
@@ -84,6 +105,8 @@ public class GameHUD : MonoBehaviour
     {
         if (CurrencyManager.Instance != null)
             CurrencyManager.Instance.OnBalanceChanged -= OnRudiChanged;
+        SceneManager.sceneLoaded -= OnSceneLoadedHUD;
+        SceneManager.sceneUnloaded -= OnSceneUnloadedHUD;
     }
 
     void TryBindCurrency()

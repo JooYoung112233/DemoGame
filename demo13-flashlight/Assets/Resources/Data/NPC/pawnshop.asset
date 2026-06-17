@@ -45,6 +45,7 @@ MonoBehaviour:
       affinityChange: 0
       trustChange: 0
       fearChange: 0
+      reputationChange: 0
       resultLines: []
       triggerQuest: 
       setFlag: 
@@ -53,6 +54,7 @@ MonoBehaviour:
       affinityChange: 0
       trustChange: 0
       fearChange: 0
+      reputationChange: 0
       resultLines:
       - "\uD765."
       triggerQuest: 

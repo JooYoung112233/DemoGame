@@ -212,20 +212,26 @@ public class TopDownPlayer : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
+    bool _uiOpen;   // 대화/UI 열림 — 이동·조준·전투 입력 전면 봉쇄용
+
     void Update()
     {
         if (_cam == null) _cam = Camera.main;
 
-        UpdateMouseFacing();
-        UpdateFlip();
-        UpdateVisionLight();
+        _uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
 
-        bool uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
-        if (!uiOpen) HandleCombatInput();
+        // UI/대화 열림 → 조준·전투 입력 정지 (이동은 FixedUpdate에서 정지)
+        if (!_uiOpen)
+        {
+            UpdateMouseFacing();
+            UpdateFlip();
+            UpdateVisionLight();
+            HandleCombatInput();
+        }
 
         UpdateCombatTimers();
         UpdateStamina();
-        UpdateSprint(uiOpen);
+        UpdateSprint(_uiOpen);
 
         // 구르기 무적 → 허트박스 비활성 (피격 안 됨)
         if (_hurtbox != null) _hurtbox.SetActive(!IsInvincible);
@@ -233,6 +239,9 @@ public class TopDownPlayer : MonoBehaviour
 
     void FixedUpdate()
     {
+        // UI/대화 열림 → 이동 전면 정지
+        if (_uiOpen) { _rb.linearVelocity = Vector2.zero; MoveDirection = Vector2.zero; return; }
+
         // 구르기 중 — 대시 속도 적용
         if (_state == CombatState.Dodge)
         {

@@ -30,7 +30,48 @@ MonoBehaviour:
       requiredQuest: 
       requiredFlag: 
     priority: 0
-  eventDialogues: []
+  eventDialogues:
+  - id: rep_test
+    triggerCondition:
+      minAffinity: 0
+      minTrust: 0
+      minFear: 0
+      requiredQuest: 
+      requiredFlag: 
+    npcLines:
+    - "[\uD14C\uC2A4\uD2B8] \uB0A0 \uC5B4\uB5BB\uAC8C \uB300\uD560 \uAC70\uC57C?"
+    choices:
+    - text: "\uBE44\uC704 \uB9DE\uCD94\uAE30 (\uD3C9\uD310 +10)"
+      affinityChange: 0
+      trustChange: 0
+      fearChange: 0
+      reputationChange: 10
+      resultLines:
+      - "\uD750\uD750, \uB9C8\uC74C\uC5D0 \uB4DC\uB294\uAD70."
+      triggerQuest: 
+      setFlag: 
+      openShop: 0
+    - text: "\uC2DC\uBE44 \uAC78\uAE30 (\uD3C9\uD310 -5)"
+      affinityChange: 0
+      trustChange: 0
+      fearChange: 0
+      reputationChange: -5
+      resultLines:
+      - "...\uAC74\uBC29\uC9C4 \uB188."
+      triggerQuest: 
+      setFlag: 
+      openShop: 0
+    - text: "\uADF8\uB0E5 \uC778\uC0AC (\uBCC0\uD654 \uC5C6\uC74C)"
+      affinityChange: 0
+      trustChange: 0
+      fearChange: 0
+      reputationChange: 0
+      resultLines:
+      - "\uADF8\uB798, \uB610 \uBCF4\uC790\uACE0."
+      triggerQuest: 
+      setFlag: 
+      openShop: 0
+    oneShot: 0
   shopData: {fileID: 0}
   availableQuests: []
   shopInventory: []

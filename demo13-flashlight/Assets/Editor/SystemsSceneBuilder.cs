@@ -48,6 +48,7 @@ public static class SystemsSceneBuilder
         typeof(DailyQuestManager),
         typeof(AchievementManager),
         typeof(CurrencyManager),
+        typeof(ReputationManager),
         typeof(SaveManager),
         typeof(StoryLocale),
         typeof(StoryPlayer),

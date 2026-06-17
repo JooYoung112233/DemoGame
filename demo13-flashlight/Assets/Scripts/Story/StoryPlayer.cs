@@ -75,6 +75,9 @@ public class StoryPlayer : MonoBehaviour
     /// <summary>
     /// 특정 스토리 씬을 재생.
     /// </summary>
+    /// <summary>해당 씬이 로드돼 있는지(스토리 스크립트에 정의됐는지). 없으면 NPC 대화가 스토리로 먹히지 않게 가드용.</summary>
+    public bool HasScene(string sceneId) => scenes != null && scenes.ContainsKey(sceneId);
+
     public void PlayScene(string sceneId, System.Action onComplete = null)
     {
         if (!scenes.TryGetValue(sceneId, out var scene))

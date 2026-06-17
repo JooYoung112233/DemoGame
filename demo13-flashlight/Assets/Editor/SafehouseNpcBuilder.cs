@@ -49,6 +49,7 @@ public static class SafehouseNpcBuilder
         vet.npcId = "veteran_scavenger"; vet.displayName = "회수꾼"; vet.role = "베테랑 회수꾼";
         vet.initialAffinity = 10; vet.initialTrust = 10; vet.initialFear = 0;
         vet.defaultDialogues = new[] { Entry("greet", "옆 게시판에서 의뢰 하나 떼 와.", "갔다 오면 나한테 보고하고.") };
+        vet.eventDialogues   = new[] { RepTestEvent() };   // [테스트] 3선택지 + 평판 변동
         EditorUtility.SetDirty(vet);
 
         // ── 구역 관리인 ──
@@ -86,6 +87,21 @@ public static class SafehouseNpcBuilder
             {
                 new DialogueChoice { text = "거래하기", openShop = true },
                 new DialogueChoice { text = "됐어", resultLines = new[] { "흥." } },
+            },
+        };
+
+    // [테스트] 3선택지 + 평판 변동 — 회수꾼에 부착. W/S+E 선택 & 평판 토스트(↑↓) 검증용.
+    static EventDialogue RepTestEvent()
+        => new EventDialogue
+        {
+            id = "rep_test", oneShot = false,
+            triggerCondition = new DialogueCondition(),
+            npcLines = new[] { "[테스트] 날 어떻게 대할 거야?" },
+            choices = new[]
+            {
+                new DialogueChoice { text = "비위 맞추기 (평판 +10)", reputationChange = 10, resultLines = new[] { "흐흐, 마음에 드는군." } },
+                new DialogueChoice { text = "시비 걸기 (평판 -5)",   reputationChange = -5, resultLines = new[] { "...건방진 놈." } },
+                new DialogueChoice { text = "그냥 인사 (변화 없음)",  reputationChange = 0,  resultLines = new[] { "그래, 또 보자고." } },
             },
         };
 
