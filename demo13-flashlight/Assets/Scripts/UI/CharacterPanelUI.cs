@@ -419,8 +419,8 @@ public class CharacterPanelUI : MonoBehaviour
         leftPanelRoot = new GameObject("LeftPanel");
         leftPanelRoot.transform.SetParent(parent, false);
         leftPanel = leftPanelRoot.AddComponent<RectTransform>();
-        leftPanel.anchorMin = new Vector2(0.67f, 0.07f);    // 우측 열 = 창고/파밍 (화면 비율 stretch)
-        leftPanel.anchorMax = new Vector2(0.965f, 0.93f);
+        leftPanel.anchorMin = new Vector2(0.655f, 0.07f);   // 우측 열 = 창고/파밍 (가로 11칸 수용 위해 확장)
+        leftPanel.anchorMax = new Vector2(0.99f, 0.93f);
         leftPanel.offsetMin = Vector2.zero;
         leftPanel.offsetMax = Vector2.zero;
 
@@ -452,7 +452,7 @@ public class CharacterPanelUI : MonoBehaviour
         viewportGO.transform.SetParent(leftPanel, false);
         var vpRT = viewportGO.GetComponent<RectTransform>();
         vpRT.anchorMin = new Vector2(0, 0); vpRT.anchorMax = new Vector2(1, 1);
-        vpRT.offsetMin = new Vector2(8, 8); vpRT.offsetMax = new Vector2(-8, -52);
+        vpRT.offsetMin = new Vector2(8, 8); vpRT.offsetMax = new Vector2(-22, -52);  // 우측 스크롤바 공간
 
         // 격자 루트 = 스크롤 content. pivot(0,1) 유지 → ScreenToGridCell 히트테스트 정상.
         var gridGO = new GameObject("ContainerGrid");
@@ -471,14 +471,43 @@ public class CharacterPanelUI : MonoBehaviour
         leftScroll.viewport = vpRT;
         leftScroll.content = containerGridRoot;
 
+        // 세로 스크롤바 (우측, 위치 표기)
+        var sbGO = new GameObject("LeftScrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+        sbGO.transform.SetParent(leftPanel, false);
+        var sbRT = sbGO.GetComponent<RectTransform>();
+        sbRT.anchorMin = new Vector2(1, 0); sbRT.anchorMax = new Vector2(1, 1);
+        sbRT.offsetMin = new Vector2(-16, 8); sbRT.offsetMax = new Vector2(-6, -52);
+        sbGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.3f);   // 트랙
+
+        var slidingArea = new GameObject("SlidingArea", typeof(RectTransform));
+        slidingArea.transform.SetParent(sbGO.transform, false);
+        var saRT = slidingArea.GetComponent<RectTransform>();
+        saRT.anchorMin = Vector2.zero; saRT.anchorMax = Vector2.one;
+        saRT.offsetMin = Vector2.zero; saRT.offsetMax = Vector2.zero;
+
+        var handleGO = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+        handleGO.transform.SetParent(slidingArea.transform, false);
+        var hRT = handleGO.GetComponent<RectTransform>();
+        hRT.anchorMin = Vector2.zero; hRT.anchorMax = Vector2.one;
+        hRT.offsetMin = Vector2.zero; hRT.offsetMax = Vector2.zero;
+        handleGO.GetComponent<Image>().color = new Color(0.5f, 0.6f, 0.78f);
+
+        var sb = sbGO.GetComponent<Scrollbar>();
+        sb.direction = Scrollbar.Direction.BottomToTop;
+        sb.handleRect = hRT;
+        sb.targetGraphic = handleGO.GetComponent<Image>();
+
+        leftScroll.verticalScrollbar = sb;
+        leftScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+
         leftPanelRoot.SetActive(false);
 
         // ── 우측 열 placeholder (창고/상자 미오픈 시 빈 칸 대신 안내) ──
         leftPlaceholder = new GameObject("LeftPlaceholder", typeof(RectTransform));
         leftPlaceholder.transform.SetParent(parent, false);
         var phRT = leftPlaceholder.GetComponent<RectTransform>();
-        phRT.anchorMin = new Vector2(0.67f, 0.07f);   // leftPanel과 동일 영역
-        phRT.anchorMax = new Vector2(0.965f, 0.93f);
+        phRT.anchorMin = new Vector2(0.655f, 0.07f);  // leftPanel과 동일 영역
+        phRT.anchorMax = new Vector2(0.99f, 0.93f);
         phRT.offsetMin = Vector2.zero;
         phRT.offsetMax = Vector2.zero;
         leftPlaceholder.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.08f, 0.95f);
