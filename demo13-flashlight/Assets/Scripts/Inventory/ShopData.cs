@@ -21,6 +21,10 @@ public class ShopData : ScriptableObject
     [Tooltip("판매가 배율 (ItemData.sellPrice 기준). 전당포는 후려침")]
     [Range(0.1f, 1f)] public float sellRate = 0.6f;
 
+    [Header("위탁(委託) — 상점별")]
+    [Tooltip("이 상점에서 위탁 거래 가능 여부. 전당포만 true")]
+    public bool allowConsignment = false;
+
     /// <summary>플레이어가 이 아이템을 살 때 가격 (0이면 구매 불가).</summary>
     public int BuyPrice(ItemData item)
     {

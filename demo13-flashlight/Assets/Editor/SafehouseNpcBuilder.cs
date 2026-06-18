@@ -32,6 +32,7 @@ public static class SafehouseNpcBuilder
         shop.shopName = "전당포";
         shop.buyRate  = 1f;
         shop.sellRate = 0.6f;   // 전당포는 후려침
+        shop.allowConsignment = true;   // 위탁은 전당포만
         shop.stock    = LoadItems("Battery", "Canned_Food", "WaterBottle", "AdrenalineShot");
         EditorUtility.SetDirty(shop);
 

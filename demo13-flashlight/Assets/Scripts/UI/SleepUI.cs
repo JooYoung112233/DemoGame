@@ -13,13 +13,13 @@ public class SleepUI : MonoBehaviour
     public bool IsShowing => panel != null && panel.activeSelf;
     public bool IsGenerated => canvas != null;
 
-    struct Option { public string label; public float hpPct; public float water; public float satiety; }
+    struct Option { public string label; public float hours; public float hpPct; public float water; public float satiety; }
 
     // 수면 시간별 회복/차감 (그레이박스 기본값 — 8h ≈ 각 -25)
     static readonly Option[] Options =
     {
-        new Option { label = "4시간 수면", hpPct = 0.40f, water = 12f, satiety = 12f },
-        new Option { label = "8시간 수면", hpPct = 1.00f, water = 25f, satiety = 25f },
+        new Option { label = "4시간 수면", hours = 4f, hpPct = 0.40f, water = 12f, satiety = 12f },
+        new Option { label = "8시간 수면", hours = 8f, hpPct = 1.00f, water = 25f, satiety = 25f },
     };
 
     Canvas canvas;
@@ -98,6 +98,9 @@ public class SleepUI : MonoBehaviour
         TopDownPlayer.Instance?.RefillStamina();
         SurvivalStats.Get()?.Consume(o.water, o.satiety);
 
+        // 시간 경과 — 모든 지역 시계를 수면 시간만큼 진행(밤→낮 등).
+        if (RegionTimeManager.Instance != null) RegionTimeManager.Instance.AdvanceAllRegions(o.hours);
+
         // 침대 휴식 스토리 트리거 유지
         if (StoryTriggerManager.Instance != null) StoryTriggerManager.Instance.OnBedRest();
         // 침대 수면 = 수동 저장 체크포인트(안전가옥 시설이므로 항상 Commit).
@@ -121,7 +124,7 @@ public class SleepUI : MonoBehaviour
 
         // ── 휴식 완료 표시(회복 요약) ──
         ToastManager.Show(
-            $"휴식 완료 — HP +{o.hpPct * 100:F0}%, 스태미너 회복",
+            $"{o.hours:F0}시간 휴식 — HP +{o.hpPct * 100:F0}%, 스태미너 회복 (시간 경과)",
             ToastManager.ToastType.Success);
 
         sleeping = false;

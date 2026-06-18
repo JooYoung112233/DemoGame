@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -132,6 +133,7 @@ public class ShopUI : MonoBehaviour
         stashGrid = stash != null ? stash.GetGrid() : null;
         panel.SetActive(true);
         ClearSelection();
+        if (tabConsignBg != null) tabConsignBg.gameObject.SetActive(shop.allowConsignment);  // 위탁 = 전당포만
         SetConsignMode(false);
         RefreshAll();
     }
@@ -291,6 +293,50 @@ public class ShopUI : MonoBehaviour
         for (int i = 0; i < CONSIGN_SLOTS; i++)
             if (consignSlots[i].IsEmpty) return i;
         return -1;
+    }
+
+    // ── 위탁 슬롯 세이브/로드 (전당포 위탁을 영속화 — '시스템적') ────────
+    [System.Serializable]
+    public class ConsignSave
+    {
+        public string itemId;
+        public string itemName;
+        public int    payout;
+        public float  remaining;   // 정산까지 남은 초(저장 시점 기준)
+    }
+
+    public static List<ConsignSave> GetConsignSave()
+    {
+        var list = new List<ConsignSave>();
+        foreach (var s in consignSlots)
+        {
+            if (s == null || s.IsEmpty) continue;
+            list.Add(new ConsignSave
+            {
+                itemId    = s.item != null ? s.item.itemId : null,
+                itemName  = s.itemName,
+                payout    = s.payout,
+                remaining = Mathf.Max(0f, s.readyTime - Time.unscaledTime),
+            });
+        }
+        return list;
+    }
+
+    public static void LoadConsignSave(List<ConsignSave> data)
+    {
+        // 전부 비우고 복원
+        foreach (var s in consignSlots) { s.item = null; s.itemName = null; s.payout = 0; s.readyTime = 0f; }
+        if (data == null) return;
+        int idx = 0;
+        foreach (var d in data)
+        {
+            if (idx >= consignSlots.Length) break;
+            var s = consignSlots[idx++];
+            s.item      = !string.IsNullOrEmpty(d.itemId) ? ItemDatabase.Get(d.itemId) : null;
+            s.itemName  = d.itemName;
+            s.payout    = d.payout;
+            s.readyTime = Time.unscaledTime + Mathf.Max(0f, d.remaining);
+        }
     }
 
     // ── 전체 갱신 ────────────────────────────────────────────

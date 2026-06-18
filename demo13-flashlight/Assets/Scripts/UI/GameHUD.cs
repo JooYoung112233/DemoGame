@@ -23,6 +23,7 @@ public class GameHUD : MonoBehaviour
     [SerializeField] CanvasScaler scaler;
     [SerializeField] RectTransform injuryPanel;
     [SerializeField] Text[] injuryIcons;
+    [SerializeField] Text survivalWarnText;   // 수분/포만감 위험 경고(상단 중앙)
 
     // 하이드아웃 나가기 버튼
     [SerializeField] GameObject hideoutExitBtnGO;
@@ -59,6 +60,7 @@ public class GameHUD : MonoBehaviour
         if (health == null) return;
 
         UpdateInjuryIcons();
+        UpdateSurvivalWarning();
         SyncHideoutExitButton();
     }
 
@@ -151,6 +153,63 @@ public class GameHUD : MonoBehaviour
 
         // ── 하이드아웃 나가기 버튼 (우상단, Hideout일 때만 표시) ──
         BuildHideoutExitButton(canvasRT);
+
+        // ── 생존 위험 경고 (상단 중앙) ──
+        BuildSurvivalWarning(canvasRT);
+    }
+
+    void BuildSurvivalWarning(RectTransform canvasRT)
+    {
+        var go = new GameObject("SurvivalWarn");
+        go.transform.SetParent(canvasRT, false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 1f);
+        rt.anchorMax = new Vector2(0.5f, 1f);
+        rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(0, -64);
+        rt.sizeDelta = new Vector2(640, 36);
+
+        survivalWarnText = go.AddComponent<Text>();
+        survivalWarnText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        survivalWarnText.fontSize = 20;
+        survivalWarnText.fontStyle = FontStyle.Bold;
+        survivalWarnText.alignment = TextAnchor.MiddleCenter;
+        survivalWarnText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        survivalWarnText.text = "";
+        go.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.8f);
+        go.SetActive(false);
+    }
+
+    void UpdateSurvivalWarning()
+    {
+        if (survivalWarnText == null) return;
+        var s = SurvivalStats.Get();
+        if (s == null) { survivalWarnText.gameObject.SetActive(false); return; }
+
+        // 위험한(낮은) 쪽 메시지 모음
+        string msg = "";
+        bool critical = false;
+        if (s.Water <= 0f)      { msg += "⚠ 탈수! ";    critical = true; }
+        else if (s.Water <= 20f) msg += "⚠ 수분 부족 ";
+        if (s.Satiety <= 0f)    { msg += "⚠ 굶주림! ";  critical = true; }
+        else if (s.Satiety <= 20f) msg += "⚠ 허기 ";
+
+        if (string.IsNullOrEmpty(msg))
+        {
+            survivalWarnText.gameObject.SetActive(false);
+            return;
+        }
+        survivalWarnText.gameObject.SetActive(true);
+        survivalWarnText.text = msg.TrimEnd();
+        if (critical)
+        {
+            float blink = Mathf.PingPong(Time.unscaledTime * 3f, 1f);
+            survivalWarnText.color = Color.Lerp(new Color(1f, 0.5f, 0.2f), new Color(1f, 0.15f, 0.15f), blink);
+        }
+        else
+        {
+            survivalWarnText.color = new Color(1f, 0.82f, 0.3f);
+        }
     }
 
     void BuildHideoutExitButton(RectTransform canvasRT)

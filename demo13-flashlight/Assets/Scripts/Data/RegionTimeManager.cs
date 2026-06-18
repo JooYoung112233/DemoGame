@@ -120,6 +120,16 @@ public class RegionTimeManager : MonoBehaviour
         }
     }
 
+    /// <summary>모든 지역 시계를 '게임시간' gameHours만큼 진행(수면 등). 페이즈 전환 포함.
+    /// 매핑: 풀 사이클(day+night) = 24 게임시간.</summary>
+    public void AdvanceAllRegions(float gameHours)
+    {
+        if (regions == null || gameHours <= 0f) return;
+        float realSeconds = gameHours / 24f * (dayDuration + nightDuration);
+        for (int i = 0; i < regions.Length; i++)
+            SimulateTime(regions[i], realSeconds);
+    }
+
     public RegionTime GetRegion(string regionId)
     {
         if (regions == null) return null;

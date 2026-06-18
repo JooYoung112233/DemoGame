@@ -111,6 +111,9 @@ public class SaveManager : MonoBehaviour
             data.hideoutModules = HideoutModuleManager.Instance.GetSaveData();
         }
 
+        // 위탁(전당포) 슬롯
+        data.consignSlots = ShopUI.GetConsignSave();
+
         // 메인 창고(보관함)
         if (MainStash.Instance != null)
         {
@@ -249,6 +252,9 @@ public class SaveManager : MonoBehaviour
         {
             HideoutModuleManager.Instance.LoadSaveData(data.hideoutModules);
         }
+
+        // 위탁(전당포) 슬롯
+        ShopUI.LoadConsignSave(data.consignSlots);
 
         // 메인 창고(보관함)
         if (data.mainStash != null)
@@ -392,6 +398,9 @@ public class GameSaveData
 
     // 하이드아웃 모듈 레벨
     public List<HideoutModuleSaveEntry> hideoutModules;
+
+    // 위탁(전당포) 슬롯
+    public List<ShopUI.ConsignSave> consignSlots;
 
     // 메인 창고(보관함)
     public List<GridItemEntry> mainStash;
