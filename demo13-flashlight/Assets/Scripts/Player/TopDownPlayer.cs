@@ -21,6 +21,8 @@ public class TopDownPlayer : MonoBehaviour
     [Tooltip("Spine 캐릭터(있으면 SpriteRenderer 대신 이걸로 좌우 플립 + 이동/전투 애니 구동)")]
     [SerializeField] SkeletonAnimation skeletonAnimation;
     [SerializeField] bool flipByMouse = true;
+    [Tooltip("좌우 미러 부호 반전. 캐릭터가 마우스와 반대로 보이면 토글.")]
+    [SerializeField] bool flipInvert = true;
 
     [Header("시야 라이트 (부채꼴, 앞 방향)")]
     [Tooltip("PlayerLight(Light2D) Transform. 마우스 방향으로 회전 + 앞으로 오프셋")]
@@ -42,6 +44,10 @@ public class TopDownPlayer : MonoBehaviour
 
     [Header("기본값 (StatDB 없을 때)")]
     [SerializeField] float fallbackMoveSpeed = 5f;
+
+    [Header("이동 감각 (걷는 느낌)")]
+    [Tooltip("켜면 걷기/달리기 애니 속도를 실제 이동속도에 비례시킴. 끄면 애니는 고유 속도(1x)로 재생되어 이동속도와 분리됨(기본). ※ 가속/감속 수치는 StatDB ▸ Player Stat ▸ 이동 감각.")]
+    [SerializeField] bool animCadenceMatchesSpeed = false;
 
     // ── 퍼블릭 API ───────────────────────────────────────────────────
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
@@ -65,6 +71,9 @@ public class TopDownPlayer : MonoBehaviour
     public float StaminaMax     => MaxStam;
     public float StaminaPercent => _stamina / MaxStam;
     public bool  IsExhausted    => _exhausted;
+    /// <summary>앉기(C 토글) — 속도 감소 + sit/sit_walk 애니.</summary>
+    public bool  IsCrouching    => _crouching;
+    bool _crouching;
 
     /// <summary>스태미너 완전 회복 + 탈진 해제 (수면 등에서 호출).</summary>
     public void RefillStamina() { _stamina = MaxStam; _exhausted = false; }
@@ -92,6 +101,8 @@ public class TopDownPlayer : MonoBehaviour
     float DodgeInvDur    => Stat.dodgeInvincibleDuration;
     float DodgeCooldown  => Stat.dodgeCooldown;
     float DodgeCost      => Stat.dodgeStaminaCost;
+    float MoveAccel      => Stat.moveAccel;
+    float MoveDecel      => Stat.moveDecel;
 
     // ── 내부 상태 ─────────────────────────────────────────────────────
     Rigidbody2D _rb;
@@ -231,6 +242,7 @@ public class TopDownPlayer : MonoBehaviour
         // UI/대화 열림 → 조준·전투 입력 정지 (이동은 FixedUpdate에서 정지)
         if (!_uiOpen)
         {
+            if (Input.GetKeyDown(KeyCode.C)) _crouching = !_crouching;   // 앉기 토글
             UpdateMouseFacing();
             UpdateFlip();
             UpdateVisionLight();
@@ -273,8 +285,15 @@ public class TopDownPlayer : MonoBehaviour
         if (MoveDirection.sqrMagnitude > 1f) MoveDirection.Normalize();
 
         float speed = MoveSpd * (IsSprinting ? SprintMult : 1f);
+        if (_crouching) speed *= Stat.crouchSpeedMultiplier;  // 앉아 이동 = 감속
         if (_state == CombatState.HeavyCharge) speed *= 0.4f; // 차징 중 감속
-        _rb.linearVelocity = MoveDirection * speed;
+
+        // 가속/감속 램프 — 즉속도(미끄럼)가 아니라 살짝 차오르고/잦아드는 무게감.
+        Vector2 target = MoveDirection * speed;
+        bool wantMove = MoveDirection.sqrMagnitude > 0.01f;
+        float rate = wantMove ? MoveAccel : MoveDecel;
+        if (rate <= 0f) _rb.linearVelocity = target;   // 0=즉시(기존 동작)
+        else            _rb.linearVelocity = Vector2.MoveTowards(_rb.linearVelocity, target, rate * Time.fixedDeltaTime);
     }
 
     // ── 마우스 / 비주얼 ──────────────────────────────────────────────
@@ -297,6 +316,7 @@ public class TopDownPlayer : MonoBehaviour
         if (!flipByMouse) return;
         if (Mathf.Abs(FacingDirection.x) <= 0.01f) return;
         bool faceLeft = FacingDirection.x < 0f;
+        if (flipInvert) faceLeft = !faceLeft;   // 스켈레톤 기본 방향이 반대일 때 보정
 
         // Spine 우선 — 스켈레톤 X스케일 부호로 미러링
         if (skeletonAnimation != null && skeletonAnimation.Skeleton != null)
@@ -309,7 +329,8 @@ public class TopDownPlayer : MonoBehaviour
     Spine.AnimationState _spineState;
     string _curAnim = "<init>";
 
-    /// <summary>이동/전투 상태에 맞춰 Spine 트랙0 애니를 전환. (idle 애니 없음 → 정지 시 셋업 포즈)</summary>
+    /// <summary>이동/전투 상태에 맞춰 Spine 트랙0 애니를 전환. 정지 시 idle 재생(없으면 셋업 포즈).
+    /// 모든 애니는 스켈레톤에 실제로 존재할 때만 재생 — 없는 이름을 넣어 경고나는 일 방지(점진 도입).</summary>
     void UpdateSkeletonAnimation()
     {
         if (skeletonAnimation == null) return;
@@ -319,18 +340,32 @@ public class TopDownPlayer : MonoBehaviour
             if (_spineState == null) return;
         }
 
-        string target; bool loop = true;
+        string target; bool loop;
         switch (_state)
         {
             case CombatState.Dodge:
-                target = HasAnim("roll") ? "roll" : "run"; loop = false; break;
+                target = FirstAnim("roll", "dodge"); loop = false; break;
             case CombatState.LightAttack:
             case CombatState.HeavyRelease:
-                target = HasAnim("attack") ? "attack" : "run"; loop = false; break;
+                target = FirstAnim("attack", "attack1", "attack_1"); loop = false; break;
             default:
-                if (IsMoving) target = (IsSprinting && HasAnim("run")) ? "run" : "walk";
-                else          target = null;   // 정지 = 셋업 포즈
+                if (_crouching)   target = IsMoving ? FirstAnim("sit_walk", "sit") : FirstAnim("sit");      // 앉기
+                else if (IsMoving) target = IsSprinting ? FirstAnim("run", "walk") : FirstAnim("walk", "run"); // 이동
+                else               target = IdleAnim();                                                       // 정지
+                loop = true;
                 break;
+        }
+
+        // 전용 애니(공격/구르기/이동)가 스켈레톤에 없으면 idle로 폴백(루프), idle도 없으면 셋업 포즈.
+        if (string.IsNullOrEmpty(target)) { target = IdleAnim(); loop = true; }
+
+        // 걷기/달리기 발걸음 속도를 실제 이동속도에 맞춤(매 프레임 — 미끄럼 느낌↓).
+        if (animCadenceMatchesSpeed && _rb != null)
+        {
+            if (target == "walk" || target == "run")
+                skeletonAnimation.timeScale = Mathf.Clamp(_rb.linearVelocity.magnitude / Mathf.Max(0.1f, MoveSpd), 0.5f, 1.8f);
+            else
+                skeletonAnimation.timeScale = 1f;
         }
 
         if (target == _curAnim) return;
@@ -339,8 +374,20 @@ public class TopDownPlayer : MonoBehaviour
         else                              _spineState.SetAnimation(0, target, loop);
     }
 
+    /// <summary>idle 애니 이름(흔한 표기 변형 자동 탐색). 없으면 null=셋업 포즈.</summary>
+    string IdleAnim() => FirstAnim("idle", "Idle", "idle_loop", "idle1", "Idle_Loop");
+
+    /// <summary>우선순위 목록 중 스켈레톤에 실제 존재하는 첫 애니 이름. 없으면 null.</summary>
+    string FirstAnim(params string[] names)
+    {
+        for (int i = 0; i < names.Length; i++)
+            if (HasAnim(names[i])) return names[i];
+        return null;
+    }
+
     bool HasAnim(string name)
     {
+        if (string.IsNullOrEmpty(name)) return false;
         var data = skeletonAnimation != null && skeletonAnimation.Skeleton != null
             ? skeletonAnimation.Skeleton.Data : null;
         return data != null && data.FindAnimation(name) != null;
@@ -358,7 +405,7 @@ public class TopDownPlayer : MonoBehaviour
 
     void UpdateSprint(bool uiOpen)
     {
-        IsSprinting = !uiOpen && !_exhausted && _state == CombatState.Idle
+        IsSprinting = !uiOpen && !_exhausted && !_crouching && _state == CombatState.Idle
                       && Input.GetKey(KeyCode.LeftShift) && IsMoving
                       && _stamina > SprintMinStam;
 

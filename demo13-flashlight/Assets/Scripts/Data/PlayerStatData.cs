@@ -14,6 +14,12 @@ public class PlayerStatData
     public float sprintSpeedMultiplier = 1.6f;
     public float crouchSpeedMultiplier = 0.5f;
 
+    [Header("이동 감각 (걷는 느낌)")]
+    [Tooltip("가속도(유닛/초²). 작을수록 묵직, 0=즉시(미끄럼 느낌).")]
+    public float moveAccel = 45f;
+    [Tooltip("감속도(유닛/초²). 클수록 정지가 또렷, 0=즉시 정지.")]
+    public float moveDecel = 80f;
+
     [Header("달리기")]
     public float sprintStaminaCost = 12f;
     public float sprintMinStamina = 10f;

@@ -100,8 +100,10 @@ public class GameTuning : ScriptableObject
     public float anomalyIntervalMin = 90f;
     [Tooltip("자동 발생 랜덤 간격 최대(초).")]
     public float anomalyIntervalMax = 180f;
-    [Tooltip("동시 활성 최대 개수.")]
+    [Tooltip("동시 활성 최대 개수(상한). 아래 군데 수 가중치로 뽑은 값을 이 값·잠복 존 수로 클램프.")]
     public int anomalyMaxConcurrent = 1;
+    [Tooltip("한 번 발생 시 동시에 몇 '군데' 나올지 가중치. [0]=1군데, [1]=2군데, [2]=3군데 … 비우거나 합 0이면 항상 1군데.")]
+    public float[] anomalySpotCountWeights = new float[] { 1f };
     [Tooltip("몬스터 최소 스폰 거리(m) — 플레이어 옆 즉시 스폰 방지. (Phase 2)")]
     public float anomalyMonsterMinDist = 6f;
 

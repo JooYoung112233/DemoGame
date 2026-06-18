@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// 통합 캐릭터 패널 (Tab 키). 타르코프식 3열 레이아웃.
@@ -114,6 +115,13 @@ public class CharacterPanelUI : MonoBehaviour
     InventoryGrid contextTargetGrid;
     Text contextItemNameText;
 
+    // ── 아이템 선택(클릭) → 착용 버튼 + 좌측 슬롯 하이라이트 ──
+    ItemInstance selectedItem;        // 현재 선택된 아이템(클릭 시)
+    InventoryGrid selectedGrid;       // 선택 아이템이 속한 격자
+    readonly HashSet<EquipSlot> highlightSlots = new HashSet<EquipSlot>();  // 하이라이트할 좌측 슬롯
+    Vector2 dragStartMouse;           // 드래그 시작 시 마우스 위치(클릭 판정용)
+    const float CLICK_MOVE_THRESHOLD = 6f;  // 이 거리 미만 이동이면 클릭(선택)으로 간주
+
     // ── 수색 연출 (루팅 상자 전용) ──
     bool isSearching;
     float searchTimer;
@@ -198,6 +206,7 @@ public class CharacterPanelUI : MonoBehaviour
     {
         HideContextMenu();
         if (isDragging) CancelDrag();
+        ClearSelection();
         isShowing = false;
         if (panelRoot != null)
             panelRoot.SetActive(false);
@@ -251,6 +260,9 @@ public class CharacterPanelUI : MonoBehaviour
         openStorage = null;
         openFurniture = null;
         openStashGrid = null;
+        // 좌측 격자가 닫히면 그 격자를 가리키던 선택은 무효 → 해제
+        if (selectedGrid != null && !IsPlayerGrid(selectedGrid))
+            ClearSelection();
         if (leftPanelRoot != null)
             leftPanelRoot.SetActive(false);
         SyncLeftPlaceholder();
@@ -270,6 +282,7 @@ public class CharacterPanelUI : MonoBehaviour
         openStorage = null;
         openFurniture = null;
         openStashGrid = null;
+        ClearSelection();
 
         playerGO = null;
         health = null;
@@ -384,6 +397,9 @@ public class CharacterPanelUI : MonoBehaviour
         equipSlotLabels = null;
         invPlaceholder = null;
         bagHeaderText = null;
+        selectedItem = null;
+        selectedGrid = null;
+        highlightSlots.Clear();
     }
 
     void BuildRightPanel(Transform parent)
@@ -564,6 +580,10 @@ public class CharacterPanelUI : MonoBehaviour
 
         leftScroll.verticalScrollbar = sb;
         leftScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+
+        // content 영역의 드래그가 ScrollRect 스크롤을 흔들지 않도록 차단(휠/스크롤바로만 스크롤).
+        var blocker = gridGO.AddComponent<ScrollDragBlocker>();
+        blocker.targetScroll = leftScroll;
 
         leftPanelRoot.SetActive(false);
 
@@ -829,10 +849,22 @@ public class CharacterPanelUI : MonoBehaviour
             var equipped = playerEquipment != null ? playerEquipment.GetSlot(slot) : null;
             bool hasItem = equipped != null;
 
-            // 배경색: 장착됨이면 밝게
-            bg.color = hasItem
-                ? new Color(0.15f, 0.18f, 0.25f, 0.95f)
-                : new Color(0.1f, 0.1f, 0.15f, 0.9f);
+            // 배경색: 장착됨이면 밝게. 선택 아이템이 들어갈 수 있는 슬롯이면 하이라이트.
+            bool highlighted = highlightSlots.Count > 0 && highlightSlots.Contains(slot);
+            Color bgColor = highlighted
+                ? new Color(0.2f, 0.45f, 0.65f, 0.95f)
+                : hasItem
+                    ? new Color(0.15f, 0.18f, 0.25f, 0.95f)
+                    : new Color(0.1f, 0.1f, 0.15f, 0.9f);
+            bg.color = bgColor;
+            // 버튼 ColorTint가 normalColor로 되돌리지 않도록 동기화
+            var slotBtn = bg.GetComponent<Button>();
+            if (slotBtn != null)
+            {
+                var c = slotBtn.colors;
+                c.normalColor = bgColor;
+                slotBtn.colors = c;
+            }
 
             // 아이콘
             if (icon != null)
@@ -1640,38 +1672,58 @@ public class CharacterPanelUI : MonoBehaviour
                 }
             }
         }
+
+        // 격자의 빈 칸/패널 여백을 클릭 = 선택 해제.
+        ClearSelection();
+    }
+
+    /// <summary>마우스가 해당 RectTransform 위에 있는지(슬롯 히트테스트).</summary>
+    bool IsMouseOverRect(RectTransform rt)
+    {
+        if (rt == null || !rt.gameObject.activeInHierarchy) return false;
+        return RectTransformUtility.RectangleContainsScreenPoint(rt, Input.mousePosition, null);
     }
 
     /// <summary>
-    /// Ctrl+클릭 퀵 이동.
-    /// 플레이어 격자 아이템 → 좌측(상자/창고)로, 좌측 아이템 → 플레이어 격자로.
+    /// Ctrl+클릭 스마트 이동(통일 규칙).
+    /// 장착 가능 아이템 → 자동 착용. 그 외 → 다른 컨테이너로 이동(가방↔창고/보안 컨테이너).
     /// </summary>
     void TryQuickTransfer()
     {
         var leftGrid = LeftGrid;
 
-        // 플레이어 격자(가방/주머니/보안) 클릭 → 좌측으로 이동
+        // 플레이어 격자(가방/주머니/보안) 클릭
         {
             InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
             if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
             {
                 var placed = pGrid.GetAt(gx, gy);
-                if (placed != null && leftGrid != null)
+                if (placed != null)
                 {
                     var item = placed.item;
-                    pGrid.Remove(placed);
-                    if (!leftGrid.TryAutoPlace(item))
+                    // 장착 가능 → 자동 착용
+                    if (IsEquippable(item.data))
                     {
-                        // 실패 → 원래 위치 복원
-                        pGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+                        EquipFromGrid(item, pGrid);
+                        return;
                     }
-                    RefreshAllGrids();
+                    // 그 외 → 좌측(상자/창고)로 이동
+                    if (leftGrid != null)
+                    {
+                        pGrid.Remove(placed);
+                        if (!leftGrid.TryAutoPlace(item))
+                        {
+                            // 실패 → 원래 위치 복원
+                            pGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+                        }
+                        RefreshAllGrids();
+                    }
                 }
                 return;
             }
         }
 
-        // 좌측 격자 클릭 → 플레이어(가방→주머니→보안)로 이동
+        // 좌측 격자 클릭
         if (leftGrid != null)
         {
             int gx, gy;
@@ -1686,6 +1738,13 @@ public class CharacterPanelUI : MonoBehaviour
                         return;
 
                     var item = placed.item;
+                    // 장착 가능 → 자동 착용(좌측 창고/상자에서도)
+                    if (IsEquippable(item.data))
+                    {
+                        EquipFromGrid(item, leftGrid);
+                        return;
+                    }
+                    // 그 외 → 플레이어(가방→주머니→보안)로 이동
                     leftGrid.Remove(placed);
                     if (!playerInventory.TryAutoPlaceAnywhere(item))
                     {
@@ -1708,10 +1767,16 @@ public class CharacterPanelUI : MonoBehaviour
         dragOrigY = placed.gridY;
         dragOrigRotated = placed.rotated;
         dragRotated = placed.rotated;
+        dragStartMouse = Input.mousePosition;
 
         sourceGrid.Remove(placed);
+        // 드래그 시작 = 이전 선택 해제(선택 하이라이트와 드래그 하이라이트 충돌 방지).
+        ClearSelection();
         CreateGhost();
         RefreshAllGrids();
+        // 들었을 때 즉시 좌측 장비 슬롯 하이라이트(가방=Backpack 포함 모든 타입).
+        // RefreshAllGrids(→ValidateSelection→ClearSelection) 이후에 세팅해야 살아남는다.
+        SetDragHighlightSlots();
     }
 
     // ── 고스트 비주얼 ──
@@ -1726,7 +1791,10 @@ public class CharacterPanelUI : MonoBehaviour
         ghostRT = ghostGO.AddComponent<RectTransform>();
         ghostRT.anchorMin = new Vector2(0.5f, 0.5f);
         ghostRT.anchorMax = new Vector2(0.5f, 0.5f);
-        ghostRT.pivot = new Vector2(0.5f, 0.5f);
+        // pivot=좌상단 → 고스트 좌상단이 커서를 따라오고, 배치 하이라이트 셀(커서가 가리키는 좌상단 칸)과 정렬된다.
+        ghostRT.pivot = new Vector2(0f, 1f);
+        // (0,0) 깜빡임 방지: 위치를 세팅하기 전엔 숨겨둔다.
+        ghostGO.SetActive(false);
 
         var img = ghostGO.AddComponent<Image>();
         var c = GetRarityBgColor(dragItem.data.rarity);
@@ -1755,6 +1823,10 @@ public class CharacterPanelUI : MonoBehaviour
         }
 
         UpdateGhostSize();
+
+        // 생성 즉시 현재 커서 위치로 이동시킨 뒤 표시 → 첫 프레임부터 커서를 따라온다((0,0) 안 보임).
+        UpdateGhostPosition();
+        ghostGO.SetActive(true);
     }
 
     void UpdateGhostSize()
@@ -1874,31 +1946,100 @@ public class CharacterPanelUI : MonoBehaviour
 
     void TryPlaceDragged()
     {
-        // 플레이어 격자(가방/주머니/보안)에 배치 시도
+        // 거의 안 움직였으면 = 클릭 → 이동이 아니라 "선택"으로 처리(원위치 복귀 + 선택 표시).
+        if (((Vector2)Input.mousePosition - dragStartMouse).magnitude < CLICK_MOVE_THRESHOLD)
+        {
+            var clickedItem = dragItem;
+            var clickedGrid = dragSourceGrid;
+            // 원위치 복귀
+            if (clickedGrid != null && clickedItem != null
+                && !clickedGrid.TryPlace(clickedItem, dragOrigX, dragOrigY, dragOrigRotated))
+                clickedGrid.TryAutoPlace(clickedItem);
+            EndDrag();
+            SelectItem(clickedItem, clickedGrid);
+            return;
+        }
+
+        // 실제 드래그 이동 → 선택 해제(슬롯 하이라이트 정리는 EndDrag에서)
+        ClearSelection();
+
+        // (a) 좌측 장비 슬롯 위에 놓음 → 착용 (드래그-투-슬롯)
+        EquipSlot dropSlot;
+        if (EquipSlotAtMouse(out dropSlot))
+        {
+            if (dragItem != null && IsEquippable(dragItem.data))
+            {
+                var item = dragItem;
+                var src = dragSourceGrid;
+                // EquipFromGrid는 격자에서 아이템을 찾아 빼지만, 드래그 중엔 이미 제거된 상태다.
+                // → 임시로 출발 격자에 되돌려 넣고 동일 경로로 장착(실패 시 그대로 남음).
+                bool restored = false;
+                if (src != null)
+                    restored = src.TryPlace(item, dragOrigX, dragOrigY, dragOrigRotated) || src.TryAutoPlace(item);
+                // 드래그 상태 종료(고스트/하이라이트 제거) 후 장착 처리.
+                EndDrag();
+                if (restored)
+                    EquipFromGrid(item, src, dropSlot);
+                else
+                    ReturnItemToInventory(item);
+                return;
+            }
+            // 장착 불가 아이템을 슬롯에 떨굼 → 원위치 복귀
+            CancelDrag();
+            return;
+        }
+
+        // (b) 플레이어 격자(가방/주머니/보안)에 배치 시도
         {
             InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
             if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
             {
                 TryPlaceInGrid(pGrid, gx, gy);
-                return; // 격자 위 클릭은 항상 소비 (실패해도)
+                EnsureDragEnded();   // 실패(스택 일부 등)해도 제스처 종료 — 떠다니지 않게
+                return;
             }
         }
 
-        // 좌측 격자에 배치 시도 (루팅 상자 / 창고)
+        // (c) 좌측 격자에 배치 시도 (루팅 상자 / 창고)
         var leftG2 = LeftGrid;
         if (leftG2 != null)
         {
             int gx, gy;
             if (ScreenToGridCell(containerGridRoot, leftG2, out gx, out gy))
             {
-                if (TryPlaceInGrid(leftG2, gx, gy))
-                    return;
+                TryPlaceInGrid(leftG2, gx, gy);
+                EnsureDragEnded();   // 컨테이너 간 이동도 한 제스처로 종료
                 return;
             }
         }
 
-        // 격자 밖 클릭 → 월드 드롭
+        // (d) 격자 밖 클릭 → 월드 드롭(안전구역은 인벤/창고 복귀)
         DropDraggedToWorld();
+    }
+
+    /// <summary>아직 드래그가 끝나지 않았으면(부분 실패 등) 출발지로 되돌리고 제스처를 종료.</summary>
+    void EnsureDragEnded()
+    {
+        if (!isDragging) return;
+        // 배치/스왑이 완료되지 못해 dragItem이 아직 손에 있으면 출발지로 복귀시킨다.
+        CancelDrag();
+    }
+
+    /// <summary>마우스 아래의 좌측 장비 슬롯을 찾는다.</summary>
+    bool EquipSlotAtMouse(out EquipSlot slot)
+    {
+        slot = EquipSlot.None;
+        if (equipSlotBgs == null) return false;
+        foreach (var kv in equipSlotBgs)
+        {
+            if (kv.Value == null) continue;
+            if (IsMouseOverRect(kv.Value.rectTransform))
+            {
+                slot = kv.Key;
+                return true;
+            }
+        }
+        return false;
     }
 
     bool TryPlaceInGrid(InventoryGrid grid, int x, int y)
@@ -1977,6 +2118,9 @@ public class CharacterPanelUI : MonoBehaviour
 
         if (ghostGO != null) { Destroy(ghostGO); ghostGO = null; ghostRT = null; }
         if (highlightGO != null) { Destroy(highlightGO); highlightGO = null; highlightRT = null; highlightImage = null; }
+
+        // 드래그용 좌측 슬롯 하이라이트 정리(이후 SelectItem이 다시 켤 수 있음).
+        highlightSlots.Clear();
 
         RefreshAllGrids();
     }
@@ -2116,29 +2260,16 @@ public class CharacterPanelUI : MonoBehaviour
         float y = -28f;
         bool isPlayerGrid = IsPlayerGrid(grid);
 
-        // 장착 (equipSlot != None + 플레이어 인벤토리만)
-        if (data.equipSlot != EquipSlot.None && isPlayerGrid)
+        // 장착 — 모든 장착 가능 타입(가방·헬멧·방어구·리그·무기·근접·특수창)을 어느 격자에서든 노출.
+        if (IsEquippable(data))
         {
-            AddContextButton("장착", new Color(0.4f, 0.8f, 1f), y, () =>
+            // 선택 상태도 같이 잡아 좌측 슬롯 하이라이트 일관성 유지
+            SelectItem(placed.item, grid);
+            var capItem = placed.item;
+            var capGrid = grid;
+            AddContextButton("착용", new Color(0.4f, 0.8f, 1f), y, () =>
             {
-                if (playerEquipment != null)
-                {
-                    playerEquipment.Equip(data);
-                    grid.Remove(contextTarget);
-                    RefreshAllGrids();
-                }
-                HideContextMenu();
-            });
-            y -= 26f;
-        }
-        // 무기 장착 (구형 equipSlot=None 무기)
-        else if (data.category == ItemCategory.Weapon && isPlayerGrid)
-        {
-            AddContextButton("장착", new Color(0.4f, 0.8f, 1f), y, () =>
-            {
-                playerInventory.UseItem(contextTarget);
-                HideContextMenu();
-                RefreshAllGrids();
+                EquipFromGrid(capItem, capGrid);
             });
             y -= 26f;
         }
@@ -2385,6 +2516,181 @@ public class CharacterPanelUI : MonoBehaviour
         var leftGrid = LeftGrid;
         if (leftGrid != null && leftPanelRoot != null && leftPanelRoot.activeSelf)
             RefreshLeftGrid(leftGrid);
+
+        // 선택 아이템이 더 이상 격자에 없으면 선택 해제(장착/이동/제거 후 꼬임 방지).
+        ValidateSelection();
+    }
+
+    #endregion
+
+    #region 아이템 선택 / 착용
+
+    /// <summary>장착 가능한 아이템인지(가방·헬멧·방어구·리그·무기·근접·특수창 등).</summary>
+    static bool IsEquippable(ItemData data)
+    {
+        if (data == null) return false;
+        return data.equipSlot != EquipSlot.None || data.category == ItemCategory.Weapon;
+    }
+
+    /// <summary>아이템이 들어갈 좌측 장비 슬롯(들)을 반환. 일반 슬롯은 1개, 무기는 주/보조 둘 다.</summary>
+    static void GetTargetSlots(ItemData data, HashSet<EquipSlot> outSlots)
+    {
+        outSlots.Clear();
+        if (data == null) return;
+
+        if (data.equipSlot != EquipSlot.None)
+        {
+            outSlots.Add(data.equipSlot);
+            // 무기는 주무기/보조 어느 쪽에도 들어갈 수 있게 둘 다 표시
+            if (data.category == ItemCategory.Weapon
+                && (data.equipSlot == EquipSlot.PrimaryWeapon || data.equipSlot == EquipSlot.SecondaryWeapon))
+            {
+                outSlots.Add(EquipSlot.PrimaryWeapon);
+                outSlots.Add(EquipSlot.SecondaryWeapon);
+            }
+        }
+        else if (data.category == ItemCategory.Weapon)
+        {
+            // 구형 무기(equipSlot=None) → PrimaryWeapon 취급
+            outSlots.Add(EquipSlot.PrimaryWeapon);
+        }
+    }
+
+    /// <summary>아이템 클릭 선택. 장착 가능하면 좌측 장비 슬롯 배경 하이라이트.</summary>
+    void SelectItem(ItemInstance item, InventoryGrid grid)
+    {
+        if (item == null || item.data == null) { ClearSelection(); return; }
+        selectedItem = item;
+        selectedGrid = grid;
+
+        // 장착 가능한 아이템만 좌측 슬롯 하이라이트(헬멧→Head, 가방→Backpack, 무기→Primary/Secondary…).
+        if (IsEquippable(item.data))
+            GetTargetSlots(item.data, highlightSlots);
+        else
+            highlightSlots.Clear();
+    }
+
+    void ClearSelection()
+    {
+        selectedItem = null;
+        selectedGrid = null;
+        highlightSlots.Clear();
+    }
+
+    /// <summary>드래그 중인 아이템에 맞춰 좌측 장비 슬롯 하이라이트를 갱신(픽업 즉시 강조).</summary>
+    void SetDragHighlightSlots()
+    {
+        if (isDragging && dragItem != null && dragItem.data != null && IsEquippable(dragItem.data))
+            GetTargetSlots(dragItem.data, highlightSlots);
+        else
+            highlightSlots.Clear();
+    }
+
+    /// <summary>선택 아이템이 여전히 유효(해당 격자에 존재)한지 확인. 아니면 해제.</summary>
+    void ValidateSelection()
+    {
+        if (selectedItem == null) return;
+        bool stillThere = selectedGrid != null && GridContains(selectedGrid, selectedItem);
+        if (!stillThere)
+            ClearSelection();
+    }
+
+    static bool GridContains(InventoryGrid grid, ItemInstance item)
+    {
+        if (grid == null || item == null) return false;
+        var all = grid.GetAll();
+        for (int i = 0; i < all.Count; i++)
+            if (all[i].item == item) return true;
+        return false;
+    }
+
+    /// <summary>아이템을 격자에서 빼서 지정(또는 기본) 슬롯에 장착. 무기/장비 통일 처리. 실패 시 원복.</summary>
+    void EquipFromGrid(ItemInstance item, InventoryGrid grid, EquipSlot forcedSlot = EquipSlot.None)
+    {
+        if (item == null || item.data == null || playerEquipment == null) return;
+        if (!IsEquippable(item.data))
+        {
+            ToastManager.Show("장착할 수 없는 아이템", ToastManager.ToastType.Warning);
+            return;
+        }
+
+        // 드래그-투-슬롯 가드: 지정 슬롯이 이 아이템의 유효 슬롯이 아니면 거절(엉뚱한 슬롯에 못 꽂게).
+        if (forcedSlot != EquipSlot.None)
+        {
+            var valid = new HashSet<EquipSlot>();
+            GetTargetSlots(item.data, valid);
+            if (!valid.Contains(forcedSlot))
+            {
+                ToastManager.Show("이 슬롯에는 넣을 수 없다", ToastManager.ToastType.Warning);
+                // 격자에서 빼지 않았으므로 별도 복원 불필요.
+                ClearSelection();
+                HideContextMenu();
+                RefreshAllGrids();
+                return;
+            }
+        }
+
+        // PlayerEquipment가 실제로 사용하는 슬롯(무기 equipSlot=None → PrimaryWeapon).
+        EquipSlot apiSlot = ApiEquipSlot(item.data);
+
+        // 같은 ItemData가 그 슬롯에 이미 장착됨 = 토글 해제(아이템은 격자에 그대로 남겨둠).
+        if (playerEquipment.GetSlot(apiSlot) == item.data)
+        {
+            playerEquipment.Unequip(apiSlot);
+            ClearSelection();
+            HideContextMenu();
+            RefreshAllGrids();
+            return;
+        }
+
+        // 격자에서 들어낼 위치 기억(실패 시 원복용).
+        InventoryGrid.PlacedItem placed = FindPlaced(grid, item);
+        int origX = placed != null ? placed.gridX : -1;
+        int origY = placed != null ? placed.gridY : -1;
+        bool origRot = placed != null ? placed.rotated : false;
+        if (placed != null) grid.Remove(placed);
+
+        // 교체로 빠질 기존 장비(스왑 복원용).
+        ItemData prev = playerEquipment.GetSlot(apiSlot);
+
+        bool ok = item.data.category == ItemCategory.Weapon
+            ? playerEquipment.EquipWeapon(item.data)
+            : playerEquipment.Equip(item.data);
+
+        if (!ok)
+        {
+            // 장착 실패 → 격자 원위치 복원(또는 자동 배치)
+            if (placed != null && !grid.TryPlace(item, origX, origY, origRot))
+                grid.TryAutoPlace(item);
+            ToastManager.Show("장착 실패", ToastManager.ToastType.Warning);
+        }
+        else if (prev != null && prev != item.data)
+        {
+            // 교체로 빠진 기존 장비를 인벤(없으면 창고)로 회수 — 바닥 X.
+            ReturnItemToInventory(new ItemInstance(prev, 1));
+        }
+
+        ClearSelection();
+        HideContextMenu();
+        RefreshAllGrids();
+    }
+
+    /// <summary>PlayerEquipment가 실제로 장착할 슬롯(무기 equipSlot=None → PrimaryWeapon).</summary>
+    static EquipSlot ApiEquipSlot(ItemData data)
+    {
+        if (data == null) return EquipSlot.None;
+        if (data.equipSlot != EquipSlot.None) return data.equipSlot;
+        if (data.category == ItemCategory.Weapon) return EquipSlot.PrimaryWeapon;
+        return EquipSlot.None;
+    }
+
+    static InventoryGrid.PlacedItem FindPlaced(InventoryGrid grid, ItemInstance item)
+    {
+        if (grid == null || item == null) return null;
+        var all = grid.GetAll();
+        for (int i = 0; i < all.Count; i++)
+            if (all[i].item == item) return all[i];
+        return null;
     }
 
     #endregion
@@ -2449,4 +2755,27 @@ public class CharacterPanelUI : MonoBehaviour
     }
 
     #endregion
+}
+
+/// <summary>
+/// 스크롤뷰 content에 부착. 아이템 클릭/드래그가 부모 ScrollRect 스크롤을 유발하지 않도록
+/// 드래그 이벤트를 소비(아무것도 안 함)한다. 스크롤은 휠(IScrollHandler 전달)과 스크롤바로만.
+/// CharacterPanelUI의 격자 클릭/드래그는 Input 폴링으로 별도 처리되므로 막아도 무방.
+/// </summary>
+public class ScrollDragBlocker : MonoBehaviour,
+    IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler
+{
+    public ScrollRect targetScroll;
+
+    // 드래그 이벤트를 여기서 받아 소비 → 부모 ScrollRect로 전파되지 않음(스크롤 점프 방지).
+    public void OnBeginDrag(PointerEventData e) { }
+    public void OnDrag(PointerEventData e) { }
+    public void OnEndDrag(PointerEventData e) { }
+
+    // 휠 스크롤은 부모 ScrollRect로 전달해 정상 동작 유지.
+    public void OnScroll(PointerEventData e)
+    {
+        if (targetScroll != null)
+            targetScroll.OnScroll(e);
+    }
 }

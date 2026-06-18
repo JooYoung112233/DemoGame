@@ -16,8 +16,8 @@ MonoBehaviour:
   displayName: "대형 배낭"
   description: "7x8 격자를 제공하는 대형 배낭. 무겁지만 적재량이 크다."
   icon: {fileID: 0}
-  gridWidth: 5
-  gridHeight: 5
+  gridWidth: 3
+  gridHeight: 4
   category: 6
   rarity: 1
   maxStack: 1

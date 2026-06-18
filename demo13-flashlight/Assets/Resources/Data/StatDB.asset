@@ -15,8 +15,10 @@ MonoBehaviour:
   playerStat:
     maxHp: 100
     moveSpeed: 1
-    sprintSpeedMultiplier: 1.6
+    sprintSpeedMultiplier: 2.1
     crouchSpeedMultiplier: 0.5
+    moveAccel: 45
+    moveDecel: 80
     sprintStaminaCost: 12
     sprintMinStamina: 10
     lightDamage: 8
@@ -50,4 +52,34 @@ MonoBehaviour:
     staminaRegen: 15
     staminaRegenDelay: 1
     exhaustionDuration: 0.8
-  units: []
+  units:
+  - id: 
+    displayName: 
+    scale: 0
+    tintColor: {r: 0, g: 0, b: 0, a: 0}
+    shadowColor: {r: 0, g: 0, b: 0, a: 0}
+    useGlow: 0
+    glowColor: {r: 0, g: 0, b: 0, a: 0}
+    glowIntensity: 0
+    glowRange: 0
+    useTrailParticle: 0
+    trailColor: {r: 0, g: 0, b: 0, a: 0}
+    generatedPrefab: {fileID: 0}
+    maxHp: 0
+    attackDamage: 0
+    attackRange: 0
+    attackSpeed: 0
+    attackWindup: 0
+    canBeCancelled: 0
+    maxGroggy: 0
+    groggyDecay: 0
+    groggyStunDuration: 0
+    moveSpeed: 0
+    patrolSpeed: 0
+    detectRange: 0
+    loseRange: 0
+    patrolRadius: 0
+    patrolWaitTime: 0
+    hitStunDuration: 0
+    expReward: 0
+    goldReward: 0

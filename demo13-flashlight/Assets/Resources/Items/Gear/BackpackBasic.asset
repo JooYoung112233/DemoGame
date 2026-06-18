@@ -16,8 +16,8 @@ MonoBehaviour:
   displayName: "기본 배낭"
   description: "6x6 격자를 제공하는 기본 배낭. 등에 장착해 적재 공간을 늘린다."
   icon: {fileID: 0}
-  gridWidth: 4
-  gridHeight: 4
+  gridWidth: 3
+  gridHeight: 2
   category: 6
   rarity: 0
   maxStack: 1

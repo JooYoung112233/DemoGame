@@ -21,6 +21,7 @@ public class AnomalyManager : MonoBehaviour
     float IntervalMin => T != null ? T.anomalyIntervalMin : 90f;
     float IntervalMax => T != null ? T.anomalyIntervalMax : 180f;
     int MaxConcurrent => T != null ? Mathf.Max(1, T.anomalyMaxConcurrent) : 1;
+    float[] SpotWeights => T != null ? T.anomalySpotCountWeights : null;
 
     void Awake()
     {
@@ -54,20 +55,68 @@ public class AnomalyManager : MonoBehaviour
         return n;
     }
 
-    /// <summary>잠복 중 존 하나를 랜덤 발생(동시 개수 여유 있을 때).</summary>
-    public void TryTriggerRandom()
+    /// <summary>호환 별칭 — 한 번의 발생 웨이브.</summary>
+    public void TryTriggerRandom() => TriggerWave();
+
+    /// <summary>발생 '웨이브' — 가중치(anomalySpotCountWeights)로 "몇 군데" 나올지 정하고,
+    /// 그만큼 잠복 존을 SelectionWeight 가중 비복원 추출로 골라 동시에 발생시킨다.
+    /// 동시 활성 상한(MaxConcurrent)·잠복 존 수로 클램프.</summary>
+    public void TriggerWave()
     {
-        if (ActiveCount() >= MaxConcurrent) return;
+        int free = MaxConcurrent - ActiveCount();
+        if (free <= 0) return;
+
         var candidates = new List<AnomalyZone>();
         var all = AnomalyZone.All;
         for (int i = 0; i < all.Count; i++)
-            if (all[i] != null && all[i].CanTrigger) candidates.Add(all[i]);
+            if (all[i] != null && all[i].CanTrigger && all[i].SelectionWeight > 0f) candidates.Add(all[i]);
         if (candidates.Count == 0)
         {
             Debug.LogWarning("[AnomalyManager] 발생 시도했지만 잠복 중인 AnomalyZone이 없음. (Tools▸TopDown▸Build▸Anomaly Zone로 배치)");
             return;
         }
-        candidates[Random.Range(0, candidates.Count)].Trigger();
+
+        int cap = Mathf.Min(free, candidates.Count);
+        int count = PickSpotCount(cap);
+        for (int k = 0; k < count && candidates.Count > 0; k++)
+        {
+            int idx = WeightedPick(candidates);
+            candidates[idx].Trigger();
+            candidates.RemoveAt(idx);
+        }
+    }
+
+    /// <summary>가중치 배열로 "몇 군데"(1..cap) 결정. index i → (i+1)군데. 비었거나 합 0이면 1.</summary>
+    int PickSpotCount(int cap)
+    {
+        var w = SpotWeights;
+        if (w == null || w.Length == 0) return 1;
+        int usable = Mathf.Min(w.Length, cap);
+        float total = 0f;
+        for (int i = 0; i < usable; i++) total += Mathf.Max(0f, w[i]);
+        if (total <= 0f) return 1;
+        float r = Random.value * total, c = 0f;
+        for (int i = 0; i < usable; i++)
+        {
+            c += Mathf.Max(0f, w[i]);
+            if (r <= c) return i + 1;
+        }
+        return usable;
+    }
+
+    /// <summary>SelectionWeight 가중 랜덤으로 후보 1개의 인덱스 선택.</summary>
+    static int WeightedPick(List<AnomalyZone> list)
+    {
+        float total = 0f;
+        for (int i = 0; i < list.Count; i++) total += list[i].SelectionWeight;
+        if (total <= 0f) return Random.Range(0, list.Count);
+        float r = Random.value * total, c = 0f;
+        for (int i = 0; i < list.Count; i++)
+        {
+            c += list[i].SelectionWeight;
+            if (r <= c) return i;
+        }
+        return list.Count - 1;
     }
 
     void OnGUI()

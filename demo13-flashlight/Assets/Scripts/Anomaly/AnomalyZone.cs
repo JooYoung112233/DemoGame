@@ -18,6 +18,11 @@ public class AnomalyZone : MonoBehaviour
     [SerializeField] float radius = 6f;
     [Tooltip("붕괴 후 다시 잠복까지 쿨다운(초).")]
     [SerializeField] float cooldown = 60f;
+    [Tooltip("이 위치가 뽑힐 확률 가중치(다른 잠복 존 대비 상대값). 클수록 자주 선택. 0이면 자동 발생에서 제외.")]
+    [SerializeField] float selectionWeight = 1f;
+
+    /// <summary>이 위치의 선택 가중치(AnomalyManager가 '몇 군데' 뽑을 때 사용).</summary>
+    public float SelectionWeight => Mathf.Max(0f, selectionWeight);
 
     public AnomalyState State { get; private set; } = AnomalyState.Dormant;
     public Vector2 Center => transform.position;
