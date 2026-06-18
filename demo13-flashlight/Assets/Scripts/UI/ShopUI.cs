@@ -407,15 +407,18 @@ public class ShopUI : MonoBehaviour
         SetActive(stockEmptyText, count == 0, "판매 중인 물건이 없습니다.");
     }
 
-    static ReputationTier RarityToRepTier(ItemRarity rarity) => rarity switch
+    // 희귀도별 해금 평판 등급 — GameTuning(Control Panel)에서 조정. 에셋 없으면 기본값 폴백.
+    static ReputationTier RarityToRepTier(ItemRarity rarity)
     {
-        ItemRarity.Common   => ReputationTier.F,
-        ItemRarity.Uncommon => ReputationTier.F,
-        ItemRarity.Rare     => ReputationTier.D,
-        ItemRarity.Epic     => ReputationTier.B,
-        ItemRarity.Legendary => ReputationTier.A,
-        _ => ReputationTier.F,
-    };
+        var t = GameTuning.Instance;
+        switch (rarity)
+        {
+            case ItemRarity.Rare:      return t != null ? t.shopTierRare      : ReputationTier.D;
+            case ItemRarity.Epic:      return t != null ? t.shopTierEpic      : ReputationTier.B;
+            case ItemRarity.Legendary: return t != null ? t.shopTierLegendary : ReputationTier.A;
+            default:                   return ReputationTier.F;   // Common/Uncommon = 항상 해금
+        }
+    }
 
     void AddLockedStockCell(RectTransform parent, ItemData data, ReputationTier requiredTier)
     {

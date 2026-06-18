@@ -88,4 +88,13 @@ public class GameTuning : ScriptableObject
     public int anomalyMaxConcurrent = 1;
     [Tooltip("몬스터 최소 스폰 거리(m) — 플레이어 옆 즉시 스폰 방지. (Phase 2)")]
     public float anomalyMonsterMinDist = 6f;
+
+    // ── 상점 — 희귀도별 해금 평판 등급 (NPC 상점 기능 밸런스) ──────────
+    [Header("상점 해금 평판(희귀도별)")]
+    [Tooltip("Rare 아이템을 살 수 있게 되는 최소 평판 등급. ShopUI가 읽음.")]
+    public ReputationTier shopTierRare = ReputationTier.D;
+    [Tooltip("Epic 아이템 해금 최소 평판 등급.")]
+    public ReputationTier shopTierEpic = ReputationTier.B;
+    [Tooltip("Legendary 아이템 해금 최소 평판 등급.")]
+    public ReputationTier shopTierLegendary = ReputationTier.A;
 }

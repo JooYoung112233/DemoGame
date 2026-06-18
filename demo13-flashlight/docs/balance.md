@@ -17,8 +17,12 @@
 | 전투 수치 (플레이어/적 스탯) | `StatDB` SO (`Assets/Resources/Data/StatDB.asset`) | StatDB 에디터 / 인스펙터 (`Tools ▸ TopDown ▸ ...`, `StatDBEditor.cs`) |
 | 평판/평판 티어 | `tools/balance/reputation.csv`, `tools/balance/reputation_tiers.csv` | CSV 편집 (→ `ReputationManager`/`ReputationTier`) |
 | 회복 아이템 수치 (음식 effectValue 등) | `Assets/Resources/Items/**/*.asset` (ItemData SO) | 아이템 인스펙터 (→ [survival.md §4](survival.md), [items.md](items.md)) |
+| **상점 해금 평판** (희귀도별 진열 해금 등급) | **`GameTuning`** (`shopTierRare`/`shopTierEpic`/`shopTierLegendary`) | **Control Panel** — `ShopUI`가 읽음 |
+| NPC 상점별 판매 목록 (뭘 파나) · 가격배율 · 위탁허용 | `ShopData` SO (`Assets/Resources/Data/Shops/Shop_*.asset`: stock/buyRate/sellRate/allowConsignment) | 상점 에셋 인스펙터 (※ Control Panel 통합 상점 에디터는 후속 과제) |
 
-> 원칙: **전역 단일 스칼라 값 = GameTuning**. **행이 많은 표(아이템×지역, 유닛×스탯) = 데이터 파일/SO.** 표를 코드로 옮기지 않는다.
+> 원칙: **전역 단일 스칼라 값 = GameTuning(Control Panel)**. **행이 많은 표(아이템×지역, 유닛×스탯, 상점별 목록) = 데이터 파일/SO.** 표를 코드로 옮기지 않는다.
+>
+> **컨벤션(2026-06-18 확정): 앞으로 모든 신규 밸런스는 이 컨트롤 표면에 병합한다** — 튜닝 가능한 전역 값은 GameTuning에 추가(→ Control Panel 자동 노출), 표형 데이터는 데이터 파일/SO에 두되 **반드시 이 문서(§1·§3)에 색인**한다. "기능적 밸런스"(상점 해금 평판 등)도 가능하면 GameTuning으로.
 
 ---
 
@@ -105,4 +109,5 @@
 
 | 날짜 | 던진 질문/맥락 | 결정 | 근거 |
 |------|----------------|------|------|
+| 2026-06-18 | 사용자: "밸런스 에디터에서 NPC 상점마다 뭘 팔고 평판 몇에 열리고 같은 기능 밸런스도 추가. 앞으로 밸런스는 전부 거기에 병합하고 그렇게 가자." | **컨벤션 확정: 모든 신규 밸런스 → 이 컨트롤 표면(GameTuning/Control Panel + balance.md 색인)에 병합.** 구체: **상점 희귀도별 해금 평판**을 `GameTuning.shopTierRare/Epic/Legendary`로 외부화(ShopUI가 읽음, 폴백 D/B/A). NPC 상점별 판매목록은 `ShopData` SO에 두고 §1 표에 색인(통합 상점 에디터는 후속). | 밸런스 산재 방지 + 디자이너 단일 창 조정. 앞으로 기능 밸런스도 가능한 GameTuning으로. |
 | 2026-06-18 | 밸런스 수치가 코드·SO·CSV에 흩어져 "어디서 고치지?"가 매번 발생. 단일 컨트롤 표면이 필요. (값은 바꾸지 말고 위치만 중앙화) | **생존(`SurvivalStats`)·수면(`SleepUI`) 수치를 `GameTuning` 필드로 외부화** — survivalWater/SatietyMinutesToEmpty, survivalStarveHpPerSec, sleep4h/8h(HpPct/Water/Satiety). 각 시스템은 GameTuning 경유로 읽고 **에셋 없으면 기존 값으로 폴백**(값 동일 유지). 드랍 테이블·StatDB·reputation은 데이터 파일에 유지하고 이 문서에 단일 진실원 표로 정리. | 디자이너가 Control Panel 한 창에서 전역 스칼라 조정, 행이 많은 테이블은 데이터 파일에 분리. 단일 색인으로 "밸런스가 어디 있는지"를 고정. |

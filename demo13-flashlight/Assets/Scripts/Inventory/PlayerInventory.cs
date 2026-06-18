@@ -39,6 +39,9 @@ public class PlayerInventory : MonoBehaviour
 
     void Awake()
     {
+        // 기본 주머니 칸 보장 — 가방 미장착이어도 baseline 공간(0이면 5×4로). 가방 장착 시 확장.
+        if (pocketWidth <= 0) pocketWidth = 5;
+        if (pocketHeight <= 0) pocketHeight = 4;
         Grid = new InventoryGrid(pocketWidth, pocketHeight);
 
         health = GetComponent<Health>();
