@@ -25,6 +25,19 @@ public class ShopData : ScriptableObject
     [Tooltip("이 상점에서 위탁 거래 가능 여부. 전당포만 true")]
     public bool allowConsignment = false;
 
+    [System.Serializable]
+    public class WantedItem
+    {
+        public ItemData item;
+        [Tooltip("수배 매입가 배율 = SellPrice × premium")]
+        [Range(1f, 4f)] public float premium = 2f;
+        [Tooltip("이 수배로 매입할 남은 수량")]
+        public int remaining = 3;
+    }
+
+    [Header("수배(매입 의뢰) — 상점별")]
+    public List<WantedItem> wanted = new List<WantedItem>();
+
     /// <summary>플레이어가 이 아이템을 살 때 가격 (0이면 구매 불가).</summary>
     public int BuyPrice(ItemData item)
     {
@@ -38,4 +51,14 @@ public class ShopData : ScriptableObject
         if (item == null || item.sellPrice <= 0) return 0;
         return Mathf.Max(1, Mathf.RoundToInt(item.sellPrice * sellRate));
     }
+
+    /// <summary>수배 매입가 = SellPrice(sellRate 반영) × premium. (0이면 불가)</summary>
+    public int WantedPrice(WantedItem w)
+    {
+        if (w == null || w.item == null || w.item.sellPrice <= 0) return 0;
+        return Mathf.Max(1, Mathf.RoundToInt(w.item.sellPrice * sellRate * w.premium));
+    }
+
+    /// <summary>매입 가능한 수배 항목이 하나라도 있는가.</summary>
+    public bool HasWanted => wanted != null && wanted.Exists(w => w != null && w.item != null && w.remaining > 0);
 }

@@ -22,3 +22,10 @@ MonoBehaviour:
   buyRate: 1
   sellRate: 0.6
   allowConsignment: 1
+  wanted:
+  - item: {fileID: 11400000, guid: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6, type: 2}
+    premium: 2
+    remaining: 3
+  - item: {fileID: 11400000, guid: dcff95c536f0bed43bd685d3fce684ba, type: 2}
+    premium: 2
+    remaining: 3

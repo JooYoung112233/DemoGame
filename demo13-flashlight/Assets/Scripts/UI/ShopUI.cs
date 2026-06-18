@@ -90,15 +90,23 @@ public class ShopUI : MonoBehaviour
         new ConsignSlot(), new ConsignSlot(), new ConsignSlot()
     };
 
-    bool            consignMode;          // true면 본문이 위탁 뷰
+    enum ShopTab { Trade, Consign, Wanted }
+    ShopTab         currentTab = ShopTab.Trade;
+    bool            consignMode => currentTab == ShopTab.Consign;  // 위탁 슬롯 폴링용
+    GameObject      tabBar;               // 탭 버튼 컨테이너 (전부 숨길 때 사용)
     GameObject      tradeBody;            // 구매/판매 3컬럼 본문
     GameObject      consignBody;          // 위탁 본문
+    GameObject      wantedBody;           // 수배 본문
     Text            tabTradeLabel;
     Text            tabConsignLabel;
+    Text            tabWantedLabel;
     Image           tabTradeBg;
     Image           tabConsignBg;
+    Image           tabWantedBg;
     RectTransform   consignSellList;      // 좌: 가방 판매가능 아이템 목록
     Text            consignSellEmpty;
+    RectTransform   wantedList;           // 수배 행 목록
+    Text            wantedEmpty;
     readonly Image[] consignSlotBg     = new Image[CONSIGN_SLOTS];
     readonly Text[]  consignSlotTitle  = new Text[CONSIGN_SLOTS];
     readonly Text[]  consignSlotStatus = new Text[CONSIGN_SLOTS];
@@ -133,9 +141,21 @@ public class ShopUI : MonoBehaviour
         stashGrid = stash != null ? stash.GetGrid() : null;
         panel.SetActive(true);
         ClearSelection();
-        if (tabConsignBg != null) tabConsignBg.gameObject.SetActive(shop.allowConsignment);  // 위탁 = 전당포만
-        SetConsignMode(false);
+        UpdateTabVisibility();
+        SetTab(ShopTab.Trade);   // 항상 거래 뷰로 시작
         RefreshAll();
+    }
+
+    /// <summary>탭(위탁/수배) 가시성 갱신. 둘 다 없으면 탭 바 전체를 숨긴다.</summary>
+    void UpdateTabVisibility()
+    {
+        bool consign = shop != null && shop.allowConsignment;   // 위탁 = 전당포만
+        bool wanted  = shop != null && shop.HasWanted;
+        if (tabConsignBg != null) tabConsignBg.gameObject.SetActive(consign);
+        if (tabWantedBg  != null) tabWantedBg.gameObject.SetActive(wanted);
+        // 위탁/수배가 하나라도 있어야 탭 바(거래 탭 포함)를 보인다.
+        bool showBar = consign || wanted;
+        if (tabBar != null) tabBar.SetActive(showBar);
     }
 
     // ── 위탁 슬롯 완료 체크 (MonoBehaviour Update) ────────────
@@ -227,15 +247,18 @@ public class ShopUI : MonoBehaviour
         tradeResultText.color = col;
     }
 
-    // ── 위탁 ─────────────────────────────────────────────────
-    void SetConsignMode(bool on)
+    // ── 탭 전환 (거래/위탁/수배) ──────────────────────────────
+    void SetTab(ShopTab tab)
     {
-        consignMode = on;
-        if (tradeBody   != null) tradeBody.SetActive(!on);
-        if (consignBody != null) consignBody.SetActive(on);
-        if (tabTradeBg   != null) tabTradeBg.color   = on ? C_TAB_OFF : C_TAB_ON;
-        if (tabConsignBg != null) tabConsignBg.color = on ? C_TAB_ON  : C_TAB_OFF;
-        if (on) RefreshConsign();
+        currentTab = tab;
+        if (tradeBody   != null) tradeBody.SetActive(tab == ShopTab.Trade);
+        if (consignBody != null) consignBody.SetActive(tab == ShopTab.Consign);
+        if (wantedBody  != null) wantedBody.SetActive(tab == ShopTab.Wanted);
+        if (tabTradeBg   != null) tabTradeBg.color   = tab == ShopTab.Trade   ? C_TAB_ON : C_TAB_OFF;
+        if (tabConsignBg != null) tabConsignBg.color = tab == ShopTab.Consign ? C_TAB_ON : C_TAB_OFF;
+        if (tabWantedBg  != null) tabWantedBg.color  = tab == ShopTab.Wanted  ? C_TAB_ON : C_TAB_OFF;
+        if (tab == ShopTab.Consign) RefreshConsign();
+        if (tab == ShopTab.Wanted)  RefreshWanted();
     }
 
     /// <summary>가방의 판매가능 아이템 1개를 빈 위탁 슬롯에 올린다(그리드에서 1개 제거).</summary>
@@ -745,6 +768,162 @@ public class ShopUI : MonoBehaviour
         }
     }
 
+    // ── 수배 남은 수량 = 런타임 전용(에셋 미수정·세이브 안 함, 위탁 슬롯과 동일 원칙). key=shopId:index ──
+    static readonly Dictionary<string, int> wantedRemainRuntime = new Dictionary<string, int>();
+
+    int WantedRemaining(int index)
+    {
+        if (shop == null || shop.wanted == null || index < 0 || index >= shop.wanted.Count) return 0;
+        string key = shop.shopId + ":" + index;
+        if (!wantedRemainRuntime.TryGetValue(key, out int r))
+        {
+            r = Mathf.Max(0, shop.wanted[index].remaining);   // SO의 remaining = 초기값(런타임에 복사)
+            wantedRemainRuntime[key] = r;
+        }
+        return r;
+    }
+
+    void SpendWanted(int index)
+    {
+        if (shop == null) return;
+        string key = shop.shopId + ":" + index;
+        wantedRemainRuntime[key] = Mathf.Max(0, WantedRemaining(index) - 1);
+    }
+
+    // ── 수배 뷰 갱신 ──────────────────────────────────────────
+    void RefreshWanted()
+    {
+        if (wantedList == null) return;
+        ClearChildren(wantedList);
+
+        int count = 0;
+        if (shop != null && shop.wanted != null)
+        {
+            for (int i = 0; i < shop.wanted.Count; i++)
+            {
+                var w = shop.wanted[i];
+                if (w == null || w.item == null) continue;
+                int remain = WantedRemaining(i);
+                if (remain <= 0) continue;
+                int price = shop.WantedPrice(w);
+                if (price <= 0) continue;
+                int idx = i;   // 클로저 캡처
+                AddWantedRow(wantedList, w, price, remain, () => SellWanted(idx));
+                count++;
+            }
+        }
+        SetActive(wantedEmpty, count == 0);
+    }
+
+    /// <summary>가방에서 지정 ItemData와 같은 첫 PlacedItem을 찾는다(없으면 null).</summary>
+    InventoryGrid.PlacedItem FindInStash(ItemData data)
+    {
+        if (stashGrid == null || data == null) return null;
+        foreach (var placed in stashGrid.GetAll())
+        {
+            if (placed?.item?.data == data) return placed;
+        }
+        return null;
+    }
+
+    /// <summary>수배 항목(인덱스)을 1개 매입: 가방에서 1개 제거 + 스크랩 지급 + 런타임 남은수량 감소.</summary>
+    void SellWanted(int index)
+    {
+        if (shop == null || stashGrid == null || shop.wanted == null) return;
+        if (index < 0 || index >= shop.wanted.Count) return;
+        var w = shop.wanted[index];
+        if (w == null || w.item == null) return;
+        if (WantedRemaining(index) <= 0) return;
+
+        var placed = FindInStash(w.item);
+        if (placed == null)
+        {
+            ToastManager.Show("가방에 해당 물건이 없다", ToastManager.ToastType.Warning);
+            return;
+        }
+        int price = shop.WantedPrice(w);
+        if (price <= 0) return;
+
+        // 1개 제거 (스택이면 수량 감소, 마지막이면 PlacedItem 제거)
+        if (placed.item.stackCount > 1)
+        {
+            placed.item.stackCount -= 1;
+            stashGrid.NotifyChanged();
+        }
+        else
+        {
+            stashGrid.Remove(placed);
+        }
+
+        string name = w.item.displayName;
+        CurrencyManager.Instance?.Add(price, $"수배 매입: {name}");
+        SpendWanted(index);   // 런타임 남은수량 감소(에셋 미수정)
+        // TODO 평판: 수배 매입 시 평판 보너스 (현재는 그레이박스 — 프리미엄가만)
+
+        // 수배 뷰에선 tradeBody(결과 텍스트)가 비활성 → 토스트로 피드백.
+        ToastManager.Show($"{name} 수배 매입 (+◈{price:N0})", ToastManager.ToastType.Success);
+        UpdateBalance();
+        RefreshWanted();
+    }
+
+    void AddWantedRow(RectTransform parent, ShopData.WantedItem w, int price, int remaining, System.Action onSell)
+    {
+        var data = w.item;
+        var row  = MakeRect("Row", parent.transform);
+        var rowRT = row.GetComponent<RectTransform>();
+        rowRT.sizeDelta = new Vector2(0, 44);
+        var le = row.AddComponent<LayoutElement>();
+        le.preferredHeight = 44;
+        le.minHeight       = 44;
+        row.AddComponent<Image>().color = C_CELL;
+
+        // 희귀도 좌 막대
+        var rarBar = MakeRect("RarBar", row.transform);
+        var rarRT  = rarBar.GetComponent<RectTransform>();
+        rarRT.anchorMin = new Vector2(0, 0); rarRT.anchorMax = new Vector2(0, 1);
+        rarRT.offsetMin = Vector2.zero;      rarRT.offsetMax = new Vector2(3, 0);
+        rarBar.AddComponent<Image>().color = data.RarityColor;
+
+        bool has = FindInStash(data) != null;
+
+        // 이름 (좌)
+        var nameGO = MakeRect("Name", row.transform);
+        var nameRT = nameGO.GetComponent<RectTransform>();
+        nameRT.anchorMin = new Vector2(0, 0); nameRT.anchorMax = new Vector2(0.42f, 1);
+        nameRT.offsetMin = new Vector2(10, 0); nameRT.offsetMax = Vector2.zero;
+        AddText(nameGO, data.displayName, 14, TextAnchor.MiddleLeft, has ? Color.white : C_MUTED);
+
+        // 매입가 (중)
+        var priceGO = MakeRect("Price", row.transform);
+        var priceRT = priceGO.GetComponent<RectTransform>();
+        priceRT.anchorMin = new Vector2(0.42f, 0); priceRT.anchorMax = new Vector2(0.66f, 1);
+        priceRT.offsetMin = Vector2.zero; priceRT.offsetMax = Vector2.zero;
+        AddText(priceGO, $"매입가 ◈{price:N0}", 13, TextAnchor.MiddleCenter, C_GOLD);
+
+        // 남은 수량 (중우)
+        var remGO = MakeRect("Remaining", row.transform);
+        var remRT = remGO.GetComponent<RectTransform>();
+        remRT.anchorMin = new Vector2(0.66f, 0); remRT.anchorMax = new Vector2(0.84f, 1);
+        remRT.offsetMin = Vector2.zero; remRT.offsetMax = Vector2.zero;
+        AddText(remGO, $"남은 {remaining}개", 13, TextAnchor.MiddleCenter, C_MUTED);
+
+        // 팔기 버튼 (우)
+        var btnGO = MakeRect("SellBtn", row.transform);
+        var btnRT = btnGO.GetComponent<RectTransform>();
+        btnRT.anchorMin = new Vector2(0.84f, 0.5f); btnRT.anchorMax = new Vector2(0.84f, 0.5f);
+        btnRT.pivot     = new Vector2(0, 0.5f);
+        btnRT.anchoredPosition = new Vector2(6, 0);
+        btnRT.sizeDelta = new Vector2(64, 34);
+        var btnBg = btnGO.AddComponent<Image>();
+        btnBg.color = has ? C_SELL_BTN : C_DIM;
+        var btn = btnGO.AddComponent<Button>();
+        btn.targetGraphic = btnBg;
+        btn.interactable  = has;
+        if (has) btn.onClick.AddListener(() => onSell?.Invoke());
+        AddText(btnGO.GetComponent<RectTransform>(), "팔기", 14, TextAnchor.MiddleCenter,
+                has ? Color.white : C_MUTED);
+    }
+
     void AddInvCell(RectTransform parent, InventoryGrid.PlacedItem placed, bool selected, System.Action onClick)
     {
         var data   = placed.item.data;
@@ -882,7 +1061,63 @@ public class ShopUI : MonoBehaviour
         BuildConsignView(cbody.transform);
         cbody.SetActive(false);
 
+        // ── 수배 뷰 (거래 뷰와 같은 영역, 탭으로 전환) ──────
+        var wbody = MakeRect("WantedBody", panel.transform);
+        SetAnchors(wbody, Vector2.zero, Vector2.one);
+        var wbodyRT = wbody.GetComponent<RectTransform>();
+        wbodyRT.offsetMin = new Vector2(0,    0);
+        wbodyRT.offsetMax = new Vector2(0, -72);
+        wantedBody = wbody;
+        BuildWantedView(wbody.transform);
+        wbody.SetActive(false);
+
         panel.SetActive(false);
+    }
+
+    // ── 수배 뷰 빌드 ──────────────────────────────────────────
+    void BuildWantedView(Transform parent)
+    {
+        var box = MakeRect("WantedBox", parent);
+        SetAnchors(box, new Vector2(0, 0), new Vector2(1, 1));
+        var boxRT = box.GetComponent<RectTransform>();
+        boxRT.offsetMin = new Vector2(8, 8);
+        boxRT.offsetMax = new Vector2(-8, -8);
+        box.AddComponent<Image>().color = C_PANEL;
+
+        var header = MakeRect("Header", box.transform);
+        SetAnchors(header, new Vector2(0, 1), new Vector2(1, 1));
+        var hRT = header.GetComponent<RectTransform>();
+        hRT.pivot     = new Vector2(0.5f, 1);
+        hRT.sizeDelta = new Vector2(0, 36);
+        header.AddComponent<Image>().color = C_HEADER;
+        var hTextGO = MakeRect("HeaderText", header.transform);
+        var hTextRT = hTextGO.GetComponent<RectTransform>();
+        hTextRT.anchorMin = Vector2.zero; hTextRT.anchorMax = Vector2.one;
+        hTextRT.offsetMin = new Vector2(12, 0); hTextRT.offsetMax = Vector2.zero;
+        var hText = hTextGO.AddComponent<Text>();
+        ConfigureText(hText, "수배 — 지정 물품 고가 매입", 15, TextAnchor.MiddleLeft, Color.white);
+        hText.fontStyle = FontStyle.Bold;
+
+        BuildScrollArea(box.transform, out wantedList, 36);
+        var vlg = wantedList.gameObject.AddComponent<VerticalLayoutGroup>();
+        vlg.padding       = new RectOffset(8, 8, 8, 8);
+        vlg.spacing       = 4;
+        vlg.childAlignment = TextAnchor.UpperLeft;
+        vlg.childControlWidth  = true;
+        vlg.childControlHeight = false;
+        vlg.childForceExpandWidth  = true;
+        vlg.childForceExpandHeight = false;
+        var csf = wantedList.gameObject.AddComponent<ContentSizeFitter>();
+        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        wantedEmpty = MakeRect("EmptyHint", box.transform).AddComponent<Text>();
+        ConfigureText(wantedEmpty, "현재 수배 중인 물품이 없습니다.", 13, TextAnchor.MiddleCenter, C_MUTED);
+        SetAnchors(wantedEmpty.gameObject, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+        var weRT = wantedEmpty.GetComponent<RectTransform>();
+        weRT.sizeDelta = new Vector2(300, 60);
+        weRT.anchoredPosition = Vector2.zero;
+        wantedEmpty.horizontalOverflow = HorizontalWrapMode.Wrap;
+        wantedEmpty.gameObject.SetActive(false);
     }
 
     // ── 위탁 뷰 빌드 ──────────────────────────────────────────
@@ -1087,9 +1322,16 @@ public class ShopUI : MonoBehaviour
         ConfigureText(closeTxt, "✕", 22, TextAnchor.MiddleCenter, Color.white);
         closeTxt.fontStyle = FontStyle.Bold;
 
-        // ── 탭: 거래 / 위탁 (중앙) ──────────────────────────
-        BuildTab(bar.transform, "거래",  -84, out tabTradeBg,   out tabTradeLabel,   () => SetConsignMode(false));
-        BuildTab(bar.transform, "위탁",   84, out tabConsignBg, out tabConsignLabel, () => SetConsignMode(true));
+        // ── 탭: 거래 / 위탁 / 수배 (중앙) ────────────────────
+        // 탭 바 컨테이너 — 위탁/수배가 둘 다 없으면 통째로 숨긴다.
+        var tabBarGO = MakeRect("TabBar", bar.transform);
+        SetAnchors(tabBarGO, Vector2.zero, Vector2.one);
+        var tabBarRT = tabBarGO.GetComponent<RectTransform>();
+        tabBarRT.offsetMin = Vector2.zero; tabBarRT.offsetMax = Vector2.zero;
+        tabBar = tabBarGO;
+        BuildTab(tabBarGO.transform, "거래", -150, out tabTradeBg,   out tabTradeLabel,   () => SetTab(ShopTab.Trade));
+        BuildTab(tabBarGO.transform, "위탁",    0, out tabConsignBg, out tabConsignLabel, () => SetTab(ShopTab.Consign));
+        BuildTab(tabBarGO.transform, "수배",  150, out tabWantedBg,  out tabWantedLabel,  () => SetTab(ShopTab.Wanted));
     }
 
     void BuildTab(Transform parent, string label, float centerOffsetX, out Image bg, out Text txt, System.Action onClick)
