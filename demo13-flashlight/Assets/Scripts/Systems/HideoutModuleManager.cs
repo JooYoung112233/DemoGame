@@ -9,7 +9,7 @@ using UnityEngine;
 public class HideoutModuleManager : MonoBehaviour
 {
     public static HideoutModuleManager Instance { get; private set; }
-    public const int MaxLevel = 3;
+    public const int MaxLevel = 10;   // 시설 최대 10렙 (표는 Lv1~3, 이후는 공식으로 비용 산출)
 
     public struct Cost { public int scrap; public (string id, int qty)[] mats; }
 
@@ -69,8 +69,17 @@ public class HideoutModuleManager : MonoBehaviour
     {
         int lv = GetLevel(m);
         if (lv >= MaxLevel) return null;
-        if (!Table.TryGetValue(m, out var arr) || lv >= arr.Length) return null;
-        return arr[lv];
+        if (!Table.TryGetValue(m, out var arr) || arr.Length == 0) return null;
+        if (lv < arr.Length) return arr[lv];
+
+        // 표(Lv1~3) 초과 → 마지막 비용을 레벨에 비례 스케일 (Lv4~10)
+        var last = arr[arr.Length - 1];
+        int over = lv - arr.Length + 1;                  // Lv3→Lv4 업글 시 lv=3 → over=1
+        int scrap = Mathf.RoundToInt(last.scrap * Mathf.Pow(1.6f, over));
+        var mats = new (string id, int qty)[last.mats.Length];
+        for (int i = 0; i < last.mats.Length; i++)
+            mats[i] = (last.mats[i].id, Mathf.Max(1, Mathf.RoundToInt(last.mats[i].qty * (1f + 0.5f * over))));
+        return new Cost { scrap = scrap, mats = mats };
     }
 
     /// <summary>업그레이드 가능 여부 + 불가 사유.</summary>
