@@ -44,7 +44,8 @@ public class HideoutController : MonoBehaviour
     bool _hadFollow, _prevFollowEnabled;
     InteractionSystem _interaction;
     bool _prevInteractionEnabled;
-    readonly List<SpriteRenderer> _hiddenSprites = new List<SpriteRenderer>();
+    // SpriteRenderer + Spine MeshRenderer 등 모든 렌더러를 함께 숨긴다 (Spine 캐릭터는 MeshRenderer)
+    readonly List<Renderer> _hiddenRenderers = new List<Renderer>();
     readonly List<Light2D> _hiddenLights = new List<Light2D>();
 
     GameObject _uiRoot;
@@ -71,8 +72,8 @@ public class HideoutController : MonoBehaviour
             _hadPlayer = true;
             _prevCanMove = _player.CanMove;
             _player.SetCanMove(false);
-            foreach (var sr in _player.GetComponentsInChildren<SpriteRenderer>(true))
-                if (sr.enabled) { sr.enabled = false; _hiddenSprites.Add(sr); }
+            foreach (var r in _player.GetComponentsInChildren<Renderer>(true))
+                if (r.enabled) { r.enabled = false; _hiddenRenderers.Add(r); }
             foreach (var lt in _player.GetComponentsInChildren<Light2D>(true))
                 if (lt.enabled) { lt.enabled = false; _hiddenLights.Add(lt); }
         }
@@ -156,7 +157,7 @@ public class HideoutController : MonoBehaviour
     {
         IsActive = false;
         if (_hadPlayer && _player != null) _player.SetCanMove(_prevCanMove);
-        foreach (var sr in _hiddenSprites) if (sr != null) sr.enabled = true;
+        foreach (var r in _hiddenRenderers) if (r != null) r.enabled = true;
         foreach (var lt in _hiddenLights) if (lt != null) lt.enabled = true;
         if (_interaction != null) _interaction.enabled = _prevInteractionEnabled;
         if (_systemsGlobal != null)                                    // 글로벌 라이트 원복(밝기/색)

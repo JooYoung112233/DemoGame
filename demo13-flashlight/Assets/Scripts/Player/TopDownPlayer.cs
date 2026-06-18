@@ -1,4 +1,5 @@
 using UnityEngine;
+using Spine.Unity;
 
 /// <summary>
 /// 탑다운 2D 플레이어 — WASD 8방향 이동 + 마우스 조준 + 근접 전투(약/강공격, 구르기) + 스태미너.
@@ -17,6 +18,8 @@ public class TopDownPlayer : MonoBehaviour
     // ── 인스펙터 ─────────────────────────────────────────────────────
     [Header("비주얼")]
     [SerializeField] SpriteRenderer spriteRenderer;
+    [Tooltip("Spine 캐릭터(있으면 SpriteRenderer 대신 이걸로 좌우 플립 + 이동/전투 애니 구동)")]
+    [SerializeField] SkeletonAnimation skeletonAnimation;
     [SerializeField] bool flipByMouse = true;
 
     [Header("시야 라이트 (부채꼴, 앞 방향)")]
@@ -151,6 +154,8 @@ public class TopDownPlayer : MonoBehaviour
 
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (skeletonAnimation == null)
+            skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
         _cam = Camera.main;
 
         _stamina = MaxStam;
@@ -235,6 +240,7 @@ public class TopDownPlayer : MonoBehaviour
         UpdateCombatTimers();
         UpdateStamina();
         UpdateSprint(_uiOpen);
+        UpdateSkeletonAnimation();
 
         // 구르기 무적 → 허트박스 비활성 (피격 안 됨)
         if (_hurtbox != null) _hurtbox.SetActive(!IsInvincible);
@@ -288,9 +294,56 @@ public class TopDownPlayer : MonoBehaviour
 
     void UpdateFlip()
     {
-        if (!flipByMouse || spriteRenderer == null) return;
-        if (Mathf.Abs(FacingDirection.x) > 0.01f)
-            spriteRenderer.flipX = FacingDirection.x < 0f;
+        if (!flipByMouse) return;
+        if (Mathf.Abs(FacingDirection.x) <= 0.01f) return;
+        bool faceLeft = FacingDirection.x < 0f;
+
+        // Spine 우선 — 스켈레톤 X스케일 부호로 미러링
+        if (skeletonAnimation != null && skeletonAnimation.Skeleton != null)
+            skeletonAnimation.Skeleton.ScaleX = faceLeft ? -1f : 1f;
+        else if (spriteRenderer != null)
+            spriteRenderer.flipX = faceLeft;
+    }
+
+    // ── Spine 애니메이션 구동 ────────────────────────────────────────
+    Spine.AnimationState _spineState;
+    string _curAnim = "<init>";
+
+    /// <summary>이동/전투 상태에 맞춰 Spine 트랙0 애니를 전환. (idle 애니 없음 → 정지 시 셋업 포즈)</summary>
+    void UpdateSkeletonAnimation()
+    {
+        if (skeletonAnimation == null) return;
+        if (_spineState == null)
+        {
+            _spineState = skeletonAnimation.AnimationState;
+            if (_spineState == null) return;
+        }
+
+        string target; bool loop = true;
+        switch (_state)
+        {
+            case CombatState.Dodge:
+                target = HasAnim("roll") ? "roll" : "run"; loop = false; break;
+            case CombatState.LightAttack:
+            case CombatState.HeavyRelease:
+                target = HasAnim("attack") ? "attack" : "run"; loop = false; break;
+            default:
+                if (IsMoving) target = (IsSprinting && HasAnim("run")) ? "run" : "walk";
+                else          target = null;   // 정지 = 셋업 포즈
+                break;
+        }
+
+        if (target == _curAnim) return;
+        _curAnim = target;
+        if (string.IsNullOrEmpty(target)) _spineState.SetEmptyAnimation(0, 0.12f);
+        else                              _spineState.SetAnimation(0, target, loop);
+    }
+
+    bool HasAnim(string name)
+    {
+        var data = skeletonAnimation != null && skeletonAnimation.Skeleton != null
+            ? skeletonAnimation.Skeleton.Data : null;
+        return data != null && data.FindAnimation(name) != null;
     }
 
     void UpdateVisionLight()

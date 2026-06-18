@@ -1008,7 +1008,10 @@ public class CharacterPanelUI : MonoBehaviour
             float max = playerInventory.MaxWeight;
             Color wc = cur > max ? new Color(1f, 0.3f, 0.3f) : new Color(0.7f, 0.8f, 0.9f);
             invWeightText.color = wc;
-            invWeightText.text = $"무게: {cur:F1} / {max:F0} kg  |  아이템: {playerInventory.Grid.ItemCount}개";
+            int itemCount = (playerInventory.Grid != null ? playerInventory.Grid.ItemCount : 0)
+                + (playerInventory.PocketsGrid != null ? playerInventory.PocketsGrid.ItemCount : 0)
+                + (playerInventory.SecureGrid != null ? playerInventory.SecureGrid.ItemCount : 0);
+            invWeightText.text = $"무게: {cur:F1} / {max:F0} kg  |  아이템: {itemCount}개";
         }
     }
 

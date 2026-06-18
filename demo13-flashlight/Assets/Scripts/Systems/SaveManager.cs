@@ -126,6 +126,8 @@ public class SaveManager : MonoBehaviour
         {
             var inv = playerGO.GetComponent<PlayerInventory>();
             if (inv != null && inv.Grid != null) data.bagItems = inv.Grid.GetSaveData();
+            if (inv != null && inv.PocketsGrid != null) data.pocketItems = inv.PocketsGrid.GetSaveData();
+            if (inv != null && inv.SecureGrid != null) data.secureItems = inv.SecureGrid.GetSaveData();
             var eq = playerGO.GetComponent<PlayerEquipment>();
             if (eq != null) data.equippedWeapon = eq.GetSaveData();
             var survival = SurvivalStats.Get();
@@ -274,6 +276,10 @@ public class SaveManager : MonoBehaviour
             var inv = playerGO.GetComponent<PlayerInventory>();
             if (inv != null && inv.Grid != null && data.bagItems != null)
                 inv.Grid.LoadSaveData(data.bagItems);
+            if (inv != null && inv.PocketsGrid != null && data.pocketItems != null)
+                inv.PocketsGrid.LoadSaveData(data.pocketItems);
+            if (inv != null && inv.SecureGrid != null && data.secureItems != null)
+                inv.SecureGrid.LoadSaveData(data.secureItems);
 
             if (data.survival != null) SurvivalStats.Get()?.LoadSaveData(data.survival);
         }
@@ -407,6 +413,8 @@ public class GameSaveData
 
     // 인벤토리(가방) + 장착 무기
     public List<GridItemEntry> bagItems = new List<GridItemEntry>();
+    public List<GridItemEntry> pocketItems = new List<GridItemEntry>();   // 주머니 4칸
+    public List<GridItemEntry> secureItems = new List<GridItemEntry>();   // 보안 컨테이너 3×3
     public string equippedWeapon;
 
     // 생존 스탯 (수분/포만감)

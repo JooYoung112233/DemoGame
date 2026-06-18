@@ -8,15 +8,17 @@ using UnityEngine;
 /// </summary>
 public class PlayerInventory : MonoBehaviour
 {
-    [Header("주머니 (가방 미장착 시)")]
-    [SerializeField] int pocketWidth = 0;
-    [SerializeField] int pocketHeight = 0;
-
     [Header("무게")]
     [SerializeField] float maxWeight = 30f;
 
-    public InventoryGrid Grid { get; private set; }
+    public InventoryGrid Grid { get; private set; }          // 가방(백팩) — 장착 시 그 크기, 미장착 0×0
+    public InventoryGrid PocketsGrid { get; private set; }   // 주머니 4칸 (고정, 항상 존재)
+    public InventoryGrid SecureGrid { get; private set; }    // 보안 컨테이너 3×3 (고정, 항상 존재)
     public float MaxWeight => maxWeight;
+
+    // 고정 컨테이너 크기 (가로 기준)
+    const int PocketW = 4, PocketH = 1;
+    const int SecureW = 3, SecureH = 3;
 
     /// <summary>인벤토리 아이템 + 장비 무게 합산</summary>
     public float CurrentWeight
@@ -24,6 +26,8 @@ public class PlayerInventory : MonoBehaviour
         get
         {
             float w = Grid != null ? Grid.TotalWeight : 0f;
+            if (PocketsGrid != null) w += PocketsGrid.TotalWeight;
+            if (SecureGrid != null) w += SecureGrid.TotalWeight;
             if (equipment != null) w += equipment.TotalEquipWeight;
             return w;
         }
@@ -39,10 +43,10 @@ public class PlayerInventory : MonoBehaviour
 
     void Awake()
     {
-        // 기본 주머니 칸 보장 — 가방 미장착이어도 baseline 공간(0이면 5×4로). 가방 장착 시 확장.
-        if (pocketWidth <= 0) pocketWidth = 5;
-        if (pocketHeight <= 0) pocketHeight = 4;
-        Grid = new InventoryGrid(pocketWidth, pocketHeight);
+        // 다중 컨테이너: 가방(미장착=0×0) + 고정 주머니 4칸 + 고정 보안 3×3.
+        Grid = new InventoryGrid(0, 0);
+        PocketsGrid = new InventoryGrid(PocketW, PocketH);
+        SecureGrid = new InventoryGrid(SecureW, SecureH);
 
         health = GetComponent<Health>();
         medical = GetComponent<PlayerMedicalSystem>();
@@ -61,8 +65,8 @@ public class PlayerInventory : MonoBehaviour
         }
         else
         {
-            newW = pocketWidth;
-            newH = pocketHeight;
+            newW = 0;   // 가방 미장착 = 가방 격자 0×0 (주머니는 별도 PocketsGrid 전담)
+            newH = 0;
         }
 
         if (Grid.width == newW && Grid.height == newH) return;
@@ -101,12 +105,10 @@ public class PlayerInventory : MonoBehaviour
     public bool TryPickup(ItemInstance item)
     {
         if (item == null || item.data == null) return false;
-        if (!HasBackpack)
-        {
-            Debug.Log("[Inventory] 가방 미장착 — 아이템 줍기 불가");
-            return false;
-        }
-        return Grid.TryAutoPlace(item);
+        if (HasBackpack && Grid.TryAutoPlace(item)) return true;   // 가방 우선
+        if (PocketsGrid != null && PocketsGrid.TryAutoPlace(item)) return true;  // 주머니 차선
+        Debug.Log("[Inventory] 공간 부족 (가방·주머니)");
+        return false;
     }
 
     /// <summary>아이템 사용 (우클릭)</summary>
@@ -192,17 +194,18 @@ public class PlayerInventory : MonoBehaviour
 
         if (used)
         {
+            var g = GridOf(placed) ?? Grid;   // placed가 속한 격자(가방/주머니/보안)에서 처리
             if (item.HasDurability)
             {
                 item.durability -= item.data.durabilityCostPerUse;
                 if (item.durability <= 0f)
                 {
-                    Grid.Remove(placed);
+                    g.Remove(placed);
                     Debug.Log($"[Inventory] {item.data.displayName} 내구도 소진 → 파괴");
                 }
                 else
                 {
-                    Grid.NotifyChanged();
+                    g.NotifyChanged();
                     Debug.Log($"[Inventory] {item.data.displayName} 사용 (내구도: {item.durability:F0}/{item.data.maxDurability:F0})");
                 }
             }
@@ -210,9 +213,9 @@ public class PlayerInventory : MonoBehaviour
             {
                 item.stackCount--;
                 if (item.stackCount <= 0)
-                    Grid.Remove(placed);
+                    g.Remove(placed);
                 else
-                    Grid.NotifyChanged();
+                    g.NotifyChanged();
 
                 Debug.Log($"[Inventory] {item.data.displayName} 사용");
             }
@@ -226,8 +229,60 @@ public class PlayerInventory : MonoBehaviour
     {
         if (placed == null) return;
 
-        Grid.Remove(placed);
+        (GridOf(placed) ?? Grid).Remove(placed);
         WorldItem.Drop(placed.item, transform.position + transform.right * 0.5f);
         Debug.Log($"[Inventory] {placed.item.DisplayName} 드롭");
+    }
+
+    // ── 다중 컨테이너 집계 API (가방 + 주머니 + 보안) ───────────────
+    InventoryGrid[] AllGrids => new[] { Grid, PocketsGrid, SecureGrid };
+
+    /// <summary>placed가 속한 격자(가방/주머니/보안) 반환.</summary>
+    public InventoryGrid GridOf(InventoryGrid.PlacedItem placed)
+    {
+        if (placed == null) return null;
+        foreach (var g in AllGrids)
+            if (g != null && g.GetAll().Contains(placed)) return g;
+        return null;
+    }
+
+    /// <summary>가방+주머니+보안 합산 아이템 수.</summary>
+    public int CountItemAll(string itemId)
+    {
+        int n = 0;
+        foreach (var g in AllGrids) if (g != null) n += g.CountItem(itemId);
+        return n;
+    }
+
+    /// <summary>전 컨테이너에서 아이템 소비(부족하면 false, 소비 안 함).</summary>
+    public bool ConsumeItemAll(string itemId, int count)
+    {
+        if (CountItemAll(itemId) < count) return false;
+        int remaining = count;
+        foreach (var g in AllGrids)
+        {
+            if (g == null || remaining <= 0) continue;
+            int take = Mathf.Min(g.CountItem(itemId), remaining);
+            if (take > 0) { g.ConsumeItem(itemId, take); remaining -= take; }
+        }
+        return remaining <= 0;
+    }
+
+    /// <summary>가방→주머니→보안 순으로 자동 배치 시도.</summary>
+    public bool TryAutoPlaceAnywhere(ItemInstance item)
+    {
+        if (item == null) return false;
+        if (HasBackpack && Grid.TryAutoPlace(item)) return true;
+        if (PocketsGrid != null && PocketsGrid.TryAutoPlace(item)) return true;
+        if (SecureGrid != null && SecureGrid.TryAutoPlace(item)) return true;
+        return false;
+    }
+
+    /// <summary>아무 컨테이너에든 배치 가능한지(공간 체크).</summary>
+    public bool CanPlaceAnywhere(ItemInstance item)
+    {
+        if (item == null) return false;
+        foreach (var g in AllGrids) if (g != null && g.CanAutoPlace(item)) return true;
+        return false;
     }
 }

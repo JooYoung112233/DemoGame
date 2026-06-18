@@ -217,12 +217,15 @@ public class RaidManager : MonoBehaviour
 
         Debug.Log("[RaidManager] 플레이어 사망 — 레이드 실패");
 
-        // 가방 손실
+        // 사망 손실: 가방·주머니 내용물 전부 + 가방 아이템 자체. 보안 컨테이너는 보존(타르코프식).
         var inventory = FindPlayerInventory();
         if (inventory != null)
         {
-            int lost = ApplyItemLoss(inventory, deathLossRate);
-            Debug.Log($"[RaidManager] 사망 아이템 손실: {lost}개");
+            int lost = ApplyItemLoss(inventory, deathLossRate);   // 가방+주머니 내용물(보안 제외)
+            // 가방 아이템 자체도 손실 (내용물 비운 뒤 해제 → 스태시로 새지 않음)
+            var equip = inventory.GetComponent<PlayerEquipment>();
+            if (equip != null) equip.Unequip(EquipSlot.Backpack);
+            Debug.Log($"[RaidManager] 사망 아이템 손실: {lost}개 + 가방");
         }
 
         // 사망 연출 (붉은 플래시 + 셰이크)
@@ -246,22 +249,24 @@ public class RaidManager : MonoBehaviour
             SceneTransitionManager.Instance.TransitionTo(deathExitScene, deathSpawnPointId);
     }
 
-    /// <summary>인벤토리에서 일부 아이템 랜덤 손실</summary>
+    /// <summary>인벤토리에서 일부 아이템 랜덤 손실. 가방+주머니 대상, **보안 컨테이너는 면제(타르코프식)**.</summary>
     int ApplyItemLoss(PlayerInventory inventory, float lossRate)
     {
-        var items = inventory.Grid.GetAll();
         int lostCount = 0;
-
-        for (int i = items.Count - 1; i >= 0; i--)
-        {
-            if (Random.value < lossRate)
-            {
-                inventory.Grid.Remove(items[i]);
-                lostCount++;
-            }
-        }
-
+        lostCount += LoseFromGrid(inventory.Grid, lossRate);          // 가방 내용물
+        lostCount += LoseFromGrid(inventory.PocketsGrid, lossRate);   // 주머니 내용물
+        // inventory.SecureGrid = 보존(손실 면제)
         return lostCount;
+    }
+
+    static int LoseFromGrid(InventoryGrid grid, float lossRate)
+    {
+        if (grid == null) return 0;
+        var items = grid.GetAll();
+        int n = 0;
+        for (int i = items.Count - 1; i >= 0; i--)
+            if (Random.value < lossRate) { grid.Remove(items[i]); n++; }
+        return n;
     }
 
     PlayerInventory FindPlayerInventory()

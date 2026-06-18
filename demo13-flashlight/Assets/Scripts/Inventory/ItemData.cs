@@ -24,6 +24,7 @@ public enum EquipSlot
     PrimaryWeapon,
     SecondaryWeapon,
     Melee,
+    Special,   // 시계/측정기 등 특수 장비 (좌측 특수창) ※ 끝에 추가(직렬화 인덱스 보존)
 }
 
 /// <summary>

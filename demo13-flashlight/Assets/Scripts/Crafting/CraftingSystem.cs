@@ -123,7 +123,7 @@ public class CraftingSystem : MonoBehaviour
 
         for (int i = 0; i < recipe.ingredients.Length; i++)
         {
-            int have = CountItem(inventory.Grid, recipe.ingredients[i].itemId);
+            int have = inventory.CountItemAll(recipe.ingredients[i].itemId);
             if (have < recipe.ingredients[i].count) return false;
         }
 
@@ -142,15 +142,15 @@ public class CraftingSystem : MonoBehaviour
 
         // 결과물이 인벤에 들어갈 공간이 있는지 사전 체크
         var testItem = new ItemInstance(resultData, recipe.resultCount);
-        if (!inventory.Grid.CanAutoPlace(testItem)) return false;
+        if (!inventory.CanPlaceAnywhere(testItem)) return false;
 
-        // 재료 소모
+        // 재료 소모 (가방+주머니+보안 합산)
         for (int i = 0; i < recipe.ingredients.Length; i++)
-            ConsumeItem(inventory.Grid, recipe.ingredients[i].itemId, recipe.ingredients[i].count);
+            inventory.ConsumeItemAll(recipe.ingredients[i].itemId, recipe.ingredients[i].count);
 
         // 결과물 추가
         var resultItem = new ItemInstance(resultData, recipe.resultCount);
-        inventory.Grid.TryAutoPlace(resultItem);
+        inventory.TryAutoPlaceAnywhere(resultItem);
 
         Debug.Log($"[CraftingSystem] 제작 완료: {resultData.displayName} x{recipe.resultCount}");
         return true;
@@ -188,7 +188,7 @@ public class CraftingSystem : MonoBehaviour
         var cost = GetRepairCost(item);
         if (string.IsNullOrEmpty(cost.materialId)) return false;
 
-        return CountItem(inventory.Grid, cost.materialId) >= cost.count;
+        return inventory.CountItemAll(cost.materialId) >= cost.count;
     }
 
     public bool Repair(ItemInstance item, PlayerInventory inventory)
@@ -196,7 +196,7 @@ public class CraftingSystem : MonoBehaviour
         if (!CanRepair(item, inventory)) return false;
 
         var cost = GetRepairCost(item);
-        ConsumeItem(inventory.Grid, cost.materialId, cost.count);
+        inventory.ConsumeItemAll(cost.materialId, cost.count);
 
         float amount = item.data.maxDurability * REPAIR_AMOUNT;
         item.durability = Mathf.Min(item.durability + amount, item.data.maxDurability);

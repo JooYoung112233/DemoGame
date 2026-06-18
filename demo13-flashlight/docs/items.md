@@ -163,18 +163,32 @@
 
 ---
 
-## 4. 방어구 (Weapon 카테고리 또는 Misc — 장비 슬롯 연동 전까지 Misc)
+## 4. 방어구 (Misc 카테고리 + 장비 슬롯 연동, 2026-06-18)
 
-장비 슬롯 UI 전까지는 인벤에만 들고 있는 **착용 예정** 아이템.
+**2026-06-18: equipSlot 연동 완료.** 방어구 .asset에 `equipSlot` 설정 → PlayerEquipment가 슬롯 장착 처리. 슬롯 enum: None=0, Head=1, Armor=2, Rig=3, Backpack=4.
 
-| 우선 | itemId | 표시명 | 격자 | 무게 | 희귀 | 비고 |
-|:---:|---|---|:---:|:---:|---|---|
-| P1 | `coat_light` | 낡은 코트 | 2×2 | 1.5 | Common | 피격 데미지 소폭↓ |
-| P1 | `gloves_work` | 작업 장갑 | 1×1 | 0.2 | Common | 강공 차징 안정(추후) |
-| P1 | `boots_rubber` | 고무장화 | 1×2 | 0.6 | Common | 물웅덩이·오염 지형 |
-| P2 | `vest_scrap` | 고철 조끼 | 2×2 | 2.5 | Uncommon | 강공 피해↓, 이동↓ |
-| P2 | `helmet_bucket` | 양동이 헬멧 | 2×2 | 1.0 | Common | 머리 부위 보호(의료 연동) |
-| P3 | `armor_night` | 밤순찰 방어구 | 2×3 | 3.5 | Rare | 밤 맵 전용 드롭 |
+| 우선 | itemId | 표시명 | 격자 | 무게 | 희귀 | equipSlot | 비고 |
+|:---:|---|---|:---:|:---:|---|:---:|---|
+| P1 | `coat_light` | 낡은 코트 | 2×2 | 1.5 | Common | 2 Armor | 피격 데미지 소폭↓ |
+| P1 | `gloves_work` | 작업 장갑 | 1×1 | 0.2 | Common | 0 None | 대응 슬롯 없음(장갑 슬롯 미정) |
+| P1 | `boots_rubber` | 고무장화 | 1×2 | 0.6 | Common | 0 None | 대응 슬롯 없음(신발 슬롯 미정) |
+| P2 | `vest_scrap` | 고철 조끼 | 2×2 | 2.5 | Uncommon | 2 Armor | 강공 피해↓, 이동↓ |
+| P2 | `helmet_bucket` | 양동이 헬멧 | 2×2 | 1.0 | Common | 1 Head | 머리 부위 보호(의료 연동) |
+| P3 | `armor_night` | 밤순찰 방어구 | 2×3 | 3.5 | Rare | 2 Armor | 밤 맵 전용 드롭 |
+
+### 4-A. 가방·리그 (장착 컨테이너, Misc / 2026-06-18 신규)
+
+장착 시 인벤토리 격자를 확장하는 컨테이너 아이템. `equipSlot=Backpack(4)` 장착 시 `PlayerInventory.OnBackpackChanged`가 `containerWidth/Height`로 메인 격자를 교체.
+저장 위치: `Assets/Resources/Items/Gear/`.
+
+| itemId | 표시명 | footprint(격자) | 무게 | 희귀 | equipSlot | 컨테이너(W×H) | buy/sell | 비고 |
+|---|---|:---:|:---:|---|:---:|:---:|:---:|---|
+| `backpack_basic` | 기본 배낭 | 4×4 | 1.5 | Common | 4 Backpack | 6×6 | 3500 / 1400 | 기본 적재 확장 |
+| `backpack_large` | 대형 배낭 | 5×5 | 3.0 | Uncommon | 4 Backpack | 7×8 | 9000 / 3600 | 대용량·무거움 |
+| `rig_tactical` | 전술 리그 | 3×3 | 1.2 | Common | 3 Rig | 4×3 | 2500 / 1000 | 가슴 리그. ⚠️ Rig 슬롯 격자 확장은 코드 미연동(현재 Backpack 슬롯만 OnBackpackChanged 호출) — 슬롯 점유만 동작 |
+
+> ⚠️ **Rig 격자 확장 미구현**: `PlayerEquipment.Equip`은 `EquipSlot.Backpack`일 때만 `inventory.OnBackpackChanged`를 호출. 리그는 슬롯에 장착되지만 인벤 격자는 늘지 않음. 리그 격자 확장 필요 시 코드 보강 대상(별건).
+> ⚠️ **아이콘 미연결**: 3종 모두 `icon: {fileID: 0}` — 에디터에서 스프라이트 연결 필요.
 
 ---
 
@@ -580,6 +594,7 @@ Unity 재생 시 **202종** 아이템 + **10종** `RecipeData` (`Data/Recipes/`)
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-06-18 | **장착 가방·리그 신규 + 방어구 equipSlot 연동.** `Items/Gear/`에 `backpack_basic`(6×6), `backpack_large`(7×8), `rig_tactical`(4×3) 3종 신규 ItemData 생성(§4-A). 기존 방어구 4종에 equipSlot 추가: helmet_bucket=Head(1), vest_scrap/armor_night/coat_light=Armor(2). gloves_work/boots_rubber는 대응 슬롯 없어 None 유지. 3종 모두 `Shop_pawnshop` stock에 진열. 비고: Rig 격자 확장은 코드 미연동(Backpack 슬롯만 OnBackpackChanged), 신규 3종 아이콘 미연결(에디터 연결 필요). |
 | 2026-06-16 | **빛의 역설/루디 활성 자원 캐논 정합(gdd-core §5.2/§5.3).** §6 루디 = 충전·방전·마모 활성 자원(죽은 루디·순도·마모·충전 위치) + SSOT 링크. §2 헤더에 비루디 광원 침식 리스크 주석, `lantern_basic` = 루디 광원(예외 안전)·약방전·여분 교체 보강. 새 itemId·수치 미생성(TBD). 충전/순도 상태 구현 방식은 확인 필요. |
 | 2026-05-25 | 아이템 기획 리스트 초안 작성. P0~P3 우선순위, 9분류, 파밍 매핑, Stage 3~4 구현 순서. |
 | 2026-05-25 | v2: 치료 8→32종, 잡템 §9 신설 38종, 귀중 6→28종, 합계 ~147종. 판매 등급·파밍 매핑 확장. |

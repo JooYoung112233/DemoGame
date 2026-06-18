@@ -152,9 +152,8 @@ public class DoorController : MonoBehaviour
             return false;
         }
 
-        // 열쇠 보유 확인
-        var keyItem = inventory.Grid.FindItem(requiredKeyId);
-        if (keyItem == null)
+        // 열쇠 보유 확인 (가방+주머니+보안 전체)
+        if (inventory.CountItemAll(requiredKeyId) <= 0)
         {
             // 열쇠 이름 표시
             var keyData = ItemDatabase.Get(requiredKeyId);
@@ -166,7 +165,7 @@ public class DoorController : MonoBehaviour
         // 열쇠 소모
         if (consumeKey)
         {
-            inventory.Grid.ConsumeItem(requiredKeyId, 1);
+            inventory.ConsumeItemAll(requiredKeyId, 1);
             var keyData = ItemDatabase.Get(requiredKeyId);
             string keyName = keyData != null ? keyData.displayName : requiredKeyId;
             Debug.Log($"[Door] {keyName} 사용 (소모됨)");
