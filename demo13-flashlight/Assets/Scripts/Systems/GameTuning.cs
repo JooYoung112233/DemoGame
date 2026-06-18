@@ -26,6 +26,16 @@ public class GameTuning : ScriptableObject
     [Header("수색 (루팅 상자)")]
     [Tooltip("아이템 공개 딜레이 배율. >1 느리게, <1 빠르게. 희귀도별 기본 딜레이에 곱함.")]
     [Range(0.25f, 5f)] public float searchSpeedMult = 1f;
+    [Tooltip("Common 아이템 수색 기본 딜레이(초). searchSpeedMult가 곱해짐. 고급일수록 길게.")]
+    public float searchSecCommon = 0.4f;
+    [Tooltip("Uncommon 수색 기본 딜레이(초).")]
+    public float searchSecUncommon = 0.6f;
+    [Tooltip("Rare 수색 기본 딜레이(초).")]
+    public float searchSecRare = 0.9f;
+    [Tooltip("Epic 수색 기본 딜레이(초).")]
+    public float searchSecEpic = 1.3f;
+    [Tooltip("Legendary 수색 기본 딜레이(초). 고급 아이템일수록 늦게 공개.")]
+    public float searchSecLegendary = 1.8f;
 
     // ── 시간 / 현상 (지역 낮·밤 길이) ─────────────────────────────────
     [Header("시간 / 현상 (지역 낮·밤, 초)")]
@@ -43,6 +53,12 @@ public class GameTuning : ScriptableObject
     [Header("드랍 (맵 전체)")]
     [Tooltip("지역 루트 수량 배율. 1=기본, 0.5=절반, 2=두 배. RegionLootBootstrap가 읽음.")]
     [Range(0f, 3f)] public float lootCountMult = 1f;
+    [Tooltip("루트 롤이 실제로 떨어질 확률 배율(전역). 1=기존과 동일(항상 통과), <1=빈손 증가. RegionLootCatalog.Roll이 롤마다 게이트.")]
+    [Range(0f, 1f)] public float lootChanceMult = 1f;
+    [Tooltip("귀중품(Valuable) 카테고리 등장 가중치 배율. 1=동일, >1=귀중품 더 자주. RegionLootCatalog.Roll의 Valuable 항목 weight에 곱함.")]
+    [Range(0f, 5f)] public float valuableWeightMult = 1f;
+    [Tooltip("맵 아이템 스폰 총량 전역 배율. 1=동일. MapSpawnProfile 예산에 추가로 곱함.")]
+    [Range(0f, 3f)] public float itemSpawnCountMult = 1f;
 
     // ── 생존 (수분 / 포만감 / 아사) ───────────────────────────────────
     [Header("생존 (레이드 중 차감)")]

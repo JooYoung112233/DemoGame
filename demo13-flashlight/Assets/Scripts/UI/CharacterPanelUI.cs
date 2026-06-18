@@ -49,10 +49,14 @@ public class CharacterPanelUI : MonoBehaviour
     [SerializeField] GameObject leftPanelRoot; // 숨김/표시용
     [SerializeField] GameObject leftPlaceholder; // 우측 열 빈칸 안내 (창고/상자 미오픈 시)
 
-    // ── 인벤토리 탭 ──
-    [SerializeField] RectTransform invGridRoot;
-    Image[,] invSlotImages;
-    Image[] invItemImages;      // 배치된 아이템 아이콘들
+    // ── 중앙 패널: 무기파츠(예약) / 가방 / 주머니4 / 보안3×3 (위→아래) ──
+    [SerializeField] RectTransform midContentRoot; // 세로 스택 콘텐츠 루트 (헤더 아래)
+    [SerializeField] RectTransform weaponBox;      // 무기 파츠 예약 공간 (장착 시 표시 예정)
+    [SerializeField] RectTransform invGridRoot;    // 가방(백팩) 격자 루트
+    [SerializeField] RectTransform pocketsGridRoot;// 주머니 4칸 격자 루트 (고정)
+    [SerializeField] RectTransform secureGridRoot; // 보안 컨테이너 3×3 격자 루트 (고정)
+    [SerializeField] Text pocketsHeaderText;
+    [SerializeField] Text secureHeaderText;
     [SerializeField] Text invWeightText;
 
     // ── 좌측 캐릭터/장비 패널 (타르코프식 3열 좌측) ──
@@ -79,6 +83,12 @@ public class CharacterPanelUI : MonoBehaviour
     static readonly int CELL_GAP = 2;
     static readonly float PANEL_WIDTH = 360f;
     static readonly string[] PART_NAMES = { "머 리", "몸 통", "양 팔", "왼다리", "오른다리" };
+
+    // 중앙 패널 세로 스택 레이아웃
+    const float MID_INNER_W = 520f;   // 중앙 콘텐츠 가용 폭 (격자 가로 정렬 기준)
+    const float WEAPON_BOX_H = 92f;   // 무기 파츠 예약 공간 높이
+    const float SECTION_HDR_H = 22f;  // 섹션 헤더 높이
+    const float SECTION_GAP = 10f;    // 섹션 간 간격
 
     // ── 드래그 앤 드롭 ──
     bool isDragging;
@@ -352,7 +362,13 @@ public class CharacterPanelUI : MonoBehaviour
         leftTitleText = null;
         leftPanelRoot = null;
         leftPlaceholder = null;
+        midContentRoot = null;
+        weaponBox = null;
         invGridRoot = null;
+        pocketsGridRoot = null;
+        secureGridRoot = null;
+        pocketsHeaderText = null;
+        secureHeaderText = null;
         invWeightText = null;
         containerGridRoot = null;
         searchStatusText = null;
@@ -383,35 +399,84 @@ public class CharacterPanelUI : MonoBehaviour
         rightPanelBg = go.AddComponent<Image>();
         rightPanelBg.color = new Color(0.06f, 0.06f, 0.1f, 0.95f);
 
-        // 상단 헤더 ("가방")
-        bagHeaderText = MakeText(rightPanel, "BagHeader", "가방",
-            new Vector2(10, -6), new Vector2(200, 28), 16, new Color(0.85f, 0.8f, 0.6f), TextAnchor.MiddleLeft);
-        bagHeaderText.fontStyle = FontStyle.Bold;
+        // 상단 패널 제목
+        var title = MakeText(rightPanel, "MidTitle", "장비 / 소지품",
+            new Vector2(0, -8), new Vector2(MID_INNER_W, 26), 16, new Color(0.85f, 0.85f, 0.95f), TextAnchor.MiddleCenter);
+        title.fontStyle = FontStyle.Bold;
+        var titleRT = title.GetComponent<RectTransform>();
+        titleRT.anchorMin = titleRT.anchorMax = titleRT.pivot = new Vector2(0.5f, 1f);
+        titleRT.anchoredPosition = new Vector2(0, -8);
 
-        // 인벤토리 콘텐츠 영역
-        var contentGO = new GameObject("InvContent");
+        // ── 세로 스택 콘텐츠 루트 (제목 아래, 가로 중앙 고정폭) ──
+        var contentGO = new GameObject("MidContent", typeof(RectTransform));
         contentGO.transform.SetParent(rightPanel, false);
-        var cRT = contentGO.AddComponent<RectTransform>();
-        cRT.anchorMin = new Vector2(0, 0);
-        cRT.anchorMax = new Vector2(1, 1);
-        cRT.offsetMin = new Vector2(8, 8);
-        cRT.offsetMax = new Vector2(-8, -36);
+        midContentRoot = contentGO.GetComponent<RectTransform>();
+        midContentRoot.anchorMin = midContentRoot.anchorMax = midContentRoot.pivot = new Vector2(0.5f, 1f);
+        midContentRoot.anchoredPosition = new Vector2(0, -40);
+        midContentRoot.sizeDelta = new Vector2(MID_INNER_W, 980);
 
-        BuildInventoryTabContent(contentGO.transform);
+        // 무기 파츠 예약 공간 (장착 시 채워질 자리 — 지금은 안내만)
+        weaponBox = MakeSection(midContentRoot, "WeaponPartsBox", MID_INNER_W, WEAPON_BOX_H,
+            new Color(0.09f, 0.09f, 0.14f, 0.9f));
+        var wpTxt = MakeChildText(weaponBox, "무기 파츠\n(무기 장착 시 표시)", 12, new Color(0.4f, 0.45f, 0.55f));
+        wpTxt.alignment = TextAnchor.MiddleCenter;
 
-        // 가방 미장착 안내 (인벤 콘텐츠와 같은 위치에 오버레이)
-        invPlaceholder = new GameObject("InvPlaceholder", typeof(RectTransform));
-        invPlaceholder.transform.SetParent(rightPanel, false);
-        var phRT = invPlaceholder.GetComponent<RectTransform>();
-        phRT.anchorMin = new Vector2(0, 0);
-        phRT.anchorMax = new Vector2(1, 1);
-        phRT.offsetMin = new Vector2(8, 8);
-        phRT.offsetMax = new Vector2(-8, -36);
-        var phTxt = MakeChildText(invPlaceholder.transform,
-            "가방 미장착\n\n가방을 장착하면\n인벤토리가 열립니다",
-            14, new Color(0.45f, 0.5f, 0.62f));
+        // 가방 헤더 + 격자 루트
+        bagHeaderText = MakeStackHeader(midContentRoot, "BagHeader", "가방", new Color(0.85f, 0.8f, 0.6f));
+        invGridRoot = MakeGridRoot(midContentRoot, "InvGrid");
+
+        // 가방 미장착 안내 (가방 격자 위치에 오버레이; 위치/크기는 레이아웃에서 지정)
+        invPlaceholder = MakeSection(midContentRoot, "InvPlaceholder", MID_INNER_W, 54,
+            new Color(0.08f, 0.08f, 0.12f, 0.9f));
+        var phTxt = MakeChildText(invPlaceholder, "가방 미장착 — 가방을 장착하면 격자가 열립니다",
+            12, new Color(0.45f, 0.5f, 0.62f));
         phTxt.alignment = TextAnchor.MiddleCenter;
-        invPlaceholder.SetActive(false);
+        invPlaceholder.gameObject.SetActive(false);
+
+        // 주머니 헤더 + 격자 루트 (고정 4칸)
+        pocketsHeaderText = MakeStackHeader(midContentRoot, "PocketsHeader", "주머니", new Color(0.7f, 0.78f, 0.7f));
+        pocketsGridRoot = MakeGridRoot(midContentRoot, "PocketsGrid");
+
+        // 보안 컨테이너 헤더 + 격자 루트 (고정 3×3, 레이드 사망에도 보존)
+        secureHeaderText = MakeStackHeader(midContentRoot, "SecureHeader", "보안 컨테이너", new Color(0.85f, 0.7f, 0.5f));
+        secureGridRoot = MakeGridRoot(midContentRoot, "SecureGrid");
+
+        // 무게 텍스트 (스택 맨 아래; 위치는 레이아웃에서)
+        invWeightText = MakeText(midContentRoot, "Weight", "무게: 0 / 30 kg",
+            new Vector2(0, 0), new Vector2(MID_INNER_W, 22), 13, new Color(0.7f, 0.8f, 0.9f), TextAnchor.MiddleLeft);
+    }
+
+    /// <summary>중앙 스택용 고정폭 박스 섹션 생성 (배경 Image 포함).</summary>
+    RectTransform MakeSection(RectTransform parent, string name, float w, float h, Color bg)
+    {
+        var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 1);
+        rt.sizeDelta = new Vector2(w, h);
+        go.GetComponent<Image>().color = bg;
+        return rt;
+    }
+
+    /// <summary>중앙 스택용 섹션 헤더 텍스트(가로 전체, 좌측 정렬).</summary>
+    Text MakeStackHeader(RectTransform parent, string name, string label, Color color)
+    {
+        var txt = MakeText(parent, name, label,
+            new Vector2(2, 0), new Vector2(MID_INNER_W - 4, SECTION_HDR_H), 13, color, TextAnchor.LowerLeft);
+        txt.fontStyle = FontStyle.Bold;
+        return txt;
+    }
+
+    /// <summary>격자 루트(pivot 0,1 — ScreenToGridCell 히트테스트 기준) 생성.</summary>
+    RectTransform MakeGridRoot(RectTransform parent, string name)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 1);
+        rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta = new Vector2(100, 100);
+        return rt;
     }
 
     void BuildLeftPanel(Transform parent)
@@ -590,8 +655,11 @@ public class CharacterPanelUI : MonoBehaviour
         BuildEquipSlot(charPanel, EquipSlot.SecondaryWeapon, "보조", startX + (slotSize + slotGap) * 2, y, slotSize);
         y -= slotSize + slotGap;
 
-        // 3행: Melee (가운데)
-        BuildEquipSlot(charPanel, EquipSlot.Melee, "근접", startX + slotSize + slotGap, y, slotSize);
+        // 3행: 근접 + 특수창(시계/측정기 등) — 가운데 정렬 2칸
+        float pairW = slotSize * 2 + slotGap;
+        float pairX = (PANEL_WIDTH - pairW) * 0.5f;
+        BuildEquipSlot(charPanel, EquipSlot.Melee, "근접", pairX, y, slotSize);
+        BuildEquipSlot(charPanel, EquipSlot.Special, "특수창", pairX + slotSize + slotGap, y, slotSize);
         y -= slotSize + 10f;
 
         // ── 부위 상태 ──
@@ -666,8 +734,8 @@ public class CharacterPanelUI : MonoBehaviour
         var equipped = playerEquipment.GetSlot(slot);
         if (equipped == null) return;
 
-        // 인벤토리에 공간 있으면 해제 → 인벤으로
-        if (playerInventory != null && playerInventory.Grid.TryAutoPlace(new ItemInstance(equipped, 1)))
+        // 인벤토리에 공간 있으면 해제 → 인벤으로 (가방/주머니/보안)
+        if (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(new ItemInstance(equipped, 1)))
         {
             playerEquipment.Unequip(slot);
             RefreshAllGrids();
@@ -802,69 +870,126 @@ public class CharacterPanelUI : MonoBehaviour
 
     #region 인벤토리 탭 빌드
 
-    void BuildInventoryTabContent(Transform parent)
-    {
-        // 격자 루트
-        var gridGO = new GameObject("InvGrid");
-        gridGO.transform.SetParent(parent, false);
-        invGridRoot = gridGO.AddComponent<RectTransform>();
-        invGridRoot.anchorMin = new Vector2(0, 1);
-        invGridRoot.anchorMax = new Vector2(0, 1);
-        invGridRoot.pivot = new Vector2(0, 1);
-        invGridRoot.anchoredPosition = new Vector2(0, 0);
-        invGridRoot.sizeDelta = new Vector2(280, 450);
-
-        // 무게 텍스트
-        invWeightText = MakeText(parent, "Weight", "무게: 0 / 30 kg",
-            new Vector2(0, -420), new Vector2(280, 24), 13, new Color(0.7f, 0.8f, 0.9f), TextAnchor.MiddleLeft);
-    }
-
+    /// <summary>중앙 패널 전체 갱신: 가방·주머니·보안 격자를 렌더하고 세로 스택 위치를 잡는다.</summary>
     void RefreshInventoryGrid()
     {
-        if (invGridRoot == null) return;
+        if (midContentRoot == null || playerInventory == null) return;
 
-        // 기존 자식 제거
-        for (int i = invGridRoot.childCount - 1; i >= 0; i--)
-            Destroy(invGridRoot.GetChild(i).gameObject);
+        var bag = playerInventory.Grid;
+        bool hasBackpack = bag != null && bag.width > 0 && bag.height > 0;
 
-        if (playerInventory == null || playerInventory.Grid == null) return;
-
-        var grid = playerInventory.Grid;
-
-        // 가방 미장착 (격자 0x0) → 안내 표시
-        bool hasBackpack = grid.width > 0 && grid.height > 0;
-        if (invPlaceholder != null) invPlaceholder.SetActive(!hasBackpack);
-        invGridRoot.gameObject.SetActive(hasBackpack);
-        if (invWeightText != null) invWeightText.gameObject.SetActive(hasBackpack);
-
-        // 헤더 갱신
+        // 가방 헤더
         if (bagHeaderText != null)
         {
-            if (!hasBackpack)
-            {
-                bagHeaderText.text = "가방 미장착";
-                bagHeaderText.color = new Color(0.5f, 0.5f, 0.55f);
-            }
-            else
-            {
-                var bp = playerEquipment != null ? playerEquipment.GetSlot(EquipSlot.Backpack) : null;
-                bagHeaderText.text = bp != null ? bp.displayName : "주머니";
-                bagHeaderText.color = new Color(0.85f, 0.8f, 0.6f);
-            }
+            var bp = playerEquipment != null ? playerEquipment.GetSlot(EquipSlot.Backpack) : null;
+            bagHeaderText.text = hasBackpack ? (bp != null ? $"가방 — {bp.displayName}" : "가방") : "가방 (미장착)";
+            bagHeaderText.color = hasBackpack ? new Color(0.85f, 0.8f, 0.6f) : new Color(0.5f, 0.5f, 0.55f);
         }
 
-        if (!hasBackpack) return;
+        // ── 격자 렌더 ──
+        RenderPlayerGrid(bag, invGridRoot);
+        RenderPlayerGrid(playerInventory.PocketsGrid, pocketsGridRoot);
+        RenderPlayerGrid(playerInventory.SecureGrid, secureGridRoot);
+
+        // 가방 미장착 시 격자 숨기고 안내 박스 표시
+        if (invGridRoot != null) invGridRoot.gameObject.SetActive(hasBackpack);
+        if (invPlaceholder != null) invPlaceholder.gameObject.SetActive(!hasBackpack);
+
+        LayoutMiddleStack(hasBackpack, bag);
+    }
+
+    /// <summary>세로 스택(무기파츠 → 가방 → 주머니 → 보안 → 무게) 위치를 위에서부터 잡는다.</summary>
+    void LayoutMiddleStack(bool hasBackpack, InventoryGrid bag)
+    {
+        int cellTotal = CELL_SIZE + CELL_GAP;
+        float y = 0f;
+
+        // 무기 파츠 예약 공간
+        if (weaponBox != null)
+        {
+            weaponBox.anchoredPosition = new Vector2((MID_INNER_W - weaponBox.sizeDelta.x) * 0.5f, y);
+            y -= weaponBox.sizeDelta.y + SECTION_GAP;
+        }
+
+        // 가방
+        y = PlaceHeader(bagHeaderText, y);
+        if (hasBackpack)
+        {
+            float bagW = bag.width * cellTotal;
+            CenterGrid(invGridRoot, bagW, y);
+            y -= bag.height * cellTotal + SECTION_GAP;
+        }
+        else if (invPlaceholder != null)
+        {
+            invPlaceholder.anchoredPosition = new Vector2((MID_INNER_W - invPlaceholder.sizeDelta.x) * 0.5f, y);
+            y -= invPlaceholder.sizeDelta.y + SECTION_GAP;
+        }
+
+        // 주머니 (고정 4칸)
+        y = PlaceHeader(pocketsHeaderText, y);
+        var pockets = playerInventory.PocketsGrid;
+        if (pockets != null)
+        {
+            CenterGrid(pocketsGridRoot, pockets.width * cellTotal, y);
+            y -= pockets.height * cellTotal + SECTION_GAP;
+        }
+
+        // 보안 컨테이너 (고정 3×3)
+        y = PlaceHeader(secureHeaderText, y);
+        var secure = playerInventory.SecureGrid;
+        if (secure != null)
+        {
+            CenterGrid(secureGridRoot, secure.width * cellTotal, y);
+            y -= secure.height * cellTotal + SECTION_GAP;
+        }
+
+        // 무게
+        if (invWeightText != null)
+        {
+            var wRT = invWeightText.GetComponent<RectTransform>();
+            wRT.anchoredPosition = new Vector2(2, y);
+        }
+    }
+
+    /// <summary>헤더를 y에 배치하고 그 아래 y를 반환.</summary>
+    float PlaceHeader(Text header, float y)
+    {
+        if (header != null)
+            header.GetComponent<RectTransform>().anchoredPosition = new Vector2(2, y);
+        return y - SECTION_HDR_H;
+    }
+
+    /// <summary>격자 루트를 가로 중앙(MID_INNER_W 기준) + 세로 y에 배치.</summary>
+    void CenterGrid(RectTransform gridRoot, float gridW, float y)
+    {
+        if (gridRoot == null) return;
+        gridRoot.anchoredPosition = new Vector2((MID_INNER_W - gridW) * 0.5f, y);
+    }
+
+    /// <summary>플레이어 격자 하나(가방/주머니/보안)를 gridRoot 자식으로 렌더: 빈 칸 + 아이템 + 점유색.</summary>
+    void RenderPlayerGrid(InventoryGrid grid, RectTransform gridRoot)
+    {
+        if (gridRoot == null) return;
+
+        for (int i = gridRoot.childCount - 1; i >= 0; i--)
+            Destroy(gridRoot.GetChild(i).gameObject);
+
+        if (grid == null || grid.width <= 0 || grid.height <= 0)
+        {
+            gridRoot.sizeDelta = new Vector2(0, 0);
+            return;
+        }
 
         int cellTotal = CELL_SIZE + CELL_GAP;
+        gridRoot.sizeDelta = new Vector2(grid.width * cellTotal, grid.height * cellTotal);
 
-        // 빈 칸 슬롯 생성
-        invSlotImages = new Image[grid.width, grid.height];
+        var slotImages = new Image[grid.width, grid.height];
         for (int gy = 0; gy < grid.height; gy++)
         {
             for (int gx = 0; gx < grid.width; gx++)
             {
                 var slotGO = new GameObject($"Slot_{gx}_{gy}");
-                slotGO.transform.SetParent(invGridRoot, false);
+                slotGO.transform.SetParent(gridRoot, false);
                 var rt = slotGO.AddComponent<RectTransform>();
                 rt.anchorMin = new Vector2(0, 1);
                 rt.anchorMax = new Vector2(0, 1);
@@ -874,15 +999,15 @@ public class CharacterPanelUI : MonoBehaviour
 
                 var img = slotGO.AddComponent<Image>();
                 img.color = new Color(0.15f, 0.15f, 0.2f, 0.8f);
-                invSlotImages[gx, gy] = img;
+                slotImages[gx, gy] = img;
             }
         }
 
-        // 배치된 아이템 표시
-        RefreshInventoryItems(grid, invGridRoot);
+        RenderItemsInto(grid, gridRoot, slotImages);
     }
 
-    void RefreshInventoryItems(InventoryGrid grid, RectTransform gridRoot)
+    /// <summary>격자에 배치된 아이템을 gridRoot에 렌더(아이콘/이름/내구도/스택 + 점유칸 색상).</summary>
+    void RenderItemsInto(InventoryGrid grid, RectTransform gridRoot, Image[,] slotImages)
     {
         int cellTotal = CELL_SIZE + CELL_GAP;
         var placed = grid.GetAll();
@@ -926,9 +1051,7 @@ public class CharacterPanelUI : MonoBehaviour
                 iconImg.sprite = p.item.data.icon;
                 iconImg.preserveAspect = true;
             }
-
-            // 이름 텍스트 (아이콘 없으면 이름 표시)
-            if (p.item.data.icon == null)
+            else
             {
                 var nameText = MakeChildText(itemGO.transform, p.item.data.displayName, 11, Color.white);
                 nameText.alignment = TextAnchor.MiddleCenter;
@@ -937,9 +1060,6 @@ public class CharacterPanelUI : MonoBehaviour
             // 내구도 바 (hasDurability 아이템)
             if (p.item.HasDurability)
             {
-                float itemW = w * CELL_SIZE + (w - 1) * CELL_GAP;
-
-                // 배경 바
                 var durBgGO = new GameObject("DurBg");
                 durBgGO.transform.SetParent(itemGO.transform, false);
                 var durBgRT = durBgGO.AddComponent<RectTransform>();
@@ -948,10 +1068,8 @@ public class CharacterPanelUI : MonoBehaviour
                 durBgRT.pivot = new Vector2(0, 0);
                 durBgRT.anchoredPosition = new Vector2(2, 2);
                 durBgRT.sizeDelta = new Vector2(-4, 6);
-                var durBgImg = durBgGO.AddComponent<Image>();
-                durBgImg.color = new Color(0, 0, 0, 0.6f);
+                durBgGO.AddComponent<Image>().color = new Color(0, 0, 0, 0.6f);
 
-                // 채움 바
                 var durFillGO = new GameObject("DurFill");
                 durFillGO.transform.SetParent(durBgGO.transform, false);
                 var durFillRT = durFillGO.AddComponent<RectTransform>();
@@ -959,9 +1077,8 @@ public class CharacterPanelUI : MonoBehaviour
                 durFillRT.anchorMax = new Vector2(p.item.DurabilityRatio, 1f);
                 durFillRT.offsetMin = Vector2.zero;
                 durFillRT.offsetMax = Vector2.zero;
-                var durFillImg = durFillGO.AddComponent<Image>();
                 float ratio = p.item.DurabilityRatio;
-                durFillImg.color = ratio > 0.5f ? new Color(0.3f, 0.9f, 0.4f)
+                durFillGO.AddComponent<Image>().color = ratio > 0.5f ? new Color(0.3f, 0.9f, 0.4f)
                     : ratio > 0.2f ? new Color(0.9f, 0.8f, 0.2f)
                     : new Color(0.9f, 0.2f, 0.2f);
             }
@@ -993,8 +1110,8 @@ public class CharacterPanelUI : MonoBehaviour
             // 점유 칸 색상 변경
             for (int gx = p.gridX; gx < p.gridX + w; gx++)
                 for (int gy = p.gridY; gy < p.gridY + h; gy++)
-                    if (gx < grid.width && gy < grid.height && invSlotImages != null)
-                        invSlotImages[gx, gy].color = new Color(0.1f, 0.1f, 0.15f, 0.4f);
+                    if (gx < grid.width && gy < grid.height && slotImages != null)
+                        slotImages[gx, gy].color = new Color(0.1f, 0.1f, 0.15f, 0.4f);
         }
     }
 
@@ -1392,17 +1509,18 @@ public class CharacterPanelUI : MonoBehaviour
 
     float GetSearchDelay(ItemRarity rarity)
     {
+        var gt = GameTuning.Instance;
         float baseDelay;
         switch (rarity)
         {
-            case ItemRarity.Common:    baseDelay = 0.4f; break;
-            case ItemRarity.Uncommon:  baseDelay = 0.6f; break;
-            case ItemRarity.Rare:      baseDelay = 0.9f; break;
-            case ItemRarity.Epic:      baseDelay = 1.3f; break;
-            case ItemRarity.Legendary: baseDelay = 1.8f; break;
+            case ItemRarity.Common:    baseDelay = gt != null ? gt.searchSecCommon : 0.4f; break;
+            case ItemRarity.Uncommon:  baseDelay = gt != null ? gt.searchSecUncommon : 0.6f; break;
+            case ItemRarity.Rare:      baseDelay = gt != null ? gt.searchSecRare : 0.9f; break;
+            case ItemRarity.Epic:      baseDelay = gt != null ? gt.searchSecEpic : 1.3f; break;
+            case ItemRarity.Legendary: baseDelay = gt != null ? gt.searchSecLegendary : 1.8f; break;
             default: baseDelay = 0.5f; break;
         }
-        float mult = GameTuning.Instance != null ? GameTuning.Instance.searchSpeedMult : 1f;
+        float mult = gt != null ? gt.searchSpeedMult : 1f;
         return (baseDelay + Random.Range(-0.1f, 0.1f)) * mult;
     }
 
@@ -1473,13 +1591,13 @@ public class CharacterPanelUI : MonoBehaviour
     /// <summary>마우스 아래 플레이어 아이템을 버린다(= 우클릭 버리기와 동일: 레이드=바닥 산포 / 안전구역=인벤 복귀).</summary>
     void TryDiscardItemUnderMouse()
     {
-        if (playerInventory == null || playerInventory.Grid == null) return;
-        int gx, gy;
-        if (!ScreenToGridCell(invGridRoot, playerInventory.Grid, out gx, out gy)) return;
-        var placed = playerInventory.Grid.GetAt(gx, gy);
+        if (playerInventory == null) return;
+        InventoryGrid grid; RectTransform root; int gx, gy;
+        if (!PlayerGridAtMouse(out grid, out root, out gx, out gy)) return;
+        var placed = grid.GetAt(gx, gy);
         if (placed == null || placed.item.data == null) return;
         var item = placed.item;
-        playerInventory.Grid.Remove(placed);
+        grid.Remove(placed);
         DropOrReturnItem(item);
         RefreshAllGrids();
     }
@@ -1488,16 +1606,15 @@ public class CharacterPanelUI : MonoBehaviour
 
     void TryPickupItem()
     {
-        // 플레이어 인벤토리 격자
-        if (playerInventory != null && playerInventory.Grid != null)
+        // 플레이어 격자 (가방/주머니/보안)
         {
-            int gx, gy;
-            if (ScreenToGridCell(invGridRoot, playerInventory.Grid, out gx, out gy))
+            InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
+            if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
             {
-                var placed = playerInventory.Grid.GetAt(gx, gy);
+                var placed = pGrid.GetAt(gx, gy);
                 if (placed != null)
                 {
-                    StartDrag(placed, playerInventory.Grid);
+                    StartDrag(placed, pGrid);
                     return;
                 }
             }
@@ -1531,24 +1648,22 @@ public class CharacterPanelUI : MonoBehaviour
     /// </summary>
     void TryQuickTransfer()
     {
-        var playerGrid = playerInventory != null ? playerInventory.Grid : null;
         var leftGrid = LeftGrid;
 
-        // 플레이어 격자 클릭 → 좌측으로 이동
-        if (playerGrid != null)
+        // 플레이어 격자(가방/주머니/보안) 클릭 → 좌측으로 이동
         {
-            int gx, gy;
-            if (ScreenToGridCell(invGridRoot, playerGrid, out gx, out gy))
+            InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
+            if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
             {
-                var placed = playerGrid.GetAt(gx, gy);
+                var placed = pGrid.GetAt(gx, gy);
                 if (placed != null && leftGrid != null)
                 {
                     var item = placed.item;
-                    playerGrid.Remove(placed);
+                    pGrid.Remove(placed);
                     if (!leftGrid.TryAutoPlace(item))
                     {
                         // 실패 → 원래 위치 복원
-                        playerGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+                        pGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
                     }
                     RefreshAllGrids();
                 }
@@ -1556,14 +1671,14 @@ public class CharacterPanelUI : MonoBehaviour
             }
         }
 
-        // 좌측 격자 클릭 → 플레이어로 이동
+        // 좌측 격자 클릭 → 플레이어(가방→주머니→보안)로 이동
         if (leftGrid != null)
         {
             int gx, gy;
             if (ScreenToGridCell(containerGridRoot, leftGrid, out gx, out gy))
             {
                 var placed = leftGrid.GetAt(gx, gy);
-                if (placed != null && playerGrid != null)
+                if (placed != null && playerInventory != null)
                 {
                     // 수색 모드: 공개된 아이템만
                     if (leftPanelSearchEnabled && revealedUids != null
@@ -1572,7 +1687,7 @@ public class CharacterPanelUI : MonoBehaviour
 
                     var item = placed.item;
                     leftGrid.Remove(placed);
-                    if (!playerGrid.TryAutoPlace(item))
+                    if (!playerInventory.TryAutoPlaceAnywhere(item))
                     {
                         // 실패 → 원래 위치 복원
                         leftGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
@@ -1679,14 +1794,13 @@ public class CharacterPanelUI : MonoBehaviour
         RectTransform hoverGridRoot = null;
         int cellX = -1, cellY = -1;
 
-        // 플레이어 인벤토리 위인지
-        if (playerInventory != null && playerInventory.Grid != null)
+        // 플레이어 격자 위인지 (가방/주머니/보안)
         {
-            int gx, gy;
-            if (ScreenToGridCell(invGridRoot, playerInventory.Grid, out gx, out gy))
+            InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
+            if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
             {
-                hoverGrid = playerInventory.Grid;
-                hoverGridRoot = invGridRoot;
+                hoverGrid = pGrid;
+                hoverGridRoot = pRoot;
                 cellX = gx;
                 cellY = gy;
             }
@@ -1760,14 +1874,12 @@ public class CharacterPanelUI : MonoBehaviour
 
     void TryPlaceDragged()
     {
-        // 플레이어 인벤토리에 배치 시도
-        if (playerInventory != null && playerInventory.Grid != null)
+        // 플레이어 격자(가방/주머니/보안)에 배치 시도
         {
-            int gx, gy;
-            if (ScreenToGridCell(invGridRoot, playerInventory.Grid, out gx, out gy))
+            InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
+            if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
             {
-                if (TryPlaceInGrid(playerInventory.Grid, gx, gy))
-                    return;
+                TryPlaceInGrid(pGrid, gx, gy);
                 return; // 격자 위 클릭은 항상 소비 (실패해도)
             }
         }
@@ -1900,7 +2012,7 @@ public class CharacterPanelUI : MonoBehaviour
     void ReturnItemToInventory(ItemInstance item)
     {
         if (item == null) return;
-        if (playerInventory != null && playerInventory.Grid != null && playerInventory.Grid.TryAutoPlace(item)) return;
+        if (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(item)) return;
         var stash = MainStash.Instance != null ? MainStash.Instance.GetGrid() : null;
         if (stash != null && stash.TryAutoPlace(item)) return;
         ToastManager.Show("공간이 없다", ToastManager.ToastType.Warning);
@@ -1913,8 +2025,8 @@ public class CharacterPanelUI : MonoBehaviour
 
         if (IsSafeArea())
         {
-            // 안전구역: 바닥에 못 버림 → 가방, 안 되면 창고로 되돌림
-            if (playerInventory != null && playerInventory.Grid != null && playerInventory.Grid.TryAutoPlace(item)) return;
+            // 안전구역: 바닥에 못 버림 → 가방/주머니/보안, 안 되면 창고로 되돌림
+            if (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(item)) return;
             var stash = MainStash.Instance != null ? MainStash.Instance.GetGrid() : null;
             if (stash != null && stash.TryAutoPlace(item)) return;
             ToastManager.Show("안전구역에선 바닥에 버릴 수 없다 (공간 부족)", ToastManager.ToastType.Warning);
@@ -1940,16 +2052,15 @@ public class CharacterPanelUI : MonoBehaviour
     {
         HideContextMenu();
 
-        // 플레이어 인벤토리
-        if (playerInventory != null && playerInventory.Grid != null)
+        // 플레이어 격자 (가방/주머니/보안)
         {
-            int gx, gy;
-            if (ScreenToGridCell(invGridRoot, playerInventory.Grid, out gx, out gy))
+            InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
+            if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
             {
-                var placed = playerInventory.Grid.GetAt(gx, gy);
+                var placed = pGrid.GetAt(gx, gy);
                 if (placed != null && placed.item.data != null)
                 {
-                    ShowContextMenu(placed, playerInventory.Grid);
+                    ShowContextMenu(placed, pGrid);
                     return;
                 }
             }
@@ -2003,7 +2114,7 @@ public class CharacterPanelUI : MonoBehaviour
         }
 
         float y = -28f;
-        bool isPlayerGrid = (grid == playerInventory?.Grid);
+        bool isPlayerGrid = IsPlayerGrid(grid);
 
         // 장착 (equipSlot != None + 플레이어 인벤토리만)
         if (data.equipSlot != EquipSlot.None && isPlayerGrid)
@@ -2227,6 +2338,7 @@ public class CharacterPanelUI : MonoBehaviour
     {
         gx = gy = -1;
         if (gridRoot == null || grid == null) return false;
+        if (!gridRoot.gameObject.activeInHierarchy) return false;   // 숨긴 격자(가방 미장착 등)는 히트 제외
 
         Vector2 localPos;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -2241,6 +2353,28 @@ public class CharacterPanelUI : MonoBehaviour
             return false;
 
         return true;
+    }
+
+    /// <summary>마우스 아래의 플레이어 격자(가방→주머니→보안 순)와 셀을 찾는다.</summary>
+    bool PlayerGridAtMouse(out InventoryGrid grid, out RectTransform root, out int gx, out int gy)
+    {
+        grid = null; root = null; gx = gy = -1;
+        if (playerInventory == null) return false;
+
+        if (ScreenToGridCell(invGridRoot, playerInventory.Grid, out gx, out gy))
+        { grid = playerInventory.Grid; root = invGridRoot; return true; }
+        if (ScreenToGridCell(pocketsGridRoot, playerInventory.PocketsGrid, out gx, out gy))
+        { grid = playerInventory.PocketsGrid; root = pocketsGridRoot; return true; }
+        if (ScreenToGridCell(secureGridRoot, playerInventory.SecureGrid, out gx, out gy))
+        { grid = playerInventory.SecureGrid; root = secureGridRoot; return true; }
+        return false;
+    }
+
+    /// <summary>해당 격자가 플레이어 소지 격자(가방/주머니/보안)인지.</summary>
+    bool IsPlayerGrid(InventoryGrid g)
+    {
+        return playerInventory != null && g != null
+            && (g == playerInventory.Grid || g == playerInventory.PocketsGrid || g == playerInventory.SecureGrid);
     }
 
     // ── 전체 격자 새로고침 ──

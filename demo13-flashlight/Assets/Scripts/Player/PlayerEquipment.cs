@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 플레이어 장비 관리 (타르코프식 슬롯).
-/// 7 슬롯: Head/Armor/Rig/Backpack/PrimaryWeapon/SecondaryWeapon/Melee.
+/// 8 슬롯: Head/Armor/Rig/Backpack/PrimaryWeapon/SecondaryWeapon/Melee/Special(특수창: 시계·측정기 등).
 /// 가방 장착 → PlayerInventory 격자 크기 변경.
 /// 장비 무게 → PlayerInventory 총 무게에 합산.
 /// </summary>

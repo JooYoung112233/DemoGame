@@ -23,9 +23,11 @@ public class GameControlPanel : EditorWindow
     }
 
     Vector2 scroll;
-    bool fTuning = true, fStats = true;
+    bool fTuning = true, fStatDB = true, fStats = true;
     GameTuning tuning;
     SerializedObject tuningSo;
+    StatDB statDB;
+    SerializedObject statDBSo;
 
     void OnGUI()
     {
@@ -34,6 +36,12 @@ public class GameControlPanel : EditorWindow
         // ── 튜닝 ──────────────────────────────────────────────────────
         fTuning = EditorGUILayout.Foldout(fTuning, "⚙ 게임 튜닝 (GameTuning)", true, EditorStyles.foldoutHeader);
         if (fTuning) DrawTuning();
+
+        EditorGUILayout.Space(10);
+
+        // ── 스탯 DB (플레이어/적 — 이동속도·전투 등) ───────────────────
+        fStatDB = EditorGUILayout.Foldout(fStatDB, "🎮 스탯 DB (StatDB — 플레이어/적)", true, EditorStyles.foldoutHeader);
+        if (fStatDB) DrawStatDB();
 
         EditorGUILayout.Space(10);
 
@@ -74,6 +82,36 @@ public class GameControlPanel : EditorWindow
             if (GUILayout.Button("저장")) AssetDatabase.SaveAssets();
         }
         EditorGUILayout.HelpBox("플레이 중에도 즉시 반영(수색속도). 낮밤/레이드 시간은 다음 진입/레이드부터.\n값 추가: GameTuning.cs에 필드 추가 → 쓰는 시스템에서 읽기 → 여기 자동 노출.", MessageType.None);
+    }
+
+    // ── 스탯 DB ───────────────────────────────────────────────────────
+    void DrawStatDB()
+    {
+        if (statDB == null) statDB = StatDB.Instance;   // Resources/Data/StatDB
+        if (statDB == null)
+        {
+            EditorGUILayout.HelpBox("StatDB 에셋이 없습니다 (Resources/Data/StatDB.asset).", MessageType.Info);
+            return;
+        }
+
+        if (statDBSo == null || statDBSo.targetObject != statDB) statDBSo = new SerializedObject(statDB);
+        statDBSo.Update();
+        EditorGUI.indentLevel++;
+        var p = statDBSo.GetIterator();
+        p.NextVisible(true);                 // m_Script 스킵
+        while (p.NextVisible(false))
+            EditorGUILayout.PropertyField(p, true);
+        EditorGUI.indentLevel--;
+        if (statDBSo.ApplyModifiedProperties())
+            EditorUtility.SetDirty(statDB);
+
+        EditorGUILayout.Space(2);
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            if (GUILayout.Button("에셋 선택")) EditorGUIUtility.PingObject(statDB);
+            if (GUILayout.Button("저장")) AssetDatabase.SaveAssets();
+        }
+        EditorGUILayout.HelpBox("플레이어 이동속도 = Player Stat ▸ Move Speed. 적 스탯은 Units 목록. (런타임 StatDB.Instance가 이 에셋을 읽음)", MessageType.None);
     }
 
     void CreateTuning()

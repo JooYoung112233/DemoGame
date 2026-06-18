@@ -156,20 +156,40 @@ public static class RegionLootCatalog
             Debug.LogWarning($"[RegionLootCatalog] 풀 없음: {regionId} / {tier}");
             return new ItemInstance[0];
         }
+        // GameTuning 전역 노브 (에셋 없으면 기존 동작 그대로: 1f)
+        var gt = GameTuning.Instance;
+        float chanceMult = gt != null ? gt.lootChanceMult : 1f;
+        float valuableMult = gt != null ? gt.valuableWeightMult : 1f;
+
+        // 귀중품(Valuable) 가중치 배율 적용한 유효 가중치 (valuableMult=1이면 원본과 동일)
+        float[] effWeights = new float[p.entries.Length];
         float totalWeight = 0f;
         for (int i = 0; i < p.entries.Length; i++)
-            totalWeight += p.entries[i].weight;
+        {
+            float w = p.entries[i].weight;
+            if (valuableMult != 1f)
+            {
+                var d = ItemDatabase.Get(p.entries[i].itemId);
+                if (d != null && d.category == ItemCategory.Valuable)
+                    w *= valuableMult;
+            }
+            effWeights[i] = w;
+            totalWeight += w;
+        }
 
         if (totalWeight <= 0f) return new ItemInstance[0];
 
         var results = new List<ItemInstance>();
         for (int r = 0; r < p.rollCount; r++)
         {
+            // 전역 드랍 확률 게이트 (chanceMult>=1이면 항상 통과 = 기존 동작)
+            if (chanceMult < 1f && Random.value >= chanceMult) continue;
+
             float roll = Random.Range(0f, totalWeight);
             float cumulative = 0f;
             for (int i = 0; i < p.entries.Length; i++)
             {
-                cumulative += p.entries[i].weight;
+                cumulative += effWeights[i];
                 if (roll > cumulative) continue;
 
                 var e = p.entries[i];

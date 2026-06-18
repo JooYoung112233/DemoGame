@@ -71,10 +71,16 @@ public class MapSpawnProfile : ScriptableObject
     [Range(0.5f, 3f)]
     public float nightQualityMultiplier = 1.5f;
 
+    /// <summary>전역 아이템 스폰 총량 배율 (GameTuning, 에셋 없으면 1f = 동일)</summary>
+    static float GlobalSpawnMult()
+    {
+        return GameTuning.Instance != null ? GameTuning.Instance.itemSpawnCountMult : 1f;
+    }
+
     /// <summary>실제 바닥 아이템 예산 (배율 적용)</summary>
     public int GetGroundBudget(bool isNight)
     {
-        float mult = spawnMultiplier * (isNight ? nightSpawnMultiplier : 1f);
+        float mult = spawnMultiplier * (isNight ? nightSpawnMultiplier : 1f) * GlobalSpawnMult();
         int min = Mathf.RoundToInt(groundItemBudget.start * mult);
         int max = Mathf.RoundToInt((groundItemBudget.start + groundItemBudget.length) * mult);
         return Random.Range(min, max + 1);
@@ -83,7 +89,7 @@ public class MapSpawnProfile : ScriptableObject
     /// <summary>실제 상자 아이템 예산 (배율 적용)</summary>
     public int GetContainerBudget(bool isNight)
     {
-        float mult = spawnMultiplier * (isNight ? nightSpawnMultiplier : 1f);
+        float mult = spawnMultiplier * (isNight ? nightSpawnMultiplier : 1f) * GlobalSpawnMult();
         int min = Mathf.RoundToInt(containerItemBudget.start * mult);
         int max = Mathf.RoundToInt((containerItemBudget.start + containerItemBudget.length) * mult);
         return Random.Range(min, max + 1);

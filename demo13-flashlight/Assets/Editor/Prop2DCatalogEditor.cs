@@ -14,7 +14,11 @@ public class Prop2DCatalogEditor : EditorWindow
     const string PropFolder = "Assets/Resources/Props2D";
 
     [MenuItem("Tools/TopDown/맵/프롭 카탈로그")]
-    static void Open() => GetWindow<Prop2DCatalogEditor>("2D Prop Catalog");
+    static void Open()
+    {
+        var w = GetWindow<Prop2DCatalogEditor>("2D Prop Catalog");
+        w.minSize = new Vector2(760, 540);   // 2열(팔레트|편집폼) 들어가게 넉넉히
+    }
 
     List<Prop2DDefinition> _props = new();
     Prop2DDefinition _selected;
@@ -182,12 +186,27 @@ public class Prop2DCatalogEditor : EditorWindow
         EditorGUI.DrawRect(topSep, new Color(0f, 0f, 0f, 0.35f));
         EditorGUILayout.Space(2);
 
-        // 세로 레이아웃: 목록(위) → 구분선 → 편집 폼(아래). (가로 분할 시 목록이 좁아 버튼이 잘림)
+        // 라벨 폭 통일 — 좁은 열에서도 라벨/입력칸이 가지런하게.
+        EditorGUIUtility.labelWidth = 132f;
+
+        // 2열 레이아웃: 좌=팔레트(고정폭), 우=편집 폼(가변). 세로로 길던 걸 좌우로 나눠 스크롤↓.
+        EditorGUILayout.BeginHorizontal();
+
+        EditorGUILayout.BeginVertical(GUILayout.Width(LeftColW));
         DrawList();
-        var sep = GUILayoutUtility.GetRect(1, 2, GUILayout.ExpandWidth(true));
-        EditorGUI.DrawRect(sep, new Color(0, 0, 0, 0.3f));
+        EditorGUILayout.EndVertical();
+
+        var vsep = GUILayoutUtility.GetRect(2, 2, GUILayout.Width(2), GUILayout.ExpandHeight(true));
+        EditorGUI.DrawRect(vsep, new Color(0, 0, 0, 0.3f));
+
+        EditorGUILayout.BeginVertical();
         DrawForm();
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.EndHorizontal();
     }
+
+    const float LeftColW = 380f;   // 좌측 팔레트 열 폭(헤더 버튼이 안 잘리게 넉넉히)
 
     // ───────────────────────── 위: 목록 ─────────────────────────
     void DrawList()
@@ -289,7 +308,7 @@ public class Prop2DCatalogEditor : EditorWindow
         }
 
         EditorGUILayout.Space(2);
-        _listScroll = EditorGUILayout.BeginScrollView(_listScroll, GUILayout.Height(210));
+        _listScroll = EditorGUILayout.BeginScrollView(_listScroll, GUILayout.MinHeight(280), GUILayout.ExpandHeight(true));
         if (items.Count == 0)
             EditorGUILayout.LabelField("항목 없음 — '＋ 새 항목' 또는 일괄 등록으로 추가", EditorStyles.miniLabel);
         else if (_groupFilter == null)
