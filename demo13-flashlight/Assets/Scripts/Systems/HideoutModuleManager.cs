@@ -13,20 +13,21 @@ public class HideoutModuleManager : MonoBehaviour
 
     public struct Cost { public int scrap; public (string id, int qty)[] mats; }
 
-    static Cost C(int scrap, string id, int qty) => new Cost { scrap = scrap, mats = new[] { (id, qty) } };
+    // 다재료 비용: 한 레벨에 여러 종류 재료 소비. m = (재료id, 수량) 튜플들.
+    static Cost CM(int scrap, params (string id, int qty)[] m) => new Cost { scrap = scrap, mats = m };
     static Cost[] L(params Cost[] c) => c;
 
-    // module → [Lv1, Lv2, Lv3] 비용 (hideout_modules.csv 미러)
+    // module → [Lv1, Lv2, Lv3] 비용 (tools/balance/hideout_modules.csv 미러). 각 레벨 2~3종 재료 + 고티어는 루디(ruby_shard).
     static readonly Dictionary<string, Cost[]> Table = new Dictionary<string, Cost[]>
     {
-        ["stash"]     = L(C(10000, "scrap_metal", 5),    C(50000, "tool_part", 5),       C(160000, "circuit_board", 3)),
-        ["quarters"]  = L(C(12000, "cloth_rag", 5),      C(55000, "wood_plank", 5),      C(140000, "wood_plank", 10)),
-        ["workbench"] = L(C(15000, "tool_part", 3),      C(80000, "tool_part", 6),       C(220000, "circuit_board", 3)),
-        ["medbench"]  = L(C(12000, "chemical_flask", 2), C(60000, "chemical_flask", 4),  C(160000, "chemical_flask", 6)),
-        ["cooking"]   = L(C(10000, "scrap_metal", 3),    C(40000, "fuel_can", 1),        C(100000, "fuel_can", 2)),
-        ["generator"] = L(C(18000, "fuel_can", 2),       C(90000, "fuel_can", 3),        C(250000, "wire", 5)),
-        ["radio"]     = L(C(25000, "wire", 5),           C(110000, "circuit_board", 2),  C(280000, "circuit_board", 4)),
-        ["dispatch"]  = L(C(30000, "tool_part", 3),      C(130000, "circuit_board", 2),  C(380000, "circuit_board", 4)),
+        ["stash"]     = L(CM(10000, ("scrap_metal",5), ("screw",6)),        CM(50000,  ("tool_part",5), ("plastic_sheet",4), ("wood_plank",6)),  CM(160000, ("circuit_board",3), ("tool_part",8), ("ruby_shard",1))),
+        ["quarters"]  = L(CM(12000, ("cloth_rag",5), ("wood_plank",4)),     CM(55000,  ("wood_plank",6), ("plastic_sheet",4), ("tape_roll",3)),  CM(140000, ("wood_plank",10), ("cloth_rag",8), ("fuel_can",2))),
+        ["workbench"] = L(CM(15000, ("tool_part",3), ("scrap_metal",6)),    CM(80000,  ("tool_part",6), ("wire",5), ("screw",8)),                CM(220000, ("circuit_board",3), ("tool_part",8), ("ruby_shard",1))),
+        ["medbench"]  = L(CM(12000, ("chemical_flask",2), ("cloth_rag",4)), CM(60000,  ("chemical_flask",4), ("plastic_sheet",3), ("tape_roll",3)), CM(160000, ("chemical_flask",6), ("circuit_board",2), ("ruby_shard",1))),
+        ["cooking"]   = L(CM(10000, ("scrap_metal",3), ("fuel_can",1)),     CM(40000,  ("fuel_can",2), ("tool_part",3), ("wire",3)),             CM(100000, ("fuel_can",3), ("circuit_board",2), ("chemical_flask",2))),
+        ["generator"] = L(CM(18000, ("fuel_can",2), ("wire",4)),           CM(90000,  ("fuel_can",3), ("circuit_board",2), ("tool_part",4)),     CM(250000, ("wire",8), ("circuit_board",3), ("ruby_shard",2))),
+        ["radio"]     = L(CM(25000, ("wire",5), ("circuit_board",1)),       CM(110000, ("circuit_board",2), ("wire",6), ("tool_part",3)),        CM(280000, ("circuit_board",4), ("flashlight_bulb",2), ("ruby_shard",1))),
+        ["dispatch"]  = L(CM(30000, ("tool_part",3), ("wire",4)),          CM(130000, ("circuit_board",2), ("tool_part",5), ("screw",8)),       CM(380000, ("circuit_board",4), ("tool_part",8), ("ruby_shard",2))),
     };
 
     public static readonly string[] Modules =
@@ -57,9 +58,18 @@ public class HideoutModuleManager : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        SeedDefaultsIfEmpty();   // 새 게임: 침대(quarters)·창고(stash) 기본 Lv1 건설 상태
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
+
+    /// <summary>새 게임 기본 시설 — 침대·창고는 시작부터 Lv1. (이어하기 시 LoadSaveData가 저장값으로 덮어씀.)</summary>
+    void SeedDefaultsIfEmpty()
+    {
+        if (levels.Count > 0) return;
+        levels["quarters"] = 1;
+        levels["stash"]    = 1;
+    }
 
     public int GetLevel(string m) => levels.TryGetValue(m, out var l) ? l : 0;
     public bool IsMaxed(string m) => GetLevel(m) >= MaxLevel;
