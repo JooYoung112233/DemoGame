@@ -18,8 +18,8 @@ public class SleepUI : MonoBehaviour
     // 수면 시간별 회복/차감 (그레이박스 기본값 — 8h ≈ 각 -25)
     static readonly Option[] Options =
     {
-        new Option { label = "4시간 수면", hours = 4f, hpPct = 0.40f, water = 12f, satiety = 12f },
-        new Option { label = "8시간 수면", hours = 8f, hpPct = 1.00f, water = 25f, satiety = 25f },
+        new Option { label = "4시간 수면", hours = 4f, hpPct = 0.40f, water = 18f, satiety = 18f },
+        new Option { label = "8시간 수면", hours = 8f, hpPct = 1.00f, water = 38f, satiety = 38f },
     };
 
     Canvas canvas;

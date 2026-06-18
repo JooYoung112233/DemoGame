@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 /// 둘 중 하나라도 0이면 페널티: 서서히 HP 감소. 회복: 음식=포만감, 음료/수면=조정.
 /// 플레이어 GO에 부착(없으면 자동 추가). SaveManager가 영속화.
 ///
-/// 기본 차감 속도(튜닝 가능): 수분 ≈ 30분, 포만감 ≈ 60분(레이드 실시간)에 0.
+/// 기본 차감 속도(튜닝 가능): 수분 ≈ 18분, 포만감 ≈ 36분(레이드 실시간)에 0.
 /// (기획 의도 "수분 6h / 포만감 12h(게임시간)"의 그레이박스 매핑 — 추후 GameTuning 외부화.)
 /// </summary>
 public class SurvivalStats : MonoBehaviour
@@ -18,8 +18,8 @@ public class SurvivalStats : MonoBehaviour
     [SerializeField] float satiety = 100f;
 
     [Header("레이드 중 초당 감소량")]
-    [SerializeField] float waterDrainPerSec = 100f / (30f * 60f);
-    [SerializeField] float satietyDrainPerSec = 100f / (60f * 60f);
+    [SerializeField] float waterDrainPerSec = 100f / (18f * 60f);    // 수분 ≈18분에 0
+    [SerializeField] float satietyDrainPerSec = 100f / (36f * 60f);  // 포만감 ≈36분에 0
 
     [Header("0일 때 페널티 (빈 스탯 1개당 초당 HP 감소)")]
     [SerializeField] float starveHpPerSec = 0.6f;

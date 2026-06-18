@@ -95,8 +95,9 @@
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | [`medical.md`](medical.md) | 5부위(머리/몸통/양팔/좌다리/우다리), 3부상(출혈/골절/통증), 치료 아이템·메커니즘 | 기획 확정, 코드 구현 |
+| [`survival.md`](survival.md) | 생존 스탯(수분/포만감) — 레이드 중 시간 기반 차감, 0 시 HP DoT, 수면·음식 회복. 차감속도/수면/음식 effectValue 수치(2026-06-18 튜닝) | 코드 구현 |
 
-핵심 코드: `PlayerMedicalSystem.cs`, `MedicalHUD.cs`, `MedicalItemData.cs`
+핵심 코드: `PlayerMedicalSystem.cs`, `MedicalHUD.cs`, `MedicalItemData.cs`, `SurvivalStats.cs`, `SleepUI.cs`
 
 ### 🏠 안전가옥
 
