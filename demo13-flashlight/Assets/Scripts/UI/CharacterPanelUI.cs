@@ -104,7 +104,7 @@ public class CharacterPanelUI : MonoBehaviour
     Image highlightImage;
 
     // ── 가방 미장착 안내 ──
-    GameObject invPlaceholder; // 중앙열: 가방 미장착 시 안내
+    RectTransform invPlaceholder; // 중앙열: 가방 미장착 시 안내
     Text bagHeaderText;        // "가방" 헤더 텍스트 (동적 갱신용)
 
     // ── 우클릭 컨텍스트 메뉴 ──
