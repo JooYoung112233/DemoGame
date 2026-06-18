@@ -436,15 +436,40 @@ public class CharacterPanelUI : MonoBehaviour
         searchStatusText = MakeText(leftPanel, "SearchStatus", "",
             new Vector2(10, -32), new Vector2(PANEL_WIDTH - 20, 18), 12, new Color(0.6f, 0.8f, 1f), TextAnchor.MiddleCenter);
 
-        // 격자 루트
+        // 정렬 버튼 (창고/상자 내 자동 정렬)
+        var sortGO = new GameObject("SortBtn", typeof(RectTransform));
+        sortGO.transform.SetParent(leftPanel, false);
+        var sortRT = sortGO.GetComponent<RectTransform>();
+        sortRT.anchorMin = sortRT.anchorMax = sortRT.pivot = new Vector2(1, 1);
+        sortRT.anchoredPosition = new Vector2(-8, -6);
+        sortRT.sizeDelta = new Vector2(56, 24);
+        sortGO.AddComponent<Image>().color = new Color(0.2f, 0.32f, 0.5f);
+        sortGO.AddComponent<Button>().onClick.AddListener(SortLeftGrid);
+        MakeChildText(sortGO.transform, "정렬", 13, new Color(0.9f, 0.95f, 1f));
+
+        // ── 스크롤 뷰포트 (헤더 아래 영역) + 격자 content (창고 30~100줄 대응) ──
+        var viewportGO = new GameObject("LeftViewport", typeof(RectTransform), typeof(RectMask2D), typeof(ScrollRect));
+        viewportGO.transform.SetParent(leftPanel, false);
+        var vpRT = viewportGO.GetComponent<RectTransform>();
+        vpRT.anchorMin = new Vector2(0, 0); vpRT.anchorMax = new Vector2(1, 1);
+        vpRT.offsetMin = new Vector2(8, 8); vpRT.offsetMax = new Vector2(-8, -52);
+
+        // 격자 루트 = 스크롤 content. pivot(0,1) 유지 → ScreenToGridCell 히트테스트 정상.
         var gridGO = new GameObject("ContainerGrid");
-        gridGO.transform.SetParent(leftPanel, false);
+        gridGO.transform.SetParent(viewportGO.transform, false);
         containerGridRoot = gridGO.AddComponent<RectTransform>();
         containerGridRoot.anchorMin = new Vector2(0, 1);
         containerGridRoot.anchorMax = new Vector2(0, 1);
         containerGridRoot.pivot = new Vector2(0, 1);
-        containerGridRoot.anchoredPosition = new Vector2(10, -54);
+        containerGridRoot.anchoredPosition = Vector2.zero;
         containerGridRoot.sizeDelta = new Vector2(PANEL_WIDTH - 20, 400);
+
+        var leftScroll = viewportGO.GetComponent<ScrollRect>();
+        leftScroll.horizontal = false; leftScroll.vertical = true;
+        leftScroll.scrollSensitivity = 28f;
+        leftScroll.movementType = ScrollRect.MovementType.Clamped;
+        leftScroll.viewport = vpRT;
+        leftScroll.content = containerGridRoot;
 
         leftPanelRoot.SetActive(false);
 
@@ -988,6 +1013,9 @@ public class CharacterPanelUI : MonoBehaviour
             Destroy(containerGridRoot.GetChild(i).gameObject);
         int cellTotal = CELL_SIZE + CELL_GAP;
 
+        // 스크롤 content 높이를 격자 줄 수에 맞춤 (창고 30~100줄)
+        containerGridRoot.sizeDelta = new Vector2(grid.width * cellTotal, grid.height * cellTotal + 4);
+
         containerSlotImages = new Image[grid.width, grid.height];
         for (int gy = 0; gy < grid.height; gy++)
         {
@@ -1010,6 +1038,38 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 아이템 표시 (인벤토리와 동일 패턴)
         RefreshContainerItems(grid, containerGridRoot);
+    }
+
+    /// <summary>정렬 버튼 → 현재 열린 창고/상자 격자를 자동 정렬 후 다시 그림.</summary>
+    void SortLeftGrid()
+    {
+        var grid = LeftGrid;
+        if (grid == null) return;
+        // 수색 중인 루팅 상자는 정렬 금지(공개 전 위치 흔들림 방지)
+        if (leftPanelSearchEnabled && isSearching) return;
+        SortGrid(grid);
+        RefreshLeftGrid(grid);
+    }
+
+    /// <summary>격자 내 아이템을 비우고 큰 것→카테고리→이름 순으로 재배치(촘촘히 패킹).</summary>
+    void SortGrid(InventoryGrid grid)
+    {
+        var placed = grid.GetAll();   // 복사본
+        var items = new System.Collections.Generic.List<ItemInstance>();
+        foreach (var p in placed) { items.Add(p.item); grid.Remove(p); }
+
+        items.Sort((a, b) =>
+        {
+            int sa = a.data.gridWidth * a.data.gridHeight;
+            int sb = b.data.gridWidth * b.data.gridHeight;
+            if (sb != sa) return sb - sa;                       // 큰 것 먼저(패킹 효율)
+            int ca = (int)a.data.category, cb = (int)b.data.category;
+            if (ca != cb) return ca - cb;                       // 카테고리
+            return string.Compare(a.data.displayName, b.data.displayName, System.StringComparison.Ordinal);
+        });
+
+        foreach (var it in items)
+            grid.TryAutoPlace(it);   // 같은 격자에서 뺀 것이라 공간은 충분
     }
 
     void RefreshContainerItems(InventoryGrid grid, RectTransform gridRoot)
