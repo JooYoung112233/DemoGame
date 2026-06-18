@@ -307,6 +307,9 @@ public class DialogueUI : MonoBehaviour
                     case QuestRewardType.Trust:
                         rewardText += $"\n  ✦ 신뢰도 +{r.amount}";
                         break;
+                    case QuestRewardType.Recipe:
+                        rewardText += $"\n  ✦ 레시피 해금: {r.itemId}";
+                        break;
                 }
             }
             ShowLines(currentNPC.displayName, new[] { rewardText }, rel);

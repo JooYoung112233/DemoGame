@@ -22,6 +22,7 @@ public enum QuestRewardType
     Currency,
     Affinity,
     Trust,
+    Recipe,   // itemId = 해금할 recipeId (CraftingSystem.UnlockRecipe)
 }
 
 public enum QuestState

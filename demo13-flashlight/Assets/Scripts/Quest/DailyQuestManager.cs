@@ -59,12 +59,23 @@ public class DailyQuestManager : MonoBehaviour
 
     void LoadQuestPool()
     {
-        if (dailyQuestPool == null || dailyQuestPool.Length == 0)
-        {
-            dailyQuestPool = Resources.LoadAll<QuestData>("Data/DailyQuests");
-            if (dailyQuestPool.Length == 0)
-                Debug.LogWarning("[DailyQuest] Resources/Data/DailyQuests/ 에 퀘스트 데이터가 없습니다.");
-        }
+        if (dailyQuestPool != null && dailyQuestPool.Length > 0) return;
+
+        var list = new List<QuestData>();
+        var dedicated = Resources.LoadAll<QuestData>("Data/DailyQuests");
+        if (dedicated != null) list.AddRange(dedicated);
+
+        // 별도 DailyQuests 폴더가 비어도, Data/Quests의 반복 의뢰(isRepeatable=DQ-*)를 일일 풀로 사용.
+        // (DQ를 Data/Quests에 두어 SaveManager/StoryPlayer의 id 로드를 깨지 않게 함)
+        var all = Resources.LoadAll<QuestData>("Data/Quests");
+        if (all != null)
+            foreach (var q in all)
+                if (q != null && q.isRepeatable && !list.Exists(x => x != null && x.questId == q.questId))
+                    list.Add(q);
+
+        dailyQuestPool = list.ToArray();
+        if (dailyQuestPool.Length == 0)
+            Debug.LogWarning("[DailyQuest] 일일 의뢰 풀이 비었습니다 (Data/DailyQuests/ 또는 Data/Quests/ 반복 의뢰).");
     }
 
     /// <summary>

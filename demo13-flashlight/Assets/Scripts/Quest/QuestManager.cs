@@ -136,6 +136,14 @@ public class QuestManager : MonoBehaviour
                         }
                     }
                     break;
+                case QuestRewardType.Recipe:
+                    // itemId = 해금할 recipeId
+                    if (CraftingSystem.Instance != null && !string.IsNullOrEmpty(reward.itemId))
+                    {
+                        bool ok = CraftingSystem.Instance.UnlockRecipe(reward.itemId);
+                        if (ok) ToastManager.Show($"새 레시피 해금: {reward.itemId}", ToastManager.ToastType.Success);
+                    }
+                    break;
             }
         }
     }

@@ -719,6 +719,9 @@ public class QuestLogUI : MonoBehaviour
                 case QuestRewardType.Trust:
                     parts.Add("신뢰 +" + r.amount);
                     break;
+                case QuestRewardType.Recipe:
+                    parts.Add("레시피 해금: " + (string.IsNullOrEmpty(r.itemId) ? "?" : r.itemId));
+                    break;
             }
         }
         return parts.Count > 0 ? string.Join(", ", parts) : "(없음)";
