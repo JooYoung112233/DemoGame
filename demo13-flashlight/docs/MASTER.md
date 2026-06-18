@@ -53,6 +53,8 @@
 | [`dev-roadmap.md`](dev-roadmap.md) | 10단계 개발 로드맵 + 단계 상세 + **미구현/마무리 필요 목록**. 현재 Stage 2 | 진행 중 |
 | [`backlog-ui.csv`](backlog-ui.csv) | **UI 제작 백로그** — 신규/확장/기존 UI 18종(우선순위·시스템·문서) | 2026-06-10 |
 | [`backlog-impl.csv`](backlog-impl.csv) | **구현/테스트 백로그** — 시스템·데이터·밸런스 27건(의존·우선순위·문서) | 2026-06-10 |
+| [`balance.md`](balance.md) | **밸런스 단일 컨트롤 표면** — 어떤 밸런스 값이 어디 있나 색인. GameTuning 필드 전체(시간·레이드·수색·드랍·생존·수면·아노말리) + 데이터 파일(region_loot=맵드랍, StatDB=전투, reputation csv) | 2026-06-18 |
+| [`tuning.md`](tuning.md) | **Control Panel 메커니즘** — GameTuning SO + Tools▸TopDown▸컨트롤 패널(필드 자동 노출)·맵 통계. 값 추가법 | 참고 |
 | [`editor-tools.md`](editor-tools.md) | **에디터 도구 카탈로그** — Tools▸TopDown 메뉴 전체(밸런스·빌드·맵·초기설정) 무엇/파일 | 2026-06-10 |
 | [`ai-images.md`](ai-images.md) | **AI 이미지 정리** — 만든 것(GPT ~143장 인벤토리)·적용상태(아이콘 0/204)·만들 것 요약 | 2026-06-10 |
 | [`tooling.md`](tooling.md) | **에디터 도구 인덱스** — 모든 커스텀 메뉴를 `Tools/TopDown/`(Build/Combat/Map/Data/Utility)로 통합. Attack Editor 상세 | 참고 |

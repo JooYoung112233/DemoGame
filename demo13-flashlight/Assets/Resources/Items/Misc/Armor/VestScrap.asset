@@ -23,7 +23,7 @@ MonoBehaviour:
   maxStack: 1
   weight: 2.5
   sellPrice: 4000
-  buyPrice: 0
+  buyPrice: 10000
   isUsable: 0
   useEffect: 0
   effectValue: 0

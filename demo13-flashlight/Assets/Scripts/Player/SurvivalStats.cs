@@ -8,7 +8,8 @@ using UnityEngine.SceneManagement;
 /// 플레이어 GO에 부착(없으면 자동 추가). SaveManager가 영속화.
 ///
 /// 기본 차감 속도(튜닝 가능): 수분 ≈ 18분, 포만감 ≈ 36분(레이드 실시간)에 0.
-/// (기획 의도 "수분 6h / 포만감 12h(게임시간)"의 그레이박스 매핑 — 추후 GameTuning 외부화.)
+/// (기획 의도 "수분 6h / 포만감 12h(게임시간)"의 그레이박스 매핑.)
+/// 차감/아사 수치는 GameTuning(survival*) 경유 — 에셋 없으면 아래 SerializeField 기본값으로 폴백.
 /// </summary>
 public class SurvivalStats : MonoBehaviour
 {
@@ -35,17 +36,49 @@ public class SurvivalStats : MonoBehaviour
 
     void Awake() { _health = GetComponent<Health>(); }
 
+    // ── 밸런스 값 (GameTuning 경유, 에셋 없으면 SerializeField 기본값으로 폴백) ──
+    float WaterDrainPerSec
+    {
+        get
+        {
+            var t = GameTuning.Instance;
+            if (t != null && t.survivalWaterMinutesToEmpty > 0f)
+                return Max / (t.survivalWaterMinutesToEmpty * 60f);
+            return waterDrainPerSec;
+        }
+    }
+
+    float SatietyDrainPerSec
+    {
+        get
+        {
+            var t = GameTuning.Instance;
+            if (t != null && t.survivalSatietyMinutesToEmpty > 0f)
+                return Max / (t.survivalSatietyMinutesToEmpty * 60f);
+            return satietyDrainPerSec;
+        }
+    }
+
+    float StarveHpPerSec
+    {
+        get
+        {
+            var t = GameTuning.Instance;
+            return t != null ? t.survivalStarveHpPerSec : starveHpPerSec;
+        }
+    }
+
     void Update()
     {
         if (!InRaid()) return;
 
         float dt = Time.deltaTime;
-        water = Mathf.Max(0f, water - waterDrainPerSec * dt);
-        satiety = Mathf.Max(0f, satiety - satietyDrainPerSec * dt);
+        water = Mathf.Max(0f, water - WaterDrainPerSec * dt);
+        satiety = Mathf.Max(0f, satiety - SatietyDrainPerSec * dt);
 
         int empty = (water <= 0f ? 1 : 0) + (satiety <= 0f ? 1 : 0);
         if (empty > 0 && _health != null && !_health.IsDead)
-            _health.TakeDamage(starveHpPerSec * empty * dt, null, true);  // silent(DoT)
+            _health.TakeDamage(StarveHpPerSec * empty * dt, null, true);  // silent(DoT)
     }
 
     static bool InRaid()

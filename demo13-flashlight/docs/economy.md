@@ -54,6 +54,26 @@
   - 예: 통조림 정가 3 → 떠돌이 구매가 ≈ 4 스크랩 / 물병 2 → ≈ 3 스크랩.
 - **평판 게이트**: 평판(이름값)↑ → **지역 상점(건물) 해금** → 정가 거래(buyRate≈1.0, sellRate 0.6) → 떠돌이보다 유리. [→ quest.md 평판, safehouse.md 시설 슬롯]
 
+## 전당포(Shop_pawnshop) 진열 — 대폭 확장 (2026-06-18)
+
+`Shop_pawnshop.asset`의 `stock`을 4종 → **66종**으로 확장. "무기/장비가 비어보이지 않게" 거의 모든 거래 가능 아이템을 진열.
+
+- **진열 조건**: ShopUI 구매 탭은 `shop.stock`의 각 아이템 중 `BuyPrice(item) > 0`(= `item.buyPrice > 0`)인 것만 표시. 따라서 stock에 넣을 때 해당 ItemData의 `buyPrice`가 0보다 커야 진열됨.
+- **평판 게이트**: 희귀도→평판등급 매핑(`RarityToRepTier`)으로 Common/Uncommon=F(항상 보임), Rare=D, Epic=B, Legendary=A 미만이면 **잠금 셀**로 표시(stock엔 그대로 둠).
+- **buyPrice 신규 설정**: 기존 무기·장비는 `buyPrice=0`(상점 미판매)이라 진열 불가였음 → 거래 가능하도록 `buyPrice ≈ sellPrice × 2.5`(전당포 house 비율 ~2.4)로 설정. `useEffect`/능력치는 미변경.
+
+| 분류 | 수 | buyPrice 신규 설정 항목 |
+|------|---:|------|
+| 무기(근접 10) | 10 | bat/knife/pipe/pipe_worn/wood_club=3000, axe/hammer/spear=7500, long_sword=12000, anomaly_blade=14000 |
+| 방어구·장비(6) | 6 | helmet_bucket/boots_rubber/gloves_work/coat_light=4500, vest_scrap=10000, armor_night=16000 |
+| 의료(13) | 13 | (기존 buyPrice 보유, 변경 없음) |
+| 소비-음식/음료(13) | 13 | special_meal=8000(기존 0) — 나머지 변경 없음 |
+| 소비-유틸(6) | 6 | (battery_aa·repair_kit·stim_injector·adrenaline_shot·smoke_bomb·phenom_meter, 기존값) |
+| 소비-식재료(6) | 6 | (기존값) |
+| 재료(12) | 12 | (기존값) |
+
+- 미진열 의도 제외: **Valuable(귀중품)/Key(열쇠)/Junk·Story·Regional(잡템·스토리·지역품)** 은 buyPrice=0(판매 전용·서사용)이라 진열 대상 아님 — 그대로 둠.
+
 ## 화폐 시스템 구조 (2026-05-30 구현)
 
 모든 **스크랩** 흐름은 `CurrencyManager` 싱글톤 하나를 거친다.
@@ -91,4 +111,5 @@
 | 2026-06-08 | 루디와 스크랩 명칭 혼동 | **이원 경제 명확화.** **스크랩** = 일상 화폐(`CurrencyManager`, UI·상점 표기). **루디** = `ruby_shard` 특수 자원(인벤·연료·납품) — **둘 다 존재**, 역할만 분리. | 구현상 화폐 잔액=스크랩만. 루디는 아이템. 납품 시 스크랩 보상. |
 | 2026-06-17 | 회수꾼·관리인 NPC 상점 필요 | **Shop_scavenger**(buyRate 1.2/sellRate 0.4, 생필품+재료 8종) + **Shop_warden**(buyRate 0.9/sellRate 0.5, 프리미엄 6종) ShopData 신설. NPC shopData 연결 + 거래 대화 추가. 관리인은 minAffinity 30 게이트. | 떠돌이 외 NPC별 차별화 상점으로 경제 순환 확장. 회수꾼=생존물자 할증, 관리인=신뢰 기반 정가 보급. |
 | 2026-06-17 | 떠돌이 상인 ShopData·NPCData 실 에셋 부재(기획만 존재) | **`Shop_merchant.asset`**(shopId=merchant, buyRate 1.4/sellRate 0.45, 생필품 7종: canned_food·water_bottle·energy_bar·soda_can·bandage·battery_aa·painkiller) + **`wandering_merchant.asset`**(NPCData, greet 1 + trade 이벤트 대화: "거래하기"→openShop / "됐어") 신설. NPC shopData→Shop_merchant GUID 연결 완료. | 2026-06-05 기획 떠돌이 상인을 실제 SO로 구현. 배율은 기존 기획값(1.4/0.45) 그대로. |
+| 2026-06-18 | 전당포 판매 물량이 너무 적고(stock 4종) 무기·장비가 아무것도 없음 → "우리 있는 아이템 전부 추가" | **`Shop_pawnshop.asset` stock 4종 → 66종 확장.** 무기 10·방어구 6·의료 13·소비(음식/유틸/식재료) 25·재료 12. 진열 안 되던 무기·장비는 `buyPrice=0`→`sellPrice×2.5`로 설정(무기 3000~14000, 장비 4500~16000, special_meal 8000). 능력치·useEffect는 미변경. Valuable/Key/Junk/Story/Regional(buyPrice 0=판매전용)은 제외. **아이템 참조 검증**: 기존 stock 4종 + 신규 62종 전부 실존 ItemData에 연결됨(깨진 GUID 없음), 모두 buyPrice>0 확인. | "장비가 비어보임" 해소. 진열 조건은 buyPrice>0(ShopUI `price<=0 continue`), 희귀도는 평판 잠금셀로만 표시되므로 stock엔 광범위 진열 가능. |
 | 2026-06-18 | 상점 위탁(consignment) 탭이 placeholder(준비 중) | **위탁 그레이박스 구현(ShopUI 위탁 탭).** 위탁가 = 직접 판매가(sellRate 기반) **×1.5(올림)**. 슬롯 **3개**(상점 공용, 런타임 전용·세이브 안 함). 가방 판매가능 아이템 클릭 → 빈 슬롯에 올림(그리드 1개 제거) → **30초**(unscaledTime) 후 정산완료 → 클릭 시 `CurrencyManager.Add(위탁가, "위탁 정산")`. | 위탁 = 직접 판매보다 높은 정산이지만 시간이 걸리는 트레이드오프. 30초·1.5배·슬롯3은 그레이박스 placeholder 수치(TBD). |

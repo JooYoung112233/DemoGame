@@ -192,7 +192,9 @@ public class InteractableObject : MonoBehaviour, IInteractable
     {
         if (!CanInteract) return;
 
-        if (oneShot) used = true;
+        // Pickup은 '성공'해야 소진 — 실패(공간/가방 부족) 시 프롬프트·이름 유지 + 재시도 가능.
+        // 그 외 oneShot(쪽지 등)은 즉시 소진.
+        if (oneShot && type != InteractType.Pickup) used = true;
 
         // 이벤트 발행
         OnInteracted?.Invoke(playerGO);
@@ -341,10 +343,12 @@ public class InteractableObject : MonoBehaviour, IInteractable
                             StoryTriggerManager.Instance.OnRudiPickup();
                     }
 
+                    used = true;                                   // 성공 시에만 소진
                     if (oneShot) gameObject.SetActive(false);
                 }
                 else
                 {
+                    // 실패 → used 유지(false). 프롬프트·이름 그대로, 공간 확보 후 재시도 가능.
                     string reason = inventory.HasBackpack ? "인벤토리 공간 부족" : "가방을 장착하세요";
                     Debug.Log($"[Pickup] {reason}");
                     ToastManager.Show(reason, ToastManager.ToastType.Warning);
@@ -354,6 +358,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
         else
         {
             Debug.Log($"[Pickup] {itemId} x{itemCount} (ItemDatabase 미등록)");
+            used = true;
             if (oneShot) gameObject.SetActive(false);
         }
     }

@@ -1371,7 +1371,25 @@ public class CharacterPanelUI : MonoBehaviour
             // 우클릭 컨텍스트 메뉴
             if (Input.GetMouseButtonDown(1))
                 TryShowContextMenu();
+
+            // Del 키: 마우스 위 내 아이템 버리기 (드래그 버리기 대체 수단)
+            if (Input.GetKeyDown(KeyCode.Delete))
+                TryDiscardItemUnderMouse();
         }
+    }
+
+    /// <summary>마우스 아래 플레이어 아이템을 버린다(= 우클릭 버리기와 동일: 레이드=바닥 산포 / 안전구역=인벤 복귀).</summary>
+    void TryDiscardItemUnderMouse()
+    {
+        if (playerInventory == null || playerInventory.Grid == null) return;
+        int gx, gy;
+        if (!ScreenToGridCell(invGridRoot, playerInventory.Grid, out gx, out gy)) return;
+        var placed = playerInventory.Grid.GetAt(gx, gy);
+        if (placed == null || placed.item.data == null) return;
+        var item = placed.item;
+        playerInventory.Grid.Remove(placed);
+        DropOrReturnItem(item);
+        RefreshAllGrids();
     }
 
     // ── 픽업 ──
@@ -1731,8 +1749,8 @@ public class CharacterPanelUI : MonoBehaviour
             }
             if (!placedOld)
                 placedOld = grid.TryAutoPlace(oldItem);
-            if (!placedOld && playerGO != null)
-                WorldItem.Drop(oldItem, playerGO.transform.position + playerGO.transform.right * 0.8f);
+            if (!placedOld)
+                ReturnItemToInventory(oldItem);   // 스왑 오버플로도 바닥 X
 
             EndDrag();
             return true; // 스왑 완료
@@ -1780,12 +1798,48 @@ public class CharacterPanelUI : MonoBehaviour
 
     void DropDraggedToWorld()
     {
-        if (dragItem != null && playerGO != null)
-        {
-            WorldItem.Drop(dragItem, playerGO.transform.position + playerGO.transform.right * 0.8f);
-            Debug.Log($"[Inventory] {dragItem.DisplayName} 월드 드롭");
-        }
+        // 드래그로는 바닥에 못 버림(요청) — 격자 밖에 놓으면 인벤/창고로 되돌림.
+        // 바닥 버리기는 우클릭 '버리기' 또는 Del 키로만.
+        ReturnItemToInventory(dragItem);
         EndDrag();
+    }
+
+    /// <summary>아이템을 가방(없으면 창고)로 되돌린다 — 드래그-아웃/스왑오버플로용(바닥 X).</summary>
+    void ReturnItemToInventory(ItemInstance item)
+    {
+        if (item == null) return;
+        if (playerInventory != null && playerInventory.Grid != null && playerInventory.Grid.TryAutoPlace(item)) return;
+        var stash = MainStash.Instance != null ? MainStash.Instance.GetGrid() : null;
+        if (stash != null && stash.TryAutoPlace(item)) return;
+        ToastManager.Show("공간이 없다", ToastManager.ToastType.Warning);
+    }
+
+    /// <summary>아이템을 바닥에 떨군다 — 단 안전구역에선 바닥 금지(가방→창고로 되돌림). 레이드에선 흩어지게 드롭.</summary>
+    void DropOrReturnItem(ItemInstance item)
+    {
+        if (item == null) return;
+
+        if (IsSafeArea())
+        {
+            // 안전구역: 바닥에 못 버림 → 가방, 안 되면 창고로 되돌림
+            if (playerInventory != null && playerInventory.Grid != null && playerInventory.Grid.TryAutoPlace(item)) return;
+            var stash = MainStash.Instance != null ? MainStash.Instance.GetGrid() : null;
+            if (stash != null && stash.TryAutoPlace(item)) return;
+            ToastManager.Show("안전구역에선 바닥에 버릴 수 없다 (공간 부족)", ToastManager.ToastType.Warning);
+            return;
+        }
+
+        // 레이드: 플레이어 주변에 흩어지게 드롭
+        if (playerGO != null)
+            WorldItem.Drop(item, ScatterPos());
+    }
+
+    /// <summary>플레이어 주변 반경 내 랜덤 위치(바닥 드롭 산포용).</summary>
+    Vector3 ScatterPos()
+    {
+        Vector3 basePos = playerGO != null ? playerGO.transform.position : Vector3.zero;
+        Vector2 r = Random.insideUnitCircle * 0.8f;
+        return basePos + new Vector3(r.x, r.y, 0f);
     }
 
     // ── 우클릭 컨텍스트 메뉴 ──
@@ -1886,10 +1940,11 @@ public class CharacterPanelUI : MonoBehaviour
             y -= 26f;
         }
 
-        // 사용 (isUsable + 플레이어 인벤토리만)
+        // 사용/먹기 (isUsable + 플레이어 인벤토리만). 먹을거=먹기, 그 외=사용
         if (data.isUsable && isPlayerGrid)
         {
-            AddContextButton("사용", new Color(0.3f, 0.9f, 0.4f), y, () =>
+            string useLabel = data.category == ItemCategory.Consumable ? "먹기" : "사용";
+            AddContextButton(useLabel, new Color(0.3f, 0.9f, 0.4f), y, () =>
             {
                 playerInventory.UseItem(contextTarget);
                 HideContextMenu();
@@ -1913,8 +1968,7 @@ public class CharacterPanelUI : MonoBehaviour
             {
                 var item = contextTarget.item;
                 grid.Remove(contextTarget);
-                if (playerGO != null)
-                    WorldItem.Drop(item, playerGO.transform.position + playerGO.transform.right * 0.8f);
+                DropOrReturnItem(item);
                 HideContextMenu();
                 RefreshAllGrids();
             });

@@ -15,12 +15,23 @@ public class SleepUI : MonoBehaviour
 
     struct Option { public string label; public float hours; public float hpPct; public float water; public float satiety; }
 
-    // 수면 시간별 회복/차감 (그레이박스 기본값 — 8h ≈ 각 -25)
-    static readonly Option[] Options =
+    // 수면 시간별 회복/차감.
+    // 수치는 GameTuning(sleep4h*/sleep8h*) 경유 — 에셋 없으면 아래 기본값으로 폴백(동일 값).
+    static Option[] BuildOptions()
     {
-        new Option { label = "4시간 수면", hours = 4f, hpPct = 0.40f, water = 18f, satiety = 18f },
-        new Option { label = "8시간 수면", hours = 8f, hpPct = 1.00f, water = 38f, satiety = 38f },
-    };
+        var t = GameTuning.Instance;
+        float h4Hp = t != null ? t.sleep4hHpPct   : 0.40f;
+        float h4W  = t != null ? t.sleep4hWater    : 18f;
+        float h4S  = t != null ? t.sleep4hSatiety  : 18f;
+        float h8Hp = t != null ? t.sleep8hHpPct    : 1.00f;
+        float h8W  = t != null ? t.sleep8hWater     : 38f;
+        float h8S  = t != null ? t.sleep8hSatiety   : 38f;
+        return new[]
+        {
+            new Option { label = "4시간 수면", hours = 4f, hpPct = h4Hp, water = h4W, satiety = h4S },
+            new Option { label = "8시간 수면", hours = 8f, hpPct = h8Hp, water = h8W, satiety = h8S },
+        };
+    }
 
     Canvas canvas;
     GameObject panel;
@@ -206,12 +217,13 @@ public class SleepUI : MonoBehaviour
         statusText.color = new Color(0.75f, 0.8f, 0.9f);
 
         // 수면 시간 옵션 버튼
+        var options = BuildOptions();
         float btnW = 320f, btnH = 150f, gap = 24f;
-        float totalW = btnW * Options.Length + gap * (Options.Length - 1);
+        float totalW = btnW * options.Length + gap * (options.Length - 1);
         float startX = -totalW / 2f + btnW / 2f;
-        for (int i = 0; i < Options.Length; i++)
+        for (int i = 0; i < options.Length; i++)
         {
-            var o = Options[i];
+            var o = options[i];
             var btnGO = NewRect($"Opt_{i}", win.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             var brt = btnGO.GetComponent<RectTransform>();
             brt.anchoredPosition = new Vector2(startX + i * (btnW + gap), -20);

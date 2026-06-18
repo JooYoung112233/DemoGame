@@ -1,0 +1,108 @@
+# 밸런스 단일 컨트롤 표면 (Balance Control Surface)
+
+> **이 문서 = "어떤 밸런스 값이 어디에 있나"의 단일 색인.**
+> 수치를 바꿀 때 "코드 어디를 뒤져야 하지?"를 없애기 위한 지도.
+> 튜닝 가능한 전역 값은 전부 **`GameTuning`(Control Panel)** 에 모이고, 양이 많은 테이블형 데이터(드랍·전투·평판)는 **데이터 파일**에 둔다.
+
+관련 문서: [`tuning.md`](tuning.md)(Control Panel 메커니즘), [`survival.md`](survival.md)(생존 수치 의미), [`combat.md`](combat.md)(전투), [`region-loot.md`](region-loot.md)(드랍 테이블).
+
+---
+
+## 1. 단일 진실원 (영역별)
+
+| 밸런스 영역 | 단일 진실원(SSOT) | 조정 방법 |
+|------------|-------------------|-----------|
+| 시간(낮/밤) · 레이드 · 수색 · 드랍 배율 · 아노말리 · **생존** · **수면** | **`GameTuning`** SO (`Assets/Resources/Data/GameTuning.asset`) | **Control Panel** (`Tools ▸ TopDown ▸ 컨트롤 패널`) — 필드 자동 노출 |
+| 맵별 드랍 테이블 (어떤 아이템이 얼마나 나오나) | `tools/region_loot.csv` → `Assets/Resources/region_loot.txt` (런타임은 `.txt`를 `RegionLootCatalog`가 읽음) | CSV 편집 후 `.txt`로 반영 (드랍 **수량 배율**만 GameTuning.lootCountMult) |
+| 전투 수치 (플레이어/적 스탯) | `StatDB` SO (`Assets/Resources/Data/StatDB.asset`) | StatDB 에디터 / 인스펙터 (`Tools ▸ TopDown ▸ ...`, `StatDBEditor.cs`) |
+| 평판/평판 티어 | `tools/balance/reputation.csv`, `tools/balance/reputation_tiers.csv` | CSV 편집 (→ `ReputationManager`/`ReputationTier`) |
+| 회복 아이템 수치 (음식 effectValue 등) | `Assets/Resources/Items/**/*.asset` (ItemData SO) | 아이템 인스펙터 (→ [survival.md §4](survival.md), [items.md](items.md)) |
+
+> 원칙: **전역 단일 스칼라 값 = GameTuning**. **행이 많은 표(아이템×지역, 유닛×스탯) = 데이터 파일/SO.** 표를 코드로 옮기지 않는다.
+
+---
+
+## 2. GameTuning 필드 전체 (= Control Panel에서 조정)
+
+`Assets/Scripts/Systems/GameTuning.cs`. `GameTuning.Instance.필드`로 읽고, **에셋이 없으면 각 시스템이 자체 기본값으로 폴백**(크래시 없음).
+
+### 수색
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `searchSpeedMult` | 1 | 루팅 상자 아이템 공개 딜레이 배율 (>1 느림) | `CharacterPanelUI.GetSearchDelay` |
+
+### 시간 / 현상
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `dayDuration` | 120 | 지역 낮 길이(초) | `RegionTimeManager.InitRegions` |
+| `nightDuration` | 600 | 지역 밤(현상) 길이(초) | `RegionTimeManager.InitRegions` |
+
+### 레이드
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `raidDuration` | 1200 | 레이드 제한 시간(초). 0=무제한 | `RaidManager.Start` |
+
+### 드랍
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `lootCountMult` | 1 | 지역 루트 바닥 스폰 **수량** 배율 (테이블 자체는 region_loot) | `RegionLootBootstrap.DropTier` |
+
+### 생존 (2026-06-18 중앙화)
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `survivalWaterMinutesToEmpty` | 18 | 수분 100→0까지 분(레이드 실시간). SurvivalStats가 `Max/(분·60)`로 초당 환산 | `SurvivalStats` |
+| `survivalSatietyMinutesToEmpty` | 36 | 포만감 100→0까지 분 | `SurvivalStats` |
+| `survivalStarveHpPerSec` | 0.6 | 빈 스탯(0) 1개당 초당 HP 감소(silent DoT). 둘 다 0이면 2배 | `SurvivalStats` |
+
+### 수면 (2026-06-18 중앙화)
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `sleep4hHpPct` | 0.40 | 4시간 수면 HP 회복 비율(MaxHp 기준) | `SleepUI` |
+| `sleep4hWater` | 18 | 4시간 수면 수분 차감 | `SleepUI` |
+| `sleep4hSatiety` | 18 | 4시간 수면 포만감 차감 | `SleepUI` |
+| `sleep8hHpPct` | 1.00 | 8시간 수면 HP 회복 비율 | `SleepUI` |
+| `sleep8hWater` | 38 | 8시간 수면 수분 차감 | `SleepUI` |
+| `sleep8hSatiety` | 38 | 8시간 수면 포만감 차감 | `SleepUI` |
+
+> 수면의 `hours`(4/8)와 옵션 구조는 코드 고정, 회복/차감 수치만 GameTuning 경유. 시간 경과(시계 진행)는 `hours` 그대로 사용.
+
+### 짙은현상 (아노말리)
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `anomalyActiveDuration` | 180 | 현상 활성 지속(초) | `AnomalyZone` |
+| `anomalyTelegraph` | 8 | 징조(텔레그래프) 시간(초) | `AnomalyZone` |
+| `anomalyWarning` | 30 | 종료 경고 시간(초) | `AnomalyZone` |
+| `anomalyCollapse` | 5 | 붕괴 연출 시간(초) | `AnomalyZone` |
+| `anomalyIntervalMin` | 90 | 자동 발생 간격 최소(초) | `AnomalyManager` |
+| `anomalyIntervalMax` | 180 | 자동 발생 간격 최대(초) | `AnomalyManager` |
+| `anomalyMaxConcurrent` | 1 | 동시 활성 최대 개수 | `AnomalyManager` |
+| `anomalyMonsterMinDist` | 6 | 몬스터 최소 스폰 거리(m) | (Phase 2) |
+
+---
+
+## 3. 데이터 파일 (테이블형 — 코드로 옮기지 않음)
+
+| 파일 | 무엇 | 읽는 코드 |
+|------|------|-----------|
+| `Assets/Resources/region_loot.txt` (소스 `tools/region_loot.csv`) | **맵별 드랍 테이블** — 지역×티어별 아이템·확률·수량 | `RegionLootCatalog` |
+| `Assets/Resources/Data/StatDB.asset` | **전투 수치** — 플레이어 스탯 + 유닛(적)별 스탯 | `StatDB.Instance.GetUnit(key)` / `.playerStat` |
+| `tools/balance/reputation.csv` | 평판 변동 값 | `ReputationManager` |
+| `tools/balance/reputation_tiers.csv` | 평판 티어 경계 | `ReputationTier` |
+| `Assets/Resources/Items/**/*.asset` | 아이템 개별 수치(가격·무게·회복량 등) | `ItemDatabase` |
+
+---
+
+## 4. 값 추가법 (GameTuning 확장)
+
+1. `GameTuning.cs`에 필드 하나 추가(Tooltip 권장, 직관 단위 사용).
+2. 쓰는 시스템에서 `GameTuning.Instance.필드` 읽기 — **`Instance`가 null이거나 비정상 값이면 자체 기본값으로 폴백**.
+3. Control Panel에 **자동 노출** (SerializedObject 제너릭 드로우). 별도 UI 코드 불필요.
+4. 이 문서 §2 표에 한 줄 추가.
+
+---
+
+## 변경 로그
+
+| 날짜 | 던진 질문/맥락 | 결정 | 근거 |
+|------|----------------|------|------|
+| 2026-06-18 | 밸런스 수치가 코드·SO·CSV에 흩어져 "어디서 고치지?"가 매번 발생. 단일 컨트롤 표면이 필요. (값은 바꾸지 말고 위치만 중앙화) | **생존(`SurvivalStats`)·수면(`SleepUI`) 수치를 `GameTuning` 필드로 외부화** — survivalWater/SatietyMinutesToEmpty, survivalStarveHpPerSec, sleep4h/8h(HpPct/Water/Satiety). 각 시스템은 GameTuning 경유로 읽고 **에셋 없으면 기존 값으로 폴백**(값 동일 유지). 드랍 테이블·StatDB·reputation은 데이터 파일에 유지하고 이 문서에 단일 진실원 표로 정리. | 디자이너가 Control Panel 한 창에서 전역 스칼라 조정, 행이 많은 테이블은 데이터 파일에 분리. 단일 색인으로 "밸런스가 어디 있는지"를 고정. |

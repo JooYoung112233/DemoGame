@@ -44,6 +44,32 @@ public class GameTuning : ScriptableObject
     [Tooltip("지역 루트 수량 배율. 1=기본, 0.5=절반, 2=두 배. RegionLootBootstrap가 읽음.")]
     [Range(0f, 3f)] public float lootCountMult = 1f;
 
+    // ── 생존 (수분 / 포만감 / 아사) ───────────────────────────────────
+    [Header("생존 (레이드 중 차감)")]
+    [Tooltip("수분 100→0까지 걸리는 시간(분, 레이드 실시간). SurvivalStats가 분→초당으로 환산해 읽음.")]
+    public float survivalWaterMinutesToEmpty = 18f;
+    [Tooltip("포만감 100→0까지 걸리는 시간(분, 레이드 실시간).")]
+    public float survivalSatietyMinutesToEmpty = 36f;
+    [Tooltip("빈 스탯(0) 1개당 초당 HP 감소(silent DoT). 둘 다 0이면 2배.")]
+    public float survivalStarveHpPerSec = 0.6f;
+
+    // ── 수면 (거처 침상 — 옵션별 회복/차감) ───────────────────────────
+    [Header("수면 4시간")]
+    [Tooltip("4시간 수면 시 HP 회복 비율(0~1, MaxHp 기준). SleepUI가 읽음.")]
+    public float sleep4hHpPct = 0.40f;
+    [Tooltip("4시간 수면 시 수분 차감량.")]
+    public float sleep4hWater = 18f;
+    [Tooltip("4시간 수면 시 포만감 차감량.")]
+    public float sleep4hSatiety = 18f;
+
+    [Header("수면 8시간")]
+    [Tooltip("8시간 수면 시 HP 회복 비율(0~1, MaxHp 기준).")]
+    public float sleep8hHpPct = 1.00f;
+    [Tooltip("8시간 수면 시 수분 차감량.")]
+    public float sleep8hWater = 38f;
+    [Tooltip("8시간 수면 시 포만감 차감량.")]
+    public float sleep8hSatiety = 38f;
+
     // ── 짙은현상 (구간 현상) ──────────────────────────────────────────
     [Header("짙은현상 (구간)")]
     [Tooltip("현상 활성 지속(초). 이 안에 루트 회수. AnomalyZone이 읽음.")]
