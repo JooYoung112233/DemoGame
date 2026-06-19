@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c3730e547514f3d9800a5ed1cce3758, type: 3}
+  m_Name: NegShiftyLook
+  m_EditorClassIdentifier: Game.Scripts::TraitData
+  traitId: neg_shifty_look
+  displayName: "수상한 인상"
+  description: ""
+  category: 4
+  tier: 0
+  ppCost: -1
+  prereqTraitId: 
+  tradeoff: 0
+  effectSummary: "초기 두려움↑ · 첫 거래 불리"
+  effects: []

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c3730e547514f3d9800a5ed1cce3758, type: 3}
+  m_Name: CombatOneStrike
+  m_EditorClassIdentifier: Game.Scripts::TraitData
+  traitId: combat_one_strike
+  displayName: "일격필살"
+  description: ""
+  category: 0
+  tier: 3
+  ppCost: 3
+  prereqTraitId: combat_cold_hands
+  tradeoff: 0
+  effectSummary: "차지 강공 첫 명중 피해 +40% (선행: 냉정한 손)"
+  effects: []

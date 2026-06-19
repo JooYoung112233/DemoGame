@@ -101,6 +101,7 @@
 
 ## 4. 구현 메모 〔구현 전〕
 - 데이터: `TraitData`(ScriptableObject) — id·이름·설명·카테고리·티어·선행조건·PP비용(또는 환급)·효과(스탯 모디파이어/플래그). `StatDB`/PlayerStatData에 적용.
+- **(2026-06-19) TraitData SO·생성기 구현됨**: 클래스 `Assets/Scripts/Data/TraitData.cs`(enum `TraitCategory`/`TraitTier`, `effectSummary` + 구조용 `List<TraitEffect>`), CSV `tools/traits.csv`(§3 전 41개 퍽), 생성기 `tools/GenerateTraits.ps1` → `Assets/Resources/Data/Traits/*.asset` 41개. 런타임(StatDB) 연동·UI 트리·정밀 수치는 아직 TODO.
 - UI: 캐릭터 패널("01 캐릭터 상태", [→ inventory.md])에 **특성 탭**(트리 뷰 + PP 잔량). 양피지 6패널 톤 통일.
 - 효과 = 기존 스탯/시스템 훅 재사용(전투·의료·인벤·현상·시계). 새 수치는 [balance-tuner].
 - **미정(TBD)**: PP 곡선 세부·각 퍽 정밀 수치·리스펙 방식·트리 시각·아이콘.
@@ -108,6 +109,11 @@
 ---
 
 ## 기획 결정 로그
+
+### 2026-06-19 — TraitData SO·생성기 구현
+- **무엇**: §3 트리의 전 퍽(41개)을 실제 ScriptableObject `.asset`으로 데이터화.
+- **산출**: `Assets/Scripts/Data/TraitData.cs`(+.meta) / `tools/traits.csv` / `tools/GenerateTraits.ps1` → `Assets/Resources/Data/Traits/*.asset` 41개.
+- **근거**: 데이터(콘텐츠 오서링)와 런타임 분리. 효과는 `effectSummary` 문자열로 §3 문구 그대로 보존, 정밀 수치/StatDB 연동·UI 트리는 추후(balance-tuner·구현). 수치는 §2~§3 1차값 무변경.
 
 ### 2026-06-17 — 특성 1차 수치 + 트리 확장
 - **결정**: §2 PP 경제 수치화(평판 +1/레벨·마일스톤 +1·부정 환급 1~3·상한 3·티어 1/2/3). §3 전 카테고리에 **PP·티어·1차 효과값** 부여 + 퍽 확장(일격필살·불굴·매의 눈·유령·협상가·심연 보행 추가 → 총 ~45개). 데모 도달 PP ≈ 4~6로 "방향 선택" 목표.

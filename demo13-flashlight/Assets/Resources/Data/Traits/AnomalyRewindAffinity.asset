@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c3730e547514f3d9800a5ed1cce3758, type: 3}
+  m_Name: AnomalyRewindAffinity
+  m_EditorClassIdentifier: Game.Scripts::TraitData
+  traitId: anomaly_rewind_affinity
+  displayName: "되감기 친화"
+  description: ""
+  category: 5
+  tier: 3
+  ppCost: 3
+  prereqTraitId: 
+  tradeoff: 1
+  effectSummary: "죽음→시계 회수 시 가방·시간 손실↓ / 기억 단서가 더 흐려진다(서사: 새벽 기원)"
+  effects: []

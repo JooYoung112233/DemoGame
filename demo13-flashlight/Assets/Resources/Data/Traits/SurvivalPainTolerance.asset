@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c3730e547514f3d9800a5ed1cce3758, type: 3}
+  m_Name: SurvivalPainTolerance
+  m_EditorClassIdentifier: Game.Scripts::TraitData
+  traitId: survival_pain_tolerance
+  displayName: "통증 내성"
+  description: ""
+  category: 1
+  tier: 1
+  ppCost: 1
+  prereqTraitId: 
+  tradeoff: 0
+  effectSummary: "통증 이동·조준 페널티 -40%"
+  effects: []

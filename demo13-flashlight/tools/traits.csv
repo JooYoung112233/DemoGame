@@ -1,0 +1,42 @@
+traitId,category,tier,ppCost,prereq,tradeoff,displayName,effectSummary
+combat_iron_lungs,0,1,1,,0,끈질긴 폐활량,스태미너 최대 +15% · 회복 +15%
+combat_cold_hands,0,1,1,,0,냉정한 손,강공·차지 그로기 누적 +20%
+combat_weapon_mastery,0,1,1,,0,무기 숙련,근접 내구 소모 -25% · 수리 효율 +20%
+combat_parry,0,2,2,,1,받아넘기기,구르기 무적 프레임 +30% / 스태 소모 +10%
+combat_weak_point,0,2,2,,0,약점 간파,배후·그로기 처형 피해 +25%
+combat_one_strike,0,3,3,combat_cold_hands,0,일격필살,차지 강공 첫 명중 피해 +40% (선행: 냉정한 손)
+neg_glass_shoulder,0,0,-2,,0,유리 어깨,받는 피해 +15%
+neg_hot_temper,0,0,-1,,0,욱하는 성미,피격 후 ~1초 조준 흔들림
+survival_tough_bones,1,1,1,,0,강골,골절 확률 -30% · 출혈 지속 -25%
+survival_pain_tolerance,1,1,1,,0,통증 내성,통증 이동·조준 페널티 -40%
+survival_omnivore,1,1,1,,0,잡식,상한 음식·물 페널티 무시
+survival_fast_recovery,1,2,2,,0,빠른 회복,거점 수면 HP·기력 회복 +30%
+survival_unbreakable,1,3,3,survival_tough_bones,0,불굴,HP 20% 이하일 때 받는 피해 -15% (선행: 강골)
+neg_weak_stomach,1,0,-2,,0,허약한 위장,허기·탈수 +25% 빠름
+neg_nightmare,1,0,-1,,0,악몽,수면 회복 -30% (서사: 흐릿한 기억)
+scav_quick_hands,2,1,1,,0,빠른 손,컨테이너 수색 속도 +30%
+scav_mule,2,1,1,,0,노새,휴대 무게 한도 +20%
+scav_appraiser,2,2,2,,0,감정가,판매가 +15% + 귀중품·루디 순도 식별
+scav_hawk_eye,2,2,2,scav_quick_hands,0,매의 눈,희귀·루디 컨테이너 하이라이트 (선행: 빠른 손)
+scav_no_empty_hands,2,3,3,,0,빈손 방지,사망/탈출 실패 시 보존 슬롯 +1
+neg_butterfingers,2,0,-1,,0,덜렁이,사망 시 떨어뜨리는 양 +30%
+stealth_shadow,3,1,1,,0,그림자,적 감지 반경 -20% (웅크림 -35%)
+stealth_cat_step,3,1,1,,0,고양이 걸음,이동 소음 -30%
+stealth_pathfinder,3,1,1,,0,길눈,미니맵 발견 +25% · 통로 막힘 -20%
+stealth_escape_art,3,2,2,,0,도주술,탈출 채널링 속도 +25%
+stealth_ghost,3,3,3,stealth_shadow,0,유령,웅크려 정지 3초 후 짧은 비탐지(재진입) (선행: 그림자)
+neg_heavy_feet,3,0,-1,,0,무거운 발,기본 이동 소음 +25%
+social_silver_tongue,4,1,1,,0,입담,NPC 호감·신뢰 획득 +20%
+social_regular,4,2,2,,0,단골,상점 구매가 -10% · 일일 의뢰 질↑
+social_grapevine,4,2,2,,0,소문통,정보(단서·블랙마켓) 가격 -20% · 해금 빠름
+social_negotiator,4,2,2,,0,협상가,밴딧 협상 성공률↑ · 요구치↓
+neg_shifty_look,4,0,-1,,0,수상한 인상,초기 두려움↑ · 첫 거래 불리
+anomaly_dark_adaptation,5,1,1,,0,어둠 적응,짙은 현상 시야 페널티 -30% (콘 밖 형체 인식↑)
+anomaly_light_restraint,5,2,2,,0,빛 절제,비루디 광원 침식 게이지 누적 -40%(빛의 역설 완화)
+anomaly_rudi_sense,5,2,2,,0,루디 감각,주변 루디·현상 노드 핑 반경↑ + 순도 직감
+anomaly_clock_sync,5,2,2,,0,시계 동조,"믿을 수 없는 시계 왜곡 표시 정밀↑ — 진짜 남은 시간 오차↓"
+anomaly_affinity,5,3,3,,1,현상 친화,현상권 루디·희귀 +30% / 침식·몬스터 어그로 +25%
+anomaly_rewind_affinity,5,3,3,,1,되감기 친화,죽음→시계 회수 시 가방·시간 손실↓ / 기억 단서가 더 흐려진다(서사: 새벽 기원)
+anomaly_abyss_walk,5,3,3,anomaly_dark_adaptation,0,심연 보행,영구 짙은 구역의 이동·시야 페널티 무시 (선행: 어둠 적응)
+neg_anomaly_sensitive,5,0,-2,,0,현상 과민,현상권 스태미너·시야 페널티↑
+neg_light_dependent,5,0,-1,,0,빛 의존,탐지등 방전 시 공황 — 정확도·이동↓

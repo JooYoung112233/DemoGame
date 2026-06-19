@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c3730e547514f3d9800a5ed1cce3758, type: 3}
+  m_Name: AnomalyRudiSense
+  m_EditorClassIdentifier: Game.Scripts::TraitData
+  traitId: anomaly_rudi_sense
+  displayName: "루디 감각"
+  description: ""
+  category: 5
+  tier: 2
+  ppCost: 2
+  prereqTraitId: 
+  tradeoff: 0
+  effectSummary: "주변 루디·현상 노드 핑 반경↑ + 순도 직감"
+  effects: []
