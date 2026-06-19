@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: AnomalyLightRestraint
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: anomaly_light_restraint
-  displayName: "빛 절제"
-  description: ""
+  displayName: "\uBE5B \uC808\uC81C"
+  description: 
   category: 5
   tier: 2
   ppCost: 2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "비루디 광원 침식 게이지 누적 -40%(빛의 역설 완화)"
+  effectSummary: "\uBE44\uB8E8\uB514 \uAD11\uC6D0 \uCE68\uC2DD \uAC8C\uC774\uC9C0
+    \uB204\uC801 -40%(\uBE5B\uC758 \uC5ED\uC124 \uC644\uD654)"
   effects:
   - effectKey: erosion_buildup
     op: mul

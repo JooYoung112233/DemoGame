@@ -757,8 +757,9 @@ public class CharacterPanelUI : MonoBehaviour
         var equipped = playerEquipment.GetSlot(slot);
         if (equipped == null) return;
 
-        // 인벤토리에 공간 있으면 해제 → 인벤으로 (가방/주머니/보안)
-        if (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(new ItemInstance(equipped, 1)))
+        // 인벤토리에 공간 있으면 해제 → 인벤으로 (가방/주머니/보안). 부착물 보존 위해 실제 인스턴스 회수.
+        var inst = playerEquipment.GetSlotInstance(slot) ?? new ItemInstance(equipped, 1);
+        if (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(inst))
         {
             playerEquipment.Unequip(slot);
             RefreshAllGrids();
@@ -930,7 +931,115 @@ public class CharacterPanelUI : MonoBehaviour
         if (invGridRoot != null) invGridRoot.gameObject.SetActive(hasBackpack);
         if (invPlaceholder != null) invPlaceholder.gameObject.SetActive(!hasBackpack);
 
+        RefreshWeaponParts();
         LayoutMiddleStack(hasBackpack, bag);
+    }
+
+    static readonly WeaponPartType[] PartOrder = { WeaponPartType.Scope, WeaponPartType.Muzzle, WeaponPartType.Magazine, WeaponPartType.Grip };
+    static readonly string[] PartLabels = { "조준경", "소염기", "탄창", "손잡이" };
+
+    /// <summary>무기 파츠 예약 공간에 장착 무기의 4개 파츠 슬롯 렌더(부착=아이콘+클릭 분리 / 빈칸=종류 라벨).</summary>
+    void RefreshWeaponParts()
+    {
+        if (weaponBox == null) return;
+        for (int i = weaponBox.childCount - 1; i >= 0; i--)
+            Destroy(weaponBox.GetChild(i).gameObject);
+
+        var wpn = playerEquipment != null ? playerEquipment.GetSlotInstance(EquipSlot.PrimaryWeapon) : null;
+
+        MakeText(weaponBox, "WPHdr", wpn != null ? $"무기 파츠 — {wpn.data.displayName}" : "무기 파츠",
+            new Vector2(8, -4), new Vector2(MID_INNER_W - 16, 18), 12,
+            wpn != null ? new Color(0.85f, 0.8f, 0.6f) : UITheme.TextMuted, TextAnchor.MiddleLeft);
+
+        if (wpn == null)
+        {
+            var t = MakeText(weaponBox, "WPNone", "무기를 장착하면 파츠 슬롯이 열립니다",
+                new Vector2(8, -26), new Vector2(MID_INNER_W - 16, 40), 11, new Color(0.4f, 0.45f, 0.55f), TextAnchor.MiddleCenter);
+            return;
+        }
+
+        const float cell = 50f, gap = 8f, startX = 10f;
+        for (int i = 0; i < PartOrder.Length; i++)
+        {
+            var type = PartOrder[i];
+            string attId = wpn.GetAttachment(type);
+            var attData = string.IsNullOrEmpty(attId) ? null : ItemDatabase.Get(attId);
+
+            var cellGO = new GameObject($"Part_{type}", typeof(RectTransform), typeof(Image), typeof(Button));
+            cellGO.transform.SetParent(weaponBox, false);
+            var rt = cellGO.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 1);
+            rt.sizeDelta = new Vector2(cell, cell);
+            rt.anchoredPosition = new Vector2(startX + i * (cell + gap), -26);
+            cellGO.GetComponent<Image>().color = attData != null
+                ? GetRarityBgColor(attData.rarity)
+                : new Color(0.13f, 0.13f, 0.17f, 0.9f);
+
+            if (attData != null)
+            {
+                var capType = type;
+                cellGO.GetComponent<Button>().onClick.AddListener(() => DetachPart(capType));
+                if (attData.icon != null)
+                {
+                    var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                    iconGO.transform.SetParent(cellGO.transform, false);
+                    var icRT = iconGO.GetComponent<RectTransform>();
+                    icRT.anchorMin = Vector2.zero; icRT.anchorMax = Vector2.one;
+                    icRT.offsetMin = new Vector2(4, 4); icRT.offsetMax = new Vector2(-4, -4);
+                    var ic = iconGO.GetComponent<Image>();
+                    ic.sprite = attData.icon; ic.preserveAspect = true; ic.raycastTarget = false;
+                }
+                else
+                {
+                    var nm = MakeChildText(cellGO.transform, attData.displayName, 10, attData.RarityColor);
+                    nm.alignment = TextAnchor.MiddleCenter;
+                    nm.raycastTarget = false;
+                }
+            }
+            else
+            {
+                var t = MakeChildText(cellGO.transform, PartLabels[i], 10, new Color(0.5f, 0.55f, 0.62f));
+                t.alignment = TextAnchor.MiddleCenter;
+                t.raycastTarget = false;
+            }
+        }
+    }
+
+    /// <summary>파츠를 장착 무기에 부착(컨텍스트 메뉴 "부착"에서 호출). 같은 종류 이미 있으면 거부.</summary>
+    void AttachPartFromGrid(InventoryGrid.PlacedItem placed, InventoryGrid grid)
+    {
+        if (placed == null || placed.item == null || placed.item.data == null) return;
+        var pdata = placed.item.data;
+        if (!pdata.IsWeaponPart) return;
+        var wpn = playerEquipment != null ? playerEquipment.GetSlotInstance(EquipSlot.PrimaryWeapon) : null;
+        if (wpn == null) { ToastManager.Show("무기를 먼저 장착하세요", ToastManager.ToastType.Warning); return; }
+        if (!string.IsNullOrEmpty(wpn.GetAttachment(pdata.weaponPartType)))
+        { ToastManager.Show("이미 부착됨 — 먼저 분리", ToastManager.ToastType.Warning); return; }
+
+        wpn.SetAttachment(pdata.weaponPartType, pdata.itemId);
+        if (placed.item.stackCount > 1) placed.item.stackCount--; else grid.Remove(placed);
+        ToastManager.Show($"{pdata.displayName} 부착", ToastManager.ToastType.Info);
+        RefreshAllGrids();
+    }
+
+    /// <summary>장착 무기에서 파츠 분리 → 인벤(없으면 창고) 회수.</summary>
+    void DetachPart(WeaponPartType type)
+    {
+        var wpn = playerEquipment != null ? playerEquipment.GetSlotInstance(EquipSlot.PrimaryWeapon) : null;
+        if (wpn == null) return;
+        string id = wpn.GetAttachment(type);
+        if (string.IsNullOrEmpty(id)) return;
+        var d = ItemDatabase.Get(id);
+        if (d == null) { wpn.SetAttachment(type, null); RefreshAllGrids(); return; }
+
+        var part = new ItemInstance(d, 1);
+        if (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(part))
+        {
+            wpn.SetAttachment(type, null);
+            ToastManager.Show($"{d.displayName} 분리", ToastManager.ToastType.Info);
+            RefreshAllGrids();
+        }
+        else ToastManager.Show("공간 부족 — 분리 불가", ToastManager.ToastType.Warning);
     }
 
     /// <summary>세로 스택(무기파츠 → 가방 → 주머니 → 보안 → 무게) 위치를 위에서부터 잡는다.</summary>
@@ -2279,6 +2388,19 @@ public class CharacterPanelUI : MonoBehaviour
             y -= 26f;
         }
 
+        // 부착 (무기 파츠 + 내 소지품) → 장착 무기에 부착
+        if (data.IsWeaponPart && isPlayerGrid)
+        {
+            var capPlaced = contextTarget;
+            var capGrid2 = grid;
+            AddContextButton("부착", UITheme.AccentBright, y, () =>
+            {
+                AttachPartFromGrid(capPlaced, capGrid2);
+                HideContextMenu();
+            });
+            y -= 26f;
+        }
+
         // 사용/먹기 (isUsable + 내 소지품 또는 안전 창고). 먹을거=먹기, 그 외=사용
         if (data.isUsable && (isPlayerGrid || isSafeStorage))
         {
@@ -2633,8 +2755,9 @@ public class CharacterPanelUI : MonoBehaviour
         bool origRot = placed != null ? placed.rotated : false;
         if (placed != null) grid.Remove(placed);
 
-        // 교체로 빠질 기존 장비(스왑 복원용).
+        // 교체로 빠질 기존 장비(스왑 복원용) — 인스턴스로 잡아 부착물 보존.
         ItemData prev = playerEquipment.GetSlot(apiSlot);
+        ItemInstance prevInst = playerEquipment.GetSlotInstance(apiSlot);
 
         bool ok = item.data.category == ItemCategory.Weapon
             ? playerEquipment.EquipWeapon(item.data)
@@ -2647,10 +2770,12 @@ public class CharacterPanelUI : MonoBehaviour
                 grid.TryAutoPlace(item);
             ToastManager.Show("장착 실패", ToastManager.ToastType.Warning);
         }
-        else if (prev != null && prev != item.data)
+        else
         {
-            // 교체로 빠진 기존 장비를 인벤(없으면 창고)로 회수 — 바닥 X.
-            ReturnItemToInventory(new ItemInstance(prev, 1));
+            playerEquipment.SetSlotInstance(apiSlot, item);   // 실제 인스턴스(부착물) 연결
+            if (prev != null && prev != item.data)
+                // 교체로 빠진 기존 장비를 인벤(없으면 창고)로 회수 — 부착물 보존, 바닥 X.
+                ReturnItemToInventory(prevInst ?? new ItemInstance(prev, 1));
         }
 
         ClearSelection();

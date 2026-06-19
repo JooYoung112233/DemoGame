@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: CombatWeakPoint
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: combat_weak_point
-  displayName: "약점 간파"
-  description: ""
+  displayName: "\uC57D\uC810 \uAC04\uD30C"
+  description: 
   category: 0
   tier: 2
   ppCost: 2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "배후·그로기 처형 피해 +25%"
+  effectSummary: "\uBC30\uD6C4\xB7\uADF8\uB85C\uAE30 \uCC98\uD615 \uD53C\uD574 +25%"
   effects:
   - effectKey: execute_damage
     op: mul

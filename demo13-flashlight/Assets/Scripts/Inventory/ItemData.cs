@@ -28,6 +28,18 @@ public enum EquipSlot
 }
 
 /// <summary>
+/// 무기 부착물(파츠) 종류. 무기 1정당 종류별 1개 부착.
+/// </summary>
+public enum WeaponPartType
+{
+    None = 0,
+    Scope,      // 조준경 — 사거리/명중
+    Muzzle,     // 소염기 — 반동/소음
+    Magazine,   // 탄창 — 장탄수(총기)
+    Grip,       // 손잡이 — 핸들링(이속/스태미너/흔들림)
+}
+
+/// <summary>
 /// 아이템 희귀도.
 /// </summary>
 public enum ItemRarity
@@ -151,6 +163,23 @@ public class ItemData : ScriptableObject
     [Header("무기 연동 (Weapon 전용)")]
     [Tooltip("무기 전투 데이터 SO (Weapon 카테고리일 때). 장착 시 콤보·스탯 교체")]
     public WeaponData weaponData;
+
+    [Header("무기 파츠 (부착물 — Weapon Part)")]
+    [Tooltip("이 아이템이 무기 부착물이면 종류(None=부착물 아님). 조준경/소염기/탄창/손잡이")]
+    public WeaponPartType weaponPartType;
+    [Tooltip("부착 시 이동속도 배율 보정(곱연산, 1=영향없음). 손잡이/경량화 등")]
+    public float partMoveSpeedMult = 1f;
+    [Tooltip("부착 시 스태미너 소모 배율 보정(곱연산, 1=영향없음). 손잡이 등")]
+    public float partStaminaMult = 1f;
+    [Tooltip("부착 시 사거리 가산(m). 조준경 — 총기 도입 시 활용.")]
+    public float partRangeBonus = 0f;
+    [Tooltip("부착 시 반동/흔들림 배율(곱연산, <1=감소). 소염기/손잡이 — 총기 도입 시 활용.")]
+    public float partRecoilMult = 1f;
+    [Tooltip("부착 시 장탄수 가산. 탄창 — 총기 도입 시 활용.")]
+    public int partMagBonus = 0;
+
+    /// <summary>무기 부착물 여부</summary>
+    public bool IsWeaponPart => weaponPartType != WeaponPartType.None;
 
     [Header("바닥 드롭")]
     [Tooltip("월드에 떨어졌을 때 사용할 프리팹 (없으면 기본 큐브)")]

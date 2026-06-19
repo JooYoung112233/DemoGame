@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: StealthShadow
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: stealth_shadow
-  displayName: "그림자"
-  description: ""
+  displayName: "\uADF8\uB9BC\uC790"
+  description: 
   category: 3
   tier: 1
   ppCost: 1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "적 감지 반경 -20% (웅크림 -35%)"
+  effectSummary: "\uC801 \uAC10\uC9C0 \uBC18\uACBD -20% (\uC6C5\uD06C\uB9BC -35%)"
   effects:
   - effectKey: detect_radius
     op: mul

@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: NegNightmare
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: neg_nightmare
-  displayName: "악몽"
-  description: ""
+  displayName: "\uC545\uBABD"
+  description: 
   category: 1
   tier: 0
   ppCost: -1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "수면 회복 -30% (서사: 흐릿한 기억)"
+  effectSummary: "\uC218\uBA74 \uD68C\uBCF5 -30% (\uC11C\uC0AC: \uD750\uB9BF\uD55C
+    \uAE30\uC5B5)"
   effects:
   - effectKey: sleep_recovery
     op: mul

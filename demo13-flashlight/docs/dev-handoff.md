@@ -16,8 +16,9 @@
   - **적 스포너**(`EnemySpawner`, 부팅 자가생성): 게임플레이 씬 로드 시 `SpawnZone`들 읽어 `round(enemyCount×GameTuning.enemySpawnCountMult)` 스폰(씬당1회/언로드시 해제, generatedPrefab 또는 런타임 그레이박스 적). `SpawnZone` 2D화(`GetRandomPoint2D`+기즈모). 고철시장 빌더에 밴딧 공터 SpawnZone(bandit_melee×3) 추가. `GameTuning.enemySpawnCountMult` 신설.
   - **하단 HUD(`QuickSlotBar`, 자가생성)**: 퀵슬롯 1~6(우클릭 "퀵슬롯" 등록→키/클릭 사용, `PlayerInventory.UseItemById`) + **스태미너 바**(`TopDownPlayer.StaminaPercent`, 색 단계). **세이브 영속화**(`GameSaveData.quickSlots`, GetSlotIds/LoadSlotIds). 모달 중 입력 차단, 플레이어 없으면 숨김.
   - **적 HP = unitStat.maxHp 적용**(`EnemyController.Start`). **적 처치 전리품**: `OnDeath`에서 지상 티어 region 루트 시신 주변 산포(`GameTuning.enemyDropChance` 게이트, 컨테이너보다 약함).
-  - ⚠️ **StatDB.asset 확인**: ①`playerStat.motions`/`units[].motions`가 빈 리스트로 로드될 수 있음(런타임 폴백=기존 거동, 안전) → Control Panel ▸ StatDB에서 motions 기본값 보이는지 확인, 비면 채워 저장. ②**`bandit_melee` 유닛 미등록** → 적이 그레이박스+기본스탯으로 폴백(동작은 함). Control Panel ▸ StatDB ▸ Units에 추가 권장.
-- **다음 코드 후보**(플레이어 경험 순: 루팅→전투→시스템): ① 무기 파츠 창 실제 동작(중앙 예약공간 — 무기 부착물 시스템, 설계 필요) ② **적 Spine 애니**(현재 SkeletonAnimController는 스텁) + UnitStatData.motions 와이어링 ③ FOV 시야콘(설계 필요) ④ 적별 전용 드랍 테이블(현재 region 루트 재사용).
+  - **무기 파츠(부착물) 1차** — 결정: 조준경/소염기/탄창/손잡이 4종, 무기 인스턴스 귀속(타르코프식), 시스템 먼저(총은 나중). `WeaponPartType` enum + `ItemData` 파츠필드 + `ItemInstance.attachments[4]` + `PlayerEquipment.slotInstances`/`GetSlotInstance`/`WeaponPart*Mult`. 중앙 weaponBox에 4슬롯 렌더(우클릭 "부착"/슬롯클릭 "분리"), `TopDownPlayer` 이속/스태미너에 partMult 곱연산. SO 4종(scope_basic/muzzle_basic/mag_extended/grip_tactical, `Resources/Items/Misc/WeaponPart/`, category=Misc). **⚠️ 미완: 부착물 세이브 영속화(GridItemEntry 확장), 드래그 부착, 총기+사거리/반동/장탄 실효과.** unity-reviewer 통과(인스턴스 추적·무게·null 안전 OK).
+  - ⚠️ **StatDB.asset 확인**: ①`playerStat.motions`/`units[].motions`가 빈 리스트로 로드될 수 있음(런타임 폴백=기존 거동, 안전) → Control Panel ▸ StatDB에서 motions 기본값 보이는지 확인, 비면 채워 저장. ②**`bandit_melee` 유닛 미등록** → 적이 그레이박스+기본스탯으로 폴백(동작은 함). Control Panel ▸ StatDB ▸ Units에 추가 권장. ③파츠 SO 아이콘 미연결(UI는 이름 폴백).
+- **다음 코드 후보**(사용자 지정): ① **FOV 시야콘**(좀보이드 동일 — 정면 부채꼴 밖 비가시, 렌더링/가시성 시스템) ② **적별 전용 드랍 테이블 — 밸런스 에디터에 추가**(사용자 직접 편집) ③ 무기 파츠 마무리(세이브 영속화·드래그·총기 실효과) ④ 적 Spine 애니(스텁) + motions 와이어링.
 - **사용자 Unity 테스트 대기**: 아래 신규 체크.
 
 ### 6/19 테스트 체크(신규)

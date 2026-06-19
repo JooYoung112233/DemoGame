@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: NegLightDependent
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: neg_light_dependent
-  displayName: "빛 의존"
-  description: ""
+  displayName: "\uBE5B \uC758\uC874"
+  description: 
   category: 5
   tier: 0
   ppCost: -1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "탐지등 방전 시 공황 — 정확도·이동↓"
+  effectSummary: "\uD0D0\uC9C0\uB4F1 \uBC29\uC804 \uC2DC \uACF5\uD669 \u2014 \uC815\uD655\uB3C4\xB7\uC774\uB3D9\u2193"
   effects:
   - effectKey: light_panic
     op: flag

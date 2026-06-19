@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: AnomalyAffinity
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: anomaly_affinity
-  displayName: "현상 친화"
-  description: ""
+  displayName: "\uD604\uC0C1 \uCE5C\uD654"
+  description: 
   category: 5
   tier: 3
   ppCost: 3
   prereqTraitId: 
   tradeoff: 1
-  effectSummary: "현상권 루디·희귀 +30% / 침식·몬스터 어그로 +25%"
+  effectSummary: "\uD604\uC0C1\uAD8C \uB8E8\uB514\xB7\uD76C\uADC0 +30% / \uCE68\uC2DD\xB7\uBAAC\uC2A4\uD130
+    \uC5B4\uADF8\uB85C +25%"
   effects:
   - effectKey: anomaly_loot
     op: mul

@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: NegButterfingers
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: neg_butterfingers
-  displayName: "덜렁이"
-  description: ""
+  displayName: "\uB35C\uB801\uC774"
+  description: 
   category: 2
   tier: 0
   ppCost: -1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "사망 시 떨어뜨리는 양 +30%"
+  effectSummary: "\uC0AC\uB9DD \uC2DC \uB5A8\uC5B4\uB728\uB9AC\uB294 \uC591 +30%"
   effects:
   - effectKey: death_drop_amount
     op: mul

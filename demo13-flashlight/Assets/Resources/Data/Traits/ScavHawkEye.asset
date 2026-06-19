@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: ScavHawkEye
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: scav_hawk_eye
-  displayName: "매의 눈"
-  description: ""
+  displayName: "\uB9E4\uC758 \uB208"
+  description: 
   category: 2
   tier: 2
   ppCost: 2
   prereqTraitId: scav_quick_hands
   tradeoff: 0
-  effectSummary: "희귀·루디 컨테이너 하이라이트 (선행: 빠른 손)"
+  effectSummary: "\uD76C\uADC0\xB7\uB8E8\uB514 \uCEE8\uD14C\uC774\uB108 \uD558\uC774\uB77C\uC774\uD2B8
+    (\uC120\uD589: \uBE60\uB978 \uC190)"
   effects:
   - effectKey: rare_container_highlight
     op: flag

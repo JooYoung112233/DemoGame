@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: StealthEscapeArt
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: stealth_escape_art
-  displayName: "도주술"
-  description: ""
+  displayName: "\uB3C4\uC8FC\uC220"
+  description: 
   category: 3
   tier: 2
   ppCost: 2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "탈출 채널링 속도 +25%"
+  effectSummary: "\uD0C8\uCD9C \uCC44\uB110\uB9C1 \uC18D\uB3C4 +25%"
   effects:
   - effectKey: extract_channel_speed
     op: mul

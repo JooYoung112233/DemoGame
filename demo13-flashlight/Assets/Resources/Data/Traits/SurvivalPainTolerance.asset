@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: SurvivalPainTolerance
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: survival_pain_tolerance
-  displayName: "통증 내성"
-  description: ""
+  displayName: "\uD1B5\uC99D \uB0B4\uC131"
+  description: 
   category: 1
   tier: 1
   ppCost: 1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "통증 이동·조준 페널티 -40%"
+  effectSummary: "\uD1B5\uC99D \uC774\uB3D9\xB7\uC870\uC900 \uD398\uB110\uD2F0 -40%"
   effects:
   - effectKey: pain_penalty
     op: mul

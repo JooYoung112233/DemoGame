@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: StealthCatStep
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: stealth_cat_step
-  displayName: "고양이 걸음"
-  description: ""
+  displayName: "\uACE0\uC591\uC774 \uAC78\uC74C"
+  description: 
   category: 3
   tier: 1
   ppCost: 1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "이동 소음 -30%"
+  effectSummary: "\uC774\uB3D9 \uC18C\uC74C -30%"
   effects:
   - effectKey: move_noise
     op: mul

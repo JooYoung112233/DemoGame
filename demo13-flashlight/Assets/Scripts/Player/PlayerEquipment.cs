@@ -13,9 +13,42 @@ public class PlayerEquipment : MonoBehaviour
     PlayerInventory inventory;
 
     Dictionary<EquipSlot, ItemData> slots = new Dictionary<EquipSlot, ItemData>();
+    // 슬롯별 실제 인스턴스(무기 부착물 등 인스턴스 상태 보존용). 장착 직후 SetSlotInstance로 기록.
+    Dictionary<EquipSlot, ItemInstance> slotInstances = new Dictionary<EquipSlot, ItemInstance>();
 
     /// <summary>장비 변경 이벤트 (UI 구독)</summary>
     public event System.Action<EquipSlot, ItemData> OnEquipChanged;
+
+    /// <summary>슬롯에 장착된 실제 인스턴스(부착물 포함). 데이터만으로 장착됐으면 null.</summary>
+    public ItemInstance GetSlotInstance(EquipSlot slot)
+    {
+        ItemInstance inst;
+        return slotInstances.TryGetValue(slot, out inst) ? inst : null;
+    }
+
+    /// <summary>장착 직후 실제 인스턴스를 슬롯에 연결(부착물 보존). 데이터 불일치면 무시.</summary>
+    public void SetSlotInstance(EquipSlot slot, ItemInstance inst)
+    {
+        if (inst != null && GetSlot(slot) == inst.data) slotInstances[slot] = inst;
+    }
+
+    // ── 무기 부착물 집계 보정 (장착 주무기 기준) ──────────────────────
+    public float WeaponPartMoveMult    => PartMult(EquipSlot.PrimaryWeapon, p => p.partMoveSpeedMult);
+    public float WeaponPartStaminaMult => PartMult(EquipSlot.PrimaryWeapon, p => p.partStaminaMult);
+
+    float PartMult(EquipSlot slot, System.Func<ItemData, float> sel)
+    {
+        var inst = GetSlotInstance(slot);
+        if (inst == null || inst.attachments == null) return 1f;
+        float m = 1f;
+        for (int i = 0; i < inst.attachments.Length; i++)
+        {
+            if (string.IsNullOrEmpty(inst.attachments[i])) continue;
+            var d = ItemDatabase.Get(inst.attachments[i]);
+            if (d != null) m *= sel(d);
+        }
+        return m;
+    }
 
     /// <summary>현재 장착된 무기 (PrimaryWeapon 슬롯, 하위 호환)</summary>
     public ItemData EquippedWeapon => GetSlot(EquipSlot.PrimaryWeapon);
@@ -36,6 +69,9 @@ public class PlayerEquipment : MonoBehaviour
             float w = 0f;
             foreach (var kv in slots)
                 if (kv.Value != null) w += kv.Value.weight;
+            // 장착 무기의 부착물 무게 합산
+            foreach (var kv in slotInstances)
+                if (kv.Value != null) w += kv.Value.AttachmentWeight;
             return w;
         }
     }
@@ -96,6 +132,7 @@ public class PlayerEquipment : MonoBehaviour
         ItemData prev;
         if (!slots.TryGetValue(slot, out prev)) return;
         slots.Remove(slot);
+        slotInstances.Remove(slot);
 
         if (slot == EquipSlot.PrimaryWeapon && player != null)
             player.SetWeapon(null);

@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: SurvivalToughBones
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: survival_tough_bones
-  displayName: "강골"
-  description: ""
+  displayName: "\uAC15\uACE8"
+  description: 
   category: 1
   tier: 1
   ppCost: 1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "골절 확률 -30% · 출혈 지속 -25%"
+  effectSummary: "\uACE8\uC808 \uD655\uB960 -30% \xB7 \uCD9C\uD608 \uC9C0\uC18D -25%"
   effects:
   - effectKey: fracture_chance
     op: mul

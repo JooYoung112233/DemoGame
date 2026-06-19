@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: CombatIronLungs
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: combat_iron_lungs
-  displayName: "끈질긴 폐활량"
-  description: ""
+  displayName: "\uB048\uC9C8\uAE34 \uD3D0\uD65C\uB7C9"
+  description: 
   category: 0
   tier: 1
   ppCost: 1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "스태미너 최대 +15% · 회복 +15%"
+  effectSummary: "\uC2A4\uD0DC\uBBF8\uB108 \uCD5C\uB300 +15% \xB7 \uD68C\uBCF5 +15%"
   effects:
   - effectKey: stamina_max
     op: mul

@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: CombatOneStrike
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: combat_one_strike
-  displayName: "일격필살"
-  description: ""
+  displayName: "\uC77C\uACA9\uD544\uC0B4"
+  description: 
   category: 0
   tier: 3
   ppCost: 3
   prereqTraitId: combat_cold_hands
   tradeoff: 0
-  effectSummary: "차지 강공 첫 명중 피해 +40% (선행: 냉정한 손)"
+  effectSummary: "\uCC28\uC9C0 \uAC15\uACF5 \uCCAB \uBA85\uC911 \uD53C\uD574 +40%
+    (\uC120\uD589: \uB0C9\uC815\uD55C \uC190)"
   effects:
   - effectKey: charge_first_hit_damage
     op: mul

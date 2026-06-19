@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: ScavNoEmptyHands
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: scav_no_empty_hands
-  displayName: "빈손 방지"
-  description: ""
+  displayName: "\uBE48\uC190 \uBC29\uC9C0"
+  description: 
   category: 2
   tier: 3
   ppCost: 3
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "사망/탈출 실패 시 보존 슬롯 +1"
+  effectSummary: "\uC0AC\uB9DD/\uD0C8\uCD9C \uC2E4\uD328 \uC2DC \uBCF4\uC874 \uC2AC\uB86F
+    +1"
   effects:
   - effectKey: keep_slot
     op: add

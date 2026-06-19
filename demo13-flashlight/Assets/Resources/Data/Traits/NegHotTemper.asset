@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: NegHotTemper
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: neg_hot_temper
-  displayName: "욱하는 성미"
-  description: ""
+  displayName: "\uC6B1\uD558\uB294 \uC131\uBBF8"
+  description: 
   category: 0
   tier: 0
   ppCost: -1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "피격 후 ~1초 조준 흔들림"
+  effectSummary: "\uD53C\uACA9 \uD6C4 ~1\uCD08 \uC870\uC900 \uD754\uB4E4\uB9BC"
   effects:
   - effectKey: aim_shake_on_hit
     op: flag

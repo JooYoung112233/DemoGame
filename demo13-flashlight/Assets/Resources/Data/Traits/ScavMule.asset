@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: ScavMule
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: scav_mule
-  displayName: "노새"
-  description: ""
+  displayName: "\uB178\uC0C8"
+  description: 
   category: 2
   tier: 1
   ppCost: 1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "휴대 무게 한도 +20%"
+  effectSummary: "\uD734\uB300 \uBB34\uAC8C \uD55C\uB3C4 +20%"
   effects:
   - effectKey: weight_max
     op: mul

@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: SocialRegular
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: social_regular
-  displayName: "단골"
-  description: ""
+  displayName: "\uB2E8\uACE8"
+  description: 
   category: 4
   tier: 2
   ppCost: 2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "상점 구매가 -10% · 일일 의뢰 질↑"
+  effectSummary: "\uC0C1\uC810 \uAD6C\uB9E4\uAC00 -10% \xB7 \uC77C\uC77C \uC758\uB8B0
+    \uC9C8\u2191"
   effects:
   - effectKey: buy_price
     op: mul

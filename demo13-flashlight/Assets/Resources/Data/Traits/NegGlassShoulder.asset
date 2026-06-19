@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: NegGlassShoulder
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: neg_glass_shoulder
-  displayName: "유리 어깨"
-  description: ""
+  displayName: "\uC720\uB9AC \uC5B4\uAE68"
+  description: 
   category: 0
   tier: 0
   ppCost: -2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "받는 피해 +15%"
+  effectSummary: "\uBC1B\uB294 \uD53C\uD574 +15%"
   effects:
   - effectKey: damage_taken
     op: mul

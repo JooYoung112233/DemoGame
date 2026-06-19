@@ -64,7 +64,22 @@
 - 배치: 고철시장(ScrapMarket_GB) 밴딧 공터(6,40)에 `bandit_melee × 3` 존. **재빌드 필요**(`Tools ▸ TopDown ▸ 빌드 ▸ 지역1` 또는 고철시장 빌더).
 - ⚠️ **StatDB에 `bandit_melee` 유닛 등록 필요**: 미등록 시 그레이박스 적 + EnemyController 인스펙터 기본 스탯으로 폴백(동작은 하나 의도 스탯 미적용). Control Panel ▸ StatDB ▸ Units에서 추가. [→ balance.md](balance.md)
 - **적 HP**: `EnemyController.Start`가 `unitStat.maxHp`를 Health에 적용(미등록 시 인스펙터 기본).
-- **적 처치 전리품(2026-06-19 결정)**: 처치 시 **지상(Ground) 티어 region 루트**를 시신 주변에 산포 드랍(= 컨테이너(Container 티어)보다 약함 — 잡기보다 상자가 더 값짐). `GameTuning.enemyDropChance`(기본 1)로 게이트, 루트 자체 확률은 RegionLootCatalog가 처리. ⚠️ 임시 기획 — 추후 적별 전용 드랍(장비/스크랩)으로 교체 가능. [→ economy.md](economy.md)
+- **적 처치 전리품(2026-06-19 결정)**: 처치 시 **지상(Ground) 티어 region 루트**를 시신 주변에 산포 드랍(= 컨테이너(Container 티어)보다 약함 — 잡기보다 상자가 더 값짐). `GameTuning.enemyDropChance`(기본 1)로 게이트, 루트 자체 확률은 RegionLootCatalog가 처리. ⚠️ 임시 기획 — **결정(2026-06-19): 적별 전용 드랍 테이블을 밸런스 에디터에 추가해 사용자가 직접 편집**(후속 구현). [→ economy.md](economy.md)
+
+## 무기 파츠 (부착물) — 2026-06-19 결정
+
+> **질문**: 무기 파츠를 어떻게 구성/구현할지. **결정: ① 파츠 4종 — 조준경(Scope)/소염기(Muzzle)/탄창(Magazine)/손잡이(Grip). ② 현재 근접 무기뿐(총기 없음) → 시스템 먼저 구축, 총은 나중(파츠 시스템 재사용). ③ 파츠는 무기 개별 인스턴스에 귀속(타르코프식) — 그 무기를 끼웠다 빼도 파츠 유지.**
+
+- **데이터**: `WeaponPartType` enum(None/Scope/Muzzle/Magazine/Grip). `ItemData`에 `weaponPartType` + 보정필드(`partMoveSpeedMult`/`partStaminaMult`/`partRangeBonus`/`partRecoilMult`/`partMagBonus`). `ItemData.IsWeaponPart`.
+- **귀속**: `ItemInstance.attachments`(string[4] = [Scope,Muzzle,Magazine,Grip] itemId). `GetAttachment/SetAttachment/HasAnyAttachment/AttachmentWeight`. 무기 인스턴스가 부착물을 들고 다님.
+- **장착 보존**: `PlayerEquipment.slotInstances`(슬롯별 실제 인스턴스) + `GetSlotInstance/SetSlotInstance`. 장착/해제/교체 시 인스턴스(부착물) 보존. 부착물 무게는 총 장비 무게에 합산.
+- **UI**: 중앙 패널 상단 "무기 파츠 공간"에 장착 무기의 4슬롯 표시(부착=아이콘/이름+클릭 분리, 빈칸=종류 라벨). **부착**=파츠 우클릭 "부착"(종류 슬롯 비어있을 때). **분리**=슬롯 클릭 → 인벤 회수.
+- **효과(현재)**: `partMoveSpeedMult`·`partStaminaMult`가 장착 무기 이동/스태미너 보정에 곱연산 적용(`TopDownPlayer` × `PlayerEquipment.WeaponPartMoveMult/WeaponPartStaminaMult`). 사거리/반동/장탄은 **총기 도입 시 활용**(필드만 준비).
+- 파츠 4종 SO: `scope_basic`/`muzzle_basic`/`mag_extended`/`grip_tactical` (`Resources/Items/Misc/WeaponPart/`). 아이콘 미연결(에디터에서 연결 시 표시).
+- ⚠️ **미완(후속)**: 부착물 **세이브 영속화**(인벤 무기 GridItemEntry 확장 필요), 드래그 부착, 총기 무기+사거리/반동/장탄 실효과.
+
+## 시야 (FOV) — 2026-06-19 결정
+- **결정: 좀보이드(Project Zomboid)와 동일한 시야콘** — 플레이어 정면 부채꼴 밖은 가려짐(적/오브젝트 비가시), 지역/시간별 어둠 혼합. 기존 손전등-주광 방식 폐기. 후속 구현(렌더링/가시성 시스템). [→ rendering.md](rendering.md)
 
 ## 시각 피드백 (애니메이션 없이)
 

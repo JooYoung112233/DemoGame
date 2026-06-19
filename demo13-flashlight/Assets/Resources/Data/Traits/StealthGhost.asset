@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: StealthGhost
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: stealth_ghost
-  displayName: "유령"
-  description: ""
+  displayName: "\uC720\uB839"
+  description: 
   category: 3
   tier: 3
   ppCost: 3
   prereqTraitId: stealth_shadow
   tradeoff: 0
-  effectSummary: "웅크려 정지 3초 후 짧은 비탐지(재진입) (선행: 그림자)"
+  effectSummary: "\uC6C5\uD06C\uB824 \uC815\uC9C0 3\uCD08 \uD6C4 \uC9E7\uC740 \uBE44\uD0D0\uC9C0(\uC7AC\uC9C4\uC785)
+    (\uC120\uD589: \uADF8\uB9BC\uC790)"
   effects:
   - effectKey: crouch_vanish
     op: flag

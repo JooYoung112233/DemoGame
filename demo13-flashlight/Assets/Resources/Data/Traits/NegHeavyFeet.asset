@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: NegHeavyFeet
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: neg_heavy_feet
-  displayName: "무거운 발"
-  description: ""
+  displayName: "\uBB34\uAC70\uC6B4 \uBC1C"
+  description: 
   category: 3
   tier: 0
   ppCost: -1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "기본 이동 소음 +25%"
+  effectSummary: "\uAE30\uBCF8 \uC774\uB3D9 \uC18C\uC74C +25%"
   effects:
   - effectKey: move_noise
     op: mul

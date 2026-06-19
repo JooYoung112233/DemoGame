@@ -549,6 +549,17 @@ Unity 재생 시 **202종** 아이템 + **10종** `RecipeData` (`Data/Recipes/`)
 
 > 아이콘만 선제작. 실제 총기 시스템 도입 시 밸런스·제작·조립 룰 별도 설계.
 
+### 무기 부착물 (파츠) — SO 구현 4종 (2026-06-19)
+
+> `ItemData`의 무기 파츠 필드(`weaponPartType` / `partMoveSpeedMult` / `partStaminaMult` / `partRangeBonus` / `partRecoilMult` / `partMagBonus`)를 채운 **실제 SO 4종**. 전부 `category=Misc`, `equipSlot=None`, `isUsable=false`, `hasDurability=false`. 저장 위치 `Assets/Resources/Items/Misc/WeaponPart/`. 총기 시스템은 미도입이라 효과 수치는 도입 시 활용. 아이콘 미할당(에디터 연결 필요).
+
+| itemId | 표시명 | 종류 | 격자 | 희귀도 | 무게 | 판매/구매 | 부착 효과 |
+|---|---|---|:---:|---|:---:|:---:|---|
+| `scope_basic` | 조준경 | Scope | 2×1 | Uncommon | 0.3 | 40 / 120 | 사거리 +1.0, 반동 ×0.9 |
+| `muzzle_basic` | 소염기 | Muzzle | 1×1 | Uncommon | 0.2 | 30 / 90 | 반동/소음 ×0.85 |
+| `mag_extended` | 확장 탄창 | Magazine | 1×2 | Uncommon | 0.4 | 35 / 100 | 장탄수 +10 |
+| `grip_tactical` | 전술 손잡이 | Grip | 1×1 | Common | 0.2 | 25 / 70 | 이속 ×1.05, 스태미너 ×0.92, 반동 ×0.92 |
+
 ### 무기 로스터 (세계관 재정비, 2026-06-10)
 > 판타지(장검·창) 폐기 → **현대 폐도시 = 즉석 근접 + 실총기**. 아이콘 선제작, 데모 구현은 단계적.
 
@@ -594,6 +605,7 @@ Unity 재생 시 **202종** 아이템 + **10종** `RecipeData` (`Data/Recipes/`)
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-06-19 | **무기 부착물(파츠) SO 4종 신규.** `ItemData` 무기 파츠 필드(`weaponPartType`/`partMoveSpeedMult`/`partStaminaMult`/`partRangeBonus`/`partRecoilMult`/`partMagBonus`)를 채운 실제 SO를 `Assets/Resources/Items/Misc/WeaponPart/`에 생성: `scope_basic`(Scope, 2×1, Uncommon, 사거리+1.0·반동×0.9), `muzzle_basic`(Muzzle, 1×1, Uncommon, 반동×0.85), `mag_extended`(Magazine, 1×2, Uncommon, 장탄+10), `grip_tactical`(Grip, 1×1, Common, 이속×1.05·스태미너×0.92·반동×0.92). 전부 category=Misc·equipSlot=None·isUsable=false·hasDurability=false. ItemDatabase가 `Resources.LoadAll("Items")`로 자동 로드. 근거: 무기 부착물 시스템 도입 대비 콘텐츠 선제작. 총기 시스템 미도입이라 효과 수치는 도입 시 활용, 아이콘 미할당(에디터 연결 필요). |
 | 2026-06-18 | **장착 가방·리그 신규 + 방어구 equipSlot 연동.** `Items/Gear/`에 `backpack_basic`(6×6), `backpack_large`(7×8), `rig_tactical`(4×3) 3종 신규 ItemData 생성(§4-A). 기존 방어구 4종에 equipSlot 추가: helmet_bucket=Head(1), vest_scrap/armor_night/coat_light=Armor(2). gloves_work/boots_rubber는 대응 슬롯 없어 None 유지. 3종 모두 `Shop_pawnshop` stock에 진열. 비고: Rig 격자 확장은 코드 미연동(Backpack 슬롯만 OnBackpackChanged), 신규 3종 아이콘 미연결(에디터 연결 필요). |
 | 2026-06-16 | **빛의 역설/루디 활성 자원 캐논 정합(gdd-core §5.2/§5.3).** §6 루디 = 충전·방전·마모 활성 자원(죽은 루디·순도·마모·충전 위치) + SSOT 링크. §2 헤더에 비루디 광원 침식 리스크 주석, `lantern_basic` = 루디 광원(예외 안전)·약방전·여분 교체 보강. 새 itemId·수치 미생성(TBD). 충전/순도 상태 구현 방식은 확인 필요. |
 | 2026-05-25 | 아이템 기획 리스트 초안 작성. P0~P3 우선순위, 9분류, 파밍 매핑, Stage 3~4 구현 순서. |

@@ -21,6 +21,9 @@ public class ItemInstance
     /// <summary>현재 내구도 (hasDurability 아이템은 절대값, 아니면 0~1)</summary>
     public float durability;
 
+    /// <summary>무기 부착물(파츠) — 종류별 itemId. 길이 4 = [Scope, Muzzle, Magazine, Grip]. (무기 인스턴스에 귀속, 타르코프식)</summary>
+    public string[] attachments;
+
     public ItemInstance(ItemData data, int count = 1)
     {
         uid = nextUid++;
@@ -72,8 +75,46 @@ public class ItemInstance
         return new ItemInstance(data, count);
     }
 
-    /// <summary>총 무게</summary>
-    public float TotalWeight => data != null ? data.weight * stackCount : 0f;
+    // ── 무기 부착물 ──────────────────────────────────────────────────
+    /// <summary>종류 t에 부착된 파츠 itemId (없으면 null).</summary>
+    public string GetAttachment(WeaponPartType t)
+    {
+        int i = (int)t - 1;
+        return (attachments != null && i >= 0 && i < attachments.Length) ? attachments[i] : null;
+    }
+
+    /// <summary>종류 t에 파츠 itemId 부착(null/"" = 해제).</summary>
+    public void SetAttachment(WeaponPartType t, string itemId)
+    {
+        int i = (int)t - 1;
+        if (i < 0 || i > 3) return;
+        if (attachments == null) attachments = new string[4];
+        attachments[i] = string.IsNullOrEmpty(itemId) ? null : itemId;
+    }
+
+    /// <summary>부착물이 하나라도 있는지.</summary>
+    public bool HasAnyAttachment =>
+        attachments != null && System.Array.Exists(attachments, a => !string.IsNullOrEmpty(a));
+
+    /// <summary>부착물 무게 합(파츠 ItemData 조회).</summary>
+    public float AttachmentWeight
+    {
+        get
+        {
+            if (attachments == null) return 0f;
+            float w = 0f;
+            for (int i = 0; i < attachments.Length; i++)
+            {
+                if (string.IsNullOrEmpty(attachments[i])) continue;
+                var d = ItemDatabase.Get(attachments[i]);
+                if (d != null) w += d.weight;
+            }
+            return w;
+        }
+    }
+
+    /// <summary>총 무게 (부착물 포함)</summary>
+    public float TotalWeight => (data != null ? data.weight * stackCount : 0f) + AttachmentWeight;
 
     /// <summary>표시용 이름 (스택이면 수량 포함)</summary>
     public string DisplayName

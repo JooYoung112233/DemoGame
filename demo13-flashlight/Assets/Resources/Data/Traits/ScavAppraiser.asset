@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: ScavAppraiser
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: scav_appraiser
-  displayName: "감정가"
-  description: ""
+  displayName: "\uAC10\uC815\uAC00"
+  description: 
   category: 2
   tier: 2
   ppCost: 2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "판매가 +15% + 귀중품·루디 순도 식별"
+  effectSummary: "\uD310\uB9E4\uAC00 +15% + \uADC0\uC911\uD488\xB7\uB8E8\uB514 \uC21C\uB3C4
+    \uC2DD\uBCC4"
   effects:
   - effectKey: sell_price
     op: mul

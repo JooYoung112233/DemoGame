@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: SocialSilverTongue
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: social_silver_tongue
-  displayName: "입담"
-  description: ""
+  displayName: "\uC785\uB2F4"
+  description: 
   category: 4
   tier: 1
   ppCost: 1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "NPC 호감·신뢰 획득 +20%"
+  effectSummary: "NPC \uD638\uAC10\xB7\uC2E0\uB8B0 \uD68D\uB4DD +20%"
   effects:
   - effectKey: npc_affinity
     op: mul

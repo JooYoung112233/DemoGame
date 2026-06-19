@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: CombatParry
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: combat_parry
-  displayName: "받아넘기기"
-  description: ""
+  displayName: "\uBC1B\uC544\uB118\uAE30\uAE30"
+  description: 
   category: 0
   tier: 2
   ppCost: 2
   prereqTraitId: 
   tradeoff: 1
-  effectSummary: "구르기 무적 프레임 +30% / 스태 소모 +10%"
+  effectSummary: "\uAD6C\uB974\uAE30 \uBB34\uC801 \uD504\uB808\uC784 +30% / \uC2A4\uD0DC
+    \uC18C\uBAA8 +10%"
   effects:
   - effectKey: dodge_iframe
     op: mul

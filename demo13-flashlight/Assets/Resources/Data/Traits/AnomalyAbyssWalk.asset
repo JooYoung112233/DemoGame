@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: AnomalyAbyssWalk
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: anomaly_abyss_walk
-  displayName: "심연 보행"
-  description: ""
+  displayName: "\uC2EC\uC5F0 \uBCF4\uD589"
+  description: 
   category: 5
   tier: 3
   ppCost: 3
   prereqTraitId: anomaly_dark_adaptation
   tradeoff: 0
-  effectSummary: "영구 짙은 구역의 이동·시야 페널티 무시 (선행: 어둠 적응)"
+  effectSummary: "\uC601\uAD6C \uC9D9\uC740 \uAD6C\uC5ED\uC758 \uC774\uB3D9\xB7\uC2DC\uC57C
+    \uD398\uB110\uD2F0 \uBB34\uC2DC (\uC120\uD589: \uC5B4\uB460 \uC801\uC751)"
   effects:
   - effectKey: deep_zone_immune
     op: flag

@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: CombatColdHands
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: combat_cold_hands
-  displayName: "냉정한 손"
-  description: ""
+  displayName: "\uB0C9\uC815\uD55C \uC190"
+  description: 
   category: 0
   tier: 1
   ppCost: 1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "강공·차지 그로기 누적 +20%"
+  effectSummary: "\uAC15\uACF5\xB7\uCC28\uC9C0 \uADF8\uB85C\uAE30 \uB204\uC801 +20%"
   effects:
   - effectKey: groggy_buildup
     op: mul

@@ -144,8 +144,11 @@ public class TopDownPlayer : MonoBehaviour
     AttackComboData CurrentLightCombo => (_weapon != null && _weapon.lightCombo != null) ? _weapon.lightCombo : lightCombo;
     AttackData CurrentHeavy           => (_weapon != null && _weapon.heavyAttack != null) ? _weapon.heavyAttack : heavyAttack;
     AttackData CurrentHeavyFull       => (_weapon != null && _weapon.heavyFullAttack != null) ? _weapon.heavyFullAttack : heavyFullAttack;
-    float WeaponMoveMult  => _weapon != null ? _weapon.moveSpeedMult : 1f;
-    float WeaponStamMult  => _weapon != null ? _weapon.staminaCostMult : 1f;
+    PlayerEquipment _equip;
+    PlayerEquipment Equip => _equip != null ? _equip : (_equip = GetComponent<PlayerEquipment>());
+    // 무기 보정 × 부착물(파츠) 집계 보정
+    float WeaponMoveMult  => (_weapon != null ? _weapon.moveSpeedMult : 1f) * (Equip != null ? Equip.WeaponPartMoveMult : 1f);
+    float WeaponStamMult  => (_weapon != null ? _weapon.staminaCostMult : 1f) * (Equip != null ? Equip.WeaponPartStaminaMult : 1f);
 
     /// <summary>무기 장착 반영 (PlayerEquipment가 호출). null=맨손.</summary>
     public void SetWeapon(WeaponData weapon) => _weapon = weapon;

@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: NegAnomalySensitive
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: neg_anomaly_sensitive
-  displayName: "현상 과민"
-  description: ""
+  displayName: "\uD604\uC0C1 \uACFC\uBBFC"
+  description: 
   category: 5
   tier: 0
   ppCost: -2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "현상권 스태미너·시야 페널티↑"
+  effectSummary: "\uD604\uC0C1\uAD8C \uC2A4\uD0DC\uBBF8\uB108\xB7\uC2DC\uC57C \uD398\uB110\uD2F0\u2191"
   effects:
   - effectKey: anomaly_stamina_penalty
     op: mul

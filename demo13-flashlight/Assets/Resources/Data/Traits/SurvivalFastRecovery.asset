@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: SurvivalFastRecovery
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: survival_fast_recovery
-  displayName: "빠른 회복"
-  description: ""
+  displayName: "\uBE60\uB978 \uD68C\uBCF5"
+  description: 
   category: 1
   tier: 2
   ppCost: 2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "거점 수면 HP·기력 회복 +30%"
+  effectSummary: "\uAC70\uC810 \uC218\uBA74 HP\xB7\uAE30\uB825 \uD68C\uBCF5 +30%"
   effects:
   - effectKey: sleep_recovery
     op: mul

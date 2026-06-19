@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: AnomalyRudiSense
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: anomaly_rudi_sense
-  displayName: "루디 감각"
-  description: ""
+  displayName: "\uB8E8\uB514 \uAC10\uAC01"
+  description: 
   category: 5
   tier: 2
   ppCost: 2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "주변 루디·현상 노드 핑 반경↑ + 순도 직감"
+  effectSummary: "\uC8FC\uBCC0 \uB8E8\uB514\xB7\uD604\uC0C1 \uB178\uB4DC \uD551 \uBC18\uACBD\u2191
+    + \uC21C\uB3C4 \uC9C1\uAC10"
   effects:
   - effectKey: rudi_ping
     op: flag

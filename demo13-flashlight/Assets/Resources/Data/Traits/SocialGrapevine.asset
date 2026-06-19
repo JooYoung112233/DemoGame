@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: SocialGrapevine
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: social_grapevine
-  displayName: "소문통"
-  description: ""
+  displayName: "\uC18C\uBB38\uD1B5"
+  description: 
   category: 4
   tier: 2
   ppCost: 2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "정보(단서·블랙마켓) 가격 -20% · 해금 빠름"
+  effectSummary: "\uC815\uBCF4(\uB2E8\uC11C\xB7\uBE14\uB799\uB9C8\uCF13) \uAC00\uACA9
+    -20% \xB7 \uD574\uAE08 \uBE60\uB984"
   effects:
   - effectKey: info_price
     op: mul

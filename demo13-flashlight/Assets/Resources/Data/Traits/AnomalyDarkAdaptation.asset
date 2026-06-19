@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: AnomalyDarkAdaptation
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: anomaly_dark_adaptation
-  displayName: "어둠 적응"
-  description: ""
+  displayName: "\uC5B4\uB460 \uC801\uC751"
+  description: 
   category: 5
   tier: 1
   ppCost: 1
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "짙은 현상 시야 페널티 -30% (콘 밖 형체 인식↑)"
+  effectSummary: "\uC9D9\uC740 \uD604\uC0C1 \uC2DC\uC57C \uD398\uB110\uD2F0 -30%
+    (\uCF58 \uBC16 \uD615\uCCB4 \uC778\uC2DD\u2191)"
   effects:
   - effectKey: vision_anomaly
     op: mul

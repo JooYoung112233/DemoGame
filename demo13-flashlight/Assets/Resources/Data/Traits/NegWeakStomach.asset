@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: NegWeakStomach
   m_EditorClassIdentifier: Game.Scripts::TraitData
   traitId: neg_weak_stomach
-  displayName: "허약한 위장"
-  description: ""
+  displayName: "\uD5C8\uC57D\uD55C \uC704\uC7A5"
+  description: 
   category: 1
   tier: 0
   ppCost: -2
   prereqTraitId: 
   tradeoff: 0
-  effectSummary: "허기·탈수 +25% 빠름"
+  effectSummary: "\uD5C8\uAE30\xB7\uD0C8\uC218 +25% \uBE60\uB984"
   effects:
   - effectKey: hunger_thirst_rate
     op: mul
