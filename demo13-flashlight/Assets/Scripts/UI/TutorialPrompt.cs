@@ -92,7 +92,7 @@ public class TutorialPrompt : MonoBehaviour
         rt.anchoredPosition = new Vector2(0, 180f);
 
         bgImage = promptRoot.AddComponent<Image>();
-        bgImage.color = new Color(0.1f, 0.1f, 0.1f, 0.8f);
+        bgImage.color = new Color(UITheme.Panel.r, UITheme.Panel.g, UITheme.Panel.b, 0.8f);
 
         canvasGroup = promptRoot.AddComponent<CanvasGroup>();
 
@@ -102,7 +102,7 @@ public class TutorialPrompt : MonoBehaviour
         promptText = textGO.AddComponent<Text>();
         promptText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         promptText.fontSize = 20;
-        promptText.color = new Color(1f, 0.9f, 0.6f);
+        promptText.color = UITheme.Gold;
         promptText.alignment = TextAnchor.MiddleCenter;
         var textRT = textGO.GetComponent<RectTransform>();
         textRT.anchorMin = Vector2.zero;
@@ -123,7 +123,7 @@ public class TutorialPrompt : MonoBehaviour
         panelRT.sizeDelta = new Vector2(520f, 420f);
 
         var bg = tutorialPanel.AddComponent<Image>();
-        bg.color = new Color(0.06f, 0.06f, 0.1f, 0.94f);
+        bg.color = new Color(UITheme.Panel.r, UITheme.Panel.g, UITheme.Panel.b, 0.94f);
 
         // 조작법 텍스트 (상단 영역)
         var contentGO = new GameObject("Content");
@@ -131,7 +131,7 @@ public class TutorialPrompt : MonoBehaviour
         tutorialPanelText = contentGO.AddComponent<Text>();
         tutorialPanelText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         tutorialPanelText.fontSize = 18;
-        tutorialPanelText.color = new Color(0.9f, 0.9f, 0.95f);
+        tutorialPanelText.color = UITheme.TextBright;
         tutorialPanelText.alignment = TextAnchor.UpperLeft;
         tutorialPanelText.supportRichText = true;
         tutorialPanelText.lineSpacing = 1.3f;
@@ -155,13 +155,13 @@ public class TutorialPrompt : MonoBehaviour
         startBtnRT.offsetMax = new Vector2(-8, 60);
 
         var startBtnImg = startBtnGO.AddComponent<Image>();
-        startBtnImg.color = new Color(0.15f, 0.45f, 0.2f);
+        startBtnImg.color = UITheme.Buy;
 
         startTutorialBtn = startBtnGO.AddComponent<Button>();
         startTutorialBtn.targetGraphic = startBtnImg;
         var startColors = startTutorialBtn.colors;
-        startColors.highlightedColor = new Color(0.2f, 0.6f, 0.3f);
-        startColors.pressedColor = new Color(0.1f, 0.35f, 0.15f);
+        startColors.highlightedColor = UITheme.BuyHi;
+        startColors.pressedColor = UITheme.Buy;
         startTutorialBtn.colors = startColors;
 
         MakeBtnText(startBtnGO.transform, "▶ 튜토리얼 시작");
@@ -177,13 +177,13 @@ public class TutorialPrompt : MonoBehaviour
         closeBtnRT.offsetMax = new Vector2(-24, 60);
 
         var closeBtnImg = closeBtnGO.AddComponent<Image>();
-        closeBtnImg.color = new Color(0.35f, 0.15f, 0.15f);
+        closeBtnImg.color = UITheme.Danger;
 
         closeTutorialBtn = closeBtnGO.AddComponent<Button>();
         closeTutorialBtn.targetGraphic = closeBtnImg;
         var closeColors = closeTutorialBtn.colors;
-        closeColors.highlightedColor = new Color(0.5f, 0.2f, 0.2f);
-        closeColors.pressedColor = new Color(0.25f, 0.1f, 0.1f);
+        closeColors.highlightedColor = new Color(0.52f, 0.20f, 0.16f);
+        closeColors.pressedColor = new Color(0.30f, 0.10f, 0.09f);
         closeTutorialBtn.colors = closeColors;
 
         MakeBtnText(closeBtnGO.transform, "닫기 [H]");

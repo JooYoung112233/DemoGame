@@ -95,7 +95,7 @@ public class HideoutUI : MonoBehaviour
         }
         else
         {
-            Row(lv == 0 ? "── 건설 비용 ──" : $"── Lv{lv + 1} 업그레이드 비용 ──", 15, new Color(0.8f, 0.82f, 0.9f));
+            Row(lv == 0 ? "── 건설 비용 ──" : $"── Lv{lv + 1} 업그레이드 비용 ──", 15, UITheme.TextMuted);
 
             // 스크랩
             int bal = CurrencyManager.Instance != null ? CurrencyManager.Instance.Balance : 0;
@@ -117,7 +117,7 @@ public class HideoutUI : MonoBehaviour
             bool can = mgr.CanUpgrade(m, out _);
             string label = lv == 0 ? "건설" : "업그레이드";
             string mm = m;
-            BuildButton(label, can ? new Color(0.28f, 0.6f, 0.36f) : new Color(0.42f, 0.32f, 0.32f), can, () =>
+            BuildButton(label, can ? UITheme.Buy : new Color(0.30f, 0.26f, 0.22f, 1f), can, () =>
             {
                 if (HideoutModuleManager.Instance != null) HideoutModuleManager.Instance.Upgrade(mm);
             });
@@ -129,14 +129,14 @@ public class HideoutUI : MonoBehaviour
             if (lv >= 1)
             {
                 Spacer(10);
-                Row("── 전력 ──", 15, new Color(0.8f, 0.82f, 0.9f));
+                Row("── 전력 ──", 15, UITheme.TextMuted);
                 bool powered = mgr.GeneratorPowered;
                 Row($"전력: {(powered ? "<color=#73DA73>ON</color>" : "<color=#FF8C73>OFF</color>")}", 18, Color.white)
                     .fontStyle = FontStyle.Bold;
                 if (!powered)
-                    Row("전력 켜기 = 연료(fuel_can) 1 소비", 13, new Color(0.7f, 0.7f, 0.75f));
+                    Row("전력 켜기 = 연료(fuel_can) 1 소비", 13, UITheme.TextMuted);
                 BuildButton(powered ? "전력 끄기" : "전력 켜기",
-                    powered ? new Color(0.5f, 0.32f, 0.28f) : new Color(0.28f, 0.5f, 0.4f), true, () =>
+                    powered ? UITheme.Sell : UITheme.Buy, true, () =>
                     {
                         var mr = HideoutModuleManager.Instance;
                         if (mr != null && !mr.ToggleGeneratorPower(out var reason))
@@ -152,15 +152,15 @@ public class HideoutUI : MonoBehaviour
         if (funcLabel != null)
         {
             Spacer(10);
-            Row("── 기능 ──", 15, new Color(0.8f, 0.82f, 0.9f));
+            Row("── 기능 ──", 15, UITheme.TextMuted);
             if (lv >= 1)
             {
                 string mm = m;
-                BuildButton(funcLabel, new Color(0.26f, 0.4f, 0.62f), true, () => UseFacility(mm));
+                BuildButton(funcLabel, UITheme.Accent, true, () => UseFacility(mm));
             }
             else
             {
-                Row("건설 후 사용 가능", 14, new Color(0.7f, 0.7f, 0.75f));
+                Row("건설 후 사용 가능", 14, UITheme.TextMuted);
             }
         }
     }
@@ -257,13 +257,13 @@ public class HideoutUI : MonoBehaviour
         canvasGO.AddComponent<GraphicRaycaster>();
 
         panel = NewRect("Panel", canvasGO.transform, Vector2.zero, Vector2.one);
-        panel.AddComponent<Image>().color = new Color(0.02f, 0.02f, 0.04f, 0.9f);
+        panel.AddComponent<Image>().color = UITheme.Backdrop;
 
         // 중앙 창
         var win = NewRect("Window", panel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
         var winRT = win.GetComponent<RectTransform>();
         winRT.sizeDelta = new Vector2(640, 560);
-        win.AddComponent<Image>().color = new Color(0.08f, 0.08f, 0.11f, 0.99f);
+        win.AddComponent<Image>().color = UITheme.Panel;
 
         titleText = MakeText(win.transform, "시설", 26, TextAnchor.MiddleLeft,
             new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -18), new Vector2(420, 40));
@@ -271,14 +271,14 @@ public class HideoutUI : MonoBehaviour
 
         scrapText = MakeText(win.transform, "◈ 0", 20, TextAnchor.MiddleRight,
             new Vector2(1, 1), new Vector2(1, 1), new Vector2(-96, -20), new Vector2(220, 34));
-        scrapText.color = new Color(1f, 0.85f, 0.3f);
+        scrapText.color = UITheme.Gold;
 
         var closeGO = new GameObject("Close", typeof(RectTransform));
         closeGO.transform.SetParent(win.transform, false);
         var cRT = closeGO.GetComponent<RectTransform>();
         cRT.anchorMin = cRT.anchorMax = cRT.pivot = new Vector2(1, 1);
         cRT.anchoredPosition = new Vector2(-44, -20); cRT.sizeDelta = new Vector2(44, 34);
-        closeGO.AddComponent<Image>().color = new Color(0.5f, 0.2f, 0.2f);
+        closeGO.AddComponent<Image>().color = UITheme.Danger;
         closeGO.AddComponent<Button>().onClick.AddListener(Close);
         MakeChild(closeGO.transform, "✕", 18, TextAnchor.MiddleCenter);
 
@@ -286,7 +286,7 @@ public class HideoutUI : MonoBehaviour
         var area = NewRect("Body", win.transform, new Vector2(0, 0), new Vector2(1, 1));
         var areaRT = area.GetComponent<RectTransform>();
         areaRT.offsetMin = new Vector2(20, 20); areaRT.offsetMax = new Vector2(-20, -68);
-        area.AddComponent<Image>().color = new Color(0, 0, 0, 0.25f);
+        area.AddComponent<Image>().color = UITheme.PanelAlt;
 
         var content = new GameObject("Content", typeof(RectTransform));
         content.transform.SetParent(area.transform, false);

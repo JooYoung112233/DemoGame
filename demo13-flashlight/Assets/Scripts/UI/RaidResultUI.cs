@@ -213,7 +213,8 @@ public class RaidResultUI : MonoBehaviour
         if (closeHintText != null)
         {
             float alpha = Mathf.PingPong(Time.unscaledTime * 2f, 1f) * 0.5f + 0.5f;
-            closeHintText.color = new Color(0.8f, 0.8f, 0.8f, alpha);
+            var hint = UITheme.TextMuted;
+            closeHintText.color = new Color(hint.r, hint.g, hint.b, alpha);
         }
 
         if (showTimer > 1f && (Input.GetKeyDown(closeKey) || Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(0)))
@@ -250,7 +251,7 @@ public class RaidResultUI : MonoBehaviour
 
         // 어두운 배경
         dimBg = panelRoot.AddComponent<Image>();
-        dimBg.color = new Color(0, 0, 0, 0.85f);
+        dimBg.color = UITheme.Backdrop;
 
         // 중앙 패널
         var panel = new GameObject("CenterPanel");
@@ -260,16 +261,16 @@ public class RaidResultUI : MonoBehaviour
         pRT.anchorMax = new Vector2(0.5f, 0.5f);
         pRT.sizeDelta = new Vector2(440, 400);
         var pImg = panel.AddComponent<Image>();
-        pImg.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
+        pImg.color = UITheme.Panel;
 
         // 제목
         titleText = MakeText(panel.transform, "Title", "── 귀환 정산 ──",
-            new Vector2(0, -20), new Vector2(400, 40), 24, new Color(1f, 0.85f, 0.3f), TextAnchor.MiddleCenter);
+            new Vector2(0, -20), new Vector2(400, 40), 24, UITheme.Gold, TextAnchor.MiddleCenter);
         titleText.fontStyle = FontStyle.Bold;
 
         // 생존 시간 (Show에서 갱신)
         timeText = MakeText(panel.transform, "Time", "생존 시간: --",
-            new Vector2(0, -70), new Vector2(400, 25), 16, new Color(0.7f, 1f, 0.8f), TextAnchor.MiddleCenter);
+            new Vector2(0, -70), new Vector2(400, 25), 16, UITheme.Positive, TextAnchor.MiddleCenter);
         timeText.fontStyle = FontStyle.Bold;
 
         // 구분선
@@ -277,19 +278,19 @@ public class RaidResultUI : MonoBehaviour
 
         // 획득 아이템 (Show에서 갱신)
         itemsText = MakeText(panel.transform, "Items", "[ 획득 아이템 ]",
-            new Vector2(20, -115), new Vector2(400, 140), 15, new Color(0.9f, 0.95f, 1f), TextAnchor.UpperLeft);
+            new Vector2(20, -115), new Vector2(400, 140), 15, UITheme.TextBright, TextAnchor.UpperLeft);
 
         // 구분선
         MakeLine(panel.transform, -260);
 
         // 보상 (Show에서 갱신)
         rewardsText = MakeText(panel.transform, "Rewards", "",
-            new Vector2(0, -275), new Vector2(400, 55), 16, new Color(0.7f, 1f, 0.8f), TextAnchor.MiddleCenter);
+            new Vector2(0, -275), new Vector2(400, 55), 16, UITheme.Positive, TextAnchor.MiddleCenter);
         rewardsText.fontStyle = FontStyle.Bold;
 
         // 닫기 안내
         closeHintText = MakeText(panel.transform, "CloseHint", "[ Enter / 클릭으로 닫기 ]",
-            new Vector2(0, -345), new Vector2(400, 25), 14, new Color(0.8f, 0.8f, 0.8f), TextAnchor.MiddleCenter);
+            new Vector2(0, -345), new Vector2(400, 25), 14, UITheme.TextMuted, TextAnchor.MiddleCenter);
 
         panelRoot.SetActive(false);
     }
@@ -351,6 +352,6 @@ public class RaidResultUI : MonoBehaviour
         rt.anchoredPosition = new Vector2(0, yPos);
         rt.sizeDelta = new Vector2(380, 1);
         var img = go.AddComponent<Image>();
-        img.color = new Color(1, 1, 1, 0.3f);
+        img.color = UITheme.Divider;
     }
 }

@@ -111,8 +111,8 @@ public class PlayerInventory : MonoBehaviour
         return false;
     }
 
-    /// <summary>아이템 사용 (우클릭)</summary>
-    public bool UseItem(InventoryGrid.PlacedItem placed)
+    /// <summary>아이템 사용 (우클릭). sourceGrid 지정 시 그 격자(창고 등)에서 소모.</summary>
+    public bool UseItem(InventoryGrid.PlacedItem placed, InventoryGrid sourceGrid = null)
     {
         if (placed == null) return false;
         var item = placed.item;
@@ -194,7 +194,7 @@ public class PlayerInventory : MonoBehaviour
 
         if (used)
         {
-            var g = GridOf(placed) ?? Grid;   // placed가 속한 격자(가방/주머니/보안)에서 처리
+            var g = sourceGrid ?? GridOf(placed) ?? Grid;   // 지정 격자 우선(창고 사용), 없으면 가방/주머니/보안
             if (item.HasDurability)
             {
                 item.durability -= item.data.durabilityCostPerUse;

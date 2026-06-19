@@ -194,12 +194,12 @@ public class SleepUI : MonoBehaviour
         canvasGO.AddComponent<GraphicRaycaster>();
 
         panel = NewRect("Panel", canvasGO.transform, Vector2.zero, Vector2.one);
-        panel.AddComponent<Image>().color = new Color(0.02f, 0.02f, 0.05f, 0.96f);
+        panel.AddComponent<Image>().color = UITheme.Backdrop;
 
         var win = NewRect("Window", panel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
         var winRT = win.GetComponent<RectTransform>();
         winRT.sizeDelta = new Vector2(720, 460);
-        win.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.14f, 1f);
+        win.AddComponent<Image>().color = UITheme.Panel;
 
         var title = MakeText(win.transform, "수면", 28, TextAnchor.MiddleLeft,
             new Vector2(0, 1), new Vector2(0, 1), new Vector2(26, -18), new Vector2(360, 40));
@@ -208,13 +208,13 @@ public class SleepUI : MonoBehaviour
         var closeGO = NewRect("Close", win.transform, new Vector2(1, 1), new Vector2(1, 1));
         var cRT = closeGO.GetComponent<RectTransform>();
         cRT.pivot = new Vector2(1, 1); cRT.anchoredPosition = new Vector2(-20, -18); cRT.sizeDelta = new Vector2(44, 34);
-        closeGO.AddComponent<Image>().color = new Color(0.5f, 0.2f, 0.2f);
+        closeGO.AddComponent<Image>().color = UITheme.Danger;
         closeGO.AddComponent<Button>().onClick.AddListener(Close);
         MakeChild(closeGO.transform, "✕", 18, TextAnchor.MiddleCenter);
 
         statusText = MakeText(win.transform, "현재 상태", 16, TextAnchor.MiddleLeft,
             new Vector2(0, 1), new Vector2(0, 1), new Vector2(26, -66), new Vector2(660, 28));
-        statusText.color = new Color(0.75f, 0.8f, 0.9f);
+        statusText.color = UITheme.TextMuted;
 
         // 수면 시간 옵션 버튼
         var options = BuildOptions();
@@ -229,7 +229,7 @@ public class SleepUI : MonoBehaviour
             brt.anchoredPosition = new Vector2(startX + i * (btnW + gap), -20);
             brt.sizeDelta = new Vector2(btnW, btnH);
             var img = btnGO.AddComponent<Image>();
-            img.color = new Color(0.18f, 0.22f, 0.3f);
+            img.color = UITheme.Cell;
             var btn = btnGO.AddComponent<Button>();
             btn.targetGraphic = img;
             var captured = o;
@@ -243,7 +243,7 @@ public class SleepUI : MonoBehaviour
             var detail = MakeChild(btnGO.transform,
                 $"HP +{o.hpPct * 100:F0}%   스태미너 회복\n수분 -{o.water:F0}   포만감 -{o.satiety:F0}",
                 15, TextAnchor.LowerCenter);
-            detail.color = new Color(0.8f, 0.85f, 0.92f);
+            detail.color = UITheme.TextMuted;
             detail.rectTransform.offsetMin = new Vector2(8, 14);
             detail.rectTransform.offsetMax = new Vector2(-8, -8);
         }

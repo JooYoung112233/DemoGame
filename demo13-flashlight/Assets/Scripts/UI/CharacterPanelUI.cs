@@ -145,6 +145,9 @@ public class CharacterPanelUI : MonoBehaviour
     {
         if (!isShowing) return;
 
+        // 아이템 상세 팝업이 떠 있으면 패널 입력(드래그/클릭/Esc) 차단 — 팝업이 자체 처리.
+        if (ItemDetailUI.IsShowing) return;
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (contextMenuGO != null && contextMenuGO.activeSelf)
@@ -338,7 +341,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 불투명 배경 (전체화면 모달 — 게임 화면 완전히 가림)
         var dimBg = panelRoot.AddComponent<Image>();
-        dimBg.color = new Color(0.02f, 0.02f, 0.04f, 1f);
+        dimBg.color = UITheme.Backdrop;
 
         // ── 타르코프식 3열: 좌=캐릭터/장비 · 중=내 가방(탭) · 우=창고/파밍 ──
         BuildRightPanel(panelRoot.transform);      // 중앙 = 내 가방
@@ -413,11 +416,11 @@ public class CharacterPanelUI : MonoBehaviour
         rightPanel.offsetMax = Vector2.zero;
 
         rightPanelBg = go.AddComponent<Image>();
-        rightPanelBg.color = new Color(0.06f, 0.06f, 0.1f, 0.95f);
+        rightPanelBg.color = UITheme.Panel;
 
         // 상단 패널 제목
         var title = MakeText(rightPanel, "MidTitle", "장비 / 소지품",
-            new Vector2(0, -8), new Vector2(MID_INNER_W, 26), 16, new Color(0.85f, 0.85f, 0.95f), TextAnchor.MiddleCenter);
+            new Vector2(0, -8), new Vector2(MID_INNER_W, 26), 16, UITheme.TextBright, TextAnchor.MiddleCenter);
         title.fontStyle = FontStyle.Bold;
         var titleRT = title.GetComponent<RectTransform>();
         titleRT.anchorMin = titleRT.anchorMax = titleRT.pivot = new Vector2(0.5f, 1f);
@@ -433,33 +436,33 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 무기 파츠 예약 공간 (장착 시 채워질 자리 — 지금은 안내만)
         weaponBox = MakeSection(midContentRoot, "WeaponPartsBox", MID_INNER_W, WEAPON_BOX_H,
-            new Color(0.09f, 0.09f, 0.14f, 0.9f));
-        var wpTxt = MakeChildText(weaponBox, "무기 파츠\n(무기 장착 시 표시)", 12, new Color(0.4f, 0.45f, 0.55f));
+            UITheme.PanelAlt);
+        var wpTxt = MakeChildText(weaponBox, "무기 파츠\n(무기 장착 시 표시)", 12, UITheme.TextMuted);
         wpTxt.alignment = TextAnchor.MiddleCenter;
 
         // 가방 헤더 + 격자 루트
-        bagHeaderText = MakeStackHeader(midContentRoot, "BagHeader", "가방", new Color(0.85f, 0.8f, 0.6f));
+        bagHeaderText = MakeStackHeader(midContentRoot, "BagHeader", "가방", UITheme.AccentBright);
         invGridRoot = MakeGridRoot(midContentRoot, "InvGrid");
 
         // 가방 미장착 안내 (가방 격자 위치에 오버레이; 위치/크기는 레이아웃에서 지정)
         invPlaceholder = MakeSection(midContentRoot, "InvPlaceholder", MID_INNER_W, 54,
-            new Color(0.08f, 0.08f, 0.12f, 0.9f));
+            UITheme.PanelAlt);
         var phTxt = MakeChildText(invPlaceholder, "가방 미장착 — 가방을 장착하면 격자가 열립니다",
-            12, new Color(0.45f, 0.5f, 0.62f));
+            12, UITheme.TextMuted);
         phTxt.alignment = TextAnchor.MiddleCenter;
         invPlaceholder.gameObject.SetActive(false);
 
         // 주머니 헤더 + 격자 루트 (고정 4칸)
-        pocketsHeaderText = MakeStackHeader(midContentRoot, "PocketsHeader", "주머니", new Color(0.7f, 0.78f, 0.7f));
+        pocketsHeaderText = MakeStackHeader(midContentRoot, "PocketsHeader", "주머니", UITheme.AccentBright);
         pocketsGridRoot = MakeGridRoot(midContentRoot, "PocketsGrid");
 
         // 보안 컨테이너 헤더 + 격자 루트 (고정 3×3, 레이드 사망에도 보존)
-        secureHeaderText = MakeStackHeader(midContentRoot, "SecureHeader", "보안 컨테이너", new Color(0.85f, 0.7f, 0.5f));
+        secureHeaderText = MakeStackHeader(midContentRoot, "SecureHeader", "보안 컨테이너", UITheme.AccentBright);
         secureGridRoot = MakeGridRoot(midContentRoot, "SecureGrid");
 
         // 무게 텍스트 (스택 맨 아래; 위치는 레이아웃에서)
         invWeightText = MakeText(midContentRoot, "Weight", "무게: 0 / 30 kg",
-            new Vector2(0, 0), new Vector2(MID_INNER_W, 22), 13, new Color(0.7f, 0.8f, 0.9f), TextAnchor.MiddleLeft);
+            new Vector2(0, 0), new Vector2(MID_INNER_W, 22), 13, UITheme.TextMuted, TextAnchor.MiddleLeft);
     }
 
     /// <summary>중앙 스택용 고정폭 박스 섹션 생성 (배경 Image 포함).</summary>
@@ -506,16 +509,16 @@ public class CharacterPanelUI : MonoBehaviour
         leftPanel.offsetMax = Vector2.zero;
 
         leftPanelBg = leftPanelRoot.AddComponent<Image>();
-        leftPanelBg.color = new Color(0.06f, 0.06f, 0.1f, 0.95f);
+        leftPanelBg.color = UITheme.Panel;
 
         // 제목
         leftTitleText = MakeText(leftPanel, "LeftTitle", "상자",
-            new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, new Color(1f, 0.85f, 0.3f), TextAnchor.MiddleCenter);
+            new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, UITheme.Gold, TextAnchor.MiddleCenter);
         leftTitleText.fontStyle = FontStyle.Bold;
 
         // 수색 상태 텍스트
         searchStatusText = MakeText(leftPanel, "SearchStatus", "",
-            new Vector2(10, -32), new Vector2(PANEL_WIDTH - 20, 18), 12, new Color(0.6f, 0.8f, 1f), TextAnchor.MiddleCenter);
+            new Vector2(10, -32), new Vector2(PANEL_WIDTH - 20, 18), 12, UITheme.AccentBright, TextAnchor.MiddleCenter);
 
         // 정렬 버튼 (창고/상자 내 자동 정렬)
         var sortGO = new GameObject("SortBtn", typeof(RectTransform));
@@ -524,9 +527,9 @@ public class CharacterPanelUI : MonoBehaviour
         sortRT.anchorMin = sortRT.anchorMax = sortRT.pivot = new Vector2(1, 1);
         sortRT.anchoredPosition = new Vector2(-8, -6);
         sortRT.sizeDelta = new Vector2(56, 24);
-        sortGO.AddComponent<Image>().color = new Color(0.2f, 0.32f, 0.5f);
+        sortGO.AddComponent<Image>().color = UITheme.Accent;
         sortGO.AddComponent<Button>().onClick.AddListener(SortLeftGrid);
-        MakeChildText(sortGO.transform, "정렬", 13, new Color(0.9f, 0.95f, 1f));
+        MakeChildText(sortGO.transform, "정렬", 13, UITheme.TextBright);
 
         // ── 스크롤 뷰포트 (헤더 아래 영역) + 격자 content (창고 30~100줄 대응) ──
         var viewportGO = new GameObject("LeftViewport", typeof(RectTransform), typeof(RectMask2D), typeof(ScrollRect));
@@ -571,7 +574,7 @@ public class CharacterPanelUI : MonoBehaviour
         var hRT = handleGO.GetComponent<RectTransform>();
         hRT.anchorMin = Vector2.zero; hRT.anchorMax = Vector2.one;
         hRT.offsetMin = Vector2.zero; hRT.offsetMax = Vector2.zero;
-        handleGO.GetComponent<Image>().color = new Color(0.5f, 0.6f, 0.78f);
+        handleGO.GetComponent<Image>().color = UITheme.Divider;
 
         var sb = sbGO.GetComponent<Scrollbar>();
         sb.direction = Scrollbar.Direction.BottomToTop;
@@ -595,10 +598,10 @@ public class CharacterPanelUI : MonoBehaviour
         phRT.anchorMax = new Vector2(0.99f, 0.93f);
         phRT.offsetMin = Vector2.zero;
         phRT.offsetMax = Vector2.zero;
-        leftPlaceholder.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.08f, 0.95f);
+        leftPlaceholder.AddComponent<Image>().color = UITheme.PanelAlt;
         var phTxt = MakeChildText(leftPlaceholder.transform,
             "파밍\n\n상자에 다가가 [E]\n수색하면 여기에 표시됩니다",
-            14, new Color(0.45f, 0.5f, 0.62f));
+            14, UITheme.TextMuted);
         phTxt.alignment = TextAnchor.MiddleCenter;
     }
 
@@ -619,10 +622,10 @@ public class CharacterPanelUI : MonoBehaviour
         charPanel.anchorMax = new Vector2(0.325f, 0.93f);
         charPanel.offsetMin = Vector2.zero;
         charPanel.offsetMax = Vector2.zero;
-        go.AddComponent<Image>().color = new Color(0.06f, 0.06f, 0.1f, 0.95f);
+        go.AddComponent<Image>().color = UITheme.Panel;
 
         var title = MakeText(charPanel, "CharTitle", "캐릭터 상태",
-            new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, new Color(0.8f, 0.85f, 1f), TextAnchor.MiddleCenter);
+            new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, UITheme.TextBright, TextAnchor.MiddleCenter);
         title.fontStyle = FontStyle.Bold;
 
         // ── 스탯 텍스트 ──
@@ -645,12 +648,12 @@ public class CharacterPanelUI : MonoBehaviour
         y -= 22f;
 
         charWeightText = MakeText(charPanel, "CharWeight", "무게: 0.0 / 30 kg",
-            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 20), 12, new Color(0.7f, 0.8f, 0.9f), TextAnchor.MiddleLeft);
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 20), 12, UITheme.TextMuted, TextAnchor.MiddleLeft);
         y -= 30f;
 
         // ── 장비 슬롯 (타르코프식) ──
         MakeText(charPanel, "EquipHdr", "── 장비 ──",
-            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 22), 13, new Color(0.6f, 0.65f, 0.78f), TextAnchor.MiddleCenter);
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 22), 13, UITheme.TextMuted, TextAnchor.MiddleCenter);
         y -= 28f;
 
         equipSlotBgs = new Dictionary<EquipSlot, Image>();
@@ -684,7 +687,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         // ── 부위 상태 ──
         MakeText(charPanel, "BodyHdr", "── 부위 상태 ──",
-            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 22), 13, new Color(0.6f, 0.65f, 0.78f), TextAnchor.MiddleLeft);
+            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 22), 13, UITheme.TextMuted, TextAnchor.MiddleLeft);
         y -= 26f;
 
         charBodyTexts = new Text[PART_NAMES.Length];
@@ -708,7 +711,7 @@ public class CharacterPanelUI : MonoBehaviour
         rt.sizeDelta = new Vector2(size, size);
 
         var bg = go.AddComponent<Image>();
-        bg.color = new Color(0.1f, 0.1f, 0.15f, 0.9f);
+        bg.color = UITheme.Cell;
         equipSlotBgs[slot] = bg;
 
         // 아이콘 (장착 시 표시)
@@ -726,7 +729,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 슬롯 라벨 (하단)
         var lblTxt = MakeText(rt, $"Lbl_{slot}", label,
-            new Vector2(0, 2), new Vector2(size, 14), 10, new Color(0.5f, 0.55f, 0.65f), TextAnchor.LowerCenter);
+            new Vector2(0, 2), new Vector2(size, 14), 10, UITheme.TextMuted, TextAnchor.LowerCenter);
         lblTxt.alignment = TextAnchor.LowerCenter;
         var lblRT = lblTxt.GetComponent<RectTransform>();
         lblRT.anchorMin = new Vector2(0, 0);
@@ -741,8 +744,8 @@ public class CharacterPanelUI : MonoBehaviour
         btn.targetGraphic = bg;
         var colors = btn.colors;
         colors.normalColor = bg.color;
-        colors.highlightedColor = new Color(0.18f, 0.22f, 0.32f, 0.95f);
-        colors.pressedColor = new Color(0.08f, 0.08f, 0.12f, 0.95f);
+        colors.highlightedColor = UITheme.CellHover;
+        colors.pressedColor = UITheme.CellPressed;
         btn.colors = colors;
         var capturedSlot = slot;
         btn.onClick.AddListener(() => OnEquipSlotClicked(capturedSlot));
@@ -852,10 +855,10 @@ public class CharacterPanelUI : MonoBehaviour
             // 배경색: 장착됨이면 밝게. 선택 아이템이 들어갈 수 있는 슬롯이면 하이라이트.
             bool highlighted = highlightSlots.Count > 0 && highlightSlots.Contains(slot);
             Color bgColor = highlighted
-                ? new Color(0.2f, 0.45f, 0.65f, 0.95f)
+                ? UITheme.Accent
                 : hasItem
-                    ? new Color(0.15f, 0.18f, 0.25f, 0.95f)
-                    : new Color(0.1f, 0.1f, 0.15f, 0.9f);
+                    ? UITheme.CellHover
+                    : UITheme.Cell;
             bg.color = bgColor;
             // 버튼 ColorTint가 normalColor로 되돌리지 않도록 동기화
             var slotBtn = bg.GetComponent<Button>();
@@ -891,7 +894,7 @@ public class CharacterPanelUI : MonoBehaviour
                 }
                 else
                 {
-                    lbl.color = new Color(0.5f, 0.55f, 0.65f);
+                    lbl.color = UITheme.TextMuted;
                     // 기본 라벨은 빌드 시 설정된 것 유지
                 }
             }
@@ -915,7 +918,7 @@ public class CharacterPanelUI : MonoBehaviour
         {
             var bp = playerEquipment != null ? playerEquipment.GetSlot(EquipSlot.Backpack) : null;
             bagHeaderText.text = hasBackpack ? (bp != null ? $"가방 — {bp.displayName}" : "가방") : "가방 (미장착)";
-            bagHeaderText.color = hasBackpack ? new Color(0.85f, 0.8f, 0.6f) : new Color(0.5f, 0.5f, 0.55f);
+            bagHeaderText.color = hasBackpack ? UITheme.AccentBright : UITheme.TextDim;
         }
 
         // ── 격자 렌더 ──
@@ -1030,7 +1033,7 @@ public class CharacterPanelUI : MonoBehaviour
                 rt.sizeDelta = new Vector2(CELL_SIZE, CELL_SIZE);
 
                 var img = slotGO.AddComponent<Image>();
-                img.color = new Color(0.15f, 0.15f, 0.2f, 0.8f);
+                img.color = UITheme.PanelAlt;
                 slotImages[gx, gy] = img;
             }
         }
@@ -1143,7 +1146,7 @@ public class CharacterPanelUI : MonoBehaviour
             for (int gx = p.gridX; gx < p.gridX + w; gx++)
                 for (int gy = p.gridY; gy < p.gridY + h; gy++)
                     if (gx < grid.width && gy < grid.height && slotImages != null)
-                        slotImages[gx, gy].color = new Color(0.1f, 0.1f, 0.15f, 0.4f);
+                        slotImages[gx, gy].color = UITheme.Gridline;
         }
     }
 
@@ -1155,7 +1158,7 @@ public class CharacterPanelUI : MonoBehaviour
         {
             float cur = playerInventory.CurrentWeight;
             float max = playerInventory.MaxWeight;
-            Color wc = cur > max ? new Color(1f, 0.3f, 0.3f) : new Color(0.7f, 0.8f, 0.9f);
+            Color wc = cur > max ? UITheme.Negative : UITheme.TextMuted;
             invWeightText.color = wc;
             int itemCount = (playerInventory.Grid != null ? playerInventory.Grid.ItemCount : 0)
                 + (playerInventory.PocketsGrid != null ? playerInventory.PocketsGrid.ItemCount : 0)
@@ -1212,7 +1215,7 @@ public class CharacterPanelUI : MonoBehaviour
                 rt.sizeDelta = new Vector2(CELL_SIZE, CELL_SIZE);
 
                 var img = slotGO.AddComponent<Image>();
-                img.color = new Color(0.15f, 0.15f, 0.2f, 0.8f);
+                img.color = UITheme.PanelAlt;
                 containerSlotImages[gx, gy] = img;
             }
         }
@@ -1289,8 +1292,8 @@ public class CharacterPanelUI : MonoBehaviour
             // ── 미공개: 어두운 슬롯 + "?" ──
             if (!revealed && !currentlySearching)
             {
-                bg.color = new Color(0.08f, 0.08f, 0.12f, 0.95f);
-                var qTxt = MakeChildText(itemGO.transform, "?", 18, new Color(0.3f, 0.3f, 0.4f));
+                bg.color = UITheme.PanelAlt;
+                var qTxt = MakeChildText(itemGO.transform, "?", 18, UITheme.TextDim);
                 qTxt.fontStyle = FontStyle.Bold;
                 continue;
             }
@@ -1303,7 +1306,7 @@ public class CharacterPanelUI : MonoBehaviour
                 bg.color = new Color(pulse * 0.4f, pulse * 0.35f, pulse * 0.2f, 0.95f);
 
                 // "수색 중" 텍스트
-                var searchTxt = MakeChildText(itemGO.transform, "...", 14, new Color(1f, 0.85f, 0.4f));
+                var searchTxt = MakeChildText(itemGO.transform, "...", 14, UITheme.Gold);
                 searchTxt.fontStyle = FontStyle.Bold;
 
                 // 하단 프로그레스 바
@@ -1326,7 +1329,7 @@ public class CharacterPanelUI : MonoBehaviour
                 barFillRT.anchorMax = new Vector2(Mathf.Clamp01(progress), 1f);
                 barFillRT.offsetMin = Vector2.zero;
                 barFillRT.offsetMax = Vector2.zero;
-                barFill.AddComponent<Image>().color = new Color(1f, 0.75f, 0.2f);
+                barFill.AddComponent<Image>().color = UITheme.Gold;
                 continue;
             }
 
@@ -2259,6 +2262,8 @@ public class CharacterPanelUI : MonoBehaviour
 
         float y = -28f;
         bool isPlayerGrid = IsPlayerGrid(grid);
+        // 안전 창고(메인 창고/가구 창고) — 수색 중 루팅 상자는 제외
+        bool isSafeStorage = !isPlayerGrid && grid == LeftGrid && !leftPanelSearchEnabled;
 
         // 장착 — 모든 장착 가능 타입(가방·헬멧·방어구·리그·무기·근접·특수창)을 어느 격자에서든 노출.
         if (IsEquippable(data))
@@ -2267,44 +2272,57 @@ public class CharacterPanelUI : MonoBehaviour
             SelectItem(placed.item, grid);
             var capItem = placed.item;
             var capGrid = grid;
-            AddContextButton("착용", new Color(0.4f, 0.8f, 1f), y, () =>
+            AddContextButton("착용", UITheme.AccentBright, y, () =>
             {
                 EquipFromGrid(capItem, capGrid);
             });
             y -= 26f;
         }
 
-        // 사용/먹기 (isUsable + 플레이어 인벤토리만). 먹을거=먹기, 그 외=사용
-        if (data.isUsable && isPlayerGrid)
+        // 사용/먹기 (isUsable + 내 소지품 또는 안전 창고). 먹을거=먹기, 그 외=사용
+        if (data.isUsable && (isPlayerGrid || isSafeStorage))
         {
             string useLabel = data.category == ItemCategory.Consumable ? "먹기" : "사용";
-            AddContextButton(useLabel, new Color(0.3f, 0.9f, 0.4f), y, () =>
+            var capGrid = grid;
+            AddContextButton(useLabel, UITheme.Positive, y, () =>
             {
-                playerInventory.UseItem(contextTarget);
+                playerInventory.UseItem(contextTarget, capGrid);   // 지정 격자에서 소모(창고 사용 지원)
                 HideContextMenu();
                 RefreshAllGrids();
             });
             y -= 26f;
         }
 
-        // 검사 (항상)
-        AddContextButton("검사", new Color(0.7f, 0.85f, 1f), y, () =>
+        // 자세히 (항상) — 아이템 1개 상세 팝업
+        AddContextButton("자세히", UITheme.TextBright, y, () =>
         {
-            ShowItemInspect(contextTarget.item);
+            ItemDetailUI.Show(contextTarget.item);
             HideContextMenu();
         });
         y -= 26f;
 
-        // 버리기 (플레이어 인벤토리만)
+        // 버리기 (내 소지품) — 레이드=바닥 산포 / 안전구역=인벤·창고 복귀
         if (isPlayerGrid)
         {
-            AddContextButton("버리기", new Color(1f, 0.5f, 0.3f), y, () =>
+            AddContextButton("버리기", UITheme.Negative, y, () =>
             {
                 var item = contextTarget.item;
                 grid.Remove(contextTarget);
                 DropOrReturnItem(item);
                 HideContextMenu();
                 RefreshAllGrids();
+            });
+            y -= 26f;
+        }
+        // 폐기 (안전 창고) — 영구 삭제
+        else if (isSafeStorage)
+        {
+            AddContextButton("폐기", UITheme.Negative, y, () =>
+            {
+                grid.Remove(contextTarget);
+                HideContextMenu();
+                RefreshAllGrids();
+                ToastManager.Show("아이템 폐기됨", ToastManager.ToastType.Info);
             });
             y -= 26f;
         }
@@ -2350,7 +2368,7 @@ public class CharacterPanelUI : MonoBehaviour
         bgRT.offsetMin = Vector2.zero;
         bgRT.offsetMax = Vector2.zero;
         var bgImg = bgGO.AddComponent<Image>();
-        bgImg.color = new Color(0.05f, 0.05f, 0.1f, 0.95f);
+        bgImg.color = UITheme.Panel;
 
         // 아이템 이름
         var nameGO = new GameObject("CtxName");
@@ -2386,14 +2404,14 @@ public class CharacterPanelUI : MonoBehaviour
         btnRT.sizeDelta = new Vector2(-8, 24);
 
         var btnImg = btnGO.AddComponent<Image>();
-        btnImg.color = new Color(0.12f, 0.12f, 0.18f, 0.9f);
+        btnImg.color = UITheme.Cell;
 
         var btn = btnGO.AddComponent<Button>();
         btn.targetGraphic = btnImg;
 
         var colors = btn.colors;
-        colors.highlightedColor = new Color(0.25f, 0.35f, 0.5f);
-        colors.pressedColor = new Color(0.15f, 0.25f, 0.4f);
+        colors.highlightedColor = UITheme.CellHover;
+        colors.pressedColor = UITheme.CellPressed;
         btn.colors = colors;
 
         btn.onClick.AddListener(() => onClick());
@@ -2414,54 +2432,7 @@ public class CharacterPanelUI : MonoBehaviour
         txt.alignment = TextAnchor.MiddleLeft;
     }
 
-    /// <summary>아이템 검사 (상세 정보 표시)</summary>
-    void ShowItemInspect(ItemInstance item)
-    {
-        if (item == null || item.data == null) return;
-        var d = item.data;
-
-        // 정보 탭으로 전환하여 상세 표시 대신, 간단한 팝업 로그
-        // TODO: 전용 검사 패널 UI (향후)
-        string info = $"<color=#{ColorUtility.ToHtmlStringRGB(d.RarityColor)}><b>{d.displayName}</b></color>\n";
-        info += $"<size=11>{d.description}</size>\n\n";
-        info += $"카테고리: {GetCategoryName(d.category)}\n";
-        info += $"크기: {d.gridWidth}x{d.gridHeight}  무게: {d.weight:F1}kg\n";
-
-        if (d.sellPrice > 0)
-            info += $"판매가: {d.sellPrice} 스크랩\n";
-        if (d.buyPrice > 0)
-            info += $"구매가: {d.buyPrice} 스크랩\n";
-
-        if (item.HasDurability)
-            info += $"내구도: {item.durability:F0}/{d.maxDurability:F0}\n";
-        if (item.stackCount > 1)
-            info += $"수량: {item.stackCount}/{d.maxStack}\n";
-
-        if (d.isUsable)
-        {
-            string effectName = d.useEffect.ToString();
-            info += $"\n<color=#88CC88>사용 가능: {effectName} ({d.effectValue})</color>\n";
-        }
-
-        Debug.Log($"[검사] {d.displayName}\n{info}");
-
-        ToastManager.Show(info, ToastManager.ToastType.Info, 4f);
-    }
-
-    static string GetCategoryName(ItemCategory cat)
-    {
-        switch (cat)
-        {
-            case ItemCategory.Weapon: return "무기";
-            case ItemCategory.Medical: return "의료";
-            case ItemCategory.Consumable: return "소비";
-            case ItemCategory.Material: return "재료";
-            case ItemCategory.Valuable: return "귀중품";
-            case ItemCategory.Key: return "열쇠";
-            case ItemCategory.Misc: return "기타";
-            default: return cat.ToString();
-        }
-    }
+    // (구) ShowItemInspect/GetCategoryName 제거 — "자세히"는 ItemDetailUI 팝업이 대체.
 
     // ── 좌표 변환 ──
 

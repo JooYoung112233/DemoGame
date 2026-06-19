@@ -149,6 +149,7 @@ public static class ScrapMarketGreyboxLayout
 
         // 4. 골목 공터 (밴딧 + 야외 차) — PLAZA X4~10 Y36~43. 두 건물 파밍 '후' 첫 전투(창고 직전).
         placed += Marker(map, "gb_enemy", "Bandit_Corner", 6f, 40f);
+        placed += EnemyZone(map, "Bandit_SpawnZone", 6f, 40f, 5f, 6f, "bandit_melee", 3);  // 런타임 적 3기
         placed += Marker(map, "gb_crate", "Road_Car_1",    8f, 38f);
 
         // 5. 창고 (메인 목표 — 막다름) — 방 X8~16 Y44~50. 셔터(Y47~48) 1입구. 민이 부재 = 흔적/쪽지.
@@ -217,6 +218,16 @@ public static class ScrapMarketGreyboxLayout
         var go = Spawn(prefabId, name, parent);
         if (go == null) return 0;
         go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
+        return 1;
+    }
+
+    /// <summary>적 스폰 존(SpawnZone): 영역(폭 w·높이 h)·유닛키·마릿수 설정. 런타임 EnemySpawner가 읽어 적 생성.</summary>
+    static int EnemyZone(GameObject parent, string name, float cx, float cy, float w, float h, string unitKey, int count)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent.transform, false);
+        go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);
+        go.AddComponent<SpawnZone>().Setup(new Vector3(w, 0f, h), count, unitKey);
         return 1;
     }
 

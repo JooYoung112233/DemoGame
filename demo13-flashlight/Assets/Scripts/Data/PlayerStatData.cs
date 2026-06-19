@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -23,6 +24,20 @@ public class PlayerStatData
     [Header("달리기")]
     public float sprintStaminaCost = 12f;
     public float sprintMinStamina = 10f;
+
+    [Header("모션(애니 속도/거리)")]
+    [Tooltip("모션별 애니 재생 속도 + 이동거리. 키: idle/walk/run/crouch/crouch_walk/attack/roll. " +
+             "run.distance=최대 달리기 거리(0=무제한), roll.distance=구르기 거리(0=구르기 기본값 dodgeDistance 사용).")]
+    public List<MotionStat> motions = new List<MotionStat>
+    {
+        new MotionStat { anim = "idle",        animSpeed = 1f },
+        new MotionStat { anim = "walk",        animSpeed = 1f },
+        new MotionStat { anim = "run",         animSpeed = 1f, distance = 0f },
+        new MotionStat { anim = "crouch",      animSpeed = 1f },
+        new MotionStat { anim = "crouch_walk", animSpeed = 1f },
+        new MotionStat { anim = "attack",      animSpeed = 1f },
+        new MotionStat { anim = "roll",        animSpeed = 1f, distance = 0f },
+    };
 
     [Header("약공격")]
     public float lightDamage = 8f;

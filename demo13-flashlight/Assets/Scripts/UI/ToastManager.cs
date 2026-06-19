@@ -120,7 +120,7 @@ public class ToastManager : MonoBehaviour
         rt.sizeDelta = new Vector2(560, 50);
 
         var bg = go.AddComponent<Image>();
-        bg.color = new Color(0.08f, 0.08f, 0.1f, 0.92f);
+        bg.color = new Color(UITheme.Panel.r, UITheme.Panel.g, UITheme.Panel.b, 0.92f);
 
         var group = go.AddComponent<CanvasGroup>();
         group.alpha = 0f;
@@ -167,9 +167,9 @@ public class ToastManager : MonoBehaviour
     {
         switch (type)
         {
-            case ToastType.Warning: return new Color(1f, 0.45f, 0.15f);
-            case ToastType.Success: return new Color(0.3f, 0.9f, 0.4f);
-            default: return new Color(0.4f, 0.7f, 1f);
+            case ToastType.Warning: return new Color(1f, 0.45f, 0.15f);   // 의미색(주의) 유지
+            case ToastType.Success: return new Color(0.3f, 0.9f, 0.4f);   // 의미색(성공) 유지
+            default: return UITheme.AccentBright;                          // 일반(Info) — 웜 탄 강조
         }
     }
 

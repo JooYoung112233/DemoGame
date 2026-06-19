@@ -22,13 +22,22 @@ public class SpawnZone : MonoBehaviour
         unitKey = key;
     }
 
-    /// <summary>영역 내 랜덤 위치 반환</summary>
+    /// <summary>영역 내 랜덤 위치 반환 (legacy 3D — XZ 평면).</summary>
     public Vector3 GetRandomPoint()
     {
         Vector3 pos = transform.position;
         pos.x += Random.Range(-size.x * 0.5f, size.x * 0.5f);
         pos.z += Random.Range(-size.z * 0.5f, size.z * 0.5f);
         pos.y = 0;
+        return pos;
+    }
+
+    /// <summary>영역 내 랜덤 위치 반환 (top-down 2D — XY 평면). 폭=size.x, 높이=size.z.</summary>
+    public Vector3 GetRandomPoint2D()
+    {
+        Vector3 pos = transform.position;
+        pos.x += Random.Range(-size.x * 0.5f, size.x * 0.5f);
+        pos.y += Random.Range(-size.z * 0.5f, size.z * 0.5f);
         return pos;
     }
 
@@ -44,13 +53,12 @@ public class SpawnZone : MonoBehaviour
                 baseColor = new Color(unit.tintColor.r, unit.tintColor.g, unit.tintColor.b, 0.3f);
         }
 
+        // top-down 2D: XY 평면에 그린다 (폭=size.x, 높이=size.z).
+        var box = new Vector3(size.x, size.z, 0.1f);
         Gizmos.color = baseColor;
-        Gizmos.DrawCube(transform.position + Vector3.up * 0.1f,
-            new Vector3(size.x, 0.2f, size.z));
-
+        Gizmos.DrawCube(transform.position, box);
         Gizmos.color = new Color(baseColor.r, baseColor.g, baseColor.b, 0.8f);
-        Gizmos.DrawWireCube(transform.position + Vector3.up * 0.1f,
-            new Vector3(size.x, 0.2f, size.z));
+        Gizmos.DrawWireCube(transform.position, box);
     }
 
 #if UNITY_EDITOR

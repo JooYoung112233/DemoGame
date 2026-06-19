@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 public class GameHUD : MonoBehaviour
 {
     [Header("Colors")]
-    [SerializeField] Color barBgColor = new Color(0.1f, 0.1f, 0.1f, 0.85f);
+    [SerializeField] Color barBgColor = new Color(0.115f, 0.110f, 0.098f, 0.85f);
 
     // 레퍼런스
     Health health;
@@ -224,13 +224,13 @@ public class GameHUD : MonoBehaviour
         rt.sizeDelta = new Vector2(140, 40);
 
         var bg = hideoutExitBtnGO.AddComponent<Image>();
-        bg.color = new Color(0.45f, 0.2f, 0.2f, 0.92f);
+        bg.color = UITheme.Danger;
 
         var btn = hideoutExitBtnGO.AddComponent<Button>();
         btn.targetGraphic = bg;
         var colors = btn.colors;
-        colors.highlightedColor = new Color(0.6f, 0.25f, 0.25f);
-        colors.pressedColor = new Color(0.35f, 0.15f, 0.15f);
+        colors.highlightedColor = new Color(0.52f, 0.20f, 0.16f);
+        colors.pressedColor = new Color(0.30f, 0.10f, 0.09f);
         btn.colors = colors;
         btn.onClick.AddListener(OnHideoutExitClicked);
 
@@ -246,7 +246,7 @@ public class GameHUD : MonoBehaviour
         txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         txt.fontSize = 16;
         txt.fontStyle = FontStyle.Bold;
-        txt.color = new Color(1f, 0.9f, 0.85f);
+        txt.color = UITheme.TextBright;
         txt.alignment = TextAnchor.MiddleCenter;
         txt.text = "나가기";
 

@@ -86,6 +86,8 @@ public class TopDownPlayer : MonoBehaviour
     float SprintMult     => Stat.sprintSpeedMultiplier;
     float SprintCost     => Stat.sprintStaminaCost;
     float SprintMinStam  => Stat.sprintMinStamina;
+    float MotionSpeed(string key) => Stat != null ? MotionStat.SpeedOf(Stat.motions, key, 1f) : 1f;
+    float RunMaxDistance => Stat != null ? MotionStat.DistanceOf(Stat.motions, "run", 0f) : 0f;
     float MaxStam        => Stat.maxStamina;
     float StamRegen      => Stat.staminaRegen;
     float StamRegenDelay => Stat.staminaRegenDelay;
@@ -96,7 +98,7 @@ public class TopDownPlayer : MonoBehaviour
     float HeavyChargeTime=> Stat.heavyChargeTime;
     float HeavyMaxCharge => Stat.heavyMaxCharge;
     float HeavyCooldown  => Stat.heavyCooldown;
-    float DodgeDist      => Stat.dodgeDistance;
+    float DodgeDist      => Stat != null ? MotionStat.DistanceOf(Stat.motions, "roll", Stat.dodgeDistance) : 3f;
     float DodgeDur       => Stat.dodgeDuration;
     float DodgeInvDur    => Stat.dodgeInvincibleDuration;
     float DodgeCooldown  => Stat.dodgeCooldown;
@@ -113,6 +115,7 @@ public class TopDownPlayer : MonoBehaviour
     float _stamina;
     float _regenDelayTimer;
     float _exhaustTimer;
+    float _runDist;   // 현재 연속 달린 누적 거리(m) — RunMaxDistance 게이트용
     bool  _exhausted;
 
     // 약공격 콤보
@@ -328,6 +331,7 @@ public class TopDownPlayer : MonoBehaviour
     // ── Spine 애니메이션 구동 ────────────────────────────────────────
     Spine.AnimationState _spineState;
     string _curAnim = "<init>";
+    string _oneShotAnim;   // 끝까지 1회 보장할 비루프 애니(roll/attack) — 재생 중엔 루프 애니로 안 끊음
 
     /// <summary>이동/전투 상태에 맞춰 Spine 트랙0 애니를 전환. 정지 시 idle 재생(없으면 셋업 포즈).
     /// 모든 애니는 스켈레톤에 실제로 존재할 때만 재생 — 없는 이름을 넣어 경고나는 일 방지(점진 도입).</summary>
@@ -340,18 +344,30 @@ public class TopDownPlayer : MonoBehaviour
             if (_spineState == null) return;
         }
 
-        string target; bool loop;
+        string target; bool loop; string motionKey;   // motionKey = 논리 모션(애니 속도 조회용)
         switch (_state)
         {
             case CombatState.Dodge:
-                target = FirstAnim("roll", "dodge"); loop = false; break;
+                target = FirstAnim("roll", "dodge"); loop = false; motionKey = "roll"; break;
             case CombatState.LightAttack:
             case CombatState.HeavyRelease:
-                target = FirstAnim("attack", "attack1", "attack_1"); loop = false; break;
+                target = FirstAnim("attack", "attack1", "attack_1"); loop = false; motionKey = "attack"; break;
             default:
-                if (_crouching)   target = IsMoving ? FirstAnim("sit_walk", "sit") : FirstAnim("sit");      // 앉기
-                else if (IsMoving) target = IsSprinting ? FirstAnim("run", "walk") : FirstAnim("walk", "run"); // 이동
-                else               target = IdleAnim();                                                       // 정지
+                if (_crouching)
+                {
+                    target = IsMoving ? FirstAnim("sit_walk", "sit") : FirstAnim("sit");      // 앉기
+                    motionKey = IsMoving ? "crouch_walk" : "crouch";
+                }
+                else if (IsMoving)
+                {
+                    target = IsSprinting ? FirstAnim("run", "walk") : FirstAnim("walk", "run"); // 이동
+                    motionKey = IsSprinting ? "run" : "walk";
+                }
+                else
+                {
+                    target = IdleAnim();                                                       // 정지
+                    motionKey = "idle";
+                }
                 loop = true;
                 break;
         }
@@ -359,19 +375,34 @@ public class TopDownPlayer : MonoBehaviour
         // 전용 애니(공격/구르기/이동)가 스켈레톤에 없으면 idle로 폴백(루프), idle도 없으면 셋업 포즈.
         if (string.IsNullOrEmpty(target)) { target = IdleAnim(); loop = true; }
 
-        // 걷기/달리기 발걸음 속도를 실제 이동속도에 맞춤(매 프레임 — 미끄럼 느낌↓).
-        if (animCadenceMatchesSpeed && _rb != null)
+        // 원샷 애니(roll/attack) 1회 보장: 새 target이 루프 애니(idle/이동)인데 현재 원샷이 아직 안 끝났으면 유지.
+        // (Dodge 상태가 dodgeDuration에 끝나 Idle로 돌아가도 구르기 모션이 중간에 idle로 잘리지 않게.)
+        // 단 새 target이 또 다른 원샷(loop=false: 공격/재구르기)이면 잠금을 넘어 교체 허용.
+        if (loop && !string.IsNullOrEmpty(_oneShotAnim))
         {
-            if (target == "walk" || target == "run")
-                skeletonAnimation.timeScale = Mathf.Clamp(_rb.linearVelocity.magnitude / Mathf.Max(0.1f, MoveSpd), 0.5f, 1.8f);
-            else
-                skeletonAnimation.timeScale = 1f;
+            var cur = _spineState.GetCurrent(0);
+            if (cur != null && cur.Animation != null && cur.Animation.Name == _oneShotAnim && !cur.IsComplete)
+                return;            // 원샷 재생 중 → 루프 애니로 끊지 않음
+            _oneShotAnim = null;   // 완료(또는 트랙 교체) → 잠금 해제
+        }
+
+        // 애니 재생 속도 — 걷기/달리기는 이동속도 비례(토글) × 모션별 애니 속도(모든 모션).
+        {
+            float ts = 1f;
+            if ((motionKey == "walk" || motionKey == "run") && animCadenceMatchesSpeed && _rb != null)
+                ts = Mathf.Clamp(_rb.linearVelocity.magnitude / Mathf.Max(0.1f, MoveSpd), 0.5f, 1.8f);
+            ts *= MotionSpeed(motionKey);   // 모션별 애니 속도(idle/walk/run/attack/roll …)
+            skeletonAnimation.timeScale = ts;
         }
 
         if (target == _curAnim) return;
         _curAnim = target;
-        if (string.IsNullOrEmpty(target)) _spineState.SetEmptyAnimation(0, 0.12f);
-        else                              _spineState.SetAnimation(0, target, loop);
+        if (string.IsNullOrEmpty(target)) { _spineState.SetEmptyAnimation(0, 0.12f); _oneShotAnim = null; }
+        else
+        {
+            _spineState.SetAnimation(0, target, loop);
+            _oneShotAnim = loop ? null : target;   // 비루프(roll/attack)면 끝까지 보장 대상으로 잠금
+        }
     }
 
     /// <summary>idle 애니 이름(흔한 표기 변형 자동 탐색). 없으면 null=셋업 포즈.</summary>
@@ -405,15 +436,31 @@ public class TopDownPlayer : MonoBehaviour
 
     void UpdateSprint(bool uiOpen)
     {
-        IsSprinting = !uiOpen && !_exhausted && !_crouching && _state == CombatState.Idle
-                      && Input.GetKey(KeyCode.LeftShift) && IsMoving
-                      && _stamina > SprintMinStam;
+        bool wantSprint = !uiOpen && !_exhausted && !_crouching && _state == CombatState.Idle
+                          && Input.GetKey(KeyCode.LeftShift) && IsMoving
+                          && _stamina > SprintMinStam;
+
+        // 달리기 거리 제한: RunMaxDistance>0이면 그 거리만큼 달리면 끊김(멈추면 회복).
+        float maxDist = RunMaxDistance;
+        if (maxDist > 0f && _runDist >= maxDist) wantSprint = false;
+
+        IsSprinting = wantSprint;
 
         if (IsSprinting)
         {
-            _stamina -= SprintCost * Time.deltaTime;
-            _regenDelayTimer = StamRegenDelay;
-            if (_stamina <= 0f) { _stamina = 0f; EnterExhausted(); }
+            if (!StaminaInfinite)   // 안전구역: 무소모
+            {
+                _stamina -= SprintCost * Time.deltaTime;
+                _regenDelayTimer = StamRegenDelay;
+                if (_stamina <= 0f) { _stamina = 0f; EnterExhausted(); }
+            }
+            if (maxDist > 0f && _rb != null)
+                _runDist += _rb.linearVelocity.magnitude * Time.deltaTime;
+        }
+        else if (_runDist > 0f)
+        {
+            // 안 달리면 거리 예산 회복(달리기 속도의 2배로 빠르게 차오름).
+            _runDist = Mathf.Max(0f, _runDist - MoveSpd * 2f * Time.deltaTime);
         }
     }
 
@@ -561,8 +608,22 @@ public class TopDownPlayer : MonoBehaviour
         }
     }
 
+    /// <summary>안전구역(레이드 아님 = 안전가옥/은신처)에선 스태미너 무한 — 소모·탈진 없음.</summary>
+    bool StaminaInfinite =>
+        RegionTimeManager.Instance == null
+        || string.IsNullOrEmpty(RegionTimeManager.Instance.ActiveRegionId);
+
     void UpdateStamina()
     {
+        // 안전구역: 스태미너 항상 가득 + 탈진 해제.
+        if (StaminaInfinite)
+        {
+            _stamina = MaxStam;
+            _exhausted = false;
+            _exhaustTimer = 0f;
+            return;
+        }
+
         // 탈진 회복
         if (_exhausted)
         {
@@ -586,6 +647,7 @@ public class TopDownPlayer : MonoBehaviour
     /// <summary>스태미너 소모. 부족하면 false (탈진 진입 가능).</summary>
     public bool ConsumeStamina(float amount)
     {
+        if (StaminaInfinite) return true;   // 안전구역: 무소모(행동 제한 없음)
         if (_exhausted) return false;
         if (_stamina < amount) return false;
         _stamina -= amount;

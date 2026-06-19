@@ -59,7 +59,7 @@ public class PauseMenu : MonoBehaviour
 
         // 제목
         var title = MakeText("Title", canvasGO.transform, "일시정지", 64, FontStyle.Bold,
-            new Color(0.92f, 0.92f, 0.95f));
+            UITheme.TextBright);
         Anchor(title, new Vector2(0.5f, 0.5f), new Vector2(0, 180), new Vector2(700, 100));
 
         MakeButton("계속하기", new Vector2(0, 60), OnResume);
@@ -147,17 +147,17 @@ public class PauseMenu : MonoBehaviour
         rt.sizeDelta = new Vector2(360, 64);
 
         var img = go.AddComponent<Image>();
-        img.color = new Color(0.15f, 0.17f, 0.21f, 1f);
+        img.color = UITheme.Cell;
 
         var button = go.AddComponent<Button>();
         var colors = button.colors;
-        colors.highlightedColor = new Color(0.65f, 0.8f, 1f, 1f);
-        colors.pressedColor = new Color(0.4f, 0.55f, 0.8f, 1f);
+        colors.highlightedColor = UITheme.CellHover;
+        colors.pressedColor = UITheme.CellPressed;
         button.colors = colors;
         button.targetGraphic = img;
         button.onClick.AddListener(onClick);
 
-        var t = MakeText("Label", go.transform, label, 28, FontStyle.Bold, new Color(0.9f, 0.92f, 0.96f));
+        var t = MakeText("Label", go.transform, label, 28, FontStyle.Bold, UITheme.TextBright);
         Stretch(t.rectTransform);
     }
 }

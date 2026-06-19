@@ -309,10 +309,16 @@ public class InteractableObject : MonoBehaviour, IInteractable
         var worldItem = GetComponent<WorldItem>();
         if (worldItem != null)
         {
-            if (worldItem.TryPickup(playerGO))
-                return; // 성공 시 WorldItem이 Destroy 처리
-            else
-                return; // 공간 부족
+            // 바닥에 여러 개 겹쳐 있으면 → 목록 UI로 선택 줍기
+            var cluster = WorldItem.GatherNear(playerGO.transform.position, GroundPickupUI.ClusterRadius);
+            if (cluster.Count >= 2)
+            {
+                GroundPickupUI.Show(cluster, playerGO);
+                return;
+            }
+
+            worldItem.TryPickup(playerGO); // 성공 시 WorldItem이 Destroy / 실패 시 토스트
+            return;
         }
 
         // WorldItem 없으면 ItemDatabase에서 생성

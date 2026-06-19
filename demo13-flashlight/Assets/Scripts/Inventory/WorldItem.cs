@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,10 +10,35 @@ using UnityEngine.UI;
 /// </summary>
 public class WorldItem : MonoBehaviour
 {
+    /// <summary>활성 WorldItem 정적 레지스트리 — 바닥 중첩 클러스터 판정용.</summary>
+    public static readonly List<WorldItem> All = new List<WorldItem>();
+
     [SerializeField] ItemData itemData;
     [SerializeField] int stackCount = 1;
 
     ItemInstance itemInstance;
+
+    void OnEnable() => All.Add(this);
+    void OnDisable() => All.Remove(this);
+
+    /// <summary>center 반경 radius 안의 WorldItem들을 가까운 순으로 모은다(중첩 줍기 목록용).</summary>
+    public static List<WorldItem> GatherNear(Vector3 center, float radius)
+    {
+        var result = new List<WorldItem>();
+        float r2 = radius * radius;
+        Vector2 c = center;
+        for (int i = 0; i < All.Count; i++)
+        {
+            var wi = All[i];
+            if (wi == null) continue;
+            if (((Vector2)wi.transform.position - c).sqrMagnitude <= r2)
+                result.Add(wi);
+        }
+        result.Sort((a, b) =>
+            (((Vector2)a.transform.position - c).sqrMagnitude)
+            .CompareTo(((Vector2)b.transform.position - c).sqrMagnitude));
+        return result;
+    }
 
     /// <summary>아이템 인스턴스 (런타임 생성 또는 외부 할당)</summary>
     public ItemInstance Item

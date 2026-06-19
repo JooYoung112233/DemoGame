@@ -36,17 +36,17 @@ public class QuestLogUI : MonoBehaviour
     }
 
     // ── 색 팔레트 (어두운 전술 톤) ──
-    static readonly Color CDim = new Color(0.05f, 0.06f, 0.08f, 0.96f);
-    static readonly Color CPanel = new Color(0.11f, 0.12f, 0.15f, 0.98f);
-    static readonly Color CPanel2 = new Color(0.07f, 0.08f, 0.11f, 0.98f);
-    static readonly Color CGold = new Color(0.95f, 0.85f, 0.30f);
-    static readonly Color CText = new Color(0.93f, 0.93f, 0.92f);
-    static readonly Color CFaint = new Color(0.55f, 0.58f, 0.66f);
-    static readonly Color CLine = new Color(1f, 1f, 1f, 0.12f);
-    static readonly Color CButton = new Color(0.16f, 0.18f, 0.24f, 0.95f);
-    static readonly Color CDanger = new Color(0.5f, 0.22f, 0.22f, 1f);
-    static readonly Color CGood = new Color(0.45f, 0.85f, 0.45f, 1f);
-    static readonly Color CWarn = new Color(1f, 0.55f, 0.45f, 1f);
+    static readonly Color CDim = UITheme.Backdrop;
+    static readonly Color CPanel = UITheme.Panel;
+    static readonly Color CPanel2 = UITheme.PanelAlt;
+    static readonly Color CGold = UITheme.Gold;
+    static readonly Color CText = UITheme.TextBright;
+    static readonly Color CFaint = UITheme.TextMuted;
+    static readonly Color CLine = UITheme.Divider;
+    static readonly Color CButton = UITheme.Cell;
+    static readonly Color CDanger = UITheme.Danger;
+    static readonly Color CGood = UITheme.Positive;
+    static readonly Color CWarn = UITheme.Negative;
 
     // ── 한 발신자(의뢰인)의 스레드 묶음 ──
     class Sender
@@ -403,7 +403,7 @@ public class QuestLogUI : MonoBehaviour
             itRT.sizeDelta = new Vector2(-8, 64);
             bool isSel = s == selected;
             var img = item.AddComponent<Image>();
-            img.color = isSel ? new Color(0.20f, 0.24f, 0.32f, 0.95f) : CButton;
+            img.color = isSel ? UITheme.Accent : CButton;
             var btn = item.AddComponent<Button>();
             btn.targetGraphic = img;
             btn.onClick.AddListener(() => { selected = sCap; RebuildSidebar(); RebuildThread(); });
@@ -415,7 +415,7 @@ public class QuestLogUI : MonoBehaviour
             avRT.pivot = new Vector2(0, 0.5f);
             avRT.anchoredPosition = new Vector2(10, 0);
             avRT.sizeDelta = new Vector2(44, 44);
-            av.AddComponent<Image>().color = new Color(0.18f, 0.20f, 0.26f, 1f);
+            av.AddComponent<Image>().color = UITheme.Cell;
             string initial = string.IsNullOrEmpty(s.displayName) ? "?" : s.displayName.Substring(0, 1);
             MakeLabel(av.transform, "Init", initial, 20, CGold, TextAnchor.MiddleCenter,
                 Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, true);
@@ -469,7 +469,7 @@ public class QuestLogUI : MonoBehaviour
 
         if (threadHeaderText != null)
         {
-            string roleSuffix = string.IsNullOrEmpty(selected.role) ? "" : "  <size=12><color=#8C95A8>· " + selected.role + "</color></size>";
+            string roleSuffix = string.IsNullOrEmpty(selected.role) ? "" : "  <size=12><color=#8A8270>· " + selected.role + "</color></size>";
             threadHeaderText.text = "@ " + selected.displayName + roleSuffix;
         }
 
@@ -488,29 +488,29 @@ public class QuestLogUI : MonoBehaviour
         string desc = e.placeholder ? e.phDesc : (e.data != null ? e.data.description : "");
 
         var sb = new System.Text.StringBuilder();
-        sb.Append("<b><color=#F2D94C>").Append(title).Append("</color></b>  ");
+        sb.Append("<b><color=#DBBC6B>").Append(title).Append("</color></b>  ");
         sb.Append(StateTag(e.state)).Append("\n");
         if (!string.IsNullOrEmpty(desc))
-            sb.Append("<color=#D7D9D4>").Append(desc).Append("</color>\n");
+            sb.Append("<color=#EBE5D6>").Append(desc).Append("</color>\n");
 
         // 목표 체크리스트
-        sb.Append("\n<color=#8C95A8>목표</color>\n");
+        sb.Append("\n<color=#8A8270>목표</color>\n");
         foreach (var line in ObjectiveLines(e))
             sb.Append(line).Append("\n");
 
         // 보상
-        sb.Append("\n<color=#8C95A8>보상</color>\n<color=#D7D9D4>")
+        sb.Append("\n<color=#8A8270>보상</color>\n<color=#EBE5D6>")
           .Append(RewardLine(e)).Append("</color>");
 
         // 첨부 자리 (지도/아이템 첨부 플레이스홀더)
         if (HasAttachment(e))
-            sb.Append("\n\n<color=#6E7689>[첨부] ").Append(AttachmentLabel(e)).Append("</color>");
+            sb.Append("\n\n<color=#665F52>[첨부] ").Append(AttachmentLabel(e)).Append("</color>");
 
         // 말풍선 박스: 높이를 내용에 맞게 자동(ContentSizeFitter)
         var bubble = MakeChild(threadContent, "Msg");
         bubble.AddComponent<RectTransform>();
         var bImg = bubble.AddComponent<Image>();
-        bImg.color = new Color(0.09f, 0.10f, 0.13f, 0.98f);
+        bImg.color = UITheme.PanelAlt;
         var fitter = bubble.AddComponent<ContentSizeFitter>();
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -568,17 +568,17 @@ public class QuestLogUI : MonoBehaviour
         float x = 16f;
         if (rep.state == QuestState.Available)
         {
-            x = AddActionButton("수락", new Color(0.20f, 0.40f, 0.28f, 0.95f), x, () => OnAccept(repCap));
+            x = AddActionButton("수락", UITheme.Buy, x, () => OnAccept(repCap));
             x = AddActionButton("거절", CButton, x, () => ToastManager.Show("의뢰를 보류했습니다.", ToastManager.ToastType.Info));
         }
         else if (rep.state == QuestState.ReadyToReport)
         {
-            x = AddActionButton("보고", new Color(0.30f, 0.40f, 0.55f, 0.95f), x, () => OnReport(repCap));
+            x = AddActionButton("보고", UITheme.Accent, x, () => OnReport(repCap));
             x = AddActionButton("추적", CButton, x, () => OnTrack(repCap));
         }
         else if (rep.state == QuestState.Active)
         {
-            x = AddActionButton("추적", new Color(0.30f, 0.40f, 0.55f, 0.95f), x, () => OnTrack(repCap));
+            x = AddActionButton("추적", UITheme.Accent, x, () => OnTrack(repCap));
         }
         else // Completed
         {
@@ -641,7 +641,7 @@ public class QuestLogUI : MonoBehaviour
         QuestState.Available => "<color=#FF8C73>● 신규</color>",
         QuestState.Active => "<color=#F2D94C>● 진행중</color>",
         QuestState.ReadyToReport => "<color=#73D973>● 보고 가능</color>",
-        QuestState.Completed => "<color=#8C95A8>● 완료</color>",
+        QuestState.Completed => "<color=#8A8270>● 완료</color>",
         QuestState.Failed => "<color=#FF7373>● 실패</color>",
         _ => ""
     };
@@ -668,7 +668,7 @@ public class QuestLogUI : MonoBehaviour
 
         if (e.data == null || e.data.objectives == null || e.data.objectives.Length == 0)
         {
-            yield return "  <color=#8C95A8>(목표 없음)</color>";
+            yield return "  <color=#8A8270>(목표 없음)</color>";
             yield break;
         }
 

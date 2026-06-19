@@ -288,7 +288,7 @@ public class PostRaidEventUI : MonoBehaviour
 
         // 어두운 배경
         var dim = panelRoot.AddComponent<Image>();
-        dim.color = new Color(0, 0, 0, 0.85f);
+        dim.color = UITheme.Backdrop;
 
         // 중앙 패널
         var panel = new GameObject("CenterPanel");
@@ -298,7 +298,7 @@ public class PostRaidEventUI : MonoBehaviour
         pRT.anchorMax = new Vector2(0.5f, 0.5f);
         pRT.sizeDelta = new Vector2(520, 420);
         var pImg = panel.AddComponent<Image>();
-        pImg.color = new Color(0.08f, 0.08f, 0.12f, 0.95f);
+        pImg.color = UITheme.Panel;
 
         // 제목
         titleText = MakeText(panel.transform, "Title", "", 22, TextAnchor.MiddleCenter);
@@ -308,7 +308,7 @@ public class PostRaidEventUI : MonoBehaviour
         titleRT.pivot = new Vector2(0.5f, 1);
         titleRT.offsetMin = new Vector2(16, -50);
         titleRT.offsetMax = new Vector2(-16, -12);
-        titleText.color = new Color(1f, 0.85f, 0.3f);
+        titleText.color = UITheme.Gold;
         titleText.fontStyle = FontStyle.Bold;
 
         // 구분선
@@ -322,7 +322,7 @@ public class PostRaidEventUI : MonoBehaviour
         descRT.pivot = new Vector2(0.5f, 1);
         descRT.offsetMin = new Vector2(24, -180);
         descRT.offsetMax = new Vector2(-24, -65);
-        descText.color = new Color(0.88f, 0.88f, 0.92f);
+        descText.color = UITheme.TextBright;
 
         // 선택지 패널
         choicePanel = new GameObject("ChoicePanel");
@@ -347,12 +347,12 @@ public class PostRaidEventUI : MonoBehaviour
             btnRT.offsetMax = new Vector2(-4, -i * 52 - 4);
 
             var btnImg = btnGO.AddComponent<Image>();
-            btnImg.color = new Color(0.12f, 0.12f, 0.18f, 0.85f);
+            btnImg.color = UITheme.Cell;
 
             choiceButtons[i] = btnGO.AddComponent<Button>();
             var colors = choiceButtons[i].colors;
-            colors.highlightedColor = new Color(0.25f, 0.25f, 0.35f);
-            colors.pressedColor = new Color(0.18f, 0.18f, 0.25f);
+            colors.highlightedColor = UITheme.CellHover;
+            colors.pressedColor = UITheme.CellPressed;
             choiceButtons[i].colors = colors;
 
             choiceTexts[i] = MakeText(btnGO.transform, "Text", "", 16, TextAnchor.MiddleLeft);
@@ -361,7 +361,7 @@ public class PostRaidEventUI : MonoBehaviour
             txtRT.anchorMax = Vector2.one;
             txtRT.offsetMin = new Vector2(12, 0);
             txtRT.offsetMax = new Vector2(-12, 0);
-            choiceTexts[i].color = new Color(0.9f, 0.9f, 0.95f);
+            choiceTexts[i].color = UITheme.TextBright;
         }
 
         // 결과 패널
@@ -379,7 +379,7 @@ public class PostRaidEventUI : MonoBehaviour
         rRT.anchorMax = new Vector2(1, 1);
         rRT.offsetMin = new Vector2(8, 0);
         rRT.offsetMax = new Vector2(-8, -4);
-        resultText.color = new Color(0.88f, 0.88f, 0.92f);
+        resultText.color = UITheme.TextBright;
 
         rewardText = MakeText(resultPanel.transform, "RewardText", "", 15, TextAnchor.UpperLeft);
         var rwRT = rewardText.GetComponent<RectTransform>();
@@ -387,7 +387,7 @@ public class PostRaidEventUI : MonoBehaviour
         rwRT.anchorMax = new Vector2(1, 0.4f);
         rwRT.offsetMin = new Vector2(8, 0);
         rwRT.offsetMax = new Vector2(-8, 0);
-        rewardText.color = new Color(0.6f, 1f, 0.7f);
+        rewardText.color = UITheme.Positive;
 
         // 계속 버튼 (텍스트)
         continueLabel = MakeText(resultPanel.transform, "Continue", "[ 계속 ]", 14, TextAnchor.MiddleCenter);
@@ -397,7 +397,7 @@ public class PostRaidEventUI : MonoBehaviour
         clRT.pivot = new Vector2(0.5f, 0);
         clRT.anchoredPosition = new Vector2(0, 4);
         clRT.sizeDelta = new Vector2(200, 28);
-        continueLabel.color = new Color(0.7f, 0.7f, 0.7f);
+        continueLabel.color = UITheme.TextMuted;
 
         resultPanel.SetActive(false);
         panelRoot.SetActive(false);
@@ -453,6 +453,6 @@ public class PostRaidEventUI : MonoBehaviour
         rt.pivot = new Vector2(0.5f, 1);
         rt.anchoredPosition = pos;
         rt.sizeDelta = size;
-        go.AddComponent<Image>().color = new Color(1, 1, 1, 0.25f);
+        go.AddComponent<Image>().color = UITheme.Divider;
     }
 }

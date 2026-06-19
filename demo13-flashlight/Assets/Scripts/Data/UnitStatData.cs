@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -64,6 +65,19 @@ public class UnitStatData
     [Header("보상")]
     public int expReward = 10;
     public int goldReward = 5;
+
+    // ===== 모션(애니 속도/거리) — 플레이어와 동일 규칙 =====
+    // ⚠️ 데이터만 준비됨. 적/NPC는 아직 Spine 애니 시스템이 없어 와이어링 안 됨(적 애니 생기면 적용).
+    [Header("모션(애니 속도/거리)")]
+    [Tooltip("모션별 애니 재생 속도 + 이동거리. 키: idle/walk/attack/hit/death 등. (적 Spine 애니 도입 시 EnemyController가 사용)")]
+    public List<MotionStat> motions = new List<MotionStat>
+    {
+        new MotionStat { anim = "idle",   animSpeed = 1f },
+        new MotionStat { anim = "walk",   animSpeed = 1f },
+        new MotionStat { anim = "attack", animSpeed = 1f },
+        new MotionStat { anim = "hit",    animSpeed = 1f },
+        new MotionStat { anim = "death",  animSpeed = 1f },
+    };
 
     // ===== 계산 프로퍼티 =====
     public float DPS => attackDamage * attackSpeed;

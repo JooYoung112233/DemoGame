@@ -29,19 +29,19 @@ public class DispatchUI : MonoBehaviour
         }
     }
 
-    // ── 색 팔레트(전술 톤) ──
-    static readonly Color ColDim       = new Color(0.05f, 0.06f, 0.08f, 0.96f);
-    static readonly Color ColPanel     = new Color(0.11f, 0.12f, 0.15f, 0.98f);
-    static readonly Color ColPanel2    = new Color(0.07f, 0.08f, 0.11f, 0.98f);
-    static readonly Color ColPanelBlue = new Color(0.10f, 0.16f, 0.26f, 0.96f); // 좌측 정보 패널(파란톤)
-    static readonly Color ColGold      = new Color(0.95f, 0.85f, 0.30f);
-    static readonly Color ColText      = new Color(0.93f, 0.93f, 0.92f);
-    static readonly Color ColTextDim   = new Color(0.55f, 0.58f, 0.66f);
-    static readonly Color ColLine      = new Color(1f, 1f, 1f, 0.12f);
-    static readonly Color ColBtn       = new Color(0.16f, 0.18f, 0.24f, 0.95f);
-    static readonly Color ColDanger    = new Color(0.5f, 0.22f, 0.22f);
-    static readonly Color ColGood       = new Color(0.45f, 0.85f, 0.45f);
-    static readonly Color ColWarn       = new Color(1f, 0.55f, 0.45f);
+    // ── 색 팔레트(웜/올리브 전술 톤 — UITheme 공유) ──
+    static readonly Color ColDim       = UITheme.Backdrop;
+    static readonly Color ColPanel     = UITheme.Panel;
+    static readonly Color ColPanel2    = UITheme.PanelAlt;
+    static readonly Color ColPanelBlue = UITheme.Panel;        // 좌측 정보 패널(파란톤 제거 → 웜 패널)
+    static readonly Color ColGold      = UITheme.Gold;
+    static readonly Color ColText      = UITheme.TextBright;
+    static readonly Color ColTextDim   = UITheme.TextMuted;
+    static readonly Color ColLine      = UITheme.Divider;
+    static readonly Color ColBtn       = UITheme.Cell;
+    static readonly Color ColDanger    = UITheme.Danger;
+    static readonly Color ColGood       = UITheme.Positive;
+    static readonly Color ColWarn       = UITheme.Negative;
 
     // 파견 슬롯 (그레이박스: 최대 2)
     static readonly string[] SlotLabels = { "파견 슬롯 1", "파견 슬롯 2" };
@@ -245,7 +245,7 @@ public class DispatchUI : MonoBehaviour
         var tabGO = MakeRect(parent, $"Tab_{mode}", new Vector2(0, 0.5f), new Vector2(0, 0.5f),
             new Vector2(x, 0), new Vector2(96, 40));
         tabGO.GetComponent<RectTransform>().pivot = new Vector2(0, 0.5f);
-        tabGO.AddComponent<Image>().color = active ? new Color(0.18f, 0.22f, 0.30f, 0.98f) : ColBtn;
+        tabGO.AddComponent<Image>().color = active ? UITheme.Accent : ColBtn;
         var btn = tabGO.AddComponent<Button>();
         btn.targetGraphic = tabGO.GetComponent<Image>();
         var m = mode;
@@ -305,7 +305,7 @@ public class DispatchUI : MonoBehaviour
 
             var slotGO = MakeRect(prt, $"Slot_{i}", new Vector2(0, 1), new Vector2(0, 1),
                 new Vector2(pad, y), new Vector2(innerW, 52));
-            slotGO.AddComponent<Image>().color = isSel ? new Color(0.18f, 0.30f, 0.46f, 0.98f)
+            slotGO.AddComponent<Image>().color = isSel ? UITheme.Accent
                                                        : (unlocked ? ColBtn : ColPanel2);
 
             // 슬롯 제목 + 상태
@@ -379,7 +379,7 @@ public class DispatchUI : MonoBehaviour
         logText.supportRichText = true;
         logText.horizontalOverflow = HorizontalWrapMode.Wrap;
         logText.verticalOverflow = VerticalWrapMode.Overflow;
-        logText.text = logContent.Length > 0 ? logContent : "<color=#556677>아직 파견 기록 없음</color>";
+        logText.text = logContent.Length > 0 ? logContent : "<color=#8A8170>아직 파견 기록 없음</color>";
 
         // ④ 파견 보내기 버튼 (맨 아래)
         var sendGO = MakeRect(prt, "SendBtn", new Vector2(0, 0), new Vector2(1, 0),
@@ -388,7 +388,7 @@ public class DispatchUI : MonoBehaviour
         srt.pivot = new Vector2(0.5f, 0f);
         srt.offsetMin = new Vector2(pad, 8);
         srt.offsetMax = new Vector2(-pad, 56);
-        sendGO.AddComponent<Image>().color = new Color(0.22f, 0.40f, 0.30f, 0.98f);
+        sendGO.AddComponent<Image>().color = UITheme.Buy;
         var sendBtn = sendGO.AddComponent<Button>();
         sendBtn.targetGraphic = sendGO.GetComponent<Image>();
         sendBtn.onClick.AddListener(DispatchSelected);
@@ -455,7 +455,7 @@ public class DispatchUI : MonoBehaviour
             var hireGO = MakeRect(rowGO.transform, "Hire", new Vector2(1, 0.5f), new Vector2(1, 0.5f),
                 new Vector2(-12, 0), new Vector2(92, 44));
             hireGO.GetComponent<RectTransform>().pivot = new Vector2(1, 0.5f);
-            hireGO.AddComponent<Image>().color = new Color(0.22f, 0.40f, 0.30f, 0.98f);
+            hireGO.AddComponent<Image>().color = UITheme.Buy;
             var hireBtn = hireGO.AddComponent<Button>();
             hireBtn.targetGraphic = hireGO.GetComponent<Image>();
             int idx = i;
@@ -587,9 +587,9 @@ public class DispatchUI : MonoBehaviour
             markRT.pivot = new Vector2(0.5f, 0.5f);
             markRT.anchoredPosition = Vector2.zero;
 
-            Color mcol = !unlocked ? new Color(0.12f, 0.12f, 0.14f, 0.92f)
-                : isSel ? new Color(0.20f, 0.34f, 0.50f, 0.98f)
-                : new Color(0.16f, 0.20f, 0.28f, 0.95f);
+            Color mcol = !unlocked ? UITheme.PanelAlt
+                : isSel ? UITheme.Accent
+                : UITheme.Cell;
             markerGO.AddComponent<Image>().color = mcol;
 
             // 선택 시 골드 테두리(작은 상단 바)

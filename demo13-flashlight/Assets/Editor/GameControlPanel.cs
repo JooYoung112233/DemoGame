@@ -19,7 +19,7 @@ public class GameControlPanel : EditorWindow
     const string TUNING_PATH = "Assets/Resources/Data/GameTuning.asset";
     static string ToolsDir => Path.GetFullPath(Path.Combine(Application.dataPath, "../tools"));
 
-    static readonly string[] TabNames = { "컨트롤 (튜닝·스탯·통계)", "NPC·상점", "지역 루트", "CSV 밸런스" };
+    static readonly string[] TabNames = { "컨트롤 (튜닝·스탯·통계)", "NPC·상점", "몬스터", "지역 루트", "CSV 밸런스" };
     int tab;
 
     [MenuItem("Tools/TopDown/밸런스·컨트롤")]
@@ -39,7 +39,8 @@ public class GameControlPanel : EditorWindow
 
         if (tab == 0) DrawControlTab();
         else if (tab == 1) DrawNpcTab();
-        else if (tab == 2) DrawRegionLootTab();
+        else if (tab == 2) DrawMonsterTab();
+        else if (tab == 3) DrawRegionLootTab();
         else          DrawCsvTab();
     }
 
@@ -61,7 +62,7 @@ public class GameControlPanel : EditorWindow
         if (fTuning) DrawTuning();
 
         EditorGUILayout.Space(10);
-        fStatDB = EditorGUILayout.Foldout(fStatDB, "🎮 스탯 DB (StatDB — 플레이어/적)", true, EditorStyles.foldoutHeader);
+        fStatDB = EditorGUILayout.Foldout(fStatDB, "🎮 플레이어 스탯 (StatDB)", true, EditorStyles.foldoutHeader);
         if (fStatDB) DrawStatDB();
 
         EditorGUILayout.Space(10);
@@ -227,9 +228,8 @@ public class GameControlPanel : EditorWindow
         if (statDBSo == null || statDBSo.targetObject != statDB) statDBSo = new SerializedObject(statDB);
         statDBSo.Update();
         EditorGUI.indentLevel++;
-        var p = statDBSo.GetIterator();
-        p.NextVisible(true);
-        while (p.NextVisible(false)) EditorGUILayout.PropertyField(p, true);
+        var playerProp = statDBSo.FindProperty("playerStat");   // 적/몬스터(units)는 '몬스터' 탭으로 분리
+        if (playerProp != null) DrawKoClass(playerProp);
         EditorGUI.indentLevel--;
         if (statDBSo.ApplyModifiedProperties()) EditorUtility.SetDirty(statDB);
 
@@ -239,7 +239,151 @@ public class GameControlPanel : EditorWindow
             if (GUILayout.Button("에셋 선택")) EditorGUIUtility.PingObject(statDB);
             if (GUILayout.Button("저장")) AssetDatabase.SaveAssets();
         }
-        EditorGUILayout.HelpBox("플레이어 이동속도 = Player Stat ▸ Move Speed. 적 스탯은 Units 목록.", MessageType.None);
+        EditorGUILayout.HelpBox("플레이어 이동속도 = 이동 ▸ 이동 속도. 필드 라벨은 한글(영문 변수명은 라벨 위 툴팁).\n※ 적/몬스터 스탯은 상단 '몬스터' 탭에서 편집.", MessageType.None);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  탭 — 몬스터 (StatDB.units 마스터-디테일) — 가짓수 많아 NPC처럼 분리
+    // ══════════════════════════════════════════════════════════════════
+    int monsterIdx;
+    Vector2 monsterListScroll, monsterDetailScroll;
+    string monsterFilter = "";
+    bool monsterAddReq;        // 레이아웃 종료 후 처리(구조 변경을 스코프 안에서 하지 않음)
+    int monsterDelReq = -1;
+
+    void DrawMonsterTab()
+    {
+        if (statDB == null) statDB = StatDB.Instance;
+        if (statDB == null)
+        {
+            EditorGUILayout.HelpBox("StatDB 에셋이 없습니다 (Resources/Data/StatDB.asset).", MessageType.Info);
+            return;
+        }
+        if (statDBSo == null || statDBSo.targetObject != statDB) statDBSo = new SerializedObject(statDB);
+        statDBSo.Update();
+
+        var units = statDBSo.FindProperty("units");
+        if (units == null) { EditorGUILayout.HelpBox("StatDB.units 를 찾을 수 없습니다.", MessageType.Warning); return; }
+
+        monsterAddReq = false;
+        monsterDelReq = -1;
+
+        // ── 상단 바: 개수 + 새 몬스터 + 에셋/저장 + 검색 ──
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            EditorGUILayout.LabelField($"몬스터/적 유닛  {units.arraySize}종 (StatDB ▸ Units)", EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
+            var prev = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.40f, 0.85f, 0.50f);
+            if (GUILayout.Button("＋ 새 몬스터", GUILayout.Width(110))) monsterAddReq = true;
+            GUI.backgroundColor = prev;
+            if (GUILayout.Button("에셋 선택", GUILayout.Width(80))) EditorGUIUtility.PingObject(statDB);
+            if (GUILayout.Button("저장", GUILayout.Width(70))) { statDBSo.ApplyModifiedProperties(); AssetDatabase.SaveAssets(); }
+        }
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            GUILayout.Label("🔍", GUILayout.Width(18));
+            monsterFilter = EditorGUILayout.TextField(monsterFilter, GUILayout.Width(220));
+        }
+        DrawSeparator(2);
+
+        if (units.arraySize > 0)
+        {
+            monsterIdx = Mathf.Clamp(monsterIdx, 0, units.arraySize - 1);
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                // ── 좌: 몬스터 목록(세로 스크롤) ──
+                using (new EditorGUILayout.VerticalScope(GUILayout.Width(230)))
+                {
+                    monsterListScroll = EditorGUILayout.BeginScrollView(monsterListScroll, GUILayout.ExpandHeight(true));
+                    DrawMonsterList(units);
+                    EditorGUILayout.EndScrollView();
+                }
+
+                var vsep = GUILayoutUtility.GetRect(2, 2, GUILayout.Width(2), GUILayout.ExpandHeight(true));
+                EditorGUI.DrawRect(vsep, CSep);
+
+                // ── 우: 선택 몬스터 상세(2열 섹션) ──
+                using (new EditorGUILayout.VerticalScope())
+                {
+                    monsterDetailScroll = EditorGUILayout.BeginScrollView(monsterDetailScroll);
+                    DrawMonsterDetail(units);
+                    EditorGUILayout.EndScrollView();
+                }
+            }
+        }
+        else
+        {
+            EditorGUILayout.HelpBox("등록된 몬스터가 없습니다. ‘＋ 새 몬스터’로 추가하세요.", MessageType.Info);
+        }
+
+        // ── 구조 변경은 모든 레이아웃 스코프 종료 후 적용(스크롤뷰 불일치 방지) ──
+        if (monsterAddReq)
+        {
+            units.arraySize++;
+            int at = units.arraySize - 1;
+            var ne = units.GetArrayElementAtIndex(at);
+            var idP = ne.FindPropertyRelative("id");          if (idP != null) idP.stringValue = "new_unit";
+            var nmP = ne.FindPropertyRelative("displayName"); if (nmP != null) nmP.stringValue = "New Unit";
+            monsterIdx = at;
+        }
+        else if (monsterDelReq >= 0 && monsterDelReq < units.arraySize)
+        {
+            units.DeleteArrayElementAtIndex(monsterDelReq);
+            if (monsterIdx >= units.arraySize) monsterIdx = Mathf.Max(0, units.arraySize - 1);
+        }
+
+        if (statDBSo.ApplyModifiedProperties()) EditorUtility.SetDirty(statDB);
+    }
+
+    void DrawMonsterList(SerializedProperty units)
+    {
+        string f = string.IsNullOrEmpty(monsterFilter) ? null : monsterFilter.ToLowerInvariant();
+        for (int i = 0; i < units.arraySize; i++)
+        {
+            var u = units.GetArrayElementAtIndex(i);
+            string id = u.FindPropertyRelative("id")?.stringValue ?? "";
+            string nm = u.FindPropertyRelative("displayName")?.stringValue ?? "";
+            if (f != null && !id.ToLowerInvariant().Contains(f) && !nm.ToLowerInvariant().Contains(f)) continue;
+
+            bool sel = i == monsterIdx;
+            var rect = GUILayoutUtility.GetRect(0, 34, GUILayout.ExpandWidth(true));
+            if (Event.current.type == EventType.Repaint && sel) EditorGUI.DrawRect(rect, CSelBg);
+
+            var titleStyle = new GUIStyle(EditorStyles.label)
+            { fontStyle = FontStyle.Bold, padding = new RectOffset(8, 2, 0, 0),
+              normal = { textColor = sel ? Color.white : EditorStyles.label.normal.textColor } };
+            GUI.Label(new Rect(rect.x, rect.y + 2, rect.width - 26, 16), string.IsNullOrEmpty(nm) ? id : nm, titleStyle);
+            GUI.Label(new Rect(rect.x + 4, rect.y + 18, rect.width - 30, 13), id, HdrSub);
+
+            // 삭제 요청(실제 삭제는 레이아웃 종료 후)
+            if (GUI.Button(new Rect(rect.xMax - 24, rect.y + 8, 20, 18), new GUIContent("✕", "이 몬스터 삭제")))
+            {
+                if (EditorUtility.DisplayDialog("삭제", $"‘{(string.IsNullOrEmpty(nm) ? id : nm)}’ 몬스터를 삭제할까요?", "삭제", "취소"))
+                    monsterDelReq = i;
+            }
+            if (GUI.Button(new Rect(rect.x, rect.y, rect.width - 26, rect.height), GUIContent.none, GUIStyle.none))
+                monsterIdx = i;
+        }
+    }
+
+    void DrawMonsterDetail(SerializedProperty units)
+    {
+        var u = units.GetArrayElementAtIndex(monsterIdx);
+        string id = u.FindPropertyRelative("id")?.stringValue ?? "";
+        string nm = u.FindPropertyRelative("displayName")?.stringValue ?? "";
+
+        var hdr = GUILayoutUtility.GetRect(0, 24, GUILayout.ExpandWidth(true));
+        EditorGUI.DrawRect(hdr, new Color(0.50f, 0.28f, 0.30f));
+        EditorGUI.DrawRect(new Rect(hdr.x, hdr.y, 4f, hdr.height), new Color(0.50f, 0.28f, 0.30f) * 1.6f);
+        GUI.Label(new Rect(hdr.x + 9, hdr.y, hdr.width - 12, hdr.height),
+            $"{(string.IsNullOrEmpty(nm) ? id : nm)}   ·   {id}", KoSecStyle);
+
+        EditorGUILayout.Space(2);
+        EditorGUI.indentLevel++;
+        DrawKoClass(u);
+        EditorGUI.indentLevel--;
     }
 
     void CreateTuning()
@@ -323,7 +467,7 @@ public class GameControlPanel : EditorWindow
             EditorGUILayout.LabelField("NPC·상점 수치 (Resources/Data/NPC · Data/Shops)", EditorStyles.boldLabel);
             if (GUILayout.Button("새로고침", GUILayout.Width(80))) ReloadNpcAssets();
         }
-        EditorGUILayout.HelpBox("NPC 관계(호감/신뢰/두려움)·대화·상점 환율(buyRate/sellRate)·재고를 여기서 편집. 항목 펼쳐 수정 후 '저장'.\n※ 적/유닛 전투 스탯은 '컨트롤' 탭 ▸ StatDB(Units).", MessageType.None);
+        EditorGUILayout.HelpBox("NPC 관계(호감/신뢰/두려움)·대화·상점 환율(구매가/판매가 배율)·재고를 여기서 편집. 항목 펼쳐 수정 후 '저장'.\n필드 라벨은 한글로 표시(영문 변수명은 라벨 위에 마우스 올리면 툴팁). 대화/선택지 같은 묶음은 펼쳐서 값 수정.\n※ 대화·수배 항목의 추가/삭제는 인스펙터·NPC 메이커에서. / 적·몬스터 전투 스탯은 상단 '몬스터' 탭.", MessageType.None);
 
         npcScroll = EditorGUILayout.BeginScrollView(npcScroll);
         DrawAssetSection("── NPC (NPCData) ──", npcAssets, npcSo);
@@ -340,18 +484,21 @@ public class GameControlPanel : EditorWindow
         for (int i = 0; i < assets.Length; i++)
         {
             if (assets[i] == null || sos[i] == null) continue;
+            var so = sos[i];
+            so.Update();
+
             string key = title + "/" + assets[i].name;
             npcFold.TryGetValue(key, out bool open);
-            open = EditorGUILayout.Foldout(open, assets[i].name, true);
+            // 폴드아웃 제목: 한글 표시이름(displayName/shopName) 우선 + 에셋 파일명(회색)
+            string disp = so.FindProperty("displayName")?.stringValue;
+            if (string.IsNullOrEmpty(disp)) disp = so.FindProperty("shopName")?.stringValue;
+            string foldTitle = string.IsNullOrEmpty(disp) ? assets[i].name : $"{disp}   ({assets[i].name})";
+            open = EditorGUILayout.Foldout(open, foldTitle, true);
             npcFold[key] = open;
             if (!open) continue;
 
-            var so = sos[i];
-            so.Update();
             EditorGUI.indentLevel++;
-            var p = so.GetIterator();
-            p.NextVisible(true);                       // m_Script 스킵
-            while (p.NextVisible(false)) EditorGUILayout.PropertyField(p, true);
+            DrawKoRoot(so);
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -363,6 +510,246 @@ public class GameControlPanel : EditorWindow
             if (so.ApplyModifiedProperties()) EditorUtility.SetDirty(assets[i]);
             DrawSeparator(1);
         }
+    }
+
+    // ── SO 필드를 한글 라벨로 재귀 렌더(NPC/Shop 등). 영문 변수명은 데이터에 그대로, 표시만 한글. ──
+    //  · 리프/원시·오브젝트 배열/문자열 배열 → Unity 기본(리오더 리스트·추가삭제 유지, 라벨만 한글)
+    //  · 클래스 배열(요소가 직렬화 클래스) → 수동 재귀(요소 내부 필드까지 한글). 값 편집 전용(구조 추가/삭제는 인스펙터/메이커에서).
+    static void DrawKoProperty(SerializedProperty prop)
+    {
+        string ko = KoLabels.Field(prop.name);
+        string tip = string.IsNullOrEmpty(prop.tooltip) ? prop.name : $"{prop.name}\n{prop.tooltip}";
+        var label = new GUIContent(ko ?? prop.displayName, tip);
+
+        bool isClassArray = prop.isArray
+            && prop.propertyType == SerializedPropertyType.Generic
+            && prop.arraySize > 0
+            && prop.GetArrayElementAtIndex(0).propertyType == SerializedPropertyType.Generic
+            && prop.GetArrayElementAtIndex(0).hasVisibleChildren;
+
+        if (isClassArray)
+        {
+            prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, $"{label.text}   ({prop.arraySize})", true);
+            if (prop.isExpanded)
+            {
+                EditorGUI.indentLevel++;
+                for (int i = 0; i < prop.arraySize; i++)
+                {
+                    var el = prop.GetArrayElementAtIndex(i);
+                    // 요소 제목: 요소 안 id/displayName/text가 있으면 미리보기로
+                    string idv = el.FindPropertyRelative("id")?.stringValue;
+                    string nm  = el.FindPropertyRelative("displayName")?.stringValue;
+                    string hint =
+                        !string.IsNullOrEmpty(idv) && !string.IsNullOrEmpty(nm) ? $"{idv} · {nm}" :
+                        !string.IsNullOrEmpty(idv) ? idv :
+                        !string.IsNullOrEmpty(nm)  ? nm  :
+                        el.FindPropertyRelative("text")?.stringValue;
+                    string elTitle = string.IsNullOrEmpty(hint) ? $"{i}" : $"{i}  ·  {hint}";
+                    el.isExpanded = EditorGUILayout.Foldout(el.isExpanded, elTitle, true);
+                    if (el.isExpanded)
+                    {
+                        EditorGUI.indentLevel++;
+                        DrawKoClass(el);
+                        EditorGUI.indentLevel--;
+                    }
+                }
+                EditorGUI.indentLevel--;
+            }
+            return;
+        }
+
+        // 일반 직렬화 클래스(자식 보유, 배열 아님) → 수동 foldout + 섹션 2열 그리드
+        if (prop.propertyType == SerializedPropertyType.Generic && !prop.isArray && prop.hasVisibleChildren)
+        {
+            prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, label, true);
+            if (prop.isExpanded)
+            {
+                EditorGUI.indentLevel++;
+                DrawKoClass(prop);
+                EditorGUI.indentLevel--;
+            }
+            return;
+        }
+
+        // 그 외 → Unity 기본(라벨만 한글 교체)
+        EditorGUILayout.PropertyField(prop, label, true);
+    }
+
+    // 단순 자식 순회(폴백 — 타입 리플렉션 실패 시)
+    static void DrawKoChildren(SerializedProperty parent)
+    {
+        var it = parent.Copy();
+        var end = parent.GetEndProperty();
+        bool enter = true;
+        while (it.NextVisible(enter) && !SerializedProperty.EqualContents(it, end))
+        {
+            enter = false;
+            DrawKoProperty(it);
+        }
+    }
+
+    // ── 클래스(또는 배열 요소)를 [Header] 섹션별로 묶고, 스칼라 필드는 2열로 가로 배치 ──
+    static void DrawKoClass(SerializedProperty classProp)
+    {
+        var t = ResolveManagedType(classProp);
+        if (t == null) { DrawKoChildren(classProp); return; }   // 타입 못 풀면 기존 세로 순회
+        DrawKoContainer(t, classProp.FindPropertyRelative);
+    }
+
+    // SerializedObject 루트(NPCData/ShopData/StatDB 등)도 동일 레이아웃으로
+    static void DrawKoRoot(SerializedObject so)
+    {
+        var t = so.targetObject != null ? so.targetObject.GetType() : null;
+        if (t == null) { var p = so.GetIterator(); p.NextVisible(true); while (p.NextVisible(false)) DrawKoProperty(p); return; }
+        DrawKoContainer(t, so.FindProperty);
+    }
+
+    // 타입의 [Header] 그룹 순서대로: (제목 섹션 바) + (그룹 필드 2열 그리드 / 복잡필드 전체폭)
+    static void DrawKoContainer(System.Type t, System.Func<string, SerializedProperty> find)
+    {
+        foreach (var g in GroupsOf(t))
+        {
+            var props = new List<SerializedProperty>();
+            foreach (var fn in g.fields)
+            {
+                var cp = find(fn);
+                if (cp != null) props.Add(cp);
+            }
+            if (props.Count == 0) continue;
+
+            if (!string.IsNullOrEmpty(g.title)) KoSection(KoLabels.Header(g.title));
+            DrawKoFieldGrid(props);
+        }
+    }
+
+    static readonly Color KoSecColor = new Color(0.27f, 0.33f, 0.41f);
+    static GUIStyle _koSecStyle;
+    static GUIStyle KoSecStyle => _koSecStyle ??= new GUIStyle(EditorStyles.label)
+    { fontSize = 11, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft, normal = { textColor = Color.white } };
+
+    static void KoSection(string title)
+    {
+        EditorGUILayout.Space(4);
+        var r = GUILayoutUtility.GetRect(0, 19, GUILayout.ExpandWidth(true));
+        EditorGUI.DrawRect(r, KoSecColor);
+        EditorGUI.DrawRect(new Rect(r.x, r.y, 3f, r.height), KoSecColor * 1.6f);
+        GUI.Label(new Rect(r.x + 8, r.y, r.width - 12, r.height), title, KoSecStyle);
+    }
+
+    // 스칼라는 2열, 배열/중첩클래스 등 복잡 필드는 전체폭으로
+    static void DrawKoFieldGrid(List<SerializedProperty> props)
+    {
+        int savedIndent = EditorGUI.indentLevel;
+        float indentPx = savedIndent * 15f;
+        float avail = EditorGUIUtility.currentViewWidth - indentPx - 30f;
+        int colCount = avail >= 540f ? 2 : 1;
+        float cellW = colCount == 2 ? avail / 2f - 6f : Mathf.Max(avail, 220f);
+        float labelW = Mathf.Clamp(cellW * 0.48f, 92f, 190f);
+
+        EditorGUI.indentLevel = 0;     // 셀은 수동 들여쓰기(가로 정렬 안정화)
+        int col = 0;
+        bool rowOpen = false;
+
+        void EndRow() { if (rowOpen) { EditorGUILayout.EndHorizontal(); rowOpen = false; col = 0; } }
+
+        foreach (var p in props)
+        {
+            if (!IsCellable(p))
+            {
+                EndRow();
+                EditorGUI.indentLevel = savedIndent;   // 복잡필드(폴드아웃)는 정상 들여쓰기로
+                DrawKoProperty(p);
+                EditorGUI.indentLevel = 0;
+                continue;
+            }
+            if (col == 0) { EditorGUILayout.BeginHorizontal(); GUILayout.Space(indentPx + 4); rowOpen = true; }
+            DrawKoCell(p, cellW, labelW);
+            if (++col >= colCount) EndRow();
+        }
+        EndRow();
+        EditorGUI.indentLevel = savedIndent;
+    }
+
+    static bool IsCellable(SerializedProperty p)
+    {
+        if (p.isArray && p.propertyType != SerializedPropertyType.String) return false;       // 배열 = 전체폭
+        if (p.propertyType == SerializedPropertyType.Generic && p.hasVisibleChildren) return false; // 중첩 클래스 = 전체폭
+        return true;
+    }
+
+    static void DrawKoCell(SerializedProperty p, float cellW, float labelW)
+    {
+        string ko = KoLabels.Field(p.name);
+        string tip = string.IsNullOrEmpty(p.tooltip) ? p.name : $"{p.name}\n{p.tooltip}";
+        var label = new GUIContent(ko ?? p.displayName, tip);
+        float prevLW = EditorGUIUtility.labelWidth;
+        EditorGUIUtility.labelWidth = labelW;
+        EditorGUILayout.PropertyField(p, label, false, GUILayout.Width(cellW));
+        EditorGUIUtility.labelWidth = prevLW;
+    }
+
+    // ── 리플렉션: 타입의 직렬화 필드를 [Header] 기준 그룹으로(캐시) ──
+    //  ※ 단일 클래스 계층 전용. base에 직렬화 public 필드가 있는 타입에 쓰면 MetadataToken 정렬이
+    //    계층을 가로질러 선언순서를 보장 못 해 헤더 매핑이 어긋날 수 있음(현재 대상 4종은 무관).
+    class KoGroup { public string title; public readonly List<string> fields = new List<string>(); }
+    static readonly Dictionary<System.Type, List<KoGroup>> _koGroupCache = new Dictionary<System.Type, List<KoGroup>>();
+
+    static List<KoGroup> GroupsOf(System.Type t)
+    {
+        if (_koGroupCache.TryGetValue(t, out var cached)) return cached;
+        var groups = new List<KoGroup>();
+        var cur = new KoGroup { title = null };
+        groups.Add(cur);
+        // GetFields()는 순서 미보장 → MetadataToken(선언 순서 대응)으로 정렬해 [Header] 매핑 안정화
+        var fields = t.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                      .OrderBy(f => f.MetadataToken);
+        foreach (var fi in fields)
+        {
+            if (fi.IsNotSerialized) continue;
+            var hdr = (HeaderAttribute)System.Attribute.GetCustomAttribute(fi, typeof(HeaderAttribute));
+            if (hdr != null) { cur = new KoGroup { title = hdr.header }; groups.Add(cur); }
+            cur.fields.Add(fi.Name);
+        }
+        _koGroupCache[t] = groups;
+        return groups;
+    }
+
+    // SerializedProperty(클래스/배열 요소)의 관리형 타입 해석. 실패 시 null.
+    static System.Type ResolveManagedType(SerializedProperty prop)
+    {
+        var obj = prop.serializedObject?.targetObject;
+        if (obj == null) return null;
+        System.Type t = obj.GetType();
+        string path = prop.propertyPath.Replace(".Array.data[", "[");
+        foreach (var seg in path.Split('.'))
+        {
+            if (seg.Length == 0) continue;
+            string fname = seg;
+            bool indexed = false;
+            int b = seg.IndexOf('[');
+            if (b >= 0) { fname = seg.Substring(0, b); indexed = true; }
+            var fi = GetFieldRec(t, fname);
+            if (fi == null) return null;
+            t = fi.FieldType;
+            if (indexed) t = ElementTypeOf(t);
+            if (t == null) return null;
+        }
+        return t;
+    }
+
+    static System.Reflection.FieldInfo GetFieldRec(System.Type t, string name)
+    {
+        const System.Reflection.BindingFlags F = System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+        while (t != null) { var fi = t.GetField(name, F); if (fi != null) return fi; t = t.BaseType; }
+        return null;
+    }
+
+    static System.Type ElementTypeOf(System.Type t)
+    {
+        if (t.IsArray) return t.GetElementType();
+        if (t.IsGenericType) { var a = t.GetGenericArguments(); if (a.Length > 0) return a[0]; }
+        return t;
     }
 
     // ══════════════════════════════════════════════════════════════════
@@ -870,7 +1257,8 @@ public class GameControlPanel : EditorWindow
     List<string> files;
     string current;
     List<string[]> rows;   // rows[0] = 헤더
-    Vector2 csvScroll;
+    Vector2 csvScroll;   // 우측 그리드(가로+세로)
+    Vector2 fileScroll;  // 좌측 파일 목록(세로)
     bool dirty;
     float colW = 130f;
     string filter = "";
@@ -918,6 +1306,10 @@ public class GameControlPanel : EditorWindow
     { fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft, normal = { textColor = Color.white }, padding = new RectOffset(4, 2, 0, 0) };
     GUIStyle RowNum   => _rowNum   ??= new GUIStyle(EditorStyles.miniLabel)
     { alignment = TextAnchor.MiddleRight, normal = { textColor = new Color(0.6f, 0.65f, 0.75f) } };
+    GUIStyle _hdrSub;
+    GUIStyle HdrSub   => _hdrSub   ??= new GUIStyle(EditorStyles.miniLabel)
+    { alignment = TextAnchor.MiddleLeft, fontSize = 9, padding = new RectOffset(4, 2, 0, 0),
+      normal = { textColor = new Color(0.74f, 0.80f, 0.90f, 0.85f) } };
 
     void RefreshFiles()
     {
@@ -1053,7 +1445,9 @@ public class GameControlPanel : EditorWindow
         EditorGUILayout.BeginHorizontal();
 
         EditorGUILayout.BeginVertical(GUILayout.Width(210));
+        fileScroll = EditorGUILayout.BeginScrollView(fileScroll, false, false, GUILayout.ExpandHeight(true));
         DrawFileList();
+        EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();
 
         var vsep = GUILayoutUtility.GetRect(2, 2, GUILayout.Width(2), GUILayout.ExpandHeight(true));
@@ -1066,13 +1460,21 @@ public class GameControlPanel : EditorWindow
         EditorGUILayout.EndHorizontal();
     }
 
+    // 상단 바: 한글 제목 우선 "퀘스트 (quests.csv)" — 매핑 없으면 파일명만
+    string CsvToolbarTitle()
+    {
+        var name = Path.GetFileName(current);
+        var ko = KoLabels.FileTitle(name);
+        return ko != null ? $"{ko}  ({name})" : name;
+    }
+
     void DrawCsvToolbar()
     {
         EditorGUILayout.Space(3);
         EditorGUILayout.BeginHorizontal();
 
-        GUILayout.Label(rows == null ? "CSV 미선택" : Path.GetFileName(current) + (dirty ? "  ●" : ""),
-            BarLabel, GUILayout.Width(220), GUILayout.Height(26));
+        GUILayout.Label(rows == null ? "CSV 미선택" : CsvToolbarTitle() + (dirty ? "  ●" : ""),
+            BarLabel, GUILayout.Width(260), GUILayout.Height(26));
 
         var prev = GUI.backgroundColor;
         using (new EditorGUI.DisabledScope(rows == null || !dirty))
@@ -1106,18 +1508,31 @@ public class GameControlPanel : EditorWindow
         GUILayout.Label("CSV 파일", EditorStyles.boldLabel);
         foreach (var f in files)
         {
-            var name = Path.GetFileName(f);
-            bool sel = current == f;
+            var name  = Path.GetFileName(f);
+            string ko = KoLabels.FileTitle(name);   // 파일 한글 제목(없으면 null → 파일명만)
+            bool sel  = current == f;
 
-            var rect = GUILayoutUtility.GetRect(new GUIContent(name), EditorStyles.label,
-                GUILayout.Height(22), GUILayout.ExpandWidth(true));
+            float rowH = ko != null ? 34f : 22f;
+            var rect = GUILayoutUtility.GetRect(0, rowH, GUILayout.ExpandWidth(true));
             if (Event.current.type == EventType.Repaint && sel)
                 EditorGUI.DrawRect(rect, CSelBg);
 
-            var lblStyle = new GUIStyle(EditorStyles.label)
-            { padding = new RectOffset(8, 2, 0, 0), normal = { textColor = sel ? Color.white : EditorStyles.label.normal.textColor } };
-            if (sel) lblStyle.fontStyle = FontStyle.Bold;
-            GUI.Label(rect, name, lblStyle);
+            if (ko != null)
+            {
+                // 1행: 한글 제목(굵게) / 2행: 파일명(회색 작게)
+                var titleStyle = new GUIStyle(EditorStyles.label)
+                { fontStyle = FontStyle.Bold, padding = new RectOffset(8, 2, 0, 0),
+                  normal = { textColor = sel ? Color.white : EditorStyles.label.normal.textColor } };
+                GUI.Label(new Rect(rect.x, rect.y + 2, rect.width, 16), ko, titleStyle);
+                GUI.Label(new Rect(rect.x + 4, rect.y + 18, rect.width - 6, 13), name, HdrSub);
+            }
+            else
+            {
+                var lblStyle = new GUIStyle(EditorStyles.label)
+                { padding = new RectOffset(8, 2, 0, 0), normal = { textColor = sel ? Color.white : EditorStyles.label.normal.textColor } };
+                if (sel) lblStyle.fontStyle = FontStyle.Bold;
+                GUI.Label(rect, name, lblStyle);
+            }
 
             if (GUI.Button(rect, GUIContent.none, GUIStyle.none) && !sel)
             {
@@ -1147,6 +1562,10 @@ public class GameControlPanel : EditorWindow
 
         csvScroll = EditorGUILayout.BeginScrollView(csvScroll);
 
+        // 콘텐츠 폭을 확정해야 가로 스크롤바가 잡힌다(#열 34 + 데이터열 cols×colW + 행조작버튼 94).
+        float totalW = 34f + cols * colW + 94f + 6f;
+        EditorGUILayout.BeginVertical(GUILayout.Width(totalW));
+
         DrawGridHeader(cols);
 
         int rowOp = 0, opAt = -1; // rowOp: 1=복제 2=위 3=아래 4=삭제
@@ -1175,6 +1594,7 @@ public class GameControlPanel : EditorWindow
             EditorGUILayout.EndHorizontal();
         }
 
+        EditorGUILayout.EndVertical();
         EditorGUILayout.EndScrollView();
 
         // 행 조작 적용 (열거 종료 후)
@@ -1213,24 +1633,34 @@ public class GameControlPanel : EditorWindow
         if (colTypes == null || colTypes.Length != cols) InferColTypes();
     }
 
+    const float CsvHdrH = 34f; // 2행 헤더(한글 + 영문 원문)
+
     void DrawGridHeader(int cols)
     {
         var hRect = EditorGUILayout.BeginHorizontal();
         if (Event.current.type == EventType.Repaint) EditorGUI.DrawRect(hRect, CHeaderBg);
-        GUILayout.Label("#", RowNum, GUILayout.Width(34), GUILayout.Height(20));
+        GUILayout.Label("#", RowNum, GUILayout.Width(34), GUILayout.Height(CsvHdrH));
+
+        string file = current != null ? Path.GetFileName(current) : null;
 
         for (int c = 0; c < cols; c++)
         {
-            var cellRect = GUILayoutUtility.GetRect(colW, 20, GUILayout.Width(colW), GUILayout.Height(20));
+            var cellRect = GUILayoutUtility.GetRect(colW, CsvHdrH, GUILayout.Width(colW), GUILayout.Height(CsvHdrH));
             if (Event.current.type == EventType.Repaint && c == sortCol)
                 EditorGUI.DrawRect(cellRect, CSortCol);
 
+            string raw   = rows[0][c] ?? "";
+            string ko    = KoLabels.Get(file, raw);          // 한글 라벨(없으면 null → 영문 원문 fallback)
             string arrow = c == sortCol ? (sortAsc ? " ▲" : " ▼") : "";
             string badge = (colTypes != null && c < colTypes.Length) ? TypeBadge(colTypes[c]) : "T";
-            var content = new GUIContent($"{rows[0][c]}{arrow}", $"타입: {badge}  (헤더 클릭=정렬)");
-            // 타입 뱃지: 우측에 작게
-            GUI.Label(new Rect(cellRect.x + 4, cellRect.y, cellRect.width - 30, cellRect.height), content, HdrCell);
-            GUI.Label(new Rect(cellRect.xMax - 28, cellRect.y, 26, cellRect.height), badge, RowNum);
+
+            // 1행: 한글 우선(없으면 영문 헤더) — 굵게 흰색 / 우측 타입 뱃지
+            var primary = new GUIContent($"{ko ?? raw}{arrow}", $"{raw}  ·  타입: {badge}  (헤더 클릭=정렬)");
+            GUI.Label(new Rect(cellRect.x + 4, cellRect.y + 1, cellRect.width - 28, 16), primary, HdrCell);
+            GUI.Label(new Rect(cellRect.xMax - 26, cellRect.y + 1, 24, 14), badge, RowNum);
+            // 2행: 영문 원문(회색 작게) — 한글 라벨이 있을 때만(영문 fallback이면 1행에 이미 표기)
+            if (ko != null)
+                GUI.Label(new Rect(cellRect.x + 4, cellRect.y + 17, cellRect.width - 6, 13), raw, HdrSub);
 
             if (GUI.Button(cellRect, GUIContent.none, GUIStyle.none))
                 SortByColumn(c);

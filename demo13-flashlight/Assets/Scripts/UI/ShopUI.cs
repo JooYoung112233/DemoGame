@@ -20,18 +20,20 @@ public class ShopUI : MonoBehaviour
     const float COL_L_RATIO = 0.35f;   // 좌 컬럼 너비 비율
     const float COL_R_RATIO = 0.35f;   // 우 컬럼 너비 비율
 
-    static readonly Color C_BG          = new Color(0.02f, 0.02f, 0.04f, 0.98f);
-    static readonly Color C_PANEL       = new Color(0.06f, 0.06f, 0.10f, 1.00f);
-    static readonly Color C_CELL        = new Color(0.10f, 0.10f, 0.14f, 1.00f);
-    static readonly Color C_CELL_SEL    = new Color(0.20f, 0.32f, 0.48f, 1.00f);
-    static readonly Color C_CELL_HOVER  = new Color(0.16f, 0.22f, 0.32f, 1.00f);
-    static readonly Color C_HEADER      = new Color(0.12f, 0.12f, 0.18f, 1.00f);
-    static readonly Color C_GOLD        = new Color(1.00f, 0.85f, 0.30f, 1.00f);
-    static readonly Color C_BUY_BTN     = new Color(0.12f, 0.42f, 0.18f, 1.00f);
-    static readonly Color C_SELL_BTN    = new Color(0.52f, 0.26f, 0.06f, 1.00f);
-    static readonly Color C_CLOSE       = new Color(0.42f, 0.12f, 0.12f, 1.00f);
-    static readonly Color C_MUTED       = new Color(0.50f, 0.52f, 0.60f, 1.00f);
-    static readonly Color C_DIM         = new Color(0.08f, 0.08f, 0.12f, 1.00f);
+    // Tarkov 거래창 톤 — 파란끼 제거, 어두운 웜그레이/올리브 팔레트 + 탄(tan) 강조.
+    static readonly Color C_BG          = new Color(0.085f, 0.082f, 0.072f, 0.99f);  // 거의 검정(웜)
+    static readonly Color C_PANEL       = new Color(0.135f, 0.130f, 0.115f, 1.00f);  // 패널 배경
+    static readonly Color C_CELL        = new Color(0.175f, 0.168f, 0.148f, 1.00f);  // 셀 배경
+    static readonly Color C_CELL_SEL    = new Color(0.40f,  0.34f,  0.18f,  1.00f);  // 선택(탄)
+    static readonly Color C_CELL_HOVER  = new Color(0.24f,  0.23f,  0.20f,  1.00f);
+    static readonly Color C_HEADER      = new Color(0.155f, 0.150f, 0.130f, 1.00f);
+    static readonly Color C_GOLD        = new Color(0.86f,  0.74f,  0.42f,  1.00f);  // 가격(탄/골드)
+    static readonly Color C_BUY_BTN     = new Color(0.20f,  0.34f,  0.16f,  1.00f);  // 올리브 그린
+    static readonly Color C_SELL_BTN    = new Color(0.46f,  0.28f,  0.10f,  1.00f);
+    static readonly Color C_CLOSE       = new Color(0.40f,  0.14f,  0.12f,  1.00f);
+    static readonly Color C_MUTED       = new Color(0.54f,  0.51f,  0.44f,  1.00f);  // 웜 뮤트
+    static readonly Color C_DIM         = new Color(0.115f, 0.110f, 0.098f, 1.00f);  // 슬롯/그리드 배경
+    static readonly Color C_GRIDLINE    = new Color(0.05f,  0.048f, 0.042f, 1.00f);  // 셀 사이 그리드선
 
     // ── 런타임 상태 ─────────────────────────────────────────
     Canvas          canvas;
@@ -46,16 +48,21 @@ public class ShopUI : MonoBehaviour
     RectTransform   stockContent;
     Text            stockEmptyText;
 
-    // 중: 프리뷰
-    Image           previewIcon;
-    Text            previewName;
-    Text            previewRarity;
-    Text            previewDesc;
-    Text            previewDetails;
+    // 중: 구매 박스(상) / 판매 박스(하)
+    Image           buyIcon;
+    Text            buyName;
+    Text            buyInfo;
     Button          actionBuyBtn;
-    Button          actionSellBtn;
     Text            actionBuyLabel;
+    GameObject      buyEmpty;
+
+    Image           sellIcon;
+    Text            sellName;
+    Text            sellInfo;
+    Button          actionSellBtn;
     Text            actionSellLabel;
+    GameObject      sellEmpty;
+
     Text            tradeResultText;
 
     // 우: 내 가방
@@ -112,8 +119,8 @@ public class ShopUI : MonoBehaviour
     readonly Text[]  consignSlotStatus = new Text[CONSIGN_SLOTS];
     readonly Button[] consignSlotBtn   = new Button[CONSIGN_SLOTS];
 
-    static readonly Color C_TAB_ON   = new Color(0.18f, 0.30f, 0.46f, 1f);
-    static readonly Color C_TAB_OFF  = new Color(0.10f, 0.10f, 0.16f, 1f);
+    static readonly Color C_TAB_ON   = new Color(0.34f, 0.30f, 0.18f, 1f);   // 활성 탭(탄)
+    static readonly Color C_TAB_OFF  = new Color(0.135f, 0.130f, 0.115f, 1f);
     static readonly Color C_CONSIGN  = new Color(0.30f, 0.20f, 0.42f, 1f);  // 정산중
     static readonly Color C_READY    = new Color(0.16f, 0.40f, 0.20f, 1f);  // 정산완료
 
@@ -186,21 +193,18 @@ public class ShopUI : MonoBehaviour
         selectedInv   = null;
     }
 
+    // 좌(상인 재고) 선택 = 구매 박스 / 우(창고) 선택 = 판매 박스 — 서로 독립(둘 다 동시 선택 가능).
     void SelectStock(ItemData item)
     {
         selectedStock = item;
-        selectedInv   = null;
-        RefreshPreview();
+        RefreshBuyBox();
         RefreshStockCells();
-        RefreshInvCells();
     }
 
     void SelectInv(InventoryGrid.PlacedItem placed)
     {
-        selectedInv   = placed;
-        selectedStock = null;
-        RefreshPreview();
-        RefreshStockCells();
+        selectedInv = placed;
+        RefreshSellBox();
         RefreshInvCells();
     }
 
@@ -367,7 +371,8 @@ public class ShopUI : MonoBehaviour
     {
         RefreshTopBar();
         RefreshStockCells();
-        RefreshPreview();
+        RefreshBuyBox();
+        RefreshSellBox();
         RefreshInvGrid();
     }
 
@@ -484,7 +489,7 @@ public class ShopUI : MonoBehaviour
         var cb = btn.colors;
         cb.normalColor      = selected ? C_CELL_SEL : C_CELL;
         cb.highlightedColor = C_CELL_HOVER;
-        cb.pressedColor     = new Color(0.12f, 0.18f, 0.28f);
+        cb.pressedColor     = new Color(0.28f, 0.24f, 0.14f);
         cb.selectedColor    = C_CELL_SEL;
         btn.colors = cb;
         btn.onClick.AddListener(() => onClick?.Invoke());
@@ -525,79 +530,70 @@ public class ShopUI : MonoBehaviour
         AddText(priceBg.GetComponent<RectTransform>(), $"◈{price:N0}", 9, TextAnchor.MiddleCenter, C_GOLD);
     }
 
-    // ── 중: 프리뷰 ────────────────────────────────────────────
-    void RefreshPreview()
+    // ── 중·상: 구매(BUY) 박스 — 좌 상인 재고 선택을 표시 ─────────
+    void RefreshBuyBox()
     {
-        ItemData  data  = null;
-        int       price = 0;
-        bool      isBuy  = false;
-        bool      isSell = false;
+        var  data  = selectedStock;
+        bool has   = data != null && shop != null && shop.BuyPrice(data) > 0;
+        int  price = has ? shop.BuyPrice(data) : 0;
 
-        if (selectedStock != null && shop != null)
+        if (buyEmpty != null) buyEmpty.SetActive(!has);
+
+        if (buyIcon != null)
         {
-            data   = selectedStock;
-            price  = shop.BuyPrice(data);
-            isBuy  = true;
+            buyIcon.sprite  = has ? data.icon : null;
+            buyIcon.enabled = has && data.icon != null;
+            buyIcon.color   = Color.white;
         }
-        else if (selectedInv?.item?.data != null && shop != null)
+        if (buyName != null)
         {
-            data   = selectedInv.item.data;
-            price  = shop.SellPrice(data) * (selectedInv.item.stackCount);
-            isSell = true;
+            buyName.text  = has ? data.displayName : "";
+            buyName.color = has ? data.RarityColor : C_MUTED;
         }
-
-        // 아이콘
-        if (previewIcon != null)
+        if (buyInfo != null)
         {
-            previewIcon.sprite  = data?.icon;
-            previewIcon.enabled = data?.icon != null;
-            previewIcon.color   = Color.white;
+            buyInfo.text = has
+                ? $"{RarityLabel(data.rarity)} · {data.category} · {data.gridWidth}×{data.gridHeight} · {data.weight:F2}kg"
+                : "";
         }
+        if (actionBuyBtn != null) actionBuyBtn.gameObject.SetActive(has);
+        if (has && actionBuyLabel != null) actionBuyLabel.text = $"구매  ◈{price:N0}";
 
-        // 이름 + 희귀도
-        if (previewName   != null) previewName.text   = data != null ? data.displayName    : "아이템 선택";
-        if (previewRarity != null)
-        {
-            previewRarity.text  = data != null ? RarityLabel(data.rarity)  : "";
-            previewRarity.color = data != null ? data.RarityColor : C_MUTED;
-        }
-        if (previewDesc    != null) previewDesc.text    = data != null ? data.description    : "좌측에서 구매할 아이템을,\n우측에서 판매할 아이템을 선택하세요.";
-
-        // 세부 정보
-        if (previewDetails != null)
-        {
-            if (data != null)
-            {
-                int sellRef = shop != null ? shop.SellPrice(data) : 0;
-                int buyRef  = shop != null ? shop.BuyPrice(data)  : 0;
-                previewDetails.text =
-                    $"분류: {data.category}\n" +
-                    $"크기: {data.gridWidth}×{data.gridHeight}\n" +
-                    $"무게: {data.weight:F2} kg\n" +
-                    $"구매가: ◈{buyRef:N0}\n" +
-                    $"판매가: ◈{sellRef:N0}";
-                if (data.maxDurability > 0)
-                    previewDetails.text += $"\n내구도: {data.maxDurability}";
-                if (data.maxStack > 1 && selectedInv != null)
-                    previewDetails.text += $"\n수량: {selectedInv.item.stackCount}/{data.maxStack}";
-            }
-            else
-            {
-                previewDetails.text = "";
-            }
-        }
-
-        // 버튼 표시
-        if (actionBuyBtn  != null) actionBuyBtn.gameObject.SetActive(isBuy);
-        if (actionSellBtn != null) actionSellBtn.gameObject.SetActive(isSell);
-
-        if (isBuy && actionBuyLabel != null)
-            actionBuyLabel.text  = $"구매  ◈{price:N0}";
-        if (isSell && actionSellLabel != null)
-            actionSellLabel.text = $"판매  ◈{price:N0}";
-
-        // 잔액 갱신
         UpdateBalance();
+    }
+
+    // ── 중·하: 판매(SELL) 박스 — 우 창고 선택을 표시 ────────────
+    void RefreshSellBox()
+    {
+        var placed = selectedInv;
+        var data   = placed?.item?.data;
+        bool has   = data != null && shop != null && shop.SellPrice(data) > 0;
+        int  each  = has ? shop.SellPrice(data) : 0;
+        int  total = has ? each * placed.item.stackCount : 0;
+
+        if (sellEmpty != null) sellEmpty.SetActive(!has);
+
+        if (sellIcon != null)
+        {
+            sellIcon.sprite  = has ? data.icon : null;
+            sellIcon.enabled = has && data.icon != null;
+            sellIcon.color   = Color.white;
+        }
+        if (sellName != null)
+        {
+            sellName.text  = has
+                ? (placed.item.stackCount > 1 ? $"{data.displayName} (x{placed.item.stackCount})" : data.displayName)
+                : "";
+            sellName.color = has ? data.RarityColor : C_MUTED;
+        }
+        if (sellInfo != null)
+        {
+            sellInfo.text = has
+                ? $"{RarityLabel(data.rarity)} · {data.category} · 개당 ◈{each:N0}"
+                : "";
+        }
+        if (actionSellBtn != null) actionSellBtn.gameObject.SetActive(has);
+        if (has && actionSellLabel != null) actionSellLabel.text = $"판매  ◈{total:N0}";
     }
 
     // ── 우: 인벤토리 그리드 ───────────────────────────────────
@@ -702,7 +698,7 @@ public class ShopUI : MonoBehaviour
         var cb = btn.colors;
         cb.normalColor      = C_CELL;
         cb.highlightedColor = C_CELL_HOVER;
-        cb.pressedColor     = new Color(0.12f, 0.18f, 0.28f);
+        cb.pressedColor     = new Color(0.28f, 0.24f, 0.14f);
         btn.colors = cb;
         btn.onClick.AddListener(() => onClick?.Invoke());
 
@@ -1390,167 +1386,157 @@ public class ShopUI : MonoBehaviour
         stockEmptyText.horizontalOverflow = HorizontalWrapMode.Wrap;
         stockEmptyText.gameObject.SetActive(false);
 
-        // GLG 설정
+        // GLG 설정 — Tarkov 트레이더 재고처럼 작은 셀을 촘촘히 채워 그리드선 느낌.
         var glg = stockContent.gameObject.AddComponent<GridLayoutGroup>();
-        glg.cellSize      = new Vector2(CELL_SIZE * 1.6f, CELL_SIZE * 1.6f);
-        glg.spacing       = new Vector2(5, 5);
-        glg.padding       = new RectOffset(8, 8, 8, 8);
+        glg.cellSize      = new Vector2(CELL_SIZE * 1.28f, CELL_SIZE * 1.28f);
+        glg.spacing       = new Vector2(2, 2);
+        glg.padding       = new RectOffset(6, 6, 6, 6);
         glg.childAlignment = TextAnchor.UpperLeft;
         var csf = stockContent.gameObject.AddComponent<ContentSizeFitter>();
         csf.verticalFit   = ContentSizeFitter.FitMode.PreferredSize;
+
+        // 셀 사이 2px 틈이 또렷한 그리드선으로 보이도록 스크롤 배경을 가장 어둡게.
+        var stockAreaImg = stockContent.parent != null ? stockContent.parent.GetComponent<Image>() : null;
+        if (stockAreaImg != null) stockAreaImg.color = C_GRIDLINE;
     }
 
-    // ── 중 컬럼: 프리뷰 ──────────────────────────────────────
+    // ── 중 컬럼: 구매 박스(상) / 거래 결과(중) / 판매 박스(하) ──
     void BuildCenterColumn(Transform parent)
     {
-        float leftEnd = COL_L_RATIO;
+        float leftEnd    = COL_L_RATIO;
         float rightStart = 1f - COL_R_RATIO;
         var col = MakeRect("ColCenter", parent);
         SetAnchors(col, new Vector2(leftEnd, 0), new Vector2(rightStart, 1));
         var colRT = col.GetComponent<RectTransform>();
         colRT.offsetMin = new Vector2(4, 8);
         colRT.offsetMax = new Vector2(-4, -8);
-        col.AddComponent<Image>().color = C_PANEL;
+        // 컬럼 자체 배경은 없음 — 두 박스가 각각 카드(패널)로 보이게 한다.
 
-        float innerPad = 14f;
+        // 구매 박스 (상단 ~52%)
+        BuildDealBox(col.transform, isBuy: true,  aMin: new Vector2(0, 0.52f), aMax: new Vector2(1, 1));
+        // 판매 박스 (하단 ~48%)
+        BuildDealBox(col.transform, isBuy: false, aMin: new Vector2(0, 0),     aMax: new Vector2(1, 0.48f));
 
-        // 아이콘 (정사각, 상단)
-        var iconHolder   = MakeRect("IconHolder", col.transform);
-        var iconHolderRT = iconHolder.GetComponent<RectTransform>();
-        iconHolderRT.anchorMin        = new Vector2(0.5f, 1);
-        iconHolderRT.anchorMax        = new Vector2(0.5f, 1);
-        iconHolderRT.pivot            = new Vector2(0.5f, 1);
-        iconHolderRT.anchoredPosition = new Vector2(0, -innerPad);
-        iconHolderRT.sizeDelta        = new Vector2(100, 100);
-        // 어두운 배경 이미지 — 자식 GO로 분리
-        var iconBg   = MakeRect("IconBg", iconHolder.transform);
+        // 중간 거래 결과 스트립
+        var mid = MakeRect("TradeStrip", col.transform);
+        SetAnchors(mid, new Vector2(0, 0.48f), new Vector2(1, 0.52f));
+        var midRT = mid.GetComponent<RectTransform>();
+        midRT.offsetMin = new Vector2(2, 0); midRT.offsetMax = new Vector2(-2, 0);
+        tradeResultText = mid.AddComponent<Text>();
+        ConfigureText(tradeResultText, "", 13, TextAnchor.MiddleCenter, new Color(0.5f, 0.9f, 0.6f));
+        tradeResultText.horizontalOverflow = HorizontalWrapMode.Wrap;
+    }
+
+    /// <summary>구매/판매 공용 거래 박스 — 헤더 + 아이콘 + 이름/정보 + 액션 버튼 + 빈 힌트.</summary>
+    void BuildDealBox(Transform parent, bool isBuy, Vector2 aMin, Vector2 aMax)
+    {
+        var box   = MakeRect(isBuy ? "BuyBox" : "SellBox", parent);
+        SetAnchors(box, aMin, aMax);
+        var boxRT = box.GetComponent<RectTransform>();
+        boxRT.offsetMin = new Vector2(2, isBuy ? 2 : 4);
+        boxRT.offsetMax = new Vector2(-2, isBuy ? -4 : -2);
+        box.AddComponent<Image>().color = C_PANEL;
+
+        // 헤더 (구매=올리브 / 판매=갈색)
+        var header = MakeRect("Header", box.transform);
+        SetAnchors(header, new Vector2(0, 1), new Vector2(1, 1));
+        var hRT = header.GetComponent<RectTransform>();
+        hRT.pivot     = new Vector2(0.5f, 1);
+        hRT.sizeDelta = new Vector2(0, 30);
+        header.AddComponent<Image>().color = isBuy ? C_BUY_BTN : C_SELL_BTN;
+        var hTextGO = MakeRect("HeaderText", header.transform);
+        var hTextRT = hTextGO.GetComponent<RectTransform>();
+        hTextRT.anchorMin = Vector2.zero; hTextRT.anchorMax = Vector2.one;
+        hTextRT.offsetMin = new Vector2(12, 0); hTextRT.offsetMax = Vector2.zero;
+        var hText = hTextGO.AddComponent<Text>();
+        ConfigureText(hText, isBuy ? "구매  BUY" : "판매  SELL", 14, TextAnchor.MiddleLeft, Color.white);
+        hText.fontStyle = FontStyle.Bold;
+
+        // 아이콘 (좌)
+        var iconHolder = MakeRect("Icon", box.transform);
+        var iconRT = iconHolder.GetComponent<RectTransform>();
+        iconRT.anchorMin        = new Vector2(0, 1);
+        iconRT.anchorMax        = new Vector2(0, 1);
+        iconRT.pivot            = new Vector2(0, 1);
+        iconRT.anchoredPosition = new Vector2(12, -40);
+        iconRT.sizeDelta        = new Vector2(72, 72);
+        var iconBg = MakeRect("IconBg", iconHolder.transform);
         SetAnchors(iconBg.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
         iconBg.AddComponent<Image>().color = C_DIM;
+        var icon = iconHolder.AddComponent<Image>();
+        icon.color = Color.white; icon.enabled = false; icon.preserveAspect = true;
 
-        // 실제 아이템 아이콘 이미지
-        previewIcon         = iconHolder.AddComponent<Image>();
-        previewIcon.color   = Color.white;
-        previewIcon.enabled = false;
-        previewIcon.preserveAspect = true;
-
-        // 이름
-        var nameGO = MakeRect("PreviewName", col.transform);
+        // 이름 (아이콘 우측 상단)
+        var nameGO = MakeRect("Name", box.transform);
         var nameRT = nameGO.GetComponent<RectTransform>();
         nameRT.anchorMin        = new Vector2(0, 1);
         nameRT.anchorMax        = new Vector2(1, 1);
-        nameRT.pivot            = new Vector2(0.5f, 1);
-        nameRT.anchoredPosition = new Vector2(0, -(innerPad + 106));
-        nameRT.sizeDelta        = new Vector2(-innerPad * 2, 30);
-        previewName = nameGO.AddComponent<Text>();
-        ConfigureText(previewName, "아이템 선택", 18, TextAnchor.MiddleCenter, Color.white);
-        previewName.fontStyle = FontStyle.Bold;
-        previewName.horizontalOverflow = HorizontalWrapMode.Wrap;
+        nameRT.pivot            = new Vector2(0, 1);
+        nameRT.anchoredPosition = new Vector2(96, -42);
+        nameRT.sizeDelta        = new Vector2(-108, 28);
+        var nameTxt = nameGO.AddComponent<Text>();
+        ConfigureText(nameTxt, "", 16, TextAnchor.UpperLeft, Color.white);
+        nameTxt.fontStyle = FontStyle.Bold;
+        nameTxt.horizontalOverflow = HorizontalWrapMode.Wrap;
 
-        // 희귀도
-        var rarGO = MakeRect("PreviewRarity", col.transform);
-        var rarRT = rarGO.GetComponent<RectTransform>();
-        rarRT.anchorMin        = new Vector2(0, 1);
-        rarRT.anchorMax        = new Vector2(1, 1);
-        rarRT.pivot            = new Vector2(0.5f, 1);
-        rarRT.anchoredPosition = new Vector2(0, -(innerPad + 140));
-        rarRT.sizeDelta        = new Vector2(-innerPad * 2, 20);
-        previewRarity = rarGO.AddComponent<Text>();
-        ConfigureText(previewRarity, "", 12, TextAnchor.MiddleCenter, C_MUTED);
+        // 정보 (아이콘 우측 하단)
+        var infoGO = MakeRect("Info", box.transform);
+        var infoRT = infoGO.GetComponent<RectTransform>();
+        infoRT.anchorMin        = new Vector2(0, 1);
+        infoRT.anchorMax        = new Vector2(1, 1);
+        infoRT.pivot            = new Vector2(0, 1);
+        infoRT.anchoredPosition = new Vector2(96, -74);
+        infoRT.sizeDelta        = new Vector2(-108, 40);
+        var infoTxt = infoGO.AddComponent<Text>();
+        ConfigureText(infoTxt, "", 12, TextAnchor.UpperLeft, new Color(0.75f, 0.73f, 0.66f));
+        infoTxt.horizontalOverflow = HorizontalWrapMode.Wrap;
 
-        // 구분선
-        var div1 = MakeRect("Div1", col.transform);
-        var d1RT = div1.GetComponent<RectTransform>();
-        d1RT.anchorMin        = new Vector2(0, 1);
-        d1RT.anchorMax        = new Vector2(1, 1);
-        d1RT.pivot            = new Vector2(0.5f, 1);
-        d1RT.anchoredPosition = new Vector2(0, -(innerPad + 164));
-        d1RT.sizeDelta        = new Vector2(-innerPad * 2, 1);
-        div1.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.28f);
+        // 액션 버튼 (하단)
+        var btnGO = MakeRect("ActionBtn", box.transform);
+        var btnRT = btnGO.GetComponent<RectTransform>();
+        btnRT.anchorMin        = new Vector2(0, 0);
+        btnRT.anchorMax        = new Vector2(1, 0);
+        btnRT.pivot            = new Vector2(0.5f, 0);
+        btnRT.anchoredPosition = new Vector2(0, 12);
+        btnRT.sizeDelta        = new Vector2(-24, 42);
+        var btnImg = btnGO.AddComponent<Image>();
+        btnImg.color = isBuy ? C_BUY_BTN : C_SELL_BTN;
+        var btn = btnGO.AddComponent<Button>();
+        btn.targetGraphic = btnImg;
+        var cb = btn.colors;
+        cb.normalColor      = isBuy ? C_BUY_BTN : C_SELL_BTN;
+        cb.highlightedColor = isBuy ? new Color(0.28f, 0.46f, 0.22f) : new Color(0.60f, 0.38f, 0.14f);
+        cb.pressedColor     = isBuy ? new Color(0.12f, 0.26f, 0.10f) : new Color(0.30f, 0.18f, 0.06f);
+        btn.colors = cb;
+        var btnLabel = AddText(btnGO.GetComponent<RectTransform>(), isBuy ? "구매" : "판매", 16, TextAnchor.MiddleCenter, Color.white);
+        btnLabel.fontStyle = FontStyle.Bold;
 
-        // 설명
-        var descGO = MakeRect("PreviewDesc", col.transform);
-        var descRT = descGO.GetComponent<RectTransform>();
-        descRT.anchorMin        = new Vector2(0, 1);
-        descRT.anchorMax        = new Vector2(1, 1);
-        descRT.pivot            = new Vector2(0.5f, 1);
-        descRT.anchoredPosition = new Vector2(0, -(innerPad + 170));
-        descRT.sizeDelta        = new Vector2(-innerPad * 2, 72);
-        previewDesc = descGO.AddComponent<Text>();
-        ConfigureText(previewDesc, "좌측에서 구매할 아이템을,\n우측에서 판매할 아이템을 선택하세요.", 12, TextAnchor.UpperCenter, C_MUTED);
-        previewDesc.horizontalOverflow = HorizontalWrapMode.Wrap;
-        previewDesc.verticalOverflow   = VerticalWrapMode.Overflow;
+        // 빈 힌트 (선택 전 안내)
+        var emptyGO = MakeRect("Empty", box.transform);
+        var emptyRT = emptyGO.GetComponent<RectTransform>();
+        emptyRT.anchorMin = new Vector2(0, 0); emptyRT.anchorMax = new Vector2(1, 1);
+        emptyRT.offsetMin = new Vector2(12, 60); emptyRT.offsetMax = new Vector2(-12, -34);
+        var emptyTxt = emptyGO.AddComponent<Text>();
+        ConfigureText(emptyTxt,
+            isBuy ? "왼쪽 상인 재고에서\n구매할 물건을 선택하세요."
+                  : "오른쪽 창고에서\n판매할 물건을 선택하세요.",
+            13, TextAnchor.MiddleCenter, C_MUTED);
+        emptyTxt.horizontalOverflow = HorizontalWrapMode.Wrap;
 
-        // 세부 정보
-        var detailGO = MakeRect("PreviewDetails", col.transform);
-        var detailRT = detailGO.GetComponent<RectTransform>();
-        detailRT.anchorMin        = new Vector2(0, 1);
-        detailRT.anchorMax        = new Vector2(1, 1);
-        detailRT.pivot            = new Vector2(0.5f, 1);
-        detailRT.anchoredPosition = new Vector2(0, -(innerPad + 248));
-        detailRT.sizeDelta        = new Vector2(-innerPad * 2, 110);
-        previewDetails = detailGO.AddComponent<Text>();
-        ConfigureText(previewDetails, "", 12, TextAnchor.UpperLeft, new Color(0.75f, 0.77f, 0.83f));
-        previewDetails.horizontalOverflow = HorizontalWrapMode.Wrap;
-        previewDetails.verticalOverflow   = VerticalWrapMode.Overflow;
-
-        // ── 하단 액션 버튼 영역 ──
-        // 구매 버튼
-        var buyGO = MakeRect("BuyBtn", col.transform);
-        var buyRT = buyGO.GetComponent<RectTransform>();
-        buyRT.anchorMin        = new Vector2(0, 0);
-        buyRT.anchorMax        = new Vector2(1, 0);
-        buyRT.pivot            = new Vector2(0.5f, 0);
-        buyRT.anchoredPosition = new Vector2(0, 72);
-        buyRT.sizeDelta        = new Vector2(-innerPad * 2, 44);
-        buyGO.AddComponent<Image>().color = C_BUY_BTN;
-        actionBuyBtn = buyGO.AddComponent<Button>();
-        actionBuyBtn.targetGraphic = buyGO.GetComponent<Image>();
-        var buyCB = actionBuyBtn.colors;
-        buyCB.normalColor      = C_BUY_BTN;
-        buyCB.highlightedColor = new Color(0.20f, 0.62f, 0.28f);
-        buyCB.pressedColor     = new Color(0.08f, 0.30f, 0.12f);
-        actionBuyBtn.colors = buyCB;
-        actionBuyBtn.onClick.AddListener(() => {
-            if (selectedStock != null) Buy(selectedStock);
-        });
-        actionBuyLabel = AddText(buyGO.GetComponent<RectTransform>(), "구매", 17, TextAnchor.MiddleCenter, Color.white);
-        actionBuyLabel.fontStyle = FontStyle.Bold;
-        actionBuyBtn.gameObject.SetActive(false);
-
-        // 판매 버튼
-        var sellGO = MakeRect("SellBtn", col.transform);
-        var sellRT = sellGO.GetComponent<RectTransform>();
-        sellRT.anchorMin        = new Vector2(0, 0);
-        sellRT.anchorMax        = new Vector2(1, 0);
-        sellRT.pivot            = new Vector2(0.5f, 0);
-        sellRT.anchoredPosition = new Vector2(0, 72);
-        sellRT.sizeDelta        = new Vector2(-innerPad * 2, 44);
-        sellGO.AddComponent<Image>().color = C_SELL_BTN;
-        actionSellBtn = sellGO.AddComponent<Button>();
-        actionSellBtn.targetGraphic = sellGO.GetComponent<Image>();
-        var sellCB = actionSellBtn.colors;
-        sellCB.normalColor      = C_SELL_BTN;
-        sellCB.highlightedColor = new Color(0.72f, 0.40f, 0.10f);
-        sellCB.pressedColor     = new Color(0.36f, 0.18f, 0.04f);
-        actionSellBtn.colors = sellCB;
-        actionSellBtn.onClick.AddListener(() => {
-            if (selectedInv != null) Sell(selectedInv);
-        });
-        actionSellLabel = AddText(sellGO.GetComponent<RectTransform>(), "판매", 17, TextAnchor.MiddleCenter, Color.white);
-        actionSellLabel.fontStyle = FontStyle.Bold;
-        actionSellBtn.gameObject.SetActive(false);
-
-        // 거래 결과 텍스트
-        var resultGO = MakeRect("TradeResult", col.transform);
-        var resultRT = resultGO.GetComponent<RectTransform>();
-        resultRT.anchorMin        = new Vector2(0, 0);
-        resultRT.anchorMax        = new Vector2(1, 0);
-        resultRT.pivot            = new Vector2(0.5f, 0);
-        resultRT.anchoredPosition = new Vector2(0, 20);
-        resultRT.sizeDelta        = new Vector2(-innerPad * 2, 44);
-        tradeResultText = resultGO.AddComponent<Text>();
-        ConfigureText(tradeResultText, "", 12, TextAnchor.MiddleCenter, new Color(0.4f, 1f, 0.5f));
-        tradeResultText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        // 필드 바인딩 + 클릭
+        if (isBuy)
+        {
+            buyIcon = icon; buyName = nameTxt; buyInfo = infoTxt;
+            actionBuyBtn = btn; actionBuyLabel = btnLabel; buyEmpty = emptyGO;
+            btn.onClick.AddListener(() => { if (selectedStock != null) Buy(selectedStock); });
+        }
+        else
+        {
+            sellIcon = icon; sellName = nameTxt; sellInfo = infoTxt;
+            actionSellBtn = btn; actionSellLabel = btnLabel; sellEmpty = emptyGO;
+            btn.onClick.AddListener(() => { if (selectedInv != null) Sell(selectedInv); });
+        }
+        btn.gameObject.SetActive(false);
     }
 
     // ── 우 컬럼: 내 가방 ──────────────────────────────────────

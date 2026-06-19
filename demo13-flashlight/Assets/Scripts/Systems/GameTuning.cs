@@ -59,6 +59,8 @@ public class GameTuning : ScriptableObject
     [Range(0f, 5f)] public float valuableWeightMult = 1f;
     [Tooltip("맵 아이템 스폰 총량 전역 배율. 1=동일. MapSpawnProfile 예산에 추가로 곱함.")]
     [Range(0f, 3f)] public float itemSpawnCountMult = 1f;
+    [Tooltip("적 스폰 마릿수 전역 배율. 1=동일. EnemySpawner가 각 SpawnZone.enemyCount에 곱함(반올림).")]
+    [Range(0f, 3f)] public float enemySpawnCountMult = 1f;
 
     // ── 생존 (수분 / 포만감 / 아사) ───────────────────────────────────
     [Header("생존 (레이드 중 차감)")]

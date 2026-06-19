@@ -55,16 +55,16 @@ public class TitleScreen : MonoBehaviour
         // 배경(어두운 풀스크린)
         var bg = MakeRect("BG", canvasGO.transform);
         Stretch(bg);
-        bg.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.06f, 0.08f, 1f);
+        bg.gameObject.AddComponent<Image>().color = UITheme.Backdrop;
 
         // 타이틀
         var title = MakeText("Title", canvasGO.transform, "다녀올게", 96, FontStyle.Bold,
-            new Color(0.92f, 0.92f, 0.95f));
+            UITheme.TextBright);
         Anchor(title, new Vector2(0.5f, 0.5f), new Vector2(0, 240), new Vector2(900, 140));
 
         // 부제
         var sub = MakeText("Subtitle", canvasGO.transform, "— 안전가옥에서 다시 돌아오기까지 —", 28,
-            FontStyle.Italic, new Color(0.6f, 0.62f, 0.68f));
+            FontStyle.Italic, UITheme.TextMuted);
         Anchor(sub, new Vector2(0.5f, 0.5f), new Vector2(0, 150), new Vector2(900, 50));
 
         // 버튼들
@@ -74,7 +74,7 @@ public class TitleScreen : MonoBehaviour
 
         // 버전 표기
         var ver = MakeText("Version", canvasGO.transform, "프로토타입 v0.1", 20, FontStyle.Normal,
-            new Color(0.4f, 0.42f, 0.48f));
+            UITheme.TextDim);
         Anchor(ver, new Vector2(1f, 0f), new Vector2(-110, 30), new Vector2(200, 30));
     }
 
@@ -188,20 +188,20 @@ public class TitleScreen : MonoBehaviour
         rt.sizeDelta = new Vector2(360, 64);
 
         var img = go.AddComponent<Image>();
-        img.color = new Color(0.15f, 0.17f, 0.21f, 1f);
+        img.color = UITheme.Cell;
 
         button = go.AddComponent<Button>();
         var colors = button.colors;
         colors.normalColor = new Color(1f, 1f, 1f, 1f);
-        colors.highlightedColor = new Color(0.65f, 0.8f, 1f, 1f);
-        colors.pressedColor = new Color(0.4f, 0.55f, 0.8f, 1f);
+        colors.highlightedColor = UITheme.CellHover;
+        colors.pressedColor = UITheme.CellPressed;
         colors.disabledColor = new Color(0.4f, 0.4f, 0.4f, 0.5f);
         button.colors = colors;
         button.targetGraphic = img;
         button.onClick.AddListener(onClick);
 
         var label_t = MakeText("Label", go.transform, label, 30, FontStyle.Bold,
-            new Color(0.9f, 0.92f, 0.96f));
+            UITheme.TextBright);
         Stretch(label_t.rectTransform);
     }
 }

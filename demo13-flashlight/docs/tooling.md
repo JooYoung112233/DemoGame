@@ -55,7 +55,51 @@
 
 ---
 
+## CSV 헤더 한글 라벨 (가독성)
+`밸런스·컨트롤 ▸ CSV 밸런스` 탭의 컬럼 헤더는 **파일의 영문 헤더(변수명)는 그대로 두고 툴 표시만 한글**로 보여준다.
+- 매핑 사전: **`Assets/Editor/KoLabels.cs`** (`KoLabels.Get(fileName, header)` → 한글 또는 `null`).
+  - 우선순위: 파일별(PerFile) → 전역(Global). 미등록 헤더는 `null` → **영문 원문 그대로 fallback**(누락돼도 안 깨짐).
+  - 같은 헤더라도 파일마다 의미가 다른 것(`id`/`cat`/`type`/`tier`/`min`/`max`)은 파일별 오버라이드로 분기.
+- 표시 형태: **2행 헤더** — 1행 한글(굵게) + 2행 영문 원문(회색 작게), 우상단 타입 뱃지(`#`/`✓`/`▼`/`T`). 헤더 클릭=정렬은 동일.
+- **좌측 파일 목록**도 동일하게 한글 제목(굵게) + 파일명(회색 작게) 2행 표시. 매핑은 `KoLabels.FileTitle(파일명)`(예: `quests.csv`→"퀘스트", `reputation.csv`→"평판 증감"). 상단 바도 "한글 (파일명)".
+- 스크롤: **좌측 파일 목록 = 세로** 독립 스크롤, **우측 그리드 = 가로+세로**. 가로 스크롤은 콘텐츠 폭 확정용으로 그리드를 `Width(totalW)` 세로 그룹으로 감싸 처리(열 너비 합 = `34 + 열수×colW + 94`).
+- 신규 CSV 컬럼/파일 추가 시 `KoLabels.cs`에 항목만 추가(헤더=`PerFile`/`Global`, 파일제목=`Files`).
+
+## NPC·상점 탭 한글 라벨
+`밸런스·컨트롤 ▸ NPC·상점` 탭(`NPCData`/`ShopData` SO 직접 편집)도 **필드명(C# 변수)은 그대로, 표시만 한글**.
+- 매핑: **`KoLabels.Field(필드명)`**(예: `buyRate`→"구매가 배율", `affinityChange`→"호감도 변화", `initialAffinity`→"초기 호감도"). 미등록은 Unity 기본 라벨(영문 nicify) fallback.
+- 렌더러: `GameControlPanel`의 `DrawKoRoot`/`DrawKoClass`/`DrawKoProperty` — SO 필드를 재귀로 그리며 라벨만 한글 교체. 영문 변수명은 라벨 툴팁.
+  - **레이아웃: `[Header]` 섹션별 색 바 + 스칼라 필드 2열 가로 배치**(세로로만 길던 것 → 가로 활용). `[Header]`는 리플렉션(`GroupsOf`, MetadataToken 정렬)으로 읽어 색 섹션으로 복원. 창이 좁거나 2단 이상 중첩이면 자동 1열.
+  - 리프·오브젝트 배열(`stock`/`availableQuests` 등)·문자열 배열(`lines` 등) → **Unity 기본 위젯 유지**(리오더·추가/삭제·TextArea 그대로, 라벨만 한글, 전체폭).
+  - 직렬화 클래스 배열(`defaultDialogues`/`eventDialogues`/`choices`/`wanted`) → **수동 재귀로 요소 내부 필드까지 한글**(요소는 `[Header]` 섹션 2열), 값 편집 전용(구조 추가/삭제는 인스펙터·NPC 메이커에서).
+  - `GroupsOf` 리플렉션은 **단일 클래스 계층 전용**(base에 직렬화 필드 있는 타입엔 헤더 매핑 어긋날 수 있음).
+- 에셋 폴드아웃 제목 = 한글 표시이름(`displayName`/`shopName`) + 파일명(회색).
+
+## 탭 구성 (2026-06-19 기준)
+상단 탭 5개: **컨트롤 / NPC·상점 / 몬스터 / 지역 루트 / CSV 밸런스**.
+- 플레이어 스탯은 `컨트롤 ▸ 🎮 플레이어 스탯`(StatDB.playerStat)에 둔다.
+- **적/몬스터(StatDB.units)는 가짓수가 많아 NPC처럼 별도 `몬스터` 탭으로 분리**(2026-06-19).
+
+## 플레이어 스탯 (컨트롤 탭) 한글 라벨
+`밸런스·컨트롤 ▸ 컨트롤 ▸ 🎮 플레이어 스탯` 섹션(`StatDB.playerStat`)은 NPC와 **같은 `KoLabels.Field` 사전 + 2열 섹션 렌더러**(`DrawKoClass`) 공유.
+- 펼치면 체력/이동/약공격/강공격/구르기/스태미너 전 필드 한글(`lightDamage`→"약공격 데미지", `dodgeCooldown`→"구르기 쿨다운" 등) + `[Header]` 섹션 2열.
+
+## 몬스터 탭 (마스터-디테일)
+`밸런스·컨트롤 ▸ 몬스터` — `StatDB.units`(UnitStatData=적/몬스터)를 **좌측 목록 + 우측 상세** 마스터-디테일로 편집(가짓수 많아 NPC처럼 분리).
+- 좌측: 몬스터 목록(이름 굵게 + `id` 회색, 세로 스크롤). 검색 필터(id/이름), 행마다 `✕` 삭제, 행 클릭=선택.
+- 우측: 선택 몬스터의 전 필드를 `DrawKoClass`로 `[Header]` 섹션 2열 한글 표시(비주얼/체력/공격/그로기/이동/감지/AI/보상 등).
+- 상단 `＋ 새 몬스터`로 추가, `저장`/`에셋 선택`. **구조 변경(추가/삭제)은 레이아웃 스코프 종료 후 적용**(스크롤뷰 불일치 방지 — `monsterAddReq`/`monsterDelReq` 지연 처리, `ExitGUI` 미사용).
+- 같은 StatDB.asset을 편집하므로 컨트롤 탭 플레이어 스탯과 동일 에셋.
+- 색상(`tintColor` 등)·프리팹 참조 필드는 Unity 기본 위젯 유지(라벨만 한글).
+
+---
+
 ## 변경 로그
 | 날짜 | 내용 |
 |---|---|
 | 2026-06-02 | 흩어진 메뉴 4루트(`BRB`/`TopDown 2D`/`TopDown Combat`/`Dev Tools`) → **`Tools/TopDown/` 단일 루트 + 카테고리**(Build/Combat/Map/Data/Utility)로 통합. 코드 11개 `MenuItem` + 인라인 주석 갱신. `ExecuteMenuItem` 의존 0(안전). 에셋 생성 메뉴(`Create ▸ …`)·데이터 생성기는 범위 밖. |
+| 2026-06-19 | **몬스터 탭 분리.** 적/몬스터(StatDB.units)를 NPC처럼 상단 별도 `몬스터` 탭으로 분리(가짓수 많음). 좌 목록+우 상세(2열 섹션) 마스터-디테일, 검색·추가·삭제. 플레이어 스탯은 컨트롤 탭에 잔류(StatDB 섹션명 "플레이어 스탯"으로 변경). 탭 5개: 컨트롤/NPC·상점/몬스터/지역 루트/CSV. 구조변경은 지연 적용(ExitGUI 미사용). |
+| 2026-06-19 | **NPC·StatDB 탭 2열 가로 레이아웃.** 필드를 한 줄씩 세로로만 쌓던 걸 `[Header]` 섹션 색 바 + 스칼라 2열 가로 배치로 변경(지역루트/GameTuning 느낌). `[Header]`는 리플렉션(`GroupsOf`)으로 복원, 배열·중첩클래스는 전체폭. 좁은 창/깊은 중첩은 자동 1열. 요청: "세로만 말고 데이터 가로로 가독성↑". |
+| 2026-06-19 | **컨트롤 탭 StatDB(Player/몬스터) 한글 라벨.** `StatDB.playerStat`(PlayerStatData)·`units`(UnitStatData=적/몬스터)를 NPC와 같은 `KoLabels.Field`+`DrawKoProperty`로 한글 표시. PlayerStatData·UnitStatData 전 필드 추가(약/강공격·구르기·스태미너·그로기·감지·AI·보상 등). 유닛 목록은 `id · displayName` 폴드아웃. 이로써 CSV·NPC·Player·몬스터 전 탭이 동일 사전 공유. |
+| 2026-06-19 | **NPC·상점 탭 한글 라벨.** `NPCData`/`ShopData` SO 필드를 `KoLabels.Field` + 재귀 렌더러(`DrawKoProperty`)로 한글 표시(변수명 불변, 영문은 툴팁). 오브젝트/문자열 배열은 Unity 기본 위젯 유지, 직렬화 클래스 배열(대화·선택지·수배)은 값 편집 전용 재귀. CSV 탭과 같은 `KoLabels` 사전 공유 — Player/몬스터는 다음 단계. |
+| 2026-06-19 | **CSV 밸런스 탭 헤더 한글화.** `action`/`rep`/`gw`/`wt`/`fx` 등 불특정 영문 헤더 → 툴에서 한글 우선 + 영문 작게(2행 헤더)로 표시. 매핑 사전 `Assets/Editor/KoLabels.cs` 신설(파일별 오버라이드 + 전역, 미등록은 영문 fallback). 변수명·CSV 파일은 불변. **질문**: "CSV로 컨트롤하는 데이터 헤더(rep/action 등)를 지역루트 탭처럼 가독성 좋게, 변수는 영어여도 툴 표시는 한글로?" / **결정**: 한글 우선 + 영문 작게 / 적용 범위는 CSV 탭 먼저(NPC·Player·몬스터는 후속). |

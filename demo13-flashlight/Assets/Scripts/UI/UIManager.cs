@@ -242,6 +242,7 @@ public class UIManager : MonoBehaviour
         // ── ESC: 열린 UI 있으면 전부 닫기, 없으면 일시정지 메뉴 (중앙 권위) ──
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            if (ItemDetailUI.IsShowing) { ItemDetailUI.Hide(); return; }   // 상세 팝업만 먼저 닫기(뒤 패널 유지)
             if (IsAnyUIOpen()) CloseAll();
             else if (!HideoutController.IsActive) PauseMenu.Show();   // 하이드아웃에선 HideoutController가 ESC=나가기확인 처리
             return;
@@ -347,6 +348,8 @@ public class UIManager : MonoBehaviour
         if (DispatchUI.IsShowing) DispatchUI.Hide();
         if (QuestLogUI.IsShowing) QuestLogUI.Hide();
         if (RaidMapUI.IsShowing) RaidMapUI.Hide();
+        if (GroundPickupUI.IsShowing) GroundPickupUI.Hide();
+        if (ItemDetailUI.IsShowing) ItemDetailUI.Hide();
     }
 
     /// <summary>현재 어떤 UI든 열려있는지</summary>
@@ -367,6 +370,8 @@ public class UIManager : MonoBehaviour
         if (DispatchUI.IsShowing) return true;
         if (QuestLogUI.IsShowing) return true;
         if (RaidMapUI.IsShowing) return true;
+        if (GroundPickupUI.IsShowing) return true;
+        if (ItemDetailUI.IsShowing) return true;
         return false;
     }
 }

@@ -18,6 +18,8 @@ public static class GameBootstrap
         EnsureSingleton<ToastManager>("ToastManager");
         EnsureSingleton<NarrationUI>("NarrationUI");
         EnsureSingleton<NoteUI>("NoteUI");
+        EnsureSingleton<GroundPickupUI>("GroundPickupUI");
+        EnsureSingleton<ItemDetailUI>("ItemDetailUI");
         EnsureSingleton<TutorialPrompt>("TutorialPrompt");
         EnsureSingleton<ScreenEffectManager>("ScreenEffectManager");
 

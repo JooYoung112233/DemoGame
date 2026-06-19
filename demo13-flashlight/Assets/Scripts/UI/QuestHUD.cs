@@ -163,7 +163,7 @@ public class QuestHUD : MonoBehaviour
         listRT.anchorMax = Vector2.one;
         listRT.offsetMin = new Vector2(8, 4);
         listRT.offsetMax = new Vector2(-8, -4);
-        questListText.color = new Color(0.9f, 0.9f, 0.95f);
+        questListText.color = UITheme.TextBright;
         questListText.raycastTarget = false;   // 클릭이 패널 버튼으로 통과되게
 
         // 알림 텍스트 (상단 중앙)

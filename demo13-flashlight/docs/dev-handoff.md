@@ -1,9 +1,34 @@
 # 개발 핸드오프 (이어서 작업)
 
 > 다른 PC에서 이어서 작업할 때 **여기부터** 읽기. `/build`로 이어서 진행.
-> 최신 갱신: 2026-06-18
+> 최신 갱신: 2026-06-19
 
-## 지금 위치 (2026-06-18 커밋 시점)
+## 지금 위치 (2026-06-19)
+**Phase 3(인벤토리·루팅) 코드 마무리 진행 중.** 6/18 핸드오프 이후 커밋들(대규모 업데이트·Spine 플레이어·중앙 인벤 재구성)에 더해, 이번에 **바닥 중첩 아이템 줍기 목록 UI**까지 코드 완료(정적 감사 통과, Unity 테스트 대기).
+
+- **이번 세션(6/19) 코드 완료** (커밋 `ff346e1` 이후는 **미커밋**, 재컴파일만 필요):
+  - **중앙 인벤 UI 재구성**: 단일 가방 격자 → 세로 스택(무기파츠 예약/가방/주머니4/보안3×3) + 좌측 특수창(Special) 슬롯. (커밋 `ff346e1`)
+  - **바닥 중첩 줍기 목록 UI**(`GroundPickupUI`): E로 줍을 때 반경 1.6m WorldItem ≥2개면 목록(휠/↑↓ 선택, E 줍기, F 전부, Esc). `WorldItem.All`+`GatherNear`, `InteractableObject.HandlePickup` 분기, UIManager/GameBootstrap 등록.
+  - **모션 스탯 일반화**(`MotionStat{anim,animSpeed,distance}` 리스트): 모든 모션 애니 속도+이동거리를 STAT으로. `PlayerStatData.motions`(idle/walk/run/crouch/crouch_walk/attack/roll) 배선(`TopDownPlayer`), `UnitStatData.motions`(idle/walk/attack/hit/death)는 **데이터만**(적 Spine 없음 → 적 애니 도입 시 EnemyController 와이어링). run.distance=최대 달리기 거리, roll.distance=구르기 거리 override. KoLabels 한글 라벨 추가.
+  - **roll 애니 끝까지 1회 보장**: 원샷 애니 잠금(`_oneShotAnim`, Spine `IsComplete`) — Dodge 종료돼도 idle로 안 잘림.
+  - **안전구역 스태미너 무한**: `RegionTimeManager.ActiveRegionId` 비어있음=안전구역 → 스태미너 가득·무소모·탈진 없음. 레이드 진입 시에만 소모.
+  - **아이템 상세 팝업 + 우클릭 메뉴 개편**: "검사"→"자세히"(`ItemDetailUI` 팝업: 큰 아이콘+이름+설명+스탯), 사용템은 안전창고에서도 먹기/사용(`UseItem(placed, sourceGrid)`), 안전창고에 "폐기" 추가. UIManager Esc 우선+등록, 팝업 중 패널 입력 차단. 구 ShowItemInspect 제거.
+  - **적 스포너**(`EnemySpawner`, 부팅 자가생성): 게임플레이 씬 로드 시 `SpawnZone`들 읽어 `round(enemyCount×GameTuning.enemySpawnCountMult)` 스폰(씬당1회/언로드시 해제, generatedPrefab 또는 런타임 그레이박스 적). `SpawnZone` 2D화(`GetRandomPoint2D`+기즈모). 고철시장 빌더에 밴딧 공터 SpawnZone(bandit_melee×3) 추가. `GameTuning.enemySpawnCountMult` 신설.
+  - ⚠️ **StatDB.asset 확인**: ①`playerStat.motions`/`units[].motions`가 빈 리스트로 로드될 수 있음(런타임 폴백=기존 거동, 안전) → Control Panel ▸ StatDB에서 motions 기본값 보이는지 확인, 비면 채워 저장. ②**`bandit_melee` 유닛 미등록** → 적이 그레이박스+기본스탯으로 폴백(동작은 함). Control Panel ▸ StatDB ▸ Units에 추가 권장.
+- **다음 코드 후보**(플레이어 경험 순: 루팅→전투→시스템): ① HUD 하단 스태미너/퀵슬롯(1~6) ② 무기 파츠 창 실제 동작 ③ **적 Spine 애니 + UnitStatData.motions 와이어링** ④ Health에 unitStat.maxHp 적용(현재 적 HP가 Health 기본값).
+- **사용자 Unity 테스트 대기**: 아래 신규 체크.
+
+### 6/19 테스트 체크(신규)
+- Tab → 중앙 패널이 무기파츠 예약/가방/주머니4/보안3×3 세로로, 좌측에 특수창 슬롯.
+- 가방↔주머니↔보안↔창고 드래그·Ctrl이동·우클릭·Del 정상.
+- 레이드에서 한자리에 2개+ 드롭 후 E → 목록 UI 뜨고 휠 선택·E 줍기·F 전부·Esc 닫힘.
+- 구르기(Space) → roll 애니가 끝까지 재생 후 idle.
+- 안전가옥/은신처에서 Shift 달리기·공격 무한(스태미너 안 닳음), 레이드선 닳음.
+- Control Panel ▸ StatDB ▸ Player Stat ▸ motions에서 run/roll/attack 등 animSpeed·distance 조절 → 반영.
+- 아이템 우클릭 → **자세히** 팝업(큰 아이콘+설명), 창고 음료 우클릭 → **사용/폐기**.
+- **적 스포너**: `Tools ▸ TopDown ▸ 빌드 ▸ 지역1`(또는 고철시장 빌더) 재실행 → 레이드 진입 시 밴딧 공터에 적 3기 스폰·추격·전투. `GameTuning.enemySpawnCountMult`로 마릿수 조절.
+
+## (이전) 지금 위치 (2026-06-18 커밋 시점)
 **하이드아웃 + 안전구역 전 기능을 그레이박스로 일괄 구현 완료 → 사용자 Unity 테스트 대기.**
 이번 세션(6/18) 작업이 **이 커밋에 모두 포함**됨. 아래 "6/18 세션 (1)~(3)" 변경 섹션 + 맨 끝 변경들 참조.
 

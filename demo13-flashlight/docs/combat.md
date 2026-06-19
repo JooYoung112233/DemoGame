@@ -30,6 +30,21 @@
 ### 스태미너
 - 최대 100, 초당 15 회복 (소모 후 1초 딜레이)
 - 0이 되면 0.8초 탈진 (행동 불가)
+- **안전구역(레이드 아님 = 안전가옥/은신처)에선 스태미너 무한** — 항상 가득 + 탈진 없음, 달리기/공격/구르기 무소모. 레이드(활성 지역) 진입 시에만 위 소모·탈진 규칙 적용. (판정: `RegionTimeManager.ActiveRegionId` 비어있음 = 안전구역, CharacterPanelUI와 동일 기준)
+
+### 달리기 (Shift)
+- 속도 = 이동속도 × `sprintSpeedMultiplier`(기본 1.6). 초당 `sprintStaminaCost`(12) 소모, `sprintMinStamina`(10) 미만이면 불가.
+- 달리기 모션 속도/거리는 아래 "모션 스탯"의 `run` 항목에서 조절.
+
+### 모션 스탯 (애니 속도/거리) — 플레이어·적·NPC 동일 규칙
+- **규칙: 모든 모션은 애니 재생 속도를 따로 조절하고, 움직이거나 거리가 있는 모션(run/roll 등)은 distance도 따로 둔다.**
+- 데이터: `PlayerStatData.motions` / `UnitStatData.motions` = `List<MotionStat>`. 각 항목 = `{ anim(논리 키), animSpeed(재생 배율, 기본 1), distance(m, 0=미사용) }`. **논리 키로 조회**(스켈레톤 실제 애니 이름이 attack1 등으로 달라도 무관).
+- 플레이어 키: `idle/walk/run/crouch/crouch_walk/attack/roll`.
+  - `animSpeed` — 해당 모션 애니 재생 속도(이동속도와 별개). walk/run은 이동속도 비례 토글(`animCadenceMatchesSpeed`)과 곱해짐.
+  - `run.distance` — 한 번에 달릴 수 있는 최대 거리(m). 0=무제한(스태미너로만 제한). >0이면 그만큼 달리면 끊기고 멈추면 이동속도 2배로 회복.
+  - `roll.distance` — 구르기 이동거리(m). 0이면 기존 `dodgeDistance`(3) 사용, >0이면 그 값으로 override.
+- **적/NPC(`UnitStatData.motions`, 키 idle/walk/attack/hit/death)**: ⚠️ **데이터만 존재**. 적은 아직 Spine 애니 시스템이 없어(그레이박스 스프라이트) `EnemyController`가 사용하지 않음 — **적 애니 도입 시 동일 규칙으로 와이어링 예정**.
+- 전부 **Control Panel ▸ StatDB ▸ Player Stat / Units**에서 조절(`motions` 리스트 자동 노출). [→ balance.md](balance.md)
 
 ### 그로기 (적)
 - 숨겨진 게이지 (최대 100), 초당 8 자연 감소
@@ -39,6 +54,15 @@
 ### 적 공격 예고 + 캔슬
 - 적 공격 전 0.8초 예비동작 (빨간색 깜빡임)
 - 예비동작 중 강공격 적중 → 공격 캔슬 + 긴 경직
+
+### 적 스폰 (SpawnZone → EnemySpawner) — 2026-06-19
+- **`SpawnZone`**(씬 배치): 영역(폭 size.x·높이 size.z, 2D XY) + `enemyCount` + `unitKey`(StatDB). 기즈모로 영역 표시.
+- **`EnemySpawner`**(런타임, 부팅 시 자가 생성·DontDestroyOnLoad): 게임플레이 씬이 로드되면 그 씬의 SpawnZone들을 읽어 존마다 **`round(enemyCount × GameTuning.enemySpawnCountMult)`** 마리를 영역 랜덤 위치에 스폰(씬당 1회, 언로드 시 가드 해제→재입장 재스폰). 안전구역은 존이 없어 0기.
+  - 유닛 프리팹(`UnitStatData.generatedPrefab`) 있으면 그걸, 없으면 **런타임 그레이박스 적**(붉은 사각 + Rigidbody2D/Collider/Hurtbox/Health/CombatFeedback/EnemyController) 생성 후 `SetUnitKey`.
+  - 스폰 적은 레이드 씬으로 이동(`MoveGameObjectToScene`) → 씬과 함께 정리.
+- **마릿수 조절**: `GameTuning.enemySpawnCountMult` (Control Panel). 0=스폰 안 함, 2=두 배.
+- 배치: 고철시장(ScrapMarket_GB) 밴딧 공터(6,40)에 `bandit_melee × 3` 존. **재빌드 필요**(`Tools ▸ TopDown ▸ 빌드 ▸ 지역1` 또는 고철시장 빌더).
+- ⚠️ **StatDB에 `bandit_melee` 유닛 등록 필요**: 미등록 시 그레이박스 적 + EnemyController 인스펙터 기본 스탯으로 폴백(동작은 하나 의도 스탯 미적용). Control Panel ▸ StatDB ▸ Units에서 추가. [→ balance.md](balance.md)
 
 ## 시각 피드백 (애니메이션 없이)
 

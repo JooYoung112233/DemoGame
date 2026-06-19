@@ -27,17 +27,17 @@ public class RadioUI : MonoBehaviour
         }
     }
 
-    // ── 색 팔레트 (어두운 전술 톤) ──
-    static readonly Color Panel   = new Color(0.11f, 0.12f, 0.15f, 0.98f);
-    static readonly Color Panel2  = new Color(0.07f, 0.08f, 0.11f, 0.98f);
-    static readonly Color Gold    = new Color(0.95f, 0.85f, 0.30f);
-    static readonly Color BodyTxt = new Color(0.93f, 0.93f, 0.92f);
-    static readonly Color DimTxt  = new Color(0.55f, 0.58f, 0.66f);
-    static readonly Color Line    = new Color(1f, 1f, 1f, 0.12f);
-    static readonly Color BtnCol  = new Color(0.16f, 0.18f, 0.24f, 0.95f);
-    static readonly Color Danger  = new Color(0.5f, 0.22f, 0.22f);
-    static readonly Color Good     = new Color(0.45f, 0.85f, 0.45f);
-    static readonly Color Warn     = new Color(1f, 0.55f, 0.45f);
+    // ── 색 팔레트 (Tarkov 웜그레이/올리브 톤 — UITheme 기반) ──
+    static readonly Color Panel   = new Color(UITheme.Panel.r,    UITheme.Panel.g,    UITheme.Panel.b,    0.98f);
+    static readonly Color Panel2  = new Color(UITheme.PanelAlt.r, UITheme.PanelAlt.g, UITheme.PanelAlt.b, 0.98f);
+    static readonly Color Gold    = UITheme.Gold;
+    static readonly Color BodyTxt = UITheme.TextBright;
+    static readonly Color DimTxt  = UITheme.TextMuted;
+    static readonly Color Line    = UITheme.Divider;
+    static readonly Color BtnCol  = UITheme.Cell;
+    static readonly Color Danger  = UITheme.Danger;
+    static readonly Color Good     = UITheme.Positive;
+    static readonly Color Warn     = UITheme.Negative;
 
     // ── 채널 정의 (기존 값 재사용) ──
     static readonly string[] ChannelNames = { "소식 채널", "시장 정보", "구조 신호", "세계관 단편" };
@@ -179,7 +179,7 @@ public class RadioUI : MonoBehaviour
 
         // 루트 = 화면 전체 딤 배경
         var root = MakeStretch(uiRoot.transform, "Root", Vector2.zero, Vector2.zero);
-        root.AddComponent<Image>().color = new Color(0.05f, 0.06f, 0.08f, 0.96f);
+        root.AddComponent<Image>().color = new Color(UITheme.Backdrop.r, UITheme.Backdrop.g, UITheme.Backdrop.b, 0.96f);
         var rootRT = root.GetComponent<RectTransform>();
 
         BuildHeader(rootRT);
@@ -398,7 +398,7 @@ public class RadioUI : MonoBehaviour
 
         // 로그 배경
         var logBg = MakeStretch(rightRT, "LogBg", new Vector2(20, 20), new Vector2(20, 66));
-        logBg.AddComponent<Image>().color = new Color(0.04f, 0.05f, 0.07f, 0.98f);
+        logBg.AddComponent<Image>().color = new Color(UITheme.Gridline.r, UITheme.Gridline.g, UITheme.Gridline.b, 0.98f);
         var logBgRT = logBg.GetComponent<RectTransform>();
 
         var logGO = MakeStretch(logBgRT, "LogText", new Vector2(16, 16), new Vector2(16, 16));
@@ -411,7 +411,7 @@ public class RadioUI : MonoBehaviour
         logText.supportRichText = true;
         logText.horizontalOverflow = HorizontalWrapMode.Wrap;
         logText.verticalOverflow = VerticalWrapMode.Overflow;
-        logText.text = receivedLog.Length > 0 ? receivedLog : "<color=#8C95A8>주파수를 맞추고 [수신] 버튼을 누르세요…</color>";
+        logText.text = receivedLog.Length > 0 ? receivedLog : "<color=#8A8270>주파수를 맞추고 [수신] 버튼을 누르세요…</color>";
     }
 
     // ── 채널 뷰 갱신 (주파수 표시 / 동조 판정 / 힌트 / 노이즈 / 수신 버튼) ──
@@ -467,7 +467,7 @@ public class RadioUI : MonoBehaviour
         // 좌측 힌트 헤더 + 리스트
         string headerTag = tuned ? ChannelNames[tunedChannel] : "비동조";
         if (hintHeaderText != null)
-            hintHeaderText.text = $"도움 문서 · 힌트  <size=13><color=#8C95A8>[{headerTag}]</color></size>";
+            hintHeaderText.text = $"도움 문서 · 힌트  <size=13><color=#8A8270>[{headerTag}]</color></size>";
 
         if (hintListRT != null)
         {

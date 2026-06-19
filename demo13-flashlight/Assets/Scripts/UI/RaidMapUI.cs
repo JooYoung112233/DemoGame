@@ -80,17 +80,17 @@ public class RaidMapUI : MonoBehaviour
     //  색 팔레트 (어두운 전술 톤 — 공통 스펙)
     // ─────────────────────────────────────────────────────────────────
 
-    static readonly Color ColDim     = new Color(0.05f, 0.06f, 0.08f, 0.96f);
-    static readonly Color ColPanel   = new Color(0.11f, 0.12f, 0.15f, 0.98f);
-    static readonly Color ColPanel2  = new Color(0.07f, 0.08f, 0.11f, 0.98f);
-    static readonly Color ColGold    = new Color(0.95f, 0.85f, 0.30f);
-    static readonly Color ColText    = new Color(0.93f, 0.93f, 0.92f);
-    static readonly Color ColMuted   = new Color(0.55f, 0.58f, 0.66f);
-    static readonly Color ColLine    = new Color(1f, 1f, 1f, 0.12f);
-    static readonly Color ColBtn     = new Color(0.16f, 0.18f, 0.24f, 0.95f);
-    static readonly Color ColDanger  = new Color(0.5f, 0.22f, 0.22f);
-    static readonly Color ColGood     = new Color(0.45f, 0.85f, 0.45f);
-    static readonly Color ColWarn     = new Color(1f, 0.55f, 0.45f);
+    static readonly Color ColDim     = UITheme.Backdrop;
+    static readonly Color ColPanel   = UITheme.Panel;
+    static readonly Color ColPanel2  = UITheme.PanelAlt;
+    static readonly Color ColGold    = UITheme.Gold;
+    static readonly Color ColText    = UITheme.TextBright;
+    static readonly Color ColMuted   = UITheme.TextMuted;
+    static readonly Color ColLine    = UITheme.Divider;
+    static readonly Color ColBtn     = UITheme.Cell;
+    static readonly Color ColDanger  = UITheme.Danger;
+    static readonly Color ColGood     = UITheme.Positive;
+    static readonly Color ColWarn     = UITheme.Negative;
 
     // 맵 전용 색
     static readonly Color ColMapBg    = new Color(0.06f, 0.08f, 0.09f, 1f);   // 위성 톤 어두운 배경

@@ -52,18 +52,18 @@ public class MapSelectUI : MonoBehaviour
         }
     }
 
-    // ── 색 팔레트(어두운 전술 톤) ────────────────
-    static readonly Color DimBg = new Color(0.05f, 0.06f, 0.08f, 0.96f);
-    static readonly Color Panel = new Color(0.11f, 0.12f, 0.15f, 0.98f);
-    static readonly Color Panel2 = new Color(0.07f, 0.08f, 0.11f, 0.98f);
-    static readonly Color Gold = new Color(0.95f, 0.85f, 0.30f);
-    static readonly Color BodyText = new Color(0.93f, 0.93f, 0.92f);
-    static readonly Color FaintText = new Color(0.55f, 0.58f, 0.66f);
-    static readonly Color Line = new Color(1f, 1f, 1f, 0.12f);
-    static readonly Color BtnCol = new Color(0.16f, 0.18f, 0.24f, 0.95f);
-    static readonly Color Danger = new Color(0.5f, 0.22f, 0.22f);
-    static readonly Color Good = new Color(0.45f, 0.85f, 0.45f);
-    static readonly Color Warn = new Color(1f, 0.55f, 0.45f);
+    // ── 색 팔레트(웜/올리브 전술 톤 — UITheme 공유) ────────────────
+    static readonly Color DimBg = UITheme.Backdrop;
+    static readonly Color Panel = UITheme.Panel;
+    static readonly Color Panel2 = UITheme.PanelAlt;
+    static readonly Color Gold = UITheme.Gold;
+    static readonly Color BodyText = UITheme.TextBright;
+    static readonly Color FaintText = UITheme.TextMuted;
+    static readonly Color Line = UITheme.Divider;
+    static readonly Color BtnCol = UITheme.Cell;
+    static readonly Color Danger = UITheme.Danger;
+    static readonly Color Good = UITheme.Positive;
+    static readonly Color Warn = UITheme.Negative;
 
     const float HeaderH = 64f;
     const float InfoPanelW = 380f;
@@ -201,7 +201,7 @@ public class MapSelectUI : MonoBehaviour
             b.anchoredPosition = new Vector2(x, 0);
             var img = b.gameObject.AddComponent<Image>();
             float shade = 0.10f + (i % 3) * 0.025f;
-            img.color = new Color(shade, shade + 0.01f, shade + 0.03f, 0.9f);
+            img.color = new Color(shade + 0.03f, shade + 0.01f, shade, 0.9f);
             x += widths[i] + 18f;
         }
 
@@ -250,7 +250,7 @@ public class MapSelectUI : MonoBehaviour
 
         // 마커 아이콘(잠금/난이도)
         var icon = MakeChildText(btnRT, r.IsPlayable ? "◈" : "🔒", 22,
-            r.IsPlayable ? BodyText : new Color(0.45f, 0.45f, 0.5f));
+            r.IsPlayable ? BodyText : UITheme.TextDim);
         icon.name = "Icon";
 
         // 마커 하단 지역명 라벨(+ 시간; UpdateRegionTimeDisplay가 갱신)
@@ -314,7 +314,7 @@ public class MapSelectUI : MonoBehaviour
         var cColors = confirmBtn.colors;
         cColors.highlightedColor = new Color(Good.r * 0.5f, Good.g * 0.5f, Good.b * 0.5f, 1f);
         cColors.pressedColor = new Color(Good.r * 0.28f, Good.g * 0.28f, Good.b * 0.28f, 1f);
-        cColors.disabledColor = new Color(0.2f, 0.2f, 0.22f, 0.9f);
+        cColors.disabledColor = new Color(0.22f, 0.21f, 0.18f, 0.9f);
         confirmBtn.colors = cColors;
         confirmText = MakeChildText(confirmRT, "출전", 18, BodyText);
         confirmText.fontStyle = FontStyle.Bold;
@@ -329,8 +329,8 @@ public class MapSelectUI : MonoBehaviour
         var cancel2Btn = cancel2RT.gameObject.AddComponent<Button>();
         cancel2Btn.targetGraphic = cancel2Img;
         var c2Colors = cancel2Btn.colors;
-        c2Colors.highlightedColor = new Color(0.22f, 0.24f, 0.3f, 1f);
-        c2Colors.pressedColor = new Color(0.12f, 0.14f, 0.18f, 1f);
+        c2Colors.highlightedColor = UITheme.CellHover;
+        c2Colors.pressedColor = UITheme.CellPressed;
         cancel2Btn.colors = c2Colors;
         MakeChildText(cancel2RT, "취소  [ESC]", 15, FaintText);
         cancel2Btn.onClick.AddListener(Hide);
@@ -447,7 +447,7 @@ public class MapSelectUI : MonoBehaviour
         {
             if (infoTimeText != null) infoTimeText.text = "";
             if (selectedInfoText != null)
-                selectedInfoText.text = "<color=#8C95A8>맵에서 지역 마커를 선택하세요.</color>";
+                selectedInfoText.text = "<color=#8A8170>맵에서 지역 마커를 선택하세요.</color>";
             if (confirmBtn != null) confirmBtn.interactable = false;
         }
     }

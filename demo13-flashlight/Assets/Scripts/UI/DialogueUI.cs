@@ -466,8 +466,8 @@ public class DialogueUI : MonoBehaviour
             bool sel = (i == choiceHighlight);
             var img = choiceButtons[i].GetComponent<Image>();
             if (img != null)
-                img.color = sel ? new Color(0.28f, 0.34f, 0.5f, 0.95f)
-                                : new Color(0.15f, 0.15f, 0.2f, 0.7f);
+                img.color = sel ? UITheme.Accent
+                                : UITheme.PanelAlt;
             if (choiceTexts[i] != null)
                 choiceTexts[i].text = $"  {(sel ? "▶" : "  ")} {i + 1}. {currentChoices[i].text}";
         }
@@ -640,7 +640,7 @@ public class DialogueUI : MonoBehaviour
         bgRT.offsetMin = new Vector2(60, 20);
         bgRT.offsetMax = new Vector2(-60, 260);
         var bgImg = dialogueBG.AddComponent<Image>();
-        bgImg.color = new Color(0.05f, 0.05f, 0.1f, 1f);   // 불투명 — 뒤 맵 글자 비침 방지
+        bgImg.color = UITheme.Panel;   // 불투명 — 뒤 맵 글자 비침 방지
 
         // NPC 이름
         nameText = MakeText(dialogueBG.transform, "NPCName", "", 20, TextAnchor.MiddleLeft);
@@ -650,7 +650,7 @@ public class DialogueUI : MonoBehaviour
         nameRT.pivot = new Vector2(0, 1);
         nameRT.offsetMin = new Vector2(20, -40);
         nameRT.offsetMax = new Vector2(300, -8);
-        nameText.color = new Color(1f, 0.85f, 0.3f);
+        nameText.color = UITheme.Gold;
         nameText.fontStyle = FontStyle.Bold;
 
         // 관계 라벨
@@ -661,7 +661,7 @@ public class DialogueUI : MonoBehaviour
         relRT.pivot = new Vector2(0, 1);
         relRT.offsetMin = new Vector2(220, -40);
         relRT.offsetMax = new Vector2(400, -12);
-        relationLabel.color = new Color(0.6f, 0.8f, 0.6f);
+        relationLabel.color = UITheme.Positive;
 
         // 대사 텍스트
         dialogueText = MakeText(dialogueBG.transform, "Dialogue", "", 18, TextAnchor.UpperLeft);
@@ -670,7 +670,7 @@ public class DialogueUI : MonoBehaviour
         dlgRT.anchorMax = new Vector2(1, 1);
         dlgRT.offsetMin = new Vector2(24, 40);
         dlgRT.offsetMax = new Vector2(-24, -48);
-        dialogueText.color = new Color(0.92f, 0.92f, 0.95f);
+        dialogueText.color = UITheme.TextBright;
 
         // 계속 힌트
         continueHint = MakeText(dialogueBG.transform, "ContinueHint", "[E] 계속 ▶", 14, TextAnchor.MiddleRight);
@@ -680,7 +680,7 @@ public class DialogueUI : MonoBehaviour
         hintRT.pivot = new Vector2(1, 0);
         hintRT.offsetMin = new Vector2(-160, 8);
         hintRT.offsetMax = new Vector2(-16, 32);
-        continueHint.color = new Color(0.7f, 0.7f, 0.7f);
+        continueHint.color = UITheme.TextMuted;
 
         // 선택지 패널
         choicePanel = new GameObject("ChoicePanel");
@@ -692,7 +692,7 @@ public class DialogueUI : MonoBehaviour
         cpRT.offsetMin = new Vector2(60, 270);
         cpRT.offsetMax = new Vector2(-60, 430);
         var cpBg = choicePanel.AddComponent<Image>();
-        cpBg.color = new Color(0.08f, 0.08f, 0.12f, 1f);   // 불투명
+        cpBg.color = UITheme.PanelAlt;   // 불투명
 
         choiceButtons = new Button[3];
         choiceTexts = new Text[3];
@@ -708,12 +708,12 @@ public class DialogueUI : MonoBehaviour
             btnRT.offsetMax = new Vector2(-12, -i * 48 - 8);
 
             var btnImg = btnGO.AddComponent<Image>();
-            btnImg.color = new Color(0.15f, 0.15f, 0.2f, 0.7f);
+            btnImg.color = UITheme.PanelAlt;
 
             choiceButtons[i] = btnGO.AddComponent<Button>();
             var colors = choiceButtons[i].colors;
-            colors.highlightedColor = new Color(0.3f, 0.3f, 0.4f);
-            colors.pressedColor = new Color(0.2f, 0.2f, 0.3f);
+            colors.highlightedColor = UITheme.CellHover;
+            colors.pressedColor = UITheme.CellPressed;
             choiceButtons[i].colors = colors;
 
             choiceTexts[i] = MakeText(btnGO.transform, "Text", "", 16, TextAnchor.MiddleLeft);
@@ -722,7 +722,7 @@ public class DialogueUI : MonoBehaviour
             txtRT.anchorMax = Vector2.one;
             txtRT.offsetMin = new Vector2(8, 0);
             txtRT.offsetMax = new Vector2(-8, 0);
-            choiceTexts[i].color = new Color(0.9f, 0.9f, 0.95f);
+            choiceTexts[i].color = UITheme.TextBright;
         }
 
         choicePanel.SetActive(false);
