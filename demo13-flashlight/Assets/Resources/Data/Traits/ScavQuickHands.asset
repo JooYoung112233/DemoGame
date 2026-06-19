@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "컨테이너 수색 속도 +30%"
-  effects: []
+  effects:
+  - effectKey: search_speed
+    op: mul
+    value: 0.3

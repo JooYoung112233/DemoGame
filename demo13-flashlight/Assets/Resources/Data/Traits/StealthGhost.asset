@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: stealth_shadow
   tradeoff: 0
   effectSummary: "웅크려 정지 3초 후 짧은 비탐지(재진입) (선행: 그림자)"
-  effects: []
+  effects:
+  - effectKey: crouch_vanish
+    op: flag
+    value: 1

@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "초기 두려움↑ · 첫 거래 불리"
-  effects: []
+  effects:
+  - effectKey: initial_fear
+    op: mul
+    value: 0.2
+  - effectKey: first_deal_penalty
+    op: flag
+    value: 1

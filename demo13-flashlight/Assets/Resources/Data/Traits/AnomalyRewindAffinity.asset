@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 1
   effectSummary: "죽음→시계 회수 시 가방·시간 손실↓ / 기억 단서가 더 흐려진다(서사: 새벽 기원)"
-  effects: []
+  effects:
+  - effectKey: rewind_loss
+    op: mul
+    value: -0.3
+  - effectKey: memory_clue_clarity
+    op: mul
+    value: -0.25

@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "상점 구매가 -10% · 일일 의뢰 질↑"
-  effects: []
+  effects:
+  - effectKey: buy_price
+    op: mul
+    value: -0.1
+  - effectKey: daily_quest_quality
+    op: flag
+    value: 1

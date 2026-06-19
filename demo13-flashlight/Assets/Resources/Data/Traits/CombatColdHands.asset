@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "강공·차지 그로기 누적 +20%"
-  effects: []
+  effects:
+  - effectKey: groggy_buildup
+    op: mul
+    value: 0.2

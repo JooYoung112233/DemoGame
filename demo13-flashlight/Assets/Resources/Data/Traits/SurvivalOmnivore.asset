@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "상한 음식·물 페널티 무시"
-  effects: []
+  effects:
+  - effectKey: spoiled_food_immune
+    op: flag
+    value: 1

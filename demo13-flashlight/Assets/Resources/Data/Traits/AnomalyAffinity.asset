@@ -21,4 +21,13 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 1
   effectSummary: "현상권 루디·희귀 +30% / 침식·몬스터 어그로 +25%"
-  effects: []
+  effects:
+  - effectKey: anomaly_loot
+    op: mul
+    value: 0.3
+  - effectKey: erosion_buildup
+    op: mul
+    value: 0.25
+  - effectKey: monster_aggro
+    op: mul
+    value: 0.25

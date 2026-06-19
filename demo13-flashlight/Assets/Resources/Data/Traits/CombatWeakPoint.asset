@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "배후·그로기 처형 피해 +25%"
-  effects: []
+  effects:
+  - effectKey: execute_damage
+    op: mul
+    value: 0.25

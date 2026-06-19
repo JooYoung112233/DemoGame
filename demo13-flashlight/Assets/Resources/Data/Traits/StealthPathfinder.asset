@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "미니맵 발견 +25% · 통로 막힘 -20%"
-  effects: []
+  effects:
+  - effectKey: minimap_reveal
+    op: mul
+    value: 0.25
+  - effectKey: path_block
+    op: mul
+    value: -0.2

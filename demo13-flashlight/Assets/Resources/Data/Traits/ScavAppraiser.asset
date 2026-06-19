@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "판매가 +15% + 귀중품·루디 순도 식별"
-  effects: []
+  effects:
+  - effectKey: sell_price
+    op: mul
+    value: 0.15
+  - effectKey: purity_id
+    op: flag
+    value: 1

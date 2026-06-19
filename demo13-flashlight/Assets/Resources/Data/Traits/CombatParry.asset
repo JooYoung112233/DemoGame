@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 1
   effectSummary: "구르기 무적 프레임 +30% / 스태 소모 +10%"
-  effects: []
+  effects:
+  - effectKey: dodge_iframe
+    op: mul
+    value: 0.3
+  - effectKey: dodge_stamina_cost
+    op: mul
+    value: 0.1

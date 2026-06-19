@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "허기·탈수 +25% 빠름"
-  effects: []
+  effects:
+  - effectKey: hunger_thirst_rate
+    op: mul
+    value: 0.25

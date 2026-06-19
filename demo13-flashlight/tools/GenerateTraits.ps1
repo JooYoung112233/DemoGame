@@ -21,6 +21,44 @@ function Esc-Yaml([string]$s) {
     $s.Replace('\', '\\').Replace('"', '\"')
 }
 
+# effects 컬럼 -> Unity List<TraitEffect> YAML 시퀀스로 변환.
+# 입력 형식: "key:op:value;key2:op2:value2"  (세미콜론으로 항목 구분, 콜론으로 필드 구분)
+#   op 어휘: mul(비율, value 0.15 = +15%) / add(가산) / flag(능력 on, value=1)
+# 부정 특성은 value에 부호로 페널티 표기(예: -0.30).
+# 출력: TraitData.effects 의 YAML(빈값이면 "[]").
+function Build-EffectsYaml([string]$spec) {
+    if ($null -eq $spec) { return "[]" }
+    $spec = $spec.Trim()
+    if (-not $spec) { return "[]" }
+    $sb = New-Object System.Text.StringBuilder
+    $items = $spec -split ';'
+    $count = 0
+    foreach ($it in $items) {
+        $t = $it.Trim()
+        if (-not $t) { continue }
+        $parts = $t -split ':'
+        if ($parts.Count -lt 3) {
+            Write-Warning "effects 항목 형식 오류(무시): '$t' (key:op:value 필요)"
+            continue
+        }
+        $key = $parts[0].Trim()
+        $op  = $parts[1].Trim()
+        $valRaw = $parts[2].Trim()
+        # 소수점 보존 + 정상 숫자 포맷 (invariant culture)
+        $valNum = 0.0
+        [void][double]::TryParse($valRaw, [Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$valNum)
+        $valStr = $valNum.ToString([Globalization.CultureInfo]::InvariantCulture)
+        [void]$sb.Append("`n  - effectKey: $key")
+        [void]$sb.Append("`n    op: $op")
+        [void]$sb.Append("`n    value: $valStr")
+        $count++
+        # NOTE: 2-space indent. Unity MonoBehaviour 필드 하위 시퀀스는
+        #   "  effects:" 다음 줄에 "  - effectKey:" (필드와 동일 들여쓰기) 형식.
+    }
+    if ($count -eq 0) { return "[]" }
+    return $sb.ToString()
+}
+
 $utf8 = New-Object System.Text.UTF8Encoding $false
 $rows = Import-Csv -Path $csv -Encoding UTF8
 $created = 0
@@ -48,6 +86,12 @@ foreach ($r in $rows) {
 
     $disp = Esc-Yaml $r.displayName
     $effect = Esc-Yaml $r.effectSummary
+    $effSpec = ""
+    $effProp = $r.PSObject.Properties['effects']
+    if ($effProp) { $effSpec = [string]$effProp.Value }
+    $effectsYaml = Build-EffectsYaml $effSpec
+    if ($effectsYaml -eq "[]") { $effectsLine = "  effects: []" }
+    else { $effectsLine = "  effects:" + $effectsYaml }
 
     $yaml = @"
 %YAML 1.1
@@ -73,7 +117,7 @@ MonoBehaviour:
   prereqTraitId: $prereq
   tradeoff: $tradeoff
   effectSummary: "$effect"
-  effects: []
+$effectsLine
 "@
     [IO.File]::WriteAllText($assetPath, $yaml, $utf8)
 

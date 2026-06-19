@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "정보(단서·블랙마켓) 가격 -20% · 해금 빠름"
-  effects: []
+  effects:
+  - effectKey: info_price
+    op: mul
+    value: -0.2
+  - effectKey: info_unlock_speed
+    op: flag
+    value: 1

@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: anomaly_dark_adaptation
   tradeoff: 0
   effectSummary: "영구 짙은 구역의 이동·시야 페널티 무시 (선행: 어둠 적응)"
-  effects: []
+  effects:
+  - effectKey: deep_zone_immune
+    op: flag
+    value: 1

@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "스태미너 최대 +15% · 회복 +15%"
-  effects: []
+  effects:
+  - effectKey: stamina_max
+    op: mul
+    value: 0.15
+  - effectKey: stamina_regen
+    op: mul
+    value: 0.15

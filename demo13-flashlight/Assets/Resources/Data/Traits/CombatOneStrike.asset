@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: combat_cold_hands
   tradeoff: 0
   effectSummary: "차지 강공 첫 명중 피해 +40% (선행: 냉정한 손)"
-  effects: []
+  effects:
+  - effectKey: charge_first_hit_damage
+    op: mul
+    value: 0.4

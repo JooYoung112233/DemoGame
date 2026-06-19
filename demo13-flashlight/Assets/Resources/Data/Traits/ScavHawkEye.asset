@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: scav_quick_hands
   tradeoff: 0
   effectSummary: "희귀·루디 컨테이너 하이라이트 (선행: 빠른 손)"
-  effects: []
+  effects:
+  - effectKey: rare_container_highlight
+    op: flag
+    value: 1

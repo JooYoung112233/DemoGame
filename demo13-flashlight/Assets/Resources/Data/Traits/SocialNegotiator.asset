@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "밴딧 협상 성공률↑ · 요구치↓"
-  effects: []
+  effects:
+  - effectKey: bandit_negotiate
+    op: flag
+    value: 1

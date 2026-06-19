@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "휴대 무게 한도 +20%"
-  effects: []
+  effects:
+  - effectKey: weight_max
+    op: mul
+    value: 0.2

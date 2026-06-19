@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: survival_tough_bones
   tradeoff: 0
   effectSummary: "HP 20% 이하일 때 받는 피해 -15% (선행: 강골)"
-  effects: []
+  effects:
+  - effectKey: low_hp_damage_taken
+    op: mul
+    value: -0.15

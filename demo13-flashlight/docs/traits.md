@@ -99,9 +99,71 @@
 
 > 현상 트리는 **서사와 직결**: '되감기 친화'·'빛 의존'이 주인공의 기원(죽음→부활, 빛의 역설, §2.4)을 *플레이로* 만지게 한다. 깊게 파는 빌드일수록 진실에 가까워지는 결.
 
-## 4. 구현 메모 〔구현 전〕
-- 데이터: `TraitData`(ScriptableObject) — id·이름·설명·카테고리·티어·선행조건·PP비용(또는 환급)·효과(스탯 모디파이어/플래그). `StatDB`/PlayerStatData에 적용.
-- **(2026-06-19) TraitData SO·생성기 구현됨**: 클래스 `Assets/Scripts/Data/TraitData.cs`(enum `TraitCategory`/`TraitTier`, `effectSummary` + 구조용 `List<TraitEffect>`), CSV `tools/traits.csv`(§3 전 41개 퍽), 생성기 `tools/GenerateTraits.ps1` → `Assets/Resources/Data/Traits/*.asset` 41개. 런타임(StatDB) 연동·UI 트리·정밀 수치는 아직 TODO.
+## 4. effectKey 어휘 · op 규약 (구현 2026-06-19)
+
+`TraitData.effects`(`List<TraitEffect>{effectKey, op, value}`)의 데이터 어휘. CSV `effects` 컬럼 → 생성기 → `.asset` 파이프라인으로 채운다. **런타임 합성은 `TraitManager`가 담당.**
+
+### 4.1 op 규약
+| op | 의미 | value 해석 | 합성(TraitManager) | 조회 API |
+|---|---|---|---|---|
+| `mul` | 비율 | `0.15`=+15%, `-0.30`=−30% | ∏(1+value) → **최종 배수** | `GetModifier(key)` (없으면 1.0) |
+| `add` | 가산(절대량) | 단위 그대로 (예: 슬롯 +1) | Σvalue | `GetAdditive(key)` (없으면 0) |
+| `flag` | 능력 on/off | `1`=켜짐 | OR (하나라도 켜지면 on) | `HasFlag(key)` |
+
+> 부정 특성은 value에 **페널티 부호**로 표기(예: 받는 피해 +15% = `damage_taken:mul:0.15`, 수면 회복 −30% = `sleep_recovery:mul:-0.30`).
+> 호출부 사용 규약: 수치형은 `final = base * GetModifier(key)`, 능력형은 `if (HasFlag(key)) …`.
+
+### 4.2 effectKey 사전 (41개 퍽 1차 매핑)
+| 카테고리 | effectKey | op | 1차 value | 출처 퍽 |
+|---|---|---|---|---|
+| 전투 | `stamina_max` / `stamina_regen` | mul | +0.15 | 끈질긴 폐활량 |
+| 전투 | `groggy_buildup` | mul | +0.20 | 냉정한 손 |
+| 전투 | `weapon_durability_cost` / `repair_efficiency` | mul | −0.25 / +0.20 | 무기 숙련 |
+| 전투 | `dodge_iframe` / `dodge_stamina_cost` | mul | +0.30 / +0.10 | 받아넘기기 ⚖ |
+| 전투 | `execute_damage` | mul | +0.25 | 약점 간파 |
+| 전투 | `charge_first_hit_damage` | mul | +0.40 | 일격필살 |
+| 전투(부정) | `damage_taken` | mul | +0.15 | 유리 어깨 |
+| 전투(부정) | `aim_shake_on_hit` | flag | 1 | 욱하는 성미 |
+| 생존 | `fracture_chance` / `bleed_duration` | mul | −0.30 / −0.25 | 강골 |
+| 생존 | `pain_penalty` | mul | −0.40 | 통증 내성 |
+| 생존 | `spoiled_food_immune` | flag | 1 | 잡식 |
+| 생존 | `sleep_recovery` | mul | +0.30 | 빠른 회복 |
+| 생존 | `low_hp_damage_taken` | mul | −0.15 | 불굴 |
+| 생존(부정) | `hunger_thirst_rate` | mul | +0.25 | 허약한 위장 |
+| 생존(부정) | `sleep_recovery` | mul | −0.30 | 악몽 |
+| 회수 | `search_speed` | mul | +0.30 | 빠른 손 |
+| 회수 | `weight_max` | mul | +0.20 | 노새 |
+| 회수 | `sell_price` / `purity_id` | mul / flag | +0.15 / 1 | 감정가 |
+| 회수 | `rare_container_highlight` | flag | 1 | 매의 눈 |
+| 회수 | `keep_slot` | add | +1 | 빈손 방지 |
+| 회수(부정) | `death_drop_amount` | mul | +0.30 | 덜렁이 |
+| 잠행 | `detect_radius` | mul | −0.20 | 그림자 |
+| 잠행 | `move_noise` | mul | −0.30 | 고양이 걸음 |
+| 잠행 | `minimap_reveal` / `path_block` | mul | +0.25 / −0.20 | 길눈 |
+| 잠행 | `extract_channel_speed` | mul | +0.25 | 도주술 |
+| 잠행 | `crouch_vanish` | flag | 1 | 유령 |
+| 잠행(부정) | `move_noise` | mul | +0.25 | 무거운 발 |
+| 사회 | `npc_affinity` | mul | +0.20 | 입담 |
+| 사회 | `buy_price` / `daily_quest_quality` | mul / flag | −0.10 / 1 | 단골 |
+| 사회 | `info_price` / `info_unlock_speed` | mul / flag | −0.20 / 1 | 소문통 |
+| 사회 | `bandit_negotiate` | flag | 1 | 협상가 |
+| 사회(부정) | `initial_fear` / `first_deal_penalty` | mul / flag | +0.20 / 1 | 수상한 인상 |
+| 현상 | `vision_anomaly` | mul | −0.30 | 어둠 적응 |
+| 현상 | `erosion_buildup` | mul | −0.40 | 빛 절제 |
+| 현상 | `rudi_ping` / `purity_id` | flag | 1 / 1 | 루디 감각 |
+| 현상 | `timer_accuracy` | mul | +0.30 | 시계 동조 |
+| 현상 | `anomaly_loot` / `erosion_buildup` / `monster_aggro` | mul | +0.30 / +0.25 / +0.25 | 현상 친화 ⚖ |
+| 현상 | `rewind_loss` / `memory_clue_clarity` | mul | −0.30 / −0.25 | 되감기 친화 ⚖ |
+| 현상 | `deep_zone_immune` | flag | 1 | 심연 보행 |
+| 현상(부정) | `anomaly_stamina_penalty` / `vision_anomaly` | mul | +0.25 / +0.25 | 현상 과민 |
+| 현상(부정) | `light_panic` | flag | 1 | 빛 의존 |
+
+> ⚠ 위 수치는 **1차 초안**. 정밀값은 [balance-tuner]→`GameTuning` 확정. 동일 key가 여러 퍽에 걸리면(예: `move_noise`, `sleep_recovery`, `purity_id`, `vision_anomaly`, `erosion_buildup`) `TraitManager`가 규약대로 자동 합성.
+
+## 4b. 구현 메모
+- 데이터: `TraitData`(ScriptableObject) — id·이름·설명·카테고리·티어·선행조건·PP비용(또는 환급)·효과(`effects` = §4 어휘). `StatDB`/PlayerStatData 적용은 말단 배선 TODO.
+- **(2026-06-19) TraitData SO·생성기 구현됨**: 클래스 `Assets/Scripts/Data/TraitData.cs`(enum `TraitCategory`/`TraitTier`, `effectSummary` + `List<TraitEffect>`), CSV `tools/traits.csv`(§3 전 41개 퍽 + `effects` 컬럼), 생성기 `tools/GenerateTraits.ps1` → `Assets/Resources/Data/Traits/*.asset` 41개.
+- **(2026-06-19) TraitManager 런타임 코어 구현됨**: `Assets/Scripts/Data/TraitManager.cs`(싱글톤+DontDestroyOnLoad, NPCRelationshipManager 패턴). 로드/해금상태/PP/부정상한 추적 + 쿼리 API(`GetModifier`/`GetAdditive`/`HasFlag`) + 세이브 구조체(`TraitSaveData`). **StatDB·전투·인벤·SaveManager 등 말단 read-site 미배선(TODO)** — 쿼리 API만 제공.
 - UI: 캐릭터 패널("01 캐릭터 상태", [→ inventory.md])에 **특성 탭**(트리 뷰 + PP 잔량). 양피지 6패널 톤 통일.
 - 효과 = 기존 스탯/시스템 훅 재사용(전투·의료·인벤·현상·시계). 새 수치는 [balance-tuner].
 - **미정(TBD)**: PP 곡선 세부·각 퍽 정밀 수치·리스펙 방식·트리 시각·아이콘.
@@ -109,6 +171,12 @@
 ---
 
 ## 기획 결정 로그
+
+### 2026-06-19 — effects 어휘·op 규약 + TraitManager 런타임 코어
+- **무엇**: §3 41개 퍽의 `effectSummary`를 effectKey/op/value로 1차 매핑(§4 표) + 런타임 합성 코어 신설.
+- **op 규약**: `mul`(비율, ∏(1+value)=최종배수) / `add`(절대 가산, Σ) / `flag`(능력 on, OR). 부정 특성은 value 부호로 페널티.
+- **산출**: `tools/traits.csv`에 `effects` 컬럼 추가, `tools/GenerateTraits.ps1`가 파싱→`.asset effects` 시퀀스 출력(41개 재생성 완료, GUID 보존). 런타임 `Assets/Scripts/Data/TraitManager.cs`(+.meta) — 로드·해금·PP·부정상한3·쿼리 API(`GetModifier`/`GetAdditive`/`HasFlag`)·세이브 구조체.
+- **경계**: StatDB/전투/인벤/SaveManager 등 말단 read-site·UI 트리는 **미배선(TODO)**. TraitManager는 쿼리 API만 제공. 수치는 1차 초안(→balance-tuner).
 
 ### 2026-06-19 — TraitData SO·생성기 구현
 - **무엇**: §3 트리의 전 퍽(41개)을 실제 ScriptableObject `.asset`으로 데이터화.

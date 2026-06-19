@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "탐지등 방전 시 공황 — 정확도·이동↓"
-  effects: []
+  effects:
+  - effectKey: light_panic
+    op: flag
+    value: 1

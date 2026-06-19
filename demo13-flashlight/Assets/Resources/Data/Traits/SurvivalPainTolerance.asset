@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "통증 이동·조준 페널티 -40%"
-  effects: []
+  effects:
+  - effectKey: pain_penalty
+    op: mul
+    value: -0.4

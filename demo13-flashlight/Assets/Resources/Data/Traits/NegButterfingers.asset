@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "사망 시 떨어뜨리는 양 +30%"
-  effects: []
+  effects:
+  - effectKey: death_drop_amount
+    op: mul
+    value: 0.3

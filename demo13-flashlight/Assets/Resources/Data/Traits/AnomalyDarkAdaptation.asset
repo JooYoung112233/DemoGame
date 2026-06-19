@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "짙은 현상 시야 페널티 -30% (콘 밖 형체 인식↑)"
-  effects: []
+  effects:
+  - effectKey: vision_anomaly
+    op: mul
+    value: -0.3

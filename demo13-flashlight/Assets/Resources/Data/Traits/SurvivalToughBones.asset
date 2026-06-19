@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "골절 확률 -30% · 출혈 지속 -25%"
-  effects: []
+  effects:
+  - effectKey: fracture_chance
+    op: mul
+    value: -0.3
+  - effectKey: bleed_duration
+    op: mul
+    value: -0.25

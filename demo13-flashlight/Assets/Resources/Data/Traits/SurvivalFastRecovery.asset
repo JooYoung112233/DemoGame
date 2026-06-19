@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "거점 수면 HP·기력 회복 +30%"
-  effects: []
+  effects:
+  - effectKey: sleep_recovery
+    op: mul
+    value: 0.3

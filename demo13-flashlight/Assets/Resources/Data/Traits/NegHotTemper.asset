@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "피격 후 ~1초 조준 흔들림"
-  effects: []
+  effects:
+  - effectKey: aim_shake_on_hit
+    op: flag
+    value: 1

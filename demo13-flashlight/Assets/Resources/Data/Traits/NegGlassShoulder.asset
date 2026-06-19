@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "받는 피해 +15%"
-  effects: []
+  effects:
+  - effectKey: damage_taken
+    op: mul
+    value: 0.15

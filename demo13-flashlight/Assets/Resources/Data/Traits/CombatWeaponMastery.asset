@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "근접 내구 소모 -25% · 수리 효율 +20%"
-  effects: []
+  effects:
+  - effectKey: weapon_durability_cost
+    op: mul
+    value: -0.25
+  - effectKey: repair_efficiency
+    op: mul
+    value: 0.2

@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "비루디 광원 침식 게이지 누적 -40%(빛의 역설 완화)"
-  effects: []
+  effects:
+  - effectKey: erosion_buildup
+    op: mul
+    value: -0.4

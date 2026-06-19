@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "기본 이동 소음 +25%"
-  effects: []
+  effects:
+  - effectKey: move_noise
+    op: mul
+    value: 0.25

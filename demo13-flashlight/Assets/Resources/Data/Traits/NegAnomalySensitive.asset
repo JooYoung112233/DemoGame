@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "현상권 스태미너·시야 페널티↑"
-  effects: []
+  effects:
+  - effectKey: anomaly_stamina_penalty
+    op: mul
+    value: 0.25
+  - effectKey: vision_anomaly
+    op: mul
+    value: 0.25

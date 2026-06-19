@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "탈출 채널링 속도 +25%"
-  effects: []
+  effects:
+  - effectKey: extract_channel_speed
+    op: mul
+    value: 0.25

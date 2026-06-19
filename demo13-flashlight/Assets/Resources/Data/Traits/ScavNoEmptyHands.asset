@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "사망/탈출 실패 시 보존 슬롯 +1"
-  effects: []
+  effects:
+  - effectKey: keep_slot
+    op: add
+    value: 1

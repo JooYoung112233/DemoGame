@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "수면 회복 -30% (서사: 흐릿한 기억)"
-  effects: []
+  effects:
+  - effectKey: sleep_recovery
+    op: mul
+    value: -0.3

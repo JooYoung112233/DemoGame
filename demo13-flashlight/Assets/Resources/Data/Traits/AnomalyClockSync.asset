@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "믿을 수 없는 시계 왜곡 표시 정밀↑ — 진짜 남은 시간 오차↓"
-  effects: []
+  effects:
+  - effectKey: timer_accuracy
+    op: mul
+    value: 0.3

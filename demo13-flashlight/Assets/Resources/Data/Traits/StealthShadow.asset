@@ -21,4 +21,7 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "적 감지 반경 -20% (웅크림 -35%)"
-  effects: []
+  effects:
+  - effectKey: detect_radius
+    op: mul
+    value: -0.2

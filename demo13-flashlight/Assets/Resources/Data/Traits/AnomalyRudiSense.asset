@@ -21,4 +21,10 @@ MonoBehaviour:
   prereqTraitId: 
   tradeoff: 0
   effectSummary: "주변 루디·현상 노드 핑 반경↑ + 순도 직감"
-  effects: []
+  effects:
+  - effectKey: rudi_ping
+    op: flag
+    value: 1
+  - effectKey: purity_id
+    op: flag
+    value: 1
