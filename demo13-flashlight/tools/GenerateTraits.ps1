@@ -119,7 +119,7 @@ MonoBehaviour:
   effectSummary: "$effect"
 $effectsLine
 "@
-    [IO.File]::WriteAllText($assetPath, $yaml, $utf8)
+    [IO.File]::WriteAllText($assetPath, $yaml + "`n", $utf8)   # 끝 개행 보장 (Unity YAML import)
 
     $meta = @"
 fileFormatVersion: 2
