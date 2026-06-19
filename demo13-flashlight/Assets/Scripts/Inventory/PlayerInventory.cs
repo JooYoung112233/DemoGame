@@ -268,6 +268,19 @@ public class PlayerInventory : MonoBehaviour
         return remaining <= 0;
     }
 
+    /// <summary>itemId로 아무 컨테이너(가방/주머니/보안)에서 첫 매칭 아이템을 사용. 성공 시 true. (퀵슬롯용)</summary>
+    public bool UseItemById(string itemId)
+    {
+        if (string.IsNullOrEmpty(itemId)) return false;
+        foreach (var g in AllGrids)
+        {
+            if (g == null) continue;
+            var placed = g.FindItem(itemId);
+            if (placed != null) return UseItem(placed, g);
+        }
+        return false;
+    }
+
     /// <summary>가방→주머니→보안 순으로 자동 배치 시도.</summary>
     public bool TryAutoPlaceAnywhere(ItemInstance item)
     {

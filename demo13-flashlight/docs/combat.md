@@ -63,6 +63,8 @@
 - **마릿수 조절**: `GameTuning.enemySpawnCountMult` (Control Panel). 0=스폰 안 함, 2=두 배.
 - 배치: 고철시장(ScrapMarket_GB) 밴딧 공터(6,40)에 `bandit_melee × 3` 존. **재빌드 필요**(`Tools ▸ TopDown ▸ 빌드 ▸ 지역1` 또는 고철시장 빌더).
 - ⚠️ **StatDB에 `bandit_melee` 유닛 등록 필요**: 미등록 시 그레이박스 적 + EnemyController 인스펙터 기본 스탯으로 폴백(동작은 하나 의도 스탯 미적용). Control Panel ▸ StatDB ▸ Units에서 추가. [→ balance.md](balance.md)
+- **적 HP**: `EnemyController.Start`가 `unitStat.maxHp`를 Health에 적용(미등록 시 인스펙터 기본).
+- **적 처치 전리품(2026-06-19 결정)**: 처치 시 **지상(Ground) 티어 region 루트**를 시신 주변에 산포 드랍(= 컨테이너(Container 티어)보다 약함 — 잡기보다 상자가 더 값짐). `GameTuning.enemyDropChance`(기본 1)로 게이트, 루트 자체 확률은 RegionLootCatalog가 처리. ⚠️ 임시 기획 — 추후 적별 전용 드랍(장비/스크랩)으로 교체 가능. [→ economy.md](economy.md)
 
 ## 시각 피드백 (애니메이션 없이)
 

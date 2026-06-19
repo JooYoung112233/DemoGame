@@ -172,6 +172,11 @@ public class EnemyController : MonoBehaviour
 
         if (health != null)
         {
+            if (unitStat != null && unitStat.maxHp > 0f)   // 유닛 스탯의 최대 HP 적용(없으면 Health 인스펙터 기본값)
+            {
+                health.SetMaxHp(unitStat.maxHp);
+                health.FullHeal();
+            }
             health.OnDamaged += OnDamaged;
             health.OnDeath   += OnDeath;
         }
@@ -512,7 +517,25 @@ public class EnemyController : MonoBehaviour
         if (QuestManager.Instance != null && !string.IsNullOrEmpty(unitKey))
             QuestManager.Instance.UpdateObjective(ObjectiveType.KillEnemy, unitKey, 1);
 
+        DropLoot();
+
         Destroy(gameObject, 3f);
+    }
+
+    /// <summary>전리품 드랍 — 지상 티어 region 루트를 시신 주변에 산포(컨테이너보다 약함). GameTuning.enemyDropChance로 게이트.</summary>
+    void DropLoot()
+    {
+        float chance = GameTuning.Instance != null ? GameTuning.Instance.enemyDropChance : 1f;
+        if (Random.value > chance) return;
+
+        var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
+        if (loot == null) return;
+        for (int i = 0; i < loot.Length; i++)
+        {
+            if (loot[i] == null) continue;
+            Vector2 r = Random.insideUnitCircle * 0.6f;
+            WorldItem.Drop(loot[i], transform.position + new Vector3(r.x, r.y, 0f));
+        }
     }
 
     void OnGroggyTriggered() { state = State.Stunned; SetVelocity(Vector2.zero); }

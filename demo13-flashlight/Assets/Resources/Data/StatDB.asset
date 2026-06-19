@@ -21,6 +21,28 @@ MonoBehaviour:
     moveDecel: 80
     sprintStaminaCost: 12
     sprintMinStamina: 10
+    motions:
+    - anim: idle
+      animSpeed: 1
+      distance: 0
+    - anim: walk
+      animSpeed: 1
+      distance: 0
+    - anim: run
+      animSpeed: 1
+      distance: 0
+    - anim: crouch
+      animSpeed: 1
+      distance: 0
+    - anim: crouch_walk
+      animSpeed: 1
+      distance: 0
+    - anim: attack
+      animSpeed: 1
+      distance: 0
+    - anim: roll
+      animSpeed: 1
+      distance: 0
     lightDamage: 8
     lightRange: 2
     lightStaminaCost: 6
@@ -52,34 +74,4 @@ MonoBehaviour:
     staminaRegen: 15
     staminaRegenDelay: 1
     exhaustionDuration: 0.8
-  units:
-  - id: 
-    displayName: 
-    scale: 0
-    tintColor: {r: 0, g: 0, b: 0, a: 0}
-    shadowColor: {r: 0, g: 0, b: 0, a: 0}
-    useGlow: 0
-    glowColor: {r: 0, g: 0, b: 0, a: 0}
-    glowIntensity: 0
-    glowRange: 0
-    useTrailParticle: 0
-    trailColor: {r: 0, g: 0, b: 0, a: 0}
-    generatedPrefab: {fileID: 0}
-    maxHp: 0
-    attackDamage: 0
-    attackRange: 0
-    attackSpeed: 0
-    attackWindup: 0
-    canBeCancelled: 0
-    maxGroggy: 0
-    groggyDecay: 0
-    groggyStunDuration: 0
-    moveSpeed: 0
-    patrolSpeed: 0
-    detectRange: 0
-    loseRange: 0
-    patrolRadius: 0
-    patrolWaitTime: 0
-    hitStunDuration: 0
-    expReward: 0
-    goldReward: 0
+  units: []

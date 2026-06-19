@@ -2293,6 +2293,18 @@ public class CharacterPanelUI : MonoBehaviour
             y -= 26f;
         }
 
+        // 퀵슬롯 등록/해제 (사용 가능 + 내 소지품) — 1~6 숫자키로 즉시 사용
+        if (data.isUsable && isPlayerGrid)
+        {
+            var capId = data.itemId;
+            AddContextButton("퀵슬롯", UITheme.AccentBright, y, () =>
+            {
+                if (QuickSlotBar.Instance != null) QuickSlotBar.Instance.Assign(capId);
+                HideContextMenu();
+            });
+            y -= 26f;
+        }
+
         // 자세히 (항상) — 아이템 1개 상세 팝업
         AddContextButton("자세히", UITheme.TextBright, y, () =>
         {

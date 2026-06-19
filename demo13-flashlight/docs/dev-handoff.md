@@ -14,8 +14,10 @@
   - **안전구역 스태미너 무한**: `RegionTimeManager.ActiveRegionId` 비어있음=안전구역 → 스태미너 가득·무소모·탈진 없음. 레이드 진입 시에만 소모.
   - **아이템 상세 팝업 + 우클릭 메뉴 개편**: "검사"→"자세히"(`ItemDetailUI` 팝업: 큰 아이콘+이름+설명+스탯), 사용템은 안전창고에서도 먹기/사용(`UseItem(placed, sourceGrid)`), 안전창고에 "폐기" 추가. UIManager Esc 우선+등록, 팝업 중 패널 입력 차단. 구 ShowItemInspect 제거.
   - **적 스포너**(`EnemySpawner`, 부팅 자가생성): 게임플레이 씬 로드 시 `SpawnZone`들 읽어 `round(enemyCount×GameTuning.enemySpawnCountMult)` 스폰(씬당1회/언로드시 해제, generatedPrefab 또는 런타임 그레이박스 적). `SpawnZone` 2D화(`GetRandomPoint2D`+기즈모). 고철시장 빌더에 밴딧 공터 SpawnZone(bandit_melee×3) 추가. `GameTuning.enemySpawnCountMult` 신설.
+  - **하단 HUD(`QuickSlotBar`, 자가생성)**: 퀵슬롯 1~6(우클릭 "퀵슬롯" 등록→키/클릭 사용, `PlayerInventory.UseItemById`) + **스태미너 바**(`TopDownPlayer.StaminaPercent`, 색 단계). **세이브 영속화**(`GameSaveData.quickSlots`, GetSlotIds/LoadSlotIds). 모달 중 입력 차단, 플레이어 없으면 숨김.
+  - **적 HP = unitStat.maxHp 적용**(`EnemyController.Start`). **적 처치 전리품**: `OnDeath`에서 지상 티어 region 루트 시신 주변 산포(`GameTuning.enemyDropChance` 게이트, 컨테이너보다 약함).
   - ⚠️ **StatDB.asset 확인**: ①`playerStat.motions`/`units[].motions`가 빈 리스트로 로드될 수 있음(런타임 폴백=기존 거동, 안전) → Control Panel ▸ StatDB에서 motions 기본값 보이는지 확인, 비면 채워 저장. ②**`bandit_melee` 유닛 미등록** → 적이 그레이박스+기본스탯으로 폴백(동작은 함). Control Panel ▸ StatDB ▸ Units에 추가 권장.
-- **다음 코드 후보**(플레이어 경험 순: 루팅→전투→시스템): ① HUD 하단 스태미너/퀵슬롯(1~6) ② 무기 파츠 창 실제 동작 ③ **적 Spine 애니 + UnitStatData.motions 와이어링** ④ Health에 unitStat.maxHp 적용(현재 적 HP가 Health 기본값).
+- **다음 코드 후보**(플레이어 경험 순: 루팅→전투→시스템): ① 무기 파츠 창 실제 동작(중앙 예약공간 — 무기 부착물 시스템, 설계 필요) ② **적 Spine 애니**(현재 SkeletonAnimController는 스텁) + UnitStatData.motions 와이어링 ③ FOV 시야콘(설계 필요) ④ 적별 전용 드랍 테이블(현재 region 루트 재사용).
 - **사용자 Unity 테스트 대기**: 아래 신규 체크.
 
 ### 6/19 테스트 체크(신규)
@@ -27,6 +29,9 @@
 - Control Panel ▸ StatDB ▸ Player Stat ▸ motions에서 run/roll/attack 등 animSpeed·distance 조절 → 반영.
 - 아이템 우클릭 → **자세히** 팝업(큰 아이콘+설명), 창고 음료 우클릭 → **사용/폐기**.
 - **적 스포너**: `Tools ▸ TopDown ▸ 빌드 ▸ 지역1`(또는 고철시장 빌더) 재실행 → 레이드 진입 시 밴딧 공터에 적 3기 스폰·추격·전투. `GameTuning.enemySpawnCountMult`로 마릿수 조절.
+- **퀵슬롯**: 소비템 우클릭 → "퀵슬롯" 등록 → 하단 바에 표시, 1~6 키/클릭으로 사용·개수 갱신. 저장→이어하기 시 슬롯 유지.
+- **하단 스태미너 바**: 레이드서 달리기/공격 시 줄고 색 변함, 안전구역선 가득.
+- **적 처치 전리품**: 적 죽이면 시신 주변에 루트 드랍(주워서 가방). `GameTuning.enemyDropChance`로 조절.
 
 ## (이전) 지금 위치 (2026-06-18 커밋 시점)
 **하이드아웃 + 안전구역 전 기능을 그레이박스로 일괄 구현 완료 → 사용자 Unity 테스트 대기.**

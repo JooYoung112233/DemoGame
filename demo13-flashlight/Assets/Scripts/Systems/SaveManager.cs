@@ -134,6 +134,8 @@ public class SaveManager : MonoBehaviour
             if (survival != null) data.survival = survival.GetSaveData();
         }
 
+        if (QuickSlotBar.Instance != null) data.quickSlots = QuickSlotBar.Instance.GetSlotIds();
+
         // 창고 (안전가옥 가구 — static 목록)
         data.storageUnits = new List<StorageUnitEntry>();
         foreach (var f in SafehouseStorage.AllFurniture)
@@ -284,6 +286,9 @@ public class SaveManager : MonoBehaviour
             if (data.survival != null) SurvivalStats.Get()?.LoadSaveData(data.survival);
         }
 
+        if (data.quickSlots != null && QuickSlotBar.Instance != null)
+            QuickSlotBar.Instance.LoadSlotIds(data.quickSlots);
+
         // 창고 (uid 매칭)
         if (data.storageUnits != null)
         {
@@ -416,6 +421,9 @@ public class GameSaveData
     public List<GridItemEntry> pocketItems = new List<GridItemEntry>();   // 주머니 4칸
     public List<GridItemEntry> secureItems = new List<GridItemEntry>();   // 보안 컨테이너 3×3
     public string equippedWeapon;
+
+    // 퀵슬롯(1~6) — itemId 6개(빈 칸은 "")
+    public List<string> quickSlots;
 
     // 생존 스탯 (수분/포만감)
     public SurvivalSaveData survival;
