@@ -16,6 +16,15 @@ public static class TraitManagerSelfTest
     public static void Run()
     {
         pass = 0; fail = 0;
+
+        // ── 진단: Resources vs AssetDatabase 로드 카운트 (0개 로드 원인 격리) ──
+        int resTrait  = Resources.LoadAll<TraitData>("Data/Traits").Length;
+        int resRecipe = Resources.LoadAll<RecipeData>("Data/Recipes").Length;
+        int adbTrait  = AssetDatabase.FindAssets("t:TraitData").Length;
+        Debug.Log($"[진단] Resources TraitData={resTrait} · Resources RecipeData={resRecipe} · AssetDatabase TraitData={adbTrait}\n" +
+                  "  → 둘 다 Resources=0인데 AssetDatabase>0: 에딧모드 Resources 퀵(런타임 정상, 폴백이 처리).\n" +
+                  "  → AssetDatabase도 0: 에셋이 TraitData로 인식 안 됨(임포터 재실행 필요).");
+
         var go = new GameObject("__trait_selftest");
         try
         {
