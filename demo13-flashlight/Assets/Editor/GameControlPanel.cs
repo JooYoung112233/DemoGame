@@ -294,14 +294,22 @@ public class GameControlPanel : EditorWindow
         if (monsterPresetReq != null)
         {
             var preset = monsterPresetReq; monsterPresetReq = null;
-            string baseId = preset.id; int suffix = 0;
-            while (statDB.GetUnit(preset.id) != null) { suffix++; preset.id = $"{baseId}_{suffix}"; }
-            Undo.RecordObject(statDB, "Add Unit Preset");
-            statDB.units.Add(preset);
-            EditorUtility.SetDirty(statDB);
-            AssetDatabase.SaveAssets();
-            statDBSo = null;                 // 새 유닛 반영 위해 재생성
-            monsterIdx = statDB.units.Count - 1;
+            int existingIdx = statDB.units.FindIndex(u => u != null && u.id == preset.id);
+            if (existingIdx >= 0)
+            {
+                // 같은 id 유닛이 이미 있으면 중복 생성하지 않고 선택만 — 프리셋 반복 클릭 시 _1/_2 누적 방지
+                monsterIdx = existingIdx;
+                ShowNotification(new GUIContent($"'{preset.id}' 이미 있음 — 중복 생성 안 함(기존 선택)"));
+            }
+            else
+            {
+                Undo.RecordObject(statDB, "Add Unit Preset");
+                statDB.units.Add(preset);
+                EditorUtility.SetDirty(statDB);
+                AssetDatabase.SaveAssets();
+                statDBSo = null;                 // 새 유닛 반영 위해 재생성
+                monsterIdx = statDB.units.Count - 1;
+            }
         }
 
         if (statDBSo == null || statDBSo.targetObject != statDB) statDBSo = new SerializedObject(statDB);
