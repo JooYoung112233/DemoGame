@@ -2,6 +2,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
+/// 적별 전리품 드랍 한 줄 — itemId × 확률 × 수량범위. UnitStatData.drops 리스트에 포함.
+/// 밸런스 에디터(Control Panel ▸ StatDB ▸ Units ▸ 전리품 드랍)에서 직접 편집.
+/// </summary>
+[System.Serializable]
+public class EnemyDropEntry
+{
+    [Tooltip("드랍 아이템 itemId (ItemDatabase 기준).")]
+    public string itemId;
+    [Tooltip("드랍 확률 0~1.")]
+    [Range(0f, 1f)] public float chance = 0.5f;
+    [Tooltip("최소 수량.")]
+    [Min(1)] public int minQty = 1;
+    [Tooltip("최대 수량.")]
+    [Min(1)] public int maxQty = 1;
+}
+
+/// <summary>
 /// 유닛(적/NPC) 통합 스탯. StatDB.units 리스트에 포함.
 /// id(키)로 조회: StatDB.Instance.GetUnit("bandit_melee")
 /// </summary>
@@ -65,6 +82,11 @@ public class UnitStatData
     [Header("보상")]
     public int expReward = 10;
     public int goldReward = 5;
+
+    // ===== 전리품 드랍 (적별 전용 테이블) =====
+    [Header("전리품 드랍 (비우면 지역 루트로 폴백)")]
+    [Tooltip("적 처치 시 굴리는 드랍 항목. 비면 지역(Ground) 루트로 폴백, 채우면 이 테이블이 우선. EnemyController.DropLoot가 읽음.")]
+    public List<EnemyDropEntry> drops = new List<EnemyDropEntry>();
 
     // ===== 모션(애니 속도/거리) — 플레이어와 동일 규칙 =====
     // ⚠️ 데이터만 준비됨. 적/NPC는 아직 Spine 애니 시스템이 없어 와이어링 안 됨(적 애니 생기면 적용).

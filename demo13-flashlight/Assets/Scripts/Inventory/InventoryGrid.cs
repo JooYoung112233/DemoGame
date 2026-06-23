@@ -468,6 +468,7 @@ public class InventoryGrid
                 count = p.item.stackCount,
                 durability = p.item.durability,
                 x = p.gridX, y = p.gridY, rotated = p.rotated,
+                attachments = p.item.HasAnyAttachment ? (string[])p.item.attachments.Clone() : null,
             });
         }
         return list;
@@ -484,6 +485,8 @@ public class InventoryGrid
             if (data == null) continue;
             var inst = new ItemInstance(data, e.count);
             if (data.hasDurability) inst.durability = e.durability;
+            if (e.attachments != null && e.attachments.Length > 0)
+                inst.attachments = (string[])e.attachments.Clone();
             if (!TryPlace(inst, e.x, e.y, e.rotated)) TryAutoPlace(inst);
         }
     }

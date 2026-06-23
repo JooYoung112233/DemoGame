@@ -66,6 +66,15 @@
 
 > ⚠️ 데모 폴더명 `demo13-flashlight`는 역사적 이름. **손전등(F토글 단일 빔) 메커니즘은 폐기** — 빛은 시야 FOV + **착용 랜턴**(위)으로 대체.
 
+### FOV 시야콘 구현 1차 (2026-06-19)
+> **결정: 좀보이드식 시야콘 — 정면 부채꼴 + 근접 360° 밖의 적은 안 보임(몸체 렌더러 숨김). AI·충돌은 유지(적은 존재하되 안 보일 뿐).**
+
+- **`PlayerVision`**(신규, 부팅 자가생성): 매 프레임(LateUpdate) `EnemyController.All` 순회 → 가시성 판정 → `EnemyController.SetVisionVisible(bool)`(spriteRenderer + HP바 토글). 안전구역은 적이 없어 무영향.
+- **판정**: `사거리 안 && (근접반경 안 || 콘각도 안) && (LOS 켜졌으면 벽 안 막힘)`. 콘은 `TopDownPlayer.FacingDirection`(마우스) 기준. LOS = `Physics2D.Linecast`(Player/Enemy/IgnoreRaycast 제외, 트리거 무시 → 솔리드 벽만 차단).
+- **튜닝(GameTuning)**: `visionEnabled`(킬스위치) / `visionFovDegrees`(150) / `visionRange`(9) / `visionNearRadius`(2.2) / `visionLineOfSight`(true). Control Panel에서 조절.
+- **2026-06-05 '항상 은신 + 말풍선' 실험 정리**: FOV가 가시성 권위가 되며 `EnemySpeechBubble.Enabled` **기본 OFF**(둘 다 bodySprite를 만져 동시 ON 금지). 말풍선을 off-screen 단서로 FOV와 **결합**하려면 EnemySpeechBubble의 body-hide를 떼고 PlayerVision에만 맡기는 방향(후속 옵션).
+- **⚠️ 미완(다음 FOV 단계)**: 시각적 어둠 오버레이(콘 밖 어둑/포그 — 현재는 적 몸체만 숨김, 화면 자체는 안 어두움). 지역/시간대별 가시성 가변. 착용 랜턴(Light2D) 연동.
+
 ### 적 은신 + 머리 위 말풍선 (2026-06-05, 실험 토글)
 
 > 시야 콘을 "적을 드러내는" 장치로 쓰지 않고, **적은 항상 안 보이게(몸체 숨김) 하되 "말할 때"만 머리 위 말풍선으로 존재를 흘리는** 방향 실험.

@@ -64,7 +64,8 @@
 - 배치: 고철시장(ScrapMarket_GB) 밴딧 공터(6,40)에 `bandit_melee × 3` 존. **재빌드 필요**(`Tools ▸ TopDown ▸ 빌드 ▸ 지역1` 또는 고철시장 빌더).
 - ⚠️ **StatDB에 `bandit_melee` 유닛 등록 필요**: 미등록 시 그레이박스 적 + EnemyController 인스펙터 기본 스탯으로 폴백(동작은 하나 의도 스탯 미적용). Control Panel ▸ StatDB ▸ Units에서 추가. [→ balance.md](balance.md)
 - **적 HP**: `EnemyController.Start`가 `unitStat.maxHp`를 Health에 적용(미등록 시 인스펙터 기본).
-- **적 처치 전리품(2026-06-19 결정)**: 처치 시 **지상(Ground) 티어 region 루트**를 시신 주변에 산포 드랍(= 컨테이너(Container 티어)보다 약함 — 잡기보다 상자가 더 값짐). `GameTuning.enemyDropChance`(기본 1)로 게이트, 루트 자체 확률은 RegionLootCatalog가 처리. ⚠️ 임시 기획 — **결정(2026-06-19): 적별 전용 드랍 테이블을 밸런스 에디터에 추가해 사용자가 직접 편집**(후속 구현). [→ economy.md](economy.md)
+- **적 처치 전리품(2026-06-19)**: `EnemyController.DropLoot`가 **적별 전용 드랍 테이블(`UnitStatData.drops`) 우선**, 비면 **지상(Ground) 티어 region 루트 폴백**(컨테이너보다 약함). `GameTuning.enemyDropChance`로 전역 게이트.
+  - **적별 드랍 테이블** = `List<EnemyDropEntry>{ itemId, chance(0~1), minQty, maxQty }`. **Control Panel ▸ StatDB ▸ Units ▸ 전리품 드랍**에서 유닛별로 직접 편집(비우면 지역 루트). 처치 시 각 항목을 chance로 굴려 `Random(min,max)`개 드랍. [→ balance.md](balance.md) [→ economy.md](economy.md)
 
 ## 무기 파츠 (부착물) — 2026-06-19 결정
 
@@ -76,7 +77,8 @@
 - **UI**: 중앙 패널 상단 "무기 파츠 공간"에 장착 무기의 4슬롯 표시(부착=아이콘/이름+클릭 분리, 빈칸=종류 라벨). **부착**=파츠 우클릭 "부착"(종류 슬롯 비어있을 때). **분리**=슬롯 클릭 → 인벤 회수.
 - **효과(현재)**: `partMoveSpeedMult`·`partStaminaMult`가 장착 무기 이동/스태미너 보정에 곱연산 적용(`TopDownPlayer` × `PlayerEquipment.WeaponPartMoveMult/WeaponPartStaminaMult`). 사거리/반동/장탄은 **총기 도입 시 활용**(필드만 준비).
 - 파츠 4종 SO: `scope_basic`/`muzzle_basic`/`mag_extended`/`grip_tactical` (`Resources/Items/Misc/WeaponPart/`). 아이콘 미연결(에디터에서 연결 시 표시).
-- ⚠️ **미완(후속)**: 부착물 **세이브 영속화**(인벤 무기 GridItemEntry 확장 필요), 드래그 부착, 총기 무기+사거리/반동/장탄 실효과.
+- **세이브 영속화(2026-06-19 완료)**: `GridItemEntry.attachments`(인벤 무기) + `GameSaveData.equippedWeaponAttachments`(장착 무기) → 저장/로드 라운드트립. **드래그 부착(완료)**: 파츠를 weaponBox 슬롯에 드래그 = 부착(컨텍스트 "부착"과 별개).
+- ⚠️ **미완(총기 설계 필요)**: 총기 무기 + 사거리/반동/장탄(`partRangeBonus`/`partRecoilMult`/`partMagBonus`) 실효과. (현재 필드만 준비, 근접 무기엔 손잡이 이속/스태미너만 적용.)
 
 ## 시야 (FOV) — 2026-06-19 결정
 - **결정: 좀보이드(Project Zomboid)와 동일한 시야콘** — 플레이어 정면 부채꼴 밖은 가려짐(적/오브젝트 비가시), 지역/시간별 어둠 혼합. 기존 손전등-주광 방식 폐기. 후속 구현(렌더링/가시성 시스템). [→ rendering.md](rendering.md)

@@ -129,7 +129,11 @@ public class SaveManager : MonoBehaviour
             if (inv != null && inv.PocketsGrid != null) data.pocketItems = inv.PocketsGrid.GetSaveData();
             if (inv != null && inv.SecureGrid != null) data.secureItems = inv.SecureGrid.GetSaveData();
             var eq = playerGO.GetComponent<PlayerEquipment>();
-            if (eq != null) data.equippedWeapon = eq.GetSaveData();
+            if (eq != null)
+            {
+                data.equippedWeapon = eq.GetSaveData();
+                data.equippedWeaponAttachments = eq.GetEquippedWeaponAttachments();
+            }
             var survival = SurvivalStats.Get();
             if (survival != null) data.survival = survival.GetSaveData();
         }
@@ -273,7 +277,11 @@ public class SaveManager : MonoBehaviour
             // ★ 장비(가방)를 먼저 복원해야 가방 격자가 그 크기로 확장된다.
             //   (가방 아이템을 먼저 넣으면 0x0 격자라 공간 부족으로 사라지는 버그.)
             var eq = playerGO.GetComponent<PlayerEquipment>();
-            if (eq != null) eq.LoadSaveData(data.equippedWeapon);
+            if (eq != null)
+            {
+                eq.LoadSaveData(data.equippedWeapon);
+                eq.SetEquippedWeaponAttachments(data.equippedWeaponAttachments);
+            }
 
             var inv = playerGO.GetComponent<PlayerInventory>();
             if (inv != null && inv.Grid != null && data.bagItems != null)
@@ -421,6 +429,7 @@ public class GameSaveData
     public List<GridItemEntry> pocketItems = new List<GridItemEntry>();   // 주머니 4칸
     public List<GridItemEntry> secureItems = new List<GridItemEntry>();   // 보안 컨테이너 3×3
     public string equippedWeapon;
+    public string[] equippedWeaponAttachments;   // 장착 주무기 부착물 itemId[4]
 
     // 퀵슬롯(1~6) — itemId 6개(빈 칸은 "")
     public List<string> quickSlots;
@@ -450,6 +459,7 @@ public class GridItemEntry
     public int x;
     public int y;
     public bool rotated;
+    public string[] attachments;   // 무기 부착물(파츠) itemId[4] — 없으면 null
 }
 
 [System.Serializable]

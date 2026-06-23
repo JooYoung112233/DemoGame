@@ -17,8 +17,12 @@
   - **하단 HUD(`QuickSlotBar`, 자가생성)**: 퀵슬롯 1~6(우클릭 "퀵슬롯" 등록→키/클릭 사용, `PlayerInventory.UseItemById`) + **스태미너 바**(`TopDownPlayer.StaminaPercent`, 색 단계). **세이브 영속화**(`GameSaveData.quickSlots`, GetSlotIds/LoadSlotIds). 모달 중 입력 차단, 플레이어 없으면 숨김.
   - **적 HP = unitStat.maxHp 적용**(`EnemyController.Start`). **적 처치 전리품**: `OnDeath`에서 지상 티어 region 루트 시신 주변 산포(`GameTuning.enemyDropChance` 게이트, 컨테이너보다 약함).
   - **무기 파츠(부착물) 1차** — 결정: 조준경/소염기/탄창/손잡이 4종, 무기 인스턴스 귀속(타르코프식), 시스템 먼저(총은 나중). `WeaponPartType` enum + `ItemData` 파츠필드 + `ItemInstance.attachments[4]` + `PlayerEquipment.slotInstances`/`GetSlotInstance`/`WeaponPart*Mult`. 중앙 weaponBox에 4슬롯 렌더(우클릭 "부착"/슬롯클릭 "분리"), `TopDownPlayer` 이속/스태미너에 partMult 곱연산. SO 4종(scope_basic/muzzle_basic/mag_extended/grip_tactical, `Resources/Items/Misc/WeaponPart/`, category=Misc). **⚠️ 미완: 부착물 세이브 영속화(GridItemEntry 확장), 드래그 부착, 총기+사거리/반동/장탄 실효과.** unity-reviewer 통과(인스턴스 추적·무게·null 안전 OK).
-  - ⚠️ **StatDB.asset 확인**: ①`playerStat.motions`/`units[].motions`가 빈 리스트로 로드될 수 있음(런타임 폴백=기존 거동, 안전) → Control Panel ▸ StatDB에서 motions 기본값 보이는지 확인, 비면 채워 저장. ②**`bandit_melee` 유닛 미등록** → 적이 그레이박스+기본스탯으로 폴백(동작은 함). Control Panel ▸ StatDB ▸ Units에 추가 권장. ③파츠 SO 아이콘 미연결(UI는 이름 폴백).
-- **다음 코드 후보**(사용자 지정): ① **FOV 시야콘**(좀보이드 동일 — 정면 부채꼴 밖 비가시, 렌더링/가시성 시스템) ② **적별 전용 드랍 테이블 — 밸런스 에디터에 추가**(사용자 직접 편집) ③ 무기 파츠 마무리(세이브 영속화·드래그·총기 실효과) ④ 적 Spine 애니(스텁) + motions 와이어링.
+  - **FOV 시야콘 1차**(`PlayerVision` 자가생성): 매 프레임 `EnemyController.All`(신규 레지스트리) 가시성 판정(사거리·근접360°·콘각도·LOS Linecast) → `SetVisionVisible`로 시야 밖 적 몸체/HP바 숨김(AI·충돌 유지). `GameTuning.vision*`(enabled/fov150/range9/near2.2/los). **2026-06-05 '항상 은신+말풍선' 실험 정리**: `EnemySpeechBubble.Enabled` 기본 OFF(FOV가 가시성 권위, 강제표시 제거). **⚠️ 미완: 시각적 어둠 오버레이(콘 밖 어둑/포그 — 현재 적 몸체만 숨김), 지역/시간 가변, 랜턴 연동.** unity-reviewer 통과.
+  - **적별 전용 드랍 테이블**: `UnitStatData.drops`(`EnemyDropEntry{itemId,chance,minQty,maxQty}`) + `EnemyController.DropLoot`가 테이블 우선/지역루트 폴백. **Control Panel ▸ StatDB ▸ Units ▸ 전리품 드랍**에서 유닛별 편집(제너릭 드로우 자동 노출).
+  - **특성 로드버그 수정(검증대기)**: `TraitManager.LoadDefinitions`에 에디터 AssetDatabase 폴백 + 자가검증에 진단 로그(Resources vs AssetDatabase 카운트). 사용자가 자가검증 재실행 → `[진단]` 결과 확인 필요.
+  - ⚠️ **StatDB.asset 확인**: ①motions 빈 리스트 가능(폴백 안전) → 채워 저장. ②`bandit_melee` 미등록 → 그레이박스 폴백. Control Panel ▸ StatDB. ③파츠 SO 아이콘 미연결(이름 폴백).
+  - **무기 파츠 마무리(2026-06-19)**: 부착물 **세이브 영속화**(`GridItemEntry.attachments` 인벤 무기 + `GameSaveData.equippedWeaponAttachments` 장착 무기, 라운드트립) + **드래그 부착**(`TryAttachDraggedToPartSlot` — weaponBox 슬롯에 드래그). 총기 실효과만 미완(총기 설계 필요). unity-reviewer 통과.
+- **다음 코드 후보**: ① ~~FOV 시야콘 1차~~ ✅ · ② ~~적별 드랍 테이블~~ ✅ · ③ ~~무기 파츠 마무리(세이브·드래그)~~ ✅ · ④ **특성 탭 UI**(버그 검증 후) ⑤ **FOV 어둠 오버레이**(콘 밖 화면 어둑) ⑥ 총기 무기(+파츠 사거리/반동/장탄 실효과) ⑦ 적 Spine 애니.
 - **사용자 Unity 테스트 대기**: 아래 신규 체크.
 
 ### 6/19 테스트 체크(신규)

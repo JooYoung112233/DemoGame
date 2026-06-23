@@ -1005,6 +1005,36 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 
+    /// <summary>드래그 중인 파츠가 weaponBox의 같은 종류 슬롯 위에 떨어졌으면 부착. 처리했으면 true(제스처 소비).</summary>
+    bool TryAttachDraggedToPartSlot()
+    {
+        if (weaponBox == null) return false;
+        var wpn = playerEquipment != null ? playerEquipment.GetSlotInstance(EquipSlot.PrimaryWeapon) : null;
+        if (wpn == null) return false;
+
+        var type = dragItem.data.weaponPartType;
+        var cell = weaponBox.Find($"Part_{type}") as RectTransform;
+        if (cell == null) return false;
+        if (!RectTransformUtility.RectangleContainsScreenPoint(cell, Input.mousePosition, null)) return false;
+
+        if (!string.IsNullOrEmpty(wpn.GetAttachment(type)))
+        {
+            ToastManager.Show("이미 부착됨 — 먼저 분리", ToastManager.ToastType.Warning);
+            CancelDrag();   // 원위치 복귀
+            return true;
+        }
+
+        wpn.SetAttachment(type, dragItem.data.itemId);
+        if (dragItem.stackCount > 1)
+        {
+            dragItem.stackCount--;
+            ReturnItemToInventory(dragItem);   // 남은 스택 복귀
+        }
+        ToastManager.Show($"{dragItem.data.displayName} 부착", ToastManager.ToastType.Info);
+        EndDrag();   // 고스트 제거 + RefreshAllGrids
+        return true;
+    }
+
     /// <summary>파츠를 장착 무기에 부착(컨텍스트 메뉴 "부착"에서 호출). 같은 종류 이미 있으면 거부.</summary>
     void AttachPartFromGrid(InventoryGrid.PlacedItem placed, InventoryGrid grid)
     {
@@ -2100,6 +2130,11 @@ public class CharacterPanelUI : MonoBehaviour
             CancelDrag();
             return;
         }
+
+        // (a-2) 무기 파츠 슬롯 위에 놓음 → 부착 (드래그-투-파츠슬롯)
+        if (dragItem != null && dragItem.data != null && dragItem.data.IsWeaponPart
+            && TryAttachDraggedToPartSlot())
+            return;
 
         // (b) 플레이어 격자(가방/주머니/보안)에 배치 시도
         {

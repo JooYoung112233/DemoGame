@@ -18,8 +18,10 @@ using UnityEngine;
 public class EnemySpeechBubble : MonoBehaviour
 {
     // ── 전역 토글 / 시야 콘 판정 (게임플레이용 — 라이트 렌더와 별개) ──────────
-    /// <summary>ON: 적 몸체 숨김 + 말풍선 사용. OFF: 몸체 보임 + 말풍선 끔.</summary>
-    public static bool  Enabled          = true;
+    /// <summary>ON: 적 몸체 숨김 + 말풍선 사용. OFF: 몸체 보임 + 말풍선 끔.
+    /// ⚠️ 2026-06-19: FOV 시야콘(PlayerVision) 채택으로 '항상 은신' 실험은 기본 OFF.
+    /// 가시성 권위는 PlayerVision(좀보이드식 콘). 둘 다 bodySprite.enabled를 만지므로 동시 ON 금지.</summary>
+    public static bool  Enabled          = false;
     /// <summary>시야 콘 반각(도). 전체 시야각 = 2배.</summary>
     public static float ConeHalfAngleDeg = 45f;
     /// <summary>시야 콘 사거리(유닛).</summary>
@@ -108,9 +110,9 @@ public class EnemySpeechBubble : MonoBehaviour
 
     void Update()
     {
-        // 몸체 은신 토글 (이 스크립트만 bodySprite.enabled를 만짐)
-        if (bodySprite != null && bodySprite.enabled == Enabled)
-            bodySprite.enabled = !Enabled;
+        // 몸체 은신: 실험 ON일 때만 숨김(절대 강제 표시 안 함). OFF면 가시성은 PlayerVision(FOV)이 권위.
+        if (Enabled && bodySprite != null && bodySprite.enabled)
+            bodySprite.enabled = false;
 
         if (!Enabled)
         {

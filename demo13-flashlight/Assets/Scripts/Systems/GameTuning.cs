@@ -64,6 +64,19 @@ public class GameTuning : ScriptableObject
     [Tooltip("적 처치 시 전리품(지상 티어 루트) 드랍 확률. 1=항상 굴림(루트 자체 확률은 별도), 0=안 떨굼. EnemyController가 읽음.")]
     [Range(0f, 1f)] public float enemyDropChance = 1f;
 
+    // ── 시야 (FOV 시야콘, 좀보이드식) ─────────────────────────────────
+    [Header("시야 (FOV 시야콘)")]
+    [Tooltip("시야콘 켜기. 끄면 시야 제한 없이 모든 적이 보임(디버그/비활성).")]
+    public bool visionEnabled = true;
+    [Tooltip("시야콘 전체 각도(도). 정면 기준 좌우로 절반씩. 150=정면 ±75°. PlayerVision이 읽음.")]
+    [Range(30f, 360f)] public float visionFovDegrees = 150f;
+    [Tooltip("시야 사거리(m). 이 안 + 콘 각도 안의 적만 보임.")]
+    [Range(2f, 30f)] public float visionRange = 9f;
+    [Tooltip("근접 인지 반경(m) — 이 안은 각도 무관 360° 보임(바로 옆 기척).")]
+    [Range(0f, 6f)] public float visionNearRadius = 2.2f;
+    [Tooltip("켜면 벽(솔리드 콜라이더)이 시야를 막음(LOS). 끄면 각도·사거리만.")]
+    public bool visionLineOfSight = true;
+
     // ── 생존 (수분 / 포만감 / 아사) ───────────────────────────────────
     [Header("생존 (레이드 중 차감)")]
     [Tooltip("수분 100→0까지 걸리는 시간(분, 레이드 실시간). SurvivalStats가 분→초당으로 환산해 읽음.")]

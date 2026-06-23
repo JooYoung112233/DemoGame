@@ -90,6 +90,26 @@ public class TraitManager : MonoBehaviour
     {
         if (all.Count > 0) return; // 중복 로드 방지
         var loaded = Resources.LoadAll<TraitData>("Data/Traits");
+
+#if UNITY_EDITOR
+        // 에딧 모드에서 Resources.LoadAll이 (런타임은 정상인데) 0을 반환하는 케이스 폴백.
+        // AssetDatabase는 에디터에서 임포트된 에셋을 확실히 찾는다. (빌드에선 컴파일 제외 → 순수 Resources)
+        if (loaded == null || loaded.Length == 0)
+        {
+            var guids = UnityEditor.AssetDatabase.FindAssets("t:TraitData");
+            var list = new List<TraitData>(guids.Length);
+            foreach (var g in guids)
+            {
+                var p = UnityEditor.AssetDatabase.GUIDToAssetPath(g);
+                var t = UnityEditor.AssetDatabase.LoadAssetAtPath<TraitData>(p);
+                if (t != null) list.Add(t);
+            }
+            loaded = list.ToArray();
+            if (loaded.Length > 0)
+                Debug.Log($"[TraitManager] (에디터 폴백) AssetDatabase에서 특성 {loaded.Length}개 로드 — Resources.LoadAll가 0 반환.");
+        }
+#endif
+
         foreach (var t in loaded)
         {
             if (t == null || string.IsNullOrEmpty(t.traitId)) continue;

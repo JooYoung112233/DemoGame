@@ -32,6 +32,25 @@ public class PlayerEquipment : MonoBehaviour
         if (inst != null && GetSlot(slot) == inst.data) slotInstances[slot] = inst;
     }
 
+    // ── 세이브: 장착 주무기 부착물 ────────────────────────────────────
+    /// <summary>장착 주무기의 부착물 itemId[4] (없으면 null). SaveManager용.</summary>
+    public string[] GetEquippedWeaponAttachments()
+    {
+        var inst = GetSlotInstance(EquipSlot.PrimaryWeapon);
+        return (inst != null && inst.HasAnyAttachment) ? inst.attachments : null;
+    }
+
+    /// <summary>로드 후 장착 주무기에 부착물 복원(인스턴스 없으면 생성).</summary>
+    public void SetEquippedWeaponAttachments(string[] att)
+    {
+        if (att == null || att.Length == 0) return;   // JsonUtility는 null→빈배열 → 길이로 가드
+        var data = GetSlot(EquipSlot.PrimaryWeapon);
+        if (data == null) return;
+        var inst = GetSlotInstance(EquipSlot.PrimaryWeapon);
+        if (inst == null) { inst = new ItemInstance(data); slotInstances[EquipSlot.PrimaryWeapon] = inst; }
+        inst.attachments = (string[])att.Clone();
+    }
+
     // ── 무기 부착물 집계 보정 (장착 주무기 기준) ──────────────────────
     public float WeaponPartMoveMult    => PartMult(EquipSlot.PrimaryWeapon, p => p.partMoveSpeedMult);
     public float WeaponPartStaminaMult => PartMult(EquipSlot.PrimaryWeapon, p => p.partStaminaMult);

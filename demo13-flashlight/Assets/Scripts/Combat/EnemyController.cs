@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -11,6 +12,10 @@ public class EnemyController : MonoBehaviour
     #region 열거형 & 필드
 
     public enum State { Patrol, Chase, AttackWindup, Attack, Hit, Stunned, Dead }
+
+    /// <summary>활성 적 레지스트리 — PlayerVision(FOV 시야콘)이 순회.</summary>
+    public static readonly List<EnemyController> All = new List<EnemyController>();
+    bool _visionVisible = true;
 
     [Header("Detection")]
     [SerializeField] float detectRange    = 8f;
@@ -125,6 +130,23 @@ public class EnemyController : MonoBehaviour
     {
         unitKey = key;
         if (StatDB.Instance != null) unitStat = StatDB.Instance.GetUnit(unitKey);
+    }
+
+    void OnEnable() => All.Add(this);
+    void OnDisable() => All.Remove(this);
+
+    /// <summary>FOV 시야콘이 호출 — 시야 밖이면 렌더러만 숨김(AI·충돌은 유지). 사망/시야 무관 처리는 호출부.</summary>
+    public void SetVisionVisible(bool v)
+    {
+        if (_visionVisible == v) return;
+        _visionVisible = v;
+        if (spriteRenderer != null) spriteRenderer.enabled = v;
+        if (!v)
+        {
+            if (hpBarBg != null) hpBarBg.SetActive(false);
+            if (hpBarFill != null) hpBarFill.SetActive(false);
+        }
+        // 다시 보이면 UpdateHPBar가 다음 프레임에 필요 시 재표시.
     }
 
     void Awake()
@@ -432,7 +454,7 @@ public class EnemyController : MonoBehaviour
     void UpdateHPBar()
     {
         if (health == null || hpBarBg == null) return;
-        bool show = health.Percent < 0.99f && state != State.Dead;
+        bool show = _visionVisible && health.Percent < 0.99f && state != State.Dead;
         hpBarBg.SetActive(show); hpBarFill.SetActive(show);
         if (!show) return;
         float pct = health.Percent;
@@ -522,20 +544,39 @@ public class EnemyController : MonoBehaviour
         Destroy(gameObject, 3f);
     }
 
-    /// <summary>전리품 드랍 — 지상 티어 region 루트를 시신 주변에 산포(컨테이너보다 약함). GameTuning.enemyDropChance로 게이트.</summary>
+    /// <summary>전리품 드랍 — 적별 전용 드랍 테이블(unitStat.drops) 우선, 비면 지상 티어 region 루트 폴백.
+    /// GameTuning.enemyDropChance로 전역 게이트.</summary>
     void DropLoot()
     {
-        float chance = GameTuning.Instance != null ? GameTuning.Instance.enemyDropChance : 1f;
-        if (Random.value > chance) return;
+        float gate = GameTuning.Instance != null ? GameTuning.Instance.enemyDropChance : 1f;
+        if (Random.value > gate) return;
 
+        // 적별 전용 테이블이 있으면 그것만 사용(밸런스 에디터에서 편집).
+        if (unitStat != null && unitStat.drops != null && unitStat.drops.Count > 0)
+        {
+            foreach (var d in unitStat.drops)
+            {
+                if (d == null || string.IsNullOrEmpty(d.itemId)) continue;
+                if (Random.value > d.chance) continue;
+                var data = ItemDatabase.Get(d.itemId);
+                if (data == null) continue;
+                int qty = Random.Range(d.minQty, Mathf.Max(d.minQty, d.maxQty) + 1);
+                if (qty > 0) DropOne(new ItemInstance(data, qty));
+            }
+            return;
+        }
+
+        // 폴백: 지역(Ground) 루트
         var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
         if (loot == null) return;
         for (int i = 0; i < loot.Length; i++)
-        {
-            if (loot[i] == null) continue;
-            Vector2 r = Random.insideUnitCircle * 0.6f;
-            WorldItem.Drop(loot[i], transform.position + new Vector3(r.x, r.y, 0f));
-        }
+            if (loot[i] != null) DropOne(loot[i]);
+    }
+
+    void DropOne(ItemInstance item)
+    {
+        Vector2 r = Random.insideUnitCircle * 0.6f;
+        WorldItem.Drop(item, transform.position + new Vector3(r.x, r.y, 0f));
     }
 
     void OnGroggyTriggered() { state = State.Stunned; SetVelocity(Vector2.zero); }

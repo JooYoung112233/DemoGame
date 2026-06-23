@@ -1,0 +1,114 @@
+using UnityEngine;
+
+/// <summary>
+/// 좀보이드식 FOV 시야콘 — 플레이어 정면 부채꼴 + 근접 360° 밖의 적은 **렌더러만 숨김**(AI·충돌은 유지).
+/// 매 프레임 `EnemyController.All`을 순회해 가시성 판정 후 `SetVisionVisible` 호출.
+///
+/// 판정: 사거리 안 && (근접 반경 안 || 콘 각도 안) && (LOS 켜졌으면 벽에 안 막힘).
+/// 튜닝: GameTuning.vision*(각도/사거리/근접/LOS/enable). 플레이어 없으면 전부 보임.
+/// 부팅 시 자가 생성(DontDestroyOnLoad). 안전구역엔 적이 없어 자연히 무영향.
+/// </summary>
+public class PlayerVision : MonoBehaviour
+{
+    public static PlayerVision Instance { get; private set; }
+
+    int _occluderMask;   // LOS 레이캐스트 대상(=Player/Enemy/IgnoreRaycast 제외)
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void Bootstrap()
+    {
+        if (MapToolScene.IsActive) return;
+        if (Instance != null) return;
+        var go = new GameObject("[PlayerVision]");
+        DontDestroyOnLoad(go);
+        go.AddComponent<PlayerVision>();
+    }
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        int player = LayerMask.NameToLayer("Player");
+        int enemy = LayerMask.NameToLayer("Enemy");
+        int mask = ~0;                       // 전체
+        if (player >= 0) mask &= ~(1 << player);
+        if (enemy >= 0) mask &= ~(1 << enemy);
+        mask &= ~(1 << 2);                    // IgnoreRaycast
+        _occluderMask = mask;
+    }
+
+    void OnDestroy() { if (Instance == this) Instance = null; }
+
+    // 이동/마우스 방향 갱신 뒤에 판정 → LateUpdate.
+    void LateUpdate()
+    {
+        var list = EnemyController.All;
+        if (list.Count == 0) return;
+
+        var p = TopDownPlayer.Instance;
+        var gt = GameTuning.Instance;
+        bool on = (gt == null || gt.visionEnabled) && p != null;
+
+        // 시야 비활성/플레이어 없음 → 전부 보이게
+        if (!on)
+        {
+            for (int i = 0; i < list.Count; i++)
+                if (list[i] != null) list[i].SetVisionVisible(true);
+            return;
+        }
+
+        float fovDeg   = gt != null ? gt.visionFovDegrees : 150f;
+        float range    = gt != null ? gt.visionRange : 9f;
+        float near     = gt != null ? gt.visionNearRadius : 2.2f;
+        bool los       = gt == null || gt.visionLineOfSight;
+
+        Vector2 eye = p.transform.position;
+        Vector2 facing = p.FacingDirection.sqrMagnitude > 0.0001f ? p.FacingDirection.normalized : Vector2.down;
+        float cosHalf = Mathf.Cos(fovDeg * 0.5f * Mathf.Deg2Rad);
+        float range2 = range * range;
+        float near2 = near * near;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            var e = list[i];
+            if (e == null) continue;
+
+            Vector2 to = (Vector2)e.transform.position - eye;
+            float d2 = to.sqrMagnitude;
+
+            bool visible;
+            if (d2 > range2) visible = false;                 // 사거리 밖
+            else if (d2 <= near2) visible = true;             // 근접 360°
+            else
+            {
+                // 콘 각도: dot(facing, dir) >= cos(half)
+                float dot = Vector2.Dot(facing, to.normalized);
+                visible = dot >= cosHalf;
+            }
+
+            // LOS: 벽(솔리드)에 막히면 안 보임
+            if (visible && los && d2 > near2)
+                visible = !BlockedByWall(eye, (Vector2)e.transform.position);
+
+            e.SetVisionVisible(visible);
+        }
+    }
+
+    static readonly RaycastHit2D[] _hitBuf = new RaycastHit2D[1];
+    ContactFilter2D _filter;
+    bool _filterInit;
+
+    bool BlockedByWall(Vector2 a, Vector2 b)
+    {
+        if (!_filterInit)
+        {
+            _filter = new ContactFilter2D { useTriggers = false };   // 트리거(아이템/허트박스)는 무시
+            _filter.SetLayerMask(_occluderMask);
+            _filter.useLayerMask = true;
+            _filterInit = true;
+        }
+        return Physics2D.Linecast(a, b, _filter, _hitBuf) > 0;
+    }
+}
