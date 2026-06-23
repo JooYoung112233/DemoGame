@@ -24,6 +24,24 @@ public class ItemInstance
     /// <summary>무기 부착물(파츠) — 종류별 itemId. 길이 4 = [Scope, Muzzle, Magazine, Grip]. (무기 인스턴스에 귀속, 타르코프식)</summary>
     public string[] attachments;
 
+    /// <summary>보관함 내부 격자(컨테이너 아이템만, 인스턴스 귀속). 첫 접근 시 internalW×H로 생성.</summary>
+    [System.NonSerialized] InventoryGrid _containerGrid;
+
+    /// <summary>이 인스턴스가 보관함인지.</summary>
+    public bool IsContainer => data != null && data.IsContainer;
+
+    /// <summary>보관함 내부 격자(컨테이너가 아니면 null). 지연 생성.</summary>
+    public InventoryGrid ContainerGrid
+    {
+        get
+        {
+            if (data == null || !data.IsContainer) return null;
+            if (_containerGrid == null)
+                _containerGrid = new InventoryGrid(data.ContainerGridWidth, data.ContainerGridHeight);
+            return _containerGrid;
+        }
+    }
+
     public ItemInstance(ItemData data, int count = 1)
     {
         uid = nextUid++;
@@ -113,8 +131,18 @@ public class ItemInstance
         }
     }
 
-    /// <summary>총 무게 (부착물 포함)</summary>
-    public float TotalWeight => (data != null ? data.weight * stackCount : 0f) + AttachmentWeight;
+    /// <summary>총 무게 (부착물 + 보관함 내용물 포함)</summary>
+    public float TotalWeight
+    {
+        get
+        {
+            float w = (data != null ? data.weight * stackCount : 0f) + AttachmentWeight;
+            if (_containerGrid != null)
+                foreach (var p in _containerGrid.GetAll())
+                    if (p.item != null) w += p.item.TotalWeight;
+            return w;
+        }
+    }
 
     /// <summary>표시용 이름 (스택이면 수량 포함)</summary>
     public string DisplayName

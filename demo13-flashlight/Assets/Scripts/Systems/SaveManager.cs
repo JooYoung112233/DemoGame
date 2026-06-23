@@ -460,6 +460,7 @@ public class GridItemEntry
     public int y;
     public bool rotated;
     public string[] attachments;   // 무기 부착물(파츠) itemId[4] — 없으면 null
+    public List<GridItemEntry> containerItems;   // 보관함(컨테이너 아이템) 내부 격자 — 컨테이너만, 없으면 null
 }
 
 [System.Serializable]

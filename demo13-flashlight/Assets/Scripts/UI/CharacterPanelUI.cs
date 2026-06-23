@@ -27,8 +27,16 @@ public class CharacterPanelUI : MonoBehaviour
     SafehouseStorage openStorage; // 안전가옥 창고 (LootContainer와 별도)
     FurnitureInstance openFurniture; // 현재 열린 가구 인스턴스 (카테고리 필터용)
     InventoryGrid openStashGrid;  // 메인 창고(MainStash) — 안전구역 인벤 우측 열
+    ItemInstance openContainerItem; // 현재 열린 보관함/가방(컨테이너 아이템) — 독립 팝업에 내부 격자 표시
+    // 컨테이너 팝업(이동 가능 창)
+    GameObject containerPopupGO;
+    RectTransform containerPopupRT;
+    RectTransform popupGridRoot;
+    Text containerPopupTitle;
+    GameObject containerPopupSortBtn;
+    Image[,] popupSlotImages;
 
-    /// <summary>현재 열린 우측 격자 (상자/가구창고/메인창고)</summary>
+    /// <summary>현재 열린 우측 격자 (상자 > 가구창고 > 메인창고)</summary>
     InventoryGrid LeftGrid =>
         openContainer != null ? openContainer.Grid
         : openStorage != null ? openStorage.Grid
@@ -98,6 +106,9 @@ public class CharacterPanelUI : MonoBehaviour
     int dragOrigX, dragOrigY;
     bool dragOrigRotated;
     bool dragRotated;
+    // 픽셀 잡기 오프셋: 아이템 좌상단 → 잡은 지점(커서)까지의 캔버스 픽셀 거리.
+    // 고스트는 이 값만큼 커서를 자유 추적(칸 점프 없음), 배치는 좌상단을 가까운 칸에 스냅.
+    Vector2 grabPixelOffset;
     GameObject ghostGO;
     RectTransform ghostRT;
     GameObject highlightGO;
@@ -114,6 +125,11 @@ public class CharacterPanelUI : MonoBehaviour
     InventoryGrid.PlacedItem contextTarget;
     InventoryGrid contextTargetGrid;
     Text contextItemNameText;
+
+    // ── 확인 팝업(버리기/폐기/제거 등 파괴적 동작 전 한 번 더 묻기) ──
+    GameObject confirmGO;
+    Text confirmText;
+    System.Action confirmYes;
 
     // ── 아이템 선택(클릭) → 착용 버튼 + 좌측 슬롯 하이라이트 ──
     ItemInstance selectedItem;        // 현재 선택된 아이템(클릭 시)
@@ -252,9 +268,172 @@ public class CharacterPanelUI : MonoBehaviour
         ShowLeftPanel(storage.Grid, title, false); // 수색 연출 X (내 창고)
     }
 
+    /// <summary>보관함/가방 열기 → 내부 격자 셀 크기에 맞는 독립 이동 팝업 표시.</summary>
+    public void OpenContainerItem(ItemInstance inst)
+    {
+        if (inst == null || !inst.IsContainer) return;
+        Show();
+        openContainerItem = inst;
+        EnsureContainerPopup();
+
+        string title = inst.data.displayName;
+        if (inst.data.allowedCategories != null && inst.data.allowedCategories.Length > 0)
+            title += $"  <size=10><color=#88AACC>({inst.data.AllowedCategorySummary})</color></size>";
+        containerPopupTitle.text = title;
+
+        // 가방/조끼(장비형 컨테이너)는 정렬 버튼 제외.
+        bool showSort = inst.data.equipSlot == EquipSlot.None;
+        if (containerPopupSortBtn != null) containerPopupSortBtn.SetActive(showSort);
+
+        RefreshContainerPopup();
+        containerPopupGO.SetActive(true);
+        containerPopupGO.transform.SetAsLastSibling();
+    }
+
+    /// <summary>컨테이너 팝업 닫기(X).</summary>
+    void CloseContainerPopup()
+    {
+        openContainerItem = null;
+        if (containerPopupGO != null) containerPopupGO.SetActive(false);
+        if (selectedGrid != null && !IsPlayerGrid(selectedGrid)) ClearSelection();
+    }
+
+    /// <summary>현재 열린 좌측 격자(가구)가 dragItem을 받을 수 있는지(카테고리 게이트).</summary>
+    bool LeftGridAccepts(ItemInstance item)
+    {
+        if (item == null || item.data == null) return false;
+        if (openFurniture != null) return openFurniture.AcceptsItem(item);
+        return true;   // 루팅 상자 / 메인 창고 = 제한 없음
+    }
+
+    // ── 컨테이너 팝업(이동 가능 창) ──────────────────────────────────
+    const float POPUP_HEADER_H = 30f;
+    const float POPUP_PAD = 8f;
+
+    void EnsureContainerPopup()
+    {
+        if (containerPopupGO != null) return;
+
+        containerPopupGO = new GameObject("ContainerPopup", typeof(RectTransform), typeof(Image));
+        containerPopupGO.transform.SetParent(canvasRT, false);
+        containerPopupRT = containerPopupGO.GetComponent<RectTransform>();
+        containerPopupRT.anchorMin = containerPopupRT.anchorMax = new Vector2(0.5f, 0.5f);
+        containerPopupRT.pivot = new Vector2(0.5f, 0.5f);
+        containerPopupRT.sizeDelta = new Vector2(220, 200);
+        containerPopupRT.anchoredPosition = new Vector2(160, 0);
+        containerPopupGO.GetComponent<Image>().color = UITheme.Panel;
+
+        // 헤더(드래그 핸들)
+        var header = new GameObject("Header", typeof(RectTransform), typeof(Image), typeof(DraggableWindow));
+        header.transform.SetParent(containerPopupRT, false);
+        var hRT = header.GetComponent<RectTransform>();
+        hRT.anchorMin = new Vector2(0, 1); hRT.anchorMax = new Vector2(1, 1); hRT.pivot = new Vector2(0.5f, 1);
+        hRT.anchoredPosition = Vector2.zero;
+        hRT.sizeDelta = new Vector2(0, POPUP_HEADER_H);
+        header.GetComponent<Image>().color = UITheme.Header;
+        header.GetComponent<DraggableWindow>().target = containerPopupRT;
+
+        // 제목
+        containerPopupTitle = MakeText(hRT, "Title", "",
+            Vector2.zero, new Vector2(0, POPUP_HEADER_H), 13, UITheme.Gold, TextAnchor.MiddleLeft);
+        var tRT = containerPopupTitle.GetComponent<RectTransform>();
+        tRT.anchorMin = new Vector2(0, 0); tRT.anchorMax = new Vector2(1, 1);
+        tRT.offsetMin = new Vector2(10, 0); tRT.offsetMax = new Vector2(-92, 0);
+        containerPopupTitle.fontStyle = FontStyle.Bold;
+
+        // 정렬 / 닫기 버튼 (헤더 우측)
+        containerPopupSortBtn = MakePopupHeaderButton(hRT, "정렬", -36, UITheme.Accent, SortContainerPopup, 50);
+        MakePopupHeaderButton(hRT, "✕", -6, UITheme.Negative, CloseContainerPopup, 24);
+
+        // 격자 루트(헤더 아래)
+        var gridGO = new GameObject("PopupGrid", typeof(RectTransform));
+        gridGO.transform.SetParent(containerPopupRT, false);
+        popupGridRoot = gridGO.GetComponent<RectTransform>();
+        popupGridRoot.anchorMin = new Vector2(0, 1); popupGridRoot.anchorMax = new Vector2(0, 1);
+        popupGridRoot.pivot = new Vector2(0, 1);
+        popupGridRoot.anchoredPosition = new Vector2(POPUP_PAD, -(POPUP_HEADER_H + POPUP_PAD));
+
+        containerPopupGO.SetActive(false);
+    }
+
+    GameObject MakePopupHeaderButton(RectTransform header, string label, float xFromRight, Color col,
+                                     UnityEngine.Events.UnityAction onClick, float width)
+    {
+        var btn = new GameObject($"Btn_{label}", typeof(RectTransform), typeof(Image), typeof(Button));
+        btn.transform.SetParent(header, false);
+        var rt = btn.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(1, 1);
+        rt.anchoredPosition = new Vector2(xFromRight, -4);
+        rt.sizeDelta = new Vector2(width, 22);
+        btn.GetComponent<Image>().color = col;
+        btn.GetComponent<Button>().onClick.AddListener(onClick);
+        MakeChildText(btn.transform, label, 12, UITheme.TextBright);
+        return btn;
+    }
+
+    /// <summary>팝업 격자 슬롯·아이템 재그림 + 팝업 창 크기를 격자에 맞춤.</summary>
+    void RefreshContainerPopup()
+    {
+        if (openContainerItem == null || popupGridRoot == null) return;
+        var grid = openContainerItem.ContainerGrid;
+        if (grid == null) return;
+
+        for (int i = popupGridRoot.childCount - 1; i >= 0; i--)
+            Destroy(popupGridRoot.GetChild(i).gameObject);
+
+        int cellTotal = CELL_SIZE + CELL_GAP;
+        float gw = grid.width * cellTotal - CELL_GAP;
+        float gh = grid.height * cellTotal - CELL_GAP;
+        popupGridRoot.sizeDelta = new Vector2(gw, gh);
+        containerPopupRT.sizeDelta = new Vector2(gw + POPUP_PAD * 2, gh + POPUP_HEADER_H + POPUP_PAD * 2);
+
+        popupSlotImages = new Image[grid.width, grid.height];
+        for (int gy = 0; gy < grid.height; gy++)
+            for (int gx = 0; gx < grid.width; gx++)
+            {
+                var slotGO = new GameObject($"PSlot_{gx}_{gy}", typeof(RectTransform), typeof(Image));
+                slotGO.transform.SetParent(popupGridRoot, false);
+                var rt = slotGO.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0, 1); rt.anchorMax = new Vector2(0, 1); rt.pivot = new Vector2(0, 1);
+                rt.anchoredPosition = new Vector2(gx * cellTotal, -gy * cellTotal);
+                rt.sizeDelta = new Vector2(CELL_SIZE, CELL_SIZE);
+                slotGO.GetComponent<Image>().color = UITheme.PanelAlt;
+                popupSlotImages[gx, gy] = slotGO.GetComponent<Image>();
+            }
+
+        RefreshContainerItems(grid, popupGridRoot, false);   // 수색 무관(항상 공개)
+    }
+
+    void SortContainerPopup()
+    {
+        if (openContainerItem == null) return;
+        SortGrid(openContainerItem.ContainerGrid);
+        RefreshContainerPopup();
+    }
+
+    /// <summary>마우스가 컨테이너 팝업 격자 위인지 + 셀 반환.</summary>
+    bool ContainerPopupAtMouse(out InventoryGrid grid, out int gx, out int gy)
+    {
+        grid = null; gx = gy = -1;
+        if (openContainerItem == null || containerPopupGO == null || !containerPopupGO.activeSelf) return false;
+        var g = openContainerItem.ContainerGrid;
+        if (g == null || popupGridRoot == null) return false;
+        if (ScreenToGridCell(popupGridRoot, g, out gx, out gy)) { grid = g; return true; }
+        return false;
+    }
+
+    /// <summary>마우스가 컨테이너 팝업 창(헤더·여백 포함) 위인지 — 뒤 격자로 클릭이 새지 않게.</summary>
+    bool PointerOverContainerPopup()
+    {
+        return containerPopupGO != null && containerPopupGO.activeSelf
+            && IsMouseOverRect(containerPopupRT);
+    }
+
     public void CloseContainer()
     {
         StopSearch(false);
+        openContainerItem = null;
+        if (containerPopupGO != null) containerPopupGO.SetActive(false);
         if (openContainer != null)
         {
             openContainer.Close();
@@ -285,6 +464,8 @@ public class CharacterPanelUI : MonoBehaviour
         openStorage = null;
         openFurniture = null;
         openStashGrid = null;
+        openContainerItem = null;
+        if (containerPopupGO != null) containerPopupGO.SetActive(false);
         ClearSelection();
 
         playerGO = null;
@@ -754,11 +935,36 @@ public class CharacterPanelUI : MonoBehaviour
     void OnEquipSlotClicked(EquipSlot slot)
     {
         if (playerEquipment == null) return;
+        if (playerEquipment.GetSlot(slot) == null) return;
+
+        // 좌클릭만으로는 해제하지 않는다(실수 방지). Ctrl+좌클릭일 때만 해제.
+        // 일반 해제/제거는 우클릭 메뉴(착용해제/제거)로.
+        if (!(Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+            return;
+
+        UnequipToInventory(slot);
+    }
+
+    /// <summary>해당 슬롯의 착용 아이템을 인벤(가방/주머니/보안)으로 해제. 부착물 보존 위해 실제 인스턴스 회수.</summary>
+    void UnequipToInventory(EquipSlot slot)
+    {
+        if (playerEquipment == null) return;
         var equipped = playerEquipment.GetSlot(slot);
         if (equipped == null) return;
 
-        // 인벤토리에 공간 있으면 해제 → 인벤으로 (가방/주머니/보안). 부착물 보존 위해 실제 인스턴스 회수.
         var inst = playerEquipment.GetSlotInstance(slot) ?? new ItemInstance(equipped, 1);
+
+        // 가방: 휴대 격자 내용물을 가방 안으로 먼저 담고(함께 보관), 해제 후 가방을 주머니/창고로.
+        if (slot == EquipSlot.Backpack && playerInventory != null)
+        {
+            playerInventory.TransferBagToContainer(inst);
+            playerEquipment.Unequip(slot);   // 휴대 격자 0×0
+            if (!playerInventory.TryAutoPlaceAnywhere(inst) && !TryPlaceInStash(inst))
+                ToastManager.Show("가방 둘 공간이 없다 (주머니·창고 가득)", ToastManager.ToastType.Warning);
+            RefreshAllGrids();
+            return;
+        }
+
         if (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(inst))
         {
             playerEquipment.Unequip(slot);
@@ -768,6 +974,29 @@ public class CharacterPanelUI : MonoBehaviour
         {
             ToastManager.Show("인벤토리 공간 부족", ToastManager.ToastType.Warning);
         }
+    }
+
+    /// <summary>메인 창고에 자동 배치 시도.</summary>
+    bool TryPlaceInStash(ItemInstance inst)
+    {
+        var stash = MainStash.Instance != null ? MainStash.Instance : MainStash.Ensure();
+        return stash != null && inst != null && stash.GetGrid().TryAutoPlace(inst);
+    }
+
+    /// <summary>착용 아이템을 완전히 제거(해제 후 레이드=바닥 산포 / 안전구역=인벤·창고 복귀).</summary>
+    void RemoveEquipped(EquipSlot slot)
+    {
+        if (playerEquipment == null) return;
+        var equipped = playerEquipment.GetSlot(slot);
+        if (equipped == null) return;
+
+        var inst = playerEquipment.GetSlotInstance(slot) ?? new ItemInstance(equipped, 1);
+        // 가방이면 휴대 내용물을 가방에 먼저 담아 함께 처리.
+        if (slot == EquipSlot.Backpack && playerInventory != null)
+            playerInventory.TransferBagToContainer(inst);
+        playerEquipment.Unequip(slot);
+        DropOrReturnItem(inst);
+        RefreshAllGrids();
     }
 
     void UpdateCharacterPanel()
@@ -1395,7 +1624,7 @@ public class CharacterPanelUI : MonoBehaviour
             grid.TryAutoPlace(it);   // 같은 격자에서 뺀 것이라 공간은 충분
     }
 
-    void RefreshContainerItems(InventoryGrid grid, RectTransform gridRoot)
+    void RefreshContainerItems(InventoryGrid grid, RectTransform gridRoot, bool applySearch = true)
     {
         int cellTotal = CELL_SIZE + CELL_GAP;
         var placed = grid.GetAll();
@@ -1411,9 +1640,9 @@ public class CharacterPanelUI : MonoBehaviour
             float itemH = h * CELL_SIZE + (h - 1) * CELL_GAP;
 
             // ── 수색 상태 판별 ──
-            bool revealed = !leftPanelSearchEnabled
+            bool revealed = !applySearch || !leftPanelSearchEnabled
                 || (revealedUids != null && revealedUids.Contains(p.item.uid));
-            bool currentlySearching = leftPanelSearchEnabled
+            bool currentlySearching = applySearch && leftPanelSearchEnabled
                 && searchingItem != null && searchingItem.item.uid == p.item.uid;
 
             // 공통 배경 GO
@@ -1720,6 +1949,10 @@ public class CharacterPanelUI : MonoBehaviour
 
     void HandleDragAndDrop()
     {
+        // 확인 팝업이 떠 있는 동안엔 패널 수동 입력 정지(뒤 격자 클릭/픽업 방지). 팝업 버튼은 EventSystem으로 동작.
+        if (confirmGO != null && confirmGO.activeSelf)
+            return;
+
         if (isDragging)
         {
             // 1제스처 드래그: 누른 상태로 끌고, 떼면 놓는다.
@@ -1745,7 +1978,12 @@ public class CharacterPanelUI : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 if (contextMenuGO != null && contextMenuGO.activeSelf)
-                    HideContextMenu();
+                {
+                    // 메뉴 '밖'을 클릭했을 때만 닫는다. 메뉴 버튼 클릭은 닫지 말고
+                    // 버튼 onClick(=마우스 업)이 발동하도록 둬야 한다(다운에서 닫으면 클릭이 씹힘).
+                    if (!IsMouseOverRect(contextMenuRT))
+                        HideContextMenu();
+                }
                 else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
                     TryQuickTransfer();
                 else
@@ -1780,6 +2018,18 @@ public class CharacterPanelUI : MonoBehaviour
 
     void TryPickupItem()
     {
+        // 컨테이너 팝업 격자 (최상단)
+        {
+            InventoryGrid cg; int cgx, cgy;
+            if (ContainerPopupAtMouse(out cg, out cgx, out cgy))
+            {
+                var placed = cg.GetAt(cgx, cgy);
+                if (placed != null) StartDrag(placed, cg, popupGridRoot);
+                return;
+            }
+            if (PointerOverContainerPopup()) return;   // 팝업 창(헤더·여백) 위 = 뒤 격자로 안 샘
+        }
+
         // 플레이어 격자 (가방/주머니/보안)
         {
             InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
@@ -1788,7 +2038,7 @@ public class CharacterPanelUI : MonoBehaviour
                 var placed = pGrid.GetAt(gx, gy);
                 if (placed != null)
                 {
-                    StartDrag(placed, pGrid);
+                    StartDrag(placed, pGrid, pRoot);
                     return;
                 }
             }
@@ -1809,7 +2059,7 @@ public class CharacterPanelUI : MonoBehaviour
                         && !revealedUids.Contains(placed.item.uid))
                         return;
 
-                    StartDrag(placed, leftGrid);
+                    StartDrag(placed, leftGrid, containerGridRoot);
                     return;
                 }
             }
@@ -1900,7 +2150,7 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 
-    void StartDrag(InventoryGrid.PlacedItem placed, InventoryGrid sourceGrid)
+    void StartDrag(InventoryGrid.PlacedItem placed, InventoryGrid sourceGrid, RectTransform sourceRoot)
     {
         isDragging = true;
         dragItem = placed.item;
@@ -1910,6 +2160,19 @@ public class CharacterPanelUI : MonoBehaviour
         dragOrigRotated = placed.rotated;
         dragRotated = placed.rotated;
         dragStartMouse = Input.mousePosition;
+        // 픽셀 잡기 오프셋 = 커서(격자 로컬) − 아이템 좌상단(격자 로컬). 잡은 지점이 커서에 고정된다.
+        grabPixelOffset = Vector2.zero;
+        if (sourceRoot != null)
+        {
+            Vector2 cursorLocal;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    sourceRoot, Input.mousePosition, null, out cursorLocal))
+            {
+                int cellTotal = CELL_SIZE + CELL_GAP;
+                Vector2 itemTopLeft = new Vector2(placed.gridX * cellTotal, -placed.gridY * cellTotal);
+                grabPixelOffset = cursorLocal - itemTopLeft;
+            }
+        }
 
         sourceGrid.Remove(placed);
         // 드래그 시작 = 이전 선택 해제(선택 하이라이트와 드래그 하이라이트 충돌 방지).
@@ -1987,7 +2250,8 @@ public class CharacterPanelUI : MonoBehaviour
         Vector2 localPos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvasRT, Input.mousePosition, null, out localPos);
-        ghostRT.anchoredPosition = localPos;
+        // 잡은 지점이 커서에 고정되도록 고스트 좌상단을 픽셀 오프셋만큼 당긴다(칸 점프 없이 자유 추적).
+        ghostRT.anchoredPosition = localPos - grabPixelOffset;
     }
 
     // ── 회전 ──
@@ -1997,7 +2261,14 @@ public class CharacterPanelUI : MonoBehaviour
         if (dragItem == null || dragItem.data == null) return;
         if (dragItem.data.gridWidth == dragItem.data.gridHeight) return; // 정사각형 무의미
         dragRotated = !dragRotated;
+        // 회전 후 새 풋프린트 픽셀 범위로 잡기 오프셋 클램프(아이템 밖으로 안 벗어나게).
+        int cellTotal = CELL_SIZE + CELL_GAP;
+        int nw = dragRotated ? dragItem.data.gridHeight : dragItem.data.gridWidth;
+        int nh = dragRotated ? dragItem.data.gridWidth : dragItem.data.gridHeight;
+        grabPixelOffset.x = Mathf.Clamp(grabPixelOffset.x, 0f, nw * cellTotal);
+        grabPixelOffset.y = Mathf.Clamp(grabPixelOffset.y, -nh * cellTotal, 0f);
         UpdateGhostSize();
+        UpdateGhostPosition();
     }
 
     // ── 하이라이트 ──
@@ -2008,7 +2279,17 @@ public class CharacterPanelUI : MonoBehaviour
         RectTransform hoverGridRoot = null;
         int cellX = -1, cellY = -1;
 
+        // 컨테이너 팝업 격자 위인지 (최상단)
+        {
+            InventoryGrid cg; int cgx, cgy;
+            if (ContainerPopupAtMouse(out cg, out cgx, out cgy))
+            {
+                hoverGrid = cg; hoverGridRoot = popupGridRoot; cellX = cgx; cellY = cgy;
+            }
+        }
+
         // 플레이어 격자 위인지 (가방/주머니/보안)
+        if (hoverGrid == null)
         {
             InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
             if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
@@ -2040,6 +2321,9 @@ public class CharacterPanelUI : MonoBehaviour
             return;
         }
 
+        // 커서가 가리키는 격자 안에서, 픽셀 오프셋 기준 아이템 원점 셀(가까운 칸 스냅)을 계산.
+        GhostOriginCell(hoverGridRoot, out cellX, out cellY);
+
         // 하이라이트 생성/재배치
         EnsureHighlight(hoverGridRoot);
         highlightGO.SetActive(true);
@@ -2047,20 +2331,32 @@ public class CharacterPanelUI : MonoBehaviour
         int w = dragRotated ? dragItem.data.gridHeight : dragItem.data.gridWidth;
         int h = dragRotated ? dragItem.data.gridWidth : dragItem.data.gridHeight;
 
-        // 카테고리 필터 체크 (가구 창고에 놓을 때)
+        // 카테고리 필터 체크 (가구 창고/컨테이너 팝업에 놓을 때)
         bool categoryOk = true;
-        if (openFurniture != null && hoverGrid == LeftGrid)
-            categoryOk = openFurniture.AcceptsItem(dragItem);
+        if (hoverGridRoot == popupGridRoot && openContainerItem != null)
+            categoryOk = openContainerItem.data.AcceptsCategory(dragItem.data.category);
+        else if (hoverGrid == LeftGrid)
+            categoryOk = LeftGridAccepts(dragItem);
 
         bool canPlace = categoryOk && hoverGrid.CanPlace(dragItem, cellX, cellY, dragRotated);
+
+        // 컨테이너 위 호버 = '안에 넣기' 표시(파랑). 빈칸 아닐 때만 검사.
+        bool insertable = false;
+        if (!canPlace)
+        {
+            var hover = hoverGrid.GetAt(cellX, cellY);
+            insertable = hover != null && hover.item != dragItem && hover.item.IsContainer
+                && hover.item.data.AcceptsCategory(dragItem.data.category)
+                && hover.item.ContainerGrid.CanAutoPlace(dragItem);
+        }
 
         int cellTotal = CELL_SIZE + CELL_GAP;
         highlightRT.anchoredPosition = new Vector2(cellX * cellTotal, -cellY * cellTotal);
         highlightRT.sizeDelta = new Vector2(
             w * CELL_SIZE + (w - 1) * CELL_GAP,
             h * CELL_SIZE + (h - 1) * CELL_GAP);
-        highlightImage.color = canPlace
-            ? new Color(0.2f, 0.8f, 0.3f, 0.35f)
+        highlightImage.color = insertable ? new Color(0.3f, 0.55f, 1f, 0.45f)   // 파랑 = 컨테이너에 넣기
+            : canPlace ? new Color(0.2f, 0.8f, 0.3f, 0.35f)
             : new Color(0.9f, 0.2f, 0.2f, 0.35f);
     }
 
@@ -2136,12 +2432,33 @@ public class CharacterPanelUI : MonoBehaviour
             && TryAttachDraggedToPartSlot())
             return;
 
+        // (a-3) 컨테이너 팝업 격자에 배치 (최상단)
+        {
+            InventoryGrid cg; int cgx, cgy;
+            if (ContainerPopupAtMouse(out cg, out cgx, out cgy))
+            {
+                if (openContainerItem != null && !openContainerItem.data.AcceptsCategory(dragItem.data.category))
+                {
+                    ToastManager.Show("이 보관함에 넣을 수 없는 종류다", ToastManager.ToastType.Warning);
+                    CancelDrag();
+                    return;
+                }
+                int ox, oy; GhostOriginCell(popupGridRoot, out ox, out oy);
+                TryPlaceInGrid(cg, ox, oy);
+                EnsureDragEnded();
+                RefreshContainerPopup();
+                return;
+            }
+            if (PointerOverContainerPopup()) { CancelDrag(); return; }   // 팝업 창 위(격자 밖)에 떨굼 = 원위치
+        }
+
         // (b) 플레이어 격자(가방/주머니/보안)에 배치 시도
         {
             InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
             if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
             {
-                TryPlaceInGrid(pGrid, gx, gy);
+                int ox, oy; GhostOriginCell(pRoot, out ox, out oy);
+                TryPlaceInGrid(pGrid, ox, oy);
                 EnsureDragEnded();   // 실패(스택 일부 등)해도 제스처 종료 — 떠다니지 않게
                 return;
             }
@@ -2154,7 +2471,15 @@ public class CharacterPanelUI : MonoBehaviour
             int gx, gy;
             if (ScreenToGridCell(containerGridRoot, leftG2, out gx, out gy))
             {
-                TryPlaceInGrid(leftG2, gx, gy);
+                // 보관함/가구 카테고리 게이트 — 불일치면 배치 거부(원위치 복귀).
+                if (!LeftGridAccepts(dragItem))
+                {
+                    ToastManager.Show("이 보관함에 넣을 수 없는 종류다", ToastManager.ToastType.Warning);
+                    CancelDrag();
+                    return;
+                }
+                int ox, oy; GhostOriginCell(containerGridRoot, out ox, out oy);
+                TryPlaceInGrid(leftG2, ox, oy);
                 EnsureDragEnded();   // 컨테이너 간 이동도 한 제스처로 종료
                 return;
             }
@@ -2217,6 +2542,21 @@ public class CharacterPanelUI : MonoBehaviour
             grid.NotifyChanged();
             RefreshAllGrids();
             return false;
+        }
+
+        // 컨테이너(보관함/가방) 위에 떨굼 → 열지 않고 그 안으로 넣기(스왑 대신).
+        // 카테고리 불일치 또는 내부 꽉참 → false 반환(스왑 X) → 호출부 EnsureDragEnded가 원위치 복구.
+        if (target.item.IsContainer && target.item != dragItem)
+        {
+            if (!target.item.data.AcceptsCategory(dragItem.data.category))
+                return false;   // 카테고리 불일치 → 원상복구
+            if (target.item.ContainerGrid.TryAutoPlace(dragItem))
+            {
+                grid.NotifyChanged();
+                EndDrag();
+                return true;
+            }
+            return false;       // 내부 꽉참 → 원상복구
         }
 
         // 스왑 시도: 대상 아이템을 빼고, 새 아이템 배치, 이전 아이템은 드래그 시작 위치로.
@@ -2343,6 +2683,33 @@ public class CharacterPanelUI : MonoBehaviour
     {
         HideContextMenu();
 
+        // 컨테이너 팝업 격자 (최상단)
+        {
+            InventoryGrid cg; int cgx, cgy;
+            if (ContainerPopupAtMouse(out cg, out cgx, out cgy))
+            {
+                var placed = cg.GetAt(cgx, cgy);
+                if (placed != null && placed.item.data != null)
+                    ShowContextMenu(placed, cg);
+                return;   // 팝업 위에선 다른 격자로 흘리지 않음
+            }
+            if (PointerOverContainerPopup()) return;
+        }
+
+        // 좌측 장비 슬롯 위 (착용 아이템) → 착용해제/자세히/제거
+        {
+            EquipSlot eqSlot;
+            if (EquipSlotAtMouse(out eqSlot) && playerEquipment != null)
+            {
+                var equipped = playerEquipment.GetSlot(eqSlot);
+                if (equipped != null)
+                {
+                    ShowEquipContextMenu(eqSlot, equipped);
+                    return;
+                }
+            }
+        }
+
         // 플레이어 격자 (가방/주머니/보안)
         {
             InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
@@ -2409,6 +2776,18 @@ public class CharacterPanelUI : MonoBehaviour
         // 안전 창고(메인 창고/가구 창고) — 수색 중 루팅 상자는 제외
         bool isSafeStorage = !isPlayerGrid && grid == LeftGrid && !leftPanelSearchEnabled;
 
+        // 열기 — 보관함(컨테이너 아이템) → 좌측에 내부 격자
+        if (data.IsContainer)
+        {
+            var capInst = placed.item;
+            AddContextButton("열기", UITheme.AccentBright, y, () =>
+            {
+                HideContextMenu();
+                OpenContainerItem(capInst);
+            });
+            y -= 26f;
+        }
+
         // 장착 — 모든 장착 가능 타입(가방·헬멧·방어구·리그·무기·근접·특수창)을 어느 격자에서든 노출.
         if (IsEquippable(data))
         {
@@ -2419,6 +2798,7 @@ public class CharacterPanelUI : MonoBehaviour
             AddContextButton("착용", UITheme.AccentBright, y, () =>
             {
                 EquipFromGrid(capItem, capGrid);
+                HideContextMenu();
             });
             y -= 26f;
         }
@@ -2475,11 +2855,16 @@ public class CharacterPanelUI : MonoBehaviour
         {
             AddContextButton("버리기", UITheme.Negative, y, () =>
             {
-                var item = contextTarget.item;
-                grid.Remove(contextTarget);
-                DropOrReturnItem(item);
+                var capPlaced = contextTarget;
+                var capGrid = grid;
+                var item = capPlaced.item;
                 HideContextMenu();
-                RefreshAllGrids();
+                ShowConfirm($"'{item.DisplayName}'을(를) 버릴까요?", () =>
+                {
+                    capGrid.Remove(capPlaced);
+                    DropOrReturnItem(item);
+                    RefreshAllGrids();
+                });
             });
             y -= 26f;
         }
@@ -2488,10 +2873,16 @@ public class CharacterPanelUI : MonoBehaviour
         {
             AddContextButton("폐기", UITheme.Negative, y, () =>
             {
-                grid.Remove(contextTarget);
+                var capPlaced = contextTarget;
+                var capGrid = grid;
+                var nm = capPlaced.item.DisplayName;
                 HideContextMenu();
-                RefreshAllGrids();
-                ToastManager.Show("아이템 폐기됨", ToastManager.ToastType.Info);
+                ShowConfirm($"'{nm}'을(를) 영구 폐기할까요?\n되돌릴 수 없습니다.", () =>
+                {
+                    capGrid.Remove(capPlaced);
+                    RefreshAllGrids();
+                    ToastManager.Show("아이템 폐기됨", ToastManager.ToastType.Info);
+                });
             });
             y -= 26f;
         }
@@ -2508,12 +2899,185 @@ public class CharacterPanelUI : MonoBehaviour
         contextMenuRT.anchoredPosition = pos;
     }
 
+    /// <summary>착용 슬롯 아이템 우클릭 메뉴 — 착용해제 / 자세히 / 제거(확인 팝업).</summary>
+    void ShowEquipContextMenu(EquipSlot slot, ItemData data)
+    {
+        contextTarget = null;        // 격자 대상 아님(슬롯 기반)
+        contextTargetGrid = null;
+
+        EnsureContextMenu();
+        contextMenuGO.SetActive(true);
+
+        Vector2 localPos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvasRT, Input.mousePosition, null, out localPos);
+        contextMenuRT.anchoredPosition = localPos;
+
+        var inst = playerEquipment.GetSlotInstance(slot) ?? new ItemInstance(data, 1);
+        contextItemNameText.text = inst.DisplayName;
+        contextItemNameText.color = data.RarityColor;
+
+        // 기존 버튼 제거 (이름/배경 제외)
+        for (int i = contextMenuRT.childCount - 1; i >= 0; i--)
+        {
+            var child = contextMenuRT.GetChild(i);
+            if (child.name != "CtxBg" && child.name != "CtxName")
+                Destroy(child.gameObject);
+        }
+
+        float y = -28f;
+        var capSlot = slot;
+        var capInst = inst;
+        var capName = data.displayName;
+
+        AddContextButton("착용해제", UITheme.AccentBright, y, () =>
+        {
+            UnequipToInventory(capSlot);
+            HideContextMenu();
+        });
+        y -= 26f;
+
+        AddContextButton("자세히", UITheme.TextBright, y, () =>
+        {
+            ItemDetailUI.Show(capInst);
+            HideContextMenu();
+        });
+        y -= 26f;
+
+        AddContextButton("제거", UITheme.Negative, y, () =>
+        {
+            HideContextMenu();
+            ShowConfirm($"'{capName}'을(를) 제거할까요?", () => RemoveEquipped(capSlot));
+        });
+        y -= 26f;
+
+        // 메뉴 높이 + 화면 밖 보정
+        float totalH = Mathf.Abs(y) + 8f;
+        contextMenuRT.sizeDelta = new Vector2(150, totalH);
+        Vector2 canvasSize = canvasRT.rect.size;
+        Vector2 pos = contextMenuRT.anchoredPosition;
+        if (pos.x + 150 > canvasSize.x / 2f) pos.x -= 150;
+        if (pos.y - totalH < -canvasSize.y / 2f) pos.y += totalH;
+        contextMenuRT.anchoredPosition = pos;
+    }
+
     void HideContextMenu()
     {
         if (contextMenuGO != null)
             contextMenuGO.SetActive(false);
         contextTarget = null;
         contextTargetGrid = null;
+    }
+
+    // ── 확인 팝업 ──
+
+    /// <summary>파괴적 동작(버리기/폐기/제거) 전 [예/아니오] 모달. 예 → onYes 실행.</summary>
+    void ShowConfirm(string message, System.Action onYes)
+    {
+        EnsureConfirm();
+        confirmYes = onYes;
+        confirmText.text = message;
+        confirmGO.SetActive(true);
+        confirmGO.transform.SetAsLastSibling();   // 항상 최상단(컨텍스트 메뉴/고스트 위)
+    }
+
+    void HideConfirm()
+    {
+        if (confirmGO != null) confirmGO.SetActive(false);
+        confirmYes = null;
+    }
+
+    void EnsureConfirm()
+    {
+        if (confirmGO != null) return;
+
+        // 전체 화면 반투명 백드롭(뒤 클릭 차단: raycastTarget=true)
+        confirmGO = new GameObject("ConfirmPopup");
+        confirmGO.transform.SetParent(canvasRT, false);
+        var backRT = confirmGO.AddComponent<RectTransform>();
+        backRT.anchorMin = Vector2.zero;
+        backRT.anchorMax = Vector2.one;
+        backRT.offsetMin = Vector2.zero;
+        backRT.offsetMax = Vector2.zero;
+        var backImg = confirmGO.AddComponent<Image>();
+        backImg.color = new Color(0f, 0f, 0f, 0.6f);
+        backImg.raycastTarget = true;
+
+        // 중앙 패널
+        var panelGO = new GameObject("ConfirmPanel");
+        panelGO.transform.SetParent(confirmGO.transform, false);
+        var panelRT = panelGO.AddComponent<RectTransform>();
+        panelRT.anchorMin = new Vector2(0.5f, 0.5f);
+        panelRT.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRT.pivot = new Vector2(0.5f, 0.5f);
+        panelRT.sizeDelta = new Vector2(360, 150);
+        var panelImg = panelGO.AddComponent<Image>();
+        panelImg.color = UITheme.Panel;
+
+        // 메시지
+        var msgGO = new GameObject("Msg");
+        msgGO.transform.SetParent(panelRT, false);
+        var msgRT = msgGO.AddComponent<RectTransform>();
+        msgRT.anchorMin = new Vector2(0, 1);
+        msgRT.anchorMax = new Vector2(1, 1);
+        msgRT.pivot = new Vector2(0.5f, 1);
+        msgRT.anchoredPosition = new Vector2(0, -16);
+        msgRT.sizeDelta = new Vector2(-24, 72);
+        confirmText = msgGO.AddComponent<Text>();
+        confirmText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        confirmText.fontSize = 14;
+        confirmText.color = UITheme.TextBright;
+        confirmText.alignment = TextAnchor.MiddleCenter;
+        confirmText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        confirmText.verticalOverflow = VerticalWrapMode.Overflow;
+
+        // 버튼 2개 (아니오 / 예)
+        MakeConfirmButton(panelRT, "아니오", UITheme.TextBright, new Vector2(-85, 24), () => HideConfirm());
+        MakeConfirmButton(panelRT, "예", UITheme.Negative, new Vector2(85, 24), () =>
+        {
+            var act = confirmYes;
+            HideConfirm();
+            act?.Invoke();
+        });
+
+        confirmGO.SetActive(false);
+    }
+
+    void MakeConfirmButton(RectTransform parent, string label, Color textColor, Vector2 anchoredPos, System.Action onClick)
+    {
+        var btnGO = new GameObject($"Confirm_{label}");
+        btnGO.transform.SetParent(parent, false);
+        var btnRT = btnGO.AddComponent<RectTransform>();
+        btnRT.anchorMin = new Vector2(0.5f, 0f);
+        btnRT.anchorMax = new Vector2(0.5f, 0f);
+        btnRT.pivot = new Vector2(0.5f, 0f);
+        btnRT.anchoredPosition = anchoredPos;
+        btnRT.sizeDelta = new Vector2(130, 32);
+
+        var img = btnGO.AddComponent<Image>();
+        img.color = UITheme.Cell;
+        var btn = btnGO.AddComponent<Button>();
+        btn.targetGraphic = img;
+        var colors = btn.colors;
+        colors.highlightedColor = UITheme.CellHover;
+        colors.pressedColor = UITheme.CellPressed;
+        btn.colors = colors;
+        btn.onClick.AddListener(() => onClick());
+
+        var txtGO = new GameObject("Label");
+        txtGO.transform.SetParent(btnGO.transform, false);
+        var txtRT = txtGO.AddComponent<RectTransform>();
+        txtRT.anchorMin = Vector2.zero;
+        txtRT.anchorMax = Vector2.one;
+        txtRT.offsetMin = Vector2.zero;
+        txtRT.offsetMax = Vector2.zero;
+        var txt = txtGO.AddComponent<Text>();
+        txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.fontSize = 13;
+        txt.fontStyle = FontStyle.Bold;
+        txt.color = textColor;
+        txt.text = label;
+        txt.alignment = TextAnchor.MiddleCenter;
     }
 
     void EnsureContextMenu()
@@ -2627,6 +3191,21 @@ public class CharacterPanelUI : MonoBehaviour
     }
 
     /// <summary>마우스 아래의 플레이어 격자(가방→주머니→보안 순)와 셀을 찾는다.</summary>
+    /// <summary>드래그 중 아이템 좌상단(= 커서 − 픽셀 잡기 오프셋)이 놓일 격자 칸을 가까운 칸으로 스냅해 반환.</summary>
+    void GhostOriginCell(RectTransform gridRoot, out int gx, out int gy)
+    {
+        gx = gy = 0;
+        if (gridRoot == null) return;
+        Vector2 localPos;
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                gridRoot, Input.mousePosition, null, out localPos))
+            return;
+        Vector2 topLeft = localPos - grabPixelOffset;   // 아이템 좌상단 로컬 위치
+        int cellTotal = CELL_SIZE + CELL_GAP;
+        gx = Mathf.RoundToInt(topLeft.x / cellTotal);
+        gy = Mathf.RoundToInt(-topLeft.y / cellTotal);
+    }
+
     bool PlayerGridAtMouse(out InventoryGrid grid, out RectTransform root, out int gx, out int gy)
     {
         grid = null; root = null; gx = gy = -1;
@@ -2656,6 +3235,10 @@ public class CharacterPanelUI : MonoBehaviour
         var leftGrid = LeftGrid;
         if (leftGrid != null && leftPanelRoot != null && leftPanelRoot.activeSelf)
             RefreshLeftGrid(leftGrid);
+
+        // 컨테이너 팝업도 갱신(팝업 안/밖 드래그 반영).
+        if (openContainerItem != null && containerPopupGO != null && containerPopupGO.activeSelf)
+            RefreshContainerPopup();
 
         // 선택 아이템이 더 이상 격자에 없으면 선택 해제(장착/이동/제거 후 꼬임 방지).
         ValidateSelection();
@@ -2794,6 +3377,10 @@ public class CharacterPanelUI : MonoBehaviour
         ItemData prev = playerEquipment.GetSlot(apiSlot);
         ItemInstance prevInst = playerEquipment.GetSlotInstance(apiSlot);
 
+        // 가방 교체: 기존 가방의 휴대 내용물을 그 가방 인스턴스에 먼저 담아 함께 회수(창고로 흩어지지 않게).
+        if (apiSlot == EquipSlot.Backpack && prevInst != null && playerInventory != null)
+            playerInventory.TransferBagToContainer(prevInst);
+
         bool ok = item.data.category == ItemCategory.Weapon
             ? playerEquipment.EquipWeapon(item.data)
             : playerEquipment.Equip(item.data);
@@ -2808,6 +3395,9 @@ public class CharacterPanelUI : MonoBehaviour
         else
         {
             playerEquipment.SetSlotInstance(apiSlot, item);   // 실제 인스턴스(부착물) 연결
+            // 새 가방의 보관 내용물 → 휴대 격자(가방 안 짐이 따라옴).
+            if (apiSlot == EquipSlot.Backpack && playerInventory != null)
+                playerInventory.TransferContainerToBag(item);
             if (prev != null && prev != item.data)
                 // 교체로 빠진 기존 장비를 인벤(없으면 창고)로 회수 — 부착물 보존, 바닥 X.
                 ReturnItemToInventory(prevInst ?? new ItemInstance(prev, 1));

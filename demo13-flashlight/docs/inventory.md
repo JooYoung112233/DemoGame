@@ -315,7 +315,7 @@ allowedCategories  : ItemCategory[]      // 빈 배열=전체(범용 상자), �
 
 **마이그레이션**
 - 기존 `FurnitureData` SO/`SafehouseStorage` 가구 인스턴스 → **컨테이너 ItemData로 일원화**(2026-05-26 가구 기획 대체 마무리).
-- `cont_*` 9종(§보관함 사양) = 위 필드 채운 ItemData로 생성 — **필드 추가가 SO 생성의 선행 작업**(현재 미생성 사유).
+- `cont_*` = 위 필드 채운 ItemData로 생성. **2026-06-23 8종 생성 완료**(`Resources/Items/Container/`): box·fridge·drawer·material·medbox·weapon·docs·safe. **cont_ammo는 보류**(ItemCategory에 Ammo 미정의 — 총기 도입 시).
 
 **구현 순서**
 1. `ItemData`에 4필드 + `ItemInstance.containerGrid` 추가.
@@ -440,6 +440,7 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-06-23 | **보관함 컨테이너 ItemData SO 8종 생성** (`Assets/Resources/Items/Container/`). cont_box(범용 2×2→내부6×4, 전체)·cont_fridge(냉장고 2×3→8×7, Consumable)·cont_drawer(서랍 2×2→6×8, Misc)·cont_material(재료함 2×2→8×6, Material)·cont_medbox(의료함 1×2→6×5, Medical)·cont_weapon(무기케이스 2×3→8×7, Weapon)·cont_docs(문서함 1×2→5×6, Key)·cont_safe(금고 2×2→6×4, Valuable). 공통: category=Misc, isContainer=1, maxStack=1, icon/worldDropPrefab 비움(그레이박스). 가격(buyPrice)=§9.7 관리인 판매가, sellPrice=절반. allowedCategories는 Unity enum 배열 YAML(`- N`) 포맷, 범용상자만 `[]`. **cont_ammo는 ItemCategory에 Ammo 미정의로 보류**(총기 도입 시). ItemDatabase가 Resources/Items/** 재귀 로드라 자동 포함 → 인게임·F1 노출. 근거: §보관함 사양(2026-06-10) + ItemData 컨테이너 필드 구현 완료. |
 | 2026-06-19 | **하단 퀵슬롯 바(1~6) 구현.** 결정: 소비/사용 아이템을 슬롯에 등록 → **숫자키 1~6(또는 슬롯 클릭)으로 즉시 사용**. 등록은 인벤 우클릭 메뉴 "퀵슬롯"(토글: 이미 있으면 해제 / 없으면 첫 빈 슬롯 / 다 차면 1번 교체). 구현: `QuickSlotBar`(자가 부트스트랩 싱글톤, 하단 중앙 6칸, UITheme 색, 아이콘+개수, 0개면 흐리게) + `PlayerInventory.UseItemById`(가방/주머니/보안에서 첫 매칭 사용). 모달 UI 열려 있으면 입력 차단, 플레이어 없으면 숨김. 슬롯은 itemId만 보관(런타임 전용, 세이브는 후속). | 근거: 전투/생존 중 빠른 소비 사용. number-key 충돌 없음(PostRaidEventUI는 모달이라 IsAnyUIOpen로 차단). |
 | 2026-06-19 | **아이템 상세 팝업 + 우클릭 메뉴 개편.** 질문: "검사" 눌러도 토스트만 떠 효과 없음 + 창고 아이템은 검사만 뜨고 사용/제거 불가. **결정: ①"검사"→"자세히" + 전용 상세 팝업 `ItemDetailUI`(큰 아이콘+이름+설명+분류/희귀도/크기/무게/가격/내구도/스택/사용효과)로 표시(토스트 폐기). ②사용 가능 아이템은 내 소지품뿐 아니라 안전 창고에서도 "먹기/사용"(`UseItem(placed, sourceGrid)` 지정격자 소모). ③안전 창고 아이템엔 "폐기"(영구 삭제), 레이드 루팅 상자는 제외.** 메뉴: 내 소지품=착용/먹기·사용/자세히/버리기, 안전창고=착용/먹기·사용/자세히/폐기, 루팅상자=착용/자세히. `ItemDetailUI`=자가부트스트랩 싱글톤(sortingOrder 112, UITheme 색), 배경클릭·우클릭·Esc 닫힘, UIManager Esc 우선(상세만 닫고 뒤 패널 유지)+IsAnyUIOpen/CloseAll 등록, 팝업 중 CharacterPanelUI raw Input 차단. 구(舊) ShowItemInspect 제거. | 근거: 검사 기능이 실제로 안 보이던 문제 + 창고 사용성. unity-reviewer 정적감사 통과. |
 | 2026-06-19 | **바닥 중첩 아이템 줍기 목록 UI 구현.** 질문: 바닥에 여러 아이템이 겹쳐 떨어져 있을 때 어떻게 선택적으로 줍나. **결정: E로 줍을 때 플레이어 반경 `ClusterRadius=1.6m` 안의 `WorldItem`이 2개 이상이면 목록 UI(`GroundPickupUI`)를 띄워 휠/↑↓ 선택 → E·Enter·클릭으로 하나씩 줍기, F=전부 줍기(공간 부족 시 멈춤), Esc 닫기.** 1개뿐이면 기존처럼 즉시 줍기. 구현: `WorldItem.All` 정적 레지스트리 + `GatherNear` / `GroundPickupUI`(자가 부트스트랩 싱글톤, NoteUI 패턴, ExecOrder 60으로 InteractionSystem 뒤에 실행해 자동 닫힘 프레임 E 재처리 방지) / `InteractableObject.HandlePickup` 클러스터 분기 / UIManager IsAnyUIOpen·CloseAll 등록. 줍기 실패(공간/가방 미장착)는 토스트 후 목록 유지. | 근거: 흩뿌려 드롭(ScatterPos)·다중 드롭과 정합. 단일 줍기 UX는 그대로. unity-reviewer 정적감사 통과(컴파일/타이밍/레지스트리 생명주기). |
@@ -461,3 +462,10 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 | 2026-05-30 | **소비 아이템 스태미너 회복 구현.** `PlayerController.RestoreStamina(amount)` 신설(최대치 클램프 + 탈진 해제). `ItemUseEffect.RestoreStamina`가 `effectValue`만큼 즉시 회복. 기존 TODO(음수 ConsumeStamina) 제거. |
 | 2026-06-10 | **백팩 = 휴대 격자 제공 아이템 확정.** 장착한 백팩이 레이드 중 격자 칸 수 결정(슬링4×4~택티컬7×9). 가방 없으면 포켓 2×2만(→2026-06-17 장비 슬롯 도입 시 2×4로 변경). 좋은 가방 루팅/장착이 곧 적재량 업그레이드 → 루팅 루프 동기 강화. 백팩 5종 아이콘 제작 예정. |
 | 2026-06-02 | **인벤토리·창고·장착무기 세이브 영속화.** 루팅한 전리품이 저장되도록 `SaveManager` 확장. `InventoryGrid.GetSaveData/LoadSaveData`(공용) — `GridItemEntry`(itemId·count·durability·격자위치·회전), 로드 시 저장 위치 우선 복원→실패 시 자동배치. 저장 대상: **가방**(`PlayerInventory.Grid`), **창고**(`SafehouseStorage.AllFurniture` static 목록을 uid 매칭으로 각 `FurnitureInstance.grid` 복원), **장착 무기**(`PlayerEquipment.GetSaveData`=itemId). ※ 게임 시작 직후 로드 시 창고 가구가 아직 인스턴스화 전이면 매칭 누락 가능(안전가옥 진입 후 저장/로드는 정상) — 알려진 한계. |
+| 2026-06-23 | **컨테이너 드롭-인(열지 않고) + 가득 차면 원위치.** 보관함/가방 아이템 위에 다른 아이템을 드래그 드롭하면 **열지 않고도 그 내부 격자에 자동 배치**된다. 카테고리 불일치 또는 **내부 꽉참 시 위치 스왑이 아니라 원위치 복구**(드래그 아이템이 출발지로 돌아감). 호버 시 컨테이너 위는 **파랑 하이라이트**(=넣기 가능)로 구분. |
+| 2026-06-23 | **컨테이너 열기 = 독립 이동 팝업.** 보관함/가방 '열기' 시 좌측 패널 대신 **내부 격자 셀 크기에 맞춘 별도 팝업 창**이 뜬다. 헤더 드래그로 이동, 헤더 우측에 **정렬·닫기(✕)** 버튼. **가방·조끼(장비형 컨테이너)는 정렬 버튼 제외**(equipSlot 있으면 숨김). 팝업 격자도 드래그/우클릭/카테고리 게이트 정상 동작(드래그 시스템에 최상단 표면으로 통합). 팝업 창(헤더·여백) 위 클릭은 뒤 격자로 새지 않음. |
+| 2026-06-23 | **가방·조끼도 컨테이너(열어서 보관).** `containerWidth/Height>0`이면 자동 `IsContainer` → 창고/인벤에서 우클릭 '열기'로 내부 격자에 보관 가능. **장착=가방 인스턴스 내부 격자 내용 → 휴대 격자로 이동 / 해제=휴대 격자 내용 → 가방 인스턴스로 이동**(짐이 가방과 함께 다님, 타르코프식). 가방 인스턴스가 내용물을 보유하므로 창고에 둔 가방·장착한 가방이 동일 짐을 공유. 세이브: 장착 시 bagItems(휴대격자) / 미장착 시 보관함 nested 직렬화 — 기존 포맷 호환. |
+| 2026-06-23 | **드래그 = 픽셀 잡기 오프셋(자유 추적).** 격자 인벤 유지하되 드래그 중 고스트는 잡은 지점이 커서에 고정되어 픽셀 단위로 따라오고, 놓을 때만 가까운 칸에 스냅. (이전: 고스트 좌상단이 커서로 순간이동하는 버그) |
+| 2026-06-23 | **파괴적 동작 확인 팝업.** 버리기/폐기/제거 시 [예/아니오] 모달로 한 번 더 확인(실수 방지). 팝업 떠 있는 동안 패널 수동입력 차단(뒤 격자 클릭 방지). |
+| 2026-06-23 | **착용 아이템 좌클릭 해제 → Ctrl+좌클릭으로 변경.** 장비 슬롯 일반 좌클릭은 무동작(실수 해제 방지), Ctrl+좌클릭일 때만 인벤으로 해제. 그리드의 Ctrl+클릭(스마트 이동/착용)과 대칭. |
+| 2026-06-23 | **착용 슬롯 우클릭 메뉴 = 착용해제 / 자세히 / 제거.** 장비 슬롯 위 우클릭 시 메뉴 3종. 착용해제=인벤 복귀, 자세히=상세 팝업, 제거=확인 후 레이드 바닥 산포·안전구역 인벤 복귀. |

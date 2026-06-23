@@ -10,25 +10,41 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
-  m_Name: Canned_Food
+  m_Name: ContainerMedbox
   m_EditorClassIdentifier: Game.Scripts::ItemData
-  itemId: canned_food
-  displayName: "통조림"
-  description: "유통기한이 지난 통조림. 그래도 먹을 수 있다."
+  itemId: cont_medbox
+  displayName: "의료함"
+  description: "붕대·진통제·구급상자 등 의료품 전용 보관함."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 2
-  category: 2
+  category: 6
   rarity: 0
-  maxStack: 3
-  weight: 0.4
-  sellPrice: 800
-  buyPrice: 1500
-  isUsable: 1
-  useEffect: 5
-  effectValue: 40
+  primaryRegionId:
+  maxStack: 1
+  weight: 1
+  sellPrice: 40000
+  buyPrice: 80000
+  isUsable: 0
+  useEffect: 0
+  effectValue: 0
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
   medicalData: {fileID: 0}
+  equipSlot: 0
+  containerWidth: 0
+  containerHeight: 0
+  isContainer: 1
+  internalWidth: 6
+  internalHeight: 5
+  allowedCategories:
+  - 1
+  weaponData: {fileID: 0}
+  weaponPartType: 0
+  partMoveSpeedMult: 1
+  partStaminaMult: 1
+  partRangeBonus: 0
+  partRecoilMult: 1
+  partMagBonus: 0
   worldDropPrefab: {fileID: 0}

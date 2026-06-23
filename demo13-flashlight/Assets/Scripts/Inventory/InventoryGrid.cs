@@ -469,6 +469,8 @@ public class InventoryGrid
                 durability = p.item.durability,
                 x = p.gridX, y = p.gridY, rotated = p.rotated,
                 attachments = p.item.HasAnyAttachment ? (string[])p.item.attachments.Clone() : null,
+                // 보관함이면 내부 격자도 재귀 저장
+                containerItems = p.item.IsContainer ? p.item.ContainerGrid.GetSaveData() : null,
             });
         }
         return list;
@@ -487,6 +489,9 @@ public class InventoryGrid
             if (data.hasDurability) inst.durability = e.durability;
             if (e.attachments != null && e.attachments.Length > 0)
                 inst.attachments = (string[])e.attachments.Clone();
+            // 보관함이면 내부 격자 복원(재귀)
+            if (inst.IsContainer && e.containerItems != null)
+                inst.ContainerGrid.LoadSaveData(e.containerItems);
             if (!TryPlace(inst, e.x, e.y, e.rotated)) TryAutoPlace(inst);
         }
     }

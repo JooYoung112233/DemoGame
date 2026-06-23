@@ -98,6 +98,44 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
+    /// <summary>가방 장착 시 — 그 가방 인스턴스의 보관 내용물을 휴대 격자(Grid)로 이동. (가방 장착 후 호출)</summary>
+    public void TransferContainerToBag(ItemInstance bag)
+    {
+        if (bag == null || !bag.IsContainer) return;
+        var src = bag.ContainerGrid;
+        if (src == null) return;
+        var list = new System.Collections.Generic.List<InventoryGrid.PlacedItem>(src.GetAll());
+        foreach (var p in list)
+        {
+            if (p.item == null) continue;
+            src.Remove(p);
+            // 휴대 격자 우선, 안 되면 주머니, 그래도 안 되면 가방 보관 격자에 잔류.
+            if (!(HasBackpack && Grid.TryAutoPlace(p.item))
+                && !(PocketsGrid != null && PocketsGrid.TryAutoPlace(p.item)))
+                src.TryAutoPlace(p.item);
+        }
+    }
+
+    /// <summary>가방 해제 직전 — 휴대 격자(Grid) 내용물을 그 가방 인스턴스의 보관 격자로 이동(가방과 함께 보관). (해제 전 호출)</summary>
+    public void TransferBagToContainer(ItemInstance bag)
+    {
+        if (bag == null || !bag.IsContainer || Grid == null) return;
+        var dst = bag.ContainerGrid;
+        if (dst == null) return;
+        var list = new System.Collections.Generic.List<InventoryGrid.PlacedItem>(Grid.GetAll());
+        foreach (var p in list)
+        {
+            if (p.item == null) continue;
+            Grid.Remove(p);
+            // 같은 크기라 보통 전부 들어감. 넘치면 주머니→창고→월드 순.
+            if (dst.TryAutoPlace(p.item)) continue;
+            if (PocketsGrid != null && PocketsGrid.TryAutoPlace(p.item)) continue;
+            var stash = MainStash.Ensure();
+            if (stash != null && stash.GetGrid().TryAutoPlace(p.item)) continue;
+            WorldItem.Drop(p.item, transform.position + transform.right * 0.5f);
+        }
+    }
+
     /// <summary>가방 장착 여부</summary>
     public bool HasBackpack => Grid != null && Grid.width > 0 && Grid.height > 0;
 
@@ -148,6 +186,7 @@ public class PlayerInventory : MonoBehaviour
                     health.Heal(item.data.effectValue);
                     used = true;
                 }
+                else ToastManager.Show("체력이 이미 가득 찼다", ToastManager.ToastType.Info);
                 break;
 
             case ItemUseEffect.HealInjury:
@@ -169,6 +208,7 @@ public class PlayerInventory : MonoBehaviour
                     }
                     doneHeal:;
                 }
+                else ToastManager.Show("치료할 부상이 없다", ToastManager.ToastType.Info);
                 break;
 
             case ItemUseEffect.AddBattery:
@@ -177,6 +217,7 @@ public class PlayerInventory : MonoBehaviour
                     flashlight.AddBattery(item.data.effectValue);
                     used = true;
                 }
+                else ToastManager.Show("충전할 손전등이 없다", ToastManager.ToastType.Info);
                 break;
 
             case ItemUseEffect.Food:
@@ -190,10 +231,15 @@ public class PlayerInventory : MonoBehaviour
                 used = true;
                 break;
             }
+
+            default:
+                ToastManager.Show("이 아이템은 사용 효과가 없다 (데이터 미설정)", ToastManager.ToastType.Warning);
+                break;
         }
 
         if (used)
         {
+            ToastManager.Show($"{item.data.displayName} 사용", ToastManager.ToastType.Info);
             var g = sourceGrid ?? GridOf(placed) ?? Grid;   // 지정 격자 우선(창고 사용), 없으면 가방/주머니/보안
             if (item.HasDurability)
             {

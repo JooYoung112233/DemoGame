@@ -46,7 +46,7 @@ public class DebugTestUI : MonoBehaviour
 
     // 아이템 탭
     int itemSubTab;
-    string[] itemSubTabNames = { "장비", "무기", "의료", "소비", "재료", "귀중품", "특수" };
+    string[] itemSubTabNames = { "장비", "무기", "의료", "소비", "재료", "귀중품", "특수", "보관함" };
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
@@ -483,6 +483,8 @@ public class DebugTestUI : MonoBehaviour
                     || item.category == ItemCategory.Misc;
             case 6: // 특수 (열쇠/스토리/지역)
                 return item.category == ItemCategory.Key;
+            case 7: // 보관함 (컨테이너 아이템)
+                return item.IsContainer;
             default:
                 return true;
         }

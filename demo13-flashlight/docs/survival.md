@@ -149,13 +149,20 @@
 
 ## 8. 후속 TODO — 음식/음료 enum 분리 (이번 범위 밖, 에디터 작업)
 
-현재 `ItemUseEffect.Food(5)`가 포만감만 회복한다. 이로 인한 불일치:
+현재 `ItemUseEffect.Food(5)`는 포만감(`effectValue`) + 수분(`effectValue×0.5`)을 함께 회복한다(`PlayerInventory.UseItem`). 남은 불일치:
 
-- **통조림(Canned_Food)**: `useEffect = HealHP(1)` → 포만감이 아니라 **HP를 회복**(식품인데 식품 효과가 없음).
-- **물병(WaterBottle)**: `useEffect = Food(5)` → 수분이 아니라 **포만감**을 줌(음료인데 수분 회복 X).
-- 음료 계열(탄산캔/물병/허브차/술병)이 전부 Food라 수분이 아닌 포만감에 들어감.
+- **(해결 2026-06-23)** 통조림(Canned_Food)은 HealHP(1)→Food(5)로 교정됨. 더 이상 HP만 회복하지 않음.
+- **물병(WaterBottle)**: `useEffect = Food(5)` → 음료인데 포만감 위주(수분은 절반만). 전용 `RestoreWater` enum 부재로 음료/음식 구분 불가.
+- 음료 계열(탄산캔/물병/허브차/술병)이 전부 Food라 포만감 위주로 들어감(수분은 절반 보정).
 
-→ `RestoreWater`(수분) 등 enum 추가 + 각 아이템 `useEffect` 재배정이 필요. **enum/데이터 구조 변경이므로 에디터에서** 처리(이번 수치 튜닝에서는 미수정).
+→ `RestoreWater`(수분) 등 enum 추가 + 각 아이템 `useEffect` 재배정이 필요. **enum/데이터 구조 변경이므로 에디터/코드에서** 처리(이번 수치 튜닝에서는 미수정).
+
+### 8-A. RestoreStamina 소비템 재설계 (기획 결정 대기, 2026-06-23)
+
+`ItemUseEffect.RestoreStamina(3)`는 미구현(switch 케이스 없음 → 비작동). 본래 스태미너 회복 의도였던 **coffee / energy_soup / stim_injector**(및 items.md상 energy_bar의 RestoreStamina 부분)를 임시로 **Food(5)** 로 매핑해 최소 작동시킨 상태다. 즉 현재는 스태미너가 아니라 포만감(+수분 절반)을 회복한다.
+
+- **결정 필요**: 스태미너(기력) 회복 효과를 (a) 신규 `RestoreStamina` 케이스로 재구현할지, (b) "스태미너 회복 속도 버프(일정 시간)" 같은 버프형으로 갈지, (c) 음료/식품 enum 분리(§8)와 함께 묶어 재설계할지.
+- 그 전까지 coffee/energy_soup/stim_injector는 "포만감 회복 음식"으로 동작(기획 의도와 불일치한 임시값).
 
 ---
 
@@ -165,6 +172,7 @@
 
 | 날짜 | 던진 질문/맥락 | 결정(수치 before→after) | 근거 |
 |------|----------------|--------------------------|------|
+| 2026-06-23 | 소비 아이템 useEffect 오태깅으로 인게임 "먹기/사용"이 작동 안 함(식품인데 HealHP/None). `PlayerInventory.UseItem`가 처리하는 작동 효과는 HealHP(1)/HealInjury(2)/AddBattery(4)/Food(5)뿐이고 RestoreStamina(3)는 비구현. `Consumable/*.asset` 교정. | **useEffect(before→after)**: `canned_food` 1(HealHP)→5(Food) + effectValue 25→40(items.md "허기+40"), `protein_shake` 1(HealHP)→5(Food), `coffee` 0(None)→5(Food), `energy_soup` 0(None)→5(Food), `stim_injector` 0(None)→5(Food). `adrenaline_shot`은 HealHP(1) 유지(주사·앰플 전투 HP 회복, 정상 작동). 식음료 hasDurability는 이미 0(추가 변경 없음). | 식품이 Food(5)여야 포만감(+수분 절반)을 회복하며 항상 작동. coffee/energy_soup/stim_injector는 본래 RestoreStamina 의도지만 enum 3이 미구현(비작동)이라 **임시로 Food(5) 매핑**해 최소한 작동하게 함 → 스태미너 소비템 효과 재설계 필요(아래 §8/결정 대기). |
 | 2026-06-18 | 생존 스탯 밸런스 튜닝(승인됨) — 차감이 너무 느려 레이드 반복 중 생존 압박이 거의 없음. 차감 ~3배 가속 + 음식/수면 보정. | **차감속도**(SurvivalStats.cs): waterDrainPerSec `100/(30·60)`→`100/(18·60)`(수분 30분→18분), satietyDrainPerSec `100/(60·60)`→`100/(36·60)`(포만감 60분→36분), starveHpPerSec 0.6 유지. **수면**(SleepUI.cs): 4h water/satiety 12→18, 8h 25→38(hpPct/hours 유지). **음식 effectValue**(.asset): 탄산캔·에너지바 10→15, 라면·구운빵·물병 15→30, 허브차 20→30, 고기스튜 35→45, 특제요리 50→60, 술병 5 유지(useEffect 미변경). | 차감 3배 가속으로 수분=3회·포만감=6회 레이드 압박 곡선(§3.5). 회복량은 차감 보상(1끼≈레이드 1~2회분). 수면 차감도 비례 상향. 음식/음료 enum 분리는 §8 후속 TODO. |
 
 ### 2026-06-05 — 생존 스탯(허기·수분) + 수면 루프 도입

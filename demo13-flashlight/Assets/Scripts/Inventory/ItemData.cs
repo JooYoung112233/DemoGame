@@ -160,6 +160,67 @@ public class ItemData : ScriptableObject
     [Min(0)]
     public int containerHeight;
 
+    [Header("보관함 (컨테이너 아이템 — 타르코프 케이스)")]
+    [Tooltip("true면 자기만의 내부 격자를 가진 보관함(창고에 놓고 열어 보관). 외부 footprint=gridWidth/Height")]
+    public bool isContainer;
+    [Tooltip("내부 격자 가로 칸 (예: 냉장고 8)")]
+    [Min(0)]
+    public int internalWidth;
+    [Tooltip("내부 격자 세로 칸 (예: 냉장고 7)")]
+    [Min(0)]
+    public int internalHeight;
+    [Tooltip("내부에 넣을 수 있는 카테고리(빈 배열=전체=범용 상자). 불일치=배치 불가")]
+    public ItemCategory[] allowedCategories;
+
+    /// <summary>이 아이템이 보관함(내부 격자 보유)인지. 명시 보관함 + 가방/조끼(containerWidth>0)도 포함.</summary>
+    public bool IsContainer =>
+        (isContainer && internalWidth > 0 && internalHeight > 0)
+        || (containerWidth > 0 && containerHeight > 0);
+
+    /// <summary>내부 격자 가로(internalWidth 우선, 없으면 가방 containerWidth).</summary>
+    public int ContainerGridWidth => internalWidth > 0 ? internalWidth : containerWidth;
+    /// <summary>내부 격자 세로(internalHeight 우선, 없으면 가방 containerHeight).</summary>
+    public int ContainerGridHeight => internalHeight > 0 ? internalHeight : containerHeight;
+
+    /// <summary>해당 카테고리를 이 보관함에 넣을 수 있는지(빈 allowedCategories=범용).</summary>
+    public bool AcceptsCategory(ItemCategory c)
+    {
+        if (allowedCategories == null || allowedCategories.Length == 0) return true;
+        for (int i = 0; i < allowedCategories.Length; i++)
+            if (allowedCategories[i] == c) return true;
+        return false;
+    }
+
+    /// <summary>허용 카테고리 요약 문자열(범용이면 "전체").</summary>
+    public string AllowedCategorySummary
+    {
+        get
+        {
+            if (allowedCategories == null || allowedCategories.Length == 0) return "전체";
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < allowedCategories.Length; i++)
+            {
+                if (i > 0) sb.Append('/');
+                sb.Append(CategoryKo(allowedCategories[i]));
+            }
+            return sb.ToString();
+        }
+    }
+
+    static string CategoryKo(ItemCategory c)
+    {
+        switch (c)
+        {
+            case ItemCategory.Weapon:     return "무기";
+            case ItemCategory.Medical:    return "의료";
+            case ItemCategory.Consumable: return "소비";
+            case ItemCategory.Material:   return "재료";
+            case ItemCategory.Valuable:   return "귀중품";
+            case ItemCategory.Key:        return "열쇠";
+            default:                      return "기타";
+        }
+    }
+
     [Header("무기 연동 (Weapon 전용)")]
     [Tooltip("무기 전투 데이터 SO (Weapon 카테고리일 때). 장착 시 콤보·스탯 교체")]
     public WeaponData weaponData;
