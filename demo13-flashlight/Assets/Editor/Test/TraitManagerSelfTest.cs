@@ -12,23 +12,16 @@ public static class TraitManagerSelfTest
 {
     static int pass, fail;
 
-    [MenuItem("Tools/TopDown/테스트/특성 시스템 자가검증")]
+    // 메뉴 폐지 — 밸런스·컨트롤 패널 ▸ 도구·검증 탭에서 호출.
     public static void Run()
     {
         pass = 0; fail = 0;
 
-        // ── 진단: Resources vs AssetDatabase 로드 카운트 (0개 로드 원인 격리) ──
-        int resTrait  = Resources.LoadAll<TraitData>("Data/Traits").Length;
-        int resRecipe = Resources.LoadAll<RecipeData>("Data/Recipes").Length;
-        int adbTrait  = AssetDatabase.FindAssets("t:TraitData").Length;
-        Debug.Log($"[진단] Resources TraitData={resTrait} · Resources RecipeData={resRecipe} · AssetDatabase TraitData={adbTrait}\n" +
-                  "  → 둘 다 Resources=0인데 AssetDatabase>0: 에딧모드 Resources 퀵(런타임 정상, 폴백이 처리).\n" +
-                  "  → AssetDatabase도 0: 에셋이 TraitData로 인식 안 됨(임포터 재실행 필요).");
-
         var go = new GameObject("__trait_selftest");
         try
         {
-            var m = go.AddComponent<TraitManager>();   // Awake → Resources 로드
+            var m = go.AddComponent<TraitManager>();
+            m.EnsureLoaded();   // ★ 에딧 모드는 Awake가 안 돌아 LoadDefinitions 미실행 → 명시 로드
             Eq("SO 41개 로드", 41, m.AllTraits.Count);
             True("초기 PP 0", m.AvailablePP == 0);
 
@@ -104,6 +97,7 @@ public static class TraitManagerSelfTest
             try
             {
                 var m2 = go2.AddComponent<TraitManager>();
+                m2.EnsureLoaded();   // 에딧 모드 Awake 미실행 → 명시 로드
                 m2.LoadSaveData(save);
                 Eq("로드 후 PP 복원", save.availablePP, m2.AvailablePP);
                 True("로드 후 unlocked 복원", save.unlocked.All(id => m2.IsUnlocked(id)));

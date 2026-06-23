@@ -9,7 +9,9 @@ using UnityEngine;
 /// - 2D 프리뷰: facing=오른쪽. 현재 프레임 활성 윈도우 진하게. 중심 핸들 드래그로 offset.
 /// - 콤보: steps 탭 [1타][2타]… 으로 단계 전환, 캔슬 프레임 마커 표시.
 /// </summary>
-public class AttackDataEditorWindow : EditorWindow
+// 밸런스·컨트롤 패널의 "전투" 탭에 임베드되는 공격(AttackData) 에디터.
+// (별도 창 폐지 — 모든 컨트롤·밸런스는 밸런스·컨트롤 단일 패널에서.)
+public class AttackDataEditorWindow
 {
     enum Mode { Single, Combo }
     Mode mode = Mode.Single;
@@ -25,11 +27,12 @@ public class AttackDataEditorWindow : EditorWindow
 
     const float PPU = 60f;
 
-    [MenuItem("Tools/TopDown/전투/공격 에디터")]
-    static void Open() => GetWindow<AttackDataEditorWindow>("Attack Editor").minSize = new Vector2(440, 640);
+    System.Action _repaint;
 
-    void OnGUI()
+    /// <summary>밸런스·컨트롤 패널의 "전투" 탭에서 호출. repaint=호스트 패널의 Repaint.</summary>
+    public void Draw(System.Action repaint)
     {
+        _repaint = repaint;
         scroll = EditorGUILayout.BeginScrollView(scroll);
 
         mode = (Mode)GUILayout.Toolbar((int)mode, new[] { "단일 공격", "콤보 (연속 공격)" });
@@ -175,7 +178,7 @@ public class AttackDataEditorWindow : EditorWindow
             GUI.Label(new Rect(bar.x + 2, bar.y - 1, 120, 12), w.label, EditorStyles.miniLabel);
             if (Event.current.type == EventType.MouseDown && bar.Contains(Event.current.mousePosition))
             {
-                selectedWindow = i; Event.current.Use(); Repaint();
+                selectedWindow = i; Event.current.Use(); _repaint?.Invoke();
             }
         }
 
@@ -187,7 +190,7 @@ public class AttackDataEditorWindow : EditorWindow
         if ((e.type == EventType.MouseDown || e.type == EventType.MouseDrag) && r.Contains(e.mousePosition) && e.button == 0)
         {
             scrubFrame = Mathf.Clamp(Mathf.FloorToInt((e.mousePosition.x - r.x) / fw), 0, frames);
-            Repaint();
+            _repaint?.Invoke();
         }
 
         scrubFrame = EditorGUILayout.IntSlider("스크러버 (프레임)", scrubFrame, 0, a.totalFrames);
@@ -235,7 +238,7 @@ public class AttackDataEditorWindow : EditorWindow
                 if (draggingCenter && e.type == EventType.MouseDrag)
                 {
                     w.offset = S2W(e.mousePosition, origin);
-                    EditorUtility.SetDirty(a); e.Use(); Repaint();
+                    EditorUtility.SetDirty(a); e.Use(); _repaint?.Invoke();
                 }
                 if (e.type == EventType.MouseUp) draggingCenter = false;
             }

@@ -172,6 +172,13 @@
 
 ## 기획 결정 로그
 
+### 2026-06-19 — 🔴 "SO 41개 로드=0" 블로커 **해결** (진단으로 진범 확정)
+- **증상**: 자가검증 `[SO 41개 로드] expected=41 actual=0`. 여러 차례 .asset/임포터 수정 시도했으나 안 됨.
+- **진단(결정타)**: 자가검증에 카운트 로그 추가 → `Resources TraitData=41 · RecipeData=15 · AssetDatabase=41`. **에셋·로드는 처음부터 정상**(Resources가 41 반환). 즉 손저작 .asset/임포터/YAML이 문제가 아니었음.
+- **진범**: `TraitManager.Awake`의 **싱글톤 가드**. 이전 플레이/테스트가 남긴 `Instance`(DontDestroyOnLoad 잔존)가 있으면, 자가검증이 `AddComponent<TraitManager>`한 새 인스턴스가 `if (Instance != null) { Destroy; return; }`로 **LoadDefinitions를 건너뜀** → `AllTraits=0`. 한 번 막히면 그 인스턴스가 안 지워져 매 실행 실패. **런타임(게임)은 줄곧 정상**(싱글톤 1개 → 정상 로드).
+- **수정**: 자가검증이 인스턴스 생성 전에 **잔존 `TraitManager.Instance`를 DestroyImmediate로 정리**. (불필요했던 에디터 AssetDatabase 폴백은 제거 — 로드는 정상이라.)
+- **교훈**: 싱글톤 + Resources 로드 시스템의 자가검증은 잔존 인스턴스를 먼저 정리. "에셋 0개 로드"라고 로드만 의심하지 말 것.
+
 ### 2026-06-19 — effects 어휘·op 규약 + TraitManager 런타임 코어
 - **무엇**: §3 41개 퍽의 `effectSummary`를 effectKey/op/value로 1차 매핑(§4 표) + 런타임 합성 코어 신설.
 - **op 규약**: `mul`(비율, ∏(1+value)=최종배수) / `add`(절대 가산, Σ) / `flag`(능력 on, OR). 부정 특성은 value 부호로 페널티.

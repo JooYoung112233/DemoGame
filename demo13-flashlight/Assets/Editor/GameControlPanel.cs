@@ -19,8 +19,9 @@ public class GameControlPanel : EditorWindow
     const string TUNING_PATH = "Assets/Resources/Data/GameTuning.asset";
     static string ToolsDir => Path.GetFullPath(Path.Combine(Application.dataPath, "../tools"));
 
-    static readonly string[] TabNames = { "컨트롤 (튜닝·스탯·통계)", "NPC·상점", "몬스터", "지역 루트", "CSV 밸런스" };
+    static readonly string[] TabNames = { "컨트롤 (튜닝·스탯·통계)", "NPC·상점", "몬스터", "지역 루트", "CSV 밸런스", "전투", "도구·검증" };
     int tab;
+    readonly AttackDataEditorWindow attackTab = new AttackDataEditorWindow();   // 전투 탭(공격 에디터 임베드)
 
     [MenuItem("Tools/TopDown/밸런스·컨트롤")]
     static void Open()
@@ -41,7 +42,35 @@ public class GameControlPanel : EditorWindow
         else if (tab == 1) DrawNpcTab();
         else if (tab == 2) DrawMonsterTab();
         else if (tab == 3) DrawRegionLootTab();
-        else          DrawCsvTab();
+        else if (tab == 4) DrawCsvTab();
+        else if (tab == 5) DrawCombatTab();
+        else          DrawToolsTab();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  탭 — 전투 (공격/콤보 AttackData 에디터 임베드)
+    // ══════════════════════════════════════════════════════════════════
+    void DrawCombatTab() => attackTab.Draw(Repaint);
+
+    // ══════════════════════════════════════════════════════════════════
+    //  탭 — 도구·검증 (데이터 생성기 + 자가검증)
+    // ══════════════════════════════════════════════════════════════════
+    void DrawToolsTab()
+    {
+        EditorGUILayout.Space(6);
+        EditorGUILayout.LabelField("데이터 생성", EditorStyles.boldLabel);
+        if (GUILayout.Button("특성 SO 재생성 (CSV→AssetDatabase)", GUILayout.Height(26)))
+            TraitDataImporter.Generate();
+
+        EditorGUILayout.Space(10);
+        EditorGUILayout.LabelField("자가검증 (결과는 Console)", EditorStyles.boldLabel);
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            if (GUILayout.Button("특성 시스템", GUILayout.Height(26))) TraitManagerSelfTest.Run();
+            if (GUILayout.Button("평판 시스템", GUILayout.Height(26))) ReputationSelfTest.Run();
+        }
+        EditorGUILayout.Space(4);
+        EditorGUILayout.HelpBox("모든 컨트롤·밸런스·데이터 도구는 이 패널 한 곳에서. (별도 메뉴 폐지)", MessageType.None);
     }
 
     // ══════════════════════════════════════════════════════════════════
@@ -250,6 +279,7 @@ public class GameControlPanel : EditorWindow
     string monsterFilter = "";
     bool monsterAddReq;        // 레이아웃 종료 후 처리(구조 변경을 스코프 안에서 하지 않음)
     int monsterDelReq = -1;
+    UnitStatData monsterPresetReq;   // 프리셋 추가 요청(다음 프레임 SO 재생성 전에 처리)
 
     void DrawMonsterTab()
     {
@@ -259,6 +289,21 @@ public class GameControlPanel : EditorWindow
             EditorGUILayout.HelpBox("StatDB 에셋이 없습니다 (Resources/Data/StatDB.asset).", MessageType.Info);
             return;
         }
+
+        // 프리셋 추가 요청(이전 프레임 버튼) — SerializedObject 재생성 전에 직접 리스트에 추가.
+        if (monsterPresetReq != null)
+        {
+            var preset = monsterPresetReq; monsterPresetReq = null;
+            string baseId = preset.id; int suffix = 0;
+            while (statDB.GetUnit(preset.id) != null) { suffix++; preset.id = $"{baseId}_{suffix}"; }
+            Undo.RecordObject(statDB, "Add Unit Preset");
+            statDB.units.Add(preset);
+            EditorUtility.SetDirty(statDB);
+            AssetDatabase.SaveAssets();
+            statDBSo = null;                 // 새 유닛 반영 위해 재생성
+            monsterIdx = statDB.units.Count - 1;
+        }
+
         if (statDBSo == null || statDBSo.targetObject != statDB) statDBSo = new SerializedObject(statDB);
         statDBSo.Update();
 
@@ -275,10 +320,15 @@ public class GameControlPanel : EditorWindow
             GUILayout.FlexibleSpace();
             var prev = GUI.backgroundColor;
             GUI.backgroundColor = new Color(0.40f, 0.85f, 0.50f);
-            if (GUILayout.Button("＋ 새 몬스터", GUILayout.Width(110))) monsterAddReq = true;
+            if (GUILayout.Button("＋ 새 몬스터", GUILayout.Width(96))) monsterAddReq = true;
             GUI.backgroundColor = prev;
-            if (GUILayout.Button("에셋 선택", GUILayout.Width(80))) EditorGUIUtility.PingObject(statDB);
-            if (GUILayout.Button("저장", GUILayout.Width(70))) { statDBSo.ApplyModifiedProperties(); AssetDatabase.SaveAssets(); }
+            // 프리셋(스탯 자동 채움) — bandit_melee/ranged/tank/boss_01
+            if (GUILayout.Button("근접", GUILayout.Width(44)))   monsterPresetReq = UnitStatData.PresetMelee();
+            if (GUILayout.Button("원거리", GUILayout.Width(52)))  monsterPresetReq = UnitStatData.PresetRanged();
+            if (GUILayout.Button("탱크", GUILayout.Width(44)))   monsterPresetReq = UnitStatData.PresetTank();
+            if (GUILayout.Button("보스", GUILayout.Width(44)))   monsterPresetReq = UnitStatData.PresetBoss();
+            if (GUILayout.Button("에셋 선택", GUILayout.Width(76))) EditorGUIUtility.PingObject(statDB);
+            if (GUILayout.Button("저장", GUILayout.Width(56))) { statDBSo.ApplyModifiedProperties(); AssetDatabase.SaveAssets(); }
         }
         using (new EditorGUILayout.HorizontalScope())
         {

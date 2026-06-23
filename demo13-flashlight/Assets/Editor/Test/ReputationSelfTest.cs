@@ -11,7 +11,7 @@ public static class ReputationSelfTest
 {
     static int pass, fail;
 
-    [MenuItem("Tools/TopDown/테스트/평판 시스템 자가검증")]
+    // 메뉴 폐지 — 밸런스·컨트롤 패널 ▸ 도구·검증 탭에서 호출.
     public static void Run()
     {
         pass = 0; fail = 0;

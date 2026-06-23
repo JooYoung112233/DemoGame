@@ -16,7 +16,7 @@ public static class TraitDataImporter
     const string CsvRel = "tools/traits.csv";
     const string OutDir = "Assets/Resources/Data/Traits";
 
-    [MenuItem("Tools/TopDown/Data/특성 SO 재생성(CSV→AssetDatabase)")]
+    // 메뉴 폐지 — 밸런스·컨트롤 패널 ▸ 도구·검증 탭에서 호출.
     public static void Generate()
     {
         string csvPath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", CsvRel));
