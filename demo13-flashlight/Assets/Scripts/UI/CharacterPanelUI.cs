@@ -429,6 +429,19 @@ public class CharacterPanelUI : MonoBehaviour
             && IsMouseOverRect(containerPopupRT);
     }
 
+    /// <summary>장착형 컨테이너(가방·조끼)인지 — 이런 것끼리는 중첩 금지(가방 안 가방 방지).</summary>
+    static bool IsWearableContainer(ItemData d) => d != null && d.IsContainer && d.equipSlot != EquipSlot.None;
+
+    /// <summary>dragged를 container 내부에 넣을 수 있는지(카테고리 일치 + 가방 안 가방 방지).</summary>
+    bool CanInsertIntoContainer(ItemInstance dragged, ItemInstance container)
+    {
+        if (dragged == null || container == null || dragged == container) return false;
+        if (dragged.data == null || container.data == null || !container.IsContainer) return false;
+        if (!container.data.AcceptsCategory(dragged.data.category)) return false;
+        if (IsWearableContainer(dragged.data) && IsWearableContainer(container.data)) return false; // 가방 안 가방 방지
+        return true;
+    }
+
     public void CloseContainer()
     {
         StopSearch(false);
@@ -959,8 +972,9 @@ public class CharacterPanelUI : MonoBehaviour
         {
             playerInventory.TransferBagToContainer(inst);
             playerEquipment.Unequip(slot);   // 휴대 격자 0×0
-            if (!playerInventory.TryAutoPlaceAnywhere(inst) && !TryPlaceInStash(inst))
-                ToastManager.Show("가방 둘 공간이 없다 (주머니·창고 가득)", ToastManager.ToastType.Warning);
+            // 가방은 창고로 우선 복귀(주머니/보안으로 새지 않게). 창고 가득이면 주머니·보안.
+            if (!TryPlaceInStash(inst) && !playerInventory.TryAutoPlaceAnywhere(inst))
+                ToastManager.Show("가방 둘 공간이 없다 (창고·주머니 가득)", ToastManager.ToastType.Warning);
             RefreshAllGrids();
             return;
         }
@@ -2083,8 +2097,29 @@ public class CharacterPanelUI : MonoBehaviour
     void TryQuickTransfer()
     {
         var leftGrid = LeftGrid;
+        bool popupOpen = openContainerItem != null && containerPopupGO != null && containerPopupGO.activeSelf;
+        var containerGrid = popupOpen ? openContainerItem.ContainerGrid : null;
 
-        // 플레이어 격자(가방/주머니/보안) 클릭
+        // 0) 컨테이너 팝업 격자 클릭 → 밖으로 빼기(가방→주머니→보안→창고)
+        {
+            InventoryGrid cg; int cgx, cgy;
+            if (ContainerPopupAtMouse(out cg, out cgx, out cgy))
+            {
+                var placed = cg.GetAt(cgx, cgy);
+                if (placed != null && playerInventory != null)
+                {
+                    var item = placed.item;
+                    cg.Remove(placed);
+                    if (!playerInventory.TryAutoPlaceAnywhere(item) && !TryPlaceInStash(item))
+                        cg.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);   // 복원
+                    RefreshAllGrids();
+                }
+                return;
+            }
+            if (PointerOverContainerPopup()) return;
+        }
+
+        // 1) 플레이어 격자(가방/주머니/보안) 클릭
         {
             InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
             if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
@@ -2093,21 +2128,23 @@ public class CharacterPanelUI : MonoBehaviour
                 if (placed != null)
                 {
                     var item = placed.item;
-                    // 장착 가능 → 자동 착용
-                    if (IsEquippable(item.data))
+                    // 컨테이너 팝업이 열려 있으면 그 안으로 투입 우선
+                    if (popupOpen && CanInsertIntoContainer(item, openContainerItem))
                     {
-                        EquipFromGrid(item, pGrid);
+                        pGrid.Remove(placed);
+                        if (!containerGrid.TryAutoPlace(item))
+                            pGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+                        RefreshAllGrids();
                         return;
                     }
+                    // 장착 가능 → 자동 착용
+                    if (IsEquippable(item.data)) { EquipFromGrid(item, pGrid); return; }
                     // 그 외 → 좌측(상자/창고)로 이동
                     if (leftGrid != null)
                     {
                         pGrid.Remove(placed);
                         if (!leftGrid.TryAutoPlace(item))
-                        {
-                            // 실패 → 원래 위치 복원
                             pGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
-                        }
                         RefreshAllGrids();
                     }
                 }
@@ -2115,7 +2152,7 @@ public class CharacterPanelUI : MonoBehaviour
             }
         }
 
-        // 좌측 격자 클릭
+        // 2) 좌측 격자(창고/상자) 클릭
         if (leftGrid != null)
         {
             int gx, gy;
@@ -2130,19 +2167,21 @@ public class CharacterPanelUI : MonoBehaviour
                         return;
 
                     var item = placed.item;
-                    // 장착 가능 → 자동 착용(좌측 창고/상자에서도)
-                    if (IsEquippable(item.data))
+                    // 컨테이너 팝업 열림 → 그 안으로 투입(가방 열고 창고아이템 Ctrl+클릭 = 가방으로)
+                    if (popupOpen && CanInsertIntoContainer(item, openContainerItem))
                     {
-                        EquipFromGrid(item, leftGrid);
+                        leftGrid.Remove(placed);
+                        if (!containerGrid.TryAutoPlace(item))
+                            leftGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+                        RefreshAllGrids();
                         return;
                     }
+                    // 장착 가능 → 자동 착용
+                    if (IsEquippable(item.data)) { EquipFromGrid(item, leftGrid); return; }
                     // 그 외 → 플레이어(가방→주머니→보안)로 이동
                     leftGrid.Remove(placed);
                     if (!playerInventory.TryAutoPlaceAnywhere(item))
-                    {
-                        // 실패 → 원래 위치 복원
                         leftGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
-                    }
                     RefreshAllGrids();
                 }
                 return;
@@ -2334,7 +2373,7 @@ public class CharacterPanelUI : MonoBehaviour
         // 카테고리 필터 체크 (가구 창고/컨테이너 팝업에 놓을 때)
         bool categoryOk = true;
         if (hoverGridRoot == popupGridRoot && openContainerItem != null)
-            categoryOk = openContainerItem.data.AcceptsCategory(dragItem.data.category);
+            categoryOk = CanInsertIntoContainer(dragItem, openContainerItem);
         else if (hoverGrid == LeftGrid)
             categoryOk = LeftGridAccepts(dragItem);
 
@@ -2346,7 +2385,7 @@ public class CharacterPanelUI : MonoBehaviour
         {
             var hover = hoverGrid.GetAt(cellX, cellY);
             insertable = hover != null && hover.item != dragItem && hover.item.IsContainer
-                && hover.item.data.AcceptsCategory(dragItem.data.category)
+                && CanInsertIntoContainer(dragItem, hover.item)
                 && hover.item.ContainerGrid.CanAutoPlace(dragItem);
         }
 
@@ -2437,9 +2476,11 @@ public class CharacterPanelUI : MonoBehaviour
             InventoryGrid cg; int cgx, cgy;
             if (ContainerPopupAtMouse(out cg, out cgx, out cgy))
             {
-                if (openContainerItem != null && !openContainerItem.data.AcceptsCategory(dragItem.data.category))
+                if (openContainerItem != null && !CanInsertIntoContainer(dragItem, openContainerItem))
                 {
-                    ToastManager.Show("이 보관함에 넣을 수 없는 종류다", ToastManager.ToastType.Warning);
+                    bool bagInBag = IsWearableContainer(dragItem.data) && IsWearableContainer(openContainerItem.data);
+                    ToastManager.Show(bagInBag ? "가방 안에 가방은 넣을 수 없다" : "이 보관함에 넣을 수 없는 종류다",
+                                      ToastManager.ToastType.Warning);
                     CancelDrag();
                     return;
                 }
@@ -2548,8 +2589,8 @@ public class CharacterPanelUI : MonoBehaviour
         // 카테고리 불일치 또는 내부 꽉참 → false 반환(스왑 X) → 호출부 EnsureDragEnded가 원위치 복구.
         if (target.item.IsContainer && target.item != dragItem)
         {
-            if (!target.item.data.AcceptsCategory(dragItem.data.category))
-                return false;   // 카테고리 불일치 → 원상복구
+            if (!CanInsertIntoContainer(dragItem, target.item))
+                return false;   // 카테고리 불일치/가방안가방 → 원상복구(스왑 X)
             if (target.item.ContainerGrid.TryAutoPlace(dragItem))
             {
                 grid.NotifyChanged();
