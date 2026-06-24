@@ -28,6 +28,7 @@ MonoBehaviour:
   isUsable: 1
   useEffect: 2
   effectValue: 0
+  useTimeSeconds: 5
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50

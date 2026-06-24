@@ -132,6 +132,10 @@ public class ItemData : ScriptableObject
     [Tooltip("효과 수치 (HP 회복량, 배터리 충전량 등)")]
     public float effectValue;
 
+    [Tooltip("사용에 걸리는 시간(초). 0이면 즉시. 예: 붕대 5초. 진행 중 ESC로 취소.")]
+    [Min(0)]
+    public float useTimeSeconds;
+
     [Header("내구도 (구급상자 등 다회 사용 아이템)")]
     [Tooltip("true면 스택 대신 내구도 소모 방식")]
     public bool hasDurability;

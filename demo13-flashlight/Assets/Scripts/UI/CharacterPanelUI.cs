@@ -171,6 +171,18 @@ public class CharacterPanelUI : MonoBehaviour
                 HideContextMenu();
                 return;
             }
+            // 사용 채널 진행 중이면 먼저 취소
+            if (UseActionManager.Instance != null && UseActionManager.Instance.IsBusy)
+            {
+                UseActionManager.Instance.Cancel();
+                return;
+            }
+            // 컨테이너 팝업 열려 있으면 먼저 닫기(인벤 패널보다 우선)
+            if (openContainerItem != null && containerPopupGO != null && containerPopupGO.activeSelf)
+            {
+                CloseContainerPopup();
+                return;
+            }
             if (isDragging)
                 CancelDrag();
             else

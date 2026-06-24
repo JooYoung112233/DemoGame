@@ -172,6 +172,31 @@ public class PlayerInventory : MonoBehaviour
 
         if (!item.data.isUsable) return false;
 
+        // 사용 시간(시전): useTimeSeconds>0이면 진행바 채널 후 효과 적용. 0이면 즉시.
+        float useTime = item.data.useTimeSeconds;
+        if (useTime > 0f && UseActionManager.Instance != null)
+        {
+            if (UseActionManager.Instance.IsBusy)
+            {
+                ToastManager.Show("이미 사용 중", ToastManager.ToastType.Warning);
+                return false;
+            }
+            var capPlaced = placed;
+            var capGrid = sourceGrid;
+            UseActionManager.Instance.Begin($"{item.data.displayName} 사용", useTime,
+                () => ApplyUseEffect(capPlaced, capGrid));
+            return true;   // 채널 시작(완료 시 효과 적용)
+        }
+
+        return ApplyUseEffect(placed, sourceGrid);
+    }
+
+    /// <summary>실제 사용 효과 적용 + 소모. (useTimeSeconds 0=즉시, >0=채널 완료 시 호출)</summary>
+    bool ApplyUseEffect(InventoryGrid.PlacedItem placed, InventoryGrid sourceGrid = null)
+    {
+        if (placed == null || placed.item == null || placed.item.data == null) return false;
+        var item = placed.item;
+
         bool used = false;
 
         if (CraftingSystem.Instance != null && CraftingSystem.Instance.TryUnlockFromItem(item.data.itemId))
