@@ -164,7 +164,7 @@ public class CharacterPanelUI : MonoBehaviour
         // 아이템 상세 팝업이 떠 있으면 패널 입력(드래그/클릭/Esc) 차단 — 팝업이 자체 처리.
         if (ItemDetailUI.IsShowing) return;
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (GameInput.GetKeyDown(KeyCode.Escape))
         {
             if (contextMenuGO != null && contextMenuGO.activeSelf)
             {
@@ -952,7 +952,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 좌클릭만으로는 해제하지 않는다(실수 방지). Ctrl+좌클릭일 때만 해제.
         // 일반 해제/제거는 우클릭 메뉴(착용해제/제거)로.
-        if (!(Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+        if (!(GameInput.GetKey(KeyCode.LeftControl) || GameInput.GetKey(KeyCode.RightControl)))
             return;
 
         UnequipToInventory(slot);
@@ -972,8 +972,8 @@ public class CharacterPanelUI : MonoBehaviour
         {
             playerInventory.TransferBagToContainer(inst);
             playerEquipment.Unequip(slot);   // 휴대 격자 0×0
-            // 가방은 창고로 우선 복귀(주머니/보안으로 새지 않게). 창고 가득이면 주머니·보안.
-            if (!TryPlaceInStash(inst) && !playerInventory.TryAutoPlaceAnywhere(inst))
+            // 가방은 창고로 우선 복귀(레이드면 인벤 우선). 창고 가득이면 주머니·보안.
+            if (!StoreItemPreferStash(inst))
                 ToastManager.Show("가방 둘 공간이 없다 (창고·주머니 가득)", ToastManager.ToastType.Warning);
             RefreshAllGrids();
             return;
@@ -995,6 +995,17 @@ public class CharacterPanelUI : MonoBehaviour
     {
         var stash = MainStash.Instance != null ? MainStash.Instance : MainStash.Ensure();
         return stash != null && inst != null && stash.GetGrid().TryAutoPlace(inst);
+    }
+
+    /// <summary>보관 위치 배치 — 안전구역=창고 우선→인벤, 레이드(창고 없음)=인벤 우선→창고. 실패 시 false.</summary>
+    bool StoreItemPreferStash(ItemInstance item)
+    {
+        if (item == null) return false;
+        if (IsSafeArea())
+            return TryPlaceInStash(item)
+                || (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(item));
+        return (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(item))
+            || TryPlaceInStash(item);
     }
 
     /// <summary>착용 아이템을 완전히 제거(해제 후 레이드=바닥 산포 / 안전구역=인벤·창고 복귀).</summary>
@@ -1258,7 +1269,7 @@ public class CharacterPanelUI : MonoBehaviour
         var type = dragItem.data.weaponPartType;
         var cell = weaponBox.Find($"Part_{type}") as RectTransform;
         if (cell == null) return false;
-        if (!RectTransformUtility.RectangleContainsScreenPoint(cell, Input.mousePosition, null)) return false;
+        if (!RectTransformUtility.RectangleContainsScreenPoint(cell, GameInput.mousePosition, null)) return false;
 
         if (!string.IsNullOrEmpty(wpn.GetAttachment(type)))
         {
@@ -1973,23 +1984,23 @@ public class CharacterPanelUI : MonoBehaviour
             UpdateGhostPosition();
             UpdateHighlight();
 
-            if (Input.GetKeyDown(KeyCode.R))
+            if (GameInput.GetKeyDown(KeyCode.R))
                 ToggleDragRotation();
 
             // 우클릭은 드래그 취소(원위치 복귀)
-            if (Input.GetMouseButtonDown(1))
+            if (GameInput.GetMouseButtonDown(1))
             {
                 CancelDrag();
                 return;
             }
 
             // 마우스 버튼을 떼는 순간 = 놓기
-            if (Input.GetMouseButtonUp(0))
+            if (GameInput.GetMouseButtonUp(0))
                 TryPlaceDragged();
         }
         else
         {
-            if (Input.GetMouseButtonDown(0))
+            if (GameInput.GetMouseButtonDown(0))
             {
                 if (contextMenuGO != null && contextMenuGO.activeSelf)
                 {
@@ -1998,18 +2009,18 @@ public class CharacterPanelUI : MonoBehaviour
                     if (!IsMouseOverRect(contextMenuRT))
                         HideContextMenu();
                 }
-                else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                else if (GameInput.GetKey(KeyCode.LeftControl) || GameInput.GetKey(KeyCode.RightControl))
                     TryQuickTransfer();
                 else
                     TryPickupItem(); // 아이템 칸이면 StartDrag → 이후 떼면 놓기
             }
 
             // 우클릭 컨텍스트 메뉴
-            if (Input.GetMouseButtonDown(1))
+            if (GameInput.GetMouseButtonDown(1))
                 TryShowContextMenu();
 
             // Del 키: 마우스 위 내 아이템 버리기 (드래그 버리기 대체 수단)
-            if (Input.GetKeyDown(KeyCode.Delete))
+            if (GameInput.GetKeyDown(KeyCode.Delete))
                 TryDiscardItemUnderMouse();
         }
     }
@@ -2087,7 +2098,7 @@ public class CharacterPanelUI : MonoBehaviour
     bool IsMouseOverRect(RectTransform rt)
     {
         if (rt == null || !rt.gameObject.activeInHierarchy) return false;
-        return RectTransformUtility.RectangleContainsScreenPoint(rt, Input.mousePosition, null);
+        return RectTransformUtility.RectangleContainsScreenPoint(rt, GameInput.mousePosition, null);
     }
 
     /// <summary>
@@ -2110,7 +2121,7 @@ public class CharacterPanelUI : MonoBehaviour
                 {
                     var item = placed.item;
                     cg.Remove(placed);
-                    if (!playerInventory.TryAutoPlaceAnywhere(item) && !TryPlaceInStash(item))
+                    if (!StoreItemPreferStash(item))   // 창고 우선 → 인벤 (창고 없으면 인벤)
                         cg.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);   // 복원
                     RefreshAllGrids();
                 }
@@ -2198,14 +2209,14 @@ public class CharacterPanelUI : MonoBehaviour
         dragOrigY = placed.gridY;
         dragOrigRotated = placed.rotated;
         dragRotated = placed.rotated;
-        dragStartMouse = Input.mousePosition;
+        dragStartMouse = GameInput.mousePosition;
         // 픽셀 잡기 오프셋 = 커서(격자 로컬) − 아이템 좌상단(격자 로컬). 잡은 지점이 커서에 고정된다.
         grabPixelOffset = Vector2.zero;
         if (sourceRoot != null)
         {
             Vector2 cursorLocal;
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    sourceRoot, Input.mousePosition, null, out cursorLocal))
+                    sourceRoot, GameInput.mousePosition, null, out cursorLocal))
             {
                 int cellTotal = CELL_SIZE + CELL_GAP;
                 Vector2 itemTopLeft = new Vector2(placed.gridX * cellTotal, -placed.gridY * cellTotal);
@@ -2288,7 +2299,7 @@ public class CharacterPanelUI : MonoBehaviour
         if (ghostGO == null || canvasRT == null) return;
         Vector2 localPos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRT, Input.mousePosition, null, out localPos);
+            canvasRT, GameInput.mousePosition, null, out localPos);
         // 잡은 지점이 커서에 고정되도록 고스트 좌상단을 픽셀 오프셋만큼 당긴다(칸 점프 없이 자유 추적).
         ghostRT.anchoredPosition = localPos - grabPixelOffset;
     }
@@ -2424,7 +2435,7 @@ public class CharacterPanelUI : MonoBehaviour
     void TryPlaceDragged()
     {
         // 거의 안 움직였으면 = 클릭 → 이동이 아니라 "선택"으로 처리(원위치 복귀 + 선택 표시).
-        if (((Vector2)Input.mousePosition - dragStartMouse).magnitude < CLICK_MOVE_THRESHOLD)
+        if (((Vector2)GameInput.mousePosition - dragStartMouse).magnitude < CLICK_MOVE_THRESHOLD)
         {
             var clickedItem = dragItem;
             var clickedGrid = dragSourceGrid;
@@ -2797,7 +2808,7 @@ public class CharacterPanelUI : MonoBehaviour
         // 마우스 위치에 메뉴 배치
         Vector2 localPos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRT, Input.mousePosition, null, out localPos);
+            canvasRT, GameInput.mousePosition, null, out localPos);
         contextMenuRT.anchoredPosition = localPos;
 
         // 아이템 이름
@@ -2951,7 +2962,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         Vector2 localPos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRT, Input.mousePosition, null, out localPos);
+            canvasRT, GameInput.mousePosition, null, out localPos);
         contextMenuRT.anchoredPosition = localPos;
 
         var inst = playerEquipment.GetSlotInstance(slot) ?? new ItemInstance(data, 1);
@@ -3218,7 +3229,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         Vector2 localPos;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            gridRoot, Input.mousePosition, null, out localPos))
+            gridRoot, GameInput.mousePosition, null, out localPos))
             return false;
 
         int cellTotal = CELL_SIZE + CELL_GAP;
@@ -3239,7 +3250,7 @@ public class CharacterPanelUI : MonoBehaviour
         if (gridRoot == null) return;
         Vector2 localPos;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                gridRoot, Input.mousePosition, null, out localPos))
+                gridRoot, GameInput.mousePosition, null, out localPos))
             return;
         Vector2 topLeft = localPos - grabPixelOffset;   // 아이템 좌상단 로컬 위치
         int cellTotal = CELL_SIZE + CELL_GAP;
