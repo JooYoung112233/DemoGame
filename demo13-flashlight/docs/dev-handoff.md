@@ -1,7 +1,37 @@
 # 개발 핸드오프 (이어서 작업)
 
 > 다른 PC에서 이어서 작업할 때 **여기부터** 읽기. `/build`로 이어서 진행.
-> 최신 갱신: 2026-06-19
+> 최신 갱신: 2026-06-24
+
+## 지금 위치 (2026-06-24) — 인벤토리 대규모 개편 완료, 전부 커밋·푸시됨
+
+이번 세션은 **인벤토리/컨테이너 UX 전면 개편**. 모두 `feature/demo13-flashlight`에 **커밋·푸시 완료**(최신 `3800113`).
+
+- **드래그 = 픽셀 잡기 오프셋**: 고스트가 잡은 지점 고정(자유 추적), 놓을 때만 가까운 칸 스냅. (`de629de`)
+- **우클릭 메뉴 수정**: 좌클릭 다운에서 메뉴 닫혀 onClick 씹히던 버그 → 메뉴 밖 클릭일 때만 닫음. 착용 슬롯 우클릭=착용해제/자세히/제거, 좌클릭 해제는 Ctrl+클릭. 버리기/폐기/제거 **확인 팝업**.
+- **아이템 사용 피드백**: `UseItem` 항상 성공/실패 사유 토스트. 소비템 useEffect 오태깅 교정(통조림/단백질/커피/에너지수프/스팀→Food).
+- **🟢 보관함(컨테이너) 시스템**: `ItemData`(isContainer/internal격자/allowedCategories) + `ItemInstance.containerGrid`. `cont_*` 8종 SO(`Resources/Items/Container/`, 냉장고·무기케이스·금고 등), 카테고리 게이트, **세이브 재귀 직렬화**(`GridItemEntry.containerItems`), F1 보관함 탭.
+- **가방·조끼도 컨테이너**: `containerWidth>0`이면 자동 `IsContainer`. 장착=내용물 휴대격자로 / 해제=가방으로 이동(짐 동행). 해제·반출은 **창고 우선→인벤**(레이드는 인벤, `StoreItemPreferStash`/`IsSafeArea`).
+- **컨테이너 = 독립 이동 팝업**(`DraggableWindow`): 셀 크기 맞춤 창, 헤더 드래그, 정렬·닫기 버튼(가방은 정렬 제외). 드래그/우클릭/Ctrl/카테고리 게이트 통합. 팝업 항상 1개.
+- **열지 않고 드롭-인**: 컨테이너 위에 드롭=안에 넣기, 꽉차면 스왑 대신 원위치(파랑 하이라이트). **가방 안 가방 방지**(`CanInsertIntoContainer`). Ctrl+클릭: 팝업 안=빼기 / 팝업 열림+창고아이템=넣기.
+- **사용 시간(시전) 시스템**: `ItemData.useTimeSeconds`(0=즉시, >0=진행바 채널, 예 붕대 5초). `UseActionManager`(unscaled, ESC 취소, 단일). `UseItem`→`ApplyUseEffect` 분리. (`3800113`)
+- **ESC 우선순위**: 컨텍스트메뉴 > 사용채널 > 컨테이너팝업 > 드래그 > 패널.
+
+### ⚠️ 작업 재개 시 먼저 알 것
+- **워킹트리에 대규모 Input System 마이그레이션이 진행 중**(미커밋): 약 40+개 파일 `Input.*`→`GameInput.*`, `cha.atlas`/`Monster.prefab` 삭제, `StatDB.asset`/`Zone1.unity`/`PlayerRig.prefab` 수정 등. **내(클로드) 작업 아님 — 손대지 않고 그대로 둠.** 재개하면 이 마이그레이션부터 마무리/커밋할 것.
+- **규칙(CLAUDE.md 2026-06-24)**: `UnityEngine.Input.*` 직접 호출 금지 → `Scripts/Core/GameInput.cs` 사용(New-only면 Input.*가 런타임 throw). 코드로 EventSystem 만들 땐 `InputSystemUIInputModule`+`AssignDefaultActions()`. (현 EventSystem 생성처들은 이미 적용됨.)
+
+### 이번 세션 Unity 테스트 대기
+- 드래그 잡기 지점 고정 / 우클릭 메뉴 동작 / 확인 팝업 / 사용 토스트.
+- F1 보관함 탭→냉장고 +창고→우클릭 열기(팝업)→카테고리 게이트→세이브 유지.
+- 가방 열기/장착 시 짐 동행, 해제→창고 우선, 가방안가방 거부.
+- 열지 않고 컨테이너 위 드롭-인(꽉차면 원위치), Ctrl 입출.
+- 붕대 사용→진행바 5초→ESC 취소. ESC로 팝업만 닫힘.
+
+### 다음 코드 후보
+④ **특성 탭 UI**(자가검증 21 PASS 통과 — 이제 UI) · ⑤ **FOV 어둠 오버레이** · ⑥ 총기 무기(+파츠 실효과) · ⑦ 적 Spine 애니.
+
+---
 
 ## 지금 위치 (2026-06-19)
 **Phase 3(인벤토리·루팅) 코드 마무리 진행 중.** 6/18 핸드오프 이후 커밋들(대규모 업데이트·Spine 플레이어·중앙 인벤 재구성)에 더해, 이번에 **바닥 중첩 아이템 줍기 목록 UI**까지 코드 완료(정적 감사 통과, Unity 테스트 대기).
