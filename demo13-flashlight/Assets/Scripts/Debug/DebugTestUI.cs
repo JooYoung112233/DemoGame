@@ -99,7 +99,7 @@ public class DebugTestUI : MonoBehaviour
     void Update()
     {
         if (inMapTool) return;
-        if (Input.GetKeyDown(toggleKey))
+        if (GameInput.GetKeyDown(toggleKey))
             isOpen = !isOpen;
     }
 

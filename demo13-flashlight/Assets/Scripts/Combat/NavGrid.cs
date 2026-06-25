@@ -74,7 +74,9 @@ public class NavGrid : MonoBehaviour
 
     bool CellHasObstacle(Vector2 center, Vector2 box)
     {
-        int n = Physics2D.OverlapBoxNonAlloc(center, box, 0f, _buf, obstacleMask);
+        var filter = new ContactFilter2D { useTriggers = true, useLayerMask = true };
+        filter.SetLayerMask(obstacleMask);
+        int n = Physics2D.OverlapBox(center, box, 0f, filter, _buf);
         for (int i = 0; i < n; i++)
         {
             var col = _buf[i];

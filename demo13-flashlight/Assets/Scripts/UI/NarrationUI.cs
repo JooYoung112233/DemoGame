@@ -139,7 +139,7 @@ public class NarrationUI : MonoBehaviour
     {
         if (!isShowing) return;
 
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+        if (GameInput.GetMouseButtonDown(0) || GameInput.GetKeyDown(KeyCode.Space) || GameInput.GetKeyDown(KeyCode.Return))
         {
             if (isTyping)
             {

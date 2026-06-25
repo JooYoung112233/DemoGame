@@ -404,7 +404,7 @@ public class MapSelectUI : MonoBehaviour
     {
         if (!isShowing) return;
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (GameInput.GetKeyDown(KeyCode.Escape))
             Hide();
 
         UpdateRegionTimeDisplay();

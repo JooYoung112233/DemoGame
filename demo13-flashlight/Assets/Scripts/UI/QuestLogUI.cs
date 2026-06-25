@@ -109,13 +109,13 @@ public class QuestLogUI : MonoBehaviour
     void Update()
     {
         // J 토글. 다른 UI가 떠 있으면 겹쳐 열지 않음(닫기는 항상 허용).
-        if (Input.GetKeyDown(KeyCode.J))
+        if (GameInput.GetKeyDown(KeyCode.J))
         {
             if (isShowing) Hide();
             else if (UIManager.Instance == null || !UIManager.Instance.IsAnyUIOpen()) Show();
         }
         if (!isShowing) return;
-        if (Input.GetKeyDown(KeyCode.Escape)) Hide();
+        if (GameInput.GetKeyDown(KeyCode.Escape)) Hide();
     }
 
     // ═══════════════════════════

@@ -217,7 +217,7 @@ public class RaidResultUI : MonoBehaviour
             closeHintText.color = new Color(hint.r, hint.g, hint.b, alpha);
         }
 
-        if (showTimer > 1f && (Input.GetKeyDown(closeKey) || Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(0)))
+        if (showTimer > 1f && (GameInput.GetKeyDown(closeKey) || GameInput.GetKeyDown(KeyCode.Escape) || GameInput.GetMouseButtonDown(0)))
             Hide();
     }
 

@@ -133,9 +133,9 @@ public class TitleScreen : MonoBehaviour
     static void EnsureEventSystem()
     {
         if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() != null) return;
-        var es = new GameObject("EventSystem",
-            typeof(UnityEngine.EventSystems.EventSystem),
-            typeof(UnityEngine.EventSystems.StandaloneInputModule));
+        var es = new GameObject("EventSystem");
+        es.AddComponent<UnityEngine.EventSystems.EventSystem>();
+        es.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>().AssignDefaultActions();
         DontDestroyOnLoad(es);
     }
 

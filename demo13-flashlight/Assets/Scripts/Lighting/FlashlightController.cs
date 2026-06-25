@@ -119,7 +119,7 @@ public class FlashlightController : MonoBehaviour
     {
         if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return;
 
-        if (Input.GetKeyDown(KeyCode.F)) Toggle();
+        if (GameInput.GetKeyDown(KeyCode.F)) Toggle();
 
         if (isOn && currentBattery > 0)
         {

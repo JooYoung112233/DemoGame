@@ -97,6 +97,10 @@ void OnDestroy() { dayNight.OnPhaseChanged -= OnPhaseChanged; }
 
 ### UI Construction
 UI is built procedurally in code (uGUI), not scene-placed. GameHUD, RaidResultUI, MedicalHUD all create their own Canvas in `Awake()`/`BuildUI()`. Reference resolution: 1920x1080.
+When creating an EventSystem in code, use `InputSystemUIInputModule` (not `StandaloneInputModule`) and **call `.AssignDefaultActions()`** on it — without it, pointer/click actions are empty and mouse clicks do nothing.
+
+### Input (new Input System, 2026-06-24)
+Project uses the **new Input System** (`activeInputHandler:1`, New-only). **Do NOT call `UnityEngine.Input.*` directly** — it throws at runtime in New-only mode. Use the compat shim **`Scripts/Core/GameInput.cs`** instead (`GameInput.GetKeyDown(KeyCode)`, `GameInput.mousePosition`, `GameInput.GetAxisRaw("Horizontal"/"Vertical")`, etc.). It wraps `Keyboard.current`/`Mouse.current` with the same legacy signatures; add new keys to its `KeyCode→Key` map. See `docs/architecture.md` §입력 시스템.
 
 ### NPC & Quest System
 - **NPCData** (ScriptableObject) — NPC identity, dialogues (state-based + event branching), available quests.

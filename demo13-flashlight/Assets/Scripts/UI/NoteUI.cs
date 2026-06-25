@@ -98,8 +98,8 @@ public class NoteUI : MonoBehaviour
         if (!isShowing) return;
         if (Time.frameCount == openFrame) return;   // 연 프레임의 키 입력 무시
 
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.E) ||
-            Input.GetKeyDown(KeyCode.Space)  || Input.GetMouseButtonDown(0))
+        if (GameInput.GetKeyDown(KeyCode.Escape) || GameInput.GetKeyDown(KeyCode.E) ||
+            GameInput.GetKeyDown(KeyCode.Space)  || GameInput.GetMouseButtonDown(0))
         {
             Close();
         }

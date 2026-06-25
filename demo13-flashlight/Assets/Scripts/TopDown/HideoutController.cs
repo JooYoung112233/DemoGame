@@ -186,7 +186,7 @@ public class HideoutController : MonoBehaviour
         // 이 컴포넌트는 UIManager(-50)보다 먼저 실행(-60)되므로, 여기서 본 uiOpen은 'UIManager가 닫기 전' 상태다.
         bool uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (GameInput.GetKeyDown(KeyCode.Escape))
         {
             if (uiOpen) return;                                 // 열린 UI는 UIManager가 닫음 — 여기선 나가지 않음
             if (_confirmShowing) { HideExitConfirm(); return; } // 확인창 떠 있으면 ESC=취소
@@ -196,12 +196,12 @@ public class HideoutController : MonoBehaviour
 
         if (_confirmShowing) return;                            // 확인창 떠 있으면 시설 클릭 차단
 
-        if (!Input.GetMouseButtonDown(0)) return;
+        if (!GameInput.GetMouseButtonDown(0)) return;
         if (uiOpen) return;                                                  // 시설 UI가 열려 있으면 무시
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return; // 화면 버튼 클릭
         if (_cam == null) return;
 
-        Vector3 mw = _cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mw = _cam.ScreenToWorldPoint(GameInput.mousePosition);
         var hits = Physics2D.OverlapPointAll(new Vector2(mw.x, mw.y));
         if (hits == null || hits.Length == 0) return;
 
@@ -388,7 +388,7 @@ public class HideoutController : MonoBehaviour
         if (FindFirstObjectByType<EventSystem>() != null) return;
         var es = new GameObject("EventSystem");
         es.AddComponent<EventSystem>();
-        es.AddComponent<StandaloneInputModule>();
+        es.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>().AssignDefaultActions();
     }
 
     static Font LoadKoreanFont()

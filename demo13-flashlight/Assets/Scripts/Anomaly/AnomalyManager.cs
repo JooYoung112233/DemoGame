@@ -37,7 +37,7 @@ public class AnomalyManager : MonoBehaviour
     void Update()
     {
         // 디버그 강제 발생(레이드/간격 무시) — 어디서든 테스트
-        if (Input.GetKeyDown(forceTriggerKey)) { TryTriggerRandom(); ScheduleNext(); }
+        if (GameInput.GetKeyDown(forceTriggerKey)) { TryTriggerRandom(); ScheduleNext(); }
 
         // 자동 발생은 레이드 중에만
         if (RaidManager.Instance == null || !RaidManager.Instance.IsRaidActive) return;

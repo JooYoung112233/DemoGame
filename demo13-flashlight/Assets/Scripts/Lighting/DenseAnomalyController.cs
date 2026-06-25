@@ -112,7 +112,7 @@ public class DenseAnomalyController : MonoBehaviour
         Vector3 cp = _cam.transform.position;
         _mat.SetVector(IdWorldOffset, new Vector4(cp.x, cp.y, 0, 0));
 
-        if (Input.GetKeyDown(debugKey))
+        if (GameInput.GetKeyDown(debugKey))
             intensity = intensity > 0.5f ? 0f : 1f;
     }
 

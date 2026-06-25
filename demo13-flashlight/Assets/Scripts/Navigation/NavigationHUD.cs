@@ -173,7 +173,7 @@ public class NavigationHUD : MonoBehaviour
 
     void HandleOverlayInput()
     {
-        bool held = Input.GetKey(raiseMapKey);
+        bool held = GameInput.GetKey(raiseMapKey);
         if (held && !_overlayOpen) OpenOverlay();
         else if (!held && _overlayOpen) CloseOverlay();
         if (_overlayOpen) UpdateOverlay();

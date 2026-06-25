@@ -153,7 +153,7 @@ public class RadioUI : MonoBehaviour
     void Update()
     {
         if (!isShowing) return;
-        if (Input.GetKeyDown(KeyCode.Escape)) Hide();
+        if (GameInput.GetKeyDown(KeyCode.Escape)) Hide();
     }
 
     // ── UI 빌드 ──

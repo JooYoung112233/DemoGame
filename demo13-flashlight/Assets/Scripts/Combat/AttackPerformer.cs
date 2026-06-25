@@ -79,9 +79,11 @@ public class AttackPerformer : MonoBehaviour
 
         Vector2 center = (Vector2)transform.position + RotateByAngle(w.offset, facingAngle);
 
+        var filter = new ContactFilter2D { useTriggers = true, useLayerMask = true };
+        filter.SetLayerMask(targetMask);
         int count = w.shape == HitboxShape.Box
-            ? Physics2D.OverlapBoxNonAlloc(center, w.boxSize, facingAngle + w.angle, _buf, targetMask)
-            : Physics2D.OverlapCircleNonAlloc(center, w.radius, _buf, targetMask);
+            ? Physics2D.OverlapBox(center, w.boxSize, facingAngle + w.angle, filter, _buf)
+            : Physics2D.OverlapCircle(center, w.radius, filter, _buf);
 
         bool landed = false;
         for (int i = 0; i < count; i++)

@@ -124,7 +124,7 @@ public static class CombatSandboxBuilder
         {
             var es = new GameObject("EventSystem");
             es.AddComponent<EventSystem>();
-            es.AddComponent<StandaloneInputModule>();
+            es.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>().AssignDefaultActions();
         }
 
         // ── SpawnPoint(플레이어 자동 스폰) ──────────────────

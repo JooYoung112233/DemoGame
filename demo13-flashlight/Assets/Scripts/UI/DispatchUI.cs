@@ -147,7 +147,7 @@ public class DispatchUI : MonoBehaviour
     void Update()
     {
         if (!isShowing) return;
-        if (Input.GetKeyDown(KeyCode.Escape)) { Hide(); return; }
+        if (GameInput.GetKeyDown(KeyCode.Escape)) { Hide(); return; }
 
         // 파견 귀환 체크
         for (int i = 0; i < slots.Length; i++)

@@ -242,8 +242,8 @@ public class PostRaidEventUI : MonoBehaviour
         // 결과 화면에서 Enter/클릭으로 닫기
         if (resultPanel.activeSelf)
         {
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space) ||
-                Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(0))
+            if (GameInput.GetKeyDown(KeyCode.Return) || GameInput.GetKeyDown(KeyCode.Space) ||
+                GameInput.GetKeyDown(KeyCode.Escape) || GameInput.GetMouseButtonDown(0))
                 OnContinue();
         }
 
@@ -252,7 +252,7 @@ public class PostRaidEventUI : MonoBehaviour
         {
             for (int i = 0; i < currentEvent.choices.Length; i++)
             {
-                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                if (GameInput.GetKeyDown(KeyCode.Alpha1 + i))
                 {
                     OnChoiceSelected(i);
                     break;

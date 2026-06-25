@@ -248,7 +248,7 @@ public class TopDownPlayer : MonoBehaviour
         // UI/대화 열림 → 조준·전투 입력 정지 (이동은 FixedUpdate에서 정지)
         if (!_uiOpen)
         {
-            if (Input.GetKeyDown(KeyCode.C)) _crouching = !_crouching;   // 앉기 토글
+            if (GameInput.GetKeyDown(KeyCode.C)) _crouching = !_crouching;   // 앉기 토글
             UpdateMouseFacing();
             UpdateFlip();
             UpdateVisionLight();
@@ -285,8 +285,8 @@ public class TopDownPlayer : MonoBehaviour
 
         if (!CanMove) { _rb.linearVelocity = Vector2.zero; return; }
 
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
+        float h = GameInput.GetAxisRaw("Horizontal");
+        float v = GameInput.GetAxisRaw("Vertical");
         MoveDirection = new Vector2(h, v);
         if (MoveDirection.sqrMagnitude > 1f) MoveDirection.Normalize();
 
@@ -307,7 +307,7 @@ public class TopDownPlayer : MonoBehaviour
     void UpdateMouseFacing()
     {
         if (_cam == null) return;
-        Vector3 m = _cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 m = _cam.ScreenToWorldPoint(GameInput.mousePosition);
         m.z = transform.position.z;
         Vector2 dir = (Vector2)(m - transform.position);
         if (dir.sqrMagnitude > 0.01f)
@@ -440,7 +440,7 @@ public class TopDownPlayer : MonoBehaviour
     void UpdateSprint(bool uiOpen)
     {
         bool wantSprint = !uiOpen && !_exhausted && !_crouching && _state == CombatState.Idle
-                          && Input.GetKey(KeyCode.LeftShift) && IsMoving
+                          && GameInput.GetKey(KeyCode.LeftShift) && IsMoving
                           && _stamina > SprintMinStam;
 
         // 달리기 거리 제한: RunMaxDistance>0이면 그 거리만큼 달리면 끊김(멈추면 회복).
@@ -474,7 +474,7 @@ public class TopDownPlayer : MonoBehaviour
         if (!CombatEnabled || _exhausted) return;
 
         // 구르기 (Space)
-        if (Input.GetKeyDown(KeyCode.Space) && _state != CombatState.Dodge && _dodgeCooldownTimer <= 0f)
+        if (GameInput.GetKeyDown(KeyCode.Space) && _state != CombatState.Dodge && _dodgeCooldownTimer <= 0f)
         {
             TryDodge();
             return;
@@ -483,7 +483,7 @@ public class TopDownPlayer : MonoBehaviour
         if (_state != CombatState.Idle && _state != CombatState.HeavyCharge) return;
 
         // 약공격 (좌클릭) — 콤보 체인
-        if (Input.GetMouseButtonDown(0))
+        if (GameInput.GetMouseButtonDown(0))
         {
             if (_state == CombatState.Idle && _lightCooldownTimer <= 0f)
             {
@@ -499,7 +499,7 @@ public class TopDownPlayer : MonoBehaviour
         }
 
         // 강공격 (우클릭 차징 → 떼면 발동)
-        if (Input.GetMouseButtonDown(1) && _heavyCooldownTimer <= 0f && _state == CombatState.Idle)
+        if (GameInput.GetMouseButtonDown(1) && _heavyCooldownTimer <= 0f && _state == CombatState.Idle)
         {
             _state = CombatState.HeavyCharge;
             _chargeTimer = 0f;
@@ -507,7 +507,7 @@ public class TopDownPlayer : MonoBehaviour
         if (_state == CombatState.HeavyCharge)
         {
             _chargeTimer += Time.deltaTime;
-            if (Input.GetMouseButtonUp(1))
+            if (GameInput.GetMouseButtonUp(1))
                 DoHeavyAttack();
         }
     }

@@ -412,7 +412,7 @@ public class DialogueUI : MonoBehaviour
         yield return null;
         while (true)
         {
-            if (Input.GetKeyDown(KeyCode.E))   // 대화 진행 = E 단일키
+            if (GameInput.GetKeyDown(KeyCode.E))   // 대화 진행 = E 단일키
                 yield break;
             yield return null;
         }
@@ -478,7 +478,7 @@ public class DialogueUI : MonoBehaviour
         if (!isShowing) return;
 
         // 타이핑 중 E → 즉시 완성
-        if (isTyping && Input.GetKeyDown(KeyCode.E))
+        if (isTyping && GameInput.GetKeyDown(KeyCode.E))
         {
             _skipTyping = true;   // 코루틴 유지(전체 표시 후 입력 대기로 이어짐) — StopCoroutine 시 E 먹통 버그 수정
         }
@@ -489,11 +489,11 @@ public class DialogueUI : MonoBehaviour
             int n = Mathf.Min(currentChoices.Length, choiceButtons.Length);
             if (n > 0)
             {
-                if (Input.GetKeyDown(KeyCode.W))
+                if (GameInput.GetKeyDown(KeyCode.W))
                 { choiceHighlight = (choiceHighlight - 1 + n) % n; UpdateChoiceHighlight(); }
-                else if (Input.GetKeyDown(KeyCode.S))
+                else if (GameInput.GetKeyDown(KeyCode.S))
                 { choiceHighlight = (choiceHighlight + 1) % n; UpdateChoiceHighlight(); }
-                else if (Input.GetKeyDown(KeyCode.E))
+                else if (GameInput.GetKeyDown(KeyCode.E))
                 { OnChoiceSelected(choiceHighlight); }
             }
         }

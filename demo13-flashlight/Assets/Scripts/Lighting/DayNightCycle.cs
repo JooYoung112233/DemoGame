@@ -105,7 +105,7 @@ public class DayNightCycle : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
+        if (GameInput.GetKeyDown(KeyCode.T))
             ForceToggle();
     }
 

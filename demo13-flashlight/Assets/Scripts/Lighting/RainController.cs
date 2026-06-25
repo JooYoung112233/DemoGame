@@ -45,14 +45,14 @@ public class RainController : MonoBehaviour
     void Update()
     {
         // R키 디버그 토글
-        if (Input.GetKeyDown(KeyCode.R))
+        if (GameInput.GetKeyDown(KeyCode.R))
         {
             isRaining = !isRaining;
             Debug.Log($"[Rain] R키: 비 {(isRaining ? "ON" : "OFF")}");
         }
 
         // WeatherData에서 타겟 갱신
-        if (weatherData != null && !Input.GetKey(KeyCode.R))
+        if (weatherData != null && !GameInput.GetKey(KeyCode.R))
         {
             isRaining = weatherData.IsRaining;
         }

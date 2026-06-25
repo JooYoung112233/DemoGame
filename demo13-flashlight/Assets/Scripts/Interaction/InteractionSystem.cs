@@ -70,7 +70,7 @@ public class InteractionSystem : MonoBehaviour
             return;
 
         // E키 입력
-        if (currentTarget != null && Input.GetKeyDown(interactKey))
+        if (currentTarget != null && GameInput.GetKeyDown(interactKey))
         {
             currentTarget.Interact(gameObject);
 

@@ -93,7 +93,7 @@ public class QuickSlotBar : MonoBehaviour
         if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return;
 
         for (int i = 0; i < SlotCount; i++)
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i) || Input.GetKeyDown(KeyCode.Keypad1 + i))
+            if (GameInput.GetKeyDown(KeyCode.Alpha1 + i) || GameInput.GetKeyDown(KeyCode.Keypad1 + i))
                 UseSlot(i);
     }
 

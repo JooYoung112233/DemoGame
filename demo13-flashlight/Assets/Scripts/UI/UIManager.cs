@@ -128,7 +128,7 @@ public class UIManager : MonoBehaviour
         {
             var esGO = new GameObject("[EventSystem]");
             esGO.AddComponent<EventSystem>();
-            esGO.AddComponent<StandaloneInputModule>();
+            esGO.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>().AssignDefaultActions();
             DontDestroyOnLoad(esGO);
         }
     }
@@ -240,7 +240,7 @@ public class UIManager : MonoBehaviour
     void Update()
     {
         // ── ESC: 열린 UI 있으면 전부 닫기, 없으면 일시정지 메뉴 (중앙 권위) ──
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (GameInput.GetKeyDown(KeyCode.Escape))
         {
             if (ItemDetailUI.IsShowing) { ItemDetailUI.Hide(); return; }   // 상세 팝업만 먼저 닫기(뒤 패널 유지)
             if (IsAnyUIOpen()) CloseAll();
@@ -249,7 +249,7 @@ public class UIManager : MonoBehaviour
         }
 
         // ── Tab: 캐릭터 패널 토글 — 다른 UI 열려있으면 무시(중첩 금지) ──
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (GameInput.GetKeyDown(KeyCode.Tab))
         {
             if (characterPanelUI != null && characterPanelUI.IsShowing)
                 characterPanelUI.Hide();

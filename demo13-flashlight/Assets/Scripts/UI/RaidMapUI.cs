@@ -146,7 +146,7 @@ public class RaidMapUI : MonoBehaviour
     void Update()
     {
         // N 토글. 다른 UI가 떠 있으면 그 위에 겹쳐 열지 않음(닫기는 항상 허용).
-        if (Input.GetKeyDown(ToggleKey))
+        if (GameInput.GetKeyDown(ToggleKey))
         {
             if (_showing) Close();
             else if (UIManager.Instance == null || !UIManager.Instance.IsAnyUIOpen()) Open();
@@ -157,7 +157,7 @@ public class RaidMapUI : MonoBehaviour
         // 연 프레임의 키 입력 무시(즉시 닫힘 방지).
         if (Time.frameCount == _openFrame) return;
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (GameInput.GetKeyDown(KeyCode.Escape))
         {
             Close();
             return;

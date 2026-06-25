@@ -118,7 +118,7 @@ public class ItemDetailUI : MonoBehaviour
     {
         if (!isShowing) return;
         if (Time.frameCount == openFrame) return;   // 연 프레임 입력 무시
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+        if (GameInput.GetKeyDown(KeyCode.Escape) || GameInput.GetMouseButtonDown(0) || GameInput.GetMouseButtonDown(1))
             Close();
     }
 

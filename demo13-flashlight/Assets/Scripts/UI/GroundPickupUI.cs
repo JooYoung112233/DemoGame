@@ -114,18 +114,18 @@ public class GroundPickupUI : MonoBehaviour
 
         if (Time.frameCount == openFrame) return;   // 연 프레임의 입력 무시
 
-        if (Input.GetKeyDown(KeyCode.Escape)) { Close(); return; }
+        if (GameInput.GetKeyDown(KeyCode.Escape)) { Close(); return; }
 
         // 휠/방향키 선택
-        float wheel = Input.mouseScrollDelta.y;
-        if (wheel > 0.01f || Input.GetKeyDown(KeyCode.UpArrow)) MoveSelection(-1);
-        else if (wheel < -0.01f || Input.GetKeyDown(KeyCode.DownArrow)) MoveSelection(1);
+        float wheel = GameInput.mouseScrollDelta.y;
+        if (wheel > 0.01f || GameInput.GetKeyDown(KeyCode.UpArrow)) MoveSelection(-1);
+        else if (wheel < -0.01f || GameInput.GetKeyDown(KeyCode.DownArrow)) MoveSelection(1);
 
         // 전부 줍기
-        if (Input.GetKeyDown(KeyCode.F)) { PickAll(); return; }
+        if (GameInput.GetKeyDown(KeyCode.F)) { PickAll(); return; }
 
         // 선택 줍기
-        if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        if (GameInput.GetKeyDown(KeyCode.E) || GameInput.GetKeyDown(KeyCode.Return) || GameInput.GetKeyDown(KeyCode.KeypadEnter))
             PickAt(selected);
     }
 

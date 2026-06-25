@@ -54,12 +54,12 @@ public class TutorialPrompt : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.H))
+        if (GameInput.GetKeyDown(KeyCode.H))
         {
             ToggleTutorialPanel();
         }
 
-        if (tutorialPanelOpen && Input.GetKeyDown(KeyCode.Escape))
+        if (tutorialPanelOpen && GameInput.GetKeyDown(KeyCode.Escape))
         {
             CloseTutorialPanel();
         }

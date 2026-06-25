@@ -6,7 +6,8 @@
         "Unity.RenderPipelines.Universal.2D.Runtime",
         "Unity.RenderPipelines.Core.Runtime",
         "spine-unity",
-        "spine-csharp"
+        "spine-csharp",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
