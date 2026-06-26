@@ -27,9 +27,13 @@ public class RaidMapUI : MonoBehaviour
     {
         if (_instance == null)
         {
-            var go = new GameObject("[RaidMapUI]");
+            // 프리팹 우선 — Instantiate가 Awake를 돌려 _instance 설정(폰트 재바인딩 포함).
+            // 프리팹이 없으면(미베이크) 코드 생성으로 폴백.
+            var prefab = Resources.Load<GameObject>("UI/RaidMapUI");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("[RaidMapUI]");
+            go.name = "[RaidMapUI]";
+            if (prefab == null) go.AddComponent<RaidMapUI>(); // 폴백: Awake가 BuildUI
             DontDestroyOnLoad(go);
-            go.AddComponent<RaidMapUI>(); // Awake에서 _instance 설정 + UI 생성
         }
         return _instance;
     }
@@ -117,10 +121,21 @@ public class RaidMapUI : MonoBehaviour
     bool _showing;
     int  _openFrame = -1;
 
-    Canvas      _canvas;
-    GameObject  _rootGO;          // 전체 루트(딤)
-    RectTransform _mapArea;       // 마커가 배치되는 좌표계(중앙 앵커)
+    // ── 영속 스켈레톤(프리팹 베이크 시 직렬화 보존) ──
+    [SerializeField] Canvas      _canvas;
+    [SerializeField] GameObject  _rootGO;          // 전체 루트(딤)
+    [SerializeField] RectTransform _mapArea;       // 마커가 배치되는 좌표계(중앙 앵커)
+    // 정적 라벨(폰트 재바인딩 대상) — 마커는 동적이라 직렬화하지 않음.
+    [SerializeField] Text _titleText;
+    [SerializeField] Text _closeText;
+    [SerializeField] Text _legendHead;
+    [SerializeField] Text _legendRow0;
+    [SerializeField] Text _legendRow1;
+    [SerializeField] Text _legendRow2;
+
     Rect _worldBounds;            // 맵 영역에 매핑되는 월드 사각
+
+    bool IsGenerated => _canvas != null;
 
     readonly List<GameObject> _markerPool = new List<GameObject>();
     readonly List<GameObject> _gridPool   = new List<GameObject>();
@@ -135,7 +150,8 @@ public class RaidMapUI : MonoBehaviour
     {
         if (_instance != null && _instance != this) { Destroy(gameObject); return; }
         _instance = this;
-        BuildUI();
+        if (!IsGenerated) BuildUI();   // 폴백: 프리팹 없이 코드로 생성
+        else ApplyFonts();             // 프리팹 인스턴스: 동적 폰트 재바인딩
     }
 
     void OnDestroy()
@@ -176,6 +192,8 @@ public class RaidMapUI : MonoBehaviour
         if (_rootGO == null) BuildUI();
         _showing = true;
         _openFrame = Time.frameCount;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (_canvas != null && !_canvas.gameObject.activeSelf) _canvas.gameObject.SetActive(true);
         _rootGO.SetActive(true);
         Rebuild();
     }
@@ -478,6 +496,27 @@ public class RaidMapUI : MonoBehaviour
         _rootGO.SetActive(false);
     }
 
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 정적 Text 참조에 재바인딩.</summary>
+    void ApplyFonts()
+    {
+        var f = KR;
+        if (_titleText)  _titleText.font  = f;
+        if (_closeText)  _closeText.font  = f;
+        if (_legendHead) _legendHead.font = f;
+        if (_legendRow0) _legendRow0.font = f;
+        if (_legendRow1) _legendRow1.font = f;
+        if (_legendRow2) _legendRow2.font = f;
+    }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — BuildUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        BuildUI();
+    }
+#endif
+
     void BuildHeader(RectTransform root)
     {
         // 상단 헤더바 (전폭, 높이 64).
@@ -489,6 +528,7 @@ public class RaidMapUI : MonoBehaviour
 
         // 제목.
         var title = MakeText(bar, "Title", "지역 지도", 26, FontStyle.Bold, ColText, TextAnchor.MiddleLeft);
+        _titleText = title;
         var tRT = title.rectTransform;
         tRT.anchorMin = new Vector2(0f, 0f); tRT.anchorMax = new Vector2(1f, 1f);
         tRT.offsetMin = new Vector2(28f, 0f); tRT.offsetMax = new Vector2(-120f, 0f);
@@ -506,6 +546,7 @@ public class RaidMapUI : MonoBehaviour
         var cBtn = closeGO.AddComponent<Button>();
         cBtn.onClick.AddListener(Close);
         var cTxt = MakeText(cRT, "X", "✕", 22, FontStyle.Bold, ColText, TextAnchor.MiddleCenter);
+        _closeText = cTxt;
         var xRT = cTxt.rectTransform;
         xRT.anchorMin = Vector2.zero; xRT.anchorMax = Vector2.one;
         xRT.offsetMin = Vector2.zero; xRT.offsetMax = Vector2.zero;
@@ -549,22 +590,24 @@ public class RaidMapUI : MonoBehaviour
         AddOutline(legend, ColLine);
 
         var head = MakeText(legend, "LegendHead", "범례", 14, FontStyle.Bold, ColGold, TextAnchor.UpperLeft);
+        _legendHead = head;
         var hRT = head.rectTransform;
         hRT.anchorMin = new Vector2(0f, 1f); hRT.anchorMax = new Vector2(1f, 1f);
         hRT.offsetMin = new Vector2(12f, -26f); hRT.offsetMax = new Vector2(-12f, -6f);
 
-        LegendRow(legend, 0, ColPlayer, "● 현재 위치");
-        LegendRow(legend, 1, ColExit,   "◆ 탈출구");
-        LegendRow(legend, 2, ColPoi,    "◇ POI / 인텔");
+        _legendRow0 = LegendRow(legend, 0, ColPlayer, "● 현재 위치");
+        _legendRow1 = LegendRow(legend, 1, ColExit,   "◆ 탈출구");
+        _legendRow2 = LegendRow(legend, 2, ColPoi,    "◇ POI / 인텔");
     }
 
-    void LegendRow(RectTransform parent, int index, Color color, string text)
+    Text LegendRow(RectTransform parent, int index, Color color, string text)
     {
         var row = MakeText(parent, "LegendRow" + index, text, 13, FontStyle.Normal, color, TextAnchor.MiddleLeft);
         var rt = row.rectTransform;
         rt.anchorMin = new Vector2(0f, 1f); rt.anchorMax = new Vector2(1f, 1f);
         float top = -34f - index * 24f;
         rt.offsetMin = new Vector2(14f, top - 22f); rt.offsetMax = new Vector2(-10f, top);
+        return row;
     }
 
     // ─────────────────────────────────────────────────────────────────

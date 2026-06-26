@@ -17,6 +17,12 @@ public class DispatchUI : MonoBehaviour
     static bool isShowing;
     public static bool IsShowing => isShowing;
 
+    // 프리팹 베이크 시 보존되는 영속 스켈레톤(캔버스). 리스트/마커 등 동적 항목은 BuildUI에서 매번 재생성하므로 직렬화하지 않는다.
+    // 프리팹이 없으면(미베이크) null → 기존 코드 생성 경로(아래 BuildUI에서 새 Canvas 생성) 그대로.
+    [SerializeField] Canvas bakedCanvas;
+
+    bool IsGenerated => bakedCanvas != null;
+
     // ── 한글 폰트 로더 (LegacyRuntime는 ASCII만이라 한글이 안 나옴) ──
     static Font _kr;
     static Font KR
@@ -127,19 +133,42 @@ public class DispatchUI : MonoBehaviour
     {
         if (instance == null)
         {
-            var go = new GameObject("DispatchUI");
+            // 프리팹 우선(베이크된 스켈레톤) — Instantiate가 Awake로 instance를 세팅. 없으면 코드 생성 폴백.
+            var prefab = Resources.Load<GameObject>("UI/DispatchUI");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("DispatchUI");
+            go.name = "DispatchUI";
+            if (prefab == null) instance = go.AddComponent<DispatchUI>();
             DontDestroyOnLoad(go);
-            instance = go.AddComponent<DispatchUI>();
         }
         instance.dispatchLevel = lv;
         instance.BuildUI(lv);
         isShowing = true;
     }
 
+    void Awake()
+    {
+        if (instance == null) instance = this;
+    }
+
     public static void Hide()
     {
         isShowing = false;
-        if (uiRoot != null) { Destroy(uiRoot); uiRoot = null; }
+        if (uiRoot != null)
+        {
+            // 베이크된 영속 캔버스는 파괴하지 않고 비활성화(동적 자식 정리). 코드 생성본은 기존대로 파괴.
+            bool baked = instance != null && instance.bakedCanvas != null && uiRoot == instance.bakedCanvas.gameObject;
+            if (baked)
+            {
+                for (int i = uiRoot.transform.childCount - 1; i >= 0; i--)
+                    Destroy(uiRoot.transform.GetChild(i).gameObject);
+                uiRoot.SetActive(false);
+            }
+            else
+            {
+                Destroy(uiRoot);
+            }
+            uiRoot = null;
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -172,18 +201,29 @@ public class DispatchUI : MonoBehaviour
 
     void BuildUI(int dispatchLv)
     {
-        if (uiRoot != null) Destroy(uiRoot);
+        if (IsGenerated)
+        {
+            // 베이크된 영속 캔버스 재사용 — 캔버스는 보존하고 동적 자식만 비운 뒤 아래에서 다시 채운다.
+            uiRoot = bakedCanvas.gameObject;
+            if (!uiRoot.activeSelf) uiRoot.SetActive(true);
+            for (int i = uiRoot.transform.childCount - 1; i >= 0; i--)
+                Destroy(uiRoot.transform.GetChild(i).gameObject);
+        }
+        else
+        {
+            if (uiRoot != null) Destroy(uiRoot);
 
-        uiRoot = new GameObject("DispatchUI_Canvas");
-        uiRoot.transform.SetParent(transform, false);
-        var canvas = uiRoot.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 55;
-        var scaler = uiRoot.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
-        scaler.matchWidthOrHeight = 0.5f;
-        uiRoot.AddComponent<GraphicRaycaster>();
+            uiRoot = new GameObject("DispatchUI_Canvas");
+            uiRoot.transform.SetParent(transform, false);
+            var canvas = uiRoot.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 55;
+            var scaler = uiRoot.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.matchWidthOrHeight = 0.5f;
+            uiRoot.AddComponent<GraphicRaycaster>();
+        }
 
         // 전체화면 딤 배경(화면 꽉 채움)
         var dim = MakeStretch(uiRoot.transform, "Dim");
@@ -395,6 +435,29 @@ public class DispatchUI : MonoBehaviour
         MakeLabel(sendGO.transform, "Label", "파견 보내기", 16, ColText, TextAnchor.MiddleCenter,
             Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, FontStyle.Bold);
     }
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// 에디터 베이크 전용 — 영속 스켈레톤(빈 캔버스)만 만들어 프리팹화한다.
+    /// 본문(슬롯/마커/로그/탭)은 동적이라 런타임 BuildUI에서 매번 재생성하므로 베이크하지 않는다.
+    /// </summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        var go = new GameObject("DispatchUI_Canvas");
+        go.transform.SetParent(transform, false);
+        var canvas = go.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 55;
+        var scaler = go.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.matchWidthOrHeight = 0.5f;
+        go.AddComponent<GraphicRaycaster>();
+        go.SetActive(false);
+        bakedCanvas = canvas;
+    }
+#endif
 
     // ─────────────────────────────────────────────────────────────────
     // 고용 뷰 — 좌: 회수꾼(랜덤) 풀 / 우: 내 파티(계약됨)

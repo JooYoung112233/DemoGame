@@ -15,12 +15,12 @@ public class HideoutUI : MonoBehaviour
     public bool IsShowing => panel != null && panel.activeSelf;
     public bool IsGenerated => canvas != null;
 
-    Canvas canvas;
-    GameObject panel;
-    RectTransform listContent;
-    Text titleText;
-    Text scrapText;
-    Font font;
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panel;
+    [SerializeField] RectTransform listContent;
+    [SerializeField] Text titleText;
+    [SerializeField] Text scrapText;
+    Font font;   // 빌트인 LegacyRuntime 폰트 — 직렬화/재바인딩 불필요
 
     string currentModule = "workbench";
 
@@ -31,9 +31,12 @@ public class HideoutUI : MonoBehaviour
     {
         if (Instance == null)
         {
-            var go = new GameObject("HideoutUI");
+            // 프리팹 우선(Instantiate가 Awake로 Instance 세팅), 없으면 코드 생성 폴백.
+            var prefab = Resources.Load<GameObject>("UI/HideoutUI");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("HideoutUI");
+            go.name = "HideoutUI";
+            if (prefab == null) go.AddComponent<HideoutUI>();
             DontDestroyOnLoad(go);
-            Instance = go.AddComponent<HideoutUI>();
         }
         Instance.currentModule = string.IsNullOrEmpty(module) ? "workbench" : module;
         Instance.Open();
@@ -43,6 +46,8 @@ public class HideoutUI : MonoBehaviour
     public void Open()
     {
         if (!IsGenerated) GenerateUI();
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panel.SetActive(true);
         if (HideoutModuleManager.Instance != null)
         {
@@ -301,6 +306,15 @@ public class HideoutUI : MonoBehaviour
 
         panel.SetActive(false);
     }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();
+    }
+#endif
 
     // ── 헬퍼 ──
     static GameObject NewRect(string name, Transform parent, Vector2 aMin, Vector2 aMax)

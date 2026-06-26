@@ -11,8 +11,10 @@ public class TitleScreen : MonoBehaviour
 {
     public static TitleScreen Instance { get; private set; }
 
-    Canvas canvas;
-    Button continueBtn;
+    bool IsGenerated => canvas != null;
+
+    [SerializeField] Canvas canvas;
+    [SerializeField] Button continueBtn;
     Font font;
 
     /// <summary>타이틀을 띄운다(없으면 생성). 부팅/타이틀복귀에서 호출.</summary>
@@ -20,10 +22,13 @@ public class TitleScreen : MonoBehaviour
     {
         if (Instance == null)
         {
-            var go = new GameObject("TitleScreen");
+            // 프리팹 우선(Instantiate가 Awake로 Instance 세팅), 없으면 코드 생성 폴백.
+            var prefab = Resources.Load<GameObject>("UI/TitleScreen");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("TitleScreen");
+            go.name = "TitleScreen";
             DontDestroyOnLoad(go);
-            Instance = go.AddComponent<TitleScreen>();
-            Instance.BuildUI();
+            if (prefab == null) Instance = go.AddComponent<TitleScreen>();   // 폴백: Awake가 BuildUI
+            EnsureEventSystem();
         }
         Instance.SetVisible(true);
         return Instance;
@@ -33,14 +38,15 @@ public class TitleScreen : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (!IsGenerated) BuildUI();   // 폴백: 프리팹 없이 코드로 생성
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
     void BuildUI()
     {
-        EnsureEventSystem();
-        font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
         var canvasGO = new GameObject("Title_Canvas");
         canvasGO.transform.SetParent(transform, false);
@@ -78,8 +84,20 @@ public class TitleScreen : MonoBehaviour
         Anchor(ver, new Vector2(1f, 0f), new Vector2(-110, 30), new Vector2(200, 30));
     }
 
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — BuildUI를 1회 실행해 프리팹화할 계층을 만든다(EventSystem 등 런타임 셋업 제외).</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        BuildUI();
+    }
+#endif
+
     void SetVisible(bool v)
     {
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (v && canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         if (canvas != null) canvas.gameObject.SetActive(v);
         if (v && continueBtn != null)
             continueBtn.interactable = SaveManager.Instance != null && SaveManager.Instance.HasSave();

@@ -33,22 +33,30 @@ public class SleepUI : MonoBehaviour
         };
     }
 
-    Canvas canvas;
-    GameObject panel;
-    Text statusText;
-    Font font;
-    Image fadeOverlay;   // 폴백 페이드용(ScreenEffectManager 부재 시)
+    // uGUI (프리팹 베이크 시 직렬화 보존)
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panel;
+    [SerializeField] Text statusText;
+    Font font;            // 빌트인 폰트 — 직렬화 안 함(코드 생성 시점에만 사용)
+    Image fadeOverlay;   // 폴백 페이드용(ScreenEffectManager 부재 시) — 런타임 생성
     bool sleeping;        // 휴식 처리 중복 방지
 
-    void Awake() { if (Instance == null) Instance = this; }
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        // 프리팹 인스턴스(이미 베이크된 계층)면 코드 생성 생략. 빌트인 폰트라 재바인딩 불필요.
+    }
 
     public static SleepUI Show()
     {
         if (Instance == null)
         {
-            var go = new GameObject("SleepUI");
+            // 프리팹 우선(Instantiate가 Awake로 Instance 세팅), 없으면 코드 생성 폴백.
+            var prefab = Resources.Load<GameObject>("UI/SleepUI");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("SleepUI");
+            go.name = "SleepUI";
+            if (prefab == null) go.AddComponent<SleepUI>();   // 폴백: Open()이 GenerateUI
             DontDestroyOnLoad(go);
-            Instance = go.AddComponent<SleepUI>();
         }
         Instance.Open();
         return Instance;
@@ -57,6 +65,8 @@ public class SleepUI : MonoBehaviour
     public void Open()
     {
         if (!IsGenerated) GenerateUI();
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panel.SetActive(true);
         RefreshStatus();
     }
@@ -250,6 +260,15 @@ public class SleepUI : MonoBehaviour
 
         panel.SetActive(false);
     }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();   // GenerateUI 첫 줄에서 빌트인 font 설정
+    }
+#endif
 
     // ── 헬퍼 ──────────────────────────────────────────────
     static GameObject NewRect(string name, Transform parent, Vector2 aMin, Vector2 aMax)

@@ -22,6 +22,31 @@ public class QuestLogUI : MonoBehaviour
     static bool isShowing;
     public static bool IsShowing => isShowing;
 
+    // 베이크된 스켈레톤이 직렬화돼 들어왔는지 여부(프리팹 인스턴스 판별).
+    bool IsGenerated => threadContent != null;
+
+    void Awake()
+    {
+        if (instance == null) instance = this;
+        // 프리팹 인스턴스로 들어온 경우, 직렬화된 Text에 동적 OS 폰트 재바인딩.
+        if (IsGenerated) ApplyFonts();
+    }
+
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
+    void ApplyFonts()
+    {
+        if (threadHeaderText != null) threadHeaderText.font = KR;
+    }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — BuildUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        BuildUI();
+    }
+#endif
+
     // ── 한글 폰트 로더 ──
     static Font _kr;
     static Font KR
@@ -75,9 +100,12 @@ public class QuestLogUI : MonoBehaviour
 
     readonly List<Sender> senders = new List<Sender>();
     Sender selected;
-    RectTransform threadContent;       // 우측 스레드 메시지 컨테이너
-    RectTransform sidebarContent;      // 좌측 목록 컨테이너
-    RectTransform actionBar;           // 하단 액션 버튼 영역
+
+    // 영속 스켈레톤(프리팹 베이크 시 직렬화 보존). 동적 항목(말풍선/발신자 행/액션 버튼)은
+    // BuildUI/Rebuild* 가 매번 재생성하므로 직렬화하지 않는다.
+    [SerializeField] RectTransform threadContent;       // 우측 스레드 메시지 컨테이너
+    [SerializeField] RectTransform sidebarContent;      // 좌측 목록 컨테이너
+    [SerializeField] RectTransform actionBar;           // 하단 액션 버튼 영역
 
     // ═══════════════════════════
     //  공개 API
@@ -89,9 +117,13 @@ public class QuestLogUI : MonoBehaviour
 
         if (instance == null)
         {
-            var go = new GameObject("QuestLogUI");
+            // 프리팹 우선(베이크된 스켈레톤 사용), 없으면 코드 생성 폴백.
+            var prefab = Resources.Load<GameObject>("UI/QuestLogUI");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("QuestLogUI");
+            go.name = "QuestLogUI";
             DontDestroyOnLoad(go);
-            instance = go.AddComponent<QuestLogUI>();
+            instance = go.GetComponent<QuestLogUI>();
+            if (instance == null) instance = go.AddComponent<QuestLogUI>();
         }
         instance.BuildUI();
         isShowing = true;
@@ -283,6 +315,8 @@ public class QuestLogUI : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920, 1080);
         scaler.matchWidthOrHeight = 0.5f;
         uiRoot.AddComponent<GraphicRaycaster>();
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (!uiRoot.activeSelf) uiRoot.SetActive(true);
 
         var rootRT = uiRoot.GetComponent<RectTransform>();
 
@@ -383,7 +417,7 @@ public class QuestLogUI : MonoBehaviour
         RebuildThread();
     }
 
-    Text threadHeaderText;
+    [SerializeField] Text threadHeaderText;
 
     // ── 좌측 발신자 목록 ──
     void RebuildSidebar()

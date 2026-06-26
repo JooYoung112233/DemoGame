@@ -15,6 +15,9 @@ public class RadioUI : MonoBehaviour
     static bool isShowing;
     public static bool IsShowing => isShowing;
 
+    // 프리팹 베이크 시 직렬화된 스켈레톤이 존재하는지(= 코드 생성 폴백 불필요).
+    bool IsGenerated => canvas != null;
+
     // ── 한글 폰트 로더 ──
     static Font _kr;
     static Font KR
@@ -91,15 +94,17 @@ public class RadioUI : MonoBehaviour
     int tunedChannel = -1;       // 현재 동조된 채널 (-1 = 동조 안 됨, 노이즈)
     string receivedLog = "";
 
-    Text logText;
-    Text hintHeaderText;
-    Text noiseText;
-    Text freqReadout;            // 상단 현재 주파수 숫자 표시
-    Slider freqSlider;           // 주파수 다이얼 (드래그로 조절)
-    Button receiveBtn;           // 동조 상태에 따라 활성/비활성
-    Text receiveBtnLbl;
-    RectTransform tuneRowRT;     // 주파수 눈금 행 (채널 틱 마커)
-    RectTransform hintListRT;    // 좌측 힌트 리스트
+    // ── 영속 스켈레톤 (프리팹 베이크 시 직렬화 보존) ──
+    [SerializeField] Canvas canvas;          // uiRoot 캔버스
+    [SerializeField] Text logText;
+    [SerializeField] Text hintHeaderText;
+    [SerializeField] Text noiseText;
+    [SerializeField] Text freqReadout;            // 상단 현재 주파수 숫자 표시
+    [SerializeField] Slider freqSlider;           // 주파수 다이얼 (드래그로 조절)
+    [SerializeField] Button receiveBtn;           // 동조 상태에 따라 활성/비활성
+    [SerializeField] Text receiveBtnLbl;
+    [SerializeField] RectTransform tuneRowRT;     // 주파수 눈금 행 (채널 틱 마커 부모)
+    [SerializeField] RectTransform hintListRT;    // 좌측 힌트 리스트 컨테이너
 
     // ── 외부 API (보존) ──
 
@@ -136,12 +141,21 @@ public class RadioUI : MonoBehaviour
     {
         if (instance == null)
         {
-            var go = new GameObject("RadioUI");
+            // 프리팹 우선 — Instantiate가 Awake로 instance를 세팅. 없으면 코드 생성 폴백.
+            var prefab = Resources.Load<GameObject>("UI/RadioUI");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("RadioUI");
+            go.name = "RadioUI";
+            if (prefab == null) go.AddComponent<RadioUI>();
             DontDestroyOnLoad(go);
-            instance = go.AddComponent<RadioUI>();
         }
         instance.BuildUI(radioLv);
         isShowing = true;
+    }
+
+    void Awake()
+    {
+        if (instance == null) instance = this;
+        if (IsGenerated) ApplyFonts();   // 프리팹 인스턴스: 동적 폰트 재바인딩
     }
 
     public static void Hide()
@@ -165,10 +179,13 @@ public class RadioUI : MonoBehaviour
         currentFreq = ChannelFreq[FirstUnlockedChannel()];
 
         if (uiRoot != null) Destroy(uiRoot);
+        // 프리팹으로 베이크된 스켈레톤(직렬화된 canvas)이 있으면 — 코드 생성 경로는
+        // 매 호출 전체 재구성이므로 중복 캔버스 방지를 위해 베이크본을 정리한다.
+        if (canvas != null) { Destroy(canvas.gameObject); canvas = null; }
 
         uiRoot = new GameObject("RadioUI_Canvas");
         uiRoot.transform.SetParent(transform, false);
-        var canvas = uiRoot.AddComponent<Canvas>();
+        canvas = uiRoot.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 55;
         var scaler = uiRoot.AddComponent<CanvasScaler>();
@@ -186,6 +203,9 @@ public class RadioUI : MonoBehaviour
         BuildTuningBar(rootRT);
         BuildBody(rootRT);
         RefreshChannelView();
+
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
     }
 
     // ── 레이아웃 상수 (한 곳에서 관리 — 밴드가 겹치지 않게) ──
@@ -557,6 +577,27 @@ public class RadioUI : MonoBehaviour
         if (logText != null) logText.text = receivedLog;
         Debug.Log($"[Radio] 수신: {msg}");
     }
+
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
+    void ApplyFonts()
+    {
+        var f = KR;
+        if (logText)        logText.font        = f;
+        if (hintHeaderText) hintHeaderText.font = f;
+        if (noiseText)      noiseText.font      = f;
+        if (freqReadout)    freqReadout.font    = f;
+        if (receiveBtnLbl)  receiveBtnLbl.font  = f;
+    }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — BuildUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        int lv = 3;   // 베이크 시 임의 레벨(채널 전부 노출). 런타임 BuildUI가 실제 레벨로 재구성.
+        BuildUI(lv);
+    }
+#endif
 
     // ── UI 유틸 ──
 

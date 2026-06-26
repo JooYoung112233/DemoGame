@@ -53,7 +53,9 @@
 5. ✅ **HUD + 중형 패널 8종**(2026-06-27): ToastManager(BuildCanvas)·GameHUD·QuestHUD·QuickSlotBar(RuntimeInit 부트 프리팹화+ApplyFonts)·NavigationHUD(`Scripts/Navigation/`)·MapSelectUI(ApplyFonts)·CraftingUI(`Scripts/Crafting/`)·DialogueUI. 각 `[SerializeField]`(대부분 이미 됨)+`EditorBake`+필요시 Canvas 가드. 베이크 엔트리 추가. **사용자 검증 대기.** (대부분 빌트인 폰트, QuickSlot/MapSelect만 동적폰트→ApplyFonts)
 6. ✅ **대형 패널 `CharacterPanelUI`(3580줄)**(2026-06-27): 스켈레톤 ref 직렬화(2개 추가, 26개 기존)+`EditorBake`+Canvas 가드. 동적 격자 셀/장비 슬롯 Dict는 직렬화 안 함(런타임 재생성 유지). 빌트인 폰트. 362/362.
 7. ✅ **대형 패널 `ShopUI`(2441줄)**(2026-06-27): 스켈레톤 ref 다수 직렬화(consign 슬롯 배열은 `readonly` 제거 후 직렬화)+`EditorBake`+Canvas 가드. 동적 셀/행은 컨테이너 루트만 직렬화·셀은 절차 유지. 244/244.
-8. ⏭ (선택) 기타: DispatchUI/RadioUI/QuestLogUI/RaidMapUI/HideoutUI/SleepUI/TitleScreen.
+8. ✅ **기타 2차 패널 7종**(2026-06-27): QuestLogUI·RaidMapUI·DispatchUI·RadioUI·HideoutUI·SleepUI·TitleScreen. 각 `[SerializeField]`+`EditorBake`+Show→프리팹 우선(자가부트)+Canvas 가드. RaidMap만 동적폰트→ApplyFonts, TitleScreen은 EnsureEventSystem을 Show로 이동(PauseMenu 패턴). **주의**: QuestLog/Dispatch/Radio는 "열 때마다 캔버스 재생성" 구조라 프리팹은 스켈레톤 보유 위주(완전 프리팹화는 후속 리팩터 필요) — 추가형·폴백 안전.
+
+> ✅ **§4-A 완료: 코드 생성 UI 22종 전부 프리팹 베이크 가능 + 부트스트랩 프리팹 우선화.** 사용자: `프리팹 베이크/── 전부 ──` → Systems 재빌드 → 플레이 검증. 다음은 §4-B 스킨.
 
 ### 4-B. 시안 스킨 적용 (전환 완료 후 — 보류)
 - 9-slice 자산 셋업 + 시안 스프라이트 입히기 + TMP 전환. (이전에 만든 `UIAssetSetup`/`UIKitBuilder`는 이 단계용이었으나, 우선순위 변경으로 **삭제**했고 스킨 단계 진입 시 재도입.) §5 매핑·§6 결정 참조.

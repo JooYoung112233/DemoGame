@@ -73,6 +73,27 @@ public static class UIPrefabBaker
     [MenuItem("Tools/TopDown/UI/프리팹 베이크/ShopUI")]
     public static void BakeShopUI() => Bake<ShopUI>("ShopUI", c => c.EditorBake());
 
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/QuestLogUI")]
+    public static void BakeQuestLogUI() => Bake<QuestLogUI>("QuestLogUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/RaidMapUI")]
+    public static void BakeRaidMapUI() => Bake<RaidMapUI>("RaidMapUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/DispatchUI")]
+    public static void BakeDispatchUI() => Bake<DispatchUI>("DispatchUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/RadioUI")]
+    public static void BakeRadioUI() => Bake<RadioUI>("RadioUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/HideoutUI")]
+    public static void BakeHideoutUI() => Bake<HideoutUI>("HideoutUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/SleepUI")]
+    public static void BakeSleepUI() => Bake<SleepUI>("SleepUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/TitleScreen")]
+    public static void BakeTitleScreen() => Bake<TitleScreen>("TitleScreen", c => c.EditorBake());
+
     [MenuItem("Tools/TopDown/UI/프리팹 베이크/── 전부 ──", priority = 100)]
     public static void BakeAll()
     {
@@ -81,6 +102,8 @@ public static class UIPrefabBaker
         BakeToastManager(); BakeGameHUD(); BakeQuestHUD(); BakeQuickSlotBar();
         BakeNavigationHUD(); BakeMapSelectUI(); BakeCraftingUI(); BakeDialogueUI();
         BakeCharacterPanelUI(); BakeShopUI();
+        BakeQuestLogUI(); BakeRaidMapUI(); BakeDispatchUI(); BakeRadioUI();
+        BakeHideoutUI(); BakeSleepUI(); BakeTitleScreen();
         Debug.Log("[UIPrefabBaker] 전체 베이크 완료. (Systems 씬 재빌드로 프리팹 인스턴스 반영)");
     }
 
