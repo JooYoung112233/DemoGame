@@ -31,12 +31,12 @@ public class GroundPickupUI : MonoBehaviour
     GameObject playerGO;
     readonly List<WorldItem> items = new List<WorldItem>();
 
-    // uGUI
-    Canvas canvas;
-    GameObject panelRoot;
-    RectTransform listRoot;
-    Text headerText;
-    Font koreanFont;
+    // uGUI (프리팹 베이크 시 직렬화 보존 — 영속 스켈레톤만. 동적 행은 직렬화 안 함)
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] RectTransform listRoot;
+    [SerializeField] Text headerText;
+    Font koreanFont;   // 런타임 동적 OS 폰트 — 직렬화 안 함(Instantiate 후 재바인딩)
 
     const int SortingOrder = 108;      // NoteUI(110) 아래, DialogueUI(100) 위
     const float PanelWidth = 360f;
@@ -50,7 +50,8 @@ public class GroundPickupUI : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         koreanFont = LoadKoreanFont();
-        if (!IsGenerated) GenerateUI();
+        if (!IsGenerated) GenerateUI();   // 폴백: 프리팹 없이 코드로 생성
+        else ApplyFonts();                // 프리팹 인스턴스: 동적 폰트 재바인딩
     }
 
     void OnDestroy()
@@ -63,9 +64,12 @@ public class GroundPickupUI : MonoBehaviour
     {
         if (Instance == null)
         {
-            var go = new GameObject("[GroundPickupUI]");
+            // 프리팹 우선(Instantiate가 Awake로 Instance 세팅), 없으면 코드 생성 폴백.
+            var prefab = Resources.Load<GameObject>("UI/GroundPickupUI");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("[GroundPickupUI]");
+            go.name = "[GroundPickupUI]";
+            if (prefab == null) go.AddComponent<GroundPickupUI>();
             DontDestroyOnLoad(go);
-            go.AddComponent<GroundPickupUI>();
         }
         return Instance;
     }
@@ -91,6 +95,8 @@ public class GroundPickupUI : MonoBehaviour
         selected = 0;
         isShowing = true;
         openFrame = Time.frameCount;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panelRoot.SetActive(true);
         RebuildRows();
     }
@@ -319,6 +325,23 @@ public class GroundPickupUI : MonoBehaviour
 
         panelRoot.SetActive(false);
     }
+
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
+    void ApplyFonts()
+    {
+        var f = koreanFont != null ? koreanFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (headerText) headerText.font = f;
+    }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        koreanFont = LoadKoreanFont();
+        GenerateUI();
+    }
+#endif
 
     Text MakeText(Transform parent, string name, int size, FontStyle style, Color color, TextAnchor anchor)
     {

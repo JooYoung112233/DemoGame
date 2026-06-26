@@ -48,8 +48,8 @@
 
 1. ✅ **PoC `ItemDetail`(A형)** (2026-06-26): 뷰 ref 8개 `[SerializeField]` + `ApplyFonts()` + `EditorBake()`, `Ensure()`→Instantiate 폴백. 베이크 툴 `UIPrefabBaker`. + 프리팹 Canvas 비활성 버그 수정. **검증 완료(사용자: 자세히 팝업 정상).**
 2. ✅ **`SystemsSceneBuilder` 프리팹 인식화** (2026-06-26): `InstantiateUIOrComponent(type, parent)` — `Resources/UI/<Type>.prefab` 있으면 `PrefabUtility.InstantiatePrefab`, 없으면 `AddComponent` 폴백. ManagerTypes·UiPanels 두 루프에 적용.
-3. 🔄 **PoC `NoteUI`(B형)** (2026-06-26): 동일 레시피 적용 + 베이크 엔트리. **사용자 검증 대기**(베이크 → Systems 씬 재빌드 → 쪽지 읽기).
-4. ⏭ **나머지 B형 팝업/매니저**(Narration/Tutorial/Toast/GroundPickup/Pause/RaidResult/PostRaidEvent) — 동일 레시피.
+3. ✅ **PoC `NoteUI`(B형)** (2026-06-26): 검증 완료(디버그 패널 쪽지 버튼 정상). + 디버그 테스트 버튼.
+4. ✅ **팝업 배치 6종**(2026-06-27): NarrationUI·TutorialPrompt·RaidResultUI·PostRaidEventUI(B형, 빌트인 폰트) + PauseMenu·GroundPickupUI(자가부트, Pause는 EnsureEventSystem을 Show로 이동/Ground는 ApplyFonts). 각 `[SerializeField]`+`EditorBake`+Canvas 가드, 베이크 엔트리 추가(+`프리팹 베이크/── 전부 ──`). **사용자 검증 대기**(전부 베이크 → Systems 재빌드 → 각 팝업 확인). 남음: ToastManager(동적 토스트).
 5. ⏭ **HUD류**(GameHUD/QuestHUD/QuickSlotBar/NavigationHUD).
 6. ⏭ **대형 패널 `CharacterPanelUI`(3580줄)** — ref 수백 개. 뷰 ref 직렬화 + 격자 슬롯 루트만 직렬화(셀은 GridPanel 절차 유지). 위험 → 단독 진행·검증.
 7. ⏭ **대형 패널 `ShopUI`(2441줄)** — 동일.

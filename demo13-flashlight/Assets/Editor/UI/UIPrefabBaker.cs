@@ -25,6 +25,32 @@ public static class UIPrefabBaker
         Bake<NoteUI>("NoteUI", c => c.EditorBake());
     }
 
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/NarrationUI")]
+    public static void BakeNarrationUI() => Bake<NarrationUI>("NarrationUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/TutorialPrompt")]
+    public static void BakeTutorialPrompt() => Bake<TutorialPrompt>("TutorialPrompt", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/RaidResultUI")]
+    public static void BakeRaidResultUI() => Bake<RaidResultUI>("RaidResultUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/PostRaidEventUI")]
+    public static void BakePostRaidEventUI() => Bake<PostRaidEventUI>("PostRaidEventUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/PauseMenu")]
+    public static void BakePauseMenu() => Bake<PauseMenu>("PauseMenu", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/GroundPickupUI")]
+    public static void BakeGroundPickupUI() => Bake<GroundPickupUI>("GroundPickupUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/── 전부 ──", priority = 100)]
+    public static void BakeAll()
+    {
+        BakeItemDetail(); BakeNoteUI(); BakeNarrationUI(); BakeTutorialPrompt();
+        BakeRaidResultUI(); BakePostRaidEventUI(); BakePauseMenu(); BakeGroundPickupUI();
+        Debug.Log("[UIPrefabBaker] 전체 베이크 완료. (Systems 씬 재빌드로 프리팹 인스턴스 반영)");
+    }
+
     // ── 공통 베이크 ────────────────────────────────────────
     static void Bake<T>(string assetName, System.Action<T> build) where T : Component
     {

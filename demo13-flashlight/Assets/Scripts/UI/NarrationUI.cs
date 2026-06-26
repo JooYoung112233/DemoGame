@@ -119,6 +119,15 @@ public class NarrationUI : MonoBehaviour
         // 현재 바인딩할 이벤트 없음 — 일관성을 위해 유지
     }
 
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — 현재 GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();
+    }
+#endif
+
     public void ClearGeneratedUI()
     {
         if (canvas != null)
@@ -173,6 +182,8 @@ public class NarrationUI : MonoBehaviour
         this.onComplete = onComplete;
 
         isShowing = true;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panelRoot.SetActive(true);
 
         // 플레이어 입력 차단

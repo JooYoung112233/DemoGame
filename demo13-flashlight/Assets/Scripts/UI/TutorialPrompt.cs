@@ -197,6 +197,15 @@ public class TutorialPrompt : MonoBehaviour
         if (closeTutorialBtn != null) closeTutorialBtn.onClick.AddListener(CloseTutorialPanel);
     }
 
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();
+    }
+#endif
+
     public void ClearGeneratedUI()
     {
         if (canvas != null)
@@ -240,6 +249,8 @@ public class TutorialPrompt : MonoBehaviour
     IEnumerator ShowRoutine(string text, float duration)
     {
         promptText.text = text;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         promptRoot.SetActive(true);
 
         // 페이드 인
@@ -303,6 +314,8 @@ public class TutorialPrompt : MonoBehaviour
         // 현재 상황에 맞는 튜토리얼 내용 구성
         string content = BuildTutorialContent();
         tutorialPanelText.text = content;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         tutorialPanel.SetActive(true);
         tutorialPanelOpen = true;
     }

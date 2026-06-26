@@ -11,8 +11,9 @@ public class PauseMenu : MonoBehaviour
     public static PauseMenu Instance { get; private set; }
 
     public bool IsShowing => canvas != null && canvas.gameObject.activeSelf;
+    bool IsGenerated => canvas != null;
 
-    Canvas canvas;
+    [SerializeField] Canvas canvas;
     Font font;
     float _prevTimeScale = 1f;
 
@@ -20,10 +21,13 @@ public class PauseMenu : MonoBehaviour
     {
         if (Instance == null)
         {
-            var go = new GameObject("PauseMenu");
+            // 프리팹 우선(Instantiate가 Awake로 Instance 세팅), 없으면 코드 생성 폴백.
+            var prefab = Resources.Load<GameObject>("UI/PauseMenu");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("PauseMenu");
+            go.name = "PauseMenu";
             DontDestroyOnLoad(go);
-            Instance = go.AddComponent<PauseMenu>();
-            Instance.BuildUI();
+            if (prefab == null) Instance = go.AddComponent<PauseMenu>();   // 폴백: Awake가 BuildUI
+            EnsureEventSystem();
         }
         Instance.SetVisible(true);
         return Instance;
@@ -33,14 +37,15 @@ public class PauseMenu : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (!IsGenerated) BuildUI();   // 폴백: 프리팹 없이 코드로 생성
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
     void BuildUI()
     {
-        EnsureEventSystem();
-        font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
         var canvasGO = new GameObject("Pause_Canvas");
         canvasGO.transform.SetParent(transform, false);
@@ -67,8 +72,20 @@ public class PauseMenu : MonoBehaviour
         MakeButton("게임 종료", new Vector2(0, -100), OnQuit);
     }
 
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — BuildUI를 1회 실행해 프리팹화할 계층을 만든다(EventSystem 등 런타임 셋업 제외).</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        BuildUI();
+    }
+#endif
+
     void SetVisible(bool v)
     {
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (v && canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         if (canvas != null) canvas.gameObject.SetActive(v);
         if (v) { _prevTimeScale = Time.timeScale; Time.timeScale = 0f; }   // 일시정지
         else   { Time.timeScale = _prevTimeScale; }                        // 원복(안전가옥=0, 레이드=1)
