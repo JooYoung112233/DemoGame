@@ -350,7 +350,7 @@ public class UIManager : MonoBehaviour
         if (RaidMapUI.IsShowing) { RaidMapUI.Hide(); return true; }
         if (HideoutUI.Instance != null && HideoutUI.Instance.IsShowing) { HideoutUI.Instance.Close(); return true; }
         if (SleepUI.Instance != null && SleepUI.Instance.IsShowing) { SleepUI.Instance.Close(); return true; }
-        if (postRaidEventUI != null && postRaidEventUI.IsShowing) { postRaidEventUI.Hide(); return true; }
+        // PostRaidEventUI는 선택지로만 닫히는 모달 → Esc 대상 아님(원래 CloseAll에도 없음).
         if (raidResultUI != null && raidResultUI.IsShowing) { raidResultUI.Hide(); return true; }
 
         // 4) 일시정지 메뉴
