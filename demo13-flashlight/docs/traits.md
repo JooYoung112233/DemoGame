@@ -172,6 +172,10 @@
 
 ## 기획 결정 로그
 
+### 2026-06-24 — 특성 탭 UI 구현 (`TraitPanelUI`)
+- **결정**: 캐릭터 특성을 **독립 패널(K 토글)**로 우선 구현(캐릭터 패널 탭 통합은 추후 — 패널 비대화 방지). 카테고리×티어 목록 + PP 잔량 + **행 클릭 해금**(TraitManager.CanUnlock/Unlock 그대로 사용 — 선행·비용·부정상한 준수) + 디버그 +10PP. **세이브 훅**(`GameSaveData.traits`) 추가. unity-reviewer 통과.
+- **미배선(다음)**: 특성 **효과 스탯 말단 read-site**(이속/스태미너/시야 등 `GetModifier`/`HasFlag` 적용 — 현재 해금만 되고 효과 미적용), PP 획득 루트(레이드/평판→GrantPP) 연결. UI 아트는 그레이박스(추후 양피지 톤).
+
 ### 2026-06-19 — 🔴 "SO 41개 로드=0" 블로커 **해결** (진단으로 진범 확정)
 - **증상**: 자가검증 `[SO 41개 로드] expected=41 actual=0`. 여러 차례 .asset/임포터 수정 시도했으나 안 됨.
 - **진단(결정타)**: 자가검증에 카운트 로그 추가 → `Resources TraitData=41 · RecipeData=15 · AssetDatabase=41`. **에셋·로드는 처음부터 정상**(Resources가 41 반환). 즉 손저작 .asset/임포터/YAML이 문제가 아니었음.

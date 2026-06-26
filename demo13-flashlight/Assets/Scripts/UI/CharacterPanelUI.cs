@@ -554,6 +554,19 @@ public class CharacterPanelUI : MonoBehaviour
         BuildLeftPanel(panelRoot.transform);       // 우측 = 창고/파밍
         BuildCharacterPanel(panelRoot.transform);  // 좌측 = 캐릭터/장비
 
+        // 우측 상단 닫기(X) 버튼
+        var closeGO = new GameObject("CloseBtn", typeof(RectTransform), typeof(Image), typeof(Button));
+        closeGO.transform.SetParent(panelRoot.transform, false);
+        var cRT = closeGO.GetComponent<RectTransform>();
+        cRT.anchorMin = cRT.anchorMax = cRT.pivot = new Vector2(1, 1);
+        cRT.anchoredPosition = new Vector2(-18, -18);
+        cRT.sizeDelta = new Vector2(36, 36);
+        closeGO.GetComponent<Image>().color = UITheme.Negative;
+        var cBtn = closeGO.GetComponent<Button>();
+        var ccol = cBtn.colors; ccol.highlightedColor = UITheme.CellHover; ccol.pressedColor = UITheme.CellPressed; cBtn.colors = ccol;
+        cBtn.onClick.AddListener(Hide);
+        MakeChildText(closeGO.transform, "✕", 18, UITheme.TextBright);
+
         panelRoot.SetActive(false);
     }
 

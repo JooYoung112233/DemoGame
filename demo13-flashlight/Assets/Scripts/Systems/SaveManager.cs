@@ -140,6 +140,8 @@ public class SaveManager : MonoBehaviour
 
         if (QuickSlotBar.Instance != null) data.quickSlots = QuickSlotBar.Instance.GetSlotIds();
 
+        if (TraitManager.Instance != null) data.traits = TraitManager.Instance.GetSaveData();
+
         // 창고 (안전가옥 가구 — static 목록)
         data.storageUnits = new List<StorageUnitEntry>();
         foreach (var f in SafehouseStorage.AllFurniture)
@@ -297,6 +299,9 @@ public class SaveManager : MonoBehaviour
         if (data.quickSlots != null && QuickSlotBar.Instance != null)
             QuickSlotBar.Instance.LoadSlotIds(data.quickSlots);
 
+        if (data.traits != null && TraitManager.Instance != null)
+            TraitManager.Instance.LoadSaveData(data.traits);
+
         // 창고 (uid 매칭)
         if (data.storageUnits != null)
         {
@@ -436,6 +441,9 @@ public class GameSaveData
 
     // 생존 스탯 (수분/포만감)
     public SurvivalSaveData survival;
+
+    // 특성(퍽) — PP·해금 목록
+    public TraitSaveData traits;
 
     // 창고 (안전가옥 가구)
     public List<StorageUnitEntry> storageUnits = new List<StorageUnitEntry>();

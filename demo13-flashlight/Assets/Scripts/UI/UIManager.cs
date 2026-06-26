@@ -372,6 +372,7 @@ public class UIManager : MonoBehaviour
         if (RaidMapUI.IsShowing) return true;
         if (GroundPickupUI.IsShowing) return true;
         if (ItemDetailUI.IsShowing) return true;
+        if (TraitPanelUI.IsShowing) return true;
         return false;
     }
 }
