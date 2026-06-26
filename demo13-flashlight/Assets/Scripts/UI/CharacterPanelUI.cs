@@ -99,7 +99,7 @@ public class CharacterPanelUI : MonoBehaviour
     Image[,] containerSlotImages;
 
     // 설정
-    static readonly int CELL_SIZE = 48;
+    static readonly int CELL_SIZE = 54;   // 격자 셀 — 창고 11칸이 패널 폭을 꽉 채우도록 키움
     static readonly int CELL_GAP = 2;
     static readonly float PANEL_WIDTH = 360f;
     static readonly string[] PART_NAMES = { "머 리", "몸 통", "양 팔", "왼다리", "오른다리" };
@@ -784,16 +784,20 @@ public class CharacterPanelUI : MonoBehaviour
         var tagRT = tagGO.GetComponent<RectTransform>();
         tagRT.anchorMin = tagRT.anchorMax = tagRT.pivot = new Vector2(0, 1);
         tagRT.anchoredPosition = new Vector2(8, -6);
-        tagRT.sizeDelta = new Vector2(130, 30);
+        tagRT.sizeDelta = new Vector2(168, 42);
         var tagImg = tagGO.AddComponent<Image>(); tagImg.color = Color.white;
         UISkin.Tag(tagImg);   // 시안: name.png(밝은 찢긴 종이) — 글자 어둡게
         // 태그 위 제목 텍스트(어두운 잉크, 굵게)
-        leftTitleText = MakeChildText(tagGO.transform, "창고", 15, new Color(0.15f, 0.12f, 0.09f));
+        leftTitleText = MakeChildText(tagGO.transform, "창고", 19, new Color(0.15f, 0.12f, 0.09f));
 
-        // ── 헤더: 무게(우상단, 밝은 텍스트 — 어두운 storage 프레임 위) ──
+        // ── 헤더: 무게(우상단 끝, 밝은 텍스트 — 어두운 storage 프레임 위) ──
         leftWeightText = MakeText(leftPanel, "LeftWeight", "0.0 KG",
-            new Vector2(PANEL_WIDTH - 124, -10), new Vector2(116, 24), 14, UITheme.TextBright, TextAnchor.MiddleRight);
+            Vector2.zero, new Vector2(180, 30), 17, UITheme.TextBright, TextAnchor.MiddleRight);
         leftWeightText.fontStyle = FontStyle.Bold;
+        var lwRT = (RectTransform)leftWeightText.transform;
+        lwRT.anchorMin = lwRT.anchorMax = lwRT.pivot = new Vector2(1, 1);
+        lwRT.anchoredPosition = new Vector2(-16, -16);
+        lwRT.sizeDelta = new Vector2(180, 30);
 
         // ── 카테고리 탭 (헤더 아래, 비주얼만 — 필터 로직 없음) ──
         string[] tabLabels = { "ALL", "WEAPONS", "ARMOR", "CONSUMABLES", "MATERIALS", "ETC" };
@@ -802,10 +806,10 @@ public class CharacterPanelUI : MonoBehaviour
         var tabRowRT = tabRowGO.GetComponent<RectTransform>();
         tabRowRT.anchorMin = new Vector2(0, 1); tabRowRT.anchorMax = new Vector2(1, 1);
         tabRowRT.pivot = new Vector2(0.5f, 1);
-        // 가로 스트레치: 좌우 8px 여백 / 세로: 상단에서 -40 위치, 높이 26
+        // 가로 스트레치: 좌우 8px 여백 / 세로: 제목태그 아래(-56), 높이 30
         tabRowRT.offsetMin = new Vector2(8, 0);   tabRowRT.offsetMax = new Vector2(-8, 0);
-        tabRowRT.anchoredPosition = new Vector2(0, -40);
-        tabRowRT.sizeDelta = new Vector2(tabRowRT.sizeDelta.x, 26);
+        tabRowRT.anchoredPosition = new Vector2(0, -56);
+        tabRowRT.sizeDelta = new Vector2(tabRowRT.sizeDelta.x, 30);
         var tabLayout = tabRowGO.AddComponent<HorizontalLayoutGroup>();
         tabLayout.spacing = 3;
         tabLayout.childForceExpandWidth = true;
@@ -819,12 +823,12 @@ public class CharacterPanelUI : MonoBehaviour
             var tabImg = tabGO.AddComponent<Image>();
             tabImg.color = UITheme.Accent;
             if (t == 0) UISkin.TabOn(tabImg); else UISkin.TabOff(tabImg);   // ALL 활성, 나머지 비활성
-            MakeChildText(tabGO.transform, tabLabels[t], 9, UITheme.TextBright);
+            MakeChildText(tabGO.transform, tabLabels[t], 11, UITheme.TextBright);
         }
 
-        // 수색 상태 텍스트 (탭 아래)
+        // 수색 상태 텍스트 (탭 아래 — 창고에선 빈 문자열, 상자 수색 시만 표시)
         searchStatusText = MakeText(leftPanel, "SearchStatus", "",
-            new Vector2(10, -68), new Vector2(PANEL_WIDTH - 20, 18), 12, UITheme.AccentBright, TextAnchor.MiddleCenter);
+            new Vector2(10, -92), new Vector2(PANEL_WIDTH - 20, 16), 11, UITheme.AccentBright, TextAnchor.MiddleCenter);
 
         // ── 푸터(하단): TAKE ALL(좌) / SORT(우) ──
         // TAKE ALL — 신규 버튼: 좌측 격자 전체를 플레이어 인벤으로 이동
@@ -860,7 +864,7 @@ public class CharacterPanelUI : MonoBehaviour
         viewportGO.transform.SetParent(leftPanel, false);
         var vpRT = viewportGO.GetComponent<RectTransform>();
         vpRT.anchorMin = new Vector2(0, 0); vpRT.anchorMax = new Vector2(1, 1);
-        vpRT.offsetMin = new Vector2(8, 48); vpRT.offsetMax = new Vector2(-22, -90);  // 우측 스크롤바 공간 / 헤더·푸터 여백
+        vpRT.offsetMin = new Vector2(8, 48); vpRT.offsetMax = new Vector2(-22, -94);  // 우측 스크롤바 공간 / 헤더(제목+탭)·푸터 여백
 
         // 격자 루트 = 스크롤 content. pivot(0,1) 유지 → ScreenToGridCell 히트테스트 정상.
         var gridGO = new GameObject("ContainerGrid");
@@ -884,7 +888,7 @@ public class CharacterPanelUI : MonoBehaviour
         sbGO.transform.SetParent(leftPanel, false);
         var sbRT = sbGO.GetComponent<RectTransform>();
         sbRT.anchorMin = new Vector2(1, 0); sbRT.anchorMax = new Vector2(1, 1);
-        sbRT.offsetMin = new Vector2(-16, 48); sbRT.offsetMax = new Vector2(-6, -90);
+        sbRT.offsetMin = new Vector2(-16, 48); sbRT.offsetMax = new Vector2(-6, -94);
         sbGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.3f);   // 트랙
 
         var slidingArea = new GameObject("SlidingArea", typeof(RectTransform));
