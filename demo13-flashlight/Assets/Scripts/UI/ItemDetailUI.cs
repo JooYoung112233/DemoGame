@@ -198,7 +198,7 @@ public class ItemDetailUI : MonoBehaviour
         var dimRT = dim.GetComponent<RectTransform>();
         dimRT.anchorMin = Vector2.zero; dimRT.anchorMax = Vector2.one;
         dimRT.offsetMin = Vector2.zero; dimRT.offsetMax = Vector2.zero;
-        dim.GetComponent<Image>().color = UITheme.Backdrop;
+        dim.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.22f);   // 팝업: 전체화면 어둠 대신 옅은 dim(바깥 클릭 닫기용)
         dimButton = dim.GetComponent<Button>();
         dimButton.transition = Selectable.Transition.None;
 
