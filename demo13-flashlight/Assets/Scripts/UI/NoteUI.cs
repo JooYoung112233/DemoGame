@@ -25,14 +25,14 @@ public class NoteUI : MonoBehaviour
     int  openFrame = -1;          // 연 프레임(같은 프레임 입력으로 즉시 닫힘 방지)
     Coroutine fadeCo;
 
-    // uGUI
-    Canvas canvas;
-    CanvasGroup group;            // 페이드용
-    GameObject panelRoot;
-    Text titleText;
-    Text bodyText;
-    Text closeHint;
-    Font koreanFont;
+    // uGUI (프리팹 베이크 시 직렬화 보존)
+    [SerializeField] Canvas canvas;
+    [SerializeField] CanvasGroup group;            // 페이드용
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] Text titleText;
+    [SerializeField] Text bodyText;
+    [SerializeField] Text closeHint;
+    Font koreanFont;   // 런타임 동적 OS 폰트 — 직렬화 안 함(Instantiate 후 재바인딩)
 
     // 설정
     const int   SortingOrder   = 110;   // DialogueUI(100)·Narration(90) 위
@@ -45,7 +45,8 @@ public class NoteUI : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         koreanFont = LoadKoreanFont();
-        if (!IsGenerated) GenerateUI();
+        if (!IsGenerated) GenerateUI();   // 폴백: 프리팹 없이 코드로 생성
+        else ApplyFonts();                // 프리팹 인스턴스: 동적 폰트 재바인딩
     }
 
     void OnDestroy()
@@ -58,9 +59,12 @@ public class NoteUI : MonoBehaviour
     {
         if (Instance == null)
         {
-            var go = new GameObject("[NoteUI]");
+            // 프리팹 우선(Instantiate가 Awake로 Instance 세팅), 없으면 코드 생성 폴백.
+            var prefab = Resources.Load<GameObject>("UI/NoteUI");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("[NoteUI]");
+            go.name = "[NoteUI]";
+            if (prefab == null) go.AddComponent<NoteUI>();
             DontDestroyOnLoad(go);
-            go.AddComponent<NoteUI>();   // Awake에서 Instance 설정 + Canvas 생성
         }
         return Instance;
     }
@@ -79,6 +83,8 @@ public class NoteUI : MonoBehaviour
 
         isShowing = true;
         openFrame = Time.frameCount;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panelRoot.SetActive(true);
 
         if (fadeCo != null) StopCoroutine(fadeCo);
@@ -216,6 +222,25 @@ public class NoteUI : MonoBehaviour
 
         panelRoot.SetActive(false);
     }
+
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
+    void ApplyFonts()
+    {
+        var f = koreanFont != null ? koreanFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (titleText) titleText.font = f;
+        if (bodyText)  bodyText.font  = f;
+        if (closeHint) closeHint.font = f;
+    }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        koreanFont = LoadKoreanFont();
+        GenerateUI();
+    }
+#endif
 
     Text MakeText(Transform parent, string name, int size, FontStyle style, Color color, TextAnchor anchor)
     {

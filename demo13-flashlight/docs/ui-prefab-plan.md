@@ -44,12 +44,15 @@
 > 베이크 방식(룩 1:1 보존): ① 뷰 참조 `[SerializeField]` → ② 에디터 `EditorBake()`로 GenerateUI 1회 실행 → `SaveAsPrefabAsset`(`Resources/UI/*.prefab`) → ③ 부트스트랩 `Instantiate`(프리팹 없으면 코드 생성 폴백). 동적 OS 폰트는 직렬화 불가 → Instantiate 후 `ApplyFonts()` 재바인딩. 동적 격자/리스트는 절차 유지.
 
 ### 4-A. 프리팹 우선 전환 (현재 작업 — 모든 패널)
-1. ✅ **PoC `ItemDetail`** (2026-06-26): `ItemDetailUI` 뷰 ref 8개 `[SerializeField]` + `ApplyFonts()` + `EditorBake()`, `Ensure()` → `Instantiate(Resources/UI/ItemDetailUI)` 폴백有. 베이크 툴 `Assets/Editor/UI/UIPrefabBaker.cs`(Tools/TopDown/UI/프리팹 베이크/ItemDetail). **사용자 검증 대기.**
-2. ⏭ **나머지 자가부트스트랩 팝업**(NoteUI/GroundPickup/Pause/Toast/Narration/Tutorial/RaidResult/PostRaidEvent 등) — 동일 패턴 기계적 적용.
-3. ⏭ **HUD류**(GameHUD/QuestHUD/QuickSlotBar) — 동일.
-4. ⏭ **대형 패널 `CharacterPanelUI`(3580줄)** — ref 수백 개. 뷰 ref 직렬화 + 격자 슬롯 루트만 직렬화(셀은 GridPanel 절차 유지). 위험 → 단독 진행·검증.
-5. ⏭ **대형 패널 `ShopUI`(2441줄)** — 동일.
-6. ⏭ Systems 씬 배치 패널들 정합(부트스트랩 경로 점검).
+> **부트스트랩 2부류**(중요): **A형 lazy 자가부트**(`Ensure()`만, Systems 씬에 없음 — 예: ItemDetailUI) → `Ensure()`를 Instantiate로. **B형 Systems 씬 배치**(대부분 — NoteUI/Narration/Tutorial/Toast 매니저 + UIManager 하위 GameHUD/Shop/CharacterPanel 등) → `SystemsSceneBuilder`가 빈 GO+AddComponent로 박음. **B형은 빌더가 `Resources/UI/<Type>.prefab` 있으면 프리팹 인스턴스로 배치(없으면 폴백)** 하도록 중앙 수정 완료. B형도 패널 자체는 동일 레시피([SerializeField]/ApplyFonts/EditorBake) 필요 + **베이크 후 Systems 씬 재빌드**.
+
+1. ✅ **PoC `ItemDetail`(A형)** (2026-06-26): 뷰 ref 8개 `[SerializeField]` + `ApplyFonts()` + `EditorBake()`, `Ensure()`→Instantiate 폴백. 베이크 툴 `UIPrefabBaker`. + 프리팹 Canvas 비활성 버그 수정. **검증 완료(사용자: 자세히 팝업 정상).**
+2. ✅ **`SystemsSceneBuilder` 프리팹 인식화** (2026-06-26): `InstantiateUIOrComponent(type, parent)` — `Resources/UI/<Type>.prefab` 있으면 `PrefabUtility.InstantiatePrefab`, 없으면 `AddComponent` 폴백. ManagerTypes·UiPanels 두 루프에 적용.
+3. 🔄 **PoC `NoteUI`(B형)** (2026-06-26): 동일 레시피 적용 + 베이크 엔트리. **사용자 검증 대기**(베이크 → Systems 씬 재빌드 → 쪽지 읽기).
+4. ⏭ **나머지 B형 팝업/매니저**(Narration/Tutorial/Toast/GroundPickup/Pause/RaidResult/PostRaidEvent) — 동일 레시피.
+5. ⏭ **HUD류**(GameHUD/QuestHUD/QuickSlotBar/NavigationHUD).
+6. ⏭ **대형 패널 `CharacterPanelUI`(3580줄)** — ref 수백 개. 뷰 ref 직렬화 + 격자 슬롯 루트만 직렬화(셀은 GridPanel 절차 유지). 위험 → 단독 진행·검증.
+7. ⏭ **대형 패널 `ShopUI`(2441줄)** — 동일.
 
 ### 4-B. 시안 스킨 적용 (전환 완료 후 — 보류)
 - 9-slice 자산 셋업 + 시안 스프라이트 입히기 + TMP 전환. (이전에 만든 `UIAssetSetup`/`UIKitBuilder`는 이 단계용이었으나, 우선순위 변경으로 **삭제**했고 스킨 단계 진입 시 재도입.) §5 매핑·§6 결정 참조.
@@ -82,4 +85,5 @@
 | 2026-06-26 | §6 열린 질문 4건(TMP / 창고 탭 / 격자 셀 / RESOURCES HUD) | **TMP 전환**(전제: TMP Essential Resources 임포트 필요) · **창고 탭 비주얼만**(필터 후속) · **격자 GridPanel 절차 유지**(Cell.prefab 안 만듦) · **RESOURCES HUD 포함**. | 키트/PoC 진입 위해 설계 확정. 스코프는 비주얼 우선·로직 후속으로 관리. |
 | 2026-06-26 | §4-1 자산 9-slice 셋업 / §4-2 공용 키트 | **에디터 빌더 2종 작성.** `UIAssetSetup`(Image/ 13종 스프라이트→Sprite+9-slice 보더+Clamp/Bilinear) · `UIKitBuilder`(Button_Primary/Secondary·Tab·TitleTag 프리팹을 Resources/UI/Kit에 생성, TMP 라벨). Cell.prefab은 §6 결정대로 생략. | 코드 절차→프리팹 전환의 재사용 원자 확보. 사용자가 Tools 메뉴로 실행. |
 | 2026-06-26 | **우선순위 변경**: 시안 이미지를 "새 UI"로 만드는 게 아니라 *기존 UI에 입히는 것*. 그리고 그 전에 **모든 UI를 코드 생성→프리팹 베이크/Instantiate 구조로 먼저 전환**. | 스킨(§4-B) 보류, **프리팹 우선 전환(§4-A)을 전 패널에** 우선. 진행 방식 = **PoC 1개로 패턴 확정 후 전체**(Unity 검증 불가로 일괄 위험). 저장 = `Resources/UI/`. | 사용자가 직접 씬에서 UI 편집 가능하게 + 큰 패널 리스크 관리. 이전 `UIAssetSetup`/`UIKitBuilder`는 스킨 단계용이라 삭제(재도입 예정). |
-| 2026-06-26 | PoC `ItemDetail` 프리팹화 | **완료(코드).** 뷰 ref 8개 `[SerializeField]`, `ApplyFonts()`(동적 폰트 재바인딩)·`EditorBake()` 추가, `Ensure()`를 `Instantiate(Resources/UI/ItemDetailUI)`+코드폴백으로 교체. 베이크 툴 `UIPrefabBaker`(Tools/TopDown/UI/프리팹 베이크/ItemDetail). | 베이크→Instantiate 패턴 검증용 최소 패널. 사용자 Unity 검증 후 전 패널 확대. |
+| 2026-06-26 | PoC `ItemDetail` 프리팹화 | **완료·검증.** 뷰 ref 8개 `[SerializeField]`, `ApplyFonts()`·`EditorBake()`, `Ensure()`→Instantiate+폴백. 베이크 툴 `UIPrefabBaker`. + Canvas 비활성 버그 수정(팝업 안 보임). 사용자 "자세히 팝업 정상" 확인. | 베이크→Instantiate 패턴 검증 완료. |
+| 2026-06-26 | B형(Systems 씬 배치) 전환 경로 | **부트스트랩 2부류 발견**: A형 lazy(Ensure)·B형 Systems 씬 배치. B형 대응으로 `SystemsSceneBuilder.InstantiateUIOrComponent` 추가(프리팹 있으면 인스턴스, 없으면 AddComponent 폴백). **PoC `NoteUI`** 동일 레시피 전환 + 베이크 엔트리. | 대부분 UI가 B형이라 빌더 1곳 수정으로 전 패널 커버. 폴백으로 미베이크分 안전. 사용자: NoteUI 베이크→Systems 재빌드→쪽지 검증. |

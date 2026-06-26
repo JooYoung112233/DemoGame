@@ -17,6 +17,14 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public static class EditorSceneBuildUtil
 {
+    /// <summary>해당 경로의 씬이 이미 열려 있으면 닫는다(언로드). 재빌드 전 호출 — 저장 충돌·중복 라이트 경고 방지.</summary>
+    public static void CloseSceneIfOpen(string path)
+    {
+        var s = EditorSceneManager.GetSceneByPath(path);
+        if (s.IsValid() && s.isLoaded)
+            EditorSceneManager.CloseScene(s, true);
+    }
+
     /// <summary>현재 열린 씬을 유지한 채 새 빈 씬을 additive로 만들고 active로 전환. prevActive는 복구용.</summary>
     public static Scene NewDetachedScene(out Scene prevActive)
     {
@@ -29,6 +37,15 @@ public static class EditorSceneBuildUtil
     /// <summary>씬을 path에 저장한 뒤 닫고(언로드) 원래 active 씬을 복구. 저장 성공 여부 반환.</summary>
     public static bool SaveAndClose(Scene scene, string path, Scene prevActive)
     {
+        // 같은 경로의 씬이 이미 열려 있으면 "Overwriting the same path as another open scene" 에러 →
+        // 먼저 닫는다(재빌드라 기존 내용은 어차피 덮어씀). 닫을 씬이 복구 대상이면 복구에서 제외.
+        var existing = EditorSceneManager.GetSceneByPath(path);
+        if (existing.IsValid() && existing.isLoaded && existing != scene)
+        {
+            if (prevActive == existing) prevActive = default;
+            EditorSceneManager.CloseScene(existing, true);
+        }
+
         EditorSceneManager.MarkSceneDirty(scene);
         bool saved = EditorSceneManager.SaveScene(scene, path);
         if (scene.IsValid() && scene.isLoaded)

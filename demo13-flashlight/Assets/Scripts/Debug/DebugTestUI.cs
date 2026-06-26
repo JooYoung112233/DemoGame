@@ -616,6 +616,13 @@ public class DebugTestUI : MonoBehaviour
         }
 
         GUILayout.Space(10);
+        GUILayout.Label("── UI 팝업 테스트(프리팹 검증) ──", headerStyle);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("쪽지(NoteUI)", btnStyle, GUILayout.Height(28)))
+            NoteUI.Ensure().Show("테스트 쪽지 본문입니다.\n\n프리팹 인스턴스로 정상 렌더되는지 확인용.\n[E]/[Esc]로 닫기.", "테스트 쪽지");
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
         GUILayout.Label("── 시간 ──", headerStyle);
         GUILayout.Label($"Time.timeScale: {Time.timeScale:F2}", labelStyle);
 

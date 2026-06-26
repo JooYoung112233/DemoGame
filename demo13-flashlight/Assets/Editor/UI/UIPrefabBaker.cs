@@ -19,6 +19,12 @@ public static class UIPrefabBaker
         Bake<ItemDetailUI>("ItemDetailUI", c => c.EditorBake());
     }
 
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/NoteUI")]
+    public static void BakeNoteUI()
+    {
+        Bake<NoteUI>("NoteUI", c => c.EditorBake());
+    }
+
     // ── 공통 베이크 ────────────────────────────────────────
     static void Bake<T>(string assetName, System.Action<T> build) where T : Component
     {

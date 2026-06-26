@@ -78,15 +78,14 @@ public static class SystemsSceneBuilder
     [MenuItem("Tools/TopDown/개발/시스템 씬")]
     public static void BuildSystemsScene()
     {
+        // Systems가 이미 열려 있으면 먼저 닫는다(같은 경로 저장 충돌·중복 글로벌라이트 경고 방지).
+        EditorSceneBuildUtil.CloseSceneIfOpen(SCENE_PATH);
         // additive로 만들어 현재 열린 씬을 닫지 않으므로 저장 프롬프트 불필요.
         var scene = EditorSceneBuildUtil.NewDetachedScene(out var prevActive);  // 현재 씬 유지(폴더에만 생성)
 
         // ── [매니저들] (각각 루트 GO — DontDestroyOnLoad는 루트 GO에서만 동작) ──
         foreach (var t in ManagerTypes)
-        {
-            var go = new GameObject(t.Name);
-            go.AddComponent(t);
-        }
+            InstantiateUIOrComponent(t, null);
 
         // ── UIManager (+ 모든 UI 패널을 자식 GO로 배치) ──
         var uiGO = new GameObject("UIManager");
@@ -94,9 +93,7 @@ public static class SystemsSceneBuilder
         var uiSo = new SerializedObject(ui);
         foreach (var (field, type) in UiPanels)
         {
-            var child = new GameObject(type.Name);
-            child.transform.SetParent(uiGO.transform, false);
-            var comp = child.AddComponent(type);
+            var comp = InstantiateUIOrComponent(type, uiGO.transform);
             var p = uiSo.FindProperty(field);
             if (p != null) p.objectReferenceValue = comp;
             else Debug.LogWarning($"[SystemsScene] UIManager 필드 못 찾음: {field}");
@@ -170,6 +167,32 @@ public static class SystemsSceneBuilder
                     ? "⚠ PlayerRig 프리팹이 없어 플레이어가 빠졌습니다.\n   'Tools/TopDown/Build/Player Rig' 먼저 실행 후 다시 빌드하세요."
                     : "상점(ShopUI) 포함 모든 UI가 UIManager 아래에 배치되어 있습니다."),
                 "확인");
+    }
+
+    /// <summary>
+    /// UI/매니저 타입을 씬에 배치. `Resources/UI/&lt;TypeName&gt;.prefab`가 있으면 **프리팹 인스턴스**로
+    /// (에디터에서 편집 가능), 없으면 기존처럼 빈 GameObject + AddComponent **폴백**. 컴포넌트 반환.
+    /// </summary>
+    static Component InstantiateUIOrComponent(System.Type t, Transform parent)
+    {
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Resources/UI/{t.Name}.prefab");
+        GameObject go;
+        Component comp;
+        if (prefab != null)
+        {
+            go = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            go.name = t.Name;
+            comp = go.GetComponent(t);
+            if (comp == null)
+                Debug.LogWarning($"[SystemsScene] 프리팹에 {t.Name} 컴포넌트가 없음: {prefab.name} — AddComponent 폴백.");
+        }
+        else
+        {
+            go = new GameObject(t.Name);
+            comp = go.AddComponent(t);
+        }
+        if (parent != null) go.transform.SetParent(parent, false);
+        return comp;
     }
 
     static void WireRef(Object target, string field, Object value)
