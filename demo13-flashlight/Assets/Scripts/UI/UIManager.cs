@@ -239,12 +239,11 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
-        // ── ESC: 열린 UI 있으면 전부 닫기, 없으면 일시정지 메뉴 (중앙 권위) ──
+        // ── ESC: 맨 위(가장 최근) UI 1개만 닫기(LIFO). 없으면 일시정지 (중앙 권위) ──
         if (GameInput.GetKeyDown(KeyCode.Escape))
         {
-            if (ItemDetailUI.IsShowing) { ItemDetailUI.Hide(); return; }   // 상세 팝업만 먼저 닫기(뒤 패널 유지)
-            if (IsAnyUIOpen()) CloseAll();
-            else if (!HideoutController.IsActive) PauseMenu.Show();   // 하이드아웃에선 HideoutController가 ESC=나가기확인 처리
+            if (CloseTopmost()) return;
+            if (!HideoutController.IsActive) PauseMenu.Show();   // 하이드아웃에선 HideoutController가 ESC=나가기확인 처리
             return;
         }
 
@@ -321,6 +320,42 @@ public class UIManager : MonoBehaviour
         if (NarrationUI.Instance != null && NarrationUI.Instance.IsShowing) NarrationUI.Instance.Dismiss();  // 하단 독백 잔류 방지
 
         shopUI.Open(shop);
+    }
+
+    /// <summary>
+    /// 맨 위(가장 최근에 열린) UI 1개만 닫는다 — Esc 한 번에 하나씩(LIFO).
+    /// 위에 뜨는 팝업 → 캐릭터 패널(내부 레이어 위임) → 기타 base 패널 → 모달 순.
+    /// 닫을 게 있으면 true.
+    /// </summary>
+    bool CloseTopmost()
+    {
+        // 1) base 패널 위에 뜨는 독립 팝업 (최상위부터)
+        if (ItemDetailUI.IsShowing) { ItemDetailUI.Hide(); return true; }
+        if (NoteUI.Instance != null && NoteUI.Instance.IsShowing) { NoteUI.Instance.Close(); return true; }
+        if (GroundPickupUI.IsShowing) { GroundPickupUI.Hide(); return true; }
+        if (TraitPanelUI.IsShowing) { TraitPanelUI.Hide(); return true; }
+
+        // 2) 캐릭터 패널 — 내부 레이어(컨텍스트/사용/컨테이너팝업/드래그)부터 LIFO로 자체 처리
+        if (characterPanelUI != null && characterPanelUI.IsShowing)
+            return characterPanelUI.HandleEscape();
+
+        // 3) 기타 base 패널 (보통 동시에 하나만 열림)
+        if (shopUI != null && shopUI.IsShowing) { shopUI.Close(); return true; }
+        if (craftingUI != null && craftingUI.IsShowing) { craftingUI.Hide(); return true; }
+        if (mapSelectUI != null && mapSelectUI.IsShowing) { mapSelectUI.Hide(); return true; }
+        if (dialogueUI != null && dialogueUI.IsShowing) { dialogueUI.Hide(); return true; }
+        if (RadioUI.IsShowing) { RadioUI.Hide(); return true; }
+        if (DispatchUI.IsShowing) { DispatchUI.Hide(); return true; }
+        if (QuestLogUI.IsShowing) { QuestLogUI.Hide(); return true; }
+        if (RaidMapUI.IsShowing) { RaidMapUI.Hide(); return true; }
+        if (HideoutUI.Instance != null && HideoutUI.Instance.IsShowing) { HideoutUI.Instance.Close(); return true; }
+        if (SleepUI.Instance != null && SleepUI.Instance.IsShowing) { SleepUI.Instance.Close(); return true; }
+        if (postRaidEventUI != null && postRaidEventUI.IsShowing) { postRaidEventUI.Hide(); return true; }
+        if (raidResultUI != null && raidResultUI.IsShowing) { raidResultUI.Hide(); return true; }
+
+        // 4) 일시정지 메뉴
+        if (PauseMenu.Instance != null && PauseMenu.Instance.IsShowing) { PauseMenu.Instance.Hide(); return true; }
+        return false;
     }
 
     /// <summary>모든 UI 닫기</summary>

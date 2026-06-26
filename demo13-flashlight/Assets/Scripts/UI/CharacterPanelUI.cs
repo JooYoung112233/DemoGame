@@ -198,27 +198,8 @@ public class CharacterPanelUI : MonoBehaviour
 
         if (GameInput.GetKeyDown(KeyCode.Escape))
         {
-            if (contextMenuGO != null && contextMenuGO.activeSelf)
-            {
-                HideContextMenu();
-                return;
-            }
-            // 사용 채널 진행 중이면 먼저 취소
-            if (UseActionManager.Instance != null && UseActionManager.Instance.IsBusy)
-            {
-                UseActionManager.Instance.Cancel();
-                return;
-            }
-            // 컨테이너 팝업 열려 있으면 먼저 닫기(인벤 패널보다 우선)
-            if (openContainerItem != null && containerPopupGO != null && containerPopupGO.activeSelf)
-            {
-                CloseContainerPopup();
-                return;
-            }
-            if (isDragging)
-                CancelDrag();
-            else
-                Hide();
+            // UIManager가 있으면 그쪽이 LIFO 권위로 HandleEscape()를 호출 → 여기선 양보(이중 닫힘 방지).
+            if (UIManager.Instance == null) HandleEscape();
             return;
         }
 
@@ -229,6 +210,19 @@ public class CharacterPanelUI : MonoBehaviour
             UpdateContainerGrid();
 
         HandleDragAndDrop();
+    }
+
+    /// <summary>Esc 한 단계 처리(LIFO): 컨텍스트메뉴 → 사용취소 → 컨테이너팝업 → 드래그취소 → 패널닫기.
+    /// 무언가 처리하면 true. UIManager(Esc 중앙권위)가 위임 호출하거나, UIManager 없을 때 Update가 직접 호출.</summary>
+    public bool HandleEscape()
+    {
+        if (!isShowing) return false;
+        if (contextMenuGO != null && contextMenuGO.activeSelf) { HideContextMenu(); return true; }
+        if (UseActionManager.Instance != null && UseActionManager.Instance.IsBusy) { UseActionManager.Instance.Cancel(); return true; }
+        if (openContainerItem != null && containerPopupGO != null && containerPopupGO.activeSelf) { CloseContainerPopup(); return true; }
+        if (isDragging) { CancelDrag(); return true; }
+        Hide();
+        return true;
     }
 
     #region Show / Hide
