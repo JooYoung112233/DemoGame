@@ -779,6 +779,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         leftPanelBg = leftPanelRoot.AddComponent<Image>();
         leftPanelBg.color = UITheme.Panel;
+        UISkin.StoragePanel(leftPanelBg);   // 시안: storage.png 어두운 프레임(텍스트는 밝게 유지)
 
         // 제목
         leftTitleText = MakeText(leftPanel, "LeftTitle", "상자",
@@ -796,10 +797,12 @@ public class CharacterPanelUI : MonoBehaviour
         sortRT.anchorMin = sortRT.anchorMax = sortRT.pivot = new Vector2(1, 1);
         sortRT.anchoredPosition = new Vector2(-8, -6);
         sortRT.sizeDelta = new Vector2(56, 24);
-        sortGO.AddComponent<Image>().color = UITheme.Accent;
+        var sortImg = sortGO.AddComponent<Image>(); sortImg.color = UITheme.Accent;
+        UISkin.ButtonPrimary(sortImg);   // 시안: btn(밝은 종이) — 글자만 어둡게
         leftSortBtn = sortGO.AddComponent<Button>();
+        leftSortBtn.targetGraphic = sortImg;
         leftSortBtn.onClick.AddListener(SortLeftGrid);
-        MakeChildText(sortGO.transform, "정렬", 13, UITheme.TextBright);
+        MakeChildText(sortGO.transform, "정렬", 13, new Color(0.15f, 0.12f, 0.09f));
 
         // ── 스크롤 뷰포트 (헤더 아래 영역) + 격자 content (창고 30~100줄 대응) ──
         var viewportGO = new GameObject("LeftViewport", typeof(RectTransform), typeof(RectMask2D), typeof(ScrollRect));
@@ -1695,6 +1698,7 @@ public class CharacterPanelUI : MonoBehaviour
 
                 var img = slotGO.AddComponent<Image>();
                 img.color = UITheme.PanelAlt;
+                UISkin.Cell(img);   // 시안: storage_box 격자 셀
                 containerSlotImages[gx, gy] = img;
             }
         }
