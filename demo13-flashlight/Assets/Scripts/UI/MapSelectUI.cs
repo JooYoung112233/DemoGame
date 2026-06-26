@@ -70,7 +70,8 @@ public class MapSelectUI : MonoBehaviour
 
     void Awake()
     {
-        if (!IsGenerated) GenerateUI();
+        if (!IsGenerated) GenerateUI();   // 폴백: 프리팹 없이 코드로 생성
+        else ApplyFonts();                // 프리팹 인스턴스: 동적 폰트 재바인딩
         BindEvents();
     }
 
@@ -356,6 +357,28 @@ public class MapSelectUI : MonoBehaviour
         }
     }
 
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
+    void ApplyFonts()
+    {
+        var f = KR;
+        if (titleText)        titleText.font = f;
+        if (selectedInfoText) selectedInfoText.font = f;
+        if (confirmText)      confirmText.font = f;
+        if (infoTimeText)     infoTimeText.font = f;
+        if (regionBtnTexts != null)
+            foreach (var t in regionBtnTexts)
+                if (t) t.font = f;
+    }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();
+    }
+#endif
+
     public void ClearGeneratedUI()
     {
         var child = transform.Find("MapSelect_Canvas");
@@ -388,6 +411,8 @@ public class MapSelectUI : MonoBehaviour
     {
         isShowing = true;
         selectedRegion = -1;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         if (panelRoot != null)
             panelRoot.SetActive(true);
         UpdateSelection();

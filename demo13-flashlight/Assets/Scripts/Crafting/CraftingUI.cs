@@ -96,6 +96,8 @@ public class CraftingUI : MonoBehaviour
         FindRefs();
         currentStation = station;
         isShowing = true;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panelRoot.SetActive(true);
 
         string stationName;
@@ -268,6 +270,15 @@ public class CraftingUI : MonoBehaviour
 
         panelRoot.SetActive(false);
     }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();
+    }
+#endif
 
     void BuildCraftContent(RectTransform parent)
     {

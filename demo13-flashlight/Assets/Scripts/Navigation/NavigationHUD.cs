@@ -21,15 +21,17 @@ public class NavigationHUD : MonoBehaviour
 
     const float MapW = 760f, MapH = 520f;
 
-    // Canvas
-    RectTransform compassRoot;
-    RectTransform needle;
-    Image needleImg;
-    Text targetLabel;
+    // Canvas (프리팹 베이크 시 직렬화 보존되는 영속 스켈레톤)
+    [SerializeField] Canvas canvas;
+    [SerializeField] RectTransform compassRoot;
+    [SerializeField] RectTransform needle;
+    [SerializeField] Image needleImg;
+    [SerializeField] Text targetLabel;
 
-    // Overlay (들어올려 보기)
-    RectTransform overlayRoot;
-    RectTransform mapArea;
+    // Overlay (들어올려 보기) — 영속 골격만 직렬화
+    [SerializeField] RectTransform overlayRoot;
+    [SerializeField] RectTransform mapArea;
+    // playerBlip / _mapPooled 는 RebuildMap에서 마커별로 동적 생성 → 직렬화 안 함
     RectTransform playerBlip;
     readonly List<GameObject> _mapPooled = new List<GameObject>();
     Rect _worldBounds;
@@ -41,12 +43,15 @@ public class NavigationHUD : MonoBehaviour
 
     static Font UiFont => Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
+    /// <summary>프리팹 베이크 여부 — Canvas가 직렬화돼 있으면 코드 생성 생략.</summary>
+    bool IsGenerated => canvas != null;
+
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         // UIManager 자식으로 배치 → 부모(UIManager)의 DontDestroyOnLoad를 따라 영속.
-        BuildUI();
+        if (!IsGenerated) BuildUI();   // 폴백: 프리팹 없이 코드로 생성
     }
 
     void OnDestroy()
@@ -325,7 +330,7 @@ public class NavigationHUD : MonoBehaviour
         var canvasGO = new GameObject("Nav_Canvas");
         canvasGO.transform.SetParent(transform, false);
 
-        var canvas = canvasGO.AddComponent<Canvas>();
+        canvas = canvasGO.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 50;
 
@@ -340,6 +345,15 @@ public class NavigationHUD : MonoBehaviour
         BuildCompass(canvasRT);
         BuildOverlay(canvasRT);
     }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — BuildUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        BuildUI();
+    }
+#endif
 
     void BuildCompass(RectTransform canvasRT)
     {

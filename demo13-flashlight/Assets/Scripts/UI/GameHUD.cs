@@ -158,6 +158,16 @@ public class GameHUD : MonoBehaviour
         BuildSurvivalWarning(canvasRT);
     }
 
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 영속 계층을 만든다.
+    /// (부상 아이콘 8개·생존 경고·나가기 버튼 = 영속 스켈레톤은 베이크 대상. 부상 표시는 런타임에 토글만.)</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();
+    }
+#endif
+
     void BuildSurvivalWarning(RectTransform canvasRT)
     {
         var go = new GameObject("SurvivalWarn");

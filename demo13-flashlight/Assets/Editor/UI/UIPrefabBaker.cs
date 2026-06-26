@@ -43,11 +43,37 @@ public static class UIPrefabBaker
     [MenuItem("Tools/TopDown/UI/프리팹 베이크/GroundPickupUI")]
     public static void BakeGroundPickupUI() => Bake<GroundPickupUI>("GroundPickupUI", c => c.EditorBake());
 
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/ToastManager")]
+    public static void BakeToastManager() => Bake<ToastManager>("ToastManager", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/GameHUD")]
+    public static void BakeGameHUD() => Bake<GameHUD>("GameHUD", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/QuestHUD")]
+    public static void BakeQuestHUD() => Bake<QuestHUD>("QuestHUD", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/QuickSlotBar")]
+    public static void BakeQuickSlotBar() => Bake<QuickSlotBar>("QuickSlotBar", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/NavigationHUD")]
+    public static void BakeNavigationHUD() => Bake<NavigationHUD>("NavigationHUD", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/MapSelectUI")]
+    public static void BakeMapSelectUI() => Bake<MapSelectUI>("MapSelectUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/CraftingUI")]
+    public static void BakeCraftingUI() => Bake<CraftingUI>("CraftingUI", c => c.EditorBake());
+
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/DialogueUI")]
+    public static void BakeDialogueUI() => Bake<DialogueUI>("DialogueUI", c => c.EditorBake());
+
     [MenuItem("Tools/TopDown/UI/프리팹 베이크/── 전부 ──", priority = 100)]
     public static void BakeAll()
     {
         BakeItemDetail(); BakeNoteUI(); BakeNarrationUI(); BakeTutorialPrompt();
         BakeRaidResultUI(); BakePostRaidEventUI(); BakePauseMenu(); BakeGroundPickupUI();
+        BakeToastManager(); BakeGameHUD(); BakeQuestHUD(); BakeQuickSlotBar();
+        BakeNavigationHUD(); BakeMapSelectUI(); BakeCraftingUI(); BakeDialogueUI();
         Debug.Log("[UIPrefabBaker] 전체 베이크 완료. (Systems 씬 재빌드로 프리팹 인스턴스 반영)");
     }
 

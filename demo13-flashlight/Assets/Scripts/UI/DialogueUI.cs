@@ -323,6 +323,7 @@ public class DialogueUI : MonoBehaviour
     void ShowLines(string npcName, string[] lines, NPCRelationship rel, System.Action onComplete = null)
     {
         isShowing = true;
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panelRoot.SetActive(true);
         choicePanel.SetActive(false);
 
@@ -523,6 +524,7 @@ public class DialogueUI : MonoBehaviour
         storyOnComplete = onComplete;
 
         isShowing = true;
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panelRoot.SetActive(true);
         choicePanel.SetActive(false);
 
@@ -549,6 +551,7 @@ public class DialogueUI : MonoBehaviour
     public void ShowStoryChoices(string[] choiceTextsArray, System.Action<int> onChoice)
     {
         isShowing = true;
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panelRoot.SetActive(true);
         choicePanel.SetActive(true);
         continueHint.gameObject.SetActive(false);
@@ -728,6 +731,15 @@ public class DialogueUI : MonoBehaviour
         choicePanel.SetActive(false);
         panelRoot.SetActive(false);
     }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();
+    }
+#endif
 
     public void ClearGeneratedUI()
     {

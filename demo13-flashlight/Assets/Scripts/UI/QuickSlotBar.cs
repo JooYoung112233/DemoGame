@@ -17,27 +17,33 @@ public class QuickSlotBar : MonoBehaviour
     PlayerInventory inventory;
     GameObject playerGO;
 
-    Canvas canvas;
-    GameObject barRoot;
-    Image[] slotBgs = new Image[SlotCount];
-    Image[] slotIcons = new Image[SlotCount];
-    Text[] slotNames = new Text[SlotCount];
-    Text[] slotCounts = new Text[SlotCount];
-    RectTransform staminaFillRT;
-    Image staminaFill;
-    Font koreanFont;
+    // uGUI (프리팹 베이크 시 직렬화 보존). 슬롯은 고정 6개 — 1회 생성 후 갱신만 하므로 직렬화 OK.
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject barRoot;
+    [SerializeField] Image[] slotBgs = new Image[SlotCount];
+    [SerializeField] Image[] slotIcons = new Image[SlotCount];
+    [SerializeField] Text[] slotNames = new Text[SlotCount];
+    [SerializeField] Text[] slotCounts = new Text[SlotCount];
+    [SerializeField] RectTransform staminaFillRT;
+    [SerializeField] Image staminaFill;
+    Font koreanFont;   // 런타임 동적 OS 폰트 — 직렬화 안 함(Instantiate 후 재바인딩)
 
     const float CELL = 56f, GAP = 6f;
     const int SortingOrder = 30;   // HUD 층 (CharacterPanel 40 아래 → 모달 열리면 가려짐)
+
+    bool IsGenerated => canvas != null;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
         if (MapToolScene.IsActive) return;
         if (Instance != null) return;
-        var go = new GameObject("[QuickSlotBar]");
+        // 프리팹 우선(Instantiate가 Awake로 Instance 세팅), 없으면 코드 생성 폴백.
+        var prefab = Resources.Load<GameObject>("UI/QuickSlotBar");
+        GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("[QuickSlotBar]");
+        go.name = "[QuickSlotBar]";
+        if (prefab == null) go.AddComponent<QuickSlotBar>();   // 폴백: Awake가 GenerateUI
         DontDestroyOnLoad(go);
-        go.AddComponent<QuickSlotBar>();
     }
 
     void Awake()
@@ -46,7 +52,8 @@ public class QuickSlotBar : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         koreanFont = LoadKoreanFont();
-        GenerateUI();
+        if (!IsGenerated) GenerateUI();   // 폴백: 프리팹 없이 코드로 생성
+        else ApplyFonts();                // 프리팹 인스턴스: 동적 폰트 재바인딩
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
@@ -83,6 +90,8 @@ public class QuickSlotBar : MonoBehaviour
     void Update()
     {
         ResolveRefs();
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         if (barRoot != null) barRoot.SetActive(playerGO != null);
         if (playerGO == null) return;
 
@@ -218,6 +227,27 @@ public class QuickSlotBar : MonoBehaviour
         Refresh();
         barRoot.SetActive(false);
     }
+
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
+    void ApplyFonts()
+    {
+        var f = koreanFont != null ? koreanFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        for (int i = 0; i < SlotCount; i++)
+        {
+            if (slotNames != null && i < slotNames.Length && slotNames[i])   slotNames[i].font = f;
+            if (slotCounts != null && i < slotCounts.Length && slotCounts[i]) slotCounts[i].font = f;
+        }
+    }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        koreanFont = LoadKoreanFont();
+        GenerateUI();
+    }
+#endif
 
     void UpdateStamina()
     {

@@ -17,9 +17,12 @@ public class ToastManager : MonoBehaviour
     const int MaxVisible = 4;
     const float DefaultDuration = 2.2f;
 
-    Canvas canvas;
-    RectTransform stack;          // 토스트가 쌓이는 세로 컨테이너
-    readonly List<ToastItem> active = new List<ToastItem>();
+    // uGUI 영속 스켈레톤 (프리팹 베이크 시 직렬화 보존)
+    [SerializeField] Canvas canvas;
+    [SerializeField] RectTransform stack;          // 토스트가 쌓이는 세로 컨테이너
+    readonly List<ToastItem> active = new List<ToastItem>();   // 동적 토스트 — 직렬화 안 함
+
+    public bool IsGenerated => canvas != null;
 
     class ToastItem
     {
@@ -39,7 +42,7 @@ public class ToastManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        BuildCanvas();
+        if (!IsGenerated) BuildCanvas();   // 폴백: 프리팹 없이 코드로 생성
     }
 
     void OnDestroy()
@@ -110,6 +113,15 @@ public class ToastManager : MonoBehaviour
         layout.childForceExpandWidth = false;
         layout.childForceExpandHeight = false;
     }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — BuildCanvas를 1회 실행해 프리팹화할 영속 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        BuildCanvas();
+    }
+#endif
 
     ToastItem CreateToast(string message, ToastType type, float duration)
     {
