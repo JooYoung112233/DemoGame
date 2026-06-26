@@ -164,6 +164,7 @@ public class ItemDetailUI : MonoBehaviour
         cardRT.sizeDelta = new Vector2(CardW, CardH);
         cardRT.anchoredPosition = Vector2.zero;
         card.GetComponent<Image>().color = UITheme.Panel;
+        UISkin.Panel(card.GetComponent<Image>());   // 시안: box 프레임(스프라이트 없으면 위 색 유지)
 
         // 이름 (상단)
         nameText = MakeText(cardRT, "Name", 26, FontStyle.Bold, Color.white, TextAnchor.MiddleLeft);
@@ -180,6 +181,7 @@ public class ItemDetailUI : MonoBehaviour
         ibRT.anchoredPosition = new Vector2(0, -76);
         iconBg = iconBgGO.GetComponent<Image>();
         iconBg.color = UITheme.Cell;
+        UISkin.IconBox(iconBg);   // 시안: itembox 프레임(Open에서 희귀도 색으로 tint)
 
         var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
         iconGO.transform.SetParent(iconBgGO.transform, false);
