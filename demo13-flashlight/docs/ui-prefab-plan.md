@@ -60,12 +60,13 @@
 ### 4-B. 시안 스킨 적용 (전환 완료 후 — 보류)
 - 9-slice 자산 셋업 + 시안 스프라이트 입히기 + TMP 전환. (이전에 만든 `UIAssetSetup`/`UIKitBuilder`는 이 단계용이었으나, 우선순위 변경으로 **삭제**했고 스킨 단계 진입 시 재도입.) §5 매핑·§6 결정 참조.
 
-## 5. 패널별 시안 매핑
-- **RESOURCES 바**(좌상단): 무게/부피/스크랩 — `box` 배경 + 아이콘. (현재 GameHUD 자원 표시와 연결)
-- **BUTTONS**: PRIMARY=`btn`, SECONDARY=`btnb`, SMALL=같은 스프라이트 축소.
-- **SLOTS**: 단일/가로/격자 = `storage_box`(or `item`) 셀.
-- **ITEM NAME 패널**: `box` 배경 + `name` 제목태그 + `itembox` 아이콘 + TYPE/WEIGHT/STACK/설명/STAT/DURABILITY바/SELL VALUE + EQUIP/DROP/SCRAP(btn/btnb).
-- **STORAGE 패널**: `storage` 배경 + `name` 제목태그("STORAGE") + 무게표시 + **탭**(ALL/WEAPONS/ARMOR/CONSUMABLES/MATERIALS/ETC = storage_btn) + 격자 + TAKE ALL/SORT(btn).
+## 5. 패널별 시안 매핑 (2026-06-27 교정 — 고해상도 시안 기준, 크기 맞춤)
+> ⚠️ 이전 오류: ITEM NAME 큰 패널에 `box`(76px 소형 프레임)를 넣었음 → **`item`(440x650 큰 크림 종이)** 가 맞음. 큰 종이/프레임은 9-slice 보더를 크게(≈90px) 잡아 모서리 찢김 보존. UISkin 역할: `ItemPanel`=item, `StoragePanel`=storage, `Panel`=box(소형), `Tag/Bar`=name.
+- **ITEM NAME 패널**(중앙 큰 크림 종이): 배경=**`item`**(UISkin.ItemPanel) + 제목태그=**`name`**(Tag, "ITEM NAME") + 아이콘박스=**`itembox`** + TYPE/WEIGHT/STACK + 설명 + STAT1~3 + DURABILITY바 + SELL VALUE + EQUIP(`btn`)/DROP·SCRAP(`btnb` or `btn`).
+- **STORAGE 패널**(우측 큰 어두운 프레임): 배경=**`storage`**(StoragePanel) + 제목태그=`name`("STORAGE") + 무게 + **탭** ALL/WEAPONS/ARMOR/CONSUMABLES/MATERIALS/ETC=`storage_btn_on`(활성)/`off`(비활성) + 격자 셀=`storage_box` + TAKE ALL/SORT(`btn`).
+- **RESOURCES 바**(좌상단, GameHUD): 무게/부피/스크랩 — 가로 태그 바=**`name`**(Bar) + 아이콘. 섹션 배경은 `box`.
+- **BUTTONS**: PRIMARY=`btn`(밝은 종이), SECONDARY=`btnb`(어두움), SMALL=동일 스프라이트 축소.
+- **SLOTS/격자 셀**: `storage_box`.
 
 ## 6. 결정됨 (2026-06-26)
 - **TMP vs legacy Text → `TMP`로 전환.** 새 키트/프리팹은 `TextMeshProUGUI`, 기존 패널은 전환 시 TMP로 교체.

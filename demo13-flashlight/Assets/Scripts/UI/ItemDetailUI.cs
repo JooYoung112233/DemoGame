@@ -164,7 +164,7 @@ public class ItemDetailUI : MonoBehaviour
         cardRT.sizeDelta = new Vector2(CardW, CardH);
         cardRT.anchoredPosition = Vector2.zero;
         card.GetComponent<Image>().color = UITheme.Panel;
-        UISkin.Panel(card.GetComponent<Image>());   // 시안: box 프레임(스프라이트 없으면 위 색 유지)
+        UISkin.ItemPanel(card.GetComponent<Image>());   // 시안: item.png 큰 크림 종이(이미지 크기에 맞춘 9-slice)
 
         // 이름 (상단)
         nameText = MakeText(cardRT, "Name", 26, FontStyle.Bold, Color.white, TextAnchor.MiddleLeft);

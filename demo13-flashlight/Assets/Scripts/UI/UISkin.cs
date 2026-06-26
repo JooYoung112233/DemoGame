@@ -30,12 +30,15 @@ public static class UISkin
     }
 
     // ── 역할별 단축 (시안 매핑표) ─────────────────────────────
-    public static void Panel(Image img)            => Slice(img, "box");          // 패널/팝업 프레임
-    public static void StoragePanel(Image img)     => Slice(img, "storage");      // 창고 큰 패널
+    public static void ItemPanel(Image img)        => Slice(img, "item");         // 큰 크림 종이(ITEM NAME 등 아이템/정보 패널)
+    public static void StoragePanel(Image img)     => Slice(img, "storage");      // 큰 어두운 프레임(STORAGE/창고)
+    public static void Panel(Image img)            => Slice(img, "box");          // 소형 패널/팝업 프레임(자원바 배경 등)
+    public static void Tag(Image img)              => Slice(img, "name");         // 찢긴 종이 제목 태그(ITEM NAME/STORAGE)
+    public static void Bar(Image img, Color? tint = null) => Slice(img, "name", tint); // 자원 바(가로 태그)
     public static void IconBox(Image img, Color? tint = null) => Slice(img, "itembox", tint); // 아이콘 박스
     public static void Cell(Image img, Color? tint = null)    => Slice(img, "storage_box", tint); // 격자 셀
-    public static void ButtonPrimary(Image img)    => Slice(img, "btn");          // 밝은 종이 버튼
-    public static void ButtonSecondary(Image img)  => Slice(img, "btnb");         // 어두운 버튼
+    public static void ButtonPrimary(Image img)    => Slice(img, "btn");          // 밝은 종이 버튼(EQUIP/TAKE ALL/SORT)
+    public static void ButtonSecondary(Image img)  => Slice(img, "btnb");         // 어두운 버튼(DROP/SCRAP)
     public static void TabOn(Image img)            => Slice(img, "storage_btn_on");
     public static void TabOff(Image img)           => Slice(img, "storage_btn_off");
 }
