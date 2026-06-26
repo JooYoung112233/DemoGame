@@ -75,6 +75,12 @@
 - **RESOURCES HUD → 이번 범위 포함.** GameHUD 자원바(무게/부피/스크랩)도 `box` 배경+아이콘으로 프리팹화 대상에 추가.
 - 바인딩: 패널 스크립트 = 뷰 컴포넌트(합침) + `[SerializeField]` 직렬화 ref. (find-by-name 금지)
 
+## 6.5 베이크 주의 — onClick은 직렬화 안 됨 (2026-06-27, 중요)
+- **런타임 `button.onClick.AddListener(...)`는 프리팹에 저장되지 않는다.** 베이크된 프리팹을 Instantiate하면 `BuildUI`가 스킵돼 **정적 버튼이 죽는다**(클릭 무반응).
+- **해결 패턴(`WireEvents`)**: 정적 버튼 ref를 `[SerializeField]`로 잡고, `WireEvents()`가 `RemoveAllListeners()+AddListener(핸들러)`로 **Awake에서 양쪽 경로(프리팹/코드) 모두 재부착**. (TitleScreen/PauseMenu/Crafting/MapSelect/Hideout/Sleep/Shop/CharacterPanel 적용)
+- **매 Show마다 재빌드하는 패널**(QuestLog/Dispatch/Radio)과 **동적 버튼**(격자 셀/컨텍스트 메뉴/선택지/픽업 행)은 런타임에 재부착되므로 영향 없음.
+- ⚠️ **새 직렬화 버튼 ref를 추가한 패널은 반드시 재베이크**해야 ref가 채워진다(안 하면 그 버튼만 프리팹 경로에서 무반응; 코드 폴백은 정상).
+
 ## 7. 리스크 / 주의
 - `CharacterPanelUI`(~3300줄)·`ShopUI`(~2400줄)는 생성+로직 결합 → **한 번에 X, 패널 단위 점진 전환**.
 - 전환 중 **이중 상태**(코드 생성 + 프리팹 공존) 피하려 패널별로 완결.
