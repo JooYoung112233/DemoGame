@@ -37,7 +37,7 @@ public class ItemDetailUI : MonoBehaviour
     Font koreanFont;   // 런타임 동적 OS 폰트 — 직렬화 안 함(Instantiate 후 ApplyFonts 재바인딩)
 
     const int SortingOrder = 112;
-    const float CardW = 460f, CardH = 620f;
+    const float CardW = 460f, CardH = 680f;
 
     // 종이 위 어두운 잉크 톤
     static readonly Color Ink     = new Color(0.15f, 0.12f, 0.09f, 1f);   // 라벨/제목(진함)
@@ -218,7 +218,7 @@ public class ItemDetailUI : MonoBehaviour
         tag.transform.SetParent(cardRT, false);
         var tagRT = tag.GetComponent<RectTransform>();
         tagRT.anchorMin = tagRT.anchorMax = tagRT.pivot = new Vector2(0, 1);
-        tagRT.anchoredPosition = new Vector2(12, 14);
+        tagRT.anchoredPosition = new Vector2(12, 6);
         tagRT.sizeDelta = new Vector2(238, 58);
         var tagImg = tag.GetComponent<Image>(); tagImg.color = new Color(0.74f, 0.68f, 0.54f, 1f); UISkin.Tag(tagImg);
         nameText = Txt(tag.transform, "Name", 24, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, 0, 0, 0, 0);
@@ -276,14 +276,14 @@ public class ItemDetailUI : MonoBehaviour
         stat3Value = Txt(cardRT, "S3V", 15, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 426, pw, 24);
 
         // DURABILITY (라벨 + 값 + 바)
-        Txt(cardRT, "DurL", 15, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, px, 462, 200, 24).text = "DURABILITY";
-        durValue = Txt(cardRT, "DurV", 15, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 462, pw, 24);
-        durFill = MakeBar(cardRT, px, 492, pw, 10);
-        Rule(cardRT, px, 512, pw);
+        Txt(cardRT, "DurL", 15, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, px, 486, 200, 24).text = "DURABILITY";
+        durValue = Txt(cardRT, "DurV", 15, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 486, pw, 24);
+        durFill = MakeBar(cardRT, px, 514, pw, 10);
+        Rule(cardRT, px, 540, pw);
 
         // SELL VALUE
-        Txt(cardRT, "SellL", 16, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, px, 536, 220, 24).text = "SELL VALUE";
-        sellValue = Txt(cardRT, "SellV", 16, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 536, pw, 24);
+        Txt(cardRT, "SellL", 16, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, px, 564, 220, 24).text = "SELL VALUE";
+        sellValue = Txt(cardRT, "SellV", 16, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 564, pw, 24);
 
         // EQUIP / DROP / SCRAP (btn.png, 어두운 글자)
         equipBtn = ActionButton(cardRT, "EquipBtn", "EQUIP", 30, 20, 128, 48);
