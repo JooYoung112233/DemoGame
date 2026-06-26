@@ -109,6 +109,8 @@ public class ItemDetailUI : MonoBehaviour
 
         isShowing = true;
         openFrame = Time.frameCount;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panelRoot.SetActive(true);
     }
 
