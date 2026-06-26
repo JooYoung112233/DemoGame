@@ -18,15 +18,15 @@ public class ItemDetailUI : MonoBehaviour
     bool isShowing;
     int openFrame = -1;
 
-    Canvas canvas;
-    GameObject panelRoot;
-    Image iconImage;
-    Image iconBg;
-    Text iconFallback;
-    Text nameText;
-    Text descText;
-    Text statText;
-    Font koreanFont;
+    [SerializeField] Canvas canvas;
+    [SerializeField] GameObject panelRoot;
+    [SerializeField] Image iconImage;
+    [SerializeField] Image iconBg;
+    [SerializeField] Text iconFallback;
+    [SerializeField] Text nameText;
+    [SerializeField] Text descText;
+    [SerializeField] Text statText;
+    Font koreanFont;   // 런타임 동적 OS 폰트 — 직렬화 안 함(프리팹 저장 불가, Instantiate 후 재바인딩)
 
     const int SortingOrder = 112;   // CharacterPanel(40) 위, NoteUI(110) 부근
     const float CardW = 460f, CardH = 620f;
@@ -38,7 +38,8 @@ public class ItemDetailUI : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         koreanFont = LoadKoreanFont();
-        if (!IsGenerated) GenerateUI();
+        if (!IsGenerated) GenerateUI();   // 폴백: 프리팹 없이 코드로 생성
+        else ApplyFonts();                // 프리팹 인스턴스: 동적 폰트 재바인딩
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
@@ -47,9 +48,13 @@ public class ItemDetailUI : MonoBehaviour
     {
         if (Instance == null)
         {
-            var go = new GameObject("[ItemDetailUI]");
+            // 프리팹 우선 — Instantiate가 Awake를 돌려 Instance를 세팅(폰트 재바인딩 포함).
+            // 프리팹이 없으면(미베이크) 코드 생성으로 폴백.
+            var prefab = Resources.Load<GameObject>("UI/ItemDetailUI");
+            GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("[ItemDetailUI]");
+            go.name = "[ItemDetailUI]";
+            if (prefab == null) go.AddComponent<ItemDetailUI>();   // 폴백: Awake가 GenerateUI
             DontDestroyOnLoad(go);
-            go.AddComponent<ItemDetailUI>();
         }
         return Instance;
     }
@@ -213,6 +218,26 @@ public class ItemDetailUI : MonoBehaviour
 
         panelRoot.SetActive(false);
     }
+
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
+    void ApplyFonts()
+    {
+        var f = koreanFont != null ? koreanFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (nameText)     nameText.font = f;
+        if (descText)     descText.font = f;
+        if (statText)     statText.font = f;
+        if (iconFallback) iconFallback.font = f;
+    }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — 현재 GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        koreanFont = LoadKoreanFont();
+        GenerateUI();
+    }
+#endif
 
     Text MakeText(Transform parent, string name, int size, FontStyle style, Color color, TextAnchor anchor)
     {

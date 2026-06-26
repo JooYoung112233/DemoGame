@@ -39,14 +39,20 @@
 
 > 슬롯 점유색/희귀도/내구도바 등 **시맨틱 색**은 스프라이트로 대체하지 말고 기존 `UITheme` 유지(시안에 없음).
 
-## 4. 단계별 작업 (집에서 이어서)
-1. **자산 셋업**: 스프라이트 import 설정 — Sprite(2D), `name/title` 류는 Sprite Editor에서 **9-slice border** 지정, 필터/압축 확인. `btn/box/storage` 9-slice 보더 설정.
-2. **공용 UI 키트**: 재사용 프리팹 — `UI/Button_Primary.prefab`(btn), `UI/Button_Secondary.prefab`(btnb), `UI/Cell.prefab`(storage_box), `UI/Tab.prefab`(storage_btn on/off), `UI/TitleTag.prefab`(name). 각자 Image(Sliced)+Text(또는 TMP) 자식.
-3. **PoC 1개 전환** — 권장: **ItemDetail**(시안 ITEM NAME과 1:1, 작고 독립적). `ItemDetailUI`를 프리팹+직렬화 ref로 전환해 패턴 검증.
-4. **Storage/인벤(`CharacterPanelUI`)** 전환 — 가장 큼. 프레임/탭/버튼/슬롯 루트만 프리팹화, 격자 셀은 `GridPanel` 렌더 유지(슬롯 루트는 직렬화).
-5. **Shop(`ShopUI`)** 전환 — 3컬럼·구매/판매 박스·트레이. 인벤과 공용 키트 재사용.
-6. (선택) `GameHUD`/자원바(RESOURCES) 등 작은 HUD.
-7. **절차 생성 코드 제거** — 각 패널 전환 완료분의 `BuildUI` 삭제, 부트스트랩을 Instantiate로 교체.
+## 4. 단계별 작업 — ⚠️ 우선순위 변경 (2026-06-26)
+> **사용자 지시: 스킨(시안 이미지) 적용은 나중. 먼저 "게임 시작 시 코드 생성" → "프리팹 베이크 후 Instantiate" 구조 전환을 *지금 있는 모든 UI*에 대해.**
+> 베이크 방식(룩 1:1 보존): ① 뷰 참조 `[SerializeField]` → ② 에디터 `EditorBake()`로 GenerateUI 1회 실행 → `SaveAsPrefabAsset`(`Resources/UI/*.prefab`) → ③ 부트스트랩 `Instantiate`(프리팹 없으면 코드 생성 폴백). 동적 OS 폰트는 직렬화 불가 → Instantiate 후 `ApplyFonts()` 재바인딩. 동적 격자/리스트는 절차 유지.
+
+### 4-A. 프리팹 우선 전환 (현재 작업 — 모든 패널)
+1. ✅ **PoC `ItemDetail`** (2026-06-26): `ItemDetailUI` 뷰 ref 8개 `[SerializeField]` + `ApplyFonts()` + `EditorBake()`, `Ensure()` → `Instantiate(Resources/UI/ItemDetailUI)` 폴백有. 베이크 툴 `Assets/Editor/UI/UIPrefabBaker.cs`(Tools/TopDown/UI/프리팹 베이크/ItemDetail). **사용자 검증 대기.**
+2. ⏭ **나머지 자가부트스트랩 팝업**(NoteUI/GroundPickup/Pause/Toast/Narration/Tutorial/RaidResult/PostRaidEvent 등) — 동일 패턴 기계적 적용.
+3. ⏭ **HUD류**(GameHUD/QuestHUD/QuickSlotBar) — 동일.
+4. ⏭ **대형 패널 `CharacterPanelUI`(3580줄)** — ref 수백 개. 뷰 ref 직렬화 + 격자 슬롯 루트만 직렬화(셀은 GridPanel 절차 유지). 위험 → 단독 진행·검증.
+5. ⏭ **대형 패널 `ShopUI`(2441줄)** — 동일.
+6. ⏭ Systems 씬 배치 패널들 정합(부트스트랩 경로 점검).
+
+### 4-B. 시안 스킨 적용 (전환 완료 후 — 보류)
+- 9-slice 자산 셋업 + 시안 스프라이트 입히기 + TMP 전환. (이전에 만든 `UIAssetSetup`/`UIKitBuilder`는 이 단계용이었으나, 우선순위 변경으로 **삭제**했고 스킨 단계 진입 시 재도입.) §5 매핑·§6 결정 참조.
 
 ## 5. 패널별 시안 매핑
 - **RESOURCES 바**(좌상단): 무게/부피/스크랩 — `box` 배경 + 아이콘. (현재 GameHUD 자원 표시와 연결)
@@ -55,12 +61,13 @@
 - **ITEM NAME 패널**: `box` 배경 + `name` 제목태그 + `itembox` 아이콘 + TYPE/WEIGHT/STACK/설명/STAT/DURABILITY바/SELL VALUE + EQUIP/DROP/SCRAP(btn/btnb).
 - **STORAGE 패널**: `storage` 배경 + `name` 제목태그("STORAGE") + 무게표시 + **탭**(ALL/WEAPONS/ARMOR/CONSUMABLES/MATERIALS/ETC = storage_btn) + 격자 + TAKE ALL/SORT(btn).
 
-## 6. 확인 필요 (집에서 결정)
-- **TMP vs legacy Text**: 현재 legacy `Text`. 시안 폰트 느낌 살리려면 TMP+커스텀 폰트 권장 → 전환 범위 결정 필요.
-- **창고 탭 카테고리 필터**(ALL/WEAPONS/…): 시안엔 있으나 현 창고엔 없음 — 이번에 같이 구현할지.
-- **격자 셀**: `GridPanel` 절차 렌더 유지 vs `Cell.prefab` Instantiate 중 택1.
-- **HUD(RESOURCES)**: 이번 범위 포함 여부.
-- 바인딩: 패널 스크립트 1개에 합칠지 vs `XxxView`(직렬화 ref) + 로직 분리.
+## 6. 결정됨 (2026-06-26)
+- **TMP vs legacy Text → `TMP`로 전환.** 새 키트/프리팹은 `TextMeshProUGUI`, 기존 패널은 전환 시 TMP로 교체.
+  - ⚠️ **전제조건**: `Assets/TextMesh Pro` 폴더가 없음 = TMP Essential Resources 미임포트. 사용자가 Unity에서 **Window ▸ TextMeshPro ▸ Import TMP Essential Resources** 1회 실행해야 TMP 텍스트가 렌더됨. (com.unity.ugui 2.0.0에 TMP 번들 → 패키지 추가는 불필요)
+- **창고 카테고리 탭(ALL/WEAPONS/…) → 비주얼만 이번에, 필터 로직은 나중.** `Tab.prefab`(storage_btn on/off)으로 탭 UI는 배치하되 클릭 필터링 동작은 후속 단계.
+- **격자 셀 → `GridPanel` 절차 렌더 유지.** `Cell.prefab` 안 만듦. 직렬화된 슬롯 루트 transform에만 기존 렌더 부착.
+- **RESOURCES HUD → 이번 범위 포함.** GameHUD 자원바(무게/부피/스크랩)도 `box` 배경+아이콘으로 프리팹화 대상에 추가.
+- 바인딩: 패널 스크립트 = 뷰 컴포넌트(합침) + `[SerializeField]` 직렬화 ref. (find-by-name 금지)
 
 ## 7. 리스크 / 주의
 - `CharacterPanelUI`(~3300줄)·`ShopUI`(~2400줄)는 생성+로직 결합 → **한 번에 X, 패널 단위 점진 전환**.
@@ -72,3 +79,7 @@
 | 날짜 | 질문 | 결정 | 근거 |
 |------|------|------|------|
 | 2026-06-26 | 코드 절차 생성 UI를 프리팹 기반(씬 편집 가능)으로 + 시안 스프라이트 적용 | **프리팹화 방향 확정(계획).** Resources/UI에 패널 프리팹 + 직렬화 ref 바인딩, 동적 격자만 절차 유지, 패널 단위 점진 전환. 이미지는 매핑표대로 자연스러운 곳만, 시맨틱 색은 UITheme 유지. | 에디터 비편집 문제 해소. 큰 두 패널은 점진 전환으로 리스크 관리. 구현은 후속. |
+| 2026-06-26 | §6 열린 질문 4건(TMP / 창고 탭 / 격자 셀 / RESOURCES HUD) | **TMP 전환**(전제: TMP Essential Resources 임포트 필요) · **창고 탭 비주얼만**(필터 후속) · **격자 GridPanel 절차 유지**(Cell.prefab 안 만듦) · **RESOURCES HUD 포함**. | 키트/PoC 진입 위해 설계 확정. 스코프는 비주얼 우선·로직 후속으로 관리. |
+| 2026-06-26 | §4-1 자산 9-slice 셋업 / §4-2 공용 키트 | **에디터 빌더 2종 작성.** `UIAssetSetup`(Image/ 13종 스프라이트→Sprite+9-slice 보더+Clamp/Bilinear) · `UIKitBuilder`(Button_Primary/Secondary·Tab·TitleTag 프리팹을 Resources/UI/Kit에 생성, TMP 라벨). Cell.prefab은 §6 결정대로 생략. | 코드 절차→프리팹 전환의 재사용 원자 확보. 사용자가 Tools 메뉴로 실행. |
+| 2026-06-26 | **우선순위 변경**: 시안 이미지를 "새 UI"로 만드는 게 아니라 *기존 UI에 입히는 것*. 그리고 그 전에 **모든 UI를 코드 생성→프리팹 베이크/Instantiate 구조로 먼저 전환**. | 스킨(§4-B) 보류, **프리팹 우선 전환(§4-A)을 전 패널에** 우선. 진행 방식 = **PoC 1개로 패턴 확정 후 전체**(Unity 검증 불가로 일괄 위험). 저장 = `Resources/UI/`. | 사용자가 직접 씬에서 UI 편집 가능하게 + 큰 패널 리스크 관리. 이전 `UIAssetSetup`/`UIKitBuilder`는 스킨 단계용이라 삭제(재도입 예정). |
+| 2026-06-26 | PoC `ItemDetail` 프리팹화 | **완료(코드).** 뷰 ref 8개 `[SerializeField]`, `ApplyFonts()`(동적 폰트 재바인딩)·`EditorBake()` 추가, `Ensure()`를 `Instantiate(Resources/UI/ItemDetailUI)`+코드폴백으로 교체. 베이크 툴 `UIPrefabBaker`(Tools/TopDown/UI/프리팹 베이크/ItemDetail). | 베이크→Instantiate 패턴 검증용 최소 패널. 사용자 Unity 검증 후 전 패널 확대. |
