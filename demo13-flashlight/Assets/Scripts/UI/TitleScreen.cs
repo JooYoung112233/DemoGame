@@ -45,12 +45,24 @@ public class TitleScreen : MonoBehaviour
         WireEvents();                  // onClick은 프리팹에 직렬화 안 됨 → 양쪽 경로에서 항상 재부착
     }
 
-    /// <summary>버튼 onClick 재부착. 프리팹 인스턴스는 BuildUI를 스킵하므로 직렬화된 버튼 ref에 리스너를 다시 건다.</summary>
+    /// <summary>버튼 onClick 재부착. 프리팹 인스턴스는 BuildUI를 스킵하므로 직렬화된 버튼 ref에 리스너를 다시 건다.
+    /// 스테일/부분 베이크(직렬화 ref 누락) 대비 — null이면 자식 이름으로 재해결.</summary>
     void WireEvents()
     {
+        if (newGameBtn  == null) newGameBtn  = FindButton("Btn_새 게임");
+        if (continueBtn == null) continueBtn = FindButton("Btn_이어하기");
+        if (quitBtn     == null) quitBtn     = FindButton("Btn_종료");
         if (newGameBtn  != null) { newGameBtn.onClick.RemoveAllListeners();  newGameBtn.onClick.AddListener(OnNewGame); }
         if (continueBtn != null) { continueBtn.onClick.RemoveAllListeners(); continueBtn.onClick.AddListener(OnContinue); }
         if (quitBtn     != null) { quitBtn.onClick.RemoveAllListeners();     quitBtn.onClick.AddListener(OnQuit); }
+    }
+
+    /// <summary>자식 계층에서 이름으로 Button 찾기(직렬화 ref 누락 폴백).</summary>
+    Button FindButton(string childName)
+    {
+        foreach (var b in GetComponentsInChildren<Button>(true))
+            if (b.gameObject.name == childName) return b;
+        return null;
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
