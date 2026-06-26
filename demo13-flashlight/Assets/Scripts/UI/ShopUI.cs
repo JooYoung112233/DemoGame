@@ -36,44 +36,46 @@ public class ShopUI : MonoBehaviour
     static readonly Color C_SLOT        = new Color(0.225f, 0.215f, 0.195f, 1.00f);  // 빈 슬롯(인벤처럼 또렷이)
     static readonly Color C_GRIDLINE    = new Color(0.05f,  0.048f, 0.042f, 1.00f);  // 셀 사이 그리드선
 
-    // ── 런타임 상태 ─────────────────────────────────────────
-    Canvas          canvas;
-    GameObject      panel;
+    // ── 영속 스켈레톤(프리팹 베이크 시 직렬화 보존) / 런타임 상태 ─────
+    // [SerializeField] = GenerateUI/Build* 로 만들어지는 영속 골격(프리팹에 굳음).
+    // 직렬화 안 함: 동적 셀/행/트레이 엔트리, 선택·런타임 상태, 런타임 추가 컴포넌트.
+    [SerializeField] Canvas          canvas;
+    [SerializeField] GameObject      panel;
 
     // 상단 바
-    Text            traderNameText;
-    Text            trustText;
-    Text            balanceText;
+    [SerializeField] Text            traderNameText;
+    [SerializeField] Text            trustText;
+    [SerializeField] Text            balanceText;
 
     // 좌: 상인 재고 (footprint 격자 — 인벤/창고와 동일 렌더)
-    RectTransform   stockContent;
-    RectTransform   stockSlotRoot;   // 슬롯 그리드
-    RectTransform   stockItemRoot;   // 배치 아이템 오버레이
-    Text            stockEmptyText;
+    [SerializeField] RectTransform   stockContent;
+    [SerializeField] RectTransform   stockSlotRoot;   // 슬롯 그리드(루트 — 동적 셀은 런타임 생성)
+    [SerializeField] RectTransform   stockItemRoot;   // 배치 아이템 오버레이(루트 — 동적 셀은 런타임 생성)
+    [SerializeField] Text            stockEmptyText;
 
     // 중: 구매 박스(상) / 판매 박스(하)
-    Image           buyIcon;
-    Text            buyName;
-    Text            buyInfo;
-    Button          actionBuyBtn;
-    Text            actionBuyLabel;
-    GameObject      buyEmpty;
-    int             buyQty = 1;        // 다중 구매 수량
-    Text            buyQtyText;
-    GameObject      buyQtyRow;
+    [SerializeField] Image           buyIcon;
+    [SerializeField] Text            buyName;
+    [SerializeField] Text            buyInfo;
+    [SerializeField] Button          actionBuyBtn;
+    [SerializeField] Text            actionBuyLabel;
+    [SerializeField] GameObject      buyEmpty;
+    int             buyQty = 1;        // 다중 구매 수량(런타임 상태 — 직렬화 안 함)
+    [SerializeField] Text            buyQtyText;
+    [SerializeField] GameObject      buyQtyRow;
 
-    Image           sellIcon;
-    Text            sellName;
-    Text            sellInfo;
-    Button          actionSellBtn;
-    Text            actionSellLabel;
-    GameObject      sellEmpty;
+    [SerializeField] Image           sellIcon;
+    [SerializeField] Text            sellName;
+    [SerializeField] Text            sellInfo;
+    [SerializeField] Button          actionSellBtn;
+    [SerializeField] Text            actionSellLabel;
+    [SerializeField] GameObject      sellEmpty;
 
-    Text            tradeResultText;
+    [SerializeField] Text            tradeResultText;
 
     // 우: 내 가방
-    RectTransform   invSlotRoot;    // 슬롯 그리드 (InventoryGrid 크기)
-    RectTransform   invItemRoot;    // 배치된 아이템 오버레이
+    [SerializeField] RectTransform   invSlotRoot;    // 슬롯 그리드 루트 (동적 셀은 런타임 생성)
+    [SerializeField] RectTransform   invItemRoot;    // 배치된 아이템 오버레이 루트 (동적 셀은 런타임 생성)
 
     // 선택 상태
     ItemData        selectedStock;      // 상인 재고에서 선택한 아이템
@@ -83,20 +85,20 @@ public class ShopUI : MonoBehaviour
     InventoryGrid   stashGrid;
 
     // ── 판매 트레이 (다중 판매) ──────────────────────────────
-    InventoryGrid   sellTray;
-    RectTransform   sellTraySlotRoot, sellTrayItemRoot;
-    Button          sellTrayBtn;
-    Text            sellTrayBtnLabel;
+    InventoryGrid   sellTray;        // 트레이 데이터(런타임) — 직렬화 안 함
+    [SerializeField] RectTransform   sellTraySlotRoot, sellTrayItemRoot;
+    [SerializeField] Button          sellTrayBtn;
+    [SerializeField] Text            sellTrayBtnLabel;
 
     // 드래그 격자(인벤 동일) — 창고/트레이/가방팝업
     GridDragManager dragMgr;
     GridPanel       stashPanel, trayPanel, bagPanel;
 
-    // 가방 이동 팝업
-    GameObject      bagPopup;
-    Text            bagPopupTitle;
-    ItemInstance    bagPopupInst;
-    GameObject      bagSortBtn;
+    // 가방 이동 팝업 (영속 골격 — BuildBagPopup이 GenerateUI 체인에서 생성)
+    [SerializeField] GameObject      bagPopup;
+    [SerializeField] Text            bagPopupTitle;
+    ItemInstance    bagPopupInst;   // 런타임 상태 — 직렬화 안 함
+    [SerializeField] GameObject      bagSortBtn;
 
     // 우클릭 컨텍스트 메뉴 (열기/자세히/버리기)
     GameObject      shopMenu;
@@ -104,9 +106,9 @@ public class ShopUI : MonoBehaviour
     Text            shopMenuName;
 
     // ── 상점 내 컨테이너 열기 (가방 안 아이템 판매) ───────────
-    ItemInstance    shopOpenBag;        // null = 루트 창고, 아니면 그 가방 내부
-    Text            stashHeaderText;    // 창고/가방 제목
-    GameObject      stashBackBtn;       // '← 뒤로'
+    ItemInstance    shopOpenBag;        // null = 루트 창고, 아니면 그 가방 내부 (런타임 상태)
+    [SerializeField] Text            stashHeaderText;    // 창고/가방 제목
+    [SerializeField] GameObject      stashBackBtn;       // '← 뒤로'
 
     /// <summary>현재 창고 패널이 보여주는 격자 (루트 창고 또는 열린 가방 내부).</summary>
     InventoryGrid CurrentStashGrid => shopOpenBag != null ? shopOpenBag.ContainerGrid : stashGrid;
@@ -172,24 +174,25 @@ public class ShopUI : MonoBehaviour
     enum ShopTab { Trade, Consign, Wanted }
     ShopTab         currentTab = ShopTab.Trade;
     bool            consignMode => currentTab == ShopTab.Consign;  // 위탁 슬롯 폴링용
-    GameObject      tabBar;               // 탭 버튼 컨테이너 (전부 숨길 때 사용)
-    GameObject      tradeBody;            // 구매/판매 3컬럼 본문
-    GameObject      consignBody;          // 위탁 본문
-    GameObject      wantedBody;           // 수배 본문
-    Text            tabTradeLabel;
-    Text            tabConsignLabel;
-    Text            tabWantedLabel;
-    Image           tabTradeBg;
-    Image           tabConsignBg;
-    Image           tabWantedBg;
-    RectTransform   consignSellList;      // 좌: 가방 판매가능 아이템 목록
-    Text            consignSellEmpty;
-    RectTransform   wantedList;           // 수배 행 목록
-    Text            wantedEmpty;
-    readonly Image[] consignSlotBg     = new Image[CONSIGN_SLOTS];
-    readonly Text[]  consignSlotTitle  = new Text[CONSIGN_SLOTS];
-    readonly Text[]  consignSlotStatus = new Text[CONSIGN_SLOTS];
-    readonly Button[] consignSlotBtn   = new Button[CONSIGN_SLOTS];
+    [SerializeField] GameObject      tabBar;               // 탭 버튼 컨테이너 (전부 숨길 때 사용)
+    [SerializeField] GameObject      tradeBody;            // 구매/판매 3컬럼 본문
+    [SerializeField] GameObject      consignBody;          // 위탁 본문
+    [SerializeField] GameObject      wantedBody;           // 수배 본문
+    [SerializeField] Text            tabTradeLabel;
+    [SerializeField] Text            tabConsignLabel;
+    [SerializeField] Text            tabWantedLabel;
+    [SerializeField] Image           tabTradeBg;
+    [SerializeField] Image           tabConsignBg;
+    [SerializeField] Image           tabWantedBg;
+    [SerializeField] RectTransform   consignSellList;      // 좌: 가방 판매가능 아이템 목록 루트(동적 행은 런타임)
+    [SerializeField] Text            consignSellEmpty;
+    [SerializeField] RectTransform   wantedList;           // 수배 행 목록 루트(동적 행은 런타임)
+    [SerializeField] Text            wantedEmpty;
+    // 위탁 슬롯 3개 = 고정 골격(BuildConsignView가 생성). 동적 셀 아님 → 직렬화.
+    [SerializeField] Image[]  consignSlotBg     = new Image[CONSIGN_SLOTS];
+    [SerializeField] Text[]   consignSlotTitle  = new Text[CONSIGN_SLOTS];
+    [SerializeField] Text[]   consignSlotStatus = new Text[CONSIGN_SLOTS];
+    [SerializeField] Button[] consignSlotBtn    = new Button[CONSIGN_SLOTS];
 
     static readonly Color C_TAB_ON   = new Color(0.34f, 0.30f, 0.18f, 1f);   // 활성 탭(탄)
     static readonly Color C_TAB_OFF  = new Color(0.135f, 0.130f, 0.115f, 1f);
@@ -220,6 +223,8 @@ public class ShopUI : MonoBehaviour
         stashGrid = stash != null ? stash.GetGrid() : null;
         EnsureSellTray();
         shopOpenBag = null;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panel.SetActive(true);
         ClearSelection();
         UpdateTabVisibility();
@@ -1626,6 +1631,15 @@ public class ShopUI : MonoBehaviour
     }
 
     // ── UI 빌드 ────────────────────────────────────────────
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();
+    }
+#endif
+
     void GenerateUI()
     {
         // Canvas

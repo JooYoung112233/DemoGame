@@ -116,8 +116,8 @@ public class CharacterPanelUI : MonoBehaviour
     Image highlightImage;
 
     // ── 가방 미장착 안내 ──
-    RectTransform invPlaceholder; // 중앙열: 가방 미장착 시 안내
-    Text bagHeaderText;        // "가방" 헤더 텍스트 (동적 갱신용)
+    [SerializeField] RectTransform invPlaceholder; // 중앙열: 가방 미장착 시 안내
+    [SerializeField] Text bagHeaderText;        // "가방" 헤더 텍스트 (동적 갱신용)
 
     // ── 우클릭 컨텍스트 메뉴 ──
     GameObject contextMenuGO;
@@ -205,6 +205,8 @@ public class CharacterPanelUI : MonoBehaviour
     {
         FindRefs();
         isShowing = true;
+        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
+        if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         if (panelRoot != null)
             panelRoot.SetActive(true);
         RefreshInventoryGrid();
@@ -573,6 +575,15 @@ public class CharacterPanelUI : MonoBehaviour
     public void BindEvents()
     {
     }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        GenerateUI();
+    }
+#endif
 
     /// <summary>생성된 UI 구조 제거 및 모든 직렬화 레퍼런스 초기화</summary>
     public void ClearGeneratedUI()

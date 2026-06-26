@@ -51,8 +51,8 @@
 3. ✅ **PoC `NoteUI`(B형)** (2026-06-26): 검증 완료(디버그 패널 쪽지 버튼 정상). + 디버그 테스트 버튼.
 4. ✅ **팝업 배치 6종**(2026-06-27): NarrationUI·TutorialPrompt·RaidResultUI·PostRaidEventUI(B형, 빌트인 폰트) + PauseMenu·GroundPickupUI(자가부트, Pause는 EnsureEventSystem을 Show로 이동/Ground는 ApplyFonts). 각 `[SerializeField]`+`EditorBake`+Canvas 가드, 베이크 엔트리 추가(+`프리팹 베이크/── 전부 ──`). **사용자 검증 대기**(전부 베이크 → Systems 재빌드 → 각 팝업 확인). 남음: ToastManager(동적 토스트).
 5. ✅ **HUD + 중형 패널 8종**(2026-06-27): ToastManager(BuildCanvas)·GameHUD·QuestHUD·QuickSlotBar(RuntimeInit 부트 프리팹화+ApplyFonts)·NavigationHUD(`Scripts/Navigation/`)·MapSelectUI(ApplyFonts)·CraftingUI(`Scripts/Crafting/`)·DialogueUI. 각 `[SerializeField]`(대부분 이미 됨)+`EditorBake`+필요시 Canvas 가드. 베이크 엔트리 추가. **사용자 검증 대기.** (대부분 빌트인 폰트, QuickSlot/MapSelect만 동적폰트→ApplyFonts)
-6. ⏭ **대형 패널 `CharacterPanelUI`(3580줄)** — ref 수백 개. 뷰 ref 직렬화 + 격자 슬롯 루트만 직렬화(셀은 GridPanel 절차 유지). 위험 → 단독 진행·검증.
-7. ⏭ **대형 패널 `ShopUI`(2441줄)** — 동일.
+6. ✅ **대형 패널 `CharacterPanelUI`(3580줄)**(2026-06-27): 스켈레톤 ref 직렬화(2개 추가, 26개 기존)+`EditorBake`+Canvas 가드. 동적 격자 셀/장비 슬롯 Dict는 직렬화 안 함(런타임 재생성 유지). 빌트인 폰트. 362/362.
+7. ✅ **대형 패널 `ShopUI`(2441줄)**(2026-06-27): 스켈레톤 ref 다수 직렬화(consign 슬롯 배열은 `readonly` 제거 후 직렬화)+`EditorBake`+Canvas 가드. 동적 셀/행은 컨테이너 루트만 직렬화·셀은 절차 유지. 244/244.
 8. ⏭ (선택) 기타: DispatchUI/RadioUI/QuestLogUI/RaidMapUI/HideoutUI/SleepUI/TitleScreen.
 
 ### 4-B. 시안 스킨 적용 (전환 완료 후 — 보류)
