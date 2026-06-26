@@ -14,7 +14,9 @@ public class TitleScreen : MonoBehaviour
     bool IsGenerated => canvas != null;
 
     [SerializeField] Canvas canvas;
+    [SerializeField] Button newGameBtn;
     [SerializeField] Button continueBtn;
+    [SerializeField] Button quitBtn;
     Font font;
 
     /// <summary>타이틀을 띄운다(없으면 생성). 부팅/타이틀복귀에서 호출.</summary>
@@ -40,6 +42,15 @@ public class TitleScreen : MonoBehaviour
         Instance = this;
         font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         if (!IsGenerated) BuildUI();   // 폴백: 프리팹 없이 코드로 생성
+        WireEvents();                  // onClick은 프리팹에 직렬화 안 됨 → 양쪽 경로에서 항상 재부착
+    }
+
+    /// <summary>버튼 onClick 재부착. 프리팹 인스턴스는 BuildUI를 스킵하므로 직렬화된 버튼 ref에 리스너를 다시 건다.</summary>
+    void WireEvents()
+    {
+        if (newGameBtn  != null) { newGameBtn.onClick.RemoveAllListeners();  newGameBtn.onClick.AddListener(OnNewGame); }
+        if (continueBtn != null) { continueBtn.onClick.RemoveAllListeners(); continueBtn.onClick.AddListener(OnContinue); }
+        if (quitBtn     != null) { quitBtn.onClick.RemoveAllListeners();     quitBtn.onClick.AddListener(OnQuit); }
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
@@ -74,9 +85,9 @@ public class TitleScreen : MonoBehaviour
         Anchor(sub, new Vector2(0.5f, 0.5f), new Vector2(0, 150), new Vector2(900, 50));
 
         // 버튼들
-        MakeButton("새 게임", new Vector2(0, 0), OnNewGame, out _);
+        MakeButton("새 게임", new Vector2(0, 0), OnNewGame, out newGameBtn);
         MakeButton("이어하기", new Vector2(0, -80), OnContinue, out continueBtn);
-        MakeButton("종료", new Vector2(0, -160), OnQuit, out _);
+        MakeButton("종료", new Vector2(0, -160), OnQuit, out quitBtn);
 
         // 버전 표기
         var ver = MakeText("Version", canvasGO.transform, "프로토타입 v0.1", 20, FontStyle.Normal,

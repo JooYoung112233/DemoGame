@@ -83,6 +83,15 @@ public class CharacterPanelUI : MonoBehaviour
     Dictionary<EquipSlot, Image> equipSlotIcons;
     Dictionary<EquipSlot, Text> equipSlotLabels;
 
+    // ── 정적 프레임 버튼 ref (프리팹에 굳음 — onClick은 직렬화 안 되므로 WireEvents에서 재부착) ──
+    // Dictionary는 직렬화 불가 → 장비 슬롯 버튼은 키/버튼 평행 배열로 보존.
+    [SerializeField] Button closeBtn;       // 우상단 닫기(X)
+    [SerializeField] Button leftSortBtn;    // 좌측 창고/상자 정렬
+    [SerializeField] EquipSlot[] equipSlotKeys;     // equipSlotButtons와 평행
+    [SerializeField] Button[] equipSlotButtons;     // 장비 슬롯 클릭 버튼(Ctrl+클릭 해제)
+    List<EquipSlot> equipSlotKeyList;               // 빌드 중 임시 수집(→ 배열로 확정)
+    List<Button> equipSlotBtnList;                  // 빌드 중 임시 수집
+
     // ── 좌측 상자 격자 ──
     [SerializeField] RectTransform containerGridRoot;
     Image[,] containerSlotImages;
@@ -154,7 +163,30 @@ public class CharacterPanelUI : MonoBehaviour
     void Awake()
     {
         if (!IsGenerated) GenerateUI();
+        WireEvents();   // onClick은 프리팹에 직렬화 안 됨 → 양쪽 경로(코드생성/프리팹)에서 정적 버튼 리스너 재부착
         BindEvents();
+    }
+
+    /// <summary>정적 프레임 버튼 onClick 재부착. 프리팹 인스턴스는 GenerateUI를 스킵하므로
+    /// 직렬화된 버튼 ref에 리스너를 다시 건다. 동적 격자 셀/장비 아이콘/컨텍스트 메뉴는
+    /// 매 갱신마다 재생성되며 자체 재부착하므로 여기서 건드리지 않는다.</summary>
+    void WireEvents()
+    {
+        if (closeBtn != null)    { closeBtn.onClick.RemoveAllListeners();    closeBtn.onClick.AddListener(Hide); }
+        if (leftSortBtn != null) { leftSortBtn.onClick.RemoveAllListeners(); leftSortBtn.onClick.AddListener(SortLeftGrid); }
+
+        if (equipSlotKeys != null && equipSlotButtons != null)
+        {
+            int n = Mathf.Min(equipSlotKeys.Length, equipSlotButtons.Length);
+            for (int i = 0; i < n; i++)
+            {
+                var btn = equipSlotButtons[i];
+                if (btn == null) continue;
+                var capturedSlot = equipSlotKeys[i];
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => OnEquipSlotClicked(capturedSlot));
+            }
+        }
     }
 
     void Update()
@@ -566,6 +598,7 @@ public class CharacterPanelUI : MonoBehaviour
         closeGO.GetComponent<Image>().color = UITheme.Negative;
         var cBtn = closeGO.GetComponent<Button>();
         var ccol = cBtn.colors; ccol.highlightedColor = UITheme.CellHover; ccol.pressedColor = UITheme.CellPressed; cBtn.colors = ccol;
+        closeBtn = cBtn;
         cBtn.onClick.AddListener(Hide);
         MakeChildText(closeGO.transform, "✕", 18, UITheme.TextBright);
 
@@ -628,6 +661,12 @@ public class CharacterPanelUI : MonoBehaviour
         equipSlotBgs = null;
         equipSlotIcons = null;
         equipSlotLabels = null;
+        closeBtn = null;
+        leftSortBtn = null;
+        equipSlotKeys = null;
+        equipSlotButtons = null;
+        equipSlotKeyList = null;
+        equipSlotBtnList = null;
         invPlaceholder = null;
         bagHeaderText = null;
         selectedItem = null;
@@ -758,7 +797,8 @@ public class CharacterPanelUI : MonoBehaviour
         sortRT.anchoredPosition = new Vector2(-8, -6);
         sortRT.sizeDelta = new Vector2(56, 24);
         sortGO.AddComponent<Image>().color = UITheme.Accent;
-        sortGO.AddComponent<Button>().onClick.AddListener(SortLeftGrid);
+        leftSortBtn = sortGO.AddComponent<Button>();
+        leftSortBtn.onClick.AddListener(SortLeftGrid);
         MakeChildText(sortGO.transform, "정렬", 13, UITheme.TextBright);
 
         // ── 스크롤 뷰포트 (헤더 아래 영역) + 격자 content (창고 30~100줄 대응) ──
@@ -889,6 +929,9 @@ public class CharacterPanelUI : MonoBehaviour
         equipSlotBgs = new Dictionary<EquipSlot, Image>();
         equipSlotIcons = new Dictionary<EquipSlot, Image>();
         equipSlotLabels = new Dictionary<EquipSlot, Text>();
+        // 장비 슬롯 버튼을 평행 배열에 모은다(직렬화용 — Dictionary 불가).
+        equipSlotKeyList = new List<EquipSlot>();
+        equipSlotBtnList = new List<Button>();
 
         // 슬롯 레이아웃: 3열 상단(Head/Armor/Rig), 3열 중단(Weapon1/Backpack/Weapon2), 1열 하단(Melee)
         float slotSize = 64f;
@@ -927,6 +970,10 @@ public class CharacterPanelUI : MonoBehaviour
                 new Vector2(22, y), new Vector2(PANEL_WIDTH - 40, 20), 12, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
             y -= 22f;
         }
+
+        // 수집한 장비 슬롯 버튼을 직렬화 평행 배열로 확정.
+        equipSlotKeys = equipSlotKeyList.ToArray();
+        equipSlotButtons = equipSlotBtnList.ToArray();
     }
 
     void BuildEquipSlot(RectTransform parent, EquipSlot slot, string label, float x, float y, float size)
@@ -979,6 +1026,9 @@ public class CharacterPanelUI : MonoBehaviour
         btn.colors = colors;
         var capturedSlot = slot;
         btn.onClick.AddListener(() => OnEquipSlotClicked(capturedSlot));
+
+        // 직렬화용 평행 배열 수집(프리팹 경로에서 WireEvents가 재부착).
+        if (equipSlotKeyList != null) { equipSlotKeyList.Add(slot); equipSlotBtnList.Add(btn); }
     }
 
     void OnEquipSlotClicked(EquipSlot slot)

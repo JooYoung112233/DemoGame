@@ -70,7 +70,7 @@ public class CraftingUI : MonoBehaviour
     void Awake()
     {
         if (!IsGenerated) GenerateUI();
-        BindEvents();
+        WireEvents();   // onClick은 프리팹에 직렬화 안 됨 → 빌드 가드 밖에서 양쪽 경로 모두 재부착
     }
 
     void Update()
@@ -165,18 +165,39 @@ public class CraftingUI : MonoBehaviour
 
     #region Events
 
-    public void BindEvents()
+    /// <summary>
+    /// 정적 버튼 onClick 재부착. onClick 리스너는 프리팹에 직렬화되지 않으므로, 프리팹
+    /// 인스턴스(GenerateUI 스킵)에서도 직렬화된 버튼 ref에 핸들러를 다시 건다.
+    /// RemoveAllListeners로 중복 부착(코드 생성 폴백 경로 등)도 방지.
+    /// 동적 per-recipe/per-repair 항목 버튼은 갱신 시 매번 재생성되므로 여기서 다루지 않는다.
+    /// </summary>
+    public void WireEvents()
     {
         if (craftTabBtn != null)
+        {
+            craftTabBtn.onClick.RemoveAllListeners();
             craftTabBtn.onClick.AddListener(() => SelectTab(false));
+        }
         if (repairTabBtn != null)
+        {
+            repairTabBtn.onClick.RemoveAllListeners();
             repairTabBtn.onClick.AddListener(() => SelectTab(true));
+        }
         if (craftButton != null)
+        {
+            craftButton.onClick.RemoveAllListeners();
             craftButton.onClick.AddListener(OnCraftClicked);
+        }
         if (repairButton != null)
+        {
+            repairButton.onClick.RemoveAllListeners();
             repairButton.onClick.AddListener(OnRepairClicked);
+        }
         if (closeBtn != null)
+        {
+            closeBtn.onClick.RemoveAllListeners();
             closeBtn.onClick.AddListener(Hide);
+        }
     }
 
     #endregion

@@ -46,6 +46,7 @@ public class ShopUI : MonoBehaviour
     [SerializeField] Text            traderNameText;
     [SerializeField] Text            trustText;
     [SerializeField] Text            balanceText;
+    [SerializeField] Button          closeBtn;             // 닫기(✕) — 정적 골격 버튼
 
     // 좌: 상인 재고 (footprint 격자 — 인벤/창고와 동일 렌더)
     [SerializeField] RectTransform   stockContent;
@@ -63,6 +64,8 @@ public class ShopUI : MonoBehaviour
     int             buyQty = 1;        // 다중 구매 수량(런타임 상태 — 직렬화 안 함)
     [SerializeField] Text            buyQtyText;
     [SerializeField] GameObject      buyQtyRow;
+    [SerializeField] Button          buyMinusBtn;          // 수량 − (정적 골격 버튼)
+    [SerializeField] Button          buyPlusBtn;           // 수량 + (정적 골격 버튼)
 
     [SerializeField] Image           sellIcon;
     [SerializeField] Text            sellName;
@@ -89,6 +92,7 @@ public class ShopUI : MonoBehaviour
     [SerializeField] RectTransform   sellTraySlotRoot, sellTrayItemRoot;
     [SerializeField] Button          sellTrayBtn;
     [SerializeField] Text            sellTrayBtnLabel;
+    [SerializeField] Button          returnTrayBtn;        // 트레이 되돌리기 (정적 골격 버튼)
 
     // 드래그 격자(인벤 동일) — 창고/트레이/가방팝업
     GridDragManager dragMgr;
@@ -99,6 +103,7 @@ public class ShopUI : MonoBehaviour
     [SerializeField] Text            bagPopupTitle;
     ItemInstance    bagPopupInst;   // 런타임 상태 — 직렬화 안 함
     [SerializeField] GameObject      bagSortBtn;
+    [SerializeField] Button          bagCloseBtn;          // 가방 팝업 닫기(✕) (정적 골격 버튼)
 
     // 우클릭 컨텍스트 메뉴 (열기/자세히/버리기)
     GameObject      shopMenu;
@@ -211,6 +216,57 @@ public class ShopUI : MonoBehaviour
     void Awake()
     {
         if (Instance == null) Instance = this;
+        WireEvents();   // onClick은 프리팹에 직렬화 안 됨 → 정적 골격 버튼 리스너를 양쪽 경로에서 재부착
+    }
+
+    /// <summary>
+    /// 정적 골격 버튼(탭/구매·판매/트레이/수량/뒤로/닫기 등)의 onClick 재부착.
+    /// 프리팹 인스턴스는 GenerateUI를 스킵하므로(빌드 1회) 직렬화된 버튼 ref에 리스너를 다시 건다.
+    /// 동적 셀/행/컨텍스트 메뉴 버튼은 Refresh* 시 매번 다시 그리며 자체적으로 재부착하므로 여기서 건드리지 않는다.
+    /// RemoveAllListeners로 코드생성 경로의 중복 부착도 방지.
+    /// </summary>
+    void WireEvents()
+    {
+        // 탭 (거래/위탁/수배) — 버튼은 탭 배경 Image와 같은 GameObject에 있음.
+        Button tabTradeBtn   = tabTradeBg   != null ? tabTradeBg.GetComponent<Button>()   : null;
+        Button tabConsignBtn = tabConsignBg != null ? tabConsignBg.GetComponent<Button>() : null;
+        Button tabWantedBtn  = tabWantedBg  != null ? tabWantedBg.GetComponent<Button>()  : null;
+        if (tabTradeBtn   != null) { tabTradeBtn.onClick.RemoveAllListeners();   tabTradeBtn.onClick.AddListener(() => SetTab(ShopTab.Trade)); }
+        if (tabConsignBtn != null) { tabConsignBtn.onClick.RemoveAllListeners(); tabConsignBtn.onClick.AddListener(() => SetTab(ShopTab.Consign)); }
+        if (tabWantedBtn  != null) { tabWantedBtn.onClick.RemoveAllListeners();  tabWantedBtn.onClick.AddListener(() => SetTab(ShopTab.Wanted)); }
+
+        // 닫기(✕)
+        if (closeBtn != null) { closeBtn.onClick.RemoveAllListeners(); closeBtn.onClick.AddListener(Close); }
+
+        // 구매/판매 액션
+        if (actionBuyBtn  != null) { actionBuyBtn.onClick.RemoveAllListeners();  actionBuyBtn.onClick.AddListener(() => { if (selectedStock != null) Buy(selectedStock, buyQty); }); }
+        if (actionSellBtn != null) { actionSellBtn.onClick.RemoveAllListeners(); actionSellBtn.onClick.AddListener(() => { if (selectedInv != null) Sell(selectedInv); }); }
+
+        // 구매 수량 스테퍼 (− / +)
+        if (buyMinusBtn != null) { buyMinusBtn.onClick.RemoveAllListeners(); buyMinusBtn.onClick.AddListener(() => { buyQty = Mathf.Max(1, buyQty - 1); RefreshBuyBox(); }); }
+        if (buyPlusBtn  != null) { buyPlusBtn.onClick.RemoveAllListeners();  buyPlusBtn.onClick.AddListener(() => { buyQty += 1; RefreshBuyBox(); }); }
+
+        // 판매 트레이 (판매 / 되돌리기)
+        if (sellTrayBtn   != null) { sellTrayBtn.onClick.RemoveAllListeners();   sellTrayBtn.onClick.AddListener(SellTrayAll); }
+        if (returnTrayBtn != null) { returnTrayBtn.onClick.RemoveAllListeners(); returnTrayBtn.onClick.AddListener(() => ReturnTrayAll(true)); }
+
+        // 창고 '← 뒤로' — GameObject로 직렬화되므로 같은 GO의 Button을 집는다.
+        Button backBtn = stashBackBtn != null ? stashBackBtn.GetComponent<Button>() : null;
+        if (backBtn != null) { backBtn.onClick.RemoveAllListeners(); backBtn.onClick.AddListener(CloseBag); }
+
+        // 가방 팝업 (정렬 / 닫기)
+        Button sortBtn = bagSortBtn != null ? bagSortBtn.GetComponent<Button>() : null;
+        if (sortBtn != null) { sortBtn.onClick.RemoveAllListeners(); sortBtn.onClick.AddListener(SortBagPopup); }
+        if (bagCloseBtn != null) { bagCloseBtn.onClick.RemoveAllListeners(); bagCloseBtn.onClick.AddListener(CloseBagPopup); }
+
+        // 위탁 슬롯 3개 (정산 수령) — 인덱스별 동일 핸들러.
+        if (consignSlotBtn != null)
+            for (int i = 0; i < consignSlotBtn.Length; i++)
+            {
+                int idx = i;
+                var b = consignSlotBtn[i];
+                if (b != null) { b.onClick.RemoveAllListeners(); b.onClick.AddListener(() => CollectConsign(idx)); }
+            }
     }
 
     // ── 공개 메서드 ──────────────────────────────────────────
@@ -1072,7 +1128,8 @@ public class ShopUI : MonoBehaviour
         var btRT = bagPopupTitle.GetComponent<RectTransform>(); btRT.offsetMin = new Vector2(10, 0); btRT.offsetMax = new Vector2(-92, 0);
 
         bagSortBtn = MakeBagHeaderBtn(hRT, "정렬", -36, UITheme.Accent, SortBagPopup, 50);
-        MakeBagHeaderBtn(hRT, "✕", -6, UITheme.Negative, CloseBagPopup, 24);
+        var bagCloseGO = MakeBagHeaderBtn(hRT, "✕", -6, UITheme.Negative, CloseBagPopup, 24);
+        bagCloseBtn = bagCloseGO != null ? bagCloseGO.GetComponent<Button>() : null;
 
         // 격자(헤더 아래 직접 배치 — 마스크/내부패널 없음). GridHost가 Refresh의 content 리사이즈를 흡수.
         var host = MakeRect("GridHost", bagPopup.transform);
@@ -1696,6 +1753,9 @@ public class ShopUI : MonoBehaviour
         BuildWantedView(wbody.transform);
         wbody.SetActive(false);
 
+        // 코드생성 폴백 경로: 빌드가 직접 AddListener 했지만 단일 출처로 다시 부착(RemoveAllListeners로 중복 방지).
+        WireEvents();
+
         panel.SetActive(false);
     }
 
@@ -1927,19 +1987,20 @@ public class ShopUI : MonoBehaviour
         balanceText.alignment = TextAnchor.MiddleRight;
 
         // 닫기 버튼
-        var closeBtn = MakeRect("CloseBtn", bar.transform);
-        var closeRT  = closeBtn.GetComponent<RectTransform>();
+        var closeGO = MakeRect("CloseBtn", bar.transform);
+        var closeRT  = closeGO.GetComponent<RectTransform>();
         closeRT.anchorMin        = new Vector2(1, 0.5f);
         closeRT.anchorMax        = new Vector2(1, 0.5f);
         closeRT.pivot            = new Vector2(1, 0.5f);
         closeRT.anchoredPosition = new Vector2(-14, 0);
         closeRT.sizeDelta        = new Vector2(44, 44);
-        closeBtn.AddComponent<Image>().color = C_CLOSE;
-        var cb = closeBtn.AddComponent<Button>();
-        cb.targetGraphic = closeBtn.GetComponent<Image>();
+        closeGO.AddComponent<Image>().color = C_CLOSE;
+        var cb = closeGO.AddComponent<Button>();
+        cb.targetGraphic = closeGO.GetComponent<Image>();
         cb.onClick.AddListener(Close);
+        closeBtn = cb;
         var closeTxtGO = new GameObject("Text");
-        closeTxtGO.transform.SetParent(closeBtn.transform, false);
+        closeTxtGO.transform.SetParent(closeGO.transform, false);
         var closeTxtRT = closeTxtGO.AddComponent<RectTransform>();
         closeTxtRT.anchorMin = Vector2.zero; closeTxtRT.anchorMax = Vector2.one;
         closeTxtRT.offsetMin = Vector2.zero; closeTxtRT.offsetMax = Vector2.zero;
@@ -2161,8 +2222,8 @@ public class ShopUI : MonoBehaviour
             qrRT.anchorMin = new Vector2(0.5f, 0); qrRT.anchorMax = new Vector2(0.5f, 0); qrRT.pivot = new Vector2(0.5f, 0);
             qrRT.anchoredPosition = new Vector2(0, 58);
             qrRT.sizeDelta = new Vector2(180, 30);
-            MakeStepBtn(buyQtyRow.transform, "−", -66, () => { buyQty = Mathf.Max(1, buyQty - 1); RefreshBuyBox(); });
-            MakeStepBtn(buyQtyRow.transform, "+",  66, () => { buyQty += 1; RefreshBuyBox(); });
+            buyMinusBtn = MakeStepBtn(buyQtyRow.transform, "−", -66, () => { buyQty = Mathf.Max(1, buyQty - 1); RefreshBuyBox(); });
+            buyPlusBtn  = MakeStepBtn(buyQtyRow.transform, "+",  66, () => { buyQty += 1; RefreshBuyBox(); });
             var qtGO = MakeRect("Qty", buyQtyRow.transform);
             var qtRT = qtGO.GetComponent<RectTransform>();
             qtRT.anchorMin = qtRT.anchorMax = qtRT.pivot = new Vector2(0.5f, 0.5f);
@@ -2230,6 +2291,7 @@ public class ShopUI : MonoBehaviour
         var retImg = ret.AddComponent<Image>(); retImg.color = C_CELL;
         var retBtn = ret.AddComponent<Button>(); retBtn.targetGraphic = retImg;
         retBtn.onClick.AddListener(() => ReturnTrayAll(true));
+        returnTrayBtn = retBtn;
         var rtxt = AddText(ret.GetComponent<RectTransform>(), "되돌리기", 13, TextAnchor.MiddleCenter, Color.white);
         rtxt.fontStyle = FontStyle.Bold;
 
@@ -2245,7 +2307,7 @@ public class ShopUI : MonoBehaviour
         sellTrayBtnLabel.fontStyle = FontStyle.Bold;
     }
 
-    void MakeStepBtn(Transform parent, string label, float posX, System.Action onClick)
+    Button MakeStepBtn(Transform parent, string label, float posX, System.Action onClick)
     {
         var go = MakeRect("Step_" + label, parent);
         var rt = go.GetComponent<RectTransform>();
@@ -2256,6 +2318,7 @@ public class ShopUI : MonoBehaviour
         b.onClick.AddListener(() => onClick?.Invoke());
         var t = AddText(go.GetComponent<RectTransform>(), label, 20, TextAnchor.MiddleCenter, Color.white);
         t.fontStyle = FontStyle.Bold;
+        return b;
     }
 
     // ── 우 컬럼: 내 가방 ──────────────────────────────────────

@@ -337,19 +337,31 @@ public class MapSelectUI : MonoBehaviour
         cancel2Btn.onClick.AddListener(Hide);
     }
 
+    /// <summary>
+    /// 정적 버튼 onClick 재부착. onClick 리스너는 프리팹에 직렬화되지 않으므로
+    /// (코드 생성 / 프리팹 인스턴스) 양쪽 경로에서 Awake가 호출한다.
+    /// 멱등(idempotent): GenerateUI 직후·재호출에도 중복되지 않도록 RemoveAllListeners 후 AddListener.
+    /// </summary>
     public void BindEvents()
     {
         if (confirmBtn != null)
+        {
+            confirmBtn.onClick.RemoveAllListeners();
             confirmBtn.onClick.AddListener(OnConfirm);
+        }
 
         if (cancelBtn != null)
+        {
+            cancelBtn.onClick.RemoveAllListeners();
             cancelBtn.onClick.AddListener(Hide);
+        }
 
         if (regionButtons != null)
         {
             for (int i = 0; i < regionButtons.Length; i++)
             {
                 if (regionButtons[i] == null) continue;
+                regionButtons[i].onClick.RemoveAllListeners();
                 if (!regionButtons[i].interactable) continue;
                 int idx = i;
                 regionButtons[i].onClick.AddListener(() => SelectRegion(idx));

@@ -37,6 +37,8 @@ public class SleepUI : MonoBehaviour
     [SerializeField] Canvas canvas;
     [SerializeField] GameObject panel;
     [SerializeField] Text statusText;
+    [SerializeField] Button closeBtn;        // 닫기 버튼 — onClick 재부착용 ref
+    [SerializeField] Button[] optionBtns;    // 수면 옵션 버튼(인덱스=BuildOptions 순서) — onClick 재부착용 ref
     Font font;            // 빌트인 폰트 — 직렬화 안 함(코드 생성 시점에만 사용)
     Image fadeOverlay;   // 폴백 페이드용(ScreenEffectManager 부재 시) — 런타임 생성
     bool sleeping;        // 휴식 처리 중복 방지
@@ -45,6 +47,25 @@ public class SleepUI : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         // 프리팹 인스턴스(이미 베이크된 계층)면 코드 생성 생략. 빌트인 폰트라 재바인딩 불필요.
+        WireEvents();   // onClick은 프리팹에 직렬화 안 됨 → 양쪽 경로(프리팹/폴백)에서 항상 재부착
+    }
+
+    /// <summary>정적 버튼 onClick 재부착. 프리팹 인스턴스는 GenerateUI를 스킵하므로
+    /// 직렬화된 버튼 ref에 리스너를 다시 건다. 옵션 버튼은 인덱스로 BuildOptions 데이터를 재매핑.</summary>
+    void WireEvents()
+    {
+        if (closeBtn != null) { closeBtn.onClick.RemoveAllListeners(); closeBtn.onClick.AddListener(Close); }
+        if (optionBtns != null)
+        {
+            var options = BuildOptions();
+            for (int i = 0; i < optionBtns.Length; i++)
+            {
+                if (optionBtns[i] == null || i >= options.Length) continue;
+                var captured = options[i];
+                optionBtns[i].onClick.RemoveAllListeners();
+                optionBtns[i].onClick.AddListener(() => DoSleep(captured));
+            }
+        }
     }
 
     public static SleepUI Show()
@@ -219,7 +240,8 @@ public class SleepUI : MonoBehaviour
         var cRT = closeGO.GetComponent<RectTransform>();
         cRT.pivot = new Vector2(1, 1); cRT.anchoredPosition = new Vector2(-20, -18); cRT.sizeDelta = new Vector2(44, 34);
         closeGO.AddComponent<Image>().color = UITheme.Danger;
-        closeGO.AddComponent<Button>().onClick.AddListener(Close);
+        closeBtn = closeGO.AddComponent<Button>();
+        closeBtn.onClick.AddListener(Close);
         MakeChild(closeGO.transform, "✕", 18, TextAnchor.MiddleCenter);
 
         statusText = MakeText(win.transform, "현재 상태", 16, TextAnchor.MiddleLeft,
@@ -228,6 +250,7 @@ public class SleepUI : MonoBehaviour
 
         // 수면 시간 옵션 버튼
         var options = BuildOptions();
+        optionBtns = new Button[options.Length];   // 베이크/폴백 시 ref 채움 → WireEvents가 인덱스로 재부착
         float btnW = 320f, btnH = 150f, gap = 24f;
         float totalW = btnW * options.Length + gap * (options.Length - 1);
         float startX = -totalW / 2f + btnW / 2f;
@@ -242,6 +265,7 @@ public class SleepUI : MonoBehaviour
             img.color = UITheme.Cell;
             var btn = btnGO.AddComponent<Button>();
             btn.targetGraphic = img;
+            optionBtns[i] = btn;
             var captured = o;
             btn.onClick.AddListener(() => DoSleep(captured));
 

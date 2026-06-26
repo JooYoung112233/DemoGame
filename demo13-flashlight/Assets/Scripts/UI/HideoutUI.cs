@@ -20,11 +20,22 @@ public class HideoutUI : MonoBehaviour
     [SerializeField] RectTransform listContent;
     [SerializeField] Text titleText;
     [SerializeField] Text scrapText;
+    [SerializeField] Button closeBtn;   // 정적 프레임 버튼 — onClick은 프리팹에 직렬화 안 됨 → WireEvents에서 재부착
     Font font;   // 빌트인 LegacyRuntime 폰트 — 직렬화/재바인딩 불필요
 
     string currentModule = "workbench";
 
-    void Awake() { if (Instance == null) Instance = this; }
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        WireEvents();   // 프리팹 인스턴스는 GenerateUI를 스킵 → 직렬화된 정적 버튼 ref에 리스너 재부착
+    }
+
+    /// <summary>정적 프레임 버튼 onClick 재부착. 프리팹 경로는 GenerateUI를 안 타므로 여기서 다시 건다.</summary>
+    void WireEvents()
+    {
+        if (closeBtn != null) { closeBtn.onClick.RemoveAllListeners(); closeBtn.onClick.AddListener(Close); }
+    }
 
     /// <summary>해당 시설 패널을 연다(온디맨드 생성). 시설 타일 클릭 → 여기로.</summary>
     public static HideoutUI Show(string module = "workbench")
@@ -284,7 +295,8 @@ public class HideoutUI : MonoBehaviour
         cRT.anchorMin = cRT.anchorMax = cRT.pivot = new Vector2(1, 1);
         cRT.anchoredPosition = new Vector2(-44, -20); cRT.sizeDelta = new Vector2(44, 34);
         closeGO.AddComponent<Image>().color = UITheme.Danger;
-        closeGO.AddComponent<Button>().onClick.AddListener(Close);
+        closeBtn = closeGO.AddComponent<Button>();   // ref 저장(프리팹 직렬화 대상) — 리스너는 WireEvents에서 부착
+        closeBtn.onClick.AddListener(Close);
         MakeChild(closeGO.transform, "✕", 18, TextAnchor.MiddleCenter);
 
         // 본문 목록(시설 1개 분량)

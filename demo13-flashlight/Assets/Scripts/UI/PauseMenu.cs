@@ -14,6 +14,9 @@ public class PauseMenu : MonoBehaviour
     bool IsGenerated => canvas != null;
 
     [SerializeField] Canvas canvas;
+    [SerializeField] Button resumeBtn;
+    [SerializeField] Button settingsBtn;
+    [SerializeField] Button quitBtn;
     Font font;
     float _prevTimeScale = 1f;
 
@@ -39,6 +42,15 @@ public class PauseMenu : MonoBehaviour
         Instance = this;
         font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         if (!IsGenerated) BuildUI();   // 폴백: 프리팹 없이 코드로 생성
+        WireEvents();                  // onClick은 프리팹에 직렬화 안 됨 → 양쪽 경로에서 항상 재부착
+    }
+
+    /// <summary>버튼 onClick 재부착. 프리팹 인스턴스는 BuildUI를 스킵하므로 직렬화된 버튼 ref에 리스너를 다시 건다.</summary>
+    void WireEvents()
+    {
+        if (resumeBtn   != null) { resumeBtn.onClick.RemoveAllListeners();   resumeBtn.onClick.AddListener(OnResume); }
+        if (settingsBtn != null) { settingsBtn.onClick.RemoveAllListeners(); settingsBtn.onClick.AddListener(OnSettings); }
+        if (quitBtn     != null) { quitBtn.onClick.RemoveAllListeners();     quitBtn.onClick.AddListener(OnQuit); }
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
@@ -67,9 +79,9 @@ public class PauseMenu : MonoBehaviour
             UITheme.TextBright);
         Anchor(title, new Vector2(0.5f, 0.5f), new Vector2(0, 180), new Vector2(700, 100));
 
-        MakeButton("계속하기", new Vector2(0, 60), OnResume);
-        MakeButton("설정", new Vector2(0, -20), OnSettings);
-        MakeButton("게임 종료", new Vector2(0, -100), OnQuit);
+        MakeButton("계속하기", new Vector2(0, 60), OnResume, out resumeBtn);
+        MakeButton("설정", new Vector2(0, -20), OnSettings, out settingsBtn);
+        MakeButton("게임 종료", new Vector2(0, -100), OnQuit, out quitBtn);
     }
 
 #if UNITY_EDITOR
@@ -153,7 +165,7 @@ public class PauseMenu : MonoBehaviour
         return t;
     }
 
-    void MakeButton(string label, Vector2 pos, UnityEngine.Events.UnityAction onClick)
+    void MakeButton(string label, Vector2 pos, UnityEngine.Events.UnityAction onClick, out Button button)
     {
         var go = new GameObject($"Btn_{label}", typeof(RectTransform));
         go.transform.SetParent(canvas.transform, false);
@@ -166,7 +178,7 @@ public class PauseMenu : MonoBehaviour
         var img = go.AddComponent<Image>();
         img.color = UITheme.Cell;
 
-        var button = go.AddComponent<Button>();
+        button = go.AddComponent<Button>();
         var colors = button.colors;
         colors.highlightedColor = UITheme.CellHover;
         colors.pressedColor = UITheme.CellPressed;
