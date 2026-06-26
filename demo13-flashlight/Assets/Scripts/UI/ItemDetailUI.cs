@@ -2,10 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 아이템 1개 상세 정보 팝업 — 큰 아이콘 + 이름 + 설명 + 스탯.
-/// 컨텍스트 메뉴 "자세히"에서 호출. 전체화면 어두운 배경 + 가운데 카드.
-/// 클릭(배경)/Esc로 닫힘. 싱글톤 자가 부트스트랩(NoteUI 패턴).
-/// UIManager.IsAnyUIOpen()에 포함, Esc는 다른 UI보다 먼저 이 팝업을 닫음.
+/// 아이템 1개 상세 정보 팝업 — 시안 "ITEM NAME" 패널 레이아웃.
+/// 제목태그 + 아이콘박스 + TYPE/WEIGHT/STACK + 설명 + STAT 3행 + DURABILITY 바 + SELL VALUE + EQUIP/DROP/SCRAP.
+/// 컨텍스트 메뉴 "자세히"에서 호출. item.png 종이 배경 + 어두운 잉크 텍스트. 배경 클릭/Esc로 닫힘.
+/// 싱글톤 자가 부트스트랩(NoteUI 패턴). 프리팹 베이크 가능(WireEvents로 버튼 onClick 재부착).
 /// </summary>
 public class ItemDetailUI : MonoBehaviour
 {
@@ -17,21 +17,37 @@ public class ItemDetailUI : MonoBehaviour
 
     bool isShowing;
     int openFrame = -1;
+    ItemInstance current;
 
+    // ── 직렬화 뷰(프리팹 베이크 보존) ───────────────────────────────
     [SerializeField] Canvas canvas;
     [SerializeField] GameObject panelRoot;
+    [SerializeField] Button dimButton;          // 배경 클릭 닫기
     [SerializeField] Image iconImage;
     [SerializeField] Image iconBg;
     [SerializeField] Text iconFallback;
-    [SerializeField] Text nameText;
+    [SerializeField] Text nameText;             // 제목 태그
+    [SerializeField] Text typeValue, weightValue, stackValue;
     [SerializeField] Text descText;
-    [SerializeField] Text statText;
-    Font koreanFont;   // 런타임 동적 OS 폰트 — 직렬화 안 함(프리팹 저장 불가, Instantiate 후 재바인딩)
+    [SerializeField] Text stat1Label, stat1Value, stat2Label, stat2Value, stat3Label, stat3Value;
+    [SerializeField] Text durValue;
+    [SerializeField] Image durFill;
+    [SerializeField] Text sellValue;
+    [SerializeField] Button equipBtn, dropBtn, scrapBtn;
+    Font koreanFont;   // 런타임 동적 OS 폰트 — 직렬화 안 함(Instantiate 후 ApplyFonts 재바인딩)
 
-    const int SortingOrder = 112;   // CharacterPanel(40) 위, NoteUI(110) 부근
+    const int SortingOrder = 112;
     const float CardW = 460f, CardH = 620f;
 
-    bool IsGenerated => canvas != null;
+    // 종이 위 어두운 잉크 톤
+    static readonly Color Ink     = new Color(0.15f, 0.12f, 0.09f, 1f);   // 라벨/제목(진함)
+    static readonly Color InkSoft = new Color(0.28f, 0.23f, 0.17f, 1f);   // 값/보조
+    static readonly Color RuleCol = new Color(0.38f, 0.31f, 0.22f, 0.6f); // 밑줄
+    static readonly Color BarBg   = new Color(0.16f, 0.13f, 0.10f, 0.5f);
+    static readonly Color BarFill = new Color(0.30f, 0.24f, 0.16f, 1f);
+
+    // 새 레이아웃 마커로 판정 — 구버전 베이크 프리팹(이 필드 없음)이면 false → 재생성(아래 캔버스 정리).
+    bool IsGenerated => equipBtn != null;
 
     void Awake()
     {
@@ -40,6 +56,7 @@ public class ItemDetailUI : MonoBehaviour
         koreanFont = LoadKoreanFont();
         if (!IsGenerated) GenerateUI();   // 폴백: 프리팹 없이 코드로 생성
         else ApplyFonts();                // 프리팹 인스턴스: 동적 폰트 재바인딩
+        WireEvents();                     // onClick은 직렬화 안 됨 → 양쪽 경로에서 재부착
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
@@ -48,29 +65,28 @@ public class ItemDetailUI : MonoBehaviour
     {
         if (Instance == null)
         {
-            // 프리팹 우선 — Instantiate가 Awake를 돌려 Instance를 세팅(폰트 재바인딩 포함).
-            // 프리팹이 없으면(미베이크) 코드 생성으로 폴백.
             var prefab = Resources.Load<GameObject>("UI/ItemDetailUI");
             GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("[ItemDetailUI]");
             go.name = "[ItemDetailUI]";
-            if (prefab == null) go.AddComponent<ItemDetailUI>();   // 폴백: Awake가 GenerateUI
+            if (prefab == null) go.AddComponent<ItemDetailUI>();
             DontDestroyOnLoad(go);
         }
         return Instance;
     }
 
+    // ── 데이터 바인딩 ───────────────────────────────────────────────
+
     void Open(ItemInstance item)
     {
         if (item == null || item.data == null) return;
         if (!IsGenerated) GenerateUI();
+        current = item;
         var d = item.data;
 
-        // 이름
         nameText.text = d.displayName;
-        nameText.color = d.RarityColor;
 
-        // 아이콘 / 폴백
-        iconBg.color = ScaleColor(d.RarityColor, 0.22f);
+        // 아이콘 박스 — 희귀도 어두운 tint
+        iconBg.color = DarkTint(d.RarityColor);
         if (d.icon != null)
         {
             iconImage.sprite = d.icon;
@@ -82,34 +98,36 @@ public class ItemDetailUI : MonoBehaviour
             iconImage.enabled = false;
             iconFallback.enabled = true;
             iconFallback.text = d.displayName;
-            iconFallback.color = d.RarityColor;
         }
+
+        // TYPE / WEIGHT / STACK
+        typeValue.text   = $"{GetCategoryName(d.category)}";
+        weightValue.text = $"{d.weight:F1} kg";
+        stackValue.text  = item.stackCount > 1 ? $"{item.stackCount} / {d.maxStack}" : "1";
 
         // 설명
-        descText.text = string.IsNullOrEmpty(d.description) ? "<color=#888888>설명 없음</color>" : d.description;
+        descText.text = string.IsNullOrEmpty(d.description) ? "설명 없음." : d.description;
 
-        // 스탯
-        var sb = new System.Text.StringBuilder();
-        sb.Append($"<b>분류</b>  {GetCategoryName(d.category)} · {GetRarityName(d.rarity)}\n");
-        sb.Append($"<b>크기</b>  {d.gridWidth} x {d.gridHeight}    <b>무게</b>  {d.weight:F1} kg\n");
-        if (item.stackCount > 1)
-            sb.Append($"<b>수량</b>  {item.stackCount} / {d.maxStack}\n");
+        // STAT 3행
+        stat1Label.text = "크기";     stat1Value.text = $"{d.gridWidth} x {d.gridHeight}";
+        stat2Label.text = "희귀도";   stat2Value.text = GetRarityName(d.rarity);
+        if (d.isUsable) { stat3Label.text = "효과"; stat3Value.text = $"{GetEffectName(d.useEffect)} ({d.effectValue:F0})"; }
+        else            { stat3Label.text = "분류"; stat3Value.text = GetCategoryName(d.category); }
+
+        // DURABILITY
         if (item.HasDurability)
-            sb.Append($"<b>내구도</b>  {item.durability:F0} / {d.maxDurability:F0}\n");
-        if (d.sellPrice > 0 || d.buyPrice > 0)
         {
-            sb.Append("<b>가격</b>  ");
-            if (d.buyPrice > 0) sb.Append($"구매 {d.buyPrice}  ");
-            if (d.sellPrice > 0) sb.Append($"판매 {d.sellPrice}  ");
-            sb.Append("스크랩\n");
+            durValue.text = $"{item.durability:F0} / {d.maxDurability:F0}";
+            durFill.fillAmount = d.maxDurability > 0 ? Mathf.Clamp01(item.durability / d.maxDurability) : 1f;
+            durFill.enabled = true;
         }
-        if (d.isUsable)
-            sb.Append($"\n<color=#88CC88><b>사용 가능</b> — {GetEffectName(d.useEffect)} ({d.effectValue:F0})</color>");
-        statText.text = sb.ToString();
+        else { durValue.text = "—"; durFill.fillAmount = 0f; durFill.enabled = false; }
+
+        // SELL VALUE
+        sellValue.text = d.sellPrice > 0 ? $"{d.sellPrice} 스크랩" : "—";
 
         isShowing = true;
         openFrame = Time.frameCount;
-        // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
         if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         panelRoot.SetActive(true);
     }
@@ -118,21 +136,45 @@ public class ItemDetailUI : MonoBehaviour
     {
         if (!isShowing) return;
         isShowing = false;
+        current = null;
         if (panelRoot != null) panelRoot.SetActive(false);
     }
 
     void Update()
     {
         if (!isShowing) return;
-        if (Time.frameCount == openFrame) return;   // 연 프레임 입력 무시
-        if (GameInput.GetKeyDown(KeyCode.Escape) || GameInput.GetMouseButtonDown(0) || GameInput.GetMouseButtonDown(1))
-            Close();
+        if (Time.frameCount == openFrame) return;
+        if (GameInput.GetKeyDown(KeyCode.Escape)) Close();   // 바깥 클릭은 Dim 버튼이 처리
     }
 
-    // ── UI 생성 ───────────────────────────────────────────────────────
+    // ── 버튼 동작 (TODO: 인벤토리 컨텍스트 연결 — 현재는 닫기 + 로그 placeholder) ──
+    void OnEquip() { Debug.Log($"[ItemDetail] EQUIP {current?.data?.displayName} (액션 연결 TODO)"); Close(); }
+    void OnDrop()  { Debug.Log($"[ItemDetail] DROP {current?.data?.displayName} (액션 연결 TODO)");  Close(); }
+    void OnScrap() { Debug.Log($"[ItemDetail] SCRAP {current?.data?.displayName} (액션 연결 TODO)"); Close(); }
+
+    void WireEvents()
+    {
+        Wire(dimButton, Close);
+        Wire(equipBtn, OnEquip);
+        Wire(dropBtn,  OnDrop);
+        Wire(scrapBtn, OnScrap);
+    }
+
+    static void Wire(Button b, UnityEngine.Events.UnityAction h)
+    {
+        if (b == null) return;
+        b.onClick.RemoveAllListeners();
+        b.onClick.AddListener(h);
+    }
+
+    // ── UI 생성 (시안 레이아웃) ───────────────────────────────────────
 
     void GenerateUI()
     {
+        // 스테일 프리팹(구버전 베이크)에서 재생성 시 기존 캔버스 제거(중복 방지). 신규 베이크/폴백은 자식 없음.
+        var stale = transform.Find("ItemDetailUI_Canvas");
+        if (stale != null) Destroy(stale.gameObject);
+
         var canvasGO = new GameObject("ItemDetailUI_Canvas");
         canvasGO.transform.SetParent(transform, false);
         canvas = canvasGO.AddComponent<Canvas>();
@@ -150,91 +192,115 @@ public class ItemDetailUI : MonoBehaviour
         rootRT.anchorMin = Vector2.zero; rootRT.anchorMax = Vector2.one;
         rootRT.offsetMin = Vector2.zero; rootRT.offsetMax = Vector2.zero;
 
-        var dim = new GameObject("Dim", typeof(RectTransform), typeof(Image));
+        // 배경(클릭 시 닫기)
+        var dim = new GameObject("Dim", typeof(RectTransform), typeof(Image), typeof(Button));
         dim.transform.SetParent(panelRoot.transform, false);
         var dimRT = dim.GetComponent<RectTransform>();
         dimRT.anchorMin = Vector2.zero; dimRT.anchorMax = Vector2.one;
         dimRT.offsetMin = Vector2.zero; dimRT.offsetMax = Vector2.zero;
         dim.GetComponent<Image>().color = UITheme.Backdrop;
+        dimButton = dim.GetComponent<Button>();
+        dimButton.transition = Selectable.Transition.None;
 
+        // 카드 (item.png 큰 크림 종이)
         var card = new GameObject("Card", typeof(RectTransform), typeof(Image));
         card.transform.SetParent(panelRoot.transform, false);
         var cardRT = card.GetComponent<RectTransform>();
         cardRT.anchorMin = cardRT.anchorMax = cardRT.pivot = new Vector2(0.5f, 0.5f);
         cardRT.sizeDelta = new Vector2(CardW, CardH);
         cardRT.anchoredPosition = Vector2.zero;
-        card.GetComponent<Image>().color = UITheme.Panel;
-        UISkin.ItemPanel(card.GetComponent<Image>());   // 시안: item.png 큰 크림 종이(이미지 크기에 맞춘 9-slice)
+        var cardImg = card.GetComponent<Image>();
+        cardImg.color = new Color(0.78f, 0.72f, 0.58f, 1f);   // 폴백 종이색(스프라이트 없을 때)
+        UISkin.ItemPanel(cardImg);                            // 시안: item.png
 
-        // 이름 (상단)
-        nameText = MakeText(cardRT, "Name", 26, FontStyle.Bold, Color.white, TextAnchor.MiddleLeft);
+        // 제목 태그 (name.png 찢긴 종이) + 제목
+        var tag = new GameObject("TitleTag", typeof(RectTransform), typeof(Image));
+        tag.transform.SetParent(cardRT, false);
+        var tagRT = tag.GetComponent<RectTransform>();
+        tagRT.anchorMin = tagRT.anchorMax = tagRT.pivot = new Vector2(0, 1);
+        tagRT.anchoredPosition = new Vector2(12, 14);
+        tagRT.sizeDelta = new Vector2(238, 58);
+        var tagImg = tag.GetComponent<Image>(); tagImg.color = new Color(0.74f, 0.68f, 0.54f, 1f); UISkin.Tag(tagImg);
+        nameText = Txt(tag.transform, "Name", 24, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, 0, 0, 0, 0);
         var nRT = (RectTransform)nameText.transform;
-        nRT.anchorMin = new Vector2(0, 1); nRT.anchorMax = new Vector2(1, 1); nRT.pivot = new Vector2(0.5f, 1f);
-        nRT.offsetMin = new Vector2(24, -64); nRT.offsetMax = new Vector2(-24, -18);
+        nRT.anchorMin = Vector2.zero; nRT.anchorMax = Vector2.one;
+        nRT.offsetMin = new Vector2(26, 4); nRT.offsetMax = new Vector2(-14, -4);
 
-        // 아이콘 박스 (큰 사각)
+        // 아이콘 박스 (itembox.png)
         var iconBgGO = new GameObject("IconBg", typeof(RectTransform), typeof(Image));
         iconBgGO.transform.SetParent(cardRT, false);
         var ibRT = iconBgGO.GetComponent<RectTransform>();
-        ibRT.anchorMin = new Vector2(0.5f, 1f); ibRT.anchorMax = new Vector2(0.5f, 1f); ibRT.pivot = new Vector2(0.5f, 1f);
-        ibRT.sizeDelta = new Vector2(220, 220);
-        ibRT.anchoredPosition = new Vector2(0, -76);
+        ibRT.anchorMin = ibRT.anchorMax = ibRT.pivot = new Vector2(0, 1);
+        ibRT.anchoredPosition = new Vector2(30, -98);
+        ibRT.sizeDelta = new Vector2(176, 176);
         iconBg = iconBgGO.GetComponent<Image>();
-        iconBg.color = UITheme.Cell;
-        UISkin.IconBox(iconBg);   // 시안: itembox 프레임(Open에서 희귀도 색으로 tint)
+        iconBg.color = UITheme.Cell; UISkin.IconBox(iconBg);
 
         var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
         iconGO.transform.SetParent(iconBgGO.transform, false);
         var icRT = iconGO.GetComponent<RectTransform>();
         icRT.anchorMin = Vector2.zero; icRT.anchorMax = Vector2.one;
-        icRT.offsetMin = new Vector2(14, 14); icRT.offsetMax = new Vector2(-14, -14);
+        icRT.offsetMin = new Vector2(16, 16); icRT.offsetMax = new Vector2(-16, -16);
         iconImage = iconGO.GetComponent<Image>();
-        iconImage.preserveAspect = true;
-        iconImage.raycastTarget = false;
+        iconImage.preserveAspect = true; iconImage.raycastTarget = false;
 
-        iconFallback = MakeText(iconBgGO.transform, "IconFallback", 20, FontStyle.Bold, Color.white, TextAnchor.MiddleCenter);
+        iconFallback = Txt(iconBgGO.transform, "IconFallback", 18, FontStyle.Bold, new Color(0.85f,0.82f,0.74f), TextAnchor.MiddleCenter, 0,0,0,0);
         var ifRT = (RectTransform)iconFallback.transform;
         ifRT.anchorMin = Vector2.zero; ifRT.anchorMax = Vector2.one;
         ifRT.offsetMin = new Vector2(8, 8); ifRT.offsetMax = new Vector2(-8, -8);
 
-        // 설명 (아이콘 아래)
-        descText = MakeText(cardRT, "Desc", 16, FontStyle.Normal, UITheme.TextBright, TextAnchor.UpperLeft);
-        descText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        descText.lineSpacing = 1.1f;
-        var dRT = (RectTransform)descText.transform;
-        dRT.anchorMin = new Vector2(0, 1); dRT.anchorMax = new Vector2(1, 1); dRT.pivot = new Vector2(0.5f, 1f);
-        dRT.offsetMin = new Vector2(24, -432); dRT.offsetMax = new Vector2(-24, -306);
+        // 우측 필드: TYPE / WEIGHT / STACK (라벨 + 값 + 밑줄)
+        const float fx = 224f, fw = 208f;
+        Txt(cardRT, "TypeL", 16, FontStyle.Bold, Ink, TextAnchor.LowerLeft, fx, 122, fw, 24).text = "TYPE";
+        typeValue = Txt(cardRT, "TypeV", 16, FontStyle.Normal, InkSoft, TextAnchor.LowerRight, fx, 122, fw, 24);
+        Rule(cardRT, fx, 130, fw);
+        Txt(cardRT, "WeightL", 16, FontStyle.Bold, Ink, TextAnchor.LowerLeft, fx, 176, fw, 24).text = "WEIGHT";
+        weightValue = Txt(cardRT, "WeightV", 16, FontStyle.Normal, InkSoft, TextAnchor.LowerRight, fx, 176, fw, 24);
+        Rule(cardRT, fx, 184, fw);
+        Txt(cardRT, "StackL", 16, FontStyle.Bold, Ink, TextAnchor.LowerLeft, fx, 230, fw, 24).text = "STACK";
+        stackValue = Txt(cardRT, "StackV", 16, FontStyle.Normal, InkSoft, TextAnchor.LowerRight, fx, 230, fw, 24);
+        Rule(cardRT, fx, 238, fw);
 
-        // 스탯 (설명 아래, 상단 기준 고정 — 설명이 길어도 겹침 최소화)
-        statText = MakeText(cardRT, "Stats", 15, FontStyle.Normal, UITheme.TextMuted, TextAnchor.UpperLeft);
-        statText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        statText.lineSpacing = 1.15f;
-        var sRT = (RectTransform)statText.transform;
-        sRT.anchorMin = new Vector2(0, 1); sRT.anchorMax = new Vector2(1, 1); sRT.pivot = new Vector2(0.5f, 1f);
-        sRT.offsetMin = new Vector2(24, -588); sRT.offsetMax = new Vector2(-24, -442);
+        // 설명 (아이콘 아래 전폭)
+        const float px = 28f, pw = 404f;
+        descText = Txt(cardRT, "Desc", 15, FontStyle.Normal, Ink, TextAnchor.UpperLeft, px, 292, pw, 50);
+        descText.horizontalOverflow = HorizontalWrapMode.Wrap; descText.lineSpacing = 1.1f;
+        Rule(cardRT, px, 350, pw);
 
-        // 닫기 힌트
-        var hint = MakeText(cardRT, "Hint", 13, FontStyle.Italic, UITheme.TextDim, TextAnchor.LowerCenter);
-        hint.text = "[클릭] / [Esc] 닫기";
-        var hRT = (RectTransform)hint.transform;
-        hRT.anchorMin = new Vector2(0, 0); hRT.anchorMax = new Vector2(1, 0); hRT.pivot = new Vector2(0.5f, 0f);
-        hRT.offsetMin = new Vector2(12, 12); hRT.offsetMax = new Vector2(-12, 34);
+        // STAT 3행 (라벨 좌 / 값 우)
+        stat1Label = Txt(cardRT, "S1L", 15, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, px, 366, 180, 24);
+        stat1Value = Txt(cardRT, "S1V", 15, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 366, pw, 24);
+        stat2Label = Txt(cardRT, "S2L", 15, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, px, 396, 180, 24);
+        stat2Value = Txt(cardRT, "S2V", 15, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 396, pw, 24);
+        stat3Label = Txt(cardRT, "S3L", 15, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, px, 426, 180, 24);
+        stat3Value = Txt(cardRT, "S3V", 15, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 426, pw, 24);
+
+        // DURABILITY (라벨 + 값 + 바)
+        Txt(cardRT, "DurL", 15, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, px, 462, 200, 24).text = "DURABILITY";
+        durValue = Txt(cardRT, "DurV", 15, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 462, pw, 24);
+        durFill = MakeBar(cardRT, px, 492, pw, 10);
+        Rule(cardRT, px, 512, pw);
+
+        // SELL VALUE
+        Txt(cardRT, "SellL", 16, FontStyle.Bold, Ink, TextAnchor.MiddleLeft, px, 536, 220, 24).text = "SELL VALUE";
+        sellValue = Txt(cardRT, "SellV", 16, FontStyle.Normal, InkSoft, TextAnchor.MiddleRight, px, 536, pw, 24);
+
+        // EQUIP / DROP / SCRAP (btn.png, 어두운 글자)
+        equipBtn = ActionButton(cardRT, "EquipBtn", "EQUIP", 30, 20, 128, 48);
+        dropBtn  = ActionButton(cardRT, "DropBtn",  "DROP",  166, 20, 128, 48);
+        scrapBtn = ActionButton(cardRT, "ScrapBtn", "SCRAP", 302, 20, 128, 48);
 
         panelRoot.SetActive(false);
     }
 
-    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
+    /// <summary>프리팹 인스턴스화 시 모든 Text에 동적 OS 폰트 재바인딩.</summary>
     void ApplyFonts()
     {
         var f = koreanFont != null ? koreanFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        if (nameText)     nameText.font = f;
-        if (descText)     descText.font = f;
-        if (statText)     statText.font = f;
-        if (iconFallback) iconFallback.font = f;
+        foreach (var t in GetComponentsInChildren<Text>(true)) t.font = f;
     }
 
 #if UNITY_EDITOR
-    /// <summary>에디터 베이크 전용 — 현재 GenerateUI를 1회 실행해 프리팹화할 계층을 만든다.</summary>
     public void EditorBake()
     {
         if (IsGenerated) return;
@@ -243,24 +309,81 @@ public class ItemDetailUI : MonoBehaviour
     }
 #endif
 
-    Text MakeText(Transform parent, string name, int size, FontStyle style, Color color, TextAnchor anchor)
+    // ── 빌더 헬퍼 ───────────────────────────────────────────────────
+
+    /// <summary>cardRT 기준 top-left 좌표(x, yTop=위에서 아래로 +)에 Text 배치.</summary>
+    Text Txt(Transform parent, string name, int size, FontStyle style, Color color, TextAnchor anchor,
+             float x, float yTop, float w, float h)
     {
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var t = go.AddComponent<Text>();
         t.font = koreanFont != null ? koreanFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        t.fontSize = size;
-        t.fontStyle = style;
-        t.color = color;
-        t.alignment = anchor;
+        t.fontSize = size; t.fontStyle = style; t.color = color; t.alignment = anchor;
         t.supportRichText = true;
         t.horizontalOverflow = HorizontalWrapMode.Overflow;
         t.verticalOverflow = VerticalWrapMode.Overflow;
         t.raycastTarget = false;
+        var rt = (RectTransform)t.transform;
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 1);
+        rt.anchoredPosition = new Vector2(x, -yTop);
+        rt.sizeDelta = new Vector2(w, h);
         return t;
     }
 
-    static Color ScaleColor(Color c, float a) => new Color(c.r * 0.5f, c.g * 0.5f, c.b * 0.5f, a);
+    Image Rule(Transform parent, float x, float yTop, float w)
+    {
+        var go = new GameObject("Rule", typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 1);
+        rt.anchoredPosition = new Vector2(x, -yTop);
+        rt.sizeDelta = new Vector2(w, 2);
+        var img = go.GetComponent<Image>(); img.color = RuleCol; img.raycastTarget = false;
+        return img;
+    }
+
+    Image MakeBar(Transform parent, float x, float yTop, float w, float h)
+    {
+        var bg = new GameObject("DurBar", typeof(RectTransform), typeof(Image));
+        bg.transform.SetParent(parent, false);
+        var rt = bg.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 1);
+        rt.anchoredPosition = new Vector2(x, -yTop);
+        rt.sizeDelta = new Vector2(w, h);
+        var bgImg = bg.GetComponent<Image>(); bgImg.color = BarBg; bgImg.raycastTarget = false;
+
+        var fillGO = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+        fillGO.transform.SetParent(bg.transform, false);
+        var frt = fillGO.GetComponent<RectTransform>();
+        frt.anchorMin = Vector2.zero; frt.anchorMax = Vector2.one;
+        frt.offsetMin = Vector2.zero; frt.offsetMax = Vector2.zero;
+        var fill = fillGO.GetComponent<Image>();
+        fill.color = BarFill; fill.raycastTarget = false;
+        fill.type = Image.Type.Filled; fill.fillMethod = Image.FillMethod.Horizontal; fill.fillOrigin = 0; fill.fillAmount = 1f;
+        return fill;
+    }
+
+    Button ActionButton(Transform parent, string name, string label, float x, float yBottom, float w, float h)
+    {
+        var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 0);
+        rt.anchoredPosition = new Vector2(x, yBottom);
+        rt.sizeDelta = new Vector2(w, h);
+        var img = go.GetComponent<Image>();
+        img.color = new Color(0.72f, 0.66f, 0.52f, 1f); UISkin.ButtonPrimary(img);
+        var btn = go.GetComponent<Button>(); btn.targetGraphic = img;
+        var lbl = Txt(go.transform, "Label", 20, FontStyle.Bold, Ink, TextAnchor.MiddleCenter, 0, 0, 0, 0);
+        var lrt = (RectTransform)lbl.transform;
+        lrt.anchorMin = Vector2.zero; lrt.anchorMax = Vector2.one;
+        lrt.offsetMin = Vector2.zero; lrt.offsetMax = Vector2.zero;
+        lbl.text = label;
+        return btn;
+    }
+
+    static Color DarkTint(Color c) => new Color(c.r * 0.35f, c.g * 0.35f, c.b * 0.35f, 1f);
 
     static string GetCategoryName(ItemCategory cat)
     {
