@@ -96,10 +96,12 @@ public class ShopUI : MonoBehaviour
     GameObject      bagPopup;
     Text            bagPopupTitle;
     ItemInstance    bagPopupInst;
+    GameObject      bagSortBtn;
 
     // 우클릭 컨텍스트 메뉴 (열기/자세히/버리기)
     GameObject      shopMenu;
     RectTransform   shopMenuPanel;
+    Text            shopMenuName;
 
     // ── 상점 내 컨테이너 열기 (가방 안 아이템 판매) ───────────
     ItemInstance    shopOpenBag;        // null = 루트 창고, 아니면 그 가방 내부
@@ -108,6 +110,43 @@ public class ShopUI : MonoBehaviour
 
     /// <summary>현재 창고 패널이 보여주는 격자 (루트 창고 또는 열린 가방 내부).</summary>
     InventoryGrid CurrentStashGrid => shopOpenBag != null ? shopOpenBag.ContainerGrid : stashGrid;
+
+    // ── 재고 수량(품절) — 세션 런타임. 재입고 시스템은 추후. shopId → (item → 남은 수량) ──
+    static readonly Dictionary<string, Dictionary<ItemData, int>> stockBank
+        = new Dictionary<string, Dictionary<ItemData, int>>();
+
+    Dictionary<ItemData, int> EnsureStockBank()
+    {
+        if (shop == null) return null;
+        if (!stockBank.TryGetValue(shop.shopId, out var bank))
+        {
+            bank = new Dictionary<ItemData, int>();
+            if (shop.stock != null)
+                foreach (var it in shop.stock)
+                    if (it != null && !bank.ContainsKey(it)) bank[it] = Mathf.Max(0, shop.defaultStock);
+            stockBank[shop.shopId] = bank;
+        }
+        return bank;
+    }
+
+    /// <summary>현재 상점에서 item의 남은 재고. defaultStock ≤ 0 = 무제한(int.MaxValue).</summary>
+    int StockRemaining(ItemData item)
+    {
+        if (item == null || shop == null) return 0;
+        if (shop.defaultStock <= 0) return int.MaxValue;   // 무제한
+        var bank = EnsureStockBank();
+        return bank != null && bank.TryGetValue(item, out int n) ? n : shop.defaultStock;
+    }
+
+    /// <summary>구매분만큼 재고 차감(무제한이면 무시).</summary>
+    void DecrementStock(ItemData item, int qty)
+    {
+        if (item == null || shop == null || shop.defaultStock <= 0 || qty <= 0) return;
+        var bank = EnsureStockBank();
+        if (bank == null) return;
+        int cur = bank.TryGetValue(item, out int n) ? n : shop.defaultStock;
+        bank[item] = Mathf.Max(0, cur - qty);
+    }
 
     // ── 위탁(consignment) — 그레이박스 ────────────────────────
     // 위탁 = 직접 판매보다 높은 정산(1.5배)이지만 시간이 걸린다(그레이박스 30초).
@@ -179,7 +218,7 @@ public class ShopUI : MonoBehaviour
         shop = shopData;
         var stash = MainStash.Ensure();
         stashGrid = stash != null ? stash.GetGrid() : null;
-        if (sellTray == null) sellTray = new InventoryGrid(6, 4);
+        EnsureSellTray();
         shopOpenBag = null;
         panel.SetActive(true);
         ClearSelection();
@@ -248,6 +287,15 @@ public class ShopUI : MonoBehaviour
         if (price <= 0) return;
         qty = Mathf.Max(1, qty);
 
+        int remain = StockRemaining(item);
+        if (remain <= 0)
+        {
+            ToastManager.Show("품절된 물건", ToastManager.ToastType.Warning);
+            ShowTradeResult("품절되었습니다.", new Color(1f, 0.6f, 0.3f));
+            return;
+        }
+        qty = Mathf.Min(qty, remain);
+
         int bought = 0;
         for (int i = 0; i < qty; i++)
         {
@@ -268,10 +316,10 @@ public class ShopUI : MonoBehaviour
 
         if (bought > 0)
         {
+            DecrementStock(item, bought);
             ShowTradeResult($"{item.displayName} ×{bought} 구매 완료. (-◈{(price * bought):N0})", new Color(0.4f, 1f, 0.5f));
             buyQty = 1;
-            RefreshTrade();
-            RefreshBuyBox();
+            RefreshAll();   // 재고 수량 배지/품절 표시까지 갱신(구매=재고 변동, 갱신 정당)
         }
     }
 
@@ -519,7 +567,7 @@ public class ShopUI : MonoBehaviour
                 srt.anchorMin = new Vector2(0, 1); srt.anchorMax = new Vector2(0, 1); srt.pivot = new Vector2(0, 1);
                 srt.anchoredPosition = new Vector2(c * cellTotal, -r * cellTotal);
                 srt.sizeDelta = new Vector2(CELL_SIZE, CELL_SIZE);
-                slot.AddComponent<Image>().color = C_SLOT;
+                slot.AddComponent<Image>().color = UITheme.PanelAlt;   // 인벤과 동일
             }
 
         if (stockContent != null)
@@ -528,14 +576,18 @@ public class ShopUI : MonoBehaviour
         foreach (var e in entries)
         {
             var captured = e.data;
-            AddStockGridCell(stockItemRoot, e.p, e.data, e.price, e.locked, selectedStock == e.data, () => SelectStock(captured));
+            int remain = StockRemaining(e.data);
+            AddStockGridCell(stockItemRoot, e.p, e.data, e.price, e.locked, remain, selectedStock == e.data, () => SelectStock(captured));
         }
     }
 
     class StockEntry { public InventoryGrid.PlacedItem p; public ItemData data; public int price; public bool locked; }
 
-    void AddStockGridCell(RectTransform parent, InventoryGrid.PlacedItem placed, ItemData data, int price, bool locked, bool selected, System.Action onClick)
+    void AddStockGridCell(RectTransform parent, InventoryGrid.PlacedItem placed, ItemData data, int price, bool locked, int remaining, bool selected, System.Action onClick)
     {
+        if (parent == null || placed == null || data == null) return;   // 안전 가드(NRE 방지)
+        bool soldOut = remaining <= 0;
+
         int cellTotal = CELL_SIZE + CELL_GAP;
         int cw = placed.EffectiveWidth, ch = placed.EffectiveHeight;
         float pw = cw * CELL_SIZE + (cw - 1) * CELL_GAP;
@@ -547,36 +599,48 @@ public class ShopUI : MonoBehaviour
         crt.anchoredPosition = new Vector2(placed.gridX * cellTotal, -placed.gridY * cellTotal);
         crt.sizeDelta = new Vector2(pw, ph);
 
-        var rarCol = data.RarityColor;
+        var baseCol = UITheme.RarityBg(data.rarity);   // 인벤과 동일한 희귀도 배경
         var bg = cell.AddComponent<Image>();
         bg.color = selected
-            ? new Color(rarCol.r * 0.55f + 0.25f, rarCol.g * 0.55f + 0.30f, rarCol.b * 0.55f + 0.40f, 0.92f)
-            : new Color(rarCol.r * 0.40f + 0.06f, rarCol.g * 0.40f + 0.06f, rarCol.b * 0.40f + 0.06f, 0.92f);
+            ? new Color(baseCol.r + 0.18f, baseCol.g + 0.18f, baseCol.b + 0.18f, 0.98f)
+            : baseCol;
 
         if (data.icon != null)
         {
             var ic = MakeRect("Icon", cell.transform); var irt = ic.GetComponent<RectTransform>();
             irt.anchorMin = new Vector2(0, 0); irt.anchorMax = new Vector2(1, 1);
-            irt.offsetMin = new Vector2(2, 2); irt.offsetMax = new Vector2(-2, -2);
+            irt.offsetMin = new Vector2(4, 4); irt.offsetMax = new Vector2(-4, -4);
             var im = ic.AddComponent<Image>(); im.sprite = data.icon; im.preserveAspect = true;
         }
         else
         {
             var ng = MakeRect("Name", cell.transform); var nrt = ng.GetComponent<RectTransform>();
             nrt.anchorMin = new Vector2(0, 0); nrt.anchorMax = new Vector2(1, 1);
-            nrt.offsetMin = new Vector2(3, 2); nrt.offsetMax = new Vector2(-3, -2);
-            var nt = AddText(ng, data.displayName, 9, TextAnchor.MiddleCenter, Color.white);
-            nt.horizontalOverflow = HorizontalWrapMode.Wrap;
+            nrt.offsetMin = new Vector2(2, 2); nrt.offsetMax = new Vector2(-2, -2);
+            var nt = AddText(ng, data.displayName, 11, TextAnchor.MiddleCenter, Color.white);
+            if (nt != null) nt.horizontalOverflow = HorizontalWrapMode.Wrap;
         }
 
-        if (locked)
+        // 남은 수량 배지 (우하단) — 무제한/잠김/품절 아닐 때만
+        if (!locked && !soldOut && remaining < int.MaxValue)
         {
-            var lk = MakeRect("Lock", cell.transform); var lrt = lk.GetComponent<RectTransform>();
+            var qg = MakeRect("Qty", cell.transform); var qrt = qg.GetComponent<RectTransform>();
+            qrt.anchorMin = new Vector2(1, 0); qrt.anchorMax = new Vector2(1, 0); qrt.pivot = new Vector2(1, 0);
+            qrt.anchoredPosition = new Vector2(-2, 2); qrt.sizeDelta = new Vector2(34, 16);
+            var qt = AddText(qg, $"x{remaining}", 11, TextAnchor.LowerRight, new Color(0.95f, 0.92f, 0.72f));
+            if (qt != null) { qt.fontStyle = FontStyle.Bold; qg.AddComponent<Shadow>().effectColor = Color.black; }
+        }
+
+        // 오버레이(잠김 / 품절) — 클릭 불가
+        if (locked || soldOut)
+        {
+            var lk = MakeRect("Overlay", cell.transform); var lrt = lk.GetComponent<RectTransform>();
             lrt.anchorMin = Vector2.zero; lrt.anchorMax = Vector2.one; lrt.offsetMin = Vector2.zero; lrt.offsetMax = Vector2.zero;
-            lk.AddComponent<Image>().color = new Color(0, 0, 0, 0.55f);
-            var lt = AddText(lk, "잠김", 11, TextAnchor.MiddleCenter, new Color(0.7f, 0.6f, 0.4f));
-            lt.fontStyle = FontStyle.Bold;
-            return;   // 잠김 = 클릭 불가
+            lk.AddComponent<Image>().color = new Color(0, 0, 0, 0.6f);
+            var lt = AddText(lk, locked ? "잠김" : "품절", 11, TextAnchor.MiddleCenter,
+                locked ? new Color(0.7f, 0.6f, 0.4f) : new Color(0.92f, 0.5f, 0.42f));
+            if (lt != null) lt.fontStyle = FontStyle.Bold;
+            return;
         }
 
         var btn = cell.AddComponent<Button>();
@@ -699,9 +763,10 @@ public class ShopUI : MonoBehaviour
     // ── 중·상: 구매(BUY) 박스 — 좌 상인 재고 선택을 표시 ─────────
     void RefreshBuyBox()
     {
-        var  data  = selectedStock;
-        bool has   = data != null && shop != null && shop.BuyPrice(data) > 0;
-        int  price = has ? shop.BuyPrice(data) : 0;
+        var  data   = selectedStock;
+        int  remain = data != null ? StockRemaining(data) : 0;
+        bool has    = data != null && shop != null && shop.BuyPrice(data) > 0 && remain > 0;
+        int  price  = has ? shop.BuyPrice(data) : 0;
 
         if (buyEmpty != null) buyEmpty.SetActive(!has);
 
@@ -718,15 +783,17 @@ public class ShopUI : MonoBehaviour
         }
         if (buyInfo != null)
         {
+            string stockTxt = (has && remain < int.MaxValue) ? $" · 재고 {remain}" : "";
             buyInfo.text = has
-                ? $"{RarityLabel(data.rarity)} · {data.category} · {data.gridWidth}×{data.gridHeight} · {data.weight:F2}kg"
+                ? $"{RarityLabel(data.rarity)} · {data.category} · {data.gridWidth}×{data.gridHeight} · {data.weight:F2}kg{stockTxt}"
                 : "";
         }
         if (actionBuyBtn != null) actionBuyBtn.gameObject.SetActive(has);
         if (buyQtyRow != null) buyQtyRow.SetActive(has);
         if (has)
         {
-            buyQty = Mathf.Max(1, buyQty);
+            int qtyMax = remain == int.MaxValue ? 99 : remain;
+            buyQty = Mathf.Clamp(buyQty, 1, Mathf.Max(1, qtyMax));
             if (buyQtyText != null) buyQtyText.text = buyQty.ToString();
             if (actionBuyLabel != null)
                 actionBuyLabel.text = buyQty > 1 ? $"구매 ×{buyQty}  ◈{(price * buyQty):N0}" : $"구매  ◈{price:N0}";
@@ -806,7 +873,7 @@ public class ShopUI : MonoBehaviour
         // 트레이에 담기 (현재 격자에서 빼서 트레이로)
         var from = CurrentStashGrid;
         from.Remove(placed);
-        if (sellTray == null) sellTray = new InventoryGrid(6, 4);
+        EnsureSellTray();
         if (!sellTray.TryAutoPlace(item))
         {
             from.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);   // 복원
@@ -897,7 +964,7 @@ public class ShopUI : MonoBehaviour
             && !(it.IsContainer && it.ContainerGrid != null && it.ContainerGrid.GetAll().Count > 0);
         trayPanel.onDrop = (item, src, x, y) =>
         {
-            if (sellTray == null) sellTray = new InventoryGrid(6, 4);
+            EnsureSellTray();
             bool ok = sellTray.TryPlace(item, x, y, false) || sellTray.TryAutoPlace(item);
             if (ok) trayPanel.Refresh();
             return ok;
@@ -911,7 +978,7 @@ public class ShopUI : MonoBehaviour
             if (it.IsContainer && it.ContainerGrid != null && it.ContainerGrid.GetAll().Count > 0) { ToastManager.Show("가방은 비우고 판매", ToastManager.ToastType.Warning); return; }
             var from = CurrentStashGrid;
             from.Remove(placed);
-            if (sellTray == null) sellTray = new InventoryGrid(6, 4);
+            EnsureSellTray();
             if (!sellTray.TryAutoPlace(it)) from.TryPlace(it, placed.gridX, placed.gridY, placed.rotated);
             RefreshTrade();
         };
@@ -944,7 +1011,7 @@ public class ShopUI : MonoBehaviour
             if (it?.data == null || bagPanel.grid == null) return;
             if (shop == null || shop.SellPrice(it.data) <= 0) { ToastManager.Show("팔 수 없는 물건", ToastManager.ToastType.Warning); return; }
             bagPanel.grid.Remove(placed);
-            if (sellTray == null) sellTray = new InventoryGrid(6, 4);
+            EnsureSellTray();
             if (!sellTray.TryAutoPlace(it)) bagPanel.grid.TryPlace(it, placed.gridX, placed.gridY, placed.rotated);
             bagPanel.Refresh();
             RefreshTrade();
@@ -978,53 +1045,95 @@ public class ShopUI : MonoBehaviour
     }
 
     // ── 가방 이동 팝업 ────────────────────────────────────────
+    const float BAG_HEADER_H = 30f, BAG_PAD = 8f;
+
     void BuildBagPopup()
     {
         bagPopup = MakeRect("BagPopup", canvas.transform);
         var rt = bagPopup.GetComponent<RectTransform>();
         rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f); rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(360, 320); rt.anchoredPosition = new Vector2(140, 0);
-        bagPopup.AddComponent<Image>().color = C_PANEL;
+        rt.sizeDelta = new Vector2(220, 200); rt.anchoredPosition = new Vector2(140, 0);
+        bagPopup.AddComponent<Image>().color = UITheme.Panel;
 
+        // 헤더(드래그 핸들) — 인벤 컨테이너 팝업과 동일
         var header = MakeRect("Header", bagPopup.transform);
         SetAnchors(header, new Vector2(0, 1), new Vector2(1, 1));
-        var hRT = header.GetComponent<RectTransform>(); hRT.pivot = new Vector2(0.5f, 1); hRT.sizeDelta = new Vector2(0, 30);
-        header.AddComponent<Image>().color = C_HEADER;
+        var hRT = header.GetComponent<RectTransform>(); hRT.pivot = new Vector2(0.5f, 1); hRT.sizeDelta = new Vector2(0, BAG_HEADER_H);
+        header.AddComponent<Image>().color = UITheme.Header;
         header.AddComponent<DraggableWindow>().target = rt;
-        bagPopupTitle = AddText(header.GetComponent<RectTransform>(), "가방", 14, TextAnchor.MiddleLeft, Color.white);
+
+        bagPopupTitle = AddText(hRT, "가방", 13, TextAnchor.MiddleLeft, UITheme.Gold);
         bagPopupTitle.fontStyle = FontStyle.Bold;
-        var btRT = bagPopupTitle.GetComponent<RectTransform>(); btRT.offsetMin = new Vector2(10, 0); btRT.offsetMax = new Vector2(-40, 0);
+        var btRT = bagPopupTitle.GetComponent<RectTransform>(); btRT.offsetMin = new Vector2(10, 0); btRT.offsetMax = new Vector2(-92, 0);
 
-        var close = MakeRect("Close", header.transform);
-        var cRT = close.GetComponent<RectTransform>(); cRT.anchorMin = cRT.anchorMax = cRT.pivot = new Vector2(1, 0.5f);
-        cRT.anchoredPosition = new Vector2(-6, 0); cRT.sizeDelta = new Vector2(26, 24);
-        close.AddComponent<Image>().color = C_SELL_BTN;
-        close.AddComponent<Button>().onClick.AddListener(CloseBagPopup);
-        var cx = AddText(close.GetComponent<RectTransform>(), "✕", 14, TextAnchor.MiddleCenter, Color.white); cx.fontStyle = FontStyle.Bold;
+        bagSortBtn = MakeBagHeaderBtn(hRT, "정렬", -36, UITheme.Accent, SortBagPopup, 50);
+        MakeBagHeaderBtn(hRT, "✕", -6, UITheme.Negative, CloseBagPopup, 24);
 
-        var area = MakeRect("Area", bagPopup.transform);
-        SetAnchors(area, Vector2.zero, Vector2.one);
-        var aRT = area.GetComponent<RectTransform>(); aRT.offsetMin = new Vector2(8, 8); aRT.offsetMax = new Vector2(-8, -34);
-        area.AddComponent<Image>().color = new Color(0, 0, 0, 0.25f);
-        area.AddComponent<RectMask2D>();
-
-        var slot = MakeRect("SlotRoot", area.transform);
-        var slotRT = slot.GetComponent<RectTransform>(); slotRT.anchorMin = new Vector2(0, 1); slotRT.anchorMax = new Vector2(0, 1); slotRT.pivot = new Vector2(0, 1); slotRT.anchoredPosition = new Vector2(6, -6);
-        var item = MakeRect("ItemRoot", area.transform);
-        var itemRT = item.GetComponent<RectTransform>(); itemRT.anchorMin = new Vector2(0, 1); itemRT.anchorMax = new Vector2(0, 1); itemRT.pivot = new Vector2(0, 1); itemRT.anchoredPosition = new Vector2(6, -6);
+        // 격자(헤더 아래 직접 배치 — 마스크/내부패널 없음). GridHost가 Refresh의 content 리사이즈를 흡수.
+        var host = MakeRect("GridHost", bagPopup.transform);
+        var hostRT = host.GetComponent<RectTransform>();
+        hostRT.anchorMin = new Vector2(0, 1); hostRT.anchorMax = new Vector2(0, 1); hostRT.pivot = new Vector2(0, 1);
+        hostRT.anchoredPosition = new Vector2(BAG_PAD, -(BAG_HEADER_H + BAG_PAD));
+        var slot = MakeRect("SlotRoot", host.transform);
+        var slotRT = slot.GetComponent<RectTransform>(); slotRT.anchorMin = new Vector2(0, 1); slotRT.anchorMax = new Vector2(0, 1); slotRT.pivot = new Vector2(0, 1);
+        var item = MakeRect("ItemRoot", host.transform);
+        var itemRT = item.GetComponent<RectTransform>(); itemRT.anchorMin = new Vector2(0, 1); itemRT.anchorMax = new Vector2(0, 1); itemRT.pivot = new Vector2(0, 1);
 
         bagPanel = new GridPanel { slotRoot = slotRT, itemRoot = itemRT, hitRoot = slotRT };
         bagPopup.SetActive(false);
+    }
+
+    /// <summary>가방 팝업 헤더 버튼(정렬/닫기) — 인벤 MakePopupHeaderButton과 동일.</summary>
+    GameObject MakeBagHeaderBtn(RectTransform header, string label, float xFromRight, Color col,
+                                UnityEngine.Events.UnityAction onClick, float width)
+    {
+        var btn = MakeRect($"Btn_{label}", header);
+        btn.anchorMin = btn.anchorMax = btn.pivot = new Vector2(1, 1);
+        btn.anchoredPosition = new Vector2(xFromRight, -4);
+        btn.sizeDelta = new Vector2(width, 22);
+        btn.gameObject.AddComponent<Image>().color = col;
+        btn.gameObject.AddComponent<Button>().onClick.AddListener(onClick);
+        AddText(btn, label, 12, TextAnchor.MiddleCenter, UITheme.TextBright);
+        return btn.gameObject;
     }
 
     void OpenBagPopup(ItemInstance inst)
     {
         if (inst == null || !inst.IsContainer || bagPopup == null) return;
         bagPopupInst = inst;
-        bagPanel.grid = inst.ContainerGrid;
-        if (bagPopupTitle != null) bagPopupTitle.text = $"📦 {inst.data.displayName}";
+        var g = inst.ContainerGrid;
+        bagPanel.grid = g;
+
+        // 제목: 이름 + 허용 카테고리(인벤과 동일)
+        if (bagPopupTitle != null)
+        {
+            string title = inst.data.displayName;
+            if (inst.data.allowedCategories != null && inst.data.allowedCategories.Length > 0)
+                title += $"  <size=10><color=#88AACC>({inst.data.AllowedCategorySummary})</color></size>";
+            bagPopupTitle.text = title;
+        }
+        // 가방(장비형) = 정렬 제외, 보관함(equipSlot None) = 정렬 노출
+        if (bagSortBtn != null) bagSortBtn.SetActive(inst.data.equipSlot == EquipSlot.None);
+
+        // 팝업 크기를 격자에 맞춤(인벤과 동일)
+        if (g != null)
+        {
+            int cellTotal = GridPanel.CellTotal;
+            float gw = g.width * cellTotal - GridPanel.GAP;
+            float gh = g.height * cellTotal - GridPanel.GAP;
+            var rt = bagPopup.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(gw + BAG_PAD * 2, gh + BAG_HEADER_H + BAG_PAD * 2);
+        }
+
         bagPopup.SetActive(true);
         bagPopup.transform.SetAsLastSibling();
+        bagPanel.Refresh();
+    }
+
+    void SortBagPopup()
+    {
+        if (bagPopupInst == null || bagPopupInst.ContainerGrid == null) return;
+        bagPopupInst.ContainerGrid.AutoSort();
         bagPanel.Refresh();
     }
 
@@ -1047,8 +1156,18 @@ public class ShopUI : MonoBehaviour
         var panel = MakeRect("MenuPanel", shopMenu.transform);
         shopMenuPanel = panel.GetComponent<RectTransform>();
         shopMenuPanel.anchorMin = shopMenuPanel.anchorMax = new Vector2(0.5f, 0.5f); shopMenuPanel.pivot = new Vector2(0, 1);
-        shopMenuPanel.sizeDelta = new Vector2(140, 100);
-        panel.AddComponent<Image>().color = C_PANEL;
+        shopMenuPanel.sizeDelta = new Vector2(150, 100);
+        panel.AddComponent<Image>().color = UITheme.Panel;
+
+        // 아이템 이름 헤더(인벤 CtxName과 동일)
+        var nameRT = MakeRect("CtxName", shopMenuPanel);
+        nameRT.anchorMin = new Vector2(0, 1); nameRT.anchorMax = new Vector2(1, 1); nameRT.pivot = new Vector2(0, 1);
+        nameRT.anchoredPosition = new Vector2(8, -4); nameRT.sizeDelta = new Vector2(-16, 22);
+        shopMenuName = nameRT.gameObject.AddComponent<Text>();
+        shopMenuName.font = UITheme.Font; shopMenuName.fontSize = 13; shopMenuName.fontStyle = FontStyle.Bold;
+        shopMenuName.alignment = TextAnchor.MiddleLeft; shopMenuName.horizontalOverflow = HorizontalWrapMode.Overflow;
+        nameRT.gameObject.AddComponent<Shadow>().effectColor = Color.black;
+
         shopMenu.SetActive(false);
     }
 
@@ -1058,18 +1177,35 @@ public class ShopUI : MonoBehaviour
         EnsureShopMenu();
         if (dragMgr != null) dragMgr.suspended = true;
 
-        for (int i = shopMenuPanel.childCount - 1; i >= 0; i--) Destroy(shopMenuPanel.GetChild(i).gameObject);
-
         var it = placed.item;
-        float y = -6f; int n = 0;
-        if (it.IsContainer && it.ContainerGrid != null)
-        { AddMenuBtn(y, "열기", () => { HideShopMenu(); OpenBagPopup(it); }); y -= 30; n++; }
-        AddMenuBtn(y, "자세히", () => { HideShopMenu(); ItemDetailUI.Show(it); }); y -= 30; n++;
-        AddMenuBtn(y, "버리기", () => { HideShopMenu(); grid.Remove(placed); RefreshAll(); ToastManager.Show("버렸다", ToastManager.ToastType.Info); }); y -= 30; n++;
+        shopMenuName.text = it.DisplayName;
+        shopMenuName.color = it.data.RarityColor;
 
-        shopMenuPanel.sizeDelta = new Vector2(140, n * 30 + 12);
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas.GetComponent<RectTransform>(), GameInput.mousePosition, null, out var lp))
+        // 기존 버튼 제거(이름 헤더 제외)
+        for (int i = shopMenuPanel.childCount - 1; i >= 0; i--)
+        {
+            var ch = shopMenuPanel.GetChild(i);
+            if (ch.name != "CtxName") Destroy(ch.gameObject);
+        }
+
+        float y = -28f;
+        if (it.IsContainer && it.ContainerGrid != null)
+        { AddMenuBtn(y, "열기", UITheme.AccentBright, () => { HideShopMenu(); OpenBagPopup(it); }); y -= 26; }
+        AddMenuBtn(y, "자세히", UITheme.TextBright, () => { HideShopMenu(); ItemDetailUI.Show(it); }); y -= 26;
+        AddMenuBtn(y, "버리기", UITheme.Negative, () => { HideShopMenu(); grid.Remove(placed); RefreshAll(); ToastManager.Show("버렸다", ToastManager.ToastType.Info); }); y -= 26;
+
+        float totalH = Mathf.Abs(y) + 8f;
+        shopMenuPanel.sizeDelta = new Vector2(150, totalH);
+
+        var canvasRT = canvas.GetComponent<RectTransform>();
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, GameInput.mousePosition, null, out var lp))
             shopMenuPanel.anchoredPosition = lp;
+        // 화면 밖 보정(인벤과 동일)
+        Vector2 cs = canvasRT.rect.size; Vector2 pos = shopMenuPanel.anchoredPosition;
+        if (pos.x + 150 > cs.x / 2f) pos.x -= 150;
+        if (pos.y - totalH < -cs.y / 2f) pos.y += totalH;
+        shopMenuPanel.anchoredPosition = pos;
+
         shopMenu.SetActive(true);
         shopMenu.transform.SetAsLastSibling();
     }
@@ -1080,23 +1216,52 @@ public class ShopUI : MonoBehaviour
         if (dragMgr != null) dragMgr.suspended = false;
     }
 
-    void AddMenuBtn(float y, string label, UnityEngine.Events.UnityAction onClick)
+    void AddMenuBtn(float y, string label, Color textColor, UnityEngine.Events.UnityAction onClick)
     {
         var rt = MakeRect($"M_{label}", shopMenuPanel);   // RectTransform 반환 오버로드
-        rt.anchorMin = new Vector2(0, 1); rt.anchorMax = new Vector2(1, 1); rt.pivot = new Vector2(0.5f, 1);
-        rt.anchoredPosition = new Vector2(0, y); rt.sizeDelta = new Vector2(-8, 26);
-        var img = rt.gameObject.AddComponent<Image>(); img.color = C_CELL;
+        rt.anchorMin = new Vector2(0, 1); rt.anchorMax = new Vector2(1, 1); rt.pivot = new Vector2(0, 1);
+        rt.anchoredPosition = new Vector2(4, y); rt.sizeDelta = new Vector2(-8, 24);
+        var img = rt.gameObject.AddComponent<Image>(); img.color = UITheme.Cell;
         var btn = rt.gameObject.AddComponent<Button>(); btn.targetGraphic = img;
+        var cb = btn.colors; cb.highlightedColor = UITheme.CellHover; cb.pressedColor = UITheme.CellPressed; btn.colors = cb;
         btn.onClick.AddListener(onClick);
-        var t = AddText(rt, label, 13, TextAnchor.MiddleLeft, Color.white);
-        var trt = t.GetComponent<RectTransform>(); trt.offsetMin = new Vector2(10, 0);
+        var t = AddText(rt, label, 13, TextAnchor.MiddleLeft, textColor);
+        var trt = t.GetComponent<RectTransform>(); trt.offsetMin = new Vector2(8, 0); trt.offsetMax = new Vector2(-4, 0);
     }
 
     // ── 판매 트레이 렌더 ──────────────────────────────────────
+    /// <summary>트레이 박스(TrayArea) 크기에 맞춰 격자 칸수를 계산 — 영역을 꽉 채운다.</summary>
+    Vector2Int ComputeTraySize()
+    {
+        int cols = 6, rows = 4;
+        var host = sellTraySlotRoot != null ? sellTraySlotRoot.parent as RectTransform : null;   // TrayHost
+        var box  = host != null ? host.parent as RectTransform : null;                            // TrayArea
+        if (box != null && box.rect.width > 4f)
+        {
+            int ct = GridPanel.CellTotal;
+            cols = Mathf.Clamp(Mathf.FloorToInt((box.rect.width  - 12f) / ct), 4, 14);
+            rows = Mathf.Clamp(Mathf.FloorToInt((box.rect.height - 12f) / ct), 3, 12);
+        }
+        return new Vector2Int(cols, rows);
+    }
+
+    void EnsureSellTray()
+    {
+        if (sellTray != null) return;
+        var s = ComputeTraySize();
+        sellTray = new InventoryGrid(s.x, s.y);
+    }
+
     void RefreshSellTray()
     {
         if (trayPanel == null) return;
-        if (sellTray == null) sellTray = new InventoryGrid(6, 4);
+        EnsureSellTray();
+        // 비어 있으면 레이아웃 확정 크기로 맞춤(첫 프레임 rect=0 보정 + 영역 꽉 채우기)
+        if (sellTray.GetAll().Count == 0)
+        {
+            var s = ComputeTraySize();
+            if (s.x != sellTray.width || s.y != sellTray.height) sellTray = new InventoryGrid(s.x, s.y);
+        }
         trayPanel.grid = sellTray;
         trayPanel.Refresh();
         if (sellTrayBtnLabel != null) sellTrayBtnLabel.text = $"판매  ◈{SellTrayTotal():N0}";
@@ -1814,14 +1979,9 @@ public class ShopUI : MonoBehaviour
         var hRT = header.GetComponent<RectTransform>();
         hRT.pivot    = new Vector2(0.5f, 1);
         hRT.sizeDelta = new Vector2(0, 36);
-        header.AddComponent<Image>().color = C_HEADER;
-        var hText = AddText(header.GetComponent<RectTransform>(), "상인 재고", 15, TextAnchor.MiddleLeft, Color.white);
+        header.AddComponent<Image>().color = UITheme.Panel;   // 인벤처럼 스트립 없이 카드에 녹임
+        var hText = AddText(header.GetComponent<RectTransform>(), "상인 재고", 16, TextAnchor.MiddleCenter, UITheme.Gold);
         hText.fontStyle = FontStyle.Bold;
-        if (hText != null)
-        {
-            var hTextRT = hText.GetComponent<RectTransform>();
-            if (hTextRT != null) { hTextRT.offsetMin = new Vector2(12, 0); }
-        }
 
         // 스크롤
         BuildScrollArea(col.transform, out stockContent, 36);
@@ -1847,9 +2007,9 @@ public class ShopUI : MonoBehaviour
         stockItemRoot.anchorMin = new Vector2(0, 1); stockItemRoot.anchorMax = new Vector2(0, 1);
         stockItemRoot.pivot = new Vector2(0, 1); stockItemRoot.anchoredPosition = new Vector2(8, -8);
 
-        // 그리드선 느낌 위해 스크롤 배경을 가장 어둡게.
+        // 격자 배경 = 패널색(인벤과 동일) — 격자선이 과하게 진하지 않게.
         var stockAreaImg = stockContent.parent != null ? stockContent.parent.GetComponent<Image>() : null;
-        if (stockAreaImg != null) stockAreaImg.color = C_GRIDLINE;
+        if (stockAreaImg != null) stockAreaImg.color = UITheme.Panel;
     }
 
     // ── 중 컬럼: 구매 박스(상) / 거래 결과(중) / 판매 박스(하) ──
@@ -2032,17 +2192,21 @@ public class ShopUI : MonoBehaviour
         SetAnchors(area, Vector2.zero, Vector2.one);
         var areaRT = area.GetComponent<RectTransform>();
         areaRT.offsetMin = new Vector2(8, 52); areaRT.offsetMax = new Vector2(-8, -34);
-        area.AddComponent<Image>().color = new Color(0, 0, 0, 0.22f);
+        area.AddComponent<Image>().color = UITheme.Panel;   // 인벤처럼 격자가 패널 위에 바로
         area.AddComponent<RectMask2D>();
 
-        var sSlot = MakeRect("TraySlotRoot", area.transform);
+        // GridHost: GridPanel.Refresh의 content 리사이즈를 흡수(stretch된 area 변형 방지)
+        var trayHost = MakeRect("TrayHost", area.transform);
+        var thRT = trayHost.GetComponent<RectTransform>();
+        thRT.anchorMin = new Vector2(0, 1); thRT.anchorMax = new Vector2(0, 1); thRT.pivot = new Vector2(0, 1);
+        thRT.anchoredPosition = new Vector2(6, -6);
+
+        var sSlot = MakeRect("TraySlotRoot", trayHost.transform);
         sellTraySlotRoot = sSlot.GetComponent<RectTransform>();
         sellTraySlotRoot.anchorMin = new Vector2(0, 1); sellTraySlotRoot.anchorMax = new Vector2(0, 1); sellTraySlotRoot.pivot = new Vector2(0, 1);
-        sellTraySlotRoot.anchoredPosition = new Vector2(6, -6);
-        var sItem = MakeRect("TrayItemRoot", area.transform);
+        var sItem = MakeRect("TrayItemRoot", trayHost.transform);
         sellTrayItemRoot = sItem.GetComponent<RectTransform>();
         sellTrayItemRoot.anchorMin = new Vector2(0, 1); sellTrayItemRoot.anchorMax = new Vector2(0, 1); sellTrayItemRoot.pivot = new Vector2(0, 1);
-        sellTrayItemRoot.anchoredPosition = new Vector2(6, -6);
 
         // 되돌리기 (좌하단)
         var ret = MakeRect("ReturnBtn", box.transform);
@@ -2096,14 +2260,13 @@ public class ShopUI : MonoBehaviour
         var hRT = header.GetComponent<RectTransform>();
         hRT.pivot     = new Vector2(0.5f, 1);
         hRT.sizeDelta = new Vector2(0, 36);
-        header.AddComponent<Image>().color = C_HEADER;
-        // 헤더 텍스트 — 별도 GO로 만들어 offsetMin으로 좌 패딩 적용
+        header.AddComponent<Image>().color = UITheme.Panel;   // 인벤처럼 스트립 없이 카드에 녹임
         var hTextGO = MakeRect("HeaderText", header.transform);
         var hTextRT2 = hTextGO.GetComponent<RectTransform>();
         hTextRT2.anchorMin = Vector2.zero; hTextRT2.anchorMax = Vector2.one;
-        hTextRT2.offsetMin = new Vector2(12, 0); hTextRT2.offsetMax = Vector2.zero;
+        hTextRT2.offsetMin = new Vector2(12, 0); hTextRT2.offsetMax = new Vector2(-12, 0);
         var hText = hTextGO.AddComponent<Text>();
-        ConfigureText(hText, "창고", 15, TextAnchor.MiddleLeft, Color.white);
+        ConfigureText(hText, "창고", 16, TextAnchor.MiddleCenter, UITheme.Gold);
         hText.fontStyle = FontStyle.Bold;
         stashHeaderText = hText;
 
@@ -2127,7 +2290,7 @@ public class ShopUI : MonoBehaviour
         var sr = scrollArea.AddComponent<ScrollRect>();
         sr.horizontal = false;
         sr.movementType = ScrollRect.MovementType.Clamped;   // 바운스 없이 격자 안에서만 스크롤
-        scrollArea.AddComponent<Image>().color = new Color(0, 0, 0, 0.2f);
+        scrollArea.AddComponent<Image>().color = UITheme.Panel;   // 인벤처럼 격자가 패널 위에 바로
         var mask = scrollArea.AddComponent<Mask>();
         mask.showMaskGraphic = true;
 

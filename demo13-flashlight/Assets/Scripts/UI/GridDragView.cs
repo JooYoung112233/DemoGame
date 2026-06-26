@@ -46,7 +46,7 @@ public class GridPanel
         for (int y = 0; y < h; y++)
             for (int x = 0; x < w; x++)
             {
-                var s = NewImg(slotRoot, $"S_{x}_{y}", new Color(0.225f, 0.215f, 0.195f, 1f));
+                var s = NewImg(slotRoot, $"S_{x}_{y}", UITheme.PanelAlt);
                 Place(s.rectTransform, x * CellTotal, -y * CellTotal, CELL, CELL);
                 slots[x, y] = s;
             }
@@ -62,10 +62,8 @@ public class GridPanel
     void AddCell(InventoryGrid.PlacedItem p)
     {
         int cw = p.EffectiveWidth, ch = p.EffectiveHeight;
-        var rar = p.item.data.RarityColor;
         var cell = NewImg(itemRoot, $"I_{p.item.uid}",
-            cellColor != null ? cellColor(p.item, false)
-            : new Color(rar.r * 0.4f + 0.06f, rar.g * 0.4f + 0.06f, rar.b * 0.4f + 0.06f, 0.92f));
+            cellColor != null ? cellColor(p.item, false) : UITheme.RarityBg(p.item.data.rarity));
         Place(cell.rectTransform, p.gridX * CellTotal, -p.gridY * CellTotal,
               cw * CELL + (cw - 1) * GAP, ch * CELL + (ch - 1) * GAP);
 
@@ -74,21 +72,43 @@ public class GridPanel
             var ic = NewImg(cell.rectTransform, "Icon", Color.white);
             ic.sprite = p.item.data.icon; ic.preserveAspect = true;
             var irt = ic.rectTransform; irt.anchorMin = Vector2.zero; irt.anchorMax = Vector2.one;
-            irt.offsetMin = new Vector2(2, 2); irt.offsetMax = new Vector2(-2, -2);
+            irt.offsetMin = new Vector2(4, 4); irt.offsetMax = new Vector2(-4, -4);
         }
         else
         {
-            var t = NewText(cell.rectTransform, p.item.data.displayName, 9);
+            var t = NewText(cell.rectTransform, p.item.data.displayName, 11);
             var trt = t.rectTransform; trt.anchorMin = Vector2.zero; trt.anchorMax = Vector2.one;
             trt.offsetMin = new Vector2(2, 2); trt.offsetMax = new Vector2(-2, -2);
         }
-        if (p.item.stackCount > 1)
+
+        // 내구도 바(있으면) / 스택 수 — 인벤과 동일
+        if (p.item.HasDurability)
         {
-            var c = NewText(cell.rectTransform, $"x{p.item.stackCount}", 9);
+            float ratio = p.item.DurabilityRatio;
+            var durBg = NewImg(cell.rectTransform, "DurBg", new Color(0, 0, 0, 0.6f));
+            var dbrt = durBg.rectTransform;
+            dbrt.anchorMin = new Vector2(0, 0); dbrt.anchorMax = new Vector2(1, 0); dbrt.pivot = new Vector2(0, 0);
+            dbrt.anchoredPosition = new Vector2(2, 2); dbrt.sizeDelta = new Vector2(-4, 6);
+            var durFill = NewImg(durBg.rectTransform, "DurFill",
+                ratio > 0.5f ? new Color(0.3f, 0.9f, 0.4f) : ratio > 0.2f ? new Color(0.9f, 0.8f, 0.2f) : new Color(0.9f, 0.2f, 0.2f));
+            var dfrt = durFill.rectTransform;
+            dfrt.anchorMin = Vector2.zero; dfrt.anchorMax = new Vector2(ratio, 1f);
+            dfrt.offsetMin = Vector2.zero; dfrt.offsetMax = Vector2.zero;
+        }
+        else if (p.item.stackCount > 1)
+        {
+            var c = NewText(cell.rectTransform, $"x{p.item.stackCount}", 11);
             c.alignment = TextAnchor.LowerRight; c.fontStyle = FontStyle.Bold;
+            c.gameObject.AddComponent<Shadow>().effectColor = Color.black;
             var crt = c.rectTransform; crt.anchorMin = Vector2.zero; crt.anchorMax = Vector2.one;
             crt.offsetMin = new Vector2(0, 0); crt.offsetMax = new Vector2(-3, -2);
         }
+
+        // 점유 칸 색 → 그리드선(아이템 뒤로 비치게)
+        if (slots != null)
+            for (int gx = p.gridX; gx < p.gridX + cw && gx < grid.width; gx++)
+                for (int gy = p.gridY; gy < p.gridY + ch && gy < grid.height; gy++)
+                    if (gx >= 0 && gy >= 0 && slots[gx, gy] != null) slots[gx, gy].color = UITheme.Gridline;
     }
 
     /// <summary>마우스가 이 패널 격자의 어느 칸인지.</summary>
@@ -124,6 +144,7 @@ public class GridPanel
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         t.fontSize = size; t.color = Color.white; t.alignment = TextAnchor.MiddleCenter;
         t.horizontalOverflow = HorizontalWrapMode.Wrap; t.raycastTarget = false;
+        t.text = s;   // ← 누락돼 있던 줄: 이름/스택 수가 안 보이던 원인
         return t;
     }
 }
@@ -143,6 +164,7 @@ public class GridDragManager : MonoBehaviour
     bool dragRotated;
     Vector2 grabPixelOffset;
     GameObject ghost; RectTransform ghostRT;
+    GameObject highlightGO; RectTransform highlightRT; Image highlightImage;   // 배치 미리보기(초록/빨강)
 
     public bool IsDragging => active;
     public bool suspended;            // true면 픽업/우클릭 무시(컨텍스트 메뉴 등 떠 있을 때)
@@ -160,6 +182,7 @@ public class GridDragManager : MonoBehaviour
         if (active)
         {
             UpdateGhost();
+            UpdateHighlight();
             if (GameInput.GetMouseButtonDown(1)) { CancelDrag(); return; }
             if (GameInput.GetMouseButtonUp(0)) Drop();
             return;
@@ -297,5 +320,54 @@ public class GridDragManager : MonoBehaviour
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, GameInput.mousePosition, null, out var lp))
             ghostRT.anchoredPosition = lp - grabPixelOffset;
     }
-    void EndGhost() { if (ghost != null) { Destroy(ghost); ghost = null; ghostRT = null; } }
+    void EndGhost()
+    {
+        if (ghost != null) { Destroy(ghost); ghost = null; ghostRT = null; }
+        if (highlightGO != null) highlightGO.SetActive(false);
+    }
+
+    // ── 배치 미리보기 하이라이트(인벤과 동일: 배치가능=초록 / 불가=빨강) ──
+    void UpdateHighlight()
+    {
+        GridPanel hover = null; int ox = 0, oy = 0;
+        foreach (var p in panels)
+        {
+            if (!p.CellAtMouse(out int gx, out int gy)) continue;
+            hover = p; ox = OriginCell(p, true); oy = OriginCell(p, false); break;
+        }
+        if (hover == null || dragPlaced == null)
+        {
+            if (highlightGO != null) highlightGO.SetActive(false);
+            return;
+        }
+
+        var item = dragPlaced.item;
+        EnsureHighlight(hover);
+        highlightGO.SetActive(true);
+
+        int w = dragRotated ? item.data.gridHeight : item.data.gridWidth;
+        int h = dragRotated ? item.data.gridWidth : item.data.gridHeight;
+        bool canPlace = hover.Accepts(item) && hover.grid.CanPlace(item, ox, oy, dragRotated);
+
+        int ct = GridPanel.CellTotal;
+        highlightRT.anchoredPosition = new Vector2(ox * ct, -oy * ct);
+        highlightRT.sizeDelta = new Vector2(w * GridPanel.CELL + (w - 1) * GridPanel.GAP,
+                                            h * GridPanel.CELL + (h - 1) * GridPanel.GAP);
+        highlightImage.color = canPlace ? new Color(0.2f, 0.8f, 0.3f, 0.35f) : new Color(0.9f, 0.2f, 0.2f, 0.35f);
+    }
+
+    void EnsureHighlight(GridPanel p)
+    {
+        var root = p.itemRoot != null ? p.itemRoot : p.slotRoot;
+        if (highlightGO == null)
+        {
+            highlightGO = new GameObject("DragHighlight", typeof(RectTransform), typeof(Image));
+            highlightRT = highlightGO.GetComponent<RectTransform>();
+            highlightRT.anchorMin = new Vector2(0, 1); highlightRT.anchorMax = new Vector2(0, 1); highlightRT.pivot = new Vector2(0, 1);
+            highlightImage = highlightGO.GetComponent<Image>();
+            highlightImage.raycastTarget = false;
+        }
+        if (highlightGO.transform.parent != root) highlightGO.transform.SetParent(root, false);
+        highlightGO.transform.SetAsLastSibling();
+    }
 }

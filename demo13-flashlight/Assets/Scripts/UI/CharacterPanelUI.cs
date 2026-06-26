@@ -3507,18 +3507,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     #region 유틸
 
-    Color GetRarityBgColor(ItemRarity rarity)
-    {
-        switch (rarity)
-        {
-            case ItemRarity.Common:    return new Color(0.25f, 0.25f, 0.3f, 0.9f);
-            case ItemRarity.Uncommon:  return new Color(0.15f, 0.3f, 0.15f, 0.9f);
-            case ItemRarity.Rare:      return new Color(0.15f, 0.2f, 0.4f, 0.9f);
-            case ItemRarity.Epic:      return new Color(0.25f, 0.15f, 0.35f, 0.9f);
-            case ItemRarity.Legendary: return new Color(0.35f, 0.3f, 0.1f, 0.9f);
-            default: return new Color(0.2f, 0.2f, 0.25f, 0.9f);
-        }
-    }
+    Color GetRarityBgColor(ItemRarity rarity) => UITheme.RarityBg(rarity);
 
     Text MakeText(Transform parent, string name, string content,
         Vector2 pos, Vector2 size, int fontSize, Color color, TextAnchor align)

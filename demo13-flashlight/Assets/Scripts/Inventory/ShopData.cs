@@ -15,6 +15,9 @@ public class ShopData : ScriptableObject
     [Tooltip("이 상점에서 살 수 있는 아이템 목록")]
     public List<ItemData> stock = new List<ItemData>();
 
+    [Tooltip("아이템별 최대 재고(품절 cap). 0 이하면 무제한. 품절 후 재입고는 추후 시스템에서 채움.")]
+    public int defaultStock = 5;
+
     [Header("가격 배율")]
     [Tooltip("구매가 배율 (ItemData.buyPrice 기준)")]
     [Range(0.5f, 2f)] public float buyRate = 1f;

@@ -42,6 +42,20 @@ public static class UITheme
     public static readonly Color Positive     = new Color(0.50f,  0.90f,  0.60f,  1.00f);  // 성공 텍스트
     public static readonly Color Negative     = new Color(0.92f,  0.42f,  0.32f,  1.00f);  // 실패 텍스트
 
+    /// <summary>희귀도별 아이템 셀 배경색 — 인벤/상점/창고 격자 공통(SSOT).</summary>
+    public static Color RarityBg(ItemRarity rarity)
+    {
+        switch (rarity)
+        {
+            case ItemRarity.Common:    return new Color(0.25f, 0.25f, 0.30f, 0.9f);
+            case ItemRarity.Uncommon:  return new Color(0.15f, 0.30f, 0.15f, 0.9f);
+            case ItemRarity.Rare:      return new Color(0.15f, 0.20f, 0.40f, 0.9f);
+            case ItemRarity.Epic:      return new Color(0.25f, 0.15f, 0.35f, 0.9f);
+            case ItemRarity.Legendary: return new Color(0.35f, 0.30f, 0.10f, 0.9f);
+            default:                   return new Color(0.20f, 0.20f, 0.25f, 0.9f);
+        }
+    }
+
     static Font _font;
     public static Font Font =>
         _font != null ? _font : (_font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"));
