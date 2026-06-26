@@ -55,6 +55,8 @@ public class CharacterPanelUI : MonoBehaviour
     [SerializeField] RectTransform leftPanel;
     [SerializeField] Image leftPanelBg;
     [SerializeField] Text leftTitleText;
+    [SerializeField] Text leftWeightText;   // 우상단 무게 표시(밝은 텍스트, 어두운 storage 프레임 위)
+    [SerializeField] Button takeAllBtn;      // 푸터 좌: 좌측 격자 → 플레이어 인벤 일괄 이동
     [SerializeField] GameObject leftPanelRoot; // 숨김/표시용
     [SerializeField] GameObject leftPlaceholder; // 우측 열 빈칸 안내 (창고/상자 미오픈 시)
 
@@ -174,6 +176,7 @@ public class CharacterPanelUI : MonoBehaviour
     {
         if (closeBtn != null)    { closeBtn.onClick.RemoveAllListeners();    closeBtn.onClick.AddListener(Hide); }
         if (leftSortBtn != null) { leftSortBtn.onClick.RemoveAllListeners(); leftSortBtn.onClick.AddListener(SortLeftGrid); }
+        if (takeAllBtn != null)  { takeAllBtn.onClick.RemoveAllListeners();  takeAllBtn.onClick.AddListener(TakeAllFromLeft); }
 
         if (equipSlotKeys != null && equipSlotButtons != null)
         {
@@ -775,35 +778,89 @@ public class CharacterPanelUI : MonoBehaviour
         leftPanelBg.color = UITheme.Panel;
         UISkin.StoragePanel(leftPanelBg);   // 시안: storage.png 어두운 프레임(텍스트는 밝게 유지)
 
-        // 제목
-        leftTitleText = MakeText(leftPanel, "LeftTitle", "상자",
-            new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, UITheme.Gold, TextAnchor.MiddleCenter);
-        leftTitleText.fontStyle = FontStyle.Bold;
+        // ── 헤더: 제목 태그(name.png, 좌상단, 어두운 잉크) ──
+        var tagGO = new GameObject("LeftTitleTag", typeof(RectTransform));
+        tagGO.transform.SetParent(leftPanel, false);
+        var tagRT = tagGO.GetComponent<RectTransform>();
+        tagRT.anchorMin = tagRT.anchorMax = tagRT.pivot = new Vector2(0, 1);
+        tagRT.anchoredPosition = new Vector2(8, -6);
+        tagRT.sizeDelta = new Vector2(130, 30);
+        var tagImg = tagGO.AddComponent<Image>(); tagImg.color = Color.white;
+        UISkin.Tag(tagImg);   // 시안: name.png(밝은 찢긴 종이) — 글자 어둡게
+        // 태그 위 제목 텍스트(어두운 잉크, 굵게)
+        leftTitleText = MakeChildText(tagGO.transform, "창고", 15, new Color(0.15f, 0.12f, 0.09f));
 
-        // 수색 상태 텍스트
+        // ── 헤더: 무게(우상단, 밝은 텍스트 — 어두운 storage 프레임 위) ──
+        leftWeightText = MakeText(leftPanel, "LeftWeight", "0.0 KG",
+            new Vector2(PANEL_WIDTH - 124, -10), new Vector2(116, 24), 14, UITheme.TextBright, TextAnchor.MiddleRight);
+        leftWeightText.fontStyle = FontStyle.Bold;
+
+        // ── 카테고리 탭 (헤더 아래, 비주얼만 — 필터 로직 없음) ──
+        string[] tabLabels = { "ALL", "WEAPONS", "ARMOR", "CONSUMABLES", "MATERIALS", "ETC" };
+        var tabRowGO = new GameObject("LeftCategoryTabs", typeof(RectTransform));
+        tabRowGO.transform.SetParent(leftPanel, false);
+        var tabRowRT = tabRowGO.GetComponent<RectTransform>();
+        tabRowRT.anchorMin = new Vector2(0, 1); tabRowRT.anchorMax = new Vector2(1, 1);
+        tabRowRT.pivot = new Vector2(0.5f, 1);
+        // 가로 스트레치: 좌우 8px 여백 / 세로: 상단에서 -40 위치, 높이 26
+        tabRowRT.offsetMin = new Vector2(8, 0);   tabRowRT.offsetMax = new Vector2(-8, 0);
+        tabRowRT.anchoredPosition = new Vector2(0, -40);
+        tabRowRT.sizeDelta = new Vector2(tabRowRT.sizeDelta.x, 26);
+        var tabLayout = tabRowGO.AddComponent<HorizontalLayoutGroup>();
+        tabLayout.spacing = 3;
+        tabLayout.childForceExpandWidth = true;
+        tabLayout.childForceExpandHeight = true;
+        tabLayout.childControlWidth = true;
+        tabLayout.childControlHeight = true;
+        for (int t = 0; t < tabLabels.Length; t++)
+        {
+            var tabGO = new GameObject($"Tab_{tabLabels[t]}", typeof(RectTransform));
+            tabGO.transform.SetParent(tabRowGO.transform, false);
+            var tabImg = tabGO.AddComponent<Image>();
+            tabImg.color = UITheme.Accent;
+            if (t == 0) UISkin.TabOn(tabImg); else UISkin.TabOff(tabImg);   // ALL 활성, 나머지 비활성
+            MakeChildText(tabGO.transform, tabLabels[t], 9, UITheme.TextBright);
+        }
+
+        // 수색 상태 텍스트 (탭 아래)
         searchStatusText = MakeText(leftPanel, "SearchStatus", "",
-            new Vector2(10, -32), new Vector2(PANEL_WIDTH - 20, 18), 12, UITheme.AccentBright, TextAnchor.MiddleCenter);
+            new Vector2(10, -68), new Vector2(PANEL_WIDTH - 20, 18), 12, UITheme.AccentBright, TextAnchor.MiddleCenter);
 
-        // 정렬 버튼 (창고/상자 내 자동 정렬)
+        // ── 푸터(하단): TAKE ALL(좌) / SORT(우) ──
+        // TAKE ALL — 신규 버튼: 좌측 격자 전체를 플레이어 인벤으로 이동
+        var takeAllGO = new GameObject("TakeAllBtn", typeof(RectTransform));
+        takeAllGO.transform.SetParent(leftPanel, false);
+        var takeAllRT = takeAllGO.GetComponent<RectTransform>();
+        takeAllRT.anchorMin = takeAllRT.anchorMax = takeAllRT.pivot = new Vector2(0, 0);
+        takeAllRT.anchoredPosition = new Vector2(8, 8);
+        takeAllRT.sizeDelta = new Vector2(120, 32);
+        var takeAllImg = takeAllGO.AddComponent<Image>(); takeAllImg.color = UITheme.Accent;
+        UISkin.ButtonPrimary(takeAllImg);   // 시안: btn(밝은 종이) — 글자 어둡게
+        takeAllBtn = takeAllGO.AddComponent<Button>();
+        takeAllBtn.targetGraphic = takeAllImg;
+        takeAllBtn.onClick.AddListener(TakeAllFromLeft);
+        MakeChildText(takeAllGO.transform, "TAKE ALL", 12, new Color(0.15f, 0.12f, 0.09f));
+
+        // SORT — 기존 정렬 버튼: 우상단 → 푸터 우측으로 이동(핸들러/필드 유지)
         var sortGO = new GameObject("SortBtn", typeof(RectTransform));
         sortGO.transform.SetParent(leftPanel, false);
         var sortRT = sortGO.GetComponent<RectTransform>();
-        sortRT.anchorMin = sortRT.anchorMax = sortRT.pivot = new Vector2(1, 1);
-        sortRT.anchoredPosition = new Vector2(-8, -6);
-        sortRT.sizeDelta = new Vector2(56, 24);
+        sortRT.anchorMin = sortRT.anchorMax = sortRT.pivot = new Vector2(1, 0);
+        sortRT.anchoredPosition = new Vector2(-8, 8);
+        sortRT.sizeDelta = new Vector2(90, 32);
         var sortImg = sortGO.AddComponent<Image>(); sortImg.color = UITheme.Accent;
         UISkin.ButtonPrimary(sortImg);   // 시안: btn(밝은 종이) — 글자만 어둡게
         leftSortBtn = sortGO.AddComponent<Button>();
         leftSortBtn.targetGraphic = sortImg;
         leftSortBtn.onClick.AddListener(SortLeftGrid);
-        MakeChildText(sortGO.transform, "정렬", 13, new Color(0.15f, 0.12f, 0.09f));
+        MakeChildText(sortGO.transform, "SORT", 13, new Color(0.15f, 0.12f, 0.09f));
 
-        // ── 스크롤 뷰포트 (헤더 아래 영역) + 격자 content (창고 30~100줄 대응) ──
+        // ── 스크롤 뷰포트 (헤더+탭 아래 ~ 푸터 위) + 격자 content (창고 30~100줄 대응) ──
         var viewportGO = new GameObject("LeftViewport", typeof(RectTransform), typeof(RectMask2D), typeof(ScrollRect));
         viewportGO.transform.SetParent(leftPanel, false);
         var vpRT = viewportGO.GetComponent<RectTransform>();
         vpRT.anchorMin = new Vector2(0, 0); vpRT.anchorMax = new Vector2(1, 1);
-        vpRT.offsetMin = new Vector2(8, 8); vpRT.offsetMax = new Vector2(-22, -52);  // 우측 스크롤바 공간
+        vpRT.offsetMin = new Vector2(8, 48); vpRT.offsetMax = new Vector2(-22, -90);  // 우측 스크롤바 공간 / 헤더·푸터 여백
 
         // 격자 루트 = 스크롤 content. pivot(0,1) 유지 → ScreenToGridCell 히트테스트 정상.
         var gridGO = new GameObject("ContainerGrid");
@@ -827,7 +884,7 @@ public class CharacterPanelUI : MonoBehaviour
         sbGO.transform.SetParent(leftPanel, false);
         var sbRT = sbGO.GetComponent<RectTransform>();
         sbRT.anchorMin = new Vector2(1, 0); sbRT.anchorMax = new Vector2(1, 1);
-        sbRT.offsetMin = new Vector2(-16, 8); sbRT.offsetMax = new Vector2(-6, -52);
+        sbRT.offsetMin = new Vector2(-16, 48); sbRT.offsetMax = new Vector2(-6, -90);
         sbGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.3f);   // 트랙
 
         var slidingArea = new GameObject("SlidingArea", typeof(RectTransform));
@@ -1654,6 +1711,7 @@ public class CharacterPanelUI : MonoBehaviour
         leftPanelRoot.SetActive(true);
         leftTitleText.text = title;
         leftPanelSearchEnabled = withSearch;
+        RefreshLeftWeight();
         SyncLeftPlaceholder();   // 패널 열렸으니 안내 숨김
 
         RefreshLeftGrid(grid);
@@ -1699,6 +1757,47 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 아이템 표시 (인벤토리와 동일 패턴)
         RefreshContainerItems(grid, containerGridRoot);
+
+        RefreshLeftWeight();
+    }
+
+    /// <summary>헤더 우상단 무게 표시 갱신 ("78.3 KG"). 현재 열린 좌측 격자 기준.</summary>
+    void RefreshLeftWeight()
+    {
+        if (leftWeightText == null) return;
+        var grid = LeftGrid;
+        leftWeightText.text = grid != null ? $"{grid.TotalWeight:0.0} KG" : "";
+    }
+
+    /// <summary>푸터 TAKE ALL: 좌측 격자의 모든 아이템을 플레이어 인벤(가방→주머니→보안)으로 이동.
+    /// 인벤이 꽉 차서 들어가지 못한 것은 격자에 남긴다.</summary>
+    void TakeAllFromLeft()
+    {
+        var grid = LeftGrid;
+        if (grid == null || playerInventory == null) return;
+        // 수색 중인 루팅 상자는 공개 전 이동 금지(위치 흔들림/미공개 아이템 방지).
+        if (leftPanelSearchEnabled && isSearching) return;
+
+        int moved = 0, left = 0;
+        foreach (var placed in grid.GetAll())   // GetAll은 복사본 → 순회 중 Remove 안전
+        {
+            if (placed == null || placed.item == null) continue;
+            if (playerInventory.TryAutoPlaceAnywhere(placed.item))
+            {
+                grid.Remove(placed);
+                moved++;
+            }
+            else
+            {
+                left++;   // 인벤 공간 부족 → 남김
+            }
+        }
+
+        if (left > 0)
+            Debug.Log($"[CharacterPanelUI] TAKE ALL: {moved}개 이동, {left}개는 인벤토리 공간 부족으로 남김");
+
+        RefreshLeftGrid(grid);
+        RefreshInventoryGrid();
     }
 
     /// <summary>정렬 버튼 → 현재 열린 창고/상자 격자를 자동 정렬 후 다시 그림.</summary>
