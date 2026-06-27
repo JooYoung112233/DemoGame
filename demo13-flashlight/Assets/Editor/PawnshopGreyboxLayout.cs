@@ -49,7 +49,7 @@ public static class PawnshopGreyboxLayout
         n += Wall(map, "Pawn_Counter", 6f, 5.5f, 6f, 0.8f, "전당포 카운터");
 
         // 출구 트리거 — 밟으면 Safehouse/from_pawnshop으로 복귀(페이드+additive, 캐릭터 유지).
-        n += Entrance(map, "Exit_ToSafehouse", 6f, 1.6f, 2.5f, 1f, "Safehouse", "from_pawnshop", isExit: true);
+        n += Entrance(map, "Exit_ToSafehouse", 6f, 1.6f, 1.3f, 1f, "Safehouse", "from_pawnshop", isExit: true);
 
         // ── 저장(덮어쓰기) + 빌드세팅 등록 ──
         Selection.activeObject = null;

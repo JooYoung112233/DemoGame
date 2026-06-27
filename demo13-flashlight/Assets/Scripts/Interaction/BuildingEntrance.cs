@@ -25,8 +25,20 @@ public class BuildingEntrance : MonoBehaviour
     [Tooltip("표시/세이브용. true=건물에서 나가는 출구(BuildingExited), false=건물로 들어가는 입구(BuildingEntered)")]
     [SerializeField] bool isExit = false;
 
+    [Header("── 트리거 크기 ──")]
+    [Tooltip("진입 트리거(문) 크기. 너무 넓으면 문에 도달 전/건물 앞을 지나가다 발동한다. 기본 1.3 x 1.0(문 한 칸). Awake에서 BoxCollider2D에 강제 적용.")]
+    [SerializeField] Vector2 triggerSize = new Vector2(1.3f, 1.0f);
+
     // 중복 발동 방지(전환이 시작되면 다시 트리거에 닿아도 무시).
     bool _fired;
+
+    void Awake()
+    {
+        // 베이크된 씬의 넓은 트리거(예: 2.5x1)도 런타임에 문 크기로 강제 → 재베이크 없이 교정.
+        var box = GetComponent<BoxCollider2D>();
+        if (box != null && triggerSize.x > 0f && triggerSize.y > 0f)
+            box.size = triggerSize;
+    }
 
     public string TargetScene => targetScene;
     public string SpawnPointId => spawnPointId;

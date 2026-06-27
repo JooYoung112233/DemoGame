@@ -65,7 +65,7 @@ public static class SafehouseGreyboxLayout
         // ── 전당포(상단 중앙): 건물 외관(솔리드) + 입구 BuildingEntrance 트리거(→Pawnshop 실내 씬) ──
         //   강무진(주인장)은 전당포 실내 씬(Pawnshop.unity)으로 이동 — 여기선 외관+입구만.
         n += Wall(map, "Pawn_Building", 17f, 23.5f, 9f, 4.5f, "전당포");       // 외관(솔리드) X12.5~21.5 Y21.25~25.75
-        n += Entrance(map, "Pawn_Entrance", 17f, 20.7f, 2.5f, 1f, "Pawnshop", "default", isExit: false); // 입구(남측 앞)
+        n += Entrance(map, "Pawn_Entrance", 17f, 20.7f, 1.3f, 1f, "Pawnshop", "default", isExit: false); // 입구(남측 앞) — 문 한 칸
         n += Spawn(map, "from_pawnshop", 17f, 19.8f);                          // 전당포에서 복귀 → 건물 문 앞
 
         // ── 중앙 광장(허브, 열림) + 중앙 스폰 ──
@@ -82,7 +82,7 @@ public static class SafehouseGreyboxLayout
         //   은신처 퇴장은 HideoutController의 UI '나가기'/ESC가 담당(Safehouse/from_hideout 복귀, 캐릭터 없는 클릭화면이라 트리거 퇴장 불가).
         //   ★ 복귀 스폰(from_hideout)은 입구 트리거 밖에 둬야 함 — 안이면 복귀 즉시 재진입 루프. 입구(28,5,폭2.5→X26.75~29.25)보다 서쪽.
         n += Wall(map, "Container_Home", 32f, 5f, 8f, 5f, "집 (은신처)");      // 사는 컨테이너 외관(솔리드) — 내부는 Hideout 씬
-        n += Entrance(map, "Hideout_Entrance", 28f, 5f, 2.5f, 1f, "Hideout", "default", isExit: false); // 입구 트리거 → Hideout.unity (건물 바로 앞)
+        n += Entrance(map, "Hideout_Entrance", 28f, 5f, 1.3f, 1f, "Hideout", "default", isExit: false); // 입구 트리거 → Hideout.unity (문 한 칸)
         n += Spawn(map, "default",      25.5f, 5f);                          // ① 최초 시작 — 집 문 앞(입구 트리거 밖)
         // ③ 은신처(Hideout) UI '나가기'/ESC 복귀 → 입구 문 바로 앞.
         //   문은 서향(입구 트리거가 컨테이너 서벽 X=28 위에 걸침). 트리거(X26.75~29.25,Y4.5~5.5)·컨테이너벽(X28~36)

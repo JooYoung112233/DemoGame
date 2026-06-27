@@ -133,6 +133,11 @@
   - **집/은신처**: 안전가옥 `Hideout_Entrance`(트리거→`Hideout`/default)로 진입. **퇴장은 트리거 없음** — 하이드아웃은 캐릭터 없는 클릭 화면이라 걸어나갈 수 없음 → `HideoutController`의 UI '나가기'/ESC가 `Safehouse`/default로 복귀. (`Hideout.unity`의 옛 `Exit_ToSafehouse` 걷기 출구는 제거.)
 - **기존 `InteractableObject.ExitPoint`(E키 전환)는 그대로 둠** — 레이드 탈출 등 다른 용도. 건물 입구만 BuildingEntrance로 교체.
 
+**[2026-06-27] 트리거 크기 — 문 한 칸으로 축소**
+- 질문: 건물 입구 트리거가 너무 넓어 도달 전/건물 앞을 지나가다 자동 전환됨. 어떻게?
+- 결정: **트리거 크기 2.5×1 → 1.3×1.0(문 한 칸)**. `BuildingEntrance.triggerSize`(직렬화 필드, 기본 1.3×1.0)를 `Awake`에서 `BoxCollider2D.size`에 강제 적용 → **베이크된 기존 씬도 재베이크 없이 런타임 교정**. 그레이박스 빌더(Safehouse 전당포·은신처 입구 / Pawnshop 출구)의 `Entrance(...)` 기본값도 1.3×1.0으로 맞춤.
+- 근거: 넓은 폭(2.5)이 문이 아닌 건물 앞 통행 중에도 발동시킴. 문 폭(≈1칸)으로 좁혀 "걸어 들어가야 전환". 더 좁히려면 triggerSize 인스펙터에서 조정.
+
 ### 빈 슬롯 / 미해금 건물 비주얼
 
 - 초기: **셔터 내린 건물 정면** + 최소 잡동사니 (앞에 빈 상자/팔레트)
