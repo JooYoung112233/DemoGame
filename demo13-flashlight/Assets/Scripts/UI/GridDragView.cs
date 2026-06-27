@@ -47,6 +47,7 @@ public class GridPanel
             for (int x = 0; x < w; x++)
             {
                 var s = NewImg(slotRoot, $"S_{x}_{y}", UITheme.PanelAlt);
+                UISkin.Cell(s);   // 시안: storage_box 빈 격자 셀(폴백: 색 유지)
                 Place(s.rectTransform, x * CellTotal, -y * CellTotal, CELL, CELL);
                 slots[x, y] = s;
             }

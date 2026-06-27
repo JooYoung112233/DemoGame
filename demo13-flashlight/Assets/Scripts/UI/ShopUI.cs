@@ -218,6 +218,9 @@ public class ShopUI : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         WireEvents();   // onClick은 프리팹에 직렬화 안 됨 → 정적 골격 버튼 리스너를 양쪽 경로에서 재부착
+        // GridPanel(창고/트레이)은 plain 객체라 직렬화 안 됨 → 프리팹 인스턴스(GenerateUI 스킵)는 여기서 셋업.
+        // 코드생성 경로는 GenerateUI→SetupDragGrids가 처리(canvas==null이면 GenerateUI 전이므로 건너뜀).
+        if (IsGenerated) SetupDragGrids();
     }
 
     /// <summary>
