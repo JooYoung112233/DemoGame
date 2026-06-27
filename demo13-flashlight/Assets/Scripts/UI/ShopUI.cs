@@ -35,6 +35,7 @@ public class ShopUI : MonoBehaviour
     static readonly Color C_DIM         = new Color(0.115f, 0.110f, 0.098f, 1.00f);  // 슬롯/그리드 배경
     static readonly Color C_SLOT        = new Color(0.225f, 0.215f, 0.195f, 1.00f);  // 빈 슬롯(인벤처럼 또렷이)
     static readonly Color C_GRIDLINE    = new Color(0.05f,  0.048f, 0.042f, 1.00f);  // 셀 사이 그리드선
+    static readonly Color C_INK         = new Color(0.15f,  0.12f,  0.09f,  1.00f);  // btn(밝은 종이) 위 어두운 글자
 
     // ── 영속 스켈레톤(프리팹 베이크 시 직렬화 보존) / 런타임 상태 ─────
     // [SerializeField] = GenerateUI/Build* 로 만들어지는 영속 골격(프리팹에 굳음).
@@ -628,7 +629,9 @@ public class ShopUI : MonoBehaviour
                 srt.anchorMin = new Vector2(0, 1); srt.anchorMax = new Vector2(0, 1); srt.pivot = new Vector2(0, 1);
                 srt.anchoredPosition = new Vector2(c * cellTotal, -r * cellTotal);
                 srt.sizeDelta = new Vector2(CELL_SIZE, CELL_SIZE);
-                slot.AddComponent<Image>().color = UITheme.PanelAlt;   // 인벤과 동일
+                var slotImg = slot.AddComponent<Image>();
+                slotImg.color = UITheme.PanelAlt;   // 인벤과 동일
+                UISkin.Cell(slotImg);   // 시안: storage_box 빈 격자 셀(폴백: 색 유지)
             }
 
         if (stockContent != null)
@@ -1114,7 +1117,9 @@ public class ShopUI : MonoBehaviour
         var rt = bagPopup.GetComponent<RectTransform>();
         rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f); rt.pivot = new Vector2(0.5f, 0.5f);
         rt.sizeDelta = new Vector2(220, 200); rt.anchoredPosition = new Vector2(140, 0);
-        bagPopup.AddComponent<Image>().color = UITheme.Panel;
+        var bagPopupImg = bagPopup.AddComponent<Image>();
+        bagPopupImg.color = UITheme.Panel;
+        UISkin.Panel(bagPopupImg);   // 시안: box 프레임(어두운 팝업 — 위 텍스트는 밝게 유지)
 
         // 헤더(드래그 핸들) — 인벤 컨테이너 팝업과 동일
         var header = MakeRect("Header", bagPopup.transform);
@@ -1153,9 +1158,11 @@ public class ShopUI : MonoBehaviour
         btn.anchorMin = btn.anchorMax = btn.pivot = new Vector2(1, 1);
         btn.anchoredPosition = new Vector2(xFromRight, -4);
         btn.sizeDelta = new Vector2(width, 22);
-        btn.gameObject.AddComponent<Image>().color = col;
+        var btnImg = btn.gameObject.AddComponent<Image>();
+        btnImg.color = col;
+        UISkin.ButtonPrimary(btnImg);   // 시안: btn(밝은 종이) — 시맨틱 색은 tint로 유지, 글자 어둡게
         btn.gameObject.AddComponent<Button>().onClick.AddListener(onClick);
-        AddText(btn, label, 12, TextAnchor.MiddleCenter, UITheme.TextBright);
+        AddText(btn, label, 12, TextAnchor.MiddleCenter, C_INK);
         return btn.gameObject;
     }
 
@@ -1219,7 +1226,9 @@ public class ShopUI : MonoBehaviour
         shopMenuPanel = panel.GetComponent<RectTransform>();
         shopMenuPanel.anchorMin = shopMenuPanel.anchorMax = new Vector2(0.5f, 0.5f); shopMenuPanel.pivot = new Vector2(0, 1);
         shopMenuPanel.sizeDelta = new Vector2(150, 100);
-        panel.AddComponent<Image>().color = UITheme.Panel;
+        var menuPanelImg = panel.AddComponent<Image>();
+        menuPanelImg.color = UITheme.Panel;
+        UISkin.Panel(menuPanelImg);   // 시안: box 프레임(어두운 메뉴 — 위 텍스트는 밝게 유지)
 
         // 아이템 이름 헤더(인벤 CtxName과 동일)
         var nameRT = MakeRect("CtxName", shopMenuPanel);
@@ -1284,6 +1293,7 @@ public class ShopUI : MonoBehaviour
         rt.anchorMin = new Vector2(0, 1); rt.anchorMax = new Vector2(1, 1); rt.pivot = new Vector2(0, 1);
         rt.anchoredPosition = new Vector2(4, y); rt.sizeDelta = new Vector2(-8, 24);
         var img = rt.gameObject.AddComponent<Image>(); img.color = UITheme.Cell;
+        UISkin.Cell(img);   // 시안: storage_box 격자 셀(폴백: 색 유지)
         var btn = rt.gameObject.AddComponent<Button>(); btn.targetGraphic = img;
         var cb = btn.colors; cb.highlightedColor = UITheme.CellHover; cb.pressedColor = UITheme.CellPressed; btn.colors = cb;
         btn.onClick.AddListener(onClick);
@@ -1714,7 +1724,9 @@ public class ShopUI : MonoBehaviour
         // 전체화면 배경
         panel = MakeRect("Panel", canvasGO.transform);
         SetAnchors(panel, Vector2.zero, Vector2.one);
-        panel.AddComponent<Image>().color = C_BG;
+        var panelImg = panel.AddComponent<Image>();
+        panelImg.color = C_BG;
+        UISkin.StoragePanel(panelImg);   // 시안: storage.png 어두운 프레임(폴백: 색 유지) — 위 텍스트는 밝게
 
         // ── 최상단 바 (높이 72) ──────────────────────────────
         BuildTopBar(panel.transform);
@@ -1994,9 +2006,11 @@ public class ShopUI : MonoBehaviour
         closeRT.pivot            = new Vector2(1, 0.5f);
         closeRT.anchoredPosition = new Vector2(-14, 0);
         closeRT.sizeDelta        = new Vector2(44, 44);
-        closeGO.AddComponent<Image>().color = C_CLOSE;
+        var closeImg = closeGO.AddComponent<Image>();
+        closeImg.color = C_CLOSE;
+        UISkin.ButtonPrimary(closeImg);   // 시안: btn(밝은 종이) — 글자 어둡게
         var cb = closeGO.AddComponent<Button>();
-        cb.targetGraphic = closeGO.GetComponent<Image>();
+        cb.targetGraphic = closeImg;
         cb.onClick.AddListener(Close);
         closeBtn = cb;
         var closeTxtGO = new GameObject("Text");
@@ -2005,7 +2019,7 @@ public class ShopUI : MonoBehaviour
         closeTxtRT.anchorMin = Vector2.zero; closeTxtRT.anchorMax = Vector2.one;
         closeTxtRT.offsetMin = Vector2.zero; closeTxtRT.offsetMax = Vector2.zero;
         var closeTxt = closeTxtGO.AddComponent<Text>();
-        ConfigureText(closeTxt, "✕", 22, TextAnchor.MiddleCenter, Color.white);
+        ConfigureText(closeTxt, "✕", 22, TextAnchor.MiddleCenter, C_INK);
         closeTxt.fontStyle = FontStyle.Bold;
 
         // ── 탭: 거래 / 위탁 / 수배 (중앙) ────────────────────
@@ -2031,6 +2045,7 @@ public class ShopUI : MonoBehaviour
         tabRT.sizeDelta        = new Vector2(150, 40);
         bg = tab.AddComponent<Image>();
         bg.color = C_TAB_OFF;
+        UISkin.TabOff(bg);   // 시안: storage_btn 스프라이트(런타임 C_TAB_ON/OFF 색 스왑이 tint로 활성/비활성 구분). 폴백: 색 유지
         var btn = tab.AddComponent<Button>();
         btn.targetGraphic = bg;
         btn.onClick.AddListener(() => onClick?.Invoke());
@@ -2188,6 +2203,7 @@ public class ShopUI : MonoBehaviour
         btnRT.sizeDelta        = new Vector2(-24, 42);
         var btnImg = btnGO.AddComponent<Image>();
         btnImg.color = isBuy ? C_BUY_BTN : C_SELL_BTN;
+        UISkin.ButtonPrimary(btnImg);   // 시안: btn(밝은 종이) — 시맨틱 색은 Button tint로 유지, 글자 어둡게
         var btn = btnGO.AddComponent<Button>();
         btn.targetGraphic = btnImg;
         var cb = btn.colors;
@@ -2195,7 +2211,7 @@ public class ShopUI : MonoBehaviour
         cb.highlightedColor = isBuy ? new Color(0.28f, 0.46f, 0.22f) : new Color(0.60f, 0.38f, 0.14f);
         cb.pressedColor     = isBuy ? new Color(0.12f, 0.26f, 0.10f) : new Color(0.30f, 0.18f, 0.06f);
         btn.colors = cb;
-        var btnLabel = AddText(btnGO.GetComponent<RectTransform>(), isBuy ? "구매" : "판매", 16, TextAnchor.MiddleCenter, Color.white);
+        var btnLabel = AddText(btnGO.GetComponent<RectTransform>(), isBuy ? "구매" : "판매", 16, TextAnchor.MiddleCenter, C_INK);
         btnLabel.fontStyle = FontStyle.Bold;
 
         // 빈 힌트 (선택 전 안내)
@@ -2289,10 +2305,11 @@ public class ShopUI : MonoBehaviour
         retRT.anchorMin = new Vector2(0, 0); retRT.anchorMax = new Vector2(0, 0); retRT.pivot = new Vector2(0, 0);
         retRT.anchoredPosition = new Vector2(10, 10); retRT.sizeDelta = new Vector2(96, 34);
         var retImg = ret.AddComponent<Image>(); retImg.color = C_CELL;
+        UISkin.ButtonPrimary(retImg);   // 시안: btn(밝은 종이) — 글자 어둡게
         var retBtn = ret.AddComponent<Button>(); retBtn.targetGraphic = retImg;
         retBtn.onClick.AddListener(() => ReturnTrayAll(true));
         returnTrayBtn = retBtn;
-        var rtxt = AddText(ret.GetComponent<RectTransform>(), "되돌리기", 13, TextAnchor.MiddleCenter, Color.white);
+        var rtxt = AddText(ret.GetComponent<RectTransform>(), "되돌리기", 13, TextAnchor.MiddleCenter, C_INK);
         rtxt.fontStyle = FontStyle.Bold;
 
         // 판매 (우하단, 나머지 폭)
@@ -2301,9 +2318,10 @@ public class ShopUI : MonoBehaviour
         sgRT.anchorMin = new Vector2(0, 0); sgRT.anchorMax = new Vector2(1, 0); sgRT.pivot = new Vector2(0.5f, 0);
         sgRT.offsetMin = new Vector2(114, 10); sgRT.offsetMax = new Vector2(-10, 44);
         var sellImg = sellGO.AddComponent<Image>(); sellImg.color = C_SELL_BTN;
+        UISkin.ButtonPrimary(sellImg);   // 시안: btn(밝은 종이) — 시맨틱 색은 tint로 유지, 글자 어둡게
         sellTrayBtn = sellGO.AddComponent<Button>(); sellTrayBtn.targetGraphic = sellImg;
         sellTrayBtn.onClick.AddListener(SellTrayAll);
-        sellTrayBtnLabel = AddText(sellGO.GetComponent<RectTransform>(), "판매  ◈0", 15, TextAnchor.MiddleCenter, Color.white);
+        sellTrayBtnLabel = AddText(sellGO.GetComponent<RectTransform>(), "판매  ◈0", 15, TextAnchor.MiddleCenter, C_INK);
         sellTrayBtnLabel.fontStyle = FontStyle.Bold;
     }
 
@@ -2314,9 +2332,10 @@ public class ShopUI : MonoBehaviour
         rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = new Vector2(posX, 0); rt.sizeDelta = new Vector2(34, 28);
         var img = go.AddComponent<Image>(); img.color = C_CELL;
+        UISkin.ButtonPrimary(img);   // 시안: btn(밝은 종이) — 글자 어둡게
         var b = go.AddComponent<Button>(); b.targetGraphic = img;
         b.onClick.AddListener(() => onClick?.Invoke());
-        var t = AddText(go.GetComponent<RectTransform>(), label, 20, TextAnchor.MiddleCenter, Color.white);
+        var t = AddText(go.GetComponent<RectTransform>(), label, 20, TextAnchor.MiddleCenter, C_INK);
         t.fontStyle = FontStyle.Bold;
         return b;
     }
@@ -2352,9 +2371,11 @@ public class ShopUI : MonoBehaviour
         var bkRT = stashBackBtn.GetComponent<RectTransform>();
         bkRT.anchorMin = new Vector2(1, 0.5f); bkRT.anchorMax = new Vector2(1, 0.5f); bkRT.pivot = new Vector2(1, 0.5f);
         bkRT.anchoredPosition = new Vector2(-8, 0); bkRT.sizeDelta = new Vector2(72, 26);
-        stashBackBtn.AddComponent<Image>().color = C_CELL;
+        var bkImg = stashBackBtn.AddComponent<Image>();
+        bkImg.color = C_CELL;
+        UISkin.ButtonPrimary(bkImg);   // 시안: btn(밝은 종이) — 글자 어둡게
         stashBackBtn.AddComponent<Button>().onClick.AddListener(CloseBag);
-        var bkTxt = AddText(stashBackBtn.GetComponent<RectTransform>(), "← 뒤로", 12, TextAnchor.MiddleCenter, Color.white);
+        var bkTxt = AddText(stashBackBtn.GetComponent<RectTransform>(), "← 뒤로", 12, TextAnchor.MiddleCenter, C_INK);
         bkTxt.fontStyle = FontStyle.Bold;
         stashBackBtn.SetActive(false);
 
