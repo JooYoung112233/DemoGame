@@ -5,17 +5,23 @@ using System.Linq;
 
 /// <summary>
 /// 특성(퍽) 패널 — 카테고리별 특성 목록 + PP 잔량 + 클릭 해금(선행·비용·부정상한 준수).
-/// 'K' 토글, ESC 닫기. 데이터: TraitManager 코어. self-spawn DontDestroyOnLoad 싱글톤(QuestLogUI 패턴). 그레이박스.
+/// 'K' 토글, ESC 닫기. 데이터: TraitManager 코어.
+/// 프리팹 우선: Resources/UI/TraitPanelUI.prefab 베이크본(정적 스켈레톤)을 Instantiate → 캔버스만 토글,
+/// 동적 행은 Rebuild. 프리팹 없으면 코드 생성 폴백. 키 토글이라 부팅 시 영속 인스턴스 1개(캔버스 숨김)로 K 폴링.
 /// </summary>
 public class TraitPanelUI : MonoBehaviour
 {
     static TraitPanelUI instance;
-    static GameObject uiRoot;
     static bool isShowing;
     public static bool IsShowing => isShowing;
 
-    RectTransform listContent;
-    Text ppText;
+    [SerializeField] Canvas canvas;             // 베이크된 스켈레톤 루트(자식 캔버스). null=코드생성 폴백 필요.
+    [SerializeField] RectTransform listContent; // 동적 행 컨테이너
+    [SerializeField] Text ppText;               // PP 잔량 표시
+    [SerializeField] Button debugPpBtn;         // +10 PP (디버그)
+    [SerializeField] Button closeBtn;           // 닫기 ✕
+
+    bool IsGenerated => canvas != null;
 
     static Font _kr;
     static Font KR
@@ -33,35 +39,54 @@ public class TraitPanelUI : MonoBehaviour
     {
         if (instance != null) return;
         if (FindFirstObjectByType<TraitPanelUI>(FindObjectsInactive.Include) != null) return;
-        var go = new GameObject("TraitPanelUI");
+        EnsureInstance();   // 프리팹 우선(스켈레톤 보유), 없으면 bare. K 폴링용 영속 인스턴스.
+    }
+
+    static void EnsureInstance()
+    {
+        if (instance != null) return;
+        // 프리팹 우선 — Instantiate가 Awake로 instance를 세팅. 없으면 코드 생성 폴백.
+        var prefab = Resources.Load<GameObject>("UI/TraitPanelUI");
+        GameObject go = prefab != null ? Instantiate(prefab) : new GameObject("TraitPanelUI");
+        go.name = "TraitPanelUI";
+        if (prefab == null) go.AddComponent<TraitPanelUI>();
         DontDestroyOnLoad(go);
-        instance = go.AddComponent<TraitPanelUI>();
     }
 
     void Awake()
     {
         if (instance != null && instance != this) { Destroy(gameObject); return; }
         instance = this;
+        if (IsGenerated)   // 프리팹 인스턴스: 동적 폰트·onClick 재바인딩(직렬화 안 됨) + 부팅 시 숨김
+        {
+            ApplyFonts();
+            WireEvents();
+            SetVisible(false);
+        }
     }
 
     public static void Show()
     {
         if (isShowing) { Hide(); return; }
-        if (instance == null)
-        {
-            var go = new GameObject("TraitPanelUI");
-            DontDestroyOnLoad(go);
-            instance = go.AddComponent<TraitPanelUI>();
-        }
-        instance.BuildUI();
+        EnsureInstance();
+        instance.Open();
+    }
+
+    void Open()
+    {
+        if (!IsGenerated) BuildSkeleton();   // 폴백: 코드로 스켈레톤 생성(+ 참조 할당)
+        SetVisible(true);
+        Rebuild();
         isShowing = true;
     }
 
     public static void Hide()
     {
         isShowing = false;
-        if (uiRoot != null) { Destroy(uiRoot); uiRoot = null; }
+        if (instance != null) instance.SetVisible(false);
     }
+
+    void SetVisible(bool v) { if (canvas != null) canvas.gameObject.SetActive(v); }
 
     void Update()
     {
@@ -75,12 +100,13 @@ public class TraitPanelUI : MonoBehaviour
     }
 
     // ─────────────────────────────────────────────
-    //  UI 빌드
+    //  스켈레톤 빌드 (정적 프레임 — 동적 행은 Rebuild)
     // ─────────────────────────────────────────────
-    void BuildUI()
+    void BuildSkeleton()
     {
-        uiRoot = new GameObject("TraitPanelCanvas");
-        var canvas = uiRoot.AddComponent<Canvas>();
+        var uiRoot = new GameObject("TraitPanelCanvas");
+        uiRoot.transform.SetParent(transform, false);   // 컴포넌트 GO 자식 → 프리팹에 베이크됨
+        canvas = uiRoot.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 920;
         var scaler = uiRoot.AddComponent<CanvasScaler>();
@@ -108,16 +134,11 @@ public class TraitPanelUI : MonoBehaviour
             new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(220, 32));
         ppText.fontStyle = FontStyle.Bold;
 
-        // 디버그 +10 PP
-        MakeButton(pRT, "+10 PP (디버그)", UITheme.Cell, new Vector2(1, 1), new Vector2(1, 1),
-            new Vector2(-120, -16), new Vector2(130, 30), () =>
-            {
-                if (TraitManager.Instance != null) { TraitManager.Instance.GrantPP(10); Rebuild(); }
-            });
-
-        // 닫기 X
-        MakeButton(pRT, "✕", UITheme.Negative, new Vector2(1, 1), new Vector2(1, 1),
-            new Vector2(-44, -16), new Vector2(30, 30), Hide);
+        // 디버그 +10 PP / 닫기 X (onClick은 WireEvents에서 — 프리팹 직렬화 안 됨)
+        debugPpBtn = MakeButton(pRT, "+10 PP (디버그)", UITheme.Cell, new Vector2(1, 1), new Vector2(1, 1),
+            new Vector2(-120, -16), new Vector2(130, 30));
+        closeBtn = MakeButton(pRT, "✕", UITheme.Negative, new Vector2(1, 1), new Vector2(1, 1),
+            new Vector2(-44, -16), new Vector2(30, 30));
 
         // 안내
         MakeText(pRT, "행을 클릭해 PP로 해금 · 부정 특성(낙인)은 PP 환급 · 부정 최대 3개 · K/ESC 닫기",
@@ -127,8 +148,43 @@ public class TraitPanelUI : MonoBehaviour
         // 스크롤 리스트
         BuildScroll(pRT);
 
-        Rebuild();
+        WireEvents();
     }
+
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text들에 재바인딩.</summary>
+    void ApplyFonts()
+    {
+        if (canvas == null) return;
+        var f = KR;
+        foreach (var t in canvas.GetComponentsInChildren<Text>(true)) t.font = f;
+    }
+
+    /// <summary>정적 버튼 onClick 재부착(프리팹 베이크는 onClick 직렬화 안 됨). 멱등.</summary>
+    void WireEvents()
+    {
+        if (debugPpBtn != null)
+        {
+            debugPpBtn.onClick.RemoveAllListeners();
+            debugPpBtn.onClick.AddListener(() =>
+            {
+                if (TraitManager.Instance != null) { TraitManager.Instance.GrantPP(10); Rebuild(); }
+            });
+        }
+        if (closeBtn != null)
+        {
+            closeBtn.onClick.RemoveAllListeners();
+            closeBtn.onClick.AddListener(Hide);
+        }
+    }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 베이크 전용 — 정적 스켈레톤만 1회 생성해 프리팹화. 동적 행은 런타임 Rebuild.</summary>
+    public void EditorBake()
+    {
+        if (IsGenerated) return;
+        BuildSkeleton();
+    }
+#endif
 
     void BuildScroll(RectTransform parent)
     {
@@ -174,13 +230,13 @@ public class TraitPanelUI : MonoBehaviour
         var tm = TraitManager.Instance;
         if (tm == null)
         {
-            ppText.text = "PP -";
+            if (ppText != null) ppText.text = "PP -";
             AddRowLabel("TraitManager 없음 (런타임 미부팅)");
             return;
         }
         if (tm.AllTraits.Count == 0) tm.EnsureLoaded();
 
-        ppText.text = $"PP {tm.AvailablePP}   ·   부정 {tm.NegativeTraitCount}/3";
+        if (ppText != null) ppText.text = $"PP {tm.AvailablePP}   ·   부정 {tm.NegativeTraitCount}/3";
 
         foreach (var cat in CatOrder)
         {
@@ -317,8 +373,8 @@ public class TraitPanelUI : MonoBehaviour
         return t;
     }
 
-    void MakeButton(RectTransform parent, string label, Color col, Vector2 aMin, Vector2 aMax,
-                    Vector2 anchoredPos, Vector2 size, UnityEngine.Events.UnityAction onClick)
+    Button MakeButton(RectTransform parent, string label, Color col, Vector2 aMin, Vector2 aMax,
+                      Vector2 anchoredPos, Vector2 size)
     {
         var img = NewImage(parent, $"Btn_{label}", col);
         var rt = img.rectTransform;
@@ -327,7 +383,7 @@ public class TraitPanelUI : MonoBehaviour
         var btn = img.gameObject.AddComponent<Button>();
         btn.targetGraphic = img;
         var colors = btn.colors; colors.highlightedColor = UITheme.CellHover; colors.pressedColor = UITheme.CellPressed; btn.colors = colors;
-        btn.onClick.AddListener(onClick);
         MakeText(rt, label, 13, UITheme.TextBright, TextAnchor.MiddleCenter, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+        return btn;
     }
 }

@@ -163,7 +163,8 @@
 ## 4b. 구현 메모
 - 데이터: `TraitData`(ScriptableObject) — id·이름·설명·카테고리·티어·선행조건·PP비용(또는 환급)·효과(`effects` = §4 어휘). `StatDB`/PlayerStatData 적용은 말단 배선 TODO.
 - **(2026-06-19) TraitData SO·생성기 구현됨**: 클래스 `Assets/Scripts/Data/TraitData.cs`(enum `TraitCategory`/`TraitTier`, `effectSummary` + `List<TraitEffect>`), CSV `tools/traits.csv`(§3 전 41개 퍽 + `effects` 컬럼), 생성기 `tools/GenerateTraits.ps1` → `Assets/Resources/Data/Traits/*.asset` 41개.
-- **(2026-06-19) TraitManager 런타임 코어 구현됨**: `Assets/Scripts/Data/TraitManager.cs`(싱글톤+DontDestroyOnLoad, NPCRelationshipManager 패턴). 로드/해금상태/PP/부정상한 추적 + 쿼리 API(`GetModifier`/`GetAdditive`/`HasFlag`) + 세이브 구조체(`TraitSaveData`). **StatDB·전투·인벤·SaveManager 등 말단 read-site 미배선(TODO)** — 쿼리 API만 제공.
+- **(2026-06-19) TraitManager 런타임 코어 구현됨**: `Assets/Scripts/Data/TraitManager.cs`(싱글톤+DontDestroyOnLoad, NPCRelationshipManager 패턴). 로드/해금상태/PP/부정상한 추적 + 쿼리 API(`GetModifier`/`GetAdditive`/`HasFlag`, 정적 `Mod`/`AddVal`/`Flag`) + 세이브 구조체(`TraitSaveData`). 세이브 배선 완료(`GameSaveData.traits`).
+- **(2026-06-29) 말단 배선 1차 = 핵심 캐릭터 스탯 8개 키**: 스태미너(max/regen)·회피(iframe/cost)·무게·허기수분·받는피해(저체력) — `TopDownPlayer`/`PlayerInventory`/`SurvivalStats`/`Health`. **나머지 키(전투 finesse·경제/회수·잠행·현상계)는 미배선** — 결정 로그 2026-06-29 참조. 현상계는 대상 시스템 다수 미구현.
 - UI: 캐릭터 패널("01 캐릭터 상태", [→ inventory.md])에 **특성 탭**(트리 뷰 + PP 잔량). 양피지 6패널 톤 통일.
 - 효과 = 기존 스탯/시스템 훅 재사용(전투·의료·인벤·현상·시계). 새 수치는 [balance-tuner].
 - **미정(TBD)**: PP 곡선 세부·각 퍽 정밀 수치·리스펙 방식·트리 시각·아이콘.
@@ -171,6 +172,17 @@
 ---
 
 ## 기획 결정 로그
+
+### 2026-06-29 — 특성 효과 말단 배선 1차 (핵심 캐릭터 스탯)
+- **무엇**: 해금만 되고 효과 미적용이던 특성을 **실제 스탯 read-site에 배선** 시작. `TraitManager`에 정적 null-safe 접근자 `Mod(key)`/`AddVal(key)`/`Flag(key)` 추가(매니저 없으면 1/0/false) → 호출부는 `final = base * TraitManager.Mod(key)` 한 줄.
+- **배선된 8개 키(배치 1)**:
+  - `TopDownPlayer` 게터: `stamina_max`·`stamina_regen`(MaxStam/StamRegen), `dodge_iframe`(DodgeInvDur), `dodge_stamina_cost`(DodgeCost).
+  - `PlayerInventory.MaxWeight`: `weight_max`(노새). 과적 판정도 `MaxWeight` 기준으로 정합.
+  - `SurvivalStats` 소모율: `hunger_thirst_rate`(허약한 위장 — 수분·포만 둘 다).
+  - `Health.TakeDamage`: `damage_taken`(유리 어깨) + `low_hp_damage_taken`(불굴, 체력 ≤30%일 때). **플레이어 한정** — 적 공용 Health라 `TopDownPlayer` 캐시(`_tp`)로 게이팅. 저체력 임계 `0.3`은 placeholder(→ GameTuning 이관 가능).
+- **남은 배치(TODO)**: ①전투 finesse(`execute_damage`·`charge_first_hit_damage`·`groggy_buildup`·`weapon_durability_cost`·`repair_efficiency`·`fracture_chance`·`bleed_duration`·`pain_penalty`·`spoiled_food_immune`·`sleep_recovery`) ②경제/회수(`sell_price`·`buy_price`·`info_price`·`search_speed`·`keep_slot`·`death_drop_amount`·`rare_container_highlight`·`npc_affinity`) ③잠행(`detect_radius`·`move_noise`·`crouch_vanish`·`minimap_reveal`·`extract_channel_speed`) ④현상계(`vision_anomaly`·`erosion_buildup`·`rudi_ping`·`rewind_loss`·`memory_clue_clarity`·`deep_zone_immune`·`timer_accuracy` 등 — **대상 시스템 다수 미구현**, 시스템 생길 때 동반 배선).
+- **별개 TODO**: PP 획득 루트(레이드/평판 → `GrantPP`) 연결(현재 디버그 +10PP만).
+- **검증**: 정적 컴파일 감사 통과(브레이스·호출 정합). 효과 체감은 Unity 플레이 검증 필요.
 
 ### 2026-06-24 — 특성 탭 UI 구현 (`TraitPanelUI`)
 - **결정**: 캐릭터 특성을 **독립 패널(K 토글)**로 우선 구현(캐릭터 패널 탭 통합은 추후 — 패널 비대화 방지). 카테고리×티어 목록 + PP 잔량 + **행 클릭 해금**(TraitManager.CanUnlock/Unlock 그대로 사용 — 선행·비용·부정상한 준수) + 디버그 +10PP. **세이브 훅**(`GameSaveData.traits`) 추가. unity-reviewer 통과.

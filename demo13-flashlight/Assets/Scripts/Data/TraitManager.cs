@@ -301,6 +301,19 @@ public class TraitManager : MonoBehaviour
         return false;
     }
 
+    // ── 정적 null-safe 편의 접근자 (말단 read-site용) ──
+    //   매니저 없을 때도 안전한 기본값(배수 1 / 가산 0 / flag false)을 반환해
+    //   호출부가 매번 null 체크하지 않도록 한다. 예: base * TraitManager.Mod("stamina_max").
+
+    /// <summary>해금 특성의 최종 배수(없으면 1). `final = base * Mod(key)`.</summary>
+    public static float Mod(string key) => Instance != null ? Instance.GetModifier(key) : 1f;
+
+    /// <summary>해금 특성의 add 절대합(없으면 0).</summary>
+    public static float AddVal(string key) => Instance != null ? Instance.GetAdditive(key) : 0f;
+
+    /// <summary>flag 효과 on 여부(없으면 false).</summary>
+    public static bool Flag(string key) => Instance != null && Instance.HasFlag(key);
+
     // ═══════════════════════════
     //  세이브/로드 (ReputationManager / NPCRelationshipManager 패턴)
     // ═══════════════════════════

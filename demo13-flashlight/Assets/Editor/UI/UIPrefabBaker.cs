@@ -94,6 +94,9 @@ public static class UIPrefabBaker
     [MenuItem("Tools/TopDown/UI/프리팹 베이크/TitleScreen")]
     public static void BakeTitleScreen() => Bake<TitleScreen>("TitleScreen", c => c.EditorBake());
 
+    [MenuItem("Tools/TopDown/UI/프리팹 베이크/TraitPanelUI")]
+    public static void BakeTraitPanelUI() => Bake<TraitPanelUI>("TraitPanelUI", c => c.EditorBake());
+
     [MenuItem("Tools/TopDown/UI/프리팹 베이크/── 전부 ──", priority = 100)]
     public static void BakeAll()
     {
@@ -103,7 +106,7 @@ public static class UIPrefabBaker
         BakeNavigationHUD(); BakeMapSelectUI(); BakeCraftingUI(); BakeDialogueUI();
         BakeCharacterPanelUI(); BakeShopUI();
         BakeQuestLogUI(); BakeRaidMapUI(); BakeDispatchUI(); BakeRadioUI();
-        BakeHideoutUI(); BakeSleepUI(); BakeTitleScreen();
+        BakeHideoutUI(); BakeSleepUI(); BakeTitleScreen(); BakeTraitPanelUI();
         Debug.Log("[UIPrefabBaker] 전체 베이크 완료. (Systems 씬 재빌드로 프리팹 인스턴스 반영)");
     }
 
