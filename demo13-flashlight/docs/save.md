@@ -43,6 +43,7 @@ InRaid = SystemsScene.IsGameplayScene(scene) && scene.name ∉ { Safehouse, Hide
 | `CombatStarted()` | CombatStateTracker | **항상 Record** | 항상 Record |
 | `CombatEnded()` | CombatStateTracker | **항상 Record** | 항상 Record |
 | `BedSleepSave()` | SleepUI.DoSleep | **Commit** (수동 저장) | Commit |
+| `InventoryChanged()` | 상점 구매·판매·위탁·수배(ShopUI 5곳) / F1 디버그 아이템 변경(DebugTestUI 4곳) | Record | Commit |
 
 - **Commit** = `SaveManager.Save()` (디스크 즉시 쓰기).
 - **Record** = `_raidSnapshotJson = SaveManager.ToJson(SaveManager.BuildSaveData())` (디스크 X, 인메모리만).
@@ -90,4 +91,5 @@ InRaid = SystemsScene.IsGameplayScene(scene) && scene.name ∉ { Safehouse, Hide
 ---
 
 ## 변경 로그
+- 2026-06-30: **`InventoryChanged()` 훅 추가** — 상점 거래(구매/판매/위탁 정산/수배 매입)·F1 디버그 아이템 변경(인벤·창고 비우기/지급) 시 `RecordOrCommit()`(안전구역=디스크 커밋, 레이드=인메모리). 기존엔 거래·F1 변경이 자동 저장 안 돼 다음 로드 시 유실되던 것 보완. ShopUI 5곳·DebugTestUI 4곳 연결.
 - 2026-06-18: 최초 작성. 저장 체크포인트 모델(안전=Commit/레이드=Record/크래시=복구커밋/강제종료=레이드시작복귀) + CombatStateTracker + SaveManager 직렬화·디스크 분리.

@@ -161,6 +161,10 @@ public class SaveCheckpoints : MonoBehaviour
     /// <summary>침대 수면(수동 저장) — 침대는 안전가옥 시설이므로 항상 Commit.</summary>
     public void BedSleepSave() => Commit();
 
+    /// <summary>인벤/창고/경제 변경(상점 구매·판매, F1 디버그 아이템 변경 등) —
+    /// 안전 맥락이면 디스크 커밋, 레이드 중이면 인메모리 기록.</summary>
+    public void InventoryChanged() => RecordOrCommit();
+
     /// <summary>레이드 중이면 Record(인메모리), 아니면 Commit(디스크). 이벤트성 훅 공용.</summary>
     void RecordOrCommit()
     {

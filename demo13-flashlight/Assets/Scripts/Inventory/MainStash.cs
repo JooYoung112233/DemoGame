@@ -10,8 +10,8 @@ public class MainStash : MonoBehaviour
 {
     public static MainStash Instance { get; private set; }
 
-    public const int Width = 11;           // 칸수는 가로 기준 (8→11)
-    public const int BaseHeight = 20;      // 가로 늘린 만큼 세로 축소 (30→20)
+    public const int Width = 8;            // 칸수는 가로 기준 (11→7→8, 창고 패널 꽉 채움. 셀 72px)
+    public const int BaseHeight = 30;      // 세로 스크롤 (8×30=240칸 기본)
     public const int HeightPerLevel = 7;   // stash 모듈 레벨당 +7줄
 
     public InventoryGrid Grid { get; private set; }

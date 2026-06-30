@@ -161,17 +161,20 @@
 > ⚠ 위 수치는 **1차 초안**. 정밀값은 [balance-tuner]→`GameTuning` 확정. 동일 key가 여러 퍽에 걸리면(예: `move_noise`, `sleep_recovery`, `purity_id`, `vision_anomaly`, `erosion_buildup`) `TraitManager`가 규약대로 자동 합성.
 
 ## 4b. 구현 메모
-- 데이터: `TraitData`(ScriptableObject) — id·이름·설명·카테고리·티어·선행조건·PP비용(또는 환급)·효과(`effects` = §4 어휘). `StatDB`/PlayerStatData 적용은 말단 배선 TODO.
+- 데이터: `TraitData`(ScriptableObject) — id·이름·설명·카테고리·티어·선행조건·PP비용(또는 환급)·효과(`effects` = §4 어휘). 말단 배선은 1·2차로 12개 키 적용 완료(아래 2026-06-29), 나머지는 대상 시스템 구현 시 동반 배선.
 - **(2026-06-19) TraitData SO·생성기 구현됨**: 클래스 `Assets/Scripts/Data/TraitData.cs`(enum `TraitCategory`/`TraitTier`, `effectSummary` + `List<TraitEffect>`), CSV `tools/traits.csv`(§3 전 41개 퍽 + `effects` 컬럼), 생성기 `tools/GenerateTraits.ps1` → `Assets/Resources/Data/Traits/*.asset` 41개.
 - **(2026-06-19) TraitManager 런타임 코어 구현됨**: `Assets/Scripts/Data/TraitManager.cs`(싱글톤+DontDestroyOnLoad, NPCRelationshipManager 패턴). 로드/해금상태/PP/부정상한 추적 + 쿼리 API(`GetModifier`/`GetAdditive`/`HasFlag`, 정적 `Mod`/`AddVal`/`Flag`) + 세이브 구조체(`TraitSaveData`). 세이브 배선 완료(`GameSaveData.traits`).
 - **(2026-06-29) 말단 배선 1차 = 핵심 캐릭터 스탯 8개 키**: 스태미너(max/regen)·회피(iframe/cost)·무게·허기수분·받는피해(저체력) — `TopDownPlayer`/`PlayerInventory`/`SurvivalStats`/`Health`. **나머지 키(전투 finesse·경제/회수·잠행·현상계)는 미배선** — 결정 로그 2026-06-29 참조. 현상계는 대상 시스템 다수 미구현.
-- UI: 캐릭터 패널("01 캐릭터 상태", [→ inventory.md])에 **특성 탭**(트리 뷰 + PP 잔량). 양피지 6패널 톤 통일.
+- UI: **독립 패널 `TraitPanelUI`(K 토글)** — 카테고리×티어 목록 + PP 잔량 + 행 클릭 해금(2026-06-24). 캐릭터 패널 탭 통합은 추후(패널 비대화 방지). 프리팹 베이크됨(`Resources/UI/TraitPanelUI.prefab`, 2026-06-29). 양피지 6패널 톤은 후속.
 - 효과 = 기존 스탯/시스템 훅 재사용(전투·의료·인벤·현상·시계). 새 수치는 [balance-tuner].
 - **미정(TBD)**: PP 곡선 세부·각 퍽 정밀 수치·리스펙 방식·트리 시각·아이콘.
 
 ---
 
 ## 기획 결정 로그
+
+### 2026-06-30 — 문서 정합성 교정 (§4b stale 서술)
+- **무엇**(현 상태=진실): §4b 구현 메모의 낡은 서술을 현재 코드 상태로 정정. ① "`StatDB`/PlayerStatData 적용은 말단 배선 TODO" → 1·2차 12키 배선 완료(아래 2026-06-29) 반영. ② UI를 "캐릭터 패널 특성 탭" → **독립 `TraitPanelUI`(K 토글)**로 정정(2026-06-24 결정대로, 탭 통합은 추후) + 프리팹 베이크 명시. 코드 대조(`TraitManager.Mod/Flag` 12개 호출부·`UIPrefabBaker`)로 확인. 수치·기획 무변경.
 
 ### 2026-06-29 — 특성 효과 말단 배선 1차 (핵심 캐릭터 스탯)
 - **무엇**: 해금만 되고 효과 미적용이던 특성을 **실제 스탯 read-site에 배선** 시작. `TraitManager`에 정적 null-safe 접근자 `Mod(key)`/`AddVal(key)`/`Flag(key)` 추가(매니저 없으면 1/0/false) → 호출부는 `final = base * TraitManager.Mod(key)` 한 줄.
@@ -180,7 +183,11 @@
   - `PlayerInventory.MaxWeight`: `weight_max`(노새). 과적 판정도 `MaxWeight` 기준으로 정합.
   - `SurvivalStats` 소모율: `hunger_thirst_rate`(허약한 위장 — 수분·포만 둘 다).
   - `Health.TakeDamage`: `damage_taken`(유리 어깨) + `low_hp_damage_taken`(불굴, 체력 ≤30%일 때). **플레이어 한정** — 적 공용 Health라 `TopDownPlayer` 캐시(`_tp`)로 게이팅. 저체력 임계 `0.3`은 placeholder(→ GameTuning 이관 가능).
-- **남은 배치(TODO)**: ①전투 finesse(`execute_damage`·`charge_first_hit_damage`·`groggy_buildup`·`weapon_durability_cost`·`repair_efficiency`·`fracture_chance`·`bleed_duration`·`pain_penalty`·`spoiled_food_immune`·`sleep_recovery`) ②경제/회수(`sell_price`·`buy_price`·`info_price`·`search_speed`·`keep_slot`·`death_drop_amount`·`rare_container_highlight`·`npc_affinity`) ③잠행(`detect_radius`·`move_noise`·`crouch_vanish`·`minimap_reveal`·`extract_channel_speed`) ④현상계(`vision_anomaly`·`erosion_buildup`·`rudi_ping`·`rewind_loss`·`memory_clue_clarity`·`deep_zone_immune`·`timer_accuracy` 등 — **대상 시스템 다수 미구현**, 시스템 생길 때 동반 배선).
+- **배선된 4개 키(배치 2, 2026-06-29 — 의료·생존·경제)**:
+  - `PlayerMedicalSystem.RecalculateDebuffs`: `pain_penalty`(통증 내성 −0.40 = 통증의 스태미너 페널티 감소).
+  - `SleepUI.DoSleep`: `sleep_recovery`(빠른 회복 +0.30 / 악몽 −0.30 — **HP 회복량만** 스케일, 물·포만은 수면 소모라 제외).
+  - `ShopData.BuyPrice`/`SellPrice`(데이터층): `buy_price`(단골 −0.10) / `sell_price`(감정가 +0.15) — 상점 UI 표시·정산에 일괄 반영.
+- **남은 배치(TODO)**: ①전투 finesse(`execute_damage`·`charge_first_hit_damage`·`groggy_buildup`·`weapon_durability_cost`·`repair_efficiency`·`fracture_chance`·`bleed_duration`·`spoiled_food_immune`) ②경제/회수(`info_price`·`search_speed`·`keep_slot`·`death_drop_amount`·`rare_container_highlight`·`npc_affinity`) ③잠행(`detect_radius`·`move_noise`·`crouch_vanish`·`minimap_reveal`·`extract_channel_speed`) ④현상계(`vision_anomaly`·`erosion_buildup`·`rudi_ping`·`rewind_loss`·`memory_clue_clarity`·`deep_zone_immune`·`timer_accuracy` 등 — **대상 시스템 다수 미구현**, 시스템 생길 때 동반 배선).
 - **별개 TODO**: PP 획득 루트(레이드/평판 → `GrantPP`) 연결(현재 디버그 +10PP만).
 - **검증**: 정적 컴파일 감사 통과(브레이스·호출 정합). 효과 체감은 Unity 플레이 검증 필요.
 

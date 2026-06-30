@@ -41,18 +41,18 @@ public class ShopData : ScriptableObject
     [Header("수배(매입 의뢰) — 상점별")]
     public List<WantedItem> wanted = new List<WantedItem>();
 
-    /// <summary>플레이어가 이 아이템을 살 때 가격 (0이면 구매 불가).</summary>
+    /// <summary>플레이어가 이 아이템을 살 때 가격 (0이면 구매 불가). 특성 buy_price(단골 −0.10) 반영.</summary>
     public int BuyPrice(ItemData item)
     {
         if (item == null || item.buyPrice <= 0) return 0;
-        return Mathf.Max(1, Mathf.RoundToInt(item.buyPrice * buyRate));
+        return Mathf.Max(1, Mathf.RoundToInt(item.buyPrice * buyRate * TraitManager.Mod("buy_price")));
     }
 
-    /// <summary>플레이어가 이 아이템을 팔 때 받는 가격 (0이면 판매 불가).</summary>
+    /// <summary>플레이어가 이 아이템을 팔 때 받는 가격 (0이면 판매 불가). 특성 sell_price(감정가 +0.15) 반영.</summary>
     public int SellPrice(ItemData item)
     {
         if (item == null || item.sellPrice <= 0) return 0;
-        return Mathf.Max(1, Mathf.RoundToInt(item.sellPrice * sellRate));
+        return Mathf.Max(1, Mathf.RoundToInt(item.sellPrice * sellRate * TraitManager.Mod("sell_price")));
     }
 
     /// <summary>수배 매입가 = SellPrice(sellRate 반영) × premium. (0이면 불가)</summary>

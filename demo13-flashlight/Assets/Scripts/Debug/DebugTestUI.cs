@@ -376,11 +376,12 @@ public class DebugTestUI : MonoBehaviour
 
         GUILayout.Space(5);
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("인벤 비우기", btnStyle)) inventory.Grid.Clear();
+        if (GUILayout.Button("인벤 비우기", btnStyle)) { inventory.Grid.Clear(); SaveCheckpoints.Instance?.InventoryChanged(); }
         if (GUILayout.Button("창고 비우기", btnStyle))
         {
             var stash = MainStash.Ensure();
             if (stash != null) stash.GetGrid().Clear();
+            SaveCheckpoints.Instance?.InventoryChanged();
         }
         GUILayout.EndHorizontal();
 
@@ -417,6 +418,7 @@ public class DebugTestUI : MonoBehaviour
                     var item = new ItemInstance(allItems[i], 1);
                     if (!inventory.TryPickup(item))
                         ToastManager.Show("인벤 공간 부족", ToastManager.ToastType.Warning);
+                    else SaveCheckpoints.Instance?.InventoryChanged();
                 }
                 if (GUILayout.Button("+창고", smallBtnStyle, GUILayout.Width(50)))
                 {
@@ -426,6 +428,7 @@ public class DebugTestUI : MonoBehaviour
                         var item = new ItemInstance(allItems[i], 1);
                         if (!stash.GetGrid().TryAutoPlace(item))
                             ToastManager.Show("창고 공간 부족", ToastManager.ToastType.Warning);
+                        else SaveCheckpoints.Instance?.InventoryChanged();
                     }
                 }
                 GUILayout.EndHorizontal();

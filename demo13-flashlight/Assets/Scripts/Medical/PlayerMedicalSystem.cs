@@ -215,7 +215,8 @@ public class PlayerMedicalSystem : MonoBehaviour
         for (int i = 0; i < allParts.Length; i++)
             totalPain += allParts[i].GetSeverity(InjuryType.Pain);
         totalPain = Mathf.Clamp01(totalPain); // 최대 1.0으로 캡
-        staminaMult -= painStaminaDebuff * totalPain;
+        // 특성 pain_penalty(통증 내성 −0.40 = 통증 페널티 40% 감소). 매니저 없으면 1.
+        staminaMult -= painStaminaDebuff * totalPain * TraitManager.Mod("pain_penalty");
 
         cachedMoveSpeedMult = Mathf.Max(0.2f, moveMult);   // 최소 20%
         cachedAtkSpeedMult = Mathf.Max(0.3f, atkMult);     // 최소 30%

@@ -16,7 +16,7 @@ public class GridPanel
     public RectTransform itemRoot;   // 아이템 오버레이
     public RectTransform hitRoot;    // 좌표 변환 기준(보통 slotRoot)
 
-    public const int CELL = 48, GAP = 2;
+    public const int CELL = 72, GAP = 2;   // 인벤(CharacterPanelUI.CELL_SIZE)과 동일 — 가로 7칸 통일
     public static int CellTotal => CELL + GAP;
 
     /// <summary>이 패널에 item을 받을 수 있는지(카테고리 게이트 등). null=모두 허용.</summary>

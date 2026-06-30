@@ -14,7 +14,7 @@
 |---|---|---|
 | 플레이어 휴대 격자 | **장착 백팩이 결정** | 백팩 = 격자 제공 아이템 (아래) |
 | (백팩 없음 = 포켓만) | 2x4 | 가방 안 메면 주머니만 (→ §장비 시스템) |
-| 안전가옥 메인 창고(`MainStash`) | 10x14 (그레이박스 고정) | 안전구역 Tab 우측 상시 표시. 추후 stash 모듈 레벨 비례 확장 |
+| 안전가옥 메인 창고(`MainStash`) | **8×30** (가로 8칸 · 세로 스크롤) | 안전구역 Tab 우측 상시 표시. stash 모듈 레벨당 +7줄(`HeightPerLevel`). (2026-06-30: 11×20 → 8×30, 셀 72px·창고 패널 꽉 채움) |
 | 루팅 상자 (소) | 3x3 | 파밍 오브젝트 |
 | 루팅 상자 (중) | 4x5 | |
 | 루팅 상자 (대) | 5x6 | 레어 |
@@ -36,7 +36,8 @@
 - 백팩 자체는 **Backpack 장비 슬롯**에 장착 → 그 `containerWidth x containerHeight`가 메인 인벤 격자가 됨 (→ §장비 시스템)
 - 가방 교체/해제 시 넘치는 아이템 → 메인 창고(MainStash) → 월드 드롭 (→ §장비 시스템 넘침 처리)
 - 안전가옥 창고(stash)는 별도·대형, 백팩과 무관
-- 조끼(Rig 슬롯)도 `containerWidth/Height`로 추가 소형 격자 제공 가능 — 추후
+- 조끼(Rig 슬롯)도 `containerWidth/Height`로 추가 소형 격자 제공 — `RigTactical`(전술 리그, 외부 3×3/내부 4×3) 구현됨
+- **⚠ 실제 구현 백팩은 2종** (2026-06-30 축소): `backpack_basic`(기본 배낭) **외부 2×2 / 내부 5×4** · `backpack_large`(대형 배낭) **외부 2×3 / 내부 6×5**. **위 5종 표(슬링/학생/등산/군용/택티컬)는 기획안** — itemId가 실제 에셋과 다르고 미구현. (5종 빌드 vs 표 정리는 추후 결정)
 
 ### 아이템 크기
 - 모든 아이템은 **가로 x 세로** 격자 점유
@@ -440,6 +441,9 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-06-30 | **창고 패널 UX 3건.** ①**가방 스왑 버그픽스(같은 종류 유실)**: 장착 가방 교체 시 기존 가방 증발 — **근본 원인**: EquipFromGrid 토글 판정과 `PlayerEquipment.Equip` 내부 토글이 **둘 다 ItemData 비교**라, 창고에 '기본 배낭'이 여러 개일 때 장착품과 같은 종류를 누르면 스왑이 **토글 해제(Unequip=회수 없이 제거)** 로 오인됨. **수정**: 토글을 **인스턴스 비교**(`GetSlotInstance==item`)로 + 같은 ItemData 교체는 **먼저 Unequip 후 장착**(Equip 토글 회피) + 기존 장비를 **출발 격자(창고)로 회수**(빈자리 → 자동배치 → 인벤/창고 폴백). 같은/다른 종류 모두 정상 스왑. ②**TAKE ALL 버튼 = 필드 루팅(루팅 상자)에서만** 노출, 창고/가구 보관함에선 숨김(`ShowLeftPanel` withSearch 기준). ③**카테고리 탭 필터 구현**(이전엔 비주얼만): 탭 클릭 시 비일치 아이템 흐리게(α0.22, 위치 유지·클릭 가능). 매핑 = WEAPONS=Weapon · ARMOR=착용류(Head/Armor/Rig/Backpack) · CONSUMABLES=Consumable+Medical · MATERIALS=Material · ETC=나머지. 베이크 프리팹용 `leftTabBgs` 직렬화 + WireEvents 재부착 → **CharacterPanelUI 재베이크 필요**. |
+| 2026-06-30 | **가방(백팩) 크기 축소 — "너무 크다" 밸런스 조정.** 외부 footprint ~2/3, 내부 용량은 밸런스상 좀 더(≈55%) 축소. `backpack_basic` 외부 3×2→**2×2** · 내부 6×6(36칸)→**5×4**(20칸). `backpack_large` 외부 3×4→**2×3** · 내부 7×8(56칸)→**6×5**(30칸). 등급순서(basic<large)·내부 width ≤7(격자 7칸 표준) 유지. 전술 리그(내부 4×3)는 이미 작아 유지. 가격·무게 미변경. |
+| 2026-06-30 | **격자 셀 키움(48/54 → 72px) + 폭 통일(창고 8칸·가방 ≤7칸).** "격자가 너무 작다"(창고 11칸·셀 작음) 해소 — 셀 상수 3곳(`CharacterPanelUI.CELL_SIZE` 54·`GridPanel.CELL` 48·`ShopUI.CELL_SIZE` 48)을 **72**로 통일(상점이 인벤보다 작던 불일치도 해소). **`MainStash` 11×20 → 8×30**(가로 **8칸**으로 창고 패널 꽉 채움). 상점 재고 열 상한 12→**8**(창고와 동일). **셀 72px 근거**: 7칸 가방(예전 7×9 등)이 좁은 중앙 패널(`MID_INNER_W=520`)을 넘치지 않는 최대치(7×72+6×2=516≤520) → 가방은 ≤7칸 유지, 창고는 패널이 더 넓어 8칸. 주머니(4×1)·보안(3×3) 유지(셀만 커짐). ⚠ 기존 세이브는 로드 시 아이템 재배치(그레이박스). **Unity 플레이 시각 검증 대기.** |
 | 2026-06-23 | **보관함 컨테이너 ItemData SO 8종 생성** (`Assets/Resources/Items/Container/`). cont_box(범용 2×2→내부6×4, 전체)·cont_fridge(냉장고 2×3→8×7, Consumable)·cont_drawer(서랍 2×2→6×8, Misc)·cont_material(재료함 2×2→8×6, Material)·cont_medbox(의료함 1×2→6×5, Medical)·cont_weapon(무기케이스 2×3→8×7, Weapon)·cont_docs(문서함 1×2→5×6, Key)·cont_safe(금고 2×2→6×4, Valuable). 공통: category=Misc, isContainer=1, maxStack=1, icon/worldDropPrefab 비움(그레이박스). 가격(buyPrice)=§9.7 관리인 판매가, sellPrice=절반. allowedCategories는 Unity enum 배열 YAML(`- N`) 포맷, 범용상자만 `[]`. **cont_ammo는 ItemCategory에 Ammo 미정의로 보류**(총기 도입 시). ItemDatabase가 Resources/Items/** 재귀 로드라 자동 포함 → 인게임·F1 노출. 근거: §보관함 사양(2026-06-10) + ItemData 컨테이너 필드 구현 완료. |
 | 2026-06-19 | **하단 퀵슬롯 바(1~6) 구현.** 결정: 소비/사용 아이템을 슬롯에 등록 → **숫자키 1~6(또는 슬롯 클릭)으로 즉시 사용**. 등록은 인벤 우클릭 메뉴 "퀵슬롯"(토글: 이미 있으면 해제 / 없으면 첫 빈 슬롯 / 다 차면 1번 교체). 구현: `QuickSlotBar`(자가 부트스트랩 싱글톤, 하단 중앙 6칸, UITheme 색, 아이콘+개수, 0개면 흐리게) + `PlayerInventory.UseItemById`(가방/주머니/보안에서 첫 매칭 사용). 모달 UI 열려 있으면 입력 차단, 플레이어 없으면 숨김. 슬롯은 itemId만 보관(런타임 전용, 세이브는 후속). | 근거: 전투/생존 중 빠른 소비 사용. number-key 충돌 없음(PostRaidEventUI는 모달이라 IsAnyUIOpen로 차단). |
 | 2026-06-19 | **아이템 상세 팝업 + 우클릭 메뉴 개편.** 질문: "검사" 눌러도 토스트만 떠 효과 없음 + 창고 아이템은 검사만 뜨고 사용/제거 불가. **결정: ①"검사"→"자세히" + 전용 상세 팝업 `ItemDetailUI`(큰 아이콘+이름+설명+분류/희귀도/크기/무게/가격/내구도/스택/사용효과)로 표시(토스트 폐기). ②사용 가능 아이템은 내 소지품뿐 아니라 안전 창고에서도 "먹기/사용"(`UseItem(placed, sourceGrid)` 지정격자 소모). ③안전 창고 아이템엔 "폐기"(영구 삭제), 레이드 루팅 상자는 제외.** 메뉴: 내 소지품=착용/먹기·사용/자세히/버리기, 안전창고=착용/먹기·사용/자세히/폐기, 루팅상자=착용/자세히. `ItemDetailUI`=자가부트스트랩 싱글톤(sortingOrder 112, UITheme 색), 배경클릭·우클릭·Esc 닫힘, UIManager Esc 우선(상세만 닫고 뒤 패널 유지)+IsAnyUIOpen/CloseAll 등록, 팝업 중 CharacterPanelUI raw Input 차단. 구(舊) ShowItemInspect 제거. | 근거: 검사 기능이 실제로 안 보이던 문제 + 창고 사용성. unity-reviewer 정적감사 통과. |

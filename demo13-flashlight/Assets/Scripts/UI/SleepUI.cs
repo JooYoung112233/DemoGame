@@ -136,7 +136,8 @@ public class SleepUI : MonoBehaviour
         // ── 수면 처리(회복/차감/스토리/세이브) ──
         var go = GameObject.FindGameObjectWithTag("Player");
         var health = go != null ? go.GetComponent<Health>() : null;
-        if (health != null) health.Heal(health.MaxHp * o.hpPct);
+        // 특성 sleep_recovery(빠른 회복 +0.30 / 악몽 −0.30) — HP 회복량만 스케일(물·포만은 소모라 제외).
+        if (health != null) health.Heal(health.MaxHp * o.hpPct * TraitManager.Mod("sleep_recovery"));
         TopDownPlayer.Instance?.RefillStamina();
         SurvivalStats.Get()?.Consume(o.water, o.satiety);
 

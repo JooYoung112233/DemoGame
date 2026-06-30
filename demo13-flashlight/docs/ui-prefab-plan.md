@@ -57,7 +57,7 @@
 
 9. ✅ **누락분 `TraitPanelUI`(K 토글 특성 패널)**(2026-06-29): 1차 전환 때 빠져 있던 패널. 다른 패널과 달리 **K키 전용 토글**이라 폴링용 영속 인스턴스 필요 → **프리팹 인스턴스 영속 보유 + 캔버스만 토글**(SetVisible) 모델. 정적 스켈레톤(패널/헤더/PP/버튼/스크롤)만 `EditorBake`로 베이크, 동적 특성 행은 런타임 `Rebuild`. `[SerializeField]` canvas/listContent/ppText/debugPpBtn/closeBtn + `ApplyFonts`(동적 KR 폰트 재바인딩) + `WireEvents`(+10PP·X onClick 재부착) + 프리팹 우선 `EnsureInstance`. 베이크 엔트리 추가. 57/57.
 
-> ✅ **§4-A 완료: 코드 생성 UI 23종 전부 프리팹 베이크 가능 + 부트스트랩 프리팹 우선화.** (2026-06-29 TraitPanelUI 합류) 사용자: `프리팹 베이크/── 전부 ──`(또는 `TraitPanelUI`) → Systems 재빌드 불필요(자가부트) → 플레이 검증. 다음은 §4-B 스킨.
+> ✅ **§4-A 완료: 코드 생성 UI 26종(`Resources/UI/*.prefab` 26개 = 베이크 엔트리 26개) 전부 프리팹 베이크 가능 + 부트스트랩 프리팹 우선화.** (2026-06-29 TraitPanelUI 합류) 사용자: `프리팹 베이크/── 전부 ──`(또는 `TraitPanelUI`) → Systems 재빌드 불필요(자가부트) → 플레이 검증. 다음은 §4-B 스킨.
 
 ### 4-B. 시안 스킨 적용 (전환 완료 후 — 보류)
 - 9-slice 자산 셋업 + 시안 스프라이트 입히기 + TMP 전환. (이전에 만든 `UIAssetSetup`/`UIKitBuilder`는 이 단계용이었으나, 우선순위 변경으로 **삭제**했고 스킨 단계 진입 시 재도입.) §5 매핑·§6 결정 참조.

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1417712199510611114
+--- !u!1 &1218999415944863611
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,9 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 481468327006559683}
-  - component: {fileID: 1136264055524680565}
-  - component: {fileID: 1904111318998595692}
+  - component: {fileID: 733036613030379975}
+  - component: {fileID: 3001714529153617852}
+  - component: {fileID: 844297559196218016}
   m_Layer: 0
   m_Name: Line
   m_TagString: Untagged
@@ -18,13 +18,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &481468327006559683
+--- !u!224 &733036613030379975
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417712199510611114}
+  m_GameObject: {fileID: 1218999415944863611}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -34,24 +34,24 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -100}
+  m_AnchoredPosition: {x: 0, y: -260}
   m_SizeDelta: {x: 380, y: 1}
   m_Pivot: {x: 0.5, y: 1}
---- !u!222 &1136264055524680565
+--- !u!222 &3001714529153617852
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417712199510611114}
+  m_GameObject: {fileID: 1218999415944863611}
   m_CullTransparentMesh: 1
---- !u!114 &1904111318998595692
+--- !u!114 &844297559196218016
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417712199510611114}
+  m_GameObject: {fileID: 1218999415944863611}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -109,7 +109,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -260}
+  m_AnchoredPosition: {x: 0, y: -100}
   m_SizeDelta: {x: 380, y: 1}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &7097212983846658365
@@ -337,9 +337,9 @@ RectTransform:
   m_Children:
   - {fileID: 7106814792532667384}
   - {fileID: 3801825165725570742}
-  - {fileID: 481468327006559683}
-  - {fileID: 3823070543680882002}
   - {fileID: 110228059013655642}
+  - {fileID: 3823070543680882002}
+  - {fileID: 733036613030379975}
   - {fileID: 9194357274483739133}
   - {fileID: 2716483643741460953}
   m_Father: {fileID: 5083264225592421456}

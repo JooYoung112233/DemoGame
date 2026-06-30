@@ -33,7 +33,7 @@ The canonical runtime layout is a persistent **`Systems` scene** (`Assets/Scenes
 
 ### Player System Stack
 **TopDownPlayer** owns movement (Rigidbody2D + WASD 8-direction), mouse-facing, sprite flip, sprint, and flashlight pivot rotation (Light2D). Combat state machine / stamina are stubs pending re-port. Game-logic components on the same GameObject (view-agnostic):
-- **PlayerInventory** — Grid-based inventory (5x8, 30kg max).
+- **PlayerInventory** — Multi-container grid inventory: **bag** (size from the equipped Backpack, 0×0 when none) + fixed **pockets** (4×1) + fixed **secure container** (3×3). `MaxWeight` = base 30kg × `TraitManager.Mod("weight_max")` (trait-modified). See `docs/inventory.md`.
 - **PlayerMedicalSystem** — 5 body parts, 3 injury types (Bleeding/Fracture/Pain).
 - **Health** — HP tracking, damage/heal/death.
 - **FlashlightController** — Battery-based, auto-off at daytime via DayNightCycle event.
@@ -95,9 +95,13 @@ void OnPhaseChanged(bool isNight) { /* react */ }
 void OnDestroy() { dayNight.OnPhaseChanged -= OnPhaseChanged; }
 ```
 
-### UI Construction
-UI is built procedurally in code (uGUI), not scene-placed. GameHUD, RaidResultUI, MedicalHUD all create their own Canvas in `Awake()`/`BuildUI()`. Reference resolution: 1920x1080.
-When creating an EventSystem in code, use `InputSystemUIInputModule` (not `StandaloneInputModule`) and **call `.AssignDefaultActions()`** on it — without it, pointer/click actions are empty and mouse clicks do nothing.
+### UI Construction (prefab-baked, 2026-06~)
+UI was **migrated from pure-code procedural generation → prefab-baked + Instantiate.** SSOT: **`docs/ui-prefab-plan.md`** (§4-A all panels converted; §4-B 시안 skin via `UISkin` is deferred). Reference resolution: 1920x1080.
+- **Bake:** each panel keeps its uGUI builder but exposes `EditorBake()`. The editor tool **`Editor/UI/UIPrefabBaker.cs`** (`Tools/TopDown/UI/프리팹 베이크/*`, `── 전부 ──`) runs the builder once and `SaveAsPrefabAsset`s to **`Assets/Resources/UI/<TypeName>.prefab`** (26 panels).
+- **Instantiate:** bootstrap loads the prefab instead of building. A-type (lazy self-boot, e.g. `ItemDetailUI`): `Ensure()` does `Resources.Load<GameObject>("UI/<Type>")` → Instantiate, **falling back to code generation if the prefab is missing.** B-type (Systems-scene placed): `Editor/SystemsSceneBuilder.cs` `InstantiateUIOrComponent` instantiates the prefab if present, else `AddComponent` (so re-bake → rebuild Systems scene to apply).
+- **View binding = `[SerializeField]`** references on the panel script (which IS the view component), set during the bake — **not find-by-name.** Dynamic content (grid cells, list rows) stays procedural under a serialized container transform.
+- **Two things are NOT serialized and must be re-bound in `Awake()`:** (1) `button.onClick` listeners → re-attach via **`WireEvents()`** (`RemoveAllListeners()`+`AddListener`) on both prefab and code paths; (2) dynamic OS fonts → re-bind via **`ApplyFonts()`** after Instantiate. Adding a new serialized button ref requires a re-bake.
+- When creating an EventSystem in code, use `InputSystemUIInputModule` (not `StandaloneInputModule`) and **call `.AssignDefaultActions()`** on it — without it, pointer/click actions are empty and mouse clicks do nothing.
 
 ### Input (new Input System, 2026-06-24)
 Project uses the **new Input System** (`activeInputHandler:1`, New-only). **Do NOT call `UnityEngine.Input.*` directly** — it throws at runtime in New-only mode. Use the compat shim **`Scripts/Core/GameInput.cs`** instead (`GameInput.GetKeyDown(KeyCode)`, `GameInput.mousePosition`, `GameInput.GetAxisRaw("Horizontal"/"Vertical")`, etc.). It wraps `Keyboard.current`/`Mouse.current` with the same legacy signatures; add new keys to its `KeyCode→Key` map. See `docs/architecture.md` §입력 시스템.
@@ -135,4 +139,4 @@ Current state: Stage 2 (Safehouse container map). See `docs/dev-roadmap.md` for 
 ## Design Documentation
 All game design decisions are recorded in `docs/` as system-specific markdown files. When a design decision is made, record it immediately in the appropriate file with date, question, and decision. See parent `CLAUDE.md` for full recording rules.
 
-Key docs: start with **`docs/MASTER.md`** (index). GDD master split into `gdd-core.md` / `gdd-progression.md` / `gdd-demo.md`. System docs: `combat.md`, `medical.md`, `inventory.md`, `items.md` (+ `items-crafting-farming.md`), `crafting.md`, `world-map.md`, `safehouse.md`, `rendering.md` (+ `topdown-migration.md` / `topdown-art-spec.md` / `map-tool.md`), `npc-dialogue.md`, `quest.md` (+ `quests-region1.md`), `post-raid-event.md`, `story.md`, `story-script.md`. Incomplete/TODO items tracked in `dev-roadmap.md`.
+Key docs: start with **`docs/MASTER.md`** (index). Structure/tech: **`architecture.md`** (Systems scene + Input System), **`ui-prefab-plan.md`** (UI prefab-bake), `save.md`. GDD master split into `gdd-core.md` / `gdd-progression.md` / `gdd-demo.md`. System docs: `combat.md`, `traits.md`, `medical.md`, `survival.md`, `inventory.md`, `items.md` (+ `items-crafting-farming.md`), `crafting.md`, `economy.md`, `world-map.md`, `safehouse.md`, `rendering.md` (+ `topdown-migration.md` / `topdown-art-spec.md` / `map-tool.md`), `npc-dialogue.md`, `quest.md` (+ `quests-region1.md`), `post-raid-event.md`, `story.md`, `story-script.md`. Incomplete/TODO items tracked in `dev-roadmap.md`.

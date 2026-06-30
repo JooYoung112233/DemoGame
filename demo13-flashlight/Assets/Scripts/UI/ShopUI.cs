@@ -15,7 +15,7 @@ public class ShopUI : MonoBehaviour
     public bool IsGenerated => canvas != null;
 
     // ── 상수 ────────────────────────────────────────────────
-    const int   CELL_SIZE   = 48;
+    const int   CELL_SIZE   = 72;   // 인벤/GridPanel과 동일 — 가로 7칸 통일
     const int   CELL_GAP    = 2;
     const float COL_L_RATIO = 0.35f;   // 좌 컬럼 너비 비율
     const float COL_R_RATIO = 0.35f;   // 우 컬럼 너비 비율
@@ -385,6 +385,7 @@ public class ShopUI : MonoBehaviour
             ShowTradeResult($"{item.displayName} ×{bought} 구매 완료. (-◈{(price * bought):N0})", new Color(0.4f, 1f, 0.5f));
             buyQty = 1;
             RefreshAll();   // 재고 수량 배지/품절 표시까지 갱신(구매=재고 변동, 갱신 정당)
+            SaveCheckpoints.Instance?.InventoryChanged();   // 거래 = 자동 세이브(안전구역 커밋)
         }
     }
 
@@ -412,6 +413,7 @@ public class ShopUI : MonoBehaviour
         selectedInv = null;
         ShowTradeResult($"{name} 판매 완료. (+◈{total:N0})", new Color(0.4f, 1f, 0.5f));
         RefreshAll();
+        SaveCheckpoints.Instance?.InventoryChanged();
     }
 
     void ShowTradeResult(string msg, Color col)
@@ -478,6 +480,7 @@ public class ShopUI : MonoBehaviour
         if (slot.IsEmpty || !slot.IsReady) return;
 
         CurrencyManager.Instance?.Add(slot.payout, "위탁 정산");
+        SaveCheckpoints.Instance?.InventoryChanged();
         slot.item      = null;
         slot.itemName  = null;
         slot.payout    = 0;
@@ -594,7 +597,7 @@ public class ShopUI : MonoBehaviour
 
         int cellTotal = CELL_SIZE + CELL_GAP;
         float availW = stockContent != null ? stockContent.rect.width : 0f;
-        int cols = availW > 0f ? Mathf.Clamp(Mathf.FloorToInt((availW - 16) / cellTotal), 3, 12) : 6;
+        int cols = availW > 0f ? Mathf.Clamp(Mathf.FloorToInt((availW - 16) / cellTotal), 3, 8) : 8;   // 창고와 동일 8칸
 
         var repTier = ReputationManager.Instance != null ? ReputationManager.Instance.Tier : ReputationTier.F;
 
@@ -1005,6 +1008,7 @@ public class ShopUI : MonoBehaviour
         CurrencyManager.Instance?.Add(total, "트레이 판매");
         ShowTradeResult($"{items.Count}종 판매 완료. (+◈{total:N0})", new Color(0.4f, 1f, 0.5f));
         RefreshTrade();
+        SaveCheckpoints.Instance?.InventoryChanged();
     }
 
     // ── 드래그 격자 셋업(창고/트레이 = 인벤 동일 동작) ─────────
@@ -1542,6 +1546,7 @@ public class ShopUI : MonoBehaviour
 
         string name = w.item.displayName;
         CurrencyManager.Instance?.Add(price, $"수배 매입: {name}");
+        SaveCheckpoints.Instance?.InventoryChanged();
         SpendWanted(index);   // 런타임 남은수량 감소(에셋 미수정)
         // TODO 평판: 수배 매입 시 평판 보너스 (현재는 그레이박스 — 프리미엄가만)
 

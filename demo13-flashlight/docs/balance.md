@@ -19,6 +19,7 @@
 | 회복 아이템 수치 (음식 effectValue 등) | `Assets/Resources/Items/**/*.asset` (ItemData SO) | 아이템 인스펙터 (→ [survival.md §4](survival.md), [items.md](items.md)) |
 | **상점 해금 평판** (희귀도별 진열 해금 등급) | **`GameTuning`** (`shopTierRare`/`shopTierEpic`/`shopTierLegendary`) | **Control Panel** — `ShopUI`가 읽음 |
 | NPC 상점별 판매 목록 (뭘 파나) · 가격배율 · 위탁허용 | `ShopData` SO (`Assets/Resources/Data/Shops/Shop_*.asset`: stock/buyRate/sellRate/allowConsignment) | 상점 에셋 인스펙터 (※ Control Panel 통합 상점 에디터는 후속 과제) |
+| **특성(Trait) 효과 수치** (effectKey value, 41종) | `Assets/Resources/Data/Traits/*.asset` (`TraitData.effects`) — 런타임 합성 `TraitManager` | 트레잇 에셋 인스펙터 (→ [traits.md §4](traits.md)). ⚠ 현재 SO가 진실원 · **GameTuning 이관은 TBD**(미정) |
 
 > 원칙: **전역 단일 스칼라 값 = GameTuning(Control Panel)**. **행이 많은 표(아이템×지역, 유닛×스탯, 상점별 목록) = 데이터 파일/SO.** 표를 코드로 옮기지 않는다.
 >

@@ -51,6 +51,7 @@
 | **기획서 마스터 (3분할, 가장 먼저 읽을 것)** | 게임 전체 설계. ① [`gdd-core.md`](gdd-core.md) 코어 시스템(전투·루팅·낮밤·세계관) · ② [`gdd-progression.md`](gdd-progression.md) 진행·스토리(안전가옥·NPC·메인스토리·엔딩·월드) · ③ [`gdd-demo.md`](gdd-demo.md) 데모 범위·우선순위 | 확정 |
 | 🌐 **세계관 SSOT** | 세계 설정·로어의 **단일 출처 = [`gdd-core.md §5`](gdd-core.md)** (시대·무대 / 짙은현상 / **빛의역설** / **루디=충전·방전·마모 활성 자원** / 시간왜곡). 타 문서는 재서술 금지·링크만. story.md §2=스토리 사건 순서, anomaly.md=현상 메커닉, world-map.md=지리 컨셉(모두 §5로 위임) | 확정 |
 | [`dev-roadmap.md`](dev-roadmap.md) | 10단계 개발 로드맵 + 단계 상세 + **미구현/마무리 필요 목록**. 현재 Stage 2 | 진행 중 |
+| [`dev-handoff.md`](dev-handoff.md) | **개발 핸드오프** — 다른 PC에서 이어서 작업할 때 "지금 위치" 요약(최신 작업·다음 후보·Unity 검증 대기) | 갱신 중 |
 | [`backlog-ui.csv`](backlog-ui.csv) | **UI 제작 백로그** — 신규/확장/기존 UI 18종(우선순위·시스템·문서) | 2026-06-10 |
 | [`backlog-impl.csv`](backlog-impl.csv) | **구현/테스트 백로그** — 시스템·데이터·밸런스 27건(의존·우선순위·문서) | 2026-06-10 |
 | [`balance.md`](balance.md) | **밸런스 단일 컨트롤 표면** — 어떤 밸런스 값이 어디 있나 색인. GameTuning 필드 전체(시간·레이드·수색·드랍·생존·수면·아노말리) + 데이터 파일(region_loot=맵드랍, StatDB=전투, reputation csv) | 2026-06-18 |
@@ -63,13 +64,23 @@
 | [`prop-catalog.md`](prop-catalog.md) | **프랍 변형 카탈로그** — 실내/옥상/외벽/도로/차량/랜드마크 프랍을 기본219종×재질·방향변형으로 전부 펼침. 손그림 vs 셰이더 처리 원칙 + [`prop-list.csv`](prop-list.csv)(285행 작업 리스트) | 정리 (2026-06-10) |
 | [`char-art.md`](char-art.md) | **캐릭터·적 애니메이션 리스트** — 플레이어/적/NPC 모션을 전부 펼침. 인간형 리그공유+스킨교체 원칙 + [`char-anim-list.csv`](char-anim-list.csv)(46행) | 정리 (2026-06-10) |
 | **아트 작업 체크리스트(CSV)** | [`item-icon-checklist.csv`](item-icon-checklist.csv) 아이템 204종 · [`prop-list.csv`](prop-list.csv) 프랍 285행 · [`char-anim-list.csv`](char-anim-list.csv) 캐릭터 46행 | 생성됨 |
+| [`item-icon-list.md`](item-icon-list.md) · [`item-icon-additions.md`](item-icon-additions.md) | **아이콘 제작 리스트(footprint별)** + **아이콘↔데이터 매칭/신규 등록·보류** 정리 | 정리 (2026-06-10) |
+| [`prop-production.md`](prop-production.md) | **프랍 생성 진행 추적** — 맥락 씬 1장 생성→개별 슬라이스 방식, 슬라이스 규칙 | 정리 (2026-06-10) |
+
+### 🧱 기술 · 아키텍처
+
+| 문서 | 내용 | 상태 |
+|------|------|------|
+| [`architecture.md`](architecture.md) | **씬/부트 구조 SSOT** — 영속 `Systems` 씬(매니저+UIManager+모든 UI+PlayerRig) + 게임플레이 씬 additive 교체 로드, 부트스트랩 폴백, **입력 시스템(신 Input System + `GameInput` 셰임)** | 구현 |
+| [`ui-prefab-plan.md`](ui-prefab-plan.md) | **UI 프리팹화 SSOT** — 코드 절차 생성 → 프리팹 베이크(`UIPrefabBaker`)/Instantiate 전환(§4-A 전 패널 완료), `[SerializeField]`/`WireEvents`/`ApplyFonts` 패턴, 시안 스킨(`UISkin`, §4-B 보류) | §4-A 완료 |
+| [`save.md`](save.md) | **저장/체크포인트** — 세이브 스커밍 방지(레이드 진행=인메모리 스냅샷, 디스크는 안전 맥락만, 크래시 1회 커밋). `SaveManager`/`SaveCheckpoints`/`CombatStateTracker` | 구현 |
 
 ### ⚔️ 전투
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | [`combat.md`](combat.md) | 근접 전투 시스템 — 약공(3타 콤보)/강공(차징)/구르기/스태미너/그로기/적 캔슬. 수치 확정 | 프로토타입 완료 |
-| [`traits.md`](traits.md) | **캐릭터 특성(퍽) 시스템** — 진행형 퍽 트리 + 부정 특성(환급). 6 카테고리(전투·생존·회수·잠행·사회·**★현상**). 세계관 고유 현상 트리(빛절제·루디감각·시계동조·되감기 친화)가 정체성 | 기획(구현 전) |
+| [`traits.md`](traits.md) | **캐릭터 특성(퍽) 시스템** — 진행형 퍽 트리 + 부정 특성(환급). 6 카테고리(전투·생존·회수·잠행·사회·**★현상**). 세계관 고유 현상 트리(빛절제·루디감각·시계동조·되감기 친화)가 정체성 | SO 41종·`TraitManager`·`TraitPanelUI`(K) 구현, 효과 배선 1·2차(12키), 수치 1차 초안 |
 
 핵심 코드: `TopDownPlayer.cs` (이동·조준·손전등), `EnemyController.cs` (Rigidbody2D AI 상태머신), `StatDB` (스탯 DB)
 
@@ -108,7 +119,6 @@
 |------|------|------|
 | [`safehouse.md`](safehouse.md) | 덕코프식 물리 공간 안전가옥 — 뒷골목 맵 레이아웃, 시설 목록, 확장 기획, NPC 배치, 가구 시스템 | 방향 확정 + 확장 기획 |
 | [`safehouse-intel.md`](safehouse-intel.md) | **탐사 정보 루프** — 자원 생산 금지 원칙, NPC 랜드마크 파견(인텔 수집), 라디오(루디 가동), 랜드마크 재방문 확장 + Phase A~E 작업 계획 | 기획 확정, 구현 전 |
-| [`safehouse-map-prompt.md`](safehouse-map-prompt.md) | 안전가옥 맵 컨셉 아트 프롬프트 | 참고 |
 | [`safehouse-asset-list.md`](safehouse-asset-list.md) | 컨셉아트 기반 에셋 목록 — 바닥/펜스/프랍 분류 + 구현 우선순위 | 정리 완료 |
 | [`safehouse-tile-prompt.md`](safehouse-tile-prompt.md) | 바닥/펜스/프랍 에셋 생성 AI 프롬프트 — 레퍼 첨부용 | 작성 완료 |
 
@@ -124,6 +134,7 @@
 | [`level-tower.md`](level-tower.md) | **유리 R&D 타워** 레벨 디자인 — 랜드마크#3, 저층→상층 R&D(카드키 게이트), 현상 빈발 | 설계 |
 | [`raid.md`](raid.md) | 15분 타이머, 탈출 시스템, 루팅 흐름, 귀환 정산(RaidResultUI), 시간초과 페널티 | 기획 확정, 코드 구현 |
 | [`post-raid-event.md`](post-raid-event.md) | 레이드 후 랜덤 이벤트 — 40% 확률, 텍스트 선택지, 보상/페널티 | 기획 확정, 코드 구현 |
+| [`anomaly.md`](anomaly.md) | **짙은현상 구간 메커닉** — 위험/보상 타임어택(루트·몬스터 스폰→붕괴 증발). 세계관=gdd-core §5.1 위임, 시각=rendering.md `DenseAnomalyController` | 기획(수치 TBD) |
 | [`replayability.md`](replayability.md) | 반복성·엔드게임 progression — 장비 부품 모딩, 지역 격상, 밴딧 생태계, Co-op 멀티 | 검토 중 (확정 전) |
 
 핵심 코드: `RaidManager.cs`, `SceneTransitionManager.cs`, `PostRaidEventManager.cs`, `WorldRegionCatalog.cs`
@@ -204,7 +215,7 @@ Safehouse (timeScale=0, 안전 허브)
 
 1. **Phaser Container 사용 금지** — 이 프로젝트는 Unity지만, depth 정렬 버그 방지를 위해 Container 패턴 사용 X
 2. **Editor State Preservation** — 런타임 스크립트는 `Start()`에서 값을 적용하지 않음. 이벤트(`OnPhaseChanged` 등)로만 변경
-3. **UI는 코드로 생성** — uGUI 프로시저럴 빌드, 씬에 배치하지 않음. 해상도 기준: 1920x1080
+3. **UI는 프리팹 베이크 + Instantiate** (2026-06~ 전환) — 각 패널 `EditorBake()`로 `Resources/UI/*.prefab` 굽고 부트스트랩이 Instantiate(없으면 코드 생성 폴백). 뷰=`[SerializeField]`, onClick=`WireEvents`, 동적 폰트=`ApplyFonts`. 상세 [`ui-prefab-plan.md`](ui-prefab-plan.md). 해상도 기준: 1920x1080
 4. **기획 결정 즉시 기록** — `docs/` 내 시스템별 md에 날짜 + 질문 + 결정 기록. 세션 끝까지 미루지 않음
 5. **StatDB 중앙 집중** — 모든 유닛/플레이어 스탯은 `StatDB.asset` SO에서 관리. 코드에 하드코딩 금지
 
@@ -214,6 +225,7 @@ Safehouse (timeScale=0, 안전 허브)
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-06-30 | **문서 정합성 교정(인덱스·stale 서술).** ① 색인 누락 8종 등재: 새 「🧱 기술·아키텍처」 섹션(`architecture.md`/`ui-prefab-plan.md`/`save.md`) + `anomaly.md`(월드·레이드) + `dev-handoff.md`(기획총괄) + `item-icon-list/additions.md`·`prop-production.md`(아트). ② **죽은 링크 제거**: `safehouse-map-prompt.md`(2026-06-02 삭제분). ③ stale 상태/서술 교정: `traits.md` 상태(기획→SO·매니저·UI·배선 구현), 핵심규칙 #3 「UI 코드 생성」→「프리팹 베이크+Instantiate」. ④ `demo13-flashlight/CLAUDE.md` 동기화: UI Construction 섹션을 프리팹 베이크/Instantiate·`[SerializeField]`/`WireEvents`/`ApplyFonts` 패턴으로 재작성, PlayerInventory 「5x8 30kg」→ 다중 컨테이너(가방+주머니4×1+보안3×3, 무게 trait 보정). 코드 대조로 검증(수치 무변경). |
 | 2026-06-16 | **빛의 역설/루디 활성 자원 캐논 정합(gdd-core §5.2/§5.3).** SSOT 색인 행의 「불의역설」→「빛의역설」 교정 + 「루디=충전·방전·마모 활성 자원」 명기. 대상 문서(economy/items/items-crafting-farming은 미해당·safehouse/safehouse-intel/raid/crafting/navigation/anomaly)에 루디 충전·방전·마모·순도·죽은 루디·루디 충전/가공대·비루디 광원 침식 반영 + SSOT 링크 추가. 새 수치 미생성(GameTuning TBD). | gdd-core §5 본문은 이미 캐논(진실). |
 | 2026-06-16 | **세계관 통합 정리 — gdd-core §5를 단일 출처(SSOT)로 확정.** §5 상단에 SSOT 배너+하위 색인(5.0~5.4) 추가. 흩어진 로어 재서술 제거: story.md §2 "봉쇄 이후"의 자원작전·불의역설·회수꾼·루디 정의 → 스토리 사건만 남기고 §5로 위임 / world-map.md 상단에 로어 SSOT 위임 노트 + §1 "영구적 밤·붕괴한 날·밤 개장" 옛 표현을 캐논(봉쇄+짙은현상=시간 무관) 용어로 교정. anomaly.md는 이미 §5.1/§5.4 위임(유지). |
 | 2026-05-28 | 마스터 문서 생성. 게임 제목 확정: 다녀올게 (Be Right Back) |

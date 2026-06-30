@@ -57,6 +57,8 @@ public class CharacterPanelUI : MonoBehaviour
     [SerializeField] Text leftTitleText;
     [SerializeField] Text leftWeightText;   // 우상단 무게 표시(밝은 텍스트, 어두운 storage 프레임 위)
     [SerializeField] Button takeAllBtn;      // 푸터 좌: 좌측 격자 → 플레이어 인벤 일괄 이동
+    [SerializeField] Image[] leftTabBgs;      // 카테고리 탭 6개(ALL/WEAPONS/ARMOR/CONSUMABLES/MATERIALS/ETC)
+    int leftActiveTab;                        // 0=ALL. 좌측(창고/상자) 격자 카테고리 필터(비일치=흐림)
     [SerializeField] GameObject leftPanelRoot; // 숨김/표시용
     [SerializeField] GameObject leftPlaceholder; // 우측 열 빈칸 안내 (창고/상자 미오픈 시)
 
@@ -99,7 +101,7 @@ public class CharacterPanelUI : MonoBehaviour
     Image[,] containerSlotImages;
 
     // 설정
-    static readonly int CELL_SIZE = 54;   // 격자 셀 — 창고 11칸이 패널 폭을 꽉 채우도록 키움
+    static readonly int CELL_SIZE = 72;   // 격자 셀 — 가로 7칸 통일. 가방(≤7칸)이 중앙 패널(MID_INNER_W=520)에 맞는 최대치(7×72+6×2=516)
     static readonly int CELL_GAP = 2;
     static readonly float PANEL_WIDTH = 360f;
     static readonly string[] PART_NAMES = { "머 리", "몸 통", "양 팔", "왼다리", "오른다리" };
@@ -177,6 +179,17 @@ public class CharacterPanelUI : MonoBehaviour
         if (closeBtn != null)    { closeBtn.onClick.RemoveAllListeners();    closeBtn.onClick.AddListener(Hide); }
         if (leftSortBtn != null) { leftSortBtn.onClick.RemoveAllListeners(); leftSortBtn.onClick.AddListener(SortLeftGrid); }
         if (takeAllBtn != null)  { takeAllBtn.onClick.RemoveAllListeners();  takeAllBtn.onClick.AddListener(TakeAllFromLeft); }
+
+        if (leftTabBgs != null)
+            for (int i = 0; i < leftTabBgs.Length; i++)
+            {
+                if (leftTabBgs[i] == null) continue;
+                var b = leftTabBgs[i].GetComponent<Button>() ?? leftTabBgs[i].gameObject.AddComponent<Button>();
+                b.targetGraphic = leftTabBgs[i];
+                int idx = i;
+                b.onClick.RemoveAllListeners();
+                b.onClick.AddListener(() => SetLeftTab(idx));
+            }
 
         if (equipSlotKeys != null && equipSlotButtons != null)
         {
@@ -816,6 +829,7 @@ public class CharacterPanelUI : MonoBehaviour
         tabLayout.childForceExpandHeight = true;
         tabLayout.childControlWidth = true;
         tabLayout.childControlHeight = true;
+        leftTabBgs = new Image[tabLabels.Length];
         for (int t = 0; t < tabLabels.Length; t++)
         {
             var tabGO = new GameObject($"Tab_{tabLabels[t]}", typeof(RectTransform));
@@ -823,6 +837,11 @@ public class CharacterPanelUI : MonoBehaviour
             var tabImg = tabGO.AddComponent<Image>();
             tabImg.color = UITheme.Accent;
             if (t == 0) UISkin.TabOn(tabImg); else UISkin.TabOff(tabImg);   // ALL 활성, 나머지 비활성
+            leftTabBgs[t] = tabImg;
+            int idx = t;
+            var tabBtn = tabGO.AddComponent<Button>();
+            tabBtn.targetGraphic = tabImg;
+            tabBtn.onClick.AddListener(() => SetLeftTab(idx));   // 코드 경로(프리팹은 WireEvents 재부착)
             MakeChildText(tabGO.transform, tabLabels[t], 11, UITheme.TextBright);
         }
 
@@ -1715,6 +1734,8 @@ public class CharacterPanelUI : MonoBehaviour
         leftPanelRoot.SetActive(true);
         leftTitleText.text = title;
         leftPanelSearchEnabled = withSearch;
+        // TAKE ALL 버튼 = 필드 파밍(루팅 상자)에서만 노출. 창고/가구 보관함에선 숨김.
+        if (takeAllBtn != null) takeAllBtn.gameObject.SetActive(withSearch);
         RefreshLeftWeight();
         SyncLeftPlaceholder();   // 패널 열렸으니 안내 숨김
 
@@ -1836,6 +1857,35 @@ public class CharacterPanelUI : MonoBehaviour
             grid.TryAutoPlace(it);   // 같은 격자에서 뺀 것이라 공간은 충분
     }
 
+    /// <summary>좌측(창고/상자) 카테고리 탭 선택 — 비일치 아이템을 흐리게(필터). 0=ALL.</summary>
+    void SetLeftTab(int idx)
+    {
+        leftActiveTab = idx;
+        if (leftTabBgs != null)
+            for (int i = 0; i < leftTabBgs.Length; i++)
+                if (leftTabBgs[i] != null) { if (i == idx) UISkin.TabOn(leftTabBgs[i]); else UISkin.TabOff(leftTabBgs[i]); }
+        var g = LeftGrid;
+        if (g != null) RefreshLeftGrid(g);
+    }
+
+    /// <summary>아이템이 현재 좌측 탭 카테고리에 해당하는지. ARMOR=착용 방어구류(머리/방어구/리그/가방).</summary>
+    bool MatchesLeftTab(ItemData d)
+    {
+        if (leftActiveTab == 0 || d == null) return true;
+        bool gear = d.equipSlot == EquipSlot.Head || d.equipSlot == EquipSlot.Armor
+                 || d.equipSlot == EquipSlot.Rig  || d.equipSlot == EquipSlot.Backpack;
+        switch (leftActiveTab)
+        {
+            case 1: return d.category == ItemCategory.Weapon;                                            // WEAPONS
+            case 2: return gear;                                                                         // ARMOR(착용류)
+            case 3: return d.category == ItemCategory.Consumable || d.category == ItemCategory.Medical;  // CONSUMABLES
+            case 4: return d.category == ItemCategory.Material;                                          // MATERIALS
+            case 5: return d.category != ItemCategory.Weapon && d.category != ItemCategory.Consumable    // ETC(나머지)
+                        && d.category != ItemCategory.Medical && d.category != ItemCategory.Material && !gear;
+            default: return true;
+        }
+    }
+
     void RefreshContainerItems(InventoryGrid grid, RectTransform gridRoot, bool applySearch = true)
     {
         int cellTotal = CELL_SIZE + CELL_GAP;
@@ -1915,6 +1965,10 @@ public class CharacterPanelUI : MonoBehaviour
 
             // ── 공개됨: 정상 렌더링 ──
             bg.color = GetRarityBgColor(p.item.data.rarity);
+
+            // 카테고리 탭 필터 — 메인 좌측 격자에서 비일치 아이템은 흐리게(위치 유지·클릭 가능)
+            if (gridRoot == containerGridRoot && !MatchesLeftTab(p.item.data))
+                itemGO.AddComponent<CanvasGroup>().alpha = 0.22f;
 
             if (p.item.data.icon != null)
             {
@@ -3595,8 +3649,9 @@ public class CharacterPanelUI : MonoBehaviour
         // PlayerEquipment가 실제로 사용하는 슬롯(무기 equipSlot=None → PrimaryWeapon).
         EquipSlot apiSlot = ApiEquipSlot(item.data);
 
-        // 같은 ItemData가 그 슬롯에 이미 장착됨 = 토글 해제(아이템은 격자에 그대로 남겨둠).
-        if (playerEquipment.GetSlot(apiSlot) == item.data)
+        // 토글 해제: **클릭한 그 인스턴스가 바로 장착품**일 때만(장비 슬롯에서의 해제는 별도 핸들러).
+        // ※ ItemData 비교 금지 — 같은 종류 가방이 창고에 여러 개면 스왑이 토글로 오인돼 기존 장비가 유실됨.
+        if (playerEquipment.GetSlotInstance(apiSlot) == item)
         {
             playerEquipment.Unequip(apiSlot);
             ClearSelection();
@@ -3620,15 +3675,25 @@ public class CharacterPanelUI : MonoBehaviour
         if (apiSlot == EquipSlot.Backpack && prevInst != null && playerInventory != null)
             playerInventory.TransferBagToContainer(prevInst);
 
+        // 같은 ItemData 교체면 Equip/EquipWeapon 내부의 '같은 종류=토글 해제' 분기를 피하려 먼저 슬롯을 비운다.
+        // (prevInst는 이미 잡아뒀으니 아래에서 출발 격자로 회수 — 같은 종류 가방 교체가 유실되던 버그 픽스.)
+        if (prev != null && prev == item.data) playerEquipment.Unequip(apiSlot);
+
         bool ok = item.data.category == ItemCategory.Weapon
             ? playerEquipment.EquipWeapon(item.data)
             : playerEquipment.Equip(item.data);
+
+        // 회수할 기존 장비(인스턴스 우선, 없으면 데이터로 재구성). 같은 종류라도 다른 인스턴스면 회수 대상.
+        var oldItem = prevInst ?? (prev != null ? new ItemInstance(prev, 1) : null);
 
         if (!ok)
         {
             // 장착 실패 → 격자 원위치 복원(또는 자동 배치)
             if (placed != null && !grid.TryPlace(item, origX, origY, origRot))
                 grid.TryAutoPlace(item);
+            // 같은 종류라 먼저 비웠는데 실패한 극단적 경우 — 기존 장비도 잃지 않게 회수.
+            if (oldItem != null && playerEquipment.GetSlotInstance(apiSlot) == null)
+                ReturnItemToInventory(oldItem);
             ToastManager.Show("장착 실패", ToastManager.ToastType.Warning);
         }
         else
@@ -3637,9 +3702,14 @@ public class CharacterPanelUI : MonoBehaviour
             // 새 가방의 보관 내용물 → 휴대 격자(가방 안 짐이 따라옴).
             if (apiSlot == EquipSlot.Backpack && playerInventory != null)
                 playerInventory.TransferContainerToBag(item);
-            if (prev != null && prev != item.data)
-                // 교체로 빠진 기존 장비를 인벤(없으면 창고)로 회수 — 부착물 보존, 바닥 X.
-                ReturnItemToInventory(prevInst ?? new ItemInstance(prev, 1));
+            if (oldItem != null && oldItem != item)
+            {
+                // 교체로 빠진 기존 장비 = 새 장비가 있던 **출발 격자**로 되돌림(진짜 스왑 — 창고서 바꾸면 창고로).
+                // 빈 자리(새 장비가 비운 칸) 우선 → 안 되면 같은 격자 자동배치 → 그래도 안 되면 인벤/창고 폴백.
+                bool back = grid != null
+                    && ((origX >= 0 && grid.TryPlace(oldItem, origX, origY, origRot)) || grid.TryAutoPlace(oldItem));
+                if (!back) ReturnItemToInventory(oldItem);
+            }
         }
 
         ClearSelection();
