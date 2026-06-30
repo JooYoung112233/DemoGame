@@ -174,20 +174,31 @@ public class GridDragManager : MonoBehaviour
     public bool suspended;            // true면 픽업/우클릭 무시(컨텍스트 메뉴 등 떠 있을 때)
     public System.Action onChanged;   // 드롭/이동 후 호출(소비측 갱신)
 
-    const float WHEEL_SENSITIVITY = 40f;   // 평상시 휠 속도(일반 탭 창고와 동일). 드래그 중엔 0으로 끄고 수동 폴링.
-
     public void Init(RectTransform canvas) { canvasRT = canvas; }
     public void Register(GridPanel p) { if (p != null && !panels.Contains(p)) panels.Add(p); }
     public void Clear() { panels.Clear(); CancelDrag(); }
+
+    /// <summary>마우스 아래 패널을 휠로 스크롤(EventSystem 비의존, 직접 폴링).</summary>
+    void PollWheel()
+    {
+        float wheelY = GameInput.mouseScrollDelta.y;
+        if (Mathf.Abs(wheelY) <= 0.01f) return;
+        for (int i = 0; i < panels.Count; i++)
+            if (panels[i].scrollRect != null && panels[i].CellAtMouse(out _, out _))
+            { WheelOnlyScrollRect.WheelStep(panels[i].scrollRect, wheelY); break; }
+    }
 
     void Update()
     {
         if (panels.Count == 0) return;
 
-        // 휠 속도/충돌 정리: 드래그 중엔 EventSystem 휠을 끄고(중복 방지) 수동 폴링, 평소엔 빠르게.
+        // 휠은 EventSystem(InputSystem 액션) 전달에 의존하지 않고 직접 폴링한다(드래그/비드래그 모두).
+        // EventSystem 휠은 중복/오동작 방지로 항상 끔(sensitivity=0). 컨텍스트 메뉴(suspended·비드래그) 땐 휠 무시.
         for (int i = 0; i < panels.Count; i++)
             if (panels[i].scrollRect != null)
-                panels[i].scrollRect.scrollSensitivity = active ? 0f : WHEEL_SENSITIVITY;
+                panels[i].scrollRect.scrollSensitivity = 0f;
+        if (!suspended || active)
+            PollWheel();
 
         if (suspended && !active) return;   // 메뉴 떠 있을 땐 픽업 금지(진행 중 드래그는 계속)
 
@@ -195,14 +206,6 @@ public class GridDragManager : MonoBehaviour
         {
             UpdateGhost();
             UpdateHighlight();
-
-            // 아이템을 잡은 채로도 휠로 스크롤(마우스 아래 패널). EventSystem 휠은 위에서 sensitivity=0으로 차단됨.
-            float wheelY = GameInput.mouseScrollDelta.y;
-            if (Mathf.Abs(wheelY) > 0.01f)
-                for (int i = 0; i < panels.Count; i++)
-                    if (panels[i].scrollRect != null && panels[i].CellAtMouse(out _, out _))
-                    { WheelOnlyScrollRect.WheelStep(panels[i].scrollRect, wheelY); break; }
-
             if (GameInput.GetMouseButtonDown(1)) { CancelDrag(); return; }
             if (GameInput.GetMouseButtonUp(0)) Drop();
             return;

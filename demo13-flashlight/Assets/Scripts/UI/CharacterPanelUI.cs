@@ -2226,23 +2226,23 @@ public class CharacterPanelUI : MonoBehaviour
         if (confirmGO != null && confirmGO.activeSelf)
             return;
 
-        // 휠 충돌 정리: 드래그 중엔 EventSystem 휠을 끄고(중복 방지) 수동 폴링, 평소엔 빠르게.
-        // 프리팹 경로(GenerateUI 스킵)에선 leftScrollRect가 null이라 containerGridRoot로 재바인딩(재베이크 불필요).
+        // 휠은 EventSystem(InputSystem 액션) 전달에 의존하지 않고 직접 폴링한다(드래그/비드래그 모두).
+        // EventSystem 휠은 중복 방지로 항상 끔. 프리팹 경로(GenerateUI 스킵)에선 leftScrollRect가 null이라 재바인딩.
         if (leftScrollRect == null && containerGridRoot != null)
             leftScrollRect = containerGridRoot.GetComponentInParent<ScrollRect>();
-        if (leftScrollRect != null)
-            leftScrollRect.scrollSensitivity = isDragging ? 0f : 40f;
+        if (leftScrollRect != null && leftScrollRect.gameObject.activeInHierarchy)
+        {
+            leftScrollRect.scrollSensitivity = 0f;
+            float wheelY = GameInput.mouseScrollDelta.y;
+            if (Mathf.Abs(wheelY) > 0.01f && (isDragging || PointerOverLeftScroll()))
+                WheelOnlyScrollRect.WheelStep(leftScrollRect, wheelY);
+        }
 
         if (isDragging)
         {
             // 1제스처 드래그: 누른 상태로 끌고, 떼면 놓는다.
             UpdateGhostPosition();
             UpdateHighlight();
-
-            // 아이템을 잡은 채로도 휠로 창고 스크롤(드래그 중엔 EventSystem 휠을 sensitivity=0으로 꺼 직접 폴링).
-            float wheelY = GameInput.mouseScrollDelta.y;
-            if (Mathf.Abs(wheelY) > 0.01f && leftScrollRect != null && leftScrollRect.gameObject.activeInHierarchy)
-                WheelOnlyScrollRect.WheelStep(leftScrollRect, wheelY);
 
             if (GameInput.GetKeyDown(KeyCode.R))
                 ToggleDragRotation();
@@ -2824,6 +2824,14 @@ public class CharacterPanelUI : MonoBehaviour
             }
         }
         return false;
+    }
+
+    /// <summary>마우스가 좌측 창고 스크롤 뷰포트 위에 있는지(비드래그 휠 스크롤 범위 제한용).</summary>
+    bool PointerOverLeftScroll()
+    {
+        if (leftScrollRect == null) return false;
+        var vp = leftScrollRect.viewport != null ? leftScrollRect.viewport : leftScrollRect.transform as RectTransform;
+        return vp != null && RectTransformUtility.RectangleContainsScreenPoint(vp, GameInput.mousePosition, null);
     }
 
     /// <summary>드래그 footprint가 (x,y)에서 겹치는 '단일' 아이템을 찾는다(부분 중첩 허용).
