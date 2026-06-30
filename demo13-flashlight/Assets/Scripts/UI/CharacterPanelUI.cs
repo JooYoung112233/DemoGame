@@ -453,8 +453,10 @@ public class CharacterPanelUI : MonoBehaviour
                 rt.anchorMin = new Vector2(0, 1); rt.anchorMax = new Vector2(0, 1); rt.pivot = new Vector2(0, 1);
                 rt.anchoredPosition = new Vector2(gx * cellTotal, -gy * cellTotal);
                 rt.sizeDelta = new Vector2(CELL_SIZE, CELL_SIZE);
-                slotGO.GetComponent<Image>().color = UITheme.PanelAlt;
-                popupSlotImages[gx, gy] = slotGO.GetComponent<Image>();
+                var pImg = slotGO.GetComponent<Image>();
+                pImg.color = UITheme.PanelAlt;
+                UISkin.Cell(pImg);   // 시안: storage_box 격자 셀
+                popupSlotImages[gx, gy] = pImg;
             }
 
         RefreshContainerItems(grid, popupGridRoot, false);   // 수색 무관(항상 공개)
@@ -696,6 +698,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         rightPanelBg = go.AddComponent<Image>();
         rightPanelBg.color = UITheme.Panel;
+        UISkin.Panel(rightPanelBg);   // 시안: box 프레임(가방/중앙 패널 — 텍스트는 밝게 유지)
 
         // 상단 패널 제목
         var title = MakeText(rightPanel, "MidTitle", "장비 / 소지품",
@@ -969,7 +972,8 @@ public class CharacterPanelUI : MonoBehaviour
         charPanel.anchorMax = new Vector2(0.325f, 0.93f);
         charPanel.offsetMin = Vector2.zero;
         charPanel.offsetMax = Vector2.zero;
-        go.AddComponent<Image>().color = UITheme.Panel;
+        var charBg = go.AddComponent<Image>(); charBg.color = UITheme.Panel;
+        UISkin.Panel(charBg);   // 시안: box 프레임(캐릭터/장비 패널)
 
         var title = MakeText(charPanel, "CharTitle", "캐릭터 상태",
             new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, UITheme.TextBright, TextAnchor.MiddleCenter);
@@ -1590,6 +1594,7 @@ public class CharacterPanelUI : MonoBehaviour
 
                 var img = slotGO.AddComponent<Image>();
                 img.color = UITheme.PanelAlt;
+                UISkin.Cell(img);   // 시안: storage_box 격자 셀
                 slotImages[gx, gy] = img;
             }
         }
