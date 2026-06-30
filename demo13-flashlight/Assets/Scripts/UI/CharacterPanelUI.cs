@@ -54,6 +54,7 @@ public class CharacterPanelUI : MonoBehaviour
     // 좌측 상자 패널
     [SerializeField] RectTransform leftPanel;
     [SerializeField] Image leftPanelBg;
+    ScrollRect leftScrollRect;   // 창고 세로 스크롤 — 드래그 중 휠 폴링용(직렬화 불필요, 빌드 시 세팅)
     [SerializeField] Text leftTitleText;
     [SerializeField] Text leftWeightText;   // 우상단 무게 표시(밝은 텍스트, 어두운 storage 프레임 위)
     [SerializeField] Button takeAllBtn;      // 푸터 좌: 좌측 격자 → 플레이어 인벤 일괄 이동
@@ -899,6 +900,7 @@ public class CharacterPanelUI : MonoBehaviour
         containerGridRoot.sizeDelta = new Vector2(PANEL_WIDTH - 20, 400);
 
         var leftScroll = viewportGO.GetComponent<ScrollRect>();
+        leftScrollRect = leftScroll;   // 드래그 중 휠 폴링용
         leftScroll.horizontal = false; leftScroll.vertical = true;
         leftScroll.scrollSensitivity = 28f;
         leftScroll.movementType = ScrollRect.MovementType.Clamped;
@@ -2230,6 +2232,15 @@ public class CharacterPanelUI : MonoBehaviour
             UpdateGhostPosition();
             UpdateHighlight();
 
+            // 아이템을 잡은 채로도 휠로 창고 스크롤(드래그 중엔 EventSystem 스크롤이 막혀 직접 폴링).
+            float wheelY = GameInput.mouseScrollDelta.y;
+            if (Mathf.Abs(wheelY) > 0.01f && leftScrollRect != null
+                && leftScrollRect.gameObject.activeInHierarchy && leftScrollRect.vertical)
+            {
+                leftScrollRect.verticalNormalizedPosition = Mathf.Clamp01(
+                    leftScrollRect.verticalNormalizedPosition + Mathf.Sign(wheelY) * 0.06f);
+            }
+
             if (GameInput.GetKeyDown(KeyCode.R))
                 ToggleDragRotation();
 
@@ -2857,8 +2868,8 @@ public class CharacterPanelUI : MonoBehaviour
             return false;       // 내부 꽉참 → 원상복구
         }
 
-        // 스왑 시도: 대상 아이템을 빼고, 새 아이템 배치, 이전 아이템은 드래그 시작 위치로.
-        // (1제스처 드래그이므로 떼는 즉시 스왑 완료 — 들고 다니지 않는다.)
+        // 스왑 시도: A↔B 정확 1:1 교환. A는 B 자리(oldX,oldY)에, B는 A 출발지(dragOrig)에.
+        // 둘 다 서로 자리에 정확히 들어갈 때만 교환. 안 맞으면 원위치 복귀(자동 재배치=좌상단 흩뿌리기 금지).
         var oldItem = target.item;
         bool oldRotated = target.rotated;
         int oldX = target.gridX;
@@ -2866,31 +2877,21 @@ public class CharacterPanelUI : MonoBehaviour
         var sourceGrid = dragSourceGrid; // dragItem이 빠져나온 격자 (그 칸은 현재 비어있음)
         grid.Remove(target);
 
-        if (grid.CanPlace(dragItem, x, y, dragRotated))
+        bool aFits = grid.CanPlace(dragItem, oldX, oldY, dragRotated);
+        bool bFits = sourceGrid != null
+                     && sourceGrid.CanPlace(oldItem, dragOrigX, dragOrigY, dragOrigRotated);
+
+        if (aFits && bFits)
         {
-            grid.TryPlace(dragItem, x, y, dragRotated);
-
-            // 빠진 아이템을 드래그 출발지로 되돌린다.
-            bool placedOld = false;
-            if (sourceGrid != null)
-            {
-                placedOld = sourceGrid.TryPlace(oldItem, dragOrigX, dragOrigY, dragOrigRotated)
-                            || sourceGrid.TryAutoPlace(oldItem);
-            }
-            if (!placedOld)
-                placedOld = grid.TryAutoPlace(oldItem);
-            if (!placedOld)
-                ReturnItemToInventory(oldItem);   // 스왑 오버플로도 바닥 X
-
+            grid.TryPlace(dragItem, oldX, oldY, dragRotated);
+            sourceGrid.TryPlace(oldItem, dragOrigX, dragOrigY, dragOrigRotated);
             EndDrag();
-            return true; // 스왑 완료
+            return true; // 깔끔한 1:1 스왑
         }
-        else
-        {
-            // 배치 불가 → 기존 아이템 복원 (드래그 아이템은 호출부에서 원위치)
-            grid.TryPlace(oldItem, oldX, oldY, oldRotated);
-            return false;
-        }
+
+        // 교환 불가(크기·회전 불일치 등) → 기존 아이템 원위치. A는 호출부 EnsureDragEnded가 출발지로 되돌림.
+        grid.TryPlace(oldItem, oldX, oldY, oldRotated);
+        return false;
     }
 
     // ── 드래그 종료 ──
