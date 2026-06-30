@@ -31,6 +31,9 @@ public class GridPanel
     /// <summary>아이템 셀 배경색(희귀도 등). null이면 기본.</summary>
     public System.Func<ItemInstance, bool, Color> cellColor;
 
+    /// <summary>이 패널의 세로 스크롤(있으면). 드래그 중 휠 폴링·속도 제어용. 없으면 null.</summary>
+    public ScrollRect scrollRect;
+
     Image[,] slots;
 
     public bool Accepts(ItemInstance item) => canAccept == null || canAccept(item);
@@ -171,6 +174,8 @@ public class GridDragManager : MonoBehaviour
     public bool suspended;            // true면 픽업/우클릭 무시(컨텍스트 메뉴 등 떠 있을 때)
     public System.Action onChanged;   // 드롭/이동 후 호출(소비측 갱신)
 
+    const float WHEEL_SENSITIVITY = 40f;   // 평상시 휠 속도(일반 탭 창고와 동일). 드래그 중엔 0으로 끄고 수동 폴링.
+
     public void Init(RectTransform canvas) { canvasRT = canvas; }
     public void Register(GridPanel p) { if (p != null && !panels.Contains(p)) panels.Add(p); }
     public void Clear() { panels.Clear(); CancelDrag(); }
@@ -178,12 +183,26 @@ public class GridDragManager : MonoBehaviour
     void Update()
     {
         if (panels.Count == 0) return;
+
+        // 휠 속도/충돌 정리: 드래그 중엔 EventSystem 휠을 끄고(중복 방지) 수동 폴링, 평소엔 빠르게.
+        for (int i = 0; i < panels.Count; i++)
+            if (panels[i].scrollRect != null)
+                panels[i].scrollRect.scrollSensitivity = active ? 0f : WHEEL_SENSITIVITY;
+
         if (suspended && !active) return;   // 메뉴 떠 있을 땐 픽업 금지(진행 중 드래그는 계속)
 
         if (active)
         {
             UpdateGhost();
             UpdateHighlight();
+
+            // 아이템을 잡은 채로도 휠로 스크롤(마우스 아래 패널). EventSystem 휠은 위에서 sensitivity=0으로 차단됨.
+            float wheelY = GameInput.mouseScrollDelta.y;
+            if (Mathf.Abs(wheelY) > 0.01f)
+                for (int i = 0; i < panels.Count; i++)
+                    if (panels[i].scrollRect != null && panels[i].CellAtMouse(out _, out _))
+                    { WheelOnlyScrollRect.WheelStep(panels[i].scrollRect, wheelY); break; }
+
             if (GameInput.GetMouseButtonDown(1)) { CancelDrag(); return; }
             if (GameInput.GetMouseButtonUp(0)) Drop();
             return;
@@ -255,7 +274,18 @@ public class GridDragManager : MonoBehaviour
             if (!p.CellAtMouse(out int gx, out int gy)) continue;
             if (!p.Accepts(item)) { CancelDrag(); return; }
             int ox = OriginCell(p, true), oy = OriginCell(p, false);
-            bool consumed = p.onDrop != null && p.onDrop(item, srcPanel, ox, oy);
+
+            // 같은 격자 안에서 다른 아이템 위에 떨굼 → 스택/스왑(부분 중첩 허용). 빈 칸이면 onDrop이 배치.
+            bool consumed;
+            if (p == srcPanel && TryInternalSwap(p, item, ox, oy, out bool swapped))
+            {
+                consumed = swapped;
+                if (swapped) p.Refresh();
+            }
+            else
+            {
+                consumed = p.onDrop != null && p.onDrop(item, srcPanel, ox, oy);
+            }
             EndGhost();
             active = false;
             if (!consumed && srcPanel != null)   // 처리 안 됐으면 출발지로 복귀
@@ -269,6 +299,62 @@ public class GridDragManager : MonoBehaviour
             return;
         }
         CancelDrag();   // 격자 밖 → 원위치
+    }
+
+    /// <summary>같은 격자 안에서 다른 아이템 위에 떨굼 → 스택 또는 A↔B 1:1 스왑.
+    /// 반환 true = 이 메서드가 드롭을 책임짐(스왑/스택 완료 또는 실패→호출부가 출발지로 bounce).
+    /// 반환 false = 빈 칸 등 → 호출부가 onDrop으로 처리.
+    /// 드래그 footprint와 겹치는 단일 아이템을 타겟으로 잡으므로 세로/가로 부분 중첩도 스왑됨.</summary>
+    bool TryInternalSwap(GridPanel p, ItemInstance item, int ox, int oy, out bool placed)
+    {
+        placed = false;
+        var g = p.grid;
+        if (g == null || item?.data == null) return false;
+        if (g.CanPlace(item, ox, oy, dragRotated)) return false;   // 빈 칸 → onDrop이 배치
+
+        int w = dragRotated ? item.data.gridHeight : item.data.gridWidth;
+        int h = dragRotated ? item.data.gridWidth : item.data.gridHeight;
+
+        // footprint와 겹치는 '단일' 아이템 검출(부분 중첩 허용)
+        InventoryGrid.PlacedItem target = null;
+        for (int gx = ox; gx < ox + w; gx++)
+            for (int gy = oy; gy < oy + h; gy++)
+            {
+                var pp = g.GetAt(gx, gy);
+                if (pp == null) continue;
+                if (target == null) target = pp;
+                else if (pp != target) return false;   // 둘 이상 겹침 → onDrop(보통 실패→bounce)
+            }
+        if (target == null) return false;
+
+        // 같은 아이템이면 스택 우선
+        if (target.item != null && target.item.CanStackWith(item))
+        {
+            int remaining = target.item.TryStack(item);
+            g.NotifyChanged();
+            placed = remaining <= 0;   // 완전 흡수=소비, 일부면 나머지 bounce
+            return true;
+        }
+
+        // 1:1 스왑: A는 B 자리(oldX,oldY)에, B는 A 출발지(dragPlaced)에. 둘 다 맞을 때만(아니면 원복).
+        var oldItem = target.item;
+        bool oldRot = target.rotated;
+        int oldX = target.gridX, oldY = target.gridY;
+        g.Remove(target);
+
+        bool aFits = p.Accepts(item) && g.CanPlace(item, oldX, oldY, dragRotated);
+        bool bFits = g.CanPlace(oldItem, dragPlaced.gridX, dragPlaced.gridY, oldRot);
+        if (aFits && bFits)
+        {
+            g.TryPlace(item, oldX, oldY, dragRotated);
+            g.TryPlace(oldItem, dragPlaced.gridX, dragPlaced.gridY, oldRot);
+            placed = true;
+            return true;
+        }
+
+        g.TryPlace(oldItem, oldX, oldY, oldRot);   // 스왑 불가 → B 원복, A는 호출부가 출발지로 bounce
+        placed = false;
+        return true;
     }
 
     int OriginCell(GridPanel p, bool xAxis)

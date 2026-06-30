@@ -1022,6 +1022,25 @@ public class ShopUI : MonoBehaviour
         stashPanel = new GridPanel { slotRoot = invSlotRoot, itemRoot = invItemRoot, hitRoot = invSlotRoot };
         trayPanel  = new GridPanel { slotRoot = sellTraySlotRoot, itemRoot = sellTrayItemRoot, hitRoot = sellTraySlotRoot };
 
+        // 창고(stash) 스크롤 = 일반 탭 창고와 동일 동작: 휠 빠르게 + 드래그-스크롤 버그 차단 + 스크롤바.
+        // invSlotRoot이 [SerializeField]라 프리팹/코드 두 경로 모두 부모 ScrollRect를 런타임에 찾아 세팅(재베이크 불필요).
+        var stashSR = invSlotRoot != null ? invSlotRoot.GetComponentInParent<ScrollRect>() : null;
+        if (stashSR != null)
+        {
+            stashSR.horizontal = false; stashSR.vertical = true;
+            stashSR.scrollSensitivity = 40f;
+            stashSR.movementType = ScrollRect.MovementType.Clamped;
+            // 아이템을 들고 격자를 끌 때 창고가 멋대로 스크롤되던 버그 차단(휠은 통과).
+            var content = invSlotRoot.parent as RectTransform;
+            if (content != null && content.GetComponent<ScrollDragBlocker>() == null)
+            {
+                var blk = content.gameObject.AddComponent<ScrollDragBlocker>();
+                blk.targetScroll = stashSR;
+            }
+            EnsureStashScrollbar(stashSR);
+        }
+        stashPanel.scrollRect = stashSR;
+
         stashPanel.onDrop = (item, src, x, y) =>
         {
             var g = CurrentStashGrid;
@@ -2428,6 +2447,47 @@ public class ShopUI : MonoBehaviour
         invItemRoot = itemRoot;
 
         // content 크기를 그리드에 맞게 — 실제 크기는 RefreshInvGrid 에서 설정
+    }
+
+    /// <summary>창고 세로 스크롤바를 런타임 생성(없을 때만) — 일반 탭 창고처럼 항상 보이게. 프리팹/코드 두 경로 공용.</summary>
+    void EnsureStashScrollbar(ScrollRect sr)
+    {
+        if (sr == null || sr.verticalScrollbar != null) return;
+        var area = sr.GetComponent<RectTransform>();
+        var parentRT = area != null ? area.parent as RectTransform : null;
+        if (parentRT == null) return;
+
+        // 스크롤 영역 우측을 비워 스크롤바 자리 확보
+        area.offsetMax = new Vector2(-18f, area.offsetMax.y);
+
+        var sbGO = new GameObject("StashScrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+        sbGO.transform.SetParent(parentRT, false);
+        var sbRT = sbGO.GetComponent<RectTransform>();
+        sbRT.anchorMin = new Vector2(1, 0); sbRT.anchorMax = new Vector2(1, 1); sbRT.pivot = new Vector2(1, 0.5f);
+        sbRT.offsetMin = new Vector2(-14f, area.offsetMin.y);
+        sbRT.offsetMax = new Vector2(-4f,  area.offsetMax.y);
+        sbGO.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.3f);   // 트랙
+
+        var slide = new GameObject("SlidingArea", typeof(RectTransform));
+        slide.transform.SetParent(sbGO.transform, false);
+        var slRT = slide.GetComponent<RectTransform>();
+        slRT.anchorMin = Vector2.zero; slRT.anchorMax = Vector2.one;
+        slRT.offsetMin = Vector2.zero; slRT.offsetMax = Vector2.zero;
+
+        var handleGO = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+        handleGO.transform.SetParent(slide.transform, false);
+        var hRT = handleGO.GetComponent<RectTransform>();
+        hRT.anchorMin = Vector2.zero; hRT.anchorMax = Vector2.one;
+        hRT.offsetMin = Vector2.zero; hRT.offsetMax = Vector2.zero;
+        handleGO.GetComponent<Image>().color = UITheme.Divider;
+
+        var sb = sbGO.GetComponent<Scrollbar>();
+        sb.direction = Scrollbar.Direction.BottomToTop;
+        sb.handleRect = hRT;
+        sb.targetGraphic = handleGO.GetComponent<Image>();
+
+        sr.verticalScrollbar = sb;
+        sr.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;   // 항상 표시
     }
 
     // ── 스크롤 영역 헬퍼 ──────────────────────────────────────

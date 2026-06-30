@@ -54,7 +54,7 @@ public class CharacterPanelUI : MonoBehaviour
     // 좌측 상자 패널
     [SerializeField] RectTransform leftPanel;
     [SerializeField] Image leftPanelBg;
-    ScrollRect leftScrollRect;   // 창고 세로 스크롤 — 드래그 중 휠 폴링용(직렬화 불필요, 빌드 시 세팅)
+    ScrollRect leftScrollRect;   // 창고 세로 스크롤 — 드래그 중 휠 폴링용. 코드생성=GenerateUI에서 세팅, 프리팹 경로=HandleDragAndDrop에서 containerGridRoot로 재바인딩
     [SerializeField] Text leftTitleText;
     [SerializeField] Text leftWeightText;   // 우상단 무게 표시(밝은 텍스트, 어두운 storage 프레임 위)
     [SerializeField] Button takeAllBtn;      // 푸터 좌: 좌측 격자 → 플레이어 인벤 일괄 이동
@@ -2226,20 +2226,23 @@ public class CharacterPanelUI : MonoBehaviour
         if (confirmGO != null && confirmGO.activeSelf)
             return;
 
+        // 휠 충돌 정리: 드래그 중엔 EventSystem 휠을 끄고(중복 방지) 수동 폴링, 평소엔 빠르게.
+        // 프리팹 경로(GenerateUI 스킵)에선 leftScrollRect가 null이라 containerGridRoot로 재바인딩(재베이크 불필요).
+        if (leftScrollRect == null && containerGridRoot != null)
+            leftScrollRect = containerGridRoot.GetComponentInParent<ScrollRect>();
+        if (leftScrollRect != null)
+            leftScrollRect.scrollSensitivity = isDragging ? 0f : 40f;
+
         if (isDragging)
         {
             // 1제스처 드래그: 누른 상태로 끌고, 떼면 놓는다.
             UpdateGhostPosition();
             UpdateHighlight();
 
-            // 아이템을 잡은 채로도 휠로 창고 스크롤(드래그 중엔 EventSystem 스크롤이 막혀 직접 폴링).
+            // 아이템을 잡은 채로도 휠로 창고 스크롤(드래그 중엔 EventSystem 휠을 sensitivity=0으로 꺼 직접 폴링).
             float wheelY = GameInput.mouseScrollDelta.y;
-            if (Mathf.Abs(wheelY) > 0.01f && leftScrollRect != null
-                && leftScrollRect.gameObject.activeInHierarchy && leftScrollRect.vertical)
-            {
-                leftScrollRect.verticalNormalizedPosition = Mathf.Clamp01(
-                    leftScrollRect.verticalNormalizedPosition + Mathf.Sign(wheelY) * 0.06f);
-            }
+            if (Mathf.Abs(wheelY) > 0.01f && leftScrollRect != null && leftScrollRect.gameObject.activeInHierarchy)
+                WheelOnlyScrollRect.WheelStep(leftScrollRect, wheelY);
 
             if (GameInput.GetKeyDown(KeyCode.R))
                 ToggleDragRotation();
@@ -2823,6 +2826,25 @@ public class CharacterPanelUI : MonoBehaviour
         return false;
     }
 
+    /// <summary>드래그 footprint가 (x,y)에서 겹치는 '단일' 아이템을 찾는다(부분 중첩 허용).
+    /// 0개 또는 2개 이상 겹치면 null(스왑 모호 → 호출부가 원위치 복귀).</summary>
+    InventoryGrid.PlacedItem FindOverlapTarget(InventoryGrid grid, int x, int y)
+    {
+        if (grid == null || dragItem?.data == null) return null;
+        int w = dragRotated ? dragItem.data.gridHeight : dragItem.data.gridWidth;
+        int h = dragRotated ? dragItem.data.gridWidth : dragItem.data.gridHeight;
+        InventoryGrid.PlacedItem found = null;
+        for (int gx = x; gx < x + w; gx++)
+            for (int gy = y; gy < y + h; gy++)
+            {
+                var p = grid.GetAt(gx, gy);
+                if (p == null) continue;
+                if (found == null) found = p;
+                else if (p != found) return null;
+            }
+        return found;
+    }
+
     bool TryPlaceInGrid(InventoryGrid grid, int x, int y)
     {
         // 빈 칸이면 직접 배치
@@ -2833,8 +2855,9 @@ public class CharacterPanelUI : MonoBehaviour
             return true;
         }
 
-        // 이미 있는 칸 → 스택 또는 스왑
-        var target = grid.GetAt(x, y);
+        // 이미 있는 칸 → 스택 또는 스왑. 원점 1칸이 아니라 footprint와 겹치는 단일 아이템을 잡아
+        // 세로/가로 부분 중첩에도 타겟을 검출(예전엔 원점이 빈 칸에 떨어지면 스왑이 안 됐음).
+        var target = FindOverlapTarget(grid, x, y);
         if (target == null) return false;
 
         // 스택 시도
@@ -3802,6 +3825,19 @@ public class WheelOnlyScrollRect : UnityEngine.UI.ScrollRect
     public override void OnBeginDrag(PointerEventData e) { }
     public override void OnDrag(PointerEventData e) { }
     public override void OnEndDrag(PointerEventData e) { }
+
+    /// <summary>휠 1 notch당 pixelsPerNotch만큼 세로 스크롤(내용 높이와 무관하게 일정 속도).
+    /// 드래그 중 수동 폴링·평상시 공용 헬퍼(창고 일반/상점 동일 속도).</summary>
+    public static void WheelStep(UnityEngine.UI.ScrollRect sr, float wheelY, float pixelsPerNotch = 170f)
+    {
+        if (sr == null || !sr.vertical || sr.content == null) return;
+        var vp = sr.viewport != null ? sr.viewport : sr.transform as RectTransform;
+        if (vp == null) return;
+        float scrollable = sr.content.rect.height - vp.rect.height;
+        if (scrollable <= 1f) return;
+        sr.verticalNormalizedPosition = Mathf.Clamp01(
+            sr.verticalNormalizedPosition + Mathf.Sign(wheelY) * (pixelsPerNotch / scrollable));
+    }
 }
 
 /// <summary>
