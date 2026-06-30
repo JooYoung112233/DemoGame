@@ -97,6 +97,7 @@ public class InventoryGrid
     public PlacedItem GetAt(int x, int y)
     {
         if (x < 0 || x >= width || y < 0 || y >= height) return null;
+        if (grid == null) grid = new PlacedItem[width, height];   // 역직렬화 등으로 grid 배열이 비면 지연 할당(NRE 방지)
         return grid[x, y];
     }
 
@@ -110,6 +111,7 @@ public class InventoryGrid
     public bool IsEmpty(int x, int y)
     {
         if (x < 0 || x >= width || y < 0 || y >= height) return false;
+        if (grid == null) grid = new PlacedItem[width, height];   // NRE 방지(지연 할당)
         return grid[x, y] == null;
     }
 

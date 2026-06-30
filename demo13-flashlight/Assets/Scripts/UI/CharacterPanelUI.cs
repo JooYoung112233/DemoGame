@@ -882,7 +882,7 @@ public class CharacterPanelUI : MonoBehaviour
         MakeChildText(sortGO.transform, "SORT", 13, new Color(0.15f, 0.12f, 0.09f));
 
         // ── 스크롤 뷰포트 (헤더+탭 아래 ~ 푸터 위) + 격자 content (창고 30~100줄 대응) ──
-        var viewportGO = new GameObject("LeftViewport", typeof(RectTransform), typeof(RectMask2D), typeof(ScrollRect));
+        var viewportGO = new GameObject("LeftViewport", typeof(RectTransform), typeof(RectMask2D), typeof(WheelOnlyScrollRect));
         viewportGO.transform.SetParent(leftPanel, false);
         var vpRT = viewportGO.GetComponent<RectTransform>();
         vpRT.anchorMin = new Vector2(0, 0); vpRT.anchorMax = new Vector2(1, 1);
@@ -932,7 +932,7 @@ public class CharacterPanelUI : MonoBehaviour
         sb.targetGraphic = handleGO.GetComponent<Image>();
 
         leftScroll.verticalScrollbar = sb;
-        leftScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+        leftScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;   // 항상 표시(안 보이던 문제)
 
         // content 영역의 드래그가 ScrollRect 스크롤을 흔들지 않도록 차단(휠/스크롤바로만 스크롤).
         var blocker = gridGO.AddComponent<ScrollDragBlocker>();
@@ -3791,6 +3791,16 @@ public class CharacterPanelUI : MonoBehaviour
     }
 
     #endregion
+}
+
+/// <summary>드래그로는 스크롤되지 않고 **마우스 휠로만** 스크롤되는 ScrollRect.
+/// (아이템을 들고 격자 위를 드래그할 때 창고가 멋대로 스크롤되던 문제 방지 — 휠 전용.)
+/// OnScroll(휠)은 base 그대로 동작, 드래그 핸들러만 무효화.</summary>
+public class WheelOnlyScrollRect : UnityEngine.UI.ScrollRect
+{
+    public override void OnBeginDrag(PointerEventData e) { }
+    public override void OnDrag(PointerEventData e) { }
+    public override void OnEndDrag(PointerEventData e) { }
 }
 
 /// <summary>
