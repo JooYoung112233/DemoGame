@@ -1,7 +1,17 @@
 # 개발 핸드오프 (이어서 작업)
 
 > 다른 PC에서 이어서 작업할 때 **여기부터** 읽기. `/build`로 이어서 진행.
-> 최신 갱신: 2026-06-24
+> 최신 갱신: 2026-06-29
+
+## 지금 위치 (2026-06-29) — UI 프리팹화 풀 + 특성 효과 배선 1차
+
+- **UI 프리팹화 전체(다른 PC 작업) 풀 완료**(b1c612e): 22개 패널 코드생성→프리팹 베이크 + UISkin 시안 스킨. 상세는 `docs/ui-prefab-plan.md`. (옛 로컬 Systems.unity/PlayerRig.prefab는 stash@{0} 보관 — 원격이 최신.)
+- **특성 효과 말단 배선 1차(미커밋)** — 핵심 캐릭터 스탯 8개 키. 해금만 되고 효과 미적용이던 것 → 실제 read-site 연결:
+  - `TraitManager` 정적 헬퍼 `Mod`/`AddVal`/`Flag`(null-safe) 추가.
+  - `TopDownPlayer`(stamina_max/regen·dodge_iframe/stamina_cost) · `PlayerInventory`(weight_max) · `SurvivalStats`(hunger_thirst_rate) · `Health`(damage_taken·low_hp_damage_taken, 플레이어 게이팅·저체력 0.3 placeholder).
+  - 정적 컴파일 감사 통과. 상세·잔여 키는 `docs/traits.md` 결정 로그 2026-06-29.
+- **다음 코드 후보**: ⑤-2 **특성 효과 배선 2차**(전투 finesse·경제/회수·잠행 — 대상 시스템 존재하는 것부터) · ⑥ **FOV 어둠 오버레이** · ⑦ 총기 무기 · **PP 획득 루트**(레이드/평판→GrantPP).
+- **Unity 테스트 대기**: K로 특성 해금(예: 노새=weight_max, 끈질긴 폐활량=stamina) → 효과 체감(무게 상한↑·스태미너↑). 허약한 위장=허기 빨리, 유리 어깨=받는 피해↑.
 
 ## 지금 위치 (2026-06-24) — 인벤토리 대규모 개편 완료, 전부 커밋·푸시됨
 

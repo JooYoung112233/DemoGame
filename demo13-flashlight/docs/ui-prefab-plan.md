@@ -55,7 +55,9 @@
 7. ✅ **대형 패널 `ShopUI`(2441줄)**(2026-06-27): 스켈레톤 ref 다수 직렬화(consign 슬롯 배열은 `readonly` 제거 후 직렬화)+`EditorBake`+Canvas 가드. 동적 셀/행은 컨테이너 루트만 직렬화·셀은 절차 유지. 244/244.
 8. ✅ **기타 2차 패널 7종**(2026-06-27): QuestLogUI·RaidMapUI·DispatchUI·RadioUI·HideoutUI·SleepUI·TitleScreen. 각 `[SerializeField]`+`EditorBake`+Show→프리팹 우선(자가부트)+Canvas 가드. RaidMap만 동적폰트→ApplyFonts, TitleScreen은 EnsureEventSystem을 Show로 이동(PauseMenu 패턴). **주의**: QuestLog/Dispatch/Radio는 "열 때마다 캔버스 재생성" 구조라 프리팹은 스켈레톤 보유 위주(완전 프리팹화는 후속 리팩터 필요) — 추가형·폴백 안전.
 
-> ✅ **§4-A 완료: 코드 생성 UI 22종 전부 프리팹 베이크 가능 + 부트스트랩 프리팹 우선화.** 사용자: `프리팹 베이크/── 전부 ──` → Systems 재빌드 → 플레이 검증. 다음은 §4-B 스킨.
+9. ✅ **누락분 `TraitPanelUI`(K 토글 특성 패널)**(2026-06-29): 1차 전환 때 빠져 있던 패널. 다른 패널과 달리 **K키 전용 토글**이라 폴링용 영속 인스턴스 필요 → **프리팹 인스턴스 영속 보유 + 캔버스만 토글**(SetVisible) 모델. 정적 스켈레톤(패널/헤더/PP/버튼/스크롤)만 `EditorBake`로 베이크, 동적 특성 행은 런타임 `Rebuild`. `[SerializeField]` canvas/listContent/ppText/debugPpBtn/closeBtn + `ApplyFonts`(동적 KR 폰트 재바인딩) + `WireEvents`(+10PP·X onClick 재부착) + 프리팹 우선 `EnsureInstance`. 베이크 엔트리 추가. 57/57.
+
+> ✅ **§4-A 완료: 코드 생성 UI 23종 전부 프리팹 베이크 가능 + 부트스트랩 프리팹 우선화.** (2026-06-29 TraitPanelUI 합류) 사용자: `프리팹 베이크/── 전부 ──`(또는 `TraitPanelUI`) → Systems 재빌드 불필요(자가부트) → 플레이 검증. 다음은 §4-B 스킨.
 
 ### 4-B. 시안 스킨 적용 (전환 완료 후 — 보류)
 - 9-slice 자산 셋업 + 시안 스프라이트 입히기 + TMP 전환. (이전에 만든 `UIAssetSetup`/`UIKitBuilder`는 이 단계용이었으나, 우선순위 변경으로 **삭제**했고 스킨 단계 진입 시 재도입.) §5 매핑·§6 결정 참조.
@@ -91,6 +93,7 @@
 ## 변경 로그
 | 날짜 | 질문 | 결정 | 근거 |
 |------|------|------|------|
+| 2026-06-29 | 특성 UI(`TraitPanelUI`)가 프리팹 전환에서 누락됨 — 도 프리팹으로? | **변환 완료.** K키 전용 토글이라 폴링용 영속 인스턴스 필요 → **프리팹 인스턴스 영속 + 캔버스만 토글** 모델(다른 재생성형과 달리 스켈레톤 실제 재사용 = 편집 반영). 정적 스켈레톤만 베이크, 동적 행 런타임 Rebuild. `[SerializeField]`+`ApplyFonts`+`WireEvents`+`EditorBake`+베이크 엔트리. 정적 감사 통과(57/57). | 일관성(전 패널 프리팹화) + 키 토글 패널은 영속 폴러 불가피 → 영속+토글이 정석. 사용자 베이크 후 K로 검증 필요. |
 | 2026-06-26 | 코드 절차 생성 UI를 프리팹 기반(씬 편집 가능)으로 + 시안 스프라이트 적용 | **프리팹화 방향 확정(계획).** Resources/UI에 패널 프리팹 + 직렬화 ref 바인딩, 동적 격자만 절차 유지, 패널 단위 점진 전환. 이미지는 매핑표대로 자연스러운 곳만, 시맨틱 색은 UITheme 유지. | 에디터 비편집 문제 해소. 큰 두 패널은 점진 전환으로 리스크 관리. 구현은 후속. |
 | 2026-06-26 | §6 열린 질문 4건(TMP / 창고 탭 / 격자 셀 / RESOURCES HUD) | **TMP 전환**(전제: TMP Essential Resources 임포트 필요) · **창고 탭 비주얼만**(필터 후속) · **격자 GridPanel 절차 유지**(Cell.prefab 안 만듦) · **RESOURCES HUD 포함**. | 키트/PoC 진입 위해 설계 확정. 스코프는 비주얼 우선·로직 후속으로 관리. |
 | 2026-06-26 | §4-1 자산 9-slice 셋업 / §4-2 공용 키트 | **에디터 빌더 2종 작성.** `UIAssetSetup`(Image/ 13종 스프라이트→Sprite+9-slice 보더+Clamp/Bilinear) · `UIKitBuilder`(Button_Primary/Secondary·Tab·TitleTag 프리팹을 Resources/UI/Kit에 생성, TMP 라벨). Cell.prefab은 §6 결정대로 생략. | 코드 절차→프리팹 전환의 재사용 원자 확보. 사용자가 Tools 메뉴로 실행. |

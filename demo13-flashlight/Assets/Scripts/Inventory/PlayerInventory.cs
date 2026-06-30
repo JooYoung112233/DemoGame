@@ -14,7 +14,7 @@ public class PlayerInventory : MonoBehaviour
     public InventoryGrid Grid { get; private set; }          // 가방(백팩) — 장착 시 그 크기, 미장착 0×0
     public InventoryGrid PocketsGrid { get; private set; }   // 주머니 4칸 (고정, 항상 존재)
     public InventoryGrid SecureGrid { get; private set; }    // 보안 컨테이너 3×3 (고정, 항상 존재)
-    public float MaxWeight => maxWeight;
+    public float MaxWeight => maxWeight * TraitManager.Mod("weight_max");   // 노새: +20%
 
     // 고정 컨테이너 크기 (가로 기준)
     const int PocketW = 4, PocketH = 1;
@@ -33,7 +33,7 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    public bool IsOverweight => CurrentWeight > maxWeight;
+    public bool IsOverweight => CurrentWeight > MaxWeight;
 
     // 캐시
     Health health;

@@ -88,8 +88,8 @@ public class TopDownPlayer : MonoBehaviour
     float SprintMinStam  => Stat.sprintMinStamina;
     float MotionSpeed(string key) => Stat != null ? MotionStat.SpeedOf(Stat.motions, key, 1f) : 1f;
     float RunMaxDistance => Stat != null ? MotionStat.DistanceOf(Stat.motions, "run", 0f) : 0f;
-    float MaxStam        => Stat.maxStamina;
-    float StamRegen      => Stat.staminaRegen;
+    float MaxStam        => Stat.maxStamina * TraitManager.Mod("stamina_max");
+    float StamRegen      => Stat.staminaRegen * TraitManager.Mod("stamina_regen");
     float StamRegenDelay => Stat.staminaRegenDelay;
     float ExhaustDur     => Stat.exhaustionDuration;
     float LightRange     => Stat.lightRange;
@@ -100,9 +100,9 @@ public class TopDownPlayer : MonoBehaviour
     float HeavyCooldown  => Stat.heavyCooldown;
     float DodgeDist      => Stat != null ? MotionStat.DistanceOf(Stat.motions, "roll", Stat.dodgeDistance) : 3f;
     float DodgeDur       => Stat.dodgeDuration;
-    float DodgeInvDur    => Stat.dodgeInvincibleDuration;
+    float DodgeInvDur    => Stat.dodgeInvincibleDuration * TraitManager.Mod("dodge_iframe");
     float DodgeCooldown  => Stat.dodgeCooldown;
-    float DodgeCost      => Stat.dodgeStaminaCost;
+    float DodgeCost      => Stat.dodgeStaminaCost * TraitManager.Mod("dodge_stamina_cost");
     float MoveAccel      => Stat.moveAccel;
     float MoveDecel      => Stat.moveDecel;
 

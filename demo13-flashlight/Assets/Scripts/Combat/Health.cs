@@ -6,6 +6,11 @@ public class Health : MonoBehaviour
     float currentHp;
     bool isDead;
 
+    // 플레이어 한정 특성 게이팅용(적 Health엔 null). 같은 GO에 TopDownPlayer 존재 = 플레이어.
+    TopDownPlayer _tp;
+    // 불굴(low_hp_damage_taken) 발동 체력 비율 — placeholder(→ GameTuning 이관 가능).
+    const float LowHpThreshold = 0.3f;
+
     public float CurrentHp => currentHp;
     public float MaxHp => maxHp;
     public float Percent => currentHp / maxHp;
@@ -19,6 +24,7 @@ public class Health : MonoBehaviour
     void Awake()
     {
         currentHp = maxHp;
+        _tp = GetComponent<TopDownPlayer>();
     }
 
     public void TakeDamage(float amount)
@@ -37,10 +43,14 @@ public class Health : MonoBehaviour
         if (isDead) return;
 
         // 플레이어 무적 체크 (구르기 중) — silent 데미지(DoT)는 무적 무시
-        if (!silent)
+        if (!silent && _tp != null && _tp.IsInvincible) return;
+
+        // 플레이어 한정 특성 — 받는 피해 보정(유리 어깨 +0.15 / 불굴: 저체력 시 −0.15)
+        if (_tp != null && amount > 0f)
         {
-            var playerCombat = GetComponent<TopDownPlayer>();
-            if (playerCombat != null && playerCombat.IsInvincible) return;
+            amount *= TraitManager.Mod("damage_taken");
+            if (Percent <= LowHpThreshold)
+                amount *= TraitManager.Mod("low_hp_damage_taken");
         }
 
         currentHp = Mathf.Max(0, currentHp - amount);

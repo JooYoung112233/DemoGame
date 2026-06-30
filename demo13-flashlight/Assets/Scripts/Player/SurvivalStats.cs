@@ -37,14 +37,18 @@ public class SurvivalStats : MonoBehaviour
     void Awake() { _health = GetComponent<Health>(); }
 
     // ── 밸런스 값 (GameTuning 경유, 에셋 없으면 SerializeField 기본값으로 폴백) ──
+    // 특성 hunger_thirst_rate(허약한 위장 +0.25 = 25% 빨리 소모). 매니저 없으면 1.
+    float HungerThirstMul => TraitManager.Mod("hunger_thirst_rate");
+
     float WaterDrainPerSec
     {
         get
         {
             var t = GameTuning.Instance;
-            if (t != null && t.survivalWaterMinutesToEmpty > 0f)
-                return Max / (t.survivalWaterMinutesToEmpty * 60f);
-            return waterDrainPerSec;
+            float baseRate = (t != null && t.survivalWaterMinutesToEmpty > 0f)
+                ? Max / (t.survivalWaterMinutesToEmpty * 60f)
+                : waterDrainPerSec;
+            return baseRate * HungerThirstMul;
         }
     }
 
@@ -53,9 +57,10 @@ public class SurvivalStats : MonoBehaviour
         get
         {
             var t = GameTuning.Instance;
-            if (t != null && t.survivalSatietyMinutesToEmpty > 0f)
-                return Max / (t.survivalSatietyMinutesToEmpty * 60f);
-            return satietyDrainPerSec;
+            float baseRate = (t != null && t.survivalSatietyMinutesToEmpty > 0f)
+                ? Max / (t.survivalSatietyMinutesToEmpty * 60f)
+                : satietyDrainPerSec;
+            return baseRate * HungerThirstMul;
         }
     }
 
