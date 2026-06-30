@@ -2233,9 +2233,18 @@ public class CharacterPanelUI : MonoBehaviour
         if (leftScrollRect != null && leftScrollRect.gameObject.activeInHierarchy)
         {
             leftScrollRect.scrollSensitivity = 0f;
-            float wheelY = GameInput.mouseScrollDelta.y;
-            if (Mathf.Abs(wheelY) > 0.01f && (isDragging || PointerOverLeftScroll()))
-                WheelOnlyScrollRect.WheelStep(leftScrollRect, wheelY);
+            float invWheelY = GameInput.mouseScrollDelta.y;
+            if (Mathf.Abs(invWheelY) > 0.01f)
+            {
+                bool over = isDragging || PointerOverLeftScroll();
+#if UNITY_EDITOR
+                var c = leftScrollRect.content;
+                var v = leftScrollRect.viewport != null ? leftScrollRect.viewport : leftScrollRect.transform as RectTransform;
+                Debug.Log($"[창고휠-인벤] over={over} content={(c != null ? c.name : "null")} rectH={(c != null ? c.rect.height : 0):F0} sizeH={(c != null ? c.sizeDelta.y : 0):F0} vpH={(v != null ? v.rect.height : 0):F0} posY={(c != null ? c.anchoredPosition.y : 0):F0}");
+#endif
+                if (over)
+                    WheelOnlyScrollRect.WheelStep(leftScrollRect, invWheelY);
+            }
         }
 
         if (isDragging)
@@ -3835,16 +3844,21 @@ public class WheelOnlyScrollRect : UnityEngine.UI.ScrollRect
     public override void OnEndDrag(PointerEventData e) { }
 
     /// <summary>휠 1 notch당 pixelsPerNotch만큼 세로 스크롤(내용 높이와 무관하게 일정 속도).
-    /// 드래그 중 수동 폴링·평상시 공용 헬퍼(창고 일반/상점 동일 속도).</summary>
+    /// content.anchoredPosition을 직접 이동(ScrollRect 내부 bounds/normalizedPosition 비의존 — 더 견고) + 스크롤바 수동 연동.
+    /// content는 top pivot(0,1) 가정(창고/상점 모두 해당): y∈[0,max], 0=맨 위.</summary>
     public static void WheelStep(UnityEngine.UI.ScrollRect sr, float wheelY, float pixelsPerNotch = 170f)
     {
-        if (sr == null || !sr.vertical || sr.content == null) return;
+        if (sr == null || sr.content == null) return;
         var vp = sr.viewport != null ? sr.viewport : sr.transform as RectTransform;
         if (vp == null) return;
-        float scrollable = sr.content.rect.height - vp.rect.height;
-        if (scrollable <= 1f) return;
-        sr.verticalNormalizedPosition = Mathf.Clamp01(
-            sr.verticalNormalizedPosition + Mathf.Sign(wheelY) * (pixelsPerNotch / scrollable));
+        float maxScroll = sr.content.rect.height - vp.rect.height;
+        if (maxScroll <= 1f) return;
+        var p = sr.content.anchoredPosition;
+        p.y = Mathf.Clamp(p.y - Mathf.Sign(wheelY) * pixelsPerNotch, 0f, maxScroll);
+        sr.content.anchoredPosition = p;
+        sr.velocity = Vector2.zero;
+        if (sr.verticalScrollbar != null)
+            sr.verticalScrollbar.SetValueWithoutNotify(1f - p.y / maxScroll);   // top=1
     }
 }
 

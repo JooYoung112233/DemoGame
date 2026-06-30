@@ -1024,7 +1024,8 @@ public class ShopUI : MonoBehaviour
 
         // 창고(stash) 스크롤 = 일반 탭 창고와 동일 동작: 휠 빠르게 + 드래그-스크롤 버그 차단 + 스크롤바.
         // invSlotRoot이 [SerializeField]라 프리팹/코드 두 경로 모두 부모 ScrollRect를 런타임에 찾아 세팅(재베이크 불필요).
-        var stashSR = invSlotRoot != null ? invSlotRoot.GetComponentInParent<ScrollRect>() : null;
+        // includeInactive=true: SetupDragGrids는 Awake(상점 패널 비활성)에 돌 수 있어, 비활성이면 GetComponentInParent가 null을 반환함.
+        var stashSR = invSlotRoot != null ? invSlotRoot.GetComponentInParent<ScrollRect>(true) : null;
         if (stashSR != null)
         {
             stashSR.horizontal = false; stashSR.vertical = true;
