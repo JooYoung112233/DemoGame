@@ -95,7 +95,7 @@ public class EnemyController : MonoBehaviour
     float Damage          => unitStat != null ? unitStat.attackDamage        : attackDamage;
     float AtkRange        => unitStat != null ? unitStat.attackRange         : attackRange;
     float AtkCooldown     => 1f / Mathf.Max(unitStat != null ? unitStat.attackSpeed : attackSpeed, 0.1f);
-    float DetectRng       => unitStat != null ? unitStat.detectRange         : detectRange;
+    float DetectRng       => (unitStat != null ? unitStat.detectRange : detectRange) * TraitManager.Mod("detect_radius");   // 잠행: 그림자 감지반경 -20%
     float LoseRng         => unitStat != null ? unitStat.loseRange           : loseRange;
     float MoveSpd         => unitStat != null ? unitStat.moveSpeed           : moveSpeed;
     float PatrolSpd       => unitStat != null ? unitStat.patrolSpeed         : patrolSpeed;
@@ -416,7 +416,7 @@ public class EnemyController : MonoBehaviour
         if (state == State.AttackWindup) TryCancelAttack();
 
         if (health != null) health.TakeDamage(damage);
-        AddGroggy(groggy);
+        AddGroggy(groggy * TraitManager.Mod("groggy_buildup"));   // 전투: 냉정한 손 그로기 누적 +20%
 
         DamagePopup.Create(transform.position, damage, DamagePopup.DamageType.Normal);
 

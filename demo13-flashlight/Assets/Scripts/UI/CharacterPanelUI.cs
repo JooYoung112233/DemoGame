@@ -2195,7 +2195,7 @@ public class CharacterPanelUI : MonoBehaviour
             default: baseDelay = 0.5f; break;
         }
         float mult = gt != null ? gt.searchSpeedMult : 1f;
-        return (baseDelay + Random.Range(-0.1f, 0.1f)) * mult;
+        return (baseDelay + Random.Range(-0.1f, 0.1f)) * mult / TraitManager.Mod("search_speed");   // 회수: 빠른 손 수색 +30%(딜레이↓)
     }
 
     void UpdateSearchStatusText()

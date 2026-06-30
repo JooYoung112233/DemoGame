@@ -44,12 +44,14 @@ public class NPCRelationshipManager : MonoBehaviour
 
     public void ModifyAffinity(string npcId, int delta)
     {
+        if (delta > 0) delta = Mathf.RoundToInt(delta * TraitManager.Mod("npc_affinity"));   // 사회: 입담 +20%(획득만)
         var rel = GetRelationship(npcId);
         rel.affinity = Mathf.Clamp(rel.affinity + delta, 0, 100);
     }
 
     public void ModifyTrust(string npcId, int delta)
     {
+        if (delta > 0) delta = Mathf.RoundToInt(delta * TraitManager.Mod("npc_affinity"));   // 사회: 입담 +20%(획득만)
         var rel = GetRelationship(npcId);
         rel.trust = Mathf.Clamp(rel.trust + delta, 0, 100);
     }

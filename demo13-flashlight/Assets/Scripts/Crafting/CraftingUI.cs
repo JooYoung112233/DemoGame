@@ -668,7 +668,7 @@ public class CraftingUI : MonoBehaviour
             : ratio > 0.2f ? new Color(1f, 0.9f, 0.3f)
             : new Color(1f, 0.3f, 0.3f);
 
-        float previewDur = Mathf.Min(item.durability + item.data.maxDurability * 0.3f, item.data.maxDurability);
+        float previewDur = Mathf.Min(item.durability + item.data.maxDurability * 0.3f * TraitManager.Mod("repair_efficiency"), item.data.maxDurability);   // 무기 숙련 +20% 반영(실제 Repair와 일치)
         repairDurText.text = $"내구도: <color=#{ColorUtility.ToHtmlStringRGB(durColor)}>{item.durability:F0}</color> / {item.data.maxDurability:F0}\n" +
             $"수리 후: <color=#88CC88>{previewDur:F0}</color> / {item.data.maxDurability:F0}";
 

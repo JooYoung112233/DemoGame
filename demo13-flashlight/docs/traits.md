@@ -191,6 +191,16 @@
 - **별개 TODO**: PP 획득 루트(레이드/평판 → `GrantPP`) 연결(현재 디버그 +10PP만).
 - **검증**: 정적 컴파일 감사 통과(브레이스·호출 정합). 효과 체감은 Unity 플레이 검증 필요.
 
+### 2026-07-01 — 특성 효과 말단 배선 3차 (전투 일부·잠행·회수·사회)
+- **배선된 5개 키(대상 시스템 존재하는 것만)**:
+  - `EnemyController.DetectRng`: `detect_radius`(그림자 −0.20 = 적 감지반경 감소). 플레이어 잠행 특성을 적 감지 게터에 곱.
+  - `EnemyController.TakeHit`: `groggy_buildup`(냉정한 손 +0.20). 플레이어 공격→피격 그로기에 적용(현재 그로기 출처=플레이어뿐이라 호출부에 곱).
+  - `CraftingSystem.Repair` + `CraftingUI` 미리보기(previewDur): `repair_efficiency`(무기 숙련 +0.20 = 수리량↑). 실제·미리보기 동일 반영(표시 불일치 방지).
+  - `CharacterPanelUI.GetSearchDelay`: `search_speed`(빠른 손 +0.30 = 수색 딜레이 ÷Mod로 단축).
+  - `NPCRelationshipManager.ModifyAffinity/ModifyTrust`: `npc_affinity`(입담 +0.20 = 호감·신뢰 **획득만**, delta>0 한정 — 손실은 그대로).
+- **SKIP(대상 시스템 미구현)**: `weapon_durability_cost`(근접 무기 내구 소모 없음)·`execute_damage`(배후/그로기 처형 데미지 없음) → 근접 전투 본격 구현 시 동반 배선.
+- **검증**: 정적 컴파일 감사 통과(5파일 브레이스·키 CSV 대조 일치). 체감은 Unity 플레이 검증.
+
 ### 2026-06-24 — 특성 탭 UI 구현 (`TraitPanelUI`)
 - **결정**: 캐릭터 특성을 **독립 패널(K 토글)**로 우선 구현(캐릭터 패널 탭 통합은 추후 — 패널 비대화 방지). 카테고리×티어 목록 + PP 잔량 + **행 클릭 해금**(TraitManager.CanUnlock/Unlock 그대로 사용 — 선행·비용·부정상한 준수) + 디버그 +10PP. **세이브 훅**(`GameSaveData.traits`) 추가. unity-reviewer 통과.
 - **미배선(다음)**: 특성 **효과 스탯 말단 read-site**(이속/스태미너/시야 등 `GetModifier`/`HasFlag` 적용 — 현재 해금만 되고 효과 미적용), PP 획득 루트(레이드/평판→GrantPP) 연결. UI 아트는 그레이박스(추후 양피지 톤).

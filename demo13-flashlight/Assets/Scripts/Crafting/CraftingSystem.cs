@@ -198,7 +198,7 @@ public class CraftingSystem : MonoBehaviour
         var cost = GetRepairCost(item);
         inventory.ConsumeItemAll(cost.materialId, cost.count);
 
-        float amount = item.data.maxDurability * REPAIR_AMOUNT;
+        float amount = item.data.maxDurability * REPAIR_AMOUNT * TraitManager.Mod("repair_efficiency");   // 전투: 무기 숙련 수리효율 +20%
         item.durability = Mathf.Min(item.durability + amount, item.data.maxDurability);
 
         Debug.Log($"[CraftingSystem] 수리 완료: {item.data.displayName} → {item.durability:F0}/{item.data.maxDurability:F0}");
