@@ -2229,22 +2229,13 @@ public class CharacterPanelUI : MonoBehaviour
         // 휠은 EventSystem(InputSystem 액션) 전달에 의존하지 않고 직접 폴링한다(드래그/비드래그 모두).
         // EventSystem 휠은 중복 방지로 항상 끔. 프리팹 경로(GenerateUI 스킵)에선 leftScrollRect가 null이라 재바인딩.
         if (leftScrollRect == null && containerGridRoot != null)
-            leftScrollRect = containerGridRoot.GetComponentInParent<ScrollRect>();
+            leftScrollRect = containerGridRoot.GetComponentInParent<ScrollRect>(true);   // 프리팹: 비활성 시점도 탐색
         if (leftScrollRect != null && leftScrollRect.gameObject.activeInHierarchy)
         {
             leftScrollRect.scrollSensitivity = 0f;
             float invWheelY = GameInput.mouseScrollDelta.y;
-            if (Mathf.Abs(invWheelY) > 0.01f)
-            {
-                bool over = isDragging || PointerOverLeftScroll();
-#if UNITY_EDITOR
-                var c = leftScrollRect.content;
-                var v = leftScrollRect.viewport != null ? leftScrollRect.viewport : leftScrollRect.transform as RectTransform;
-                Debug.Log($"[창고휠-인벤] over={over} content={(c != null ? c.name : "null")} rectH={(c != null ? c.rect.height : 0):F0} sizeH={(c != null ? c.sizeDelta.y : 0):F0} vpH={(v != null ? v.rect.height : 0):F0} posY={(c != null ? c.anchoredPosition.y : 0):F0}");
-#endif
-                if (over)
-                    WheelOnlyScrollRect.WheelStep(leftScrollRect, invWheelY);
-            }
+            if (Mathf.Abs(invWheelY) > 0.01f && (isDragging || PointerOverLeftScroll()))
+                WheelOnlyScrollRect.WheelStep(leftScrollRect, invWheelY);
         }
 
         if (isDragging)
@@ -2840,7 +2831,11 @@ public class CharacterPanelUI : MonoBehaviour
     {
         if (leftScrollRect == null) return false;
         var vp = leftScrollRect.viewport != null ? leftScrollRect.viewport : leftScrollRect.transform as RectTransform;
-        return vp != null && RectTransformUtility.RectangleContainsScreenPoint(vp, GameInput.mousePosition, null);
+        if (vp != null && RectTransformUtility.RectangleContainsScreenPoint(vp, GameInput.mousePosition, null))
+            return true;
+        // 폴백(상점 PollWheel과 동일 판정): 마우스가 창고 격자 칸 위면 스크롤 허용 — 뷰포트 rect가 어긋나도 동작.
+        var g = LeftGrid;
+        return g != null && containerGridRoot != null && ScreenToGridCell(containerGridRoot, g, out _, out _);
     }
 
     /// <summary>드래그 footprint가 (x,y)에서 겹치는 '단일' 아이템을 찾는다(부분 중첩 허용).
