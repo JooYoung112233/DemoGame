@@ -84,6 +84,13 @@
 - **매 Show마다 재빌드하는 패널**(QuestLog/Dispatch/Radio)과 **동적 버튼**(격자 셀/컨텍스트 메뉴/선택지/픽업 행)은 런타임에 재부착되므로 영향 없음.
 - ⚠️ **새 직렬화 버튼 ref를 추가한 패널은 반드시 재베이크**해야 ref가 채워진다(안 하면 그 버튼만 프리팹 경로에서 무반응; 코드 폴백은 정상).
 
+## 6.6 베이크 주의 — 베이크되는 보조 MonoBehaviour는 반드시 '독립 파일'(2026-07-01, 중요)
+- **증상**: 베이크된 `CharacterPanelUI.prefab`에서 `ScrollDragBlocker`의 `m_Script: {fileID: 0}`(스크립트 유실 → 런타임 미동작), `LeftViewport`의 `WheelOnlyScrollRect`가 베이스 `UnityEngine.UI.ScrollRect`로 격하(드래그 무효화 오버라이드 소실). → **아이템을 들고 창고 격자를 끌면 창고가 멋대로 스크롤**되는 잠재버그(휠 스크롤은 static `WheelStep`이라 무관하게 정상).
+- **원인**: 두 클래스가 `CharacterPanelUI.cs` 안(파일명≠클래스명)에 정의돼 있었음. **Unity는 파일명과 이름이 같은 클래스에만 MonoScript 에셋을 만든다.** 그래서 보조 MonoBehaviour엔 MonoScript가 없고, `SaveAsPrefabAsset`이 그 컴포넌트의 스크립트 참조를 직렬화하지 못한다. (런타임 `AddComponent`/`new GameObject(typeof(...))`는 리플렉션으로 해석돼 **코드 생성 경로에선 멀쩡** → 베이크할 때만 깨짐.)
+- **해결(2026-07-01)**: `WheelOnlyScrollRect`·`ScrollDragBlocker`를 각자 `WheelOnlyScrollRect.cs`·`ScrollDragBlocker.cs`로 분리(+ .meta guid 고정). 각 파일 상단에 "합치지 말 것" 경고 주석. → 재베이크 시 참조 정상 직렬화. **ShopUI는 런타임 AddComponent라 원래 영향 없었음.**
+- ⚠️ **규칙**: 베이크 대상(프리팹 빌더/`EditorBake`에서 부착)에 붙는 커스텀 MonoBehaviour는 **무조건 파일명=클래스명 독립 파일**. 런타임에만 `AddComponent`하는 헬퍼는 무방. (런타임 전용 예: `BreakDebris`/`DamagePopup`/`BloodDropFall` — 베이크 안 되므로 OK.)
+- ⚠️ 소스만 고쳐선 안 반영 → **CharacterPanelUI 재베이크 → Systems 씬 재빌드**(B형이라 씬에 인스턴스 배치됨) 필요.
+
 ## 7. 리스크 / 주의
 - `CharacterPanelUI`(~3300줄)·`ShopUI`(~2400줄)는 생성+로직 결합 → **한 번에 X, 패널 단위 점진 전환**.
 - 전환 중 **이중 상태**(코드 생성 + 프리팹 공존) 피하려 패널별로 완결.
@@ -93,6 +100,7 @@
 ## 변경 로그
 | 날짜 | 질문 | 결정 | 근거 |
 |------|------|------|------|
+| 2026-07-01 | 베이크된 프리팹의 `ScrollDragBlocker`(fileID:0)·`WheelOnlyScrollRect`(베이스 ScrollRect로 격하) 스크립트 참조 유실 → 창고 드래그-스크롤 억제 소실 | **원인=보조 MonoBehaviour를 `CharacterPanelUI.cs`에 정의(파일명≠클래스명)해 MonoScript 미생성 → `SaveAsPrefabAsset` 직렬화 실패.** 두 클래스를 독립 파일로 분리(+.meta guid 고정, 재발 방지 주석). §6.6 참조. | Unity는 파일명=클래스명에만 MonoScript 부여. 베이크 대상 커스텀 컴포넌트는 독립 파일 필수. 사용자: CharacterPanelUI 재베이크→Systems 재빌드→드래그 검증. |
 | 2026-06-29 | 특성 UI(`TraitPanelUI`)가 프리팹 전환에서 누락됨 — 도 프리팹으로? | **변환 완료.** K키 전용 토글이라 폴링용 영속 인스턴스 필요 → **프리팹 인스턴스 영속 + 캔버스만 토글** 모델(다른 재생성형과 달리 스켈레톤 실제 재사용 = 편집 반영). 정적 스켈레톤만 베이크, 동적 행 런타임 Rebuild. `[SerializeField]`+`ApplyFonts`+`WireEvents`+`EditorBake`+베이크 엔트리. 정적 감사 통과(57/57). | 일관성(전 패널 프리팹화) + 키 토글 패널은 영속 폴러 불가피 → 영속+토글이 정석. 사용자 베이크 후 K로 검증 필요. |
 | 2026-06-26 | 코드 절차 생성 UI를 프리팹 기반(씬 편집 가능)으로 + 시안 스프라이트 적용 | **프리팹화 방향 확정(계획).** Resources/UI에 패널 프리팹 + 직렬화 ref 바인딩, 동적 격자만 절차 유지, 패널 단위 점진 전환. 이미지는 매핑표대로 자연스러운 곳만, 시맨틱 색은 UITheme 유지. | 에디터 비편집 문제 해소. 큰 두 패널은 점진 전환으로 리스크 관리. 구현은 후속. |
 | 2026-06-26 | §6 열린 질문 4건(TMP / 창고 탭 / 격자 셀 / RESOURCES HUD) | **TMP 전환**(전제: TMP Essential Resources 임포트 필요) · **창고 탭 비주얼만**(필터 후속) · **격자 GridPanel 절차 유지**(Cell.prefab 안 만듦) · **RESOURCES HUD 포함**. | 키트/PoC 진입 위해 설계 확정. 스코프는 비주얼 우선·로직 후속으로 관리. |
