@@ -95,6 +95,9 @@ public class PostRaidEventUI : MonoBehaviour
         ApplyRewards(choice);
         ApplyPenalties(choice);
 
+        // 선택 결과 확정 커밋 — 미커밋이면 강제종료→재로드로 페널티 무효 + 이벤트 재추첨(세이브 스커밍)
+        SaveCheckpoints.Instance?.InventoryChanged();
+
         choicePanel.SetActive(false);
         resultPanel.SetActive(true);
 

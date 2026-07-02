@@ -266,6 +266,9 @@ public class SaveManager : MonoBehaviour
         // 위탁(전당포) 슬롯
         ShopUI.LoadConsignSave(data.consignSlots);
 
+        // 아르바이트 보드 — 런타임 전용 상태라 로드 시 초기화(슬롯 간 이월 방지)
+        ArbeitBoard.ResetRuntime();
+
         // 메인 창고(보관함)
         if (data.mainStash != null)
         {

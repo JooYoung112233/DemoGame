@@ -200,6 +200,9 @@ public class RaidManager : MonoBehaviour
             }
         }
 
+        // 페널티 확정 커밋 — 미커밋이면 강제종료→재로드로 손실 회피 가능(세이브 스커밍)
+        SaveCheckpoints.Instance?.RaidEnded();
+
         // 강제 귀환
         if (SceneTransitionManager.Instance != null)
         {
@@ -243,6 +246,9 @@ public class RaidManager : MonoBehaviour
             player.GetComponent<Health>()?.FullHeal();
             player.GetComponent<PlayerMedicalSystem>()?.HealAll();
         }
+
+        // 사망 페널티 확정 커밋(부활 회복 후) — 미커밋이면 강제종료→재로드로 가방 손실 회피 가능
+        SaveCheckpoints.Instance?.RaidEnded();
 
         // 강제 귀환
         if (SceneTransitionManager.Instance != null)

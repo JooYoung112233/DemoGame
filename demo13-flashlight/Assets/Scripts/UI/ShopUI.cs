@@ -479,12 +479,15 @@ public class ShopUI : MonoBehaviour
         var slot = consignSlots[slotIdx];
         if (slot.IsEmpty || !slot.IsReady) return;
 
-        CurrencyManager.Instance?.Add(slot.payout, "위탁 정산");
-        SaveCheckpoints.Instance?.InventoryChanged();
+        int payout = slot.payout;
+        // 슬롯을 먼저 비우고 커밋 — 지급 후 커밋 시점에 슬롯이 남아 있으면
+        // 강제종료→재로드로 같은 정산을 무한 재수령할 수 있다
         slot.item      = null;
         slot.itemName  = null;
         slot.payout    = 0;
         slot.readyTime = 0f;
+        CurrencyManager.Instance?.Add(payout, "위탁 정산");
+        SaveCheckpoints.Instance?.InventoryChanged();
         RefreshConsign();
     }
 
