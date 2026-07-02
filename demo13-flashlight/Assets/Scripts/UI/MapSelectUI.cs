@@ -35,6 +35,17 @@ public class MapSelectUI : MonoBehaviour
     [SerializeField] Text[] regionBtnTexts;     // 마커 하단 라벨(지역명 + 시간)
     [SerializeField] Text infoTimeText;         // 우측 정보 패널 시간대 라인
 
+    // ── 아르바이트(납품 게시판 — economy.md §아르바이트, 로직=ArbeitBoard) ──
+    [SerializeField] Button arbeitBtn;          // 헤더 토글 버튼
+    [SerializeField] Text arbeitBtnText;
+    [SerializeField] GameObject arbeitPanel;    // 중앙 오버레이 패널
+    [SerializeField] RectTransform arbeitList;  // 동적 의뢰 행 컨테이너
+    [SerializeField] Text arbeitTitleText;
+    [SerializeField] Text arbeitHintText;
+    [SerializeField] Text arbeitPpText;         // 누적 납품/PP 안내
+    [SerializeField] Button arbeitCloseBtn;
+    [SerializeField] Text arbeitCloseText;
+
     static WorldRegionCatalog.RegionDefinition[] Regions => WorldRegionCatalog.All;
 
     int selectedRegion = -1;
@@ -71,7 +82,11 @@ public class MapSelectUI : MonoBehaviour
     void Awake()
     {
         if (!IsGenerated) GenerateUI();   // 폴백: 프리팹 없이 코드로 생성
-        else ApplyFonts();                // 프리팹 인스턴스: 동적 폰트 재바인딩
+        else
+        {
+            ApplyFonts();                 // 프리팹 인스턴스: 동적 폰트 재바인딩
+            EnsureArbeitUI();             // 스테일 프리팹(아르바이트 미베이크) 보충 생성
+        }
         BindEvents();
     }
 
@@ -134,6 +149,9 @@ public class MapSelectUI : MonoBehaviour
         for (int i = 0; i < count; i++)
             BuildRegionMarker(mapArea, i);
 
+        // ── 아르바이트 오버레이(기본 닫힘) ──
+        BuildArbeitPanel(rootRT);
+
         panelRoot.SetActive(false);
     }
 
@@ -168,6 +186,9 @@ public class MapSelectUI : MonoBehaviour
         xColors.pressedColor = new Color(0.35f, 0.14f, 0.14f);
         cancelBtn.colors = xColors;
         MakeChildText(closeRT, "✕", 22, BodyText);
+
+        // 아르바이트 토글 버튼 (닫기 왼쪽, 150x40) — 납품 의뢰 게시판 오버레이
+        BuildArbeitHeaderButton(header);
 
         // 헤더 아래 1px 구분선
         var lineRT = CreateRect(parent, "HeaderLine", new Vector2(0, 1), new Vector2(1, 1), Vector2.zero);
@@ -337,6 +358,178 @@ public class MapSelectUI : MonoBehaviour
         cancel2Btn.onClick.AddListener(Hide);
     }
 
+    // ══════════════════════════════════════
+    // 아르바이트 (납품 게시판 — 로직: ArbeitBoard)
+    // ══════════════════════════════════════
+
+    void BuildArbeitHeaderButton(RectTransform header)
+    {
+        var arbRT = CreateRect(header, "ArbeitBtn", new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(150, 40));
+        arbRT.pivot = new Vector2(1, 0.5f);
+        arbRT.anchoredPosition = new Vector2(-72, 0);
+        var arbImg = arbRT.gameObject.AddComponent<Image>();
+        arbImg.color = BtnCol;
+        arbeitBtn = arbRT.gameObject.AddComponent<Button>();
+        arbeitBtn.targetGraphic = arbImg;
+        var aColors = arbeitBtn.colors;
+        aColors.highlightedColor = UITheme.CellHover;
+        aColors.pressedColor = UITheme.CellPressed;
+        arbeitBtn.colors = aColors;
+        arbeitBtnText = MakeChildText(arbRT, "아르바이트", 15, Gold);
+    }
+
+    /// <summary>아르바이트 필드 추가 이전에 베이크된 스테일 프리팹 폴백 —
+    /// 직렬화 참조가 비어 있으면 해당 UI만 코드로 보충 생성한다(재베이크하면 이 경로는 통과만 함).</summary>
+    void EnsureArbeitUI()
+    {
+        if (arbeitBtn != null && arbeitPanel != null) return;
+        if (panelRoot == null) return;
+        var rootRT = panelRoot.GetComponent<RectTransform>();
+        if (arbeitBtn == null)
+        {
+            var header = panelRoot.transform.Find("Header") as RectTransform;
+            if (header != null) BuildArbeitHeaderButton(header);
+        }
+        if (arbeitPanel == null) BuildArbeitPanel(rootRT);
+        Debug.LogWarning("[MapSelectUI] 프리팹에 아르바이트 UI 미베이크 — 코드 폴백으로 생성함. " +
+                         "'Tools/TopDown/UI/프리팹 베이크'로 MapSelectUI 재베이크 권장.");
+    }
+
+    void BuildArbeitPanel(Transform parent)
+    {
+        // 중앙 오버레이(딤 + 패널). 기본 닫힘 — 헤더 버튼으로 토글.
+        var overlayRT = CreateStretch(parent, "ArbeitOverlay");
+        arbeitPanel = overlayRT.gameObject;
+        var dim = overlayRT.gameObject.AddComponent<Image>();
+        dim.color = new Color(0f, 0f, 0f, 0.55f);   // 뒤 클릭 차단 겸 딤
+
+        var panelRT = CreateRect(overlayRT, "ArbeitPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(620, 460));
+        panelRT.pivot = new Vector2(0.5f, 0.5f);
+        panelRT.anchoredPosition = Vector2.zero;
+        panelRT.gameObject.AddComponent<Image>().color = Panel;
+
+        arbeitTitleText = MakeText(panelRT, "ArbeitTitle", "아르바이트 — 납품 의뢰",
+            new Vector2(24, -18), new Vector2(560, 30), 20, Gold, TextAnchor.UpperLeft);
+        arbeitTitleText.fontStyle = FontStyle.Bold;
+
+        arbeitHintText = MakeText(panelRT, "ArbeitHint", "요구 품목을 모아 납품하면 보수를 받는다. (창고+가방+주머니에서 차감)",
+            new Vector2(24, -50), new Vector2(572, 24), 13, FaintText, TextAnchor.UpperLeft);
+
+        MakeLine(panelRT, -80, 572);
+
+        // 의뢰 행 컨테이너 (동적 — RefreshArbeit가 채움)
+        var listRT = CreateStretch(panelRT, "ArbeitList");
+        listRT.offsetMin = new Vector2(24, 110);
+        listRT.offsetMax = new Vector2(-24, -92);
+        arbeitList = listRT;
+
+        // 하단: 누적 납품/PP 안내
+        arbeitPpText = MakeText(panelRT, "ArbeitPp", "",
+            new Vector2(24, 0), new Vector2(400, 24), 13, FaintText, TextAnchor.UpperLeft);
+        var ppRT = arbeitPpText.rectTransform;
+        ppRT.anchorMin = new Vector2(0, 0); ppRT.anchorMax = new Vector2(0, 0);
+        ppRT.pivot = new Vector2(0, 0);
+        ppRT.anchoredPosition = new Vector2(24, 24);
+
+        // 하단 닫기 버튼(우하단)
+        var cRT = CreateRect(panelRT, "ArbeitClose", new Vector2(1, 0), new Vector2(1, 0), new Vector2(150, 44));
+        cRT.pivot = new Vector2(1, 0);
+        cRT.anchoredPosition = new Vector2(-24, 16);
+        var cImg = cRT.gameObject.AddComponent<Image>();
+        cImg.color = BtnCol;
+        arbeitCloseBtn = cRT.gameObject.AddComponent<Button>();
+        arbeitCloseBtn.targetGraphic = cImg;
+        var ccColors = arbeitCloseBtn.colors;
+        ccColors.highlightedColor = UITheme.CellHover;
+        ccColors.pressedColor = UITheme.CellPressed;
+        arbeitCloseBtn.colors = ccColors;
+        arbeitCloseText = MakeChildText(cRT, "닫기  [ESC]", 15, FaintText);
+
+        arbeitPanel.SetActive(false);
+    }
+
+    bool ArbeitOpen => arbeitPanel != null && arbeitPanel.activeSelf;
+
+    void ToggleArbeit()
+    {
+        if (arbeitPanel == null) return;
+        if (ArbeitOpen) { arbeitPanel.SetActive(false); return; }
+        arbeitPanel.SetActive(true);
+        RefreshArbeit();
+    }
+
+    void CloseArbeit()
+    {
+        if (arbeitPanel != null) arbeitPanel.SetActive(false);
+    }
+
+    /// <summary>의뢰 행 재생성(동적). 보유량/보수/납품 버튼 상태 갱신.</summary>
+    void RefreshArbeit()
+    {
+        if (arbeitList == null) return;
+        for (int i = arbeitList.childCount - 1; i >= 0; i--)
+        {
+            var child = arbeitList.GetChild(i).gameObject;
+            if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
+        }
+
+        var list = ArbeitBoard.Offers;
+        float y = 0f;
+        for (int i = 0; i < list.Count; i++)
+        {
+            var o = list[i];
+            if (o == null || o.item == null) continue;
+            int idx = i;
+            int owned = ArbeitBoard.CountOwned(o.item);
+            bool can = owned >= o.qty;
+
+            var rowRT = CreateRect(arbeitList, $"Row{i}", new Vector2(0, 1), new Vector2(1, 1), Vector2.zero);
+            rowRT.pivot = new Vector2(0.5f, 1);
+            rowRT.anchoredPosition = new Vector2(0, y);
+            rowRT.offsetMin = new Vector2(0, y - 72);
+            rowRT.offsetMax = new Vector2(0, y);
+            rowRT.gameObject.AddComponent<Image>().color = Panel2;
+
+            var label = MakeText(rowRT, "Label",
+                $"<b>{o.item.displayName}</b> ×{o.qty}   보수 <color=#E8C86A>◈{o.reward:N0}</color>\n" +
+                $"<color={(can ? "#7FBF7F" : "#B06A5A")}>보유 {owned}/{o.qty}</color>",
+                new Vector2(14, -10), new Vector2(380, 56), 15, BodyText, TextAnchor.UpperLeft);
+            label.supportRichText = true;
+
+            var dRT = CreateRect(rowRT, "DeliverBtn", new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(110, 44));
+            dRT.pivot = new Vector2(1, 0.5f);
+            dRT.anchoredPosition = new Vector2(-14, 0);
+            var dImg = dRT.gameObject.AddComponent<Image>();
+            dImg.color = can
+                ? new Color(Good.r * 0.35f, Good.g * 0.35f, Good.b * 0.35f, 0.95f)
+                : new Color(0.22f, 0.21f, 0.18f, 0.9f);
+            var dBtn = dRT.gameObject.AddComponent<Button>();
+            dBtn.targetGraphic = dImg;
+            dBtn.interactable = can;
+            dBtn.onClick.AddListener(() => OnDeliver(idx));
+            MakeChildText(dRT, "납품", 16, can ? BodyText : FaintText);
+
+            y -= 80f;
+        }
+
+        if (arbeitPpText != null)
+        {
+            int every = ArbeitBoard.PpEvery;
+            arbeitPpText.text = every > 0
+                ? $"누적 납품 {ArbeitBoard.CompletedCount}회 — {every}회마다 PP +1"
+                : $"누적 납품 {ArbeitBoard.CompletedCount}회";
+        }
+    }
+
+    void OnDeliver(int index)
+    {
+        if (ArbeitBoard.Deliver(index, out string msg))
+            ToastManager.Show(msg, ToastManager.ToastType.Success);
+        else if (!string.IsNullOrEmpty(msg))
+            ToastManager.Show(msg, ToastManager.ToastType.Warning);
+        RefreshArbeit();
+    }
+
     /// <summary>
     /// 정적 버튼 onClick 재부착. onClick 리스너는 프리팹에 직렬화되지 않으므로
     /// (코드 생성 / 프리팹 인스턴스) 양쪽 경로에서 Awake가 호출한다.
@@ -354,6 +547,18 @@ public class MapSelectUI : MonoBehaviour
         {
             cancelBtn.onClick.RemoveAllListeners();
             cancelBtn.onClick.AddListener(Hide);
+        }
+
+        if (arbeitBtn != null)
+        {
+            arbeitBtn.onClick.RemoveAllListeners();
+            arbeitBtn.onClick.AddListener(ToggleArbeit);
+        }
+
+        if (arbeitCloseBtn != null)
+        {
+            arbeitCloseBtn.onClick.RemoveAllListeners();
+            arbeitCloseBtn.onClick.AddListener(CloseArbeit);
         }
 
         if (regionButtons != null)
@@ -380,6 +585,12 @@ public class MapSelectUI : MonoBehaviour
         if (regionBtnTexts != null)
             foreach (var t in regionBtnTexts)
                 if (t) t.font = f;
+        // 아르바이트 정적 텍스트(동적 행은 생성 시 KR 적용)
+        if (arbeitBtnText)   arbeitBtnText.font = f;
+        if (arbeitTitleText) arbeitTitleText.font = f;
+        if (arbeitHintText)  arbeitHintText.font = f;
+        if (arbeitPpText)    arbeitPpText.font = f;
+        if (arbeitCloseText) arbeitCloseText.font = f;
     }
 
 #if UNITY_EDITOR
@@ -413,6 +624,15 @@ public class MapSelectUI : MonoBehaviour
         regionButtons = null;
         regionBtnTexts = null;
         infoTimeText = null;
+        arbeitBtn = null;
+        arbeitBtnText = null;
+        arbeitPanel = null;
+        arbeitList = null;
+        arbeitTitleText = null;
+        arbeitHintText = null;
+        arbeitPpText = null;
+        arbeitCloseBtn = null;
+        arbeitCloseText = null;
     }
 
     // ══════════════════════════════════════
@@ -427,6 +647,7 @@ public class MapSelectUI : MonoBehaviour
         if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         if (panelRoot != null)
             panelRoot.SetActive(true);
+        CloseArbeit();   // 열 때 아르바이트 오버레이는 항상 닫힌 상태로
         UpdateSelection();
     }
 
@@ -442,7 +663,10 @@ public class MapSelectUI : MonoBehaviour
         if (!isShowing) return;
 
         if (GameInput.GetKeyDown(KeyCode.Escape))
-            Hide();
+        {
+            if (ArbeitOpen) CloseArbeit();   // 오버레이 먼저 닫고
+            else Hide();
+        }
 
         UpdateRegionTimeDisplay();
     }

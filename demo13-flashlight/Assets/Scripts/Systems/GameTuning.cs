@@ -124,6 +124,19 @@ public class GameTuning : ScriptableObject
     [Tooltip("몬스터 최소 스폰 거리(m) — 플레이어 옆 즉시 스폰 방지. (Phase 2)")]
     public float anomalyMonsterMinDist = 6f;
 
+    // ── 아르바이트 (안전구역 납품 의뢰 — economy.md §아르바이트) ──────
+    [Header("아르바이트 (게시판 납품)")]
+    [Tooltip("게시판에 동시에 걸리는 납품 의뢰 수. ArbeitBoard가 읽음. (패널 높이상 3행까지 — 4+ 필요 시 MapSelectUI 아르바이트 패널 스크롤 대응 먼저)")]
+    [Range(1, 3)] public int arbeitSlotCount = 3;
+    [Tooltip("의뢰당 요구 수량 최소.")]
+    public int arbeitQtyMin = 2;
+    [Tooltip("의뢰당 요구 수량 최대.")]
+    public int arbeitQtyMax = 5;
+    [Tooltip("보수 배율 — 아이템 sellPrice × 수량 × 이 값(10 단위 올림). 직접판매(sellRate≈0.6)보다 높고 수배(×1.2)와 비슷하게.")]
+    [Range(0.5f, 3f)] public float arbeitRewardMult = 1.0f;
+    [Tooltip("납품 n회마다 PP +1 (0=PP 지급 안 함). TraitManager.GrantPP 호출.")]
+    public int arbeitPpEvery = 3;
+
     // ── 상점 — 희귀도별 해금 평판 등급 (NPC 상점 기능 밸런스) ──────────
     [Header("상점 해금 평판(희귀도별)")]
     [Tooltip("Rare 아이템을 살 수 있게 되는 최소 평판 등급. ShopUI가 읽음.")]

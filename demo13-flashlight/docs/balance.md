@@ -18,6 +18,7 @@
 | 평판/평판 티어 | `tools/balance/reputation.csv`, `tools/balance/reputation_tiers.csv` | CSV 편집 (→ `ReputationManager`/`ReputationTier`) |
 | 회복 아이템 수치 (음식 effectValue 등) | `Assets/Resources/Items/**/*.asset` (ItemData SO) | 아이템 인스펙터 (→ [survival.md §4](survival.md), [items.md](items.md)) |
 | **상점 해금 평판** (희귀도별 진열 해금 등급) | **`GameTuning`** (`shopTierRare`/`shopTierEpic`/`shopTierLegendary`) | **Control Panel** — `ShopUI`가 읽음 |
+| **아르바이트** (납품 슬롯 수·수량·보수 배율·PP 주기) | **`GameTuning`** (`arbeitSlotCount`/`arbeitQtyMin`/`arbeitQtyMax`/`arbeitRewardMult`/`arbeitPpEvery`) | **Control Panel** — `ArbeitBoard`가 읽음 (→ [economy.md §아르바이트](economy.md)) |
 | NPC 상점별 판매 목록 (뭘 파나) · 가격배율 · 위탁허용 | `ShopData` SO (`Assets/Resources/Data/Shops/Shop_*.asset`: stock/buyRate/sellRate/allowConsignment) | 상점 에셋 인스펙터 (※ Control Panel 통합 상점 에디터는 후속 과제) |
 | **특성(Trait) 효과 수치** (effectKey value, 41종) | `Assets/Resources/Data/Traits/*.asset` (`TraitData.effects`) — 런타임 합성 `TraitManager` | 트레잇 에셋 인스펙터 (→ [traits.md §4](traits.md)). ⚠ 현재 SO가 진실원 · **GameTuning 이관은 TBD**(미정) |
 
@@ -92,6 +93,15 @@
 | `anomalyIntervalMax` | 180 | 자동 발생 간격 최대(초) | `AnomalyManager` |
 | `anomalyMaxConcurrent` | 1 | 동시 활성 최대 개수 | `AnomalyManager` |
 | `anomalyMonsterMinDist` | 6 | 몬스터 최소 스폰 거리(m) | (Phase 2) |
+
+### 아르바이트 (2026-07-02, 게시판 납품 — economy.md §아르바이트)
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `arbeitSlotCount` | 3 | 게시판 동시 의뢰 수 | `ArbeitBoard` |
+| `arbeitQtyMin` | 2 | 의뢰당 요구 수량 최소 | `ArbeitBoard` |
+| `arbeitQtyMax` | 5 | 의뢰당 요구 수량 최대 | `ArbeitBoard` |
+| `arbeitRewardMult` | 1.0 | 보수 배율 (sellPrice×수량×이 값, 10 단위 올림) | `ArbeitBoard` |
+| `arbeitPpEvery` | 3 | 납품 n회마다 PP +1 (0=지급 안 함) | `ArbeitBoard` |
 
 ---
 
