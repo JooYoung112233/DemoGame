@@ -18,6 +18,10 @@ silence_living,container_day,4,ingredient_vegetable,5,1,3
 silence_living,container_day,4,ingredient_salt,4,1,2
 silence_living,container_day,4,recipe_stew,3,1,1
 silence_living,container_day,4,recipe_soup,3,1,1
+silence_living,container_day,4,val_silver_spoon,7,2,4
+silence_living,container_day,4,val_camera_film,6,2,4
+silence_living,container_day,4,val_watch_wrist,5,1,3
+silence_living,container_day,4,val_bracelet,5,1,2
 silence_living,container_night,4,reg_silence_market_chit,10,1,2
 silence_living,container_night,4,reg_silence_note_bundle,12,1,2
 silence_living,container_night,4,note_scrap,9,2,4
@@ -32,6 +36,9 @@ silence_living,container_night,4,energy_bar,3,1,2
 silence_living,container_night,4,water_bottle,3,1,2
 silence_living,container_night,4,ingredient_meat,4,1,2
 silence_living,container_night,4,ingredient_vegetable,4,1,2
+silence_living,container_night,4,val_ring_silver,6,2,4
+silence_living,container_night,4,val_earring_pair,6,2,4
+silence_living,container_night,4,val_jade_pendant,5,1,2
 silence_living,ground_day,2,reg_silence_note_bundle,8,1,1
 silence_living,ground_day,2,junk_newspaper,6,1,2
 silence_living,ground_day,2,coin_old,5,2,6
@@ -60,7 +67,7 @@ scrap_market,container_day,4,junk_magazine,6,1,3
 scrap_market,container_day,4,val_radio_hand,5,1,1
 scrap_market,container_day,4,coin_scrap,8,3,10
 scrap_market,container_day,4,coin_old,6,2,8
-scrap_market,container_day,4,battery,5,1,2
+scrap_market,container_day,4,battery_aa,5,1,2
 scrap_market,container_day,4,canned_food,5,1,2
 scrap_market,container_day,4,bandage,5,1,2
 scrap_market,container_day,4,junk_plastic_bottle,5,2,6
@@ -133,6 +140,11 @@ entertainment,container_day,4,junk_doll_head,6,1,1
 entertainment,container_day,4,val_perfume_empty,5,1,1
 entertainment,container_day,4,junk_magazine,5,2,4
 entertainment,container_day,4,val_chess_set,3,1,1
+entertainment,container_day,4,val_chain_gold,8,2,4
+entertainment,container_day,4,val_gem_loose,8,2,3
+entertainment,container_day,4,val_watch_pocket,6,1,3
+entertainment,container_day,4,val_cigar_box,6,1,3
+entertainment,container_day,4,val_dental_gold,8,2,4
 entertainment,container_day,4,liquor_bottle,4,1,2
 entertainment,container_day,4,water_bottle,4,1,2
 entertainment,container_day,4,ingredient_meat,4,1,2
@@ -145,6 +157,7 @@ entertainment,container_night,4,recipe_special,2,1,1
 entertainment,container_night,4,junk_mannequin_arm,5,1,1
 entertainment,container_night,4,val_cigar_box,5,1,1
 entertainment,container_night,4,val_camera_film,4,1,1
+entertainment,container_night,4,val_ring_wedding,1,1,1
 entertainment,container_night,4,smoke_bomb,4,1,1
 entertainment,container_night,4,stim_injector,3,1,1
 entertainment,container_night,4,junk_trophy_fake,4,1,1
@@ -180,7 +193,6 @@ entertainment,container_day,4,reg_sanctuary_wilted_flower,10,1,3
 entertainment,container_day,4,junk_candle_stub,8,2,5
 entertainment,container_day,4,mark_chalk,7,2,4
 entertainment,container_day,4,clock_part,5,1,2
-entertainment,container_day,4,val_ring_wedding,2,1,1
 entertainment,container_day,4,junk_photo_frame,6,1,1
 entertainment,container_day,4,junk_book_novel,5,1,2
 entertainment,container_day,4,junk_ashtray,4,1,1

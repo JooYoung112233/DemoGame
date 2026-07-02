@@ -25,7 +25,7 @@ MonoBehaviour:
   rewards:
   - type: 1
     itemId:
-    amount: 150
+    amount: 32000
     npcId:
   unlockCondition:
     requiredAffinity: 0
