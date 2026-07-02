@@ -120,6 +120,10 @@ public class SaveManager : MonoBehaviour
             data.mainStash = MainStash.Instance.GetSaveData();
         }
 
+        // 상점 판매 트레이(런타임 격자) — 올려둔 채 저장되면 창고·트레이 어디에도 없어 크래시 시 소실.
+        // 스냅샷에 포함하고 로드 시 창고로 복구(RestoreSellTrayToStash).
+        data.sellTray = ShopUI.GetSellTraySave();
+
         // 인벤토리(가방) + 장착 무기
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
@@ -274,6 +278,9 @@ public class SaveManager : MonoBehaviour
         {
             MainStash.Ensure().LoadSaveData(data.mainStash);
         }
+
+        // 상점 판매 트레이에 걸려 있던 아이템을 창고로 복구(반드시 mainStash 로드 뒤).
+        ShopUI.RestoreSellTrayToStash(data.sellTray);
 
         // 인벤토리(가방) + 장착 무기
         var playerGO = GameObject.FindGameObjectWithTag("Player");
@@ -431,6 +438,9 @@ public class GameSaveData
 
     // 메인 창고(보관함)
     public List<GridItemEntry> mainStash;
+
+    // 상점 판매 트레이(크래시 시 창고로 복구) — 비었으면 null
+    public List<GridItemEntry> sellTray;
 
     // 인벤토리(가방) + 장착 무기
     public List<GridItemEntry> bagItems = new List<GridItemEntry>();

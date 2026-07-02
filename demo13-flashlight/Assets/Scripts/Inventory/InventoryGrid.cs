@@ -482,6 +482,13 @@ public class InventoryGrid
     public void LoadSaveData(List<GridItemEntry> entries)
     {
         Clear();
+        AppendSaveData(entries);
+    }
+
+    /// <summary>격자를 비우지 않고 엔트리들을 추가 배치(저장 위치 우선, 실패 시 자동 배치).
+    /// 다른 격자(예: 상점 판매 트레이)의 내용을 이 격자로 합칠 때 사용.</summary>
+    public void AppendSaveData(List<GridItemEntry> entries)
+    {
         if (entries == null) return;
         foreach (var e in entries)
         {

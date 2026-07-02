@@ -542,6 +542,28 @@ public class ShopUI : MonoBehaviour
         }
     }
 
+    // ── 판매 트레이 세이브(크래시 안전) ───────────────────────────
+    // 판매 트레이는 런타임 전용 격자라, 아이템을 올려둔 채 다른 거래(구매/판매/위탁·수배)가
+    // 커밋을 트리거하면 창고·트레이 어디에도 없는 상태로 저장돼 그 순간 크래시 시 소실된다.
+    // → 저장 시 트레이 내용을 스냅샷에 포함하고, 로드 시 **창고로 되돌린다**(정상 Close의 ReturnTrayAll과 동일 의미).
+
+    /// <summary>현재 열린 상점의 판매 트레이 내용(비었으면 null). SaveManager가 스냅샷에 포함.</summary>
+    public static List<GridItemEntry> GetSellTraySave()
+    {
+        var tray = Instance != null ? Instance.sellTray : null;
+        if (tray == null) return null;
+        var data = tray.GetSaveData();
+        return (data != null && data.Count > 0) ? data : null;
+    }
+
+    /// <summary>로드 시 트레이에 걸려 있던 아이템을 창고(MainStash)로 복구 — 크래시 복구.
+    /// MainStash가 먼저 로드된 뒤 호출해야 한다(SaveManager 순서).</summary>
+    public static void RestoreSellTrayToStash(List<GridItemEntry> data)
+    {
+        if (data == null || data.Count == 0) return;
+        MainStash.Ensure()?.GetGrid()?.AppendSaveData(data);
+    }
+
     // ── 전체 갱신 ────────────────────────────────────────────
     void RefreshAll()
     {
