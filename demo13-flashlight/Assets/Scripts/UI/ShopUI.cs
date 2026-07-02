@@ -542,6 +542,33 @@ public class ShopUI : MonoBehaviour
         }
     }
 
+    // ── 판매 트레이 세이브/로드 (상점 열림 중 커밋 시 트레이 물건 보존) ────────
+    // 트레이는 런타임 전용 격자라, 물건이 트레이에 올라간 상태에서 다른 거래(구매 등)가
+    // 커밋(InventoryChanged)을 일으키면 세이브엔 그 물건이 창고에도 트레이에도 없는 상태로
+    // 기록된다 — 그 시점 크래시/강제종료 시 아이템 유실. 커밋에 트레이 내용을 포함하고
+    // 로드 시 창고로 반환해서 막는다(위탁 슬롯 영속화와 같은 패턴).
+    public static List<GridItemEntry> GetSellTraySave()
+    {
+        var tray = Instance != null ? Instance.sellTray : null;
+        if (tray == null || tray.GetAll().Count == 0) return null;
+        return tray.GetSaveData();
+    }
+
+    public static void LoadSellTraySave(List<GridItemEntry> data)
+    {
+        // 런타임 트레이는 항상 비운다 — 세션 중 로드 시 이전 트레이 잔여물이 팔리는 것(복제) 방지
+        Instance?.sellTray?.Clear();
+        if (data == null || data.Count == 0) return;
+        var stash = MainStash.Ensure()?.GetGrid();
+        foreach (var e in data)
+        {
+            var inst = InventoryGrid.InstanceFromEntry(e);
+            if (inst == null) continue;
+            if (stash == null || !stash.TryAutoPlace(inst))
+                Debug.LogWarning($"[Save] 판매 트레이 복구 실패(창고 공간 부족): {e.itemId} ×{e.count}");
+        }
+    }
+
     // ── 전체 갱신 ────────────────────────────────────────────
     void RefreshAll()
     {

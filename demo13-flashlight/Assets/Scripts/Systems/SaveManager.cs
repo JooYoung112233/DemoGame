@@ -114,6 +114,9 @@ public class SaveManager : MonoBehaviour
         // 위탁(전당포) 슬롯
         data.consignSlots = ShopUI.GetConsignSave();
 
+        // 판매 트레이 — 상점 열림 중 커밋 시 트레이에 올라간 물건 보존(크래시 유실 방지)
+        data.sellTray = ShopUI.GetSellTraySave();
+
         // 메인 창고(보관함)
         if (MainStash.Instance != null)
         {
@@ -275,6 +278,9 @@ public class SaveManager : MonoBehaviour
             MainStash.Ensure().LoadSaveData(data.mainStash);
         }
 
+        // 판매 트레이 — 트레이는 런타임 전용이므로 저장분을 창고로 반환(창고 로드 뒤에 실행해야 함)
+        ShopUI.LoadSellTraySave(data.sellTray);
+
         // 인벤토리(가방) + 장착 무기
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
@@ -428,6 +434,7 @@ public class GameSaveData
 
     // 위탁(전당포) 슬롯
     public List<ShopUI.ConsignSave> consignSlots;
+    public List<GridItemEntry> sellTray;   // 판매 트레이(상점 열림 중 커밋 시점) — 로드 시 창고로 반환
 
     // 메인 창고(보관함)
     public List<GridItemEntry> mainStash;

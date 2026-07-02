@@ -485,17 +485,26 @@ public class InventoryGrid
         if (entries == null) return;
         foreach (var e in entries)
         {
-            var data = ItemDatabase.Get(e.itemId);
-            if (data == null) continue;
-            var inst = new ItemInstance(data, e.count);
-            if (data.hasDurability) inst.durability = e.durability;
-            if (e.attachments != null && e.attachments.Length > 0)
-                inst.attachments = (string[])e.attachments.Clone();
-            // 보관함이면 내부 격자 복원(재귀)
-            if (inst.IsContainer && e.containerItems != null)
-                inst.ContainerGrid.LoadSaveData(e.containerItems);
+            var inst = InstanceFromEntry(e);
+            if (inst == null) continue;
             if (!TryPlace(inst, e.x, e.y, e.rotated)) TryAutoPlace(inst);
         }
+    }
+
+    /// <summary>세이브 엔트리 1개 → ItemInstance 복원 (내구도·부착물·내부 격자 재귀 포함). 아이템 DB에 없으면 null.</summary>
+    public static ItemInstance InstanceFromEntry(GridItemEntry e)
+    {
+        if (e == null) return null;
+        var data = ItemDatabase.Get(e.itemId);
+        if (data == null) return null;
+        var inst = new ItemInstance(data, e.count);
+        if (data.hasDurability) inst.durability = e.durability;
+        if (e.attachments != null && e.attachments.Length > 0)
+            inst.attachments = (string[])e.attachments.Clone();
+        // 보관함이면 내부 격자 복원(재귀)
+        if (inst.IsContainer && e.containerItems != null)
+            inst.ContainerGrid.LoadSaveData(e.containerItems);
+        return inst;
     }
 
     /// <summary>특정 itemId를 가진 아이템 찾기 (첫 번째)</summary>

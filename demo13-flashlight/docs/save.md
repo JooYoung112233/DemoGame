@@ -43,7 +43,18 @@ InRaid = SystemsScene.IsGameplayScene(scene) && scene.name ∉ { Safehouse, Hide
 | `CombatStarted()` | CombatStateTracker | **항상 Record** | 항상 Record |
 | `CombatEnded()` | CombatStateTracker | **항상 Record** | 항상 Record |
 | `BedSleepSave()` | SleepUI.DoSleep | **Commit** (수동 저장) | Commit |
-| `InventoryChanged()` | 상점 구매·판매·위탁·수배(ShopUI 5곳) / F1 디버그 아이템 변경(DebugTestUI 4곳) | Record | Commit |
+| `InventoryChanged()` | 상점 구매·판매·위탁·수배(ShopUI 5곳) / 아르바이트 납품(ArbeitBoard) / F1 디버그 아이템 변경(DebugTestUI 4곳) | Record | Commit |
+
+### 판매 트레이(sellTray) 보존 (2026-07-02)
+
+문제: 상점 판매 트레이는 런타임 전용 격자다. 물건을 트레이에 올린 상태에서 다른 거래(구매 등)가 `InventoryChanged()` 커밋을 일으키면, 세이브엔 그 물건이 **창고에도 트레이에도 없는** 상태로 기록됐다 — 그 시점에 크래시/강제종료가 나면 아이템 유실. `Close()`의 `ReturnTrayAll`은 정상 종료만 커버.
+
+결정: **커밋 시점에 트레이 내용을 세이브에 포함**하고(위탁 슬롯 `GetConsignSave`와 같은 영속화 패턴), **로드 시 창고로 반환**한다(트레이는 런타임 전용이라는 성격 유지).
+
+- `ShopUI.GetSellTraySave()` → `GameSaveData.sellTray` (`List<GridItemEntry>`, 비었으면 null).
+- 로드: `ShopUI.LoadSellTraySave()` — **창고 로드 뒤에** 실행, 각 엔트리를 `InventoryGrid.InstanceFromEntry()`로 복원해 메인 창고에 자동 배치. 창고가 가득 차면 경고 로그(유실 가능, 극히 드묾).
+- 로드 시 런타임 트레이는 항상 비운다 — 세션 중 로드 시 이전 트레이 잔여물 판매(복제) 방지.
+- 정상 흐름 무변화: `Close()`의 `ReturnTrayAll` 그대로. 세이브의 `sellTray` 필드는 "창고 + 트레이 = 전체 재산"이 항상 성립하게 하는 안전망.
 
 - **Commit** = `SaveManager.Save()` (디스크 즉시 쓰기).
 - **Record** = `_raidSnapshotJson = SaveManager.ToJson(SaveManager.BuildSaveData())` (디스크 X, 인메모리만).
@@ -91,5 +102,6 @@ InRaid = SystemsScene.IsGameplayScene(scene) && scene.name ∉ { Safehouse, Hide
 ---
 
 ## 변경 로그
+- 2026-07-02: **판매 트레이 보존** — 상점 열림 중 커밋 시 트레이 물건이 세이브에서 누락돼 크래시 시 유실되던 구멍 봉쇄. 커밋에 `sellTray` 포함 + 로드 시 창고 반환 (§3 참조).
 - 2026-06-30: **`InventoryChanged()` 훅 추가** — 상점 거래(구매/판매/위탁 정산/수배 매입)·F1 디버그 아이템 변경(인벤·창고 비우기/지급) 시 `RecordOrCommit()`(안전구역=디스크 커밋, 레이드=인메모리). 기존엔 거래·F1 변경이 자동 저장 안 돼 다음 로드 시 유실되던 것 보완. ShopUI 5곳·DebugTestUI 4곳 연결.
 - 2026-06-18: 최초 작성. 저장 체크포인트 모델(안전=Commit/레이드=Record/크래시=복구커밋/강제종료=레이드시작복귀) + CombatStateTracker + SaveManager 직렬화·디스크 분리.
