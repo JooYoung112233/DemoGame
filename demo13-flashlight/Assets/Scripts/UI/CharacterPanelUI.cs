@@ -80,6 +80,7 @@ public class CharacterPanelUI : MonoBehaviour
     [SerializeField] Text charWaterText;
     [SerializeField] Text charFoodText;
     [SerializeField] Text charWeightText;
+    [SerializeField] Text charLevelText;   // 제목 줄 우측 — Lv.N · XP n/m (PlayerProgress)
     [SerializeField] Text[] charBodyTexts;
 
     // ── 장비 슬롯 UI ──
@@ -670,6 +671,7 @@ public class CharacterPanelUI : MonoBehaviour
         charWaterText = null;
         charFoodText = null;
         charWeightText = null;
+        charLevelText = null;
         charBodyTexts = null;
         equipSlotBgs = null;
         equipSlotIcons = null;
@@ -981,6 +983,11 @@ public class CharacterPanelUI : MonoBehaviour
             new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, UITheme.TextBright, TextAnchor.MiddleCenter);
         title.fontStyle = FontStyle.Bold;
 
+        // 레벨/XP — 제목과 같은 줄 우측(레이아웃 안 밀림). UpdateCharacterPanel이 갱신.
+        charLevelText = MakeText(charPanel, "CharLevel", "Lv.1",
+            new Vector2(10, -8), new Vector2(PANEL_WIDTH - 24, 28), 12, UITheme.Gold, TextAnchor.MiddleRight);
+        charLevelText.fontStyle = FontStyle.Bold;
+
         // ── 스탯 텍스트 ──
         float y = -48f;
         charHpText = MakeText(charPanel, "CharHp", "HP: 100 / 100",
@@ -1229,6 +1236,12 @@ public class CharacterPanelUI : MonoBehaviour
 
         if (charWeightText != null && playerInventory != null)
             charWeightText.text = $"무게: {playerInventory.CurrentWeight:F1} / {playerInventory.MaxWeight:F0} kg";
+
+        if (charLevelText != null)
+        {
+            var prog = PlayerProgress.Instance;   // lazy — 접근이 곧 생성
+            charLevelText.text = $"Lv.{prog.Level}  <color=#8A8170>XP {prog.Xp}/{prog.XpToNext}</color>";
+        }
 
         // 장비 슬롯 시각 갱신
         UpdateEquipSlots();
