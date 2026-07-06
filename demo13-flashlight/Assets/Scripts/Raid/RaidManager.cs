@@ -84,6 +84,7 @@ public class RaidManager : MonoBehaviour
         raidActive = true;
         raidEnded = false;
         PendingResult = true;   // 레이드 시작 → 귀환 시 정산 표시 대상
+        startInvValue = CurrentInventoryValue();   // 루팅 XP 기준점 (플레이어는 영속 PlayerRig라 이 시점 존재)
         TryBindPlayerHealth();
         SaveCheckpoints.Instance?.RaidStarted();   // 레이드 시작 = 복귀 기준점 커밋
         Debug.Log($"[RaidManager] 레이드 시작! 제한시간: {raidDuration}초");
@@ -138,6 +139,76 @@ public class RaidManager : MonoBehaviour
     }
 
     // ════════════════════════════════════════
+    //  경험치 (traits.md §2 — 킬+탈출+루팅, 실패 시 킬×배율)
+    // ════════════════════════════════════════
+
+    int killXp;          // 이번 레이드 킬 XP 누적 (EnemyController.OnDeath가 호출)
+    int startInvValue;   // 레이드 시작 시 소지품 가치 스냅샷 (루팅 XP = 종료-시작 차액)
+
+    /// <summary>적 처치 시 킬 XP 누적 (유닛별 UnitStatData.expReward).</summary>
+    public void TrackKillXp(int exp)
+    {
+        if (!raidActive || raidEnded || exp <= 0) return;
+        killXp += exp;
+    }
+
+    /// <summary>소지품 총 가치(sellPrice×스택) = 가방+주머니+보안+장비.
+    /// 루팅 XP는 lootedItems가 아니라 이 값의 시작/종료 **차액**으로 계산 —
+    /// 픽업 경로(E키/클러스터/컨테이너 드래그)와 무관하게 전부 집계되고,
+    /// 레이드에 들고 들어간 장비는 차액에서 자연 상쇄된다.</summary>
+    int CurrentInventoryValue()
+    {
+        int v = 0;
+        var inv = FindPlayerInventory();
+        if (inv != null)
+        {
+            v += GridValue(inv.Grid);
+            v += GridValue(inv.PocketsGrid);
+            v += GridValue(inv.SecureGrid);
+            var equip = inv.GetComponent<PlayerEquipment>();
+            if (equip != null)
+                foreach (var kv in equip.GetAllEquipped())
+                    if (kv.Value != null) v += kv.Value.sellPrice;
+        }
+        return v;
+    }
+
+    static int GridValue(InventoryGrid g)
+    {
+        if (g == null) return 0;
+        int v = 0;
+        foreach (var p in g.GetAll())
+            if (p?.item?.data != null) v += p.item.data.sellPrice * Mathf.Max(1, p.item.stackCount);
+        return v;
+    }
+
+    /// <summary>레이드 종료 XP 정산 → PlayerProgress 지급. RaidEnded()(세이브 커밋) **전**에 호출할 것.</summary>
+    void SettleXp(bool success)
+    {
+        var t = GameTuning.Instance;
+        int total;
+        int lootValue = 0;
+        if (success)
+        {
+            lootValue = Mathf.Max(0, CurrentInventoryValue() - startInvValue);   // 순증가분만
+            int extractBonus = t != null ? t.xpExtractBonus : 100;
+            float perLoot = t != null ? t.xpPerLootValue : 0.02f;
+            total = killXp + extractBonus + Mathf.RoundToInt(lootValue * perLoot);
+        }
+        else
+        {
+            // 실패(사망/시간초과) = 킬 XP × 배율만 — 탈출·루팅 보너스 없음("죽어도 배운다").
+            float failMult = t != null ? t.xpFailMult : 0.5f;
+            total = Mathf.RoundToInt(killXp * failMult);
+        }
+
+        if (total <= 0) return;
+        ToastManager.Show($"경험치 +{total}", ToastManager.ToastType.Info, 2.5f);   // 레벨업 토스트보다 먼저
+        PlayerProgress.Instance.GrantXp(total);
+        Debug.Log($"[RaidManager] XP 정산({(success ? "성공" : "실패")}): 킬 {killXp} + 루팅가치 {lootValue} → 총 {total}");
+    }
+
+    // ════════════════════════════════════════
     //  탈출 / 시간초과
     // ════════════════════════════════════════
 
@@ -150,6 +221,8 @@ public class RaidManager : MonoBehaviour
 
         float elapsed = Time.time - raidStartTime;
         Debug.Log($"[RaidManager] 탈출 성공! 생존시간: {elapsed:F0}초, 획득 아이템: {lootedItems.Count}개");
+
+        SettleXp(true);   // XP 정산(레벨업/PP 포함) — 커밋 전에 확정
 
         // 탈출 정산 = 체크포인트 커밋(레이드 종료). 인벤/정산 결과를 디스크에 확정.
         SaveCheckpoints.Instance?.RaidEnded();
@@ -200,6 +273,8 @@ public class RaidManager : MonoBehaviour
             }
         }
 
+        SettleXp(false);   // 시간초과 = 킬 XP 절반 — 커밋 전에 확정
+
         // 페널티 확정 커밋 — 미커밋이면 강제종료→재로드로 손실 회피 가능(세이브 스커밍)
         SaveCheckpoints.Instance?.RaidEnded();
 
@@ -246,6 +321,8 @@ public class RaidManager : MonoBehaviour
             player.GetComponent<Health>()?.FullHeal();
             player.GetComponent<PlayerMedicalSystem>()?.HealAll();
         }
+
+        SettleXp(false);   // 사망 = 킬 XP 절반("죽어도 배운다") — 커밋 전에 확정
 
         // 사망 페널티 확정 커밋(부활 회복 후) — 미커밋이면 강제종료→재로드로 가방 손실 회피 가능
         SaveCheckpoints.Instance?.RaidEnded();

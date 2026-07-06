@@ -94,6 +94,17 @@
 | `anomalyMaxConcurrent` | 1 | 동시 활성 최대 개수 | `AnomalyManager` |
 | `anomalyMonsterMinDist` | 6 | 몬스터 최소 스폰 거리(m) | (Phase 2) |
 
+### 경험치/레벨 (2026-07-06, 레이드 XP→레벨업→PP — traits.md §2)
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `xpExtractBonus` | 100 | 탈출 성공 고정 보너스 XP | `RaidManager.SettleXp` |
+| `xpPerLootValue` | 0.02 | 루팅 XP = 소지품 가치(sellPrice×스택) **시작/종료 차액** × 이 값 (성공 시만) | `RaidManager.SettleXp` |
+| `xpFailMult` | 0.5 | 실패(사망/시간초과) 시 킬 XP 배율 | `RaidManager.SettleXp` |
+| `xpPerLevelBase` | 100 | 다음 레벨 필요 XP = 이 값 × 현재 레벨 (선형) | `PlayerProgress.XpToNext` |
+| `xpPpPerLevel` | 1 | 레벨업당 PP 지급량 | `PlayerProgress.GrantXp` |
+
+> 킬 XP 자체는 유닛별 `UnitStatData.expReward`(StatDB — Control Panel 스탯 DB 섹션) — 표형 데이터라 §1 원칙대로 SO 유지.
+
 ### 아르바이트 (2026-07-02, 게시판 납품 — economy.md §아르바이트)
 | 필드 | 기본값 | 의미 | 읽는 곳 |
 |------|--------|------|---------|

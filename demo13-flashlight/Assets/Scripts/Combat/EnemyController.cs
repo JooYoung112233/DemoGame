@@ -539,6 +539,10 @@ public class EnemyController : MonoBehaviour
         if (QuestManager.Instance != null && !string.IsNullOrEmpty(unitKey))
             QuestManager.Instance.UpdateObjective(ObjectiveType.KillEnemy, unitKey, 1);
 
+        // 킬 XP 누적 (레이드 중에만 — RaidManager가 종료 시 정산. traits.md §2)
+        if (RaidManager.Instance != null && unitStat != null)
+            RaidManager.Instance.TrackKillXp(unitStat.expReward);
+
         DropLoot();
 
         Destroy(gameObject, 3f);

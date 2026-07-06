@@ -146,6 +146,8 @@ public class SaveManager : MonoBehaviour
 
         if (TraitManager.Instance != null) data.traits = TraitManager.Instance.GetSaveData();
 
+        data.progress = PlayerProgress.Instance.GetSaveData();   // 레벨/XP (lazy 싱글톤 — 접근이 곧 생성)
+
         // 창고 (안전가옥 가구 — static 목록)
         data.storageUnits = new List<StorageUnitEntry>();
         foreach (var f in SafehouseStorage.AllFurniture)
@@ -312,6 +314,9 @@ public class SaveManager : MonoBehaviour
         if (data.traits != null && TraitManager.Instance != null)
             TraitManager.Instance.LoadSaveData(data.traits);
 
+        if (data.progress != null)
+            PlayerProgress.Instance.LoadSaveData(data.progress);
+
         // 창고 (uid 매칭)
         if (data.storageUnits != null)
         {
@@ -457,6 +462,9 @@ public class GameSaveData
 
     // 특성(퍽) — PP·해금 목록
     public TraitSaveData traits;
+
+    // 캐릭터 레벨/XP (traits.md §2 — PP 주 공급원)
+    public PlayerProgress.ProgressSaveData progress;
 
     // 창고 (안전가옥 가구)
     public List<StorageUnitEntry> storageUnits = new List<StorageUnitEntry>();

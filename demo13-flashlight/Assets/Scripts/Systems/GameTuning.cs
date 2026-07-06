@@ -124,6 +124,19 @@ public class GameTuning : ScriptableObject
     [Tooltip("몬스터 최소 스폰 거리(m) — 플레이어 옆 즉시 스폰 방지. (Phase 2)")]
     public float anomalyMonsterMinDist = 6f;
 
+    // ── 경험치/레벨 (레이드 XP → 레벨업 → PP — traits.md §2) ─────────
+    [Header("경험치/레벨 (레이드 정산)")]
+    [Tooltip("탈출 성공 고정 보너스 XP. RaidManager가 읽음.")]
+    public int xpExtractBonus = 100;
+    [Tooltip("루팅 XP = 획득 아이템 sellPrice 합 × 이 값. 탈출 성공 시에만.")]
+    [Range(0f, 1f)] public float xpPerLootValue = 0.02f;
+    [Tooltip("실패(사망/시간초과) 시 킬 XP 획득 배율(탈출·루팅 보너스는 없음).")]
+    [Range(0f, 1f)] public float xpFailMult = 0.5f;
+    [Tooltip("다음 레벨 필요 XP = 이 값 × 현재 레벨 (선형). PlayerProgress가 읽음.")]
+    public int xpPerLevelBase = 100;
+    [Tooltip("레벨업 1회당 지급 PP. TraitManager.GrantPP.")]
+    public int xpPpPerLevel = 1;
+
     // ── 아르바이트 (안전구역 납품 의뢰 — economy.md §아르바이트) ──────
     [Header("아르바이트 (게시판 납품)")]
     [Tooltip("게시판에 동시에 걸리는 납품 의뢰 수. ArbeitBoard가 읽음. (패널 높이상 3행까지 — 4+ 필요 시 MapSelectUI 아르바이트 패널 스크롤 대응 먼저)")]
