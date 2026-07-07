@@ -158,10 +158,19 @@ public class RaidResultUI : MonoBehaviour
     /// <summary>캡처된 데이터로 UI 텍스트 갱신</summary>
     void UpdateTexts()
     {
+        var s = RaidManager.LastSettlement;   // static — RaidManager 파괴 후에도 유효
+
+        if (titleText != null && s != null)
+        {
+            titleText.text = s.success ? "── 귀환 정산 ──" : "── 레이드 실패 ──";
+            titleText.color = s.success ? UITheme.Gold : UITheme.Negative;
+        }
+
         if (timeText != null)
         {
-            int min = (int)(survivalTime / 60);
-            int sec = (int)(survivalTime % 60);
+            float t = s != null ? s.survivalTime : survivalTime;
+            int min = (int)(t / 60);
+            int sec = (int)(t % 60);
             timeText.text = $"생존 시간: {min}분 {sec}초";
         }
 
@@ -174,17 +183,37 @@ public class RaidResultUI : MonoBehaviour
 
         if (rewardsText != null)
         {
-            // 보상 계산: 아이템 가치 합산
-            int totalValue = 0;
-            if (RaidManager.Instance != null)
+            // 런타임 스타일 오버라이드 — 베이크된 프리팹 rect/폰트를 3줄 XP 블록에 맞춤(재베이크 불필요).
+            rewardsText.supportRichText = true;
+            rewardsText.fontSize = 14;
+            rewardsText.fontStyle = FontStyle.Normal;   // 전체 볼드 해제 — 강조는 <b> 인라인만
+            rewardsText.alignment = TextAnchor.MiddleCenter;
+            rewardsText.rectTransform.sizeDelta = new Vector2(400, 70);
+
+            if (s == null)
             {
-                foreach (var item in RaidManager.Instance.LootedItems)
-                {
-                    if (item != null && item.data != null)
-                        totalValue += item.data.sellPrice * item.stackCount;
-                }
+                rewardsText.text = "";   // 정산 레코드 없음(구버전 경로) — 표기 생략
             }
-            rewardsText.text = $"아이템 가치: {totalValue} 스크랩";
+            else if (s.success)
+            {
+                string levelLine = s.levelAfter > s.levelBefore
+                    ? $"<color=#E8C86A><b>Lv.{s.levelBefore} → Lv.{s.levelAfter}  레벨 업!</b></color>  <color=#8A8170>XP {s.xpAfter}/{s.xpToNextAfter}</color>"
+                    : $"Lv.{s.levelAfter}  <color=#8A8170>XP {s.xpAfter}/{s.xpToNextAfter}</color>";
+                rewardsText.text =
+                    $"루팅 가치 <color=#E8C86A>+◈{s.lootValue:N0}</color>\n" +
+                    $"경험치 <b>+{s.totalXp}</b>  <color=#8A8170>(킬 {s.killXp} · 탈출 {s.extractBonus} · 루팅 {s.lootXp})</color>\n" +
+                    levelLine;
+            }
+            else
+            {
+                string levelLine = s.levelAfter > s.levelBefore
+                    ? $"<color=#E8C86A><b>Lv.{s.levelBefore} → Lv.{s.levelAfter}  레벨 업!</b></color>"
+                    : $"Lv.{s.levelAfter}  <color=#8A8170>XP {s.xpAfter}/{s.xpToNextAfter}</color>";
+                rewardsText.text =
+                    $"<color=#B06A5A>물자 손실 발생</color>\n" +   // 사망=가방 전체 / 시간초과=일부 (구분은 토스트가 이미 안내)
+                    $"경험치 <b>+{s.totalXp}</b>  <color=#8A8170>(킬 XP의 절반 — 죽어도 배운다)</color>\n" +
+                    levelLine;
+            }
         }
     }
 
@@ -285,10 +314,9 @@ public class RaidResultUI : MonoBehaviour
         // 구분선
         MakeLine(panel.transform, -260);
 
-        // 보상 (Show에서 갱신)
+        // 보상/XP 블록 (Show에서 갱신 — 내용·스타일은 UpdateTexts가 런타임 지정)
         rewardsText = MakeText(panel.transform, "Rewards", "",
-            new Vector2(0, -275), new Vector2(400, 55), 16, UITheme.Positive, TextAnchor.MiddleCenter);
-        rewardsText.fontStyle = FontStyle.Bold;
+            new Vector2(0, -270), new Vector2(400, 70), 14, UITheme.Positive, TextAnchor.MiddleCenter);
 
         // 닫기 안내
         closeHintText = MakeText(panel.transform, "CloseHint", "[ Enter / 클릭으로 닫기 ]",

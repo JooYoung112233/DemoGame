@@ -84,6 +84,7 @@ public class RaidManager : MonoBehaviour
         raidActive = true;
         raidEnded = false;
         PendingResult = true;   // 레이드 시작 → 귀환 시 정산 표시 대상
+        LastSettlement = null;  // 이전 레이드 정산 레코드 폐기
         startInvValue = CurrentInventoryValue();   // 루팅 XP 기준점 (플레이어는 영속 PlayerRig라 이 시점 존재)
         TryBindPlayerHealth();
         SaveCheckpoints.Instance?.RaidStarted();   // 레이드 시작 = 복귀 기준점 커밋
@@ -145,6 +146,24 @@ public class RaidManager : MonoBehaviour
     int killXp;          // 이번 레이드 킬 XP 누적 (EnemyController.OnDeath가 호출)
     int startInvValue;   // 레이드 시작 시 소지품 가치 스냅샷 (루팅 XP = 종료-시작 차액)
 
+    /// <summary>레이드 정산 레코드 — RaidResultUI 표시용. static이라 씬 전환(RaidManager 파괴) 후에도 생존.
+    /// SettleXp가 채우고, 다음 레이드 Start에서 초기화.</summary>
+    public class RaidSettlement
+    {
+        public bool success;
+        public float survivalTime;
+        public int killXp;
+        public int extractBonus;
+        public int lootValue;      // 소지품 가치 순증가분(스크랩 기준)
+        public int lootXp;
+        public int totalXp;
+        public int levelBefore;
+        public int levelAfter;
+        public int xpAfter;        // 레벨업 처리 후 현재 레벨 내 XP
+        public int xpToNextAfter;
+    }
+    public static RaidSettlement LastSettlement;
+
     /// <summary>적 처치 시 킬 XP 누적 (유닛별 UnitStatData.expReward).</summary>
     public void TrackKillXp(int exp)
     {
@@ -182,18 +201,22 @@ public class RaidManager : MonoBehaviour
         return v;
     }
 
-    /// <summary>레이드 종료 XP 정산 → PlayerProgress 지급. RaidEnded()(세이브 커밋) **전**에 호출할 것.</summary>
+    /// <summary>레이드 종료 XP 정산 → PlayerProgress 지급 + 정산 레코드(LastSettlement) 기록.
+    /// RaidEnded()(세이브 커밋) **전**에 호출할 것.</summary>
     void SettleXp(bool success)
     {
         var t = GameTuning.Instance;
         int total;
         int lootValue = 0;
+        int extractBonus = 0;
+        int lootXp = 0;
         if (success)
         {
             lootValue = Mathf.Max(0, CurrentInventoryValue() - startInvValue);   // 순증가분만
-            int extractBonus = t != null ? t.xpExtractBonus : 100;
+            extractBonus = t != null ? t.xpExtractBonus : 100;
             float perLoot = t != null ? t.xpPerLootValue : 0.02f;
-            total = killXp + extractBonus + Mathf.RoundToInt(lootValue * perLoot);
+            lootXp = Mathf.RoundToInt(lootValue * perLoot);
+            total = killXp + extractBonus + lootXp;
         }
         else
         {
@@ -202,9 +225,31 @@ public class RaidManager : MonoBehaviour
             total = Mathf.RoundToInt(killXp * failMult);
         }
 
-        if (total <= 0) return;
-        ToastManager.Show($"경험치 +{total}", ToastManager.ToastType.Info, 2.5f);   // 레벨업 토스트보다 먼저
-        PlayerProgress.Instance.GrantXp(total);
+        var prog = PlayerProgress.Instance;
+        int levelBefore = prog.Level;
+
+        if (total > 0)
+        {
+            ToastManager.Show($"경험치 +{total}", ToastManager.ToastType.Info, 2.5f);   // 레벨업 토스트보다 먼저
+            prog.GrantXp(total);
+        }
+
+        // 정산 레코드 — RaidResultUI가 귀환 후 표시 (static: 씬 전환 생존)
+        LastSettlement = new RaidSettlement
+        {
+            success = success,
+            survivalTime = Time.time - raidStartTime,
+            killXp = killXp,
+            extractBonus = extractBonus,
+            lootValue = lootValue,
+            lootXp = lootXp,
+            totalXp = total,
+            levelBefore = levelBefore,
+            levelAfter = prog.Level,
+            xpAfter = prog.Xp,
+            xpToNextAfter = prog.XpToNext,
+        };
+
         Debug.Log($"[RaidManager] XP 정산({(success ? "성공" : "실패")}): 킬 {killXp} + 루팅가치 {lootValue} → 총 {total}");
     }
 
