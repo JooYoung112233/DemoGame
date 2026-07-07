@@ -25,7 +25,13 @@ public static class QuestBoard
     // 평판 C+ 게이트 (§9.3 표의 평판C 항목 — SO엔 flag만 있어 코드로 게이트)
     static readonly HashSet<string> RepCGate = new HashSet<string> { "BD-10", "BD-15", "BD-17" };
 
-    static QuestData[] pool;                 // Board 폴더 전체 로드(1회)
+    static QuestData[] pool;                 // Board 폴더 전체 로드(1회) — BD(일일)+BQ(고정) 공용
+
+    static QuestData[] Pool()
+    {
+        if (pool == null) pool = Resources.LoadAll<QuestData>("Data/Quests/Board");
+        return pool ?? System.Array.Empty<QuestData>();
+    }
     static readonly List<QuestData> today = new List<QuestData>();
     static readonly HashSet<string> doneToday = new HashSet<string>();   // 오늘 완료(슬롯 소진) — 런타임 전용
     static int rolledDay = -1;
@@ -80,17 +86,15 @@ public static class QuestBoard
         }
     }
 
-    /// <summary>노출 가능 풀 — 해금 flag + 평판 게이트 + '지금 완수 가능한 목표'만(자동 게이트).</summary>
+    /// <summary>일일 회전(BD) 노출 가능 풀 — BD 전용(같은 폴더의 BQ 제외) + 해금 flag + 평판 게이트 + '지금 완수 가능한 목표'만(자동 게이트).</summary>
     static List<QuestData> AvailablePool()
     {
-        if (pool == null) pool = Resources.LoadAll<QuestData>("Data/Quests/Board");
         var list = new List<QuestData>();
-        if (pool == null) return list;
-
         var qm = QuestManager.Instance;
-        foreach (var q in pool)
+        foreach (var q in Pool())
         {
             if (q == null || q.objectives == null || q.objectives.Length == 0) continue;
+            if (!q.questId.StartsWith("BD-")) continue;   // BQ 고정 의뢰는 별도 섹션(BqOffers)
 
             // 해금 flag (prologue_complete 등)
             string flag = q.unlockCondition != null ? q.unlockCondition.requiredFlag : null;
@@ -127,6 +131,84 @@ public static class QuestBoard
             }
         }
         return true;
+    }
+
+    // ═══════════════════════════
+    //  BQ 고정 의뢰 (평판 티어 게이트 — quests-region1 §9.3)
+    // ═══════════════════════════
+
+    /// <summary>BQ questId → 요구 평판 티어 ("BQ-E01" → E). 포맷 밖이면 null.</summary>
+    public static ReputationTier? RequiredTier(string questId)
+    {
+        if (string.IsNullOrEmpty(questId) || !questId.StartsWith("BQ-") || questId.Length < 4) return null;
+        switch (questId[3])
+        {
+            case 'E': return ReputationTier.E;
+            case 'D': return ReputationTier.D;
+            case 'C': return ReputationTier.C;
+            case 'B': return ReputationTier.B;
+            case 'A': return ReputationTier.A;
+            default: return null;
+        }
+    }
+
+    /// <summary>현재 평판 티어로 노출되는 BQ 고정 의뢰(회전 아님 — 항상 게시). 해금 flag + 자동 게이트 동일 적용.</summary>
+    public static List<QuestData> BqOffers()
+    {
+        var list = new List<QuestData>();
+        var qm = QuestManager.Instance;
+        var rep = ReputationManager.Instance;
+        var tier = rep != null ? rep.Tier : ReputationTier.F;
+
+        foreach (var q in Pool())
+        {
+            if (q == null || q.objectives == null || q.objectives.Length == 0) continue;
+            var req = RequiredTier(q.questId);
+            if (req == null)
+            {
+                // "BQ-" 접두인데 티어 문자 파싱 실패 = 에셋 ID 오타 — 조용히 증발하는 계열이라 경고
+                if (q.questId.StartsWith("BQ-"))
+                    Debug.LogWarning($"[QuestBoard] BQ ID 포맷 이상({q.questId}) — 'BQ-{{E|D|C|B|A}}nn' 규칙 필요, 게시판에 노출되지 않음");
+                continue;
+            }
+            if (tier < req.Value) continue;       // 평판 티어 미달
+
+            string flag = q.unlockCondition != null ? q.unlockCondition.requiredFlag : null;
+            if (!string.IsNullOrEmpty(flag) && (qm == null || !qm.GetFlag(flag))) continue;
+            if (!IsImplementable(q)) continue;
+            list.Add(q);
+        }
+        list.Sort((a, b) => string.Compare(a.questId, b.questId, System.StringComparison.Ordinal));
+        return list;
+    }
+
+    /// <summary>수주 중인 계약 의뢰(BQ/NQ — 계약 슬롯 1 공유, §9.3).</summary>
+    public static QuestInstance ActiveContract()
+    {
+        if (QuestManager.Instance == null) return null;
+        return QuestManager.Instance.ActiveQuests.Find(q => q?.data != null &&
+            (q.data.questId.StartsWith("BQ-") || q.data.questId.StartsWith("NQ-")));
+    }
+
+    /// <summary>BQ 수주 — 계약 슬롯 1개(BQ/NQ 공유) 제한.</summary>
+    public static bool AcceptBq(QuestData data, out string msg)
+    {
+        msg = "";
+        if (data == null || QuestManager.Instance == null) return false;
+        if (FindActive(data.questId) != null) { msg = "이미 수주한 의뢰다"; return false; }
+        var contract = ActiveContract();
+        if (contract != null) { msg = $"계약 의뢰는 1건까지 — 진행 중: {contract.data.title}"; return false; }
+        if (!QuestManager.Instance.AcceptQuest(data)) { msg = "수주할 수 없다"; return false; }
+        msg = $"계약 수주: {data.title} — 완수 후 {ReportNpcName(data)}에게 보고";
+        return true;
+    }
+
+    /// <summary>보고 NPC 표시명 (giverNpcId → NPCData.displayName, 없으면 id).</summary>
+    public static string ReportNpcName(QuestData q)
+    {
+        if (q == null || string.IsNullOrEmpty(q.giverNpcId)) return "게시판";
+        var npc = Resources.Load<NPCData>($"Data/NPC/{q.giverNpcId}");
+        return npc != null && !string.IsNullOrEmpty(npc.displayName) ? npc.displayName : q.giverNpcId;
     }
 
     // ═══════════════════════════

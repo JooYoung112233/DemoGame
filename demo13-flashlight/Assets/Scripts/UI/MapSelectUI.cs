@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -55,6 +56,7 @@ public class MapSelectUI : MonoBehaviour
     [SerializeField] Text bdHintText;
     [SerializeField] Button bdCloseBtn;
     [SerializeField] Text bdCloseText;
+    WheelOnlyScrollRect boardScroll;   // 게시판 목록 휠 스크롤(직렬화 안 함 — bdList 부모에서 런타임 재바인딩)
 
     static WorldRegionCatalog.RegionDefinition[] Regions => WorldRegionCatalog.All;
 
@@ -604,10 +606,24 @@ public class MapSelectUI : MonoBehaviour
 
         MakeLine(panelRT, -80, 632);
 
-        var listRT = CreateStretch(panelRT, "BoardList");
-        listRT.offsetMin = new Vector2(24, 76);
-        listRT.offsetMax = new Vector2(-24, -92);
+        // 스크롤 뷰포트(BD 2장 + BQ 고정 의뢰가 패널 높이를 넘을 수 있음) — 휠 전용(폴링은 Update)
+        var vpRT = CreateStretch(panelRT, "BoardViewport");
+        vpRT.offsetMin = new Vector2(24, 76);
+        vpRT.offsetMax = new Vector2(-24, -92);
+        vpRT.gameObject.AddComponent<RectMask2D>();
+        boardScroll = vpRT.gameObject.AddComponent<WheelOnlyScrollRect>();
+
+        var listRT = CreateRect(vpRT, "BoardList", new Vector2(0, 1), new Vector2(1, 1), Vector2.zero);
+        listRT.pivot = new Vector2(0.5f, 1);
+        listRT.anchoredPosition = Vector2.zero;
+        listRT.sizeDelta = new Vector2(0, 400);   // 높이는 RefreshBoard가 행 수에 맞춰 갱신
         bdList = listRT;
+
+        boardScroll.horizontal = false;
+        boardScroll.vertical = true;
+        boardScroll.movementType = UnityEngine.UI.ScrollRect.MovementType.Clamped;
+        boardScroll.viewport = vpRT;
+        boardScroll.content = bdList;
 
         var cRT = CreateRect(panelRT, "BoardClose", new Vector2(1, 0), new Vector2(1, 0), new Vector2(150, 44));
         cRT.pivot = new Vector2(1, 0);
@@ -670,11 +686,101 @@ public class MapSelectUI : MonoBehaviour
             y = AddBoardRow(inst.data, inst, y);
         }
 
+        // ── BQ 고정 의뢰 (평판 티어 게이트 — 보고는 의뢰인 NPC) ──
+        var bqs = QuestBoard.BqOffers();
+        if (bqs.Count > 0)
+        {
+            var hdr = MakeText(bdList, "BqHeader", "── 고정 의뢰 (평판) — 보고는 의뢰인에게 ──",
+                new Vector2(8, y - 8), new Vector2(600, 22), 13, FaintText, TextAnchor.UpperCenter);
+            var hRT = hdr.rectTransform;
+            hRT.anchorMin = new Vector2(0, 1); hRT.anchorMax = new Vector2(1, 1);
+            y -= 34f;
+            foreach (var q in bqs)
+                y = AddBqRow(q, QuestBoard.FindActive(q.questId), y);
+        }
+
         if (y >= 0f)   // 행이 하나도 없음
         {
             MakeText(bdList, "Empty", "붙은 의뢰서가 없다. (해금 전이거나 오늘 의뢰를 모두 끝냈다)",
                 new Vector2(8, -12), new Vector2(600, 24), 14, FaintText, TextAnchor.UpperLeft);
+            y = -40f;
         }
+
+        // 콘텐츠 높이 = 행 총합 → 스크롤 범위. 열 때 맨 위로.
+        bdList.sizeDelta = new Vector2(bdList.sizeDelta.x, Mathf.Max(1f, -y + 8f));
+        bdList.anchoredPosition = Vector2.zero;
+    }
+
+    /// <summary>BQ 고정 의뢰 1행(컴팩트) — 수주 버튼만(보고는 NPC 대화). 다음 y 반환.</summary>
+    float AddBqRow(QuestData q, QuestInstance active, float y)
+    {
+        const float ROW_H = 96f;
+        var rowRT = CreateRect(bdList, $"Bq_{q.questId}", new Vector2(0, 1), new Vector2(1, 1), Vector2.zero);
+        rowRT.pivot = new Vector2(0.5f, 1);
+        rowRT.offsetMin = new Vector2(0, y - ROW_H);
+        rowRT.offsetMax = new Vector2(0, y);
+        rowRT.gameObject.AddComponent<Image>().color = Panel2;
+
+        var reqTier = QuestBoard.RequiredTier(q.questId);
+        string tierTag = reqTier != null ? $"<color=#E8C86A>[{reqTier.Value}]</color> " : "";
+        string state = active != null ? "<color=#E8C86A>[수주 중]</color> " : "";
+        var title = MakeText(rowRT, "Title", $"{tierTag}{state}<b>{q.title}</b>",
+            new Vector2(14, -8), new Vector2(470, 22), 15, BodyText, TextAnchor.UpperLeft);
+        title.supportRichText = true;
+
+        var flavor = MakeText(rowRT, "Flavor", q.description,
+            new Vector2(14, -32), new Vector2(470, 22), 12, FaintText, TextAnchor.UpperLeft);
+        flavor.fontStyle = FontStyle.Italic;
+        flavor.verticalOverflow = VerticalWrapMode.Truncate;
+
+        // 진행 표시 — BQ 보고 게이트는 NPC 대화의 ReadyToReport(픽업 카운트)라,
+        // BD처럼 보유량(CanReport)을 보여주면 "보유 5/5인데 보고 불가"가 생긴다. 실제 진행도(progress)로 표시.
+        string prog = "";
+        if (active != null && active.data.objectives.Length > 0)
+        {
+            var obj0 = active.data.objectives[0];
+            int cur = active.progress.TryGetValue(0, out int v) ? v : 0;
+            bool ready = active.state == QuestState.ReadyToReport;
+            string verb = obj0.type == ObjectiveType.KillEnemy ? "처치" : "수집";
+            prog = ready ? "완수 — 보고하러 가자" : $"{verb} {cur}/{obj0.requiredCount}";
+        }
+        var info = MakeText(rowRT, "Info",
+            $"보상: {RewardSummary(q)}   <color=#8A8170>보고: {QuestBoard.ReportNpcName(q)}</color>" +
+            (active != null ? $"   <color=#7FBF7F>{prog}</color>" : ""),
+            new Vector2(14, -64), new Vector2(470, 22), 13, BodyText, TextAnchor.UpperLeft);
+        info.supportRichText = true;
+
+        var btnRT = CreateRect(rowRT, "ActBtn", new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(120, 44));
+        btnRT.pivot = new Vector2(1, 0.5f);
+        btnRT.anchoredPosition = new Vector2(-14, 0);
+        var btnImg = btnRT.gameObject.AddComponent<Image>();
+        var btn = btnRT.gameObject.AddComponent<Button>();
+        btn.targetGraphic = btnImg;
+
+        if (active != null)
+        {
+            btnImg.color = new Color(0.22f, 0.21f, 0.18f, 0.9f);
+            btn.interactable = false;
+            MakeChildText(btnRT, "진행 중", 14, FaintText);   // 보고는 의뢰인 NPC 대화에서
+        }
+        else
+        {
+            btnImg.color = BtnCol;
+            var data = q;
+            btn.onClick.AddListener(() => OnBqAccept(data));
+            MakeChildText(btnRT, "수주", 16, Gold);
+        }
+
+        return y - (ROW_H + 8f);
+    }
+
+    void OnBqAccept(QuestData q)
+    {
+        if (QuestBoard.AcceptBq(q, out string msg))
+            ToastManager.Show(msg, ToastManager.ToastType.Success);
+        else if (!string.IsNullOrEmpty(msg))
+            ToastManager.Show(msg, ToastManager.ToastType.Warning);
+        RefreshBoard();
     }
 
     /// <summary>의뢰서 1행 — 제목·게시문·보상 + 상태 버튼(수주/보고/완료). 다음 y 반환.</summary>
@@ -908,6 +1014,7 @@ public class MapSelectUI : MonoBehaviour
         bdHintText = null;
         bdCloseBtn = null;
         bdCloseText = null;
+        boardScroll = null;
     }
 
     // ══════════════════════════════════════
@@ -943,6 +1050,20 @@ public class MapSelectUI : MonoBehaviour
             if (ArbeitOpen) CloseArbeit();        // 오버레이 먼저 닫고
             else if (BoardOpen) CloseBoard();
             else Hide();
+        }
+
+        // 게시판 목록 휠 스크롤 — EventSystem 휠 비의존 직접 폴링(프로젝트 규약, 창고/상점과 동일)
+        if (BoardOpen)
+        {
+            if (boardScroll == null && bdList != null)
+                boardScroll = bdList.GetComponentInParent<WheelOnlyScrollRect>(true);   // 프리팹 경로 재바인딩
+            if (boardScroll != null)
+            {
+                boardScroll.scrollSensitivity = 0f;   // EventSystem 휠 중복 방지
+                float wheelY = GameInput.mouseScrollDelta.y;
+                if (Mathf.Abs(wheelY) > 0.01f)
+                    WheelOnlyScrollRect.WheelStep(boardScroll, wheelY);
+            }
         }
 
         UpdateRegionTimeDisplay();

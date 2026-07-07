@@ -473,7 +473,7 @@
 | 항목 | 상태 | 비고 |
 |------|------|------|
 | **평판 수치·구간** | 🟡 초안 | §9.1 — 구현 전 |
-| **게시판 BQ 풀** | 🟡 초안 | §9.2 — QuestData 미작성 |
+| **게시판 BQ 풀** | 🟢 SO 작성 완료 | §9.3 — BQ-E01~A01 QuestData SO 14개 생성(`Resources/Data/Quests/Board/`, 2026-07-07). 평판 티어 게이트·POI 트리거·분기/특수보상 미구현 |
 | **게시판 BD 일일 풀(19)** | 🟢 SO 작성 완료 | §9.3 — BD-01~20(11 결번) QuestData SO 19개 생성(`Resources/Data/Quests/Board/`, 2026-07-07). 회전 로직(게시판 매니저)·POI 트리거·루트테이블 롤 훅 미작성 |
 | **NPC 개인 NQ** | 🟢 골격+상세 | §9.4 — 4 NPC 라인 서사아크+대사비트 확정, QuestData SO 미작성 |
 | **DQ 풀 SO** | 🔴 없음 | `Resources/Data/DailyQuests/` 폴더 비어 있음 |
@@ -564,13 +564,17 @@ MQ-001/002, SQ-001/002, DQ 풀 목록(§3), AM 목록(§4), 허브 동선(게시
 | 루디 납품 1개 (S-017 / BD-17) | **+1** | 반복 |
 | **BD 일반 · DQ (전당포)** | **0** | 평판은 스토리·BQ·루디만 |
 
-### 9.3 게시판 반복 의뢰 (BQ) — 메인 루프
+> **구현됨(2026-07-07, 적립 연동):** `QuestManager.CompleteQuest → GrantReputation(questId)` — questId→`reputation.csv` 액션 키 매핑(MQ/SQ 일회, BQ 등급별 prefix, BD-17·DQ-006=rudi_deliver, **DQ-007=루디 3개라 rudi_deliver ×3**). BD 일반·DQ 일반은 미매핑=0. 값 SSOT는 CSV 유지.
+> **평판 등급업 → PP +1**(등급 수만큼, 하락 시 회수 없음) — traits.md §2 보조 공급원 배선(`ReputationManager.Add` 티어업 분기 → `TraitManager.GrantPP`). 캐릭터 패널(Tab) 제목 줄에 **평판 수치·등급 상시 표시**. 남음: 수배 매입 평판(§B "소폭" — CSV 키 미정), 등급별 게시판 노출 장수 확대(B=2장 등).
 
 **규칙**
 - **수령** = 게시판에서 의뢰서 떼기
 - **보고** = 의뢰서에 적힌 **의뢰인 NPC** (대부분 회수꾼, 일부 전당포·관리인)
 - 보드에 **평판 구간별 2~4장** 노출, 완료 시 갱신(실시간 or 휴식 시)
 - **계약 슬롯 1개** — BQ와 NQ 공유
+
+> **구현됨(2026-07-07, 그레이박스 — BQ 노출·수령·계약 슬롯):** SO 14종(`Data/Quests/Board/BQ-*.asset`) + `QuestBoard.BqOffers/AcceptBq/ActiveContract`. 의뢰 게시판 오버레이에 **「고정 의뢰 (평판)」 섹션**(티어 배지·보고 NPC 표시·수주 버튼, 목록 휠 스크롤) — 노출 = **평판 티어 게이트(questId 등급 문자 ≥ 현재 티어)** + 자동 게이트(BD와 동일: 탐색형 4종·negotiator 자동 제외, 현재 실효 ~9/14종). **계약 슬롯 1개(BQ/NQ 공유)** 코드 제한. **보고 = 의뢰인 NPC 대화**(기존 `GetReportableQuest(giverNpcId)` 흐름 — BQ-C01 2단계 보고는 전당포 단일로 단순화). 평판 보상은 완료 시 코드 적립(§9.2 메모). 티어 표기(§9.3 "25+/40+")와 §9.2 구간이 상이한데 **§9.2 티어 기준으로 통일 구현**.
+> ⚠ 한계: NPC 보고 시 아이템 미차감(기존 DQ와 동일 — 게시판 BD 보고만 차감형). 수집 카운트 픽업 훅은 **WorldItem.TryPickup에 확장(2026-07-07)** — E키+바닥/클러스터 줍기 카운트, 컨테이너→가방 드래그만 미카운트(후속). "구간별 노출 장수 제한(2~4장)"·완료 시 갱신 주기도 후속.
 
 #### BQ-E (평판 10+, 안전 구간)
 
@@ -1571,3 +1575,16 @@ NQ-W03 (정착 예고):
   7. **BD-17 평판+1은 SO 생략**(QuestRewardType에 평판 없음 — 후속 I01 연동). 신뢰도 보상은 Trust로: BD-08=vendor+1, BD-17=pawnshop+1, BD-19=veteran_scavenger+1.
   8. **평판 게이트(BD-10/14/15/17)는 SO에 안 적음** — 게시판 회전 매니저가 코드로 처리(전 SO 공통 `prologue_complete`만).
 - **남은 작업**: 게시판 회전 매니저(일일 2장, ★가중치, BD-17 10%) · POI ReachPoint 트리거 · 루트테이블 보상 롤 훅 · BD-14 SQ-001 힌트 플래그.
+
+### 2026-07-07 — 게시판 고정 의뢰(BQ) QuestData SO 14개 생성 (§9.3 표 구현)
+- **작업**: BQ-E01~04·D01~04·C01~03·B01~02·A01 14개를 `Assets/Resources/Data/Quests/Board/BQ-*.asset`으로 생성. 소스 = `tools/quests.csv` BQ 14행 + §9.3 표. description = 의뢰서 게시문 톤 신규 작성(본문+`\n— 서명`: 회수꾼 보고건=베테랑 회수꾼, D04=구역 관리인, C01/C03=전당포 주인). region=`scrap_market`, isRepeatable, unlock=`prologue_complete`.
+- **SO에 확정한 구체화 결정**:
+  1. **giverNpcId = 보고 NPC**(수령은 게시판, 보고를 NPC 대화가 잡음): veteran→`veteran_scavenger`, 관리인→`district_warden`, 전당포→`pawnshop`. BQ-C01(회수꾼→전당포 2단계)은 그레이박스 단순화로 `pawnshop` 단일 보고. B01/B02/A01(보고 미표기)=`veteran_scavenger`.
+  2. **와일드카드 구체화**: BQ-D04 잡템→`junk_ashtray` x8, BQ-C03 `val_*`→`val_ring_silver` x1.
+  3. **처치 targetId**: BQ-E04(안전)·BQ-D01(약국) = `bandit_melee_1`(위치 조건 미구현 — placeholder), BQ-B02 협상꾼=`negotiator`(StatDB 미등록 → 적 추가 전 자동 미달성 게이트, 의도).
+  4. **탐색 targetId(POI, 트리거 미구현)**: E03=`poi_warehouse_noise` / D03=`poi_collapsed_shop` / C02=`poi_anomaly_edge`(x2) / A01=`poi_deep_seal`.
+  5. **스크랩 placeholder**: 소=2,500 / 중=7,000 / 대=35,000 / 특대(B01)=70,000 / A01=0(스크랩 보상 없음 — 칭호·2지역 단서는 미구현 생략).
+  6. **평판(+1~+5)은 SO 미기재** — QuestManager.GrantReputation이 questId 프리픽스(reputation.csv)로 코드 처리. CSV reward_rep 열 무시. 신뢰도만 Trust 보상으로: E03=veteran_scavenger+1, C03=pawnshop+1.
+  7. **평판 티어 게이트(E10+/D25+/C40+/B60+/A80+)는 SO 미기재** — QuestBoard가 questId로 코드 처리.
+  8. **특수 보상 생략(후속)**: D03 SQ-001 힌트, D04 자릿세 -5%, C02 연료 힌트, B02 두려움/신뢰 분기, A01 칭호·2지역 단서.
+- **남은 작업**: 평판 티어별 게시판 노출 회전 · POI ReachPoint 트리거 · `negotiator` 적 추가 · 특수 보상(힌트/버프/분기) 훅.

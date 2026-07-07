@@ -110,6 +110,12 @@ public class WorldItem : MonoBehaviour
         if (inventory.TryPickup(Item))
         {
             Debug.Log($"[WorldItem] {Item.DisplayName} 획득");
+
+            // 수집형 퀘스트 목표 카운트 — E키 픽업(InteractableObject:340)과 동일 훅.
+            // 이게 없으면 바닥 줍기/클러스터(GroundPickupUI) 픽업이 BQ/DQ 수집 목표에 안 잡힌다.
+            if (QuestManager.Instance != null && Item.data != null)
+                QuestManager.Instance.UpdateObjective(ObjectiveType.CollectItem, Item.data.itemId, Mathf.Max(1, Item.stackCount));
+
             Destroy(gameObject);
             return true;
         }
