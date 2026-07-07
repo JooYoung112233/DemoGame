@@ -99,7 +99,7 @@ NativeFormatImporter:
 def main():
     exist = existing_ids()
     created = skipped = 0
-    with open(CSV_PATH, encoding="utf-8") as f:
+    with open(CSV_PATH, encoding="utf-8-sig") as f:   # utf-8-sig: BOM 있든 없든 처리(Excel 호환 위해 items.csv에 BOM 부착됨)
         for row in csv.DictReader(f):
             if row["id"] in exist:
                 skipped += 1
