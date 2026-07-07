@@ -174,6 +174,36 @@ public static class ArbeitBoard
         return true;
     }
 
+    /// <summary>소지품(창고→가방→주머니, 보안 제외)에서 itemId 기준 count개 **원자 차감**.
+    /// 전량 확보 못 하면 아무것도 빼지 않고 false. 게시판 의뢰(QuestBoard) 등 납품 공용.</summary>
+    public static bool TryRemoveOwned(ItemData data, int count)
+    {
+        if (data == null || count <= 0) return false;
+        var plan = new List<(InventoryGrid grid, InventoryGrid.PlacedItem placed, int take)>();
+        int need = count;
+        var stash = MainStash.Ensure()?.GetGrid();
+        if (stash != null) need = PlanRemove(stash, data, need, plan);
+        var inv = Object.FindFirstObjectByType<PlayerInventory>();
+        if (inv != null && need > 0)
+        {
+            if (inv.Grid != null) need = PlanRemove(inv.Grid, data, need, plan);
+            if (inv.PocketsGrid != null && need > 0) need = PlanRemove(inv.PocketsGrid, data, need, plan);
+        }
+        if (need > 0) return false;
+
+        foreach (var (grid, placed, take) in plan)
+        {
+            int stack = Mathf.Max(1, placed.item.stackCount);
+            if (stack > take)
+            {
+                placed.item.stackCount = stack - take;
+                grid.NotifyChanged();
+            }
+            else grid.Remove(placed);
+        }
+        return true;
+    }
+
     /// <summary>격자에서 itemId 일치 스택을 count개 확보할 계획을 plan에 누적. 남은 필요 수량 반환.
     /// CountOwned와 동일하게 **itemId 문자열** 기준 — 참조 비교면 itemId 중복 에셋이 "세지는데 안 빠지는" 구멍이 된다.</summary>
     static int PlanRemove(InventoryGrid grid, ItemData data, int count,

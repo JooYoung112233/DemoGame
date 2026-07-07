@@ -1,7 +1,7 @@
 id,feature,category,status,priority,depends_on,doc
 I01,ReputationManager(평판 수치·등급 F~A),시스템,코어+영속화+자가검증완료(UI/적립연동 미),P0,-,quests-region1 §9.2
 I02,ShopCatalogData+해금필터(신뢰도+평판),시스템/데이터,신규,P0,I01·NPCRelationshipManager,quests-region1 §9.7
-I03,BoardQuestSystem(BD/BQ 수령·보고·갱신·평판잠금),시스템,신규,P0,QuestManager·I01,quests-region1 §9.3
+I03,BoardQuestSystem(BD/BQ 수령·보고·갱신·평판잠금),시스템,BD 완료(2026-07-07 QuestBoard+게시판UI+SO19 · BQ/NPC보고/POI 미),P0,QuestManager·I01,quests-region1 §9.3
 I04,QuestData SO(소스=tools/quests.csv ~85의뢰)+생성기,데이터/도구,신규,P1,I03,tools/quests.csv
 I05,ItemData 컨테이너 4필드+ItemInstance.containerGrid,시스템,신규,P1,InventoryGrid,inventory.md
 I06,cont_* 보관함 9종 SO,데이터,신규,P1,I05,inventory.md

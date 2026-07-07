@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb7a23f8e25eea74ba9cecc7af67cdeb, type: 3}
+  m_Name: BD-19
+  m_EditorClassIdentifier: Game.Scripts::QuestData
+  questId: BD-19
+  title: "분실물을 찾소"
+  description: "이름 적힌 명패를 잃었소. 값은 안 따질 테니 꼭 찾아 주오.\n(서명 없음)"
+  questType: 0
+  giverNpcId: 
+  objectives:
+  - type: 0
+    targetId: note_nameplate
+    requiredCount: 1
+    description: "이름 적힌 명패 x1 납품"
+  rewards:
+  - type: 1
+    itemId:
+    amount: 7000
+    npcId:
+  - type: 3
+    itemId:
+    amount: 1
+    npcId: veteran_scavenger
+  unlockCondition:
+    requiredAffinity: 0
+    requiredTrust: 0
+    requiredQuest:
+    requiredFlag: prologue_complete
+  region: scrap_market
+  isRepeatable: 1
+  expiresOnRaid: 0

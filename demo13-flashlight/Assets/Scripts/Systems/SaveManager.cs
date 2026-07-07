@@ -274,6 +274,8 @@ public class SaveManager : MonoBehaviour
 
         // 아르바이트 보드 — 런타임 전용 상태라 로드 시 초기화(슬롯 간 이월 방지)
         ArbeitBoard.ResetRuntime();
+        // 의뢰 게시판(BD) — 동일 원칙 (오늘의 의뢰는 일자 시드라 재추첨돼도 같은 2장)
+        QuestBoard.ResetRuntime();
 
         // 메인 창고(보관함)
         if (data.mainStash != null)
@@ -351,6 +353,8 @@ public class SaveManager : MonoBehaviour
             foreach (var entry in data.activeQuests)
             {
                 var questData = Resources.Load<QuestData>($"Data/Quests/{entry.questId}");
+                if (questData == null)   // 게시판 BD는 Board/ 서브폴더 — Resources.Load는 서브폴더 미탐색이라 폴백
+                    questData = Resources.Load<QuestData>($"Data/Quests/Board/{entry.questId}");
                 if (questData == null) continue;
 
                 if (QuestManager.Instance.AcceptQuest(questData))

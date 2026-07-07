@@ -46,6 +46,16 @@ public class MapSelectUI : MonoBehaviour
     [SerializeField] Button arbeitCloseBtn;
     [SerializeField] Text arbeitCloseText;
 
+    // ── 의뢰 게시판(BD 일일 의뢰 — quests-region1 §9.3, 로직=QuestBoard) ──
+    [SerializeField] Button bdBtn;              // 헤더 토글 버튼
+    [SerializeField] Text bdBtnText;
+    [SerializeField] GameObject bdPanel;        // 중앙 오버레이 패널
+    [SerializeField] RectTransform bdList;      // 동적 의뢰서 행 컨테이너
+    [SerializeField] Text bdTitleText;
+    [SerializeField] Text bdHintText;
+    [SerializeField] Button bdCloseBtn;
+    [SerializeField] Text bdCloseText;
+
     static WorldRegionCatalog.RegionDefinition[] Regions => WorldRegionCatalog.All;
 
     int selectedRegion = -1;
@@ -86,6 +96,7 @@ public class MapSelectUI : MonoBehaviour
         {
             ApplyFonts();                 // 프리팹 인스턴스: 동적 폰트 재바인딩
             EnsureArbeitUI();             // 스테일 프리팹(아르바이트 미베이크) 보충 생성
+            EnsureBoardUI();              // 스테일 프리팹(의뢰 게시판 미베이크) 보충 생성
         }
         BindEvents();
     }
@@ -152,6 +163,9 @@ public class MapSelectUI : MonoBehaviour
         // ── 아르바이트 오버레이(기본 닫힘) ──
         BuildArbeitPanel(rootRT);
 
+        // ── 의뢰 게시판 오버레이(기본 닫힘) ──
+        BuildBoardPanel(rootRT);
+
         panelRoot.SetActive(false);
     }
 
@@ -189,6 +203,9 @@ public class MapSelectUI : MonoBehaviour
 
         // 아르바이트 토글 버튼 (닫기 왼쪽, 150x40) — 납품 의뢰 게시판 오버레이
         BuildArbeitHeaderButton(header);
+
+        // 의뢰 토글 버튼 (아르바이트 왼쪽) — BD 일일 의뢰 게시판 오버레이
+        BuildBoardHeaderButton(header);
 
         // 헤더 아래 1px 구분선
         var lineRT = CreateRect(parent, "HeaderLine", new Vector2(0, 1), new Vector2(1, 1), Vector2.zero);
@@ -454,6 +471,7 @@ public class MapSelectUI : MonoBehaviour
     {
         if (arbeitPanel == null) return;
         if (ArbeitOpen) { arbeitPanel.SetActive(false); return; }
+        CloseBoard();   // 오버레이 동시 열림 방지
         arbeitPanel.SetActive(true);
         RefreshArbeit();
     }
@@ -530,6 +548,238 @@ public class MapSelectUI : MonoBehaviour
         RefreshArbeit();
     }
 
+    // ══════════════════════════════════════
+    // 의뢰 게시판 (BD 일일 의뢰 — 로직: QuestBoard)
+    // ══════════════════════════════════════
+
+    void BuildBoardHeaderButton(RectTransform header)
+    {
+        var bdRT = CreateRect(header, "BoardBtn", new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(120, 40));
+        bdRT.pivot = new Vector2(1, 0.5f);
+        bdRT.anchoredPosition = new Vector2(-232, 0);   // ✕(-12~-60) ← 아르바이트(-72~-222) ← 의뢰
+        var bdImg = bdRT.gameObject.AddComponent<Image>();
+        bdImg.color = BtnCol;
+        bdBtn = bdRT.gameObject.AddComponent<Button>();
+        bdBtn.targetGraphic = bdImg;
+        var bColors = bdBtn.colors;
+        bColors.highlightedColor = UITheme.CellHover;
+        bColors.pressedColor = UITheme.CellPressed;
+        bdBtn.colors = bColors;
+        bdBtnText = MakeChildText(bdRT, "의뢰", 15, Gold);
+    }
+
+    /// <summary>의뢰 게시판 필드 추가 이전에 베이크된 스테일 프리팹 폴백(EnsureArbeitUI와 동일 패턴).</summary>
+    void EnsureBoardUI()
+    {
+        if (bdBtn != null && bdPanel != null) return;
+        if (panelRoot == null) return;
+        var rootRT = panelRoot.GetComponent<RectTransform>();
+        if (bdBtn == null)
+        {
+            var header = panelRoot.transform.Find("Header") as RectTransform;
+            if (header != null) BuildBoardHeaderButton(header);
+        }
+        if (bdPanel == null) BuildBoardPanel(rootRT);
+        Debug.LogWarning("[MapSelectUI] 프리팹에 의뢰 게시판 UI 미베이크 — 코드 폴백으로 생성함. 재베이크 권장.");
+    }
+
+    void BuildBoardPanel(Transform parent)
+    {
+        var overlayRT = CreateStretch(parent, "BoardOverlay");
+        bdPanel = overlayRT.gameObject;
+        var dim = overlayRT.gameObject.AddComponent<Image>();
+        dim.color = new Color(0f, 0f, 0f, 0.55f);
+
+        var panelRT = CreateRect(overlayRT, "BoardPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(680, 560));
+        panelRT.pivot = new Vector2(0.5f, 0.5f);
+        panelRT.anchoredPosition = Vector2.zero;
+        panelRT.gameObject.AddComponent<Image>().color = Panel;
+
+        bdTitleText = MakeText(panelRT, "BoardTitle", "의뢰 게시판 — 오늘의 의뢰서",
+            new Vector2(24, -18), new Vector2(620, 30), 20, Gold, TextAnchor.UpperLeft);
+        bdTitleText.fontStyle = FontStyle.Bold;
+
+        bdHintText = MakeText(panelRT, "BoardHint", "의뢰서를 떼면(수주) 목표 완수 후 이 게시판에서 보고한다. 동시 수주 2건.",
+            new Vector2(24, -50), new Vector2(632, 24), 13, FaintText, TextAnchor.UpperLeft);
+
+        MakeLine(panelRT, -80, 632);
+
+        var listRT = CreateStretch(panelRT, "BoardList");
+        listRT.offsetMin = new Vector2(24, 76);
+        listRT.offsetMax = new Vector2(-24, -92);
+        bdList = listRT;
+
+        var cRT = CreateRect(panelRT, "BoardClose", new Vector2(1, 0), new Vector2(1, 0), new Vector2(150, 44));
+        cRT.pivot = new Vector2(1, 0);
+        cRT.anchoredPosition = new Vector2(-24, 16);
+        var cImg = cRT.gameObject.AddComponent<Image>();
+        cImg.color = BtnCol;
+        bdCloseBtn = cRT.gameObject.AddComponent<Button>();
+        bdCloseBtn.targetGraphic = cImg;
+        var ccColors = bdCloseBtn.colors;
+        ccColors.highlightedColor = UITheme.CellHover;
+        ccColors.pressedColor = UITheme.CellPressed;
+        bdCloseBtn.colors = ccColors;
+        bdCloseText = MakeChildText(cRT, "닫기  [ESC]", 15, FaintText);
+
+        bdPanel.SetActive(false);
+    }
+
+    bool BoardOpen => bdPanel != null && bdPanel.activeSelf;
+
+    void ToggleBoard()
+    {
+        if (bdPanel == null) return;
+        if (BoardOpen) { bdPanel.SetActive(false); return; }
+        CloseArbeit();   // 오버레이 동시 열림 방지
+        bdPanel.SetActive(true);
+        RefreshBoard();
+    }
+
+    void CloseBoard()
+    {
+        if (bdPanel != null) bdPanel.SetActive(false);
+    }
+
+    /// <summary>의뢰서 행 재생성 — 오늘의 의뢰 2장 + (오늘 목록 밖) 수주 중 BD.</summary>
+    void RefreshBoard()
+    {
+        if (bdList == null) return;
+        for (int i = bdList.childCount - 1; i >= 0; i--)
+        {
+            var child = bdList.GetChild(i).gameObject;
+            if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
+        }
+
+        float y = 0f;
+        var shown = new HashSet<string>();
+
+        var offers = QuestBoard.TodayOffers;
+        for (int i = 0; i < offers.Count; i++)
+        {
+            var q = offers[i];
+            if (q == null) continue;
+            shown.Add(q.questId);
+            y = AddBoardRow(q, QuestBoard.FindActive(q.questId), y);
+        }
+
+        // 어제 수주해 아직 진행 중인 BD(오늘 목록 밖)도 보고 가능해야 함
+        foreach (var inst in QuestBoard.ActiveBd())
+        {
+            if (inst?.data == null || shown.Contains(inst.data.questId)) continue;
+            y = AddBoardRow(inst.data, inst, y);
+        }
+
+        if (y >= 0f)   // 행이 하나도 없음
+        {
+            MakeText(bdList, "Empty", "붙은 의뢰서가 없다. (해금 전이거나 오늘 의뢰를 모두 끝냈다)",
+                new Vector2(8, -12), new Vector2(600, 24), 14, FaintText, TextAnchor.UpperLeft);
+        }
+    }
+
+    /// <summary>의뢰서 1행 — 제목·게시문·보상 + 상태 버튼(수주/보고/완료). 다음 y 반환.</summary>
+    float AddBoardRow(QuestData q, QuestInstance active, float y)
+    {
+        const float ROW_H = 118f;
+        var rowRT = CreateRect(bdList, $"Bd_{q.questId}", new Vector2(0, 1), new Vector2(1, 1), Vector2.zero);
+        rowRT.pivot = new Vector2(0.5f, 1);
+        rowRT.offsetMin = new Vector2(0, y - ROW_H);
+        rowRT.offsetMax = new Vector2(0, y);
+        rowRT.gameObject.AddComponent<Image>().color = Panel2;
+
+        bool doneToday = QuestBoard.IsDoneToday(q.questId);
+        string state = active != null ? "<color=#E8C86A>[수주 중]</color> " : doneToday ? "<color=#8A8170>[완료]</color> " : "";
+        var title = MakeText(rowRT, "Title", $"{state}<b>{q.title}</b>",
+            new Vector2(14, -8), new Vector2(470, 22), 15, BodyText, TextAnchor.UpperLeft);
+        title.supportRichText = true;
+
+        // 게시문(공고 톤) — 2줄까지
+        var flavor = MakeText(rowRT, "Flavor", q.description,
+            new Vector2(14, -32), new Vector2(470, 40), 12, FaintText, TextAnchor.UpperLeft);
+        flavor.fontStyle = FontStyle.Italic;
+        flavor.verticalOverflow = VerticalWrapMode.Truncate;
+
+        // 보상 + 진행
+        string prog = "";
+        bool can = false;
+        if (active != null) can = QuestBoard.CanReport(active, out prog);
+        var info = MakeText(rowRT, "Info",
+            $"보상: {RewardSummary(q)}" + (active != null ? $"   <color=#{(can ? "7FBF7F" : "B06A5A")}>{prog}</color>" : ""),
+            new Vector2(14, -86), new Vector2(470, 22), 13, BodyText, TextAnchor.UpperLeft);
+        info.supportRichText = true;
+
+        // 우측 버튼: 수주 / 보고 / 완료(비활성)
+        var btnRT = CreateRect(rowRT, "ActBtn", new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(120, 46));
+        btnRT.pivot = new Vector2(1, 0.5f);
+        btnRT.anchoredPosition = new Vector2(-14, 0);
+        var btnImg = btnRT.gameObject.AddComponent<Image>();
+        var btn = btnRT.gameObject.AddComponent<Button>();
+        btn.targetGraphic = btnImg;
+
+        if (active != null)
+        {
+            btnImg.color = can ? new Color(Good.r * 0.35f, Good.g * 0.35f, Good.b * 0.35f, 0.95f)
+                               : new Color(0.22f, 0.21f, 0.18f, 0.9f);
+            btn.interactable = can;
+            var inst = active;
+            btn.onClick.AddListener(() => OnBoardReport(inst));
+            MakeChildText(btnRT, "보고", 16, can ? BodyText : FaintText);
+        }
+        else if (doneToday)
+        {
+            btnImg.color = new Color(0.22f, 0.21f, 0.18f, 0.9f);
+            btn.interactable = false;
+            MakeChildText(btnRT, "완료됨", 14, FaintText);
+        }
+        else
+        {
+            btnImg.color = BtnCol;
+            var data = q;
+            btn.onClick.AddListener(() => OnBoardAccept(data));
+            MakeChildText(btnRT, "수주", 16, Gold);
+        }
+
+        return y - (ROW_H + 8f);
+    }
+
+    static string RewardSummary(QuestData q)
+    {
+        if (q.rewards == null || q.rewards.Length == 0) return "-";
+        var parts = new List<string>();
+        foreach (var r in q.rewards)
+        {
+            switch (r.type)
+            {
+                case QuestRewardType.Currency: parts.Add($"<color=#E8C86A>◈{r.amount:N0}</color>"); break;
+                case QuestRewardType.Item:
+                    var item = ItemDatabase.Get(r.itemId);
+                    parts.Add(item != null ? $"{item.displayName} x{r.amount}" : r.itemId);
+                    break;
+                case QuestRewardType.Trust: parts.Add($"신뢰 +{r.amount}"); break;
+                case QuestRewardType.Affinity: parts.Add($"호감 +{r.amount}"); break;
+            }
+        }
+        return string.Join(" + ", parts);
+    }
+
+    void OnBoardAccept(QuestData q)
+    {
+        if (QuestBoard.Accept(q, out string msg))
+            ToastManager.Show(msg, ToastManager.ToastType.Success);
+        else if (!string.IsNullOrEmpty(msg))
+            ToastManager.Show(msg, ToastManager.ToastType.Warning);
+        RefreshBoard();
+    }
+
+    void OnBoardReport(QuestInstance inst)
+    {
+        if (QuestBoard.Report(inst, out string msg))
+            ToastManager.Show(msg, ToastManager.ToastType.Success);
+        else if (!string.IsNullOrEmpty(msg))
+            ToastManager.Show(msg, ToastManager.ToastType.Warning);
+        RefreshBoard();
+    }
+
     /// <summary>
     /// 정적 버튼 onClick 재부착. onClick 리스너는 프리팹에 직렬화되지 않으므로
     /// (코드 생성 / 프리팹 인스턴스) 양쪽 경로에서 Awake가 호출한다.
@@ -559,6 +809,18 @@ public class MapSelectUI : MonoBehaviour
         {
             arbeitCloseBtn.onClick.RemoveAllListeners();
             arbeitCloseBtn.onClick.AddListener(CloseArbeit);
+        }
+
+        if (bdBtn != null)
+        {
+            bdBtn.onClick.RemoveAllListeners();
+            bdBtn.onClick.AddListener(ToggleBoard);
+        }
+
+        if (bdCloseBtn != null)
+        {
+            bdCloseBtn.onClick.RemoveAllListeners();
+            bdCloseBtn.onClick.AddListener(CloseBoard);
         }
 
         if (regionButtons != null)
@@ -591,6 +853,11 @@ public class MapSelectUI : MonoBehaviour
         if (arbeitHintText)  arbeitHintText.font = f;
         if (arbeitPpText)    arbeitPpText.font = f;
         if (arbeitCloseText) arbeitCloseText.font = f;
+        // 의뢰 게시판 정적 텍스트(동적 행은 생성 시 KR 적용)
+        if (bdBtnText)   bdBtnText.font = f;
+        if (bdTitleText) bdTitleText.font = f;
+        if (bdHintText)  bdHintText.font = f;
+        if (bdCloseText) bdCloseText.font = f;
     }
 
 #if UNITY_EDITOR
@@ -633,6 +900,14 @@ public class MapSelectUI : MonoBehaviour
         arbeitPpText = null;
         arbeitCloseBtn = null;
         arbeitCloseText = null;
+        bdBtn = null;
+        bdBtnText = null;
+        bdPanel = null;
+        bdList = null;
+        bdTitleText = null;
+        bdHintText = null;
+        bdCloseBtn = null;
+        bdCloseText = null;
     }
 
     // ══════════════════════════════════════
@@ -647,7 +922,8 @@ public class MapSelectUI : MonoBehaviour
         if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         if (panelRoot != null)
             panelRoot.SetActive(true);
-        CloseArbeit();   // 열 때 아르바이트 오버레이는 항상 닫힌 상태로
+        CloseArbeit();   // 열 때 오버레이는 항상 닫힌 상태로
+        CloseBoard();
         UpdateSelection();
     }
 
@@ -664,7 +940,8 @@ public class MapSelectUI : MonoBehaviour
 
         if (GameInput.GetKeyDown(KeyCode.Escape))
         {
-            if (ArbeitOpen) CloseArbeit();   // 오버레이 먼저 닫고
+            if (ArbeitOpen) CloseArbeit();        // 오버레이 먼저 닫고
+            else if (BoardOpen) CloseBoard();
             else Hide();
         }
 
