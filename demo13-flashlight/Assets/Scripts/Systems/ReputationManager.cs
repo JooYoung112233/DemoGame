@@ -64,7 +64,18 @@ public class ReputationManager : MonoBehaviour
             Debug.Log($"[Reputation] 등급 변동 {oldTier} → {newTier}");
             OnTierChanged?.Invoke(oldTier, newTier);
             if ((int)newTier > (int)oldTier)
+            {
                 ToastManager.Show($"★ 평판 상승 — {ReputationTiers.Name(newTier)} ({newTier})", ToastManager.ToastType.Success);
+                // 평판 등급업 = PP 보조 공급원 (traits.md §2 — 등급당 +1, 한 번에 여러 등급이면 등급 수만큼).
+                // 등급 하락 시 회수는 안 함(이미 쓴 PP 회수 불가 — 단순화).
+                int tiersUp = (int)newTier - (int)oldTier;
+                if (TraitManager.Instance != null)
+                {
+                    TraitManager.Instance.GrantPP(tiersUp);
+                    ToastManager.Show($"PP +{tiersUp} (평판 등급 상승)", ToastManager.ToastType.Success);
+                }
+                else Debug.LogWarning($"[Reputation] TraitManager 없음 — 등급업 PP {tiersUp} 소실");
+            }
         }
     }
 

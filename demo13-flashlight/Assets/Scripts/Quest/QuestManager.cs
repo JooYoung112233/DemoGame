@@ -90,10 +90,50 @@ public class QuestManager : MonoBehaviour
         GiveRewards(quest);
         completedQuestIds.Add(questId);
         activeQuests.Remove(quest);
+        GrantReputation(quest);   // 평판 적립 (quests-region1 §9.2, 값 SSOT: reputation.csv) — 완료 상태 확정 후
         OnQuestCompleted?.Invoke(quest);
         Debug.Log($"[QuestManager] 퀘스트 완료: {quest.data.title}");
         SaveCheckpoints.Instance?.QuestCompleted();
         return true;
+    }
+
+    /// <summary>퀘스트 완료 → 평판 적립 배선 (quests-region1 §9.2).
+    /// questId → reputation.csv 액션 키 매핑. 미매핑/값 0(BD 일반·DQ 일반)은 무시.
+    /// 루디 납품 계열은 목표 requiredCount(에셋)만큼 배수 — 수량 하드코딩 금지(에셋과 이중 소스 방지).</summary>
+    void GrantReputation(QuestInstance quest)
+    {
+        if (ReputationManager.Instance == null || quest?.data == null) return;
+        string questId = quest.data.questId;
+
+        // 루디 납품 계열 — 개당 +1 × 납품 수량(에셋 requiredCount). 토스트 스팸 방지 위해 합산 1회 Add.
+        if (questId == "BD-17" || questId == "DQ-006" || questId == "DQ-007")
+        {
+            int per = ReputationActions.Value("rudi_deliver");
+            int count = quest.data.objectives != null && quest.data.objectives.Length > 0
+                ? Mathf.Max(1, quest.data.objectives[0].requiredCount) : 1;
+            if (per != 0)
+                ReputationManager.Instance.Add(per * count, $"루디 납품 ×{count} ({questId})");
+            return;
+        }
+
+        string actionKey = questId switch
+        {
+            "MQ-001" => "MQ-001_report",
+            "MQ-002" => "MQ-002_done",
+            "SQ-001" => "SQ-001_rescue",
+            "SQ-002" => "SQ-002_done",
+            _ => null,
+        };
+        // BQ 등급별 반복 적립 (BQ-E01 → BQ-E_done) — ID 포맷 "BQ-{등급대문자}nn" 전제
+        if (actionKey == null && questId.StartsWith("BQ-") && questId.Length >= 4)
+        {
+            actionKey = $"BQ-{questId[3]}_done";
+            if (ReputationActions.Value(actionKey) == 0)
+                Debug.LogWarning($"[QuestManager] BQ 평판 키 매핑 실패({questId} → {actionKey}) — reputation.csv/ID 포맷 확인");
+        }
+
+        if (actionKey != null)
+            ReputationManager.Instance.AddByAction(actionKey, $"의뢰 완료: {questId}");
     }
 
     void GiveRewards(QuestInstance quest)

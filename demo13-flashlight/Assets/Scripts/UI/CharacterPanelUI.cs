@@ -1240,7 +1240,11 @@ public class CharacterPanelUI : MonoBehaviour
         if (charLevelText != null)
         {
             var prog = PlayerProgress.Instance;   // lazy — 접근이 곧 생성
-            charLevelText.text = $"Lv.{prog.Level}  <color=#8A8170>XP {prog.Xp}/{prog.XpToNext}</color>";
+            var rep = ReputationManager.Instance;
+            string repPart = rep != null
+                ? $"  ·  평판 {rep.Reputation} <color=#8A8170>[{rep.TierName}]</color>"
+                : "";
+            charLevelText.text = $"Lv.{prog.Level}  <color=#8A8170>XP {prog.Xp}/{prog.XpToNext}</color>{repPart}";
         }
 
         // 장비 슬롯 시각 갱신
