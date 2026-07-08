@@ -326,11 +326,14 @@ public class GroundPickupUI : MonoBehaviour
         panelRoot.SetActive(false);
     }
 
-    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
+    /// <summary>프리팹 인스턴스화 시 동적 OS 폰트 재바인딩 — 전체 자식 Text 일괄.
+    /// headerText만 재바인딩하던 방식은 미직렬화 하단 힌트 줄('[휠/↑↓] 선택…')을 놓쳐
+    /// 프리팹 경로에서 안 보였다(전체 검수 2026-07-07). 이 패널의 모든 텍스트 = koreanFont.</summary>
     void ApplyFonts()
     {
         var f = koreanFont != null ? koreanFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        if (headerText) headerText.font = f;
+        foreach (var t in GetComponentsInChildren<Text>(true))
+            if (t != null) t.font = f;
     }
 
 #if UNITY_EDITOR

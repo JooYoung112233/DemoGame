@@ -52,6 +52,20 @@ public class NavigationHUD : MonoBehaviour
         Instance = this;
         // UIManager 자식으로 배치 → 부모(UIManager)의 DontDestroyOnLoad를 따라 영속.
         if (!IsGenerated) BuildUI();   // 폴백: 프리팹 없이 코드로 생성
+        else ReapplyProceduralSprites();   // 프리팹 경로: 절차 생성 스프라이트는 직렬화 불가 → 재적용
+    }
+
+    /// <summary>PlaceholderSprite.Circle 같은 런타임 생성 스프라이트는 에셋이 아니라 프리팹에 못 구워진다
+    /// (나침반 다이얼/핀이 사각형으로 렌더 — 전체 검수 2026-07-07). 프리팹 경로에서 다시 꽂는다(코스메틱).</summary>
+    void ReapplyProceduralSprites()
+    {
+        if (compassRoot == null) return;
+        foreach (var img in compassRoot.GetComponentsInChildren<Image>(true))
+        {
+            if (img == null || img.sprite != null) continue;
+            if (img.gameObject.name == "Dial" || img.gameObject.name == "Pin")
+                img.sprite = PlaceholderSprite.Circle;
+        }
     }
 
     void OnDestroy()

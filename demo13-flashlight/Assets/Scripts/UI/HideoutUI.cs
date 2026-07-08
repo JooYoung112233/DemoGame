@@ -28,6 +28,9 @@ public class HideoutUI : MonoBehaviour
     void Awake()
     {
         if (Instance == null) Instance = this;
+        // 프리팹 경로는 GenerateUI(font 할당처)를 스킵 → 동적 Row/버튼 라벨의 font가 null이 되어
+        // "제목만 나오고 본문이 전부 빈" 패널이 된다(2026-07-07 하이드아웃 버그). 항상 여기서 보장.
+        if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         WireEvents();   // 프리팹 인스턴스는 GenerateUI를 스킵 → 직렬화된 정적 버튼 ref에 리스너 재부착
     }
 

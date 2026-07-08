@@ -30,6 +30,12 @@ public class QuestLogUI : MonoBehaviour
         if (instance == null) instance = this;
         // 프리팹 인스턴스로 들어온 경우, 직렬화된 Text에 동적 OS 폰트 재바인딩.
         if (IsGenerated) ApplyFonts();
+
+        // 베이크 스켈레톤 캔버스는 런타임에 전혀 안 쓰인다(BuildUI가 매번 컨테이너까지 전부 재생성) —
+        // 켜진 채 남으면 리스너 없는 유령 캔버스가 겹쳐 클릭을 삼키고 Hide 후에도 화면에 잔류(전체 검수 2026-07-07).
+        // Awake는 첫 BuildUI 전에 돌므로 이 Find는 베이크분만 잡는다.
+        var baked = transform.Find("QuestLogUI_Canvas");
+        if (baked != null) baked.gameObject.SetActive(false);
     }
 
     /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>

@@ -125,6 +125,15 @@ public class QuestHUD : MonoBehaviour
             QuestManager.Instance.OnQuestAccepted += OnQuestAccepted;
             QuestManager.Instance.OnQuestCompleted += OnQuestCompleted;
         }
+
+        // 패널 클릭 → 퀘스트 로그 열기 onClick 재부착 — 빌더에서만 붙이면 프리팹 경로에서
+        // 클릭 무반응(§6.5, 전체 검수 2026-07-07). panelRoot는 직렬화 ref라 양 경로 커버.
+        var openBtn = panelRoot != null ? panelRoot.GetComponent<UnityEngine.UI.Button>() : null;
+        if (openBtn != null)
+        {
+            openBtn.onClick.RemoveAllListeners();
+            openBtn.onClick.AddListener(QuestLogUI.Show);
+        }
     }
 
     public void GenerateUI()

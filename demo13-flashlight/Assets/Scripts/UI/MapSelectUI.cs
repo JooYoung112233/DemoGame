@@ -929,6 +929,22 @@ public class MapSelectUI : MonoBehaviour
             bdCloseBtn.onClick.AddListener(CloseBoard);
         }
 
+        // 정보 패널 하단 '취소 [ESC]' 버튼 — 빌더 로컬 변수라 미직렬화, 프리팹 경로에서 onClick 유실(전체 검수 2026-07-07).
+        // 직렬화 ref 추가 대신 이름 탐색 재부착(재베이크 없이도 동작; CreateRect가 "CancelBtn2"로 명명).
+        if (panelRoot != null)
+        {
+            var c2T = panelRoot.transform.Find("Body/InfoPanel/CancelBtn2");
+            var c2 = c2T != null ? c2T.GetComponent<Button>() : null;
+            if (c2 == null)   // 계층 경로가 어긋난 구버전 베이크 대비 전체 탐색 폴백
+                foreach (var b in panelRoot.GetComponentsInChildren<Button>(true))
+                    if (b.gameObject.name == "CancelBtn2") { c2 = b; break; }
+            if (c2 != null)
+            {
+                c2.onClick.RemoveAllListeners();
+                c2.onClick.AddListener(Hide);
+            }
+        }
+
         if (regionButtons != null)
         {
             for (int i = 0; i < regionButtons.Length; i++)
@@ -945,25 +961,13 @@ public class MapSelectUI : MonoBehaviour
     /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
     void ApplyFonts()
     {
+        // 전체 자식 Text 일괄 재바인딩 — 개별 ref 나열 방식은 직렬화 안 된 정적 텍스트
+        // (✕ 글리프·'지역 정보' 제목·맵 안내·마커 아이콘·취소 라벨 등 9종)를 놓쳐
+        // 프리팹 경로에서 전부 안 보였다(전체 검수 2026-07-07). OS 동적 폰트는 프리팹에 직렬화 불가(m_Font null).
+        // 이 패널의 모든 텍스트는 원래 KR이므로 일괄 적용이 안전하다.
         var f = KR;
-        if (titleText)        titleText.font = f;
-        if (selectedInfoText) selectedInfoText.font = f;
-        if (confirmText)      confirmText.font = f;
-        if (infoTimeText)     infoTimeText.font = f;
-        if (regionBtnTexts != null)
-            foreach (var t in regionBtnTexts)
-                if (t) t.font = f;
-        // 아르바이트 정적 텍스트(동적 행은 생성 시 KR 적용)
-        if (arbeitBtnText)   arbeitBtnText.font = f;
-        if (arbeitTitleText) arbeitTitleText.font = f;
-        if (arbeitHintText)  arbeitHintText.font = f;
-        if (arbeitPpText)    arbeitPpText.font = f;
-        if (arbeitCloseText) arbeitCloseText.font = f;
-        // 의뢰 게시판 정적 텍스트(동적 행은 생성 시 KR 적용)
-        if (bdBtnText)   bdBtnText.font = f;
-        if (bdTitleText) bdTitleText.font = f;
-        if (bdHintText)  bdHintText.font = f;
-        if (bdCloseText) bdCloseText.font = f;
+        foreach (var t in GetComponentsInChildren<Text>(true))
+            if (t != null) t.font = f;
     }
 
 #if UNITY_EDITOR

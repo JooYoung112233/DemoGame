@@ -96,6 +96,7 @@ public class PauseMenu : MonoBehaviour
 
     void SetVisible(bool v)
     {
+        if (v == IsShowing) return;   // 재진입 가드 — 이미 일시정지 중 Show가 또 오면 _prevTimeScale이 0으로 덮여 원복 불가(전체 검수 2026-07-07)
         // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
         if (v && canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         if (canvas != null) canvas.gameObject.SetActive(v);

@@ -46,7 +46,9 @@ public class SleepUI : MonoBehaviour
     void Awake()
     {
         if (Instance == null) Instance = this;
-        // 프리팹 인스턴스(이미 베이크된 계층)면 코드 생성 생략. 빌트인 폰트라 재바인딩 불필요.
+        // 정적 텍스트는 빌트인 폰트가 프리팹에 직렬화돼 무해하나, font "필드"는 미직렬화 —
+        // 프리팹 경로에서 null로 남는다(HideoutUI 빈 패널 버그와 동일 계열). 방어적으로 항상 보장.
+        if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         WireEvents();   // onClick은 프리팹에 직렬화 안 됨 → 양쪽 경로(프리팹/폴백)에서 항상 재부착
     }
 

@@ -83,6 +83,7 @@
 - **해결 패턴(`WireEvents`)**: 정적 버튼 ref를 `[SerializeField]`로 잡고, `WireEvents()`가 `RemoveAllListeners()+AddListener(핸들러)`로 **Awake에서 양쪽 경로(프리팹/코드) 모두 재부착**. (TitleScreen/PauseMenu/Crafting/MapSelect/Hideout/Sleep/Shop/CharacterPanel 적용)
 - **매 Show마다 재빌드하는 패널**(QuestLog/Dispatch/Radio)과 **동적 버튼**(격자 셀/컨텍스트 메뉴/선택지/픽업 행)은 런타임에 재부착되므로 영향 없음.
 - ⚠️ **새 직렬화 버튼 ref를 추가한 패널은 반드시 재베이크**해야 ref가 채워진다(안 하면 그 버튼만 프리팹 경로에서 무반응; 코드 폴백은 정상).
+- **(2026-07-07 일제 점검)** WireEvents 미적용 잔존분 3건 발견·수정: **GameHUD**(하이드아웃 우상단 나가기 — 실제 무반응 버그였음), **QuickSlotBar**(슬롯 클릭), **RaidMapUI**(✕ 닫기). QuestLog/Dispatch/Radio/GroundPickup은 매 표시 재빌드형이라 해당 없음(기존 판정 유지).
 
 ## 6.6 베이크 주의 — 베이크되는 보조 MonoBehaviour는 반드시 '독립 파일'(2026-07-01, 중요)
 - **증상**: 베이크된 `CharacterPanelUI.prefab`에서 `ScrollDragBlocker`의 `m_Script: {fileID: 0}`(스크립트 유실 → 런타임 미동작), `LeftViewport`의 `WheelOnlyScrollRect`가 베이스 `UnityEngine.UI.ScrollRect`로 격하(드래그 무효화 오버라이드 소실). → **아이템을 들고 창고 격자를 끌면 창고가 멋대로 스크롤**되는 잠재버그(휠 스크롤은 static `WheelStep`이라 무관하게 정상).
@@ -90,6 +91,12 @@
 - **해결(2026-07-01)**: `WheelOnlyScrollRect`·`ScrollDragBlocker`를 각자 `WheelOnlyScrollRect.cs`·`ScrollDragBlocker.cs`로 분리(+ .meta guid 고정). 각 파일 상단에 "합치지 말 것" 경고 주석. → 재베이크 시 참조 정상 직렬화. **ShopUI는 런타임 AddComponent라 원래 영향 없었음.**
 - ⚠️ **규칙**: 베이크 대상(프리팹 빌더/`EditorBake`에서 부착)에 붙는 커스텀 MonoBehaviour는 **무조건 파일명=클래스명 독립 파일**. 런타임에만 `AddComponent`하는 헬퍼는 무방. (런타임 전용 예: `BreakDebris`/`DamagePopup`/`BloodDropFall` — 베이크 안 되므로 OK.)
 - ⚠️ 소스만 고쳐선 안 반영 → **CharacterPanelUI 재베이크 → Systems 씬 재빌드**(B형이라 씬에 인스턴스 배치됨) 필요.
+
+## 6.7 베이크 주의 — GenerateUI에서만 채우는 '캐시 필드'는 프리팹 경로에서 null (2026-07-07, 중요)
+- **증상**: 하이드아웃 시설 창(HideoutUI)이 **제목·✕만 나오고 본문이 텅 빈 패널**로 뜸(업글 버튼 = 글자 없는 어두운 바). 창을 못 닫는 것처럼 보여 나가기/ESC까지 먹통 체감. 콘솔 에러 없음.
+- **원인**: `Font font;` 같은 **미직렬화 캐시 필드를 GenerateUI 안에서만 할당**하는 패턴. 프리팹 인스턴스는 `IsGenerated=true`라 GenerateUI를 스킵 → 필드가 영원히 null → **동적 생성 텍스트(Row 등)만 폰트 없음 = 안 보임**. 정적 텍스트는 빌트인 폰트가 프리팹에 직렬화돼 멀쩡해서 "제목만 나오는" 반쪽 증상이 됨. HideoutUI는 A형 자가부트(Resources.Load 프리팹)라 일괄 재베이크로 프리팹이 생기는 순간 처음 노출.
+- **해결(2026-07-07)**: HideoutUI/SleepUI `Awake`에 `if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");` 폴백. 재베이크 불필요(런타임 필드).
+- ⚠️ **규칙**: GenerateUI(빌더)에서 할당하는 **비직렬화 캐시**(폰트·색 캐시·참조 캐시)는 반드시 `Awake`/`ApplyFonts`에서도 보장하라 — "빌트인 폰트라 재바인딩 불필요"는 **직렬화된 Text에만** 참이고, 런타임 동적 생성이 쓰는 필드엔 거짓.
 
 ## 7. 리스크 / 주의
 - `CharacterPanelUI`(~3300줄)·`ShopUI`(~2400줄)는 생성+로직 결합 → **한 번에 X, 패널 단위 점진 전환**.
@@ -100,6 +107,7 @@
 ## 변경 로그
 | 날짜 | 질문 | 결정 | 근거 |
 |------|------|------|------|
+| 2026-07-07 | 일괄 재베이크 후 하이드아웃 등 UI 연쇄 고장 → **27패널 전체 검수**(멀티에이전트 감사+적대검증) | **프리팹 경로 지뢰 12건 수정.** ①폰트 캐시(§6.7): HideoutUI(빈 패널·실고장)/SleepUI 폴백 ②onClick(§6.5): GameHUD 하이드아웃 나가기(실고장)/QuickSlotBar 슬롯/RaidMapUI ✕/QuestHUD 패널 클릭/MapSelectUI 취소(이름탐색 재부착) ③동적 OS 폰트 일괄 재바인딩(ApplyFonts를 전체 자식 순회로): MapSelectUI(정적 9종)/QuickSlotBar(숫자 라벨)/GroundPickupUI(힌트) ④CharacterPanelUI 장비 슬롯 Dictionary 재수화(프리팹 경로에서 장비 UI 전멸이던 실고장) ⑤QuestLogUI 유령 베이크 캔버스 비활성(겹침·클릭 삼킴·잔류) ⑥NavigationHUD 절차 스프라이트 재적용(원형) ⑦PauseMenu timeScale 재진입 가드. **잔여(후속)**: SleepUI 옵션 라벨=베이크 시점 튜닝값 고정(info)/sleeping 고착(latent), NarrationUI 스토리 중단(latent), GameUI.prefab=고아 프리팹(삭제 후보), ShopUI=수동 스팟체크 통과. | 원인 공통 = "빌더에서만 하는 일은 프리팹 경로에서 누락"(§6.5/6.7). 검수는 패널별 코드+프리팹 YAML 교차 대조. 사용자 플레이 검증 필요. |
 | 2026-07-01 | 베이크된 프리팹의 `ScrollDragBlocker`(fileID:0)·`WheelOnlyScrollRect`(베이스 ScrollRect로 격하) 스크립트 참조 유실 → 창고 드래그-스크롤 억제 소실 | **원인=보조 MonoBehaviour를 `CharacterPanelUI.cs`에 정의(파일명≠클래스명)해 MonoScript 미생성 → `SaveAsPrefabAsset` 직렬화 실패.** 두 클래스를 독립 파일로 분리(+.meta guid 고정, 재발 방지 주석). §6.6 참조. | Unity는 파일명=클래스명에만 MonoScript 부여. 베이크 대상 커스텀 컴포넌트는 독립 파일 필수. 사용자: CharacterPanelUI 재베이크→Systems 재빌드→드래그 검증. |
 | 2026-06-29 | 특성 UI(`TraitPanelUI`)가 프리팹 전환에서 누락됨 — 도 프리팹으로? | **변환 완료.** K키 전용 토글이라 폴링용 영속 인스턴스 필요 → **프리팹 인스턴스 영속 + 캔버스만 토글** 모델(다른 재생성형과 달리 스켈레톤 실제 재사용 = 편집 반영). 정적 스켈레톤만 베이크, 동적 행 런타임 Rebuild. `[SerializeField]`+`ApplyFonts`+`WireEvents`+`EditorBake`+베이크 엔트리. 정적 감사 통과(57/57). | 일관성(전 패널 프리팹화) + 키 토글 패널은 영속 폴러 불가피 → 영속+토글이 정석. 사용자 베이크 후 K로 검증 필요. |
 | 2026-06-26 | 코드 절차 생성 UI를 프리팹 기반(씬 편집 가능)으로 + 시안 스프라이트 적용 | **프리팹화 방향 확정(계획).** Resources/UI에 패널 프리팹 + 직렬화 ref 바인딩, 동적 격자만 절차 유지, 패널 단위 점진 전환. 이미지는 매핑표대로 자연스러운 곳만, 시맨틱 색은 UITheme 유지. | 에디터 비편집 문제 해소. 큰 두 패널은 점진 전환으로 리스크 관리. 구현은 후속. |

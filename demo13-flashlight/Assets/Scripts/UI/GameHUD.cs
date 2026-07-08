@@ -33,9 +33,20 @@ public class GameHUD : MonoBehaviour
     void Awake()
     {
         if (!IsGenerated) GenerateUI();
+        WireEvents();   // onClick은 프리팹에 직렬화 안 됨(§6.5) — 프리팹/코드 양쪽 경로에서 재부착
         SceneManager.sceneLoaded += OnSceneLoadedHUD;
         SceneManager.sceneUnloaded += OnSceneUnloadedHUD;
         ApplyVisibility();   // 부팅 시점엔 게임플레이 씬 없음 → 숨김
+    }
+
+    /// <summary>정적 버튼 onClick 재부착 — 하이드아웃 나가기(우상단). 빌더에서만 붙이면 프리팹 경로에서 무반응.</summary>
+    void WireEvents()
+    {
+        if (hideoutExitBtnGO == null) return;
+        var btn = hideoutExitBtnGO.GetComponent<UnityEngine.UI.Button>();
+        if (btn == null) return;
+        btn.onClick.RemoveAllListeners();
+        btn.onClick.AddListener(OnHideoutExitClicked);
     }
 
     void OnSceneLoadedHUD(Scene scene, LoadSceneMode mode) => ApplyVisibility();

@@ -152,6 +152,16 @@ public class RaidMapUI : MonoBehaviour
         _instance = this;
         if (!IsGenerated) BuildUI();   // 폴백: 프리팹 없이 코드로 생성
         else ApplyFonts();             // 프리팹 인스턴스: 동적 폰트 재바인딩
+        WireEvents();                  // onClick은 프리팹에 직렬화 안 됨(§6.5) — 닫기 버튼 재부착
+    }
+
+    /// <summary>정적 버튼 onClick 재부착 — ✕(닫기)는 BuildUI에서만 붙어 프리팹 경로에서 무반응(§6.5).</summary>
+    void WireEvents()
+    {
+        var btn = _closeText != null ? _closeText.GetComponentInParent<Button>() : null;
+        if (btn == null) return;
+        btn.onClick.RemoveAllListeners();
+        btn.onClick.AddListener(Close);
     }
 
     void OnDestroy()

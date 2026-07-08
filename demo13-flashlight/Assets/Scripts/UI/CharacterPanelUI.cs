@@ -205,6 +205,35 @@ public class CharacterPanelUI : MonoBehaviour
                 btn.onClick.AddListener(() => OnEquipSlotClicked(capturedSlot));
             }
         }
+
+        RehydrateEquipSlotDicts();
+    }
+
+    /// <summary>장비 슬롯 Dictionary(bg/icon/label) 재수화 — 빌더(BuildEquipSlot)에서만 채워져서
+    /// 프리팹 경로에선 null이라 장비 슬롯 시각 갱신(UpdateEquipSlots)이 통째로 죽는다(전체 검수 2026-07-07).
+    /// 직렬화된 평행 배열(equipSlotKeys/equipSlotButtons)에서 슬롯 GO 구조(bg Image + 자식 Icon/Lbl_)를 복원.</summary>
+    void RehydrateEquipSlotDicts()
+    {
+        if (equipSlotBgs != null && equipSlotBgs.Count > 0) return;   // 코드 생성 경로 — 빌더가 이미 채움
+        if (equipSlotKeys == null || equipSlotButtons == null) return;
+
+        equipSlotBgs = new Dictionary<EquipSlot, Image>();
+        equipSlotIcons = new Dictionary<EquipSlot, Image>();
+        equipSlotLabels = new Dictionary<EquipSlot, Text>();
+
+        int n = Mathf.Min(equipSlotKeys.Length, equipSlotButtons.Length);
+        for (int i = 0; i < n; i++)
+        {
+            var btn = equipSlotButtons[i];
+            if (btn == null) continue;
+            var slot = equipSlotKeys[i];
+            var bg = btn.GetComponent<Image>();
+            if (bg != null) equipSlotBgs[slot] = bg;
+            var iconT = btn.transform.Find("Icon");
+            if (iconT != null) equipSlotIcons[slot] = iconT.GetComponent<Image>();
+            var lblT = btn.transform.Find($"Lbl_{slot}");
+            if (lblT != null) equipSlotLabels[slot] = lblT.GetComponent<Text>();
+        }
     }
 
     void Update()

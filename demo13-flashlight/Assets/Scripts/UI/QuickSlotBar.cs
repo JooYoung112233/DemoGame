@@ -54,6 +54,22 @@ public class QuickSlotBar : MonoBehaviour
         koreanFont = LoadKoreanFont();
         if (!IsGenerated) GenerateUI();   // 폴백: 프리팹 없이 코드로 생성
         else ApplyFonts();                // 프리팹 인스턴스: 동적 폰트 재바인딩
+        WireEvents();                     // onClick은 프리팹에 직렬화 안 됨(§6.5) — 슬롯 클릭 재부착
+    }
+
+    /// <summary>슬롯 셀 onClick 재부착 — 빌더에서만 붙이면 프리팹 경로에서 클릭 무반응(§6.5).</summary>
+    void WireEvents()
+    {
+        if (slotBgs == null) return;
+        for (int i = 0; i < slotBgs.Length; i++)
+        {
+            if (slotBgs[i] == null) continue;
+            var btn = slotBgs[i].GetComponent<UnityEngine.UI.Button>();
+            if (btn == null) continue;
+            int captured = i;
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() => UseSlot(captured));
+        }
     }
 
     void OnDestroy() { if (Instance == this) Instance = null; }
@@ -231,12 +247,11 @@ public class QuickSlotBar : MonoBehaviour
     /// <summary>프리팹 인스턴스화 시 동적 OS 폰트를 직렬화된 Text 참조에 재바인딩.</summary>
     void ApplyFonts()
     {
+        // 전체 자식 Text 일괄 재바인딩 — 개별 ref 방식은 미직렬화 숫자 라벨("Num" 1~6)을 놓쳐
+        // 프리팹 경로에서 슬롯 번호가 전부 안 보였다(전체 검수 2026-07-07). 이 바의 모든 텍스트 = koreanFont.
         var f = koreanFont != null ? koreanFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        for (int i = 0; i < SlotCount; i++)
-        {
-            if (slotNames != null && i < slotNames.Length && slotNames[i])   slotNames[i].font = f;
-            if (slotCounts != null && i < slotCounts.Length && slotCounts[i]) slotCounts[i].font = f;
-        }
+        foreach (var t in GetComponentsInChildren<Text>(true))
+            if (t != null) t.font = f;
     }
 
 #if UNITY_EDITOR
