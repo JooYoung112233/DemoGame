@@ -113,7 +113,7 @@ InRaid = SystemsScene.IsGameplayScene(scene) && scene.name ∉ { Safehouse, Hide
 - **현재 설계가 이미 클라우드 친화적**: ①파일 기반(`save_0..2.json` + `.tmp` 제외) ②슬롯 3개로 **파일 세트 소수·고정**(쿼터/파일수 안전) ③`persistentDataPath` 상대 경로(절대경로 가정 없음).
 - **적용된 하드닝**: `WriteAtomic`(임시파일→`File.Replace`) — 쓰기 도중 크래시/클라우드 동기화가 겹쳐도 **반쪽 파일 미생성**. 클라우드가 파손 세이브를 동기화·전파하는 사고 방지.
 - **출시 전 TODO(유니티/파트너 설정 — 코드 아님)**:
-  - `ProjectSettings.companyName`이 **`DefaultCompany`(placeholder)** → 실제 스튜디오명으로 변경. 이게 `persistentDataPath`(`%userprofile%/AppData/LocalLow/<company>/<product>/`) 루트이자 **Auto-Cloud 경로 기준**이라 세이브 위치가 바뀜(변경 시점 이후 새 경로).
+  - ✅ `companyName` = **`Studio Pod Games`**(2026-07-08 확정, `DefaultCompany`에서 변경). `persistentDataPath` = `%userprofile%/AppData/LocalLow/Studio Pod Games/demo13-flashlight/`. ⚠ 변경으로 **경로가 바뀌어 구 `DefaultCompany` 경로의 세이브는 새 경로에서 안 보임**(개발 세이브라 무해, 필요 시 수동 이동). productName·`applicationIdentifier`(스팀 번들ID)는 게임 정식 타이틀 확정 시 별도.
   - Steamworks 파트너: Auto-Cloud 루트 = `WinAppDataLocalLow`(또는 플랫폼별), 패턴 `save_*.json`. 쿼터·파일수 상한 설정.
   - `.tmp` 파일은 클라우드 글로브에서 **제외**(패턴을 `save_?.json`로 좁혀 자동 제외됨).
   - 충돌 해결 UI(같은 슬롯 다른 기기 동시 편집)는 스팀 기본 처리에 의존 — 필요 시 후속.
