@@ -741,7 +741,8 @@ public class MapSelectUI : MonoBehaviour
             var obj0 = active.data.objectives[0];
             int cur = active.progress.TryGetValue(0, out int v) ? v : 0;
             bool ready = active.state == QuestState.ReadyToReport;
-            string verb = obj0.type == ObjectiveType.KillEnemy ? "처치" : "수집";
+            string verb = obj0.type == ObjectiveType.KillEnemy ? "처치"
+                        : obj0.type == ObjectiveType.ReachPoint ? "정찰" : "수집";
             prog = ready ? "완수 — 보고하러 가자" : $"{verb} {cur}/{obj0.requiredCount}";
         }
         var info = MakeText(rowRT, "Info",

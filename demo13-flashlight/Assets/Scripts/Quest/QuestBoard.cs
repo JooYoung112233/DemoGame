@@ -113,7 +113,15 @@ public static class QuestBoard
         return list;
     }
 
-    /// <summary>목표가 현재 콘텐츠로 완수 가능한가 — 수집/납품: itemId 실존, 처치: unitKey 실존, 탐색: POI 시스템 전이라 제외.</summary>
+    /// <summary>레이드 맵에 QuestPoiZone으로 배치된(=완수 가능한) 탐색 POI id.
+    /// ScrapMarketGreyboxLayout에 존이 있는 것만. 짙은 현상(anomaly_edge/deep_seal)은 그 맵 생기면 추가.</summary>
+    static readonly HashSet<string> ImplementedPois = new HashSet<string>
+    {
+        "poi_warehouse_noise", "poi_collapsed_shop", "poi_north_road", "poi_signal_source", "poi_farm_sweep",
+    };
+
+    /// <summary>목표가 현재 콘텐츠로 완수 가능한가 — 수집/납품: itemId 실존, 처치: unitKey 실존,
+    /// 탐색: POI 존이 배치된 poiId만(미배치 anomaly 등은 자동 제외).</summary>
     static bool IsImplementable(QuestData q)
     {
         foreach (var obj in q.objectives)
@@ -126,8 +134,11 @@ public static class QuestBoard
                 case ObjectiveType.KillEnemy:
                     if (StatDB.Instance == null || StatDB.Instance.GetUnit(obj.targetId) == null) return false;
                     break;
+                case ObjectiveType.ReachPoint:
+                    if (!ImplementedPois.Contains(obj.targetId)) return false;
+                    break;
                 default:
-                    return false;   // ReachPoint(탐색)·TalkToNPC — POI/보고 시스템 후 합류
+                    return false;   // TalkToNPC — 보고 시스템 후 합류
             }
         }
         return true;
@@ -256,9 +267,10 @@ public static class QuestBoard
             progress = $"보유 {owned}/{obj.requiredCount}";
             return owned >= obj.requiredCount;
         }
-        // 처치형 — QuestManager 진행도
+        // 처치/탐색형 — QuestManager 진행도
         int cur = q.progress.TryGetValue(0, out int v) ? v : 0;
-        progress = $"처치 {cur}/{obj.requiredCount}";
+        string verb = obj.type == ObjectiveType.ReachPoint ? "정찰" : "처치";
+        progress = $"{verb} {cur}/{obj.requiredCount}";
         return q.state == QuestState.ReadyToReport;
     }
 

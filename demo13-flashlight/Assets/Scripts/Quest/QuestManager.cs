@@ -48,6 +48,23 @@ public class QuestManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>이 (타입,대상)을 필요로 하는 '진행 중이고 미완료'인 목표가 있는가 —
+    /// POI 존 등이 진행 피드백(토스트) 여부를 결정할 때 사용.</summary>
+    public bool HasActiveObjective(ObjectiveType type, string targetId)
+    {
+        foreach (var quest in activeQuests)
+        {
+            if (quest.state != QuestState.Active) continue;
+            for (int i = 0; i < quest.data.objectives.Length; i++)
+            {
+                var obj = quest.data.objectives[i];
+                if (obj.type == type && obj.targetId == targetId && !quest.IsObjectiveComplete(i))
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public void UpdateObjective(ObjectiveType type, string targetId, int count = 1)
     {
         for (int q = activeQuests.Count - 1; q >= 0; q--)

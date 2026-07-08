@@ -166,6 +166,18 @@ public static class ScrapMarketGreyboxLayout
         placed += Barricade(map, "Pharmacy_Barricade_N", 11f, 54.5f, 6f, 1f);  // 맨홀 공터 북단(X8~14)→약국/Zone1
         placed += Barricade(map, "Basement_Block",       15f, 47f,   1f, 4f);  // 창고 동측 안쪽→밤 지하창고(루디)
 
+        // 7. 탐색 의뢰 POI 존 (게시판 탐색 의뢰 ReachPoint 대상 — QuestPoiZone). 각 존은 맵 지형지물에 얹음.
+        //    poi_farm_sweep(3곳=파밍 건물 3채)·collapsed_shop·warehouse_noise·signal_source는 같은 건물에 겹쳐도 무방(다른 poiId).
+        //    ⚠ poi_anomaly_edge/poi_deep_seal(짙은 현상)은 이 튜토 안전맵이 아니라 현상 레이드 소속 → 여기 미배치(그 맵 생기면 추가).
+        placed += Poi(map, "POI_Warehouse", "poi_warehouse_noise", "창고 인근",    12f, 47f, 4f, 4f);  // 창고
+        placed += Poi(map, "POI_Shop",      "poi_collapsed_shop",  "무너진 상점",  12f, 9f,  4f, 4f);  // 폐상점
+        placed += Poi(map, "POI_North",     "poi_north_road",      "북쪽 진입로",  12f, 54f, 5f, 2f);  // 북벽 갭(약국 통로)
+        placed += Poi(map, "POI_Signal",    "poi_signal_source",   "신호원",      12f, 30f, 4f, 4f);  // 차고(신호 추적 placeholder)
+        // 근방 정밀 수색(BD-18) = 파밍 포인트 3곳 → 3개 존
+        placed += Poi(map, "POI_Farm_1",    "poi_farm_sweep",      "수색 지점 1", 12f, 9f,  3f, 3f);
+        placed += Poi(map, "POI_Farm_2",    "poi_farm_sweep",      "수색 지점 2", 12f, 30f, 3f, 3f);
+        placed += Poi(map, "POI_Farm_3",    "poi_farm_sweep",      "수색 지점 3",  6f, 40f, 3f, 3f);  // 밴딧 공터
+
         return placed;
     }
 
@@ -200,6 +212,22 @@ public static class ScrapMarketGreyboxLayout
         go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);
         go.transform.localScale    = new Vector3(lenX, thickY, 1f);
         CounterScaleLabel(go);
+        return 1;
+    }
+
+    /// <summary>탐색 의뢰 POI 존 배치 — 프리팹 없이 GameObject + BoxCollider2D(trigger) + QuestPoiZone.
+    /// (cx,cy)=중심, (w,h)=크기. poiId는 의뢰 SO의 ReachPoint targetId와 일치.</summary>
+    static int Poi(GameObject parent, string name, string poiId, string displayName, float cx, float cy, float w, float h)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent.transform, false);
+        go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);
+        var col = go.AddComponent<BoxCollider2D>();
+        col.isTrigger = true;
+        col.size = new Vector2(w, h);
+        var z = go.AddComponent<QuestPoiZone>();
+        z.poiId = poiId;
+        z.displayName = displayName;
         return 1;
     }
 

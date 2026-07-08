@@ -576,6 +576,8 @@ MQ-001/002, SQ-001/002, DQ 풀 목록(§3), AM 목록(§4), 허브 동선(게시
 > **구현됨(2026-07-07, 그레이박스 — BQ 노출·수령·계약 슬롯):** SO 14종(`Data/Quests/Board/BQ-*.asset`) + `QuestBoard.BqOffers/AcceptBq/ActiveContract`. 의뢰 게시판 오버레이에 **「고정 의뢰 (평판)」 섹션**(티어 배지·보고 NPC 표시·수주 버튼, 목록 휠 스크롤) — 노출 = **평판 티어 게이트(questId 등급 문자 ≥ 현재 티어)** + 자동 게이트(BD와 동일: 탐색형 4종·negotiator 자동 제외, 현재 실효 ~9/14종). **계약 슬롯 1개(BQ/NQ 공유)** 코드 제한. **보고 = 의뢰인 NPC 대화**(기존 `GetReportableQuest(giverNpcId)` 흐름 — BQ-C01 2단계 보고는 전당포 단일로 단순화). 평판 보상은 완료 시 코드 적립(§9.2 메모). 티어 표기(§9.3 "25+/40+")와 §9.2 구간이 상이한데 **§9.2 티어 기준으로 통일 구현**.
 > ⚠ 한계: NPC 보고 시 아이템 미차감(기존 DQ와 동일 — 게시판 BD 보고만 차감형). 수집 카운트 픽업 훅은 **WorldItem.TryPickup에 확장(2026-07-07)** — E키+바닥/클러스터 줍기 카운트, 컨테이너→가방 드래그만 미카운트(후속). "구간별 노출 장수 제한(2~4장)"·완료 시 갱신 주기도 후속.
 
+> **탐색형 POI 트리거 구현(2026-07-08)**: `QuestPoiZone`(2D 트리거) — 플레이어 입장 시 `UpdateObjective(ReachPoint, poiId)`. 입장 진행 + 퇴장 재무장(oneShot 아님 → 수주 전 통과해도 소비 안 됨). ScrapMarket 그레이박스에 **poi_warehouse_noise·collapsed_shop·north_road·signal_source·farm_sweep×3** 배치(Poi 헬퍼, 재베이크=`Build Scrap Market Greybox`). `QuestBoard.IsImplementable`에 ReachPoint 케이스 추가 — **배치된 5개 poiId 의뢰만 게시판 노출**: 열림 = **BD-12/13/14/16/18 · BQ-D03 · BQ-E03**(각 의뢰는 ReachPoint 목표 1개뿐, 나머지 type은 보상). ⚠ **anomaly_edge(BD-15·BQ-C02)·deep_seal(BQ-A01)은 짙은 현상 맵 소속이라 미배치 → 계속 게이트 아웃**(그 맵 생기면 ImplementedPois에 추가). 수량2 의뢰는 서로 다른 존 2곳으로 완수(같은 존 재입장 치팅은 그레이박스 허용).
+
 #### BQ-E (평판 10+, 안전 구간)
 
 | ID | 제목 (의뢰서) | 유형 | 목표 | 보고 | 보상 |
