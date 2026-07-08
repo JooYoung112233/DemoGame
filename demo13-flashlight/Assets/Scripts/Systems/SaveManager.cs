@@ -222,8 +222,28 @@ public class SaveManager : MonoBehaviour
     public void WriteJson(string json)
     {
         if (string.IsNullOrEmpty(json)) return;
-        File.WriteAllText(SavePath, json);
+        WriteAtomic(SavePath, json);
         Debug.Log($"[Save] 저장 완료: {SavePath}");
+    }
+
+    /// <summary>원자적 파일 쓰기 — 임시파일에 먼저 쓰고 교체(File.Replace).
+    /// 쓰는 도중 크래시/스팀 클라우드 동기화가 겹쳐도 반쪽 파일이 남지 않음(세이브 파손 방지).
+    /// 스팀 클라우드(Auto-Cloud)가 이 파일을 그대로 동기화하므로 원자성이 특히 중요. (save.md §10)</summary>
+    static void WriteAtomic(string path, string content)
+    {
+        string tmp = path + ".tmp";
+        try
+        {
+            File.WriteAllText(tmp, content);
+            if (File.Exists(path)) File.Replace(tmp, path, null);   // 동일 볼륨 원자 교체
+            else File.Move(tmp, path);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[Save] 원자적 쓰기 실패({e.Message}) → 직접 쓰기 폴백");
+            try { File.WriteAllText(path, content); } catch (System.Exception e2) { Debug.LogError($"[Save] 저장 실패: {e2.Message}"); }
+            try { if (File.Exists(tmp)) File.Delete(tmp); } catch { }
+        }
     }
 
     // ═══════════════════════════

@@ -107,7 +107,20 @@ InRaid = SystemsScene.IsGameplayScene(scene) && scene.name ∉ { Safehouse, Hide
   - `SaveManager`: 파일 슬롯화 `save_{0..2}.json`, `CurrentSlot`/`SetSlot(int)`, `HasSave(slot)`/`DeleteSave(slot)`, **`PeekSlot(slot)`**(전체 로드 없이 요약만 역직렬화 → level/특성수/currency/saveTime). 자동저장·`Load()`·`ResetToNewGame()`은 CurrentSlot 대상. 구 단일 `save.json`은 슬롯0로 1회 마이그레이션.
   - 슬롯 화면 = **TitleScreen 런타임 오버레이**(매번 재생성·닫으면 파괴 — 재베이크 의존 없음, 프리팹 지뢰 회피). 새 게임=슬롯 선택→`SetSlot`+`DeleteSave`+`ResetToNewGame`→프롤로그, 이어하기=슬롯 선택→`SetSlot`→`Load`. `GameStartHandler`는 `HasSave(CurrentSlot)`로 로드/프롤로그 분기.
 
+## 10. 스팀 클라우드 (2026-07-08 — 백엔드 방향 확정)
+
+- **결정**: 출시 시 세이브는 **스팀 클라우드** 사용. 방식은 **Auto-Cloud(경로 기반)** 우선 — 런타임 Steamworks 코드 없이, 지금처럼 **파일로 `persistentDataPath`에 저장**하고 Steamworks 파트너 설정에서 경로/글로브를 등록하면 스팀이 자동 동기화한다. (API 방식 `ISteamRemoteStorage`는 파일 단위 명시 read/write가 필요해 후순위 — Auto-Cloud로 충분.)
+- **현재 설계가 이미 클라우드 친화적**: ①파일 기반(`save_0..2.json` + `.tmp` 제외) ②슬롯 3개로 **파일 세트 소수·고정**(쿼터/파일수 안전) ③`persistentDataPath` 상대 경로(절대경로 가정 없음).
+- **적용된 하드닝**: `WriteAtomic`(임시파일→`File.Replace`) — 쓰기 도중 크래시/클라우드 동기화가 겹쳐도 **반쪽 파일 미생성**. 클라우드가 파손 세이브를 동기화·전파하는 사고 방지.
+- **출시 전 TODO(유니티/파트너 설정 — 코드 아님)**:
+  - `ProjectSettings.companyName`이 **`DefaultCompany`(placeholder)** → 실제 스튜디오명으로 변경. 이게 `persistentDataPath`(`%userprofile%/AppData/LocalLow/<company>/<product>/`) 루트이자 **Auto-Cloud 경로 기준**이라 세이브 위치가 바뀜(변경 시점 이후 새 경로).
+  - Steamworks 파트너: Auto-Cloud 루트 = `WinAppDataLocalLow`(또는 플랫폼별), 패턴 `save_*.json`. 쿼터·파일수 상한 설정.
+  - `.tmp` 파일은 클라우드 글로브에서 **제외**(패턴을 `save_?.json`로 좁혀 자동 제외됨).
+  - 충돌 해결 UI(같은 슬롯 다른 기기 동시 편집)는 스팀 기본 처리에 의존 — 필요 시 후속.
+- **호환 유지 규칙**: 세이브는 항상 파일 기반·`persistentDataPath`·소수 고정 파일명으로 유지. 절대경로·다수 동적 파일·프로세스 종료 시점 쓰기(OnApplicationQuit)는 클라우드와 상성이 나쁘니 금지(현 모델도 종료 저장 no-op이라 정합).
+
 ## 변경 로그
+- 2026-07-08: **스팀 클라우드 백엔드 방향 확정(§10)** + 원자적 쓰기(`WriteAtomic`) 도입. Auto-Cloud(경로 기반) 전제 — 파일 기반 유지, 출시 전 companyName·파트너 설정 TODO.
 - 2026-07-08: **저장 슬롯 3개 + `ResetToNewGame` 이월 차단.** SaveManager 슬롯화(save_0..2, CurrentSlot, PeekSlot 요약), TitleScreen 슬롯 오버레이(새 게임/이어하기 공용). §7.5·§9 참조.
 - 2026-06-30: **`InventoryChanged()` 훅 추가** — 상점 거래(구매/판매/위탁 정산/수배 매입)·F1 디버그 아이템 변경(인벤·창고 비우기/지급) 시 `RecordOrCommit()`(안전구역=디스크 커밋, 레이드=인메모리). 기존엔 거래·F1 변경이 자동 저장 안 돼 다음 로드 시 유실되던 것 보완. ShopUI 5곳·DebugTestUI 4곳 연결.
 - 2026-06-18: 최초 작성. 저장 체크포인트 모델(안전=Commit/레이드=Record/크래시=복구커밋/강제종료=레이드시작복귀) + CombatStateTracker + SaveManager 직렬화·디스크 분리.
