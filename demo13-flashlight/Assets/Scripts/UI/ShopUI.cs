@@ -525,6 +525,12 @@ public class ShopUI : MonoBehaviour
         return list;
     }
 
+    /// <summary>새 게임 — 판매 트레이(런타임) 비움. 위탁은 LoadConsignSave(null)로 별도 초기화.</summary>
+    public static void ClearSellTray()
+    {
+        if (Instance != null && Instance.sellTray != null) Instance.sellTray.Clear();
+    }
+
     public static void LoadConsignSave(List<ConsignSave> data)
     {
         // 전부 비우고 복원

@@ -108,6 +108,9 @@ public class NPCRelationshipManager : MonoBehaviour
         return list;
     }
 
+    /// <summary>새 게임 — 모든 NPC 관계 초기화. SaveManager.ResetToNewGame용.</summary>
+    public void ResetForNewGame() => relationships.Clear();
+
     public void LoadAllSaveData(List<NPCRelationshipSaveEntry> data)
     {
         if (data == null) return;

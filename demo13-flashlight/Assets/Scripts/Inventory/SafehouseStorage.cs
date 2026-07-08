@@ -225,6 +225,15 @@ public class SafehouseStorage : MonoBehaviour
         return false;
     }
 
+    /// <summary>새 게임 — 가구 격자 내용물 초기화. static 리스트라 씬 재로드로는 안 비워짐
+    /// (같은 세션 새 게임 시 이전 판 가구 아이템이 이월되던 버그, 2026-07-08 검수).
+    /// 리스트 자체는 유지(가구 GameObject가 재등록하므로) — 격자 내용만 비운다.</summary>
+    public static void ResetForNewGame()
+    {
+        foreach (var f in allFurniture)
+            f?.grid?.Clear();
+    }
+
     // ── 에디터 도메인 리로드 대응 ──
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

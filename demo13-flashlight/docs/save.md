@@ -82,6 +82,15 @@ InRaid = SystemsScene.IsGameplayScene(scene) && scene.name ∉ { Safehouse, Hide
 - 폴백 경로(`GameBootstrap.Init`)에도 `EnsureSingleton`으로 등록.
 - `DontDestroyOnLoad`.
 
+## 7.5 새 게임 상태 초기화 (2026-07-08)
+
+**문제**: 세이브 로드는 파일에서 각 시스템 `LoadSaveData`로 상태를 씌우지만, **새 게임은 세이브가 없어 아무것도 안 씌운다.** 그런데 매니저들은 `DontDestroyOnLoad`라 **같은 세션에서 '새 게임'을 다시 누르면 이전 판의 인메모리 상태(돈·특성·레벨·평판·인벤·퀘스트…)가 그대로 이월**됐다(첫 실행만 깨끗). `OnNewGame`은 `DeleteSave` + `ResetSession`만 했지 인메모리를 안 건드림.
+
+**해결**: `SaveManager.ResetToNewGame()` — `Load()`가 복원하는 **영속 시스템 전체를 기본값으로 초기화**. `TitleScreen.OnNewGame`에서 `DeleteSave` 뒤 호출.
+- 대상(=Load 목록 1:1): Currency/Reputation/PlayerProgress/Trait, NPCRelationship/Achievement/HideoutModule/DailyQuest/Quest(+flags)/StoryPlayer playedScenes/TutorialPrompt, ArbeitBoard·QuestBoard 런타임, MainStash·ShopUI(위탁/트레이), 플레이어 장비 해제·격자 클리어·생존/체력/의료 복귀, QuickSlot.
+- **씬-로컬(안전가옥 가구 `SafehouseStorage` 등)은 제외** — DontDestroyOnLoad 아님 → 새 안전가옥 로드 시 빈 격자로 자연 재생성.
+- **null-guard 함정**: 일부 `LoadSaveData`는 `data==null`이면 clear 없이 early-return(NPCRel/Achievement/Daily/Trait) → 각 시스템에 명시 `ResetForNewGame()` 추가(또는 Trait은 `new TraitSaveData()`). ⚠ **Load에 새 영속 시스템을 추가하면 ResetToNewGame에도 반드시 대응 추가.**
+
 ## 8. 기존 자동저장과의 관계 (중복 방지 메모)
 
 - `SleepUI.DoSleep` 의 직접 `SaveManager.AutoSave()` → `SaveCheckpoints.BedSleepSave()`로 교체(없으면 폴백).
@@ -90,6 +99,15 @@ InRaid = SystemsScene.IsGameplayScene(scene) && scene.name ∉ { Safehouse, Hide
 
 ---
 
+## 9. 저장 슬롯 (2026-07-08)
+
+- **질문**: 저장 슬롯 개념 도입 — 새 게임 시 슬롯 리스트. 슬롯 3개. 슬롯 카드엔 캐릭터 레벨·특성·돈 표시. '이어하기'도 슬롯 쓰나?
+- **결정**: **슬롯 3개. 새 게임·이어하기 둘 다 슬롯 화면.** 새 게임=슬롯 선택 후 시작(찬 슬롯이면 덮어쓰기 확인), 이어하기=찬 슬롯만 로드(빈 슬롯 비활성). 슬롯 카드 표시 = **Lv N · 특성 M개 · ◈ 돈 · 저장 시각**(빈 슬롯="비어 있음").
+- **구현**:
+  - `SaveManager`: 파일 슬롯화 `save_{0..2}.json`, `CurrentSlot`/`SetSlot(int)`, `HasSave(slot)`/`DeleteSave(slot)`, **`PeekSlot(slot)`**(전체 로드 없이 요약만 역직렬화 → level/특성수/currency/saveTime). 자동저장·`Load()`·`ResetToNewGame()`은 CurrentSlot 대상. 구 단일 `save.json`은 슬롯0로 1회 마이그레이션.
+  - 슬롯 화면 = **TitleScreen 런타임 오버레이**(매번 재생성·닫으면 파괴 — 재베이크 의존 없음, 프리팹 지뢰 회피). 새 게임=슬롯 선택→`SetSlot`+`DeleteSave`+`ResetToNewGame`→프롤로그, 이어하기=슬롯 선택→`SetSlot`→`Load`. `GameStartHandler`는 `HasSave(CurrentSlot)`로 로드/프롤로그 분기.
+
 ## 변경 로그
+- 2026-07-08: **저장 슬롯 3개 + `ResetToNewGame` 이월 차단.** SaveManager 슬롯화(save_0..2, CurrentSlot, PeekSlot 요약), TitleScreen 슬롯 오버레이(새 게임/이어하기 공용). §7.5·§9 참조.
 - 2026-06-30: **`InventoryChanged()` 훅 추가** — 상점 거래(구매/판매/위탁 정산/수배 매입)·F1 디버그 아이템 변경(인벤·창고 비우기/지급) 시 `RecordOrCommit()`(안전구역=디스크 커밋, 레이드=인메모리). 기존엔 거래·F1 변경이 자동 저장 안 돼 다음 로드 시 유실되던 것 보완. ShopUI 5곳·DebugTestUI 4곳 연결.
 - 2026-06-18: 최초 작성. 저장 체크포인트 모델(안전=Commit/레이드=Record/크래시=복구커밋/강제종료=레이드시작복귀) + CombatStateTracker + SaveManager 직렬화·디스크 분리.

@@ -95,6 +95,9 @@ public class SurvivalStats : MonoBehaviour
     public void AddWater(float v)   { water = Mathf.Clamp(water + v, 0f, Max); }
     public void AddSatiety(float v) { satiety = Mathf.Clamp(satiety + v, 0f, Max); }
 
+    /// <summary>새 게임 — 수분·포만 만땅 복귀. SaveManager.ResetToNewGame용.</summary>
+    public void ResetForNewGame() { water = Max; satiety = Max; }
+
     /// <summary>수면 등 — 수분/포만감 차감(0 미만 클램프).</summary>
     public void Consume(float waterCost, float satietyCost)
     {

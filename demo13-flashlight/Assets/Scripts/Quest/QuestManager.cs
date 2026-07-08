@@ -246,6 +246,14 @@ public class QuestManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>새 게임 — 진행 상태 전체 초기화(활성/완료 퀘스트·플래그). SaveManager.ResetToNewGame용.</summary>
+    public void ResetForNewGame()
+    {
+        activeQuests.Clear();
+        completedQuestIds.Clear();
+        flags.Clear();
+    }
+
     public void SetFlag(string flag, bool value = true)
     {
         flags[flag] = value;

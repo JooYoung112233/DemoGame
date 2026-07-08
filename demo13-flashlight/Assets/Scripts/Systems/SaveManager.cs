@@ -12,10 +12,23 @@ public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance { get; private set; }
 
-    const string SAVE_FILE = "save.json";
+    const string SAVE_FILE = "save.json";   // 레거시 단일 파일(슬롯0로 마이그레이션)
     const int SAVE_VERSION = 1;
+    public const int SlotCount = 3;
 
-    string SavePath => Path.Combine(Application.persistentDataPath, SAVE_FILE);
+    int currentSlot = 0;
+    public int CurrentSlot => currentSlot;
+
+    /// <summary>활성 슬롯 지정(0..SlotCount-1). 새 게임/이어하기 슬롯 선택 시 호출.</summary>
+    public void SetSlot(int slot)
+    {
+        currentSlot = Mathf.Clamp(slot, 0, SlotCount - 1);
+        Debug.Log($"[Save] 활성 슬롯 = {currentSlot}");
+    }
+
+    static string SlotPath(int slot) => Path.Combine(Application.persistentDataPath, $"save_{slot}.json");
+    string SavePath => SlotPath(currentSlot);
+    string LegacyPath => Path.Combine(Application.persistentDataPath, SAVE_FILE);
 
     void Awake()
     {
@@ -26,6 +39,21 @@ public class SaveManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        MigrateLegacySave();
+    }
+
+    /// <summary>구 단일 save.json이 있고 슬롯0가 비어 있으면 슬롯0로 이관(기존 사용자 세이브 보존).</summary>
+    void MigrateLegacySave()
+    {
+        try
+        {
+            if (File.Exists(LegacyPath) && !File.Exists(SlotPath(0)))
+            {
+                File.Move(LegacyPath, SlotPath(0));
+                Debug.Log("[Save] 레거시 save.json → 슬롯0 이관");
+            }
+        }
+        catch (System.Exception e) { Debug.LogWarning($"[Save] 레거시 이관 실패: {e.Message}"); }
     }
 
     void OnDestroy()
@@ -381,21 +409,119 @@ public class SaveManager : MonoBehaviour
     /// <summary>
     /// 세이브 파일 존재 여부.
     /// </summary>
-    public bool HasSave()
+    public bool HasSave() => File.Exists(SavePath);
+    public bool HasSave(int slot) => File.Exists(SlotPath(slot));
+
+    /// <summary>슬롯 중 하나라도 세이브가 있는가 — 타이틀 '이어하기' 버튼 게이팅용
+    /// (currentSlot 기준 HasSave()는 부팅 직후 슬롯0만 봐서 슬롯1/2 전용 세이브를 놓친다).</summary>
+    public bool HasAnySave()
     {
-        return File.Exists(SavePath);
+        for (int i = 0; i < SlotCount; i++)
+            if (File.Exists(SlotPath(i))) return true;
+        return false;
+    }
+
+    /// <summary>슬롯 카드 요약 — 전체 로드/월드 적용 없이 파일만 역직렬화해 표시용 값만 뽑는다.</summary>
+    public struct SlotSummary
+    {
+        public bool exists;
+        public int level;
+        public int traitCount;
+        public int currency;
+        public string saveTime;
+    }
+
+    public SlotSummary PeekSlot(int slot)
+    {
+        var s = new SlotSummary { exists = false, level = 1, traitCount = 0, currency = 0, saveTime = "" };
+        try
+        {
+            string path = SlotPath(slot);
+            if (!File.Exists(path)) return s;
+            var data = JsonUtility.FromJson<GameSaveData>(File.ReadAllText(path));
+            if (data == null) return s;
+            s.exists = true;
+            s.level = data.progress != null ? Mathf.Max(1, data.progress.level) : 1;
+            s.traitCount = data.traits != null && data.traits.unlocked != null ? data.traits.unlocked.Count : 0;
+            s.currency = data.currency;
+            s.saveTime = data.saveTime ?? "";
+        }
+        catch (System.Exception e) { Debug.LogWarning($"[Save] 슬롯{slot} 요약 실패: {e.Message}"); }
+        return s;
     }
 
     /// <summary>
     /// 세이브 파일 삭제 (새 게임 시작).
     /// </summary>
-    public void DeleteSave()
+    public void DeleteSave() => DeleteSave(currentSlot);
+
+    public void DeleteSave(int slot)
     {
-        if (File.Exists(SavePath))
+        string path = SlotPath(slot);
+        if (File.Exists(path))
         {
-            File.Delete(SavePath);
-            Debug.Log("[Save] 세이브 파일 삭제.");
+            File.Delete(path);
+            Debug.Log($"[Save] 슬롯{slot} 세이브 삭제.");
         }
+    }
+
+    /// <summary>새 게임 시작 — 세이브가 없어도 이전 세션의 인메모리 상태가 이월되지 않도록
+    /// 모든 영속(DontDestroyOnLoad) 시스템을 기본값으로 초기화한다. 씬-로컬(안전가옥 가구 등)은
+    /// 씬 재로드로 자연 초기화되므로 제외. TitleScreen.OnNewGame에서 DeleteSave 뒤 호출.
+    /// (Load()가 복원하는 시스템 목록과 1:1 대응 — 새 항목 추가 시 여기도 갱신.)</summary>
+    public void ResetToNewGame()
+    {
+        // ── 스칼라 / 진행도 ──
+        CurrencyManager.Instance?.LoadSaveData(0);
+        ReputationManager.Instance?.LoadSaveData(0);
+        PlayerProgress.Instance.LoadSaveData(new PlayerProgress.ProgressSaveData());   // Lv1/XP0
+        TraitManager.Instance?.LoadSaveData(new TraitSaveData());                      // 해금·PP 초기화
+
+        // ── 컬렉션형 매니저 ──
+        NPCRelationshipManager.Instance?.ResetForNewGame();
+        AchievementManager.Instance?.ResetForNewGame();
+        HideoutModuleManager.Instance?.LoadSaveData(null);   // levels.Clear (전 모듈 Lv0)
+        DailyQuestManager.Instance?.ResetForNewGame();
+        QuestManager.Instance?.ResetForNewGame();            // 활성/완료 퀘스트 + 플래그
+        StoryPlayer.Instance?.SetPlayedScenes(null);         // 재생 기록 초기화
+        TutorialPrompt.Instance?.SetShownIds(null);          // 튜토 1회성 기록 초기화
+
+        // ── 게시판 런타임 상태 ──
+        ArbeitBoard.ResetRuntime();
+        QuestBoard.ResetRuntime();
+
+        // ── 창고 / 상점 / 안전가옥 가구 ──
+        MainStash.Ensure()?.GetGrid()?.Clear();
+        ShopUI.LoadConsignSave(null);   // 위탁 슬롯 비움
+        ShopUI.ClearSellTray();         // 판매 트레이 비움
+        SafehouseStorage.ResetForNewGame();   // 가구 격자 = static 리스트라 씬 재로드로 안 비워짐(검수 반영)
+
+        // ── 플레이어(영속 PlayerRig): 장비 해제 → 격자 클리어 → 생존/체력/의료 복귀 ──
+        var playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO != null)
+        {
+            playerGO.GetComponent<PlayerEquipment>()?.ResetForNewGame();
+            var inv = playerGO.GetComponent<PlayerInventory>();
+            if (inv != null)
+            {
+                inv.Grid?.Clear();
+                inv.PocketsGrid?.Clear();
+                inv.SecureGrid?.Clear();
+            }
+            playerGO.GetComponent<SurvivalStats>()?.ResetForNewGame();
+            playerGO.GetComponent<Health>()?.FullHeal();
+            playerGO.GetComponent<PlayerMedicalSystem>()?.HealAll();
+        }
+        else
+        {
+            // 정석 Systems-씬 빌드에선 PlayerRig가 영속이라 항상 존재. 없으면(폴백 부트 미완)
+            // 인벤/장비 리셋이 스킵돼 이월될 수 있음 — 경고만(다음 안전가옥 진입 시 세이브 없음이라 실피해 낮음).
+            Debug.LogWarning("[SaveManager] ResetToNewGame: Player 없음 — 인벤/장비 리셋 스킵(폴백 부트?)");
+        }
+
+        QuickSlotBar.Instance?.LoadSlotIds(new List<string>());   // 퀵슬롯 비움
+
+        Debug.Log("[SaveManager] 새 게임 — 영속 상태 전체 초기화 완료");
     }
 
     // ═══════════════════════════

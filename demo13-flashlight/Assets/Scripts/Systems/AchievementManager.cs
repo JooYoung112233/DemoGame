@@ -201,6 +201,13 @@ public class AchievementManager : MonoBehaviour
         return data;
     }
 
+    /// <summary>새 게임 — 업적 통계·해금 초기화. SaveManager.ResetToNewGame용.</summary>
+    public void ResetForNewGame()
+    {
+        stats.Clear();
+        unlockedAchievements = new HashSet<string>();
+    }
+
     public void LoadSaveData(AchievementSaveData data)
     {
         if (data == null) return;

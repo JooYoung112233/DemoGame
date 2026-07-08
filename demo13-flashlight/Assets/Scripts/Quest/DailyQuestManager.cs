@@ -190,6 +190,15 @@ public class DailyQuestManager : MonoBehaviour
         };
     }
 
+    /// <summary>새 게임 — 일일 의뢰 상태 초기화. SaveManager.ResetToNewGame용.</summary>
+    public void ResetForNewGame()
+    {
+        currentDailyQuestId = null;
+        completedToday = false;
+        lastResetDay = -1;
+        lastQuestId = null;
+    }
+
     public void LoadSaveData(DailyQuestSaveData data)
     {
         if (data == null) return;

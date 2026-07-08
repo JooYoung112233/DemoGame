@@ -169,6 +169,14 @@ public class PlayerEquipment : MonoBehaviour
         Unequip(EquipSlot.PrimaryWeapon);
     }
 
+    /// <summary>새 게임 — 모든 슬롯 해제. SaveManager.ResetToNewGame용.
+    /// (Unequip이 slots를 수정하므로 키 사본으로 순회.)</summary>
+    public void ResetForNewGame()
+    {
+        foreach (var slot in new List<EquipSlot>(slots.Keys))
+            Unequip(slot);
+    }
+
     // ── 세이브/로드 ──
     public string GetSaveData()
     {

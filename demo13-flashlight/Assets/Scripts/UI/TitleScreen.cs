@@ -122,30 +122,175 @@ public class TitleScreen : MonoBehaviour
         // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
         if (v && canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
         if (canvas != null) canvas.gameObject.SetActive(v);
-        if (v && continueBtn != null)
-            continueBtn.interactable = SaveManager.Instance != null && SaveManager.Instance.HasSave();
+        if (v && continueBtn != null)   // 슬롯 아무 데나 세이브 있으면 활성(currentSlot 기준 HasSave는 슬롯0만 봄)
+            continueBtn.interactable = SaveManager.Instance != null && SaveManager.Instance.HasAnySave();
     }
 
     void Hide() => SetVisible(false);
 
     // ── 버튼 동작 ───────────────────────────────────────────────
 
-    void OnNewGame()
+    void OnNewGame()  => OpenSlotPicker(newMode: true);
+    void OnContinue() => OpenSlotPicker(newMode: false);
+
+    // ── 저장 슬롯 선택 (런타임 오버레이 — 매번 생성·닫으면 파괴, 재베이크 의존 없음) ──
+    GameObject slotOverlay;
+
+    void OpenSlotPicker(bool newMode)
     {
-        // 새 게임 = 기존 세이브 삭제 → Safehouse 진입 시 GameStartHandler가 프롤로그(S-000) 재생
-        if (SaveManager.Instance != null && SaveManager.Instance.HasSave())
-            SaveManager.Instance.DeleteSave();
-        GameStartHandler.ResetSession();   // 안전가옥 진입 시 시작 분기 1회 재실행
-        Debug.Log("[Title] 새 게임 → Safehouse");
+        if (SaveManager.Instance == null)   // 세이브 매니저 없으면(맵툴 등) 구 동작 폴백
+        {
+            if (newMode) StartNewInSlot(0); else ContinueInSlot(0);
+            return;
+        }
+        if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        CloseSlotPicker();
+
+        slotOverlay = new GameObject("SlotOverlay", typeof(RectTransform));
+        slotOverlay.transform.SetParent(canvas.transform, false);
+        Stretch(slotOverlay.GetComponent<RectTransform>());
+        slotOverlay.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.78f);
+
+        var title = MakeText("SlotTitle", slotOverlay.transform,
+            newMode ? "새 게임 — 슬롯 선택" : "이어하기 — 슬롯 선택", 44, FontStyle.Bold, UITheme.Gold);
+        Anchor(title, new Vector2(0.5f, 1f), new Vector2(0, -100), new Vector2(1000, 60));
+
+        const float cardW = 300f, cardH = 380f, gap = 44f;
+        float totalW = cardW * SaveManager.SlotCount + gap * (SaveManager.SlotCount - 1);
+        float startX = -totalW / 2f + cardW / 2f;
+        for (int i = 0; i < SaveManager.SlotCount; i++)
+            BuildSlotCard(slotOverlay.transform, i, newMode,
+                new Vector2(startX + i * (cardW + gap), 20f), new Vector2(cardW, cardH));
+
+        MakeOverlayButton(slotOverlay.transform, "← 뒤로", new Vector2(0, -cardH / 2f - 70f),
+            new Vector2(220, 56), CloseSlotPicker, true, UITheme.Cell);
+    }
+
+    void CloseSlotPicker()
+    {
+        if (slotOverlay != null) { Destroy(slotOverlay); slotOverlay = null; }
+    }
+
+    void BuildSlotCard(Transform parent, int slot, bool newMode, Vector2 pos, Vector2 size)
+    {
+        var sum = SaveManager.Instance.PeekSlot(slot);
+
+        var cardGO = new GameObject($"Slot_{slot}", typeof(RectTransform));
+        cardGO.transform.SetParent(parent, false);
+        var rt = cardGO.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = size;
+        cardGO.AddComponent<Image>().color = UITheme.Panel;
+
+        MakeText($"Hdr", cardGO.transform, $"슬롯 {slot + 1}", 26, FontStyle.Bold, UITheme.TextBright)
+            .rectTransform.anchoredPosition = new Vector2(0, size.y / 2f - 34f);
+
+        // 요약 본문
+        string body = sum.exists
+            ? $"Lv {sum.level}\n특성 {sum.traitCount}개\n<color=#E8C86A>◈ {sum.currency:N0}</color>\n\n<size=16><color=#8A8170>{sum.saveTime}</color></size>"
+            : "<color=#8A8170>— 비어 있음 —</color>";
+        var bodyT = MakeText("Body", cardGO.transform, body, 22, FontStyle.Normal, UITheme.TextBright);
+        bodyT.supportRichText = true;
+        bodyT.rectTransform.anchoredPosition = new Vector2(0, 24f);
+        bodyT.rectTransform.sizeDelta = new Vector2(size.x - 32f, size.y - 150f);
+
+        // 액션 버튼
+        int captured = slot;
+        if (newMode)
+        {
+            string label = sum.exists ? "덮어쓰기" : "여기서 시작";
+            var col = sum.exists ? UITheme.Negative : UITheme.Positive;
+            MakeCardButton(cardGO.transform, label, size, col, true, () =>
+            {
+                if (sum.exists) ConfirmOverwrite(captured);
+                else StartNewInSlot(captured);
+            });
+        }
+        else
+        {
+            MakeCardButton(cardGO.transform, sum.exists ? "이어하기" : "비어 있음", size,
+                sum.exists ? UITheme.Positive : UITheme.Cell, sum.exists,
+                () => ContinueInSlot(captured));
+        }
+    }
+
+    void MakeCardButton(Transform card, string label, Vector2 cardSize, Color col, bool enabled, UnityEngine.Events.UnityAction action)
+    {
+        var go = new GameObject($"Act_{label}", typeof(RectTransform));
+        go.transform.SetParent(card, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
+        rt.pivot = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = new Vector2(0, 20f);
+        rt.sizeDelta = new Vector2(cardSize.x - 40f, 52f);
+        var img = go.AddComponent<Image>(); img.color = col;
+        var btn = go.AddComponent<Button>(); btn.targetGraphic = img; btn.interactable = enabled;
+        var c = btn.colors; c.highlightedColor = UITheme.CellHover; c.pressedColor = UITheme.CellPressed;
+        c.disabledColor = new Color(0.3f, 0.3f, 0.3f, 0.5f); btn.colors = c;
+        btn.onClick.AddListener(action);
+        Stretch(MakeText("L", go.transform, label, 22, FontStyle.Bold, UITheme.TextBright).rectTransform);
+    }
+
+    void MakeOverlayButton(Transform parent, string label, Vector2 pos, Vector2 size, UnityEngine.Events.UnityAction action, bool enabled, Color col)
+    {
+        var go = new GameObject($"Ov_{label}", typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = pos; rt.sizeDelta = size;
+        var img = go.AddComponent<Image>(); img.color = col;
+        var btn = go.AddComponent<Button>(); btn.targetGraphic = img; btn.interactable = enabled;
+        var c = btn.colors; c.highlightedColor = UITheme.CellHover; c.pressedColor = UITheme.CellPressed; btn.colors = c;
+        btn.onClick.AddListener(action);
+        Stretch(MakeText("L", go.transform, label, 22, FontStyle.Bold, UITheme.TextBright).rectTransform);
+    }
+
+    /// <summary>찬 슬롯에 새 게임 덮어쓰기 확인 모달.</summary>
+    void ConfirmOverwrite(int slot)
+    {
+        var box = new GameObject("Confirm", typeof(RectTransform));
+        box.transform.SetParent(slotOverlay.transform, false);
+        var rt = box.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f); rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero; rt.sizeDelta = new Vector2(560, 240);
+        box.AddComponent<Image>().color = UITheme.PanelAlt;
+
+        var msg = MakeText("Msg", box.transform, $"슬롯 {slot + 1}의 저장을 지우고\n새로 시작할까요?", 26, FontStyle.Bold, UITheme.TextBright);
+        msg.rectTransform.anchoredPosition = new Vector2(0, 50f);
+        msg.rectTransform.sizeDelta = new Vector2(520, 100);
+
+        MakeOverlayButton(box.transform, "덮어쓰기", new Vector2(-130, -60), new Vector2(220, 56),
+            () => StartNewInSlot(slot), true, UITheme.Negative);
+        MakeOverlayButton(box.transform, "취소", new Vector2(130, -60), new Vector2(220, 56),
+            () => Destroy(box), true, UITheme.Cell);
+    }
+
+    // ── 슬롯 확정 후 실제 진입 ──
+    void StartNewInSlot(int slot)
+    {
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.SetSlot(slot);
+            SaveManager.Instance.DeleteSave(slot);       // 슬롯 파일 제거 → GameStartHandler가 프롤로그 분기
+            SaveManager.Instance.ResetToNewGame();       // 인메모리 이월 차단(같은 세션 재시작 대비)
+        }
+        GameStartHandler.ResetSession();
+        Debug.Log($"[Title] 새 게임(슬롯{slot}) → Safehouse");
+        CloseSlotPicker();
         Hide();
         GoToSafehouse();
     }
 
-    void OnContinue()
+    void ContinueInSlot(int slot)
     {
-        // 이어하기 = 세이브 보존 → Safehouse 진입 시 GameStartHandler가 로드
-        GameStartHandler.ResetSession();   // 안전가옥 진입 시 Load() 1회 재실행
-        Debug.Log("[Title] 이어하기 → Safehouse");
+        if (SaveManager.Instance == null || !SaveManager.Instance.HasSave(slot)) return;   // 빈 슬롯 방어
+        SaveManager.Instance.SetSlot(slot);
+        GameStartHandler.ResetSession();               // 안전가옥 진입 시 Load() 1회 재실행(현재 슬롯)
+        Debug.Log($"[Title] 이어하기(슬롯{slot}) → Safehouse");
+        CloseSlotPicker();
         Hide();
         GoToSafehouse();
     }
