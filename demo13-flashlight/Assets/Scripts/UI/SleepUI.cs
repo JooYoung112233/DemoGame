@@ -66,6 +66,13 @@ public class SleepUI : MonoBehaviour
                 var captured = options[i];
                 optionBtns[i].onClick.RemoveAllListeners();
                 optionBtns[i].onClick.AddListener(() => DoSleep(captured));
+
+                // 라벨/상세 텍스트도 현재 GameTuning 값으로 갱신 — 프리팹엔 베이크 시점 수치가
+                // 굳어 있어 튜닝을 바꿔도 표시가 안 따라오던 문제(전체 검수 2026-07-07 잔여분).
+                var texts = optionBtns[i].GetComponentsInChildren<Text>(true);
+                if (texts.Length >= 1) texts[0].text = captured.label;
+                if (texts.Length >= 2) texts[1].text =
+                    $"HP +{captured.hpPct * 100:F0}%   스태미너 회복\n수분 -{captured.water:F0}   포만감 -{captured.satiety:F0}";
             }
         }
     }
@@ -122,13 +129,19 @@ public class SleepUI : MonoBehaviour
     {
         const float fadeDur = 0.4f;
 
+        // sleeping 고착 방지(전체 검수 2026-07-07 잔여분): 코루틴이 예외/오브젝트 파괴로 중단되거나
+        // Fade 콜백이 안 와도 플래그가 반드시 풀리도록 try/finally + 콜백 대기 타임아웃.
+        try
+        {
+
         // ── 페이드 아웃 ──
         var sem = ScreenEffectManager.Instance;
         if (sem != null && sem.IsGenerated)
         {
             bool done = false;
             sem.FadeOut(fadeDur, () => done = true);
-            while (!done) yield return null;
+            float wait = 0f;
+            while (!done && (wait += Time.unscaledDeltaTime) < fadeDur + 2f) yield return null;   // 콜백 유실 대비 상한
         }
         else
         {
@@ -160,7 +173,8 @@ public class SleepUI : MonoBehaviour
         {
             bool done = false;
             sem.FadeIn(fadeDur, () => done = true);
-            while (!done) yield return null;
+            float wait = 0f;
+            while (!done && (wait += Time.unscaledDeltaTime) < fadeDur + 2f) yield return null;   // 콜백 유실 대비 상한
         }
         else
         {
@@ -172,8 +186,13 @@ public class SleepUI : MonoBehaviour
             $"{o.hours:F0}시간 휴식 — HP +{o.hpPct * 100:F0}%, 스태미너 회복 (시간 경과)",
             ToastManager.ToastType.Success);
 
-        sleeping = false;
         Close();
+
+        }
+        finally
+        {
+            sleeping = false;   // 어떤 경로로 끝나든(정상/예외/중단) 반드시 해제
+        }
     }
 
     // ScreenEffectManager 부재 시 자체 검은 오버레이 페이드(0→1→0)

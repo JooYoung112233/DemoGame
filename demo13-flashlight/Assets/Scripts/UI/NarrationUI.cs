@@ -235,7 +235,10 @@ public class NarrationUI : MonoBehaviour
         callback?.Invoke();
     }
 
-    /// <summary>외부에서 강제로 내레이션을 닫는다(모달 UI 진입 시). onComplete는 호출하지 않음(중단 처리).</summary>
+    /// <summary>외부에서 강제로 내레이션을 닫는다(모달 UI 진입 시 잔류 방지).
+    /// onComplete는 **호출한다**(스킵 처리) — 삼켜버리면 이 콜백을 기다리는 StoryPlayer의
+    /// 씬 재생이 영구히 멈춰 다음 노드/플래그가 죽는다(전체 검수 2026-07-07 잔여분).
+    /// 시각 표시만 치우고 스토리 진행은 완료로 간주.</summary>
     public void Dismiss()
     {
         if (!isShowing) return;
@@ -243,6 +246,9 @@ public class NarrationUI : MonoBehaviour
         isShowing = false;
         if (panelRoot != null) panelRoot.SetActive(false);
         currentLines = null;
+
+        var callback = onComplete;
         onComplete = null;
+        callback?.Invoke();
     }
 }
