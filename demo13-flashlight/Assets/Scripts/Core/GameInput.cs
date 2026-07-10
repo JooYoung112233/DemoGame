@@ -15,29 +15,43 @@ using UnityEngine.InputSystem.Controls;
 /// </summary>
 public static class GameInput
 {
-    // ── 키보드 ───────────────────────────────────────────────
+    // ── 키보드 (+ 게임패드 버튼 병합) ─────────────────────────
+    // 각 키 조회는 키보드 상태 OR 매핑된 게임패드 버튼으로 합쳐진다.
+    // (매핑은 아래 GamepadButtonFor 참조 — 셰임 확장이라 호출처는 그대로.)
     public static bool GetKey(KeyCode code)
     {
         var k = Keyboard.current;
-        if (k == null) return false;
-        var key = Map(code);
-        return key != Key.None && k[key].isPressed;
+        if (k != null)
+        {
+            var key = Map(code);
+            if (key != Key.None && k[key].isPressed) return true;
+        }
+        var gb = GamepadButtonFor(code);
+        return gb != null && gb.isPressed;
     }
 
     public static bool GetKeyDown(KeyCode code)
     {
         var k = Keyboard.current;
-        if (k == null) return false;
-        var key = Map(code);
-        return key != Key.None && k[key].wasPressedThisFrame;
+        if (k != null)
+        {
+            var key = Map(code);
+            if (key != Key.None && k[key].wasPressedThisFrame) return true;
+        }
+        var gb = GamepadButtonFor(code);
+        return gb != null && gb.wasPressedThisFrame;
     }
 
     public static bool GetKeyUp(KeyCode code)
     {
         var k = Keyboard.current;
-        if (k == null) return false;
-        var key = Map(code);
-        return key != Key.None && k[key].wasReleasedThisFrame;
+        if (k != null)
+        {
+            var key = Map(code);
+            if (key != Key.None && k[key].wasReleasedThisFrame) return true;
+        }
+        var gb = GamepadButtonFor(code);
+        return gb != null && gb.wasReleasedThisFrame;
     }
 
     // ── 마우스 버튼 (0=좌, 1=우, 2=중) ────────────────────────
@@ -54,22 +68,44 @@ public static class GameInput
         }
     }
 
+    // 마우스 버튼은 게임패드 트리거와도 병합한다 (0=우트리거=약공격, 1=좌트리거=강공격 차징).
+    static ButtonControl GamepadForMouse(int button)
+    {
+        var g = Gamepad.current;
+        if (g == null) return null;
+        // UI 열림 중엔 트리거를 마우스 클릭으로 병합하지 않는다.
+        // (인벤토리 드래그/분할 등이 마지막 커서 위치에서 유령 조작되는 것을 막음. 공격은 UI 열림 시 어차피 봉쇄.)
+        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return null;
+        switch (button)
+        {
+            case 0: return g.rightTrigger;
+            case 1: return g.leftTrigger;
+            default: return null;
+        }
+    }
+
     public static bool GetMouseButton(int button)
     {
         var b = MouseButton(button);
-        return b != null && b.isPressed;
+        if (b != null && b.isPressed) return true;
+        var gb = GamepadForMouse(button);
+        return gb != null && gb.isPressed;
     }
 
     public static bool GetMouseButtonDown(int button)
     {
         var b = MouseButton(button);
-        return b != null && b.wasPressedThisFrame;
+        if (b != null && b.wasPressedThisFrame) return true;
+        var gb = GamepadForMouse(button);
+        return gb != null && gb.wasPressedThisFrame;
     }
 
     public static bool GetMouseButtonUp(int button)
     {
         var b = MouseButton(button);
-        return b != null && b.wasReleasedThisFrame;
+        if (b != null && b.wasReleasedThisFrame) return true;
+        var gb = GamepadForMouse(button);
+        return gb != null && gb.wasReleasedThisFrame;
     }
 
     // ── 마우스 위치/휠 ────────────────────────────────────────
@@ -104,6 +140,12 @@ public static class GameInput
         {
             case "Horizontal":
             {
+                var g = Gamepad.current;
+                if (g != null)
+                {
+                    float d = DeadzoneAxis(g.leftStick.x.ReadValue());
+                    if (d != 0f) return d;   // 스틱 밀면 아날로그 우선(재스케일)
+                }
                 float v = 0f;
                 if (GetKey(KeyCode.D) || GetKey(KeyCode.RightArrow)) v += 1f;
                 if (GetKey(KeyCode.A) || GetKey(KeyCode.LeftArrow)) v -= 1f;
@@ -111,6 +153,12 @@ public static class GameInput
             }
             case "Vertical":
             {
+                var g = Gamepad.current;
+                if (g != null)
+                {
+                    float d = DeadzoneAxis(g.leftStick.y.ReadValue());
+                    if (d != 0f) return d;
+                }
                 float v = 0f;
                 if (GetKey(KeyCode.W) || GetKey(KeyCode.UpArrow)) v += 1f;
                 if (GetKey(KeyCode.S) || GetKey(KeyCode.DownArrow)) v -= 1f;
@@ -118,6 +166,93 @@ public static class GameInput
             }
             default:
                 return 0f;
+        }
+    }
+
+    // ── 게임패드 ─────────────────────────────────────────────
+    // 셰임 확장 (T0/T1). 조준은 오른쪽 스틱, 이동은 왼쪽 스틱, 버튼은 KeyCode/마우스에 병합.
+    // 방향 소스 전환: 오른쪽 스틱/버튼을 쓰면 PadActive=true(마우스 조준 무시),
+    // 마우스를 물리적으로 움직이면 false로 복귀 → 키보드·패드 매끄럽게 혼용.
+    const float StickDeadzone = 0.30f;
+    static bool _padActive;
+
+    // 정적 셰임 필드는 도메인 리로드로만 초기화되므로, 플레이 시작마다 명시 리셋한다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetState() { _padActive = false; }
+
+    /// <summary>스틱 데드존 재스케일 — 경계에서 0→0.30 속도 점프 없이 매끄럽게 차오르게.</summary>
+    static float DeadzoneAxis(float v)
+    {
+        float a = Mathf.Abs(v);
+        if (a <= StickDeadzone) return 0f;
+        return Mathf.Sign(v) * (a - StickDeadzone) / (1f - StickDeadzone);
+    }
+
+    /// <summary>현재 방향 입력이 게임패드 기준인지(마우스 조준을 대체). TopDownPlayer가 매 프레임 Tick 후 조회.</summary>
+    public static bool PadActive => _padActive;
+
+    /// <summary>오른쪽 스틱 조준 벡터(데드존 적용, 미입력 시 zero — 호출부가 마지막 방향 유지).</summary>
+    public static Vector2 AimStick
+    {
+        get
+        {
+            var g = Gamepad.current;
+            if (g == null) return Vector2.zero;
+            Vector2 v = g.rightStick.ReadValue();
+            return v.sqrMagnitude < StickDeadzone * StickDeadzone ? Vector2.zero : v;
+        }
+    }
+
+    /// <summary>매 프레임 1회 호출 — 패드/마우스 마지막 사용 디바이스로 PadActive 갱신.</summary>
+    public static void Tick()
+    {
+        var g = Gamepad.current;
+        if (g != null)
+        {
+            Vector2 rs = g.rightStick.ReadValue();
+            Vector2 ls = g.leftStick.ReadValue();
+            float dz2 = StickDeadzone * StickDeadzone;
+            if (rs.sqrMagnitude > dz2 || ls.sqrMagnitude > dz2 || AnyPadButtonPressed(g))
+                _padActive = true;
+        }
+        var m = Mouse.current;
+        if (m != null && (m.delta.ReadValue().sqrMagnitude > 4f
+                          || m.leftButton.wasPressedThisFrame || m.rightButton.wasPressedThisFrame))
+            _padActive = false;
+    }
+
+    static bool AnyPadButtonPressed(Gamepad g)
+    {
+        return g.buttonSouth.wasPressedThisFrame || g.buttonEast.wasPressedThisFrame
+            || g.buttonNorth.wasPressedThisFrame || g.buttonWest.wasPressedThisFrame
+            || g.leftTrigger.wasPressedThisFrame || g.rightTrigger.wasPressedThisFrame
+            || g.leftShoulder.wasPressedThisFrame || g.rightShoulder.wasPressedThisFrame
+            || g.startButton.wasPressedThisFrame || g.selectButton.wasPressedThisFrame
+            || g.leftStickButton.wasPressedThisFrame || g.rightStickButton.wasPressedThisFrame
+            || g.dpad.up.wasPressedThisFrame || g.dpad.down.wasPressedThisFrame
+            || g.dpad.left.wasPressedThisFrame || g.dpad.right.wasPressedThisFrame;
+    }
+
+    // KeyCode → 게임패드 버튼 매핑 (레이드 조작 T1).
+    //  E=상호작용→A(남) / Space=구르기→B(동) / LeftShift=달리기→L3 / C=앉기→Y(북)
+    //  Escape=일시정지·닫기→Start / Tab=인벤·캐릭터→Select / Alpha1~4=퀵슬롯→D패드(상우하좌)
+    static ButtonControl GamepadButtonFor(KeyCode code)
+    {
+        var g = Gamepad.current;
+        if (g == null) return null;
+        switch (code)
+        {
+            case KeyCode.E:         return g.buttonSouth;
+            case KeyCode.Space:     return g.buttonEast;
+            case KeyCode.LeftShift: return g.leftStickButton;
+            case KeyCode.C:         return g.buttonNorth;
+            case KeyCode.Escape:    return g.startButton;
+            case KeyCode.Tab:       return g.selectButton;
+            case KeyCode.Alpha1:    return g.dpad.up;
+            case KeyCode.Alpha2:    return g.dpad.right;
+            case KeyCode.Alpha3:    return g.dpad.down;
+            case KeyCode.Alpha4:    return g.dpad.left;
+            default:                return null;
         }
     }
 

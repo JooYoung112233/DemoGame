@@ -72,6 +72,7 @@
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | [`architecture.md`](architecture.md) | **씬/부트 구조 SSOT** — 영속 `Systems` 씬(매니저+UIManager+모든 UI+PlayerRig) + 게임플레이 씬 additive 교체 로드, 부트스트랩 폴백, **입력 시스템(신 Input System + `GameInput` 셰임)** | 구현 |
+| [`controls.md`](controls.md) | **컨트롤/입력 매핑 SSOT** — 키보드·마우스 + **게임패드** 전체 매핑표. 셰임 확장 방식(액션 에셋 없이 `Gamepad.current` 병합), 조준 디바이스 전환(`PadActive`), T2(메뉴 UX)/T3(격자 인벤) 남은 단계 | T0/T1 구현 |
 | [`ui-prefab-plan.md`](ui-prefab-plan.md) | **UI 프리팹화 SSOT** — 코드 절차 생성 → 프리팹 베이크(`UIPrefabBaker`)/Instantiate 전환(§4-A 전 패널 완료), `[SerializeField]`/`WireEvents`/`ApplyFonts` 패턴, 시안 스킨(`UISkin`, §4-B 보류) | §4-A 완료 |
 | [`save.md`](save.md) | **저장/체크포인트** — 세이브 스커밍 방지(레이드 진행=인메모리 스냅샷, 디스크는 안전 맥락만, 크래시 1회 커밋). `SaveManager`/`SaveCheckpoints`/`CombatStateTracker` | 구현 |
 
@@ -225,6 +226,7 @@ Safehouse (timeScale=0, 안전 허브)
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-07-09 | **게임패드 지원 T0/T1 + `controls.md` 신설.** 입력 기반 = GameInput 셰임 확장(신규 액션 에셋 대신 `Gamepad.current` 병합), 범위 = 레이드 조작(T1). 왼쪽 스틱 이동·오른쪽 스틱 조준·버튼 맵(E→A/Space→B/Shift→L3/C→Y/Esc→Start/Tab→Select/1~4→D패드/좌우클릭→RT·LT)·디바이스 전환(`PadActive`). UI 기본 내비는 기존 `InputSystemUIInputModule`. T2(메뉴 포커스·스크롤·글리프)/T3(격자 인벤 스틱 커서) 후속. 매핑 상세 = [`controls.md`](controls.md). |
 | 2026-06-30 | **문서 정합성 교정(인덱스·stale 서술).** ① 색인 누락 8종 등재: 새 「🧱 기술·아키텍처」 섹션(`architecture.md`/`ui-prefab-plan.md`/`save.md`) + `anomaly.md`(월드·레이드) + `dev-handoff.md`(기획총괄) + `item-icon-list/additions.md`·`prop-production.md`(아트). ② **죽은 링크 제거**: `safehouse-map-prompt.md`(2026-06-02 삭제분). ③ stale 상태/서술 교정: `traits.md` 상태(기획→SO·매니저·UI·배선 구현), 핵심규칙 #3 「UI 코드 생성」→「프리팹 베이크+Instantiate」. ④ `demo13-flashlight/CLAUDE.md` 동기화: UI Construction 섹션을 프리팹 베이크/Instantiate·`[SerializeField]`/`WireEvents`/`ApplyFonts` 패턴으로 재작성, PlayerInventory 「5x8 30kg」→ 다중 컨테이너(가방+주머니4×1+보안3×3, 무게 trait 보정). 코드 대조로 검증(수치 무변경). |
 | 2026-06-16 | **빛의 역설/루디 활성 자원 캐논 정합(gdd-core §5.2/§5.3).** SSOT 색인 행의 「불의역설」→「빛의역설」 교정 + 「루디=충전·방전·마모 활성 자원」 명기. 대상 문서(economy/items/items-crafting-farming은 미해당·safehouse/safehouse-intel/raid/crafting/navigation/anomaly)에 루디 충전·방전·마모·순도·죽은 루디·루디 충전/가공대·비루디 광원 침식 반영 + SSOT 링크 추가. 새 수치 미생성(GameTuning TBD). | gdd-core §5 본문은 이미 캐논(진실). |
 | 2026-06-16 | **세계관 통합 정리 — gdd-core §5를 단일 출처(SSOT)로 확정.** §5 상단에 SSOT 배너+하위 색인(5.0~5.4) 추가. 흩어진 로어 재서술 제거: story.md §2 "봉쇄 이후"의 자원작전·불의역설·회수꾼·루디 정의 → 스토리 사건만 남기고 §5로 위임 / world-map.md 상단에 로어 SSOT 위임 노트 + §1 "영구적 밤·붕괴한 날·밤 개장" 옛 표현을 캐논(봉쇄+짙은현상=시간 무관) 용어로 교정. anomaly.md는 이미 §5.1/§5.4 위임(유지). |

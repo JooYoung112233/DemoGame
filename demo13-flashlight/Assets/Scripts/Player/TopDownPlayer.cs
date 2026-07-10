@@ -243,6 +243,7 @@ public class TopDownPlayer : MonoBehaviour
     {
         if (_cam == null) _cam = Camera.main;
 
+        GameInput.Tick();   // 패드/마우스 마지막 사용 디바이스 갱신 (조준 소스 전환)
         _uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
 
         // UI/대화 열림 → 조준·전투 입력 정지 (이동은 FixedUpdate에서 정지)
@@ -306,7 +307,29 @@ public class TopDownPlayer : MonoBehaviour
 
     void UpdateMouseFacing()
     {
+        // 게임패드 조준 — 카메라 불필요하므로 _cam 가드 위에서 처리.
+        if (GameInput.PadActive)
+        {
+            Vector2 aim = GameInput.AimStick;
+            if (aim.sqrMagnitude > 0.01f)
+            {
+                // 오른쪽 스틱을 밀면 그 방향을 바라본다.
+                FacingDirection = aim.normalized;
+                MouseWorldPos   = transform.position + (Vector3)(FacingDirection * 3f);
+            }
+            else if (MoveDirection.sqrMagnitude > 0.01f)
+            {
+                // 오른쪽 스틱 미입력 → 이동 방향으로 바라본다(트윈스틱 폴백, facing 고착 방지).
+                FacingDirection = MoveDirection.normalized;
+                MouseWorldPos   = transform.position + (Vector3)(FacingDirection * 3f);
+            }
+            // 조준·이동 둘 다 미입력이면 마지막 방향 유지.
+            return;
+        }
+
         if (_cam == null) return;
+
+        // 마우스 조준 — 커서 월드좌표를 향한다.
         Vector3 m = _cam.ScreenToWorldPoint(GameInput.mousePosition);
         m.z = transform.position.z;
         Vector2 dir = (Vector2)(m - transform.position);
