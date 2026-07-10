@@ -2,15 +2,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 하단 퀵슬롯 바 (1~6). 소비/사용 아이템을 슬롯에 등록 → 숫자키(또는 슬롯 클릭)로 즉시 사용.
-/// 등록: 인벤 우클릭 "퀵슬롯"(토글). 사용: 게임플레이 중 1~6 키.
+/// 하단 퀵슬롯 바 (1~4 — docs/inventory.md 2026-07-10 확정: 4칸, 갭 분석 ③).
+/// 소모품(의료·음식)을 슬롯에 등록 → 숫자키(또는 슬롯 클릭)로 즉시 사용.
+/// 등록: 인벤 드래그로 슬롯에 놓기(해당 슬롯 지정) 또는 우클릭 "퀵슬롯"(첫 빈 칸 토글). 의료·음식만 등록 가능.
 /// 자가 부트스트랩(부팅 시 생성). 플레이어 존재 시 표시, 모달 UI 없을 때만 입력.
-/// (슬롯은 itemId만 보관 — 런타임 전용, 세이브는 후속.)
+/// 슬롯은 itemId만 보관 — SaveManager가 저장/복원(quickSlots).
 /// </summary>
 public class QuickSlotBar : MonoBehaviour
 {
     public static QuickSlotBar Instance { get; private set; }
-    const int SlotCount = 6;
+    const int SlotCount = 4;
 
     readonly string[] _slotIds = new string[SlotCount];
 
@@ -74,10 +75,44 @@ public class QuickSlotBar : MonoBehaviour
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
-    /// <summary>아이템을 퀵슬롯에 등록(토글: 이미 있으면 해제 / 없으면 첫 빈 슬롯 / 다 차면 1번 교체).</summary>
+    /// <summary>퀵슬롯 등록 가능 여부 — 소모품(의료·음식)만 (docs/inventory.md 2026-07-10).</summary>
+    public static bool IsAssignable(ItemData data)
+        => data != null && (data.category == ItemCategory.Medical || data.category == ItemCategory.Consumable);
+
+    /// <summary>드래그 드롭 등록 — 화면 좌표가 슬롯 위면 그 슬롯에 지정 등록(교체). 반환 = 바 위였는지(핸들 여부).
+    /// 아이템 이동이 아니라 id 등록 — 호출자(CharacterPanelUI)가 드래그를 원위치 복귀시킨다.</summary>
+    public bool TryAssignAtScreenPoint(Vector2 screenPos, string itemId)
+    {
+        if (string.IsNullOrEmpty(itemId) || slotBgs == null) return false;
+        for (int i = 0; i < SlotCount && i < slotBgs.Length; i++)
+        {
+            if (slotBgs[i] == null) continue;
+            if (!RectTransformUtility.RectangleContainsScreenPoint((RectTransform)slotBgs[i].transform, screenPos))
+                continue;
+
+            var data = ItemDatabase.Get(itemId);
+            if (!IsAssignable(data))
+            {
+                ToastManager.Show("의료·음식만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
+                return true;   // 바 위 드롭이긴 함 — 제스처는 소비(원위치 복귀는 호출자)
+            }
+            _slotIds[i] = itemId;
+            Refresh();
+            ToastManager.Show($"퀵슬롯 {i + 1} 등록", ToastManager.ToastType.Info);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>아이템을 퀵슬롯에 등록(토글: 이미 있으면 해제 / 없으면 첫 빈 슬롯 / 다 차면 1번 교체). 의료·음식만.</summary>
     public void Assign(string itemId)
     {
         if (string.IsNullOrEmpty(itemId)) return;
+        if (!IsAssignable(ItemDatabase.Get(itemId)))
+        {
+            ToastManager.Show("의료·음식만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
+            return;
+        }
         for (int i = 0; i < SlotCount; i++)
             if (_slotIds[i] == itemId) { _slotIds[i] = null; Refresh(); ToastManager.Show("퀵슬롯 해제", ToastManager.ToastType.Info); return; }
         for (int i = 0; i < SlotCount; i++)

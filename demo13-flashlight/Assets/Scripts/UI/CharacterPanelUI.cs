@@ -2806,6 +2806,14 @@ public class CharacterPanelUI : MonoBehaviour
         // 실제 드래그 이동 → 선택 해제(슬롯 하이라이트 정리는 EndDrag에서)
         ClearSelection();
 
+        // (a-0) 하단 퀵슬롯 바에 드롭 → 그 슬롯에 등록 (2026-07-10 — 아이템 이동이 아니라 id 등록, 원위치 복귀)
+        if (dragItem != null && dragItem.data != null && QuickSlotBar.Instance != null
+            && QuickSlotBar.Instance.TryAssignAtScreenPoint(GameInput.mousePosition, dragItem.data.itemId))
+        {
+            CancelDrag();   // 아이템은 원래 자리로(등록만 됨)
+            return;
+        }
+
         // (a) 좌측 장비 슬롯 위에 놓음 → 착용 (드래그-투-슬롯)
         EquipSlot dropSlot;
         if (EquipSlotAtMouse(out dropSlot))
