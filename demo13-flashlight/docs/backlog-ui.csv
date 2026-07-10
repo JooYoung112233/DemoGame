@@ -17,3 +17,7 @@ U15,CharacterPanel,가방+창고(Tab) 인벤,있음,-,인벤,inventory.md
 U16,CraftingUI,제작(작업대/의료대/취사대),있음,-,제작,crafting.md
 U17,RaidResultUI,레이드 결과 정산,있음,-,레이드,-
 U18,MedicalHUD,부위별 부상 표시,있음,-,의료,medical.md
+U19,SettingsUI,설정 메뉴(마스터/BGM/SFX 볼륨·해상도+창모드·키 안내 보기 전용) — ESC 일시정지에서 진입·PlayerPrefs 저장·키 리바인딩은 2차,신규,P0,설정,dev-roadmap.md
+U20,CodexUI,아이템 도감(카테고리 탭·미발견 실루엣·첫 획득 기록·이상현상 로어 설명),신규,P1,도감,items.md
+U21,QuickSlotUI,퀵슬롯 핫바 4칸(1~4키·인벤 드래그 할당·즉시 사용·세이브 저장),신규,P0,인벤,inventory.md
+U22,MapUI,전체화면 지도(M키·map_fragment 구역 해금·안개)+시계 나침반(활성 탈출구 방향),신규,P1,레이드,raid.md

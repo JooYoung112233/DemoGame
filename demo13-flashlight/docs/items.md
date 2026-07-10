@@ -601,10 +601,23 @@ Unity 재생 시 **202종** 아이템 + **10종** `RecipeData` (`Data/Recipes/`)
 - **앵커 트릭 (아이콘 일관성 표준)**: NPC와 동일 — 신규 아이콘 배치 시 **합격한 P0 아이콘 2~3개를 같은 시트 안에 앵커로 함께 생성** → 새 아이콘이 앵커 화풍·디테일에 맞춰짐. 생성 후 앵커는 버리고 새 것만 슬라이스. (따로 뽑으면 디테일/톤 드리프트)
 - 제작 순서: 카테고리/우선순위별 시트로 분할 생성 (귀중품 → 무기 → 잡템 → 소비/재료 ...)
 
+## 아이템 도감 (Codex) — 2026-07-10 확정, 구현 전
+
+> 질문: 아이템 수집 기록(도감)을 넣나? **결정: 넣는다 — 1차 = 기록·열람만.**
+
+- **발견 기록**: 아이템 **첫 획득 시** 발견 처리 — 세이브에 발견 itemId set 저장.
+- **도감 UI(`CodexUI`)**: 카테고리 탭, **미발견 = 실루엣** 표시. ([backlog-ui.csv](backlog-ui.csv) U20)
+- **1차 범위 = 기록·열람만(보상 없음).** 수집률 보상(PP/스크랩)은 **2차 검토**.
+- **이상현상 카테고리(§10) 아이템의 도감 설명 = 로어 조각** — 세계관 연결 통로.
+- 구현 순서: 갭 분석 채택 5종 중 **4번째** (dev-roadmap.md 2026-07-10).
+
+> 근거: 낙원식 수집 동기 + 아이템 204종의 가치 표면화.
+
 ## 변경 로그
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-07-10 | **아이템 도감 확정 (기획, 구현 전).** 질문: 아이템 수집 기록(도감)을 넣나? **결정: 첫 획득 시 발견 기록(세이브에 itemId set) + 도감 UI 패널(카테고리 탭, 미발견=실루엣). 1차 = 기록·열람만(보상 없음), 수집률 보상(PP/스크랩)은 2차 검토. 이상현상 카테고리 아이템의 도감 설명 = 로어 조각(세계관 연결).** §아이템 도감 신설, backlog-ui.csv U20(CodexUI) 등재. 갭 분석 5종 구현 순서 4번째. | 근거: 낙원식 수집 동기, 아이템 204종의 가치 표면화. |
 | 2026-06-23 | **소비 아이템 useEffect 오태깅 교정** (`Resources/Items/Consumable/*.asset`). 인게임 "먹기/사용" 미작동 버그 수정 — `PlayerInventory.UseItem`가 처리하는 작동 효과는 HealHP(1)/HealInjury(2)/AddBattery(4)/Food(5)뿐, RestoreStamina(3)는 비구현. useEffect(before→after): `canned_food` 1→5(+effectValue 25→40, §2 "허기+40"), `protein_shake` 1→5, `coffee` 0→5, `energy_soup` 0→5, `stim_injector` 0→5. `adrenaline_shot`은 HealHP(1) 유지(전투 HP 회복). coffee/energy_soup/stim_injector는 본래 RestoreStamina 의도지만 enum 미구현이라 **임시 Food(5) 대체**(포만감+수분 절반 회복) → 스태미너 소비템 효과 재설계는 기획 결정 대기(survival.md §8-A). 식음료 hasDurability는 이미 0(변경 없음). meta/GUID 미변경. |
 | 2026-06-19 | **무기 부착물(파츠) SO 4종 신규.** `ItemData` 무기 파츠 필드(`weaponPartType`/`partMoveSpeedMult`/`partStaminaMult`/`partRangeBonus`/`partRecoilMult`/`partMagBonus`)를 채운 실제 SO를 `Assets/Resources/Items/Misc/WeaponPart/`에 생성: `scope_basic`(Scope, 2×1, Uncommon, 사거리+1.0·반동×0.9), `muzzle_basic`(Muzzle, 1×1, Uncommon, 반동×0.85), `mag_extended`(Magazine, 1×2, Uncommon, 장탄+10), `grip_tactical`(Grip, 1×1, Common, 이속×1.05·스태미너×0.92·반동×0.92). 전부 category=Misc·equipSlot=None·isUsable=false·hasDurability=false. ItemDatabase가 `Resources.LoadAll("Items")`로 자동 로드. 근거: 무기 부착물 시스템 도입 대비 콘텐츠 선제작. 총기 시스템 미도입이라 효과 수치는 도입 시 활용, 아이콘 미할당(에디터 연결 필요). |
 | 2026-06-18 | **장착 가방·리그 신규 + 방어구 equipSlot 연동.** `Items/Gear/`에 `backpack_basic`(6×6), `backpack_large`(7×8), `rig_tactical`(4×3) 3종 신규 ItemData 생성(§4-A). 기존 방어구 4종에 equipSlot 추가: helmet_bucket=Head(1), vest_scrap/armor_night/coat_light=Armor(2). gloves_work/boots_rubber는 대응 슬롯 없어 None 유지. 3종 모두 `Shop_pawnshop` stock에 진열. 비고: Rig 격자 확장은 코드 미연동(Backpack 슬롯만 OnBackpackChanged), 신규 3종 아이콘 미연결(에디터 연결 필요). |
