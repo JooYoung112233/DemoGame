@@ -66,6 +66,21 @@ public class GameTuning : ScriptableObject
     [Tooltip("적 시체에 가방(컨테이너 아이템)이 통째로 들어 있을 확률(타르코프식 — 가방 안엔 지역 루트 1~2개, 가방째 가져갈 수 있음). EnemyController가 읽음.")]
     [Range(0f, 1f)] public float corpseBagChance = 0.3f;
 
+    // ── 무게 초과 페널티 (타르코프식 3구간 — docs/inventory.md 2026-07-10) ────────
+    [Header("무게 초과 페널티")]
+    [Tooltip("과적 시작 비율(현재무게/MaxWeight). 이 이상부터 스프린트 불가 + 이속 −slow1. 1.0=100%.")]
+    [Range(0.5f, 2f)] public float overweightStartPct = 1.0f;
+    [Tooltip("심각 시작 비율. 이 이상부터 이속 −slow2 + 스태미너 회복 배율 적용. 1.15=115%.")]
+    [Range(0.5f, 2f)] public float overweightSeverePct = 1.15f;
+    [Tooltip("하드컷 비율. 이 이상이 되도록은 더 담지 못함(줍기/이전 차단). 1.30=130%.")]
+    [Range(0.5f, 3f)] public float overweightHardPct = 1.30f;
+    [Tooltip("과적(과적~심각) 구간 이동속도 감소율. 0.15=−15%.")]
+    [Range(0f, 0.9f)] public float overweightSlow1 = 0.15f;
+    [Tooltip("심각(심각~하드컷 이상) 구간 이동속도 감소율. 0.30=−30%.")]
+    [Range(0f, 0.95f)] public float overweightSlow2 = 0.30f;
+    [Tooltip("심각 구간 스태미너 회복 배율. 0.5=회복 절반.")]
+    [Range(0f, 1f)] public float overweightRegenMult = 0.5f;
+
     // ── 시야 (FOV 시야콘, 좀보이드식) ─────────────────────────────────
     [Header("시야 (FOV 시야콘)")]
     [Tooltip("시야콘 켜기. 끄면 시야 제한 없이 모든 적이 보임(디버그/비활성).")]

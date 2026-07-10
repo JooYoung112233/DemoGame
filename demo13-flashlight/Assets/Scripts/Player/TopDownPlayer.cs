@@ -146,6 +146,11 @@ public class TopDownPlayer : MonoBehaviour
     AttackData CurrentHeavyFull       => (_weapon != null && _weapon.heavyFullAttack != null) ? _weapon.heavyFullAttack : heavyFullAttack;
     PlayerEquipment _equip;
     PlayerEquipment Equip => _equip != null ? _equip : (_equip = GetComponent<PlayerEquipment>());
+    PlayerInventory _inv;
+    PlayerInventory Inv => _inv != null ? _inv : (_inv = GetComponent<PlayerInventory>());
+    // 무게 페널티는 레이드에서만(안전구역=스태미너 무한과 동일 조건으로 면제).
+    float OverweightMoveMult => (Inv != null && !StaminaInfinite) ? Inv.OverweightMoveMult : 1f;
+    bool OverweightSprintBlocked => Inv != null && !StaminaInfinite && Inv.SprintBlocked;
     // 무기 보정 × 부착물(파츠) 집계 보정
     float WeaponMoveMult  => (_weapon != null ? _weapon.moveSpeedMult : 1f) * (Equip != null ? Equip.WeaponPartMoveMult : 1f);
     float WeaponStamMult  => (_weapon != null ? _weapon.staminaCostMult : 1f) * (Equip != null ? Equip.WeaponPartStaminaMult : 1f);
@@ -294,6 +299,7 @@ public class TopDownPlayer : MonoBehaviour
         float speed = MoveSpd * (IsSprinting ? SprintMult : 1f);
         if (_crouching) speed *= Stat.crouchSpeedMultiplier;  // 앉아 이동 = 감속
         if (_state == CombatState.HeavyCharge) speed *= 0.4f; // 차징 중 감속
+        speed *= OverweightMoveMult;                          // 무게 초과 페널티(과적 −15% / 심각 −30%)
 
         // 가속/감속 램프 — 즉속도(미끄럼)가 아니라 살짝 차오르고/잦아드는 무게감.
         Vector2 target = MoveDirection * speed;
@@ -463,6 +469,8 @@ public class TopDownPlayer : MonoBehaviour
     void UpdateSprint(bool uiOpen)
     {
         bool wantSprint = !uiOpen && !_exhausted && !_crouching && _state == CombatState.Idle
+                          && !ChannelBusy                                  // 아이템 사용(채널) 중 달리기 금지
+                          && !OverweightSprintBlocked                      // 과적(100%+) 시 스프린트 불가(레이드만)
                           && GameInput.GetKey(KeyCode.LeftShift) && IsMoving
                           && _stamina > SprintMinStam;
 
@@ -492,8 +500,12 @@ public class TopDownPlayer : MonoBehaviour
 
     // ── 전투 입력 ────────────────────────────────────────────────────
 
+    /// <summary>아이템 사용(채널) 진행 중 — 이 동안 구르기/공격/달리기를 막는다.</summary>
+    bool ChannelBusy => UseActionManager.Instance != null && UseActionManager.Instance.IsBusy;
+
     void HandleCombatInput()
     {
+        if (ChannelBusy) return;   // 아이템 사용 중 — 구르기·공격 금지 (취소는 ESC)
         if (!CombatEnabled || _exhausted) return;
 
         // 구르기 (Space)
@@ -660,7 +672,10 @@ public class TopDownPlayer : MonoBehaviour
         if (_regenDelayTimer > 0f) { _regenDelayTimer -= Time.deltaTime; return; }
 
         if (_stamina < MaxStam && !IsSprinting)
-            _stamina = Mathf.Min(MaxStam, _stamina + StamRegen * Time.deltaTime);
+        {
+            float regen = StamRegen * (Inv != null ? Inv.StaminaRegenMult : 1f);   // 심각 과적 시 회복 절반
+            _stamina = Mathf.Min(MaxStam, _stamina + regen * Time.deltaTime);
+        }
     }
 
     void EnterExhausted()

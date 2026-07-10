@@ -128,17 +128,18 @@
 | `dialogueTypingSpeed` | 0.02 | 대화 타이핑 속도(자당 초) | `DialogueUI` |
 | `tutorialDefaultDuration` | 4 | 튜토리얼 프롬프트 기본 표시(초, 노드 미명시 시) | `StoryPlayer` |
 
-### 무게 초과 페널티 (2026-07-10 — **구현 전, 기획 확정 · 필드 예정**)
+### 무게 초과 페널티 (2026-07-10 — ✅ **구현 완료** · GameTuning 6필드)
 
-> 하드컷 폐지 → 3구간 페널티 곡선. 기준 = `PlayerInventory.MaxWeight`(30kg × 특성 `weight_max`). 수치는 1차 초안(플레이 조정 전제). [→ inventory.md §무게 시스템](inventory.md)
+> 하드컷 폐지 → 3구간 페널티 곡선. 기준 = `PlayerInventory.MaxWeight`(30kg × 특성 `weight_max`). 수치 1차 초안(플레이 조정 전제). [→ inventory.md §무게 시스템](inventory.md)
 
-| 필드(예정) | 기획값 | 의미 | 읽는 곳(예정) |
+| GameTuning 필드 | 값 | 의미 | 읽는 곳 |
 |------|--------|------|---------|
-| `overweightSoftPct` | 1.0 | 이 비율(현재무게/MaxWeight)까지 정상 | `TopDownPlayer`/`PlayerInventory` |
-| `overweightSprintBlockPct` | 1.0 | 이 비율 초과 시 스프린트 불가(=과적 시작) | `TopDownPlayer` |
+| `overweightStartPct` | 1.0 | 과적 시작 비율(스프린트 불가 + 이속 −slow1) | `PlayerInventory`→`TopDownPlayer` |
+| `overweightSeverePct` | 1.15 | 심각 시작 비율(이속 −slow2 + 스태미너 회복 배율) | `PlayerInventory`→`TopDownPlayer` |
+| `overweightHardPct` | 1.30 | 이 비율 넘게는 외부 루팅 못 담음(하드컷) | `PlayerInventory` |
 | `overweightSlow1` | 0.15 | 과적(100~115%) 이동속도 감소율 | `TopDownPlayer` |
-| `overweightSlow2` | 0.30 | 심각(115~130%) 이동속도 감소율(+스태미너 회복 절반) | `TopDownPlayer` |
-| `overweightHardPct` | 1.3 | 이 비율 이상 더 못 담음(하드컷) | `PlayerInventory` |
+| `overweightSlow2` | 0.30 | 심각(115~130%+) 이동속도 감소율 | `TopDownPlayer` |
+| `overweightRegenMult` | 0.5 | 심각 이상 스태미너 회복 배율 | `TopDownPlayer` |
 
 ---
 

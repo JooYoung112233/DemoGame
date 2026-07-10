@@ -1909,14 +1909,14 @@ public class CharacterPanelUI : MonoBehaviour
                 // 착용 실패(방어) → 아래 일반 이동 폴백
             }
 
-            if (playerInventory.TryAutoPlaceAnywhere(placed.item))
+            if (playerInventory.TryAutoPlaceAnywhere(placed.item, respectWeightCap: true))   // 하드컷: 130% 넘게 못 챙김
             {
                 grid.Remove(placed);
                 moved++;
             }
             else
             {
-                left++;   // 인벤 공간 부족 → 남김
+                left++;   // 인벤 공간 부족(또는 무게 하드컷) → 남김
             }
         }
 
@@ -2557,9 +2557,9 @@ public class CharacterPanelUI : MonoBehaviour
                     }
                     // 장착 가능 → 자동 착용
                     if (IsEquippable(item.data)) { EquipFromGrid(item, leftGrid); return; }
-                    // 그 외 → 플레이어(가방→주머니→보안)로 이동
+                    // 그 외 → 플레이어(가방→주머니→보안)로 이동. 하드컷(130%) 넘으면 원위치 복원.
                     leftGrid.Remove(placed);
-                    if (!playerInventory.TryAutoPlaceAnywhere(item))
+                    if (!playerInventory.TryAutoPlaceAnywhere(item, respectWeightCap: true))
                         leftGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
                     RefreshAllGrids();
                 }
@@ -2897,6 +2897,15 @@ public class CharacterPanelUI : MonoBehaviour
                     EndDrag();
                     if (restored) EquipFromGrid(wear, src);
                     else ReturnItemToInventory(wear);
+                    return;
+                }
+
+                // (b-1) 외부(루팅 상자/창고/컨테이너 팝업)에서 플레이어로 끌어오는 경우 무게 하드컷(130%) 게이트.
+                //   내부 재배치(플레이어 격자끼리)는 무게 변화 없어 면제.
+                if (dragItem != null && dragSourceGrid != null && !IsPlayerGrid(dragSourceGrid)
+                    && playerInventory != null && playerInventory.WouldExceedHardCut(dragItem.TotalWeight))
+                {
+                    CancelDrag();   // 원위치 복귀(WouldExceedHardCut이 토스트 표시)
                     return;
                 }
 

@@ -35,6 +35,40 @@ public class PlayerInventory : MonoBehaviour
 
     public bool IsOverweight => CurrentWeight > MaxWeight;
 
+    // ── 무게 초과 페널티 (타르코프식 3구간 — docs/inventory.md 2026-07-10) ──
+    /// <summary>현재무게 / MaxWeight 비율(0~).</summary>
+    public float WeightRatio => MaxWeight > 0f ? CurrentWeight / MaxWeight : 0f;
+
+    float OwStart  => GameTuning.Instance != null ? GameTuning.Instance.overweightStartPct  : 1.0f;
+    float OwSevere => GameTuning.Instance != null ? GameTuning.Instance.overweightSeverePct : 1.15f;
+    float OwHard   => GameTuning.Instance != null ? GameTuning.Instance.overweightHardPct   : 1.30f;
+    float OwSlow1  => GameTuning.Instance != null ? GameTuning.Instance.overweightSlow1      : 0.15f;
+    float OwSlow2  => GameTuning.Instance != null ? GameTuning.Instance.overweightSlow2      : 0.30f;
+    float OwRegen  => GameTuning.Instance != null ? GameTuning.Instance.overweightRegenMult  : 0.5f;
+
+    /// <summary>이동속도 배율(1=정상, 과적 −slow1, 심각 이상 −slow2). TopDownPlayer가 곱함.</summary>
+    public float OverweightMoveMult
+    {
+        get
+        {
+            float r = WeightRatio;
+            if (r >= OwSevere) return Mathf.Clamp01(1f - OwSlow2);
+            if (r >= OwStart)  return Mathf.Clamp01(1f - OwSlow1);
+            return 1f;
+        }
+    }
+
+    /// <summary>스프린트 차단(과적 이상).</summary>
+    public bool SprintBlocked => WeightRatio >= OwStart;
+
+    /// <summary>스태미너 회복 배율(심각 이상 절반).</summary>
+    public float StaminaRegenMult => WeightRatio >= OwSevere ? OwRegen : 1f;
+
+    /// <summary>이 무게를 더 담으면 하드컷(130%)을 넘는가 — 넘으면 줍기/이전 차단.
+    /// 이미 하드컷 이상이면 무게가 0 이하로 줄지 않는 한 항상 차단.</summary>
+    public bool WouldExceedHardCut(float addWeight)
+        => MaxWeight > 0f && addWeight > 0f && (CurrentWeight + addWeight) > MaxWeight * OwHard;
+
     // 캐시
     Health health;
     PlayerMedicalSystem medical;
@@ -143,6 +177,11 @@ public class PlayerInventory : MonoBehaviour
     public bool TryPickup(ItemInstance item)
     {
         if (item == null || item.data == null) return false;
+        if (WouldExceedHardCut(item.TotalWeight))   // 하드컷(130%): 더 못 담음
+        {
+            ToastManager.Show("너무 무겁다 — 더 들 수 없다", ToastManager.ToastType.Warning);
+            return false;
+        }
         if (HasBackpack && Grid.TryAutoPlace(item)) return true;   // 가방 우선
         if (PocketsGrid != null && PocketsGrid.TryAutoPlace(item)) return true;  // 주머니 차선
         Debug.Log("[Inventory] 공간 부족 (가방·주머니)");
@@ -352,10 +391,16 @@ public class PlayerInventory : MonoBehaviour
         return false;
     }
 
-    /// <summary>가방→주머니→보안 순으로 자동 배치 시도.</summary>
-    public bool TryAutoPlaceAnywhere(ItemInstance item)
+    /// <summary>가방→주머니→보안 순으로 자동 배치 시도. respectWeightCap=true면 하드컷 초과 시 거부(외부 루팅 유입).
+    /// 내부 이동(가방 해제 복귀 등)은 false로 호출해 무게 변화 없는 재배치를 막지 않는다.</summary>
+    public bool TryAutoPlaceAnywhere(ItemInstance item, bool respectWeightCap = false)
     {
         if (item == null) return false;
+        if (respectWeightCap && WouldExceedHardCut(item.TotalWeight))
+        {
+            ToastManager.Show("너무 무겁다 — 더 들 수 없다", ToastManager.ToastType.Warning);
+            return false;
+        }
         if (HasBackpack && Grid.TryAutoPlace(item)) return true;
         if (PocketsGrid != null && PocketsGrid.TryAutoPlace(item)) return true;
         if (SecureGrid != null && SecureGrid.TryAutoPlace(item)) return true;

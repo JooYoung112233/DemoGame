@@ -188,6 +188,13 @@ public class HideoutController : MonoBehaviour
 
         if (GameInput.GetKeyDown(KeyCode.Escape))
         {
+            // 아이템 사용(채널) 중이면 ESC = 사용 취소 (나가기 확인창 대신). 이 컴포넌트가 UIManager보다 먼저 실행됨.
+            if (UseActionManager.Instance != null && UseActionManager.Instance.IsBusy)
+            {
+                UseActionManager.Instance.Cancel();
+                ToastManager.Show("사용 취소", ToastManager.ToastType.Info);
+                return;
+            }
             if (uiOpen) return;                                 // 열린 UI는 UIManager가 닫음 — 여기선 나가지 않음
             if (_confirmShowing) { HideExitConfirm(); return; } // 확인창 떠 있으면 ESC=취소
             ShowExitConfirm();                                  // UI 없을 때만 '나가기 확인창'

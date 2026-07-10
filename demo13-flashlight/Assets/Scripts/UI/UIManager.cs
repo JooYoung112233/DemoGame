@@ -242,6 +242,13 @@ public class UIManager : MonoBehaviour
         // ── ESC: 맨 위(가장 최근) UI 1개만 닫기(LIFO). 없으면 일시정지 (중앙 권위) ──
         if (GameInput.GetKeyDown(KeyCode.Escape))
         {
+            // 아이템 사용(채널) 중이면 ESC = 사용 취소. 설정/일시정지 창은 열지 않는다.
+            if (UseActionManager.Instance != null && UseActionManager.Instance.IsBusy)
+            {
+                UseActionManager.Instance.Cancel();
+                ToastManager.Show("사용 취소", ToastManager.ToastType.Info);
+                return;
+            }
             if (CloseTopmost()) return;
             if (!HideoutController.IsActive) PauseMenu.Show();   // 하이드아웃에선 HideoutController가 ESC=나가기확인 처리
             return;
