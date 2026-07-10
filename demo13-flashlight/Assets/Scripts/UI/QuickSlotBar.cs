@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 하단 퀵슬롯 바 (1~4 — docs/inventory.md 2026-07-10 확정: 4칸, 갭 분석 ③).
+/// 하단 퀵슬롯 바 (1~6 — docs/inventory.md 2026-07-10: 4칸으로 줄였다가 사용자 요청으로 6칸 복구).
 /// 소모품(의료·음식)을 슬롯에 등록 → 숫자키(또는 슬롯 클릭)로 즉시 사용.
 /// 등록: 인벤 드래그로 슬롯에 놓기(해당 슬롯 지정) 또는 우클릭 "퀵슬롯"(첫 빈 칸 토글). 의료·음식만 등록 가능.
 /// 자가 부트스트랩(부팅 시 생성). 플레이어 존재 시 표시, 모달 UI 없을 때만 입력.
@@ -11,7 +11,7 @@ using UnityEngine.UI;
 public class QuickSlotBar : MonoBehaviour
 {
     public static QuickSlotBar Instance { get; private set; }
-    const int SlotCount = 4;
+    const int SlotCount = 6;
 
     readonly string[] _slotIds = new string[SlotCount];
 
