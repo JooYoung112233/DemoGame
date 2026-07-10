@@ -2377,6 +2377,19 @@ public class CharacterPanelUI : MonoBehaviour
             // Del 키: 마우스 위 내 아이템 버리기 (드래그 버리기 대체 수단)
             if (GameInput.GetKeyDown(KeyCode.Delete))
                 TryDiscardItemUnderMouse();
+
+            // 숫자키 1~6: 클릭 선택한 아이템을 해당 퀵슬롯에 등록 (2026-07-10 — 드래그 등록과 병행 UX)
+            if (selectedItem != null && selectedItem.data != null && QuickSlotBar.Instance != null)
+            {
+                for (int k = 0; k < QuickSlotBar.SlotCount; k++)
+                {
+                    if (GameInput.GetKeyDown(KeyCode.Alpha1 + k) || GameInput.GetKeyDown(KeyCode.Keypad1 + k))
+                    {
+                        QuickSlotBar.Instance.AssignToSlot(k, selectedItem.data.itemId);
+                        break;
+                    }
+                }
+            }
         }
     }
 

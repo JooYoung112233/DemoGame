@@ -11,7 +11,7 @@ using UnityEngine.UI;
 public class QuickSlotBar : MonoBehaviour
 {
     public static QuickSlotBar Instance { get; private set; }
-    const int SlotCount = 6;
+    public const int SlotCount = 6;   // CharacterPanelUI(클릭→숫자키 등록)도 참조
 
     readonly string[] _slotIds = new string[SlotCount];
 
@@ -79,6 +79,22 @@ public class QuickSlotBar : MonoBehaviour
     public static bool IsAssignable(ItemData data)
         => data != null && (data.category == ItemCategory.Medical || data.category == ItemCategory.Consumable);
 
+    /// <summary>지정 슬롯에 직접 등록(교체) — 드래그 드롭·클릭 후 숫자키 공용. 의료·음식만. 성공 시 true.</summary>
+    public bool AssignToSlot(int index, string itemId)
+    {
+        if (index < 0 || index >= SlotCount || string.IsNullOrEmpty(itemId)) return false;
+        var data = ItemDatabase.Get(itemId);
+        if (!IsAssignable(data))
+        {
+            ToastManager.Show("의료·음식만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
+            return false;
+        }
+        _slotIds[index] = itemId;
+        Refresh();
+        ToastManager.Show($"퀵슬롯 {index + 1} 등록", ToastManager.ToastType.Info);
+        return true;
+    }
+
     /// <summary>드래그 드롭 등록 — 화면 좌표가 슬롯 위면 그 슬롯에 지정 등록(교체). 반환 = 바 위였는지(핸들 여부).
     /// 아이템 이동이 아니라 id 등록 — 호출자(CharacterPanelUI)가 드래그를 원위치 복귀시킨다.</summary>
     public bool TryAssignAtScreenPoint(Vector2 screenPos, string itemId)
@@ -89,16 +105,7 @@ public class QuickSlotBar : MonoBehaviour
             if (slotBgs[i] == null) continue;
             if (!RectTransformUtility.RectangleContainsScreenPoint((RectTransform)slotBgs[i].transform, screenPos))
                 continue;
-
-            var data = ItemDatabase.Get(itemId);
-            if (!IsAssignable(data))
-            {
-                ToastManager.Show("의료·음식만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
-                return true;   // 바 위 드롭이긴 함 — 제스처는 소비(원위치 복귀는 호출자)
-            }
-            _slotIds[i] = itemId;
-            Refresh();
-            ToastManager.Show($"퀵슬롯 {i + 1} 등록", ToastManager.ToastType.Info);
+            AssignToSlot(i, itemId);   // 등록 불가(카테고리)여도 바 위 드롭 = 제스처 소비
             return true;
         }
         return false;
@@ -149,8 +156,15 @@ public class QuickSlotBar : MonoBehaviour
         RefreshCounts();
         UpdateStamina();
 
-        // 모달 UI 열려 있으면 입력만 차단(표시는 유지하되 모달이 위를 덮음)
-        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return;
+        // 모달 UI 열려 있으면 입력만 차단. 단 캐릭터 패널(인벤) 위엔 바를 올려 보이게 —
+        // 드래그로 슬롯에 놓는 등록 타깃이 보여야 함(패널 캔버스 40 위 = 41, 평소 30).
+        bool uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
+        if (canvas != null)
+        {
+            int want = uiOpen ? 41 : SortingOrder;
+            if (canvas.sortingOrder != want) canvas.sortingOrder = want;
+        }
+        if (uiOpen) return;
 
         for (int i = 0; i < SlotCount; i++)
             if (GameInput.GetKeyDown(KeyCode.Alpha1 + i) || GameInput.GetKeyDown(KeyCode.Keypad1 + i))
