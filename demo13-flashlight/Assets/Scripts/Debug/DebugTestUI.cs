@@ -457,7 +457,42 @@ public class DebugTestUI : MonoBehaviour
                 }
             }
             GUILayout.EndHorizontal();
+
+            GUILayout.Space(4);
+            if (GUILayout.Button("시체 스폰 (앞에, 랜덤 아이템 — 뒤지기 테스트)", btnStyle))
+                SpawnTestCorpse(p, allItems);
         }
+    }
+
+    /// <summary>시체 루팅 테스트 — 플레이어 앞에 시체(LootContainer 3×3 + '시체 뒤지기' 상호작용)를 만들고
+    /// 랜덤 아이템 2~4종을 채운다. 적 사망 경로(EnemyController.BecomeCorpse)와 동일 구성.</summary>
+    static void SpawnTestCorpse(TopDownPlayer p, ItemData[] allItems)
+    {
+        var go = new GameObject("Debug_Corpse");
+        go.transform.position = p.transform.position + (Vector3)(p.FacingDirection * 2f);
+
+        // 비주얼: 누운 몸뚱이 느낌의 어두운 막대 스프라이트
+        var tex = new Texture2D(1, 1);
+        tex.SetPixel(0, 0, Color.white);
+        tex.Apply();
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
+        sr.color = new Color(0.35f, 0.22f, 0.20f, 1f);
+        go.transform.localScale = new Vector3(1.1f, 0.5f, 1f);
+
+        var container = go.AddComponent<LootContainer>();
+        container.Setup("시체 (테스트)", 3, 3);
+        int count = Random.Range(2, 5);
+        for (int j = 0; j < count; j++)
+        {
+            var data = allItems[Random.Range(0, allItems.Length)];
+            container.AddItem(new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1)));
+        }
+
+        var io = go.AddComponent<InteractableObject>();
+        io.SetupAsContainer("시체 뒤지기");
+
+        ToastManager.Show($"시체 스폰 — 아이템 {count}종", ToastManager.ToastType.Info);
     }
 
     static bool MatchesItemSubTab(ItemData item, int tab)
