@@ -82,12 +82,33 @@ public class GameStartHandler : MonoBehaviour
         }
 
         // ── 새 게임: 프롤로그 재생 ──
+        // 새 게임은 전환 커버(검정)를 유지한 채 진입한다(TitleScreen keepCovered).
+        // 프롤로그 S-000이 자체 암전 페이드(ScreenEffectManager)로 화면을 이어받으므로,
+        // 스토리 페이드(#2)를 먼저 검정으로 만든 뒤 전환 커버(#1)를 조용히 제거해
+        // 중간에 안전가옥이 번쩍이는 것을 막는다.
         Debug.Log("[GameStart] 새 게임. 프롤로그 시작.");
+
+        var stm  = SceneTransitionManager.Instance;
+        var sem  = ScreenEffectManager.Instance;
+        if (sem != null) yield return sem.FadeOut(0.01f);   // #2 즉시 검정(프롤로그 첫 노드와 동일 효과)
+        if (stm != null) stm.ClearCover();                  // #1 제거 — 이미 검정이라 화면 변화 없음
+
         yield return new WaitForSecondsRealtime(delayBeforePrologue);
 
+        bool started = false;
         if (StoryTriggerManager.Instance != null)
-            StoryTriggerManager.Instance.PlayPrologueAuto();
-        else if (StoryPlayer.Instance != null)
+            started = StoryTriggerManager.Instance.PlayPrologueAuto();
+        if (!started && StoryPlayer.Instance != null)
+        {
             StoryPlayer.Instance.PlayScene("S-000");
+            started = StoryPlayer.Instance.IsPlaying;
+        }
+
+        // 안전망: 프롤로그가 실제로 시작되지 않았다면(중복 방지 플래그/씬 누락) 검은 화면에 갇히지 않게 드러낸다.
+        if (!started)
+        {
+            if (sem != null) yield return sem.FadeIn(0.5f);
+            else if (stm != null) stm.ClearCover();
+        }
     }
 }

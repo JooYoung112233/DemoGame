@@ -281,7 +281,8 @@ public class TitleScreen : MonoBehaviour
         Debug.Log($"[Title] 새 게임(슬롯{slot}) → Safehouse");
         CloseSlotPicker();
         Hide();
-        GoToSafehouse();
+        // 새 게임은 커버를 유지한 채 진입 — reveal 없이 곧바로 프롤로그 암전 페이드로 넘긴다(안전가옥 번쩍임 방지).
+        GoToSafehouse(keepCovered: true);
     }
 
     void ContinueInSlot(int slot)
@@ -305,11 +306,12 @@ public class TitleScreen : MonoBehaviour
 #endif
     }
 
-    void GoToSafehouse()
+    void GoToSafehouse(bool keepCovered = false)
     {
         if (SceneTransitionManager.Instance != null)
             // 즉시 검게 덮은 채 로드 → 셋업 → reveal. 클릭 순간 화면이 검어져 HUD/타이틀 깜빡임 없음.
-            SceneTransitionManager.Instance.TransitionTo("Safehouse", "default", instantCover: true);
+            // keepCovered면 reveal 생략(새 게임: 프롤로그가 화면을 이어받음).
+            SceneTransitionManager.Instance.TransitionTo("Safehouse", "default", instantCover: true, keepCovered: keepCovered);
         else
             Debug.LogWarning("[Title] SceneTransitionManager 없음 — Safehouse 전환 불가(씬 미빌드?)");
     }

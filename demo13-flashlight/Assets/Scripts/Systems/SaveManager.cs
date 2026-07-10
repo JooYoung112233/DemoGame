@@ -504,6 +504,7 @@ public class SaveManager : MonoBehaviour
         DailyQuestManager.Instance?.ResetForNewGame();
         QuestManager.Instance?.ResetForNewGame();            // 활성/완료 퀘스트 + 플래그
         StoryPlayer.Instance?.SetPlayedScenes(null);         // 재생 기록 초기화
+        StoryTriggerManager.Instance?.ResetForNewGame();     // 프롤로그 재생 플래그 초기화(같은 세션 재시작 시 프롤로그 재생)
         TutorialPrompt.Instance?.SetShownIds(null);          // 튜토 1회성 기록 초기화
 
         // ── 게시판 런타임 상태 ──

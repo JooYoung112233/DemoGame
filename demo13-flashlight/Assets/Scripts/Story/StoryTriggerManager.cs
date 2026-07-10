@@ -137,12 +137,18 @@ public class StoryTriggerManager : MonoBehaviour
     /// <summary>
     /// 자동 프롤로그 (GameStartHandler에서 호출, 1회만).
     /// </summary>
-    public void PlayPrologueAuto()
+    /// <summary>새 게임 리셋 — 프롤로그 재생 플래그 초기화(같은 세션 재시작 시 프롤로그 다시 재생).</summary>
+    public void ResetForNewGame() { prologuePlayed = false; }
+
+    /// <returns>실제로 프롤로그를 시작했으면 true(이미 재생됐거나 StoryPlayer 없음이면 false).</returns>
+    public bool PlayPrologueAuto()
     {
-        if (prologuePlayed) return;
+        if (prologuePlayed) return false;
+        if (StoryPlayer.Instance == null || StoryPlayer.Instance.IsPlaying) return false;
         prologuePlayed = true;
 
         PlayPrologue();
+        return true;
     }
 
     /// <summary>

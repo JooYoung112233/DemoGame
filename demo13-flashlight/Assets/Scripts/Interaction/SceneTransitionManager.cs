@@ -74,18 +74,24 @@ public class SceneTransitionManager : MonoBehaviour
 
     /// <summary>씬 전환 요청 (즉시).</summary>
     /// <param name="instantCover">true면 페이드 없이 화면을 즉시 검게 덮은 채 로드(부팅/새게임 셋업 중 HUD 깜빡임 차단). 로드 후 reveal.</param>
-    public void TransitionTo(string sceneName, string spawnPointId = "", bool instantCover = false)
+    /// <param name="keepCovered">true면 로드 후 reveal(페이드 인)을 생략하고 검게 덮은 채 둔다.
+    /// 새 게임처럼 곧바로 프롤로그가 자체 페이드로 화면을 이어받는 경우 — 중간에 안전가옥이 번쩍이는 것을 막는다.
+    /// 이때 커버 해제는 호출측(GameStartHandler)이 ClearCover/RevealRoutine으로 책임진다.</param>
+    public void TransitionTo(string sceneName, string spawnPointId = "", bool instantCover = false, bool keepCovered = false)
     {
         if (isTransitioning) return;
         // timeScale=0(안전가옥)에서 출전 시 복구
         Time.timeScale = 1f;
         PendingSpawnPointId = spawnPointId;
         if (instantCover) fadeAlpha = 1f;
-        transitionCoroutine = StartCoroutine(TransitionRoutine(sceneName, 0f, instantCover));
+        transitionCoroutine = StartCoroutine(TransitionRoutine(sceneName, 0f, instantCover, keepCovered));
     }
 
     /// <summary>즉시 화면을 검게 덮는다(페이드 없이). 부팅/새게임 셋업 중 HUD(HP바 등) 깜빡임 차단용.</summary>
     public void CoverInstant() { fadeAlpha = 1f; }
+
+    /// <summary>즉시 커버를 제거한다(페이드 없이). 다른 오버레이(스토리 페이드)가 이미 화면을 덮고 있어 번쩍임 없이 넘길 때.</summary>
+    public void ClearCover() { fadeAlpha = 0f; isFading = false; }
 
     /// <summary>덮인 화면을 페이드로 드러낸다(reveal). 셋업 완료 후 호출.</summary>
     public IEnumerator RevealRoutine() { yield return StartCoroutine(FadeRoutine(fadeAlpha, 0f)); }
@@ -117,7 +123,7 @@ public class SceneTransitionManager : MonoBehaviour
         Debug.Log("[SceneTransition] 탈출 취소됨");
     }
 
-    IEnumerator TransitionRoutine(string sceneName, float waitTime, bool startCovered = false)
+    IEnumerator TransitionRoutine(string sceneName, float waitTime, bool startCovered = false, bool keepCovered = false)
     {
         isTransitioning = true;
 
@@ -201,7 +207,9 @@ public class SceneTransitionManager : MonoBehaviour
 
         // 페이드 인 (OnSceneLoaded에서 스폰 처리 후)
         yield return new WaitForSeconds(0.1f); // 씬 초기화 대기
-        yield return StartCoroutine(FadeRoutine(1f, 0f));
+        // keepCovered면 reveal 생략 — 곧바로 이어질 프롤로그 페이드가 화면을 넘겨받는다(안전가옥 번쩍임 방지).
+        if (!keepCovered)
+            yield return StartCoroutine(FadeRoutine(1f, 0f));
 
         isTransitioning = false;
     }
