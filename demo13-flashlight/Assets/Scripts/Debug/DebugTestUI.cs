@@ -462,6 +462,56 @@ public class DebugTestUI : MonoBehaviour
             if (GUILayout.Button("시체 스폰 (앞에, 랜덤 아이템 — 뒤지기 테스트)", btnStyle))
                 SpawnTestCorpse(p, allItems);
         }
+
+        // ── 무게 테스트 (초과 페널티 검증) ──
+        GUILayout.Space(10);
+        GUILayout.Label("── 무게 테스트 (초과 페널티) ──", headerStyle);
+        float ratio = inventory.MaxWeight > 0f ? inventory.CurrentWeight / inventory.MaxWeight : 0f;
+        string tier = ratio >= 1.30f ? "하드컷" : ratio >= 1.15f ? "심각" : ratio >= 1.00f ? "과적" : "정상";
+        GUILayout.Label($"무게 {inventory.CurrentWeight:F1} / {inventory.MaxWeight:F0} kg  ({ratio * 100f:F0}%) — <b>{tier}</b>", labelStyle);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("+납덩이 15kg", btnStyle)) GiveHeavyFiller(inventory, 0f);   // 1개만
+        if (GUILayout.Button("과적 105%", btnStyle)) GiveHeavyFiller(inventory, 1.05f);
+        if (GUILayout.Button("심각 120%", btnStyle)) GiveHeavyFiller(inventory, 1.20f);
+        if (GUILayout.Button("하드컷 135%", btnStyle)) GiveHeavyFiller(inventory, 1.35f);
+        GUILayout.EndHorizontal();
+    }
+
+    /// <summary>무게 테스트용 15kg 납덩이(1×1)를 인벤에 추가. targetRatio>0이면 그 비율에 도달할 때까지 반복(하드컷 무시 = 디버그).
+    /// 런타임 ItemData라 세이브/DB에 안 남음.</summary>
+    static void GiveHeavyFiller(PlayerInventory inventory, float targetRatio)
+    {
+        int added = 0, guard = 0;
+        do
+        {
+            var lead = MakeHeavyItem();
+            if (!inventory.TryAutoPlaceAnywhere(new ItemInstance(lead, 1)))   // 하드컷 미적용(기본 respectWeightCap=false)
+            {
+                ToastManager.Show("공간 부족 — 가방을 착용하거나 인벤을 비워라", ToastManager.ToastType.Warning);
+                break;
+            }
+            added++;
+            if (targetRatio <= 0f) break;   // 1개만
+        }
+        while (inventory.MaxWeight > 0f
+               && inventory.CurrentWeight < inventory.MaxWeight * targetRatio
+               && ++guard < 50);
+
+        SaveCheckpoints.Instance?.InventoryChanged();
+        if (added > 0) ToastManager.Show($"납덩이 {added}개 추가 ({inventory.CurrentWeight:F0}kg)", ToastManager.ToastType.Info);
+    }
+
+    static ItemData MakeHeavyItem()
+    {
+        var d = ScriptableObject.CreateInstance<ItemData>();
+        d.itemId = "debug_lead";
+        d.displayName = "납덩이(테스트)";
+        d.gridWidth = 1; d.gridHeight = 1;
+        d.category = ItemCategory.Material;
+        d.rarity = ItemRarity.Common;
+        d.maxStack = 1;
+        d.weight = 15f;
+        return d;
     }
 
     /// <summary>시체 루팅 테스트 — 플레이어 앞에 시체(LootContainer 3×3 + '시체 뒤지기' 상호작용)를 만들고
