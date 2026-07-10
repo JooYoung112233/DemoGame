@@ -81,6 +81,27 @@ public class GameTuning : ScriptableObject
     [Tooltip("심각 구간 스태미너 회복 배율. 0.5=회복 절반.")]
     [Range(0f, 1f)] public float overweightRegenMult = 0.5f;
 
+    // ── 소음 (행동별 발생 반경 m — docs/combat.md 2026-07-10) ────────────
+    [Header("소음 (행동별 반경, m)")]
+    [Tooltip("가만히 있을 때 소음 반경(보통 0).")]
+    [Range(0f, 20f)] public float noiseIdle = 0f;
+    [Tooltip("웅크려 이동 소음 반경(최소).")]
+    [Range(0f, 20f)] public float noiseCrouch = 1.5f;
+    [Tooltip("걷기 소음 반경(소).")]
+    [Range(0f, 30f)] public float noiseWalk = 5f;
+    [Tooltip("달리기 소음 반경(중).")]
+    [Range(0f, 40f)] public float noiseRun = 11f;
+    [Tooltip("전투·타격 소음 반경(대, 순간 펄스).")]
+    [Range(0f, 40f)] public float noiseAttack = 14f;
+    [Tooltip("문·셔터 소음 반경(중, 순간 펄스).")]
+    [Range(0f, 30f)] public float noiseDoor = 8f;
+    [Tooltip("순간 펄스(타격·문) 지속 시간(초) — 이 동안 적이 들을 수 있음.")]
+    [Range(0.1f, 3f)] public float noisePulseDuration = 0.6f;
+    [Tooltip("UI 정규화 기준 최대 반경(m) — 발밑 링/HUD 미터가 이 값 대비 비율로 표시.")]
+    [Range(5f, 40f)] public float noiseUiMax = 14f;
+    [Tooltip("적이 소음 지점 도착 후 두리번거리는 시간(초). 이후 순찰 복귀.")]
+    [Range(0.5f, 6f)] public float noiseInvestigateLook = 2.5f;
+
     // ── 시야 (FOV 시야콘, 좀보이드식) ─────────────────────────────────
     [Header("시야 (FOV 시야콘)")]
     [Tooltip("시야콘 켜기. 끄면 시야 제한 없이 모든 적이 보임(디버그/비활성).")]

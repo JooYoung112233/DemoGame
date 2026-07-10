@@ -216,16 +216,21 @@
 
 ---
 
-## 소음 시스템 — 최소 버전 (2026-07-10 확정 — 구현 전)
+## 소음 시스템 — 최소 버전 (2026-07-10 확정 · ✅ 구현 완료)
 
-> 질문: 잠행/유인을 성립시키는 소음 규칙은. **결정: 소음 이벤트 + 적 '조사' 상태 최소 버전.**
+> 질문: 잠행/유인을 성립시키는 소음 규칙은. **결정: 소음 이벤트 + 적 '조사' 상태 + 플레이어 소음 UI(발밑 링 + HUD 미터).**
 
-- **① 소음 이벤트** — 행동별 발생 반경: **걷기(소) / 달리기(중) / 전투·타격(대) / 문·셔터(중)**. 반경 수치 = **GameTuning**.
-- **② 적 반응** — 반경 내 적은 **'조사(Investigate)' 상태 신설**(EnemyController 상태머신 확장): 소음 지점으로 이동 → 두리번 → 순찰 복귀. **시야 발견과 별개 축.**
-- **③ 특성 연동** — [traits.md](traits.md) 잠행 카테고리(발소리 반경 감소 등)가 이 시스템에 물림.
-- **④ 범위** — 1차는 **인간 적만**, 현상 몬스터는 2차.
-- **⑤ 투척물과 동반** — 아래 §투척물의 전제가 바로 이 시스템 — 투척물 직전 단계에 함께 구현.
-- 구현 순서: A+B 통합 10종 중 **5번째**(투척물 6번째 직전 — dev-roadmap.md 2026-07-10).
+- **① 소음 발생** — 중앙 허브 `NoiseSystem`(정적): 지속 소음(이동)은 `SetPlayerSustained(pos,radius)`, 순간 펄스(타격·문)는 `ReportPulse(pos,radius,dur)`. 적은 `TryHear(listenerPos, out src)` 한 번으로 질의. 행동별 반경 = GameTuning: `noiseIdle 0 / noiseCrouch 1.5 / noiseWalk 5 / noiseRun 11 / noiseAttack 14(펄스) / noiseDoor 8(펄스)`, 펄스 지속 `noisePulseDuration 0.6`.
+- **② 발생원**: `PlayerNoise`(자가부트 싱글턴)가 매 프레임 `TopDownPlayer` 이동 상태(웅크림/걷기/달리기)로 지속 반경 계산. 타격 = `TopDownPlayer` 약공/강공에서 `PlayerNoise.AttackNoise()`. 문 = `DoorController.Open`에서 `DoorNoise(pos)`.
+- **③ 적 반응** — `EnemyController.State.Investigate` 신설: `UpdatePatrol`에서 `TryHear` → 소음 지점으로 이동 → `noiseInvestigateLook`(2.5s) 두리번 → 순찰 복귀. 도중 시야(`DetectRng`) 발견 시 Chase. 머리 위 '?' 표시(`ShowAlertMark`). **시야 발견과 별개 축.**
+- **④ 플레이어 소음 UI (사용자 요청 — "내가 얼마나 시끄러운지")**:
+  - **발밑 링** — `PlayerNoise`가 그리는 반투명 원(반경 = 실제 소음 반경, 시끄러울수록 진함) → 감지 범위 직관.
+  - **파문 VFX** — 순간 펄스 지점에 퍼지는 링(`NoiseRipple`).
+  - **HUD 미터** — `NoiseHUD`(자가부트, 좌하단) 소음 레벨 0~1 막대(조용=초록 → 시끄러움=빨강). `noiseUiMax`(14m) 기준 정규화.
+- **⑤ 특성 연동** — `TraitManager.Mod("move_noise")`가 이동·타격 소음 반경에 곱(고양이걸음 −30% / 무거운발 +25%). **공중에 떠 있던 잠행 특성 개통.**
+- **⑥ 범위** — 1차 **인간 적만**, 현상 몬스터는 2차. 안전가옥(IsSafehouse)은 무음(면제).
+- **테스트**: F1 플레이어 탭 — 현재 소음 레벨/반경 표시 + "큰 소음(타격급)"·"문 소음" 버튼(적 조사 유도).
+- 구현 순서: A+B 통합 10종 중 **5번째**. 다음 = ⑥투척물(이 소음 위에 얹음).
 
 > 근거: 좀보이드의 심장. 공중에 떠 있던 잠행 특성들(traits.md)이 실제 시스템에 물리게 됨.
 

@@ -573,6 +573,7 @@ public class TopDownPlayer : MonoBehaviour
         _state = CombatState.LightAttack;
         _attackStateTimer = atk.Duration;
         _performer.Perform(atk);
+        PlayerNoise.AttackNoise();   // 타격 소음 펄스
         _comboBuffered = false;
     }
 
@@ -596,6 +597,7 @@ public class TopDownPlayer : MonoBehaviour
         _heavyCooldownTimer = HeavyCooldown;
 
         _performer.Perform(atk);
+        PlayerNoise.AttackNoise();   // 타격 소음 펄스(강공)
     }
 
     void TryDodge()

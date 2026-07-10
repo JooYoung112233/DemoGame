@@ -253,6 +253,25 @@ public class DebugTestUI : MonoBehaviour
             GUILayout.Label($"이속: {medical.MoveSpeedMultiplier * 100:F0}%  공속: {medical.AttackSpeedMultiplier * 100:F0}%", labelStyle);
         }
         else GUILayout.Label("의료 시스템 없음", labelStyle);
+
+        // ── 소음 테스트 ──
+        GUILayout.Space(8);
+        GUILayout.Label("── 소음 ──", headerStyle);
+        var pn = PlayerNoise.Instance;
+        if (pn != null)
+        {
+            GUILayout.Label($"현재 소음 레벨: {pn.Level01 * 100f:F0}%  |  지속 반경: {NoiseSystem.PlayerSustainedRadius:F1} m", labelStyle);
+            GUILayout.Label("(웅크림<걷기<달리기, 타격/문=순간 펄스 — 반경 안 적이 조사하러 옴)", labelStyle);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("큰 소음(타격급) 발생", btnStyle)) PlayerNoise.AttackNoise();
+            if (GUILayout.Button("문 소음 발생", btnStyle))
+            {
+                var pp = TopDownPlayer.Instance;
+                if (pp != null) PlayerNoise.DoorNoise(pp.transform.position);
+            }
+            GUILayout.EndHorizontal();
+        }
+        else GUILayout.Label("PlayerNoise 없음", labelStyle);
     }
 
     #endregion

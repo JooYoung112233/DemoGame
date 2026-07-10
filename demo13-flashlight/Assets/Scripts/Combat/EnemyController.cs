@@ -11,7 +11,7 @@ public class EnemyController : MonoBehaviour
 {
     #region 열거형 & 필드
 
-    public enum State { Patrol, Chase, AttackWindup, Attack, Hit, Stunned, Dead }
+    public enum State { Patrol, Chase, AttackWindup, Attack, Hit, Stunned, Dead, Investigate }
 
     /// <summary>활성 적 레지스트리 — PlayerVision(FOV 시야콘)이 순회.</summary>
     public static readonly List<EnemyController> All = new List<EnemyController>();
@@ -67,6 +67,9 @@ public class EnemyController : MonoBehaviour
 
     Vector2 spawnPos;
     Vector2 patrolTarget;
+    Vector2 investigatePos;       // 소음 조사 지점
+    float   investigateLook;      // 도착 후 두리번 타이머
+    GameObject alertMark;         // '?' 조사 표시(머리 위)
     float   patrolTimer;
     float   attackTimer;
     float   hitTimer;
@@ -218,6 +221,7 @@ public class EnemyController : MonoBehaviour
         switch (state)
         {
             case State.Patrol:       UpdatePatrol();       break;
+            case State.Investigate:  UpdateInvestigate();  break;
             case State.Chase:        UpdateChase();        break;
             case State.AttackWindup: UpdateAttackWindup(); break;
             case State.Attack:       UpdateAttack();       break;
@@ -243,6 +247,13 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
+        // 소음 청취 — 반경 안이면 소리 지점으로 조사하러 이동(시야 발견과 별개 축).
+        if (NoiseSystem.TryHear(transform.position, out var src))
+        {
+            EnterInvestigate(src);
+            return;
+        }
+
         Vector2 toTarget = patrolTarget - (Vector2)transform.position;
         if (toTarget.magnitude < 0.4f)
         {
@@ -257,6 +268,63 @@ public class EnemyController : MonoBehaviour
             SetVelocity(dir * PatrolSpd);
             FlipSprite(dir);
             animController?.Play("walk");
+        }
+    }
+
+    void EnterInvestigate(Vector2 pos)
+    {
+        investigatePos = pos;
+        investigateLook = 0f;
+        state = State.Investigate;
+        ShowAlertMark(true);
+    }
+
+    /// <summary>소음 조사 — 소리 지점으로 이동 → 두리번 → 순찰 복귀. 도중 시야로 플레이어 발견 시 추격.</summary>
+    void UpdateInvestigate()
+    {
+        // 시야로 실제 발견 → 추격 전환(우선).
+        if (player != null && DistToPlayer() < DetectRng)
+        {
+            ShowAlertMark(false);
+            state = State.Chase;
+            StoryTriggerManager.Instance?.OnFirstCombatEncounter();
+            return;
+        }
+
+        // 더 가까운/새 소음이 들리면 지점 갱신.
+        if (NoiseSystem.TryHear(transform.position, out var src))
+            investigatePos = src;
+
+        Vector2 to = investigatePos - (Vector2)transform.position;
+        if (to.magnitude > 0.6f)
+        {
+            Vector2 d;
+            if (_nav != null)
+            {
+                _nav.SetDestination(investigatePos);
+                d = _nav.DesiredDirection;
+                if (d.sqrMagnitude < 0.0001f) d = to.normalized;
+            }
+            else d = to.normalized;
+
+            SetVelocity(d * PatrolSpd);
+            FlipSprite(d);
+            animController?.Play("walk");
+        }
+        else
+        {
+            // 도착 → 두리번(대기).
+            SetVelocity(Vector2.zero);
+            _nav?.Stop();
+            animController?.Play("idle");
+            investigateLook += Time.deltaTime;
+            float look = GameTuning.Instance != null ? GameTuning.Instance.noiseInvestigateLook : 2.5f;
+            if (investigateLook >= look)
+            {
+                ShowAlertMark(false);
+                state = State.Patrol;
+                SetPatrolTarget();
+            }
         }
     }
 
@@ -537,6 +605,7 @@ public class EnemyController : MonoBehaviour
         if (hpBarFill != null) hpBarFill.SetActive(false);
         if (groggyBarBg   != null) groggyBarBg.SetActive(false);    // 시체 잔존화로 바가 영구 남는 것 방지
         if (groggyBarFill != null) groggyBarFill.SetActive(false);
+        ShowAlertMark(false);   // 조사 표시 제거
         _nav?.Stop();   // 추격 중 사망 시 A* 리패스 잔류 방지(시체가 파괴되지 않으므로)
 
         if (QuestManager.Instance != null && !string.IsNullOrEmpty(unitKey))
@@ -663,6 +732,24 @@ public class EnemyController : MonoBehaviour
     {
         patrolTimer  = 0f;
         patrolTarget = spawnPos + Random.insideUnitCircle * PatrolRad;
+    }
+
+    /// <summary>머리 위 '?' 조사 표시(소음 들었을 때). 지연 생성.</summary>
+    void ShowAlertMark(bool on)
+    {
+        if (on && alertMark == null)
+        {
+            alertMark = new GameObject("AlertMark");
+            alertMark.transform.SetParent(transform, false);
+            alertMark.transform.localPosition = new Vector3(0f, 0.9f, 0f);
+            var tm = alertMark.AddComponent<TextMesh>();
+            tm.text = "?"; tm.fontSize = 48; tm.characterSize = 0.06f;
+            tm.anchor = TextAnchor.LowerCenter; tm.alignment = TextAlignment.Center;
+            tm.color = new Color(1f, 0.85f, 0.3f);
+            var mr = alertMark.GetComponent<MeshRenderer>();
+            if (mr != null) mr.sortingOrder = 132;   // 말풍선 층 근처
+        }
+        if (alertMark != null) alertMark.SetActive(on);
     }
 
     void SetVelocity(Vector2 v) { if (_rb != null) _rb.linearVelocity = v; }
