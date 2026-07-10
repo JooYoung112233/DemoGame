@@ -109,8 +109,8 @@ public class DebugTestUI : MonoBehaviour
 
         InitStyles();
 
-        float panelW = 440f;
-        float panelH = 520f;
+        float panelW = 640f;
+        float panelH = 760f;
 
         if (!windowRectInit)
         {
@@ -229,12 +229,12 @@ public class DebugTestUI : MonoBehaviour
             for (int i = 0; i < parts.Length; i++)
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label(partNames[i], labelStyle, GUILayout.Width(55));
-                if (GUILayout.Button("출혈", smallBtnStyle, GUILayout.Width(45)))
+                GUILayout.Label(partNames[i], labelStyle, GUILayout.Width(80));
+                if (GUILayout.Button("출혈", smallBtnStyle, GUILayout.Width(60)))
                     medical.InflictInjury(parts[i], InjuryType.Bleeding, 0.7f);
-                if (GUILayout.Button("골절", smallBtnStyle, GUILayout.Width(45)))
+                if (GUILayout.Button("골절", smallBtnStyle, GUILayout.Width(60)))
                     medical.InflictInjury(parts[i], InjuryType.Fracture, 0.8f);
-                if (GUILayout.Button("통증", smallBtnStyle, GUILayout.Width(45)))
+                if (GUILayout.Button("통증", smallBtnStyle, GUILayout.Width(60)))
                     medical.InflictInjury(parts[i], InjuryType.Pain, 0.5f);
                 GUILayout.EndHorizontal();
             }
@@ -335,10 +335,10 @@ public class DebugTestUI : MonoBehaviour
                 foreach (var kv in allRels)
                 {
                     GUILayout.BeginHorizontal();
-                    GUILayout.Label($"{kv.Key}: 호감{kv.Value.affinity} 신뢰{kv.Value.trust} 공포{kv.Value.fear}", labelStyle, GUILayout.Width(260));
-                    if (GUILayout.Button("+호감", smallBtnStyle, GUILayout.Width(50)))
+                    GUILayout.Label($"{kv.Key}: 호감{kv.Value.affinity} 신뢰{kv.Value.trust} 공포{kv.Value.fear}", labelStyle, GUILayout.Width(360));
+                    if (GUILayout.Button("+호감", smallBtnStyle, GUILayout.Width(70)))
                         npcRel.ModifyRelationship(kv.Key, 10, 0, 0);
-                    if (GUILayout.Button("+신뢰", smallBtnStyle, GUILayout.Width(50)))
+                    if (GUILayout.Button("+신뢰", smallBtnStyle, GUILayout.Width(70)))
                         npcRel.ModifyRelationship(kv.Key, 0, 10, 0);
                     GUILayout.EndHorizontal();
                 }
@@ -412,15 +412,15 @@ public class DebugTestUI : MonoBehaviour
 
                 GUILayout.BeginHorizontal();
                 string equipInfo = allItems[i].equipSlot != EquipSlot.None ? $" [{allItems[i].equipSlot}]" : "";
-                GUILayout.Label($"{allItems[i].displayName} ({allItems[i].gridWidth}x{allItems[i].gridHeight}){equipInfo}", labelStyle, GUILayout.Width(220));
-                if (GUILayout.Button("+인벤", smallBtnStyle, GUILayout.Width(50)))
+                GUILayout.Label($"{allItems[i].displayName} ({allItems[i].gridWidth}x{allItems[i].gridHeight}){equipInfo}", labelStyle, GUILayout.Width(360));
+                if (GUILayout.Button("+인벤", smallBtnStyle, GUILayout.Width(70)))
                 {
                     var item = new ItemInstance(allItems[i], 1);
                     if (!inventory.TryPickup(item))
                         ToastManager.Show("인벤 공간 부족", ToastManager.ToastType.Warning);
                     else SaveCheckpoints.Instance?.InventoryChanged();
                 }
-                if (GUILayout.Button("+창고", smallBtnStyle, GUILayout.Width(50)))
+                if (GUILayout.Button("+창고", smallBtnStyle, GUILayout.Width(70)))
                 {
                     var stash = MainStash.Ensure();
                     if (stash != null)
@@ -758,30 +758,32 @@ public class DebugTestUI : MonoBehaviour
         tabInactiveTex = MakeTex(new Color(0.15f, 0.15f, 0.2f));
 
         headerStyle = new GUIStyle(GUI.skin.label);
-        headerStyle.fontSize = 14;
+        headerStyle.fontSize = 18;
         headerStyle.fontStyle = FontStyle.Bold;
         headerStyle.normal.textColor = new Color(1f, 0.85f, 0.3f);
 
         labelStyle = new GUIStyle(GUI.skin.label);
-        labelStyle.fontSize = 13;
+        labelStyle.fontSize = 16;
         labelStyle.normal.textColor = new Color(0.9f, 0.9f, 0.95f);
         labelStyle.richText = true;
 
         btnStyle = new GUIStyle(GUI.skin.button);
-        btnStyle.fontSize = 12;
+        btnStyle.fontSize = 15;
         btnStyle.fontStyle = FontStyle.Bold;
+        btnStyle.padding = new RectOffset(8, 8, 6, 6);
 
         smallBtnStyle = new GUIStyle(GUI.skin.button);
-        smallBtnStyle.fontSize = 11;
+        smallBtnStyle.fontSize = 14;
+        smallBtnStyle.padding = new RectOffset(6, 6, 5, 5);
 
         tabActiveStyle = new GUIStyle(GUI.skin.button);
-        tabActiveStyle.fontSize = 12;
+        tabActiveStyle.fontSize = 15;
         tabActiveStyle.fontStyle = FontStyle.Bold;
         tabActiveStyle.normal.background = tabActiveTex;
         tabActiveStyle.normal.textColor = Color.white;
 
         tabInactiveStyle = new GUIStyle(GUI.skin.button);
-        tabInactiveStyle.fontSize = 12;
+        tabInactiveStyle.fontSize = 15;
         tabInactiveStyle.normal.background = tabInactiveTex;
         tabInactiveStyle.normal.textColor = new Color(0.6f, 0.6f, 0.7f);
 
