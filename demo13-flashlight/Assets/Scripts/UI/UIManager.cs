@@ -330,6 +330,7 @@ public class UIManager : MonoBehaviour
     bool CloseTopmost()
     {
         // 1) base 패널 위에 뜨는 독립 팝업 (최상위부터)
+        if (SettingsUI.IsShowing) { SettingsUI.Hide(); return true; }   // 일시정지 위 레이어 — PauseMenu보다 먼저
         if (ItemDetailUI.IsShowing) { ItemDetailUI.Hide(); return true; }
         if (NoteUI.Instance != null && NoteUI.Instance.IsShowing) { NoteUI.Instance.Close(); return true; }
         if (GroundPickupUI.IsShowing) { GroundPickupUI.Hide(); return true; }
@@ -385,6 +386,7 @@ public class UIManager : MonoBehaviour
         if (RaidMapUI.IsShowing) RaidMapUI.Hide();
         if (GroundPickupUI.IsShowing) GroundPickupUI.Hide();
         if (ItemDetailUI.IsShowing) ItemDetailUI.Hide();
+        if (SettingsUI.IsShowing) SettingsUI.Hide();
     }
 
     /// <summary>현재 어떤 UI든 열려있는지</summary>
@@ -408,6 +410,7 @@ public class UIManager : MonoBehaviour
         if (GroundPickupUI.IsShowing) return true;
         if (ItemDetailUI.IsShowing) return true;
         if (TraitPanelUI.IsShowing) return true;
+        if (SettingsUI.IsShowing) return true;
         return false;
     }
 }

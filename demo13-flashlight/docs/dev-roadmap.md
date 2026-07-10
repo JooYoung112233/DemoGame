@@ -154,7 +154,7 @@
 | **맵 콘텐츠 제작** | 시스템·루프·씬 골격 연결 완료. Safehouse/InGameScene 타일맵 바닥·벽이 비어있음(플레이스홀더 마커만) → 직접 페인팅 | architecture/migration |
 | **FOV 시야 시스템** 신규 + 손전등 완전 제거 | 좀보이드식 부채꼴 시야 전환 **결정 완료, 구현 0**. 손전등 코드 임시 잔존 | combat/rendering |
 | **타격감 연출** 구현 | 설계 확정·구현 미완: 히트스탑(강공)·적 흰 플래시(셰이더 `_FlashAmount` 추가)·피격 화면연출(위험비례)·카메라 셰이크/줌(CameraFollow 오프셋)·**DamagePopup 2D 리워크** | combat |
-| **설정 메뉴(`SettingsUI`)** | **2026-07-10 확정, 구현 전 — 갭 분석 5종 중 구현 순서 1번째. 스팀 데모 배포 전 필수.** ESC 일시정지 메뉴에서 진입. 1차 = 마스터/BGM/SFX 볼륨 + 해상도·창모드 + 키 안내(보기 전용). 키 리바인딩은 2차(신 Input System rebinding 별도). 저장 = **PlayerPrefs**(세이브 슬롯과 분리) | backlog-ui.csv U19 |
+| **설정 메뉴(`SettingsUI`)** | **✅ 1차 구현 완료(2026-07-10)** — PauseMenu '설정' 버튼 → `SettingsUI`(sortingOrder 620, 일시정지 위). 마스터(=`AudioListener.volume` 즉시)/BGM/SFX(배율만 보관 — 오디오 인프라 생기면 `GameSettings.BgmVolume/SfxVolume` 읽는 계약) + 해상도·창모드(◀▶ 사이클, 빌드만 실적용) + 키 안내(보기 전용). 저장 = 신규 `GameSettings`(PlayerPrefs "settings.*", 닫을 때 flush, 부팅 시 자동 적용). UIManager 3곳 등록(ESC LIFO = 설정→일시정지 순), UIPrefabBaker 등록. **잔여**: 프리팹 베이크 1회(폴백 있어 없어도 동작) · 키 리바인딩 2차 · 오디오 인프라(BGM/SFX 실효화) | backlog-ui.csv U19 |
 
 ### 🟡 기능 연동 미완
 | 작업 | 위치 |

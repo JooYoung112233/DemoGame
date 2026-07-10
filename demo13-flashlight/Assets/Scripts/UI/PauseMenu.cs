@@ -109,7 +109,7 @@ public class PauseMenu : MonoBehaviour
     // ── 버튼 ─────────────────────────────────────────────
     void OnResume() => Hide();
 
-    void OnSettings() => ToastManager.Show("설정 — 준비 중", ToastManager.ToastType.Info);
+    void OnSettings() => SettingsUI.Show();   // 일시정지 위 레이어(sortingOrder 620)로 설정 패널
 
     void OnQuit()
     {
