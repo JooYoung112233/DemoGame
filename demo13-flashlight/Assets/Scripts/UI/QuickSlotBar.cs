@@ -34,6 +34,13 @@ public class QuickSlotBar : MonoBehaviour
 
     bool IsGenerated => canvas != null;
 
+    /// <summary>직렬화된 슬롯 배열 중 하나라도 null이거나 길이가 SlotCount와 다르면 true(재생성 필요).</summary>
+    bool SlotArraysMismatch()
+        => slotBgs == null || slotBgs.Length != SlotCount
+        || slotIcons == null || slotIcons.Length != SlotCount
+        || slotNames == null || slotNames.Length != SlotCount
+        || slotCounts == null || slotCounts.Length != SlotCount;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
@@ -53,8 +60,14 @@ public class QuickSlotBar : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         koreanFont = LoadKoreanFont();
-        if (!IsGenerated) GenerateUI();   // 폴백: 프리팹 없이 코드로 생성
-        else ApplyFonts();                // 프리팹 인스턴스: 동적 폰트 재바인딩
+        // 프리팹이 옛 슬롯 수(예: 4)로 베이크돼 있으면 배열 길이가 SlotCount(6)와 어긋나 IndexOutOfRange.
+        // 프리팹이든 아니든 슬롯 배열이 SlotCount와 안 맞으면 통째로 재생성(자가 치유 — 재베이크 불필요).
+        if (!IsGenerated || SlotArraysMismatch())
+        {
+            if (canvas != null) { Destroy(canvas.gameObject); canvas = null; barRoot = null; }
+            GenerateUI();
+        }
+        else ApplyFonts();                // 프리팹 인스턴스(슬롯 수 일치): 동적 폰트 재바인딩
         WireEvents();                     // onClick은 프리팹에 직렬화 안 됨(§6.5) — 슬롯 클릭 재부착
     }
 
@@ -202,6 +215,12 @@ public class QuickSlotBar : MonoBehaviour
 
     void GenerateUI()
     {
+        // 배열을 SlotCount 길이로 리셋(프리팹 잔재 길이 무시) — 아래 루프가 slotBgs[i] 등에 직접 대입.
+        slotBgs = new Image[SlotCount];
+        slotIcons = new Image[SlotCount];
+        slotNames = new Text[SlotCount];
+        slotCounts = new Text[SlotCount];
+
         var canvasGO = new GameObject("QuickSlot_Canvas");
         canvasGO.transform.SetParent(transform, false);
         canvas = canvasGO.AddComponent<Canvas>();
@@ -327,6 +346,7 @@ public class QuickSlotBar : MonoBehaviour
     /// <summary>슬롯 아이콘/이름 갱신(등록 변경 시).</summary>
     void Refresh()
     {
+        if (SlotArraysMismatch()) return;   // 배열 초기화 전이면 스킵(Awake 재생성 전 방어)
         for (int i = 0; i < SlotCount; i++)
         {
             var data = string.IsNullOrEmpty(_slotIds[i]) ? null : ItemDatabase.Get(_slotIds[i]);
@@ -348,6 +368,7 @@ public class QuickSlotBar : MonoBehaviour
     /// <summary>보유 개수 표시 + 0이면 슬롯 흐리게.</summary>
     void RefreshCounts()
     {
+        if (SlotArraysMismatch()) return;   // 배열 초기화 전이면 스킵(Awake 재생성 전 방어)
         for (int i = 0; i < SlotCount; i++)
         {
             string id = _slotIds[i];
