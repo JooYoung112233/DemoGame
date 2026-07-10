@@ -206,7 +206,9 @@
 - **내용물**: StatDB 해당 유닛 보상 테이블(`UnitStatData.drops`, §적 스폰의 "적 처치 전리품" 규칙)에서 생성. 테이블 비면 지역(GroundDay) 루트 폴백, `GameTuning.enemyDropChance` 게이트(실패 = 빈손 시체 — 뒤질 수는 있음).
 - **유지**: 시체는 **레이드 종료까지 유지** — GO를 파괴하지 않고 레이드 씬 소속으로 남김 → 씬 언로드 시 자동 정리.
 - 기존 즉시 바닥 드랍(`EnemyController.DropLoot`) 방식을 시체 컨테이너 루팅으로 대체.
-- **구현(2026-07-10)**: `EnemyController.OnDeath` → `BecomeCorpse()` — 같은 GO에 `LootContainer.Setup("<유닛명> 시체", 3×3)` + `InteractableObject.SetupAsContainer("시체 뒤지기")`(거리 기반 E). 3×3 초과분만 바닥 드랍. 사망 시 그로기 바 숨김 + `_nav.Stop()`(A* 리패스 잔류 방지) + `SetVisionVisible(true)`(시야 밖 사망 시 영구 투명 방지) 후 컨트롤러 disable(All 해제 — 시야/전투 판정 제외).
+- **구현(2026-07-10)**: `EnemyController.OnDeath` → `BecomeCorpse()` — 같은 GO에 `LootContainer` + `InteractableObject.SetupAsContainer("시체 뒤지기")`(거리 기반 E). 사망 시 그로기 바 숨김 + `_nav.Stop()`(A* 리패스 잔류 방지) + `SetVisionVisible(true)`(시야 밖 사망 시 영구 투명 방지) 후 컨트롤러 disable(All 해제 — 시야/전투 판정 제외).
+- **격자 크기 = 내용물에 맞춤(2026-07-10 사용자 결정 — "칸이 너무 작다")**: 고정 3×3 폐기 → `LootContainer.SetupAutoSize` — 4열 고정, 행 = 필요 칸수 올림 +1줄 여유, 2~6행 클램프. 그래도 넘치는 것만 바닥 드랍.
+- **시체 가방(타르코프식, 2026-07-10 사용자 결정)**: `GameTuning.corpseBagChance`(기본 0.3) 확률로 시체에 **가방 아이템이 통째로** 들어 있음 — 가방 내부(ContainerGrid)에 지역 루트 1~2개. **가방째 드래그해 가져갈 수 있고**(중첩 컨테이너·세이브 기존 지원) 내용물은 컨테이너 팝업으로 열람. 드랍 게이트(enemyDropChance)와 독립 롤.
 - ⚠️ **알려진 제약**: 컨테이너(시체 포함)에서 드래그로 가져온 아이템은 **수집 퀘스트(CollectItem) 카운트에 안 잡힘** — 훅이 `WorldItem.TryPickup`(바닥 줍기)에만 있음. 기존 씬 배치 상자도 동일 한계(회귀 아님 → 루팅 이전 지점 공통 훅으로 일괄 해결 예정, CharacterPanelUI).
 - 구현 순서: A+B 통합 10종 중 **2번째** (①설정 → ②**적 시체 루팅** → ③퀵슬롯 → ④무게 → ⑤소음 → ⑥투척물 → ⑦재고 회전 → ⑧시체 회수 → ⑨도감 → ⑩지도+나침반 — dev-roadmap.md 2026-07-10).
 

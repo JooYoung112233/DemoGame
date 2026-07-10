@@ -480,19 +480,46 @@ public class DebugTestUI : MonoBehaviour
         sr.color = new Color(0.35f, 0.22f, 0.20f, 1f);
         go.transform.localScale = new Vector3(1.1f, 0.5f, 1f);
 
-        var container = go.AddComponent<LootContainer>();
-        container.Setup("시체 (테스트)", 3, 3);
+        // 내용물: 랜덤 아이템 2~4종 + 가방 1개(테스트라 항상 — 안에 랜덤 1~3개, 가방째 회수 가능)
+        var items = new System.Collections.Generic.List<ItemInstance>();
         int count = Random.Range(2, 5);
         for (int j = 0; j < count; j++)
         {
             var data = allItems[Random.Range(0, allItems.Length)];
-            container.AddItem(new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1)));
+            items.Add(new ItemInstance(data, Random.Range(1, Mathf.Min(data.maxStack, 3) + 1)));
         }
+
+        ItemData bagData = null;
+        int seen = 0;
+        for (int j = 0; j < allItems.Length; j++)
+        {
+            var d = allItems[j];
+            if (d == null || d.equipSlot != EquipSlot.Backpack || !d.IsContainer) continue;
+            seen++;
+            if (Random.Range(0, seen) == 0) bagData = d;
+        }
+        if (bagData != null)
+        {
+            var bag = new ItemInstance(bagData, 1);
+            var inner = bag.ContainerGrid;
+            int innerCount = Random.Range(1, 4);
+            for (int j = 0; j < innerCount && inner != null; j++)
+            {
+                var d = allItems[Random.Range(0, allItems.Length)];
+                inner.TryAutoPlace(new ItemInstance(d, 1));
+            }
+            items.Add(bag);
+        }
+
+        var container = go.AddComponent<LootContainer>();
+        var overflow = container.SetupAutoSize("시체 (테스트)", items);   // 격자 = 내용물 크기에 맞춤
+        foreach (var it in overflow)
+            WorldItem.Drop(it, go.transform.position + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0));
 
         var io = go.AddComponent<InteractableObject>();
         io.SetupAsContainer("시체 뒤지기");
 
-        ToastManager.Show($"시체 스폰 — 아이템 {count}종", ToastManager.ToastType.Info);
+        ToastManager.Show($"시체 스폰 — 아이템 {count}종{(bagData != null ? " + 가방" : "")}", ToastManager.ToastType.Info);
     }
 
     static bool MatchesItemSubTab(ItemData item, int tab)

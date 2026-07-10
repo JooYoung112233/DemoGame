@@ -112,4 +112,24 @@ public class LootContainer : MonoBehaviour
         gridHeight = height;
         Grid = new InventoryGrid(width, height);
     }
+
+    /// <summary>내용물에 맞춰 격자 크기를 정하고 배치하는 초기화(시체 등 동적 컨테이너).
+    /// 행 수 = 필요 칸수/columns 올림 +1줄 여유(모양이 안 맞아 남는 자투리 대비), minRows~maxRows로 클램프.
+    /// 반환 = 그래도 못 들어간 초과분(호출자가 바닥 드랍 등으로 처리).</summary>
+    public List<ItemInstance> SetupAutoSize(string name, List<ItemInstance> items, int columns = 4, int minRows = 2, int maxRows = 6)
+    {
+        int cells = 0;
+        if (items != null)
+            foreach (var it in items)
+                if (it != null && it.data != null) cells += it.data.gridWidth * it.data.gridHeight;
+
+        int rows = Mathf.Clamp(Mathf.CeilToInt(cells / (float)columns) + 1, minRows, maxRows);
+        Setup(name, columns, rows);
+
+        var overflow = new List<ItemInstance>();
+        if (items != null)
+            foreach (var it in items)
+                if (it != null && !Grid.TryAutoPlace(it)) overflow.Add(it);
+        return overflow;
+    }
 }

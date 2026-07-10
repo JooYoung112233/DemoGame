@@ -559,45 +559,87 @@ public class EnemyController : MonoBehaviour
     {
         var container = gameObject.AddComponent<LootContainer>();
         string label = (unitStat != null && !string.IsNullOrEmpty(unitStat.displayName)) ? unitStat.displayName : "적";
-        container.Setup($"{label} 시체", 3, 3);
-        RollLootInto(container);
+
+        var items = RollLoot();
+        var overflow = container.SetupAutoSize($"{label} 시체", items);   // 격자 크기 = 내용물에 맞춤(4열, 2~6행)
+        foreach (var it in overflow) DropOne(it);                          // 그래도 넘치는 것만 바닥에
 
         var io = gameObject.AddComponent<InteractableObject>();
         io.SetupAsContainer("시체 뒤지기");
     }
 
     /// <summary>전리품 롤 — 적별 전용 드랍 테이블(unitStat.drops) 우선, 비면 지상 티어 region 루트 폴백.
-    /// GameTuning.enemyDropChance로 전역 게이트(실패 = 빈손 시체 — 뒤질 수는 있음). 격자 초과분은 바닥 드랍.</summary>
-    void RollLootInto(LootContainer container)
+    /// GameTuning.enemyDropChance로 전역 게이트(실패 = 빈손 시체 — 뒤질 수는 있음).
+    /// 추가로 corpseBagChance 확률로 가방(컨테이너 아이템)이 통째로 — 안에 지역 루트 1~2개(타르코프식, 가방째 회수 가능).</summary>
+    List<ItemInstance> RollLoot()
     {
-        float gate = GameTuning.Instance != null ? GameTuning.Instance.enemyDropChance : 1f;
-        if (Random.value > gate) return;
+        var items = new List<ItemInstance>();
 
-        // 적별 전용 테이블이 있으면 그것만 사용(밸런스 에디터에서 편집).
-        if (unitStat != null && unitStat.drops != null && unitStat.drops.Count > 0)
+        float gate = GameTuning.Instance != null ? GameTuning.Instance.enemyDropChance : 1f;
+        if (Random.value <= gate)
         {
-            foreach (var d in unitStat.drops)
+            // 적별 전용 테이블이 있으면 그것만 사용(밸런스 에디터에서 편집).
+            if (unitStat != null && unitStat.drops != null && unitStat.drops.Count > 0)
             {
-                if (d == null || string.IsNullOrEmpty(d.itemId)) continue;
-                if (Random.value > d.chance) continue;
-                var data = ItemDatabase.Get(d.itemId);
-                if (data == null) continue;
-                int qty = Random.Range(d.minQty, Mathf.Max(d.minQty, d.maxQty) + 1);
-                if (qty > 0) AddOrDrop(container, new ItemInstance(data, qty));
+                foreach (var d in unitStat.drops)
+                {
+                    if (d == null || string.IsNullOrEmpty(d.itemId)) continue;
+                    if (Random.value > d.chance) continue;
+                    var data = ItemDatabase.Get(d.itemId);
+                    if (data == null) continue;
+                    int qty = Random.Range(d.minQty, Mathf.Max(d.minQty, d.maxQty) + 1);
+                    if (qty > 0) items.Add(new ItemInstance(data, qty));
+                }
             }
-            return;
+            else
+            {
+                // 폴백: 지역(Ground) 루트
+                var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
+                if (loot != null)
+                    for (int i = 0; i < loot.Length; i++)
+                        if (loot[i] != null) items.Add(loot[i]);
+            }
         }
 
-        // 폴백: 지역(Ground) 루트
-        var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
-        if (loot == null) return;
-        for (int i = 0; i < loot.Length; i++)
-            if (loot[i] != null) AddOrDrop(container, loot[i]);
+        TryAddBag(items);   // 가방은 드랍 게이트와 별개 롤
+        return items;
     }
 
-    void AddOrDrop(LootContainer container, ItemInstance item)
+    /// <summary>corpseBagChance 확률로 시체에 가방 아이템을 넣는다 — 가방 내부엔 지역 루트 1~2개.</summary>
+    void TryAddBag(List<ItemInstance> items)
     {
-        if (!container.AddItem(item)) DropOne(item);   // 3×3 격자 초과분만 바닥에
+        float chance = GameTuning.Instance != null ? GameTuning.Instance.corpseBagChance : 0.3f;
+        if (Random.value > chance) return;
+
+        var bagData = PickRandomBag();
+        if (bagData == null) return;
+
+        var bag = new ItemInstance(bagData, 1);
+        var inner = bag.ContainerGrid;
+        if (inner != null)
+        {
+            var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
+            int put = 0, max = Random.Range(1, 3);   // 1~2개
+            if (loot != null)
+                for (int i = 0; i < loot.Length && put < max; i++)
+                    if (loot[i] != null && inner.TryAutoPlace(loot[i])) put++;
+        }
+        items.Add(bag);
+    }
+
+    static ItemData PickRandomBag()
+    {
+        var all = ItemDatabase.GetAll();
+        ItemData pick = null;
+        int seen = 0;
+        for (int i = 0; i < all.Length; i++)
+        {
+            var d = all[i];
+            if (d == null || d.equipSlot != EquipSlot.Backpack || !d.IsContainer) continue;
+            seen++;
+            if (Random.Range(0, seen) == 0) pick = d;   // 저수지 샘플링 — 목록 생성 없이 균등 랜덤
+        }
+        return pick;
     }
 
     void DropOne(ItemInstance item)

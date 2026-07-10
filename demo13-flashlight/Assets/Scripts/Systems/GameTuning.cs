@@ -63,6 +63,8 @@ public class GameTuning : ScriptableObject
     [Range(0f, 3f)] public float enemySpawnCountMult = 1f;
     [Tooltip("적 처치 시 전리품(지상 티어 루트) 드랍 확률. 1=항상 굴림(루트 자체 확률은 별도), 0=안 떨굼. EnemyController가 읽음.")]
     [Range(0f, 1f)] public float enemyDropChance = 1f;
+    [Tooltip("적 시체에 가방(컨테이너 아이템)이 통째로 들어 있을 확률(타르코프식 — 가방 안엔 지역 루트 1~2개, 가방째 가져갈 수 있음). EnemyController가 읽음.")]
+    [Range(0f, 1f)] public float corpseBagChance = 0.3f;
 
     // ── 시야 (FOV 시야콘, 좀보이드식) ─────────────────────────────────
     [Header("시야 (FOV 시야콘)")]
