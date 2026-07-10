@@ -102,4 +102,14 @@ public class LootContainer : MonoBehaviour
     {
         return Grid.TryAutoPlace(item);
     }
+
+    /// <summary>런타임 생성 컨테이너 초기화(적 시체 등 — AddComponent 직후, 아이템 채우기 전에 호출).
+    /// Awake가 만든 기본 격자를 지정 크기로 재생성한다.</summary>
+    public void Setup(string name, int width, int height)
+    {
+        containerName = name;
+        gridWidth = width;
+        gridHeight = height;
+        Grid = new InventoryGrid(width, height);
+    }
 }

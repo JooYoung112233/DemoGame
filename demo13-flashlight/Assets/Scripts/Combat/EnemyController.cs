@@ -535,6 +535,9 @@ public class EnemyController : MonoBehaviour
         animController?.PlayOneShot("death");
         if (hpBarBg   != null) hpBarBg.SetActive(false);
         if (hpBarFill != null) hpBarFill.SetActive(false);
+        if (groggyBarBg   != null) groggyBarBg.SetActive(false);    // 시체 잔존화로 바가 영구 남는 것 방지
+        if (groggyBarFill != null) groggyBarFill.SetActive(false);
+        _nav?.Stop();   // 추격 중 사망 시 A* 리패스 잔류 방지(시체가 파괴되지 않으므로)
 
         if (QuestManager.Instance != null && !string.IsNullOrEmpty(unitKey))
             QuestManager.Instance.UpdateObjective(ObjectiveType.KillEnemy, unitKey, 1);
@@ -543,14 +546,29 @@ public class EnemyController : MonoBehaviour
         if (RaidManager.Instance != null && unitStat != null)
             RaidManager.Instance.TrackKillXp(unitStat.expReward);
 
-        DropLoot();
+        BecomeCorpse();
 
-        Destroy(gameObject, 3f);
+        SetVisionVisible(true);   // 시야 밖 사망 대비 — All 해제 후엔 PlayerVision이 다시 켜주지 않음(시체 = 항상 보이는 월드 오브젝트)
+        enabled = false;          // AI 종료 + All 등록 해제(OnDisable) — 시야/전투 판정 대상에서 제외. GO는 시체로 유지.
     }
 
-    /// <summary>전리품 드랍 — 적별 전용 드랍 테이블(unitStat.drops) 우선, 비면 지상 티어 region 루트 폴백.
-    /// GameTuning.enemyDropChance로 전역 게이트.</summary>
-    void DropLoot()
+    /// <summary>시체 = 루팅 컨테이너 전환(docs/combat.md 2026-07-10 — 옛 즉시 바닥 드랍을 대체).
+    /// GO를 파괴하지 않고 그 자리에 유지(레이드 씬 언로드 시 함께 정리 = "레이드 종료까지").
+    /// 드랍 테이블을 시체 인벤에 굴려 넣고, E 상호작용(Container)으로 뒤진다.</summary>
+    void BecomeCorpse()
+    {
+        var container = gameObject.AddComponent<LootContainer>();
+        string label = (unitStat != null && !string.IsNullOrEmpty(unitStat.displayName)) ? unitStat.displayName : "적";
+        container.Setup($"{label} 시체", 3, 3);
+        RollLootInto(container);
+
+        var io = gameObject.AddComponent<InteractableObject>();
+        io.SetupAsContainer("시체 뒤지기");
+    }
+
+    /// <summary>전리품 롤 — 적별 전용 드랍 테이블(unitStat.drops) 우선, 비면 지상 티어 region 루트 폴백.
+    /// GameTuning.enemyDropChance로 전역 게이트(실패 = 빈손 시체 — 뒤질 수는 있음). 격자 초과분은 바닥 드랍.</summary>
+    void RollLootInto(LootContainer container)
     {
         float gate = GameTuning.Instance != null ? GameTuning.Instance.enemyDropChance : 1f;
         if (Random.value > gate) return;
@@ -565,7 +583,7 @@ public class EnemyController : MonoBehaviour
                 var data = ItemDatabase.Get(d.itemId);
                 if (data == null) continue;
                 int qty = Random.Range(d.minQty, Mathf.Max(d.minQty, d.maxQty) + 1);
-                if (qty > 0) DropOne(new ItemInstance(data, qty));
+                if (qty > 0) AddOrDrop(container, new ItemInstance(data, qty));
             }
             return;
         }
@@ -574,7 +592,12 @@ public class EnemyController : MonoBehaviour
         var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
         if (loot == null) return;
         for (int i = 0; i < loot.Length; i++)
-            if (loot[i] != null) DropOne(loot[i]);
+            if (loot[i] != null) AddOrDrop(container, loot[i]);
+    }
+
+    void AddOrDrop(LootContainer container, ItemInstance item)
+    {
+        if (!container.AddItem(item)) DropOne(item);   // 3×3 격자 초과분만 바닥에
     }
 
     void DropOne(ItemInstance item)

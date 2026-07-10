@@ -453,6 +453,14 @@ public class InteractableObject : MonoBehaviour, IInteractable
         oneShot = once;
     }
 
+    /// <summary>런타임에서 루팅 컨테이너로 구성(적 시체 등). LootContainer는 같은 GO에 별도 부착할 것.</summary>
+    public void SetupAsContainer(string prompt)
+    {
+        type = InteractType.Container;
+        promptText = prompt;
+        oneShot = false;
+    }
+
     /// <summary>코드에서 Pickup 타입으로 설정 (WorldItem.Drop에서 사용)</summary>
     public void SetupAsPickup(string id, int count, string prompt)
     {
