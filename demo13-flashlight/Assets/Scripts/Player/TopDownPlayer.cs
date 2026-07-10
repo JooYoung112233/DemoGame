@@ -148,9 +148,11 @@ public class TopDownPlayer : MonoBehaviour
     PlayerEquipment Equip => _equip != null ? _equip : (_equip = GetComponent<PlayerEquipment>());
     PlayerInventory _inv;
     PlayerInventory Inv => _inv != null ? _inv : (_inv = GetComponent<PlayerInventory>());
-    // 무게 페널티는 레이드에서만(안전구역=스태미너 무한과 동일 조건으로 면제).
-    float OverweightMoveMult => (Inv != null && !StaminaInfinite) ? Inv.OverweightMoveMult : 1f;
-    bool OverweightSprintBlocked => Inv != null && !StaminaInfinite && Inv.SprintBlocked;
+    // 무게 페널티는 안전가옥(Safehouse 허브)만 면제 — 레이드/테스트 맵에선 항상 적용.
+    //   (구: StaminaInfinite 기준은 '활성 지역 없음'이라 F1 직행·지역 미활성 레이드에서 페널티가 꺼지는 버그 → IsSafehouse로 교체)
+    bool WeightPenaltyActive => UIManager.Instance == null || !UIManager.Instance.IsSafehouse;
+    float OverweightMoveMult => (Inv != null && WeightPenaltyActive) ? Inv.OverweightMoveMult : 1f;
+    bool OverweightSprintBlocked => Inv != null && WeightPenaltyActive && Inv.SprintBlocked;
     // 무기 보정 × 부착물(파츠) 집계 보정
     float WeaponMoveMult  => (_weapon != null ? _weapon.moveSpeedMult : 1f) * (Equip != null ? Equip.WeaponPartMoveMult : 1f);
     float WeaponStamMult  => (_weapon != null ? _weapon.staminaCostMult : 1f) * (Equip != null ? Equip.WeaponPartStaminaMult : 1f);

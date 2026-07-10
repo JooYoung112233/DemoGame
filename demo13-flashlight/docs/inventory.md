@@ -423,7 +423,7 @@ containerHeight  : int         // 장착 시 제공하는 격자 세로 (가방/
 | 하드컷 | 130% 이상 | **더 못 담음** (외부 루팅 유입 차단) |
 
 - 수치 = GameTuning 6필드(플레이 조정 전제): `overweightStartPct=1.0` / `overweightSeverePct=1.15` / `overweightHardPct=1.30` / `overweightSlow1=0.15` / `overweightSlow2=0.30` / `overweightRegenMult=0.5`. [→ balance.md](balance.md)
-- **구현(2026-07-10)**: `PlayerInventory` — `OverweightMoveMult`(이속 배율)·`SprintBlocked`·`StaminaRegenMult`·`WouldExceedHardCut(addWeight)`. `TopDownPlayer`가 이동속도(`speed *= OverweightMoveMult`)·스프린트(`!SprintBlocked`)·스태미너 회복(`* StaminaRegenMult`)에 연동. **이동 페널티·스프린트 차단은 레이드에서만** — 안전구역(`StaminaInfinite`)은 면제(스태미너 무한과 동일 조건).
+- **구현(2026-07-10)**: `PlayerInventory` — `OverweightMoveMult`(이속 배율)·`SprintBlocked`·`StaminaRegenMult`·`WouldExceedHardCut(addWeight)`. `TopDownPlayer`가 이동속도(`speed *= OverweightMoveMult`)·스프린트(`!SprintBlocked`)·스태미너 회복(`* StaminaRegenMult`)에 연동. **면제는 안전가옥(Safehouse) 허브 씬만** (`WeightPenaltyActive = !UIManager.IsSafehouse`) — 레이드·하이드아웃·테스트 맵은 항상 적용. ⚠️ 초기 구현은 `StaminaInfinite`(활성 지역 없음) 기준이라 F1 직행/지역 미활성 레이드에서 페널티가 꺼지는 버그가 있었음 → `IsSafehouse`로 교체(2026-07-10).
 - **하드컷**(130% 초과 못 담음)은 **외부 유입 전 지점**에 적용: 월드 줍기(`TryPickup`) · TAKE ALL·퀵트랜스퍼(`TryAutoPlaceAnywhere(respectWeightCap:true)`) · **컨테이너→플레이어 수동 드래그**(`TryPlaceDragged` (b-1) — 외부 격자 출처일 때 게이트). 내부 재배치(플레이어 격자끼리, 장비 해제 복귀)는 무게 변화 없어 면제.
 - 구현 순서: A+B 통합 10종 중 **4번째** (①설정 → ②적 시체 루팅 → ③퀵슬롯 → ④**무게** → ⑤소음 … — dev-roadmap.md 2026-07-10).
 
