@@ -50,6 +50,7 @@
 |------|------|------|
 | **기획서 마스터 (3분할, 가장 먼저 읽을 것)** | 게임 전체 설계. ① [`gdd-core.md`](gdd-core.md) 코어 시스템(전투·루팅·낮밤·세계관) · ② [`gdd-progression.md`](gdd-progression.md) 진행·스토리(안전가옥·NPC·메인스토리·엔딩·월드) · ③ [`gdd-demo.md`](gdd-demo.md) 데모 범위·우선순위 | 확정 |
 | 🌐 **세계관 SSOT** | 세계 설정·로어의 **단일 출처 = [`gdd-core.md §5`](gdd-core.md)** (시대·무대 / 짙은현상 / **빛의역설** / **루디=충전·방전·마모 활성 자원** / 시간왜곡). 타 문서는 재서술 금지·링크만. story.md §2=스토리 사건 순서, anomaly.md=현상 메커닉, world-map.md=지리 컨셉(모두 §5로 위임) | 확정 |
+| [`dev-protocol.md`](dev-protocol.md) | ⭐ **기능 추가 규칙(단일 게이트)** — "기능 하나 = 열고 같은 세션에 닫는다". BEFORE(SSOT 찾기·재서술 금지)/DURING(5대 런타임 규약·GameTuning)/DONE 체크리스트(기획기록·MASTER동기화·로드맵·검증·브랜치PR)/정리 주기 | 규칙 (2026-07-10) |
 | [`dev-roadmap.md`](dev-roadmap.md) | 10단계 개발 로드맵 + 단계 상세 + **미구현/마무리 필요 목록**. 현재 Stage 2 | 진행 중 |
 | [`dev-handoff.md`](dev-handoff.md) | **개발 핸드오프** — 다른 PC에서 이어서 작업할 때 "지금 위치" 요약(최신 작업·다음 후보·Unity 검증 대기) | 갱신 중 |
 | [`backlog-ui.csv`](backlog-ui.csv) | **UI 제작 백로그** — 신규/확장/기존 UI 18종(우선순위·시스템·문서) | 2026-06-10 |
@@ -214,6 +215,8 @@ Safehouse (timeScale=0, 안전 허브)
 
 ## 핵심 규칙 (새 세션 필독)
 
+> ⭐ **기능·콘텐츠 추가는 [`dev-protocol.md`](dev-protocol.md)(기능 추가 규칙) 게이트를 따른다** — "기능 하나 = 열고 같은 세션에 코드·값·기획·색인을 닫는다." 아래 규칙들은 그 게이트의 구성요소.
+
 1. **Phaser Container 사용 금지** — 이 프로젝트는 Unity지만, depth 정렬 버그 방지를 위해 Container 패턴 사용 X
 2. **Editor State Preservation** — 런타임 스크립트는 `Start()`에서 값을 적용하지 않음. 이벤트(`OnPhaseChanged` 등)로만 변경
 3. **UI는 프리팹 베이크 + Instantiate** (2026-06~ 전환) — 각 패널 `EditorBake()`로 `Resources/UI/*.prefab` 굽고 부트스트랩이 Instantiate(없으면 코드 생성 폴백). 뷰=`[SerializeField]`, onClick=`WireEvents`, 동적 폰트=`ApplyFonts`. 상세 [`ui-prefab-plan.md`](ui-prefab-plan.md). 해상도 기준: 1920x1080
@@ -226,6 +229,7 @@ Safehouse (timeScale=0, 안전 허브)
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-07-10 | **기능 추가 규칙 신설(`dev-protocol.md`).** 지속 개발 시 방향이 어긋나지 않도록 기존 규율(SSOT·즉시기록·GameTuning·5대 런타임 규약 R1~R5·브랜치PR)을 "기능 하나 = 열고 같은 세션에 닫는다" 단일 게이트로 통합. BEFORE/DURING/DONE 체크리스트 + 정리 주기. 핵심 규칙 섹션 상단·문서 맵(기획총괄)·CLAUDE.md에 등재. 실제 겪은 드리프트(색인 누락 8종·로어 중복 재서술·stale 서술 = 06-30/06-16 교정) 재발 방지. |
 | 2026-07-09 | **게임패드 지원 T0/T1 + `controls.md` 신설.** 입력 기반 = GameInput 셰임 확장(신규 액션 에셋 대신 `Gamepad.current` 병합), 범위 = 레이드 조작(T1). 왼쪽 스틱 이동·오른쪽 스틱 조준·버튼 맵(E→A/Space→B/Shift→L3/C→Y/Esc→Start/Tab→Select/1~4→D패드/좌우클릭→RT·LT)·디바이스 전환(`PadActive`). UI 기본 내비는 기존 `InputSystemUIInputModule`. T2(메뉴 포커스·스크롤·글리프)/T3(격자 인벤 스틱 커서) 후속. 매핑 상세 = [`controls.md`](controls.md). |
 | 2026-06-30 | **문서 정합성 교정(인덱스·stale 서술).** ① 색인 누락 8종 등재: 새 「🧱 기술·아키텍처」 섹션(`architecture.md`/`ui-prefab-plan.md`/`save.md`) + `anomaly.md`(월드·레이드) + `dev-handoff.md`(기획총괄) + `item-icon-list/additions.md`·`prop-production.md`(아트). ② **죽은 링크 제거**: `safehouse-map-prompt.md`(2026-06-02 삭제분). ③ stale 상태/서술 교정: `traits.md` 상태(기획→SO·매니저·UI·배선 구현), 핵심규칙 #3 「UI 코드 생성」→「프리팹 베이크+Instantiate」. ④ `demo13-flashlight/CLAUDE.md` 동기화: UI Construction 섹션을 프리팹 베이크/Instantiate·`[SerializeField]`/`WireEvents`/`ApplyFonts` 패턴으로 재작성, PlayerInventory 「5x8 30kg」→ 다중 컨테이너(가방+주머니4×1+보안3×3, 무게 trait 보정). 코드 대조로 검증(수치 무변경). |
 | 2026-06-16 | **빛의 역설/루디 활성 자원 캐논 정합(gdd-core §5.2/§5.3).** SSOT 색인 행의 「불의역설」→「빛의역설」 교정 + 「루디=충전·방전·마모 활성 자원」 명기. 대상 문서(economy/items/items-crafting-farming은 미해당·safehouse/safehouse-intel/raid/crafting/navigation/anomaly)에 루디 충전·방전·마모·순도·죽은 루디·루디 충전/가공대·비루디 광원 침식 반영 + SSOT 링크 추가. 새 수치 미생성(GameTuning TBD). | gdd-core §5 본문은 이미 캐논(진실). |

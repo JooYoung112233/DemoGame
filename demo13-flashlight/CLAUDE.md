@@ -136,6 +136,9 @@ Project uses the **new Input System** (`activeInputHandler:1`, New-only). **Do N
 ## Development Roadmap
 Current state: Stage 2 (Safehouse container map). See `docs/dev-roadmap.md` for full 10-stage plan. Core principle: "complete the go-out-and-return loop first, combat later."
 
+## Feature-Add Protocol (기능 추가 규칙)
+**Every new feature/content passes one gate: "open it, close it in the same session."** A feature = code (5 runtime conventions) + values (GameTuning) + design record (one SSOT doc) + index (MASTER), all updated as one set. Half-done = drift. Full gate + DONE checklist: **`docs/dev-protocol.md`**. This exists because the repo twice needed doc-consistency corrections (index gaps, lore duplication, stale prose) from features that weren't closed out.
+
 ## Design Documentation
 All game design decisions are recorded in `docs/` as system-specific markdown files. When a design decision is made, record it immediately in the appropriate file with date, question, and decision. See parent `CLAUDE.md` for full recording rules.
 
