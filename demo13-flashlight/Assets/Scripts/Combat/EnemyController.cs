@@ -69,6 +69,7 @@ public class EnemyController : MonoBehaviour
     Vector2 patrolTarget;
     Vector2 investigatePos;       // 소음 조사 지점
     float   investigateLook;      // 도착 후 두리번 타이머
+    float   investigateTotal;     // 총 조사 경과(도달 불가 지점 무한 조사 방지 캡)
     GameObject alertMark;         // '?' 조사 표시(머리 위)
     float   patrolTimer;
     float   attackTimer;
@@ -275,6 +276,7 @@ public class EnemyController : MonoBehaviour
     {
         investigatePos = pos;
         investigateLook = 0f;
+        investigateTotal = 0f;
         state = State.Investigate;
         ShowAlertMark(true);
     }
@@ -291,9 +293,23 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        // 더 가까운/새 소음이 들리면 지점 갱신.
+        // 더 가까운/새 소음이 들리면 지점 갱신 + 총 조사시간 리셋(계속 시끄러우면 계속 따라옴).
         if (NoiseSystem.TryHear(transform.position, out var src))
+        {
             investigatePos = src;
+            investigateTotal = 0f;
+        }
+
+        // 총 조사시간 캡 — 도달 불가 지점(벽 뒤)에서 영영 못 벗어나는 것 방지.
+        investigateTotal += Time.deltaTime;
+        float look = GameTuning.Instance != null ? GameTuning.Instance.noiseInvestigateLook : 2.5f;
+        if (investigateTotal >= look * 4f)   // 도착 못 해도 이만큼 지나면 포기
+        {
+            ShowAlertMark(false);
+            state = State.Patrol;
+            SetPatrolTarget();
+            return;
+        }
 
         Vector2 to = investigatePos - (Vector2)transform.position;
         if (to.magnitude > 0.6f)
@@ -318,8 +334,7 @@ public class EnemyController : MonoBehaviour
             _nav?.Stop();
             animController?.Play("idle");
             investigateLook += Time.deltaTime;
-            float look = GameTuning.Instance != null ? GameTuning.Instance.noiseInvestigateLook : 2.5f;
-            if (investigateLook >= look)
+            if (investigateLook >= look)   // look = 위에서 계산됨
             {
                 ShowAlertMark(false);
                 state = State.Patrol;
@@ -588,6 +603,7 @@ public class EnemyController : MonoBehaviour
         if (state == State.Dead) return;
         FacePlayer();
         if (state == State.AttackWindup) windupFlashTimer = 0;
+        ShowAlertMark(false);   // 조사 중 피격 시 '?' 잔류 방지
         state    = State.Hit;
         hitTimer = HitStun;
         SetVelocity(Vector2.zero);
@@ -717,7 +733,7 @@ public class EnemyController : MonoBehaviour
         WorldItem.Drop(item, transform.position + new Vector3(r.x, r.y, 0f));
     }
 
-    void OnGroggyTriggered() { state = State.Stunned; SetVelocity(Vector2.zero); }
+    void OnGroggyTriggered() { ShowAlertMark(false); state = State.Stunned; SetVelocity(Vector2.zero); }
 
     void OnGroggyRecovered()
     {
