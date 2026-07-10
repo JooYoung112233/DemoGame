@@ -1179,7 +1179,16 @@ public class CharacterPanelUI : MonoBehaviour
             playerEquipment.Unequip(slot);   // 휴대 격자 0×0
             // 가방은 창고로 우선 복귀(레이드면 인벤 우선). 창고 가득이면 주머니·보안.
             if (!StoreItemPreferStash(inst))
-                ToastManager.Show("가방 둘 공간이 없다 (창고·주머니 가득)", ToastManager.ToastType.Warning);
+            {
+                // 어디에도 못 넣으면 바닥에 내려놓는다 — 인스턴스 유실 금지(내용물 포함, 가방 소실 버그 수정 2026-07-10).
+                var p = TopDownPlayer.Instance;
+                if (p != null)
+                {
+                    WorldItem.Drop(inst, p.transform.position + new Vector3(0f, -0.6f, 0f));
+                    ToastManager.Show("공간이 없어 가방을 바닥에 내려놨다", ToastManager.ToastType.Warning);
+                }
+                else ToastManager.Show("가방 둘 공간이 없다 (창고·주머니 가득)", ToastManager.ToastType.Warning);
+            }
             RefreshAllGrids();
             return;
         }
@@ -1789,6 +1798,8 @@ public class CharacterPanelUI : MonoBehaviour
         leftPanelSearchEnabled = withSearch;
         // TAKE ALL 버튼 = 필드 파밍(루팅 상자)에서만 노출. 창고/가구 보관함에선 숨김.
         if (takeAllBtn != null) takeAllBtn.gameObject.SetActive(withSearch);
+        // 루팅 상자(시체/필드 상자) = 간소 레이아웃(분류탭 X, 패널 높이 = 격자에 맞춤). 창고류 = 풀 레이아웃 원복.
+        ApplyLeftLootLayout(openContainer != null, grid);
         RefreshLeftWeight();
         SyncLeftPlaceholder();   // 패널 열렸으니 안내 숨김
 
@@ -1798,6 +1809,34 @@ public class CharacterPanelUI : MonoBehaviour
             StartSearch(grid);
         else
             StopSearch(true); // 창고: 전부 즉시 공개
+    }
+
+    /// <summary>좌측 패널 레이아웃 전환 — 루팅 상자(시체 등)는 창고 UI와 달리 간소하게(2026-07-10 사용자 결정):
+    /// ① 카테고리 분류탭 숨김(필터 ALL 강제) ② 패널 세로 크기를 격자 내용에 맞춰 축소. 창고/가구/스태시는 원복.</summary>
+    void ApplyLeftLootLayout(bool loot, InventoryGrid grid)
+    {
+        // ① 분류탭 행 숨김/복원 (+ 루팅 땐 필터 ALL 강제 — 숨겨진 탭이 아이템을 흐리게 하지 않도록)
+        if (leftTabBgs != null && leftTabBgs.Length > 0 && leftTabBgs[0] != null)
+            leftTabBgs[0].transform.parent.gameObject.SetActive(!loot);
+        if (loot && leftActiveTab != 0) SetLeftTab(0);
+
+        // 탭이 사라진 만큼 격자 뷰포트 상단 여백 축소(-94 → -60). 창고류는 원복.
+        var viewport = containerGridRoot != null ? containerGridRoot.parent as RectTransform : null;
+        if (viewport != null) viewport.offsetMax = new Vector2(viewport.offsetMax.x, loot ? -60f : -94f);
+
+        // ② 패널 높이 — 루팅 = 헤더+격자+푸터만큼(부모 대비 anchor 환산), 창고류 = 빌드 기본(0.07~0.93).
+        if (leftPanel != null && leftPanel.parent is RectTransform parentRT && parentRT.rect.height > 1f)
+        {
+            const float TOP_Y = 0.93f, MIN_Y = 0.07f;
+            float minY = MIN_Y;
+            if (loot && grid != null)
+            {
+                float cellTotal = CELL_SIZE + CELL_GAP;
+                float contentPx = 165f + grid.height * cellTotal;   // 제목/무게 헤더 + TAKE ALL·SORT 푸터 여유
+                minY = Mathf.Clamp(TOP_Y - contentPx / parentRT.rect.height, MIN_Y, TOP_Y - 0.15f);
+            }
+            leftPanel.anchorMin = new Vector2(leftPanel.anchorMin.x, minY);
+        }
     }
 
     void RefreshLeftGrid(InventoryGrid grid)
@@ -1860,6 +1899,16 @@ public class CharacterPanelUI : MonoBehaviour
         foreach (var placed in grid.GetAll())   // GetAll은 복사본 → 순회 중 Remove 안전
         {
             if (placed == null || placed.item == null) continue;
+
+            // 착용형 컨테이너(가방 등) + 해당 슬롯 미착용 → 착용 우선 (2026-07-10, 드래그 b-0과 동일 규칙)
+            if (IsWearableContainer(placed.item.data) && playerEquipment != null
+                && playerEquipment.GetSlot(ApiEquipSlot(placed.item.data)) == null)
+            {
+                EquipFromGrid(placed.item, grid);
+                if (playerEquipment.GetSlotInstance(ApiEquipSlot(placed.item.data)) == placed.item) { moved++; continue; }
+                // 착용 실패(방어) → 아래 일반 이동 폴백
+            }
+
             if (playerInventory.TryAutoPlaceAnywhere(placed.item))
             {
                 grid.Remove(placed);
@@ -2815,6 +2864,21 @@ public class CharacterPanelUI : MonoBehaviour
             InventoryGrid pGrid; RectTransform pRoot; int gx, gy;
             if (PlayerGridAtMouse(out pGrid, out pRoot, out gx, out gy))
             {
+                // (b-0) 루팅 상자(시체 등)에서 꺼낸 착용형 컨테이너(가방 등) + 해당 슬롯 미착용 → 착용 우선 (2026-07-10).
+                //   주머니/보안에 구겨 넣는 대신 몸에 걸친다(타르코프식). 착용 중이면 일반 배치.
+                if (dragItem != null && IsWearableContainer(dragItem.data)
+                    && openContainer != null && dragSourceGrid == openContainer.Grid
+                    && playerEquipment != null && playerEquipment.GetSlot(ApiEquipSlot(dragItem.data)) == null)
+                {
+                    var wear = dragItem;
+                    var src = dragSourceGrid;
+                    bool restored = src.TryPlace(wear, dragOrigX, dragOrigY, dragOrigRotated) || src.TryAutoPlace(wear);
+                    EndDrag();
+                    if (restored) EquipFromGrid(wear, src);
+                    else ReturnItemToInventory(wear);
+                    return;
+                }
+
                 int ox, oy; GhostOriginCell(pRoot, out ox, out oy);
                 TryPlaceInGrid(pGrid, ox, oy);
                 EnsureDragEnded();   // 실패(스택 일부 등)해도 제스처 종료 — 떠다니지 않게
