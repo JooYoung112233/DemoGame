@@ -373,6 +373,7 @@ public class DialogueUI : MonoBehaviour
         dialogueText.supportRichText = true;
         dialogueText.text = "";
 
+        float typeSpeed = GameTuning.Instance != null ? GameTuning.Instance.dialogueTypingSpeed : 0.03f;
         bool inTag = false;
         string visibleText = "";
 
@@ -396,7 +397,7 @@ public class DialogueUI : MonoBehaviour
             dialogueText.text = visibleText;
 
             if (!inTag)
-                yield return new WaitForSecondsRealtime(0.03f);
+                yield return new WaitForSecondsRealtime(typeSpeed);
         }
 
         isTyping = false;

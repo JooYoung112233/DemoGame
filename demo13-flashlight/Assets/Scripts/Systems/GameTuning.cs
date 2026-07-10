@@ -160,4 +160,19 @@ public class GameTuning : ScriptableObject
     public ReputationTier shopTierEpic = ReputationTier.B;
     [Tooltip("Legendary 아이템 해금 최소 평판 등급.")]
     public ReputationTier shopTierLegendary = ReputationTier.A;
+
+    // ── 스토리/대화 페이싱 (프롤로그·내레이션·대화·튜토리얼 완급) ──────
+    [Header("스토리/대화 페이싱")]
+    [Tooltip("새 게임 프롤로그 시작 전 대기(초). GameStartHandler가 읽음. 짧을수록 흑화면 빨리 지나감.")]
+    [Range(0f, 2f)] public float prologueStartDelay = 0.2f;
+    [Tooltip("스토리 JSON의 wait 노드 전역 배율. 1=원본, 0.5=절반(빠르게). StoryPlayer가 곱함. authored 값을 안 건드리고 전체 완급 조절.")]
+    [Range(0.1f, 3f)] public float storyWaitScale = 0.6f;
+    [Tooltip("스토리 fade_in 기본 지속(초). S-000 등이 이 값을 쓰도록 배선. 흑화면→화면 드러나는 속도.")]
+    [Range(0.1f, 3f)] public float storyFadeInDuration = 0.8f;
+    [Tooltip("내레이션(독백) 타이핑 속도(자당 초). 작을수록 빠름. NarrationUI가 읽음.")]
+    [Range(0.005f, 0.1f)] public float narrationTypingSpeed = 0.02f;
+    [Tooltip("대화(NPC) 타이핑 속도(자당 초). 작을수록 빠름. DialogueUI가 읽음.")]
+    [Range(0.005f, 0.1f)] public float dialogueTypingSpeed = 0.02f;
+    [Tooltip("튜토리얼 프롬프트 기본 표시 시간(초). 노드에 duration 미지정 시. StoryPlayer가 읽음.")]
+    [Range(1f, 10f)] public float tutorialDefaultDuration = 4f;
 }

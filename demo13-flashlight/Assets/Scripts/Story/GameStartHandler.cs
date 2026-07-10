@@ -18,7 +18,7 @@ public class GameStartHandler : MonoBehaviour
     static GameStartHandler instance;
     static bool sessionInitialized;   // 한 세션(게임 실행)당 1회만 게임 시작 분기
 
-    [Tooltip("프롤로그 전 대기 시간(초)")]
+    [Tooltip("프롤로그 전 대기 시간(초) — GameTuning.prologueStartDelay가 있으면 그 값 우선(폴백용).")]
     [SerializeField] float delayBeforePrologue = 0.5f;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -93,7 +93,8 @@ public class GameStartHandler : MonoBehaviour
         if (sem != null) yield return sem.FadeOut(0.01f);   // #2 즉시 검정(프롤로그 첫 노드와 동일 효과)
         if (stm != null) stm.ClearCover();                  // #1 제거 — 이미 검정이라 화면 변화 없음
 
-        yield return new WaitForSecondsRealtime(delayBeforePrologue);
+        float startDelay = GameTuning.Instance != null ? GameTuning.Instance.prologueStartDelay : delayBeforePrologue;
+        yield return new WaitForSecondsRealtime(startDelay);
 
         bool started = false;
         if (StoryTriggerManager.Instance != null)

@@ -291,7 +291,8 @@ public class StoryPlayer : MonoBehaviour
     {
         if (TutorialPrompt.Instance == null) return;
         string text = StoryLocale.Instance.Get(node.textKey);
-        float dur = node.duration > 0 ? node.duration : 4f;
+        float def = GameTuning.Instance != null ? GameTuning.Instance.tutorialDefaultDuration : 4f;
+        float dur = node.duration > 0 ? node.duration : def;
         TutorialPrompt.Instance.Show(text, dur, node.tutId);
     }
 
@@ -300,6 +301,7 @@ public class StoryPlayer : MonoBehaviour
         if (ScreenEffectManager.Instance == null) yield break;
 
         var sem = ScreenEffectManager.Instance;
+        var tune = GameTuning.Instance;
         float p1 = node.floatParam;
         float p2 = node.floatParam2;
 
@@ -309,8 +311,12 @@ public class StoryPlayer : MonoBehaviour
                 yield return sem.FadeOut(p1 > 0 ? p1 : 1f);
                 break;
             case "fade_in":
-                yield return sem.FadeIn(p1 > 0 ? p1 : 1f);
+            {
+                // 노드에 명시값 없으면 튜닝 필드(storyFadeInDuration) 사용 → 컨트롤 패널로 흑화면 드러나는 속도 조절.
+                float dur = p1 > 0 ? p1 : (tune != null ? tune.storyFadeInDuration : 1f);
+                yield return sem.FadeIn(dur);
                 break;
+            }
             case "shake":
                 sem.ScreenShake(p1 > 0 ? p1 : 0.15f, p2 > 0 ? p2 : 0.3f);
                 break;
@@ -331,8 +337,13 @@ public class StoryPlayer : MonoBehaviour
                 sem.SetGrayscale(false);
                 break;
             case "wait":
-                yield return new WaitForSecondsRealtime(p1 > 0 ? p1 : 1f);
+            {
+                // authored wait에 전역 배율(storyWaitScale)을 곱해 JSON 안 건드리고 완급 조절.
+                float baseW = p1 > 0 ? p1 : 1f;
+                float scale = tune != null ? tune.storyWaitScale : 1f;
+                yield return new WaitForSecondsRealtime(baseW * scale);
                 break;
+            }
         }
     }
 

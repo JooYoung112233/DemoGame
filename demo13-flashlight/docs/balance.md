@@ -19,6 +19,7 @@
 | 회복 아이템 수치 (음식 effectValue 등) | `Assets/Resources/Items/**/*.asset` (ItemData SO) | 아이템 인스펙터 (→ [survival.md §4](survival.md), [items.md](items.md)) |
 | **상점 해금 평판** (희귀도별 진열 해금 등급) | **`GameTuning`** (`shopTierRare`/`shopTierEpic`/`shopTierLegendary`) | **Control Panel** — `ShopUI`가 읽음 |
 | **아르바이트** (납품 슬롯 수·수량·보수 배율·PP 주기) | **`GameTuning`** (`arbeitSlotCount`/`arbeitQtyMin`/`arbeitQtyMax`/`arbeitRewardMult`/`arbeitPpEvery`) | **Control Panel** — `ArbeitBoard`가 읽음 (→ [economy.md §아르바이트](economy.md)) |
+| **스토리/대화 페이싱** (프롤로그 대기·wait 배율·페이드인·타이핑 속도·튜토 표시) | **`GameTuning`** (`prologueStartDelay`/`storyWaitScale`/`storyFadeInDuration`/`narrationTypingSpeed`/`dialogueTypingSpeed`/`tutorialDefaultDuration`) | **Control Panel** — `StoryPlayer`/`GameStartHandler`/`NarrationUI`/`DialogueUI`가 읽음 |
 | NPC 상점별 판매 목록 (뭘 파나) · 가격배율 · 위탁허용 | `ShopData` SO (`Assets/Resources/Data/Shops/Shop_*.asset`: stock/buyRate/sellRate/allowConsignment) | 상점 에셋 인스펙터 (※ Control Panel 통합 상점 에디터는 후속 과제) |
 | **특성(Trait) 효과 수치** (effectKey value, 41종) | `Assets/Resources/Data/Traits/*.asset` (`TraitData.effects`) — 런타임 합성 `TraitManager` | 트레잇 에셋 인스펙터 (→ [traits.md §4](traits.md)). ⚠ 현재 SO가 진실원 · **GameTuning 이관은 TBD**(미정) |
 
@@ -113,6 +114,19 @@
 | `arbeitQtyMax` | 5 | 의뢰당 요구 수량 최대 | `ArbeitBoard` |
 | `arbeitRewardMult` | 1.0 | 보수 배율 (sellPrice×수량×이 값, 10 단위 올림) | `ArbeitBoard` |
 | `arbeitPpEvery` | 3 | 납품 n회마다 PP +1 (0=지급 안 함) | `ArbeitBoard` |
+
+### 스토리/대화 페이싱 (2026-07-10, 프롤로그·내레이션·대화·튜토리얼 완급)
+
+> 새 게임 프롤로그 흑화면이 길다는 피드백 → 전역 페이싱 값을 GameTuning으로 노출(컨트롤 패널 슬라이더로 조절). authored `wait` 노드는 `storyWaitScale` 전역 배율로 JSON 안 건드리고 완급 조정. S-000의 fade_in은 명시값 제거 → `storyFadeInDuration` 사용.
+
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `prologueStartDelay` | 0.2 | 새 게임 프롤로그 시작 전 대기(초) | `GameStartHandler` |
+| `storyWaitScale` | 0.6 | 스토리 `wait` 노드 전역 배율(1=원본) | `StoryPlayer` |
+| `storyFadeInDuration` | 0.8 | 스토리 `fade_in` 기본 지속(초, 노드 미명시 시) | `StoryPlayer` |
+| `narrationTypingSpeed` | 0.02 | 내레이션 타이핑 속도(자당 초) | `NarrationUI` |
+| `dialogueTypingSpeed` | 0.02 | 대화 타이핑 속도(자당 초) | `DialogueUI` |
+| `tutorialDefaultDuration` | 4 | 튜토리얼 프롬프트 기본 표시(초, 노드 미명시 시) | `StoryPlayer` |
 
 ### 무게 초과 페널티 (2026-07-10 — **구현 전, 기획 확정 · 필드 예정**)
 

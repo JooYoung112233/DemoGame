@@ -215,10 +215,11 @@ public class NarrationUI : MonoBehaviour
     {
         isTyping = true;
         narrationText.text = "";
+        float speed = GameTuning.Instance != null ? GameTuning.Instance.narrationTypingSpeed : TYPING_SPEED;
         foreach (char c in text)
         {
             narrationText.text += c;
-            yield return new WaitForSecondsRealtime(TYPING_SPEED);
+            yield return new WaitForSecondsRealtime(speed);
         }
         isTyping = false;
         continueHint.gameObject.SetActive(true);

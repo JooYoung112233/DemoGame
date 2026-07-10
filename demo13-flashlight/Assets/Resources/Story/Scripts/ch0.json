@@ -9,7 +9,7 @@
         { "type": "effect", "effect": "fade_out", "floatParam": 0.01 },
         { "type": "effect", "effect": "wait", "floatParam": 2.0 },
         { "type": "narration", "textKeys": ["S000_N01"] },
-        { "type": "effect", "effect": "fade_in", "floatParam": 1.5 },
+        { "type": "effect", "effect": "fade_in" },
         { "type": "narration", "textKeys": ["S000_N02", "S000_N03"] }
       ]
     },
