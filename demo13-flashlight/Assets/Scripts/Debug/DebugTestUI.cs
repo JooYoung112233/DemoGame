@@ -359,6 +359,13 @@ public class DebugTestUI : MonoBehaviour
 
         GUILayout.Space(10);
 
+        // ── 상점 재고 회전 ──
+        GUILayout.Label("── 상점 재고 회전 (1일 주기) ──", headerStyle);
+        GUILayout.Label($"현재 게임일: {DailyQuestManager.Day()}  (이 날짜 경계로 고정+회전 슬롯 갱신)", labelStyle);
+        if (GUILayout.Button("상점 재고 '다음날'로 강제 회전(+재입고)", btnStyle)) ShopUI.ForceRotate();
+
+        GUILayout.Space(10);
+
         // ── NPC 호감도 ──
         GUILayout.Label("── NPC 관계도 ──", headerStyle);
         var npcRel = NPCRelationshipManager.Instance;

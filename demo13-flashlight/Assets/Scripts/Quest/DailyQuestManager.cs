@@ -166,6 +166,17 @@ public class DailyQuestManager : MonoBehaviour
             return Mathf.FloorToInt(Time.time / 86400f); // 게임 내 24시간
     }
 
+    /// <summary>현재 게임 '일' 인덱스 — 일일 시스템 공용(상점 재고 회전 등이 같은 날 경계 사용).
+    /// 인스턴스 없으면 세션시간 폴백.</summary>
+    public static int Day()
+    {
+        var inst = Instance;
+        // 인스턴스 없을 때도 기본 경로(useRealTimeDays=true=실날짜)를 미러 — day 점프로 인한 불필요 재추첨 방지.
+        return inst != null
+            ? inst.GetCurrentDay()
+            : System.DateTime.Now.DayOfYear + System.DateTime.Now.Year * 366;
+    }
+
     // ═══════════════════════════
     //  세이브/로드
     // ═══════════════════════════

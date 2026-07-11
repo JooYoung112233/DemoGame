@@ -12,8 +12,11 @@ public class ShopData : ScriptableObject
     public string shopId = "pawnshop";
     public string shopName = "전당포";
 
-    [Tooltip("이 상점에서 살 수 있는 아이템 목록")]
+    [Tooltip("이 상점에서 살 수 있는 아이템 목록. 재고 회전의 '로테이션 풀'로도 쓰인다(신규 아이템 0, 여기서 추첨).")]
     public List<ItemData> stock = new List<ItemData>();
+
+    [Tooltip("재고 회전 시 '고정 슬롯'(기본품 상시 진열) — 매일 항상 노출. 비우면 전부 회전 슬롯에서 추첨. (docs/economy.md 재고 회전)")]
+    public List<ItemData> fixedStock = new List<ItemData>();
 
     [Tooltip("아이템별 최대 재고(품절 cap). 0 이하면 무제한. 품절 후 재입고는 추후 시스템에서 채움.")]
     public int defaultStock = 5;

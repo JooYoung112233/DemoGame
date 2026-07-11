@@ -17,7 +17,7 @@
 | 전투·이동 수치 (플레이어/적 스탯, **이동속도 포함**) | `StatDB` SO (`Assets/Resources/Data/StatDB.asset`) — `playerStat.moveSpeed` 등 | **Control Panel ▸ 🎮 스탯 DB 섹션** (한 창에서 조정) / StatDB 에디터 / 인스펙터 |
 | 평판/평판 티어 | `tools/balance/reputation.csv`, `tools/balance/reputation_tiers.csv` | CSV 편집 (→ `ReputationManager`/`ReputationTier`) |
 | 회복 아이템 수치 (음식 effectValue 등) | `Assets/Resources/Items/**/*.asset` (ItemData SO) | 아이템 인스펙터 (→ [survival.md §4](survival.md), [items.md](items.md)) |
-| **상점 해금 평판** (희귀도별 진열 해금 등급) | **`GameTuning`** (`shopTierRare`/`shopTierEpic`/`shopTierLegendary`) | **Control Panel** — `ShopUI`가 읽음 |
+| **상점 해금 평판 + 재고 회전** (희귀도별 진열 해금 등급 · 일일 회전 슬롯 수) | **`GameTuning`** (`shopTierRare`/`shopTierEpic`/`shopTierLegendary`/`shopRotationSlots`) | **Control Panel** — `ShopUI`가 읽음 (재고 회전 → [economy.md §A](economy.md)) |
 | **아르바이트** (납품 슬롯 수·수량·보수 배율·PP 주기) | **`GameTuning`** (`arbeitSlotCount`/`arbeitQtyMin`/`arbeitQtyMax`/`arbeitRewardMult`/`arbeitPpEvery`) | **Control Panel** — `ArbeitBoard`가 읽음 (→ [economy.md §아르바이트](economy.md)) |
 | **스토리/대화 페이싱** (프롤로그 대기·wait 배율·페이드인·타이핑 속도·튜토 표시) | **`GameTuning`** (`prologueStartDelay`/`storyWaitScale`/`storyFadeInDuration`/`narrationTypingSpeed`/`dialogueTypingSpeed`/`tutorialDefaultDuration`) | **Control Panel** — `StoryPlayer`/`GameStartHandler`/`NarrationUI`/`DialogueUI`가 읽음 |
 | **소음·투척물** (행동별 소음 반경·펄스·조사 시간, 돌 사거리·착탄 소음 반경·비행) | **`GameTuning`** (`noiseWalk`/`noiseRun`/`noiseAttack`/`noiseDoor`/`noisePulseDuration`/`noiseInvestigateLook`, `throwRange`/`throwNoiseRadius`/`throwSpeed`) | **Control Panel** — `PlayerNoise`/`EnemyController`/`ThrowSystem`이 읽음 (→ [combat.md §소음·§투척물](combat.md)) |

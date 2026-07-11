@@ -205,6 +205,8 @@ public class GameTuning : ScriptableObject
     public ReputationTier shopTierEpic = ReputationTier.B;
     [Tooltip("Legendary 아이템 해금 최소 평판 등급.")]
     public ReputationTier shopTierLegendary = ReputationTier.A;
+    [Tooltip("재고 회전 — 매일 회전 슬롯 수(고정 슬롯 외 추가로 풀에서 추첨). ShopUI가 읽음.")]
+    [Range(0, 8)] public int shopRotationSlots = 4;
 
     // ── 스토리/대화 페이싱 (프롤로그·내레이션·대화·튜토리얼 완급) ──────
     [Header("스토리/대화 페이싱")]

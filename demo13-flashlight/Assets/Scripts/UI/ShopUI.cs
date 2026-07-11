@@ -123,6 +123,79 @@ public class ShopUI : MonoBehaviour
     static readonly Dictionary<string, Dictionary<ItemData, int>> stockBank
         = new Dictionary<string, Dictionary<ItemData, int>>();
 
+    // ── 재고 회전(1일 주기) — 날짜별 고정 슬롯 + 회전 슬롯 추첨. 세션 런타임(세이브 안 함). (docs/economy.md) ──
+    static readonly Dictionary<string, int> _stockDay = new Dictionary<string, int>();                       // shopId → 마지막 롤 날짜
+    static readonly Dictionary<string, List<ItemData>> _dayRoll = new Dictionary<string, List<ItemData>>();  // shopId → 오늘 진열
+    static int _dayOffset;   // F1 디버그 '다음날' 강제 갱신용
+
+    /// <summary>오늘 이 상점의 진열 목록(고정 + 회전). 날짜 바뀌면 재추첨 + 재입고(stockBank 리셋).</summary>
+    List<ItemData> CurrentDayStock()
+    {
+        if (shop == null) return new List<ItemData>();
+        int day = DailyQuestManager.Day() + _dayOffset;
+        if (!_stockDay.TryGetValue(shop.shopId, out int last) || last != day || !_dayRoll.ContainsKey(shop.shopId))
+        {
+            stockBank.Remove(shop.shopId);          // 새 날 = 재입고(다음 StockRemaining이 defaultStock로 재생성)
+            _dayRoll[shop.shopId] = RollDayStock(shop, day);
+            _stockDay[shop.shopId] = day;
+        }
+        return _dayRoll[shop.shopId];
+    }
+
+    /// <summary>고정 슬롯 + 회전 슬롯(shopId+day 시드로 결정론적, 희귀도 가중). 신규 아이템 0(stock 풀에서만).</summary>
+    static List<ItemData> RollDayStock(ShopData s, int day)
+    {
+        var result = new List<ItemData>();
+        if (s.fixedStock != null)
+            foreach (var it in s.fixedStock)
+                if (it != null && it.buyPrice > 0 && !result.Contains(it)) result.Add(it);
+
+        var pool = new List<ItemData>();
+        if (s.stock != null)
+            foreach (var it in s.stock)
+                if (it != null && it.buyPrice > 0 && !result.Contains(it) && !pool.Contains(it)) pool.Add(it);
+
+        int slots = GameTuning.Instance != null ? Mathf.Max(0, GameTuning.Instance.shopRotationSlots) : 4;
+        var rng = new System.Random(StableSeed(s.shopId, day));
+        for (int k = 0; k < slots && pool.Count > 0; k++)
+        {
+            int idx = WeightedPick(pool, rng);
+            result.Add(pool[idx]);
+            pool.RemoveAt(idx);
+        }
+        return result;
+    }
+
+    static int WeightedPick(List<ItemData> pool, System.Random rng)
+    {
+        int total = 0;
+        for (int i = 0; i < pool.Count; i++) total += RarityWeight(pool[i]);
+        int r = rng.Next(Mathf.Max(1, total));
+        for (int i = 0; i < pool.Count; i++) { r -= RarityWeight(pool[i]); if (r < 0) return i; }
+        return pool.Count - 1;
+    }
+
+    /// <summary>희귀도 가중 — 흔할수록 자주(Common 5 … Legendary 1). 평판 게이트는 셀 표시에서 별도.</summary>
+    static int RarityWeight(ItemData it) => it != null ? Mathf.Max(1, 5 - (int)it.rarity) : 1;
+
+    static int StableSeed(string shopId, int day)
+    {
+        int h = 17;
+        if (shopId != null) foreach (char c in shopId) h = h * 31 + c;
+        return h * 92821 + day;
+    }
+
+    /// <summary>디버그/테스트 — '다음날'로 강제 회전(재추첨 + 재입고). F1에서 호출.</summary>
+    public static void ForceRotate()
+    {
+        _dayOffset++;
+        _dayRoll.Clear();
+        _stockDay.Clear();
+        stockBank.Clear();
+        // RefreshAll = 재고 격자(RefreshStockCells)까지 다시 그림. RefreshTrade는 재고 격자를 제외하므로 회전이 안 보였음.
+        if (Instance != null && Instance.IsShowing) Instance.RefreshAll();
+    }
+
     Dictionary<ItemData, int> EnsureStockBank()
     {
         if (shop == null) return null;
@@ -620,11 +693,12 @@ public class ShopUI : MonoBehaviour
         ClearChildren(stockSlotRoot);
         ClearChildren(stockItemRoot);
 
-        if (shop == null || shop.stock == null)
+        if (shop == null)
         {
             SetActive(stockEmptyText, true, "판매 중인 물건이 없습니다.");
             return;
         }
+        // stock이 비어도 fixedStock만으로 진열될 수 있어, 빈 여부는 아래 entries.Count로 판단(조기반환 좁힘).
 
         int cellTotal = CELL_SIZE + CELL_GAP;
         float availW = stockContent != null ? stockContent.rect.width : 0f;
@@ -635,7 +709,7 @@ public class ShopUI : MonoBehaviour
         // 구매 가능 재고를 가상 격자에 footprint 자동 배치
         var vgrid = new InventoryGrid(cols, 80);
         var entries = new List<StockEntry>();
-        foreach (var item in shop.stock)
+        foreach (var item in CurrentDayStock())   // 오늘의 진열(고정 + 회전) — 전체 stock 대신
         {
             if (item == null) continue;
             int price = shop.BuyPrice(item);
