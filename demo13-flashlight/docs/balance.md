@@ -12,7 +12,7 @@
 
 | 밸런스 영역 | 단일 진실원(SSOT) | 조정 방법 |
 |------------|-------------------|-----------|
-| 시간(낮/밤) · 레이드 · 수색 · 드랍 배율 · 아노말리 · **생존** · **수면** | **`GameTuning`** SO (`Assets/Resources/Data/GameTuning.asset`) | **Control Panel** (`Tools ▸ TopDown ▸ 컨트롤 패널`) — 필드 자동 노출 |
+| 시간(낮/밤) · 레이드 · 수색 · 드랍 배율 · 아노말리 · **생존** · **수면** · **약탈자 회수**(`scavengerCount`) | **`GameTuning`** SO (`Assets/Resources/Data/GameTuning.asset`) | **Control Panel** (`Tools ▸ TopDown ▸ 컨트롤 패널`) — 필드 자동 노출 |
 | 맵별 드랍 테이블 (어떤 아이템이 얼마나 나오나) | `tools/region_loot.csv` → `Assets/Resources/region_loot.txt` (런타임은 `.txt`를 `RegionLootCatalog`가 읽음) | CSV 편집 후 `.txt`로 반영 (드랍 **수량 배율**만 GameTuning.lootCountMult) |
 | 전투·이동 수치 (플레이어/적 스탯, **이동속도 포함**) | `StatDB` SO (`Assets/Resources/Data/StatDB.asset`) — `playerStat.moveSpeed` 등 | **Control Panel ▸ 🎮 스탯 DB 섹션** (한 창에서 조정) / StatDB 에디터 / 인스펙터 |
 | 평판/평판 티어 | `tools/balance/reputation.csv`, `tools/balance/reputation_tiers.csv` | CSV 편집 (→ `ReputationManager`/`ReputationTier`) |

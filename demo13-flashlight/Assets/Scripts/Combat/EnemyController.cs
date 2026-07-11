@@ -637,6 +637,20 @@ public class EnemyController : MonoBehaviour
         enabled = false;          // AI 종료 + All 등록 해제(OnDisable) — 시야/전투 판정 대상에서 제외. GO는 시체로 유지.
     }
 
+    // ── 약탈자(회수 루프, docs/raid.md) — ScavengerLoot가 스폰 직후 지정. 시체 루팅에 이 물품이 추가됨. ──
+    bool _isScavenger;
+    List<ItemInstance> _scavengerLoot;
+
+    /// <summary>이 적을 '약탈자'로 지정 — 플레이어가 잃은 물품 loot을 지녀, 시체를 뒤지면 회수된다.
+    /// 특징(식별): 몸을 보랏빛으로 틴트(HUD 표식 없음 — 관찰로 구분).</summary>
+    public void MakeScavenger(List<ItemInstance> loot)
+    {
+        _isScavenger = true;
+        _scavengerLoot = loot;
+        var sr = GetComponentInChildren<SpriteRenderer>();
+        if (sr != null) sr.color = new Color(0.62f, 0.45f, 0.85f);   // 약탈자 = 보랏빛(붉은 일반 적과 구분)
+    }
+
     /// <summary>시체 = 루팅 컨테이너 전환(docs/combat.md 2026-07-10 — 옛 즉시 바닥 드랍을 대체).
     /// GO를 파괴하지 않고 그 자리에 유지(레이드 씬 언로드 시 함께 정리 = "레이드 종료까지").
     /// 드랍 테이블을 시체 인벤에 굴려 넣고, E 상호작용(Container)으로 뒤진다.</summary>
@@ -644,8 +658,11 @@ public class EnemyController : MonoBehaviour
     {
         var container = gameObject.AddComponent<LootContainer>();
         string label = (unitStat != null && !string.IsNullOrEmpty(unitStat.displayName)) ? unitStat.displayName : "적";
+        if (_isScavenger) label = "약탈자 " + label;
 
         var items = RollLoot();
+        // 약탈자 = 플레이어가 잃은 물품을 지님 → 시체 루팅으로 회수.
+        if (_isScavenger && _scavengerLoot != null) items.AddRange(_scavengerLoot);
         var overflow = container.SetupAutoSize($"{label} 시체", items);   // 격자 크기 = 내용물에 맞춤(4열, 2~6행)
         foreach (var it in overflow) DropOne(it);                          // 그래도 넘치는 것만 바닥에
 

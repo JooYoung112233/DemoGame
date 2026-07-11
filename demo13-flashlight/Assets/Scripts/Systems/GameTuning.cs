@@ -65,6 +65,8 @@ public class GameTuning : ScriptableObject
     [Range(0f, 1f)] public float enemyDropChance = 1f;
     [Tooltip("적 시체에 가방(컨테이너 아이템)이 통째로 들어 있을 확률(타르코프식 — 가방 안엔 지역 루트 1~2개, 가방째 가져갈 수 있음). EnemyController가 읽음.")]
     [Range(0f, 1f)] public float corpseBagChance = 0.3f;
+    [Tooltip("약탈자 회수 — 사망 시 잃은 소지품을 다음 레이드에서 나눠 가질 '약탈자' 적 최대 마리 수. ScavengerLoot가 읽음. (docs/raid.md)")]
+    [Range(1, 6)] public int scavengerCount = 3;
 
     // ── 무게 초과 페널티 (타르코프식 3구간 — docs/inventory.md 2026-07-10) ────────
     [Header("무게 초과 페널티")]

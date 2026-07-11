@@ -344,11 +344,14 @@ public class RaidManager : MonoBehaviour
         var inventory = FindPlayerInventory();
         if (inventory != null)
         {
-            int lost = ApplyItemLoss(inventory, deathLossRate);   // 가방+주머니 내용물(보안 제외)
+            // 사망 손실을 삭제 대신 '약탈자 회수' 대기열로 캡처(docs/raid.md — ⑧ 대체).
+            var captured = new List<ItemInstance>();
+            int lost = ApplyItemLoss(inventory, deathLossRate, captured);   // 가방+주머니 내용물(보안 제외)
             // 가방 아이템 자체도 손실 (내용물 비운 뒤 해제 → 스태시로 새지 않음)
             var equip = inventory.GetComponent<PlayerEquipment>();
             if (equip != null) equip.Unequip(EquipSlot.Backpack);
-            Debug.Log($"[RaidManager] 사망 아이템 손실: {lost}개 + 가방");
+            ScavengerLoot.Capture(captured);   // 다음 레이드 약탈자에게 분배(한 번의 회수 기회)
+            Debug.Log($"[RaidManager] 사망 아이템 손실: {lost}개 + 가방 → 약탈자 회수 대기");
         }
 
         // 사망 연출 (붉은 플래시 + 셰이크)
@@ -357,7 +360,7 @@ public class RaidManager : MonoBehaviour
             ScreenEffectManager.Instance.Flash(new Color(0.7f, 0.05f, 0.05f), 0.8f);
             ScreenEffectManager.Instance.ScreenShake(0.3f, 0.5f);
         }
-        ToastManager.Show("사망 — 가방을 잃었다", ToastManager.ToastType.Warning, 3f);
+        ToastManager.Show("사망 — 소지품을 약탈자가 가져갔다. 다음 레이드에서 되찾아라", ToastManager.ToastType.Warning, 3.5f);
 
         // 안전가옥에서 부활 (풀회복)
         var player = GameObject.FindGameObjectWithTag("Player");
@@ -378,22 +381,27 @@ public class RaidManager : MonoBehaviour
     }
 
     /// <summary>인벤토리에서 일부 아이템 랜덤 손실. 가방+주머니 대상, **보안 컨테이너는 면제(타르코프식)**.</summary>
-    int ApplyItemLoss(PlayerInventory inventory, float lossRate)
+    int ApplyItemLoss(PlayerInventory inventory, float lossRate, List<ItemInstance> captured = null)
     {
         int lostCount = 0;
-        lostCount += LoseFromGrid(inventory.Grid, lossRate);          // 가방 내용물
-        lostCount += LoseFromGrid(inventory.PocketsGrid, lossRate);   // 주머니 내용물
+        lostCount += LoseFromGrid(inventory.Grid, lossRate, captured);          // 가방 내용물
+        lostCount += LoseFromGrid(inventory.PocketsGrid, lossRate, captured);   // 주머니 내용물
         // inventory.SecureGrid = 보존(손실 면제)
         return lostCount;
     }
 
-    static int LoseFromGrid(InventoryGrid grid, float lossRate)
+    /// <summary>격자에서 lossRate 확률로 아이템 제거. captured != null이면 제거분을 거기 담는다(약탈자 회수용).</summary>
+    static int LoseFromGrid(InventoryGrid grid, float lossRate, List<ItemInstance> captured = null)
     {
         if (grid == null) return 0;
         var items = grid.GetAll();
         int n = 0;
         for (int i = items.Count - 1; i >= 0; i--)
-            if (Random.value < lossRate) { grid.Remove(items[i]); n++; }
+            if (Random.value < lossRate)
+            {
+                if (captured != null && items[i].item != null) captured.Add(items[i].item);
+                grid.Remove(items[i]); n++;
+            }
         return n;
     }
 

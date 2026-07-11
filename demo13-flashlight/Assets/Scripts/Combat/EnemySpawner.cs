@@ -68,6 +68,7 @@ public class EnemySpawner : MonoBehaviour
         float mult = GameTuning.Instance != null ? GameTuning.Instance.enemySpawnCountMult : 1f;
 
         int total = 0, zoneCount = 0;
+        var spawned = new List<EnemyController>();
         for (int i = 0; i < zones.Length; i++)
         {
             var z = zones[i];
@@ -79,9 +80,14 @@ public class EnemySpawner : MonoBehaviour
                 var e = SpawnOne(z);
                 if (e == null) continue;
                 SceneManager.MoveGameObjectToScene(e, scene);   // 레이드 씬과 함께 언로드되도록
+                var ec = e.GetComponent<EnemyController>();
+                if (ec != null) spawned.Add(ec);
                 total++;
             }
         }
+
+        // 약탈자 회수(docs/raid.md) — 지난 사망에서 잃은 물품이 있으면 이 레이드 적 몇 마리에 분배(한 번의 기회).
+        if (ScavengerLoot.HasPending) ScavengerLoot.Distribute(spawned);
 
         if (total > 0)
             Debug.Log($"[EnemySpawner] '{scene.name}' 적 {total}기 스폰 (존 {zoneCount}, 배율 {mult:0.##})");

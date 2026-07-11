@@ -773,6 +773,19 @@ public class DebugTestUI : MonoBehaviour
         }
 
         GUILayout.Space(10);
+        GUILayout.Label("── 약탈자 회수 (사망 루프) ──", headerStyle);
+        GUILayout.Label($"회수 대기 물품: {ScavengerLoot.PendingCount}개  (다음 레이드 약탈자=보랏빛 적에게 분배)", labelStyle);
+        if (GUILayout.Button("잃은 물건 시뮬(3개 뺏김) → 다음 레이드 회수", btnStyle, GUILayout.Height(28)))
+        {
+            var db = ItemDatabase.GetAll();
+            var loot = new System.Collections.Generic.List<ItemInstance>();   // 이 파일엔 Generic using 없음 → 완전수식(파일 관례)
+            for (int i = 0; i < db.Length && loot.Count < 3; i++)             // GetAll()은 ItemData[] → .Length
+                if (db[i] != null && db[i].buyPrice > 0) loot.Add(new ItemInstance(db[i], 1));
+            ScavengerLoot.Capture(loot);
+            ToastManager.Show($"약탈자 대기열 +{loot.Count} — 레이드 가서 보랏빛 적을 잡아 회수", ToastManager.ToastType.Info);
+        }
+
+        GUILayout.Space(10);
         GUILayout.Label("── UI 팝업 테스트(프리팹 검증) ──", headerStyle);
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("쪽지(NoteUI)", btnStyle, GUILayout.Height(28)))
