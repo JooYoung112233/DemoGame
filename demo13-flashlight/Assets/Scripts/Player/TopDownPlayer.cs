@@ -508,6 +508,8 @@ public class TopDownPlayer : MonoBehaviour
     void HandleCombatInput()
     {
         if (ChannelBusy) return;   // 아이템 사용 중 — 구르기·공격 금지 (취소는 ESC)
+        // 투척 조준 중 — 좌클릭=투척 / 우클릭=취소가 ThrowSystem에서 처리되므로 공격 입력 차단(중복 발동 방지).
+        if (ThrowSystem.Instance != null && ThrowSystem.Instance.IsAiming) return;
         if (!CombatEnabled || _exhausted) return;
 
         // 구르기 (Space)
@@ -573,7 +575,7 @@ public class TopDownPlayer : MonoBehaviour
         _state = CombatState.LightAttack;
         _attackStateTimer = atk.Duration;
         _performer.Perform(atk);
-        PlayerNoise.AttackNoise();   // 타격 소음 펄스
+        // 소음은 스윙이 아니라 '적중' 시에만 발생(AttackPerformer.ScanWindow) — 2026-07-11 변경.
         _comboBuffered = false;
     }
 
@@ -597,7 +599,7 @@ public class TopDownPlayer : MonoBehaviour
         _heavyCooldownTimer = HeavyCooldown;
 
         _performer.Perform(atk);
-        PlayerNoise.AttackNoise();   // 타격 소음 펄스(강공)
+        // 강공도 적중 시에만 소음(AttackPerformer.ScanWindow).
     }
 
     void TryDodge()

@@ -98,6 +98,14 @@ public class AttackPerformer : MonoBehaviour
             landed = true;
         }
 
+        // 타격 성공(적중) 시 소음 펄스 — 스윙/헛방은 무음(2026-07-11). 플레이어·적 공용이라
+        // "플레이어가 때림/맞음" 모두 impact 소음이 됨(반경 안 다른 적이 조사하러 옴).
+        if (landed)
+        {
+            float r = GameTuning.Instance != null ? GameTuning.Instance.noiseAttack : 14f;
+            PlayerNoise.Pulse(center, r);
+        }
+
         // 강공(데이터 플래그) 적중 시 히트스탑 + 카메라 셰이크/줌 — 한 번만
         if (landed && _current.hitstop)
         {

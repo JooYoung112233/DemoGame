@@ -31,8 +31,8 @@ public class DenseAnomalyController : MonoBehaviour
     [Range(0.3f, 3f)] public float farFull = 1.4f;
 
     [Header("Debug")]
-    [Tooltip("테스트용 토글 키(현상 0↔1).")]
-    public KeyCode debugKey = KeyCode.G;
+    [Tooltip("테스트용 토글 키(현상 0↔1). ※ G는 투척(ThrowSystem)이 사용 → 충돌 회피로 P.")]
+    public KeyCode debugKey = KeyCode.P;
 
     float _current;
     Camera _cam;

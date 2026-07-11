@@ -88,9 +88,9 @@ public class QuickSlotBar : MonoBehaviour
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
-    /// <summary>퀵슬롯 등록 가능 여부 — 소모품(의료·음식)만 (docs/inventory.md 2026-07-10).</summary>
+    /// <summary>퀵슬롯 등록 가능 여부 — 소모품(의료·음식) + 투척물 (docs/inventory.md 2026-07-10, 투척물 2026-07-11).</summary>
     public static bool IsAssignable(ItemData data)
-        => data != null && (data.category == ItemCategory.Medical || data.category == ItemCategory.Consumable);
+        => data != null && (data.category == ItemCategory.Medical || data.category == ItemCategory.Consumable || data.isThrowable);
 
     /// <summary>지정 슬롯에 직접 등록(교체) — 드래그 드롭·클릭 후 숫자키 공용. 의료·음식만. 성공 시 true.</summary>
     public bool AssignToSlot(int index, string itemId)
@@ -99,7 +99,7 @@ public class QuickSlotBar : MonoBehaviour
         var data = ItemDatabase.Get(itemId);
         if (!IsAssignable(data))
         {
-            ToastManager.Show("의료·음식만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
+            ToastManager.Show("의료·음식·투척물만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
             return false;
         }
         _slotIds[index] = itemId;
@@ -130,7 +130,7 @@ public class QuickSlotBar : MonoBehaviour
         if (string.IsNullOrEmpty(itemId)) return;
         if (!IsAssignable(ItemDatabase.Get(itemId)))
         {
-            ToastManager.Show("의료·음식만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
+            ToastManager.Show("의료·음식·투척물만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
             return;
         }
         for (int i = 0; i < SlotCount; i++)
@@ -205,6 +205,14 @@ public class QuickSlotBar : MonoBehaviour
         if (inventory.CountItemAll(id) <= 0)
         {
             ToastManager.Show("아이템 없음", ToastManager.ToastType.Warning);
+            return;
+        }
+        // 투척물은 '사용' 대신 조준 모드 진입(좌클릭 착탄에서 소모). 그 외는 즉시 사용.
+        var data = ItemDatabase.Get(id);
+        if (data != null && data.isThrowable)
+        {
+            if (ThrowSystem.Instance != null && !ThrowSystem.Instance.TryEnterAim(id))
+                ToastManager.Show("지금은 던질 수 없다", ToastManager.ToastType.Warning);
             return;
         }
         inventory.UseItemById(id);

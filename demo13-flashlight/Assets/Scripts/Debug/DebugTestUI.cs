@@ -272,6 +272,22 @@ public class DebugTestUI : MonoBehaviour
             GUILayout.EndHorizontal();
         }
         else GUILayout.Label("PlayerNoise 없음", labelStyle);
+
+        // ── 투척물 테스트 (돌 지급) ──
+        GUILayout.Space(8);
+        GUILayout.Label("── 투척물 (돌) ──", headerStyle);
+        var thInv = TopDownPlayer.Instance != null ? TopDownPlayer.Instance.GetComponent<PlayerInventory>() : null;
+        if (thInv != null)
+        {
+            GUILayout.Label($"보유 돌: {thInv.CountItemAll(ThrowSystem.ThrowItemId)}개  (G키 조준 → 좌클릭 투척, 착탄 소음으로 유인)", labelStyle);
+            if (GUILayout.Button("돌 5개 지급", btnStyle))
+            {
+                var stone = ItemDatabase.Get(ThrowSystem.ThrowItemId);
+                if (stone != null) thInv.TryAutoPlaceAnywhere(new ItemInstance(stone, 5));
+                else ToastManager.Show("Stone SO 없음 (Resources/Items/Misc/Stone)", ToastManager.ToastType.Warning);
+            }
+        }
+        else GUILayout.Label("PlayerInventory 없음", labelStyle);
     }
 
     #endregion

@@ -20,6 +20,7 @@
 | **상점 해금 평판** (희귀도별 진열 해금 등급) | **`GameTuning`** (`shopTierRare`/`shopTierEpic`/`shopTierLegendary`) | **Control Panel** — `ShopUI`가 읽음 |
 | **아르바이트** (납품 슬롯 수·수량·보수 배율·PP 주기) | **`GameTuning`** (`arbeitSlotCount`/`arbeitQtyMin`/`arbeitQtyMax`/`arbeitRewardMult`/`arbeitPpEvery`) | **Control Panel** — `ArbeitBoard`가 읽음 (→ [economy.md §아르바이트](economy.md)) |
 | **스토리/대화 페이싱** (프롤로그 대기·wait 배율·페이드인·타이핑 속도·튜토 표시) | **`GameTuning`** (`prologueStartDelay`/`storyWaitScale`/`storyFadeInDuration`/`narrationTypingSpeed`/`dialogueTypingSpeed`/`tutorialDefaultDuration`) | **Control Panel** — `StoryPlayer`/`GameStartHandler`/`NarrationUI`/`DialogueUI`가 읽음 |
+| **소음·투척물** (행동별 소음 반경·펄스·조사 시간, 돌 사거리·착탄 소음 반경·비행) | **`GameTuning`** (`noiseWalk`/`noiseRun`/`noiseAttack`/`noiseDoor`/`noisePulseDuration`/`noiseInvestigateLook`, `throwRange`/`throwNoiseRadius`/`throwSpeed`) | **Control Panel** — `PlayerNoise`/`EnemyController`/`ThrowSystem`이 읽음 (→ [combat.md §소음·§투척물](combat.md)) |
 | NPC 상점별 판매 목록 (뭘 파나) · 가격배율 · 위탁허용 | `ShopData` SO (`Assets/Resources/Data/Shops/Shop_*.asset`: stock/buyRate/sellRate/allowConsignment) | 상점 에셋 인스펙터 (※ Control Panel 통합 상점 에디터는 후속 과제) |
 | **특성(Trait) 효과 수치** (effectKey value, 41종) | `Assets/Resources/Data/Traits/*.asset` (`TraitData.effects`) — 런타임 합성 `TraitManager` | 트레잇 에셋 인스펙터 (→ [traits.md §4](traits.md)). ⚠ 현재 SO가 진실원 · **GameTuning 이관은 TBD**(미정) |
 

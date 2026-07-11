@@ -136,6 +136,10 @@ public class ItemData : ScriptableObject
     [Min(0)]
     public float useTimeSeconds;
 
+    [Header("투척물")]
+    [Tooltip("true면 던질 수 있는 투척물(G키 조준→착탄 소음으로 적 유인). 1차=돌. 사거리/소음반경은 GameTuning.")]
+    public bool isThrowable;
+
     [Header("내구도 (구급상자 등 다회 사용 아이템)")]
     [Tooltip("true면 스택 대신 내구도 소모 방식")]
     public bool hasDurability;

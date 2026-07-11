@@ -102,6 +102,15 @@ public class GameTuning : ScriptableObject
     [Tooltip("적이 소음 지점 도착 후 두리번거리는 시간(초). 이후 순찰 복귀.")]
     [Range(0.5f, 6f)] public float noiseInvestigateLook = 2.5f;
 
+    // ── 투척물 (돌 — 유인 전용) ───────────────────────────────────────
+    [Header("투척물 (돌 유인)")]
+    [Tooltip("돌 최대 투척 사거리(m). 조준 원 반경 = 이 값. 커서가 밖이면 경계로 클램프.")]
+    [Range(3f, 20f)] public float throwRange = 8f;
+    [Tooltip("착탄 시 발생하는 소음 펄스 반경(m). 이 안의 적이 조사하러 이동. 유인 강도.")]
+    [Range(3f, 30f)] public float throwNoiseRadius = 9f;
+    [Tooltip("돌 비행 속도(m/s). 착탄까지 시간 = 거리/속도(0.15~1.0s 클램프). 낮을수록 느리게 = 눈에 보이는 포물선. 착탄 순간 소음.")]
+    [Range(4f, 30f)] public float throwSpeed = 10f;
+
     // ── 시야 (FOV 시야콘, 좀보이드식) ─────────────────────────────────
     [Header("시야 (FOV 시야콘)")]
     [Tooltip("시야콘 켜기. 끄면 시야 제한 없이 모든 적이 보임(디버그/비활성).")]
