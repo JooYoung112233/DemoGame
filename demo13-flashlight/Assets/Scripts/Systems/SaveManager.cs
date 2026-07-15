@@ -202,6 +202,10 @@ public class SaveManager : MonoBehaviour
             data.playedScenes = StoryPlayer.Instance.GetPlayedScenes().ToList();
         }
 
+        // 도감 발견 기록
+        if (CodexManager.Instance != null)
+            data.discoveredItems = CodexManager.Instance.GetSaveData();
+
         return data;
     }
 
@@ -325,6 +329,17 @@ public class SaveManager : MonoBehaviour
         // 의뢰 게시판(BD) — 동일 원칙 (오늘의 의뢰는 일자 시드라 재추첨돼도 같은 2장)
         QuestBoard.ResetRuntime();
 
+        // 도감 발견 기록 — ★반드시 플레이어 격자 복원(아래)보다 먼저.
+        // 격자 복원은 TryPlace를 타 OnItemPlaced(도감 발견 훅)를 발화시키는데, 발견 set이 먼저 채워져 있어야
+        // Discover가 "이미 발견"으로 조용히 무시된다. 순서가 뒤바뀌면 로드마다 전 아이템 발견 토스트가 쏟아짐.
+        // + 로드 구간 내내 SilentDiscovery — discoveredItems가 없는 구 세이브를 처음 열 때
+        //   가방 내용물이 새로 발견 처리되며 토스트가 쏟아지는 것을 막는다(기록은 정상적으로 남음).
+        if (CodexManager.Instance != null)
+        {
+            CodexManager.Instance.SilentDiscovery = true;
+            CodexManager.Instance.LoadSaveData(data.discoveredItems);
+        }
+
         // 메인 창고(보관함)
         if (data.mainStash != null)
         {
@@ -422,6 +437,9 @@ public class SaveManager : MonoBehaviour
             }
         }
 
+        // 로드 완료 — 이후 획득부터는 정상적으로 발견 토스트를 띄운다.
+        if (CodexManager.Instance != null) CodexManager.Instance.SilentDiscovery = false;
+
         Debug.Log($"[Save] 로드 완료. 저장 시각: {data.saveTime}");
         return true;
     }
@@ -504,6 +522,7 @@ public class SaveManager : MonoBehaviour
         DailyQuestManager.Instance?.ResetForNewGame();
         QuestManager.Instance?.ResetForNewGame();            // 활성/완료 퀘스트 + 플래그
         StoryPlayer.Instance?.SetPlayedScenes(null);         // 재생 기록 초기화
+        CodexManager.Instance?.ResetForNewGame();            // 도감 발견 기록 초기화
         StoryTriggerManager.Instance?.ResetForNewGame();     // 프롤로그 재생 플래그 초기화(같은 세션 재시작 시 프롤로그 재생)
         TutorialPrompt.Instance?.SetShownIds(null);          // 튜토 1회성 기록 초기화
 
@@ -628,6 +647,9 @@ public class GameSaveData
 
     // 스토리
     public List<string> playedScenes = new List<string>();
+
+    // 도감 — 발견한 itemId (docs/items.md §아이템 도감)
+    public List<string> discoveredItems = new List<string>();
 }
 
 [System.Serializable]

@@ -58,6 +58,10 @@ public class InventoryGrid
     /// <summary>변경 시 발행 (UI 갱신용)</summary>
     public event System.Action OnChanged;
 
+    /// <summary>이 격자에 아이템이 새로 배치될 때 호출(옵트인, 기본 null → 기존 동작 무변경).
+    /// 플레이어 격자(가방/주머니/보안)만 구독해 도감 '첫 획득' 발견 처리에 쓴다 — 줍기·루팅 드래그·자동배치·구매·제작 등 모든 경로를 한 지점에서 포착.</summary>
+    public System.Action<ItemInstance> OnItemPlaced;
+
     /// <summary>외부에서 변경 알림 발행</summary>
     public void NotifyChanged() => OnChanged?.Invoke();
 
@@ -179,6 +183,7 @@ public class InventoryGrid
             for (int gy = y; gy < y + h; gy++)
                 grid[gx, gy] = placed;
 
+        OnItemPlaced?.Invoke(item);
         OnChanged?.Invoke();
         return true;
     }
@@ -239,6 +244,8 @@ public class InventoryGrid
                     int remaining = items[i].item.TryStack(item);
                     if (remaining <= 0)
                     {
+                        // 병합은 TryPlace를 안 타므로 발견 훅을 여기서도 발행(도감). Discover는 멱등이라 중복 무해.
+                        OnItemPlaced?.Invoke(item);
                         OnChanged?.Invoke();
                         return true;
                     }
@@ -307,7 +314,11 @@ public class InventoryGrid
     {
         var target = GetAt(x, y);
         if (target == null) return item.stackCount;
-        return target.item.TryStack(item);
+        int before = item.stackCount;
+        int remaining = target.item.TryStack(item);
+        // 일부라도 병합됐으면 발견 훅 발행(도감) — 병합 경로는 TryPlace를 안 탄다.
+        if (remaining < before) OnItemPlaced?.Invoke(item);
+        return remaining;
     }
 
     #endregion

@@ -288,6 +288,30 @@ public class DebugTestUI : MonoBehaviour
             }
         }
         else GUILayout.Label("PlayerInventory 없음", labelStyle);
+
+        // ── 도감 (⑨) ──
+        GUILayout.Space(6);
+        GUILayout.Label("── 아이템 도감 (U키) ──", headerStyle);
+        var cx = CodexManager.Instance;
+        if (cx != null)
+        {
+            var allItems = ItemDatabase.GetAll();
+            int totalItems = allItems != null ? allItems.Length : 0;
+            GUILayout.Label($"발견: {cx.DiscoveredCount}/{totalItems}   (U키로 도감 열기 — 미발견=실루엣+???)", labelStyle);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("전체 발견 처리", btnStyle))
+            {
+                cx.DebugDiscoverAll();
+                ToastManager.Show("도감 — 전체 발견", ToastManager.ToastType.Info);
+            }
+            if (GUILayout.Button("도감 초기화", btnStyle))
+            {
+                cx.ResetForNewGame();
+                ToastManager.Show("도감 — 초기화", ToastManager.ToastType.Warning);
+            }
+            GUILayout.EndHorizontal();
+        }
+        else GUILayout.Label("CodexManager 없음", labelStyle);
     }
 
     #endregion

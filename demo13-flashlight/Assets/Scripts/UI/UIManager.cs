@@ -342,6 +342,7 @@ public class UIManager : MonoBehaviour
         if (NoteUI.Instance != null && NoteUI.Instance.IsShowing) { NoteUI.Instance.Close(); return true; }
         if (GroundPickupUI.IsShowing) { GroundPickupUI.Hide(); return true; }
         if (TraitPanelUI.IsShowing) { TraitPanelUI.Hide(); return true; }
+        if (CodexUI.IsShowing) { CodexUI.Hide(); return true; }
 
         // 2) 캐릭터 패널 — 내부 레이어(컨텍스트/사용/컨테이너팝업/드래그)부터 LIFO로 자체 처리
         if (characterPanelUI != null && characterPanelUI.IsShowing)
@@ -417,6 +418,7 @@ public class UIManager : MonoBehaviour
         if (GroundPickupUI.IsShowing) return true;
         if (ItemDetailUI.IsShowing) return true;
         if (TraitPanelUI.IsShowing) return true;
+        if (CodexUI.IsShowing) return true;
         if (SettingsUI.IsShowing) return true;
         return false;
     }

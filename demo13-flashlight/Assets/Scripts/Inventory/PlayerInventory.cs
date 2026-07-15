@@ -82,10 +82,23 @@ public class PlayerInventory : MonoBehaviour
         PocketsGrid = new InventoryGrid(PocketW, PocketH);
         SecureGrid = new InventoryGrid(SecureW, SecureH);
 
+        // 도감 '첫 획득' 발견 훅 — 플레이어 격자에 배치되는 모든 아이템을 포착(줍기·루팅 드래그·구매·제작).
+        // Grid는 Resize로 유지되므로(인스턴스 교체 없음) 여기서 1회 구독으로 충분.
+        Grid.OnItemPlaced        += MarkDiscovered;
+        PocketsGrid.OnItemPlaced += MarkDiscovered;
+        SecureGrid.OnItemPlaced  += MarkDiscovered;
+
         health = GetComponent<Health>();
         medical = GetComponent<PlayerMedicalSystem>();
         flashlight = GetComponentInChildren<FlashlightController>();
         equipment = GetComponent<PlayerEquipment>();
+    }
+
+    /// <summary>도감 발견 처리 — 플레이어 격자에 아이템이 배치될 때(InventoryGrid.OnItemPlaced).</summary>
+    void MarkDiscovered(ItemInstance item)
+    {
+        if (item == null || item.data == null) return;
+        CodexManager.Instance?.Discover(item.data.itemId);
     }
 
     /// <summary>가방 장착/해제 시 호출. 격자 크기를 가방에 맞게 변경.</summary>
