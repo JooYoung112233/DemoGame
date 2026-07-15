@@ -19,6 +19,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: dcff95c536f0bed43bd685d3fce684ba, type: 2}
   - {fileID: 11400000, guid: 1976dc33a61044eaada4a6f6f3190ab6, type: 2}
   - {fileID: 11400000, guid: 9ab7696b00764c8bb46424a2e05eb24e, type: 2}
+  defaultStock: 5
   buyRate: 1
   sellRate: 0.6
   allowConsignment: 1

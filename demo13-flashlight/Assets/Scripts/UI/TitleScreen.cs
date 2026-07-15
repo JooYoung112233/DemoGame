@@ -281,7 +281,10 @@ public class TitleScreen : MonoBehaviour
         Debug.Log($"[Title] 새 게임(슬롯{slot}) → Safehouse");
         CloseSlotPicker();
         Hide();
-        // 새 게임은 커버를 유지한 채 진입 — reveal 없이 곧바로 프롤로그 암전 페이드로 넘긴다(안전가옥 번쩍임 방지).
+        // 로드 시작 전부터 스토리 페이드 오버레이(#2, sortingOrder 999)로 즉시 덮는다.
+        // → 전환 커버(#1=OnGUI)와 레이어가 엇갈려 생기던 첫 깜박임 제거. 프롤로그가 같은 #2로 이어받음.
+        ScreenEffectManager.Instance?.CoverInstant();
+        // 새 게임은 커버를 유지한 채 진입 — reveal 없이 곧바로 프롤로그 암전 페이드로 넘긴다.
         GoToSafehouse(keepCovered: true);
     }
 

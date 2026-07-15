@@ -82,16 +82,19 @@ public class GameStartHandler : MonoBehaviour
         }
 
         // ── 새 게임: 프롤로그 재생 ──
-        // 새 게임은 전환 커버(검정)를 유지한 채 진입한다(TitleScreen keepCovered).
-        // 프롤로그 S-000이 자체 암전 페이드(ScreenEffectManager)로 화면을 이어받으므로,
-        // 스토리 페이드(#2)를 먼저 검정으로 만든 뒤 전환 커버(#1)를 조용히 제거해
-        // 중간에 안전가옥이 번쩍이는 것을 막는다.
+        // 새 게임은 타이틀에서 이미 스토리 페이드 오버레이(#2, sortingOrder 999)로 화면을 덮은 채 진입한다.
+        // 여기서 #2를 유지(CoverInstant)하고 전환 커버(#1=OnGUI)를 제거해, 로드~프롤로그까지 검정이 끊기지 않게 한다.
+        // 프롤로그 S-000이 같은 #2를 fade_in으로 드러내므로 seam/깜박임이 없다.
         Debug.Log("[GameStart] 새 게임. 프롤로그 시작.");
+
+        // 새 게임 시작 상태(Lv1·돈0·특성 없음)를 슬롯에 즉시 기록 → 저장 슬롯 카드에 바로 뜬다.
+        // 위 HasSave 분기를 이미 지난 뒤라 프롤로그 재생엔 영향 없음(타이틀에서 미리 저장하면 HasSave=true라 프롤로그 스킵됨).
+        SaveManager.Instance?.Save();
 
         var stm  = SceneTransitionManager.Instance;
         var sem  = ScreenEffectManager.Instance;
-        if (sem != null) yield return sem.FadeOut(0.01f);   // #2 즉시 검정(프롤로그 첫 노드와 동일 효과)
-        if (stm != null) stm.ClearCover();                  // #1 제거 — 이미 검정이라 화면 변화 없음
+        if (sem != null) sem.CoverInstant();   // #2 즉시 검정(이미 덮여 있으면 유지 — lerp 없이 깜박임 0)
+        if (stm != null) stm.ClearCover();      // #1(OnGUI 커버) 제거 — #2가 덮고 있어 화면 변화 없음
 
         float startDelay = GameTuning.Instance != null ? GameTuning.Instance.prologueStartDelay : delayBeforePrologue;
         yield return new WaitForSecondsRealtime(startDelay);

@@ -285,6 +285,16 @@ public class ScreenEffectManager : MonoBehaviour
         return StartCoroutine(FadeRoutine(1f, 0f, duration, onComplete));
     }
 
+    /// <summary>즉시 화면을 검게 덮는다(페이드 없이). 씬 전환 커버를 seam 없이 이어받을 때 —
+    /// sortingOrder 999 uGUI 오버레이라 HUD/월드를 확실히 덮는다. 이후 fade_in으로 드러낸다.</summary>
+    public void CoverInstant()
+    {
+        if (!IsGenerated) GenerateUI();
+        fadeCanvas.gameObject.SetActive(true);
+        fadeImage.raycastTarget = true;
+        fadeImage.color = new Color(0, 0, 0, 1f);
+    }
+
     IEnumerator FadeRoutine(float from, float to, float duration, System.Action onComplete)
     {
         fadeCanvas.gameObject.SetActive(true);
