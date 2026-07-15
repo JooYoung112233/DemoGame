@@ -46,8 +46,12 @@ public static class WorldRegionCatalog
             regionId = "scrap_market",
             displayName = "폐상가 교역 지구",     // 지역1
             subzone = "무너진 상가 / 검문소",
-            sceneName = "ScrapMarket_GB",
-            spawnId = "default",
+            // 2026-07-11: 튜토 단독 조각(ScrapMarket_GB) → 본편 도심(Zone1)으로 전환.
+            //   Zone1은 SW 코너에 튜토 구역을 그대로 품고 있고(Zone1GreyboxLayout이 ScrapMarketGreyboxLayout.Place 호출),
+            //   스폰 랜덤 5·탈출 고정1+반대편2·루팅 예산제·적 밀도 곡선이 여기에만 있다.
+            //   spawnId는 비움 — RaidSpawnDirector가 매 판 랜덤 스폰을 지정한다(고정 진입 X).
+            sceneName = "Zone1",
+            spawnId = "",
             safeFeature = "기본 파밍·회수꾼 허브·오르골 떡밥 (1차 데모)",
             anomalyFeature = "밴딧·몬스터 혼합·짙은 현상 첫 체험",
             difficulty = 2,

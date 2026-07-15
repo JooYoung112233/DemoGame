@@ -17,10 +17,14 @@ public class MapSpawnProfile : ScriptableObject
 
     [Header("총량 예산")]
     [Tooltip("바닥 스폰 포인트 총 아이템 수 (min~max)")]
-    public RangeInt groundItemBudget = new RangeInt(15, 10); // 15~25
+    // ⚠️ 2026-07-11: RangeInt는 Unity가 **직렬화하지 않는다** → 에셋에 값이 아예 안 써져 전 프로파일이
+    //    조용히 코드 기본값으로 떨어지고 있었다(인스펙터엔 정상처럼 보여 추적도 어려움). int 2필드로 교체.
+    public int groundItemMin = 15;
+    public int groundItemMax = 25;
 
     [Tooltip("상자 스폰 포인트 총 아이템 수 (min~max)")]
-    public RangeInt containerItemBudget = new RangeInt(20, 15); // 20~35
+    public int containerItemMin = 20;
+    public int containerItemMax = 35;
 
     [Tooltip("고정 아이템 수 (열쇠, 스토리 등)")]
     public int fixedItemCount = 2;
@@ -81,8 +85,8 @@ public class MapSpawnProfile : ScriptableObject
     public int GetGroundBudget(bool isNight)
     {
         float mult = spawnMultiplier * (isNight ? nightSpawnMultiplier : 1f) * GlobalSpawnMult();
-        int min = Mathf.RoundToInt(groundItemBudget.start * mult);
-        int max = Mathf.RoundToInt((groundItemBudget.start + groundItemBudget.length) * mult);
+        int min = Mathf.RoundToInt(groundItemMin * mult);
+        int max = Mathf.RoundToInt(groundItemMax * mult);
         return Random.Range(min, max + 1);
     }
 
@@ -90,8 +94,8 @@ public class MapSpawnProfile : ScriptableObject
     public int GetContainerBudget(bool isNight)
     {
         float mult = spawnMultiplier * (isNight ? nightSpawnMultiplier : 1f) * GlobalSpawnMult();
-        int min = Mathf.RoundToInt(containerItemBudget.start * mult);
-        int max = Mathf.RoundToInt((containerItemBudget.start + containerItemBudget.length) * mult);
+        int min = Mathf.RoundToInt(containerItemMin * mult);
+        int max = Mathf.RoundToInt(containerItemMax * mult);
         return Random.Range(min, max + 1);
     }
 

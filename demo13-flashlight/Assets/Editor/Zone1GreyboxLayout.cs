@@ -71,21 +71,196 @@ public static class Zone1GreyboxLayout
         n += GreyboxBuild.Note(map, "RV_Label", 100f, 328f, "강변 부두 ★★★", "最北 한강 경계. 부두 창고. 탈출 밀집.");
 
         // ── 레이드 스폰 5(매 판 랜덤 1곳) — 주변부 거리 분산(간선도로 위) ──
-        n += GreyboxBuild.Marker(map, "gb_spawn", "SP1_S",  172f, 49f);   // 남(차고 큰길)
-        n += GreyboxBuild.Marker(map, "gb_spawn", "SP2_N",  172f, 328f);  // 북(강변 앞)
-        n += GreyboxBuild.Marker(map, "gb_spawn", "SP3_W",   67f, 172f);  // 서
-        n += GreyboxBuild.Marker(map, "gb_spawn", "SP4_E",  279f, 172f);  // 동
-        n += GreyboxBuild.Marker(map, "gb_spawn", "SP5_NE", 203f, 260f);  // 북동 내부
+        //   pointId를 오브젝트명과 같게 주입해야 SpawnPoint가 실제로 식별된다(주입 없으면 프리팹 기본값 "default").
+        n += Spawn5(map, "SP1_S",  172f, 49f);   // 남(차고 큰길)
+        n += Spawn5(map, "SP2_N",  172f, 328f);  // 북(강변 앞)
+        n += Spawn5(map, "SP3_W",   67f, 172f);  // 서
+        n += Spawn5(map, "SP4_E",  279f, 172f);  // 동
+        n += Spawn5(map, "SP5_NE", 203f, 260f);  // 북동 내부
         // ── 탈출: 고정 1(전 스폰 공용) + 풀 4(스폰별 2개 매치 = 먼 코너, 맵 횡단 유도) ──
-        n += GreyboxBuild.Marker(map, "gb_exit", "Exit_Fixed", 123f, 172f);  // 고정(중앙)
-        n += GreyboxBuild.Marker(map, "gb_exit", "PX_SW", 40f,  49f);
-        n += GreyboxBuild.Marker(map, "gb_exit", "PX_SE", 300f, 49f);
-        n += GreyboxBuild.Marker(map, "gb_exit", "PX_NW", 40f,  328f);
-        n += GreyboxBuild.Marker(map, "gb_exit", "PX_NE", 300f, 328f);
+        //   ExitPoint 설정(targetScene/spawnPointId/대기)을 주입해야 실제 탈출로 동작한다.
+        n += ExitPt(map, "Exit_Fixed", 123f, 172f);  // 고정(중앙)
+        n += ExitPt(map, "PX_SW", 40f,  49f);
+        n += ExitPt(map, "PX_SE", 300f, 49f);
+        n += ExitPt(map, "PX_NW", 40f,  328f);
+        n += ExitPt(map, "PX_NE", 300f, 328f);
         // 매치(스폰→풀 2, 고정 제외): SP1_S→{NW,NE} · SP2_N→{SW,SE} · SP3_W→{SE,NE} · SP4_E→{SW,NW} · SP5_NE→{SW,NW}
-        // ※ 런타임 랜덤스폰 + 매치 탈출 활성(RaidSpawnDirector)은 별도 구현 과제. 현재 = 마커 + 매치 설계.
+        // → 런타임 랜덤스폰 + 매치 탈출 활성 = RaidSpawnDirector(아래 배치). 매치표는 디렉터가 동일하게 보유.
+        n += Director(map);
+
+        // ── 루팅 예산제(MapSpawnController + ItemSpawnPoint 앵커) + 적 밀도 ──
+        //   예산은 맵 전체 총량 → 앵커를 많이 심은 구역에 루트가 몰린다 = 보상 곡선.
+        //   난이도는 SpawnZone 유닛키/마릿수로 = 위험 곡선. (결정 2026-07-11: 안쪽으로 갈수록 위험·보상 ↑)
+        n += Controller(map);
+
+        // ① 상가골목/약국 아케이드(진입부, C0R2) — 약함·잡템
+        n += Scatter(map, "SZ_Arcade", 18f, 86f, 62f, 164f, 4, 3, 11);
+        n += EnemyZone(map, "EZ_Arcade", 40f, 125f, 20f, 30f, "bandit_melee_1", 2);
+
+        // ② 폐아파트(C1R0~1) — 중
+        n += Scatter(map, "SZ_Apt", 72f, 18f, 118f, 74f, 5, 4, 22);
+        n += EnemyZone(map, "EZ_Apt", 95f, 46f, 24f, 26f, "bandit_melee_1", 3);
+
+        // ③ 식물원 돔·습지(C2R3) — 중상
+        n += Scatter(map, "SZ_Dome", 130f, 180f, 196f, 252f, 5, 5, 33);
+        n += EnemyZone(map, "EZ_Dome", 163f, 216f, 30f, 30f, "bandit_melee_1", 2);
+        n += EnemyZone(map, "EZ_Dome_R", 178f, 236f, 14f, 14f, "bandit_melee_1", 1);
+
+        // ④ 유리 R&D 타워(C4R0) — 강함·고급 루트(최심부)
+        n += Scatter(map, "SZ_Tower", 285f, 18f, 325f, 42f, 6, 6, 44);
+        n += EnemyZone(map, "EZ_Tower", 305f, 30f, 22f, 14f, "bandit_melee_1", 2);
+        n += EnemyZone(map, "EZ_Tower_T", 315f, 30f, 10f, 10f, "bandit_melee_1", 1);
+
+        // ⑤ 주차장·공원(개활지) — 낮은 밀도, 적 약간
+        n += Scatter(map, "SZ_Plaza", 210f, 86f, 272f, 164f, 3, 2, 55);
+        n += EnemyZone(map, "EZ_Plaza", 240f, 125f, 24f, 24f, "bandit_melee_1", 2);
+        n += Scatter(map, "SZ_Park", 74f, 268f, 116f, 320f, 3, 2, 66);
 
         GreyboxBuild.EndScene(scene, ScenePath, n, "지역1 Zone1(폐상가 도심 — 블록 성격 다양화)");
+        AddToBuildSettings(ScenePath);   // 등록 안 하면 TransitionTo("Zone1")이 LoadSceneAsync에서 실패
+        AssetDatabase.SaveAssets();
+    }
+
+    /// <summary>씬을 빌드세팅에 등록(이미 있으면 무시). ScrapMarketGreyboxLayout과 동일 패턴.</summary>
+    static void AddToBuildSettings(string scenePath)
+    {
+        var cur = EditorBuildSettings.scenes;
+        foreach (var s in cur) if (s.path == scenePath) return;
+        var arr = new EditorBuildSettingsScene[cur.Length + 1];
+        System.Array.Copy(cur, arr, cur.Length);
+        arr[cur.Length] = new EditorBuildSettingsScene(scenePath, true);
+        EditorBuildSettings.scenes = arr;
+        Debug.Log($"[Zone1] 빌드세팅 등록: {scenePath}");
+    }
+
+    // ── 스폰/탈출/디렉터 (마커 → 실제 동작하는 컴포넌트) ────────────────────
+
+    /// <summary>레이드 스폰 후보(gb_spawn = SpawnPoint). pointId를 오브젝트명과 동일하게 주입.</summary>
+    static int Spawn5(GameObject map, string name, float x, float y)
+    {
+        if (GreyboxBuild.Marker(map, "gb_spawn", name, x, y) == 0) return 0;
+        var go = FindChild(map.transform, name);
+        var sp = go != null ? go.GetComponentInChildren<SpawnPoint>() : null;
+        if (sp != null)
+        {
+            var so = new SerializedObject(sp);
+            var p = so.FindProperty("pointId");
+            if (p != null) { p.stringValue = name; so.ApplyModifiedPropertiesWithoutUndo(); }
+        }
+        return 1;
+    }
+
+    /// <summary>탈출구(gb_exit = InteractableObject/ExitPoint). 안전가옥 복귀로 설정.</summary>
+    static int ExitPt(GameObject map, string name, float x, float y)
+    {
+        if (GreyboxBuild.Marker(map, "gb_exit", name, x, y) == 0) return 0;
+        var go = FindChild(map.transform, name);
+        var io = go != null ? go.GetComponentInChildren<InteractableObject>() : null;
+        if (io != null)
+        {
+            var so = new SerializedObject(io);
+            var ts = so.FindProperty("targetScene");   if (ts != null) ts.stringValue = "Safehouse";
+            var sp = so.FindProperty("spawnPointId");  if (sp != null) sp.stringValue = "default";
+            var ew = so.FindProperty("exitWaitTime");  if (ew != null) ew.floatValue = 5f;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+        return 1;
+    }
+
+    // ── 루팅 예산제 / 적 밀도 ────────────────────────────────────────────
+
+    /// <summary>루팅 예산 분배기(MapSpawnController) — 지역1 프로파일 + region_loot 지역 지정.</summary>
+    static int Controller(GameObject map)
+    {
+        var go = new GameObject("MapSpawnController");
+        go.transform.SetParent(map.transform, false);
+        var c = go.AddComponent<MapSpawnController>();
+
+        var profile = AssetDatabase.LoadAssetAtPath<MapSpawnProfile>("Assets/Resources/Data/MapSpawn/scrap_market.asset");
+        if (profile == null) Debug.LogWarning("[Zone1] MapSpawnProfile 'Zone1.asset' 로드 실패 — 예산제 비활성(앵커는 자체 폴백 스폰).");
+
+        var so = new SerializedObject(c);
+        var p  = so.FindProperty("profile");           if (p  != null) p.objectReferenceValue = profile;
+        var r  = so.FindProperty("regionIdOverride");  if (r  != null) r.stringValue = "scrap_market";   // region_loot 지역1
+        var fb = so.FindProperty("fallbackToRegionLoot"); if (fb != null) fb.boolValue = true;
+        so.ApplyModifiedPropertiesWithoutUndo();
+        return 1;
+    }
+
+    /// <summary>구역에 루트 앵커를 뿌린다 — 바닥 ground개 + 상자 crate개(상자엔 Container 앵커 부착).
+    /// 앵커 수 = 그 구역의 보상 비중(예산이 앵커에 분배되므로). 시드로 결정론적 배치.</summary>
+    static int Scatter(GameObject map, string prefix, float x0, float y0, float x1, float y1, int ground, int crate, int seed)
+    {
+        int n = 0;
+        var rnd = new System.Random(seed);
+        for (int i = 0; i < ground; i++)
+        {
+            float x = Mathf.Lerp(x0, x1, (float)rnd.NextDouble());
+            float y = Mathf.Lerp(y0, y1, (float)rnd.NextDouble());
+            var go = new GameObject($"{prefix}_G{i}");
+            go.transform.SetParent(map.transform, false);
+            go.transform.localPosition = new Vector3(x, y, 0f);
+            SetSpawnType(go.AddComponent<ItemSpawnPoint>(), 0);   // Ground
+            n++;
+        }
+        for (int i = 0; i < crate; i++)
+        {
+            float x = Mathf.Lerp(x0, x1, (float)rnd.NextDouble());
+            float y = Mathf.Lerp(y0, y1, (float)rnd.NextDouble());
+            string name = $"{prefix}_C{i}";
+            if (GreyboxBuild.Marker(map, "gb_crate", name, x, y) == 0) continue;
+            var go = FindChild(map.transform, name);
+            if (go == null) continue;
+            var lc = go.GetComponentInChildren<LootContainer>();
+            var sp = go.gameObject.AddComponent<ItemSpawnPoint>();
+            SetSpawnType(sp, 1);                                   // Container
+            if (lc != null)
+            {
+                var so = new SerializedObject(sp);
+                var lk = so.FindProperty("linkedContainer");
+                if (lk != null) { lk.objectReferenceValue = lc; so.ApplyModifiedPropertiesWithoutUndo(); }
+            }
+            n++;
+        }
+        return n;
+    }
+
+    /// <summary>ItemSpawnPoint.spawnType(private) 주입. 0=Ground 1=Container 2=Fixed.</summary>
+    static void SetSpawnType(ItemSpawnPoint sp, int type)
+    {
+        var so = new SerializedObject(sp);
+        var t = so.FindProperty("spawnType");
+        if (t != null) { t.enumValueIndex = type; so.ApplyModifiedPropertiesWithoutUndo(); }
+    }
+
+    /// <summary>적 스폰 존(SpawnZone) — 런타임 EnemySpawner가 읽어 생성. 난이도 곡선용.</summary>
+    static int EnemyZone(GameObject map, string name, float cx, float cy, float w, float h, string unitKey, int count)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(map.transform, false);
+        go.transform.localPosition = new Vector3(cx, cy, 0f);
+        go.AddComponent<SpawnZone>().Setup(new Vector3(w, 0f, h), count, unitKey);
+        return 1;
+    }
+
+    /// <summary>랜덤 스폰 + 매치 탈출 활성 디렉터(런타임).</summary>
+    static int Director(GameObject map)
+    {
+        var go = new GameObject("RaidSpawnDirector");
+        go.transform.SetParent(map.transform, false);
+        go.AddComponent<RaidSpawnDirector>();
+        return 1;
+    }
+
+    static Transform FindChild(Transform t, string n)
+    {
+        if (t.name == n) return t;
+        for (int i = 0; i < t.childCount; i++)
+        {
+            var r = FindChild(t.GetChild(i), n);
+            if (r != null) return r;
+        }
+        return null;
     }
 
     /// <summary>
@@ -106,7 +281,10 @@ public static class Zone1GreyboxLayout
         n += GreyboxBuild.WallSeg(m, "PA_E_b", 62f, 128f, 64f, 168f);
 
         // 약국(앵커) — 방 x37~62 y84~116, 서문(스파인 향). key_pharmacy→약장(잠금)→SQ-002.
+        //   2026-07-11: 껍데기만 두고 **내부는 Int_Pharmacy 씬**(전당포식 전환). 서문에 진입 트리거 + 복귀 스폰.
         n += GreyboxBuild.Building(m, "Pharmacy", 37f, 84f, 62f, 116f, 'W', 98f, "gb_door", "Pharmacy_Door");
+        n += Enter(m, "Pharmacy_Enter", 36.2f, 99f, "Int_Pharmacy");   // 서문 바로 앞(문 갭 y98~100)
+        n += ReturnSpawn(m, "from_pharmacy", 34.5f, 99f);              // 내부에서 나오면 문 앞
         n += GreyboxBuild.Marker(m, "gb_crate", "key_pharmacy", 44f, 92f);
         n += GreyboxBuild.Marker(m, "gb_door",  "MedCabinet(key_pharmacy)", 58f, 110f);
         n += GreyboxBuild.Marker(m, "gb_crate", "SQ002_Box", 52f, 110f);
@@ -191,21 +369,55 @@ public static class Zone1GreyboxLayout
         return n;
     }
 
-    /// <summary>큰 건물(랜드마크): 둘레 + 내부 십자 칸막이(문 갭) = 백화점·주거동·돔 느낌(빈 박스 아님).</summary>
+    /// <summary>큰 건물(랜드마크): **껍데기(외벽+문)만** — 내부는 별도 씬(전당포식 전환, 2026-07-11).
+    /// 예전엔 내부 십자 칸막이를 그려 위에서 내부가 다 보였음 → 제거.</summary>
     static int Big(GameObject m, string p, float x0, float y0, float x1, float y1, char side)
     {
         float bx0 = x0 + 2f, by0 = y0 + 2f, bx1 = x1 - 2f, by1 = y1 - 2f;
         if (bx1 - bx0 < 12f || by1 - by0 < 12f) return Shops(m, p, x0, y0, x1, y1, 3f, H((int)x0, (int)y0));
-        int n = 0; const float t = 1f;
+        int n = 0;
         float doorAt = (side == 'S' || side == 'N') ? (bx0 + bx1) * 0.5f - 1f : (by0 + by1) * 0.5f - 1f;
         n += GreyboxBuild.Building(m, p, bx0, by0, bx1, by1, side, doorAt, "gb_door", $"{p}_D");
-        // 내부 십자 칸막이(문 갭 3m)
-        float mx = (bx0 + bx1) * 0.5f, my = (by0 + by1) * 0.5f;
-        n += GreyboxBuild.WallSeg(m, $"{p}_pH1", bx0 + t, my, mx - 1.5f, my + t);
-        n += GreyboxBuild.WallSeg(m, $"{p}_pH2", mx + 1.5f, my, bx1 - t, my + t);
-        n += GreyboxBuild.WallSeg(m, $"{p}_pV1", mx, by0 + t, mx + t, my - 1.5f);
-        n += GreyboxBuild.WallSeg(m, $"{p}_pV2", mx, my + t + 1.5f, mx + t, by1 - t);
+        // 2026-07-11: 내부 십자 칸막이 제거 — 건물 = 껍데기(외벽+문)뿐. 내부는 별도 씬(전당포식 전환).
+        //   문에 BuildingEntrance를 달 건물은 Enter()로 개별 지정한다(내부 씬이 있는 건물만).
         return n;
+    }
+
+    /// <summary>건물 문에 진입 트리거(BuildingEntrance) — 내부 씬이 있는 건물만.
+    /// 밟으면 내부 씬으로 전환(페이드+캐릭터 유지). 복귀 스폰은 Zone1의 from_&lt;건물&gt;.</summary>
+    static int Enter(GameObject m, string name, float x, float y, string targetScene)
+    {
+        if (GreyboxBuild.Marker(m, "gb_exit", name, x, y) == 0) return 0;
+        var t = FindChild(m.transform, name);
+        if (t == null) return 0;
+        var go = t.gameObject;
+
+        var io = go.GetComponentInChildren<InteractableObject>();   // gb_exit의 E키 ExitPoint는 중복 → 제거
+        if (io != null) Object.DestroyImmediate(io);
+
+        var box = go.GetComponent<BoxCollider2D>() ?? go.AddComponent<BoxCollider2D>();
+        box.isTrigger = true;
+        box.size = new Vector2(2.2f, 1.4f);
+
+        var be = go.GetComponent<BuildingEntrance>() ?? go.AddComponent<BuildingEntrance>();
+        be.Configure(targetScene, "default", false);
+        return 1;
+    }
+
+    /// <summary>내부에서 돌아왔을 때 서는 자리(from_&lt;건물&gt;). 건물 문 앞.</summary>
+    static int ReturnSpawn(GameObject m, string pointId, float x, float y)
+    {
+        string name = $"Ret_{pointId}";
+        if (GreyboxBuild.Marker(m, "gb_spawn", name, x, y) == 0) return 0;
+        var t = FindChild(m.transform, name);
+        var sp = t != null ? t.GetComponentInChildren<SpawnPoint>() : null;
+        if (sp != null)
+        {
+            var so = new SerializedObject(sp);
+            var p = so.FindProperty("pointId");
+            if (p != null) { p.stringValue = pointId; so.ApplyModifiedPropertiesWithoutUndo(); }
+        }
+        return 1;
     }
 
     /// <summary>광장/주차장: 거의 빈 공간 + 모서리 작은 구조물 2 + 상자 몇(변화용).</summary>

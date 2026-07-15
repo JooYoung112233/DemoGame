@@ -796,6 +796,22 @@ public class DebugTestUI : MonoBehaviour
                 SceneTransitionManager.Instance.TransitionTo("ScrapMarket_GB", "Gate_Spawn");
         }
 
+        // ── 지역1(Zone1) 직행/복귀 — 랜덤 스폰 + 매치 탈출 확인용 ──
+        GUILayout.Space(4);
+        GUILayout.Label($"지역1: 매 판 스폰 5곳 중 랜덤 1 + 탈출 고정1(중앙)+반대편 2  |  이번 판 스폰: {(string.IsNullOrEmpty(RaidSpawnDirector.ChosenSpawn) ? "-" : RaidSpawnDirector.ChosenSpawn)}", labelStyle);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("→ 지역1 (레이드)", btnStyle, GUILayout.Height(28)))
+        {
+            if (SceneTransitionManager.Instance != null)
+                SceneTransitionManager.Instance.TransitionTo("Zone1", "");   // 스폰은 RaidSpawnDirector가 랜덤 지정
+        }
+        if (GUILayout.Button("→ 마을 복귀", btnStyle, GUILayout.Height(28)))
+        {
+            if (SceneTransitionManager.Instance != null)
+                SceneTransitionManager.Instance.TransitionTo("Safehouse", "default");
+        }
+        GUILayout.EndHorizontal();
+
         GUILayout.Space(10);
         GUILayout.Label("── 약탈자 회수 (사망 루프) ──", headerStyle);
         GUILayout.Label($"회수 대기 물품: {ScavengerLoot.PendingCount}개  (다음 레이드 약탈자=보랏빛 적에게 분배)", labelStyle);

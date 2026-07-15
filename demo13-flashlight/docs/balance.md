@@ -150,6 +150,7 @@
 |------|------|-----------|
 | `Assets/Resources/region_loot.txt` (소스 `tools/region_loot.csv`) | **맵별 드랍 테이블** — 지역×티어별 아이템·확률·수량 | `RegionLootCatalog` |
 | `Assets/Resources/Data/StatDB.asset` | **전투 수치** — 플레이어 스탯 + 유닛(적)별 스탯 | `StatDB.Instance.GetUnit(key)` / `.playerStat` |
+| `Assets/Resources/Data/SpawnProfiles/*.asset` (`MapSpawnProfile`) | **맵별 루팅 예산** — 바닥/상자 아이템 총량(min~max)·희귀도 가중·카테고리 쿼터·밤 보정. **2026-07-11 `Zone1` 신설**(그 전엔 에셋 0개 = 예산제 미개통). 총량엔 `GameTuning.itemSpawnCountMult`가 추가로 곱해짐 | 씬의 `MapSpawnController`(profile 참조) → `ItemSpawnPoint` 앵커에 분배 |
 | `tools/balance/reputation.csv` | 평판 변동 값 | `ReputationManager` |
 | `tools/balance/reputation_tiers.csv` | 평판 티어 경계 | `ReputationTier` |
 | `Assets/Resources/Items/**/*.asset` | 아이템 개별 수치(가격·무게·회복량 등) | `ItemDatabase` |
