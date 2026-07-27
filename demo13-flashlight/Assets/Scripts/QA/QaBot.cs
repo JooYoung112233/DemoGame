@@ -37,6 +37,7 @@ public class QaBot : MonoBehaviour
     System.Random _rng;
 
     bool _running;
+    bool _analyzed;         // 지표·공간 분석 1회 보장(정상 종료/중단 어느 쪽이든)
     string _step = "boot";
     int _cycle;
     string _commandId = "";
@@ -296,6 +297,7 @@ public class QaBot : MonoBehaviour
     {
         if (_running) return;
         _running = true;
+        _analyzed = false;
         _quitWhenDone = quitWhenDone || _quitWhenDone;
         _startedAt = Time.realtimeSinceStartup;
         _cycle = 0;
@@ -354,13 +356,8 @@ public class QaBot : MonoBehaviour
             }
         }
 
-        // 사이클이 열린 채 끝났으면 닫는다(지표 유실 방지)
-        if (_tele.Current != null) _tele.EndCycle();
-
-        _tele.Analyze(_rep);
-        _heat?.Analyze(_rep);
         _rep.Info("done", "END", "시나리오 완료");
-        Finish();
+        Finish();   // 사이클 마감·분석은 Finish가 한다(중단 경로도 같은 처리를 받게)
     }
 
     /// <summary>스텝을 예외 안전하게 실행 — 한 스텝이 터져도 런 전체가 죽지 않는다.
@@ -397,6 +394,17 @@ public class QaBot : MonoBehaviour
         SaveManager.SuppressWrites = false;
         DisposeNav();
         Application.logMessageReceived -= OnLog;
+
+        // ★ 분석은 여기서 한다. 예전엔 정상 종료 경로에만 있어서, 중단된 런은
+        //   스턱 핫스팟·길막힘 같은 **가장 중요한 신호가 통째로 빠진 채** 판정됐다
+        //   (실제로 한 칸에서 스턱 8회인 런이 '진행 막힘 없음 PASS'로 나왔다).
+        if (_rep != null && !_analyzed)
+        {
+            _analyzed = true;
+            if (_tele.Current != null) _tele.EndCycle();   // 열린 채 중단된 사이클 마감
+            _tele.Analyze(_rep);
+            _heat?.Analyze(_rep);
+        }
 
         if (_rep != null)
         {

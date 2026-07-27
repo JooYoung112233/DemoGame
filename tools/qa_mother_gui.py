@@ -33,6 +33,7 @@ import qa_tuning  # noqa: E402
 
 REPO = HERE.parent
 AGENT_REQUEST = HERE / "qa-agent-request.md"
+LOG_FILE = HERE / "qa-mother.log"      # 마더가 무엇을 지시했는지 남는 감사 기록
 
 POLL_SEC = 1.0
 FONT_UI = ("맑은 고딕", 9)
@@ -84,10 +85,16 @@ class Watcher(threading.Thread):
     def tick(self):
         cfg = orch.load_instances()
         self.q.put(("cfg", cfg))
-        self.q.put(("status", orch.status_rows(cfg)))
+        rows = orch.status_rows(cfg)
+        self.q.put(("status", rows))
 
         # 결과 파일이 바뀌었을 때만 무거운 집계를 돈다
         d = orch.data_dir(cfg)
+
+        # 명령 파일이 사라졌다 = 차일드가 집어갔다 (지시가 먹혔는지 확인용)
+        pending = {r["name"]: (d / orch.fname(r["name"], "qa-command.json")).exists()
+                   for r in rows}
+        self.q.put(("cmdfiles", pending))
         sig = None
         if d.exists():
             files = list(d.glob("*qa-result-*.json"))
@@ -234,8 +241,9 @@ class MotherApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("QA 마더 — 차일드 관리 콘솔")
-        self.geometry("1360x860")
-        self.minsize(1100, 700)
+        self.geometry("1440x940")
+        self.minsize(1100, 720)
+        self._set_icon()
 
         self.cfg = orch.load_instances()
         self.rows = []
@@ -249,17 +257,40 @@ class MotherApp(tk.Tk):
         self.watcher = Watcher(self.q)
 
         self._style()
+        self._menubar()
         self._header()
         self._toolbar()
         self._banner()
         self._body()
+        self._logpane()
         self._statusbar()
+        self.log("시작", f"마더 기동 — 데이터 {orch.data_dir(self.cfg)}")
 
         self.watcher.start()
         self.after(200, self._drain)
         self.protocol("WM_DELETE_WINDOW", self._quit)
 
     # ── 외형 ────────────────────────────────────────────────
+    def _set_icon(self):
+        """작업표시줄·타이틀바 아이콘 — 마더(큰 점)와 차일드(작은 점) 도식."""
+        try:
+            n = 32
+            img = tk.PhotoImage(width=n, height=n)
+            img.put(BG2, to=(0, 0, n, n))
+            cx, cy = 11, 16
+            for y in range(n):
+                for x in range(n):
+                    if (x - cx) ** 2 + (y - cy) ** 2 <= 36:          # 마더
+                        img.put(ACCENT, to=(x, y, x + 1, y + 1))
+                    elif (x - 24) ** 2 + (y - 9) ** 2 <= 9:           # 차일드 2개
+                        img.put(C_RUN, to=(x, y, x + 1, y + 1))
+                    elif (x - 24) ** 2 + (y - 23) ** 2 <= 9:
+                        img.put(C_RUN, to=(x, y, x + 1, y + 1))
+            self._icon = img          # GC 방지 — 참조를 들고 있어야 아이콘이 유지된다
+            self.iconphoto(True, img)
+        except Exception:
+            pass
+
     def _style(self):
         self.configure(bg=BG)
         s = ttk.Style(self)
@@ -316,6 +347,190 @@ class MotherApp(tk.Tk):
         s.configure("Treeview.Heading", background=BG3, foreground=FG_DIM,
                     font=FONT_UI_B, relief="flat")
         s.map("Treeview.Heading", background=[("active", BG_SEL)])
+
+    def _menubar(self):
+        m = tk.Menu(self, tearoff=0, bg=BG2, fg=FG, activebackground=BG_SEL,
+                    activeforeground=FG, borderwidth=0)
+
+        def sub():
+            return tk.Menu(m, tearoff=0, bg=BG2, fg=FG, activebackground=BG_SEL,
+                           activeforeground=FG, borderwidth=1, activeborderwidth=0)
+
+        f = sub()
+        f.add_command(label="데이터 폴더 열기", command=self.open_data_dir)
+        f.add_command(label="데이터 폴더 변경…", command=self.change_data_dir)
+        f.add_separator()
+        f.add_command(label="Claude 보고서 생성", command=self.make_claude_report)
+        f.add_command(label="활동 로그 열기", command=lambda: self.open_path(LOG_FILE))
+        f.add_command(label="활동 로그 화면 지우기", command=self.clear_log)
+        f.add_command(label="활동 로그 파일 비우기…", command=self.purge_log_file)
+        f.add_separator()
+        f.add_command(label="끝내기", command=self._quit)
+        m.add_cascade(label="파일", menu=f)
+
+        c = sub()
+        c.add_command(label="차일드 추가…", command=self.add_child)
+        c.add_command(label="편집…", command=self.edit_child)
+        c.add_command(label="복제…", command=self.dup_child)
+        c.add_command(label="삭제", command=self.del_child)
+        c.add_separator()
+        c.add_command(label="레지스트리 파일 열기", command=lambda: self.open_path(orch.INSTANCES_FILE))
+        m.add_cascade(label="차일드", menu=c)
+
+        r = sub()
+        r.add_command(label="기동", command=self.launch)
+        r.add_command(label="종료", command=self.kill)
+        r.add_command(label="잔재 정리", command=self.clear_stale)
+        r.add_separator()
+        r.add_command(label="선택에 투입", command=lambda: self.dispatch(False))
+        r.add_command(label="전체에 투입", command=lambda: self.dispatch(True))
+        r.add_separator()
+        r.add_command(label="막힘 응답 — 재시도", command=lambda: self.resume("retry"))
+        r.add_command(label="막힘 응답 — 건너뛰기", command=lambda: self.resume("skip"))
+        r.add_command(label="막힘 응답 — 중단", command=lambda: self.resume("abort"))
+        m.add_cascade(label="실행", menu=r)
+
+        t = sub()
+        t.add_command(label="밸런스 저장", command=self.save_tuning)
+        t.add_command(label="밸런스 다시 읽기", command=self.load_tuning)
+        t.add_separator()
+        t.add_command(label="문제 요약 → 지시문", command=lambda: self.gen_prompt("fix"))
+        t.add_command(label="에이전트 실행", command=self.run_agent)
+        t.add_command(label="에이전트 중단", command=self.stop_agent)
+        t.add_separator()
+        t.add_command(label="웹 대시보드 열기", command=self.open_dashboard)
+        m.add_cascade(label="도구", menu=t)
+
+        h = sub()
+        h.add_command(label="QA 문서(docs/qa.md)",
+                      command=lambda: self.open_path(REPO / "demo13-flashlight" / "docs" / "qa.md"))
+        h.add_command(label="정보", command=lambda: messagebox.showinfo(
+            "QA 마더", "QA 마더 — 차일드 관리 콘솔\n\n"
+                      "차일드(Unity 에디터 / 빌드 exe)가 떨군 파일을 1초마다 읽어\n"
+                      "상태·판정·이상·원본 로그를 보여주고, 시나리오를 투입한다.\n\n"
+                      f"레지스트리: {orch.INSTANCES_FILE}\n활동 로그: {LOG_FILE}"))
+        m.add_cascade(label="도움말", menu=h)
+
+        self.config(menu=m)
+
+    def _logpane(self):
+        """아래 도킹된 활동 로그 — 마더가 무슨 지시를 언제 했는지 그대로 남는다."""
+        wrap = ttk.Frame(self)
+        wrap.pack(fill="x", padx=10, pady=(0, 2))
+
+        bar = ttk.Frame(wrap)
+        bar.pack(fill="x")
+        self.v_log_open = tk.BooleanVar(value=True)
+        ttk.Checkbutton(bar, text="활동 로그", variable=self.v_log_open,
+                        command=self._toggle_log).pack(side="left")
+        ttk.Label(bar, text=f"— 모든 지시가 {LOG_FILE.name} 에도 기록됨",
+                  foreground=FG_DIM).pack(side="left", padx=6)
+        ttk.Button(bar, text="화면 지우기", width=11, command=self.clear_log).pack(side="right")
+        ttk.Button(bar, text="파일 열기", width=9,
+                   command=lambda: self.open_path(LOG_FILE)).pack(side="right", padx=4)
+
+        self.log_body = ttk.Frame(wrap)
+        self.log_body.pack(fill="x", pady=(2, 0))
+        self.tx_log = tk.Text(self.log_body, height=7, font=FONT_MONO, wrap="none",
+                              bg="#15181d", fg=FG, insertbackground=FG,
+                              selectbackground=BG_SEL, relief="flat", borderwidth=0,
+                              highlightthickness=1, highlightbackground=BORDER)
+        ys = ttk.Scrollbar(self.log_body, orient="vertical", command=self.tx_log.yview)
+        self.tx_log.configure(yscrollcommand=ys.set)
+        self.tx_log.pack(side="left", fill="both", expand=True)
+        ys.pack(side="right", fill="y")
+        self.tx_log.tag_configure("time", foreground=FG_DIM)
+        self.tx_log.tag_configure("cmd", foreground=ACCENT, font=("Consolas", 9, "bold"))
+        self.tx_log.tag_configure("ok", foreground=C_PASS)
+        self.tx_log.tag_configure("warn", foreground=C_WARN)
+        self.tx_log.tag_configure("err", foreground=C_FAIL)
+
+    def _toggle_log(self):
+        if self.v_log_open.get():
+            self.log_body.pack(fill="x", pady=(2, 0))
+        else:
+            self.log_body.pack_forget()
+
+    def log(self, kind, text, level=""):
+        """활동 1건 — 화면 + 파일 양쪽에 남긴다."""
+        now = datetime.now()
+        self.tx_log.insert("end", f"[{now:%H:%M:%S}] ", "time")
+        self.tx_log.insert("end", f"{kind:<8}", "cmd")
+        self.tx_log.insert("end", f" {text}\n", level)
+        self.tx_log.see("end")
+        try:
+            with open(LOG_FILE, "a", encoding="utf-8") as fp:
+                fp.write(f"{now:%Y-%m-%d %H:%M:%S}\t{kind}\t{text}\n")
+        except Exception:
+            pass
+
+    def clear_log(self):
+        """화면만 지운다 — 지웠다는 사실도 로그로 남겨 기록에 구멍이 없게."""
+        n = int(self.tx_log.index("end-1c").split(".")[0]) - 1
+        if n <= 0:
+            return
+        if not messagebox.askyesno("활동 로그",
+                                   f"화면의 로그 {n}줄을 지웁니다.\n"
+                                   f"파일({LOG_FILE.name})의 기록은 그대로 남습니다.\n\n계속할까요?"):
+            return
+        self.tx_log.delete("1.0", "end")
+        self.log("로그", f"화면 로그 {n}줄 지움 — 파일 기록은 유지", "warn")
+
+    def purge_log_file(self):
+        """파일까지 비운다 — 비웠다는 표시를 첫 줄에 남긴다."""
+        size = LOG_FILE.stat().st_size if LOG_FILE.exists() else 0
+        if not messagebox.askyesno("활동 로그 파일 비우기",
+                                   f"{LOG_FILE}\n({size:,} 바이트)\n\n"
+                                   "지금까지의 기록이 사라집니다. 비운 사실만 첫 줄에 남습니다.\n\n"
+                                   "정말 비울까요?"):
+            return
+        try:
+            with open(LOG_FILE, "w", encoding="utf-8") as fp:
+                fp.write(f"{datetime.now():%Y-%m-%d %H:%M:%S}\t로그\t"
+                         f"이전 기록({size:,} 바이트)을 사용자가 비움\n")
+            self.log("로그", f"파일 기록 비움 ({size:,} 바이트) — 비운 사실은 남김", "warn")
+        except Exception as e:
+            messagebox.showerror("활동 로그", f"비우기 실패: {e}")
+
+    def open_path(self, p):
+        p = Path(p)
+        if not p.exists():
+            if p == LOG_FILE:
+                p.write_text("", encoding="utf-8")
+            else:
+                messagebox.showinfo("열기", f"파일이 없습니다: {p}")
+                return
+        os.startfile(str(p))
+
+    def open_dashboard(self):
+        ps = HERE / "qa-dashboard.ps1"
+        if not ps.exists():
+            messagebox.showinfo("대시보드", f"{ps} 없음")
+            return
+        subprocess.Popen(["powershell", "-ExecutionPolicy", "Bypass", "-File", str(ps)])
+        self.log("대시보드", "웹 대시보드 기동 → http://localhost:8787")
+
+    # ── git 변경 추적 — 에이전트가 실제로 뭘 고쳤는지 ────────
+    def git_state(self):
+        """{경로: (추가줄, 삭제줄)} — HEAD 대비 변경 + 미추적 파일."""
+        state = {}
+        try:
+            r = subprocess.run(["git", "diff", "--numstat", "HEAD"], cwd=str(REPO),
+                               capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", timeout=30)
+            for line in r.stdout.splitlines():
+                parts = line.split("\t")
+                if len(parts) == 3:
+                    state[parts[2]] = (parts[0], parts[1])
+            r2 = subprocess.run(["git", "ls-files", "--others", "--exclude-standard"],
+                                cwd=str(REPO), capture_output=True, text=True,
+                                encoding="utf-8", errors="replace", timeout=30)
+            for p in r2.stdout.splitlines():
+                if p.strip():
+                    state.setdefault(p.strip(), ("신규", "-"))
+        except Exception:
+            pass
+        return state
 
     def _header(self):
         h = ttk.Frame(self, padding=(10, 8, 10, 4))
@@ -486,9 +701,18 @@ class MotherApp(tk.Tk):
 
         top = ttk.Frame(f)
         top.pack(fill="x")
-        ttk.Label(top, text="GameTuning", font=FONT_UI_B).pack(side="left")
-        ttk.Label(top, text="— 게임 밸런스 단일 노브 (Resources/Data/GameTuning.asset)",
-                  foreground=FG_DIM).pack(side="left", padx=6)
+        ttk.Label(top, text="밸런스", font=FONT_UI_B).pack(side="left")
+        ttk.Label(top, text="소스").pack(side="left", padx=(12, 4))
+        self.bal_sources = qa_tuning.list_sources()
+        self.v_bal_src = tk.StringVar()
+        self.cb_bal_src = ttk.Combobox(top, textvariable=self.v_bal_src, width=34,
+                                       state="readonly", font=FONT_UI,
+                                       values=[s["label"] for s in self.bal_sources])
+        self.cb_bal_src.current(0)
+        self.cb_bal_src.pack(side="left")
+        self.cb_bal_src.bind("<<ComboboxSelected>>", lambda e: self.switch_source())
+        self.lb_bal_file = ttk.Label(top, text="", foreground=FG_DIM)
+        self.lb_bal_file.pack(side="left", padx=8)
         ttk.Button(top, text="다시 읽기", command=self.load_tuning).pack(side="right")
         ttk.Button(top, text="저장", style="Big.TButton", command=self.save_tuning).pack(side="right", padx=4)
         self.lb_bal = ttk.Label(top, text="", foreground=C_EDIT, font=FONT_UI_B)
@@ -587,6 +811,7 @@ class MotherApp(tk.Tk):
         ttk.Button(row2, text="진단만", command=lambda: self.gen_prompt("diagnose")).pack(side="left", padx=4)
         ttk.Button(row2, text="▶ 실행", style="Big.TButton", command=self.run_agent).pack(side="left", padx=(14, 4))
         ttk.Button(row2, text="■ 중단", command=self.stop_agent).pack(side="left")
+        ttk.Button(row2, text="변경 내용 보기", command=self.show_agent_diff).pack(side="left", padx=6)
         self.lb_agent = ttk.Label(row2, text="대기", foreground=FG_DIM)
         self.lb_agent.pack(side="left", padx=12)
 
@@ -647,10 +872,15 @@ class MotherApp(tk.Tk):
         return f
 
     def _statusbar(self):
-        s = ttk.Frame(self, padding=(10, 3))
+        tk.Frame(self, height=1, bg=BORDER).pack(fill="x")
+        s = ttk.Frame(self, padding=(10, 4))
         s.pack(fill="x")
+
         self.lb_stat = ttk.Label(s, text="—", font=FONT_UI)
         self.lb_stat.pack(side="left")
+        ttk.Label(s, text="│", foreground=BORDER).pack(side="left", padx=8)
+        self.lb_stat2 = ttk.Label(s, text="", font=FONT_UI, foreground=FG_DIM)
+        self.lb_stat2.pack(side="left")
         ttk.Button(s, text="Claude 보고서 생성", command=self.make_claude_report).pack(side="right")
         ttk.Button(s, text="🔧 에이전트에 넘기기",
                    command=lambda: self.gen_prompt("fix")).pack(side="right", padx=6)
@@ -673,6 +903,14 @@ class MotherApp(tk.Tk):
                     self.on_results(payload)
                 elif kind == "reports":
                     self.on_reports(payload)
+                elif kind == "cmdfiles":
+                    prev = getattr(self, "_cmd_pending", None)
+                    if prev is not None:
+                        for name, now in payload.items():
+                            if prev.get(name) and not now:
+                                self.log("수령", f"[{name or '(기본)'}] 차일드가 명령을 집어감 "
+                                                 f"— 실행 시작", "ok")
+                    self._cmd_pending = payload
                 elif kind == "agent":
                     t = self.tx_agent_out
                     at_bottom = t.yview()[1] > 0.999
@@ -681,12 +919,7 @@ class MotherApp(tk.Tk):
                     if at_bottom:
                         t.see("end")
                 elif kind == "agent_done":
-                    ok = payload == 0
-                    self.lb_agent.config(text="완료" if ok else f"종료 코드 {payload}",
-                                         foreground=C_PASS if ok else C_FAIL)
-                    self.tx_agent_out.insert("end", f"\n── 에이전트 종료 (코드 {payload}) ──\n",
-                                             "ok" if ok else "err")
-                    self.tx_agent_out.see("end")
+                    self.on_agent_done(payload)
                 elif kind == "error":
                     self.lb_watch.config(text=f"⚠ 감시 오류: {payload[:60]}", foreground=C_FAIL)
         except queue.Empty:
@@ -747,9 +980,13 @@ class MotherApp(tk.Tk):
         p = self.summary.get("pass", 0)
         f = self.summary.get("fail", 0)
         blk = sum(1 for r in rows if r["blocked"])
-        self.lb_stat.config(
-            text=f"차일드 {len(rows)}  ·  실행중 {n_run}  ·  통과 {p}  ·  미통과 {f}"
-                 + (f"  ·  ⛔막힘 {blk}" if blk else ""))
+        self.lb_stat.config(text=f"차일드 {len(rows)}  ·  실행중 {n_run}"
+                                 + (f"  ·  ⛔막힘 {blk}" if blk else ""),
+                            foreground=C_BLOCK if blk else FG)
+        self.lb_stat2.config(text=f"통과 {p}  ·  미통과 {f}  ·  런 {self.summary.get('runCount', 0)}건")
+        self.title(f"QA 마더 — 차일드 {len(rows)}"
+                   + (f" · 실행중 {n_run}" if n_run else "")
+                   + (" · ⛔막힘" if blk else ""))
 
     def on_results(self, summary):
         self.summary = summary
@@ -771,6 +1008,9 @@ class MotherApp(tk.Tk):
                 self.nb.select(self.tab_runs)
                 self.tv_runs.selection_set("0")
                 self.show_run_detail()
+                r0 = runs[0]
+                self.log("결과", f"[{r0['instance'] or '(기본)'}] {r0['verdict']} — {r0['reason']}",
+                         "ok" if r0["verdict"] == "PASS" else "err")
             self.last_verdict_seen = sig
 
     def on_reports(self, reports):
@@ -964,6 +1204,11 @@ class MotherApp(tk.Tk):
             messagebox.showerror("투입 실패", res["error"])
             return
         who = ", ".join(d["instance"] or "(기본)" for d in res["dispatched"])
+        cyc = int(self.v_cycles.get() or 0)
+        for d in res["dispatched"]:
+            self.log("투입", f"[{d['instance'] or '(기본)'}] 시나리오 '{res['scenario']}' "
+                             f"id={d['id']} seed={d['seed']}"
+                             f"{f' 사이클={cyc}' if cyc else ''} → {Path(d['file']).name}", "cmd")
         self.nb.select(self.tab_live)
         messagebox.showinfo("투입 완료",
                             f"시나리오 '{res['scenario']}' → {who}\n\n"
@@ -972,6 +1217,10 @@ class MotherApp(tk.Tk):
 
     def launch(self):
         res = orch.launch_instances(self.cfg, self.sel_names())
+        for l in res["launched"]:
+            self.log("기동", f"[{l['instance'] or '(기본)'}] pid={l['pid']}", "ok")
+        for s in res["skipped"]:
+            self.log("기동실패", f"[{s['instance'] or '(기본)'}] {s['why']}", "warn")
         msg = "\n".join(f"기동: {l['instance'] or '(기본)'} pid={l['pid']}" for l in res["launched"])
         msg += "\n" + "\n".join(f"스킵: {s['instance'] or '(기본)'} — {s['why']}" for s in res["skipped"])
         messagebox.showinfo("기동", msg.strip() or "대상 없음")
@@ -981,16 +1230,30 @@ class MotherApp(tk.Tk):
         if not messagebox.askyesno("종료", f"{names or '전체'} 차일드 프로세스를 종료할까요?"):
             return
         killed = orch.kill_instances(self.cfg, names)
+        self.log("종료", f"차일드 종료: {killed or '대상 없음'}", "warn")
         messagebox.showinfo("종료", f"종료: {killed or '없음'}")
 
     # ── 밸런스 ──────────────────────────────────────────────
+    def bal_src(self):
+        i = self.cb_bal_src.current()
+        return self.bal_sources[i if 0 <= i < len(self.bal_sources) else 0]
+
+    def switch_source(self):
+        if self.bal_pending and not messagebox.askyesno(
+                "밸런스", f"저장 안 한 변경 {len(self.bal_pending)}건이 있습니다.\n"
+                          "소스를 바꾸면 버려집니다. 계속할까요?"):
+            return
+        self.load_tuning()
+
     def load_tuning(self):
+        src = self.bal_src()
         try:
-            self.bal_fields = qa_tuning.load()
+            self.bal_fields = qa_tuning.load(src["key"])
         except Exception as e:
-            messagebox.showerror("밸런스", f"GameTuning 읽기 실패: {e}")
+            messagebox.showerror("밸런스", f"{src['label']} 읽기 실패: {e}")
             self.bal_fields = []
         self.bal_pending = {}
+        self.lb_bal_file.config(text=f"→ {Path(src['asset']).name} · 메타 {Path(src['cs']).name}")
         self.fill_tuning()
 
     def bal_value(self, f):
@@ -1128,16 +1391,23 @@ class MotherApp(tk.Tk):
         if not self.bal_pending:
             messagebox.showinfo("밸런스", "바뀐 값이 없습니다.")
             return
+        src = self.bal_src()
         lines = "\n".join(f"  {k} = {v}" for k, v in self.bal_pending.items())
-        if not messagebox.askyesno("밸런스 저장", f"GameTuning.asset에 {len(self.bal_pending)}건을 씁니다.\n\n{lines}"):
+        if not messagebox.askyesno("밸런스 저장",
+                                   f"{src['label']}\n{Path(src['asset']).name} 에 "
+                                   f"{len(self.bal_pending)}건을 씁니다.\n\n{lines}"):
             return
-        applied, warns = qa_tuning.save(self.bal_pending)
+        applied, warns = qa_tuning.save(src["key"], self.bal_pending)
+        self.log("밸런스", f"{src['label']} 저장 — {'; '.join(applied)}", "cmd")
+        for w in warns:
+            self.log("밸런스", w, "warn")
         self.load_tuning()
         msg = "적용:\n" + "\n".join(f"  {a}" for a in applied)
         if warns:
             msg += "\n\n경고:\n" + "\n".join(warns)
-        msg += ("\n\n※ Unity 창을 한 번 클릭하면 에셋을 다시 읽습니다.\n"
-                "※ buildingEnterRatio를 바꿨다면 `빌드 ▸ 지역1` 재실행이 필요합니다.")
+        msg += "\n\n※ Unity 창을 한 번 클릭하면 에셋을 다시 읽습니다."
+        if src["key"] == "gametuning":
+            msg += "\n※ buildingEnterRatio를 바꿨다면 `빌드 ▸ 지역1` 재실행이 필요합니다."
         messagebox.showinfo("밸런스 저장 완료", msg)
 
     # ── 에이전트 ────────────────────────────────────────────
@@ -1205,6 +1475,9 @@ class MotherApp(tk.Tk):
         self.tx_prompt.delete("1.0", "end")
         self.tx_prompt.insert("1.0", text)
         self.nb.select(self.tab_agent)
+        self.log("지시문", f"{'수정' if mode == 'fix' else '진단'} 지시문 생성 — "
+                          f"{len(text)}자 (막힌 차일드 {len(blocked)}, 최신런 "
+                          f"{runs[0]['verdict'] if runs else '없음'})")
         return text
 
     def agent_from_blocked(self):
@@ -1236,13 +1509,22 @@ class MotherApp(tk.Tk):
         if self.v_edit_ok.get():
             cmd += ["--permission-mode", "acceptEdits"]
 
+        # 실행 전 상태를 찍어둔다 — 끝나고 비교해야 "고쳤는지"를 말할 수 있다
+        self.git_before = self.git_state()
+        self.agent_started = datetime.now()
+        mode = "수정 허용" if self.v_edit_ok.get() else "진단만(수정 금지)"
+
         self.tx_agent_out.delete("1.0", "end")
         self.tx_agent_out.insert("end", f"$ claude -p … --agent {self.v_agent.get()} "
                                         f"--model {self.v_model.get()}"
                                         f"{' --permission-mode acceptEdits' if self.v_edit_ok.get() else ''}\n"
-                                        f"  지시문: {AGENT_REQUEST}\n\n", "dim")
+                                        f"  모드: {mode}\n"
+                                        f"  지시문: {AGENT_REQUEST} ({len(prompt)}자)\n"
+                                        f"  실행 전 변경된 파일: {len(self.git_before)}개\n\n", "dim")
         self.lb_agent.config(text="● 실행 중", foreground=C_RUN)
         self.nb.select(self.tab_agent)
+        self.log("지시", f"에이전트 {self.v_agent.get()} 실행 ({mode}, 모델 {self.v_model.get()}, "
+                         f"지시문 {len(prompt)}자)", "cmd")
 
         def worker():
             try:
@@ -1260,6 +1542,66 @@ class MotherApp(tk.Tk):
 
         threading.Thread(target=worker, daemon=True).start()
 
+    def on_agent_done(self, code):
+        """끝났으면 **무엇이 바뀌었는지**를 파일 단위로 보여준다.
+        이게 없으면 '고쳤는지 안 고쳤는지' 알 길이 없다."""
+        ok = (code == 0)
+        t = self.tx_agent_out
+        after = self.git_state()
+        before = getattr(self, "git_before", {})
+
+        changed = []
+        for path, nums in after.items():
+            if before.get(path) != nums:
+                changed.append((path, nums, path not in before))
+
+        secs = (datetime.now() - getattr(self, "agent_started", datetime.now())).total_seconds()
+        t.insert("end", f"\n{'─' * 60}\n", "dim")
+        t.insert("end", f"에이전트 종료 — 코드 {code} · {secs:.0f}초\n", "ok" if ok else "err")
+
+        if changed:
+            t.insert("end", f"\n✔ 이 실행으로 바뀐 파일 {len(changed)}개\n", "ok")
+            for path, (add, dele), is_new in sorted(changed):
+                mark = "신규" if is_new else "수정"
+                delta = f"+{add} -{dele}" if add != "신규" else "새 파일"
+                t.insert("end", f"    [{mark}] {path}   {delta}\n", "ok")
+            t.insert("end", "\n  → 내용 확인:  git diff\n", "dim")
+            self.log("수정됨", f"에이전트가 파일 {len(changed)}개 변경 — "
+                              + ", ".join(p for p, _, _ in sorted(changed)[:5])
+                              + ("…" if len(changed) > 5 else ""), "ok")
+        else:
+            if self.v_edit_ok.get():
+                t.insert("end", "\n✘ 바뀐 파일 없음 — 에이전트가 코드를 고치지 않았다.\n", "warn")
+                t.insert("end", "   위 출력에서 이유를 확인하세요(고칠 게 없다고 판단했거나, "
+                                "진단만 하고 끝냈을 수 있음).\n", "dim")
+                self.log("변경없음", "에이전트가 파일을 고치지 않음 (수정 허용 상태였음)", "warn")
+            else:
+                t.insert("end", "\n· 바뀐 파일 없음 — '파일 수정 허용'이 꺼져 있어 진단만 했습니다.\n", "dim")
+                t.insert("end", "   실제로 고치게 하려면 체크박스를 켜고 다시 실행하세요.\n", "dim")
+                self.log("진단만", "수정 허용 꺼짐 — 파일 변경 없음")
+
+        t.see("end")
+        self.lb_agent.config(
+            text=(f"완료 · 파일 {len(changed)}개 수정" if changed else
+                  ("완료 · 변경 없음" if ok else f"실패(코드 {code})")),
+            foreground=C_PASS if (ok and changed) else (C_WARN if ok else C_FAIL))
+
+    def show_agent_diff(self):
+        try:
+            r = subprocess.run(["git", "diff"], cwd=str(REPO), capture_output=True,
+                               text=True, encoding="utf-8", errors="replace", timeout=30)
+            body = r.stdout or "(변경 없음)"
+        except Exception as e:
+            body = f"git diff 실패: {e}"
+        t = self.tx_agent_out
+        t.insert("end", f"\n{'─' * 60}\n── git diff ──\n", "head")
+        for line in body.splitlines()[:600]:
+            style = "ok" if line.startswith("+") and not line.startswith("+++") else (
+                "err" if line.startswith("-") and not line.startswith("---") else
+                ("head" if line.startswith("diff --git") else "dim"))
+            t.insert("end", line + "\n", style)
+        t.see("end")
+
     def stop_agent(self):
         p = self.agent_proc
         if p is None or p.poll() is not None:
@@ -1273,12 +1615,21 @@ class MotherApp(tk.Tk):
 
     def clear_stale(self):
         removed = orch.clear_stale(self.cfg, self.sel_names())
+        if removed:
+            self.log("정리", f"잔재 파일 삭제: {', '.join(removed)}", "warn")
         messagebox.showinfo("잔재 정리", "\n".join(removed) if removed else "지울 잔재 없음")
 
     def resume(self, action):
         rows = [r for r in self.rows if r["blocked"]]
+        if not rows:
+            self.log("응답", "막힌 차일드가 없어 무시됨", "warn")
+            return
         names = ",".join(r["name"] for r in rows)
         orch.write_resume(self.cfg, names, action, "마더 GUI 응답")
+        ko = {"retry": "재시도", "skip": "건너뛰기", "abort": "중단"}[action]
+        for r in rows:
+            b = r["blockedInfo"] or {}
+            self.log("응답", f"[{r['instance']}] {b.get('kind','?')} → {ko}", "cmd")
 
     # ── 차일드 편집 ─────────────────────────────────────────
     def _reload_cfg(self):
@@ -1295,6 +1646,8 @@ class MotherApp(tk.Tk):
             return
         self.cfg.setdefault("instances", []).append(d.result)
         save_instances(self.cfg)
+        self.log("차일드", f"추가 — [{d.result['name'] or '(기본)'}] {d.result['label']} "
+                          f"({d.result['kind']}) {d.result['exePath'] or '경로 미설정'}", "ok")
 
     def _sel_one(self):
         sel = self.tree.selection()
@@ -1317,6 +1670,8 @@ class MotherApp(tk.Tk):
         if d.result:
             inst.update(d.result)
             save_instances(self.cfg)
+            self.log("차일드", f"편집 — [{d.result['name'] or '(기본)'}] {d.result['label']} "
+                              f"({d.result['kind']}) {d.result['exePath'] or '경로 미설정'}")
 
     def dup_child(self):
         inst = self._sel_one()
@@ -1340,6 +1695,7 @@ class MotherApp(tk.Tk):
             return
         self.cfg["instances"].remove(inst)
         save_instances(self.cfg)
+        self.log("차일드", f"삭제 — [{inst.get('name') or '(기본)'}] {inst.get('label','')}", "warn")
 
     # ── 기타 ────────────────────────────────────────────────
     def open_data_dir(self):
@@ -1393,6 +1749,8 @@ class MotherApp(tk.Tk):
             lines += ["", "## 원본 전체 로그", "", f"`{self.reports[0]['file']}`"]
 
         CLAUDE_REPORT.write_text("\n".join(lines), encoding="utf-8")
+        self.log("보고서", f"Claude 보고서 생성 — {CLAUDE_REPORT.name} "
+                          f"(런 {s.get('runCount', 0)}건, 통과 {s.get('pass', 0)}/미통과 {s.get('fail', 0)})")
         messagebox.showinfo("보고서 생성",
                             f"{CLAUDE_REPORT}\n\n이 경로를 Claude가 읽습니다.\n"
                             "채팅에 'QA 결과 봐줘'만 치면 됩니다.")
