@@ -418,9 +418,24 @@ public static class Zone1GreyboxLayout
     }
 
     /// <summary>공용 내부(Int_Generic)로 들어가는 진입 트리거. 복귀는 `__back__`(들어온 문 앞).
-    /// 전용 내부가 만들어진 건물은 Enter()로 개별 지정하고, 나머지 절차 생성 건물이 이걸 쓴다.</summary>
+    /// 전용 내부가 만들어진 건물은 Enter()로 개별 지정하고, 나머지 절차 생성 건물이 이걸 쓴다.
+    ///
+    /// **진입 가능 비율은 `GameTuning.buildingEnterRatio` 노브**(1=전부, 0.5=절반).
+    /// "건물을 더 열지"는 QA 플레이 결과로 판단 — 값만 바꾸고 이 빌더를 다시 돌리면 반영된다.
+    /// 선택은 이름 해시 기반이라 **결정론적**(같은 값이면 같은 건물이 열림).</summary>
     static int EnterGeneric(GameObject m, string name, float x, float y)
-        => Enter(m, name, x, y, "Int_Generic", BuildingReturn.BackSpawnId);
+    {
+        float ratio = GameTuning.Instance != null ? GameTuning.Instance.buildingEnterRatio : 1f;
+        if (ratio < 1f)
+        {
+            if (ratio <= 0f) return 0;
+            // 이름 해시 → 0~1 균등. ratio 미만인 건물만 연다.
+            uint h = 2166136261u;
+            for (int i = 0; i < name.Length; i++) { h ^= name[i]; h *= 16777619u; }
+            if ((h % 1000u) / 1000f >= ratio) return 0;
+        }
+        return Enter(m, name, x, y, "Int_Generic", BuildingReturn.BackSpawnId);
+    }
 
     /// <summary>내부에서 돌아왔을 때 서는 자리(from_&lt;건물&gt;). 건물 문 앞.</summary>
     static int ReturnSpawn(GameObject m, string pointId, float x, float y)

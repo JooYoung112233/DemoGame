@@ -26,6 +26,11 @@ public class MapSpawnController : MonoBehaviour
     [Tooltip("비우면 RegionTimeManager 활성 지역 사용")]
     [SerializeField] string regionIdOverride;
 
+    [Header("건물 내부")]
+    [Tooltip("이 씬이 '건물 내부'인가. true면 예산에 GameTuning.interiorLootBudgetMult를 곱한다\n" +
+             "(내부는 맵 전체가 아니라 한 채이므로). 루트 테이블 자체는 지역 확률 그대로 사용.")]
+    [SerializeField] bool isInterior;
+
     [Header("디버그")]
     [SerializeField] bool logSpawnDetails = true;
 
@@ -119,8 +124,18 @@ public class MapSpawnController : MonoBehaviour
         int groundBudget = profile.GetGroundBudget(isNight);
         int containerBudget = profile.GetContainerBudget(isNight);
 
+        // 2026-07-11: **내부 씬은 '한 채'라 맵 전체 예산을 그대로 쓰면 과다**(내부가 12개면 12맵치가 뿌려짐).
+        //   GameTuning.interiorLootBudgetMult로 줄인다 — QA가 "파밍을 늘릴지"를 판단해 조절하는 노브.
+        if (isInterior)
+        {
+            float im = GameTuning.Instance != null ? GameTuning.Instance.interiorLootBudgetMult : 0.25f;
+            groundBudget    = Mathf.Max(1, Mathf.RoundToInt(groundBudget * im));
+            containerBudget = Mathf.Max(1, Mathf.RoundToInt(containerBudget * im));
+        }
+
         if (logSpawnDetails)
-            Debug.Log($"[MapSpawnController] 예산: Ground={groundBudget}, Container={containerBudget} (night={isNight})");
+            Debug.Log($"[MapSpawnController] 예산: Ground={groundBudget}, Container={containerBudget} " +
+                      $"(night={isNight}, interior={isInterior})");
 
         // 3. 아이템 풀 생성
         var groundItems = GenerateItemPool(groundBudget, regionId, isNight);

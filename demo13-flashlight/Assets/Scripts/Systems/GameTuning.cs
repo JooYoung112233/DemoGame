@@ -59,6 +59,18 @@ public class GameTuning : ScriptableObject
     [Range(0f, 5f)] public float valuableWeightMult = 1f;
     [Tooltip("맵 아이템 스폰 총량 전역 배율. 1=동일. MapSpawnProfile 예산에 추가로 곱함.")]
     [Range(0f, 3f)] public float itemSpawnCountMult = 1f;
+
+    // ── 건물 내부 (진입 가능 비율 · 내부 루팅 예산) ─────────────────────
+    // 2026-07-11: 지역1의 건물은 수십 채인데 전용 내부 씬은 12개뿐이라 나머지는 공용 내부를 돌려 쓴다.
+    //   "건물을 더 열지 / 파밍을 늘릴지"는 **QA 플레이 결과로 판단**하므로 값이 아니라 **노브**로 뺀다.
+    //   둘 다 씬 재빌드 없이(내부 예산) 또는 빌더 1회 재실행(진입 비율)으로 반영된다.
+    [Tooltip("건물 내부가 받는 루팅 예산 배율. 내부 씬은 맵 전체가 아니라 '한 채'라 1.0이면 과다.\n" +
+             "MapSpawnController(isInterior=true)가 곱한다. 예: 0.25면 맵 예산의 1/4.")]
+    [Range(0.05f, 2f)] public float interiorLootBudgetMult = 0.25f;
+
+    [Tooltip("절차 생성 건물 중 실제로 **진입 가능**하게 만들 비율(0~1). 1=전부, 0.5=절반.\n" +
+             "Zone1 빌더가 결정론적으로 고른다 — 값을 바꾸면 `빌드 ▸ 지역1` 재실행 필요.")]
+    [Range(0f, 1f)] public float buildingEnterRatio = 1f;
     [Tooltip("적 스폰 마릿수 전역 배율. 1=동일. EnemySpawner가 각 SpawnZone.enemyCount에 곱함(반올림).")]
     [Range(0f, 3f)] public float enemySpawnCountMult = 1f;
     [Tooltip("적 처치 시 전리품(지상 티어 루트) 드랍 확률. 1=항상 굴림(루트 자체 확률은 별도), 0=안 떨굼. EnemyController가 읽음.")]

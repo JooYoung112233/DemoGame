@@ -132,6 +132,9 @@ public static class InteriorBuild
         var p  = so.FindProperty("profile");              if (p  != null) p.objectReferenceValue = profile;
         var r  = so.FindProperty("regionIdOverride");     if (r  != null) r.stringValue = regionId;
         var fb = so.FindProperty("fallbackToRegionLoot"); if (fb != null) fb.boolValue = true;
+        // 내부 씬 표시 — 런타임에 GameTuning.interiorLootBudgetMult가 곱해진다(맵 전체 예산 그대로 쓰면 과다).
+        //   루트 **테이블**은 지역 확률(regionId) 그대로 → 내부 파밍도 지역 확률에 맞춰 나온다.
+        var it = so.FindProperty("isInterior");           if (it != null) it.boolValue = true;
         so.ApplyModifiedPropertiesWithoutUndo();
         return 1;
     }
