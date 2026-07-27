@@ -15,6 +15,7 @@ QA 마더 (GUI) — 차일드 관리 콘솔.
 import json
 import os
 import queue
+import shutil
 import subprocess
 import sys
 import threading
@@ -28,6 +29,10 @@ from tkinter import ttk, messagebox, filedialog
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import qa_orchestrator as orch  # noqa: E402
+import qa_tuning  # noqa: E402
+
+REPO = HERE.parent
+AGENT_REQUEST = HERE / "qa-agent-request.md"
 
 POLL_SEC = 1.0
 FONT_UI = ("맑은 고딕", 9)
@@ -35,12 +40,24 @@ FONT_UI_B = ("맑은 고딕", 9, "bold")
 FONT_MONO = ("Consolas", 9)          # ASCII 히트맵 정렬용(한글은 폰트 링크로 대체됨)
 CLAUDE_REPORT = HERE / "qa-report-for-claude.md"
 
-# 상태별 색 — 트리 태그로 쓴다
-C_RUN = "#1a7f37"
-C_DEAD = "#8b949e"
-C_FAIL = "#c1121f"
-C_PASS = "#1a7f37"
-C_BLOCK = "#b45309"
+# ── 다크 팔레트 ──────────────────────────────────────────────
+BG = "#1b1e24"        # 창 배경
+BG2 = "#22262e"       # 패널
+BG3 = "#2b303a"       # 입력·선택
+BG_SEL = "#33507a"    # 선택 행
+BORDER = "#39404d"
+FG = "#d6dae2"
+FG_DIM = "#8a919e"
+ACCENT = "#5aa2ff"
+
+# 상태별 색 (어두운 배경 위에서 읽히도록 밝은 톤)
+C_RUN = "#4ade80"
+C_PASS = "#4ade80"
+C_DEAD = "#6b7280"
+C_FAIL = "#f87171"
+C_WARN = "#fbbf24"
+C_BLOCK = "#fbbf24"
+C_EDIT = "#c084fc"    # 저장 대기 중인 밸런스 수정
 
 
 # ─────────────────────────────────────────────────────────────
@@ -100,6 +117,24 @@ def save_instances(cfg):
     orch.INSTANCES_FILE.write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
+def list_agents():
+    """.claude/agents/*.md — QA 관련을 앞에 둔다."""
+    d = REPO / ".claude" / "agents"
+    names = sorted(p.stem for p in d.glob("*.md")) if d.exists() else []
+    head = [n for n in ("dev-fixer", "qa-runner") if n in names]
+    return head + [n for n in names if n not in head] or ["dev-fixer"]
+
+
+def num(v):
+    """None(파싱 실패)도 안전하게 표시."""
+    return "?" if v is None else f"{v:g}"
+
+
+def claude_exe():
+    """윈도우에서는 claude.cmd — which가 PATHEXT까지 훑어 잡아준다."""
+    return shutil.which("claude") or shutil.which("claude.cmd")
+
+
 # ─────────────────────────────────────────────────────────────
 #  차일드 편집 대화상자
 # ─────────────────────────────────────────────────────────────
@@ -135,7 +170,7 @@ class ChildDialog(tk.Toplevel):
         ttk.Label(f, text="이름(파일 접두)", font=FONT_UI).grid(row=r, column=0, sticky="w", pady=3)
         ttk.Entry(f, textvariable=self.v_name, width=12, font=FONT_UI).grid(row=r, column=1, sticky="w")
         ttk.Label(f, text="A → A-qa-command.json (비우면 에디터 기본)",
-                  font=FONT_UI, foreground="#666").grid(row=r, column=2, sticky="w", padx=6)
+                  font=FONT_UI, foreground=FG_DIM).grid(row=r, column=2, sticky="w", padx=6)
         r += 1
 
         ttk.Label(f, text="종류", font=FONT_UI).grid(row=r, column=0, sticky="w", pady=3)
@@ -143,7 +178,7 @@ class ChildDialog(tk.Toplevel):
                           width=10, state="readonly", font=FONT_UI)
         cb.grid(row=r, column=1, sticky="w")
         ttk.Label(f, text="build=마더가 직접 실행 / editor=사람이 F9",
-                  font=FONT_UI, foreground="#666").grid(row=r, column=2, sticky="w", padx=6)
+                  font=FONT_UI, foreground=FG_DIM).grid(row=r, column=2, sticky="w", padx=6)
         r += 1
 
         ttk.Label(f, text="표시 이름", font=FONT_UI).grid(row=r, column=0, sticky="w", pady=3)
@@ -162,7 +197,7 @@ class ChildDialog(tk.Toplevel):
         r += 1
 
         ttk.Label(f, text="-qa-serve = 명령 대기 모드(마더가 시나리오를 밀어 넣을 수 있음)",
-                  font=FONT_UI, foreground="#666").grid(row=r, column=1, columnspan=3, sticky="w", pady=(0, 8))
+                  font=FONT_UI, foreground=FG_DIM).grid(row=r, column=1, columnspan=3, sticky="w", pady=(0, 8))
         r += 1
 
         bar = ttk.Frame(f)
@@ -226,17 +261,61 @@ class MotherApp(tk.Tk):
 
     # ── 외형 ────────────────────────────────────────────────
     def _style(self):
+        self.configure(bg=BG)
         s = ttk.Style(self)
         try:
-            s.theme_use("clam")
+            s.theme_use("clam")   # clam만이 색을 제대로 먹는다(vista/xpnative는 무시)
         except tk.TclError:
             pass
-        s.configure("Treeview", font=FONT_UI, rowheight=23)
-        s.configure("Treeview.Heading", font=FONT_UI_B)
-        s.configure("TButton", font=FONT_UI, padding=3)
-        s.configure("TLabel", font=FONT_UI)
-        s.configure("TCheckbutton", font=FONT_UI)
-        s.configure("Big.TButton", font=FONT_UI_B, padding=4)
+
+        s.configure(".", background=BG, foreground=FG, fieldbackground=BG3,
+                    bordercolor=BORDER, font=FONT_UI)
+        s.configure("TFrame", background=BG)
+        s.configure("TLabel", background=BG, foreground=FG, font=FONT_UI)
+        s.configure("TLabelframe", background=BG, foreground=FG_DIM, bordercolor=BORDER)
+        s.configure("TLabelframe.Label", background=BG, foreground=FG_DIM, font=FONT_UI)
+        s.configure("TCheckbutton", background=BG, foreground=FG, font=FONT_UI)
+        s.map("TCheckbutton", background=[("active", BG)], foreground=[("active", FG)])
+        s.configure("TPanedwindow", background=BG)
+        s.configure("TNotebook", background=BG, bordercolor=BORDER, tabmargins=(2, 4, 2, 0))
+        s.configure("TNotebook.Tab", background=BG2, foreground=FG_DIM,
+                    padding=(14, 6), font=FONT_UI)
+        s.map("TNotebook.Tab", background=[("selected", BG3)],
+              foreground=[("selected", FG)], expand=[("selected", (0, 0, 0, 1))])
+
+        s.configure("TButton", background=BG3, foreground=FG, font=FONT_UI,
+                    padding=3, bordercolor=BORDER, focuscolor=BG3)
+        s.map("TButton", background=[("active", BG_SEL), ("pressed", BG_SEL)],
+              foreground=[("disabled", FG_DIM)])
+        s.configure("Big.TButton", font=FONT_UI_B, padding=4, background=BG_SEL)
+        s.map("Big.TButton", background=[("active", ACCENT)])
+
+        s.configure("TEntry", fieldbackground=BG3, foreground=FG, insertcolor=FG,
+                    bordercolor=BORDER, lightcolor=BORDER, darkcolor=BORDER)
+        s.configure("TSpinbox", fieldbackground=BG3, foreground=FG, insertcolor=FG,
+                    background=BG3, bordercolor=BORDER, arrowcolor=FG)
+        s.configure("TCombobox", fieldbackground=BG3, background=BG3, foreground=FG,
+                    bordercolor=BORDER, arrowcolor=FG)
+        s.map("TCombobox", fieldbackground=[("readonly", BG3)],
+              foreground=[("readonly", FG)], background=[("readonly", BG3)])
+        # 콤보 팝업 리스트는 ttk가 아니라 tk 위젯이라 option_add로만 색이 먹는다
+        self.option_add("*TCombobox*Listbox.background", BG3)
+        self.option_add("*TCombobox*Listbox.foreground", FG)
+        self.option_add("*TCombobox*Listbox.selectBackground", BG_SEL)
+        self.option_add("*TCombobox*Listbox.selectForeground", FG)
+
+        s.configure("TScale", background=BG, troughcolor=BG3, bordercolor=BORDER)
+        s.configure("Vertical.TScrollbar", background=BG3, troughcolor=BG,
+                    bordercolor=BORDER, arrowcolor=FG_DIM)
+        s.configure("Horizontal.TScrollbar", background=BG3, troughcolor=BG,
+                    bordercolor=BORDER, arrowcolor=FG_DIM)
+
+        s.configure("Treeview", background=BG2, fieldbackground=BG2, foreground=FG,
+                    font=FONT_UI, rowheight=23, bordercolor=BORDER)
+        s.map("Treeview", background=[("selected", BG_SEL)], foreground=[("selected", FG)])
+        s.configure("Treeview.Heading", background=BG3, foreground=FG_DIM,
+                    font=FONT_UI_B, relief="flat")
+        s.map("Treeview.Heading", background=[("active", BG_SEL)])
 
     def _header(self):
         h = ttk.Frame(self, padding=(10, 8, 10, 4))
@@ -247,9 +326,9 @@ class MotherApp(tk.Tk):
 
         ttk.Button(h, text="폴더 열기", width=10, command=self.open_data_dir).pack(side="right")
         ttk.Button(h, text="변경", width=6, command=self.change_data_dir).pack(side="right", padx=4)
-        self.lb_dir = ttk.Label(h, text=str(orch.data_dir(self.cfg)), foreground="#555")
+        self.lb_dir = ttk.Label(h, text=str(orch.data_dir(self.cfg)), foreground=FG_DIM)
         self.lb_dir.pack(side="right", padx=6)
-        ttk.Label(h, text="데이터:", foreground="#555").pack(side="right")
+        ttk.Label(h, text="데이터:", foreground=FG_DIM).pack(side="right")
 
     def _toolbar(self):
         t = ttk.Frame(self, padding=(10, 2, 10, 6))
@@ -276,7 +355,7 @@ class MotherApp(tk.Tk):
         ttk.Label(g3, text="사이클").pack(side="left", padx=(8, 2))
         self.v_cycles = tk.StringVar(value="0")
         ttk.Spinbox(g3, from_=0, to=99, width=4, textvariable=self.v_cycles, font=FONT_UI).pack(side="left")
-        ttk.Label(g3, text="(0=시나리오 기본)", foreground="#666").pack(side="left", padx=(3, 8))
+        ttk.Label(g3, text="(0=시나리오 기본)", foreground=FG_DIM).pack(side="left", padx=(3, 8))
         self.v_seed = tk.BooleanVar(value=True)
         ttk.Checkbutton(g3, text="차일드별 시드 분산", variable=self.v_seed).pack(side="left", padx=4)
         ttk.Button(g3, text="▶ 선택에 투입", style="Big.TButton",
@@ -288,13 +367,21 @@ class MotherApp(tk.Tk):
 
     def _banner(self):
         """막힘 배너 — 차일드가 '못 하겠다'고 물어오면 여기서 답한다."""
-        self.banner = tk.Frame(self, bg="#fff4e5", highlightthickness=1, highlightbackground="#f0a13a")
-        self.lb_banner = tk.Label(self.banner, text="", bg="#fff4e5", fg="#7c4a03",
+        self.banner = tk.Frame(self, bg="#3a2f18", highlightthickness=1, highlightbackground=C_BLOCK)
+        self.lb_banner = tk.Label(self.banner, text="", bg="#3a2f18", fg="#f6d68a",
                                   font=FONT_UI_B, anchor="w", justify="left")
         self.lb_banner.pack(side="left", padx=10, pady=6, fill="x", expand=True)
-        for txt, act in (("재시도", "retry"), ("건너뛰기", "skip"), ("중단", "abort")):
-            tk.Button(self.banner, text=txt, font=FONT_UI, width=8,
-                      command=lambda a=act: self.resume(a)).pack(side="right", padx=4, pady=5)
+
+        def bbtn(txt, cmd, w=8, fg=FG):
+            b = tk.Button(self.banner, text=txt, font=FONT_UI, width=w, command=cmd,
+                          bg=BG3, fg=fg, activebackground=BG_SEL, activeforeground=FG,
+                          relief="flat", borderwidth=0, highlightthickness=0, cursor="hand2")
+            b.pack(side="right", padx=4, pady=5)
+            return b
+
+        for txt, act in (("중단", "abort"), ("건너뛰기", "skip"), ("재시도", "retry")):
+            bbtn(txt, lambda a=act: self.resume(a))
+        bbtn("🔧 에이전트에 넘기기", lambda: self.agent_from_blocked(), 18, ACCENT)
         self.banner_shown = False
 
     def _body(self):
@@ -332,13 +419,17 @@ class MotherApp(tk.Tk):
         self.tab_live = self._tab_live()
         self.tab_runs = self._tab_runs()
         self.tab_prob = self._tab_problems()
+        self.tab_bal = self._tab_balance()
+        self.tab_agent = self._tab_agent()
         self.tab_cov = self._tab_coverage()
         self.tab_raw = self._tab_raw()
 
     def _mono_text(self, parent):
         fr = ttk.Frame(parent)
-        txt = tk.Text(fr, font=FONT_MONO, wrap="none", bg="#fbfbfb",
-                      relief="flat", borderwidth=1, highlightthickness=1, highlightbackground="#ddd")
+        txt = tk.Text(fr, font=FONT_MONO, wrap="none", bg=BG2, fg=FG,
+                      insertbackground=FG, selectbackground=BG_SEL, selectforeground=FG,
+                      relief="flat", borderwidth=0, highlightthickness=1,
+                      highlightbackground=BORDER, highlightcolor=BORDER)
         ys = ttk.Scrollbar(fr, orient="vertical", command=txt.yview)
         xs = ttk.Scrollbar(fr, orient="horizontal", command=txt.xview)
         txt.configure(yscrollcommand=ys.set, xscrollcommand=xs.set)
@@ -348,10 +439,10 @@ class MotherApp(tk.Tk):
         fr.rowconfigure(0, weight=1)
         fr.columnconfigure(0, weight=1)
         txt.tag_configure("err", foreground=C_FAIL)
-        txt.tag_configure("warn", foreground="#a35c00")
+        txt.tag_configure("warn", foreground=C_WARN)
         txt.tag_configure("ok", foreground=C_PASS)
-        txt.tag_configure("head", font=("맑은 고딕", 10, "bold"))
-        txt.tag_configure("dim", foreground="#777")
+        txt.tag_configure("head", font=("맑은 고딕", 10, "bold"), foreground=ACCENT)
+        txt.tag_configure("dim", foreground=FG_DIM)
         return fr, txt
 
     def _tab_live(self):
@@ -388,6 +479,133 @@ class MotherApp(tk.Tk):
         fr.pack(fill="both", expand=True)
         return f
 
+    # ── 밸런스 탭 ───────────────────────────────────────────
+    def _tab_balance(self):
+        f = ttk.Frame(self.nb, padding=6)
+        self.nb.add(f, text="  밸런스  ")
+
+        top = ttk.Frame(f)
+        top.pack(fill="x")
+        ttk.Label(top, text="GameTuning", font=FONT_UI_B).pack(side="left")
+        ttk.Label(top, text="— 게임 밸런스 단일 노브 (Resources/Data/GameTuning.asset)",
+                  foreground=FG_DIM).pack(side="left", padx=6)
+        ttk.Button(top, text="다시 읽기", command=self.load_tuning).pack(side="right")
+        ttk.Button(top, text="저장", style="Big.TButton", command=self.save_tuning).pack(side="right", padx=4)
+        self.lb_bal = ttk.Label(top, text="", foreground=C_EDIT, font=FONT_UI_B)
+        self.lb_bal.pack(side="right", padx=8)
+
+        srow = ttk.Frame(f)
+        srow.pack(fill="x", pady=(5, 2))
+        ttk.Label(srow, text="검색").pack(side="left")
+        self.v_bal_q = tk.StringVar()
+        ttk.Entry(srow, textvariable=self.v_bal_q, width=26).pack(side="left", padx=4)
+        self.v_bal_q.trace_add("write", lambda *a: self.fill_tuning())
+        self.v_bal_diff = tk.BooleanVar(value=False)
+        ttk.Checkbutton(srow, text="기본값과 다른 것만", variable=self.v_bal_diff,
+                        command=self.fill_tuning).pack(side="left", padx=10)
+        ttk.Label(srow, text="값 칸을 더블클릭하면 바로 편집", foreground=FG_DIM).pack(side="left", padx=6)
+
+        pw = ttk.PanedWindow(f, orient="vertical")
+        pw.pack(fill="both", expand=True, pady=(4, 0))
+
+        tw = ttk.Frame(pw)
+        pw.add(tw, weight=4)
+        cols = ("value", "default", "range")
+        self.tv_bal = ttk.Treeview(tw, columns=cols, show="tree headings")
+        self.tv_bal.heading("#0", text="항목")
+        self.tv_bal.column("#0", width=300, anchor="w")
+        for c, txt, w, a in (("value", "현재값", 100, "e"), ("default", "기본값", 100, "e"),
+                             ("range", "범위", 130, "center")):
+            self.tv_bal.heading(c, text=txt)
+            self.tv_bal.column(c, width=w, anchor=a)
+        self.tv_bal.tag_configure("group", foreground=ACCENT, font=FONT_UI_B)
+        self.tv_bal.tag_configure("changed", foreground=C_WARN)
+        self.tv_bal.tag_configure("pending", foreground=C_EDIT, font=FONT_UI_B)
+        ys = ttk.Scrollbar(tw, orient="vertical", command=self.tv_bal.yview)
+        self.tv_bal.configure(yscrollcommand=ys.set)
+        self.tv_bal.pack(side="left", fill="both", expand=True)
+        ys.pack(side="right", fill="y")
+        self.tv_bal.bind("<<TreeviewSelect>>", lambda e: self.on_bal_select())
+        self.tv_bal.bind("<Double-1>", lambda e: self.ed_val.focus_set())
+
+        ed = ttk.Frame(pw, padding=(0, 6))
+        pw.add(ed, weight=1)
+        self.lb_bal_name = ttk.Label(ed, text="항목을 고르세요", font=FONT_UI_B)
+        self.lb_bal_name.pack(anchor="w")
+        self.lb_bal_tip = ttk.Label(ed, text="", foreground=FG_DIM, wraplength=900, justify="left")
+        self.lb_bal_tip.pack(anchor="w", pady=(2, 6))
+
+        erow = ttk.Frame(ed)
+        erow.pack(fill="x")
+        self.v_bal_val = tk.StringVar()
+        self.ed_val = ttk.Entry(erow, textvariable=self.v_bal_val, width=12, font=FONT_UI_B)
+        self.ed_val.pack(side="left")
+        self.ed_val.bind("<Return>", lambda e: self.commit_bal_entry())
+        self.ed_val.bind("<FocusOut>", lambda e: self.commit_bal_entry())
+        self.bal_scale = ttk.Scale(erow, from_=0, to=1, orient="horizontal",
+                                   command=self.on_bal_scale, length=420)
+        self.bal_scale.pack(side="left", padx=10)
+        ttk.Button(erow, text="기본값으로", command=self.bal_reset_one).pack(side="left", padx=4)
+        ttk.Button(erow, text="변경 전체 취소", command=self.bal_discard).pack(side="left", padx=4)
+        self.lb_bal_hint = ttk.Label(ed, text="", foreground=FG_DIM)
+        self.lb_bal_hint.pack(anchor="w", pady=(6, 0))
+
+        self._bal_syncing = False
+        self.bal_fields = []
+        self.bal_pending = {}
+        self.load_tuning()
+        return f
+
+    # ── 에이전트 탭 ─────────────────────────────────────────
+    def _tab_agent(self):
+        f = ttk.Frame(self.nb, padding=6)
+        self.nb.add(f, text="  에이전트  ")
+
+        top = ttk.Frame(f)
+        top.pack(fill="x")
+        ttk.Label(top, text="에이전트에 지시", font=FONT_UI_B).pack(side="left")
+        ttk.Label(top, text="— 마더가 본 문제를 그대로 넘겨 Claude Code가 진단·수정하게 한다",
+                  foreground=FG_DIM).pack(side="left", padx=6)
+
+        row = ttk.Frame(f)
+        row.pack(fill="x", pady=(6, 2))
+        ttk.Label(row, text="에이전트").pack(side="left")
+        self.v_agent = tk.StringVar(value="dev-fixer")
+        ttk.Combobox(row, textvariable=self.v_agent, width=18, state="readonly",
+                     values=list_agents()).pack(side="left", padx=4)
+        ttk.Label(row, text="모델").pack(side="left", padx=(12, 2))
+        self.v_model = tk.StringVar(value="opus")
+        ttk.Combobox(row, textvariable=self.v_model, width=9, state="readonly",
+                     values=["opus", "sonnet", "fable"]).pack(side="left")
+        self.v_edit_ok = tk.BooleanVar(value=False)
+        ttk.Checkbutton(row, text="파일 수정 허용 (acceptEdits)", variable=self.v_edit_ok).pack(side="left", padx=14)
+        ttk.Label(row, text="끄면 진단·제안만 하고 코드는 안 건드림", foreground=FG_DIM).pack(side="left")
+
+        row2 = ttk.Frame(f)
+        row2.pack(fill="x", pady=3)
+        ttk.Button(row2, text="문제 요약 → 지시문", command=lambda: self.gen_prompt("fix")).pack(side="left")
+        ttk.Button(row2, text="진단만", command=lambda: self.gen_prompt("diagnose")).pack(side="left", padx=4)
+        ttk.Button(row2, text="▶ 실행", style="Big.TButton", command=self.run_agent).pack(side="left", padx=(14, 4))
+        ttk.Button(row2, text="■ 중단", command=self.stop_agent).pack(side="left")
+        self.lb_agent = ttk.Label(row2, text="대기", foreground=FG_DIM)
+        self.lb_agent.pack(side="left", padx=12)
+
+        pw = ttk.PanedWindow(f, orient="vertical")
+        pw.pack(fill="both", expand=True, pady=(6, 0))
+        p1 = ttk.Frame(pw)
+        pw.add(p1, weight=2)
+        ttk.Label(p1, text="보낼 지시 (그대로 고쳐도 됨)", foreground=FG_DIM).pack(anchor="w")
+        fr, self.tx_prompt = self._mono_text(p1)
+        fr.pack(fill="both", expand=True)
+        p2 = ttk.Frame(pw)
+        pw.add(p2, weight=3)
+        ttk.Label(p2, text="에이전트 출력", foreground=FG_DIM).pack(anchor="w")
+        fr2, self.tx_agent_out = self._mono_text(p2)
+        fr2.pack(fill="both", expand=True)
+
+        self.agent_proc = None
+        return f
+
     def _tab_coverage(self):
         f = ttk.Frame(self.nb, padding=6)
         self.nb.add(f, text="  커버리지  ")
@@ -419,7 +637,7 @@ class MotherApp(tk.Tk):
         top.pack(fill="x")
         ttk.Label(top, text="차일드가 떨군 전체 리포트", font=FONT_UI_B).pack(side="left")
         ttk.Label(top, text="(사람이 옮겨 붙일 필요 없음 — 마더가 직접 읽는다)",
-                  foreground="#666").pack(side="left", padx=6)
+                  foreground=FG_DIM).pack(side="left", padx=6)
         self.cb_raw = ttk.Combobox(top, width=46, state="readonly", font=FONT_UI)
         self.cb_raw.pack(side="right")
         self.cb_raw.bind("<<ComboboxSelected>>", lambda e: self.show_raw())
@@ -434,7 +652,9 @@ class MotherApp(tk.Tk):
         self.lb_stat = ttk.Label(s, text="—", font=FONT_UI)
         self.lb_stat.pack(side="left")
         ttk.Button(s, text="Claude 보고서 생성", command=self.make_claude_report).pack(side="right")
-        self.lb_time = ttk.Label(s, text="", foreground="#777")
+        ttk.Button(s, text="🔧 에이전트에 넘기기",
+                   command=lambda: self.gen_prompt("fix")).pack(side="right", padx=6)
+        self.lb_time = ttk.Label(s, text="", foreground=FG_DIM)
         self.lb_time.pack(side="right", padx=8)
 
     # ── 큐 처리 ─────────────────────────────────────────────
@@ -453,6 +673,20 @@ class MotherApp(tk.Tk):
                     self.on_results(payload)
                 elif kind == "reports":
                     self.on_reports(payload)
+                elif kind == "agent":
+                    t = self.tx_agent_out
+                    at_bottom = t.yview()[1] > 0.999
+                    style = "err" if ("Error" in payload or "실패" in payload) else ""
+                    t.insert("end", payload + "\n", style)
+                    if at_bottom:
+                        t.see("end")
+                elif kind == "agent_done":
+                    ok = payload == 0
+                    self.lb_agent.config(text="완료" if ok else f"종료 코드 {payload}",
+                                         foreground=C_PASS if ok else C_FAIL)
+                    self.tx_agent_out.insert("end", f"\n── 에이전트 종료 (코드 {payload}) ──\n",
+                                             "ok" if ok else "err")
+                    self.tx_agent_out.see("end")
                 elif kind == "error":
                     self.lb_watch.config(text=f"⚠ 감시 오류: {payload[:60]}", foreground=C_FAIL)
         except queue.Empty:
@@ -748,6 +982,294 @@ class MotherApp(tk.Tk):
             return
         killed = orch.kill_instances(self.cfg, names)
         messagebox.showinfo("종료", f"종료: {killed or '없음'}")
+
+    # ── 밸런스 ──────────────────────────────────────────────
+    def load_tuning(self):
+        try:
+            self.bal_fields = qa_tuning.load()
+        except Exception as e:
+            messagebox.showerror("밸런스", f"GameTuning 읽기 실패: {e}")
+            self.bal_fields = []
+        self.bal_pending = {}
+        self.fill_tuning()
+
+    def bal_value(self, f):
+        """저장 대기 값이 있으면 그걸, 없으면 에셋 값."""
+        return self.bal_pending.get(f["name"], f["value"])
+
+    def fill_tuning(self):
+        for iid in self.tv_bal.get_children():
+            self.tv_bal.delete(iid)
+
+        q = (self.v_bal_q.get() or "").strip().lower()
+        only_diff = self.v_bal_diff.get()
+        groups = {}
+        for f in self.bal_fields:
+            v = self.bal_value(f)
+            if only_diff and v == f["default"] and f["name"] not in self.bal_pending:
+                continue
+            if q and q not in f["name"].lower() and q not in (f["tooltip"] or "").lower() \
+                    and q not in f["group"].lower():
+                continue
+            groups.setdefault(f["group"], []).append(f)
+
+        for g, fields in groups.items():
+            gid = self.tv_bal.insert("", "end", text=g, values=("", "", ""),
+                                     open=True, tags=("group",))
+            for f in fields:
+                v = self.bal_value(f)
+                rng = f"{f['min']:g} ~ {f['max']:g}" if f["min"] is not None else "-"
+                if f["type"] == "bool":
+                    show, dflt = ("켜짐" if v else "꺼짐"), ("켜짐" if f["default"] else "꺼짐")
+                    rng = "켜기/끄기"
+                else:
+                    show, dflt = num(v), num(f["default"])
+                tag = "pending" if f["name"] in self.bal_pending else (
+                    "changed" if v != f["default"] else "")
+                self.tv_bal.insert(gid, "end", iid=f["name"], text=f"    {f['name']}",
+                                   values=(show, dflt, rng), tags=(tag,) if tag else ())
+
+        n = len(self.bal_pending)
+        self.lb_bal.config(text=f"저장 대기 {n}건" if n else "")
+
+    def bal_selected(self):
+        sel = self.tv_bal.selection()
+        if not sel:
+            return None
+        for f in self.bal_fields:
+            if f["name"] == sel[0]:
+                return f
+        return None
+
+    def on_bal_select(self):
+        f = self.bal_selected()
+        if f is None:
+            self.lb_bal_name.config(text="항목을 고르세요")
+            self.lb_bal_tip.config(text="")
+            self.lb_bal_hint.config(text="")
+            return
+        v = self.bal_value(f)
+        self.lb_bal_name.config(text=f"{f['name']}   ({f['type']}, {f['group']})")
+        self.lb_bal_tip.config(text=f["tooltip"] or "(설명 없음)")
+
+        self._bal_syncing = True
+        self.v_bal_val.set(num(v))
+        if f["min"] is not None and v is not None:
+            self.bal_scale.configure(from_=f["min"], to=f["max"], state="normal")
+            self.bal_scale.set(float(v))
+        else:
+            self.bal_scale.configure(from_=0, to=1, state="disabled")
+        self._bal_syncing = False
+
+        hint = "" if not f["missing"] else "※ 에셋에 아직 없는 필드 — 저장하면 새로 추가된다"
+        if f["type"] == "bool":
+            hint = "0=끄기 / 1=켜기. " + hint
+        self.lb_bal_hint.config(text=hint)
+
+    def set_pending(self, f, value):
+        if f["type"] in ("int", "bool"):
+            value = int(round(float(value)))
+        else:
+            value = round(float(value), 6)
+        if f["min"] is not None:
+            value = max(f["min"], min(f["max"], value))
+            if f["type"] in ("int", "bool"):
+                value = int(round(value))
+        if value == f["value"]:
+            self.bal_pending.pop(f["name"], None)
+        else:
+            self.bal_pending[f["name"]] = value
+        self.fill_tuning()
+        self.tv_bal.selection_set(f["name"])
+        self.tv_bal.see(f["name"])
+
+    def on_bal_scale(self, raw):
+        if self._bal_syncing:
+            return
+        f = self.bal_selected()
+        if f is None or f["min"] is None:
+            return
+        v = float(raw)
+        if f["type"] in ("int", "bool"):
+            v = int(round(v))
+        self._bal_syncing = True
+        self.v_bal_val.set(f"{v:g}")
+        self._bal_syncing = False
+        self.set_pending(f, v)
+
+    def commit_bal_entry(self):
+        if self._bal_syncing:
+            return
+        f = self.bal_selected()
+        if f is None:
+            return
+        try:
+            v = float(self.v_bal_val.get())
+        except ValueError:
+            self.v_bal_val.set(f"{self.bal_value(f):g}")
+            return
+        self.set_pending(f, v)
+
+    def bal_reset_one(self):
+        f = self.bal_selected()
+        if f is not None:
+            self.set_pending(f, f["default"])
+            self.on_bal_select()
+
+    def bal_discard(self):
+        if not self.bal_pending:
+            return
+        if messagebox.askyesno("밸런스", f"저장 안 한 변경 {len(self.bal_pending)}건을 버릴까요?"):
+            self.bal_pending = {}
+            self.fill_tuning()
+            self.on_bal_select()
+
+    def save_tuning(self):
+        if not self.bal_pending:
+            messagebox.showinfo("밸런스", "바뀐 값이 없습니다.")
+            return
+        lines = "\n".join(f"  {k} = {v}" for k, v in self.bal_pending.items())
+        if not messagebox.askyesno("밸런스 저장", f"GameTuning.asset에 {len(self.bal_pending)}건을 씁니다.\n\n{lines}"):
+            return
+        applied, warns = qa_tuning.save(self.bal_pending)
+        self.load_tuning()
+        msg = "적용:\n" + "\n".join(f"  {a}" for a in applied)
+        if warns:
+            msg += "\n\n경고:\n" + "\n".join(warns)
+        msg += ("\n\n※ Unity 창을 한 번 클릭하면 에셋을 다시 읽습니다.\n"
+                "※ buildingEnterRatio를 바꿨다면 `빌드 ▸ 지역1` 재실행이 필요합니다.")
+        messagebox.showinfo("밸런스 저장 완료", msg)
+
+    # ── 에이전트 ────────────────────────────────────────────
+    def gen_prompt(self, mode, extra=""):
+        s = self.summary or {}
+        runs = s.get("runs", [])
+        blocked = [r for r in self.rows if r["blocked"]]
+
+        L = []
+        if mode == "diagnose":
+            L.append("QA 마더가 넘긴 결과다. **진단만** 해라 — 코드는 고치지 말고, "
+                     "원인 가설과 확인 방법을 우선순위대로 정리해줘.")
+        else:
+            L.append("QA 마더가 넘긴 결과다. 아래 문제를 **실제로 고쳐라**. "
+                     "무엇을 왜 고쳤는지와 재검증 방법을 마지막에 정리해줘.")
+        L.append("")
+        L.append("게임: demo13-flashlight (Unity 6 탑다운 2D). QA 시스템 설명은 "
+                 "`demo13-flashlight/docs/qa.md`, 봇은 `Assets/Scripts/QA/`.")
+        L.append("")
+
+        if extra:
+            L += ["## 지금 막힌 것", "", extra, ""]
+
+        if blocked:
+            L.append("## 차일드가 막혀서 응답을 기다리는 중")
+            for r in blocked:
+                b = r["blockedInfo"] or {}
+                L.append(f"- [{r['instance']}] {b.get('kind')} · {b.get('message')} "
+                         f"(씬 {b.get('scene')}, 위치 {b.get('playerPos')}, 시도 {b.get('tried')})")
+            L.append("")
+
+        if runs:
+            r = runs[0]
+            L.append(f"## 최신 런 — {r['verdict']}")
+            L.append(f"{r['at']} · 차일드 {r['instance'] or '(기본)'} · 시나리오 {r['scenario']} "
+                     f"· 사이클 {r['cycles']} · {r['durationSec']}s")
+            L.append(f"판정 사유: {r['reason']}")
+            L.append("")
+            fails = [c for c in r.get("checks", []) if not c.get("passed")]
+            if fails:
+                L.append("실패한 판정 항목:")
+                L += [f"- {c.get('name')} — {c.get('detail','')}" for c in fails]
+                L.append("")
+            an = r.get("anomalies", [])
+            if an:
+                L.append(f"이상 {len(an)}건:")
+                for a in an[:40]:
+                    L.append(f"- [{a.get('atSec',0):.1f}s] {a.get('level')} {a.get('step')} "
+                             f"{a.get('kind')} — {a.get('msg')} @{a.get('playerPos','')} {a.get('scene','')}")
+                L.append("")
+
+        if s.get("failedChecks"):
+            L.append("## 여러 런에서 반복 실패")
+            L += [f"- {k} — {v}회" for k, v in s["failedChecks"].items()]
+            L.append("")
+        if s.get("problemSpots"):
+            L.append("## 문제 좌표(스턱/길막힘/사망)")
+            L += [f"- {x['scene']} ({x['x']},{x['y']}) 스턱{x['stuck']} 막힘{x['unreachable']} 사망{x['deaths']}"
+                  for x in s["problemSpots"][:20]]
+            L.append("")
+        if self.reports:
+            L.append(f"## 원본 전체 로그\n\n`{self.reports[0]['file']}`")
+
+        text = "\n".join(L)
+        self.tx_prompt.delete("1.0", "end")
+        self.tx_prompt.insert("1.0", text)
+        self.nb.select(self.tab_agent)
+        return text
+
+    def agent_from_blocked(self):
+        rows = [r for r in self.rows if r["blocked"]]
+        if not rows:
+            messagebox.showinfo("에이전트", "막힌 차일드가 없습니다.")
+            return
+        b = rows[0]["blockedInfo"] or {}
+        self.gen_prompt("fix", f"차일드 [{rows[0]['instance']}]가 `{b.get('kind')}`로 멈춰 응답을 기다린다: "
+                               f"{b.get('message')} (씬 {b.get('scene')}, 위치 {b.get('playerPos')})")
+
+    def run_agent(self):
+        if self.agent_proc is not None and self.agent_proc.poll() is None:
+            messagebox.showinfo("에이전트", "이미 실행 중입니다. 먼저 중단하세요.")
+            return
+        exe = claude_exe()
+        if not exe:
+            messagebox.showerror("에이전트", "claude CLI를 못 찾았습니다.\nPATH에 claude가 있어야 합니다.")
+            return
+
+        prompt = self.tx_prompt.get("1.0", "end").strip()
+        if not prompt:
+            prompt = self.gen_prompt("fix")
+
+        # 지시문은 파일로 넘긴다 — 인자에 긴 한글을 실으면 셸 인용에서 깨질 수 있다
+        AGENT_REQUEST.write_text(prompt, encoding="utf-8")
+        cmd = [exe, "-p", f"{AGENT_REQUEST} 파일을 읽고 거기 적힌 QA 결과를 처리해줘.",
+               "--agent", self.v_agent.get(), "--model", self.v_model.get()]
+        if self.v_edit_ok.get():
+            cmd += ["--permission-mode", "acceptEdits"]
+
+        self.tx_agent_out.delete("1.0", "end")
+        self.tx_agent_out.insert("end", f"$ claude -p … --agent {self.v_agent.get()} "
+                                        f"--model {self.v_model.get()}"
+                                        f"{' --permission-mode acceptEdits' if self.v_edit_ok.get() else ''}\n"
+                                        f"  지시문: {AGENT_REQUEST}\n\n", "dim")
+        self.lb_agent.config(text="● 실행 중", foreground=C_RUN)
+        self.nb.select(self.tab_agent)
+
+        def worker():
+            try:
+                p = subprocess.Popen(cmd, cwd=str(REPO), stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT, text=True,
+                                     encoding="utf-8", errors="replace", bufsize=1)
+                self.agent_proc = p
+                for line in p.stdout:
+                    self.q.put(("agent", line.rstrip("\n")))
+                p.wait()
+                self.q.put(("agent_done", p.returncode))
+            except Exception as e:
+                self.q.put(("agent", f"[실행 실패] {type(e).__name__}: {e}"))
+                self.q.put(("agent_done", -1))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def stop_agent(self):
+        p = self.agent_proc
+        if p is None or p.poll() is not None:
+            self.lb_agent.config(text="대기", foreground=FG_DIM)
+            return
+        try:
+            p.terminate()
+        except Exception:
+            pass
+        self.lb_agent.config(text="중단됨", foreground=C_WARN)
 
     def clear_stale(self):
         removed = orch.clear_stale(self.cfg, self.sel_names())

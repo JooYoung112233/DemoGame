@@ -35,6 +35,30 @@ public class NavGrid : MonoBehaviour
     public int  Height => _h;
     public float CellSize => cellSize;
 
+    /// <summary>막힘 셀 비율(0~1). 0이면 장애물을 하나도 못 잡은 것 — 베이크 시점 의심.</summary>
+    public float BlockedRatio
+    {
+        get
+        {
+            if (_blocked == null || _w * _h == 0) return 0f;
+            int n = 0;
+            foreach (bool b in _blocked) if (b) n++;
+            return (float)n / (_w * _h);
+        }
+    }
+
+    /// <summary>런타임 자동 배치용 — 영역·해상도를 코드에서 정하고 즉시 굽는다.
+    /// (씬에 손으로 배치한 경우엔 인스펙터 값이 그대로 쓰이므로 호출되지 않는다.)</summary>
+    public void Configure(Vector2 center, Vector2 area, float cell, float radius)
+    {
+        transform.position = new Vector3(center.x, center.y, 0f);
+        areaSize = area;
+        cellSize = Mathf.Max(0.05f, cell);
+        agentRadius = Mathf.Max(0f, radius);
+        bakeOnStart = false;   // 여기서 굽는다 — Start에서 중복 베이크 방지
+        Rebuild();
+    }
+
     void Awake()
     {
         Instance = this;
