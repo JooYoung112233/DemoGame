@@ -141,6 +141,44 @@ public class RaidMapManager : MonoBehaviour
 
     // ── 통로 주석 영속(잠김만; 막힘은 이번 판 한정) ──
 
+    // ── 세이브 영속 (2026-07-11 — 그동안 세션 내에서만 유지되던 스텁 해소) ──────
+    //   "안전가옥 지도판 누적"(navigation.md §3.3 결정)이 실제로 저장되게 한다.
+    //   확률로 막힌 통로는 매 레이드 랜덤이라 저장하지 않는다(설계 주석 유지).
+
+    /// <summary>발견 존 + 알게 된 통로를 지역별로 직렬화.</summary>
+    public RaidMapSaveData GetSaveData()
+    {
+        var d = new RaidMapSaveData();
+        foreach (var kv in _discoveredByRegion)
+            d.discovered.Add(new RaidMapRegionEntry { regionId = kv.Key, ids = new List<string>(kv.Value) });
+        foreach (var kv in _knownPassagesByRegion)
+            d.passages.Add(new RaidMapRegionEntry { regionId = kv.Key, ids = new List<string>(kv.Value) });
+        return d;
+    }
+
+    /// <summary>세이브 복원. null이면 전부 비움(새 게임).</summary>
+    public void LoadSaveData(RaidMapSaveData d)
+    {
+        _discoveredByRegion.Clear();
+        _knownPassagesByRegion.Clear();
+        if (d != null)
+        {
+            if (d.discovered != null)
+                foreach (var e in d.discovered)
+                    if (!string.IsNullOrEmpty(e.regionId))
+                        _discoveredByRegion[e.regionId] = new HashSet<string>(e.ids ?? new List<string>());
+            if (d.passages != null)
+                foreach (var e in d.passages)
+                    if (!string.IsNullOrEmpty(e.regionId))
+                        _knownPassagesByRegion[e.regionId] = new HashSet<string>(e.ids ?? new List<string>());
+        }
+        // 현재 씬에 이미 등록된 존이 있으면 복원된 지식으로 표시를 갱신.
+        OnMapChanged?.Invoke();
+    }
+
+    /// <summary>새 게임 리셋 — 지도 지식 비움.</summary>
+    public void ResetForNewGame() => LoadSaveData(null);
+
     public bool IsPassageKnown(string passageId)
         => !string.IsNullOrEmpty(passageId) && KnownPassageSet(CurrentRegionId).Contains(passageId);
 

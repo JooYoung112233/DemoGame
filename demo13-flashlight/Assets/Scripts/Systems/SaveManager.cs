@@ -212,6 +212,10 @@ public class SaveManager : MonoBehaviour
         if (CodexManager.Instance != null)
             data.discoveredItems = CodexManager.Instance.GetSaveData();
 
+        // 레이드 지도 지식(발견 존·통로)
+        if (RaidMapManager.InstanceIfExists != null)
+            data.raidMap = RaidMapManager.InstanceIfExists.GetSaveData();
+
         return data;
     }
 
@@ -345,6 +349,9 @@ public class SaveManager : MonoBehaviour
             CodexManager.Instance.SilentDiscovery = true;
             CodexManager.Instance.LoadSaveData(data.discoveredItems);
         }
+
+        // 레이드 지도 지식 복원 — 안전가옥 지도판에 누적 표시된다.
+        RaidMapManager.InstanceIfExists?.LoadSaveData(data.raidMap);
 
         // 메인 창고(보관함)
         if (data.mainStash != null)
@@ -529,6 +536,7 @@ public class SaveManager : MonoBehaviour
         QuestManager.Instance?.ResetForNewGame();            // 활성/완료 퀘스트 + 플래그
         StoryPlayer.Instance?.SetPlayedScenes(null);         // 재생 기록 초기화
         CodexManager.Instance?.ResetForNewGame();            // 도감 발견 기록 초기화
+        RaidMapManager.InstanceIfExists?.ResetForNewGame();  // 레이드 지도 지식 초기화
         StoryTriggerManager.Instance?.ResetForNewGame();     // 프롤로그 재생 플래그 초기화(같은 세션 재시작 시 프롤로그 재생)
         TutorialPrompt.Instance?.SetShownIds(null);          // 튜토 1회성 기록 초기화
 
@@ -656,6 +664,9 @@ public class GameSaveData
 
     // 도감 — 발견한 itemId (docs/items.md §아이템 도감)
     public List<string> discoveredItems = new List<string>();
+
+    // 레이드 지도 — 지역별 발견 존·통로 (docs/navigation.md §3.3 "안전가옥 지도판 누적")
+    public RaidMapSaveData raidMap = new RaidMapSaveData();
 }
 
 [System.Serializable]

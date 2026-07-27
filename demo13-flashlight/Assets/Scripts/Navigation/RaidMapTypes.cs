@@ -41,3 +41,21 @@ public class MapZone
     public bool Contains(Vector2 worldPos) => bounds.Contains(worldPos);
     public Vector2 Center => bounds.center;
 }
+
+// ── 세이브 DTO (2026-07-11) ─────────────────────────────────────────────
+// 지역별 "발견한 존 / 알게 된 통로" 누적 지식. JsonUtility 직렬화 대상이라
+// Dictionary/HashSet을 못 쓰므로 리스트 쌍으로 편다.
+
+[System.Serializable]
+public class RaidMapRegionEntry
+{
+    public string regionId;
+    public System.Collections.Generic.List<string> ids = new System.Collections.Generic.List<string>();
+}
+
+[System.Serializable]
+public class RaidMapSaveData
+{
+    public System.Collections.Generic.List<RaidMapRegionEntry> discovered = new System.Collections.Generic.List<RaidMapRegionEntry>();
+    public System.Collections.Generic.List<RaidMapRegionEntry> passages   = new System.Collections.Generic.List<RaidMapRegionEntry>();
+}

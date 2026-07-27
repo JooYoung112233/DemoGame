@@ -151,7 +151,7 @@
 - 막힌 문: `PassageMarker`의 `randomBlock` 체크 + `blockChance`(기본 0.18) → 매 레이드 확률 막힘.
 - 지도 아이템: 줍기 `InteractableObject`에 `MapFragmentReveal` 추가(`revealZoneIds` 또는 전체).
 
-**스텁/후속:** 세이브 영속 미연동(세션 내만 유지, `SaveManager` 직렬화 TODO) · 아트 없음(PlaceholderSprite 도형) · 멈춘 시계 교란 연출 후순위 · 입력키 **M**(Tab 선점, 인스펙터 변경 가능).
+**스텁/후속:** ~~세이브 영속 미연동~~ **✅ 2026-07-11 해소**(`RaidMapManager.GetSaveData/LoadSaveData` + `GameSaveData.raidMap` + 새게임 리셋 — 지역별 발견 존·통로가 실제로 누적 저장) · 아트 없음(PlaceholderSprite 도형) · 멈춘 시계 교란 연출 후순위 · 입력키 **M**(Tab 선점, 인스펙터 변경 가능).
 
 ---
 
@@ -208,3 +208,9 @@
 - **2026-06-06** (폐기): 현상 계측기 일회성 지급 — 별도 아이템·인벤 점멸.
 - **2026-06-08**: **랜턴 점멸로 교체.** 별도 아이템 없음. S-013 브리핑만. [→ rendering.md §랜턴]
 - **2026-06-16** (정합): 랜턴 점멸이 **빛의 역설/루디 방전과 무모순**임을 명시 — 탐지등=루디 광원(예외 안전), 점멸=현상 반응 / 방전=연료 소모 별개 축. SSOT 링크 추가. [→ gdd-core §5.2/§5.3](gdd-core.md)
+
+## 2026-07-11 — 지도 영속 연동 (⑩ 지도+나침반 마무리)
+
+- **발견 존·통로 세이브 연동** — 그동안 `RaidMapManager`의 지식이 **세션 내에서만** 유지되던 스텁(2026-06-05 기록)을 해소. `RaidMapSaveData`(지역별 id 리스트 쌍 — JsonUtility가 Dictionary/HashSet을 못 다뤄 리스트로 폄) + `SaveManager` 저장/로드/새게임 리셋 배선. §3.3 "안전가옥 지도판 누적" 결정이 이제 실제로 동작.
+- **나침반 ↔ 랜덤 탈출구 정합 확인** — `RaidSpawnDirector`가 매 판 탈출구 일부를 `SetActive(false)`로 끄는데, 나침반 폴백이 쓰는 `InteractableObject.All`은 `OnEnable/OnDisable` 등록이라 **꺼진 탈출구는 자동 제외**된다(수정 불필요). 즉 나침반은 항상 **이번 판 활성 탈출구**만 가리킨다.
+- 확률로 막힌 통로는 매 레이드 랜덤이라 **저장하지 않음**(기존 설계 유지).
