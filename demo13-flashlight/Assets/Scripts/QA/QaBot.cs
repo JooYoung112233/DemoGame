@@ -394,6 +394,7 @@ public class QaBot : MonoBehaviour
         _running = false;
         GameInput.Virtual = false;
         SaveManager.SuppressWrites = false;
+        DisposeNav();
         Application.logMessageReceived -= OnLog;
 
         if (_rep != null)
@@ -584,7 +585,21 @@ public class QaBot : MonoBehaviour
             Vector2 to = target - pos;
             if (to.magnitude <= arriveDist) { GameInput.VSetMove(Vector2.zero); onDone?.Invoke(true); yield break; }
 
-            Vector2 dir = to.normalized;
+            // ── 길찾기(A*) — 게임의 NavGrid/NavAgent를 그대로 쓴다(적 AI와 같은 경로 로직).
+            //   직선으로만 밀면 벽 하나에 막혀 STUCK이 뜨고, 그게 맵 문제인지 봇 한계인지 구분이 안 된다.
+            Vector2 dir;
+            var nav = EnsureNav(player);
+            bool pathing = false;
+            if (nav != null && NavGrid.Instance != null && NavGrid.Instance.Ready)
+            {
+                nav.SetDestination(target);
+                Vector2 nd = nav.DesiredDirection;
+                if (nd.sqrMagnitude > 0.0001f) { dir = nd; pathing = true; }
+                else dir = to.normalized;
+            }
+            else dir = to.normalized;   // NavGrid 없는 씬 → 직선 폴백
+
+            _pathingNow = pathing;
             GameInput.VSetMove(dir);
             var cam = Camera.main;
             if (cam != null) GameInput.VSetMousePos(cam.WorldToScreenPoint(pos + (Vector3)dir * 3f));
@@ -598,7 +613,9 @@ public class QaBot : MonoBehaviour
                     if (_stuckTimer >= 3f && _stuckReported < 8)
                     {
                         _stuckReported++;
-                        _rep.Warn(_step, "STUCK", $"이동 입력에도 3초 정지 — 위치({pos.x:0.#},{pos.y:0.#}) 목표({target.x:0.#},{target.y:0.#})");
+                        // 길찾기가 돌고 있었는지 함께 남긴다 — 아니면 "봇이 직선으로만 밀어서"일 수 있어 신뢰도가 다르다.
+                        string how = _pathingNow ? "A*경로 추종 중" : "직선이동(길찾기 없음 — 봇 한계 가능)";
+                        _rep.Warn(_step, "STUCK", $"이동 입력에도 3초 정지 [{how}] — 위치({pos.x:0.#},{pos.y:0.#}) 목표({target.x:0.#},{target.y:0.#})");
                         _heat?.AddStuck(Scene, pos, _cycle);
                         _stuckTimer = 0f;
                         // 자유도: 옆으로 빠져나가기 시도(벽 끼임 탈출)
@@ -615,6 +632,32 @@ public class QaBot : MonoBehaviour
 
         GameInput.VSetMove(Vector2.zero);
         onDone?.Invoke(false);
+    }
+
+    // ── 길찾기 ───────────────────────────────────────────────────────
+    NavAgent _nav;
+    bool _navAdded;      // 봇이 붙였으면 런 종료 시 떼어낸다(흔적 남기지 않음)
+    bool _pathingNow;    // 직전 프레임에 A* 경로를 따르고 있었나(STUCK 신뢰도 표기용)
+
+    /// <summary>플레이어에 NavAgent 확보 — 적 AI와 **같은** 길찾기를 쓴다.
+    /// 원래 없으면 QA가 임시로 붙이고 Finish에서 제거한다(게임 상태 오염 방지).</summary>
+    NavAgent EnsureNav(TopDownPlayer player)
+    {
+        if (_nav != null) return _nav;
+        if (player == null) return null;
+        _nav = player.GetComponent<NavAgent>();
+        if (_nav == null) { _nav = player.gameObject.AddComponent<NavAgent>(); _navAdded = true; }
+        return _nav;
+    }
+
+    void DisposeNav()
+    {
+        if (_nav != null)
+        {
+            _nav.Stop();
+            if (_navAdded) Destroy(_nav);
+        }
+        _nav = null; _navAdded = false; _pathingNow = false;
     }
 
     /// <summary>끼임 탈출 — 직각 방향으로 잠깐 이동.</summary>
