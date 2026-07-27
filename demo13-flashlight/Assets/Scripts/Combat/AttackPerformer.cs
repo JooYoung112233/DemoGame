@@ -78,6 +78,32 @@ public class AttackPerformer : MonoBehaviour
         if (_timer >= _current.Duration) Cancel();
     }
 
+    static readonly RaycastHit2D[] _losBuf = new RaycastHit2D[8];
+
+    /// <summary>공격자→대상 사이에 솔리드 벽이 있는지. 트리거·플레이어·적 레이어는 무시.</summary>
+    static bool IsBlockedByWall(Vector2 from, Collider2D target)
+    {
+        Vector2 to = target.bounds.ClosestPoint(from);
+        Vector2 d = to - from;
+        float dist = d.magnitude;
+        if (dist < 0.05f) return false;   // 몸에 붙어 있으면 검사 불필요
+
+        int playerL = LayerMask.NameToLayer("Player");
+        int enemyL  = LayerMask.NameToLayer("Enemy");
+
+        int n = Physics2D.RaycastNonAlloc(from, d / dist, _losBuf, dist);
+        for (int i = 0; i < n; i++)
+        {
+            var c = _losBuf[i].collider;
+            if (c == null || c.isTrigger) continue;                 // 트리거(루트·존)는 시야를 막지 않음
+            if (c == target || c.transform.IsChildOf(target.transform)) continue;
+            int l = c.gameObject.layer;
+            if (l == playerL || l == enemyL) continue;              // 캐릭터끼리는 서로를 막지 않음
+            return true;                                            // 솔리드 벽 — 판정 무효
+        }
+        return false;
+    }
+
     void ScanWindow(HitWindow w)
     {
         // 스윙 시작 시 고정한 방향을 쓴다(실시간 추종 금지 — Perform 참조).
@@ -100,6 +126,11 @@ public class AttackPerformer : MonoBehaviour
             if (col == null) continue;
             var hb = col.GetComponent<Hurtbox>() ?? col.GetComponentInParent<Hurtbox>();
             if (hb == null || !hb.Active || _hitThisAttack.Contains(hb)) continue;
+
+            // 2026-07-11: 벽 관통 판정 차단 — 공격자와 대상 사이에 **솔리드(비트리거)** 가 있으면 무효.
+            //   예전엔 LOS 검사가 없어 벽을 사이에 두고도 사거리 안이면 그냥 맞았다.
+            //   트리거(루트 상자·존)는 통과시켜야 하므로 비트리거만 차단으로 센다.
+            if (IsBlockedByWall(transform.position, col)) continue;
 
             _hitThisAttack.Add(hb);
             hb.ReceiveHit(_current.damage * w.damageMult, _current.groggy * w.groggyMult, facing);

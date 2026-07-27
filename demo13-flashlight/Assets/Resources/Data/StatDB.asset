@@ -122,6 +122,100 @@ MonoBehaviour:
     - anim: death
       animSpeed: 1
       distance: 0
+  - id: bandit_ranged
+    displayName: Bandit Ranged
+    scale: 1.9
+    tintColor: {r: 0.6, g: 0.85, b: 0.7, a: 1}
+    shadowColor: {r: 0, g: 0, b: 0, a: 0.4}
+    useGlow: 0
+    glowColor: {r: 1, g: 0.3, b: 0.3, a: 1}
+    glowIntensity: 3
+    glowRange: 3
+    useTrailParticle: 0
+    trailColor: {r: 1, g: 0.5, b: 0.5, a: 0.5}
+    generatedPrefab: {fileID: 0}
+    maxHp: 28
+    attackDamage: 8
+    attackRange: 3.4
+    attackSpeed: 0.55
+    attackWindup: 0.95
+    canBeCancelled: 1
+    maxGroggy: 55
+    groggyDecay: 12
+    groggyStunDuration: 2.8
+    moveSpeed: 2
+    patrolSpeed: 0.9
+    detectRange: 9.5
+    loseRange: 14
+    patrolRadius: 4
+    patrolWaitTime: 2
+    hitStunDuration: 0.4
+    expReward: 14
+    goldReward: 8
+    drops: []
+    motions:
+    - anim: idle
+      animSpeed: 1
+      distance: 0
+    - anim: walk
+      animSpeed: 1
+      distance: 0
+    - anim: attack
+      animSpeed: 1
+      distance: 0
+    - anim: hit
+      animSpeed: 1
+      distance: 0
+    - anim: death
+      animSpeed: 1
+      distance: 0
+  - id: bandit_tank
+    displayName: Bandit Tank
+    scale: 2.6
+    tintColor: {r: 0.75, g: 0.5, b: 0.35, a: 1}
+    shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
+    useGlow: 0
+    glowColor: {r: 1, g: 0.3, b: 0.3, a: 1}
+    glowIntensity: 3
+    glowRange: 3
+    useTrailParticle: 0
+    trailColor: {r: 1, g: 0.5, b: 0.5, a: 0.5}
+    generatedPrefab: {fileID: 0}
+    maxHp: 110
+    attackDamage: 18
+    attackRange: 1.9
+    attackSpeed: 0.45
+    attackWindup: 1.15
+    canBeCancelled: 0
+    maxGroggy: 160
+    groggyDecay: 8
+    groggyStunDuration: 2
+    moveSpeed: 1.9
+    patrolSpeed: 0.8
+    detectRange: 7
+    loseRange: 12
+    patrolRadius: 3
+    patrolWaitTime: 3
+    hitStunDuration: 0.15
+    expReward: 28
+    goldReward: 18
+    drops: []
+    motions:
+    - anim: idle
+      animSpeed: 1
+      distance: 0
+    - anim: walk
+      animSpeed: 1
+      distance: 0
+    - anim: attack
+      animSpeed: 1
+      distance: 0
+    - anim: hit
+      animSpeed: 1
+      distance: 0
+    - anim: death
+      animSpeed: 1
+      distance: 0
   - id: new_unit
     displayName: New Unit
     scale: 2

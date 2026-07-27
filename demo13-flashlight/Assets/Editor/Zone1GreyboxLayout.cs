@@ -104,12 +104,12 @@ public static class Zone1GreyboxLayout
         // ③ 식물원 돔·습지(C2R3) — 중상
         n += Scatter(map, "SZ_Dome", 130f, 180f, 196f, 252f, 5, 5, 33);
         n += EnemyZone(map, "EZ_Dome", 163f, 216f, 30f, 30f, "bandit_melee_1", 2);
-        n += EnemyZone(map, "EZ_Dome_R", 178f, 236f, 14f, 14f, "bandit_melee_1", 1);
+        n += EnemyZone(map, "EZ_Dome_R", 178f, 236f, 14f, 14f, "bandit_ranged", 1);
 
         // ④ 유리 R&D 타워(C4R0) — 강함·고급 루트(최심부)
         n += Scatter(map, "SZ_Tower", 285f, 18f, 325f, 42f, 6, 6, 44);
-        n += EnemyZone(map, "EZ_Tower", 305f, 30f, 22f, 14f, "bandit_melee_1", 2);
-        n += EnemyZone(map, "EZ_Tower_T", 315f, 30f, 10f, 10f, "bandit_melee_1", 1);
+        n += EnemyZone(map, "EZ_Tower", 305f, 30f, 22f, 14f, "bandit_ranged", 2);
+        n += EnemyZone(map, "EZ_Tower_T", 315f, 30f, 10f, 10f, "bandit_tank", 1);
 
         // ⑤ 주차장·공원(개활지) — 낮은 밀도, 적 약간
         n += Scatter(map, "SZ_Plaza", 210f, 86f, 272f, 164f, 3, 2, 55);

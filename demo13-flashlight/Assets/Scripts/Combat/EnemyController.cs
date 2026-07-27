@@ -396,9 +396,30 @@ public class EnemyController : MonoBehaviour
             d = ((Vector2)player.position - (Vector2)transform.position).normalized;
         }
 
+        // 2026-07-11: 적끼리 **분리(separation)** — 예전엔 반발이 없어 3마리가 한 점에 겹쳐
+        //   한 덩어리로 밀려들었다. 근처 동료에게서 밀어내는 성분을 섞어 대열이 퍼지게 한다.
+        d = (d + Separation() * 0.6f).normalized;
+
         SetVelocity(d * MoveSpd);
         FlipSprite(d);
         animController?.Play("walk");
+    }
+
+    /// <summary>근처 동료로부터 밀어내는 방향(정규화 전 합). 겹침 방지용 — 반경 안에서 거리 반비례.</summary>
+    Vector2 Separation()
+    {
+        const float R = 1.1f;
+        Vector2 me = transform.position, push = Vector2.zero;
+        for (int i = 0; i < All.Count; i++)
+        {
+            var o = All[i];
+            if (o == null || o == this || o.state == State.Dead) continue;
+            Vector2 diff = me - (Vector2)o.transform.position;
+            float dsq = diff.sqrMagnitude;
+            if (dsq > R * R || dsq < 0.0001f) continue;
+            push += diff.normalized * (1f - Mathf.Sqrt(dsq) / R);
+        }
+        return push;
     }
 
     void UpdateAttackWindup()
