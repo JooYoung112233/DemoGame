@@ -58,6 +58,12 @@ public class QaBot : MonoBehaviour
     // 스턱 감지
     float _stuckTimer;
     int _stuckReported;
+    int _oscReported;       // 와리가리(제자리 진동) 보고 횟수
+
+    // 자가 복구 — 사람이 안 붙어 있어도 런이 굴러가야 한다
+    int _recoverLevel;      // 사이클당 0→1(세이브 로드)→2(사이클 처음부터)
+    bool _restartStep;      // RunScenario가 보고 현재 사이클을 스텝0부터 다시
+    int _cycleRestarts;     // 무한 재시작 방지
 
     // ── 공간 텔레메트리 ("어디서" 데이터) ───────────────────────────
     QaHeatmap _heat;
@@ -66,6 +72,10 @@ public class QaBot : MonoBehaviour
     public string Scene => SceneManager.GetActiveScene().name;
     float _sampleTimer;
     bool _wasDead;
+
+    // 씬별 길찾기 격자 기록 — 사람이 콘솔을 뒤지지 않아도 결과 JSON에 실린다
+    readonly HashSet<string> _navSeen = new HashSet<string>();
+    readonly List<QaBridge.NavGridJson> _navGrids = new List<QaBridge.NavGridJson>();
 
     /// <summary>현재 위치를 히트맵에 기록할 좌표(플레이어 없으면 zero).</summary>
     public Vector2 PlayerPos => TopDownPlayer.Instance != null ? (Vector2)TopDownPlayer.Instance.transform.position : Vector2.zero;
@@ -160,11 +170,52 @@ public class QaBot : MonoBehaviour
         // 가상 입력의 1프레임 플래그는 모든 Update 소비자가 본 뒤 걷는다.
         if (!_running) return;
         GameInput.VEndFrame();
+        NoteNavGrid();
         SampleSpace();
 
         // 주기적 하트비트 — 스텝 전환 때만 쓰면 긴 스텝(explore 150초) 동안 밖에서 생사 확인이 안 된다.
         _hbTimer += Time.unscaledDeltaTime;
         if (_hbTimer >= 1f) { _hbTimer = 0f; WriteStatus("running", $"사이클 {_cycle} · {_step}"); }
+    }
+
+    /// <summary>씬마다 길찾기 격자 상태를 1회 기록.
+    ///
+    /// 봇이 A* 방향을 받고도 제자리면 원인이 셋인데, 이 숫자 하나로 갈린다.
+    ///   • 격자 없음      → 적·NPC·봇 전부 직선 이동(NavAgent가 폴백)
+    ///   • 막힘 0%        → 장애물을 못 잡음 = 베이크 시점 문제
+    ///   • 막힘 과다      → agentRadius 팽창이 통로를 삼킴
+    ///   • 막힘 정상인데 제자리 → 격자가 아니라 **스폰/콜라이더 문제**
+    /// 사람이 콘솔을 뒤지게 하지 않으려고 결과 JSON에 싣는다.</summary>
+    void NoteNavGrid()
+    {
+        string sc = Scene;
+        if (string.IsNullOrEmpty(sc) || sc == "Systems") return;
+        if (!_navSeen.Add(sc)) return;
+
+        var g = NavGrid.Instance;
+        var j = new QaBridge.NavGridJson { scene = sc, present = g != null && g.Ready };
+
+        if (!j.present)
+        {
+            _rep?.Warn("nav", "NO_NAVGRID",
+                $"[{sc}] 길찾기 격자 없음 — 적·NPC·봇이 전부 직선 이동만 한다");
+        }
+        else
+        {
+            j.width = g.Width; j.height = g.Height; j.cellSize = g.CellSize;
+            j.blockedPct = g.BlockedRatio * 100f;
+            _rep?.Info("nav", "NAVGRID",
+                $"[{sc}] 격자 {g.Width}×{g.Height} · 셀 {g.CellSize:0.00}m · 막힘 {j.blockedPct:0.#}%");
+
+            if (j.blockedPct <= 0f)
+                _rep?.Warn("nav", "NAVGRID_EMPTY",
+                    $"[{sc}] 막힘 0% — 장애물을 하나도 못 잡음(베이크 시점 의심). 길찾기가 사실상 직선");
+            else if (j.blockedPct >= 70f)
+                _rep?.Warn("nav", "NAVGRID_DENSE",
+                    $"[{sc}] 막힘 {j.blockedPct:0.#}% — 과다 팽창으로 통로가 막혔을 수 있음"
+                    + $"(agentRadius / 셀 {g.CellSize:0.00}m 확인)");
+        }
+        _navGrids.Add(j);
     }
 
     /// <summary>주기적 위치 샘플 — 체류/이동/사망을 셀에 누적(안전가옥은 제외, 레이드 맵만).</summary>
@@ -302,6 +353,12 @@ public class QaBot : MonoBehaviour
         _startedAt = Time.realtimeSinceStartup;
         _cycle = 0;
         _stuckReported = 0;
+        _oscReported = 0;
+        _recoverLevel = 0;
+        _restartStep = false;
+        _cycleRestarts = 0;
+        _navSeen.Clear();
+        _navGrids.Clear();
 
         _rep = new QaReport();
         _tele = new QaTelemetry();
@@ -339,8 +396,13 @@ public class QaBot : MonoBehaviour
             if (Time.realtimeSinceStartup > deadline)
             { _rep.Warn("session", "TIME_CAP", $"세션 상한 {_sessionMinutes}분 도달 — {cy - 1}사이클에서 중단"); break; }
 
-            foreach (var stepDef in _scenario.steps)
+            _recoverLevel = 0;   // 복구 예산은 사이클마다 새로
+
+            // 인덱스 루프 — 복구 2단계에서 이 사이클을 스텝0부터 다시 돌려야 한다
+            var steps = new List<QaStepDef>(_scenario.steps);
+            for (int si = 0; si < steps.Count; si++)
             {
+                var stepDef = steps[si];
                 if (!_running) yield break;
                 if (Time.realtimeSinceStartup > deadline)
                 { _rep.Warn("session", "TIME_CAP", $"세션 상한 도달 — 사이클 {cy} 중도 종료"); break; }
@@ -353,6 +415,24 @@ public class QaBot : MonoBehaviour
                 _stuckTimer = 0f;   // 스텝마다 스턱 카운터 초기화(리포트 조기 소진 방지)
                 WriteStatus("running", $"사이클 {cy} · {stepDef.op}");
                 yield return RunStepSafely(stepDef);
+
+                if (_restartStep)
+                {
+                    _restartStep = false;
+                    if (_cycleRestarts < 2)
+                    {
+                        _cycleRestarts++;
+                        _rep.Warn("recover", "CYCLE_RESTART",
+                            $"사이클 {cy}를 처음부터 다시 (재시작 {_cycleRestarts}/2)");
+                        si = -1;   // 다음 증가로 0
+                    }
+                    else
+                    {
+                        _rep.Error("recover", "RESTART_CAP",
+                            "사이클 재시작 상한(2회) 도달 — 다음 사이클로 넘어간다");
+                        break;
+                    }
+                }
             }
         }
 
@@ -460,6 +540,7 @@ public class QaBot : MonoBehaviour
             warnCount = _rep.WarnCount,
             cycles = _tele.Snapshot(),
             cells = _heat != null ? _heat.Export() : new List<QaHeatmap.CellJson>(),
+            navGrids = _navGrids,
         };
         foreach (var e in _rep.Entries)
         {
@@ -573,6 +654,22 @@ public class QaBot : MonoBehaviour
     public IEnumerator Blocked(string step, string kind, string msg, string tried)
     {
         _rep.Error(step, kind, msg);
+
+        // ★ 묻기 전에 스스로 복구한다. 사람이 안 붙어 있어도 런이 끝까지 굴러가야
+        //   "어디서 막히나"가 아니라 "막히고 나서 어디까지 가나"까지 데이터가 남는다.
+        //   1단계: 세이브를 다시 불러 이어서 / 2단계: 사이클을 처음부터.
+        if (_recoverLevel < 2)
+        {
+            _recoverLevel++;
+            bool restart = (_recoverLevel == 2);
+            _rep.Warn(step, restart ? "RECOVER_RESTART" : "RECOVER_LOAD",
+                $"{kind} — 세이브 로드 후 {(restart ? "사이클을 처음부터" : "이어서 재시도")} (복구 {_recoverLevel}/2)");
+            yield return ReloadFromSave();
+            if (restart) _restartStep = true;
+            yield break;                      // 복구했으니 마더에게 묻지 않는다
+        }
+
+        // 두 번 복구해도 안 되면 그때 사람/마더에게 묻는다
         var req = new QaBridge.BlockedJson
         {
             kind = kind, step = step, message = msg, tried = tried,
@@ -598,6 +695,11 @@ public class QaBot : MonoBehaviour
 
         float t = 0f, checkTimer = 0f;
         Vector3 lastCheck = player.transform.position;
+
+        // 와리가리 감지 — 위치가 계속 바뀌므로 STUCK(정지)으로는 절대 안 잡힌다.
+        // "많이 움직였는데 제자리"면 경로가 좌우로 진동하는 것.
+        float oscTimer = 0f, oscPath = 0f;
+        Vector3 oscAnchor = lastCheck, prevPos = lastCheck;
 
         while (t < timeout)
         {
@@ -651,12 +753,57 @@ public class QaBot : MonoBehaviour
                 lastCheck = pos; checkTimer = 0f;
             }
 
+            // ── 와리가리 판정 (6초 창) ─────────────────────────────
+            oscPath += Vector2.Distance(pos, prevPos);
+            prevPos = pos;
+            oscTimer += Time.unscaledDeltaTime;
+            if (oscTimer >= 6f)
+            {
+                float net = Vector2.Distance(pos, oscAnchor);
+                if (oscPath >= 8f && net < 2f && _oscReported < 6)
+                {
+                    _oscReported++;
+                    _rep.Warn(_step, "OSCILLATION",
+                        $"6초간 {oscPath:0.#}m 이동했는데 순이동 {net:0.#}m — 제자리 왕복(와리가리). "
+                        + $"위치({pos.x:0.#},{pos.y:0.#}) 목표({target.x:0.#},{target.y:0.#}) "
+                        + $"[{(_pathingNow ? "A*경로" : "직선")}]");
+                    _heat?.AddStuck(Scene, pos, _cycle);
+                    if (nav != null) nav.Stop();      // 경로 버리고 다시 잡게
+                    yield return Nudge(dir);
+                }
+                oscTimer = 0f; oscPath = 0f; oscAnchor = pos;
+            }
+
             t += Time.unscaledDeltaTime;
             yield return null;
         }
 
         GameInput.VSetMove(Vector2.zero);
         onDone?.Invoke(false);
+    }
+
+    /// <summary>세이브를 다시 불러 알려진 정상 상태(안전가옥)로 되돌린다.
+    /// 레이드 중이었다면 그 레이드는 버린다 — 사람이 막혔을 때 하는 것과 같다.</summary>
+    IEnumerator ReloadFromSave()
+    {
+        GameInput.VSetMove(Vector2.zero);
+        GameInput.Virtual = false;   // 눌린 가상 키 잔재 정리(setter가 전부 해제)
+        GameInput.Virtual = true;
+        _stuckTimer = 0f;
+
+        if (TitleScreen.IsShowing)
+        {
+            if (!TitleScreen.ContinueGame(0)) TitleScreen.StartNewGame(0);
+        }
+        else if (SaveManager.Instance != null)
+        {
+            if (!SaveManager.Instance.Load())
+                _rep.Warn(_step, "RECOVER_NOSAVE", "세이브 로드 실패 — 현재 상태로 계속");
+        }
+
+        yield return new WaitForSecondsRealtime(2f);   // 씬 전환·초기화 대기
+        _navSeen.Clear();                              // 씬이 바뀌었으면 격자 다시 기록
+        _rep.Info(_step, "RECOVER_DONE", $"복구 후 재개 — 씬 {Scene} 위치 {PlayerPos}");
     }
 
     // ── 길찾기 ───────────────────────────────────────────────────────

@@ -63,6 +63,19 @@ public static class QaBridge
         public List<AnomalyJson> anomalies = new List<AnomalyJson>();
         /// <summary>공간 셀 데이터 — "어디서" 분석용(파밍효율·스턱·미방문).</summary>
         public List<QaHeatmap.CellJson> cells = new List<QaHeatmap.CellJson>();
+
+        /// 씬별 길찾기 격자 상태. 봇이 못 움직일 때 "격자 문제냐 맵 문제냐"를 가른다.
+        public List<NavGridJson> navGrids = new List<NavGridJson>();
+    }
+
+    [System.Serializable]
+    public class NavGridJson
+    {
+        public string scene;
+        public bool present;
+        public int width, height;
+        public float cellSize;
+        public float blockedPct;   // 막힘 셀 비율(%). 0=장애물 못 잡음, 과다=통로 막힘 의심
     }
 
     /// <summary>항목별 통과 판정 — "루프가 도는가", "루팅이 나오는가" 같은 체크 하나.</summary>

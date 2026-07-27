@@ -469,6 +469,7 @@ def collect_summary(cfg, limit=20):
             "durationSec": round(j.get("durationSec", 0), 1),
             "checks": j.get("checks", []),
             "anomalies": j.get("anomalies", []),
+            "navGrids": j.get("navGrids", []),
             "path": str(p),
         })
         for a in j.get("anomalies", []):

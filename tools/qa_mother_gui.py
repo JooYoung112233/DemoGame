@@ -1085,6 +1085,22 @@ class MotherApp(tk.Tk):
         t.insert("end", f"{r['at']} · 차일드 {r['instance'] or '(기본)'} · 시나리오 {r['scenario']}"
                         f" · 사이클 {r['cycles']} · {r['durationSec']}s\n\n", "dim")
 
+        ng = r.get("navGrids", [])
+        if ng:
+            t.insert("end", "── 길찾기 격자 (봇이 못 움직일 때 원인을 가르는 값) ──\n", "head")
+            for g in ng:
+                if not g.get("present"):
+                    t.insert("end", f"  ✘ {g.get('scene'):<12} 격자 없음 — 적·NPC·봇 전부 직선 이동\n", "err")
+                    continue
+                pct = g.get("blockedPct", 0)
+                style = "err" if (pct <= 0 or pct >= 70) else "ok"
+                note = (" ← 장애물 못 잡음(베이크 시점)" if pct <= 0 else
+                        " ← 과다 팽창, 통로 막힘 의심" if pct >= 70 else "")
+                t.insert("end", f"  {'✔' if style == 'ok' else '⚠'} {g.get('scene'):<12}"
+                                f"{g.get('width')}×{g.get('height')} 셀 {g.get('cellSize', 0):.2f}m"
+                                f" · 막힘 {pct:.1f}%{note}\n", style)
+            t.insert("end", "\n")
+
         t.insert("end", "── 판정 항목 ──\n", "head")
         for c in r.get("checks", []):
             mark = "✔" if c.get("passed") else "✘"
