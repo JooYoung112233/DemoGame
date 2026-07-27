@@ -116,19 +116,45 @@ $html = @'
  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
  @media(max-width:1000px){.grid2{grid-template-columns:1fr}}
  .hm{font:10px/1 ui-monospace,Consolas,monospace;white-space:pre;overflow:auto;background:#111;padding:8px;border-radius:4px}
+ .tab{background:#242419;color:var(--mut);border:1px solid var(--line);border-radius:4px;padding:5px 14px;cursor:pointer;font:inherit}
+ .tab.on{background:#3a3520;color:#e8d9a0;border-color:#5a5030}
+ .st{display:inline-block;padding:1px 7px;border-radius:3px;font-size:11px;font-weight:600}
+ .st-passed{color:var(--ok);border:1px solid #2c4a2c}
+ .st-untested{color:var(--wr);border:1px solid #4a4229}
+ .st-partial{color:#9ac;border:1px solid #2c3a4a}
+ .st-blind{color:var(--ng);border:1px solid #4a2c2c;background:#2a1a1a}
+ .st-notimpl{color:var(--mut);border:1px solid var(--line)}
 </style></head><body>
 <header>
   <h1>🎮 QA 대시보드</h1>
   <span class="mut" id="dir"></span>
   <span class="mut">갱신 <b id="upd">-</b></span>
   <label class="mut"><input type="checkbox" id="auto" checked> 자동새로고침(3초)</label>
+  <span style="flex:1"></span>
+  <button class="tab on" data-t="run">결과</button>
+  <button class="tab" data-t="sys">QA 시스템</button>
 </header>
-<div class="wrap">
+
+<div class="wrap" id="tab-run">
   <div class="card"><h2>종합</h2><div class="kpi" id="kpi"></div></div>
   <div class="card"><h2>실행 중 (QA 프로그램 인스턴스)</h2><div id="live"></div></div>
   <div class="grid2">
     <div class="card"><h2>런 히스토리 — 통과/미통과</h2><div id="runs"></div></div>
     <div class="card"><h2>상세</h2><div id="detail" class="mut">런을 클릭하세요.</div></div>
+  </div>
+</div>
+
+<div class="wrap" id="tab-sys" style="display:none">
+  <div class="card"><h2>시스템 커버리지 — QA가 아는 것 / 모르는 것</h2>
+    <div class="kpi" id="covkpi"></div>
+    <div id="cov" style="margin-top:10px"></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>봇이 할 수 있는 동작 (op)</h2><div id="ops"></div></div>
+    <div class="card">
+      <h2>통과 판정 항목</h2><div id="checks"></div>
+      <h2 style="margin-top:14px">구조적 한계</h2><ul id="limits" class="small mut"></ul>
+    </div>
   </div>
 </div>
 <script>
@@ -186,6 +212,48 @@ function detail(r){
     <details open><summary>⛔ 문제 지점 (스턱/길막힘/사망)</summary><table><tr><th>씬</th><th>좌표</th><th>스턱</th><th>길막힘</th><th>사망</th></tr>${bad||'<tr><td colspan=5 class=mut>없음</td></tr>'}</table></details>
     <details><summary>💤 파밍 효율 낮은 구역 (재미없는 파밍 후보)</summary><table><tr><th>씬</th><th>좌표</th><th>효율</th><th>체류</th><th>획득</th></tr>${worst||'<tr><td colspan=5 class=mut>표본 부족</td></tr>'}</table></details>`;
 }
+// ── 탭 ──
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  document.getElementById('tab-run').style.display = b.dataset.t==='run'?'':'none';
+  document.getElementById('tab-sys').style.display = b.dataset.t==='sys'?'':'none';
+});
+
+// ── QA 시스템 뷰 (tools/qa-manifest.json = 단일 진실원) ──
+const LABEL={passed:'검증됨',untested:'미실행',partial:'부분',blind:'사각(op 없음)',notimpl:'게임 미구현'};
+async function loadManifest(){
+  let M; try{ M=await (await fetch('/manifest?'+Date.now())).json(); }catch(e){ return; }
+  if(!M||!M.coverage) return;
+
+  const cov=M.coverage, n=cov.length;
+  const cnt=s=>cov.filter(c=>c.status===s).length;
+  const covered=cnt('passed')+cnt('untested')+cnt('partial');
+  document.getElementById('covkpi').innerHTML=
+    `<div><b>${n}</b><span>게임 시스템</span></div>
+     <div><b class="pass">${cnt('passed')}</b><span>검증됨</span></div>
+     <div><b style="color:#d9a441">${cnt('untested')}</b><span>미실행</span></div>
+     <div><b style="color:#9ac">${cnt('partial')}</b><span>부분</span></div>
+     <div><b class="fail">${cnt('blind')}</b><span>사각</span></div>
+     <div style="flex:1;min-width:180px"><span>커버(op 있음) ${Math.round(covered*100/n)}%</span>
+       <div class="bar"><i style="width:${covered*100/n}%"></i></div></div>`;
+
+  document.getElementById('cov').innerHTML=`<table><tr><th>#</th><th>게임 시스템</th><th>검증 수단(op)</th><th>상태</th><th>비고</th></tr>`+
+    cov.map(c=>`<tr><td class="mut">${c.id}</td><td>${c.system}</td>
+      <td><code>${c.op||'—'}</code></td>
+      <td><span class="st st-${c.status}">${LABEL[c.status]||c.status}</span></td>
+      <td class="small mut">${c.note||''}</td></tr>`).join('')+`</table>`;
+
+  document.getElementById('ops').innerHTML=`<table><tr><th>op</th><th>분류</th><th>파라미터</th><th>하는 일</th></tr>`+
+    (M.ops||[]).map(o=>`<tr><td><code>${o.op}</code></td><td class="mut">${o.group}</td>
+      <td class="small mut">${o.params}</td><td class="small">${o.does}</td></tr>`).join('')+`</table>`;
+
+  document.getElementById('checks').innerHTML=`<table><tr><th>판정 항목</th><th>실패 조건</th></tr>`+
+    (M.checks||[]).map(k=>`<tr><td>${k.name}</td><td class="small mut">${k.fails}</td></tr>`).join('')+`</table>`;
+
+  document.getElementById('limits').innerHTML=(M.limits||[]).map(l=>`<li>${l}</li>`).join('');
+}
+loadManifest();
+
 setInterval(()=>{ if(document.getElementById('auto').checked) load(); },3000);
 load();
 </script></body></html>
@@ -202,7 +270,11 @@ try {
   while ($listener.IsListening) {
     $ctx = $listener.GetContext()
     $path = $ctx.Request.Url.AbsolutePath
-    if ($path -eq "/data") {
+    if ($path -eq "/manifest") {
+      $mf = Join-Path $PSScriptRoot "qa-manifest.json"
+      if (Test-Path $mf) { $body = Get-Content $mf -Raw -Encoding UTF8 } else { $body = "{}" }
+      $ctx.Response.ContentType = "application/json; charset=utf-8"
+    } elseif ($path -eq "/data") {
       $body = Get-QaSnapshot
       $ctx.Response.ContentType = "application/json; charset=utf-8"
     } else {
