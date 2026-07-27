@@ -269,6 +269,24 @@ public class TitleScreen : MonoBehaviour
     }
 
     // ── 슬롯 확정 후 실제 진입 ──
+    /// <summary>지정 슬롯으로 새 게임 시작(버튼 클릭과 동일 경로). 자동화·디버그용 공개 진입점.
+    /// 가상 입력은 uGUI EventSystem을 구동하지 못하므로(폴링 소비자만 구동) 버튼은 이렇게 호출한다.</summary>
+    public static bool StartNewGame(int slot = 0)
+    {
+        if (Instance == null) { Debug.LogWarning("[Title] TitleScreen 인스턴스 없음 — 새 게임 불가"); return false; }
+        Instance.StartNewInSlot(Mathf.Clamp(slot, 0, 2));
+        return true;
+    }
+
+    /// <summary>지정 슬롯 이어하기(세이브 없으면 false). 자동화·디버그용.</summary>
+    public static bool ContinueGame(int slot = 0)
+    {
+        if (Instance == null) return false;
+        if (SaveManager.Instance == null || !SaveManager.Instance.HasSave(slot)) return false;
+        Instance.ContinueInSlot(slot);
+        return true;
+    }
+
     void StartNewInSlot(int slot)
     {
         if (SaveManager.Instance != null)

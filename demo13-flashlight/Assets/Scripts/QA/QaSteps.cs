@@ -42,6 +42,9 @@ public static class QaSteps
                 { "wait",               Wait },
                 { "cycle.begin",        CycleBegin },
                 { "cycle.end",          CycleEnd },
+                { "title.newgame",      TitleNewGame },
+                { "title.continue",     TitleContinue },
+                { "story.skip",         StorySkip },
                 { "safehouse.ensure",   SafehouseEnsure },
                 { "inventory.organize", InventoryOrganize },
                 { "shop.sell",          ShopSell },
@@ -82,6 +85,72 @@ public static class QaSteps
             c.Report.Info("cycle", "END",
                 $"사이클 {m.cycle} 종료 — 소지금 {m.moneyStart}→{m.moneyEnd} · Lv {m.levelStart}→{m.levelEnd} · 루팅가치 {m.lootValue} · {m.durationSec:0}s");
         yield break;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  게임 시작 (타이틀 → 프롤로그) — 신규 유저가 실제로 겪는 구간
+    // ══════════════════════════════════════════════════════════════
+
+    /// <summary>타이틀에서 새 게임 시작. **신규 유저 경로를 실제로 탄다**(프롤로그 포함).
+    /// ※ 가상 입력은 uGUI EventSystem을 못 움직이므로 버튼은 API로 누른다(TitleScreen.StartNewGame).</summary>
+    static IEnumerator TitleNewGame(QaStepDef d, QaContext c)
+    {
+        int slot = d.count;   // 0~2
+        float budget = d.budgetSec > 0 ? d.budgetSec : 40f;
+
+        if (!TitleScreen.StartNewGame(slot))
+        {
+            c.Report.Warn("title", "NO_TITLE", "타이틀 화면이 아님 — 새 게임 스킵(이미 인게임?)");
+            yield break;
+        }
+        c.Report.Info("title", "NEW_GAME", $"슬롯 {slot} 새 게임 시작");
+
+        bool ok = false;
+        yield return c.Bot.WaitUntil(() => SceneManager.GetActiveScene().name == "Safehouse", budget, r => ok = r);
+        if (!ok) { yield return c.Bot.Blocked("title", "NEW_GAME_TIMEOUT", $"새 게임 후 {budget:0}초 내 안전가옥 미도달", "TitleScreen.StartNewGame"); yield break; }
+        c.Report.Info("title", "OK", "안전가옥 진입");
+    }
+
+    static IEnumerator TitleContinue(QaStepDef d, QaContext c)
+    {
+        int slot = d.count;
+        if (!TitleScreen.ContinueGame(slot)) { c.Report.Warn("title", "NO_SAVE", $"슬롯 {slot} 세이브 없음 — 이어하기 스킵"); yield break; }
+        bool ok = false;
+        yield return c.Bot.WaitUntil(() => SceneManager.GetActiveScene().name == "Safehouse", d.budgetSec > 0 ? d.budgetSec : 40f, r => ok = r);
+        c.Report.Info("title", ok ? "OK" : "TIMEOUT", ok ? "이어하기 진입" : "이어하기 후 안전가옥 미도달");
+    }
+
+    /// <summary>스토리(내레이션·대화·튜토)를 눌러 넘긴다 — 프롤로그·튜토 구간 통과용.
+    /// 내레이션은 Space/좌클릭/Enter로 진행한다(NarrationUI). 타이핑 중이면 1번은 즉시완성, 2번째에 다음 줄.</summary>
+    static IEnumerator StorySkip(QaStepDef d, QaContext c)
+    {
+        float budget = d.budgetSec > 0 ? d.budgetSec : 60f;
+        float end = Time.realtimeSinceStartup + budget;
+        int taps = 0;
+
+        bool Busy()
+            => (NarrationUI.Instance != null && NarrationUI.Instance.IsShowing)
+               || (DialogueUI.Instance != null && DialogueUI.Instance.IsShowing)
+               || (StoryPlayer.Instance != null && StoryPlayer.Instance.IsPlaying);
+
+        // 스토리가 시작되기까지 잠깐 기다린다(프롤로그는 페이드 뒤에 뜬다).
+        float w = 0f;
+        while (!Busy() && w < 4f) { w += Time.unscaledDeltaTime; yield return null; }
+
+        if (!Busy()) { c.Report.Info("story", "NONE", "넘길 스토리 없음"); yield break; }
+
+        while (Busy() && Time.realtimeSinceStartup < end)
+        {
+            c.Bot.Tap(KeyCode.Space);
+            taps++;
+            yield return c.Bot.WaitSec(0.35f);
+        }
+
+        bool cleared = !Busy();
+        if (cleared) c.Report.Info("story", "SKIPPED", $"스토리 통과 ({taps}회 입력, {budget - (end - Time.realtimeSinceStartup):0.0}s)");
+        else yield return c.Bot.Blocked("story", "STORY_STUCK",
+                $"{budget:0}초 동안 {taps}회 눌렀는데 스토리가 안 끝남 — 진행 불가 지점(신규 유저가 여기서 막힌다)",
+                "Space 반복 입력");
     }
 
     // ══════════════════════════════════════════════════════════════

@@ -64,6 +64,8 @@ game.exe -qa-serve -qa-instance=A -qa-minutes=5
 | op | 파라미터 | 하는 일 |
 |----|---------|--------|
 | `cycle.begin` / `cycle.end` | — | 사이클 지표 구간(밸런스 추세용) |
+| `title.newgame` / `title.continue` | count(슬롯) | 타이틀에서 새 게임/이어하기 — 신규 유저 경로 |
+| `story.skip` | budgetSec | 프롤로그·대화·튜토 넘기기(막히면 STORY_STUCK) |
 | `safehouse.ensure` | budgetSec | 안전가옥으로 복귀 |
 | `inventory.organize` | — | 가방 정리(비의료·비소비를 창고로), 무게 초과 점검 |
 | `shop.sell` | ratio, param(shopId) | 창고 잡템 판매(의료·열쇠 제외) |
