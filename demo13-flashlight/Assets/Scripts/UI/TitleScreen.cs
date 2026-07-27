@@ -13,6 +13,11 @@ public class TitleScreen : MonoBehaviour
 
     bool IsGenerated => canvas != null;
 
+    /// <summary>타이틀 화면이 실제로 떠 있는가(캔버스 활성). 자동화·UI 중첩 판정용.
+    /// ※ 타이틀 캔버스는 sortingOrder 500으로 모든 UI 위에 있다 — 이걸 안 끄고 씬만 바꾸면
+    ///   게임은 뒤에서 돌지만 화면은 타이틀에 덮인 채로 남는다.</summary>
+    public static bool IsShowing => Instance != null && Instance.canvas != null && Instance.canvas.gameObject.activeSelf;
+
     [SerializeField] Canvas canvas;
     [SerializeField] Button newGameBtn;
     [SerializeField] Button continueBtn;

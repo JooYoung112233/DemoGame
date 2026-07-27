@@ -99,11 +99,10 @@ public static class QaSteps
         int slot = d.count;   // 0~2
         float budget = d.budgetSec > 0 ? d.budgetSec : 40f;
 
+        if (!TitleScreen.IsShowing)
+        { c.Report.Warn("title", "NO_TITLE", "타이틀 화면이 아님 — 새 게임 스킵(이미 인게임?)"); yield break; }
         if (!TitleScreen.StartNewGame(slot))
-        {
-            c.Report.Warn("title", "NO_TITLE", "타이틀 화면이 아님 — 새 게임 스킵(이미 인게임?)");
-            yield break;
-        }
+        { c.Report.Error("title", "NEW_GAME_FAIL", "새 게임 호출 실패"); yield break; }
         c.Report.Info("title", "NEW_GAME", $"슬롯 {slot} 새 게임 시작");
 
         bool ok = false;
@@ -241,6 +240,28 @@ public static class QaSteps
     static IEnumerator SafehouseEnsure(QaStepDef d, QaContext c)
     {
         const string Safehouse = "Safehouse";
+        float budget0 = d.budgetSec > 0 ? d.budgetSec : 25f;
+
+        // ★ 타이틀이 떠 있으면 **정상 경로로 들어가야 한다**.
+        //   씬만 강제 전환하면 타이틀 캔버스(sortingOrder 500)가 안 꺼져 화면이 타이틀에 덮인 채 남는다
+        //   (게임은 뒤에서 도는데 화면은 그대로 = "화면이 안 꺼짐"). Hide()는 새게임/이어하기에서만 호출된다.
+        if (TitleScreen.IsShowing)
+        {
+            bool started = TitleScreen.ContinueGame(0);          // 세이브 있으면 이어하기
+            if (!started) started = TitleScreen.StartNewGame(0); // 없으면 새 게임
+            c.Report.Info("safehouse", "TITLE", started ? "타이틀에서 정상 진입(캔버스 해제)" : "타이틀 진입 실패");
+
+            bool ok0 = false;
+            yield return c.Bot.WaitUntil(
+                () => SceneManager.GetActiveScene().name == Safehouse && !TitleScreen.IsShowing, budget0, r => ok0 = r);
+
+            if (!ok0)
+                yield return c.Bot.Blocked("safehouse", "TITLE_STUCK",
+                    $"타이틀에서 {budget0:0}초 내 진입 실패(타이틀 표시={TitleScreen.IsShowing})", "ContinueGame→StartNewGame");
+            else c.Report.Info("safehouse", "OK", "안전가옥 진입");
+            yield break;
+        }
+
         if (SceneManager.GetActiveScene().name == Safehouse) { c.Report.Info("safehouse", "OK", "이미 안전가옥"); yield break; }
 
         if (SceneTransitionManager.Instance == null)
