@@ -83,8 +83,18 @@ def load_instances() -> dict:
 
 
 def data_dir(cfg) -> Path:
-    d = Path(cfg.get("dataDir") or default_data_dir())
-    return d
+    """QA 데이터 폴더. 등록된 경로에 사용자 이름이 박혀 있어 **다른 PC에서는 안 맞는다**
+    (집/회사 왕복). 설정 경로가 없고 이 PC의 기본 경로가 있으면 그쪽을 쓴다."""
+    configured = cfg.get("dataDir")
+    if configured:
+        p = Path(configured)
+        if p.exists():
+            return p
+        fallback = default_data_dir()
+        if fallback.exists():
+            return fallback
+        return p
+    return default_data_dir()
 
 
 def fname(inst: str, base: str) -> str:

@@ -1,1 +1,7 @@
 demo13-flashlight/Assets/GPT/Blitz-2.1.587.exe
+
+# QA 마더 런타임 산출물 — 기계마다 다르고 매 실행 갱신된다(설정인 qa-instances.json은 추적)
+tools/__pycache__/
+tools/qa-mother.log
+tools/qa-agent-request.md
+tools/qa-report-for-claude.md
