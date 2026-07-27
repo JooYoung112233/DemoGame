@@ -31,6 +31,8 @@ public static class QaBridge
     [System.Serializable]
     public class SessionJson
     {
+        public string instance;
+        public string commandId;
         public string scenario;
         public int seed;
         public int cyclesPlanned;
@@ -40,10 +42,30 @@ public static class QaBridge
         public bool isEditor;
         public string startedAt;
         public string endedAt;
+        public float durationSec;
+
+        /// <summary>PASS / FAIL — GUI 통계의 기본 단위.</summary>
+        public string verdict = "PASS";
+        /// <summary>판정 근거(왜 FAIL인지).</summary>
+        public string verdictReason = "";
+        /// <summary>세부 판정 — 항목별 통과/실패(GUI에서 막대로 표시).</summary>
+        public List<CheckJson> checks = new List<CheckJson>();
+
         public int errorCount;
         public int warnCount;
         public List<QaCycleMetrics> cycles = new List<QaCycleMetrics>();
         public List<AnomalyJson> anomalies = new List<AnomalyJson>();
+        /// <summary>공간 셀 데이터 — "어디서" 분석용(파밍효율·스턱·미방문).</summary>
+        public List<QaHeatmap.CellJson> cells = new List<QaHeatmap.CellJson>();
+    }
+
+    /// <summary>항목별 통과 판정 — "루프가 도는가", "루팅이 나오는가" 같은 체크 하나.</summary>
+    [System.Serializable]
+    public class CheckJson
+    {
+        public string name;
+        public bool passed;
+        public string detail;
     }
 
     [System.Serializable]

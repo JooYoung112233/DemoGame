@@ -76,7 +76,7 @@
 | [`controls.md`](controls.md) | **컨트롤/입력 매핑 SSOT** — 키보드·마우스 + **게임패드** 전체 매핑표. 셰임 확장 방식(액션 에셋 없이 `Gamepad.current` 병합), 조준 디바이스 전환(`PadActive`), T2(메뉴 UX)/T3(격자 인벤) 남은 단계 | T0/T1 구현 |
 | [`ui-prefab-plan.md`](ui-prefab-plan.md) | **UI 프리팹화 SSOT** — 코드 절차 생성 → 프리팹 베이크(`UIPrefabBaker`)/Instantiate 전환(§4-A 전 패널 완료), `[SerializeField]`/`WireEvents`/`ApplyFonts` 패턴, 시안 스킨(`UISkin`, §4-B 보류) | §4-A 완료 |
 | [`save.md`](save.md) | **저장/체크포인트** — 세이브 스커밍 방지(레이드 진행=인메모리 스냅샷, 디스크는 안전 맥락만, 크래시 1회 커밋). `SaveManager`/`SaveCheckpoints`/`CombatStateTracker` | 구현 |
-| [`qa.md`](qa.md) | **QA 자동 검증 3축 SSOT** — ①정적 `IntegrityValidator`(배선 버그) ②동적 **`QaBot`**(빌드 exe를 실제 플레이 — `GameInput` 가상 입력층으로 게임 코드 수정 0) ③수치 `QaBalanceSim`(헤드리스 밸런스 분포). 이상 종류·실행법·결정 로그 | 구현 (2026-07-11) |
+| [`qa.md`](qa.md) | **QA 자동화 SSOT** — **Claude가 명령해 게임을 실제 플레이시키고 밸런스·막힘 데이터를 뽑는 시스템**. `QaBot`(가상 입력층으로 게임 코드 수정 0) · `QaHeatmap`(어디서 재미없나·어디서 막히나 공간 분석) · PASS/FAIL 판정 · 외부 GUI 대시보드 · `qa-runner`↔`dev-fixer` 자동 루프. 이어서 = 스킬 `/QA이어서` | 구현·**Unity 미검증** (2026-07-11) |
 
 ### ⚔️ 전투
 

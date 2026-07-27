@@ -58,6 +58,20 @@ public class QaBot : MonoBehaviour
     float _stuckTimer;
     int _stuckReported;
 
+    // ── 공간 텔레메트리 ("어디서" 데이터) ───────────────────────────
+    QaHeatmap _heat;
+    public QaHeatmap Heat => _heat;
+    public int Cycle => _cycle;
+    public string Scene => SceneManager.GetActiveScene().name;
+    float _sampleTimer;
+    bool _wasDead;
+
+    /// <summary>현재 위치를 히트맵에 기록할 좌표(플레이어 없으면 zero).</summary>
+    public Vector2 PlayerPos => TopDownPlayer.Instance != null ? (Vector2)TopDownPlayer.Instance.transform.position : Vector2.zero;
+
+    /// <summary>스텝에서 "여기서 목표 도달 실패" 기록 — 진행 막히는 지점 클러스터링용.</summary>
+    public void NoteUnreachable() => _heat?.AddUnreachable(Scene, PlayerPos, _cycle);
+
     // ── 부트 ─────────────────────────────────────────────────────────
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -134,7 +148,33 @@ public class QaBot : MonoBehaviour
     void LateUpdate()
     {
         // 가상 입력의 1프레임 플래그는 모든 Update 소비자가 본 뒤 걷는다.
-        if (_running) GameInput.VEndFrame();
+        if (!_running) return;
+        GameInput.VEndFrame();
+        SampleSpace();
+    }
+
+    /// <summary>주기적 위치 샘플 — 체류/이동/사망을 셀에 누적(안전가옥은 제외, 레이드 맵만).</summary>
+    void SampleSpace()
+    {
+        if (_heat == null || TopDownPlayer.Instance == null) return;
+        string sc = Scene;
+        if (sc == "Safehouse" || sc == "Hideout" || sc == "Systems") return;
+
+        _sampleTimer += Time.unscaledDeltaTime;
+        if (_sampleTimer < 0.25f) return;
+        _heat.Sample(sc, PlayerPos, _sampleTimer, _cycle);
+        _sampleTimer = 0f;
+
+        // 사망 지점 = 난이도 스파이크 후보
+        var hp = TopDownPlayer.Instance.GetComponent<Health>();
+        bool dead = hp != null && hp.IsDead;
+        if (dead && !_wasDead)
+        {
+            _heat.AddDeath(sc, PlayerPos, _cycle);
+            if (_tele?.Current != null) _tele.Current.deaths++;
+            _rep?.Warn(_step, "DEATH", $"사망 — ({PlayerPos.x:0}, {PlayerPos.y:0})");
+        }
+        _wasDead = dead;
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -231,6 +271,7 @@ public class QaBot : MonoBehaviour
 
         _rep = new QaReport();
         _tele = new QaTelemetry();
+        _heat = new QaHeatmap();
         if (_scenario == null) _scenario = QaScenarioDef.Load();
         int seed = _scenario.seed != 0 ? _scenario.seed : System.Environment.TickCount;
         _rng = new System.Random(seed);
@@ -285,6 +326,7 @@ public class QaBot : MonoBehaviour
         if (_tele.Current != null) _tele.EndCycle();
 
         _tele.Analyze(_rep);
+        _heat?.Analyze(_rep);
         _rep.Info("done", "END", "시나리오 완료");
         Finish();
     }
@@ -325,7 +367,8 @@ public class QaBot : MonoBehaviour
 
         if (_rep != null)
         {
-            string body = _rep.Build($"QA 자동 플레이 — {_scenario?.name}") + "\n" + _tele.BuildTable();
+            string body = _rep.Build($"QA 자동 플레이 — {_scenario?.name}") + "\n" + _tele.BuildTable()
+                          + "\n" + (_heat != null ? _heat.BuildReport() : "");
             string stamp = System.DateTime.Now.ToString("yyyyMMdd-HHmmss");
             try { System.IO.File.WriteAllText(F($"qa-report-{stamp}.txt"), body); } catch { }
             Debug.Log(body);
@@ -349,10 +392,13 @@ public class QaBot : MonoBehaviour
     {
         var s = new QaBridge.SessionJson
         {
+            instance = _instance,
+            commandId = _commandId,
             scenario = _scenario?.name,
             seed = _scenario?.seed ?? 0,
             cyclesPlanned = _scenario?.cycles ?? 0,
             cyclesCompleted = _tele.Cycles.Count,
+            durationSec = Time.realtimeSinceStartup - _startedAt,
             unityVersion = Application.unityVersion,
             platform = Application.platform.ToString(),
             isEditor = Application.isEditor,
@@ -360,6 +406,7 @@ public class QaBot : MonoBehaviour
             errorCount = _rep.ErrorCount,
             warnCount = _rep.WarnCount,
             cycles = _tele.Snapshot(),
+            cells = _heat != null ? _heat.Export() : new List<QaHeatmap.CellJson>(),
         };
         foreach (var e in _rep.Entries)
         {
@@ -372,6 +419,8 @@ public class QaBot : MonoBehaviour
             });
         }
 
+        BuildVerdict(s);
+
         try
         {
             string json = JsonUtility.ToJson(s, true);
@@ -381,6 +430,47 @@ public class QaBot : MonoBehaviour
             Debug.Log($"[QA] 결과 JSON: {F(name)}");
         }
         catch (System.Exception e) { Debug.LogError($"[QA] 결과 저장 실패: {e.Message}"); }
+    }
+
+    /// <summary>항목별 통과/미통과 판정 — GUI 통계의 단위. "이번 런이 뭘 증명했나"를 명시적으로 남긴다.
+    /// (이상 로그만 있으면 사람이 매번 해석해야 한다. 체크로 못박아야 통계가 쌓인다.)</summary>
+    void BuildVerdict(QaBridge.SessionJson s)
+    {
+        void Check(string name, bool ok, string detail)
+            => s.checks.Add(new QaBridge.CheckJson { name = name, passed = ok, detail = detail });
+
+        int kind(string k) { int n = 0; foreach (var a in s.anomalies) if (a.kind == k) n++; return n; }
+
+        // 루프가 실제로 도는가
+        int completedRaids = 0;
+        foreach (var c in s.cycles) if (c.raidCompleted) completedRaids++;
+        Check("사이클 완주", s.cyclesCompleted >= s.cyclesPlanned,
+              $"{s.cyclesCompleted}/{s.cyclesPlanned} 사이클");
+        Check("레이드 탈출", completedRaids > 0 && completedRaids == s.cyclesCompleted,
+              $"{completedRaids}/{s.cyclesCompleted} 회 탈출 성공");
+
+        // 루팅이 실제로 나오는가
+        int lootTotal = 0; foreach (var c in s.cycles) lootTotal += c.lootValue;
+        Check("루팅 획득", lootTotal > 0, $"총 루팅가치 {lootTotal}");
+
+        // 치명 이상이 없는가
+        Check("예외 없음", kind("EXCEPTION") == 0 && kind("LOG_ERROR") == 0,
+              $"예외 {kind("EXCEPTION")} · 에러로그 {kind("LOG_ERROR")}");
+        Check("아이템 유실 없음", kind("ITEM_LOST") == 0, $"{kind("ITEM_LOST")}건");
+        Check("씬 전환 정상", kind("SCENE_TIMEOUT") == 0 && kind("EXTRACT_TIMEOUT") == 0,
+              $"전환실패 {kind("SCENE_TIMEOUT") + kind("EXTRACT_TIMEOUT")}건");
+        Check("진행 막힘 없음", kind("STUCK_HOTSPOT") == 0 && kind("BLOCKED_HOTSPOT") == 0 && kind("NO_EXIT") == 0,
+              $"스턱핫스팟 {kind("STUCK_HOTSPOT")} · 길막힘 {kind("BLOCKED_HOTSPOT")} · 탈출구없음 {kind("NO_EXIT")}");
+        Check("UI 잠김 없음", kind("UI_STUCK") == 0, $"{kind("UI_STUCK")}건");
+
+        int failed = 0; var reasons = new List<string>();
+        foreach (var c in s.checks) if (!c.passed) { failed++; reasons.Add($"{c.name}({c.detail})"); }
+
+        s.verdict = failed == 0 ? "PASS" : "FAIL";
+        s.verdictReason = failed == 0 ? "전 항목 통과" : string.Join(" / ", reasons);
+
+        _rep.Info("verdict", s.verdict, s.verdictReason);
+        Debug.Log($"[QA] ===== {s.verdict} ===== {s.verdictReason}");
     }
 
     void OnLog(string condition, string stack, LogType type)
@@ -478,6 +568,7 @@ public class QaBot : MonoBehaviour
                     {
                         _stuckReported++;
                         _rep.Warn(_step, "STUCK", $"이동 입력에도 3초 정지 — 위치({pos.x:0.#},{pos.y:0.#}) 목표({target.x:0.#},{target.y:0.#})");
+                        _heat?.AddStuck(Scene, pos, _cycle);
                         _stuckTimer = 0f;
                         // 자유도: 옆으로 빠져나가기 시도(벽 끼임 탈출)
                         yield return Nudge(dir);
@@ -542,13 +633,20 @@ public class QaBot : MonoBehaviour
     {
         if (c == null || c.Grid == null || Inv == null) return 0;
         int taken = 0;
+        int gained = 0;
         foreach (var it in c.Grid.GetAll())
         {
             var inst = it.item;
             c.Grid.Remove(it);
-            if (Inv.TryAutoPlaceAnywhere(inst)) taken++;
+            if (Inv.TryAutoPlaceAnywhere(inst))
+            {
+                taken++;
+                if (inst?.data != null) gained += inst.data.sellPrice * Mathf.Max(1, inst.stackCount);
+            }
             else c.Grid.TryAutoPlace(inst);   // 못 넣으면 원복(유실 금지)
         }
+        // 이 좌표에서 얼마를 벌었는지 = 파밍 효율 계산의 분자
+        if (taken > 0) _heat?.AddLoot(Scene, PlayerPos, gained, taken, _cycle);
         return taken;
     }
 

@@ -346,7 +346,7 @@ public static class QaSteps
             if (SceneManager.GetActiveScene().name != raidScene)
             { c.Report.Warn("explore", "SCENE_LEFT", "탐색 중 레이드 씬을 벗어남(사망?) — 탐색 중단"); break; }
             if (target == null) { c.Report.Warn("explore", "CRATE_GONE", "이동 중 상자가 사라짐"); continue; }
-            if (!reached) { c.Report.Warn("explore", "UNREACHABLE", $"상자 '{target.ContainerName}' 도달 실패(길막힘?)"); continue; }
+            if (!reached) { c.Report.Warn("explore", "UNREACHABLE", $"상자 '{target.ContainerName}' 도달 실패(길막힘?)"); c.Bot.NoteUnreachable(); continue; }
 
             c.Bot.Tap(KeyCode.E);
             yield return c.Bot.WaitSec(1.2f);
