@@ -395,11 +395,13 @@ public static class Zone1GreyboxLayout
         var io = go.GetComponentInChildren<InteractableObject>();   // gb_exit의 E키 ExitPoint는 중복 → 제거
         if (io != null) Object.DestroyImmediate(io);
 
-        var box = go.GetComponent<BoxCollider2D>() ?? go.AddComponent<BoxCollider2D>();
+        var box = go.GetComponent<BoxCollider2D>();
+        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
         box.isTrigger = true;
         box.size = new Vector2(2.2f, 1.4f);
 
-        var be = go.GetComponent<BuildingEntrance>() ?? go.AddComponent<BuildingEntrance>();
+        var be = go.GetComponent<BuildingEntrance>();
+        if (be == null) be = go.AddComponent<BuildingEntrance>();
         be.Configure(targetScene, "default", false);
         return 1;
     }

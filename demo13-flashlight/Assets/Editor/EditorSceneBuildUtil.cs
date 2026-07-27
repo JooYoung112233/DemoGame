@@ -47,36 +47,54 @@ public static class EditorSceneBuildUtil
             var s = EditorSceneManager.GetSceneAt(i);
             if (!s.IsValid() || !string.IsNullOrEmpty(s.path)) continue;   // 저장된 씬은 대상 아님
 
-            bool hasContent = s.rootCount > 0;
-            if (!hasContent && !s.isDirty)
+            bool hasContent = s.rootCount > 0 || s.isDirty;
+            if (hasContent)
             {
-                // 완전히 빈 무제 씬 — Single로 새 씬을 열어 조용히 치운다(작업 손실 없음).
-                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-                return;
-            }
+                // 내용이 있는 무제 씬 = 사용자가 뭔가 만들던 중일 수 있음 → 임의로 버리지 않는다.
+                int choice = EditorUtility.DisplayDialogComplex(
+                    "저장되지 않은 '무제' 씬",
+                    "빌더는 새 씬을 추가로 열어야 하는데, 저장되지 않은 무제 씬이 있으면 Unity가 이를 거부합니다.\n\n" +
+                    "무제 씬을 어떻게 할까요?",
+                    "저장하고 계속", "버리고 계속", "취소");
 
-            // 내용이 있는 무제 씬 = 사용자가 뭔가 만들던 중일 수 있음 → 임의로 버리지 않는다.
-            int choice = EditorUtility.DisplayDialogComplex(
-                "저장되지 않은 '무제' 씬",
-                "빌더는 새 씬을 추가로 열어야 하는데, 저장되지 않은 무제 씬이 있으면 Unity가 이를 거부합니다.\n\n" +
-                "무제 씬을 어떻게 할까요?",
-                "저장하고 계속", "버리고 계속", "취소");
-
-            if (choice == 0)        // 저장하고 계속
-            {
-                if (!EditorSceneManager.SaveScene(s))
+                if (choice == 2) throw new System.OperationCanceledException("[Builder] 사용자가 취소했습니다.");
+                if (choice == 0 && !EditorSceneManager.SaveScene(s))
                     throw new System.OperationCanceledException("[Builder] 무제 씬 저장이 취소되어 빌드를 중단합니다.");
+                if (choice == 0) return;   // 저장됨 = 더 이상 무제가 아님
             }
-            else if (choice == 1)   // 버리고 계속
+
+            // 무제 씬 제거. ⚠️ `NewScene(..., Single)`로 대체하면 **그 새 씬이 또 무제·미저장**이라
+            //   바로 다음 Additive 호출이 같은 이유로 실패한다(2026-07-11 실제로 밟은 함정).
+            //   → 다른 씬이 열려 있으면 그냥 닫고, 하나뿐이면 **저장된 씬을 Single로 열어** 대체한다.
+            if (EditorSceneManager.sceneCount > 1)
             {
-                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                EditorSceneManager.CloseScene(s, true);
             }
-            else                    // 취소
+            else
             {
-                throw new System.OperationCanceledException("[Builder] 사용자가 취소했습니다.");
+                string anchor = FirstSavedScenePath();
+                if (string.IsNullOrEmpty(anchor))
+                    throw new System.InvalidOperationException(
+                        "[Builder] 저장되지 않은 무제 씬만 열려 있고, 대신 열 저장된 씬을 찾지 못했습니다. " +
+                        "아무 씬이나 저장하거나 열고 다시 실행하세요.");
+                EditorSceneManager.OpenScene(anchor, OpenSceneMode.Single);
             }
             return;
         }
+    }
+
+    /// <summary>빌드세팅(없으면 프로젝트 전체)에서 실제로 존재하는 저장된 씬 경로 하나. 무제 씬 대체용 앵커.</summary>
+    static string FirstSavedScenePath()
+    {
+        foreach (var bs in EditorBuildSettings.scenes)
+            if (bs != null && !string.IsNullOrEmpty(bs.path) && System.IO.File.Exists(bs.path)) return bs.path;
+
+        foreach (var guid in AssetDatabase.FindAssets("t:Scene"))
+        {
+            var p = AssetDatabase.GUIDToAssetPath(guid);
+            if (!string.IsNullOrEmpty(p) && System.IO.File.Exists(p)) return p;
+        }
+        return null;
     }
 
     /// <summary>씬을 path에 저장한 뒤 닫고(언로드) 원래 active 씬을 복구. 저장 성공 여부 반환.</summary>

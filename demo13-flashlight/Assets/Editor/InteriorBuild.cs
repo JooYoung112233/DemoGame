@@ -71,11 +71,13 @@ public static class InteriorBuild
         var io = go.GetComponentInChildren<InteractableObject>();
         if (io != null) Object.DestroyImmediate(io);
 
-        var box = go.GetComponent<BoxCollider2D>() ?? go.AddComponent<BoxCollider2D>();
+        var box = go.GetComponent<BoxCollider2D>();
+        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
         box.isTrigger = true;
         box.size = new Vector2(w, h);
 
-        var be = go.GetComponent<BuildingEntrance>() ?? go.AddComponent<BuildingEntrance>();
+        var be = go.GetComponent<BuildingEntrance>();
+        if (be == null) be = go.AddComponent<BuildingEntrance>();
         be.Configure(targetScene, spawnId, true);
         return 1;
     }
