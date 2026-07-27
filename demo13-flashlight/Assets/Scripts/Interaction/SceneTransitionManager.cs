@@ -25,6 +25,8 @@ public class SceneTransitionManager : MonoBehaviour
     bool isFading;
     Texture2D fadeTex;
     bool isTransitioning;
+    /// <summary>전환 진행 중 — 이때 TransitionTo는 조용히 무시된다(호출측이 확인용).</summary>
+    public bool IsTransitioning => isTransitioning;
 
     // 탈출 카운트���운 UI
     float exitCountdown;

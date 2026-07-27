@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::StatDB
   playerStat:
     maxHp: 100
-    moveSpeed: 1
-    sprintSpeedMultiplier: 2.1
+    moveSpeed: 4
+    sprintSpeedMultiplier: 1.6
     crouchSpeedMultiplier: 0.5
     moveAccel: 45
     moveDecel: 80
@@ -44,10 +44,10 @@ MonoBehaviour:
       animSpeed: 1
       distance: 0
     lightDamage: 8
-    lightRange: 2
+    lightRange: 1.2
     lightStaminaCost: 6
     lightGroggy: 5
-    lightCooldown: 0.4
+    lightCooldown: 0.12
     lightComboMax: 3
     lightComboWindow: 0.6
     lightCombo2Damage: 9
@@ -56,7 +56,7 @@ MonoBehaviour:
     lightCombo3Groggy: 8
     lightCombo3StaminaCost: 8
     heavyDamage: 20
-    heavyRange: 2.5
+    heavyRange: 1.7
     heavyStaminaCost: 22
     heavyGroggy: 25
     heavyChargeTime: 0.6
@@ -68,7 +68,7 @@ MonoBehaviour:
     dodgeStaminaCost: 15
     dodgeDistance: 3
     dodgeDuration: 0.3
-    dodgeInvincibleDuration: 0.2
+    dodgeInvincibleDuration: 0.26
     dodgeCooldown: 0.5
     maxStamina: 100
     staminaRegen: 15

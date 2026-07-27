@@ -38,6 +38,22 @@
 | 맵 ▸ 이상현상 구역 생성 | 현상 존 생성 | DenseAnomalyZone |
 | 맵 ▸ 낮밤 라이트 드라이버 부착 | 낮↔밤 ambient 부드러운 전환(WeatherData lerp) | DayNightLightDriver |
 
+## ✅ QA · 정합성 검증
+
+| 메뉴 | 무엇 | 파일 |
+|------|------|------|
+| QA ▸ 정합성 검증 | **씬·데이터 배선 버그 자동 점검**(정적) — 빌드세팅 씬을 Additive로 열어 조사(현재 씬 유지) → Console `[QA] ERROR/WARN` + 요약. | IntegrityValidator |
+| QA ▸ 밸런스 시뮬레이션 | **헤드리스 수치 검증** — 루트 롤 2000회/티어로 판당 수익·레벨 페이스·경제 스프레드 분포. 씬 불필요. | QaBalanceSim |
+| *(런타임)* `game.exe -qa` / F9 | **자동 플레이 봇** — 빌드된 실행 파일에서 실제로 플레이하며 예외·스턱·아이템유실·UI잠김 감지. | QaBot (+GameInput 가상 입력층) |
+
+**검사 항목** (이번 지역1 작업에서 사람이 놓쳤던 부류 기반):
+- SpawnPoint `pointId` 공백 / 게임플레이 씬에 스폰 0개
+- ExitPoint·BuildingEntrance의 `targetScene` 공백 or **빌드세팅 미등록**(→ LoadSceneAsync 실패)
+- SpawnZone `unitKey`가 **StatDB에 없음**(→ 적이 기본 스탯 폴백) / 빈 키
+- MapSpawnController `profile` 미지정(→ 예산제 무동작=루팅 0) / 앵커 0개
+- MapSpawnProfile `profileId` 공백·중복
+- WorldRegionCatalog의 채워진 `sceneName`이 빌드세팅 미등록
+
 ## 🧪 테스트·실험 (Tools ▸ TopDown ▸ 테스트) — 정식 도구 아님
 
 > 비주얼/무드 실험용. 씬에 임시 오브젝트를 뿌리는 용도 — 프로덕션 도구와 분리(`Assets/Editor/Test/`).

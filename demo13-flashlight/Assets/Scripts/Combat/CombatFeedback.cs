@@ -141,25 +141,29 @@ public class CombatFeedback : MonoBehaviour
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO == null) yield break;
 
-        // 적이 맞은 경우만 넉백 (플레이어 자신은 약하게)
-        float dist = knockbackDist;
-        if (GetComponent<TopDownPlayer>() != null)
-            dist *= 0.5f;
+        // 2026-07-11: **플레이어는 넉백하지 않는다.**
+        //   구: dir = self - player = 0 → `Vector3.down` 폴백이라 **플레이어가 맞을 때마다 항상 아래로** 밀렸다
+        //   (방향이 무의미한 버그). 사용자 요청도 "맞으면 히트 표기만" → 이동 연출 제거.
+        if (GetComponent<TopDownPlayer>() != null) yield break;
 
         Vector3 dir = (transform.position - playerGO.transform.position);
         dir.z = 0; // 2D XY 평면
-        if (dir.sqrMagnitude < 0.01f) dir = Vector3.down;
+        if (dir.sqrMagnitude < 0.01f) yield break;   // 방향을 못 구하면 밀지 않는다(엉뚱한 방향 금지)
         dir.Normalize();
 
+        // Rigidbody2D가 있으면 물리 경로로 이동 — transform 직접 대입은 Dynamic RB에서 지터·벽 관통을 만든다.
+        var rb = GetComponent<Rigidbody2D>();
         Vector3 startPos = transform.position;
-        Vector3 endPos = startPos + dir * dist;
+        Vector3 endPos = startPos + dir * knockbackDist;
 
         float t = 0;
         while (t < knockbackDuration)
         {
             t += Time.deltaTime;
             float pct = 1f - Mathf.Pow(1f - (t / knockbackDuration), 2); // ease out
-            transform.position = Vector3.Lerp(startPos, endPos, pct);
+            Vector3 p = Vector3.Lerp(startPos, endPos, pct);
+            if (rb != null) rb.MovePosition(p);
+            else            transform.position = p;
             yield return null;
         }
     }

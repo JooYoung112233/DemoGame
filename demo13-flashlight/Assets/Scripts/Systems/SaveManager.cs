@@ -69,8 +69,14 @@ public class SaveManager : MonoBehaviour
     /// 전체 게임 상태를 파일에 저장.
     /// (= WriteToDisk(BuildSaveData()) — 기존 호출부 호환용 래퍼)
     /// </summary>
+    /// <summary>true인 동안 디스크 쓰기를 건너뛴다(인메모리 진행은 그대로).
+    /// QA 자동 플레이가 켜는 스위치 — 봇이 준 테스트 아이템·비운 상자·XP가
+    /// **플레이어의 진짜 세이브를 덮어쓰지 않게** 한다. (게임 코드는 QA를 참조하지 않는다 — QA가 이 값을 세팅)</summary>
+    public static bool SuppressWrites;
+
     public void Save()
     {
+        if (SuppressWrites) { Debug.Log("[Save] SuppressWrites=true — 디스크 쓰기 생략(QA 런)"); return; }
         WriteToDisk(BuildSaveData());
     }
 

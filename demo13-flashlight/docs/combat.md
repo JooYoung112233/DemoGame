@@ -271,3 +271,42 @@
 | 2026-06-02 | **공격 중 이동 잠금 확정 + 상하체 애니 분리 불필요.** 공격 애니 재생 중 이동 불가(다크소울식) → "걸으면서 때리기" 조합이 없으므로 상체/하체 2트랙 분리 불필요, 통짜 전신 모션으로 제작. 구르기 캔슬과 결합해 답답함 완화. 애니 세트: 이동계(idle/walk/run) + 행동계(attack/hit/dodge, 이동 잠금). |
 | 2026-06-02 | **프레임 기반 전환 + 연속 공격(콤보) 구조.** ①타이밍 정규화(0~1)→**프레임**: `AttackData.fps`+`totalFrames`, `HitWindow.startFrame/endFrame`. `AttackPerformer`가 `CurrentFrame`으로 윈도우 활성 판정. ②**콤보 체인** `AttackComboData`(SO): 순서대로 이어지는 `AttackData[] steps` + `bufferTime`(선입력). `AttackData.cancelFromFrame`(이 프레임 이후 다음 단계 캔슬 입력 허용), `AttackPerformer.CanCancel`. ③`TopDownPlayer.lightCombo`: 공격 중 캔슬 윈도우에 입력하면 다음 단계 연결 + 선입력 버퍼, 구르기 시 콤보 끊김. ④**에디터** 개편: 단일/콤보 모드 토글, 콤보는 [1타][2타]… 단계 탭, **프레임 그리드 타임라인**(칸=프레임, 윈도우 막대, 캔슬 프레임 마커, 프레임 스크러버), 윈도우 시작/끝 프레임 IntSlider. |
 | 2026-06-02 | **무기 장착 → 전투 반영.** `WeaponData`(SO): 무기별 `lightCombo`(콤보)·`heavyAttack`·`heavyFullAttack` + `moveSpeedMult`·`staminaCostMult`. `ItemData.weaponData` 참조(Weapon 카테고리). `PlayerEquipment`(플레이어 컴포넌트): `EquipWeapon`(같은 무기 재장착=해제 토글)/`Unequip`, 세이브용 `GetSaveData`(itemId). `TopDownPlayer.SetWeapon(WeaponData)` → `CurrentLightCombo`/`CurrentHeavy`/`CurrentHeavyFull`·`WeaponMoveMult`·`WeaponStamMult`로 전투 전반 무기 반영(빈 항목/맨손=인스펙터 기본 콤보). 인벤토리 우클릭 Weapon → 장착(소모 없음). 루팅한 무기가 실제 콤보·리치·속도를 바꿈. |
+
+## 2026-07-11 — 전투 체감 재정립 (사용자 피드백: "때리기·맞기·범위가 다 이상하다")
+
+> 질문: 전투가 어색한데 처음부터 재작성할까? **결정: 전면 재작성 안 함 — 원인이 코드 구조가 아니라 ①데이터 ②국소 결함이라 재작성하면 데이터 원인이 그대로 재생산됨.** 대신 판정·수치·피격반응·적 거리제어를 전부 재정립.
+
+### 진단 (전수 조사)
+공격 판정의 **진실원 = StatDB 수치 + `TopDownPlayer.MakeAttack()` 하드코딩 공식**. `PlayerRig.prefab`의 `lightCombo/heavyAttack/heavyFullAttack`이 전부 null이고 WeaponData 에셋이 0개라 **100% 자동 생성 경로**로 돈다. `Resources/Attack.asset`은 아무도 참조 않는 고아 에셋.
+
+### 확정 원인 → 조치
+
+**데이터 (StatDB)**
+| 값 | 전 | 후 | 이유 |
+|---|---|---|---|
+| `playerStat.moveSpeed` | 1 | **4** | 적 2.5보다 느려 **카이팅·거리조절이 물리적으로 불가**했음. "맞는 게 이상"의 1순위 |
+| `sprintSpeedMultiplier` | 2.1 | 1.6 | 이동속도 인상분 상쇄(6.4 m/s) |
+| `lightRange` / `heavyRange` | 2 / 2.5 | **1.2 / 1.7** | 근접 사거리로 축소 |
+| `lightCooldown` | 0.4 | **0.12** | 1타마다 정지 → 콤보 연결 |
+| `dodgeInvincibleDuration` | 0.2 | **0.26** | 구르기 0.3초 중 뒷부분이 무방비였음 |
+
+**코드**
+1. **약공 3타 콤보 부활** — 선입력 예약 분기가 `_state != Idle → return` **뒤**에 있어 `_state==LightAttack`일 때 **도달 불가 코드**였다 → `_comboBuffered`가 영원히 false → 항상 1타만. 분기를 얼리 리턴 **앞으로** 이동.
+2. **히트박스 리치/폭 분리** — 구 `offset=range*0.5, boxSize=(range, range*0.75)`는 ①사거리를 키우면 폭까지 커지고 ②박스 근접변이 플레이어 원점에 붙어 **옆(90°)·뒤 적까지 정면 판정**에 들어왔다 → `offset=BodyRadius+range*0.5`, 폭은 사거리와 독립.
+3. **스윙 방향 고정** — `AttackPerformer`가 매 프레임 facing을 새로 읽어 히트박스가 **마우스를 실시간 추종** → 스윙 중 마우스를 돌리면 **등 뒤 적까지 맞았다**. `Perform()` 시점 스냅샷으로 고정.
+4. **적 공격 런지 제거** (사용자 지적 "때릴 때 앞뒤로 움직인다") — Rigidbody2D 위에서 transform을 원위치로 하드 스냅해 고무줄처럼 튕겼다. 제자리 공격 + 히트 표기만.
+5. **적 공격 판정 정합** — 구 `AtkRange*1.5` **원형(360°)** → 사거리 일치(×1.05) + `_attackDir` 기준 **±60° 정면 제한**(뒤로 돌아가도 맞던 문제).
+6. **플레이어 피격 무적창 0.35s**(`Health`) — 무적이 구르기 중에만 있어 여럿에게 겹쳐 맞으며 "모르게 갈렸다". DoT(silent)는 예외.
+7. **그로기 보상 복구** — 스턴 중 피격이 `state=Hit`로 덮여 **첫 타격에 스턴이 풀리고 반격**당했다 → 스턴 중엔 연출만.
+8. **적 정지거리(standoff)** — 쿨다운 중에도 전속으로 파고들어 겹쳤다(양쪽 Dynamic RB라 플레이어가 떠밀림) → 사거리 0.85배에서 정지.
+9. **약공 히트스탑 부여**(0.03~0.05) — 구 `hitstop:0`이라 약공은 히트스탑·셰이크·줌펀치가 **전부 미발동**("때려도 반응 없음").
+10. **구르기 감각** — 등속(순간이동 느낌) → 속도배율 1.35→0.5 감쇠(거리 유지, 강한 시작 + 부드러운 착지).
+11. **HeavyCharge 교착 해소** — 버튼 뗀 프레임을 놓치면 차징에 영구 고착(이동 0.4배·스프린트/약공 불가)되던 것 → 버튼이 이미 풀렸으면 발동 + 최대차징 2배 타임아웃.
+12. **캔슬 보너스 무효화 수정** — `TryCancelAttack`이 준 1.5배 경직을 직후 `OnDamaged`가 덮어써 항상 무효였다 → 보호 창(0.05s).
+13. **판정 잔류 방지** — 캔슬·사망 시 `_performer.Cancel()` 누락 → 추가.
+14. **넉백 방향 버그** — 플레이어 피격 시 `dir = self−self = 0` → `Vector3.down` 폴백이라 **항상 아래로** 밀렸다 → 플레이어 넉백 제거, 적 넉백은 `Rigidbody2D.MovePosition` 경로로.
+15. **스포너 폴백 키** `bandit_melee` → `bandit_melee_1`.
+
+### ⚠️ 남은 것
+- **씬의 `unitKey`가 아직 `bandit_melee`**(`Zone1.unity`/`ScrapMarket_GB.unity`) → StatDB 미스로 적이 **인스펙터 폴백**(HP 40→**100**, 데미지 10→**15**)으로 돈다. **씬 재빌드 필요**(빌더는 이미 수정됨).
+- 벽 관통 판정(LOS 체크 없음) · 적끼리 분리(separation) 없음 · `SkeletonAnimController` 스텁(`IsAnimComplete=true`)이라 animController 붙은 적은 피격 경직·공격 후딜이 0프레임으로 무력화됨.

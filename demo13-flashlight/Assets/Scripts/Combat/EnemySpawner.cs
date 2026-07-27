@@ -96,7 +96,7 @@ public class EnemySpawner : MonoBehaviour
     GameObject SpawnOne(SpawnZone zone)
     {
         Vector3 pos = zone.GetRandomPoint2D();
-        string key = string.IsNullOrEmpty(zone.UnitKey) ? "bandit_melee" : zone.UnitKey;
+        string key = string.IsNullOrEmpty(zone.UnitKey) ? "bandit_melee_1" : zone.UnitKey;   // 2026-07-11: StatDB 실존 키(구 "bandit_melee"는 없어서 인스펙터 폴백으로 샘)
 
         var unit = StatDB.Instance != null ? StatDB.Instance.GetUnit(key) : null;
 

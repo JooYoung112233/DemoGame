@@ -15,11 +15,100 @@ using UnityEngine.InputSystem.Controls;
 /// </summary>
 public static class GameInput
 {
+    // ═══════════════════════════════════════════════════════════
+    //  가상 입력 (QA 자동 플레이) — 엄격한 옵트인. Virtual=false면 기존 동작 그대로.
+    //
+    //  이 셰임이 게임 전체 입력의 **단일 관문**이라, 여기만 가로채면 QA 봇이
+    //  게임 코드 수정 0으로 사람과 똑같은 경로로 조작한다(호출처 95곳 무변경).
+    //  켜진 동안엔 실제 디바이스를 **무시**한다 — 사람이 실수로 키를 눌러도 QA 런이 오염되지 않게.
+    // ═══════════════════════════════════════════════════════════
+    static bool _virtual;
+    /// <summary>가상 입력 모드(QA 봇 구동 중). 켜면 실제 키보드/마우스/패드는 무시된다.</summary>
+    public static bool Virtual
+    {
+        get => _virtual;
+        set { _virtual = value; if (!value) VClearAll(); }
+    }
+
+    // ★ 프레임 스탬프가 핵심.
+    //   Unity 프레임 순서 = Update() → 코루틴 재개(yield return null) → LateUpdate().
+    //   봇 시나리오는 전부 코루틴이라 키를 누르는 시점이 "모든 Update가 끝난 뒤"다.
+    //   따라서 같은 프레임의 LateUpdate에서 걷어버리면 **어떤 Update 소비자도 그 키를 못 본다**(전부 무동작).
+    //   → 눌린 프레임을 기록하고, VEndFrame은 **이전 프레임 것만** 걷는다(1프레임 보장).
+    static readonly HashSet<KeyCode> _vHeld = new HashSet<KeyCode>();
+    static readonly Dictionary<KeyCode, int> _vDown = new Dictionary<KeyCode, int>();
+    static readonly Dictionary<KeyCode, int> _vUp   = new Dictionary<KeyCode, int>();
+    static readonly Dictionary<KeyCode, int> _vAutoRelease = new Dictionary<KeyCode, int>();
+    static Vector2 _vMove;
+    static Vector3 _vMousePos;
+    static Vector2 _vScroll;
+    static int _vScrollFrame = -1;
+    static readonly bool[] _vMHeld = new bool[3];
+    static readonly int[] _vMDownFrame = { -1, -1, -1 };
+    static readonly int[] _vMUpFrame   = { -1, -1, -1 };
+    static readonly int[] _vAutoReleaseMouseFrame = { -1, -1, -1 };
+
+    /// <summary>키를 이 프레임에 '눌렀다'(Down 1프레임 + 이후 Held 유지).</summary>
+    public static void VPressKey(KeyCode code) { _vDown[code] = Time.frameCount; _vHeld.Add(code); }
+    /// <summary>키를 뗀다(Up 1프레임).</summary>
+    public static void VReleaseKey(KeyCode code) { _vUp[code] = Time.frameCount; _vHeld.Remove(code); }
+    /// <summary>한 프레임짜리 탭(Down+Held) — 다음 프레임 VEndFrame에서 자동 해제.</summary>
+    public static void VTapKey(KeyCode code) { VPressKey(code); _vAutoRelease[code] = Time.frameCount; }
+    /// <summary>이동 축(-1~1). GetAxisRaw("Horizontal"/"Vertical")로 반환된다.</summary>
+    public static void VSetMove(Vector2 move) { _vMove = move; }
+    public static void VSetMousePos(Vector3 pos) { _vMousePos = pos; }
+    public static void VSetScroll(Vector2 s) { _vScroll = s; _vScrollFrame = Time.frameCount; }
+    public static void VPressMouse(int b)   { if (b >= 0 && b < 3) { _vMDownFrame[b] = Time.frameCount; _vMHeld[b] = true; } }
+    public static void VReleaseMouse(int b) { if (b >= 0 && b < 3) { _vMUpFrame[b] = Time.frameCount;   _vMHeld[b] = false; } }
+    /// <summary>한 프레임 클릭 — 다음 프레임 VEndFrame에서 자동 해제.</summary>
+    public static void VClickMouse(int b)   { VPressMouse(b); if (b >= 0 && b < 3) _vAutoReleaseMouseFrame[b] = Time.frameCount; }
+
+    static readonly List<KeyCode> _vTmp = new List<KeyCode>();
+
+    /// <summary>프레임 종료 처리 — **이전 프레임에 찍힌** 1프레임 플래그만 걷는다.
+    /// LateUpdate에서 호출. 같은 프레임 것은 남겨 다음 프레임 Update 소비자가 보게 한다.</summary>
+    public static void VEndFrame()
+    {
+        int now = Time.frameCount;
+        Sweep(_vDown, now);
+        Sweep(_vUp, now);
+
+        // 자동 해제(탭) — 눌린 프레임이 지났으면 Held에서 뗀다.
+        _vTmp.Clear();
+        foreach (var kv in _vAutoRelease) if (kv.Value < now) _vTmp.Add(kv.Key);
+        for (int i = 0; i < _vTmp.Count; i++) { _vHeld.Remove(_vTmp[i]); _vAutoRelease.Remove(_vTmp[i]); }
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (_vMDownFrame[i] >= 0 && _vMDownFrame[i] < now) _vMDownFrame[i] = -1;
+            if (_vMUpFrame[i]   >= 0 && _vMUpFrame[i]   < now) _vMUpFrame[i]   = -1;
+            if (_vAutoReleaseMouseFrame[i] >= 0 && _vAutoReleaseMouseFrame[i] < now)
+            { _vMHeld[i] = false; _vAutoReleaseMouseFrame[i] = -1; }
+        }
+        if (_vScrollFrame >= 0 && _vScrollFrame < now) { _vScroll = Vector2.zero; _vScrollFrame = -1; }
+    }
+
+    static void Sweep(Dictionary<KeyCode, int> map, int now)
+    {
+        _vTmp.Clear();
+        foreach (var kv in map) if (kv.Value < now) _vTmp.Add(kv.Key);
+        for (int i = 0; i < _vTmp.Count; i++) map.Remove(_vTmp[i]);
+    }
+
+    static void VClearAll()
+    {
+        _vHeld.Clear(); _vDown.Clear(); _vUp.Clear(); _vAutoRelease.Clear();
+        _vMove = Vector2.zero; _vScroll = Vector2.zero; _vScrollFrame = -1;
+        for (int i = 0; i < 3; i++)
+        { _vMHeld[i] = false; _vMDownFrame[i] = _vMUpFrame[i] = _vAutoReleaseMouseFrame[i] = -1; }
+    }
+
     // ── 키보드 (+ 게임패드 버튼 병합) ─────────────────────────
     // 각 키 조회는 키보드 상태 OR 매핑된 게임패드 버튼으로 합쳐진다.
     // (매핑은 아래 GamepadButtonFor 참조 — 셰임 확장이라 호출처는 그대로.)
     public static bool GetKey(KeyCode code)
     {
+        if (_virtual) return _vHeld.Contains(code);
         var k = Keyboard.current;
         if (k != null)
         {
@@ -32,6 +121,7 @@ public static class GameInput
 
     public static bool GetKeyDown(KeyCode code)
     {
+        if (_virtual) return _vDown.ContainsKey(code);
         var k = Keyboard.current;
         if (k != null)
         {
@@ -44,6 +134,7 @@ public static class GameInput
 
     public static bool GetKeyUp(KeyCode code)
     {
+        if (_virtual) return _vUp.ContainsKey(code);
         var k = Keyboard.current;
         if (k != null)
         {
@@ -86,6 +177,7 @@ public static class GameInput
 
     public static bool GetMouseButton(int button)
     {
+        if (_virtual) return button >= 0 && button < 3 && _vMHeld[button];
         var b = MouseButton(button);
         if (b != null && b.isPressed) return true;
         var gb = GamepadForMouse(button);
@@ -94,6 +186,7 @@ public static class GameInput
 
     public static bool GetMouseButtonDown(int button)
     {
+        if (_virtual) return button >= 0 && button < 3 && _vMDownFrame[button] >= 0;
         var b = MouseButton(button);
         if (b != null && b.wasPressedThisFrame) return true;
         var gb = GamepadForMouse(button);
@@ -102,6 +195,7 @@ public static class GameInput
 
     public static bool GetMouseButtonUp(int button)
     {
+        if (_virtual) return button >= 0 && button < 3 && _vMUpFrame[button] >= 0;
         var b = MouseButton(button);
         if (b != null && b.wasReleasedThisFrame) return true;
         var gb = GamepadForMouse(button);
@@ -113,6 +207,7 @@ public static class GameInput
     {
         get
         {
+            if (_virtual) return _vMousePos;
             var m = Mouse.current;
             if (m == null) return Vector3.zero;
             Vector2 p = m.position.ReadValue();
@@ -128,6 +223,7 @@ public static class GameInput
     {
         get
         {
+            if (_virtual) return _vScroll;
             var m = Mouse.current;
             return m == null ? Vector2.zero : m.scroll.ReadValue();
         }
@@ -136,6 +232,13 @@ public static class GameInput
     // ── 가상 축 (레거시 Input Manager 기본값 재현) ────────────
     public static float GetAxisRaw(string axis)
     {
+        // QA 봇: 축을 직접 지정(키 조합 재현 불필요, 아날로그 값도 가능).
+        if (_virtual)
+        {
+            if (axis == "Horizontal") return _vMove.x;
+            if (axis == "Vertical")   return _vMove.y;
+            return 0f;
+        }
         switch (axis)
         {
             case "Horizontal":
@@ -178,7 +281,7 @@ public static class GameInput
 
     // 정적 셰임 필드는 도메인 리로드로만 초기화되므로, 플레이 시작마다 명시 리셋한다.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetState() { _padActive = false; }
+    static void ResetState() { _padActive = false; _virtual = false; VClearAll(); }
 
     /// <summary>스틱 데드존 재스케일 — 경계에서 0→0.30 속도 점프 없이 매끄럽게 차오르게.</summary>
     static float DeadzoneAxis(float v)
@@ -206,6 +309,9 @@ public static class GameInput
     /// <summary>매 프레임 1회 호출 — 패드/마우스 마지막 사용 디바이스로 PadActive 갱신.</summary>
     public static void Tick()
     {
+        // QA 가상 입력 중엔 디바이스로 조준 소스를 바꾸지 않는다.
+        // (PadActive=false 유지 → 페이싱이 mousePosition 경로를 쓰고, 봇이 VSetMousePos로 조준한다.)
+        if (_virtual) { _padActive = false; return; }
         var g = Gamepad.current;
         if (g != null)
         {

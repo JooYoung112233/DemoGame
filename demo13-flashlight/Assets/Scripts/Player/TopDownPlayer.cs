@@ -200,6 +200,9 @@ public class TopDownPlayer : MonoBehaviour
         EnsureDefaultAttacks();
     }
 
+    /// <summary>플레이어 콜라이더 반경 — 히트박스를 몸 밖으로 밀어내는 기준.</summary>
+    const float BodyRadius = 0.3f;
+
     /// <summary>인스펙터에 데이터가 비어있으면 StatDB 수치로 프레임 기반 기본 생성.</summary>
     void EnsureDefaultAttacks()
     {
@@ -209,9 +212,11 @@ public class TopDownPlayer : MonoBehaviour
             lightCombo.comboId = "light";
             lightCombo.steps = new System.Collections.Generic.List<AttackData>
             {
-                MakeAttack("light1", 6, Stat.lightDamage,       Stat.lightGroggy,       LightRange,        2, 3),
-                MakeAttack("light2", 6, Stat.lightCombo2Damage, Stat.lightCombo2Groggy, LightRange,        2, 3),
-                MakeAttack("light3", 8, Stat.lightCombo3Damage, Stat.lightCombo3Groggy, LightRange * 1.1f, 3, 5),
+                // 2026-07-11: 약공에도 짧은 히트스탑 부여 — 예전엔 hitstop:0이라 약공은 히트스탑·셰이크·
+                //   줌펀치가 **전부 미발동**해서 "때려도 아무 반응이 없는" 느낌이었다. 3타는 조금 더 길게.
+                MakeAttack("light1", 6, Stat.lightDamage,       Stat.lightGroggy,       LightRange,        2, 3, hitstop: 0.03f),
+                MakeAttack("light2", 6, Stat.lightCombo2Damage, Stat.lightCombo2Groggy, LightRange,        2, 3, hitstop: 0.035f),
+                MakeAttack("light3", 8, Stat.lightCombo3Damage, Stat.lightCombo3Groggy, LightRange * 1.1f, 3, 5, hitstop: 0.05f),
             };
         }
         if (heavyAttack == null)
@@ -232,8 +237,13 @@ public class TopDownPlayer : MonoBehaviour
             new HitWindow
             {
                 label = "hit", startFrame = hitStart, endFrame = hitEnd, shape = HitboxShape.Box,
-                offset = new Vector2(range * 0.5f, 0f),
-                boxSize = new Vector2(range, range * 0.75f),
+                // 2026-07-11: 리치(range)와 스윙 폭을 분리.
+                //   구: offset=range*0.5, boxSize=(range, range*0.75)
+                //     → ① 사거리를 키우면 폭까지 같이 커져 '몸통 폭의 몇 배짜리 장판'이 됐고
+                //        ② 박스 근접변이 플레이어 원점에 딱 붙어 **옆(90°)·뒤에 붙은 적까지** 정면 판정에 들어왔다.
+                //   신: 몸 반경만큼 앞으로 밀어내고, 폭은 무기 스윙 폭으로 고정(사거리와 독립).
+                offset = new Vector2(BodyRadius + range * 0.5f, 0f),
+                boxSize = new Vector2(range, Mathf.Max(0.7f, range * 0.55f)),
             }
         };
         return a;
@@ -280,7 +290,11 @@ public class TopDownPlayer : MonoBehaviour
         // 구르기 중 — 대시 속도 적용
         if (_state == CombatState.Dodge)
         {
-            _rb.linearVelocity = _dodgeDir * (DodgeDist / DodgeDur);
+            // 2026-07-11 구르기 감각 개선: 등속(=순간이동처럼 뚝 끊김) → **강한 시작 + 부드러운 착지**.
+            //   진행도 t에 따라 속도 배율 1.35→0.5로 감쇠(평균≈0.93이라 이동거리는 거의 그대로).
+            float dodgeT = DodgeDur > 0f ? Mathf.Clamp01(1f - _dodgeTimer / DodgeDur) : 1f;
+            float dodgeMul = Mathf.Lerp(1.35f, 0.5f, dodgeT);
+            _rb.linearVelocity = _dodgeDir * (DodgeDist / DodgeDur) * dodgeMul;
             return;
         }
 
@@ -519,21 +533,26 @@ public class TopDownPlayer : MonoBehaviour
             return;
         }
 
+        // ★ 약공 선입력 예약 — **반드시 아래 얼리 리턴보다 먼저.**
+        //   (2026-07-11 버그픽스) 예전엔 이 분기가 `_state != Idle && != HeavyCharge → return` 뒤에 있어
+        //   _state==LightAttack이면 도달 자체가 불가능했다 → _comboBuffered가 영원히 false →
+        //   3타 콤보가 한 번도 발동 못 하고 매번 1타 + 쿨다운. "때려도 씹힌다"의 정체.
+        if (_state == CombatState.LightAttack && GameInput.GetMouseButtonDown(0))
+        {
+            _comboBuffered = true;
+            _comboBufferTimer = CurrentLightCombo != null ? CurrentLightCombo.bufferTime : 0.25f;
+            return;
+        }
+
         if (_state != CombatState.Idle && _state != CombatState.HeavyCharge) return;
 
-        // 약공격 (좌클릭) — 콤보 체인
+        // 약공격 (좌클릭) — 콤보 1타 시작
         if (GameInput.GetMouseButtonDown(0))
         {
             if (_state == CombatState.Idle && _lightCooldownTimer <= 0f)
             {
                 StartLightCombo();
                 return;
-            }
-            if (_state == CombatState.LightAttack)
-            {
-                // 다음 단계 선입력 예약 (캔슬 가능 시점에 발동)
-                _comboBuffered = true;
-                _comboBufferTimer = CurrentLightCombo != null ? CurrentLightCombo.bufferTime : 0.25f;
             }
         }
 
@@ -546,7 +565,12 @@ public class TopDownPlayer : MonoBehaviour
         if (_state == CombatState.HeavyCharge)
         {
             _chargeTimer += Time.deltaTime;
-            if (GameInput.GetMouseButtonUp(1))
+            // 2026-07-11: 버튼을 떼는 순간을 놓쳐도(UI 열림·투척 조준·탈진 등으로 이 블록을 못 탄 프레임에
+            //   뗀 경우) 차징에 **영구 고착**되던 문제 → GetMouseButton(1)이 이미 풀렸으면 즉시 발동시키고,
+            //   최대 차징의 2배를 넘기면 강제 종료한다.
+            if (GameInput.GetMouseButtonUp(1) || !GameInput.GetMouseButton(1))
+                DoHeavyAttack();
+            else if (_chargeTimer > HeavyMaxCharge * 2f)
                 DoHeavyAttack();
         }
     }

@@ -369,6 +369,19 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
+        // 2026-07-11: **정지거리(standoff)** — 공격 쿨다운 중엔 더 파고들지 않는다.
+        //   예전엔 쿨다운 동안에도 계속 전속력으로 밀고 들어와 거리 0이 되도록 겹쳤다(양쪽 Dynamic RB라
+        //   플레이어가 물리적으로 떠밀림) → 조준·거리감이 무의미. 이제 사거리의 0.85배 안쪽이면 멈추고 대기.
+        float standoff = AtkRange * 0.85f;
+        if (dist <= standoff)
+        {
+            _nav?.Stop();
+            SetVelocity(Vector2.zero);
+            FacePlayer();
+            animController?.Play("idle");
+            return;
+        }
+
         // 길찾기 방향(벽 우회). 경로 없으면 직진 폴백.
         Vector2 d;
         if (_nav != null)
@@ -437,7 +450,9 @@ public class EnemyController : MonoBehaviour
             : _attackDir;
         _attackDir = dir;
 
-        if (feedback != null) feedback.DoLightLunge(dir);
+        // 2026-07-11: 공격 런지(전진→원위치 하드 스냅) 제거 — 사용자 피드백 "때릴 때 앞뒤로 움직인다".
+        //   Rigidbody2D 위에서 transform을 직접 되돌리는 연출이라 고무줄처럼 튕겨 보였다.
+        //   공격은 제자리에서, 피드백은 '맞았을 때 히트 표기'(HitFlash/팝업)만 남긴다.
 
         // 히트박스 타임라인이 있으면 프레임 기반 판정, 없으면 즉시 데미지 폴백
         if (attackData != null)
@@ -460,11 +475,20 @@ public class EnemyController : MonoBehaviour
     /// <summary>AttackData 없을 때의 즉시 근접 판정 폴백.</summary>
     void ImmediateMeleeHit()
     {
-        if (player != null && DistToPlayer() <= AtkRange * 1.5f)
-        {
-            playerHealth?.TakeDamage(Damage);
-            DamagePopup.Create(player.position, Damage, DamagePopup.DamageType.Normal);
-        }
+        if (player == null) return;
+
+        // 2026-07-11: 판정을 **진입 조건과 일치**시키고 **정면 제한**을 건다.
+        //   구: `AtkRange * 1.5f` 원형(360°) → ① 추격 정지 거리보다 1.5배 넓게 맞고
+        //       ② 적 뒤로 돌아가도 맞아서 "왜 맞았는지 모르겠다"가 됐다.
+        //   신: 사거리 그대로 + 예비동작 때 바라본 방향(_attackDir) 기준 ±60° 안에서만 적중.
+        if (DistToPlayer() > AtkRange * 1.05f) return;
+
+        Vector2 toPlayer = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        Vector2 face = _attackDir.sqrMagnitude > 0.0001f ? _attackDir.normalized : toPlayer;
+        if (Vector2.Dot(face, toPlayer) < 0.5f) return;   // cos60° — 등 뒤/옆은 빗나감
+
+        playerHealth?.TakeDamage(Damage);
+        DamagePopup.Create(player.position, Damage, DamagePopup.DamageType.Normal);
     }
 
     public void TryCancelAttack()
@@ -472,11 +496,17 @@ public class EnemyController : MonoBehaviour
         if (!CanBeCancelled || state != State.AttackWindup) return;
         state    = State.Hit;
         hitTimer = HitStun * 1.5f;
+        _cancelBonusUntil = Time.time + 0.05f;   // 직후 OnDamaged가 hitTimer를 덮어쓰지 못하게(아래 참조)
+        _performer?.Cancel();                    // 캔슬된 공격의 히트박스가 계속 판정 내는 것 방지
         SetVelocity(Vector2.zero);
         RestoreTint();
         SetTint(new Color(1f, 1f, 0.5f));
         animController?.PlayOneShot("gethit");
     }
+
+    /// <summary>예비동작 캔슬 보너스(1.5배 경직) 보호 창 — 같은 타격의 OnDamaged가 곧바로 덮어쓰는 것을 막는다.
+    /// (2026-07-11: TryCancelAttack → TakeDamage → OnDamaged 순서라 보너스가 항상 무효화되던 버그.)</summary>
+    float _cancelBonusUntil;
 
     #endregion
 
@@ -601,11 +631,22 @@ public class EnemyController : MonoBehaviour
     void OnDamaged(float amount)
     {
         if (state == State.Dead) return;
+
+        // 2026-07-11: 그로기 스턴 중엔 상태를 갈아엎지 않는다(연출만).
+        //   예전엔 스턴 중 피격이 무조건 state=Hit → Hit 종료 시 Chase로 복귀해서
+        //   **애써 그로기 채워 스턴 걸어놔도 첫 타격에 바로 풀리고 반격당했다**(그로기 보상이 없었음).
+        if (isStunned)
+        {
+            SetTint(new Color(1f, 0.5f, 0.5f));
+            return;
+        }
+
         FacePlayer();
         if (state == State.AttackWindup) windupFlashTimer = 0;
         ShowAlertMark(false);   // 조사 중 피격 시 '?' 잔류 방지
         state    = State.Hit;
-        hitTimer = HitStun;
+        // 방금 예비동작 캔슬로 1.5배 경직을 받았다면 그 값을 유지(덮어쓰기 금지).
+        if (Time.time >= _cancelBonusUntil) hitTimer = HitStun;
         SetVelocity(Vector2.zero);
         SetTint(new Color(1f, 0.5f, 0.5f));
         animController?.PlayOneShot("gethit");
@@ -614,6 +655,7 @@ public class EnemyController : MonoBehaviour
     void OnDeath()
     {
         state         = State.Dead;
+        _performer?.Cancel();   // 죽는 순간 진행 중이던 공격 판정이 계속 나가는 것 방지(2026-07-11)
         _rb.simulated = false;
         RestoreTint();
         animController?.PlayOneShot("death");

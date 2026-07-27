@@ -46,7 +46,14 @@ public class AttackPerformer : MonoBehaviour
         _timer = 0f;
         _performing = true;
         _hitThisAttack.Clear();
+        // 2026-07-11: 스윙 시작 순간의 방향을 **고정(스냅샷)**한다.
+        //   예전엔 ScanWindow가 매 프레임 _facing()을 새로 읽어 히트박스가 마우스를 실시간 추종 →
+        //   스윙 도중 마우스를 휙 돌리면 박스가 캐릭터 주위를 쓸고 지나가 **등 뒤 적까지 맞았다.**
+        _lockedFacing = _facing != null ? _facing() : (Vector2)transform.right;
+        if (_lockedFacing.sqrMagnitude < 0.0001f) _lockedFacing = Vector2.right;
     }
+
+    Vector2 _lockedFacing = Vector2.right;
 
     public void Cancel()
     {
@@ -73,7 +80,8 @@ public class AttackPerformer : MonoBehaviour
 
     void ScanWindow(HitWindow w)
     {
-        Vector2 facing = _facing != null ? _facing() : (Vector2)transform.right;
+        // 스윙 시작 시 고정한 방향을 쓴다(실시간 추종 금지 — Perform 참조).
+        Vector2 facing = _lockedFacing;
         if (facing.sqrMagnitude < 0.0001f) facing = Vector2.right;
         float facingAngle = Mathf.Atan2(facing.y, facing.x) * Mathf.Rad2Deg;
 
