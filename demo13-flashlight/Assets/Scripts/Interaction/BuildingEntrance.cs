@@ -71,6 +71,12 @@ public class BuildingEntrance : MonoBehaviour
         if (isExit) SaveCheckpoints.Instance?.BuildingExited();
         else        SaveCheckpoints.Instance?.BuildingEntered();
 
+        // 2026-07-11: **진입 시 외부 좌표 기억** — 여러 건물이 공용 내부(Int_Generic) 하나를
+        //   돌려 쓰므로, 나올 때 고정 스폰을 쓰면 엉뚱한 건물 앞에 나온다.
+        //   출구가 spawnPointId="__back__"이면 BuildingReturn이 이 자리로 되돌린다.
+        if (!isExit)
+            BuildingReturn.Remember(gameObject.scene.name, transform.position);
+
         SceneTransitionManager.Instance.TransitionTo(targetScene, spawnPointId);
     }
 

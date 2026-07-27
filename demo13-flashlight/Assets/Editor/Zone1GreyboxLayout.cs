@@ -70,6 +70,13 @@ public static class Zone1GreyboxLayout
         n += GreyboxBuild.Marker(map, "gb_enemy", "Bandit_Tower", 312f, 49f);
         n += GreyboxBuild.Note(map, "RV_Label", 100f, 328f, "강변 부두 ★★★", "最北 한강 경계. 부두 창고. 탈출 밀집.");
 
+        // ── 전용 내부 씬이 있는 랜드마크 진입 (2026-07-11) ──
+        //   §1.4c 현행 랜드마크 = 약국(아케이드 내부에 배선됨) / 무너진 상가 / 짙은현상 지하창고(창고 안).
+        //   ※ 폐아파트·유리타워는 구버전 랜드마크(level-apartment/tower.md 보존) — 공용 내부로 처리.
+        n += GreyboxBuild.Note(map, "CM_Label", 232f, 300f, "무너진 상가 ★★★", "SQ-001 갇힌 생존자. 잔해 미로 최심부.");
+        n += Enter(map, "CollapsedMall_Enter", 232f, 296f, "Int_CollapsedMall");
+        n += ReturnSpawn(map, "from_collapsed", 232f, 293f);
+
         // ── 레이드 스폰 5(매 판 랜덤 1곳) — 주변부 거리 분산(간선도로 위) ──
         //   pointId를 오브젝트명과 같게 주입해야 SpawnPoint가 실제로 식별된다(주입 없으면 프리팹 기본값 "default").
         n += Spawn5(map, "SP1_S",  172f, 49f);   // 남(차고 큰길)
@@ -359,8 +366,12 @@ public static class Zone1GreyboxLayout
                 if (!open && w >= 7f && d >= 7f)
                 {
                     char side = ((i + j) % 2 == 0) ? 'S' : 'N';
+                    float doorX = x + Mathf.Max(1f, w * 0.5f - 1f);
                     n += GreyboxBuild.Building(m, $"{p}_{i}_{j}", x, y, x + w, y + d, side,
-                                               x + Mathf.Max(1f, w * 0.5f - 1f), "gb_door", $"{p}_{i}_{j}_D");
+                                               doorX, "gb_door", $"{p}_{i}_{j}_D");
+                    // 2026-07-11: 절차 생성 점포도 **전부 들어갈 수 있게** — 공용 내부(Int_Generic)로 진입.
+                    //   복귀는 고정 스폰이 아니라 '들어온 문 앞'(BuildingReturn) → 한 채를 돌려 써도 제자리로 나온다.
+                    n += EnterGeneric(m, $"{p}_{i}_{j}_Enter", doorX + 1f, (side == 'S' ? y : y + d) + (side == 'S' ? -0.9f : 0.9f));
                 }
                 x += w + street; j++;
             }
@@ -385,7 +396,7 @@ public static class Zone1GreyboxLayout
 
     /// <summary>건물 문에 진입 트리거(BuildingEntrance) — 내부 씬이 있는 건물만.
     /// 밟으면 내부 씬으로 전환(페이드+캐릭터 유지). 복귀 스폰은 Zone1의 from_&lt;건물&gt;.</summary>
-    static int Enter(GameObject m, string name, float x, float y, string targetScene)
+    static int Enter(GameObject m, string name, float x, float y, string targetScene, string spawnId = "default")
     {
         if (GreyboxBuild.Marker(m, "gb_exit", name, x, y) == 0) return 0;
         var t = FindChild(m.transform, name);
@@ -402,9 +413,14 @@ public static class Zone1GreyboxLayout
 
         var be = go.GetComponent<BuildingEntrance>();
         if (be == null) be = go.AddComponent<BuildingEntrance>();
-        be.Configure(targetScene, "default", false);
+        be.Configure(targetScene, spawnId, false);
         return 1;
     }
+
+    /// <summary>공용 내부(Int_Generic)로 들어가는 진입 트리거. 복귀는 `__back__`(들어온 문 앞).
+    /// 전용 내부가 만들어진 건물은 Enter()로 개별 지정하고, 나머지 절차 생성 건물이 이걸 쓴다.</summary>
+    static int EnterGeneric(GameObject m, string name, float x, float y)
+        => Enter(m, name, x, y, "Int_Generic", BuildingReturn.BackSpawnId);
 
     /// <summary>내부에서 돌아왔을 때 서는 자리(from_&lt;건물&gt;). 건물 문 앞.</summary>
     static int ReturnSpawn(GameObject m, string pointId, float x, float y)

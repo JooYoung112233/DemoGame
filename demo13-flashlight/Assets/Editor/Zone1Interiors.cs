@@ -90,12 +90,234 @@ public static class Zone1Interiors
         InteriorBuild.End(scene, AbShopPath, n, "지역1 내부 — 폐상점(첫 파밍 학습: 선반2·상자1, 적 없음)");
     }
 
-    [MenuItem("Tools/TopDown/빌드/내부/── 전부 ──", priority = -80)]
+    // ── 차고 (§1.4c #2: 둘째 파밍 / 단층 정비 차고 / 선반×1·상자×2) ──────
+    const string GaragePath = "Assets/Scenes/Int_Garage.unity";
+
+    [MenuItem("Tools/TopDown/빌드/내부/차고", priority = -88)]
+    public static void BuildGarage()
+    {
+        var m = InteriorBuild.Begin(out var scene);
+        int n = 0; const float W = 14f, H = 11f;
+
+        n += InteriorBuild.Shell(m, W, H);
+        n += InteriorBuild.DoorGapSouth(m, W, 7f, 2.4f);
+        n += InteriorBuild.Spawn(m, "default", 7f, 2.2f);
+        n += InteriorBuild.Exit(m, "Exit_ToZone1", 7f, 1.4f, Outside, "from_garage", 2.4f, 1.2f);
+
+        // 차량 잔해 2대(벽 블록) — 엄폐·동선 꺾기
+        n += GreyboxBuild.WallSeg(m, "G_Car1", 2.5f, 4f, 6.5f, 6f);
+        n += GreyboxBuild.WallSeg(m, "G_Car2", 8f, 7f, 12f, 9f);
+        n += GreyboxBuild.WallSeg(m, "G_Shelf", 2f, 8.5f, 6f, 9.3f);   // 선반 ×1
+
+        n += InteriorBuild.Crate(m, "G_Crate1", 11.5f, 4.5f);          // 상자 ×2
+        n += InteriorBuild.Crate(m, "G_Crate2", 3f, 7f);
+        n += InteriorBuild.GroundLoot(m, "G_G0", 9f, 5f);
+        n += InteriorBuild.GroundLoot(m, "G_G1", 6f, 9.5f);
+
+        n += InteriorBuild.Controller(m, ProfilePath, RegionId);
+        InteriorBuild.End(scene, GaragePath, n, "지역1 내부 — 차고(정비, 선반1·상자2, 차량 잔해)");
+    }
+
+    // ── 창고 (§1.4c #3: 튜토 목표 + 지하창고 입구 / 셔터 / 민이 흔적 쪽지) ──
+    const string WarehousePath = "Assets/Scenes/Int_Warehouse.unity";
+
+    [MenuItem("Tools/TopDown/빌드/내부/창고", priority = -87)]
+    public static void BuildWarehouse()
+    {
+        var m = InteriorBuild.Begin(out var scene);
+        int n = 0; const float W = 17f, H = 14f;
+
+        n += InteriorBuild.Shell(m, W, H);
+        n += InteriorBuild.DoorGapSouth(m, W, 8.5f, 2.6f);             // 셔터
+        n += InteriorBuild.Spawn(m, "default", 8.5f, 2.2f);
+        n += InteriorBuild.Exit(m, "Exit_ToZone1", 8.5f, 1.4f, Outside, "from_warehouse", 2.6f, 1.2f);
+
+        // 적재 선반 열(창고다움) — 통로가 갈라지게
+        n += GreyboxBuild.WallSeg(m, "W_Rack1", 2f, 5f, 7f, 5.9f);
+        n += GreyboxBuild.WallSeg(m, "W_Rack2", 10f, 5f, 15f, 5.9f);
+        n += GreyboxBuild.WallSeg(m, "W_Rack3", 2f, 9f, 7f, 9.9f);
+
+        // MQ-001 민이 흔적 — 쪽지 2개(문서 §1.4b)
+        n += GreyboxBuild.Note(m, "W_Note_Trace", 4.5f, 11.5f, "손자국 흔적",
+            "먼지 쌓인 선반에 작은 손자국. 최근 것이다. 누군가 여기 숨어 있었다.");
+        n += GreyboxBuild.Note(m, "W_Note_Knock", 12f, 11.5f, "노크 규칙",
+            "벽에 긁어 쓴 글씨 — '두 번, 쉬고, 세 번.' 민이가 정한 신호다.");
+
+        n += InteriorBuild.Crate(m, "W_Crate1", 8.5f, 7.5f);
+        n += InteriorBuild.Crate(m, "W_Crate2", 14f, 11f);
+        n += InteriorBuild.GroundLoot(m, "W_G0", 5f, 7.5f);
+        n += InteriorBuild.GroundLoot(m, "W_G1", 11f, 10f);
+
+        // 동측 지하창고 입구 — 짙은현상 phase 게이트는 후속(지금은 상시 진입)
+        n += GreyboxBuild.Note(m, "W_BasementLabel", 15f, 7f, "지하창고 입구 ★★★★★",
+            "짙은 현상 때만 열리는 구획(게이트 후속). 최고 위험·최고 보상.");
+        n += InteriorBuild.Exit(m, "Basement_Block", 15.3f, 7.8f, "Int_Basement", "default", 1.4f, 1.6f);
+
+        n += InteriorBuild.Enemy(m, "W_EZ", 8.5f, 8f, 10f, 6f, "bandit_melee_1", 1);
+        n += InteriorBuild.Controller(m, ProfilePath, RegionId);
+        InteriorBuild.End(scene, WarehousePath, n, "지역1 내부 — 창고(민이 흔적·노크 쪽지 + 지하창고 입구)");
+    }
+
+    // ── 짙은현상 지하창고 〔랜드마크C〕 (§1.4c #11: 최고 위험·보상, 캄캄) ──
+    const string BasementPath = "Assets/Scenes/Int_Basement.unity";
+
+    [MenuItem("Tools/TopDown/빌드/내부/지하창고", priority = -86)]
+    public static void BuildBasement()
+    {
+        var m = InteriorBuild.Begin(out var scene);
+        int n = 0; const float W = 19f, H = 15f;
+
+        n += InteriorBuild.Shell(m, W, H);
+        n += InteriorBuild.DoorGapSouth(m, W, 9.5f, 2.2f);
+        n += InteriorBuild.Spawn(m, "default", 9.5f, 2.2f);
+        n += InteriorBuild.Exit(m, "Exit_ToWarehouse", 9.5f, 1.4f, "Int_Warehouse", "default", 2.2f, 1.2f);
+
+        // 붕괴 기둥 미로 — 시야 차단(하강감은 조명·연출로, 문서 전제)
+        n += GreyboxBuild.WallSeg(m, "B_P1", 4f, 5f, 6f, 10f);
+        n += GreyboxBuild.WallSeg(m, "B_P2", 9f, 4f, 11f, 8f);
+        n += GreyboxBuild.WallSeg(m, "B_P3", 13f, 6f, 15f, 12f);
+        n += GreyboxBuild.WallSeg(m, "B_P4", 6f, 11.5f, 12f, 12.5f);
+
+        n += GreyboxBuild.Note(m, "B_Label", 9.5f, 13.5f, "루디 결정 구역 ★★★★★",
+            "MQ-002 · S-013/S-015. 시계 이상·사망 시간회수 튜토. 루디 회수 후 즉시 이탈 권장.");
+
+        // 최고 보상 — 상자 밀집
+        n += InteriorBuild.Crate(m, "B_Rudi1", 7.5f, 8f);
+        n += InteriorBuild.Crate(m, "B_Rudi2", 12f, 9.5f);
+        n += InteriorBuild.Crate(m, "B_Crate3", 16f, 4f);
+        n += InteriorBuild.Crate(m, "B_Crate4", 3f, 12.5f);
+        n += InteriorBuild.GroundLoot(m, "B_G0", 10f, 6f);
+        n += InteriorBuild.GroundLoot(m, "B_G1", 15f, 13f);
+        n += InteriorBuild.GroundLoot(m, "B_G2", 4f, 3.5f);
+
+        // 최고 위험 — 중장 + 근접
+        n += InteriorBuild.Enemy(m, "B_EZ_T", 10f, 8f, 8f, 6f, "bandit_tank", 1);
+        n += InteriorBuild.Enemy(m, "B_EZ_M", 14f, 11f, 8f, 6f, "bandit_melee_1", 2);
+
+        n += InteriorBuild.Controller(m, ProfilePath, RegionId);
+        InteriorBuild.End(scene, BasementPath, n, "지역1 내부 — 짙은현상 지하창고(최고 위험·보상)");
+    }
+
+    // ── 무너진 상가 〔랜드마크B〕 (§1.4c #10: 잔해 미로 + 최심부 생존자) ──
+    const string CollapsedPath = "Assets/Scenes/Int_CollapsedMall.unity";
+
+    [MenuItem("Tools/TopDown/빌드/내부/무너진상가", priority = -85)]
+    public static void BuildCollapsedMall()
+    {
+        var m = InteriorBuild.Begin(out var scene);
+        int n = 0; const float W = 22f, H = 18f;
+
+        n += InteriorBuild.Shell(m, W, H);
+        n += InteriorBuild.DoorGapSouth(m, W, 11f, 2.4f);
+        n += InteriorBuild.Spawn(m, "default", 11f, 2.2f);
+        n += InteriorBuild.Exit(m, "Exit_ToZone1", 11f, 1.4f, Outside, "from_collapsed", 2.4f, 1.2f);
+
+        // 잔해 미로 — 안쪽으로 갈수록 통로가 좁아진다(문서: "깔린 틈을 기어간다")
+        n += GreyboxBuild.WallSeg(m, "C_R1", 3f, 5f, 9f, 6f);
+        n += GreyboxBuild.WallSeg(m, "C_R2", 12f, 4.5f, 19f, 5.5f);
+        n += GreyboxBuild.WallSeg(m, "C_R3", 5f, 8.5f, 16f, 9.5f);
+        n += GreyboxBuild.WallSeg(m, "C_R4", 3f, 12f, 10f, 13f);
+        n += GreyboxBuild.WallSeg(m, "C_R5", 13f, 11.5f, 19f, 12.5f);
+        n += GreyboxBuild.WallSeg(m, "C_R6", 8f, 15f, 15f, 15.8f);
+
+        n += GreyboxBuild.Note(m, "C_Survivor", 11f, 16.6f, "갇힌 생존자 ★★★",
+            "SQ-001. 잔해를 걷어내며 최심부까지 — 구조 시 파견지 해금. 라디오 RN-05 리드.");
+
+        // 깔린 점포 틈 파밍
+        n += InteriorBuild.Crate(m, "C_Crate1", 5f, 7f);
+        n += InteriorBuild.Crate(m, "C_Crate2", 17f, 8f);
+        n += InteriorBuild.Crate(m, "C_Crate3", 6f, 14f);
+        n += InteriorBuild.GroundLoot(m, "C_G0", 10f, 6.8f);
+        n += InteriorBuild.GroundLoot(m, "C_G1", 15f, 13.5f);
+        n += InteriorBuild.GroundLoot(m, "C_G2", 4f, 10.5f);
+
+        n += InteriorBuild.Enemy(m, "C_EZ", 11f, 10f, 12f, 8f, "bandit_melee_1", 2);
+        n += InteriorBuild.Controller(m, ProfilePath, RegionId);
+        InteriorBuild.End(scene, CollapsedPath, n, "지역1 내부 — 무너진 상가(잔해 미로 + 최심부 생존자)");
+    }
+
+    // ── 밀도 점포 4종 (§1.4c #6~9: 철물점·분식집·전파상·세탁소) ──────────
+    //   각 점포는 '색'이 다르다(제작재료/식량/전자/천). 루트 카테고리 차등은
+    //   region_loot 테이블 확장 후속 — 지금은 크기·구조·앵커 수로 성격을 낸다.
+
+    [MenuItem("Tools/TopDown/빌드/내부/철물점", priority = -84)]
+    public static void BuildHardware() => BuildDensityShop(
+        "Assets/Scenes/Int_Hardware.unity", "from_hardware", 13f, 10f, "HW",
+        "철물점 — 공구·부품·못(제작·수리 재료)", crates: 3, ground: 2, enemy: 1);
+
+    [MenuItem("Tools/TopDown/빌드/내부/분식집", priority = -83)]
+    public static void BuildDiner() => BuildDensityShop(
+        "Assets/Scenes/Int_Diner.unity", "from_diner", 13f, 11f, "DN",
+        "분식집 — 캔푸드·물(주방 뒤 창고)", crates: 2, ground: 3, enemy: 0, backRoom: true);
+
+    [MenuItem("Tools/TopDown/빌드/내부/전파상", priority = -82)]
+    public static void BuildElectronics() => BuildDensityShop(
+        "Assets/Scenes/Int_Electronics.unity", "from_electronics", 12f, 10f, "EL",
+        "전파상 — 배터리·전선·전자부품(라디오/발전기 업글 재료)", crates: 3, ground: 2, enemy: 1);
+
+    [MenuItem("Tools/TopDown/빌드/내부/세탁소", priority = -81)]
+    public static void BuildLaundry() => BuildDensityShop(
+        "Assets/Scenes/Int_Laundry.unity", "from_laundry", 11f, 9f, "LD",
+        "세탁소 — 천·의류(방한·붕대 재료)", crates: 2, ground: 2, enemy: 0);
+
+    [MenuItem("Tools/TopDown/빌드/내부/골목점포", priority = -80)]
+    public static void BuildAlleyShop() => BuildDensityShop(
+        "Assets/Scenes/Int_AlleyShop.unity", "from_alleyshop", 9f, 7f, "AS",
+        "골목 점포 — 잡템 1~2(약국 곁가지)", crates: 1, ground: 2, enemy: 0);
+
+    /// <summary>밀도 점포 공용 — 껍데기+진입/출구+선반+앵커. 성격은 크기·앵커 수·뒷방 유무로 낸다.</summary>
+    static void BuildDensityShop(string path, string returnSpawn, float W, float H, string pre,
+                                 string label, int crates, int ground, int enemy, bool backRoom = false)
+    {
+        var m = InteriorBuild.Begin(out var scene);
+        int n = 0;
+
+        n += InteriorBuild.Shell(m, W, H);
+        n += InteriorBuild.DoorGapSouth(m, W, W * 0.5f, 2.2f);
+        n += InteriorBuild.Spawn(m, "default", W * 0.5f, 2.2f);
+        n += InteriorBuild.Exit(m, "Exit_ToZone1", W * 0.5f, 1.4f, Outside, returnSpawn, 2.2f, 1.2f);
+
+        // 진열 선반 2열
+        n += GreyboxBuild.WallSeg(m, $"{pre}_Shelf1", 2f, H * 0.42f, W * 0.45f, H * 0.42f + 0.8f);
+        n += GreyboxBuild.WallSeg(m, $"{pre}_Shelf2", W * 0.55f, H * 0.62f, W - 2f, H * 0.62f + 0.8f);
+
+        if (backRoom)   // 주방 뒤 창고(분식집) — 칸막이 + 문 갭
+        {
+            float dy = H - 3.5f;
+            n += GreyboxBuild.WallSeg(m, $"{pre}_Div_a", 1f, dy, W * 0.4f, dy + 0.9f);
+            n += GreyboxBuild.WallSeg(m, $"{pre}_Div_b", W * 0.62f, dy, W - 1f, dy + 0.9f);
+        }
+
+        for (int i = 0; i < crates; i++)
+            n += InteriorBuild.Crate(m, $"{pre}_Crate{i}", 2.5f + i * (W - 5f) / Mathf.Max(1, crates), H - 2.2f);
+        for (int i = 0; i < ground; i++)
+            n += InteriorBuild.GroundLoot(m, $"{pre}_G{i}", 3f + i * (W - 6f) / Mathf.Max(1, ground), H * 0.5f);
+
+        if (enemy > 0)
+            n += InteriorBuild.Enemy(m, $"{pre}_EZ", W * 0.5f, H * 0.55f, W - 4f, H * 0.4f, "bandit_melee_1", enemy);
+
+        n += InteriorBuild.Controller(m, ProfilePath, RegionId);
+        InteriorBuild.End(scene, path, n, "지역1 내부 — " + label);
+    }
+
+    // ── 공용 내부 (그 외 모든 건물이 임시로 돌려 쓰는 1채) ────────────────
+    //   2026-07-11 사용자 결정: "당장 없다면 임의로 1개 돌려 쓰고 나중에 확장".
+    //   Zone1의 절차 생성 점포(Shops/Plaza 등) 전부가 이 씬을 가리킨다.
+    //   복귀 위치는 고정 스폰이 아니라 **들어온 문 앞**으로 되돌린다(BuildingReturn).
+    public const string GenericPath = "Assets/Scenes/Int_Generic.unity";
+
+    [MenuItem("Tools/TopDown/빌드/내부/공용점포", priority = -79)]
+    public static void BuildGeneric() => BuildDensityShop(
+        GenericPath, BuildingReturn.BackSpawnId, 12f, 9f, "GN",
+        "공용 점포(임시 — 모든 미제작 건물 공용, 후속 확장)", crates: 2, ground: 2, enemy: 1);
+
+    [MenuItem("Tools/TopDown/빌드/내부/── 전부 ──", priority = -70)]
     public static void BuildAll()
     {
-        BuildPharmacy();
-        BuildAbandonedShop();
-        Debug.Log("[Zone1Interiors] 내부 씬 전부 생성 완료. (나머지 9채는 같은 헬퍼로 이어서 추가)");
+        BuildPharmacy();  BuildAbandonedShop(); BuildGarage();      BuildWarehouse();
+        BuildBasement();  BuildCollapsedMall(); BuildHardware();    BuildDiner();
+        BuildElectronics(); BuildLaundry();     BuildAlleyShop();   BuildGeneric();
+        Debug.Log("[Zone1Interiors] 내부 씬 12개 생성 완료(건물 11채 + 공용 1).");
     }
 }
 #endif
