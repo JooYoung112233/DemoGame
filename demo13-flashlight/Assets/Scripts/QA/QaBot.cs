@@ -129,7 +129,13 @@ public class QaBot : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        if (_running) { GameInput.Virtual = false; SaveManager.SuppressWrites = false; }
+        // 중단(Play 정지·창 닫기)돼도 **여기까지의 결과는 남긴다**.
+        // 안 그러면 긴 런이 끊겼을 때 아무 데이터도 안 남아 밖에서 진단할 수 없다.
+        if (_running)
+        {
+            _rep?.Warn(_step, "INTERRUPTED", $"런이 끝나기 전 중단됨(스텝 {_step}, 사이클 {_cycle})");
+            Finish();
+        }
     }
 
     /// <summary>F9 수동 토글은 개발 환경에서만. 릴리스 빌드에선 -qa* 인자로만 켜진다.</summary>
@@ -145,12 +151,18 @@ public class QaBot : MonoBehaviour
         else StartRun(false);
     }
 
+    float _hbTimer;
+
     void LateUpdate()
     {
         // 가상 입력의 1프레임 플래그는 모든 Update 소비자가 본 뒤 걷는다.
         if (!_running) return;
         GameInput.VEndFrame();
         SampleSpace();
+
+        // 주기적 하트비트 — 스텝 전환 때만 쓰면 긴 스텝(explore 150초) 동안 밖에서 생사 확인이 안 된다.
+        _hbTimer += Time.unscaledDeltaTime;
+        if (_hbTimer >= 1f) { _hbTimer = 0f; WriteStatus("running", $"사이클 {_cycle} · {_step}"); }
     }
 
     /// <summary>주기적 위치 샘플 — 체류/이동/사망을 셀에 누적(안전가옥은 제외, 레이드 맵만).</summary>
@@ -242,6 +254,8 @@ public class QaBot : MonoBehaviour
                 errors = _rep != null ? _rep.ErrorCount : 0,
                 warns = _rep != null ? _rep.WarnCount : 0,
                 updatedAt = System.DateTime.Now.ToString("HH:mm:ss"),
+                recent = RecentIssues(3),
+                playerX = PlayerPos.x, playerY = PlayerPos.y,
             };
             System.IO.File.WriteAllText(F("qa-status.json"), JsonUtility.ToJson(s, true));
         }
@@ -254,6 +268,23 @@ public class QaBot : MonoBehaviour
         public string instance, state, step, detail, scene, updatedAt;
         public int cycle, money, level, errors, warns;
         public float elapsedSec;
+        /// <summary>최근 이상 3건 — 런이 끝나기 전에도 밖에서 진단할 수 있게(리포트를 기다리지 않아도 됨).</summary>
+        public string[] recent;
+        public float playerX, playerY;
+    }
+
+    /// <summary>리포트의 최근 Warn/Error 몇 건을 문자열로 — 상태 파일에 실어 실시간 진단용.</summary>
+    string[] RecentIssues(int n)
+    {
+        if (_rep == null) return new string[0];
+        var list = new List<string>();
+        var es = _rep.Entries;
+        for (int i = es.Count - 1; i >= 0 && list.Count < n; i--)
+        {
+            if (es[i].level == QaReport.Level.Info) continue;
+            list.Add($"[{es[i].level}] {es[i].step}/{es[i].kind}: {es[i].msg}");
+        }
+        return list.ToArray();
     }
 
     // ══════════════════════════════════════════════════════════════

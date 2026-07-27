@@ -45,6 +45,7 @@ public static class QaSteps
                 { "title.newgame",      TitleNewGame },
                 { "title.continue",     TitleContinue },
                 { "story.skip",         StorySkip },
+                { "goto",               GotoInteract },
                 { "safehouse.ensure",   SafehouseEnsure },
                 { "inventory.organize", InventoryOrganize },
                 { "shop.sell",          ShopSell },
@@ -151,6 +152,86 @@ public static class QaSteps
         else yield return c.Bot.Blocked("story", "STORY_STUCK",
                 $"{budget:0}초 동안 {taps}회 눌렀는데 스토리가 안 끝남 — 진행 불가 지점(신규 유저가 여기서 막힌다)",
                 "Space 반복 입력");
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  실제 이동·상호작용
+    // ══════════════════════════════════════════════════════════════
+
+    /// <summary>지정 종류의 상호작용 대상까지 **실제로 걸어가서 E를 누른다**.
+    ///
+    /// 왜 필요한가: 거래·수주를 API로만 하면 **"그 NPC에 갈 수 있는가 / 상호작용이 배선돼 있는가 /
+    /// UI가 열리는가"를 전혀 검증하지 못한다**(그래서 6스텝이 4초에 끝나던 문제).
+    /// 이 op가 도달성·상호작용 배선·UI 오픈을 실제로 확인한다.
+    ///
+    /// param = InteractType 이름(Stash, NPC, MapBoard, Workbench, Bed, Radio, Dispatch …)
+    /// ※ 거래 버튼 클릭 자체는 uGUI EventSystem이라 가상 입력으로 못 누른다 — 그 부분만 API로 남는다.
+    /// </summary>
+    static IEnumerator GotoInteract(QaStepDef d, QaContext c)
+    {
+        if (string.IsNullOrEmpty(d.param) ||
+            !System.Enum.TryParse<InteractableObject.InteractType>(d.param, out var want))
+        { c.Report.Warn("goto", "BAD_PARAM", $"InteractType '{d.param}' 파싱 실패"); yield break; }
+
+        var player = TopDownPlayer.Instance;
+        if (player == null) { c.Report.Error("goto", "NO_PLAYER", "플레이어 없음"); yield break; }
+
+        // 현재 씬에서 해당 종류 중 가장 가까운 것
+        InteractableObject best = null; float bestD = float.MaxValue;
+        foreach (var io in Object.FindObjectsByType<InteractableObject>(FindObjectsSortMode.None))
+        {
+            if (io == null || !io.gameObject.activeInHierarchy) continue;
+            if (io.Type != want) continue;
+            float dist = Vector2.Distance(io.transform.position, player.transform.position);
+            if (dist < bestD) { bestD = dist; best = io; }
+        }
+
+        if (best == null)
+        {
+            c.Report.Warn("goto", "NOT_PLACED",
+                $"'{want}' 상호작용 대상이 이 씬({SceneManager.GetActiveScene().name})에 **배치돼 있지 않음** — 해당 기능에 접근 불가");
+            yield break;
+        }
+
+        float budget = d.budgetSec > 0 ? d.budgetSec : 40f;
+        bool reached = false;
+        yield return c.Bot.MoveTo(best.transform.position, 1.4f, budget, r => reached = r);
+
+        if (!reached)
+        {
+            c.Bot.NoteUnreachable();
+            yield return c.Bot.Blocked("goto", "UNREACHABLE",
+                $"'{want}'({best.name})까지 {budget:0}초 내 도달 실패 — 직선거리 {bestD:0.#}m, 길막힘 의심",
+                "MoveTo 반복");
+            yield break;
+        }
+
+        bool uiBefore = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
+        c.Bot.Tap(KeyCode.E);
+        yield return c.Bot.WaitSec(0.8f);
+        bool uiAfter = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
+
+        c.Report.Info("goto", "OK", $"'{want}'({best.name}) 도달 + E 상호작용 — UI {(uiAfter ? "열림" : "안 열림")}");
+
+        // UI가 열려야 하는 종류인데 안 열리면 배선 문제
+        bool expectsUi = want == InteractableObject.InteractType.NPC
+                      || want == InteractableObject.InteractType.MapBoard
+                      || want == InteractableObject.InteractType.Stash
+                      || want == InteractableObject.InteractType.Workbench
+                      || want == InteractableObject.InteractType.Radio
+                      || want == InteractableObject.InteractType.Dispatch;
+        if (expectsUi && !uiAfter && !uiBefore)
+            c.Report.Error("goto", "NO_UI",
+                $"'{want}'에 상호작용했는데 UI가 안 열림 — 상호작용 배선 or UI 오픈 실패");
+
+        // 열렸으면 닫는다(다음 스텝이 이동해야 하므로)
+        if (uiAfter && d.count == 0)
+        {
+            c.Bot.Tap(KeyCode.Escape);
+            yield return c.Bot.WaitSec(0.5f);
+            if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen())
+                c.Report.Warn("goto", "UI_NOT_CLOSED", $"'{want}' UI가 ESC로 안 닫힘");
+        }
     }
 
     // ══════════════════════════════════════════════════════════════
