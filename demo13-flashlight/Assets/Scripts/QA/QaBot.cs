@@ -91,6 +91,7 @@ public class QaBot : MonoBehaviour
     void ParseArgs()
     {
         _instance = ArgValue("-qa-instance") ?? "";
+        QaBridge.Instance = _instance;   // 막힘/세션 파일도 같은 접두를 쓰게
         _serveMode = HasArg("-qa-serve");
         _quitWhenDone = HasArg("-qa-quit");
         var m = ArgValue("-qa-minutes");
@@ -407,6 +408,15 @@ public class QaBot : MonoBehaviour
 
             WriteResultJson();
         }
+        // 막힘 대기 중 종료되면 QaBridge가 요청 파일을 지울 기회를 못 얻는다.
+        // 남겨두면 마더가 죽은 차일드를 영원히 '응답 대기'로 본다.
+        try
+        {
+            string bp = QaBridge.PathOf(QaBridge.BlockedFile);
+            if (System.IO.File.Exists(bp)) System.IO.File.Delete(bp);
+        }
+        catch { }
+
         WriteStatus("done", $"오류 {_rep?.ErrorCount ?? 0} · 경고 {_rep?.WarnCount ?? 0}");
 
         if (_quitWhenDone)
@@ -434,6 +444,9 @@ public class QaBot : MonoBehaviour
             unityVersion = Application.unityVersion,
             platform = Application.platform.ToString(),
             isEditor = Application.isEditor,
+            // 마더가 (차일드,시작시각)으로 런을 식별한다 — 비면 서로 다른 런이 한 건으로 합쳐진다.
+            startedAt = System.DateTime.Now.AddSeconds(-(Time.realtimeSinceStartup - _startedAt))
+                                           .ToString("yyyy-MM-dd HH:mm:ss"),
             endedAt = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             errorCount = _rep.ErrorCount,
             warnCount = _rep.WarnCount,
@@ -456,7 +469,11 @@ public class QaBot : MonoBehaviour
         try
         {
             string json = JsonUtility.ToJson(s, true);
-            string name = string.IsNullOrEmpty(_commandId) ? "qa-result-latest.json" : $"qa-result-{_commandId}.json";
+            // latest는 매 런 덮어써진다. F9 수동 런(commandId 없음)도 타임스탬프본을 남겨야
+            // 이력이 보존되고 마더의 런 목록에 쌓인다.
+            string id = string.IsNullOrEmpty(_commandId)
+                ? System.DateTime.Now.ToString("yyyyMMdd-HHmmss") : _commandId;
+            string name = $"qa-result-{id}.json";
             System.IO.File.WriteAllText(F(name), json);
             System.IO.File.WriteAllText(F("qa-result-latest.json"), json);
             Debug.Log($"[QA] 결과 JSON: {F(name)}");

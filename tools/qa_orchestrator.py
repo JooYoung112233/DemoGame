@@ -118,22 +118,30 @@ def read_json(p: Path):
     return None
 
 
-def cmd_status(cfg, args):
+def status_rows(cfg, names=""):
+    """인스턴스별 현재 상태. CLI와 GUI가 같은 함수를 본다."""
     d = data_dir(cfg)
     rows = []
-    for inst in pick(cfg, args.instances):
+    for inst in pick(cfg, names):
         name = inst.get("name", "")
         sp = d / fname(name, "qa-status.json")
         s = read_json(sp)
         age = None
         if sp.exists():
             age = round(time.time() - sp.stat().st_mtime, 1)
-        blocked = (d / fname(name, "qa-blocked.json")).exists()
+        bp = d / fname(name, "qa-blocked.json")
+        alive = bool(s) and age is not None and age < 10
+        # 막힘 요청은 '살아서 대기 중'일 때만 유효하다. 런이 끝났는데 파일이 남아 있으면
+        # 잔재다(대기 중 종료되면 QaBridge가 지울 기회를 못 얻는다) — 배너를 띄우면 안 된다.
+        blocked_live = bp.exists() and alive and (s or {}).get("state") == "running"
         rows.append({
             "instance": name or "(기본)",
+            "name": name,
             "label": inst.get("label", ""),
             "kind": inst.get("kind", ""),
-            "alive": bool(s) and age is not None and age < 10,
+            "exePath": inst.get("exePath", ""),
+            "extraArgs": inst.get("extraArgs", []),
+            "alive": alive,
             "ageSec": age,
             "state": (s or {}).get("state"),
             "step": (s or {}).get("step"),
@@ -142,9 +150,17 @@ def cmd_status(cfg, args):
             "elapsedSec": round((s or {}).get("elapsedSec", 0), 1),
             "errors": (s or {}).get("errors"),
             "warns": (s or {}).get("warns"),
-            "blocked": blocked,
+            "blocked": blocked_live,
+            "blockedStale": bp.exists() and not blocked_live,
+            "blockedInfo": read_json(bp) if bp.exists() else None,
             "recent": (s or {}).get("recent", []),
         })
+    return rows
+
+
+def cmd_status(cfg, args):
+    d = data_dir(cfg)
+    rows = status_rows(cfg, args.instances)
 
     if args.json:
         out(rows)
@@ -167,9 +183,9 @@ def cmd_status(cfg, args):
 #  기동 / 종료
 # ─────────────────────────────────────────────────────────────
 
-def cmd_launch(cfg, args):
+def launch_instances(cfg, names="", minutes=0.0):
     launched, skipped = [], []
-    for inst in pick(cfg, args.instances):
+    for inst in pick(cfg, names):
         name, kind = inst.get("name", ""), inst.get("kind", "")
         if kind != "build":
             skipped.append({"instance": name, "why": "kind!=build — 에디터는 사람이 F9로 띄운다"})
@@ -182,15 +198,19 @@ def cmd_launch(cfg, args):
         cmdline = [exe] + list(inst.get("extraArgs", []))
         if name:
             cmdline.append(f"-qa-instance={name}")
-        if args.minutes:
-            cmdline.append(f"-qa-minutes={args.minutes}")
+        if minutes:
+            cmdline.append(f"-qa-minutes={minutes}")
         try:
             p = subprocess.Popen(cmdline, cwd=str(Path(exe).parent))
             launched.append({"instance": name, "pid": p.pid, "cmd": cmdline})
         except Exception as e:
             skipped.append({"instance": name, "why": f"실행 실패: {e}"})
+    return {"launched": launched, "skipped": skipped}
 
-    res = {"launched": launched, "skipped": skipped}
+
+def cmd_launch(cfg, args):
+    res = launch_instances(cfg, args.instances, args.minutes)
+    launched, skipped = res["launched"], res["skipped"]
     if args.json:
         out(res)
     else:
@@ -201,10 +221,10 @@ def cmd_launch(cfg, args):
     return 0
 
 
-def cmd_kill(cfg, args):
+def kill_instances(cfg, names=""):
     """빌드 인스턴스 종료(윈도우: taskkill로 이미지명 매칭)."""
     killed = []
-    for inst in pick(cfg, args.instances):
+    for inst in pick(cfg, names):
         exe = inst.get("exePath", "")
         if inst.get("kind") != "build" or not exe:
             continue
@@ -214,6 +234,11 @@ def cmd_kill(cfg, args):
             killed.append(inst.get("name", ""))
         except Exception as e:
             print(f"[orch] 종료 실패 {image}: {e}", file=sys.stderr)
+    return killed
+
+
+def cmd_kill(cfg, args):
+    killed = kill_instances(cfg, args.instances)
     if args.json:
         out({"killed": killed})
     else:
@@ -237,38 +262,66 @@ def load_scenario(name: str):
     return None, None
 
 
-def cmd_run(cfg, args):
+def list_scenarios():
+    """Resources/QA 안의 시나리오 파일 목록 → [{name, file, label, steps, cycles}]"""
+    qa_dir = REPO / "demo13-flashlight" / "Assets" / "Resources" / "QA"
+    found = []
+    if not qa_dir.exists():
+        return found
+    for p in sorted(qa_dir.glob("qa-scenario*.json")):
+        stem = p.stem  # qa-scenario / qa-scenario-tutorial
+        name = "default" if stem == "qa-scenario" else stem.replace("qa-scenario-", "")
+        j = read_json(p) or {}
+        found.append({
+            "name": name,
+            "file": str(p),
+            "label": j.get("name") or name,
+            "steps": len(j.get("steps", [])),
+            "cycles": j.get("cycles", 1),
+        })
+    return found
+
+
+def dispatch(cfg, scenario_name="default", names="", cycles=0, run_id="", note="", vary_seed=False):
+    """시나리오를 대상 인스턴스의 명령 파일로 투입."""
     d = data_dir(cfg)
     d.mkdir(parents=True, exist_ok=True)
 
-    scenario, src = load_scenario(args.scenario)
+    scenario, src = load_scenario(scenario_name)
     if scenario is None:
-        msg = f"시나리오 '{args.scenario}'를 못 찾음 (Resources/QA/ 확인)"
-        out({"error": msg}) if args.json else print(f"[orch] {msg}", file=sys.stderr)
-        return 2
+        return {"error": f"시나리오 '{scenario_name}'를 못 찾음 (Resources/QA/ 확인)"}
 
-    if args.cycles:
-        scenario["cycles"] = args.cycles
+    if cycles:
+        scenario["cycles"] = cycles
 
     dispatched = []
     stamp = datetime.now().strftime("%H%M%S")
-    for inst in pick(cfg, args.instances):
+    for inst in pick(cfg, names):
         name = inst.get("name", "")
         # 인스턴스마다 시드를 흔들어 같은 시나리오라도 다른 플레이가 되게(병렬의 의미)
         sc = json.loads(json.dumps(scenario))
-        if args.vary_seed and name:
+        if vary_seed and name:
             sc["seed"] = int(sc.get("seed", 0)) + sum(ord(ch) for ch in name)
 
         cmd = {
-            "id": f"{args.id or stamp}{('-' + name) if name else ''}",
-            "note": args.note or f"orchestrator 투입 · 시나리오={args.scenario}",
+            "id": f"{run_id or stamp}{('-' + name) if name else ''}",
+            "note": note or f"orchestrator 투입 · 시나리오={scenario_name}",
             "scenario": sc,
         }
         p = d / fname(name, "qa-command.json")
         p.write_text(json.dumps(cmd, indent=2, ensure_ascii=False), encoding="utf-8")
         dispatched.append({"instance": name, "file": str(p), "id": cmd["id"], "seed": sc.get("seed")})
 
-    res = {"scenario": args.scenario, "source": src, "dispatched": dispatched}
+    return {"scenario": scenario_name, "source": src, "dispatched": dispatched}
+
+
+def cmd_run(cfg, args):
+    res = dispatch(cfg, args.scenario, args.instances, args.cycles,
+                   args.id, args.note, args.vary_seed)
+    if res.get("error"):
+        out(res) if args.json else print(f"[orch] {res['error']}", file=sys.stderr)
+        return 2
+    src, dispatched = res["source"], res["dispatched"]
     if args.json:
         out(res)
     else:
@@ -279,18 +332,53 @@ def cmd_run(cfg, args):
     return 0
 
 
-def cmd_resume(cfg, args):
+def write_resume(cfg, names="", action="skip", note="", force=False):
     """막힘 응답 — Claude가 진단 후 지시."""
     d = data_dir(cfg)
     wrote = []
-    for inst in pick(cfg, args.instances):
+    for inst in pick(cfg, names):
         name = inst.get("name", "")
-        if not (d / fname(name, "qa-blocked.json")).exists() and not args.force:
+        if not (d / fname(name, "qa-blocked.json")).exists() and not force:
             continue
         p = d / fname(name, "qa-resume.json")
-        p.write_text(json.dumps({"action": args.action, "note": args.note or ""},
+        p.write_text(json.dumps({"action": action, "note": note or ""},
                                 indent=2, ensure_ascii=False), encoding="utf-8")
-        wrote.append({"instance": name, "file": str(p), "action": args.action})
+        wrote.append({"instance": name, "file": str(p), "action": action})
+    return wrote
+
+
+def clear_stale(cfg, names=""):
+    """끝난 런이 남긴 잔재(막힘 요청·집어가지 않은 명령) 제거."""
+    d = data_dir(cfg)
+    removed = []
+    for row in status_rows(cfg, names):
+        name = row["name"]
+        if row["blockedStale"]:
+            p = d / fname(name, "qa-blocked.json")
+            try:
+                p.unlink()
+                removed.append(p.name)
+            except Exception:
+                pass
+        if not row["alive"]:
+            p = d / fname(name, "qa-command.json")
+            if p.exists():
+                try:
+                    p.unlink()
+                    removed.append(p.name)
+                except Exception:
+                    pass
+    return removed
+
+
+def cmd_clear(cfg, args):
+    removed = clear_stale(cfg, args.instances)
+    out({"removed": removed}) if args.json else print(f"정리: {removed or '없음'}")
+    return 0
+
+
+def cmd_resume(cfg, args):
+    wrote = write_resume(cfg, args.instances, args.action, args.note, args.force)
     if args.json:
         out({"resumed": wrote})
     else:
@@ -335,18 +423,25 @@ def cmd_wait(cfg, args):
     return 4
 
 
-def cmd_collect(cfg, args):
+def collect_summary(cfg, limit=20):
     """결과 파일 집계 — PASS/FAIL 통계 + 이상 상위 + 공간 문제 지점."""
     d = data_dir(cfg)
     runs = []
-    for p in sorted(d.glob("*qa-result-*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
-        if "latest" in p.name:
-            continue
+    seen = set()
+    # latest 사본은 타임스탬프본과 같은 런이다. 무조건 건너뛰면 F9 수동 런(commandId 없음 →
+    # latest만 남는다)을 통째로 놓치므로, 버리지 말고 (차일드,시작시각)으로 중복만 제거한다.
+    # 정렬 2차 키: 같은 시각이면 이름이 고정된 latest보다 타임스탬프본을 택한다.
+    for p in sorted(d.glob("*qa-result-*.json"),
+                    key=lambda x: (x.stat().st_mtime, "latest" not in x.name), reverse=True):
         j = read_json(p)
         if not j:
             continue
+        key = (j.get("instance", ""), j.get("startedAt", ""), j.get("commandId", ""))
+        if key in seen:
+            continue
+        seen.add(key)
         runs.append((p, j))
-        if len(runs) >= args.limit:
+        if len(runs) >= limit:
             break
 
     summary = {
@@ -372,6 +467,9 @@ def cmd_collect(cfg, args):
             "errors": j.get("errorCount"),
             "warns": j.get("warnCount"),
             "durationSec": round(j.get("durationSec", 0), 1),
+            "checks": j.get("checks", []),
+            "anomalies": j.get("anomalies", []),
+            "path": str(p),
         })
         for a in j.get("anomalies", []):
             k = a.get("kind", "?")
@@ -390,6 +488,12 @@ def cmd_collect(cfg, args):
     summary["topAnomalies"] = dict(sorted(summary["topAnomalies"].items(), key=lambda kv: -kv[1]))
     summary["failedChecks"] = dict(sorted(summary["failedChecks"].items(), key=lambda kv: -kv[1]))
     summary["problemSpots"] = summary["problemSpots"][:30]
+    return summary
+
+
+def cmd_collect(cfg, args):
+    summary = collect_summary(cfg, args.limit)
+    d = summary["dataDir"]
 
     if args.json:
         out(summary)
@@ -417,22 +521,32 @@ def cmd_collect(cfg, args):
     return 0
 
 
-def cmd_coverage(cfg, args):
+def coverage_summary():
     """QA가 무엇을 아는지 — 매니페스트 요약(사각 지대 확인용)."""
     m = read_json(MANIFEST_FILE)
     if not m:
-        out({"error": "qa-manifest.json 없음"}) if args.json else print("매니페스트 없음")
-        return 2
+        return {"error": "qa-manifest.json 없음"}
     cov = m.get("coverage", [])
     by = {}
     for c in cov:
         by.setdefault(c.get("status", "?"), []).append(c)
-    res = {
+    return {
         "total": len(cov),
         "counts": {k: len(v) for k, v in by.items()},
         "blind": [c["system"] for c in by.get("blind", [])],
         "ops": [o["op"] for o in m.get("ops", [])],
+        "rows": cov,
+        "checks": m.get("checks", []),
+        "limits": m.get("limits", []),
+        "opRows": m.get("ops", []),
     }
+
+
+def cmd_coverage(cfg, args):
+    res = coverage_summary()
+    if res.get("error"):
+        out(res) if args.json else print("매니페스트 없음")
+        return 2
     if args.json:
         out(res)
     else:
@@ -453,6 +567,13 @@ def out(obj):
 
 
 def main():
+    # 윈도우 콘솔 기본이 cp949 → 한글/기호(⛔ ●) 출력에서 죽는다. utf-8로 강제.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
     ap = argparse.ArgumentParser(description="QA 총괄 시스템")
     ap.add_argument("--json", action="store_true", help="기계 판독용 JSON 출력(에이전트용)")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -489,12 +610,15 @@ def main():
 
     common(sub.add_parser("coverage", help="커버리지/사각 요약"))
 
+    common(sub.add_parser("clear", help="끝난 런의 잔재(막힘·미소비 명령) 정리"))
+
     args = ap.parse_args()
     cfg = load_instances()
 
     fn = {
         "status": cmd_status, "launch": cmd_launch, "kill": cmd_kill, "run": cmd_run,
         "resume": cmd_resume, "wait": cmd_wait, "collect": cmd_collect, "coverage": cmd_coverage,
+        "clear": cmd_clear,
     }[args.cmd]
     return fn(cfg, args)
 

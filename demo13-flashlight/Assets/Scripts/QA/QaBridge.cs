@@ -23,8 +23,14 @@ public static class QaBridge
     public const string BlockedFile = "qa-blocked.json";
     public const string ResumeFile  = "qa-resume.json";
 
+    /// <summary>병렬 실행 구분용 파일 접두(-qa-instance=A). QaBot이 부팅 때 채운다.
+    /// 마더(qa_orchestrator.fname)와 규칙이 같아야 한다 — A → "A-qa-blocked.json".
+    /// 이게 없으면 빌드 A/B가 같은 파일을 덮어써서 마더가 누가 막혔는지 구분 못 한다.</summary>
+    public static string Instance = "";
+
     public static string Dir => Application.persistentDataPath;
-    public static string PathOf(string file) => System.IO.Path.Combine(Dir, file);
+    public static string PathOf(string file) => System.IO.Path.Combine(
+        Dir, string.IsNullOrEmpty(Instance) ? file : $"{Instance}-{file}");
 
     // ── 세션 리포트(기계 판독용) ─────────────────────────────────────
 
