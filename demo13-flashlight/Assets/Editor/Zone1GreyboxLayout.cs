@@ -4,32 +4,56 @@ using UnityEngine;
 
 /// <summary>
 /// "지역1(Zone1)" — **폐상가 도심 그레이박스**(좀보이드式). (docs/world-map.md §7-5)
-///   • 똑같은 격자 = 거부 → **블록마다 성격 다르게**: 작은 점포(폭·깊이 제각각+공터) / 큰 건물(다실 분할 = 백화점·주거동·돔) / 광장(주차장).
-///   • 간선도로 격자(세로 x64/120/200/276, 가로 y44~55 차고큰길·76·168·256·324, ~6~11m)로 블록 분할. 튜토는 SW.
-///   • 5 랜드마크 = 큰 건물 + 간선 교차점 열쇠/라벨/적/탈출 마커(밀도·위치 검토용; 내부 정밀배치 후속).
+///   • 똑같은 격자 = 거부 → **블록마다 성격 다르게**: 작은 점포(폭·깊이 제각각+공터) / 큰 건물 / 광장(주차장·공원).
 ///   • 좌표 = 월드 XY, 1u=1m.
-/// 메뉴: Tools ▸ TopDown ▸ 맵 ▸ 1구역 그레이박스
+///
+/// ★ 2026-07-11 v2 — **크기 1/2 + 도로 위계 컨셉**(사용자: "맵이 너무 밀도가 없다").
+///   구: 316×330(≈10만 m²)에 도로가 전부 6~11m로 비슷 → 넓고 밋밋한 격자.
+///   신: **160×168**(≈2.7만 m², 선형 1/2) + 도로를 4단계로 구분해 '길의 성격'을 만든다.
+///
+///   ┌ 도로 위계 ──────────────────────────────────────────────────────┐
+///   │ 4차선 간선 12m — 십자 1쌍(세로 x102~114 · 가로 y114~126). 맵의 척추.       │
+///   │                  랜드마크 4채의 문이 전부 이 십자를 향한다(길 찾기 쉬움).    │
+///   │ 2차선 지선  6m — 순환도로(맵 둘레) + 블록 분할(세로 x60~66 · 가로 y72~78). │
+///   │ 골목        3m — 블록 안 점포 사이(Shops).                                │
+///   │ 실개골목    2m — 밀집 아케이드(약국 심부)만.                              │
+///   └────────────────────────────────────────────────────────────────┘
+///
+///   블록 = 3열 × 3행 = 9개(구 30개). 큰 빈 블록을 없애고 점포를 촘촘히.
+///   스폰5 = 순환도로 둘레 / 탈출 = 중앙 교차로(고정) + 순환도로 네 코너(풀).
+///
+/// 메뉴: Tools ▸ TopDown ▸ 빌드 ▸ 지역1
 /// </summary>
 public static class Zone1GreyboxLayout
 {
     const string ScenePath = "Assets/Scenes/Zone1.unity";
-    const float FX0 = 14f, FY0 = 14f, FX1 = 330f, FY1 = 344f;
-    const float TUT_OX = 20f, TUT_OY = 20f;
 
-    static readonly float[] CX0 = { 16f, 70f, 126f, 206f, 282f };
-    static readonly float[] CX1 = { 64f, 120f, 200f, 276f, 328f };
-    static readonly float[] RY0 = { 16f, 55f, 82f, 176f, 264f, 332f };
-    static readonly float[] RY1 = { 44f, 76f, 168f, 256f, 324f, 342f };
+    // ── 맵 규격 (160 × 168) ──
+    const float FX0 = 8f, FY0 = 8f, FX1 = 168f, FY1 = 176f;
+    const float TUT_OX = 16f, TUT_OY = 16f;   // 튜토(폐상가) 44×56 = C0R0에 정확히 들어맞음
 
-    // 점포 크기 풀(제각각).
-    static readonly float[] WS = { 8f, 10f, 12f, 15f, 18f, 23f };
-    static readonly float[] DS = { 9f, 11f, 13f, 16f, 20f };
+    // ── 도로 위계(폭) ──
+    public const float RoadArterial  = 12f;   // 4차선 간선
+    public const float RoadCollector = 6f;    // 2차선 지선 · 순환도로
+    public const float Alley         = 3f;    // 골목(점포 사이)
+    public const float AlleyTight    = 2f;    // 실개골목(밀집 아케이드)
+
+    // 블록 격자 — 사이 간격이 곧 도로. C0|지선|C1|간선|C2, R0|지선|R1|간선|R2. 둘레는 순환도로.
+    static readonly float[] CX0 = {  16f,  66f, 114f };
+    static readonly float[] CX1 = {  60f, 102f, 160f };
+    static readonly float[] RY0 = {  16f,  78f, 126f };
+    static readonly float[] RY1 = {  72f, 114f, 168f };
+
+    // 점포 크기 풀 — 맵이 절반이 됐으므로 점포도 잘게(밀도↑, 골목 수↑).
+    static readonly float[] WS = { 7f, 9f, 11f, 14f, 17f };
+    static readonly float[] DS = { 8f, 10f, 12f, 15f };
 
     [MenuItem("Tools/TopDown/빌드/지역1", priority = -98)]
     public static void Build()
     {
         var map = GreyboxBuild.BeginScene(out var scene);
         _buildingRects.Clear();   // 건물 자리 등록 초기화(빌드마다 새로) — Scatter가 실내를 피하는 근거
+        _keepOut.Clear();         // 장애물 금지 지점(스폰·탈출·입구)
         int n = 0;
 
         n += GreyboxBuild.Floor(map, "Floor", (FX0+FX1)*0.5f, (FY0+FY1)*0.5f, FX1-FX0, FY1-FY0);
@@ -38,60 +62,57 @@ public static class Zone1GreyboxLayout
         n += GreyboxBuild.WallSeg(map, "Edge_W", FX0, FY0, FX0+2f, FY1);
         n += GreyboxBuild.WallSeg(map, "Edge_E", FX1-2f, FY0, FX1, FY1);
 
-        // ① 튜토(SW) + 차고 동측 통로 → 세로 간선(x64~70)으로 빠짐.
+        // 튜토(SW = C0R0, 44×56이 블록에 정확히 맞음).
+        //   北 갭(월드 x24~34) → 가로 지선 → 약국 아케이드 / 東 갭(월드 y43~48) → 세로 지선(x60~66).
         n += ScrapMarketGreyboxLayout.Place(map, TUT_OX, TUT_OY, true);
 
-        // ── 블록마다 성격 다르게 채움 ──
+        // ── 블록 9개, 성격 전부 다르게 ──
+        //   C0R0=튜토 / C0R1=약국 아케이드 / C0R2=공원
+        //   C1R0=폐아파트 / C1R1=점포 밀집 / C1R2=식물원 돔
+        //   C2R0=유리타워 / C2R1=주차장 / C2R2=무너진 상가
+        //   ※ 랜드마크 4채(아파트·타워·돔·상가)의 문은 전부 **간선 십자**를 향한다.
         for (int r = 0; r < RY0.Length; r++)
         for (int c = 0; c < CX0.Length; c++)
         {
-            if (c == 0 && r <= 1) continue;  // 튜토 자리
+            if (c == 0 && r == 0) continue;  // 튜토 자리(위에서 Place로 배치됨)
             float ax0 = CX0[c], ay0 = RY0[r], ax1 = CX1[c], ay1 = RY1[r];
             string p = $"B{c}{r}";
             int seed = H(c + 1, r + 1);
 
-            if (c == 0 && r == 2)         n += BuildPharmacyArcade(map);          // ② 약국·상가 심부(상세)
-            else if (c == 1 && r <= 1)    n += Big(map, p, ax0, ay0, ax1, ay1, 'S'); // ③ 폐아파트 주거동
-            else if (c == 4 && r == 0)    n += Big(map, p, ax0, ay0, ax1, ay1, 'W'); // ④ 유리타워
-            else if (c == 2 && r == 3)    n += BuildGreenhouseDome(map);          // ⑤ 식물원 돔(상세)
-            else if (c == 3 && r == 2)    n += Plaza(map, p, ax0, ay0, ax1, ay1);    // 주차장/공터
-            else if (c == 1 && r == 4)    n += Plaza(map, p, ax0, ay0, ax1, ay1);    // 공원
-            else                          n += Shops(map, p, ax0, ay0, ax1, ay1, 4f, seed); // 작은 점포(제각각)
+            if      (c == 0 && r == 1) n += BuildPharmacyArcade(map);                       // 약국·상가 심부(상세)
+            else if (c == 0 && r == 2) n += Plaza(map, "Park", ax0, ay0, ax1, ay1);         // 공원
+            else if (c == 1 && r == 0) n += Big(map, "Apt",  ax0, ay0, ax1, ay1, 'E');      // 폐아파트(문=세로 간선)
+            else if (c == 1 && r == 2) n += BuildGreenhouseDome(map);                       // 식물원 돔(상세)
+            else if (c == 2 && r == 0) n += Big(map, "Tower", ax0, ay0, ax1, ay1, 'W');     // 유리타워(문=세로 간선)
+            else if (c == 2 && r == 1) n += Plaza(map, "Lot", ax0, ay0, ax1, ay1);          // 주차장
+            else if (c == 2 && r == 2) n += BuildCollapsedMall(map, ax0, ay0, ax1, ay1);    // 무너진 상가(전용 내부)
+            else                       n += Shops(map, p, ax0, ay0, ax1, ay1, Alley, seed); // 점포 밀집
         }
 
-        // ── 4 랜드마크 마커(간선도로 위; 약국은 아케이드 내부에 상세 배치됨) ──
-        n += GreyboxBuild.Note(map, "AP_Label", 80f, 49f, "폐아파트 ★★", "튜토 차고 東 큰길. key_apt_admin → 펜트 key_tower_card. 수직 다층 후속.");
-        n += GreyboxBuild.Marker(map, "gb_crate", "key_apt_admin", 100f, 49f);
-        n += GreyboxBuild.Marker(map, "gb_door",  "Pent_Gate(key_apt_admin)", 132f, 49f);
-        n += GreyboxBuild.Marker(map, "gb_crate", "key_tower_card", 140f, 49f);
-        n += GreyboxBuild.Marker(map, "gb_enemy", "Bandit_Apt", 170f, 49f);
-        n += GreyboxBuild.Note(map, "TW_Label", 250f, 49f, "유리타워 ★★★★", "東단. key_tower_card로 상층 R&D → key_dome_code. 카드키·수직 후속.");
-        n += GreyboxBuild.Marker(map, "gb_door",  "RnD_Gate(key_tower_card)", 278f, 49f);
-        n += GreyboxBuild.Marker(map, "gb_crate", "key_dome_code", 295f, 49f);
-        n += GreyboxBuild.Marker(map, "gb_enemy", "Bandit_Tower", 312f, 49f);
-        n += GreyboxBuild.Note(map, "RV_Label", 100f, 328f, "강변 부두 ★★★", "最北 한강 경계. 부두 창고. 탈출 밀집.");
+        // ── 랜드마크 라벨/열쇠 사슬 — 해당 건물이 면한 간선·지선 위에 ──
+        n += GreyboxBuild.Note(map, "AP_Label", 108f, 24f, "폐아파트 ★★", "세로 간선 西. key_apt_admin → 펜트 key_tower_card. 수직 다층 후속.");
+        n += GreyboxBuild.Marker(map, "gb_crate", "key_apt_admin", 108f, 36f);
+        n += GreyboxBuild.Marker(map, "gb_door",  "Pent_Gate(key_apt_admin)", 108f, 48f);
+        n += GreyboxBuild.Marker(map, "gb_crate", "key_tower_card", 108f, 60f);
+        n += GreyboxBuild.Note(map, "TW_Label", 132f, 75f, "유리타워 ★★★★", "동측. key_tower_card로 상층 R&D → key_dome_code. 카드키·수직 후속.");
+        n += GreyboxBuild.Marker(map, "gb_door",  "RnD_Gate(key_tower_card)", 144f, 75f);
+        n += GreyboxBuild.Marker(map, "gb_crate", "key_dome_code", 154f, 75f);
+        n += GreyboxBuild.Note(map, "RV_Label", 88f, 171f, "강변 부두 ★★★", "最北 한강 경계(순환도로 北). 부두 창고. 탈출 밀집.");
 
-        // ── 전용 내부 씬이 있는 랜드마크 진입 (2026-07-11) ──
-        //   §1.4c 현행 랜드마크 = 약국(아케이드 내부에 배선됨) / 무너진 상가 / 짙은현상 지하창고(창고 안).
-        //   ※ 폐아파트·유리타워는 구버전 랜드마크(level-apartment/tower.md 보존) — 공용 내부로 처리.
-        n += GreyboxBuild.Note(map, "CM_Label", 232f, 300f, "무너진 상가 ★★★", "SQ-001 갇힌 생존자. 잔해 미로 최심부.");
-        n += Enter(map, "CollapsedMall_Enter", 232f, 296f, "Int_CollapsedMall");
-        n += ReturnSpawn(map, "from_collapsed", 232f, 293f);
-
-        // ── 레이드 스폰 5(매 판 랜덤 1곳) — 주변부 거리 분산(간선도로 위) ──
+        // ── 레이드 스폰 5(매 판 랜덤 1곳) — **순환도로 둘레**에 분산 ──
         //   pointId를 오브젝트명과 같게 주입해야 SpawnPoint가 실제로 식별된다(주입 없으면 프리팹 기본값 "default").
-        n += Spawn5(map, "SP1_S",  172f, 49f);   // 남(차고 큰길)
-        n += Spawn5(map, "SP2_N",  172f, 328f);  // 북(강변 앞)
-        n += Spawn5(map, "SP3_W",   67f, 172f);  // 서
-        n += Spawn5(map, "SP4_E",  279f, 172f);  // 동
-        n += Spawn5(map, "SP5_NE", 203f, 260f);  // 북동 내부
-        // ── 탈출: 고정 1(전 스폰 공용) + 풀 4(스폰별 2개 매치 = 먼 코너, 맵 횡단 유도) ──
+        n += Spawn5(map, "SP1_S",  110f,  13f);   // 남 순환
+        n += Spawn5(map, "SP2_N",  110f, 171f);   // 북 순환
+        n += Spawn5(map, "SP3_W",   13f,  96f);   // 서 순환
+        n += Spawn5(map, "SP4_E",  163f,  96f);   // 동 순환
+        n += Spawn5(map, "SP5_NE", 163f, 150f);   // 북동 순환
+        // ── 탈출: 고정 1(중앙 교차로) + 풀 4(순환도로 네 코너 — 스폰별 2개 매치로 맵 횡단 유도) ──
         //   ExitPoint 설정(targetScene/spawnPointId/대기)을 주입해야 실제 탈출로 동작한다.
-        n += ExitPt(map, "Exit_Fixed", 123f, 172f);  // 고정(중앙)
-        n += ExitPt(map, "PX_SW", 40f,  49f);
-        n += ExitPt(map, "PX_SE", 300f, 49f);
-        n += ExitPt(map, "PX_NW", 40f,  328f);
-        n += ExitPt(map, "PX_NE", 300f, 328f);
+        n += ExitPt(map, "Exit_Fixed", 108f, 120f);  // 고정 = 간선 십자 교차점
+        n += ExitPt(map, "PX_SW",  13f,  13f);
+        n += ExitPt(map, "PX_SE", 163f,  13f);
+        n += ExitPt(map, "PX_NW",  13f, 171f);
+        n += ExitPt(map, "PX_NE", 163f, 171f);
         // 매치(스폰→풀 2, 고정 제외): SP1_S→{NW,NE} · SP2_N→{SW,SE} · SP3_W→{SE,NE} · SP4_E→{SW,NW} · SP5_NE→{SW,NW}
         // → 런타임 랜덤스폰 + 매치 탈출 활성 = RaidSpawnDirector(아래 배치). 매치표는 디렉터가 동일하게 보유.
         n += Director(map);
@@ -101,30 +122,65 @@ public static class Zone1GreyboxLayout
         //   난이도는 SpawnZone 유닛키/마릿수로 = 위험 곡선. (결정 2026-07-11: 안쪽으로 갈수록 위험·보상 ↑)
         n += Controller(map);
 
-        // ① 상가골목/약국 아케이드(진입부, C0R2) — 약함·잡템
-        n += Scatter(map, "SZ_Arcade", 18f, 86f, 62f, 164f, 4, 3, 11);
-        n += EnemyZone(map, "EZ_Arcade", 40f, 125f, 20f, 30f, "bandit_melee_1", 2);
+        // ① 약국 아케이드(C0R1) — 약함·잡템
+        n += Scatter(map, "SZ_Arcade", 18f, 80f, 58f, 112f, 4, 3, 11);
+        n += EnemyZone(map, "EZ_Arcade", 38f, 96f, 14f, 16f, "bandit_melee_1", 2);
 
-        // ② 폐아파트(C1R0~1) — 중
-        n += Scatter(map, "SZ_Apt", 72f, 18f, 118f, 74f, 5, 4, 22);
-        n += EnemyZone(map, "EZ_Apt", 95f, 46f, 24f, 26f, "bandit_melee_1", 3);
+        // ② 폐아파트(C1R0) — 중
+        n += Scatter(map, "SZ_Apt", 68f, 18f, 100f, 70f, 5, 4, 22);
+        n += EnemyZone(map, "EZ_Apt", 84f, 44f, 16f, 18f, "bandit_melee_1", 3);
 
-        // ③ 식물원 돔·습지(C2R3) — 중상
-        n += Scatter(map, "SZ_Dome", 130f, 180f, 196f, 252f, 5, 5, 33);
-        n += EnemyZone(map, "EZ_Dome", 163f, 216f, 30f, 30f, "bandit_melee_1", 2);
-        n += EnemyZone(map, "EZ_Dome_R", 178f, 236f, 14f, 14f, "bandit_ranged", 1);
+        // ③ 식물원 돔·습지(C1R2) — 중상
+        n += Scatter(map, "SZ_Dome", 68f, 128f, 100f, 166f, 5, 5, 33);
+        n += EnemyZone(map, "EZ_Dome", 84f, 146f, 14f, 14f, "bandit_melee_1", 2);
+        n += EnemyZone(map, "EZ_Dome_R", 92f, 157f, 8f, 8f, "bandit_ranged", 1);
 
-        // ④ 유리 R&D 타워(C4R0) — 강함·고급 루트(최심부)
-        n += Scatter(map, "SZ_Tower", 285f, 18f, 325f, 42f, 6, 6, 44);
-        n += EnemyZone(map, "EZ_Tower", 305f, 30f, 22f, 14f, "bandit_ranged", 2);
-        n += EnemyZone(map, "EZ_Tower_T", 315f, 30f, 10f, 10f, "bandit_tank", 1);
+        // ④ 유리 R&D 타워(C2R0) — 강함·고급 루트(최심부)
+        n += Scatter(map, "SZ_Tower", 116f, 18f, 158f, 70f, 6, 6, 44);
+        n += EnemyZone(map, "EZ_Tower", 140f, 40f, 16f, 14f, "bandit_ranged", 2);
+        n += EnemyZone(map, "EZ_Tower_T", 150f, 52f, 8f, 8f, "bandit_tank", 1);
 
-        // ⑤ 주차장·공원(개활지) — 낮은 밀도, 적 약간
-        n += Scatter(map, "SZ_Plaza", 210f, 86f, 272f, 164f, 3, 2, 55);
-        n += EnemyZone(map, "EZ_Plaza", 240f, 125f, 24f, 24f, "bandit_melee_1", 2);
-        n += Scatter(map, "SZ_Park", 74f, 268f, 116f, 320f, 3, 2, 66);
+        // ⑤ 무너진 상가(C2R2) — 중상
+        n += Scatter(map, "SZ_Mall", 116f, 128f, 158f, 166f, 4, 3, 77);
+        n += EnemyZone(map, "EZ_Mall", 137f, 146f, 16f, 16f, "bandit_melee_1", 2);
 
-        GreyboxBuild.EndScene(scene, ScenePath, n, "지역1 Zone1(폐상가 도심 — 블록 성격 다양화)");
+        // ⑥ 주차장·공원(개활지) — 낮은 밀도, 적 약간
+        n += Scatter(map, "SZ_Lot", 116f, 80f, 158f, 112f, 3, 2, 55);
+        n += EnemyZone(map, "EZ_Lot", 137f, 96f, 16f, 16f, "bandit_melee_1", 2);
+        n += Scatter(map, "SZ_Park", 18f, 128f, 58f, 166f, 3, 2, 66);
+
+        // ⑦ 도로 자체의 소량 루트(버려진 차·잔해) — 길에서도 주울 게 있어야 이동이 심심하지 않다.
+        n += Scatter(map, "SZ_RoadV", 103f,  20f, 113f, 164f, 3, 2, 88);   // 세로 간선
+        n += Scatter(map, "SZ_RoadH",  20f, 115f, 158f, 125f, 3, 2, 99);   // 가로 간선
+
+        // ── ★ 도로 장애물 (마지막 — 스폰·탈출·입구가 다 등록된 뒤라야 그 자리를 피한다) ──
+        //   "넓은 길 = 빠르지만 직선으로는 못 달린다". 좌우 번갈아 붙여 통행선을 지그재그로.
+        //   간선(12m)은 크게 물어 뜯고, 지선(6m)·순환(6m)은 한 대씩만 — 폭에 비례해 압박.
+        n += ObstacleRun(map, "OB_ArtV", true,  102f, 114f,  12f, 172f, 16f, 0.55f, 201);  // 세로 간선
+        n += ObstacleRun(map, "OB_ArtH", false, 114f, 126f,  12f, 164f, 16f, 0.55f, 202);  // 가로 간선
+        n += ObstacleRun(map, "OB_ColV", true,   60f,  66f,  12f, 172f, 24f, 0.45f, 203);  // 세로 지선
+        n += ObstacleRun(map, "OB_ColH", false,  72f,  78f,  12f, 164f, 24f, 0.45f, 204);  // 가로 지선
+        n += ObstacleRun(map, "OB_RingS", false, 10f,  16f,  20f, 156f, 30f, 0.42f, 205);  // 순환 남
+        n += ObstacleRun(map, "OB_RingN", false,168f, 174f,  20f, 156f, 30f, 0.42f, 206);  // 순환 북
+        n += ObstacleRun(map, "OB_RingW", true,   10f, 16f,  20f, 164f, 30f, 0.42f, 207);  // 순환 서
+        n += ObstacleRun(map, "OB_RingE", true,  160f,166f,  20f, 164f, 30f, 0.42f, 208);  // 순환 동
+
+        // ── 길을 아예 끊는 것들 = "못 가는 곳 / 돌아가야 하는 곳" ──
+        //   ① 영구: 세로 간선 중간의 무너진 고가 — **척추가 끊긴다.** 남↔북은 지선이나 순환으로 우회.
+        n += Blocker(map, "BLK_Overpass", 108f, 66f, 12f, 5f,
+                     BlockedPassage.Mode.Permanent, "무너진 고가도로");
+        //   ② 치울 수 있는 지름길 3곳 — 치우면 빨라지지만 **소음**으로 적이 몰린다(대가 있는 지름길).
+        n += Blocker(map, "BLK_ColV", 63f, 100f, 6f, 3.5f,
+                     BlockedPassage.Mode.Clearable, "쌓인 폐자재");
+        n += Blocker(map, "BLK_ColH", 92f, 75f, 3.5f, 6f,
+                     BlockedPassage.Mode.Clearable, "전복된 트럭");
+        n += Blocker(map, "BLK_ArtH", 60f, 120f, 3.5f, 12f,
+                     BlockedPassage.Mode.Clearable, "사고 차량 더미");
+        //   ③ 밤에만 지나갈 수 있는 골목 — 낮엔 우회(짙은현상 게이트의 전신).
+        n += Blocker(map, "BLK_NightAlley", 163f, 130f, 6f, 3.5f,
+                     BlockedPassage.Mode.NightOnly, "잠긴 셔터");
+
+        GreyboxBuild.EndScene(scene, ScenePath, n, "지역1 Zone1(160×168 · 도로 위계 4단계 · 장애물/차단)");
         AddToBuildSettings(ScenePath);   // 등록 안 하면 TransitionTo("Zone1")이 LoadSceneAsync에서 실패
         AssetDatabase.SaveAssets();
     }
@@ -147,6 +203,7 @@ public static class Zone1GreyboxLayout
     static int Spawn5(GameObject map, string name, float x, float y)
     {
         if (GreyboxBuild.Marker(map, "gb_spawn", name, x, y) == 0) return 0;
+        KeepOut(x, y);   // 스폰 자리엔 도로 잔해를 깔지 않는다(스폰하자마자 끼는 사고 방지)
         var go = FindChild(map.transform, name);
         var sp = go != null ? go.GetComponentInChildren<SpawnPoint>() : null;
         if (sp != null)
@@ -162,6 +219,7 @@ public static class Zone1GreyboxLayout
     static int ExitPt(GameObject map, string name, float x, float y)
     {
         if (GreyboxBuild.Marker(map, "gb_exit", name, x, y) == 0) return 0;
+        KeepOut(x, y);   // 탈출구 자리도 비워 둔다
         var go = FindChild(map.transform, name);
         var io = go != null ? go.GetComponentInChildren<InteractableObject>() : null;
         if (io != null)
@@ -343,40 +401,38 @@ public static class Zone1GreyboxLayout
     }
 
     /// <summary>
-    /// ② 약국·상가 심부(상세) — C0R2(x16~64 y82~168). 좁은 아케이드 골목 + 약국 앵커.
-    ///   동선: (튜토 南 갭 x28~38) → 세로 스파인(x28~38) → 교차골목(y122~128) → 북 출구(x46~52, 식물원 간선) / 동 갭(y122~128 → V간선).
+    /// 약국·상가 심부(상세) — C0R1(x16~60 y78~114). 맵에서 **가장 촘촘한** 구역(실개골목 2m).
+    ///   동선: 튜토 北 갭(x24~34) → 지선 → 남 갭 → 세로 스파인(x28~34) → 북 갭(→ 가로 간선) / 동 갭(→ 세로 지선).
     ///   약국 미니퍼즐: key_pharmacy(카운터) → MedCabinet(잠금) → SQ-002. 의료·생필품 루팅.
     /// </summary>
     static int BuildPharmacyArcade(GameObject m)
     {
+        const float X0 = 16f, Y0 = 78f, X1 = 60f, Y1 = 114f;
         int n = 0;
-        // 경계(남 갭 x28~38 튜토 · 북 갭 x46~52 식물원 · 동 갭 y122~128 V간선 · 서벽)
-        n += GreyboxBuild.WallSeg(m, "PA_S_a", 16f, 82f, 28f, 84f);
-        n += GreyboxBuild.WallSeg(m, "PA_S_b", 38f, 82f, 64f, 84f);
-        n += GreyboxBuild.WallSeg(m, "PA_N_a", 16f, 166f, 46f, 168f);
-        n += GreyboxBuild.WallSeg(m, "PA_N_b", 52f, 166f, 64f, 168f);
-        n += GreyboxBuild.WallSeg(m, "PA_W",   16f, 82f, 18f, 168f);
-        n += GreyboxBuild.WallSeg(m, "PA_E_a", 62f, 82f, 64f, 122f);
-        n += GreyboxBuild.WallSeg(m, "PA_E_b", 62f, 128f, 64f, 168f);
+        // 경계 — 남 갭 x28~34(튜토에서 올라옴) · 북 갭 x40~46(가로 간선) · 동 갭 y92~98(세로 지선) · 서벽 폐쇄
+        n += GreyboxBuild.WallSeg(m, "PA_S_a", X0, Y0, 28f, Y0 + 2f);
+        n += GreyboxBuild.WallSeg(m, "PA_S_b", 34f, Y0, X1, Y0 + 2f);
+        n += GreyboxBuild.WallSeg(m, "PA_N_a", X0, Y1 - 2f, 40f, Y1);
+        n += GreyboxBuild.WallSeg(m, "PA_N_b", 46f, Y1 - 2f, X1, Y1);
+        n += GreyboxBuild.WallSeg(m, "PA_W",   X0, Y0, X0 + 2f, Y1);
+        n += GreyboxBuild.WallSeg(m, "PA_E_a", X1 - 2f, Y0, X1, 92f);
+        n += GreyboxBuild.WallSeg(m, "PA_E_b", X1 - 2f, 98f, X1, Y1);
 
-        // 약국(앵커) — 방 x37~62 y84~116, 서문(스파인 향). key_pharmacy→약장(잠금)→SQ-002.
-        //   2026-07-11: 껍데기만 두고 **내부는 Int_Pharmacy 씬**(전당포식 전환). 서문에 진입 트리거 + 복귀 스폰.
-        n += GreyboxBuild.Building(m, "Pharmacy", 37f, 84f, 62f, 116f, 'W', 98f, "gb_door", "Pharmacy_Door");
-        MarkBuilding(37f, 84f, 62f, 116f);
-        n += Enter(m, "Pharmacy_Enter", 36.2f, 99f, "Int_Pharmacy");   // 서문 바로 앞(문 갭 y98~100)
-        n += ReturnSpawn(m, "from_pharmacy", 34.5f, 99f);              // 내부에서 나오면 문 앞
-        // ★ 2026-07-11: 약국 실내 오브젝트(key_pharmacy 상자·MedCabinet 문·SQ002_Box·선반2)는
-        //   **Int_Pharmacy 씬으로 이전**하고 외부에서 제거 — 건물=껍데기 원칙(외부에 상자가 보이던 불일치).
-        n += GreyboxBuild.Note(m, "Pharmacy_Note", 44f, 106f, "약국 카운터 메모",
+        // 약국(앵커) — 방 x38~58 y80~98, 서문(스파인 향). 껍데기만 — 내부는 Int_Pharmacy 씬.
+        n += GreyboxBuild.Building(m, "Pharmacy", 38f, 80f, 58f, 98f, 'W', 87f, "gb_door", "Pharmacy_Door");
+        MarkBuilding(38f, 80f, 58f, 98f);
+        n += Enter(m, "Pharmacy_Enter", 38.5f, 88f, "Int_Pharmacy", "default", 1f, 2f);   // 서문 **문간**(벽 x38~39, 갭 y87~89)
+        n += ReturnSpawn(m, "from_pharmacy", 35.5f, 88f);                                  // 내부에서 나오면 문 앞
+        // 메모는 **문 밖 스파인**에(건물 안에 두면 껍데기 원칙 위반 — 외부에서 보이면 안 된다).
+        n += GreyboxBuild.Note(m, "Pharmacy_Note", 32f, 84f, "약국 카운터 메모",
             "처방 약은 약장(MedCabinet) 안. 카운터 밑 열쇠(key_pharmacy)로 연다.");
 
-        // 빽빽한 점포(스파인 x29~37 개방·약국 제외) — 서측 열 + 동측 하단(약국 아래). 골목 3m.
-        n += Shops(m, "AW", 16f, 84f, 29f, 164f, 3f, H(101, 7));   // 서측 점포 열
-        n += Shops(m, "AE", 37f, 120f, 62f, 164f, 3f, H(102, 7));  // 동측 하단 점포
+        // 빽빽한 점포 — **실개골목 2m**(맵에서 가장 좁음). 스파인 x28~34는 비워 둔다.
+        n += Shops(m, "AW", X0 + 2f, Y0 + 2f, 28f, Y1 - 2f, AlleyTight, H(101, 7));   // 서측 열
+        n += Shops(m, "AE", 38f, 100f, X1 - 2f, Y1 - 2f, AlleyTight, H(102, 7));      // 약국 위쪽 열
 
-        n += GreyboxBuild.Marker(m, "gb_enemy", "Bandit_Pharmacy", 33f, 140f);
-        n += GreyboxBuild.Note(m, "PD_Label", 32f, 160f, "약국·상가 심부 ★★",
-            "튜토 北. 약장 미니퍼즐(key_pharmacy→약장→SQ-002) + 의료·생필품. 빽빽한 아케이드 골목.");
+        n += GreyboxBuild.Note(m, "PD_Label", 31f, 110f, "약국·상가 심부 ★★",
+            "튜토 北. 약장 미니퍼즐(key_pharmacy→약장→SQ-002) + 의료·생필품. 실개골목 2m = 최고 밀도.");
         return n;
     }
 
@@ -387,34 +443,32 @@ public static class Zone1GreyboxLayout
     /// </summary>
     static int BuildGreenhouseDome(GameObject m)
     {
+        const float X0 = 66f, Y0 = 126f, X1 = 102f, Y1 = 168f;
         int n = 0;
-        // 외곽(남 갭 x148~160 = 간선 진입)
-        n += GreyboxBuild.WallSeg(m, "GH_S_a", 126f, 176f, 148f, 178f);
-        n += GreyboxBuild.WallSeg(m, "GH_S_b", 160f, 176f, 200f, 178f);
-        n += GreyboxBuild.WallSeg(m, "GH_N",   126f, 254f, 200f, 256f);
-        n += GreyboxBuild.WallSeg(m, "GH_W",   126f, 178f, 128f, 254f);
-        n += GreyboxBuild.WallSeg(m, "GH_E",   198f, 178f, 200f, 254f);
-        // 중앙 금고실(돔 코어) — 문 = 金庫(key_dome_code 잠금). 최고 보상.
-        n += GreyboxBuild.Building(m, "DomeCore", 150f, 204f, 178f, 232f, 'S', 162f, "gb_door", "Dome_Vault(key_dome_code)");
-        MarkBuilding(150f, 204f, 178f, 232f);
-        // ★ 2026-07-11: 금고실 내부 보상(Dome_Reward·Dome_RareA/B)은 **Int_Dome 씬으로 이전**.
-        //   외부엔 껍데기와 금고문만 — 들어가야 최고 보상을 본다.
-        n += Enter(m, "Dome_Enter", 163f, 203f, "Int_Dome");
-        n += ReturnSpawn(m, "from_dome", 163f, 200f);
+        // 외곽 — 남 갭 x80~88 = 가로 간선에서 진입(온실 정문)
+        n += GreyboxBuild.WallSeg(m, "GH_S_a", X0, Y0, 80f, Y0 + 2f);
+        n += GreyboxBuild.WallSeg(m, "GH_S_b", 88f, Y0, X1, Y0 + 2f);
+        n += GreyboxBuild.WallSeg(m, "GH_N",   X0, Y1 - 2f, X1, Y1);
+        n += GreyboxBuild.WallSeg(m, "GH_W",   X0, Y0, X0 + 2f, Y1);
+        n += GreyboxBuild.WallSeg(m, "GH_E",   X1 - 2f, Y0, X1, Y1);
+
+        // 중앙 금고실(돔 코어) — 문 = 金庫(key_dome_code 잠금). 최고 보상. 내부는 Int_Dome 씬.
+        n += GreyboxBuild.Building(m, "DomeCore", 76f, 140f, 96f, 158f, 'S', 84f, "gb_door", "Dome_Vault(key_dome_code)");
+        MarkBuilding(76f, 140f, 96f, 158f);
+        n += Enter(m, "Dome_Enter", 85f, 140.5f, "Int_Dome", "default", 2f, 1f);   // 금고문 **문간**(남벽 y140~141, 갭 x84~86)
+        n += ReturnSpawn(m, "from_dome", 85f, 136f);
+
         // 온실 화단(벤치=선반) + 고가 루팅
-        n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed1", 136f, 190f);
-        n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed2", 146f, 190f);
-        n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed3", 188f, 190f);
-        n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed4", 138f, 246f);
-        n += GreyboxBuild.Marker(m, "gb_crate", "GH_Crate1", 132f, 240f);
-        n += GreyboxBuild.Marker(m, "gb_crate", "GH_Crate2", 192f, 246f);
-        // 습지 침수(이동 제약) = 바리케이드 패치
-        n += GreyboxBuild.Barricade(m, "GH_Flood_W", 134f, 218f, 8f, 22f);
-        n += GreyboxBuild.Barricade(m, "GH_Flood_E", 193f, 205f, 8f, 18f);
-        // 적(고위험) 2 + 라벨
-        n += GreyboxBuild.Marker(m, "gb_enemy", "Bandit_Dome1", 140f, 240f);
-        n += GreyboxBuild.Marker(m, "gb_enemy", "Bandit_Dome2", 184f, 226f);
-        n += GreyboxBuild.Note(m, "GH_Label", 132f, 182f, "식물원 돔 ★★★★★ (시그니처)",
+        n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed1", 70f, 132f);
+        n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed2", 74f, 136f);
+        n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed3", 98f, 134f);
+        n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed4", 71f, 163f);
+        n += GreyboxBuild.Marker(m, "gb_crate", "GH_Crate1", 69f, 152f);
+        n += GreyboxBuild.Marker(m, "gb_crate", "GH_Crate2", 99f, 163f);
+        // 습지 침수(이동 제약) = 바리케이드 패치 — 돔 주위를 도는 동선을 만든다.
+        n += GreyboxBuild.Barricade(m, "GH_Flood_W", 71f, 148f, 5f, 14f);
+        n += GreyboxBuild.Barricade(m, "GH_Flood_E", 99f, 146f, 5f, 12f);
+        n += GreyboxBuild.Note(m, "GH_Label", 70f, 129f, "식물원 돔 ★★★★★ (시그니처)",
             "중앙 금고 key_dome_code = 최고 보상. 온실 화단·습지 침수(이동 제약). 최고 위험.");
         return n;
     }
@@ -456,26 +510,51 @@ public static class Zone1GreyboxLayout
 
     /// <summary>큰 건물(랜드마크): **껍데기(외벽+문)만** — 내부는 별도 씬(전당포식 전환, 2026-07-11).
     /// 예전엔 내부 십자 칸막이를 그려 위에서 내부가 다 보였음 → 제거.</summary>
-    static int Big(GameObject m, string p, float x0, float y0, float x1, float y1, char side)
+    static int Big(GameObject m, string p, float x0, float y0, float x1, float y1, char side,
+                   string targetScene = null, string returnSpawn = null)
     {
         float bx0 = x0 + 2f, by0 = y0 + 2f, bx1 = x1 - 2f, by1 = y1 - 2f;
-        if (bx1 - bx0 < 12f || by1 - by0 < 12f) return Shops(m, p, x0, y0, x1, y1, 3f, H((int)x0, (int)y0));
+        if (bx1 - bx0 < 12f || by1 - by0 < 12f) return Shops(m, p, x0, y0, x1, y1, Alley, H((int)x0, (int)y0));
         int n = 0;
         float doorAt = (side == 'S' || side == 'N') ? (bx0 + bx1) * 0.5f - 1f : (by0 + by1) * 0.5f - 1f;
         n += GreyboxBuild.Building(m, p, bx0, by0, bx1, by1, side, doorAt, "gb_door", $"{p}_D");
         // 2026-07-11: 내부 십자 칸막이 제거 — 건물 = 껍데기(외벽+문)뿐. 내부는 별도 씬(전당포식 전환).
-        // 2026-07-11: 대형 건물도 진입 가능("입구 발판을 건물에 붙여줘 전부다"). 문 바로 앞에 붙인다.
-        n += EnterAtDoor(m, $"{p}_Enter", bx0, by0, bx1, by1, side, doorAt);
+        // 2026-07-11: 대형 건물도 진입 가능("입구 발판을 건물에 붙여줘 전부다"). 문간에 발판을 채운다.
+        //   targetScene을 주면 **전용 내부 씬**, 안 주면 공용 내부(Int_Generic).
+        if (string.IsNullOrEmpty(targetScene))
+            n += EnterAtDoor(m, $"{p}_Enter", bx0, by0, bx1, by1, side, doorAt);
+        else
+        {
+            n += EnterAtDoorTo(m, $"{p}_Enter", bx0, by0, bx1, by1, side, doorAt, targetScene);
+            if (!string.IsNullOrEmpty(returnSpawn))
+            {
+                DoorPad(bx0, by0, bx1, by1, side, doorAt, out float ex, out float ey, out _, out _);
+                // 복귀 자리 = 문간에서 바깥으로 2.5m(발판과 안 겹치게).
+                float rx = ex + (side == 'W' ? -2.5f : side == 'E' ? 2.5f : 0f);
+                float ry = ey + (side == 'S' ? -2.5f : side == 'N' ? 2.5f : 0f);
+                n += ReturnSpawn(m, returnSpawn, rx, ry);
+            }
+        }
         MarkBuilding(bx0, by0, bx1, by1);
-        //   문에 BuildingEntrance를 달 건물은 Enter()로 개별 지정한다(내부 씬이 있는 건물만).
+        return n;
+    }
+
+    /// <summary>무너진 상가(랜드마크) — 껍데기 + **전용 내부 씬** `Int_CollapsedMall`. 문은 남쪽(가로 간선 향).</summary>
+    static int BuildCollapsedMall(GameObject m, float x0, float y0, float x1, float y1)
+    {
+        int n = Big(m, "CollapsedMall", x0, y0, x1, y1, 'S', "Int_CollapsedMall", "from_collapsed");
+        n += GreyboxBuild.Note(m, "CM_Label", (x0 + x1) * 0.5f, y0 - 4f, "무너진 상가 ★★★",
+            "SQ-001 갇힌 생존자. 잔해 미로 최심부. 문 = 가로 간선(南).");
         return n;
     }
 
     /// <summary>건물 문에 진입 트리거(BuildingEntrance) — 내부 씬이 있는 건물만.
     /// 밟으면 내부 씬으로 전환(페이드+캐릭터 유지). 복귀 스폰은 Zone1의 from_&lt;건물&gt;.</summary>
-    static int Enter(GameObject m, string name, float x, float y, string targetScene, string spawnId = "default")
+    static int Enter(GameObject m, string name, float x, float y, string targetScene, string spawnId = "default",
+                     float tw = 2f, float th = 1f)
     {
         if (GreyboxBuild.Marker(m, "gb_enter", name, x, y) == 0) return 0;
+        KeepOut(x, y);   // 건물 입구 앞도 비워 둔다(문이 잔해로 막히면 못 들어간다)
         var t = FindChild(m.transform, name);
         if (t == null) return 0;
         var go = t.gameObject;
@@ -486,30 +565,50 @@ public static class Zone1GreyboxLayout
         var box = go.GetComponent<BoxCollider2D>();
         if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
         box.isTrigger = true;
-        box.size = new Vector2(2.2f, 1.4f);
+        box.size = new Vector2(tw, th);
 
         var be = go.GetComponent<BuildingEntrance>();
         if (be == null) be = go.AddComponent<BuildingEntrance>();
-        be.Configure(targetScene, spawnId, false);
+        // 크기를 함께 넘겨야 한다 — 안 넘기면 Awake가 기본 1.3×1.0으로 덮어써서
+        //   **문 갭(2m)보다 좁은 발판**이 되고, 옆으로 비껴 들어가 빈 껍데기 안에 갇힌다.
+        be.Configure(targetScene, spawnId, false, new Vector2(tw, th));
         return 1;
     }
 
-    /// <summary>건물 문 **바로 앞**(바깥쪽 0.9m)에 입구 발판을 붙인다. `GreyboxBuild.Building`의
-    /// (side, doorAt) 규약과 동일하게 문 위치를 계산 — 발판이 허공에 뜨지 않고 건물에 붙는다.
-    /// 2026-07-11 사용자 요청 "입구 발판을 건물에 붙여줘 전부다".</summary>
+    /// <summary>입구 발판을 **문간(문 갭 그 자리)** 에 정확히 채운다. `GreyboxBuild.Building`의
+    /// (side, doorAt) 규약대로 계산 — 벽 두께 1m × 문 갭 2m를 발판이 꽉 메운다.
+    ///
+    /// 2026-07-11 수정: 예전엔 문 **바깥 0.9m**에 1.3m짜리 발판을 뒀다. 문 갭은 2m라
+    /// **발판 옆으로 비껴 들어가면 빈 껍데기 안에 갇혔다**(사용자 보고: "벽 안에 입구 있으면 어떻게 나가니").
+    /// 문간을 꽉 채우면 ① 발판을 안 밟고 통과하는 게 불가능하고 ② 건물 외벽을 따라 지나가도 안 밟힌다.
+    /// </summary>
     static int EnterAtDoor(GameObject m, string name, float x0, float y0, float x1, float y1,
                            char side, float doorAt)
     {
-        const float gap = 2f, off = 0.9f;   // Building()의 문 갭 폭 = 2m
-        float ex, ey;
+        DoorPad(x0, y0, x1, y1, side, doorAt, out float ex, out float ey, out float tw, out float th);
+        return EnterGeneric(m, name, ex, ey, tw, th);
+    }
+
+    /// <summary>EnterAtDoor의 '전용 내부 씬' 판 — 공용(Int_Generic) 대신 지정 씬으로 들어간다.</summary>
+    static int EnterAtDoorTo(GameObject m, string name, float x0, float y0, float x1, float y1,
+                             char side, float doorAt, string targetScene, string spawnId = "default")
+    {
+        DoorPad(x0, y0, x1, y1, side, doorAt, out float ex, out float ey, out float tw, out float th);
+        return Enter(m, name, ex, ey, targetScene, spawnId, tw, th);
+    }
+
+    /// <summary>`GreyboxBuild.Building`의 (side, doorAt) 규약 → 문간 발판의 중심·크기.</summary>
+    static void DoorPad(float x0, float y0, float x1, float y1, char side, float doorAt,
+                        out float ex, out float ey, out float tw, out float th)
+    {
+        const float gap = 2f, t = 1f;   // Building(): 문 갭 2m, 벽 두께 1m
         switch (side)
         {
-            case 'S': ex = doorAt + gap * 0.5f; ey = y0 - off; break;
-            case 'N': ex = doorAt + gap * 0.5f; ey = y1 + off; break;
-            case 'W': ex = x0 - off;            ey = doorAt + gap * 0.5f; break;
-            default:  ex = x1 + off;            ey = doorAt + gap * 0.5f; break;   // 'E'
+            case 'S': ex = doorAt + gap * 0.5f; ey = y0 + t * 0.5f;       tw = gap; th = t;   break;
+            case 'N': ex = doorAt + gap * 0.5f; ey = y1 - t * 0.5f;       tw = gap; th = t;   break;
+            case 'W': ex = x0 + t * 0.5f;       ey = doorAt + gap * 0.5f; tw = t;   th = gap; break;
+            default:  ex = x1 - t * 0.5f;       ey = doorAt + gap * 0.5f; tw = t;   th = gap; break;   // 'E'
         }
-        return EnterGeneric(m, name, ex, ey);
     }
 
     /// <summary>공용 내부(Int_Generic)로 들어가는 진입 트리거. 복귀는 `__back__`(들어온 문 앞).
@@ -518,7 +617,7 @@ public static class Zone1GreyboxLayout
     /// **진입 가능 비율은 `GameTuning.buildingEnterRatio` 노브**(1=전부, 0.5=절반).
     /// "건물을 더 열지"는 QA 플레이 결과로 판단 — 값만 바꾸고 이 빌더를 다시 돌리면 반영된다.
     /// 선택은 이름 해시 기반이라 **결정론적**(같은 값이면 같은 건물이 열림).</summary>
-    static int EnterGeneric(GameObject m, string name, float x, float y)
+    static int EnterGeneric(GameObject m, string name, float x, float y, float tw = 2f, float th = 1f)
     {
         float ratio = GameTuning.Instance != null ? GameTuning.Instance.buildingEnterRatio : 1f;
         if (ratio < 1f)
@@ -529,7 +628,9 @@ public static class Zone1GreyboxLayout
             for (int i = 0; i < name.Length; i++) { h ^= name[i]; h *= 16777619u; }
             if ((h % 1000u) / 1000f >= ratio) return 0;
         }
-        return Enter(m, name, x, y, "Int_Generic", BuildingReturn.BackSpawnId);
+        // 진입 스폰은 내부 씬의 "default". `__back__`은 **나올 때** 쓰는 값이라(내부 씬 출구가 보유)
+        //   여기 넣으면 매번 "스폰 __back__ 미발견" 경고만 찍힌다.
+        return Enter(m, name, x, y, "Int_Generic", "default", tw, th);
     }
 
     /// <summary>내부에서 돌아왔을 때 서는 자리(from_&lt;건물&gt;). 건물 문 앞.</summary>
@@ -559,9 +660,109 @@ public static class Zone1GreyboxLayout
         // 광장 키오스크 2채도 진입 가능.
         n += EnterAtDoor(m, $"{p}_k1_Enter", x0 + 3f, y0 + 3f, x0 + 17f, y0 + 14f, (char)83, x0 + 9f);
         n += EnterAtDoor(m, $"{p}_k2_Enter", x1 - 18f, y1 - 15f, x1 - 3f, y1 - 3f, (char)78, x1 - 13f);
-        n += GreyboxBuild.Marker(m, "gb_crate", $"{p}_c1", (x0 + x1) * 0.5f, (y0 + y1) * 0.5f);
-        n += GreyboxBuild.Marker(m, "gb_crate", $"{p}_c2", (x0 + x1) * 0.5f + 9f, (y0 + y1) * 0.5f + 7f);
+        // 상자는 **개활지 바닥에만** — 키오스크 껍데기 안에 들어가면 "건물 안에 상자" 불일치가 재발한다.
+        //   (블록이 절반으로 작아지면서 예전 오프셋이 키오스크 안으로 들어갔다.)
+        n += PlazaCrate(m, $"{p}_c1", (x0 + x1) * 0.5f, (y0 + y1) * 0.5f);
+        n += PlazaCrate(m, $"{p}_c2", x0 + 8f, y1 - 8f);
         return n;
+    }
+
+    /// <summary>개활지 상자 — 건물 자리면 배치하지 않는다(건물 = 껍데기 원칙).</summary>
+    static int PlazaCrate(GameObject m, string name, float x, float y)
+    {
+        if (IsIndoors(x, y)) { Debug.LogWarning($"[Zone1] {name} 위치가 건물 안 → 생략"); return 0; }
+        return GreyboxBuild.Marker(m, "gb_crate", name, x, y);
+    }
+
+    // ── 도로 장애물 (2026-07-11) ─────────────────────────────────────────
+    //   사용자: "도로의 장애물 개념". 12m 간선이 그냥 뻥 뚫린 복도면 넓기만 하고 심심하다.
+    //   → 버려진 차·전복 트럭·콘크리트 잔해를 **좌우 번갈아** 놓아 통행선을 지그재그로 만든다.
+    //     · 시야가 끊긴다(모퉁이마다 조우 가능성)
+    //     · 엄폐가 생긴다(원거리 적 상대 가능)
+    //     · 넓은 길 = 빠른 길이지만 **직선으로는 못 달린다**
+    //   남는 통행 폭은 GameTuning.roadMinPassWidth 아래로 내려가지 않는다(끼임 방지).
+
+    /// <summary>도로 한 줄에 장애물을 깐다. vertical=true면 세로 도로(폭=x, 진행=y).
+    /// spacing 간격마다 좌/우 번갈아 도로 폭의 blockFrac만큼 막는다.</summary>
+    /// <summary>장애물 금지 지점 — 스폰·탈출·건물 입구. 여기 잔해가 깔리면 스폰 즉시 끼거나 문이 막힌다.</summary>
+    static readonly System.Collections.Generic.List<Vector2> _keepOut = new System.Collections.Generic.List<Vector2>();
+    static void KeepOut(float x, float y) => _keepOut.Add(new Vector2(x, y));
+    static bool NearKeepOut(float x, float y, float r)
+    {
+        for (int i = 0; i < _keepOut.Count; i++)
+            if ((_keepOut[i] - new Vector2(x, y)).sqrMagnitude < r * r) return true;
+        return false;
+    }
+
+    static int ObstacleRun(GameObject m, string p, bool vertical,
+                           float a0, float a1, float b0, float b1,
+                           float spacing, float blockFrac, int seed)
+    {
+        float density = GameTuning.Instance != null ? GameTuning.Instance.roadObstacleDensity : 1f;
+        if (density <= 0.01f) return 0;
+        float minPass = GameTuning.Instance != null ? GameTuning.Instance.roadMinPassWidth : 3f;
+
+        float width = a1 - a0;                                   // 도로 폭
+        float maxBlock = Mathf.Max(0f, width - minPass);          // 최소 통행 폭은 반드시 남긴다
+        float block = Mathf.Min(width * blockFrac, maxBlock);
+        if (block < 1f) return 0;
+
+        float step = Mathf.Max(6f, spacing / Mathf.Max(0.2f, density));
+        int n = 0, i = 0;
+        for (float t = b0 + step * 0.5f; t < b1; t += step, i++)
+        {
+            uint h = (uint)H(seed, i);
+            bool left = (h & 1u) == 0;                            // 좌우 번갈이 + 해시로 흔들기
+            float len  = 3.5f + (h >> 1) % 4 * 1.2f;              // 차 1대 ~ 트럭
+            float thick = Mathf.Max(1.6f, block * (0.75f + ((h >> 4) % 3) * 0.12f));
+            thick = Mathf.Min(thick, maxBlock);
+            if (len > (b1 - t)) len = b1 - t;
+            if (len < 2f) break;
+
+            float ca = left ? a0 + thick * 0.5f : a1 - thick * 0.5f;   // 도로 한쪽에 붙임
+            float cb = t + len * 0.5f;
+            // 스폰·탈출·건물 입구 근처는 건너뛴다 — 거기 잔해가 깔리면 스폰 즉시 끼거나 문이 막힌다.
+            float cx0 = vertical ? ca : cb, cy0 = vertical ? cb : ca;
+            if (NearKeepOut(cx0, cy0, len * 0.5f + 3.5f)) continue;
+            string name = $"{p}_{i}";
+            // 세로 도로면 장애물의 '길이'가 y축, 두께가 x축.
+            n += vertical ? GreyboxBuild.Barricade(m, name, ca, cb, thick, len)
+                          : GreyboxBuild.Barricade(m, name, cb, ca, len, thick);
+            // 잔해 자리를 등록 → 도로 루트 앵커(Scatter)가 잔해 속에 박히지 않는다.
+            float hw = (vertical ? thick : len) * 0.5f, hh = (vertical ? len : thick) * 0.5f;
+            MarkBuilding(cx0 - hw, cy0 - hh, cx0 + hw, cy0 + hh);
+        }
+        return n;
+    }
+
+    /// <summary>막힌 통로(BlockedPassage) — 도로를 **가로질러** 완전히 막는 잔해.
+    /// mode에 따라 영구 차단 / 치울 수 있음 / 열쇠 / 밤에만.</summary>
+    static int Blocker(GameObject m, string name, float cx, float cy, float w, float h,
+                       BlockedPassage.Mode mode, string label, string itemId = null)
+    {
+        if (GreyboxBuild.Barricade(m, name, cx, cy, w, h) == 0) return 0;
+        var t = FindChild(m.transform, name);
+        if (t == null) return 0;
+        var go = t.gameObject;
+
+        // 솔리드 콜라이더(통행 차단). gb_barricade에 이미 있으면 크기만 맞춘다.
+        var box = go.GetComponent<BoxCollider2D>();
+        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+        box.isTrigger = false;
+        box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
+
+        var io = go.GetComponent<InteractableObject>();
+        if (io == null) io = go.AddComponent<InteractableObject>();
+        // 상호작용 반경은 **크기에 비례**해야 한다 — 12m 잔해에 고정 2.2m를 주면
+        //   플레이어가 가장자리에 서 있을 때 중심까지 6m라 E가 아예 안 먹는다.
+        io.Configure(InteractableObject.InteractType.Passage, label, Mathf.Max(w, h) * 0.5f + 1.8f);
+
+        var bp = go.GetComponent<BlockedPassage>();
+        if (bp == null) bp = go.AddComponent<BlockedPassage>();
+        bp.Configure(mode, label, itemId);
+
+        MarkBuilding(cx - w * 0.5f, cy - h * 0.5f, cx + w * 0.5f, cy + h * 0.5f);
+        return 1;
     }
 
     /// <summary>결정적 해시(인덱스 → 의사난수). Math.random 없이 재현 가능한 변동.</summary>

@@ -140,12 +140,12 @@ public static class ScrapMarketGreyboxLayout
         //     내부 파밍은 `Int_AbandonedShop` 씬이 담당(선반2·상자1 사양 그대로 그 안에 있음).
         //     이유: 건물 = 껍데기 + 별도 내부 씬인데 외부에 상자가 남아 "건물 안에 상자가 보이는" 불일치.
         placed += Marker(map, "gb_door",  "Shop_Door",    7.5f, 9.5f);
-        placed += Enter(map, "Shop_Enter", 8.6f, 9.5f, "Int_AbandonedShop");
+        placed += Enter(map, "Shop_Enter", 7.5f, 9.5f, "Int_AbandonedShop");   // 문간(gb_door와 같은 자리)
         placed += Marker(map, "gb_spawn", "Ret_from_abshop", 6.6f, 9.5f);   // 복귀 자리(문 밖)
 
         // 3. 차고 (파밍 #2) — 방 X8~16 Y26~35. 서벽 출입문(Y30~31). 내부 = `Int_Garage`.
         placed += Marker(map, "gb_door",  "Garage_Door",    7.5f, 30.5f);
-        placed += Enter(map, "Garage_Enter", 8.6f, 30.5f, "Int_Garage");
+        placed += Enter(map, "Garage_Enter", 7.5f, 30.5f, "Int_Garage");
         placed += Marker(map, "gb_spawn", "Ret_from_garage", 6.6f, 30.5f);
 
         // 4. 골목 공터 (밴딧 + 야외 차) — PLAZA X4~10 Y36~43. 두 건물 파밍 '후' 첫 전투(창고 직전).
@@ -159,7 +159,7 @@ public static class ScrapMarketGreyboxLayout
         //   ★ 2026-07-11: 창고도 껍데기 + 진입. 민이 흔적·노크 쪽지는 **`Int_Warehouse` 안으로 이전**
         //     (그 씬에 W_Note_Trace / W_Note_Knock으로 동일 내용 배치됨). 지하창고 입구도 그 안.
         placed += Marker(map, "gb_door",  "Warehouse_Shutter",    7.5f, 47.5f);
-        placed += Enter(map, "Warehouse_Enter", 8.6f, 47.5f, "Int_Warehouse");
+        placed += Enter(map, "Warehouse_Enter", 7.5f, 47.5f, "Int_Warehouse");
         placed += Marker(map, "gb_spawn", "Ret_from_warehouse", 6.6f, 47.5f);
 
         // 6. 맨홀 탈출 (EXIT) — 창고 옆 골목 공터(CT X4~14 Y51~55). 추출구.
@@ -276,7 +276,8 @@ public static class ScrapMarketGreyboxLayout
     /// <summary>탈출구(ExitPoint): 좌표 배치 + targetScene/spawnPointId/대기 설정(추출 = 상호작용 후 wait초).</summary>
     /// <summary>건물 진입 트리거(BuildingEntrance) — 밟으면 내부 씬으로 전환. 2026-07-11 건물 모델 전환.
     /// 복귀는 `__back__`(들어온 문 앞, `BuildingReturn`)이라 튜토가 Zone1에 얹혀도 좌표가 맞는다.</summary>
-    static int Enter(GameObject parent, string name, float x, float y, string targetScene)
+    static int Enter(GameObject parent, string name, float x, float y, string targetScene,
+                     float tw = 1.2f, float th = 1.2f)
     {
         var go = Spawn("gb_enter", name, parent);
         if (go == null) return 0;
@@ -288,11 +289,14 @@ public static class ScrapMarketGreyboxLayout
         var box = go.GetComponent<BoxCollider2D>();
         if (box == null) box = go.AddComponent<BoxCollider2D>();     // ??는 Unity 가짜 null을 통과시켜 못 씀
         box.isTrigger = true;
-        box.size = new Vector2(1.6f, 2.0f);
+        box.size = new Vector2(tw, th);
 
         var be = go.GetComponent<BuildingEntrance>();
         if (be == null) be = go.AddComponent<BuildingEntrance>();
-        be.Configure(targetScene, BuildingReturn.BackSpawnId, false);
+        // 2026-07-11: 크기를 함께 넘긴다 — 안 넘기면 Awake가 기본 1.3×1.0으로 덮어써서
+        //   **문 갭보다 좁은 발판**이 되고, 옆으로 비껴 들어가 빈 껍데기 안에 갇힌다.
+        //   진입 스폰은 내부 씬의 "default". `__back__`은 **나올 때** 쓰는 값(내부 씬 출구가 보유).
+        be.Configure(targetScene, "default", false, new Vector2(tw, th));
         return 1;
     }
 

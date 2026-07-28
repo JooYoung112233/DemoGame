@@ -71,6 +71,24 @@ public class GameTuning : ScriptableObject
     [Tooltip("절차 생성 건물 중 실제로 **진입 가능**하게 만들 비율(0~1). 1=전부, 0.5=절반.\n" +
              "Zone1 빌더가 결정론적으로 고른다 — 값을 바꾸면 `빌드 ▸ 지역1` 재실행 필요.")]
     [Range(0f, 1f)] public float buildingEnterRatio = 1f;
+    // ── 도로 장애물 / 막힌 통로 (2026-07-11) ──────────────────────────
+    //   "넓은 길인데 그냥 뻥 뚫린 통로" 방지 — 도로 위 잔해로 동선을 꺾고 시야를 끊는다.
+    //   밀도/통행폭은 빌더가 읽으므로 바꾸면 `빌드 ▸ 지역1` 재실행 필요.
+    [Header("도로 장애물")]
+    [Tooltip("도로 장애물 밀도 배율. 1=기본, 0=장애물 없음(뻥 뚫린 도로), 2=배로 빽빽.\n" +
+             "Zone1 빌더가 읽는다 — 바꾸면 `빌드 ▸ 지역1` 재실행.")]
+    [Range(0f, 2f)] public float roadObstacleDensity = 1f;
+    [Tooltip("장애물을 놓고 **남겨 둘 최소 통행 폭(m)**. 이보다 좁아지지 않는다.\n" +
+             "2.2 미만이면 플레이어가 낄 수 있으니 주의(몸 반경 ≈0.3).")]
+    [Range(1.5f, 8f)] public float roadMinPassWidth = 3f;
+    [Tooltip("잔해 '치우기' 채널 시간(초). BlockedPassage.Clearable.")]
+    [Range(0.5f, 15f)] public float barricadeClearSeconds = 3.5f;
+    [Tooltip("열쇠 없이 **강제 돌파**할 때 걸리는 시간(초). 열쇠 경로보다 확실히 비싸야 한다.")]
+    [Range(1f, 30f)] public float barricadeBreachSeconds = 7f;
+    [Tooltip("잔해를 치웠을 때 나는 소음 반경(m). 이 안의 적이 소리를 듣고 몰려온다.\n" +
+             "'빠른 길이지만 시끄럽다'의 대가 — 0이면 무소음(지름길이 공짜가 된다).")]
+    [Range(0f, 40f)] public float barricadeNoiseRadius = 14f;
+
     [Tooltip("적 스폰 마릿수 전역 배율. 1=동일. EnemySpawner가 각 SpawnZone.enemyCount에 곱함(반올림).")]
     [Range(0f, 3f)] public float enemySpawnCountMult = 1f;
     [Tooltip("적 처치 시 전리품(지상 티어 루트) 드랍 확률. 1=항상 굴림(루트 자체 확률은 별도), 0=안 떨굼. EnemyController가 읽음.")]

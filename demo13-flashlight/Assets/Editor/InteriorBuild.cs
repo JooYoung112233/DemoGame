@@ -18,7 +18,9 @@ public static class InteriorBuild
     public static GameObject Begin(out UnityEngine.SceneManagement.Scene scene)
         => GreyboxBuild.BeginScene(out scene);
 
-    /// <summary>바닥 + 외벽 4면(두께 1m). 문 갭은 벽 세그먼트를 나눠서 만든다.</summary>
+    /// <summary>바닥 + 외벽 4면(두께 1m) — <b>사방 완전 밀폐</b>.
+    /// 2026-07-11 사용자 결정: 내부는 벽에 구멍을 뚫지 않는다. 밖으로 나가는 유일한 수단은
+    /// 포탈(<see cref="ExitDoorSouth"/> / <see cref="Stairs"/>)뿐.</summary>
     public static int Shell(GameObject m, float w, float h)
     {
         int n = 0;
@@ -30,16 +32,32 @@ public static class InteriorBuild
         return n;
     }
 
-    /// <summary>남쪽 벽에 문 갭을 뚫는다(Shell 뒤에 호출 — W_S를 지우고 좌/우로 재생성).</summary>
-    public static int DoorGapSouth(GameObject m, float w, float doorX, float doorW = 2f)
+    /// <summary>남쪽 정문 = <b>벽은 그대로 두고</b> 그 앞 바닥에 복귀 포탈 발판을 깐다.
+    ///
+    /// 구(舊) `DoorGapSouth`는 남벽을 실제로 뚫었다 — 그래서 발판을 살짝 비껴 지나가면
+    /// **구현 안 된 씬 바깥(캄캄한 공백)으로 걸어 나가졌다**(2026-07-11 사용자 보고).
+    /// 지금은 벽에 문 '표시'(gb_door)만 붙이고, 통과는 오직 이 발판으로만 일어난다.
+    ///
+    /// 배치: 문 표시 y=0.5(벽 안), 발판 y=1.65(방 안쪽) → 진입 스폰은 y≈2.9면 안 겹친다.
+    /// </summary>
+    public static int ExitDoorSouth(GameObject m, string name, float doorX,
+                                    string targetScene, string spawnId, float doorW = 2.2f)
     {
-        var old = m.transform.Find("W_S");
-        if (old != null) Object.DestroyImmediate(old.gameObject);
         int n = 0;
-        float x0 = Mathf.Max(0f, doorX - doorW * 0.5f);
-        float x1 = Mathf.Min(w, doorX + doorW * 0.5f);
-        if (x0 > 0.01f) n += GreyboxBuild.WallSeg(m, "W_S_a", 0f, 0f, x0, 1f);
-        if (x1 < w - 0.01f) n += GreyboxBuild.WallSeg(m, "W_S_b", x1, 0f, w, 1f);
+        n += GreyboxBuild.Marker(m, "gb_door", name + "_Door", doorX, 0.5f);
+        n += Exit(m, name, doorX, 1.65f, targetScene, spawnId, doorW, 1.0f);
+        // gb_exit 프리팹 라벨은 "탈출"(=맵 이탈)이라 건물 안에선 뜻이 어긋난다.
+        GreyboxBuild.Relabel(Find(m.transform, name), "나가기");
+        return n;
+    }
+
+    /// <summary>층간 이동 포탈(2층/지하 계단). 벽을 뚫지 않는 바닥 발판이라 밀폐가 유지된다.</summary>
+    public static int Stairs(GameObject m, string name, float x, float y,
+                             string targetScene, string spawnId, string label = "계단",
+                             float w = 1.6f, float h = 1.6f)
+    {
+        int n = Exit(m, name, x, y, targetScene, spawnId, w, h);
+        if (n > 0) GreyboxBuild.Relabel(Find(m.transform, name), label);
         return n;
     }
 
@@ -78,7 +96,9 @@ public static class InteriorBuild
 
         var be = go.GetComponent<BuildingEntrance>();
         if (be == null) be = go.AddComponent<BuildingEntrance>();
-        be.Configure(targetScene, spawnId, true);
+        // 크기를 Configure로 함께 넘긴다 — 안 그러면 Awake가 triggerSize(1.3×1.0)로 덮어써서
+        //   여기서 지정한 폭이 조용히 사라진다(발판 옆으로 빠져나가는 원인이었다).
+        be.Configure(targetScene, spawnId, true, new Vector2(w, h));
         return 1;
     }
 

@@ -199,12 +199,7 @@ public class EnemyController : MonoBehaviour
     {
         spawnPos = transform.position;
 
-        var playerGO = GameObject.FindGameObjectWithTag("Player");
-        if (playerGO != null)
-        {
-            player       = playerGO.transform;
-            playerHealth = playerGO.GetComponent<Health>();
-        }
+        AcquirePlayer();
 
         if (health != null)
         {
@@ -224,10 +219,30 @@ public class EnemyController : MonoBehaviour
         SetPatrolTarget();
     }
 
+    /// <summary>플레이어 참조 확보. 2026-07-11: 예전엔 Start에서 **한 번만** 찾았다 —
+    /// 그때 플레이어가 아직 없었거나(씬 로드 순서) 이후 재생성되면 그 적은 탐지·추격·공격을
+    /// **영영 한 번도 안 했다**("공격범위 안인데 안 때리는 개체가 있다"의 한 갈래).
+    /// 이제 비어 있으면 주기적으로 다시 찾는다(찾을 때까지만 도는 저비용 루프).</summary>
+    void AcquirePlayer()
+    {
+        var go = GameObject.FindGameObjectWithTag("Player");
+        if (go == null) return;
+        player       = go.transform;
+        playerHealth = go.GetComponent<Health>();
+    }
+
+    float _reacquireAt;
+
     void Update()
     {
         if (state == State.Dead) return;
         attackTimer -= Time.deltaTime;
+
+        if (player == null && Time.time >= _reacquireAt)   // 참조 유실 복구(0.5초 간격)
+        {
+            _reacquireAt = Time.time + 0.5f;
+            AcquirePlayer();
+        }
 
         switch (state)
         {
@@ -408,7 +423,14 @@ public class EnemyController : MonoBehaviour
 
         // 2026-07-11: 적끼리 **분리(separation)** — 예전엔 반발이 없어 3마리가 한 점에 겹쳐
         //   한 덩어리로 밀려들었다. 근처 동료에게서 밀어내는 성분을 섞어 대열이 퍼지게 한다.
-        d = (d + Separation() * 0.6f).normalized;
+        //
+        // ★ 단, **접근 중일 때만.** 사거리 근처에선 0으로 죽인다 —
+        //   안 그러면 플레이어 옆에 모인 둘이 서로 밀어내며 사거리 밖을 맴돌아
+        //   **아무도 공격하지 않는다**(2026-07-11 사용자 보고: "공격범위 들어와도 안 때리는 경우가 있다").
+        //   합성 벡터도 1로 클램프 — 분리 성분이 추격 방향을 이기지 못하게.
+        float sepW = Mathf.InverseLerp(AtkRange, AtkRange * 2f, dist) * 0.6f;
+        if (sepW > 0.001f)
+            d = (d + Vector2.ClampMagnitude(Separation(), 1f) * sepW).normalized;
 
         SetVelocity(d * MoveSpd);
         FlipSprite(d);

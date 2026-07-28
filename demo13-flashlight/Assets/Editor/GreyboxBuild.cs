@@ -29,7 +29,7 @@ public static class GreyboxBuild
     static readonly string[] Core =
     {
         "gb_floor", "gb_wall", "gb_barricade", "gb_door", "gb_crate",
-        "gb_shelf", "gb_note", "gb_spawn", "gb_exit", "gb_enemy",
+        "gb_shelf", "gb_note", "gb_spawn", "gb_exit", "gb_enter", "gb_enemy",
     };
 
     // ── 씬 시작/종료 ──────────────────────────────────────────────────────
@@ -237,6 +237,17 @@ public static class GreyboxBuild
         go.transform.localRotation = Quaternion.identity;
         go.transform.localScale    = Vector3.one;
         return go;
+    }
+
+    /// <summary>배치된 gb_* 마커의 머리 글씨를 바꾼다(팔레트 프리팹 라벨 그대로가 부정확할 때).
+    /// 예: 내부 씬의 gb_exit는 프리팹상 "탈출"이지만 실제로는 '건물 밖으로'라 "나가기"가 맞다.</summary>
+    public static void Relabel(Transform marker, string text)
+    {
+        if (marker == null || string.IsNullOrEmpty(text)) return;
+        var label = marker.Find("Label");
+        if (label == null) return;
+        var tm = label.GetComponent<TextMesh>();
+        if (tm != null) tm.text = text;
     }
 
     static void CounterScaleLabel(GameObject go, float angleDeg = 0f)

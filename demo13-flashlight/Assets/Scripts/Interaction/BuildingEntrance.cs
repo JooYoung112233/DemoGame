@@ -32,6 +32,14 @@ public class BuildingEntrance : MonoBehaviour
     // 중복 발동 방지(전환이 시작되면 다시 트리거에 닿아도 무시).
     bool _fired;
 
+    // 2026-07-11: 씬 로드 직후 **스폰 지점이 발판과 겹치면 즉시 재발동**해 왕복 루프가 된다
+    //   (발판을 문간으로 옮기면서 복귀 좌표와 겹칠 여지가 커졌다). 로드 후 잠깐은 무시하고,
+    //   그 뒤엔 '한 번 벗어났다 다시 들어올 때'만 발동한다(OnTriggerEnter2D 특성 그대로).
+    const float ArmDelay = 0.6f;
+    float _armedAt;
+
+    void OnEnable() => _armedAt = Time.time + ArmDelay;
+
     void Awake()
     {
         // 베이크된 씬의 넓은 트리거(예: 2.5x1)도 런타임에 문 크기로 강제 → 재베이크 없이 교정.
@@ -44,7 +52,7 @@ public class BuildingEntrance : MonoBehaviour
     public string SpawnPointId => spawnPointId;
     public bool IsExit => isExit;
 
-    /// <summary>빌더/런타임에서 한 번에 설정.</summary>
+    /// <summary>빌더/런타임에서 한 번에 설정(트리거 크기는 기본값 유지).</summary>
     public void Configure(string scene, string spawnId, bool exit)
     {
         targetScene = scene;
@@ -52,9 +60,19 @@ public class BuildingEntrance : MonoBehaviour
         isExit = exit;
     }
 
+    /// <summary>트리거 크기까지 함께 지정. 2026-07-11: 빌더가 BoxCollider2D.size를 넓게 잡아도
+    /// Awake가 triggerSize(기본 1.3×1.0)로 **덮어써서 조용히 좁아지던** 문제 때문에 추가.
+    /// 내부 씬 출구처럼 "문 폭 전체가 발판"이어야 하는 곳은 이걸 써야 옆으로 새지 않는다.</summary>
+    public void Configure(string scene, string spawnId, bool exit, Vector2 size)
+    {
+        Configure(scene, spawnId, exit);
+        if (size.x > 0f && size.y > 0f) triggerSize = size;
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (_fired) return;
+        if (Time.time < _armedAt) return;   // 로드 직후 스폰이 발판 위여도 즉시 되돌아가지 않게
         if (string.IsNullOrEmpty(targetScene)) return;
         if (!other.CompareTag("Player")) return;
 
@@ -74,10 +92,23 @@ public class BuildingEntrance : MonoBehaviour
         // 2026-07-11: **진입 시 외부 좌표 기억** — 여러 건물이 공용 내부(Int_Generic) 하나를
         //   돌려 쓰므로, 나올 때 고정 스폰을 쓰면 엉뚱한 건물 앞에 나온다.
         //   출구가 spawnPointId="__back__"이면 BuildingReturn이 이 자리로 되돌린다.
+        //   2026-07-11: 발판이 **문간**으로 옮겨져서, 트리거 좌표를 그대로 기억하면
+        //   나올 때 발판 한가운데에 서게 되고 → 곧바로 재발동해 왕복 루프가 된다.
+        //   그래서 '플레이어가 들어온 방향'으로 트리거 밖까지 밀어낸 지점을 기억한다.
         if (!isExit)
-            BuildingReturn.Remember(gameObject.scene.name, transform.position);
+            BuildingReturn.Remember(gameObject.scene.name, ReturnPointFor(other));
 
         SceneTransitionManager.Instance.TransitionTo(targetScene, spawnPointId);
+    }
+
+    /// <summary>이 트리거 '밖'의 복귀 지점 — 플레이어가 들어온 방향으로 트리거 반경 + 여유만큼 밀어낸 자리.</summary>
+    Vector3 ReturnPointFor(Collider2D player)
+    {
+        Vector2 here = transform.position;
+        Vector2 away = (Vector2)player.transform.position - here;
+        if (away.sqrMagnitude < 0.0001f) away = Vector2.down;   // 정확히 겹쳤으면 남쪽(관례상 바깥)
+        float clear = Mathf.Max(triggerSize.x, triggerSize.y) * 0.5f + 0.7f;
+        return here + away.normalized * clear;
     }
 
     void OnTriggerExit2D(Collider2D other)

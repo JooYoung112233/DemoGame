@@ -31,10 +31,9 @@ public static class Zone1Interiors
         int n = 0;
         const float W = 18f, H = 16f;
 
-        n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.DoorGapSouth(m, W, 9f, 2.4f);          // 남쪽 정문
-        n += InteriorBuild.Spawn(m, "default", 9f, 2.2f);
-        n += InteriorBuild.Exit(m, "Exit_ToZone1", 9f, 1.4f, Outside, "from_pharmacy", 2.4f, 1.2f);
+        n += InteriorBuild.Shell(m, W, H);                                                     // 사방 밀폐
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 9f, Outside, "from_pharmacy", 2.4f);  // 남쪽 정문(포탈)
+        n += InteriorBuild.Spawn(m, "default", 9f, 2.9f);
 
         // 매장/약품실 칸막이(y=10) — 약품실 문 갭 x=13~15.5(잠금 게이트)
         n += GreyboxBuild.WallSeg(m, "P_Div_a", 1f, 10f, 13f, 11f);
@@ -76,9 +75,8 @@ public static class Zone1Interiors
         const float W = 12f, H = 9f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.DoorGapSouth(m, W, 6f, 2.2f);
-        n += InteriorBuild.Spawn(m, "default", 6f, 2.2f);
-        n += InteriorBuild.Exit(m, "Exit_ToZone1", 6f, 1.4f, Outside, "from_abshop", 2.2f, 1.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 6f, Outside, "from_abshop", 2.2f);
+        n += InteriorBuild.Spawn(m, "default", 6f, 2.9f);
 
         // 선반 2 + 상자 1 (문서 사양)
         n += GreyboxBuild.WallSeg(m, "S_Shelf1", 2f, 4f, 6f, 4.8f);
@@ -101,9 +99,8 @@ public static class Zone1Interiors
         int n = 0; const float W = 14f, H = 11f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.DoorGapSouth(m, W, 7f, 2.4f);
-        n += InteriorBuild.Spawn(m, "default", 7f, 2.2f);
-        n += InteriorBuild.Exit(m, "Exit_ToZone1", 7f, 1.4f, Outside, "from_garage", 2.4f, 1.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 7f, Outside, "from_garage", 2.4f);
+        n += InteriorBuild.Spawn(m, "default", 7f, 2.9f);
 
         // 차량 잔해 2대(벽 블록) — 엄폐·동선 꺾기
         n += GreyboxBuild.WallSeg(m, "G_Car1", 2.5f, 4f, 6.5f, 6f);
@@ -129,9 +126,8 @@ public static class Zone1Interiors
         int n = 0; const float W = 17f, H = 14f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.DoorGapSouth(m, W, 8.5f, 2.6f);             // 셔터
-        n += InteriorBuild.Spawn(m, "default", 8.5f, 2.2f);
-        n += InteriorBuild.Exit(m, "Exit_ToZone1", 8.5f, 1.4f, Outside, "from_warehouse", 2.6f, 1.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 8.5f, Outside, "from_warehouse", 2.6f);   // 셔터
+        n += InteriorBuild.Spawn(m, "default", 8.5f, 2.9f);
 
         // 적재 선반 열(창고다움) — 통로가 갈라지게
         n += GreyboxBuild.WallSeg(m, "W_Rack1", 2f, 5f, 7f, 5.9f);
@@ -152,7 +148,7 @@ public static class Zone1Interiors
         // 동측 지하창고 입구 — 짙은현상 phase 게이트는 후속(지금은 상시 진입)
         n += GreyboxBuild.Note(m, "W_BasementLabel", 15f, 7f, "지하창고 입구 ★★★★★",
             "짙은 현상 때만 열리는 구획(게이트 후속). 최고 위험·최고 보상.");
-        n += InteriorBuild.Exit(m, "Basement_Block", 15.3f, 7.8f, "Int_Basement", "default", 1.4f, 1.6f);
+        n += InteriorBuild.Stairs(m, "Basement_Block", 15.3f, 7.8f, "Int_Basement", "default", "지하 계단");
 
         n += InteriorBuild.Enemy(m, "W_EZ", 8.5f, 8f, 10f, 6f, "bandit_melee_1", 1);
         n += InteriorBuild.Controller(m, ProfilePath, RegionId);
@@ -168,10 +164,10 @@ public static class Zone1Interiors
         var m = InteriorBuild.Begin(out var scene);
         int n = 0; const float W = 19f, H = 15f;
 
+        // 지하는 남쪽 '문'이 아니라 **올라가는 계단**으로 창고에 복귀한다(사방 밀폐 유지).
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.DoorGapSouth(m, W, 9.5f, 2.2f);
-        n += InteriorBuild.Spawn(m, "default", 9.5f, 2.2f);
-        n += InteriorBuild.Exit(m, "Exit_ToWarehouse", 9.5f, 1.4f, "Int_Warehouse", "default", 2.2f, 1.2f);
+        n += InteriorBuild.Stairs(m, "Exit_ToWarehouse", 5f, 2.2f, "Int_Warehouse", "default", "위층 계단");
+        n += InteriorBuild.Spawn(m, "default", 9.5f, 2.9f);
 
         // 붕괴 기둥 미로 — 시야 차단(하강감은 조명·연출로, 문서 전제)
         n += GreyboxBuild.WallSeg(m, "B_P1", 4f, 5f, 6f, 10f);
@@ -209,9 +205,8 @@ public static class Zone1Interiors
         int n = 0; const float W = 22f, H = 18f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.DoorGapSouth(m, W, 11f, 2.4f);
-        n += InteriorBuild.Spawn(m, "default", 11f, 2.2f);
-        n += InteriorBuild.Exit(m, "Exit_ToZone1", 11f, 1.4f, Outside, "from_collapsed", 2.4f, 1.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 11f, Outside, "from_collapsed", 2.4f);
+        n += InteriorBuild.Spawn(m, "default", 11f, 2.9f);
 
         // 잔해 미로 — 안쪽으로 갈수록 통로가 좁아진다(문서: "깔린 틈을 기어간다")
         n += GreyboxBuild.WallSeg(m, "C_R1", 3f, 5f, 9f, 6f);
@@ -274,9 +269,8 @@ public static class Zone1Interiors
         int n = 0;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.DoorGapSouth(m, W, W * 0.5f, 2.2f);
-        n += InteriorBuild.Spawn(m, "default", W * 0.5f, 2.2f);
-        n += InteriorBuild.Exit(m, "Exit_ToZone1", W * 0.5f, 1.4f, Outside, returnSpawn, 2.2f, 1.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", W * 0.5f, Outside, returnSpawn, 2.2f);
+        n += InteriorBuild.Spawn(m, "default", W * 0.5f, 2.9f);
 
         // 진열 선반 2열
         n += GreyboxBuild.WallSeg(m, $"{pre}_Shelf1", 2f, H * 0.42f, W * 0.45f, H * 0.42f + 0.8f);
@@ -317,9 +311,8 @@ public static class Zone1Interiors
         int n = 0; const float W = 16f, H = 14f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.DoorGapSouth(m, W, 8f, 2.2f);
-        n += InteriorBuild.Spawn(m, "default", 8f, 2.2f);
-        n += InteriorBuild.Exit(m, "Exit_ToZone1", 8f, 1.4f, Outside, "from_dome", 2.2f, 1.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 8f, Outside, "from_dome", 2.2f);
+        n += InteriorBuild.Spawn(m, "default", 8f, 2.9f);
 
         n += GreyboxBuild.Note(m, "D_Label", 8f, 12.5f, "돔 금고실 ★★★★",
             "key_dome_code로 여는 최고 보상 구역. 유리타워 상층 R&D에서 코드 획득.");

@@ -169,7 +169,7 @@ public static class PawnshopGreyboxLayout
 
         var be = go.GetComponent<BuildingEntrance>();
         if (be == null) be = go.AddComponent<BuildingEntrance>();
-        be.Configure(targetScene, spawnId, isExit);
+        be.Configure(targetScene, spawnId, isExit, new Vector2(w, h));   // 크기 미전달 시 Awake가 기본값으로 덮어쓴다
 
         SetLabel(go, isExit ? "출구" : "입구");
         return 1;

@@ -37,6 +37,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
         Radio,          // 라디오 (정보 수신 — RadioUI) ※ 끝에 추가
         Dispatch,       // 파견 보드 (NPC 출전 — DispatchUI) ※ 끝에 추가
         Generator,      // 발전기 (전력 ON/OFF — HideoutUI generator) ※ 끝에 추가(직렬화 인덱스 보존)
+        Passage,        // 막힌 통로 (철거/열쇠/조건부 — BlockedPassage) ※ 끝에 추가(직렬화 인덱스 보존)
     }
 
     #endregion
@@ -235,6 +236,9 @@ public class InteractableObject : MonoBehaviour, IInteractable
                 break;
             case InteractType.Door:
                 HandleDoor(playerGO);
+                break;
+            case InteractType.Passage:
+                GetComponent<BlockedPassage>()?.TryPass(playerGO);
                 break;
             case InteractType.Stash:
                 HideoutUI.Show("stash");
@@ -443,6 +447,19 @@ public class InteractableObject : MonoBehaviour, IInteractable
     #endregion
 
     #region 외부 설정
+
+    /// <summary>런타임 프롬프트 교체 — 상태가 변하는 상호작용(막힌 통로 등)용.</summary>
+    public void SetPrompt(string prompt)
+    {
+        if (!string.IsNullOrEmpty(prompt)) promptText = prompt;
+    }
+
+    /// <summary>상호작용 가능/불가 토글 — 치운 잔해처럼 '끝난' 오브젝트를 목록에서 빼는 용도.</summary>
+    public void SetInteractable(bool on)
+    {
+        if (on) used = false;
+        else  { used = true; oneShot = true; }
+    }
 
     /// <summary>런타임/부트스트랩에서 타입·프롬프트 설정</summary>
     public void Configure(InteractType interactType, string prompt, float range = 1.5f, bool once = false)
