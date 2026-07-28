@@ -140,8 +140,54 @@ public static class InteriorBuild
         return 1;
     }
 
-    /// <summary>루팅 예산 분배기 — 내부 씬도 제 예산을 갖는다(프로파일 경로 지정).</summary>
-    public static int Controller(GameObject m, string profilePath, string regionId)
+    /// <summary>내부 잠금 문(BlockedPassage) — 무기고·금고처럼 **내부 최고 보상을 가두는** 문.
+    /// mode=Locked면 keyOrKnowledge = 아이템 id, Code면 지식 id.</summary>
+    public static int Gate(GameObject m, string name, float cx, float cy, float w, float h,
+                           BlockedPassage.Mode mode, string label, string keyOrKnowledge = null,
+                           string hint = null)
+    {
+        if (GreyboxBuild.Barricade(m, name, cx, cy, w, h) == 0) return 0;
+        var t = Find(m.transform, name);
+        if (t == null) return 0;
+        var go = t.gameObject;
+
+        var box = go.GetComponent<BoxCollider2D>();
+        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+        box.isTrigger = false;
+        box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
+
+        var io = go.GetComponent<InteractableObject>();
+        if (io == null) io = go.AddComponent<InteractableObject>();
+        io.Configure(InteractableObject.InteractType.Passage, label, Mathf.Max(w, h) * 0.5f + 1.6f);
+
+        var bp = go.GetComponent<BlockedPassage>();
+        if (bp == null) bp = go.AddComponent<BlockedPassage>();
+        bp.Configure(mode, label, keyOrKnowledge, hint);
+        return 1;
+    }
+
+    /// <summary>지식을 주는 쪽지 — 읽으면 PlayerKnowledge에 남는다(아이템이 아니라 죽어도 안 잃음).</summary>
+    public static int KnowledgeNote(GameObject m, string name, float x, float y,
+                                    string title, string content, string knowledgeId)
+    {
+        if (GreyboxBuild.Marker(m, "gb_note", name, x, y) == 0) return 0;
+        var t = Find(m.transform, name);
+        var io = t != null ? t.GetComponentInChildren<InteractableObject>() : null;
+        if (io != null) io.SetKnowledgeNote(content, title, knowledgeId);
+        return 1;
+    }
+
+    /// <summary>루팅 예산 분배기 — 내부 씬도 제 예산을 갖는다(프로파일 경로 지정).
+    /// budgetMult = 이 씬만의 후함(유니크 건물). lootRegion을 주면 **상위 지역 루트 테이블**을 쓴다
+    /// (= "위험을 감수하면 더 좋은 물품"을 데이터로 표현).</summary>
+    public static int Controller(GameObject m, string profilePath, string regionId,
+                                 float budgetMult = 1f, string lootRegion = null)
+    {
+        if (!string.IsNullOrEmpty(lootRegion)) regionId = lootRegion;
+        return ControllerInternal(m, profilePath, regionId, budgetMult);
+    }
+
+    static int ControllerInternal(GameObject m, string profilePath, string regionId, float budgetMult)
     {
         var go = new GameObject("MapSpawnController");
         go.transform.SetParent(m.transform, false);
@@ -155,6 +201,7 @@ public static class InteriorBuild
         // 내부 씬 표시 — 런타임에 GameTuning.interiorLootBudgetMult가 곱해진다(맵 전체 예산 그대로 쓰면 과다).
         //   루트 **테이블**은 지역 확률(regionId) 그대로 → 내부 파밍도 지역 확률에 맞춰 나온다.
         var it = so.FindProperty("isInterior");           if (it != null) it.boolValue = true;
+        var bm = so.FindProperty("budgetMult");           if (bm != null) bm.floatValue = budgetMult;
         so.ApplyModifiedPropertiesWithoutUndo();
         return 1;
     }

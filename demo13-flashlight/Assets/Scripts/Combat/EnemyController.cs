@@ -17,6 +17,7 @@ public class EnemyController : MonoBehaviour
     public static readonly List<EnemyController> All = new List<EnemyController>();
     bool _visionVisible = true;
     UnitLabel _label;   // 머리 위 "적"/"시체" 라벨 (그레이박스용)
+    MeleeWeaponVisual _weaponVis;   // 그레이박스 칼 (연출 전용 — 판정은 AttackPerformer)
 
     [Header("Detection")]
     [SerializeField] float detectRange    = 8f;
@@ -149,6 +150,7 @@ public class EnemyController : MonoBehaviour
         // 라벨은 스프라이트의 자식이지만 MeshRenderer라 위 한 줄로는 안 꺼진다 —
         // 안 끄면 시야 밖 적의 "적" 글자만 어둠 속에 떠서 위치가 노출된다.
         if (_label != null) _label.SetVisible(v);
+        if (_weaponVis != null) _weaponVis.SetVisible(v);   // 칼도 루트의 자식이라 같이 꺼줘야 한다
         if (!v)
         {
             if (hpBarBg != null) hpBarBg.SetActive(false);
@@ -189,6 +191,9 @@ public class EnemyController : MonoBehaviour
         if (_label == null && spriteRenderer != null)
             _label = UnitLabel.Attach(spriteRenderer.transform, "적", UnitLabel.EnemyColor,
                                       spriteRenderer.sortingOrder + 1);
+
+        // 그레이박스 칼 — 플레이어와 같은 연출을 적도 쓴다(예비동작이 눈에 보여야 캔슬을 노릴 수 있다).
+        _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.80f, 0.70f, 0.66f), 4, 0.95f);
 
         // 적 은신 + 머리 위 말풍선 (가시성 실험) — 자동 부착
         if (GetComponent<EnemySpeechBubble>() == null)
@@ -255,6 +260,7 @@ public class EnemyController : MonoBehaviour
             case State.Stunned:      UpdateStunned();      break;
         }
 
+        UpdateWeaponVisual();
         UpdateGroggy();
         UpdateGroggyBar();
         UpdateHPBar();
@@ -454,12 +460,24 @@ public class EnemyController : MonoBehaviour
         return push;
     }
 
+    /// <summary>칼 방향/자세 — 예비동작은 UpdateAttackWindup이, 스윙은 DoAttack이 따로 건다.</summary>
+    void UpdateWeaponVisual()
+    {
+        if (_weaponVis == null) return;
+        if (player != null && state != State.Dead)
+            _weaponVis.SetFacing(((Vector2)player.position - (Vector2)transform.position).normalized);
+        if (state != State.AttackWindup && state != State.Attack && !_weaponVis.IsSwinging)
+            _weaponVis.Rest();
+    }
+
     void UpdateAttackWindup()
     {
         windupTimer -= Time.deltaTime;
         SetVelocity(Vector2.zero);
         windupFlashTimer += Time.deltaTime;
         SetTint(Mathf.Sin(windupFlashTimer * 15f) > 0 ? new Color(1f, 0.2f, 0.2f) : originalColor);
+        // 예비동작 = 칼을 치켜든 자세 + 떨림. 붉은 점멸만 있을 땐 "뭘 하는지" 안 읽혔다.
+        _weaponVis?.Charge(Windup > 0f ? 1f - windupTimer / Windup : 1f);
         if (windupTimer <= 0) { RestoreTint(); DoAttack(); }
     }
 
@@ -502,6 +520,8 @@ public class EnemyController : MonoBehaviour
             ? ((Vector2)player.position - (Vector2)transform.position).normalized
             : _attackDir;
         _attackDir = dir;
+        _weaponVis?.SetFacing(dir);
+        _weaponVis?.SwingHeavy(0.30f, false);   // 적은 콤보가 없다 — 크게 한 번
 
         // 2026-07-11: 공격 런지(전진→원위치 하드 스냅) 제거 — 사용자 피드백 "때릴 때 앞뒤로 움직인다".
         //   Rigidbody2D 위에서 transform을 직접 되돌리는 연출이라 고무줄처럼 튕겨 보였다.
@@ -727,6 +747,8 @@ public class EnemyController : MonoBehaviour
             RaidManager.Instance.TrackKillXp(unitStat.expReward);
 
         BecomeCorpse();
+
+        if (_weaponVis != null) _weaponVis.SetVisible(false);   // 시체가 칼을 들고 서 있지 않게
 
         // 2026-07-11: "적이 죽으면 시체" — 머리 위 라벨을 교체하고 몸체를 어둡게 해
         //   살아있는(붉은) 적과 한눈에 구분되게 한다. 이름표만 바뀌면 여전히 헷갈린다.

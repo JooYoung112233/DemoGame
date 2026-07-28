@@ -20,7 +20,7 @@ using UnityEngine;
 [RequireComponent(typeof(InteractableObject))]
 public class BlockedPassage : MonoBehaviour
 {
-    public enum Mode { Permanent, Clearable, Locked, NightOnly }
+    public enum Mode { Permanent, Clearable, Locked, NightOnly, Code }
 
     [Header("── 방식 ──")]
     [SerializeField] Mode mode = Mode.Clearable;
@@ -31,6 +31,13 @@ public class BlockedPassage : MonoBehaviour
     [Tooltip("ItemData.itemId. 비었거나 DB에 없으면 강제 돌파만 가능.")]
     [SerializeField] string requiredItemId;
     [SerializeField] bool consumeItem = true;
+
+    [Header("Code — 알아내야 하는 지식")]
+    [Tooltip("PlayerKnowledge 플래그 id (예: code_jewelry_vault). 쪽지·퀘스트로 획득.\n" +
+             "아이템이 아니라 '지식'이라 죽어도 잃지 않는다.")]
+    [SerializeField] string requiredKnowledgeId;
+    [Tooltip("아직 모를 때 주는 힌트 한 줄 (어디서 알아낼 수 있는지).")]
+    [SerializeField] string codeHint = "번호를 모른다. 어딘가에 적어 뒀을 텐데.";
 
     [Header("시간·소음 (0 = GameTuning 기본값)")]
     [SerializeField] float clearSeconds;
@@ -70,12 +77,14 @@ public class BlockedPassage : MonoBehaviour
 
     void Start() => RefreshPrompt();
 
-    /// <summary>빌더/런타임 설정.</summary>
-    public void Configure(Mode m, string displayLabel, string itemId = null)
+    /// <summary>빌더/런타임 설정. Locked면 keyOrKnowledgeId = 아이템 id, Code면 지식 id.</summary>
+    public void Configure(Mode m, string displayLabel, string keyOrKnowledgeId = null, string hint = null)
     {
         mode = m;
         label = displayLabel;
-        requiredItemId = itemId;
+        if (m == Mode.Code) requiredKnowledgeId = keyOrKnowledgeId;
+        else                requiredItemId      = keyOrKnowledgeId;
+        if (!string.IsNullOrEmpty(hint)) codeHint = hint;
     }
 
     /// <summary>E 상호작용 진입점 — `InteractableObject`가 호출.</summary>
@@ -96,6 +105,17 @@ public class BlockedPassage : MonoBehaviour
 
             case Mode.Locked:
                 TryUnlockOrBreach(playerGO);
+                return;
+
+            case Mode.Code:
+                if (PlayerKnowledge.IsKnown(requiredKnowledgeId))
+                {
+                    Open($"{label} — 번호를 입력했다. 열렸다.");
+                    return;
+                }
+                Toast($"{label} — {codeHint}", ToastManager.ToastType.Warning);
+                // 번호를 몰라도 **부술 수는 있다**(오래·시끄럽게). 알아낸 쪽이 항상 이득.
+                BeginChannel(BreachSecs, $"{label} 강제 개방 중");
                 return;
 
             default:
@@ -160,6 +180,7 @@ public class BlockedPassage : MonoBehaviour
             Mode.Permanent => $"{label} (막힘)",
             Mode.NightOnly => $"{label} (밤에만)",
             Mode.Locked    => $"{label} 열기",
+            Mode.Code      => $"{label} (번호)",
             _              => $"{label} 치우기",
         };
         _io.SetPrompt(p);

@@ -189,6 +189,9 @@ public class TopDownPlayer : MonoBehaviour
         if (_performer == null) _performer = gameObject.AddComponent<AttackPerformer>();
         _performer.Configure(enemyMask, () => FacingDirection);
 
+        // 그레이박스 칼 — 스파인이 들어오면 통째로 교체. **판정엔 관여하지 않는다**(연출 전용).
+        _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.85f, 0.88f, 0.95f), 6, 1.05f);
+
         _hurtbox = GetComponentInChildren<Hurtbox>();
 
         // 장비 컴포넌트 보장 (무기 장착)
@@ -273,6 +276,7 @@ public class TopDownPlayer : MonoBehaviour
             HandleCombatInput();
         }
 
+        UpdateWeaponVisual();   // UI 열림 여부와 무관 — 칼이 허공에 굳어 있지 않게
         UpdateCombatTimers();
         UpdateStamina();
         UpdateSprint(_uiOpen);
@@ -472,6 +476,18 @@ public class TopDownPlayer : MonoBehaviour
         return data != null && data.FindAnimation(name) != null;
     }
 
+    MeleeWeaponVisual _weaponVis;
+
+    /// <summary>칼 비주얼 갱신 — 바라보는 각 + 상태별 자세(차징/평상시). 스윙은 공격 시점에 1회 호출.</summary>
+    void UpdateWeaponVisual()
+    {
+        if (_weaponVis == null) return;
+        _weaponVis.SetFacing(FacingDirection);
+        if (_state == CombatState.HeavyCharge) _weaponVis.Charge(ChargePercent);
+        else if (!_weaponVis.IsSwinging && _state != CombatState.HeavyRelease
+                 && _state != CombatState.LightAttack) _weaponVis.Rest();
+    }
+
     void UpdateVisionLight()
     {
         if (lightPivot == null) return;
@@ -599,6 +615,7 @@ public class TopDownPlayer : MonoBehaviour
         _state = CombatState.LightAttack;
         _attackStateTimer = atk.Duration;
         _performer.Perform(atk);
+        _weaponVis?.Swing(_comboStep, atk.Duration);   // 3연타 = 서로 다른 궤적
         // 소음은 스윙이 아니라 '적중' 시에만 발생(AttackPerformer.ScanWindow) — 2026-07-11 변경.
         _comboBuffered = false;
     }
@@ -623,6 +640,7 @@ public class TopDownPlayer : MonoBehaviour
         _heavyCooldownTimer = HeavyCooldown;
 
         _performer.Perform(atk);
+        _weaponVis?.SwingHeavy(_attackStateTimer, full);   // 치켜든 대각에서 크고 빠르게
         // 강공도 적중 시에만 소음(AttackPerformer.ScanWindow).
     }
 

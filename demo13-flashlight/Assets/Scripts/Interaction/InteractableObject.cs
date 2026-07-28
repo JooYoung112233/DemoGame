@@ -81,6 +81,10 @@ public class InteractableObject : MonoBehaviour, IInteractable
     [Tooltip("쪽지 UI 상단 제목 (비어있으면 '쪽지')")]
     [SerializeField] string noteTitle;
 
+    [Tooltip("읽으면 얻는 **지식** 플래그 id (예: code_jewelry_vault). 아이템이 아니라 플래그라 죽어도 안 잃는다.\n" +
+             "BlockedPassage(Code)가 이 값을 확인한다. 비우면 그냥 읽는 쪽지.")]
+    [SerializeField] string grantsKnowledgeId;
+
     [Header("── NPC (스토리 연동) ──")]
     [Tooltip("스토리 트리거에 사용할 NPC ID (pawnshop, merchant 등)")]
     [SerializeField] string storyNpcId;
@@ -289,6 +293,12 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
     void HandleNote(GameObject playerGO)
     {
+        // 2026-07-11: 쪽지가 **지식**(금고 번호 등)을 준다 — 아이템이 아니라 플래그라 죽어도 잃지 않는다.
+        //   (docs/level-scrapmarket.md — 보석상 금고 코드는 다른 건물에서 주운 쪽지로 알아낸다)
+        if (!string.IsNullOrEmpty(grantsKnowledgeId) && PlayerKnowledge.Learn(grantsKnowledgeId))
+            ToastManager.Show($"알아냈다 — {(string.IsNullOrEmpty(noteTitle) ? grantsKnowledgeId : noteTitle)}",
+                              ToastManager.ToastType.Info);
+
         // 스토리 씬에 연결된 쪽지 → 스크립트 씬 재생(StoryPlayer 경유).
         if (!string.IsNullOrEmpty(noteStorySceneId) && StoryTriggerManager.Instance != null)
         {
@@ -498,6 +508,13 @@ public class InteractableObject : MonoBehaviour, IInteractable
         noteStorySceneId = "";
         promptText = prompt;
         if (interactRange < 0.5f) interactRange = 1.5f;
+    }
+
+    /// <summary>지식(금고 번호 등)을 주는 쪽지로 구성. 읽는 순간 PlayerKnowledge에 기록된다.</summary>
+    public void SetKnowledgeNote(string content, string title, string knowledgeId, string prompt = "읽기")
+    {
+        SetNote(content, title, prompt);
+        grantsKnowledgeId = knowledgeId;
     }
 
     #endregion

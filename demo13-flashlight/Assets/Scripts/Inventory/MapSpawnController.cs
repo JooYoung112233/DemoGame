@@ -31,6 +31,10 @@ public class MapSpawnController : MonoBehaviour
              "(내부는 맵 전체가 아니라 한 채이므로). 루트 테이블 자체는 지역 확률 그대로 사용.")]
     [SerializeField] bool isInterior;
 
+    [Tooltip("이 씬만의 루팅 예산 배율. **유니크 건물**(보석상·경찰서 등)을 일반 점포보다 후하게 만드는 값.\n" +
+             "interiorLootBudgetMult 위에 곱해진다. 1=일반, 2.2=보석상급. '위험을 감수하면 더 좋은 물품'의 보상 쪽 축.")]
+    [SerializeField] float budgetMult = 1f;
+
     [Header("디버그")]
     [SerializeField] bool logSpawnDetails = true;
 
@@ -131,6 +135,13 @@ public class MapSpawnController : MonoBehaviour
             float im = GameTuning.Instance != null ? GameTuning.Instance.interiorLootBudgetMult : 0.25f;
             groundBudget    = Mathf.Max(1, Mathf.RoundToInt(groundBudget * im));
             containerBudget = Mathf.Max(1, Mathf.RoundToInt(containerBudget * im));
+        }
+
+        // 유니크 건물 가산 — 이 씬만 더 후하게(보석상·경찰서). 내부 여부와 무관하게 곱한다.
+        if (budgetMult > 0f && !Mathf.Approximately(budgetMult, 1f))
+        {
+            groundBudget    = Mathf.Max(1, Mathf.RoundToInt(groundBudget * budgetMult));
+            containerBudget = Mathf.Max(1, Mathf.RoundToInt(containerBudget * budgetMult));
         }
 
         if (logSpawnDetails)

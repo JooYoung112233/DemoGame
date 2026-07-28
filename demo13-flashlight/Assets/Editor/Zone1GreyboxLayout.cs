@@ -66,6 +66,16 @@ public static class Zone1GreyboxLayout
         //   北 갭(월드 x24~34) → 가로 지선 → 약국 아케이드 / 東 갭(월드 y43~48) → 세로 지선(x60~66).
         n += ScrapMarketGreyboxLayout.Place(map, TUT_OX, TUT_OY, true);
 
+        // ── 개활 블록에 얹는 유니크 2채 (주차장 안 경찰서 · 공원 안 분식집) ──
+        //   **블록 루프보다 먼저** 세운다 — 그래야 Plaza가 이 자리를 알고 키오스크·상자를 피한다
+        //   (블록이 절반으로 작아진 뒤로 "건물 안에 상자"가 쉽게 재발한다).
+        n += UniqueShop(map, "Police", "경찰서 ★★★★", "Int_Police", "from_police",
+                        116f, 95f, 134f, 111f, 'W', 101f, 3, "bandit_melee_1",
+                        "무기고 뒷문은 잠겨 있다(열쇠). 로비 압수품 대장에 **보석상 금고 번호**가 적혀 있다.");
+        n += UniqueShop(map, "Diner", "분식집 ★", "Int_Diner", "from_diner",
+                        38f, 130f, 52f, 143f, 'S', 43f, 0, "bandit_melee_1",
+                        "캔푸드·물. 주방 뒤 창고. 공원 옆이라 조용하다.");
+
         // ── 블록 9개, 성격 전부 다르게 ──
         //   C0R0=튜토 / C0R1=약국 아케이드 / C0R2=공원
         //   C1R0=폐아파트 / C1R1=점포 밀집 / C1R2=식물원 돔
@@ -86,8 +96,10 @@ public static class Zone1GreyboxLayout
             else if (c == 2 && r == 0) n += Big(map, "Tower", ax0, ay0, ax1, ay1, 'W');     // 유리타워(문=세로 간선)
             else if (c == 2 && r == 1) n += Plaza(map, "Lot", ax0, ay0, ax1, ay1);          // 주차장
             else if (c == 2 && r == 2) n += BuildCollapsedMall(map, ax0, ay0, ax1, ay1);    // 무너진 상가(전용 내부)
+            else if (c == 1 && r == 1) n += BuildUniqueRow(map);                            // 유니크 상점가 4채
             else                       n += Shops(map, p, ax0, ay0, ax1, ay1, Alley, seed); // 점포 밀집
         }
+
 
         // ── 랜드마크 라벨/열쇠 사슬 — 해당 건물이 면한 간선·지선 위에 ──
         n += GreyboxBuild.Note(map, "AP_Label", 108f, 24f, "폐아파트 ★★", "세로 간선 西. key_apt_admin → 펜트 key_tower_card. 수직 다층 후속.");
@@ -149,9 +161,8 @@ public static class Zone1GreyboxLayout
         n += EnemyZone(map, "EZ_Lot", 137f, 96f, 16f, 16f, "bandit_melee_1", 2);
         n += Scatter(map, "SZ_Park", 18f, 128f, 58f, 166f, 3, 2, 66);
 
-        // ⑦ 도로 자체의 소량 루트(버려진 차·잔해) — 길에서도 주울 게 있어야 이동이 심심하지 않다.
-        n += Scatter(map, "SZ_RoadV", 103f,  20f, 113f, 164f, 3, 2, 88);   // 세로 간선
-        n += Scatter(map, "SZ_RoadH",  20f, 115f, 158f, 125f, 3, 2, 99);   // 가로 간선
+        // ⑦ 도로 파밍은 **바닥에 뿌리지 않는다** — 잔해(부서진 차)의 트렁크에 붙는다.
+        //   아래 ObstacleRun이 3대 중 1대를 트렁크로 만든다(사용자: "도로 중앙에 말고 … 유기적으로").
 
         // ── ★ 도로 장애물 (마지막 — 스폰·탈출·입구가 다 등록된 뒤라야 그 자리를 피한다) ──
         //   "넓은 길 = 빠르지만 직선으로는 못 달린다". 좌우 번갈아 붙여 통행선을 지그재그로.
@@ -323,13 +334,46 @@ public static class Zone1GreyboxLayout
         return false;
     }
 
+    /// <summary>건물·잔해 **벽에 붙는** 좌표를 뽑는다 — 도로 한복판에 상자가 둥둥 뜨는 걸 막는다.
+    /// (2026-07-11 사용자: "도로 중앙에 말고 건물에 붙어서나 이런 유기적인 방향으로")
+    ///
+    /// 등록된 사각형(건물·도로 잔해) 중 이 구역과 겹치는 걸 하나 골라, **한 면 바깥 0.6~1.3m**를 잡는다.
+    /// 실제 벽면과의 거리는 여기에 등록 여유 0.6m가 더해져 1.2~1.9m — 벽에 기댄 잔해처럼 읽힌다.
+    /// 붙일 데가 아예 없는 개활지(광장·공원)면 무작위 실외로 폴백한다.</summary>
+    static readonly System.Collections.Generic.List<Rect> _hugBuf = new System.Collections.Generic.List<Rect>();
+    static bool PickHuggingPoint(System.Random rnd, float x0, float y0, float x1, float y1,
+                                 out float x, out float y)
+    {
+        var area = Rect.MinMaxRect(x0, y0, x1, y1);
+        _hugBuf.Clear();
+        for (int i = 0; i < _buildingRects.Count; i++)
+            if (_buildingRects[i].Overlaps(area)) _hugBuf.Add(_buildingRects[i]);
+
+        for (int t = 0; t < 24 && _hugBuf.Count > 0; t++)
+        {
+            var r = _hugBuf[rnd.Next(_hugBuf.Count)];
+            float off = 0.6f + (float)rnd.NextDouble() * 0.7f;
+            switch (rnd.Next(4))
+            {
+                case 0:  x = Mathf.Lerp(r.xMin, r.xMax, (float)rnd.NextDouble()); y = r.yMin - off; break;  // 남면
+                case 1:  x = Mathf.Lerp(r.xMin, r.xMax, (float)rnd.NextDouble()); y = r.yMax + off; break;  // 북면
+                case 2:  x = r.xMin - off; y = Mathf.Lerp(r.yMin, r.yMax, (float)rnd.NextDouble());  break;  // 서면
+                default: x = r.xMax + off; y = Mathf.Lerp(r.yMin, r.yMax, (float)rnd.NextDouble());  break;  // 동면
+            }
+            if (x < x0 || x > x1 || y < y0 || y > y1) continue;   // 이 구역 밖으로 튀면 버림
+            if (IsIndoors(x, y)) continue;                        // 옆 건물/잔해에 파묻히면 버림
+            return true;
+        }
+        return PickOutdoorPoint(rnd, x0, y0, x1, y1, out x, out y);   // 개활지 폴백
+    }
+
     static int Scatter(GameObject map, string prefix, float x0, float y0, float x1, float y1, int ground, int crate, int seed)
     {
         int n = 0;
         var rnd = new System.Random(seed);
         for (int i = 0; i < ground; i++)
         {
-            if (!PickOutdoorPoint(rnd, x0, y0, x1, y1, out float x, out float y)) continue;
+            if (!PickHuggingPoint(rnd, x0, y0, x1, y1, out float x, out float y)) continue;
             var go = new GameObject($"{prefix}_G{i}");
             go.transform.SetParent(map.transform, false);
             go.transform.localPosition = new Vector3(x, y, 0f);
@@ -338,7 +382,7 @@ public static class Zone1GreyboxLayout
         }
         for (int i = 0; i < crate; i++)
         {
-            if (!PickOutdoorPoint(rnd, x0, y0, x1, y1, out float x, out float y)) continue;
+            if (!PickHuggingPoint(rnd, x0, y0, x1, y1, out float x, out float y)) continue;
             string name = $"{prefix}_C{i}";
             if (GreyboxBuild.Marker(map, "gb_crate", name, x, y) == 0) continue;
             var go = FindChild(map.transform, name);
@@ -429,7 +473,11 @@ public static class Zone1GreyboxLayout
 
         // 빽빽한 점포 — **실개골목 2m**(맵에서 가장 좁음). 스파인 x28~34는 비워 둔다.
         n += Shops(m, "AW", X0 + 2f, Y0 + 2f, 28f, Y1 - 2f, AlleyTight, H(101, 7));   // 서측 열
-        n += Shops(m, "AE", 38f, 100f, X1 - 2f, Y1 - 2f, AlleyTight, H(102, 7));      // 약국 위쪽 열
+
+        // 약국 위쪽은 절차 점포 대신 **골목 점포**(유니크) — 아케이드 최심부의 곁가지.
+        n += UniqueShop(m, "AlleyShop", "골목 점포 ★", "Int_AlleyShop", "from_alleyshop",
+                        40f, 100f, 52f, 111f, 'N', 45f, 0, "bandit_melee_1",
+                        "잡템 1~2. 약국 곁가지 — 실개골목 끝.");
 
         n += GreyboxBuild.Note(m, "PD_Label", 31f, 110f, "약국·상가 심부 ★★",
             "튜토 北. 약장 미니퍼즐(key_pharmacy→약장→SQ-002) + 의료·생필품. 실개골목 2m = 최고 밀도.");
@@ -728,11 +776,92 @@ public static class Zone1GreyboxLayout
             // 세로 도로면 장애물의 '길이'가 y축, 두께가 x축.
             n += vertical ? GreyboxBuild.Barricade(m, name, ca, cb, thick, len)
                           : GreyboxBuild.Barricade(m, name, cb, ca, len, thick);
-            // 잔해 자리를 등록 → 도로 루트 앵커(Scatter)가 잔해 속에 박히지 않는다.
+            // 잔해 자리를 등록 → 루트 앵커가 잔해 속에 박히지 않고, 오히려 **잔해에 붙어** 생긴다.
             float hw = (vertical ? thick : len) * 0.5f, hh = (vertical ? len : thick) * 0.5f;
             MarkBuilding(cx0 - hw, cy0 - hh, cx0 + hw, cy0 + hh);
+
+            // 3대 중 1대는 **트렁크가 열린 차** — 도로 파밍을 바닥에 뿌리는 대신 잔해에 붙인다.
+            //   (사용자: "도로에 부서진 자동차 트렁크나 상자 같은 거 … 유기적인 방향으로")
+            if (i % 3 == 1) n += Trunk(m, name, Mathf.Max(len, thick));
         }
         return n;
+    }
+
+    /// <summary>C1R1 = **유니크 상점가**. 4채가 중앙 십자 골목(폭 4m)을 마주 본다.
+    ///   보석상 / 컴퓨터가게 (남열) · 철물점 / 세탁소 (북열).
+    /// 골목은 남쪽으로 열려 가로 지선과 이어진다 — 안쪽으로 들어갈수록 시야가 좁아지는 구조.</summary>
+    static int BuildUniqueRow(GameObject m)
+    {
+        int n = 0;
+        // 문은 전부 중앙 세로 골목(x83~87)을 향한다 → 한 골목에서 4채를 다 볼 수 있다.
+        n += UniqueShop(m, "Jewelry", "보석상 ★★★★", "Int_Jewelry", "from_jewelry",
+                        68f, 82f, 83f, 95f, 'E', 87f, 2, "bandit_melee_1",
+                        "금고는 **비밀번호**. 번호는 다른 데서 알아내야 한다(경찰 압수품 대장). 최고가 루트.");
+        n += UniqueShop(m, "Electronics", "컴퓨터가게 ★★", "Int_Electronics", "from_electronics",
+                        87f, 82f, 100f, 95f, 'W', 87f, 2, "bandit_melee_1",
+                        "배터리·전선·전자부품. 라디오/발전기 업그레이드 재료.");
+        n += UniqueShop(m, "Hardware", "철물점 ★★", "Int_Hardware", "from_hardware",
+                        68f, 99f, 83f, 112f, 'E', 104f, 1, "bandit_melee_1",
+                        "공구·부품·못. 제작·수리 재료.");
+        n += UniqueShop(m, "Laundry", "세탁소 ★", "Int_Laundry", "from_laundry",
+                        87f, 99f, 100f, 112f, 'W', 104f, 0, "bandit_melee_1",
+                        "천·의류. 방한·붕대 재료.");
+        return n;
+    }
+
+    /// <summary>유니크 상점 1채 — 껍데기 + 문간 진입(전용 내부 씬) + 복귀 스폰 + 라벨 + **건물 앞 적 존**.
+    ///
+    /// (2026-07-11 사용자: "랜드마크 아니어도 뭔가 유니크한 건물들 — 보석상·철물점·컴퓨터가게 등등
+    ///  파밍의 재미를 올리고, 거기서 밴딧 나올 확률도 높여서 도전하면 더 좋은 물품이라는 동기부여")
+    ///
+    /// 보상은 **내부 씬 쪽**에서 준다(`InteriorBuild.Controller`의 budgetMult·lootRegion) —
+    /// 여기서는 위험(적 수)과 접근성만 다룬다. 위험/보상을 한 곳에 몰아넣으면 조절이 안 된다.</summary>
+    static int UniqueShop(GameObject m, string id, string label, string scene, string returnSpawn,
+                          float x0, float y0, float x1, float y1, char side, float doorAt,
+                          int enemies, string enemyKey = "bandit_melee_1", string note = null)
+    {
+        int n = 0;
+        n += GreyboxBuild.Building(m, id, x0, y0, x1, y1, side, doorAt, "gb_door", $"{id}_Door");
+        MarkBuilding(x0, y0, x1, y1);
+        n += EnterAtDoorTo(m, $"{id}_Enter", x0, y0, x1, y1, side, doorAt, scene);
+
+        DoorPad(x0, y0, x1, y1, side, doorAt, out float ex, out float ey, out _, out _);
+        float rx = ex + (side == 'W' ? -2.5f : side == 'E' ? 2.5f : 0f);
+        float ry = ey + (side == 'S' ? -2.5f : side == 'N' ? 2.5f : 0f);
+        n += ReturnSpawn(m, returnSpawn, rx, ry);
+        n += GreyboxBuild.Note(m, $"{id}_Label", (x0 + x1) * 0.5f, y1 + 1.5f, label,
+                               note ?? $"{label} — 유니크 점포. 내부 파밍 전용 씬.");
+
+        // 건물 **앞**(문 바깥)에 적 존 — 안에 두면 껍데기에서 스폰돼 걸어 나온다(SnapOutdoors가 한 번 더 보정).
+        if (enemies > 0)
+            n += EnemyZone(m, $"EZ_{id}", rx, ry, 7f, 7f, enemyKey, enemies);
+        return n;
+    }
+
+    /// <summary>도로 잔해에 **트렁크 루팅**을 붙인다 — 부서진 차를 뒤지는 감각.
+    /// 별도 상자를 옆에 놓지 않고 잔해 오브젝트 자체를 컨테이너로 만든다(도로가 어질러 보이지 않게).
+    /// 예산제(MapSpawnController)가 채우므로 `ItemSpawnPoint(Container)`를 링크해 둔다.</summary>
+    static int Trunk(GameObject m, string obstacleName, float size)
+    {
+        var t = FindChild(m.transform, obstacleName);
+        if (t == null) return 0;
+        var go = t.gameObject;
+
+        var lc = go.GetComponent<LootContainer>();
+        if (lc == null) lc = go.AddComponent<LootContainer>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+        lc.Setup("자동차 트렁크", 3, 2);
+
+        var io = go.GetComponent<InteractableObject>();
+        if (io == null) io = go.AddComponent<InteractableObject>();
+        io.Configure(InteractableObject.InteractType.Container, "트렁크 뒤지기", size * 0.5f + 1.6f);
+
+        var sp = go.GetComponent<ItemSpawnPoint>();
+        if (sp == null) sp = go.AddComponent<ItemSpawnPoint>();
+        SetSpawnType(sp, 1);   // Container
+        var so = new SerializedObject(sp);
+        var lk = so.FindProperty("linkedContainer");
+        if (lk != null) { lk.objectReferenceValue = lc; so.ApplyModifiedPropertiesWithoutUndo(); }
+        return 1;
     }
 
     /// <summary>막힌 통로(BlockedPassage) — 도로를 **가로질러** 완전히 막는 잔해.

@@ -236,34 +236,40 @@ public static class Zone1Interiors
     //   각 점포는 '색'이 다르다(제작재료/식량/전자/천). 루트 카테고리 차등은
     //   region_loot 테이블 확장 후속 — 지금은 크기·구조·앵커 수로 성격을 낸다.
 
+    //   ★ 2026-07-11: 이 5개 씬은 만들어만 두고 **Zone1에서 아무도 안 가리키는 고아**였다.
+    //     유니크 건물로 전부 연결하면서, 예산 배율·루트 지역을 씬마다 달리해 '성격'을 데이터로 준다.
+    //     (제작재료 / 식량 / 전자 / 천 — 위험도도 적 수로 차등)
+
     [MenuItem("Tools/TopDown/빌드/내부/철물점", priority = -84)]
     public static void BuildHardware() => BuildDensityShop(
         "Assets/Scenes/Int_Hardware.unity", "from_hardware", 13f, 10f, "HW",
-        "철물점 — 공구·부품·못(제작·수리 재료)", crates: 3, ground: 2, enemy: 1);
+        "철물점 — 공구·부품·못(제작·수리 재료)", crates: 3, ground: 2, enemy: 1, mult: 1.3f);
 
     [MenuItem("Tools/TopDown/빌드/내부/분식집", priority = -83)]
     public static void BuildDiner() => BuildDensityShop(
         "Assets/Scenes/Int_Diner.unity", "from_diner", 13f, 11f, "DN",
-        "분식집 — 캔푸드·물(주방 뒤 창고)", crates: 2, ground: 3, enemy: 0, backRoom: true);
+        "분식집 — 캔푸드·물(주방 뒤 창고)", crates: 2, ground: 3, enemy: 0, backRoom: true, mult: 1.0f);
 
-    [MenuItem("Tools/TopDown/빌드/내부/전파상", priority = -82)]
+    [MenuItem("Tools/TopDown/빌드/내부/컴퓨터가게", priority = -82)]
     public static void BuildElectronics() => BuildDensityShop(
         "Assets/Scenes/Int_Electronics.unity", "from_electronics", 12f, 10f, "EL",
-        "전파상 — 배터리·전선·전자부품(라디오/발전기 업글 재료)", crates: 3, ground: 2, enemy: 1);
+        "컴퓨터가게 — 배터리·전선·전자부품(라디오/발전기 업글 재료)", crates: 3, ground: 2, enemy: 2,
+        mult: 1.4f, lootRegion: "industrial");
 
     [MenuItem("Tools/TopDown/빌드/내부/세탁소", priority = -81)]
     public static void BuildLaundry() => BuildDensityShop(
         "Assets/Scenes/Int_Laundry.unity", "from_laundry", 11f, 9f, "LD",
-        "세탁소 — 천·의류(방한·붕대 재료)", crates: 2, ground: 2, enemy: 0);
+        "세탁소 — 천·의류(방한·붕대 재료)", crates: 2, ground: 2, enemy: 0, mult: 0.9f);
 
     [MenuItem("Tools/TopDown/빌드/내부/골목점포", priority = -80)]
     public static void BuildAlleyShop() => BuildDensityShop(
         "Assets/Scenes/Int_AlleyShop.unity", "from_alleyshop", 9f, 7f, "AS",
-        "골목 점포 — 잡템 1~2(약국 곁가지)", crates: 1, ground: 2, enemy: 0);
+        "골목 점포 — 잡템 1~2(약국 곁가지)", crates: 1, ground: 2, enemy: 0, mult: 0.9f);
 
-    /// <summary>밀도 점포 공용 — 껍데기+진입/출구+선반+앵커. 성격은 크기·앵커 수·뒷방 유무로 낸다.</summary>
+    /// <summary>밀도 점포 공용 — 껍데기+진입/출구+선반+앵커. 성격은 크기·앵커 수·뒷방 + **예산 배율·루트 지역**으로.</summary>
     static void BuildDensityShop(string path, string returnSpawn, float W, float H, string pre,
-                                 string label, int crates, int ground, int enemy, bool backRoom = false)
+                                 string label, int crates, int ground, int enemy, bool backRoom = false,
+                                 float mult = 1f, string lootRegion = null)
     {
         var m = InteriorBuild.Begin(out var scene);
         int n = 0;
@@ -291,8 +297,106 @@ public static class Zone1Interiors
         if (enemy > 0)
             n += InteriorBuild.Enemy(m, $"{pre}_EZ", W * 0.5f, H * 0.55f, W - 4f, H * 0.4f, "bandit_melee_1", enemy);
 
-        n += InteriorBuild.Controller(m, ProfilePath, RegionId);
+        n += InteriorBuild.Controller(m, ProfilePath, RegionId, mult, lootRegion);
         InteriorBuild.End(scene, path, n, "지역1 내부 — " + label);
+    }
+
+    // ── 보석상 〔유니크·코드 금고〕 ───────────────────────────────────────
+    //   2026-07-11 사용자: "보석상은 비밀번호인데 비밀번호는 어디에 따로 있다던가 … 쪽지 파밍이지"
+    //   매장(남) + **금고실(북, 코드 잠금)**. 번호는 경찰서 압수품에서 나온다.
+    //   번호를 몰라도 강제 개방은 가능 — 대신 오래 걸리고 시끄럽다(알아낸 쪽이 항상 이득).
+    public const string JewelryKnowledge = "code_jewelry_vault";
+    const string JewelryPath = "Assets/Scenes/Int_Jewelry.unity";
+
+    [MenuItem("Tools/TopDown/빌드/내부/보석상", priority = -77)]
+    public static void BuildJewelry()
+    {
+        var m = InteriorBuild.Begin(out var scene);
+        int n = 0; const float W = 20f, H = 15f;
+
+        n += InteriorBuild.Shell(m, W, H);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 10f, Outside, "from_jewelry", 2.2f);
+        n += InteriorBuild.Spawn(m, "default", 10f, 2.9f);
+
+        // 매장 — 진열장(선반) + 깨진 케이스
+        n += GreyboxBuild.WallSeg(m, "JW_Case1", 2f, 5f, 8f, 5.9f);
+        n += GreyboxBuild.WallSeg(m, "JW_Case2", 12f, 5f, 18f, 5.9f);
+        n += InteriorBuild.GroundLoot(m, "JW_G0", 5f, 7.5f);
+        n += InteriorBuild.GroundLoot(m, "JW_G1", 15f, 7.5f);
+        n += InteriorBuild.Crate(m, "JW_Counter", 10f, 7.5f);
+
+        // 금고실 칸막이(y=9) — 문 갭 x9~11이 **금고문**
+        n += GreyboxBuild.WallSeg(m, "JW_Div_a", 1f, 9f, 9f, 10f);
+        n += GreyboxBuild.WallSeg(m, "JW_Div_b", 11f, 9f, W - 1f, 10f);
+        n += InteriorBuild.Gate(m, "JW_Vault", 10f, 9.5f, 2f, 1f,
+                                BlockedPassage.Mode.Code, "금고문", JewelryKnowledge,
+                                "번호를 모른다. 경찰이 압수해 뒀다는 소문이 있었는데.");
+
+        // 금고 안 — 최고 보상
+        n += InteriorBuild.Crate(m, "JW_Vault1", 5f, 12.5f);
+        n += InteriorBuild.Crate(m, "JW_Vault2", 10f, 12.5f);
+        n += InteriorBuild.Crate(m, "JW_Vault3", 15f, 12.5f);
+        n += InteriorBuild.GroundLoot(m, "JW_G2", 12.5f, 11f);
+
+        // 위험도 — 매장에 근접 2, 금고 앞 견제 1
+        n += InteriorBuild.Enemy(m, "JW_EZ", 10f, 6.5f, 12f, 5f, "bandit_melee_1", 2);
+        n += InteriorBuild.Enemy(m, "JW_EZ_R", 16f, 12f, 5f, 4f, "bandit_ranged", 1);
+
+        n += InteriorBuild.Controller(m, ProfilePath, RegionId, 2.2f, "entertainment");
+        InteriorBuild.End(scene, JewelryPath, n, "지역1 내부 — 보석상(코드 금고, 최고가 루트)");
+    }
+
+    // ── 경찰서 〔유니크·열쇠 무기고〕 ────────────────────────────────────
+    //   사용자: "경찰서 같은 건 뒷문이 잠겨 있고 나중에 열쇠로 열고 하는 등의 인터랙티브도 좋고"
+    //   로비(남, 자유 진입) + **무기고(북, 열쇠 잠금)**. 로비 압수품함에 보석상 금고 번호 쪽지.
+    const string PolicePath = "Assets/Scenes/Int_Police.unity";
+    public const string PoliceArmoryKey = "key_police_armory";
+
+    [MenuItem("Tools/TopDown/빌드/내부/경찰서", priority = -76)]
+    public static void BuildPolice()
+    {
+        var m = InteriorBuild.Begin(out var scene);
+        int n = 0; const float W = 22f, H = 17f;
+
+        n += InteriorBuild.Shell(m, W, H);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 11f, Outside, "from_police", 2.4f);
+        n += InteriorBuild.Spawn(m, "default", 11f, 2.9f);
+
+        // 로비 — 민원 데스크 + 사물함
+        n += GreyboxBuild.WallSeg(m, "PL_Desk", 3f, 6f, 12f, 7f);
+        n += InteriorBuild.Crate(m, "PL_Locker1", 17f, 5f);
+        n += InteriorBuild.Crate(m, "PL_Locker2", 19.5f, 8f);
+        n += InteriorBuild.GroundLoot(m, "PL_G0", 6f, 4f);
+        n += InteriorBuild.GroundLoot(m, "PL_G1", 14f, 9f);
+
+        // ★ 압수품 보관함 옆 쪽지 = **보석상 금고 번호**(쪽지 파밍으로 코드 획득)
+        n += InteriorBuild.Crate(m, "PL_Evidence", 4f, 9.5f);
+        n += InteriorBuild.KnowledgeNote(m, "PL_Note_Code", 6.5f, 9.5f,
+            "압수품 대장",
+            "…압수: 보석상 금고 개방번호. 대장 여백에 급히 갈겨쓴 네 자리 숫자가 보인다.\n" +
+            "외워 뒀다. 이제 그 금고는 열 수 있다.",
+            JewelryKnowledge);
+
+        // 무기고 칸막이(y=11) — 문 갭 x10~12가 **뒷문(열쇠)**
+        n += GreyboxBuild.WallSeg(m, "PL_Div_a", 1f, 11f, 10f, 12f);
+        n += GreyboxBuild.WallSeg(m, "PL_Div_b", 12f, 11f, W - 1f, 12f);
+        n += InteriorBuild.Gate(m, "PL_Armory", 11f, 11.5f, 2f, 1f,
+                                BlockedPassage.Mode.Locked, "무기고 뒷문", PoliceArmoryKey,
+                                "잠겨 있다. 열쇠는 누가 가져갔을까.");
+
+        // 무기고 — 무기·방어구 집중
+        n += InteriorBuild.Crate(m, "PL_Arm1", 5f, 14.5f);
+        n += InteriorBuild.Crate(m, "PL_Arm2", 11f, 14.5f);
+        n += InteriorBuild.Crate(m, "PL_Arm3", 17f, 14.5f);
+        n += InteriorBuild.GroundLoot(m, "PL_G2", 8f, 13f);
+
+        // 위험도 최상급 — 근접 2 + 견제 1 + 중장 1
+        n += InteriorBuild.Enemy(m, "PL_EZ", 11f, 7f, 14f, 6f, "bandit_melee_1", 2);
+        n += InteriorBuild.Enemy(m, "PL_EZ_R", 18f, 14f, 6f, 4f, "bandit_ranged", 1);
+        n += InteriorBuild.Enemy(m, "PL_EZ_T", 6f, 14f, 6f, 4f, "bandit_tank", 1);
+
+        n += InteriorBuild.Controller(m, ProfilePath, RegionId, 1.8f, "industrial");
+        InteriorBuild.End(scene, PolicePath, n, "지역1 내부 — 경찰서(열쇠 무기고 + 보석상 코드 쪽지)");
     }
 
     // ── 공용 내부 (그 외 모든 건물이 임시로 돌려 쓰는 1채) ────────────────
@@ -340,8 +444,9 @@ public static class Zone1Interiors
         BuildPharmacy();  BuildAbandonedShop(); BuildGarage();      BuildWarehouse();
         BuildBasement();  BuildCollapsedMall(); BuildHardware();    BuildDiner();
         BuildElectronics(); BuildLaundry();     BuildAlleyShop();   BuildDome();
+        BuildJewelry();   BuildPolice();
         BuildGeneric();
-        Debug.Log("[Zone1Interiors] 내부 씬 13개 생성 완료(건물 12채 + 공용 1).");
+        Debug.Log("[Zone1Interiors] 내부 씬 15개 생성 완료(건물 14채 + 공용 1).");
     }
 }
 #endif
