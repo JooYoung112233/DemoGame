@@ -49,6 +49,7 @@ public static class Zone1Interiors
         n += InteriorBuild.GroundLoot(m, "P_G1", 12f, 6f);
         n += InteriorBuild.GroundLoot(m, "P_G2", 14f, 3f);
         n += InteriorBuild.Crate(m, "P_Counter_Crate", 8f, 8.8f);   // key_pharmacy 자리(고정 열쇠는 후속)
+        n += InteriorBuild.Crate(m, "P_SQ002_Box", 12f, 8.8f);      // 외부에서 이전(SQ002_Box)
 
         // 약품실(잠긴 방) — 의료 루트 집중 + 회수꾼 철제 상자
         n += InteriorBuild.Crate(m, "P_MedCab1", 4f, 13f);
@@ -306,6 +307,35 @@ public static class Zone1Interiors
     //   복귀 위치는 고정 스폰이 아니라 **들어온 문 앞**으로 되돌린다(BuildingReturn).
     public const string GenericPath = "Assets/Scenes/Int_Generic.unity";
 
+    // ── 식물원 돔 금고실 (외부에서 이전 — key_dome_code 최고 보상) ────────
+    const string DomePath = "Assets/Scenes/Int_Dome.unity";
+
+    [MenuItem("Tools/TopDown/빌드/내부/돔금고실", priority = -78)]
+    public static void BuildDome()
+    {
+        var m = InteriorBuild.Begin(out var scene);
+        int n = 0; const float W = 16f, H = 14f;
+
+        n += InteriorBuild.Shell(m, W, H);
+        n += InteriorBuild.DoorGapSouth(m, W, 8f, 2.2f);
+        n += InteriorBuild.Spawn(m, "default", 8f, 2.2f);
+        n += InteriorBuild.Exit(m, "Exit_ToZone1", 8f, 1.4f, Outside, "from_dome", 2.2f, 1.2f);
+
+        n += GreyboxBuild.Note(m, "D_Label", 8f, 12.5f, "돔 금고실 ★★★★",
+            "key_dome_code로 여는 최고 보상 구역. 유리타워 상층 R&D에서 코드 획득.");
+
+        // 외부에 있던 Dome_Reward / Dome_RareA / Dome_RareB를 이곳으로 이전
+        n += InteriorBuild.Crate(m, "D_Reward", 8f, 8f);
+        n += InteriorBuild.Crate(m, "D_RareA", 4f, 6f);
+        n += InteriorBuild.Crate(m, "D_RareB", 12f, 6f);
+        n += InteriorBuild.GroundLoot(m, "D_G0", 6f, 10f);
+        n += InteriorBuild.GroundLoot(m, "D_G1", 11f, 10f);
+
+        n += InteriorBuild.Enemy(m, "D_EZ", 8f, 8f, 10f, 8f, "bandit_ranged", 1);
+        n += InteriorBuild.Controller(m, ProfilePath, RegionId);
+        InteriorBuild.End(scene, DomePath, n, "지역1 내부 — 돔 금고실(최고 보상, key_dome_code)");
+    }
+
     [MenuItem("Tools/TopDown/빌드/내부/공용점포", priority = -79)]
     public static void BuildGeneric() => BuildDensityShop(
         GenericPath, BuildingReturn.BackSpawnId, 12f, 9f, "GN",
@@ -316,8 +346,9 @@ public static class Zone1Interiors
     {
         BuildPharmacy();  BuildAbandonedShop(); BuildGarage();      BuildWarehouse();
         BuildBasement();  BuildCollapsedMall(); BuildHardware();    BuildDiner();
-        BuildElectronics(); BuildLaundry();     BuildAlleyShop();   BuildGeneric();
-        Debug.Log("[Zone1Interiors] 내부 씬 12개 생성 완료(건물 11채 + 공용 1).");
+        BuildElectronics(); BuildLaundry();     BuildAlleyShop();   BuildDome();
+        BuildGeneric();
+        Debug.Log("[Zone1Interiors] 내부 씬 13개 생성 완료(건물 12채 + 공용 1).");
     }
 }
 #endif

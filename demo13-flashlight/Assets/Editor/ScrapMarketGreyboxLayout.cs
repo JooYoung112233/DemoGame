@@ -135,17 +135,18 @@ public static class ScrapMarketGreyboxLayout
         // 1. 녹슨 철문 / 진입 (Spawn) — 남단. 길 ST(X4~7) 하단.
         placed += Marker(map, "gb_spawn", "Gate_Spawn", 6f, 3f);
 
-        // 2. 폐상점 (실내 파밍 #1) — 방 X8~16 Y5~14. 서벽 출입문(Shop_Door Y9~10). 선반×2+박스×1.
+        // 2. 폐상점 (파밍 #1) — 방 X8~16 Y5~14. 서벽 출입문(Y9~10).
+        //   ★ 2026-07-11 건물 모델 전환: 실내 선반·상자를 **외부 맵에서 제거**하고 문에 진입 트리거를 단다.
+        //     내부 파밍은 `Int_AbandonedShop` 씬이 담당(선반2·상자1 사양 그대로 그 안에 있음).
+        //     이유: 건물 = 껍데기 + 별도 내부 씬인데 외부에 상자가 남아 "건물 안에 상자가 보이는" 불일치.
         placed += Marker(map, "gb_door",  "Shop_Door",    7.5f, 9.5f);
-        placed += Marker(map, "gb_shelf", "Shop_Shelf_1", 15f, 12f);
-        placed += Marker(map, "gb_shelf", "Shop_Shelf_2", 15f, 7f);
-        placed += Marker(map, "gb_crate", "Shop_Crate_1", 11f, 11f);
+        placed += Enter(map, "Shop_Enter", 8.6f, 9.5f, "Int_AbandonedShop");
+        placed += Marker(map, "gb_spawn", "Ret_from_abshop", 6.6f, 9.5f);   // 복귀 자리(문 밖)
 
-        // 3. 차고 (실내 파밍 #2) — 방 X8~16 Y26~35. 서벽 출입문(Garage_Door Y30~31). 선반×1+박스×2.
+        // 3. 차고 (파밍 #2) — 방 X8~16 Y26~35. 서벽 출입문(Y30~31). 내부 = `Int_Garage`.
         placed += Marker(map, "gb_door",  "Garage_Door",    7.5f, 30.5f);
-        placed += Marker(map, "gb_shelf", "Garage_Shelf_1", 15f, 33f);
-        placed += Marker(map, "gb_crate", "Garage_Crate_1", 11f, 28f);
-        placed += Marker(map, "gb_crate", "Garage_Crate_2", 14f, 28f);
+        placed += Enter(map, "Garage_Enter", 8.6f, 30.5f, "Int_Garage");
+        placed += Marker(map, "gb_spawn", "Ret_from_garage", 6.6f, 30.5f);
 
         // 4. 골목 공터 (밴딧 + 야외 차) — PLAZA X4~10 Y36~43. 두 건물 파밍 '후' 첫 전투(창고 직전).
         placed += Marker(map, "gb_enemy", "Bandit_Corner", 6f, 40f);
@@ -155,11 +156,11 @@ public static class ScrapMarketGreyboxLayout
         placed += Marker(map, "gb_crate", "Road_Car_1",    8f, 38f);
 
         // 5. 창고 (메인 목표 — 막다름) — 방 X8~16 Y44~50. 셔터(Y47~48) 1입구. 민이 부재 = 흔적/쪽지.
+        //   ★ 2026-07-11: 창고도 껍데기 + 진입. 민이 흔적·노크 쪽지는 **`Int_Warehouse` 안으로 이전**
+        //     (그 씬에 W_Note_Trace / W_Note_Knock으로 동일 내용 배치됨). 지하창고 입구도 그 안.
         placed += Marker(map, "gb_door",  "Warehouse_Shutter",    7.5f, 47.5f);
-        placed += Note(map, "Warehouse_Mini_Note",  11f, 46f, "창고 안 흔적",
-            "셔터 아래쪽에 작은 손자국이 말라붙어 있다.\n안에서 누가 긁은 것 같은 자국도 보인다.\n\n……민이, 여기 있었구나. 지금은 어디 있지?");
-        placed += Note(map, "Warehouse_Knock_Note", 14f, 48f, "벽에 적힌 낙서",
-            "세 번 두드리면 대답해.\n한 번이면 숨고.\n두 번이면 울고.\n네 번이면 절대 열지 마.");
+        placed += Enter(map, "Warehouse_Enter", 8.6f, 47.5f, "Int_Warehouse");
+        placed += Marker(map, "gb_spawn", "Ret_from_warehouse", 6.6f, 47.5f);
 
         // 6. 맨홀 탈출 (EXIT) — 창고 옆 골목 공터(CT X4~14 Y51~55). 추출구.
         placed += Exit(map, "Manhole_Exit", 9f, 53f, "Safehouse", "raid_return", 5f);
@@ -273,6 +274,28 @@ public static class ScrapMarketGreyboxLayout
     }
 
     /// <summary>탈출구(ExitPoint): 좌표 배치 + targetScene/spawnPointId/대기 설정(추출 = 상호작용 후 wait초).</summary>
+    /// <summary>건물 진입 트리거(BuildingEntrance) — 밟으면 내부 씬으로 전환. 2026-07-11 건물 모델 전환.
+    /// 복귀는 `__back__`(들어온 문 앞, `BuildingReturn`)이라 튜토가 Zone1에 얹혀도 좌표가 맞는다.</summary>
+    static int Enter(GameObject parent, string name, float x, float y, string targetScene)
+    {
+        var go = Spawn("gb_exit", name, parent);
+        if (go == null) return 0;
+        go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
+
+        var io = go.GetComponentInChildren<InteractableObject>();   // gb_exit의 E키 ExitPoint는 중복 → 제거
+        if (io != null) Object.DestroyImmediate(io);
+
+        var box = go.GetComponent<BoxCollider2D>();
+        if (box == null) box = go.AddComponent<BoxCollider2D>();     // ??는 Unity 가짜 null을 통과시켜 못 씀
+        box.isTrigger = true;
+        box.size = new Vector2(1.6f, 2.0f);
+
+        var be = go.GetComponent<BuildingEntrance>();
+        if (be == null) be = go.AddComponent<BuildingEntrance>();
+        be.Configure(targetScene, BuildingReturn.BackSpawnId, false);
+        return 1;
+    }
+
     static int Exit(GameObject parent, string name, float x, float y, string targetScene, string spawnId, float wait)
     {
         var go = Spawn("gb_exit", name, parent);

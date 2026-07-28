@@ -29,6 +29,7 @@ public static class Zone1GreyboxLayout
     public static void Build()
     {
         var map = GreyboxBuild.BeginScene(out var scene);
+        _buildingRects.Clear();   // 건물 자리 등록 초기화(빌드마다 새로) — Scatter가 실내를 피하는 근거
         int n = 0;
 
         n += GreyboxBuild.Floor(map, "Floor", (FX0+FX1)*0.5f, (FY0+FY1)*0.5f, FX1-FX0, FY1-FY0);
@@ -196,14 +197,48 @@ public static class Zone1GreyboxLayout
 
     /// <summary>구역에 루트 앵커를 뿌린다 — 바닥 ground개 + 상자 crate개(상자엔 Container 앵커 부착).
     /// 앵커 수 = 그 구역의 보상 비중(예산이 앵커에 분배되므로). 시드로 결정론적 배치.</summary>
+    // ── 건물 자리 등록 (2026-07-11) ──────────────────────────────────────
+    //   건물 모델이 "껍데기 + 별도 내부 씬"으로 바뀌면서, **외부 맵의 루트가 건물 안에 놓이면 안 된다**
+    //   (사용자 지적: "건물 안에 상자가 보인다 — 건물 시스템이 안 맞는다").
+    //   외부 루트 = 길·골목·공터에만. 건물 내부 파밍은 Int_* 씬이 담당한다.
+    //   → 건물을 지을 때마다 바닥 사각형을 등록해 두고, Scatter가 그 안을 피한다.
+    static readonly System.Collections.Generic.List<Rect> _buildingRects = new System.Collections.Generic.List<Rect>();
+
+    /// <summary>건물 바닥 사각형 등록(외곽 벽 포함). 여유 0.6m를 둬 벽에 붙은 루트도 배제.</summary>
+    static void MarkBuilding(float x0, float y0, float x1, float y1)
+    {
+        const float pad = 0.6f;
+        _buildingRects.Add(new Rect(x0 - pad, y0 - pad, (x1 - x0) + pad * 2f, (y1 - y0) + pad * 2f));
+    }
+
+    static bool IsIndoors(float x, float y)
+    {
+        for (int i = 0; i < _buildingRects.Count; i++)
+            if (_buildingRects[i].Contains(new Vector2(x, y))) return true;
+        return false;
+    }
+
+    /// <summary>영역 안에서 **건물 밖** 좌표를 뽑는다. 실패(꽉 찬 블록)하면 false → 그 앵커는 생략.</summary>
+    static bool PickOutdoorPoint(System.Random rnd, float x0, float y0, float x1, float y1,
+                                 out float x, out float y)
+    {
+        for (int t = 0; t < 24; t++)
+        {
+            x = Mathf.Lerp(x0, x1, (float)rnd.NextDouble());
+            y = Mathf.Lerp(y0, y1, (float)rnd.NextDouble());
+            if (!IsIndoors(x, y)) return true;
+        }
+        x = y = 0f;
+        return false;
+    }
+
     static int Scatter(GameObject map, string prefix, float x0, float y0, float x1, float y1, int ground, int crate, int seed)
     {
         int n = 0;
         var rnd = new System.Random(seed);
         for (int i = 0; i < ground; i++)
         {
-            float x = Mathf.Lerp(x0, x1, (float)rnd.NextDouble());
-            float y = Mathf.Lerp(y0, y1, (float)rnd.NextDouble());
+            if (!PickOutdoorPoint(rnd, x0, y0, x1, y1, out float x, out float y)) continue;
             var go = new GameObject($"{prefix}_G{i}");
             go.transform.SetParent(map.transform, false);
             go.transform.localPosition = new Vector3(x, y, 0f);
@@ -212,8 +247,7 @@ public static class Zone1GreyboxLayout
         }
         for (int i = 0; i < crate; i++)
         {
-            float x = Mathf.Lerp(x0, x1, (float)rnd.NextDouble());
-            float y = Mathf.Lerp(y0, y1, (float)rnd.NextDouble());
+            if (!PickOutdoorPoint(rnd, x0, y0, x1, y1, out float x, out float y)) continue;
             string name = $"{prefix}_C{i}";
             if (GreyboxBuild.Marker(map, "gb_crate", name, x, y) == 0) continue;
             var go = FindChild(map.transform, name);
@@ -290,13 +324,11 @@ public static class Zone1GreyboxLayout
         // 약국(앵커) — 방 x37~62 y84~116, 서문(스파인 향). key_pharmacy→약장(잠금)→SQ-002.
         //   2026-07-11: 껍데기만 두고 **내부는 Int_Pharmacy 씬**(전당포식 전환). 서문에 진입 트리거 + 복귀 스폰.
         n += GreyboxBuild.Building(m, "Pharmacy", 37f, 84f, 62f, 116f, 'W', 98f, "gb_door", "Pharmacy_Door");
+        MarkBuilding(37f, 84f, 62f, 116f);
         n += Enter(m, "Pharmacy_Enter", 36.2f, 99f, "Int_Pharmacy");   // 서문 바로 앞(문 갭 y98~100)
         n += ReturnSpawn(m, "from_pharmacy", 34.5f, 99f);              // 내부에서 나오면 문 앞
-        n += GreyboxBuild.Marker(m, "gb_crate", "key_pharmacy", 44f, 92f);
-        n += GreyboxBuild.Marker(m, "gb_door",  "MedCabinet(key_pharmacy)", 58f, 110f);
-        n += GreyboxBuild.Marker(m, "gb_crate", "SQ002_Box", 52f, 110f);
-        n += GreyboxBuild.Marker(m, "gb_shelf", "Pharm_Shelf1", 46f, 88f);
-        n += GreyboxBuild.Marker(m, "gb_shelf", "Pharm_Shelf2", 56f, 88f);
+        // ★ 2026-07-11: 약국 실내 오브젝트(key_pharmacy 상자·MedCabinet 문·SQ002_Box·선반2)는
+        //   **Int_Pharmacy 씬으로 이전**하고 외부에서 제거 — 건물=껍데기 원칙(외부에 상자가 보이던 불일치).
         n += GreyboxBuild.Note(m, "Pharmacy_Note", 44f, 106f, "약국 카운터 메모",
             "처방 약은 약장(MedCabinet) 안. 카운터 밑 열쇠(key_pharmacy)로 연다.");
 
@@ -326,9 +358,11 @@ public static class Zone1GreyboxLayout
         n += GreyboxBuild.WallSeg(m, "GH_E",   198f, 178f, 200f, 254f);
         // 중앙 금고실(돔 코어) — 문 = 金庫(key_dome_code 잠금). 최고 보상.
         n += GreyboxBuild.Building(m, "DomeCore", 150f, 204f, 178f, 232f, 'S', 162f, "gb_door", "Dome_Vault(key_dome_code)");
-        n += GreyboxBuild.Marker(m, "gb_crate", "Dome_Reward", 164f, 222f);
-        n += GreyboxBuild.Marker(m, "gb_shelf", "Dome_RareA", 157f, 210f);
-        n += GreyboxBuild.Marker(m, "gb_shelf", "Dome_RareB", 171f, 210f);
+        MarkBuilding(150f, 204f, 178f, 232f);
+        // ★ 2026-07-11: 금고실 내부 보상(Dome_Reward·Dome_RareA/B)은 **Int_Dome 씬으로 이전**.
+        //   외부엔 껍데기와 금고문만 — 들어가야 최고 보상을 본다.
+        n += Enter(m, "Dome_Enter", 163f, 203f, "Int_Dome");
+        n += ReturnSpawn(m, "from_dome", 163f, 200f);
         // 온실 화단(벤치=선반) + 고가 루팅
         n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed1", 136f, 190f);
         n += GreyboxBuild.Marker(m, "gb_shelf", "GH_Bed2", 146f, 190f);
@@ -369,6 +403,7 @@ public static class Zone1GreyboxLayout
                     float doorX = x + Mathf.Max(1f, w * 0.5f - 1f);
                     n += GreyboxBuild.Building(m, $"{p}_{i}_{j}", x, y, x + w, y + d, side,
                                                doorX, "gb_door", $"{p}_{i}_{j}_D");
+                    MarkBuilding(x, y, x + w, y + d);
                     // 2026-07-11: 절차 생성 점포도 **전부 들어갈 수 있게** — 공용 내부(Int_Generic)로 진입.
                     //   복귀는 고정 스폰이 아니라 '들어온 문 앞'(BuildingReturn) → 한 채를 돌려 써도 제자리로 나온다.
                     n += EnterGeneric(m, $"{p}_{i}_{j}_Enter", doorX + 1f, (side == 'S' ? y : y + d) + (side == 'S' ? -0.9f : 0.9f));
@@ -390,6 +425,7 @@ public static class Zone1GreyboxLayout
         float doorAt = (side == 'S' || side == 'N') ? (bx0 + bx1) * 0.5f - 1f : (by0 + by1) * 0.5f - 1f;
         n += GreyboxBuild.Building(m, p, bx0, by0, bx1, by1, side, doorAt, "gb_door", $"{p}_D");
         // 2026-07-11: 내부 십자 칸막이 제거 — 건물 = 껍데기(외벽+문)뿐. 내부는 별도 씬(전당포식 전환).
+        MarkBuilding(bx0, by0, bx1, by1);
         //   문에 BuildingEntrance를 달 건물은 Enter()로 개별 지정한다(내부 씬이 있는 건물만).
         return n;
     }
@@ -459,6 +495,8 @@ public static class Zone1GreyboxLayout
         int n = 0;
         n += GreyboxBuild.Building(m, $"{p}_k1", x0 + 3f, y0 + 3f, x0 + 17f, y0 + 14f, 'S', x0 + 9f, "gb_door", $"{p}_k1D");
         n += GreyboxBuild.Building(m, $"{p}_k2", x1 - 18f, y1 - 15f, x1 - 3f, y1 - 3f, 'N', x1 - 13f, "gb_door", $"{p}_k2D");
+        MarkBuilding(x0 + 3f, y0 + 3f, x0 + 17f, y0 + 14f);
+        MarkBuilding(x1 - 18f, y1 - 15f, x1 - 3f, y1 - 3f);
         n += GreyboxBuild.Marker(m, "gb_crate", $"{p}_c1", (x0 + x1) * 0.5f, (y0 + y1) * 0.5f);
         n += GreyboxBuild.Marker(m, "gb_crate", $"{p}_c2", (x0 + x1) * 0.5f + 9f, (y0 + y1) * 0.5f + 7f);
         return n;
