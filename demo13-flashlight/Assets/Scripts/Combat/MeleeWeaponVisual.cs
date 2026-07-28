@@ -14,13 +14,14 @@ using UnityEngine;
 /// </summary>
 public class MeleeWeaponVisual : MonoBehaviour
 {
-    // ── 스윙 프리셋(바라보는 방향 기준 상대 각도) ──
-    //   콤보 3연타가 서로 다른 궤적을 그리도록: 위→아래 / 아래→위 / 크게 횡베기.
-    static readonly float[] ComboFrom = {  78f, -72f,  105f };
-    static readonly float[] ComboTo   = { -42f,  55f, -105f };
-    const float IdleAngle    = -38f;    // 평상시 — 몸 옆에 내려둠
-    const float ChargeAngle  = 128f;    // 강공 차징 — 뒤 대각으로 치켜듦
-    const float HeavyToAngle = -88f;    // 강공 릴리스 끝각(크고 빠른 호)
+    // ── 스윙 프리셋 (바라보는 방향 기준 상대 각도, +가 좌측/CCW) ──
+    //   2026-07-11 사용자 결정: **모든 스윙은 우측 → 좌측 한 방향**으로 통일.
+    //   콤보별 궤적 변화는 뺐다("콤보는 일단 빼줘") — 궤적이 매번 달라 타이밍이 안 읽혔다.
+    const float SwingFrom    = -72f;    // 약공 시작 — 오른쪽
+    const float SwingTo      =  72f;    // 약공 끝 — 왼쪽
+    const float IdleAngle    = -38f;    // 평상시 — 오른쪽에 내려둠
+    const float ChargeAngle  = -122f;   // 강공 차징 — 오른쪽 **뒤로 더 당겨** 힘을 모으는 자세
+    const float HeavyToAngle =   82f;   // 강공 릴리스 끝각 — 좌측으로 크게 뿌린다
 
     [SerializeField] float bladeLength = 1.05f;
     [SerializeField] float bladeWidth  = 0.12f;
@@ -119,21 +120,19 @@ public class MeleeWeaponVisual : MonoBehaviour
         _facingDeg = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
     }
 
-    /// <summary>약공 콤보 스윙. step 0/1/2 마다 궤적이 다르다.</summary>
-    public void Swing(int step, float duration)
-    {
-        int i = Mathf.Clamp(step, 0, ComboFrom.Length - 1);
-        StartSwing(ComboFrom[i], ComboTo[i], Mathf.Max(0.08f, duration * 0.75f));
-    }
+    /// <summary>약공 스윙 — 우측에서 좌측으로.</summary>
+    public void Swing(float duration)
+        => StartSwing(SwingFrom, SwingTo, Mathf.Max(0.08f, duration * 0.75f));
 
-    /// <summary>강공 릴리스 — 차징하던 대각에서 크고 빠르게 벤다.</summary>
+    /// <summary>강공 릴리스 — 뒤로 당겨 뒀던 자세에서 **좌측으로 빠르게** 뿌린다.
+    /// 릴리스가 약공보다 짧다 = 같은 거리를 더 빨리 지난다 = 눈에 '빠르게' 읽힌다.</summary>
     public void SwingHeavy(float duration, bool full)
     {
         _charging = false;
-        StartSwing(ChargeAngle, HeavyToAngle - (full ? 20f : 0f), Mathf.Max(0.08f, duration * 0.6f));
+        StartSwing(ChargeAngle, HeavyToAngle + (full ? 22f : 0f), Mathf.Max(0.07f, duration * 0.5f));
     }
 
-    /// <summary>강공 차징 — 뒤 대각으로 치켜들고, 꽉 찰수록 미세하게 떤다.</summary>
+    /// <summary>강공 차징 — 오른쪽 뒤로 당겨 들고, 꽉 찰수록 미세하게 떤다.</summary>
     public void Charge(float pct)
     {
         _charging = true;

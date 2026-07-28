@@ -426,6 +426,15 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
     void HandleDoor(GameObject playerGO)
     {
+        // 2026-07-11 (사용자: "모든 문은 상호작용해야 내부로 들어가도록"):
+        //   문 하나가 **표시 + 잠금 + 진입**을 모두 맡는다. 순서가 곧 규칙이다.
+        //   ① 잠겨 있으면 먼저 연다(열쇠·비밀번호·철거) → ② 열렸으면 안으로 들어간다.
+        var passage = GetComponent<BlockedPassage>();
+        if (passage != null && !passage.IsOpen) { passage.TryPass(playerGO); return; }
+
+        var entrance = GetComponent<BuildingEntrance>();
+        if (entrance != null) { entrance.Interact(playerGO); return; }
+
         var door = GetComponent<DoorController>();
         if (door != null)
             door.TryOpen(playerGO);

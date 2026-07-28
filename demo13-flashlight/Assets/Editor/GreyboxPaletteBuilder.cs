@@ -146,6 +146,24 @@ public static class GreyboxPaletteBuilder
                 function = Prop2DDefinition.Function.None,
                 sortingLayer = "Ground", sortingOffset = 1, labelDark = true,
             },
+            // 차량 — 도로/주차장의 통과 불가 엄폐물. 2026-07-11 신설.
+            //   ★ 색을 벽(회색)·막힘(주황)과 **다르게** 둔다. 사용자 지적: "자동차랑 갈 수 없는 벽이랑
+            //     색깔이 같으면 어쩌자는 거야". 오렌지는 **인터랙션이 있는 막힘 전용**으로 남긴다.
+            new Spec {
+                id = "gb_car", label = "차", color = Opaque(0.26f, 0.40f, 0.55f),
+                category = Prop2DDefinition.Category.Object,
+                colliderMode = Prop2DDefinition.ColliderMode.Box, isTrigger = false,
+                function = Prop2DDefinition.Function.None,
+                sortingLayer = "Ground", sortingOffset = 2, labelDark = false,
+            },
+            // 잡프랍 — 자판기·드럼통·쓰레기통 등. 작은 엄폐 + 길의 표정.
+            new Spec {
+                id = "gb_prop", label = "프랍", color = Opaque(0.52f, 0.47f, 0.28f),
+                category = Prop2DDefinition.Category.Object,
+                colliderMode = Prop2DDefinition.ColliderMode.Box, isTrigger = false,
+                function = Prop2DDefinition.Function.None,
+                sortingLayer = "Ground", sortingOffset = 2, labelDark = true,
+            },
             // 문 — Door(DoorController, 잠금 없음). Box 막힘이 문 차단 콜라이더로 연결됨.
             new Spec {
                 id = "gb_door", label = "문", color = Opaque(0.55f, 0.38f, 0.22f),

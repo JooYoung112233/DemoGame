@@ -110,12 +110,15 @@ public static class ScrapMarketGreyboxLayout
         // ── 건물 블록(조밀화) — 길/건물내부/출입구 채널 제외 전 내부를 채움(walkable 구멍 금지) ──
         placed += Wall(map, "Bldg_S_base", 22f,  1.5f, 42f,  1f);  // 남단 토대 X1~43 Y1~2
         placed += Wall(map, "Bldg_W",       2.5f,28.5f, 3f, 53f);  // 서측 띠(전 높이) X1~4 Y2~55
+        // 2026-07-11 (사용자: "너무 큰 건물들 좀 쪼개줘 … 튜토 지역 보면 커다란 2개 같은 건 좀 그렇다"):
+        //   동측 대블록을 통짜 벽 하나로 두면 27×25짜리 거대한 회색 덩어리가 된다.
+        //   **골목 낀 필지 격자로 쪼갠다** — 튜토도 '도시 한 블록'으로 읽히고 골목 탐험이 생긴다.
         if (eastCorridor)   // 차고 동측 통로(갭 Y27~32) — 동측 대블록 분할
         {
-            placed += Wall(map, "Bldg_E_S", 29.5f, 14.5f, 27f, 25f);  // X16~43 Y2~27
-            placed += Wall(map, "Bldg_E_N", 29.5f, 43.5f, 27f, 23f);  // X16~43 Y32~55
+            placed += LotGrid(map, "Bldg_E_S", 16f, 2f, 43f, 27f);
+            placed += LotGrid(map, "Bldg_E_N", 16f, 32f, 43f, 55f);
         }
-        else placed += Wall(map, "Bldg_E", 29.5f, 28.5f, 27f, 53f);   // 동측 대블록 X16~43 Y2~55
+        else placed += LotGrid(map, "Bldg_E", 16f, 2f, 43f, 55f);
         // 길↔건물 벽띠 X7~8 (출입구 3칸 Y9~10·30~31·47~48 만큼 끊김)
         placed += Wall(map, "Bldg_door_a",  7.5f, 7f,   1f,  4f);  // X7~8 Y5~9
         placed += Wall(map, "Bldg_door_b",  7.5f,12f,   1f,  4f);  // X7~8 Y10~14
@@ -124,6 +127,14 @@ public static class ScrapMarketGreyboxLayout
         placed += Wall(map, "Bldg_door_e",  7.5f,45.5f, 1f,  3f);  // X7~8 Y44~47
         placed += Wall(map, "Bldg_door_f",  7.5f,49f,   1f,  2f);  // X7~8 Y48~50
         // 건물 사이 막이 / 밴딧 공터 옆 (X7~16). 밴딧 공터는 Y36~43(차고 '뒤', 창고 직전).
+        // ★ 2026-07-11 (사용자: "이런 데는 안에 안 보여야 하는 거 아님?" — 튜토 구역 건물):
+        //   폐상점·차고·창고는 예전엔 **걸어 들어가는 방**이었다. 건물 모델이 '문 → 내부 씬 전환'으로
+        //   바뀌면서 내용물을 Int_* 씬으로 옮겼는데, **방 자체(빈 공간)는 그대로 남아** 위에서
+        //   속이 훤히 보이는 빈 방이 됐다. 이제 방을 통째로 채운다 — 진입은 서벽의 문(상호작용)으로만.
+        placed += LotGrid(map, "Bldg_Shop",  8f,  5f, 16f, 14f);   // 폐상점
+        placed += LotGrid(map, "Bldg_Gar",   8f, 26f, 16f, 35f);   // 차고
+        placed += LotGrid(map, "Bldg_Ware",  8f, 44f, 16f, 50f);   // 창고
+
         placed += Wall(map, "Bldg_z1",     11.5f, 3.5f, 9f,  3f);  // X7~16 Y2~5 (폐상점 남)
         placed += Wall(map, "Bldg_z2",     11.5f,20f,   9f, 12f);  // X7~16 Y14~26 (폐상점 북~차고 남)
         placed += Wall(map, "Bldg_z3",     11.5f,35.5f, 9f,  1f);  // X7~16 Y35~36 (차고 북~공터 남)
@@ -205,6 +216,40 @@ public static class ScrapMarketGreyboxLayout
     static int Wall(GameObject parent, string name, float cx, float cy, float lenX, float thickY)
         => Bar(parent, "gb_wall", name, cx, cy, lenX, thickY);
 
+    /// <summary>큰 덩어리를 **골목 낀 필지 격자**로 쪼갠다(2026-07-11).
+    /// 가로 골목 2.4m / 세로 틈 1.6m — Zone1의 골목 위계와 같은 어휘(관통하는 쪽이 넓다).
+    /// 필지 크기는 해시로 흔들어 균일 격자로 안 보이게 한다.</summary>
+    static int LotGrid(GameObject parent, string p, float x0, float y0, float x1, float y1)
+    {
+        const float TargetLot = 8f, GapRow = 2.4f, GapCol = 1.6f;
+        float bw = x1 - x0, bh = y1 - y0;
+        if (bw < 6f || bh < 6f) return Wall(parent, p, (x0 + x1) * 0.5f, (y0 + y1) * 0.5f, bw, bh);
+
+        int cols = Mathf.Max(1, Mathf.RoundToInt((bw + GapCol) / (TargetLot + GapCol)));
+        int rows = Mathf.Max(1, Mathf.RoundToInt((bh + GapRow) / (TargetLot + GapRow)));
+        while (cols > 1 && (bw - GapCol * (cols - 1)) / cols < 5f) cols--;
+        while (rows > 1 && (bh - GapRow * (rows - 1)) / rows < 5f) rows--;
+
+        float uw = bw - GapCol * (cols - 1), ud = bh - GapRow * (rows - 1);
+        int n = 0;
+        float y = y0;
+        for (int i = 0; i < rows; i++)
+        {
+            float d = ud / rows * (0.82f + ((i * 37 + 11) % 7) * 0.052f);
+            if (i == rows - 1) d = y1 - y;                 // 마지막 행은 남은 만큼 — 자투리 금지
+            float x = x0;
+            for (int j = 0; j < cols; j++)
+            {
+                float w = uw / cols * (0.82f + ((i * 13 + j * 29 + 5) % 7) * 0.052f);
+                if (j == cols - 1) w = x1 - x;             // 마지막 열도 남은 만큼
+                n += Wall(parent, $"{p}_{i}_{j}", x + w * 0.5f, y + d * 0.5f, w, d);
+                x += w + GapCol;
+            }
+            y += d + GapRow;
+        }
+        return n;
+    }
+
     static int Barricade(GameObject parent, string name, float cx, float cy, float lenX, float thickY)
         => Bar(parent, "gb_barricade", name, cx, cy, lenX, thickY);
 
@@ -279,12 +324,12 @@ public static class ScrapMarketGreyboxLayout
     static int Enter(GameObject parent, string name, float x, float y, string targetScene,
                      float tw = 1.2f, float th = 1.2f)
     {
-        var go = Spawn("gb_enter", name, parent);
+        var go = Spawn("gb_door", name, parent);
         if (go == null) return 0;
         go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
 
-        var io = go.GetComponentInChildren<InteractableObject>();   // gb_exit의 E키 ExitPoint는 중복 → 제거
-        if (io != null) Object.DestroyImmediate(io);
+        var dc = go.GetComponent<DoorController>();   // 팔레트 기본 DoorController는 진입과 이중 → 제거
+        if (dc != null) Object.DestroyImmediate(dc);
 
         var box = go.GetComponent<BoxCollider2D>();
         if (box == null) box = go.AddComponent<BoxCollider2D>();     // ??는 Unity 가짜 null을 통과시켜 못 씀
@@ -297,6 +342,12 @@ public static class ScrapMarketGreyboxLayout
         //   **문 갭보다 좁은 발판**이 되고, 옆으로 비껴 들어가 빈 껍데기 안에 갇힌다.
         //   진입 스폰은 내부 씬의 "default". `__back__`은 **나올 때** 쓰는 값(내부 씬 출구가 보유).
         be.Configure(targetScene, "default", false, new Vector2(tw, th));
+        be.SetRequireInteract(true);   // 문은 밟는 게 아니라 **E로 여는 것**(2026-07-11 사용자 결정)
+
+        // 문 하나가 표시이자 진입점 — 별도 '입구 발판'을 두지 않는다.
+        var io2 = go.GetComponent<InteractableObject>();
+        if (io2 == null) io2 = go.AddComponent<InteractableObject>();
+        io2.Configure(InteractableObject.InteractType.Door, "들어가기", 2.0f);
         return 1;
     }
 

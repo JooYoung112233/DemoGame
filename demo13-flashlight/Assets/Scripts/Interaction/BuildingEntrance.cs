@@ -69,12 +69,32 @@ public class BuildingEntrance : MonoBehaviour
         if (size.x > 0f && size.y > 0f) triggerSize = size;
     }
 
+    [Header("── 발동 방식 ──")]
+    [Tooltip("true면 **E 상호작용**으로만 들어간다(2026-07-11 사용자: \"모든 문은 상호작용해야 내부로 들어가도록\").\n" +
+             "밟기만 해도 넘어가면 ① 길 가다 실수로 들어가고 ② 잠금(열쇠·비밀번호) 문과 규칙이 어긋난다.\n" +
+             "문은 상호작용, 실내 바닥 발판 같은 것만 false로.")]
+    [SerializeField] bool requireInteract = true;
+
+    /// <summary>E 상호작용 진입점 — `InteractableObject`(Door)가 호출.</summary>
+    public void Interact(GameObject playerGO)
+    {
+        var col = playerGO != null ? playerGO.GetComponent<Collider2D>() : null;
+        Fire(playerGO, col);
+    }
+
     void OnTriggerEnter2D(Collider2D other)
+    {
+        if (requireInteract) return;        // 문은 밟는 게 아니라 여는 것
+        if (!other.CompareTag("Player")) return;
+        Fire(other.gameObject, other);
+    }
+
+    void Fire(GameObject playerGO, Collider2D playerCol)
     {
         if (_fired) return;
         if (Time.time < _armedAt) return;   // 로드 직후 스폰이 발판 위여도 즉시 되돌아가지 않게
         if (string.IsNullOrEmpty(targetScene)) return;
-        if (!other.CompareTag("Player")) return;
+        if (playerGO == null) return;
 
         if (SceneTransitionManager.Instance == null)
         {
@@ -96,20 +116,24 @@ public class BuildingEntrance : MonoBehaviour
         //   나올 때 발판 한가운데에 서게 되고 → 곧바로 재발동해 왕복 루프가 된다.
         //   그래서 '플레이어가 들어온 방향'으로 트리거 밖까지 밀어낸 지점을 기억한다.
         if (!isExit)
-            BuildingReturn.Remember(gameObject.scene.name, ReturnPointFor(other));
+            BuildingReturn.Remember(gameObject.scene.name, ReturnPointFor(playerCol, playerGO));
 
         SceneTransitionManager.Instance.TransitionTo(targetScene, spawnPointId);
     }
 
     /// <summary>이 트리거 '밖'의 복귀 지점 — 플레이어가 들어온 방향으로 트리거 반경 + 여유만큼 밀어낸 자리.</summary>
-    Vector3 ReturnPointFor(Collider2D player)
+    Vector3 ReturnPointFor(Collider2D playerCol, GameObject playerGO)
     {
         Vector2 here = transform.position;
-        Vector2 away = (Vector2)player.transform.position - here;
+        Transform pt = playerCol != null ? playerCol.transform : playerGO.transform;
+        Vector2 away = (Vector2)pt.position - here;
         if (away.sqrMagnitude < 0.0001f) away = Vector2.down;   // 정확히 겹쳤으면 남쪽(관례상 바깥)
         float clear = Mathf.Max(triggerSize.x, triggerSize.y) * 0.5f + 0.7f;
         return here + away.normalized * clear;
     }
+
+    /// <summary>빌더가 발동 방식을 지정. 문=상호작용(true), 실내 바닥 발판=밟기(false).</summary>
+    public void SetRequireInteract(bool v) => requireInteract = v;
 
     void OnTriggerExit2D(Collider2D other)
     {

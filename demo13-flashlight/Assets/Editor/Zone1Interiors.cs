@@ -32,7 +32,7 @@ public static class Zone1Interiors
         const float W = 18f, H = 16f;
 
         n += InteriorBuild.Shell(m, W, H);                                                     // 사방 밀폐
-        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 9f, Outside, "from_pharmacy", 2.4f);  // 남쪽 정문(포탈)
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 9f, Outside, BuildingReturn.BackSpawnId, 2.4f);  // 남쪽 정문(포탈)
         n += InteriorBuild.Spawn(m, "default", 9f, 2.9f);
 
         // 매장/약품실 칸막이(y=10) — 약품실 문 갭 x=13~15.5(잠금 게이트)
@@ -75,7 +75,7 @@ public static class Zone1Interiors
         const float W = 12f, H = 9f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 6f, Outside, "from_abshop", 2.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 6f, Outside, BuildingReturn.BackSpawnId, 2.2f);
         n += InteriorBuild.Spawn(m, "default", 6f, 2.9f);
 
         // 선반 2 + 상자 1 (문서 사양)
@@ -99,7 +99,7 @@ public static class Zone1Interiors
         int n = 0; const float W = 14f, H = 11f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 7f, Outside, "from_garage", 2.4f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 7f, Outside, BuildingReturn.BackSpawnId, 2.4f);
         n += InteriorBuild.Spawn(m, "default", 7f, 2.9f);
 
         // 차량 잔해 2대(벽 블록) — 엄폐·동선 꺾기
@@ -126,7 +126,7 @@ public static class Zone1Interiors
         int n = 0; const float W = 17f, H = 14f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 8.5f, Outside, "from_warehouse", 2.6f);   // 셔터
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 8.5f, Outside, BuildingReturn.BackSpawnId, 2.6f);   // 셔터
         n += InteriorBuild.Spawn(m, "default", 8.5f, 2.9f);
 
         // 적재 선반 열(창고다움) — 통로가 갈라지게
@@ -166,7 +166,7 @@ public static class Zone1Interiors
 
         // 지하는 남쪽 '문'이 아니라 **올라가는 계단**으로 창고에 복귀한다(사방 밀폐 유지).
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.Stairs(m, "Exit_ToWarehouse", 5f, 2.2f, "Int_Warehouse", "default", "위층 계단");
+        n += InteriorBuild.Stairs(m, "Exit_ToWarehouse", 5f, 2.2f, "Int_Warehouse", BuildingReturn.BackSpawnId, "위층 계단");
         n += InteriorBuild.Spawn(m, "default", 9.5f, 2.9f);
 
         // 붕괴 기둥 미로 — 시야 차단(하강감은 조명·연출로, 문서 전제)
@@ -205,7 +205,7 @@ public static class Zone1Interiors
         int n = 0; const float W = 22f, H = 18f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 11f, Outside, "from_collapsed", 2.4f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 11f, Outside, BuildingReturn.BackSpawnId, 2.4f);
         n += InteriorBuild.Spawn(m, "default", 11f, 2.9f);
 
         // 잔해 미로 — 안쪽으로 갈수록 통로가 좁아진다(문서: "깔린 틈을 기어간다")
@@ -275,7 +275,7 @@ public static class Zone1Interiors
         int n = 0;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", W * 0.5f, Outside, returnSpawn, 2.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", W * 0.5f, Outside, BuildingReturn.BackSpawnId, 2.2f);
         n += InteriorBuild.Spawn(m, "default", W * 0.5f, 2.9f);
 
         // 진열 선반 2열
@@ -315,7 +315,7 @@ public static class Zone1Interiors
         int n = 0; const float W = 20f, H = 15f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 10f, Outside, "from_jewelry", 2.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 10f, Outside, BuildingReturn.BackSpawnId, 2.2f);
         n += InteriorBuild.Spawn(m, "default", 10f, 2.9f);
 
         // 매장 — 진열장(선반) + 깨진 케이스
@@ -340,7 +340,7 @@ public static class Zone1Interiors
 
         // 위험도 — 매장에 근접 2, 금고 앞 견제 1
         n += InteriorBuild.Enemy(m, "JW_EZ", 10f, 6.5f, 12f, 5f, "bandit_melee_1", 2);
-        n += InteriorBuild.Enemy(m, "JW_EZ_R", 16f, 12f, 5f, 4f, "bandit_ranged", 1);
+        n += InteriorBuild.Enemy(m, "JW_EZ_T", 16f, 12f, 5f, 4f, "bandit_tank", 1);
 
         n += InteriorBuild.Controller(m, ProfilePath, RegionId, 2.2f, "entertainment");
         InteriorBuild.End(scene, JewelryPath, n, "지역1 내부 — 보석상(코드 금고, 최고가 루트)");
@@ -359,7 +359,7 @@ public static class Zone1Interiors
         int n = 0; const float W = 22f, H = 17f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 11f, Outside, "from_police", 2.4f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 11f, Outside, BuildingReturn.BackSpawnId, 2.4f);
         n += InteriorBuild.Spawn(m, "default", 11f, 2.9f);
 
         // 로비 — 민원 데스크 + 사물함
@@ -392,7 +392,7 @@ public static class Zone1Interiors
 
         // 위험도 최상급 — 근접 2 + 견제 1 + 중장 1
         n += InteriorBuild.Enemy(m, "PL_EZ", 11f, 7f, 14f, 6f, "bandit_melee_1", 2);
-        n += InteriorBuild.Enemy(m, "PL_EZ_R", 18f, 14f, 6f, 4f, "bandit_ranged", 1);
+        n += InteriorBuild.Enemy(m, "PL_EZ_M2", 18f, 14f, 6f, 4f, "bandit_melee_1", 1);
         n += InteriorBuild.Enemy(m, "PL_EZ_T", 6f, 14f, 6f, 4f, "bandit_tank", 1);
 
         n += InteriorBuild.Controller(m, ProfilePath, RegionId, 1.8f, "industrial");
@@ -415,7 +415,7 @@ public static class Zone1Interiors
         int n = 0; const float W = 16f, H = 14f;
 
         n += InteriorBuild.Shell(m, W, H);
-        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 8f, Outside, "from_dome", 2.2f);
+        n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 8f, Outside, BuildingReturn.BackSpawnId, 2.2f);
         n += InteriorBuild.Spawn(m, "default", 8f, 2.9f);
 
         n += GreyboxBuild.Note(m, "D_Label", 8f, 12.5f, "돔 금고실 ★★★★",
@@ -428,7 +428,7 @@ public static class Zone1Interiors
         n += InteriorBuild.GroundLoot(m, "D_G0", 6f, 10f);
         n += InteriorBuild.GroundLoot(m, "D_G1", 11f, 10f);
 
-        n += InteriorBuild.Enemy(m, "D_EZ", 8f, 8f, 10f, 8f, "bandit_ranged", 1);
+        n += InteriorBuild.Enemy(m, "D_EZ", 8f, 8f, 10f, 8f, "bandit_tank", 1);
         n += InteriorBuild.Controller(m, ProfilePath, RegionId);
         InteriorBuild.End(scene, DomePath, n, "지역1 내부 — 돔 금고실(최고 보상, key_dome_code)");
     }

@@ -535,6 +535,9 @@ public class TopDownPlayer : MonoBehaviour
     /// <summary>아이템 사용(채널) 진행 중 — 이 동안 구르기/공격/달리기를 막는다.</summary>
     bool ChannelBusy => UseActionManager.Instance != null && UseActionManager.Instance.IsBusy;
 
+    /// <summary>약공 콤보 사용 여부 — 2026-07-11 기본 OFF(사용자 결정). Control Panel에서 되살릴 수 있다.</summary>
+    static bool ComboOn => GameTuning.Instance != null && GameTuning.Instance.comboEnabled;
+
     void HandleCombatInput()
     {
         if (ChannelBusy) return;   // 아이템 사용 중 — 구르기·공격 금지 (취소는 ESC)
@@ -553,7 +556,7 @@ public class TopDownPlayer : MonoBehaviour
         //   (2026-07-11 버그픽스) 예전엔 이 분기가 `_state != Idle && != HeavyCharge → return` 뒤에 있어
         //   _state==LightAttack이면 도달 자체가 불가능했다 → _comboBuffered가 영원히 false →
         //   3타 콤보가 한 번도 발동 못 하고 매번 1타 + 쿨다운. "때려도 씹힌다"의 정체.
-        if (_state == CombatState.LightAttack && GameInput.GetMouseButtonDown(0))
+        if (ComboOn && _state == CombatState.LightAttack && GameInput.GetMouseButtonDown(0))
         {
             _comboBuffered = true;
             _comboBufferTimer = CurrentLightCombo != null ? CurrentLightCombo.bufferTime : 0.25f;
@@ -615,7 +618,7 @@ public class TopDownPlayer : MonoBehaviour
         _state = CombatState.LightAttack;
         _attackStateTimer = atk.Duration;
         _performer.Perform(atk);
-        _weaponVis?.Swing(_comboStep, atk.Duration);   // 3연타 = 서로 다른 궤적
+        _weaponVis?.Swing(atk.Duration);   // 우 → 좌 한 방향
         // 소음은 스윙이 아니라 '적중' 시에만 발생(AttackPerformer.ScanWindow) — 2026-07-11 변경.
         _comboBuffered = false;
     }
@@ -674,7 +677,9 @@ public class TopDownPlayer : MonoBehaviour
         {
             case CombatState.LightAttack:
                 // 캔슬 가능 시점 + 선입력 → 다음 콤보 단계
-                int lastStep = (CurrentLightCombo != null ? CurrentLightCombo.StepCount : 0) - 1;
+                // 2026-07-11: 콤보는 GameTuning.comboEnabled로 게이트(기본 OFF — 사용자 결정).
+                //   데이터는 그대로 두고 '진행'만 막는다 → 켜면 그대로 되살아난다.
+                int lastStep = ComboOn ? (CurrentLightCombo != null ? CurrentLightCombo.StepCount : 0) - 1 : 0;
                 if (_comboBuffered && _performer.CanCancel && _comboStep < lastStep)
                 {
                     AdvanceCombo();

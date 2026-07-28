@@ -18,6 +18,8 @@ public class EnemyController : MonoBehaviour
     bool _visionVisible = true;
     UnitLabel _label;   // 머리 위 "적"/"시체" 라벨 (그레이박스용)
     MeleeWeaponVisual _weaponVis;   // 그레이박스 칼 (연출 전용 — 판정은 AttackPerformer)
+    bool _nextIsHeavy;              // 이번 공격이 강공인가 (예비동작 진입 시 결정)
+    int  _lightStreak;              // 약공 연속 횟수 — N회 넘으면 강제로 강공
 
     [Header("Detection")]
     [SerializeField] float detectRange    = 8f;
@@ -217,6 +219,8 @@ public class EnemyController : MonoBehaviour
             health.OnDeath   += OnDeath;
         }
 
+        ApplyUnitLook();   // 크기·색으로 종류를 구분 — 여태 StatDB의 scale/tintColor가 **한 번도 안 쓰였다**
+
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 
         CreateHPBar();
@@ -391,9 +395,18 @@ public class EnemyController : MonoBehaviour
 
         if (dist <= AtkRange && attackTimer <= 0)
         {
+            // ── 강공 판단 (2026-07-11) ──
+            //   확률만 두면 한 판 내내 강공이 한 번도 안 나오는 경우가 생긴다 →
+            //   약공을 N회 연속 낸 뒤엔 **반드시** 강공(패턴을 읽을 수 있게).
+            var gt = GameTuning.Instance;
+            float hChance = gt != null ? gt.enemyHeavyChance : 0.3f;
+            int   force   = gt != null ? gt.enemyHeavyForceAfter : 3;
+            _nextIsHeavy = CanBeCancelled ? (_lightStreak >= force || Random.value < hChance)
+                                          : true;   // 캔슬 불가 유닛(중장) = 항상 큰 공격
+
             state = State.AttackWindup;
             _nav?.Stop();
-            windupTimer = Windup;
+            windupTimer = Windup * (_nextIsHeavy ? (gt != null ? gt.enemyHeavyWindupMult : 1.9f) : 1f);
             windupFlashTimer = 0;
             SetVelocity(Vector2.zero);
             FacePlayer();
@@ -460,6 +473,35 @@ public class EnemyController : MonoBehaviour
         return push;
     }
 
+    /// <summary>유닛 종류를 **눈으로 구분**되게 — StatDB의 tintColor/scale을 실제로 적용한다.
+    ///
+    /// 2026-07-11: 이 두 값은 데이터에 있으면서 **한 번도 읽히지 않았다**(모든 적이 같은 크기·같은 붉은색).
+    /// scale은 절대값이 아니라 **일반 적(2.0) 기준 배율**로 쓴다 — 루트에 곧바로 곱하면
+    /// 콜라이더까지 2배가 돼 물리가 통째로 바뀐다. 몸통·허트박스·칼만 비례 확대한다.</summary>
+    void ApplyUnitLook()
+    {
+        if (unitStat == null) return;
+
+        // 약탈자는 보랏빛 식별색이 우선 — 여기서 덮으면 회수 대상 구분이 사라진다(MakeScavenger는 Start 전에 호출됨).
+        if (spriteRenderer != null && !_isScavenger) spriteRenderer.color = unitStat.tintColor;
+
+        const float BaseScale = 2f;   // bandit_melee_1 기준
+        float mul = Mathf.Clamp(unitStat.scale / BaseScale, 0.5f, 3f);
+        if (Mathf.Approximately(mul, 1f)) return;
+
+        if (spriteRenderer != null)
+            spriteRenderer.transform.localScale *= mul;
+
+        var body = GetComponent<CircleCollider2D>();
+        if (body != null) body.radius *= mul;
+
+        var hurt = GetComponentInChildren<Hurtbox>();
+        var hbox = hurt != null ? hurt.GetComponent<BoxCollider2D>() : null;
+        if (hbox != null) hbox.size *= mul;
+
+        if (_weaponVis != null) _weaponVis.transform.localScale = Vector3.one * mul;
+    }
+
     /// <summary>칼 방향/자세 — 예비동작은 UpdateAttackWindup이, 스윙은 DoAttack이 따로 건다.</summary>
     void UpdateWeaponVisual()
     {
@@ -475,9 +517,13 @@ public class EnemyController : MonoBehaviour
         windupTimer -= Time.deltaTime;
         SetVelocity(Vector2.zero);
         windupFlashTimer += Time.deltaTime;
-        SetTint(Mathf.Sin(windupFlashTimer * 15f) > 0 ? new Color(1f, 0.2f, 0.2f) : originalColor);
-        // 예비동작 = 칼을 치켜든 자세 + 떨림. 붉은 점멸만 있을 땐 "뭘 하는지" 안 읽혔다.
-        _weaponVis?.Charge(Windup > 0f ? 1f - windupTimer / Windup : 1f);
+        // 강공은 더 진하게/느리게 점멸 — 약공과 구분되어야 피하거나 캔슬을 노릴 수 있다.
+        float blinkHz = _nextIsHeavy ? 9f : 15f;
+        Color warn = _nextIsHeavy ? new Color(1f, 0.45f, 0f) : new Color(1f, 0.2f, 0.2f);
+        SetTint(Mathf.Sin(windupFlashTimer * blinkHz) > 0 ? warn : originalColor);
+        // 예비동작 = 칼을 오른쪽 뒤로 당긴 자세 + 떨림. 붉은 점멸만 있을 땐 "뭘 하는지" 안 읽혔다.
+        float full = Windup > 0f ? Mathf.Clamp01(1f - windupTimer / Windup) : 1f;
+        _weaponVis?.Charge(_nextIsHeavy ? full : full * 0.45f);
         if (windupTimer <= 0) { RestoreTint(); DoAttack(); }
     }
 
@@ -521,7 +567,9 @@ public class EnemyController : MonoBehaviour
             : _attackDir;
         _attackDir = dir;
         _weaponVis?.SetFacing(dir);
-        _weaponVis?.SwingHeavy(0.30f, false);   // 적은 콤보가 없다 — 크게 한 번
+        // 약공/강공 모두 **우 → 좌**. 강공은 뒤로 당겼다가 더 빠르게(SwingHeavy).
+        if (_nextIsHeavy) { _weaponVis?.SwingHeavy(0.26f, true); _lightStreak = 0; }
+        else              { _weaponVis?.Swing(0.34f);            _lightStreak++;  }
 
         // 2026-07-11: 공격 런지(전진→원위치 하드 스냅) 제거 — 사용자 피드백 "때릴 때 앞뒤로 움직인다".
         //   Rigidbody2D 위에서 transform을 직접 되돌리는 연출이라 고무줄처럼 튕겨 보였다.
@@ -554,19 +602,28 @@ public class EnemyController : MonoBehaviour
         //   구: `AtkRange * 1.5f` 원형(360°) → ① 추격 정지 거리보다 1.5배 넓게 맞고
         //       ② 적 뒤로 돌아가도 맞아서 "왜 맞았는지 모르겠다"가 됐다.
         //   신: 사거리 그대로 + 예비동작 때 바라본 방향(_attackDir) 기준 ±60° 안에서만 적중.
-        if (DistToPlayer() > AtkRange * 1.05f) return;
+        // 강공은 리치도 조금 길다(크게 휘두르니까) — 대신 예비동작이 두 배 가까이 길다.
+        float reach = AtkRange * (_nextIsHeavy ? 1.20f : 1.05f);
+        if (DistToPlayer() > reach) return;
 
         Vector2 toPlayer = ((Vector2)player.position - (Vector2)transform.position).normalized;
         Vector2 face = _attackDir.sqrMagnitude > 0.0001f ? _attackDir.normalized : toPlayer;
         if (Vector2.Dot(face, toPlayer) < 0.5f) return;   // cos60° — 등 뒤/옆은 빗나감
 
-        playerHealth?.TakeDamage(Damage);
-        DamagePopup.Create(player.position, Damage, DamagePopup.DamageType.Normal);
+        float dmgMult = _nextIsHeavy
+            ? (GameTuning.Instance != null ? GameTuning.Instance.enemyHeavyDamageMult : 1.9f) : 1f;
+        float dmg = Damage * dmgMult;
+        playerHealth?.TakeDamage(dmg);
+        DamagePopup.Create(player.position, dmg,
+            _nextIsHeavy ? DamagePopup.DamageType.Heavy : DamagePopup.DamageType.Normal);
     }
 
     public void TryCancelAttack()
     {
         if (!CanBeCancelled || state != State.AttackWindup) return;
+        // 강공은 캔슬되지 않는다 — 길게 예고하는 대신 "확정으로 나간다"가 압박이 된다.
+        //   (예비동작이 길다고 공짜로 끊기면 강공이 그냥 손해가 된다.)
+        if (_nextIsHeavy) return;
         state    = State.Hit;
         hitTimer = HitStun * 1.5f;
         _cancelBonusUntil = Time.time + 0.05f;   // 직후 OnDamaged가 hitTimer를 덮어쓰지 못하게(아래 참조)

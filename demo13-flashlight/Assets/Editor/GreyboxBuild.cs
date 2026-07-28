@@ -30,6 +30,7 @@ public static class GreyboxBuild
     {
         "gb_floor", "gb_wall", "gb_barricade", "gb_door", "gb_crate",
         "gb_shelf", "gb_note", "gb_spawn", "gb_exit", "gb_enter", "gb_enemy",
+        "gb_car", "gb_prop",
     };
 
     // ── 씬 시작/종료 ──────────────────────────────────────────────────────
@@ -85,6 +86,14 @@ public static class GreyboxBuild
 
     public static int Barricade(GameObject p, string name, float cx, float cy, float lenX, float thickY)
         => Bar("gb_barricade", p, name, cx, cy, lenX, thickY);
+
+    /// <summary>차량(도로 엄폐물) — **벽(회색)·막힘(주황)과 색이 다르다.** 통과 불가지만 인터랙션은 없다.</summary>
+    public static int Car(GameObject p, string name, float cx, float cy, float lenX, float thickY, float angleDeg = 0f)
+        => Bar("gb_car", p, name, cx, cy, lenX, thickY, angleDeg);
+
+    /// <summary>잡프랍(자판기·드럼통·쓰레기통…) — 작은 엄폐 + 길의 표정.</summary>
+    public static int Prop(GameObject p, string name, float cx, float cy, float sx, float sy)
+        => Bar("gb_prop", p, name, cx, cy, sx, sy);
 
     /// <summary>벽 막대(회전): 중심+크기+각도(도). 콜라이더도 함께 회전.</summary>
     public static int Wall(GameObject p, string name, float cx, float cy, float lenX, float thickY, float angleDeg)

@@ -71,6 +71,22 @@ public class GameTuning : ScriptableObject
     [Tooltip("절차 생성 건물 중 실제로 **진입 가능**하게 만들 비율(0~1). 1=전부, 0.5=절반.\n" +
              "Zone1 빌더가 결정론적으로 고른다 — 값을 바꾸면 `빌드 ▸ 지역1` 재실행 필요.")]
     [Range(0f, 1f)] public float buildingEnterRatio = 1f;
+    // ── 근접 전투 (2026-07-11) ────────────────────────────────────────
+    [Header("근접 전투")]
+    [Tooltip("약공 3연타 콤보 사용. 2026-07-11 사용자 결정으로 **기본 OFF** — 궤적·타이밍이 매번 달라\n" +
+             "타격 리듬이 안 읽혔다. 데이터(AttackComboData)는 그대로 두고 진행만 막는다(되살리기 쉽게).")]
+    public bool comboEnabled = false;
+
+    [Header("적 강공(AI)")]
+    [Tooltip("적이 공격을 시작할 때 **강공**을 고를 확률. 0=항상 약공.")]
+    [Range(0f, 1f)] public float enemyHeavyChance = 0.3f;
+    [Tooltip("약공을 이만큼 연속으로 낸 뒤엔 **반드시** 강공. 확률만 두면 영영 안 나오는 판이 생긴다.")]
+    [Range(1, 8)] public int enemyHeavyForceAfter = 3;
+    [Tooltip("강공의 예비동작 배율 — 길수록 '읽고 피할 수 있는' 큰 공격이 된다.")]
+    [Range(1f, 4f)] public float enemyHeavyWindupMult = 1.9f;
+    [Tooltip("강공의 데미지 배율.")]
+    [Range(1f, 4f)] public float enemyHeavyDamageMult = 1.9f;
+
     // ── 도로 장애물 / 막힌 통로 (2026-07-11) ──────────────────────────
     //   "넓은 길인데 그냥 뻥 뚫린 통로" 방지 — 도로 위 잔해로 동선을 꺾고 시야를 끊는다.
     //   밀도/통행폭은 빌더가 읽으므로 바꾸면 `빌드 ▸ 지역1` 재실행 필요.
