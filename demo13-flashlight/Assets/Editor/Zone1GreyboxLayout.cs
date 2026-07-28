@@ -366,15 +366,20 @@ public static class Zone1GreyboxLayout
         {
             var r = _hugBuf[rnd.Next(_hugBuf.Count)];
             float off = 0.6f + (float)rnd.NextDouble() * 0.7f;
+            float nx, ny;                                          // 벽에서 바깥으로 나가는 방향
             switch (rnd.Next(4))
             {
-                case 0:  x = Mathf.Lerp(r.xMin, r.xMax, (float)rnd.NextDouble()); y = r.yMin - off; break;  // 남면
-                case 1:  x = Mathf.Lerp(r.xMin, r.xMax, (float)rnd.NextDouble()); y = r.yMax + off; break;  // 북면
-                case 2:  x = r.xMin - off; y = Mathf.Lerp(r.yMin, r.yMax, (float)rnd.NextDouble());  break;  // 서면
-                default: x = r.xMax + off; y = Mathf.Lerp(r.yMin, r.yMax, (float)rnd.NextDouble());  break;  // 동면
+                case 0:  x = Mathf.Lerp(r.xMin, r.xMax, (float)rnd.NextDouble()); y = r.yMin - off; nx = 0f; ny = -1f; break;  // 남면
+                case 1:  x = Mathf.Lerp(r.xMin, r.xMax, (float)rnd.NextDouble()); y = r.yMax + off; nx = 0f; ny =  1f; break;  // 북면
+                case 2:  x = r.xMin - off; y = Mathf.Lerp(r.yMin, r.yMax, (float)rnd.NextDouble()); nx = -1f; ny = 0f; break;  // 서면
+                default: x = r.xMax + off; y = Mathf.Lerp(r.yMin, r.yMax, (float)rnd.NextDouble()); nx =  1f; ny = 0f; break;  // 동면
             }
             if (x < x0 || x > x1 || y < y0 || y > y1) continue;   // 이 구역 밖으로 튀면 버림
             if (IsIndoors(x, y)) continue;                        // 옆 건물/잔해에 파묻히면 버림
+            // 2026-07-28: 벽 **바로 앞**이 비어 있어도 그게 사각형 둘 사이의 실틈(0.9m)이면
+            //   사람이 못 들어가 **영영 못 줍는 루트**가 된다(노점 골목에서 실제로 발생).
+            //   한 발 더 바깥이 막혀 있으면 그건 틈이지 길이 아니다.
+            if (IsIndoors(x + nx * 1.1f, y + ny * 1.1f)) continue;
             return true;
         }
         return PickOutdoorPoint(rnd, x0, y0, x1, y1, out x, out y);   // 개활지 폴백
@@ -485,9 +490,10 @@ public static class Zone1GreyboxLayout
         n += GreyboxBuild.Note(m, "Pharmacy_Note", 32f, 84f, "약국 카운터 메모",
             "처방 약은 약장(MedCabinet) 안. 카운터 밑 열쇠(key_pharmacy)로 연다.");
 
-        // 서측 열 — 폭 10m라 둘레를 두를 수 없다 → **연립 띠**(스파인을 마주 보는 연속 벽).
-        //   스파인 x28~34는 비워 둔다. 띠 중간에 통로 하나가 뚫려 서쪽으로 빠질 수 있다.
-        n += PerimeterBlock(m, "AW", X0 + 2f, Y0 + 2f, 28f, Y1 - 2f, H(101, 7));
+        // 서측 열 — **노점 골목**(2026-07-28). 튜토 바로 옆이 또 네모 격자면 첫 두 구역이 같아 보인다.
+        //   3~5m 좌판이 실틈(0.9m)을 두고 늘어서고 가운데 통로는 2m — 맵에서 가장 잔 텍스처.
+        //   좌판은 들어가는 건물이 아니라 **뒤지는 물건**이라 여기만 걷는 속도가 확 느려진다.
+        n += StallAlley(m, "AW", X0 + 2f, Y0 + 2f, 28f, Y1 - 2f, H(101, 7));
 
         // 약국 위쪽은 절차 점포 대신 **골목 점포**(유니크) — 아케이드 최심부의 곁가지.
         n += UniqueShop(m, "AlleyShop", "골목 점포 ★", "Int_AlleyShop", "from_alleyshop",
@@ -1251,6 +1257,386 @@ public static class Zone1GreyboxLayout
         return n;
     }
 
+    // ═══════════════════════════════════════════════════════════════════════
+    //  ★ 블록 유형 — 2026-07-28
+    //  사용자: "11시 1시 3시 중앙 5시 6시가 똑같은 스타일인데 2~3개 정도는 다른 스타일로"
+    //
+    //  블록이 정체성 단위라면 **블록의 형태 자체**가 정체성이어야 한다. 둘레형 하나로만 채우면
+    //  이름표만 다르고 걷는 느낌은 전부 같다 — 링을 돌고, 아치로 들어가고, 안뜰을 훑는다.
+    //    · 둘레형   `PerimeterBlock` — 테두리가 두꺼운 띠, 안쪽이 안뜰 (공원 · 상점가 · 유리타워)
+    //    · 판상 단지 `SlabRows`      — 긴 동이 나란히. 테두리가 아니라 **줄무늬** (폐아파트)
+    //    · 울타리 야적장 `FencedYard` — 테두리가 **얇은 선**(담장)이라 안이 다 보인다 (경찰서 압수장)
+    //    · 붕괴장   `RubbleField`    — 형태 자체가 없다. 잔해 사이가 곧 길 (무너진 상가)
+    //    · 노점 골목 `StallAlley`    — 3~5m 좌판이 통로 양쪽에. 맵에서 가장 잔 텍스처 (약국 아케이드)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /// <summary>판상 단지 — 긴 동 2~4개가 나란히 서고 **그 사이가 단지 안길**이 된다.
+    ///
+    /// 둘레형과 정반대 실루엣이다. 길에서 단지 안이 훤히 들여다보이지만, 들어가면 동과 동 사이에
+    /// 갇혀 **앞뒤로만** 움직이게 된다(둘레형은 사방이 막히고 안이 넓다 — 정확히 반대의 압박).
+    /// 동 길이를 서로 어긋나게 잡아야 '줄무늬 3개'가 아니라 '단지'로 읽힌다.</summary>
+    static int SlabRows(GameObject m, string p, float x0, float y0, float x1, float y1, int seed,
+                        BandSpot lm, string yardLabel, string yardNote)
+    {
+        float bw = x1 - x0, bh = y1 - y0;
+        if (bw < 22f || bh < 26f) return PerimeterBlock(m, p, x0, y0, x1, y1, seed);
+
+        const float Gap = 5.2f;                 // 동 사이 = 단지 안길(주차·놀이터가 여기 들어간다)
+        int slabs = Mathf.Clamp(Mathf.RoundToInt(bw / 14f), 2, 4);
+        float sw = (bw - Gap * (slabs - 1)) / slabs;
+        while (slabs > 2 && sw < 7f) { slabs--; sw = (bw - Gap * (slabs - 1)) / slabs; }
+        int lmIndex = lm.side == 'W' ? 0 : slabs - 1;   // 랜드마크 동 = 간선을 면한 쪽
+
+        int n = 0;
+        for (int i = 0; i < slabs; i++)
+        {
+            uint h = (uint)H(seed * 17 + i * 5, 7);
+            float sx = x0 + i * (sw + Gap);
+            // 동 길이를 흔든다 — 다 같으면 그냥 줄무늬다.
+            float sy0 = y0 + 1.5f + (h % 5u) * 1.5f;
+            float sy1 = y1 - 1.5f - ((h >> 4) % 5u) * 1.5f;
+            if (sy1 - sy0 < 14f) { sy0 = y0 + 2f; sy1 = y1 - 2f; }
+
+            bool isLm = i == lmIndex && !string.IsNullOrEmpty(lm.id);
+            n += BandMass(m, isLm ? lm.id : $"{p}_s{i}", sx, sy0, sx + sw, sy1);
+
+            // 동 출입구 — 46m짜리 동에 문 하나면 단지가 죽는다. 16m마다 하나씩, 안길을 향해.
+            int doors = Mathf.Max(1, Mathf.FloorToInt((sy1 - sy0) / 16f));
+            for (int d = 0; d < doors; d++)
+            {
+                float dAt = Mathf.Lerp(sy0, sy1, (d + 0.5f) / doors) - 1f;
+                char side = i == 0 ? 'E' : i == slabs - 1 ? 'W' : ((d % 2 == 0) ? 'W' : 'E');
+                DoorPad(sx, sy0, sx + sw, sy1, side, dAt, out float ex, out float ey, out float tw, out float th);
+                n += EnterGeneric(m, $"{p}_s{i}d{d}", ex, ey, tw, th);
+            }
+            // 랜드마크 동은 **간선을 향한 정문**을 따로 갖는다(길에서 바로 보이고 바로 들어간다).
+            if (isLm)
+            {
+                float dAt = (sy0 + sy1) * 0.5f - 1f;
+                DoorPad(sx, sy0, sx + sw, sy1, lm.side, dAt, out float ex, out float ey, out float tw, out float th);
+                n += Enter(m, $"{lm.id}_Door", ex, ey,
+                           string.IsNullOrEmpty(lm.scene) ? "Int_Generic" : lm.scene, "default", tw, th);
+                n += LandmarkTrim(m, lm, sx, sy0, sx + sw, sy1, lm.side, dAt);
+            }
+        }
+
+        // ── 안길 채우기 — 주차 열 / 놀이터 / 루트. 여기가 이 블록의 '안뜰'이다.
+        var rnd = new System.Random(seed ^ 0x11AB);
+        for (int g = 0; g < slabs - 1; g++)
+        {
+            float gx = x0 + (g + 1) * sw + g * Gap;      // 안길 좌측 경계
+            float cx = gx + Gap * 0.5f;
+            bool play = g == (H(seed, 71) % Mathf.Max(1, slabs - 1));   // 안길 하나는 놀이터
+
+            for (float cy = y0 + 5f; cy < y1 - 4f; cy += 7.5f)
+            {
+                uint h = (uint)H(seed + g * 37, (int)cy);
+                if (h % 4u == 0u) continue;
+                if (IsIndoors(cx, cy) || NearKeepOut(cx, cy, 3.2f)) continue;
+                if (play && h % 3u == 0u)
+                {
+                    n += GreyboxBuild.Prop(m, $"{p}_pl{g}{(int)cy}", cx, cy, 2.6f, 1.6f);
+                    MarkBuilding(cx - 1.3f, cy - 0.8f, cx + 1.3f, cy + 0.8f);
+                }
+                else
+                {
+                    n += GreyboxBuild.Car(m, $"{p}_car{g}{(int)cy}", cx, cy, 1.9f, 4.4f);   // 세로 주차
+                    MarkBuilding(cx - 0.95f, cy - 2.2f, cx + 0.95f, cy + 2.2f);
+                }
+            }
+            // 안길마다 상자 하나 — 동 사이를 끝까지 걸어 볼 이유.
+            if (CourtSpot(rnd, gx, y0 + 3f, gx + Gap, y1 - 3f, 1.2f, out float px, out float py))
+                n += CrateAnchor(m, $"{p}_gc{g}", px, py);
+        }
+
+        // 단지 이름표 + 적 — 가운데 안길에.
+        float mx = x0 + bw * 0.5f, my = y0 + bh * 0.5f;
+        if (!string.IsNullOrEmpty(yardLabel))
+        {
+            float ny = y0 + 4f;
+            n += GreyboxBuild.Note(m, $"{p}_Yard", mx, ny, yardLabel, yardNote ?? yardLabel);
+            KeepOut(mx, ny);
+        }
+        n += EnemyZone(m, $"EZ_{p}_yard", mx, my, Mathf.Min(bw - 6f, 14f), Mathf.Min(bh - 6f, 16f),
+                       "bandit_melee_1", 2);
+        return n;
+    }
+
+    /// <summary>울타리 야적장 — 한 변만 건물이고 나머지 세 변은 **담장(두께 0.7m)**.
+    ///
+    /// 테두리가 '선'이라 밖에서 안이 다 보인다 — 들어가기 전에 **보고 판단**할 수 있는 유일한 블록.
+    /// 대신 문은 두 곳뿐이라, 안에서 걸리면 되돌아 나가는 거리가 길다.
+    /// 안은 컨테이너 열·창고·압수 차량 — 직선 엄폐물이 줄지어 있어 교전 결이 또 다르다.</summary>
+    static int FencedYard(GameObject m, string p, float x0, float y0, float x1, float y1, int seed,
+                          BandSpot lm, string yardLabel, string yardNote)
+    {
+        float bw = x1 - x0, bh = y1 - y0;
+        if (bw < 24f || bh < 24f) return PerimeterBlock(m, p, x0, y0, x1, y1, seed);
+
+        int n = 0;
+        float depth = 12f;                                  // 건물 변의 두께
+        float ix0 = x0, iy0 = y0, ix1 = x1, iy1 = y1;       // 야적장(담장 안) 영역
+        switch (lm.side)
+        {
+            case 'W': ix0 = x0 + depth; break;
+            case 'E': ix1 = x1 - depth; break;
+            case 'S': iy0 = y0 + depth; break;
+            default:  iy1 = y1 - depth; break;
+        }
+
+        // ── 건물 변 — 랜드마크 + 그 변을 마저 채우는 보통 건물 1~2채.
+        {
+            bool vertical = lm.side == 'W' || lm.side == 'E';
+            float a0 = vertical ? y0 : x0, a1 = vertical ? y1 : x1;
+            float d0 = lm.side == 'W' ? x0 : lm.side == 'E' ? x1 : lm.side == 'S' ? y0 : y1;
+            float d1 = lm.side == 'W' ? x0 + depth : lm.side == 'E' ? x1 - depth
+                     : lm.side == 'S' ? y0 + depth : y1 - depth;
+            n += BandRun(m, $"{p}F", lm.side, a0, a1, d0, d1, !vertical, H(seed, 51), false,
+                         new[] { lm }, false);
+        }
+
+        // ── 담장 세 면 + 문 2개. 문은 서로 다른 변에 나야 '가로지르는 동선'이 생긴다.
+        int gateA = H(seed, 61) % 3, gateB = (gateA + 1 + H(seed, 62) % 2) % 3;
+        int side = 0;
+        if (lm.side != 'S') { n += Fence(m, $"{p}fS", ix0, iy0, ix1, iy0, side == gateA || side == gateB, H(seed, 71)); side++; }
+        if (lm.side != 'N') { n += Fence(m, $"{p}fN", ix0, iy1, ix1, iy1, side == gateA || side == gateB, H(seed, 72)); side++; }
+        if (lm.side != 'W') { n += Fence(m, $"{p}fW", ix0, iy0, ix0, iy1, side == gateA || side == gateB, H(seed, 73)); side++; }
+        if (lm.side != 'E') { n += Fence(m, $"{p}fE", ix1, iy0, ix1, iy1, side == gateA || side == gateB, H(seed, 74)); }
+
+        // ── 야적장 안 — 컨테이너 열(긴 직선 엄폐) + 창고 1~2채 + 압수 차량.
+        var rnd = new System.Random(seed ^ 0x2C0D);
+        float yw = ix1 - ix0, yh = iy1 - iy0;
+        if (!string.IsNullOrEmpty(yardLabel))
+        {
+            float nx = ix0 + 3f, ny = iy0 + 3f;
+            n += GreyboxBuild.Note(m, $"{p}_Yard", nx, ny, yardLabel, yardNote ?? yardLabel);
+            KeepOut(nx, ny);
+        }
+
+        int rows = Mathf.Max(1, Mathf.FloorToInt((yh - 6f) / 8f));
+        for (int r = 0; r < rows; r++)
+        {
+            float cy = iy0 + 5f + r * 8f;
+            if (cy > iy1 - 4f) break;
+            for (float cx = ix0 + 4f; cx < ix1 - 4f; cx += 9f)
+            {
+                uint h = (uint)H(seed + r * 29, (int)cx);
+                if (h % 5u == 0u) continue;                       // 빈 자리(하역 통로)
+                bool box = h % 3u != 0u;                          // 컨테이너 / 압수 차량
+                float w = box ? 7.5f : 4.4f, d = box ? 2.6f : 1.9f;
+                if (cx + w * 0.5f > ix1 - 2f) break;
+                if (IsIndoors(cx, cy) || NearKeepOut(cx, cy, 3.6f)) continue;
+                n += box ? GreyboxBuild.Prop(m, $"{p}_ct{r}{(int)cx}", cx, cy, w, d)
+                         : GreyboxBuild.Car(m, $"{p}_iv{r}{(int)cx}", cx, cy, w, d);
+                MarkBuilding(cx - w * 0.5f, cy - d * 0.5f, cx + w * 0.5f, cy + d * 0.5f);
+            }
+        }
+
+        // 창고 1~2채 — 야적장 안에도 들어갈 데가 있어야 훑을 맛이 난다.
+        int sheds = 1 + H(seed, 81) % 2;
+        for (int i = 0; i < sheds; i++)
+        {
+            float sw = 8f + (H(seed + i * 13, 3) % 30) * 0.1f;
+            float sd = 6.5f + (H(seed + i * 13, 4) % 25) * 0.1f;
+            if (yw - sw < 10f || yh - sd < 10f) break;
+            float sx = ix0 + 3f + (yw - sw - 6f) * ((H(seed + i * 19, 5) % 100) / 100f);
+            float sy = iy0 + 3f + (yh - sd - 6f) * ((H(seed + i * 19, 6) % 100) / 100f);
+            if (IsIndoors(sx + sw * 0.5f, sy + sd * 0.5f)) continue;
+            if (NearKeepOut(sx + sw * 0.5f, sy + sd * 0.5f, 5.5f)) continue;
+            n += BandBuilding(m, $"{p}_shed{i}", sx, sy, sx + sw, sy + sd, 'S', sx + sw * 0.5f - 1f, null, true);
+        }
+
+        for (int i = 0; i < 4; i++)
+            if (CourtSpot(rnd, ix0, iy0, ix1, iy1, 2.2f, out float px, out float py))
+                n += CrateAnchor(m, $"{p}_yc{i}", px, py);
+
+        n += EnemyZone(m, $"EZ_{p}_yard", (ix0 + ix1) * 0.5f, (iy0 + iy1) * 0.5f,
+                       Mathf.Min(yw - 4f, 13f), Mathf.Min(yh - 4f, 13f), "bandit_melee_1", 2);
+        n += EnemyZone(m, $"EZ_{p}_yardT", (ix0 + ix1) * 0.5f, (iy0 + iy1) * 0.5f, 7f, 7f, "bandit_tank", 1);
+        return n;
+    }
+
+    /// <summary>담장 한 줄 — 얇은 벽 + (선택) 문 갭. A→B는 축 정렬이어야 한다.</summary>
+    static int Fence(GameObject m, string name, float ax, float ay, float bx, float by, bool gate, int seed)
+    {
+        const float T = 0.7f, Gate = 4.4f;
+        bool horiz = Mathf.Abs(bx - ax) > Mathf.Abs(by - ay);
+        float L = horiz ? bx - ax : by - ay;
+        if (L < 4f) return 0;
+        if (!gate || L < Gate + 6f) return FenceSeg(m, name, ax, ay, horiz, 0f, L, T);
+
+        float g0 = 3f + (H(seed, 5) % 100) * 0.01f * (L - Gate - 6f);
+        int n = FenceSeg(m, $"{name}a", ax, ay, horiz, 0f, g0, T)
+              + FenceSeg(m, $"{name}b", ax, ay, horiz, g0 + Gate, L, T);
+        float gc = g0 + Gate * 0.5f;
+        // 문 앞뒤를 비워 둔다 — 담장 문이 잔해로 막히면 야적장이 통째로 죽는다.
+        for (int k = -1; k <= 1; k++)
+            KeepOut(horiz ? ax + gc : ax + k * 2.2f, horiz ? ay + k * 2.2f : ay + gc);
+        return n;
+    }
+
+    static int FenceSeg(GameObject m, string name, float ax, float ay, bool horiz, float t0, float t1, float T)
+    {
+        if (t1 - t0 < 1f) return 0;
+        float cx = horiz ? ax + (t0 + t1) * 0.5f : ax;
+        float cy = horiz ? ay : ay + (t0 + t1) * 0.5f;
+        float w = horiz ? t1 - t0 : T, h = horiz ? T : t1 - t0;
+        if (IsIndoors(cx, cy)) return 0;
+        int n = GreyboxBuild.Wall(m, name, cx, cy, w, h);
+        MarkBuilding(cx - w * 0.5f, cy - h * 0.5f, cx + w * 0.5f, cy + h * 0.5f);
+        return n;
+    }
+
+    /// <summary>붕괴장 — 블록의 **형태가 없다**. 살아남은 벽 조각 몇과 잔해 더미뿐이라
+    /// 길이 정해져 있지 않고, 어디로든 갈 수 있지만 어디도 곧게 가지 못한다.
+    /// 링·줄무늬·담장과 달리 **실루엣에 직선이 거의 없어** 멀리서도 한눈에 구분된다.</summary>
+    static int RubbleField(GameObject m, string p, float x0, float y0, float x1, float y1, int seed,
+                           BandSpot lm, string yardLabel, string yardNote)
+    {
+        float bw = x1 - x0, bh = y1 - y0;
+        if (bw < 20f || bh < 20f) return PerimeterBlock(m, p, x0, y0, x1, y1, seed);
+        int n = 0;
+
+        // ── 살아남은 한 채(랜드마크) — 길을 면한 변에 붙인다. 폐허 속 유일한 온전한 건물.
+        {
+            float lw = Mathf.Min(12.5f, bw * 0.35f), ld = Mathf.Min(11.5f, bh * 0.32f);
+            float bx0, by0, bx1, by1;
+            switch (lm.side)
+            {
+                case 'W': bx0 = x0; bx1 = x0 + ld; by0 = y0 + (bh - lw) * 0.5f; by1 = by0 + lw; break;
+                case 'E': bx1 = x1; bx0 = x1 - ld; by0 = y0 + (bh - lw) * 0.5f; by1 = by0 + lw; break;
+                case 'N': by1 = y1; by0 = y1 - ld; bx0 = x0 + (bw - lw) * 0.5f; bx1 = bx0 + lw; break;
+                default:  by0 = y0; by1 = y0 + ld; bx0 = x0 + (bw - lw) * 0.5f; bx1 = bx0 + lw; break;
+            }
+            float dAt = (lm.side == 'S' || lm.side == 'N') ? (bx0 + bx1) * 0.5f - 1f : (by0 + by1) * 0.5f - 1f;
+            n += BandBuilding(m, lm.id, bx0, by0, bx1, by1, lm.side, dAt, lm.scene, true);
+            n += LandmarkTrim(m, lm, bx0, by0, bx1, by1, lm.side, dAt);
+        }
+
+        // ── 무너지고 남은 벽 조각 2개 — ㄱ자 형태로 남아 '건물이었던 것'임을 알린다.
+        for (int i = 0; i < 2; i++)
+        {
+            uint h = (uint)H(seed * 7 + i * 31, 3);
+            float fx = x0 + 4f + (bw - 20f) * ((h % 100u) / 100f);
+            float fy = y0 + 4f + (bh - 20f) * (((h >> 7) % 100u) / 100f);
+            float armA = 7f + (h % 6u), armB = 6f + ((h >> 3) % 6u);
+            if (IsIndoors(fx, fy) || NearKeepOut(fx, fy, 5f)) continue;
+            n += FenceSeg(m, $"{p}_frag{i}a", fx, fy, true,  0f, armA, 1.1f);
+            n += FenceSeg(m, $"{p}_frag{i}b", fx, fy, false, 0f, armB, 1.1f);
+        }
+
+        // ── 잔해 더미 — 흔든 격자 위에. 사이가 곧 길이라 통로가 저절로 구불거린다.
+        var rnd = new System.Random(seed ^ 0x3D0F);
+        for (float gy = y0 + 4f; gy < y1 - 3f; gy += 7f)
+        for (float gx = x0 + 4f; gx < x1 - 3f; gx += 7.5f)
+        {
+            uint h = (uint)H(seed + (int)gx * 13, (int)gy);
+            if (h % 5u == 0u) continue;                                  // 빈칸 = 넓게 트인 길
+            float cx = gx + ((h >> 3) % 30u) * 0.1f - 1.5f;
+            float cy = gy + ((h >> 9) % 30u) * 0.1f - 1.5f;
+            float w = 2.6f + ((h >> 14) % 40u) * 0.11f;                  // 2.6~7.0
+            float d = 2.2f + ((h >> 20) % 40u) * 0.10f;
+            if (IsIndoors(cx, cy) || NearKeepOut(cx, cy, 4f)) continue;
+            if (cx - w * 0.5f < x0 || cx + w * 0.5f > x1) continue;
+            if (cy - d * 0.5f < y0 || cy + d * 0.5f > y1) continue;
+            n += GreyboxBuild.Wall(m, $"{p}_rb{(int)gx}_{(int)gy}", cx, cy, w, d);
+            MarkBuilding(cx - w * 0.5f, cy - d * 0.5f, cx + w * 0.5f, cy + d * 0.5f);
+        }
+
+        // 파묻힌 차 몇 대 + 루트. 폐허는 위험한 만큼 두둑해야 들어갈 이유가 생긴다.
+        for (int i = 0; i < 4; i++)
+            if (CourtSpot(rnd, x0, y0, x1, y1, 3f, out float px, out float py))
+            {
+                n += GreyboxBuild.Car(m, $"{p}_wr{i}", px, py, 4.4f, 1.9f);
+                MarkBuilding(px - 2.2f, py - 0.95f, px + 2.2f, py + 0.95f);
+            }
+        if (!string.IsNullOrEmpty(yardLabel))
+        {
+            if (CourtSpot(rnd, x0, y0, x1, y1, 3f, out float nx, out float ny))
+            {
+                n += GreyboxBuild.Note(m, $"{p}_Yard", nx, ny, yardLabel, yardNote ?? yardLabel);
+                KeepOut(nx, ny);
+            }
+        }
+        for (int i = 0; i < 5; i++)
+            if (CourtSpot(rnd, x0, y0, x1, y1, 2.5f, out float px, out float py))
+                n += CrateAnchor(m, $"{p}_rc{i}", px, py);
+
+        n += EnemyZone(m, $"EZ_{p}_field", (x0 + x1) * 0.5f, (y0 + y1) * 0.5f,
+                       Mathf.Min(bw - 6f, 14f), Mathf.Min(bh - 6f, 14f), "bandit_melee_1", 2);
+        n += EnemyZone(m, $"EZ_{p}_fieldT", x0 + bw * 0.7f, y0 + bh * 0.35f, 8f, 8f, "bandit_tank", 1);
+        return n;
+    }
+
+    /// <summary>노점 골목 — 3~5m 좌판이 통로 양쪽에 촘촘히. 맵에서 **가장 잔 텍스처**다.
+    /// 좌판은 들어가는 건물이 아니라 **뒤지는 물건**이라, 여기만 걷는 속도가 확 느려진다.</summary>
+    static int StallAlley(GameObject m, string p, float x0, float y0, float x1, float y1, int seed)
+    {
+        float bw = x1 - x0, bh = y1 - y0;
+        if (bw < 6f || bh < 10f) return RowTerrace(m, p, x0, y0, x1, y1, seed);
+
+        bool vertical = bh >= bw;                       // 통로가 뻗는 방향
+        float across = vertical ? bw : bh;              // 통로에 수직인 폭
+        float along = vertical ? bh : bw;
+        const float Aisle = 2.0f;                       // 좌판 사이 통로(맵에서 가장 좁다)
+        float rowD = (across - Aisle) * 0.5f;
+        if (rowD < 2.2f) return RowTerrace(m, p, x0, y0, x1, y1, seed);
+
+        int n = 0;
+        for (int side = 0; side < 2; side++)
+        {
+            float d0 = side == 0 ? (vertical ? x0 : y0) : (vertical ? x0 + rowD + Aisle : y0 + rowD + Aisle);
+            float d1 = d0 + rowD;
+            float a = (vertical ? y0 : x0) + 0.8f;
+            float aEnd = (vertical ? y1 : x1) - 0.8f;
+            for (int i = 0; a < aEnd - 2.5f; i++)
+            {
+                uint h = (uint)H(seed * 23 + side * 101, i * 7 + 3);
+                float len = 3.0f + (h % 22u) * 0.1f;                 // 3.0~5.1m 좌판
+                if (a + len > aEnd) len = aEnd - a;
+                if (len < 2.2f) break;
+                float dep = d1 - (((h >> 5) % 100u < 35u) ? 0.7f : 0f);   // 좌판 깊이도 흔들린다
+
+                string name = $"{p}_st{side}{i}";
+                float bx0 = vertical ? d0 : a, by0 = vertical ? a : d0;
+                float bx1 = vertical ? dep : a + len, by1 = vertical ? a + len : dep;
+                if (!IsIndoors((bx0 + bx1) * 0.5f, (by0 + by1) * 0.5f) && (h >> 11) % 100u >= 12u)
+                {
+                    n += BandMass(m, name, bx0, by0, bx1, by1);
+                    // 좌판 4개 중 1개는 뒤질 수 있다 — 골목을 끝까지 훑을 이유.
+                    if (i % 4 == side) n += Searchable(m, name, "좌판", "좌판 뒤지기", 2, 2, Mathf.Max(len, rowD));
+                }
+                a += len + 0.9f;                                      // 좌판 사이 실틈
+            }
+        }
+        return n;
+    }
+
+    /// <summary>이미 세운 오브젝트를 **뒤질 수 있는 것**으로 만든다(별도 상자를 옆에 놓지 않는다).
+    /// 예산제(MapSpawnController)가 채우도록 ItemSpawnPoint(Container)를 링크해 둔다.</summary>
+    static int Searchable(GameObject m, string objName, string label, string prompt, int w, int h, float size)
+    {
+        var t = FindChild(m.transform, objName);
+        if (t == null) return 0;
+        var go = t.gameObject;
+
+        var lc = go.GetComponent<LootContainer>();
+        if (lc == null) lc = go.AddComponent<LootContainer>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+        lc.Setup(label, w, h);
+
+        var io = go.GetComponent<InteractableObject>();
+        if (io == null) io = go.AddComponent<InteractableObject>();
+        io.Configure(InteractableObject.InteractType.Container, prompt, size * 0.5f + 1.6f);
+
+        var sp = go.GetComponent<ItemSpawnPoint>();
+        if (sp == null) sp = go.AddComponent<ItemSpawnPoint>();
+        SetSpawnType(sp, 1);   // Container
+        var so = new SerializedObject(sp);
+        var lk = so.FindProperty("linkedContainer");
+        if (lk != null) { lk.objectReferenceValue = lc; so.ApplyModifiedPropertiesWithoutUndo(); }
+        return 1;
+    }
+
     /// <summary>합이 1인 가중치 — 필지 크기를 흔들어 균일 격자처럼 보이지 않게 한다.</summary>
     static float[] LotWeights(int count, int seed)
     {
@@ -1281,14 +1667,18 @@ public static class Zone1GreyboxLayout
                               new[] { spot }, courtKind, -1, yardLabel, yardNote);
     }
 
-    /// <summary>C1R0 = 폐아파트 블록. 동측 띠 전체가 아파트 동(문 = 세로 간선), 안쪽은 단지 뒷마당.</summary>
+    /// <summary>C1R0 = 폐아파트 **판상 단지**(둘레형 아님). 긴 동 3개가 나란히, 사이가 단지 안길.
+    /// 동측 동이 간선을 면하고 정문을 갖는다.</summary>
     static int BuildAptBlock(GameObject m, float x0, float y0, float x1, float y1)
-        => LandmarkBlock(m, "Apt", x0, y0, x1, y1, 'E', null,
-                         "폐아파트 ★★",
-                         "세로 간선 西. key_apt_admin → 펜트 key_tower_card. 수직 다층 후속.",
-                         2, 1,
-                         "아파트 단지 뒷마당 ★★",
-                         "주민들이 버리고 간 차와 살림. 동에 둘러싸여 있어 한 번 들어오면 나가는 길이 좁다.");
+        => SlabRows(m, "Apt", x0, y0, x1, y1, H((int)x0 + 3, (int)y0 + 9),
+                    new BandSpot
+                    {
+                        side = 'E', id = "Apt", label = "폐아파트 ★★",
+                        note = "세로 간선 西. key_apt_admin → 펜트 key_tower_card. 수직 다층 후속.",
+                        enemies = 2, enemyKey = "bandit_melee_1",
+                    },
+                    "아파트 단지 안길 ★★",
+                    "동과 동 사이. 주민들이 버리고 간 차가 그대로다. 앞뒤로밖에 못 움직인다.");
 
     /// <summary>C2R0 = 유리타워 블록. 서측 띠 전체가 타워 단지(문 = 세로 간선), 안쪽은 하역장.</summary>
     static int BuildTowerBlock(GameObject m, float x0, float y0, float x1, float y1)
@@ -1299,14 +1689,19 @@ public static class Zone1GreyboxLayout
                          "타워 하역장 ★★★",
                          "적재 팔레트가 그대로 남았다. 사방이 막혀 있어 여기서 붙으면 피할 데가 없다.");
 
-    /// <summary>C2R2 = 무너진 상가 블록 — 남측 띠 전체 + **전용 내부 씬** `Int_CollapsedMall`.</summary>
+    /// <summary>C2R2 = **붕괴장**(둘레형 아님). 블록 전체가 잔해밭이고, 살아남은 한 채가
+    /// 가로 간선을 면한다 — 그 안이 `Int_CollapsedMall`.</summary>
     static int BuildCollapsedMall(GameObject m, float x0, float y0, float x1, float y1)
-        => LandmarkBlock(m, "CollapsedMall", x0, y0, x1, y1, 'S', "Int_CollapsedMall",
-                         "무너진 상가 ★★★",
-                         "SQ-001 갇힌 생존자. 잔해 미로 최심부. 문 = 가로 간선(南).",
-                         2, 3,
-                         "상가 안뜰 ★★★",
-                         "상층이 무너져 안뜰로 쏟아졌다. 잔해 사이가 곧 길이다.");
+        => RubbleField(m, "CollapsedMall", x0, y0, x1, y1, H((int)x0 + 3, (int)y0 + 9),
+                       new BandSpot
+                       {
+                           side = 'S', id = "CollapsedMall", label = "무너진 상가 ★★★",
+                           scene = "Int_CollapsedMall",
+                           note = "SQ-001 갇힌 생존자. 잔해 미로 최심부. 문 = 가로 간선(南).",
+                           enemies = 2, enemyKey = "bandit_melee_1",
+                       },
+                       "상가 붕괴장 ★★★",
+                       "상층이 통째로 무너져 내렸다. 길이 정해져 있지 않고, 어디로도 곧게 가지 못한다.");
 
     /// <summary>C0R2 = 공원 안뜰 블록(분식집이 남측 띠에 편입).</summary>
     static int BuildParkBlock(GameObject m, float x0, float y0, float x1, float y1)
@@ -1322,19 +1717,18 @@ public static class Zone1GreyboxLayout
                               "블록 한가운데 남은 공원. 조용한 대신 가져갈 것도 적다.");
     }
 
-    /// <summary>C2R1 = 주차 안뜰 블록(경찰서가 서측 띠에 편입 — 문 = 세로 간선).</summary>
+    /// <summary>C2R1 = **울타리 야적장**(둘레형 아님). 서측 한 변만 건물(경찰서 — 문 = 세로 간선)이고
+    /// 나머지 세 면은 담장이다. 밖에서 안이 다 보이지만 들어가는 문은 둘뿐.</summary>
     static int BuildLotBlock(GameObject m, float x0, float y0, float x1, float y1)
-    {
-        var spots = new[]
-        {
-            new BandSpot { side = 'W', at = 0.5f, id = "Police", label = "경찰서 ★★★★",
-                           scene = "Int_Police", enemies = 3,
-                           note = "무기고 뒷문은 잠겨 있다(열쇠). 로비 압수품 대장에 **보석상 금고 번호**가 적혀 있다." },
-        };
-        return PerimeterBlock(m, "Lot", x0, y0, x1, y1, H((int)x0 + 5, (int)y1), spots, 1, 2,
-                              "경찰서 뒤 주차장 ★★",
-                              "압수 차량이 빽빽해 시야가 자주 끊긴다. 뒷문 쪽엔 늘 누가 있다.");
-    }
+        => FencedYard(m, "Lot", x0, y0, x1, y1, H((int)x0 + 5, (int)y1),
+                      new BandSpot
+                      {
+                          side = 'W', at = 0.5f, id = "Police", label = "경찰서 ★★★★",
+                          scene = "Int_Police", enemies = 3, enemyKey = "bandit_melee_1",
+                          note = "무기고 뒷문은 잠겨 있다(열쇠). 로비 압수품 대장에 **보석상 금고 번호**가 적혀 있다.",
+                      },
+                      "경찰 압수 야적장 ★★",
+                      "컨테이너와 압수 차량이 줄지어 있다. 담장 너머로 다 보이는 만큼, 안에서도 다 보인다.");
 
     /// <summary>**문 = 입구.** gb_door 하나가 표시이자 진입 트리거(BuildingEntrance)다.
     /// 밟으면 내부 씬으로 전환(페이드+캐릭터 유지). 복귀 스폰은 Zone1의 from_&lt;건물&gt;.</summary>
