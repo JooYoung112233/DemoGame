@@ -203,3 +203,18 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
   - Light2D를 건드리지 않는 **독립 오버레이**(Unlit 반투명, sortingOrder 100)라 글로벌 라이트·낮밤 셋업과 충돌하지 않음
 - **노브**: `GameTuning.visionDarkAlpha`(기본 0.72, 0=끔) — 어둠 농도. 기존 `visionEnabled/FovDegrees/Range/NearRadius`와 함께 동작.
 - ⚠️ 알려진 별건: `GameTuning.asset`에 시야 필드가 **아직 기록돼 있지 않아** 코드 기본값으로 돈다(패널에서 조절하려면 에셋에 값이 써져야 함).
+
+## 2026-07-11 — 그레이박스 식별 라벨: "적" ↔ "시체" (`UnitLabel`)
+
+> 질문/지적: *"시체는 시체라고 표기해서 적은 적이라고 해주고, 적이 죽으면 시체겠지?"*
+> **결정**: 살아있는 적은 머리 위 **"적"**, 죽으면 같은 라벨을 **"시체"** 로 교체한다. 아트가 붙기 전까지의 임시 식별 장치.
+
+- **신규 `Combat/UnitLabel.cs`** — 머리 위 월드 텍스트(TextMesh) 한 곳. `Attach/Set/SetVisible`.
+  - 부착 위치 = **몸체 스프라이트의 자식**, 부모 스케일을 보정해 어떤 크기의 적이든 글자 크기 동일(월드 0.13)
+  - 색: 적 = 연분홍 / 시체 = 회색. 사망 시 **몸체 스프라이트도 45%로 어둡게** — 라벨만 바뀌면 여전히 붉은 적처럼 보인다
+- **생성 주체를 `EnemyController.Awake` 한 곳으로 통일** — 기존엔 `EnemySpawner`가 런타임 그레이박스 적에만 붙여서 **프리팹 적엔 라벨이 없었다.**
+- **디버그 시체 스폰(F1)** 도 같은 라벨을 쓴다 — 사망 경로와 눈으로 비교 가능.
+
+### 이번에 같이 잡은 두 버그
+1. **라벨이 아예 안 그려짐** — 스크립트로 `AddComponent<TextMesh>()` 하면 `font`가 null이라 머티리얼이 비어 **한 글자도 렌더되지 않는다**(인스펙터로 붙일 때와 다름). `LegacyRuntime.ttf` + 그 머티리얼을 명시 지정해 해결. `EnemySpeechBubble`이 같은 이유로 이미 폰트를 명시하고 있었다.
+2. **시야 밖인데 라벨만 떠서 위치 노출** — `PlayerVision`/`SetVisionVisible`은 **SpriteRenderer '컴포넌트'만** 끄므로 자식 MeshRenderer(라벨)는 안 꺼진다. `SetVisionVisible`에서 라벨도 같이 껐다 켜도록 수정. (시체는 항상 보이는 월드 오브젝트라 사망 시 강제 표시.)

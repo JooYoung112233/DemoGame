@@ -16,6 +16,7 @@ public class EnemyController : MonoBehaviour
     /// <summary>활성 적 레지스트리 — PlayerVision(FOV 시야콘)이 순회.</summary>
     public static readonly List<EnemyController> All = new List<EnemyController>();
     bool _visionVisible = true;
+    UnitLabel _label;   // 머리 위 "적"/"시체" 라벨 (그레이박스용)
 
     [Header("Detection")]
     [SerializeField] float detectRange    = 8f;
@@ -145,6 +146,9 @@ public class EnemyController : MonoBehaviour
         if (_visionVisible == v) return;
         _visionVisible = v;
         if (spriteRenderer != null) spriteRenderer.enabled = v;
+        // 라벨은 스프라이트의 자식이지만 MeshRenderer라 위 한 줄로는 안 꺼진다 —
+        // 안 끄면 시야 밖 적의 "적" 글자만 어둠 속에 떠서 위치가 노출된다.
+        if (_label != null) _label.SetVisible(v);
         if (!v)
         {
             if (hpBarBg != null) hpBarBg.SetActive(false);
@@ -179,6 +183,12 @@ public class EnemyController : MonoBehaviour
 
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         renderers      = GetComponentsInChildren<Renderer>();
+
+        // 그레이박스 식별 라벨("적" → 사망 시 "시체"). 프리팹 적이든 런타임 생성이든 여기 한 곳에서 보장.
+        _label = GetComponentInChildren<UnitLabel>(true);
+        if (_label == null && spriteRenderer != null)
+            _label = UnitLabel.Attach(spriteRenderer.transform, "적", UnitLabel.EnemyColor,
+                                      spriteRenderer.sortingOrder + 1);
 
         // 적 은신 + 머리 위 말풍선 (가시성 실험) — 자동 부착
         if (GetComponent<EnemySpeechBubble>() == null)
@@ -695,6 +705,15 @@ public class EnemyController : MonoBehaviour
             RaidManager.Instance.TrackKillXp(unitStat.expReward);
 
         BecomeCorpse();
+
+        // 2026-07-11: "적이 죽으면 시체" — 머리 위 라벨을 교체하고 몸체를 어둡게 해
+        //   살아있는(붉은) 적과 한눈에 구분되게 한다. 이름표만 바뀌면 여전히 헷갈린다.
+        if (_label != null) _label.Set("시체", UnitLabel.CorpseColor);
+        if (spriteRenderer != null)
+        {
+            Color c = spriteRenderer.color;
+            spriteRenderer.color = new Color(c.r * 0.45f, c.g * 0.45f, c.b * 0.45f, c.a);
+        }
 
         SetVisionVisible(true);   // 시야 밖 사망 대비 — All 해제 후엔 PlayerVision이 다시 켜주지 않음(시체 = 항상 보이는 월드 오브젝트)
         enabled = false;          // AI 종료 + All 등록 해제(OnDisable) — 시야/전투 판정 대상에서 제외. GO는 시체로 유지.

@@ -594,7 +594,11 @@ public class DebugTestUI : MonoBehaviour
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
         sr.color = new Color(0.35f, 0.22f, 0.20f, 1f);
+        sr.sortingOrder = 3;
         go.transform.localScale = new Vector3(1.1f, 0.5f, 1f);
+
+        // 적 사망 경로와 같은 "시체" 라벨(그레이박스 식별).
+        UnitLabel.Attach(go.transform, "시체", UnitLabel.CorpseColor, 4);
 
         // 내용물: 랜덤 아이템 2~4종 + 가방 1개(테스트라 항상 — 안에 랜덤 1~3개, 가방째 회수 가능)
         var items = new System.Collections.Generic.List<ItemInstance>();
