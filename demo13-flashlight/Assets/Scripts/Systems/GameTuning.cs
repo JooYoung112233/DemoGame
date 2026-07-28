@@ -138,6 +138,10 @@ public class GameTuning : ScriptableObject
     [Tooltip("켜면 벽(솔리드 콜라이더)이 시야를 막음(LOS). 끄면 각도·사거리만.")]
     public bool visionLineOfSight = true;
 
+    [Tooltip("시야콘 **밖** 어둠 농도(0=끔, 1=완전 암흑). VisionDarkness 오버레이가 읽는다.\n" +
+             "적이 시야 밖에서 숨겨지는 걸 '사라진 버그'가 아니라 '안 보이는 구역'으로 읽히게 하는 값.")]
+    [Range(0f, 1f)] public float visionDarkAlpha = 0.72f;
+
     // ── 생존 (수분 / 포만감 / 아사) ───────────────────────────────────
     [Header("생존 (레이드 중 차감)")]
     [Tooltip("수분 100→0까지 걸리는 시간(분, 레이드 실시간). SurvivalStats가 분→초당으로 환산해 읽음.")]

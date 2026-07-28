@@ -191,6 +191,16 @@ public static class GreyboxPaletteBuilder
                 spawnPointId = "default",
                 sortingLayer = "Ground", sortingOffset = 5, labelDark = false,
             },
+            // 입구 — 건물 진입 발판(BuildingEntrance). 2026-07-11 신설:
+            //   그전엔 진입에도 gb_exit(파란 '탈출')를 재사용해 **"입구인데 탈출이라고 쓰여 있는"** 혼동이 있었다.
+            //   기능 컴포넌트는 빌더가 붙이므로 여기선 라벨·색만 구분한다(노랑 = 들어가는 곳).
+            new Spec {
+                id = "gb_enter", label = "입구", color = Marker(0.90f, 0.75f, 0.20f),
+                category = Prop2DDefinition.Category.Object,
+                colliderMode = Prop2DDefinition.ColliderMode.None, isTrigger = true,
+                function = Prop2DDefinition.Function.None,
+                sortingLayer = "Ground", sortingOffset = 5, labelDark = true,
+            },
             // 탈출 — Interactable(ExitPoint), 통과 트리거 마커.
             new Spec {
                 id = "gb_exit", label = "탈출", color = Marker(0.20f, 0.50f, 0.85f),

@@ -191,3 +191,15 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | 2026-06-18 | **Spine-Unity 런타임 4.2 고정(다운그레이드).** 캐릭터 에셋 `cha`(`Assets/Resources/Charater/cha.json·atlas·png`)가 Spine 4.2.43 익스포트인데 프로젝트엔 4.3.81 런타임 → `Data version 4.2.43 / Required 4.3` 로드 에러. **데이터 재익스포트 대신 런타임을 공식 `spine-unity 4.2.120`(`spine-unity-4.2-2026-05-29.unitypackage`)로 다운그레이드**해 맞춤. `Assets/Spine`·`Assets/Spine Examples` 전체 교체(asmdef GUID 동일→참조 유지). **앞으로 Spine 익스포트는 4.2 타깃 유지.** 선택지: ⓐ 데이터 4.3 재익스포트 vs ⓑ 런타임 4.2 다운그레이드 → **ⓑ 채택**. | `cha` 데이터 버전을 못 바꾸는 상황이라 런타임을 데이터에 맞춤. |
 | 2026-06-18 | **플레이어 비주얼 = 단일 SpriteRenderer → Spine 스켈레톤(`cha`).** `PlayerRig.prefab`에 `PlayerSpine`(SkeletonAnimation) 자식 추가, 기존 `PlayerSprite`는 렌더러만 끔(오브젝트 유지). `TopDownPlayer`가 이동/전투 상태로 Spine 애니 구동(걷기=walk·달리기=run·약/강공격=attack·구르기=roll; `idle` 없어 정지 시 셋업 포즈), 좌우 플립=Skeleton.ScaleX 부호. 적용 메뉴 `Tools/TopDown/초기설정/Spine 플레이어 적용 (cha)`. **알려진 한계(후속)**: `BRB/SpineLitURP`에 flash 프로퍼티 없어 HitFlash 흰 플래시·InjuryVFX 통증 깜빡임이 플레이어 바디엔 미표시(화면 효과는 정상) → 셰이더에 flash 지원 추가 필요. | CLAUDE.md 명시 원래 방향(2D 스프라이트 + Spine animation)대로 플레이어를 Spine으로. |
 | 2026-06-05 | **랜턴(장비 기반 시야 강화) 도입.** 손전등 F토글/단일 빔 폐기 계승. 시야(주변광 원형 + facing 콘)의 **반경·각도·밝기를 착용 랜턴 등급으로 가변** — 미착용=좁은 주변광(코앞)/착용=주변광·콘 동시 확대·증광. 토글 아닌 착용 패시브(상시 점등). 연료 소모·'빛=노출' 트레이드오프는 추후 옵션. | 사용자 결정: '손전등 폐기, 랜턴 차면 라이트·콘 커지고 밝아짐'. 시야가 장비 성장 축이 됨. 구현은 PlayerRig 주변광/콘 Light2D(쿠키) 파라미터를 LanternModifier로 조절. [→ items.md 랜턴, story-script S-013/S-020] |
+
+## 2026-07-11 — FOV 어둠 오버레이 (`VisionDarkness`)
+
+> 사용자 지적: "적군이 제대로 안 보이던데 스프라이트 빠졌나?" → **스프라이트 정상.** `PlayerVision`이 시야콘 밖 적의 렌더러를 끄는 설계대로였는데, **주변이 밝아서 적이 그냥 사라진 것처럼** 보였다. 사용자 결정: *"시야콘이 비추지 않는 곳을 좀 더 어둡게."*
+
+- **신규 `Combat/VisionDarkness.cs`** — 플레이어 중심 부채꼴 메시를 매 프레임 생성해 **시야콘 밖을 어두운 반투명으로 덮는다.** 자가부트 싱글턴(DontDestroyOnLoad), 맵툴 씬 제외, **안전가옥에선 자동 비활성**.
+  - 콘 안(정면 ±fov/2) → `visionRange`까지 밝음 / 근접 `visionNearRadius` 안 → 각도 무관 밝음 / 그 외 → 어둠
+  - 콘 경계는 `half~half+soft` 구간을 보간해 계단현상 없이 부드럽게
+  - **판정 수치를 `PlayerVision`과 동일한 GameTuning 필드에서 읽는다** — 시각과 판정이 어긋나면 그게 더 큰 버그
+  - Light2D를 건드리지 않는 **독립 오버레이**(Unlit 반투명, sortingOrder 100)라 글로벌 라이트·낮밤 셋업과 충돌하지 않음
+- **노브**: `GameTuning.visionDarkAlpha`(기본 0.72, 0=끔) — 어둠 농도. 기존 `visionEnabled/FovDegrees/Range/NearRadius`와 함께 동작.
+- ⚠️ 알려진 별건: `GameTuning.asset`에 시야 필드가 **아직 기록돼 있지 않아** 코드 기본값으로 돈다(패널에서 조절하려면 에셋에 값이 써져야 함).

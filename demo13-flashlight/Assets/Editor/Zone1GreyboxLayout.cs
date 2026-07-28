@@ -211,6 +211,39 @@ public static class Zone1GreyboxLayout
         _buildingRects.Add(new Rect(x0 - pad, y0 - pad, (x1 - x0) + pad * 2f, (y1 - y0) + pad * 2f));
     }
 
+    /// <summary>존 중심을 가장 가까운 실외로 옮기고, 건물에 걸치면 크기를 줄인다.
+    /// (적이 건물 껍데기 안에서 스폰되는 것을 막는다 — 실내 전투는 Int_* 씬 담당.)</summary>
+    static void SnapOutdoors(ref float cx, ref float cy, ref float w, ref float h)
+    {
+        if (IsIndoors(cx, cy))
+        {
+            // 나선 탐색 — 가까운 실외 지점으로.
+            bool found = false;
+            for (float r = 3f; r <= 40f && !found; r += 3f)
+            {
+                for (int a = 0; a < 12; a++)
+                {
+                    float t = a * Mathf.PI * 2f / 12f;
+                    float nx = cx + Mathf.Cos(t) * r, ny = cy + Mathf.Sin(t) * r;
+                    if (IsIndoors(nx, ny)) continue;
+                    cx = nx; cy = ny; found = true; break;
+                }
+            }
+            if (!found) { w = h = 0f; return; }   // 못 찾으면 존을 0으로(스폰 안 함)
+        }
+
+        // 존 네 모서리가 건물에 걸리면 걸치지 않을 때까지 축소.
+        for (int i = 0; i < 6; i++)
+        {
+            float hx = w * 0.5f, hy = h * 0.5f;
+            bool ok = !IsIndoors(cx - hx, cy - hy) && !IsIndoors(cx + hx, cy - hy)
+                   && !IsIndoors(cx - hx, cy + hy) && !IsIndoors(cx + hx, cy + hy);
+            if (ok) return;
+            w *= 0.7f; h *= 0.7f;
+            if (w < 2f || h < 2f) { w = Mathf.Max(w, 2f); h = Mathf.Max(h, 2f); return; }
+        }
+    }
+
     static bool IsIndoors(float x, float y)
     {
         for (int i = 0; i < _buildingRects.Count; i++)
@@ -277,6 +310,11 @@ public static class Zone1GreyboxLayout
     /// <summary>적 스폰 존(SpawnZone) — 런타임 EnemySpawner가 읽어 생성. 난이도 곡선용.</summary>
     static int EnemyZone(GameObject map, string name, float cx, float cy, float w, float h, string unitKey, int count)
     {
+        // 2026-07-11: 적 존이 **건물 안**에 있으면 적이 껍데기 안에서 스폰됐다가 문으로 걸어 나온다
+        //   (사용자 지적: "적이 건물 안에 있는데 건물 밖으로 나가진다"). 건물 내부 전투는 Int_* 씬 담당.
+        //   → 중심을 실외로 스냅하고, 건물에 걸치지 않게 크기를 줄인다.
+        SnapOutdoors(ref cx, ref cy, ref w, ref h);
+
         var go = new GameObject(name);
         go.transform.SetParent(map.transform, false);
         go.transform.localPosition = new Vector3(cx, cy, 0f);
@@ -406,7 +444,8 @@ public static class Zone1GreyboxLayout
                     MarkBuilding(x, y, x + w, y + d);
                     // 2026-07-11: 절차 생성 점포도 **전부 들어갈 수 있게** — 공용 내부(Int_Generic)로 진입.
                     //   복귀는 고정 스폰이 아니라 '들어온 문 앞'(BuildingReturn) → 한 채를 돌려 써도 제자리로 나온다.
-                    n += EnterGeneric(m, $"{p}_{i}_{j}_Enter", doorX + 1f, (side == 'S' ? y : y + d) + (side == 'S' ? -0.9f : 0.9f));
+                    //   발판 위치는 EnterAtDoor가 Building()의 (side, doorAt) 규약대로 계산 → 건물에 정확히 붙는다.
+                    n += EnterAtDoor(m, $"{p}_{i}_{j}_Enter", x, y, x + w, y + d, side, doorX);
                 }
                 x += w + street; j++;
             }
@@ -425,6 +464,8 @@ public static class Zone1GreyboxLayout
         float doorAt = (side == 'S' || side == 'N') ? (bx0 + bx1) * 0.5f - 1f : (by0 + by1) * 0.5f - 1f;
         n += GreyboxBuild.Building(m, p, bx0, by0, bx1, by1, side, doorAt, "gb_door", $"{p}_D");
         // 2026-07-11: 내부 십자 칸막이 제거 — 건물 = 껍데기(외벽+문)뿐. 내부는 별도 씬(전당포식 전환).
+        // 2026-07-11: 대형 건물도 진입 가능("입구 발판을 건물에 붙여줘 전부다"). 문 바로 앞에 붙인다.
+        n += EnterAtDoor(m, $"{p}_Enter", bx0, by0, bx1, by1, side, doorAt);
         MarkBuilding(bx0, by0, bx1, by1);
         //   문에 BuildingEntrance를 달 건물은 Enter()로 개별 지정한다(내부 씬이 있는 건물만).
         return n;
@@ -434,7 +475,7 @@ public static class Zone1GreyboxLayout
     /// 밟으면 내부 씬으로 전환(페이드+캐릭터 유지). 복귀 스폰은 Zone1의 from_&lt;건물&gt;.</summary>
     static int Enter(GameObject m, string name, float x, float y, string targetScene, string spawnId = "default")
     {
-        if (GreyboxBuild.Marker(m, "gb_exit", name, x, y) == 0) return 0;
+        if (GreyboxBuild.Marker(m, "gb_enter", name, x, y) == 0) return 0;
         var t = FindChild(m.transform, name);
         if (t == null) return 0;
         var go = t.gameObject;
@@ -451,6 +492,24 @@ public static class Zone1GreyboxLayout
         if (be == null) be = go.AddComponent<BuildingEntrance>();
         be.Configure(targetScene, spawnId, false);
         return 1;
+    }
+
+    /// <summary>건물 문 **바로 앞**(바깥쪽 0.9m)에 입구 발판을 붙인다. `GreyboxBuild.Building`의
+    /// (side, doorAt) 규약과 동일하게 문 위치를 계산 — 발판이 허공에 뜨지 않고 건물에 붙는다.
+    /// 2026-07-11 사용자 요청 "입구 발판을 건물에 붙여줘 전부다".</summary>
+    static int EnterAtDoor(GameObject m, string name, float x0, float y0, float x1, float y1,
+                           char side, float doorAt)
+    {
+        const float gap = 2f, off = 0.9f;   // Building()의 문 갭 폭 = 2m
+        float ex, ey;
+        switch (side)
+        {
+            case 'S': ex = doorAt + gap * 0.5f; ey = y0 - off; break;
+            case 'N': ex = doorAt + gap * 0.5f; ey = y1 + off; break;
+            case 'W': ex = x0 - off;            ey = doorAt + gap * 0.5f; break;
+            default:  ex = x1 + off;            ey = doorAt + gap * 0.5f; break;   // 'E'
+        }
+        return EnterGeneric(m, name, ex, ey);
     }
 
     /// <summary>공용 내부(Int_Generic)로 들어가는 진입 트리거. 복귀는 `__back__`(들어온 문 앞).
@@ -497,6 +556,9 @@ public static class Zone1GreyboxLayout
         n += GreyboxBuild.Building(m, $"{p}_k2", x1 - 18f, y1 - 15f, x1 - 3f, y1 - 3f, 'N', x1 - 13f, "gb_door", $"{p}_k2D");
         MarkBuilding(x0 + 3f, y0 + 3f, x0 + 17f, y0 + 14f);
         MarkBuilding(x1 - 18f, y1 - 15f, x1 - 3f, y1 - 3f);
+        // 광장 키오스크 2채도 진입 가능.
+        n += EnterAtDoor(m, $"{p}_k1_Enter", x0 + 3f, y0 + 3f, x0 + 17f, y0 + 14f, (char)83, x0 + 9f);
+        n += EnterAtDoor(m, $"{p}_k2_Enter", x1 - 18f, y1 - 15f, x1 - 3f, y1 - 3f, (char)78, x1 - 13f);
         n += GreyboxBuild.Marker(m, "gb_crate", $"{p}_c1", (x0 + x1) * 0.5f, (y0 + y1) * 0.5f);
         n += GreyboxBuild.Marker(m, "gb_crate", $"{p}_c2", (x0 + x1) * 0.5f + 9f, (y0 + y1) * 0.5f + 7f);
         return n;

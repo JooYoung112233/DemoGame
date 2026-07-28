@@ -37,7 +37,7 @@ public static class ScrapMarketGreyboxLayout
     // 이 레이아웃이 쓰는 gb_* 프리팹(하나라도 없으면 빌드 시 팔레트 자동 생성).
     static readonly string[] RequiredPrefabIds =
     {
-        "gb_floor", "gb_wall", "gb_barricade", "gb_door", "gb_crate",
+        "gb_floor", "gb_wall", "gb_barricade", "gb_door", "gb_crate", "gb_enter",
         "gb_shelf", "gb_note", "gb_spawn", "gb_exit", "gb_enemy",
     };
 
@@ -278,7 +278,7 @@ public static class ScrapMarketGreyboxLayout
     /// 복귀는 `__back__`(들어온 문 앞, `BuildingReturn`)이라 튜토가 Zone1에 얹혀도 좌표가 맞는다.</summary>
     static int Enter(GameObject parent, string name, float x, float y, string targetScene)
     {
-        var go = Spawn("gb_exit", name, parent);
+        var go = Spawn("gb_enter", name, parent);
         if (go == null) return 0;
         go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
 

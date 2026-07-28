@@ -137,6 +137,22 @@ public class EnemySpawner : MonoBehaviour
         sr.sortingOrder = 3;
         spriteGo.transform.localScale = new Vector3(0.8f, 1.0f, 1f);
 
+        // 2026-07-11: 그레이박스라 적/프랍 구분이 안 된다는 지적 → 머리 위 "적" 라벨.
+        //   (아트가 붙으면 제거. 시야콘 밖에선 스프라이트와 함께 숨겨져야 하므로 스프라이트의 자식으로 둔다.)
+        var labelGo = new GameObject("Label");
+        labelGo.transform.SetParent(spriteGo.transform, false);
+        labelGo.transform.localPosition = new Vector3(0f, 0.85f, 0f);
+        labelGo.transform.localScale = new Vector3(0.16f, 0.13f, 1f);   // 부모 스케일(0.8,1.0) 보정
+        var tm = labelGo.AddComponent<TextMesh>();
+        tm.text = "적";
+        tm.anchor = TextAnchor.LowerCenter;
+        tm.alignment = TextAlignment.Center;
+        tm.fontSize = 48;
+        tm.characterSize = 1f;
+        tm.color = new Color(1f, 0.85f, 0.85f);
+        var tmr = labelGo.GetComponent<MeshRenderer>();
+        tmr.sortingOrder = 4;   // 적 스프라이트(3) 위
+
         // 허트박스(trigger, Enemy 레이어 — 플레이어 AttackPerformer가 스캔)
         var hurtGo = new GameObject("Hurtbox");
         hurtGo.transform.SetParent(root.transform, false);
