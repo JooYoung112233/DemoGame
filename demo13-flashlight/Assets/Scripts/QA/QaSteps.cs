@@ -556,7 +556,8 @@ public static class QaSteps
     static bool IsCorpse(LootContainer box) =>
         box != null && box.GetComponent<EnemyController>() != null;
 
-    static QaBrain.State BuildState(QaContext c, float t0, float budget, HashSet<int> opened)
+    static QaBrain.State BuildState(QaContext c, float t0, float budget, HashSet<int> opened,
+                                     HashSet<int> passageDone, int moveFailStreak)
     {
         var bot = c.Bot;
         var per = bot.Perception;
@@ -569,7 +570,8 @@ public static class QaSteps
             timeUsed = Mathf.Clamp01((Time.realtimeSinceStartup - t0) / Mathf.Max(1f, budget)),
             inInterior = IsInterior(),
             scene = SceneManager.GetActiveScene().name,
-            crateDist = -1f, corpseDist = -1f, enemyDist = -1f, exitDist = -1f, doorDist = -1f,
+            crateDist = -1f, corpseDist = -1f, enemyDist = -1f, exitDist = -1f, doorDist = -1f, passageDist = -1f,
+            blockedRecently = moveFailStreak > 0,
         };
 
         var inv = player != null ? player.GetComponent<PlayerInventory>() : null;
@@ -600,7 +602,28 @@ public static class QaSteps
         var door = NearestUnvisitedDoor(pos, per.Omniscient);
         if (door != null) s.doorDist = Vector2.Distance(door.transform.position, pos);
 
+        // 아직 안 열린(해결 안 된) 막힌 통로 — 아는 것 중 가장 가까운 것.
+        var passage = NearestOpenPassage(per, pos, passageDone);
+        if (passage != null) s.passageDist = Vector2.Distance(passage.transform.position, pos);
+
         return s;
+    }
+
+    /// <summary>아는 것 중 아직 안 열린 막힌 통로(가장 가까운 것). — <see cref="QaBrain.Goal.ClearPassage"/>가 쓴다.
+    /// <paramref name="passageDone"/>에 든 것(도달불가·영구차단·개방완료)은 다시 고르지 않는다.</summary>
+    static InteractableObject NearestOpenPassage(QaPerception per, Vector2 from, HashSet<int> passageDone)
+    {
+        InteractableObject best = null; float bestD = float.MaxValue;
+        foreach (var io in per.KnownOthers)
+        {
+            if (io == null || io.Type != InteractableObject.InteractType.Passage) continue;
+            if (passageDone != null && passageDone.Contains(io.GetInstanceID())) continue;
+            var bp = io.GetComponent<BlockedPassage>();
+            if (bp == null || bp.IsOpen) continue;
+            float d = Vector2.Distance(io.transform.position, from);
+            if (d < bestD) { bestD = d; best = io; }
+        }
+        return best;
     }
 
     // 이미 들어갔다 나온 입구는 다시 안 들어간다(사람도 그렇다). 씬 단위로 기억.
@@ -647,9 +670,11 @@ public static class QaSteps
 
         string startScene = SceneManager.GetActiveScene().name;
         var opened = new HashSet<int>();
+        var passageDone = new HashSet<int>();     // 도달불가·영구차단·개방완료 통로 — 재선택 안 함(NightOnly-낮 실패는 예외)
         int loots = 0, corpses = 0, fights = 0, explores = 0, enters = 0;
         var lastGoal = (QaBrain.Goal)(-1);
         int sameGoalRepeat = 0;
+        int moveFailStreak = 0;   // Explore·EnterBuilding·LootCrate/Corpse 이동 실패 연속 횟수 → blockedRecently
 
         while (Time.realtimeSinceStartup < deadline)
         {
@@ -658,7 +683,7 @@ public static class QaSteps
             if (!IsRaidScene(SceneManager.GetActiveScene().name))
             { c.Report.Info("ai", "RAID_OVER", $"레이드 종료(씬 {SceneManager.GetActiveScene().name}) — AI 정지"); break; }
 
-            var st = BuildState(c, t0, budget, opened);
+            var st = BuildState(c, t0, budget, opened, passageDone, moveFailStreak);
             var goal = brain.Decide(st, out string why, out bool ambiguous);
 
             // 같은 목표만 계속 고르는데 진전이 없으면 교착이다.
@@ -694,13 +719,50 @@ public static class QaSteps
             {
                 case QaBrain.Goal.Flee:
                 {
-                    var foe = NearestEnemy(pos, 14f);
-                    Vector2 away = foe != null
-                        ? ((Vector2)pos - (Vector2)foe.transform.position).normalized
-                        : per.UnexploredDirection(pos);
-                    GameInput.VSetMove(away);
-                    yield return c.Bot.WaitSec(1.6f);
+                    // 예전엔 반대 방향으로 1.6초 이동하고 끝났다 — 그래서 매 판단마다 다시 Flee를
+                    // 골라 제자리에서 반복하다 죽었다(실측: 점수 2.00 × 10회 반복 → 사망).
+                    // 안전거리를 벌거나 시간이 다할 때까지 **계속** 도주하고, 방향은 매 스텝 갱신한다
+                    // (적이 쫓아오므로 한 번 잡은 방향으로는 못 벌어진다).
+                    const float safeDist = 18f;
+                    const float maxFleeTime = 12f;
+                    float fleeStart = Time.realtimeSinceStartup;
+                    float hpAtStart = PlayerHpRatio();
+                    bool escaped = false;
+
+                    while (Time.realtimeSinceStartup - fleeStart < maxFleeTime)
+                    {
+                        player = TopDownPlayer.Instance;
+                        if (player == null) break;
+                        var hpc = player.GetComponent<Health>();
+                        if (hpc != null && hpc.IsDead) break;
+
+                        var foe = NearestEnemy(player.transform.position, 20f, visibleOnly: !per.Omniscient);
+                        if (foe == null) { escaped = true; break; }   // 위협이 안 보임 = 이탈 성공
+
+                        float d = Vector2.Distance(foe.transform.position, player.transform.position);
+                        if (d >= safeDist) { escaped = true; break; }
+
+                        Vector2 away = ((Vector2)player.transform.position - (Vector2)foe.transform.position).normalized;
+                        GameInput.VSetMove(away);
+                        yield return c.Bot.WaitSec(0.3f);
+                    }
+
                     GameInput.VSetMove(Vector2.zero);
+                    float hpEnd = PlayerHpRatio();
+                    float fleeSec = Time.realtimeSinceStartup - fleeStart;
+
+                    if (!escaped && hpEnd < hpAtStart - 0.001f)
+                        // QA 한계가 아니라 게임 쪽 신호다 — 도망쳐도 못 벗어나면 추격속도/피격경직 문제일 수 있다.
+                        c.Report.Error("flee", "CANNOT_ESCAPE",
+                            $"{maxFleeTime:0}초 도망쳤는데도 체력이 계속 깎임 ({hpAtStart * 100f:0}%→{hpEnd * 100f:0}%)");
+                    else if (escaped)
+                        c.Report.Info("flee", "ESCAPED",
+                            $"{fleeSec:0.#}초 만에 이탈 (체력 {hpAtStart * 100f:0}%→{hpEnd * 100f:0}%)");
+                    else
+                        c.Report.Warn("flee", "TIMEOUT",
+                            $"{maxFleeTime:0}초 안에 안전거리({safeDist:0}m) 확보 실패 (체력 {hpAtStart * 100f:0}%→{hpEnd * 100f:0}%)");
+
+                    brain.Outcome(goal, escaped, escaped ? "이탈 성공" : "이탈 실패");
                     break;
                 }
 
@@ -715,6 +777,7 @@ public static class QaSteps
                     bool got = false;
                     // 입구는 트리거(문 1.3×1.0)라 **밟아야** 발동한다 — 도착 판정을 좁게.
                     yield return c.Bot.MoveTo(door.transform.position, 0.6f, 25f, r => got = r);
+                    moveFailStreak = got ? 0 : moveFailStreak + 1;
                     yield return c.Bot.WaitSec(1.5f);          // 페이드 + additive 전환 대기
 
                     string now = SceneManager.GetActiveScene().name;
@@ -732,6 +795,79 @@ public static class QaSteps
                     bool wasInside = IsInterior();
                     yield return LeaveBuildingIfInside(c);
                     brain.Outcome(goal, wasInside && !IsInterior(), "건물 이탈");
+                    break;
+                }
+
+                case QaBrain.Goal.ClearPassage:
+                {
+                    // "빠른 길이지만 시끄럽다" 대 "조용히 돌아간다"의 선택 — 버그가 아니라 콘텐츠다.
+                    // 지금까지 봇은 길이 막히면 NO_PATH로 포기만 하고 이 선택지를 한 번도 안 밟았다.
+                    var target = NearestOpenPassage(per, pos, passageDone);
+                    if (target == null) { yield return c.Bot.WaitSec(0.2f); break; }
+
+                    var bp = target.GetComponent<BlockedPassage>();
+                    if (bp == null)   // InteractableObject는 있는데 BlockedPassage가 없다 — 배선 문제, 재선택 안 함
+                    {
+                        passageDone.Add(target.GetInstanceID());
+                        c.Report.Warn("passage", "NO_COMPONENT", $"'{target.name}' Passage 타입인데 BlockedPassage 없음");
+                        brain.Outcome(goal, false, "컴포넌트 없음");
+                        break;
+                    }
+
+                    int pid = target.GetInstanceID();
+                    float arrive = Mathf.Clamp(target.InteractRange * 0.6f, 0.8f, 1.6f);
+                    bool reached = false;
+                    yield return c.Bot.MoveTo(target.transform.position, arrive, 25f, r => reached = r);
+
+                    if (!reached)
+                    {
+                        passageDone.Add(pid);   // 도달 못 하는 통로는 다시 안 고른다
+                        c.Bot.NoteUnreachable();
+                        c.Report.Warn("passage", "UNREACHABLE", $"'{target.name}' 통로까지 도달 실패");
+                        brain.Outcome(goal, false, "도달 실패");
+                        break;
+                    }
+
+                    if (bp.PassageMode == BlockedPassage.Mode.Permanent)
+                    {
+                        c.Bot.Tap(KeyCode.E);
+                        yield return c.Bot.WaitSec(0.5f);
+                        passageDone.Add(pid);   // 영구 차단 — 재선택 안 함
+                        c.Report.Warn("passage", "BLOCKED_PERMANENT", $"'{target.name}' 영구 차단 — 돌아가야 함");
+                        brain.Outcome(goal, false, "영구 차단");
+                        break;
+                    }
+
+                    // 나머지 모드(Clearable/Locked/NightOnly/Code)는 E 홀드 채널이다 — 한 번 눌러 끝나지 않는다.
+                    // 시작 여부부터 확인하고, 시작했으면 끝날 때까지 기다린다.
+                    float clearT0 = Time.realtimeSinceStartup;
+                    c.Bot.Tap(KeyCode.E);
+                    yield return c.Bot.WaitSec(0.4f);
+                    bool channelStarted = UseActionManager.Instance != null && UseActionManager.Instance.IsBusy;
+                    if (channelStarted)
+                        yield return c.Bot.WaitUntil(() => UseActionManager.Instance == null || !UseActionManager.Instance.IsBusy,
+                                                      20f, null);
+                    yield return c.Bot.WaitSec(0.3f);   // Open() 반영 대기
+
+                    if (bp.IsOpen)
+                    {
+                        float elapsed = Time.realtimeSinceStartup - clearT0;
+                        int nearFoes = CountEnemiesNear(target.transform.position, 20f);
+                        passageDone.Add(pid);           // 개방 완료 — 재선택 안 함
+                        c.Report.Info("passage", "CLEARED",
+                            $"'{target.name}' 통로 개방 — {bp.PassageMode} · {elapsed:0.#}초 소요 · 20m 내 적 {nearFoes}기(소음 유인 확인)");
+                        brain.Outcome(goal, true, "통로 개방");
+                    }
+                    else
+                    {
+                        // NightOnly가 낮이라 실패한 경우만 예외 — 밤엔 다시 시도할 수 있어야 한다.
+                        bool nightBlockedByDay = bp.PassageMode == BlockedPassage.Mode.NightOnly;
+                        if (!nightBlockedByDay) passageDone.Add(pid);
+                        c.Report.Warn("passage", "CLEAR_FAIL",
+                            $"'{target.name}' 개방 실패 — 모드 {bp.PassageMode}"
+                            + (nightBlockedByDay ? " (낮 — 밤에 재시도 가능)" : ""));
+                        brain.Outcome(goal, false, "개방 실패");
+                    }
                     break;
                 }
 
@@ -773,6 +909,7 @@ public static class QaSteps
                     int id = target.GetInstanceID();
                     bool reached = false;
                     yield return c.Bot.MoveTo(target.transform.position, 1.5f, 20f, r => reached = r);
+                    moveFailStreak = reached ? 0 : moveFailStreak + 1;
                     if (!reached)
                     {
                         opened.Add(id);   // 못 가는 건 다시 고르지 않는다(사람도 포기한다)
@@ -835,6 +972,7 @@ public static class QaSteps
                             var pl = TopDownPlayer.Instance;
                             return pl != null && NearestEnemy(pl.transform.position, 10f, visibleOnly: !omni) != null;
                         });
+                    moveFailStreak = moved ? 0 : moveFailStreak + 1;
                     if (!moved) c.Bot.NoteUnreachable();   // 그쪽이 막혔다는 신호(맵 구멍 후보)
                     // 탐색의 성패는 "갔는가"가 아니라 **새로 발견했는가**다
                     brain.Outcome(goal, per.KnownCrateCount > knownBefore || moved,
@@ -891,6 +1029,36 @@ public static class QaSteps
         return best;
     }
 
+    /// <summary>발동 거부 사유 집계를 "사유×횟수, 사유×횟수" 문자열로.</summary>
+    static string RejectSummary(Dictionary<string, int> rc)
+    {
+        if (rc == null || rc.Count == 0) return "없음";
+        var parts = new List<string>();
+        foreach (var kv in rc) parts.Add($"{kv.Key}×{kv.Value}");
+        return string.Join(", ", parts);
+    }
+
+    /// <summary>가장 많이 나온 발동 거부 사유 하나.</summary>
+    static string TopRejectReason(Dictionary<string, int> rc)
+    {
+        if (rc == null || rc.Count == 0) return "-";
+        string top = "-"; int best = -1;
+        foreach (var kv in rc) if (kv.Value > best) { best = kv.Value; top = kv.Key; }
+        return best > 0 ? $"{top}×{best}" : "-";
+    }
+
+    /// <summary>반경 안의 살아있는 적 수 — 소음 유인 검증용(막힌 통로 철거·강제돌파의 대가를 수치로 남긴다).</summary>
+    static int CountEnemiesNear(Vector2 pos, float radius)
+    {
+        int n = 0;
+        foreach (var e in EnemyController.All)
+        {
+            if (e == null || !e.gameObject.activeInHierarchy || e.IsDead) continue;
+            if (Vector2.Distance(e.transform.position, pos) <= radius) n++;
+        }
+        return n;
+    }
+
     static void AimAt(Vector3 worldPos)
     {
         var cam = Camera.main;
@@ -931,6 +1099,14 @@ public static class QaSteps
             float foeHpStart = foeHp != null ? foeHp.CurrentHp : -1f;
             float myHpStart = PlayerHpRatio();
             int swingsHere = 0;
+
+            // ── CHAIN 계측 — 클릭→발동→적중 어디서 끊기는지 분리해서 잡는다.
+            //   swings(클릭)만 세면 "발동은 되는데 안 맞는지" "애초에 발동이 안 되는지" 구분이 안 된다.
+            int launchesHere = 0, hitsHere = 0;
+            var rejectCounts = new Dictionary<string, int>();      // 발동 실패 사유별 집계
+            float missDistSum = 0f, missAngleSum = 0f;             // 발동은 됐는데 못 맞힌 스윙의 거리·각도차 누적
+            int missCount = 0;
+
             c.Report.Info("combat", "ENGAGE",
                 $"교전 시작 — {foe.name} (거리 {Vector2.Distance(foe.transform.position, player.transform.position):0.#}m"
                 + (foeHpStart >= 0f ? $", 적 HP {foeHpStart:0}" : "") + ")");
@@ -980,11 +1156,72 @@ public static class QaSteps
                 else
                 {
                     GameInput.VSetMove(Vector2.zero);
+
+                    // 클릭 시점 스냅샷 — 발동 실패 시 사유를 배제법으로 가른다.
+                    bool wasExhausted = player.IsExhausted;
+                    var clickState = player.CurrentState;
+                    float staminaBefore = player.StaminaCurrent;
+                    float hpAtClick = foeHp != null ? foeHp.CurrentHp : -1f;
+                    float distAtClick = dist;
+                    float angleAtClick = Vector2.Angle(player.FacingDirection, dir);
+
                     GameInput.VClickMouse(0);                   // 약공격
                     swings++; swingsHere++;
-                    yield return c.Bot.WaitSec(0.22f);
+
+                    // 발동 = 클릭 후 6프레임(~0.1초) 안에 Idle → 공격 상태로 전환됐는가.
+                    bool launched = false;
+                    float launchWait = 0f;
+                    for (int fr = 0; fr < 6 && launchWait < 0.1f; fr++)
+                    {
+                        yield return null;
+                        launchWait += Time.unscaledDeltaTime;
+                        var nowP = TopDownPlayer.Instance;
+                        var now = nowP != null ? nowP.CurrentState : TopDownPlayer.CombatState.Idle;
+                        if (now == TopDownPlayer.CombatState.LightAttack
+                            || now == TopDownPlayer.CombatState.HeavyCharge
+                            || now == TopDownPlayer.CombatState.HeavyRelease)
+                        { launched = true; break; }
+                    }
+
+                    float hitWait = 0f;
+                    if (launched)
+                    {
+                        launchesHere++;
+
+                        // 적중 = 발동 후 0.4초 동안 대상 체력이 실제로 하락했는가.
+                        bool hitFound = false;
+                        while (hitWait < 0.4f)
+                        {
+                            yield return null;
+                            hitWait += Time.unscaledDeltaTime;
+                            if (foeHp != null && hpAtClick >= 0f && foeHp.CurrentHp < hpAtClick - 0.01f)
+                            { hitFound = true; break; }
+                        }
+                        if (hitFound) hitsHere++;
+                        else { missDistSum += distAtClick; missAngleSum += angleAtClick; missCount++; }
+                    }
+                    else
+                    {
+                        // 발동 실패 사유 — 게임 코드를 못 읽는 부분(쿨다운 타이머는 private)은 배제법으로.
+                        string reason;
+                        if (wasExhausted) reason = "Exhausted";
+                        else if (clickState != TopDownPlayer.CombatState.Idle) reason = clickState.ToString();
+                        else
+                        {
+                            // StaminaGap: ConsumeStamina는 부족해도 _exhausted를 세우지 않으므로
+                            // IsExhausted만으론 못 잡는다 — 클릭 시점 스태미너와 추정 비용을 비교한다.
+                            float estCost = (StatDB.Instance != null && StatDB.Instance.playerStat != null)
+                                ? StatDB.Instance.playerStat.lightStaminaCost : 6f;
+                            reason = staminaBefore < estCost ? "StaminaGap" : "CooldownGap(추정)";
+                        }
+                        rejectCounts[reason] = rejectCounts.TryGetValue(reason, out int rc) ? rc + 1 : 1;
+                    }
+
+                    // 계측 대기(최대 0.5초)가 이미 흘렀으니 기존 치고 빠지기 리듬(0.5초)에서 남은 만큼만 채운다.
+                    float already = launched ? (launchWait + hitWait) : launchWait;
+                    float remain = Mathf.Max(0f, 0.5f - already);
                     GameInput.VSetMove(-dir);                   // 치고 빠지기
-                    yield return c.Bot.WaitSec(0.28f);
+                    if (remain > 0f) yield return c.Bot.WaitSec(remain);
                 }
             }
 
@@ -1005,6 +1242,24 @@ public static class QaSteps
             else if (dealt > 0.1f && foeHpEnd > 0.1f && taken > dealt / Mathf.Max(1f, foeHpStart) * 100f)
                 c.Report.Warn("combat", "LOSING_TRADE",
                     $"피해 교환이 불리하다 — 준 {dealt:0} / 받은 {taken:0}%p. 적이 세거나 카이팅이 안 먹힘");
+
+            // ── CHAIN 결산: 클릭 → 발동 → 적중 어디서 끊기는지 ──────────────
+            c.Report.Info("combat", "CHAIN",
+                $"클릭 {swingsHere} → 발동 {launchesHere} (거부: {RejectSummary(rejectCounts)}) → "
+                + $"적중 {hitsHere} → 데미지 {dealt:0}");
+
+            if (swingsHere > 0 && launchesHere <= swingsHere / 2)
+                c.Report.Error("combat", "ATTACK_BLOCKED",
+                    $"클릭 {swingsHere}회 중 발동 {launchesHere}회뿐 — 절반 이상 거부됨. 최다 사유: {TopRejectReason(rejectCounts)}");
+            else if (launchesHere > 0 && hitsHere == 0)
+            {
+                float avgDist = missCount > 0 ? missDistSum / missCount : -1f;
+                float avgAngle = missCount > 0 ? missAngleSum / missCount : -1f;
+                c.Report.Error("combat", "ATTACK_MISSES",
+                    $"발동 {launchesHere}회가 전부 헛스윙 — 명중 0"
+                    + (missCount > 0 ? $" · 평균 거리 {avgDist:0.##}m · 평균 각도차 {avgAngle:0.#}도" : "")
+                    + $" (lightRange {range:0.##}m, 교전 밴드 {range - 0.5f:0.##}~{range + 0.4f:0.##}m)");
+            }
 
             if (foe != null && foeHp != null && foeHp.IsDead)
             {

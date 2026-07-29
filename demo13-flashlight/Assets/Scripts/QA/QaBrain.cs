@@ -15,7 +15,7 @@ using UnityEngine;
 /// </summary>
 public class QaBrain
 {
-    public enum Goal { Explore, LootCrate, LootCorpse, FightEnemy, EnterBuilding, LeaveBuilding, Extract, Flee }
+    public enum Goal { Explore, LootCrate, LootCorpse, FightEnemy, EnterBuilding, LeaveBuilding, Extract, Flee, ClearPassage }
 
     // ── 정책(가중치·임계) — Claude가 고치는 파일 ─────────────────────────
     [System.Serializable]
@@ -33,6 +33,8 @@ public class QaBrain
         public float wLeaveWhenDone = 0.8f;   // 실내에 볼 일이 끝났을 때 '나가기' 점수(탐색보다 높아야 한다)
         public float wEnterBuilding = 0.75f;  // 건물 진입 — 2026-07-28 커밋 b2b3937로 **루트가 실내로 옮겨졌다**.
                                               // 밖만 돌면 파밍 자체가 불가능하므로 탐색보다 높아야 한다.
+        public float wClearPassage = 0.65f;   // 막힌 통로 — "빠른 길이지만 시끄럽다" 대 "돌아간다"의 선택.
+                                              // 평소엔 낮게 깔아두고, 실제로 가려던 방향이 막혔을 때만 확 올린다.
         public float ambiguousMargin = 0.06f; // 1·2위 차가 이보다 작으면 '애매하다'고 신고
     }
 
@@ -64,6 +66,8 @@ public class QaBrain
         public float enemyDist;         // -1 = 안 보임
         public float exitDist;          // -1 = 모름
         public float doorDist;          // -1 = 아는 건물 입구 없음 (실외에서만 의미)
+        public float passageDist;       // -1 = 아는 미해결 막힌 통로 없음
+        public bool blockedRecently;    // 최근 이동이 막혔는가(moveFailStreak > 0)
         public float timeUsed;          // 0~1
         public bool inInterior;
         public string scene;
@@ -276,6 +280,12 @@ public class QaBrain
               * (s.knownCrates > 0 ? 0.5f : 1f)
             : 0f;
 
+        // 막힌 통로 — 콘텐츠 선택지다("빠른 길이지만 시끄럽다" vs "조용히 돌아간다").
+        // 평소엔 낮게 깔려 있다가, 실제로 가려던 방향이 막혔을 때(blockedRecently) 확 오른다.
+        scores[Goal.ClearPassage] = s.passageDist >= 0f
+            ? Pol.wClearPassage * Falloff(s.passageDist, 20f) * (s.blockedRecently ? 1f : 0.3f)
+            : 0f;
+
         // 탐색 — 아는 게 없을 때의 유일한 수단. 이미 아는 상자가 많으면 낮춘다
         scores[Goal.Explore] = Pol.wExplore * (s.knownCrates > 0 ? 0.5f : 1f);
 
@@ -326,6 +336,8 @@ public class QaBrain
           .Append(",\"enemyDist\":").Append(s.enemyDist.ToString("0.#"))
           .Append(",\"exitDist\":").Append(s.exitDist.ToString("0.#"))
           .Append(",\"doorDist\":").Append(s.doorDist.ToString("0.#"))
+          .Append(",\"passageDist\":").Append(s.passageDist.ToString("0.#"))
+          .Append(",\"blockedRecently\":").Append(s.blockedRecently ? "true" : "false")
           .Append(",\"timeUsed\":").Append(s.timeUsed.ToString("0.##"))
           .Append(",\"inInterior\":").Append(s.inInterior ? "true" : "false")
           .Append("},\"scores\":{");
