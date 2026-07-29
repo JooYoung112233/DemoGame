@@ -176,6 +176,9 @@ public static class ScrapMarketGreyboxLayout
         placed += Marker(map, "gb_spawn", "Ret_from_warehouse", 6.6f, 47.5f);
 
         // 6. 맨홀 탈출 (EXIT) — 창고 옆 골목 공터(CT X4~14 Y51~55). 추출구.
+        //   ★ Zone1에 얹힐 때 이건 **남서 고정 탈출구**다(2026-07-29 사용자 결정).
+        //     `RaidSpawnDirector.AlwaysOnExtra`에 이름이 적혀 있어야 '의도된 고정'으로 취급된다 —
+        //     풀(PX_*)에 안 넣은 것만으로는 "빠뜨린 것"과 구분이 안 된다.
         placed += Exit(map, "Manhole_Exit", 9f, 53f, "Safehouse", "raid_return", 5f);
 
         // ── 통합 연결점 (철거 가능 바리케이드). §2. ──

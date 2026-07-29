@@ -25,6 +25,17 @@ public class RaidSpawnDirector : MonoBehaviour
     [Tooltip("탈출 풀(랜덤 매치 대상) 이름 전체. 매치되지 않은 것은 비활성.")]
     [SerializeField] string[] exitPoolNames = { "PX_SW", "PX_SE", "PX_NW", "PX_NE" };
 
+    /// <summary>fixedExitName 말고도 **항상 열어 두는** 탈출구.
+    ///
+    /// 풀에 안 들어간 탈출구는 자동으로 상시 활성이 되는데, 그래서 여태 '일부러 고정으로 둔 것'과
+    /// '풀에 넣는 걸 빠뜨린 것'을 구분할 수 없었다. 여기 적힌 것만 **의도된** 고정 탈출이다.
+    ///   · Manhole_Exit — 남서 튜토 구역 맨홀. 2026-07-29 사용자 결정: **남서 고정으로 둔다**.
+    ///     (튜토로 들어가는 길이 뚫리면서 실제로 쓸 수 있는 탈출구가 됐다. 풀에는 넣지 않는다.)
+    ///
+    /// [SerializeField]로 두지 않는 건 일부러다 — 배열 필드를 새로 직렬화하면 **이미 베이크된 씬**의
+    /// 컴포넌트는 필드 초기화식을 안 타고 빈 배열이 되어, 고정 탈출이 조용히 사라진다.
+    static readonly string[] AlwaysOnExtra = { "Manhole_Exit" };
+
     /// <summary>이번 판에 선택된 스폰 이름(디버그/HUD용).</summary>
     public static string ChosenSpawn { get; private set; }
 
@@ -50,7 +61,8 @@ public class RaidSpawnDirector : MonoBehaviour
         ChosenSpawn = spawn.name;
         MovePlayerTo(spawn.transform.position);
         ApplyExits(ChosenSpawn);
-        Debug.Log($"[RaidSpawnDirector] 스폰={ChosenSpawn} · 탈출=고정({fixedExitName}) + {string.Join(",", Exits(ChosenSpawn))}");
+        Debug.Log($"[RaidSpawnDirector] 스폰={ChosenSpawn} · 탈출=고정({fixedExitName}," +
+                  $"{string.Join(",", AlwaysOnExtra)}) + 매치({string.Join(",", Exits(ChosenSpawn))})");
     }
 
     GameObject PickSpawn()
@@ -81,6 +93,11 @@ public class RaidSpawnDirector : MonoBehaviour
         // 고정 탈출은 항상 활성(꺼져 있었을 수 있으니 보정)
         var fx = FindInScene(fixedExitName);
         if (fx != null) fx.SetActive(true);
+        foreach (var n in AlwaysOnExtra)
+        {
+            var go = FindInScene(n);
+            if (go != null) go.SetActive(true);
+        }
     }
 
     void MovePlayerTo(Vector3 pos)
