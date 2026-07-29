@@ -86,7 +86,11 @@ public class NavGrid : MonoBehaviour
             for (int y = 0; y < _h; y++)
                 raw[x, y] = CellHasObstacle(CellToWorld(x, y), box);
 
-        int r = Mathf.Max(0, Mathf.CeilToInt(agentRadius / cellSize - 0.001f));
+        // 팽창은 **반올림**이다. Ceil을 쓰면 셀이 굵을 때 과다 팽창한다 —
+        // 2026-07-28 QA: Zone1이 셀 1.54m라 ceil(0.35/1.54)=1 → 벽을 1.54m 부풀려(필요치의 4.4배)
+        // 폭 1~3m 통로가 통째로 막히고 봇·적이 갇혔다. 굵은 셀은 그 자체로 벽을 과대표현하므로
+        // 반경이 셀의 절반보다 작으면 팽창하지 않는 게 맞다.
+        int r = Mathf.Max(0, Mathf.RoundToInt(agentRadius / cellSize));
         if (r == 0) { _blocked = raw; return; }
 
         var dil = new bool[_w, _h];

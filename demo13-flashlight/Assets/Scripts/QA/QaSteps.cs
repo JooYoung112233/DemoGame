@@ -53,6 +53,8 @@ public static class QaSteps
                 { "quest.accept",       QuestAccept },
                 { "raid.enter",         RaidEnter },
                 { "raid.explore",       RaidExplore },
+                { "ai.play",            AiPlay },
+                { "combat.engage",      CombatEngage },
                 { "raid.extract",       RaidExtract },
                 { "settle.verify",      SettleVerify },
             };
@@ -226,8 +228,7 @@ public static class QaSteps
         // 열렸으면 닫는다(다음 스텝이 이동해야 하므로)
         if (uiAfter && d.count == 0)
         {
-            c.Bot.Tap(KeyCode.Escape);
-            yield return c.Bot.WaitSec(0.5f);
+            yield return c.Bot.CloseUi("goto");
             if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen())
                 c.Report.Warn("goto", "UI_NOT_CLOSED", $"'{want}' UI가 ESC로 안 닫힘");
         }
@@ -488,6 +489,571 @@ public static class QaSteps
         yield return c.Bot.WaitSec(1f);
     }
 
+    // ── 건물 안/밖 (2026-07-11 "건물 = 전당포식 씬 전환") ────────────────
+    //  건물 내부는 **별도 씬**이고, 출입은 E키가 아니라 BuildingEntrance **트리거**다.
+    //  봇은 밖에서 상자로 걸어가다 입구를 밟아 그냥 빨려 들어간다 — 2026-07-28 QA에서
+    //  3사이클 전부 Int_Generic에 갇혀 NO_EXIT로 끝났다(내부엔 탈출구가 없다).
+
+    /// <summary>레이드가 이어지는 씬인가(외부 맵 또는 그 건물 내부).</summary>
+    static bool IsRaidScene(string n) =>
+        !string.IsNullOrEmpty(n) && (n.StartsWith("Int_") || (n != "Safehouse" && n != "Hideout"
+            && n != "Systems" && n != "Pawnshop" && n != "ScrapMarket_GB"));
+
+    static bool IsInterior() => SceneManager.GetActiveScene().name.StartsWith("Int_");
+
+    /// <summary>건물 안이면 나가는 문(트리거)을 밟아 밖으로 나온다. 중첩 대비 최대 3번.</summary>
+    static IEnumerator LeaveBuildingIfInside(QaContext c)
+    {
+        for (int hop = 0; hop < 3 && IsInterior(); hop++)
+        {
+            var player = TopDownPlayer.Instance;
+            if (player == null) yield break;
+
+            string from = SceneManager.GetActiveScene().name;
+            BuildingEntrance door = null; float bestD = float.MaxValue;
+            foreach (var be in Object.FindObjectsByType<BuildingEntrance>(FindObjectsSortMode.None))
+            {
+                if (be == null || !be.IsExit || string.IsNullOrEmpty(be.TargetScene)) continue;
+                if (!be.gameObject.activeInHierarchy) continue;
+                float dist = Vector2.Distance(be.transform.position, player.transform.position);
+                if (dist < bestD) { bestD = dist; door = be; }
+            }
+
+            if (door == null)
+            {
+                c.Report.Error("building", "NO_INTERIOR_EXIT",
+                    $"[{from}] 건물 내부인데 나가는 문(BuildingEntrance isExit)이 없다 — 플레이어가 갇힌다");
+                yield break;
+            }
+
+            bool reached = false;
+            // 트리거(문 1.3×1.0)를 실제로 밟아야 발동하므로 도착 판정을 좁게 잡는다.
+            yield return c.Bot.MoveTo(door.transform.position, 0.6f, 25f, r => reached = r);
+            yield return c.Bot.WaitSec(1.5f);   // 페이드 + additive 전환 대기
+
+            string now = SceneManager.GetActiveScene().name;
+            if (now != from)
+            {
+                c.Report.Info("building", "LEAVE", $"건물 밖으로 나옴 {from} → {now}");
+                continue;
+            }
+
+            c.Report.Error("building", "EXIT_DOOR_FAIL",
+                $"[{from}] 출구 문까지 {(reached ? "도달했는데" : "도달 못 해")} 씬이 안 바뀜 — 트리거 미발동 의심");
+            yield break;
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  ai.play — 플레이어 AI (2026-07-28)
+    //
+    //  정해진 순서를 재생하는 대신 **상황을 보고 목표를 고른다**.
+    //  아는 것은 QaPerception이 준다(시야에 들어온 것만) — 전지 상태에서는
+    //  루팅가치가 "사람이 얻을 값"이 아니라 이론 최대값이 되어 밸런스가 측정 안 된다.
+    //  판단 근거는 전부 qa-decisions.jsonl에 남고, 애매하면 qa-ask.json으로 신고한다.
+    // ══════════════════════════════════════════════════════════════════
+
+    static bool IsCorpse(LootContainer box) =>
+        box != null && box.GetComponent<EnemyController>() != null;
+
+    static QaBrain.State BuildState(QaContext c, float t0, float budget, HashSet<int> opened)
+    {
+        var bot = c.Bot;
+        var per = bot.Perception;
+        var player = TopDownPlayer.Instance;
+        Vector2 pos = player != null ? (Vector2)player.transform.position : Vector2.zero;
+
+        var s = new QaBrain.State
+        {
+            hp = PlayerHpRatio(),
+            timeUsed = Mathf.Clamp01((Time.realtimeSinceStartup - t0) / Mathf.Max(1f, budget)),
+            inInterior = IsInterior(),
+            scene = SceneManager.GetActiveScene().name,
+            crateDist = -1f, corpseDist = -1f, enemyDist = -1f, exitDist = -1f, doorDist = -1f,
+        };
+
+        var inv = player != null ? player.GetComponent<PlayerInventory>() : null;
+        s.weight = (inv != null && inv.MaxWeight > 0f) ? Mathf.Clamp01(inv.CurrentWeight / inv.MaxWeight) : 0f;
+
+        int known = 0;
+        foreach (var box in per.KnownCrates)
+        {
+            if (box == null || opened.Contains(box.GetInstanceID())) continue;
+            float dist = Vector2.Distance(box.transform.position, pos);
+            if (IsCorpse(box)) { if (s.corpseDist < 0f || dist < s.corpseDist) s.corpseDist = dist; }
+            else
+            {
+                known++;
+                if (s.crateDist < 0f || dist < s.crateDist) s.crateDist = dist;
+            }
+        }
+        s.knownCrates = known;
+
+        // 판단에는 **보이는 적만** 넣는다(오라클 모드가 아니면).
+        var foe = NearestEnemy(pos, 12f, visibleOnly: !per.Omniscient);
+        if (foe != null) s.enemyDist = Vector2.Distance(foe.transform.position, pos);
+
+        var exit = per.NearestKnown(InteractableObject.InteractType.ExitPoint, pos);
+        if (exit != null) s.exitDist = Vector2.Distance(exit.transform.position, pos);
+
+        // 아직 안 들어가 본 건물 입구(가장 가까운 것). 실외에서만 의미가 있다.
+        var door = NearestUnvisitedDoor(pos, per.Omniscient);
+        if (door != null) s.doorDist = Vector2.Distance(door.transform.position, pos);
+
+        return s;
+    }
+
+    // 이미 들어갔다 나온 입구는 다시 안 들어간다(사람도 그렇다). 씬 단위로 기억.
+    static readonly HashSet<int> _visitedDoors = new HashSet<int>();
+    static string _doorScene = "";
+
+    /// <summary>아직 안 들어가 본 건물 입구 중 가장 가까운 것.
+    /// 2026-07-28 커밋 b2b3937로 루트가 실내로 옮겨져, 진입이 파밍의 전제가 됐다.</summary>
+    static BuildingEntrance NearestUnvisitedDoor(Vector2 from, bool omniscient)
+    {
+        string scene = SceneManager.GetActiveScene().name;
+        if (scene != _doorScene) { _doorScene = scene; _visitedDoors.Clear(); }
+
+        BuildingEntrance best = null; float bestD = float.MaxValue;
+        foreach (var be in Object.FindObjectsByType<BuildingEntrance>(FindObjectsSortMode.None))
+        {
+            if (be == null || be.IsExit || string.IsNullOrEmpty(be.TargetScene)) continue;   // 들어가는 문만
+            if (!be.gameObject.activeInHierarchy) continue;
+            if (_visitedDoors.Contains(be.GetInstanceID())) continue;
+            // 입구도 눈에 보여야 안다(오라클 모드 제외)
+            if (!omniscient && !PlayerVision.CanSee(be.transform.position)) continue;
+            float d = Vector2.Distance(be.transform.position, from);
+            if (d < bestD) { bestD = d; best = be; }
+        }
+        return best;
+    }
+
+    /// <summary>AI가 스스로 판단하며 논다. 레이드 안에서 쓰는 것을 전제.</summary>
+    static IEnumerator AiPlay(QaStepDef d, QaContext c)
+    {
+        float budget = d.budgetSec > 0 ? d.budgetSec : 180f;
+        float t0 = Time.realtimeSinceStartup;
+        float deadline = t0 + budget;
+
+        var bot = c.Bot;
+        var per = bot.Perception;
+        var brain = bot.Brain;
+        if (per == null || brain == null) { c.Report.Error("ai", "NO_BRAIN", "AI 미초기화"); yield break; }
+
+        per.Omniscient = (d.param == "oracle");   // 오라클 모드 = 도달성 검증용(발견율 분모)
+        c.Report.Info("ai", "START", per.Omniscient
+            ? "오라클 모드 — 전지(도달성 검증용)"
+            : "플레이어 모드 — 본 것만 알고 판단");
+
+        string startScene = SceneManager.GetActiveScene().name;
+        var opened = new HashSet<int>();
+        int loots = 0, corpses = 0, fights = 0, explores = 0, enters = 0;
+        var lastGoal = (QaBrain.Goal)(-1);
+        int sameGoalRepeat = 0;
+
+        while (Time.realtimeSinceStartup < deadline)
+        {
+            var player = TopDownPlayer.Instance;
+            if (player == null) break;
+            if (!IsRaidScene(SceneManager.GetActiveScene().name))
+            { c.Report.Info("ai", "RAID_OVER", $"레이드 종료(씬 {SceneManager.GetActiveScene().name}) — AI 정지"); break; }
+
+            var st = BuildState(c, t0, budget, opened);
+            var goal = brain.Decide(st, out string why, out bool ambiguous);
+
+            // 같은 목표만 계속 고르는데 진전이 없으면 교착이다.
+            // 예전엔 무조건 Explore로 바꿨는데, **Explore 자체가 막힌 경우**엔 그게 해결이 아니다
+            // (2026-07-28: 실내에서 벽 속 좌표를 목표로 잡고 계속 박았다).
+            if (goal == lastGoal) sameGoalRepeat++; else { sameGoalRepeat = 0; lastGoal = goal; }
+            if (sameGoalRepeat >= 5)
+            {
+                if (st.inInterior)
+                {
+                    c.Report.Warn("ai", "GOAL_LOOP", $"실내에서 '{goal}'만 {sameGoalRepeat}회 반복 — 건물 밖으로 나간다");
+                    goal = QaBrain.Goal.LeaveBuilding;
+                }
+                else if (goal == QaBrain.Goal.Explore)
+                {
+                    c.Report.Warn("ai", "GOAL_LOOP", $"탐색이 {sameGoalRepeat}회 연속 헛돔 — 무작위 배회로 흔든다");
+                    yield return c.Bot.Wander(c, 3f);
+                    sameGoalRepeat = 0;
+                    continue;
+                }
+                else
+                {
+                    c.Report.Warn("ai", "GOAL_LOOP", $"'{goal}'만 {sameGoalRepeat}회 반복 — 탐색으로 전환");
+                    goal = QaBrain.Goal.Explore;
+                }
+                sameGoalRepeat = 0;
+            }
+
+            c.Report.Info("ai", goal.ToString(), why + (ambiguous ? "  ※애매" : ""));
+            Vector2 pos = player.transform.position;
+
+            switch (goal)
+            {
+                case QaBrain.Goal.Flee:
+                {
+                    var foe = NearestEnemy(pos, 14f);
+                    Vector2 away = foe != null
+                        ? ((Vector2)pos - (Vector2)foe.transform.position).normalized
+                        : per.UnexploredDirection(pos);
+                    GameInput.VSetMove(away);
+                    yield return c.Bot.WaitSec(1.6f);
+                    GameInput.VSetMove(Vector2.zero);
+                    break;
+                }
+
+                case QaBrain.Goal.EnterBuilding:
+                {
+                    var door = NearestUnvisitedDoor(pos, per.Omniscient);
+                    if (door == null) { yield return c.Bot.WaitSec(0.2f); break; }
+                    enters++;
+
+                    int did = door.GetInstanceID();
+                    string from = SceneManager.GetActiveScene().name;
+                    bool got = false;
+                    // 입구는 트리거(문 1.3×1.0)라 **밟아야** 발동한다 — 도착 판정을 좁게.
+                    yield return c.Bot.MoveTo(door.transform.position, 0.6f, 25f, r => got = r);
+                    yield return c.Bot.WaitSec(1.5f);          // 페이드 + additive 전환 대기
+
+                    string now = SceneManager.GetActiveScene().name;
+                    bool entered = now != from;
+                    _visitedDoors.Add(did);                    // 성공이든 실패든 이 문은 소진
+                    if (entered) c.Report.Info("building", "ENTER", $"건물 진입 {from} → {now}");
+                    else c.Report.Warn("building", "ENTER_FAIL",
+                        got ? "입구까지 갔는데 씬이 안 바뀜 — 트리거 미발동 의심" : "입구까지 도달 실패");
+                    brain.Outcome(goal, entered, "건물 진입");
+                    break;
+                }
+
+                case QaBrain.Goal.LeaveBuilding:
+                {
+                    bool wasInside = IsInterior();
+                    yield return LeaveBuildingIfInside(c);
+                    brain.Outcome(goal, wasInside && !IsInterior(), "건물 이탈");
+                    break;
+                }
+
+                case QaBrain.Goal.Extract:
+                {
+                    string before = SceneManager.GetActiveScene().name;
+                    yield return RaidExtract(new QaStepDef { op = "raid.extract", budgetSec = 60f }, c);
+                    brain.Outcome(goal, SceneManager.GetActiveScene().name != before, "레이드 이탈");
+                    break;
+                }
+
+                case QaBrain.Goal.FightEnemy:
+                {
+                    fights++;
+                    float hpBefore = PlayerHpRatio();
+                    var foeBefore = NearestEnemy(pos, 12f, visibleOnly: !per.Omniscient);
+                    yield return CombatEngage(new QaStepDef { op = "combat.engage", budgetSec = 35f, count = 1, ratio = 12f }, c);
+                    bool killed = foeBefore == null
+                                  || foeBefore.GetComponent<Health>() == null
+                                  || foeBefore.GetComponent<Health>().IsDead;
+                    brain.Outcome(goal, killed && PlayerHpRatio() > hpBefore * 0.5f, "교전");
+                    break;
+                }
+
+                case QaBrain.Goal.LootCorpse:
+                case QaBrain.Goal.LootCrate:
+                {
+                    bool wantCorpse = goal == QaBrain.Goal.LootCorpse;
+                    LootContainer target = null; float bestD = float.MaxValue;
+                    foreach (var box in per.KnownCrates)
+                    {
+                        if (box == null || opened.Contains(box.GetInstanceID())) continue;
+                        if (IsCorpse(box) != wantCorpse) continue;
+                        float dist = Vector2.Distance(box.transform.position, pos);
+                        if (dist < bestD) { bestD = dist; target = box; }
+                    }
+                    if (target == null) { yield return c.Bot.WaitSec(0.2f); break; }
+
+                    int id = target.GetInstanceID();
+                    bool reached = false;
+                    yield return c.Bot.MoveTo(target.transform.position, 1.5f, 20f, r => reached = r);
+                    if (!reached)
+                    {
+                        opened.Add(id);   // 못 가는 건 다시 고르지 않는다(사람도 포기한다)
+                        c.Report.Warn("ai", "GIVE_UP", $"{(wantCorpse ? "시체" : "상자")} 도달 실패 — 포기하고 다른 목표로");
+                        c.Bot.NoteUnreachable();
+                        brain.Outcome(goal, false, "도달 실패");
+                        break;
+                    }
+                    if (target == null) break;
+
+                    c.Bot.Tap(KeyCode.E);
+                    yield return c.Bot.WaitSec(1.0f);
+                    if (target == null) break;
+                    int taken = c.Bot.TakeAllFrom(target);
+                    yield return c.Bot.CloseUi("ai");
+                    opened.Add(id);
+                    if (wantCorpse) corpses++; else loots++;
+                    c.Report.Info("ai", wantCorpse ? "CORPSE" : "CRATE",
+                        $"{(wantCorpse ? "시체" : "상자")} 수색 — {taken}개 회수 (무게 {st.weight * 100f:0}%)");
+                    // 열었는데 계속 빈손이면 '루팅'의 매력이 실제로 낮은 것 — 학습에 반영
+                    brain.Outcome(goal, taken > 0, taken > 0 ? "회수 성공" : "빈 상자");
+                    break;
+                }
+
+                default:   // Explore — 안 가본 쪽, 단 **갈 수 있는 지점**으로
+                {
+                    explores++;
+                    // **갈 수 있는** 미탐색지를 격자 전파로 찾는다.
+                    // 방향+거리 방식은 벽 반대편을 목표로 잡아 A*가 계속 실패했다.
+                    Vector2 dest;
+                    if (!per.TryReachableUnexplored(pos, out dest, st.inInterior ? 4f : 8f))
+                        dest = per.UnexploredTarget(pos, st.inInterior ? 6f : 14f);   // 격자 없을 때 폴백
+
+                    if ((dest - pos).sqrMagnitude < 1f)
+                    {
+                        // 격자가 "갈 데가 없다"고 답했다. 실내면 나가는 게 맞다.
+                        if (st.inInterior)
+                        {
+                            c.Report.Info("ai", "EXPLORE_DONE", "실내에 더 갈 곳이 없음 — 건물 밖으로");
+                            yield return LeaveBuildingIfInside(c);
+                        }
+                        else
+                        {
+                            c.Report.Warn("ai", "NO_WHERE_TO_GO", "걸을 수 있는 미탐색 지점을 못 찾음 — 격자/맵 확인");
+                            yield return c.Bot.Wander(c, 2f);
+                        }
+                        break;
+                    }
+
+                    int knownBefore = per.KnownCrateCount;
+                    bool moved = false;
+                    // 이제 목적지가 멀다(가장 먼 미탐색지) — 이동 시간도 거리에 맞춰야 한다.
+                    // 12초 고정이면 먼 구역은 영원히 못 간다.
+                    float trek = Mathf.Clamp(Vector2.Distance(dest, pos) / 2.2f + 8f, 10f, 45f);
+                    // 걷다가 적이 보이면 멈춘다 — 안 그러면 45초 내내 밀고 가며 적을 지나친다.
+                    bool omni = per.Omniscient;
+                    yield return c.Bot.MoveTo(dest, 2.5f, trek, r => moved = r,
+                        abortIf: () =>
+                        {
+                            var pl = TopDownPlayer.Instance;
+                            return pl != null && NearestEnemy(pl.transform.position, 10f, visibleOnly: !omni) != null;
+                        });
+                    if (!moved) c.Bot.NoteUnreachable();   // 그쪽이 막혔다는 신호(맵 구멍 후보)
+                    // 탐색의 성패는 "갔는가"가 아니라 **새로 발견했는가**다
+                    brain.Outcome(goal, per.KnownCrateCount > knownBefore || moved,
+                                  per.KnownCrateCount > knownBefore ? "새 발견" : (moved ? "이동함" : "막힘"));
+                    break;
+                }
+            }
+        }
+
+        GameInput.VSetMove(Vector2.zero);
+
+        // 발견율 — 오라클(존재) 대비 플레이어(발견). 낮으면 맵이 안내를 못 하고 있다는 뜻.
+        c.Report.Metric($"[{startScene}] 씬 상자 수", per.TotalCratesInScene);
+        c.Report.Metric($"[{startScene}] 발견한 상자", per.KnownCrateCount);
+        c.Report.Metric($"[{startScene}] 발견율(%)", per.CrateDiscoveryRate * 100f);
+        c.Report.Info("ai", "OK",
+            $"상자 {loots} · 시체 {corpses} · 교전 {fights} · 탐색 {explores} · 건물진입 {enters} · " +
+            $"발견 {per.KnownCrateCount}/{per.TotalCratesInScene} ({per.CrateDiscoveryRate * 100f:0}%)");
+        c.Report.Info("ai", "LEARNED", brain.TrustSummary());   // 런 중 무엇을 배웠나
+
+        if (!per.Omniscient && per.TotalCratesInScene > 0 && per.KnownCrateCount == 0)
+            c.Report.Error("ai", "DISCOVERY_ZERO",
+                $"상자가 {per.TotalCratesInScene}개 있는데 **하나도 못 봤다** — 시야/배치/안내 문제");
+    }
+
+    // ── 전투 (2026-07-28) ────────────────────────────────────────────────
+    //  정면 난타는 사람도 안 한다 — 스태미너·체력이 먼저 마른다.
+    //  사거리 밖에서 맴돌다 적의 빈틈(회복·이동·경직)에 파고들어 치고 빠지는 **카이팅**.
+    //  적이 윈드업(IsInWindup)이면 구르기로 흘린다. 처치 후 시체를 뒤진다(시체 = LootContainer).
+
+    static float PlayerHpRatio()
+    {
+        var p = TopDownPlayer.Instance;
+        if (p == null) return 0f;
+        var h = p.GetComponent<Health>();
+        return (h == null || h.MaxHp <= 0f) ? 1f : h.CurrentHp / h.MaxHp;
+    }
+
+    /// <summary>가장 가까운 살아있는 적. <paramref name="visibleOnly"/>면 **지금 보이는 적만**
+    /// (게임의 시야 규칙 그대로). AI의 판단 입력은 반드시 보이는 것만 써야 한다 —
+    /// 안 보이는 적을 알고 교전을 결정하면 그건 사람의 플레이가 아니다.</summary>
+    static EnemyController NearestEnemy(Vector2 from, float maxDist, bool visibleOnly = false)
+    {
+        EnemyController best = null; float bestD = maxDist;
+        foreach (var e in Object.FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
+        {
+            if (e == null || !e.gameObject.activeInHierarchy) continue;
+            var h = e.GetComponent<Health>();
+            if (h != null && h.IsDead) continue;
+            if (visibleOnly && !PlayerVision.CanSee(e.transform.position)) continue;
+            float dist = Vector2.Distance(e.transform.position, from);
+            if (dist < bestD) { bestD = dist; best = e; }
+        }
+        return best;
+    }
+
+    static void AimAt(Vector3 worldPos)
+    {
+        var cam = Camera.main;
+        if (cam != null) GameInput.VSetMousePos(cam.WorldToScreenPoint(worldPos));
+    }
+
+    /// <summary>교전 — 카이팅으로 치고 빠지며, 처치하면 시체를 뒤진다.</summary>
+    static IEnumerator CombatEngage(QaStepDef d, QaContext c)
+    {
+        float budget = d.budgetSec > 0 ? d.budgetSec : 45f;
+        int wantKills = d.count > 0 ? d.count : 2;
+        float deadline = Time.realtimeSinceStartup + budget;
+        float searchR = d.ratio > 0f ? d.ratio : 14f;   // 교전 대상 탐색 반경(m)
+
+        var ps = StatDB.Instance != null ? StatDB.Instance.playerStat : null;
+        float range = ps != null && ps.lightRange > 0f ? ps.lightRange : 1.2f;
+        float fleeHp = 0.35f;
+
+        int kills = 0, swings = 0, dodges = 0;
+        string scene = SceneManager.GetActiveScene().name;
+
+        while (kills < wantKills && Time.realtimeSinceStartup < deadline)
+        {
+            var player = TopDownPlayer.Instance;
+            if (player == null) yield break;
+
+            var foe = NearestEnemy(player.transform.position, searchR);
+            if (foe == null)
+            {
+                if (kills == 0) c.Report.Info("combat", "NO_ENEMY", $"반경 {searchR:0}m에 교전할 적 없음");
+                break;
+            }
+
+            var foeHp = foe.GetComponent<Health>();
+            // 계측: 적 체력 변화 — "안 맞는 것"과 "맞는데 못 죽이는 것"은 원인이 완전히 다르다.
+            //   때린 횟수 많은데 체력 그대로 → 히트박스·사거리·상태 문제(AI 또는 게임 코드)
+            //   체력은 깎이는데 못 죽임      → 데미지/HP 밸런스(게임 데이터, 내가 손댈 것 아님)
+            float foeHpStart = foeHp != null ? foeHp.CurrentHp : -1f;
+            float myHpStart = PlayerHpRatio();
+            int swingsHere = 0;
+            c.Report.Info("combat", "ENGAGE",
+                $"교전 시작 — {foe.name} (거리 {Vector2.Distance(foe.transform.position, player.transform.position):0.#}m"
+                + (foeHpStart >= 0f ? $", 적 HP {foeHpStart:0}" : "") + ")");
+
+            // ── 한 마리와의 교전 루프 ──
+            while (Time.realtimeSinceStartup < deadline)
+            {
+                player = TopDownPlayer.Instance;
+                if (player == null || foe == null) break;
+                if (foeHp != null && foeHp.IsDead) break;
+                if (SceneManager.GetActiveScene().name != scene) break;   // 사망·전환
+
+                float hp = PlayerHpRatio();
+                if (hp <= fleeHp)
+                {
+                    c.Report.Warn("combat", "DISENGAGE", $"체력 {hp * 100f:0}% — 교전 이탈(도주)");
+                    Vector2 away = ((Vector2)player.transform.position - (Vector2)foe.transform.position).normalized;
+                    GameInput.VSetMove(away);
+                    yield return c.Bot.WaitSec(1.5f);
+                    GameInput.VSetMove(Vector2.zero);
+                    yield break;
+                }
+
+                Vector2 toFoe = (Vector2)foe.transform.position - (Vector2)player.transform.position;
+                float dist = toFoe.magnitude;
+                Vector2 dir = dist > 0.01f ? toFoe / dist : Vector2.right;
+                AimAt(foe.transform.position);
+
+                if (foe.IsInWindup && dist < range + 1.2f)
+                {
+                    // 적이 때리려 한다 — 구르기로 흘리고 물러난다
+                    c.Bot.Tap(KeyCode.Space);
+                    dodges++;
+                    GameInput.VSetMove(-dir);
+                    yield return c.Bot.WaitSec(0.45f);
+                }
+                else if (dist > range + 0.4f)
+                {
+                    GameInput.VSetMove(dir);                    // 파고들기
+                    yield return c.Bot.WaitSec(0.12f);
+                }
+                else if (dist < range - 0.5f)
+                {
+                    GameInput.VSetMove(-dir);                   // 너무 붙음 — 간격 회복
+                    yield return c.Bot.WaitSec(0.12f);
+                }
+                else
+                {
+                    GameInput.VSetMove(Vector2.zero);
+                    GameInput.VClickMouse(0);                   // 약공격
+                    swings++; swingsHere++;
+                    yield return c.Bot.WaitSec(0.22f);
+                    GameInput.VSetMove(-dir);                   // 치고 빠지기
+                    yield return c.Bot.WaitSec(0.28f);
+                }
+            }
+
+            GameInput.VSetMove(Vector2.zero);
+
+            // ── 교전 1건 결산: 내가 준 피해 vs 받은 피해 ──────────────────
+            float foeHpEnd = (foe != null && foeHp != null) ? foeHp.CurrentHp : 0f;
+            float dealt = foeHpStart >= 0f ? Mathf.Max(0f, foeHpStart - foeHpEnd) : -1f;
+            float taken = (myHpStart - PlayerHpRatio()) * 100f;
+            c.Report.Info("combat", "TRADE",
+                $"타격 {swingsHere}회 → 적 HP {foeHpStart:0}→{foeHpEnd:0} (준 피해 {dealt:0}) · "
+                + $"내 체력 {myHpStart * 100f:0}%→{PlayerHpRatio() * 100f:0}% (받은 피해 {taken:0}%p)");
+
+            if (swingsHere >= 4 && dealt <= 0.1f)
+                c.Report.Error("combat", "NO_DAMAGE",
+                    $"{swingsHere}회 때렸는데 적 체력이 **전혀 안 깎임** — 명중 안 됨(사거리·히트박스·공격 상태 확인). "
+                    + "밸런스가 아니라 배선 문제다");
+            else if (dealt > 0.1f && foeHpEnd > 0.1f && taken > dealt / Mathf.Max(1f, foeHpStart) * 100f)
+                c.Report.Warn("combat", "LOSING_TRADE",
+                    $"피해 교환이 불리하다 — 준 {dealt:0} / 받은 {taken:0}%p. 적이 세거나 카이팅이 안 먹힘");
+
+            if (foe != null && foeHp != null && foeHp.IsDead)
+            {
+                kills++;
+                c.Report.Info("combat", "KILL", $"처치 {kills}/{wantKills} — {foe.name}");
+                yield return LootCorpse(foe, c);
+            }
+            else if (Time.realtimeSinceStartup >= deadline)
+            {
+                c.Report.Warn("combat", "TIMEOUT", $"제한 {budget:0}초 안에 처치 실패 (타격 {swings}회)");
+                break;
+            }
+            else break;
+        }
+
+        c.Report.Info("combat", "OK", $"처치 {kills} · 타격 {swings} · 회피 {dodges} · 체력 {PlayerHpRatio() * 100f:0}%");
+        if (swings > 0 && kills == 0)
+            c.Report.Warn("combat", "NO_KILL", $"{swings}회 때렸는데 한 마리도 못 잡음 — 데미지/히트박스 확인");
+    }
+
+    /// <summary>시체 파밍 — 시체는 LootContainer + InteractableObject('시체 뒤지기')로 바뀐다.</summary>
+    static IEnumerator LootCorpse(EnemyController foe, QaContext c)
+    {
+        if (foe == null) yield break;
+        var box = foe.GetComponent<LootContainer>();
+        if (box == null)
+        {
+            c.Report.Warn("combat", "NO_CORPSE_LOOT", $"{foe.name} 시체에 LootContainer가 없음 — 전리품 회수 불가");
+            yield break;
+        }
+
+        bool reached = false;
+        yield return c.Bot.MoveTo(foe.transform.position, 1.4f, 12f, r => reached = r);
+        if (!reached)
+        {
+            c.Report.Warn("combat", "CORPSE_UNREACHABLE", "시체까지 도달 실패 — 전리품 유실");
+            c.Bot.NoteUnreachable();
+            yield break;
+        }
+
+        c.Bot.Tap(KeyCode.E);
+        yield return c.Bot.WaitSec(1.0f);
+        int taken = c.Bot.TakeAllFrom(box);
+        yield return c.Bot.CloseUi("combat");
+
+        c.Report.Info("combat", "CORPSE", $"시체 수색 — {taken}개 회수");
+        if (taken == 0) c.Report.Warn("combat", "CORPSE_EMPTY", "시체가 비어 있음 — enemyDropChance/드랍 테이블 확인");
+    }
+
     /// <summary>탐색 — 상자를 훑고, wander면 무작위 배회도 섞는다(자유도).</summary>
     static IEnumerator RaidExplore(QaStepDef d, QaContext c)
     {
@@ -513,9 +1079,19 @@ public static class QaSteps
             yield return c.Bot.MoveTo(target.transform.position, 1.6f,
                                       Mathf.Min(20f, Mathf.Max(3f, deadline - Time.realtimeSinceStartup)), r => reached = r);
 
-            // 이동 중 사망·씬 언로드로 레이드를 벗어났으면 탐색 중단(파괴된 참조 접근 방지).
-            if (SceneManager.GetActiveScene().name != raidScene)
-            { c.Report.Warn("explore", "SCENE_LEFT", "탐색 중 레이드 씬을 벗어남(사망?) — 탐색 중단"); break; }
+            // 이동 중 씬이 바뀌었다. 사망·탈출이면 중단, **건물 출입이면 목표만 다시 잡는다**.
+            // (예전엔 무조건 break라, 상자로 가다 건물 입구를 밟으면 그 사이클이 통째로 끝났다)
+            string nowScene = SceneManager.GetActiveScene().name;
+            if (nowScene != raidScene)
+            {
+                if (!IsRaidScene(nowScene))
+                { c.Report.Warn("explore", "SCENE_LEFT", $"레이드를 벗어남 → {nowScene} (사망/탈출?) — 탐색 중단"); break; }
+
+                c.Report.Info("explore", "SCENE_CHANGED", $"{raidScene} → {nowScene} — 이 씬의 상자로 목표 재선정");
+                crates = new List<LootContainer>(Object.FindObjectsByType<LootContainer>(FindObjectsSortMode.None));
+                c.Report.Metric($"[{nowScene}] 상자 수", crates.Count);
+                continue;
+            }
             if (target == null) { c.Report.Warn("explore", "CRATE_GONE", "이동 중 상자가 사라짐"); continue; }
             if (!reached) { c.Report.Warn("explore", "UNREACHABLE", $"상자 '{target.ContainerName}' 도달 실패(길막힘?)"); c.Bot.NoteUnreachable(); continue; }
 
@@ -526,8 +1102,7 @@ public static class QaSteps
 
             int taken = c.Bot.TakeAllFrom(target);
             c.Report.Info("explore", "CRATE", $"'{target.ContainerName}' 수색 — {taken}개 회수");
-            c.Bot.Tap(KeyCode.Escape);
-            yield return c.Bot.WaitSec(0.3f);
+            yield return c.Bot.CloseUi("explore");
 
             if (d.wander && Time.realtimeSinceStartup < deadline)
                 yield return c.Bot.Wander(c, 2.5f);   // 사이사이 배회 — 스턱·구멍 발견 확률 ↑
@@ -546,6 +1121,11 @@ public static class QaSteps
         var player = TopDownPlayer.Instance;
         if (player == null) { c.Report.Error("extract", "NO_PLAYER", "플레이어 없음"); yield break; }
 
+        // 건물 내부엔 탈출구가 없다 — 먼저 밖으로 나가야 한다(사람도 그렇게 한다).
+        yield return LeaveBuildingIfInside(c);
+        player = TopDownPlayer.Instance;
+        if (player == null) { c.Report.Error("extract", "NO_PLAYER", "플레이어 없음"); yield break; }
+
         foreach (var io in Object.FindObjectsByType<InteractableObject>(FindObjectsSortMode.None))
         {
             if (io == null || !io.gameObject.activeInHierarchy) continue;
@@ -562,7 +1142,13 @@ public static class QaSteps
 
         string raidScene = SceneManager.GetActiveScene().name;
         bool reached = false;
-        yield return c.Bot.MoveTo(best.transform.position, 1.4f, budget * 0.6f, r => reached = r);
+        // 도착 판정을 그 오브젝트의 실제 상호작용 반경에 맞춘다 —
+        // 고정값(1.4m)을 쓰면 interactRange가 더 좁은 탈출구에서는 '도착했는데 범위 밖'이 된다.
+        float arrive = Mathf.Clamp(best.InteractRange * 0.6f, 0.8f, 1.4f);
+        // 이동 시간은 **거리에 맞춰야** 한다. 고정 배분(budget×0.6)이면 먼 탈출구는 무조건 실패한다
+        // (2026-07-28: 직선 173.7m를 54초 안에 — 우회까지 하면 불가능 → EXIT_UNREACHABLE).
+        float moveBudget = Mathf.Max(budget * 0.6f, bestD / 2.2f + 20f);
+        yield return c.Bot.MoveTo(best.transform.position, arrive, moveBudget, r => reached = r);
         if (!reached)
         {
             yield return c.Bot.Blocked("extract", "EXIT_UNREACHABLE",
@@ -570,11 +1156,46 @@ public static class QaSteps
             yield break;
         }
 
-        c.Bot.Tap(KeyCode.E);
-        bool left = false;
-        yield return c.Bot.WaitUntil(() => SceneManager.GetActiveScene().name != raidScene, budget * 0.4f, r => left = r);
+        // ── 탈출 상호작용 ──────────────────────────────────────────────
+        // E를 한 번 누르고 기다리면 안 된다. InteractionSystem이 입력을 **버리는 조건이 둘** 있다:
+        //   ① UI가 열려 있으면 타겟 해제 + return  → 프롬프트조차 안 뜬다
+        //   ② TopDownPlayer.CurrentState != Idle(공격·구르기 중)이면 E 무시
+        // 봇은 교전 직후 탈출구로 오므로 ②에 걸려 입력이 통째로 사라진다(2026-07-28 EXTRACT_TIMEOUT).
+        // 게다가 탈출은 즉시 전환이 아니라 exitWaitTime 동안 **버텨야** 하고,
+        // interactRange×2 밖으로 나가면 취소된다 → 그 동안 움직이면 안 된다.
+        yield return c.Bot.CloseUi("extract");                 // ① 해소
+        GameInput.VSetMove(Vector2.zero);                      // 카운트다운 중 이탈 방지
 
-        if (!left) yield return c.Bot.Blocked("extract", "EXTRACT_TIMEOUT", "탈출 상호작용 후 씬 전환 없음", "E키 상호작용 1회");
+        bool left = false;
+        float deadline = Time.realtimeSinceStartup + budget * 0.4f;
+        int taps = 0;
+        bool sawPrompt = false;
+
+        while (Time.realtimeSinceStartup < deadline)
+        {
+            if (SceneManager.GetActiveScene().name != raidScene) { left = true; break; }
+
+            var pl = TopDownPlayer.Instance;
+            bool idle = pl == null || pl.CurrentState == TopDownPlayer.CombatState.Idle;   // ② 해소: Idle일 때만
+            bool uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
+            if (uiOpen) yield return c.Bot.CloseUi("extract");
+
+            if (idle && !uiOpen)
+            {
+                sawPrompt = true;
+                c.Bot.Tap(KeyCode.E);
+                taps++;
+            }
+            yield return c.Bot.WaitSec(0.5f);                  // 카운트다운을 버티며 재시도
+        }
+
+        if (!left)
+        {
+            string why = !sawPrompt
+                ? "플레이어가 Idle 상태가 된 적이 없어 E가 한 번도 전달되지 않음(공격·구르기 상태 고착 의심)"
+                : $"E {taps}회 전달했는데 씬 전환 없음 — 탈출구 배선(targetScene)·대기시간·취소거리 확인";
+            yield return c.Bot.Blocked("extract", "EXTRACT_TIMEOUT", $"탈출 실패 — {why}", $"E {taps}회 · 정지 유지");
+        }
         else
         {
             if (c.Tele.Current != null) c.Tele.Current.raidCompleted = true;

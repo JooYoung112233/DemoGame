@@ -45,6 +45,10 @@ public class QaReport
     /// <summary>밸런스/성능 지표 기록(리포트 하단에 표로 출력).</summary>
     public void Metric(string key, float value) => _metrics[key] = value;
 
+    /// <summary>기록된 지표 — 결과 JSON에 실어야 밖(마더·자동루프)에서 단계 판정을 할 수 있다.
+    /// 2026-07-28까지 직렬화에서 빠져 있어 '발견율' 같은 값이 밖에서 항상 0으로 보였다.</summary>
+    public IReadOnlyDictionary<string, float> Metrics => _metrics;
+
     public string Build(string title)
     {
         var sb = new StringBuilder();

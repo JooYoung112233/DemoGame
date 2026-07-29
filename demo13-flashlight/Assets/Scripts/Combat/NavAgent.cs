@@ -10,6 +10,9 @@ public class NavAgent : MonoBehaviour
 {
     [SerializeField] float repathInterval = 0.4f;
     [SerializeField] float arriveRadius   = 0.25f;
+    [Tooltip("이 거리 안에서는 길찾기를 끄고 직진한다. 상호작용 대상·문·플레이어는 벽에 붙어 있어 "
+             + "팽창된 격자에선 그 셀이 '막힘'이라, A*가 옆 칸만 오가며 제자리 왕복(와리가리)한다.")]
+    [SerializeField] float nearDirectDist = 1.8f;
     [Tooltip("LOS 스킵(부드러운 경로)용 캐스트 반경")]
     [SerializeField] float agentRadius = 0.3f;
     [SerializeField] LayerMask obstacleMask = ~0;
@@ -53,6 +56,15 @@ public class NavAgent : MonoBehaviour
         if (!_hasDest) { DesiredDirection = Vector2.zero; return; }
 
         Vector2 pos = transform.position;
+
+        // 코앞이면 길찾기를 쓰지 않는다 — 2026-07-28 QA에서 목표 1.9m 앞인데
+        // 6초간 12m를 왕복(OSCILLATION)했다. 목표 셀이 팽창으로 막혀 A*가 옆 칸만 오간 것.
+        Vector2 toDest = _dest - pos;
+        if (toDest.sqrMagnitude <= nearDirectDist * nearDirectDist)
+        {
+            DesiredDirection = toDest.sqrMagnitude > 0.0001f ? toDest.normalized : Vector2.zero;
+            return;
+        }
 
         _repathTimer -= Time.deltaTime;
         if (_repathTimer <= 0f)

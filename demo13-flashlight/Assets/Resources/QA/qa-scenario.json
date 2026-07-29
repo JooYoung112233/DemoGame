@@ -1,25 +1,22 @@
 {
-    "name": "표준 순환 (실제 이동·상호작용 포함)",
-    "seed": 20260711,
+    "_note": "F9 / -qa-serve 무지정 시 쓰이는 **기본 시나리오**. 2026-07-28부터 플레이어 AI가 기본이다. 정해진 순서대로 재생하는 옛 방식은 qa-scenario-standard.json (마더에서 'standard'로 투입).",
+    "name": "플레이어 AI (스스로 판단하며 레이드)",
+    "seed": 20260728,
     "cycles": 3,
     "steps": [
         { "op": "cycle.begin",        "budgetSec": 0,   "count": 0, "param": "",         "ratio": 0,   "wander": false },
         { "op": "safehouse.ensure",   "budgetSec": 30,  "count": 0, "param": "",         "ratio": 0,   "wander": false },
         { "op": "story.skip",         "budgetSec": 20,  "count": 0, "param": "",         "ratio": 0,   "wander": false },
 
-        { "op": "goto",               "budgetSec": 40,  "count": 0, "param": "Stash",    "ratio": 0,   "wander": false },
         { "op": "inventory.organize", "budgetSec": 15,  "count": 0, "param": "",         "ratio": 0,   "wander": false },
-
         { "op": "goto",               "budgetSec": 40,  "count": 0, "param": "NPC",      "ratio": 0,   "wander": false },
         { "op": "shop.sell",          "budgetSec": 0,   "count": 0, "param": "",         "ratio": 0.7, "wander": false },
-        { "op": "shop.buy",           "budgetSec": 0,   "count": 2, "param": "Medical",  "ratio": 0.4, "wander": false },
-
-        { "op": "goto",               "budgetSec": 40,  "count": 0, "param": "MapBoard", "ratio": 0,   "wander": false },
-        { "op": "quest.accept",       "budgetSec": 0,   "count": 2, "param": "",         "ratio": 0,   "wander": false },
 
         { "op": "raid.enter",         "budgetSec": 30,  "count": 0, "param": "auto",     "ratio": 0,   "wander": false },
-        { "op": "raid.explore",       "budgetSec": 150, "count": 6, "param": "",         "ratio": 0,   "wander": true  },
-        { "op": "raid.extract",       "budgetSec": 120, "count": 0, "param": "",         "ratio": 0,   "wander": false },
+
+        { "op": "ai.play",            "budgetSec": 200, "count": 0, "param": "",         "ratio": 0,   "wander": false },
+
+        { "op": "raid.extract",       "budgetSec": 90,  "count": 0, "param": "",         "ratio": 0,   "wander": false },
         { "op": "settle.verify",      "budgetSec": 10,  "count": 0, "param": "",         "ratio": 0,   "wander": false },
         { "op": "cycle.end",          "budgetSec": 0,   "count": 0, "param": "",         "ratio": 0,   "wander": false }
     ]

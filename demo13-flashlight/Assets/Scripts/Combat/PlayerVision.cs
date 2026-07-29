@@ -75,25 +75,59 @@ public class PlayerVision : MonoBehaviour
             var e = list[i];
             if (e == null) continue;
 
-            Vector2 to = (Vector2)e.transform.position - eye;
-            float d2 = to.sqrMagnitude;
-
-            bool visible;
-            if (d2 > range2) visible = false;                 // 사거리 밖
-            else if (d2 <= near2) visible = true;             // 근접 360°
-            else
-            {
-                // 콘 각도: dot(facing, dir) >= cos(half)
-                float dot = Vector2.Dot(facing, to.normalized);
-                visible = dot >= cosHalf;
-            }
-
-            // LOS: 벽(솔리드)에 막히면 안 보임
-            if (visible && los && d2 > near2)
-                visible = !BlockedByWall(eye, (Vector2)e.transform.position);
-
-            e.SetVisionVisible(visible);
+            if (e == null) continue;
+            e.SetVisionVisible(Test(eye, facing, cosHalf, range2, near2, los, e.transform.position));
         }
+    }
+
+    /// <summary>한 지점이 시야에 들어오는지 — 적 판정과 **같은 계산**을 한 곳에 모은 것.</summary>
+    bool Test(Vector2 eye, Vector2 facing, float cosHalf, float range2, float near2, bool los, Vector2 target)
+    {
+        Vector2 to = target - eye;
+        float d2 = to.sqrMagnitude;
+
+        bool visible;
+        if (d2 > range2) visible = false;                 // 사거리 밖
+        else if (d2 <= near2) visible = true;             // 근접 360°
+        else
+        {
+            // 콘 각도: dot(facing, dir) >= cos(half)
+            float dot = Vector2.Dot(facing, to.normalized);
+            visible = dot >= cosHalf;
+        }
+
+        // LOS: 벽(솔리드)에 막히면 안 보임
+        if (visible && los && d2 > near2)
+            visible = !BlockedByWall(eye, target);
+
+        return visible;
+    }
+
+    /// <summary>이 월드 좌표가 지금 플레이어 눈에 보이는가 — **적 판정과 완전히 같은 규칙**.
+    ///
+    /// QA 지각(QaPerception)이 "봇이 무엇을 발견했는가"를 정할 때 쓴다. 규칙을 따로 구현하면
+    /// QA가 게임과 다른 것을 검증하게 되므로, 반드시 이 하나만 쓴다.
+    /// 시야 시스템이 꺼져 있으면(visionEnabled=false) 사거리 안이면 전부 보이는 것으로 본다.</summary>
+    public static bool CanSee(Vector2 worldPos)
+    {
+        var inst = Instance;
+        var p = TopDownPlayer.Instance;
+        if (inst == null || p == null) return true;      // 판정 불가 — 막지 않는다
+
+        var gt = GameTuning.Instance;
+        float range = gt != null ? gt.visionRange : 9f;
+        Vector2 eye = p.transform.position;
+
+        if (gt != null && !gt.visionEnabled)
+            return ((Vector2)worldPos - eye).sqrMagnitude <= range * range;
+
+        float fovDeg = gt != null ? gt.visionFovDegrees : 150f;
+        float near   = gt != null ? gt.visionNearRadius : 2.2f;
+        bool los     = gt == null || gt.visionLineOfSight;
+        Vector2 facing = p.FacingDirection.sqrMagnitude > 0.0001f ? p.FacingDirection.normalized : Vector2.down;
+
+        return inst.Test(eye, facing, Mathf.Cos(fovDeg * 0.5f * Mathf.Deg2Rad),
+                         range * range, near * near, los, worldPos);
     }
 
     static readonly RaycastHit2D[] _hitBuf = new RaycastHit2D[1];

@@ -66,6 +66,17 @@ public static class QaBridge
 
         /// 씬별 길찾기 격자 상태. 봇이 못 움직일 때 "격자 문제냐 맵 문제냐"를 가른다.
         public List<NavGridJson> navGrids = new List<NavGridJson>();
+
+        /// QaReport.Metric()으로 기록된 지표(발견율·씬 상자 수 등).
+        /// JsonUtility는 Dictionary를 직렬화하지 못하므로 키/값 배열로 편다.
+        public List<MetricJson> metrics = new List<MetricJson>();
+    }
+
+    [System.Serializable]
+    public class MetricJson
+    {
+        public string key;
+        public float value;
     }
 
     [System.Serializable]

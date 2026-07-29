@@ -22,7 +22,10 @@ public static class NavGridBootstrap
     const float CellSize     = 0.5f;   // NavGrid 기본값과 동일(적 바디 기준 적정)
     const float AgentRadius  = 0.35f;
     const float Margin       = 4f;     // 맵 가장자리 바깥 여유 — 벽에 붙은 목표도 격자 안에 들어오게
-    const int   MaxCellsSide = 220;    // 한 변 셀 상한. 넘으면 cellSize를 키워 베이크 폭발 방지
+    // 한 변 셀 상한. 넘으면 cellSize를 키운다.
+    // 2026-07-28: 220이면 Zone1(324m)이 셀 1.54m가 돼 팽창이 4.4배로 튀고 통로가 막혔다.
+    // 700이면 Zone1도 0.5m를 유지한다(648셀). 베이크는 한 번뿐이고 씬 전환 페이드 뒤에 가려진다.
+    const int   MaxCellsSide = 700;
 
     static bool _hooked;
 
