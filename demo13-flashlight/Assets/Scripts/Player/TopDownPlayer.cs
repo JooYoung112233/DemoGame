@@ -203,7 +203,11 @@ public class TopDownPlayer : MonoBehaviour
         _performer.Configure(enemyMask, () => FacingDirection);
 
         // 그레이박스 칼 — 스파인이 들어오면 통째로 교체. **판정엔 관여하지 않는다**(연출 전용).
+        // 손에 들리는 것 3종 — 무엇을 보여줄지는 **장착 아이템**이 정한다(UpdateWeaponVisual).
+        //   2026-07-29 이전엔 칼만 무조건 붙어서 **맨손이어도 칼이 보였다**.
         _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.85f, 0.88f, 0.95f), 6, 1.05f);
+        _fistVis   = FistVisual.Attach(transform, new Color(0.42f, 0.36f, 0.30f), 6);          // 장갑 낀 주먹
+        _gunVis    = GunVisual.Attach(transform, new Color(0.46f, 0.47f, 0.50f), 6, 0.62f);    // 총
 
         _hurtbox = GetComponentInChildren<Hurtbox>();
 
@@ -490,18 +494,63 @@ public class TopDownPlayer : MonoBehaviour
     }
 
     MeleeWeaponVisual _weaponVis;
+    FistVisual _fistVis;
+    GunVisual  _gunVis;
+
+    /// <summary>손에 뭐가 들려 있나. **장착 아이템이 정한다** — 맨손이면 주먹이 보여야지 칼이 보이면 안 된다.
+    /// 근접 무기는 WeaponData가 없는 것들이 많아(구형 무기) 카테고리로 판단한다.</summary>
+    enum HandVisual { Fist, Melee, Gun }
+    HandVisual InHand
+    {
+        get
+        {
+            var it = Equip != null ? Equip.EquippedWeapon : null;
+            if (it == null) return HandVisual.Fist;
+            if (it.weaponData != null && it.weaponData.isRanged) return HandVisual.Gun;
+            return it.category == ItemCategory.Weapon ? HandVisual.Melee : HandVisual.Fist;
+        }
+    }
 
     /// <summary>칼 비주얼 갱신 — 바라보는 각 + 상태별 자세(차징/평상시). 스윙은 공격 시점에 1회 호출.</summary>
     void UpdateWeaponVisual()
     {
-        if (_weaponVis == null) return;
-        // 총을 들었으면 칼은 치운다 — 안 그러면 총 쏘는데 칼이 같이 떠 있다.
-        _weaponVis.SetVisible(!IsRangedEquipped);
-        if (IsRangedEquipped) return;
-        _weaponVis.SetFacing(FacingDirection);
-        if (_state == CombatState.HeavyCharge) _weaponVis.Charge(ChargePercent);
-        else if (!_weaponVis.IsSwinging && _state != CombatState.HeavyRelease
-                 && _state != CombatState.LightAttack) _weaponVis.Rest();
+        // 셋 중 **하나만** 보인다. 안 그러면 총 쏘는데 칼이 같이 떠 있는 식이 된다.
+        var hand = InHand;
+
+        if (_weaponVis != null)
+        {
+            _weaponVis.SetVisible(hand == HandVisual.Melee);
+            if (hand == HandVisual.Melee)
+            {
+                _weaponVis.SetFacing(FacingDirection);
+                if (_state == CombatState.HeavyCharge) _weaponVis.Charge(ChargePercent);
+                else if (!_weaponVis.IsSwinging && _state != CombatState.HeavyRelease
+                         && _state != CombatState.LightAttack) _weaponVis.Rest();
+            }
+        }
+
+        if (_fistVis != null)
+        {
+            _fistVis.SetVisible(hand == HandVisual.Fist);
+            if (hand == HandVisual.Fist)
+            {
+                _fistVis.SetFacing(FacingDirection);
+                if (!_fistVis.IsPunching && _state != CombatState.HeavyRelease
+                    && _state != CombatState.LightAttack) _fistVis.Rest();
+            }
+        }
+
+        if (_gunVis != null)
+        {
+            _gunVis.SetVisible(hand == HandVisual.Gun);
+            if (hand == HandVisual.Gun)
+            {
+                _gunVis.SetFacing(FacingDirection);
+                _gunVis.SetState(_gun != null && _gun.IsAiming,
+                                 _gun != null && _gun.IsReloading,
+                                 _gun != null ? _gun.ReloadProgress : 0f);
+            }
+        }
     }
 
     void UpdateVisionLight()
@@ -643,7 +692,9 @@ public class TopDownPlayer : MonoBehaviour
         _state = CombatState.LightAttack;
         _attackStateTimer = atk.Duration;
         _performer.Perform(atk);
-        _weaponVis?.Swing(atk.Duration);   // 우 → 좌 한 방향
+        // 손에 든 것에 맞는 동작 — 칼은 휘두르고, 맨손은 정권으로 지른다.
+        if (InHand == HandVisual.Melee) _weaponVis?.Swing(atk.Duration);   // 우 → 좌 한 방향
+        else                            _fistVis?.Punch(atk.Duration);
         // 소음은 스윙이 아니라 '적중' 시에만 발생(AttackPerformer.ScanWindow) — 2026-07-11 변경.
         _comboBuffered = false;
     }
@@ -668,7 +719,8 @@ public class TopDownPlayer : MonoBehaviour
         _heavyCooldownTimer = HeavyCooldown;
 
         _performer.Perform(atk);
-        _weaponVis?.SwingHeavy(_attackStateTimer, full);   // 치켜든 대각에서 크고 빠르게
+        if (InHand == HandVisual.Melee) _weaponVis?.SwingHeavy(_attackStateTimer, full);   // 치켜든 대각에서 크고 빠르게
+        else                            _fistVis?.PunchHeavy(_attackStateTimer, full);    // 더 깊은 정권
         // 강공도 적중 시에만 소음(AttackPerformer.ScanWindow).
     }
 
