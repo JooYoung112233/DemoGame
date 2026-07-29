@@ -191,6 +191,8 @@ public class TopDownPlayer : MonoBehaviour
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         if (skeletonAnimation == null)
             skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
+        EnsureGreyboxBody();   // ★ 스파인 탐색 **뒤에** — 앞에 두면 스파인이 있어도 네모를 덧그린다
+        TestHealthBar.Attach(transform, 0.72f);   // 테스트용 — 이 한 줄만 지우면 흔적이 안 남는다
         _cam = Camera.main;
 
         _stamina = MaxStam;
@@ -496,6 +498,39 @@ public class TopDownPlayer : MonoBehaviour
     MeleeWeaponVisual _weaponVis;
     FistVisual _fistVis;
     GunVisual  _gunVis;
+
+    /// <summary>주인공 그레이박스 몸통 — **스프라이트도 스파인도 없으면** 네모를 만들어 준다.
+    ///
+    /// (2026-07-29 사용자: "지금 주인공 없으니 네모 스프라이트 적당한 크기로 만들어서 해주라, 적들처럼")
+    /// PlayerRig 프리팹엔 몸통 스프라이트가 없어서 여태 **주인공이 안 보였다**(손/칼만 떠 있었다).
+    /// 적의 런타임 그레이박스와 같은 방식이라, 스파인이 붙으면 이 분기는 저절로 안 탄다.
+    /// 크기는 콜라이더(0.6×0.9)에 맞춘다 — 보이는 것과 맞는 것이 어긋나면 안 된다.</summary>
+    void EnsureGreyboxBody()
+    {
+        if (skeletonAnimation != null) return;                       // 스파인이 있으면 그쪽이 몸통
+        if (spriteRenderer != null && spriteRenderer.sprite != null) return;
+
+        var go = new GameObject("GreyboxBody");
+        go.transform.SetParent(transform, false);
+        go.transform.localPosition = Vector3.zero;
+        go.transform.localScale = new Vector3(0.62f, 0.9f, 1f);      // 콜라이더 0.6×0.9에 맞춤
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = PlaceholderSprite.Square;
+        sr.color = new Color(0.42f, 0.58f, 0.72f);                   // 청회색 — 붉은 적과 확실히 구분
+        sr.sortingOrder = 5;                                          // 손/무기(6)보다 뒤
+        spriteRenderer = sr;
+
+        // 어느 쪽을 보는지 알 수 있게 코 하나. 네모만 있으면 방향이 안 읽힌다.
+        var nose = new GameObject("Facing");
+        nose.transform.SetParent(go.transform, false);
+        nose.transform.localPosition = new Vector3(0.34f, 0f, 0f);   // 몸통 로컬 = 오른쪽
+        nose.transform.localScale = new Vector3(0.28f, 0.34f, 1f);
+        var nsr = nose.AddComponent<SpriteRenderer>();
+        nsr.sprite = PlaceholderSprite.Square;
+        nsr.color = new Color(0.78f, 0.86f, 0.94f);
+        nsr.sortingOrder = 5;
+    }
 
     /// <summary>손에 뭐가 들려 있나. **장착 아이템이 정한다** — 맨손이면 주먹이 보여야지 칼이 보이면 안 된다.
     /// 근접 무기는 WeaponData가 없는 것들이 많아(구형 무기) 카테고리로 판단한다.</summary>

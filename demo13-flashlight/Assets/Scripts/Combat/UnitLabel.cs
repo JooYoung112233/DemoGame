@@ -17,7 +17,10 @@ public class UnitLabel : MonoBehaviour
     public static readonly Color CorpseColor = new Color(0.70f, 0.70f, 0.74f);
 
     const float WorldSize = 0.13f;   // 부모 스케일과 무관한 월드 기준 글자 크기
-    const float HeadY     = 0.85f;   // 머리 위 오프셋(부모 로컬)
+    // 2026-07-29 사용자: "적들 이름이 머리 위가 아니라 몸 중앙에 뜨게".
+    //   머리 위는 HP/그로기 바(0.7·0.85)와 겹쳐 셋이 층층이 쌓여 시끄러웠다.
+    //   몸 중앙이면 "저게 뭔지"와 "저게 어디 있는지"가 한 점에서 읽힌다.
+    const float BodyY     = 0f;      // 몸 중앙(부모 로컬)
 
     TextMesh     _tm;
     MeshRenderer _mr;
@@ -36,7 +39,7 @@ public class UnitLabel : MonoBehaviour
         var go = new GameObject("Label");
         go.transform.SetParent(parent, false);
         go.layer = parent.gameObject.layer;
-        go.transform.localPosition = new Vector3(0f, HeadY, 0f);
+        go.transform.localPosition = new Vector3(0f, BodyY, 0f);
 
         // 부모 스케일 보정 — 예: 몸체가 (0.8, 1.0)이어도 글자는 정사각 비율로.
         Vector3 ls = parent.lossyScale;
@@ -46,7 +49,7 @@ public class UnitLabel : MonoBehaviour
 
         var tm = go.AddComponent<TextMesh>();
         tm.text          = text;
-        tm.anchor        = TextAnchor.LowerCenter;
+        tm.anchor        = TextAnchor.MiddleCenter;   // 몸 중앙에 두므로 글자도 중앙 정렬
         tm.alignment     = TextAlignment.Center;
         tm.fontSize      = 48;
         tm.characterSize = 1f;
