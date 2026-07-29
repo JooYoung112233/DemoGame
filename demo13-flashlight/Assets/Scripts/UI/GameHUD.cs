@@ -72,6 +72,7 @@ public class GameHUD : MonoBehaviour
 
         UpdateInjuryIcons();
         UpdateSurvivalWarning();
+        UpdateAmmo();
         SyncHideoutExitButton();
     }
 
@@ -167,6 +168,7 @@ public class GameHUD : MonoBehaviour
 
         // ── 생존 위험 경고 (상단 중앙) ──
         BuildSurvivalWarning(canvasRT);
+        BuildAmmo(canvasRT);
     }
 
 #if UNITY_EDITOR
@@ -199,6 +201,75 @@ public class GameHUD : MonoBehaviour
         survivalWarnText.text = "";
         go.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.8f);
         go.SetActive(false);
+    }
+
+    // ── 탄약 표시 (2026-07-29 총기) ──────────────────────────────────────
+    //   우하단. 총을 안 들었으면 아예 안 보인다 — 근접만 쓰는 판에 빈 칸을 남기지 않는다.
+    [SerializeField] Text ammoText;
+
+    void BuildAmmo(RectTransform canvasRT)
+    {
+        var go = new GameObject("AmmoText");
+        go.transform.SetParent(canvasRT, false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(1f, 0f);
+        rt.anchorMax = new Vector2(1f, 0f);
+        rt.pivot     = new Vector2(1f, 0f);
+        rt.anchoredPosition = new Vector2(-28, 96);
+        rt.sizeDelta = new Vector2(260, 44);
+
+        ammoText = go.AddComponent<Text>();
+        ammoText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        ammoText.fontSize = 26;
+        ammoText.fontStyle = FontStyle.Bold;
+        ammoText.alignment = TextAnchor.LowerRight;
+        ammoText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        ammoText.text = "";
+        go.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.85f);
+        go.SetActive(false);
+    }
+
+    void UpdateAmmo()
+    {
+        // ★ GameHUD는 **프리팹 베이크 대상**이다(UIPrefabBaker). 이미 구워진 프리팹엔 이 위젯이 없어
+        //   ammoText가 null이고, GenerateUI는 IsGenerated 가드에 막혀 다시 안 돈다 →
+        //   재베이크 전까지 탄약 표시가 **조용히 안 뜬다**. 없으면 여기서 직접 만든다.
+        //   (A타입 패널의 "프리팹 없으면 코드 생성으로 폴백"과 같은 규약.)
+        if (ammoText == null)
+        {
+            if (canvas == null) canvas = GetComponentInChildren<Canvas>();
+            var rt = canvas != null ? canvas.GetComponent<RectTransform>() : null;
+            if (rt == null) return;
+            BuildAmmo(rt);
+            if (ammoText == null) return;
+        }
+
+        var player = TopDownPlayer.Instance;
+        var gun = player != null ? player.GetComponent<PlayerGun>() : null;
+
+        bool show = gun != null && player.IsRangedEquipped;
+        if (ammoText.gameObject.activeSelf != show) ammoText.gameObject.SetActive(show);
+        if (!show) return;
+
+        if (gun.IsReloading)
+        {
+            ammoText.text = $"장전 {Mathf.RoundToInt(gun.ReloadProgress * 100f)}%";
+            ammoText.color = new Color(0.86f, 0.74f, 0.42f);      // 금색 — 지금 못 쏜다
+            return;
+        }
+        if (!gun.HasMagazine)
+        {
+            ammoText.text = "탄창 없음";
+            ammoText.color = new Color(0.85f, 0.32f, 0.28f);
+            return;
+        }
+
+        int a = gun.Ammo, cap = gun.Capacity;
+        ammoText.text = $"{a} / {cap}";
+        // 남은 탄이 1/4 아래로 떨어지면 붉게 — 장전할 자리를 고르라는 신호.
+        ammoText.color = a <= 0 ? new Color(0.85f, 0.32f, 0.28f)
+                       : (cap > 0 && a <= cap * 0.25f) ? new Color(0.88f, 0.55f, 0.25f)
+                       : new Color(0.92f, 0.90f, 0.84f);
     }
 
     void UpdateSurvivalWarning()

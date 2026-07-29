@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9003d63bbe317e14bb4f8f3e6e931023, type: 3}
+  m_Name: Weapon_Pistol9
+  m_EditorClassIdentifier: Game.Scripts::WeaponData
+  weaponId: pistol9
+  lightCombo: {fileID: 0}
+  heavyAttack: {fileID: 0}
+  heavyFullAttack: {fileID: 0}
+  moveSpeedMult: 1
+  staminaCostMult: 1
+  isRanged: 1
+  caliber: 9x19
+  fireMode: 0
+  rpm: 320
+  damage: 14
+  groggy: 14
+  projectileSpeed: 42
+  effectiveRange: 14
+  hipSpreadDeg: 8
+  adsSpreadDeg: 1.8
+  recoilPerShot: 2.6
+  recoilRecover: 10
+  recoilMax: 10
+  reloadSeconds: 2
+  noiseRadius: 34
+  adsMoveMult: 0.6

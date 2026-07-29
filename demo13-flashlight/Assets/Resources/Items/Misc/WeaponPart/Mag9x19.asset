@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
+  m_Name: Mag9x19
+  m_EditorClassIdentifier: Game.Scripts::ItemData
+  itemId: mag_9x19
+  displayName: "9x19 탄창 (15발)"
+  description: "탄이 든 채로 보관된다. 반쯤 쓴 탄창을 버릴지 챙길지는 네 판단."
+  icon: {fileID: 0}
+  gridWidth: 1
+  gridHeight: 1
+  category: 6
+  rarity: 0
+  maxStack: 1
+  weight: 0.16
+  sellPrice: 220
+  buyPrice: 550
+  isUsable: 0
+  useEffect: 0
+  effectValue: 0
+  medicalData: {fileID: 0}
+  weaponPartType: 3
+  partMoveSpeedMult: 1
+  partStaminaMult: 1
+  partRangeBonus: 0
+  partRecoilMult: 1
+  partNoiseMult: 1
+  magCapacity: 15
+  magCaliber: 9x19
+  ammoCaliber:
+  ammoDamageMult: 1
+  worldDropPrefab: {fileID: 0}

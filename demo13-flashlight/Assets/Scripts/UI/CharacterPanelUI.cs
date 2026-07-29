@@ -3290,6 +3290,37 @@ public class CharacterPanelUI : MonoBehaviour
             y -= 26f;
         }
 
+        // 탄창: 탄약 채우기 / 비우기 (2026-07-29 총기).
+        //   낱알 탄약은 그 자체로 아무 쓸모가 없다 — 탄창에 채워야 화력이 된다.
+        //   이 항목이 없으면 장전이 영원히 "맞는 탄창 없음"이라 총이 장식이 된다.
+        if (data.IsMagazine && isPlayerGrid)
+        {
+            var capMag = placed.item;
+            if (capMag.ammoCount < data.magCapacity)
+            {
+                AddContextButton("탄약 채우기", UITheme.AccentBright, y, () =>
+                {
+                    int n = GunAmmo.FillMagazine(playerInventory, capMag);
+                    Debug.Log(n > 0 ? $"[탄창] {n}발 채움 ({capMag.ammoCount}/{data.magCapacity})"
+                                    : "[탄창] 맞는 탄약이 없다");
+                    HideContextMenu();
+                    RefreshAllGrids();
+                });
+                y -= 26f;
+            }
+            if (capMag.ammoCount > 0)
+            {
+                AddContextButton("탄약 비우기", UITheme.Sell, y, () =>
+                {
+                    int n = GunAmmo.UnloadMagazine(playerInventory, capMag);
+                    Debug.Log($"[탄창] {n}발 회수 ({capMag.ammoCount}/{data.magCapacity} 남음)");
+                    HideContextMenu();
+                    RefreshAllGrids();
+                });
+                y -= 26f;
+            }
+        }
+
         // 사용/먹기 (isUsable + 내 소지품 또는 안전 창고). 먹을거=먹기, 그 외=사용
         if (data.isUsable && (isPlayerGrid || isSafeStorage))
         {

@@ -289,6 +289,61 @@ public class DebugTestUI : MonoBehaviour
         }
         else GUILayout.Label("PlayerInventory 없음", labelStyle);
 
+        // ── 총기 (2026-07-29) ──
+        //   기능엔 검증 수단이 같이 가야 한다 — 총·탄창·탄약을 손으로 찾아 주우려면 테스트가 안 된다.
+        GUILayout.Space(8);
+        GUILayout.Label("── 총기 (좌클릭 사격 / 우클릭 조준 / R 장전) ──", headerStyle);
+        var gunInv = TopDownPlayer.Instance != null ? TopDownPlayer.Instance.GetComponent<PlayerInventory>() : null;
+        if (gunInv != null)
+        {
+            var gunComp = TopDownPlayer.Instance.GetComponent<PlayerGun>();
+            if (gunComp != null && TopDownPlayer.Instance.IsRangedEquipped)
+                GUILayout.Label($"탄 {gunComp.Ammo}/{gunComp.Capacity}" +
+                                (gunComp.IsReloading ? "  장전 중…" : "") +
+                                $"   탄퍼짐 {gunComp.CurrentSpreadDeg:0.0}°", labelStyle);
+            else
+                GUILayout.Label("총 미장착 — 아래로 지급한 뒤 인벤에서 착용", labelStyle);
+
+            if (GUILayout.Button("권총 + 탄창2 + 탄약60 지급", btnStyle))
+            {
+                var gun  = ItemDatabase.Get("pistol9");
+                var mag  = ItemDatabase.Get("mag_9x19");
+                var ammo = ItemDatabase.Get("ammo_9x19");
+                if (gun == null || mag == null || ammo == null)
+                    ToastManager.Show("총기 SO 없음 (Resources/Items의 pistol9/mag_9x19/ammo_9x19)",
+                                      ToastManager.ToastType.Warning);
+                else
+                {
+                    // 탄창 하나는 **가득 채워** 준다 — 안 그러면 지급하자마자 "맞는 탄창 없음"이라
+                    //   총이 왜 안 나가는지 확인하는 데만 시간이 든다.
+                    var full = new ItemInstance(mag);
+                    full.ammoCount = mag.magCapacity;
+                    full.ammoItemId = ammo.itemId;
+                    gunInv.TryAutoPlaceAnywhere(new ItemInstance(gun));
+                    gunInv.TryAutoPlaceAnywhere(full);
+                    gunInv.TryAutoPlaceAnywhere(new ItemInstance(mag));     // 빈 탄창 — 채우기 테스트용
+                    gunInv.TryAutoPlaceAnywhere(new ItemInstance(ammo, 60));
+                    ToastManager.Show("권총·탄창2(하나는 가득)·탄약60 지급", ToastManager.ToastType.Info);
+                }
+            }
+            if (GUILayout.Button("장착 총에 탄창 물리기(빠른 셋업)", btnStyle))
+            {
+                var eq = TopDownPlayer.Instance.GetComponent<PlayerEquipment>();
+                var inst = eq != null ? eq.GetSlotInstance(EquipSlot.PrimaryWeapon) : null;
+                var mag  = ItemDatabase.Get("mag_9x19");
+                var ammo = ItemDatabase.Get("ammo_9x19");
+                if (inst == null || mag == null || ammo == null)
+                    ToastManager.Show("총을 먼저 착용하세요", ToastManager.ToastType.Warning);
+                else
+                {
+                    inst.SetAttachment(WeaponPartType.Magazine, mag.itemId);
+                    inst.ammoCount = mag.magCapacity;
+                    inst.ammoItemId = ammo.itemId;
+                    ToastManager.Show($"탄창 장착 — {inst.ammoCount}/{inst.AmmoCapacity}", ToastManager.ToastType.Info);
+                }
+            }
+        }
+
         // ── 도감 (⑨) ──
         GUILayout.Space(6);
         GUILayout.Label("── 아이템 도감 (U키) ──", headerStyle);
