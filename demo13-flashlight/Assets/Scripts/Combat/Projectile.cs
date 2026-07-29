@@ -14,7 +14,7 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     Vector2 _dir;
-    float _speed, _damage, _groggy, _rangeLeft;
+    float _speed, _damage, _groggy, _rangeLeft, _rangeTotal;
     Transform _owner;
     int _ownerLayer;
     bool _dead;
@@ -45,7 +45,19 @@ public class Projectile : MonoBehaviour
         p._damage = damage;
         p._groggy = groggy;
         p._rangeLeft = range;
+        p._rangeTotal = Mathf.Max(0.01f, range);
         return p;
+    }
+
+    /// <summary>날아간 거리에 따른 데미지 배율. 유효사거리의 절반까지는 그대로,
+    /// 그 뒤로 끝에서 55%까지 선형으로 준다. 총도 "멀면 약하다"가 있어야
+    /// 거리를 좁힐 이유가 생긴다 — 안 그러면 사거리 끝에서만 쏘는 게 항상 정답이다.</summary>
+    float Falloff()
+    {
+        float traveled = _rangeTotal - _rangeLeft;
+        float t = Mathf.Clamp01(traveled / _rangeTotal);
+        if (t <= 0.5f) return 1f;
+        return Mathf.Lerp(1f, 0.55f, Mathf.InverseLerp(0.5f, 1f, t));
     }
 
     void Update()
@@ -87,7 +99,9 @@ public class Projectile : MonoBehaviour
             {
                 // 쏜 쪽과 같은 진영(레이어)은 통과 — 아군 오사는 아직 없다.
                 if (_ownerLayer >= 0 && hb.gameObject.layer == _ownerLayer) continue;
-                hb.ReceiveHit(_damage, _groggy, _dir);
+                // 부위 = **맞은 자리 그대로**. 총은 조준한 곳이 맞는다(2026-07-29 결정).
+                // 사거리 감쇠 — 멀수록 약해진다. 유효사거리 절반까지는 그대로.
+                hb.ReceiveHitAt(_damage * Falloff(), _groggy, _dir, _buf[i].point);
                 Impact(_buf[i].point, true);
                 return true;
             }

@@ -77,6 +77,14 @@ public class GameTuning : ScriptableObject
              "타격 리듬이 안 읽혔다. 데이터(AttackComboData)는 그대로 두고 진행만 막는다(되살리기 쉽게).")]
     public bool comboEnabled = false;
 
+    // ── 근접 사거리 감쇠 (2026-07-29) ──
+    //   "닿기만 하면 같은 데미지"면 사거리가 긴 무기가 무조건 이득이라 거리 판단이 사라진다.
+    //   품 안으로 파고들면 100%, 끝에 걸치면 farMult까지.
+    [Tooltip("이 비율(사거리 대비)까지는 감쇠 없음. 0.35 = 사거리 5의 1.75m 안쪽은 100%")]
+    [Range(0f, 0.9f)] public float meleeFalloffNear = 0.35f;
+    [Tooltip("사거리 끝에서의 데미지 배율. 0.6 = 끝에 걸치면 60%")]
+    [Range(0.1f, 1f)] public float meleeFalloffFar = 0.6f;
+
     [Header("적 강공(AI)")]
     [Tooltip("적이 공격을 시작할 때 **강공**을 고를 확률. 0=항상 약공.")]
     [Range(0f, 1f)] public float enemyHeavyChance = 0.3f;

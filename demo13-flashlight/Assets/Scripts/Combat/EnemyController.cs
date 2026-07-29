@@ -197,6 +197,9 @@ public class EnemyController : MonoBehaviour
         // 그레이박스 칼 — 플레이어와 같은 연출을 적도 쓴다(예비동작이 눈에 보여야 캔슬을 노릴 수 있다).
         _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.80f, 0.70f, 0.66f), 4, 0.95f);
 
+        // 테스트용 부위 표시(F1에서 켠다, 기본 꺼짐) — 다리를 노렸는지 눈으로 확인할 유일한 수단.
+        BodyZoneOverlay.Attach(transform);
+
         // 적 은신 + 머리 위 말풍선 (가시성 실험) — 자동 부착
         if (GetComponent<EnemySpeechBubble>() == null)
             gameObject.AddComponent<EnemySpeechBubble>();

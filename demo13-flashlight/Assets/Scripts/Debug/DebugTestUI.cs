@@ -289,6 +289,14 @@ public class DebugTestUI : MonoBehaviour
         }
         else GUILayout.Label("PlayerInventory 없음", labelStyle);
 
+        // ── 부위 표시 (2026-07-29 테스트 도구) ──
+        GUILayout.Space(8);
+        GUILayout.Label("── 부위 판정 ──", headerStyle);
+        bool zonesOn = GUILayout.Toggle(BodyZoneOverlay.Enabled, " 몸 부위 표시(타르코프식)");
+        if (zonesOn != BodyZoneOverlay.Enabled) BodyZoneOverlay.Enabled = zonesOn;
+        GUILayout.Label("머리 ×2.0 · 몸통 ×1.0 · 팔 ×0.8 · 다리 ×0.75\n" +
+                        "근접·총 모두 **조준한 곳**이 맞는다. 맞은 부위가 잠깐 밝아진다.", labelStyle);
+
         // ── 총기 (2026-07-29) ──
         //   기능엔 검증 수단이 같이 가야 한다 — 총·탄창·탄약을 손으로 찾아 주우려면 테스트가 안 된다.
         GUILayout.Space(8);

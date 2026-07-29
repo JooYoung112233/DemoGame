@@ -133,7 +133,23 @@ public class AttackPerformer : MonoBehaviour
             if (IsBlockedByWall(transform.position, col)) continue;
 
             _hitThisAttack.Add(hb);
-            hb.ReceiveHit(_current.damage * w.damageMult, _current.groggy * w.groggyMult, facing);
+
+            // ── 사거리 감쇠 (2026-07-29 사용자: "단검이면 사거리 5 안에서 때려야 하는데
+            //    1에서 때리면 100%, 4.5에서 때리면 60% 이런 느낌") ──
+            //    끝에 걸쳐 맞히면 스치는 것이고, 파고들어 때리면 제대로 들어간다.
+            //    "닿기만 하면 같은 데미지"면 무기 사거리가 길수록 무조건 이득이라 거리 판단이 사라진다.
+            float reach = w.shape == HitboxShape.Box
+                ? w.offset.x + w.boxSize.x * 0.5f
+                : w.offset.magnitude + w.radius;
+            float dist = Vector2.Distance(transform.position, col.bounds.ClosestPoint(transform.position));
+            float falloff = RangeFalloff(dist, reach);
+
+            // ── 부위 (2026-07-29 사용자: "근접도 조준 똑같이 넣어줘") ──
+            //    플레이어는 조준점(마우스)이 그대로 부위가 된다. 적은 조준점이 없으니 가중 랜덤.
+            Vector2? aim = AimPoint != null ? AimPoint() : (Vector2?)null;
+
+            hb.ReceiveHitAt(_current.damage * w.damageMult * falloff,
+                            _current.groggy * w.groggyMult, facing, aim);
             landed = true;
         }
 
@@ -155,6 +171,23 @@ public class AttackPerformer : MonoBehaviour
                 CameraFollow.Instance.ZoomPunch(0.05f, 0.18f);
             }
         }
+    }
+
+    /// <summary>조준점 공급자(플레이어만 설정). null이면 조준 없는 공격 = 부위 가중 랜덤.</summary>
+    public System.Func<Vector2> AimPoint;
+
+    /// <summary>사거리 감쇠 — 품 안(사거리의 NearBand 이내)은 100%, 끝은 FarMult까지 선형으로 준다.
+    /// GameTuning에 값이 있으면 그걸 쓴다(밸런스는 Control Panel에서 만진다).</summary>
+    public static float RangeFalloff(float dist, float reach)
+    {
+        if (reach <= 0.01f) return 1f;
+        var gt = GameTuning.Instance;
+        float nearBand = gt != null ? gt.meleeFalloffNear : 0.35f;   // 이 비율까지는 감쇠 없음
+        float farMult  = gt != null ? gt.meleeFalloffFar  : 0.6f;    // 사거리 끝에서의 배율
+        float t = Mathf.Clamp01(dist / reach);
+        if (t <= nearBand) return 1f;
+        float k = Mathf.InverseLerp(nearBand, 1f, t);
+        return Mathf.Lerp(1f, farMult, k);
     }
 
     /// <summary>facing 기준 로컬 오프셋(x=전방, y=좌)을 월드 방향으로 회전.</summary>

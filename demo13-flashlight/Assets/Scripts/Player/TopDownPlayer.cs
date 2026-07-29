@@ -193,6 +193,7 @@ public class TopDownPlayer : MonoBehaviour
             skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
         EnsureGreyboxBody();   // ★ 스파인 탐색 **뒤에** — 앞에 두면 스파인이 있어도 네모를 덧그린다
         TestHealthBar.Attach(transform, 0.72f);   // 테스트용 — 이 한 줄만 지우면 흔적이 안 남는다
+        BodyZoneOverlay.Attach(transform);        // 테스트용 부위 표시(F1에서 켠다, 기본 꺼짐)
         _cam = Camera.main;
 
         _stamina = MaxStam;
@@ -203,6 +204,8 @@ public class TopDownPlayer : MonoBehaviour
         _gun = GetComponent<PlayerGun>();
         if (_gun == null) _gun = gameObject.AddComponent<PlayerGun>();
         _performer.Configure(enemyMask, () => FacingDirection);
+        // 근접도 **조준한 곳**이 맞는다(2026-07-29 사용자). 마우스 월드 좌표가 곧 부위가 된다.
+        _performer.AimPoint = () => MouseWorldPos;
 
         // 그레이박스 칼 — 스파인이 들어오면 통째로 교체. **판정엔 관여하지 않는다**(연출 전용).
         // 손에 들리는 것 3종 — 무엇을 보여줄지는 **장착 아이템**이 정한다(UpdateWeaponVisual).
