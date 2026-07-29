@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;   // FormerlySerializedAs — 필드 이름을 바꿔도 기존 에셋 값 보존
 
 /// <summary>
 /// 아이템 카테고리.
@@ -240,15 +241,36 @@ public class ItemData : ScriptableObject
     public float partMoveSpeedMult = 1f;
     [Tooltip("부착 시 스태미너 소모 배율 보정(곱연산, 1=영향없음). 손잡이 등")]
     public float partStaminaMult = 1f;
-    [Tooltip("부착 시 사거리 가산(m). 조준경 — 총기 도입 시 활용.")]
+    [Tooltip("부착 시 유효사거리 가산(m). 조준경.")]
     public float partRangeBonus = 0f;
-    [Tooltip("부착 시 반동/흔들림 배율(곱연산, <1=감소). 소염기/손잡이 — 총기 도입 시 활용.")]
+    [Tooltip("부착 시 반동/탄퍼짐 배율(곱연산, <1=감소). 소염기/손잡이.")]
     public float partRecoilMult = 1f;
-    [Tooltip("부착 시 장탄수 가산. 탄창 — 총기 도입 시 활용.")]
-    public int partMagBonus = 0;
+    [Tooltip("부착 시 총성 반경 배율(곱연산, <1=조용해짐). 소염기 전용 — 이 게임에서 가장 값비싼 효과.")]
+    public float partNoiseMult = 1f;
+
+    // 2026-07-29: 구 `partMagBonus`(장탄수 '가산') → `magCapacity`(탄창 자체의 '용량').
+    //   탄창을 아이템으로 만들기로 하면서(타르코프식) 탄창이 곧 장탄수의 주인이 됐다.
+    //   [FormerlySerializedAs]로 기존 에셋 값(mag_extended=10)이 그대로 넘어온다 —
+    //   이름만 바꾸고 어트리뷰트를 안 달면 **조용히 0이 되어 장탄 0짜리 탄창**이 된다.
+    [Header("탄창 / 탄약 (총기)")]
+    [FormerlySerializedAs("partMagBonus")]
+    [Tooltip("탄창 용량(발). weaponPartType=Magazine일 때만 의미 있다.")]
+    public int magCapacity = 0;
+    [Tooltip("탄창이 받는 구경(예: 9x19). 총기의 caliber와 같아야 장착된다. 비우면 아무거나.")]
+    public string magCaliber;
+    [Tooltip("이 아이템이 **탄약**이면 구경(예: 9x19). 비어 있으면 탄약이 아니다.")]
+    public string ammoCaliber;
+    [Tooltip("탄종 데미지 배율(곱연산). 철갑/저위력탄 등.")]
+    public float ammoDamageMult = 1f;
 
     /// <summary>무기 부착물 여부</summary>
     public bool IsWeaponPart => weaponPartType != WeaponPartType.None;
+
+    /// <summary>탄창인지(용량이 있어야 쓸 수 있는 탄창이다).</summary>
+    public bool IsMagazine => weaponPartType == WeaponPartType.Magazine && magCapacity > 0;
+
+    /// <summary>탄약 아이템인지.</summary>
+    public bool IsAmmo => !string.IsNullOrEmpty(ammoCaliber);
 
     [Header("바닥 드롭")]
     [Tooltip("월드에 떨어졌을 때 사용할 프리팹 (없으면 기본 큐브)")]

@@ -679,6 +679,8 @@ public class GridItemEntry
     public int y;
     public bool rotated;
     public string[] attachments;   // 무기 부착물(파츠) itemId[4] — 없으면 null
+    public int ammoCount;          // 탄창=든 탄 / 총기=장착 탄창에 남은 탄 (2026-07-29 총기)
+    public string ammoItemId;      // 담긴 탄종. ammoCount가 0이면 무의미
     public List<GridItemEntry> containerItems;   // 보관함(컨테이너 아이템) 내부 격자 — 컨테이너만, 없으면 null
 }
 

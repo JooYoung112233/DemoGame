@@ -22,4 +22,55 @@ public class WeaponData : ScriptableObject
     [Range(0.5f, 1.3f)] public float moveSpeedMult = 1f;
     [Tooltip("스태미너 소모 배율 (무거운 무기 = 높게)")]
     [Range(0.5f, 2f)] public float staminaCostMult = 1f;
+
+    // ── 총기 (2026-07-29) ────────────────────────────────────────────────
+    //  근접 필드와 같은 SO에 둔다 — 무기 하나가 근접이면서 총인 일은 없으므로 타입을 쪼갤 이유가 없다.
+    //  isRanged가 켜지면 TopDownPlayer의 좌클릭이 '휘두르기' 대신 '사격'으로 갈린다.
+    public enum FireMode { Single, Auto, Burst }
+
+    [Header("── 총기 ──")]
+    [Tooltip("켜면 이 무기는 총이다. 좌클릭=사격 / 우클릭=조준 / R=장전.")]
+    public bool isRanged = false;
+
+    [Tooltip("구경(예: 9x19). **탄창의 magCaliber와 같아야** 장착된다.")]
+    public string caliber = "9x19";
+
+    [Tooltip("격발 방식. Single=클릭마다 1발, Auto=누르는 동안 연사.")]
+    public FireMode fireMode = FireMode.Single;
+
+    [Tooltip("분당 발사수(RPM). 600 = 초당 10발.")]
+    public float rpm = 400f;
+
+    [Tooltip("탄 1발 기본 데미지. 탄종 배율(ammoDamageMult)이 곱해진다.")]
+    public float damage = 18f;
+
+    [Tooltip("적중 시 그로기 누적치.")]
+    public float groggy = 12f;
+
+    [Tooltip("총알 속도(m/s). 탑다운에서 눈에 보여야 하므로 실제보다 훨씬 느리게 잡는다.")]
+    public float projectileSpeed = 42f;
+
+    [Tooltip("유효사거리(m). 넘으면 총알이 사라진다. 조준경 partRangeBonus가 더해진다.")]
+    public float effectiveRange = 16f;
+
+    [Tooltip("허리쏴 탄퍼짐(도, 반각). 조준하면 adsSpreadDeg로 좁아진다.")]
+    public float hipSpreadDeg = 7f;
+    [Tooltip("조준 시 탄퍼짐(도, 반각).")]
+    public float adsSpreadDeg = 1.6f;
+
+    [Tooltip("한 발 쏠 때마다 누적되는 탄퍼짐(도). 연사하면 벌어진다.")]
+    public float recoilPerShot = 2.2f;
+    [Tooltip("초당 회복되는 누적 탄퍼짐(도). 손을 떼면 다시 모인다.")]
+    public float recoilRecover = 9f;
+    [Tooltip("누적 탄퍼짐 상한(도).")]
+    public float recoilMax = 11f;
+
+    [Tooltip("장전(탄창 교체)에 걸리는 시간(초).")]
+    public float reloadSeconds = 2.2f;
+
+    [Tooltip("총성이 들리는 반경(m). **이 게임에서 가장 시끄러운 행동**이다. 소염기가 줄여 준다.")]
+    public float noiseRadius = 38f;
+
+    [Tooltip("조준 중 이동속도 배율.")]
+    [Range(0.2f, 1f)] public float adsMoveMult = 0.55f;
 }

@@ -137,6 +137,7 @@ public class TopDownPlayer : MonoBehaviour
 
     // 히트박스 / 허트박스
     AttackPerformer _performer;
+    PlayerGun _gun;          // 총기 사격/조준/장전 (근접 상태기계와 분리)
     Hurtbox _hurtbox;
 
     // 장착 무기 (null=맨손, 인스펙터 기본값 사용)
@@ -154,11 +155,21 @@ public class TopDownPlayer : MonoBehaviour
     float OverweightMoveMult => (Inv != null && WeightPenaltyActive) ? Inv.OverweightMoveMult : 1f;
     bool OverweightSprintBlocked => Inv != null && WeightPenaltyActive && Inv.SprintBlocked;
     // 무기 보정 × 부착물(파츠) 집계 보정
-    float WeaponMoveMult  => (_weapon != null ? _weapon.moveSpeedMult : 1f) * (Equip != null ? Equip.WeaponPartMoveMult : 1f);
+    // 조준 중엔 느려진다 — 정밀 사격의 대가(2026-07-29).
+    float AdsMoveMult     => (_gun != null && _gun.IsAiming && _weapon != null && _weapon.isRanged)
+                             ? _weapon.adsMoveMult : 1f;
+    float WeaponMoveMult  => (_weapon != null ? _weapon.moveSpeedMult : 1f)
+                             * (Equip != null ? Equip.WeaponPartMoveMult : 1f) * AdsMoveMult;
     float WeaponStamMult  => (_weapon != null ? _weapon.staminaCostMult : 1f) * (Equip != null ? Equip.WeaponPartStaminaMult : 1f);
 
     /// <summary>무기 장착 반영 (PlayerEquipment가 호출). null=맨손.</summary>
     public void SetWeapon(WeaponData weapon) => _weapon = weapon;
+
+    /// <summary>지금 장착한 무기 데이터(맨손이면 null).</summary>
+    public WeaponData CurrentWeapon => _weapon;
+
+    /// <summary>총을 들고 있나 — 켜져 있으면 좌클릭이 '휘두르기'가 아니라 '사격'이다.</summary>
+    public bool IsRangedEquipped => _weapon != null && _weapon.isRanged;
 
     // ── Unity 생명주기 ───────────────────────────────────────────────
 
@@ -187,6 +198,8 @@ public class TopDownPlayer : MonoBehaviour
         // 공격 판정기 (적 레이어 타격)
         _performer = GetComponent<AttackPerformer>();
         if (_performer == null) _performer = gameObject.AddComponent<AttackPerformer>();
+        _gun = GetComponent<PlayerGun>();
+        if (_gun == null) _gun = gameObject.AddComponent<PlayerGun>();
         _performer.Configure(enemyMask, () => FacingDirection);
 
         // 그레이박스 칼 — 스파인이 들어오면 통째로 교체. **판정엔 관여하지 않는다**(연출 전용).
@@ -482,6 +495,9 @@ public class TopDownPlayer : MonoBehaviour
     void UpdateWeaponVisual()
     {
         if (_weaponVis == null) return;
+        // 총을 들었으면 칼은 치운다 — 안 그러면 총 쏘는데 칼이 같이 떠 있다.
+        _weaponVis.SetVisible(!IsRangedEquipped);
+        if (IsRangedEquipped) return;
         _weaponVis.SetFacing(FacingDirection);
         if (_state == CombatState.HeavyCharge) _weaponVis.Charge(ChargePercent);
         else if (!_weaponVis.IsSwinging && _state != CombatState.HeavyRelease
@@ -545,10 +561,19 @@ public class TopDownPlayer : MonoBehaviour
         if (ThrowSystem.Instance != null && ThrowSystem.Instance.IsAiming) return;
         if (!CombatEnabled || _exhausted) return;
 
-        // 구르기 (Space)
+        // 구르기 (Space) — 총을 들고 있어도 구를 수 있다.
         if (GameInput.GetKeyDown(KeyCode.Space) && _state != CombatState.Dodge && _dodgeCooldownTimer <= 0f)
         {
             TryDodge();
+            return;
+        }
+
+        // ★ 총기(2026-07-29) — 좌클릭=사격 / 우클릭=조준 / R=장전.
+        //   근접 상태기계는 아예 안 탄다. 총기 분기를 아래 콤보·차징 코드에 섞으면
+        //   애써 잡아 놓은 선입력·차징 타이밍이 같이 흔들린다. 입력만 갈라 준다.
+        if (IsRangedEquipped)
+        {
+            if (_gun != null) _gun.HandleInput(false);
             return;
         }
 

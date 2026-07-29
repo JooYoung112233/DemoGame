@@ -482,6 +482,8 @@ public class InventoryGrid
                 durability = p.item.durability,
                 x = p.gridX, y = p.gridY, rotated = p.rotated,
                 attachments = p.item.HasAnyAttachment ? (string[])p.item.attachments.Clone() : null,
+                ammoCount = p.item.ammoCount,          // 반쯤 쓴 탄창은 남은 탄째로 저장돼야 한다
+                ammoItemId = p.item.ammoItemId,
                 // 보관함이면 내부 격자도 재귀 저장
                 containerItems = p.item.IsContainer ? p.item.ContainerGrid.GetSaveData() : null,
             });
@@ -509,6 +511,8 @@ public class InventoryGrid
             if (data.hasDurability) inst.durability = e.durability;
             if (e.attachments != null && e.attachments.Length > 0)
                 inst.attachments = (string[])e.attachments.Clone();
+            inst.ammoCount  = e.ammoCount;
+            inst.ammoItemId = e.ammoItemId;
             // 보관함이면 내부 격자 복원(재귀)
             if (inst.IsContainer && e.containerItems != null)
                 inst.ContainerGrid.LoadSaveData(e.containerItems);

@@ -24,6 +24,41 @@ public class ItemInstance
     /// <summary>무기 부착물(파츠) — 종류별 itemId. 길이 4 = [Scope, Muzzle, Magazine, Grip]. (무기 인스턴스에 귀속, 타르코프식)</summary>
     public string[] attachments;
 
+    /// <summary>남은 탄. **탄창 인스턴스**엔 그 탄창에 든 탄, **총기 인스턴스**엔 장착 탄창에 남은 탄.
+    ///
+    /// 2026-07-29: 탄창을 아이템으로 만들면서(타르코프식) 탄창은 '탄을 담은 개별 물건'이 됐다.
+    ///   총기가 탄창 인스턴스를 **품게** 하면 자기참조 타입이 되어 유니티 직렬화가 못 다룬다
+    ///   → 총기와 탄창이 **같은 두 필드를 나눠 쓴다**. 장전은 이 값을 서로 옮기는 일이다.
+    ///   그래서 반쯤 쓴 탄창을 빼도 남은 탄이 그대로 따라 나온다.</summary>
+    public int ammoCount;
+
+    /// <summary>담긴 탄의 itemId(탄종). ammoCount가 0이면 의미 없다.</summary>
+    public string ammoItemId;
+
+    /// <summary>이 인스턴스가 담을 수 있는 최대 탄 수. 탄창=제 용량 / 총기=장착 탄창의 용량(없으면 0).</summary>
+    public int AmmoCapacity
+    {
+        get
+        {
+            if (data == null) return 0;
+            if (data.IsMagazine) return data.magCapacity;
+            var mag = LoadedMagazineData;
+            return mag != null ? mag.magCapacity : 0;
+        }
+    }
+
+    /// <summary>총기에 물려 있는 탄창의 ItemData(없으면 null). 부착 슬롯 [2]=Magazine.</summary>
+    public ItemData LoadedMagazineData
+    {
+        get
+        {
+            string id = GetAttachment(WeaponPartType.Magazine);
+            if (string.IsNullOrEmpty(id)) return null;
+            var d = ItemDatabase.Get(id);
+            return (d != null && d.IsMagazine) ? d : null;
+        }
+    }
+
     /// <summary>보관함 내부 격자(컨테이너 아이템만, 인스턴스 귀속). 첫 접근 시 internalW×H로 생성.</summary>
     [System.NonSerialized] InventoryGrid _containerGrid;
 
