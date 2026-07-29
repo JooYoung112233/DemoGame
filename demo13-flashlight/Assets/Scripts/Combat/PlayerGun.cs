@@ -13,9 +13,16 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class PlayerGun : MonoBehaviour
 {
-    TopDownPlayer _player;
-    PlayerEquipment _equip;
-    PlayerInventory _inv;
+    // ★ 지연 조회 — Awake에서 한 번만 캐시하면 그 시점에 아직 안 붙은 컴포넌트는 **영영 null**이다.
+    //   (PlayerEquipment/PlayerInventory는 부트스트랩 순서에 따라 나중에 붙는 경우가 있다.)
+    //   TopDownPlayer.Equip이 같은 이유로 지연 조회를 쓴다.
+    TopDownPlayer _playerC;
+    PlayerEquipment _equipC;
+    PlayerInventory _invC;
+
+    TopDownPlayer _player => _playerC != null ? _playerC : (_playerC = GetComponent<TopDownPlayer>());
+    PlayerEquipment _equip => _equipC != null ? _equipC : (_equipC = GetComponent<PlayerEquipment>());
+    PlayerInventory _inv   => _invC   != null ? _invC   : (_invC   = GetComponent<PlayerInventory>());
 
     float _nextShotAt;          // 연사 간격
     float _recoil;              // 누적 탄퍼짐(도)
@@ -59,13 +66,6 @@ public class PlayerGun : MonoBehaviour
             float partMult = _equip != null ? _equip.WeaponPartRecoilMult : 1f;
             return (baseSpread + _recoil) * Mathf.Max(0.05f, partMult);
         }
-    }
-
-    void Awake()
-    {
-        _player = GetComponent<TopDownPlayer>();
-        _equip  = GetComponent<PlayerEquipment>();
-        _inv    = GetComponent<PlayerInventory>();
     }
 
     void Update()

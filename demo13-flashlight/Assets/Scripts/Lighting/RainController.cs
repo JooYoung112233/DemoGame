@@ -44,15 +44,17 @@ public class RainController : MonoBehaviour
 
     void Update()
     {
-        // R키 디버그 토글
-        if (GameInput.GetKeyDown(KeyCode.R))
+        // 비 디버그 토글 — 2026-07-29 R → **F7**로 이동.
+        //   R은 총기 장전(PlayerGun)이 가져갔다. 그대로 두면 장전할 때마다 비가 켜졌다 꺼진다.
+        //   장전은 핵심 조작이고 R은 그쪽의 관례라, 디버그 토글이 비켜 주는 게 맞다.
+        if (GameInput.GetKeyDown(KeyCode.F7))
         {
             isRaining = !isRaining;
-            Debug.Log($"[Rain] R키: 비 {(isRaining ? "ON" : "OFF")}");
+            Debug.Log($"[Rain] F7: 비 {(isRaining ? "ON" : "OFF")}");
         }
 
         // WeatherData에서 타겟 갱신
-        if (weatherData != null && !GameInput.GetKey(KeyCode.R))
+        if (weatherData != null && !GameInput.GetKey(KeyCode.F7))
         {
             isRaining = weatherData.IsRaining;
         }

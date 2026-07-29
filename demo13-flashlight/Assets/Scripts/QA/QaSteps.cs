@@ -739,8 +739,9 @@ public static class QaSteps
                         var foe = NearestEnemy(player.transform.position, 20f, visibleOnly: !per.Omniscient);
                         if (foe == null) { escaped = true; break; }   // 위협이 안 보임 = 이탈 성공
 
-                        float d = Vector2.Distance(foe.transform.position, player.transform.position);
-                        if (d >= safeDist) { escaped = true; break; }
+                        // 이름이 `d`면 AiPlay(QaStepDef d, …)의 인자를 가려 CS0136이 난다.
+                        float foeDist = Vector2.Distance(foe.transform.position, player.transform.position);
+                        if (foeDist >= safeDist) { escaped = true; break; }
 
                         Vector2 away = ((Vector2)player.transform.position - (Vector2)foe.transform.position).normalized;
                         GameInput.VSetMove(away);
