@@ -11,13 +11,15 @@ static class Program
     static void Main(string[] argv)
     {
         Zone1GreyboxLayout.Build();
+        Rec.Harvest();   // 튜토(프리팹 경로) 배치분을 뒤늦게 수확 — 크기가 나중에 정해지기 때문
 
         Console.WriteLine("=== 경고 ===");
         foreach (var w in Rec.Warns) Console.WriteLine("  ! " + w);
         if (Rec.Warns.Count == 0) Console.WriteLine("  (없음)");
         Console.WriteLine();
 
-        var solids = Rec.Solids.Where(b => b.kind != "tutorial").ToList();
+        // 치울 수 있는 잔해(BlockedPassage 비-Permanent)는 '길'로 친다 — 대가를 치르면 지나갈 수 있다.
+        var solids = Rec.Solids.Where(b => !Rec.Passable.Contains(b.name)).ToList();
         Console.WriteLine($"=== 배치 === 솔리드 {solids.Count} / 마커 {Rec.Points.Count}");
         foreach (var g in Rec.Points.GroupBy(p => p.kind).OrderByDescending(g => g.Count()))
             Console.WriteLine($"  {g.Key,-12} {g.Count()}");
@@ -50,7 +52,7 @@ static class Program
             var bad = new List<string>();
             foreach (var p in Rec.Points)
             {
-                if (p.kind == "tutorial") continue;
+                if (p.name.EndsWith("|Permanent")) continue;   // 영구 차단은 못 가는 게 정상
                 if (!NearReachable(seen, blocked, p.x, p.y)) bad.Add($"{p.kind}:{p.name} ({p.x:F1},{p.y:F1})");
             }
             Console.WriteLine($"  도달 불가 오브젝트 {bad.Count}개");

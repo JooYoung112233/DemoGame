@@ -19,6 +19,7 @@
   <ItemGroup>
     <!-- 검사 대상 = 실제 빌더 소스. 복사하지 않고 직접 참조하므로 항상 최신이다. -->
     <Compile Include="../../Assets/Editor/Zone1GreyboxLayout.cs" />
+    <Compile Include="../../Assets/Editor/ScrapMarketGreyboxLayout.cs" />
     <Compile Include="Stubs.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>

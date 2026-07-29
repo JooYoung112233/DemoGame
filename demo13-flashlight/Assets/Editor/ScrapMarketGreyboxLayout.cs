@@ -38,7 +38,7 @@ public static class ScrapMarketGreyboxLayout
     static readonly string[] RequiredPrefabIds =
     {
         "gb_floor", "gb_wall", "gb_barricade", "gb_door", "gb_crate", "gb_enter",
-        "gb_shelf", "gb_note", "gb_spawn", "gb_exit", "gb_enemy",
+        "gb_shelf", "gb_note", "gb_spawn", "gb_exit", "gb_enemy", "gb_prop",
     };
 
     [MenuItem("Tools/TopDown/개발/고철시장 그레이박스(단독)")]
@@ -110,15 +110,17 @@ public static class ScrapMarketGreyboxLayout
         // ── 건물 블록(조밀화) — 길/건물내부/출입구 채널 제외 전 내부를 채움(walkable 구멍 금지) ──
         placed += Wall(map, "Bldg_S_base", 22f,  1.5f, 42f,  1f);  // 남단 토대 X1~43 Y1~2
         placed += Wall(map, "Bldg_W",       2.5f,28.5f, 3f, 53f);  // 서측 띠(전 높이) X1~4 Y2~55
-        // 2026-07-11 (사용자: "너무 큰 건물들 좀 쪼개줘 … 튜토 지역 보면 커다란 2개 같은 건 좀 그렇다"):
-        //   동측 대블록을 통짜 벽 하나로 두면 27×25짜리 거대한 회색 덩어리가 된다.
-        //   **골목 낀 필지 격자로 쪼갠다** — 튜토도 '도시 한 블록'으로 읽히고 골목 탐험이 생긴다.
-        if (eastCorridor)   // 차고 동측 통로(갭 Y27~32) — 동측 대블록 분할
+        // ★ 2026-07-29 (사용자: "튜토 지역의 오른쪽, 저 의미없는 상자 배치만 수정하면 될 것 같은데"):
+        //   동측 대블록은 **똑같은 네모의 격자**였다(옛 LotGrid). 게다가 그 사이 골목은
+        //   **아무 데도 이어지지 않는다** — 동측 통로로 들어가면 네모 사이를 돌다 끝난다.
+        //   이제 **고철 야적장 두 곳**이다: 둘레는 붙은 건물 띠(미로 없음), 안은 마당,
+        //   진입은 동측 통로를 향한 문 하나. 지역 이름(고철시장)이 처음으로 지형에 나타난다.
+        if (eastCorridor)   // 차고 동측 통로(갭 Y27~32) — 두 야적장의 문이 이 통로를 마주 본다
         {
-            placed += LotGrid(map, "Bldg_E_S", 16f, 2f, 43f, 27f);
-            placed += LotGrid(map, "Bldg_E_N", 16f, 32f, 43f, 55f);
+            placed += ScrapYard(map, "Yard_S", 16f, 2f, 43f, 27f, 'N', 4111);
+            placed += ScrapYard(map, "Yard_N", 16f, 32f, 43f, 55f, 'S', 4222);
         }
-        else placed += LotGrid(map, "Bldg_E", 16f, 2f, 43f, 55f);
+        else placed += ScrapYard(map, "Yard_E", 16f, 2f, 43f, 55f, 'W', 4333);
         // 길↔건물 벽띠 X7~8 (출입구 3칸 Y9~10·30~31·47~48 만큼 끊김)
         placed += Wall(map, "Bldg_door_a",  7.5f, 7f,   1f,  4f);  // X7~8 Y5~9
         placed += Wall(map, "Bldg_door_b",  7.5f,12f,   1f,  4f);  // X7~8 Y10~14
@@ -131,9 +133,9 @@ public static class ScrapMarketGreyboxLayout
         //   폐상점·차고·창고는 예전엔 **걸어 들어가는 방**이었다. 건물 모델이 '문 → 내부 씬 전환'으로
         //   바뀌면서 내용물을 Int_* 씬으로 옮겼는데, **방 자체(빈 공간)는 그대로 남아** 위에서
         //   속이 훤히 보이는 빈 방이 됐다. 이제 방을 통째로 채운다 — 진입은 서벽의 문(상호작용)으로만.
-        placed += LotGrid(map, "Bldg_Shop",  8f,  5f, 16f, 14f);   // 폐상점
-        placed += LotGrid(map, "Bldg_Gar",   8f, 26f, 16f, 35f);   // 차고
-        placed += LotGrid(map, "Bldg_Ware",  8f, 44f, 16f, 50f);   // 창고
+        placed += Solid(map, "Bldg_Shop",  8f,  5f, 16f, 14f);   // 폐상점
+        placed += Solid(map, "Bldg_Gar",   8f, 26f, 16f, 35f);   // 차고
+        placed += Solid(map, "Bldg_Ware",  8f, 44f, 16f, 50f);   // 창고
 
         placed += Wall(map, "Bldg_z1",     11.5f, 3.5f, 9f,  3f);  // X7~16 Y2~5 (폐상점 남)
         placed += Wall(map, "Bldg_z2",     11.5f,20f,   9f, 12f);  // X7~16 Y14~26 (폐상점 북~차고 남)
@@ -176,9 +178,17 @@ public static class ScrapMarketGreyboxLayout
         // 6. 맨홀 탈출 (EXIT) — 창고 옆 골목 공터(CT X4~14 Y51~55). 추출구.
         placed += Exit(map, "Manhole_Exit", 9f, 53f, "Safehouse", "raid_return", 5f);
 
-        // 통합 연결점 (철거 가능 바리케이드). §2.
-        placed += Barricade(map, "Pharmacy_Barricade_N", 11f, 54.5f, 6f, 1f);  // 맨홀 공터 북단(X8~14)→약국/Zone1
-        placed += Barricade(map, "Basement_Block",       15f, 47f,   1f, 4f);  // 창고 동측 안쪽→밤 지하창고(루디)
+        // ── 통합 연결점 (철거 가능 바리케이드). §2. ──
+        // ★ 2026-07-29: 여태 **그냥 gb_barricade 막대**였다 = 치울 수 없는 영구 벽.
+        //   북단 이 자리가 Zone1에서 튜토로 들어오는 **유일한 통로**인데(나머지 북벽 갭은
+        //   Bldg_z7·동측 블록이 메우고, 동측 통로는 차고 벽에서 막다른다), 그게 막혀 있어
+        //   Zone1에 얹힌 튜토는 **폐상점·차고·창고·맨홀 탈출이 전부 도달 불가**였다.
+        //   (LayoutSim 연결성 검사로 확인 — 식물원 돔과 같은 종류의 사고.)
+        //   이제 BlockedPassage(Clearable) — 치우면 열리고, 대신 소음이 난다.
+        placed += Blocker(map, "Pharmacy_Barricade_N", 11f, 54.5f, 6f, 1f,
+                          BlockedPassage.Mode.Clearable, "쌓인 폐자재");   // 맨홀 공터 북단(X8~14)→약국/Zone1
+        // (구 Basement_Block 제거 — 창고를 통째로 채우면서 **Bldg_Ware 덩어리 안에 파묻혀**
+        //  손댈 수 없는 오브젝트가 됐다. 밤 지하창고 입구는 `Int_Warehouse` 씬이 갖고 있다.)
 
         // 7. 탐색 의뢰 POI 존 (게시판 탐색 의뢰 ReachPoint 대상 — QuestPoiZone). 각 존은 맵 지형지물에 얹음.
         //    poi_farm_sweep(3곳=파밍 건물 3채)·collapsed_shop·warehouse_noise·signal_source는 같은 건물에 겹쳐도 무방(다른 poiId).
@@ -216,38 +226,115 @@ public static class ScrapMarketGreyboxLayout
     static int Wall(GameObject parent, string name, float cx, float cy, float lenX, float thickY)
         => Bar(parent, "gb_wall", name, cx, cy, lenX, thickY);
 
-    /// <summary>큰 덩어리를 **골목 낀 필지 격자**로 쪼갠다(2026-07-11).
-    /// 가로 골목 2.4m / 세로 틈 1.6m — Zone1의 골목 위계와 같은 어휘(관통하는 쪽이 넓다).
-    /// 필지 크기는 해시로 흔들어 균일 격자로 안 보이게 한다.</summary>
-    static int LotGrid(GameObject parent, string p, float x0, float y0, float x1, float y1)
+    static int Prop(GameObject parent, string name, float cx, float cy, float lenX, float thickY)
+        => Bar(parent, "gb_prop", name, cx, cy, lenX, thickY);
+
+    /// <summary>덩어리를 **틈 없이** 13m 이하 조각으로 쪼갠다(아트 리소스 상한 = Zone1의 MaxSpan).
+    ///
+    /// 2026-07-29: 옛 `LotGrid`는 조각 사이에 2.4m/1.6m 골목을 뒀는데, 그 골목이
+    ///   **아무 데도 이어지지 않아** 똑같은 네모 사이를 돌다 끝나는 미로가 됐다.
+    ///   조각을 붙여 놓으면 실루엣은 쪼개져 보이면서 갈 곳 없는 골목은 사라진다.</summary>
+    static int Solid(GameObject parent, string p, float x0, float y0, float x1, float y1)
     {
-        const float TargetLot = 8f, GapRow = 2.4f, GapCol = 1.6f;
+        const float MaxSpan = 13f;
         float bw = x1 - x0, bh = y1 - y0;
-        if (bw < 6f || bh < 6f) return Wall(parent, p, (x0 + x1) * 0.5f, (y0 + y1) * 0.5f, bw, bh);
-
-        int cols = Mathf.Max(1, Mathf.RoundToInt((bw + GapCol) / (TargetLot + GapCol)));
-        int rows = Mathf.Max(1, Mathf.RoundToInt((bh + GapRow) / (TargetLot + GapRow)));
-        while (cols > 1 && (bw - GapCol * (cols - 1)) / cols < 5f) cols--;
-        while (rows > 1 && (bh - GapRow * (rows - 1)) / rows < 5f) rows--;
-
-        float uw = bw - GapCol * (cols - 1), ud = bh - GapRow * (rows - 1);
+        if (bw < 0.2f || bh < 0.2f) return 0;
+        int cols = Mathf.Max(1, Mathf.CeilToInt(bw / MaxSpan - 0.001f));
+        int rows = Mathf.Max(1, Mathf.CeilToInt(bh / MaxSpan - 0.001f));
+        float pw = bw / cols, pd = bh / rows;
         int n = 0;
-        float y = y0;
         for (int i = 0; i < rows; i++)
-        {
-            float d = ud / rows * (0.82f + ((i * 37 + 11) % 7) * 0.052f);
-            if (i == rows - 1) d = y1 - y;                 // 마지막 행은 남은 만큼 — 자투리 금지
-            float x = x0;
-            for (int j = 0; j < cols; j++)
-            {
-                float w = uw / cols * (0.82f + ((i * 13 + j * 29 + 5) % 7) * 0.052f);
-                if (j == cols - 1) w = x1 - x;             // 마지막 열도 남은 만큼
-                n += Wall(parent, $"{p}_{i}_{j}", x + w * 0.5f, y + d * 0.5f, w, d);
-                x += w + GapCol;
-            }
-            y += d + GapRow;
-        }
+        for (int j = 0; j < cols; j++)
+            n += Wall(parent, cols * rows == 1 ? p : $"{p}_{i}{j}",
+                      x0 + (j + 0.5f) * pw, y0 + (i + 0.5f) * pd, pw, pd);
         return n;
+    }
+
+    /// <summary>고철 야적장 — 둘레는 붙은 건물 띠, 안은 마당, 진입은 **문 하나**(openSide 향).
+    /// 튜토 동측이 "갈 데 없는 네모 격자"가 아니라 **들어가서 뒤질 마당**이 된다.
+    /// 지역 이름(고철시장)이 처음으로 지형에 드러나는 자리이기도 하다.</summary>
+    static int ScrapYard(GameObject parent, string p, float x0, float y0, float x1, float y1,
+                         char openSide, int seed)
+    {
+        const float Band = 7f, Gate = 4.6f;
+        float bw = x1 - x0, bh = y1 - y0;
+        if (bw < Band * 2f + 9f || bh < Band * 2f + 9f) return Solid(parent, p, x0, y0, x1, y1);
+
+        float yx0 = x0 + Band, yy0 = y0 + Band, yx1 = x1 - Band, yy1 = y1 - Band;
+        bool horizGate = openSide == 'N' || openSide == 'S';
+        float g0 = horizGate ? Mathf.Lerp(yx0 + 1f, yx1 - Gate - 1f, (Hs(seed, 3) % 100) * 0.01f)
+                             : Mathf.Lerp(yy0 + 1f, yy1 - Gate - 1f, (Hs(seed, 3) % 100) * 0.01f);
+        int n = 0;
+
+        // 둘레 띠 — 열린 변만 문 폭만큼 끊는다(남·북 띠가 모서리를 먹고, 서·동 띠는 마당 높이만큼).
+        if (openSide == 'S') { n += Solid(parent, $"{p}_Sa", x0, y0, g0, yy0);
+                               n += Solid(parent, $"{p}_Sb", g0 + Gate, y0, x1, yy0); }
+        else                   n += Solid(parent, $"{p}_S", x0, y0, x1, yy0);
+        if (openSide == 'N') { n += Solid(parent, $"{p}_Na", x0, yy1, g0, y1);
+                               n += Solid(parent, $"{p}_Nb", g0 + Gate, yy1, x1, y1); }
+        else                   n += Solid(parent, $"{p}_N", x0, yy1, x1, y1);
+        if (openSide == 'W') { n += Solid(parent, $"{p}_Wa", x0, yy0, yx0, g0);
+                               n += Solid(parent, $"{p}_Wb", x0, g0 + Gate, yx0, yy1); }
+        else                   n += Solid(parent, $"{p}_W", x0, yy0, yx0, yy1);
+        if (openSide == 'E') { n += Solid(parent, $"{p}_Ea", yx1, yy0, x1, g0);
+                               n += Solid(parent, $"{p}_Eb", yx1, g0 + Gate, x1, yy1); }
+        else                   n += Solid(parent, $"{p}_E", yx1, yy0, x1, yy1);
+
+        // 마당 — 고철 더미. 크기를 제각각으로 흔들어야 '쌓인 것'으로 보인다(격자면 또 상자밭이다).
+        //   문 앞 4m는 비워 둔다 — 더미가 문을 막으면 마당이 통째로 죽는다.
+        float gx = horizGate ? g0 + Gate * 0.5f : (openSide == 'W' ? yx0 : yx1);
+        float gy = horizGate ? (openSide == 'S' ? yy0 : yy1) : g0 + Gate * 0.5f;
+        for (int i = 0; i < 7; i++)
+        {
+            uint h = (uint)Hs(seed + i * 31, 11);
+            float w = 1.6f + (h % 26u) * 0.11f;
+            float d = 1.3f + ((h >> 5) % 24u) * 0.10f;
+            float sx = yx0 + 1.1f + Mathf.Max(0f, yx1 - yx0 - 2.2f - w) * (((h >> 10) % 100u) * 0.01f) + w * 0.5f;
+            float sy = yy0 + 1.1f + Mathf.Max(0f, yy1 - yy0 - 2.2f - d) * (((h >> 17) % 100u) * 0.01f) + d * 0.5f;
+            if ((sx - gx) * (sx - gx) + (sy - gy) * (sy - gy) < 16f) continue;
+            n += Prop(parent, $"{p}_sc{i}", sx, sy, w, d);
+        }
+        // 뒤질 거리 — 마당 구석 둘. 여기까지 걸어 들어올 이유.
+        n += Marker(parent, "gb_crate", $"{p}_c0", yx0 + 1.8f, yy1 - 1.8f);
+        n += Marker(parent, "gb_crate", $"{p}_c1", yx1 - 1.8f, yy0 + 1.8f);
+        return n;
+    }
+
+    /// <summary>막힌 통로(BlockedPassage) — 치우거나(Clearable) 조건이 맞으면 지나갈 수 있다.
+    /// Zone1의 `Blocker`와 같은 규약. 주황(gb_barricade)은 **인터랙션이 있는 것**에만 쓴다.</summary>
+    static int Blocker(GameObject parent, string name, float cx, float cy, float w, float h,
+                       BlockedPassage.Mode mode, string label)
+    {
+        if (Barricade(parent, name, cx, cy, w, h) == 0) return 0;
+        var t = parent.transform.Find(name);
+        if (t == null) return 1;
+        var go = t.gameObject;
+
+        var box = go.GetComponent<BoxCollider2D>();
+        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+        box.isTrigger = false;
+        box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
+
+        var io = go.GetComponent<InteractableObject>();
+        if (io == null) io = go.AddComponent<InteractableObject>();
+        // 상호작용 반경은 크기에 비례해야 한다 — 6m 잔해에 고정값을 주면 가장자리에서 E가 안 먹는다.
+        io.Configure(InteractableObject.InteractType.Passage, label, Mathf.Max(w, h) * 0.5f + 1.8f);
+
+        var bp = go.GetComponent<BlockedPassage>();
+        if (bp == null) bp = go.AddComponent<BlockedPassage>();
+        bp.Configure(mode, label, null);
+        return 1;
+    }
+
+    /// <summary>결정적 해시 — 같은 시드면 같은 배치(Zone1의 H와 같은 식).</summary>
+    static int Hs(int a, int b)
+    {
+        unchecked
+        {
+            uint h = (uint)(a * 374761393 + b * 668265263);
+            h = (h ^ (h >> 13)) * 1274126177u;
+            return (int)((h ^ (h >> 16)) & 0x7fffffff);
+        }
     }
 
     static int Barricade(GameObject parent, string name, float cx, float cy, float lenX, float thickY)

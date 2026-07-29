@@ -79,6 +79,9 @@ public static class Zone1GreyboxLayout
         // 튜토(SW = C0R0, 44×56이 블록에 정확히 맞음).
         //   北 갭(월드 x24~34) → 가로 지선 → 약국 아케이드 / 東 갭(월드 y43~48) → 세로 지선(x60~66).
         n += ScrapMarketGreyboxLayout.Place(map, TUT_OX, TUT_OY, true);
+        // 튜토의 **출입구 두 곳**도 비워 둘 곳으로 등록 — 안 하면 지선 갓길 차량이 갭 앞을 덮는다.
+        MarkGap(32f, 67f, 32f, 78f);        // 北 갭(월드 x30~34) → 가로 지선 → 약국 아케이드 南 갭
+        MarkGap(55f, 45.5f, 67f, 45.5f);    // 東 통로(월드 y43~48) → 세로 지선
 
         // ── 블록 9개, 성격 전부 다르게 ── (2026-07-28: 전부 **둘레형 블록**)
         //   C0R0=튜토 / C0R1=약국 아케이드 / C0R2=공원 안뜰(분식집)
@@ -200,9 +203,16 @@ public static class Zone1GreyboxLayout
         n += Blocker(map, "BLK_NightAlley", 163f, 130f, 6f, 3.5f,
                      BlockedPassage.Mode.NightOnly, "잠긴 셔터");
 
-        // ── 거리 프랍 (마지막 — 건물·차량이 다 등록된 뒤라야 정면에 붙는다) ──
-        //   길에 표정을 주고(길 외우기), 작은 엄폐를 깔고, 4개 중 1개는 뒤질 수 있게 한다.
-        n += StreetProps(map, 300, 3, 4242);
+        // ── 길목(교차로) — 도로가 만나는 자리마다 작은 무리 ──
+        //   (2026-07-29 사용자: "길가가 좀 비지 않게 밀도 조금만 더 올려주고, 길목마다")
+        //   교차로는 길을 외우는 기준점이다. 아무것도 없으면 사방이 똑같은 길이라 방향 감각이 안 생긴다.
+        n += Junctions(map, 4141);
+
+        // ── 거리 프랍 (마지막 — 건물·차량·길목이 다 등록된 뒤라야 정면에 붙는다) ──
+        //   길에 표정을 주고(길 외우기), 작은 엄폐를 깔고, 일부는 뒤질 수 있게 한다.
+        //   2026-07-29: 300 → 460으로 올려 길가가 비어 보이지 않게. 뒤질 수 있는 비율은
+        //   3개당 1 → 5개당 1로 낮춰 **루팅 앵커 총량은 그대로**(예산이 묽어지지 않게).
+        n += StreetProps(map, 460, 5, 4242);
 
         GreyboxBuild.EndScene(scene, ScenePath, n, "지역1 Zone1(160×168 · 도로 위계 4단계 · 장애물/프랍)");
         AddToBuildSettings(ScenePath);   // 등록 안 하면 TransitionTo("Zone1")이 LoadSceneAsync에서 실패
@@ -1184,6 +1194,72 @@ public static class Zone1GreyboxLayout
         return n;
     }
 
+    /// <summary>길목(교차로) — 도로가 만나는 자리마다 작은 무리를 놓는다.
+    ///
+    /// (2026-07-29 사용자: "길가가 좀 비지 않게 밀도 조금만 더 올려주고, 길목마다")
+    /// 교차로는 **길을 외우는 기준점**이다. 여기가 비면 사방이 똑같은 길이라 어디쯤인지 감이 안 온다.
+    /// 네 귀퉁이에 각각 다른 것을 놓아(전복 차·잔해·드럼통 무리) 교차로마다 인상이 달라지게 한다.</summary>
+    static int Junctions(GameObject m, int seed)
+    {
+        float[] xs = { 13f, 63f, 108f, 163f };   // 순환 서 · 세로 지선 · 세로 간선 · 순환 동
+        float[] ys = { 13f, 75f, 120f, 171f };   // 순환 남 · 가로 지선 · 가로 간선 · 순환 북
+        int n = 0, k = 0;
+        for (int i = 0; i < xs.Length; i++)
+        for (int j = 0; j < ys.Length; j++)
+        {
+            // 스폰·탈출이 앉은 교차로(순환 네 코너 · 중앙 교차점)는 통째로 건너뛴다.
+            //   귀퉁이 넷을 다 채우면 구석에 있는 탈출구가 갇힌다(PX_SE에서 실제로 발생).
+            //   거긴 이미 그 자체로 기준점이라 표식이 더 필요하지도 않다.
+            if (NearKeepOut(xs[i], ys[j], 11f)) { k += 4; continue; }
+
+            for (int q = 0; q < 4; q++, k++)
+            {
+                uint h = (uint)H(seed + k * 13, q * 7 + 3);
+                float off = 5.5f + (h % 30u) * 0.12f;                 // 교차점에서 5.5~9.1m
+                float cx = xs[i] + ((q & 1) == 0 ? -off : off);
+                float cy = ys[j] + ((q & 2) == 0 ? -off : off);
+                if (cx < FX0 + 3f || cx > FX1 - 3f || cy < FY0 + 3f || cy > FY1 - 3f) continue;
+                if (IsIndoors(cx, cy)) continue;
+                if (NearKeepOut(cx, cy, 5f)) continue;                // 스폰·탈출·문 앞은 비워 둔다
+                if ((h >> 5) % 100u < 22u) continue;                  // 네 귀퉁이가 다 차면 그것대로 답답하다
+
+                string name = $"JX{i}{j}_{q}";
+                switch ((h >> 9) % 3u)
+                {
+                    case 0:   // 전복 차 — 교차로에서 제일 눈에 띄는 표식
+                    {
+                        bool along = ((h >> 12) & 1u) == 0u;
+                        float w = along ? 4.4f : 1.9f, d = along ? 1.9f : 4.4f;
+                        n += GreyboxBuild.Car(m, name, cx, cy, w, d);
+                        MarkBuilding(cx - w * 0.5f, cy - d * 0.5f, cx + w * 0.5f, cy + d * 0.5f);
+                        break;
+                    }
+                    case 1:   // 무너져 내린 잔해 — 길 폭이 들쭉날쭉해진다
+                    {
+                        float w = 2.2f + ((h >> 14) % 20u) * 0.13f, d = 1.8f + ((h >> 19) % 18u) * 0.12f;
+                        n += GreyboxBuild.Wall(m, name, cx, cy, w, d);
+                        MarkBuilding(cx - w * 0.5f, cy - d * 0.5f, cx + w * 0.5f, cy + d * 0.5f);
+                        break;
+                    }
+                    default:  // 드럼통·자재 무리 3개 — 작은 엄폐가 뭉쳐 있어 교전선이 꺾인다
+                    {
+                        for (int t = 0; t < 3; t++)
+                        {
+                            uint ht = (uint)H(seed + k * 13 + t * 5, 17);
+                            float px = cx + ((ht % 40u) * 0.1f - 2f), py = cy + (((ht >> 6) % 40u) * 0.1f - 2f);
+                            if (IsIndoors(px, py) || NearKeepOut(px, py, 4f)) continue;
+                            float s = 0.8f + ((ht >> 12) % 12u) * 0.09f;
+                            n += GreyboxBuild.Prop(m, $"{name}_{t}", px, py, s, s);
+                            MarkBuilding(px - s * 0.5f, py - s * 0.5f, px + s * 0.5f, py + s * 0.5f);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return n;
+    }
+
     /// <summary>거리 프랍 — 건물 정면을 따라 자판기·드럼통·쓰레기통·전신주 따위를 붙인다.
     ///
     /// (2026-07-11 사용자: "중간에 프랍도 좀 넣고 유저가 탐험할 맛 나는 맵을 좀 만들어보라고")
@@ -1582,31 +1658,44 @@ public static class Zone1GreyboxLayout
         float rowD = (across - Aisle) * 0.5f;
         if (rowD < 2.2f) return RowTerrace(m, p, x0, y0, x1, y1, seed);
 
+        // 좌판 칸 경계는 **양쪽 줄이 공유**한다. 그래야 4칸마다 비우는 자리가 통로로 맞물려
+        //   가운데 통로가 밖과 이어진다. (칸을 줄마다 따로 잡았더니 두 줄이 벽이 되고
+        //   통로 양 끝은 아케이드 외벽이라 **들어갈 수 없는 복도**가 됐다 — 시뮬레이션이 잡음.)
+        var st = new System.Collections.Generic.List<float>();
+        var ln = new System.Collections.Generic.List<float>();
+        {
+            float a = (vertical ? y0 : x0) + 0.8f;
+            float aEnd = (vertical ? y1 : x1) - 0.8f;
+            for (int i = 0; a < aEnd - 2.5f; i++)
+            {
+                float len = 3.0f + ((uint)H(seed * 23, i * 7 + 3) % 22u) * 0.1f;   // 3.0~5.1m
+                if (a + len > aEnd) len = aEnd - a;
+                if (len < 2.2f) break;
+                st.Add(a); ln.Add(len);
+                a += len + 0.9f;                                                   // 좌판 사이 실틈
+            }
+        }
+
         int n = 0;
         for (int side = 0; side < 2; side++)
         {
             float d0 = side == 0 ? (vertical ? x0 : y0) : (vertical ? x0 + rowD + Aisle : y0 + rowD + Aisle);
             float d1 = d0 + rowD;
-            float a = (vertical ? y0 : x0) + 0.8f;
-            float aEnd = (vertical ? y1 : x1) - 0.8f;
-            for (int i = 0; a < aEnd - 2.5f; i++)
+            for (int i = 0; i < st.Count; i++)
             {
+                if (i % 4 == 3) continue;                        // ★ 가로지르는 통로 — 양쪽 줄이 같이 비운다
                 uint h = (uint)H(seed * 23 + side * 101, i * 7 + 3);
-                float len = 3.0f + (h % 22u) * 0.1f;                 // 3.0~5.1m 좌판
-                if (a + len > aEnd) len = aEnd - a;
-                if (len < 2.2f) break;
-                float dep = d1 - (((h >> 5) % 100u < 35u) ? 0.7f : 0f);   // 좌판 깊이도 흔들린다
+                if ((h >> 11) % 100u < 10u) continue;            // 비어 있는 자리(장사 접은 칸)
 
+                float dep = d1 - (((h >> 5) % 100u < 35u) ? 0.7f : 0f);   // 좌판 깊이도 흔들린다
                 string name = $"{p}_st{side}{i}";
-                float bx0 = vertical ? d0 : a, by0 = vertical ? a : d0;
-                float bx1 = vertical ? dep : a + len, by1 = vertical ? a + len : dep;
-                if (!IsIndoors((bx0 + bx1) * 0.5f, (by0 + by1) * 0.5f) && (h >> 11) % 100u >= 12u)
-                {
-                    n += BandMass(m, name, bx0, by0, bx1, by1);
-                    // 좌판 4개 중 1개는 뒤질 수 있다 — 골목을 끝까지 훑을 이유.
-                    if (i % 4 == side) n += Searchable(m, name, "좌판", "좌판 뒤지기", 2, 2, Mathf.Max(len, rowD));
-                }
-                a += len + 0.9f;                                      // 좌판 사이 실틈
+                float bx0 = vertical ? d0 : st[i], by0 = vertical ? st[i] : d0;
+                float bx1 = vertical ? dep : st[i] + ln[i], by1 = vertical ? st[i] + ln[i] : dep;
+                if (IsIndoors((bx0 + bx1) * 0.5f, (by0 + by1) * 0.5f)) continue;
+
+                n += BandMass(m, name, bx0, by0, bx1, by1);
+                // 좌판 4개 중 1개는 뒤질 수 있다 — 골목을 끝까지 훑을 이유.
+                if (i % 4 == side) n += Searchable(m, name, "좌판", "좌판 뒤지기", 2, 2, Mathf.Max(ln[i], rowD));
             }
         }
         return n;
