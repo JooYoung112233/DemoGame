@@ -289,6 +289,14 @@ public class DebugTestUI : MonoBehaviour
         }
         else GUILayout.Label("PlayerInventory 없음", labelStyle);
 
+        // ── 타격 판정 진단 (2026-07-29 임시) ──
+        GUILayout.Space(8);
+        GUILayout.Label("── 진단 ──", headerStyle);
+        bool atkLog = GUILayout.Toggle(AttackPerformer.DebugLog, " 타격 판정 로그");
+        if (atkLog != AttackPerformer.DebugLog) AttackPerformer.DebugLog = atkLog;
+        GUILayout.Label("스윙할 때마다 콘솔에: 스캔 몇 개 / 적중 / 허트박스없음·꺼짐·중복·벽막힘",
+                        labelStyle);
+
         // ── 부위 표시 (2026-07-29 테스트 도구) ──
         GUILayout.Space(8);
         GUILayout.Label("── 부위 판정 ──", headerStyle);

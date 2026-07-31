@@ -4007,7 +4007,31 @@ public class CharacterPanelUI : MonoBehaviour
                 // 빈 자리(새 장비가 비운 칸) 우선 → 안 되면 같은 격자 자동배치 → 그래도 안 되면 인벤/창고 폴백.
                 bool back = grid != null
                     && ((origX >= 0 && grid.TryPlace(oldItem, origX, origY, origRot)) || grid.TryAutoPlace(oldItem));
-                if (!back) ReturnItemToInventory(oldItem);
+                if (!back && playerInventory != null) back = playerInventory.TryAutoPlaceAnywhere(oldItem);
+                if (!back)
+                {
+                    var stash = MainStash.Instance != null ? MainStash.Instance.GetGrid() : null;
+                    if (stash != null) back = stash.TryAutoPlace(oldItem);
+                }
+
+                // ★ 2026-07-29 (사용자: "나이프 착용하니 기존 착용된 장비 사라지는데?").
+                //   둘 곳이 없으면 여태 토스트만 띄우고 **그냥 흘렸다 = 장비가 조용히 사라졌다.**
+                //   가방이 없고 주머니가 꽉 찬 상태에서 실제로 터졌다(보안 컨테이너는
+                //   AcceptFilter가 무기를 안 받는다).
+                //   둘 곳이 없으면 **교체 자체를 취소**한다 — 아이템을 지우는 것보다 낫다.
+                if (!back)
+                {
+                    if (oldItem.data.category == ItemCategory.Weapon)
+                        playerEquipment.EquipWeapon(oldItem.data);
+                    else
+                        playerEquipment.Equip(oldItem.data);
+                    playerEquipment.SetSlotInstance(apiSlot, oldItem);   // 부착물·잔탄까지 원상복구
+
+                    bool putBack = grid != null
+                        && ((origX >= 0 && grid.TryPlace(item, origX, origY, origRot)) || grid.TryAutoPlace(item));
+                    if (!putBack) ReturnItemToInventory(item);
+                    ToastManager.Show("기존 장비를 둘 곳이 없다 — 교체 취소", ToastManager.ToastType.Warning);
+                }
             }
         }
 

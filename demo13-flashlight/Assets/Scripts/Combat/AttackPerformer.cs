@@ -120,17 +120,20 @@ public class AttackPerformer : MonoBehaviour
             : Physics2D.OverlapCircle(center, w.radius, filter, _buf);
 
         bool landed = false;
+        int dbgNoHurtbox = 0, dbgInactive = 0, dbgDup = 0, dbgWalled = 0;
         for (int i = 0; i < count; i++)
         {
             var col = _buf[i];
             if (col == null) continue;
             var hb = col.GetComponent<Hurtbox>() ?? col.GetComponentInParent<Hurtbox>();
-            if (hb == null || !hb.Active || _hitThisAttack.Contains(hb)) continue;
+            if (hb == null)               { dbgNoHurtbox++; continue; }
+            if (!hb.Active)               { dbgInactive++;  continue; }
+            if (_hitThisAttack.Contains(hb)) { dbgDup++;    continue; }
 
             // 2026-07-11: 벽 관통 판정 차단 — 공격자와 대상 사이에 **솔리드(비트리거)** 가 있으면 무효.
             //   예전엔 LOS 검사가 없어 벽을 사이에 두고도 사거리 안이면 그냥 맞았다.
             //   트리거(루트 상자·존)는 통과시켜야 하므로 비트리거만 차단으로 센다.
-            if (IsBlockedByWall(transform.position, col)) continue;
+            if (IsBlockedByWall(transform.position, col)) { dbgWalled++; continue; }
 
             _hitThisAttack.Add(hb);
 
@@ -152,6 +155,15 @@ public class AttackPerformer : MonoBehaviour
                             _current.groggy * w.groggyMult, facing, aim);
             landed = true;
         }
+
+        // ★ 진단(2026-07-29) — "때려도 아무 일도 안 난다"를 눈으로 좁히기 위한 임시 로그.
+        //   판정이 왜 안 닿는지는 겉으로 전혀 안 보인다: 콜라이더를 못 잡은 건지, 허트박스가 없는 건지,
+        //   꺼져 있는 건지, 벽에 막힌 건지가 다 똑같이 "아무 일 없음"으로 보인다.
+        //   F1 ▸ "타격 판정 로그"로 켠다. 원인을 잡으면 지운다.
+        if (DebugLog)
+            Debug.Log($"[타격] {name} 스캔 {count}개 → 적중 {(landed ? 1 : 0)} " +
+                      $"| 허트박스없음 {dbgNoHurtbox} · 꺼짐 {dbgInactive} · 중복 {dbgDup} · 벽막힘 {dbgWalled} " +
+                      $"| 중심({center.x:F1},{center.y:F1}) 마스크 {targetMask.value}");
 
         // 타격 성공(적중) 시 소음 펄스 — 스윙/헛방은 무음(2026-07-11). 플레이어·적 공용이라
         // "플레이어가 때림/맞음" 모두 impact 소음이 됨(반경 안 다른 적이 조사하러 옴).
@@ -175,6 +187,9 @@ public class AttackPerformer : MonoBehaviour
 
     /// <summary>조준점 공급자(플레이어만 설정). null이면 조준 없는 공격 = 부위 가중 랜덤.</summary>
     public System.Func<Vector2> AimPoint;
+
+    /// <summary>타격 판정 진단 로그(F1에서 토글). 원인을 잡으면 지운다.</summary>
+    public static bool DebugLog;
 
     /// <summary>사거리 감쇠 — 품 안(사거리의 NearBand 이내)은 100%, 끝은 FarMult까지 선형으로 준다.
     /// GameTuning에 값이 있으면 그걸 쓴다(밸런스는 Control Panel에서 만진다).</summary>
