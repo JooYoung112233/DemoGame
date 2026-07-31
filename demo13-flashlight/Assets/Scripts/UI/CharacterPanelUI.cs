@@ -1436,10 +1436,18 @@ public class CharacterPanelUI : MonoBehaviour
             return;
         }
 
+        // ★ 2026-07-29 버그 — 칼을 들어도 조준경·소염기·탄창 슬롯이 떴다("칼인데 파츠 착용?").
+        //   근접 무기에 탄창을 끼울 수 있다는 건 말이 안 되고, 총기용 파츠가 근접에 붙으면
+        //   사거리/반동 보정이 아무 데도 안 쓰여 **조용히 죽는 값**이 된다.
+        //   총이면 4종 전부, 근접이면 **손잡이만**(무게·이속 보정은 근접에서도 의미가 있다).
+        bool ranged = wpn.data != null && wpn.data.weaponData != null && wpn.data.weaponData.isRanged;
+
         const float cell = 50f, gap = 8f, startX = 10f;
+        int shown = 0;
         for (int i = 0; i < PartOrder.Length; i++)
         {
             var type = PartOrder[i];
+            if (!ranged && type != WeaponPartType.Grip) continue;
             string attId = wpn.GetAttachment(type);
             var attData = string.IsNullOrEmpty(attId) ? null : ItemDatabase.Get(attId);
 
@@ -1448,15 +1456,31 @@ public class CharacterPanelUI : MonoBehaviour
             var rt = cellGO.GetComponent<RectTransform>();
             rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 1);
             rt.sizeDelta = new Vector2(cell, cell);
-            rt.anchoredPosition = new Vector2(startX + i * (cell + gap), -26);
+            rt.anchoredPosition = new Vector2(startX + shown * (cell + gap), -26);
+            shown++;
             cellGO.GetComponent<Image>().color = attData != null
                 ? GetRarityBgColor(attData.rarity)
                 : new Color(0.13f, 0.13f, 0.17f, 0.9f);
 
             if (attData != null)
             {
+                // ★ 2026-07-29 (사용자: "파츠창에서 누르면 바로 착용해제 되지 않고, 인벤/창고랑 똑같이").
+                //   여태 좌클릭 한 번에 즉시 분리라 스치기만 해도 파츠가 빠졌다.
+                //   인벤과 같은 규약으로 바꾼다 — **좌클릭=선택(정보), 우클릭=메뉴("분리")**.
                 var capType = type;
-                cellGO.GetComponent<Button>().onClick.AddListener(() => DetachPart(capType));
+                var capData = attData;
+                var trig = cellGO.AddComponent<EventTrigger>();
+                var ent = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+                ent.callback.AddListener(e =>
+                {
+                    var ped = e as PointerEventData;
+                    if (ped != null && ped.button == PointerEventData.InputButton.Right)
+                        ShowPartContextMenu(capType, capData);
+                    else
+                        ItemDetailUI.Show(new ItemInstance(capData));   // 좌클릭은 정보만 — 실수로 안 빠지게
+                });
+                trig.triggers.Add(ent);
+                Destroy(cellGO.GetComponent<Button>());   // 즉시 분리 버튼 제거
                 if (attData.icon != null)
                 {
                     var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
@@ -1469,7 +1493,11 @@ public class CharacterPanelUI : MonoBehaviour
                 }
                 else
                 {
-                    var nm = MakeChildText(cellGO.transform, attData.displayName, 10, attData.RarityColor);
+                    // 탄창 슬롯엔 잔탄을 같이 — 물린 탄창이 비었는지 여기서 바로 보여야 한다.
+                    string cellLabel = attData.IsMagazine
+                        ? $"{attData.displayName}\n{wpn.ammoCount}/{attData.magCapacity}"
+                        : attData.displayName;
+                    var nm = MakeChildText(cellGO.transform, cellLabel, 10, attData.RarityColor);
                     nm.alignment = TextAnchor.MiddleCenter;
                     nm.raycastTarget = false;
                 }
@@ -1503,6 +1531,7 @@ public class CharacterPanelUI : MonoBehaviour
         }
 
         wpn.SetAttachment(type, dragItem.data.itemId);
+        CarryMagAmmoIn(wpn, dragItem);        // ★ 탄창이면 든 탄까지 옮긴다
         if (dragItem.stackCount > 1)
         {
             dragItem.stackCount--;
@@ -1525,9 +1554,23 @@ public class CharacterPanelUI : MonoBehaviour
         { ToastManager.Show("이미 부착됨 — 먼저 분리", ToastManager.ToastType.Warning); return; }
 
         wpn.SetAttachment(pdata.weaponPartType, pdata.itemId);
+        CarryMagAmmoIn(wpn, placed.item);     // ★ 탄창이면 든 탄까지 옮긴다
         if (placed.item.stackCount > 1) placed.item.stackCount--; else grid.Remove(placed);
         ToastManager.Show($"{pdata.displayName} 부착", ToastManager.ToastType.Info);
         RefreshAllGrids();
+    }
+
+    /// <summary>탄창을 무기에 물릴 때 **든 탄까지** 옮긴다.
+    ///
+    /// 2026-07-29 버그 — 부착은 `SetAttachment(type, itemId)`로 **itemId만** 넘기고
+    ///   탄창 인스턴스를 버렸다. 그래서 15발 채운 탄창을 끼워도 총은 0발이었다
+    ///   (사용자: "총알 채운 탄창 장착했는데 적용 안 되는 버그").
+    ///   탄은 인스턴스에 있으므로 인스턴스가 사라지는 자리에서 반드시 옮겨야 한다.</summary>
+    void CarryMagAmmoIn(ItemInstance weapon, ItemInstance mag)
+    {
+        if (weapon == null || mag == null || mag.data == null || !mag.data.IsMagazine) return;
+        weapon.ammoCount  = mag.ammoCount;
+        weapon.ammoItemId = mag.ammoItemId;
     }
 
     /// <summary>장착 무기에서 파츠 분리 → 인벤(없으면 창고) 회수.</summary>
@@ -1541,9 +1584,12 @@ public class CharacterPanelUI : MonoBehaviour
         if (d == null) { wpn.SetAttachment(type, null); RefreshAllGrids(); return; }
 
         var part = new ItemInstance(d, 1);
+        // ★ 탄창을 빼면 **남은 탄이 따라 나온다**(타르코프식). 안 그러면 분리할 때마다 탄이 증발한다.
+        if (d.IsMagazine) { part.ammoCount = wpn.ammoCount; part.ammoItemId = wpn.ammoItemId; }
         if (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(part))
         {
             wpn.SetAttachment(type, null);
+            if (d.IsMagazine) { wpn.ammoCount = 0; wpn.ammoItemId = null; }
             ToastManager.Show($"{d.displayName} 분리", ToastManager.ToastType.Info);
             RefreshAllGrids();
         }
@@ -3216,6 +3262,47 @@ public class CharacterPanelUI : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>파츠 슬롯 우클릭 메뉴 — 인벤과 같은 규약("분리"를 눌러야 빠진다).
+    /// 좌클릭 한 번에 즉시 분리하던 것을 대체(2026-07-29 사용자 요청).</summary>
+    void ShowPartContextMenu(WeaponPartType type, ItemData part)
+    {
+        if (part == null) return;
+        contextTarget = null;                 // 격자 아이템이 아니다 — 다른 버튼이 안 뜨게
+        contextTargetGrid = null;
+
+        EnsureContextMenu();
+        contextMenuGO.SetActive(true);
+
+        Vector2 localPos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvasRT, GameInput.mousePosition, null, out localPos);
+        contextMenuRT.anchoredPosition = localPos;
+
+        contextItemNameText.text = part.displayName;
+        contextItemNameText.color = part.RarityColor;
+
+        for (int i = contextMenuRT.childCount - 1; i >= 0; i--)
+        {
+            var child = contextMenuRT.GetChild(i);
+            if (child.name != "CtxBg" && child.name != "CtxName")
+                Destroy(child.gameObject);
+        }
+
+        float y = -28f;
+        var capType = type;
+        AddContextButton("분리", UITheme.AccentBright, y, () =>
+        {
+            DetachPart(capType);
+            HideContextMenu();
+        });
+        y -= 26f;
+        AddContextButton("자세히", UITheme.TextBright, y, () =>
+        {
+            ItemDetailUI.Show(new ItemInstance(part));
+            HideContextMenu();
+        });
     }
 
     void ShowContextMenu(InventoryGrid.PlacedItem placed, InventoryGrid grid)

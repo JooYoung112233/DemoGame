@@ -185,6 +185,8 @@ public class ItemInstance
         get
         {
             if (data == null) return "???";
+            // 탄창은 **몇 발 들었는지**가 이름의 일부다 — 안 보이면 채웠는지 아닌지 알 수가 없다.
+            if (data.IsMagazine) return $"{data.displayName} [{ammoCount}/{data.magCapacity}]";
             if (stackCount > 1)
                 return $"{data.displayName} x{stackCount}";
             return data.displayName;
