@@ -10,8 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 5211848516599466399}
   - component: {fileID: 5910840071347477517}
-  - component: {fileID: 1592486652001025814}
   - component: {fileID: 3916696107163786574}
+  - component: {fileID: 1592486652001025814}
+  - component: {fileID: 918843550967683559}
   m_Layer: 0
   m_Name: gb_npc
   m_TagString: Untagged
@@ -32,7 +33,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4257731394727556964}
+  - {fileID: 519008135945515}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5910840071347477517
@@ -94,6 +95,33 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &3916696107163786574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3628748994123919798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43f2a216c91f63c48b750a6450df9e3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::InteractableObject
+  type: 0
+  promptText: "\uC870\uC0AC\uD558\uAE30"
+  interactRange: 2
+  oneShot: 0
+  highlightColor: {r: 1, g: 1, b: 0.5, a: 1}
+  targetScene: 
+  spawnPointId: 
+  exitWaitTime: 0
+  noteContent: 
+  noteStorySceneId: 
+  noteTitle: 
+  grantsKnowledgeId: 
+  storyNpcId: 
+  itemId: 
+  itemCount: 1
 --- !u!114 &1592486652001025814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,7 +136,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::NPCController
   npcData: {fileID: 0}
   storyNpcId: 
---- !u!114 &3916696107163786574
+--- !u!114 &918843550967683559
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -131,10 +159,11 @@ MonoBehaviour:
   noteContent: 
   noteStorySceneId: 
   noteTitle: 
+  grantsKnowledgeId: 
   storyNpcId: 
   itemId: 
   itemCount: 1
---- !u!1 &8886982711468608771
+--- !u!1 &4125947560730022935
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -142,9 +171,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4257731394727556964}
-  - component: {fileID: 9184737173321351411}
-  - component: {fileID: 6070188308275351918}
+  - component: {fileID: 519008135945515}
+  - component: {fileID: 6090806734907244959}
+  - component: {fileID: 8933829641154163112}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -152,13 +181,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4257731394727556964
+--- !u!4 &519008135945515
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8886982711468608771}
+  m_GameObject: {fileID: 4125947560730022935}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -167,13 +196,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5211848516599466399}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &9184737173321351411
+--- !u!23 &6090806734907244959
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8886982711468608771}
+  m_GameObject: {fileID: 4125947560730022935}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -216,14 +245,14 @@ MeshRenderer:
   m_SortingOrder: 6
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!102 &6070188308275351918
+--- !u!102 &8933829641154163112
 TextMesh:
   serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8886982711468608771}
+  m_GameObject: {fileID: 4125947560730022935}
   m_Text: NPC
   m_OffsetZ: 0
   m_CharacterSize: 0.05

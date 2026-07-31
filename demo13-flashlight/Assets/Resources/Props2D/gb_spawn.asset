@@ -23,7 +23,7 @@ MonoBehaviour:
   drawMode: 0
   tiledSize: {x: 1, y: 1}
   tileMode: 0
-  prefab: {fileID: 0}
+  prefab: {fileID: 401867558853457574, guid: d125ed8df27a6e34395a7185505a232d, type: 3}
   colliderMode: 0
   isTrigger: 1
   boxSizeScale: {x: 1, y: 1}
@@ -75,9 +75,5 @@ MonoBehaviour:
   triggerTargetScene: 
   triggerTargetSpawnId: 
   triggerSize: {x: 2, y: 2}
+  triggerOffset: {x: 0, y: 0}
   triggerAutoEnter: 1
-  ceilingGroupId: 
-  ceilingHiddenAlpha: 0
-  ceilingFadeSpeed: 6
-  ceilingTriggerSize: {x: 0, y: 0}
-  ceilingTriggerOffset: {x: 0, y: 0}
