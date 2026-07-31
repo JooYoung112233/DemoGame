@@ -109,8 +109,10 @@ public class DebugTestUI : MonoBehaviour
 
         InitStyles();
 
-        float panelW = 640f;
-        float panelH = 760f;
+        // 2026-07-29 사용자: "F1 창이 좀 작아서 글씨가 깨진다 — 30% 정도 키워줘".
+        //   창만 키우면 글자는 그대로라 여전히 잘린다 → **글꼴도 같은 비율로** 키운다(아래 Styles).
+        float panelW = 832f;    // 640 × 1.3
+        float panelH = 988f;    // 760 × 1.3
 
         if (!windowRectInit)
         {
@@ -134,20 +136,22 @@ public class DebugTestUI : MonoBehaviour
         GUI.DrawTexture(new Rect(0, 0, panelW, panelH), bgTex);
         GUI.color = Color.white;
 
-        GUI.Label(new Rect(10, 5, panelW - 20, 25), "[ DEBUG ]  F1 닫기", headerStyle);
-        GUI.DragWindow(new Rect(0, 0, panelW, 28));
+        // 글꼴을 30% 키웠으므로 머리말·탭 높이도 같이 키운다 — 안 키우면 글자가 버튼 밖으로 삐져나온다.
+        GUI.Label(new Rect(12, 6, panelW - 24, 32), "[ DEBUG ]  F1 닫기", headerStyle);
+        GUI.DragWindow(new Rect(0, 0, panelW, 36));
 
-        float tabY = 30;
+        float tabY = 38;
+        float tabH = 36;
         float tabW = panelW / tabNames.Length;
         for (int i = 0; i < tabNames.Length; i++)
         {
             GUIStyle style = (i == currentTab) ? tabActiveStyle : tabInactiveStyle;
-            if (GUI.Button(new Rect(tabW * i, tabY, tabW, 28), tabNames[i], style))
+            if (GUI.Button(new Rect(tabW * i, tabY, tabW, tabH), tabNames[i], style))
                 currentTab = i;
         }
 
-        float contentY = tabY + 35;
-        float contentH = panelH - 70;
+        float contentY = tabY + tabH + 8;
+        float contentH = panelH - contentY - 12;
         Rect contentRect = new Rect(10, contentY, panelW - 20, contentH);
 
         GUILayout.BeginArea(contentRect);
@@ -978,32 +982,32 @@ public class DebugTestUI : MonoBehaviour
         tabInactiveTex = MakeTex(new Color(0.15f, 0.15f, 0.2f));
 
         headerStyle = new GUIStyle(GUI.skin.label);
-        headerStyle.fontSize = 18;
+        headerStyle.fontSize = 23;
         headerStyle.fontStyle = FontStyle.Bold;
         headerStyle.normal.textColor = new Color(1f, 0.85f, 0.3f);
 
         labelStyle = new GUIStyle(GUI.skin.label);
-        labelStyle.fontSize = 16;
+        labelStyle.fontSize = 21;
         labelStyle.normal.textColor = new Color(0.9f, 0.9f, 0.95f);
         labelStyle.richText = true;
 
         btnStyle = new GUIStyle(GUI.skin.button);
-        btnStyle.fontSize = 15;
+        btnStyle.fontSize = 20;
         btnStyle.fontStyle = FontStyle.Bold;
         btnStyle.padding = new RectOffset(8, 8, 6, 6);
 
         smallBtnStyle = new GUIStyle(GUI.skin.button);
-        smallBtnStyle.fontSize = 14;
+        smallBtnStyle.fontSize = 18;
         smallBtnStyle.padding = new RectOffset(6, 6, 5, 5);
 
         tabActiveStyle = new GUIStyle(GUI.skin.button);
-        tabActiveStyle.fontSize = 15;
+        tabActiveStyle.fontSize = 20;
         tabActiveStyle.fontStyle = FontStyle.Bold;
         tabActiveStyle.normal.background = tabActiveTex;
         tabActiveStyle.normal.textColor = Color.white;
 
         tabInactiveStyle = new GUIStyle(GUI.skin.button);
-        tabInactiveStyle.fontSize = 15;
+        tabInactiveStyle.fontSize = 20;
         tabInactiveStyle.normal.background = tabInactiveTex;
         tabInactiveStyle.normal.textColor = new Color(0.6f, 0.6f, 0.7f);
 
