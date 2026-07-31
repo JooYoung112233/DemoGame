@@ -18,6 +18,7 @@ public class EnemyController : MonoBehaviour
     bool _visionVisible = true;
     UnitLabel _label;   // 머리 위 "적"/"시체" 라벨 (그레이박스용)
     MeleeWeaponVisual _weaponVis;   // 그레이박스 칼 (연출 전용 — 판정은 AttackPerformer)
+    GreyboxLimbs _limbs;            // 머리·몸통·팔·다리 실루엣 (부위 조준이 눈에 읽히게)
     bool _nextIsHeavy;              // 이번 공격이 강공인가 (예비동작 진입 시 결정)
     int  _lightStreak;              // 약공 연속 횟수 — N회 넘으면 강제로 강공
 
@@ -159,6 +160,13 @@ public class EnemyController : MonoBehaviour
         if (_visionVisible == v) return;
         _visionVisible = v;
         if (spriteRenderer != null) spriteRenderer.enabled = v;
+        // 팔다리가 있으면 **그쪽이 몸**이다 — 통짜 네모는 계속 꺼 둔다.
+        //   안 그러면 시야에 들어오는 순간 네모가 다시 켜져 팔다리를 덮는다.
+        if (_limbs != null)
+        {
+            if (spriteRenderer != null) spriteRenderer.enabled = false;
+            _limbs.SetVisible(v);
+        }
         // 라벨은 스프라이트의 자식이지만 MeshRenderer라 위 한 줄로는 안 꺼진다 —
         // 안 끄면 시야 밖 적의 "적" 글자만 어둠 속에 떠서 위치가 노출된다.
         if (_label != null) _label.SetVisible(v);
@@ -206,6 +214,15 @@ public class EnemyController : MonoBehaviour
 
         // 그레이박스 칼 — 플레이어와 같은 연출을 적도 쓴다(예비동작이 눈에 보여야 캔슬을 노릴 수 있다).
         _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.80f, 0.70f, 0.66f), 4, 0.95f);
+
+        // 팔다리 실루엣(2026-07-29) — 통짜 사각형이면 부위를 어디로 노리는 건지 알 수가 없다.
+        //   몸통 스프라이트 밑에 붙여 ApplyUnitLook의 크기 조절이 그대로 먹게 한다.
+        if (spriteRenderer != null)
+        {
+            _limbs = GreyboxLimbs.Attach(spriteRenderer.transform, spriteRenderer.color,
+                                         spriteRenderer.sortingOrder + 1);
+            spriteRenderer.enabled = false;   // 통짜 네모는 끈다 — 겹쳐 그리면 구획이 안 보인다
+        }
 
         // 테스트용 부위 표시(F1에서 켠다, 기본 꺼짐) — 다리를 노렸는지 눈으로 확인할 유일한 수단.
         BodyZoneOverlay.Attach(transform);
@@ -847,7 +864,9 @@ public class EnemyController : MonoBehaviour
         if (spriteRenderer != null)
         {
             Color c = spriteRenderer.color;
-            spriteRenderer.color = new Color(c.r * 0.45f, c.g * 0.45f, c.b * 0.45f, c.a);
+            var dark = new Color(c.r * 0.45f, c.g * 0.45f, c.b * 0.45f, c.a);
+            spriteRenderer.color = dark;
+            if (_limbs != null) _limbs.SetTint(dark);   // 팔다리가 몸이므로 그쪽도 어둡게
         }
 
         SetVisionVisible(true);   // 시야 밖 사망 대비 — All 해제 후엔 PlayerVision이 다시 켜주지 않음(시체 = 항상 보이는 월드 오브젝트)
@@ -1024,6 +1043,8 @@ public class EnemyController : MonoBehaviour
     void SetTint(Color c)
     {
         if (spriteRenderer != null) spriteRenderer.color = c;
+        // 팔다리가 몸을 대신하므로 색도 그쪽으로 — 안 그러면 예비동작 깜빡임이 안 보인다.
+        if (_limbs != null) _limbs.SetTint(c);
         foreach (var r in renderers) if (r is SpriteRenderer sr) sr.color = c;
     }
 

@@ -10,6 +10,10 @@ public class InteractionSystem : MonoBehaviour
 {
     [Header("Detection")]
     [SerializeField] KeyCode interactKey = KeyCode.E;
+
+    /// <summary>상호작용 입력 잠금 — UI가 닫히는 프레임의 같은 입력으로 곧바로 재발동하는 것을 막는다.</summary>
+    const float InteractLock = 0.22f;
+    float _interactLockUntil;
     [SerializeField] float maxDetectRadius = 4f;
 
     [Header("Prompt Style")]
@@ -59,6 +63,18 @@ public class InteractionSystem : MonoBehaviour
                 currentTarget.SetHighlight(false);
                 currentTarget = null;
             }
+            // ★ 2026-07-29 (사용자: "E 눌러서 UI 작동 중인데 또 E 누르면 또 UI가 뜬다").
+            //   UI를 E로 닫으면 **그 UI의 Update가 먼저 돌아** 닫히고, 뒤늦게 이 Update가
+            //   같은 프레임의 GetKeyDown을 보고 곧바로 다시 연다(스크립트 실행 순서 문제).
+            //   UI가 열려 있는 동안 계속 잠가 두면, 닫힌 직후의 그 입력은 이미 만료된다.
+            _interactLockUntil = Time.unscaledTime + InteractLock;
+            return;
+        }
+
+        // 채널(탐색·치료 등) 진행 중에도 잠근다 — 안 그러면 같은 탐색이 겹쳐 시작된다.
+        if (UseActionManager.Instance != null && UseActionManager.Instance.IsBusy)
+        {
+            _interactLockUntil = Time.unscaledTime + InteractLock;
             return;
         }
 
@@ -70,8 +86,10 @@ public class InteractionSystem : MonoBehaviour
             return;
 
         // E키 입력
-        if (currentTarget != null && GameInput.GetKeyDown(interactKey))
+        if (currentTarget != null && Time.unscaledTime >= _interactLockUntil
+            && GameInput.GetKeyDown(interactKey))
         {
+            _interactLockUntil = Time.unscaledTime + InteractLock;   // 연타·같은 프레임 재발동 차단
             currentTarget.Interact(gameObject);
 
             // 일회용 오브���트가 비활성화되었으면 타겟 해제
