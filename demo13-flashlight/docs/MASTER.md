@@ -64,7 +64,9 @@
 | [`art-needs.md`](art-needs.md) | **아트(VIEW) 필요 목록** — 시스템별 아트 에셋 집계(캐릭터/VFX/아이콘/맵/HUD), 스타일 기준선, 프랍/UI 카탈로그, P1~P6 제작 로드맵, 완료/필요 현황 | 정리 (2026-06-10) |
 | [`prop-catalog.md`](prop-catalog.md) | **프랍 변형 카탈로그** — 실내/옥상/외벽/도로/차량/랜드마크 프랍을 기본219종×재질·방향변형으로 전부 펼침. 손그림 vs 셰이더 처리 원칙 + [`prop-list.csv`](prop-list.csv)(285행 작업 리스트) | 정리 (2026-06-10) |
 | [`char-art.md`](char-art.md) | **캐릭터·적 애니메이션 리스트** — 플레이어/적/NPC 모션을 전부 펼침. 인간형 리그공유+스킨교체 원칙 + [`char-anim-list.csv`](char-anim-list.csv)(46행) | 정리 (2026-06-10) |
-| **아트 작업 체크리스트(CSV)** | [`item-icon-checklist.csv`](item-icon-checklist.csv) 아이템 204종 · [`prop-list.csv`](prop-list.csv) 프랍 285행 · [`char-anim-list.csv`](char-anim-list.csv) 캐릭터 46행 | 생성됨 |
+| [`ui-reference.md`](ui-reference.md) | ⭐ **UI 룩 SSOT** — 레퍼런스 캐논 = **이중 언어**(종이=문서형 / 프레임=기능형, 앵커 This War of Mine) + **28패널 배분표**(종이9·프레임15·기물1·무프레임3) + 판정 기준 3개(손에 드는가 / 레이드당 10회 이상 만지는가 / 스크롤·격자·드래그) + 미구현 UI 10종 사전 배정 | **확정 (2026-07-29)** |
+| [`ui-resources.md`](ui-resources.md) | **UI 리소스 발주 스펙** — 아트가 UI 스프라이트·시스템 아이콘을 그려 납품하기 위한 기준. ⚠️시안 13장 해상도 부족(1366 목업 1:1 컷 → 1920 대비 1.41× 업스케일) 전량 재납품 · 9-slice 규약 · 상태 변형 · 아이콘 64px 그리드 · 네이밍/납품/임포트 + [`ui-asset-list.csv`](ui-asset-list.csv)(~144항목) | 정리 (2026-07-29) |
+| **아트 작업 체크리스트(CSV)** | [`item-icon-checklist.csv`](item-icon-checklist.csv) 아이템 204종 · [`prop-list.csv`](prop-list.csv) 프랍 285행 · [`char-anim-list.csv`](char-anim-list.csv) 캐릭터 46행 · [`ui-asset-list.csv`](ui-asset-list.csv) UI 파츠 53+아이콘 17세트 | 생성됨 |
 | [`item-icon-list.md`](item-icon-list.md) · [`item-icon-additions.md`](item-icon-additions.md) | **아이콘 제작 리스트(footprint별)** + **아이콘↔데이터 매칭/신규 등록·보류** 정리 | 정리 (2026-06-10) |
 | [`prop-production.md`](prop-production.md) | **프랍 생성 진행 추적** — 맥락 씬 1장 생성→개별 슬라이스 방식, 슬라이스 규칙 | 정리 (2026-06-10) |
 

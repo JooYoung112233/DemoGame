@@ -1,0 +1,71 @@
+id,분류,언어,항목,수량,파일명,납품px_2x,9slice_LRTB,상태변형,사용처,시안커버,우선순위,상태,비고
+UA01,재납품,종이,대형 종이 패널(아이템 상세),1,panel_item.png,1236x1828,"180/180/180/180",-,ItemDetailUI,O,P0,⬜,현재 440x650 — 1.41x 업스케일 중 · 종이 9패널 공용 배경
+UA02,재납품,프레임,대형 어두운 패널(창고),1,panel_storage.png,1450x2052,"180/180/180/180",-,CharacterPanelUI/ShopUI,O,P0,⬜,현재 516x730 · 프레임 15패널 공용 배경
+UA03,재납품,프레임,소형 프레임,1,frame_box.png,214x214,"24/24/24/24",-,공용 팝업/섹션,O,P0,⬜,현재 76x76
+UA04,재납품,프레임,아이콘 박스,1,frame_itembox.png,254x282,"32/32/32/32",-,ItemDetailUI 아이콘,O,P0,⬜,현재 90x100 · 종이 위에 얹히는 유일한 프레임(예외 허용)
+UA05,재납품,프레임,격자 셀,1,slot_grid.png,258x258,"24/24/24/24",-,인벤/창고/도감 격자,O,P0,⬜,현재 92x92 · 가장 많이 반복되는 파츠
+UA06,재납품,공용,버튼 Primary,1,btn_primary.png,652x140,"48/48/0/0",normal,EQUIP/구매 등,O,P0,⬜,현재 232x50 · 종이/프레임 양쪽에서 사용
+UA07,재납품,공용,버튼 Secondary,1,btn_secondary.png,652x140,"48/48/0/0",normal,DROP/취소 등,O,P0,⬜,현재 232x50
+UA08,재납품,프레임,탭 ON,1,tab_on.png,196x152,"24/24/0/0",on,카테고리 탭,O,P0,⬜,현재 70x54
+UA09,재납품,프레임,탭 OFF,1,tab_off.png,196x152,"24/24/0/0",off,카테고리 탭,O,P0,⬜,현재 70x54
+UA10,재납품,종이,종이 태그(제목),1,tag_title_m.png,332x140,고정(9slice 불가),-,패널 제목,O,P0,⬜,비대칭 찢김 — 폭 변형 별도(UB21)
+UA11,재납품,종이,종이 태그(아이콘형),1,tag_icon.png,472x466,고정,-,제목+아이콘 조합,O,P1,⬜,현재 168x166
+UA12,재납품,종이,배너 A,1,tag_banner_a.png,658x140,"48/48/0/0",-,상단 헤더,O,P1,⬜,현재 234x50
+UA13,재납품,종이,배너 B,1,tag_banner_b.png,478x168,"48/48/0/0",-,상단 헤더 변형,O,P1,⬜,현재 170x60
+UB01,공용파츠,공용,버튼 Primary pressed,1,btn_primary_pressed.png,652x140,"48/48/0/0",pressed,전 버튼,X,P0,⬜,미결#1 — 틴트로 대체 가능
+UB02,공용파츠,공용,버튼 Secondary pressed,1,btn_secondary_pressed.png,652x140,"48/48/0/0",pressed,전 버튼,X,P0,⬜,미결#1
+UB03,공용파츠,공용,버튼 disabled,2,btn_*_disabled.png,652x140,"48/48/0/0",disabled,전 버튼,X,P1,⬜,미결#1 — 틴트 권장
+UB04,공용파츠,프레임,탭 hover,1,tab_hover.png,196x152,"24/24/0/0",hover,카테고리 탭,X,P1,⬜,
+UB05,공용파츠,프레임,게이지 배경,1,bar_bg.png,400x48,"12/12/0/0",-,체력/스태미너/내구도/그로기/진행도,X,P0,⬜,회색조 납품 — 색은 엔진 틴트
+UB06,공용파츠,프레임,게이지 채움,1,bar_fill.png,400x48,"12/12/0/0",-,동일,X,P0,⬜,반드시 흰색 — 코드가 틴트
+UB07,공용파츠,프레임,슬롯 드래그오버 프레임,2,slot_highlight_*.png,258x258,"24/24/24/24",유효/무효,격자 드래그앤드롭,X,P0,⬜,흰 프레임만 — 초록/빨강은 틴트
+UB08,공용파츠,프레임,장비 슬롯 프레임(대형),1,slot_equip.png,320x320,"32/32/32/32",-,CharacterPanelUI 장비창,X,P1,⬜,격자 셀보다 큼
+UB09,공용파츠,프레임,퀵슬롯 프레임,1,slot_quick.png,258x258,"24/24/24/24",-,QuickSlotBar,X,P1,⬜,
+UB10,공용파츠,프레임,퀵슬롯 선택 하이라이트,1,slot_quick_active.png,258x258,"24/24/24/24",-,QuickSlotBar,X,P1,⬜,
+UB11,공용파츠,프레임,스크롤 트랙,1,scroll_track.png,32x400,"0/0/12/12",-,전 스크롤 패널,X,P1,⬜,종이엔 스크롤 없음(캐논 §2-③)
+UB12,공용파츠,프레임,스크롤 핸들,1,scroll_handle.png,32x160,"0/0/12/12",-,전 스크롤 패널,X,P1,⬜,
+UB13,공용파츠,프레임,체크박스,2,check_on/off.png,64x64,-,on/off,SettingsUI,X,P2,⬜,
+UB14,공용파츠,프레임,슬라이더 트랙,1,slider_track.png,600x32,"12/12/0/0",-,SettingsUI 볼륨,X,P2,⬜,
+UB15,공용파츠,프레임,슬라이더 핸들,1,slider_handle.png,56x72,-,normal/드래그,SettingsUI 볼륨,X,P2,⬜,
+UB16,공용파츠,프레임,드롭다운 배경,1,dropdown_bg.png,600x88,"24/24/24/24",-,SettingsUI 해상도/창모드,X,P2,⬜,
+UB17,공용파츠,프레임,드롭다운 화살표,1,dropdown_arrow.png,48x48,-,-,SettingsUI,X,P2,⬜,
+UB18,공용파츠,프레임,입력 필드 배경,1,input_bg.png,600x88,"24/24/24/24",-,세이브 슬롯명 등,X,P3,⬜,
+UB19,공용파츠,프레임,툴팁 배경,1,tooltip_bg.png,400x200,"32/32/32/32",-,전 UI 호버 툴팁,X,P2,⬜,
+UB20,공용파츠,공용,구분선,1,divider.png,600x8,"24/24/0/0",-,전 패널,X,P2,⬜,종이용/프레임용 명도 2종 필요할 수 있음
+UB21,공용파츠,종이,종이 태그 폭 변형,2,tag_title_s/l.png,"220x140 / 520x140",고정,-,제목 길이 대응,X,P1,⬜,미결#3 — 한글 폰트 확정 후 폭 결정
+UC01,패널전용,프레임,대화창 배경,1,panel_dialogue.png,2400x480,"120/120/120/120",-,DialogueUI,X,P2,⬜,하단 전폭 · 캐논상 프레임(②대화마다 반복)
+UC02,패널전용,프레임,NPC 초상 프레임,1,frame_portrait.png,400x400,"48/48/48/48",-,DialogueUI,X,P2,⬜,정면 NPC 스프라이트용
+UC03,패널전용,공용,선택지 버튼,1,btn_choice.png,1600x120,"48/48/0/0",normal/hover,DialogueUI/PostRaidEventUI,X,P2,⬜,종이(PostRaid)·프레임(Dialogue) 양쪽 — 중립 톤으로
+UC04,패널전용,기물,라디오 본체 패널,1,panel_radio.png,1600x1000,고정,-,RadioUI,X,P3,⬜,캐논 예외(§4 기물) · 빈티지 무전기 실물
+UC05,패널전용,기물,주파수 다이얼 노브,1,radio_knob.png,240x240,-,회전,RadioUI,X,P3,⬜,중심 피벗 — 코드 회전
+UC06,패널전용,기물,주파수 눈금 스트립,1,radio_scale.png,2400x120,"0/0/0/0",-,RadioUI,X,P3,⬜,가로 스크럽 — 타일링 가능하게
+UC07,패널전용,기물,신호 강도 게이지,1,radio_signal.png,400x160,-,-,RadioUI,X,P3,⬜,아날로그 미터 배경 + 니들 분리
+UC08,패널전용,종이,파견 보드 배경,1,panel_dispatch.png,2400x1400,"120/120/120/120",-,DispatchUI,X,P3,⬜,핀보드/지도판 — 캐논상 종이
+UC09,패널전용,종이,랜드마크 카드 프레임,1,card_landmark.png,480x640,"48/48/48/48",normal/선택,DispatchUI,X,P3,⬜,
+UC10,패널전용,종이,파견 NPC 슬롯,1,slot_dispatch.png,320x320,"32/32/32/32",빈/채움,DispatchUI,X,P3,⬜,
+UC11,패널전용,프레임,나침반 스트립,1,compass_strip.png,2400x160,"0/0/0/0",-,NavigationHUD,X,P3,⬜,하단중앙 — 가로 스크롤
+UC12,패널전용,프레임,미니맵 프레임,1,frame_minimap.png,800x800,"48/48/48/48",-,NavigationHUD,X,P3,⬜,M홀드 확대
+UC13,패널전용,종이,타이틀 대형 배너,1,tag_title_main.png,1600x400,고정,-,TitleScreen,X,P3,⬜,캐논 §6 단독 규정 — 일러스트 위 종이 배너
+UC14,패널전용,종이,소식지(신문) 템플릿,1,panel_newspaper.png,2400x3200,고정,-,NewspaperUI(U01),X,P3,⬜,온보딩 — 헤드라인/본문/컷 영역 분할
+UC15,패널전용,종이,의뢰서 종이,1,panel_quest_note.png,800x1100,"90/90/90/90",-,BoardUI(U05)/QuestLogUI,X,P3,⬜,게시판 의뢰 — BoardUI는 시스템 미구현
+UC16,패널전용,종이,쪽지 배경,1,panel_note.png,900x1200,"90/90/90/90",-,NoteUI,X,P3,⬜,스토리 단서
+UC17,패널전용,프레임,하이드아웃 시설 패널,1,panel_hideout.png,1450x2052,"180/180/180/180",-,HideoutUI,X,P3,⬜,panel_storage 재사용 가능 여부 검토
+UC18,패널전용,종이,지역 선택 카드,1,card_region.png,600x800,"48/48/48/48",normal/선택/잠김,MapSelectUI,X,P3,⬜,지도판 위 카드
+UC19,패널전용,프레임,특성 노드 프레임,1,frame_trait.png,200x200,"24/24/24/24",해금/잠김,TraitPanelUI,X,P4,⬜,
+UD01,아이콘,공용,화폐,2,ico_currency.png,64x64 그리드,-,-,GameHUD/ShopUI/RaidResultUI,X,P1,⬜,스크랩 · 루디(◈)
+UD02,아이콘,프레임,자원 바,3,ico_resource.png,64x64 그리드,-,-,GameHUD RESOURCES,O,P1,⬜,무게 · 부피 · 스크랩 — 시안에 있음(재납품)
+UD03,아이콘,프레임,장비 슬롯,8,ico_equip_slots.png,128x128 그리드,-,-,CharacterPanelUI,X,P1,⬜,Head/Armor/Rig/Backpack/Primary/Secondary/Melee/Special
+UD04,아이콘,프레임,아이템 카테고리 탭,8,ico_category.png,64x64 그리드,-,-,창고/상점/도감 탭,X,P1,⬜,ALL+Weapon/Medical/Consumable/Material/Valuable/Key/Misc
+UD05,아이콘,프레임,무기 부착 슬롯,4,ico_weapon_parts.png,64x64 그리드,-,-,무기 상세,X,P3,⬜,Scope/Muzzle/Magazine/Grip
+UD06,아이콘,프레임,의료 부위,6,ico_bodyparts.png,128x128 그리드,-,-,MedicalHUD,X,P1,⬜,실루엣1+Head/Torso/Arms/LeftLeg/RightLeg
+UD07,아이콘,프레임,부상 종류,3,ico_injury.png,64x64 그리드,-,-,MedicalHUD,X,P1,⬜,Bleeding/Fracture/Pain — 색은 엔진 틴트
+UD08,아이콘,프레임,제작 스테이션,3,ico_station.png,128x128 그리드,-,-,CraftingUI/HideoutUI,X,P2,⬜,Workbench/MedicalBench/CookingBench
+UD09,아이콘,무프레임,퀘스트 마커,5,ico_quest_marker.png,64x64 그리드,-,-,NPC 머리 위,X,P4,⬜,Talk/Story/InProgress/Available/ReadyToReport — 월드 공간
+UD10,아이콘,종이,퀘스트 타입,4,ico_quest_type.png,64x64 그리드,-,-,QuestLogUI(종이)/QuestHUD(프레임),X,P4,⬜,Collect/Kill/Explore/Deliver — 양쪽 노출이라 중립 톤
+UD11,아이콘,무프레임,이모트(말풍선),8,ico_emote.png,128x128 그리드,-,-,NPC 감정 표현,X,P3,⬜,! ? 하트 분노 곤란 놀람 말줄임 Zzz — 표정 스프라이트 대체분 · 월드 공간
+UD12,아이콘,기물,라디오 방송 타입,4,ico_broadcast.png,64x64 그리드,-,-,RadioUI,X,P3,⬜,랜드마크/생존자/세계관조각/특수이벤트
+UD13,아이콘,프레임,평판 등급,6,ico_reputation.png,128x128 그리드,-,-,ReputationHUD(U06),X,P4,⬜,F E D C B A — 뱃지형
+UD14,아이콘,프레임,하이드아웃 시설,6,ico_facility.png,128x128 그리드,-,-,HideoutUI,X,P4,⬜,침대/보관함/작업대/의료대/조리대/라디오
+UD15,아이콘,무프레임,키캡,12,ico_keycap.png,64x64 그리드,-,-,상호작용 프롬프트/조작 안내,X,P2,⬜,E Tab M K U Esc Space Shift 1~4 좌클릭 우클릭 — 게임패드 글리프는 제외(controls.md T2)
+UD16,아이콘,종이,맵/나침반 마커,6,ico_map_marker.png,64x64 그리드,-,-,RaidMapUI(종이)/NavigationHUD(프레임),X,P3,⬜,플레이어/탈출구/잠긴통로/막힌통로/일방통행/인텔핀 — 양쪽 노출
+UD17,아이콘,공용,상태 뱃지,3,ico_badge.png,64x64 그리드,-,-,파견/해금 공용,X,P4,⬜,대기중(모래시계)/완료(!)/잠김(자물쇠)
