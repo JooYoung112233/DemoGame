@@ -49,6 +49,10 @@ public class Hurtbox : MonoBehaviour
 
         float dmg = damage * BodyZones.DamageMult(part);
 
+        // 부위 부상 누적 — 데미지를 넣기 **전에** 기록해야 이번 타격도 부상 판정에 든다.
+        var inj = GetComponentInParent<UnitInjuries>();
+        if (inj != null) inj.Add(part, dmg);
+
         if (enemy != null)      enemy.TakeHit(dmg, groggyAmount, hitDir);
         else if (health != null) health.TakeDamage(dmg);
 

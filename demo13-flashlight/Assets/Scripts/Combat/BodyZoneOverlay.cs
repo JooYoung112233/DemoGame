@@ -24,6 +24,7 @@ public class BodyZoneOverlay : MonoBehaviour
     };
 
     Collider2D _body;
+    UnitInjuries _inj;
     SpriteRenderer[] _cells;      // Arms는 좌우 2칸이라 총 6칸
     float[] _flash;
     BodyPartType[] _cellPart;
@@ -43,6 +44,7 @@ public class BodyZoneOverlay : MonoBehaviour
     {
         var hb = GetComponentInParent<Hurtbox>();
         _body = hb != null ? hb.GetComponent<Collider2D>() : GetComponentInParent<Collider2D>();
+        _inj = GetComponentInParent<UnitInjuries>();   // 없으면(플레이어) 부상 색은 안 쓴다
 
         _cells = new SpriteRenderer[6];
         _flash = new float[6];
@@ -93,7 +95,12 @@ public class BodyZoneOverlay : MonoBehaviour
             var t = _cells[i].transform;
             t.position   = new Vector3(r.x + r.width * 0.5f, r.y + r.height * 0.5f, 0f);
             t.localScale = new Vector3(Mathf.Max(0.01f, r.width), Mathf.Max(0.01f, r.height), 1f);
-            _cells[i].color = Color.Lerp(BaseColor(part), Color.white, _flash[i] * 0.85f);
+            // 부상한 부위는 짙게 — 다리를 부순 게 먹혔는지 눈으로 확인할 수 있어야 한다.
+            Color c = BaseColor(part);
+            int lv = _inj != null ? _inj.Level(part) : 0;
+            if (lv > 0) c = new Color(c.r * 0.5f, c.g * 0.35f, c.b * 0.35f,
+                                      Mathf.Min(0.75f, c.a + 0.18f * lv));
+            _cells[i].color = Color.Lerp(c, Color.white, _flash[i] * 0.85f);
         }
     }
 

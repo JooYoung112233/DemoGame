@@ -100,20 +100,30 @@ public class EnemyController : MonoBehaviour
 
     #region 프로퍼티
 
-    float Damage          => unitStat != null ? unitStat.attackDamage        : attackDamage;
+    // ── 부위 부상 디버프(2026-07-29) — 배율을 **여기 한 곳**에서만 곱한다.
+    //    스탯을 읽는 자리마다 따로 곱하면 하나 빠뜨려도 아무도 모른다.
+    UnitInjuries _injuries;
+    UnitInjuries Inj => _injuries != null ? _injuries : (_injuries = GetComponent<UnitInjuries>());
+    float InjMove   => Inj != null ? Inj.MoveMult        : 1f;
+    float InjWindup => Inj != null ? Inj.WindupMult      : 1f;
+    float InjAtk    => Inj != null ? Inj.AttackMult      : 1f;
+    float InjDetect => Inj != null ? Inj.DetectMult      : 1f;
+    float InjDecay  => Inj != null ? Inj.GroggyDecayMult : 1f;
+
+    float Damage          => (unitStat != null ? unitStat.attackDamage        : attackDamage) * InjAtk;
     float AtkRange        => unitStat != null ? unitStat.attackRange         : attackRange;
     float AtkCooldown     => 1f / Mathf.Max(unitStat != null ? unitStat.attackSpeed : attackSpeed, 0.1f);
     float DetectRng       => (unitStat != null ? unitStat.detectRange : detectRange) * TraitManager.Mod("detect_radius");   // 잠행: 그림자 감지반경 -20%
     float LoseRng         => unitStat != null ? unitStat.loseRange           : loseRange;
-    float MoveSpd         => unitStat != null ? unitStat.moveSpeed           : moveSpeed;
-    float PatrolSpd       => unitStat != null ? unitStat.patrolSpeed         : patrolSpeed;
+    float MoveSpd         => (unitStat != null ? unitStat.moveSpeed          : moveSpeed) * InjMove;
+    float PatrolSpd       => (unitStat != null ? unitStat.patrolSpeed        : patrolSpeed) * InjMove;
     float PatrolRad       => unitStat != null ? unitStat.patrolRadius        : patrolRadius;
     float HitStun         => unitStat != null ? unitStat.hitStunDuration     : 0.3f;
     float PatrolWait      => unitStat != null ? unitStat.patrolWaitTime      : patrolWaitTime;
-    float Windup          => unitStat != null ? unitStat.attackWindup        : attackWindup;
+    float Windup          => (unitStat != null ? unitStat.attackWindup       : attackWindup) * InjWindup;
     bool  CanBeCancelled  => unitStat != null ? unitStat.canBeCancelled      : true;
     float MaxGroggy       => unitStat != null ? unitStat.maxGroggy           : maxGroggy;
-    float GroggyDecayRate => unitStat != null ? unitStat.groggyDecay         : groggyDecay;
+    float GroggyDecayRate => (unitStat != null ? unitStat.groggyDecay        : groggyDecay) * InjDecay;
     float StunDuration    => unitStat != null ? unitStat.groggyStunDuration  : groggyStunDuration;
 
     public State CurrentState  => state;
@@ -200,6 +210,10 @@ public class EnemyController : MonoBehaviour
         // 테스트용 부위 표시(F1에서 켠다, 기본 꺼짐) — 다리를 노렸는지 눈으로 확인할 유일한 수단.
         BodyZoneOverlay.Attach(transform);
 
+        // 부위 부상(2026-07-29) — 다리를 부수면 못 쫓아오고, 팔을 부수면 느리게 때린다.
+        _injuries = GetComponent<UnitInjuries>();
+        if (_injuries == null) _injuries = gameObject.AddComponent<UnitInjuries>();
+
         // 적 은신 + 머리 위 말풍선 (가시성 실험) — 자동 부착
         if (GetComponent<EnemySpeechBubble>() == null)
             gameObject.AddComponent<EnemySpeechBubble>();
@@ -216,6 +230,8 @@ public class EnemyController : MonoBehaviour
             if (unitStat != null && unitStat.maxHp > 0f)   // 유닛 스탯의 최대 HP 적용(없으면 Health 인스펙터 기본값)
             {
                 health.SetMaxHp(unitStat.maxHp);
+                // 부상 임계치를 그 유닛의 HP에 맞춘다 — HP 110짜리 탱커와 40짜리 밴딧이 같으면 안 된다.
+                if (Inj != null) Inj.Setup(unitStat.maxHp);
                 health.FullHeal();
             }
             health.OnDamaged += OnDamaged;
@@ -271,6 +287,7 @@ public class EnemyController : MonoBehaviour
         UpdateGroggy();
         UpdateGroggyBar();
         UpdateHPBar();
+        UpdateInjuryBadge();
     }
 
     #endregion
@@ -662,7 +679,9 @@ public class EnemyController : MonoBehaviour
         if (state == State.AttackWindup) TryCancelAttack();
 
         if (health != null) health.TakeDamage(damage);
-        AddGroggy(groggy * TraitManager.Mod("groggy_buildup"));   // 전투: 냉정한 손 그로기 누적 +20%
+        // 머리를 다치면 더 쉽게 무너진다 — 부위마다 다른 이득이 있어야 조준에 선택이 생긴다.
+        float groggyTaken = Inj != null ? Inj.GroggyTakenMult : 1f;
+        AddGroggy(groggy * TraitManager.Mod("groggy_buildup") * groggyTaken);   // 전투: 냉정한 손 +20%
 
         DamagePopup.Create(transform.position, damage, DamagePopup.DamageType.Normal);
 
@@ -695,6 +714,18 @@ public class EnemyController : MonoBehaviour
         hpBarBg   = MakeBar("HPBar_BG",   c.transform, new Color(0.1f, 0.1f, 0.1f, 0.8f), 0, BAR_W, BAR_H);
         hpBarFill = MakeBar("HPBar_Fill", c.transform, Color.green, 1, BAR_W, BAR_H);
         hpFillMat = hpBarFill.GetComponent<SpriteRenderer>().material;
+    }
+
+    /// <summary>이름표에 부상 표시를 붙인다 — "적 [다]" 처럼. F1 오버레이를 안 켜도
+    /// **다리를 부순 게 먹혔는지** 바로 보여야 조준이 의미가 있다.</summary>
+    string _badgeShown = "";
+    void UpdateInjuryBadge()
+    {
+        if (_label == null || Inj == null || state == State.Dead) return;
+        string badge = Inj.Badge();
+        if (badge == _badgeShown) return;                 // 매 프레임 TextMesh를 건드리지 않는다
+        _badgeShown = badge;
+        _label.Set("적" + badge, UnitLabel.EnemyColor);
     }
 
     void UpdateHPBar()
