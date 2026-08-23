@@ -14,7 +14,7 @@ public class EnemySpawner : MonoBehaviour
 {
     public static EnemySpawner Instance { get; private set; }
 
-    readonly HashSet<int> _processed = new HashSet<int>();   // 씬 핸들 — 중복 스폰 방지
+    readonly HashSet<SceneHandle> _processed = new HashSet<SceneHandle>();   // 씬 핸들 — 중복 스폰 방지
 
     /// <summary>부팅 시 자가 생성 (Systems 씬 유무와 무관하게 항상 동작 — 맵툴 씬 제외).</summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]

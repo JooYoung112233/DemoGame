@@ -1013,7 +1013,7 @@ public class QaBot : MonoBehaviour
         {
             if (e == null || !e.gameObject.activeInHierarchy || e.IsDead) continue;
 
-            int id = e.GetInstanceID();
+            int id = e.GetEntityId().GetHashCode();
             var now = e.CurrentState;
             float dist = Vector2.Distance(e.transform.position, me);
 
