@@ -24,6 +24,8 @@
 
 **2026-09-07 추가:** 3D 쿼터뷰 전환의 첫 에셋으로 귀여운 2.5등신 로우폴리 캐릭터·Idle/Walk/Run 제작 후, **플레이어 표시를 이 3D 모델로 교체**(`ChibiPlayerVisual`, Spine/스프라이트 대체). 이동/전투/충돌/URP 2D 렌더러는 그대로. [3D 캐릭터 패키지/사용법](chibi-survivor-3d.md), [캐릭터 결정](char-art.md).
 
+**2026-09-07 방향 확정:** 프로젝트를 **완전 3D 쿼터뷰로 전환**하기로 결정(고정 오소 카메라 / 단차·엄폐 / 아트 전부 3D 재제작). **아직 미착수** — 현 구현은 URP 2D 그대로다. 실측·단계 계획·리스크는 [3D 전환 계획](3d-migration.md).
+
 **로드맵 Stage 2 진행 중** (안전가옥 컨테이너 맵)
 
 | 단계 | 내용 | 상태 |
@@ -178,8 +180,9 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
+| [`3d-migration.md`](3d-migration.md) | ⭐ **3D 쿼터뷰 전환 계획 SSOT** — 결정 4건(완전 3D·오소 고정 쿼터뷰·단차/엄폐·아트 전부 3D) + 2D 결합 실측(66,933 LOC 중 32%, Rigidbody2D 9파일·Physics2D 10곳) + 유지/교체/신규 표 + Stage 0~5 + 리스크·미결 | **계획 (2026-09-07), 미착수** |
 | [`topdown-migration.md`](topdown-migration.md) | **아이소 → 탑다운 2D 전환** 배경·유지/제거/신규 목록·단계 계획 | 진행 중 |
-| [`rendering.md`](rendering.md) | 순수 탑다운 2D — URP 2D Renderer, 2D Orthographic 카메라, Light2D, Tilemap, Prop2D, BRB/ 셰이더 10종 | 확정 |
+| [`rendering.md`](rendering.md) | **현 구현 = 순수 탑다운 2D** — URP 2D Renderer, 2D Orthographic 카메라, Light2D, Tilemap, Prop2D, BRB/ 셰이더 10종. 상단에 3D 전환 방향 결정 등재(계획은 `3d-migration.md`) | 확정 (전환 예정) |
 | [`destructible.md`](destructible.md) | 파괴 가능 오브젝트 — `Breakable` + `BRB/DamageOverlay`(오버레이라 전 셰이더 호환), 단계별 부서짐→파괴, Health 자동 연동 | 구현 |
 | [`topdown-art-spec.md`](topdown-art-spec.md) | AI 이미지 생성 스펙 — near-overhead 시점, 마젠타 배경, 플랫 라이팅, 엔진 조명값 | 작성 완료 |
 
