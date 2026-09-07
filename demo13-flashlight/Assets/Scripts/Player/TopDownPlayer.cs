@@ -2,11 +2,10 @@ using UnityEngine;
 
 /// <summary>
 /// 탑다운 2D 플레이어 — WASD 8방향 이동 + 마우스 조준 + 근접 전투(약/강공격, 구르기) + 스태미너.
-/// Rigidbody2D 기반. NavMesh 없음. 스탯은 StatDB.playerStat에서 로드.
+/// Rigidbody(3D) 기반, 월드는 XZ 평면. 평면 로직은 Vector2 유지(Plan3D 참조). 스탯은 StatDB.playerStat에서 로드.
 /// 게임 로직(인벤/의료/퀘스트 등)은 별도 컴포넌트로 부착.
 /// </summary>
-[RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(Rigidbody))]
 public class TopDownPlayer : MonoBehaviour
 {
     // ── 싱글톤 ──────────────────────────────────────────────────────
@@ -110,7 +109,7 @@ public class TopDownPlayer : MonoBehaviour
     float MoveDecel      => Stat.moveDecel;
 
     // ── 내부 상태 ─────────────────────────────────────────────────────
-    Rigidbody2D _rb;
+    Rigidbody   _rb;
     Camera      _cam;
     CombatState _state = CombatState.Idle;
 
@@ -183,12 +182,19 @@ public class TopDownPlayer : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(transform.root.gameObject);
 
-        _rb = GetComponent<Rigidbody2D>();
-        _rb.bodyType       = RigidbodyType2D.Dynamic;       // 벽에 막히려면 Dynamic (Kinematic이면 뚫음)
-        _rb.gravityScale   = 0f;
-        _rb.freezeRotation = true;
-        _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // 빠른 이동·대시 터널링 방지
-        _rb.interpolation  = RigidbodyInterpolation2D.Interpolate;        // 부드러운 이동
+        // 2D 시절 프리팹엔 Rigidbody2D만 있다. RequireComponent는 기존 프리팹에
+        // 소급 적용되지 않으므로 런타임에 직접 보정한다.
+        var rb2d = GetComponent<Rigidbody2D>();
+        if (rb2d != null) Destroy(rb2d);
+        foreach (var c2d in GetComponents<Collider2D>()) Destroy(c2d);
+        _rb = GetComponent<Rigidbody>();
+        if (_rb == null) _rb = gameObject.AddComponent<Rigidbody>();
+        _rb.isKinematic = false;                            // 벽에 막히려면 Dynamic
+        _rb.useGravity  = true;                             // 단차에서 떨어진다
+        _rb.constraints = RigidbodyConstraints.FreezeRotation;
+        _rb.collisionDetectionMode = CollisionDetectionMode.Continuous;   // 빠른 이동·대시 터널링 방지
+        _rb.interpolation  = RigidbodyInterpolation.Interpolate;          // 부드러운 이동
+        EnsureBodyCollider();
 
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -326,7 +332,7 @@ public class TopDownPlayer : MonoBehaviour
     void FixedUpdate()
     {
         // UI/대화 열림 → 이동 전면 정지
-        if (_uiOpen) { _rb.linearVelocity = Vector2.zero; MoveDirection = Vector2.zero; return; }
+        if (_uiOpen) { SetPlanVelocity(Vector2.zero); MoveDirection = Vector2.zero; return; }
 
         // 구르기 중 — 대시 속도 적용
         if (_state == CombatState.Dodge)
@@ -335,18 +341,18 @@ public class TopDownPlayer : MonoBehaviour
             //   진행도 t에 따라 속도 배율 1.35→0.5로 감쇠(평균≈0.93이라 이동거리는 거의 그대로).
             float dodgeT = DodgeDur > 0f ? Mathf.Clamp01(1f - _dodgeTimer / DodgeDur) : 1f;
             float dodgeMul = Mathf.Lerp(1.35f, 0.5f, dodgeT);
-            _rb.linearVelocity = _dodgeDir * (DodgeDist / DodgeDur) * dodgeMul;
+            SetPlanVelocity(_dodgeDir * (DodgeDist / DodgeDur) * dodgeMul);
             return;
         }
 
         // 공격/차징 중 — 이동 정지 (제자리 공격)
         if (_state == CombatState.LightAttack || _state == CombatState.HeavyRelease)
         {
-            _rb.linearVelocity = Vector2.zero;
+            SetPlanVelocity(Vector2.zero);
             return;
         }
 
-        if (!CanMove) { _rb.linearVelocity = Vector2.zero; return; }
+        if (!CanMove) { SetPlanVelocity(Vector2.zero); return; }
 
         float h = GameInput.GetAxisRaw("Horizontal");
         float v = GameInput.GetAxisRaw("Vertical");
@@ -362,11 +368,32 @@ public class TopDownPlayer : MonoBehaviour
         Vector2 target = MoveDirection * speed;
         bool wantMove = MoveDirection.sqrMagnitude > 0.01f;
         float rate = wantMove ? MoveAccel : MoveDecel;
-        if (rate <= 0f) _rb.linearVelocity = target;   // 0=즉시(기존 동작)
-        else            _rb.linearVelocity = Vector2.MoveTowards(_rb.linearVelocity, target, rate * Time.fixedDeltaTime);
+        if (rate <= 0f) SetPlanVelocity(target);   // 0=즉시(기존 동작)
+        else            SetPlanVelocity(Vector2.MoveTowards(PlanVelocity, target, rate * Time.fixedDeltaTime));
     }
 
     // ── 마우스 / 비주얼 ──────────────────────────────────────────────
+
+    /// <summary>평면(XZ) 속도. 중력이 쓰는 Y 성분은 제외한다.</summary>
+    Vector2 PlanVelocity => _rb != null ? Plan3D.ToPlan(_rb.linearVelocity) : Vector2.zero;
+
+    /// <summary>평면 속도만 바꾸고 낙하 속도(Y)는 보존한다.</summary>
+    void SetPlanVelocity(Vector2 v)
+    {
+        if (_rb == null) return;
+        _rb.linearVelocity = new Vector3(v.x, _rb.linearVelocity.y, v.y);
+    }
+
+    /// <summary>3D 몸통 콜라이더 보장 — 2D 시절 프리팹엔 CircleCollider2D만 있다.</summary>
+    void EnsureBodyCollider()
+    {
+        if (GetComponent<Collider>() != null) return;
+        var cap = gameObject.AddComponent<CapsuleCollider>();
+        cap.radius = BodyRadius;
+        cap.height = 1.8f;
+        cap.center = new Vector3(0f, 0.9f, 0f);
+        cap.direction = 1;   // Y축
+    }
 
     void UpdateMouseFacing()
     {
@@ -378,13 +405,13 @@ public class TopDownPlayer : MonoBehaviour
             {
                 // 오른쪽 스틱을 밀면 그 방향을 바라본다.
                 FacingDirection = aim.normalized;
-                MouseWorldPos   = transform.position + (Vector3)(FacingDirection * 3f);
+                MouseWorldPos   = transform.position + Plan3D.ToWorld(FacingDirection) * 3f;
             }
             else if (MoveDirection.sqrMagnitude > 0.01f)
             {
                 // 오른쪽 스틱 미입력 → 이동 방향으로 바라본다(트윈스틱 폴백, facing 고착 방지).
                 FacingDirection = MoveDirection.normalized;
-                MouseWorldPos   = transform.position + (Vector3)(FacingDirection * 3f);
+                MouseWorldPos   = transform.position + Plan3D.ToWorld(FacingDirection) * 3f;
             }
             // 조준·이동 둘 다 미입력이면 마지막 방향 유지.
             return;
@@ -392,10 +419,10 @@ public class TopDownPlayer : MonoBehaviour
 
         if (_cam == null) return;
 
-        // 마우스 조준 — 커서 월드좌표를 향한다.
-        Vector3 m = _cam.ScreenToWorldPoint(GameInput.mousePosition);
-        m.z = transform.position.z;
-        Vector2 dir = (Vector2)(m - transform.position);
+        // 마우스 조준 — 커서 광선이 발밑 높이의 바닥면과 만나는 지점을 향한다.
+        // (오소 쿼터뷰에서 ScreenToWorldPoint는 의미가 없다 — docs/3d-migration.md)
+        if (!Plan3D.ScreenToGround(_cam, GameInput.mousePosition, transform.position.y, out Vector3 m)) return;
+        Vector2 dir = Plan3D.ToPlan(m - transform.position);
         if (dir.sqrMagnitude > 0.01f)
         {
             FacingDirection = dir.normalized;
@@ -418,7 +445,7 @@ public class TopDownPlayer : MonoBehaviour
     void UpdateCharacter3D()
     {
         if (_character3D == null) return;
-        float speed = _rb != null ? _rb.linearVelocity.magnitude : 0f;
+        float speed = _rb != null ? PlanVelocity.magnitude : 0f;
         bool allowed = !_uiOpen && CanMove && !IsAttacking;
         bool running = IsSprinting || _state == CombatState.Dodge;
         string motion = allowed && speed > .05f ? (running ? "run" : "walk") : "idle";
@@ -554,7 +581,7 @@ public class TopDownPlayer : MonoBehaviour
                 if (_stamina <= 0f) { _stamina = 0f; EnterExhausted(); }
             }
             if (maxDist > 0f && _rb != null)
-                _runDist += _rb.linearVelocity.magnitude * Time.deltaTime;
+                _runDist += PlanVelocity.magnitude * Time.deltaTime;
         }
         else if (_runDist > 0f)
         {

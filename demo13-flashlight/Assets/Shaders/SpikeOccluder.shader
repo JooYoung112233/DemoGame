@@ -1,15 +1,19 @@
-// Stage 0 스파이크 전용 — 오클루전 처리 3종 비교용. 프로덕션 셰이더 아님.
-// _Mode 0 = 디더 페이드(스크린도어) / 1 = 구형 컷어웨이(플레이어 주변만 뚫음)
+// Stage 0/1 스파이크 — 카메라 오클루전 처리. 프로덕션 셰이더 아님(조명은 최소 구현).
+//
+// 규약: 컷어웨이 파라미터는 **전역 유니폼**이다(Properties에 없음).
+//   Shader.SetGlobalVector("_CutCenter", ...) 한 번이면 이 셰이더를 쓰는 모든 건물이
+//   같이 동작한다 — 재질별 배선이 필요 없다.
+//
+// 판정은 두 조건의 교집합이다:
+//   ① 화면상 플레이어 위치에서 반경 안  (월드 거리로 하면 건물 표면이 멀어 안 잘린다)
+//   ② 프래그먼트가 플레이어보다 카메라에 가까움 (뒤에 있는 건물까지 뚫리면 안 된다)
 Shader "Spike/OccluderFX"
 {
     Properties
     {
         _BaseColor ("Base Color", Color) = (0.46, 0.45, 0.44, 1)
-        _Mode      ("Mode (0=dither 1=cutaway)", Float) = 0
+        _Mode      ("Mode (0=solid 1=cutaway 2=dither)", Float) = 1
         _Alpha     ("Dither Alpha", Range(0,1)) = 0.25
-        _PlayerPos ("Player World Pos", Vector) = (0,0,0,0)
-        _Radius    ("Cutaway Radius", Float) = 3.0
-        _Soft      ("Cutaway Soft Edge", Float) = 1.2
     }
 
     SubShader
@@ -35,10 +39,14 @@ Shader "Spike/OccluderFX"
                 float4 _BaseColor;
                 float  _Mode;
                 float  _Alpha;
-                float4 _PlayerPos;
-                float  _Radius;
-                float  _Soft;
             CBUFFER_END
+
+            // ── 전역(재질별 아님) ──
+            // 해상도 비의존: xy는 뷰포트 0~1(위→아래), 반경은 **화면 높이 대비 비율**.
+            float4 _CutCenter;   // xy = 뷰포트 0~1(위→아래), z = 플레이어 뷰 깊이
+            float  _CutRadius;   // 화면 높이 대비 (예 0.13)
+            float  _CutSoft;     // 화면 높이 대비 (예 0.05)
+            float  _CutEnabled;  // 0/1
 
             struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
             struct Varyings
@@ -46,6 +54,7 @@ Shader "Spike/OccluderFX"
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD0;
                 float3 normalWS   : TEXCOORD1;
+                float  viewDepth  : TEXCOORD2;
             };
 
             Varyings vert (Attributes IN)
@@ -55,10 +64,11 @@ Shader "Spike/OccluderFX"
                 o.positionCS = p.positionCS;
                 o.positionWS = p.positionWS;
                 o.normalWS   = TransformObjectToWorldNormal(IN.normalOS);
+                o.viewDepth  = -TransformWorldToView(p.positionWS).z;   // 카메라로부터의 거리
                 return o;
             }
 
-            // 4x4 Bayer — 스크린도어 투명(깊이를 유지해 정렬 문제가 없다)
+            // 4x4 Bayer — 스크린도어. 깊이를 유지하므로 반투명 정렬 문제가 없다.
             float Bayer4(float2 sp)
             {
                 const float m[16] = {
@@ -73,20 +83,24 @@ Shader "Spike/OccluderFX"
 
             half4 frag (Varyings IN) : SV_Target
             {
-                if (_Mode < 0.5)
+                float dither = Bayer4(IN.positionCS.xy);
+
+                if (_Mode > 1.5)
                 {
-                    // 디더 페이드 — 알파만큼 픽셀을 규칙적으로 버린다
-                    clip(_Alpha - Bayer4(IN.positionCS.xy));
+                    clip(_Alpha - dither);                       // 통짜 디더 페이드
                 }
-                else
+                else if (_Mode > 0.5 && _CutEnabled > 0.5)
                 {
-                    // 컷어웨이 — 화면상 플레이어 위치 주변에 구멍을 뚫는다.
-                    // 월드 거리로 하면 건물 표면이 플레이어에서 멀어 아무것도 안 잘린다 —
-                    // 가리는 것을 걷어내는 일이므로 판정은 시선 축(=화면 공간)에서 해야 한다.
-                    // _PlayerPos.xy = 픽셀 좌표(위에서 아래), _Radius/_Soft = 픽셀.
-                    float d = length(IN.positionCS.xy - _PlayerPos.xy);
-                    float t = saturate((d - _Radius) / max(_Soft, 0.001));  // 0=중심 1=바깥
-                    clip(t - Bayer4(IN.positionCS.xy) * 0.999);
+                    // ② 플레이어보다 뒤면 건드리지 않는다 (여유 0.5m)
+                    if (IN.viewDepth < _CutCenter.z - 0.5)
+                    {
+                        // ① 화면상 플레이어 주변 반경 — 종횡비 보정해 원형을 유지한다
+                        float2 uv = IN.positionCS.xy / _ScreenParams.xy;
+                        float2 off = (uv - _CutCenter.xy) * float2(_ScreenParams.x / _ScreenParams.y, 1.0);
+                        float d = length(off);
+                        float t = saturate((d - _CutRadius) / max(_CutSoft, 0.001));
+                        clip(t - dither * 0.999);
+                    }
                 }
 
                 float3 N = normalize(IN.normalWS);
@@ -118,14 +132,12 @@ Shader "Spike/OccluderFX"
                 float4 _BaseColor;
                 float  _Mode;
                 float  _Alpha;
-                float4 _PlayerPos;
-                float  _Radius;
-                float  _Soft;
             CBUFFER_END
 
             struct SAttributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
             struct SVaryings   { float4 positionCS : SV_POSITION; };
 
+            // 그림자는 구멍과 무관하게 그대로 드리운다 — 건물이 사라진 것처럼 보이면 안 된다.
             SVaryings shadowVert (SAttributes IN)
             {
                 SVaryings o;

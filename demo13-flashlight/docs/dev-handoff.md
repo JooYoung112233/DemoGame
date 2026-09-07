@@ -1,7 +1,56 @@
 # 개발 핸드오프 (이어서 작업)
 
 > 다른 PC에서 이어서 작업할 때 **여기부터** 읽기. `/build`로 이어서 진행.
-> 최신 갱신: 2026-09-07
+> 최신 갱신: 2026-09-07 (밤)
+
+## 지금 위치 (2026-09-07 밤) — Stage 0 완료, Stage 1 진행 중
+
+브랜치 **`spike/3d-stage0`**(푸시됨). 베이스 = `chore/unity-6.6-upgrade`(PR #7).
+
+### 확정된 카메라 (문서: 3d-migration.md)
+**pitch 55° / yaw 0° / orthographicSize 7**(세로 14m) · 오클루전 = **화면 공간 컷어웨이**.
+(yaw는 45°로 갔다가 사용자 재결정으로 0°. 대각선 폐기.)
+
+### 된 것
+- `Assets/Scenes/Sandbox3D.unity` — 스파이크 씬. 기존 2D를 안 건드리려고 **URP-2D 파이프라인에
+  ForwardRenderer를 인덱스 1로 덧붙이고** 이 씬 카메라만 그것을 쓴다(되돌리기 = 목록 한 줄 제거).
+- `Assets/Shaders/SpikeOccluder.shader` — 컷어웨이 완성형. 판정 = 화면 반경 ∩ 플레이어보다 앞.
+  파라미터는 **전역 유니폼**이라 `Shader.SetGlobalVector` 한 번에 모든 건물이 동작한다.
+  반경은 화면 높이 대비 비율(해상도 비의존). 그림자는 구멍과 무관하게 유지.
+- `Assets/Scripts/Core/Plan3D.cs` — **평면(XZ) ↔ 월드 변환 헬퍼. Stage 1의 핵심 설계.**
+  평면 로직은 계속 `Vector2`(x=월드X, y=월드Z)로 두고 물리·트랜스폼 경계에서만 변환한다.
+  덕분에 `FacingDirection` 같은 공개 API가 안 바뀌어 소비자 86개 파일을 건드리지 않는다.
+- `TopDownPlayer` 3D 전환 — Rigidbody+중력+CapsuleCollider, 마우스 조준을 **바닥 평면
+  레이캐스트**로(오소에서 `ScreenToWorldPoint`는 의미 없음). 컴파일 통과 확인.
+
+### ⚠️ 남은 일 (우선순위 순)
+1. **PR #7에 깨진 프리팹이 들어 있다.** Spine 제거 때 쓴 perl 스크립트 버그로
+   (`my (@out,$skip,...)=((),0,0,0,0);` — 배열이 뒤 값을 삼킴) `PlayerRig.prefab` 앞에
+   `0000`이 찍혀 Unity가 못 읽었다. **`spike/3d-stage0`에서는 고쳤지만 `chore/unity-6.6-upgrade`
+   (=PR #7 브랜치)에는 아직 반영 안 됨.** 교훈: **프리팹/씬 YAML을 직접 수정하지 말 것 —
+   반드시 `PrefabUtility` 등 Unity API로.**
+2. **`PlayerRig` 프리팹의 2D 물리 → 3D 교체 미완.** 런타임에선 `TopDownPlayer.Awake`가
+   Rigidbody2D/Collider2D를 제거하고 3D를 붙여 자가보정하지만, 프리팹 자체는 아직 2D다.
+   API 스크립트(`PrefabUtility.LoadPrefabContents`)가 NRE로 실패 — 디버깅 필요.
+3. **캐릭터 가독성** — 컷어웨이로 뚫어도 캐릭터가 어둡다(올리브/검정 팔레트 + 구멍 안쪽이 그늘).
+   권장: **아웃라인 + 접지 링**.
+4. Stage 1 나머지 — `EnemyController`(1054) · `AttackPerformer` · `Hurtbox` · `Projectile` ·
+   `PlayerGun` · `ThrowSystem` · `NavGrid`/`NavAgent` · `PlayerVision` LOS · `Breakable` ·
+   `InteractableObject` · `DoorController`. 총 15파일 4,844 LOC 중 플레이어만 끝난 상태.
+
+### 에디터를 CLI로 몰기 (이 세션에서 검증됨)
+```bash
+export PATH="$PATH:/c/Users/admin/AppData/Local/Unity/bin"
+cd <프로젝트>            # ⚠️ --project-path 대신 cwd 기준으로 실행할 것
+unity status             # state: ready 확인
+unity command eval --code '<C#>'      # ⚠️ using 지시문 불가 — 전부 정규화 이름
+unity command eval_file --file <.cs>
+unity command screenshot --view game --output <png> --width 1280 --height 720
+unity command recompile ; unity command recompile_status
+unity command console --tail 30 --level error
+```
+
+---
 
 ## 지금 위치 (2026-09-07) — 3D 전환 착수 준비 완료, Stage 0 직전
 
