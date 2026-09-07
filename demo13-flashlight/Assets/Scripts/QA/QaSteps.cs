@@ -580,7 +580,7 @@ public static class QaSteps
         int known = 0;
         foreach (var box in per.KnownCrates)
         {
-            if (box == null || opened.Contains(box.GetInstanceID())) continue;
+            if (box == null || opened.Contains(box.GetEntityId())) continue;
             float dist = Vector2.Distance(box.transform.position, pos);
             if (IsCorpse(box)) { if (s.corpseDist < 0f || dist < s.corpseDist) s.corpseDist = dist; }
             else
@@ -617,7 +617,7 @@ public static class QaSteps
         foreach (var io in per.KnownOthers)
         {
             if (io == null || io.Type != InteractableObject.InteractType.Passage) continue;
-            if (passageDone != null && passageDone.Contains(io.GetInstanceID())) continue;
+            if (passageDone != null && passageDone.Contains(io.GetEntityId())) continue;
             var bp = io.GetComponent<BlockedPassage>();
             if (bp == null || bp.IsOpen) continue;
             float d = Vector2.Distance(io.transform.position, from);
@@ -642,7 +642,7 @@ public static class QaSteps
         {
             if (be == null || be.IsExit || string.IsNullOrEmpty(be.TargetScene)) continue;   // 들어가는 문만
             if (!be.gameObject.activeInHierarchy) continue;
-            if (_visitedDoors.Contains(be.GetInstanceID())) continue;
+            if (_visitedDoors.Contains(be.GetEntityId())) continue;
             // 입구도 눈에 보여야 안다(오라클 모드 제외)
             if (!omniscient && !PlayerVision.CanSee(be.transform.position)) continue;
             float d = Vector2.Distance(be.transform.position, from);
@@ -773,7 +773,7 @@ public static class QaSteps
                     if (door == null) { yield return c.Bot.WaitSec(0.2f); break; }
                     enters++;
 
-                    int did = door.GetInstanceID();
+                    int did = door.GetEntityId();
                     string from = SceneManager.GetActiveScene().name;
                     bool got = false;
                     // 입구는 트리거(문 1.3×1.0)라 **밟아야** 발동한다 — 도착 판정을 좁게.
@@ -809,13 +809,13 @@ public static class QaSteps
                     var bp = target.GetComponent<BlockedPassage>();
                     if (bp == null)   // InteractableObject는 있는데 BlockedPassage가 없다 — 배선 문제, 재선택 안 함
                     {
-                        passageDone.Add(target.GetInstanceID());
+                        passageDone.Add(target.GetEntityId());
                         c.Report.Warn("passage", "NO_COMPONENT", $"'{target.name}' Passage 타입인데 BlockedPassage 없음");
                         brain.Outcome(goal, false, "컴포넌트 없음");
                         break;
                     }
 
-                    int pid = target.GetInstanceID();
+                    int pid = target.GetEntityId();
                     float arrive = Mathf.Clamp(target.InteractRange * 0.6f, 0.8f, 1.6f);
                     bool reached = false;
                     yield return c.Bot.MoveTo(target.transform.position, arrive, 25f, r => reached = r);
@@ -900,14 +900,14 @@ public static class QaSteps
                     LootContainer target = null; float bestD = float.MaxValue;
                     foreach (var box in per.KnownCrates)
                     {
-                        if (box == null || opened.Contains(box.GetInstanceID())) continue;
+                        if (box == null || opened.Contains(box.GetEntityId())) continue;
                         if (IsCorpse(box) != wantCorpse) continue;
                         float dist = Vector2.Distance(box.transform.position, pos);
                         if (dist < bestD) { bestD = dist; target = box; }
                     }
                     if (target == null) { yield return c.Bot.WaitSec(0.2f); break; }
 
-                    int id = target.GetInstanceID();
+                    int id = target.GetEntityId();
                     bool reached = false;
                     yield return c.Bot.MoveTo(target.transform.position, 1.5f, 20f, r => reached = r);
                     moveFailStreak = reached ? 0 : moveFailStreak + 1;
