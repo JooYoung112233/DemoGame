@@ -556,8 +556,8 @@ public static class QaSteps
     static bool IsCorpse(LootContainer box) =>
         box != null && box.GetComponent<EnemyController>() != null;
 
-    static QaBrain.State BuildState(QaContext c, float t0, float budget, HashSet<int> opened,
-                                     HashSet<int> passageDone, int moveFailStreak)
+    static QaBrain.State BuildState(QaContext c, float t0, float budget, HashSet<EntityId> opened,
+                                     HashSet<EntityId> passageDone, int moveFailStreak)
     {
         var bot = c.Bot;
         var per = bot.Perception;
@@ -611,7 +611,7 @@ public static class QaSteps
 
     /// <summary>아는 것 중 아직 안 열린 막힌 통로(가장 가까운 것). — <see cref="QaBrain.Goal.ClearPassage"/>가 쓴다.
     /// <paramref name="passageDone"/>에 든 것(도달불가·영구차단·개방완료)은 다시 고르지 않는다.</summary>
-    static InteractableObject NearestOpenPassage(QaPerception per, Vector2 from, HashSet<int> passageDone)
+    static InteractableObject NearestOpenPassage(QaPerception per, Vector2 from, HashSet<EntityId> passageDone)
     {
         InteractableObject best = null; float bestD = float.MaxValue;
         foreach (var io in per.KnownOthers)
@@ -627,7 +627,7 @@ public static class QaSteps
     }
 
     // 이미 들어갔다 나온 입구는 다시 안 들어간다(사람도 그렇다). 씬 단위로 기억.
-    static readonly HashSet<int> _visitedDoors = new HashSet<int>();
+    static readonly HashSet<EntityId> _visitedDoors = new HashSet<EntityId>();
     static string _doorScene = "";
 
     /// <summary>아직 안 들어가 본 건물 입구 중 가장 가까운 것.
@@ -669,8 +669,8 @@ public static class QaSteps
             : "플레이어 모드 — 본 것만 알고 판단");
 
         string startScene = SceneManager.GetActiveScene().name;
-        var opened = new HashSet<int>();
-        var passageDone = new HashSet<int>();     // 도달불가·영구차단·개방완료 통로 — 재선택 안 함(NightOnly-낮 실패는 예외)
+        var opened = new HashSet<EntityId>();
+        var passageDone = new HashSet<EntityId>();     // 도달불가·영구차단·개방완료 통로 — 재선택 안 함(NightOnly-낮 실패는 예외)
         int loots = 0, corpses = 0, fights = 0, explores = 0, enters = 0;
         var lastGoal = (QaBrain.Goal)(-1);
         int sameGoalRepeat = 0;
@@ -773,7 +773,7 @@ public static class QaSteps
                     if (door == null) { yield return c.Bot.WaitSec(0.2f); break; }
                     enters++;
 
-                    int did = door.GetEntityId();
+                    EntityId did = door.GetEntityId();
                     string from = SceneManager.GetActiveScene().name;
                     bool got = false;
                     // 입구는 트리거(문 1.3×1.0)라 **밟아야** 발동한다 — 도착 판정을 좁게.
@@ -815,7 +815,7 @@ public static class QaSteps
                         break;
                     }
 
-                    int pid = target.GetEntityId();
+                    EntityId pid = target.GetEntityId();
                     float arrive = Mathf.Clamp(target.InteractRange * 0.6f, 0.8f, 1.6f);
                     bool reached = false;
                     yield return c.Bot.MoveTo(target.transform.position, arrive, 25f, r => reached = r);
@@ -907,7 +907,7 @@ public static class QaSteps
                     }
                     if (target == null) { yield return c.Bot.WaitSec(0.2f); break; }
 
-                    int id = target.GetEntityId();
+                    EntityId id = target.GetEntityId();
                     bool reached = false;
                     yield return c.Bot.MoveTo(target.transform.position, 1.5f, 20f, r => reached = r);
                     moveFailStreak = reached ? 0 : moveFailStreak + 1;

@@ -22,7 +22,7 @@ public class QaPerception
     /// <summary>true면 전지(구 동작) — 도달성·배선 검증용. false면 사람처럼 본 것만 안다.</summary>
     public bool Omniscient;
 
-    readonly HashSet<int> _seen = new HashSet<int>();          // 이미 발견한 오브젝트(InstanceID)
+    readonly HashSet<EntityId> _seen = new HashSet<EntityId>();   // 이미 발견한 오브젝트(EntityId)
     readonly List<LootContainer> _crates = new List<LootContainer>();
     readonly List<InteractableObject> _exits = new List<InteractableObject>();
     readonly List<InteractableObject> _others = new List<InteractableObject>();
@@ -123,7 +123,7 @@ public class QaPerception
         foreach (var box in allCrates)
         {
             if (box == null || !box.gameObject.activeInHierarchy) continue;
-            int id = box.GetEntityId();
+            EntityId id = box.GetEntityId();
             if (_seen.Contains(id)) continue;
             if (!Omniscient && !OnScreen(box.transform.position)) continue;
             _seen.Add(id);
@@ -137,7 +137,7 @@ public class QaPerception
             bool isExit = io.Type == InteractableObject.InteractType.ExitPoint;
             if (isExit) exits++;
 
-            int id = io.GetEntityId();
+            EntityId id = io.GetEntityId();
             if (_seen.Contains(id)) continue;
             if (!Omniscient && !OnScreen(io.transform.position)) continue;
             _seen.Add(id);
@@ -164,7 +164,7 @@ public class QaPerception
         return best;
     }
 
-    public LootContainer NearestKnownCrate(Vector2 from, HashSet<int> skip = null)
+    public LootContainer NearestKnownCrate(Vector2 from, HashSet<EntityId> skip = null)
     {
         LootContainer best = null; float bestD = float.MaxValue;
         foreach (var box in _crates)
