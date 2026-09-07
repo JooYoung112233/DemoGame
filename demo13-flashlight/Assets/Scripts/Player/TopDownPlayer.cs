@@ -20,6 +20,12 @@ public class TopDownPlayer : MonoBehaviour
     [SerializeField] SpriteRenderer spriteRenderer;
     [Tooltip("Spine 캐릭터(있으면 SpriteRenderer 대신 이걸로 좌우 플립 + 이동/전투 애니 구동)")]
     [SerializeField] SkeletonAnimation skeletonAnimation;
+    [Header("3D 캐릭터 표시")]
+    [SerializeField] GameObject character3DPrefab;
+    [SerializeField] RuntimeAnimatorController character3DController;
+    [SerializeField] Shader character3DShader;
+    [SerializeField, Min(.01f)] float character3DScale = .65f;
+    ChibiPlayerVisual _character3D;
     [SerializeField] bool flipByMouse = true;
     [Tooltip("좌우 미러 부호 반전. 캐릭터가 마우스와 반대로 보이면 토글.")]
     [SerializeField] bool flipInvert = true;
@@ -191,6 +197,27 @@ public class TopDownPlayer : MonoBehaviour
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         if (skeletonAnimation == null)
             skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
+        if (character3DPrefab != null)
+        {
+            var visual = gameObject.AddComponent<ChibiPlayerVisual>();
+            if (visual.Initialize(character3DPrefab, character3DController, character3DShader, character3DScale))
+            {
+                _character3D = visual;
+                if (spriteRenderer != null) spriteRenderer.enabled = false;
+                if (skeletonAnimation != null)
+                {
+                    skeletonAnimation.enabled = false;
+                    var spineRenderer = skeletonAnimation.GetComponent<Renderer>();
+                    if (spineRenderer != null) spineRenderer.enabled = false;
+                    skeletonAnimation = null;
+                }
+            }
+            else
+            {
+                Destroy(visual);
+                Debug.LogWarning("[TopDownPlayer] 3D character setup failed; keeping the previous visual.", this);
+            }
+        }
         EnsureGreyboxBody();   // ★ 스파인 탐색 **뒤에** — 앞에 두면 스파인이 있어도 네모를 덧그린다
         TestHealthBar.Attach(transform, 0.72f);   // 테스트용 — 이 한 줄만 지우면 흔적이 안 남는다
         BodyZoneOverlay.Attach(transform);        // 테스트용 부위 표시(F1에서 켠다, 기본 꺼짐)
@@ -303,6 +330,7 @@ public class TopDownPlayer : MonoBehaviour
         UpdateStamina();
         UpdateSprint(_uiOpen);
         UpdateSkeletonAnimation();
+        UpdateCharacter3D();
 
         // 구르기 무적 → 허트박스 비활성 (피격 안 됨)
         if (_hurtbox != null) _hurtbox.SetActive(!IsInvincible);
@@ -390,6 +418,7 @@ public class TopDownPlayer : MonoBehaviour
 
     void UpdateFlip()
     {
+        if (_character3D != null) return;
         if (!flipByMouse) return;
         if (Mathf.Abs(FacingDirection.x) <= 0.01f) return;
         bool faceLeft = FacingDirection.x < 0f;
@@ -400,6 +429,19 @@ public class TopDownPlayer : MonoBehaviour
             skeletonAnimation.Skeleton.ScaleX = faceLeft ? -1f : 1f;
         else if (spriteRenderer != null)
             spriteRenderer.flipX = faceLeft;
+    }
+
+    void UpdateCharacter3D()
+    {
+        if (_character3D == null) return;
+        float speed = _rb != null ? _rb.linearVelocity.magnitude : 0f;
+        bool allowed = !_uiOpen && CanMove && !IsAttacking;
+        bool running = IsSprinting || _state == CombatState.Dodge;
+        string motion = allowed && speed > .05f ? (running ? "run" : "walk") : "idle";
+        float cadence = MotionSpeed(motion);
+        if (animCadenceMatchesSpeed && motion != "idle")
+            cadence *= Mathf.Clamp(speed / Mathf.Max(.1f, MoveSpd), .5f, 1.8f);
+        _character3D.UpdateMotion(FacingDirection, speed, running, allowed, cadence, Time.deltaTime);
     }
 
     // ── Spine 애니메이션 구동 ────────────────────────────────────────
@@ -510,6 +552,7 @@ public class TopDownPlayer : MonoBehaviour
     /// 크기는 콜라이더(0.6×0.9)에 맞춘다 — 보이는 것과 맞는 것이 어긋나면 안 된다.</summary>
     void EnsureGreyboxBody()
     {
+        if (_character3D != null) return;
         if (skeletonAnimation != null) return;                       // 스파인이 있으면 그쪽이 몸통
         if (spriteRenderer != null && spriteRenderer.sprite != null) return;
 
@@ -569,7 +612,7 @@ public class TopDownPlayer : MonoBehaviour
 
         if (_fistVis != null)
         {
-            _fistVis.SetVisible(hand == HandVisual.Fist);
+            _fistVis.SetVisible(hand == HandVisual.Fist && _character3D == null);
             if (hand == HandVisual.Fist)
             {
                 _fistVis.SetFacing(FacingDirection);

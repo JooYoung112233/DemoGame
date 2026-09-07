@@ -5,13 +5,13 @@
 - 질문: 기존 2D 게임을 3D 쿼터뷰로 전환할 때 무엇부터 제작할까? 로우폴리/현실 비율 중 어떤 외형을 사용할까?
 - 사용자 결정: 은신처 전환을 논의한 뒤 **캐릭터 모델과 애니메이션부터 제작**. **귀여운 로우폴리, 2~2.5등신**.
 - 첫 제작안: 2.5등신 생존자. 큰 머리, 짧은 팔다리, 올리브 재킷, 주황 스카프, 카고팬츠, 갈색 부츠, 배낭. 색과 의상 세부는 첫 시안이며 별도 최종 승인을 뜻하지 않는다.
-- 범위: 에셋 제작 완료. 현재 게임의 2D 이동/전투/Spine/은신처/렌더러를 교체하는 작업은 포함하지 않는다.
+- 범위: 에셋 제작 완료 + **플레이어 표시만 3D로 교체**(2026-09-07 2차). 2D 이동/전투/충돌/은신처/URP 2D 렌더러 설정은 그대로다 — 3D 캐릭터는 기존 XY 평면 위에 얹혀 Spine/스프라이트 대신 보이기만 한다.
 
 ## 파일
 
 | 경로 | 내용 |
 |---|---|
-| `Assets/Art/Characters/ChibiSurvivor/ChibiSurvivor.fbx` | 스킨 메시, Generic 리그, Idle/Walk/Run 세 가지 take |
+| `Assets/ChibiSurvivor/ChibiSurvivor.fbx` | 스킨 메시, Generic 리그, Idle/Walk/Run 세 가지 take |
 | 같은 폴더의 `ChibiSurvivor.prefab` | 모델·Avatar·Animator가 연결된 프리팹 |
 | 같은 폴더의 `Idle.anim`, `Walk.anim`, `Run.anim` | Unity에서 독립적으로 편집 가능한 루프 클립 |
 | 같은 폴더의 `ChibiSurvivor.controller` | `Speed` float 값의 1D Blend Tree: 0=Idle, 1=Walk, 2=Run |
@@ -22,6 +22,11 @@
 | `ArtSource/ChibiSurvivor/Animations.gif` | 세 모션 비교. 개별 Idle/Walk/Run GIF도 제공 |
 | `tools/build_chibi_survivor.py` | Blender로 모델·리그·애니메이션·렌더를 재생성하는 소스 |
 | `tools/chibi_preview_sheet.py` | 렌더에서 시트/GIF를 조합하는 Pillow 스크립트 |
+| `Assets/ChibiSurvivor/ChibiInGame.shader` | 게임 화면용 셰이더 — URP 2D 렌더러 아래서도 단색 팔레트가 그대로 보이게 한다 |
+| `Assets/Scripts/Player/ChibiPlayerVisual.cs` | 3D 모델을 플레이어에 붙이고 카메라 기울기·방향·Speed 블렌드를 구동 |
+| `tools/build_reclaimer.py` | 현재 외형(리클레이머) 빌더. `build_chibi_survivor.py`가 기본으로 이 스크립트를 호출한다(`--legacy`로 구 외형) |
+| `tools/chibi_cap.py`, `tools/update_chibi_cap.py` | 모자·액세서리를 리그 유지한 채 따로 갱신하는 스크립트 |
+| `ArtSource/ChibiSurvivor/ReclaimerBase.blend` | 리클레이머 외형 원본 |
 
 ## Unity 사용
 
@@ -31,6 +36,16 @@
 4. 일반 3D 조명으로 볼 때 URP **Universal Renderer(3D)**와 Lit 재질을 사용한다. 기존 게임의 URP 2D Renderer 설정은 이 패키지가 바꾸지 않는다. 임포터는 URP/Lit가 있으면 사용하고 Built-in 프로젝트에서는 Standard로 대체한다.
 5. 새로 베이크하려면 `Tools > TopDown > Art > Bake Chibi Survivor Assets`. 이 메뉴는 패키지의 `.anim`과 프리팹을 다시 저장한다. 별도 커스터마이즈한 모션/프리팹은 먼저 다른 이름으로 복제한다. 기존 controller는 보존한다.
 6. 이 리그는 **Generic**이다. Humanoid 자동 리타기팅용 T-pose/아바타가 아니다. `HandSocket.R`은 손 장비 연결 위치다. 배낭은 하나의 별도 본에 가중치가 연결되어 있으나 렌더 메시에는 합쳐져 있다.
+
+## 게임 내 표시 (2026-09-07 2차)
+
+`TopDownPlayer`에 3D 표시 필드 4개(`character3DPrefab` / `character3DController` / `character3DShader` / `character3DScale`)가 생겼고, `Resources/PlayerRig.prefab`에 이 패키지의 프리팹·컨트롤러·셰이더가 연결돼 있다(scale 0.65).
+
+- 프리팹이 물려 있으면 `ChibiPlayerVisual`이 붙고 **SpriteRenderer·SkeletonAnimation·그레이박스 몸통·주먹 표시가 꺼진다.** 초기화에 실패하면 경고를 남기고 기존 2D 표시를 그대로 쓴다.
+- 모델은 X−35° 기울기로 XY 평면에 서고, 조준 방향으로 yaw 회전한다(좌우 flip 대신).
+- `Speed` 파라미터는 실제 이동속도가 아니라 0/1/2 모션 지표다. `animCadenceMatchesSpeed`가 켜져 있으면 `animator.speed`로 재생 속도를 맞춘다.
+- 재질은 런타임 인스턴스로 복제되며 `OnDestroy`에서 해제한다. 그림자는 끈다.
+- ⚠ 미완: 공격·피격·사망 모션이 없어 전투 중에는 idle/walk/run만 나온다. 적·NPC는 여전히 2D다.
 
 ## 제작 스펙
 
@@ -69,3 +84,4 @@ python tools/chibi_preview_sheet.py
 | 날짜 | 변경 |
 |---|---|
 | 2026-09-07 | 사용자 3D 쿼터뷰/캐릭터 우선/귀여운 2~2.5등신 로우폴리 결정 기록. 첫 모델·리깅·세 가지 루프·Unity 프리팹·원본·프리뷰 제작. |
+| 2026-09-07 (2차) | 패키지 경로를 `Assets/ChibiSurvivor`로 이동. 외형을 리클레이머로 교체(`build_reclaimer.py`, 모자 분리 빌드). `ChibiPlayerVisual` + `ChibiInGame.shader`로 **플레이어 표시를 3D로 교체**(Spine/스프라이트 대체). |

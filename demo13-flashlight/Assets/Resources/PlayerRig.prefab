@@ -122,6 +122,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::TopDownPlayer
   spriteRenderer: {fileID: 0}
   skeletonAnimation: {fileID: 3493287558190560143}
+  character3DPrefab: {fileID: 919132149155446097, guid: 2a79dfd43d1524443accd590fe754a1d, type: 3}
+  character3DController: {fileID: 9100000, guid: 3282f9a4fe4db1b48a67df03a44b5a46, type: 2}
+  character3DShader: {fileID: 4800000, guid: 8d13773ed15b453b9416d81754b86f32, type: 3}
+  character3DScale: 0.65
   flipByMouse: 1
   flipInvert: 1
   lightPivot: {fileID: 8118394434070430730}

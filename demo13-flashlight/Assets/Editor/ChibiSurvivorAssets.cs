@@ -8,7 +8,7 @@ using UnityEngine;
 /// <summary>Import and bake only the standalone chibi art package; no scene or player changes.</summary>
 public sealed class ChibiSurvivorImporter : AssetPostprocessor
 {
-    internal const string Folder = "Assets/Art/Characters/ChibiSurvivor";
+    internal const string Folder = "Assets/ChibiSurvivor";
     internal const string Model = Folder + "/ChibiSurvivor.fbx";
 
     void OnPreprocessModel()

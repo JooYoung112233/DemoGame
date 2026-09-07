@@ -6,12 +6,23 @@ All geometry, bone weights and animations are authored here; no external assets.
 import bpy
 import math
 import json
+import sys
 from pathlib import Path
 from mathutils import Vector
 
+# Keep the original construction available for archival recovery only. The active
+# appearance builder preserves the rig and supports independent accessory updates.
+if '--legacy' not in sys.argv:
+    import runpy
+    runpy.run_path(str(Path(__file__).with_name('build_reclaimer.py')), run_name='__main__')
+    raise SystemExit(0)
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from chibi_cap import build_cap
+
 PROJECT = Path(__file__).resolve().parents[1]
 SOURCE = PROJECT / 'ArtSource/ChibiSurvivor'
-ASSETS = PROJECT / 'Assets/Art/Characters/ChibiSurvivor'
+ASSETS = PROJECT / 'Assets/ChibiSurvivor'
 SOURCE.mkdir(parents=True, exist_ok=True)
 ASSETS.mkdir(parents=True, exist_ok=True)
 bpy.ops.object.select_all(action='SELECT')
@@ -99,26 +110,7 @@ for side, x in [('L', .123), ('R', -.123)]:
 oval('ButtonNose', (0, -.312, 1.398), (.036, .033, .031), 'skin', 'Head')
 box('SmallSmile', (0, -.302, 1.326), (.038, .01, .012), 'eyes', 'Head', .004)
 
-# A faceted cap with an open lower edge, followed by broad sculpted hair locks.
-verts, faces = [], []
-for z, rx, ry in [(1.52, .355, .294), (1.69, .355, .30), (1.79, .23, .22), (1.815, .06, .06)]:
-    for i in range(12):
-        a = i*math.tau/12
-        verts.append((rx*math.cos(a), .015+ry*math.sin(a), z))
-for ring in range(3):
-    for i in range(12):
-        j = (i+1)%12
-        faces.append((ring*12+i, ring*12+j, (ring+1)*12+j, (ring+1)*12+i))
-faces.append(tuple(range(36, 48)))
-mesh = bpy.data.meshes.new('HairCapMesh')
-mesh.from_pydata(verts, [], faces)
-obj = bpy.data.objects.new('HairCap', mesh)
-bpy.context.collection.objects.link(obj)
-finish(obj, 'HairCap', 'hair', 'Head')
-for i, (x, z, tilt) in enumerate([(-.245, 1.59, -.28), (-.12, 1.625, -.22), (.02, 1.64, -.25), (.16, 1.665, -.22), (.275, 1.63, .2)]):
-    box('HairLock%02d'%i, (x, -.25, z), (.17, .17, .22), 'hairlight' if i in (1, 3) else 'hair', 'Head', .055, (0, tilt, 0))
-for x in [-.32, .32]:
-    box('Sideburn', (x, -.025, 1.49), (.078, .24, .22), 'hair', 'Head', .025)
+# Headwear is built separately after rig creation; it is never joined into the body.
 
 rod('Neck', (0, 0, 1.08), (0, 0, 1.22), .105, 'skin', 'Chest')
 box('JacketBody', (0, 0, .905), (.49, .33, .48), 'jacket', 'Chest', .08)
@@ -206,6 +198,7 @@ bpy.ops.object.mode_set(mode='OBJECT')
 character.parent = rig
 mod = character.modifiers.new('SurvivorSkin', 'ARMATURE')
 mod.object = rig
+cap = build_cap(rig)
 rig.show_in_front = True
 for pb in rig.pose.bones:
     pb.rotation_mode = 'XYZ'
@@ -279,6 +272,7 @@ scene.frame_set(1)
 bpy.ops.object.select_all(action='DESELECT')
 rig.select_set(True)
 character.select_set(True)
+cap.select_set(True)
 bpy.context.view_layer.objects.active = rig
 bpy.ops.export_scene.fbx(filepath=str(ASSETS/'ChibiSurvivor.fbx'), use_selection=True,
     object_types={'ARMATURE', 'MESH'}, axis_forward='-Z', axis_up='Y',
