@@ -1,5 +1,4 @@
 using UnityEngine;
-using Spine.Unity;
 
 /// <summary>
 /// 탑다운 2D 플레이어 — WASD 8방향 이동 + 마우스 조준 + 근접 전투(약/강공격, 구르기) + 스태미너.
@@ -18,8 +17,6 @@ public class TopDownPlayer : MonoBehaviour
     // ── 인스펙터 ─────────────────────────────────────────────────────
     [Header("비주얼")]
     [SerializeField] SpriteRenderer spriteRenderer;
-    [Tooltip("Spine 캐릭터(있으면 SpriteRenderer 대신 이걸로 좌우 플립 + 이동/전투 애니 구동)")]
-    [SerializeField] SkeletonAnimation skeletonAnimation;
     [Header("3D 캐릭터 표시")]
     [SerializeField] GameObject character3DPrefab;
     [SerializeField] RuntimeAnimatorController character3DController;
@@ -195,8 +192,6 @@ public class TopDownPlayer : MonoBehaviour
 
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        if (skeletonAnimation == null)
-            skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
         if (character3DPrefab != null)
         {
             var visual = gameObject.AddComponent<ChibiPlayerVisual>();
@@ -204,13 +199,6 @@ public class TopDownPlayer : MonoBehaviour
             {
                 _character3D = visual;
                 if (spriteRenderer != null) spriteRenderer.enabled = false;
-                if (skeletonAnimation != null)
-                {
-                    skeletonAnimation.enabled = false;
-                    var spineRenderer = skeletonAnimation.GetComponent<Renderer>();
-                    if (spineRenderer != null) spineRenderer.enabled = false;
-                    skeletonAnimation = null;
-                }
             }
             else
             {
@@ -329,7 +317,6 @@ public class TopDownPlayer : MonoBehaviour
         UpdateCombatTimers();
         UpdateStamina();
         UpdateSprint(_uiOpen);
-        UpdateSkeletonAnimation();
         UpdateCharacter3D();
 
         // 구르기 무적 → 허트박스 비활성 (피격 안 됨)
@@ -422,12 +409,9 @@ public class TopDownPlayer : MonoBehaviour
         if (!flipByMouse) return;
         if (Mathf.Abs(FacingDirection.x) <= 0.01f) return;
         bool faceLeft = FacingDirection.x < 0f;
-        if (flipInvert) faceLeft = !faceLeft;   // 스켈레톤 기본 방향이 반대일 때 보정
+        if (flipInvert) faceLeft = !faceLeft;   // 스프라이트 기본 방향이 반대일 때 보정
 
-        // Spine 우선 — 스켈레톤 X스케일 부호로 미러링
-        if (skeletonAnimation != null && skeletonAnimation.Skeleton != null)
-            skeletonAnimation.Skeleton.ScaleX = faceLeft ? -1f : 1f;
-        else if (spriteRenderer != null)
+        if (spriteRenderer != null)
             spriteRenderer.flipX = faceLeft;
     }
 
@@ -444,102 +428,6 @@ public class TopDownPlayer : MonoBehaviour
         _character3D.UpdateMotion(FacingDirection, speed, running, allowed, cadence, Time.deltaTime);
     }
 
-    // ── Spine 애니메이션 구동 ────────────────────────────────────────
-    Spine.AnimationState _spineState;
-    string _curAnim = "<init>";
-    string _oneShotAnim;   // 끝까지 1회 보장할 비루프 애니(roll/attack) — 재생 중엔 루프 애니로 안 끊음
-
-    /// <summary>이동/전투 상태에 맞춰 Spine 트랙0 애니를 전환. 정지 시 idle 재생(없으면 셋업 포즈).
-    /// 모든 애니는 스켈레톤에 실제로 존재할 때만 재생 — 없는 이름을 넣어 경고나는 일 방지(점진 도입).</summary>
-    void UpdateSkeletonAnimation()
-    {
-        if (skeletonAnimation == null) return;
-        if (_spineState == null)
-        {
-            _spineState = skeletonAnimation.AnimationState;
-            if (_spineState == null) return;
-        }
-
-        string target; bool loop; string motionKey;   // motionKey = 논리 모션(애니 속도 조회용)
-        switch (_state)
-        {
-            case CombatState.Dodge:
-                target = FirstAnim("roll", "dodge"); loop = false; motionKey = "roll"; break;
-            case CombatState.LightAttack:
-            case CombatState.HeavyRelease:
-                target = FirstAnim("attack", "attack1", "attack_1"); loop = false; motionKey = "attack"; break;
-            default:
-                if (_crouching)
-                {
-                    target = IsMoving ? FirstAnim("sit_walk", "sit") : FirstAnim("sit");      // 앉기
-                    motionKey = IsMoving ? "crouch_walk" : "crouch";
-                }
-                else if (IsMoving)
-                {
-                    target = IsSprinting ? FirstAnim("run", "walk") : FirstAnim("walk", "run"); // 이동
-                    motionKey = IsSprinting ? "run" : "walk";
-                }
-                else
-                {
-                    target = IdleAnim();                                                       // 정지
-                    motionKey = "idle";
-                }
-                loop = true;
-                break;
-        }
-
-        // 전용 애니(공격/구르기/이동)가 스켈레톤에 없으면 idle로 폴백(루프), idle도 없으면 셋업 포즈.
-        if (string.IsNullOrEmpty(target)) { target = IdleAnim(); loop = true; }
-
-        // 원샷 애니(roll/attack) 1회 보장: 새 target이 루프 애니(idle/이동)인데 현재 원샷이 아직 안 끝났으면 유지.
-        // (Dodge 상태가 dodgeDuration에 끝나 Idle로 돌아가도 구르기 모션이 중간에 idle로 잘리지 않게.)
-        // 단 새 target이 또 다른 원샷(loop=false: 공격/재구르기)이면 잠금을 넘어 교체 허용.
-        if (loop && !string.IsNullOrEmpty(_oneShotAnim))
-        {
-            var cur = _spineState.GetCurrent(0);
-            if (cur != null && cur.Animation != null && cur.Animation.Name == _oneShotAnim && !cur.IsComplete)
-                return;            // 원샷 재생 중 → 루프 애니로 끊지 않음
-            _oneShotAnim = null;   // 완료(또는 트랙 교체) → 잠금 해제
-        }
-
-        // 애니 재생 속도 — 걷기/달리기는 이동속도 비례(토글) × 모션별 애니 속도(모든 모션).
-        {
-            float ts = 1f;
-            if ((motionKey == "walk" || motionKey == "run") && animCadenceMatchesSpeed && _rb != null)
-                ts = Mathf.Clamp(_rb.linearVelocity.magnitude / Mathf.Max(0.1f, MoveSpd), 0.5f, 1.8f);
-            ts *= MotionSpeed(motionKey);   // 모션별 애니 속도(idle/walk/run/attack/roll …)
-            skeletonAnimation.timeScale = ts;
-        }
-
-        if (target == _curAnim) return;
-        _curAnim = target;
-        if (string.IsNullOrEmpty(target)) { _spineState.SetEmptyAnimation(0, 0.12f); _oneShotAnim = null; }
-        else
-        {
-            _spineState.SetAnimation(0, target, loop);
-            _oneShotAnim = loop ? null : target;   // 비루프(roll/attack)면 끝까지 보장 대상으로 잠금
-        }
-    }
-
-    /// <summary>idle 애니 이름(흔한 표기 변형 자동 탐색). 없으면 null=셋업 포즈.</summary>
-    string IdleAnim() => FirstAnim("idle", "Idle", "idle_loop", "idle1", "Idle_Loop");
-
-    /// <summary>우선순위 목록 중 스켈레톤에 실제 존재하는 첫 애니 이름. 없으면 null.</summary>
-    string FirstAnim(params string[] names)
-    {
-        for (int i = 0; i < names.Length; i++)
-            if (HasAnim(names[i])) return names[i];
-        return null;
-    }
-
-    bool HasAnim(string name)
-    {
-        if (string.IsNullOrEmpty(name)) return false;
-        var data = skeletonAnimation != null && skeletonAnimation.Skeleton != null
-            ? skeletonAnimation.Skeleton.Data : null;
-        return data != null && data.FindAnimation(name) != null;
-    }
-
     MeleeWeaponVisual _weaponVis;
     FistVisual _fistVis;
     GunVisual  _gunVis;
@@ -553,7 +441,6 @@ public class TopDownPlayer : MonoBehaviour
     void EnsureGreyboxBody()
     {
         if (_character3D != null) return;
-        if (skeletonAnimation != null) return;                       // 스파인이 있으면 그쪽이 몸통
         if (spriteRenderer != null && spriteRenderer.sprite != null) return;
 
         var go = new GameObject("GreyboxBody");

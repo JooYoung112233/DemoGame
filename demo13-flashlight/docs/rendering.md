@@ -114,22 +114,22 @@
   - `Prop2DBuilder`(static): 정의→GameObject 런타임·에디터 공용 생성. Polygon은 `sprite.GetPhysicsShape`로 외곽선 자동.
   - 맵 도구는 [`map-tool.md`](map-tool.md) 참고.
 
-## Spine 런타임 / 캐릭터 에셋 파이프라인 (2026-06-18)
+## 캐릭터 렌더 (Spine 제거됨, 2026-09-07)
 
-> **현 상태 = 진실.** 플레이어 비주얼 = **Spine 스켈레톤(`cha`)**. Spine-Unity 런타임 = **4.2 고정**.
+> **현 상태 = 진실.** 플레이어 비주얼 = **3D 치비 모델**(`ChibiPlayerVisual`). **Spine은 완전 제거됨.**
 
-- **Spine-Unity 런타임 버전 = 4.2 고정**(공식 `spine-unity 4.2.120`, 패키지 `spine-unity-4.2-2026-05-29.unitypackage`).
-  - 캐릭터 에셋 `cha`(`Assets/Resources/Charater/cha.json`·`cha.atlas`·`cha.png`)가 **Spine 4.2.43**로 익스포트됨. 기존 프로젝트엔 **4.3.81** 런타임이 깔려 있어 로드 시 `Data version 4.2.43 / Required 4.3` 에러 발생.
-  - **데이터를 4.3으로 재익스포트하는 대신 런타임을 4.2로 다운그레이드**해 맞춤(소스/에디터 사정으로 데이터 버전 변경 불가). `Assets/Spine`·`Assets/Spine Examples` 전체를 4.2.120으로 교체 — asmdef GUID 동일 → 기존 참조 유지.
-  - **앞으로 Spine 익스포트는 4.2 타깃을 유지한다.**
-- **플레이어 비주얼 = 단일 SpriteRenderer → Spine 스켈레톤(`cha`).**
-  - `PlayerRig.prefab`에 `PlayerSpine`(SkeletonAnimation) 자식을 추가. 기존 `PlayerSprite`는 **렌더러만 끔**(오브젝트 자체는 유지).
-  - `TopDownPlayer`가 이동/전투 상태로 Spine 애니를 구동: **걷기=`walk`, 달리기=`run`, 약/강공격=`attack`, 구르기=`roll`**. `cha`엔 `idle` 애니가 없어 **정지 시 셋업 포즈**. 좌우 플립은 **Skeleton.ScaleX 부호**로.
-  - 적용 = 에디터 메뉴 `Tools/TopDown/초기설정/Spine 플레이어 적용 (cha)` **+ 시스템 씬 빌드(`Tools/TopDown/개발/시스템 씬`) 시 자동 적용**(`SystemsSceneBuilder`가 `SpinePlayerSetup.Apply(false)` 호출 → 멱등, cha 데이터 없으면 기존 스프라이트 유지).
-  - **머티리얼 = 임포터 기본 Spine 머티리얼(`Spine/Skeleton`, unlit)** — 우선 "확실히 보이게". (검증된 기본값. 머티리얼은 atlas 임포트 시 재생성되므로 셰이더를 직접 바꾸면 리임포트에 되돌아감.)
-- ⚠️ **알려진 한계(후속)**:
-  - 바디가 **unlit 기본 머티리얼**이라 아직 **Light2D(밤/시야) 반응 안 함** → 후속: `BRB/SpineLitURP`로 전환(PMA `Blend One OneMinusSrcAlpha`가 `cha`의 `pma:true`와 정합, `_StraightAlphaInput`=0로 설정). 리임포트 보존 위해 전용 머티리얼 생성/배선 방식 필요.
-  - **HitFlash 피격 흰 플래시 / InjuryVFX 통증 깜빡임**이 **플레이어 바디엔 미표시**(둘 다 SpriteRenderer 바디를 가정 → 꺼진 PlayerSprite를 잡음. 화면 효과(비네트/쉐이크)는 정상). → 후속: `BRB/SpineLitURP`에 flash 지원(`_FlashColor`/`_FlashAmount`) 추가 + HitFlash를 Spine 경로로.
+- **Spine 제거(2026-09-07)**: Unity 6.6(6000.6) 업그레이드에서 Spine 4.2 소스가 `Object.GetInstanceID()`
+  obsolete-as-error(CS0619)로 컴파일 불가. 3D 전환 계획상 어차피 제거 대상이라 앞당겨 들어냄.
+  삭제: `Assets/Spine`(689파일) · `Assets/Resources/Charater`(cha) · `Editor/SpinePlayerSetup.cs` ·
+  `Shaders/SpineLitURP.shader` · `PlayerRig.prefab`의 `PlayerSpine` 노드 · asmdef 참조.
+- **현재 플레이어 표시**: `TopDownPlayer.character3DPrefab`이 물려 있으면 `ChibiPlayerVisual`이 3D 모델을
+  띄우고 SpriteRenderer를 끈다. 없으면 스프라이트 → 그레이박스 몸통 순으로 폴백.
+- ⚠️ **이월된 한계**: `HitFlash`(피격 흰 플래시)·`InjuryVFX`(통증 깜빡임)가 **SpriteRenderer 바디를 가정**한다.
+  3D 표시에선 그 SpriteRenderer가 꺼져 있어 **플레이어 몸에 피격 연출이 안 보인다**(화면 효과는 정상).
+  Spine 시절과 같은 구멍이 그대로 넘어옴 → 3D 전환 Stage 4에서 메시 렌더러 기준으로 재배선 필요.
+- ⚠️ **미제작 모션**: 3D 캐릭터는 idle/walk/run 3종뿐. **공격·피격·사망·앉기 없음.**
+  구 Spine 구동부가 갖고 있던 상태→모션 매핑(구르기=`roll`, 약/강공격=`attack`, 앉기=`sit`/`sit_walk`,
+  이동=`walk`/`run`, 정지=`idle`)은 3D 애니메이터로 다시 구현해야 한다 → `3d-migration.md` Stage 4.
 
 ## 셰이더 (네임스페이스 `BRB/`)
 
@@ -151,7 +151,6 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 | `BRB/PlayerSprite` | 플레이어/캐릭터(표준 SpriteRenderer) — 외곽선 + 최소광(어둠 가독성) + 픽셀화/색단계(옵션) + `_FlashAmount`(HitFlash 연동). 수동 시트UV 제거 | Light2D 반응 |
 | `BRB/SpriteSheet` | 스프라이트 시트 UV | Light2D 반응 |
 | `BRB/SpriteBillboard` | SpriteRenderer용 | Light2D 반응 |
-| `BRB/SpineLitURP` | Spine(premultiplied 알파) Light2D 반응 셰이더. **플레이어 바디(`cha` 스켈레톤) 전환 예정**(현재는 임포터 기본 `Spine/Skeleton` unlit 사용). ⚠️ flash 프로퍼티 없음 → 전환 시 HitFlash 지원 추가 필요 | Light2D 반응 |
 | `BRB/SpriteFlash` | 타격감 흰 플래시(HitFlash 런타임 설치) | Light2D 반응 |
 
 **삭제됨(2026-06-02)**: `Pixelated`(PropPixel/FloorPixel로 대체), `OcclusionOutline`(iso 잔재), `FlashlightBeam`(손전등 폐기), `ShadowProjector`(2D 미렌더). 0 참조 확인 후 제거.

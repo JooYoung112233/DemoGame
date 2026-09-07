@@ -1,6 +1,6 @@
 # 에디터 도구 카탈로그 (Tools ▸ TopDown)
 
-> 유니티 상단 **Tools ▸ TopDown** 메뉴의 자체 제작 도구 목록. (Spine 등 서드파티 CONTEXT 메뉴 제외.)
+> 유니티 상단 **Tools ▸ TopDown** 메뉴의 자체 제작 도구 목록. (서드파티 CONTEXT 메뉴 제외.)
 > "뭐가 뭔지" 빠르게 찾기용. 파일은 `Assets/Editor/`(일부 `Assets/Scripts/`).
 
 ## 🎛️ 데이터·밸런스 편집

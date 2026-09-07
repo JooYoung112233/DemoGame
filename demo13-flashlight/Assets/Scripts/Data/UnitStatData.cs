@@ -89,9 +89,9 @@ public class UnitStatData
     public List<EnemyDropEntry> drops = new List<EnemyDropEntry>();
 
     // ===== 모션(애니 속도/거리) — 플레이어와 동일 규칙 =====
-    // ⚠️ 데이터만 준비됨. 적/NPC는 아직 Spine 애니 시스템이 없어 와이어링 안 됨(적 애니 생기면 적용).
+    // ⚠️ 데이터만 준비됨. 적/NPC 애니가 아직 없어 와이어링 안 됨(3D 적 애니 도입 시 적용 — docs/3d-migration.md Stage 4).
     [Header("모션(애니 속도/거리)")]
-    [Tooltip("모션별 애니 재생 속도 + 이동거리. 키: idle/walk/attack/hit/death 등. (적 Spine 애니 도입 시 EnemyController가 사용)")]
+    [Tooltip("모션별 애니 재생 속도 + 이동거리. 키: idle/walk/attack/hit/death 등. (3D 적 애니 도입 시 EnemyController가 사용)")]
     public List<MotionStat> motions = new List<MotionStat>
     {
         new MotionStat { anim = "idle",   animSpeed = 1f },

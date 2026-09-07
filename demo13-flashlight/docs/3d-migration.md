@@ -66,7 +66,7 @@
 | **UI 전체**(uGUI 스크린스페이스 26패널) | 맵 빌더 좌표 `(x,y,0)` → `(x,0,y)` | 3D용 오소 쿼터뷰 카메라 리그 |
 | 아이템 아이콘 204종 | `Prop2DDefinition`/`Prop2DBuilder`(615) → 3D판 | |
 | StatDB·GameTuning·밸런스 | `PlayerVision` LOS: `Linecast` → `Physics.Linecast` | |
-| 특성·퀵슬롯·도감 | Spine 플레이어/적 → 3D 모델(Spine 런타임 제거) | |
+| 특성·퀵슬롯·도감 | ~~Spine 플레이어/적 → 3D 모델~~ ✅ Spine 제거 완료(2026-09-07) | |
 | 나침반·미니맵·지도조각 (XY→XZ만) | 월드 라벨·HP바·말풍선 → 빌보드 | |
 
 ## 좌표계 규약 (전환 후 SSOT)
@@ -125,7 +125,12 @@
 ### Stage 4 — 캐릭터 · 적 · 월드 오브젝트
 **목표:** 화면에 2D 스프라이트가 남지 않는다.
 - 적·NPC 3D 모델 + **공격·피격·사망 애니**(현재 치비는 idle/walk/run만 있음 — 전투 모션 부재가 지금 최대 구멍).
-- Spine 런타임·`cha` 에셋 제거.
+ - **상태→모션 매핑 재구현**: 구 Spine 구동부가 갖고 있던 매핑을 3D 애니메이터로 옮긴다 —
+   구르기=`roll` / 약·강공격=`attack` / 앉기=`sit`·`sit_walk` / 이동=`walk`·`run` / 정지=`idle`.
+   원샷 애니(roll/attack) 끝까지 1회 보장 로직도 함께(루프 애니가 중간에 자르지 않도록).
+ - **`HitFlash`·`InjuryVFX` 재배선**: 둘 다 SpriteRenderer 바디를 가정한다. 3D 표시에선 그 SpriteRenderer가
+   꺼져 있어 **플레이어 몸에 피격 연출이 안 보인다**(화면 효과는 정상). 메시 렌더러 기준으로 옮길 것.
+ - ~~Spine 런타임·`cha` 에셋 제거~~ ✅ **2026-09-07 완료**(Unity 6.6 컴파일 불가로 앞당김).
 - 월드 라벨·HP바·말풍선(`EnemySpeechBubble` 292)·퀘스트 마커(`NPCQuestMarker` 319)·`WorldItem`(184)·`InjuryVFX`(264) 빌보드화.
 - **검증:** 지역1 레이드 완주 — 진입·전투·루팅·탈출·정산.
 
@@ -158,3 +163,4 @@
 | 날짜 | 내용 |
 |------|------|
 | 2026-09-07 | 3D 쿼터뷰 전환 결정 4건(완전 3D / 오소 고정 쿼터뷰 / 단차·엄폐 / 아트 전부 3D) + 실측 + Stage 0~5 계획 수립. 미착수. |
+| 2026-09-07 | **Unity 6.6(6000.6) 업그레이드 결정** — 사용자가 LTS 아니어도 무방 판단. 그 과정에서 Spine 4.2 소스가 `Object.GetInstanceID()` obsolete-as-error(CS0619)로 컴파일 불가 → **Stage 4의 Spine 제거를 앞당겨 실행**(689파일·cha 에셋·SpinePlayerSetup·SpineLitURP·PlayerRig 노드·asmdef 참조). 상태→모션 매핑과 HitFlash/InjuryVFX 구멍은 Stage 4 항목으로 이월 기록. |

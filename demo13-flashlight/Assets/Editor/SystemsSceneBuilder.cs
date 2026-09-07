@@ -101,8 +101,6 @@ public static class SystemsSceneBuilder
         uiSo.ApplyModifiedPropertiesWithoutUndo();
 
         // ── PlayerRig (카메라 + 라이트 + 후처리) ──
-        // 시스템 씬 빌드 시 플레이어를 Spine(cha)으로 보장 (멱등). cha 데이터 없으면 기존 스프라이트 유지.
-        SpinePlayerSetup.Apply(false);
         var rigPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/PlayerRig.prefab");
         if (rigPrefab != null)
         {

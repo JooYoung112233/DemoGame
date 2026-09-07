@@ -44,7 +44,7 @@ public class HideoutController : MonoBehaviour
     bool _hadFollow, _prevFollowEnabled;
     InteractionSystem _interaction;
     bool _prevInteractionEnabled;
-    // SpriteRenderer + Spine MeshRenderer 등 모든 렌더러를 함께 숨긴다 (Spine 캐릭터는 MeshRenderer)
+    // SpriteRenderer + MeshRenderer(3D 캐릭터) 등 모든 렌더러를 함께 숨긴다
     readonly List<Renderer> _hiddenRenderers = new List<Renderer>();
     readonly List<Light2D> _hiddenLights = new List<Light2D>();
 
