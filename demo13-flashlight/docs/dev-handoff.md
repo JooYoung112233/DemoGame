@@ -1,7 +1,61 @@
 # 개발 핸드오프 (이어서 작업)
 
 > 다른 PC에서 이어서 작업할 때 **여기부터** 읽기. `/build`로 이어서 진행.
-> 최신 갱신: 2026-06-29
+> 최신 갱신: 2026-09-07
+
+## 지금 위치 (2026-09-07) — 3D 전환 착수 준비 완료, Stage 0 직전
+
+브랜치 **`chore/unity-6.6-upgrade`** (푸시됨). 커밋 6개: `fafd5e1` 계획 → `ffe9a21` 6.6 →
+`511039c` Spine 제거 → `2ab7d2b`·`6b900cc` API 대응 → `c4c3232` CLI/MCP 연동.
+
+### 이 PC에서 한 일
+- **3D 쿼터뷰 전환 결정 4건 + Stage 0~5 계획** → SSOT는 [`3d-migration.md`](3d-migration.md).
+  완전 3D(XZ+Rigidbody+URP 3D) / 고정 쿼터뷰 오소 / 단차·엄폐까지 / 아트 전부 3D 재제작.
+- **Unity 6.3 → 6.6(6000.6.0f1) 업그레이드.** 사용자가 LTS 아니어도 무방 판단.
+- **Spine 완전 제거**(689파일 + cha 에셋). 6.6에서 컴파일 불가 + 어차피 Stage 4 대상이라 앞당김.
+  플레이어 표시는 3D 치비(`ChibiPlayerVisual`) → 스프라이트 → 그레이박스 순 폴백.
+- **6.6 obsolete-as-error 대응**: `GetInstanceID()`→`GetEntityId()`(+컨테이너를 `EntityId`로),
+  `SceneHandle`→int 폐지분은 `HashSet<Scene>`으로 회피. **컴파일 통과 확인됨**(에디터 ready).
+- **Unity CLI + 공식 skills 6종 + MCP 연동.** 에디터를 CLI/MCP로 직접 제어 가능해짐.
+
+### 🏠 집 PC에서 먼저 할 일 (순서대로)
+1. **Unity 6000.6.0f1 설치** — 프로젝트가 이 버전이다. 다른 버전으로 열면 또 업그레이드가 일어난다.
+2. `git checkout chore/unity-6.6-upgrade && git pull`
+3. **Unity CLI 설치**(머신마다 필요):
+   `$env:UNITY_CLI_CHANNEL='beta'; irm https://public-cdn.cloud.unity3d.com/hub/prod/cli/install.ps1 | iex`
+   설치 위치 `%LOCALAPPDATA%NITYIN` — 새 셸을 열어야 PATH에 잡힌다.
+4. **MCP 등록**: `unity mcp configure claude-code --project-path <프로젝트경로> --yes`
+5. Unity로 프로젝트 열기 → `com.unity.pipeline`(manifest에 이미 있음)이 임포트되면
+   프로젝트 폴더에서 `unity status` 가 `state: ready` 를 반환해야 한다.
+   ⚠️ `--project-path`에 슬래시 경로를 주면 못 찾는 경우가 있다 — **프로젝트 폴더에서 cwd 기준으로 실행**할 것.
+   ⚠️ 컴파일 에러가 있으면 Unity가 Safe Mode로 뜨고 Pipeline이 안 올라와 연결 자체가 안 된다.
+
+### 다음 작업 = Stage 0 스파이크 (버리는 실험)
+`Sandbox3D` 씬 하나에 URP-3D + 치비 프리팹 + 그레이박스 블록 + 오소 쿼터뷰 카메라.
+**눈으로 확정할 것**: 카메라 pitch(≈50° 가안) / **yaw 0° vs 45°** / orthographicSize /
+캐릭터 스케일 / 벽 높이 기준 / **오클루전 처리 방식**(디더 페이드·컷어웨이·지붕 숨김 중).
+→ 씬 삭제로 되돌아가며 기존 코드는 안 건드린다. 오클루전 방식을 정하지 않고 Stage 3(맵)에
+들어가면 맵을 두 번 만들게 되므로 여기서 반드시 답을 낼 것.
+
+쓸 수 있는 에디터 명령(확인됨): `create_scene` `create_gameobject(s)` `add_component`
+`set_component_properties` `set_serialized_field` `capture_scene_view` `capture_game_view`
+`screenshot` `eval`(Roslyn C#) `open_scene` `save_scene` `bake_navmesh` 등.
+
+### 알려진 구멍 (Stage 4 이월, `3d-migration.md`에 기록됨)
+- **피격 연출이 플레이어 몸에 안 보임** — `HitFlash`·`InjuryVFX`가 SpriteRenderer 바디를 가정하는데
+  3D 표시에선 그게 꺼져 있다. 화면 효과(비네트·셰이크)는 정상.
+- **전투 모션 없음** — 치비는 idle/walk/run 3종뿐. 공격·피격·사망·앉기 미제작.
+  구 Spine 구동부의 상태→모션 매핑(roll/attack/sit/sit_walk/walk/run/idle + 원샷 1회 보장)은
+  `3d-migration.md` Stage 4에 옮겨 적어둠.
+- **QA 봇 처분 미결** — 9파일 4,215 LOC 중 `QaBrain`·`QaBridge`·`QaReport`·`QaScenario`·`QaTelemetry`는
+  2D 참조 0(3D에서도 재사용 가능), `QaBot`/`QaSteps`/`QaPerception`/`QaHeatmap`만 2D 결합.
+  **Stage 1(XZ 전환)에서 깨질 때 포팅 vs 폐기를 판단**하기로 함.
+- **`com.unity.pipeline` 0.6.0-exp.1은 experimental** — 문제 생기면 manifest에서 한 줄 제거.
+
+### 미결 (사용자 판단 필요)
+- 카메라 yaw 0° vs 45° · 오클루전 방식 → **Stage 0에서 눈으로**
+- 2층·계단을 나중에 넣을지 (이번 범위는 단차·엄폐까지)
+- 브랜치 전략 — `codex/chibi-survivor-3d`가 `origin/main` 기준 430 앞/1 뒤로 갈라져 있음
 
 ## 지금 위치 (2026-06-29) — UI 프리팹화 풀 + 특성 효과 배선 1·2차 + TraitPanelUI 프리팹화
 
