@@ -146,11 +146,22 @@ public static class Hideout3DLayout
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
+        AddToBuildSettings(ScenePath);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
         Debug.Log($"<color=cyan>[Hideout3D]</color> 생성 완료: {ScenePath} — 오브젝트 {n}개. " +
                   "천장 없음(쿼터뷰에서 내부가 보이도록). 시설 좌표는 2D판과 1:1.");
+    }
+
+    /// <summary>빌드 세팅에 씬 등록 — 없으면 SceneManager.LoadScene("...")이 실패한다.
+    /// (2D 빌더는 하는데 3D 빌더가 빠뜨려 마을↔은신처 전환이 통째로 안 됐다.)</summary>
+    static void AddToBuildSettings(string scenePath)
+    {
+        var list = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+        foreach (var s in list) if (s.path == scenePath) { s.enabled = true; EditorBuildSettings.scenes = list.ToArray(); return; }
+        list.Add(new EditorBuildSettingsScene(scenePath, true));
+        EditorBuildSettings.scenes = list.ToArray();
     }
 
     // ── 헬퍼 ────────────────────────────────────────────────────────

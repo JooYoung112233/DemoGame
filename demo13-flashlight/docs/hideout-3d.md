@@ -139,6 +139,7 @@
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-09-08 | **레시피·스테이션 배선 + 기능 버튼.** 도크에 시설별 **기능 버튼**을 붙였다(작업대=제작·수리, 요리대=요리, 의료대=조제, 창고=창고 열기, 라디오=청취, 파견=파견, 침대=휴식, 발전기=전력 전환). 제작 3종은 `CraftingStation` enum(Workbench/CookingBench/MedicalBench)으로 갈라져 `UIManager.ShowCrafting`으로 들어간다. 버튼은 **Lv≥1(건설 완료)일 때만** 뜬다. 기능 버튼이 연 UI는 전부 도크 안으로 입양(`Adopt`)돼 캐릭터를 덮지 않는다. 검증: 8개 시설 전부 실제 클릭으로 통과(라디오·파견은 **발전기 전력** 게이트가 정상 작동 — 전력 없으면 토스트로 거부). |
 | 2026-09-08 | **배치 재설계 + 역할 라벨.** 소품이 겹치던 2D 좌표 직행을 버리고 벽에 줄 세워 가운데를 비웠다. 소품 머리 위 `FacilityLabel` 상시 표시. **근접 E 프롬프트를 끈다**(`InteractionSystem.enabled=false`) — 디오라마가 `HideoutController`의 경로를 양보받으면서 이 처리가 같이 빠져 있었다. |
 | 2026-09-08 | **오케스트레이터 구현**(`HideoutDiorama`). 3D 레이캐스트 클릭 → 앵커로 이동·응시 → `CameraFollow.SetFocus`로 UI 자리 확보 → 기존 `InteractableObject.Interact` 호출. 빌더가 시설 9곳에 `InteractableObject`(Bed/Workbench/Stash/Radio/CookingBench/MedicalBench/Dispatch/Generator)를 배선. 방이 14×9m뿐이라 줌인 시 카메라가 방 밖(검은 공백)을 잡아 **70×70 배경판** 추가, 포커스 오소 4.5→6.0. |
 | 2026-09-08 | **상호작용 = 디오라마 확정.** 걸어다니지 않고 클릭 유지하되 캐릭터를 숨기지 않는다 — 시설마다 캐릭터가 가서 자세를 잡는다(침대=눕기, 요리대=앞에 서기, 대기=의자에 앉기). **UI는 캐릭터를 가리지 않는다**(우측 도킹/하단 바, 카메라가 부드럽게 밀어 자리 비움). `HideoutFacilityAnchor` + `CameraFollow.SetFocus` 구현, 빌더에 앵커 9개 배선. |

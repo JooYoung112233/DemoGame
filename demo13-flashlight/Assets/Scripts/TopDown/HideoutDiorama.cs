@@ -161,7 +161,7 @@ public class HideoutDiorama : MonoBehaviour
     /// <summary>현재 켜져 있는 UI 패널들(= 캔버스의 활성 자식).
     /// ⚠️ 캔버스 자체를 세면 안 된다 — 이 프로젝트 UI는 캔버스를 부팅 때 만들어두고
     /// **자식 패널만 켜고 끄기** 때문에 캔버스 목록은 변하지 않는다.</summary>
-    static List<RectTransform> ActivePanels()
+    public static List<RectTransform> ActivePanels()
     {
         var list = new List<RectTransform>();
         foreach (var c in FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
@@ -177,11 +177,21 @@ public class HideoutDiorama : MonoBehaviour
         return list;
     }
 
-    static RectTransform FindNewPanel(List<RectTransform> before)
+    /// <summary>직전 스냅샷에 없던 = 방금 켜진 패널을 고른다.
+    /// ⚠️ UI 하나가 패널을 **여러 개** 켜는 경우가 있다(파견은 딤 오버레이 + 본체).
+    /// 첫 번째를 잡으면 딤을 입양해 화면이 회색으로 덮인다. 그래서 **맨 위(마지막)**를
+    /// 본체로 보고, 같이 켜진 나머지(딤 등)는 꺼버린다 — 도크 안에서는 전체화면 딤이
+    /// 오히려 캐릭터를 가린다.</summary>
+    public static RectTransform FindNewPanel(List<RectTransform> before)
     {
+        var opened = new List<RectTransform>();
         foreach (var rt in ActivePanels())
-            if (!before.Contains(rt)) return rt;
-        return null;
+            if (!before.Contains(rt)) opened.Add(rt);
+        if (opened.Count == 0) return null;
+
+        var main = opened[opened.Count - 1];
+        for (int i = 0; i < opened.Count - 1; i++) opened[i].gameObject.SetActive(false);
+        return main;
     }
 
     /// <summary>시설 한 줄 설명 — 도킹 패널 본문.</summary>

@@ -23,7 +23,7 @@ public class HideoutDockPanel : MonoBehaviour
     GameObject _root;
     RectTransform _panel;
     Text _title, _body;
-    Button _openBtn, _closeBtn, _upgradeBtn;
+    Button _openBtn, _closeBtn, _upgradeBtn, _useBtn;
     Text _statusText;
     System.Action _onOpen;
     string _module;
@@ -124,6 +124,7 @@ public class HideoutDockPanel : MonoBehaviour
         _statusText.gameObject.SetActive(false);
         _upgradeBtn.gameObject.SetActive(false);
         _openBtn.gameObject.SetActive(false);
+        _useBtn.gameObject.SetActive(false);
         return true;
     }
 
@@ -138,6 +139,10 @@ public class HideoutDockPanel : MonoBehaviour
         _adopted.offsetMin = _adoptedOffMin;
         _adopted.offsetMax = _adoptedOffMax;
         _adopted.localScale = _adoptedScale;
+        // ⚠️ 되돌려만 놓고 끄지 않으면, 도크를 닫은 뒤에도 그 패널이 전체화면으로
+        // 화면에 남는다(=캐릭터를 덮는다). 게다가 계속 켜져 있어서 다음에 같은
+        // 시설을 열 때 '새로 켜진 패널'로 안 잡혀 입양이 실패한다.
+        _adopted.gameObject.SetActive(false);
         _adopted = null;
         _adoptedParent = null;
 
@@ -176,6 +181,66 @@ public class HideoutDockPanel : MonoBehaviour
         var lbl = _upgradeBtn.GetComponentInChildren<Text>();
         if (lbl != null) lbl.text = lv <= 0 ? "건설" : "업그레이드";
         if (!can && !string.IsNullOrEmpty(reason)) _statusText.text += "\n\n" + reason;
+
+        // 기능 버튼 — 건설(Lv≥1)된 시설만 뜬다. 라벨은 시설마다 다르다.
+        string useLabel = UseLabelFor(_module);
+        bool built = lv >= 1 && !string.IsNullOrEmpty(useLabel);
+        _useBtn.gameObject.SetActive(built);
+        var ul = _useBtn.GetComponentInChildren<Text>();
+        if (ul != null) ul.text = useLabel;
+    }
+
+    /// <summary>시설별 기능 버튼 이름. 빈 문자열이면 기능 없음.</summary>
+    static string UseLabelFor(string key) => key switch
+    {
+        "workbench" => "제작·수리",
+        "cooking"   => "요리",
+        "medical"   => "조제",
+        "stash"     => "창고 열기",
+        "radio"     => "청취",
+        "dispatch"  => "파견",
+        "bed"       => "휴식",
+        "generator" => "전력 전환",
+        _           => "",
+    };
+
+    /// <summary>시설 기능 실행 — 레시피·스테이션 배선.
+    /// 제작 3종은 <see cref="CraftingStation"/> enum으로 갈라지고, 나머지는 각자의 UI를 쓴다.
+    /// 여기서 여는 UI들은 아직 전체화면이라, 열릴 때 도킹으로 입양된다(Adopt).</summary>
+    void UseFacility()
+    {
+        var um = UIManager.Instance;
+
+        // 발전기는 UI가 아니라 토글이다 - 입양할 패널이 없다.
+        if (_module == "generator")
+        {
+            var gm = HideoutModuleManager.Instance;
+            if (gm == null) return;
+            bool ok = gm.ToggleGeneratorPower(out string why);
+            ToastManager.Show(ok ? (gm.GeneratorPowered ? "전력 켬" : "전력 끔") : why,
+                              ok ? ToastManager.ToastType.Info : ToastManager.ToastType.Warning);
+            RefreshModule();
+            return;
+        }
+
+        // ⚠️ 여기서 여는 UI는 전부 전체화면 전제라, 그냥 띄우면 캐릭터를 덮는다.
+        // 열기 직전 화면을 찍어두고 새로 켜진 패널을 도크 안으로 끌어들인다.
+        var before = HideoutDiorama.ActivePanels();
+
+        switch (_module)
+        {
+            case "workbench": if (um != null) um.ShowCrafting(CraftingStation.Workbench);    break;
+            case "cooking":   if (um != null) um.ShowCrafting(CraftingStation.CookingBench); break;
+            case "medical":   if (um != null) um.ShowCrafting(CraftingStation.MedicalBench); break;
+            case "stash":     if (um != null) um.ShowCharacterPanelWithStash();              break;
+            case "radio":     RadioUI.Show();     break;
+            case "dispatch":  DispatchUI.Show();  break;
+            case "bed":       SleepUI.Show();     break;
+            default: return;
+        }
+
+        var opened = HideoutDiorama.FindNewPanel(before);
+        if (opened != null) Adopt(opened);          // Adopt가 기능 버튼까지 정리한다
     }
 
     // ── uGUI 코드 생성 ──────────────────────────────────────────────
@@ -215,6 +280,11 @@ public class HideoutDockPanel : MonoBehaviour
         _upgradeBtn = MakeButton(panelGO.transform, "Upgrade", "업그레이드",
                                  new Vector2(0f, 0f), new Vector2(28f, 92f), new Vector2(260f, 56f));
 
+        // 기능 버튼 - 건설 버튼 오른쪽. 시설을 실제로 쓰는 입구(제작/요리/창고/휴식).
+        _useBtn = MakeButton(panelGO.transform, "Use", "사용",
+                             new Vector2(0f, 0f), new Vector2(300f, 92f), new Vector2(232f, 56f));
+        _useBtn.gameObject.SetActive(false);
+
         // 입양 자리 — 제목 아래, 버튼 위
         var contentGO = new GameObject("Content");
         contentGO.transform.SetParent(panelGO.transform, false);
@@ -223,9 +293,13 @@ public class HideoutDockPanel : MonoBehaviour
         _content.anchorMax = new Vector2(1f, 1f);
         _content.offsetMin = new Vector2(16f, 92f);
         _content.offsetMax = new Vector2(-16f, -80f);
+        // 입양하는 UI들은 1920 폭 전체화면 전제로 만들어져 있어, 도크에 넣으면
+        // 자식들이 밖으로 삐져나온다. 도크 경계에서 잘라 화면이 지저분해지지 않게.
+        contentGO.AddComponent<RectMask2D>();
 
         _openBtn.onClick.AddListener(() => { _onOpen?.Invoke(); });
         _closeBtn.onClick.AddListener(Hide);
+        _useBtn.onClick.AddListener(UseFacility);
         _upgradeBtn.onClick.AddListener(() =>
         {
             var mm = HideoutModuleManager.Instance;
