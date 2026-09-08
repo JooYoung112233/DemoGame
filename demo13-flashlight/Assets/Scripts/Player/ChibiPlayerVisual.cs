@@ -42,7 +42,9 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
                 if (palette[i] != null)
                     color = palette[i].HasProperty("_BaseColor") ? palette[i].GetColor("_BaseColor") : palette[i].color;
                 var material = new Material(shader) { name = "Chibi_InGame_" + i };
-                material.SetColor("_Color", color);
+                // 셰이더에 따라 색 프로퍼티 이름이 다르다 — URP/Lit은 _BaseColor, 언릿 계열은 _Color.
+                if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
+                if (material.HasProperty("_Color"))     material.SetColor("_Color", color);
                 palette[i] = material;
                 ownedMaterials.Add(material);
             }

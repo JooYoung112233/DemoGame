@@ -16,6 +16,9 @@ public class CameraFollow : MonoBehaviour
 
     [SerializeField] Transform target;
     [SerializeField] float smoothSpeed = 8f;
+    [Tooltip("3D 쿼터뷰에서 카메라가 타깃 뒤로 물러나는 거리(m). " +
+             "⚠️ 그림자 거리(URP 에셋 기본 50m) 안이어야 그림자가 렌더된다.")]
+    [SerializeField] float followDistance = 25f;
 
     Vector3 offset;
     Vector3 _basePos;        // 셰이크 제외한 추적 위치(스무딩 누적용)
@@ -78,9 +81,11 @@ public class CameraFollow : MonoBehaviour
 
         if (target != null && !offsetInitialized)
         {
-            Vector3 localP = transform.InverseTransformPoint(target.position);
-            transform.position += transform.right * localP.x + transform.up * localP.y;
-            offset = transform.position - target.position;
+            // 3D 쿼터뷰: 카메라는 **시선 축을 따라** 타깃 뒤에 선다.
+            // 구 2D 방식(transform.right/up으로 화면 중앙 맞추기)은 카메라가 정면을 볼 때만
+            // 성립한다 — 55°로 기울면 up이 Z 성분을 가져 오프셋이 어긋난다.
+            offset = -transform.forward * followDistance;
+            transform.position = target.position + offset;
             _basePos = transform.position;
             offsetInitialized = true;
         }
