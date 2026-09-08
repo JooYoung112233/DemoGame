@@ -363,20 +363,25 @@ public class UIManager : MonoBehaviour
         _stack.RemoveAll(e => e.Name == name);
     }
 
-    /// <summary>스택에서 아직 열려 있는 맨 위 패널을 닫는다. 닫았으면 true.</summary>
+    /// <summary>스택에서 아직 열려 있는 맨 위 패널을 닫는다. 닫았으면 true.
+    ///
+    /// ⚠️ 반복 도중 인덱스로 지우면 안 된다. <c>IsOpen()</c>·<c>Close()</c>가 내부에서
+    /// <see cref="PopUI"/>를 불러 스택을 줄일 수 있어, 들고 있던 i가 곧바로 범위를 벗어난다
+    /// (실제로 ArgumentOutOfRange가 났다). 스냅샷을 돌면서 **이름으로** 지운다 — 멱등이다.</summary>
     bool CloseTopmostRegistered()
     {
-        for (int i = _stack.Count - 1; i >= 0; i--)
+        var snapshot = _stack.ToArray();
+        for (int i = snapshot.Length - 1; i >= 0; i--)
         {
-            var e = _stack[i];
+            var e = snapshot[i];
             bool open;
-            try { open = e.IsOpen(); } catch { _stack.RemoveAt(i); continue; }   // 파괴된 패널 정리
-            if (!open) { _stack.RemoveAt(i); continue; }
-            // ⚠️ Close()가 내부적으로 PopUI로 자기를 먼저 지울 수 있다.
-            //    그 뒤에 RemoveAt(i)를 부르면 범위를 벗어난다 — 이름으로 지운다(멱등).
-            string name = e.Name;
+            try { open = e.IsOpen(); }
+            catch { _stack.RemoveAll(x => x.Name == e.Name); continue; }   // 파괴된 패널 정리
+
+            if (!open) { _stack.RemoveAll(x => x.Name == e.Name); continue; }
+
             e.Close();
-            _stack.RemoveAll(x => x.Name == name);
+            _stack.RemoveAll(x => x.Name == e.Name);
             return true;
         }
         return false;
@@ -385,9 +390,12 @@ public class UIManager : MonoBehaviour
     /// <summary>스택에 열려 있는 패널이 하나라도 있는가.</summary>
     bool AnyRegisteredOpen()
     {
-        for (int i = _stack.Count - 1; i >= 0; i--)
+        var snapshot = _stack.ToArray();
+        for (int i = snapshot.Length - 1; i >= 0; i--)
         {
-            try { if (_stack[i].IsOpen()) return true; } catch { _stack.RemoveAt(i); }
+            var e = snapshot[i];
+            try { if (e.IsOpen()) return true; }
+            catch { _stack.RemoveAll(x => x.Name == e.Name); }
         }
         return false;
     }

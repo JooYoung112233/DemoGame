@@ -248,8 +248,21 @@ public static class ScrapMarketGreyboxLayout
         int n = 0;
         for (int i = 0; i < rows; i++)
         for (int j = 0; j < cols; j++)
-            n += Wall(parent, cols * rows == 1 ? p : $"{p}_{i}{j}",
-                      x0 + (j + 0.5f) * pw, y0 + (i + 0.5f) * pd, pw, pd);
+        {
+            string nm = cols * rows == 1 ? p : $"{p}_{i}{j}";
+            float cx0 = x0 + j * pw, cz0 = y0 + i * pd;
+            float cx1 = cx0 + pw,    cz1 = cz0 + pd;
+
+            // 3D — 들어갈 만한 크기면 **걸어 들어가는 방**으로 만든다(별도 실내 씬 폐기).
+            // 작으면 사람이 끼므로 막힌 덩어리로 둔다.
+            if (GreyboxBuild.Use3D && Greybox3D.CanBeRoom(cx0, cz0, cx1, cz1))
+            {
+                n += Greybox3D.Room(parent, nm, cx0 + OX, cz0 + OY, cx1 + OX, cz1 + OY,
+                                    'S', cx0 + OX + pw * 0.5f - 1.2f);
+                continue;
+            }
+            n += Wall(parent, nm, cx0 + pw * 0.5f, cz0 + pd * 0.5f, pw, pd);
+        }
         return n;
     }
 
@@ -449,29 +462,9 @@ public static class ScrapMarketGreyboxLayout
     static int Enter(GameObject parent, string name, float x, float y, string targetScene,
                      float tw = 1.2f, float th = 1.2f)
     {
-        if (GreyboxBuild.Use3D)
-        {
-            if (Greybox3D.Marker(parent, "gb_door", name, x + OX, y + OY) == 0) return 0;
-            var t3 = parent.transform.Find(name);
-            if (t3 == null) return 1;
-            var go3 = t3.gameObject;
-
-            // 3D 문은 밟는 게 아니라 E로 연다 — SceneDoor3D(밟기)가 아니라
-            // InteractableObject.Door + BuildingEntrance 대신 씬 전환을 직접 건다.
-            var col = go3.GetComponent<BoxCollider>();
-            if (col == null) col = go3.AddComponent<BoxCollider>();
-            col.isTrigger = false;                       // 문은 막는 몸이다(E로 통과)
-            col.size = new Vector3(tw, 2.4f, th);
-            col.center = new Vector3(0f, 1.2f, 0f);
-
-            var io3 = go3.GetComponent<InteractableObject>() ?? go3.AddComponent<InteractableObject>();
-            io3.Configure(InteractableObject.InteractType.ExitPoint, "들어가기", 2.0f);
-            var so3 = new SerializedObject(io3);
-            var ts3 = so3.FindProperty("targetScene");   if (ts3 != null) ts3.stringValue = targetScene;
-            var sp3 = so3.FindProperty("spawnPointId");  if (sp3 != null) sp3.stringValue = "default";
-            so3.ApplyModifiedPropertiesWithoutUndo();
-            return 1;
-        }
+        // 2026-09-08: 별도 실내 씬 폐기 — 건물은 같은 맵에서 걸어 들어간다.
+        // 3D에서는 씬 전환 문을 세우지 않는다(실내는 Greybox3D.Room이 만든다).
+        if (GreyboxBuild.Use3D) return 0;
 
         var go = Spawn("gb_door", name, parent);
         if (go == null) return 0;

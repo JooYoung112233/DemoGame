@@ -5,7 +5,10 @@ using UnityEngine;
 /// AttackPerformer가 OverlapXXX로 스캔 → ReceiveHit 호출.
 /// 비활성(구르기 무적 등) 시 콜라이더를 꺼 스캔에서 제외.
 /// </summary>
-[RequireComponent(typeof(Collider))]
+/// ⚠️ <c>[RequireComponent(typeof(Collider))]</c>는 쓸 수 없다 — <c>Collider</c>는 추상 클래스라
+/// Unity가 자동으로 붙여 주지 못한다(2D의 <c>Collider2D</c>도 마찬가지였지만, 2D 프리팹엔
+/// 이미 붙어 있어 드러나지 않았다). 3D 전환 후 콜라이더 없는 오브젝트에서 실제로
+/// NullReference가 났다. 그래서 없으면 **박스를 직접 붙이고 경고**한다.
 public class Hurtbox : MonoBehaviour
 {
     [Tooltip("이 허트박스가 속한 캐릭터의 Health (비우면 부모에서 탐색)")]
@@ -21,6 +24,16 @@ public class Hurtbox : MonoBehaviour
     void Awake()
     {
         _col = GetComponent<Collider>();
+        if (_col == null)
+        {
+            // 맞을 몸이 없으면 허트박스는 아무 일도 못 한다. 조용히 죽지 않도록 만들어 준다.
+            var box = gameObject.AddComponent<BoxCollider>();
+            box.size = new Vector3(0.7f, 1.6f, 0.7f);
+            box.center = new Vector3(0f, 0.85f, 0f);   // 부위 판정이 높이로 갈리므로 세워 둔다
+            _col = box;
+            Debug.LogWarning($"[Hurtbox] {name}: 콜라이더가 없어 기본 박스를 붙였다 — " +
+                             "프리팹/빌더에서 3D 콜라이더를 지정할 것.", this);
+        }
         _col.isTrigger = true;
         if (health == null) health = GetComponentInParent<Health>();
         if (enemy == null)  enemy  = GetComponentInParent<EnemyController>();

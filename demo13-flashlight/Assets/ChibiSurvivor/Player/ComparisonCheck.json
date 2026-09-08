@@ -1,0 +1,28 @@
+{
+  "fps": 30,
+  "frames": 184,
+  "same_camera": true,
+  "retimed": false,
+  "clips": [
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Quarter.mp4",
+      "start": 1,
+      "frames": 49
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Quarter.mp4",
+      "start": 50,
+      "frames": 49
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Quarter.mp4",
+      "start": 99,
+      "frames": 43
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Quarter.mp4",
+      "start": 142,
+      "frames": 43
+    }
+  ]
+}

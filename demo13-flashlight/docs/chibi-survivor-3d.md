@@ -11,18 +11,18 @@
 
 | 경로 | 내용 |
 |---|---|
-| `Assets/ChibiSurvivor/ChibiSurvivor.fbx` | 스킨 메시, Generic 리그, Idle/Walk/Run 세 가지 take |
+| `ArtSource/CharacterArchive/2026-09-08/Assets/ChibiSurvivor/ChibiSurvivor.fbx` | 스킨 메시, Generic 리그, Idle/Walk/Run 세 가지 take |
 | 같은 폴더의 `ChibiSurvivor.prefab` | 모델·Avatar·Animator가 연결된 프리팹 |
 | 같은 폴더의 `Idle.anim`, `Walk.anim`, `Run.anim` | Unity에서 독립적으로 편집 가능한 루프 클립 |
 | 같은 폴더의 `ChibiSurvivor.controller` | `Speed` float 값의 1D Blend Tree: 0=Idle, 1=Walk, 2=Run |
-| `Assets/Editor/ChibiSurvivorAssets.cs` | 해당 FBX 전용 Generic/루프/재질 임포터와 에셋 베이크 메뉴 |
+| `ArtSource/CharacterArchive/2026-09-08/Assets/Editor/ChibiSurvivorAssets.cs` | 해당 FBX 전용 Generic/루프/재질 임포터와 에셋 베이크 메뉴 |
 | `ArtSource/ChibiSurvivor/ChibiSurvivor.blend` | 골격, 메시, 액션, 촬영용 조명/카메라가 들어 있는 원본 |
 | `ArtSource/ChibiSurvivor/ChibiSurvivor.glb` | Blender 설치 없이 확인 가능한 GLB 모델과 모션 |
 | `ArtSource/ChibiSurvivor/CharacterSheet.png` | 정면·쿼터뷰·뒷모습 시트 |
 | `ArtSource/ChibiSurvivor/Animations.gif` | 세 모션 비교. 개별 Idle/Walk/Run GIF도 제공 |
 | `tools/build_chibi_survivor.py` | Blender로 모델·리그·애니메이션·렌더를 재생성하는 소스 |
 | `tools/chibi_preview_sheet.py` | 렌더에서 시트/GIF를 조합하는 Pillow 스크립트 |
-| `Assets/ChibiSurvivor/ChibiInGame.shader` | 게임 화면용 셰이더 — URP 2D 렌더러 아래서도 단색 팔레트가 그대로 보이게 한다 |
+| `ArtSource/CharacterArchive/2026-09-08/Assets/ChibiSurvivor/ChibiInGame.shader` | 게임 화면용 셰이더 — URP 2D 렌더러 아래서도 단색 팔레트가 그대로 보이게 한다 |
 | `Assets/Scripts/Player/ChibiPlayerVisual.cs` | 3D 모델을 플레이어에 붙이고 카메라 기울기·방향·Speed 블렌드를 구동 |
 | `tools/build_reclaimer.py` | 현재 외형(리클레이머) 빌더. `build_chibi_survivor.py`가 기본으로 이 스크립트를 호출한다(`--legacy`로 구 외형) |
 | `tools/chibi_cap.py`, `tools/update_chibi_cap.py` | 모자·액세서리를 리그 유지한 채 따로 갱신하는 스크립트 |

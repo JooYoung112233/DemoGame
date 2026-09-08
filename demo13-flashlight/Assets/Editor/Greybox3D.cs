@@ -43,6 +43,22 @@ public static class Greybox3D
         wall = 2.6f, barricade = 0.9f, car = 1.5f, prop = 0.9f, building = 2.6f, floor = 0.1f,
     };
 
+
+    // ── 평면 배율 ────────────────────────────────────────────────────
+    /// <summary>맵 **평면(XZ) 좌표·크기에 곱하는 배율.** 높이는 곱하지 않는다 —
+    /// 벽 3m·사람 1.8m는 이미 실제 치수라 늘리면 거인의 세계가 된다.
+    ///
+    /// 왜 필요한가: 맵 레이아웃 좌표가 빌더에 상수로 박혀 있다(지역1만 2223줄).
+    /// 맵을 키우려고 그 숫자를 다 고치면 실수만 늘어난다. 대신 좌표가 지나가는
+    /// **한 지점**에서 곱한다 — 도로·블록·건물·스폰이 비율을 유지한 채 함께 커진다.
+    ///
+    /// 배경(2026-09-08): 2D 시절 건물 상한 `MaxSpan=13m`은 **스프라이트 아트 제약**이었고
+    /// (한 장으로 그릴 수 있는 크기), 그래서 실내는 별도 씬(최대 22×18m)으로 뺐다.
+    /// 3D 그레이박스엔 그 제약이 없는데 상한만 남아, 건물이 실내 씬의 절반이 됐다.
+    /// 배율로 건물까지 함께 키워 실내를 그 안에 담는다.</summary>
+    public static float PlanScale = 1f;
+
+    static float S(float v) => v * PlanScale;
     // ── 재질 ─────────────────────────────────────────────────────────
     static Material _floor, _wall, _barricade, _car, _prop, _door;
 
@@ -90,8 +106,8 @@ public static class Greybox3D
     }
 
     static int FloorImpl(GameObject p, string name, float cx, float cy, float w, float h)
-        => Box(p, name, new Vector3(cx, -Heights.floor * 0.5f, cy),
-               new Vector3(w, Heights.floor, h), _floor, 0f);
+        => Box(p, name, new Vector3(S(cx), -Heights.floor * 0.5f, S(cy)),
+               new Vector3(S(w), Heights.floor, S(h)), _floor, 0f);
 
     public static int Wall(GameObject p, string name, float cx, float cy, float lenX, float thickY)
         => Wall(p, name, cx, cy, lenX, thickY, 0f);
@@ -144,7 +160,7 @@ public static class Greybox3D
                         float height, Material mat, float angleDeg2D, float yawOverride = float.NaN)
     {
         float yaw = float.IsNaN(yawOverride) ? -angleDeg2D : yawOverride;
-        return Box(p, name, new Vector3(cx, height * 0.5f, cz), new Vector3(sx, height, sz), mat, yaw);
+        return Box(p, name, new Vector3(S(cx), height * 0.5f, S(cz)), new Vector3(S(sx), height, S(sz)), mat, yaw);
     }
 
     static int Box(GameObject p, string name, Vector3 center, Vector3 size, Material mat, float yaw)
@@ -193,14 +209,14 @@ public static class Greybox3D
             {
                 var go = new GameObject(name);
                 go.transform.SetParent(p.transform, false);
-                go.transform.localPosition = new Vector3(x, 0f, y);
+                go.transform.localPosition = new Vector3(S(x), 0f, S(y));
                 go.AddComponent<SpawnPoint>();
                 return 1;
             }
 
             case "gb_door":
                 // 문 '표시' — 통과는 출구 발판이 담당하므로 콜라이더는 두지 않는다.
-                Box(p, name, new Vector3(x, 1.2f, y), new Vector3(2.2f, 2.4f, 0.15f), _door, 0f);
+                Box(p, name, new Vector3(S(x), 1.2f, S(y)), new Vector3(2.2f, 2.4f, 0.15f), _door, 0f);
                 Strip(p, name);
                 return 1;
 
@@ -215,7 +231,7 @@ public static class Greybox3D
             {
                 var go = new GameObject(name);
                 go.transform.SetParent(p.transform, false);
-                go.transform.localPosition = new Vector3(x, 0f, y);
+                go.transform.localPosition = new Vector3(S(x), 0f, S(y));
                 return 1;
             }
         }
@@ -229,6 +245,91 @@ public static class Greybox3D
         if (t == null) return;
         var c = t.GetComponent<Collider>();
         if (c != null) Object.DestroyImmediate(c);
+    }
+
+    // ── 걸어 들어가는 방 ─────────────────────────────────────────────
+
+    /// <summary>실내를 걸어 다닐 수 있는 **최소 발자국**(m). 이보다 작으면 방이 아니라
+    /// 사람이 낄 상자다 — 그런 건 그냥 막힌 덩어리로 둔다.</summary>
+    public const float MinRoomSpan = 7f;
+
+    /// <summary>이 발자국이 방이 될 수 있는가.</summary>
+    public static bool CanBeRoom(float x0, float z0, float x1, float z1)
+        => (x1 - x0) >= MinRoomSpan && (z1 - z0) >= MinRoomSpan;
+
+    /// <summary>**걸어 들어가는 건물** — 바닥 + 벽 4면(문 쪽은 갈라서 비움) + 지붕.
+    ///
+    /// 별도 실내 씬으로 넘기지 않고 같은 맵 안에서 들어간다(2026-09-08 결정).
+    /// 쿼터뷰라 지붕이 있으면 안이 안 보이므로, 진입 판정 볼륨 + <see cref="BuildingInterior"/>가
+    /// 들어온 순간 지붕을 끈다. 로딩이 없어 레이드의 긴장이 끊기지 않는 것이 요점이다.
+    ///
+    /// <paramref name="side"/> = 문이 뚫릴 면('S'/'N'/'W'/'E'),
+    /// <paramref name="doorAt"/> = 그 면을 따라 문이 시작하는 좌표.</summary>
+    public static int Room(GameObject parent, string name,
+                           float x0, float z0, float x1, float z1,
+                           char side, float doorAt, float doorW = 2.4f)
+    {
+        EnsurePalette();
+
+        var root = new GameObject(name);
+        root.transform.SetParent(parent.transform, false);
+        int n = 1;
+
+        const float T = 1f;                 // 벽 두께
+        float h = Heights.building;
+
+        // 실내 바닥 — 바깥 지면보다 살짝 올려 문턱을 만든다.
+        n += Box(root, name + "_Floor", new Vector3(S((x0 + x1) * 0.5f), 0.03f, S((z0 + z1) * 0.5f)),
+                 new Vector3(S(x1 - x0), 0.06f, S(z1 - z0)), _floor, 0f);
+
+        // 벽 4면. 문이 있는 면만 두 토막으로 갈라 가운데를 비운다.
+        var prev = Heights;
+        Heights = new HeightSet { wall = h, barricade = prev.barricade, car = prev.car,
+                                  prop = prev.prop, building = h, floor = prev.floor };
+
+        n += side == 'S' ? Gap(root, name + "_S", x0, x1, z0, z0 + T, true,  doorAt, doorW)
+                         : WallSeg(root, name + "_S", x0, z0, x1, z0 + T);
+        n += side == 'N' ? Gap(root, name + "_N", x0, x1, z1 - T, z1, true,  doorAt, doorW)
+                         : WallSeg(root, name + "_N", x0, z1 - T, x1, z1);
+        n += side == 'W' ? Gap(root, name + "_W", z0, z1, x0, x0 + T, false, doorAt, doorW)
+                         : WallSeg(root, name + "_W", x0, z0, x0 + T, z1);
+        n += side == 'E' ? Gap(root, name + "_E", z0, z1, x1 - T, x1, false, doorAt, doorW)
+                         : WallSeg(root, name + "_E", x1 - T, z0, x1, z1);
+
+        Heights = prev;
+
+        // 지붕 — 이름이 "Roof"로 시작해야 BuildingInterior가 자동으로 찾는다.
+        n += Box(root, "Roof", new Vector3(S((x0 + x1) * 0.5f), h + 0.15f, S((z0 + z1) * 0.5f)),
+                 new Vector3(S(x1 - x0) + T, 0.3f, S(z1 - z0) + T), _wall, 0f);
+
+        // 진입 판정 + 지붕 끄기. 볼륨은 실내 공간을 덮는다.
+        var trg = root.AddComponent<BoxCollider>();
+        trg.isTrigger = true;
+        trg.center = new Vector3(S((x0 + x1) * 0.5f), h * 0.5f, S((z0 + z1) * 0.5f));
+        trg.size   = new Vector3(S(x1 - x0) - T * 1.5f, h, S(z1 - z0) - T * 1.5f);
+        root.AddComponent<BuildingInterior>();
+
+        return n;
+    }
+
+    /// <summary>한 면을 문 폭만큼 비워 두 토막으로 세운다.</summary>
+    static int Gap(GameObject p, string name, float a0, float a1, float b0, float b1,
+                   bool alongX, float doorAt, float doorW)
+    {
+        float d0 = Mathf.Clamp(doorAt, a0, a1);
+        float d1 = Mathf.Clamp(doorAt + doorW, a0, a1);
+        int n = 0;
+        if (alongX)
+        {
+            n += WallSeg(p, name + "_a", a0, b0, d0, b1);
+            n += WallSeg(p, name + "_b", d1, b0, a1, b1);
+        }
+        else
+        {
+            n += WallSeg(p, name + "_a", b0, a0, b1, d0);
+            n += WallSeg(p, name + "_b", b0, d1, b1, a1);
+        }
+        return n;
     }
     // ── 건물 ─────────────────────────────────────────────────────────
 

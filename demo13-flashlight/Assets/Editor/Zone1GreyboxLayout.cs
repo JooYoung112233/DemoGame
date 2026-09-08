@@ -772,12 +772,24 @@ public static class Zone1GreyboxLayout
     static int BandBuilding(GameObject m, string name, float x0, float y0, float x1, float y1,
                             char side, float doorAt, string scene = null, bool force = false)
     {
+        // 3D — 별도 실내 씬 없이 **같은 맵에서 걸어 들어간다.**
+        // 작은 창고·헛간은 방으로 만들 수 없으니(사람이 낀다) 막힌 덩어리로 둔다.
+        if (GreyboxBuild.Use3D)
+        {
+            if (!Greybox3D.CanBeRoom(x0, y0, x1, y1)) return BandMass(m, name, x0, y0, x1, y1);
+
+            DoorPad(x0, y0, x1, y1, side, doorAt, out float ex, out float ey, out float _, out float _2);
+            float gapAt = (side == 'S' || side == 'N') ? ex - 1.2f : ey - 1.2f;
+            MarkBuilding(x0, y0, x1, y1);
+            return Greybox3D.Room(m, name, x0, y0, x1, y1, side, gapAt);
+        }
+
         int n = BandMass(m, name, x0, y0, x1, y1);
         if (n == 0) return 0;
-        DoorPad(x0, y0, x1, y1, side, doorAt, out float ex, out float ey, out float tw, out float th);
-        if (!string.IsNullOrEmpty(scene)) n += Enter(m, $"{name}_Door", ex, ey, scene, "default", tw, th);
-        else if (force)                   n += Enter(m, $"{name}_Door", ex, ey, "Int_Generic", "default", tw, th);
-        else                              n += EnterGeneric(m, $"{name}_Door", ex, ey, tw, th);
+        DoorPad(x0, y0, x1, y1, side, doorAt, out float ex2, out float ey2, out float tw, out float th);
+        if (!string.IsNullOrEmpty(scene)) n += Enter(m, $"{name}_Door", ex2, ey2, scene, "default", tw, th);
+        else if (force)                   n += Enter(m, $"{name}_Door", ex2, ey2, "Int_Generic", "default", tw, th);
+        else                              n += EnterGeneric(m, $"{name}_Door", ex2, ey2, tw, th);
         return n;
     }
 
@@ -1824,6 +1836,9 @@ public static class Zone1GreyboxLayout
     static int Enter(GameObject m, string name, float x, float y, string targetScene, string spawnId = "default",
                      float tw = 2f, float th = 1f)
     {
+        // 3D — 건물은 같은 맵에서 걸어 들어간다. 씬 전환 문을 세우지 않는다.
+        // (2026-09-08 결정: 별도 실내 씬 폐기)
+        if (GreyboxBuild.Use3D) return 0;
         if (GreyboxBuild.Marker(m, "gb_door", name, x, y) == 0) return 0;
         KeepOut(x, y);   // 건물 입구 앞도 비워 둔다(문이 잔해로 막히면 못 들어간다)
         var t = FindChild(m.transform, name);
@@ -1905,6 +1920,22 @@ public static class Zone1GreyboxLayout
         //   랜드마크의 정체성은 '큰 덩어리'가 아니라 라벨·전용 내부 씬·주변 위험도가 만든다.
         if (x1 - x0 > MaxSpan || y1 - y0 > MaxSpan)
             return SolidCluster(m, name, x0, y0, x1, y1, side, doorAt, scene, returnSpawn);
+
+        // ── 3D: 걸어 들어가는 방 ──────────────────────────────────────
+        // 별도 실내 씬으로 넘기지 않고 **같은 맵 안에서** 들어간다(2026-09-08 결정).
+        // 발자국이 너무 작으면 사람이 낄 상자라 방으로 만들지 않고 막힌 덩어리로 둔다.
+        if (GreyboxBuild.Use3D)
+        {
+            MarkBuilding(x0, y0, x1, y1);
+            if (Greybox3D.CanBeRoom(x0, y0, x1, y1))
+            {
+                DoorPad(x0, y0, x1, y1, side, doorAt, out float rex, out float rey, out float rtw, out float rth);
+                // 문 갭 시작 좌표 = 문 면을 따라가는 축의 값에서 폭의 절반을 뺀 것.
+                float gapAt = (side == 'S' || side == 'N') ? rex - 1.2f : rey - 1.2f;
+                return Greybox3D.Room(m, name, x0, y0, x1, y1, side, gapAt);
+            }
+            return GreyboxBuild.Wall(m, name, (x0 + x1) * 0.5f, (y0 + y1) * 0.5f, x1 - x0, y1 - y0);
+        }
 
         int n = GreyboxBuild.Wall(m, name, (x0 + x1) * 0.5f, (y0 + y1) * 0.5f, x1 - x0, y1 - y0);
         MarkBuilding(x0, y0, x1, y1);
@@ -2011,6 +2042,7 @@ public static class Zone1GreyboxLayout
     /// 선택은 이름 해시 기반이라 **결정론적**(같은 값이면 같은 건물이 열림).</summary>
     static int EnterGeneric(GameObject m, string name, float x, float y, float tw = 2f, float th = 1f)
     {
+        if (GreyboxBuild.Use3D) return 0;   // 3D — 씬 전환 문 없음(같은 맵에서 들어간다)
         float ratio = GameTuning.Instance != null ? GameTuning.Instance.buildingEnterRatio : 1f;
         if (ratio < 1f)
         {
