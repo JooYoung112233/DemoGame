@@ -64,6 +64,12 @@ public class HideoutDiorama : MonoBehaviour
         var rb = _player.GetComponent<Rigidbody>();
         if (rb != null) { rb.linearVelocity = Vector3.zero; rb.isKinematic = true; }
 
+        // ⚠️ 근접 E 프롬프트를 끈다. 걸어다니지 않는 화면이라 "다가가서 E"가 성립하지 않고,
+        //    무엇을 누를 수 있는지는 소품 머리 위 FacilityLabel이 알려준다.
+        //    (HideoutController가 하던 일인데 디오라마가 그 경로를 양보받으면서 같이 빠졌었다.)
+        var interaction = _player.GetComponent<InteractionSystem>();
+        if (interaction != null) interaction.enabled = false;
+
         _view = _player.transform.Find("Character3D");
 
         if (_idle != null) PlaceAt(_idle, instant: true);

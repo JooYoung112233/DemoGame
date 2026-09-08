@@ -66,17 +66,22 @@ public static class Hideout3DLayout
         // 시설 — 클릭하면 캐릭터가 그 앞으로 가서 자세를 잡는다(디오라마).
         // dock = UI가 붙을 자리. 카메라가 반대쪽으로 밀어 캐릭터를 안 가린다.
         //   침대만 Bottom(하단 바 = 시간 표기), 나머지는 Right(우측 패널).
-        n += Facility(map, "Bed_BoxCot",       new Vector3(5f,  0f, 6.5f), new Vector3(2.0f, 0.55f, 1.0f), new Color(0.45f, 0.38f, 0.32f), "bed",       Pose.Lie,   Dock.Bottom);
-        n += Facility(map, "Workbench_Broken", new Vector3(9f,  0f, 6.5f), new Vector3(1.8f, 0.95f, 0.8f), new Color(0.50f, 0.45f, 0.38f), "workbench", Pose.Stand, Dock.Right);
-        n += Facility(map, "Stash_창고",        new Vector3(11f, 0f, 6.5f), new Vector3(1.2f, 1.4f,  0.8f), new Color(0.30f, 0.62f, 0.55f), "stash",     Pose.Stand, Dock.Right);
-        n += Facility(map, "Radio_라디오",      new Vector3(7f,  0f, 6.5f), new Vector3(0.8f, 0.6f,  0.6f), new Color(0.30f, 0.45f, 0.72f), "radio",     Pose.Stand, Dock.Right);
-        n += Facility(map, "CookingBench",     new Vector3(11f, 0f, 2.5f), new Vector3(1.6f, 0.9f,  0.8f), new Color(0.60f, 0.45f, 0.30f), "cooking",   Pose.Stand, Dock.Right);
-        n += Facility(map, "MedicalBench",     new Vector3(5f,  0f, 2.5f), new Vector3(1.6f, 0.9f,  0.8f), new Color(0.70f, 0.70f, 0.72f), "medical",   Pose.Stand, Dock.Right);
-        n += Facility(map, "Dispatch_파견",     new Vector3(8f,  0f, 2.5f), new Vector3(1.0f, 1.6f,  0.3f), new Color(0.66f, 0.42f, 0.24f), "dispatch",  Pose.Stand, Dock.Right);
-        n += Facility(map, "Generator_발전기",  new Vector3(9f,  0f, 4.5f), new Vector3(1.0f, 1.0f,  1.0f), new Color(0.62f, 0.55f, 0.30f), "generator", Pose.Stand, Dock.Right);
+        // 북쪽 벽 줄 (z=7.7) — 침대 · 라디오 · 작업대 · 창고
+        n += Facility(map, "Bed_BoxCot",       new Vector3(2.6f,  0f, 7.7f), new Vector3(2.2f, 0.55f, 1.1f), new Color(0.45f, 0.38f, 0.32f), "bed",       Pose.Lie,   Dock.Bottom);
+        n += Facility(map, "Radio_라디오",      new Vector3(5.6f,  0f, 7.9f), new Vector3(0.8f, 0.6f,  0.6f), new Color(0.30f, 0.45f, 0.72f), "radio",     Pose.Stand, Dock.Right);
+        n += Facility(map, "Workbench_Broken", new Vector3(8.4f,  0f, 7.8f), new Vector3(1.9f, 0.95f, 0.8f), new Color(0.50f, 0.45f, 0.38f), "workbench", Pose.Stand, Dock.Right);
+        n += Facility(map, "Stash_창고",        new Vector3(11.6f, 0f, 7.8f), new Vector3(1.3f, 1.4f,  0.8f), new Color(0.30f, 0.62f, 0.55f), "stash",     Pose.Stand, Dock.Right);
 
-        // 대기 자리 — 아무 시설도 안 눌렀을 때 캐릭터가 앉아 있는 의자.
-        n += Facility(map, "Chair_Idle", new Vector3(7f, 0f, 4.2f), new Vector3(0.6f, 0.85f, 0.6f), new Color(0.42f, 0.34f, 0.28f), "idle", Pose.Sit, Dock.None);
+        // 남쪽 벽 줄 (z=1.3) — 의료대 · 조리대 · 파견 보드
+        n += Facility(map, "MedicalBench",     new Vector3(3.0f,  0f, 1.3f), new Vector3(1.7f, 0.9f,  0.8f), new Color(0.70f, 0.70f, 0.72f), "medical",   Pose.Stand, Dock.Right);
+        n += Facility(map, "CookingBench",     new Vector3(6.6f,  0f, 1.3f), new Vector3(1.7f, 0.9f,  0.8f), new Color(0.60f, 0.45f, 0.30f), "cooking",   Pose.Stand, Dock.Right);
+        n += Facility(map, "Dispatch_파견",     new Vector3(10.2f, 0f, 1.15f),new Vector3(1.2f, 1.6f,  0.3f), new Color(0.66f, 0.42f, 0.24f), "dispatch",  Pose.Stand, Dock.Right);
+
+        // 동쪽 벽 — 발전기
+        n += Facility(map, "Generator_발전기",  new Vector3(12.9f, 0f, 4.5f), new Vector3(1.0f, 1.0f,  1.0f), new Color(0.62f, 0.55f, 0.30f), "generator", Pose.Stand, Dock.Right);
+
+        // 대기 의자 — 방 가운데. 여기만 캐릭터가 소품 "위"에 있으므로 서기 오프셋 0.
+        n += Facility(map, "Chair_Idle", new Vector3(6.6f, 0f, 4.5f), new Vector3(0.6f, 0.85f, 0.6f), new Color(0.42f, 0.34f, 0.28f), "idle", Pose.Sit, Dock.None);
 
         // ── 디오라마 오케스트레이터 ── 시설 클릭 → 캐릭터 이동·자세 → 카메라 → UI
         var dio = new GameObject("HideoutDiorama");
@@ -181,11 +186,14 @@ public static class Hideout3DLayout
         Box(parent, name, center, size, Mat(c, 0.06f));
         var go = parent.transform.Find(name).gameObject;
 
-        // 캐릭터가 설 자리 — 방 중앙(7, 4.5) 쪽에서 접근한다고 보고 그 방향으로 띄운다.
-        var toCenter = new Vector3(7f - floorPos.x, 0f, 4.5f - floorPos.z).normalized;
+        // 캐릭터가 설 자리 — 방 중앙에서 접근한다고 보고 그 방향으로 띄운다.
+        // 대기 의자(idle)만 예외: 앉는 자리라 소품 위치 그대로.
+        var toCenter = new Vector3(RoomW * .5f - floorPos.x, 0f, RoomD * .5f - floorPos.z);
+        toCenter = toCenter.sqrMagnitude > 0.0001f ? toCenter.normalized : Vector3.forward;
+        float standDist = moduleKey == "idle" ? 0f : 1.15f;
         var standGO = new GameObject("Stand");
         standGO.transform.SetParent(go.transform, true);
-        standGO.transform.position = new Vector3(floorPos.x, 0f, floorPos.z) + toCenter * 1.1f;
+        standGO.transform.position = new Vector3(floorPos.x, 0f, floorPos.z) + toCenter * standDist;
 
         // 기존 UI 배선 — moduleKey에 맞는 상호작용 타입을 붙인다.
         var io = go.AddComponent<InteractableObject>();
@@ -198,6 +206,10 @@ public static class Hideout3DLayout
         a.standPoint = standGO.transform;
         a.pose = pose;
         a.dock = dock;
+
+        // 머리 위 역할 라벨 — 클릭 화면이라 E 프롬프트가 성립하지 않는다.
+        // 무엇을 누를 수 있는지 한눈에 보여야 한다.
+        if (moduleKey != "idle") go.AddComponent<FacilityLabel>();
         return 2;
     }
 }
