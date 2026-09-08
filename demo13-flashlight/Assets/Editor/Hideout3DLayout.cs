@@ -2,6 +2,8 @@
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using Pose = HideoutFacilityAnchor.Pose;
+using Dock = HideoutFacilityAnchor.Dock;
 
 /// <summary>
 /// 은신처(컨테이너) — **3D 쿼터뷰 버전**. 2D `HideoutGreyboxLayout`의 3D 대응.
@@ -55,14 +57,20 @@ public static class Hideout3DLayout
         }
 
         // ── 시설 ── 2D판과 같은 (x, y) → (x, 0, y)
-        n += Facility(map, "Bed_BoxCot",       new Vector3(5f,  0f, 6.5f), new Vector3(2.0f, 0.55f, 1.0f), new Color(0.45f, 0.38f, 0.32f));
-        n += Facility(map, "Workbench_Broken", new Vector3(9f,  0f, 6.5f), new Vector3(1.8f, 0.95f, 0.8f), new Color(0.50f, 0.45f, 0.38f));
-        n += Facility(map, "Stash_창고",        new Vector3(11f, 0f, 6.5f), new Vector3(1.2f, 1.4f,  0.8f), new Color(0.30f, 0.62f, 0.55f));
-        n += Facility(map, "Radio_라디오",      new Vector3(7f,  0f, 6.5f), new Vector3(0.8f, 0.6f,  0.6f), new Color(0.30f, 0.45f, 0.72f));
-        n += Facility(map, "CookingBench",     new Vector3(11f, 0f, 2.5f), new Vector3(1.6f, 0.9f,  0.8f), new Color(0.60f, 0.45f, 0.30f));
-        n += Facility(map, "MedicalBench",     new Vector3(5f,  0f, 2.5f), new Vector3(1.6f, 0.9f,  0.8f), new Color(0.70f, 0.70f, 0.72f));
-        n += Facility(map, "Dispatch_파견",     new Vector3(8f,  0f, 2.5f), new Vector3(1.0f, 1.6f,  0.3f), new Color(0.66f, 0.42f, 0.24f));
-        n += Facility(map, "Generator_발전기",  new Vector3(9f,  0f, 4.5f), new Vector3(1.0f, 1.0f,  1.0f), new Color(0.62f, 0.55f, 0.30f));
+        // 시설 — 클릭하면 캐릭터가 그 앞으로 가서 자세를 잡는다(디오라마).
+        // dock = UI가 붙을 자리. 카메라가 반대쪽으로 밀어 캐릭터를 안 가린다.
+        //   침대만 Bottom(하단 바 = 시간 표기), 나머지는 Right(우측 패널).
+        n += Facility(map, "Bed_BoxCot",       new Vector3(5f,  0f, 6.5f), new Vector3(2.0f, 0.55f, 1.0f), new Color(0.45f, 0.38f, 0.32f), "bed",       Pose.Lie,   Dock.Bottom);
+        n += Facility(map, "Workbench_Broken", new Vector3(9f,  0f, 6.5f), new Vector3(1.8f, 0.95f, 0.8f), new Color(0.50f, 0.45f, 0.38f), "workbench", Pose.Stand, Dock.Right);
+        n += Facility(map, "Stash_창고",        new Vector3(11f, 0f, 6.5f), new Vector3(1.2f, 1.4f,  0.8f), new Color(0.30f, 0.62f, 0.55f), "stash",     Pose.Stand, Dock.Right);
+        n += Facility(map, "Radio_라디오",      new Vector3(7f,  0f, 6.5f), new Vector3(0.8f, 0.6f,  0.6f), new Color(0.30f, 0.45f, 0.72f), "radio",     Pose.Stand, Dock.Right);
+        n += Facility(map, "CookingBench",     new Vector3(11f, 0f, 2.5f), new Vector3(1.6f, 0.9f,  0.8f), new Color(0.60f, 0.45f, 0.30f), "cooking",   Pose.Stand, Dock.Right);
+        n += Facility(map, "MedicalBench",     new Vector3(5f,  0f, 2.5f), new Vector3(1.6f, 0.9f,  0.8f), new Color(0.70f, 0.70f, 0.72f), "medical",   Pose.Stand, Dock.Right);
+        n += Facility(map, "Dispatch_파견",     new Vector3(8f,  0f, 2.5f), new Vector3(1.0f, 1.6f,  0.3f), new Color(0.66f, 0.42f, 0.24f), "dispatch",  Pose.Stand, Dock.Right);
+        n += Facility(map, "Generator_발전기",  new Vector3(9f,  0f, 4.5f), new Vector3(1.0f, 1.0f,  1.0f), new Color(0.62f, 0.55f, 0.30f), "generator", Pose.Stand, Dock.Right);
+
+        // 대기 자리 — 아무 시설도 안 눌렀을 때 캐릭터가 앉아 있는 의자.
+        n += Facility(map, "Chair_Idle", new Vector3(7f, 0f, 4.2f), new Vector3(0.6f, 0.85f, 0.6f), new Color(0.42f, 0.34f, 0.28f), "idle", Pose.Sit, Dock.None);
 
         // ── 진입 스폰 (2D판과 동일 위치) ──
         var spawn = new GameObject("default");
@@ -139,11 +147,26 @@ public static class Hideout3DLayout
         return 1;
     }
 
-    /// <summary>시설 — 바닥에 놓이도록 y를 높이 절반만큼 띄운다.</summary>
-    static int Facility(GameObject parent, string name, Vector3 floorPos, Vector3 size, Color c)
+    /// <summary>시설 — 바닥에 놓이도록 y를 높이 절반만큼 띄우고, 캐릭터 자세 앵커를 붙인다.</summary>
+    static int Facility(GameObject parent, string name, Vector3 floorPos, Vector3 size, Color c,
+                        string moduleKey, Pose pose, Dock dock)
     {
         var center = new Vector3(floorPos.x, size.y * .5f, floorPos.z);
-        return Box(parent, name, center, size, Mat(c, 0.06f));
+        Box(parent, name, center, size, Mat(c, 0.06f));
+        var go = parent.transform.Find(name).gameObject;
+
+        // 캐릭터가 설 자리 — 방 중앙(7, 4.5) 쪽에서 접근한다고 보고 그 방향으로 띄운다.
+        var toCenter = new Vector3(7f - floorPos.x, 0f, 4.5f - floorPos.z).normalized;
+        var standGO = new GameObject("Stand");
+        standGO.transform.SetParent(go.transform, true);
+        standGO.transform.position = new Vector3(floorPos.x, 0f, floorPos.z) + toCenter * 1.1f;
+
+        var a = go.AddComponent<HideoutFacilityAnchor>();
+        a.moduleKey = moduleKey;
+        a.standPoint = standGO.transform;
+        a.pose = pose;
+        a.dock = dock;
+        return 2;
     }
 }
 #endif

@@ -21,6 +21,13 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] float followDistance = 25f;
 
     Vector3 offset;
+
+    // ── 연출 포커스 ──
+    // 시설 UI를 열 때 피사체를 화면 한쪽으로 밀어 UI 자리를 비운다(캐릭터를 가리지 않기 위해).
+    Transform _focus;
+    Vector2   _focusBias;     // 화면 비율. (0,+0.25) = 피사체를 화면 위쪽으로
+    float     _focusSize;     // 0이면 오소 크기 유지
+    bool      _hasFocus;
     Vector3 _basePos;        // 셰이크 제외한 추적 위치(스무딩 누적용)
     Camera cam;
     float baseOrthoSize;
@@ -91,6 +98,33 @@ public class CameraFollow : MonoBehaviour
         }
     }
 
+    /// <summary>시설 UI 등에서 피사체를 화면 한쪽으로 밀어 UI 자리를 비운다.
+    /// <paramref name="screenBias"/>는 화면 비율 — (0, 0.25)면 피사체가 화면 위쪽 1/4쯤으로 올라간다.
+    /// 카메라는 스무딩으로 부드럽게 이동한다(순간이동 아님).</summary>
+    public void SetFocus(Transform focus, Vector2 screenBias, float orthoSize = 0f)
+    {
+        _focus = focus; _focusBias = screenBias; _focusSize = orthoSize; _hasFocus = true;
+    }
+
+    /// <summary>연출 포커스 해제 — 다시 플레이어를 화면 중앙에 둔다.</summary>
+    public void ClearFocus()
+    {
+        _hasFocus = false; _focus = null; _focusBias = Vector2.zero;
+        if (cam != null && baseOrthoSize > 0f) _focusSize = baseOrthoSize;
+    }
+
+    /// <summary>화면 비율 편향을 월드 이동으로 바꾼다. 카메라가 기울어 있으므로
+    /// 화면 '위'는 월드에서 카메라 forward를 지면에 눕힌 방향이다.</summary>
+    Vector3 FramingShift()
+    {
+        if (!_hasFocus || cam == null) return Vector3.zero;
+        float half = cam.orthographic ? cam.orthographicSize : 10f;
+        Vector3 right = transform.right;
+        Vector3 up    = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+        // 피사체를 위로 올리려면 카메라가 볼 지점을 아래로 내린다 → 부호 반전
+        return (-right * _focusBias.x - up * _focusBias.y) * (half * 2f);
+    }
+
     /// <summary>카메라를 타깃 위치로 즉시 스냅(스무딩 건너뜀). 스폰/순간이동 직후 호출 — "슉~" 슬라이드 방지.</summary>
     public void SnapToTarget()
     {
@@ -108,8 +142,11 @@ public class CameraFollow : MonoBehaviour
             if (target == null) return;
         }
 
-        Vector3 desired = target.position + offset;
+        Vector3 anchor = _hasFocus && _focus != null ? _focus.position : target.position;
+        Vector3 desired = anchor + offset + FramingShift();
         _basePos = Vector3.Lerp(_basePos, desired, smoothSpeed * Time.unscaledDeltaTime);
+        if (cam != null && _hasFocus && _focusSize > 0f)
+            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, _focusSize, smoothSpeed * Time.unscaledDeltaTime);
         transform.position = _basePos + UpdateShake();
         UpdateZoom();
     }
