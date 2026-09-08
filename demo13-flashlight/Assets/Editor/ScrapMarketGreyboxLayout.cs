@@ -313,10 +313,22 @@ public static class ScrapMarketGreyboxLayout
         if (t == null) return 1;
         var go = t.gameObject;
 
-        var box = go.GetComponent<BoxCollider2D>();
-        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-        box.isTrigger = false;
-        box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
+        // 솔리드 콜라이더(통행 차단). 2D는 BoxCollider2D, 3D는 BoxCollider다.
+        // ⚠️ 3D 상자에 2D 콜라이더를 붙이면 AddComponent가 null을 돌려주고 다음 줄에서 죽는다.
+        if (GreyboxBuild.Use3D)
+        {
+            var box3 = go.GetComponent<BoxCollider>();
+            if (box3 == null) box3 = go.AddComponent<BoxCollider>();
+            box3.isTrigger = false;
+            box3.size = Vector3.one;
+        }
+        else
+        {
+            var box = go.GetComponent<BoxCollider2D>();
+            if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+            box.isTrigger = false;
+            box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
+        }
 
         var io = go.GetComponent<InteractableObject>();
         if (io == null) io = go.AddComponent<InteractableObject>();
@@ -345,6 +357,10 @@ public static class ScrapMarketGreyboxLayout
 
     static int Bar(GameObject parent, string prefabId, string name, float cx, float cy, float lenX, float thickY)
     {
+        // 3D 모드면 프리미티브를 Greybox3D로 넘긴다 — 이 빌더는 GreyboxBuild를 안 쓰고
+        // 자체 헬퍼를 갖고 있어서, 스위치를 여기에도 달아야 3D로 나온다.
+        if (GreyboxBuild.Use3D) return Greybox3D.Bar(prefabId, parent, name, cx + OX, cy + OY, lenX, thickY);
+
         var go = Spawn(prefabId, name, parent);
         if (go == null) return 0;
         go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);
@@ -371,6 +387,7 @@ public static class ScrapMarketGreyboxLayout
 
     static int Floor(GameObject parent, string name, float cx, float cy, float w, float h)
     {
+        if (GreyboxBuild.Use3D) return Greybox3D.Floor(parent, name, cx + OX, cy + OY, w, h);
         var go = Spawn("gb_floor", name, parent);
         if (go == null) return 0;
         go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);

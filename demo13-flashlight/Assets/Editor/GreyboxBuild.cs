@@ -166,6 +166,17 @@ public static class GreyboxBuild
     /// <summary>쪽지(gb_note) + 내용 주입(읽으면 NoteUI 전체화면).</summary>
     public static int Note(GameObject p, string name, float x, float y, string title, string content)
     {
+        if (Use3D)
+        {
+            // 3D는 그레이박스 상자로 세우고 상호작용을 직접 얹는다(2D 프리팹엔 이미 붙어 있다).
+            if (Greybox3D.Marker(p, "gb_note", name, x, y) == 0) return 0;
+            var t3 = p.transform.Find(name);
+            if (t3 == null) return 1;
+            var io3 = t3.GetComponent<InteractableObject>() ?? t3.gameObject.AddComponent<InteractableObject>();
+            io3.SetNote(content, title, "읽기");
+            return 1;
+        }
+
         var go = Spawn("gb_note", name, p); if (go == null) return 0;
         go.transform.localPosition = new Vector3(x, y, 0f);
         var io = go.GetComponentInChildren<InteractableObject>();

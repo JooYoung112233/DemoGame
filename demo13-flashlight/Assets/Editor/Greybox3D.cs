@@ -197,10 +197,20 @@ public static class Greybox3D
                 go.AddComponent<SpawnPoint>();
                 return 1;
             }
+
             case "gb_door":
                 // 문 '표시' — 통과는 출구 발판이 담당하므로 콜라이더는 두지 않는다.
-                return Box(p, name, new Vector3(x, 1.2f, y), new Vector3(2.2f, 2.4f, 0.15f), _door, 0f)
-                       + Strip(p, name);
+                Box(p, name, new Vector3(x, 1.2f, y), new Vector3(2.2f, 2.4f, 0.15f), _door, 0f);
+                Strip(p, name);
+                return 1;
+
+            // 상자·쪽지·적·탈출구 — 아직 모델이 없다. 크기만 다른 그레이박스로 세우고
+            // 기능(콜라이더·컴포넌트)은 호출부가 얹는다. 위치가 맞는 것이 지금 단계의 목표다.
+            case "gb_crate":  return Standing(p, name, x, y, 0.9f, 0.9f, 0.9f, _prop, 0f);
+            case "gb_note":   return Standing(p, name, x, y, 0.4f, 0.4f, 0.15f, _prop, 0f);
+            case "gb_enemy":  return Standing(p, name, x, y, 0.6f, 0.6f, 1.8f, _barricade, 0f);
+            case "gb_exit":   return Standing(p, name, x, y, 1.6f, 1.6f, 0.08f, _door, 0f);
+
             default:
             {
                 var go = new GameObject(name);
@@ -211,18 +221,15 @@ public static class Greybox3D
         }
     }
 
-    /// <summary>방금 만든 상자에서 콜라이더를 뗀다(장식용).</summary>
-    static int Strip(GameObject p, string name)
+
+    /// <summary>방금 만든 상자에서 콜라이더를 뗀다(문 표시처럼 통과해야 하는 장식용).</summary>
+    static void Strip(GameObject p, string name)
     {
         var t = p.transform.Find(name);
-        if (t != null)
-        {
-            var c = t.GetComponent<Collider>();
-            if (c != null) Object.DestroyImmediate(c);
-        }
-        return 0;
+        if (t == null) return;
+        var c = t.GetComponent<Collider>();
+        if (c != null) Object.DestroyImmediate(c);
     }
-
     // ── 건물 ─────────────────────────────────────────────────────────
 
     /// <summary>폐쇄 '건물' = 둘레 4벽(두께 1) + 한 면에 2m 문 갭.

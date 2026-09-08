@@ -2189,11 +2189,23 @@ public static class Zone1GreyboxLayout
         if (t == null) return 0;
         var go = t.gameObject;
 
-        // 솔리드 콜라이더(통행 차단). gb_barricade에 이미 있으면 크기만 맞춘다.
-        var box = go.GetComponent<BoxCollider2D>();
-        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-        box.isTrigger = false;
-        box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
+        // 솔리드 콜라이더(통행 차단). 2D는 BoxCollider2D, 3D는 BoxCollider다.
+        // ⚠️ 3D 상자에 2D 콜라이더를 붙이면 AddComponent가 null을 돌려주고 바로 다음 줄에서
+        //    NullReference가 난다(실내 빌더에서도 같은 자리에 걸렸다).
+        if (GreyboxBuild.Use3D)
+        {
+            var box3 = go.GetComponent<BoxCollider>();
+            if (box3 == null) box3 = go.AddComponent<BoxCollider>();
+            box3.isTrigger = false;
+            box3.size = Vector3.one;   // 부모 스케일(w, 높이, h)이 곱해진다
+        }
+        else
+        {
+            var box = go.GetComponent<BoxCollider2D>();
+            if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+            box.isTrigger = false;
+            box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
+        }
 
         var io = go.GetComponent<InteractableObject>();
         if (io == null) io = go.AddComponent<InteractableObject>();

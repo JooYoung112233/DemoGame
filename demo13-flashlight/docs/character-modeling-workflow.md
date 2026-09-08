@@ -32,6 +32,15 @@
 - 확인 결과: 손 외 12개 메시와 모든 모션 키가 그대로임을 확인했다. 둥근 손의 FBX 재임포트/GLB 스킨·3개 클립 검사를 통과했다. [최신 모션 영상](../Assets/ChibiSurvivor/CompactSurvivor/Animated/RoundHands/LocomotionPreview.mp4)도 갱신했다.
 - 재생성: [round_compact_hands.py](../tools/round_compact_hands.py). 영상/내보내기 검사는 기존 도구에 `-- --round-hands`를 붙여 최신 손 버전을 대상으로 한다.
 
+### 다음 모션 제작안 — 2026-09-08
+
+- 요청: **“다음모션 만들어볼까”**. 앞서 논의한 순서에 따라 한손 근접 공격을 다음 작업으로 해석했다. 이번 동작의 세부 타이밍과 형태는 사용자 확인 전 제작안이다.
+- 최신 작업 파일: [Combat/CompactSurvivor_Combat.blend](../Assets/ChibiSurvivor/CompactSurvivor/Animated/Combat/CompactSurvivor_Combat.blend). 승인된 RoundHands 버전에 `Attack_OneHand`만 추가했으며 13개 메시·가중치와 기존 Idle/Walk/Run 키는 그대로다.
+- 오른손 사선 베기: 30fps, 1~40프레임(1.3초). 준비 11f → 베기 중심 15f → 마무리 18f → 기존 Idle 첫 자세로 복귀 40f. 제자리 단발 동작이며 전투 판정/대미지 이벤트는 연결하지 않았다.
+- 양발 접지는 고정하고 몸통과 어깨를 회전한다. 복귀하는 손은 허리 파우치 앞쪽을 돌아가도록 조정했다. 같은 골격과 `HandSocket.R`를 사용하며 둥근 손에 손가락/엄지를 다시 만들지 않는다.
+- [실제 Blender 영상](../Assets/ChibiSurvivor/CompactSurvivor/Animated/Combat/Attack_OneHand_Preview.mp4), [단계별 자세](../Assets/ChibiSurvivor/CompactSurvivor/Animated/Combat/Attack_OneHand_Poses.png). 임시 칼은 궤적 확인용으로 별도 `Attack_OneHand_Preview.blend`에만 포함하며 캐릭터 FBX/GLB에서는 제외한다.
+- 재생성: `tools/animate_compact_onehand.py`; 자세/영상: `tools/preview_compact_onehand.py -- --poses` 또는 `-- --movies`; FBX/GLB 검사: `tools/check_compact_animation_export.py -- --onehand`. 기존 루프/외형 보존, 새 모션 복귀·접지, 내보내기 후 4개 클립을 확인했다. 임시 칼의 40프레임 메시 표면 교차 검사도 통과했다. Unity 연결/검증은 다음 단계다.
+
 ### 기본 모션 산출물과 재사용 정보
 
 - [CompactSurvivor_Animated.blend](../Assets/ChibiSurvivor/CompactSurvivor/Animated/CompactSurvivor_Animated.blend): 원본 외형에 스킨을 연결한 작업 파일. `CompactSurvivor_Rig`의 액션에서 Idle/Walk/Run 선택. 기본 재생 범위는 Idle이다.
@@ -125,6 +134,7 @@
 
 ## 변경 이력
 
+- 2026-09-08: 둥근 손과 기존 이동 모션을 유지한 한손 사선 베기 제작안 추가. 복귀 중 파우치를 통과하던 칼 경로 수정. 실제 Blender 영상과 4개 클립 FBX/GLB를 Combat 폴더에 분리.
 - 2026-09-08: CompactSurvivor에 23본 리그와 Idle/Walk/Run 3개 제작. 13개 메시 분리 유지, 제자리 모션 접지/루프 확인 및 FBX 재임포트·GLB 확인 완료. Unity 연결은 보류.
 - 2026-09-08: 사용자 선택 이미지에 해당하는 ThreeHeadSurvivor로 기준을 전환. 이전 얼굴 수정 작업 중단, 원본 머리를 유지한 2.608등신 CompactSurvivor 제작 및 Blender 렌더 확인.
 - 2026-09-08: 얼굴형 피드백에 따라 볼 아래·턱 폭을 넓힌 부드러운 사각형 수정안 진행. 전체 비율 유지, 얼굴 내부 형상 수정 허용 범위를 명시.
