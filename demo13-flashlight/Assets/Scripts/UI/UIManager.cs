@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -334,8 +335,68 @@ public class UIManager : MonoBehaviour
     /// 위에 뜨는 팝업 → 캐릭터 패널(내부 레이어 위임) → 기타 base 패널 → 모달 순.
     /// 닫을 게 있으면 true.
     /// </summary>
+    // ── 열린 순서 스택 ────────────────────────────────────────────
+    // 아래 CloseTopmost()의 목록은 **하드코딩된 우선순위**라 실제로 연 순서와 무관하다.
+    // 그래서 나중에 연 UI가 남고 먼저 연 UI가 닫히는 일이 생긴다.
+    // 여기 등록한 패널은 **연 순서의 역순(LIFO)** 으로 ESC에 닫힌다.
+    // 기존 패널들은 하나씩 옮기면 되고, 옮기기 전까지는 아래 목록이 폴백으로 남는다.
+    struct UiEntry
+    {
+        public string Name;
+        public System.Func<bool> IsOpen;
+        public System.Action Close;
+    }
+    readonly List<UiEntry> _stack = new List<UiEntry>();
+
+    /// <summary>패널이 열릴 때 등록. 같은 이름이 이미 있으면 맨 위로 올린다.</summary>
+    public void PushUI(string name, System.Func<bool> isOpen, System.Action close)
+    {
+        if (string.IsNullOrEmpty(name) || isOpen == null || close == null) return;
+        _stack.RemoveAll(e => e.Name == name);
+        _stack.Add(new UiEntry { Name = name, IsOpen = isOpen, Close = close });
+    }
+
+    /// <summary>패널이 닫힐 때 해제.</summary>
+    public void PopUI(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return;
+        _stack.RemoveAll(e => e.Name == name);
+    }
+
+    /// <summary>스택에서 아직 열려 있는 맨 위 패널을 닫는다. 닫았으면 true.</summary>
+    bool CloseTopmostRegistered()
+    {
+        for (int i = _stack.Count - 1; i >= 0; i--)
+        {
+            var e = _stack[i];
+            bool open;
+            try { open = e.IsOpen(); } catch { _stack.RemoveAt(i); continue; }   // 파괴된 패널 정리
+            if (!open) { _stack.RemoveAt(i); continue; }
+            // ⚠️ Close()가 내부적으로 PopUI로 자기를 먼저 지울 수 있다.
+            //    그 뒤에 RemoveAt(i)를 부르면 범위를 벗어난다 — 이름으로 지운다(멱등).
+            string name = e.Name;
+            e.Close();
+            _stack.RemoveAll(x => x.Name == name);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>스택에 열려 있는 패널이 하나라도 있는가.</summary>
+    bool AnyRegisteredOpen()
+    {
+        for (int i = _stack.Count - 1; i >= 0; i--)
+        {
+            try { if (_stack[i].IsOpen()) return true; } catch { _stack.RemoveAt(i); }
+        }
+        return false;
+    }
+
     bool CloseTopmost()
     {
+        // ① 연 순서가 기록된 것부터 — 나중에 연 것이 먼저 닫힌다.
+        if (CloseTopmostRegistered()) return true;
+
         // 1) base 패널 위에 뜨는 독립 팝업 (최상위부터)
         if (SettingsUI.IsShowing) { SettingsUI.Hide(); return true; }   // 일시정지 위 레이어 — PauseMenu보다 먼저
         if (ItemDetailUI.IsShowing) { ItemDetailUI.Hide(); return true; }
@@ -370,6 +431,10 @@ public class UIManager : MonoBehaviour
     /// <summary>모든 UI 닫기</summary>
     public void CloseAll()
     {
+        for (int i = _stack.Count - 1; i >= 0; i--)
+        { try { if (_stack[i].IsOpen()) _stack[i].Close(); } catch { } }
+        _stack.Clear();
+
         if (raidResultUI != null)
             raidResultUI.Hide();
         if (mapSelectUI != null)
@@ -400,6 +465,7 @@ public class UIManager : MonoBehaviour
     /// <summary>현재 어떤 UI든 열려있는지</summary>
     public bool IsAnyUIOpen()
     {
+        if (AnyRegisteredOpen()) return true;
         if (raidResultUI != null && raidResultUI.IsShowing) return true;
         if (mapSelectUI != null && mapSelectUI.IsShowing) return true;
         if (characterPanelUI != null && characterPanelUI.IsShowing) return true;

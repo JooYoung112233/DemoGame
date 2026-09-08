@@ -23,10 +23,20 @@ public class HideoutDockPanel : MonoBehaviour
     GameObject _root;
     RectTransform _panel;
     Text _title, _body;
-    Button _openBtn, _closeBtn;
+    Button _openBtn, _closeBtn, _upgradeBtn;
+    Text _statusText;
     System.Action _onOpen;
+    string _module;
+
+    // ── 기존 패널 입양 ──
+    RectTransform _content;          // 입양한 패널이 들어갈 자리
+    RectTransform _adopted;          // 지금 들고 있는 남의 패널
+    Transform _adoptedParent;        // 돌려줄 원래 부모
+    Vector2 _adoptedMin, _adoptedMax, _adoptedOffMin, _adoptedOffMax, _adoptedPivot;
+    Vector3 _adoptedScale;
 
     public bool IsOpen => _root != null && _root.activeSelf;
+    public bool HasAdopted => _adopted != null;
 
     void Awake()
     {
@@ -39,14 +49,17 @@ public class HideoutDockPanel : MonoBehaviour
     void OnDestroy() { if (Instance == this) Instance = null; }
 
     /// <summary>시설 패널을 연다. <paramref name="dock"/>에 따라 우측/하단에 붙는다.</summary>
-    public void Show(string title, string body, HideoutFacilityAnchor.Dock dock, System.Action onOpen)
+    public void Show(string title, string body, HideoutFacilityAnchor.Dock dock, System.Action onOpen,
+                     string moduleKey = null)
     {
         if (_root == null) Build();
         _onOpen = onOpen;
+        _module = moduleKey;
 
         _title.text = title;
         _body.text = body;
         _openBtn.gameObject.SetActive(onOpen != null);
+        RefreshModule();
 
         // 도킹 위치 — 캐릭터가 밀려난 반대쪽에 붙는다.
         if (dock == HideoutFacilityAnchor.Dock.Bottom)
@@ -67,12 +80,102 @@ public class HideoutDockPanel : MonoBehaviour
         }
 
         _root.SetActive(true);
+
+        // ESC로 닫히도록 UI 매니저의 **열린 순서 스택**에 등록한다.
+        if (UIManager.Instance != null)
+            UIManager.Instance.PushUI("HideoutDock", () => IsOpen, Hide);
     }
 
     public void Hide()
     {
+        Release();
         if (_root != null) _root.SetActive(false);
         _onOpen = null;
+        _module = null;
+        if (UIManager.Instance != null) UIManager.Instance.PopUI("HideoutDock");
+    }
+
+    /// <summary>남의 패널을 도킹 안으로 끌어들인다 — 전체화면 UI를 덮어쓰지 않고 **자리만** 옮긴다.
+    /// 각 UI가 구조가 제각각이라 개별 접근자를 만들지 않고, 방금 켜진 Canvas의 내용을 통째로 받는다.</summary>
+    public bool Adopt(RectTransform panel)
+    {
+        if (panel == null || _content == null) return false;
+        Release();
+
+        _adopted        = panel;
+        _adoptedParent  = panel.parent;
+        _adoptedMin     = panel.anchorMin;
+        _adoptedMax     = panel.anchorMax;
+        _adoptedOffMin  = panel.offsetMin;
+        _adoptedOffMax  = panel.offsetMax;
+        _adoptedPivot   = panel.pivot;
+        _adoptedScale   = panel.localScale;
+
+        panel.SetParent(_content, false);
+        panel.anchorMin = Vector2.zero;
+        panel.anchorMax = Vector2.one;
+        panel.pivot     = new Vector2(0.5f, 0.5f);
+        panel.offsetMin = Vector2.zero;
+        panel.offsetMax = Vector2.zero;
+        panel.localScale = Vector3.one;
+
+        // 입양하면 설명·상태·열기 버튼은 그 패널이 대신한다.
+        _body.gameObject.SetActive(false);
+        _statusText.gameObject.SetActive(false);
+        _upgradeBtn.gameObject.SetActive(false);
+        _openBtn.gameObject.SetActive(false);
+        return true;
+    }
+
+    /// <summary>들고 있던 패널을 원래 자리로 돌려준다. 안 돌려주면 다음에 열 때 화면에서 사라진다.</summary>
+    public void Release()
+    {
+        if (_adopted == null) return;
+        if (_adoptedParent != null) _adopted.SetParent(_adoptedParent, false);
+        _adopted.anchorMin = _adoptedMin;
+        _adopted.anchorMax = _adoptedMax;
+        _adopted.pivot     = _adoptedPivot;
+        _adopted.offsetMin = _adoptedOffMin;
+        _adopted.offsetMax = _adoptedOffMax;
+        _adopted.localScale = _adoptedScale;
+        _adopted = null;
+        _adoptedParent = null;
+
+        if (_body != null) _body.gameObject.SetActive(true);
+        if (_statusText != null) _statusText.gameObject.SetActive(true);
+    }
+
+    /// <summary>시설 상태(레벨·다음 비용)를 패널 안에 직접 보여준다.
+    /// 전체화면 HideoutUI로 넘어가지 않고 여기서 건설·업그레이드까지 끝난다.</summary>
+    void RefreshModule()
+    {
+        var mm = HideoutModuleManager.Instance;
+        if (string.IsNullOrEmpty(_module) || mm == null)
+        {
+            _statusText.text = "";
+            _upgradeBtn.gameObject.SetActive(false);
+            return;
+        }
+
+        int lv = mm.GetLevel(_module);
+        string state = lv <= 0 ? "<미건설>" : "Lv " + lv + (mm.IsMaxed(_module) ? " (최대)" : "");
+        string cost = "";
+        var next = mm.NextCost(_module);
+        if (next.HasValue)
+        {
+            cost = "\n다음 단계: 스크랩 " + next.Value.scrap;
+            if (next.Value.mats != null)
+                foreach (var m in next.Value.mats)
+                    cost += "  " + m.id + " ×" + m.qty;
+        }
+        _statusText.text = state + cost;
+
+        bool can = mm.CanUpgrade(_module, out string reason);
+        _upgradeBtn.gameObject.SetActive(!mm.IsMaxed(_module));
+        _upgradeBtn.interactable = can;
+        var lbl = _upgradeBtn.GetComponentInChildren<Text>();
+        if (lbl != null) lbl.text = lv <= 0 ? "건설" : "업그레이드";
+        if (!can && !string.IsNullOrEmpty(reason)) _statusText.text += "\n\n" + reason;
     }
 
     // ── uGUI 코드 생성 ──────────────────────────────────────────────
@@ -105,8 +208,31 @@ public class HideoutDockPanel : MonoBehaviour
         _openBtn  = MakeButton(panelGO.transform, "Open",  "열기",  new Vector2(0f, 0f), new Vector2(28f, 24f),  new Vector2(200f, 56f));
         _closeBtn = MakeButton(panelGO.transform, "Close", "닫기", new Vector2(1f, 0f), new Vector2(-28f, 24f), new Vector2(160f, 56f));
 
+        _statusText = MakeText(panelGO.transform, "Status", 24, TextAnchor.LowerLeft,
+                               new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(28f, 170f), new Vector2(-56f, 340f));
+        _statusText.color = new Color(0.86f, 0.82f, 0.60f);
+
+        _upgradeBtn = MakeButton(panelGO.transform, "Upgrade", "업그레이드",
+                                 new Vector2(0f, 0f), new Vector2(28f, 92f), new Vector2(260f, 56f));
+
+        // 입양 자리 — 제목 아래, 버튼 위
+        var contentGO = new GameObject("Content");
+        contentGO.transform.SetParent(panelGO.transform, false);
+        _content = contentGO.AddComponent<RectTransform>();
+        _content.anchorMin = new Vector2(0f, 0f);
+        _content.anchorMax = new Vector2(1f, 1f);
+        _content.offsetMin = new Vector2(16f, 92f);
+        _content.offsetMax = new Vector2(-16f, -80f);
+
         _openBtn.onClick.AddListener(() => { _onOpen?.Invoke(); });
         _closeBtn.onClick.AddListener(Hide);
+        _upgradeBtn.onClick.AddListener(() =>
+        {
+            var mm = HideoutModuleManager.Instance;
+            if (mm == null || string.IsNullOrEmpty(_module)) return;
+            if (mm.Upgrade(_module)) RefreshModule();
+            else { mm.CanUpgrade(_module, out string why); ToastManager.Show(why, ToastManager.ToastType.Warning); }
+        });
     }
 
     static Text MakeText(Transform parent, string name, int size, TextAnchor anchor,
