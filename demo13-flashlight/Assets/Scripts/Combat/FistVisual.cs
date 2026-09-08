@@ -80,13 +80,14 @@ public class FistVisual : MonoBehaviour
     }
 
     /// <summary>약공 — 정권찌르기 1회(손 번갈아).</summary>
-    public void Punch(float duration) => Start(duration, ReachX, 0f);
+    public void Punch(float duration) => BeginPunch(duration, ReachX, 0f);
 
     /// <summary>강공 — 더 깊게 지르고, 지르기 전에 살짝 당긴다.</summary>
     public void PunchHeavy(float duration, bool full)
-        => Start(duration, ReachX + (full ? 0.20f : 0.10f), WindBackX);
+        => BeginPunch(duration, ReachX + (full ? 0.20f : 0.10f), WindBackX);
 
-    void Start(float duration, float reach, float wind)
+    // ⚠️ 이름이 Start면 Unity가 매직 메서드로 보고 "Start() can not take parameters" 경고를 낸다.
+    void BeginPunch(float duration, float reach, float wind)
     {
         _dur = Mathf.Max(0.08f, duration * 0.8f);
         _reach = reach;

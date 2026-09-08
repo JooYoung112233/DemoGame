@@ -22,6 +22,9 @@ public class TopDownPlayer : MonoBehaviour
     [SerializeField] Shader character3DShader;
     [SerializeField, Min(.01f)] float character3DScale = .65f;
     ChibiPlayerVisual _character3D;
+    [Tooltip("중력·낙하. 맵에 3D 콜라이더가 생긴 뒤(3D 전환 Stage 3)에 켠다. " +
+             "2D 스프라이트 맵에서 켜면 밟을 바닥이 없어 끝없이 떨어진다.")]
+    [SerializeField] bool useGravity = false;
     [SerializeField] bool flipByMouse = true;
     [Tooltip("좌우 미러 부호 반전. 캐릭터가 마우스와 반대로 보이면 토글.")]
     [SerializeField] bool flipInvert = true;
@@ -182,16 +185,26 @@ public class TopDownPlayer : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(transform.root.gameObject);
 
-        // 2D 시절 프리팹엔 Rigidbody2D만 있다. RequireComponent는 기존 프리팹에
-        // 소급 적용되지 않으므로 런타임에 직접 보정한다.
+        // ⚠️ Rigidbody2D가 남아 있으면 같은 오브젝트에 3D Rigidbody를 붙일 수 없다.
+        //    Destroy는 프레임 끝에 처리되므로 여기서 지우고 바로 붙이는 것도 불가능하다.
+        //    즉 **프리팹을 3D로 고쳐야만** 한다 — 조용히 실패하면 3D 캐릭터가 통째로 안 붙으므로
+        //    (Awake가 여기서 끊긴다) 눈에 띄게 알린다.
         var rb2d = GetComponent<Rigidbody2D>();
-        if (rb2d != null) Destroy(rb2d);
-        foreach (var c2d in GetComponents<Collider2D>()) Destroy(c2d);
+        if (rb2d != null)
+        {
+            Debug.LogError("[TopDownPlayer] Rigidbody2D가 남아 있다 — PlayerRig 프리팹을 3D로 갱신할 것. " +
+                           "3D 전환(이동·조준·캐릭터 표시)이 적용되지 않는다.", this);
+            Destroy(rb2d);
+        }
         _rb = GetComponent<Rigidbody>();
         if (_rb == null) _rb = gameObject.AddComponent<Rigidbody>();
         _rb.isKinematic = false;                            // 벽에 막히려면 Dynamic
-        _rb.useGravity  = true;                             // 단차에서 떨어진다
-        _rb.constraints = RigidbodyConstraints.FreezeRotation;
+        // ⚠️ 중력은 **3D 맵(Stage 3)이 생긴 뒤에** 켠다.
+        //    지금 맵은 2D 스프라이트라 3D 콜라이더가 없어 켜면 끝없이 떨어진다.
+        _rb.useGravity  = useGravity;
+        _rb.constraints = useGravity
+            ? RigidbodyConstraints.FreezeRotation
+            : RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
         _rb.collisionDetectionMode = CollisionDetectionMode.Continuous;   // 빠른 이동·대시 터널링 방지
         _rb.interpolation  = RigidbodyInterpolation.Interpolate;          // 부드러운 이동
         EnsureBodyCollider();

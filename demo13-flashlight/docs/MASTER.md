@@ -180,6 +180,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
+| [`hideout-3d.md`](hideout-3d.md) | **은신처 3D — 공간 규격·소품 정의서** (3D 전환의 첫 실제 공간). 방 14×9m·벽 2.6m·**천장 없음**(쿼터뷰), 시설 8종 치수/위치/형태 메모(모델 제작용), 조명 값. 빌더 `Editor/Hideout3DLayout.cs` | **그레이박스 (2026-09-08)** |
 | [`3d-migration.md`](3d-migration.md) | ⭐ **3D 쿼터뷰 전환 계획 SSOT** — 결정 4건(완전 3D·오소 고정 쿼터뷰·단차/엄폐·아트 전부 3D) + 2D 결합 실측(66,933 LOC 중 32%, Rigidbody2D 9파일·Physics2D 10곳) + 유지/교체/신규 표 + Stage 0~5 + 리스크·미결 | **계획 (2026-09-07), 미착수** |
 | [`topdown-migration.md`](topdown-migration.md) | **아이소 → 탑다운 2D 전환** 배경·유지/제거/신규 목록·단계 계획 | 진행 중 |
 | [`rendering.md`](rendering.md) | **현 구현 = 순수 탑다운 2D** — URP 2D Renderer, 2D Orthographic 카메라, Light2D, Tilemap, Prop2D, BRB/ 셰이더 10종. 상단에 3D 전환 방향 결정 등재(계획은 `3d-migration.md`) | 확정 (전환 예정) |
