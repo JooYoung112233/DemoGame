@@ -39,6 +39,9 @@ public static class DockedLayout
     /// <summary>줄일 때의 하한. 이보다 작아지면 글씨를 못 읽는다 — 그럴 바엔 스크롤이 낫다.</summary>
     const float MinScale = 0.72f;
 
+    /// <summary>이 배수까지는 스크롤 대신 살짝 줄여 한 화면에 담는다(하한 축소율 ≈ 0.87).</summary>
+    const float SquashLimit = 1.15f;
+
 
     /// <summary>쌓기 재귀 깊이 한계. 이 아래로는 축소로 처리한다.</summary>
     const int MaxDepth = 3;
@@ -74,6 +77,10 @@ public static class DockedLayout
 
         /// <summary>스크롤 안 내용의 폭. 도크가 옆으로 넓어도 이 폭까지만 차지한다.</summary>
         public float ContentWidth { get; internal set; }
+
+        /// <summary>도크가 늘리지 말고 **제 크기·제 배율 그대로** 가운데 두어야 하는가.
+        /// 가로 유지형(창고)은 이미 균일 축소로 맞춰 놨으므로 다시 늘리면 배치가 깨진다.</summary>
+        public bool KeepsOwnSize { get; internal set; }
 
         internal void Record(RectTransform rt)
         {
@@ -142,17 +149,15 @@ public static class DockedLayout
         "dispatch" => new[] { "MapArea" },
         // 도크에 이미 '닫기'가 있다. 패널 자체 닫기는 중복이고 도크 밖으로 삐져나간다.
         "radio"    => new[] { "Close" },
-        "stash"    => new[] { "CloseBtn" },
+        // 창고는 말 그대로 창고 격자만 있으면 된다. 캐릭터 상태·장비/소지품은
+        // Tab 인벤토리에서 보는 것이고, 여기 같이 띄우면 정작 창고가 좁아진다.
+        "stash"    => new[] { "CloseBtn", "CharacterPanel", "RightPanel" },
         "bed"      => new[] { "Close" },
         // 제작창 자체 닫기(X)도 도크의 X와 겹친다.
         "workbench" or "cooking" or "medical" => new[] { "CloseBtn", "Close" },
         _          => null,
     };
 
-    /// <summary>세로가 넘쳐도 스크롤 대신 **눌러 담아도 되는** 패널.
-    /// 수면창은 버튼(Opt_0/1)이 가운데 앵커라 상자를 줄이면 알아서 가운데로 모인다 —
-    /// 이런 패널은 스크롤을 붙이는 쪽이 오히려 불편하다(버튼 두 개 누르자고 스크롤).</summary>
-    static bool AllowSquash(string moduleKey) => moduleKey == "bed";
 
     // ─────────────────────────────────────────────────────────────
     // 본체
@@ -170,6 +175,8 @@ public static class DockedLayout
             foreach (var name in hide) HideByName(root, name, s);
 
         var node = Descend(root, area.x, s);
+
+
         Fit(node, node.rect.width, area.x, s, 0);
 
         s.Record(node);                       // 도크로 옮기기 전 원래 자리를 기억
@@ -178,15 +185,18 @@ public static class DockedLayout
         // stretch 앵커를 쓰는 자식은 따라 넓어지고, 고정 폭 자식은 그대로 남는다(빈자리만 생긴다).
         // ⚠️ 세로가 넘치는 것에만 적용한다. 높이에 여유가 있는 패널(제작 520×480)은
         //    넓히는 대신 통째로 키우는 편이 낫다 — 내부 2열 배치를 흔들지 않는다.
-        if (node.rect.height > area.y && node.rect.width < area.x * 0.9f)
+        //    창고 격자(643)처럼 이미 도크 폭의 8할을 쓰는 것도 건드리면 안 된다 — 격자 칸이
+        //    고정 크기라 늘려봐야 오른쪽에 빈자리만 생긴다. 확실히 좁은 것(7할 미만)만 넓힌다.
+        if (node.rect.height > area.y && node.rect.width < area.x * 0.7f)
         {
             s.Record(node);
             SetBox(node, area.x, node.rect.height);
         }
 
-        s.Placed = AllowSquash(moduleKey) ? node : WrapIfTall(node, area, s);
+        s.Placed = WrapIfTall(node, area, s);
         return s;
     }
+
 
     /// <summary>전체화면 껍데기를 지나 진짜 내용까지 내려간다.
     /// 자식이 하나뿐이고 그 자식이 눈에 띄게 작으면 껍데기로 본다.</summary>
@@ -281,6 +291,18 @@ public static class DockedLayout
         float contentH = node.rect.height;
         float contentW = node.rect.width;
         if (contentH <= area.y + 0.5f) return node;
+        // 조금 넘치는 정도면 스크롤 대신 **살짝 줄여** 한 화면에 담는다.
+        // 창고 격자는 928인데 도크가 856이라 8%만 넘친다 — 그만큼 때문에 스크롤을 붙이면
+        // 격자 아래 한 줄 보자고 스크롤해야 해서 오히려 불편하다.
+        if (contentH <= area.y * SquashLimit)
+        {
+            s.Record(node);
+            float k = area.y / contentH;
+            node.localScale = new Vector3(k, k, 1f);
+            s.KeepsOwnSize = true;            // 줄여 놨으니 도크가 다시 늘리면 안 된다
+            return node;
+        }
+
 
         var scrollGO = new GameObject("DockScroll", typeof(RectTransform), typeof(ScrollRect));
         s.Created(scrollGO);

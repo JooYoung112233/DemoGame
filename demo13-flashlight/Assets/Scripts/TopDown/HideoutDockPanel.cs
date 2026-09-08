@@ -49,18 +49,17 @@ public class HideoutDockPanel : MonoBehaviour
     public const float RightMargin  = 32f;   // 도크와 화면 오른쪽 사이
     public const float BottomMargin = 28f;
 
-    public static Vector2 RightDockSize(string moduleKey) => moduleKey switch
-    {
-        "stash" => new Vector2(880f, 960f),   // 3열이라 한 열(643)이 그대로 들어가야 한다
-        _       => new Vector2(840f, 960f),
-    };
+    /// <summary>우측 도크 크기. **전 시설 동일** — 시설마다 다르면 열 때마다 화면이
+    /// 들쭉날쭉해 산만하다. 시설별로 넓혀야 할 일이 생기면 여기서만 갈라내면 된다.</summary>
+    public static Vector2 RightDockSize(string moduleKey) => new Vector2(840f, 960f);
 
-    /// <summary>하단 바 높이. 침대는 수면창(720×460)이 들어가야 해서 기본 바보다 높다.</summary>
-    public static float BottomDockHeight(string moduleKey) => moduleKey switch
-    {
-        "bed" => 380f,
-        _     => 220f,
-    };
+    /// <summary>도크가 가장 넓을 때의 폭. 상단 제목·시설 바가 이 밑으로 들어가면 안 된다.</summary>
+    public static float MaxRightDockWidth => 840f;
+    /// <summary>하단 바 높이. 지금은 쓰는 시설이 없다 — 침대까지 우측 도크로 통일했다.
+
+    /// (수면창 720×460이 커서 하단 바를 높이면 방이 다른 시설보다 작게 잡혔다.)
+    /// Dock.Bottom 자체는 살려 둔다 — 짧은 상태 표시용으로는 여전히 맞는 자리다.</summary>
+    public static float BottomDockHeight(string moduleKey) => 220f;
 
     /// <summary>제목 + 안내 + 시설 바가 쓰는 화면 상단 띠 높이.</summary>
     public const float TopBandHeight = 180f;
@@ -164,16 +163,30 @@ public class HideoutDockPanel : MonoBehaviour
         var placed = _session.Placed;
         if (placed == null) { _session = null; return false; }
 
+        // ⚠️ 크기는 **옮기기 전에** 읽어야 한다. 남의 패널은 1920 부모 기준 앵커를 갖고 있어서,
+        //    도크(808) 밑으로 옮긴 뒤 rect를 읽으면 이미 줄어든 값이 나온다.
+        Vector2 nativeSize = placed.rect.size;
+
         placed.SetParent(_content, false);
 
-        // 도크 자리를 **꽉 채운다.** 제 크기로 가운데 두면 배경만 넓고 내용이 갑갑해 보인다.
-        // 스크롤이든 아니든 자리는 똑같이 채우고, 세로로 넘치는 몫만 스크롤이 흡수한다.
-        placed.anchorMin = Vector2.zero;
-        placed.anchorMax = Vector2.one;
-        placed.pivot     = new Vector2(0.5f, 0.5f);
-        placed.offsetMin = Vector2.zero;
-        placed.offsetMax = Vector2.zero;
-        placed.localScale = Vector3.one;
+        if (_session.KeepsOwnSize)
+        {
+            // 이미 도크에 맞게 줄여 놨다 — 다시 늘리면 배치가 깨진다.
+            placed.anchorMin = placed.anchorMax = placed.pivot = new Vector2(0.5f, 0.5f);
+            placed.anchoredPosition = Vector2.zero;
+            placed.sizeDelta = nativeSize;
+        }
+        else
+        {
+            // 도크 자리를 **꽉 채운다.** 제 크기로 가운데 두면 배경만 넓고 내용이 갑갑해 보인다.
+            // 스크롤이든 아니든 자리는 똑같이 채우고, 세로로 넘치는 몫만 스크롤이 흡수한다.
+            placed.anchorMin = Vector2.zero;
+            placed.anchorMax = Vector2.one;
+            placed.pivot     = new Vector2(0.5f, 0.5f);
+            placed.offsetMin = Vector2.zero;
+            placed.offsetMax = Vector2.zero;
+            placed.localScale = Vector3.one;
+        }
 
         // 입양하면 설명·상태·열기 버튼은 그 패널이 대신한다.
         _body.gameObject.SetActive(false);

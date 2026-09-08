@@ -34,8 +34,8 @@ public class HideoutDiorama : MonoBehaviour
 
     /// <summary>기본 시야에서 방이 차지하는 반지름 비율. 시야 보정 계산의 기준.</summary>
     /// <summary>기본 시야(오소 7·16:9)에서 방이 차지하는 반지름 비율. 실측값 — 프레이밍 계산의 기준.</summary>
-    const float RoomHalfFracX = 0.29f;
-    const float RoomHalfFracY = 0.33f;
+    const float RoomHalfFracX = 0.31f;   // 실측 0.29 + 여유 — 딱 맞추면 벽이 화면 끝에 붙어 잘린다
+    const float RoomHalfFracY = 0.35f;
 
     readonly List<HideoutFacilityAnchor> _anchors = new List<HideoutFacilityAnchor>();
     HideoutFacilityAnchor _idle;
@@ -137,7 +137,7 @@ public class HideoutDiorama : MonoBehaviour
         if (listed.Count == 0) return;
 
         float avail = 1920f - HideoutDockPanel.RightMargin
-                    - HideoutDockPanel.RightDockSize(null).x - BarLeft - 16f;
+                    - HideoutDockPanel.MaxRightDockWidth - BarLeft - 16f;
         float btnW = Mathf.Min(BarBtnW, (avail - BarGap * (listed.Count - 1)) / listed.Count);
 
         float x = BarLeft;
@@ -168,7 +168,10 @@ public class HideoutDiorama : MonoBehaviour
             var txt = tGO.AddComponent<UnityEngine.UI.Text>();
             txt.text = FacilityLabel.KoreanFor(a.moduleKey);
             txt.font = font;
-            txt.fontSize = 24;
+            txt.fontSize = 20;
+            // 도크가 넓어지면 버튼이 좁아진다 — 줄바꿈으로 잘리느니 살짝 넘치게 둔다.
+            txt.horizontalOverflow = UnityEngine.HorizontalWrapMode.Overflow;
+            txt.verticalOverflow   = UnityEngine.VerticalWrapMode.Overflow;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.color = new Color(0.92f, 0.90f, 0.85f);
 

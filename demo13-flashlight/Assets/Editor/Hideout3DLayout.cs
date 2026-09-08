@@ -65,9 +65,10 @@ public static class Hideout3DLayout
         // ── 시설 ── 2D판과 같은 (x, y) → (x, 0, y)
         // 시설 — 클릭하면 캐릭터가 그 앞으로 가서 자세를 잡는다(디오라마).
         // dock = UI가 붙을 자리. 카메라가 반대쪽으로 밀어 캐릭터를 안 가린다.
-        //   침대만 Bottom(하단 바 = 시간 표기), 나머지는 Right(우측 패널).
+        //   전부 Right(우측 패널). 침대도 하단 바를 쓰다가 통일했다 — 수면창(720×460)이 커서
+        //   하단 바를 높이면 방이 다른 시설보다 작게 잡혀 화면 크기가 시설마다 들쭉날쭉했다.
         // 북쪽 벽 줄 (z=7.7) — 침대 · 라디오 · 작업대 · 창고
-        n += Facility(map, "Bed_BoxCot",       new Vector3(2.6f,  0f, 7.7f), new Vector3(2.2f, 0.55f, 1.1f), new Color(0.45f, 0.38f, 0.32f), "bed",       Pose.Lie,   Dock.Bottom);
+        n += Facility(map, "Bed_BoxCot",       new Vector3(2.6f,  0f, 7.7f), new Vector3(2.2f, 0.55f, 1.1f), new Color(0.45f, 0.38f, 0.32f), "bed",       Pose.Lie,   Dock.Right);
         n += Facility(map, "Radio_라디오",      new Vector3(5.6f,  0f, 7.9f), new Vector3(0.8f, 0.6f,  0.6f), new Color(0.30f, 0.45f, 0.72f), "radio",     Pose.Stand, Dock.Right);
         n += Facility(map, "Workbench_Broken", new Vector3(8.4f,  0f, 7.8f), new Vector3(1.9f, 0.95f, 0.8f), new Color(0.50f, 0.45f, 0.38f), "workbench", Pose.Stand, Dock.Right);
         n += Facility(map, "Stash_창고",        new Vector3(11.6f, 0f, 7.8f), new Vector3(1.3f, 1.4f,  0.8f), new Color(0.30f, 0.62f, 0.55f), "stash",     Pose.Stand, Dock.Right);

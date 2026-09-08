@@ -254,7 +254,8 @@ public class HideoutController : MonoBehaviour
         // 제목 · 안내
         // ⚠️ 디오라마(3D)에서는 화면 오른쪽 840px을 도크가 통째로 쓴다. 화면 가운데 정렬로 두면
         //    제목·안내가 도크 밑으로 들어가 잘린다 — 방이 있는 왼쪽 영역의 가운데로 옮긴다.
-        const float DockW = 840f, DockMargin = 32f;
+        float DockW = HideoutDockPanel.MaxRightDockWidth;
+        const float DockMargin = 32f;
         float hx = HideoutDiorama.Active
                  ? (1920f - DockMargin - DockW) / 2f - 960f     // 왼쪽 영역 중심 - 화면 중심
                  : 0f;
