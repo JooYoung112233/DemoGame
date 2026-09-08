@@ -48,7 +48,10 @@ public static class EditorSceneBuildUtil
             if (!s.IsValid() || !string.IsNullOrEmpty(s.path)) continue;   // 저장된 씬은 대상 아님
 
             bool hasContent = s.rootCount > 0 || s.isDirty;
-            if (hasContent)
+            // ⚠️ 일괄 빌드(Quiet) 중에는 묻지 않는다. 자동화에는 대화상자를 누를 사람이 없어
+            //    씬마다 메인 스레드가 멈춘다. 이때 무제 씬은 빌더가 방금 만들다 만 것이므로
+            //    버려도 잃을 것이 없다.
+            if (hasContent && !ContentBuildAll.Quiet)
             {
                 // 내용이 있는 무제 씬 = 사용자가 뭔가 만들던 중일 수 있음 → 임의로 버리지 않는다.
                 int choice = EditorUtility.DisplayDialogComplex(

@@ -1,6 +1,6 @@
 # 캐릭터 · 적 아트/애니메이션 리스트
 
-> **2026-09-08 현재 캐릭터 외형 작업 기준:** [캐릭터 모델링 작업 기준](character-modeling-workflow.md). 최신 시안의 **비율 모델만 승인**되었으며 부위별 디테일을 확인 중이다. 다음 캐릭터 제작 전 이 기준과 승인된 Blender 비교 렌더를 먼저 읽는다. 아래 2026-09-07의 2~2.5등신은 초기 결정 이력이다.
+> **2026-09-08 현재 캐릭터 작업 기준:** [캐릭터 모델링 작업 기준](character-modeling-workflow.md). 사용자가 긍정 평가한 **약 2.6등신 CompactSurvivor**에 23본 리그와 **Idle/Walk/Run**을 제작했다. 실제 모션 영상과 Blender/FBX/GLB가 `Assets/ChibiSurvivor/CompactSurvivor/Animated/`에 있으며 Unity 연결은 다음 단계다. 이전 얼굴 연구안 수정은 중단했다. 아래 2026-09-07의 2~2.5등신은 초기 결정 이력이다.
 
 ## 2026-09-07 — 3D 캐릭터 우선 제작
 

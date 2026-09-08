@@ -2,13 +2,69 @@
 
 ## 현재 승인 상태 — 2026-09-08
 
-- 질문/요청: 먼저 시안으로 크기를 맞추고 머리·몸·다리 비율부터 확인할까? 비율이 맞으면 디테일을 하나씩 진행하고 다음 캐릭터에도 이번 방법을 참고할까?
-- 사용자 결정: **“비율은 좋다 디테일만 이제 하나씩 잡아볼까? 그리고 지금 하는 거 잘 기억했다가 다음 캐릭터만들때도 참고해야해”**.
-- 승인 대상: [ProportionStudy.blend](../Assets/ChibiSurvivor/ProportionStudy/ProportionStudy.blend)의 기본 비율. [실제 Blender 비교 렌더](../Assets/ChibiSurvivor/ProportionStudy/Comparison.png).
-- 외형 기준: [Reference.png](../Assets/ChibiSurvivor/ProportionStudy/Reference.png). 최신 업로드인 세 방향의 긴 다리 캐릭터 시안이다. 이전의 2등신/3등신 시안을 대신해 현재 인체 비율 기준으로 사용한다.
-- **승인 범위는 비율뿐이다.** 얼굴·모자·옷·장비 완성본 승인, 리깅/애니메이션 검증 또는 인게임 교체 완료를 의미하지 않는다.
-- 얼굴 1차 피드백: 사용자는 전반적으로 좋다고 평가했으나 디테일 축소를 요청했다. 귀 안쪽 장식은 불필요하다. 단순화 결과는 별도 확인 전이다.
-- 다음 단계: 귀 안쪽 무늬·눈 위 잔주름·볼 밴드의 작은 패드를 덜어낸 얼굴 단순화안을 실제 Blender 렌더로 확인한다.
+- 사용자 방향 전환: **“다 필요없고 요걸 비율을 좀 줄이면 좋아보이는데 어때”**, [선택한 이미지](../Assets/ChibiSurvivor/KakaoTalk_20260908_170010839.png) 기준으로 **“작업해줘”**.
+- 질문/제안: 이 이미지의 머리·얼굴·모자를 유지하고 몸통 길이 약 10%, 하체 길이 약 20~25%를 줄여 약 2.6등신으로 만들까?
+- 사용자 결정: 해당 비율 조정 작업 진행. 이전 ProportionStudy→FaceStudy→귀 유무 수정 흐름은 중단한다. 아래 얼굴 연구 기록은 현재 적용 지시가 아닌 이력이다.
+- 확정된 원본: 이미지와 동일한 렌더를 생성한 [ThreeHeadSurvivor.blend](../Assets/ChibiSurvivor/ThreeHeadSurvivor/ThreeHeadSurvivor.blend). 얼굴·귀·헤어·모자와 기존 색감/재질은 이 원본에서 유지한다.
+- 현재 제작안: [CompactSurvivor.blend](../Assets/ChibiSurvivor/CompactSurvivor/CompactSurvivor.blend), [원본과 같은 축척의 비교 렌더](../Assets/ChibiSurvivor/CompactSurvivor/Comparison.png). 사용자가 **“좋은데? 근데 모션 애니 작업이 가능할까”**라고 긍정 평가했다. 다음 리깅/모션 검토의 외형 기준으로 삼는다.
+- 구현 수치: 모자 포함 머리 높이 0.6 유지, 전체 높이 1.8→1.5648(3.0→2.608등신). 몸통 길이 90%, 허리~바닥 높이 75%. X/Y 폭·깊이는 유지한다.
+- 손·시계·벨트·허리 파우치는 길이로 눌러 변형하지 않고 새 위치로 옮긴다. 나머지 옷·팔·배낭·바지·부츠는 해당 높이 구간에 맞춰 줄인다. 원본과 13개 분리 부품 구조를 보존한다.
+- 산출물: Blender, FBX, GLB 및 정면/사선/뒷면/비율 비교 렌더. 정적 모델 수정이며 리깅·애니메이션·Unity 연결 완료가 아니다. 재생성: [build_compact_survivor.py](../tools/build_compact_survivor.py).
+- 앞으로도 적용할 원칙: 시안의 분위기 우선, 비율 먼저 확인, 부위별 수정, 모듈 분리, 조명·셰이더까지 고려. 특정 얼굴 연구안의 모양이나 귀 제거를 모든 캐릭터에 강제하지 않는다.
+
+## 모션 제작 가능 여부 — 2026-09-08
+
+- 사용자 질문: 현재 CompactSurvivor로 모션 애니메이션 작업이 가능한가?
+- 사용자 후속 결정: **“해보자”**. 현재 외형에 리깅과 기본 대기·걷기·뛰기 3개를 먼저 제작한다. 공격/총 자세와 Unity 연결은 이후 단계다.
+- 현재 작업: 원본 정적 모델과 별도로 `CompactSurvivor/Animated/`에 23개 뼈와 13개 분리 부품을 유지하는 골격 및 기본 모션을 제작했다. 사용자는 **“모션은 좋은데 손자체가좀이상한데?”**라고 모션을 긍정 평가하고 손 형태 수정을 요청했다.
+- 제작 방향: 현재 외형에 공통 골격과 관절 가중치를 넣고, 모자/머리카락은 머리, 가방은 몸통, 시계는 손목을 따라가도록 연결한다. 옷·장비의 부품 분리는 유지한다.
+- 제안 순서: 리깅과 관절 변형 확인 → Idle/Walk/Run → 앞서 논의한 한손/양손 근접 공격과 한손/양손 총 자세. 짧은 팔·다리에서 무기 손잡이 위치와 어깨/무릎 변형은 실제 포즈로 확인한다.
+- 클립 방식: 제자리(in-place) 루프. 발이 땅에 닿는 구간의 이동 속도를 일정하게 만들고, 게임에서 캐릭터 이동 속도와 모션 재생 속도를 맞춘다. 미리보기 영상에는 발 접지를 보기 위한 가상 전진 이동을 적용할 수 있으나 FBX/GLB 클립에는 전진 루트 이동을 넣지 않는다.
+- 골격: 몸통·팔·다리와 머리, 배낭을 연결하고 양손의 무기 부착 위치를 마련한다. 표정/손가락/공격 모션은 이번 기본 이동 범위에 포함하지 않는다.
+- 완료 여부는 산출물과 아래 변경 이력을 따른다. Unity 게임 연결/검증 완료를 의미하지 않는다.
+
+### 손 형태 확정 방향 — 2026-09-08
+
+- 질문/피드백: 모션은 좋으나 손 자체의 형태가 어색하다. 손가락 형태를 다듬을까?
+- 사용자 결정: **“손가락 없애고 그냥 동그란 손으로 하자”**.
+- 적용: 엄지와 네 손가락 표현을 모두 없애고 양손을 둥근 덩어리로 단순화한다. 손목 연결, 모션 키, 다른 부위와 13개 메시 분리는 유지한다. 이후 캐릭터의 손 표현에도 이 간결한 방향을 참고하되 개별 캐릭터 요청을 우선한다.
+- 최신 수정안: [RoundHands/CompactSurvivor_Animated.blend](../Assets/ChibiSurvivor/CompactSurvivor/Animated/RoundHands/CompactSurvivor_Animated.blend). 이전 애니메이션 파일은 원본으로 보존한다. 아래 기본 모션 파일 링크들은 손 수정 이전의 기반 버전이다.
+- 확인 결과: 손 외 12개 메시와 모든 모션 키가 그대로임을 확인했다. 둥근 손의 FBX 재임포트/GLB 스킨·3개 클립 검사를 통과했다. [최신 모션 영상](../Assets/ChibiSurvivor/CompactSurvivor/Animated/RoundHands/LocomotionPreview.mp4)도 갱신했다.
+- 재생성: [round_compact_hands.py](../tools/round_compact_hands.py). 영상/내보내기 검사는 기존 도구에 `-- --round-hands`를 붙여 최신 손 버전을 대상으로 한다.
+
+### 기본 모션 산출물과 재사용 정보
+
+- [CompactSurvivor_Animated.blend](../Assets/ChibiSurvivor/CompactSurvivor/Animated/CompactSurvivor_Animated.blend): 원본 외형에 스킨을 연결한 작업 파일. `CompactSurvivor_Rig`의 액션에서 Idle/Walk/Run 선택. 기본 재생 범위는 Idle이다.
+- [CompactSurvivor_Animated.fbx](../Assets/ChibiSurvivor/CompactSurvivor/Animated/CompactSurvivor_Animated.fbx), [GLB](../Assets/ChibiSurvivor/CompactSurvivor/Animated/CompactSurvivor_Animated.glb): 세 클립을 포함하는 내보내기 파일. 기본 포즈에서 기존 메시 형상을 유지한다.
+- [모션 미리보기 영상](../Assets/ChibiSurvivor/CompactSurvivor/Animated/LocomotionPreview.mp4): 대기→걷기→뛰기 순서, 약 9.33초. 실제 Blender 애니메이션을 EEVEE로 렌더했으며 캐릭터가 걷는 모습 확인을 위해 영상에만 가상 전진 이동을 적용했다. [여러 동작 단계 비교](../Assets/ChibiSurvivor/CompactSurvivor/Animated/MotionPoses.png).
+- [AnimationCheck.json](../Assets/ChibiSurvivor/CompactSurvivor/Animated/AnimationCheck.json): 정점 가중치·기본 외형·루프 경계·실제 변형된 발바닥 접지·보행 속도 일치 검사. [ExportCheck.json](../Assets/ChibiSurvivor/CompactSurvivor/Animated/ExportCheck.json): FBX 재임포트 후 13개 스킨 메시와 3개 모션의 실제 변형/루프, GLB 스킨/클립 포함 검사.
+
+| 클립 | 30fps 재생 범위 | 한 주기 | 제자리 모션 기준 전진 속도 |
+|---|---|---|---|
+| Idle | 1~91 | 3초 | 0 |
+| Walk | 1~31 | 1초 | 0.60m/s |
+| Run | 1~21 | 약 0.667초 | 약 1.417m/s |
+
+- 마지막 프레임은 첫 프레임과 같은 루프 경계 포즈다. 게임 이동 속도를 바꾸면 재생 속도도 기준 속도에 비례해 조정해야 발 미끄러짐을 줄일 수 있다. 위 속도는 모션의 기준값이며 게임 디자인 이동 속도를 변경한 것이 아니다.
+- 뼈의 FK 키는 편집 가능하다. 다리는 두 관절 IK 계산 결과를 키프레임으로 구워 접지시킨 구조이며 실시간 IK 컨트롤러가 구현된 것은 아니다.
+- 손목 각도는 달리기 중 손바닥이 위로 들리지 않도록 조정했다. 양손 `HandSocket.L`/`HandSocket.R`는 이후 무기 부착용으로 확보했다.
+- 생성: [rig_compact_survivor.py](../tools/rig_compact_survivor.py). 영상: [preview_compact_animation.py](../tools/preview_compact_animation.py). 내보내기 검사: [check_compact_animation_export.py](../tools/check_compact_animation_export.py).
+- 영상 조립 시 이미 렌더된 색상에 AgX를 이중 적용하지 않는다. [finalize_compact_preview.py](../tools/finalize_compact_preview.py)가 Standard 변환으로 조립하고 각 영상의 프레임 수와 대표 장면을 확인한다.
+
+## 이전 연구: 귀 유무 비교 — 2026-09-08
+
+- 사용자 질문: **“귀가 있어서 별로인가 좀 너무 어색한데”**.
+- 해석: 귀의 존재/형태가 어색함의 원인인지 확인하자는 피드백이며, 귀를 영구 제거하라는 확정 결정은 아니다.
+- 비교 작업: 기존 사각형 얼굴의 귀 두 개만 일시적으로 숨긴다. 얼굴형·표정·재질·카메라·조명을 동일하게 유지해 귀의 영향을 비교한다. 귀 메시는 보존하고 다시 표시할 수 있게 한다.
+- 검토안: [EarStudy.blend](../Assets/ChibiSurvivor/EarVisibilityStudy/EarStudy.blend). 기존 중립/어두운 조명 씬과 귀를 숨긴 중립/어두운 조명 씬을 함께 보존한다. 사용자 판단 전에는 귀 제거를 다음 캐릭터의 기본 규칙으로 삼지 않는다.
+
+## 이전 연구: 얼굴형 수정 — 2026-09-08
+
+- 사용자 피드백: **“얼굴형이 별론데 실제 얼굴같지가 않아 시안 보면 약간 사각형느낌인데”**.
+- 결정: 현재의 아래로 급격히 좁아지는 얼굴형을 수정한다. 아래 볼과 턱 양옆을 살리고, 턱 끝은 짧고 평평한 부드러운 사각형으로 잡는다. 날카로운 역삼각형이나 상자처럼 각진 얼굴은 피한다.
+- 범위: 승인된 전체 키·머리 높이/최대 폭·몸/다리 비율은 유지한다. 얼굴 안의 볼/턱 정점만 수정하고 단순한 눈·귀·코·입 표현은 유지한다. 기존 비율 고정 원칙에 대한 사용자의 명시적 국소 수정 요청이다.
+- 현재 검토안: [FaceStudySquare/FaceStudy.blend](../Assets/ChibiSurvivor/FaceStudySquare/FaceStudy.blend), `build_face_study.py -- --square-jaw`. 이전 얼굴안은 보존한다. 이 얼굴형은 사용자 승인 전이다.
+- 기술 확인: 기본 메시 중 `Head`만 변경되었는지 검사하고, 얼굴 표면 디테일은 새 표면에 다시 투영한다. 정면/사선 및 중립/어두운 조명에서 확인한다.
 
 ## 시안 해석과 디테일 수준 — 2026-09-08
 
@@ -69,5 +125,8 @@
 
 ## 변경 이력
 
+- 2026-09-08: CompactSurvivor에 23본 리그와 Idle/Walk/Run 3개 제작. 13개 메시 분리 유지, 제자리 모션 접지/루프 확인 및 FBX 재임포트·GLB 확인 완료. Unity 연결은 보류.
+- 2026-09-08: 사용자 선택 이미지에 해당하는 ThreeHeadSurvivor로 기준을 전환. 이전 얼굴 수정 작업 중단, 원본 머리를 유지한 2.608등신 CompactSurvivor 제작 및 Blender 렌더 확인.
+- 2026-09-08: 얼굴형 피드백에 따라 볼 아래·턱 폭을 넓힌 부드러운 사각형 수정안 진행. 전체 비율 유지, 얼굴 내부 형상 수정 허용 범위를 명시.
 - 2026-09-08: 얼굴 1차 피드백 반영. 시안과 동일한 재현이 아닌 느낌 유지가 목표임을 명시하고, 귀 등 불필요한 세부 묘사를 축소하는 기준 추가.
 - 2026-09-08: 사용자 비율 승인 및 다음 캐릭터에도 재사용할 작업 기준 기록 요청 반영. 이 기록은 작업 방식 기억을 위한 것으로, 이전 요청대로 전체 문서 정리와 Git 작업은 여전히 보류한다.

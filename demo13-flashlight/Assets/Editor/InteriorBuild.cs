@@ -89,16 +89,33 @@ public static class InteriorBuild
         var io = go.GetComponentInChildren<InteractableObject>();
         if (io != null) Object.DestroyImmediate(io);
 
-        var box = go.GetComponent<BoxCollider2D>();
-        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-        box.isTrigger = true;
-        box.size = new Vector2(w, h);
+        // 출구 발판. 2D는 BoxCollider2D + BuildingEntrance, 3D는 BoxCollider + SceneDoor3D다.
+        // (BuildingEntrance는 BoxCollider2D 전제라 3D 맵에서 동작하지 않는다 — SceneDoor3D 참조)
+        if (GreyboxBuild.Use3D)
+        {
+            var box3 = go.GetComponent<BoxCollider>();
+            if (box3 == null) box3 = go.AddComponent<BoxCollider>();
+            box3.isTrigger = true;
+            box3.size = new Vector3(w, 2.4f, h);
+            box3.center = new Vector3(0f, 1.2f, 0f);   // 사람 키만큼 세워야 밟히는 게 아니라 통과로 잡힌다
 
-        var be = go.GetComponent<BuildingEntrance>();
-        if (be == null) be = go.AddComponent<BuildingEntrance>();
-        // 크기를 Configure로 함께 넘긴다 — 안 그러면 Awake가 triggerSize(1.3×1.0)로 덮어써서
-        //   여기서 지정한 폭이 조용히 사라진다(발판 옆으로 빠져나가는 원인이었다).
-        be.Configure(targetScene, spawnId, true, new Vector2(w, h));
+            var d3 = go.GetComponent<SceneDoor3D>();
+            if (d3 == null) d3 = go.AddComponent<SceneDoor3D>();
+            d3.Configure(targetScene, spawnId);
+        }
+        else
+        {
+            var box = go.GetComponent<BoxCollider2D>();
+            if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+            box.isTrigger = true;
+            box.size = new Vector2(w, h);
+
+            var be = go.GetComponent<BuildingEntrance>();
+            if (be == null) be = go.AddComponent<BuildingEntrance>();
+            // 크기를 Configure로 함께 넘긴다 — 안 그러면 Awake가 triggerSize(1.3×1.0)로 덮어써서
+            //   여기서 지정한 폭이 조용히 사라진다(발판 옆으로 빠져나가는 원인이었다).
+            be.Configure(targetScene, spawnId, true, new Vector2(w, h));
+        }
         return 1;
     }
 
@@ -151,10 +168,23 @@ public static class InteriorBuild
         if (t == null) return 0;
         var go = t.gameObject;
 
-        var box = go.GetComponent<BoxCollider2D>();
-        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-        box.isTrigger = false;
-        box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
+        // 막힌 통로의 몸통. 2D는 BoxCollider2D, 3D는 BoxCollider다.
+        // ⚠️ 3D 상자에 2D 콜라이더를 붙이면 AddComponent가 null을 돌려주고(기존 3D 콜라이더와 충돌)
+        //    바로 다음 줄에서 NullReference가 난다 — 보석상·경찰서 빌드가 여기서 죽었다.
+        if (GreyboxBuild.Use3D)
+        {
+            var box3 = go.GetComponent<BoxCollider>();
+            if (box3 == null) box3 = go.AddComponent<BoxCollider>();
+            box3.isTrigger = false;
+            box3.size = Vector3.one;   // 부모 스케일(w, 높이, h)이 곱해진다
+        }
+        else
+        {
+            var box = go.GetComponent<BoxCollider2D>();
+            if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+            box.isTrigger = false;
+            box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
+        }
 
         var io = go.GetComponent<InteractableObject>();
         if (io == null) io = go.AddComponent<InteractableObject>();

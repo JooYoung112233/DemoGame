@@ -36,6 +36,17 @@ public static class GreyboxBuild
     // ── 씬 시작/종료 ──────────────────────────────────────────────────────
     static Scene _prevActive;   // BeginScene→EndScene 간 복구용(빌더는 순차 실행)
 
+    /// <summary>켜면 모든 프리미티브를 <see cref="Greybox3D"/>로 보낸다 — 같은 빌더 코드가 3D 맵을 만든다.
+    ///
+    /// 이 프로젝트의 맵 빌더는 전부 이 클래스 위에 서 있다(지역1 2223줄, 고철시장 500줄, 실내 15씬).
+    /// 빌더마다 좌표를 손으로 고치면 2D판이 죽고 실수도 그만큼 늘어난다. 대신 **바닥에 해당하는
+    /// 프리미티브 세 개**(Bar·Floor·Marker)만 갈아끼웠다 — Wall·Barricade·Car·Prop과
+    /// 그 위에 선 WallSeg·WallLine·Building·RotBuilding이 전부 따라온다.
+    ///
+    /// ⚠️ 기본은 false다. 켜지 않으면 2D 경로 그대로라, 아직 안 옮긴 맵은 지금처럼 돈다.
+    /// 빌더가 자기 시작부에서 켜고 끝나면 되돌린다.</summary>
+    public static bool Use3D = false;
+
     public static GameObject BeginScene(out Scene scene)
     {
         scene = EditorSceneBuildUtil.NewDetachedScene(out _prevActive);  // 현재 씬 유지(폴더에만 생성)
@@ -52,7 +63,9 @@ public static class GreyboxBuild
             Debug.Log($"<color=cyan>[Greybox]</color> {label} 생성 완료: {path} — 그레이박스 {placed}개.");
         else
             Debug.LogError($"[Greybox] 씬 저장 실패: {path}");
-        if (saved && !Application.isBatchMode)
+        // ⚠️ ContentBuildAll.Quiet을 함께 봐야 한다. 이걸 빠뜨려서 일괄 빌드가 씬마다 모달에
+        //    걸려 멈췄다(자동화에는 누를 사람이 없다). 다른 빌더는 전부 Quiet을 본다.
+        if (saved && !Application.isBatchMode && !ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("Greybox 조각", $"{label} 생성 완료.\n{path}\n그레이박스 {placed}개 배치.\n\nSystems 씬 additive로 Play.", "확인");
     }
 
@@ -74,6 +87,7 @@ public static class GreyboxBuild
     /// <summary>바닥: gb_floor 전체 스케일.</summary>
     public static int Floor(GameObject p, string name, float cx, float cy, float w, float h)
     {
+        if (Use3D) return Greybox3D.Floor(p, name, cx, cy, w, h);
         var go = Spawn("gb_floor", name, p); if (go == null) return 0;
         go.transform.localPosition = new Vector3(cx, cy, 0f);
         go.transform.localScale    = new Vector3(w, h, 1f);
@@ -128,6 +142,12 @@ public static class GreyboxBuild
 
     static int Bar(string prefabId, GameObject p, string name, float cx, float cy, float lenX, float thickY, float angleDeg = 0f)
     {
+        if (Use3D) return Greybox3D.Bar(prefabId, p, name, cx, cy, lenX, thickY, angleDeg);
+        return Bar2D(prefabId, p, name, cx, cy, lenX, thickY, angleDeg);
+    }
+
+    static int Bar2D(string prefabId, GameObject p, string name, float cx, float cy, float lenX, float thickY, float angleDeg = 0f)
+    {
         var go = Spawn(prefabId, name, p); if (go == null) return 0;
         go.transform.localPosition = new Vector3(cx, cy, 0f);
         go.transform.localRotation = Quaternion.Euler(0f, 0f, angleDeg);
@@ -138,6 +158,7 @@ public static class GreyboxBuild
     /// <summary>마커/오브젝트(스케일 1).</summary>
     public static int Marker(GameObject p, string prefabId, string name, float x, float y)
     {
+        if (Use3D) return Greybox3D.Marker(p, prefabId, name, x, y);
         var go = Spawn(prefabId, name, p); if (go == null) return 0;
         go.transform.localPosition = new Vector3(x, y, 0f); return 1;
     }
