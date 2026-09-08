@@ -70,10 +70,10 @@ public static class Safehouse3DLayout
         n += PawnshopInterior(map);
 
         // 잠금 상가 4채 — 실내까지 지어두고 셔터로 막는다(해금 시 그대로 열림)
-        n += Building(map, "Repair",    12f, 44f, 14f, 10f, ShopH, "S", open: false);
-        n += Building(map, "Medical",   64f, 44f, 18f, 10f, ShopH, "S", open: false);
-        n += Building(map, "Furniture", 12f, 27f, 14f, 10f, ShopH, "E", open: false);
-        n += Building(map, "BlackMarket",12f, 10f, 14f, 12f, ShopH, "E", open: false);
+        n += Building(map, "Repair",    12f, 44f, 14f, 10f, ShopH, "S", open: false, unlockFlag: "shop_repair_unlocked");
+        n += Building(map, "Medical",   64f, 44f, 18f, 10f, ShopH, "S", open: false, unlockFlag: "shop_medical_unlocked");
+        n += Building(map, "Furniture", 12f, 27f, 14f, 10f, ShopH, "E", open: false, unlockFlag: "shop_furniture_unlocked");
+        n += Building(map, "BlackMarket",12f, 10f, 14f, 12f, ShopH, "E", open: false, unlockFlag: "shop_blackmarket_unlocked");
 
         // ── 집/은신처 = 솔리드 컨테이너. 발자국을 실내(14×9)와 일치시킨다 ──
         n += Slab(map, "Container_Home", 64f, 12f, 14f, 9f, ContH, _cont);
@@ -89,6 +89,9 @@ public static class Safehouse3DLayout
         n += Npc (map, "회수꾼",       "veteran_scavenger",  67f, 29f, new Color(0.52f, 0.46f, 0.40f));
         n += Npc (map, "떠돌이 상인",  "wandering_merchant", 36f, 14f, new Color(0.55f, 0.40f, 0.45f));
         n += Npc (map, "구역 관리인", "district_warden",    50f, 16f, new Color(0.40f, 0.48f, 0.56f));
+
+        // ── 마을 분위기 (골목·간판·가로등·잡동사니) ──
+        n += Dressing(map);
 
         // ── 조명 ──
         var sunGO = new GameObject("Sun");
@@ -131,7 +134,8 @@ public static class Safehouse3DLayout
     /// <paramref name="doorSide"/> = 문이 뚫릴 면("N"/"S"/"E"/"W").
     /// <paramref name="open"/>=false면 문틈에 셔터를 세워 막는다(잠금 상가).</summary>
     static int Building(GameObject parent, string name, float cx, float cz,
-                        float w, float d, float h, string doorSide, bool open)
+                        float w, float d, float h, string doorSide, bool open,
+                        string unlockFlag = null)
     {
         var root = new GameObject(name);
         root.transform.SetParent(parent.transform, false);
@@ -170,20 +174,22 @@ public static class Safehouse3DLayout
         };
         bool doorFacesZ = doorSide == "S" || doorSide == "N";
 
-        if (open)
-        {
-            n += Box(root, "DoorFrame", door + Vector3.up * 1.2f,
-                     doorFacesZ ? new Vector3(DoorW + 0.3f, 2.4f, 0.14f)
-                                : new Vector3(0.14f, 2.4f, DoorW + 0.3f), _frame);
-            // 문틀은 장식 — 통과해야 하므로 콜라이더 제거
-            var f = root.transform.Find("DoorFrame");
-            if (f != null) Object.DestroyImmediate(f.GetComponent<Collider>());
-        }
-        else
+        // 문틀은 열림·잠금 상관없이 세운다. 해금은 **셔터를 걷는 것**이 전부여야
+        // "닫혀 있던 가게가 열렸다"로 읽힌다 — 해금 때 건물을 새로 짓지 않는다.
+        n += Box(root, "DoorFrame", door + Vector3.up * 1.2f,
+                 doorFacesZ ? new Vector3(DoorW + 0.3f, 2.4f, 0.14f)
+                            : new Vector3(0.14f, 2.4f, DoorW + 0.3f), _frame);
+        var f = root.transform.Find("DoorFrame");
+        if (f != null) Object.DestroyImmediate(f.GetComponent<Collider>());   // 장식 — 통과해야 한다
+
+        if (!open)
         {
             n += Box(root, "Shutter", door + Vector3.up * 1.2f,
                      doorFacesZ ? new Vector3(DoorW, 2.4f, 0.2f)
                                 : new Vector3(0.2f, 2.4f, DoorW), _shutter);
+
+            var unlock = root.AddComponent<BuildingUnlock>();
+            unlock.Configure(unlockFlag, root.transform.Find("Shutter")?.gameObject);
         }
         return n;
     }
@@ -355,5 +361,113 @@ public static class Safehouse3DLayout
         go.AddComponent<SpawnPoint>();
         return 1;
     }
+
+    // ── 마을 분위기 ──────────────────────────────────────────────────
+    /// <summary>마을을 "사람이 사는 곳"으로 보이게 하는 것들 — 골목·간판·가로등·잡동사니.
+    ///
+    /// 건물만 세워 두면 넓은 빈 판 위에 상자가 몇 개 놓인 것으로 보인다. 길이 보여야
+    /// 어디로 가야 할지 알고, 간판이 있어야 어느 가게인지 알고, 불이 있어야 밤에 걸을 수 있다.
+    ///
+    /// ⚠️ 소품은 **문 앞을 막지 않는다.** 문은 남/동쪽에 있으므로 그 앞 2m는 비운다.</summary>
+    static int Dressing(GameObject map)
+    {
+        var root = new GameObject("Dressing");
+        root.transform.SetParent(map.transform, false);
+        int n = 1;
+
+        var road  = Lit(new Color(0.26f, 0.25f, 0.24f), 0.04f);   // 다져진 흙길
+        var wood  = new Color(0.42f, 0.34f, 0.24f);
+        var rust  = new Color(0.40f, 0.28f, 0.20f);
+        var steel = new Color(0.34f, 0.36f, 0.37f);
+        var cloth = new Color(0.46f, 0.42f, 0.34f);
+
+        // ① 골목 — 상가 앞 동서 대로 + 광장에서 게이트로 나가는 동서 길 + 남북 연결로.
+        //    지면과 살짝 다른 색이면 충분하다. 길이 보이면 마을이 격자로 읽힌다.
+        n += Box(root, "Road_ShopFront", new Vector3(38f, 0.01f, 36.5f), new Vector3(66f, 0.02f, 5f), road);
+        n += Box(root, "Road_Plaza",     new Vector3(44f, 0.01f, 29f),   new Vector3(58f, 0.02f, 6f), road);
+        n += Box(root, "Road_Link",      new Vector3(40f, 0.01f, 32.5f), new Vector3(5f,  0.02f, 12f), road);
+        n += Box(root, "Road_Home",      new Vector3(58f, 0.01f, 16f),   new Vector3(5f,  0.02f, 24f), road);
+
+        // ② 간판 — 어느 가게인지 문 위에서 알려준다. 잠긴 가게도 이름은 보인다.
+        n += Sign(root, "전당포",  34f, 37.6f);
+        n += Sign(root, "수리점",  12f, 38.6f);
+        n += Sign(root, "의료소",  64f, 38.6f);
+        n += Sign(root, "가구점",  19.6f, 27f);
+        n += Sign(root, "암시장",  19.6f, 10f);
+
+        // ③ 가로등 — 밤에 걸을 수 있게. 광장과 상가 앞에.
+        n += Lamp(root, "Lamp_Plaza_W", 30f, 31.5f);
+        n += Lamp(root, "Lamp_Plaza_E", 58f, 31.5f);
+        n += Lamp(root, "Lamp_Shop_W",  22f, 38.5f);
+        n += Lamp(root, "Lamp_Shop_E",  52f, 38.5f);
+        n += Lamp(root, "Lamp_Home",    58f, 16f);
+
+        // ④ 광장 화톳불 — 사람이 모이는 자리. 마을에 중심이 생긴다.
+        n += Prop(root, "Brazier", 44f, 29f, new Vector3(1.1f, 0.7f, 1.1f), new Color(0.28f, 0.26f, 0.25f));
+        var fireGO = new GameObject("Brazier_Fire");
+        fireGO.transform.SetParent(root.transform, false);
+        fireGO.transform.position = new Vector3(44f, 1.1f, 29f);
+        var fire = fireGO.AddComponent<Light>();
+        fire.type = LightType.Point; fire.range = 12f; fire.intensity = 2.2f;
+        fire.color = new Color(1.00f, 0.62f, 0.32f);
+        n++;
+
+        // ⑤ 잡동사니 — 벽에 붙여 쌓는다. 가운데 두면 동선만 막는다.
+        (float x, float z, float w, float h, float d, Color c)[] junk =
+        {
+            (5.0f, 33.0f, 1.0f, 0.9f, 1.0f, wood),  (6.2f, 34.0f, 0.8f, 0.7f, 0.8f, wood),
+            (5.4f, 20.0f, 0.9f, 1.1f, 0.9f, rust),  (6.4f, 19.0f, 0.9f, 0.6f, 0.9f, steel),
+            (74.0f, 20.0f, 1.0f, 0.9f, 1.0f, rust), (75.2f, 21.0f, 0.8f, 1.2f, 0.8f, steel),
+            (74.5f, 40.0f, 1.1f, 0.8f, 1.1f, wood), (73.4f, 41.2f, 0.7f, 0.6f, 0.7f, wood),
+            (26.0f, 12.0f, 1.2f, 0.5f, 1.2f, cloth),(27.4f, 12.6f, 0.9f, 0.9f, 0.9f, rust),
+            (46.0f, 47.0f, 1.0f, 1.0f, 1.0f, steel),(47.2f, 46.2f, 0.8f, 0.7f, 0.8f, wood),
+        };
+        foreach (var j in junk)
+            n += Prop(root, "Junk", j.x, j.z, new Vector3(j.w, j.h, j.d), j.c);
+
+        // ⑥ 게이트 앞 바리케이드 — 폐도시로 나가는 문턱임을 알린다(통과는 된다).
+        n += Prop(root, "Barricade_A", 76.5f, 26.5f, new Vector3(2.2f, 1.0f, 0.4f), steel);
+        n += Prop(root, "Barricade_B", 76.5f, 31.5f, new Vector3(2.2f, 1.0f, 0.4f), steel);
+
+        return n;
+    }
+
+    /// <summary>가게 간판 — 문 위에 이름을 띄운다. 쿼터뷰라 카메라를 향해 세운다.</summary>
+    static int Sign(GameObject p, string text, float x, float z)
+    {
+        var go = new GameObject("Sign_" + text);
+        go.transform.SetParent(p.transform, false);
+        go.transform.position = new Vector3(x, 3.1f, z);
+        go.transform.rotation = Quaternion.Euler(55f, 0f, 0f);   // 카메라 피치와 맞춘다
+
+        var tm = go.AddComponent<TextMesh>();
+        tm.text = text;
+        tm.fontSize = 64;
+        tm.characterSize = 0.06f;
+        tm.anchor = TextAnchor.LowerCenter;
+        tm.alignment = TextAlignment.Center;
+        tm.color = new Color(0.93f, 0.88f, 0.72f);
+        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (font != null) { tm.font = font; go.GetComponent<MeshRenderer>().sharedMaterial = font.material; }
+        var mr = go.GetComponent<MeshRenderer>();
+        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        mr.receiveShadows = false;
+        return 1;
+    }
+
+    /// <summary>가로등 — 기둥 + 점광. 밤에 길이 보이게.</summary>
+    static int Lamp(GameObject p, string name, float x, float z)
+    {
+        int n = Box(p, name + "_Pole", new Vector3(x, 1.6f, z), new Vector3(0.18f, 3.2f, 0.18f),
+                    Lit(new Color(0.22f, 0.22f, 0.23f), 0.20f));
+        var go = new GameObject(name + "_Light");
+        go.transform.SetParent(p.transform, false);
+        go.transform.position = new Vector3(x, 3.3f, z);
+        var l = go.AddComponent<Light>();
+        l.type = LightType.Point; l.range = 13f; l.intensity = 1.8f;
+        l.color = new Color(1.00f, 0.90f, 0.72f);
+        return n + 1;
+    }
 }
+
 #endif
