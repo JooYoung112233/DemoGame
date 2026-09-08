@@ -2,7 +2,7 @@
 
 > 모든 커스텀 에디터 메뉴는 **`Tools/TopDown/`** 한 루트 아래 카테고리로 묶음 (2026-06-02 통합).
 > 이전엔 `BRB` / `TopDown 2D` / `TopDown Combat` / `Dev Tools` 4개 루트로 흩어져 있었음.
-> (Spine 등 서드파티 메뉴, `Create ▸ …` 에셋 생성 메뉴는 범위 밖.)
+> (서드파티 메뉴, `Create ▸ …` 에셋 생성 메뉴는 범위 밖.)
 
 ## 카테고리별 메뉴 (`Tools ▸ TopDown ▸ …`)
 

@@ -993,8 +993,8 @@ public class QaBot : MonoBehaviour
     //  그게 사실인지, 몇 미터에서 인식하는지, 아예 못 하는지를 **수치로** 남겨야
     //  게임 결함으로 보고할 근거가 된다(추측으로는 보고하지 않는다).
     //  EnemyController.CurrentState가 Patrol/Investigate → Chase/AttackWindup으로 바뀌는 순간이 '인식'이다.
-    readonly Dictionary<int, EnemyController.State> _foeState = new Dictionary<int, EnemyController.State>();
-    readonly HashSet<int> _foeNoticed = new HashSet<int>();
+    readonly Dictionary<EntityId, EnemyController.State> _foeState = new Dictionary<EntityId, EnemyController.State>();
+    readonly HashSet<EntityId> _foeNoticed = new HashSet<EntityId>();
     int _foeSeenClose;          // 플레이어가 detectRange 안에 들어간 적 수(중복 없이)
     int _foeNoticedCount;       // 그중 실제로 인식(추격 전환)한 수
     float _foeTimer;
@@ -1013,7 +1013,7 @@ public class QaBot : MonoBehaviour
         {
             if (e == null || !e.gameObject.activeInHierarchy || e.IsDead) continue;
 
-            int id = e.GetEntityId().GetHashCode();
+            EntityId id = e.GetEntityId();
             var now = e.CurrentState;
             float dist = Vector2.Distance(e.transform.position, me);
 
@@ -1042,7 +1042,7 @@ public class QaBot : MonoBehaviour
     }
 
     const float ObserveRadius = 8f;                       // 인식률 분모 기준(게임 detectRange가 아님)
-    readonly HashSet<int> _foeExposed = new HashSet<int>();
+    readonly HashSet<EntityId> _foeExposed = new HashSet<EntityId>();
     float _foeNoticeDistSum;
 
     /// <summary>적 인식 통계 — 리포트용. 분모는 관측 반경 8m 기준(게임 detectRange 아님).</summary>

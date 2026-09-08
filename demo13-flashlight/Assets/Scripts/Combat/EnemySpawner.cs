@@ -14,7 +14,7 @@ public class EnemySpawner : MonoBehaviour
 {
     public static EnemySpawner Instance { get; private set; }
 
-    readonly HashSet<SceneHandle> _processed = new HashSet<SceneHandle>();   // 씬 핸들 — 중복 스폰 방지
+    readonly HashSet<Scene> _processed = new HashSet<Scene>();   // 처리된 씬 — 중복 스폰 방지 (Scene은 값 비교)
 
     /// <summary>부팅 시 자가 생성 (Systems 씬 유무와 무관하게 항상 동작 — 맵툴 씬 제외).</summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -52,13 +52,13 @@ public class EnemySpawner : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode) => ProcessScene(scene);
 
     // 언로드 시 가드 해제 → 같은 레이드 재입장(핸들 재사용 가능) 시 재스폰 보장.
-    void OnSceneUnloaded(Scene scene) => _processed.Remove(scene.handle);
+    void OnSceneUnloaded(Scene scene) => _processed.Remove(scene);
 
     void ProcessScene(Scene scene)
     {
         if (!scene.IsValid() || !scene.isLoaded) return;
         if (!SystemsScene.IsGameplayScene(scene)) return;   // Systems/맵툴 제외 (안전구역은 존이 없어 자연히 0마리)
-        if (!_processed.Add(scene.handle)) return;           // 씬당 1회
+        if (!_processed.Add(scene)) return;           // 씬당 1회
         SpawnInScene(scene);
     }
 

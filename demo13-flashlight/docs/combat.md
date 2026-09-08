@@ -43,7 +43,7 @@
   - `animSpeed` — 해당 모션 애니 재생 속도(이동속도와 별개). walk/run은 이동속도 비례 토글(`animCadenceMatchesSpeed`)과 곱해짐.
   - `run.distance` — 한 번에 달릴 수 있는 최대 거리(m). 0=무제한(스태미너로만 제한). >0이면 그만큼 달리면 끊기고 멈추면 이동속도 2배로 회복.
   - `roll.distance` — 구르기 이동거리(m). 0이면 기존 `dodgeDistance`(3) 사용, >0이면 그 값으로 override.
-- **적/NPC(`UnitStatData.motions`, 키 idle/walk/attack/hit/death)**: ⚠️ **데이터만 존재**. 적은 아직 Spine 애니 시스템이 없어(그레이박스 스프라이트) `EnemyController`가 사용하지 않음 — **적 애니 도입 시 동일 규칙으로 와이어링 예정**.
+- **적/NPC(`UnitStatData.motions`, 키 idle/walk/attack/hit/death)**: ⚠️ **데이터만 존재**. 적은 아직 애니 시스템이 없어(그레이박스 스프라이트) `EnemyController`가 사용하지 않음 — **3D 적 애니 도입 시 동일 규칙으로 와이어링 예정**(3d-migration.md Stage 4).
 - 전부 **Control Panel ▸ StatDB ▸ Player Stat / Units**에서 조절(`motions` 리스트 자동 노출). [→ balance.md](balance.md)
 
 ### 그로기 (적)
@@ -152,7 +152,7 @@
 ### 상하체 애니 분리 불필요
 - 공격 중 이동을 잠그므로 "걸으면서 때리기" 조합이 없음
 - → 상체/하체 애니 분리(2트랙 블렌딩) **불필요**, 통짜 전신 모션으로 제작
-- Spine 스켈레톤도 허리 분리 없이 전신 단일 애니로 구성
+- (구 Spine 계획) 스켈레톤도 허리 분리 없이 전신 단일 애니로 구성 — 3D에서도 상하체 분리 마스크는 후순위
 
 ### 애니메이션 세트
 | 분류 | 애니 | 이동 잠금 |
