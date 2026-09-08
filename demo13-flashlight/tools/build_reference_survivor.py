@@ -159,7 +159,50 @@ bpy.ops.object.select_all(action='DESELECT')
 rig.select_set(True)
 for o in meshes: o.select_set(True)
 bpy.context.view_layer.objects.active=rig
-bpy.ops.export_scene.fbx(filepath=str(OUT/'ReferenceSurvivor.fbx'),use_selection=True,object_types={'ARMATURE','MESH'},axis_forward='-Z',axis_up='Y',add_leaf_bones=False,bake_anim=True,bake_anim_use_all_actions=True,bake_anim_use_nla_strips=False,bake_anim_simplify_factor=0,mesh_smooth_type='FACE')
+# ── 앰비언트 오클루전을 버텍스 컬러에 굽는다 ─────────────────────────────
+# 왜 버텍스 AO인가: 실시간 SSAO는 게임플레이 거리에서 캐릭터가 화면에 작게 잡혀
+# 틈새(모자챙 아래·턱밑·가방과 등 사이)가 몇 픽셀밖에 안 되므로 사실상 안 잡힌다.
+# 구워두면 런타임 비용이 0이고 거리·해상도와 무관하게 일정하다.
+# 도메인은 CORNER — 면마다 값을 따로 가져 각진 로우폴리에서 경계가 뭉개지지 않는다.
+scene=bpy.context.scene
+scene.render.engine='CYCLES'
+try:
+    scene.cycles.device='CPU'
+    scene.cycles.samples=128
+    scene.cycles.use_denoising=False
+except Exception as exc:
+    print('AO_BAKE_CYCLES_SETUP_SKIPPED',exc)
+scene.render.bake.target='VERTEX_COLORS'
+scene.render.bake.use_selected_to_active=False
+scene.render.bake.margin=0
+
+ao_meshes=[o for o in rig.children if o.type=='MESH']
+for o in ao_meshes:
+    me=o.data
+    for existing in list(me.color_attributes):
+        if existing.name=='AO':
+            me.color_attributes.remove(existing)
+    attr=me.color_attributes.new(name='AO',type='BYTE_COLOR',domain='CORNER')
+    me.color_attributes.active_color=attr
+    me.color_attributes.render_color_index=me.color_attributes.find('AO')
+
+bpy.ops.object.select_all(action='DESELECT')
+for o in ao_meshes: o.select_set(True)
+bpy.context.view_layer.objects.active=ao_meshes[0]
+try:
+    bpy.ops.object.bake(type='AO')
+    print('AO_BAKE_OK',len(ao_meshes))
+except Exception as exc:
+    print('AO_BAKE_FAILED',exc)
+
+# ⚠️ 베이크가 선택 상태를 덮어썼다. 익스포트는 use_selection=True이므로 여기서
+#    아마추어+메시 선택을 되돌리지 않으면 **리그가 빠져 스키닝이 통째로 사라진다.**
+bpy.ops.object.select_all(action='DESELECT')
+rig.select_set(True)
+for o in meshes: o.select_set(True)
+bpy.context.view_layer.objects.active=rig
+
+bpy.ops.export_scene.fbx(filepath=str(OUT/'ReferenceSurvivor.fbx'),use_selection=True,object_types={'ARMATURE','MESH'},axis_forward='-Z',axis_up='Y',add_leaf_bones=False,bake_anim=True,bake_anim_use_all_actions=True,bake_anim_use_nla_strips=False,bake_anim_simplify_factor=0,mesh_smooth_type='FACE',colors_type='SRGB')
 bpy.ops.export_scene.gltf(filepath=str(OUT/'ReferenceSurvivor.glb'),use_selection=True,export_format='GLB',export_animations=True,export_animation_mode='ACTIONS')
 material('Backdrop',(.026,.028,.03))
 material('Stage',(.075,.072,.063))

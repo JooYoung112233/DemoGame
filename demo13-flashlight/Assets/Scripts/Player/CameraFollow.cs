@@ -15,7 +15,8 @@ public class CameraFollow : MonoBehaviour
     // 씬마다 있는 다른 카메라(메인/AudioListener)는 충돌하므로 씬 로드 시 비활성화한다.
 
     [SerializeField] Transform target;
-    [SerializeField] float smoothSpeed = 8f;
+    [Tooltip("카메라 추적 반응 속도. 클수록 즉각적. 지수 감쇠 계수라 프레임레이트와 무관하다.")]
+    [SerializeField] float smoothSpeed = 14f;
     [Tooltip("3D 쿼터뷰에서 카메라가 타깃 뒤로 물러나는 거리(m). " +
              "⚠️ 그림자 거리(URP 에셋 기본 50m) 안이어야 그림자가 렌더된다.")]
     [SerializeField] float followDistance = 25f;
@@ -144,9 +145,12 @@ public class CameraFollow : MonoBehaviour
 
         Vector3 anchor = _hasFocus && _focus != null ? _focus.position : target.position;
         Vector3 desired = anchor + offset + FramingShift();
-        _basePos = Vector3.Lerp(_basePos, desired, smoothSpeed * Time.unscaledDeltaTime);
+        // ⚠️ Lerp(a, b, k*dt)는 **프레임레이트에 의존한다** — 같은 smoothSpeed라도 fps에 따라
+        //    따라오는 속도가 달라진다. 지수 감쇠 1-exp(-k*dt)가 프레임레이트와 무관한 정식이다.
+        float t = 1f - Mathf.Exp(-smoothSpeed * Time.unscaledDeltaTime);
+        _basePos = Vector3.Lerp(_basePos, desired, t);
         if (cam != null && _hasFocus && _focusSize > 0f)
-            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, _focusSize, smoothSpeed * Time.unscaledDeltaTime);
+            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, _focusSize, t);
         transform.position = _basePos + UpdateShake();
         UpdateZoom();
     }

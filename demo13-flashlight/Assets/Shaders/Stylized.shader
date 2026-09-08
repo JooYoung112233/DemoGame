@@ -21,6 +21,7 @@ Shader "BRB/Stylized"
         _RimColor    ("Rim Color", Color) = (1, 0.96, 0.88, 1)
         _RimPower    ("Rim Power", Range(0.5, 8)) = 3.0
         _RimStrength ("Rim Strength", Range(0, 1)) = 0.18
+        _VertexAO    ("Vertex AO Strength", Range(0, 1)) = 0.50
     }
 
     SubShader
@@ -51,15 +52,19 @@ Shader "BRB/Stylized"
                 float4 _RimColor;
                 float  _RimPower;
                 float  _RimStrength;
+                float  _VertexAO;
             CBUFFER_END
 
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
+            // 버텍스 컬러 = Blender에서 구운 AO (CORNER 도메인). 실시간 SSAO가 못 잡는
+            // 틈새(모자챙 아래·턱밑·가방과 등 사이)를 거리와 무관하게 일정히 만든다.
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float4 color : COLOR; };
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD0;
                 float3 normalWS   : TEXCOORD1;
                 float4 screenPos  : TEXCOORD2;
+                float  bakedAO    : TEXCOORD3;
             };
 
             Varyings vert (Attributes IN)
@@ -70,6 +75,7 @@ Shader "BRB/Stylized"
                 o.positionWS = p.positionWS;
                 o.normalWS   = TransformObjectToWorldNormal(IN.normalOS);
                 o.screenPos  = ComputeScreenPos(p.positionCS);
+                o.bakedAO    = IN.color.r;   // 구운 AO는 그레이스케일
                 return o;
             }
 
@@ -98,7 +104,10 @@ Shader "BRB/Stylized"
                 float rim = pow(1.0 - saturate(dot(N, V)), _RimPower);
                 col += _RimColor.rgb * rim * _RimStrength;
 
-                // ⑤ 틈새 AO(렌더러의 SSAO)
+                // ⑤ 구운 AO — 틈새를 거리와 무관하게 눌러준다
+                col *= lerp(1.0, saturate(IN.bakedAO), _VertexAO);
+
+                // ⑥ 틈새 AO(렌더러의 SSAO) — 큰 형태의 접촉 그늘 보강
                 #if defined(_SCREEN_SPACE_OCCLUSION)
                     float2 nuv = IN.screenPos.xy / max(IN.screenPos.w, 1e-6);
                     AmbientOcclusionFactor ao = GetScreenSpaceAmbientOcclusion(nuv);
@@ -125,7 +134,7 @@ Shader "BRB/Stylized"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor; float _Wrap; float4 _ShadowTint; float _ShadowDepth;
-                float4 _RimColor; float _RimPower; float _RimStrength;
+                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
             CBUFFER_END
 
             struct SA { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
@@ -157,7 +166,7 @@ Shader "BRB/Stylized"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor; float _Wrap; float4 _ShadowTint; float _ShadowDepth;
-                float4 _RimColor; float _RimPower; float _RimStrength;
+                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
             CBUFFER_END
 
             struct DA { float4 positionOS : POSITION; };
@@ -181,7 +190,7 @@ Shader "BRB/Stylized"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor; float _Wrap; float4 _ShadowTint; float _ShadowDepth;
-                float4 _RimColor; float _RimPower; float _RimStrength;
+                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
             CBUFFER_END
 
             struct NA { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
