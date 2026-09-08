@@ -114,6 +114,7 @@ public class GameControlPanel : EditorWindow
     static readonly Color TG_Sleep8   = new Color(0.24f, 0.36f, 0.50f); // 짙은 청 — 수면8h
     static readonly Color TG_Anomaly  = new Color(0.50f, 0.30f, 0.46f); // 자홍 — 짙은현상
     static readonly Color TG_Shop     = new Color(0.42f, 0.40f, 0.24f); // 금 — 상점
+    static readonly Color TG_Hideout  = new Color(0.26f, 0.44f, 0.42f); // 청록빛 — 은신처 화면
 
     // 좌측 컬럼 그룹
     static readonly TuneGroup[] TuneColLeft =
@@ -142,6 +143,10 @@ public class GameControlPanel : EditorWindow
               "anomalyIntervalMin", "anomalyIntervalMax", "anomalyMaxConcurrent", "anomalySpotCountWeights", "anomalyMonsterMinDist" } },
         new TuneGroup { title = "상점 해금 평판 (희귀도별)", accent = TG_Shop, fields = new[]
             { "shopTierRare", "shopTierEpic", "shopTierLegendary" } },
+        new TuneGroup { title = "은신처 화면 — 카메라", accent = TG_Hideout, fields = new[]
+            { "hideoutRoomOrtho", "hideoutRoomHalfX", "hideoutRoomHalfY", "hideoutTopBand" } },
+        new TuneGroup { title = "은신처 화면 — 도크", accent = TG_Hideout, fields = new[]
+            { "hideoutDockWidth", "hideoutDockHeight", "hideoutDockMargin", "hideoutDockMinScale" } },
     };
 
     GUIStyle _tuneSection;

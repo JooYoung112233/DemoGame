@@ -282,4 +282,28 @@ public class GameTuning : ScriptableObject
     [Range(0.005f, 0.1f)] public float dialogueTypingSpeed = 0.02f;
     [Tooltip("튜토리얼 프롬프트 기본 표시 시간(초). 노드에 duration 미지정 시. StoryPlayer가 읽음.")]
     [Range(1f, 10f)] public float tutorialDefaultDuration = 4f;
+
+    // ── 은신처 화면 (3D 디오라마 · 카메라 / 도크) ─────────────────────
+    // 이 값들은 코드 상수로 흩어져 있었다. 카메라를 조금 당기고 싶을 때마다 스크립트를
+    // 찾아 고치고 재컴파일해야 했다 — 화면 연출 수치라 자주 만지게 되므로 여기로 모은다.
+    // 읽는 곳: HideoutDiorama(카메라·프레이밍), HideoutDockPanel(도크), DockedLayout(재배치).
+    [Header("은신처 화면 — 카메라")]
+    [Tooltip("방을 담는 카메라 오소 크기. 작을수록 확대(방이 크게 보인다). 기본 7.")]
+    [Range(3f, 14f)] public float hideoutRoomOrtho = 7f;
+    [Tooltip("기본 시야에서 방이 차지하는 가로 반지름 비율(실측 0.29 + 여유). 도크를 피해 줌아웃하는 계산의 기준. 키우면 더 물러난다.")]
+    [Range(0.15f, 0.5f)] public float hideoutRoomHalfX = 0.31f;
+    [Tooltip("같은 값의 세로판(실측 0.33 + 여유).")]
+    [Range(0.15f, 0.5f)] public float hideoutRoomHalfY = 0.35f;
+    [Tooltip("제목·안내·시설 바가 쓰는 화면 상단 띠 높이(1920×1080 기준). 방은 이 아래에 담긴다.")]
+    [Range(0f, 400f)] public float hideoutTopBand = 180f;
+
+    [Header("은신처 화면 — 도크")]
+    [Tooltip("시설 UI 도크 폭(1920 기준). 넓힐수록 UI가 크고 방이 작아진다. 카메라가 자동으로 따라 물러난다.")]
+    [Range(400f, 1400f)] public float hideoutDockWidth = 840f;
+    [Tooltip("시설 UI 도크 높이(1080 기준).")]
+    [Range(400f, 1040f)] public float hideoutDockHeight = 960f;
+    [Tooltip("도크와 화면 오른쪽 사이 여백.")]
+    [Range(0f, 120f)] public float hideoutDockMargin = 32f;
+    [Tooltip("입양한 패널을 줄일 때의 하한. 이보다 더 줄여야 하면 스크롤을 붙인다. 작을수록 글씨가 작아진다.")]
+    [Range(0.5f, 1f)] public float hideoutDockMinScale = 0.72f;
 }
