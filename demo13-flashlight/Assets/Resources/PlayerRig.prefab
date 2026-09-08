@@ -153,9 +153,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::TopDownPlayer
   spriteRenderer: {fileID: 0}
-  character3DPrefab: {fileID: 919132149155446097, guid: 2a79dfd43d1524443accd590fe754a1d, type: 3}
-  character3DController: {fileID: 9100000, guid: 3282f9a4fe4db1b48a67df03a44b5a46, type: 2}
-  character3DShader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  character3DPrefab: {fileID: 547444241873832026, guid: 2f7177a4e26e1c848b059917035f983c, type: 3}
+  character3DController: {fileID: 9100000, guid: 8a91b7b1fcf15994daff8ecc36e499a7, type: 2}
+  character3DShader: {fileID: 4800000, guid: c6e3d88c0ad30434f9795336b99d2b71, type: 3}
   character3DScale: 1
   useGravity: 0
   flipByMouse: 1
@@ -605,6 +605,9 @@ MonoBehaviour:
   softEdge: 0.05
   pivotHeight: 1
   enableCutaway: 1
+  blockerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &8594966188139907139
 GameObject:
   m_ObjectHideFlags: 0

@@ -100,7 +100,15 @@ Shader "Spike/OccluderFX"
                 else if (_Mode > 0.5 && _CutEnabled > 0.5)
                 {
                     // ② 플레이어보다 뒤면 건드리지 않는다 (여유 0.5m)
-                    if (IN.viewDepth < IN.cutNDCDepth.z - 0.5)
+                    // ② "플레이어보다 앞"을 **지면 평면에서** 판정한다.
+                    //    프래그먼트의 뷰 깊이로 판정하면 안 된다 — 카메라가 기울어 있어
+                    //    플레이어 **북쪽(뒤쪽) 벽의 윗부분**이 플레이어보다 카메라에 가까워진다.
+                    //    (pitch 55°·벽 2m 뒤 기준 높이 2.4m부터 역전) 그래서 가리지도 않는
+                    //    벽에 구멍이 뚫렸다. 높이를 빼고 XZ만 보면 그 착시가 사라진다.
+                    float3 camF = GetViewForwardDir();
+                    float2 fwdXZ = normalize(camF.xz + 1e-6);
+                    float along = dot(IN.positionWS.xz - _CutCenter.xz, fwdXZ);
+                    if (along < -0.3)   // 플레이어에서 카메라 쪽 = 실제로 가리는 것
                     {
                         // ① 화면상 플레이어 주변 반경. NDC는 세로 -1~1(=2)이므로 반경을 2배로.
                         //    종횡비 보정해 원형을 유지한다.

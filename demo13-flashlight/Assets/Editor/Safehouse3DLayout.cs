@@ -46,7 +46,7 @@ public static class Safehouse3DLayout
         _wallOut   = Occ(new Color(0.40f, 0.39f, 0.36f));
         _shopWall  = Occ(new Color(0.47f, 0.45f, 0.42f));
         _shopFloor = Lit(new Color(0.36f, 0.34f, 0.32f), 0.05f);
-        _roof      = Lit(new Color(0.30f, 0.29f, 0.28f), 0.04f);
+        _roof      = Occ(new Color(0.30f, 0.29f, 0.28f));   // ★ 지붕도 컷어웨이 대상 — 건물 뒤로 가면 막는 건 대부분 지붕이다
         _cont      = Occ(new Color(0.36f, 0.44f, 0.40f));
         _shutter   = Lit(new Color(0.55f, 0.48f, 0.32f), 0.20f);
         _frame     = Lit(new Color(0.18f, 0.16f, 0.15f), 0.10f);
