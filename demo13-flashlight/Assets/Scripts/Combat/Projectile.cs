@@ -20,7 +20,11 @@ public class Projectile : MonoBehaviour
     bool _dead;
 
     static Sprite _dot;
-    static readonly RaycastHit2D[] _buf = new RaycastHit2D[12];
+    static readonly RaycastHit[] _buf = new RaycastHit[12];
+
+    /// <summary>탄이 나는 높이(총구 높이). 지면을 긁지 않게 가슴 높이로 띄운다.</summary>
+    const float MuzzleY = 0.9f;
+    float _height;
 
     /// <summary>총알 하나를 쏜다. from=총구, dir=단위벡터.</summary>
     public static Projectile Spawn(Transform owner, Vector2 from, Vector2 dir,
@@ -28,19 +32,20 @@ public class Projectile : MonoBehaviour
                                    Color color, float length = 0.55f)
     {
         var go = new GameObject("Bullet");
-        go.transform.position = from;
-        go.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
+        go.transform.position = Plan3D.ToWorld(from, (owner != null ? owner.position.y : 0f) + MuzzleY);
+        go.transform.rotation = Plan3D.LookRotation(dir, Quaternion.identity);
 
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = Dot();
         sr.color = color;
         sr.sortingOrder = 40;                       // 바닥·건물 위, UI 아래
-        go.transform.localScale = new Vector3(length, 0.09f, 1f);
+        go.transform.localScale = new Vector3(0.09f, 0.09f, length);   // 전방(local Z)이 탄 길이
 
         var p = go.AddComponent<Projectile>();
         p._owner = owner;
         p._ownerLayer = owner != null ? owner.gameObject.layer : -1;
         p._dir = dir.normalized;
+        p._height = go.transform.position.y;
         p._speed = speed;
         p._damage = damage;
         p._groggy = groggy;
@@ -67,21 +72,23 @@ public class Projectile : MonoBehaviour
         if (step <= 0f) return;
         if (step > _rangeLeft) step = _rangeLeft;
 
-        Vector2 prev = transform.position;
+        Vector2 prev = Plan3D.ToPlan(transform.position);
         Vector2 next = prev + _dir * step;
 
         if (Sweep(prev, step)) return;               // 뭔가 맞았으면 여기서 끝
 
-        transform.position = next;
+        transform.position = Plan3D.ToWorld(next, _height);
         _rangeLeft -= step;
         if (_rangeLeft <= 0.001f) Destroy(gameObject);   // 유효사거리 끝 — 조용히 사라진다
     }
 
-    /// <summary>이전→현재 구간을 훑어 처음 걸리는 것에 맞는다. 맞았으면 true.</summary>
+    /// <summary>이전→현재 구간을 훑어 처음 걸리는 것에 맞는다. 맞았으면 true.
+    /// 평면 방향으로만 난다 — 탄도(중력)는 없다. 쿼터뷰라 높이차 사격은 아직 다루지 않는다.</summary>
     bool Sweep(Vector2 from, float dist)
     {
-        var filter = new ContactFilter2D { useTriggers = true, useLayerMask = false };
-        int n = Physics2D.Raycast(from, _dir, filter, _buf, dist);
+        Vector3 origin = Plan3D.ToWorld(from, _height);
+        int n = Physics.RaycastNonAlloc(origin, Plan3D.ToWorld(_dir), _buf, dist, ~0,
+                                        QueryTriggerInteraction.Collide);
         if (n <= 0) return false;
 
         // 가까운 것부터 봐야 한다 — Raycast 결과 순서는 보장되지 않는다.
@@ -112,7 +119,7 @@ public class Projectile : MonoBehaviour
         return false;
     }
 
-    void Impact(Vector2 at, bool onFlesh)
+    void Impact(Vector3 at, bool onFlesh)
     {
         _dead = true;
         if (onFlesh)
@@ -123,11 +130,11 @@ public class Projectile : MonoBehaviour
         Destroy(gameObject);
     }
 
-    /// <summary>RaycastHit2D를 거리순으로 — Array.Sort에 넘길 비교자.</summary>
-    class HitOrder : System.Collections.Generic.IComparer<RaycastHit2D>
+    /// <summary>RaycastHit을 거리순으로 — Array.Sort에 넘길 비교자.</summary>
+    class HitOrder : System.Collections.Generic.IComparer<RaycastHit>
     {
         public static readonly HitOrder I = new HitOrder();
-        public int Compare(RaycastHit2D a, RaycastHit2D b) => a.distance.CompareTo(b.distance);
+        public int Compare(RaycastHit a, RaycastHit b) => a.distance.CompareTo(b.distance);
     }
 
     /// <summary>1×1 흰 스프라이트(총알 몸통). 스케일로 길이를 준다.</summary>

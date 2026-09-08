@@ -44,13 +44,30 @@ public static class BodyZones
     }
 
     /// <summary>피격 지점 → 부위. bounds는 대상 몸통의 월드 경계(허트박스 콜라이더).
-    /// 경계 밖이면 가장 가까운 쪽으로 눌러 읽는다(빗맞아도 부위는 정해져야 한다).</summary>
-    public static BodyPartType FromPoint(Bounds bounds, Vector2 worldPoint)
+    /// 경계 밖이면 가장 가까운 쪽으로 눌러 읽는다(빗맞아도 부위는 정해져야 한다).
+    ///
+    /// ⚠️ 3D 전환(2026-09-08): 2D에선 화면 y가 곧 키였지만, 3D에서 **키는 월드 Y**이고
+    ///    좌우는 XZ 평면 위의 한 축이다. 그래서 피격 지점을 평면 <c>Vector2</c>로 받으면
+    ///    머리·다리를 가를 수 없다 — 월드 <c>Vector3</c>와 좌우 기준축을 함께 받는다.
+    /// </summary>
+    /// <param name="lateralAxis">좌우를 가를 수평 축(보통 대상의 오른쪽 또는 카메라 오른쪽).
+    /// 0이면 월드 X를 쓴다.</param>
+    public static BodyPartType FromPoint(Bounds bounds, Vector3 worldPoint, Vector3 lateralAxis)
     {
         float h = Mathf.Max(0.0001f, bounds.size.y);
-        float w = Mathf.Max(0.0001f, bounds.size.x);
         float y01 = Mathf.Clamp01((worldPoint.y - bounds.min.y) / h);
-        float x01 = Mathf.Clamp01((worldPoint.x - bounds.min.x) / w);
+
+        // 좌우 — 기준축에 투영해 몸 폭으로 정규화한다.
+        Vector3 axis = lateralAxis; axis.y = 0f;
+        if (axis.sqrMagnitude < 0.000001f) axis = Vector3.right;
+        axis.Normalize();
+        // 축 방향 몸 반폭 — AABB를 단위축에 투영한 길이.
+        float halfW = Mathf.Abs(bounds.extents.x * axis.x) + Mathf.Abs(bounds.extents.z * axis.z);
+        if (halfW < 0.01f) halfW = Mathf.Max(bounds.extents.x, bounds.extents.z);
+
+
+        float lateral = Vector3.Dot(worldPoint - bounds.center, axis);
+        float x01 = Mathf.Clamp01(lateral / (2f * halfW) + 0.5f);
 
         if (y01 >= HeadBottom) return BodyPartType.Head;
         if (y01 < LegTop) return x01 < 0.5f ? BodyPartType.LeftLeg : BodyPartType.RightLeg;

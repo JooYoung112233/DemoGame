@@ -17,7 +17,7 @@ public class AttackPerformer : MonoBehaviour
     float _timer;
     bool _performing;
     readonly HashSet<Hurtbox> _hitThisAttack = new HashSet<Hurtbox>();
-    readonly Collider2D[] _buf = new Collider2D[16];
+    readonly Collider[] _buf = new Collider[16];
 
     public bool IsPerforming => _performing;
     public AttackData Current => _current;
@@ -49,7 +49,7 @@ public class AttackPerformer : MonoBehaviour
         // 2026-07-11: 스윙 시작 순간의 방향을 **고정(스냅샷)**한다.
         //   예전엔 ScanWindow가 매 프레임 _facing()을 새로 읽어 히트박스가 마우스를 실시간 추종 →
         //   스윙 도중 마우스를 휙 돌리면 박스가 캐릭터 주위를 쓸고 지나가 **등 뒤 적까지 맞았다.**
-        _lockedFacing = _facing != null ? _facing() : (Vector2)transform.right;
+        _lockedFacing = _facing != null ? _facing() : Plan3D.ToPlan(transform.forward);
         if (_lockedFacing.sqrMagnitude < 0.0001f) _lockedFacing = Vector2.right;
     }
 
@@ -78,20 +78,24 @@ public class AttackPerformer : MonoBehaviour
         if (_timer >= _current.Duration) Cancel();
     }
 
-    static readonly RaycastHit2D[] _losBuf = new RaycastHit2D[8];
+    static readonly RaycastHit[] _losBuf = new RaycastHit[8];
+
+    /// <summary>몸 판정 높이 — 히트박스가 지면에 눌리지 않게 가슴 높이를 기준으로 잡는다.</summary>
+    const float BodyMidY = 0.9f;
+    const float BodyHalfH = 0.9f;
 
     /// <summary>공격자→대상 사이에 솔리드 벽이 있는지. 트리거·플레이어·적 레이어는 무시.</summary>
-    static bool IsBlockedByWall(Vector2 from, Collider2D target)
+    static bool IsBlockedByWall(Vector3 from, Collider target)
     {
-        Vector2 to = target.bounds.ClosestPoint(from);
-        Vector2 d = to - from;
+        Vector3 to = target.bounds.ClosestPoint(from);
+        Vector3 d = to - from;
         float dist = d.magnitude;
         if (dist < 0.05f) return false;   // 몸에 붙어 있으면 검사 불필요
 
         int playerL = LayerMask.NameToLayer("Player");
         int enemyL  = LayerMask.NameToLayer("Enemy");
 
-        int n = Physics2D.RaycastNonAlloc(from, d / dist, _losBuf, dist);
+        int n = Physics.RaycastNonAlloc(from, d / dist, _losBuf, dist, ~0, QueryTriggerInteraction.Collide);
         for (int i = 0; i < n; i++)
         {
             var c = _losBuf[i].collider;
@@ -111,13 +115,25 @@ public class AttackPerformer : MonoBehaviour
         if (facing.sqrMagnitude < 0.0001f) facing = Vector2.right;
         float facingAngle = Mathf.Atan2(facing.y, facing.x) * Mathf.Rad2Deg;
 
-        Vector2 center = (Vector2)transform.position + RotateByAngle(w.offset, facingAngle);
+        // 히트박스 중심 — 평면 계산은 2D 그대로 두고 마지막에만 월드로 올린다.
+        Vector2 centerPlan = Plan3D.ToPlan(transform.position) + RotateByAngle(w.offset, facingAngle);
+        Vector3 center = Plan3D.ToWorld(centerPlan, transform.position.y + BodyMidY);
 
-        var filter = new ContactFilter2D { useTriggers = true, useLayerMask = true };
-        filter.SetLayerMask(targetMask);
-        int count = w.shape == HitboxShape.Box
-            ? Physics2D.OverlapBox(center, w.boxSize, facingAngle + w.angle, filter, _buf)
-            : Physics2D.OverlapCircle(center, w.radius, filter, _buf);
+        int count;
+        if (w.shape == HitboxShape.Box)
+        {
+            // 박스는 **전방(local Z)이 사거리**, local X가 폭이다(2D의 boxSize.x=사거리, y=폭과 같은 뜻).
+            Vector2 boxDir = RotateByAngle(facing, w.angle);
+            Quaternion rot = Plan3D.LookRotation(boxDir, transform.rotation);
+            Vector3 half = new Vector3(w.boxSize.y * 0.5f, BodyHalfH, w.boxSize.x * 0.5f);
+            count = Physics.OverlapBoxNonAlloc(center, half, _buf, rot, targetMask, QueryTriggerInteraction.Collide);
+        }
+        else
+        {
+            count = Physics.OverlapSphereNonAlloc(center, w.radius, _buf, targetMask, QueryTriggerInteraction.Collide);
+        }
+
+        Vector3 fromWorld = Plan3D.ToWorld(Plan3D.ToPlan(transform.position), transform.position.y + BodyMidY);
 
         bool landed = false;
         int dbgNoHurtbox = 0, dbgInactive = 0, dbgDup = 0, dbgWalled = 0;
@@ -133,7 +149,7 @@ public class AttackPerformer : MonoBehaviour
             // 2026-07-11: 벽 관통 판정 차단 — 공격자와 대상 사이에 **솔리드(비트리거)** 가 있으면 무효.
             //   예전엔 LOS 검사가 없어 벽을 사이에 두고도 사거리 안이면 그냥 맞았다.
             //   트리거(루트 상자·존)는 통과시켜야 하므로 비트리거만 차단으로 센다.
-            if (IsBlockedByWall(transform.position, col)) { dbgWalled++; continue; }
+            if (IsBlockedByWall(fromWorld, col)) { dbgWalled++; continue; }
 
             _hitThisAttack.Add(hb);
 
@@ -144,12 +160,13 @@ public class AttackPerformer : MonoBehaviour
             float reach = w.shape == HitboxShape.Box
                 ? w.offset.x + w.boxSize.x * 0.5f
                 : w.offset.magnitude + w.radius;
-            float dist = Vector2.Distance(transform.position, col.bounds.ClosestPoint(transform.position));
+            // ⚠️ 거리는 **평면 거리**다. 단차 위 적을 때릴 때 높이차가 사거리를 먹으면 안 된다.
+            float dist = Plan3D.PlanDistance(transform.position, col.bounds.ClosestPoint(transform.position));
             float falloff = RangeFalloff(dist, reach);
 
             // ── 부위 (2026-07-29 사용자: "근접도 조준 똑같이 넣어줘") ──
-            //    플레이어는 조준점(마우스)이 그대로 부위가 된다. 적은 조준점이 없으니 가중 랜덤.
-            Vector2? aim = AimPoint != null ? AimPoint() : (Vector2?)null;
+            //    플레이어는 조준점(마우스 → 몸 위 한 점)이 그대로 부위가 된다. 적은 조준점이 없으니 가중 랜덤.
+            Vector3? aim = AimPoint != null ? AimPoint() : null;
 
             hb.ReceiveHitAt(_current.damage * w.damageMult * falloff,
                             _current.groggy * w.groggyMult, facing, aim);
@@ -186,7 +203,7 @@ public class AttackPerformer : MonoBehaviour
     }
 
     /// <summary>조준점 공급자(플레이어만 설정). null이면 조준 없는 공격 = 부위 가중 랜덤.</summary>
-    public System.Func<Vector2> AimPoint;
+    public System.Func<Vector3?> AimPoint;
 
     /// <summary>타격 판정 진단 로그(F1에서 토글). 원인을 잡으면 지운다.</summary>
     public static bool DebugLog;

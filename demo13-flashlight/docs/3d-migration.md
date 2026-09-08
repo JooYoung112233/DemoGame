@@ -84,6 +84,37 @@
 | **가시성** | 시야 FOV 유지 — LOS만 `Physics.Linecast`로. 어둠 오버레이는 3D 포그/후처리로 재작성 |
 | **아트** | 로우폴리 단색 팔레트, 텍스처 없음. Blender 스크립트 생성 |
 
+## 2D 정리 장부 (무엇을 언제 지울 수 있는가)
+
+> 2026-09-08 실측. **"2D 흔적을 지금 다 지우면 안 되나"에 대한 답이 여기 있다.**
+> 결론: 2D는 아직 잔재가 아니라 **레이드 전체가 올라가 있는 살아 있는 층**이다.
+> 3D로 넘어간 곳은 **은신처와 마을 두 곳뿐**이고, 전투·맵·조명은 전부 2D가 정본이다.
+> 지우는 순서는 항상 **포팅 → 참조 교체 → 삭제**다. 순서를 건너뛰면 컴파일이 깨진다.
+
+| 대상 | 실측 | 무엇이 막고 있나 | 풀리는 시점 |
+|---|---|---|---|
+| 전투 12파일 (`EnemyController` `AttackPerformer` `Hurtbox` `NavGrid` `NavAgent` `Projectile` `PlayerVision` `Breakable` `EnemySpawner` `CombatFeedback` `BodyZoneOverlay` `NavGridBootstrap`) | `Rigidbody2D`/`Collider2D`/`Physics2D` 참조 다수 | 3D 물리로 옮기기 전엔 지울 수도 대체할 수도 없다 | **Stage 1** |
+| `Prop2DDefinition` · `Prop2DBuilder` | 씬·프리팹 **63곳**이 `Prop2DDefinition`을 참조 | 레이드 맵 소품이 전부 이 카탈로그로 서 있다 | **Stage 3** (`Prop3D*` 대체 후) |
+| `BuildingEntrance` | 씬 **18곳** 참조, 코드 14곳 | 2D 실내 진입이 아직 이걸로 돈다. 3D는 `SceneDoor3D` | Stage 3 (실내씬 3D화) |
+| `Light2D` 11파일 (`DayNightCycle` `PropLight2D` `FlashlightController` `VisionDarkness` …) | 파일당 1~8회 | 낮밤·시야·랜턴이 전부 2D 조명 위에 있다 | **Stage 2** |
+| 레이드 맵 씬 | `Int_*` **15개** + `Zone1` + `ScrapMarket_GB` | 3D 대응 **없음**. 지우면 게임에 갈 곳이 없다 | Stage 3 |
+| 2D 씬 이름 문자열 (`"Safehouse"` `"Hideout"` `"Pawnshop"`) | 코드 **13파일 25곳** — 스토리 트리거·QA·세이브 체크포인트·디버그 UI | 씬만 지워도 흐름이 끊긴다. **문자열 교체가 선행**되어야 한다 | Stage 3 이후 |
+| `HideoutGreyboxLayout.cs` · `SafehouseGreyboxLayout.cs` | 3D 빌더가 1:1 대체 | 없음 — **지금도 지울 수 있다.** 다만 2D 씬을 다시 만들 수단이 사라진다 | 지금 (보류 중) |
+
+### 왜 지금 안 지우는가
+
+전투 12파일이 병목이다. 이것이 2D 물리에 묶여 있는 한:
+- 2D 물리 층(`Physics2D` 10곳)을 걷어낼 수 없고,
+- 레이드 맵을 3D로 옮겨도 그 위에서 싸울 수가 없다.
+
+그래서 정리의 **전제 조건은 Stage 1**이다. 맵·조명·씬 삭제는 그 뒤에 따라온다.
+
+### 지금 지키는 규칙
+
+- 3D 신규 코드는 2D 파일을 **고치지 않고** 옆에 새로 만든다(`SceneDoor3D`가 `BuildingEntrance`를 안 건드린 것처럼).
+- 2D 전용 파일은 **지우지 말고 그대로 둔다.** 반쯤 지우면 어느 쪽이 정본인지 알 수 없어진다.
+- 3D가 대체를 끝낸 것만 이 표에서 지우고 실제 삭제로 옮긴다.
+
 ## 단계 계획
 
 각 단계는 **끝에 돌려볼 수 있는 상태**로 닫는다. 전체 작업은 전용 브랜치에서 한다 — 파이프라인 전환이 전역이라 중간 상태로 main에 섞이면 안 된다.

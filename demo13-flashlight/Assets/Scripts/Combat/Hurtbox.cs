@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// 피격 판정 박스. 캐릭터(또는 자식)에 부착, trigger Collider2D 필요.
+/// 피격 판정 박스. 캐릭터(또는 자식)에 부착, trigger Collider 필요.
 /// AttackPerformer가 OverlapXXX로 스캔 → ReceiveHit 호출.
 /// 비활성(구르기 무적 등) 시 콜라이더를 꺼 스캔에서 제외.
 /// </summary>
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(Collider))]
 public class Hurtbox : MonoBehaviour
 {
     [Tooltip("이 허트박스가 속한 캐릭터의 Health (비우면 부모에서 탐색)")]
@@ -13,14 +13,14 @@ public class Hurtbox : MonoBehaviour
     [Tooltip("적이면 EnemyController (비우면 부모에서 탐색) — TakeHit으로 그로기 처리")]
     [SerializeField] EnemyController enemy;
 
-    Collider2D _col;
+    Collider _col;
 
     public bool Active => _col != null && _col.enabled;
     public Health Health => health;
 
     void Awake()
     {
-        _col = GetComponent<Collider2D>();
+        _col = GetComponent<Collider>();
         _col.isTrigger = true;
         if (health == null) health = GetComponentInParent<Health>();
         if (enemy == null)  enemy  = GetComponentInParent<EnemyController>();
@@ -40,11 +40,14 @@ public class Hurtbox : MonoBehaviour
     ///
     /// 부위는 `PlayerMedicalSystem`과 같은 `BodyPartType`을 쓴다 — 판정과 치료가 같은 언어를 쓰게.
     /// hitPoint가 null이면(조준점 없는 공격) 가중 랜덤으로 부위를 뽑는다.</summary>
-    public BodyPartType ReceiveHitAt(float damage, float groggyAmount, Vector2 hitDir, Vector2? hitPoint)
+    public BodyPartType ReceiveHitAt(float damage, float groggyAmount, Vector2 hitDir, Vector3? hitPoint)
     {
+        // 좌우 기준축은 **타격 방향의 수직**으로 잡는다 — 정면에서 맞으면 좌우가 그대로,
+        // 옆에서 맞으면 앞뒤가 좌우가 된다. 3D에선 어느 쪽에서 맞았는지가 매번 다르다.
+        Vector3 lateral = Vector3.Cross(Vector3.up, Plan3D.ToWorld(hitDir));
         var part = hitPoint.HasValue
             ? BodyZones.FromPoint(_col != null ? _col.bounds : new Bounds(transform.position, Vector3.one),
-                                  hitPoint.Value)
+                                  hitPoint.Value, lateral)
             : BodyZones.Random();
 
         float dmg = damage * BodyZones.DamageMult(part);
