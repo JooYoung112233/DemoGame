@@ -29,14 +29,61 @@ public class HideoutDockPanel : MonoBehaviour
     string _module;
 
     // ── 기존 패널 입양 ──
-    RectTransform _content;          // 입양한 패널이 들어갈 자리
-    RectTransform _adopted;          // 지금 들고 있는 남의 패널
-    Transform _adoptedParent;        // 돌려줄 원래 부모
-    Vector2 _adoptedMin, _adoptedMax, _adoptedOffMin, _adoptedOffMax, _adoptedPivot;
-    Vector3 _adoptedScale;
+    RectTransform _content;                 // 입양한 패널이 들어갈 자리
+    DockedLayout.Session _session;          // 들고 있는 패널 + 되돌릴 값 전부 (DockedLayout 참조)
 
     public bool IsOpen => _root != null && _root.activeSelf;
-    public bool HasAdopted => _adopted != null;
+    public bool HasAdopted => _session != null;
+
+
+    // ── 시설별 도크 크기 ────────────────────────────────────────────
+    // 실측(2026-09-08, 1920 기준): 제작 520×480 / 침대 720×460 / 파견 조작부 360×964
+    //                              라디오 540+1276 2열 / 창고 643+556+556 3열
+    //
+    // ⚠️ 도크를 좁게(560) 잡으면 1920 기준으로 짠 패널이 통째로 줄어들어 글씨를 못 읽는다.
+    //    캐릭터만 안 가리면 되므로 **화면의 43% 정도까지 넉넉히 준다.** 나머지 57%에 방을 담고,
+    //    카메라가 그만큼 방을 왼쪽으로 민다(ResolvedBias가 이 값에서 정확히 계산한다).
+
+    public const float RefWidth  = 1920f;
+    public const float RefHeight = 1080f;
+    public const float RightMargin  = 32f;   // 도크와 화면 오른쪽 사이
+    public const float BottomMargin = 28f;
+
+    public static Vector2 RightDockSize(string moduleKey) => moduleKey switch
+    {
+        "stash" => new Vector2(880f, 960f),   // 3열이라 한 열(643)이 그대로 들어가야 한다
+        _       => new Vector2(840f, 960f),
+    };
+
+    /// <summary>하단 바 높이. 침대는 수면창(720×460)이 들어가야 해서 기본 바보다 높다.</summary>
+    public static float BottomDockHeight(string moduleKey) => moduleKey switch
+    {
+        "bed" => 380f,
+        _     => 220f,
+    };
+
+    /// <summary>제목 + 안내 + 시설 바가 쓰는 화면 상단 띠 높이.</summary>
+    public const float TopBandHeight = 180f;
+
+    /// <summary>도크와 상단 띠를 뺀, **방을 담을 수 있는 화면 영역**(정규화 0~1, y는 아래가 0).
+    /// 카메라 프레이밍은 여기서 나온다 — 편향과 줌을 따로 손으로 맞추면 도크 크기를 바꿀 때마다
+    /// 방이 UI 밑으로 들어가거나 화면 밖으로 잘린다.</summary>
+    public static Rect FreeScreenRect(string moduleKey, HideoutFacilityAnchor.Dock dock)
+    {
+        float top = TopBandHeight / RefHeight;
+
+        if (dock == HideoutFacilityAnchor.Dock.Bottom)
+        {
+            float b = (BottomDockHeight(moduleKey) + BottomMargin) / RefHeight;
+            return new Rect(0f, b, 1f, Mathf.Max(1f - top - b, 0.1f));
+        }
+
+        // 도크가 없으면(대기 상태) 상단 띠만 피하고 화면 전체를 쓴다.
+        float r = dock == HideoutFacilityAnchor.Dock.None
+                ? 0f
+                : (RightDockSize(moduleKey).x + RightMargin) / RefWidth;
+        return new Rect(0f, 0f, Mathf.Max(1f - r, 0.1f), Mathf.Max(1f - top, 0.1f));
+    }
 
     void Awake()
     {
@@ -67,7 +114,7 @@ public class HideoutDockPanel : MonoBehaviour
             _panel.anchorMin = new Vector2(0.06f, 0f);
             _panel.anchorMax = new Vector2(0.94f, 0f);
             _panel.pivot     = new Vector2(0.5f, 0f);
-            _panel.sizeDelta = new Vector2(0f, 220f);
+            _panel.sizeDelta = new Vector2(0f, BottomDockHeight(_module));
             _panel.anchoredPosition = new Vector2(0f, 28f);
         }
         else   // Right
@@ -75,9 +122,14 @@ public class HideoutDockPanel : MonoBehaviour
             _panel.anchorMin = new Vector2(1f, 0.5f);
             _panel.anchorMax = new Vector2(1f, 0.5f);
             _panel.pivot     = new Vector2(1f, 0.5f);
-            _panel.sizeDelta = new Vector2(560f, 720f);
+            _panel.sizeDelta = RightDockSize(_module);
             _panel.anchoredPosition = new Vector2(-32f, 0f);
         }
+
+        // 입양 자리 — 위쪽 88px만 제목(좌)·닫기 X(우)에게 내주고 나머지는 전부 내용이 쓴다.
+        // 우측·하단 도크가 같은 규칙이다.
+        _content.offsetMin = new Vector2(16f, 16f);
+        _content.offsetMax = new Vector2(-16f, -88f);
 
         _root.SetActive(true);
 
@@ -102,22 +154,26 @@ public class HideoutDockPanel : MonoBehaviour
         if (panel == null || _content == null) return false;
         Release();
 
-        _adopted        = panel;
-        _adoptedParent  = panel.parent;
-        _adoptedMin     = panel.anchorMin;
-        _adoptedMax     = panel.anchorMax;
-        _adoptedOffMin  = panel.offsetMin;
-        _adoptedOffMax  = panel.offsetMax;
-        _adoptedPivot   = panel.pivot;
-        _adoptedScale   = panel.localScale;
+        // 도크 크기가 바뀐 직후라 _content의 rect가 아직 갱신 전일 수 있다.
+        // 재배치는 폭 하나로 결정되므로, 여기서 강제로 한 번 계산시킨다.
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
+        var area = _content.rect.size;
 
-        panel.SetParent(_content, false);
-        panel.anchorMin = Vector2.zero;
-        panel.anchorMax = Vector2.one;
-        panel.pivot     = new Vector2(0.5f, 0.5f);
-        panel.offsetMin = Vector2.zero;
-        panel.offsetMax = Vector2.zero;
-        panel.localScale = Vector3.one;
+        _session = DockedLayout.Prepare(panel, _module, area);
+        var placed = _session.Placed;
+        if (placed == null) { _session = null; return false; }
+
+        placed.SetParent(_content, false);
+
+        // 도크 자리를 **꽉 채운다.** 제 크기로 가운데 두면 배경만 넓고 내용이 갑갑해 보인다.
+        // 스크롤이든 아니든 자리는 똑같이 채우고, 세로로 넘치는 몫만 스크롤이 흡수한다.
+        placed.anchorMin = Vector2.zero;
+        placed.anchorMax = Vector2.one;
+        placed.pivot     = new Vector2(0.5f, 0.5f);
+        placed.offsetMin = Vector2.zero;
+        placed.offsetMax = Vector2.zero;
+        placed.localScale = Vector3.one;
 
         // 입양하면 설명·상태·열기 버튼은 그 패널이 대신한다.
         _body.gameObject.SetActive(false);
@@ -128,23 +184,20 @@ public class HideoutDockPanel : MonoBehaviour
         return true;
     }
 
-    /// <summary>들고 있던 패널을 원래 자리로 돌려준다. 안 돌려주면 다음에 열 때 화면에서 사라진다.</summary>
+    /// <summary>들고 있던 패널을 원래 자리·원래 모양으로 돌려준다.
+    /// ⚠️ 재배치한 것까지 전부 되돌려야 한다 — 안 그러면 은신처 밖에서 그 UI가 찌그러진 채 뜬다.</summary>
     public void Release()
     {
-        if (_adopted == null) return;
-        if (_adoptedParent != null) _adopted.SetParent(_adoptedParent, false);
-        _adopted.anchorMin = _adoptedMin;
-        _adopted.anchorMax = _adoptedMax;
-        _adopted.pivot     = _adoptedPivot;
-        _adopted.offsetMin = _adoptedOffMin;
-        _adopted.offsetMax = _adoptedOffMax;
-        _adopted.localScale = _adoptedScale;
+        if (_session == null) return;
+
+        var root = _session.Root;
+        _session.Restore();
+        _session = null;
+
         // ⚠️ 되돌려만 놓고 끄지 않으면, 도크를 닫은 뒤에도 그 패널이 전체화면으로
         // 화면에 남는다(=캐릭터를 덮는다). 게다가 계속 켜져 있어서 다음에 같은
         // 시설을 열 때 '새로 켜진 패널'로 안 잡혀 입양이 실패한다.
-        _adopted.gameObject.SetActive(false);
-        _adopted = null;
-        _adoptedParent = null;
+        if (root != null) root.gameObject.SetActive(false);
 
         if (_body != null) _body.gameObject.SetActive(true);
         if (_statusText != null) _statusText.gameObject.SetActive(true);
@@ -265,13 +318,17 @@ public class HideoutDockPanel : MonoBehaviour
         bg.color = new Color(0.07f, 0.07f, 0.085f, 0.93f);
 
         _title   = MakeText(panelGO.transform, "Title", 40, TextAnchor.UpperLeft,
-                            new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(28f, -24f), new Vector2(-56f, 56f));
+                            // ⚠️ 상단 stretch에서 offMax.y는 위쪽 바깥으로 나가는 값이다.
+                            // +56이면 제목이 패널 밖으로 떠서 씬 헤더와 겹친다. 안쪽(-)으로 잡는다.
+                            // 우상단 X 자리(-90)를 비워 둔다.
+                            new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(28f, -84f), new Vector2(-90f, -24f));
         _body    = MakeText(panelGO.transform, "Body", 26, TextAnchor.UpperLeft,
                             new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(28f, 96f), new Vector2(-56f, -190f));
         _body.color = new Color(0.78f, 0.78f, 0.74f);
 
         _openBtn  = MakeButton(panelGO.transform, "Open",  "열기",  new Vector2(0f, 0f), new Vector2(28f, 24f),  new Vector2(200f, 56f));
-        _closeBtn = MakeButton(panelGO.transform, "Close", "닫기", new Vector2(1f, 0f), new Vector2(-28f, 24f), new Vector2(160f, 56f));
+        // 닫기 = 우측 상단 X. 아래에 두면 내용이 쓸 세로 자리를 100px 가까이 잡아먹는다.
+        _closeBtn = MakeButton(panelGO.transform, "Close", "✕", new Vector2(1f, 1f), new Vector2(-20f, -20f), new Vector2(52f, 52f));
 
         _statusText = MakeText(panelGO.transform, "Status", 24, TextAnchor.LowerLeft,
                                new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(28f, 170f), new Vector2(-56f, 340f));

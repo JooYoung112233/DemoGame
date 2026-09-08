@@ -115,15 +115,25 @@ public class CameraFollow : MonoBehaviour
     }
 
     /// <summary>화면 비율 편향을 월드 이동으로 바꾼다. 카메라가 기울어 있으므로
-    /// 화면 '위'는 월드에서 카메라 forward를 지면에 눕힌 방향이다.</summary>
+    /// 화면 '위'는 월드에서 카메라 forward를 지면에 눕힌 방향이다.
+    ///
+    /// ⚠️ 두 축의 환산 계수가 다르다. 예전엔 양쪽 다 뷰 높이(half*2)를 곱했는데,
+    ///    ① 가로는 뷰 **폭**(높이×aspect)이라 16:9에서 요구한 만큼의 56%밖에 안 밀렸고,
+    ///    ② 세로는 지면 방향 이동이 화면에서 sin(pitch)만큼 눌려 보여 55°에서 82%만 밀렸다.
+    ///    도크가 좁을 땐 티가 안 났지만 도크를 키우자 방이 UI 밑으로 들어갔다.</summary>
     Vector3 FramingShift()
     {
         if (!_hasFocus || cam == null) return Vector3.zero;
-        float half = cam.orthographic ? cam.orthographicSize : 10f;
+        float viewH = (cam.orthographic ? cam.orthographicSize : 10f) * 2f;
+        float viewW = viewH * cam.aspect;
+
+        // 지면 방향 이동이 화면 세로로 얼마나 보이는가 = sin(pitch) = |forward.y|
+        float tilt = Mathf.Max(Mathf.Abs(transform.forward.y), 0.3f);
+
         Vector3 right = transform.right;
         Vector3 up    = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
         // 피사체를 위로 올리려면 카메라가 볼 지점을 아래로 내린다 → 부호 반전
-        return (-right * _focusBias.x - up * _focusBias.y) * (half * 2f);
+        return -right * (_focusBias.x * viewW) - up * (_focusBias.y * viewH / tilt);
     }
 
     /// <summary>카메라를 타깃 위치로 즉시 스냅(스무딩 건너뜀). 스폰/순간이동 직후 호출 — "슉~" 슬라이드 방지.</summary>

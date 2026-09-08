@@ -251,13 +251,23 @@ public class HideoutController : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920, 1080);
         _uiRoot.AddComponent<GraphicRaycaster>();
 
-        // 제목
+        // 제목 · 안내
+        // ⚠️ 디오라마(3D)에서는 화면 오른쪽 840px을 도크가 통째로 쓴다. 화면 가운데 정렬로 두면
+        //    제목·안내가 도크 밑으로 들어가 잘린다 — 방이 있는 왼쪽 영역의 가운데로 옮긴다.
+        const float DockW = 840f, DockMargin = 32f;
+        float hx = HideoutDiorama.Active
+                 ? (1920f - DockMargin - DockW) / 2f - 960f     // 왼쪽 영역 중심 - 화면 중심
+                 : 0f;
+
         MakeText("Title", "은신처", 40, TextAnchor.UpperCenter,
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -28f), new Vector2(600f, 60f),
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(hx, -28f), new Vector2(600f, 60f),
             new Color(0.95f, 0.95f, 0.9f, 1f));
-        // 안내
-        MakeText("Hint", "시설 클릭 = 건설 · 업그레이드 · 사용  ·  인벤토리 = Tab/버튼  ·  ESC로 나가기", 22, TextAnchor.UpperCenter,
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -78f), new Vector2(1100f, 36f),
+        MakeText("Hint",
+            HideoutDiorama.Active
+                ? "소품 클릭 또는 상단 목록  ·  인벤토리 = Tab/버튼  ·  ESC로 나가기"
+                : "시설 클릭 = 건설 · 업그레이드 · 사용  ·  인벤토리 = Tab/버튼  ·  ESC로 나가기",
+            22, TextAnchor.UpperCenter,
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(hx, -78f), new Vector2(1000f, 36f),
             new Color(0.8f, 0.82f, 0.85f, 0.9f));
 
         // 좌하단 버튼: 나가기 + 인벤토리만(시설은 방 안 타일을 클릭).
@@ -300,6 +310,16 @@ public class HideoutController : MonoBehaviour
     void ShowExitConfirm()
     {
         if (_confirmRoot == null) return;
+
+        // ⚠️ 시설 UI가 열려 있으면 나가기를 막는다. 제작·파견 도중에 씬이 바뀌면
+        //    그 UI가 붙은 채로 넘어가거나(도크가 남의 패널을 들고 있다) 작업이 통째로 날아간다.
+        //    먼저 UI를 닫게 한다 — 닫기는 우상단 X 또는 ESC.
+        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen())
+        {
+            ToastManager.Show("열려 있는 창을 먼저 닫아라", ToastManager.ToastType.Warning);
+            return;
+        }
+
         _confirmShowing = true;
         _confirmRoot.SetActive(true);
     }

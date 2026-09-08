@@ -32,6 +32,11 @@ public class HideoutDiorama : MonoBehaviour
     [Tooltip("방을 담는 카메라 오소 크기.")]
     [SerializeField] float roomOrthoSize = 7.0f;
 
+    /// <summary>기본 시야에서 방이 차지하는 반지름 비율. 시야 보정 계산의 기준.</summary>
+    /// <summary>기본 시야(오소 7·16:9)에서 방이 차지하는 반지름 비율. 실측값 — 프레이밍 계산의 기준.</summary>
+    const float RoomHalfFracX = 0.29f;
+    const float RoomHalfFracY = 0.33f;
+
     readonly List<HideoutFacilityAnchor> _anchors = new List<HideoutFacilityAnchor>();
     HideoutFacilityAnchor _idle;
     HideoutFacilityAnchor _current;
@@ -84,10 +89,101 @@ public class HideoutDiorama : MonoBehaviour
         //    디오라마는 무대다 — 무대는 고정이고 배우가 움직인다.
         //    캐릭터를 쫓으면 의자↔시설을 오갈 때마다 화면 전체가 흔들려 정신이 없다.
         SetupRoomFocus();
-        FrameRoom(Vector2.zero);
+        FrameRoom();
 
-        if (_idle != null) { PlaceAt(_idle, instant: true); _current = _idle; }
+        BuildFacilityBar();
+
+        if (_idle != null) { PlaceAt(_idle, instant: true); _current = _idle; RefreshFacilityBar(); }
         else Debug.LogWarning("[HideoutDiorama] moduleKey=\"idle\" 앵커(대기 의자)가 없다.", this);
+    }
+
+    // ── 상단 시설 바로가기 ───────────────────────────────────────────
+    // 소품을 직접 누르는 것만으로는 불편하다 — 소품이 작고, 어디에 뭐가 있는지 외워야 한다.
+    // 화면 상단에 시설 목록을 한 줄로 두고, 눌렀을 때 소품을 누른 것과 **똑같이** 동작시킨다.
+
+    const float BarBtnW = 132f, BarBtnH = 50f, BarGap = 6f, BarLeft = 40f, BarTop = -120f;
+
+    GameObject _barRoot;
+    readonly List<UnityEngine.UI.Image> _barBtns = new List<UnityEngine.UI.Image>();
+    readonly List<HideoutFacilityAnchor> _barKeys = new List<HideoutFacilityAnchor>();
+
+    static readonly Color BarIdle = new Color(0.13f, 0.13f, 0.15f, 0.92f);
+    static readonly Color BarOn   = new Color(0.55f, 0.44f, 0.18f, 0.95f);
+
+    void BuildFacilityBar()
+    {
+        _barRoot = new GameObject("HideoutFacilityBar");
+        _barRoot.transform.SetParent(transform, false);
+
+        var canvas = _barRoot.AddComponent<Canvas>();
+        canvas.renderMode = UnityEngine.RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 55;                       // 도크(60)보다 아래
+        var scaler = _barRoot.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 0.5f;
+        _barRoot.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
+        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        // 버튼 폭은 **남는 자리에 맞춰** 나눈다. 고정 폭으로 두면 시설이 하나 늘어난 순간
+        // 마지막 버튼이 도크 밑으로 들어가 안 눌린다.
+        var listed = new List<HideoutFacilityAnchor>();
+        foreach (var a in _anchors)
+        {
+            if (a == null || a.moduleKey == "idle") continue;
+            if (string.IsNullOrEmpty(FacilityLabel.KoreanFor(a.moduleKey))) continue;
+            listed.Add(a);
+        }
+        if (listed.Count == 0) return;
+
+        float avail = 1920f - HideoutDockPanel.RightMargin
+                    - HideoutDockPanel.RightDockSize(null).x - BarLeft - 16f;
+        float btnW = Mathf.Min(BarBtnW, (avail - BarGap * (listed.Count - 1)) / listed.Count);
+
+        float x = BarLeft;
+
+        foreach (var a in listed)
+        {
+
+            var go = new GameObject("Btn_" + a.moduleKey);
+            go.transform.SetParent(_barRoot.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0f, 1f);
+            rt.anchoredPosition = new Vector2(x, BarTop);
+            rt.sizeDelta = new Vector2(btnW, BarBtnH);
+
+            var img = go.AddComponent<UnityEngine.UI.Image>();
+            img.color = BarIdle;
+
+            var btn = go.AddComponent<UnityEngine.UI.Button>();
+            btn.targetGraphic = img;
+            var target = a;                                        // ⚠️ 클로저 캡처 — 반복 변수 그대로 쓰면 전부 마지막 것이 된다
+            btn.onClick.AddListener(() => Select(target));
+
+            var tGO = new GameObject("Label");
+            tGO.transform.SetParent(go.transform, false);
+            var trt = tGO.AddComponent<RectTransform>();
+            trt.anchorMin = Vector2.zero; trt.anchorMax = Vector2.one;
+            trt.offsetMin = Vector2.zero; trt.offsetMax = Vector2.zero;
+            var txt = tGO.AddComponent<UnityEngine.UI.Text>();
+            txt.text = FacilityLabel.KoreanFor(a.moduleKey);
+            txt.font = font;
+            txt.fontSize = 24;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.color = new Color(0.92f, 0.90f, 0.85f);
+
+            _barBtns.Add(img);
+            _barKeys.Add(a);
+            x += btnW + BarGap;
+        }
+    }
+
+    /// <summary>지금 선택된 시설을 바에서 강조한다. 어디를 보고 있는지 한눈에 알려야 한다.</summary>
+    void RefreshFacilityBar()
+    {
+        for (int i = 0; i < _barBtns.Count; i++)
+            if (_barBtns[i] != null)
+                _barBtns[i].color = (_barKeys[i] == _current) ? BarOn : BarIdle;
     }
 
     void Update()
@@ -106,8 +202,8 @@ public class HideoutDiorama : MonoBehaviour
         //    자연스럽고, 의자 왕복이 사라져 카메라 이동이 절반으로 준다.
         //    의자는 '처음 들어왔을 때의 자세'로만 쓴다.
         if (uiOpen) _uiWasOpen = true;
-        else if (_uiWasOpen) { _uiWasOpen = false; FrameRoom(Vector2.zero); }
-        else if (!dockOpen && _framed) FrameRoom(Vector2.zero);   // 패널 닫힘 = 프레임만 복귀
+        else if (_uiWasOpen) { _uiWasOpen = false; FrameRoom(); }
+        else if (!dockOpen && _framed) FrameRoom();   // 패널 닫힘 = 프레임만 복귀
 
         // ⚠️ 도킹 패널이 열려 있어도 **다른 시설을 바로 고를 수 있게** 한다.
         //    매번 '닫기'를 눌러야 다음 시설이 눌리면 번거롭다.
@@ -131,11 +227,13 @@ public class HideoutDiorama : MonoBehaviour
     void Select(HideoutFacilityAnchor a)
     {
         _current = a;
+        RefreshFacilityBar();
         _uiWasOpen = false;
         PlaceAt(a, instant: false);
 
         // 카메라는 방에 고정된 채 **UI 자리만큼만** 한 번 밀린다(캐릭터를 따라가지 않는다).
-        FrameRoom(a.ResolvedBias);
+        // 앵커에 cameraBias를 직접 넣어 뒀으면 그것이 우선한다(수동 연출용).
+        FrameInto(HideoutDockPanel.FreeScreenRect(a.moduleKey, a.dock), a.cameraBias);
 
         // 도킹 패널 — 캐릭터를 가리지 않는 자리(우측/하단)에 붙는다.
         // 기존 시설 UI는 전체화면 전제라, 그 내용을 옮기기 전까지는 패널의 '열기'가 띄운다.
@@ -224,14 +322,28 @@ public class HideoutDiorama : MonoBehaviour
 
     bool _framed;   // 현재 UI 자리만큼 밀려 있는가
 
-    /// <summary>방을 화면에 담는다. <paramref name="bias"/>만큼 밀어 UI 자리를 비운다.</summary>
     Vector2 _wantedBias;
-    bool _focusApplied;
+    float   _wantedOrtho;
+    bool    _focusApplied;
 
-    void FrameRoom(Vector2 bias)
+    /// <summary>화면 전체를 쓰는 기본 프레이밍(아무것도 안 눌렀을 때). 상단 띠만 피한다.</summary>
+    void FrameRoom() => FrameInto(HideoutDockPanel.FreeScreenRect(null, HideoutFacilityAnchor.Dock.None));
+
+    /// <summary>도크가 차지하고 남은 화면 영역에 방을 맞춘다.
+    ///
+    /// 편향과 줌을 손으로 따로 맞추면 도크 크기를 바꿀 때마다 방이 UI 밑으로 들어가거나
+    /// 화면 밖으로 잘린다. 남는 영역의 **중심으로 옮기고, 그 영역에 들어갈 만큼 줌아웃**한다.</summary>
+    void FrameInto(Rect free, Vector2 overrideBias = default)
     {
-        _wantedBias = bias;
-        _framed = bias != Vector2.zero;
+        Vector2 center = new Vector2(free.x + free.width * 0.5f, free.y + free.height * 0.5f);
+        _wantedBias = overrideBias != Vector2.zero ? overrideBias : center - new Vector2(0.5f, 0.5f);
+        _framed     = _wantedBias.sqrMagnitude > 0.000001f;
+
+        // 방이 기본 시야에서 차지하는 반지름 비율(가로/세로)을 기준으로 필요한 오소를 구한다.
+        float needX = roomOrthoSize * RoomHalfFracX / Mathf.Max(free.width  * 0.5f, 0.08f);
+        float needY = roomOrthoSize * RoomHalfFracY / Mathf.Max(free.height * 0.5f, 0.08f);
+        _wantedOrtho = Mathf.Max(roomOrthoSize, Mathf.Max(needX, needY));
+
         _focusApplied = false;
         TryApplyFocus();
     }
@@ -243,7 +355,7 @@ public class HideoutDiorama : MonoBehaviour
         if (_focusApplied || _roomFocus == null) return;
         var cf = CameraFollow.Instance;
         if (cf == null) return;
-        cf.SetFocus(_roomFocus, _wantedBias, roomOrthoSize);
+        cf.SetFocus(_roomFocus, _wantedBias, _wantedOrtho);
         _focusApplied = true;
     }
 

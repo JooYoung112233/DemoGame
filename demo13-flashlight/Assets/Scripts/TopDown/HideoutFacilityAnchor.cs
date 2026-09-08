@@ -54,7 +54,11 @@ public class HideoutFacilityAnchor : MonoBehaviour
         }
     }
 
-    /// <summary>UI 자리를 비우기 위한 화면 편향. 직접 지정하지 않았으면 dock에서 뽑는다.</summary>
+    /// <summary>UI 자리를 비우기 위한 화면 편향. 직접 지정하지 않았으면 도크 크기에서 계산한다.
+    ///
+    /// 남는 자리(도크를 뺀 쪽)의 한가운데로 방을 옮기면 된다. 도크 폭이 W, 여백이 M이면
+    /// 남는 자리의 중심은 화면 중앙에서 (W+M)/2 만큼 왼쪽이므로 편향 = -(W+M)/2/화면폭.
+    /// ⚠️ 예전처럼 고정값(-0.18)을 쓰면 도크를 키운 순간 캐릭터가 도크 밑에 깔린다.</summary>
     public Vector2 ResolvedBias
     {
         get
@@ -62,11 +66,17 @@ public class HideoutFacilityAnchor : MonoBehaviour
             if (cameraBias != Vector2.zero) return cameraBias;
             return dock switch
             {
-                // 우측에 UI → 캐릭터를 왼쪽으로 민다
-                Dock.Right  => new Vector2(-0.18f, 0f),
-                // 하단에 UI → 캐릭터를 위로 민다
-                Dock.Bottom => new Vector2(0f, 0.16f),
-                _           => Vector2.zero,
+                // 우측에 UI → 캐릭터를 왼쪽으로
+                Dock.Right => new Vector2(
+                    -(HideoutDockPanel.RightDockSize(moduleKey).x + HideoutDockPanel.RightMargin)
+                    / (2f * HideoutDockPanel.RefWidth),
+                    0f),
+                // 하단에 UI → 캐릭터를 위로
+                Dock.Bottom => new Vector2(
+                    0f,
+                    (HideoutDockPanel.BottomDockHeight(moduleKey) + HideoutDockPanel.BottomMargin)
+                    / (2f * HideoutDockPanel.RefHeight)),
+                _ => Vector2.zero,
             };
         }
     }
