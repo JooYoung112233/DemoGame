@@ -67,6 +67,7 @@ public static class Safehouse3DLayout
         // 전당포(북 중앙) — 유일하게 지금 열려 있는 실내
         n += Building(map, "Pawnshop", 34f, 44f, 16f, 12f, ShopH, "S", open: true);
         n += Spawn(map, "from_pawnshop", 34f, 36.5f);
+        n += PawnshopInterior(map);
 
         // 잠금 상가 4채 — 실내까지 지어두고 셔터로 막는다(해금 시 그대로 열림)
         n += Building(map, "Repair",    12f, 44f, 14f, 10f, ShopH, "S", open: false);
@@ -85,9 +86,9 @@ public static class Safehouse3DLayout
         // ── 광장 · 게시판 · NPC ──
         n += Spawn(map, "raid_return", 40f, 29f);
         n += Prop(map, "Board_Quest", 72f, 29f, new Vector3(3.0f, 2.4f, 0.35f), new Color(0.58f, 0.46f, 0.28f));
-        n += Npc (map, "NPC_Veteran",  67f, 29f, new Color(0.52f, 0.46f, 0.40f));
-        n += Npc (map, "NPC_Merchant", 36f, 14f, new Color(0.55f, 0.40f, 0.45f));
-        n += Npc (map, "NPC_Warden",   50f, 16f, new Color(0.40f, 0.48f, 0.56f));
+        n += Npc (map, "회수꾼",       "veteran_scavenger",  67f, 29f, new Color(0.52f, 0.46f, 0.40f));
+        n += Npc (map, "떠돌이 상인",  "wandering_merchant", 36f, 14f, new Color(0.55f, 0.40f, 0.45f));
+        n += Npc (map, "구역 관리인", "district_warden",    50f, 16f, new Color(0.40f, 0.48f, 0.56f));
 
         // ── 조명 ──
         var sunGO = new GameObject("Sun");
@@ -259,7 +260,12 @@ public static class Safehouse3DLayout
     static int Prop(GameObject p, string name, float x, float z, Vector3 size, Color c)
         => Box(p, name, new Vector3(x, size.y * .5f, z), size, Lit(c, 0.06f));
 
-    static int Npc(GameObject p, string name, float x, float z, Color c)
+    /// <summary>말을 걸 수 있는 NPC. 캡슐 몸 + 상호작용 + 대화 배선.
+    ///
+    /// 2D판은 `gb_npc` 스프라이트 프리팹을 썼다. 3D에선 아직 NPC 모델이 없으므로(Stage 4)
+    /// 캡슐 그레이박스로 세우되 **배선은 진짜로** 한다 — NPCData를 물려 대화가 실제로 열린다.
+    /// 모델만 나중에 갈아끼우면 된다.</summary>
+    static int Npc(GameObject p, string name, string storyNpcId, float x, float z, Color c)
     {
         var go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
         go.name = name;
@@ -267,7 +273,78 @@ public static class Safehouse3DLayout
         go.transform.position = new Vector3(x, 0.9f, z);
         go.transform.localScale = new Vector3(0.6f, 0.9f, 0.6f);
         go.GetComponent<MeshRenderer>().sharedMaterial = Lit(c, 0.08f);
+
+        // 몸은 밀리지 않게 — 대화 상대가 플레이어에 밀려 가게 두면 안 된다.
+        var col = go.GetComponent<Collider>();
+        if (col != null) col.isTrigger = false;
+
+        var io = go.AddComponent<InteractableObject>();
+        var so = new SerializedObject(io);
+        var tp = so.FindProperty("type");
+        if (tp != null) tp.enumValueIndex = (int)InteractableObject.InteractType.NPC;
+        var pt = so.FindProperty("promptText");
+        if (pt != null) pt.stringValue = "대화하기";
+        // ⚠️ 상점 주인은 **카운터 너머**에 선다. 기본 사거리(2m)면 카운터 두께 + 서로의 몸
+        //    때문에 손님 자리에서 말이 안 걸린다. NPC만 넉넉히 준다(전역으로 늘리면
+        //    상자·문까지 멀리서 집히게 된다).
+        var rp = so.FindProperty("interactRange");
+        if (rp != null) rp.floatValue = 3.2f;
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        var npc = go.AddComponent<NPCController>();
+        var nso = new SerializedObject(npc);
+        var sid = nso.FindProperty("storyNpcId");
+        if (sid != null) sid.stringValue = storyNpcId;
+        var data = AssetDatabase.LoadAssetAtPath<NPCData>($"Assets/Resources/Data/NPC/{storyNpcId}.asset");
+        var dp = nso.FindProperty("npcData");
+        if (dp != null && data != null) dp.objectReferenceValue = data;
+        nso.ApplyModifiedPropertiesWithoutUndo();
+        if (data == null)
+            Debug.LogWarning($"[Safehouse3D] NPCData를 못 찾았다: Data/NPC/{storyNpcId} — 대화가 안 열린다.");
+
         return 1;
+    }
+
+    // ── 전당포 실내 ──────────────────────────────────────────────────
+    /// <summary>전당포 안을 채운다. 건물(34,44 / 16×12)은 Building이 이미 세웠고,
+    /// 여기서는 **그 안의 내용**만 넣는다 — 카운터·주인장·선반.
+    ///
+    /// 2D판은 별도 씬(`Pawnshop.unity`)이었지만 3D는 걸어 들어가므로 같은 맵 안에 둔다
+    /// (로딩이 끊기지 않는 것이 3D 실내의 요점 — building-interior.md).</summary>
+    static int PawnshopInterior(GameObject map)
+    {
+        var root = new GameObject("Pawnshop_Interior");
+        root.transform.SetParent(map.transform, false);
+        int n = 1;
+
+        const float CX = 34f, CZ = 44f;   // 건물 중심
+
+        // 카운터 — 손님(남쪽)과 주인(북쪽)을 가르는 선. 이게 있어야 점포로 읽힌다.
+        n += Slab(root, "Pawn_Counter", CX, CZ + 1.5f, 8f, 0.9f, 1.05f, Lit(new Color(0.42f, 0.33f, 0.24f), 0.06f));
+
+        // 주인장 강무진 — 카운터 **뒤**에 선다.
+        n += Npc(root, "전당포 주인", "pawnshop", CX, CZ + 2.4f, new Color(0.62f, 0.55f, 0.42f));   // 카운터에 붙어 선다
+
+        // 북벽 선반 — 저당 잡힌 물건들이 놓이는 자리(모델은 후속).
+        n += Prop(root, "Shelf_N1", CX - 5.5f, CZ + 4.6f, new Vector3(3.4f, 1.9f, 0.5f), new Color(0.34f, 0.31f, 0.28f));
+        n += Prop(root, "Shelf_N2", CX + 5.5f, CZ + 4.6f, new Vector3(3.4f, 1.9f, 0.5f), new Color(0.34f, 0.31f, 0.28f));
+
+        // 손님 쪽 — 기다리는 자리. 비워 두면 방이 넓기만 하고 쓸모가 없어 보인다.
+        n += Prop(root, "Crate_A", CX - 6.2f, CZ - 3.4f, new Vector3(1.0f, 0.8f, 1.0f), new Color(0.45f, 0.38f, 0.28f));
+        n += Prop(root, "Crate_B", CX - 5.2f, CZ - 4.2f, new Vector3(0.8f, 0.6f, 0.8f), new Color(0.42f, 0.35f, 0.26f));
+        n += Prop(root, "Barrel",  CX + 6.2f, CZ - 3.6f, new Vector3(0.9f, 1.1f, 0.9f), new Color(0.33f, 0.36f, 0.34f));
+
+        // 실내 전구 — 지붕이 꺼지면 BuildingInterior가 켠다(lightsFollowRoof).
+        var lightGO = new GameObject("Bulb");
+        lightGO.transform.SetParent(root.transform, false);
+        lightGO.transform.position = new Vector3(CX, 3.2f, CZ);
+        var lt = lightGO.AddComponent<Light>();
+        lt.type = LightType.Point;
+        lt.range = 14f; lt.intensity = 2.6f;
+        lt.color = new Color(1.00f, 0.86f, 0.66f);
+        n++;
+
+        return n;
     }
 
     static int Spawn(GameObject p, string id, float x, float z)
