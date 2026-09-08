@@ -32,7 +32,15 @@
 - 확인 결과: 손 외 12개 메시와 모든 모션 키가 그대로임을 확인했다. 둥근 손의 FBX 재임포트/GLB 스킨·3개 클립 검사를 통과했다. [최신 모션 영상](../Assets/ChibiSurvivor/CompactSurvivor/Animated/RoundHands/LocomotionPreview.mp4)도 갱신했다.
 - 재생성: [round_compact_hands.py](../tools/round_compact_hands.py). 영상/내보내기 검사는 기존 도구에 `-- --round-hands`를 붙여 최신 손 버전을 대상으로 한다.
 
-### 다음 모션 제작안 — 2026-09-08
+### 한손 찌르기 비교안 — 2026-09-08
+
+- 사용자 피드백: **“나쁘진않은데 찌르기가 좀 좋지않을까”**. 베기를 남기고 찌르기 비교안을 제작한다. 기본 공격을 찌르기로 최종 확정한 것은 아니다.
+- 최신 작업 파일: [Combat/Thrust/CompactSurvivor_Combat.blend](../Assets/ChibiSurvivor/CompactSurvivor/Animated/Combat/Thrust/CompactSurvivor_Combat.blend). 기존 네 모션과 외형·스킨 가중치를 보존하고 `Attack_OneHand_Thrust`를 추가했다.
+- 제작안: 30fps, 1~34프레임(1.1초). 당기기 9f → 정면 찌르기 14f → 회수 시작 16f → 당긴 자세 22f → Idle 복귀 34f. 칼끝은 정면을 유지하며 거의 직선으로 뻗고 같은 경로로 회수한다. 양발 접지는 고정하고 팔꿈치를 낮게 모으며 상체를 조금 앞으로 싣는다. 전투 판정/대미지 이벤트는 미연결이다.
+- [실제 Blender 미리보기](../Assets/ChibiSurvivor/CompactSurvivor/Animated/Combat/Thrust/Attack_OneHand_Thrust_Preview.mp4). 앞뒤 이동이 보이는 사선과 쿼터뷰를 사용한다. 임시 칼은 별도 미리보기 파일에만 포함한다.
+- 재생성/자세/영상/내보내기 검사/칼 간섭 검사 도구는 베기와 같으며 `-- --stab` 옵션을 추가한다. 13개 메시·23개 뼈·기존 네 액션 보존, 5개 액션 내보내기, 접지·복귀 및 34프레임 칼 표면 간섭 검사를 통과했다. Unity 검증 전이다.
+
+### 한손 베기 제작안 — 2026-09-08
 
 - 요청: **“다음모션 만들어볼까”**. 앞서 논의한 순서에 따라 한손 근접 공격을 다음 작업으로 해석했다. 이번 동작의 세부 타이밍과 형태는 사용자 확인 전 제작안이다.
 - 최신 작업 파일: [Combat/CompactSurvivor_Combat.blend](../Assets/ChibiSurvivor/CompactSurvivor/Animated/Combat/CompactSurvivor_Combat.blend). 승인된 RoundHands 버전에 `Attack_OneHand`만 추가했으며 13개 메시·가중치와 기존 Idle/Walk/Run 키는 그대로다.
@@ -134,6 +142,7 @@
 
 ## 변경 이력
 
+- 2026-09-08: 한손 공격을 찌르기로 비교해 보자는 피드백 반영. 원래 베기와 이동 클립을 보존하고 1.1초 정면 찌르기를 Combat/Thrust에 추가.
 - 2026-09-08: 둥근 손과 기존 이동 모션을 유지한 한손 사선 베기 제작안 추가. 복귀 중 파우치를 통과하던 칼 경로 수정. 실제 Blender 영상과 4개 클립 FBX/GLB를 Combat 폴더에 분리.
 - 2026-09-08: CompactSurvivor에 23본 리그와 Idle/Walk/Run 3개 제작. 13개 메시 분리 유지, 제자리 모션 접지/루프 확인 및 FBX 재임포트·GLB 확인 완료. Unity 연결은 보류.
 - 2026-09-08: 사용자 선택 이미지에 해당하는 ThreeHeadSurvivor로 기준을 전환. 이전 얼굴 수정 작업 중단, 원본 머리를 유지한 2.608등신 CompactSurvivor 제작 및 Blender 렌더 확인.

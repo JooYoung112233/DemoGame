@@ -375,10 +375,16 @@ public static class ScrapMarketGreyboxLayout
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent.transform, false);
-        go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);
-        var col = go.AddComponent<BoxCollider2D>();
+        go.transform.localPosition = GreyboxBuild.Use3D
+            ? new Vector3(cx + OX, 0f, cy + OY)
+            : new Vector3(cx + OX, cy + OY, 0f);
+
+        // 퀘스트 POI 존 = 밟히기만 하면 되는 트리거. QuestPoiZone이 3D 콜라이더를 요구하므로
+        // (2026-09-08 3D 전환) 2D 경로에서도 3D 상자를 쓴다 — 2D 맵은 어차피 폐기 예정이다.
+        var col = go.AddComponent<BoxCollider>();
         col.isTrigger = true;
-        col.size = new Vector2(w, h);
+        col.size = new Vector3(w, 2.4f, h);
+        col.center = new Vector3(0f, 1.2f, 0f);   // 사람 키만큼 세워야 발밑만 훑지 않는다
         var z = go.AddComponent<QuestPoiZone>();
         z.poiId = poiId;
         z.displayName = displayName;
@@ -398,6 +404,9 @@ public static class ScrapMarketGreyboxLayout
 
     static int Marker(GameObject parent, string prefabId, string name, float x, float y)
     {
+        // 3D 모드 — 마커도 XZ 평면에 세운다. 이걸 빼면 스폰·문이 (x, y, 0)에 남아
+        // 맵 모양은 3D인데 시작 지점이 엉뚱한 곳이 된다(플레이 불가).
+        if (GreyboxBuild.Use3D) return Greybox3D.Marker(parent, prefabId, name, x + OX, y + OY);
         var go = Spawn(prefabId, name, parent);
         if (go == null) return 0;
         go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
@@ -410,6 +419,7 @@ public static class ScrapMarketGreyboxLayout
         var go = new GameObject(name);
         go.transform.SetParent(parent.transform, false);
         go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);
+        if (GreyboxBuild.Use3D) go.transform.localPosition = new Vector3(cx + OX, 0f, cy + OY);
         go.AddComponent<SpawnZone>().Setup(new Vector3(w, 0f, h), count, unitKey);
         return 1;
     }
@@ -417,6 +427,16 @@ public static class ScrapMarketGreyboxLayout
     /// <summary>쪽지(gb_note): 좌표 배치 + InteractableObject에 내용/제목 주입(읽으면 NoteUI 전체화면).</summary>
     static int Note(GameObject parent, string name, float x, float y, string title, string content)
     {
+        if (GreyboxBuild.Use3D)
+        {
+            if (Greybox3D.Marker(parent, "gb_note", name, x + OX, y + OY) == 0) return 0;
+            var t3 = parent.transform.Find(name);
+            if (t3 == null) return 1;
+            var io3 = t3.GetComponent<InteractableObject>() ?? t3.gameObject.AddComponent<InteractableObject>();
+            io3.SetNote(content, title, "읽기");
+            return 1;
+        }
+
         var go = Spawn("gb_note", name, parent);
         if (go == null) return 0;
         go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
@@ -425,12 +445,34 @@ public static class ScrapMarketGreyboxLayout
         return 1;
     }
 
-    /// <summary>탈출구(ExitPoint): 좌표 배치 + targetScene/spawnPointId/대기 설정(추출 = 상호작용 후 wait초).</summary>
-    /// <summary>건물 진입 트리거(BuildingEntrance) — 밟으면 내부 씬으로 전환. 2026-07-11 건물 모델 전환.
-    /// 복귀는 `__back__`(들어온 문 앞, `BuildingReturn`)이라 튜토가 Zone1에 얹혀도 좌표가 맞는다.</summary>
+    /// <summary>건물 진입 문 — E로 여는 문(밟는 발판 아님).</summary>
     static int Enter(GameObject parent, string name, float x, float y, string targetScene,
                      float tw = 1.2f, float th = 1.2f)
     {
+        if (GreyboxBuild.Use3D)
+        {
+            if (Greybox3D.Marker(parent, "gb_door", name, x + OX, y + OY) == 0) return 0;
+            var t3 = parent.transform.Find(name);
+            if (t3 == null) return 1;
+            var go3 = t3.gameObject;
+
+            // 3D 문은 밟는 게 아니라 E로 연다 — SceneDoor3D(밟기)가 아니라
+            // InteractableObject.Door + BuildingEntrance 대신 씬 전환을 직접 건다.
+            var col = go3.GetComponent<BoxCollider>();
+            if (col == null) col = go3.AddComponent<BoxCollider>();
+            col.isTrigger = false;                       // 문은 막는 몸이다(E로 통과)
+            col.size = new Vector3(tw, 2.4f, th);
+            col.center = new Vector3(0f, 1.2f, 0f);
+
+            var io3 = go3.GetComponent<InteractableObject>() ?? go3.AddComponent<InteractableObject>();
+            io3.Configure(InteractableObject.InteractType.ExitPoint, "들어가기", 2.0f);
+            var so3 = new SerializedObject(io3);
+            var ts3 = so3.FindProperty("targetScene");   if (ts3 != null) ts3.stringValue = targetScene;
+            var sp3 = so3.FindProperty("spawnPointId");  if (sp3 != null) sp3.stringValue = "default";
+            so3.ApplyModifiedPropertiesWithoutUndo();
+            return 1;
+        }
+
         var go = Spawn("gb_door", name, parent);
         if (go == null) return 0;
         go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
@@ -447,11 +489,9 @@ public static class ScrapMarketGreyboxLayout
         if (be == null) be = go.AddComponent<BuildingEntrance>();
         // 2026-07-11: 크기를 함께 넘긴다 — 안 넘기면 Awake가 기본 1.3×1.0으로 덮어써서
         //   **문 갭보다 좁은 발판**이 되고, 옆으로 비껴 들어가 빈 껍데기 안에 갇힌다.
-        //   진입 스폰은 내부 씬의 "default". `__back__`은 **나올 때** 쓰는 값(내부 씬 출구가 보유).
         be.Configure(targetScene, "default", false, new Vector2(tw, th));
         be.SetRequireInteract(true);   // 문은 밟는 게 아니라 **E로 여는 것**(2026-07-11 사용자 결정)
 
-        // 문 하나가 표시이자 진입점 — 별도 '입구 발판'을 두지 않는다.
         var io2 = go.GetComponent<InteractableObject>();
         if (io2 == null) io2 = go.AddComponent<InteractableObject>();
         io2.Configure(InteractableObject.InteractType.Door, "들어가기", 2.0f);
@@ -460,9 +500,23 @@ public static class ScrapMarketGreyboxLayout
 
     static int Exit(GameObject parent, string name, float x, float y, string targetScene, string spawnId, float wait)
     {
-        var go = Spawn("gb_exit", name, parent);
-        if (go == null) return 0;
-        go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
+        GameObject go;
+        if (GreyboxBuild.Use3D)
+        {
+            if (Greybox3D.Marker(parent, "gb_exit", name, x + OX, y + OY) == 0) return 0;
+            var t3 = parent.transform.Find(name);
+            if (t3 == null) return 1;
+            go = t3.gameObject;
+            var io3 = go.GetComponent<InteractableObject>() ?? go.AddComponent<InteractableObject>();
+            io3.Configure(InteractableObject.InteractType.ExitPoint, "탈출하기", 2.0f);
+        }
+        else
+        {
+            go = Spawn("gb_exit", name, parent);
+            if (go == null) return 0;
+            go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
+        }
+
         var io = go.GetComponentInChildren<InteractableObject>();
         if (io != null)
         {

@@ -1835,15 +1835,35 @@ public static class Zone1GreyboxLayout
         if (io == null) io = go.AddComponent<InteractableObject>();
         io.Configure(InteractableObject.InteractType.Door, "들어가기", 2.0f);
 
-        var box = go.GetComponent<BoxCollider2D>();
-        if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-        box.isTrigger = true;
-        box.size = new Vector2(tw, th);
+        // 진입 몸통. 2D는 BoxCollider2D(trigger) + BuildingEntrance,
+        // 3D는 BoxCollider + InteractableObject.ExitPoint로 씬 전환을 직접 건다
+        // (BuildingEntrance는 BoxCollider2D 전제라 3D 맵에서 동작하지 않는다).
+        if (GreyboxBuild.Use3D)
+        {
+            var box3 = go.GetComponent<BoxCollider>();
+            if (box3 == null) box3 = go.AddComponent<BoxCollider>();
+            box3.isTrigger = false;                       // 문은 막는 몸 — E로 통과한다
+            box3.size = new Vector3(tw, 2.4f, th);
+            box3.center = new Vector3(0f, 1.2f, 0f);
 
-        var be = go.GetComponent<BuildingEntrance>();
-        if (be == null) be = go.AddComponent<BuildingEntrance>();
-        be.Configure(targetScene, spawnId, false, new Vector2(tw, th));
-        be.SetRequireInteract(true);
+            io.Configure(InteractableObject.InteractType.ExitPoint, "들어가기", 2.0f);
+            var so3 = new SerializedObject(io);
+            var ts3 = so3.FindProperty("targetScene");   if (ts3 != null) ts3.stringValue = targetScene;
+            var sp3 = so3.FindProperty("spawnPointId");  if (sp3 != null) sp3.stringValue = spawnId;
+            so3.ApplyModifiedPropertiesWithoutUndo();
+        }
+        else
+        {
+            var box = go.GetComponent<BoxCollider2D>();
+            if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+            box.isTrigger = true;
+            box.size = new Vector2(tw, th);
+
+            var be = go.GetComponent<BuildingEntrance>();
+            if (be == null) be = go.AddComponent<BuildingEntrance>();
+            be.Configure(targetScene, spawnId, false, new Vector2(tw, th));
+            be.SetRequireInteract(true);
+        }
 
         // 문 앞 DoorController(팔레트 기본)는 진입과 이중이라 제거 — 문 하나가 한 가지 일만 하게.
         var dc = go.GetComponent<DoorController>();

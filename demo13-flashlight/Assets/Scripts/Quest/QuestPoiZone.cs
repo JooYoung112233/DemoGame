@@ -11,9 +11,9 @@ using UnityEngine;
 ///    완료 목표 스킵)하므로 반복 입장은 목표를 채우기만 하고 무한 누적 없음.
 ///  - 요구 수량 2(POI 2곳)는 **서로 다른 존 2개**로 채우는 설계 — 같은 존 재입장 반복도
 ///    수량을 채우긴 하나(그레이박스 허용), 정상 플레이는 서로 다른 지점 방문.
-///  - 2D 트리거(Collider2D isTrigger). 좀보이드식 top-down 2D 규약.
+///  - 트리거 콜라이더(isTrigger). 3D 전환으로 Collider2D → Collider.
 /// </summary>
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(Collider))]
 public class QuestPoiZone : MonoBehaviour
 {
     [Tooltip("탐색 의뢰가 참조하는 POI 식별자 (예: poi_warehouse_noise). 의뢰 SO의 ReachPoint targetId와 일치해야 함.")]
@@ -26,18 +26,18 @@ public class QuestPoiZone : MonoBehaviour
 
     void Reset()
     {
-        var col = GetComponent<Collider2D>();
+        var col = GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter(Collider other)
     {
         if (_inside || !other.CompareTag("Player")) return;
         _inside = true;
         TryProgress();
     }
 
-    void OnTriggerExit2D(Collider2D other)
+    void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player")) _inside = false;
     }
@@ -60,7 +60,7 @@ public class QuestPoiZone : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.color = new Color(0.4f, 0.8f, 1f, 0.5f);
-        var col = GetComponent<Collider2D>();
-        if (col != null) Gizmos.DrawWireCube(transform.position + (Vector3)col.offset, col.bounds.size);
+        var col = GetComponent<Collider>();
+        if (col != null) Gizmos.DrawWireCube(col.bounds.center, col.bounds.size);
     }
 }
