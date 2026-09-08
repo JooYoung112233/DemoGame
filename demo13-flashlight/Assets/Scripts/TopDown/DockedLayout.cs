@@ -148,7 +148,7 @@ public static class DockedLayout
         // 지도는 폭 1464를 먹는데, 실제 조작(인력·목적지·보내기)은 전부 왼쪽 폼(360)에 있다.
         "dispatch" => new[] { "MapArea" },
         // 도크에 이미 '닫기'가 있다. 패널 자체 닫기는 중복이고 도크 밖으로 삐져나간다.
-        "radio"    => new[] { "Close" },
+        // (라디오의 자체 닫기는 Header 안에 있어 HeaderFor에서 같이 사라진다)
         // 창고는 말 그대로 창고 격자만 있으면 된다. 캐릭터 상태·장비/소지품은
         // Tab 인벤토리에서 보는 것이고, 여기 같이 띄우면 정작 창고가 좁아진다.
         "stash"    => new[] { "CloseBtn", "CharacterPanel", "RightPanel" },
@@ -156,6 +156,20 @@ public static class DockedLayout
         // 제작창 자체 닫기(X)도 도크의 X와 겹친다.
         "workbench" or "cooking" or "medical" => new[] { "CloseBtn", "Close" },
         _          => null,
+    };
+
+    /// <summary>패널이 스스로 달고 있는 **제목 줄**. 도크가 좌상단에 시설 이름을 이미 띄우므로
+    /// 중복이고, 그 자리만큼 내용이 좁아진다. 여기 적힌 것은 감추고 아래 내용을 끌어올린다.
+    ///
+    /// ⚠️ 이름 검색은 <b>바로 아래 자식</b>에만 건다. 자손 전체를 뒤지면 목록 항목 안의
+    ///    "Title" 같은 것까지 같이 사라진다.</summary>
+    static string[] HeaderFor(string moduleKey) => moduleKey switch
+    {
+        // 제작창: "작업대" + "해금된 레시피 제작 · 수리 탭에서…" 두 줄(y -8~-56).
+        "workbench" or "cooking" or "medical" => new[] { "Title", "Desc" },
+        // 라디오: Header(64) + 그 아래 구분선.
+        "radio" => new[] { "Header", "HeaderDivider" },
+        _ => null,
     };
 
 
@@ -175,6 +189,9 @@ public static class DockedLayout
             foreach (var name in hide) HideByName(root, name, s);
 
         var node = Descend(root, area.x, s);
+
+        // 패널이 스스로 단 제목 줄은 도크 제목과 중복이다 — 지우고 아래 내용을 끌어올린다.
+        StripHeader(node, HeaderFor(moduleKey), s);
 
 
         Fit(node, node.rect.width, area.x, s, 0);
@@ -197,6 +214,65 @@ public static class DockedLayout
         return s;
     }
 
+
+    /// <summary>제목 줄을 감추고 **그 아래 것들을 그만큼 끌어올린다.**
+    ///
+    /// 감추기만 하면 위쪽에 빈 띠만 남아 내용이 좁은 채로 그대로다. 제목 띠가 있던 자리를
+    /// 아래 내용이 이어받도록, 띠 바로 밑 요소가 띠의 맨 위로 올라오는 만큼 전부 옮긴다.
+    /// 세로로 늘어나는 요소(목록·본문)는 옮기는 대신 **위로 자라게** 한다.</summary>
+    static void StripHeader(RectTransform node, string[] names, Session s)
+    {
+        if (names == null || names.Length == 0) return;
+
+        // ① 감출 제목 띠를 찾는다 (바로 아래 자식만).
+        float bandTop = float.NegativeInfinity, bandBottom = float.PositiveInfinity;
+        bool found = false;
+        for (int i = 0; i < node.childCount; i++)
+        {
+            var c = node.GetChild(i) as RectTransform;
+            if (c == null || !c.gameObject.activeSelf) continue;
+            if (System.Array.IndexOf(names, c.name) < 0) continue;
+
+            bandTop    = Mathf.Max(bandTop,    c.offsetMax.y);
+            bandBottom = Mathf.Min(bandBottom, c.offsetMin.y);
+            s.Record(c);
+            c.gameObject.SetActive(false);
+            found = true;
+        }
+        if (!found) return;
+
+        // ② 띠보다 완전히 아래에 있는 것들 중 가장 위 = 이어받을 요소.
+        //    (비활성 형제도 포함한다 — 탭 전환으로 나중에 켜지는 패널이 어긋나면 안 된다)
+        float nextTop = float.NegativeInfinity;
+        for (int i = 0; i < node.childCount; i++)
+        {
+            var c = node.GetChild(i) as RectTransform;
+            if (c == null || System.Array.IndexOf(names, c.name) >= 0) continue;
+            if (c.offsetMax.y > bandBottom + 0.5f) continue;      // 띠와 겹치거나 위 → 건드리지 않는다
+            nextTop = Mathf.Max(nextTop, c.offsetMax.y);
+        }
+        if (float.IsNegativeInfinity(nextTop)) return;
+
+        float lift = bandTop - nextTop;
+        if (lift <= 0.5f) return;
+
+        // ③ 실제로 끌어올린다.
+        for (int i = 0; i < node.childCount; i++)
+        {
+            var c = node.GetChild(i) as RectTransform;
+            if (c == null || System.Array.IndexOf(names, c.name) >= 0) continue;
+            if (c.offsetMax.y > bandBottom + 0.5f) continue;
+
+            s.Record(c);
+            bool stretchesY = c.anchorMax.y - c.anchorMin.y > 0.01f;
+            if (stretchesY)
+                c.offsetMax = new Vector2(c.offsetMax.x, c.offsetMax.y + lift);   // 위로 자란다
+            else
+                c.offsetMin = new Vector2(c.offsetMin.x, c.offsetMin.y + lift);   // 통째로 올라간다
+            if (!stretchesY)
+                c.offsetMax = new Vector2(c.offsetMax.x, c.offsetMax.y + lift);
+        }
+    }
 
     /// <summary>전체화면 껍데기를 지나 진짜 내용까지 내려간다.
     /// 자식이 하나뿐이고 그 자식이 눈에 띄게 작으면 껍데기로 본다.</summary>
