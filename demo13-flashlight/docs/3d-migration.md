@@ -93,7 +93,7 @@
 
 | 대상 | 실측 | 무엇이 막고 있나 | 풀리는 시점 |
 |---|---|---|---|
-| 전투 12파일 (`EnemyController` `AttackPerformer` `Hurtbox` `NavGrid` `NavAgent` `Projectile` `PlayerVision` `Breakable` `EnemySpawner` `CombatFeedback` `BodyZoneOverlay` `NavGridBootstrap`) | `Rigidbody2D`/`Collider2D`/`Physics2D` 참조 다수 | 3D 물리로 옮기기 전엔 지울 수도 대체할 수도 없다 | **Stage 1** |
+| ~~전투 12파일~~ | ✅ **2026-09-08 이식 완료** — 2D 물리 참조 0 | — | 완료 |
 | `Prop2DDefinition` · `Prop2DBuilder` | 씬·프리팹 **63곳**이 `Prop2DDefinition`을 참조 | 레이드 맵 소품이 전부 이 카탈로그로 서 있다 | **Stage 3** (`Prop3D*` 대체 후) |
 | `BuildingEntrance` | 씬 **18곳** 참조, 코드 14곳 | 2D 실내 진입이 아직 이걸로 돈다. 3D는 `SceneDoor3D` | Stage 3 (실내씬 3D화) |
 | `Light2D` 11파일 (`DayNightCycle` `PropLight2D` `FlashlightController` `VisionDarkness` …) | 파일당 1~8회 | 낮밤·시야·랜턴이 전부 2D 조명 위에 있다 | **Stage 2** |
@@ -101,13 +101,32 @@
 | 2D 씬 이름 문자열 (`"Safehouse"` `"Hideout"` `"Pawnshop"`) | 코드 **13파일 25곳** — 스토리 트리거·QA·세이브 체크포인트·디버그 UI | 씬만 지워도 흐름이 끊긴다. **문자열 교체가 선행**되어야 한다 | Stage 3 이후 |
 | `HideoutGreyboxLayout.cs` · `SafehouseGreyboxLayout.cs` | 3D 빌더가 1:1 대체 | 없음 — **지금도 지울 수 있다.** 다만 2D 씬을 다시 만들 수단이 사라진다 | 지금 (보류 중) |
 
-### 왜 지금 안 지우는가
+### 왜 아직 못 지우는가
 
-전투 12파일이 병목이다. 이것이 2D 물리에 묶여 있는 한:
-- 2D 물리 층(`Physics2D` 10곳)을 걷어낼 수 없고,
-- 레이드 맵을 3D로 옮겨도 그 위에서 싸울 수가 없다.
+~~전투 12파일이 병목이다~~ → **2026-09-08 해소.** 전투 계열은 3D 물리로 옮겨 2D 참조 0.
+남은 병목은 **맵 층**이다:
 
-그래서 정리의 **전제 조건은 Stage 1**이다. 맵·조명·씬 삭제는 그 뒤에 따라온다.
+- `Prop2DDefinition`이 씬·프리팹 63곳을 붙들고 있어 레이드 맵이 통째로 2D다.
+- `Light2D` 11파일 위에 낮밤·시야·랜턴이 서 있다.
+- 2D 씬 이름이 코드 13파일 25곳에 문자열로 박혀 있다.
+
+그래서 다음 전제 조건은 **Stage 2(조명)와 Stage 3(맵)**이다.
+
+#### Stage 1에서 실제로 무엇이 바뀌었나 (2026-09-08)
+
+컴파일이 안 되는 문제보다 **컴파일은 되는데 조용히 틀리는 문제**가 많았다. 기록해 둔다:
+
+- `(Vector2)transform.position` — 3D에서 `(x, 높이)`로 읽힌다. Z가 통째로 사라져 거리·방향이
+  전부 틀어지는데 오류는 안 난다. 전투·플레이어 범위 24곳 중 해당분을 `Plan3D.ToPlan`으로 교체.
+- `BodyZones.FromPoint`가 `Vector2.y`를 **키**로 썼다 — 3D에선 키가 월드 Y다. 월드 `Vector3` +
+  좌우 기준축을 받도록 변경.
+- `PlayerVision.CanSee(Vector2)` — 호출부가 `Vector3`를 넘기면 암묵 변환으로 높이를 Z로 읽었다.
+  시그니처를 월드 `Vector3`로.
+- `SpawnZone.GetRandomPoint2D`가 **y(높이) 방향으로 흩뿌렸다** — 적이 공중·땅속에 생긴다.
+  XZ판과 중복이라 하나로 합침.
+- 물리 검사 높이: 히트박스·시야·길찾기 LOS를 **지면이 아니라 몸 높이**에서 쏜다. 지면에서
+  쏘면 바닥·연석·문턱에 전부 걸려 "항상 막힘"이 된다.
+- 사거리는 **평면 거리**로. 단차 위 적을 때릴 때 높이차가 사거리를 먹으면 안 된다.
 
 ### 지금 지키는 규칙
 

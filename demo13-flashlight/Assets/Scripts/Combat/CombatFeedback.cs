@@ -151,8 +151,8 @@ public class CombatFeedback : MonoBehaviour
         if (dir.sqrMagnitude < 0.01f) yield break;   // 방향을 못 구하면 밀지 않는다(엉뚱한 방향 금지)
         dir.Normalize();
 
-        // Rigidbody2D가 있으면 물리 경로로 이동 — transform 직접 대입은 Dynamic RB에서 지터·벽 관통을 만든다.
-        var rb = GetComponent<Rigidbody2D>();
+        // Rigidbody가 있으면 물리 경로로 이동 — transform 직접 대입은 Dynamic RB에서 지터·벽 관통을 만든다.
+        var rb = GetComponent<Rigidbody>();
         Vector3 startPos = transform.position;
         Vector3 endPos = startPos + dir * knockbackDist;
 

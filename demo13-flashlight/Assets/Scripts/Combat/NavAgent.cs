@@ -3,7 +3,8 @@ using UnityEngine;
 
 /// <summary>
 /// 격자 A* 경로 추종 에이전트 (적 AI용). 타겟까지 경로를 받아 웨이포인트를 따라가는
-/// 방향(DesiredDirection)을 매 프레임 제공. 실제 이동은 EnemyController가 Rigidbody2D로 적용.
+/// 방향(DesiredDirection)을 매 프레임 제공. 실제 이동은 EnemyController가 Rigidbody로 적용.
+/// 경로·방향은 전부 **평면(XZ) Vector2**다 — 물리 검사에서만 월드로 올린다.
 /// NavGrid가 없거나 경로 실패면 타겟 직진으로 폴백. 주기적 리패스(스태거).
 /// </summary>
 public class NavAgent : MonoBehaviour
@@ -55,7 +56,7 @@ public class NavAgent : MonoBehaviour
     {
         if (!_hasDest) { DesiredDirection = Vector2.zero; return; }
 
-        Vector2 pos = transform.position;
+        Vector2 pos = Plan3D.ToPlan(transform.position);
 
         // 코앞이면 길찾기를 쓰지 않는다 — 2026-07-28 QA에서 목표 1.9m 앞인데
         // 6초간 12m를 왕복(OSCILLATION)했다. 목표 셀이 팽창으로 막혀 A*가 옆 칸만 오간 것.
@@ -102,13 +103,20 @@ public class NavAgent : MonoBehaviour
             _wp++;
 
         // LOS skip-ahead: 더 먼 웨이포인트가 직선으로 막힘 없이 보이면 당겨서 부드럽게
+        // ⚠️ 검사는 **몸 높이**에서 한다. 지면에서 쏘면 바닥·연석에 걸려 항상 막힌 것으로 나온다.
+        float y = transform.position.y + BodyProbeY;
         for (int i = _path.Count - 1; i > _wp; i--)
         {
             Vector2 to = _path[i] - pos;
             float dist = to.magnitude;
             if (dist < 0.001f) { _wp = i; break; }
-            var hit = Physics2D.CircleCast(pos, agentRadius * 0.8f, to / dist, dist, _losMask);
-            if (hit.collider == null) { _wp = i; break; }
+            bool blocked = Physics.SphereCast(Plan3D.ToWorld(pos, y), agentRadius * 0.8f,
+                                              Plan3D.ToWorld(to / dist), out _, dist,
+                                              _losMask, QueryTriggerInteraction.Ignore);
+            if (!blocked) { _wp = i; break; }
         }
     }
+
+    /// <summary>LOS 검사를 쏘는 높이(발밑이 아니라 몸통).</summary>
+    const float BodyProbeY = 0.9f;
 }

@@ -126,7 +126,7 @@ public class PlayerGun : MonoBehaviour
 
         float range = g.effectiveRange + (_equip != null ? _equip.WeaponPartRangeBonus : 0f);
         float dmg = g.damage * AmmoDamageMult(inst);
-        Vector2 muzzle = (Vector2)transform.position + shotDir * 0.55f;
+        Vector2 muzzle = Plan3D.ToPlan(transform.position) + shotDir * 0.55f;
 
         Projectile.Spawn(transform, muzzle, shotDir, g.projectileSpeed, dmg, g.groggy, range,
                          new Color(1f, 0.93f, 0.6f));

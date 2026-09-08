@@ -187,7 +187,7 @@ public class AttackPerformer : MonoBehaviour
         if (landed)
         {
             float r = GameTuning.Instance != null ? GameTuning.Instance.noiseAttack : 14f;
-            PlayerNoise.Pulse(center, r);
+            PlayerNoise.Pulse(Plan3D.ToPlan(center), r);
         }
 
         // 강공(데이터 플래그) 적중 시 히트스탑 + 카메라 셰이크/줌 — 한 번만

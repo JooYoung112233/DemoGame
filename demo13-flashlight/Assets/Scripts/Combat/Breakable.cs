@@ -277,7 +277,7 @@ public class Breakable : MonoBehaviour
         }
         else
         {
-            foreach (var c in GetComponents<Collider2D>()) c.enabled = false;
+            foreach (var c in GetComponents<Collider>()) c.enabled = false;
             if (rubbleSprite != null && _baseSR != null) _baseSR.sprite = rubbleSprite;
             // 오버레이는 최대 손상치(_Damage=1)로 남아 폐허 느낌 유지.
         }

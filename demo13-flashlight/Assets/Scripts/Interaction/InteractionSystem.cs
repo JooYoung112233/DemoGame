@@ -116,7 +116,7 @@ public class InteractionSystem : MonoBehaviour
             if (!obj.CanInteract) continue;
 
             // XY 평면 거리 (top-down 2D)
-            Vector2 diff = (Vector2)obj.transform.position - (Vector2)playerPos;
+            Vector2 diff = Plan3D.ToPlan(obj.transform.position) - Plan3D.ToPlan(playerPos);
             float dist = diff.magnitude;
 
             // 히스테리시스: 현재 타겟은 이탈 범위(1.3배)로, 새 타겟은 진입 범위로 판정

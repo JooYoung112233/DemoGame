@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 적 통합 컨트롤러 — 탑다운 2D (Rigidbody2D 기반, NavMesh 없음).
+/// 적 통합 컨트롤러 — 쿼터뷰 3D (Rigidbody 기반, XZ 평면 이동, NavMesh 없음).
+/// 평면 수학은 Vector2(x=월드X, y=월드Z) 그대로 두고 물리·트랜스폼 경계에서만 Plan3D로 변환한다.
 /// AI 상태머신(순찰/추격/예비동작/공격/피격/스턴/사망) + 그로기 시스템.
 /// </summary>
-[RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Collider))]
 public class EnemyController : MonoBehaviour
 {
     #region 열거형 & 필드
@@ -61,7 +62,7 @@ public class EnemyController : MonoBehaviour
     Transform      player;
     Health         health;
     Health         playerHealth;
-    Rigidbody2D    _rb;
+    Rigidbody      _rb;
     CombatFeedback feedback;
     AttackPerformer _performer;
     NavAgent       _nav;          // 격자 A* 길찾기 (추격 시)
@@ -184,11 +185,11 @@ public class EnemyController : MonoBehaviour
         if (!string.IsNullOrEmpty(unitKey) && StatDB.Instance != null)
             unitStat = StatDB.Instance.GetUnit(unitKey);
 
-        _rb                = GetComponent<Rigidbody2D>();
-        _rb.bodyType       = RigidbodyType2D.Dynamic;       // 벽에 막히려면 Dynamic
-        _rb.gravityScale   = 0f;
-        _rb.freezeRotation = true;
-        _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        _rb                = GetComponent<Rigidbody>();
+        _rb.isKinematic    = false;                        // 벽에 막히려면 Dynamic
+        _rb.useGravity     = false;                        // 평면 이동 — 낙하는 아직 다루지 않는다
+        _rb.constraints    = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
+        _rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
         health    = GetComponent<Health>();
         feedback  = GetComponent<CombatFeedback>();
@@ -238,7 +239,7 @@ public class EnemyController : MonoBehaviour
 
     void Start()
     {
-        spawnPos = transform.position;
+        spawnPos = Plan3D.ToPlan(transform.position);
 
         AcquirePlayer();
 
@@ -321,13 +322,13 @@ public class EnemyController : MonoBehaviour
         }
 
         // 소음 청취 — 반경 안이면 소리 지점으로 조사하러 이동(시야 발견과 별개 축).
-        if (NoiseSystem.TryHear(transform.position, out var src))
+        if (NoiseSystem.TryHear(Plan3D.ToPlan(transform.position), out var src))
         {
             EnterInvestigate(src);
             return;
         }
 
-        Vector2 toTarget = patrolTarget - (Vector2)transform.position;
+        Vector2 toTarget = patrolTarget - Plan3D.ToPlan(transform.position);
         if (toTarget.magnitude < 0.4f)
         {
             SetVelocity(Vector2.zero);
@@ -366,7 +367,7 @@ public class EnemyController : MonoBehaviour
         }
 
         // 더 가까운/새 소음이 들리면 지점 갱신 + 총 조사시간 리셋(계속 시끄러우면 계속 따라옴).
-        if (NoiseSystem.TryHear(transform.position, out var src))
+        if (NoiseSystem.TryHear(Plan3D.ToPlan(transform.position), out var src))
         {
             investigatePos = src;
             investigateTotal = 0f;
@@ -383,7 +384,7 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        Vector2 to = investigatePos - (Vector2)transform.position;
+        Vector2 to = investigatePos - Plan3D.ToPlan(transform.position);
         if (to.magnitude > 0.6f)
         {
             Vector2 d;
@@ -470,11 +471,11 @@ public class EnemyController : MonoBehaviour
             _nav.SetDestination(player.position);
             d = _nav.DesiredDirection;
             if (d.sqrMagnitude < 0.0001f)
-                d = ((Vector2)player.position - (Vector2)transform.position).normalized;
+                d = (Plan3D.ToPlan(player.position) - Plan3D.ToPlan(transform.position)).normalized;
         }
         else
         {
-            d = ((Vector2)player.position - (Vector2)transform.position).normalized;
+            d = (Plan3D.ToPlan(player.position) - Plan3D.ToPlan(transform.position)).normalized;
         }
 
         // 2026-07-11: 적끼리 **분리(separation)** — 예전엔 반발이 없어 3마리가 한 점에 겹쳐
@@ -497,12 +498,12 @@ public class EnemyController : MonoBehaviour
     Vector2 Separation()
     {
         const float R = 1.1f;
-        Vector2 me = transform.position, push = Vector2.zero;
+        Vector2 me = Plan3D.ToPlan(transform.position), push = Vector2.zero;
         for (int i = 0; i < All.Count; i++)
         {
             var o = All[i];
             if (o == null || o == this || o.state == State.Dead) continue;
-            Vector2 diff = me - (Vector2)o.transform.position;
+            Vector2 diff = me - Plan3D.ToPlan(o.transform.position);
             float dsq = diff.sqrMagnitude;
             if (dsq > R * R || dsq < 0.0001f) continue;
             push += diff.normalized * (1f - Mathf.Sqrt(dsq) / R);
@@ -529,11 +530,11 @@ public class EnemyController : MonoBehaviour
         if (spriteRenderer != null)
             spriteRenderer.transform.localScale *= mul;
 
-        var body = GetComponent<CircleCollider2D>();
+        var body = GetComponent<CapsuleCollider>();
         if (body != null) body.radius *= mul;
 
         var hurt = GetComponentInChildren<Hurtbox>();
-        var hbox = hurt != null ? hurt.GetComponent<BoxCollider2D>() : null;
+        var hbox = hurt != null ? hurt.GetComponent<BoxCollider>() : null;
         if (hbox != null) hbox.size *= mul;
 
         if (_weaponVis != null) _weaponVis.transform.localScale = Vector3.one * mul;
@@ -544,7 +545,7 @@ public class EnemyController : MonoBehaviour
     {
         if (_weaponVis == null) return;
         if (player != null && state != State.Dead)
-            _weaponVis.SetFacing(((Vector2)player.position - (Vector2)transform.position).normalized);
+            _weaponVis.SetFacing((Plan3D.ToPlan(player.position) - Plan3D.ToPlan(transform.position)).normalized);
         if (state != State.AttackWindup && state != State.Attack && !_weaponVis.IsSwinging)
             _weaponVis.Rest();
     }
@@ -600,7 +601,7 @@ public class EnemyController : MonoBehaviour
         FacePlayer();
 
         Vector2 dir = player != null
-            ? ((Vector2)player.position - (Vector2)transform.position).normalized
+            ? (Plan3D.ToPlan(player.position) - Plan3D.ToPlan(transform.position)).normalized
             : _attackDir;
         _attackDir = dir;
         _weaponVis?.SetFacing(dir);
@@ -609,7 +610,7 @@ public class EnemyController : MonoBehaviour
         else              { _weaponVis?.Swing(0.34f);            _lightStreak++;  }
 
         // 2026-07-11: 공격 런지(전진→원위치 하드 스냅) 제거 — 사용자 피드백 "때릴 때 앞뒤로 움직인다".
-        //   Rigidbody2D 위에서 transform을 직접 되돌리는 연출이라 고무줄처럼 튕겨 보였다.
+        //   Rigidbody 위에서 transform을 직접 되돌리는 연출이라 고무줄처럼 튕겨 보였다.
         //   공격은 제자리에서, 피드백은 '맞았을 때 히트 표기'(HitFlash/팝업)만 남긴다.
 
         // 히트박스 타임라인이 있으면 프레임 기반 판정, 없으면 즉시 데미지 폴백
@@ -643,7 +644,7 @@ public class EnemyController : MonoBehaviour
         float reach = AtkRange * (_nextIsHeavy ? 1.20f : 1.05f);
         if (DistToPlayer() > reach) return;
 
-        Vector2 toPlayer = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        Vector2 toPlayer = (Plan3D.ToPlan(player.position) - Plan3D.ToPlan(transform.position)).normalized;
         Vector2 face = _attackDir.sqrMagnitude > 0.0001f ? _attackDir.normalized : toPlayer;
         if (Vector2.Dot(face, toPlayer) < 0.5f) return;   // cos60° — 등 뒤/옆은 빗나감
 
@@ -703,7 +704,7 @@ public class EnemyController : MonoBehaviour
         DamagePopup.Create(transform.position, damage, DamagePopup.DamageType.Normal);
 
         if (knockbackDir != Vector2.zero && _rb != null)
-            _rb.AddForce(knockbackDir.normalized * 3f, ForceMode2D.Impulse);
+            _rb.AddForce(Plan3D.ToWorld(knockbackDir.normalized) * 3f, ForceMode.Impulse);
     }
 
     void UpdateGroggy()
@@ -837,7 +838,7 @@ public class EnemyController : MonoBehaviour
     {
         state         = State.Dead;
         _performer?.Cancel();   // 죽는 순간 진행 중이던 공격 판정이 계속 나가는 것 방지(2026-07-11)
-        _rb.simulated = false;
+        _rb.detectCollisions = false;
         RestoreTint();
         animController?.PlayOneShot("death");
         if (hpBarBg   != null) hpBarBg.SetActive(false);
@@ -1021,7 +1022,12 @@ public class EnemyController : MonoBehaviour
         if (alertMark != null) alertMark.SetActive(on);
     }
 
-    void SetVelocity(Vector2 v) { if (_rb != null) _rb.linearVelocity = v; }
+    /// <summary>평면 속도 적용 — 세로(Y) 성분은 건드리지 않는다(중력·단차용으로 남겨 둔다).</summary>
+    void SetVelocity(Vector2 v)
+    {
+        if (_rb == null) return;
+        _rb.linearVelocity = new Vector3(v.x, _rb.linearVelocity.y, v.y);
+    }
 
     float DistToPlayer()
         => player == null ? float.MaxValue : Vector2.Distance(transform.position, player.position);
@@ -1029,7 +1035,7 @@ public class EnemyController : MonoBehaviour
     void FacePlayer()
     {
         if (player == null) return;
-        Vector2 dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        Vector2 dir = (Plan3D.ToPlan(player.position) - Plan3D.ToPlan(transform.position)).normalized;
         animController?.SetDirection(dir);
         FlipSprite(dir);
     }

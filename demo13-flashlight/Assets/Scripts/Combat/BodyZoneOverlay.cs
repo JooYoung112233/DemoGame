@@ -23,7 +23,7 @@ public class BodyZoneOverlay : MonoBehaviour
         BodyPartType.LeftLeg, BodyPartType.RightLeg,
     };
 
-    Collider2D _body;
+    Collider _body;
     UnitInjuries _inj;
     SpriteRenderer[] _cells;      // Arms는 좌우 2칸이라 총 6칸
     float[] _flash;
@@ -43,7 +43,7 @@ public class BodyZoneOverlay : MonoBehaviour
     void Awake()
     {
         var hb = GetComponentInParent<Hurtbox>();
-        _body = hb != null ? hb.GetComponent<Collider2D>() : GetComponentInParent<Collider2D>();
+        _body = hb != null ? hb.GetComponent<Collider>() : GetComponentInParent<Collider>();
         _inj = GetComponentInParent<UnitInjuries>();   // 없으면(플레이어) 부상 색은 안 쓴다
 
         _cells = new SpriteRenderer[6];

@@ -151,7 +151,7 @@ public class BlockedPassage : MonoBehaviour
         mgr.Begin(text, seconds, () =>
         {
             Open($"{label} — 치웠다.");
-            PlayerNoise.Pulse(transform.position, NoiseRad);   // ★ 대가: 주변 적이 몰려온다
+            PlayerNoise.Pulse(Plan3D.ToPlan(transform.position), NoiseRad);   // ★ 대가: 주변 적이 몰려온다
         });
     }
 

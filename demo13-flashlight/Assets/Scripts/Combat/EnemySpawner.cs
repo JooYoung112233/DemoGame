@@ -95,7 +95,7 @@ public class EnemySpawner : MonoBehaviour
 
     GameObject SpawnOne(SpawnZone zone)
     {
-        Vector3 pos = zone.GetRandomPoint2D();
+        Vector3 pos = zone.GetRandomPoint();
         string key = string.IsNullOrEmpty(zone.UnitKey) ? "bandit_melee_1" : zone.UnitKey;   // 2026-07-11: StatDB 실존 키(구 "bandit_melee"는 없어서 인스펙터 폴백으로 샘)
 
         var unit = StatDB.Instance != null ? StatDB.Instance.GetUnit(key) : null;
@@ -122,10 +122,11 @@ public class EnemySpawner : MonoBehaviour
         if (enemyLayer >= 0) root.layer = enemyLayer;
 
         // 물리(바디 콜라이더 — 통과 차단)
-        var rb = root.AddComponent<Rigidbody2D>();
-        rb.gravityScale = 0f; rb.freezeRotation = true;
-        var body = root.AddComponent<CircleCollider2D>();
-        body.radius = 0.3f; body.isTrigger = false;
+        var rb = root.AddComponent<Rigidbody>();
+        rb.useGravity = false;
+        rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
+        var body = root.AddComponent<CapsuleCollider>();
+        body.radius = 0.3f; body.height = 1.8f; body.center = new Vector3(0f, 0.9f, 0f); body.isTrigger = false;
 
         // 바디 스프라이트(붉은 틴트)
         var spriteGo = new GameObject("EnemySprite");
@@ -143,8 +144,9 @@ public class EnemySpawner : MonoBehaviour
         var hurtGo = new GameObject("Hurtbox");
         hurtGo.transform.SetParent(root.transform, false);
         if (enemyLayer >= 0) hurtGo.layer = enemyLayer;
-        var hb = hurtGo.AddComponent<BoxCollider2D>();
-        hb.isTrigger = true; hb.size = new Vector2(0.7f, 1.0f);
+        var hb = hurtGo.AddComponent<BoxCollider>();
+        // 허트박스는 **몸 전체를 덮는 상자** — 부위 판정이 높이로 갈리므로 키만큼 세워야 한다.
+        hb.isTrigger = true; hb.size = new Vector3(0.7f, 1.6f, 0.7f); hb.center = new Vector3(0f, 0.85f, 0f);
         hurtGo.AddComponent<Hurtbox>();
 
         // 게임 로직 (EnemyController.playerMask 기본 1<<6 = Player)

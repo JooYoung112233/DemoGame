@@ -22,7 +22,9 @@ public class SpawnZone : MonoBehaviour
         unitKey = key;
     }
 
-    /// <summary>영역 내 랜덤 위치 반환 (legacy 3D — XZ 평면).</summary>
+    /// <summary>구역 안 임의 지점 — **XZ 평면**에 흩뿌린다.
+    /// 2D 시절 쓰던 GetRandomPoint2D는 y(높이) 방향으로 흩어서, 3D에선 적이 공중·땅속에
+    /// 생겼다. 그쪽을 지우고 이것 하나로 합쳤다.</summary>
     public Vector3 GetRandomPoint()
     {
         Vector3 pos = transform.position;
@@ -32,14 +34,6 @@ public class SpawnZone : MonoBehaviour
         return pos;
     }
 
-    /// <summary>영역 내 랜덤 위치 반환 (top-down 2D — XY 평면). 폭=size.x, 높이=size.z.</summary>
-    public Vector3 GetRandomPoint2D()
-    {
-        Vector3 pos = transform.position;
-        pos.x += Random.Range(-size.x * 0.5f, size.x * 0.5f);
-        pos.y += Random.Range(-size.z * 0.5f, size.z * 0.5f);
-        return pos;
-    }
 
     void OnDrawGizmos()
     {

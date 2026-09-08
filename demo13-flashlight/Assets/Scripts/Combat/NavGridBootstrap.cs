@@ -51,7 +51,7 @@ public static class NavGridBootstrap
     {
         var g = NavGrid.Instance;
         if (g == null) return;
-        Physics2D.SyncTransforms();
+        Physics.SyncTransforms();
         g.Rebuild();
     }
 
@@ -64,7 +64,8 @@ public static class NavGridBootstrap
         if (!TryComputeBounds(scene, out Bounds b))
             return;                               // 콜라이더가 없는 씬 — 막힐 게 없으니 직선으로 충분
 
-        Vector2 area = (Vector2)b.size + Vector2.one * (Margin * 2f);
+        // 격자는 XZ 평면 — 세로(높이)는 격자와 무관하다.
+        Vector2 area = new Vector2(b.size.x, b.size.z) + Vector2.one * (Margin * 2f);
         float cell = CellSize;
         float longest = Mathf.Max(area.x, area.y);
         if (longest / cell > MaxCellsSide) cell = longest / MaxCellsSide;
@@ -73,8 +74,8 @@ public static class NavGridBootstrap
         SceneManager.MoveGameObjectToScene(go, scene);   // 씬과 함께 소멸 — 다음 맵에 새로 깔린다
         var grid = go.AddComponent<NavGrid>();
 
-        Physics2D.SyncTransforms();                      // 방금 로드된 콜라이더 위치 확정
-        grid.Configure(b.center, area, cell, AgentRadius);
+        Physics.SyncTransforms();                      // 방금 로드된 콜라이더 위치 확정
+        grid.Configure(Plan3D.ToPlan(b.center), area, cell, AgentRadius);
 
         float pct = grid.BlockedRatio * 100f;
         Debug.Log($"[NavGrid] 자동 배치 — {scene.name}  영역 {area.x:0}×{area.y:0}m  "
@@ -109,7 +110,7 @@ public static class NavGridBootstrap
         var roots = scene.GetRootGameObjects();
         for (int i = 0; i < roots.Length; i++)
         {
-            var cols = roots[i].GetComponentsInChildren<Collider2D>(true);
+            var cols = roots[i].GetComponentsInChildren<Collider>(true);
             for (int j = 0; j < cols.Length; j++)
             {
                 var c = cols[j];

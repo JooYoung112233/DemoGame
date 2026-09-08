@@ -1,8 +1,10 @@
 using UnityEngine;
 
 /// <summary>
-/// 2D 길찾기 격자 (탑다운). 맵 영역을 cellSize 격자로 나눠 셀별 막힘을 베이크.
-/// 막힘 = 비-트리거 Collider2D가 셀에 겹침 (Player/Enemy 레이어는 제외 — 장애물 아님).
+/// 길찾기 격자 (쿼터뷰). 맵의 **XZ 평면**을 cellSize 격자로 나눠 셀별 막힘을 베이크.
+/// 막힘 = 비-트리거 Collider가 셀 기둥에 겹침 (Player/Enemy 레이어는 제외 — 장애물 아님).
+/// 셀 검사는 **바닥이 아니라 사람 키 높이의 기둥**으로 한다 — 바닥 턱·연석까지 벽으로 세면
+/// 갈 수 있는 길이 사라진다.
 /// 에이전트 바디 반경만큼 막힘을 dilate → "전신"이 벽에 안 끼는 경로만 통과.
 /// 씬에 1개 배치(빌더가 생성). NavAgent가 Instance로 조회. 정적 맵 가정(필요 시 Rebuild).
 /// </summary>
@@ -28,7 +30,10 @@ public class NavGrid : MonoBehaviour
     Vector2 _origin;            // 셀(0,0) 중심의 월드 좌표
     bool[,] _blocked;           // dilate 반영된 최종 막힘
     int _ignoreMask;            // Player|Enemy
-    readonly Collider2D[] _buf = new Collider2D[16];
+    readonly Collider[] _buf = new Collider[16];
+
+    /// <summary>셀 막힘 검사 기둥 — 지면 위 이 높이 구간만 본다.</summary>
+    const float ProbeBottom = 0.25f, ProbeTop = 1.9f;
 
     public bool Ready => _blocked != null;
     public int  Width  => _w;
@@ -51,7 +56,8 @@ public class NavGrid : MonoBehaviour
     /// (씬에 손으로 배치한 경우엔 인스펙터 값이 그대로 쓰이므로 호출되지 않는다.)</summary>
     public void Configure(Vector2 center, Vector2 area, float cell, float radius)
     {
-        transform.position = new Vector3(center.x, center.y, 0f);
+        // center는 **평면 좌표**(x=월드X, y=월드Z). 높이는 지금 있는 값을 유지한다.
+        transform.position = Plan3D.ToWorld(center, transform.position.y);
         areaSize = area;
         cellSize = Mathf.Max(0.05f, cell);
         agentRadius = Mathf.Max(0f, radius);
@@ -77,7 +83,7 @@ public class NavGrid : MonoBehaviour
     {
         _w = Mathf.Max(1, Mathf.RoundToInt(areaSize.x / cellSize));
         _h = Mathf.Max(1, Mathf.RoundToInt(areaSize.y / cellSize));
-        Vector2 c = transform.position;
+        Vector2 c = Plan3D.ToPlan(transform.position);
         _origin = c - areaSize * 0.5f + Vector2.one * (cellSize * 0.5f);
 
         var raw = new bool[_w, _h];
@@ -102,9 +108,14 @@ public class NavGrid : MonoBehaviour
 
     bool CellHasObstacle(Vector2 center, Vector2 box)
     {
-        var filter = new ContactFilter2D { useTriggers = true, useLayerMask = true };
-        filter.SetLayerMask(obstacleMask);
-        int n = Physics2D.OverlapBox(center, box, 0f, filter, _buf);
+        // 셀 하나를 **기둥**으로 본다. 지면 바로 위(0.25m)부터 키 높이(1.9m)까지에
+        // 솔리드가 걸리면 막힘 — 바닥 자체나 낮은 턱은 통과로 남는다.
+        float baseY = transform.position.y;
+        Vector3 c = Plan3D.ToWorld(center, baseY + (ProbeBottom + ProbeTop) * 0.5f);
+        Vector3 half = new Vector3(box.x * 0.5f, (ProbeTop - ProbeBottom) * 0.5f, box.y * 0.5f);
+
+        int n = Physics.OverlapBoxNonAlloc(c, half, _buf, Quaternion.identity,
+                                           obstacleMask, QueryTriggerInteraction.Collide);
         for (int i = 0; i < n; i++)
         {
             var col = _buf[i];

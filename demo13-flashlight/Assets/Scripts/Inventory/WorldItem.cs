@@ -31,12 +31,12 @@ public class WorldItem : MonoBehaviour
         {
             var wi = All[i];
             if (wi == null) continue;
-            if (((Vector2)wi.transform.position - c).sqrMagnitude <= r2)
+            if ((Plan3D.ToPlan(wi.transform.position) - c).sqrMagnitude <= r2)
                 result.Add(wi);
         }
         result.Sort((a, b) =>
-            (((Vector2)a.transform.position - c).sqrMagnitude)
-            .CompareTo(((Vector2)b.transform.position - c).sqrMagnitude));
+            ((Plan3D.ToPlan(a.transform.position) - c).sqrMagnitude)
+            .CompareTo((Plan3D.ToPlan(b.transform.position) - c).sqrMagnitude));
         return result;
     }
 

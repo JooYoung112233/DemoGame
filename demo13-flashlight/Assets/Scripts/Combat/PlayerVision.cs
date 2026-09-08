@@ -64,7 +64,7 @@ public class PlayerVision : MonoBehaviour
         float near     = gt != null ? gt.visionNearRadius : 2.2f;
         bool los       = gt == null || gt.visionLineOfSight;
 
-        Vector2 eye = p.transform.position;
+        Vector2 eye = Plan3D.ToPlan(p.transform.position);
         Vector2 facing = p.FacingDirection.sqrMagnitude > 0.0001f ? p.FacingDirection.normalized : Vector2.down;
         float cosHalf = Mathf.Cos(fovDeg * 0.5f * Mathf.Deg2Rad);
         float range2 = range * range;
@@ -76,7 +76,7 @@ public class PlayerVision : MonoBehaviour
             if (e == null) continue;
 
             if (e == null) continue;
-            e.SetVisionVisible(Test(eye, facing, cosHalf, range2, near2, los, e.transform.position));
+            e.SetVisionVisible(Test(eye, facing, cosHalf, range2, near2, los, Plan3D.ToPlan(e.transform.position)));
         }
     }
 
@@ -108,7 +108,9 @@ public class PlayerVision : MonoBehaviour
     /// QA 지각(QaPerception)이 "봇이 무엇을 발견했는가"를 정할 때 쓴다. 규칙을 따로 구현하면
     /// QA가 게임과 다른 것을 검증하게 되므로, 반드시 이 하나만 쓴다.
     /// 시야 시스템이 꺼져 있으면(visionEnabled=false) 사거리 안이면 전부 보이는 것으로 본다.</summary>
-    public static bool CanSee(Vector2 worldPos)
+    /// ⚠️ 인자는 **월드 좌표**다. 예전 Vector2 시그니처를 그대로 두면 호출부의 Vector3가
+    ///    암묵 변환되어 (x, 높이)로 읽힌다 — 컴파일은 되고 판정만 조용히 틀린다.
+    public static bool CanSee(Vector3 world)
     {
         var inst = Instance;
         var p = TopDownPlayer.Instance;
@@ -116,10 +118,10 @@ public class PlayerVision : MonoBehaviour
 
         var gt = GameTuning.Instance;
         float range = gt != null ? gt.visionRange : 9f;
-        Vector2 eye = p.transform.position;
+        Vector2 eye = Plan3D.ToPlan(p.transform.position);
 
         if (gt != null && !gt.visionEnabled)
-            return ((Vector2)worldPos - eye).sqrMagnitude <= range * range;
+            return (Plan3D.ToPlan(world) - eye).sqrMagnitude <= range * range;
 
         float fovDeg = gt != null ? gt.visionFovDegrees : 150f;
         float near   = gt != null ? gt.visionNearRadius : 2.2f;
@@ -127,22 +129,16 @@ public class PlayerVision : MonoBehaviour
         Vector2 facing = p.FacingDirection.sqrMagnitude > 0.0001f ? p.FacingDirection.normalized : Vector2.down;
 
         return inst.Test(eye, facing, Mathf.Cos(fovDeg * 0.5f * Mathf.Deg2Rad),
-                         range * range, near * near, los, worldPos);
+                         range * range, near * near, los, Plan3D.ToPlan(world));
     }
 
-    static readonly RaycastHit2D[] _hitBuf = new RaycastHit2D[1];
-    ContactFilter2D _filter;
-    bool _filterInit;
+    /// <summary>시야 차단 검사를 쏘는 높이 — 눈높이. 지면에서 쏘면 턱마다 막힌다.</summary>
+    const float EyeY = 1.5f;
 
     bool BlockedByWall(Vector2 a, Vector2 b)
     {
-        if (!_filterInit)
-        {
-            _filter = new ContactFilter2D { useTriggers = false };   // 트리거(아이템/허트박스)는 무시
-            _filter.SetLayerMask(_occluderMask);
-            _filter.useLayerMask = true;
-            _filterInit = true;
-        }
-        return Physics2D.Linecast(a, b, _filter, _hitBuf) > 0;
+        float y = TopDownPlayer.Instance != null ? TopDownPlayer.Instance.transform.position.y : 0f;
+        return Physics.Linecast(Plan3D.ToWorld(a, y + EyeY), Plan3D.ToWorld(b, y + EyeY),
+                                _occluderMask, QueryTriggerInteraction.Ignore);
     }
 }

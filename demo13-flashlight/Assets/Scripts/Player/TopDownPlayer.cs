@@ -871,7 +871,7 @@ public class TopDownPlayer : MonoBehaviour
     void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(1f, 0.8f, 0.2f, 0.4f);
-        Vector2 c = (Vector2)transform.position + FacingDirection * 1f;
+        Vector2 c = Plan3D.ToPlan(transform.position) + FacingDirection * 1f;
         Gizmos.DrawWireSphere(c, 1.2f);
     }
 #endif

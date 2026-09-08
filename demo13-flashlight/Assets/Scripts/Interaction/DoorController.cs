@@ -38,7 +38,7 @@ public class DoorController : MonoBehaviour
 
     [Header("문 물리")]
     [Tooltip("통과 차단용 콜라이더 (문 자체 또는 별도 오브젝트)")]
-    [SerializeField] Collider2D doorCollider;
+    [SerializeField] Collider doorCollider;
     [Tooltip("열릴 때 비활성화할 비주얼 오브젝트 (문짝 메쉬/스프라이트)")]
     [SerializeField] GameObject doorVisual;
 
@@ -75,8 +75,8 @@ public class DoorController : MonoBehaviour
         // 콜라이더 자동 탐색
         if (doorCollider == null)
         {
-            // trigger 아닌 Collider2D 우선
-            var cols = GetComponents<Collider2D>();
+            // trigger 아닌 Collider 우선 — 문은 막는 몸이 있어야 한다
+            var cols = GetComponents<Collider>();
             foreach (var c in cols)
             {
                 if (!c.isTrigger)
@@ -86,7 +86,7 @@ public class DoorController : MonoBehaviour
                 }
             }
             if (doorCollider == null)
-                doorCollider = GetComponent<Collider2D>();
+                doorCollider = GetComponent<Collider>();
         }
     }
 
@@ -273,8 +273,8 @@ public class DoorController : MonoBehaviour
         if (doorCollider != null)
         {
             Gizmos.matrix = doorCollider.transform.localToWorldMatrix;
-            if (doorCollider is BoxCollider2D box2d)
-                Gizmos.DrawWireCube(box2d.offset, box2d.size);
+            if (doorCollider is BoxCollider box)
+                Gizmos.DrawWireCube(box.center, box.size);
             else
                 Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
         }

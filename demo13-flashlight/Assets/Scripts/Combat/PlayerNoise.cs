@@ -65,7 +65,7 @@ public class PlayerNoise : MonoBehaviour
             target = baseR * TraitManager.Mod("move_noise");
         }
 
-        NoiseSystem.SetPlayerSustained(player != null ? (Vector2)player.transform.position : Vector2.zero, target);
+        NoiseSystem.SetPlayerSustained(player != null ? Plan3D.ToPlan(player.transform.position) : Vector2.zero, target);
 
         // 펄스 UI 페이드
         if (_pulseFade > 0f)
