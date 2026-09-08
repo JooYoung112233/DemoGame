@@ -31,6 +31,7 @@ public class CutawayDriver : MonoBehaviour
 
     Camera _cam;
     Transform _target;
+    Renderer[] _renderers;
 
     void LateUpdate()
     {
@@ -47,7 +48,7 @@ public class CutawayDriver : MonoBehaviour
             return;
         }
 
-        Vector3 pivot = _target.position + Vector3.up * pivotHeight;
+        Vector3 pivot = ResolvePivot();
         Vector3 vp = _cam.WorldToViewportPoint(pivot);
 
         // 플레이어가 화면 밖이거나 카메라 뒤면 뚫지 않는다.
@@ -57,12 +58,30 @@ public class CutawayDriver : MonoBehaviour
             return;
         }
 
-        // 셰이더의 SV_POSITION은 위에서 아래로 세므로 y를 뒤집는다.
-        float depth = -_cam.worldToCameraMatrix.MultiplyPoint(pivot).z;
-        Shader.SetGlobalVector(CutCenterId, new Vector4(vp.x, 1f - vp.y, depth, 0f));
+        // ⚠️ **월드 좌표를 넘긴다.** 화면 좌표를 여기서 계산하면 렌더 타겟에 따라 Y가
+        //    뒤집혀(게임 뷰 vs RenderTexture) 구멍이 어긋난다. 셰이더가 프래그먼트와
+        //    같은 행렬로 투영하게 두면 그 문제가 원천적으로 사라진다.
+        Shader.SetGlobalVector(CutCenterId, new Vector4(pivot.x, pivot.y, pivot.z, 0f));
         Shader.SetGlobalFloat(CutRadiusId, radius);
         Shader.SetGlobalFloat(CutSoftId, softEdge);
         Shader.SetGlobalFloat(CutEnabledId, 1f);
+    }
+
+    /// <summary>구멍 중심 — 캐릭터 렌더러 바운즈의 중앙. 없으면 발밑 + pivotHeight.</summary>
+    Vector3 ResolvePivot()
+    {
+        if (_renderers == null || _renderers.Length == 0)
+            _renderers = _target.GetComponentsInChildren<Renderer>();
+
+        bool has = false; Bounds b = default;
+        for (int i = 0; i < _renderers.Length; i++)
+        {
+            var r = _renderers[i];
+            if (r == null || !r.enabled) continue;
+            if (!has) { b = r.bounds; has = true; }
+            else b.Encapsulate(r.bounds);
+        }
+        return has ? b.center : _target.position + Vector3.up * pivotHeight;
     }
 
     void OnDisable() => Shader.SetGlobalFloat(CutEnabledId, 0f);

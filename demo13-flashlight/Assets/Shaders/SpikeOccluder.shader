@@ -42,10 +42,12 @@ Shader "Spike/OccluderFX"
             CBUFFER_END
 
             // ── 전역(재질별 아님) ──
-            // 해상도 비의존: xy는 뷰포트 0~1(위→아래), 반경은 **화면 높이 대비 비율**.
-            float4 _CutCenter;   // xy = 뷰포트 0~1(위→아래), z = 플레이어 뷰 깊이
-            float  _CutRadius;   // 화면 높이 대비 (예 0.13)
-            float  _CutSoft;     // 화면 높이 대비 (예 0.05)
+            // ⚠️ **월드 좌표를 받는다.** 화면 좌표를 CPU에서 계산해 넘기면 렌더 타겟에 따라
+            //    Y가 뒤집혀(UNITY_UV_STARTS_AT_TOP / _ProjectionParams.x) 구멍이 어긋난다.
+            //    프래그먼트와 중심을 **같은 행렬로** 투영하면 뒤집힘과 무관해진다.
+            float4 _CutCenter;   // xyz = 플레이어 월드 좌표(가슴 높이)
+            float  _CutRadius;   // 화면 높이 대비 비율 (예 0.13)
+            float  _CutSoft;     // 화면 높이 대비 비율 (예 0.05)
             float  _CutEnabled;  // 0/1
 
             struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
@@ -55,6 +57,8 @@ Shader "Spike/OccluderFX"
                 float3 positionWS : TEXCOORD0;
                 float3 normalWS   : TEXCOORD1;
                 float  viewDepth  : TEXCOORD2;
+                float2 fragNDC    : TEXCOORD3;   // -1~1
+                float3 cutNDCDepth: TEXCOORD4;   // xy = 중심 NDC, z = 중심 뷰 깊이
             };
 
             Varyings vert (Attributes IN)
@@ -65,6 +69,10 @@ Shader "Spike/OccluderFX"
                 o.positionWS = p.positionWS;
                 o.normalWS   = TransformObjectToWorldNormal(IN.normalOS);
                 o.viewDepth  = -TransformWorldToView(p.positionWS).z;   // 카메라로부터의 거리
+                o.fragNDC    = p.positionCS.xy / max(p.positionCS.w, 1e-6);
+                float4 cutCS = TransformWorldToHClip(_CutCenter.xyz);   // 프래그먼트와 동일 경로
+                o.cutNDCDepth = float3(cutCS.xy / max(cutCS.w, 1e-6),
+                                       -TransformWorldToView(_CutCenter.xyz).z);
                 return o;
             }
 
@@ -92,13 +100,14 @@ Shader "Spike/OccluderFX"
                 else if (_Mode > 0.5 && _CutEnabled > 0.5)
                 {
                     // ② 플레이어보다 뒤면 건드리지 않는다 (여유 0.5m)
-                    if (IN.viewDepth < _CutCenter.z - 0.5)
+                    if (IN.viewDepth < IN.cutNDCDepth.z - 0.5)
                     {
-                        // ① 화면상 플레이어 주변 반경 — 종횡비 보정해 원형을 유지한다
-                        float2 uv = IN.positionCS.xy / _ScreenParams.xy;
-                        float2 off = (uv - _CutCenter.xy) * float2(_ScreenParams.x / _ScreenParams.y, 1.0);
+                        // ① 화면상 플레이어 주변 반경. NDC는 세로 -1~1(=2)이므로 반경을 2배로.
+                        //    종횡비 보정해 원형을 유지한다.
+                        float aspect = _ScreenParams.x / _ScreenParams.y;
+                        float2 off = (IN.fragNDC - IN.cutNDCDepth.xy) * float2(aspect, 1.0);
                         float d = length(off);
-                        float t = saturate((d - _CutRadius) / max(_CutSoft, 0.001));
+                        float t = saturate((d - _CutRadius * 2.0) / max(_CutSoft * 2.0, 0.001));
                         clip(t - dither * 0.999);
                     }
                 }
