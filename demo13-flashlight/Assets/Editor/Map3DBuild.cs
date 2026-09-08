@@ -19,11 +19,13 @@ public static class Map3DBuild
 {
     /// <summary>3D 모드로 <paramref name="build"/>를 실행한다. 예외가 나도 모드를 반드시 되돌린다 —
     /// 켜진 채로 남으면 그다음 2D 빌드까지 3D로 나온다.</summary>
-    static void In3D(System.Action build, Greybox3D.HeightSet heights, float planScale = 1f)
+    static void In3D(System.Action build, Greybox3D.HeightSet heights, float planScale = 1f,
+                     Lighting3D.Preset preset = Lighting3D.Preset.Outdoor)
     {
         var prevUse = GreyboxBuild.Use3D;
         var prevH   = Greybox3D.Heights;
         var prevS   = Greybox3D.PlanScale;
+        var prevP   = Greybox3D.ScenePreset;
         var prevQ   = ContentBuildAll.Quiet;
         // ⚠️ 조용히 굽는다. 빌더는 씬마다 완료 대화상자를 띄우는데, 자동화에는 누를 사람이
         //    없어 메인 스레드가 그대로 멈춘다(실제로 여러 번 밟았다).
@@ -32,19 +34,21 @@ public static class Map3DBuild
         Greybox3D.EnsurePalette();
         Greybox3D.Heights = heights;
         Greybox3D.PlanScale = planScale;
+        Greybox3D.ScenePreset = preset;
         try { build(); }
         finally
         {
             GreyboxBuild.Use3D = prevUse; Greybox3D.Heights = prevH;
-            Greybox3D.PlanScale = prevS; ContentBuildAll.Quiet = prevQ;
+            Greybox3D.PlanScale = prevS; Greybox3D.ScenePreset = prevP;
+            ContentBuildAll.Quiet = prevQ;
         }
     }
 
     [MenuItem("Tools/TopDown/빌드3D/실내 전체(15씬)", priority = -80)]
-    public static void BuildInteriorsAll() => In3D(Zone1Interiors.BuildAll, Greybox3D.Indoor);
+    public static void BuildInteriorsAll() => In3D(Zone1Interiors.BuildAll, Greybox3D.Indoor, 1f, Lighting3D.Preset.Indoor);
 
     [MenuItem("Tools/TopDown/빌드3D/실내 · 약국", priority = -79)]
-    public static void BuildPharmacy() => In3D(Zone1Interiors.BuildPharmacy, Greybox3D.Indoor);
+    public static void BuildPharmacy() => In3D(Zone1Interiors.BuildPharmacy, Greybox3D.Indoor, 1f, Lighting3D.Preset.Indoor);
 
     [MenuItem("Tools/TopDown/빌드3D/고철시장", priority = -70)]
     public static void BuildScrapMarket() => In3D(ScrapMarketGreyboxLayout.Build, Greybox3D.Default, OutdoorScale);

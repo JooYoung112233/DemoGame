@@ -120,14 +120,9 @@ public static class Hideout3DLayout
         n++;
 
         // ── 조명 ── 컨테이너 내부: 약한 천창 + 매달린 전구 한 개
-        var sunGO = new GameObject("KeyLight");
-        sunGO.transform.SetParent(map.transform, false);
-        var sun = sunGO.AddComponent<Light>();
-        sun.type = LightType.Directional;
-        sun.intensity = 0.55f;
-        sun.color = new Color(0.80f, 0.86f, 1f);      // 위에서 새어드는 찬 빛
-        sun.shadows = LightShadows.Soft;
-        sunGO.transform.rotation = Quaternion.Euler(62f, -30f, 0f);
+        // 천창(디렉셔널)과 앰비언트는 Lighting3D의 Hideout 프리셋이 갖고 있다.
+        // 전구는 이 방만의 소품이라 여기 남긴다 — 다른 씬이 따라 할 값이 아니다.
+        Lighting3D.Apply(map, Lighting3D.Preset.Hideout);
 
         var bulbGO = new GameObject("Bulb");
         bulbGO.transform.SetParent(map.transform, false);
@@ -139,11 +134,6 @@ public static class Hideout3DLayout
         bulb.color = new Color(1f, 0.82f, 0.58f);      // 백열 전구
         bulb.shadows = LightShadows.Soft;
         n += 2;
-
-        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor     = new Color(0.20f, 0.22f, 0.26f);
-        RenderSettings.ambientEquatorColor = new Color(0.15f, 0.15f, 0.17f);
-        RenderSettings.ambientGroundColor  = new Color(0.09f, 0.09f, 0.10f);
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);

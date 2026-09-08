@@ -19,7 +19,7 @@ public class BuildingInterior : MonoBehaviour
     [Tooltip("끌 지붕 오브젝트. 비우면 이름이 'Roof'로 시작하는 자식을 자동 수집.")]
     [SerializeField] List<GameObject> roof = new List<GameObject>();
 
-    [Tooltip("안에 들어왔을 때만 켜는 실내 조명(전구 등). 비어도 무방.")]
+    [Tooltip("안에 들어왔을 때만 켜는 실내 조명(전구 등). 비우면 자식 Light를 전부 자동 수집.")]
     [SerializeField] List<Light> interiorLights = new List<Light>();
 
     [Tooltip("켜면 지붕이 꺼질 때 실내 조명도 함께 켜진다.")]
@@ -46,7 +46,13 @@ public class BuildingInterior : MonoBehaviour
             _roofRenderers.AddRange(go.GetComponentsInChildren<Renderer>(true));
         }
 
-        SetInside(false);   // 시작은 지붕 있음
+        // 실내등도 지붕과 같이 자동 수집한다. 이게 없으면 방 안 전구가 **밖에서도 켜진 채**로
+        // 남는다 — 점광은 벽을 뚫고 나가(추가 라이트 그림자를 끄고 쓴다) 건물 주변 바닥에
+        // 이유 없는 밝은 원을 만든다. 안에 있을 때만 켜면 새는 순간 자체가 없어진다.
+        if (interiorLights.Count == 0)
+            interiorLights.AddRange(GetComponentsInChildren<Light>(true));
+
+        SetInside(false);   // 시작은 지붕 있음 + 실내등 꺼짐
     }
 
     void OnTriggerEnter(Collider other)

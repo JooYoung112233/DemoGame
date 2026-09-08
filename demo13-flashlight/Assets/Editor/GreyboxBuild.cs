@@ -56,6 +56,18 @@ public static class GreyboxBuild
 
     public static void EndScene(Scene scene, string path, int placed, string label)
     {
+        // 3D로 굽는 중이면 저장 직전에 조명을 얹는다. 2D 빌더는 조명을 만들지 않는 것이
+        // 맞았지만(Light2D 글로벌 하나가 화면 전체를 덮었다) 3D는 태양이 없으면 앰비언트만
+        // 받아 납작해진다 — 실제로 지역1·고철시장·실내 전부 광원 0개로 구워져 있었다.
+        if (Use3D)
+        {
+            Lighting3D.Apply(null, Greybox3D.ScenePreset);
+            // 실내 씬은 Room을 쓰지 않아(옛 2D 실내 빌더) 천장등이 하나도 안 달린다 — 여기서 깐다.
+            if (Greybox3D.ScenePreset == Lighting3D.Preset.Indoor)
+                foreach (var go in scene.GetRootGameObjects())
+                    if (go.name == "Map") { Lighting3D.FillCeilingLamps(go, Greybox3D.Heights.building - 0.4f); break; }
+        }
+
         Selection.activeObject = null;
         bool saved = EditorSceneBuildUtil.SaveAndClose(scene, path, _prevActive);  // 저장 후 닫기(현재 씬 유지)
         AssetDatabase.SaveAssets();

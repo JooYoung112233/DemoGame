@@ -20,9 +20,9 @@ MonoBehaviour:
   dayFog: 0
   dayFogColor: {r: 0.6, g: 0.6, b: 0.65, a: 1}
   dayFogDensity: 0.01
-  nightIntensity: 0
-  nightLightColor: {r: 0, g: 0, b: 0, a: 1}
-  nightSunAngle: {x: 50, y: -30, z: 0}
+  nightIntensity: 0.18
+  nightLightColor: {r: 0.55, g: 0.62, b: 0.85, a: 1}
+  nightSunAngle: {x: 60, y: 200, z: 0}
   nightAmbientColor: {r: 0.04, g: 0.04, b: 0.06, a: 1}
   nightAmbientIntensity: 0.2
   nightFog: 1

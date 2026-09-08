@@ -93,21 +93,9 @@ public static class Safehouse3DLayout
         // ── 마을 분위기 (골목·간판·가로등·잡동사니) ──
         n += Dressing(map);
 
-        // ── 조명 ──
-        var sunGO = new GameObject("Sun");
-        sunGO.transform.SetParent(map.transform, false);
-        var sun = sunGO.AddComponent<Light>();
-        sun.type = LightType.Directional;
-        sun.intensity = 1.05f;
-        sun.color = new Color(1f, 0.95f, 0.86f);
-        sun.shadows = LightShadows.Soft;
-        sunGO.transform.rotation = Quaternion.Euler(50f, -40f, 0f);
+        // ── 조명 ── (값은 Lighting3D 한 곳에 있다 — 레이드 맵과 같은 태양을 쓴다)
+        Lighting3D.Apply(map, Lighting3D.Preset.Outdoor);
         n++;
-
-        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor     = new Color(0.40f, 0.44f, 0.52f);
-        RenderSettings.ambientEquatorColor = new Color(0.30f, 0.30f, 0.32f);
-        RenderSettings.ambientGroundColor  = new Color(0.16f, 0.15f, 0.14f);
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);

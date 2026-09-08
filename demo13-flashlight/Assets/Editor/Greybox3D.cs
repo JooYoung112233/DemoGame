@@ -58,6 +58,10 @@ public static class Greybox3D
     /// 배율로 건물까지 함께 키워 실내를 그 안에 담는다.</summary>
     public static float PlanScale = 1f;
 
+    /// <summary>이번에 굽는 씬의 조명 성격. <see cref="GreyboxBuild.EndScene"/>이 저장 직전에 읽는다.
+    /// 높이 세트로 실내/야외를 추측하지 않고 빌더가 명시한다 — 추측은 높이 값을 손보는 순간 틀린다.</summary>
+    public static Lighting3D.Preset ScenePreset = Lighting3D.Preset.Outdoor;
+
     static float S(float v) => v * PlanScale;
     // ── 재질 ─────────────────────────────────────────────────────────
     static Material _floor, _wall, _barricade, _car, _prop, _door;
@@ -308,6 +312,12 @@ public static class Greybox3D
         trg.center = new Vector3(S((x0 + x1) * 0.5f), h * 0.5f, S((z0 + z1) * 0.5f));
         trg.size   = new Vector3(S(x1 - x0) - T * 1.5f, h, S(z1 - z0) - T * 1.5f);
         root.AddComponent<BuildingInterior>();
+
+        // 천장등. 지붕을 씌운 순간 실내는 태양이 닿지 않아 **캄캄해진다** — 방을 만든
+        // 그 자리에서 같이 달아야 "지붕은 있는데 조명은 없는 방"이 생기지 않는다.
+        n += Lighting3D.CeilingLights(root,
+                 S((x0 + x1) * 0.5f), S((z0 + z1) * 0.5f),
+                 S(x1 - x0), S(z1 - z0), h);
 
         return n;
     }
