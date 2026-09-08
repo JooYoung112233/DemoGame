@@ -76,7 +76,7 @@ public static class Safehouse3DLayout
 
         // ── 집/은신처 = 솔리드 컨테이너. 발자국을 실내(14×9)와 일치시킨다 ──
         n += Slab(map, "Container_Home", 64f, 12f, 14f, 9f, ContH, _cont);
-        n += Doorway(map, "Hideout_Entrance", 56.4f, 12f);          // 컨테이너 서쪽 문
+        n += Doorway(map, "Hideout_Entrance", 56.4f, 12f, "Hideout3D", "default");   // 컨테이너 서쪽 문 → 은신처
         n += Spawn(map, "default",      53.5f, 12f);
         n += Spawn(map, "from_hideout", 54.2f, 12f);
         n += Slab(map, "Container_D1", 52f, 20f, 6f, 2.4f, 2.6f, _cont);
@@ -231,7 +231,8 @@ public static class Safehouse3DLayout
     static int Slab(GameObject p, string name, float cx, float cz, float lenX, float lenZ, float h, Material m)
         => Box(p, name, new Vector3(cx, h * .5f, cz), new Vector3(lenX, h, lenZ), m);
 
-    static int Doorway(GameObject p, string name, float x, float z)
+    /// <summary>씬 전환 문. 2D BuildingEntrance는 BoxCollider2D 전제라 3D에선 SceneDoor3D를 쓴다.</summary>
+    static int Doorway(GameObject p, string name, float x, float z, string scene = null, string spawn = "default")
     {
         var go = new GameObject(name);
         go.transform.SetParent(p.transform, false);
@@ -240,6 +241,7 @@ public static class Safehouse3DLayout
         t.isTrigger = true;
         t.size = new Vector3(1.6f, 2.2f, 1.2f);
         t.center = new Vector3(0f, 1.1f, 0f);
+        if (!string.IsNullOrEmpty(scene)) go.AddComponent<SceneDoor3D>().Configure(scene, spawn);
         return 1;
     }
 

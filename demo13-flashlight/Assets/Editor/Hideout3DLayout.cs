@@ -83,6 +83,28 @@ public static class Hideout3DLayout
         // 대기 의자 — 방 가운데. 여기만 캐릭터가 소품 "위"에 있으므로 서기 오프셋 0.
         n += Facility(map, "Chair_Idle", new Vector3(6.6f, 0f, 4.5f), new Vector3(0.6f, 0.85f, 0.6f), new Color(0.42f, 0.34f, 0.28f), "idle", Pose.Sit, Dock.None);
 
+        // ── 나가기 ── 2D판과 같은 HideoutController가 화면 UI('나가기' 버튼)·ESC 확인창·
+        //    씬 복귀를 담당한다. 디오라마가 있으면 캐릭터 숨김·카메라 고정·2D 클릭은 스스로 양보한다.
+        //    ★ 걸어나가는 출구는 두지 않는다 — 클릭 화면이라 트리거 퇴장이 성립하지 않는다.
+        var hcGO = new GameObject("HideoutController");
+        hcGO.transform.SetParent(map.transform, false);
+        var hc = hcGO.AddComponent<HideoutController>();
+        {
+            var so = new SerializedObject(hc);
+            var sc = so.FindProperty("safehouseScene");
+            var sp = so.FindProperty("safehouseSpawn");
+            if (sc != null) sc.stringValue = "Safehouse3D";   // 3D 마을로 복귀
+            if (sp != null) sp.stringValue = "from_hideout";
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+        n++;
+
+        // ── 도킹 UI ── 캐릭터를 가리지 않는 우측/하단 패널
+        var dockGO = new GameObject("HideoutDockPanel");
+        dockGO.transform.SetParent(map.transform, false);
+        dockGO.AddComponent<HideoutDockPanel>();
+        n++;
+
         // ── 디오라마 오케스트레이터 ── 시설 클릭 → 캐릭터 이동·자세 → 카메라 → UI
         var dio = new GameObject("HideoutDiorama");
         dio.transform.SetParent(map.transform, false);

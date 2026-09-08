@@ -85,10 +85,12 @@ public class HideoutDiorama : MonoBehaviour
         // 열린 시설 UI가 **닫혔을 때만** 대기 자리로 돌아간다.
         // ⚠️ uiOpen만 보면 UI가 열리기도 전에(같은 프레임) 복귀가 발동해
         //    시설 선택이 즉시 취소된다.
+        bool dockOpen = HideoutDockPanel.Instance != null && HideoutDockPanel.Instance.IsOpen;
         if (uiOpen) _uiWasOpen = true;
         else if (_uiWasOpen && _current != null && _current != _idle) { _uiWasOpen = false; ReturnToIdle(); }
+        else if (!dockOpen && _current != null && _current != _idle) ReturnToIdle();   // 패널 닫힘 = 대기 복귀
 
-        if (uiOpen) return;
+        if (uiOpen || dockOpen) return;
         if (!GameInput.GetMouseButtonDown(0)) return;
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
         if (_cam == null) { _cam = Camera.main; if (_cam == null) return; }
@@ -113,16 +115,36 @@ public class HideoutDiorama : MonoBehaviour
         if (CameraFollow.Instance != null)
             CameraFollow.Instance.SetFocus(_player.transform, a.ResolvedBias, focusOrthoSize);
 
-        // 기존 시설 UI를 그대로 쓴다(HideoutUI/InteractableObject 배선 유지).
+        // 도킹 패널 — 캐릭터를 가리지 않는 자리(우측/하단)에 붙는다.
+        // 기존 시설 UI는 전체화면 전제라, 그 내용을 옮기기 전까지는 패널의 '열기'가 띄운다.
         var io = a.GetComponentInParent<InteractableObject>();
-        if (io != null) io.Interact(_player.gameObject);
-        else Debug.Log($"[HideoutDiorama] '{a.moduleKey}' 에 InteractableObject가 없다 — 자세만 적용.", a);
+        if (HideoutDockPanel.Instance != null)
+        {
+            System.Action open = io != null ? () => io.Interact(_player.gameObject) : (System.Action)null;
+            HideoutDockPanel.Instance.Show(FacilityLabel.KoreanFor(a.moduleKey), DescriptionFor(a.moduleKey), a.dock, open);
+        }
+        else if (io != null) io.Interact(_player.gameObject);
     }
+
+    /// <summary>시설 한 줄 설명 — 도킹 패널 본문.</summary>
+    static string DescriptionFor(string key) => key switch
+    {
+        "bed"       => "잠을 자 체력을 회복하고 시간을 넘긴다.",
+        "workbench" => "무기·장비를 만들고 수리한다.",
+        "stash"     => "가져온 것을 보관한다. 레이드에 들고 나가지 않는 짐.",
+        "radio"     => "바깥 소식을 듣는다. 전력이 필요하다.",
+        "cooking"   => "재료로 음식을 만든다. 버프가 붙는다.",
+        "medical"   => "붕대·진통제 같은 일회용 치료품을 만든다.",
+        "dispatch"  => "사람을 내보낸다. 돌아올 때까지 시간이 걸린다.",
+        "generator" => "전력을 켜고 끈다. 라디오·파견의 전제.",
+        _           => "",
+    };
 
     void ReturnToIdle()
     {
         _current = _idle;
         if (_idle != null) PlaceAt(_idle, instant: false);
+        if (HideoutDockPanel.Instance != null) HideoutDockPanel.Instance.Hide();
         ClearFocus();
     }
 
