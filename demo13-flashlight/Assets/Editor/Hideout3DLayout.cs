@@ -38,6 +38,12 @@ public static class Hideout3DLayout
         var matWall  = Mat(new Color(0.38f, 0.40f, 0.38f), 0.08f);   // 골판 금속 컨테이너
         var matRib   = Mat(new Color(0.33f, 0.35f, 0.33f), 0.10f);
 
+        // ── 배경판 ── 방이 14×9m뿐이라 줌인하면 카메라가 방 밖(검은 공백)을 잡는다.
+        // 컨테이너 바깥은 어차피 보일 일이 없으니 넓고 어두운 판을 깔아 공백을 없앤다.
+        var matVoid = Mat(new Color(0.055f, 0.055f, 0.065f), 0f);
+        n += Deco(map, "Backdrop", new Vector3(RoomW * .5f, -0.35f, RoomD * .5f),
+                  new Vector3(70f, 0.2f, 70f), matVoid);
+
         // ── 바닥 ──
         n += Box(map, "Floor", new Vector3(RoomW * .5f, -0.05f, RoomD * .5f),
                  new Vector3(RoomW, 0.1f, RoomD), matFloor);
@@ -71,6 +77,12 @@ public static class Hideout3DLayout
 
         // 대기 자리 — 아무 시설도 안 눌렀을 때 캐릭터가 앉아 있는 의자.
         n += Facility(map, "Chair_Idle", new Vector3(7f, 0f, 4.2f), new Vector3(0.6f, 0.85f, 0.6f), new Color(0.42f, 0.34f, 0.28f), "idle", Pose.Sit, Dock.None);
+
+        // ── 디오라마 오케스트레이터 ── 시설 클릭 → 캐릭터 이동·자세 → 카메라 → UI
+        var dio = new GameObject("HideoutDiorama");
+        dio.transform.SetParent(map.transform, false);
+        dio.AddComponent<HideoutDiorama>();
+        n++;
 
         // ── 진입 스폰 (2D판과 동일 위치) ──
         var spawn = new GameObject("default");
@@ -115,6 +127,20 @@ public static class Hideout3DLayout
     }
 
     // ── 헬퍼 ────────────────────────────────────────────────────────
+    /// <summary>moduleKey → 기존 상호작용 타입. 2D판 FacilityOverride/Marker와 같은 배선.</summary>
+    static InteractableObject.InteractType InteractTypeFor(string key) => key switch
+    {
+        "bed"       => InteractableObject.InteractType.Bed,
+        "workbench" => InteractableObject.InteractType.Workbench,
+        "stash"     => InteractableObject.InteractType.Stash,
+        "radio"     => InteractableObject.InteractType.Radio,
+        "cooking"   => InteractableObject.InteractType.CookingBench,
+        "medical"   => InteractableObject.InteractType.MedicalBench,
+        "dispatch"  => InteractableObject.InteractType.Dispatch,
+        "generator" => InteractableObject.InteractType.Generator,
+        _           => InteractableObject.InteractType.Generic,
+    };
+
     static Material Mat(Color c, float smooth)
     {
         var m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
@@ -160,6 +186,12 @@ public static class Hideout3DLayout
         var standGO = new GameObject("Stand");
         standGO.transform.SetParent(go.transform, true);
         standGO.transform.position = new Vector3(floorPos.x, 0f, floorPos.z) + toCenter * 1.1f;
+
+        // 기존 UI 배선 — moduleKey에 맞는 상호작용 타입을 붙인다.
+        var io = go.AddComponent<InteractableObject>();
+        var so = new SerializedObject(io);
+        var tp = so.FindProperty("interactType");
+        if (tp != null) { tp.enumValueIndex = (int)InteractTypeFor(moduleKey); so.ApplyModifiedPropertiesWithoutUndo(); }
 
         var a = go.AddComponent<HideoutFacilityAnchor>();
         a.moduleKey = moduleKey;

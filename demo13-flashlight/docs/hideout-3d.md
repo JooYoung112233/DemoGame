@@ -37,13 +37,17 @@
 
 | 구성 | 파일 | 역할 |
 |---|---|---|
+| **오케스트레이터** | `Scripts/TopDown/HideoutDiorama.cs` | 시설 클릭(3D 레이캐스트) → 캐릭터 이동·시설 응시·자세 → 카메라 포커스 → 기존 UI 열기. 씬에 있으면 `HideoutController`가 **캐릭터 숨김·카메라 고정·2D 클릭 판정을 양보**한다(`HideoutDiorama.Active`) |
 | 시설 앵커 | `Scripts/TopDown/HideoutFacilityAnchor.cs` | 시설별 **캐릭터가 설 자리·자세(Stand/Sit/Lie)·UI 도킹(Right/Bottom/None)**. `moduleKey`는 `HideoutUI.Show(module)` 값과 일치해야 한다 |
 | 카메라 연출 | `CameraFollow.SetFocus(focus, screenBias, orthoSize)` | 피사체를 화면 비율만큼 밀어 UI 자리를 비운다. `ClearFocus()`로 복귀. 도킹에서 편향 자동 산출(우측→캐릭터 왼쪽, 하단→캐릭터 위) |
 
 ### ⚠️ 아직 안 된 것
 
-- **앵커를 읽어 실제로 캐릭터를 옮기고 자세를 재생하는 오케스트레이터가 없다.**
-  `HideoutController`(2D판, 캐릭터 숨김 전제)를 디오라마 기준으로 다시 써야 한다.
+- **앉기·눕기 애니메이션이 없다.** 위치·응시 방향은 맞지만 자세는 idle이다.
+  `HideoutDiorama.ApplyPose`는 애니메이터에 같은 이름(Sit/Lie)의 트리거가 **있을 때만** 건다 —
+  없으면 조용히 넘어가므로, 클립이 제작되면 트리거만 추가하면 자동으로 살아난다.
+- **기존 UI 패널이 전체화면 전제**다. 도킹(우측/하단)은 앵커에 정의됐고 카메라도 자리를 비우지만,
+  패널 자체를 그 자리에 맞게 재배치하는 작업이 남았다.
 - **자세 애니메이션이 없다.** 치비는 idle/walk/run 3종뿐 — 앉기·눕기·작업 자세 미제작
   ([3d-migration.md](3d-migration.md) Stage 4). 그전까지는 위치·방향만 맞고 자세는 idle이다.
 - **기존 UI 패널들이 전체화면 전제**다. 요리·수면·창고 등을 우측/하단 도킹으로 재배치해야 한다.
@@ -119,5 +123,6 @@
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-09-08 | **오케스트레이터 구현**(`HideoutDiorama`). 3D 레이캐스트 클릭 → 앵커로 이동·응시 → `CameraFollow.SetFocus`로 UI 자리 확보 → 기존 `InteractableObject.Interact` 호출. 빌더가 시설 9곳에 `InteractableObject`(Bed/Workbench/Stash/Radio/CookingBench/MedicalBench/Dispatch/Generator)를 배선. 방이 14×9m뿐이라 줌인 시 카메라가 방 밖(검은 공백)을 잡아 **70×70 배경판** 추가, 포커스 오소 4.5→6.0. |
 | 2026-09-08 | **상호작용 = 디오라마 확정.** 걸어다니지 않고 클릭 유지하되 캐릭터를 숨기지 않는다 — 시설마다 캐릭터가 가서 자세를 잡는다(침대=눕기, 요리대=앞에 서기, 대기=의자에 앉기). **UI는 캐릭터를 가리지 않는다**(우측 도킹/하단 바, 카메라가 부드럽게 밀어 자리 비움). `HideoutFacilityAnchor` + `CameraFollow.SetFocus` 구현, 빌더에 앵커 9개 배선. |
 | 2026-09-08 | 3D 은신처 그레이박스 최초 제작(14×9m, 벽 2.6m, 천장 없음). 시설 8종 좌표를 2D판과 1:1로 배치. 골판 리브·전구/천창 조명. 샌드박스 테스트 씬 폐기. |

@@ -66,6 +66,10 @@ public class HideoutController : MonoBehaviour
     // ─────────────────────────────────────────────
     void HidePlayerAndFixCamera()
     {
+        // 3D 디오라마가 있으면 캐릭터를 숨기지 않고 카메라도 고정하지 않는다.
+        // (숨기면 3D 캐릭터가 안 보여 디오라마의 의미가 사라진다 — docs/hideout-3d.md)
+        if (HideoutDiorama.Active) return;
+
         _player = TopDownPlayer.Instance;
         if (_player != null)
         {
@@ -141,6 +145,8 @@ public class HideoutController : MonoBehaviour
     /// <summary>은신처 카메라 상태 유지 — 추적이 되살아나거나 카메라가 꺼지면 매 프레임 되돌린다.</summary>
     void KeepHideoutCamera()
     {
+        if (HideoutDiorama.Active) return;   // 디오라마가 카메라를 몬다
+
         if (_hadFollow && CameraFollow.Instance != null && CameraFollow.Instance.enabled)
             CameraFollow.Instance.enabled = false;          // 추적 재활성 방지
         if (_rigCam != null)
@@ -207,6 +213,8 @@ public class HideoutController : MonoBehaviour
         if (uiOpen) return;                                                  // 시설 UI가 열려 있으면 무시
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return; // 화면 버튼 클릭
         if (_cam == null) return;
+
+        if (HideoutDiorama.Active) return;   // 3D 클릭은 디오라마가 레이캐스트로 처리
 
         Vector3 mw = _cam.ScreenToWorldPoint(GameInput.mousePosition);
         var hits = Physics2D.OverlapPointAll(new Vector2(mw.x, mw.y));
