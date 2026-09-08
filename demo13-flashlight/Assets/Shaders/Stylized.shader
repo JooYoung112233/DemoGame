@@ -15,12 +15,12 @@ Shader "BRB/Stylized"
     Properties
     {
         _BaseColor   ("Base Color", Color) = (0.5, 0.5, 0.5, 1)
-        _Wrap        ("Light Wrap", Range(0, 1)) = 0.45
+        _Wrap        ("Light Wrap", Range(0, 1)) = 0.28
         _ShadowTint  ("Shadow Tint", Color) = (0.42, 0.47, 0.58, 1)
-        _ShadowDepth ("Shadow Depth", Range(0, 1)) = 0.55
+        _ShadowDepth ("Shadow Depth", Range(0, 1)) = 0.42
         _RimColor    ("Rim Color", Color) = (1, 0.96, 0.88, 1)
         _RimPower    ("Rim Power", Range(0.5, 8)) = 3.0
-        _RimStrength ("Rim Strength", Range(0, 1)) = 0.22
+        _RimStrength ("Rim Strength", Range(0, 1)) = 0.18
     }
 
     SubShader
@@ -92,7 +92,7 @@ Shader "BRB/Stylized"
                 float3 col = lerp(shadowCol, litCol, lit);
 
                 // 앰비언트 — 하늘/땅 그라디언트가 형태를 읽히게 한다
-                col += _BaseColor.rgb * SampleSH(N) * 0.9;
+                col += _BaseColor.rgb * SampleSH(N) * 1.25;
 
                 // ③ 림 — 실루엣을 배경에서 떼어낸다
                 float rim = pow(1.0 - saturate(dot(N, V)), _RimPower);

@@ -22,7 +22,9 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
         GameObject instance = Instantiate(model, view, false);
         instance.name = "ChibiSurvivor";
         animator = instance.GetComponentInChildren<Animator>();
-        if (animator == null || animator.avatar == null || !animator.avatar.isValid)
+        // Generic 리그는 아바타 없이도 컨트롤러로 재생된다 — 애니메이터만 있으면 통과시킨다.
+        // (아바타 필수로 두면 avatarSetup=NoAvatar로 임포트된 모델이 통째로 안 보인다.)
+        if (animator == null)
         {
             Destroy(view.gameObject);
             view = null;
