@@ -18,10 +18,9 @@ MonoBehaviour:
   category: 1
   tier: 3
   ppCost: 3
-  prereqTraitId: survival_tough_bones
+  prereqTraitId: 
   tradeoff: 0
-  effectSummary: "HP 20% \uC774\uD558\uC77C \uB54C \uBC1B\uB294 \uD53C\uD574 -15%
-    (\uC120\uD589: \uAC15\uACE8)"
+  effectSummary: "HP 20% 이하일 때 받는 피해 -15%"
   effects:
   - effectKey: low_hp_damage_taken
     op: mul
