@@ -2,22 +2,6 @@
   "fbx_meshes": 13,
   "fbx_bones": 23,
   "clips": {
-    "Attack_OneHand": {
-      "frames": [
-        1,
-        40
-      ],
-      "max_loop_seam_m": 0.0,
-      "max_motion_m": 0.46958521502686734
-    },
-    "Attack_OneHand_Chop": {
-      "frames": [
-        1,
-        40
-      ],
-      "max_loop_seam_m": 0.0,
-      "max_motion_m": 0.7183084484059576
-    },
     "Attack_OneHand_Thrust": {
       "frames": [
         1,
@@ -25,6 +9,22 @@
       ],
       "max_loop_seam_m": 0.0,
       "max_motion_m": 0.3097808509104132
+    },
+    "Attack_TwoHand_Chop": {
+      "frames": [
+        1,
+        43
+      ],
+      "max_loop_seam_m": 0.0,
+      "max_motion_m": 0.2708388469456528
+    },
+    "Attack_TwoHand_Slash": {
+      "frames": [
+        1,
+        40
+      ],
+      "max_loop_seam_m": 0.0,
+      "max_motion_m": 0.24912511348658975
     },
     "Idle": {
       "frames": [
@@ -52,9 +52,9 @@
     }
   },
   "glb_animations": [
-    "Attack_OneHand",
-    "Attack_OneHand_Chop",
     "Attack_OneHand_Thrust",
+    "Attack_TwoHand_Chop",
+    "Attack_TwoHand_Slash",
     "Idle",
     "Run",
     "Walk"

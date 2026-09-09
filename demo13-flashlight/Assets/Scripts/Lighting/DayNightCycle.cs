@@ -249,12 +249,33 @@ public class DayNightCycle : MonoBehaviour
         RenderSettings.ambientGroundColor  = Scale(0.55f);
     }
 
-    /// <summary>씬(또는 DontDestroyOnLoad)의 디렉셔널 라이트를 찾는다.
-    /// 맵 씬에는 태양이 없고 Systems 쪽에 하나만 있다 — 그래서 이름이 아니라 **타입**으로 찾는다.</summary>
+    /// <summary>이 씬에서 낮밤이 몰 태양을 고른다.
+    ///
+    /// ⚠️ 예전엔 "먼저 찾은 디렉셔널"을 그냥 썼다. 맵마다 태양을 굽게 되면서 태양이 둘이 됐고
+    ///    (맵 + PlayerRig에 남아 있던 것) **화면을 실제로 밝히는 쪽은 대낮에 멈춰 있었다.**
+    ///    값을 재도 몰리는 쪽만 정상으로 보여 한참 안 드러났다. 그래서 지금은
+    ///    <see cref="SunLight"/> 꼬리표를 우선하고, 후보가 여럿이면 경고한다.</summary>
     Light FindSun()
     {
+        Light marked = null, plain = null;
+        int candidates = 0;
+
         foreach (var l in FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
-            if (l.type == LightType.Directional) return l;
-        return null;
+        {
+            if (l.type != LightType.Directional) continue;
+
+            var mark = l.GetComponent<SunLight>();
+            if (mark != null && !mark.followDayNight) continue;   // 고정 조명 씬(은신처 등)
+
+            candidates++;
+            if (mark != null) { if (marked == null) marked = l; }
+            else if (plain == null) plain = l;
+        }
+
+        var sun = marked != null ? marked : plain;
+        if (candidates > 1)
+            Debug.LogWarning($"[DayNight] 낮밤이 몰 수 있는 태양이 {candidates}개다 — '{sun?.name}'만 몰고 " +
+                             "나머지는 구운 값에 멈춘다. 맵 씬에 태양은 하나만 두는 게 맞다.", sun);
+        return sun;
     }
 }

@@ -76,6 +76,11 @@ public static class Lighting3D
                 sun.transform.rotation = Quaternion.Euler(50f, -40f, 0f);
                 break;
         }
+
+        // 낮밤이 몰 대상임을 표시한다. 표시가 없으면 DayNightCycle이 "먼저 찾은 디렉셔널"을
+        // 몰게 되고, 그게 화면을 밝히는 태양이 아니면 밤이 와도 맵은 대낮 그대로다.
+        var mark = sun.GetComponent<SunLight>() ?? sun.gameObject.AddComponent<SunLight>();
+        mark.followDayNight = preset != Preset.Hideout;   // 은신처는 시간과 무관하게 고정
         return sun;
     }
 

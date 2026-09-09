@@ -1,0 +1,52 @@
+{
+  "axis_convention": "Weapon-local +Y points toward blade/head; right grip at origin",
+  "dagger": {
+    "action": "Attack_OneHand_Thrust",
+    "right_grip": [
+      0,
+      0,
+      0
+    ],
+    "left_grip": null
+  },
+  "sword": {
+    "action": "Attack_TwoHand_Slash",
+    "right_grip": [
+      0,
+      0,
+      0
+    ],
+    "left_grip": [
+      0,
+      -0.11,
+      0
+    ]
+  },
+  "axe": {
+    "action": "Attack_TwoHand_Chop",
+    "right_grip": [
+      0,
+      0,
+      0
+    ],
+    "left_grip": [
+      0,
+      -0.11,
+      0
+    ]
+  },
+  "hammer": {
+    "action": "Attack_TwoHand_Chop",
+    "right_grip": [
+      0,
+      0,
+      0
+    ],
+    "left_grip": [
+      0,
+      -0.11,
+      0
+    ]
+  },
+  "scope": "Blender authoring attachment convention. Runtime weapon swapping and IK are not connected."
+}
