@@ -86,15 +86,23 @@ public class VisionDarkness : MonoBehaviour
 
     void AllocBuffers()
     {
-        // 세그먼트마다 사각형(내측 2 + 외측 2) → 삼각형 2개
-        _verts = new Vector3[Segments * 4];
-        _colors = new Color[Segments * 4];
-        _tris = new int[Segments * 6];
+        // ⚠️ 예전엔 각도마다 **정점 2개**(밝은 경계=투명, 바깥 60m=어둠)뿐이었다.
+        //    그러면 알파가 그 58m 구간에 **선형으로 퍼져** 게임 줌(화면 높이 18m)에서
+        //    실제로 보이는 부분은 알파가 0.1밖에 안 된다 — 어둠이 있으나 마나였다.
+        //    각도마다 정점을 **3개**로 늘려(경계 → 경계+FadeBand → 바깥) 어둠이
+        //    좁은 띠 안에서 차오르게 한다.
+        _verts = new Vector3[Segments * 6];
+        _colors = new Color[Segments * 6];
+        _tris = new int[Segments * 12];
         for (int s = 0; s < Segments; s++)
         {
-            int v = s * 4, t = s * 6;
-            _tris[t + 0] = v + 0; _tris[t + 1] = v + 2; _tris[t + 2] = v + 1;
-            _tris[t + 3] = v + 1; _tris[t + 4] = v + 2; _tris[t + 5] = v + 3;
+            int v = s * 6, t = s * 12;
+            // 안쪽 띠(경계 → 페이드 끝)
+            _tris[t + 0] = v + 0; _tris[t + 1] = v + 3; _tris[t + 2] = v + 1;
+            _tris[t + 3] = v + 1; _tris[t + 4] = v + 3; _tris[t + 5] = v + 4;
+            // 바깥(페이드 끝 → 60m, 전부 어둠)
+            _tris[t + 6] = v + 1; _tris[t + 7] = v + 4; _tris[t + 8] = v + 2;
+            _tris[t + 9] = v + 2; _tris[t +10] = v + 4; _tris[t +11] = v + 5;
         }
     }
 
@@ -136,8 +144,8 @@ public class VisionDarkness : MonoBehaviour
         {
             float a0 = s * 360f / Segments;
             float a1 = (s + 1) * 360f / Segments;
-            SetEdge(s * 4 + 0, s * 4 + 1, a0, faceDeg, half, soft, near, range, dark, clear);
-            SetEdge(s * 4 + 2, s * 4 + 3, a1, faceDeg, half, soft, near, range, dark, clear);
+            SetEdge(s * 6 + 0, a0, faceDeg, half, soft, near, range, dark, clear);
+            SetEdge(s * 6 + 3, a1, faceDeg, half, soft, near, range, dark, clear);
         }
 
         _mesh.Clear();
@@ -147,8 +155,12 @@ public class VisionDarkness : MonoBehaviour
         _mesh.RecalculateBounds();
     }
 
-    /// <summary>한 각도의 내측(밝음 경계)·외측(완전 어둠) 정점 2개를 만든다.</summary>
-    void SetEdge(int viInner, int viOuter, float angDeg, float faceDeg, float half, float soft,
+    /// <summary>밝은 곳에서 어둠으로 넘어가는 띠의 폭(m). 이 안에서 알파가 0 → 최대까지 오른다.
+    /// 좁을수록 시야 경계가 또렷하다. 0에 가까우면 계단처럼 끊겨 보인다.</summary>
+    const float FadeBand = 1.6f;
+
+    /// <summary>한 각도의 정점 3개를 만든다 — 밝음 경계(투명) / 페이드 끝(어둠) / 바깥(어둠).</summary>
+    void SetEdge(int vi, float angDeg, float faceDeg, float half, float soft,
                  float near, float range, Color dark, Color clear)
     {
         float diff = Mathf.Abs(Mathf.DeltaAngle(faceDeg, angDeg));
@@ -165,7 +177,8 @@ public class VisionDarkness : MonoBehaviour
         float rad = angDeg * Mathf.Deg2Rad;
         var dir = new Vector3(Mathf.Cos(rad), 0f, Mathf.Sin(rad));
 
-        _verts[viInner] = dir * inner;   _colors[viInner] = clear;   // 밝은 쪽 = 투명
-        _verts[viOuter] = dir * OuterRadius; _colors[viOuter] = dark; // 바깥 = 어둠
+        _verts[vi + 0] = dir * inner;                  _colors[vi + 0] = clear;  // 밝은 쪽 = 투명
+        _verts[vi + 1] = dir * (inner + FadeBand);     _colors[vi + 1] = dark;   // 좁은 띠 끝 = 어둠
+        _verts[vi + 2] = dir * OuterRadius;            _colors[vi + 2] = dark;   // 바깥 = 계속 어둠
     }
 }

@@ -23,7 +23,7 @@ MonoBehaviour:
   nightIntensity: 0.18
   nightLightColor: {r: 0.55, g: 0.62, b: 0.85, a: 1}
   nightSunAngle: {x: 60, y: 200, z: 0}
-  nightAmbientColor: {r: 0.04, g: 0.04, b: 0.06, a: 1}
+  nightAmbientColor: {r: 0.1, g: 0.11, b: 0.15, a: 1}
   nightAmbientIntensity: 0.2
   nightFog: 1
   nightFogColor: {r: 0.02, g: 0.02, b: 0.03, a: 1}
