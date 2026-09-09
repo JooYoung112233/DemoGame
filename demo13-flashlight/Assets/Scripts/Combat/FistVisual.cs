@@ -33,7 +33,7 @@ public class FistVisual : MonoBehaviour
     public bool IsPunching => _t < 1f;
 
     /// <summary>owner 밑에 주먹을 만들어 붙인다. 이미 있으면 그걸 돌려준다.</summary>
-    public static FistVisual Attach(Transform owner, Color glove, int sortingOrder)
+    public static FistVisual Attach(Transform owner, Color glove)
     {
         if (owner == null) return null;
         var existing = owner.GetComponentInChildren<FistVisual>(true);
@@ -43,23 +43,23 @@ public class FistVisual : MonoBehaviour
         root.transform.SetParent(owner, false);
         root.transform.localPosition = Vector3.zero;
         var f = root.AddComponent<FistVisual>();
-        f.Build(glove, sortingOrder);
+        f.Build(glove);
         return f;
     }
 
-    void Build(Color glove, int order)
+    void Build(Color glove)
     {
         _pivot = new GameObject("Pivot").transform;
         _pivot.SetParent(transform, false);
         _pivot.localPosition = new Vector3(0f, HandHeight, 0f);
-        _l = MakeHand("HandL", glove, order,  RestSide);
-        _r = MakeHand("HandR", glove, order,  -RestSide);
+        _l = MakeHand("HandL", glove,  RestSide);
+        _r = MakeHand("HandR", glove, -RestSide);
         Apply();
     }
 
     /// <summary>주먹 하나(3D 상자). ⚠️ 좌우 벌림은 2D에선 y(화면 상하)였지만
     /// 3D에선 **z**(진행 방향의 옆)다. y로 두면 두 주먹이 위아래로 겹쳐 뜬다.</summary>
-    MeshRenderer MakeHand(string name, Color color, int _unusedOrder, float side)
+    MeshRenderer MakeHand(string name, Color color, float side)
         => GreyboxMesh.Box(_pivot, name, new Vector3(RestX, 0f, side),
                            new Vector3(0.19f, 0.17f, 0.17f), color, castShadow: false);
 

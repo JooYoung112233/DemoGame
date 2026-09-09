@@ -244,9 +244,9 @@ public class TopDownPlayer : MonoBehaviour
         // 그레이박스 칼 — 스파인이 들어오면 통째로 교체. **판정엔 관여하지 않는다**(연출 전용).
         // 손에 들리는 것 3종 — 무엇을 보여줄지는 **장착 아이템**이 정한다(UpdateWeaponVisual).
         //   2026-07-29 이전엔 칼만 무조건 붙어서 **맨손이어도 칼이 보였다**.
-        _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.85f, 0.88f, 0.95f), 6, 1.05f);
-        _fistVis   = FistVisual.Attach(transform, new Color(0.42f, 0.36f, 0.30f), 6);          // 장갑 낀 주먹
-        _gunVis    = GunVisual.Attach(transform, new Color(0.46f, 0.47f, 0.50f), 6, 0.62f);    // 총
+        _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.85f, 0.88f, 0.95f), 1.05f);
+        _fistVis   = FistVisual.Attach(transform, new Color(0.42f, 0.36f, 0.30f));          // 장갑 낀 주먹
+        _gunVis    = GunVisual.Attach(transform, new Color(0.46f, 0.47f, 0.50f), 0.62f);    // 총
 
         _hurtbox = GetComponentInChildren<Hurtbox>();
 

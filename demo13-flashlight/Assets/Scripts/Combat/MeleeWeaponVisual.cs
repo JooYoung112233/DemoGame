@@ -43,7 +43,7 @@ public class MeleeWeaponVisual : MonoBehaviour
     public bool IsSwinging => _t < 1f;
 
     /// <summary>owner 밑에 칼을 만들어 붙인다. 이미 있으면 그걸 돌려준다.</summary>
-    public static MeleeWeaponVisual Attach(Transform owner, Color bladeColor, int sortingOrder,
+    public static MeleeWeaponVisual Attach(Transform owner, Color bladeColor,
                                            float length = 1.05f)
     {
         if (owner == null) return null;
@@ -55,11 +55,11 @@ public class MeleeWeaponVisual : MonoBehaviour
         root.transform.localPosition = Vector3.zero;
         var w = root.AddComponent<MeleeWeaponVisual>();
         w.bladeLength = length;
-        w.Build(bladeColor, sortingOrder);
+        w.Build(bladeColor);
         return w;
     }
 
-    void Build(Color bladeColor, int sortingOrder)
+    void Build(Color bladeColor)
     {
         _pivot = new GameObject("Pivot").transform;
         _pivot.SetParent(transform, false);
@@ -68,10 +68,10 @@ public class MeleeWeaponVisual : MonoBehaviour
         _pivot.localPosition = new Vector3(0f, HandHeight, 0f);
 
         // 손잡이/가드(어두운 짧은 막대) — 칼끝 방향이 한눈에 읽히게.
-        _guard = MakePart("Guard", new Color(0.25f, 0.22f, 0.20f), sortingOrder,
+        _guard = MakePart("Guard", new Color(0.25f, 0.22f, 0.20f),
                           gripOffset * 0.5f, 0.22f, bladeWidth * 2.2f);
         // 칼날
-        _blade = MakePart("Blade", bladeColor, sortingOrder + 1,
+        _blade = MakePart("Blade", bladeColor,
                           gripOffset + bladeLength * 0.5f, bladeLength, bladeWidth);
 
         // 칼끝 궤적(테일)
@@ -85,7 +85,7 @@ public class MeleeWeaponVisual : MonoBehaviour
         _trail.numCapVertices = 2;
         _trail.autodestruct = false;
         _trail.emitting = false;
-        _trail.sortingOrder = sortingOrder;   // 칼날 아래로 깔린다
+        // 궤적은 깊이로 정렬된다 — 2D 시절의 sortingOrder 배선은 제거했다(3D에선 의미 없다).
         // ⚠️ `Sprites/Default`는 빌트인 파이프라인 셰이더다. URP-3D로 넘어온 뒤에도 그걸 쓰면
         //    칼 궤적이 **분홍색 에러 머티리얼**로 나올 수 있다. URP 파티클 언릿을 먼저 찾는다
         //    (버텍스 컬러를 받아야 그라디언트 페이드가 산다).
@@ -104,7 +104,7 @@ public class MeleeWeaponVisual : MonoBehaviour
 
     /// <summary>칼 조각 하나(3D 상자). 두께는 y·z 양쪽에 준다 — 두께 0인 판은
     /// 쿼터뷰에서 각도에 따라 선으로 사라진다.</summary>
-    MeshRenderer MakePart(string name, Color color, int _unusedOrder, float offX, float len, float thick)
+    MeshRenderer MakePart(string name, Color color, float offX, float len, float thick)
         => GreyboxMesh.Box(_pivot, name, new Vector3(offX, 0f, 0f),
                            new Vector3(len, thick, thick), color, castShadow: false);
 

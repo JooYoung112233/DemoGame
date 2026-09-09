@@ -213,7 +213,7 @@ public class EnemyController : MonoBehaviour
             _label = UnitLabel.Attach(transform, "적", UnitLabel.EnemyColor, 0, LABEL_Y);
 
         // 그레이박스 칼 — 플레이어와 같은 연출을 적도 쓴다(예비동작이 눈에 보여야 캔슬을 노릴 수 있다).
-        _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.80f, 0.70f, 0.66f), 4, 0.95f);
+        _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.80f, 0.70f, 0.66f), 0.95f);
 
         // 팔다리 실루엣(2026-07-29) — 통짜 사각형이면 부위를 어디로 노리는 건지 알 수가 없다.
         //   몸통 스프라이트 밑에 붙여 ApplyUnitLook의 크기 조절이 그대로 먹게 한다.

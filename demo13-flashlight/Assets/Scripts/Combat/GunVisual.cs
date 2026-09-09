@@ -31,7 +31,7 @@ public class GunVisual : MonoBehaviour
     float _reload01;
 
     /// <summary>owner 밑에 총을 만들어 붙인다. 이미 있으면 그걸 돌려준다.</summary>
-    public static GunVisual Attach(Transform owner, Color metal, int sortingOrder, float length = 0.62f)
+    public static GunVisual Attach(Transform owner, Color metal, float length = 0.62f)
     {
         if (owner == null) return null;
         var existing = owner.GetComponentInChildren<GunVisual>(true);
@@ -41,27 +41,27 @@ public class GunVisual : MonoBehaviour
         root.transform.SetParent(owner, false);
         root.transform.localPosition = Vector3.zero;
         var g = root.AddComponent<GunVisual>();
-        g.Build(metal, sortingOrder, length);
+        g.Build(metal, length);
         return g;
     }
 
-    void Build(Color metal, int order, float len)
+    void Build(Color metal, float len)
     {
         _pivot = new GameObject("Pivot").transform;
         _pivot.SetParent(transform, false);
 
         var dark = new Color(metal.r * 0.55f, metal.g * 0.55f, metal.b * 0.55f);
         // 손잡이(아래로 살짝) → 총몸 → 총열 순으로 겹쳐 놓으면 탑다운에서도 '총'으로 읽힌다.
-        _grip   = MakePart("Grip",   dark,  order,     0.06f, -0.09f, 0.16f, 0.16f);
-        _body   = MakePart("Body",   metal, order + 1, len * 0.34f, 0f, len * 0.62f, 0.15f);
-        _barrel = MakePart("Barrel", dark,  order + 1, len * 0.78f, 0f, len * 0.52f, 0.085f);
+        _grip   = MakePart("Grip",   dark,  0.06f, -0.09f, 0.16f, 0.16f);
+        _body   = MakePart("Body",   metal, len * 0.34f, 0f, len * 0.62f, 0.15f);
+        _barrel = MakePart("Barrel", dark,  len * 0.78f, 0f, len * 0.52f, 0.085f);
 
         Apply();
     }
 
     /// <summary>총 조각 하나(3D 상자). offY(총열 아래 손잡이)는 3D에서도 그대로 y다 —
     /// 위아래 관계라서 평면으로 눕히면 안 된다.</summary>
-    MeshRenderer MakePart(string name, Color color, int _unusedOrder,
+    MeshRenderer MakePart(string name, Color color,
                           float offX, float offY, float len, float thick)
         => GreyboxMesh.Box(_pivot, name, new Vector3(offX, offY, 0f),
                            new Vector3(len, thick, thick), color, castShadow: false);
