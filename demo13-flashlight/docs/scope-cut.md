@@ -28,7 +28,7 @@
 | 1 | **부위별 의료** (5부위 × 출혈·골절·통증) | **삭제** → 단일 HP + 회복 아이템 | ✅ |
 | 2 | **소음 시스템** (`PlayerNoise`/`NoiseSystem`) | **삭제** → 적 감지는 시야 기반만 | ✅ |
 | 3 | **격자(테트리스) 인벤토리** | **폐기** → 슬롯형. **무게는 유지** | ⬜ |
-| 4 | **파견(Dispatch) + 아르바이트 보드** | **삭제** | ⬜ |
+| 4 | **파견(Dispatch) + 아르바이트 보드** | **삭제** | ✅ |
 | 5 | **특성(퍽) 41종** | **축소** (핵심만 남김) | ⬜ |
 | 6 | **QA 자동화** (4,215줄) | **분리/삭제** | ⬜ |
 
@@ -64,6 +64,19 @@
   바리케이드 돌파의 소음 대가(→ 시간만), 잠행 특성 `move_noise`(물릴 시스템 없음 → 5번에서 정리)
 - 상세: [`combat.md`](combat.md) §유인
 
+### 4. 파견 + 아르바이트 보드 삭제 ✅ (2026-09-09)
+- 삭제: `Systems/DispatchRoster.cs`(152줄) · `UI/DispatchUI.cs`(838) · `Resources/UI/DispatchUI.prefab` ·
+  `Systems/ArbeitBoard.cs`(224) · MapSelectUI 아르바이트 오버레이(약 190줄)
+- 정리: 하이드아웃 파견 시설 타일·`HideoutUI`/`HideoutDockPanel`/`UIManager`/F1 진입점,
+  GameTuning `arbeit*` 5필드, `UIPrefabBaker` 베이크 항목
+- **살려 옮긴 것**: `ArbeitBoard.CountOwned`/`TryRemoveOwned`(창고+가방+주머니 집계·원자 차감)는
+  `QuestBoard` 납품형 의뢰가 계속 쓴다 → **`Inventory/OwnedItems.cs`**(72줄)로 이관
+- **예약 슬롯 유지**: `InteractType.Dispatch` — 뒤의 `Generator`/`Passage` 직렬화 인덱스가 밀리면
+  씬의 시설 타일이 엉뚱한 UI를 연다. enum 멤버만 남기고 동작은 제거
+- **딸려 사라진 것**: 파산 방지 안전판(레이드 없이 버는 유일한 수단), 비전투 PP 루트(납품 3회당 +1),
+  인텔 발생원 3개 → 2개(라디오·랜드마크)
+- 상세: [`economy.md`](economy.md) §아르바이트 · [`safehouse.md`](safehouse.md) · [`safehouse-intel.md`](safehouse-intel.md)
+
 ---
 
 ## 변경 로그
@@ -72,3 +85,4 @@
 |---|---|
 | 2026-09-09 | 볼륨 축소 착수. 6개 항목 확정(위 표), 비대상 항목 명시. 1번(부위별 의료) 완료. |
 | 2026-09-09 | 2번(소음) 완료. 투척물 유지 결정과 충돌해 `Distraction` 최소 API만 남김. |
+| 2026-09-09 | 4번(파견+아르바이트) 완료. 공용 헬퍼는 `OwnedItems`로 이관, `InteractType.Dispatch`는 예약 슬롯 유지. |

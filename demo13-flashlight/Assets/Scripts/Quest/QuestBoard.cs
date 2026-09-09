@@ -10,7 +10,7 @@ using UnityEngine;
 ///  - 떡밥(★ BD-13/15/16/19/20)은 슬롯당 ~20% 확률로만 섞임.
 ///  - 동시 수주 = BD 최대 2 (계약 BQ/NQ·전당포 DQ와 별개 슬롯 — §9.3).
 ///  - 수령/보고 모두 게시판(그레이박스 — 의뢰인 NPC 보고는 후속).
-///    수집·납품형 보고 = 보유 검사 + 원자 차감(ArbeitBoard.TryRemoveOwned) 후 완료.
+///    수집·납품형 보고 = 보유 검사 + 원자 차감(OwnedItems.TryRemove) 후 완료.
 ///    처치형 보고 = QuestManager 목표(ReadyToReport) 게이트.
 ///  - 회전 풀 자동 게이트: 목표 itemId/unitKey가 실존하는 의뢰만 노출(탐색형=POI 시스템 전 제외).
 ///  - 오늘 완료 슬롯은 소진(런타임 전용 — 재시작 시 재노출되나 반복 의뢰라 무해. 위탁/수배 원칙).
@@ -263,7 +263,7 @@ public static class QuestBoard
         if (obj.type == ObjectiveType.CollectItem)
         {
             var item = ItemDatabase.Get(obj.targetId);
-            int owned = item != null ? ArbeitBoard.CountOwned(item) : 0;
+            int owned = item != null ? OwnedItems.Count(item) : 0;
             progress = $"보유 {owned}/{obj.requiredCount}";
             return owned >= obj.requiredCount;
         }
@@ -287,7 +287,7 @@ public static class QuestBoard
         if (obj.type == ObjectiveType.CollectItem)
         {
             var item = ItemDatabase.Get(obj.targetId);
-            if (item == null || !ArbeitBoard.TryRemoveOwned(item, obj.requiredCount))
+            if (item == null || !OwnedItems.TryRemove(item, obj.requiredCount))
             {
                 msg = "물건이 모자라다";
                 return false;

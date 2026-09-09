@@ -35,7 +35,7 @@ public class InteractableObject : MonoBehaviour, IInteractable
         Door,           // 문 (잠금/열쇠/조건부)
         Stash,          // 창고 (메인 보관함 — 인벤 우측 열) ※ 끝에 추가(기존 직렬화 인덱스 보존)
         Radio,          // 라디오 (정보 수신 — RadioUI) ※ 끝에 추가
-        Dispatch,       // 파견 보드 (NPC 출전 — DispatchUI) ※ 끝에 추가
+        Dispatch,       // [폐기 2026-09-09] 파견 보드 — 시스템 삭제됨. 뒤 항목 직렬화 인덱스 보존용 예약 슬롯
         Generator,      // 발전기 (전력 ON/OFF — HideoutUI generator) ※ 끝에 추가(직렬화 인덱스 보존)
         Passage,        // 막힌 통로 (철거/열쇠/조건부 — BlockedPassage) ※ 끝에 추가(직렬화 인덱스 보존)
     }
@@ -249,9 +249,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
                 break;
             case InteractType.Radio:
                 HideoutUI.Show("radio");
-                break;
-            case InteractType.Dispatch:
-                HideoutUI.Show("dispatch");
                 break;
             case InteractType.Generator:
                 HideoutUI.Show("generator");

@@ -18,7 +18,6 @@
 | 평판/평판 티어 | `tools/balance/reputation.csv`, `tools/balance/reputation_tiers.csv` | CSV 편집 (→ `ReputationManager`/`ReputationTier`) |
 | 회복 아이템 수치 (음식 effectValue 등) | `Assets/Resources/Items/**/*.asset` (ItemData SO) | 아이템 인스펙터 (→ [survival.md §4](survival.md), [items.md](items.md)) |
 | **상점 해금 평판 + 재고 회전** (희귀도별 진열 해금 등급 · 일일 회전 슬롯 수) | **`GameTuning`** (`shopTierRare`/`shopTierEpic`/`shopTierLegendary`/`shopRotationSlots`) | **Control Panel** — `ShopUI`가 읽음 (재고 회전 → [economy.md §A](economy.md)) |
-| **아르바이트** (납품 슬롯 수·수량·보수 배율·PP 주기) | **`GameTuning`** (`arbeitSlotCount`/`arbeitQtyMin`/`arbeitQtyMax`/`arbeitRewardMult`/`arbeitPpEvery`) | **Control Panel** — `ArbeitBoard`가 읽음 (→ [economy.md §아르바이트](economy.md)) |
 | **스토리/대화 페이싱** (프롤로그 대기·wait 배율·페이드인·타이핑 속도·튜토 표시) | **`GameTuning`** (`prologueStartDelay`/`storyWaitScale`/`storyFadeInDuration`/`narrationTypingSpeed`/`dialogueTypingSpeed`/`tutorialDefaultDuration`) | **Control Panel** — `StoryPlayer`/`GameStartHandler`/`NarrationUI`/`DialogueUI`가 읽음 |
 | **건물 내부**(진입 가능 비율 · 내부 루팅 예산 배율) | **`GameTuning`** (`buildingEnterRatio`/`interiorLootBudgetMult`) | **Control Panel** — 비율은 `빌드 ▸ 지역1` 재실행 시 반영, 예산은 런타임 즉시. 루트 **테이블**은 지역 확률 그대로(regionId) → 내부 파밍도 지역 확률에 맞춰 나옴. QA가 "건물을 더 열지/파밍을 늘릴지" 판단해 조절 |
 | **투척물 유인** (돌 사거리·착탄 유인 반경·비행·조사 시간) | **`GameTuning`** (`throwRange`/`throwNoiseRadius`/`throwSpeed`/`noisePulseDuration`/`noiseInvestigateLook`) | **Control Panel** — `ThrowSystem`/`Distraction`/`EnemyController`가 읽음. ⚠️ 소음 시스템은 2026-09-09 폐기 — 행동별 소음 필드(`noiseWalk`/`noiseRun`/`noiseAttack`/`noiseDoor`/`noiseUiMax`) 삭제됨 (→ [combat.md §유인](combat.md)) |
@@ -110,14 +109,7 @@
 
 > 킬 XP 자체는 유닛별 `UnitStatData.expReward`(StatDB — Control Panel 스탯 DB 섹션) — 표형 데이터라 §1 원칙대로 SO 유지.
 
-### 아르바이트 (2026-07-02, 게시판 납품 — economy.md §아르바이트)
-| 필드 | 기본값 | 의미 | 읽는 곳 |
-|------|--------|------|---------|
-| `arbeitSlotCount` | 3 | 게시판 동시 의뢰 수 | `ArbeitBoard` |
-| `arbeitQtyMin` | 2 | 의뢰당 요구 수량 최소 | `ArbeitBoard` |
-| `arbeitQtyMax` | 5 | 의뢰당 요구 수량 최대 | `ArbeitBoard` |
-| `arbeitRewardMult` | 1.0 | 보수 배율 (sellPrice×수량×이 값, 10 단위 올림) | `ArbeitBoard` |
-| `arbeitPpEvery` | 3 | 납품 n회마다 PP +1 (0=지급 안 함) | `ArbeitBoard` |
+### ~~아르바이트~~ — **폐기 (2026-09-09)** · `arbeit*` 필드 5종 삭제 ([scope-cut.md](scope-cut.md))
 
 ### 스토리/대화 페이싱 (2026-07-10, 프롤로그·내레이션·대화·튜토리얼 완급)
 

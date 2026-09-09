@@ -53,10 +53,9 @@ public static class HideoutGreyboxLayout
         n += Marker(map, "gb_cookbench", "CookingBench",   11f, 2.5f);
         n += Marker(map, "gb_medbench",  "MedicalBench",    5f, 2.5f);
         n += StashFacility(map, "Stash_창고", 11f, 6.5f);  // 창고 시설(메인 보관함) — 클릭 시 인벤 우측에 창고
-        // 라디오(정보 수신) + 파견 보드(NPC 출전) — 클릭 시 각 UI(RadioUI/DispatchUI)
+        // 라디오(정보 수신) — 클릭 시 RadioUI. (파견 보드는 2026-09-09 폐기)
         n += FacilityOverride(map, "Radio_라디오",    7f, 6.5f, "라디오",  new Color(0.30f, 0.45f, 0.72f), InteractableObject.InteractType.Radio);
-        n += FacilityOverride(map, "Dispatch_파견",   8f, 2.5f, "파견",    new Color(0.66f, 0.42f, 0.24f), InteractableObject.InteractType.Dispatch);
-        // 발전기(전력 ON/OFF) — 라디오/파견의 전력 전제. 클릭 시 HideoutUI("generator")
+        // 발전기(전력 ON/OFF) — 라디오의 전력 전제. 클릭 시 HideoutUI("generator")
         n += FacilityOverride(map, "Generator_발전기", 9f, 4.5f, "발전기", new Color(0.62f, 0.55f, 0.30f), InteractableObject.InteractType.Generator);
 
         // 타르코프식 화면 컨트롤러: 캐릭터 숨김 + 카메라 고정(방 중심 7,4.5 / size 5) + 클릭 상호작용 + 나가기 버튼/ESC.
@@ -129,7 +128,7 @@ public static class HideoutGreyboxLayout
         => FacilityOverride(parent, name, x, y, "창고", new Color(0.30f, 0.62f, 0.55f), InteractableObject.InteractType.Stash);
 
     /// <summary>기존 시설 프리팹(gb_workbench) 구조를 재사용하되 색/라벨/InteractType을 덮어써 새 시설을 추가한다.
-    /// (팔레트 재생성 없이 시설 추가 — 창고/라디오/파견 등. 클릭 시 해당 InteractType의 UI가 열림.)</summary>
+    /// (팔레트 재생성 없이 시설 추가 — 창고/라디오 등. 클릭 시 해당 InteractType의 UI가 열림.)</summary>
     static int FacilityOverride(GameObject parent, string name, float x, float y,
         string label, Color color, InteractableObject.InteractType interactType)
     {

@@ -79,8 +79,6 @@ public static class UIPrefabBaker
     [MenuItem("Tools/TopDown/UI/프리팹 베이크/RaidMapUI")]
     public static void BakeRaidMapUI() => Bake<RaidMapUI>("RaidMapUI", c => c.EditorBake());
 
-    [MenuItem("Tools/TopDown/UI/프리팹 베이크/DispatchUI")]
-    public static void BakeDispatchUI() => Bake<DispatchUI>("DispatchUI", c => c.EditorBake());
 
     [MenuItem("Tools/TopDown/UI/프리팹 베이크/RadioUI")]
     public static void BakeRadioUI() => Bake<RadioUI>("RadioUI", c => c.EditorBake());
@@ -108,7 +106,7 @@ public static class UIPrefabBaker
         BakeToastManager(); BakeGameHUD(); BakeQuestHUD(); BakeQuickSlotBar();
         BakeNavigationHUD(); BakeMapSelectUI(); BakeCraftingUI(); BakeDialogueUI();
         BakeCharacterPanelUI(); BakeShopUI();
-        BakeQuestLogUI(); BakeRaidMapUI(); BakeDispatchUI(); BakeRadioUI();
+        BakeQuestLogUI(); BakeRaidMapUI(); BakeRadioUI();
         BakeHideoutUI(); BakeSleepUI(); BakeTitleScreen(); BakeTraitPanelUI(); BakeSettingsUI();
         Debug.Log("[UIPrefabBaker] 전체 베이크 완료. (Systems 씬 재빌드로 프리팹 인스턴스 반영)");
     }

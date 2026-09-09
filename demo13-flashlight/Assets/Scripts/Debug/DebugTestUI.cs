@@ -762,7 +762,6 @@ public class DebugTestUI : MonoBehaviour
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("시설 관리 UI", btnStyle)) HideoutUI.Show();
         if (GUILayout.Button("라디오 UI", btnStyle)) RadioUI.Show();
-        if (GUILayout.Button("파견 UI", btnStyle)) DispatchUI.Show();
         GUILayout.EndHorizontal();
 
         GUILayout.Space(5);
@@ -788,7 +787,6 @@ public class DebugTestUI : MonoBehaviour
         if (GUILayout.Button("의뢰/통신", btnStyle)) QuestLogUI.ShowPreview();
         GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("파견", btnStyle)) DispatchUI.ShowPreview();
         if (GUILayout.Button("라디오", btnStyle)) RadioUI.ShowPreview();
         GUILayout.EndHorizontal();
     }

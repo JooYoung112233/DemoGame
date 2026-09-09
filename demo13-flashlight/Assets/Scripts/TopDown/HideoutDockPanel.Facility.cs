@@ -57,7 +57,6 @@ public partial class HideoutDockPanel
         "medical"   => "조제",
         "stash"     => "창고 열기",
         "radio"     => "청취",
-        "dispatch"  => "파견",
         "bed"       => "휴식",
         "generator" => "전력 전환",
         _           => "",
@@ -93,7 +92,6 @@ public partial class HideoutDockPanel
             case "medical":   if (um != null) um.ShowCrafting(CraftingStation.MedicalBench); break;
             case "stash":     if (um != null) um.ShowCharacterPanelWithStash();              break;
             case "radio":     RadioUI.Show();     break;
-            case "dispatch":  DispatchUI.Show();  break;
             case "bed":       SleepUI.Show();     break;
             default: return;
         }

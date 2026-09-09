@@ -4,7 +4,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 하이드아웃 시설 **단일 패널**(타르코프식). 시설 타일을 클릭하면 그 시설 1개만 보여준다:
 ///   • 미건설(Lv0) → 건설 UI(필요 스크랩+재료)
-///   • 건설됨(Lv1~) → 업그레이드 UI(필요 재화) + 그 시설의 기능 버튼(제작/창고/라디오/파견/휴식)
+///   • 건설됨(Lv1~) → 업그레이드 UI(필요 재화) + 그 시설의 기능 버튼(제작/창고/라디오/휴식)
 ///   • 최대 레벨 → MAX + 기능 버튼만
 /// HideoutModuleManager로 건설/업글. 기능 버튼은 각 UI(CraftingUI/RadioUI/…)로 연결.
 /// 진입: InteractableObject(시설 타일) 클릭 → HideoutUI.Show(moduleKey).
@@ -192,7 +192,6 @@ public class HideoutUI : MonoBehaviour
         "cooking"   => "제작 (조리대)",
         "stash"     => "창고 열기",
         "radio"     => "라디오 듣기",
-        "dispatch"  => "파견 보내기",
         "quarters"  => "휴식",
         _ => null,
     };
@@ -207,7 +206,6 @@ public class HideoutUI : MonoBehaviour
             case "cooking":   UIManager.Instance?.ShowCrafting(CraftingStation.CookingBench); break;
             case "stash":     UIManager.Instance?.ShowCharacterPanelWithStash(); break;
             case "radio":     RadioUI.Show(); break;
-            case "dispatch":  DispatchUI.Show(); break;
             case "quarters":  SleepUI.Show(); break;
         }
     }

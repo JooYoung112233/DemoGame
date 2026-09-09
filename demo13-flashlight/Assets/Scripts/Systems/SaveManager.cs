@@ -335,7 +335,6 @@ public class SaveManager : MonoBehaviour
         ShopUI.LoadConsignSave(data.consignSlots);
 
         // 아르바이트 보드 — 런타임 전용 상태라 로드 시 초기화(슬롯 간 이월 방지)
-        ArbeitBoard.ResetRuntime();
         // 의뢰 게시판(BD) — 동일 원칙 (오늘의 의뢰는 일자 시드라 재추첨돼도 같은 2장)
         QuestBoard.ResetRuntime();
 
@@ -541,7 +540,6 @@ public class SaveManager : MonoBehaviour
         TutorialPrompt.Instance?.SetShownIds(null);          // 튜토 1회성 기록 초기화
 
         // ── 게시판 런타임 상태 ──
-        ArbeitBoard.ResetRuntime();
         QuestBoard.ResetRuntime();
 
         // ── 창고 / 상점 / 안전가옥 가구 ──

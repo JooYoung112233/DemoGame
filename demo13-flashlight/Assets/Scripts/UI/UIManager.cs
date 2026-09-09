@@ -423,7 +423,6 @@ public class UIManager : MonoBehaviour
         if (mapSelectUI != null && mapSelectUI.IsShowing) { mapSelectUI.Hide(); return true; }
         if (dialogueUI != null && dialogueUI.IsShowing) { dialogueUI.Hide(); return true; }
         if (RadioUI.IsShowing) { RadioUI.Hide(); return true; }
-        if (DispatchUI.IsShowing) { DispatchUI.Hide(); return true; }
         if (QuestLogUI.IsShowing) { QuestLogUI.Hide(); return true; }
         if (RaidMapUI.IsShowing) { RaidMapUI.Hide(); return true; }
         if (HideoutUI.Instance != null && HideoutUI.Instance.IsShowing) { HideoutUI.Instance.Close(); return true; }
@@ -462,7 +461,6 @@ public class UIManager : MonoBehaviour
         if (SleepUI.Instance != null)
             SleepUI.Instance.Close();
         if (RadioUI.IsShowing) RadioUI.Hide();
-        if (DispatchUI.IsShowing) DispatchUI.Hide();
         if (QuestLogUI.IsShowing) QuestLogUI.Hide();
         if (RaidMapUI.IsShowing) RaidMapUI.Hide();
         if (GroundPickupUI.IsShowing) GroundPickupUI.Hide();
@@ -486,7 +484,6 @@ public class UIManager : MonoBehaviour
         if (HideoutUI.Instance != null && HideoutUI.Instance.IsShowing) return true;
         if (SleepUI.Instance != null && SleepUI.Instance.IsShowing) return true;
         if (RadioUI.IsShowing) return true;
-        if (DispatchUI.IsShowing) return true;
         if (QuestLogUI.IsShowing) return true;
         if (RaidMapUI.IsShowing) return true;
         if (GroundPickupUI.IsShowing) return true;
