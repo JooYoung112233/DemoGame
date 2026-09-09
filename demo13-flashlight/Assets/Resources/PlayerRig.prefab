@@ -10,13 +10,14 @@ GameObject:
   m_Component:
   - component: {fileID: 1125499658942335540}
   - component: {fileID: 3564928344584844655}
+  - component: {fileID: 7549450901722197562}
   m_Layer: 0
   m_Name: PlayerLamp3D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1125499658942335540
 Transform:
   m_ObjectHideFlags: 0
@@ -26,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 650730275018329870}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.25, z: 0}
+  m_LocalPosition: {x: 0, y: 1.15, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -97,6 +98,21 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &7549450901722197562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 650730275018329870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b19d5a3c7ffe6c34cbbd5c364478556e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::WornLamp
+  baseRange: 2.8
+  nightIntensity: 1.6
+  dayIntensity: 0.25
 --- !u!1 &1153366666490221086
 GameObject:
   m_ObjectHideFlags: 0
@@ -109,10 +125,8 @@ GameObject:
   - component: {fileID: 7565409250949538666}
   - component: {fileID: 8558418155601727802}
   - component: {fileID: 6215134973793974149}
-  - component: {fileID: 205060372314405106}
   - component: {fileID: 3143386885110805470}
   - component: {fileID: 8075589984345291797}
-  - component: {fileID: 2864189877136972526}
   - component: {fileID: 5072992761431413252}
   - component: {fileID: 4391156332630265909}
   - component: {fileID: 7757579085525224646}
@@ -197,24 +211,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PlayerInventory
   maxWeight: 30
---- !u!114 &205060372314405106
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1153366666490221086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3908de66427b5f4b9c5cddd78f294eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Scripts::PlayerMedicalSystem
-  bleedDamagePerSec: 3
-  legFractureMoveDebuff: 0.5
-  armFractureAtkDebuff: 0.4
-  painStaminaDebuff: 0.5
-  painDefaultDuration: 60
-  immobileDuringHeal: 1
 --- !u!114 &3143386885110805470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,26 +277,6 @@ MonoBehaviour:
   heavyLungeDist: 0.6
   heavyLungeDuration: 0.06
   heavyReturnDuration: 0.18
---- !u!114 &2864189877136972526
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1153366666490221086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac9a980bf01b17249bb063e6c949794d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Scripts::MedicalHUD
-  canvas: {fileID: 0}
-  panelRoot: {fileID: 0}
-  partTexts: []
-  debuffText: {fileID: 0}
-  healingText: {fileID: 0}
-  titleText: {fileID: 0}
-  panelBg: {fileID: 0}
-  warningText: {fileID: 0}
 --- !u!114 &5072992761431413252
 MonoBehaviour:
   m_ObjectHideFlags: 0

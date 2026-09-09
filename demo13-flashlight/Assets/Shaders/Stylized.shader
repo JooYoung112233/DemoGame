@@ -40,6 +40,13 @@ Shader "BRB/Stylized"
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _SHADOWS_SOFT
             #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+            // ⚠️ 추가 광원(점광·스포트) 키워드. 이게 없으면 이 셰이더는 **태양만** 본다 —
+            //    실내 천장등도, 옷에 달린 랜턴도, 프롭 램프도 전부 화면에 안 나온다.
+            //    램프를 켠 장면과 끈 장면이 픽셀 단위로 똑같이 나와서야 드러났다.
+            //    형태는 URP 기본 Lit(Shaders/Lit.shader)과 **글자 그대로 같아야** 한다 —
+            //    `multi_compile_fragment`로 쓰면 정점 변형이 빠져 변형 매칭이 어긋난다.
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -96,6 +103,19 @@ Shader "BRB/Stylized"
                 float3 shadowCol = _BaseColor.rgb * lerp(1.0, 1.0 - _ShadowDepth, 1.0 - lit) * _ShadowTint.rgb;
                 float3 litCol    = _BaseColor.rgb * L.color;
                 float3 col = lerp(shadowCol, litCol, lit);
+
+                // 추가 광원(점광·스포트) — 천장등·착용 랜턴·프롭 램프가 여기서 더해진다.
+                // 주 광원과 같은 wrapped diffuse를 쓴다 — 램프만 딱딱하게 떨어지면 룩이 갈린다.
+                #if defined(_ADDITIONAL_LIGHTS)
+                    uint addCount = GetAdditionalLightsCount();
+                    for (uint li = 0u; li < addCount; li++)
+                    {
+                        Light AL = GetAdditionalLight(li, IN.positionWS);
+                        float andl  = dot(N, AL.direction);
+                        float awrap = saturate((andl + _Wrap) / (1.0 + _Wrap));
+                        col += _BaseColor.rgb * AL.color * awrap * AL.distanceAttenuation * AL.shadowAttenuation;
+                    }
+                #endif
 
                 // 앰비언트 — 하늘/땅 그라디언트가 형태를 읽히게 한다
                 col += _BaseColor.rgb * SampleSH(N) * 1.25;
