@@ -1,0 +1,19 @@
+{
+    "name": "Game.QA",
+    "rootNamespace": "",
+    "references": [
+        "Game.Scripts",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "QA_ENABLED"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

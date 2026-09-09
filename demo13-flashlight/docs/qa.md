@@ -1,5 +1,19 @@
 # QA 시스템 — Claude 지휘 자동 플레이 + 자동 검증
 
+> ## ⚠️ 2026-09-09 — 게임 런타임에서 **분리**됨 (`QA_ENABLED`)
+> 볼륨 축소([`scope-cut.md`](scope-cut.md) 6번). QA 봇 4,215줄이 게임 런타임 어셈블리에 그대로
+> 실려 있던 걸 **별도 어셈블리 `Game.QA`**(`Assets/Scripts/QA/Game.QA.asmdef`)로 떼어내고
+> `defineConstraints: ["QA_ENABLED"]`를 걸었다. **평소 빌드에는 QA 코드가 한 줄도 안 들어간다.**
+>
+> **켜는 법**: `Tools ▸ TopDown ▸ QA ▸ QA 자동화 켜기 (QA_ENABLED)` 토글
+> (= Player Settings의 Scripting Define Symbols에 `QA_ENABLED` 추가/제거).
+> 끈 상태에서는 `QaBot`/`QaBridge` 등이 아예 컴파일되지 않으므로 F9·`-qa-serve`도 동작하지 않는다.
+>
+> **삭제가 아니라 분리인 이유**: `QaBot`은 **빌드된 게임 안에서** 돌아야 해서(`-qa-serve`)
+> 에디터 전용 어셈블리로 옮길 수 없고, 지우면 `/qa`·`/qa-loop`·`qa-runner`↔`dev-fixer` 워크플로가
+> 통째로 죽는다. 게임 코드는 QA를 **한 곳도 참조하지 않으므로**(역참조 0) 분리는 무손실이다.
+> 완전 삭제를 원하면 `Assets/Scripts/QA/` 폴더 + `tools/qa_*` 제거로 끝난다.
+
 > **목표**: "우리가 의도한 플레이가 실제로 그렇게 동작하는가"를 **Claude가 명령을 내려 확인**한다.
 > 2026-07-11 게임성 검토가 지목한 3대 구멍 중 하나 — *"풀 루프를 엔진에서 완주한 기록이 없음"* — 의 해답.
 >
