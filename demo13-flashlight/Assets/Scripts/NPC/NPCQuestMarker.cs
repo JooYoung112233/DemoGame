@@ -220,6 +220,9 @@ public class NPCQuestMarker : MonoBehaviour
         markerRoot = new GameObject("QuestMarker");
         markerRoot.transform.SetParent(transform);
         markerRoot.transform.localPosition = new Vector3(0, heightOffset, 0);
+        // 머리 위 아이콘은 카메라를 향해야 한다 — 쿼터뷰에서 눕혀 두면 마름모가
+        // 납작해져 "!"인지 "?"인지 구분이 안 된다.
+        Billboard.Attach(markerRoot.transform);
 
         // ❗ 느낌표 (ReadyToReport)
         exclamationMark = CreateTextMarker("Exclamation", "!", exclamationColor, 1.2f);

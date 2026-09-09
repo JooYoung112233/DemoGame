@@ -37,6 +37,9 @@ public class BodyZoneOverlay : MonoBehaviour
         if (existing != null) return existing;
         var go = new GameObject("BodyZoneOverlay");
         go.transform.SetParent(owner, false);
+        // F1 부위 오버레이는 허트박스를 화면에 그대로 겹쳐 보여 주는 것이 목적이다.
+        // 쿼터뷰에서 눕혀 두면 칸이 찌그러져 "다리를 노렸는지"를 확인할 수가 없다.
+        Billboard.Attach(go.transform);
         return go.AddComponent<BodyZoneOverlay>();
     }
 

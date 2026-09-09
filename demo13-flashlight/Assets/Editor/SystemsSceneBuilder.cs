@@ -14,7 +14,7 @@ using UnityEngine.SceneManagement;
 ///  • UIManager (+ GameHUD/RaidResult/MapSelect/CharacterPanel/Crafting/Shop/Dialogue/PostRaidEvent/Quest)
 ///    → 상점(ShopUI) 포함 모든 UI가 씬에 GameObject로 배치되어 에디터에서 보임
 ///  • PlayerRig 프리팹 인스턴스 (카메라 + 라이트 + 후처리 Volume)
-///  • Global Light2D (어두운 밤) + DayNightCycle + SystemsSceneEnforcer
+///  • DayNightCycle + SystemsSceneEnforcer (조명은 맵 씬의 태양 — docs/3d-migration.md Stage 2)
 ///  • GameBoot (Systems 단독 진입 시 기본 게임플레이 씬 additive 로드)
 ///
 /// 그리고 빌드세팅에 Systems(맨 앞) + Safehouse/InGameScene/CombatSandbox 를 등록한다.
@@ -113,20 +113,17 @@ public static class SystemsSceneBuilder
                              "'Tools/TopDown/Build/Player Rig'로 먼저 만든 뒤 다시 실행하세요.");
         }
 
-        // ── 글로벌 조명(어두운 밤) + DayNightCycle + Enforcer ──
-        var lightGO = new GameObject("Global Light 2D (Dark)");
-        var global = lightGO.AddComponent<Light2D>();
-        global.lightType = Light2D.LightType.Global;
-        global.intensity = 0.22f;
-        global.color = new Color(0.45f, 0.5f, 0.68f);
-        SceneLightingBuilder.ApplyAllSortingLayers(global);
-
-        var dn = lightGO.AddComponent<DayNightCycle>();
-        WireRef(dn, "globalLight", global);
+        // ── 낮밤 + Enforcer ──
+        // ⚠️ 예전엔 여기서 Global Light2D를 만들어 그것이 화면 전체의 조명이었다.
+        //    URP-3D로 넘어온 뒤 그 라이트는 **아무것도 하지 않는다** — 3D 메시를 안 비춘다.
+        //    지금 조명은 맵 씬의 태양(Lighting3D가 굽고 SunLight 꼬리표가 붙는다) +
+        //    RenderSettings 앰비언트이고, DayNightCycle이 그것을 몬다.
+        //    Enforcer는 남겨 둔다 — 아직 2D 시절 씬이 열릴 때 떠도는 글로벌을 꺼 준다.
+        var dnGO = new GameObject("DayNightCycle");
+        dnGO.AddComponent<DayNightCycle>();
 
         var enforcerGO = new GameObject("SystemsSceneEnforcer");
-        var enforcer = enforcerGO.AddComponent<SystemsSceneEnforcer>();
-        WireRef(enforcer, "ownedGlobal", global);
+        enforcerGO.AddComponent<SystemsSceneEnforcer>();
 
         // ── GameBoot (기본 게임플레이 씬 진입) ──
         var bootGO = new GameObject("GameBoot");
@@ -151,10 +148,13 @@ public static class SystemsSceneBuilder
         Debug.Log("<color=cyan>[SystemsScene]</color> 생성 완료: " + SCENE_PATH +
                   "\n  • 매니저 " + ManagerTypes.Length + "개 + UIManager(+UI " + UiPanels.Length + "개, 상점·나침반 포함)" +
                   (rigPrefab != null ? " + PlayerRig" : " (PlayerRig 누락!)") +
-                  " + 글로벌조명 + GameBoot" +
+                  " + 낮밤 + GameBoot" +
                   "\n  • 빌드세팅 등록(Systems 맨 앞). 게임플레이 씬은 additive로 교체 로드됩니다.");
 
-        if (!Application.isBatchMode)
+        // ⚠️ ContentBuildAll.Quiet을 함께 봐야 한다. 이걸 빠뜨리면 자동화(에디터를 CLI로
+        //    모는 경우 포함)에서 **누를 사람이 없어 메인 스레드가 그대로 멈춘다.**
+        //    GreyboxBuild·EditorSceneBuildUtil이 같은 함정을 밟았고 그때 고쳤는데 여기만 남아 있었다.
+        if (!Application.isBatchMode && !ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("Systems Scene",
                 "Assets/Scenes/Systems.unity 생성 완료.\n\n" +
                 "▶ 전체 게임을 테스트하려면 Systems 씬을 열고 Play 하세요.\n" +

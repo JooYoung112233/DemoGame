@@ -110,7 +110,9 @@ public static class GreyboxPaletteBuilder
                      $"정의: {PropFolder}/gb_*.asset\n\n" +
                      "Tools ▸ TopDown ▸ Map ▸ Prop Catalog 의 바닥/벽/오브젝트 탭에서 클릭 배치하세요.";
         Debug.Log("<color=cyan>[Greybox]</color> " + msg.Replace("\n", " "));
-        if (!Application.isBatchMode)
+        // ⚠️ 이 함수는 GreyboxBuild.EnsurePalette()가 **맵 빌드마다** 부른다(팔레트가 없으면).
+        //    Quiet을 안 보면 자동 빌드가 여기서 멈춘다.
+        if (!Application.isBatchMode && !ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("그레이박스 팔레트", msg, "확인");
     }
 

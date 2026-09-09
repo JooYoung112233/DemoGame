@@ -29,6 +29,7 @@ public class TestHealthBar : MonoBehaviour
         var root = new GameObject("TestHealthBar");
         root.transform.SetParent(owner, false);
         root.transform.localPosition = new Vector3(0f, yOffset, 0f);
+        Billboard.Attach(root.transform);
         var b = root.AddComponent<TestHealthBar>();
         b._hideWhenFull = hideWhenFull;
         b.Build();

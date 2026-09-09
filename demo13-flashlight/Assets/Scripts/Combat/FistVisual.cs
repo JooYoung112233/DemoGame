@@ -18,8 +18,11 @@ public class FistVisual : MonoBehaviour
     const float ReachX    = 0.86f;   // 정권이 뻗는 끝
     const float WindBackX = 0.08f;   // 지르기 전 살짝 당김(강공만)
 
+    /// <summary>주먹을 쥔 손 높이(m). 몸이 발밑 기준으로 서면서 0(=발밑)은 땅을 치는 높이가 됐다.</summary>
+    const float HandHeight = 1.02f;
+
     Transform _pivot;
-    SpriteRenderer _l, _r;
+    MeshRenderer _l, _r;
 
     float _facingDeg;
     bool  _rightTurn = true;         // 이번에 나갈 손
@@ -48,23 +51,17 @@ public class FistVisual : MonoBehaviour
     {
         _pivot = new GameObject("Pivot").transform;
         _pivot.SetParent(transform, false);
+        _pivot.localPosition = new Vector3(0f, HandHeight, 0f);
         _l = MakeHand("HandL", glove, order,  RestSide);
         _r = MakeHand("HandR", glove, order,  -RestSide);
         Apply();
     }
 
-    SpriteRenderer MakeHand(string name, Color color, int order, float side)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(_pivot, false);
-        go.transform.localPosition = new Vector3(RestX, side, 0f);
-        go.transform.localScale    = new Vector3(0.19f, 0.17f, 1f);   // 주먹 = 작고 도톰한 사각
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = PlaceholderSprite.Square;
-        sr.color = color;
-        sr.sortingOrder = order;
-        return sr;
-    }
+    /// <summary>주먹 하나(3D 상자). ⚠️ 좌우 벌림은 2D에선 y(화면 상하)였지만
+    /// 3D에선 **z**(진행 방향의 옆)다. y로 두면 두 주먹이 위아래로 겹쳐 뜬다.</summary>
+    MeshRenderer MakeHand(string name, Color color, int _unusedOrder, float side)
+        => GreyboxMesh.Box(_pivot, name, new Vector3(RestX, 0f, side),
+                           new Vector3(0.19f, 0.17f, 0.17f), color, castShadow: false);
 
     /// <summary>표시 on/off — 시야콘 밖에서 **주먹만 어둠에 떠 있는** 것을 막는다.</summary>
     public void SetVisible(bool v)
@@ -76,7 +73,8 @@ public class FistVisual : MonoBehaviour
     public void SetFacing(Vector2 dir)
     {
         if (dir.sqrMagnitude < 0.0001f) return;
-        _facingDeg = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        // 평면 방향 → Unity yaw. yaw θ는 로컬 +X를 (cos θ, 0, −sin θ)로 보내므로 부호가 뒤집힌다.
+        _facingDeg = Mathf.Atan2(-dir.y, dir.x) * Mathf.Rad2Deg;
     }
 
     /// <summary>약공 — 정권찌르기 1회(손 번갈아).</summary>
@@ -108,7 +106,8 @@ public class FistVisual : MonoBehaviour
     void Apply()
     {
         if (_pivot == null) return;
-        _pivot.localRotation = Quaternion.Euler(0f, 0f, _facingDeg);
+        // 2D의 Z축 회전 → 3D는 Y축. 지르기는 XZ 평면에서 일어난다.
+        _pivot.localRotation = Quaternion.Euler(0f, _facingDeg, 0f);
 
         // 0→0.35 뻗고 0.35→1 되돌아온다. 뻗는 쪽이 빨라야 '지른다'로 읽힌다.
         float x = RestX;
@@ -142,9 +141,9 @@ public class FistVisual : MonoBehaviour
         }
     }
 
-    void SetHand(SpriteRenderer sr, float x, float side)
+    void SetHand(MeshRenderer mr, float x, float side)
     {
-        if (sr == null) return;
-        sr.transform.localPosition = new Vector3(x, side, 0f);
+        if (mr == null) return;
+        mr.transform.localPosition = new Vector3(x, 0f, side);
     }
 }

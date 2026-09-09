@@ -18,8 +18,11 @@ public class GunVisual : MonoBehaviour
     const float AdsForwardM   = 0.10f;  // 조준하면 앞으로 살짝 내민다(자세가 달라 보이게)
     const float ReloadDownDeg = -58f;   // 장전 중 총구를 내린다 — 지금 못 쏜다는 표시
 
+    /// <summary>총을 든 손 높이(m).</summary>
+    const float HandHeight = 1.10f;
+
     Transform _pivot;
-    SpriteRenderer _body, _barrel, _grip;
+    MeshRenderer _body, _barrel, _grip;
 
     float _facingDeg;
     float _recoil01;        // 1 = 방금 쏨 → 0으로 회복
@@ -56,19 +59,12 @@ public class GunVisual : MonoBehaviour
         Apply();
     }
 
-    SpriteRenderer MakePart(string name, Color color, int order,
-                            float offX, float offY, float len, float thick)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(_pivot, false);
-        go.transform.localPosition = new Vector3(offX, offY, 0f);
-        go.transform.localScale    = new Vector3(len, thick, 1f);
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = PlaceholderSprite.Square;
-        sr.color = color;
-        sr.sortingOrder = order;
-        return sr;
-    }
+    /// <summary>총 조각 하나(3D 상자). offY(총열 아래 손잡이)는 3D에서도 그대로 y다 —
+    /// 위아래 관계라서 평면으로 눕히면 안 된다.</summary>
+    MeshRenderer MakePart(string name, Color color, int _unusedOrder,
+                          float offX, float offY, float len, float thick)
+        => GreyboxMesh.Box(_pivot, name, new Vector3(offX, offY, 0f),
+                           new Vector3(len, thick, thick), color, castShadow: false);
 
     /// <summary>표시 on/off — 시야콘 밖에서 **총만 어둠에 떠 있는** 것을 막는다.
     /// (총은 몸통 스프라이트의 자식이 아니라 루트의 자식이라 몸통을 꺼도 자동으로 안 꺼진다.)</summary>
@@ -82,7 +78,8 @@ public class GunVisual : MonoBehaviour
     public void SetFacing(Vector2 dir)
     {
         if (dir.sqrMagnitude < 0.0001f) return;
-        _facingDeg = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        // 평면 방향 → Unity yaw(부호가 뒤집힌다). 자세한 근거는 MeleeWeaponVisual.SetFacing 참조.
+        _facingDeg = Mathf.Atan2(-dir.y, dir.x) * Mathf.Rad2Deg;
     }
 
     /// <summary>매 프레임 상태 갱신 — 조준/장전.</summary>
@@ -116,11 +113,16 @@ public class GunVisual : MonoBehaviour
         }
 
         float kickDeg = RecoilKickDeg * _recoil01;
-        _pivot.localRotation = Quaternion.Euler(0f, 0f, _facingDeg + reloadDeg + kickDeg);
+        // ⚠️ 2D에선 조준 방향과 총구 들림이 **둘 다 Z축**이라 그냥 더하면 됐다. 3D에선 갈린다 —
+        //    조준은 yaw(Y), 총구 들림·장전 내림은 **총열을 기준으로 한 상하**(로컬 Z)다.
+        //    Euler(0, y, z)는 Rz를 먼저 적용하므로 총열을 들었다가 그대로 조준 방향으로 돌린다.
+        _pivot.localRotation = Quaternion.Euler(0f, _facingDeg, reloadDeg + kickDeg);
 
         // 앞뒤 위치 — 조준하면 내밀고, 쏘면 뒤로 밀린다.
         float fwd = (_aiming ? AdsForwardM : 0f) - RecoilBackM * _recoil01;
-        _pivot.localPosition = new Vector3(Mathf.Cos(_facingDeg * Mathf.Deg2Rad) * fwd,
-                                           Mathf.Sin(_facingDeg * Mathf.Deg2Rad) * fwd, 0f);
+        // yaw θ의 전방은 (cos θ, 0, −sin θ)다. 2D 시절 (cos, sin, 0)을 그대로 두면
+        // 반동이 **위아래로** 튄다.
+        float rad = _facingDeg * Mathf.Deg2Rad;
+        _pivot.localPosition = new Vector3(Mathf.Cos(rad) * fwd, HandHeight, -Mathf.Sin(rad) * fwd);
     }
 }

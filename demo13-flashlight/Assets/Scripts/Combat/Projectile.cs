@@ -19,7 +19,6 @@ public class Projectile : MonoBehaviour
     int _ownerLayer;
     bool _dead;
 
-    static Sprite _dot;
     static readonly RaycastHit[] _buf = new RaycastHit[12];
 
     /// <summary>탄이 나는 높이(총구 높이). 지면을 긁지 않게 가슴 높이로 띄운다.</summary>
@@ -35,11 +34,11 @@ public class Projectile : MonoBehaviour
         go.transform.position = Plan3D.ToWorld(from, (owner != null ? owner.position.y : 0f) + MuzzleY);
         go.transform.rotation = Plan3D.LookRotation(dir, Quaternion.identity);
 
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = Dot();
-        sr.color = color;
-        sr.sortingOrder = 40;                       // 바닥·건물 위, UI 아래
-        go.transform.localScale = new Vector3(0.09f, 0.09f, length);   // 전방(local Z)이 탄 길이
+        // ⚠️ 스프라이트는 XY 평면에 납작해서 **local Z 스케일이 아무 일도 하지 않는다** —
+        //    회전·길이를 이미 3D로 계산해 두고도 화면엔 길이 없는 점으로 나왔다.
+        //    상자로 세우면 진행 방향(local Z)으로 실제 길이가 생겨 탄이 읽힌다.
+        GreyboxMesh.Box(go.transform, "Tracer", Vector3.zero,
+                        new Vector3(0.09f, 0.09f, length), color, castShadow: false);
 
         var p = go.AddComponent<Projectile>();
         p._owner = owner;
@@ -137,14 +136,4 @@ public class Projectile : MonoBehaviour
         public int Compare(RaycastHit a, RaycastHit b) => a.distance.CompareTo(b.distance);
     }
 
-    /// <summary>1×1 흰 스프라이트(총알 몸통). 스케일로 길이를 준다.</summary>
-    static Sprite Dot()
-    {
-        if (_dot != null) return _dot;
-        var t = new Texture2D(1, 1, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
-        t.SetPixel(0, 0, Color.white);
-        t.Apply();
-        _dot = Sprite.Create(t, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
-        return _dot;
-    }
 }
