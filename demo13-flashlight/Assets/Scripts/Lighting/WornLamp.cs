@@ -24,24 +24,44 @@ using UnityEngine;
 public class WornLamp : MonoBehaviour
 {
     [Header("기본(랜턴 미착용) — 문서상 '좁은 주변광 ~2칸, 밤엔 코앞만'")]
-    [Tooltip("빛이 닿는 반경(m).")]
-    [SerializeField] float baseRange = 2.8f;
+    [Tooltip("빛이 닿는 거리(m).")]
+    [SerializeField] float baseRange = 5.5f;
     [Tooltip("밤 밝기. 캐릭터 실루엣이 읽힐 만큼만 — 주변을 훤히 밝히면 시야 콘이 의미를 잃는다.")]
-    [SerializeField] float nightIntensity = 1.6f;
+    [SerializeField] float nightIntensity = 1.5f;
     [Tooltip("낮 밝기. 0이 아니라 아주 낮은 값 — '늘 켜져 있다'가 사실이어야 한다.")]
-    [SerializeField] float dayIntensity = 0.25f;
+    [SerializeField] float dayIntensity = 0.2f;
+
+    [Header("몸에 달린 느낌")]
+    [Tooltip("빛이 퍼지는 각도. 좁을수록 '가슴에 단 등'으로 읽힌다. 360°에 가까우면 머리 위 전등처럼 보인다.")]
+    [Range(30f, 170f)][SerializeField] float coneAngle = 96f;
+    [Tooltip("콘 안쪽(풀 밝기) 각도 비율. 가장자리를 부드럽게 풀어 준다.")]
+    [Range(0.1f, 0.95f)][SerializeField] float innerRatio = 0.45f;
 
     Light _light;
     DayNightCycle _dayNight;
+    TopDownPlayer _player;
     float _gradeRange = 1f, _gradeIntensity = 1f;   // 등급 배율(미착용 = 1)
 
     void Awake()
     {
         _light = GetComponent<Light>();
-        _light.type = LightType.Point;
-        // ⚠️ 그림자는 끈다. 플레이어를 늘 따라다니는 광원이라 그림자를 켜면 매 프레임
-        //    섀도맵을 새로 굽는다 — 얻는 것에 비해 값이 너무 비싸다.
-        _light.shadows = LightShadows.None;
+
+        // ⚠️ **점광이 아니라 스포트다.** 점광은 사방을 고르게 비춰 완전한 원을 만든다 —
+        //    그러면 몸에 단 등이 아니라 **머리 위에 떠 있는 전등**으로 읽힌다(사용자 지적).
+        //    가슴에 단 등은 바라보는 쪽을 비춘다.
+        _light.type = LightType.Spot;
+        _light.spotAngle = coneAngle;
+        _light.innerSpotAngle = coneAngle * innerRatio;
+
+        // ⚠️ **그림자를 켠다.** 2D 시절엔 `ShadowCaster2D`가 벽에서 빛을 끊어 줬다.
+        //    끄고 두면 빛이 건물 벽을 그대로 통과해 골목 밖까지 새어 나가고,
+        //    그것 역시 "공중에 뜬 조명" 느낌의 원인이다. 플레이어 광원 하나뿐이라 값은 감당된다.
+        _light.shadows = LightShadows.Soft;
+        _light.shadowStrength = 0.9f;
+        // 자기 몸에 생기는 그림자 얼룩(shadow acne)을 피한다 — 등이 몸에 붙어 있어 특히 잘 생긴다.
+        _light.shadowNearPlane = 0.35f;
+        _light.shadowBias = 0.08f;
+        _light.shadowNormalBias = 0.5f;
     }
 
     void Start()
@@ -66,6 +86,28 @@ public class WornLamp : MonoBehaviour
         if (_light == null) return;
         _light.range = baseRange * _gradeRange;
         _light.intensity = (isNight ? nightIntensity : dayIntensity) * _gradeIntensity;
+        _light.spotAngle = coneAngle;
+        _light.innerSpotAngle = coneAngle * innerRatio;
+    }
+
+    /// <summary>등이 바라보는 쪽을 향하게 한다 — **몸에 달린 등이므로 몸을 따라 돈다.**
+    /// 이게 없으면 방향이 고정돼 옆으로 걸을 때 엉뚱한 데를 비추고, 결국 "떠 있는 조명"이 된다.</summary>
+    const float TiltDown = 34f;   // 아래로 숙인 각. 가슴에 달린 등은 발 앞을 비춘다.
+
+    void LateUpdate()
+    {
+        // LateUpdate여야 한다 — 플레이어의 회전/조준이 같은 프레임에 갱신되므로
+        // Update에서 맞추면 한 프레임 뒤처져 빠르게 돌 때 빛이 끌려다닌다.
+        if (_player == null) _player = TopDownPlayer.Instance;
+        if (_player == null) return;
+
+        Vector2 f = _player.FacingDirection;
+        if (f.sqrMagnitude < 0.0001f) return;
+
+        // 평면 방향(x=월드X, y=월드Z) → 월드 전방. 그 상태에서 아래로 숙인다.
+        Vector3 fwd = Plan3D.ToWorld(f.normalized);
+        transform.rotation = Quaternion.LookRotation(fwd, Vector3.up)
+                           * Quaternion.Euler(TiltDown, 0f, 0f);
     }
 
     /// <summary>착용한 랜턴 등급을 반영한다(반경·밝기 배율). 미착용은 (1, 1).

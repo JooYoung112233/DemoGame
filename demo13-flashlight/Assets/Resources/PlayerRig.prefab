@@ -110,9 +110,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b19d5a3c7ffe6c34cbbd5c364478556e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::WornLamp
-  baseRange: 2.8
-  nightIntensity: 1.6
-  dayIntensity: 0.25
+  baseRange: 5.5
+  nightIntensity: 1.5
+  dayIntensity: 0.2
+  coneAngle: 96
+  innerRatio: 0.45
 --- !u!1 &1153366666490221086
 GameObject:
   m_ObjectHideFlags: 0
