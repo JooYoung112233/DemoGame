@@ -1,0 +1,38 @@
+{
+  "source": "ExplosiveLLC/Unarmed-Run-Forward.FBX",
+  "action": "Run_Explosive_Unarmed",
+  "frames": [
+    1,
+    25
+  ],
+  "fps": 30,
+  "seconds": 0.8,
+  "mapped_bones": {
+    "Hips": "B_Pelvis",
+    "Spine": "B_Spine1",
+    "Chest": "B_Spine2",
+    "Neck": "B_Neck",
+    "Head": "B_Head",
+    "Clavicle.L": "B_L_Clavicle",
+    "UpperArm.L": "B_L_UpperArm",
+    "Forearm.L": "B_L_Forearm",
+    "Hand.L": "B_L_Hand",
+    "Thigh.L": "B_L_Thigh",
+    "Shin.L": "B_L_Calf",
+    "Foot.L": "B_L_Foot",
+    "Clavicle.R": "B_R_Clavicle",
+    "UpperArm.R": "B_R_UpperArm",
+    "Forearm.R": "B_R_Forearm",
+    "Hand.R": "B_R_Hand",
+    "Thigh.R": "B_R_Thigh",
+    "Shin.R": "B_R_Calf",
+    "Foot.R": "B_R_Foot"
+  },
+  "leg_scale": 0.35696850602722274,
+  "floor_offset_m": 0.026157841086387634,
+  "min_sole_height_after_offset": 0.0,
+  "geometry_and_weights_unchanged": true,
+  "existing_actions_preserved": true,
+  "humanoid_validated": false,
+  "approval": "pending"
+}

@@ -545,7 +545,11 @@ public class InteractableObject : MonoBehaviour, IInteractable
         if (spriteRenderer != null)
             spriteRenderer.color = on ? highlightColor : originalColor;
 
-        if (_meshRenderers == null) CacheMeshRenderers();
+        // ⚠️ **비어 있으면 다시 훑는다.** 한 번 캐시하고 끝내면, 첫 호출이 렌더러가
+        //    생기기 전에 들어온 오브젝트는 빈 배열이 굳어 **하이라이트가 영영 죽는다**
+        //    — 실제로 마을 NPC 전원이 그 상태였고 원인을 찾는 데 오래 걸렸다.
+        //    하이라이트는 바라보는 대상이 바뀔 때만 호출되므로 재조회 비용은 무시할 만하다.
+        if (_meshRenderers == null || _meshRenderers.Length == 0) CacheMeshRenderers();
         for (int i = 0; i < _meshRenderers.Length; i++)
             GreyboxMesh.Tint(_meshRenderers[i], on ? highlightColor : _meshBaseColors[i]);
     }
