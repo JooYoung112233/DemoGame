@@ -1,23 +1,23 @@
 {
-  "revision": 2,
+  "revision": 3,
   "frames": [
     1,
     25
   ],
   "fps": 30,
   "cycle_seconds": 0.8,
-  "nominal_forward_speed_mps": 1.1562499999999998,
+  "nominal_forward_speed_mps": 2.13235294117647,
   "run_only_changed": true,
   "approved_walk_and_other_four_actions_unchanged": true,
   "geometry_and_weights_unchanged": true,
   "loop_seam_m": 0.0,
-  "minimum_sole_z_m": 2.0489096641540527e-08,
-  "max_contact_height_error_m": 2.942979335784912e-07,
-  "max_same_support_vertex_slide_per_frame_m": 2.3146470384816098e-07,
+  "minimum_sole_z_m": -9.023863611901106e-08,
+  "max_contact_height_error_m": 6.258487701416016e-07,
+  "max_same_support_vertex_slide_per_frame_m": 0.00039135241040999524,
   "max_pelvis_reach_correction_m": 0.0,
-  "pelvis_vertical_range_m": 0.038811326026916504,
-  "airborne_frames": 4,
+  "pelvis_vertical_range_m": 0.05189219117164612,
+  "airborne_frames": 6,
   "approval": "pending",
   "unity_connected": false,
-  "reference": "Cached video frames at 11.208, 11.833 and 12.458 seconds; interpretation, not motion capture"
+  "reference": "Full source video reattached; continuous 10.875-12.750 seconds studied, interpretation not motion capture"
 }

@@ -530,11 +530,50 @@ public class InteractableObject : MonoBehaviour, IInteractable
 
     #region 하이라이트
 
+    /// <summary>바라보는 대상임을 색으로 알린다.
+    ///
+    /// ⚠️ 예전엔 <see cref="SpriteRenderer"/>만 칠했다. 3D로 오면서 NPC·문·컨테이너가 전부
+    ///    메시가 됐고, 그 순간 **하이라이트가 통째로 안 보이게 됐다** — "이걸 누를 수 있다"는
+    ///    피드백이 사라지면 무엇과 상호작용되는지 알 방법이 없다. 이제 자식 렌더러를 전부 칠한다.
+    ///
+    /// 원래 색은 <c>sharedMaterial</c>에서 읽는다. <c>material</c>을 읽으면 그 순간
+    /// 머티리얼이 인스턴스화돼 공유가 깨지고 오브젝트마다 하나씩 샌다.</summary>
     public void SetHighlight(bool on)
     {
         isHighlighted = on;
-        if (spriteRenderer == null) return;
-        spriteRenderer.color = on ? highlightColor : originalColor;
+
+        if (spriteRenderer != null)
+            spriteRenderer.color = on ? highlightColor : originalColor;
+
+        if (_meshRenderers == null) CacheMeshRenderers();
+        for (int i = 0; i < _meshRenderers.Length; i++)
+            GreyboxMesh.Tint(_meshRenderers[i], on ? highlightColor : _meshBaseColors[i]);
+    }
+
+    Renderer[] _meshRenderers;
+    Color[]    _meshBaseColors;
+
+    void CacheMeshRenderers()
+    {
+        var all = GetComponentsInChildren<Renderer>(true);
+        var keep = new System.Collections.Generic.List<Renderer>();
+        foreach (var r in all)
+        {
+            if (r is SpriteRenderer) continue;          // 위에서 따로 처리
+            if (r is TrailRenderer || r is LineRenderer) continue;
+            if (r.GetComponentInParent<Billboard>() != null) continue;   // 이름표·게이지는 칠하지 않는다
+            keep.Add(r);
+        }
+        _meshRenderers   = keep.ToArray();
+        _meshBaseColors  = new Color[_meshRenderers.Length];
+        for (int i = 0; i < _meshRenderers.Length; i++)
+        {
+            var m = _meshRenderers[i].sharedMaterial;
+            _meshBaseColors[i] = m == null ? Color.white
+                               : m.HasProperty("_BaseColor") ? m.GetColor("_BaseColor")
+                               : m.HasProperty("_Color")     ? m.GetColor("_Color")
+                               : Color.white;
+        }
     }
 
     #endregion

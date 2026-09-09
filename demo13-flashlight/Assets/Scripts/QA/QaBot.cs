@@ -1007,7 +1007,7 @@ public class QaBot : MonoBehaviour
 
         var player = TopDownPlayer.Instance;
         if (player == null) return;
-        Vector2 me = player.transform.position;
+        Vector2 me = Plan3D.ToPlan(player.transform.position);
 
         foreach (var e in EnemyController.All)
         {
@@ -1073,7 +1073,7 @@ public class QaBot : MonoBehaviour
         }
         if (near == null) return dir;
 
-        Vector2 toE = (Vector2)near.transform.position - pos;
+        Vector2 toE = Plan3D.ToPlan(near.transform.position) - pos;
         if (toE.sqrMagnitude < 0.0001f) return dir;
         // 진행 방향에 있는 적만 피한다(뒤·옆의 적까지 피하면 이동이 흔들린다)
         if (Vector2.Dot(dir, toE.normalized) < 0.3f) return dir;

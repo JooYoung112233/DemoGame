@@ -1,0 +1,87 @@
+{
+  "status": "static poses for review, not an animation",
+  "poses": [
+    {
+      "reference": 13,
+      "label": "Landing",
+      "legs": {
+        "L": [
+          -10,
+          16,
+          0
+        ],
+        "R": [
+          10,
+          88,
+          80
+        ]
+      },
+      "arms": {
+        "L": [
+          -12,
+          85
+        ],
+        "R": [
+          23,
+          30
+        ]
+      },
+      "floor": 0
+    },
+    {
+      "reference": 18,
+      "label": "Push-off / initial flight",
+      "legs": {
+        "L": [
+          -38,
+          40,
+          0
+        ],
+        "R": [
+          36,
+          20,
+          62
+        ]
+      },
+      "arms": {
+        "L": [
+          22,
+          34
+        ],
+        "R": [
+          -16,
+          86
+        ]
+      },
+      "floor": 0.025
+    },
+    {
+      "reference": 28,
+      "label": "Flight reach",
+      "legs": {
+        "L": [
+          -40,
+          25,
+          -12
+        ],
+        "R": [
+          30,
+          55,
+          76
+        ]
+      },
+      "arms": {
+        "L": [
+          22,
+          34
+        ],
+        "R": [
+          -16,
+          86
+        ]
+      },
+      "floor": 0.055
+    }
+  ],
+  "existing_walk_and_run_files_unchanged": true
+}

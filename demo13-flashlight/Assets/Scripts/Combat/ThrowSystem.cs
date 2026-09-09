@@ -109,8 +109,10 @@ public class ThrowSystem : MonoBehaviour
     {
         var gt = GameTuning.Instance;
         float range = gt != null ? gt.throwRange : 8f;
-        Vector2 origin = player.transform.position;
-        Vector2 d = (Vector2)player.MouseWorldPos - origin;
+        // ⚠️ Vector3 → Vector2 암묵 변환은 (x, **높이**)를 읽는다. 컴파일도 되고 에러도 없지만
+        //    착탄점 계산이 통째로 틀린 평면에서 돈다. 평면 좌표는 반드시 Plan3D.ToPlan을 거친다.
+        Vector2 origin = Plan3D.ToPlan(player.transform.position);
+        Vector2 d = Plan3D.ToPlan(player.MouseWorldPos) - origin;
         if (d.sqrMagnitude > range * range) d = d.normalized * range;
         return origin + d;
     }
@@ -124,24 +126,33 @@ public class ThrowSystem : MonoBehaviour
         float speed  = gt != null ? gt.throwSpeed       : 10f;
         float noiseR = gt != null ? gt.throwNoiseRadius : 9f;
         // 비행 시간 = 거리/속도(0.15~1.0s 클램프) → 거리와 무관하게 일정 속도(멀수록 오래 = 눈에 보이는 포물선).
-        float flight = Mathf.Clamp(Vector2.Distance(player.transform.position, land) / Mathf.Max(1f, speed), 0.15f, 1.0f);
-        SpawnStone(player.transform.position, land, flight, noiseR);
+        Vector2 origin = Plan3D.ToPlan(player.transform.position);
+        float flight = Mathf.Clamp(Vector2.Distance(origin, land) / Mathf.Max(1f, speed), 0.15f, 1.0f);
+        SpawnStone(origin, land, flight, noiseR);
         CancelAim();
     }
 
     static void SpawnStone(Vector2 from, Vector2 to, float flight, float noiseRadius)
     {
+        // ⚠️ `transform.position = from`(Vector2)은 3D에서 **z 대신 y로 들어간다** —
+        //    돌이 지면이 아니라 공중/지하로 날아간다. 평면→월드 변환은 Plan3D를 거친다.
         var go = new GameObject("ThrownStone");
-        go.transform.position = from;
-        go.transform.localScale = Vector3.one * 0.28f;
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = MarkerSprite();
-        sr.color = new Color(0.72f, 0.68f, 0.60f, 1f);
-        sr.sortingOrder = 60;
+        go.transform.position = Plan3D.ToWorld(from, ThrownStone.CarryY);
+        GreyboxMesh.Box(go.transform, "Visual", Vector3.zero,
+                        Vector3.one * 0.16f, new Color(0.72f, 0.68f, 0.60f, 1f), castShadow: false);
         go.AddComponent<ThrownStone>().Init(from, to, flight, noiseRadius);
     }
 
     // ── 조준 비주얼 (사거리 원 + 착탄 마커) ───────────────────────────
+
+    /// <summary>지면 표식을 띄우는 높이(m). 0이면 바닥과 z-fighting으로 지글거린다.</summary>
+    const float GroundDecalY = 0.03f;
+
+    /// <summary>지면에 눕히는 회전. 스프라이트는 기본적으로 XY 평면(수직)이라
+    /// 그대로 두면 조준 원과 착탄 표식이 **벽처럼 서 있다** — 실제로 그 상태였다.
+    /// x축 +90°로 눕혀야 바닥 데칼로 읽힌다.</summary>
+    static readonly Quaternion GroundDecal = Quaternion.Euler(90f, 0f, 0f);
+
     void BuildAimVisuals()
     {
         var ringGo = new GameObject("ThrowRange");
@@ -151,6 +162,7 @@ public class ThrowSystem : MonoBehaviour
         rangeSr.sprite = RingSprite();
         rangeSr.color = new Color(0.55f, 0.9f, 1f, 0.35f);
         rangeSr.sortingOrder = -5;   // 바닥 위, 캐릭터 아래(소음 링과 동일 층)
+        ringGo.transform.rotation = GroundDecal;
         ringGo.SetActive(false);
 
         var markGo = new GameObject("ThrowMarker");
@@ -161,6 +173,7 @@ public class ThrowSystem : MonoBehaviour
         markerSr.sprite = MarkerSprite();
         markerSr.color = new Color(1f, 0.85f, 0.3f, 0.95f);
         markerSr.sortingOrder = 55;
+        markGo.transform.rotation = GroundDecal;
         markGo.SetActive(false);
     }
 
@@ -176,10 +189,12 @@ public class ThrowSystem : MonoBehaviour
         float range = gt != null ? gt.throwRange : 8f;
         if (rangeRing != null)
         {
-            rangeRing.position = player.transform.position;
+            // 지면 바로 위에 깐다. z-fighting을 피할 만큼만 띄운다.
+            var p = player.transform.position;
+            rangeRing.position = new Vector3(p.x, p.y + GroundDecalY, p.z);
             rangeRing.localScale = Vector3.one * (range * 2f);   // 스프라이트 지름 1 기준 → 반경×2
         }
-        if (marker != null) marker.position = land;
+        if (marker != null) marker.position = Plan3D.ToWorld(land, GroundDecalY);
     }
 
     // ── 절차적 스프라이트 ─────────────────────────────────────────────
@@ -225,6 +240,11 @@ public class ThrowSystem : MonoBehaviour
 /// <summary>던져진 돌 — from→to로 포물선 비행 후 착탄 시 소음 펄스 발생.</summary>
 public class ThrownStone : MonoBehaviour
 {
+    /// <summary>손을 떠난 돌이 나는 기본 높이(m). 0이면 지면을 긁는다.</summary>
+    public const float CarryY = 1.0f;
+    /// <summary>포물선 호의 최고 추가 높이(m).</summary>
+    const float ArcHeight = 1.2f;
+
     Vector2 _from, _to;
     float _dur, _t, _noiseRadius;
 
@@ -238,14 +258,15 @@ public class ThrownStone : MonoBehaviour
         _t += Time.deltaTime / _dur;
         if (_t >= 1f)
         {
-            transform.position = _to;
+            transform.position = Plan3D.ToWorld(_to);
             PlayerNoise.Pulse(_to, _noiseRadius);   // 착탄 소음 → 반경 내 적 조사
             Destroy(gameObject);
             return;
         }
-        // 수평 보간 + 작은 포물선 호(연출)
+        // 수평 보간 + 포물선 호. ⚠️ 2D에선 호가 화면 y였다 — 3D에서 그대로 두면
+        //    돌이 **옆으로 휘어 날아간다.** 호는 높이(y), 이동은 평면(xz)이다.
         Vector2 flat = Vector2.Lerp(_from, _to, _t);
-        float hop = Mathf.Sin(_t * Mathf.PI) * 0.6f;
-        transform.position = new Vector3(flat.x, flat.y + hop, 0f);
+        float hop = Mathf.Sin(_t * Mathf.PI) * ArcHeight;
+        transform.position = Plan3D.ToWorld(flat, CarryY + hop);
     }
 }

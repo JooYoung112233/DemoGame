@@ -562,7 +562,7 @@ public static class QaSteps
         var bot = c.Bot;
         var per = bot.Perception;
         var player = TopDownPlayer.Instance;
-        Vector2 pos = player != null ? (Vector2)player.transform.position : Vector2.zero;
+        Vector2 pos = player != null ? Plan3D.ToPlan(player.transform.position) : Vector2.zero;
 
         var s = new QaBrain.State
         {
@@ -713,7 +713,7 @@ public static class QaSteps
             }
 
             c.Report.Info("ai", goal.ToString(), why + (ambiguous ? "  ※애매" : ""));
-            Vector2 pos = player.transform.position;
+            Vector2 pos = Plan3D.ToPlan(player.transform.position);
 
             switch (goal)
             {
@@ -743,7 +743,7 @@ public static class QaSteps
                         float foeDist = Vector2.Distance(foe.transform.position, player.transform.position);
                         if (foeDist >= safeDist) { escaped = true; break; }
 
-                        Vector2 away = ((Vector2)player.transform.position - (Vector2)foe.transform.position).normalized;
+                        Vector2 away = (Plan3D.ToPlan(player.transform.position) - Plan3D.ToPlan(foe.transform.position)).normalized;
                         GameInput.VSetMove(away);
                         yield return c.Bot.WaitSec(0.3f);
                     }
@@ -1124,14 +1124,14 @@ public static class QaSteps
                 if (hp <= fleeHp)
                 {
                     c.Report.Warn("combat", "DISENGAGE", $"체력 {hp * 100f:0}% — 교전 이탈(도주)");
-                    Vector2 away = ((Vector2)player.transform.position - (Vector2)foe.transform.position).normalized;
+                    Vector2 away = (Plan3D.ToPlan(player.transform.position) - Plan3D.ToPlan(foe.transform.position)).normalized;
                     GameInput.VSetMove(away);
                     yield return c.Bot.WaitSec(1.5f);
                     GameInput.VSetMove(Vector2.zero);
                     yield break;
                 }
 
-                Vector2 toFoe = (Vector2)foe.transform.position - (Vector2)player.transform.position;
+                Vector2 toFoe = Plan3D.ToPlan(foe.transform.position) - Plan3D.ToPlan(player.transform.position);
                 float dist = toFoe.magnitude;
                 Vector2 dir = dist > 0.01f ? toFoe / dist : Vector2.right;
                 AimAt(foe.transform.position);

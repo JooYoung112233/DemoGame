@@ -124,9 +124,9 @@ public class BuildingEntrance : MonoBehaviour
     /// <summary>이 트리거 '밖'의 복귀 지점 — 플레이어가 들어온 방향으로 트리거 반경 + 여유만큼 밀어낸 자리.</summary>
     Vector3 ReturnPointFor(Collider2D playerCol, GameObject playerGO)
     {
-        Vector2 here = transform.position;
+        Vector2 here = Plan3D.ToPlan(transform.position);
         Transform pt = playerCol != null ? playerCol.transform : playerGO.transform;
-        Vector2 away = (Vector2)pt.position - here;
+        Vector2 away = Plan3D.ToPlan(pt.position) - here;
         if (away.sqrMagnitude < 0.0001f) away = Vector2.down;   // 정확히 겹쳤으면 남쪽(관례상 바깥)
         float clear = Mathf.Max(triggerSize.x, triggerSize.y) * 0.5f + 0.7f;
         return here + away.normalized * clear;

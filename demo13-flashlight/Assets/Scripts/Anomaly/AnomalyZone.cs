@@ -114,14 +114,14 @@ public class AnomalyZone : MonoBehaviour
     }
 
     // ── 스폰 배치용 (Phase 2) ──
-    public bool Contains(Vector2 p) => ((Vector2)transform.position - p).sqrMagnitude <= radius * radius;
+    public bool Contains(Vector2 p) => (Plan3D.ToPlan(transform.position) - p).sqrMagnitude <= radius * radius;
 
     /// <summary>구역 내 랜덤 점. edgeBias 0=균일, 1=가장자리 쏠림(몬스터 가장자리 등장용).</summary>
     public Vector2 RandomPoint(float edgeBias = 0f)
     {
         float t = Mathf.Lerp(Mathf.Sqrt(Random.value), 1f, Mathf.Clamp01(edgeBias));
         float a = Random.value * Mathf.PI * 2f;
-        return (Vector2)transform.position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * (radius * t);
+        return Plan3D.ToPlan(transform.position) + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * (radius * t);
     }
 
 #if UNITY_EDITOR

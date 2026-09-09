@@ -298,7 +298,7 @@ public class RaidMapUI : MonoBehaviour
         {
             var io = all[i];
             if (io == null || io.Type != InteractableObject.InteractType.ExitPoint) continue;
-            Vector2 wp = io.transform.position;
+            Vector2 wp = Plan3D.ToPlan(io.transform.position);
             if (!InsideDiscovered(zones, wp)) continue;
             PlaceDiamond(WorldToMap(wp), 20f, ColExit, "탈출구");
         }
@@ -323,7 +323,7 @@ public class RaidMapUI : MonoBehaviour
         if (_playerMarker == null) return;
         var p = TopDownPlayer.Instance;
         if (p == null) return;
-        _playerMarker.anchoredPosition = WorldToMap((Vector2)p.transform.position);
+        _playerMarker.anchoredPosition = WorldToMap(Plan3D.ToPlan(p.transform.position));
     }
 
     // ── 그레이박스 더미 ──

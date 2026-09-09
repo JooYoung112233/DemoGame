@@ -23,11 +23,11 @@ public class MapZoneVolume : MonoBehaviour
         var box = GetComponent<BoxCollider2D>();
         if (box != null)
         {
-            Vector2 c = (Vector2)transform.position + box.offset;
+            Vector2 c = Plan3D.ToPlan(transform.position) + box.offset;
             Vector2 s = Vector2.Scale(box.size, (Vector2)transform.lossyScale);
             return new Rect(c.x - s.x * 0.5f, c.y - s.y * 0.5f, s.x, s.y);
         }
-        Vector2 cc = transform.position;
+        Vector2 cc = Plan3D.ToPlan(transform.position);
         return new Rect(cc.x - size.x * 0.5f, cc.y - size.y * 0.5f, size.x, size.y);
     }
 
@@ -54,10 +54,10 @@ public class MapZoneVolume : MonoBehaviour
 
         var p = TopDownPlayer.Instance;
         if (p == null) return;
-        if (_zone.Contains((Vector2)p.transform.position))
+        if (_zone.Contains(Plan3D.ToPlan(p.transform.position)))
         {
             var m = RaidMapManager.InstanceIfExists;
-            if (m != null) m.DiscoverAt((Vector2)p.transform.position);
+            if (m != null) m.DiscoverAt(Plan3D.ToPlan(p.transform.position));
         }
     }
 

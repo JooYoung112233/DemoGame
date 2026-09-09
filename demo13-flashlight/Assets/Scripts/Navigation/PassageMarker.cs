@@ -87,7 +87,7 @@ public class PassageMarker : MonoBehaviour
         if (_known) return;
         var p = TopDownPlayer.Instance;
         if (p == null) return;
-        if (((Vector2)p.transform.position - (Vector2)transform.position).sqrMagnitude <= knownRadius * knownRadius)
+        if ((Plan3D.ToPlan(p.transform.position) - Plan3D.ToPlan(transform.position)).sqrMagnitude <= knownRadius * knownRadius)
         {
             _known = true;
             // 잠김 주석만 영속(막힘은 이번 판 한정)

@@ -132,7 +132,7 @@ public class NavigationHUD : MonoBehaviour
         var player = TopDownPlayer.Instance;
         if (player == null) { HideNeedle(); return; }
 
-        Vector2 ppos = player.transform.position;
+        Vector2 ppos = Plan3D.ToPlan(player.transform.position);
         if (!ResolveTarget(ppos, out Vector2 tpos, out string label)) { HideNeedle(); return; }
 
         needleImg.enabled = true;
@@ -181,7 +181,7 @@ public class NavigationHUD : MonoBehaviour
         {
             var io = all[i];
             if (io == null || io.Type != InteractableObject.InteractType.ExitPoint) continue;
-            float sq = ((Vector2)io.transform.position - from).sqrMagnitude;
+            float sq = (Plan3D.ToPlan(io.transform.position) - from).sqrMagnitude;
             if (sq < bestSq) { bestSq = sq; nearestExit = io; }
         }
         if (nearestExit != null) { pos = nearestExit.transform.position; label = "탈출구"; return true; }
@@ -246,7 +246,7 @@ public class NavigationHUD : MonoBehaviour
             {
                 var io = all[i];
                 if (io == null || io.Type != InteractableObject.InteractType.ExitPoint) continue;
-                Vector2 wp = io.transform.position;
+                Vector2 wp = Plan3D.ToPlan(io.transform.position);
                 if (!InsideDiscovered(zones, wp)) continue;
 
                 var ex = MakeMapImage("Exit", PlaceholderSprite.Square, new Color(0.3f, 1f, 0.45f));
@@ -279,7 +279,7 @@ public class NavigationHUD : MonoBehaviour
         if (playerBlip == null) return;
         var p = TopDownPlayer.Instance;
         if (p == null) return;
-        playerBlip.anchoredPosition = WorldToMap((Vector2)p.transform.position);
+        playerBlip.anchoredPosition = WorldToMap(Plan3D.ToPlan(p.transform.position));
     }
 
     static Color PassageColor(PassageState s)
