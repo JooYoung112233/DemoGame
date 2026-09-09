@@ -104,6 +104,18 @@ public class GameTuning : ScriptableObject
     [Tooltip("약탈자 회수 — 사망 시 잃은 소지품을 다음 레이드에서 나눠 가질 '약탈자' 적 최대 마리 수. ScavengerLoot가 읽음. (docs/raid.md)")]
     [Range(1, 6)] public int scavengerCount = 3;
 
+    // ── 적 무리 / 레이드 스폰 안전 (2026-09-09) ────────────────────────
+    [Header("적 무리 · 스폰 안전")]
+    [Tooltip("한 '무리'로 볼 반경(m). 이 안의 적 스폰존들은 사실상 동시에 달려든다.\n" +
+             "Zone1 빌더가 읽는다 — 바꾸면 `빌드3D ▸ 지역1` 재실행.")]
+    [Range(4f, 30f)] public float enemyPackRadius = 12f;
+    [Tooltip("무리 하나의 최대 **무게**(일반=1, 중장=2). 초과분은 빌드 시 잘린다.\n" +
+             "3 = 일반 3마리 또는 일반 1 + 중장 1. 손으로 배치한 구역 존이 우선 살아남는다.")]
+    [Range(1, 10)] public int enemyPackMaxWeight = 3;
+    [Tooltip("레이드 진입 스폰이 확보해야 할 적 없는 반경(m). RaidSpawnDirector가 후보 스폰 중\n" +
+             "이 조건을 만족하는 곳만 고른다(전부 실패하면 가장 여유 있는 곳).")]
+    [Range(0f, 60f)] public float raidSpawnSafeRadius = 20f;
+
     // ── 무게 초과 페널티 (타르코프식 3구간 — docs/inventory.md 2026-07-10) ────────
     [Header("무게 초과 페널티")]
     [Tooltip("과적 시작 비율(현재무게/MaxWeight). 이 이상부터 스프린트 불가 + 이속 −slow1. 1.0=100%.")]

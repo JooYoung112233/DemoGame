@@ -12,12 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc1962bb26eb9844ea1de55f2168bebc, type: 3}
   m_Name: GameTuning
   m_EditorClassIdentifier: Game.Scripts::GameTuning
-  searchSpeedMult: 1
-  searchSecCommon: 0.4
-  searchSecUncommon: 0.6
-  searchSecRare: 0.9
-  searchSecEpic: 1.3
-  searchSecLegendary: 1.8
   dayDuration: 120
   nightDuration: 600
   raidDuration: 1200
@@ -38,29 +32,24 @@ MonoBehaviour:
   roadMinPassWidth: 3
   barricadeClearSeconds: 3.5
   barricadeBreachSeconds: 7
-  barricadeNoiseRadius: 14
   enemySpawnCountMult: 1
   enemyDropChance: 1
   corpseBagChance: 0.3
   scavengerCount: 3
+  enemyPackRadius: 12
+  enemyPackMaxWeight: 3
+  raidSpawnSafeRadius: 20
   overweightStartPct: 1
   overweightSeverePct: 1.15
   overweightHardPct: 1.3
   overweightSlow1: 0.15
   overweightSlow2: 0.3
   overweightRegenMult: 0.5
-  noiseIdle: 0
-  noiseCrouch: 1.5
-  noiseWalk: 5
-  noiseRun: 11
-  noiseAttack: 14
-  noiseDoor: 8
-  noisePulseDuration: 0.6
-  noiseUiMax: 14
-  noiseInvestigateLook: 2.5
   throwRange: 8
   throwNoiseRadius: 9
   throwSpeed: 10
+  noisePulseDuration: 0.6
+  noiseInvestigateLook: 2.5
   visionEnabled: 1
   visionFovDegrees: 150
   visionRange: 9
@@ -91,11 +80,6 @@ MonoBehaviour:
   xpFailMult: 0.5
   xpPerLevelBase: 100
   xpPpPerLevel: 1
-  arbeitSlotCount: 3
-  arbeitQtyMin: 2
-  arbeitQtyMax: 5
-  arbeitRewardMult: 1
-  arbeitPpEvery: 3
   shopTierRare: 2
   shopTierEpic: 4
   shopTierLegendary: 5

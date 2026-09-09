@@ -47,8 +47,9 @@ public class SpawnZone : MonoBehaviour
                 baseColor = new Color(unit.tintColor.r, unit.tintColor.g, unit.tintColor.b, 0.3f);
         }
 
-        // top-down 2D: XY 평면에 그린다 (폭=size.x, 높이=size.z).
-        var box = new Vector3(size.x, size.z, 0.1f);
+        // 지면은 XZ 평면 — 2D 시절 XY로 그리던 걸 그대로 두면 존이 **벽처럼 세로로 서 보여**
+        // 어디에 적이 깔리는지 눈으로 확인할 수 없다(GetRandomPoint는 이미 XZ로 뿌린다).
+        var box = new Vector3(size.x, 0.1f, size.z);
         Gizmos.color = baseColor;
         Gizmos.DrawCube(transform.position, box);
         Gizmos.color = new Color(baseColor.r, baseColor.g, baseColor.b, 0.8f);

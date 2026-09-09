@@ -65,6 +65,12 @@ public class RaidSpawnDirector : MonoBehaviour
                   $"{string.Join(",", AlwaysOnExtra)}) + 매치({string.Join(",", Exits(ChosenSpawn))})");
     }
 
+    /// <summary>후보 스폰 중 하나. **적이 붙어 있는 곳은 고르지 않는다** —
+    /// 진입 직후 아무것도 못 하고 얻어맞는 시작은 랜덤 스폰의 취지(매 판 다른 동선)와 무관한 사고다.
+    ///
+    /// 안전 반경(GameTuning.raidSpawnSafeRadius)을 만족하는 후보들 중에서 랜덤 —
+    /// "가장 안전한 곳"을 고르면 매 판 같은 데서 시작하게 되므로 무작위성은 지킨다.
+    /// 전부 실패하면 그중 가장 여유 있는 곳(적이 아직 안 깔렸으면 예전처럼 완전 랜덤).</summary>
     GameObject PickSpawn()
     {
         var found = new List<GameObject>();
@@ -74,7 +80,31 @@ public class RaidSpawnDirector : MonoBehaviour
             if (go != null) found.Add(go);
         }
         if (found.Count == 0) return null;
-        return found[Random.Range(0, found.Count)];
+
+        var gt = GameTuning.Instance;
+        float safe = gt != null ? gt.raidSpawnSafeRadius : 20f;
+        var enemies = EnemyController.All;
+        if (safe <= 0f || enemies == null || enemies.Count == 0)
+            return found[Random.Range(0, found.Count)];
+
+        var ok = new List<GameObject>();
+        GameObject best = null; float bestClear = -1f;
+        foreach (var go in found)
+        {
+            float clear = float.MaxValue;
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                if (enemies[i] == null) continue;
+                float d = Vector3.Distance(go.transform.position, enemies[i].transform.position);
+                if (d < clear) clear = d;
+            }
+            if (clear >= safe) ok.Add(go);
+            if (clear > bestClear) { bestClear = clear; best = go; }
+        }
+
+        if (ok.Count > 0) return ok[Random.Range(0, ok.Count)];
+        Debug.LogWarning($"[RaidSpawnDirector] 안전 반경 {safe}m를 만족하는 스폰이 없다 — 가장 여유 있는 {best.name}({bestClear:F0}m) 사용.");
+        return best;
     }
 
     string[] Exits(string spawnName)

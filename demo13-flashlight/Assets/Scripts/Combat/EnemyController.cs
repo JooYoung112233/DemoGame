@@ -424,7 +424,7 @@ public class EnemyController : MonoBehaviour
             Vector2 d;
             if (_nav != null)
             {
-                _nav.SetDestination(investigatePos);
+                _nav.SetDestinationPlan(investigatePos);
                 d = _nav.DesiredDirection;
                 if (d.sqrMagnitude < 0.0001f) d = to.normalized;
             }

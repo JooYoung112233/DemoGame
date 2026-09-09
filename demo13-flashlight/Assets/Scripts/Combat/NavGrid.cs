@@ -167,12 +167,13 @@ public class NavGrid : MonoBehaviour
     void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
-        Gizmos.DrawWireCube(transform.position, new Vector3(areaSize.x, areaSize.y, 0f));
+        // 격자는 XZ 평면 — 예전 (x, y, 0)은 2D 시절 값이라 3D에선 벽처럼 세로로 섰다.
+        Gizmos.DrawWireCube(transform.position, new Vector3(areaSize.x, 0f, areaSize.y));
         if (!drawGizmos || _blocked == null) return;
         Gizmos.color = new Color(1f, 0f, 0f, 0.4f);
         for (int x = 0; x < _w; x++)
             for (int y = 0; y < _h; y++)
-                if (_blocked[x, y]) Gizmos.DrawCube(CellToWorld(x, y), Vector3.one * cellSize * 0.9f);
+                if (_blocked[x, y]) Gizmos.DrawCube(Plan3D.ToWorld(CellToWorld(x, y), transform.position.y), new Vector3(cellSize * 0.9f, 0.05f, cellSize * 0.9f));
     }
 #endif
 }

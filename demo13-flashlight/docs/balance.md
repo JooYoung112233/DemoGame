@@ -65,7 +65,16 @@
 | `valuableWeightMult` | 1 | **귀중품(Valuable)** 카테고리 등장 가중치 배율. 1=동일, >1=귀중품 더 자주 | `RegionLootCatalog.Roll` |
 | `itemSpawnCountMult` | 1 | 맵 아이템 스폰 **총량** 전역 배율 (프로파일 spawnMultiplier에 추가로 곱) | `MapSpawnProfile.GetGroundBudget`/`GetContainerBudget` |
 
-> **몹 스폰 마릿수/밀도는 외부화하지 않음** — `SpawnZone.EnemyCount`를 런타임에 읽어 적을 인스턴스화하는 시스템이 현재 코드에 **없다**(SpawnZone은 정의·씬 데이터만, 소비처 0). 곱할 지점이 없어 노브가 죽은 값이 됨. 적 스폰 런타임 시스템이 생기면 그때 `enemySpawnCountMult`를 신설·연결할 것.
+> ~~몹 스폰 마릿수/밀도는 외부화하지 않음~~ — **해소됨.** `EnemySpawner`가 씬의 `SpawnZone`을 읽어 실제로 스폰하므로 `enemySpawnCountMult`는 살아 있는 노브다(위 §근접/적 표 참조).
+
+### 적 무리 · 레이드 스폰 안전 (2026-09-09)
+| 필드 | 기본값 | 의미 | 읽는 곳 |
+|------|--------|------|---------|
+| `enemyPackRadius` | 12 | 한 '무리'로 볼 반경(m). 이 안의 스폰존은 사실상 동시에 달려든다 | `Zone1GreyboxLayout.TrimEnemyPacks` (빌드 시) |
+| `enemyPackMaxWeight` | **3** | 무리 하나의 최대 무게(일반=1, 중장=2). 초과분은 빌드 때 잘림 | `Zone1GreyboxLayout.TrimEnemyPacks` (빌드 시) |
+| `raidSpawnSafeRadius` | 20 | 레이드 진입 스폰이 확보해야 할 '적 없는' 반경(m) | `RaidSpawnDirector.PickSpawn` (런타임) |
+
+> 앞의 둘은 **빌드 시** 적용 — 바꾸면 `Tools ▸ TopDown ▸ 빌드3D ▸ 지역1` 재실행. 마지막 하나는 런타임 즉시.
 
 ### 생존 (2026-06-18 중앙화)
 | 필드 | 기본값 | 의미 | 읽는 곳 |

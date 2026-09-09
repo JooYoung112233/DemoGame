@@ -37,10 +37,22 @@ public class NavAgent : MonoBehaviour
         _losMask = obstacleMask & ~ignore;       // 벽/프롭만 LOS 차단 (플레이어·다른 적 무시)
     }
 
-    /// <summary>추격 목표 갱신 (매 프레임 호출 OK).</summary>
-    public void SetDestination(Vector2 worldDest)
+    /// <summary>추격 목표 갱신 (매 프레임 호출 OK). **월드 좌표**를 받는다.
+    ///
+    /// ⚠️ 예전 시그니처는 `Vector2`였다. 호출부는 전부 `transform.position`(Vector3)을 넘기는데,
+    ///    C#이 이걸 조용히 `(x, y)`로 잘라 넣어 **목적지가 (x, 높이) = 맵 남단**이 됐다.
+    ///    컴파일도 되고 적도 전속력으로 달렸지만, 플레이어가 아니라 남쪽 벽으로 달렸다
+    ///    (추격이 성립한 적이 없다). 평면 좌표를 넘길 때는 <see cref="SetDestinationPlan"/>.</summary>
+    public void SetDestination(Vector3 world)
     {
-        _dest = worldDest;
+        _dest = Plan3D.ToPlan(world);
+        _hasDest = true;
+    }
+
+    /// <summary>이미 평면(XZ) 좌표를 들고 있을 때. 조사 지점처럼 Vector2로 보관하는 값용.</summary>
+    public void SetDestinationPlan(Vector2 plan)
+    {
+        _dest = plan;
         _hasDest = true;
     }
 

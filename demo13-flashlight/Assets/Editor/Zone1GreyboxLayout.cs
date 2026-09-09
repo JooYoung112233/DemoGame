@@ -214,6 +214,9 @@ public static class Zone1GreyboxLayout
         //   3개당 1 → 5개당 1로 낮춰 **루팅 앵커 총량은 그대로**(예산이 묽어지지 않게).
         n += StreetProps(map, 460, 5, 4242);
 
+        // ── ★ 적 무리 상한 (맨 마지막 — 존이 다 놓인 뒤라야 겹침을 볼 수 있다) ──
+        TrimEnemyPacks(map);
+
         GreyboxBuild.EndScene(scene, ScenePath, n, "지역1 Zone1(160×168 · 도로 위계 4단계 · 장애물/프랍)");
         AddToBuildSettings(ScenePath);   // 등록 안 하면 TransitionTo("Zone1")이 LoadSceneAsync에서 실패
         AssetDatabase.SaveAssets();
@@ -457,6 +460,50 @@ public static class Zone1GreyboxLayout
         var go = GreyboxBuild.Point(map, name, cx, cy);
         go.AddComponent<SpawnZone>().Setup(GreyboxBuild.PlanSize(w, h), count, unitKey);
         return 1;
+    }
+
+    /// <summary>겹쳐 놓인 적 존을 잘라 **한 자리에 몰리는 마릿수**에 상한을 건다.
+    ///
+    /// 구역 존(손배치, 난이도 곡선)과 건물 안뜰 존(절차 생성)이 서로를 모르고 놓이는 바람에
+    /// 같은 자리에 4~6마리가 쌓였다(실측: 폐아파트 5 · 유니크열 5(중장 포함) · 무너진상가 4).
+    /// 시야 7m·추적 11m라 그 안에 들어서면 **전원이 동시에** 달려든다 — 곡선이 아니라 사고다.
+    /// 안뜰의 '일반+중장' 짝(가중치 1+2=3)은 의도된 조합이라 상한 4 안에 그대로 들어간다.
+    ///
+    /// 나중에 놓인 것(=구역 존)을 먼저 살린다 — 블록·안뜰이 앞서 만들어지므로, 역순 처리가
+    /// 곧 "손으로 배치한 곡선 우선"이 된다. 수치는 GameTuning(enemyPackRadius/enemyPackMaxWeight).</summary>
+    static void TrimEnemyPacks(GameObject map)
+    {
+        var gt = GameTuning.Instance;
+        float radius = gt != null ? gt.enemyPackRadius : 12f;
+        int maxWeight = gt != null ? gt.enemyPackMaxWeight : 4;
+        if (radius <= 0f || maxWeight <= 0) return;
+
+        var zones = new System.Collections.Generic.List<SpawnZone>(map.GetComponentsInChildren<SpawnZone>(true));
+        zones.Reverse();   // 늦게 놓인 것부터 = 구역 존 우선
+
+        int Weight(SpawnZone z) => z.UnitKey == "bandit_tank" ? 2 : 1;
+        var kept = new System.Collections.Generic.List<SpawnZone>();
+        int trimmed = 0, dropped = 0;
+
+        foreach (var z in zones)
+        {
+            int used = 0;
+            foreach (var k in kept)
+                if (Vector3.Distance(k.transform.position, z.transform.position) <= radius)
+                    used += k.EnemyCount * Weight(k);
+
+            int room = maxWeight - used;
+            int allow = room / Weight(z);                 // 중장은 자리를 2 차지한다
+            if (allow >= z.EnemyCount) { kept.Add(z); continue; }
+
+            if (allow <= 0) { trimmed += z.EnemyCount; dropped++; Object.DestroyImmediate(z.gameObject); continue; }
+            trimmed += z.EnemyCount - allow;
+            z.Setup(z.Size, allow, z.UnitKey);
+            kept.Add(z);
+        }
+
+        if (trimmed > 0)
+            Debug.Log($"[Zone1] 적 무리 상한(반경 {radius}m · 가중치 {maxWeight}): {trimmed}마리 감축, 존 {dropped}개 제거 → 존 {kept.Count}개");
     }
 
     /// <summary>랜덤 스폰 + 매치 탈출 활성 디렉터(런타임).</summary>
