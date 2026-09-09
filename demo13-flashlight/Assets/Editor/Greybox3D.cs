@@ -63,6 +63,9 @@ public static class Greybox3D
     public static Lighting3D.Preset ScenePreset = Lighting3D.Preset.Outdoor;
 
     static float S(float v) => v * PlanScale;
+
+    /// <summary>평면 좌표(2D 빌더의 x,y) → 3D 로컬 위치. 지면은 XZ, 높이는 Y.</summary>
+    public static Vector3 Plan(float x, float y) => new Vector3(S(x), 0f, S(y));
     // ── 재질 ─────────────────────────────────────────────────────────
     static Material _floor, _wall, _barricade, _car, _prop, _door;
 

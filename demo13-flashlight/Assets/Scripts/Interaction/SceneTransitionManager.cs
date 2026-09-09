@@ -172,9 +172,6 @@ public class SceneTransitionManager : MonoBehaviour
             // Systems(부트) 씬은 유지하고, 게임플레이 콘텐츠 씬만 additive로 교체한다.
             // 1) 현재 게임플레이 씬 기억 → 2) 새 씬 additive 로드 → 3) 새 씬을 Active로 →
             // 4) 이전 게임플레이 씬 언로드 (Systems는 절대 언로드 안 함).
-            Scene prev = SceneManager.GetActiveScene();
-            bool prevIsGameplay = SystemsScene.IsGameplayScene(prev) && prev.isLoaded;
-
             AsyncOperation op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
             if (op != null)
             {
@@ -186,9 +183,23 @@ public class SceneTransitionManager : MonoBehaviour
             if (loaded.IsValid())
                 SceneManager.SetActiveScene(loaded);
 
-            if (prevIsGameplay && prev.IsValid() && prev != loaded)
+            // ⚠️ **남아 있는 게임플레이 씬을 전부** 언로드한다(Systems는 제외).
+            //    예전엔 전환 직전의 **활성 씬 하나만** 지웠는데, 그 순간 활성 씬이 Systems이면
+            //    아무것도 안 지워진다 — 실제로 레이드 탈출 후 Zone1(메시 1311·라이트 117)이
+            //    마을과 함께 그대로 남아 있었다. 메모리가 두 배로 물리고 두 맵이 겹쳐 돈다.
+            //    "무엇이 이전 씬이었나"를 추측하는 대신 "지금 남아도 되는 건 새 씬뿐"으로 뒤집는다.
+            var stale = new System.Collections.Generic.List<Scene>();
+            for (int i = 0; i < SceneManager.sceneCount; i++)
             {
-                AsyncOperation un = SceneManager.UnloadSceneAsync(prev);
+                var s = SceneManager.GetSceneAt(i);
+                if (!s.isLoaded || s == loaded) continue;
+                if (!SystemsScene.IsGameplayScene(s)) continue;   // Systems·MapTool은 유지
+                stale.Add(s);
+            }
+            foreach (var s in stale)
+            {
+                if (!s.IsValid() || !s.isLoaded) continue;
+                AsyncOperation un = SceneManager.UnloadSceneAsync(s);
                 if (un != null)
                 {
                     while (!un.isDone)

@@ -165,7 +165,8 @@ public class EnemySpeechBubble : MonoBehaviour
         speaking    = true;
         shownCone   = -1;                            // 강제 갱신
         RefreshConeText();
-        SetVisible(true);
+        // 시야 밖이면 말도 안 띄운다 — 말풍선이 곧 위치 표시가 되어 버린다.
+        SetVisible(!_visionHidden);
     }
 
     void StopSpeak()
@@ -199,6 +200,19 @@ public class EnemySpeechBubble : MonoBehaviour
 
     // ── 비주얼 ───────────────────────────────────────────────────────────────
     void SetVisible(bool v) { if (bubbleRoot != null) bubbleRoot.SetActive(v); }
+
+    /// <summary>시야 콘 밖이면 말풍선도 내린다(<see cref="EnemyController.SetVisionVisible"/>가 호출).
+    ///
+    /// ⚠️ 몸은 숨기는데 말풍선만 남기면 **그게 곧 적의 위치 표시**가 되어 시야 콘이 무의미해진다.
+    /// 게다가 말풍선은 2D 스프라이트라, 3D 몸이 사라진 자리에 납작한 판만 떠 있게 된다.</summary>
+    public void SetVisionVisible(bool v)
+    {
+        _visionHidden = !v;
+        if (!v) SetVisible(false);
+        // 다시 보일 때는 켜지 않는다 — 말할 때가 되면 대사 로직이 알아서 띄운다.
+    }
+
+    bool _visionHidden;
 
     void BuildBubble()
     {

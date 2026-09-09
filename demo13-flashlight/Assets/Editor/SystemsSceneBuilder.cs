@@ -57,6 +57,7 @@ public static class SystemsSceneBuilder
         typeof(StoryPlayer),
         typeof(StoryTriggerManager),
         typeof(RaidMapManager),        // 내비게이션: 레이드 맵 상태 + 지역별 영속 지식(지도판 누적)
+        typeof(RaidManager),           // 레이드 타이머·루트 추적·정산 — 레이드 씬 로드 시 BeginRaid(내부 씬 왕복에도 유지)
         typeof(SceneTransitionManager),
     };
 

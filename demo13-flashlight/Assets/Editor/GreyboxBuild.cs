@@ -175,6 +175,23 @@ public static class GreyboxBuild
         go.transform.localPosition = new Vector3(x, y, 0f); return 1;
     }
 
+    /// <summary>빈 앵커(컴포넌트는 호출자가 붙인다). 프리팹 없이 좌표만 필요한 마커용 —
+    /// 빌더가 직접 <c>new GameObject</c>로 만들면 3D 평면 변환(축 교환·PlanScale)을 통째로
+    /// 건너뛴다(지역1 바닥 루트 앵커 30개가 실제로 XY평면 z=0에 남아 아이템이 허공에 떨어졌다).</summary>
+    public static GameObject Point(GameObject p, string name, float x, float y)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(p.transform, false);
+        go.transform.localPosition = Use3D ? Greybox3D.Plan(x, y) : new Vector3(x, y, 0f);
+        return go;
+    }
+
+    /// <summary>평면 크기(폭·깊이) → 배치용 3D 크기. 3D는 맵을 PlanScale배로 굽기 때문에
+    /// 영역(적 스폰 존 등)도 같이 키우지 않으면 맵만 커지고 존은 그대로 좁아진다.</summary>
+    public static Vector3 PlanSize(float w, float h)
+        => Use3D ? new Vector3(w * Greybox3D.PlanScale, 0f, h * Greybox3D.PlanScale)
+                 : new Vector3(w, 0f, h);
+
     /// <summary>쪽지(gb_note) + 내용 주입(읽으면 NoteUI 전체화면).</summary>
     public static int Note(GameObject p, string name, float x, float y, string title, string content)
     {

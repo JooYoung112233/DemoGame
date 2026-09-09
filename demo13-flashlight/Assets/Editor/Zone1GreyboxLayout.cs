@@ -255,12 +255,23 @@ public static class Zone1GreyboxLayout
         if (GreyboxBuild.Marker(map, "gb_exit", name, x, y) == 0) return 0;
         KeepOut(x, y);   // 탈출구 자리도 비워 둔다
         var go = FindChild(map.transform, name);
-        var io = go != null ? go.GetComponentInChildren<InteractableObject>() : null;
+        if (go == null) return 1;
+
+        // 3D 그레이박스의 gb_exit는 **상자만** 세운다(기능은 호출부 책임 — Greybox3D 주석).
+        //   이걸 빠뜨려서 Exit_Fixed·PX_* 4곳이 상호작용 없는 장식으로 남았고,
+        //   지역1의 실제 탈출구는 맨홀 하나뿐이었다(고정1+랜덤2 설계가 통째로 죽어 있었다).
+        var io = go.GetComponentInChildren<InteractableObject>();
+        if (io == null && GreyboxBuild.Use3D)
+        {
+            io = go.gameObject.AddComponent<InteractableObject>();
+            io.Configure(InteractableObject.InteractType.ExitPoint, "탈출하기", 2.0f);
+        }
         if (io != null)
         {
             var so = new SerializedObject(io);
             var ts = so.FindProperty("targetScene");   if (ts != null) ts.stringValue = "Safehouse";
-            var sp = so.FindProperty("spawnPointId");  if (sp != null) sp.stringValue = "default";
+            // 귀환 스폰은 안전구역 1곳으로 통합됨 — 맨홀과 같은 raid_return.
+            var sp = so.FindProperty("spawnPointId");  if (sp != null) sp.stringValue = "raid_return";
             var ew = so.FindProperty("exitWaitTime");  if (ew != null) ew.floatValue = 5f;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -402,9 +413,7 @@ public static class Zone1GreyboxLayout
         for (int i = 0; i < ground; i++)
         {
             if (!PickHuggingPoint(rnd, x0, y0, x1, y1, out float x, out float y)) continue;
-            var go = new GameObject($"{prefix}_G{i}");
-            go.transform.SetParent(map.transform, false);
-            go.transform.localPosition = new Vector3(x, y, 0f);
+            var go = GreyboxBuild.Point(map, $"{prefix}_G{i}", x, y);
             SetSpawnType(go.AddComponent<ItemSpawnPoint>(), 0);   // Ground
             n++;
         }
@@ -445,10 +454,8 @@ public static class Zone1GreyboxLayout
         //   → 중심을 실외로 스냅하고, 건물에 걸치지 않게 크기를 줄인다.
         SnapOutdoors(ref cx, ref cy, ref w, ref h);
 
-        var go = new GameObject(name);
-        go.transform.SetParent(map.transform, false);
-        go.transform.localPosition = new Vector3(cx, cy, 0f);
-        go.AddComponent<SpawnZone>().Setup(new Vector3(w, 0f, h), count, unitKey);
+        var go = GreyboxBuild.Point(map, name, cx, cy);
+        go.AddComponent<SpawnZone>().Setup(GreyboxBuild.PlanSize(w, h), count, unitKey);
         return 1;
     }
 

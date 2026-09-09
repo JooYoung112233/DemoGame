@@ -111,6 +111,11 @@ public class WorldItem : MonoBehaviour
         {
             Debug.Log($"[WorldItem] {Item.DisplayName} 획득");
 
+            // 정산 획득 목록 — 여기가 실제 바닥 줍기 경로다(InteractableObject의 TrackLoot는
+            // WorldItem이 없을 때만 타는 폴백 분기라, 이게 없으면 정산에 전리품이 하나도 안 잡힌다).
+            if (RaidManager.Instance != null)
+                RaidManager.Instance.TrackLoot(Item);
+
             // 수집형 퀘스트 목표 카운트 — E키 픽업(InteractableObject:340)과 동일 훅.
             // 이게 없으면 바닥 줍기/클러스터(GroundPickupUI) 픽업이 BQ/DQ 수집 목표에 안 잡힌다.
             if (QuestManager.Instance != null && Item.data != null)

@@ -104,9 +104,15 @@ public class RaidSpawnDirector : MonoBehaviour
     {
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player == null) return;
-        pos.z = player.transform.position.z;
-        var rb = player.GetComponent<Rigidbody2D>();
-        if (rb != null) rb.position = pos;          // Rigidbody2D는 position으로 옮겨야 물리와 어긋나지 않음
+        // 3D: 지면 평면은 XZ, 높이는 Y. (2D 시절엔 z가 정렬 깊이라 z를 보존했는데,
+        //  그대로 두면 X만 옮겨지고 Z는 직전 씬 값이 남아 스폰이 맵 밖으로 튄다.)
+        pos.y = player.transform.position.y;
+        var rb = player.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.position = pos;                      // Rigidbody는 position으로 옮겨야 물리와 어긋나지 않음
+        }
         player.transform.position = pos;
 
         // 카메라 즉시 스냅 — 없으면 직전 위치(안전가옥 등)에서 최대 300u를 Lerp로 날아가는 게 보인다.

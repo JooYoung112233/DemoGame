@@ -122,9 +122,7 @@ public static class InteriorBuild
     /// <summary>바닥 루트 앵커(ItemSpawnPoint.Ground) — 예산제가 분배.</summary>
     public static int GroundLoot(GameObject m, string name, float x, float y)
     {
-        var go = new GameObject(name);
-        go.transform.SetParent(m.transform, false);
-        go.transform.localPosition = new Vector3(x, y, 0f);
+        var go = GreyboxBuild.Point(m, name, x, y);
         SetType(go.AddComponent<ItemSpawnPoint>(), 0);
         return 1;
     }
@@ -150,10 +148,8 @@ public static class InteriorBuild
     /// <summary>적 스폰 존.</summary>
     public static int Enemy(GameObject m, string name, float cx, float cy, float w, float h, string unitKey, int count)
     {
-        var go = new GameObject(name);
-        go.transform.SetParent(m.transform, false);
-        go.transform.localPosition = new Vector3(cx, cy, 0f);
-        go.AddComponent<SpawnZone>().Setup(new Vector3(w, 0f, h), count, unitKey);
+        var go = GreyboxBuild.Point(m, name, cx, cy);
+        go.AddComponent<SpawnZone>().Setup(GreyboxBuild.PlanSize(w, h), count, unitKey);
         return 1;
     }
 

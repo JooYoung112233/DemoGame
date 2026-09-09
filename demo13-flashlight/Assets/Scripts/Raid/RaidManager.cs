@@ -78,11 +78,41 @@ public class RaidManager : MonoBehaviour
 
     void Start()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        // 레이드 씬에서 바로 Play한 경우 — 씬 로드 이벤트가 이미 지나갔으므로 여기서 시작 판정.
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+            if (IsRaidScene(SceneManager.GetSceneAt(i).name)) { BeginRaid(); break; }
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (IsRaidScene(scene.name)) BeginRaid();
+        else if (scene.name == failExitScene) StopRaid();   // 안전가옥 복귀 = 레이드 종료
+    }
+
+    /// <summary>이 씬이 레이드 맵인가(= 월드 지역 카탈로그에 등재된 씬).
+    /// 건물 내부 씬은 카탈로그에 없으므로 내부를 드나들어도 레이드가 재시작되지 않는다.</summary>
+    public static bool IsRaidScene(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName)) return false;
+        for (int i = 0; i < WorldRegionCatalog.All.Length; i++)
+            if (WorldRegionCatalog.All[i].sceneName == sceneName) return true;
+        return false;
+    }
+
+    /// <summary>레이드 시작. 이미 진행 중이면 무시 — 내부 씬 왕복으로 타이머·전리품이 리셋되지 않게.</summary>
+    public void BeginRaid()
+    {
+        if (raidActive) return;
+
         if (GameTuning.Instance != null) raidDuration = GameTuning.Instance.raidDuration;
         remainingTime = raidDuration;
         raidStartTime = Time.time;
         raidActive = true;
         raidEnded = false;
+        _deathHandled = false;
+        lootedItems.Clear();
+        killXp = 0;
         PendingResult = true;   // 레이드 시작 → 귀환 시 정산 표시 대상
         LastSettlement = null;  // 이전 레이드 정산 레코드 폐기
         startInvValue = CurrentInventoryValue();   // 루팅 XP 기준점 (플레이어는 영속 PlayerRig라 이 시점 존재)
@@ -91,8 +121,16 @@ public class RaidManager : MonoBehaviour
         Debug.Log($"[RaidManager] 레이드 시작! 제한시간: {raidDuration}초");
     }
 
+    /// <summary>레이드 상태 해제(타이머·HUD 정지). 정산은 탈출/사망/시간초과에서 이미 처리됨.</summary>
+    void StopRaid()
+    {
+        raidActive = false;
+        raidEnded = true;
+    }
+
     void OnDestroy()
     {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         if (_playerHealth != null) _playerHealth.OnDeath -= OnPlayerDeath;
         if (Instance == this)
             Instance = null;
@@ -416,7 +454,7 @@ public class RaidManager : MonoBehaviour
 
     void OnGUI()
     {
-        if (!enableTimer || raidEnded) return;
+        if (!enableTimer || raidEnded || !raidActive) return;
 
         InitStyles();
 

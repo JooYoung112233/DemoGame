@@ -21,6 +21,9 @@ public class EnemyController : MonoBehaviour
     MeleeWeaponVisual _weaponVis;   // 그레이박스 칼 (연출 전용 — 판정은 AttackPerformer)
     GreyboxLimbs _limbs;            // 머리·몸통·팔·다리 실루엣 (부위 조준이 눈에 읽히게)
     bool _nextIsHeavy;              // 이번 공격이 강공인가 (예비동작 진입 시 결정)
+    BanditEnemyVisual _banditVisual;
+    float _banditAttackElapsed, _banditAttackDuration, _banditHitAt;
+    bool _banditPendingHit;
     int  _lightStreak;              // 약공 연속 횟수 — N회 넘으면 강제로 강공
 
     [Header("Detection")]
@@ -172,12 +175,28 @@ public class EnemyController : MonoBehaviour
         // 안 끄면 시야 밖 적의 "적" 글자만 어둠 속에 떠서 위치가 노출된다.
         if (_label != null) _label.SetVisible(v);
         if (_weaponVis != null) _weaponVis.SetVisible(v);   // 칼도 루트의 자식이라 같이 꺼줘야 한다
+        if (_banditVisual != null)
+        {
+            _banditVisual.SetVisible(v);
+            if (spriteRenderer != null) spriteRenderer.enabled = false;
+        }
         if (!v)
         {
+            // ⚠️ **머리 위 표시물을 전부** 내린다. 예전엔 HP바만 껐는데, 몸(3D 상자)이
+            //    사라진 자리에 그로기바·말풍선 같은 **납작한 2D 스프라이트만 남아 떠 있었다.**
+            //    화면에는 "적이 아직 2D로 나온다"로 보이고, 동시에 시야 밖 적의 위치가
+            //    그대로 노출된다 — 시야 콘의 의미가 사라진다.
             if (hpBarBg != null) hpBarBg.SetActive(false);
             if (hpBarFill != null) hpBarFill.SetActive(false);
+            if (groggyBarBg != null) groggyBarBg.SetActive(false);
+            if (groggyBarFill != null) groggyBarFill.SetActive(false);
+            if (alertMark != null) alertMark.SetActive(false);
         }
-        // 다시 보이면 UpdateHPBar가 다음 프레임에 필요 시 재표시.
+        // 말풍선도 시야를 따른다 — 몸이 안 보이는데 말만 떠 있으면 그게 곧 위치 표시다.
+        var bubble = GetComponent<EnemySpeechBubble>();
+        if (bubble != null) bubble.SetVisionVisible(v);
+
+        // 다시 보이면 UpdateHPBar/UpdateGroggyBar가 다음 프레임에 필요 시 재표시.
     }
 
     void Awake()
@@ -257,6 +276,21 @@ public class EnemyController : MonoBehaviour
         }
 
         ApplyUnitLook();   // 크기·색으로 종류를 구분 — 여태 StatDB의 scale/tintColor가 **한 번도 안 쓰였다**
+        if (!string.IsNullOrEmpty(unitKey) && unitKey.StartsWith("bandit_", System.StringComparison.Ordinal))
+        {
+            var visual = gameObject.AddComponent<BanditEnemyVisual>();
+            float scale = unitStat != null ? Mathf.Clamp(unitStat.scale / 2f, .5f, 3f) : 1f;
+            if (visual.Initialize(this, scale))
+            {
+                _banditVisual = visual;
+                if (_limbs != null) { Destroy(_limbs.gameObject); _limbs = null; }
+                if (_weaponVis != null) { Destroy(_weaponVis.gameObject); _weaponVis = null; }
+                if (animController != null) { animController.enabled = false; animController = null; }
+                if (spriteRenderer != null) spriteRenderer.enabled = false;
+                _banditVisual.SetVisible(_visionVisible);
+            }
+            else Destroy(visual);
+        }
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 
@@ -448,6 +482,7 @@ public class EnemyController : MonoBehaviour
             windupFlashTimer = 0;
             SetVelocity(Vector2.zero);
             FacePlayer();
+            _banditVisual?.Windup(windupTimer);
             return;
         }
 
@@ -574,6 +609,21 @@ public class EnemyController : MonoBehaviour
 
     void UpdateAttack()
     {
+        if (_banditVisual != null)
+        {
+            SetVelocity(Vector2.zero);
+            _banditAttackElapsed += Time.deltaTime;
+            if (_banditPendingHit && _banditAttackElapsed >= _banditHitAt)
+            {
+                _banditPendingHit = false;
+                ImmediateMeleeHit();
+            }
+            if (_banditAttackElapsed >= _banditAttackDuration)
+            {
+                _banditVisual.CancelAttack(); state = State.Chase;
+            }
+            return;
+        }
         if (animController == null || animController.IsAnimComplete)
             state = State.Chase;
     }
@@ -611,6 +661,23 @@ public class EnemyController : MonoBehaviour
             ? (Plan3D.ToPlan(player.position) - Plan3D.ToPlan(transform.position)).normalized
             : _attackDir;
         _attackDir = dir;
+        if (_banditVisual != null)
+        {
+            _banditAttackElapsed = 0;
+            _banditAttackDuration = attackData != null ? attackData.Duration : .65f;
+            _banditHitAt = _banditAttackDuration * .34f;
+            if (attackData != null && attackData.windows.Count > 0)
+            {
+                int first = int.MaxValue;
+                foreach (var window in attackData.windows) first = Mathf.Min(first, window.startFrame);
+                _banditHitAt = first / Mathf.Max(1f, attackData.fps);
+            }
+            _banditPendingHit = attackData == null;
+            _banditVisual.Attack(_banditAttackDuration, _banditHitAt);
+            if (attackData != null) _performer.Perform(attackData);
+            if (_nextIsHeavy) _lightStreak = 0; else _lightStreak++;
+            return;
+        }
         _weaponVis?.SetFacing(dir);
         // 약공/강공 모두 **우 → 좌**. 강공은 뒤로 당겼다가 더 빠르게(SwingHeavy).
         if (_nextIsHeavy) { _weaponVis?.SwingHeavy(0.26f, true); _lightStreak = 0; }
@@ -673,6 +740,8 @@ public class EnemyController : MonoBehaviour
         hitTimer = HitStun * 1.5f;
         _cancelBonusUntil = Time.time + 0.05f;   // 직후 OnDamaged가 hitTimer를 덮어쓰지 못하게(아래 참조)
         _performer?.Cancel();                    // 캔슬된 공격의 히트박스가 계속 판정 내는 것 방지
+        _banditPendingHit = false;
+        _banditVisual?.CancelAttack();
         SetVelocity(Vector2.zero);
         RestoreTint();
         SetTint(new Color(1f, 1f, 0.5f));
@@ -842,6 +911,7 @@ public class EnemyController : MonoBehaviour
         ShowAlertMark(false);   // 조사 중 피격 시 '?' 잔류 방지
         state    = State.Hit;
         // 방금 예비동작 캔슬로 1.5배 경직을 받았다면 그 값을 유지(덮어쓰기 금지).
+        if (_banditVisual != null) { _banditPendingHit = false; _banditVisual.CancelAttack(); _performer?.Cancel(); }
         if (Time.time >= _cancelBonusUntil) hitTimer = HitStun;
         SetVelocity(Vector2.zero);
         SetTint(new Color(1f, 0.5f, 0.5f));
@@ -851,6 +921,8 @@ public class EnemyController : MonoBehaviour
     void OnDeath()
     {
         state         = State.Dead;
+        _banditPendingHit = false;
+        _banditVisual?.Die();
         _performer?.Cancel();   // 죽는 순간 진행 중이던 공격 판정이 계속 나가는 것 방지(2026-07-11)
         _rb.detectCollisions = false;
         RestoreTint();
@@ -1001,7 +1073,11 @@ public class EnemyController : MonoBehaviour
         WorldItem.Drop(item, transform.position + new Vector3(r.x, r.y, 0f));
     }
 
-    void OnGroggyTriggered() { ShowAlertMark(false); state = State.Stunned; SetVelocity(Vector2.zero); }
+    void OnGroggyTriggered()
+    {
+        ShowAlertMark(false); state = State.Stunned; SetVelocity(Vector2.zero);
+        if (_banditVisual != null) { _banditPendingHit = false; _banditVisual.CancelAttack(); _performer?.Cancel(); }
+    }
 
     void OnGroggyRecovered()
     {
@@ -1044,7 +1120,7 @@ public class EnemyController : MonoBehaviour
     }
 
     float DistToPlayer()
-        => player == null ? float.MaxValue : Vector2.Distance(transform.position, player.position);
+        => player == null ? float.MaxValue : Vector2.Distance(Plan3D.ToPlan(transform.position), Plan3D.ToPlan(player.position));
 
     void FacePlayer()
     {
@@ -1056,6 +1132,7 @@ public class EnemyController : MonoBehaviour
 
     void FlipSprite(Vector2 dir)
     {
+        _banditVisual?.SetFacing(dir);
         // 3D 몸은 좌우 뒤집기가 아니라 회전이다 — 쿼터뷰에선 앞뒤도 보인다.
         if (_limbs != null) _limbs.SetFacing(dir);
         if (spriteRenderer != null && Mathf.Abs(dir.x) > 0.01f)
@@ -1064,6 +1141,7 @@ public class EnemyController : MonoBehaviour
 
     void SetTint(Color c)
     {
+        _banditVisual?.SetTint(c == originalColor ? (_isScavenger ? new Color(.75f,.6f,1f) : Color.white) : c);
         if (spriteRenderer != null) spriteRenderer.color = c;
         // 팔다리가 몸을 대신하므로 색도 그쪽으로 — 안 그러면 예비동작 깜빡임이 안 보인다.
         if (_limbs != null) _limbs.SetTint(c);
