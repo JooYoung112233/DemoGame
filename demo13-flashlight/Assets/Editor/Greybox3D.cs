@@ -81,10 +81,26 @@ public static class Greybox3D
         _door      = Mat(new Color(0.20f, 0.17f, 0.15f), 0.10f);
     }
 
+    /// <summary>컷어웨이가 필요 없는 것들의 재질 — **Stage 0에서 정한 스타일라이즈드 룩**을 쓴다.
+    ///
+    /// ⚠️ `BRB/Stylized`는 Stage 0에서 룩을 확정하며 만들어 놓고 **어디에도 안 걸려 있었다.**
+    ///    맵도 캐릭터도 기본 URP/Lit이라, 정해 둔 아트 방향(무광·부드러운 명암·림라이트)이
+    ///    화면에 전혀 반영되지 않았다. 특히 림라이트는 Stage 0 함정 ③(어두운 팔레트가
+    ///    배경에 묻힌다)에 직접 듣는 항목이다.
+    ///
+    /// <paramref name="smooth"/>는 URP/Lit 폴백에서만 쓰인다 — 스타일라이즈드는 무광이 전제다.</summary>
     static Material Mat(Color c, float smooth)
     {
-        var sh = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-        var m = new Material(sh);
+        var sh = Shader.Find("BRB/Stylized");
+        if (sh != null)
+        {
+            var s = new Material(sh);
+            s.SetColor("_BaseColor", c);
+            return s;
+        }
+
+        var lit = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+        var m = new Material(lit);
         if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c);
         if (m.HasProperty("_Color")) m.SetColor("_Color", c);
         if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", smooth);

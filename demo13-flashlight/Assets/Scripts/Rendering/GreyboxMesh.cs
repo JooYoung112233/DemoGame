@@ -35,12 +35,18 @@ public static class GreyboxMesh
         }
     }
 
-    /// <summary>색만 다른 단색 Lit 머티리얼(색별 공유).</summary>
+    /// <summary>색만 다른 단색 머티리얼(색별 공유).
+    ///
+    /// Stage 0에서 정한 <c>BRB/Stylized</c>(무광·부드러운 명암·림라이트)를 쓴다 —
+    /// 적 몸·무기·떨어진 아이템이 맵과 같은 룩으로 서야 한 화면으로 읽힌다.
+    /// 림라이트는 어두운 팔레트에서 실루엣이 배경에 묻히는 문제에 직접 듣는다.</summary>
     public static Material Material(Color c)
     {
         if (_mats.TryGetValue(c, out var cached) && cached != null) return cached;
 
-        var sh = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+        var sh = Shader.Find("BRB/Stylized")
+              ?? Shader.Find("Universal Render Pipeline/Lit")
+              ?? Shader.Find("Standard");
         var m = new Material(sh) { name = $"gb_{ColorUtility.ToHtmlStringRGB(c)}" };
         if (m.HasProperty(BaseColorID)) m.SetColor(BaseColorID, c);
         if (m.HasProperty(ColorID))     m.SetColor(ColorID, c);

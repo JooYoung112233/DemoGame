@@ -208,8 +208,18 @@ public static class Safehouse3DLayout
     }
 
     // ── 기본 헬퍼 ───────────────────────────────────────────────────
+    /// <summary>컷어웨이가 필요 없는 것들(지면·실내 바닥·셔터·문틀).
+    /// Stage 0에서 정한 스타일라이즈드 룩을 쓴다 — 레이드 맵(<c>Greybox3D</c>)과 같은 재질이어야
+    /// 마을과 레이드가 한 게임으로 보인다.</summary>
     static Material Lit(Color c, float s)
     {
+        var sty = Shader.Find("BRB/Stylized");
+        if (sty != null)
+        {
+            var sm = new Material(sty);
+            sm.SetColor("_BaseColor", c);
+            return sm;
+        }
         var m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         m.SetColor("_BaseColor", c); m.SetFloat("_Smoothness", s);
         return m;

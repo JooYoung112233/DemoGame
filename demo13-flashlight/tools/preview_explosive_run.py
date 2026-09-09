@@ -4,6 +4,7 @@ from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[1];CACHE=ROOT/'Library/CodexBlender/ExplosiveReview';OUT=ROOT/'Assets/ChibiSurvivor/Player/ExplosiveRunReview'
 p=argparse.ArgumentParser();p.add_argument('--input');p.add_argument('--out');p.add_argument('--cache');p.add_argument('--stem',default='ExplosiveRunPreview')
 p.add_argument('--label',default='패키지 달리기')
+p.add_argument('--engine',choices=['BLENDER_EEVEE_NEXT','CYCLES'],default='BLENDER_EEVEE_NEXT')
 args=p.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 source=Path(args.input) if args.input else CACHE/'Render.blend'
 if args.out:OUT=Path(args.out)
@@ -26,7 +27,7 @@ for f in range(1,end+1):
 stats['loop_seam_max_vertex_m']=max((Vector(a)-Vector(b)).length for a,b in zip(poses[1],poses[end]))
 assert stats['loop_seam_max_vertex_m']<.01,stats['loop_seam_max_vertex_m']
 stats['review_findings']=['Existing sleeve geometry and weights have not been modified.','Head gaze adjusted; original oscillation preserved.' if stats.get('head_gaze_adjusted') else 'Original head rotation preserved.','No Unity Humanoid Avatar validation performed.']
-stats['preview']='Actual imported FBX joint animation retargeted in Blender at native clip timing; in-place.'
+stats['preview']=stats.get('preview_description','Actual imported FBX joint animation retargeted in Blender at native clip timing; in-place.')
 (OUT/'RetargetCheck.json').write_text(json.dumps(stats,indent=2))
 def movie():
  scene.render.image_settings.file_format='FFMPEG';scene.render.ffmpeg.format='MPEG4';scene.render.ffmpeg.codec='H264';scene.render.ffmpeg.constant_rate_factor='HIGH';scene.render.ffmpeg.audio_codec='NONE'
@@ -37,7 +38,9 @@ def exact(path):
 mat=bpy.data.materials.new('ReviewGround');mat.diffuse_color=(.05,.055,.05,1)
 bpy.ops.mesh.primitive_plane_add(size=200,location=(0,0,-.002));bpy.context.object.data.materials.append(mat)
 scene.frame_start=1;scene.frame_end=count
-scene.render.engine='BLENDER_EEVEE_NEXT';scene.eevee.taa_render_samples=24
+scene.render.engine=args.engine
+if args.engine=='CYCLES':scene.cycles.device='CPU';scene.cycles.samples=12;scene.cycles.use_denoising=True
+else:scene.eevee.taa_render_samples=24
 scene.render.resolution_x=480;scene.render.resolution_y=600;scene.render.resolution_percentage=100;scene.render.fps=30
 for name,position in [('Front',(-4.8,-7,1.9)),('Side',(-7,-.4,1.65))]:
  scene.camera.location=position;scene.camera.rotation_euler=(Vector((0,0,.79))-scene.camera.location).to_track_quat('-Z','Y').to_euler();scene.camera.data.ortho_scale=1.98
