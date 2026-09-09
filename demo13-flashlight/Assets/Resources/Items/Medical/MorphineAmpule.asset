@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: morphine_ampule
   displayName: "\uBAA8\uB974\uD540 \uC570\uD50C"
-  description: "\uAC15\uD55C \uD1B5\uC99D"
+  description: "통증을 눌러 HP를 35 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 1
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 2800
   buyPrice: 6000
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 35
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: 5e2faf927a80c1b42bd88fdae3465942, type: 2}
   worldDropPrefab: {fileID: 0}

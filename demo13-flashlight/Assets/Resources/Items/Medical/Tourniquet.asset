@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: tourniquet
   displayName: "\uC9C0\uD608\uB300"
-  description: "\uC0AC\uC9C0 \uCD9C\uD608"
+  description: "사지를 묶어 HP를 30 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 2
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 1000
   buyPrice: 2400
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 30
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: 7b952d77517ea3f448f801c6975f282e, type: 2}
   worldDropPrefab: {fileID: 0}

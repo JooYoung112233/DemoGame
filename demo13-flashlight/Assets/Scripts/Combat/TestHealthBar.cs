@@ -7,7 +7,7 @@ using UnityEngine;
 /// 나중에 통째로 빼야 하므로 **다른 코드가 이걸 참조하지 않는다** — 스스로 Health를 찾아 그리기만 한다.
 /// 이 컴포넌트를 지우면 그걸로 끝이고, 게임 로직엔 아무 흔적도 남지 않는다.
 ///
-/// 부위별 부상(`PlayerMedicalSystem`)이 들어와도 **전체 HP 바는 계속 필요하다** —
+/// 적 부위 부상(`UnitInjuries`)이 있어도 **전체 HP 바는 계속 필요하다** —
 /// "어디를 다쳤나"와 "얼마나 남았나"는 다른 정보다.
 /// </summary>
 public class TestHealthBar : MonoBehaviour

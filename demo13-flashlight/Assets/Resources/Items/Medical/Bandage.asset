@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: bandage
   displayName: "\uBD95\uB300"
-  description: "\uCD9C\uD608\uC744 \uCE58\uB8CC\uD55C\uB2E4. 2\uCD08 \uC18C\uC694."
+  description: "상처를 감아 HP를 15 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 2
@@ -26,11 +26,10 @@ MonoBehaviour:
   sellPrice: 500
   buyPrice: 1200
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 15
   useTimeSeconds: 5
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: 0da1141c02a64d942b80e40dcb20ca42, type: 2}
   worldDropPrefab: {fileID: 0}

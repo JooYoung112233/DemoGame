@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: antidote
   displayName: "\uD574\uB3C5\uC81C"
-  description: "\uC911\uB3C5 \uC644\uD654"
+  description: "중독을 씻어낸다. HP를 25 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 1
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 1000
   buyPrice: 2400
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 25
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: d3b70a07f304a8c45b66376357805044, type: 2}
   worldDropPrefab: {fileID: 0}

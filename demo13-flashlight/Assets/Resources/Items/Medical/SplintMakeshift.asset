@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: splint_makeshift
   displayName: "\uC784\uC2DC \uBD80\uBAA9"
-  description: "\uACE8\uC808 \uC751\uAE09"
+  description: "급조한 부목. HP를 15 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 2
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 500
   buyPrice: 1200
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 15
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: 3bec99481a4cced4fb74a1d4d5c0d00e, type: 2}
   worldDropPrefab: {fileID: 0}

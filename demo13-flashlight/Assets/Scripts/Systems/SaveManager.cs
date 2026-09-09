@@ -564,7 +564,6 @@ public class SaveManager : MonoBehaviour
             }
             playerGO.GetComponent<SurvivalStats>()?.ResetForNewGame();
             playerGO.GetComponent<Health>()?.FullHeal();
-            playerGO.GetComponent<PlayerMedicalSystem>()?.HealAll();
         }
         else
         {

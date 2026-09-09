@@ -1,6 +1,19 @@
 using UnityEngine;
 
 /// <summary>
+/// 몸의 부위 — **어디를 맞았나**에만 쓴다.
+/// (원래 `Medical/BodyPart.cs`에 있었으나 2026-09-09 부위별 의료 폐기로 여기로 이관)
+/// </summary>
+public enum BodyPartType
+{
+    Head,       // 머리 — 데미지 배율 최대
+    Torso,      // 몸통 — 기준
+    Arms,       // 양팔
+    LeftLeg,    // 왼다리
+    RightLeg,   // 오른다리
+}
+
+/// <summary>
 /// 어디를 맞았나 — 피격 지점을 몸의 **부위**로 옮긴다. (docs/combat.md "부위 피격")
 ///
 /// 2026-07-29 사용자 결정: **근접도 총과 똑같이 조준한 곳이 맞는다.**
@@ -8,8 +21,8 @@ using UnityEngine;
 ///   **위아래가 곧 몸의 높이**다. 위를 노리면 머리, 아래를 노리면 다리 — 조준점만으로 읽힌다.
 ///   조준점이 없는 쪽(적의 공격)은 가중 랜덤으로 떨어진다.
 ///
-/// `PlayerMedicalSystem`의 5부위와 같은 enum(`BodyPartType`)을 쓴다 — 부위 부상이 붙을 때
-/// 판정과 치료가 같은 언어를 쓰게 하려고. 여기서 새 부위 개념을 만들지 않는다.
+/// 부위는 **피격 판정과 데미지 배율**에만 쓴다 — 플레이어 부위별 치료(출혈/골절/통증)는
+/// 2026-09-09 RPG화 결정으로 폐기됐고, 적 부위 부상(`UnitInjuries`)만 남았다.
 /// </summary>
 public static class BodyZones
 {

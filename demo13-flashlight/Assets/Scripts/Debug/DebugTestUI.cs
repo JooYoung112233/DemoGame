@@ -17,7 +17,6 @@ public class DebugTestUI : MonoBehaviour
     string[] tabNames = { "플레이어", "경제/평판", "아이템", "하이드아웃", "씬" };
 
     // 레퍼런스
-    PlayerMedicalSystem medical;
     Health health;
     PlayerInventory inventory;
     PlayerEquipment equipment;
@@ -80,7 +79,7 @@ public class DebugTestUI : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // 씬 전환 시 레퍼런스 리셋
-        medical = null; health = null; inventory = null; equipment = null; flashlight = null;
+        health = null; inventory = null; equipment = null; flashlight = null;
     }
 
     void FindPlayer()
@@ -88,7 +87,6 @@ public class DebugTestUI : MonoBehaviour
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null)
         {
-            medical = playerGO.GetComponent<PlayerMedicalSystem>();
             health = playerGO.GetComponent<Health>();
             inventory = playerGO.GetComponent<PlayerInventory>();
             equipment = playerGO.GetComponent<PlayerEquipment>();
@@ -127,7 +125,7 @@ public class DebugTestUI : MonoBehaviour
 
     void DrawWindow(int windowID)
     {
-        if (medical == null) FindPlayer();
+        if (health == null) FindPlayer();
 
         float panelW = windowRect.width;
         float panelH = windowRect.height;
@@ -222,41 +220,6 @@ public class DebugTestUI : MonoBehaviour
         else GUILayout.Label("SurvivalStats 없음", labelStyle);
 
         GUILayout.Space(8);
-
-        // ── 의료 (간략) ──
-        GUILayout.Label("── 의료 (부상) ──", headerStyle);
-        if (medical != null)
-        {
-            BodyPartType[] parts = { BodyPartType.Head, BodyPartType.Torso, BodyPartType.Arms, BodyPartType.LeftLeg, BodyPartType.RightLeg };
-            string[] partNames = { "머리", "몸통", "양팔", "왼다리", "오른다리" };
-
-            for (int i = 0; i < parts.Length; i++)
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label(partNames[i], labelStyle, GUILayout.Width(80));
-                if (GUILayout.Button("출혈", smallBtnStyle, GUILayout.Width(60)))
-                    medical.InflictInjury(parts[i], InjuryType.Bleeding, 0.7f);
-                if (GUILayout.Button("골절", smallBtnStyle, GUILayout.Width(60)))
-                    medical.InflictInjury(parts[i], InjuryType.Fracture, 0.8f);
-                if (GUILayout.Button("통증", smallBtnStyle, GUILayout.Width(60)))
-                    medical.InflictInjury(parts[i], InjuryType.Pain, 0.5f);
-                GUILayout.EndHorizontal();
-            }
-
-            GUILayout.Space(4);
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("전체 치료", btnStyle)) medical.HealAll();
-            if (GUILayout.Button("랜덤 부상 x3", btnStyle))
-            {
-                medical.InflictRandomInjury(InjuryType.Bleeding, Random.Range(0.3f, 0.9f));
-                medical.InflictRandomInjury(InjuryType.Pain, Random.Range(0.3f, 0.7f));
-                medical.InflictRandomInjury(InjuryType.Fracture, Random.Range(0.5f, 1f));
-            }
-            GUILayout.EndHorizontal();
-
-            GUILayout.Label($"이속: {medical.MoveSpeedMultiplier * 100:F0}%  공속: {medical.AttackSpeedMultiplier * 100:F0}%", labelStyle);
-        }
-        else GUILayout.Label("의료 시스템 없음", labelStyle);
 
         // ── 소음 테스트 ──
         GUILayout.Space(8);

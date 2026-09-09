@@ -33,13 +33,11 @@ public class PlayerHitReaction : MonoBehaviour
     static readonly Color RedVignette = new Color(0.6f, 0f, 0f, 1f);
 
     Health              _health;
-    PlayerMedicalSystem _medical;
     TopDownPlayer       _player;
 
     void Awake()
     {
         _health  = GetComponent<Health>();
-        _medical = GetComponent<PlayerMedicalSystem>();
         _player  = GetComponent<TopDownPlayer>();
     }
 
@@ -53,8 +51,7 @@ public class PlayerHitReaction : MonoBehaviour
 
         var sem = ScreenEffectManager.Instance;
 
-        bool danger = (_health != null && _health.Percent < lowHpThreshold)
-                   || (_medical != null && _medical.HasAnyInjury);
+        bool danger = _health != null && _health.Percent < lowHpThreshold;
 
         if (danger)
         {

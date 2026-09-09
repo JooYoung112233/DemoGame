@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: painkiller
   displayName: "\uC9C4\uD1B5\uC81C"
-  description: "\uD1B5\uC99D\uC744 \uC989\uC2DC \uC644\uD654\uD55C\uB2E4."
+  description: "통증을 완화해 HP를 20 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 1
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 500
   buyPrice: 1200
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 20
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: abf4bbdfe4f3b9b47af8c3af5166ff71, type: 2}
   worldDropPrefab: {fileID: 0}

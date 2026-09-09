@@ -27,7 +27,6 @@ MonoBehaviour:
   isUsable: 0
   useEffect: 0
   effectValue: 0
-  medicalData: {fileID: 0}
   equipSlot: 5
   weaponData: {fileID: 11400000, guid: 9f10a2b3c4d5e6f708192a3b4c5d6e7f, type: 2}
   worldDropPrefab: {fileID: 0}

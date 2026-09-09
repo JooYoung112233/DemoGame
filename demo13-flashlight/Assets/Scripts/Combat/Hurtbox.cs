@@ -51,7 +51,7 @@ public class Hurtbox : MonoBehaviour
 
     /// <summary>부위까지 아는 피격(2026-07-29). hitPoint가 있으면 그 자리의 **부위 배율**이 곱해진다.
     ///
-    /// 부위는 `PlayerMedicalSystem`과 같은 `BodyPartType`을 쓴다 — 판정과 치료가 같은 언어를 쓰게.
+    /// 부위는 `BodyZones`의 `BodyPartType`을 쓴다 — 데미지 배율/적 부위 부상 판정용.
     /// hitPoint가 null이면(조준점 없는 공격) 가중 랜덤으로 부위를 뽑는다.</summary>
     public BodyPartType ReceiveHitAt(float damage, float groggyAmount, Vector2 hitDir, Vector3? hitPoint)
     {

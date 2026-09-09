@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: hemostatic_powder
   displayName: "\uC9C0\uD608 \uBD84\uB9D0"
-  description: "\uC989\uC2DC \uC9C0\uD608"
+  description: "즉시 지혈해 HP를 30 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 1
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 1000
   buyPrice: 2400
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 30
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: 47af3ef873b1ddd43a133a3d28954749, type: 2}
   worldDropPrefab: {fileID: 0}

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: splint
   displayName: "\uBD80\uBAA9"
-  description: "\uACE8\uC808\uC744 \uACE0\uC815\uD55C\uB2E4. 3\uCD08 \uC18C\uC694."
+  description: "부러진 곳을 고정한다. HP를 25 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 2
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 500
   buyPrice: 1200
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 25
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: 3104c1d65f75c9748b849c4133ab1927, type: 2}
   worldDropPrefab: {fileID: 0}

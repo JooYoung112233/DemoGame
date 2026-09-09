@@ -59,7 +59,7 @@ public enum ItemUseEffect
 {
     None,
     HealHP,          // HP 회복
-    HealInjury,      // 부상 치료 (MedicalItemData 연동)
+    HealInjury,      // [폐기 2026-09-09] 부위별 치료 제거 → HealHP로 흡수. enum 인덱스 보존용 예약 슬롯
     RestoreStamina,  // [미사용/deprecated] 스태미너 회복 — 2026-05-30 제거. enum 인덱스 보존용으로만 유지(삭제 시 AddBattery/Food SO 깨짐)
     AddBattery,      // 배터리 충전
     Food,            // 포만감 (향후)
@@ -152,10 +152,6 @@ public class ItemData : ScriptableObject
     [Tooltip("1회 사용 시 내구도 소모량 (예: 50)")]
     [Min(1)]
     public float durabilityCostPerUse = 50f;
-
-    [Header("의료 연동 (HealInjury 전용)")]
-    [Tooltip("치료 아이템 SO (Medical 카테고리일 때)")]
-    public MedicalItemData medicalData;
 
     [Header("장비 슬롯")]
     [Tooltip("장착 가능 슬롯 (None이면 장착 불가)")]

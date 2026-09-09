@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: gauze_roll
   displayName: "\uAC70\uC988 \uB864"
-  description: "\uAC00\uBCBC\uC6B4 \uCD9C\uD608"
+  description: "가벼운 상처에. HP를 18 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 1
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 300
   buyPrice: 800
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 18
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: 32a92fe75c90e3a46a52ffd38ab8e0f1, type: 2}
   worldDropPrefab: {fileID: 0}

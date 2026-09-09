@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: ifak_injury
   displayName: "\uBD80\uC0C1 IFAK"
-  description: "\uCD9C\uD608\xB7\uD1B5\uC99D \uC751\uAE09\uCC98\uCE58. 5\uD68C."
+  description: "응급처치 키트. HP를 50 회복한다. 5회."
   icon: {fileID: 0}
   gridWidth: 2
   gridHeight: 2
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 4000
   buyPrice: 9000
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 50
   hasDurability: 1
   maxDurability: 300
   durabilityCostPerUse: 60
-  medicalData: {fileID: 11400000, guid: 53baaa206771c904ba6bc78dacb3c34c, type: 2}
   worldDropPrefab: {fileID: 0}

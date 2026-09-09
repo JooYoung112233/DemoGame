@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: disinfectant
   displayName: "\uC18C\uB3C5\uC57D"
-  description: "\uAC10\uC5FC \uC608\uBC29"
+  description: "상처를 소독한다. HP를 20 회복한다."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 1
@@ -26,10 +26,9 @@ MonoBehaviour:
   sellPrice: 500
   buyPrice: 1200
   isUsable: 1
-  useEffect: 2
-  effectValue: 0
+  useEffect: 1
+  effectValue: 20
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
-  medicalData: {fileID: 11400000, guid: 0e18dbda1cd337b40b593f6a21fc32fe, type: 2}
   worldDropPrefab: {fileID: 0}

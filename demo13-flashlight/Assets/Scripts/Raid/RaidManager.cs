@@ -367,7 +367,6 @@ public class RaidManager : MonoBehaviour
         if (player != null)
         {
             player.GetComponent<Health>()?.FullHeal();
-            player.GetComponent<PlayerMedicalSystem>()?.HealAll();
         }
 
         SettleXp(false);   // 사망 = 킬 XP 절반("죽어도 배운다") — 커밋 전에 확정

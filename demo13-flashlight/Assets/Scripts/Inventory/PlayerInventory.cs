@@ -71,7 +71,6 @@ public class PlayerInventory : MonoBehaviour
 
     // 캐시
     Health health;
-    PlayerMedicalSystem medical;
     FlashlightController flashlight;
     PlayerEquipment equipment;
 
@@ -89,7 +88,6 @@ public class PlayerInventory : MonoBehaviour
         SecureGrid.OnItemPlaced  += MarkDiscovered;
 
         health = GetComponent<Health>();
-        medical = GetComponent<PlayerMedicalSystem>();
         flashlight = GetComponentInChildren<FlashlightController>();
         equipment = GetComponent<PlayerEquipment>();
     }
@@ -266,26 +264,15 @@ public class PlayerInventory : MonoBehaviour
                 else ToastManager.Show("체력이 이미 가득 찼다", ToastManager.ToastType.Info);
                 break;
 
+            // HealInjury(부위별 치료)는 2026-09-09 폐기 — 의료 아이템은 전부 HealHP로 전환됨.
+            // 옛 세이브/SO가 남아 있으면 HP 회복으로 처리한다.
             case ItemUseEffect.HealInjury:
-                if (medical != null && medical.HasAnyInjury && item.data.medicalData != null)
+                if (health != null && health.CurrentHp < health.MaxHp)
                 {
-                    var parts = medical.GetAllParts();
-                    for (int i = 0; i < parts.Length; i++)
-                    {
-                        if (!parts[i].IsInjured) continue;
-                        for (int j = 0; j < parts[i].injuries.Count; j++)
-                        {
-                            if (item.data.medicalData.CanTreat(parts[i].injuries[j].type))
-                            {
-                                medical.StartHealing(parts[i].partType, parts[i].injuries[j].type, item.data.medicalData);
-                                used = true;
-                                goto doneHeal;
-                            }
-                        }
-                    }
-                    doneHeal:;
+                    health.Heal(item.data.effectValue > 0f ? item.data.effectValue : 20f);
+                    used = true;
                 }
-                else ToastManager.Show("치료할 부상이 없다", ToastManager.ToastType.Info);
+                else ToastManager.Show("체력이 이미 가득 찼다", ToastManager.ToastType.Info);
                 break;
 
             case ItemUseEffect.AddBattery:

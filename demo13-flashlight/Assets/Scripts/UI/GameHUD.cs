@@ -15,14 +15,11 @@ public class GameHUD : MonoBehaviour
 
     // 레퍼런스
     Health health;
-    PlayerMedicalSystem medical;
 
     // uGUI 요소
     [Header("uGUI References (auto-filled by GenerateUI)")]
     [SerializeField] Canvas canvas;
     [SerializeField] CanvasScaler scaler;
-    [SerializeField] RectTransform injuryPanel;
-    [SerializeField] Text[] injuryIcons;
     [SerializeField] Text survivalWarnText;   // 수분/포만감 위험 경고(상단 중앙)
 
     // 하이드아웃 나가기 버튼
@@ -70,7 +67,6 @@ public class GameHUD : MonoBehaviour
         if (health == null) FindPlayer();
         if (health == null) return;
 
-        UpdateInjuryIcons();
         UpdateSurvivalWarning();
         UpdateAmmo();
         SyncHideoutExitButton();
@@ -87,7 +83,6 @@ public class GameHUD : MonoBehaviour
         var go = GameObject.FindGameObjectWithTag("Player");
         if (go == null) return;
         health = go.GetComponent<Health>();
-        medical = go.GetComponent<PlayerMedicalSystem>();
     }
 
     #region UI 빌드
@@ -96,12 +91,7 @@ public class GameHUD : MonoBehaviour
     {
         // 이미 Canvas가 있으면 스킵
         canvas = GetComponentInChildren<Canvas>();
-        if (canvas != null)
-        {
-            // 기존 요소 재연결
-            RebindExisting();
-            return;
-        }
+        if (canvas != null) return;
 
         // Canvas 생성
         var canvasGO = new GameObject("HUD_Canvas");
@@ -128,40 +118,6 @@ public class GameHUD : MonoBehaviour
         anchorRT.pivot = new Vector2(0, 0);
         anchorRT.anchoredPosition = new Vector2(30, 25);
         anchorRT.sizeDelta = new Vector2(300, 120);
-
-        // ── 부상 아이콘 패널 ──
-        var injGO = CreatePanel("InjuryIcons", anchorRT);
-        injuryPanel = injGO.GetComponent<RectTransform>();
-        injuryPanel.anchorMin = new Vector2(0, 1);
-        injuryPanel.anchorMax = new Vector2(0, 1);
-        injuryPanel.pivot = new Vector2(0, 0);
-        injuryPanel.anchoredPosition = new Vector2(0, 5);
-        injuryPanel.sizeDelta = new Vector2(250, 24);
-
-        // 부상 아이콘 (최대 8개 미리 생성)
-        injuryIcons = new Text[8];
-        for (int i = 0; i < injuryIcons.Length; i++)
-        {
-            var iconGO = new GameObject($"Injury_{i}");
-            iconGO.transform.SetParent(injuryPanel, false);
-
-            var iconRT = iconGO.AddComponent<RectTransform>();
-            iconRT.anchorMin = new Vector2(0, 0.5f);
-            iconRT.anchorMax = new Vector2(0, 0.5f);
-            iconRT.pivot = new Vector2(0, 0.5f);
-            iconRT.anchoredPosition = new Vector2(i * 24, 0);
-            iconRT.sizeDelta = new Vector2(22, 22);
-
-            var txt = iconGO.AddComponent<Text>();
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = 16;
-            txt.fontStyle = FontStyle.Bold;
-            txt.alignment = TextAnchor.MiddleCenter;
-            txt.text = "";
-
-            injuryIcons[i] = txt;
-            iconGO.SetActive(false);
-        }
 
         // ── 하이드아웃 나가기 버튼 (우상단, Hideout일 때만 표시) ──
         BuildHideoutExitButton(canvasRT);
@@ -372,25 +328,7 @@ public class GameHUD : MonoBehaviour
 
         canvas = null;
         scaler = null;
-        injuryPanel = null;
-        injuryIcons = null;
         hideoutExitBtnGO = null;
-    }
-
-    void RebindExisting()
-    {
-        injuryPanel = FindChild<RectTransform>("InjuryIcons");
-        if (injuryPanel != null)
-            injuryIcons = injuryPanel.GetComponentsInChildren<Text>(true);
-    }
-
-    T FindChild<T>(string childName) where T : Component
-    {
-        var all = GetComponentsInChildren<T>(true);
-        for (int i = 0; i < all.Length; i++)
-            if (all[i].gameObject.name == childName)
-                return all[i];
-        return null;
     }
 
     GameObject CreatePanel(string name, RectTransform parent)
@@ -404,65 +342,6 @@ public class GameHUD : MonoBehaviour
     #endregion
 
     #region 업데이트
-
-    void UpdateInjuryIcons()
-    {
-        if (injuryIcons == null || medical == null) return;
-
-        // 모두 숨김
-        for (int i = 0; i < injuryIcons.Length; i++)
-            if (injuryIcons[i] != null)
-                injuryIcons[i].gameObject.SetActive(false);
-
-        if (!medical.HasAnyInjury) return;
-
-        int idx = 0;
-        var parts = medical.GetAllParts();
-        for (int i = 0; i < parts.Length && idx < injuryIcons.Length; i++)
-        {
-            for (int j = 0; j < parts[i].injuries.Count && idx < injuryIcons.Length; j++)
-            {
-                var inj = parts[i].injuries[j];
-                var icon = injuryIcons[idx];
-                icon.gameObject.SetActive(true);
-                icon.text = GetInjurySymbol(inj.type);
-                icon.color = GetInjuryColor(inj.type, inj.severity);
-                idx++;
-            }
-        }
-    }
-
-    string GetInjurySymbol(InjuryType type)
-    {
-        switch (type)
-        {
-            case InjuryType.Bleeding: return "●";
-            case InjuryType.Fracture: return "✕";
-            case InjuryType.Pain: return "◆";
-            default: return "?";
-        }
-    }
-
-    Color GetInjuryColor(InjuryType type, float severity)
-    {
-        Color c;
-        switch (type)
-        {
-            case InjuryType.Bleeding: c = new Color(1f, 0.15f, 0.15f); break;
-            case InjuryType.Fracture: c = new Color(1f, 0.6f, 0.1f); break;
-            case InjuryType.Pain: c = new Color(0.8f, 0.7f, 1f); break;
-            default: c = Color.white; break;
-        }
-
-        // 심각하면 깜빡임
-        if (severity > 0.7f)
-        {
-            float blink = Mathf.PingPong(Time.unscaledTime * 3f, 1f);
-            c.a = 0.6f + blink * 0.4f;
-        }
-
-        return c;
-    }
 
     #endregion
 }

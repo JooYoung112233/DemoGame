@@ -17,7 +17,6 @@ public class CharacterPanelUI : MonoBehaviour
 
     // 레퍼런스 (자동 탐색)
     PlayerInventory playerInventory;
-    PlayerMedicalSystem medical;
     Health health;
     GameObject playerGO; // 플레이어 GO 참조 (컴포넌트는 GetComponent로 접근)
     FlashlightController flashlight;
@@ -81,7 +80,6 @@ public class CharacterPanelUI : MonoBehaviour
     [SerializeField] Text charFoodText;
     [SerializeField] Text charWeightText;
     [SerializeField] Text charLevelText;   // 제목 줄 우측 — Lv.N · XP n/m (PlayerProgress)
-    [SerializeField] Text[] charBodyTexts;
 
     // ── 장비 슬롯 UI ──
     PlayerEquipment playerEquipment;
@@ -106,7 +104,6 @@ public class CharacterPanelUI : MonoBehaviour
     static readonly int CELL_SIZE = 72;   // 격자 셀 — 가로 7칸 통일. 가방(≤7칸)이 중앙 패널(MID_INNER_W=520)에 맞는 최대치(7×72+6×2=516)
     static readonly int CELL_GAP = 2;
     static readonly float PANEL_WIDTH = 360f;
-    static readonly string[] PART_NAMES = { "머 리", "몸 통", "양 팔", "왼다리", "오른다리" };
 
     // 중앙 패널 세로 스택 레이아웃
     const float MID_INNER_W = 520f;   // 중앙 콘텐츠 가용 폭 (격자 가로 정렬 기준)
@@ -572,7 +569,6 @@ public class CharacterPanelUI : MonoBehaviour
 
         playerGO = null;
         health = null;
-        medical = null;
         playerInventory = null;
         playerEquipment = null;
         flashlight = null;
@@ -585,7 +581,6 @@ public class CharacterPanelUI : MonoBehaviour
         if (go == null) return;
         playerGO = go;
         health = go.GetComponent<Health>();
-        medical = go.GetComponent<PlayerMedicalSystem>();
         playerInventory = go.GetComponent<PlayerInventory>();
         playerEquipment = go.GetComponent<PlayerEquipment>();
         flashlight = go.GetComponentInChildren<FlashlightController>();
@@ -701,7 +696,6 @@ public class CharacterPanelUI : MonoBehaviour
         charFoodText = null;
         charWeightText = null;
         charLevelText = null;
-        charBodyTexts = null;
         equipSlotBgs = null;
         equipSlotIcons = null;
         equipSlotLabels = null;
@@ -1077,19 +1071,6 @@ public class CharacterPanelUI : MonoBehaviour
         BuildEquipSlot(charPanel, EquipSlot.Special, "특수창", pairX + slotSize + slotGap, y, slotSize);
         y -= slotSize + 10f;
 
-        // ── 부위 상태 ──
-        MakeText(charPanel, "BodyHdr", "── 부위 상태 ──",
-            new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 22), 13, UITheme.TextMuted, TextAnchor.MiddleLeft);
-        y -= 26f;
-
-        charBodyTexts = new Text[PART_NAMES.Length];
-        for (int i = 0; i < PART_NAMES.Length; i++)
-        {
-            charBodyTexts[i] = MakeText(charPanel, $"Body_{i}", $"{PART_NAMES[i]}: 정상",
-                new Vector2(22, y), new Vector2(PANEL_WIDTH - 40, 20), 12, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
-            y -= 22f;
-        }
-
         // 수집한 장비 슬롯 버튼을 직렬화 평행 배열로 확정.
         equipSlotKeys = equipSlotKeyList.ToArray();
         equipSlotButtons = equipSlotBtnList.ToArray();
@@ -1287,32 +1268,6 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 장비 슬롯 시각 갱신
         UpdateEquipSlots();
-
-        // 부위별 의료 상태
-        if (charBodyTexts != null && medical != null)
-        {
-            var parts = medical.GetAllParts();
-            for (int i = 0; i < parts.Length && i < charBodyTexts.Length; i++)
-            {
-                if (charBodyTexts[i] == null) continue;
-                if (parts[i].IsInjured)
-                {
-                    string st = "";
-                    if (parts[i].HasInjury(InjuryType.Bleeding)) st += "출혈 ";
-                    if (parts[i].HasInjury(InjuryType.Fracture)) st += "골절 ";
-                    if (parts[i].HasInjury(InjuryType.Pain)) st += "통증 ";
-                    charBodyTexts[i].text = $"{PART_NAMES[i]}: {st.TrimEnd()}";
-                    charBodyTexts[i].color = parts[i].HasInjury(InjuryType.Fracture) ? new Color(1f, 0.2f, 0.2f)
-                        : parts[i].HasInjury(InjuryType.Bleeding) ? new Color(1f, 0.5f, 0.2f)
-                        : new Color(1f, 1f, 0.3f);
-                }
-                else
-                {
-                    charBodyTexts[i].text = $"{PART_NAMES[i]}: 정상";
-                    charBodyTexts[i].color = new Color(0.4f, 1f, 0.5f);
-                }
-            }
-        }
     }
 
     void UpdateEquipSlots()
