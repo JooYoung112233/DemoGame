@@ -210,8 +210,7 @@ public class EnemyController : MonoBehaviour
         // 그레이박스 식별 라벨("적" → 사망 시 "시체"). 프리팹 적이든 런타임 생성이든 여기 한 곳에서 보장.
         _label = GetComponentInChildren<UnitLabel>(true);
         if (_label == null && spriteRenderer != null)
-            _label = UnitLabel.Attach(spriteRenderer.transform, "적", UnitLabel.EnemyColor,
-                                      spriteRenderer.sortingOrder + 1);
+            _label = UnitLabel.Attach(transform, "적", UnitLabel.EnemyColor, 0, LABEL_Y);
 
         // 그레이박스 칼 — 플레이어와 같은 연출을 적도 쓴다(예비동작이 눈에 보여야 캔슬을 노릴 수 있다).
         _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.80f, 0.70f, 0.66f), 4, 0.95f);
@@ -220,8 +219,9 @@ public class EnemyController : MonoBehaviour
         //   몸통 스프라이트 밑에 붙여 ApplyUnitLook의 크기 조절이 그대로 먹게 한다.
         if (spriteRenderer != null)
         {
-            _limbs = GreyboxLimbs.Attach(spriteRenderer.transform, spriteRenderer.color,
-                                         spriteRenderer.sortingOrder + 1);
+            // 몸은 **루트**에 붙인다(앵커가 아니라) — 앵커의 비균등 스케일을 타면
+            // 3D에서 폭보다 두꺼운 몸이 나온다. 크기는 ApplyUnitLook이 SetScale로 준다.
+            _limbs = GreyboxLimbs.Attach(transform, spriteRenderer.color);
             spriteRenderer.enabled = false;   // 통짜 네모는 끈다 — 겹쳐 그리면 구획이 안 보인다
         }
 
@@ -521,10 +521,17 @@ public class EnemyController : MonoBehaviour
         if (unitStat == null) return;
 
         // 약탈자는 보랏빛 식별색이 우선 — 여기서 덮으면 회수 대상 구분이 사라진다(MakeScavenger는 Start 전에 호출됨).
-        if (spriteRenderer != null && !_isScavenger) spriteRenderer.color = unitStat.tintColor;
+        if (spriteRenderer != null && !_isScavenger)
+        {
+            spriteRenderer.color = unitStat.tintColor;
+            // ⚠️ 팔다리는 Awake에서 **그 전 색으로** 이미 만들어졌다. 여기서 같이 밀어주지
+            //    않으면 StatDB의 종류별 식별색이 화면에 전혀 안 나타난다(전부 같은 색으로 보인다).
+            if (_limbs != null) _limbs.SetTint(unitStat.tintColor);
+        }
 
         const float BaseScale = 2f;   // bandit_melee_1 기준
         float mul = Mathf.Clamp(unitStat.scale / BaseScale, 0.5f, 3f);
+        if (_limbs != null) _limbs.SetScale(mul);   // 몸은 배율을 매번 받는다(누적 곱이 아니다)
         if (Mathf.Approximately(mul, 1f)) return;
 
         if (spriteRenderer != null)
@@ -724,11 +731,17 @@ public class EnemyController : MonoBehaviour
 
     #region HP바 / 그로기바 (2D SpriteRenderer)
 
+    /// <summary>머리 위 표시물 높이(m). 3D 몸(<see cref="GreyboxLimbs.Height"/> 1.8m) 위로 띄운다.
+    /// 예전 값(HP 0.7 / 그로기 0.85 / 라벨 0)은 원점 중심 1m 몸 기준이라, 몸이 제 키로 서자
+    /// **가슴에 박히거나 발치에 깔렸다.** 아래에서 위로: HP → 그로기 → 이름표.</summary>
+    const float HP_BAR_Y = 2.02f, GROGGY_BAR_Y = 2.18f, LABEL_Y = 2.42f;
+
     void CreateHPBar()
     {
         var c = new GameObject("HPBar");
         c.transform.SetParent(transform);
-        c.transform.localPosition = new Vector3(0, 0.7f, 0);
+        c.transform.localPosition = new Vector3(0, HP_BAR_Y, 0);
+        Billboard.Attach(c.transform);   // 쿼터뷰에서 눕혀 두면 게이지가 안 읽힌다
         hpBarBg   = MakeBar("HPBar_BG",   c.transform, new Color(0.1f, 0.1f, 0.1f, 0.8f), 0, BAR_W, BAR_H);
         hpBarFill = MakeBar("HPBar_Fill", c.transform, Color.green, 1, BAR_W, BAR_H);
         hpFillMat = hpBarFill.GetComponent<SpriteRenderer>().material;
@@ -762,7 +775,8 @@ public class EnemyController : MonoBehaviour
     {
         var c = new GameObject("GroggyBar");
         c.transform.SetParent(transform);
-        c.transform.localPosition = new Vector3(0, 0.85f, 0);
+        c.transform.localPosition = new Vector3(0, GROGGY_BAR_Y, 0);
+        Billboard.Attach(c.transform);
         groggyBarBg   = MakeBar("GroggyBar_BG",   c.transform, new Color(0.15f, 0.15f, 0.15f, 0.7f), 0, GROG_W, GROG_H);
         groggyBarFill = MakeBar("GroggyBar_Fill",  c.transform, new Color(1f, 0.6f, 0f, 0.9f), 1, 0, GROG_H);
         groggyFillMat = groggyBarFill.GetComponent<SpriteRenderer>().material;
@@ -1042,6 +1056,8 @@ public class EnemyController : MonoBehaviour
 
     void FlipSprite(Vector2 dir)
     {
+        // 3D 몸은 좌우 뒤집기가 아니라 회전이다 — 쿼터뷰에선 앞뒤도 보인다.
+        if (_limbs != null) _limbs.SetFacing(dir);
         if (spriteRenderer != null && Mathf.Abs(dir.x) > 0.01f)
             spriteRenderer.flipX = dir.x < 0f;
     }

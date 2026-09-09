@@ -28,7 +28,10 @@ public class MeleeWeaponVisual : MonoBehaviour
     [SerializeField] float gripOffset  = 0.30f;   // 몸통에서 손잡이까지
 
     Transform      _pivot;
-    SpriteRenderer _blade, _guard;
+    /// <summary>칼을 쥔 손 높이(m). <see cref="GreyboxLimbs.Height"/> 몸의 허리~가슴 사이.</summary>
+    const float HandHeight = 1.05f;
+
+    MeshRenderer _blade, _guard;
     TrailRenderer  _trail;
 
     float _facingDeg;
@@ -60,6 +63,9 @@ public class MeleeWeaponVisual : MonoBehaviour
     {
         _pivot = new GameObject("Pivot").transform;
         _pivot.SetParent(transform, false);
+        // 손 높이. 예전엔 0(=발밑)이었다 — 2D에선 몸이 원점 중심이라 맞았지만
+        // 3D에서 몸이 발밑 기준으로 서면서 칼이 바닥을 긁게 됐다.
+        _pivot.localPosition = new Vector3(0f, HandHeight, 0f);
 
         // 손잡이/가드(어두운 짧은 막대) — 칼끝 방향이 한눈에 읽히게.
         _guard = MakePart("Guard", new Color(0.25f, 0.22f, 0.20f), sortingOrder,
@@ -80,7 +86,12 @@ public class MeleeWeaponVisual : MonoBehaviour
         _trail.autodestruct = false;
         _trail.emitting = false;
         _trail.sortingOrder = sortingOrder;   // 칼날 아래로 깔린다
-        var sh = Shader.Find("Sprites/Default");
+        // ⚠️ `Sprites/Default`는 빌트인 파이프라인 셰이더다. URP-3D로 넘어온 뒤에도 그걸 쓰면
+        //    칼 궤적이 **분홍색 에러 머티리얼**로 나올 수 있다. URP 파티클 언릿을 먼저 찾는다
+        //    (버텍스 컬러를 받아야 그라디언트 페이드가 산다).
+        var sh = Shader.Find("Universal Render Pipeline/Particles/Unlit")
+              ?? Shader.Find("Universal Render Pipeline/Unlit")
+              ?? Shader.Find("Sprites/Default");
         if (sh != null) _trail.material = new Material(sh);
         var grad = new Gradient();
         grad.SetKeys(
@@ -91,18 +102,11 @@ public class MeleeWeaponVisual : MonoBehaviour
         Apply(IdleAngle);
     }
 
-    SpriteRenderer MakePart(string name, Color color, int order, float offX, float len, float thick)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(_pivot, false);
-        go.transform.localPosition = new Vector3(offX, 0f, 0f);
-        go.transform.localScale    = new Vector3(len, thick, 1f);
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = PlaceholderSprite.Square;
-        sr.color = color;
-        sr.sortingOrder = order;
-        return sr;
-    }
+    /// <summary>칼 조각 하나(3D 상자). 두께는 y·z 양쪽에 준다 — 두께 0인 판은
+    /// 쿼터뷰에서 각도에 따라 선으로 사라진다.</summary>
+    MeshRenderer MakePart(string name, Color color, int _unusedOrder, float offX, float len, float thick)
+        => GreyboxMesh.Box(_pivot, name, new Vector3(offX, 0f, 0f),
+                           new Vector3(len, thick, thick), color, castShadow: false);
 
     /// <summary>표시 on/off — FOV 시야콘 밖에서 **칼만 어둠에 떠 있는** 것을 막는다.
     /// (칼은 몸통 스프라이트의 자식이 아니라 루트의 자식이라, 몸통을 꺼도 자동으로 안 꺼진다.)</summary>
@@ -117,7 +121,10 @@ public class MeleeWeaponVisual : MonoBehaviour
     public void SetFacing(Vector2 dir)
     {
         if (dir.sqrMagnitude < 0.0001f) return;
-        _facingDeg = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        // ⚠️ 평면 방향(x=월드X, y=월드Z)을 **Unity yaw**로 옮긴다. yaw θ는 로컬 +X를
+        //    월드 (cos θ, 0, −sin θ)로 보내므로, 칼이 dir을 향하려면 θ = atan2(−dir.y, dir.x)다.
+        //    2D의 atan2(dir.y, dir.x)를 그대로 쓰면 칼이 좌우로 뒤집혀 나간다.
+        _facingDeg = Mathf.Atan2(-dir.y, dir.x) * Mathf.Rad2Deg;
     }
 
     /// <summary>약공 스윙 — 우측에서 좌측으로.</summary>
@@ -185,6 +192,8 @@ public class MeleeWeaponVisual : MonoBehaviour
     void Apply(float offsetDeg)
     {
         if (_pivot == null) return;
-        _pivot.rotation = Quaternion.Euler(0f, 0f, _facingDeg + offsetDeg);
+        // ⚠️ 2D에선 Z축 회전이었다. 3D 쿼터뷰에서 스윙은 **XZ 평면**을 도는 것이라 Y축이다.
+        //    Z축으로 두면 칼이 수직면에서 돌아 위아래로 까딱거리기만 한다.
+        _pivot.rotation = Quaternion.Euler(0f, _facingDeg + offsetDeg, 0f);
     }
 }

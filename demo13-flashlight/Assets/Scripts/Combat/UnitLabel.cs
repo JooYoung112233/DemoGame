@@ -31,15 +31,19 @@ public class UnitLabel : MonoBehaviour
         if (_mr == null) _mr = GetComponent<MeshRenderer>();
     }
 
-    /// <summary>parent(보통 몸체 스프라이트) 머리 위에 라벨 생성. 부모가 눌린 스케일이어도 글자 비율은 정상.</summary>
-    public static UnitLabel Attach(Transform parent, string text, Color color, int sortingOrder)
+    /// <summary>parent 머리 위에 라벨 생성. 부모가 눌린 스케일이어도 글자 비율은 정상.
+    ///
+    /// <paramref name="localY"/>는 부모 로컬 기준 높이다. 예전 기본값 0은 "원점 = 몸 중앙"인
+    /// 2D 시절 전제였는데, 3D에선 원점이 <b>발밑</b>이라 그대로 두면 이름표가 발치에 깔린다.</summary>
+    public static UnitLabel Attach(Transform parent, string text, Color color, int sortingOrder, float localY = BodyY)
     {
         if (parent == null) return null;
 
         var go = new GameObject("Label");
         go.transform.SetParent(parent, false);
         go.layer = parent.gameObject.layer;
-        go.transform.localPosition = new Vector3(0f, BodyY, 0f);
+        go.transform.localPosition = new Vector3(0f, localY, 0f);
+        Billboard.Attach(go.transform);   // 쿼터뷰에서 눕혀 두면 글자가 찌그러져 안 읽힌다
 
         // 부모 스케일 보정 — 예: 몸체가 (0.8, 1.0)이어도 글자는 정사각 비율로.
         Vector3 ls = parent.lossyScale;

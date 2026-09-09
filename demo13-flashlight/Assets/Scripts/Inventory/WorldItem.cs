@@ -63,15 +63,15 @@ public class WorldItem : MonoBehaviour
         }
         else
         {
-            // 임시 2D 스프라이트 (사각, 희귀도 색). 추후 worldDropPrefab으로 교체
+            // 임시 그레이박스 상자(희귀도 색). 추후 worldDropPrefab으로 교체.
+            // ⚠️ 2D 시절엔 납작한 스프라이트였다. 쿼터뷰에서 바닥에 눕힌 판은 **거의 안 보인다**
+            //    — 루팅이 핵심 루프인데 떨어진 물건이 눈에 안 띄면 게임이 성립하지 않는다.
+            //    지면에서 살짝 띄운 작은 상자로 세운다.
             go = new GameObject();
             go.transform.position = position;
-            go.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
-
-            var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = PlaceholderSprite.Square;
-            sr.color = item.data.RarityColor;
-            sr.sortingOrder = 3;
+            const float S = 0.28f;
+            GreyboxMesh.Box(go.transform, "Visual", new Vector3(0f, S * 0.5f, 0f),
+                            new Vector3(S, S, S), item.data.RarityColor);
         }
 
         go.name = $"WorldItem_{item.data.itemId}";
@@ -131,10 +131,12 @@ public class WorldItem : MonoBehaviour
     /// <summary>아이템 위에 월드 스페이스 이름 라벨 생성</summary>
     static void CreateWorldLabel(Transform parent, string itemName, Color rarityColor)
     {
-        // 빌보드 캔버스
+        // 빌보드 캔버스 — 이름만 "빌보드"였고 실제로는 고정이었다.
+        // 2D에선 카메라가 정면이라 티가 안 났지만 쿼터뷰에선 눕혀져 글자가 안 읽힌다.
         var labelGO = new GameObject("WorldLabel");
         labelGO.transform.SetParent(parent, false);
-        labelGO.transform.localPosition = new Vector3(0, 0.5f, 0);
+        labelGO.transform.localPosition = new Vector3(0, 0.62f, 0);
+        Billboard.Attach(labelGO.transform);
 
         var canvas = labelGO.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;

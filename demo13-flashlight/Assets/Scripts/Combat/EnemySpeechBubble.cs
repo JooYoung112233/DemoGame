@@ -50,8 +50,8 @@ public class EnemySpeechBubble : MonoBehaviour
     [SerializeField] string[] mutterLines    = { "...", "조용하군.", "누구 없나?", "어디 갔지?", "또 허탕인가.", "쯧, 지루하군." };
 
     [Header("말풍선")]
-    [Tooltip("머리 위 높이 오프셋")]
-    [SerializeField] float heightOffset = 1.2f;
+    [Tooltip("머리 위 높이(m). 3D 몸 1.8m + 이름표 위. 예전 1.2는 1m 몸 기준이라 얼굴을 가렸다.")]
+    [SerializeField] float heightOffset = 2.72f;
     [Tooltip("한 줄 표시 시간(초)")]
     [SerializeField] float lineDuration = 2.0f;
     [SerializeField] Color panelColor   = new Color(0.08f, 0.08f, 0.10f, 0.86f);
@@ -205,6 +205,7 @@ public class EnemySpeechBubble : MonoBehaviour
         bubbleRoot = new GameObject("SpeechBubble");
         bubbleRoot.transform.SetParent(transform, false);
         bubbleRoot.transform.localPosition = new Vector3(0, heightOffset, 0);
+        Billboard.Attach(bubbleRoot.transform);   // 쿼터뷰에서 눕혀 두면 말풍선 글자가 안 읽힌다
 
         // 패널은 조명 영향 안 받게 Unlit (어둠 속에서도 읽힘). 없으면 패널 생략.
         Material unlit = null;
