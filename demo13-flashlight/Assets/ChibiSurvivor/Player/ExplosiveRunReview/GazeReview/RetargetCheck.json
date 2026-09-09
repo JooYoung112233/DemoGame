@@ -1,0 +1,61 @@
+{
+  "source": "ExplosiveLLC/Unarmed-Run-Forward.FBX",
+  "action": "Run_Explosive_Unarmed",
+  "frames": [
+    1,
+    25
+  ],
+  "fps": 30,
+  "seconds": 0.8,
+  "mapped_bones": {
+    "Hips": "B_Pelvis",
+    "Spine": "B_Spine1",
+    "Chest": "B_Spine2",
+    "Neck": "B_Neck",
+    "Head": "B_Head",
+    "Clavicle.L": "B_L_Clavicle",
+    "UpperArm.L": "B_L_UpperArm",
+    "Forearm.L": "B_L_Forearm",
+    "Hand.L": "B_L_Hand",
+    "Thigh.L": "B_L_Thigh",
+    "Shin.L": "B_L_Calf",
+    "Foot.L": "B_L_Foot",
+    "Clavicle.R": "B_R_Clavicle",
+    "UpperArm.R": "B_R_UpperArm",
+    "Forearm.R": "B_R_Forearm",
+    "Hand.R": "B_R_Hand",
+    "Thigh.R": "B_R_Thigh",
+    "Shin.R": "B_R_Calf",
+    "Foot.R": "B_R_Foot"
+  },
+  "leg_scale": 0.35696850602722274,
+  "floor_offset_m": 0.026157841086387634,
+  "min_sole_height_after_offset": 0.0,
+  "geometry_and_weights_unchanged": true,
+  "existing_actions_preserved": true,
+  "humanoid_validated": false,
+  "approval": "Running gait approved; head gaze correction pending",
+  "loop_seam_max_vertex_m": 0.00378975270479517,
+  "review_findings": [
+    "Large elbow flexion exposes existing cuff/upper-sleeve deformation.",
+    "Head gaze raised; original oscillation preserved.",
+    "No Unity Humanoid Avatar validation performed."
+  ],
+  "preview": "Actual imported FBX joint animation retargeted in Blender at native clip timing; in-place.",
+  "head_gaze_adjusted": true,
+  "head_pitch_lift_degrees": 20.255593935809575,
+  "gaze_elevation_before": {
+    "min": -26.26015811699124,
+    "max": -26.244639186888826,
+    "mean": -26.255593935809575
+  },
+  "gaze_elevation_after": {
+    "min": -6.0250226526724875,
+    "max": -5.999394409093401,
+    "mean": -6.015094222067408
+  },
+  "changed_channels": [
+    "pose.bones[\"Head\"].rotation_quaternion"
+  ],
+  "all_other_animation_channels_unchanged": true
+}

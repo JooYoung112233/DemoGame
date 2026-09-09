@@ -70,9 +70,13 @@ public static class Greybox3D
     {
         if (_wall != null) return;
         _floor     = Mat(new Color(0.30f, 0.29f, 0.28f), 0.04f);
-        _wall      = Mat(new Color(0.40f, 0.39f, 0.38f), 0.05f);
+        // ⚠️ 키를 넘는 것은 **컷어웨이 재질**을 쓴다. 안 그러면 쿼터뷰에서 벽·지붕 뒤로
+        //    들어가는 순간 플레이어가 통째로 가려진다(Stage 0에서 정한 화면공간 컷어웨이).
+        //    마을은 처음부터 이 재질이었는데 레이드 맵만 빠져 있었다 — 정작 벽이 많은 쪽이다.
+        _wall      = Occ(new Color(0.40f, 0.39f, 0.38f));
+        _car       = Occ(new Color(0.32f, 0.35f, 0.38f));   // 차량 1.5m — 앉은 몸을 가린다
+        // 낮은 것들은 애초에 시야를 안 막으므로 컷어웨이가 필요 없다(1m = 반엄폐).
         _barricade = Mat(new Color(0.38f, 0.31f, 0.24f), 0.06f);
-        _car       = Mat(new Color(0.32f, 0.35f, 0.38f), 0.18f);
         _prop      = Mat(new Color(0.44f, 0.41f, 0.36f), 0.06f);
         _door      = Mat(new Color(0.20f, 0.17f, 0.15f), 0.10f);
     }
@@ -84,6 +88,22 @@ public static class Greybox3D
         if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c);
         if (m.HasProperty("_Color")) m.SetColor("_Color", c);
         if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", smooth);
+        return m;
+    }
+
+    /// <summary>컷어웨이 재질 — <c>CutawayDriver</c>가 갱신하는 전역 유니폼을 읽어
+    /// 플레이어를 가리는 부분에 화면 공간 구멍을 뚫는다. 재질별 배선은 필요 없다.</summary>
+    static Material Occ(Color c)
+    {
+        var sh = Shader.Find("Spike/OccluderFX");
+        if (sh == null)
+        {
+            Debug.LogWarning("[Greybox3D] Spike/OccluderFX 셰이더 없음 — 컷어웨이 없이 굽는다(벽 뒤에서 플레이어가 가려진다).");
+            return Mat(c, 0.05f);
+        }
+        var m = new Material(sh);
+        if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c);
+        if (m.HasProperty("_Color")) m.SetColor("_Color", c);
         return m;
     }
 

@@ -22,6 +22,13 @@ public class VisionDarkness : MonoBehaviour
     const int Segments = 96;          // 부채꼴 해상도(높을수록 경계가 매끈)
     const float OuterRadius = 60f;    // 화면을 덮고도 남는 바깥 반경
 
+    /// <summary>부채꼴을 지면 위로 띄우는 높이(m).
+    ///
+    /// ⚠️ 이 오버레이는 **바닥만 덮는다** — 벽·서 있는 프롭은 어두워지지 않는다. 2D에선
+    ///    화면 전체를 덮었지만 3D에서 같은 효과를 내려면 후처리가 필요하다(Stage 2 잔여).
+    ///    지금은 "저 바닥은 안 보이는 구역"이라는 신호 + `PlayerVision`의 적 은폐 조합으로 읽힌다.</summary>
+    const float GroundY = 0.05f;
+
     Mesh _mesh;
     MeshRenderer _mr;
     Vector3[] _verts;
@@ -52,9 +59,7 @@ public class VisionDarkness : MonoBehaviour
 
         _mr = GetComponent<MeshRenderer>();
         _mr.sharedMaterial = BuildMaterial();
-        // 월드 오브젝트 위 · UI(ScreenSpaceOverlay) 아래. 적 스프라이트가 sortingOrder 3이라 그보다 위.
-        _mr.sortingLayerName = "Default";
-        _mr.sortingOrder = 100;
+        // 3D에선 `sortingOrder`가 의미 없다 — 순서는 셰이더의 Queue/ZTest가 정한다.
         _mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         _mr.receiveShadows = false;
 
@@ -63,13 +68,20 @@ public class VisionDarkness : MonoBehaviour
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
-    /// <summary>Unlit 반투명 — Light2D 영향을 받지 않아야 '어둠'이 흔들리지 않는다.</summary>
+    /// <summary>Unlit 반투명 — 조명 영향을 받지 않아야 '어둠'이 흔들리지 않는다.
+    ///
+    /// ⚠️ 예전엔 `Sprites/Default`였다. URP-3D에선 그게 빌트인 파이프라인 셰이더라
+    ///    **분홍 에러 머티리얼**이 되고, URP 기본 Unlit은 정점 색을 안 읽어 부채꼴의
+    ///    밝음↔어둠 그라디언트가 통째로 사라진다. 그래서 전용 셰이더를 쓴다.</summary>
     static Material BuildMaterial()
     {
-        var sh = Shader.Find("Sprites/Default") ?? Shader.Find("Unlit/Transparent");
-        var m = new Material(sh) { name = "VisionDarknessMat" };
-        m.SetInt("_ZWrite", 0);
-        return m;
+        var sh = Shader.Find("BRB/VisionDarkness");
+        if (sh == null)
+        {
+            Debug.LogWarning("[VisionDarkness] BRB/VisionDarkness 셰이더 없음 — 어둠 오버레이가 안 보일 수 있다.");
+            sh = Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Sprites/Default");
+        }
+        return new Material(sh) { name = "VisionDarknessMat" };
     }
 
     void AllocBuffers()
@@ -107,8 +119,10 @@ public class VisionDarkness : MonoBehaviour
         float range  = gt != null ? gt.visionRange : 9f;
         float near   = gt != null ? gt.visionNearRadius : 2.2f;
 
+        // ⚠️ 예전엔 `new Vector3(c.x, c.y, 0f)`였다 — 2D에선 맞았지만 3D에선 부채꼴이
+        //    **원점 평면에 세워진 검은 벽**이 된다. 지면 바로 위에 깐다.
         Vector3 c = p.transform.position;
-        transform.position = new Vector3(c.x, c.y, 0f);
+        transform.position = new Vector3(c.x, c.y + GroundY, c.z);
 
         Vector2 facing = p.FacingDirection.sqrMagnitude > 0.0001f ? p.FacingDirection.normalized : Vector2.down;
         float faceDeg = Mathf.Atan2(facing.y, facing.x) * Mathf.Rad2Deg;
@@ -146,8 +160,10 @@ public class VisionDarkness : MonoBehaviour
         if (diff > half && diff < half + soft)
             inner = Mathf.Lerp(range, near, (diff - half) / soft);
 
+        // ⚠️ 평면 각도를 **XZ**에 편다. 2D 시절의 (cos, sin, 0)을 그대로 두면 부채꼴이
+        //    수직면에 서서 바닥을 전혀 덮지 못한다. 평면 방향 (x, y)는 월드 (x, _, z)다.
         float rad = angDeg * Mathf.Deg2Rad;
-        var dir = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f);
+        var dir = new Vector3(Mathf.Cos(rad), 0f, Mathf.Sin(rad));
 
         _verts[viInner] = dir * inner;   _colors[viInner] = clear;   // 밝은 쪽 = 투명
         _verts[viOuter] = dir * OuterRadius; _colors[viOuter] = dark; // 바깥 = 어둠
