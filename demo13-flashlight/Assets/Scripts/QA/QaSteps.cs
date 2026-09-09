@@ -183,7 +183,7 @@ public static class QaSteps
         {
             if (io == null || !io.gameObject.activeInHierarchy) continue;
             if (io.Type != want) continue;
-            float dist = Vector2.Distance(io.transform.position, player.transform.position);
+            float dist = Vector2.Distance(Plan3D.ToPlan(io.transform.position), Plan3D.ToPlan(player.transform.position));
             if (dist < bestD) { bestD = dist; best = io; }
         }
 
@@ -515,7 +515,7 @@ public static class QaSteps
             {
                 if (be == null || !be.IsExit || string.IsNullOrEmpty(be.TargetScene)) continue;
                 if (!be.gameObject.activeInHierarchy) continue;
-                float dist = Vector2.Distance(be.transform.position, player.transform.position);
+                float dist = Vector2.Distance(Plan3D.ToPlan(be.transform.position), Plan3D.ToPlan(player.transform.position));
                 if (dist < bestD) { bestD = dist; door = be; }
             }
 
@@ -581,7 +581,7 @@ public static class QaSteps
         foreach (var box in per.KnownCrates)
         {
             if (box == null || opened.Contains(box.GetEntityId())) continue;
-            float dist = Vector2.Distance(box.transform.position, pos);
+            float dist = Vector2.Distance(Plan3D.ToPlan(box.transform.position), pos);
             if (IsCorpse(box)) { if (s.corpseDist < 0f || dist < s.corpseDist) s.corpseDist = dist; }
             else
             {
@@ -593,18 +593,18 @@ public static class QaSteps
 
         // 판단에는 **보이는 적만** 넣는다(오라클 모드가 아니면).
         var foe = NearestEnemy(pos, 12f, visibleOnly: !per.Omniscient);
-        if (foe != null) s.enemyDist = Vector2.Distance(foe.transform.position, pos);
+        if (foe != null) s.enemyDist = Vector2.Distance(Plan3D.ToPlan(foe.transform.position), pos);
 
         var exit = per.NearestKnown(InteractableObject.InteractType.ExitPoint, pos);
-        if (exit != null) s.exitDist = Vector2.Distance(exit.transform.position, pos);
+        if (exit != null) s.exitDist = Vector2.Distance(Plan3D.ToPlan(exit.transform.position), pos);
 
         // 아직 안 들어가 본 건물 입구(가장 가까운 것). 실외에서만 의미가 있다.
         var door = NearestUnvisitedDoor(pos, per.Omniscient);
-        if (door != null) s.doorDist = Vector2.Distance(door.transform.position, pos);
+        if (door != null) s.doorDist = Vector2.Distance(Plan3D.ToPlan(door.transform.position), pos);
 
         // 아직 안 열린(해결 안 된) 막힌 통로 — 아는 것 중 가장 가까운 것.
         var passage = NearestOpenPassage(per, pos, passageDone);
-        if (passage != null) s.passageDist = Vector2.Distance(passage.transform.position, pos);
+        if (passage != null) s.passageDist = Vector2.Distance(Plan3D.ToPlan(passage.transform.position), pos);
 
         return s;
     }
@@ -620,7 +620,7 @@ public static class QaSteps
             if (passageDone != null && passageDone.Contains(io.GetEntityId())) continue;
             var bp = io.GetComponent<BlockedPassage>();
             if (bp == null || bp.IsOpen) continue;
-            float d = Vector2.Distance(io.transform.position, from);
+            float d = Vector2.Distance(Plan3D.ToPlan(io.transform.position), from);
             if (d < bestD) { bestD = d; best = io; }
         }
         return best;
@@ -645,7 +645,7 @@ public static class QaSteps
             if (_visitedDoors.Contains(be.GetEntityId())) continue;
             // 입구도 눈에 보여야 안다(오라클 모드 제외)
             if (!omniscient && !PlayerVision.CanSee(be.transform.position)) continue;
-            float d = Vector2.Distance(be.transform.position, from);
+            float d = Vector2.Distance(Plan3D.ToPlan(be.transform.position), from);
             if (d < bestD) { bestD = d; best = be; }
         }
         return best;
@@ -740,7 +740,7 @@ public static class QaSteps
                         if (foe == null) { escaped = true; break; }   // 위협이 안 보임 = 이탈 성공
 
                         // 이름이 `d`면 AiPlay(QaStepDef d, …)의 인자를 가려 CS0136이 난다.
-                        float foeDist = Vector2.Distance(foe.transform.position, player.transform.position);
+                        float foeDist = Vector2.Distance(Plan3D.ToPlan(foe.transform.position), Plan3D.ToPlan(player.transform.position));
                         if (foeDist >= safeDist) { escaped = true; break; }
 
                         Vector2 away = (Plan3D.ToPlan(player.transform.position) - Plan3D.ToPlan(foe.transform.position)).normalized;
@@ -902,7 +902,7 @@ public static class QaSteps
                     {
                         if (box == null || opened.Contains(box.GetEntityId())) continue;
                         if (IsCorpse(box) != wantCorpse) continue;
-                        float dist = Vector2.Distance(box.transform.position, pos);
+                        float dist = Vector2.Distance(Plan3D.ToPlan(box.transform.position), pos);
                         if (dist < bestD) { bestD = dist; target = box; }
                     }
                     if (target == null) { yield return c.Bot.WaitSec(0.2f); break; }
@@ -1015,8 +1015,11 @@ public static class QaSteps
     /// <summary>가장 가까운 살아있는 적. <paramref name="visibleOnly"/>면 **지금 보이는 적만**
     /// (게임의 시야 규칙 그대로). AI의 판단 입력은 반드시 보이는 것만 써야 한다 —
     /// 안 보이는 적을 알고 교전을 결정하면 그건 사람의 플레이가 아니다.</summary>
-    static EnemyController NearestEnemy(Vector2 from, float maxDist, bool visibleOnly = false)
+    /// <summary>가장 가까운 적. **월드 좌표**를 받는다 — 호출부가 전부 `transform.position`(Vector3)을
+    /// 넘기는데 예전엔 매개변수가 Vector2라 C#이 조용히 (x, 높이)로 잘랐다(봇이 늘 z=0을 기준으로 쟀다).</summary>
+    static EnemyController NearestEnemy(Vector3 world, float maxDist, bool visibleOnly = false)
     {
+        Vector2 from = Plan3D.ToPlan(world);
         EnemyController best = null; float bestD = maxDist;
         foreach (var e in Object.FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
         {
@@ -1024,7 +1027,7 @@ public static class QaSteps
             var h = e.GetComponent<Health>();
             if (h != null && h.IsDead) continue;
             if (visibleOnly && !PlayerVision.CanSee(e.transform.position)) continue;
-            float dist = Vector2.Distance(e.transform.position, from);
+            float dist = Vector2.Distance(Plan3D.ToPlan(e.transform.position), from);
             if (dist < bestD) { bestD = dist; best = e; }
         }
         return best;
@@ -1049,13 +1052,15 @@ public static class QaSteps
     }
 
     /// <summary>반경 안의 살아있는 적 수 — 소음 유인 검증용(막힌 통로 철거·강제돌파의 대가를 수치로 남긴다).</summary>
-    static int CountEnemiesNear(Vector2 pos, float radius)
+    /// <summary>반경 안 적 수. **월드 좌표**(위 NearestEnemy와 같은 이유).</summary>
+    static int CountEnemiesNear(Vector3 world, float radius)
     {
+        Vector2 pos = Plan3D.ToPlan(world);
         int n = 0;
         foreach (var e in EnemyController.All)
         {
             if (e == null || !e.gameObject.activeInHierarchy || e.IsDead) continue;
-            if (Vector2.Distance(e.transform.position, pos) <= radius) n++;
+            if (Vector2.Distance(Plan3D.ToPlan(e.transform.position), pos) <= radius) n++;
         }
         return n;
     }
@@ -1109,7 +1114,7 @@ public static class QaSteps
             int missCount = 0;
 
             c.Report.Info("combat", "ENGAGE",
-                $"교전 시작 — {foe.name} (거리 {Vector2.Distance(foe.transform.position, player.transform.position):0.#}m"
+                $"교전 시작 — {foe.name} (거리 {Vector2.Distance(Plan3D.ToPlan(foe.transform.position), Plan3D.ToPlan(player.transform.position)):0.#}m"
                 + (foeHpStart >= 0f ? $", 적 HP {foeHpStart:0}" : "") + ")");
 
             // ── 한 마리와의 교전 루프 ──
@@ -1386,7 +1391,7 @@ public static class QaSteps
         {
             if (io == null || !io.gameObject.activeInHierarchy) continue;
             if (io.Type != InteractableObject.InteractType.ExitPoint) continue;
-            float dist = Vector2.Distance(io.transform.position, player.transform.position);
+            float dist = Vector2.Distance(Plan3D.ToPlan(io.transform.position), Plan3D.ToPlan(player.transform.position));
             if (dist < bestD) { bestD = dist; best = io; }
         }
 

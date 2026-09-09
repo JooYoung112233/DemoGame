@@ -158,7 +158,7 @@ public class QaPerception
         foreach (var io in pool)
         {
             if (io == null || io.Type != type) continue;
-            float d = Vector2.Distance(io.transform.position, from);
+            float d = Vector2.Distance(Plan3D.ToPlan(io.transform.position), from);
             if (d < bestD) { bestD = d; best = io; }
         }
         return best;
@@ -171,7 +171,7 @@ public class QaPerception
         {
             if (box == null) continue;
             if (skip != null && skip.Contains(box.GetEntityId())) continue;
-            float d = Vector2.Distance(box.transform.position, from);
+            float d = Vector2.Distance(Plan3D.ToPlan(box.transform.position), from);
             if (d < bestD) { bestD = d; best = box; }
         }
         return best;

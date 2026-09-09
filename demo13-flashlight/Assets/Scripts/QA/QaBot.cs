@@ -87,7 +87,7 @@ public class QaBot : MonoBehaviour
     readonly List<QaBridge.NavGridJson> _navGrids = new List<QaBridge.NavGridJson>();
 
     /// <summary>현재 위치를 히트맵에 기록할 좌표(플레이어 없으면 zero).</summary>
-    public Vector2 PlayerPos => TopDownPlayer.Instance != null ? (Vector2)TopDownPlayer.Instance.transform.position : Vector2.zero;
+    public Vector2 PlayerPos => TopDownPlayer.Instance != null ? Plan3D.ToPlan(TopDownPlayer.Instance.transform.position) : Vector2.zero;   // ⚠️ (Vector2)캐스트는 (x, 높이)라 봇이 늘 z=0에 있다고 믿었다
 
     /// <summary>스텝에서 "여기서 목표 도달 실패" 기록 — 진행 막히는 지점 클러스터링용.</summary>
     public void NoteUnreachable() => _heat?.AddUnreachable(Scene, PlayerPos, _cycle);
@@ -864,7 +864,9 @@ public class QaBot : MonoBehaviour
             if (float.IsNaN(pos.x) || float.IsNaN(pos.y))
             { _rep.Error(_step, "NAN_POS", "플레이어 좌표 NaN"); GameInput.VSetMove(Vector2.zero); onDone?.Invoke(false); yield break; }
 
-            Vector2 to = target - pos;
+            // ⚠️ target·pos는 Vector3다. 그냥 빼면 C#이 (dx, dy=높이차≈0)으로 잘라
+            //    봇이 **X축으로만** 걷는다(리포트의 STUCK 도배가 전부 이것).
+            Vector2 to = Plan3D.ToPlan(target) - Plan3D.ToPlan(pos);
             if (to.magnitude <= arriveDist) { GameInput.VSetMove(Vector2.zero); onDone?.Invoke(true); yield break; }
 
             // 중간에 판단이 바뀔 사유가 생기면(적 등장 등) 멈춘다 — 긴 이동을 끝까지 밀지 않는다.
@@ -893,10 +895,10 @@ public class QaBot : MonoBehaviour
                     if (noPathTimer >= 1.5f)
                     {
                         _rep.Warn(_step, "NO_PATH",
-                            $"경로 없음 — 위치({pos.x:0.#},{pos.y:0.#}) 목표({target.x:0.#},{target.y:0.#}) "
+                            $"경로 없음 — 위치({pos.x:0.#},{pos.z:0.#}) 목표({target.x:0.#},{target.z:0.#}) "
                             + $"직선 {to.magnitude:0.#}m. 벽 너머이거나 격자가 끊겼다");
                         GameInput.VSetMove(Vector2.zero);
-                        _heat?.AddUnreachable(Scene, pos, _cycle);
+                        _heat?.AddUnreachable(Scene, Plan3D.ToPlan(pos), _cycle);
                         onDone?.Invoke(false);
                         yield break;
                     }
@@ -911,12 +913,13 @@ public class QaBot : MonoBehaviour
             _pathingNow = pathing;
             GameInput.VSetMove(dir);
             var cam = Camera.main;
-            if (cam != null) GameInput.VSetMousePos(cam.WorldToScreenPoint(pos + (Vector3)dir * 3f));
+            // dir은 평면(XZ) 방향 — (Vector3)로 캐스트하면 (x, y, 0)이 되어 하늘을 겨눈다.
+            if (cam != null) GameInput.VSetMousePos(cam.WorldToScreenPoint(pos + new Vector3(dir.x, 0f, dir.y) * 3f));
 
             checkTimer += Time.unscaledDeltaTime;
             if (checkTimer >= 1f)
             {
-                if (Vector2.Distance(pos, lastCheck) < 0.15f)
+                if (Vector2.Distance(Plan3D.ToPlan(pos), Plan3D.ToPlan(lastCheck)) < 0.15f)
                 {
                     _stuckTimer += checkTimer;
                     if (_stuckTimer >= 3f && _stuckReported < 8)
@@ -924,8 +927,8 @@ public class QaBot : MonoBehaviour
                         _stuckReported++;
                         // 길찾기가 돌고 있었는지 함께 남긴다 — 아니면 "봇이 직선으로만 밀어서"일 수 있어 신뢰도가 다르다.
                         string how = _pathingNow ? "A*경로 추종 중" : "직선이동(길찾기 없음 — 봇 한계 가능)";
-                        _rep.Warn(_step, "STUCK", $"이동 입력에도 3초 정지 [{how}] — 위치({pos.x:0.#},{pos.y:0.#}) 목표({target.x:0.#},{target.y:0.#})");
-                        _heat?.AddStuck(Scene, pos, _cycle);
+                        _rep.Warn(_step, "STUCK", $"이동 입력에도 3초 정지 [{how}] — 위치({pos.x:0.#},{pos.z:0.#}) 목표({target.x:0.#},{target.z:0.#})");
+                        _heat?.AddStuck(Scene, Plan3D.ToPlan(pos), _cycle);
                         _stuckTimer = 0f;
                         // 자유도: 옆으로 빠져나가기 시도(벽 끼임 탈출)
                         yield return Nudge(dir);
@@ -936,20 +939,20 @@ public class QaBot : MonoBehaviour
             }
 
             // ── 와리가리 판정 (6초 창) ─────────────────────────────
-            oscPath += Vector2.Distance(pos, prevPos);
+            oscPath += Vector2.Distance(Plan3D.ToPlan(pos), Plan3D.ToPlan(prevPos));
             prevPos = pos;
             oscTimer += Time.unscaledDeltaTime;
             if (oscTimer >= 6f)
             {
-                float net = Vector2.Distance(pos, oscAnchor);
+                float net = Vector2.Distance(Plan3D.ToPlan(pos), Plan3D.ToPlan(oscAnchor));
                 if (oscPath >= 8f && net < 2f && _oscReported < 6)
                 {
                     _oscReported++;
                     _rep.Warn(_step, "OSCILLATION",
                         $"6초간 {oscPath:0.#}m 이동했는데 순이동 {net:0.#}m — 제자리 왕복(와리가리). "
-                        + $"위치({pos.x:0.#},{pos.y:0.#}) 목표({target.x:0.#},{target.y:0.#}) "
+                        + $"위치({pos.x:0.#},{pos.z:0.#}) 목표({target.x:0.#},{target.z:0.#}) "
                         + $"[{(_pathingNow ? "A*경로" : "직선")}]");
-                    _heat?.AddStuck(Scene, pos, _cycle);
+                    _heat?.AddStuck(Scene, Plan3D.ToPlan(pos), _cycle);
                     if (nav != null) nav.Stop();      // 경로 버리고 다시 잡게
                     yield return Nudge(dir);
                 }
@@ -1015,7 +1018,7 @@ public class QaBot : MonoBehaviour
 
             EntityId id = e.GetEntityId();
             var now = e.CurrentState;
-            float dist = Vector2.Distance(e.transform.position, me);
+            float dist = Vector2.Distance(Plan3D.ToPlan(e.transform.position), me);
 
             // 분모 = **관측 반경 안에 들어와 본 적 수**. 게임의 detectRange는 접근자가 없어
             // 읽을 수 없으므로 추정하지 않고, 고정 관측 반경(8m)을 기준으로 세고 그렇게 표기한다.
@@ -1068,7 +1071,7 @@ public class QaBot : MonoBehaviour
             if (e == null || !e.gameObject.activeInHierarchy) continue;
             var h = e.GetComponent<Health>();
             if (h != null && h.IsDead) continue;           // 시체는 밀어도 된다(루팅 대상)
-            float d = Vector2.Distance(e.transform.position, pos);
+            float d = Vector2.Distance(Plan3D.ToPlan(e.transform.position), pos);
             if (d < bestD) { bestD = d; near = e; }
         }
         if (near == null) return dir;
@@ -1131,7 +1134,7 @@ public class QaBot : MonoBehaviour
             Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
             GameInput.VSetMove(dir);
             var cam = Camera.main;
-            if (cam != null) GameInput.VSetMousePos(cam.WorldToScreenPoint(player.transform.position + (Vector3)dir * 3f));
+            if (cam != null) GameInput.VSetMousePos(cam.WorldToScreenPoint(player.transform.position + new Vector3(dir.x, 0f, dir.y) * 3f));
             yield return WaitSec(0.5f + ctx.Rand01());
         }
         GameInput.VSetMove(Vector2.zero);
@@ -1145,8 +1148,8 @@ public class QaBot : MonoBehaviour
         var p = TopDownPlayer.Instance;
         if (p == null) return res;
         pool.RemoveAll(x => x == null);
-        pool.Sort((a, b) => Vector2.Distance(a.transform.position, p.transform.position)
-                     .CompareTo(Vector2.Distance(b.transform.position, p.transform.position)));
+        pool.Sort((a, b) => Vector2.Distance(Plan3D.ToPlan(a.transform.position), Plan3D.ToPlan(p.transform.position))
+                     .CompareTo(Vector2.Distance(Plan3D.ToPlan(b.transform.position), Plan3D.ToPlan(p.transform.position))));
         for (int i = 0; i < pool.Count && i < take; i++) res.Add(pool[i]);
         return res;
     }
