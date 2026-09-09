@@ -275,7 +275,16 @@ public static class Greybox3D
             case "gb_crate":  return Standing(p, name, x, y, 0.9f, 0.9f, 0.9f, _prop, 0f);
             case "gb_note":   return Standing(p, name, x, y, 0.4f, 0.4f, 0.15f, _prop, 0f);
             case "gb_enemy":  return Standing(p, name, x, y, 0.6f, 0.6f, 1.8f, _barricade, 0f);
-            case "gb_exit":   return Standing(p, name, x, y, 1.6f, 1.6f, 0.08f, _door, 0f);
+            // 탈출 발판 = **바닥 표식**이다. 콜라이더를 남기면 8cm짜리 판때기가 벽이 된다 —
+            //   캡슐은 턱을 못 넘으므로 발판 위에 설 수 없고, 반경 1.66m(판 절반 1.36 + 몸 0.3)
+            //   밖에서 튕긴다(QA 봇이 Exit_Fixed 1.6m 앞에서 7번 끼인 것이 이것).
+            //   상호작용은 콜라이더가 아니라 InteractableObject.All 거리 판정이라 떼도 그대로 동작한다.
+            case "gb_exit":
+            {
+                int r = Standing(p, name, x, y, 1.6f, 1.6f, 0.08f, _door, 0f);
+                if (r > 0) Strip(p, name);
+                return r;
+            }
 
             default:
             {

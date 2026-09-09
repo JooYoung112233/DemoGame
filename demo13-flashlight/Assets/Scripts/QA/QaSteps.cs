@@ -1017,12 +1017,14 @@ public static class QaSteps
     /// 안 보이는 적을 알고 교전을 결정하면 그건 사람의 플레이가 아니다.</summary>
     /// <summary>가장 가까운 적. **월드 좌표**를 받는다 — 호출부가 전부 `transform.position`(Vector3)을
     /// 넘기는데 예전엔 매개변수가 Vector2라 C#이 조용히 (x, 높이)로 잘랐다(봇이 늘 z=0을 기준으로 쟀다).</summary>
-    static EnemyController NearestEnemy(Vector3 world, float maxDist, bool visibleOnly = false)
+    static EnemyController NearestEnemy(Vector3 world, float maxDist, bool visibleOnly = false,
+                                       HashSet<EnemyController> skip = null)
     {
         Vector2 from = Plan3D.ToPlan(world);
         EnemyController best = null; float bestD = maxDist;
         foreach (var e in Object.FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
         {
+            if (skip != null && skip.Contains(e)) continue;
             if (e == null || !e.gameObject.activeInHierarchy) continue;
             var h = e.GetComponent<Health>();
             if (h != null && h.IsDead) continue;
@@ -1085,16 +1087,18 @@ public static class QaSteps
 
         int kills = 0, swings = 0, dodges = 0;
         string scene = SceneManager.GetActiveScene().name;
+        var unreachable = new HashSet<EnemyController>();   // 접근 실패한 적 — 같은 놈을 무한히 다시 고르지 않게
 
         while (kills < wantKills && Time.realtimeSinceStartup < deadline)
         {
             var player = TopDownPlayer.Instance;
             if (player == null) yield break;
 
-            var foe = NearestEnemy(player.transform.position, searchR);
+            var foe = NearestEnemy(player.transform.position, searchR, skip: unreachable);
             if (foe == null)
             {
-                if (kills == 0) c.Report.Info("combat", "NO_ENEMY", $"반경 {searchR:0}m에 교전할 적 없음");
+                if (kills == 0) c.Report.Info("combat", "NO_ENEMY", $"반경 {searchR:0}m에 교전할 적 없음"
+                                             + (unreachable.Count > 0 ? $" (접근 실패로 제외 {unreachable.Count}기)" : ""));
                 break;
             }
 
@@ -1116,6 +1120,26 @@ public static class QaSteps
             c.Report.Info("combat", "ENGAGE",
                 $"교전 시작 — {foe.name} (거리 {Vector2.Distance(Plan3D.ToPlan(foe.transform.position), Plan3D.ToPlan(player.transform.position)):0.#}m"
                 + (foeHpStart >= 0f ? $", 적 HP {foeHpStart:0}" : "") + ")");
+
+            // ── 사거리까지는 길찾기로 붙는다 ──
+            //   교전 루프의 '파고들기'는 직선 입력이라 벽 하나에 막힌다. 30m 밖의 적을 고르면
+            //   150초를 벽에 밀며 다 쓰고 "타격 0회"로 끝난다(실제로 그랬다) — 접근은 A*에 맡긴다.
+            float approach = Vector2.Distance(Plan3D.ToPlan(foe.transform.position), Plan3D.ToPlan(player.transform.position));
+            if (approach > range + 4f)
+            {
+                bool arrived = false;
+                yield return c.Bot.MoveTo(foe.transform.position, range + 1.5f,
+                                          Mathf.Clamp(approach / 2.5f + 6f, 8f, 45f), r => arrived = r,
+                                          () => foe == null || (foeHp != null && foeHp.IsDead));
+                if (!arrived)
+                {
+                    c.Report.Warn("combat", "APPROACH_FAIL",
+                        $"{foe.name}까지 접근 실패(직선 {approach:0.#}m) — 다른 적을 고른다");
+                    GameInput.VSetMove(Vector2.zero);
+                    unreachable.Add(foe);
+                    continue;   // 다음 후보로
+                }
+            }
 
             // ── 한 마리와의 교전 루프 ──
             while (Time.realtimeSinceStartup < deadline)

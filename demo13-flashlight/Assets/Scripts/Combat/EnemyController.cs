@@ -209,6 +209,11 @@ public class EnemyController : MonoBehaviour
         _rb.useGravity     = false;                        // 평면 이동 — 낙하는 아직 다루지 않는다
         _rb.constraints    = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
         _rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        // 질량이 기본값 1로 남아 있었다 — 플레이어(70)가 스치기만 해도 적이 날아갔고,
+        // 특히 구르기(3m/0.3s = 10m/s)로 파고들면 볼링처럼 밀려났다. 적이 **길을 막는 것**은
+        // 전투의 기본 압박이므로 밀리면 안 된다. 이동은 속도를 직접 넣어 굴리므로(SetVelocity)
+        // 질량을 키워도 적 자신의 발걸음은 그대로다 — 충돌 반응만 단단해진다.
+        _rb.mass = 300f;
 
         health    = GetComponent<Health>();
         feedback  = GetComponent<CombatFeedback>();
@@ -566,6 +571,15 @@ public class EnemyController : MonoBehaviour
 
         const float BaseScale = 2f;   // bandit_melee_1 기준
         float mul = Mathf.Clamp(unitStat.scale / BaseScale, 0.5f, 3f);
+        // 표시물(HP·그로기·이름표) 높이도 같은 배율을 탄다 — 고정 높이로 두면 큰 유닛에선
+        // 바가 **가슴에 묻힌다**(중장 모델 2.30m vs 바 2.02m. 화면에선 바닥에 깔린 것처럼 보인다).
+        _visualScale = mul;
+        // 이름표는 Awake에서 이미 만들어졌다(배율을 모르던 시점) → 여기서 높이를 다시 잡는다.
+        if (_label != null)
+        {
+            var lp = _label.transform.localPosition;
+            _label.transform.localPosition = new Vector3(lp.x, LABEL_Y * mul, lp.z);
+        }
         if (_limbs != null) _limbs.SetScale(mul);   // 몸은 배율을 매번 받는다(누적 곱이 아니다)
         if (Mathf.Approximately(mul, 1f)) return;
 
@@ -805,11 +819,15 @@ public class EnemyController : MonoBehaviour
     /// **가슴에 박히거나 발치에 깔렸다.** 아래에서 위로: HP → 그로기 → 이름표.</summary>
     const float HP_BAR_Y = 2.02f, GROGGY_BAR_Y = 2.18f, LABEL_Y = 2.42f;
 
+    /// <summary>유닛 크기 배율(StatDB.scale 기준). 표시물 높이를 여기에 맞춰 올린다.
+    /// ApplyUnitLook이 채우고, 바·이름표 생성이 읽는다(생성이 그 뒤에 온다).</summary>
+    float _visualScale = 1f;
+
     void CreateHPBar()
     {
         var c = new GameObject("HPBar");
         c.transform.SetParent(transform);
-        c.transform.localPosition = new Vector3(0, HP_BAR_Y, 0);
+        c.transform.localPosition = new Vector3(0, HP_BAR_Y * _visualScale, 0);
         Billboard.Attach(c.transform);   // 쿼터뷰에서 눕혀 두면 게이지가 안 읽힌다
         hpBarBg   = MakeBar("HPBar_BG",   c.transform, new Color(0.1f, 0.1f, 0.1f, 0.8f), 0, BAR_W, BAR_H);
         hpBarFill = MakeBar("HPBar_Fill", c.transform, Color.green, 1, BAR_W, BAR_H);
@@ -844,7 +862,7 @@ public class EnemyController : MonoBehaviour
     {
         var c = new GameObject("GroggyBar");
         c.transform.SetParent(transform);
-        c.transform.localPosition = new Vector3(0, GROGGY_BAR_Y, 0);
+        c.transform.localPosition = new Vector3(0, GROGGY_BAR_Y * _visualScale, 0);
         Billboard.Attach(c.transform);
         groggyBarBg   = MakeBar("GroggyBar_BG",   c.transform, new Color(0.15f, 0.15f, 0.15f, 0.7f), 0, GROG_W, GROG_H);
         groggyBarFill = MakeBar("GroggyBar_Fill",  c.transform, new Color(1f, 0.6f, 0f, 0.9f), 1, 0, GROG_H);
