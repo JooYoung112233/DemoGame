@@ -1,0 +1,2624 @@
+{
+  "project": "D:\\Demo\\demo13-flashlight",
+  "character_root": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor",
+  "archive_root": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08",
+  "current_root": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player",
+  "external_roots": {
+    "Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.prefab": [
+      "Assets\\Resources\\PlayerRig.prefab"
+    ],
+    "Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.controller": [
+      "Assets\\Resources\\PlayerRig.prefab"
+    ]
+  },
+  "preserved_assets": [
+    "Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.controller",
+    "Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.fbx",
+    "Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.prefab"
+  ],
+  "kept_files": [
+    "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.controller",
+    "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.controller.meta",
+    "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.fbx",
+    "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.fbx.meta",
+    "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.prefab",
+    "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.prefab.meta",
+    "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor.meta",
+    "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor.meta"
+  ],
+  "operations": [
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CapPreview.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CapPreview.png",
+      "kind": "archive",
+      "bytes": 644290,
+      "sha256": "8075a7c1cec4fcfb14c7e0c516777736be822639a622d85d6cbf3cdcc7ac5c47"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CapPreview.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CapPreview.png.meta",
+      "kind": "archive",
+      "bytes": 3362,
+      "sha256": "0f490b30ac07a3762c8eec36103efccb28f5da1d200955ce7b1e7d83f6dc2f6b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CharacterSheet.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CharacterSheet.png",
+      "kind": "archive",
+      "bytes": 721464,
+      "sha256": "f3613b79489d143538ceb56a7deaebafcc7c2536f8afff9b7f413b4126435a5a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CharacterSheet.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CharacterSheet.png.meta",
+      "kind": "archive",
+      "bytes": 3362,
+      "sha256": "8f139802995690af9ec81fe28ef68ba7f3333505e8cfe07fa1ed4503cbf333bd"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ChibiInGame.shader",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ChibiInGame.shader",
+      "kind": "archive",
+      "bytes": 2471,
+      "sha256": "873a42c6392998232b9fe3c2a68fc9b8f06be8ed05fdb7c3547a9467c6872bb0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ChibiInGame.shader.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ChibiInGame.shader.meta",
+      "kind": "archive",
+      "bytes": 60,
+      "sha256": "c30a7bff45a26bb34c09e8e2798377ea2ca5db8832493a7c691754a160b8c941"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ChibiSurvivor.controller",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ChibiSurvivor.controller",
+      "kind": "archive",
+      "bytes": 3230,
+      "sha256": "f9650fda1072971524b666f5e6801a414bc35ab109ae165f55ac268b00dd5c74"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ChibiSurvivor.controller.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ChibiSurvivor.controller.meta",
+      "kind": "archive",
+      "bytes": 188,
+      "sha256": "a2d8954077699b8cba6d3684c606e325eff0e623fa40227434b793f8c70e2522"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ChibiSurvivor.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ChibiSurvivor.fbx",
+      "kind": "archive",
+      "bytes": 826348,
+      "sha256": "c8d3d87e6ce720be78c9f29a8bc6b9ab616304ff9d68901dd6a9125dbc287a07"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ChibiSurvivor.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ChibiSurvivor.fbx.meta",
+      "kind": "archive",
+      "bytes": 5508,
+      "sha256": "6eabcc7dfe18a81d16681d0c80e1f64827f5dec1b2553ebd0c4884f8a691f589"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ChibiSurvivor.prefab",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ChibiSurvivor.prefab",
+      "kind": "archive",
+      "bytes": 2684,
+      "sha256": "42c66f6f5bea466ec6b7737b7595f149deaefc2a47162592c118782dc34afab9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ChibiSurvivor.prefab.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ChibiSurvivor.prefab.meta",
+      "kind": "archive",
+      "bytes": 154,
+      "sha256": "65b23b4b54563a1968c1b35a90288945899d461803d7e0cbfb2186eb563e6816"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\AnimationCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\AnimationCheck.json",
+      "kind": "archive",
+      "bytes": 2828,
+      "sha256": "ac2d8b857a65c2e175191f675194c8d84d3422b0ba7efb80a354547641fb7ffc"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\AnimationCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\AnimationCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "6b3aafd90acaf4e3b533dd3cf470f1b338575ed61562acbc73a05e2162d55a95"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\AnimationCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\AnimationCheck.json",
+      "kind": "archive",
+      "bytes": 4796,
+      "sha256": "02f8219057ee17525a2f4eb909e9d87e3f950d95b4f6a37a67d99c22c7466fbf"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\AnimationCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\AnimationCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "d9a940e7e3be54221b0bdbb915df0ef74b44acc2915e7a5cad9e1e744fc06341"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Poses.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Poses.png",
+      "kind": "archive",
+      "bytes": 1084875,
+      "sha256": "6b7e634fcf585cb2728af133b80c8e42d5c101cf0f4b0d02395993abc6982314"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Poses.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Poses.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "6d3dd788bb780225d05beb431517351aa6b2c8fc4544289132176c72e5b93e4f"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.blend",
+      "kind": "archive",
+      "bytes": 4561591,
+      "sha256": "d791164dfa2cda0174ca2fda3484c2a0aed597dd4b5d7565d6b6573d68d910e5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "bc767709539db044a3032dcc2c5974a45dc6d71991af3dee2b32f46dca28712d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.blend1",
+      "kind": "archive",
+      "bytes": 4561591,
+      "sha256": "3628ee3b5c5c666227ef9d88f5033af12ab9c0e8e8bbedeb3b8a2500ba171ce0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "f8a95124eea40893ac2c1d34494e63aafe9fe50ddf33e7134b2ed3835c137e14"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.mp4",
+      "kind": "archive",
+      "bytes": 651307,
+      "sha256": "163763eda6007ef50b9413b70eea247113980785614b5039b392282096ebbd23"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Attack_OneHand_Preview.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "45cefe8aefafec886de30c2dece58b1c213ffc1fe134d4ab9bca8347212e49bf"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\BladeClearanceCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\BladeClearanceCheck.json",
+      "kind": "archive",
+      "bytes": 178,
+      "sha256": "dde97654ada00dc8801a42b30dd09a96661144fe0f75db5bb4f7f4d6e1554a28"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\BladeClearanceCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\BladeClearanceCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "771cecbadf500b54d65f3d7bea2bfd7252169e164db6110381ffd253ec1b1bef"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.blend",
+      "kind": "archive",
+      "bytes": 4444291,
+      "sha256": "543a9b49e4669f3933d5aa9c11fbe5c468187e63426e8532d18c22fc6ed6d56c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "8f08d78b9ba20acca29a995c040cf1d4d120bbd15698c585ece5aff53f9b6560"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.blend1",
+      "kind": "archive",
+      "bytes": 4444291,
+      "sha256": "e66cc0642959d8f221ce1cf4fcd399b24c8d99014ba305bc0e711d28b3114188"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "fe9cec38632f92b7fe49c10572395704dc78e34a42aba2a2f03a7efddbd51567"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.fbx",
+      "kind": "archive",
+      "bytes": 1420604,
+      "sha256": "ad414db2e3ac3bc5a6b89f2d4b8e872449cc2760cca58398a7b95a2caaec247d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.fbx.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "7c37e74ac87d7b913720f9dbeef6ae1b0093614b17a625bf069e5bf4a487447a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.glb",
+      "kind": "archive",
+      "bytes": 1211896,
+      "sha256": "997a4c45f27743a8fc3b39f223a6c1cf226af9a2e6c89b63ec8f9952ef263477"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\CompactSurvivor_Combat.glb.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "25e6ee619143e4d67945aa53e66d066e087295fa551ef6b5309b52daddbab610"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\ExportCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\ExportCheck.json",
+      "kind": "archive",
+      "bytes": 820,
+      "sha256": "ae98ad8ce397ab366564903cef0d8bfca0b2363b8ec9c91f7bd2583385c76552"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\ExportCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\ExportCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "2335619e756d11029368e964804e40ba7a0bc958aaafea34a34797b816e8d580"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\GameAngle.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\GameAngle.mp4",
+      "kind": "archive",
+      "bytes": 168478,
+      "sha256": "95a838c55ef876a6ec464b296f284b17e40580d0baa086e950b8150563e3257e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\GameAngle.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\GameAngle.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "3921888b738e1b1d11bdbcd202a0015c20d658053037e1e509a480712f620e27"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Preview_GameAngle.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Preview_GameAngle.png",
+      "kind": "archive",
+      "bytes": 166618,
+      "sha256": "a672028fb84557186575e09a6ec122a4de10e65821ac42ce1904f71076baf47d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Preview_GameAngle.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Preview_GameAngle.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "c601c9a5663a4c9e9a89bf9ab25a341a8868c92339ec9a1a154b248b2775988d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Preview_Quarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Preview_Quarter.png",
+      "kind": "archive",
+      "bytes": 197155,
+      "sha256": "b577de2b810a5d0da215b031d541259093df3ce76b2ba1e8b8891be1fd936f0a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Preview_Quarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Preview_Quarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "3caf9d4b24b5fa0e9724800366bd3ccf3366fafc249fa07c2b68d9daaea757ad"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\PreviewCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\PreviewCheck.json",
+      "kind": "archive",
+      "bytes": 598,
+      "sha256": "de9680bbfbdf8e8834f6e7194a46c90d58eaa61382c0a38f4f9af7baec87d254"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\PreviewCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\PreviewCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "2bd32e935b9ee89604f34aec45a22cc53b74835caa1558a2ccd8e5c94db3dd83"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Quarter.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Quarter.mp4",
+      "kind": "archive",
+      "bytes": 188270,
+      "sha256": "2ccce3e77fdb1feb83f36339368fa16d5fe7843d496179e51729d2fc394a23bd"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Quarter.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Quarter.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "5b4ca005644033648b90cab3216168c72addab4421e04c3a0ccf3b9edad7546c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\AnimationCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\AnimationCheck.json",
+      "kind": "archive",
+      "bytes": 4195,
+      "sha256": "4e163eddf407abae193a6b5f98680b224315398af284240e79b46b31d7d8e219"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\AnimationCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\AnimationCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "6bea4e74b0e76072ff0562e6efa1856d2a3bcb85ccc6398226295d67e80f6ba5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Poses.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Poses.png",
+      "kind": "archive",
+      "bytes": 1045994,
+      "sha256": "6b28495be206f83cb811c337ae02d447cb7b654c22d7c8ba503e8cb64e245f3e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Poses.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Poses.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "2f38851fb2fb5e6e286696f465763492df696261aa61cc7c296caf609df14e92"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.blend",
+      "kind": "archive",
+      "bytes": 5001106,
+      "sha256": "0acb02e2f74dedd74fdd1bbb88bd450b4b425fdaaf1cf21b986fb4956bcaf6a0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "8771cc0aa5e8a3473b10b52d337675929049949f3e7d38eab5a50773e307822a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.blend1",
+      "kind": "archive",
+      "bytes": 5001106,
+      "sha256": "de7034cce5a9f22efe1945ba0bfe4f2e7f5baf3b5e917931db46037f6b304050"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "a13e515c48da2cfc71608b9d66f3257dbe62903b349158539e51c5a0e5619096"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.mp4",
+      "kind": "archive",
+      "bytes": 579468,
+      "sha256": "2c1311527ca7e4a020eb0412b735c77842280a5345f1c58bf863c94cbfbe75f6"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Attack_OneHand_Thrust_Preview.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "ba9bc4aa077885cf3499ef59133448895e647a00d94e1ef47bd1d1ee7fbb14b7"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\BladeClearanceCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\BladeClearanceCheck.json",
+      "kind": "archive",
+      "bytes": 178,
+      "sha256": "258c8e66c8b07271a6a07115799058feb018f1e004850a960851b26891174227"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\BladeClearanceCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\BladeClearanceCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "abafe722ad8f81eb611871e92db05dcf4e63457b1a0fbd416c7f27740902bbea"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.blend",
+      "kind": "archive",
+      "bytes": 4883806,
+      "sha256": "bb879946c37d0c9afa4d17d1e77e69881aa14a1bce6319ff15389943e2dde925"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "7555e95b33a364f0ebb2ee66592a3aa0eda08b577a75590244d10e9864b798bd"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.fbx",
+      "kind": "archive",
+      "bytes": 1594972,
+      "sha256": "8714682580294252adbaf265ca21d6988a0a601edab8c0e4c7d0b16946cdff07"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.fbx.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "9378522d658d77683ed093241276b7a1689a242db024a8c26669b3933d20025a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.glb",
+      "kind": "archive",
+      "bytes": 1231220,
+      "sha256": "cff4f811517dd065242384f67d9e91f0232f907819f782be0b090b3491e4a454"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\CompactSurvivor_Combat.glb.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "a1084d6a3e8700308c24079c5c93109545c92a6680028c5e51fedee798be6176"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\ExportCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\ExportCheck.json",
+      "kind": "archive",
+      "bytes": 1016,
+      "sha256": "282735633bc61168d62e3725f9a6c2c87f784a01bcf6dd463de225a4a4c06bf8"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\ExportCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\ExportCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "057bed3e1edc431180758f0dca35d10d47cd7e97db7fb65bd97eb243405c71c8"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\AnimationCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\AnimationCheck.json",
+      "kind": "current",
+      "bytes": 4456,
+      "sha256": "b6179155bb2a504f1f9a325978299419010bc118899297d69e905907a14725da"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\AnimationCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\AnimationCheck.json.meta",
+      "kind": "current",
+      "bytes": 158,
+      "sha256": "9887d886222520684014d834307eb4062bf39974ff80ec347b08c21395afe709"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Poses.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Poses.png",
+      "kind": "current",
+      "bytes": 1048842,
+      "sha256": "0482f85d9f8d991c769e597aa53502ff1d7e74d34fce7d891c7ebf98ccbf65be"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Poses.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Poses.png.meta",
+      "kind": "current",
+      "bytes": 2714,
+      "sha256": "29fe40c4776cb8e138ada675beb4b4908baa5af0f5d98d7895e794ec79e4317b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Preview.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Preview.blend",
+      "kind": "current",
+      "bytes": 4931440,
+      "sha256": "8290f87682f953e77899af7236ee6fd0949b7e597a4db82460cb66ce856db913"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Preview.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Preview.blend.meta",
+      "kind": "current",
+      "bytes": 3063,
+      "sha256": "2cf499ea631baedd17aa34b2aeb433d1a9e516f8dacce9af204b6b58a789e7df"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Preview.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Preview.blend1",
+      "kind": "archive",
+      "bytes": 4931440,
+      "sha256": "d401a7e75df42b0f48c40e8741c7979075a6105acf11d167b2a6293d49dd121a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Preview.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Preview.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "b5bd7e4ea0234d53df0954f9eb0d546232174ffac5f6be6f7d9e317102b53051"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Preview.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Preview.mp4",
+      "kind": "current",
+      "bytes": 476364,
+      "sha256": "6f88e4730ed5501e1f83f23fa5c2f79e21e216bd9c6823f70189cbd19cce630c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Attack_OneHand_Thrust_Preview.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Preview.mp4.meta",
+      "kind": "current",
+      "bytes": 354,
+      "sha256": "7147f5235645d4eeeb8f28903131a58c21ea0c2d87de78012ebc08cc0a1b4c2b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\BladeClearanceCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\BladeClearanceCheck.json",
+      "kind": "current",
+      "bytes": 178,
+      "sha256": "037a1e396534c867911af27b0b4f34b3ef6e1607e7e5e684ecc2768324d008d2"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\BladeClearanceCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\BladeClearanceCheck.json.meta",
+      "kind": "current",
+      "bytes": 158,
+      "sha256": "5519225a471727abcc96d3099411ce02a40acac4bf1ed6c252c42c430954bcbf"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.blend",
+      "kind": "current",
+      "bytes": 4814140,
+      "sha256": "16aee6c0575beccfdaf7e9ce2f1a37fdd4ee83e59697fa31dcc71459a2270629"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.blend.meta",
+      "kind": "current",
+      "bytes": 3063,
+      "sha256": "bc0381b16d19c0921d3d2007e2faeefd42dce605597af7f4137e04f8d8e2559c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.blend1",
+      "kind": "archive",
+      "bytes": 4814140,
+      "sha256": "a61ac113a157be9e609bde98d3e00b5aa585636fee4da8e561fe520f57ed0bc5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "52d1ca0f2dd1d816d27995beb470ab7ce244e085db1bf35b599f3b561d4f7a0e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.fbx",
+      "kind": "current",
+      "bytes": 1594460,
+      "sha256": "892bd8a3baad09e7e8857af16f65dbd5824f7e23632815ccee8ca958832c55bb"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.fbx.meta",
+      "kind": "current",
+      "bytes": 3063,
+      "sha256": "e04af133a5254e9b094a04019e3baaedc3603bc507e78e10b90006b1d9b9cb32"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.glb",
+      "kind": "current",
+      "bytes": 1229492,
+      "sha256": "6e70c1aebe1958e23ec27e9ba7cfdc7d97ecc134fa7034b3279de33a87f0b7ba"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\CompactSurvivor_Combat.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.glb.meta",
+      "kind": "current",
+      "bytes": 155,
+      "sha256": "0c1bacd737fa5f4b44b5b954bf6bd404f42fd11e502028357ce7303ab02d0314"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\ComparisonCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\ComparisonCheck.json",
+      "kind": "current",
+      "bytes": 841,
+      "sha256": "00ae4a20bbdad7fa02bb538e3d5ad7248295d84a8af963929b093b17ec7cbcca"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\ComparisonCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\ComparisonCheck.json.meta",
+      "kind": "current",
+      "bytes": 158,
+      "sha256": "43925cc41c7a5f070fd373b64c5fbb32c5f7c26e3625df688aae33872b979b50"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\ExportCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\ExportCheck.json",
+      "kind": "current",
+      "bytes": 1016,
+      "sha256": "cf36f533baca29ce65acb7e83128e8ad9bfb0853e3c0427b5fa9a743453da82c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\ExportCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\ExportCheck.json.meta",
+      "kind": "current",
+      "bytes": 158,
+      "sha256": "91afb915bba1fce7c3fef60210f7e44fbec634f3e611d97ea30339311199ea56"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\GameAngle.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\GameAngle.mp4",
+      "kind": "current",
+      "bytes": 130961,
+      "sha256": "6e5c45b384e2f1cf3baf47c340b6d83c90b1160ae71f0c4bf4d8e305e439146a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\GameAngle.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\GameAngle.mp4.meta",
+      "kind": "current",
+      "bytes": 354,
+      "sha256": "c0cdaa0c87009ea6595c311543e1c9cbc4d2629380e729ced1bf9b1a35150b67"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Preview_GameAngle.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Preview_GameAngle.png",
+      "kind": "current",
+      "bytes": 163340,
+      "sha256": "7d638b743f631badeff717a4a02ec9a4a0b8a9274e3270b39868780f2c3f8a1a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Preview_GameAngle.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Preview_GameAngle.png.meta",
+      "kind": "current",
+      "bytes": 2714,
+      "sha256": "48cd75f9ef1d6398c01dff27b1998c0f7c34b56ce6708a2efc826f5d44ca71d4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Preview_Quarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Preview_Quarter.png",
+      "kind": "current",
+      "bytes": 183753,
+      "sha256": "c2450f16ef6060a6c4c518cf13fb0a770fbfdb265ce45baaf3b608936c9f3b5e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Preview_Quarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Preview_Quarter.png.meta",
+      "kind": "current",
+      "bytes": 2714,
+      "sha256": "35c0ba8aa2cf9f1098c303e4400f51bfc368fc9ec60974058b04dab40be18604"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\PreviewCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\PreviewCheck.json",
+      "kind": "current",
+      "bytes": 597,
+      "sha256": "c46016ba13a1ed70ff3285eeadedd44bcb9ce7eaef0a657e3caaceb4dc616902"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\PreviewCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\PreviewCheck.json.meta",
+      "kind": "current",
+      "bytes": 158,
+      "sha256": "974f1b2d117f94548245ff6ad6450d3d4b543ab2e28c08b2ce0139275fb11085"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Quarter.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Quarter.mp4",
+      "kind": "current",
+      "bytes": 131434,
+      "sha256": "e7ba99ad168774f9e9b7e557dabf668fca83b648fccffa45a25f5389b08e1912"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Quarter.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Quarter.mp4.meta",
+      "kind": "current",
+      "bytes": 354,
+      "sha256": "6c9897a0738cd0530d7be66a46692541eb428dbe428ac9c86baae11289fe5a55"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Thrust_Comparison.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Thrust_Comparison.mp4",
+      "kind": "current",
+      "bytes": 552614,
+      "sha256": "02af9a0a91d90d53272e59584e3dba51c44d9052f759b3029785612393cfb2cc"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid\\Thrust_Comparison.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\Thrust_Comparison.mp4.meta",
+      "kind": "current",
+      "bytes": 354,
+      "sha256": "958325c2f9e5d6ffe05a67a60bc4157ebd81e4c241af51654e6a93542c037b37"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Fluid.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "12f1f7993f57cf96bb5b3a2d460b476b7483db98f88afa5f8ba4d90569a63b23"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\GameAngle.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\GameAngle.mp4",
+      "kind": "archive",
+      "bytes": 150806,
+      "sha256": "ca78a08f5a59fdb2b2263e67723a7d5dde7c2cddad363f15239e16d9a91d05f7"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\GameAngle.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\GameAngle.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "165580ea3a9a824459877088a6d94322e0c17930c42830cc646e4711b12693f7"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Preview_GameAngle.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Preview_GameAngle.png",
+      "kind": "archive",
+      "bytes": 171641,
+      "sha256": "895495f1c296e012e96ae47c6b8dc2ce072632903571efda07efbc7afa8a68a4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Preview_GameAngle.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Preview_GameAngle.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "cb68ff6cad78c043b3bb4d72f9c6505b5a0c145752e3221acc3a99a303ab86fa"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Preview_Quarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Preview_Quarter.png",
+      "kind": "archive",
+      "bytes": 189750,
+      "sha256": "5c1627c714b4094a91bbb6de5dab928c5e474ece8b1f38e3ce86188a2503ab28"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Preview_Quarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Preview_Quarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "8664faf9dcfb81c4616fa54ef782dcc55b8ffab46e783c7c14090671019cb08e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\PreviewCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\PreviewCheck.json",
+      "kind": "archive",
+      "bytes": 597,
+      "sha256": "d06e3bdd71693fdcdb9b87eaf70cc7fec1e5d038e1ae3b87b8d6e8739b4bfeda"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\PreviewCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\PreviewCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "d5fac3342914a989eb2fea9f220b0f24f1eff6f6aff4c5d35a28f07dcabc882c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Quarter.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Quarter.mp4",
+      "kind": "archive",
+      "bytes": 150263,
+      "sha256": "ed2752ab4ecf00c73ec2688867932d594e627f7a13136a28639fe290ba0f82dd"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Quarter.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust\\Quarter.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "389ae23b5dedd3297cfadb6bc804d6a43611819f42fbc67e562cb5320385aaaf"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat\\Thrust.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "341b0504747565c4bb36c7ec7359fc30d7765e80a14bcdc2c65dd96efe572f34"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Combat.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "9763d642c885bfbd4f4aac6b5959f43f8fbae1e78e1d0e17bbe21af032cf8321"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.blend",
+      "kind": "archive",
+      "bytes": 3992439,
+      "sha256": "9a10fdd1d4e6ad6777efa49bad01bd58cb4b18a410fe0a99387632cf914b040f"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "e6675fd20cd26ba869b4123b8e6d6618624c7f314bb33923b1b7297c20e469f1"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.blend1",
+      "kind": "archive",
+      "bytes": 3992439,
+      "sha256": "1ca9aa4e4f21ce1be09a57895b9a542b750dc9e346bb80befda0bef7b344b33f"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "cb6ef4b05738ad3a2b48b8aee1a2b1dabac1036a0d5d2a97bf3197c6311e8037"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.fbx",
+      "kind": "archive",
+      "bytes": 1247452,
+      "sha256": "16ba0db41e531f98dd9a7b99a0ab6e98cfd4b42b5642bbfd9298d9f471d3d863"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.fbx.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "6884667d24907b893ff8a82b8003f1af319d94e7ae6be6265a8bdc998d78591a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.glb",
+      "kind": "archive",
+      "bytes": 1295648,
+      "sha256": "6d739a994f1aa709e3fe726fa93d444044f1574f80ed415e35901488169c6df0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\CompactSurvivor_Animated.glb.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "bc138c714c2ce5b8d2605ece992d64fbe8a5ef87b59af920a3eaa64df31ce945"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\ExportCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\ExportCheck.json",
+      "kind": "archive",
+      "bytes": 637,
+      "sha256": "59e79ff237693e3e7f80522c43002f70842b15bedb91c91f29f146ce286505ec"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\ExportCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\ExportCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "dccd740b6321052560a45ce3bd80a197b5681fb124da312b0c06c3a449b9e8eb"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Idle.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Idle.mp4",
+      "kind": "archive",
+      "bytes": 149997,
+      "sha256": "f20343276b894ba95701bac6f46379f2771bca57eb3e33bdbcf87026f6ae6751"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Idle.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Idle.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "77040c8063a08ceadaaf276a1bb3bf2d918ee21d17d5008ef73ab033f9e932ca"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Idle_Pose.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Idle_Pose.png",
+      "kind": "archive",
+      "bytes": 417260,
+      "sha256": "6baf76b744c1ccb36c5136d255a3b871e0e35b79aa7b21997402f2e4996ea3e2"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Idle_Pose.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Idle_Pose.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "1324c6bb4e68f6236c0e58a6dceb5019976ec29a3a73cbf94005b9bfc911ca0a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\LocomotionPreview.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\LocomotionPreview.mp4",
+      "kind": "archive",
+      "bytes": 725708,
+      "sha256": "09eeb0f77583d92e85904aa8bc3b6f4f7882eb96e26918f68234703f004444f3"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\LocomotionPreview.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\LocomotionPreview.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "bcae27fda021c073c54b778184e43d64e8af8f29c64eb30406c31bad824811fb"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\MotionPoses.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\MotionPoses.png",
+      "kind": "archive",
+      "bytes": 2232777,
+      "sha256": "5e558ebf7e203e6c243caa5c40c0bd428c50a7cfa66a963bcedc4d4efb5d9502"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\MotionPoses.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\MotionPoses.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "83f39c6e2112825877222973f764be1c039dfb181224b37fb0f3644ffec40777"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Idle.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Idle.png",
+      "kind": "archive",
+      "bytes": 184994,
+      "sha256": "1a5737557e5f434b69b5ee2c6e85ce6a212238838f04b638c93a290fd491e647"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Idle.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Idle.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "4f6c0c37a48330d146ba4d0aa5b5de143fe93832e2ce332a96b8f73ebb0257c3"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Run.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Run.png",
+      "kind": "archive",
+      "bytes": 215503,
+      "sha256": "8fb0ff91a3e6ac083dabad4ac2bbe02b72f22f55b53976ab1e1dc97738989afb"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Run.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Run.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "48393f48e5e068d4878b792d141598c301ef08c55804e4776ae377e73eb2f9e5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Walk.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Walk.png",
+      "kind": "archive",
+      "bytes": 228434,
+      "sha256": "8e66e2603fff7bd2a20d0ad67d16d02fa34a635416c6032987621602344569d1"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Walk.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Preview_Walk.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "996f45f3369d94814fdeaae52ff871ec18ccaa80fef6686b0284e053f468265e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\PreviewCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\PreviewCheck.json",
+      "kind": "archive",
+      "bytes": 695,
+      "sha256": "ae987faf2776b28da092ee971d0efb808b11975d622e89047cd046e2e1de21bd"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\PreviewCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\PreviewCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "679d809bce05a2d99eb7e77ec3b0deac4afe119042b44ce73a0c24db9a552032"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\AnimationCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\AnimationCheck.json",
+      "kind": "archive",
+      "bytes": 3207,
+      "sha256": "09c6771f57ba71ee9b5fe07bcc5ceba5c39fa62eb640175957b2d4e57d8bb52f"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\AnimationCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\AnimationCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "84eeaf3eafec6f1305628241c269a93f37b065f41f5c957c9ac39a3239e26722"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.blend",
+      "kind": "archive",
+      "bytes": 3935406,
+      "sha256": "c9b711a7aba4b226f65fa35ed1de637ef986a3b1c2db80d068e82b4f50ff22a5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "1edc756793fc1e2d039b5c5e928031e6bbbc5ac75fe4e96138cd1db6fc51628f"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.fbx",
+      "kind": "archive",
+      "bytes": 1234204,
+      "sha256": "353c9c5fc5fe8a23b390b472bbda72fddf27d7e7c017eea0c507fde0335289c4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.fbx.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "2fe495913ff12c4dc42cc534a508042fbed8410b433a8bdc7e8319c79c3cff82"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.glb",
+      "kind": "archive",
+      "bytes": 1187524,
+      "sha256": "86a89812f27ea656e12be518014909a8020e58856d6a8397f930d2c74e52cfdc"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\CompactSurvivor_Animated.glb.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "694dcedea152f21c23554c5f0d16fb2612ef6f1546b4fae917bc9496b82fb8bb"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\ExportCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\ExportCheck.json",
+      "kind": "archive",
+      "bytes": 638,
+      "sha256": "c7cfb0e68628316117245c6690df959a102693331a38ba067de8cdafab518136"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\ExportCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\ExportCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "7fc69a91f546b4b6e4a4cf5c8f3fcbcb81cf53bf0aafdaa81b0428a585c6ba17"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Idle.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Idle.mp4",
+      "kind": "archive",
+      "bytes": 146748,
+      "sha256": "08e9059812f145e3aa49dfedb05854b6c1ad14c3b5b63146177f40aafe178d03"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Idle.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Idle.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "c7693fccf16a54bca95ba3e0f8f3b7e91108d5cb1aeafe7c75aacf4fc5e21dc9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Idle_Pose.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\CharacterPreview.png",
+      "kind": "current",
+      "bytes": 415604,
+      "sha256": "0fe9a3da606f163d261d469192febd280b65819293f7cedf4b23250bbba1a5a9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Idle_Pose.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\CharacterPreview.png.meta",
+      "kind": "current",
+      "bytes": 2714,
+      "sha256": "14496ee74cd4da7d2d3526b99697fb83828cdfe279b4d15e5ff6813022cdb4fa"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\LocomotionPreview.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\LocomotionPreview.mp4",
+      "kind": "current",
+      "bytes": 706670,
+      "sha256": "65d66e7f9acd82e5dfbf98975a956369dc847c9d801ef9a171fb5aa458a954c9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\LocomotionPreview.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\LocomotionPreview.mp4.meta",
+      "kind": "current",
+      "bytes": 354,
+      "sha256": "379fff822a8e2ef3cf6a086af571f62f0ffe6ee904293688341e6764dcfe7776"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\MotionPoses.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\MotionPoses.png",
+      "kind": "archive",
+      "bytes": 2221049,
+      "sha256": "626c99a36dfd442ddb257a1bbce7e7c437edb02035d630987b13d7fc6efe9e5b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\MotionPoses.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\MotionPoses.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "c73abee36b2317686d82f137536058174475a96f2e583284f8089af7912759ec"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Idle.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Idle.png",
+      "kind": "archive",
+      "bytes": 184042,
+      "sha256": "50f4a9834d154c9c048539e5fe05c8845a4943891da7d688868c5dd3ce9ea321"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Idle.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Idle.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "e5eaf2323d381b2c7caab873351e6692fedc226698b12f03f5696c008e92a913"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Run.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Run.png",
+      "kind": "archive",
+      "bytes": 214972,
+      "sha256": "e18e1e15546a16ec1e5b882862b7c93a6b6d503c3a347a684cb19c4e6444d94e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Run.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Run.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "5f01af18b0a69d8975512d0635ad5798382caa634c6e751430f0bb52ca286c91"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Walk.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Walk.png",
+      "kind": "archive",
+      "bytes": 226856,
+      "sha256": "723d88a0556bd5d2095b5c59ceb5214198311aaa6db17b2fb6234b0ec05ab6fe"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Walk.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Preview_Walk.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "30236c29d596a061e0282a5a9c71e54767d4a2d115d1d22ba29e090ae44a3487"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\PreviewCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\PreviewCheck.json",
+      "kind": "archive",
+      "bytes": 695,
+      "sha256": "c5d9d6ebc7dc3dbbe3a2b10e3d73d9e4e426378892d3d3f30cc0df074245f9e1"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\PreviewCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\PreviewCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "69efed5fc2cbb02e7a5921092ab271c7f4b4053ffc889577ad9cc43188ffd1de"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Run.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Run.mp4",
+      "kind": "archive",
+      "bytes": 327258,
+      "sha256": "41fdc7d022c900653822cacbf32d7b2c2e3c11773e8d87ec7a76026507566ddc"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Run.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Run.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "e54468cfe91dd993f615a25cec9efbe9b06d7cf7e4e2acf3439f1517c03418ef"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Run_Pose.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Run_Pose.png",
+      "kind": "archive",
+      "bytes": 413101,
+      "sha256": "0a9bbea426e29819dfd272dbaf8e924b7ee884b4263ebf62a613316f6d273785"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Run_Pose.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Run_Pose.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "e2cf320a31d736c2c4913aa102e6b4fe47a436c1bd935ac8576360e904cb4bec"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Walk.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Walk.mp4",
+      "kind": "archive",
+      "bytes": 263210,
+      "sha256": "6f43b3192ecbd3b4d44df93c1910766db0d651d4029a996e3bc003bf1f71e266"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Walk.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Walk.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "63893b48c1552f808e01bdab58deae96152ed681c11d5c411f4c789a66b08343"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Walk_Pose.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Walk_Pose.png",
+      "kind": "archive",
+      "bytes": 415328,
+      "sha256": "220b2ab175427c8afc10a82b915c4b58f89ef6b61cfb098e0369451f0e2f28eb"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Walk_Pose.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands\\Walk_Pose.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "92b484defbcf6d7f0009f6b515433c687a2227a2dd6270a27dfbb7711dd07b89"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\RoundHands.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "447c91b101b58781351bb2218ee1efbb0e884925f2d80299803ba0729d409981"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Run.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Run.mp4",
+      "kind": "archive",
+      "bytes": 336997,
+      "sha256": "932d63ec8a543e966fc07be5d28fd57b0283475536c66e44cbdf87eec964dc08"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Run.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Run.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "d451cc09e820cbbe8c17c5bbb4c8d8ae0616e8492a7834e06765d576c9694d65"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Run_Pose.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Run_Pose.png",
+      "kind": "archive",
+      "bytes": 416320,
+      "sha256": "1e3833145ec6f9045938b26fe4c47b1e2a654325c03d5823d06119ad9624cb49"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Run_Pose.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Run_Pose.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "eccbf0a654c989c6549d2d0c195797abd4337be3b01447d658f345794ea17361"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Walk.mp4",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Walk.mp4",
+      "kind": "archive",
+      "bytes": 268984,
+      "sha256": "04faa8a78ccfa156e9492961ae41909eb6b029bb6bb44214ab21317b0e5371ac"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Walk.mp4.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Walk.mp4.meta",
+      "kind": "archive",
+      "bytes": 354,
+      "sha256": "8201a335b988dd37bded798fca7c4ce9c6eda2716b62088d656c4c021912f50a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Walk_Pose.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Walk_Pose.png",
+      "kind": "archive",
+      "bytes": 417720,
+      "sha256": "59daa78c3d81d3b49cfbd815b162bc1ff59ef796e018a9ba25c8de33b5fa17ab"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Walk_Pose.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated\\Walk_Pose.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "5bf645fd5e855236bd08216617da08e520f8bd14bb9702fc18fb514d7f0ede08"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Animated.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "7af20319a8bc818ec96fc0368ccaf8af8c4122ca9065149a905ec6178b976415"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Back.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Back.png",
+      "kind": "archive",
+      "bytes": 806354,
+      "sha256": "9ee8e597f49e062b1aa23057cf1799ee7ce0a67c896976ee8ede5e1920505dcb"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Back.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Back.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "1222b4cd17f421d12f313d7a63c7d38904daaaef3db07a00e16b4ee690ca4d20"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\ChosenReference.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\ChosenReference.png",
+      "kind": "current",
+      "bytes": 617439,
+      "sha256": "2aafd00eec0ab5a35661b720b69eb5c582b207a75deac71386ac558b329e7265"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\ChosenReference.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\ChosenReference.png.meta",
+      "kind": "current",
+      "bytes": 2714,
+      "sha256": "8218f40df4795bc1e7557fa1377bb8e3fdf7bfc75056c904f24e5d69cafe0f08"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.blend",
+      "kind": "archive",
+      "bytes": 1806000,
+      "sha256": "08213f61ab693928a418918ddb026322d41de50ea6fca679efc6881a4b50a721"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "b03cbfee09cc8caa2f325e1caadc70dbc2a378a603cf6f4f1f97fcdf6a39561b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.fbx",
+      "kind": "archive",
+      "bytes": 309852,
+      "sha256": "59f292bced8b8d8a7f6e69774aa4d8dd8893d84e780a33a14680732330e132c4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.fbx.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "b9b6f34683c29d5c8c0659a801e409eb67a8e9d568b64e0be4d95d803514746e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.glb",
+      "kind": "archive",
+      "bytes": 755716,
+      "sha256": "41cf36cf89ef3b8986791372876bafdd638e54550196a062b35662f5b8decff5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\CompactSurvivor.glb.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "08555d440cf233922cfeaafe5c7ae131de70bef11420b0e03ed01a63c1794b84"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Comparison.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Comparison.png",
+      "kind": "archive",
+      "bytes": 1529770,
+      "sha256": "a986330f0f8153d3d3a07be74f5034a32c5dea5f9f87dd9bc95fcc43047877e9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Comparison.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Comparison.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "2da10398e04e11793058281f1c5559446ccaae9aa0b860e5c9c0b7f6edaf75ad"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Front.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Front.png",
+      "kind": "archive",
+      "bytes": 837697,
+      "sha256": "097823e88508d3394bb27aaa235bdc343bf247ca0d2c48d9823963cf9a22fd74"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Front.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Front.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "f27be96c3f98675beda4a5d0fb4530d8f3efa236a04537c965fa960de845f5ac"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\ProportionCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\ProportionCheck.json",
+      "kind": "archive",
+      "bytes": 596,
+      "sha256": "d92815f54683725f5673a72897f1f2d92532f4e9f0c33d220b82d0686239aeef"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\ProportionCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\ProportionCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "f2589d592355bfd391d14ea2adbf1368c62dbd92ebd5c1b441f478ffc64f09f4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\ProportionComparison.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\ProportionComparison.blend",
+      "kind": "archive",
+      "bytes": 2517272,
+      "sha256": "27a2d411676bce6e5ff0bbde168f4f27cac77f3b9fb3fb8a781890913d038cd0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\ProportionComparison.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\ProportionComparison.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "9d5bfa0ed7fd0392de7f563e83379e41aaaa37de636f58213f0c5ae6847f299e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Quarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Quarter.png",
+      "kind": "archive",
+      "bytes": 843829,
+      "sha256": "fe2860663ee3a86a67d7a612ec6583d4243712dd33092b488995c1e98dbe163a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor\\Quarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor\\Quarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "0f121c29e4e41a2690f69531efc749d64cfd50bd59930fd097a467c6bb8541a1"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\CompactSurvivor.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\CompactSurvivor.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "32d54ee68361664f6d463c067c903948b16331188df10ded3883db54ec3dbef0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\EarStudy.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\EarStudy.blend",
+      "kind": "archive",
+      "bytes": 8541379,
+      "sha256": "1eaca1c72545bc9c041f65315abc53aabb36d7e1a8ab40af1ad23a2a0b362e40"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\EarStudy.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\EarStudy.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "dc470610ec906a1c9635ea52761791d066fce91e2681e6762e76fb752d3ea021"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\NoEarsAtmosphere.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\NoEarsAtmosphere.png",
+      "kind": "archive",
+      "bytes": 827704,
+      "sha256": "bc5294dd0e652b3a475d596f9c7b803dd0d46be4d07b61226bdac7274e9bc0dd"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\NoEarsAtmosphere.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\NoEarsAtmosphere.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "9312a2cf75d668f45c7fd295d16d87edc0688ff389f971306042d95906a4a032"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\NoEarsNeutral.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\NoEarsNeutral.png",
+      "kind": "archive",
+      "bytes": 830646,
+      "sha256": "323e8603e0c4393982bcab556097dedf4cbf845ec81d2baa548735c31db92191"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\NoEarsNeutral.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\EarVisibilityStudy\\NoEarsNeutral.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "1eb968d83146f34c59db34433f02945b47f092b980fab483ec536bea46f7a94a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\EarVisibilityStudy.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\EarVisibilityStudy.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "f92732a7a093ee802cd2e9ebf417214662f9088eed9f33882a7e025b86d74145"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.blend",
+      "kind": "archive",
+      "bytes": 5727883,
+      "sha256": "e8bed15453e1700d124520f35f1e14119d278488a7118977bbb36aa66b27f480"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "e8e91b4ee2f1814f4bdf45b0627f60ee2f83d9396643be621e7af9ee13d0bea3"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.blend1",
+      "kind": "archive",
+      "bytes": 3290005,
+      "sha256": "a82e22dc20c22e579a7ac19bad66e95b828437d811d86d4516d8119102e91fe4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "5ddc46a2b9aba1edb13c4739b12fc13e0c02b9b14db0a8f9f6a4c23e50838747"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.png",
+      "kind": "archive",
+      "bytes": 1477049,
+      "sha256": "1223f93e4f6b2bf15811db7f46cea448007e4ebcc87c6668b435510da40307d0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceComparison.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "6f6c223976ae03ab00a610cdd9bdd76799d590cb6d56d72f0707ecce739797f9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceFront.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceFront.png",
+      "kind": "archive",
+      "bytes": 1019018,
+      "sha256": "ac253748079952b562316ce74e3a9e600f24fd966defa2fe81797000292c637a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceFront.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceFront.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "ee6a3d5f0a2dd4c9afa4df31f9372e2f96c2e512867b3889b4f8599006d00648"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceQuarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceQuarter.png",
+      "kind": "archive",
+      "bytes": 1012788,
+      "sha256": "0ed49d8f9abacc87a0396a4e3c4cecf2d6768e6f4140c81e553b48cb9f329024"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceQuarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceQuarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "576d9f08766c315484e21344b9413bdface247170b135087084e7b2465999bcd"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceStudy.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceStudy.blend",
+      "kind": "archive",
+      "bytes": 4023826,
+      "sha256": "70b195ca5a6f0af9e648469e6f73e807a592c77028a4f3162fa0598ed1861df4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceStudy.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceStudy.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "18be26a47a535bb908f50dca12daa77092a3464218079edfcefecb679c015b0c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceStudy.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceStudy.blend1",
+      "kind": "archive",
+      "bytes": 1585948,
+      "sha256": "f7a2d90acfe937b158a4ab5d9bd9396e68ae58b23d695a6d209a4e4d56a4433e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FaceStudy.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FaceStudy.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "43a81535150234ba45dee508c2c3cc45ec55420b2a1ebc2392ed51ba37adcdde"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FullBody.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FullBody.png",
+      "kind": "archive",
+      "bytes": 1022933,
+      "sha256": "b36a126e8d29348555b00ca6d3705e78830b5fef066db0b17d1d566e83eb5fee"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\FullBody.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\FullBody.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "0d23214afd9578171343cba6323d6fc512ba8f0215c9edeb629210ee99a48fc8"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\GeometryCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\GeometryCheck.json",
+      "kind": "archive",
+      "bytes": 1845,
+      "sha256": "ecf69e9dcaa7bfba34842642d83fc28418d74a289b8ce415666fcad151f40871"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy\\GeometryCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy\\GeometryCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "b110b5ffba6abbf62d1865e7e81296c4ce5fb10ce8e1e45a752d2895a77f08ca"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudy.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudy.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "d096866977451009a54c5a2f952a5bca75a019e82c1fa4d7047c58cb202fd2fb"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceAtmosphere.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceAtmosphere.png",
+      "kind": "archive",
+      "bytes": 833470,
+      "sha256": "eff251d2b2d5332787798131efa0a18d3c4a90a829ca07bf7299d84e2e967eea"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceAtmosphere.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceAtmosphere.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "b0cd05bab136fe5943618cef987a91f10348423d960b818db21eaeceaacba31b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceFront.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceFront.png",
+      "kind": "archive",
+      "bytes": 1009961,
+      "sha256": "bb62c9d84dd103f121d6cbdccc54abd382733edefb582cc4e3d5ab55f23724ae"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceFront.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceFront.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "4d793e0e29ae2ad4a33eb2c9d95336ca380ef1eb3f63932d663c4551285bcb69"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceLightingStudy.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceLightingStudy.blend",
+      "kind": "archive",
+      "bytes": 4605510,
+      "sha256": "bc9019d50273d01de522f77588397d668c82f5152f2cea8620245b51129d811d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceLightingStudy.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceLightingStudy.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "b4296f8ce23b160c42fa18090cc4e840f085e6ca55bc5b59e7131c8213a9cd61"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceNeutral.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceNeutral.png",
+      "kind": "archive",
+      "bytes": 834575,
+      "sha256": "3e069e4ba4ef289c3070c59f8cd59115ab7da19438d64e20736e32ce87e3a0ba"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceNeutral.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceNeutral.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "0c734b83ea26ec6d3d7a4028ec217330e6ce6bdd309c983e15d4b3d44c130bea"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceQuarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceQuarter.png",
+      "kind": "archive",
+      "bytes": 1003272,
+      "sha256": "02f35c32879145fa7b5b2b06b3c4b52ba8859e055bf58b836e3738c6df1c0d04"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceQuarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceQuarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "e48246e893b4dd117fa70766c72dc7f84a4e8faedef63bbf87d33b875cbe48e2"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceStudy.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceStudy.blend",
+      "kind": "archive",
+      "bytes": 2639681,
+      "sha256": "ff55868207d5552307c28586205025caead8442acd4508a3eac0de4625effa3e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceStudy.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceStudy.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "307818a8458b96ecdaf7632120efdd5025abded0d315c8755b35bfc07412243b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceStudy.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceStudy.blend1",
+      "kind": "archive",
+      "bytes": 3396843,
+      "sha256": "07a82e6b90e059859764a1948e2f9b49847f0339b3613d56981ed1e22f52a1c5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceStudy.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FaceStudy.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "14ea607a4c2f4ee3a5eda1c4154388bd46eb5ef2df3ef6d2a9c06ddc15e5fdb5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FullBody.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FullBody.png",
+      "kind": "archive",
+      "bytes": 1020258,
+      "sha256": "60a31c5eee3a1b2a3d9a018e793860b20b84705a11237e9385a32cbaf14a22bd"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\FullBody.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\FullBody.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "f3ddd47f1c4efcce7d2a575555606322645e5e2f238da66ea107c43def831fdd"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\GeometryCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\GeometryCheck.json",
+      "kind": "archive",
+      "bytes": 1849,
+      "sha256": "d1510e7a20becb6d33a0628de46fb4dc9ad6b3d846cd85878339789d58e8925b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple\\GeometryCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple\\GeometryCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "473307d09e5c1b7ef15a1732d02a169bf51331441ed82dbfef8fbbe424d15c0a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySimple.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySimple.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "aa61aa4a0a05d0030f8bd9d799b5e2ad757e22a69365f7d58e074f36c40effb1"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceAtmosphere.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceAtmosphere.png",
+      "kind": "archive",
+      "bytes": 835717,
+      "sha256": "8869fd675b0252831de6b6fd7ea19a60bef71150f403f25f6e13a4065866914b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceAtmosphere.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceAtmosphere.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "d812cf983ac341090eec90ec85b1f963e3ad66c40665eab93c6647ee4891d516"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceFront.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceFront.png",
+      "kind": "archive",
+      "bytes": 1013287,
+      "sha256": "e083db27755d18550a04432ec1d73d1df9ff4cf6207286ba7919f799bc6033f3"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceFront.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceFront.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "01ab865a4fa1ddd7e126ec7a60e397b5858c5524292088a399162adbf8029565"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceLightingStudy.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceLightingStudy.blend",
+      "kind": "archive",
+      "bytes": 4606016,
+      "sha256": "08ddead387836b0e70a856a4686dd4c1e07b4cce6525f6c44040537103267a76"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceLightingStudy.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceLightingStudy.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "7e3aec08be4a135d1e457ae1090cfee1804de1bc6673b1915511767d2e39e570"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceNeutral.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceNeutral.png",
+      "kind": "archive",
+      "bytes": 836532,
+      "sha256": "4e978090dc3d1147ada66c6dec879b472d6beef6e26f96ee9fea229bde8bf422"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceNeutral.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceNeutral.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "f9bd4175a3ada2f128049abd78cb4f726afe6689d665d4b368be524b66a21c53"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceQuarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceQuarter.png",
+      "kind": "archive",
+      "bytes": 1006731,
+      "sha256": "87677e79e619c619ebd83c0871b846c2b72e9dc350beb49d0293d15334278d23"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceQuarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceQuarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "55d0d87e68116a1e4f26222f33ac28688f95049ccf9899a8ac3c34c9cfee5d33"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceStudy.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceStudy.blend",
+      "kind": "archive",
+      "bytes": 2639934,
+      "sha256": "9fd71302515ff07f98dbe227322b2b5a6e68475f69f54d1f17836b4daab669ea"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceStudy.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FaceStudy.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "e4c0b1002044e27e755b16ae7914c0bd3b8dfd80798fc2914f6ffd8ac5d68d46"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FullBody.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FullBody.png",
+      "kind": "archive",
+      "bytes": 1020847,
+      "sha256": "916f9b92c18671dd1588db475b51d6655f5873af598e986bd810e8f51faa2093"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\FullBody.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\FullBody.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "afe6661b527147f250d32fa7fd67cae90bd3f78138e3ecb0c9307ed8caabc687"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\GeometryCheck.json",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\GeometryCheck.json",
+      "kind": "archive",
+      "bytes": 1953,
+      "sha256": "7a38f50550fae94899472f23d97cb43275d95879191adfd8fd04f9865d66a4db"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare\\GeometryCheck.json.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare\\GeometryCheck.json.meta",
+      "kind": "archive",
+      "bytes": 158,
+      "sha256": "6558f3aa901ba84dda9ee6981f27dc3e155d298a4d083ee6ea5dae4d226c51e9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\FaceStudySquare.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\FaceStudySquare.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "6a991e7b1a70f6a76123dbbfa4761f6c2a543afdacccdba2e7bc3465e5dc62b7"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Idle.anim",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\Idle.anim",
+      "kind": "archive",
+      "bytes": 1682164,
+      "sha256": "5abf7cc8d129e8e1bdc142ad5fca271f19edb7635ec13a6ac7cfa098af6ecedc"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Idle.anim.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\Idle.anim.meta",
+      "kind": "archive",
+      "bytes": 188,
+      "sha256": "0452967bf68774c5fbd31ca93b8b5f15ddee9016020a8bbf4185c3eb36ac5835"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\KakaoTalk_20260908_170010839.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\KakaoTalk_20260908_170010839.png",
+      "kind": "archive",
+      "bytes": 617439,
+      "sha256": "2aafd00eec0ab5a35661b720b69eb5c582b207a75deac71386ac558b329e7265"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\KakaoTalk_20260908_170010839.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\KakaoTalk_20260908_170010839.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "03a23d6fede66d84a88ba2f404976790da5b3e0341700d281db8ee6c8cd996b5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\Comparison.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\Comparison.png",
+      "kind": "archive",
+      "bytes": 2582569,
+      "sha256": "3d333c7f2cbb7356848accc6f5a63973761bf788b2cf3e5cf0f2a0e7515afd10"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\Comparison.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\Comparison.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "75eafdb2f2010bc59c087421f95a7b2f2c78bf5603758ad6d8a8c013c0b59405"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\Front.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\Front.png",
+      "kind": "archive",
+      "bytes": 1000388,
+      "sha256": "de57e18b84f0f9bd54cdeb02e523ea3997421fcd8adbfa8c131262139b14d52c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\Front.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\Front.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "a671f68471ed9d53e145a7f2268a67c22e1da459de198fcd1266e00853c80f02"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionComparison.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionComparison.blend",
+      "kind": "archive",
+      "bytes": 3220942,
+      "sha256": "b2605f76e8ffe1b663fc4410309ea84b28cc97e57fdb4c69624cc3b5025c7267"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionComparison.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionComparison.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "00d044720f32c166a68c5d0b77a3d017dae3ec76ff66a8ffd6dfa119dc2381da"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionComparison.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionComparison.blend1",
+      "kind": "archive",
+      "bytes": 3220942,
+      "sha256": "b08f80ef332b1a7378d73e4016dc65c97a0c140da904bf99163db70edb5b782e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionComparison.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionComparison.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "51040255f266d2789e1c16c38bb7b8e3e7ab94fdd082fd203e510d3f1c43010f"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionStudy.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionStudy.blend",
+      "kind": "archive",
+      "bytes": 999714,
+      "sha256": "4380df93745b8f63ca52f683c59d64dd4af5e29aa28fde5c18a9574f7c716e99"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionStudy.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionStudy.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "666a439dddb1f3e80e4c6e74779ca329b46a8b082875b38fdf4434a658554352"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionStudy.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionStudy.blend1",
+      "kind": "archive",
+      "bytes": 999714,
+      "sha256": "7c3f31092a6c1d061a7ec1b33170ba07dcc5402391e517b50154bb4f1e07f3d3"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionStudy.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\ProportionStudy.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "a97eb5fa57d98f3446894e5a23f18eaba0259b5c67385e2713fa0bc741c612e4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\Reference.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\Reference.png",
+      "kind": "archive",
+      "bytes": 1679564,
+      "sha256": "467d57dfb0466ef0c4af5ae0f778471612cbe9f33d3eca4fd2bcd6b06a22dc0c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy\\Reference.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy\\Reference.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "342ff2e1028171bdff341b4544c8fb345354e0263cb10c30e93c1aa9a1bf3ddc"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ProportionStudy.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ProportionStudy.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "627f49acc1b52383092f8f6822ec873d99017d190f43bfaf0dacdef5b9742367"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\RecoveryBack.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\RecoveryBack.png",
+      "kind": "archive",
+      "bytes": 795905,
+      "sha256": "472862011443985360f051c6e6851e2d5d6cbbc81d16ffd090e6df5bbe3ded4a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\RecoveryBack.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\RecoveryBack.png.meta",
+      "kind": "archive",
+      "bytes": 3362,
+      "sha256": "bcf1753ecf3bf13fb4f3fe032ecaec1d256384a8b7dc712f1c5118082a88f30c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\RecoveryPreview.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\RecoveryPreview.png",
+      "kind": "archive",
+      "bytes": 808131,
+      "sha256": "8d8e17e3e8692e3c73189febb1f38fc4c94739b107d6e7314af460592851720e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\RecoveryPreview.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\RecoveryPreview.png.meta",
+      "kind": "archive",
+      "bytes": 3362,
+      "sha256": "a10f5c48a8d58d42c941ec73c046328f61154a6800e445facdb983f4a83a786d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\Codex 이미지 2026년 9월 8일 오전 11_58_28.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\Codex 이미지 2026년 9월 8일 오전 11_58_28.png",
+      "kind": "archive",
+      "bytes": 1927896,
+      "sha256": "db0bbb64bfff89ee6ad56e48db496ae37eb4270fe553c14b6703fd43d09b6df8"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\Codex 이미지 2026년 9월 8일 오전 11_58_28.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\Codex 이미지 2026년 9월 8일 오전 11_58_28.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "9cf1e1b3921fc13c373c3ee0bcbf7d3c5e89c55eb08bdb8b9e4f302531741c6b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\Preview.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\Preview.png",
+      "kind": "archive",
+      "bytes": 1454482,
+      "sha256": "25102f877f9513361a8631db0f25c27c986d1b544eec55718f05153271f448e6"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\Preview.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\Preview.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "70a28bffa8686746b6c42bbb70828dc476703787accfd3b9b757d1db13609168"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\PreviewBack.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\PreviewBack.png",
+      "kind": "archive",
+      "bytes": 1464405,
+      "sha256": "8c1c8a88ea4adcd1bd8f7a068bbe88298627e449689d6f0601add228ab75cb5f"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\PreviewBack.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\PreviewBack.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "9752b78bd72373b0a777411b437ea20d6be027e3ac03aeae9347669c65e2deff"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.blend",
+      "kind": "archive",
+      "bytes": 3287133,
+      "sha256": "2d7061826437dd0236dceb069df61cd14652f348402fef503417304ca5728aae"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "90e0ddc13a8b93d381391d697e6c5131688f8a35fa3e13a7b45b8926d4c76381"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.blend1",
+      "kind": "archive",
+      "bytes": 3196669,
+      "sha256": "81c68ee604d866e326c32ef26273b1eb6f2f4a94396cc7d92b7775a397f307e9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "c562bd4ed3546290d666f3bca9e6e962f21483ccca7a20bdb95f5909f7c02747"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.glb",
+      "kind": "archive",
+      "bytes": 1047768,
+      "sha256": "a18838c09f7f268202d1a59c936970ccbbfb7fdec6aff409a66ac10f85ba5b94"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ReferenceSurvivor\\ReferenceSurvivor.glb.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "178832cacdd72b6831c3fc06054c19eaa09bcf585ab95cb77152dc647927b566"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Run.anim",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\Run.anim",
+      "kind": "archive",
+      "bytes": 522287,
+      "sha256": "85014560bb791f71d51e8f77bfab99cfea76cfa5385338bcc01908d00163e5ed"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Run.anim.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\Run.anim.meta",
+      "kind": "archive",
+      "bytes": 188,
+      "sha256": "6e734ebc093afe2aab877d38c372f9d3e379dba792729ebcfc39f7dc49f98c69"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ShapeStudy\\Front.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ShapeStudy\\Front.png",
+      "kind": "archive",
+      "bytes": 708408,
+      "sha256": "327f190a2937f3809e2f8877613433548e01af1af6d4314aef87e92fe6b2449e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ShapeStudy\\Front.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ShapeStudy\\Front.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "9848476f84171687ff014200a53ff60add03dfc2fb3e09fe250fd9cbb894129a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ShapeStudy\\Quarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ShapeStudy\\Quarter.png",
+      "kind": "archive",
+      "bytes": 714552,
+      "sha256": "5b7ede66f124ed4de63c040b4a7f27f1e8578b6dfd8535759cfd12d071690da8"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ShapeStudy\\Quarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ShapeStudy\\Quarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "a66f787f999633d15da25e1c9474d833b856d316e5bb89944edad55e36f106d4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ShapeStudy\\SurvivorShapeStudy.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ShapeStudy\\SurvivorShapeStudy.blend",
+      "kind": "archive",
+      "bytes": 1074258,
+      "sha256": "38ed699b9dfe1cf8c1629c9a519a8630d8024f6ab8dc25b6e610aeea967f480d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ShapeStudy\\SurvivorShapeStudy.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ShapeStudy\\SurvivorShapeStudy.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "9fcc0b2669c9ad62b9c9f093e82b01bedc815e7f0e6c4a9661ad4f8adc4e5792"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ShapeStudy\\SurvivorShapeStudy.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ShapeStudy\\SurvivorShapeStudy.blend1",
+      "kind": "archive",
+      "bytes": 1045612,
+      "sha256": "801c6130efb552f6913be982e3b7521ce23bc5b23364d9a5bf637235e871e161"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ShapeStudy\\SurvivorShapeStudy.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ShapeStudy\\SurvivorShapeStudy.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "ddfe527a862116502783073c7169fdf5bd345256dab64259dc300e6b2aa2260a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ShapeStudy.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ShapeStudy.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "ee1cf13170247dc62ddec40898c9812a747405ff49b009cdf01bee38e1b30b2b"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Front.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Front.png",
+      "kind": "archive",
+      "bytes": 917717,
+      "sha256": "fe722c85befa00d9fbf453c260f8222efb9f3092e2730e95fcc6f76b816b7d31"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Front.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Front.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "4cf0183598f8d840997c68af1fbcd7eeea8dab6a039bef7b06d5fc96e6c68e66"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Quarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Quarter.png",
+      "kind": "archive",
+      "bytes": 921009,
+      "sha256": "12bfffac5ed05d1fce70c28339a699cce7673cdc5a40293e9d261fb744592698"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Quarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Quarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "6098ee3830bec65d7757846423c58dd8e9c5414a0e3fa91e34c4eb241cd2bba1"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Side.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Side.png",
+      "kind": "archive",
+      "bytes": 884492,
+      "sha256": "abe886eeb91547ef2a7e3409f51dc101ec88f07a50222d976b6e217a0552eee0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Side.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\Side.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "7ec9aa9e4b400bc740a24c313192a4f2aa3093bd7d04e37e71a92c7c57b0d06e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.blend",
+      "kind": "archive",
+      "bytes": 1366489,
+      "sha256": "243bf20cf803d4e6d2fd955f1b4308bd78cdaedbb6835a44a13b862d898201d4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "4e99923f4d4d308714e8ff4c34973115409998af1ccd650af34042cacca66d33"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.blend1",
+      "kind": "archive",
+      "bytes": 1310163,
+      "sha256": "7feae58a363517c01bc98c9fbf8f36b12f329679520d95b3164fad7ece25b82f"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "d686d8cd3414e503eaddb168b3423234dcde3ead4d84ba5a0bfe4e7cc21bcb6f"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.fbx",
+      "kind": "archive",
+      "bytes": 224140,
+      "sha256": "87eb7b19f24a43c46aad85ee8ca57465a165e7b19d094523360ac42d19ff46f6"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.fbx.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "6c6b93133fa1a885464cc7121ce828c378f455f1041a2f4bdc85874f2f00889d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.glb",
+      "kind": "archive",
+      "bytes": 527236,
+      "sha256": "cd8b35872348aeb5f4d5550c36301ee82668054bf94d179e418d55e1ce7087fc"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor\\SimpleSurvivor.glb.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "eb725dd846b34ea07fdd90336a878836c0fb9631153e9218a9311b1b241d8245"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\SimpleSurvivor.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\SimpleSurvivor.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "5a36b6b940d2ec9aadfee02ea23bad3ee63fcf4fa40324eb82d69d910ce35084"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Back.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Back.png",
+      "kind": "archive",
+      "bytes": 1189269,
+      "sha256": "3a591a82955ba984aed22a79b3ff1a51d5ea6c27d8a1da40971590dbb8219d1d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Back.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Back.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "1bda1e366e332cec972f7cba00425b37fcb68537a9793c03d066f38f31fa0705"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Front.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Front.png",
+      "kind": "archive",
+      "bytes": 1215331,
+      "sha256": "81de2f0c10809af53a2b59149d89bff75c59fee42c7c2f7e56cbb46e2551a1f0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Front.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Front.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "d5f166767edc7984a64d043b17e31bb22963266017bfc7f114e6e4f58f7d39a5"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Quarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Quarter.png",
+      "kind": "archive",
+      "bytes": 1216911,
+      "sha256": "8365cf26c5ffaa719f15da44ec00f80cf2fbb871ed8db6bf8f4ae89633b37005"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Quarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Quarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "b3b038680666f03326c986e0563e9cb2b9dbf081ef8bf6115c446d0a31bc58f1"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Side.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Side.png",
+      "kind": "archive",
+      "bytes": 1183730,
+      "sha256": "abffbebb293a3aab00004169ddf5faa265634b79f48c156dd2d1dd3277c8c42e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Side.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\Side.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "866a33170ac18eba232b16bcecac7be0b74892691b0482eed0055b2cd71f61c1"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.blend",
+      "kind": "archive",
+      "bytes": 15311038,
+      "sha256": "0c9e2850883930728282aea3b0856be325a5bebb817426b5745e79d9bd5662c2"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "a6c3b9e8c4f0fd524d520238bf59fcc5283ea5e64af739ec1445bf5654db9f1d"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.blend1",
+      "kind": "archive",
+      "bytes": 14319108,
+      "sha256": "510103aaab4162e0d5a26874f9091e3d82f09f03bcfa71b9a4503dfb5fb60d96"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "96efa01e43cd66c44a7922a1def411ce106a4b0433ae7ec1ebc6e166a9fddde9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.fbx",
+      "kind": "archive",
+      "bytes": 5168124,
+      "sha256": "f54a2e782e151129df0a54b0d027bd9c39a77da79c51237350bd3ccea59aeb90"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.fbx.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "c97a3f403a249ba932b77b480aacd897be940b61565cf78c65c310f94868a9df"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.glb",
+      "kind": "archive",
+      "bytes": 5455536,
+      "sha256": "f3af3fda4e6354298ec5600e2edb0bea3fde54b7cf413317150e716d7d356f71"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor\\StylizedSurvivor.glb.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "457836861947471ab8ede86d2cee9636d98f10216e51ab457d45fc3c04b7cd5c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\StylizedSurvivor.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\StylizedSurvivor.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "99e0b78d633c5dac241298cc41a7dc08774b15b66da9ac648dceb247a07f130e"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Back.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Back.png",
+      "kind": "archive",
+      "bytes": 790142,
+      "sha256": "a73f74b047296dff411f9a3cff933415b4289d89d70f8bdbbc5b85b7830eb3c9"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Back.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Back.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "2a453069141b8295a7d305d203f41657474baa23016c9e9c7af88bb157807ef8"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ConceptReference.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ConceptReference.png",
+      "kind": "archive",
+      "bytes": 1679564,
+      "sha256": "467d57dfb0466ef0c4af5ae0f778471612cbe9f33d3eca4fd2bcd6b06a22dc0c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ConceptReference.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ConceptReference.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "f092dae04c6fc42540d4256c7cec064cbc8ef9dc88f7e9ff1a1599d0e03ee1b4"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Front.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Front.png",
+      "kind": "archive",
+      "bytes": 813141,
+      "sha256": "6e14d416f30d981dee59992786186a8356197023c8c9796dd63a6e7f1b1c7769"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Front.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Front.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "0318ca95f4e1f127d43592f2ba0d432eacbc68c07dff799a5266abbf02deca3a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Quarter.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Quarter.png",
+      "kind": "archive",
+      "bytes": 819442,
+      "sha256": "c22a762bb8d683272d1228c9e83a2a1e9fd505632eb32440ff8eecff062d45b0"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Quarter.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Quarter.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "d74bd2bd85740bbac6c2fab4b7ad6b2dd6cadcb25dd49aa10643851bed1cd3b3"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Side.png",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Side.png",
+      "kind": "archive",
+      "bytes": 754779,
+      "sha256": "a7f42e54dfc256cca9366948ac20b6807fe59ee4fcfc5a0769008adfe1a902a1"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Side.png.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\Side.png.meta",
+      "kind": "archive",
+      "bytes": 2714,
+      "sha256": "92d93af03f4a50ade104600fb15118623b1f5b8b72dce6559614d8c2e3b88bee"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.blend",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.blend",
+      "kind": "archive",
+      "bytes": 1961686,
+      "sha256": "d4d747a535929256ce0d8885e23c4432f73e2c6808a84df123fb3448fa88d737"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.blend.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.blend.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "9c285026c2e73e6b99169776b655c59c4a392ba58a70ae49b22bb73ea9cdbe4c"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.blend1",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.blend1",
+      "kind": "archive",
+      "bytes": 1919422,
+      "sha256": "cd97787ff7ca556e2cf93d10025a22444dae8a0d84a7228b1d63f12ec3aa0847"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.blend1.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.blend1.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "ba68f8eb145e5374c8d943d8f17b9185d69664a3c7fe175cf9a0ff5488b94cf6"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.fbx",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.fbx",
+      "kind": "archive",
+      "bytes": 309580,
+      "sha256": "a3159b0f76cbde123c3f95b1e43b2bb5364e6950b5371560fd80497cb6a3d6b2"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.fbx.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.fbx.meta",
+      "kind": "archive",
+      "bytes": 3063,
+      "sha256": "bf331c5e3c2a9da57c87363573712a66660dafdb81c553686af72e0ad623ac3a"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.glb",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.glb",
+      "kind": "archive",
+      "bytes": 755668,
+      "sha256": "c48df40efff81c139612388c522bad70154bf02b030f7f6fd7967154d1699b00"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.glb.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor\\ThreeHeadSurvivor.glb.meta",
+      "kind": "archive",
+      "bytes": 155,
+      "sha256": "d237dd0d861e5cf5fb41cc92c7e3f041310ac4202d45edc920358d79ae1630ef"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\ThreeHeadSurvivor.meta",
+      "kind": "archive",
+      "bytes": 172,
+      "sha256": "28f4e3794a94bfd75f40eb5ddc15905f0a92516cb21827053f0c09e8b9469d18"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Walk.anim",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\Walk.anim",
+      "kind": "archive",
+      "bytes": 763520,
+      "sha256": "bdea3872a7080e47160e069f27246f171b4316d5a8eb0064389d05234e9c4afb"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Walk.anim.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\ChibiSurvivor\\Walk.anim.meta",
+      "kind": "archive",
+      "bytes": 188,
+      "sha256": "6b19ce6e189e719c04fcd3ca7db74efd31ce59236f1ca11f05f39665f12d6dcf"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\Editor\\ChibiSurvivorAssets.cs",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\Editor\\ChibiSurvivorAssets.cs",
+      "kind": "archive",
+      "bytes": 7030,
+      "sha256": "2c625a489880e97816b00ce9158d736be56ecc50a36752ca41768d02a863ef77"
+    },
+    {
+      "source": "D:\\Demo\\demo13-flashlight\\Assets\\Editor\\ChibiSurvivorAssets.cs.meta",
+      "destination": "D:\\Demo\\demo13-flashlight\\ArtSource\\CharacterArchive\\2026-09-08\\Assets\\Editor\\ChibiSurvivorAssets.cs.meta",
+      "kind": "archive",
+      "bytes": 59,
+      "sha256": "caee47ae10c9cf59b743e8815e62eb98f3724ddb631490ad9d146d476ee670ab"
+    }
+  ],
+  "summary": {
+    "current": {
+      "files": 38,
+      "bytes": 17029115
+    },
+    "archive": {
+      "files": 331,
+      "bytes": 244158981
+    }
+  }
+}

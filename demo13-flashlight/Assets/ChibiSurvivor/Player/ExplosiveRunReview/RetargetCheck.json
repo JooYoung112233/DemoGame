@@ -34,5 +34,12 @@
   "geometry_and_weights_unchanged": true,
   "existing_actions_preserved": true,
   "humanoid_validated": false,
-  "approval": "pending"
+  "approval": "pending",
+  "loop_seam_max_vertex_m": 0.00378975270479517,
+  "review_findings": [
+    "Large elbow flexion exposes existing cuff/upper-sleeve deformation.",
+    "Source head forward lean is retained; large head makes it more visible.",
+    "No Unity Humanoid Avatar validation performed."
+  ],
+  "preview": "Actual imported FBX joint animation retargeted in Blender at native clip timing; in-place."
 }
