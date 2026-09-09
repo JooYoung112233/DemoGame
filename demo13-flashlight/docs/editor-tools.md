@@ -36,7 +36,7 @@
 | 맵 ▸ 조명 쿠키 생성 / 씬 조명 셋업 | Light2D 쿠키·씬 조명 | LightCookieGenerator·SceneLightingBuilder |
 | 맵 ▸ 그레이박스(안전가옥/고철시장/1구역/은신처) | 레이아웃 그레이박스 빌더 | *GreyboxLayout 4종 |
 | 맵 ▸ 이상현상 구역 생성 | 현상 존 생성 | DenseAnomalyZone |
-| 맵 ▸ 낮밤 라이트 드라이버 부착 | 낮↔밤 ambient 부드러운 전환(WeatherData lerp) | DayNightLightDriver |
+| ~~맵 ▸ 낮밤 라이트 드라이버 부착~~ | 폐기(2026-09-09) — 낮밤은 `DayNightCycle`이 맵 씬 태양+앰비언트를 직접 몬다 | ~~DayNightLightDriver~~ |
 
 ## ✅ QA · 정합성 검증
 

@@ -46,13 +46,13 @@
 
 ## 카메라 / 좌표계
 
-- 카메라 = 표준 2D 셋업. `CameraSortSetup`이 `TransparencySortMode.CustomAxis`, 정렬축 `(0,1,0)` 설정 → **Y가 낮을수록(화면 아래) 앞**.
+- ~~카메라 = 2D 정렬축(`CameraSortSetup`)~~ **폐기(2026-09-09)** — URP-3D 전환으로 `TransparencySortMode`는 Default(카메라 거리)다. `CameraSortSetup`은 삭제됨.
 - 모든 위치/투영/그림자 계산은 **XY 기준**. (구 "XZ 바닥평면 + 90° 눕힌 쿼드" 전제는 폐기.)
 - **모든 스프라이트(타일/프롭/캐릭터)는 회전 (0,0,0)** — 카메라 정면을 향하는 순수 2D. 원근은 아트가 담당하므로 트랜스폼 회전·빌보드 불필요.
 - **플레이어 카메라 = PlayerRig 프리팹에 포함, 한 세트(2026-06-02 결정 변경).** ~~씬 카메라 자동 장착~~ → **카메라+플레이어+라이트+후처리(Volume)를 `Resources/PlayerRig.prefab` 한 세트로 묶어 DontDestroyOnLoad**로 모든 씬 공유. Bootstrap이 1개만 스폰. `CameraFollow`가 씬 로드 시 **자기(PlayerRig 카메라) 외 다른 Camera/AudioListener를 비활성**해 2개 충돌을 막음. (추적+셰이크/줌·후처리·피격 Volume 모두 프리팹 카메라에 내장.)
   - 빌더 `TopDownPlayerBuilder`(메뉴 `Tools ▸ TopDown ▸ Build ▸ Player Rig`)가 PlayerRig 전체를 코드 조립.
   - → 어느 씬(InGame/Safehouse/MapTool2D)에서 Play해도 동일한 카메라·조명·후처리로 동작.
-  - **씬 빌더는 카메라를 안 만든다**(PlayerRig가 제공). 2D 정렬축은 **PlayerRig 카메라의 `CameraSortSetup`**(CustomAxis (0,1,0))이 담당.
+  - **씬 빌더는 카메라를 안 만든다**(PlayerRig가 제공). 3D에선 깊이가 정렬을 맡으므로 별도 정렬축 설정이 없다.
   - **글로벌 Light2D의 주인 = Systems 부트 씬**(0.22 어둠). PlayerRig는 플레이어 점광(point)만 들고 오므로 글로벌 앰비언트가 없으면 URP 2D가 빛 반경 밖을 **새까맣게** 렌더 → 글로벌이 필요하지만, **게임플레이 씬(InGame/Safehouse)은 글로벌을 안 만든다**(Systems가 공급, 씬은 맵/프롭/스폰만). **자체 글로벌을 갖는 씬은 Systems + MapTool(밝게) + CombatSandbox(테스트)뿐.** 글로벌이 2개 이상 활성이면 URP가 `More than one global light on layer ...` 경고 → **런타임은 `SystemsSceneEnforcer`, 에디트 모드는 `SystemsGlobalLightEditorEnforcer`**(Systems 로드 시 그 글로벌만 남기고 나머지 비활성)가 중복을 막는다.
 
 ## 조명 / 가시성 (시야 FOV) — 2026-06-02 전환
