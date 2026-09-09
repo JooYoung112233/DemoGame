@@ -56,6 +56,7 @@
 | 🌐 **세계관 SSOT** | 세계 설정·로어의 **단일 출처 = [`gdd-core.md §5`](gdd-core.md)** (시대·무대 / 짙은현상 / **빛의역설** / **루디=충전·방전·마모 활성 자원** / 시간왜곡). 타 문서는 재서술 금지·링크만. story.md §2=스토리 사건 순서, anomaly.md=현상 메커닉, world-map.md=지리 컨셉(모두 §5로 위임) | 확정 |
 | [`dev-protocol.md`](dev-protocol.md) | ⭐ **기능 추가 규칙(단일 게이트)** — "기능 하나 = 열고 같은 세션에 닫는다". BEFORE(SSOT 찾기·재서술 금지)/DURING(5대 런타임 규약·GameTuning)/DONE 체크리스트(기획기록·MASTER동기화·로드맵·검증·브랜치PR)/정리 주기 | 규칙 (2026-07-10) |
 | [`dev-roadmap.md`](dev-roadmap.md) | 10단계 개발 로드맵 + 단계 상세 + **미구현/마무리 필요 목록**. 현재 Stage 2 | 진행 중 |
+| ✂️ [`scope-cut.md`](scope-cut.md) | **볼륨 축소 SSOT (2026-09-09)** — 타르코프식 하드코어를 걷어내고 RPG처럼 단순화한 6건의 결정과 범위. 무엇을 왜 잘랐나 · 자르지 **않기로** 한 것 · 딸려 사라진 것 · 되살리는 법 | 6/6 완료 |
 | [`dev-handoff.md`](dev-handoff.md) | **개발 핸드오프** — 다른 PC에서 이어서 작업할 때 "지금 위치" 요약(최신 작업·다음 후보·Unity 검증 대기) | 갱신 중 |
 | [`backlog-ui.csv`](backlog-ui.csv) | **UI 제작 백로그** — 신규/확장/기존 UI 18종(우선순위·시스템·문서) | 2026-06-10 |
 | [`backlog-impl.csv`](backlog-impl.csv) | **구현/테스트 백로그** — 시스템·데이터·밸런스 27건(의존·우선순위·문서) | 2026-06-10 |
@@ -83,14 +84,14 @@
 | [`controls.md`](controls.md) | **컨트롤/입력 매핑 SSOT** — 키보드·마우스 + **게임패드** 전체 매핑표. 셰임 확장 방식(액션 에셋 없이 `Gamepad.current` 병합), 조준 디바이스 전환(`PadActive`), T2(메뉴 UX)/T3(격자 인벤) 남은 단계 | T0/T1 구현 |
 | [`ui-prefab-plan.md`](ui-prefab-plan.md) | **UI 프리팹화 SSOT** — 코드 절차 생성 → 프리팹 베이크(`UIPrefabBaker`)/Instantiate 전환(§4-A 전 패널 완료), `[SerializeField]`/`WireEvents`/`ApplyFonts` 패턴, 시안 스킨(`UISkin`, §4-B 보류) | §4-A 완료 |
 | [`save.md`](save.md) | **저장/체크포인트** — 세이브 스커밍 방지(레이드 진행=인메모리 스냅샷, 디스크는 안전 맥락만, 크래시 1회 커밋). `SaveManager`/`SaveCheckpoints`/`CombatStateTracker` | 구현 |
-| [`qa.md`](qa.md) | **QA 자동화 SSOT** — **Claude가 명령해 게임을 실제 플레이시키고 밸런스·막힘 데이터를 뽑는 시스템**. `QaBot`(가상 입력층으로 게임 코드 수정 0) · `QaHeatmap`(어디서 재미없나·어디서 막히나 공간 분석) · PASS/FAIL 판정 · 외부 GUI 대시보드 · `qa-runner`↔`dev-fixer` 자동 루프. 이어서 = 스킬 `/QA이어서` | 구현·**Unity 미검증** (2026-07-11) |
+| [`qa.md`](qa.md) | **QA 자동화 SSOT** — `QaBot`(가상 입력층으로 게임 코드 수정 0) · `QaHeatmap` · PASS/FAIL 판정 · 외부 GUI 대시보드 · `qa-runner`↔`dev-fixer` 자동 루프. 이어서 = 스킬 `/QA이어서`. **2026-09-09 게임 런타임에서 분리** — `Game.QA` 어셈블리 + `QA_ENABLED` 정의 심볼(평소 빌드엔 미포함, `Tools ▸ TopDown ▸ QA`로 토글) | 구현·**Unity 미검증** · 분리됨 |
 
 ### ⚔️ 전투
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | [`combat.md`](combat.md) | 근접 전투 시스템 — 약공(3타 콤보)/강공(차징)/구르기/스태미너/그로기/적 캔슬. 수치 확정 | 프로토타입 완료 |
-| [`traits.md`](traits.md) | **캐릭터 특성(퍽) 시스템** — 진행형 퍽 트리 + 부정 특성(환급). 6 카테고리(전투·생존·회수·잠행·사회·**★현상**). 세계관 고유 현상 트리(빛절제·루디감각·시계동조·되감기 친화)가 정체성 | SO 41종·`TraitManager`·`TraitPanelUI`(K) 구현, 효과 배선 1·2차(12키), 수치 1차 초안 |
+| [`traits.md`](traits.md) | **캐릭터 특성(퍽) 시스템** — 진행형 퍽 트리 + 부정 특성(환급). **2026-09-09 41종 → 11종 축소**(기준 = 코드가 실제로 읽는 `effectKey`가 있는 퍽만). ⚠️ **★현상 트리 7종 전부 삭제** — 기획은 §3.6에 보존, 재개통 1순위 | SO **11종**·`TraitManager`·`TraitPanelUI`(K) 구현 |
 
 핵심 코드: `TopDownPlayer.cs` (이동·조준·손전등), `EnemyController.cs` (Rigidbody2D AI 상태머신), `StatDB` (스탯 DB)
 
@@ -98,7 +99,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`inventory.md`](inventory.md) | 격자 인벤토리 — 컨테이너 크기, 아이템 크기, ItemData SO 구조, 가격 체계, 내구도/스택 규칙 | 기획 확정, 코드 구현 |
+| [`inventory.md`](inventory.md) | **슬롯형 인벤토리** — **2026-09-09 테트리스식 격자 폐기**(아이템 1개=슬롯 1칸, 90도 회전·컨테이너 수색 연출 제거, 무기 파츠 4종→탄창 1종). **무게 제한은 유지**. ItemData SO 구조, 가격 체계, 내구도/스택 규칙 | 기획 확정, 코드 구현 |
 | [`items.md`](items.md) | 아이템 **목록/데이터** (~172종 SO) — 치료·소비·무기·방어·재료·루디·귀중품·정보·잡템·이상현상. 우선순위(P0~P3) 태깅 | 확정, SO 생성 완료 |
 | [`items-crafting-farming.md`](items-crafting-farming.md) | 아이템 **제작·획득** — 음식/조리·의료대 레시피·파밍 오브젝트 매핑·데모 구현 순서 (items.md에서 분리) | 확정 |
 | [`crafting.md`](crafting.md) | RecipeData SO 구조, 해금 규칙(기본/문서), 조리대·작업대·의료대 레시피 목록, 무기 수리 규칙 | 확정, 코드 구현 |
@@ -118,7 +119,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`medical.md`](medical.md) | 5부위(머리/몸통/양팔/좌다리/우다리), 3부상(출혈/골절/통증), 치료 아이템·메커니즘 | 기획 확정, 코드 구현 |
+| [`medical.md`](medical.md) | **단일 HP + 회복 아이템(RPG식)** — **2026-09-09 부위별 의료 전면 폐기**(5부위 × 출혈/골절/통증). 의료 아이템 13종은 HP 회복 15~50으로 전환. 부위 피격 배율·적 부위 부상은 전투 쪽에 존치 | 기획 확정, 코드 구현 |
 | [`survival.md`](survival.md) | 생존 스탯(수분/포만감) — 레이드 중 시간 기반 차감, 0 시 HP DoT, 수면·음식 회복. 차감속도/수면/음식 effectValue 수치(2026-06-18 튜닝) | 코드 구현 |
 
 핵심 코드: `PlayerMedicalSystem.cs`, `MedicalHUD.cs`, `MedicalItemData.cs`, `SurvivalStats.cs`, `SleepUI.cs`
@@ -128,7 +129,7 @@
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | [`safehouse.md`](safehouse.md) | 덕코프식 물리 공간 안전가옥 — 뒷골목 맵 레이아웃, 시설 목록, 확장 기획, NPC 배치, 가구 시스템 | 방향 확정 + 확장 기획 |
-| [`safehouse-intel.md`](safehouse-intel.md) | **탐사 정보 루프** — 자원 생산 금지 원칙, NPC 랜드마크 파견(인텔 수집), 라디오(루디 가동), 랜드마크 재방문 확장 + Phase A~E 작업 계획 | 기획 확정, 구현 전 |
+| [`safehouse-intel.md`](safehouse-intel.md) | **탐사 정보 루프** — 자원 생산 금지 원칙, 라디오(루디 가동), 랜드마크 재방문 확장 + Phase A~E 작업 계획. ⚠️ **NPC 파견은 2026-09-09 폐기**(인텔 발생원 3→2) | 기획 확정, 구현 전 |
 | [`safehouse-asset-list.md`](safehouse-asset-list.md) | 컨셉아트 기반 에셋 목록 — 바닥/펜스/프랍 분류 + 구현 우선순위 | 정리 완료 |
 | [`safehouse-tile-prompt.md`](safehouse-tile-prompt.md) | 바닥/펜스/프랍 에셋 생성 AI 프롬프트 — 레퍼 첨부용 | 작성 완료 |
 
@@ -240,6 +241,7 @@ Safehouse (timeScale=0, 안전 허브)
 
 | 날짜 | 내용 |
 |------|------|
+| **2026-09-09** | **볼륨 축소 — 타르코프식 하드코어 → RPG식 단순화 (6건 완료, `scope-cut.md` 신설).** 사용자 판단: "코드·문서 다이어트 + 기획적 기능 축소. 부위별 치료 같은 타르코프 시스템 삭제하고 장비창도 간단하게 RPG처럼." ①**부위별 의료 폐기** → 단일 HP + 회복 아이템 ②**소음 시스템 폐기** → 적 발견은 시야 단일 축(투척물 유인만 `Distraction`으로 존치) ③**격자 인벤 폐기** → 슬롯 1칸·회전/수색 제거, **무게는 유지**, 무기 파츠 4→1(탄창) ④**파견 + 아르바이트 보드 삭제** ⑤**특성 41종 → 11종**(코드가 읽는 effectKey만) ⑥**QA 자동화 분리**(`QA_ENABLED` 어셈블리 게이트, 삭제 아님). 관련 SSOT 전부 개정: medical/combat/inventory/traits/economy/safehouse/safehouse-intel/balance/qa. |
 | 2026-07-10 | **기능 추가 규칙 신설(`dev-protocol.md`).** 지속 개발 시 방향이 어긋나지 않도록 기존 규율(SSOT·즉시기록·GameTuning·5대 런타임 규약 R1~R5·브랜치PR)을 "기능 하나 = 열고 같은 세션에 닫는다" 단일 게이트로 통합. BEFORE/DURING/DONE 체크리스트 + 정리 주기. 핵심 규칙 섹션 상단·문서 맵(기획총괄)·CLAUDE.md에 등재. 실제 겪은 드리프트(색인 누락 8종·로어 중복 재서술·stale 서술 = 06-30/06-16 교정) 재발 방지. |
 | 2026-07-09 | **게임패드 지원 T0/T1 + `controls.md` 신설.** 입력 기반 = GameInput 셰임 확장(신규 액션 에셋 대신 `Gamepad.current` 병합), 범위 = 레이드 조작(T1). 왼쪽 스틱 이동·오른쪽 스틱 조준·버튼 맵(E→A/Space→B/Shift→L3/C→Y/Esc→Start/Tab→Select/1~4→D패드/좌우클릭→RT·LT)·디바이스 전환(`PadActive`). UI 기본 내비는 기존 `InputSystemUIInputModule`. T2(메뉴 포커스·스크롤·글리프)/T3(격자 인벤 스틱 커서) 후속. 매핑 상세 = [`controls.md`](controls.md). |
 | 2026-06-30 | **문서 정합성 교정(인덱스·stale 서술).** ① 색인 누락 8종 등재: 새 「🧱 기술·아키텍처」 섹션(`architecture.md`/`ui-prefab-plan.md`/`save.md`) + `anomaly.md`(월드·레이드) + `dev-handoff.md`(기획총괄) + `item-icon-list/additions.md`·`prop-production.md`(아트). ② **죽은 링크 제거**: `safehouse-map-prompt.md`(2026-06-02 삭제분). ③ stale 상태/서술 교정: `traits.md` 상태(기획→SO·매니저·UI·배선 구현), 핵심규칙 #3 「UI 코드 생성」→「프리팹 베이크+Instantiate」. ④ `demo13-flashlight/CLAUDE.md` 동기화: UI Construction 섹션을 프리팹 베이크/Instantiate·`[SerializeField]`/`WireEvents`/`ApplyFonts` 패턴으로 재작성, PlayerInventory 「5x8 30kg」→ 다중 컨테이너(가방+주머니4×1+보안3×3, 무게 trait 보정). 코드 대조로 검증(수치 무변경). |
