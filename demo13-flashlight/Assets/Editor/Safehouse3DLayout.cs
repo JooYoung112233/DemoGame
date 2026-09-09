@@ -86,6 +86,8 @@ public static class Safehouse3DLayout
         // ── 광장 · 게시판 · NPC ──
         n += Spawn(map, "raid_return", 40f, 29f);
         n += Prop(map, "Board_Quest", 72f, 29f, new Vector3(3.0f, 2.4f, 0.35f), new Color(0.58f, 0.46f, 0.28f));
+        // 출전 지도판 — 레이드로 나가는 유일한 입구. 동쪽 게이트로 가는 길목에 둔다.
+        n += MapBoard(map, "Board_Dispatch", 72f, 24f, new Vector3(2.6f, 2.2f, 0.35f), new Color(0.42f, 0.50f, 0.58f));
         n += Npc (map, "회수꾼",       "veteran_scavenger",  67f, 29f, new Color(0.52f, 0.46f, 0.40f));
         n += Npc (map, "떠돌이 상인",  "wandering_merchant", 36f, 14f, new Color(0.55f, 0.40f, 0.45f));
         n += Npc (map, "구역 관리인", "district_warden",    50f, 16f, new Color(0.40f, 0.48f, 0.56f));
@@ -263,6 +265,28 @@ public static class Safehouse3DLayout
 
     static int Prop(GameObject p, string name, float x, float z, Vector3 size, Color c)
         => Box(p, name, new Vector3(x, size.y * .5f, z), size, Lit(c, 0.06f));
+
+    /// <summary>출전 지도판 — 누르면 `MapSelectUI`가 열려 레이드 지역을 고른다.
+    ///
+    /// ⚠️ 이게 없으면 **마을에서 레이드로 나갈 방법이 아예 없다.** 3D 마을을 새로 지으면서
+    ///    게시판을 장식용 `Prop`으로만 세워 두는 바람에 핵심 루프(나가서 → 돌아온다)의
+    ///    "나가서"가 통째로 끊겨 있었다. 상호작용 타입 `MapBoard`가 그 UI를 연다.</summary>
+    static int MapBoard(GameObject p, string name, float x, float z, Vector3 size, Color c)
+    {
+        int n = Box(p, name, new Vector3(x, size.y * .5f, z), size, Lit(c, 0.06f));
+
+        var go = p.transform.Find(name)?.gameObject;
+        if (go == null) return n;
+
+        var io = go.AddComponent<InteractableObject>();
+        var so = new SerializedObject(io);
+        so.FindProperty("type").enumValueIndex = (int)InteractableObject.InteractType.MapBoard;
+        so.FindProperty("promptText").stringValue = "출전 준비";
+        // 판이 두껍고(0.35m) 플레이어가 정면에 서므로 기본 2m보다 조금 넉넉하게.
+        so.FindProperty("interactRange").floatValue = 3.0f;
+        so.ApplyModifiedPropertiesWithoutUndo();
+        return n;
+    }
 
     /// <summary>말을 걸 수 있는 NPC. 캡슐 몸 + 상호작용 + 대화 배선.
     ///

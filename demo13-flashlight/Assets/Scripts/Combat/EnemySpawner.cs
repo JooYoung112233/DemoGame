@@ -140,6 +140,13 @@ public class EnemySpawner : MonoBehaviour
 
         // 머리 위 "적"/"시체" 라벨은 EnemyController.Awake가 UnitLabel로 붙인다(프리팹 적도 동일 경로).
 
+        // ⚠️ **맞을 몸(Health)을 허트박스보다 먼저 붙인다.** `AddComponent`는 그 자리에서
+        //    `Awake()`를 부르므로, 순서가 뒤집히면 `Hurtbox.Awake`가 루트에서 Health를
+        //    못 찾는다. 실제로 그 상태였고 **스폰된 적 전부가 때려도 데미지가 0**이었다.
+        //    (Hurtbox 쪽도 지연 해석으로 고쳤지만, 원인을 여기서도 없애 둔다.)
+        root.AddComponent<Health>();
+        root.AddComponent<CombatFeedback>();
+
         // 허트박스(trigger, Enemy 레이어 — 플레이어 AttackPerformer가 스캔)
         var hurtGo = new GameObject("Hurtbox");
         hurtGo.transform.SetParent(root.transform, false);
@@ -150,8 +157,6 @@ public class EnemySpawner : MonoBehaviour
         hurtGo.AddComponent<Hurtbox>();
 
         // 게임 로직 (EnemyController.playerMask 기본 1<<6 = Player)
-        root.AddComponent<Health>();
-        root.AddComponent<CombatFeedback>();
         root.AddComponent<EnemyController>();
         return root;
     }

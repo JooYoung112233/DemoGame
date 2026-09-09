@@ -19,7 +19,30 @@ public class Hurtbox : MonoBehaviour
     Collider _col;
 
     public bool Active => _col != null && _col.enabled;
-    public Health Health => health;
+    /// <summary>맞을 몸. **비어 있으면 그때 찾는다.**
+    ///
+    /// ⚠️ Awake에서 한 번만 찾으면 안 된다. `AddComponent`는 즉시 `Awake()`를 부르므로,
+    ///    조립 순서상 <b>Health보다 Hurtbox가 먼저 붙으면 null이 그대로 굳는다.</b>
+    ///    실제로 `EnemySpawner`가 허트박스를 Health보다 먼저 붙여서, 스폰된 적 전부가
+    ///    **때려도 데미지가 안 들어가는** 상태였다. 지연 해석이면 순서에 안 휘둘린다.</summary>
+    public Health Health
+    {
+        get
+        {
+            if (health == null) health = GetComponentInParent<Health>();
+            return health;
+        }
+    }
+
+    /// <summary>같은 이유로 적 참조도 지연 해석한다 — 그로기·피격 반응이 여기 달려 있다.</summary>
+    EnemyController Enemy
+    {
+        get
+        {
+            if (enemy == null) enemy = GetComponentInParent<EnemyController>();
+            return enemy;
+        }
+    }
 
     void Awake()
     {
@@ -69,8 +92,9 @@ public class Hurtbox : MonoBehaviour
         var inj = GetComponentInParent<UnitInjuries>();
         if (inj != null) inj.Add(part, dmg);
 
-        if (enemy != null)      enemy.TakeHit(dmg, groggyAmount, hitDir);
-        else if (health != null) health.TakeDamage(dmg);
+        // 지연 해석 프로퍼티로 읽는다 — 필드를 직접 보면 조립 순서에 따라 null일 수 있다.
+        if (Enemy != null)      Enemy.TakeHit(dmg, groggyAmount, hitDir);
+        else if (Health != null) Health.TakeDamage(dmg);
 
         // 표시용 — 오버레이가 맞은 자리를 잠깐 밝힌다(테스트 도구, 로직 아님).
         var ov = GetComponentInParent<BodyZoneOverlay>();
