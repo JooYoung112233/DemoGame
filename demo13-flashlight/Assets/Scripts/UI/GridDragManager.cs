@@ -15,7 +15,6 @@ public class GridDragManager : MonoBehaviour
 
     GridPanel srcPanel;
     InventoryGrid.PlacedItem dragPlaced;
-    bool dragRotated;
     Vector2 grabPixelOffset;
     GameObject ghost; RectTransform ghostRT;
     GameObject highlightGO; RectTransform highlightRT; Image highlightImage;   // 배치 미리보기(초록/빨강)
@@ -105,7 +104,7 @@ public class GridDragManager : MonoBehaviour
 
     void BeginDrag(GridPanel p, InventoryGrid.PlacedItem placed, int gx, int gy)
     {
-        active = true; srcPanel = p; dragPlaced = placed; dragRotated = placed.rotated;
+        active = true; srcPanel = p; dragPlaced = placed;
 
         var root = p.hitRoot != null ? p.hitRoot : p.slotRoot;
         grabPixelOffset = Vector2.zero;
@@ -143,7 +142,7 @@ public class GridDragManager : MonoBehaviour
             active = false;
             if (!consumed && srcPanel != null)   // 처리 안 됐으면 출발지로 복귀
             {
-                if (!srcPanel.grid.TryPlace(item, dragPlaced.gridX, dragPlaced.gridY, dragRotated))
+                if (!srcPanel.grid.TryPlace(item, dragPlaced.gridX, dragPlaced.gridY))
                     srcPanel.grid.TryAutoPlace(item);
                 srcPanel.Refresh();
             }
@@ -163,10 +162,9 @@ public class GridDragManager : MonoBehaviour
         placed = false;
         var g = p.grid;
         if (g == null || item?.data == null) return false;
-        if (g.CanPlace(item, ox, oy, dragRotated)) return false;   // 빈 칸 → onDrop이 배치
+        if (g.CanPlace(item, ox, oy)) return false;   // 빈 칸 → onDrop이 배치
 
-        int w = dragRotated ? item.data.gridHeight : item.data.gridWidth;
-        int h = dragRotated ? item.data.gridWidth : item.data.gridHeight;
+        const int w = 1, h = 1;   // 슬롯 1칸 고정(2026-09-09 격자 폐기)
 
         // footprint와 겹치는 '단일' 아이템 검출(부분 중첩 허용)
         InventoryGrid.PlacedItem target = null;
@@ -191,21 +189,20 @@ public class GridDragManager : MonoBehaviour
 
         // 1:1 스왑: A는 B 자리(oldX,oldY)에, B는 A 출발지(dragPlaced)에. 둘 다 맞을 때만(아니면 원복).
         var oldItem = target.item;
-        bool oldRot = target.rotated;
         int oldX = target.gridX, oldY = target.gridY;
         g.Remove(target);
 
-        bool aFits = p.Accepts(item) && g.CanPlace(item, oldX, oldY, dragRotated);
-        bool bFits = g.CanPlace(oldItem, dragPlaced.gridX, dragPlaced.gridY, oldRot);
+        bool aFits = p.Accepts(item) && g.CanPlace(item, oldX, oldY);
+        bool bFits = g.CanPlace(oldItem, dragPlaced.gridX, dragPlaced.gridY);
         if (aFits && bFits)
         {
-            g.TryPlace(item, oldX, oldY, dragRotated);
-            g.TryPlace(oldItem, dragPlaced.gridX, dragPlaced.gridY, oldRot);
+            g.TryPlace(item, oldX, oldY);
+            g.TryPlace(oldItem, dragPlaced.gridX, dragPlaced.gridY);
             placed = true;
             return true;
         }
 
-        g.TryPlace(oldItem, oldX, oldY, oldRot);   // 스왑 불가 → B 원복, A는 호출부가 출발지로 bounce
+        g.TryPlace(oldItem, oldX, oldY);   // 스왑 불가 → B 원복, A는 호출부가 출발지로 bounce
         placed = false;
         return true;
     }
@@ -222,7 +219,7 @@ public class GridDragManager : MonoBehaviour
     {
         if (active && srcPanel != null && dragPlaced != null)
         {
-            if (!srcPanel.grid.TryPlace(dragPlaced.item, dragPlaced.gridX, dragPlaced.gridY, dragRotated))
+            if (!srcPanel.grid.TryPlace(dragPlaced.item, dragPlaced.gridX, dragPlaced.gridY))
                 srcPanel.grid.TryAutoPlace(dragPlaced.item);
             srcPanel.Refresh();
         }
@@ -240,8 +237,7 @@ public class GridDragManager : MonoBehaviour
         ghost.transform.SetParent(canvasRT, false);
         ghostRT = ghost.GetComponent<RectTransform>();
         ghostRT.anchorMin = ghostRT.anchorMax = new Vector2(0.5f, 0.5f); ghostRT.pivot = new Vector2(0, 1);
-        int w = dragRotated ? item.data.gridHeight : item.data.gridWidth;
-        int h = dragRotated ? item.data.gridWidth : item.data.gridHeight;
+        const int w = 1, h = 1;   // 슬롯 1칸 고정(2026-09-09 격자 폐기)
         ghostRT.sizeDelta = new Vector2(w * GridPanel.CELL + (w - 1) * GridPanel.GAP, h * GridPanel.CELL + (h - 1) * GridPanel.GAP);
         var img = ghost.GetComponent<Image>();
         var c = item.data.RarityColor; img.color = new Color(c.r, c.g, c.b, 0.7f); img.raycastTarget = false;
@@ -285,9 +281,8 @@ public class GridDragManager : MonoBehaviour
         EnsureHighlight(hover);
         highlightGO.SetActive(true);
 
-        int w = dragRotated ? item.data.gridHeight : item.data.gridWidth;
-        int h = dragRotated ? item.data.gridWidth : item.data.gridHeight;
-        bool canPlace = hover.Accepts(item) && hover.grid.CanPlace(item, ox, oy, dragRotated);
+        const int w = 1, h = 1;   // 슬롯 1칸 고정(2026-09-09 격자 폐기)
+        bool canPlace = hover.Accepts(item) && hover.grid.CanPlace(item, ox, oy);
 
         int ct = GridPanel.CellTotal;
         highlightRT.anchoredPosition = new Vector2(ox * ct, -oy * ct);

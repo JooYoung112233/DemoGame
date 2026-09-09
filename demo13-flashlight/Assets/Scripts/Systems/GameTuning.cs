@@ -22,20 +22,6 @@ public class GameTuning : ScriptableObject
         }
     }
 
-    // ── 수색 (루팅 상자 아이템 공개 속도) ──────────────────────────────
-    [Header("수색 (루팅 상자)")]
-    [Tooltip("아이템 공개 딜레이 배율. >1 느리게, <1 빠르게. 희귀도별 기본 딜레이에 곱함.")]
-    [Range(0.25f, 5f)] public float searchSpeedMult = 1f;
-    [Tooltip("Common 아이템 수색 기본 딜레이(초). searchSpeedMult가 곱해짐. 고급일수록 길게.")]
-    public float searchSecCommon = 0.4f;
-    [Tooltip("Uncommon 수색 기본 딜레이(초).")]
-    public float searchSecUncommon = 0.6f;
-    [Tooltip("Rare 수색 기본 딜레이(초).")]
-    public float searchSecRare = 0.9f;
-    [Tooltip("Epic 수색 기본 딜레이(초).")]
-    public float searchSecEpic = 1.3f;
-    [Tooltip("Legendary 수색 기본 딜레이(초). 고급 아이템일수록 늦게 공개.")]
-    public float searchSecLegendary = 1.8f;
 
     // ── 시간 / 현상 (지역 낮·밤 길이) ─────────────────────────────────
     [Header("시간 / 현상 (지역 낮·밤, 초)")]

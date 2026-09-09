@@ -109,7 +109,7 @@ public class ItemDetailUI : MonoBehaviour
         descText.text = string.IsNullOrEmpty(d.description) ? "설명 없음." : d.description;
 
         // STAT 3행
-        stat1Label.text = "크기";     stat1Value.text = $"{d.gridWidth} x {d.gridHeight}";
+        stat1Label.text = "무게";     stat1Value.text = $"{d.weight * Mathf.Max(1, item.stackCount):F2} kg";
         stat2Label.text = "희귀도";   stat2Value.text = GetRarityName(d.rarity);
         if (d.isUsable) { stat3Label.text = "효과"; stat3Value.text = $"{GetEffectName(d.useEffect)} ({d.effectValue:F0})"; }
         else            { stat3Label.text = "분류"; stat3Value.text = GetCategoryName(d.category); }

@@ -2,9 +2,16 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// 격자 기반 인벤토리 컨테이너.
+/// 슬롯 기반 인벤토리 컨테이너.
 /// 플레이어 가방, 창고, 루팅 상자 모두 이 클래스 사용.
 /// UI 독립 — 순수 데이터 로직만 담당.
+///
+/// **2026-09-09: 테트리스식 격자 폐기 → 아이템 1개 = 슬롯 1칸(RPG식).**
+///   (docs/scope-cut.md 3번) `ItemData.gridWidth/gridHeight`(1~3칸 footprint)와 90도 회전은
+///   더 이상 배치에 영향을 주지 않는다. 용량은 **칸 수(width×height)** 와 **무게**(PlayerInventory)
+///   두 축으로만 제한된다 — 무게는 유지 결정.
+///   클래스·API 이름(`InventoryGrid`, `gridX/gridY`, `rotated`)은 세이브 호환과
+///   호출부 20여 곳을 건드리지 않으려고 그대로 뒀다. x/y는 이제 **슬롯 좌표**다.
 /// </summary>
 [System.Serializable]
 public class InventoryGrid
@@ -14,33 +21,26 @@ public class InventoryGrid
     public class PlacedItem
     {
         public ItemInstance item;
-        public int gridX;  // 좌상단 X
-        public int gridY;  // 좌상단 Y
-        public bool rotated; // 90도 회전 여부
+        public int gridX;  // 슬롯 X
+        public int gridY;  // 슬롯 Y
+        public bool rotated; // [폐기 2026-09-09] 회전 개념 없음 — 세이브 호환용으로만 남김(항상 false)
 
         public PlacedItem(ItemInstance item, int x, int y, bool rotated = false)
         {
             this.item = item;
             gridX = x;
             gridY = y;
-            this.rotated = rotated;
+            this.rotated = false;
         }
 
-        /// <summary>회전 반영 실제 가로 칸 수</summary>
-        public int EffectiveWidth => (item != null && item.data != null)
-            ? (rotated ? item.data.gridHeight : item.data.gridWidth) : 1;
+        /// <summary>슬롯 1칸 고정(2026-09-09 격자 폐기).</summary>
+        public int EffectiveWidth => 1;
 
-        /// <summary>회전 반영 실제 세로 칸 수</summary>
-        public int EffectiveHeight => (item != null && item.data != null)
-            ? (rotated ? item.data.gridWidth : item.data.gridHeight) : 1;
+        /// <summary>슬롯 1칸 고정(2026-09-09 격자 폐기).</summary>
+        public int EffectiveHeight => 1;
 
-        /// <summary>이 아이템이 (x,y) 칸을 점유하는지</summary>
-        public bool Occupies(int x, int y)
-        {
-            if (item == null || item.data == null) return false;
-            return x >= gridX && x < gridX + EffectiveWidth
-                && y >= gridY && y < gridY + EffectiveHeight;
-        }
+        /// <summary>이 아이템이 (x,y) 칸을 점유하는지 — 슬롯 1칸이므로 좌표 일치.</summary>
+        public bool Occupies(int x, int y) => item != null && x == gridX && y == gridY;
     }
 
     public int width;
@@ -147,41 +147,24 @@ public class InventoryGrid
 
     #region 배치
 
-    /// <summary>해당 위치에 아이템 배치 가능한지 (rotated: 90도 회전)</summary>
+    /// <summary>해당 슬롯에 배치 가능한지. (rotated 인자는 폐기 — 무시)</summary>
     public bool CanPlace(ItemInstance item, int x, int y, bool rotated = false)
     {
         if (item == null || item.data == null) return false;
         if (AcceptFilter != null && !AcceptFilter(item)) return false;
-
-        int w = rotated ? item.data.gridHeight : item.data.gridWidth;
-        int h = rotated ? item.data.gridWidth : item.data.gridHeight;
-
-        // 범위 체크
-        if (x < 0 || y < 0 || x + w > width || y + h > height) return false;
-
-        // 점유 체크
-        for (int gx = x; gx < x + w; gx++)
-            for (int gy = y; gy < y + h; gy++)
-                if (grid[gx, gy] != null)
-                    return false;
-
-        return true;
+        if (x < 0 || y < 0 || x >= width || y >= height) return false;
+        if (grid == null) grid = new PlacedItem[width, height];
+        return grid[x, y] == null;
     }
 
-    /// <summary>배치 시도. 성공하면 true. (rotated: 90도 회전)</summary>
+    /// <summary>배치 시도. 성공하면 true. (rotated 인자는 폐기 — 무시)</summary>
     public bool TryPlace(ItemInstance item, int x, int y, bool rotated = false)
     {
-        if (!CanPlace(item, x, y, rotated)) return false;
+        if (!CanPlace(item, x, y)) return false;
 
-        var placed = new PlacedItem(item, x, y, rotated);
+        var placed = new PlacedItem(item, x, y);
         items.Add(placed);
-
-        // 격자에 참조 기록
-        int w = placed.EffectiveWidth;
-        int h = placed.EffectiveHeight;
-        for (int gx = x; gx < x + w; gx++)
-            for (int gy = y; gy < y + h; gy++)
-                grid[gx, gy] = placed;
+        grid[x, y] = placed;
 
         OnItemPlaced?.Invoke(item);
         OnChanged?.Invoke();
@@ -209,26 +192,21 @@ public class InventoryGrid
             }
         }
 
-        int w = item.data.gridWidth;
-        int h = item.data.gridHeight;
-        for (int gy = 0; gy <= height - h; gy++)
-            for (int gx = 0; gx <= width - w; gx++)
-                if (CanPlace(item, gx, gy, false))
-                    return true;
+        return FindFreeSlot(item, out _, out _);
+    }
 
-        if (w != h)
-        {
-            int rw = h, rh = w;
-            for (int gy = 0; gy <= height - rh; gy++)
-                for (int gx = 0; gx <= width - rw; gx++)
-                    if (CanPlace(item, gx, gy, true))
-                        return true;
-        }
-
+    /// <summary>비어 있는 첫 슬롯을 찾는다(좌상단부터 행 우선).</summary>
+    bool FindFreeSlot(ItemInstance item, out int fx, out int fy)
+    {
+        for (int gy = 0; gy < height; gy++)
+            for (int gx = 0; gx < width; gx++)
+                if (CanPlace(item, gx, gy))
+                { fx = gx; fy = gy; return true; }
+        fx = fy = -1;
         return false;
     }
 
-    /// <summary>빈 자리에 자동 배치. 성공하면 true. 회전도 시도.</summary>
+    /// <summary>빈 슬롯에 자동 배치. 성공하면 true.</summary>
     public bool TryAutoPlace(ItemInstance item)
     {
         if (item == null || item.data == null) return false;
@@ -255,25 +233,8 @@ public class InventoryGrid
 
         if (item.stackCount <= 0) return true;
 
-        // 기본 방향 시도
-        int w = item.data.gridWidth;
-        int h = item.data.gridHeight;
-        for (int gy = 0; gy <= height - h; gy++)
-            for (int gx = 0; gx <= width - w; gx++)
-                if (CanPlace(item, gx, gy, false))
-                    return TryPlace(item, gx, gy, false);
-
-        // 회전 시도 (가로세로가 다를 때만)
-        if (w != h)
-        {
-            int rw = h, rh = w;
-            for (int gy = 0; gy <= height - rh; gy++)
-                for (int gx = 0; gx <= width - rw; gx++)
-                    if (CanPlace(item, gx, gy, true))
-                        return TryPlace(item, gx, gy, true);
-        }
-
-        return false; // 공간 부족
+        if (FindFreeSlot(item, out int fx, out int fy)) return TryPlace(item, fx, fy);
+        return false; // 빈 슬롯 없음
     }
 
     /// <summary>해당 칸의 아이템 제거. 제거된 PlacedItem 반환.</summary>
@@ -292,13 +253,9 @@ public class InventoryGrid
     {
         if (placed == null) return null;
 
-        // 격자에서 참조 해제 (회전 반영)
-        int w = placed.EffectiveWidth;
-        int h = placed.EffectiveHeight;
-        for (int gx = placed.gridX; gx < placed.gridX + w; gx++)
-            for (int gy = placed.gridY; gy < placed.gridY + h; gy++)
-                if (gx >= 0 && gx < width && gy >= 0 && gy < height)
-                    grid[gx, gy] = null;
+        // 슬롯 참조 해제
+        if (placed.gridX >= 0 && placed.gridX < width && placed.gridY >= 0 && placed.gridY < height)
+            grid[placed.gridX, placed.gridY] = null;
 
         items.Remove(placed);
         OnChanged?.Invoke();
@@ -325,7 +282,7 @@ public class InventoryGrid
 
     #region 스왑
 
-    /// <summary>해당 위치의 아이템과 교환. 기존 아이템 반환. (rotated: 새 아이템의 회전)</summary>
+    /// <summary>해당 슬롯의 아이템과 교환. 기존 아이템 반환. (rotated 인자는 폐기 — 무시)</summary>
     public ItemInstance TrySwap(ItemInstance newItem, int x, int y, bool rotated = false)
     {
         var existing = GetAt(x, y);
@@ -337,21 +294,20 @@ public class InventoryGrid
 
         // 기존 아이템 정보 보존
         var oldItem = existing.item;
-        bool oldRotated = existing.rotated;
         int oldX = existing.gridX;
         int oldY = existing.gridY;
         Remove(existing);
 
         // 새 아이템 배치 시도
-        if (CanPlace(newItem, x, y, rotated))
+        if (CanPlace(newItem, x, y))
         {
-            TryPlace(newItem, x, y, rotated);
+            TryPlace(newItem, x, y);
             return oldItem;
         }
         else
         {
             // 배치 실패하면 기존 아이템 복원
-            TryPlace(oldItem, oldX, oldY, oldRotated);
+            TryPlace(oldItem, oldX, oldY);
             return null;
         }
     }
@@ -369,8 +325,9 @@ public class InventoryGrid
     }
 
     /// <summary>
-    /// 자동 정렬(재배치). 모든 아이템을 회수 → 큰 것 우선·희귀도 높은 순으로 정렬 →
-    /// 빈틈 없이 다시 자동 배치. 재배치 실패분은 원래 위치로 복원.
+    /// 자동 정렬(재배치). 모든 아이템을 회수 → 카테고리·희귀도 순으로 정렬 →
+    /// 앞 슬롯부터 다시 채운다. 재배치 실패분은 원래 위치로 복원.
+    /// (2026-09-09 격자 폐기 후 "빈틈 메우기"는 의미가 없어졌다 — 이제 순서 정리다.)
     /// </summary>
     public void AutoSort()
     {
@@ -380,13 +337,13 @@ public class InventoryGrid
         var snapshot = new List<PlacedItem>(items);
         if (snapshot.Count == 0) return;
 
-        // 정렬: 면적 큰 것 먼저, 같으면 희귀도 높은 순, 그 다음 itemId
+        // 정렬: 카테고리 순 → 희귀도 높은 순 → itemId
         var ordered = new List<PlacedItem>(snapshot);
         ordered.Sort((a, b) =>
         {
-            int areaA = a.item != null && a.item.data != null ? a.item.data.gridWidth * a.item.data.gridHeight : 0;
-            int areaB = b.item != null && b.item.data != null ? b.item.data.gridWidth * b.item.data.gridHeight : 0;
-            if (areaA != areaB) return areaB.CompareTo(areaA); // 큰 면적 먼저
+            int catA = a.item != null && a.item.data != null ? (int)a.item.data.category : 0;
+            int catB = b.item != null && b.item.data != null ? (int)b.item.data.category : 0;
+            if (catA != catB) return catA.CompareTo(catB);
 
             int rarA = a.item != null && a.item.data != null ? (int)a.item.data.rarity : 0;
             int rarB = b.item != null && b.item.data != null ? (int)b.item.data.rarity : 0;
@@ -420,7 +377,7 @@ public class InventoryGrid
             for (int i = 0; i < snapshot.Count; i++)
             {
                 var s = snapshot[i];
-                if (!PlaceAtQuietly(s.item, s.gridX, s.gridY, s.rotated))
+                if (!PlaceAtQuietly(s.item, s.gridX, s.gridY))
                     PlaceQuietly(s.item); // 최후 보루
             }
         }
@@ -432,37 +389,18 @@ public class InventoryGrid
     bool PlaceQuietly(ItemInstance item)
     {
         if (item == null || item.data == null) return false;
-
-        int w = item.data.gridWidth;
-        int h = item.data.gridHeight;
-        for (int gy = 0; gy <= height - h; gy++)
-            for (int gx = 0; gx <= width - w; gx++)
-                if (CanPlace(item, gx, gy, false))
-                    return PlaceAtQuietly(item, gx, gy, false);
-
-        if (w != h)
-        {
-            int rw = h, rh = w;
-            for (int gy = 0; gy <= height - rh; gy++)
-                for (int gx = 0; gx <= width - rw; gx++)
-                    if (CanPlace(item, gx, gy, true))
-                        return PlaceAtQuietly(item, gx, gy, true);
-        }
-        return false;
+        if (!FindFreeSlot(item, out int fx, out int fy)) return false;
+        return PlaceAtQuietly(item, fx, fy);
     }
 
-    /// <summary>OnChanged 발행 없이 지정 위치 배치(AutoSort 내부 전용).</summary>
-    bool PlaceAtQuietly(ItemInstance item, int x, int y, bool rotated)
+    /// <summary>OnChanged 발행 없이 지정 슬롯 배치(AutoSort 내부 전용).</summary>
+    bool PlaceAtQuietly(ItemInstance item, int x, int y)
     {
-        if (!CanPlace(item, x, y, rotated)) return false;
+        if (!CanPlace(item, x, y)) return false;
 
-        var placed = new PlacedItem(item, x, y, rotated);
+        var placed = new PlacedItem(item, x, y);
         items.Add(placed);
-        int w = placed.EffectiveWidth;
-        int h = placed.EffectiveHeight;
-        for (int gx = x; gx < x + w; gx++)
-            for (int gy = y; gy < y + h; gy++)
-                grid[gx, gy] = placed;
+        grid[x, y] = placed;
         return true;
     }
 

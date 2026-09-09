@@ -511,7 +511,7 @@ public class DebugTestUI : MonoBehaviour
 
                 GUILayout.BeginHorizontal();
                 string equipInfo = allItems[i].equipSlot != EquipSlot.None ? $" [{allItems[i].equipSlot}]" : "";
-                GUILayout.Label($"{allItems[i].displayName} ({allItems[i].gridWidth}x{allItems[i].gridHeight}){equipInfo}", labelStyle, GUILayout.Width(360));
+                GUILayout.Label($"{allItems[i].displayName} ({allItems[i].weight:F2}kg){equipInfo}", labelStyle, GUILayout.Width(360));
                 if (GUILayout.Button("+인벤", smallBtnStyle, GUILayout.Width(70)))
                 {
                     var item = new ItemInstance(allItems[i], 1);

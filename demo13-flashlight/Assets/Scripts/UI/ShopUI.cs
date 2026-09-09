@@ -960,7 +960,7 @@ public class ShopUI : MonoBehaviour
         {
             string stockTxt = (has && remain < int.MaxValue) ? $" · 재고 {remain}" : "";
             buyInfo.text = has
-                ? $"{RarityLabel(data.rarity)} · {data.category} · {data.gridWidth}×{data.gridHeight} · {data.weight:F2}kg{stockTxt}"
+                ? $"{RarityLabel(data.rarity)} · {data.category} · {data.weight:F2}kg{stockTxt}"
                 : "";
         }
         if (actionBuyBtn != null) actionBuyBtn.gameObject.SetActive(has);
@@ -1051,7 +1051,7 @@ public class ShopUI : MonoBehaviour
         EnsureSellTray();
         if (!sellTray.TryAutoPlace(item))
         {
-            from.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);   // 복원
+            from.TryPlace(item, placed.gridX, placed.gridY);   // 복원
             ToastManager.Show("판매 트레이가 가득 참", ToastManager.ToastType.Warning);
             return;
         }
@@ -1072,7 +1072,7 @@ public class ShopUI : MonoBehaviour
         sellTray.Remove(placed);
         if (stashGrid == null || !stashGrid.TryAutoPlace(item))
         {
-            sellTray.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+            sellTray.TryPlace(item, placed.gridX, placed.gridY);
             ToastManager.Show("창고 공간 부족", ToastManager.ToastType.Warning);
             return;
         }
@@ -1175,7 +1175,7 @@ public class ShopUI : MonoBehaviour
             var from = CurrentStashGrid;
             from.Remove(placed);
             EnsureSellTray();
-            if (!sellTray.TryAutoPlace(it)) from.TryPlace(it, placed.gridX, placed.gridY, placed.rotated);
+            if (!sellTray.TryAutoPlace(it)) from.TryPlace(it, placed.gridX, placed.gridY);
             RefreshTrade();
         };
         // Ctrl+클릭 = 판매 트레이 → 창고로 즉시 이동
@@ -1184,7 +1184,7 @@ public class ShopUI : MonoBehaviour
             var it = placed?.item;
             if (it == null || sellTray == null) return;
             sellTray.Remove(placed);
-            if (stashGrid == null || !stashGrid.TryAutoPlace(it)) sellTray.TryPlace(it, placed.gridX, placed.gridY, placed.rotated);
+            if (stashGrid == null || !stashGrid.TryAutoPlace(it)) sellTray.TryPlace(it, placed.gridX, placed.gridY);
             RefreshTrade();
         };
         trayPanel.onRightClick = p => ShowShopMenu(p, sellTray);
@@ -1208,7 +1208,7 @@ public class ShopUI : MonoBehaviour
             if (shop == null || shop.SellPrice(it.data) <= 0) { ToastManager.Show("팔 수 없는 물건", ToastManager.ToastType.Warning); return; }
             bagPanel.grid.Remove(placed);
             EnsureSellTray();
-            if (!sellTray.TryAutoPlace(it)) bagPanel.grid.TryPlace(it, placed.gridX, placed.gridY, placed.rotated);
+            if (!sellTray.TryAutoPlace(it)) bagPanel.grid.TryPlace(it, placed.gridX, placed.gridY);
             bagPanel.Refresh();
             RefreshTrade();
         };

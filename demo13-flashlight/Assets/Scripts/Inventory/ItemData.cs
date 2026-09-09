@@ -87,14 +87,12 @@ public class ItemData : ScriptableObject
     [Tooltip("인벤토리 아이콘 (격자 크기에 맞게)")]
     public Sprite icon;
 
-    [Header("격자 크기")]
-    [Tooltip("인벤토리에서 차지하는 가로 칸 수")]
-    [Range(1, 3)]
-    public int gridWidth = 1;
-
-    [Tooltip("인벤토리에서 차지하는 세로 칸 수")]
-    [Range(1, 3)]
-    public int gridHeight = 1;
+    // ── [폐기 2026-09-09] 격자 footprint ──
+    //   테트리스식 격자를 버리고 아이템 1개 = 슬롯 1칸으로 바꿨다(docs/scope-cut.md 3번).
+    //   배치·정렬·용량 계산 어디에도 더는 쓰이지 않는다. 필드는 SO 236개의
+    //   직렬화 값을 날리지 않으려고 남겨 뒀을 뿐이다 — 새 코드에서 읽지 말 것.
+    [HideInInspector] public int gridWidth = 1;
+    [HideInInspector] public int gridHeight = 1;
 
     [Header("분류")]
     public ItemCategory category;

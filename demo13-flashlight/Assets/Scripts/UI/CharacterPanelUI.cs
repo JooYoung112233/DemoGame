@@ -64,7 +64,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     // ── 중앙 패널: 무기파츠(예약) / 가방 / 주머니4 / 보안3×3 (위→아래) ──
     [SerializeField] RectTransform midContentRoot; // 세로 스택 콘텐츠 루트 (헤더 아래)
-    [SerializeField] RectTransform weaponBox;      // 무기 파츠 예약 공간 (장착 시 표시 예정)
+    [SerializeField] RectTransform weaponBox;      // 탄창 슬롯 공간 (총 장착 시 표시)
     [SerializeField] RectTransform invGridRoot;    // 가방(백팩) 격자 루트
     [SerializeField] RectTransform pocketsGridRoot;// 주머니 4칸 격자 루트 (고정)
     [SerializeField] RectTransform secureGridRoot; // 보안 컨테이너 3×3 격자 루트 (고정)
@@ -107,7 +107,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     // 중앙 패널 세로 스택 레이아웃
     const float MID_INNER_W = 520f;   // 중앙 콘텐츠 가용 폭 (격자 가로 정렬 기준)
-    const float WEAPON_BOX_H = 92f;   // 무기 파츠 예약 공간 높이
+    const float WEAPON_BOX_H = 92f;   // 탄창 슬롯 공간 높이
     const float SECTION_HDR_H = 22f;  // 섹션 헤더 높이
     const float SECTION_GAP = 10f;    // 섹션 간 간격
 
@@ -116,8 +116,6 @@ public class CharacterPanelUI : MonoBehaviour
     ItemInstance dragItem;
     InventoryGrid dragSourceGrid;
     int dragOrigX, dragOrigY;
-    bool dragOrigRotated;
-    bool dragRotated;
     // 픽셀 잡기 오프셋: 아이템 좌상단 → 잡은 지점(커서)까지의 캔버스 픽셀 거리.
     // 고스트는 이 값만큼 커서를 자유 추적(칸 점프 없음), 배치는 좌상단을 가까운 칸에 스냅.
     Vector2 grabPixelOffset;
@@ -150,18 +148,8 @@ public class CharacterPanelUI : MonoBehaviour
     Vector2 dragStartMouse;           // 드래그 시작 시 마우스 위치(클릭 판정용)
     const float CLICK_MOVE_THRESHOLD = 6f;  // 이 거리 미만 이동이면 클릭(선택)으로 간주
 
-    // ── 수색 연출 (루팅 상자 전용) ──
-    bool isSearching;
-    float searchTimer;
-    float searchDelay;
-    System.Collections.Generic.Queue<InventoryGrid.PlacedItem> searchQueue;
-    InventoryGrid.PlacedItem searchingItem;
-    System.Collections.Generic.HashSet<int> revealedUids;
-    InventoryGrid lastSearchedGrid;
-    int totalSearchItems;
-    int revealedCount;
-    bool leftPanelSearchEnabled; // true=루팅상자(수색), false=창고(즉시)
-    [SerializeField] Text searchStatusText; // "수색 중... 3/7"
+    // ── 좌측 패널 종류 (2026-09-09 수색 연출 폐기 — 상자는 열면 바로 다 보인다) ──
+    bool leftPanelIsLoot; // true=필드 루팅 상자, false=창고/보관함
 
     void Awake()
     {
@@ -302,7 +290,7 @@ public class CharacterPanelUI : MonoBehaviour
         var stash = MainStash.Ensure();
         if (stash == null) return;
         openStashGrid = stash.GetGrid();
-        ShowLeftPanel(openStashGrid, "창고", false);   // 수색 연출 없이 즉시 공개
+        ShowLeftPanel(openStashGrid, "창고", false);
     }
 
     public void Hide()
@@ -332,9 +320,7 @@ public class CharacterPanelUI : MonoBehaviour
         openStorage = null;
         openFurniture = null;
         Show();
-        // 이미 수색 완료된 상자는 즉시 공개
-        bool needSearch = !container.HasBeenSearched;
-        ShowLeftPanel(container.Grid, container.ContainerName, needSearch);
+        ShowLeftPanel(container.Grid, container.ContainerName, true);   // 필드 루팅 상자
     }
 
     public void ShowWithStorage(SafehouseStorage storage)
@@ -349,7 +335,7 @@ public class CharacterPanelUI : MonoBehaviour
         if (openFurniture != null && openFurniture.data != null && !openFurniture.data.IsUniversal)
             title += $" <size=11><color=#88AACC>({openFurniture.data.AllowedCategorySummary})</color></size>";
 
-        ShowLeftPanel(storage.Grid, title, false); // 수색 연출 X (내 창고)
+        ShowLeftPanel(storage.Grid, title, false);
     }
 
     /// <summary>보관함/가방 열기 → 내부 격자 셀 크기에 맞는 독립 이동 팝업 표시.</summary>
@@ -487,7 +473,7 @@ public class CharacterPanelUI : MonoBehaviour
                 popupSlotImages[gx, gy] = pImg;
             }
 
-        RefreshContainerItems(grid, popupGridRoot, false);   // 수색 무관(항상 공개)
+        RefreshContainerItems(grid, popupGridRoot);
     }
 
     void SortContainerPopup()
@@ -530,7 +516,6 @@ public class CharacterPanelUI : MonoBehaviour
 
     public void CloseContainer()
     {
-        StopSearch(false);
         openContainerItem = null;
         if (containerPopupGO != null) containerPopupGO.SetActive(false);
         if (openContainer != null)
@@ -556,9 +541,6 @@ public class CharacterPanelUI : MonoBehaviour
     /// <summary>씬 전환 시 레퍼런스 초기화 (DontDestroyOnLoad이므로 필요)</summary>
     public void ResetRefs()
     {
-        StopSearch(false);
-        revealedUids = null;
-        lastSearchedGrid = null;
         openContainer = null;
         openStorage = null;
         openFurniture = null;
@@ -688,7 +670,6 @@ public class CharacterPanelUI : MonoBehaviour
         secureHeaderText = null;
         invWeightText = null;
         containerGridRoot = null;
-        searchStatusText = null;
         charPanel = null;
         charHpText = null;
         charStaminaText = null;
@@ -742,10 +723,10 @@ public class CharacterPanelUI : MonoBehaviour
         midContentRoot.anchoredPosition = new Vector2(0, -40);
         midContentRoot.sizeDelta = new Vector2(MID_INNER_W, 980);
 
-        // 무기 파츠 예약 공간 (장착 시 채워질 자리 — 지금은 안내만)
+        // 탄창 슬롯 공간 (총 장착 시 채워짐)
         weaponBox = MakeSection(midContentRoot, "WeaponPartsBox", MID_INNER_W, WEAPON_BOX_H,
             UITheme.PanelAlt);
-        var wpTxt = MakeChildText(weaponBox, "무기 파츠\n(무기 장착 시 표시)", 12, UITheme.TextMuted);
+        var wpTxt = MakeChildText(weaponBox, "탄창\n(총 장착 시 표시)", 12, UITheme.TextMuted);
         wpTxt.alignment = TextAnchor.MiddleCenter;
 
         // 가방 헤더 + 격자 루트
@@ -874,9 +855,6 @@ public class CharacterPanelUI : MonoBehaviour
             MakeChildText(tabGO.transform, tabLabels[t], 11, UITheme.TextBright);
         }
 
-        // 수색 상태 텍스트 (탭 아래 — 창고에선 빈 문자열, 상자 수색 시만 표시)
-        searchStatusText = MakeText(leftPanel, "SearchStatus", "",
-            new Vector2(10, -92), new Vector2(PANEL_WIDTH - 20, 16), 11, UITheme.AccentBright, TextAnchor.MiddleCenter);
 
         // ── 푸터(하단): TAKE ALL(좌) / SORT(우) ──
         // TAKE ALL — 신규 버튼: 좌측 격자 전체를 플레이어 인벤으로 이동
@@ -1368,10 +1346,13 @@ public class CharacterPanelUI : MonoBehaviour
         LayoutMiddleStack(hasBackpack, bag);
     }
 
-    static readonly WeaponPartType[] PartOrder = { WeaponPartType.Scope, WeaponPartType.Muzzle, WeaponPartType.Magazine, WeaponPartType.Grip };
-    static readonly string[] PartLabels = { "조준경", "소염기", "탄창", "손잡이" };
+    // 2026-09-09 볼륨 축소(docs/scope-cut.md 3번): 무기 파츠 4종 → **탄창 하나**.
+    //   조준경/소염기/손잡이는 "부착하면 수치가 조금 변하는" 타르코프식 커스터마이즈였다.
+    //   탄창만 남긴 이유는 하나 — **탄창 없는 총은 발사 불가**라서, 이걸 빼면 총기가 통째로 죽는다.
+    static readonly WeaponPartType[] PartOrder = { WeaponPartType.Magazine };
+    static readonly string[] PartLabels = { "탄창" };
 
-    /// <summary>무기 파츠 예약 공간에 장착 무기의 4개 파츠 슬롯 렌더(부착=아이콘+클릭 분리 / 빈칸=종류 라벨).</summary>
+    /// <summary>탄창 슬롯 렌더(부착=아이콘+클릭 분리 / 빈칸=종류 라벨).</summary>
     void RefreshWeaponParts()
     {
         if (weaponBox == null) return;
@@ -1380,13 +1361,13 @@ public class CharacterPanelUI : MonoBehaviour
 
         var wpn = playerEquipment != null ? playerEquipment.GetSlotInstance(EquipSlot.PrimaryWeapon) : null;
 
-        MakeText(weaponBox, "WPHdr", wpn != null ? $"무기 파츠 — {wpn.data.displayName}" : "무기 파츠",
+        MakeText(weaponBox, "WPHdr", wpn != null ? $"탄창 — {wpn.data.displayName}" : "탄창",
             new Vector2(8, -4), new Vector2(MID_INNER_W - 16, 18), 12,
             wpn != null ? new Color(0.85f, 0.8f, 0.6f) : UITheme.TextMuted, TextAnchor.MiddleLeft);
 
         if (wpn == null)
         {
-            var t = MakeText(weaponBox, "WPNone", "무기를 장착하면 파츠 슬롯이 열립니다",
+            var t = MakeText(weaponBox, "WPNone", "총을 장착하면 탄창 슬롯이 열립니다",
                 new Vector2(8, -26), new Vector2(MID_INNER_W - 16, 40), 11, new Color(0.4f, 0.45f, 0.55f), TextAnchor.MiddleCenter);
             return;
         }
@@ -1394,7 +1375,7 @@ public class CharacterPanelUI : MonoBehaviour
         // ★ 2026-07-29 버그 — 칼을 들어도 조준경·소염기·탄창 슬롯이 떴다("칼인데 파츠 착용?").
         //   근접 무기에 탄창을 끼울 수 있다는 건 말이 안 되고, 총기용 파츠가 근접에 붙으면
         //   사거리/반동 보정이 아무 데도 안 쓰여 **조용히 죽는 값**이 된다.
-        //   총이면 4종 전부, 근접이면 **손잡이만**(무게·이속 보정은 근접에서도 의미가 있다).
+        //   2026-09-09: 파츠가 탄창 하나로 줄면서 이 규칙은 "총일 때만 슬롯이 열린다"가 됐다.
         bool ranged = wpn.data != null && wpn.data.weaponData != null && wpn.data.weaponData.isRanged;
 
         const float cell = 50f, gap = 8f, startX = 10f;
@@ -1402,7 +1383,7 @@ public class CharacterPanelUI : MonoBehaviour
         for (int i = 0; i < PartOrder.Length; i++)
         {
             var type = PartOrder[i];
-            if (!ranged && type != WeaponPartType.Grip) continue;
+            if (!ranged) continue;   // 근접 무기엔 탄창 슬롯 없음
             string attId = wpn.GetAttachment(type);
             var attData = string.IsNullOrEmpty(attId) ? null : ItemDatabase.Get(attId);
 
@@ -1790,26 +1771,24 @@ public class CharacterPanelUI : MonoBehaviour
 
     #region 좌측 상자
 
-    void ShowLeftPanel(InventoryGrid grid, string title, bool withSearch = false)
+    /// <summary>좌측 패널 열기. isLoot=필드 루팅 상자(TAKE ALL 노출 + 간소 레이아웃), false=창고/보관함.
+    /// 2026-09-09: 수색 연출 폐기 — 상자를 열면 내용물이 **바로 전부 보인다**.</summary>
+    void ShowLeftPanel(InventoryGrid grid, string title, bool isLoot = false)
     {
         if (leftPanelRoot == null || grid == null) return;
 
         leftPanelRoot.SetActive(true);
         leftTitleText.text = title;
-        leftPanelSearchEnabled = withSearch;
+        leftPanelIsLoot = isLoot;
         // TAKE ALL 버튼 = 필드 파밍(루팅 상자)에서만 노출. 창고/가구 보관함에선 숨김.
-        if (takeAllBtn != null) takeAllBtn.gameObject.SetActive(withSearch);
+        if (takeAllBtn != null) takeAllBtn.gameObject.SetActive(isLoot);
         // 루팅 상자(시체/필드 상자) = 간소 레이아웃(분류탭 X, 패널 높이 = 격자에 맞춤). 창고류 = 풀 레이아웃 원복.
         ApplyLeftLootLayout(openContainer != null, grid);
         RefreshLeftWeight();
         SyncLeftPlaceholder();   // 패널 열렸으니 안내 숨김
 
         RefreshLeftGrid(grid);
-
-        if (withSearch)
-            StartSearch(grid);
-        else
-            StopSearch(true); // 창고: 전부 즉시 공개
+        if (openContainer != null) openContainer.HasBeenSearched = true;
     }
 
     /// <summary>좌측 패널 레이아웃 전환 — 루팅 상자(시체 등)는 창고 UI와 달리 간소하게(2026-07-10 사용자 결정):
@@ -1893,8 +1872,6 @@ public class CharacterPanelUI : MonoBehaviour
     {
         var grid = LeftGrid;
         if (grid == null || playerInventory == null) return;
-        // 수색 중인 루팅 상자는 공개 전 이동 금지(위치 흔들림/미공개 아이템 방지).
-        if (leftPanelSearchEnabled && isSearching) return;
 
         int moved = 0, left = 0;
         foreach (var placed in grid.GetAll())   // GetAll은 복사본 → 순회 중 Remove 안전
@@ -1933,8 +1910,6 @@ public class CharacterPanelUI : MonoBehaviour
     {
         var grid = LeftGrid;
         if (grid == null) return;
-        // 수색 중인 루팅 상자는 정렬 금지(공개 전 위치 흔들림 방지)
-        if (leftPanelSearchEnabled && isSearching) return;
         SortGrid(grid);
         RefreshLeftGrid(grid);
     }
@@ -1948,11 +1923,11 @@ public class CharacterPanelUI : MonoBehaviour
 
         items.Sort((a, b) =>
         {
-            int sa = a.data.gridWidth * a.data.gridHeight;
-            int sb = b.data.gridWidth * b.data.gridHeight;
-            if (sb != sa) return sb - sa;                       // 큰 것 먼저(패킹 효율)
+            // 슬롯 1칸 고정(2026-09-09) — '큰 것 먼저 패킹'이 의미를 잃어 카테고리·희귀도 순으로 정렬한다.
             int ca = (int)a.data.category, cb = (int)b.data.category;
             if (ca != cb) return ca - cb;                       // 카테고리
+            int ra = (int)a.data.rarity, rb = (int)b.data.rarity;
+            if (rb != ra) return rb - ra;                       // 희귀도 높은 순
             return string.Compare(a.data.displayName, b.data.displayName, System.StringComparison.Ordinal);
         });
 
@@ -1989,7 +1964,7 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 
-    void RefreshContainerItems(InventoryGrid grid, RectTransform gridRoot, bool applySearch = true)
+    void RefreshContainerItems(InventoryGrid grid, RectTransform gridRoot)
     {
         int cellTotal = CELL_SIZE + CELL_GAP;
         var placed = grid.GetAll();
@@ -2004,12 +1979,6 @@ public class CharacterPanelUI : MonoBehaviour
             float itemW = w * CELL_SIZE + (w - 1) * CELL_GAP;
             float itemH = h * CELL_SIZE + (h - 1) * CELL_GAP;
 
-            // ── 수색 상태 판별 ──
-            bool revealed = !applySearch || !leftPanelSearchEnabled
-                || (revealedUids != null && revealedUids.Contains(p.item.uid));
-            bool currentlySearching = applySearch && leftPanelSearchEnabled
-                && searchingItem != null && searchingItem.item.uid == p.item.uid;
-
             // 공통 배경 GO
             var itemGO = new GameObject($"CItem_{p.item.uid}");
             itemGO.transform.SetParent(gridRoot, false);
@@ -2022,51 +1991,6 @@ public class CharacterPanelUI : MonoBehaviour
 
             var bg = itemGO.AddComponent<Image>();
 
-            // ── 미공개: 어두운 슬롯 + "?" ──
-            if (!revealed && !currentlySearching)
-            {
-                bg.color = UITheme.PanelAlt;
-                var qTxt = MakeChildText(itemGO.transform, "?", 18, UITheme.TextDim);
-                qTxt.fontStyle = FontStyle.Bold;
-                continue;
-            }
-
-            // ── 수색 중: 펄스 배경 + 프로그레스 바 ──
-            if (currentlySearching)
-            {
-                // 펄스: 밝기가 시간에 따라 변함
-                float pulse = 0.5f + 0.15f * Mathf.Sin(Time.unscaledTime * 4f);
-                bg.color = new Color(pulse * 0.4f, pulse * 0.35f, pulse * 0.2f, 0.95f);
-
-                // "수색 중" 텍스트
-                var searchTxt = MakeChildText(itemGO.transform, "...", 14, UITheme.Gold);
-                searchTxt.fontStyle = FontStyle.Bold;
-
-                // 하단 프로그레스 바
-                float progress = searchDelay > 0 ? 1f - (searchTimer / searchDelay) : 1f;
-
-                var barBg = new GameObject("BarBg");
-                barBg.transform.SetParent(itemGO.transform, false);
-                var barBgRT = barBg.AddComponent<RectTransform>();
-                barBgRT.anchorMin = new Vector2(0, 0);
-                barBgRT.anchorMax = new Vector2(1, 0);
-                barBgRT.pivot = new Vector2(0, 0);
-                barBgRT.anchoredPosition = new Vector2(2, 2);
-                barBgRT.sizeDelta = new Vector2(-4, 5);
-                barBg.AddComponent<Image>().color = new Color(0, 0, 0, 0.7f);
-
-                var barFill = new GameObject("BarFill");
-                barFill.transform.SetParent(barBg.transform, false);
-                var barFillRT = barFill.AddComponent<RectTransform>();
-                barFillRT.anchorMin = Vector2.zero;
-                barFillRT.anchorMax = new Vector2(Mathf.Clamp01(progress), 1f);
-                barFillRT.offsetMin = Vector2.zero;
-                barFillRT.offsetMax = Vector2.zero;
-                barFill.AddComponent<Image>().color = UITheme.Gold;
-                continue;
-            }
-
-            // ── 공개됨: 정상 렌더링 ──
             bg.color = GetRarityBgColor(p.item.data.rarity);
 
             // 카테고리 탭 필터 — 메인 좌측 격자에서 비일치 아이템은 흐리게(위치 유지·클릭 가능)
@@ -2138,179 +2062,7 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 
-    void UpdateContainerGrid()
-    {
-        if (isSearching)
-            UpdateSearch();
-    }
-
-    // ── 수색 연출 로직 ──
-
-    void StartSearch(InventoryGrid grid)
-    {
-        StopSearch(false);
-        lastSearchedGrid = grid;
-
-        var all = grid.GetAll();
-        if (all.Count == 0) return;
-
-        // 레어도 낮은 것부터 (Common → Legendary)
-        all.Sort((a, b) => ((int)a.item.data.rarity).CompareTo((int)b.item.data.rarity));
-
-        revealedUids = new System.Collections.Generic.HashSet<int>();
-        searchQueue = new System.Collections.Generic.Queue<InventoryGrid.PlacedItem>();
-        for (int i = 0; i < all.Count; i++)
-            searchQueue.Enqueue(all[i]);
-
-        totalSearchItems = all.Count;
-        revealedCount = 0;
-        isSearching = true;
-        searchingItem = null;
-
-        AdvanceSearch();
-        UpdateSearchStatusText();
-    }
-
-    void StopSearch(bool revealAll)
-    {
-        isSearching = false;
-        searchingItem = null;
-        searchTimer = 0f;
-        searchDelay = 0f;
-
-        if (revealAll && lastSearchedGrid != null)
-        {
-            // 전부 공개 처리
-            if (revealedUids == null)
-                revealedUids = new System.Collections.Generic.HashSet<int>();
-            var all = lastSearchedGrid.GetAll();
-            for (int i = 0; i < all.Count; i++)
-                revealedUids.Add(all[i].item.uid);
-            revealedCount = all.Count;
-            totalSearchItems = all.Count;
-        }
-
-        // 수색 완료 플래그 → 재오픈 시 즉시 공개
-        MarkContainerSearched();
-
-        if (searchQueue != null) searchQueue.Clear();
-        UpdateSearchStatusText();
-    }
-
-    void MarkContainerSearched()
-    {
-        if (openContainer != null)
-            openContainer.HasBeenSearched = true;
-    }
-
-    void AdvanceSearch()
-    {
-        if (searchQueue == null || searchQueue.Count == 0)
-        {
-            // 모든 아이템 수색 완료
-            isSearching = false;
-            searchingItem = null;
-            MarkContainerSearched();
-            UpdateSearchStatusText();
-            RefreshLeftGrid(lastSearchedGrid);
-            return;
-        }
-
-        searchingItem = searchQueue.Dequeue();
-        searchDelay = GetSearchDelay(searchingItem.item.data.rarity);
-        searchTimer = searchDelay;
-    }
-
-    void UpdateSearch()
-    {
-        if (!isSearching || searchingItem == null) return;
-
-        searchTimer -= Time.unscaledDeltaTime;
-
-        if (searchTimer <= 0f)
-        {
-            // 현재 아이템 공개
-            if (revealedUids == null)
-                revealedUids = new System.Collections.Generic.HashSet<int>();
-            revealedUids.Add(searchingItem.item.uid);
-            revealedCount++;
-
-            // UI 전체 갱신 후 다음 아이템으로
-            AdvanceSearch();
-            RefreshLeftGrid(lastSearchedGrid);
-            UpdateSearchStatusText();
-            return;
-        }
-
-        // ── 프로그레스 바·펄스 경량 갱신 (Destroy 없이) ──
-        UpdateSearchAnimation();
-    }
-
-    /// <summary>수색 중 아이템의 펄스/프로그레스 바만 경량 갱신</summary>
-    void UpdateSearchAnimation()
-    {
-        if (containerGridRoot == null || searchingItem == null) return;
-
-        // searchingItem에 해당하는 GO 찾기
-        string targetName = $"CItem_{searchingItem.item.uid}";
-        Transform itemTr = containerGridRoot.Find(targetName);
-        if (itemTr == null) return;
-
-        // 배경 펄스 색상
-        var bg = itemTr.GetComponent<Image>();
-        if (bg != null)
-        {
-            float pulse = 0.5f + 0.15f * Mathf.Sin(Time.unscaledTime * 4f);
-            bg.color = new Color(pulse * 0.4f, pulse * 0.35f, pulse * 0.2f, 0.95f);
-        }
-
-        // 프로그레스 바 채움 갱신
-        Transform barBgTr = itemTr.Find("BarBg");
-        if (barBgTr != null)
-        {
-            Transform barFillTr = barBgTr.Find("BarFill");
-            if (barFillTr != null)
-            {
-                float progress = searchDelay > 0 ? 1f - (searchTimer / searchDelay) : 1f;
-                var fillRT = barFillTr.GetComponent<RectTransform>();
-                if (fillRT != null)
-                    fillRT.anchorMax = new Vector2(Mathf.Clamp01(progress), 1f);
-            }
-        }
-    }
-
-    float GetSearchDelay(ItemRarity rarity)
-    {
-        var gt = GameTuning.Instance;
-        float baseDelay;
-        switch (rarity)
-        {
-            case ItemRarity.Common:    baseDelay = gt != null ? gt.searchSecCommon : 0.4f; break;
-            case ItemRarity.Uncommon:  baseDelay = gt != null ? gt.searchSecUncommon : 0.6f; break;
-            case ItemRarity.Rare:      baseDelay = gt != null ? gt.searchSecRare : 0.9f; break;
-            case ItemRarity.Epic:      baseDelay = gt != null ? gt.searchSecEpic : 1.3f; break;
-            case ItemRarity.Legendary: baseDelay = gt != null ? gt.searchSecLegendary : 1.8f; break;
-            default: baseDelay = 0.5f; break;
-        }
-        float mult = gt != null ? gt.searchSpeedMult : 1f;
-        return (baseDelay + Random.Range(-0.1f, 0.1f)) * mult / TraitManager.Mod("search_speed");   // 회수: 빠른 손 수색 +30%(딜레이↓)
-    }
-
-    void UpdateSearchStatusText()
-    {
-        if (searchStatusText == null) return;
-        if (!leftPanelSearchEnabled || totalSearchItems == 0)
-        {
-            searchStatusText.text = "";
-            return;
-        }
-        if (isSearching)
-            searchStatusText.text = $"수색 중... {revealedCount}/{totalSearchItems}";
-        else if (revealedCount >= totalSearchItems)
-            searchStatusText.text = $"수색 완료 ({totalSearchItems}개)";
-        else
-            searchStatusText.text = "";
-    }
+    // (컨테이너 수색 연출은 2026-09-09 폐기 — 상자를 열면 내용물이 바로 다 보인다)
 
     #endregion
 
@@ -2339,9 +2091,6 @@ public class CharacterPanelUI : MonoBehaviour
             // 1제스처 드래그: 누른 상태로 끌고, 떼면 놓는다.
             UpdateGhostPosition();
             UpdateHighlight();
-
-            if (GameInput.GetKeyDown(KeyCode.R))
-                ToggleDragRotation();
 
             // 우클릭은 드래그 취소(원위치 복귀)
             if (GameInput.GetMouseButtonDown(1))
@@ -2448,10 +2197,6 @@ public class CharacterPanelUI : MonoBehaviour
                 var placed = leftGrid.GetAt(gx, gy);
                 if (placed != null)
                 {
-                    // 수색 모드: 공개된 아이템만 드래그 가능
-                    if (leftPanelSearchEnabled && revealedUids != null
-                        && !revealedUids.Contains(placed.item.uid))
-                        return;
 
                     StartDrag(placed, leftGrid, containerGridRoot);
                     return;
@@ -2491,7 +2236,7 @@ public class CharacterPanelUI : MonoBehaviour
                     var item = placed.item;
                     cg.Remove(placed);
                     if (!StoreItemPreferStash(item))   // 창고 우선 → 인벤 (창고 없으면 인벤)
-                        cg.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);   // 복원
+                        cg.TryPlace(item, placed.gridX, placed.gridY);   // 복원
                     RefreshAllGrids();
                 }
                 return;
@@ -2513,7 +2258,7 @@ public class CharacterPanelUI : MonoBehaviour
                     {
                         pGrid.Remove(placed);
                         if (!containerGrid.TryAutoPlace(item))
-                            pGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+                            pGrid.TryPlace(item, placed.gridX, placed.gridY);
                         RefreshAllGrids();
                         return;
                     }
@@ -2524,7 +2269,7 @@ public class CharacterPanelUI : MonoBehaviour
                     {
                         pGrid.Remove(placed);
                         if (!leftGrid.TryAutoPlace(item))
-                            pGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+                            pGrid.TryPlace(item, placed.gridX, placed.gridY);
                         RefreshAllGrids();
                     }
                 }
@@ -2541,10 +2286,6 @@ public class CharacterPanelUI : MonoBehaviour
                 var placed = leftGrid.GetAt(gx, gy);
                 if (placed != null && playerInventory != null)
                 {
-                    // 수색 모드: 공개된 아이템만
-                    if (leftPanelSearchEnabled && revealedUids != null
-                        && !revealedUids.Contains(placed.item.uid))
-                        return;
 
                     var item = placed.item;
                     // 컨테이너 팝업 열림 → 그 안으로 투입(가방 열고 창고아이템 Ctrl+클릭 = 가방으로)
@@ -2552,7 +2293,7 @@ public class CharacterPanelUI : MonoBehaviour
                     {
                         leftGrid.Remove(placed);
                         if (!containerGrid.TryAutoPlace(item))
-                            leftGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+                            leftGrid.TryPlace(item, placed.gridX, placed.gridY);
                         RefreshAllGrids();
                         return;
                     }
@@ -2561,7 +2302,7 @@ public class CharacterPanelUI : MonoBehaviour
                     // 그 외 → 플레이어(가방→주머니→보안)로 이동. 하드컷(130%) 넘으면 원위치 복원.
                     leftGrid.Remove(placed);
                     if (!playerInventory.TryAutoPlaceAnywhere(item, respectWeightCap: true))
-                        leftGrid.TryPlace(item, placed.gridX, placed.gridY, placed.rotated);
+                        leftGrid.TryPlace(item, placed.gridX, placed.gridY);
                     RefreshAllGrids();
                 }
                 return;
@@ -2576,8 +2317,6 @@ public class CharacterPanelUI : MonoBehaviour
         dragSourceGrid = sourceGrid;
         dragOrigX = placed.gridX;
         dragOrigY = placed.gridY;
-        dragOrigRotated = placed.rotated;
-        dragRotated = placed.rotated;
         dragStartMouse = GameInput.mousePosition;
         // 픽셀 잡기 오프셋 = 커서(격자 로컬) − 아이템 좌상단(격자 로컬). 잡은 지점이 커서에 고정된다.
         grabPixelOffset = Vector2.zero;
@@ -2656,8 +2395,7 @@ public class CharacterPanelUI : MonoBehaviour
     void UpdateGhostSize()
     {
         if (ghostRT == null || dragItem == null || dragItem.data == null) return;
-        int w = dragRotated ? dragItem.data.gridHeight : dragItem.data.gridWidth;
-        int h = dragRotated ? dragItem.data.gridWidth : dragItem.data.gridHeight;
+        const int w = 1, h = 1;   // 슬롯 1칸 고정(2026-09-09 격자 폐기)
         ghostRT.sizeDelta = new Vector2(
             w * CELL_SIZE + (w - 1) * CELL_GAP,
             h * CELL_SIZE + (h - 1) * CELL_GAP);
@@ -2673,22 +2411,7 @@ public class CharacterPanelUI : MonoBehaviour
         ghostRT.anchoredPosition = localPos - grabPixelOffset;
     }
 
-    // ── 회전 ──
-
-    void ToggleDragRotation()
-    {
-        if (dragItem == null || dragItem.data == null) return;
-        if (dragItem.data.gridWidth == dragItem.data.gridHeight) return; // 정사각형 무의미
-        dragRotated = !dragRotated;
-        // 회전 후 새 풋프린트 픽셀 범위로 잡기 오프셋 클램프(아이템 밖으로 안 벗어나게).
-        int cellTotal = CELL_SIZE + CELL_GAP;
-        int nw = dragRotated ? dragItem.data.gridHeight : dragItem.data.gridWidth;
-        int nh = dragRotated ? dragItem.data.gridWidth : dragItem.data.gridHeight;
-        grabPixelOffset.x = Mathf.Clamp(grabPixelOffset.x, 0f, nw * cellTotal);
-        grabPixelOffset.y = Mathf.Clamp(grabPixelOffset.y, -nh * cellTotal, 0f);
-        UpdateGhostSize();
-        UpdateGhostPosition();
-    }
+    // (회전 R키는 2026-09-09 격자 폐기로 제거 — 아이템은 전부 슬롯 1칸이다)
 
     // ── 하이라이트 ──
 
@@ -2747,8 +2470,7 @@ public class CharacterPanelUI : MonoBehaviour
         EnsureHighlight(hoverGridRoot);
         highlightGO.SetActive(true);
 
-        int w = dragRotated ? dragItem.data.gridHeight : dragItem.data.gridWidth;
-        int h = dragRotated ? dragItem.data.gridWidth : dragItem.data.gridHeight;
+        const int w = 1, h = 1;   // 슬롯 1칸 고정(2026-09-09 격자 폐기)
 
         // 카테고리 필터 체크 (가구 창고/컨테이너 팝업에 놓을 때)
         bool categoryOk = true;
@@ -2757,7 +2479,7 @@ public class CharacterPanelUI : MonoBehaviour
         else if (hoverGrid == LeftGrid)
             categoryOk = LeftGridAccepts(dragItem);
 
-        bool canPlace = categoryOk && hoverGrid.CanPlace(dragItem, cellX, cellY, dragRotated);
+        bool canPlace = categoryOk && hoverGrid.CanPlace(dragItem, cellX, cellY);
 
         // 컨테이너 위 호버 = '안에 넣기' 표시(파랑). 빈칸 아닐 때만 검사.
         bool insertable = false;
@@ -2810,7 +2532,7 @@ public class CharacterPanelUI : MonoBehaviour
             var clickedGrid = dragSourceGrid;
             // 원위치 복귀
             if (clickedGrid != null && clickedItem != null
-                && !clickedGrid.TryPlace(clickedItem, dragOrigX, dragOrigY, dragOrigRotated))
+                && !clickedGrid.TryPlace(clickedItem, dragOrigX, dragOrigY))
                 clickedGrid.TryAutoPlace(clickedItem);
             EndDrag();
             SelectItem(clickedItem, clickedGrid);
@@ -2840,7 +2562,7 @@ public class CharacterPanelUI : MonoBehaviour
                 // → 임시로 출발 격자에 되돌려 넣고 동일 경로로 장착(실패 시 그대로 남음).
                 bool restored = false;
                 if (src != null)
-                    restored = src.TryPlace(item, dragOrigX, dragOrigY, dragOrigRotated) || src.TryAutoPlace(item);
+                    restored = src.TryPlace(item, dragOrigX, dragOrigY) || src.TryAutoPlace(item);
                 // 드래그 상태 종료(고스트/하이라이트 제거) 후 장착 처리.
                 EndDrag();
                 if (restored)
@@ -2894,7 +2616,7 @@ public class CharacterPanelUI : MonoBehaviour
                 {
                     var wear = dragItem;
                     var src = dragSourceGrid;
-                    bool restored = src.TryPlace(wear, dragOrigX, dragOrigY, dragOrigRotated) || src.TryAutoPlace(wear);
+                    bool restored = src.TryPlace(wear, dragOrigX, dragOrigY) || src.TryAutoPlace(wear);
                     EndDrag();
                     if (restored) EquipFromGrid(wear, src);
                     else ReturnItemToInventory(wear);
@@ -2984,8 +2706,7 @@ public class CharacterPanelUI : MonoBehaviour
     InventoryGrid.PlacedItem FindOverlapTarget(InventoryGrid grid, int x, int y)
     {
         if (grid == null || dragItem?.data == null) return null;
-        int w = dragRotated ? dragItem.data.gridHeight : dragItem.data.gridWidth;
-        int h = dragRotated ? dragItem.data.gridWidth : dragItem.data.gridHeight;
+        const int w = 1, h = 1;   // 슬롯 1칸 고정(2026-09-09 격자 폐기)
         InventoryGrid.PlacedItem found = null;
         for (int gx = x; gx < x + w; gx++)
             for (int gy = y; gy < y + h; gy++)
@@ -3001,9 +2722,9 @@ public class CharacterPanelUI : MonoBehaviour
     bool TryPlaceInGrid(InventoryGrid grid, int x, int y)
     {
         // 빈 칸이면 직접 배치
-        if (grid.CanPlace(dragItem, x, y, dragRotated))
+        if (grid.CanPlace(dragItem, x, y))
         {
-            grid.TryPlace(dragItem, x, y, dragRotated);
+            grid.TryPlace(dragItem, x, y);
             EndDrag();
             return true;
         }
@@ -3047,26 +2768,25 @@ public class CharacterPanelUI : MonoBehaviour
         // 스왑 시도: A↔B 정확 1:1 교환. A는 B 자리(oldX,oldY)에, B는 A 출발지(dragOrig)에.
         // 둘 다 서로 자리에 정확히 들어갈 때만 교환. 안 맞으면 원위치 복귀(자동 재배치=좌상단 흩뿌리기 금지).
         var oldItem = target.item;
-        bool oldRotated = target.rotated;
         int oldX = target.gridX;
         int oldY = target.gridY;
         var sourceGrid = dragSourceGrid; // dragItem이 빠져나온 격자 (그 칸은 현재 비어있음)
         grid.Remove(target);
 
-        bool aFits = grid.CanPlace(dragItem, oldX, oldY, dragRotated);
+        bool aFits = grid.CanPlace(dragItem, oldX, oldY);
         bool bFits = sourceGrid != null
-                     && sourceGrid.CanPlace(oldItem, dragOrigX, dragOrigY, dragOrigRotated);
+                     && sourceGrid.CanPlace(oldItem, dragOrigX, dragOrigY);
 
         if (aFits && bFits)
         {
-            grid.TryPlace(dragItem, oldX, oldY, dragRotated);
-            sourceGrid.TryPlace(oldItem, dragOrigX, dragOrigY, dragOrigRotated);
+            grid.TryPlace(dragItem, oldX, oldY);
+            sourceGrid.TryPlace(oldItem, dragOrigX, dragOrigY);
             EndDrag();
             return true; // 깔끔한 1:1 스왑
         }
 
         // 교환 불가(크기·회전 불일치 등) → 기존 아이템 원위치. A는 호출부 EnsureDragEnded가 출발지로 되돌림.
-        grid.TryPlace(oldItem, oldX, oldY, oldRotated);
+        grid.TryPlace(oldItem, oldX, oldY);
         return false;
     }
 
@@ -3092,7 +2812,7 @@ public class CharacterPanelUI : MonoBehaviour
         // 원래 위치로 복귀
         if (dragSourceGrid != null && dragItem != null)
         {
-            if (!dragSourceGrid.TryPlace(dragItem, dragOrigX, dragOrigY, dragOrigRotated))
+            if (!dragSourceGrid.TryPlace(dragItem, dragOrigX, dragOrigY))
             {
                 // 원래 자리 점유됨 (이론상 불가능하지만 안전장치)
                 if (!dragSourceGrid.TryAutoPlace(dragItem))
@@ -3209,9 +2929,6 @@ public class CharacterPanelUI : MonoBehaviour
                 var placed = leftGrid.GetAt(gx, gy);
                 if (placed != null && placed.item.data != null)
                 {
-                    if (leftPanelSearchEnabled && revealedUids != null
-                        && !revealedUids.Contains(placed.item.uid))
-                        return;
                     ShowContextMenu(placed, leftGrid);
                     return;
                 }
@@ -3290,7 +3007,7 @@ public class CharacterPanelUI : MonoBehaviour
         float y = -28f;
         bool isPlayerGrid = IsPlayerGrid(grid);
         // 안전 창고(메인 창고/가구 창고) — 수색 중 루팅 상자는 제외
-        bool isSafeStorage = !isPlayerGrid && grid == LeftGrid && !leftPanelSearchEnabled;
+        bool isSafeStorage = !isPlayerGrid && grid == LeftGrid && !leftPanelIsLoot;
 
         // 열기 — 보관함(컨테이너 아이템) → 좌측에 내부 격자
         if (data.IsContainer)
@@ -3918,7 +3635,6 @@ public class CharacterPanelUI : MonoBehaviour
         InventoryGrid.PlacedItem placed = FindPlaced(grid, item);
         int origX = placed != null ? placed.gridX : -1;
         int origY = placed != null ? placed.gridY : -1;
-        bool origRot = placed != null ? placed.rotated : false;
         if (placed != null) grid.Remove(placed);
 
         // 교체로 빠질 기존 장비(스왑 복원용) — 인스턴스로 잡아 부착물 보존.
@@ -3943,7 +3659,7 @@ public class CharacterPanelUI : MonoBehaviour
         if (!ok)
         {
             // 장착 실패 → 격자 원위치 복원(또는 자동 배치)
-            if (placed != null && !grid.TryPlace(item, origX, origY, origRot))
+            if (placed != null && !grid.TryPlace(item, origX, origY))
                 grid.TryAutoPlace(item);
             // 같은 종류라 먼저 비웠는데 실패한 극단적 경우 — 기존 장비도 잃지 않게 회수.
             if (oldItem != null && playerEquipment.GetSlotInstance(apiSlot) == null)
@@ -3961,7 +3677,7 @@ public class CharacterPanelUI : MonoBehaviour
                 // 교체로 빠진 기존 장비 = 새 장비가 있던 **출발 격자**로 되돌림(진짜 스왑 — 창고서 바꾸면 창고로).
                 // 빈 자리(새 장비가 비운 칸) 우선 → 안 되면 같은 격자 자동배치 → 그래도 안 되면 인벤/창고 폴백.
                 bool back = grid != null
-                    && ((origX >= 0 && grid.TryPlace(oldItem, origX, origY, origRot)) || grid.TryAutoPlace(oldItem));
+                    && ((origX >= 0 && grid.TryPlace(oldItem, origX, origY)) || grid.TryAutoPlace(oldItem));
                 if (!back && playerInventory != null) back = playerInventory.TryAutoPlaceAnywhere(oldItem);
                 if (!back)
                 {
@@ -3983,7 +3699,7 @@ public class CharacterPanelUI : MonoBehaviour
                     playerEquipment.SetSlotInstance(apiSlot, oldItem);   // 부착물·잔탄까지 원상복구
 
                     bool putBack = grid != null
-                        && ((origX >= 0 && grid.TryPlace(item, origX, origY, origRot)) || grid.TryAutoPlace(item));
+                        && ((origX >= 0 && grid.TryPlace(item, origX, origY)) || grid.TryAutoPlace(item));
                     if (!putBack) ReturnItemToInventory(item);
                     ToastManager.Show("기존 장비를 둘 곳이 없다 — 교체 취소", ToastManager.ToastType.Warning);
                 }

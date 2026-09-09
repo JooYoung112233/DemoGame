@@ -30,7 +30,7 @@ public class LootContainer : MonoBehaviour
     public bool IsOpen { get; private set; }
     public bool IsLooted { get; private set; }
 
-    /// <summary>수색 연출을 이미 완료했는지 (true면 재오픈 시 즉시 전체 공개)</summary>
+    /// <summary>이미 연 적 있는 상자인지. (수색 연출은 2026-09-09 폐기 — 지금은 방문 기록 용도)</summary>
     public bool HasBeenSearched { get; set; }
 
     [System.Serializable]
@@ -118,10 +118,11 @@ public class LootContainer : MonoBehaviour
     /// 반환 = 그래도 못 들어간 초과분(호출자가 바닥 드랍 등으로 처리).</summary>
     public List<ItemInstance> SetupAutoSize(string name, List<ItemInstance> items, int columns = 4, int minRows = 2, int maxRows = 6)
     {
+        // 아이템 1개 = 슬롯 1칸(2026-09-09 격자 폐기) — 개수가 곧 필요 칸 수다.
         int cells = 0;
         if (items != null)
             foreach (var it in items)
-                if (it != null && it.data != null) cells += it.data.gridWidth * it.data.gridHeight;
+                if (it != null && it.data != null) cells++;
 
         int rows = Mathf.Clamp(Mathf.CeilToInt(cells / (float)columns) + 1, minRows, maxRows);
         Setup(name, columns, rows);
