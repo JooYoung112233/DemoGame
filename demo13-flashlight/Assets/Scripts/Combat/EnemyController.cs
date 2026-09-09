@@ -321,8 +321,8 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        // 소음 청취 — 반경 안이면 소리 지점으로 조사하러 이동(시야 발견과 별개 축).
-        if (NoiseSystem.TryHear(Plan3D.ToPlan(transform.position), out var src))
+        // 유인(던진 물건 착탄) — 반경 안이면 그 지점으로 조사하러 이동. 소음 시스템은 2026-09-09 폐기.
+        if (Distraction.TrySense(Plan3D.ToPlan(transform.position), out var src))
         {
             EnterInvestigate(src);
             return;
@@ -366,8 +366,8 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        // 더 가까운/새 소음이 들리면 지점 갱신 + 총 조사시간 리셋(계속 시끄러우면 계속 따라옴).
-        if (NoiseSystem.TryHear(Plan3D.ToPlan(transform.position), out var src))
+        // 더 가까운/새 유인이 생기면 지점 갱신 + 총 조사시간 리셋(계속 던지면 계속 따라옴).
+        if (Distraction.TrySense(Plan3D.ToPlan(transform.position), out var src))
         {
             investigatePos = src;
             investigateTotal = 0f;

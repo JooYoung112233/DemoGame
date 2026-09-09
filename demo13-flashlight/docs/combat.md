@@ -216,22 +216,23 @@
 
 ---
 
-## 소음 시스템 — 최소 버전 (2026-07-10 확정 · ✅ 구현 완료)
+## 유인 (던진 물건) — 소음 시스템 폐기 후 (2026-09-09)
 
-> 질문: 잠행/유인을 성립시키는 소음 규칙은. **결정: 소음 이벤트 + 적 '조사' 상태 + 플레이어 소음 UI(발밑 링 + HUD 미터).**
+> **소음 시스템은 폐기됐다.** 걷기·달리기·웅크림의 지속 소음, 타격·총성·문 소음, HUD 귀 아이콘 —
+> 전부 삭제(볼륨 축소 결정, [`scope-cut.md`](scope-cut.md)). **적 발견은 시야가 유일한 축이다.**
 
-- **① 소음 발생** — 중앙 허브 `NoiseSystem`(정적): 지속 소음(이동)은 `SetPlayerSustained(pos,radius)`, 순간 펄스(타격·문)는 `ReportPulse(pos,radius,dur)`. 적은 `TryHear(listenerPos, out src)` 한 번으로 질의. 행동별 반경 = GameTuning: `noiseIdle 0 / noiseCrouch 1.5 / noiseWalk 5 / noiseRun 11 / noiseAttack 14(펄스) / noiseDoor 8(펄스)`, 펄스 지속 `noisePulseDuration 0.6`.
-- **② 발생원**: `PlayerNoise`(자가부트 싱글턴)가 매 프레임 `TopDownPlayer` 이동 상태(웅크림/걷기/달리기)로 지속 반경 계산. **타격 소음 = `AttackPerformer` 적중(hit-connect) 시에만** 펄스(스윙/헛방은 무음 — 2026-07-11 변경). 던진 돌 착탄(`ThrowSystem`)·문(`DoorController.Open`)도 펄스.
-- **③ 적 반응** — `EnemyController.State.Investigate` 신설: `UpdatePatrol`에서 `TryHear` → 소음 지점으로 이동 → `noiseInvestigateLook`(2.5s) 두리번 → 순찰 복귀. 도중 시야(`DetectRng`) 발견 시 Chase. 머리 위 '?' 표시(`ShowAlertMark`). **시야 발견과 별개 축.**
-- **④ 플레이어 소음 UI — HUD 귀 아이콘만 (2026-07-11 변경: 월드 원형 VFX 전면 제거)**:
-  - **HUD 귀 아이콘** — `NoiseHUD`(자가부트, 좌하단)에 **귀 모양 아이콘**. 소음 레벨(0~1, `noiseUiMax` 14m 기준)에 따라 색(조용=초록 → 시끄러움=빨강)·밝기·음파 표시. "표기하는 정도만".
-  - ~~발밑 링 · 파문 VFX~~ **제거** — 월드에 원형을 그리지 않음(사용자 요청). 소음 위치·범위는 적 조사 행동('?')으로 간접 확인.
-- **⑤ 특성 연동** — `TraitManager.Mod("move_noise")`가 이동·타격 소음 반경에 곱(고양이걸음 −30% / 무거운발 +25%). **공중에 떠 있던 잠행 특성 개통.**
-- **⑥ 범위** — 1차 **인간 적만**, 현상 몬스터는 2차. 안전가옥(IsSafehouse)은 무음(면제).
-- **테스트**: F1 플레이어 탭 — 현재 소음 레벨/반경 표시 + "큰 소음(타격급)"·"문 소음" 버튼(적 조사 유도).
-- 구현 순서: A+B 통합 10종 중 **5번째**. 다음 = ⑥투척물(이 소음 위에 얹음).
+- **남은 것 = `Distraction`(정적, 47줄)** — 던진 물건이 떨어진 지점만 등록된다. `Report(pos, radius, duration)` / `TrySense(listenerPos, out src)`.
+- **유일한 발생원 = 투척물 착탄**(`ThrowSystem`). 이동·타격·총성·문은 이제 아무 소리도 내지 않는다.
+- **적 반응** — `EnemyController.State.Investigate`는 그대로: `UpdatePatrol`/`UpdateInvestigate`에서 `TrySense` → 지점 이동 → `noiseInvestigateLook`(2.5s) 두리번 → 순찰 복귀. 도중 시야(`DetectRng`) 발견 시 Chase. 머리 위 '?'(`ShowAlertMark`).
+- **수치** — `GameTuning.throwNoiseRadius`(유인 반경 9m) · `noisePulseDuration`(유효 시간 0.6s) · `noiseInvestigateLook`(2.5s). 이름은 SO 직렬화 값 보존을 위해 그대로 뒀다.
+- **테스트**: F1 플레이어 탭 — "발밑에 유인 발생" 버튼.
 
-> 근거: 좀보이드의 심장. 공중에 떠 있던 잠행 특성들(traits.md)이 실제 시스템에 물리게 됨.
+### 삭제된 것
+`Combat/PlayerNoise.cs`(102줄) · `Combat/NoiseSystem.cs`(67) · `UI/NoiseHUD.cs`(귀 아이콘 HUD).
+GameTuning `noiseIdle/Crouch/Walk/Run/Attack/Door/UiMax`, `barricadeNoiseRadius`, `WeaponData.noiseRadius`,
+`ItemData.partNoiseMult`(소염기 소음 배율), `PlayerEquipment.WeaponPartNoiseMult`.
+**잠행 특성 `move_noise`는 물릴 시스템이 사라졌다** — 특성 축소(scope-cut 5번)에서 정리 대상.
+**바리케이드 강제 돌파의 대가도 시간뿐**이 됐다(예전엔 소음으로 적이 몰려왔다).
 
 ---
 
@@ -239,9 +240,10 @@
 
 > 질문: 근접 전투에 원거리 상호작용을 어떻게 최소로 넣나. **결정: 투척물 1차 = 돌 1종 (유인 전용).**
 
-- **동작**: 조준 지점 착탄 → **소음 이벤트 발생** → 반경 내 적이 **조사(Investigate) 이동**. 데미지 0 — **유인 전용**.
-- **✅ 구현(2026-07-11)**: **G키**(기본 돌) 또는 **퀵슬롯 등록→숫자키/클릭**(투척물, 비안전구역·모달 없음) → 조준 모드(**사거리 원 + 커서 착탄 마커**, 사거리 밖=원 경계로 클램프) → **좌클릭** 착탄 / **우클릭·ESC** 취소. 착탄 순간 `PlayerNoise.Pulse(착탄, throwNoiseRadius)` → 반경 내 적 조사 이동. 투척물 1개 소모, 조준 중 좌/우클릭 공격은 차단. 비행은 **거리비례 일정 속도**(`throwSpeed`, 착탄까지 = 거리/속도 0.15~1.0s 클램프 — 눈에 보이는 포물선). 파일: `Combat/ThrowSystem.cs`(셀프부트 싱글턴, `TryEnterAim(itemId)` 공용) · 아이템 `Resources/Items/Misc/Stone`(`ItemData.isThrowable`) · 수치 `GameTuning.throwRange/throwNoiseRadius/throwSpeed`. 퀵슬롯 등록 허용(`QuickSlotBar.IsAssignable`에 투척물 추가). F1 디버그 "돌 5개 지급".
-- **⚠️ 전제 = 소음 시스템 최소 버전 동반 구현**: 소음 이벤트 발생/전파 + 적 '조사' 상태(EnemyController 상태머신 확장) — 상세는 위 **§소음 시스템(2026-07-10 확정)**. **잠행 특성 카테고리([traits.md](traits.md))가 이 소음 시스템을 기다리고 있음** — 투척물 구현 시 함께 개통.
+- **동작**: 조준 지점 착탄 → **유인 등록** → 반경 내 적이 **조사(Investigate) 이동**. 데미지 0 — **유인 전용**.
+- **2026-09-09 이후**: 소음 시스템이 사라져서 이게 **적을 끄는 유일한 수단**이 됐다.
+- **✅ 구현(2026-07-11)**: **G키**(기본 돌) 또는 **퀵슬롯 등록→숫자키/클릭**(투척물, 비안전구역·모달 없음) → 조준 모드(**사거리 원 + 커서 착탄 마커**, 사거리 밖=원 경계로 클램프) → **좌클릭** 착탄 / **우클릭·ESC** 취소. 착탄 순간 `Distraction.Report(착탄, throwNoiseRadius, noisePulseDuration)` → 반경 내 적 조사 이동. 투척물 1개 소모, 조준 중 좌/우클릭 공격은 차단. 비행은 **거리비례 일정 속도**(`throwSpeed`, 착탄까지 = 거리/속도 0.15~1.0s 클램프 — 눈에 보이는 포물선). 파일: `Combat/ThrowSystem.cs`(셀프부트 싱글턴, `TryEnterAim(itemId)` 공용) · 아이템 `Resources/Items/Misc/Stone`(`ItemData.isThrowable`) · 수치 `GameTuning.throwRange/throwNoiseRadius/throwSpeed`. 퀵슬롯 등록 허용(`QuickSlotBar.IsAssignable`에 투척물 추가). F1 디버그 "돌 5개 지급".
+- ~~전제 = 소음 시스템~~ → **`Distraction`로 대체**(2026-09-09). 적 '조사' 상태는 그대로 살아 있다 — 상세는 위 **§유인**.
 - 구현 순서: A+B 통합 10종 중 **6번째** — 소음(5번째) 직후 동반 (①설정 → ②적 시체 루팅 → ③퀵슬롯 → ④무게 → ⑤소음 → ⑥**투척물** → ⑦재고 회전 → ⑧시체 회수 → ⑨도감 → ⑩지도+나침반 — dev-roadmap.md 2026-07-10).
 
 > 근거: 좀보이드식 유인 — 근접 전투 게임에서 잠행 플레이를 성립시키는 유일한 원거리 수단.
@@ -252,6 +254,7 @@
 
 | 날짜 | 내용 |
 |---|---|
+| **2026-09-09** | **소음 시스템 전면 폐기 (볼륨 축소 2/6).** 질문: "타르코프식 하드코어 요소 중 뭘 자를까" / 사용자 결정: **소음 삭제**. `PlayerNoise`(102줄)·`NoiseSystem`(67)·`NoiseHUD` 삭제, 이동·타격·총성·문 소음 전부 제거, GameTuning 소음 필드 8종 + `barricadeNoiseRadius` + `WeaponData.noiseRadius` + `ItemData.partNoiseMult` 제거. **적 발견 = 시야 단일 축.** 단, 투척물은 유지 결정이라 유인 수단이 사라지면 돌이 무의미해져 **`Distraction`(47줄, 착탄 지점만 등록)** 을 남겼다 — 적 `Investigate` 상태는 그대로. 총의 대가는 탄약 유한성만 남음. 잠행 특성 `move_noise`는 물릴 곳이 없어져 특성 축소에서 정리 예정. [→ scope-cut.md](scope-cut.md) |
 | 2026-07-11 | **투척물 후속 조정 2건 (사용자 피드백).** ①**비행 너무 빠름 → 거리비례 일정 속도**: `throwFlightTime`(고정 0.32s) 폐기 → `throwSpeed`(m/s, 기본 10) 신설. 착탄까지 = 거리/속도(0.15~1.0s 클램프) → 가까우면 짧게·멀면 오래 = 일정한 눈에 보이는 포물선. ②**투척물도 퀵슬롯 등록**: `QuickSlotBar.IsAssignable`에 `isThrowable` 추가(드래그·클릭·숫자키 공용) → 퀵슬롯 발동 시 '사용' 대신 `ThrowSystem.TryEnterAim(id)`로 조준 진입(좌클릭 착탄에서 소모). G키·퀵슬롯 공용 `TryEnterAim(itemId)`. | 근거: 던지는 손맛 + 접근성. |
 | 2026-07-11 | **소음 시스템 2건 변경 (사용자 요청).** ①**월드 원형 VFX 전면 제거 → HUD 귀 아이콘만.** 발밑 반투명 링(`PlayerNoise` 링)·펄스 파문(`NoiseRipple`)을 제거하고 `NoiseHUD`를 막대→**귀 모양 아이콘**(레벨 따라 색/밝기/음파)으로 교체. "표기하는 정도만". ②**공격 스윙 소음 제거 → 타격 성공 시에만.** `TopDownPlayer` 약공/강공 시작의 `PlayerNoise.AttackNoise()` 제거 → `AttackPerformer.ScanWindow` 적중(landed) 시 `PlayerNoise.Pulse(impact, noiseAttack)` 발생. AttackPerformer가 플레이어·적 공용이라 "때리거나(플레이어 적중)·맞거나(플레이어 피격)" 모두 impact 소음. 헛방·스윙은 무음. 이동·문·돌 착탄 소음은 유지. | 근거: 시각 노이즈 감소 + 소음이 실제 타격에서만 나도록(스텔스 정합). |
 | 2026-07-11 | **⑥ 투척물 구현 완료 (돌 유인) — 갭 분석 통합 순서 6번째.** 질문(UI): 조준·발동을 어떻게 표현하나. **결정: 조준 = 사거리 원 + 커서 착탄 마커(사거리 밖 클램프) / 발동 = 전용 키 G.** 구현: `Combat/ThrowSystem.cs`(셀프부트 싱글턴 — PlayerNoise 패턴, executionOrder 100으로 TopDownPlayer 뒤에서 실행해 throw 프레임 공격 중복 차단) — G(돌 보유·비안전구역·비모달)→조준→좌클릭 착탄→`PlayerNoise.Pulse`로 착탄 소음→적 조사. 우클릭/ESC 취소, 돌 1개 소모, 데미지 0. 신규 아이템 `Resources/Items/Misc/Stone.asset`(`ItemData.isThrowable` 필드 신설, category=Misc, maxStack 10). 수치 `GameTuning`(throwRange 8 / throwNoiseRadius 9 / throwFlightTime 0.32). 조준 중 좌·우클릭 공격 차단(TopDownPlayer.HandleCombatInput 가드). F1 디버그에 "돌 5개 지급". 소음 시스템(⑤)이 이미 적 조사 상태를 처리하므로 유인은 착탄 펄스만으로 성립. | 근거: 좀보이드식 유인 — 잠행 플레이 성립. combat.md §투척물 ✅. |
@@ -448,12 +451,13 @@
 | 파츠 | 필드 | 총기에서의 뜻 |
 |---|---|---|
 | 조준경 Scope | `partRangeBonus` | 유효사거리 +m, 조준 시 시야콘 보정 |
-| 소염기 Muzzle | `partRecoilMult` + 소음 | 반동↓ **그리고 총성 반경↓** — 이 게임에서 가장 값비싼 파츠가 된다 |
+| 소염기 Muzzle | `partRecoilMult` | 반동↓ (~~총성 반경↓~~ — 소음 시스템 폐기 2026-09-09로 소멸) |
 | 탄창 Magazine | `magCapacity` | 장탄수 = 탄창 용량 |
 | 손잡이 Grip | `partRecoilMult` | 반동↓ |
 
-### 소음 — 총기의 핵심 대가
-총성은 이 게임에서 **가장 시끄러운 행동**이다(`PlayerNoise.Pulse`). 칼은 조용하고 총은 사람을 부른다 — "쏠 것인가"가 매 교전의 판단이 되어야 한다. 소염기가 그 판단을 돈으로 살 수 있게 해 준다.
+### ~~소음 — 총기의 핵심 대가~~ (2026-09-09 폐기)
+총성이 사람을 부르던 구조는 소음 시스템과 함께 사라졌다. **지금 총의 대가는 탄약 유한성뿐**이다.
+"쏠 것인가"의 긴장이 필요해지면 다시 설계할 것 — 되살릴 땐 `Distraction.Report`에 총구 위치를 얹으면 된다.
 
 > 미정(후속): 적 AI의 총기 사용, 탄종별 관통/데미지 배율, 약실 1발(chamber) 구분, 연사 중 탄퍼짐 누적 곡선 세부.
 
@@ -469,9 +473,8 @@
 | `Ammo9x19` | `ammo_9x19` | 탄약 9x19 · 최대 스택 60 · 0.012kg/발 · 판매 9 / 구매 22 |
 
 **밸런스 근거** — 적 40HP(밴딧)·110HP(탱커), 플레이어 약공 8·강공 20 기준.
-권총 14 = 밴딧 **3발**, 탱커 8발. 근접보다 확실히 세지만, 대가가 둘이다:
-① **총성 34m** — 블록 하나가 다 듣는다(칼 적중 소음 14m의 2.4배)
-② **탄약이 유한** — 낱알 탄약은 쓸모없고 탄창에 채워야 화력이 된다
+권총 14 = 밴딧 **3발**, 탱커 8발. 근접보다 확실히 세다. 대가는 **탄약 유한성 하나**뿐 —
+낱알 탄약은 쓸모없고 탄창에 채워야 화력이 된다. (~~총성 34m~~는 소음 폐기 2026-09-09로 무효)
 그로기 14 → 3~4발이면 밴딧(maxGroggy 45)이 무너진다. [→ balance.md](balance.md)
 
 **탄창 채우기 (`GunAmmo`)** — 인벤 우클릭 ▸ **탄약 채우기 / 탄약 비우기**.

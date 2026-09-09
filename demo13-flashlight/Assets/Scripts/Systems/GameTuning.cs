@@ -109,10 +109,6 @@ public class GameTuning : ScriptableObject
     [Range(0.5f, 15f)] public float barricadeClearSeconds = 3.5f;
     [Tooltip("열쇠 없이 **강제 돌파**할 때 걸리는 시간(초). 열쇠 경로보다 확실히 비싸야 한다.")]
     [Range(1f, 30f)] public float barricadeBreachSeconds = 7f;
-    [Tooltip("잔해를 치웠을 때 나는 소음 반경(m). 이 안의 적이 소리를 듣고 몰려온다.\n" +
-             "'빠른 길이지만 시끄럽다'의 대가 — 0이면 무소음(지름길이 공짜가 된다).")]
-    [Range(0f, 40f)] public float barricadeNoiseRadius = 14f;
-
     [Tooltip("적 스폰 마릿수 전역 배율. 1=동일. EnemySpawner가 각 SpawnZone.enemyCount에 곱함(반올림).")]
     [Range(0f, 3f)] public float enemySpawnCountMult = 1f;
     [Tooltip("적 처치 시 전리품(지상 티어 루트) 드랍 확률. 1=항상 굴림(루트 자체 확률은 별도), 0=안 떨굼. EnemyController가 읽음.")]
@@ -137,35 +133,19 @@ public class GameTuning : ScriptableObject
     [Tooltip("심각 구간 스태미너 회복 배율. 0.5=회복 절반.")]
     [Range(0f, 1f)] public float overweightRegenMult = 0.5f;
 
-    // ── 소음 (행동별 발생 반경 m — docs/combat.md 2026-07-10) ────────────
-    [Header("소음 (행동별 반경, m)")]
-    [Tooltip("가만히 있을 때 소음 반경(보통 0).")]
-    [Range(0f, 20f)] public float noiseIdle = 0f;
-    [Tooltip("웅크려 이동 소음 반경(최소).")]
-    [Range(0f, 20f)] public float noiseCrouch = 1.5f;
-    [Tooltip("걷기 소음 반경(소).")]
-    [Range(0f, 30f)] public float noiseWalk = 5f;
-    [Tooltip("달리기 소음 반경(중).")]
-    [Range(0f, 40f)] public float noiseRun = 11f;
-    [Tooltip("전투·타격 소음 반경(대, 순간 펄스).")]
-    [Range(0f, 40f)] public float noiseAttack = 14f;
-    [Tooltip("문·셔터 소음 반경(중, 순간 펄스).")]
-    [Range(0f, 30f)] public float noiseDoor = 8f;
-    [Tooltip("순간 펄스(타격·문) 지속 시간(초) — 이 동안 적이 들을 수 있음.")]
-    [Range(0.1f, 3f)] public float noisePulseDuration = 0.6f;
-    [Tooltip("UI 정규화 기준 최대 반경(m) — 발밑 링/HUD 미터가 이 값 대비 비율로 표시.")]
-    [Range(5f, 40f)] public float noiseUiMax = 14f;
-    [Tooltip("적이 소음 지점 도착 후 두리번거리는 시간(초). 이후 순찰 복귀.")]
-    [Range(0.5f, 6f)] public float noiseInvestigateLook = 2.5f;
-
     // ── 투척물 (돌 — 유인 전용) ───────────────────────────────────────
+    // 소음 시스템은 2026-09-09 폐기(docs/scope-cut.md). 아래 둘은 **투척물 유인** 전용으로만 남았다.
     [Header("투척물 (돌 유인)")]
     [Tooltip("돌 최대 투척 사거리(m). 조준 원 반경 = 이 값. 커서가 밖이면 경계로 클램프.")]
     [Range(3f, 20f)] public float throwRange = 8f;
-    [Tooltip("착탄 시 발생하는 소음 펄스 반경(m). 이 안의 적이 조사하러 이동. 유인 강도.")]
+    [Tooltip("착탄 유인 반경(m). 이 안의 적이 조사하러 이동. 유인 강도.")]
     [Range(3f, 30f)] public float throwNoiseRadius = 9f;
-    [Tooltip("돌 비행 속도(m/s). 착탄까지 시간 = 거리/속도(0.15~1.0s 클램프). 낮을수록 느리게 = 눈에 보이는 포물선. 착탄 순간 소음.")]
+    [Tooltip("돌 비행 속도(m/s). 착탄까지 시간 = 거리/속도(0.15~1.0s 클램프). 낮을수록 느리게 = 눈에 보이는 포물선.")]
     [Range(4f, 30f)] public float throwSpeed = 10f;
+    [Tooltip("착탄 유인이 유효한 시간(초) — 이 동안 반경 안의 적이 반응한다.")]
+    [Range(0.1f, 3f)] public float noisePulseDuration = 0.6f;
+    [Tooltip("적이 유인 지점 도착 후 두리번거리는 시간(초). 이후 순찰 복귀.")]
+    [Range(0.5f, 6f)] public float noiseInvestigateLook = 2.5f;
 
     // ── 시야 (FOV 시야콘, 좀보이드식) ─────────────────────────────────
     [Header("시야 (FOV 시야콘)")]

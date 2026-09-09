@@ -241,8 +241,6 @@ public class ItemData : ScriptableObject
     public float partRangeBonus = 0f;
     [Tooltip("부착 시 반동/탄퍼짐 배율(곱연산, <1=감소). 소염기/손잡이.")]
     public float partRecoilMult = 1f;
-    [Tooltip("부착 시 총성 반경 배율(곱연산, <1=조용해짐). 소염기 전용 — 이 게임에서 가장 값비싼 효과.")]
-    public float partNoiseMult = 1f;
 
     // 2026-07-29: 구 `partMagBonus`(장탄수 '가산') → `magCapacity`(탄창 자체의 '용량').
     //   탄창을 아이템으로 만들기로 하면서(타르코프식) 탄창이 곧 장탄수의 주인이 됐다.

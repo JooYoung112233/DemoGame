@@ -135,10 +135,6 @@ public class PlayerGun : MonoBehaviour
         ShowFlash(muzzle, shotDir);
         Visual?.Kick();                 // 손에 든 총이 반동으로 튄다
 
-        // ★ 총성 — 이 게임에서 가장 시끄러운 행동. 소염기가 이 반경을 줄인다.
-        float noise = g.noiseRadius * (_equip != null ? _equip.WeaponPartNoiseMult : 1f);
-        PlayerNoise.Pulse(muzzle, noise);
-
         if (CameraFollow.Instance != null) CameraFollow.Instance.Shake(0.09f, 0.09f);
         return true;
     }

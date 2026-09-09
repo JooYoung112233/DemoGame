@@ -221,24 +221,19 @@ public class DebugTestUI : MonoBehaviour
 
         GUILayout.Space(8);
 
-        // ── 소음 테스트 ──
+        // ── 유인 테스트 ──
         GUILayout.Space(8);
-        GUILayout.Label("── 소음 ──", headerStyle);
-        var pn = PlayerNoise.Instance;
-        if (pn != null)
+        GUILayout.Label("── 유인 (던진 물건) ──", headerStyle);
+        GUILayout.Label("소음 시스템은 폐기(2026-09-09). 적을 끄는 건 투척물 착탄뿐이다.", labelStyle);
+        if (GUILayout.Button("발밑에 유인 발생", btnStyle))
         {
-            GUILayout.Label($"현재 소음 레벨: {pn.Level01 * 100f:F0}%  |  지속 반경: {NoiseSystem.PlayerSustainedRadius:F1} m", labelStyle);
-            GUILayout.Label("(웅크림<걷기<달리기, 타격/문=순간 펄스 — 반경 안 적이 조사하러 옴)", labelStyle);
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("큰 소음(타격급) 발생", btnStyle)) PlayerNoise.AttackNoise();
-            if (GUILayout.Button("문 소음 발생", btnStyle))
-            {
-                var pp = TopDownPlayer.Instance;
-                if (pp != null) PlayerNoise.DoorNoise(pp.transform.position);
-            }
-            GUILayout.EndHorizontal();
+            var pp = TopDownPlayer.Instance;
+            var gt = GameTuning.Instance;
+            if (pp != null)
+                Distraction.Report(Plan3D.ToPlan(pp.transform.position),
+                                   gt != null ? gt.throwNoiseRadius : 9f,
+                                   gt != null ? gt.noisePulseDuration : 0.6f);
         }
-        else GUILayout.Label("PlayerNoise 없음", labelStyle);
 
         // ── 투척물 테스트 (돌 지급) ──
         GUILayout.Space(8);

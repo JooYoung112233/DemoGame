@@ -26,7 +26,7 @@
 | # | 항목 | 결정 | 상태 |
 |:-:|---|---|:-:|
 | 1 | **부위별 의료** (5부위 × 출혈·골절·통증) | **삭제** → 단일 HP + 회복 아이템 | ✅ |
-| 2 | **소음 시스템** (`PlayerNoise`/`NoiseSystem`) | **삭제** → 적 감지는 시야 기반만 | ⬜ |
+| 2 | **소음 시스템** (`PlayerNoise`/`NoiseSystem`) | **삭제** → 적 감지는 시야 기반만 | ✅ |
 | 3 | **격자(테트리스) 인벤토리** | **폐기** → 슬롯형. **무게는 유지** | ⬜ |
 | 4 | **파견(Dispatch) + 아르바이트 보드** | **삭제** | ⬜ |
 | 5 | **특성(퍽) 41종** | **축소** (핵심만 남김) | ⬜ |
@@ -52,6 +52,18 @@
 - 전환: 의료 아이템 13종 → `HealHP` 15~50. `BodyPartType` enum은 `Combat/BodyZones.cs`로 이관
 - 상세: [`medical.md`](medical.md)
 
+### 2. 소음 시스템 삭제 ✅ (2026-09-09)
+- 삭제: `Combat/PlayerNoise.cs`(102줄) · `Combat/NoiseSystem.cs`(67) · `UI/NoiseHUD.cs`(귀 아이콘 HUD)
+- 정리: 이동/타격/총성/문 소음 호출부 전부(`AttackPerformer`·`PlayerGun`·`DoorController`·`BlockedPassage`),
+  GameTuning 소음 필드 8종 + `barricadeNoiseRadius`, `WeaponData.noiseRadius`,
+  `ItemData.partNoiseMult`, `PlayerEquipment.WeaponPartNoiseMult`, F1 소음 패널
+- **판단이 필요했던 지점**: 투척물(돌 유인)은 **유지** 결정인데 소음이 사라지면 돌이 아무 일도 못 한다.
+  그래서 **`Distraction.cs`(47줄)** 를 남겼다 — 던진 물건 착탄 지점만 등록하는 최소 API.
+  적 `Investigate` 상태는 그대로 살아 있고, 발생원이 투척물 하나로 줄었을 뿐이다.
+- **딸려 사라진 것**: 총의 "총성이 사람을 부른다" 대가(→ 탄약 유한성만 남음),
+  바리케이드 돌파의 소음 대가(→ 시간만), 잠행 특성 `move_noise`(물릴 시스템 없음 → 5번에서 정리)
+- 상세: [`combat.md`](combat.md) §유인
+
 ---
 
 ## 변경 로그
@@ -59,3 +71,4 @@
 | 날짜 | 내용 |
 |---|---|
 | 2026-09-09 | 볼륨 축소 착수. 6개 항목 확정(위 표), 비대상 항목 명시. 1번(부위별 의료) 완료. |
+| 2026-09-09 | 2번(소음) 완료. 투척물 유지 결정과 충돌해 `Distraction` 최소 API만 남김. |

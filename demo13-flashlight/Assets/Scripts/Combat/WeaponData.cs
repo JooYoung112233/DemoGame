@@ -68,9 +68,6 @@ public class WeaponData : ScriptableObject
     [Tooltip("장전(탄창 교체)에 걸리는 시간(초).")]
     public float reloadSeconds = 2.2f;
 
-    [Tooltip("총성이 들리는 반경(m). **이 게임에서 가장 시끄러운 행동**이다. 소염기가 줄여 준다.")]
-    public float noiseRadius = 38f;
-
     [Tooltip("조준 중 이동속도 배율.")]
     [Range(0.2f, 1f)] public float adsMoveMult = 0.55f;
 }

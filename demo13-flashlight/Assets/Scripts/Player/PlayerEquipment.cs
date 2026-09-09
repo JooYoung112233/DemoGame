@@ -54,9 +54,9 @@ public class PlayerEquipment : MonoBehaviour
     // ── 무기 부착물 집계 보정 (장착 주무기 기준) ──────────────────────
     public float WeaponPartMoveMult    => PartMult(EquipSlot.PrimaryWeapon, p => p.partMoveSpeedMult);
     public float WeaponPartStaminaMult => PartMult(EquipSlot.PrimaryWeapon, p => p.partStaminaMult);
-    // 총기용(2026-07-29). 손잡이·소염기 = 반동↓, 소염기 = 총성 반경↓, 조준경 = 유효사거리+.
+    // 총기용(2026-07-29). 손잡이·소염기 = 반동↓, 조준경 = 유효사거리+.
+    // (소염기의 '총성 반경↓'는 소음 시스템 폐기 2026-09-09로 사라졌다.)
     public float WeaponPartRecoilMult  => PartMult(EquipSlot.PrimaryWeapon, p => p.partRecoilMult);
-    public float WeaponPartNoiseMult   => PartMult(EquipSlot.PrimaryWeapon, p => p.partNoiseMult);
 
     /// <summary>부착물 사거리 가산 합(곱이 아니라 합이다 — 조준경은 더해 준다).</summary>
     public float WeaponPartRangeBonus

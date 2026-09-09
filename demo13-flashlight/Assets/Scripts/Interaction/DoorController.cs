@@ -210,7 +210,6 @@ public class DoorController : MonoBehaviour
     {
         state = DoorState.Open;
         ShowMessage(openMessage);
-        PlayerNoise.DoorNoise(transform.position);   // 문 여는 소음(문 위치)
 
         // 콜라이더 비활성화 (통과 가능)
         if (doorCollider != null)

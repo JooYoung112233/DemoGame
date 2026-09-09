@@ -39,10 +39,9 @@ public class BlockedPassage : MonoBehaviour
     [Tooltip("아직 모를 때 주는 힌트 한 줄 (어디서 알아낼 수 있는지).")]
     [SerializeField] string codeHint = "번호를 모른다. 어딘가에 적어 뒀을 텐데.";
 
-    [Header("시간·소음 (0 = GameTuning 기본값)")]
+    [Header("시간 (0 = GameTuning 기본값)")]
     [SerializeField] float clearSeconds;
     [SerializeField] float breachSeconds;
-    [SerializeField] float noiseRadius;
 
     [Header("참조 (비우면 자동)")]
     [Tooltip("통행을 막는 솔리드 콜라이더. 열리면 비활성화된다.")]
@@ -60,8 +59,6 @@ public class BlockedPassage : MonoBehaviour
                       : (GameTuning.Instance != null ? GameTuning.Instance.barricadeClearSeconds : 3.5f);
     float BreachSecs => breachSeconds > 0f ? breachSeconds
                       : (GameTuning.Instance != null ? GameTuning.Instance.barricadeBreachSeconds : 7f);
-    float NoiseRad   => noiseRadius   > 0f ? noiseRadius
-                      : (GameTuning.Instance != null ? GameTuning.Instance.barricadeNoiseRadius : 14f);
 
     void Awake()
     {
@@ -148,11 +145,8 @@ public class BlockedPassage : MonoBehaviour
         var mgr = UseActionManager.Instance;
         if (mgr == null) { Open($"{label} — 치웠다."); return; }   // 채널 시스템이 없으면 즉시 처리(폴백)
         if (mgr.IsBusy) return;
-        mgr.Begin(text, seconds, () =>
-        {
-            Open($"{label} — 치웠다.");
-            PlayerNoise.Pulse(Plan3D.ToPlan(transform.position), NoiseRad);   // ★ 대가: 주변 적이 몰려온다
-        });
+        // 예전엔 치우는 소음으로 주변 적이 몰려왔으나, 소음 시스템 폐기(2026-09-09)로 대가는 시간뿐이다.
+        mgr.Begin(text, seconds, () => Open($"{label} — 치웠다."));
     }
 
     void Open(string msg)

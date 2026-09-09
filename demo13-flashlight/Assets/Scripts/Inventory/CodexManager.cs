@@ -8,7 +8,7 @@ using UnityEngine;
 /// 훅: `PlayerInventory`가 자기 3격자(가방/주머니/보안)의 `InventoryGrid.OnItemPlaced`를
 ///     구독해 `Discover(itemId)` 호출 → 줍기·루팅 드래그·자동배치·구매·제작 등 모든 획득 경로를 한 지점에서 포착.
 ///
-/// 자가부트 싱글턴(QuickSlotBar/PlayerNoise 패턴) + DontDestroyOnLoad.
+/// 자가부트 싱글턴(QuickSlotBar 패턴) + DontDestroyOnLoad.
 /// </summary>
 public class CodexManager : MonoBehaviour
 {
@@ -27,7 +27,7 @@ public class CodexManager : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Bootstrap()
     {
-        if (MapToolScene.IsActive) return;   // 맵툴 씬에선 비활성(QuickSlotBar/PlayerNoise와 동일 가드)
+        if (MapToolScene.IsActive) return;   // 맵툴 씬에선 비활성(QuickSlotBar와 동일 가드)
         if (Instance != null) return;
         if (FindFirstObjectByType<CodexManager>(FindObjectsInactive.Include) != null) return;
         var go = new GameObject("[CodexManager]");

@@ -3,9 +3,10 @@ using UnityEngine;
 /// <summary>
 /// 투척물 시스템 (1차 = 돌, 유인 전용). (docs/combat.md 투척물 2026-07-10)
 ///   • G키(돌 보유·안전구역 아님·모달 UI 없음) → 조준 모드: 사거리 원 + 커서 착탄 마커(사거리 밖=경계로 클램프).
-///   • 좌클릭 → 착탄 지점으로 돌 투척(짧은 비행) → 착탄 시 PlayerNoise.Pulse(소음) → 반경 내 적 조사 이동. 데미지 0.
+///   • 좌클릭 → 착탄 지점으로 돌 투척(짧은 비행) → 착탄 시 `Distraction.Report` → 반경 내 적 조사 이동. 데미지 0.
 ///   • 우클릭/ESC → 취소. 던지면 돌 1개 소모.
-/// 자가 부트스트랩(PlayerNoise 패턴, DontDestroyOnLoad). 조준값은 GameTuning + traits.
+/// 소음 시스템 폐기(2026-09-09) 후 **적을 유인하는 유일한 수단**이다.
+/// 자가 부트스트랩(DontDestroyOnLoad). 조준값은 GameTuning + traits.
 /// </summary>
 public class ThrowSystem : MonoBehaviour
 {
@@ -124,15 +125,15 @@ public class ThrowSystem : MonoBehaviour
 
         var gt = GameTuning.Instance;
         float speed  = gt != null ? gt.throwSpeed       : 10f;
-        float noiseR = gt != null ? gt.throwNoiseRadius : 9f;
+        float lureR  = gt != null ? gt.throwNoiseRadius : 9f;   // 착탄 유인 반경
         // 비행 시간 = 거리/속도(0.15~1.0s 클램프) → 거리와 무관하게 일정 속도(멀수록 오래 = 눈에 보이는 포물선).
         Vector2 origin = Plan3D.ToPlan(player.transform.position);
         float flight = Mathf.Clamp(Vector2.Distance(origin, land) / Mathf.Max(1f, speed), 0.15f, 1.0f);
-        SpawnStone(origin, land, flight, noiseR);
+        SpawnStone(origin, land, flight, lureR);
         CancelAim();
     }
 
-    static void SpawnStone(Vector2 from, Vector2 to, float flight, float noiseRadius)
+    static void SpawnStone(Vector2 from, Vector2 to, float flight, float lureRadius)
     {
         // ⚠️ `transform.position = from`(Vector2)은 3D에서 **z 대신 y로 들어간다** —
         //    돌이 지면이 아니라 공중/지하로 날아간다. 평면→월드 변환은 Plan3D를 거친다.
@@ -140,7 +141,7 @@ public class ThrowSystem : MonoBehaviour
         go.transform.position = Plan3D.ToWorld(from, ThrownStone.CarryY);
         GreyboxMesh.Box(go.transform, "Visual", Vector3.zero,
                         Vector3.one * 0.16f, new Color(0.72f, 0.68f, 0.60f, 1f), castShadow: false);
-        go.AddComponent<ThrownStone>().Init(from, to, flight, noiseRadius);
+        go.AddComponent<ThrownStone>().Init(from, to, flight, lureRadius);
     }
 
     // ── 조준 비주얼 (사거리 원 + 착탄 마커) ───────────────────────────
@@ -246,11 +247,11 @@ public class ThrownStone : MonoBehaviour
     const float ArcHeight = 1.2f;
 
     Vector2 _from, _to;
-    float _dur, _t, _noiseRadius;
+    float _dur, _t, _lureRadius;
 
-    public void Init(Vector2 from, Vector2 to, float dur, float noiseRadius)
+    public void Init(Vector2 from, Vector2 to, float dur, float lureRadius)
     {
-        _from = from; _to = to; _dur = Mathf.Max(0.05f, dur); _noiseRadius = noiseRadius;
+        _from = from; _to = to; _dur = Mathf.Max(0.05f, dur); _lureRadius = lureRadius;
     }
 
     void Update()
@@ -259,7 +260,9 @@ public class ThrownStone : MonoBehaviour
         if (_t >= 1f)
         {
             transform.position = Plan3D.ToWorld(_to);
-            PlayerNoise.Pulse(_to, _noiseRadius);   // 착탄 소음 → 반경 내 적 조사
+            // 착탄 → 반경 내 적이 조사하러 온다.
+            var gt = GameTuning.Instance;
+            Distraction.Report(_to, _lureRadius, gt != null ? gt.noisePulseDuration : 0.6f);
             Destroy(gameObject);
             return;
         }
