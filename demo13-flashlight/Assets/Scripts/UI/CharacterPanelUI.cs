@@ -238,8 +238,8 @@ public class CharacterPanelUI : MonoBehaviour
         UpdateInventoryTab();
         UpdateCharacterPanel();
 
-        if (LeftGrid != null)
-            UpdateContainerGrid();
+        // (구 UpdateContainerGrid 호출 제거 — 그 함수의 본문은 수색 연출 갱신뿐이었고,
+        //  2026-09-09 "상자는 열면 바로 다 보인다"로 연출을 폐기하며 할 일이 없어졌다.)
 
         HandleDragAndDrop();
     }

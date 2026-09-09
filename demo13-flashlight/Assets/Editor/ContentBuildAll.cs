@@ -25,9 +25,12 @@ public static class ContentBuildAll
         Quiet = true;
         try
         {
+            // ⚠️ **3D 빌더를 부른다.** 2D판(`SafehouseGreyboxLayout`/`HideoutGreyboxLayout`)은
+            //    같은 `Assets/Scenes/Safehouse.unity`·`Hideout.unity`에 쓴다 — 3D 씬을 정식
+            //    이름으로 올린 뒤에도 이 메뉴가 2D를 부르면 **마을이 통째로 덮여 사라진다.**
             SafehouseNpcBuilder.Build();        // 1) NPC 데이터 먼저
-            SafehouseGreyboxLayout.Build();     // 2) 안전가옥 (NPC 자동연결)
-            HideoutGreyboxLayout.Build();       // 3) 컨테이너 실내
+            Safehouse3DLayout.Build();          // 2) 안전가옥 (NPC 자동연결)
+            Hideout3DLayout.Build();            // 3) 컨테이너 실내
             // ※ 지역(레이드맵)은 분리 — 'Build ScrapMarket Greybox Layout' 등 각 지역 빌더로 따로 빌드.
         }
         catch (System.Exception e)

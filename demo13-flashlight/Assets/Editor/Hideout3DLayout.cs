@@ -19,7 +19,7 @@ using Dock = HideoutFacilityAnchor.Dock;
 /// </summary>
 public static class Hideout3DLayout
 {
-    const string ScenePath = "Assets/Scenes/Hideout3D.unity";
+    const string ScenePath = "Assets/Scenes/Hideout.unity";   // 3D 은신처가 곧 정식 Hideout이다(2026-09-09)
 
     // 방 규격 — 2D판(MapW 14, MapH 9)과 동일
     const float RoomW = 14f, RoomD = 9f;
@@ -94,7 +94,7 @@ public static class Hideout3DLayout
             var so = new SerializedObject(hc);
             var sc = so.FindProperty("safehouseScene");
             var sp = so.FindProperty("safehouseSpawn");
-            if (sc != null) sc.stringValue = "Safehouse3D";   // 3D 마을로 복귀
+            if (sc != null) sc.stringValue = "Safehouse";   // 3D 마을이 정식 Safehouse다
             if (sp != null) sp.stringValue = "from_hideout";
             so.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -116,7 +116,14 @@ public static class Hideout3DLayout
         var spawn = new GameObject("default");
         spawn.transform.SetParent(map.transform, false);
         spawn.transform.position = new Vector3(3f, 0f, 4.5f);
-        spawn.AddComponent<SpawnPoint>();
+        var spc = spawn.AddComponent<SpawnPoint>();
+        // 이름과 pointId를 함께 맞춘다 — 여긴 하나뿐이라 기본값과 우연히 같지만,
+        // 이름만 믿는 습관이 마을에서 스폰 전부를 "default"로 만들었다.
+        {
+            var spSo = new SerializedObject(spc);
+            spSo.FindProperty("pointId").stringValue = "default";
+            spSo.ApplyModifiedPropertiesWithoutUndo();
+        }
         n++;
 
         // ── 조명 ── 컨테이너 내부: 약한 천창 + 매달린 전구 한 개

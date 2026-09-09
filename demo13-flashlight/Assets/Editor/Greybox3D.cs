@@ -250,7 +250,14 @@ public static class Greybox3D
                 var go = new GameObject(name);
                 go.transform.SetParent(p.transform, false);
                 go.transform.localPosition = new Vector3(S(x), 0f, S(y));
-                go.AddComponent<SpawnPoint>();
+                var sp = go.AddComponent<SpawnPoint>();
+
+                // ⚠️ **`pointId`를 채운다.** 오브젝트 이름만 바꾸면 필드는 기본값 "default"로 남아
+                //    맵의 스폰이 전부 "default"를 자칭한다 — 어느 출입구로 들어와도 가장 먼저
+                //    만들어진 스폰으로 떨어진다(마을에서 실제로 그랬다).
+                var so = new SerializedObject(sp);
+                so.FindProperty("pointId").stringValue = name;
+                so.ApplyModifiedPropertiesWithoutUndo();
                 return 1;
             }
 

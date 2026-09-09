@@ -842,7 +842,8 @@ public class MapSelectUI : MonoBehaviour
 
         if (GameInput.GetKeyDown(KeyCode.Escape))
         {
-            else if (BoardOpen) CloseBoard();
+            // 2026-09-09 볼륨 축소로 앞 분기(파견)가 빠지면서 `else if`만 남아 컴파일이 깨졌다.
+            if (BoardOpen) CloseBoard();
             else Hide();
         }
 

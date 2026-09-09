@@ -22,7 +22,7 @@ using UnityEngine;
 /// </summary>
 public static class Safehouse3DLayout
 {
-    const string ScenePath = "Assets/Scenes/Safehouse3D.unity";
+    const string ScenePath = "Assets/Scenes/Safehouse.unity";   // 3D 마을이 곧 정식 Safehouse다(2026-09-09)
 
     const float MapW = 80f, MapD = 56f;
     const float PerimeterH = 4.0f;   // 외곽 방벽
@@ -77,7 +77,7 @@ public static class Safehouse3DLayout
 
         // ── 집/은신처 = 솔리드 컨테이너. 발자국을 실내(14×9)와 일치시킨다 ──
         n += Slab(map, "Container_Home", 64f, 12f, 14f, 9f, ContH, _cont);
-        n += Doorway(map, "Hideout_Entrance", 56.4f, 12f, "Hideout3D", "default");   // 컨테이너 서쪽 문 → 은신처
+        n += Doorway(map, "Hideout_Entrance", 56.4f, 12f, "Hideout", "default");   // 컨테이너 서쪽 문 → 은신처
         n += Spawn(map, "default",      53.5f, 12f);
         n += Spawn(map, "from_hideout", 54.2f, 12f);
         n += Slab(map, "Container_D1", 52f, 20f, 6f, 2.4f, 2.6f, _cont);
@@ -356,7 +356,14 @@ public static class Safehouse3DLayout
         var go = new GameObject(id);
         go.transform.SetParent(p.transform, false);
         go.transform.position = new Vector3(x, 0f, z);
-        go.AddComponent<SpawnPoint>();
+        var sp = go.AddComponent<SpawnPoint>();
+
+        // ⚠️ **`pointId`를 반드시 채운다.** 오브젝트 이름만 바꾸면 필드는 기본값 "default"로 남아
+        //    이 씬의 스폰이 **전부 "default"를 자칭**하게 된다. 그러면 어느 문으로 들어와도
+        //    가장 먼저 만들어진 스폰으로 떨어진다 — 마을 첫 진입이 전당포 앞으로 가던 원인이 이것.
+        var so = new SerializedObject(sp);
+        so.FindProperty("pointId").stringValue = id;
+        so.ApplyModifiedPropertiesWithoutUndo();
         return 1;
     }
 
