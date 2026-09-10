@@ -110,11 +110,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b19d5a3c7ffe6c34cbbd5c364478556e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::WornLamp
-  baseRange: 5.5
-  nightIntensity: 1.5
+  baseRange: 10
+  nightIntensity: 3.4
   dayIntensity: 0.2
-  coneAngle: 96
-  innerRatio: 0.45
+  coneAngle: 56
+  innerRatio: 0.74
+  spillRange: 4.6
+  spillRatio: 0.16
+  spillFloor: 0.35
+  spillCastsShadows: 1
+  bodyGlowRange: 2.6
+  bodyGlowIntensity: 0.9
+  bodyGlowHeight: 1
 --- !u!1 &1153366666490221086
 GameObject:
   m_ObjectHideFlags: 0
@@ -169,8 +176,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::TopDownPlayer
   spriteRenderer: {fileID: 0}
-  character3DPrefab: {fileID: 7299232624876691435, guid: 8a872c596d5ebf848a08c0895ec4c5e1, type: 3}
-  character3DController: {fileID: 9100000, guid: 7068915a201a6a546a078be7455b490a, type: 2}
+  character3DPrefab: {fileID: 1754818479490164135, guid: 224f5638a2affc1498fe48c2b8a8a28c, type: 3}
+  character3DController: {fileID: 9100000, guid: 95e30bf7ad6df054ea7786d1fc98600d, type: 2}
   character3DShader: {fileID: 0}
   character3DScale: 1
   useGravity: 0

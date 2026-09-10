@@ -37,6 +37,30 @@ public class WornLamp : MonoBehaviour
     [Tooltip("콘 안쪽(풀 밝기) 각도 비율. 가장자리를 부드럽게 풀어 준다.")]
     [Range(0.1f, 0.95f)][SerializeField] float innerRatio = 0.74f;
 
+    [Header("주변광 (좀보이드식 — '내가 있는 자리는 보인다')")]
+    // 2D 시절의 방식을 그대로 옮긴 것이다. 그때는 플레이어에 점 Light2D를 두고
+    // 벽의 ShadowCaster2D가 가렸다(`FlashlightController.ambientGlow`, glowAlwaysOn).
+    // 3D에서 같은 성질을 내는 건 **그림자를 켠 포인트 라이트**다.
+    [Tooltip("주변광 반경(m). 2D 때 core 반경 3.0이 기준이었다. 내가 선 방 정도가 읽히는 크기.")]
+    [SerializeField] float spillRange = 4.6f;
+    [Tooltip("빔 밝기 대비 주변광 비율. 너무 키우면 빔의 방향감이 죽는다.")]
+    [Range(0f, 1f)][SerializeField] float spillRatio = 0.16f;
+    [Tooltip("낮·실내에서도 최소한 이만큼은 켜 둔다 — '내 주변은 늘 보인다'가 사실이어야 한다.")]
+    [SerializeField] float spillFloor = 0.35f;
+    [Tooltip("⚠️ 끄면 주변광이 벽을 통과한다 — 위에서 내려다보듯 장애물 건너편까지 밝아진다. "
+           + "2D의 ShadowCaster2D 가림에 해당하는 자리다.")]
+    [SerializeField] bool spillCastsShadows = true;
+
+    // 주변광은 가슴 높이 **메시 안**에 있어서, 그림자를 켜면 캐릭터가 자기 몸을 가려 새까매진다.
+    // 2D 때도 같은 이유로 `ambientGlow`를 따로 뒀다. 아주 짧게(벽 너머로 샐 거리가 아니다)
+    // 그림자 없이 — 몸을 읽히게 하는 것만 담당한다.
+    [Tooltip("캐릭터 자신을 밝히는 글로우 반경(m). 짧아서 벽 너머로 새지 않는다.")]
+    [SerializeField] float bodyGlowRange = 2.6f;
+    [Tooltip("캐릭터 글로우 밝기. 실루엣이 읽힐 만큼만 — 키우면 캐릭터만 떠 보인다.")]
+    [SerializeField] float bodyGlowIntensity = 0.9f;
+    [Tooltip("글로우를 캐릭터 머리 위 몇 m에 둘지. 메시 안에 두면 밖에서 보이는 면이 전부 광원을 등진다.")]
+    [SerializeField] float bodyGlowHeight = 1.0f;
+
     Light _light;
     DayNightCycle _dayNight;
     TopDownPlayer _player;
@@ -64,10 +88,18 @@ public class WornLamp : MonoBehaviour
         _light.shadowNormalBias = 0.5f;
     }
 
-    /// <summary>착용자 주변 미광 — 등이 몸에 달려 있으면 **자기 몸도 조금은 밝다.**
-    /// 빔만 있으면 캐릭터가 새까만 실루엣이 되어 "어디선가 쏘는 조명"으로 읽힌다.
-    /// 아주 약하고 짧게, 그림자 없이(비용 0). 빔의 방향감을 해치지 않을 만큼만.</summary>
+    /// <summary>착용자 주변광 — **"내가 서 있는 자리는 보인다."**
+    ///
+    /// 두 가지를 한다:
+    ///   ① 빔만 있으면 캐릭터가 새까만 실루엣이 되어 "어디선가 쏘는 조명"으로 읽힌다. 자기 몸을 밝힌다.
+    ///   ② 발밑·바로 옆 사물이 읽히게 한다 — 2D 시절 플레이어에 달려 있던 점 Light2D의 역할이다.
+    ///
+    /// ⚠️ **그림자를 켠다.** 2D에서는 벽의 `ShadowCaster2D`가 이 빛을 가려 줬는데, 3D로 옮기며
+    ///    그림자 없는 점광으로 바꿔 놓아서 **벽 너머까지 밝아졌다.** 좀보이드식 "벽 뒤는 안 보인다"가
+    ///    성립하려면 가림이 필수다. 그림자 캐스팅 추가 광원이 하나 늘지만, 이 게임에서 이 빛은
+    ///    화면에 **항상 하나뿐**이라 감당할 만하다.</summary>
     Light _spill;
+    Light _glow;
 
     void EnsureSpill()
     {
@@ -77,10 +109,24 @@ public class WornLamp : MonoBehaviour
         go.transform.localPosition = Vector3.zero;
         _spill = go.AddComponent<Light>();
         _spill.type = LightType.Point;
-        _spill.shadows = LightShadows.None;
-        _spill.range = 2.6f;
+        _spill.shadows = spillCastsShadows ? LightShadows.Soft : LightShadows.None;
+        _spill.shadowStrength = 0.85f;
+        // 점광 그림자는 6면을 굽는다 — 근평면이 너무 작으면 자기 몸에 얼룩이 진다.
+        _spill.shadowNearPlane = 0.30f;
+        _spill.shadowBias = 0.10f;
+        _spill.range = spillRange;
         _spill.color = _light != null ? _light.color : Color.white;
         _spill.renderMode = LightRenderMode.ForcePixel;
+
+        var g = new GameObject("BodyGlow");
+        g.transform.SetParent(transform, false);
+        g.transform.localPosition = Vector3.zero;
+        _glow = g.AddComponent<Light>();
+        _glow.type = LightType.Point;
+        _glow.shadows = LightShadows.None;   // 몸을 밝히는 게 목적 — 그림자를 켜면 다시 자기를 가린다
+        _glow.range = bodyGlowRange;
+        _glow.color = new Color(0.72f, 0.78f, 0.92f);   // 2D 때 ambientGlow와 같은 계열(찬 색)
+        _glow.renderMode = LightRenderMode.ForcePixel;
     }
 
     void Start()
@@ -113,8 +159,20 @@ public class WornLamp : MonoBehaviour
         _light.spotAngle = coneAngle;
         _light.innerSpotAngle = coneAngle * innerRatio;
         EnsureSpill();
-        if (_spill != null)   // 빔의 1/6 — 있는지 모를 정도로만, 몸이 검은 종이가 되지 않게
-            _spill.intensity = (isNight ? nightIntensity : dayIntensity) * _gradeIntensity * 0.16f;
+        if (_spill != null)
+        {
+            // 주변광은 빔에 비례하되 **바닥값을 둔다** — 낮이나 실내에서 0에 가까워지면
+            // "내 주변은 늘 보인다"가 깨져서, 발밑조차 안 보인다.
+            _spill.intensity = Mathf.Max(spillFloor,
+                                         (isNight ? nightIntensity : dayIntensity) * _gradeIntensity * spillRatio);
+            _spill.range   = spillRange * _gradeRange;
+            _spill.shadows = spillCastsShadows ? LightShadows.Soft : LightShadows.None;
+        }
+        if (_glow != null)
+        {
+            _glow.intensity = bodyGlowIntensity;
+            _glow.range = bodyGlowRange;
+        }
     }
 
     /// <summary>등이 바라보는 쪽을 향하게 한다 — **몸에 달린 등이므로 몸을 따라 돈다.**
@@ -125,6 +183,15 @@ public class WornLamp : MonoBehaviour
 
     void LateUpdate()
     {
+        // ⚠️ 몸을 밝히는 글로우는 **등보다 위**, 월드 기준으로 올린다.
+        //    등과 같은 자리(가슴)에 두면 점광이 메시 **안**에 갇혀, 밖에서 보이는 면이 전부
+        //    광원을 등지게 된다 — 실제로 그렇게 뒀다가 캐릭터가 계속 새까맸다.
+        //    쿼터뷰(55° 부감)가 보는 건 윗면이라, 위에서 내리비춰야 어깨·모자·팔이 읽힌다.
+        //    ⚠️ 이 줄은 **플레이어 조기 반환보다 앞**에 있어야 한다. TopDownPlayer가 없는
+        //       룩 체크 씬에서도 글로우는 제자리를 잡아야 검증이 된다(실제로 그래서 안 보였다).
+        if (_glow != null)
+            _glow.transform.position = transform.position + Vector3.up * bodyGlowHeight;
+
         // LateUpdate여야 한다 — 플레이어의 회전/조준이 같은 프레임에 갱신되므로
         // Update에서 맞추면 한 프레임 뒤처져 빠르게 돌 때 빛이 끌려다닌다.
         if (_player == null) _player = TopDownPlayer.Instance;
