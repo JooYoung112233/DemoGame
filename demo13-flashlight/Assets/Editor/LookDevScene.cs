@@ -122,9 +122,6 @@ public static class LookDevScene
         // 레인은 **옆에서** 본다 — 등 뒤에서 보면 빔이 어디를 비추는지는 보여도 콘 모양이 안 보인다.
         MakeCam("Cam_4_랜턴레인", new Vector3(-6f, 2.2f, LampLaneZ + 3f), Quaternion.Euler(13f, 85f, 0f), false, 0f, false);
 
-        // 포스트프로세싱 — 게임과 **같은 프로파일**을 쓴다. 룩씬에서 톤을 판단하려면 필수다.
-        PostProcessProfileBuilder.CreateGlobalVolume();
-
         var switcher = new GameObject("LookDevCameras");
         switcher.AddComponent<LookDevCameraSwitcher>();
 
@@ -217,10 +214,7 @@ public static class LookDevScene
 
     /// <summary>렌더러를 룩 판단에 맞게 준비한다 — **머티리얼은 건드리지 않는다.**
     ///
-    /// 2026-09-10 카툰을 접고 리얼리티 쪽으로 방향을 바꿨다(사용자: "우리 세계관에 툰은 별로다").
-    /// 예전엔 여기서 `ToonMaterial.ApplyTo`로 전부 갈아끼웠는데, 그러면 모델에 저작된
-    /// **노멀맵·마스크맵(메탈릭/오클루전)이 통째로 버려진다** — 리얼 쪽에서는 그게 핵심 재료다.
-    /// 이제는 FBX에 저작된 URP/Lit 머티리얼을 그대로 쓰고, 그림자 설정만 맞춘다.</summary>
+    /// FBX에 저작된 머티리얼을 그대로 쓰고, 그림자 설정만 맞춘다.</summary>
     static void PrepareRenderers(GameObject go, string name)
     {
         if (go == null) return;

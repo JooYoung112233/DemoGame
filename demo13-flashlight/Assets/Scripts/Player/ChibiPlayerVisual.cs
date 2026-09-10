@@ -59,7 +59,6 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
             // A null override keeps the prefab.s editable material assets, including
             // textures, emission and shader settings, visible in play mode.
             if (shader == null) continue;
-            OutlineNormals.Apply(renderer.gameObject);   // 카툰 외곽선용 평균 법선(하드 엣지 대응)
             Material[] palette = renderer.sharedMaterials;
             for (int i = 0; i < palette.Length; i++)
             {
@@ -92,9 +91,6 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
                     { material.SetTexture("_MainTex", baseMap); material.SetVector("_MainTex_ST", baseMapST); }
                 }
                 if (material.HasProperty("_EmissionColor")) material.SetColor("_EmissionColor", emission);
-                // 카툰 램프 — 이 한 줄을 빠뜨리면 플레이어만 밴딩으로 나와 적과 룩이 갈린다.
-                if (material.HasProperty("_RampTex") && ToonMaterial.Ramp != null)
-                    material.SetTexture("_RampTex", ToonMaterial.Ramp);
                 palette[i] = material;
                 ownedMaterials.Add(material);
             }

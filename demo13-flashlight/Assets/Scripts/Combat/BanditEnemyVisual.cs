@@ -16,7 +16,6 @@ public sealed class BanditEnemyVisual : MonoBehaviour
     MaterialPropertyBlock block;
     Vector2 facing = Vector2.down;
     int motion, holdLayer;
-    readonly System.Collections.Generic.List<Material> _owned = new System.Collections.Generic.List<Material>();   // 새로 만든 머티리얼 — 파괴 시 정리
     /// <summary>걷기·달리기 클립이 원래 몇 m/s용인가(보폭 실측 기준). 발 미끄러짐 보정용.</summary>
     const float WalkClipSpeed = 0.34f, RunClipSpeed = 0.52f;
     float windupLength, attackLength, attackTime, impactTime;
@@ -38,10 +37,7 @@ public sealed class BanditEnemyVisual : MonoBehaviour
         foreach (Transform t in view.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = gameObject.layer;
         meshes = view.GetComponentsInChildren<Renderer>(true);
 
-        // 2026-09-10 카툰을 접고 리얼리티 쪽으로 방향을 바꿨다(사용자: "우리 세계관에 툰은 별로다").
-        //   예전엔 여기서 `ToonMaterial.ApplyTo`로 전부 갈아끼웠는데, 그러면 모델에 저작된
-        //   **노멀맵·마스크맵이 통째로 버려진다** — 리얼 쪽에서는 그게 핵심 재료다.
-        //   이제는 FBX에 저작된 URP/Lit 머티리얼을 그대로 쓰고 그림자 설정만 맞춘다.
+        // FBX에 저작된 머티리얼을 그대로 쓰고 그림자 설정만 맞춘다.
         //   (피격 플래시 등은 MaterialPropertyBlock으로 쓰므로 공유 에셋을 오염시키지 않는다.)
         foreach (var r in meshes)
         {
@@ -85,12 +81,6 @@ public sealed class BanditEnemyVisual : MonoBehaviour
     }
     public void CancelAttack() { winding = attacking = false; motion = 0; }
     public void Die() { CancelAttack(); dead = true; deathTime = 0; SetVisible(true); SetTint(new Color(.45f,.45f,.45f)); }
-
-    void OnDestroy()
-    {
-        foreach (var m in _owned) if (m != null) Destroy(m);
-        _owned.Clear();
-    }
 
     void LateUpdate()
     {

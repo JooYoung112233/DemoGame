@@ -241,7 +241,11 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 
 ---
 
-## 카툰 룩 전환 (2026-09-10)
+> ⚠️ **이 절 전체는 폐기됐다(2026-09-10).** 카툰을 접고 리얼리티로 갔다가, 룩 작업 자체를
+> 백지에서 다시 하기로 했다. 아래는 왜 그 길을 갔고 무엇에 부딪혔는지의 기록으로만 남긴다.
+> 현재 상태는 이 문서 맨 아래 **"룩 작업 초기화"** 절을 볼 것.
+
+## 카툰 룩 전환 (2026-09-10, 폐기됨)
 
 | 날짜 | 질문 | 결정 |
 |------|------|------|
@@ -334,3 +338,40 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
   지적이었고, 위 표대로 고쳤다.
 - **"재킷 0.55 vs 얼굴 0.28"** — 저작된 세트에 그 값은 없었다(실측: 전부 `_Smoothness 1`, 예외로
   `Hero_Face`만 0.1). 다만 "재질이 안 갈린다"는 관찰 자체는 맞았고, 원인은 공유 마스크맵이었다.
+
+## 룩 작업 초기화 (2026-09-10)
+
+> 사용자: *"우리 지금 만든 라이트 셰이더 이런거 다 초기화 해줄래 다시 만들꺼야"* — 모델을 새로
+> 만들 예정이라, 룩 작업을 백지에서 다시 시작하기로 했다.
+
+**현재 상태 = 캐릭터는 FBX에 저작된 URP/Lit 머티리얼로 그대로 렌더된다. 커스텀 룩 레이어 없음.**
+
+### 지운 것
+| 대상 | 무엇이었나 |
+|---|---|
+| `Shaders/Toon.shader` | 카툰 셀 셰이더(외곽선 인버티드 헐 + 램프) |
+| `Editor/ToonRampBuilder.cs`, `Resources/Shaders/ToonRamp.png` | 라이트 램프 텍스처와 생성기 |
+| `Scripts/Rendering/ToonMaterial.cs` | 카툰 머티리얼 생성 단일 창구 |
+| `Scripts/Rendering/OutlineNormals.cs` | 외곽선용 평균 법선을 tangent에 굽던 것 |
+| `Editor/PostProcessProfileBuilder.cs` | 포스트프로세싱 프로파일 생성기 |
+| `Editor/HeroMaterialTuner.cs` | 이름 기준 재질 분리(천·가죽·금속) |
+
+`PlayerRigVolume3D.asset`은 지우지 않고 **빈 프로파일로 되돌렸다**(PlayerRig가 참조한다).
+
+### 남긴 것과 이유
+- **`Editor/MeshNormalRepair.cs`** — 룩이 아니라 **모델 버그 픽스**다. 지우면 어깨가 다시 검게 나온다.
+  임포트 후처리라 새 모델에도 자동으로 걸린다.
+- **`BRB/Stylized`** — 그레이박스 월드 전체(`GreyboxMesh`, `Greybox3D`, `Safehouse3DLayout`)가 쓴다.
+  지우면 맵이 통째로 깨진다. 이번 세션에 넣은 앰비언트 ×1.0·림 0.07 조정도 그대로 둔다.
+- **`LookDevScene` / `LookDevCameraSwitcher`** — 룩 판단 도구. 새 룩을 만들 때 그대로 쓴다.
+  카메라에 `renderPostProcessing = true`가 켜져 있어, 프로파일만 채우면 바로 보인다.
+- **기존 조명 시스템**(`WornLamp`, `DayNightCycle`, `Lighting3D`, `WeatherData`) — 이번 세션 산물이 아니다.
+
+### 다시 만들 때 참고
+- **쿼터뷰 기준으로 판단할 것**(2026-09-10 사용자). `LookDevScene`의 `Cam_3_쿼터뷰(게임)`가
+  게임 설정(pitch 55° · yaw 0° · ortho 3.6)을 그대로 갖고 있다. 정면샷으로만 맞추면 인게임에서 갈린다.
+  ⚠️ 그 세 상수는 PlayerRig와 **수동 동기화**다.
+- **포스트프로세싱 프로파일은 빈 상태**다. 톤매핑이 없으면 URP는 선형 값을 그대로 잘라
+  밝은 쪽이 뭉치고 물빠져 보인다 — PBR 룩에서는 이게 먼저다.
+- Forward+ 전환은 광원 제한을 풀지만, `BRB/Stylized`가 `GetAdditionalLightsCount()`를 그대로 도는
+  방식이라 **광원을 놓친다**(이 저장소가 이미 겪은 버그 `637e7cc`). 셰이더 수정이 동반돼야 한다.
