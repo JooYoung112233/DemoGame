@@ -25,17 +25,17 @@ public class WornLamp : MonoBehaviour
 {
     [Header("기본(랜턴 미착용) — 문서상 '좁은 주변광 ~2칸, 밤엔 코앞만'")]
     [Tooltip("빛이 닿는 거리(m).")]
-    [SerializeField] float baseRange = 5.5f;
+    [SerializeField] float baseRange = 10f;
     [Tooltip("밤 밝기. 캐릭터 실루엣이 읽힐 만큼만 — 주변을 훤히 밝히면 시야 콘이 의미를 잃는다.")]
-    [SerializeField] float nightIntensity = 1.5f;
+    [SerializeField] float nightIntensity = 3.4f;
     [Tooltip("낮 밝기. 0이 아니라 아주 낮은 값 — '늘 켜져 있다'가 사실이어야 한다.")]
     [SerializeField] float dayIntensity = 0.2f;
 
     [Header("몸에 달린 느낌")]
     [Tooltip("빛이 퍼지는 각도. 좁을수록 '가슴에 단 등'으로 읽힌다. 360°에 가까우면 머리 위 전등처럼 보인다.")]
-    [Range(30f, 170f)][SerializeField] float coneAngle = 96f;
+    [Range(20f, 170f)][SerializeField] float coneAngle = 56f;
     [Tooltip("콘 안쪽(풀 밝기) 각도 비율. 가장자리를 부드럽게 풀어 준다.")]
-    [Range(0.1f, 0.95f)][SerializeField] float innerRatio = 0.45f;
+    [Range(0.1f, 0.95f)][SerializeField] float innerRatio = 0.74f;
 
     Light _light;
     DayNightCycle _dayNight;
@@ -64,8 +64,28 @@ public class WornLamp : MonoBehaviour
         _light.shadowNormalBias = 0.5f;
     }
 
+    /// <summary>착용자 주변 미광 — 등이 몸에 달려 있으면 **자기 몸도 조금은 밝다.**
+    /// 빔만 있으면 캐릭터가 새까만 실루엣이 되어 "어디선가 쏘는 조명"으로 읽힌다.
+    /// 아주 약하고 짧게, 그림자 없이(비용 0). 빔의 방향감을 해치지 않을 만큼만.</summary>
+    Light _spill;
+
+    void EnsureSpill()
+    {
+        if (_spill != null) return;
+        var go = new GameObject("LampSpill");
+        go.transform.SetParent(transform, false);
+        go.transform.localPosition = Vector3.zero;
+        _spill = go.AddComponent<Light>();
+        _spill.type = LightType.Point;
+        _spill.shadows = LightShadows.None;
+        _spill.range = 2.6f;
+        _spill.color = _light != null ? _light.color : Color.white;
+        _spill.renderMode = LightRenderMode.ForcePixel;
+    }
+
     void Start()
     {
+        EnsureSpill();
         _dayNight = FindFirstObjectByType<DayNightCycle>();
         if (_dayNight != null) _dayNight.OnPhaseChanged += OnPhaseChanged;
         // 이 컴포넌트는 **Start에서 값을 적용한다.** 프로젝트의 Editor State Preservation
@@ -81,6 +101,10 @@ public class WornLamp : MonoBehaviour
 
     void OnPhaseChanged(bool isNight) => Apply(isNight);
 
+    /// <summary>낮/밤을 강제로 적용한다 — **룩 체크 씬·QA 전용**.
+    /// 그 씬엔 DayNightCycle이 없어 늘 낮(0.2)으로 켜지는데, 그러면 빔이 안 보여 검증이 안 된다.</summary>
+    public void ForcePhase(bool night) => Apply(night);
+
     void Apply(bool isNight)
     {
         if (_light == null) return;
@@ -88,11 +112,16 @@ public class WornLamp : MonoBehaviour
         _light.intensity = (isNight ? nightIntensity : dayIntensity) * _gradeIntensity;
         _light.spotAngle = coneAngle;
         _light.innerSpotAngle = coneAngle * innerRatio;
+        EnsureSpill();
+        if (_spill != null)   // 빔의 1/6 — 있는지 모를 정도로만, 몸이 검은 종이가 되지 않게
+            _spill.intensity = (isNight ? nightIntensity : dayIntensity) * _gradeIntensity * 0.16f;
     }
 
     /// <summary>등이 바라보는 쪽을 향하게 한다 — **몸에 달린 등이므로 몸을 따라 돈다.**
     /// 이게 없으면 방향이 고정돼 옆으로 걸을 때 엉뚱한 데를 비추고, 결국 "떠 있는 조명"이 된다.</summary>
-    const float TiltDown = 34f;   // 아래로 숙인 각. 가슴에 달린 등은 발 앞을 비춘다.
+    // 아래로 숙인 각. 34°는 **발 앞 1.7m**에 원을 만들어, 캐릭터를 둘러싼 밝은 웅덩이가 됐다
+    // = "머리 위에 뜬 조명". 가슴등은 앞을 봐야 한다 — 16°면 빔이 앞으로 뻗는다.
+    const float TiltDown = 16f;
 
     void LateUpdate()
     {

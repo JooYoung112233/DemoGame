@@ -169,9 +169,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::TopDownPlayer
   spriteRenderer: {fileID: 0}
-  character3DPrefab: {fileID: 547444241873832026, guid: 2f7177a4e26e1c848b059917035f983c, type: 3}
-  character3DController: {fileID: 9100000, guid: 8a91b7b1fcf15994daff8ecc36e499a7, type: 2}
-  character3DShader: {fileID: 4800000, guid: c6e3d88c0ad30434f9795336b99d2b71, type: 3}
+  character3DPrefab: {fileID: 7299232624876691435, guid: 8a872c596d5ebf848a08c0895ec4c5e1, type: 3}
+  character3DController: {fileID: 9100000, guid: 7068915a201a6a546a078be7455b490a, type: 2}
+  character3DShader: {fileID: 4800000, guid: 3a46f00ea9dbb40479a1e6af5823942b, type: 3}
   character3DScale: 1
   useGravity: 0
   flipByMouse: 1
@@ -533,7 +533,7 @@ Camera:
   far clip plane: 200
   field of view: 60
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 3.6
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2

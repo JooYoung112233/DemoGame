@@ -52,8 +52,16 @@ public class TopDownPlayer : MonoBehaviour
     [SerializeField] float fallbackMoveSpeed = 5f;
 
     [Header("이동 감각 (걷는 느낌)")]
-    [Tooltip("켜면 걷기/달리기 애니 속도를 실제 이동속도에 비례시킴. 끄면 애니는 고유 속도(1x)로 재생되어 이동속도와 분리됨(기본). ※ 가속/감속 수치는 StatDB ▸ Player Stat ▸ 이동 감각.")]
-    [SerializeField] bool animCadenceMatchesSpeed = false;
+    [Tooltip("켜면 걷기/달리기 애니 속도를 **실제 이동거리**에 물린다(발이 미끄러지지 않게). 끄면 고유 속도로만 재생.")]
+    [SerializeField] bool animCadenceMatchesSpeed = true;
+    [Tooltip("걷기 클립이 원래 몇 m/s용인가 — 보폭 실측값. 이 속도로 걸을 때 애니 배속이 1이 된다.\n" +
+             "(2026-09-10 실측: 보폭 0.21m × 2걸음 ÷ 1.2s ≈ 0.34m/s)")]
+    [SerializeField] float walkClipSpeed = 0.34f;
+    [Tooltip("달리기 클립의 자연 속도(m/s). 실측 0.52.")]
+    [SerializeField] float runClipSpeed = 0.52f;
+    [Tooltip("애니 배속 상한. 이동속도(4m/s)는 클립(0.34m/s)의 12배라 그대로 물리면 다리가 뭉갠다 —\n" +
+             "여기서 잘라 '빠르게 걷는다'까지만 표현하고 나머지 미끄러짐은 감수한다.")]
+    [SerializeField] float animCadenceMax = 2.4f;
 
     // ── 퍼블릭 API ───────────────────────────────────────────────────
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
@@ -482,7 +490,13 @@ public class TopDownPlayer : MonoBehaviour
         string motion = allowed && speed > .05f ? (running ? "run" : "walk") : "idle";
         float cadence = MotionSpeed(motion);
         if (animCadenceMatchesSpeed && motion != "idle")
-            cadence *= Mathf.Clamp(speed / Mathf.Max(.1f, MoveSpd), .5f, 1.8f);
+        {
+            // 예전엔 "설정 이동속도 대비 비율"이라, 전속으로 달리면 늘 배속 1 = **클립 고유 속도**였다.
+            //   클립은 0.34m/s용인데 몸은 4m/s로 나가니 발이 얼음판처럼 미끄러진다.
+            //   이제 **실제 이동거리**로 나눈다 — 느리게 걸으면 느리게, 빠르면 빠르게 구른다.
+            float clipSpeed = Mathf.Max(.05f, motion == "run" ? runClipSpeed : walkClipSpeed);
+            cadence *= Mathf.Clamp(speed / clipSpeed, .5f, Mathf.Max(1f, animCadenceMax));
+        }
         _character3D.UpdateMotion(FacingDirection, speed, running, allowed, cadence, Time.deltaTime);
     }
 
