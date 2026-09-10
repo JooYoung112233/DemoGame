@@ -22,8 +22,12 @@ Shader "BRB/Toon"
         _BaseColor    ("Base Color", Color) = (0.5, 0.5, 0.5, 1)
 
         [Header(Outline)]
-        _OutlineColor ("Outline Color", Color) = (0.02, 0.02, 0.03, 1)
-        _OutlineWidth ("Outline Width (px)", Range(0, 12)) = 5.5
+        // 순검정이 아니라 아주 어두운 남색 — 순검정 외곽선은 만화적이고 밝다.
+        _OutlineColor ("Outline Color", Color) = (0.035, 0.04, 0.055, 1)
+        _OutlineWidth ("Outline Width (px)", Range(0, 12)) = 4.5
+        // 헐을 시선 방향으로 뒤로 미는 거리(미터). 얇은 껍데기에서 외곽선이 모델을 덮는 것을 막는다.
+        // 너무 키우면 지면 뒤로 들어가 외곽선이 사라진다 — 캐릭터 두께(≈0.2m)보다 작게.
+        _OutlinePush  ("Outline Depth Push (m)", Range(0, 0.3)) = 0.03
 
         [Header(Cel)]
         // 램프 텍스처가 이 룩의 핵심이다. 밴딩은 "밝기"만 계단으로 자르지만, 램프는
@@ -33,14 +37,19 @@ Shader "BRB/Toon"
         _RampStrength ("Ramp Strength", Range(0, 1)) = 1
         _Bands        ("Light Bands (램프 없을 때)", Range(2, 6)) = 3
         _BandSoft     ("Band Softness", Range(0.001, 0.25)) = 0.035
-        _Wrap         ("Light Wrap", Range(0, 1)) = 0.28
+        _Wrap         ("Light Wrap", Range(0, 1)) = 0.20
 
         [Header(Shading)]
         _ShadowTint   ("Shadow Tint", Color) = (0.42, 0.47, 0.58, 1)
         _ShadowDepth  ("Shadow Depth", Range(0, 1)) = 0.30
-        _RimColor     ("Rim Color", Color) = (1, 0.96, 0.88, 1)
-        _RimPower     ("Rim Power", Range(0.5, 8)) = 3.0
-        _RimStrength  ("Rim Strength", Range(0, 1)) = 0.22
+        // 림 = 어둠 속에서 실루엣을 배경에서 떼어내는 장치. 이 게임은 밤 비중이 커서
+        // 이게 없으면 캐릭터가 배경에 그대로 먹힌다. 색은 달빛/형광등 쪽 차가운 계열.
+        _RimColor     ("Rim Color", Color) = (0.62, 0.72, 0.85, 1)
+        _RimPower     ("Rim Power", Range(0.5, 8)) = 2.6
+        _RimStrength  ("Rim Strength", Range(0, 1)) = 0.30
+        // 채도 억제 — 모델 색을 일괄로 바래게 한다. "붕괴된 사회" 톤을 모델마다
+        // 다시 칠하지 않고 한 노브로 맞추는 장치.
+        _Desaturate   ("Desaturate", Range(0, 1)) = 0.30
         // ⚠️ 기본 0. 이 값은 **버텍스 컬러에 AO를 구워 둔 메시**에만 의미가 있는데,
         //    현재 캐릭터 모델(치비·밴딧)은 버텍스 컬러가 아예 없다(실측: colors.Length == 0).
         //    그 상태에서 곱하면 IN.color가 정의되지 않은 값이라 모델이 통째로 어두워지거나 얼룩진다.
@@ -69,9 +78,9 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
-                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
+                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO; float _Desaturate;
             CBUFFER_END
 
             // ⚠️ 밀기 방향은 NORMAL이 아니라 **TANGENT**에서 읽는다 — OutlineNormals가 거기에
@@ -84,7 +93,17 @@ Shader "BRB/Toon"
             OV outlineVert (OA IN)
             {
                 OV o;
-                float4 clip = TransformObjectToHClip(IN.positionOS.xyz);
+
+                // ★ **헐을 시선 방향으로 조금 뒤로 물린다 — 단위는 미터.**
+                //   얇은 껍데기(후드·마스크·배트)는 앞뒤 면이 거의 붙어 있어, 깊이를 안 밀면
+                //   헐이 앞면을 이겨 모델 위에 검은 얼룩이 덮인다(사용자 지적).
+                //   NDC로 밀면 카메라 near/far에 따라 실제 거리가 달라져 예측이 안 된다 —
+                //   너무 밀면 지면 뒤로 들어가 **외곽선이 통째로 사라진다**(실제로 그랬다).
+                //   월드 공간 미터로 밀면 "3cm 뒤"가 어떤 카메라에서도 3cm 뒤다.
+                float3 posWS = TransformObjectToWorld(IN.positionOS.xyz);
+                float3 toCam = GetWorldSpaceViewDir(posWS);
+                posWS -= normalize(toCam) * _OutlinePush;
+                float4 clip = TransformWorldToHClip(posWS);
 
                 // 법선을 **뷰공간**으로 옮겨 화면상의 밀 방향을 얻는다. 뒤통수를 보고 있는 정점은
                 // xy 성분이 0에 가까워 normalize가 터지므로 안전값을 둔다.
@@ -131,9 +150,9 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
-                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
+                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO; float _Desaturate;
             CBUFFER_END
 
             struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float4 color : COLOR; };
@@ -201,8 +220,12 @@ Shader "BRB/Toon"
                 // 램프가 밝기와 **색**을 동시에 준다. 예전엔 밝기(회색)만 계단으로 자르고
                 // 그림자 색은 _ShadowTint 하나로 눌렀는데, 그러면 어두운 쪽이 "같은 색의 어두움"이라
                 // 카툰 특유의 색 전이가 안 나온다(Flat Kit류와 갈리는 지점이 바로 여기다).
+                // 채도 억제 — 밝기(휘도)는 지키고 색만 바래게 한다. 톤을 한 노브로 잡는다.
+                float  lum  = dot(_BaseColor.rgb, float3(0.299, 0.587, 0.114));
+                float3 baseC = lerp(_BaseColor.rgb, lum.xxx, saturate(_Desaturate));
+
                 float3 ramp = LightRamp(t, _Bands, _BandSoft, _RampStrength);
-                float3 col  = _BaseColor.rgb * L.color * ramp;
+                float3 col  = baseC * L.color * ramp;
 
                 #if defined(_ADDITIONAL_LIGHTS)
                     uint addCount = GetAdditionalLightsCount();
@@ -213,11 +236,11 @@ Shader "BRB/Toon"
                         float awrap = saturate((andl + _Wrap) / (1.0 + _Wrap));
                         // 감쇠까지 계단화하면 램프 테두리가 동심원으로 끊긴다 — 각도만 계단화한다.
                         float3 aramp = LightRamp(awrap, _Bands, _BandSoft, _RampStrength);
-                        col += _BaseColor.rgb * AL.color * aramp * AL.distanceAttenuation * AL.shadowAttenuation;
+                        col += baseC * AL.color * aramp * AL.distanceAttenuation * AL.shadowAttenuation;
                     }
                 #endif
 
-                col += _BaseColor.rgb * SampleSH(N) * 1.25;
+                col += baseC * SampleSH(N) * 1.25;
 
                 float rim = pow(1.0 - saturate(dot(N, V)), _RimPower);
                 col += _RimColor.rgb * rim * _RimStrength;
@@ -251,9 +274,9 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
-                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
+                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO; float _Desaturate;
             CBUFFER_END
 
             struct SA { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
@@ -286,9 +309,9 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
-                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
+                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO; float _Desaturate;
             CBUFFER_END
 
             struct DA { float4 positionOS : POSITION; };
@@ -313,9 +336,9 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
-                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
+                float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO; float _Desaturate;
             CBUFFER_END
 
             struct DNA { float4 positionOS : POSITION; float3 normalOS : NORMAL; };

@@ -26,9 +26,11 @@ public static class ToonRampBuilder
     /// 경계는 <see cref="EdgeSoft"/>만큼만 풀어 카툰의 딱 떨어지는 단을 유지한다.</summary>
     static readonly (float at, Color color)[] Stops =
     {
-        (0.00f, new Color(0.34f, 0.33f, 0.46f)),   // 깊은 그늘 — 푸른 보랏빛
-        (0.40f, new Color(0.62f, 0.62f, 0.68f)),   // 중간 — 살짝 차가운 중성
-        (0.72f, new Color(1.00f, 0.98f, 0.92f)),   // 빛 — 따뜻한 흰색
+        // "어두운 붕괴된 사회" 톤 — 그늘은 차갑고 깊게, 빛은 희지 않고 탁하게(나트륨등/먼지).
+        // 밝은 카툰이 아니라 **어둠 속에서 형태만 읽히는** 룩이 목표다.
+        (0.00f, new Color(0.13f, 0.15f, 0.20f)),   // 깊은 그늘 — 차가운 콘크리트 남색
+        (0.38f, new Color(0.40f, 0.41f, 0.40f)),   // 중간 — 바랜 회녹색(부패)
+        (0.70f, new Color(0.98f, 0.93f, 0.82f)),   // 빛 — 탁한 온백색, 순백 아님
     };
     const float EdgeSoft = 0.02f;   // 단 경계 폭(0이면 완전히 각짐 → 곡면에서 지글거린다)
 
