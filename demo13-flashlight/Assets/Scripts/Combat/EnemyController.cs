@@ -299,6 +299,13 @@ public class EnemyController : MonoBehaviour
 
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 
+        // 표시물은 **모델이 정해진 뒤** 올린다 — ApplyUnitLook 시점엔 아직 그레이박스 팔다리라
+        //   그때 잰 높이로 두면 3D 밴딧(특히 중장 2.36m)에선 다시 몸에 묻힌다.
+        if (_label != null)
+        {
+            var lp = _label.transform.localPosition;
+            _label.transform.localPosition = new Vector3(lp.x, HeadTop() + LABEL_GAP, lp.z);
+        }
         CreateHPBar();
         CreateGroggyBar();
         SetPatrolTarget();
@@ -574,12 +581,6 @@ public class EnemyController : MonoBehaviour
         // 표시물(HP·그로기·이름표) 높이도 같은 배율을 탄다 — 고정 높이로 두면 큰 유닛에선
         // 바가 **가슴에 묻힌다**(중장 모델 2.30m vs 바 2.02m. 화면에선 바닥에 깔린 것처럼 보인다).
         _visualScale = mul;
-        // 이름표는 Awake에서 이미 만들어졌다(배율을 모르던 시점) → 여기서 높이를 다시 잡는다.
-        if (_label != null)
-        {
-            var lp = _label.transform.localPosition;
-            _label.transform.localPosition = new Vector3(lp.x, LABEL_Y * mul, lp.z);
-        }
         if (_limbs != null) _limbs.SetScale(mul);   // 몸은 배율을 매번 받는다(누적 곱이 아니다)
         if (Mathf.Approximately(mul, 1f)) return;
 
@@ -819,15 +820,41 @@ public class EnemyController : MonoBehaviour
     /// **가슴에 박히거나 발치에 깔렸다.** 아래에서 위로: HP → 그로기 → 이름표.</summary>
     const float HP_BAR_Y = 2.02f, GROGGY_BAR_Y = 2.18f, LABEL_Y = 2.42f;
 
-    /// <summary>유닛 크기 배율(StatDB.scale 기준). 표시물 높이를 여기에 맞춰 올린다.
-    /// ApplyUnitLook이 채우고, 바·이름표 생성이 읽는다(생성이 그 뒤에 온다).</summary>
+    /// <summary>유닛 크기 배율(StatDB.scale 기준). 모델 실측이 실패했을 때만 쓰는 폴백.</summary>
     float _visualScale = 1f;
+
+    /// <summary>표시물을 올릴 기준 높이 = **이 적 모델의 실제 정수리**(루트 기준, m).
+    ///
+    /// 상수 × 배율로 잡으면 모델이 바뀔 때마다 어긋난다 — 실제로 중장(1.3배)은 모델이 2.36m인데
+    /// 바가 2.02에 있어 **가슴에 묻혔고**, 일반 밴딧도 여유가 0.2m뿐이라 머리에 달라붙어 보였다.
+    /// 렌더러 바운즈에서 정수리를 직접 재고, 못 재면 예전 상수로 물러선다.</summary>
+    float HeadTop()
+    {
+        float top = float.MinValue;
+        foreach (var r in GetComponentsInChildren<Renderer>(true))
+        {
+            // 표시물 자신(바·이름표)은 기준에서 뺀다 — 안 그러면 매 프레임 위로 밀려 올라간다.
+            if (r is SpriteRenderer) continue;
+            if (r.GetComponentInParent<UnitLabel>() != null) continue;
+            // 3D 모델로 교체되며 Destroy된 그레이박스 팔다리는 **그 프레임 끝까지 살아 있다** —
+            // 같은 Start 안에서 재면 옛 몸이 섞여 들어온다.
+            if (r.GetComponentInParent<GreyboxLimbs>() != null) continue;
+            if (r.bounds.max.y > top) top = r.bounds.max.y;
+        }
+        if (top <= float.MinValue * 0.5f) return GreyboxLimbs.Height * _visualScale;   // 폴백
+        return Mathf.Max(0.5f, top - transform.position.y);
+    }
+
+    /// <summary>정수리 위 여유(m). 아래에서 위로: HP → 그로기 → 이름표.
+    /// 0.2m로는 **머리에 달라붙어** 보였다(사용자 지적) — 애니메이션 포즈에 따라 정수리가
+    /// 2~3cm씩 오르내리므로 그만큼도 잡아먹힌다. 쿼터뷰에서 확실히 떠 보이게 0.45부터.</summary>
+    const float HP_GAP = 0.45f, GROGGY_GAP = 0.62f, LABEL_GAP = 0.88f;
 
     void CreateHPBar()
     {
         var c = new GameObject("HPBar");
         c.transform.SetParent(transform);
-        c.transform.localPosition = new Vector3(0, HP_BAR_Y * _visualScale, 0);
+        c.transform.localPosition = new Vector3(0, HeadTop() + HP_GAP, 0);
         Billboard.Attach(c.transform);   // 쿼터뷰에서 눕혀 두면 게이지가 안 읽힌다
         hpBarBg   = MakeBar("HPBar_BG",   c.transform, new Color(0.1f, 0.1f, 0.1f, 0.8f), 0, BAR_W, BAR_H);
         hpBarFill = MakeBar("HPBar_Fill", c.transform, Color.green, 1, BAR_W, BAR_H);
@@ -862,7 +889,7 @@ public class EnemyController : MonoBehaviour
     {
         var c = new GameObject("GroggyBar");
         c.transform.SetParent(transform);
-        c.transform.localPosition = new Vector3(0, GROGGY_BAR_Y * _visualScale, 0);
+        c.transform.localPosition = new Vector3(0, HeadTop() + GROGGY_GAP, 0);
         Billboard.Attach(c.transform);
         groggyBarBg   = MakeBar("GroggyBar_BG",   c.transform, new Color(0.15f, 0.15f, 0.15f, 0.7f), 0, GROG_W, GROG_H);
         groggyBarFill = MakeBar("GroggyBar_Fill",  c.transform, new Color(1f, 0.6f, 0f, 0.9f), 1, 0, GROG_H);
