@@ -75,7 +75,7 @@ public class GroundShadow2D : MonoBehaviour
             if (c != null && c.name == "GroundShadow") DestroySafe(c.gameObject);
         }
 
-        var shader = Shader.Find("Universal Render Pipeline/Lit");
+        var shader = Shader.Find("BRB/WallPixel");
         if (shader == null) { Debug.LogWarning("[GroundShadow2D] BRB/WallPixel 못 찾음."); return; }
         _mat = new Material(shader);
         _mat.EnableKeyword("_SHADOW_MODE");

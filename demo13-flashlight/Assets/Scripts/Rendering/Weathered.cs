@@ -67,7 +67,7 @@ public class Weathered : MonoBehaviour
             if (c != null && c.name == "WeatherOverlay") DestroySafe(c.gameObject);
         }
 
-        var sh = Shader.Find("Universal Render Pipeline/Lit");
+        var sh = Shader.Find("BRB/DamageOverlay");
         if (sh == null) { Debug.LogWarning("[Weathered] BRB/DamageOverlay 못 찾음."); return; }
 
         _overlayMat = new Material(sh);

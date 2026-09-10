@@ -58,7 +58,16 @@ public class VisionDarkness : MonoBehaviour
         GetComponent<MeshFilter>().sharedMesh = _mesh;
 
         _mr = GetComponent<MeshRenderer>();
-        _mr.sharedMaterial = BuildMaterial();
+        var mat = BuildMaterial();
+        if (mat == null)
+        {
+            // 전용 셰이더가 없다 = 이 기능은 지금 없는 것이다. 렌더러를 끄고 갱신도 멈춘다.
+            Debug.LogWarning("[VisionDarkness] BRB/VisionDarkness 셰이더 없음 — 시야 어둠을 끈다.");
+            _mr.enabled = false;
+            enabled = false;
+            return;
+        }
+        _mr.sharedMaterial = mat;
         // 3D에선 `sortingOrder`가 의미 없다 — 순서는 셰이더의 Queue/ZTest가 정한다.
         _mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         _mr.receiveShadows = false;
@@ -73,14 +82,16 @@ public class VisionDarkness : MonoBehaviour
     /// ⚠️ 예전엔 `Sprites/Default`였다. URP-3D에선 그게 빌트인 파이프라인 셰이더라
     ///    **분홍 에러 머티리얼**이 되고, URP 기본 Unlit은 정점 색을 안 읽어 부채꼴의
     ///    밝음↔어둠 그라디언트가 통째로 사라진다. 그래서 전용 셰이더를 쓴다.</summary>
+    /// <summary>전용 셰이더가 있으면 그 머티리얼을, 없으면 null.
+    ///
+    /// ⚠️ **없을 때 URP/Lit 같은 일반 셰이더로 대체하면 안 된다.** 이 오브젝트는 120×120m
+    ///    평면이라, 불투명 라이트 셰이더를 물리는 순간 맵 전체를 덮는 **흰 판**이 된다
+    ///    (2026-09-10 셰이더 전면 삭제 후 하이드아웃이 통째로 하얗게 나온 원인이 이것이었다).
+    ///    셰이더가 없으면 기능을 끄는 게 맞다 — 어둠이 없는 것보다 화면이 가려지는 게 훨씬 나쁘다.</summary>
     static Material BuildMaterial()
     {
-        var sh = Shader.Find("Universal Render Pipeline/Lit");
-        if (sh == null)
-        {
-            Debug.LogWarning("[VisionDarkness] BRB/VisionDarkness 셰이더 없음 — 어둠 오버레이가 안 보일 수 있다.");
-            sh = Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Sprites/Default");
-        }
+        var sh = Shader.Find("BRB/VisionDarkness");
+        if (sh == null) return null;
         return new Material(sh) { name = "VisionDarknessMat" };
     }
 
