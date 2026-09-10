@@ -234,7 +234,12 @@ public class DayNightCycle : MonoBehaviour
     ///
     /// WeatherData는 앰비언트를 색 하나로만 들고 있어 위/옆/아래를 여기서 만든다.
     /// 하늘은 밝고 바닥은 어둡다 — 그 비율만 지키면 한 값으로도 입체감이 산다.</summary>
-    static void ApplyAmbient(Color c)
+    /// <summary>앰비언트를 적용하는 **유일한 창구**. 룩 체크 씬(`LookDevCameraSwitcher`)도 이걸 부른다.
+    ///
+    /// ⚠️ 예전엔 룩씬이 자기 값을 하드코딩해서(밤 0.07) 게임(밤 0.125)과 어긋나 있었다.
+    ///    룩씬은 "게임이 어떻게 보이는가"를 판단하는 도구인데, 조명이 다르면 그 판단이 전부 무효다.
+    ///    값을 바꿀 일이 있으면 WeatherData를 고칠 것 — 여기 코드가 아니라.</summary>
+    public static void ApplyAmbient(Color c)
     {
         // ⚠️ 알파까지 곱하면 안 된다. Color 곱셈은 a도 함께 곱해 0.55 같은 값이 남는데,
         //    앰비언트 알파는 안 쓰이지만 인스펙터에서 보면 "왜 반투명이지" 하게 된다.

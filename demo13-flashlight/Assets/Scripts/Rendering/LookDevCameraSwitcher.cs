@@ -76,12 +76,13 @@ public class LookDevCameraSwitcher : MonoBehaviour
             }
         }
 
-        Color amb = night ? new Color(.07f, .08f, .11f) : new Color(.52f, .56f, .64f);
-        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-        RenderSettings.ambientLight        = amb;
-        RenderSettings.ambientSkyColor     = amb;
-        RenderSettings.ambientEquatorColor = amb * 0.8f;
-        RenderSettings.ambientGroundColor  = amb * 0.45f;
+        // ⚠️ 앰비언트를 여기서 직접 계산하지 않는다. 예전엔 밤 0.07을 하드코딩했는데 게임은
+        //    0.125라, **룩씬에서 판단한 밤이 게임의 밤이 아니었다**(2026-09-10 발견).
+        //    게임과 같은 창구(DayNightCycle.ApplyAmbient)로 보내 값이 갈릴 여지를 없앤다.
+        Color amb = _weather != null
+            ? (night ? _weather.nightAmbientColor : _weather.dayAmbientColor)
+            : (night ? new Color(.10f, .11f, .15f) : new Color(.35f, .35f, .40f));   // WeatherData 기본값과 같은 폴백
+        DayNightCycle.ApplyAmbient(amb);
 
         foreach (var lamp in FindObjectsByType<WornLamp>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             lamp.ForcePhase(night);

@@ -122,6 +122,9 @@ public static class LookDevScene
         // 레인은 **옆에서** 본다 — 등 뒤에서 보면 빔이 어디를 비추는지는 보여도 콘 모양이 안 보인다.
         MakeCam("Cam_4_랜턴레인", new Vector3(-6f, 2.2f, LampLaneZ + 3f), Quaternion.Euler(13f, 85f, 0f), false, 0f, false);
 
+        // 포스트프로세싱 — 게임과 **같은 프로파일**. 룩씬에서 톤을 판단하려면 필수다.
+        PostProfileBuilder.CreateGlobalVolume();
+
         var switcher = new GameObject("LookDevCameras");
         switcher.AddComponent<LookDevCameraSwitcher>();
 
