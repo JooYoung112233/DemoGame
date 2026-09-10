@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// **룩 확인용 더미 씬** — 캐릭터를 정면에서 크게 보고 셰이더·외곽선·음영을 판단한다.
@@ -57,7 +58,6 @@ public static class LookDevScene
 
         // ── 모델 두 개 ── 플레이어와 밴딧을 나란히. 같은 셰이더로 갈아끼워 **같은 조건**에서 본다.
         int placed = 0;
-        var toon = Shader.Find("BRB/Toon");
         var rig = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/PlayerRig.prefab");
         GameObject heroPrefab = null;
         RuntimeAnimatorController heroCtrl = null;
@@ -88,14 +88,14 @@ public static class LookDevScene
         }
         float meleeScale = UnitScale("bandit_melee_1"), tankScale = UnitScale("bandit_tank");
 
-        if (heroPrefab != null) { Place(heroPrefab, heroCtrl, new Vector3(-1.5f, 0f, 0f), "Player", toon, heroScale); placed++; }
+        if (heroPrefab != null) { Place(heroPrefab, heroCtrl, new Vector3(-1.5f, 0f, 0f), "Player", heroScale); placed++; }
         else Debug.LogWarning("[LookDev] PlayerRig에서 캐릭터 프리팹을 못 찾음 — 플레이어 생략.");
 
         var bandit = Resources.Load<GameObject>("Characters/Bandit01");
         if (bandit != null)
         {
-            Place(bandit, null, new Vector3(0f, 0f, 0f),    "Bandit_일반", toon, meleeScale);
-            Place(bandit, null, new Vector3(1.6f, 0f, 0f),  "Bandit_중장", toon, tankScale);
+            Place(bandit, null, new Vector3(0f, 0f, 0f),    "Bandit_일반", meleeScale);
+            Place(bandit, null, new Vector3(1.6f, 0f, 0f),  "Bandit_중장", tankScale);
             placed += 2;
         }
         else Debug.LogWarning("[LookDev] Resources/Characters/Bandit01 없음 — 밴딧 생략.");
@@ -118,9 +118,12 @@ public static class LookDevScene
         MakeCam("Cam_2_측면",  new Vector3(-6.4f, 1.15f, 0f),  Quaternion.Euler(4f, 90f, 0f),   false, 0f, false);
         MakeCam("Cam_3_쿼터뷰(게임)", QuarterPos(), Quaternion.Euler(GamePitch, GameYaw, 0f),   true,  GameOrtho, false);
 
-        BuildLampLane(toon, meleeScale);
+        BuildLampLane(meleeScale);
         // 레인은 **옆에서** 본다 — 등 뒤에서 보면 빔이 어디를 비추는지는 보여도 콘 모양이 안 보인다.
         MakeCam("Cam_4_랜턴레인", new Vector3(-6f, 2.2f, LampLaneZ + 3f), Quaternion.Euler(13f, 85f, 0f), false, 0f, false);
+
+        // 포스트프로세싱 — 게임과 **같은 프로파일**을 쓴다. 룩씬에서 톤을 판단하려면 필수다.
+        PostProcessProfileBuilder.CreateGlobalVolume();
 
         var switcher = new GameObject("LookDevCameras");
         switcher.AddComponent<LookDevCameraSwitcher>();
@@ -146,7 +149,7 @@ public static class LookDevScene
     /// 그래서 전방 2·4·6·8m에 상자를 세우고 10m에 벽을 둔다. 상자는 그림자도 던진다 —
     /// 손전등처럼 보이는 데 **그림자가 절반**이다(빛만 있고 그림자가 없으면 조명판이 된다).
     /// 등을 든 사람은 카메라 반대쪽(+Z)을 본다 = 관찰자 시점에서 빔의 옆면을 본다.</summary>
-    static void BuildLampLane(Shader toon, float scale)
+    static void BuildLampLane(float scale)
     {
         var lane = new GameObject("랜턴 검증 레인").transform;
         lane.position = new Vector3(0f, 0f, LampLaneZ);
@@ -188,7 +191,7 @@ public static class LookDevScene
             go.transform.localPosition = Vector3.zero;
             go.transform.localRotation = Quaternion.identity;   // +Z(레인 안쪽)를 본다
             go.transform.localScale = Vector3.one * scale;
-            ApplyToon(go, toon, "LampHolder");
+            PrepareRenderers(go, "LampHolder");
             holder = go.transform;
         }
         else
@@ -212,13 +215,20 @@ public static class LookDevScene
         return m;
     }
 
-    static void ApplyToon(GameObject go, Shader toon, string name)
+    /// <summary>렌더러를 룩 판단에 맞게 준비한다 — **머티리얼은 건드리지 않는다.**
+    ///
+    /// 2026-09-10 카툰을 접고 리얼리티 쪽으로 방향을 바꿨다(사용자: "우리 세계관에 툰은 별로다").
+    /// 예전엔 여기서 `ToonMaterial.ApplyTo`로 전부 갈아끼웠는데, 그러면 모델에 저작된
+    /// **노멀맵·마스크맵(메탈릭/오클루전)이 통째로 버려진다** — 리얼 쪽에서는 그게 핵심 재료다.
+    /// 이제는 FBX에 저작된 URP/Lit 머티리얼을 그대로 쓰고, 그림자 설정만 맞춘다.</summary>
+    static void PrepareRenderers(GameObject go, string name)
     {
-        // ⚠️ 외곽선용 평균 법선은 **런타임에** 굽는다(LookDevCameraSwitcher.Start).
-        //    여기서 구우면 복제 메시가 에셋이 아니라서 씬을 저장하는 순간 참조가 깨진다
-        //    — 실제로 캐릭터가 통째로 청록색 덩어리로 렌더링됐다.
-        if (toon == null) return;
-        ToonMaterial.ApplyTo(go, name);
+        if (go == null) return;
+        foreach (var r in go.GetComponentsInChildren<Renderer>(true))
+        {
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            r.receiveShadows = true;
+        }
     }
 
     /// <summary>StatDB의 유닛 배율 → 화면 배율(EnemyController.ApplyUnitLook과 같은 식: scale ÷ 2).</summary>
@@ -251,11 +261,18 @@ public static class LookDevScene
         go.transform.SetPositionAndRotation(pos, rot);
         go.tag = "MainCamera";
         c.enabled = on;
+
+        // ⚠️ URP에서 포스트프로세싱은 **카메라별 스위치**다. 이걸 안 켜면 씬에 Volume이 있어도
+        //    아무 일도 일어나지 않는다 — 룩 체크 씬에서 톤을 판단할 수 없게 된다.
+        var data = go.GetComponent<UniversalAdditionalCameraData>();
+        if (data == null) data = go.AddComponent<UniversalAdditionalCameraData>();
+        data.renderPostProcessing = true;
+        data.antialiasing = AntialiasingMode.FastApproximateAntialiasing;
     }
 
     /// <summary>모델 하나를 세우고, 셰이더를 카툰으로 갈아끼운다(색은 원본 유지).
     /// 배율은 **인게임과 같은 값**을 넣는다 — 여기서 크기 비율을 보고 판단하기 위해서다.</summary>
-    static void Place(GameObject prefab, RuntimeAnimatorController ctrl, Vector3 pos, string name, Shader toon, float scale)
+    static void Place(GameObject prefab, RuntimeAnimatorController ctrl, Vector3 pos, string name, float scale)
     {
         var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
         go.name = name;
@@ -270,7 +287,7 @@ public static class LookDevScene
             an.applyRootMotion = false;
             an.cullingMode = AnimatorCullingMode.AlwaysAnimate;
         }
-        ApplyToon(go, toon, name);
+        PrepareRenderers(go, name);
     }
 
     static void AddToBuildSettings(string path)

@@ -38,10 +38,16 @@ public sealed class BanditEnemyVisual : MonoBehaviour
         foreach (Transform t in view.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = gameObject.layer;
         meshes = view.GetComponentsInChildren<Renderer>(true);
 
-        // 카툰 룩 — 플레이어(ChibiPlayerVisual)와 **같은 셰이더**로 갈아끼운다.
-        //   적만 사실적 음영이면 한 화면에서 룩이 갈려, 카툰 외곽선의 의미가 사라진다.
-        //   프리팹 머티리얼은 색만 가져오고 인스턴스를 새로 만든다(원본 에셋 오염 방지).
-        ToonMaterial.ApplyTo(view.gameObject, "Bandit", _owned);
+        // 2026-09-10 카툰을 접고 리얼리티 쪽으로 방향을 바꿨다(사용자: "우리 세계관에 툰은 별로다").
+        //   예전엔 여기서 `ToonMaterial.ApplyTo`로 전부 갈아끼웠는데, 그러면 모델에 저작된
+        //   **노멀맵·마스크맵이 통째로 버려진다** — 리얼 쪽에서는 그게 핵심 재료다.
+        //   이제는 FBX에 저작된 URP/Lit 머티리얼을 그대로 쓰고 그림자 설정만 맞춘다.
+        //   (피격 플래시 등은 MaterialPropertyBlock으로 쓰므로 공유 에셋을 오염시키지 않는다.)
+        foreach (var r in meshes)
+        {
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+            r.receiveShadows = true;
+        }
 
         baseColors = new Color[meshes.Length][];
         for (int i = 0; i < meshes.Length; i++)

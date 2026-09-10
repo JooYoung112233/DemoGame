@@ -20,7 +20,7 @@ Shader "BRB/Stylized"
         _ShadowDepth ("Shadow Depth", Range(0, 1)) = 0.42
         _RimColor    ("Rim Color", Color) = (1, 0.96, 0.88, 1)
         _RimPower    ("Rim Power", Range(0.5, 8)) = 3.0
-        _RimStrength ("Rim Strength", Range(0, 1)) = 0.18
+        _RimStrength ("Rim Strength", Range(0, 1)) = 0.07
         _VertexAO    ("Vertex AO Strength", Range(0, 1)) = 0.50
     }
 
@@ -117,8 +117,11 @@ Shader "BRB/Stylized"
                     }
                 #endif
 
-                // 앰비언트 — 하늘/땅 그라디언트가 형태를 읽히게 한다
-                col += _BaseColor.rgb * SampleSH(N) * 1.25;
+                // 앰비언트 — 하늘/땅 그라디언트가 형태를 읽히게 한다.
+                // ⚠️ 예전엔 1.25배로 부풀렸다. 카툰일 땐 램프가 톤을 직접 지정해서 티가 안 났지만,
+                //    리얼리티 쪽으로 바꾼 뒤로는 이게 명암을 씻어내 형태가 뭉근해진다
+                //    (2026-09-10 사용자 지적). 물리적으로도 앰비언트를 임의로 키울 이유가 없다.
+                col += _BaseColor.rgb * SampleSH(N);
 
                 // ③ 림 — 실루엣을 배경에서 떼어낸다
                 float rim = pow(1.0 - saturate(dot(N, V)), _RimPower);
