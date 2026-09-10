@@ -19,6 +19,7 @@ public class TopDownPlayer : MonoBehaviour
     [Header("3D 캐릭터 표시")]
     [SerializeField] GameObject character3DPrefab;
     [SerializeField] RuntimeAnimatorController character3DController;
+    [Tooltip("비우면 캐릭터 프리팹의 머티리얼을 그대로 사용합니다. 지정하면 색상만 유지한 채 셰이더를 교체합니다.")]
     [SerializeField] Shader character3DShader;
     [SerializeField, Min(.01f)] float character3DScale = .65f;
     ChibiPlayerVisual _character3D;
@@ -226,7 +227,10 @@ public class TopDownPlayer : MonoBehaviour
             }
         }
         EnsureGreyboxBody();   // ★ 스파인 탐색 **뒤에** — 앞에 두면 스파인이 있어도 네모를 덧그린다
-        TestHealthBar.Attach(transform, 0.72f);   // 테스트용 — 이 한 줄만 지우면 흔적이 안 남는다
+        // 테스트용 — 이 한 줄만 지우면 흔적이 안 남는다.
+        //   높이 0.72는 **2D 시절 1m 몸** 기준이라 3D 캐릭터(정수리 ≈1.75m)에선 가슴에 박혔다
+        //   (사용자 지적: "HP 바가 머리 위가 아니라 바닥에 깔려 있다"). 모델 정수리를 재서 그 위에 올린다.
+        TestHealthBar.Attach(transform, VisualTop() + 0.35f);
         BodyZoneOverlay.Attach(transform);        // 테스트용 부위 표시(F1에서 켠다, 기본 꺼짐)
         _cam = Camera.main;
 
@@ -261,6 +265,20 @@ public class TopDownPlayer : MonoBehaviour
 
     /// <summary>플레이어 콜라이더 반경 — 히트박스를 몸 밖으로 밀어내는 기준.</summary>
     const float BodyRadius = 0.3f;
+
+    /// <summary>지금 이 캐릭터 모델의 **정수리 높이**(루트 기준, m). 머리 위 표시물 배치용.
+    /// 상수로 박아 두면 모델이 바뀔 때마다 어긋난다 — 렌더러에서 직접 잰다(스프라이트·게이지는 제외).</summary>
+    float VisualTop()
+    {
+        float top = float.MinValue;
+        foreach (var r in GetComponentsInChildren<Renderer>(true))
+        {
+            if (r is SpriteRenderer) continue;
+            if (r.bounds.max.y > top) top = r.bounds.max.y;
+        }
+        if (top <= float.MinValue * 0.5f) return 1.75f;   // 폴백 — 사람 키
+        return Mathf.Clamp(top - transform.position.y, 0.5f, 3f);
+    }
 
     /// <summary>인스펙터에 데이터가 비어있으면 StatDB 수치로 프레임 기반 기본 생성.</summary>
     void EnsureDefaultAttacks()
@@ -508,6 +526,8 @@ public class TopDownPlayer : MonoBehaviour
     /// <summary>손에 뭐가 들려 있나. **장착 아이템이 정한다** — 맨손이면 주먹이 보여야지 칼이 보이면 안 된다.
     /// 근접 무기는 WeaponData가 없는 것들이 많아(구형 무기) 카테고리로 판단한다.</summary>
     enum HandVisual { Fist, Melee, Gun }
+    bool UsesSwordAnimation => _character3D != null && _character3D.HasSwordAnimations
+        && _weapon != null && _weapon.useTwoHandSwordAnimations && InHand == HandVisual.Melee;
     HandVisual InHand
     {
         get
@@ -524,10 +544,12 @@ public class TopDownPlayer : MonoBehaviour
     {
         // 셋 중 **하나만** 보인다. 안 그러면 총 쏘는데 칼이 같이 떠 있는 식이 된다.
         var hand = InHand;
+        bool swordAnimation = UsesSwordAnimation;
+        _character3D?.SetSwordEquipped(swordAnimation);
 
         if (_weaponVis != null)
         {
-            _weaponVis.SetVisible(hand == HandVisual.Melee);
+            _weaponVis.SetVisible(hand == HandVisual.Melee && !swordAnimation);
             if (hand == HandVisual.Melee)
             {
                 _weaponVis.SetFacing(FacingDirection);
@@ -701,7 +723,8 @@ public class TopDownPlayer : MonoBehaviour
         _attackStateTimer = atk.Duration;
         _performer.Perform(atk);
         // 손에 든 것에 맞는 동작 — 칼은 휘두르고, 맨손은 정권으로 지른다.
-        if (InHand == HandVisual.Melee) _weaponVis?.Swing(atk.Duration);   // 우 → 좌 한 방향
+        if (UsesSwordAnimation) _character3D.PlaySwordSlash(atk.Duration, FacingDirection);
+        else if (InHand == HandVisual.Melee) _weaponVis?.Swing(atk.Duration);   // 우 → 좌 한 방향
         else                            _fistVis?.Punch(atk.Duration);
         // 소음은 스윙이 아니라 '적중' 시에만 발생(AttackPerformer.ScanWindow) — 2026-07-11 변경.
         _comboBuffered = false;
@@ -727,7 +750,8 @@ public class TopDownPlayer : MonoBehaviour
         _heavyCooldownTimer = HeavyCooldown;
 
         _performer.Perform(atk);
-        if (InHand == HandVisual.Melee) _weaponVis?.SwingHeavy(_attackStateTimer, full);   // 치켜든 대각에서 크고 빠르게
+        if (UsesSwordAnimation) _character3D.PlaySwordSlash(_attackStateTimer, FacingDirection);
+        else if (InHand == HandVisual.Melee) _weaponVis?.SwingHeavy(_attackStateTimer, full);   // 치켜든 대각에서 크고 빠르게
         else                            _fistVis?.PunchHeavy(_attackStateTimer, full);    // 더 깊은 정권
         // 강공도 적중 시에만 소음(AttackPerformer.ScanWindow).
     }
@@ -741,6 +765,7 @@ public class TopDownPlayer : MonoBehaviour
         _dodgeInvTimer = DodgeInvDur;
         _dodgeCooldownTimer = DodgeCooldown;
         _performer.Cancel();           // 진행 중 공격 취소
+        _character3D?.CancelAttack();
         _comboStep = 0;                // 콤보 끊김
         _comboBuffered = false;
     }
