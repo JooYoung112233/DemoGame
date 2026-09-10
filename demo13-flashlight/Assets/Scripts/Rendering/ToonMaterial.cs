@@ -38,23 +38,46 @@ public static class ToonMaterial
         }
     }
 
-    /// <summary>원본 머티리얼의 **색만 물려받은** 카툰 머티리얼(인스턴스).
-    /// 원본 에셋은 건드리지 않는다.</summary>
+    /// <summary>원본 머티리얼의 **색과 알베도 맵**을 물려받은 카툰 머티리얼(인스턴스).
+    /// 원본 에셋은 건드리지 않는다.
+    ///
+    /// ⚠️ 맵을 같이 넘기는 게 핵심이다. 예전엔 색만 복사했는데, 그러면 모델에 UV·텍스처가
+    /// 있어도 카툰 셰이더를 씌우는 순간 파트마다 단색으로 뭉개졌다 — 팔뚝·소매·방망이가
+    /// 통째로 검게 보이던 원인이다(2026-09-10).</summary>
     public static Material From(Material src, string name)
     {
         Color c = Color.white;
+        Color emis = Color.black;
+        Texture map = null;
+        Vector4 st = new Vector4(1f, 1f, 0f, 0f);
         if (src != null)
+        {
             c = src.HasProperty("_BaseColor") ? src.GetColor("_BaseColor") : src.color;
-        return Create(c, name);
+            if (src.HasProperty("_BaseMap"))      { map = src.GetTexture("_BaseMap");   st = src.GetVector("_BaseMap_ST"); }
+            else if (src.HasProperty("_MainTex")) { map = src.GetTexture("_MainTex");   st = src.GetVector("_MainTex_ST"); }
+            // 발광은 키워드가 꺼져 있으면 색이 남아 있어도 안 쓴 것이다 — 그대로 옮기면
+            // 안 빛나야 할 파트가 통째로 빛난다.
+            if (src.IsKeywordEnabled("_EMISSION") && src.HasProperty("_EmissionColor"))
+                emis = src.GetColor("_EmissionColor");
+        }
+        return Create(c, name, map, st, emis);
     }
 
-    public static Material Create(Color baseColor, string name)
+    public static Material Create(Color baseColor, string name,
+                                  Texture baseMap = null, Vector4? baseMapST = null,
+                                  Color? emission = null)
     {
         var sh = Shader;
         if (sh == null) return null;
         var m = new Material(sh) { name = name };
         m.SetColor("_BaseColor", baseColor);
         if (Ramp != null) m.SetTexture("_RampTex", Ramp);
+        if (baseMap != null)
+        {
+            m.SetTexture("_BaseMap", baseMap);
+            m.SetVector("_BaseMap_ST", baseMapST ?? new Vector4(1f, 1f, 0f, 0f));
+        }
+        if (emission.HasValue) m.SetColor("_EmissionColor", emission.Value);
         return m;
     }
 

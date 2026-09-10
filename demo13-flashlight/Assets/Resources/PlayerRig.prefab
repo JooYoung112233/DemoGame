@@ -171,7 +171,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   character3DPrefab: {fileID: 7299232624876691435, guid: 8a872c596d5ebf848a08c0895ec4c5e1, type: 3}
   character3DController: {fileID: 9100000, guid: 7068915a201a6a546a078be7455b490a, type: 2}
-  character3DShader: {fileID: 4800000, guid: 3a46f00ea9dbb40479a1e6af5823942b, type: 3}
+  character3DShader: {fileID: 0}
   character3DScale: 1
   useGravity: 0
   flipByMouse: 1
@@ -187,6 +187,9 @@ MonoBehaviour:
   heavyFullAttack: {fileID: 0}
   fallbackMoveSpeed: 5
   animCadenceMatchesSpeed: 0
+  walkClipSpeed: 0.34
+  runClipSpeed: 0.52
+  animCadenceMax: 2.4
 --- !u!114 &8558418155601727802
 MonoBehaviour:
   m_ObjectHideFlags: 0

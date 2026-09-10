@@ -64,12 +64,34 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
             for (int i = 0; i < palette.Length; i++)
             {
                 Color color = Color.white;
+                Color emission = Color.black;
+                Texture baseMap = null;
+                Vector4 baseMapST = new Vector4(1f, 1f, 0f, 0f);
                 if (palette[i] != null)
+                {
                     color = palette[i].HasProperty("_BaseColor") ? palette[i].GetColor("_BaseColor") : palette[i].color;
+                    // ⚠️ 알베도 맵도 같이 넘긴다. 색만 복사하면 UV·텍스처가 있는 모델도
+                    //    파트마다 단색으로 뭉개져 팔·소매가 통째로 검게 보인다(2026-09-10).
+                    if (palette[i].HasProperty("_BaseMap"))
+                    { baseMap = palette[i].GetTexture("_BaseMap"); baseMapST = palette[i].GetVector("_BaseMap_ST"); }
+                    else if (palette[i].HasProperty("_MainTex"))
+                    { baseMap = palette[i].GetTexture("_MainTex"); baseMapST = palette[i].GetVector("_MainTex_ST"); }
+                    // 랜턴 액센트처럼 빛나야 하는 파트 — 키워드가 켜져 있을 때만 옮긴다.
+                    if (palette[i].IsKeywordEnabled("_EMISSION") && palette[i].HasProperty("_EmissionColor"))
+                        emission = palette[i].GetColor("_EmissionColor");
+                }
                 var material = new Material(shader) { name = "Chibi_InGame_" + i };
                 // 셰이더에 따라 색 프로퍼티 이름이 다르다 — URP/Lit은 _BaseColor, 언릿 계열은 _Color.
                 if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
                 if (material.HasProperty("_Color"))     material.SetColor("_Color", color);
+                if (baseMap != null)
+                {
+                    if (material.HasProperty("_BaseMap"))
+                    { material.SetTexture("_BaseMap", baseMap); material.SetVector("_BaseMap_ST", baseMapST); }
+                    if (material.HasProperty("_MainTex"))
+                    { material.SetTexture("_MainTex", baseMap); material.SetVector("_MainTex_ST", baseMapST); }
+                }
+                if (material.HasProperty("_EmissionColor")) material.SetColor("_EmissionColor", emission);
                 // 카툰 램프 — 이 한 줄을 빠뜨리면 플레이어만 밴딩으로 나와 적과 룩이 갈린다.
                 if (material.HasProperty("_RampTex") && ToonMaterial.Ramp != null)
                     material.SetTexture("_RampTex", ToonMaterial.Ramp);

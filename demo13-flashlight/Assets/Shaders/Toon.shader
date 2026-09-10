@@ -20,6 +20,16 @@ Shader "BRB/Toon"
     Properties
     {
         _BaseColor    ("Base Color", Color) = (0.5, 0.5, 0.5, 1)
+        // 알베도 맵. 모델에 UV가 없던 동안에는 파트마다 단색 머티리얼이라 팔뚝·소매·방망이가
+        // 통째로 한 색으로 칠해졌고, 그늘 쪽으로 돌면 그대로 검게 읽혔다(2026-09-10 사용자 지적).
+        // UV가 붙은 뒤에도 이 셰이더에 **텍스처 입력이 아예 없어서** 그 작업이 통째로 버려지고 있었다.
+        // ⚠️ 노멀맵은 일부러 안 받는다 — OutlineNormals가 외곽선 밀기 방향을 tangent에 덮어써서
+        //    탄젠트 공간이 이미 깨져 있다. 쿼터뷰 거리에서 노멀맵으로 얻는 것도 거의 없다.
+        _BaseMap      ("Base Map (알베도)", 2D) = "white" {}
+        // 자체발광. 랜턴 액센트처럼 **스스로 빛나야 하는 파트**가 여기 없으면 그냥 단색 얼룩으로
+        // 보인다(플레이어 허리의 보라 조각이 그거였다). 램프 계산 뒤에 그대로 더한다 —
+        // 셀 음영에 섞이면 빛나는 느낌이 사라진다.
+        [HDR] _EmissionColor ("Emission", Color) = (0, 0, 0, 1)
 
         [Header(Outline)]
         // 순검정이 아니라 아주 어두운 남색 — 순검정 외곽선은 만화적이고 밝다.
@@ -49,7 +59,9 @@ Shader "BRB/Toon"
         _RimStrength  ("Rim Strength", Range(0, 1)) = 0.30
         // 채도 억제 — 모델 색을 일괄로 바래게 한다. "붕괴된 사회" 톤을 모델마다
         // 다시 칠하지 않고 한 노브로 맞추는 장치.
-        _Desaturate   ("Desaturate", Range(0, 1)) = 0.30
+        // 텍스처가 붙은 뒤로는 세게 뺄 필요가 없다 — 알베도 자체가 이미 바랜 색이라
+        // 0.30이면 옷·피부 구분까지 같이 죽는다.
+        _Desaturate   ("Desaturate", Range(0, 1)) = 0.18
         // ⚠️ 기본 0. 이 값은 **버텍스 컬러에 AO를 구워 둔 메시**에만 의미가 있는데,
         //    현재 캐릭터 모델(치비·밴딧)은 버텍스 컬러가 아예 없다(실측: colors.Length == 0).
         //    그 상태에서 곱하면 IN.color가 정의되지 않은 값이라 모델이 통째로 어두워지거나 얼룩진다.
@@ -76,7 +88,7 @@ Shader "BRB/Toon"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _BaseColor;
+                float4 _BaseColor; float4 _BaseMap_ST; float4 _EmissionColor;
                 float4 _OutlineColor; float _OutlineWidth;
                 float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
@@ -148,14 +160,14 @@ Shader "BRB/Toon"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _BaseColor;
+                float4 _BaseColor; float4 _BaseMap_ST; float4 _EmissionColor;
                 float4 _OutlineColor; float _OutlineWidth;
                 float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
                 float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO; float _Desaturate;
             CBUFFER_END
 
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float4 color : COLOR; };
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float4 color : COLOR; float2 uv : TEXCOORD0; };
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
@@ -163,6 +175,7 @@ Shader "BRB/Toon"
                 float3 normalWS   : TEXCOORD1;
                 float4 screenPos  : TEXCOORD2;
                 float  bakedAO    : TEXCOORD3;
+                float2 uv         : TEXCOORD4;
             };
 
             Varyings vert (Attributes IN)
@@ -174,12 +187,15 @@ Shader "BRB/Toon"
                 o.normalWS   = TransformObjectToWorldNormal(IN.normalOS);
                 o.screenPos  = ComputeScreenPos(p.positionCS);
                 o.bakedAO    = IN.color.r;
+                o.uv         = TRANSFORM_TEX(IN.uv, _BaseMap);
                 return o;
             }
 
             // 램프 텍스처 — 가로축이 "어두움(0) → 밝음(1)". 텍스처는 CBUFFER 밖에 둔다.
             TEXTURE2D(_RampTex);
             SAMPLER(sampler_RampTex);
+            TEXTURE2D(_BaseMap);
+            SAMPLER(sampler_BaseMap);
 
             // 0~1 밝기를 N단으로 계단화. 경계는 _BandSoft만큼만 부드럽게 —
             // 완전히 각지면 곡면에서 계단이 지글거린다.
@@ -221,8 +237,11 @@ Shader "BRB/Toon"
                 // 그림자 색은 _ShadowTint 하나로 눌렀는데, 그러면 어두운 쪽이 "같은 색의 어두움"이라
                 // 카툰 특유의 색 전이가 안 나온다(Flat Kit류와 갈리는 지점이 바로 여기다).
                 // 채도 억제 — 밝기(휘도)는 지키고 색만 바래게 한다. 톤을 한 노브로 잡는다.
-                float  lum  = dot(_BaseColor.rgb, float3(0.299, 0.587, 0.114));
-                float3 baseC = lerp(_BaseColor.rgb, lum.xxx, saturate(_Desaturate));
+                // UV가 없는 메시는 uv가 (0,0)이라 텍스처의 한 점만 읽는다 — 기본값이 흰색이므로
+                // 맵을 안 물린 머티리얼은 예전과 똑같이 _BaseColor만 나온다(폴백이 안전하다).
+                float3 albedo = _BaseColor.rgb * SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv).rgb;
+                float  lum  = dot(albedo, float3(0.299, 0.587, 0.114));
+                float3 baseC = lerp(albedo, lum.xxx, saturate(_Desaturate));
 
                 float3 ramp = LightRamp(t, _Bands, _BandSoft, _RampStrength);
                 float3 col  = baseC * L.color * ramp;
@@ -241,6 +260,8 @@ Shader "BRB/Toon"
                 #endif
 
                 col += baseC * SampleSH(N) * 1.25;
+
+                col += _EmissionColor.rgb;
 
                 float rim = pow(1.0 - saturate(dot(N, V)), _RimPower);
                 col += _RimColor.rgb * rim * _RimStrength;
@@ -272,7 +293,7 @@ Shader "BRB/Toon"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _BaseColor;
+                float4 _BaseColor; float4 _BaseMap_ST; float4 _EmissionColor;
                 float4 _OutlineColor; float _OutlineWidth;
                 float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
@@ -307,7 +328,7 @@ Shader "BRB/Toon"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _BaseColor;
+                float4 _BaseColor; float4 _BaseMap_ST; float4 _EmissionColor;
                 float4 _OutlineColor; float _OutlineWidth;
                 float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
@@ -334,7 +355,7 @@ Shader "BRB/Toon"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _BaseColor;
+                float4 _BaseColor; float4 _BaseMap_ST; float4 _EmissionColor;
                 float4 _OutlineColor; float _OutlineWidth;
                 float _Bands; float _BandSoft; float _Wrap; float _RampStrength; float _OutlinePush;
                 float4 _ShadowTint; float _ShadowDepth;
