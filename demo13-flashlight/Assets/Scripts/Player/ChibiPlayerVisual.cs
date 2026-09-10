@@ -70,6 +70,9 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
                 // 셰이더에 따라 색 프로퍼티 이름이 다르다 — URP/Lit은 _BaseColor, 언릿 계열은 _Color.
                 if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
                 if (material.HasProperty("_Color"))     material.SetColor("_Color", color);
+                // 카툰 램프 — 이 한 줄을 빠뜨리면 플레이어만 밴딩으로 나와 적과 룩이 갈린다.
+                if (material.HasProperty("_RampTex") && ToonMaterial.Ramp != null)
+                    material.SetTexture("_RampTex", ToonMaterial.Ramp);
                 palette[i] = material;
                 ownedMaterials.Add(material);
             }

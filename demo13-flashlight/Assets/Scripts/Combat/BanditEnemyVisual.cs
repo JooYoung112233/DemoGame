@@ -41,26 +41,7 @@ public sealed class BanditEnemyVisual : MonoBehaviour
         // 카툰 룩 — 플레이어(ChibiPlayerVisual)와 **같은 셰이더**로 갈아끼운다.
         //   적만 사실적 음영이면 한 화면에서 룩이 갈려, 카툰 외곽선의 의미가 사라진다.
         //   프리팹 머티리얼은 색만 가져오고 인스턴스를 새로 만든다(원본 에셋 오염 방지).
-        var toon = Shader.Find("BRB/Toon");
-        if (toon != null)
-        {
-            OutlineNormals.Apply(view.gameObject);   // 하드 엣지 모델이라 외곽선용 평균 법선을 구워야 한다
-            foreach (var r in meshes)
-            {
-                var src = r.sharedMaterials;
-                var dst = new Material[src.Length];
-                for (int j = 0; j < src.Length; j++)
-                {
-                    Color c = Color.white;
-                    if (src[j] != null)
-                        c = src[j].HasProperty("_BaseColor") ? src[j].GetColor("_BaseColor") : src[j].color;
-                    dst[j] = new Material(toon) { name = "Bandit_Toon_" + j };
-                    dst[j].SetColor("_BaseColor", c);
-                    _owned.Add(dst[j]);
-                }
-                r.sharedMaterials = dst;
-            }
-        }
+        ToonMaterial.ApplyTo(view.gameObject, "Bandit", _owned);
 
         baseColors = new Color[meshes.Length][];
         for (int i = 0; i < meshes.Length; i++)

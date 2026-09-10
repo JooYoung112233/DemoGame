@@ -218,22 +218,7 @@ public static class LookDevScene
         //    여기서 구우면 복제 메시가 에셋이 아니라서 씬을 저장하는 순간 참조가 깨진다
         //    — 실제로 캐릭터가 통째로 청록색 덩어리로 렌더링됐다.
         if (toon == null) return;
-        foreach (var r in go.GetComponentsInChildren<Renderer>(true))
-        {
-            var src = r.sharedMaterials;
-            var dst = new Material[src.Length];
-            for (int i = 0; i < src.Length; i++)
-            {
-                Color c = Color.white;
-                if (src[i] != null)
-                    c = src[i].HasProperty("_BaseColor") ? src[i].GetColor("_BaseColor") : src[i].color;
-                dst[i] = new Material(toon) { name = name + "_Toon_" + i };
-                dst[i].SetColor("_BaseColor", c);
-            }
-            r.sharedMaterials = dst;
-            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-            r.receiveShadows = true;
-        }
+        ToonMaterial.ApplyTo(go, name);
     }
 
     /// <summary>StatDB의 유닛 배율 → 화면 배율(EnemyController.ApplyUnitLook과 같은 식: scale ÷ 2).</summary>

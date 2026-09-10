@@ -26,7 +26,12 @@ Shader "BRB/Toon"
         _OutlineWidth ("Outline Width (px)", Range(0, 12)) = 5.5
 
         [Header(Cel)]
-        _Bands        ("Light Bands", Range(2, 6)) = 3
+        // 램프 텍스처가 이 룩의 핵심이다. 밴딩은 "밝기"만 계단으로 자르지만, 램프는
+        // **그림자 쪽 색(色)을 따로 지정**한다 — 따뜻한 광원에 차가운 보랏빛 그림자 같은
+        // 색 전이가 Flat Kit류 카툰 룩을 만드는 실제 요소다. 비워 두면 아래 밴딩으로 폴백.
+        [NoScaleOffset] _RampTex ("Light Ramp (가로 = 어두움→밝음)", 2D) = "white" {}
+        _RampStrength ("Ramp Strength", Range(0, 1)) = 1
+        _Bands        ("Light Bands (램프 없을 때)", Range(2, 6)) = 3
         _BandSoft     ("Band Softness", Range(0.001, 0.25)) = 0.035
         _Wrap         ("Light Wrap", Range(0, 1)) = 0.28
 
@@ -64,7 +69,7 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
                 float4 _ShadowTint; float _ShadowDepth;
                 float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
             CBUFFER_END
@@ -126,7 +131,7 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
                 float4 _ShadowTint; float _ShadowDepth;
                 float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
             CBUFFER_END
@@ -153,6 +158,10 @@ Shader "BRB/Toon"
                 return o;
             }
 
+            // 램프 텍스처 — 가로축이 "어두움(0) → 밝음(1)". 텍스처는 CBUFFER 밖에 둔다.
+            TEXTURE2D(_RampTex);
+            SAMPLER(sampler_RampTex);
+
             // 0~1 밝기를 N단으로 계단화. 경계는 _BandSoft만큼만 부드럽게 —
             // 완전히 각지면 곡면에서 계단이 지글거린다.
             float Posterize(float x, float bands, float soft)
@@ -164,6 +173,19 @@ Shader "BRB/Toon"
                 return (f + smoothstep(0.5 - soft * n, 0.5 + soft * n, frac0)) / n;
             }
 
+            /// 빛의 세기 t(0~1)를 **색**으로 바꾼다.
+            ///   램프가 있으면 그 색을, 없으면(기본 흰색 텍스처) 밴딩한 회색을 돌려준다.
+            ///   가장자리 픽셀을 피하려고 0.5픽셀 안쪽을 샘플한다 — 안 그러면 clamp 때문에
+            ///   양 끝 밴드가 한 줄 두껍게 잡힌다.
+            float3 LightRamp(float t, float bands, float soft, float strength)
+            {
+                float u = clamp(t, 0.004, 0.996);
+                float3 ramp = SAMPLE_TEXTURE2D(_RampTex, sampler_RampTex, float2(u, 0.5)).rgb;
+                float3 banded = Posterize(saturate(t), bands, soft).xxx;
+                return lerp(banded, ramp, saturate(strength));
+            }
+
+
             half4 frag (Varyings IN) : SV_Target
             {
                 float3 N = normalize(IN.normalWS);
@@ -174,11 +196,13 @@ Shader "BRB/Toon"
 
                 float ndl  = dot(N, L.direction);
                 float wrap = saturate((ndl + _Wrap) / (1.0 + _Wrap));
-                float lit  = Posterize(saturate(wrap * L.shadowAttenuation), _Bands, _BandSoft);
+                float t    = saturate(wrap * L.shadowAttenuation);
 
-                float3 shadowCol = _BaseColor.rgb * lerp(1.0, 1.0 - _ShadowDepth, 1.0 - lit) * _ShadowTint.rgb;
-                float3 litCol    = _BaseColor.rgb * L.color;
-                float3 col = lerp(shadowCol, litCol, lit);
+                // 램프가 밝기와 **색**을 동시에 준다. 예전엔 밝기(회색)만 계단으로 자르고
+                // 그림자 색은 _ShadowTint 하나로 눌렀는데, 그러면 어두운 쪽이 "같은 색의 어두움"이라
+                // 카툰 특유의 색 전이가 안 나온다(Flat Kit류와 갈리는 지점이 바로 여기다).
+                float3 ramp = LightRamp(t, _Bands, _BandSoft, _RampStrength);
+                float3 col  = _BaseColor.rgb * L.color * ramp;
 
                 #if defined(_ADDITIONAL_LIGHTS)
                     uint addCount = GetAdditionalLightsCount();
@@ -188,8 +212,8 @@ Shader "BRB/Toon"
                         float andl  = dot(N, AL.direction);
                         float awrap = saturate((andl + _Wrap) / (1.0 + _Wrap));
                         // 감쇠까지 계단화하면 램프 테두리가 동심원으로 끊긴다 — 각도만 계단화한다.
-                        float aband = Posterize(awrap, _Bands, _BandSoft);
-                        col += _BaseColor.rgb * AL.color * aband * AL.distanceAttenuation * AL.shadowAttenuation;
+                        float3 aramp = LightRamp(awrap, _Bands, _BandSoft, _RampStrength);
+                        col += _BaseColor.rgb * AL.color * aramp * AL.distanceAttenuation * AL.shadowAttenuation;
                     }
                 #endif
 
@@ -227,7 +251,7 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
                 float4 _ShadowTint; float _ShadowDepth;
                 float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
             CBUFFER_END
@@ -262,7 +286,7 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
                 float4 _ShadowTint; float _ShadowDepth;
                 float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
             CBUFFER_END
@@ -289,7 +313,7 @@ Shader "BRB/Toon"
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseColor;
                 float4 _OutlineColor; float _OutlineWidth;
-                float _Bands; float _BandSoft; float _Wrap;
+                float _Bands; float _BandSoft; float _Wrap; float _RampStrength;
                 float4 _ShadowTint; float _ShadowDepth;
                 float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
             CBUFFER_END
