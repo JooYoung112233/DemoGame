@@ -375,3 +375,58 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
   밝은 쪽이 뭉치고 물빠져 보인다 — PBR 룩에서는 이게 먼저다.
 - Forward+ 전환은 광원 제한을 풀지만, `BRB/Stylized`가 `GetAdditionalLightsCount()`를 그대로 도는
   방식이라 **광원을 놓친다**(이 저장소가 이미 겪은 버그 `637e7cc`). 셰이더 수정이 동반돼야 한다.
+
+## 셰이더 전면 백지화 (2026-09-10)
+
+> 사용자: *"지금까지 만들어둔 셰이더 다 제거해버려 처음부터 만들테니까 … 한개씩"*
+
+**커스텀 셰이더 13개를 전부 삭제했다.** `Assets/Shaders/`가 비었다.
+
+```
+BRB/Stylized   BRB/VisionDarkness  Spike/OccluderFX   BRB/AnomalyFog
+BRB/DamageOverlay  BRB/SpriteFlash  BRB/PlayerSprite  BRB/SpriteSheet
+BRB/SpriteBillboard  BRB/FloorPixel  BRB/WallPixel  BRB/PropPixel  BRB/DecalPixel
+```
+
+코드 12개 파일의 `Shader.Find("BRB/…")` / `Shader.Find("Spike/…")` 를 전부
+**`Universal Render Pipeline/Lit`** 으로 돌렸다 — 안 그러면 `Shader.Find`가 null을 반환해
+맵이 통째로 마젠타로 뜬다.
+
+### 같이 사라진 기능 (다시 만들어야 함)
+컷어웨이(`Spike/OccluderFX` — 씬·프리팹 18곳 참조) · 시야 어둠 · 피격 플래시 ·
+파손/풍화 오버레이 · 이상현상 안개.
+**씬·프리팹에 guid로 박힌 머티리얼은 마젠타로 뜬다** — 그레이박스 씬은 빌더 메뉴로 재생성하면 된다.
+
+### 다시 만들 때 반드시 피해야 할 함정 두 개 (실측으로 확인함)
+
+**① 추가 광원 그림자 — `GetAdditionalLight`는 오버로드를 골라 써야 한다.**
+사용자 지적: *"라이트가 전등에 달렸는데 마치 하늘에서 보는 것마냥 장애물 건너편도 보이더라"*.
+원인은 URP 소스에 있었다(`RealtimeLights.hlsl:245`):
+```hlsl
+Light GetAdditionalLight(uint i, float3 positionWS)                   // 2인자
+{ return GetAdditionalPerObjectLight(lightIndex, positionWS); }       // ← shadowAttenuation 안 건드림
+
+Light GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask) // 3인자
+{ ... light.shadowAttenuation = AdditionalLightShadow(...); }         // ← 여기서만 그림자
+```
+옛 `BRB/Stylized`는 2인자를 써서 `AL.shadowAttenuation`이 **항상 1**이었다. 그래서 착용 랜턴
+빛이 벽·상자를 그냥 통과했다. **반드시 `half4(1,1,1,1)`을 넘기는 3인자 쪽을 쓸 것.**
+
+**② Forward+로 바꾸면 `GetAdditionalLightsCount()`가 0을 돌려준다.**
+같은 파일 292행 — 클러스터 방식에서는 개수를 미리 셀 수 없어 0이다. 지금처럼
+`for (i < GetAdditionalLightsCount())`로 도는 셰이더는 Forward+에서 **추가 광원이 통째로 사라진다.**
+Forward+를 쓰려면 URP의 `LIGHT_LOOP_BEGIN/END` 매크로로 바꿔야 한다.
+(이 저장소는 이미 비슷한 사고를 한 번 겪었다 — `637e7cc` "추가 광원을 아예 안 받던 문제".)
+
+### 2D 잔재 정리 — **여기까지만 가능했다**
+지운 것: `Settings/Renderer2D.asset`, `Settings/URP-2D.asset`(둘 다 어디서도 참조 안 됨),
+`Editor/MapTool2DSceneBuilder.cs`(참조 0).
+
+⚠️ **나머지 2D는 못 지운다. 3D 맵 빌더가 그 위에 서 있다.**
+`GreyboxBuild.PrefabRoot = "Props2D/Prefabs/"` 이고, `Zone1GreyboxLayout`·`InteriorBuild`·
+`Zone1Interiors`·`Map3DBuild`가 전부 `GreyboxBuild.Floor/Wall/Prop/Car/…`를 부른다.
+즉 3D 그레이박스 맵은 **2D 프롭 프리팹 63개를 인스턴스화해서** 만들어지고, 이미 저장된
+씬들도 그 프리팹을 guid로 물고 있다. 한 번 지웠다가 이 사실을 발견하고 되돌렸다.
+`Prop2D*` · `PropLight2D` · `GroundShadow2D` · `MapTriggerZone2D` · `GreyboxPaletteBuilder` ·
+`Prop2DCatalogEditor` · `PropSyncMenu` · `Resources/Props2D` 는 **전부 살아 있는 자산이다.**
+진짜로 걷어내려면 `GreyboxBuild`를 `GreyboxMesh`(절차적 박스) 위로 옮기는 포팅이 선행돼야 한다.

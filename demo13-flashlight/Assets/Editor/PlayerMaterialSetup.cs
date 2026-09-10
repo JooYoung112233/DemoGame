@@ -14,7 +14,7 @@ public static class PlayerMaterialSetup
     [MenuItem("Tools/TopDown/초기설정/플레이어 머티리얼 생성")]
     static void Run()
     {
-        var shader = Shader.Find("BRB/PlayerSprite");
+        var shader = Shader.Find("Universal Render Pipeline/Lit");
         if (shader == null)
         {
             EditorUtility.DisplayDialog("플레이어 머티리얼",

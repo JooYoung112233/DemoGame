@@ -40,7 +40,7 @@ public class HitFlash : MonoBehaviour
         }
         else
         {
-            var shader = Shader.Find("BRB/SpriteFlash");
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) { enabled = false; return; }
             _mat = new Material(shader);
             target.material = _mat;

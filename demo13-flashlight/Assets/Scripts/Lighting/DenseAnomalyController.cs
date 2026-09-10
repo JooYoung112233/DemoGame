@@ -131,7 +131,7 @@ public class DenseAnomalyController : MonoBehaviour
         if (_quad != null && _quad.transform.parent == _cam.transform) return;
 
         Cleanup();
-        var shader = Shader.Find("BRB/AnomalyFog");
+        var shader = Shader.Find("Universal Render Pipeline/Lit");
         if (shader == null) { Debug.LogWarning("[DenseAnomaly] BRB/AnomalyFog 셰이더 못 찾음."); return; }
 
         _mat = new Material(shader);

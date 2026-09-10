@@ -94,7 +94,7 @@ public static class Greybox3D
     /// <paramref name="smooth"/>는 URP/Lit 폴백에서만 쓰인다 — 스타일라이즈드는 무광이 전제다.</summary>
     static Material Mat(Color c, float smooth)
     {
-        var sh = Shader.Find("BRB/Stylized");
+        var sh = Shader.Find("Universal Render Pipeline/Lit");
         if (sh != null)
         {
             var s = new Material(sh);
@@ -114,7 +114,7 @@ public static class Greybox3D
     /// 플레이어를 가리는 부분에 화면 공간 구멍을 뚫는다. 재질별 배선은 필요 없다.</summary>
     static Material Occ(Color c)
     {
-        var sh = Shader.Find("Spike/OccluderFX");
+        var sh = Shader.Find("Universal Render Pipeline/Lit");
         if (sh == null)
         {
             Debug.LogWarning("[Greybox3D] Spike/OccluderFX 셰이더 없음 — 컷어웨이 없이 굽는다(벽 뒤에서 플레이어가 가려진다).");

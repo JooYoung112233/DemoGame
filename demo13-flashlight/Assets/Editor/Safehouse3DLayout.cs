@@ -41,7 +41,7 @@ public static class Safehouse3DLayout
         var map = new GameObject("Map");
         int n = 0;
 
-        _occ       = Shader.Find("Spike/OccluderFX");
+        _occ       = Shader.Find("Universal Render Pipeline/Lit");
         _ground    = Lit(new Color(0.32f, 0.31f, 0.30f), 0.03f);
         _wallOut   = Occ(new Color(0.40f, 0.39f, 0.36f));
         _shopWall  = Occ(new Color(0.47f, 0.45f, 0.42f));
@@ -215,7 +215,7 @@ public static class Safehouse3DLayout
     /// 마을과 레이드가 한 게임으로 보인다.</summary>
     static Material Lit(Color c, float s)
     {
-        var sty = Shader.Find("BRB/Stylized");
+        var sty = Shader.Find("Universal Render Pipeline/Lit");
         if (sty != null)
         {
             var sm = new Material(sty);

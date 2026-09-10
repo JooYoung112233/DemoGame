@@ -75,7 +75,7 @@ public class VisionDarkness : MonoBehaviour
     ///    밝음↔어둠 그라디언트가 통째로 사라진다. 그래서 전용 셰이더를 쓴다.</summary>
     static Material BuildMaterial()
     {
-        var sh = Shader.Find("BRB/VisionDarkness");
+        var sh = Shader.Find("Universal Render Pipeline/Lit");
         if (sh == null)
         {
             Debug.LogWarning("[VisionDarkness] BRB/VisionDarkness 셰이더 없음 — 어둠 오버레이가 안 보일 수 있다.");

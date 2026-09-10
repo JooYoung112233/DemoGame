@@ -44,7 +44,7 @@ public static class GreyboxMesh
     {
         if (_mats.TryGetValue(c, out var cached) && cached != null) return cached;
 
-        var sh = Shader.Find("BRB/Stylized")
+        var sh = Shader.Find("Universal Render Pipeline/Lit")
               ?? Shader.Find("Universal Render Pipeline/Lit")
               ?? Shader.Find("Standard");
         var m = new Material(sh) { name = $"gb_{ColorUtility.ToHtmlStringRGB(c)}" };

@@ -373,7 +373,7 @@ public class Breakable : MonoBehaviour
             if (c != null && c.name == "DamageOverlay") DestroySafe(c.gameObject);
         }
 
-        var shader = Shader.Find("BRB/DamageOverlay");
+        var shader = Shader.Find("Universal Render Pipeline/Lit");
         if (shader == null) { Debug.LogWarning("[Breakable] BRB/DamageOverlay 못 찾음."); return; }
 
         _overlayMat = new Material(shader);

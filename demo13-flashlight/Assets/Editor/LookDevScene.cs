@@ -30,7 +30,7 @@ public static class LookDevScene
         var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
         ground.name = "Ground";
         ground.transform.localScale = new Vector3(4f, 1f, 4f);
-        var groundMat = new Material(Shader.Find("BRB/Stylized"));
+        var groundMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         groundMat.SetColor("_BaseColor", new Color(0.38f, 0.38f, 0.40f));
         ground.GetComponent<Renderer>().sharedMaterial = groundMat;
 
@@ -39,7 +39,7 @@ public static class LookDevScene
         wall.name = "BackWall";
         wall.transform.position = new Vector3(0f, 2.5f, 3.2f);
         wall.transform.localScale = new Vector3(14f, 5f, 0.3f);
-        var wallMat = new Material(Shader.Find("BRB/Stylized"));
+        var wallMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         wallMat.SetColor("_BaseColor", new Color(0.22f, 0.23f, 0.27f));
         wall.GetComponent<Renderer>().sharedMaterial = wallMat;
 
@@ -105,7 +105,7 @@ public static class LookDevScene
         pole.name = "기준봉 1.8m";
         pole.transform.position = new Vector3(-2.6f, 0.9f, 0f);
         pole.transform.localScale = new Vector3(0.06f, 1.8f, 0.06f);
-        var poleMat = new Material(Shader.Find("BRB/Stylized"));
+        var poleMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         poleMat.SetColor("_BaseColor", new Color(0.85f, 0.72f, 0.25f));
         pole.GetComponent<Renderer>().sharedMaterial = poleMat;
 
@@ -207,7 +207,7 @@ public static class LookDevScene
 
     static Material Mat(Color c)
     {
-        var m = new Material(Shader.Find("BRB/Stylized"));
+        var m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         m.SetColor("_BaseColor", c);
         return m;
     }
