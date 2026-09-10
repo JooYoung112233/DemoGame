@@ -44,6 +44,7 @@ public sealed class BanditEnemyVisual : MonoBehaviour
         var toon = Shader.Find("BRB/Toon");
         if (toon != null)
         {
+            OutlineNormals.Apply(view.gameObject);   // 하드 엣지 모델이라 외곽선용 평균 법선을 구워야 한다
             foreach (var r in meshes)
             {
                 var src = r.sharedMaterials;

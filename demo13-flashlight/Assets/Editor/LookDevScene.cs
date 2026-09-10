@@ -214,6 +214,9 @@ public static class LookDevScene
 
     static void ApplyToon(GameObject go, Shader toon, string name)
     {
+        // ⚠️ 외곽선용 평균 법선은 **런타임에** 굽는다(LookDevCameraSwitcher.Start).
+        //    여기서 구우면 복제 메시가 에셋이 아니라서 씬을 저장하는 순간 참조가 깨진다
+        //    — 실제로 캐릭터가 통째로 청록색 덩어리로 렌더링됐다.
         if (toon == null) return;
         foreach (var r in go.GetComponentsInChildren<Renderer>(true))
         {

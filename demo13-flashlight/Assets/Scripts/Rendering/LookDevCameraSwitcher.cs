@@ -25,6 +25,11 @@ public class LookDevCameraSwitcher : MonoBehaviour
             UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(s);
         }
 
+        // 외곽선용 평균 법선 — 하드 엣지 모델이라 이게 없으면 테두리가 조각난다.
+        // 인게임과 같이 **런타임에** 굽는다(에디터에서 구우면 씬 저장 때 메시 참조가 깨진다).
+        foreach (var root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+            OutlineNormals.Apply(root);
+
         _cams = FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         System.Array.Sort(_cams, (a, b) => string.CompareOrdinal(a.name, b.name));
         FrameLampLane();

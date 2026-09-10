@@ -32,11 +32,15 @@ Shader "BRB/Toon"
 
         [Header(Shading)]
         _ShadowTint   ("Shadow Tint", Color) = (0.42, 0.47, 0.58, 1)
-        _ShadowDepth  ("Shadow Depth", Range(0, 1)) = 0.45
+        _ShadowDepth  ("Shadow Depth", Range(0, 1)) = 0.30
         _RimColor     ("Rim Color", Color) = (1, 0.96, 0.88, 1)
         _RimPower     ("Rim Power", Range(0.5, 8)) = 3.0
         _RimStrength  ("Rim Strength", Range(0, 1)) = 0.22
-        _VertexAO     ("Vertex AO Strength", Range(0, 1)) = 0.50
+        // ⚠️ 기본 0. 이 값은 **버텍스 컬러에 AO를 구워 둔 메시**에만 의미가 있는데,
+        //    현재 캐릭터 모델(치비·밴딧)은 버텍스 컬러가 아예 없다(실측: colors.Length == 0).
+        //    그 상태에서 곱하면 IN.color가 정의되지 않은 값이라 모델이 통째로 어두워지거나 얼룩진다.
+        //    AO를 구운 메시를 쓸 때만 머티리얼에서 올린다.
+        _VertexAO     ("Vertex AO Strength", Range(0, 1)) = 0
     }
 
     SubShader
@@ -65,7 +69,11 @@ Shader "BRB/Toon"
                 float4 _RimColor; float _RimPower; float _RimStrength; float _VertexAO;
             CBUFFER_END
 
-            struct OA { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
+            // ⚠️ 밀기 방향은 NORMAL이 아니라 **TANGENT**에서 읽는다 — OutlineNormals가 거기에
+            //    "위치를 공유하는 정점들의 평균 법선"을 구워 넣는다. 하드 엣지 모델은 같은 자리
+            //    정점들의 법선이 갈려 있어, NORMAL로 밀면 테두리가 조각조각 찢어진다.
+            //    탄젠트가 비어 있으면(안 구운 메시) 법선으로 자동 폴백한다.
+            struct OA { float4 positionOS : POSITION; float3 normalOS : NORMAL; float4 tangentOS : TANGENT; };
             struct OV { float4 positionCS : SV_POSITION; };
 
             OV outlineVert (OA IN)
@@ -75,7 +83,8 @@ Shader "BRB/Toon"
 
                 // 법선을 **뷰공간**으로 옮겨 화면상의 밀 방향을 얻는다. 뒤통수를 보고 있는 정점은
                 // xy 성분이 0에 가까워 normalize가 터지므로 안전값을 둔다.
-                float3 nWS = TransformObjectToWorldNormal(IN.normalOS);
+                float3 pushOS = (dot(IN.tangentOS.xyz, IN.tangentOS.xyz) > 1e-6) ? IN.tangentOS.xyz : IN.normalOS;
+                float3 nWS = TransformObjectToWorldNormal(pushOS);
                 float3 nVS = TransformWorldToViewDir(nWS);
                 float2 dir = nVS.xy;
                 float  len = max(length(dir), 1e-4);

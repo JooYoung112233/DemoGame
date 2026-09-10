@@ -56,9 +56,10 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
             if (renderer.name == "Hero_SwordProxy") { sword = renderer; sword.enabled = false; }
             renderer.shadowCastingMode = ShadowCastingMode.On;
             renderer.receiveShadows = true;
-            // A null override keeps the prefab's editable material assets, including
+            // A null override keeps the prefab.s editable material assets, including
             // textures, emission and shader settings, visible in play mode.
             if (shader == null) continue;
+            OutlineNormals.Apply(renderer.gameObject);   // 카툰 외곽선용 평균 법선(하드 엣지 대응)
             Material[] palette = renderer.sharedMaterials;
             for (int i = 0; i < palette.Length; i++)
             {
