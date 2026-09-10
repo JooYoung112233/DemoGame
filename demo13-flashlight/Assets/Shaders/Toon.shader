@@ -81,6 +81,11 @@ Shader "BRB/Toon"
             Tags { "LightMode"="SRPDefaultUnlit" }
             Cull Front
             ZWrite On
+            // 깊이 바이어스를 렌더 상태로도 조금 준다. URP는 SRPDefaultUnlit을 UniversalForward
+            // **뒤에** 그리므로 깊이가 비기면 외곽선이 이긴다 — 확실히 지도록 살짝 뒤로 민다.
+            // (어깨가 통째로 검던 건 이것 때문이 아니라 메시 안팎이 뒤집혀 있어서였다.
+            //  그건 MeshNormalRepair가 임포트 시점에 잡는다. 여기 값은 z-파이팅 보험용이라 작게.)
+            Offset 1, 4
 
             HLSLPROGRAM
             #pragma vertex outlineVert
@@ -112,9 +117,14 @@ Shader "BRB/Toon"
                 //   NDC로 밀면 카메라 near/far에 따라 실제 거리가 달라져 예측이 안 된다 —
                 //   너무 밀면 지면 뒤로 들어가 **외곽선이 통째로 사라진다**(실제로 그랬다).
                 //   월드 공간 미터로 밀면 "3cm 뒤"가 어떤 카메라에서도 3cm 뒤다.
-                float3 posWS = TransformObjectToWorld(IN.positionOS.xyz);
-                float3 toCam = GetWorldSpaceViewDir(posWS);
-                posWS -= normalize(toCam) * _OutlinePush;
+                //
+                //   ⚠️ 밀 방향은 **카메라의 정면 축**이어야 한다. 예전엔 GetWorldSpaceViewDir
+                //   (= 그 점에서 카메라 '위치'로 가는 방향)를 썼는데, 이 게임은 오소 카메라라
+                //   화면 중앙에서 멀어질수록 그 방향이 옆으로 기울어 헐이 **가로로 밀렸다**.
+                //   UNITY_MATRIX_V의 3번째 행이 카메라의 뒤쪽 축(월드)이라, 그 반대가 정면이다.
+                float3 posWS   = TransformObjectToWorld(IN.positionOS.xyz);
+                float3 viewFwd = -UNITY_MATRIX_V[2].xyz;   // 카메라가 향하는 방향
+                posWS += viewFwd * _OutlinePush;           // 카메라에서 멀어지는 쪽
                 float4 clip = TransformWorldToHClip(posWS);
 
                 // 법선을 **뷰공간**으로 옮겨 화면상의 밀 방향을 얻는다. 뒤통수를 보고 있는 정점은
