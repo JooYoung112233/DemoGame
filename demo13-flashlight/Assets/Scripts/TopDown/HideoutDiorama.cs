@@ -50,6 +50,7 @@ public partial class HideoutDiorama : MonoBehaviour
     void Awake() => Active = true;
     void OnDestroy()
     {
+        RestorePresentation();
         Active = false;
         if (CameraFollow.Instance != null) CameraFollow.Instance.ClearFocus();   // 나갈 때만 캐릭터 추적 복구
     }
@@ -84,6 +85,7 @@ public partial class HideoutDiorama : MonoBehaviour
         if (interaction != null) interaction.enabled = false;
 
         _view = _player.transform.Find("Character3D");
+        ApplyPresentation();
 
         // ① 카메라는 **캐릭터가 아니라 방**에 고정한다.
         //    디오라마는 무대다 — 무대는 고정이고 배우가 움직인다.
@@ -110,6 +112,12 @@ public partial class HideoutDiorama : MonoBehaviour
         // ⚠️ uiOpen만 보면 UI가 열리기도 전에(같은 프레임) 복귀가 발동해
         //    시설 선택이 즉시 취소된다.
         bool dockOpen = HideoutDockPanel.Instance != null && HideoutDockPanel.Instance.IsOpen;
+        if (_frameWidth != Screen.width || _frameHeight != Screen.height || (_cam != null && Quaternion.Angle(_frameRotation, _cam.transform.rotation) > .1f))
+        {
+            if (dockOpen && _current != null)
+                FrameInto(HideoutDockPanel.FreeScreenRect(_current.moduleKey, _current.dock), _current.cameraBias);
+            else FrameRoom();
+        }
         // ② 닫아도 **대기 자리로 돌아가지 않는다.** 방금 쓰던 시설 앞에 그대로 서 있는 편이
         //    자연스럽고, 의자 왕복이 사라져 카메라 이동이 절반으로 준다.
         //    의자는 '처음 들어왔을 때의 자세'로만 쓴다.

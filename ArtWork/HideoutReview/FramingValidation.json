@@ -1,0 +1,27 @@
+{
+  "fitsUiFreeArea": true,
+  "min": "(0.30, 0.12)",
+  "max": "(0.70, 0.81)",
+  "free": "(x:0.00, y:0.10, width:1.00, height:0.73)",
+  "renderers": 95,
+  "facilities": 9,
+  "bodyScale": "(0.84, 0.84, 0.84)",
+  "lights": [
+    {
+      "name": "LanternLight",
+      "intensity": 0.25
+    },
+    {
+      "name": "WorkbenchWarmLight",
+      "intensity": 0.55
+    },
+    {
+      "name": "Sun3D",
+      "intensity": 0.95
+    },
+    {
+      "name": "Bulb",
+      "intensity": 0.45
+    }
+  ]
+}

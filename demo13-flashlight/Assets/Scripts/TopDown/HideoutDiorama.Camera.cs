@@ -43,6 +43,9 @@ public partial class HideoutDiorama
     Vector2 _wantedBias;
     float   _wantedOrtho;
     bool    _focusApplied;
+    int _frameWidth, _frameHeight;
+    Quaternion _frameRotation;
+    CameraFollow _focusRecipient;
 
     /// <summary>화면 전체를 쓰는 기본 프레이밍(아무것도 안 눌렀을 때). 상단 띠만 피한다.</summary>
     void FrameRoom() => FrameInto(HideoutDockPanel.FreeScreenRect(null, HideoutFacilityAnchor.Dock.None));
@@ -55,12 +58,51 @@ public partial class HideoutDiorama
     {
         Vector2 center = new Vector2(free.x + free.width * 0.5f, free.y + free.height * 0.5f);
         _wantedBias = overrideBias != Vector2.zero ? overrideBias : center - new Vector2(0.5f, 0.5f);
-        _framed     = _wantedBias.sqrMagnitude > 0.000001f;
+        // The default room also has a vertical bias because of HUD margins; it is not an open dock.
+        _framed = free.width < .999f || free.yMin > 112f / HideoutDockPanel.RefHeight + .001f;
+        _frameWidth = Screen.width; _frameHeight = Screen.height;
+        if (_cam != null) _frameRotation = _cam.transform.rotation;
 
         // 방이 기본 시야에서 차지하는 반지름 비율(가로/세로)을 기준으로 필요한 오소를 구한다.
         float needX = RoomOrtho * RoomHalfX / Mathf.Max(free.width  * 0.5f, 0.08f);
         float needY = RoomOrtho * RoomHalfY / Mathf.Max(free.height * 0.5f, 0.08f);
         _wantedOrtho = Mathf.Max(RoomOrtho, Mathf.Max(needX, needY));
+
+        // Fit the actual art silhouette, including the high back wall, instead of estimates from the old room.
+        if (_cam != null && _roomFocus != null)
+        {
+            Transform art = null;
+            foreach (var root in gameObject.scene.GetRootGameObjects())
+                foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                    if (t.name == "Hideout02_Placed") { art = t; break; }
+            if (art != null)
+            {
+                Vector2 min = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+                Vector2 max = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+                foreach (var mf in art.GetComponentsInChildren<MeshFilter>())
+                {
+                    var renderer = mf.GetComponent<Renderer>();
+                    if (mf.sharedMesh == null || renderer == null || !renderer.enabled) continue;
+                    var bounds = mf.sharedMesh.bounds;
+                    for (int corner = 0; corner < 8; corner++)
+                    {
+                        Vector3 sign = new Vector3((corner & 1) == 0 ? -1 : 1, (corner & 2) == 0 ? -1 : 1, (corner & 4) == 0 ? -1 : 1);
+                        Vector3 world = mf.transform.TransformPoint(bounds.center + Vector3.Scale(bounds.extents, sign)) - _roomFocus.position;
+                        Vector2 projected = new Vector2(Vector3.Dot(world, _cam.transform.right), Vector3.Dot(world, _cam.transform.up));
+                        min = Vector2.Min(min, projected); max = Vector2.Max(max, projected);
+                    }
+                }
+                if (!float.IsInfinity(min.x))
+                {
+                    float aspect = Mathf.Max(.1f, _cam.aspect);
+                    // Small margin around the complete silhouette, within the UI-free rectangle.
+                    _wantedOrtho = Mathf.Max((max.x - min.x) / (2f * aspect * Mathf.Max(.1f, free.width)),
+                        (max.y - min.y) / (2f * Mathf.Max(.1f, free.height))) * 1.06f;
+                    Vector2 projectedCenter = (min + max) * .5f;
+                    _wantedBias -= new Vector2(projectedCenter.x / (2f * _wantedOrtho * aspect), projectedCenter.y / (2f * _wantedOrtho));
+                }
+            }
+        }
 
         _focusApplied = false;
         TryApplyFocus();
@@ -70,10 +112,14 @@ public partial class HideoutDiorama
     /// Start에서 한 번만 시도하면 조용히 실패해 카메라가 계속 캐릭터를 따라간다 — 붙을 때까지 재시도.</summary>
     void TryApplyFocus()
     {
-        if (_focusApplied || _roomFocus == null) return;
-        var cf = CameraFollow.Instance;
+        if (_roomFocus == null) return;
+        var cf = Camera.main != null ? Camera.main.GetComponent<CameraFollow>() : CameraFollow.Instance;
         if (cf == null) return;
+        // Systems may remove a duplicate rig after our Start; bind the surviving camera once ready.
+        if (_focusApplied && _focusRecipient == cf) return;
+        _cam = cf.GetComponent<Camera>();
         cf.SetFocus(_roomFocus, _wantedBias, _wantedOrtho);
+        _focusRecipient = cf;
         _focusApplied = true;
     }
 

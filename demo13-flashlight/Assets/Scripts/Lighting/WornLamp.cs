@@ -65,6 +65,15 @@ public class WornLamp : MonoBehaviour
     DayNightCycle _dayNight;
     TopDownPlayer _player;
     float _gradeRange = 1f, _gradeIntensity = 1f;   // 등급 배율(미착용 = 1)
+    bool _indoorPresentation;
+
+    /// <summary>Lit hideout presentation: keep the worn lamp on, but avoid washing out the character.</summary>
+    public void SetIndoorPresentation(bool indoor)
+    {
+        if (_indoorPresentation == indoor) return;
+        _indoorPresentation = indoor;
+        Apply(_dayNight != null && _dayNight.IsNight);
+    }
 
     void Awake()
     {
@@ -155,7 +164,8 @@ public class WornLamp : MonoBehaviour
     {
         if (_light == null) return;
         _light.range = baseRange * _gradeRange;
-        _light.intensity = (isNight ? nightIntensity : dayIntensity) * _gradeIntensity;
+        float presentation = _indoorPresentation ? .15f : 1f;
+        _light.intensity = (isNight ? nightIntensity : dayIntensity) * _gradeIntensity * presentation;
         _light.spotAngle = coneAngle;
         _light.innerSpotAngle = coneAngle * innerRatio;
         EnsureSpill();
@@ -164,13 +174,13 @@ public class WornLamp : MonoBehaviour
             // 주변광은 빔에 비례하되 **바닥값을 둔다** — 낮이나 실내에서 0에 가까워지면
             // "내 주변은 늘 보인다"가 깨져서, 발밑조차 안 보인다.
             _spill.intensity = Mathf.Max(spillFloor,
-                                         (isNight ? nightIntensity : dayIntensity) * _gradeIntensity * spillRatio);
+                                         (isNight ? nightIntensity : dayIntensity) * _gradeIntensity * spillRatio) * presentation;
             _spill.range   = spillRange * _gradeRange;
             _spill.shadows = spillCastsShadows ? LightShadows.Soft : LightShadows.None;
         }
         if (_glow != null)
         {
-            _glow.intensity = bodyGlowIntensity;
+            _glow.intensity = bodyGlowIntensity * presentation;
             _glow.range = bodyGlowRange;
         }
     }

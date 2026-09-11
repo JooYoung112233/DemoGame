@@ -6,6 +6,7 @@ try{
  var kit=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<Transform>(true)).Single(t=>t.name=="Hideout02_Placed");
  var anchors=kit.GetComponentsInChildren<HideoutFacilityAnchor>();var failures=new System.Collections.Generic.List<string>();
  foreach(var a in anchors)foreach(var c in kit.GetComponentsInChildren<BoxCollider>()){
+  if(!c.enabled||!c.gameObject.activeInHierarchy)continue;
   float distance=float.MaxValue;
   foreach(float height in new[]{.28f,.58f,.88f,1.18f,1.47f}){
    var sample=a.StandPosition+Vector3.up*height;var q=c.transform.InverseTransformPoint(sample)-c.center;var e=c.size*.5f;
