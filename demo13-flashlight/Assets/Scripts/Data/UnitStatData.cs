@@ -101,10 +101,10 @@ public class UnitStatData
     // ===== 보상 =====
     [Header("보상")]
     public int expReward = 10;
-    [Tooltip("(미사용 — 어디서도 읽지 않는다. 적 현금은 아래 cashMin/cashMax)")]
+    [Tooltip("(미사용 — 어디서도 읽지 않는다. 적이 떨구는 고철은 아래 cashMin/cashMax)")]
     public int goldReward = 5;
-    [Tooltip("시체에 넣는 현금(◈) 최소·최대 — 현금 아이템 1개 = ◈1, 들고 탈출해 귀환하면 스크랩으로 정산. " +
-             "0이면 없음. docs/economy.md §적 현금 드랍.")]
+    [Tooltip("시체에 넣는 고철 화폐(◈) 최소·최대 — 1개 = ◈1, 들고 탈출해 귀환하면 ◈에 더해진다. " +
+             "필드 이름은 옛 현금 시절 그대로(데이터 보존). 0이면 없음. docs/economy.md §적 고철 드랍.")]
     [Min(0)] public int cashMin = 0;
     [Min(0)] public int cashMax = 0;
 

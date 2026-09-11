@@ -262,14 +262,14 @@
 - ① **멀리서 보이는 표시** — 시체 위에 **가장 좋은 내용물의 희귀도 색** 빛. 다 비우면 꺼지고 라벨이 "빈 시체"가 된다. 시야콘 밖에선 숨긴다(위치 노출 방지).
 - ② **빠른 루팅 목록** — 열면 목록으로 나열, 클릭 한 번에 가져오기 + "전부 가져가기". 인벤이 슬롯형(2026-09-09)이라 잘 맞는다.
 - ③ **지닌 장비 그대로** — 적이 쓰던 무기(방망이·권총·소총)와 입은 장비가 시체에 들어 있다. 총·탄약은 2026-09-11 "나중에" 결정과 묶어 **2단계**(소총 아이템이 아직 없다).
-- ④ **현금 드랍** — 현금 아이템(가방 1칸·무게 0, 탈출 후 귀환 시 ◈스크랩 자동 정산, 사망 시 손실). 금액 일반 50~150 · 총기 80~200 · 탱크 150~400. 기준선은 [economy.md](economy.md)에도 기록.
+- ④ **돈 드랍** — ⚠️ **2026-09-11 현금 → 고철 화폐 아이템(`scrap_money`, "◈ 고철")으로 교체**(재화 역할 결정: 현금은 퀘스트·이벤트 전용, [economy.md §적 고철 드랍](economy.md)). 형태·금액은 그대로 — 원래 기록: 현금 아이템(가방 1칸·무게 0, 탈출 후 귀환 시 ◈스크랩 자동 정산, 사망 시 손실). 금액 일반 50~150 · 총기 80~200 · 탱크 150~400. 기준선은 [economy.md](economy.md)에도 기록.
 - ⑤ **래그돌** — 사망 순간 기울이는 연출(현재 `BanditEnemyVisual` 사망 85° 기울기) 대신 물리 래그돌로 무너진다. 몸이 멈추면(또는 수 초 뒤) 고정하고 뒤지기 상호작용을 붙인다. 3D 밴딧 리그(SimpleHero_Rig) 기준.
 - 구현 순서: 플레이어 총격(에임·반동·총기/탄 스펙) 다음.
 
 **구현 (2026-09-11 — ①②④⑤, ③은 2단계)**
 - ① `Combat/CorpseMarker` — 시체 루트에 붙는다. 얇은 빛기둥(2.2m, 조명 무관 Unlit — 밤에도 읽힘) + 작은 점광. 색 = 내용물(가방 속까지) 최고 희귀도의 `RarityColor`. `LootContainer.Grid.OnChanged`로 갱신, 비면 꺼지고 라벨 "빈 시체". 0.2초마다 `PlayerVision.CanSee`로 시야콘 밖이면 숨김. 래그돌이 밀려나면 엉덩이 위로 따라간다.
 - ② `UI/CorpseLootUI` — `InteractableObject.HandleContainer`가 `CorpseMarker`가 붙은 컨테이너면 이걸 연다(일반 상자는 기존 캐릭터 패널). 화면 오른쪽 목록, 행 = 희귀도 색 + 이름 + 값어치(◈판매가×수량). 클릭/E 1개, F·버튼 전부, Tab 자세히(기존 컨테이너 창), Esc·3m 이탈 시 닫힘. 가져오기는 바닥 줍기와 같은 훅(`RaidManager.TrackLoot` + 수집 퀘스트 카운트)을 탄다. `UIManager`(Esc·CloseAll·IsAnyUIOpen)에 등록.
-- ④ 현금 = `Items/Valuable/Cash.asset`(itemId `cash`, 1개 = ◈1, 무게 0) — `EnemyController.AddCash`가 `UnitStatData.cashMin~cashMax`만큼 시체에 넣는다. `RaidManager.OnExtractSuccess`가 XP 정산 **뒤**·세이브 커밋 **전**에 `CashWallet.SettleFromInventory`로 인벤(가방 속 가방까지)의 현금을 ◈스크랩으로 바꾼다.
+- ④ 고철 화폐 = `Items/Valuable/ScrapMoney.asset`(itemId `scrap_money`, 1개 = ◈1, 무게 0 — 2026-09-11 현금에서 교체) — `EnemyController.AddScrap`이 `UnitStatData.cashMin~cashMax`만큼 시체에 넣는다. `RaidManager.OnExtractSuccess`가 XP 정산 **뒤**·세이브 커밋 **전**에 `ScrapWallet.SettleFromInventory`로 인벤(가방 속 가방까지)의 고철 화폐를 ◈로 바꾼다. 현금(`cash`)은 정산하지 않는다.
 - ⑤ `Combat/BanditRagdoll` — 사망 시 `BanditEnemyVisual.Die(push)`가 애니메이터를 끄고 뼈 11개(엉덩이·가슴·머리·양팔 2마디·양다리 2마디)에 강체·콜라이더·`CharacterJoint`를 런타임으로 붙인다. 크기는 몸 높이 비례, 뼈의 FBX 100배 스케일은 월드 거리로 재 로컬로 환산. 한 몸의 부위끼리는 충돌 무시(겹침 폭발 방지). 레이어 12 `Corpse` — 플레이어·적과 충돌 안 함(런타임 `IgnoreLayerCollision`). "플레이어 → 적" 방향으로 밀려 넘어지고, 멈추거나 2.5초 지나면 굳혀 콜라이더를 끈다(총알·시야 판정에 안 걸리게). 뼈를 못 찾으면 예전 기울기 연출.
 - 준비 도구: `tools/setup_corpse_loot.cs`(현금 아이템 · StatDB 현금 · 레이어 이름, 재실행 가능).
 
@@ -314,6 +314,7 @@ GameTuning `noiseIdle/Crouch/Walk/Run/Attack/Door/UiMax`, `barricadeNoiseRadius`
 | 날짜 | 내용 |
 |---|---|
 | **2026-09-11** | **전환·방향·총 데이터·그로기 결정 (§무기 구성 결정).** 질문 4개 → 사용자: 무기 전환 = **퀵슬롯 숫자키** · 근접 방향 = **공격 순간 커서 쪽** · 총 수치 = **`WeaponData` 한 곳으로 전부**(밴딧 포함) · 그로기 = **데이터 유지**(80·160, 문서가 틀렸던 것). |
+| **2026-09-11** | **밴딧 돈 드랍 = 현금 → 고철 화폐.** 재화 역할 결정(주 재화 = 고철, 현금 = 퀘스트·이벤트 전용)에 따라 사망 루팅 ④를 고철 화폐 아이템(`scrap_money`)으로. 결정·구현은 [economy.md §재화 역할 · §적 고철 드랍](economy.md). |
 | **2026-09-11** | **그로기 조정 (사용자 "그로기 조정해주고", 값 위임).** 데이터 값(약공 5 / 밴딧 80·감쇠 10)에선 약공만으로 기절이 절대 안 쌓였다. → 플레이어 약공 5→**14**(콤보 2·3단 6·8→16·20)·강공 25→**32**·풀차지 45→**58**(StatDB + `Bat_*` 공격 에셋 4개) / 일반 밴딧 3종 80·10→**60·5** / 중장 160·8→**120·4** / `bandit_ranged` 55·12→**45·6**. 기절 시간은 그대로. 일반 밴딧 = 약공 6대·권총 5발. |
 | **2026-09-11** | **총 수치 `WeaponData` 한 곳으로 통합 (사용자 "한 곳으로 전부").** 총기 밴딧이 총 종류 enum + 절대 수치(`attackDamage`=탄 피해, `projectileSpeed`)를 따로 들던 것을 → StatDB `rangedWeaponData`(플레이어와 같은 에셋) + 적 전용 `rangedDamageMult`·`rangedBulletSpeedMult`로. 배율은 **기존 값이 그대로 나오게**(권총 14×0.643=9 / 42×0.381=16, 소총 12×0.5=6 / 50×0.4=20). 밴딧 모델도 총의 `firearmStance`로. **`Weapon_Rifle545` 신설**(5.45x39·연사 600rpm·피해 12·탄속 50·사거리 20 — **가안**, 플레이어 소총 아이템은 아직 없음). 거리 감쇠 상수 → `GameTuning.gunFalloffStart/EndMult`. `WeaponData`를 공통/근접/총 칸으로 정리 + `WeaponDataEditor`(해당 칸만 표시). 검증: Zone1에서 권총 밴딧 탄 9.00·16.00, 소총 6.00·20.00(통합 전과 같음), 근접 밴딧은 근접 그대로. |
 | **2026-09-11** | **근접 = 주력으로 정정.** 사용자: "근접도 주력이긴 해, 좀보이드처럼" — 바로 아래 행의 "근접 = 보조 무기"를 **총과 근접 둘 다 주력**으로 고쳤다. |

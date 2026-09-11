@@ -173,7 +173,7 @@ public class CorpseLootUI : MonoBehaviour
     static string Label(ItemInstance it)
     {
         if (it == null || it.data == null) return "(사라짐)";
-        if (it.data.itemId == CashWallet.ItemId) return $"현금 ◈{it.stackCount:N0}";
+        if (it.data.itemId == ScrapWallet.ItemId) return $"고철 ◈{it.stackCount:N0}";
         // DisplayName엔 이미 수량이 붙어 있어 "x2 x2"가 됐다 — 원래 이름에 한 번만 붙인다.
         return it.stackCount > 1 ? $"{it.data.displayName} x{it.stackCount}" : it.data.displayName;
     }
