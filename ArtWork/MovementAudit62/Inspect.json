@@ -1,0 +1,327 @@
+{
+  "playing": true,
+  "timeScale": 1.0,
+  "fixedDeltaTime": 0.0199999921,
+  "scene": "Safehouse",
+  "virtualInput": false,
+  "playerFields": {
+    "scale": 1.0,
+    "matchSpeed": false,
+    "walkClipSpeed": 0.34,
+    "runClipSpeed": 0.52,
+    "maxCadence": 2.4
+  },
+  "prefabFields": {
+    "scale": 1.0,
+    "matchSpeed": false,
+    "walkClipSpeed": 0.34,
+    "runClipSpeed": 0.52,
+    "maxCadence": 2.4
+  },
+  "stat": {
+    "maxHp": 100.0,
+    "moveSpeed": 4.0,
+    "sprintSpeedMultiplier": 1.6,
+    "crouchSpeedMultiplier": 0.5,
+    "moveAccel": 45.0,
+    "moveDecel": 80.0,
+    "sprintStaminaCost": 12.0,
+    "sprintMinStamina": 10.0,
+    "motions": [
+      {
+        "anim": "idle",
+        "animSpeed": 1.0,
+        "distance": 0.0
+      },
+      {
+        "anim": "walk",
+        "animSpeed": 1.0,
+        "distance": 0.0
+      },
+      {
+        "anim": "run",
+        "animSpeed": 1.0,
+        "distance": 0.0
+      },
+      {
+        "anim": "crouch",
+        "animSpeed": 1.0,
+        "distance": 0.0
+      },
+      {
+        "anim": "crouch_walk",
+        "animSpeed": 1.0,
+        "distance": 0.0
+      },
+      {
+        "anim": "attack",
+        "animSpeed": 1.0,
+        "distance": 0.0
+      },
+      {
+        "anim": "roll",
+        "animSpeed": 1.0,
+        "distance": 0.0
+      }
+    ],
+    "lightDamage": 8.0,
+    "lightRange": 1.2,
+    "lightStaminaCost": 6.0,
+    "lightGroggy": 14.0,
+    "lightCooldown": 0.12,
+    "lightComboMax": 3,
+    "lightComboWindow": 0.6,
+    "lightCombo2Damage": 9.0,
+    "lightCombo2Groggy": 16.0,
+    "lightCombo3Damage": 12.0,
+    "lightCombo3Groggy": 20.0,
+    "lightCombo3StaminaCost": 8.0,
+    "heavyDamage": 20.0,
+    "heavyRange": 1.7,
+    "heavyStaminaCost": 22.0,
+    "heavyGroggy": 32.0,
+    "heavyChargeTime": 0.6,
+    "heavyMaxCharge": 1.5,
+    "heavyFullDamage": 32.0,
+    "heavyFullStaminaCost": 35.0,
+    "heavyFullGroggy": 58.0,
+    "heavyCooldown": 0.8,
+    "dodgeStaminaCost": 15.0,
+    "dodgeDistance": 3.0,
+    "dodgeDuration": 0.3,
+    "dodgeInvincibleDuration": 0.26,
+    "dodgeCooldown": 0.5,
+    "maxStamina": 100.0,
+    "staminaRegen": 15.0,
+    "staminaRegenDelay": 1.0,
+    "exhaustionDuration": 0.8
+  },
+  "player": {
+    "pos": "(55.41, 0.00, 16.90)",
+    "IsCrouching": false,
+    "IsSprinting": false,
+    "IsExhausted": false,
+    "CanMove": true,
+    "velocity": "(-1.30, 0.00, -4.00)"
+  },
+  "weapon": null,
+  "animator": {
+    "name": "ChibiSurvivor",
+    "speed": 1.0,
+    "applyRootMotion": false,
+    "controller": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/SimpleHero.controller",
+    "state": -1269438207,
+    "clips": [
+      {
+        "name": "Idle",
+        "weight": 3.272295E-05
+      },
+      {
+        "name": "Walk",
+        "weight": 0.9999673
+      }
+    ]
+  },
+  "layers": [
+    {
+      "name": "Base Layer",
+      "defaultWeight": 0.0,
+      "states": [
+        {
+          "name": "Locomotion",
+          "speed": 1.0,
+          "speedParameter": "",
+          "speedParameterActive": false,
+          "motion": "Locomotion",
+          "tree": [
+            {
+              "clip": "Idle",
+              "threshold": 0.0,
+              "timeScale": 1.0
+            },
+            {
+              "clip": "Walk",
+              "threshold": 1.0,
+              "timeScale": 1.0
+            },
+            {
+              "clip": "Run",
+              "threshold": 2.0,
+              "timeScale": 1.0
+            }
+          ]
+        },
+        {
+          "name": "SwordWalk",
+          "speed": 1.0,
+          "speedParameter": "",
+          "speedParameterActive": false,
+          "motion": "SwordWalk",
+          "tree": null
+        },
+        {
+          "name": "SwordSlash",
+          "speed": 1.0,
+          "speedParameter": "SlashSpeed",
+          "speedParameterActive": true,
+          "motion": "SwordSlash",
+          "tree": null
+        },
+        {
+          "name": "BatSwing",
+          "speed": 1.0,
+          "speedParameter": "SlashSpeed",
+          "speedParameterActive": true,
+          "motion": "BatSwing",
+          "tree": null
+        },
+        {
+          "name": "BatWalk",
+          "speed": 1.0,
+          "speedParameter": "",
+          "speedParameterActive": false,
+          "motion": "BatWalk",
+          "tree": null
+        }
+      ]
+    },
+    {
+      "name": "SwordHold",
+      "defaultWeight": 0.0,
+      "states": [
+        {
+          "name": "Hold",
+          "speed": 0.0,
+          "speedParameter": "",
+          "speedParameterActive": false,
+          "motion": "SwordWalk",
+          "tree": null
+        }
+      ]
+    },
+    {
+      "name": "BatHold",
+      "defaultWeight": 0.0,
+      "states": [
+        {
+          "name": "Hold",
+          "speed": 0.0,
+          "speedParameter": "",
+          "speedParameterActive": false,
+          "motion": "BatWalk",
+          "tree": null
+        }
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "length": 3.00000024,
+      "frameRate": 30.0,
+      "isLooping": true,
+      "rootMotion": false,
+      "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/Idle.anim"
+    },
+    {
+      "name": "Walk",
+      "length": 1.2,
+      "frameRate": 30.0,
+      "isLooping": true,
+      "rootMotion": false,
+      "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/Walk.anim"
+    },
+    {
+      "name": "Run",
+      "length": 0.8000001,
+      "frameRate": 30.0,
+      "isLooping": true,
+      "rootMotion": false,
+      "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/Run.anim"
+    },
+    {
+      "name": "SwordWalk",
+      "length": 1.2,
+      "frameRate": 30.0,
+      "isLooping": true,
+      "rootMotion": false,
+      "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/SwordWalk.anim"
+    },
+    {
+      "name": "SwordSlash",
+      "length": 1.2,
+      "frameRate": 30.0,
+      "isLooping": false,
+      "rootMotion": false,
+      "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/SwordSlash.anim"
+    },
+    {
+      "name": "BatSwing",
+      "length": 1.6,
+      "frameRate": 240.0,
+      "isLooping": false,
+      "rootMotion": false,
+      "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/BatSwing.anim"
+    },
+    {
+      "name": "BatWalk",
+      "length": 1.2,
+      "frameRate": 30.0,
+      "isLooping": true,
+      "rootMotion": false,
+      "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/BatWalk.anim"
+    }
+  ],
+  "feet": [
+    {
+      "name": "Foot.L",
+      "pos": "(55.53, 0.15, 16.98)"
+    },
+    {
+      "name": "Foot.R",
+      "pos": "(55.28, 0.18, 16.76)"
+    }
+  ],
+  "weapons": [
+    {
+      "name": "Weapon_Pistol9",
+      "moveSpeedMult": 1.0,
+      "adsMoveMult": 0.6,
+      "isRanged": true
+    },
+    {
+      "name": "Weapon_Rifle545",
+      "moveSpeedMult": 0.92,
+      "adsMoveMult": 0.5,
+      "isRanged": true
+    },
+    {
+      "name": "Weapon_Bat",
+      "moveSpeedMult": 1.0,
+      "adsMoveMult": 0.55,
+      "isRanged": false
+    },
+    {
+      "name": "Weapon_LongSword",
+      "moveSpeedMult": 1.0,
+      "adsMoveMult": 0.55,
+      "isRanged": false
+    }
+  ],
+  "firearmSets": [
+    {
+      "name": "Pistol",
+      "walk": "Pistol_Walk",
+      "walkLength": 1.2,
+      "aim": "Pistol_Aim",
+      "drawLength": 1.2
+    },
+    {
+      "name": "Rifle",
+      "walk": "Rifle_Walk",
+      "walkLength": 1.2,
+      "aim": "Rifle_Aim",
+      "drawLength": 1.2
+    }
+  ]
+}

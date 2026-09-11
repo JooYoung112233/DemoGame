@@ -1,0 +1,141 @@
+{
+  "method": "240 samples/cycle, backward foot-bone velocity during lowest 15% of lift (minimum 1cm tolerance); in-place clips, model gameplay scale",
+  "rows": [
+    {
+      "clip": "Walk",
+      "length": 1.2,
+      "frameRate": 30.0,
+      "samples": 240,
+      "feet": [
+        {
+          "foot": "Foot.L",
+          "minY": 0.1498393,
+          "maxY": 0.22577244,
+          "contactThreshold": 0.161229268,
+          "zExcursion": 0.235570073,
+          "contactSamples": 76,
+          "contactFraction": 0.316666663,
+          "meanSpeed": 0.464453131,
+          "medianSpeed": 0.490051478,
+          "minSpeed": 0.0591695271,
+          "maxSpeed": 0.5104392
+        },
+        {
+          "foot": "Foot.R",
+          "minY": 0.149839386,
+          "maxY": 0.22577256,
+          "contactThreshold": 0.161229357,
+          "zExcursion": 0.235570163,
+          "contactSamples": 76,
+          "contactFraction": 0.316666663,
+          "meanSpeed": 0.464452863,
+          "medianSpeed": 0.490045518,
+          "minSpeed": 0.0591695271,
+          "maxSpeed": 0.5104526
+        }
+      ]
+    },
+    {
+      "clip": "Run",
+      "length": 0.8000001,
+      "frameRate": 30.0,
+      "samples": 240,
+      "feet": [
+        {
+          "foot": "Foot.L",
+          "minY": 0.162473947,
+          "maxY": 0.464229524,
+          "contactThreshold": 0.207737282,
+          "zExcursion": 0.562868237,
+          "contactSamples": 60,
+          "contactFraction": 0.25,
+          "meanSpeed": 2.15497684,
+          "medianSpeed": 2.23961759,
+          "minSpeed": 0.4636332,
+          "maxSpeed": 3.05662274
+        },
+        {
+          "foot": "Foot.R",
+          "minY": 0.169994518,
+          "maxY": 0.47375226,
+          "contactThreshold": 0.215558186,
+          "zExcursion": 0.5508692,
+          "contactSamples": 53,
+          "contactFraction": 0.220833331,
+          "meanSpeed": 1.89840412,
+          "medianSpeed": 2.07570314,
+          "minSpeed": 0.0177472811,
+          "maxSpeed": 2.76935363
+        }
+      ]
+    },
+    {
+      "clip": "SwordWalk",
+      "length": 1.2,
+      "frameRate": 30.0,
+      "samples": 240,
+      "feet": [
+        {
+          "foot": "Foot.L",
+          "minY": 0.1498393,
+          "maxY": 0.225772589,
+          "contactThreshold": 0.1612293,
+          "zExcursion": 0.235569954,
+          "contactSamples": 76,
+          "contactFraction": 0.316666663,
+          "meanSpeed": 0.4644529,
+          "medianSpeed": 0.490051478,
+          "minSpeed": 0.0591665469,
+          "maxSpeed": 0.5104392
+        },
+        {
+          "foot": "Foot.R",
+          "minY": 0.149839163,
+          "maxY": 0.2257725,
+          "contactThreshold": 0.161229163,
+          "zExcursion": 0.235570252,
+          "contactSamples": 76,
+          "contactFraction": 0.316666663,
+          "meanSpeed": 0.464453,
+          "medianSpeed": 0.490045518,
+          "minSpeed": 0.0591695271,
+          "maxSpeed": 0.5104526
+        }
+      ]
+    },
+    {
+      "clip": "BatWalk",
+      "length": 1.2,
+      "frameRate": 30.0,
+      "samples": 240,
+      "feet": [
+        {
+          "foot": "Foot.L",
+          "minY": 0.1498393,
+          "maxY": 0.225772589,
+          "contactThreshold": 0.1612293,
+          "zExcursion": 0.235569954,
+          "contactSamples": 76,
+          "contactFraction": 0.316666663,
+          "meanSpeed": 0.4644529,
+          "medianSpeed": 0.490051478,
+          "minSpeed": 0.0591665469,
+          "maxSpeed": 0.5104392
+        },
+        {
+          "foot": "Foot.R",
+          "minY": 0.149839163,
+          "maxY": 0.2257725,
+          "contactThreshold": 0.161229163,
+          "zExcursion": 0.235570252,
+          "contactSamples": 76,
+          "contactFraction": 0.316666663,
+          "meanSpeed": 0.464453,
+          "medianSpeed": 0.490045518,
+          "minSpeed": 0.0591695271,
+          "maxSpeed": 0.5104526
+        }
+      ]
+    }
+  ]
+}
