@@ -132,7 +132,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`safehouse.md`](safehouse.md) | 덕코프식 물리 공간 안전가옥 — 뒷골목 맵 레이아웃, 시설 목록, 확장 기획, NPC 배치, 가구 시스템 | 방향 확정 + 확장 기획 |
+| [`safehouse.md`](safehouse.md) | 덕코프식 물리 공간 안전가옥 — 뒷골목 맵 레이아웃, 시설 목록, 확장 기획, NPC 배치, 가구 시스템 | 방향 확정 · 전당포 앞 마감/Play 검수 완료 (2026-09-11) |
 | [`safehouse-intel.md`](safehouse-intel.md) | **탐사 정보 루프** — 자원 생산 금지 원칙, 라디오(루디 가동), 랜드마크 재방문 확장 + Phase A~E 작업 계획. ⚠️ **NPC 파견은 2026-09-09 폐기**(인텔 발생원 3→2) | 기획 확정, 구현 전 |
 | [`safehouse-asset-list.md`](safehouse-asset-list.md) | 컨셉아트 기반 에셋 목록 — 바닥/펜스/프랍 분류 + 구현 우선순위 | 정리 완료 |
 | [`safehouse-tile-prompt.md`](safehouse-tile-prompt.md) | 바닥/펜스/프랍 에셋 생성 AI 프롬프트 — 레퍼 첨부용 | 작성 완료 |
