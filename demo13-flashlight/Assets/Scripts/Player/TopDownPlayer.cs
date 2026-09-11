@@ -479,9 +479,15 @@ public class TopDownPlayer : MonoBehaviour
 
         // 2026-09-11 사용자: "조준 상태에서만 마우스 쪽을 보고, 평소엔 키보드 움직임 방향을 바라보자".
         //   조준(총 우클릭) 중 = 커서 쪽. 그 외 = 이동 방향, 멈추면 마지막 방향 유지. docs/controls.md §바라보는 방향.
-        if (IsAimingMouse)
+        //   근접(2026-09-11 "공격 순간 커서 쪽"): 강공 차징(우클릭 홀드) 중엔 조준처럼 커서 쪽을 보고,
+        //   휘두르는 동안엔 공격 순간 돌려 둔 방향을 유지한다(이동 방향으로 되돌아가지 않게). docs/combat.md §무기 구성 결정.
+        if (IsAimingMouse || _state == CombatState.HeavyCharge)
         {
             if (dir.sqrMagnitude > 0.01f) FacingDirection = dir.normalized;
+        }
+        else if (_state == CombatState.LightAttack || _state == CombatState.HeavyRelease)
+        {
+            // 휘두르는 중 — 방향 고정
         }
         else if (MoveDirection.sqrMagnitude > 0.01f)
         {
@@ -679,6 +685,19 @@ public class TopDownPlayer : MonoBehaviour
     /// <summary>약공 콤보 사용 여부 — 2026-07-11 기본 OFF(사용자 결정). Control Panel에서 되살릴 수 있다.</summary>
     static bool ComboOn => GameTuning.Instance != null && GameTuning.Instance.comboEnabled;
 
+    /// <summary>구르기 사용 여부 — 2026-09-11 기본 OFF(사용자 "구르기는 일단 꺼둬", 모션 없음). docs/combat.md §무기 구성 결정.</summary>
+    static bool DodgeOn => GameTuning.Instance != null && GameTuning.Instance.dodgeEnabled;
+
+    /// <summary>근접 공격 순간 커서 쪽으로 몸을 돌린다 — 2026-09-11 사용자 결정(docs/combat.md §무기 구성 결정).
+    /// 평소 바라보는 방향은 이동 방향이라, 이게 없으면 걸어가는 쪽으로 휘두른다. AttackPerformer가 이 방향을 스윙 시작에 고정한다.
+    /// 패드는 오른쪽 스틱이 이미 바라보는 방향을 정하므로 그대로 둔다.</summary>
+    void FaceCursorForMelee()
+    {
+        if (GameInput.PadActive) return;
+        Vector2 d = Plan3D.ToPlan(MouseWorldPos - transform.position);
+        if (d.sqrMagnitude > 0.01f) FacingDirection = d.normalized;
+    }
+
     void HandleCombatInput()
     {
         if (ChannelBusy) return;   // 아이템 사용 중 — 구르기·공격 금지 (취소는 ESC)
@@ -687,7 +706,7 @@ public class TopDownPlayer : MonoBehaviour
         if (!CombatEnabled || _exhausted) return;
 
         // 구르기 (Space) — 총을 들고 있어도 구를 수 있다.
-        if (GameInput.GetKeyDown(KeyCode.Space) && _state != CombatState.Dodge && _dodgeCooldownTimer <= 0f)
+        if (DodgeOn && GameInput.GetKeyDown(KeyCode.Space) && _state != CombatState.Dodge && _dodgeCooldownTimer <= 0f)
         {
             TryDodge();
             return;
@@ -771,6 +790,7 @@ public class TopDownPlayer : MonoBehaviour
 
         _state = CombatState.LightAttack;
         _attackStateTimer = atk.Duration;
+        FaceCursorForMelee();
         _performer.Perform(atk);
         // 손에 든 것에 맞는 동작 — 칼은 휘두른다(빈손은 공격 자체가 없다 — HandleCombatInput).
         if (UsesSwordAnimation || UsesBatAnimation) _character3D.PlayMeleeAttack(atk.Duration, FacingDirection, UsesBatAnimation);
@@ -798,6 +818,7 @@ public class TopDownPlayer : MonoBehaviour
         _attackStateTimer = atk != null ? atk.Duration : 0.25f;
         _heavyCooldownTimer = HeavyCooldown;
 
+        FaceCursorForMelee();
         _performer.Perform(atk);
         if (UsesSwordAnimation || UsesBatAnimation) _character3D.PlayMeleeAttack(_attackStateTimer, FacingDirection, UsesBatAnimation);
         else if (InHand == HandVisual.Melee) _weaponVis?.SwingHeavy(_attackStateTimer, full);   // 치켜든 대각에서 크고 빠르게

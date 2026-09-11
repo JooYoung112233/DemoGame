@@ -79,16 +79,18 @@ public class UnitStatData
     public float hitStunDuration = 0.3f;
 
     // ===== 원거리(총기 밴딧) — 2026-09-11, docs/bandit-firearms.md §레이드 배치 결정 =====
-    public enum RangedWeapon { None, Pistol, Rifle }
-
-    [Header("원거리 (None = 근접)")]
-    [Tooltip("None이면 근접 유닛. Pistol/Rifle이면 조준 경고 후 실제 Projectile을 쏜다.\n"
-           + "이때 attackRange=사격 사거리, attackWindup=조준 경고 시간, attackDamage=탄 1발 데미지, attackSpeed=사격 주기.")]
-    public RangedWeapon rangedWeapon = RangedWeapon.None;
+    //  총 자체(피해·탄속·총 종류)는 플레이어와 같은 WeaponData가 진실 — 2026-09-11 사용자 "한 곳으로 전부"
+    //  (docs/combat.md §무기 구성 결정). 여기엔 적 전용 값만: 피해·탄속 배율, 조준 경고·사격 주기·교전 거리, 점사·정확도.
+    [Header("원거리 (총 = WeaponData, 비우면 근접)")]
+    [Tooltip("이 적이 쓰는 총 — 플레이어와 같은 WeaponData. 비우면 근접 유닛. 채우면 조준 경고 후 실제 Projectile을 쏜다.\n"
+           + "이때 attackRange=사격 사거리, attackWindup=조준 경고 시간, attackSpeed=사격 주기. 모델은 총 종류(firearmStance)로 고른다.")]
+    public WeaponData rangedWeaponData;
+    [Tooltip("총 피해 배율 — 탄 1발 = WeaponData.damage × 이 값.")]
+    public float rangedDamageMult = 1f;
+    [Tooltip("탄속 배율 — WeaponData.projectileSpeed × 이 값. 적 탄은 느리게 해서 보고 피할 수 있게.")]
+    public float rangedBulletSpeedMult = 0.4f;
     [Tooltip("사선이 트이면 이 거리까지만 다가가 멈춰 선다(m). attackRange보다 짧게.")]
     public float preferredRange = 6f;
-    [Tooltip("탄속(m/s). 플레이어 권총은 42 — 적 탄은 느리게 해서 보고 피할 수 있게.")]
-    public float projectileSpeed = 16f;
     [Tooltip("한 번 사격에 나가는 탄 수(권총 1, 소총 3점사).")]
     [Min(1)] public int burstCount = 1;
     [Tooltip("점사 탄 사이 간격(초).")]

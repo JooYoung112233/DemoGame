@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9003d63bbe317e14bb4f8f3e6e931023, type: 3}
+  m_Name: Weapon_Rifle545
+  m_EditorClassIdentifier: Game.Scripts::WeaponData
+  weaponId: rifle545
+  isRanged: 1
+  moveSpeedMult: 0.92
+  useTwoHandSwordAnimations: 0
+  useTwoHandBatAnimations: 0
+  lightCombo: {fileID: 0}
+  heavyAttack: {fileID: 0}
+  heavyFullAttack: {fileID: 0}
+  staminaCostMult: 1
+  firearmStance: 1
+  caliber: 5.45x39
+  fireMode: 1
+  rpm: 600
+  damage: 12
+  groggy: 10
+  projectileSpeed: 50
+  effectiveRange: 20
+  hipSpreadDeg: 8
+  adsSpreadDeg: 2
+  recoilPerShot: 2.6
+  recoilRecover: 12
+  recoilMax: 14
+  reloadSeconds: 2.8
+  adsMoveMult: 0.5

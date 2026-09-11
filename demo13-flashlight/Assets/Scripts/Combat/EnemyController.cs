@@ -143,7 +143,7 @@ public class EnemyController : MonoBehaviour
     float MaxGroggy       => unitStat != null ? unitStat.maxGroggy           : maxGroggy;
     float GroggyDecayRate => (unitStat != null ? unitStat.groggyDecay        : groggyDecay) * InjDecay;
     float StunDuration    => unitStat != null ? unitStat.groggyStunDuration  : groggyStunDuration;
-    bool  IsRanged        => unitStat != null && unitStat.rangedWeapon != UnitStatData.RangedWeapon.None;
+    bool  IsRanged        => unitStat != null && unitStat.rangedWeaponData != null && unitStat.rangedWeaponData.isRanged;
     float PreferredRange  => unitStat != null ? Mathf.Min(unitStat.preferredRange, unitStat.attackRange) : attackRange;
 
     public State CurrentState  => state;
@@ -307,8 +307,9 @@ public class EnemyController : MonoBehaviour
             var visual = gameObject.AddComponent<BanditEnemyVisual>();
             float scale = unitStat != null ? Mathf.Clamp(unitStat.scale / 2f, .5f, 3f) : 1f;
             // 총기 밴딧은 같은 몸에 총 본이 추가된 리그를 쓴다(Resources/Characters/BanditPistol·BanditRifle).
+            //   어느 쪽인지는 쥔 총(WeaponData.firearmStance)이 정한다 — 플레이어 총기 모션과 같은 키.
             string model = !IsRanged ? "Characters/Bandit01"
-                : unitStat.rangedWeapon == UnitStatData.RangedWeapon.Rifle ? "Characters/BanditRifle" : "Characters/BanditPistol";
+                : unitStat.rangedWeaponData.firearmStance == WeaponData.FirearmStance.AssaultRifle ? "Characters/BanditRifle" : "Characters/BanditPistol";
             if (visual.Initialize(this, scale, model))
             {
                 _banditVisual = visual;
@@ -872,7 +873,11 @@ public class EnemyController : MonoBehaviour
         float spread = Random.Range(-unitStat.spreadDeg, unitStat.spreadDeg) * Mathf.Deg2Rad;
         float c = Mathf.Cos(spread), s = Mathf.Sin(spread);
         Vector2 dir = new Vector2(_aimDir.x * c - _aimDir.y * s, _aimDir.x * s + _aimDir.y * c);
-        Projectile.Spawn(transform, Plan3D.ToPlan(muzzle), dir, unitStat.projectileSpeed, Damage, 0f,
+        // 총 자체 수치는 쥔 총(WeaponData)이 진실, 적 전용은 배율만 — 2026-09-11 총 수치 통합(docs/combat.md §무기 구성 결정).
+        var gun = unitStat.rangedWeaponData;
+        float speed  = gun.projectileSpeed * unitStat.rangedBulletSpeedMult;
+        float damage = gun.damage * unitStat.rangedDamageMult * InjAtk;   // 부상 배율은 근접과 같게
+        Projectile.Spawn(transform, Plan3D.ToPlan(muzzle), dir, speed, damage, 0f,
                          AtkRange * BulletRangeMult, EnemyTracer, 0.45f, y);
         _banditVisual?.NotifyShot();
     }
