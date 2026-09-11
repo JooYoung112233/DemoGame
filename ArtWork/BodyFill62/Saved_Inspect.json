@@ -1,0 +1,423 @@
+{
+  "lamp": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"\",\"m_EditorClassIdentifier\":\"Game.Scripts::WornLamp\",\"baseRange\":10.0,\"nightIntensity\":3.4000000953674316,\"dayIntensity\":0.20000000298023224,\"coneAngle\":56.0,\"innerRatio\":0.7400000095367432,\"spillRange\":2.4000000953674316,\"spillRatio\":0.03999999910593033,\"spillFloor\":0.07999999821186066,\"spillHeightOffset\":-0.6499999761581421,\"spillCastsShadows\":false,\"bodyGlowRange\":1.600000023841858,\"bodyGlowIntensity\":0.05999999865889549,\"bodyGlowHeight\":0.10000000149011612,\"bodyGlowTowardCamera\":1.100000023841858}}",
+  "lights": [
+    {
+      "name": "BodyGlow",
+      "intensity": 0.06,
+      "range": 1.6,
+      "pos": "(45.07, 1.25, 19.08)"
+    },
+    {
+      "name": "LampSpill",
+      "intensity": 0.08,
+      "range": 2.4,
+      "pos": "(45.07, 0.50, 20.18)"
+    },
+    {
+      "name": "PlayerLamp3D",
+      "intensity": 0.2,
+      "range": 10.0,
+      "pos": "(45.07, 1.15, 20.18)"
+    }
+  ],
+  "renderers": [
+    {
+      "name": "Gear_Backpack",
+      "materials": [
+        {
+          "name": "SimpleHero_Gear",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Gear.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Gear_Charm",
+      "materials": [
+        {
+          "name": "SimpleHero_Gear",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Gear.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Gear_Scarf",
+      "materials": [
+        {
+          "name": "SimpleHero_Gear",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Gear.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Hero_SwordProxy",
+      "materials": [
+        {
+          "name": "SwordProxy",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SwordProxy.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.28
+        }
+      ]
+    },
+    {
+      "name": "Hero_Bat",
+      "materials": [
+        {
+          "name": "Player_Bandit_BatWood",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_BatWood.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.120000005
+        },
+        {
+          "name": "Player_Bandit_wrap",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_wrap.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.120000005
+        }
+      ]
+    },
+    {
+      "name": "Hero_SwordProxy_Stowed",
+      "materials": [
+        {
+          "name": "SwordProxy",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SwordProxy.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.28
+        }
+      ]
+    },
+    {
+      "name": "Hero_Bat_Stowed",
+      "materials": [
+        {
+          "name": "Player_Bandit_BatWood",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_BatWood.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.120000005
+        },
+        {
+          "name": "Player_Bandit_wrap",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_wrap.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.120000005
+        }
+      ]
+    },
+    {
+      "name": "Study_Boot_-1",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Boot_1",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Cap",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_CapBrim",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Head",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Hips",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Leg_-1",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Leg_1",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Mitten_-1",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Mitten_1",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Neck",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Sleeve_-1",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Sleeve_1",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "Study_Torso",
+      "materials": [
+        {
+          "name": "SimpleHero_Surface",
+          "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.08
+        }
+      ]
+    },
+    {
+      "name": "BG",
+      "materials": [
+        {
+          "name": "Sprite-Unlit-Default",
+          "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+          "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+          "emission": null,
+          "smoothness": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Fill",
+      "materials": [
+        {
+          "name": "Sprite-Unlit-Default",
+          "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+          "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+          "emission": null,
+          "smoothness": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Zone0",
+      "materials": [
+        {
+          "name": "Sprite-Unlit-Default",
+          "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+          "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+          "emission": null,
+          "smoothness": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Zone1",
+      "materials": [
+        {
+          "name": "Sprite-Unlit-Default",
+          "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+          "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+          "emission": null,
+          "smoothness": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Zone2",
+      "materials": [
+        {
+          "name": "Sprite-Unlit-Default",
+          "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+          "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+          "emission": null,
+          "smoothness": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Zone3",
+      "materials": [
+        {
+          "name": "Sprite-Unlit-Default",
+          "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+          "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+          "emission": null,
+          "smoothness": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Zone4",
+      "materials": [
+        {
+          "name": "Sprite-Unlit-Default",
+          "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+          "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+          "emission": null,
+          "smoothness": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Zone5",
+      "materials": [
+        {
+          "name": "Sprite-Unlit-Default",
+          "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+          "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+          "emission": null,
+          "smoothness": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Guard",
+      "materials": [
+        {
+          "name": "gb_403833",
+          "path": "",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.05
+        }
+      ]
+    },
+    {
+      "name": "Blade",
+      "materials": [
+        {
+          "name": "gb_D9E0F2",
+          "path": "",
+          "shader": "BRB/GameLit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.05
+        }
+      ]
+    },
+    {
+      "name": "Tip",
+      "materials": [
+        {
+          "name": "Universal Render Pipeline/Particles/Unlit",
+          "path": "",
+          "shader": "Universal Render Pipeline/Particles/Unlit",
+          "emission": "RGBA(0.000, 0.000, 0.000, 1.000)",
+          "smoothness": 0.0
+        }
+      ]
+    }
+  ]
+}

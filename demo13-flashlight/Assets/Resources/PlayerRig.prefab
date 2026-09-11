@@ -121,9 +121,9 @@ MonoBehaviour:
   spillHeightOffset: -0.65
   spillCastsShadows: 0
   bodyGlowRange: 1.6
-  bodyGlowIntensity: 0.35
+  bodyGlowIntensity: 0.06
   bodyGlowHeight: 0.1
-  bodyGlowTowardCamera: 0.8
+  bodyGlowTowardCamera: 1.1
 --- !u!1 &1153366666490221086
 GameObject:
   m_ObjectHideFlags: 0
