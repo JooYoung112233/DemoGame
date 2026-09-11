@@ -1,0 +1,88 @@
+{
+  "buildings": [
+    {
+      "name": "Pawnshop",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Pawnshop",
+      "meshes": 85,
+      "size": [
+        16.5999985,
+        5.25,
+        13.8549957
+      ]
+    },
+    {
+      "name": "Repair",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Repair",
+      "meshes": 85,
+      "size": [
+        14.5999985,
+        5.25,
+        11.8549957
+      ]
+    },
+    {
+      "name": "Medical",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Medical",
+      "meshes": 88,
+      "size": [
+        18.6000061,
+        5.25,
+        11.8549957
+      ]
+    },
+    {
+      "name": "Furniture",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Furniture",
+      "meshes": 83,
+      "size": [
+        15.855,
+        5.25,
+        10.5999985
+      ]
+    },
+    {
+      "name": "BlackMarket",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/BlackMarket",
+      "meshes": 83,
+      "size": [
+        15.855,
+        5.25,
+        12.5999985
+      ]
+    },
+    {
+      "name": "Container_Home",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Container_Home",
+      "meshes": 1,
+      "size": [
+        14.0,
+        2.9,
+        9.0
+      ]
+    },
+    {
+      "name": "TownOverview",
+      "source": "Assets/Scenes/Safehouse.unity/Map/",
+      "meshes": 2078,
+      "size": [
+        80.0,
+        5.33,
+        56.0
+      ]
+    },
+    {
+      "name": "Safehouse01_Complete",
+      "source": "Assets/Art/Environments/Safehouse01/Safehouse01_Complete.prefab",
+      "meshes": 1023,
+      "size": [
+        6.22850132,
+        2.95950031,
+        4.87800026
+      ]
+    }
+  ],
+  "sourceUnchanged": true,
+  "activeScenePreserved": true,
+  "playStatePreserved": true,
+  "note": "Saved scene geometry and materials. Neutral preview lights; each tile framed individually, not a shared scale."
+}
