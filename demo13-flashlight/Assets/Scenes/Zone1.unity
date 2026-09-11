@@ -2724,7 +2724,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::SpawnZone
   size: {x: 4.5715036, y: 0, z: 4.000066}
   enemyCount: 2
-  unitKey: bandit_melee_1
+  unitKey: bandit_rifle
   gizmoColor: {r: 1, g: 0.3, b: 0.3, a: 0.3}
 --- !u!1 &32869912
 GameObject:
@@ -84494,7 +84494,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::SpawnZone
   size: {x: 3.4, y: 0, z: 3.4}
   enemyCount: 2
-  unitKey: bandit_melee_1
+  unitKey: bandit_rifle
   gizmoColor: {r: 1, g: 0.3, b: 0.3, a: 0.3}
 --- !u!1 &1446066015
 GameObject:
@@ -90062,7 +90062,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::SpawnZone
   size: {x: 3.4, y: 0, z: 3.600059}
   enemyCount: 3
-  unitKey: bandit_melee_1
+  unitKey: bandit_pistol
   gizmoColor: {r: 1, g: 0.3, b: 0.3, a: 0.3}
 --- !u!1 &1520022482
 GameObject:
@@ -92898,7 +92898,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::SpawnZone
   size: {x: 3.4, y: 0, z: 3.4}
   enemyCount: 2
-  unitKey: bandit_melee_1
+  unitKey: bandit_pistol
   gizmoColor: {r: 1, g: 0.3, b: 0.3, a: 0.3}
 --- !u!1 &1566541904
 GameObject:

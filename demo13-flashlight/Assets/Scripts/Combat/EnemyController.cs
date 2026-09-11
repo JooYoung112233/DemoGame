@@ -26,6 +26,19 @@ public class EnemyController : MonoBehaviour
     bool _banditPendingHit;
     int  _lightStreak;              // 약공 연속 횟수 — N회 넘으면 강제로 강공
 
+    // 원거리(총기 밴딧, 2026-09-11) — 조준 방향·점사 상태
+    Vector2  _aimDir = Vector2.right;
+    int      _shotsLeft;
+    float    _shotTimer, _rangedAttackElapsed;
+    bool     _losOk;
+    float    _losCheckAt;
+    Collider _playerBody;
+    /// <summary>발사 직전 이만큼은 조준을 고정한다 — 고정된 조준선을 보고 옆으로 빠지면 피한다. (GameTuning)</summary>
+    static float AimLockTime   => GameTuning.Instance != null ? GameTuning.Instance.enemyAimLockTime : 0.2f;
+    /// <summary>마지막 탄 뒤 추격으로 돌아가기까지. (GameTuning)</summary>
+    static float RangedRecover => GameTuning.Instance != null ? GameTuning.Instance.enemyRangedRecover : 0.35f;
+    static float BulletRangeMult => GameTuning.Instance != null ? GameTuning.Instance.enemyBulletRangeMult : 1.25f;
+
     [Header("Detection")]
     [SerializeField] float detectRange    = 8f;
     [SerializeField] float attackRange    = 1.2f;
@@ -130,11 +143,19 @@ public class EnemyController : MonoBehaviour
     float MaxGroggy       => unitStat != null ? unitStat.maxGroggy           : maxGroggy;
     float GroggyDecayRate => (unitStat != null ? unitStat.groggyDecay        : groggyDecay) * InjDecay;
     float StunDuration    => unitStat != null ? unitStat.groggyStunDuration  : groggyStunDuration;
+    bool  IsRanged        => unitStat != null && unitStat.rangedWeapon != UnitStatData.RangedWeapon.None;
+    float PreferredRange  => unitStat != null ? Mathf.Min(unitStat.preferredRange, unitStat.attackRange) : attackRange;
 
     public State CurrentState  => state;
     public bool  IsInWindup    => state == State.AttackWindup;
     public bool  IsStunned     => isStunned;
     public bool  IsDead        => state == State.Dead;
+
+    // 총기 밴딧 표시(BanditEnemyVisual 총기 모드)가 읽는다
+    public Transform Target       => player;
+    public Vector2   AimDirection => _aimDir;
+    public bool      AimLocked    => IsRanged && state == State.AttackWindup && windupTimer <= AimLockTime;
+    public float     FireRange    => AtkRange;
     public float GroggyPercent => currentGroggy / MaxGroggy;
 
     /// <summary>이 적이 지금 플레이어와 교전 중인가(추격/예비동작/공격).
@@ -285,7 +306,10 @@ public class EnemyController : MonoBehaviour
         {
             var visual = gameObject.AddComponent<BanditEnemyVisual>();
             float scale = unitStat != null ? Mathf.Clamp(unitStat.scale / 2f, .5f, 3f) : 1f;
-            if (visual.Initialize(this, scale))
+            // 총기 밴딧은 같은 몸에 총 본이 추가된 리그를 쓴다(Resources/Characters/BanditPistol·BanditRifle).
+            string model = !IsRanged ? "Characters/Bandit01"
+                : unitStat.rangedWeapon == UnitStatData.RangedWeapon.Rifle ? "Characters/BanditRifle" : "Characters/BanditPistol";
+            if (visual.Initialize(this, scale, model))
             {
                 _banditVisual = visual;
                 if (_limbs != null) { Destroy(_limbs.gameObject); _limbs = null; }
@@ -321,6 +345,10 @@ public class EnemyController : MonoBehaviour
         if (go == null) return;
         player       = go.transform;
         playerHealth = go.GetComponent<Health>();
+        // 사선 확인 대상 = 플레이어의 **솔리드 몸**(트리거 허트박스가 아니라)
+        _playerBody = null;
+        foreach (var c in go.GetComponents<Collider>())
+            if (!c.isTrigger) { _playerBody = c; break; }
     }
 
     float _reacquireAt;
@@ -477,6 +505,8 @@ public class EnemyController : MonoBehaviour
 
         if (dist > LoseRng) { state = State.Patrol; _nav?.Stop(); SetPatrolTarget(); return; }
 
+        if (IsRanged) { UpdateRangedChase(dist); return; }
+
         if (dist <= AtkRange && attackTimer <= 0)
         {
             // ── 강공 판단 (2026-07-11) ──
@@ -511,6 +541,12 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
+        MoveTowardPlayer(dist);
+    }
+
+    /// <summary>플레이어 쪽으로 걷는다(길찾기 + 동료 분리). 근접·총기 추격 공용.</summary>
+    void MoveTowardPlayer(float dist)
+    {
         // 길찾기 방향(벽 우회). 경로 없으면 직진 폴백.
         Vector2 d;
         if (_nav != null)
@@ -609,6 +645,7 @@ public class EnemyController : MonoBehaviour
 
     void UpdateAttackWindup()
     {
+        if (IsRanged) { UpdateRangedAim(); return; }
         windupTimer -= Time.deltaTime;
         _banditVisual?.SetWindupRemaining(windupTimer);
         SetVelocity(Vector2.zero);
@@ -625,6 +662,7 @@ public class EnemyController : MonoBehaviour
 
     void UpdateAttack()
     {
+        if (IsRanged) { UpdateRangedFire(); return; }
         if (_banditVisual != null)
         {
             SetVelocity(Vector2.zero);
@@ -669,6 +707,7 @@ public class EnemyController : MonoBehaviour
 
     void DoAttack()
     {
+        if (IsRanged) { BeginRangedFire(); return; }
         state       = State.Attack;
         attackTimer = AtkCooldown;
         windupFlashTimer = 0;
@@ -746,6 +785,136 @@ public class EnemyController : MonoBehaviour
         DamagePopup.Create(player.position, dmg,
             _nextIsHeavy ? DamagePopup.DamageType.Heavy : DamagePopup.DamageType.Normal);
     }
+
+    #region 원거리 (총기 밴딧, 2026-09-11)
+    // docs/bandit-firearms.md §레이드 배치 결정 — 조준 경고 후 **날아가는 총알**(보고 피할 수 있다).
+    //   근접과 같은 상태(AttackWindup=조준, Attack=발사)를 쓰므로 피격 캔슬·스턴·사망 흐름을 그대로 탄다.
+
+    Vector2 DirToPlayer() => player != null
+        ? (Plan3D.ToPlan(player.position) - Plan3D.ToPlan(transform.position)).normalized
+        : _aimDir;
+
+    /// <summary>사선이 트이고 사거리 안이면 멈춰 조준, 트였지만 멀면 선호 거리까지만 다가간다.
+    /// 벽에 가리면 길찾기로 돌아 들어온다.</summary>
+    void UpdateRangedChase(float dist)
+    {
+        bool los = HasLineOfFire();
+        bool gunReady = _banditVisual == null || _banditVisual.GunReady;   // 총을 다 꺼내기 전엔 조준하지 않는다
+        if (los && gunReady && dist <= AtkRange && attackTimer <= 0)
+        {
+            _nextIsHeavy = false;   // 총기엔 강공이 없다 — 조준 중에 맞히면 캔슬된다(근접 약공과 같은 규칙)
+            state = State.AttackWindup;
+            _nav?.Stop();
+            windupTimer = Windup;
+            windupFlashTimer = 0;
+            SetVelocity(Vector2.zero);
+            _aimDir = DirToPlayer();
+            FacePlayer();
+            return;
+        }
+        if (los && dist <= PreferredRange)
+        {
+            _nav?.Stop();
+            SetVelocity(Vector2.zero);
+            FacePlayer();
+            return;
+        }
+        MoveTowardPlayer(dist);
+    }
+
+    /// <summary>조준 경고. 끝 <see cref="AimLockTime"/> 전까지 플레이어를 따라가다 고정된다.</summary>
+    void UpdateRangedAim()
+    {
+        windupTimer -= Time.deltaTime;
+        SetVelocity(Vector2.zero);
+        if (windupTimer > AimLockTime && player != null) { _aimDir = DirToPlayer(); FacePlayer(); }
+        windupFlashTimer += Time.deltaTime;
+        SetTint(Mathf.Sin(windupFlashTimer * 15f) > 0 ? new Color(1f, 0.2f, 0.2f) : originalColor);
+        if (windupTimer <= 0) { RestoreTint(); DoAttack(); }
+    }
+
+    void BeginRangedFire()
+    {
+        state = State.Attack;
+        attackTimer = AtkCooldown;
+        windupFlashTimer = 0;
+        _shotsLeft = Mathf.Max(1, unitStat.burstCount);
+        _shotTimer = 0f;
+        _rangedAttackElapsed = 0f;
+    }
+
+    void UpdateRangedFire()
+    {
+        SetVelocity(Vector2.zero);
+        _rangedAttackElapsed += Time.deltaTime;
+        _shotTimer -= Time.deltaTime;
+        if (_shotsLeft > 0)
+        {
+            if (_shotTimer <= 0f)
+            {
+                FireShot();
+                _shotsLeft--;
+                _shotTimer = unitStat.burstInterval;
+                _rangedAttackElapsed = 0f;
+            }
+        }
+        else if (_rangedAttackElapsed >= RangedRecover) state = State.Chase;
+    }
+
+    static readonly Color EnemyTracer = new Color(1f, 0.55f, 0.2f);
+
+    /// <summary>탄 한 발 — 실제 <see cref="Projectile"/>. 벽·엄폐·다른 적의 몸에 막힌다.</summary>
+    void FireShot()
+    {
+        Vector3 muzzle = _banditVisual != null ? _banditVisual.MuzzlePosition : transform.position + Vector3.up;
+        // 탄 높이는 플레이어 허트박스 안(0.6~1.3m)으로 — 총구가 어깨 위면 머리 위로 날아간다.
+        float y = transform.position.y + Mathf.Clamp(muzzle.y - transform.position.y, 0.6f, 1.3f);
+        float spread = Random.Range(-unitStat.spreadDeg, unitStat.spreadDeg) * Mathf.Deg2Rad;
+        float c = Mathf.Cos(spread), s = Mathf.Sin(spread);
+        Vector2 dir = new Vector2(_aimDir.x * c - _aimDir.y * s, _aimDir.x * s + _aimDir.y * c);
+        Projectile.Spawn(transform, Plan3D.ToPlan(muzzle), dir, unitStat.projectileSpeed, Damage, 0f,
+                         AtkRange * BulletRangeMult, EnemyTracer, 0.45f, y);
+        _banditVisual?.NotifyShot();
+    }
+
+    static readonly RaycastHit[] _allyBuf = new RaycastHit[8];
+    static int _enemyMask = -1;
+
+    /// <summary>몸 높이에서 플레이어 몸까지 벽도 동료도 없나. 0.15초 간격으로만 잰다.</summary>
+    bool HasLineOfFire()
+    {
+        if (player == null) return false;
+        if (Time.time < _losCheckAt) return _losOk;
+        _losCheckAt = Time.time + 0.15f;
+        Vector3 from = transform.position + Vector3.up;
+        _losOk = _playerBody == null || !AttackPerformer.IsBlockedByWall(from, _playerBody);
+        // 벽 판정은 캐릭터를 무시하지만 총알은 다른 적의 몸에 막힌다 — 동료 등 뒤에서 쏘면 점사를 통째로 버린다.
+        if (_losOk) _losOk = !AllyInLine(from);
+        return _losOk;
+    }
+
+    bool AllyInLine(Vector3 from)
+    {
+        if (_enemyMask == -1)
+        {
+            int l = LayerMask.NameToLayer("Enemy");
+            _enemyMask = l >= 0 ? 1 << l : 0;
+        }
+        if (_enemyMask == 0) return false;
+        Vector3 d = player.position + Vector3.up - from;
+        float dist = d.magnitude;
+        if (dist < 0.05f) return false;
+        int n = Physics.RaycastNonAlloc(from, d / dist, _allyBuf, dist, _enemyMask, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < n; i++)
+        {
+            var c = _allyBuf[i].collider;
+            if (c == null || c.transform == transform || c.transform.IsChildOf(transform)) continue;
+            return true;
+        }
+        return false;
+    }
+
+    #endregion
 
     public void TryCancelAttack()
     {
