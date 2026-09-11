@@ -3,7 +3,10 @@ using UnityEngine.UI;
 
 /// <summary>화면 픽셀 두께가 일정한 원 — 조준원(<see cref="AimReticle"/>)용.
 /// 원 이미지를 늘려 쓰면 선도 같이 굵어지고(큰 원), 작은 원에선 선이 사라진다 — 그래서 메시로 직접 그린다.
-/// thickness ≥ radius×2 면 속이 찬 점이 된다.</summary>
+/// thickness ≥ radius×2 면 속이 찬 점이 된다.
+/// ⚠️ CanvasRenderer가 없으면 크기·위치는 멀쩡한데 **화면에 아무것도 안 그려진다**(2026-09-11 실측 —
+///    이 버전에선 런타임 AddComponent로 Graphic을 붙여도 CanvasRenderer가 자동으로 안 따라왔다).</summary>
+[RequireComponent(typeof(CanvasRenderer))]
 public class ReticleRing : MaskableGraphic
 {
     [SerializeField] float radius = 20f;     // px

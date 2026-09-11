@@ -51,7 +51,8 @@ public class AimReticle : MonoBehaviour
 
     static ReticleRing Ring(Transform parent, string name, Color c)
     {
-        var go = new GameObject(name, typeof(RectTransform));
+        // CanvasRenderer를 처음부터 같이 만든다 — 없으면 그려지지 않는다(ReticleRing 주석).
+        var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer));
         go.transform.SetParent(parent, false);
         var r = go.AddComponent<ReticleRing>();
         r.color = c;
