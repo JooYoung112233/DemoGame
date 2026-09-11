@@ -139,8 +139,8 @@ public static class LookDevScene
     }
 
     // 인게임 카메라 설정 — PlayerRig의 값과 같아야 의미가 있다(바뀌면 여기도 같이).
-    // 2026-09-11 대각선 쿼터뷰(CameraFollow.viewPitch/viewYaw와 같은 값 — 룩씬은 게임과 같은 각도여야 판단이 맞다)
-    const float GamePitch = 45f, GameYaw = 45f, GameOrtho = 3.6f;
+    // 2026-09-11 정면 탑다운 62°(CameraFollow.viewPitch/viewYaw와 같은 값 — 룩씬은 게임과 같은 각도여야 판단이 맞다)
+    const float GamePitch = 62f, GameYaw = 0f, GameOrtho = 3.6f;
 
     /// <summary>랜턴 검증 레인의 z 시작점 — 캐릭터 전시 구역(z=0)과 겹치지 않게 뒤로 뺀다.</summary>
     const float LampLaneZ = 14f;
