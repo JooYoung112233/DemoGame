@@ -20,8 +20,8 @@ public partial class HideoutDiorama
     readonly List<UnityEngine.UI.Image> _barBtns = new List<UnityEngine.UI.Image>();
     readonly List<HideoutFacilityAnchor> _barKeys = new List<HideoutFacilityAnchor>();
 
-    static readonly Color BarIdle = new Color(0.13f, 0.13f, 0.15f, 0.92f);
-    static readonly Color BarOn   = new Color(0.55f, 0.44f, 0.18f, 0.95f);
+    static readonly Color BarIdle = UITheme.Cell;
+    static readonly Color BarOn   = UITheme.Accent;
 
     void BuildFacilityBar()
     {
@@ -30,7 +30,7 @@ public partial class HideoutDiorama
 
         var canvas = _barRoot.AddComponent<Canvas>();
         canvas.renderMode = UnityEngine.RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 55;                       // 도크(60)보다 아래
+        canvas.sortingOrder = 35;                       // 인벤토리(40)·도크(60)보다 아래
         var scaler = _barRoot.AddComponent<UnityEngine.UI.CanvasScaler>();
         scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -43,10 +43,12 @@ public partial class HideoutDiorama
         var listed = new List<HideoutFacilityAnchor>();
         foreach (var a in _anchors)
         {
-            if (a == null || a.moduleKey == "idle") continue;
+            if (a == null || a.moduleKey == "idle" || a.moduleKey == "dispatch") continue;
             if (string.IsNullOrEmpty(FacilityLabel.KoreanFor(a.moduleKey))) continue;
             listed.Add(a);
         }
+        string[] order = { "stash", "workbench", "bed", "cooking", "medical", "radio", "generator" };
+        listed.Sort((a,b)=>System.Array.IndexOf(order,a.moduleKey).CompareTo(System.Array.IndexOf(order,b.moduleKey)));
         if (listed.Count == 0) return;
 
         float avail = 1920f - HideoutDockPanel.RightMargin
@@ -80,6 +82,7 @@ public partial class HideoutDiorama
             trt.offsetMin = Vector2.zero; trt.offsetMax = Vector2.zero;
             var txt = tGO.AddComponent<UnityEngine.UI.Text>();
             txt.text = FacilityLabel.KoreanFor(a.moduleKey);
+            txt.raycastTarget = false;
             txt.font = font;
             txt.fontSize = 20;
             // 도크가 넓어지면 버튼이 좁아진다 — 줄바꿈으로 잘리느니 살짝 넘치게 둔다.

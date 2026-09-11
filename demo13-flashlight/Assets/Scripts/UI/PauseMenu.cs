@@ -74,8 +74,13 @@ public class PauseMenu : MonoBehaviour
         Stretch(dim);
         dim.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);
 
+        var frame = MakeRect("MenuFrame", canvasGO.transform);
+        frame.anchorMin = frame.anchorMax = frame.pivot = new Vector2(.5f,.5f);
+        frame.sizeDelta = new Vector2(480,500);
+        frame.gameObject.AddComponent<Image>().color = UITheme.Panel;
+
         // 제목
-        var title = MakeText("Title", canvasGO.transform, "일시정지", 64, FontStyle.Bold,
+        var title = MakeText("Title", canvasGO.transform, "일시정지", 40, FontStyle.Bold,
             UITheme.TextBright);
         Anchor(title, new Vector2(0.5f, 0.5f), new Vector2(0, 180), new Vector2(700, 100));
 

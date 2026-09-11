@@ -195,9 +195,9 @@ MonoBehaviour:
   heavyAttack: {fileID: 0}
   heavyFullAttack: {fileID: 0}
   fallbackMoveSpeed: 5
-  animCadenceMatchesSpeed: 0
-  walkClipSpeed: 0.34
-  runClipSpeed: 0.52
+  animCadenceMatchesSpeed: 1
+  walkClipSpeed: 0.45
+  runClipSpeed: 2.3
   animCadenceMax: 2.4
 --- !u!114 &8558418155601727802
 MonoBehaviour:

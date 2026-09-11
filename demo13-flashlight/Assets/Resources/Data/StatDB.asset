@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::StatDB
   playerStat:
     maxHp: 100
-    moveSpeed: 4
-    sprintSpeedMultiplier: 1.6
+    moveSpeed: 0.45
+    sprintSpeedMultiplier: 5.1
     crouchSpeedMultiplier: 0.5
     moveAccel: 45
     moveDecel: 80

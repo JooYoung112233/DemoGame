@@ -1,0 +1,178 @@
+{
+  "scene": "Safehouse",
+  "playing": true,
+  "hideout": false,
+  "diorama": false,
+  "uiOpen": false,
+  "speed": 0.45,
+  "sprint": 5.1,
+  "cadence": true,
+  "walkClip": 0.45,
+  "runClip": 2.3,
+  "player": {
+    "CanMove": true,
+    "pos": "(54.20, 0.00, 12.00)"
+  },
+  "canvases": [
+    {
+      "path": "UIManager/PostRaidEventUI/PostRaidEvent_Canvas",
+      "sortingOrder": 105,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "Story/NarrationUI/NarrationUI_Canvas",
+      "sortingOrder": 90,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "UIManager/CraftingUI/CraftingUI_Canvas",
+      "sortingOrder": 50,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "UIManager/DialogueUI/Dialogue_Canvas",
+      "sortingOrder": 90,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "UIManager/CharacterPanelUI/CharPanel_Canvas",
+      "sortingOrder": 40,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "ToastManager/Toast_Canvas",
+      "sortingOrder": 200,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "UIManager/ShopUI/Shop_Canvas",
+      "sortingOrder": 50,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "[UseActionManager]/UseChannelCanvas",
+      "sortingOrder": 950,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "UIManager/MapSelectUI/MapSelect_Canvas",
+      "sortingOrder": 50,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "Story/NoteUI/NoteUI_Canvas",
+      "sortingOrder": 110,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "UIManager/NavigationHUD/Nav_Canvas",
+      "sortingOrder": 50,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "Story/TutorialPrompt/TutorialPrompt_Canvas",
+      "sortingOrder": 85,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "UIManager/GameHUD/HUD_Canvas",
+      "sortingOrder": 10,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "[QuickSlotBar]/QuickSlot_Canvas",
+      "sortingOrder": 30,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "UIManager/RaidResultUI/RaidResult_Canvas",
+      "sortingOrder": 100,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    },
+    {
+      "path": "UIManager/QuestHUD/QuestHUD_Canvas",
+      "sortingOrder": 10,
+      "renderMode": 0,
+      "enabled": true,
+      "scale": 1.0
+    }
+  ],
+  "buttons": [
+    {
+      "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_5",
+      "interactable": true,
+      "text": "5  ",
+      "rect": "(x:0.00, y:0.00, width:56.00, height:56.00)"
+    },
+    {
+      "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_2",
+      "interactable": true,
+      "text": "2  ",
+      "rect": "(x:0.00, y:0.00, width:56.00, height:56.00)"
+    },
+    {
+      "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_6",
+      "interactable": true,
+      "text": "6  ",
+      "rect": "(x:0.00, y:0.00, width:56.00, height:56.00)"
+    },
+    {
+      "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_4",
+      "interactable": true,
+      "text": "4  ",
+      "rect": "(x:0.00, y:0.00, width:56.00, height:56.00)"
+    },
+    {
+      "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_3",
+      "interactable": true,
+      "text": "3  ",
+      "rect": "(x:0.00, y:0.00, width:56.00, height:56.00)"
+    },
+    {
+      "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_1",
+      "interactable": true,
+      "text": "1  ",
+      "rect": "(x:0.00, y:0.00, width:56.00, height:56.00)"
+    }
+  ],
+  "doors": [
+    {
+      "name": "Hideout_Entrance",
+      "TargetScene": "Hideout",
+      "SpawnPointId": "default",
+      "pos": "(56.40, 0.00, 12.00)"
+    }
+  ],
+  "controllers": [],
+  "events": 1
+}

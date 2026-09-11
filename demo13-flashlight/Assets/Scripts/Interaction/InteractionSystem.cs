@@ -28,6 +28,9 @@ public class InteractionSystem : MonoBehaviour
     GUIStyle promptStyle;
     Texture2D bgTex;
     Camera mainCam;
+    SceneDoor3D[] sceneDoors = System.Array.Empty<SceneDoor3D>();
+    BuildingEntrance[] buildingDoors = System.Array.Empty<BuildingEntrance>();
+    GUIStyle entryStyle;
 
     void Awake()
     {
@@ -38,16 +41,25 @@ public class InteractionSystem : MonoBehaviour
     {
         mainCam = Camera.main;
         SceneManager.sceneLoaded += OnSceneLoaded;
+        RefreshEntrances();
     }
 
     void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        if (bgTex != null) Destroy(bgTex);
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         mainCam = Camera.main;
+        RefreshEntrances();
+    }
+
+    void RefreshEntrances()
+    {
+        sceneDoors = FindObjectsByType<SceneDoor3D>();
+        buildingDoors = FindObjectsByType<BuildingEntrance>();
     }
 
     void Update()
@@ -148,11 +160,13 @@ public class InteractionSystem : MonoBehaviour
 
     void OnGUI()
     {
-        if (currentTarget == null || mainCam == null) return;
+        if (mainCam == null || TitleScreen.IsShowing || HideoutController.IsActive) return;
         // UI 열려있으면 프롬프트 숨김 (인벤 등 위로 뚫고 나오는 것 방지)
         if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return;
 
         InitStyles();
+        DrawEntranceMarkers();
+        if (currentTarget == null) return;
 
         // 오브젝트 머리 위 → 화면 좌표
         Vector3 worldPos = currentTarget.transform.position + Vector3.up * 1.2f;
@@ -194,6 +208,47 @@ public class InteractionSystem : MonoBehaviour
         promptStyle.fontStyle = FontStyle.Bold;
         promptStyle.normal.textColor = textColor;
         promptStyle.alignment = TextAnchor.MiddleCenter;
+        entryStyle = new GUIStyle(promptStyle);
+        entryStyle.fontSize = Mathf.Max(14, fontSize);
+        entryStyle.normal.textColor = UITheme.TextBright;
+    }
+
+    void DrawEntranceMarkers()
+    {
+        foreach (var d in sceneDoors)
+            if(d != null && d.isActiveAndEnabled && !string.IsNullOrEmpty(d.TargetScene))
+                DrawEntry(d.transform, d.TargetScene == "Hideout" ? "하이드아웃 · 진입" : "입구 · 진입");
+        foreach (var d in buildingDoors)
+        {
+            if(d == null || !d.isActiveAndEnabled || string.IsNullOrEmpty(d.TargetScene)) continue;
+            var io=d.GetComponent<InteractableObject>();
+            if(io == currentTarget && io != null) continue;
+            var lockState=d.GetComponent<BlockedPassage>();
+            string label=lockState != null && !lockState.IsOpen ? "문 · 잠김"
+                : d.IsExit ? "출구" : "입장 가능";
+            DrawEntry(d.transform,label);
+        }
+        foreach(var io in InteractableObject.All)
+        {
+            if(io == null || !io.CanInteract || io == currentTarget) continue;
+            if(io.Type == InteractableObject.InteractType.MapBoard)
+                DrawEntry(io.transform,"출전 준비");
+            else if(io.Type == InteractableObject.InteractType.ExitPoint)
+                DrawEntry(io.transform,io.PromptText);
+        }
+    }
+
+    void DrawEntry(Transform target, string label)
+    {
+        if(Plan3D.PlanDistance(transform.position,target.position)>18f) return;
+        var screen=mainCam.WorldToScreenPoint(target.position+Vector3.up*.5f);
+        if(screen.z<=0 || screen.x<24 || screen.x>Screen.width-24 || screen.y<64 || screen.y>Screen.height-24) return;
+        var size=entryStyle.CalcSize(new GUIContent(label));
+        var rect=new Rect(screen.x-size.x*.5f-12,Screen.height-screen.y-size.y*.5f-6,size.x+24,size.y+12);
+        var previous=GUI.color;
+        GUI.color=new Color(.10f,.10f,.085f,.94f);GUI.DrawTexture(rect,Texture2D.whiteTexture);
+        GUI.color=UITheme.AccentBright;GUI.DrawTexture(new Rect(rect.x,rect.y,3,rect.height),Texture2D.whiteTexture);
+        GUI.color=previous;GUI.Label(rect,label,entryStyle);
     }
 
     #endregion
