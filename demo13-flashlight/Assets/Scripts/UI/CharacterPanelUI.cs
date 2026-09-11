@@ -614,8 +614,8 @@ public class CharacterPanelUI : MonoBehaviour
         var cRT = closeGO.GetComponent<RectTransform>();
         cRT.anchorMin = cRT.anchorMax = cRT.pivot = new Vector2(1, 1);
         cRT.anchoredPosition = new Vector2(-18, -18);
-        cRT.sizeDelta = new Vector2(36, 36);
-        closeGO.GetComponent<Image>().color = UITheme.Negative;
+        cRT.sizeDelta = new Vector2(44, 44);
+        closeGO.GetComponent<Image>().color = UITheme.Cell;
         var cBtn = closeGO.GetComponent<Button>();
         var ccol = cBtn.colors; ccol.highlightedColor = UITheme.CellHover; ccol.pressedColor = UITheme.CellPressed; cBtn.colors = ccol;
         closeBtn = cBtn;
@@ -823,7 +823,7 @@ public class CharacterPanelUI : MonoBehaviour
         lwRT.sizeDelta = new Vector2(180, 30);
 
         // ── 카테고리 탭 (헤더 아래, 비주얼만 — 필터 로직 없음) ──
-        string[] tabLabels = { "ALL", "WEAPONS", "ARMOR", "CONSUMABLES", "MATERIALS", "ETC" };
+        string[] tabLabels = { "전체", "무기", "장비", "소모품", "재료", "기타" };
         var tabRowGO = new GameObject("LeftCategoryTabs", typeof(RectTransform));
         tabRowGO.transform.SetParent(leftPanel, false);
         var tabRowRT = tabRowGO.GetComponent<RectTransform>();
@@ -869,7 +869,7 @@ public class CharacterPanelUI : MonoBehaviour
         takeAllBtn = takeAllGO.AddComponent<Button>();
         takeAllBtn.targetGraphic = takeAllImg;
         takeAllBtn.onClick.AddListener(TakeAllFromLeft);
-        MakeChildText(takeAllGO.transform, "TAKE ALL", 12, new Color(0.15f, 0.12f, 0.09f));
+        MakeChildText(takeAllGO.transform, "모두 가져오기", 14, new Color(0.15f, 0.12f, 0.09f));
 
         // SORT — 기존 정렬 버튼: 우상단 → 푸터 우측으로 이동(핸들러/필드 유지)
         var sortGO = new GameObject("SortBtn", typeof(RectTransform));
@@ -883,7 +883,7 @@ public class CharacterPanelUI : MonoBehaviour
         leftSortBtn = sortGO.AddComponent<Button>();
         leftSortBtn.targetGraphic = sortImg;
         leftSortBtn.onClick.AddListener(SortLeftGrid);
-        MakeChildText(sortGO.transform, "SORT", 13, new Color(0.15f, 0.12f, 0.09f));
+        MakeChildText(sortGO.transform, "정렬", 14, new Color(0.15f, 0.12f, 0.09f));
 
         // ── 스크롤 뷰포트 (헤더+탭 아래 ~ 푸터 위) + 격자 content (창고 30~100줄 대응) ──
         var viewportGO = new GameObject("LeftViewport", typeof(RectTransform), typeof(RectMask2D), typeof(WheelOnlyScrollRect));
@@ -955,7 +955,7 @@ public class CharacterPanelUI : MonoBehaviour
         phRT.offsetMax = Vector2.zero;
         leftPlaceholder.AddComponent<Image>().color = UITheme.PanelAlt;
         var phTxt = MakeChildText(leftPlaceholder.transform,
-            "파밍\n\n상자에 다가가 [E]\n수색하면 여기에 표시됩니다",
+            "창고 없음\n\n현장 루팅은 [E]로 열리는\n수색 목록에서 확인하세요",
             14, UITheme.TextMuted);
         phTxt.alignment = TextAnchor.MiddleCenter;
     }
@@ -981,16 +981,16 @@ public class CharacterPanelUI : MonoBehaviour
         UISkin.Panel(charBg);   // 시안: box 프레임(캐릭터/장비 패널)
 
         var title = MakeText(charPanel, "CharTitle", "캐릭터 상태",
-            new Vector2(10, -8), new Vector2(PANEL_WIDTH - 20, 28), 16, UITheme.TextBright, TextAnchor.MiddleCenter);
+            new Vector2(14, -16), new Vector2(PANEL_WIDTH - 28, 32), 24, UITheme.TextBright, TextAnchor.MiddleLeft);
         title.fontStyle = FontStyle.Bold;
 
-        // 레벨/XP — 제목과 같은 줄 우측(레이아웃 안 밀림). UpdateCharacterPanel이 갱신.
+        // 레벨/경험치/평판은 제목 아래 독립 행으로 표시한다.
         charLevelText = MakeText(charPanel, "CharLevel", "Lv.1",
-            new Vector2(10, -8), new Vector2(PANEL_WIDTH - 24, 28), 12, UITheme.Gold, TextAnchor.MiddleRight);
+            new Vector2(14, -52), new Vector2(PANEL_WIDTH - 28, 28), 14, UITheme.Gold, TextAnchor.MiddleLeft);
         charLevelText.fontStyle = FontStyle.Bold;
 
         // ── 스탯 텍스트 ──
-        float y = -48f;
+        float y = -92f;
         charHpText = MakeText(charPanel, "CharHp", "HP: 100 / 100",
             new Vector2(14, y), new Vector2(PANEL_WIDTH - 28, 22), 14, new Color(0.4f, 1f, 0.5f), TextAnchor.MiddleLeft);
         charHpText.fontStyle = FontStyle.Bold;
@@ -1025,7 +1025,7 @@ public class CharacterPanelUI : MonoBehaviour
         equipSlotBtnList = new List<Button>();
 
         // 슬롯 레이아웃: 3열 상단(Head/Armor/Rig), 3열 중단(Weapon1/Backpack/Weapon2), 1열 하단(Melee)
-        float slotSize = 64f;
+        float slotSize = 80f;
         float slotGap = 6f;
         float totalW = slotSize * 3 + slotGap * 2;
         float startX = (PANEL_WIDTH - totalW) * 0.5f;
@@ -1052,6 +1052,13 @@ public class CharacterPanelUI : MonoBehaviour
         // 수집한 장비 슬롯 버튼을 직렬화 평행 배열로 확정.
         equipSlotKeys = equipSlotKeyList.ToArray();
         equipSlotButtons = equipSlotBtnList.ToArray();
+        foreach (var t in charPanel.GetComponentsInChildren<Text>(true))
+        {
+            if(t.transform.parent != charPanel) continue;
+            var rt=t.rectTransform;rt.anchorMax=new Vector2(1,1);
+            rt.sizeDelta=new Vector2(-28,rt.sizeDelta.y);
+            if(t!=title && t!=charLevelText)t.fontSize=Mathf.Max(t.fontSize,16);
+        }
     }
 
     void BuildEquipSlot(RectTransform parent, EquipSlot slot, string label, float x, float y, float size)
@@ -1059,10 +1066,10 @@ public class CharacterPanelUI : MonoBehaviour
         var go = new GameObject($"Slot_{slot}");
         go.transform.SetParent(parent, false);
         var rt = go.AddComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0, 1);
-        rt.anchorMax = new Vector2(0, 1);
+        rt.anchorMin = new Vector2(.5f, 1);
+        rt.anchorMax = new Vector2(.5f, 1);
         rt.pivot = new Vector2(0, 1);
-        rt.anchoredPosition = new Vector2(x, y);
+        rt.anchoredPosition = new Vector2(x-PANEL_WIDTH*.5f, y);
         rt.sizeDelta = new Vector2(size, size);
 
         var bg = go.AddComponent<Image>();
@@ -1084,23 +1091,23 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 슬롯 라벨 (하단)
         var lblTxt = MakeText(rt, $"Lbl_{slot}", label,
-            new Vector2(0, 2), new Vector2(size, 14), 10, UITheme.TextMuted, TextAnchor.LowerCenter);
+            new Vector2(0, 2), new Vector2(size, 20), 13, UITheme.TextMuted, TextAnchor.LowerCenter);
         lblTxt.alignment = TextAnchor.LowerCenter;
         var lblRT = lblTxt.GetComponent<RectTransform>();
         lblRT.anchorMin = new Vector2(0, 0);
         lblRT.anchorMax = new Vector2(1, 0);
         lblRT.pivot = new Vector2(0.5f, 0);
         lblRT.anchoredPosition = new Vector2(0, 2);
-        lblRT.sizeDelta = new Vector2(0, 14);
+        lblRT.sizeDelta = new Vector2(0, 20);
         equipSlotLabels[slot] = lblTxt;
 
         // 클릭 → 해제
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = bg;
         var colors = btn.colors;
-        colors.normalColor = bg.color;
-        colors.highlightedColor = UITheme.CellHover;
-        colors.pressedColor = UITheme.CellPressed;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1.2f,1.2f,1.2f,1);
+        colors.pressedColor = new Color(.85f,.85f,.85f,1);
         btn.colors = colors;
         var capturedSlot = slot;
         btn.onClick.AddListener(() => OnEquipSlotClicked(capturedSlot));
@@ -1277,7 +1284,7 @@ public class CharacterPanelUI : MonoBehaviour
             if (slotBtn != null)
             {
                 var c = slotBtn.colors;
-                c.normalColor = bgColor;
+                c.normalColor = Color.white;
                 slotBtn.colors = c;
             }
 

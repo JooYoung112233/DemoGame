@@ -165,7 +165,10 @@ public class QuickSlotBar : MonoBehaviour
         ResolveRefs();
         // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
         if (canvas != null && !canvas.gameObject.activeSelf) canvas.gameObject.SetActive(true);
-        if (barRoot != null) barRoot.SetActive(playerGO != null);
+        bool inventoryOpen = UIManager.Instance != null && UIManager.Instance.IsInventoryOpen;
+        bool uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
+        if (barRoot != null) barRoot.SetActive(playerGO != null && !TitleScreen.IsShowing
+            && (inventoryOpen || (!HideoutController.IsActive && !uiOpen)));
         if (playerGO == null) return;
 
         RefreshCounts();
@@ -173,13 +176,12 @@ public class QuickSlotBar : MonoBehaviour
 
         // 모달 UI 열려 있으면 입력만 차단. 단 캐릭터 패널(인벤) 위엔 바를 올려 보이게 —
         // 드래그로 슬롯에 놓는 등록 타깃이 보여야 함(패널 캔버스 40 위 = 41, 평소 30).
-        bool uiOpen = UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen();
         if (canvas != null)
         {
             int want = uiOpen ? 41 : SortingOrder;
             if (canvas.sortingOrder != want) canvas.sortingOrder = want;
         }
-        if (uiOpen) return;
+        if (uiOpen || HideoutController.IsActive || TitleScreen.IsShowing) return;
 
         for (int i = 0; i < SlotCount; i++)
             if (GameInput.GetKeyDown(KeyCode.Alpha1 + i) || GameInput.GetKeyDown(KeyCode.Keypad1 + i))

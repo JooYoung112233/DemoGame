@@ -204,7 +204,7 @@ public class SettingsUI : MonoBehaviour
         var panel = MakeRect("Panel", canvasGO.transform);
         panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0.5f);
         panel.pivot = new Vector2(0.5f, 0.5f);
-        panel.sizeDelta = new Vector2(760, 780);
+        panel.sizeDelta = new Vector2(800, 920);
         var panelImg = panel.gameObject.AddComponent<Image>();
         panelImg.color = UITheme.Panel;
 
@@ -229,7 +229,7 @@ public class SettingsUI : MonoBehaviour
         y -= 55f;
         MakeCycleRow(panel, "해상도", ref y, out resPrevBtn, out resolutionLabel, out resNextBtn);
         MakeCycleRow(panel, "창모드", ref y, out modePrevBtn, out screenModeLabel, out modeNextBtn);
-        MakeText("ScreenNote", panel, "변경 즉시 적용 (에디터에서는 저장만)", 18, FontStyle.Normal, UITheme.TextDim,
+        MakeText("ScreenNote", panel, "변경 사항은 자동으로 저장됩니다", 18, FontStyle.Normal, UITheme.TextMuted,
             new Vector2(0f, 1f), new Vector2(90, y), new Vector2(500, 30), TextAnchor.MiddleLeft);
         y -= 50f;
 
@@ -238,9 +238,9 @@ public class SettingsUI : MonoBehaviour
             new Vector2(0f, 1f), new Vector2(70, y), new Vector2(200, 40), TextAnchor.MiddleLeft);
         y -= 45f;
         MakeText("Keys", panel,
-            "이동 W A S D   ·   달리기 Shift   ·   구르기 Space\n" +
-            "상호작용 E   ·   손전등 F   ·   퀵슬롯 1~4\n" +
-            "캐릭터 Tab   ·   장비 C   ·   퀘스트 J   ·   특성 K   ·   도움말 H",
+            "이동 W A S D   ·   달리기 Shift   ·   웅크리기 C\n" +
+            "상호작용 E   ·   조준 마우스 오른쪽   ·   퀵슬롯 1~6\n" +
+            "인벤토리 Tab   ·   퀘스트 J   ·   닫기 / 메뉴 Esc",
             20, FontStyle.Normal, UITheme.TextBright,
             new Vector2(0f, 1f), new Vector2(90, y - 35), new Vector2(600, 110), TextAnchor.UpperLeft);
 
@@ -251,10 +251,10 @@ public class SettingsUI : MonoBehaviour
     void MakeVolumeRow(RectTransform panel, string label, ref float y, out Slider slider, out Text valueText)
     {
         MakeText($"Lbl_{label}", panel, label, 24, FontStyle.Normal, UITheme.TextBright,
-            new Vector2(0f, 1f), new Vector2(110, y), new Vector2(160, 40), TextAnchor.MiddleLeft);
-        slider = MakeSlider(panel, $"Sld_{label}", new Vector2(380, y), new Vector2(320, 24));
+            new Vector2(0f, 1f), new Vector2(110, y + 20), new Vector2(160, 40), TextAnchor.MiddleLeft);
+        slider = MakeSlider(panel, $"Sld_{label}", new Vector2(440, y), new Vector2(320, 24));
         valueText = MakeText($"Val_{label}", panel, "100%", 22, FontStyle.Normal, UITheme.TextDim,
-            new Vector2(0f, 1f), new Vector2(620, y), new Vector2(100, 40), TextAnchor.MiddleRight);
+            new Vector2(0f, 1f), new Vector2(620, y + 20), new Vector2(100, 40), TextAnchor.MiddleRight);
         y -= 55f;
     }
 
@@ -262,11 +262,12 @@ public class SettingsUI : MonoBehaviour
         out Button prevBtn, out Text valueLabel, out Button nextBtn)
     {
         MakeText($"Lbl_{label}", panel, label, 24, FontStyle.Normal, UITheme.TextBright,
-            new Vector2(0f, 1f), new Vector2(110, y), new Vector2(160, 40), TextAnchor.MiddleLeft);
-        prevBtn = MakeArrowButton(panel, $"Prev_{label}", "◀", new Vector2(250, y));
+            new Vector2(0f, 1f), new Vector2(110, y + 20), new Vector2(160, 40), TextAnchor.MiddleLeft);
+        prevBtn = MakeArrowButton(panel, $"Prev_{label}", "◀", new Vector2(310, y));
         valueLabel = MakeText($"Val_{label}", panel, "-", 24, FontStyle.Normal, UITheme.TextBright,
-            new Vector2(0f, 1f), new Vector2(430, y), new Vector2(280, 40), TextAnchor.MiddleCenter);
-        nextBtn = MakeArrowButton(panel, $"Next_{label}", "▶", new Vector2(610, y));
+            new Vector2(0f, 1f), new Vector2(475, y), new Vector2(250, 40), TextAnchor.MiddleCenter);
+        valueLabel.rectTransform.pivot = new Vector2(.5f, .5f);
+        nextBtn = MakeArrowButton(panel, $"Next_{label}", "▶", new Vector2(640, y));
         y -= 55f;
     }
 
@@ -370,6 +371,7 @@ public class SettingsUI : MonoBehaviour
         var t = go.AddComponent<Text>();
         t.font = font; t.text = content; t.fontSize = size; t.fontStyle = style; t.color = color;
         t.alignment = align;
+        t.raycastTarget = false;
         t.horizontalOverflow = HorizontalWrapMode.Overflow;
         t.verticalOverflow = VerticalWrapMode.Overflow;
         return t;

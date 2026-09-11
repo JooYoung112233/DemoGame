@@ -67,6 +67,7 @@ public class TestHealthBar : MonoBehaviour
 
         float pct = Mathf.Clamp01(_health.Percent);
         bool show = !_health.IsDead && (!_hideWhenFull || pct < 0.995f);
+        if (HideoutController.IsActive && _health.GetComponent<TopDownPlayer>() != null) show = false;
         if (_bgSr.enabled != show) { _bgSr.enabled = show; _fillSr.enabled = show; }
         if (!show) return;
 

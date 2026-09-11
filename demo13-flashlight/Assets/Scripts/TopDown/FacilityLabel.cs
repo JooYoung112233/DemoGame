@@ -75,7 +75,7 @@ public class FacilityLabel : MonoBehaviour
         "radio"     => "라디오",
         "cooking"   => "조리대",
         "medical"   => "의료대",
-        "dispatch"  => "파견 보드",
+        "dispatch"  => "",          // 폐기된 파견 시스템: 배경 프랍만 유지
         "generator" => "발전기",
         "idle"      => "",          // 대기 의자는 라벨 없음
         _           => key,

@@ -146,6 +146,7 @@ public partial class HideoutDiorama : MonoBehaviour
     /// <summary>시설 선택 — 캐릭터를 그 앞에 세우고, 카메라로 UI 자리를 비우고, 기존 UI를 연다.</summary>
     void Select(HideoutFacilityAnchor a)
     {
+        if (a == null || a.moduleKey == "dispatch") return;
         _current = a;
         RefreshFacilityBar();
         _uiWasOpen = false;

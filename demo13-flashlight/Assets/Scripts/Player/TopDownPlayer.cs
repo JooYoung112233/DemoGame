@@ -408,8 +408,8 @@ public class TopDownPlayer : MonoBehaviour
 
         float h = GameInput.GetAxisRaw("Horizontal");
         float v = GameInput.GetAxisRaw("Vertical");
-        MoveDirection = CameraRelative(h, v);   // W = 화면 위 (대각선 쿼터뷰, 2026-09-11)
-        if (MoveDirection.sqrMagnitude > 1f) MoveDirection.Normalize();
+        // Vector2 속성의 Normalize()는 반환된 복사본만 바꾼다. 결과를 명시적으로 저장한다.
+        MoveDirection = Vector2.ClampMagnitude(CameraRelative(h, v), 1f);
 
         float speed = MoveSpd * (IsSprinting ? SprintMult : 1f);
         if (_crouching) speed *= Stat.crouchSpeedMultiplier;  // 앉아 이동 = 감속

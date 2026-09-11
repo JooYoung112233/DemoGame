@@ -1,0 +1,18 @@
+[
+  {
+    "check": "ESC opens confirmation",
+    "pass": true
+  },
+  {
+    "check": "ESC cancels confirmation",
+    "pass": true
+  },
+  {
+    "check": "Tab opens inventory",
+    "pass": true
+  },
+  {
+    "check": "ESC closes inventory only",
+    "pass": true
+  }
+]
