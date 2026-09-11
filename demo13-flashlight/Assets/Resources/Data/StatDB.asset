@@ -26,7 +26,7 @@ MonoBehaviour:
       animSpeed: 1
       distance: 0
     - anim: walk
-      animSpeed: 1
+      animSpeed: 0.5
       distance: 0
     - anim: run
       animSpeed: 1
