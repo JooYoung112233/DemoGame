@@ -46,24 +46,24 @@ MonoBehaviour:
     lightDamage: 8
     lightRange: 1.2
     lightStaminaCost: 6
-    lightGroggy: 5
+    lightGroggy: 14
     lightCooldown: 0.12
     lightComboMax: 3
     lightComboWindow: 0.6
     lightCombo2Damage: 9
-    lightCombo2Groggy: 6
+    lightCombo2Groggy: 16
     lightCombo3Damage: 12
-    lightCombo3Groggy: 8
+    lightCombo3Groggy: 20
     lightCombo3StaminaCost: 8
     heavyDamage: 20
     heavyRange: 1.7
     heavyStaminaCost: 22
-    heavyGroggy: 25
+    heavyGroggy: 32
     heavyChargeTime: 0.6
     heavyMaxCharge: 1.5
     heavyFullDamage: 32
     heavyFullStaminaCost: 35
-    heavyFullGroggy: 45
+    heavyFullGroggy: 58
     heavyCooldown: 0.8
     dodgeStaminaCost: 15
     dodgeDistance: 3
@@ -93,8 +93,8 @@ MonoBehaviour:
     attackSpeed: 0.8
     attackWindup: 0.7
     canBeCancelled: 1
-    maxGroggy: 80
-    groggyDecay: 10
+    maxGroggy: 60
+    groggyDecay: 5
     groggyStunDuration: 2.5
     moveSpeed: 2.5
     patrolSpeed: 1
@@ -103,8 +103,129 @@ MonoBehaviour:
     patrolRadius: 4
     patrolWaitTime: 2
     hitStunDuration: 0.3
+    rangedWeaponData: {fileID: 0}
+    rangedDamageMult: 1
+    rangedBulletSpeedMult: 0.4
+    preferredRange: 6
+    burstCount: 1
+    burstInterval: 0.12
+    spreadDeg: 3
     expReward: 10
     goldReward: 5
+    cashMin: 50
+    cashMax: 150
+    drops: []
+    motions:
+    - anim: idle
+      animSpeed: 1
+      distance: 0
+    - anim: walk
+      animSpeed: 1
+      distance: 0
+    - anim: attack
+      animSpeed: 1
+      distance: 0
+    - anim: hit
+      animSpeed: 1
+      distance: 0
+    - anim: death
+      animSpeed: 1
+      distance: 0
+  - id: bandit_pistol
+    displayName: Bandit Pistol
+    scale: 2
+    tintColor: {r: 0.9, g: 0.7, b: 0.6, a: 1}
+    shadowColor: {r: 0, g: 0, b: 0, a: 0.4}
+    useGlow: 0
+    glowColor: {r: 1, g: 0.3, b: 0.3, a: 1}
+    glowIntensity: 3
+    glowRange: 3
+    useTrailParticle: 0
+    trailColor: {r: 1, g: 0.5, b: 0.5, a: 0.5}
+    generatedPrefab: {fileID: 0}
+    maxHp: 34
+    attackDamage: 9
+    attackRange: 9
+    attackSpeed: 0.5
+    attackWindup: 0.7
+    canBeCancelled: 1
+    maxGroggy: 60
+    groggyDecay: 5
+    groggyStunDuration: 2.5
+    moveSpeed: 2.2
+    patrolSpeed: 1
+    detectRange: 10
+    loseRange: 15
+    patrolRadius: 4
+    patrolWaitTime: 2
+    hitStunDuration: 0.3
+    rangedWeaponData: {fileID: 11400000, guid: 9f10a2b3c4d5e6f708192a3b4c5d6e7f, type: 2}
+    rangedDamageMult: 0.64285713
+    rangedBulletSpeedMult: 0.3809524
+    preferredRange: 6.5
+    burstCount: 1
+    burstInterval: 0.12
+    spreadDeg: 3
+    expReward: 10
+    goldReward: 5
+    cashMin: 80
+    cashMax: 200
+    drops: []
+    motions:
+    - anim: idle
+      animSpeed: 1
+      distance: 0
+    - anim: walk
+      animSpeed: 1
+      distance: 0
+    - anim: attack
+      animSpeed: 1
+      distance: 0
+    - anim: hit
+      animSpeed: 1
+      distance: 0
+    - anim: death
+      animSpeed: 1
+      distance: 0
+  - id: bandit_rifle
+    displayName: Bandit Rifle
+    scale: 2
+    tintColor: {r: 0.9, g: 0.7, b: 0.6, a: 1}
+    shadowColor: {r: 0, g: 0, b: 0, a: 0.4}
+    useGlow: 0
+    glowColor: {r: 1, g: 0.3, b: 0.3, a: 1}
+    glowIntensity: 3
+    glowRange: 3
+    useTrailParticle: 0
+    trailColor: {r: 1, g: 0.5, b: 0.5, a: 0.5}
+    generatedPrefab: {fileID: 0}
+    maxHp: 44
+    attackDamage: 6
+    attackRange: 12
+    attackSpeed: 0.38
+    attackWindup: 0.85
+    canBeCancelled: 1
+    maxGroggy: 60
+    groggyDecay: 5
+    groggyStunDuration: 2.5
+    moveSpeed: 1.9
+    patrolSpeed: 1
+    detectRange: 12
+    loseRange: 17
+    patrolRadius: 4
+    patrolWaitTime: 2
+    hitStunDuration: 0.3
+    rangedWeaponData: {fileID: 11400000, guid: 0dcb09b2aa62b104ab24a6deeb38ca9e, type: 2}
+    rangedDamageMult: 0.5
+    rangedBulletSpeedMult: 0.4
+    preferredRange: 9
+    burstCount: 3
+    burstInterval: 0.4
+    spreadDeg: 5
+    expReward: 10
+    goldReward: 5
+    cashMin: 80
+    cashMax: 200
     drops: []
     motions:
     - anim: idle
@@ -140,8 +261,8 @@ MonoBehaviour:
     attackSpeed: 0.55
     attackWindup: 0.95
     canBeCancelled: 1
-    maxGroggy: 55
-    groggyDecay: 12
+    maxGroggy: 45
+    groggyDecay: 6
     groggyStunDuration: 2.8
     moveSpeed: 2
     patrolSpeed: 0.9
@@ -150,8 +271,17 @@ MonoBehaviour:
     patrolRadius: 4
     patrolWaitTime: 2
     hitStunDuration: 0.4
+    rangedWeaponData: {fileID: 0}
+    rangedDamageMult: 1
+    rangedBulletSpeedMult: 0.4
+    preferredRange: 6
+    burstCount: 1
+    burstInterval: 0.12
+    spreadDeg: 3
     expReward: 14
     goldReward: 8
+    cashMin: 50
+    cashMax: 150
     drops: []
     motions:
     - anim: idle
@@ -187,8 +317,8 @@ MonoBehaviour:
     attackSpeed: 0.45
     attackWindup: 1.15
     canBeCancelled: 0
-    maxGroggy: 160
-    groggyDecay: 8
+    maxGroggy: 120
+    groggyDecay: 4
     groggyStunDuration: 2
     moveSpeed: 1.9
     patrolSpeed: 0.8
@@ -197,8 +327,17 @@ MonoBehaviour:
     patrolRadius: 3
     patrolWaitTime: 3
     hitStunDuration: 0.15
+    rangedWeaponData: {fileID: 0}
+    rangedDamageMult: 1
+    rangedBulletSpeedMult: 0.4
+    preferredRange: 6
+    burstCount: 1
+    burstInterval: 0.12
+    spreadDeg: 3
     expReward: 28
     goldReward: 18
+    cashMin: 150
+    cashMax: 400
     drops: []
     motions:
     - anim: idle
@@ -244,8 +383,17 @@ MonoBehaviour:
     patrolRadius: 5
     patrolWaitTime: 2
     hitStunDuration: 0.3
+    rangedWeaponData: {fileID: 0}
+    rangedDamageMult: 1
+    rangedBulletSpeedMult: 0.4
+    preferredRange: 6
+    burstCount: 1
+    burstInterval: 0.12
+    spreadDeg: 3
     expReward: 10
     goldReward: 5
+    cashMin: 0
+    cashMax: 0
     drops: []
     motions:
     - anim: idle

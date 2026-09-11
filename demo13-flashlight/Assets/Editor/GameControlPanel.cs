@@ -1388,7 +1388,8 @@ public class GameControlPanel : EditorWindow
 
         // 런타임이 실제 로드하는 파일(Resources/*.txt) — 여기서 편집하면 게임에 바로 반영.
         //  맵 드랍 튜닝: region_loot.txt (지역별 개별 드랍 = weight=개별확률, roll_count/min/max=수량).
-        foreach (var rf in new[] { "region_loot.txt", "region_items.txt" })
+        //  loot_tables.txt = 지역 × 상자 종류 표(2026-09-11, RegionLootCatalog가 region_loot와 함께 읽는다).
+        foreach (var rf in new[] { "region_loot.txt", "loot_tables.txt", "region_items.txt" })
         {
             var p = Path.Combine(Application.dataPath, "Resources", rf);
             if (File.Exists(p)) files.Add(p);

@@ -1,7 +1,7 @@
 # Demo 프로젝트 가이드
 
 ## 개요
-Unity 6 기반 top-down 2D 액션 게임 프로토타입 (`demo13-flashlight`). Tarkov/Zomboid 스타일 — 안전가옥 출발 → 맵 레이드 → 루팅 → 탈출 → 귀환 루프.
+Unity 6.6 기반 **3D** 루팅 RPG 슈터 프로토타입 (`demo13-flashlight`) — 정면 탑다운(오소 62°) 카메라. 방향(2026-09-11) = 낙원처럼 돈벌이·좋은 아이템 루팅 + 총격전. 루프: 마을(안전구역) 출발 → 레이드 → 루팅 → 탈출 → 귀환. (2D → 3D 전환은 2026-09 완료, `demo13-flashlight/docs/3d-migration.md`)
 
 > 이 저장소는 현재 **demo13-flashlight 단일 프로젝트**만 유지한다. (이전 Phaser 데모들 demo1~12는 정리되어 제거됨)
 
@@ -25,7 +25,7 @@ Unity 6 기반 top-down 2D 액션 게임 프로토타입 (`demo13-flashlight`). 
 ```
 D:\Demo/
 ├── CLAUDE.md            # 이 파일 (저장소 공통 룰)
-└── demo13-flashlight/   # Unity 6 top-down 2D 액션 게임
+└── demo13-flashlight/   # Unity 6.6 3D 루팅 RPG 슈터
     ├── CLAUDE.md        # demo13 코드/아키텍처 가이드
     ├── docs/            # 시스템별 기획 문서 (MASTER.md = 색인)
     └── Assets/ ...

@@ -78,10 +78,35 @@ public class UnitStatData
     public float patrolWaitTime = 2f;
     public float hitStunDuration = 0.3f;
 
+    // ===== 원거리(총기 밴딧) — 2026-09-11, docs/bandit-firearms.md §레이드 배치 결정 =====
+    //  총 자체(피해·탄속·총 종류)는 플레이어와 같은 WeaponData가 진실 — 2026-09-11 사용자 "한 곳으로 전부"
+    //  (docs/combat.md §무기 구성 결정). 여기엔 적 전용 값만: 피해·탄속 배율, 조준 경고·사격 주기·교전 거리, 점사·정확도.
+    [Header("원거리 (총 = WeaponData, 비우면 근접)")]
+    [Tooltip("이 적이 쓰는 총 — 플레이어와 같은 WeaponData. 비우면 근접 유닛. 채우면 조준 경고 후 실제 Projectile을 쏜다.\n"
+           + "이때 attackRange=사격 사거리, attackWindup=조준 경고 시간, attackSpeed=사격 주기. 모델은 총 종류(firearmStance)로 고른다.")]
+    public WeaponData rangedWeaponData;
+    [Tooltip("총 피해 배율 — 탄 1발 = WeaponData.damage × 이 값.")]
+    public float rangedDamageMult = 1f;
+    [Tooltip("탄속 배율 — WeaponData.projectileSpeed × 이 값. 적 탄은 느리게 해서 보고 피할 수 있게.")]
+    public float rangedBulletSpeedMult = 0.4f;
+    [Tooltip("사선이 트이면 이 거리까지만 다가가 멈춰 선다(m). attackRange보다 짧게.")]
+    public float preferredRange = 6f;
+    [Tooltip("한 번 사격에 나가는 탄 수(권총 1, 소총 3점사).")]
+    [Min(1)] public int burstCount = 1;
+    [Tooltip("점사 탄 사이 간격(초).")]
+    public float burstInterval = 0.12f;
+    [Tooltip("탄 퍼짐 ±각도(도).")]
+    public float spreadDeg = 3f;
+
     // ===== 보상 =====
     [Header("보상")]
     public int expReward = 10;
+    [Tooltip("(미사용 — 어디서도 읽지 않는다. 적이 떨구는 고철은 아래 cashMin/cashMax)")]
     public int goldReward = 5;
+    [Tooltip("시체에 넣는 고철 화폐(◈) 최소·최대 — 1개 = ◈1, 들고 탈출해 귀환하면 ◈에 더해진다. " +
+             "필드 이름은 옛 현금 시절 그대로(데이터 보존). 0이면 없음. docs/economy.md §적 고철 드랍.")]
+    [Min(0)] public int cashMin = 0;
+    [Min(0)] public int cashMax = 0;
 
     // ===== 전리품 드랍 (적별 전용 테이블) =====
     [Header("전리품 드랍 (비우면 지역 루트로 폴백)")]

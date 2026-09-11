@@ -390,13 +390,13 @@ public class InteractableObject : MonoBehaviour, IInteractable
             return;
         }
 
-        // 일반 루팅 상자
+        // 필드 루팅 상자·시체 = 루팅 목록(2026-09-11 docs/region-loot.md §루팅 정리 결정 — 처음 열면 옛 수색 연출로
+        //   하나씩 드러나고, 다 드러나면 전부/하나씩). Tab이면 캐릭터 패널 자세히 창. 창고·보관함은 위 SafehouseStorage.
         var container = GetComponent<LootContainer>();
         if (container != null)
         {
             container.Open(playerGO);
-            if (UIManager.Instance != null)
-                UIManager.Instance.ShowCharacterPanelWithContainer(container);
+            LootListUI.Show(container, playerGO);
         }
         else
         {

@@ -148,7 +148,9 @@ public static class Zone1GreyboxLayout
 
         // ② 폐아파트(C1R0) — 중
         n += Scatter(map, "SZ_Apt", 68f, 18f, 100f, 70f, 5, 4, 22);
-        n += EnemyZone(map, "EZ_Apt", 84f, 44f, 16f, 18f, "bandit_melee_1", 3);
+        // 2026-09-11: 총기 밴딧 배치(docs/bandit-firearms.md §레이드 배치 결정) — 손배치 존 4개를 총기형으로.
+        //   아케이드(입구·약함)는 근접만 둔다. 무리 가중치는 근접과 같은 1(TrimEnemyPacks 결과 불변).
+        n += EnemyZone(map, "EZ_Apt", 84f, 44f, 16f, 18f, "bandit_pistol", 3);
 
         // ③ 식물원 돔·습지(C1R2) — 중상
         n += Scatter(map, "SZ_Dome", 68f, 128f, 100f, 166f, 5, 5, 33);
@@ -157,16 +159,16 @@ public static class Zone1GreyboxLayout
 
         // ④ 유리 R&D 타워(C2R0) — 강함·고급 루트(최심부)
         n += Scatter(map, "SZ_Tower", 116f, 18f, 158f, 70f, 6, 6, 44);
-        n += EnemyZone(map, "EZ_Tower", 140f, 40f, 16f, 14f, "bandit_melee_1", 2);
+        n += EnemyZone(map, "EZ_Tower", 140f, 40f, 16f, 14f, "bandit_rifle", 2);
         n += EnemyZone(map, "EZ_Tower_T", 150f, 52f, 8f, 8f, "bandit_tank", 1);
 
         // ⑤ 무너진 상가(C2R2) — 중상
         n += Scatter(map, "SZ_Mall", 116f, 128f, 158f, 166f, 4, 3, 77);
-        n += EnemyZone(map, "EZ_Mall", 137f, 146f, 16f, 16f, "bandit_melee_1", 2);
+        n += EnemyZone(map, "EZ_Mall", 137f, 146f, 16f, 16f, "bandit_rifle", 2);
 
         // ⑥ 주차장·공원(개활지) — 낮은 밀도, 적 약간
         n += Scatter(map, "SZ_Lot", 116f, 80f, 158f, 112f, 3, 2, 55);
-        n += EnemyZone(map, "EZ_Lot", 137f, 96f, 16f, 16f, "bandit_melee_1", 2);
+        n += EnemyZone(map, "EZ_Lot", 137f, 96f, 16f, 16f, "bandit_pistol", 2);
         n += Scatter(map, "SZ_Park", 18f, 128f, 58f, 166f, 3, 2, 66);
 
         // ⑦ 도로 파밍은 **바닥에 뿌리지 않는다** — 잔해(부서진 차)의 트렁크에 붙는다.
@@ -291,12 +293,11 @@ public static class Zone1GreyboxLayout
         var c = go.AddComponent<MapSpawnController>();
 
         var profile = AssetDatabase.LoadAssetAtPath<MapSpawnProfile>("Assets/Resources/Data/MapSpawn/scrap_market.asset");
-        if (profile == null) Debug.LogWarning("[Zone1] MapSpawnProfile 'Zone1.asset' 로드 실패 — 예산제 비활성(앵커는 자체 폴백 스폰).");
+        if (profile == null) Debug.LogWarning("[Zone1] MapSpawnProfile 'scrap_market.asset' 로드 실패 — 기본 예산으로 채운다.");
 
         var so = new SerializedObject(c);
         var p  = so.FindProperty("profile");           if (p  != null) p.objectReferenceValue = profile;
-        var r  = so.FindProperty("regionIdOverride");  if (r  != null) r.stringValue = "scrap_market";   // region_loot 지역1
-        var fb = so.FindProperty("fallbackToRegionLoot"); if (fb != null) fb.boolValue = true;
+        var r  = so.FindProperty("regionIdOverride");  if (r  != null) r.stringValue = "scrap_market";   // 루팅 표 지역1
         so.ApplyModifiedPropertiesWithoutUndo();
         return 1;
     }
@@ -427,15 +428,7 @@ public static class Zone1GreyboxLayout
             if (GreyboxBuild.Marker(map, "gb_crate", name, x, y) == 0) continue;
             var go = FindChild(map.transform, name);
             if (go == null) continue;
-            var lc = go.GetComponentInChildren<LootContainer>();
-            var sp = go.gameObject.AddComponent<ItemSpawnPoint>();
-            SetSpawnType(sp, 1);                                   // Container
-            if (lc != null)
-            {
-                var so = new SerializedObject(sp);
-                var lk = so.FindProperty("linkedContainer");
-                if (lk != null) { lk.objectReferenceValue = lc; so.ApplyModifiedPropertiesWithoutUndo(); }
-            }
+            InteriorBuild.MakeSearchable(go.gameObject, "crate");   // 열 수 있는 진짜 나무상자(2026-09-11 전엔 모양뿐)
             n++;
         }
         return n;
@@ -1117,15 +1110,7 @@ public static class Zone1GreyboxLayout
         if (GreyboxBuild.Marker(m, "gb_crate", name, x, y) == 0) return 0;
         var t = FindChild(m.transform, name);
         if (t == null) return 0;
-        var lc = t.GetComponentInChildren<LootContainer>();
-        var sp = t.gameObject.AddComponent<ItemSpawnPoint>();
-        SetSpawnType(sp, 1);   // Container
-        if (lc != null)
-        {
-            var so = new SerializedObject(sp);
-            var lk = so.FindProperty("linkedContainer");
-            if (lk != null) { lk.objectReferenceValue = lc; so.ApplyModifiedPropertiesWithoutUndo(); }
-        }
+        InteriorBuild.MakeSearchable(t.gameObject, "crate");   // 열 수 있는 진짜 나무상자(2026-09-11 전엔 모양뿐)
         return 1;
     }
 
@@ -1381,19 +1366,7 @@ public static class Zone1GreyboxLayout
             {
                 var t = FindChild(m.transform, name);
                 if (t == null) continue;
-                var go = t.gameObject;
-                var lc = go.GetComponent<LootContainer>();
-                if (lc == null) lc = go.AddComponent<LootContainer>();
-                lc.Setup("길가 잡동사니", 2, 2);
-                var io = go.GetComponent<InteractableObject>();
-                if (io == null) io = go.AddComponent<InteractableObject>();
-                io.Configure(InteractableObject.InteractType.Container, "뒤지기", 1.8f);
-                var sp = go.GetComponent<ItemSpawnPoint>();
-                if (sp == null) sp = go.AddComponent<ItemSpawnPoint>();
-                SetSpawnType(sp, 1);
-                var so = new SerializedObject(sp);
-                var lk = so.FindProperty("linkedContainer");
-                if (lk != null) { lk.objectReferenceValue = lc; so.ApplyModifiedPropertiesWithoutUndo(); }
+                InteriorBuild.MakeSearchable(t.gameObject, "junk", "길가 잡동사니", "뒤지기", 2, 2, 1.8f);
             }
         }
         return n;
@@ -1761,7 +1734,7 @@ public static class Zone1GreyboxLayout
 
                 n += BandMass(m, name, bx0, by0, bx1, by1);
                 // 좌판 4개 중 1개는 뒤질 수 있다 — 골목을 끝까지 훑을 이유.
-                if (i % 4 == side) n += Searchable(m, name, "좌판", "좌판 뒤지기", 2, 2, Mathf.Max(ln[i], rowD));
+                if (i % 4 == side) n += Searchable(m, name, "좌판", "좌판 뒤지기", 2, 2, Mathf.Max(ln[i], rowD), "stall");   // 고철이 나오는 좌판
             }
         }
         return n;
@@ -1769,26 +1742,11 @@ public static class Zone1GreyboxLayout
 
     /// <summary>이미 세운 오브젝트를 **뒤질 수 있는 것**으로 만든다(별도 상자를 옆에 놓지 않는다).
     /// 예산제(MapSpawnController)가 채우도록 ItemSpawnPoint(Container)를 링크해 둔다.</summary>
-    static int Searchable(GameObject m, string objName, string label, string prompt, int w, int h, float size)
+    static int Searchable(GameObject m, string objName, string label, string prompt, int w, int h, float size, string kind = "crate")
     {
         var t = FindChild(m.transform, objName);
         if (t == null) return 0;
-        var go = t.gameObject;
-
-        var lc = go.GetComponent<LootContainer>();
-        if (lc == null) lc = go.AddComponent<LootContainer>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-        lc.Setup(label, w, h);
-
-        var io = go.GetComponent<InteractableObject>();
-        if (io == null) io = go.AddComponent<InteractableObject>();
-        io.Configure(InteractableObject.InteractType.Container, prompt, size * 0.5f + 1.6f);
-
-        var sp = go.GetComponent<ItemSpawnPoint>();
-        if (sp == null) sp = go.AddComponent<ItemSpawnPoint>();
-        SetSpawnType(sp, 1);   // Container
-        var so = new SerializedObject(sp);
-        var lk = so.FindProperty("linkedContainer");
-        if (lk != null) { lk.objectReferenceValue = lc; so.ApplyModifiedPropertiesWithoutUndo(); }
+        InteriorBuild.MakeSearchable(t.gameObject, kind, label, prompt, w, h, size * 0.5f + 1.6f);
         return 1;
     }
 
@@ -2266,22 +2224,7 @@ public static class Zone1GreyboxLayout
     {
         var t = FindChild(m.transform, obstacleName);
         if (t == null) return 0;
-        var go = t.gameObject;
-
-        var lc = go.GetComponent<LootContainer>();
-        if (lc == null) lc = go.AddComponent<LootContainer>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-        lc.Setup("자동차 트렁크", 3, 2);
-
-        var io = go.GetComponent<InteractableObject>();
-        if (io == null) io = go.AddComponent<InteractableObject>();
-        io.Configure(InteractableObject.InteractType.Container, "트렁크 뒤지기", size * 0.5f + 1.6f);
-
-        var sp = go.GetComponent<ItemSpawnPoint>();
-        if (sp == null) sp = go.AddComponent<ItemSpawnPoint>();
-        SetSpawnType(sp, 1);   // Container
-        var so = new SerializedObject(sp);
-        var lk = so.FindProperty("linkedContainer");
-        if (lk != null) { lk.objectReferenceValue = lc; so.ApplyModifiedPropertiesWithoutUndo(); }
+        InteriorBuild.MakeSearchable(t.gameObject, "trunk", "자동차 트렁크", "트렁크 뒤지기", 3, 2, size * 0.5f + 1.6f);
         return 1;
     }
 

@@ -138,7 +138,21 @@ public class NavigationHUD : MonoBehaviour
         needleImg.enabled = true;
         Vector2 dir = tpos - ppos;
         float dist = dir.magnitude;
-        float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        // 2026-09-11 대각선 쿼터뷰 — 월드 방향을 **화면 방향**으로 바꿔 잰다(화면 위 = 카메라 전방).
+        //   예전엔 +Z가 곧 화면 위라 월드 각을 그대로 썼는데, 카메라가 45° 돌자 바늘이 45° 틀어졌다.
+        Vector2 screen = dir;
+        var camT = CameraFollow.Instance != null ? CameraFollow.Instance.transform : null;
+        if (camT != null)
+        {
+            Vector3 f = camT.forward; f.y = 0f;
+            Vector3 r = camT.right;   r.y = 0f;
+            if (f.sqrMagnitude > 1e-4f && r.sqrMagnitude > 1e-4f)
+            {
+                f.Normalize(); r.Normalize();
+                screen = new Vector2(dir.x * r.x + dir.y * r.z, dir.x * f.x + dir.y * f.z);
+            }
+        }
+        float ang = Mathf.Atan2(screen.y, screen.x) * Mathf.Rad2Deg;
         needle.localRotation = Quaternion.Euler(0f, 0f, ang - 90f);   // 니들 기본은 +Y(위)를 향함
 
         bool near = dist <= nearDistance;

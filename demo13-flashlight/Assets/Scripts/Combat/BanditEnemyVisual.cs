@@ -29,9 +29,25 @@ public sealed class BanditEnemyVisual : MonoBehaviour
     Quaternion[] windupRotations;
     float deathTime;
 
-    public bool Initialize(EnemyController enemy, float scale)
+    // 총기 밴딧(2026-09-11) — 시안 리그(BanditFirearmPreview)를 AI 상태로 구동한다.
+    BanditFirearmPreview gun;
+    float gunDraw, gunClock, sinceShot = 10f;
+    LineRenderer aimLine;
+    Material aimMat;
+    static int aimMask = -1;
+    /// <summary>꺼내기/넣기 시간(초). 시안은 1.2초 — 교전에선 굼떠 보여 절반으로. (GameTuning)</summary>
+    static float GunDrawTime => GameTuning.Instance != null ? GameTuning.Instance.enemyGunDrawTime : .6f;
+    /// <summary>총 든 걷기 클립의 보폭 속도(m/s) — 발 미끄러짐 보정 기준.</summary>
+    const float GunWalkClipSpeed = .9f;
+
+    /// <summary>총을 다 꺼냈나(근접 모델은 항상 true). EnemyController가 조준 시작 조건으로 읽는다.</summary>
+    public bool GunReady => gun == null || gunDraw >= 1f;
+    public Vector3 MuzzlePosition => gun != null && gun.Muzzle != null ? gun.Muzzle.position : transform.position + Vector3.up;
+    public void NotifyShot() { sinceShot = 0f; }
+
+    public bool Initialize(EnemyController enemy, float scale, string model = "Characters/Bandit01")
     {
-        var prefab = Resources.Load<GameObject>("Characters/Bandit01");
+        var prefab = Resources.Load<GameObject>(model);
         if (prefab == null) return false;
         owner = enemy; body = GetComponent<Rigidbody>();
         block = new MaterialPropertyBlock();
@@ -40,7 +56,17 @@ public sealed class BanditEnemyVisual : MonoBehaviour
         animator = view.GetComponentInChildren<Animator>();
         if (animator == null) { Destroy(view.gameObject); return false; }
         animator.applyRootMotion = false; animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-        holdLayer = animator.GetLayerIndex("SwordHold");
+        gun = view.GetComponent<BanditFirearmPreview>();
+        if (gun != null)
+        {
+            // 컨트롤러 없는 리그 — 자세는 Sample()로 직접 잡는다. 시안 자체 Update(자동 연출·가짜 트레이서)는 끈다.
+            gun.autoPreview = false; gun.target = null; gun.enabled = false;
+            gun.Initialize();
+            animator.enabled = false;
+            holdLayer = -1;
+            CreateAimLine();
+        }
+        else holdLayer = animator.GetLayerIndex("SwordHold");
         foreach (Transform t in view.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = gameObject.layer;
         meshes = view.GetComponentsInChildren<Renderer>(true);
 
@@ -68,7 +94,8 @@ public sealed class BanditEnemyVisual : MonoBehaviour
         facing = direction.normalized;
         view.localRotation = Quaternion.Euler(0, Mathf.Atan2(facing.x, facing.y) * Mathf.Rad2Deg, 0);
     }
-    public void SetVisible(bool visible) { if (meshes != null) foreach (var r in meshes) r.enabled = visible; }
+    bool isVisible = true;
+    public void SetVisible(bool visible) { isVisible = visible; if (meshes != null) foreach (var r in meshes) r.enabled = visible; }
     public void SetTint(Color color)
     {
         if (meshes == null) return;
@@ -105,7 +132,18 @@ public sealed class BanditEnemyVisual : MonoBehaviour
     public void SetAttackElapsed(float elapsed) { attackTime = Mathf.Max(0, elapsed); }
     public void SetWindupRemaining(float remaining) { attackTime = Mathf.Max(0, windupLength - remaining); }
     public void CancelAttack() { winding = attacking = false; windupBones = null; motion = 0; }
-    public void Die() { CancelAttack(); dead = true; deathTime = 0; SetVisible(true); SetTint(new Color(.45f,.45f,.45f)); }
+    BanditRagdoll ragdoll;
+
+    public void Die(Vector3 push = default)
+    {
+        CancelAttack(); dead = true; deathTime = 0; SetVisible(true); SetTint(new Color(.45f,.45f,.45f));
+        if (aimLine != null) aimLine.enabled = false;
+        // 래그돌(2026-09-11 사용자 "몸 대신 레그돌") — 애니메이터를 끄고 뼈를 물리에 맡긴다.
+        //   애니메이터가 켜져 있으면 speed=0이어도 매 프레임 자세를 덮어써 래그돌과 싸운다. 실패하면 예전 기울기 연출.
+        if (animator != null) animator.enabled = false;
+        ragdoll = BanditRagdoll.Activate(view, push);
+        if (ragdoll == null && animator != null) animator.enabled = true;
+    }
 
     void LateUpdate()
     {
@@ -113,11 +151,13 @@ public sealed class BanditEnemyVisual : MonoBehaviour
         float dt = Time.deltaTime;
         if (dead)
         {
+            if (ragdoll != null) return;   // 몸은 래그돌이 맡았다 — 기울기 연출로 덮어쓰지 않는다
             animator.speed = 0; deathTime += dt;
             float t = Mathf.SmoothStep(0, 1, Mathf.Clamp01(deathTime / .35f));
             view.localRotation = Quaternion.Euler(0, Mathf.Atan2(facing.x, facing.y) * Mathf.Rad2Deg, 0) * Quaternion.Euler(0,0,85*t);
             view.localPosition = new Vector3(0,.28f*t,0); return;
         }
+        if (gun != null) { UpdateGun(dt); return; }
         if (owner.CurrentState == EnemyController.State.Hit || owner.IsStunned) CancelAttack();
         if (winding || attacking)
         {
@@ -158,4 +198,78 @@ public sealed class BanditEnemyVisual : MonoBehaviour
             animator.CrossFadeInFixedTime(next, handover ? .28f : .10f); motion = next;
         }
     }
+
+    /// <summary>총기 모드 — 교전이면 총을 꺼내 들고(플레이어를 본다), 순찰이면 넣는다.
+    /// 조준(AttackWindup)·사격(Attack) 중엔 AI의 조준 방향을 본다.</summary>
+    void UpdateGun(float dt)
+    {
+        var st = owner.CurrentState;
+        bool aiming = st == EnemyController.State.AttackWindup || st == EnemyController.State.Attack;
+        bool engaged = aiming || st == EnemyController.State.Chase || st == EnemyController.State.Hit
+                    || st == EnemyController.State.Stunned;
+        gunDraw = Mathf.MoveTowards(gunDraw, engaged ? 1f : 0f, dt / GunDrawTime);
+        sinceShot += dt;
+
+        Vector2 velocity = new Vector2(body.linearVelocity.x, body.linearVelocity.z);
+        float speed = velocity.magnitude;
+        bool moving = speed > .08f;
+        Vector2 look = Vector2.zero;
+        if (aiming) look = owner.AimDirection;
+        else if (engaged && owner.Target != null) look = Plan3D.ToPlan(owner.Target.position) - Plan3D.ToPlan(transform.position);
+        else if (moving) look = velocity;
+        if (look.sqrMagnitude > .0001f)
+        {
+            facing = look.normalized;
+            view.localRotation = Quaternion.Euler(0, Mathf.Atan2(facing.x, facing.y) * Mathf.Rad2Deg, 0);
+        }
+
+        gunClock += dt * (moving ? Mathf.Clamp(speed / GunWalkClipSpeed, .65f, 2.2f) : 1f);
+        // 시야 밖에서 총을 넣고 순찰 중이면 자세를 안 잡는다 — 클립 샘플링이 적마다 매 프레임 돈다.
+        //   보이게 되는 순간(또는 교전) 다시 잡으므로 화면엔 차이가 없다.
+        if (isVisible || engaged || gunDraw > 0f) gun.Sample(gunClock, gunDraw, moving, sinceShot);
+        UpdateAimLine(st);
+    }
+
+    void CreateAimLine()
+    {
+        // 셰이더가 빌드에서 빠지면 new Material(null)이 던져 EnemyController.Start 전체가 멈춘다 — 조준선만 포기한다.
+        var shader = Shader.Find("Universal Render Pipeline/Unlit");
+        if (shader == null) return;
+        var go = new GameObject("AimLine");
+        go.transform.SetParent(transform, false);
+        aimLine = go.AddComponent<LineRenderer>();
+        aimMat = new Material(shader);
+        aimLine.sharedMaterial = aimMat;
+        aimLine.positionCount = 2;
+        aimLine.useWorldSpace = true;
+        aimLine.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        aimLine.receiveShadows = false;
+        aimLine.enabled = false;
+    }
+
+    /// <summary>조준선 — 조준 중에만. 고정(발사 직전)되면 굵어지고 노랗게 깜빡인다.
+    /// 시야(FOV) 밖이어도 보인다: "어디서 겨누고 있다"는 경고가 핵심이라서.</summary>
+    void UpdateAimLine(EnemyController.State st)
+    {
+        if (aimLine == null) return;
+        bool on = !dead && st == EnemyController.State.AttackWindup;
+        aimLine.enabled = on;
+        if (!on) return;
+        bool locked = owner.AimLocked;
+        // 고정 전에도 화면에서 읽혀야 한다 — 0.025m였을 땐 1280×720 쿼터뷰에서 1~2px이라 안 보였다(2026-09-11 촬영).
+        float w = locked ? .07f : .045f;
+        aimLine.startWidth = w; aimLine.endWidth = w * .6f;
+        aimMat.SetColor("_BaseColor", locked && Mathf.Sin(Time.time * 45f) > 0 ? new Color(1f, .9f, .3f) : new Color(1f, .12f, .08f));
+
+        Vector3 from = MuzzlePosition;
+        var a = owner.AimDirection;
+        var dir = new Vector3(a.x, 0f, a.y);
+        float len = owner.FireRange;
+        if (aimMask == -1) aimMask = ~(1 << LayerMask.NameToLayer("Enemy") | 1 << LayerMask.NameToLayer("Player"));
+        if (Physics.Raycast(from, dir, out var hit, len, aimMask, QueryTriggerInteraction.Ignore)) len = hit.distance;   // 벽에서 끊는다
+        aimLine.SetPosition(0, from);
+        aimLine.SetPosition(1, from + dir * len);
+    }
+
+    void OnDestroy() { if (aimMat != null) Destroy(aimMat); }
 }

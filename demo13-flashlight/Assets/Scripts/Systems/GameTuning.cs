@@ -37,8 +37,19 @@ public class GameTuning : ScriptableObject
 
     // ── 드랍 ─────────────────────────────────────────────────────────
     [Header("드랍 (맵 전체)")]
-    [Tooltip("지역 루트 수량 배율. 1=기본, 0.5=절반, 2=두 배. RegionLootBootstrap가 읽음.")]
+    [Tooltip("맵 루팅 예산 배율(바닥·상자 뽑기 횟수). 1=기본, 0.5=절반, 2=두 배. MapSpawnController가 읽는다\n" +
+             "(2026-09-11 — 이걸 읽던 RegionLootBootstrap은 어디에도 없어 삭제).")]
     [Range(0f, 3f)] public float lootCountMult = 1f;
+
+    [Tooltip("상자 수색 연출 속도 배율 — 클수록 빨리 드러난다. 2026-09-11 되살림(사용자 \"상자 연 뒤 연출은 원래 있던 그 느낌\")\n" +
+             "— 2026-09-09 볼륨 축소 때 뺀 옛 수색 딜레이. LootListUI가 처음 여는 상자에서 칸을 하나씩 드러낸다.")]
+    [Range(0.25f, 5f)] public float searchSpeedMult = 1f;
+    [Tooltip("희귀도별로 한 칸이 드러나는 시간(초). searchSpeedMult로 나눈다. 고급일수록 길게(옛 값 그대로).")]
+    public float searchSecCommon = 0.4f;
+    public float searchSecUncommon = 0.6f;
+    public float searchSecRare = 0.9f;
+    public float searchSecEpic = 1.3f;
+    public float searchSecLegendary = 1.8f;
     [Tooltip("루트 롤이 실제로 떨어질 확률 배율(전역). 1=기존과 동일(항상 통과), <1=빈손 증가. RegionLootCatalog.Roll이 롤마다 게이트.")]
     [Range(0f, 1f)] public float lootChanceMult = 1f;
     [Tooltip("귀중품(Valuable) 카테고리 등장 가중치 배율. 1=동일, >1=귀중품 더 자주. RegionLootCatalog.Roll의 Valuable 항목 weight에 곱함.")]
@@ -63,6 +74,10 @@ public class GameTuning : ScriptableObject
              "타격 리듬이 안 읽혔다. 데이터(AttackComboData)는 그대로 두고 진행만 막는다(되살리기 쉽게).")]
     public bool comboEnabled = false;
 
+    [Tooltip("구르기(Space / 패드 B) 사용. 2026-09-11 사용자 결정으로 **기본 OFF** — 구르기 모션이 없어\n" +
+             "달리기 모션으로 미끄러지기만 했다. 코드·특성(dodge_iframe 등)은 그대로 두고 입력만 막는다(모션이 생기면 켠다).")]
+    public bool dodgeEnabled = false;
+
     // ── 근접 사거리 감쇠 (2026-07-29) ──
     //   "닿기만 하면 같은 데미지"면 사거리가 긴 무기가 무조건 이득이라 거리 판단이 사라진다.
     //   품 안으로 파고들면 100%, 끝에 걸치면 farMult까지.
@@ -80,6 +95,32 @@ public class GameTuning : ScriptableObject
     [Range(1f, 4f)] public float enemyHeavyWindupMult = 1.9f;
     [Tooltip("강공의 데미지 배율.")]
     [Range(1f, 4f)] public float enemyHeavyDamageMult = 1.9f;
+
+    // ── 총기 밴딧 (2026-09-11, docs/combat.md §총기 밴딧) — 유닛별 수치는 StatDB, 공통 타이밍만 여기 ──
+    [Header("총기 밴딧(AI)")]
+    [Tooltip("발사 직전 조준이 **고정**되는 시간(초). 고정된 조준선을 보고 옆으로 빠지면 피한다 — 길수록 쉽다.")]
+    [Range(0f, 1f)] public float enemyAimLockTime = 0.2f;
+    [Tooltip("마지막 탄 뒤 추격으로 돌아가기까지(초).")]
+    [Range(0f, 2f)] public float enemyRangedRecover = 0.35f;
+    [Tooltip("교전 시 총을 꺼내는 시간(초). 다 꺼내기 전엔 조준하지 않는다 — 발견 후 첫 발까지의 여유.")]
+    [Range(0.1f, 2f)] public float enemyGunDrawTime = 0.6f;
+    [Tooltip("적 탄의 비행 거리 = 사격 사거리 × 이 배율. 탄은 비행 거리 절반부터 55%까지 감쇠한다.")]
+    [Range(1f, 2f)] public float enemyBulletRangeMult = 1.25f;
+
+    [Tooltip("총알 거리 감쇠 시작 — 유효사거리의 이 비율까지는 데미지 그대로(플레이어·적 공용).\n" +
+             "2026-09-11 Projectile 상수에서 옮김(총 수치 정리, docs/combat.md §무기 구성 결정).")]
+    [Range(0f, 1f)] public float gunFalloffStart = 0.5f;
+    [Tooltip("사거리 끝에서의 데미지 배율 — 감쇠 시작부터 끝까지 선형으로 이 값까지 준다.")]
+    [Range(0.1f, 1f)] public float gunFalloffEndMult = 0.55f;
+
+    // ── 총격(플레이어) (2026-09-11, docs/combat.md §총격전) — 총마다 수치는 WeaponData, 탄마다는 탄 아이템 ──
+    [Header("총격(플레이어)")]
+    [Tooltip("조준(우클릭) 중 카메라가 커서 쪽으로 밀리는 비율 — 플레이어→커서 거리 × 이 값.")]
+    [Range(0f, 1f)] public float aimLookAhead = 0.35f;
+    [Tooltip("조준 시 카메라가 밀리는 최대 거리(m).")]
+    [Range(0f, 10f)] public float aimLookAheadMax = 4f;
+    [Tooltip("관통탄이 몸 하나를 뚫을 때마다 남는 데미지 비율(탄 스펙 ammoPenetration과 함께).")]
+    [Range(0.1f, 1f)] public float gunPierceDamageKeep = 0.6f;
 
     // ── 도로 장애물 / 막힌 통로 (2026-07-11) ──────────────────────────
     //   "넓은 길인데 그냥 뻥 뚫린 통로" 방지 — 도로 위 잔해로 동선을 꺾고 시야를 끊는다.

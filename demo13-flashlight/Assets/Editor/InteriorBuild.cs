@@ -127,23 +127,53 @@ public static class InteriorBuild
         return 1;
     }
 
-    /// <summary>상자(gb_crate) + Container 앵커(linkedContainer 주입).</summary>
-    public static int Crate(GameObject m, string name, float x, float y)
+    /// <summary>이 건물의 기본 상자 종류(루팅 표 int_*) — 각 Build*가 Begin 직후 정한다(2026-09-11).</summary>
+    public static string CrateKind = "int_shop";
+
+    /// <summary>상자 — **열 수 있는 진짜 상자**(LootContainer + 상호작용) + Container 앵커.
+    /// 2026-09-11 전엔 모양만 있는 박스라 상자 예산이 전부 바닥 더미로 흘러나왔다(docs/region-loot.md §루팅 정리 결정).
+    /// kind = 루팅 표 종류(비우면 CrateKind). register = 계산대, safe = 금고 — 고철은 여기서만(늘 채워진다).</summary>
+    public static int Crate(GameObject m, string name, float x, float y, string kind = null)
     {
         if (GreyboxBuild.Marker(m, "gb_crate", name, x, y) == 0) return 0;
         var t = Find(m.transform, name);
         if (t == null) return 0;
-        var lc = t.GetComponentInChildren<LootContainer>();
-        var sp = t.gameObject.AddComponent<ItemSpawnPoint>();
-        SetType(sp, 1);
-        if (lc != null)
-        {
-            var so = new SerializedObject(sp);
-            var lk = so.FindProperty("linkedContainer");
-            if (lk != null) { lk.objectReferenceValue = lc; so.ApplyModifiedPropertiesWithoutUndo(); }
-        }
+        MakeSearchable(t.gameObject, kind ?? CrateKind);
         return 1;
     }
+
+    /// <summary>오브젝트를 뒤질 수 있는 상자로 — LootContainer(종류·이름) + 상호작용 + Container 앵커.
+    /// Zone1 빌더(나무상자·잡동사니·좌판·트렁크)도 이걸 쓴다.</summary>
+    public static void MakeSearchable(GameObject go, string kind, string label = null, string prompt = null,
+                                      int w = 3, int h = 2, float radius = 1.8f)
+    {
+        var lc = go.GetComponent<LootContainer>();
+        if (lc == null) lc = go.AddComponent<LootContainer>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+        lc.Setup(label ?? KindLabel(kind), w, h);
+        lc.SetLootKind(kind);
+
+        var io = go.GetComponent<InteractableObject>();
+        if (io == null) io = go.AddComponent<InteractableObject>();
+        io.Configure(InteractableObject.InteractType.Container, prompt ?? KindPrompt(kind), radius);
+
+        var sp = go.GetComponent<ItemSpawnPoint>();
+        if (sp == null) sp = go.AddComponent<ItemSpawnPoint>();
+        SetType(sp, 1);   // Container
+    }
+
+    public static string KindLabel(string kind) => kind switch
+    {
+        "register" => "계산대", "safe" => "금고", "crate" => "나무상자", "junk" => "길가 잡동사니",
+        "trunk" => "자동차 트렁크", "stall" => "좌판", "int_medical" => "약품장", "int_police" => "사물함",
+        "int_jewelry" => "진열장", "int_tools" => "공구 상자", "int_food" => "식료품 상자",
+        "int_electronics" => "부품 상자", "int_basement" => "낡은 궤짝", _ => "상자",
+    };
+
+    public static string KindPrompt(string kind) => kind switch
+    {
+        "register" => "계산대 뒤지기", "safe" => "금고 열기", "trunk" => "트렁크 뒤지기", "stall" => "좌판 뒤지기",
+        _ => "뒤지기",
+    };
 
     /// <summary>적 스폰 존.</summary>
     public static int Enemy(GameObject m, string name, float cx, float cy, float w, float h, string unitKey, int count)
@@ -223,7 +253,6 @@ public static class InteriorBuild
         var so = new SerializedObject(c);
         var p  = so.FindProperty("profile");              if (p  != null) p.objectReferenceValue = profile;
         var r  = so.FindProperty("regionIdOverride");     if (r  != null) r.stringValue = regionId;
-        var fb = so.FindProperty("fallbackToRegionLoot"); if (fb != null) fb.boolValue = true;
         // 내부 씬 표시 — 런타임에 GameTuning.interiorLootBudgetMult가 곱해진다(맵 전체 예산 그대로 쓰면 과다).
         //   루트 **테이블**은 지역 확률(regionId) 그대로 → 내부 파밍도 지역 확률에 맞춰 나온다.
         var it = so.FindProperty("isInterior");           if (it != null) it.boolValue = true;

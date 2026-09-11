@@ -1872,6 +1872,7 @@ public class CharacterPanelUI : MonoBehaviour
     {
         var grid = LeftGrid;
         if (grid == null || playerInventory == null) return;
+        bool fieldLoot = openContainer != null && grid == openContainer.Grid;   // 필드 상자·시체(창고 아님)
 
         int moved = 0, left = 0;
         foreach (var placed in grid.GetAll())   // GetAll은 복사본 → 순회 중 Remove 안전
@@ -1883,7 +1884,12 @@ public class CharacterPanelUI : MonoBehaviour
                 && playerEquipment.GetSlot(ApiEquipSlot(placed.item.data)) == null)
             {
                 EquipFromGrid(placed.item, grid);
-                if (playerEquipment.GetSlotInstance(ApiEquipSlot(placed.item.data)) == placed.item) { moved++; continue; }
+                if (playerEquipment.GetSlotInstance(ApiEquipSlot(placed.item.data)) == placed.item)
+                {
+                    moved++;
+                    if (fieldLoot) LootTake.Record(placed.item);
+                    continue;
+                }
                 // 착용 실패(방어) → 아래 일반 이동 폴백
             }
 
@@ -1891,6 +1897,7 @@ public class CharacterPanelUI : MonoBehaviour
             {
                 grid.Remove(placed);
                 moved++;
+                if (fieldLoot) LootTake.Record(placed.item);   // 레이드 정산·수집 퀘스트(2026-09-11 — 예전엔 안 잡혔다)
             }
             else
             {
@@ -2566,7 +2573,13 @@ public class CharacterPanelUI : MonoBehaviour
                 // 드래그 상태 종료(고스트/하이라이트 제거) 후 장착 처리.
                 EndDrag();
                 if (restored)
+                {
                     EquipFromGrid(item, src, dropSlot);
+                    // 필드 상자·시체에서 바로 장착 → 레이드 정산·수집 퀘스트(2026-09-11)
+                    if (openContainer != null && src == openContainer.Grid
+                        && playerEquipment != null && playerEquipment.GetSlotInstance(ApiEquipSlot(item.data)) == item)
+                        LootTake.Record(item);
+                }
                 else
                     ReturnItemToInventory(item);
                 return;
@@ -2618,7 +2631,11 @@ public class CharacterPanelUI : MonoBehaviour
                     var src = dragSourceGrid;
                     bool restored = src.TryPlace(wear, dragOrigX, dragOrigY) || src.TryAutoPlace(wear);
                     EndDrag();
-                    if (restored) EquipFromGrid(wear, src);
+                    if (restored)
+                    {
+                        EquipFromGrid(wear, src);
+                        if (playerEquipment.GetSlotInstance(ApiEquipSlot(wear.data)) == wear) LootTake.Record(wear);
+                    }
                     else ReturnItemToInventory(wear);
                     return;
                 }
@@ -2633,7 +2650,10 @@ public class CharacterPanelUI : MonoBehaviour
                 }
 
                 int ox, oy; GhostOriginCell(pRoot, out ox, out oy);
-                TryPlaceInGrid(pGrid, ox, oy);
+                var moving = dragItem;
+                bool fromLoot = openContainer != null && dragSourceGrid == openContainer.Grid;   // 필드 상자·시체에서
+                bool placedOk = TryPlaceInGrid(pGrid, ox, oy);
+                if (placedOk && fromLoot) LootTake.Record(moving);   // 레이드 정산·수집 퀘스트(2026-09-11 — 예전엔 안 잡혔다)
                 EnsureDragEnded();   // 실패(스택 일부 등)해도 제스처 종료 — 떠다니지 않게
                 return;
             }

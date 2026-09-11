@@ -115,13 +115,14 @@ MonoBehaviour:
   dayIntensity: 0.2
   coneAngle: 56
   innerRatio: 0.74
-  spillRange: 4.6
+  spillRange: 2.4
   spillRatio: 0.16
   spillFloor: 0.35
-  spillCastsShadows: 1
-  bodyGlowRange: 2.6
-  bodyGlowIntensity: 0.9
-  bodyGlowHeight: 1
+  spillCastsShadows: 0
+  bodyGlowRange: 1.6
+  bodyGlowIntensity: 0.35
+  bodyGlowHeight: 0.1
+  bodyGlowTowardCamera: 0.8
 --- !u!1 &1153366666490221086
 GameObject:
   m_ObjectHideFlags: 0
@@ -501,8 +502,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8594966188139907139}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.46174863, y: 0, z: 0, w: 0.8870109}
-  m_LocalPosition: {x: -0, y: 20.478804, z: -14.339411}
+  m_LocalRotation: {x: 0.5150381, y: 0, z: 0, w: 0.8571673}
+  m_LocalPosition: {x: 0, y: 22.07369, z: -11.73679}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -626,6 +627,8 @@ MonoBehaviour:
   target: {fileID: 2839671851411938614}
   smoothSpeed: 8
   followDistance: 25
+  viewPitch: 62
+  viewYaw: 0
 --- !u!1 &8944483581810754994
 GameObject:
   m_ObjectHideFlags: 0

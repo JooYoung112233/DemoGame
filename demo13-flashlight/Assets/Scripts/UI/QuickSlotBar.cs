@@ -88,9 +88,11 @@ public class QuickSlotBar : MonoBehaviour
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
-    /// <summary>퀵슬롯 등록 가능 여부 — 소모품(의료·음식) + 투척물 (docs/inventory.md 2026-07-10, 투척물 2026-07-11).</summary>
+    /// <summary>퀵슬롯 등록 가능 여부 — 소모품(의료·음식) + 투척물 (docs/inventory.md 2026-07-10, 투척물 2026-07-11)
+    /// + 무기(총·근접, 2026-09-11 — 무기 전환 = 퀵슬롯 숫자키, docs/combat.md §무기 구성 결정).</summary>
     public static bool IsAssignable(ItemData data)
-        => data != null && (data.category == ItemCategory.Medical || data.category == ItemCategory.Consumable || data.isThrowable);
+        => data != null && (data.category == ItemCategory.Medical || data.category == ItemCategory.Consumable
+                            || data.isThrowable || data.category == ItemCategory.Weapon);
 
     /// <summary>지정 슬롯에 직접 등록(교체) — 드래그 드롭·클릭 후 숫자키 공용. 의료·음식만. 성공 시 true.</summary>
     public bool AssignToSlot(int index, string itemId)
@@ -99,7 +101,7 @@ public class QuickSlotBar : MonoBehaviour
         var data = ItemDatabase.Get(itemId);
         if (!IsAssignable(data))
         {
-            ToastManager.Show("의료·음식·투척물만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
+            ToastManager.Show("의료·음식·투척물·무기만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
             return false;
         }
         _slotIds[index] = itemId;
@@ -130,7 +132,7 @@ public class QuickSlotBar : MonoBehaviour
         if (string.IsNullOrEmpty(itemId)) return;
         if (!IsAssignable(ItemDatabase.Get(itemId)))
         {
-            ToastManager.Show("의료·음식·투척물만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
+            ToastManager.Show("의료·음식·투척물·무기만 퀵슬롯에 등록할 수 있다", ToastManager.ToastType.Warning);
             return;
         }
         for (int i = 0; i < SlotCount; i++)
@@ -209,6 +211,14 @@ public class QuickSlotBar : MonoBehaviour
         }
         // 투척물은 '사용' 대신 조준 모드 진입(좌클릭 착탄에서 소모). 그 외는 즉시 사용.
         var data = ItemDatabase.Get(id);
+        // 무기(총·근접)는 꺼내 든다 — 이미 들고 있으면 넣는다. 2026-09-11 무기 전환 = 퀵슬롯 숫자키(docs/combat.md §무기 구성 결정).
+        if (data != null && data.category == ItemCategory.Weapon)
+        {
+            if (!inventory.ToggleWeaponById(id))
+                ToastManager.Show("지금은 꺼낼 수 없다", ToastManager.ToastType.Warning);
+            RefreshCounts();
+            return;
+        }
         if (data != null && data.isThrowable)
         {
             if (ThrowSystem.Instance != null && !ThrowSystem.Instance.TryEnterAim(id))
@@ -377,6 +387,9 @@ public class QuickSlotBar : MonoBehaviour
     void RefreshCounts()
     {
         if (SlotArraysMismatch()) return;   // 배열 초기화 전이면 스킵(Awake 재생성 전 방어)
+        // 지금 들고 있는 무기 칸은 강조 — 무기 전환 = 퀵슬롯 숫자키(2026-09-11).
+        var eq = playerGO != null ? playerGO.GetComponent<PlayerEquipment>() : null;
+        var held = eq != null ? eq.GetSlot(EquipSlot.PrimaryWeapon) : null;
         for (int i = 0; i < SlotCount; i++)
         {
             string id = _slotIds[i];
@@ -388,7 +401,9 @@ public class QuickSlotBar : MonoBehaviour
             }
             int n = inventory != null ? inventory.CountItemAll(id) : 0;
             slotCounts[i].text = n > 0 ? n.ToString() : "";
-            slotBgs[i].color = n > 0 ? UITheme.Cell : new Color(UITheme.Cell.r, UITheme.Cell.g, UITheme.Cell.b, 0.4f);
+            bool holding = held != null && held.itemId == id;
+            slotBgs[i].color = holding ? UITheme.Accent
+                             : n > 0 ? UITheme.Cell : new Color(UITheme.Cell.r, UITheme.Cell.g, UITheme.Cell.b, 0.4f);
             float a = n > 0 ? 1f : 0.35f;
             var ic = slotIcons[i].color; slotIcons[i].color = new Color(ic.r, ic.g, ic.b, a);
         }

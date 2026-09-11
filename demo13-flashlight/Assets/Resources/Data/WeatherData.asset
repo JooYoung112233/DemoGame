@@ -20,13 +20,13 @@ MonoBehaviour:
   dayFog: 0
   dayFogColor: {r: 0.6, g: 0.6, b: 0.65, a: 1}
   dayFogDensity: 0.01
-  nightIntensity: 0.18
-  nightLightColor: {r: 0.55, g: 0.62, b: 0.85, a: 1}
+  nightIntensity: 0.22
+  nightLightColor: {r: 0.62, g: 0.5, b: 0.85, a: 1}
   nightSunAngle: {x: 60, y: 200, z: 0}
-  nightAmbientColor: {r: 0.1, g: 0.11, b: 0.15, a: 1}
+  nightAmbientColor: {r: 0.13, g: 0.1, b: 0.19, a: 1}
   nightAmbientIntensity: 0.2
   nightFog: 1
-  nightFogColor: {r: 0.02, g: 0.02, b: 0.03, a: 1}
+  nightFogColor: {r: 0.06, g: 0.04, b: 0.09, a: 1}
   nightFogDensity: 0.04
   weather: 0
   rainIntensity: 0.6

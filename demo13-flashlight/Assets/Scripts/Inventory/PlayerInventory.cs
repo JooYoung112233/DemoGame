@@ -207,17 +207,23 @@ public class PlayerInventory : MonoBehaviour
         if (item.data == null) return false;
 
         // 장비 아이템 → 장착(토글)
+        //   장착 뒤 실제 인스턴스를 슬롯에 잇는다 — 안 이으면 총의 탄창·잔탄·부착물이 안 따라와 **총이 안 나간다**
+        //   (PlayerGun은 슬롯 인스턴스를 읽는다). 2026-09-11 발견 — 예전엔 캐릭터 패널 드래그 장착만 이었다.
         if (item.data.equipSlot != EquipSlot.None)
         {
             if (equipment == null) equipment = GetComponent<PlayerEquipment>();
-            return equipment != null && equipment.Equip(item.data);
+            bool ok = equipment != null && equipment.Equip(item.data);
+            if (ok) equipment.SetSlotInstance(item.data.equipSlot, item);
+            return ok;
         }
 
         // 무기(equipSlot=None인 구형 무기) → 장착(토글)
         if (item.data.category == ItemCategory.Weapon)
         {
             if (equipment == null) equipment = GetComponent<PlayerEquipment>();
-            return equipment != null && equipment.EquipWeapon(item.data);
+            bool ok = equipment != null && equipment.EquipWeapon(item.data);
+            if (ok) equipment.SetSlotInstance(EquipSlot.PrimaryWeapon, item);
+            return ok;
         }
 
         if (!item.data.isUsable) return false;
@@ -379,6 +385,25 @@ public class PlayerInventory : MonoBehaviour
     }
 
     /// <summary>itemId로 아무 컨테이너(가방/주머니/보안)에서 첫 매칭 아이템을 사용. 성공 시 true. (퀵슬롯용)</summary>
+    /// <summary>무기를 찾아 주무기로 꺼내 든다(이미 들고 있으면 넣는다) — 퀵슬롯 무기 전환(2026-09-11, docs/combat.md §무기 구성 결정).
+    /// 장착은 아이템을 가방에서 빼지 않는다(슬롯이 가리킬 뿐). 실제 인스턴스를 이어야 탄창·잔탄·부착물이 따라온다.</summary>
+    public bool ToggleWeaponById(string itemId)
+    {
+        if (string.IsNullOrEmpty(itemId)) return false;
+        if (equipment == null) equipment = GetComponent<PlayerEquipment>();
+        if (equipment == null) return false;
+        foreach (var g in AllGrids)
+        {
+            if (g == null) continue;
+            var placed = g.FindItem(itemId);
+            if (placed == null || placed.item == null || placed.item.data == null) continue;
+            bool ok = equipment.ToggleAsPrimary(placed.item.data);
+            if (ok) equipment.SetSlotInstance(EquipSlot.PrimaryWeapon, placed.item);   // 넣은 경우엔 데이터 불일치로 무시된다
+            return ok;
+        }
+        return false;
+    }
+
     public bool UseItemById(string itemId)
     {
         if (string.IsNullOrEmpty(itemId)) return false;

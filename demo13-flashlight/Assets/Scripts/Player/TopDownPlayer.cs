@@ -267,12 +267,11 @@ public class TopDownPlayer : MonoBehaviour
         // 근접도 **조준한 곳**이 맞는다(2026-07-29 사용자). 마우스 월드 좌표가 곧 부위가 된다.
         _performer.AimPoint = () => MouseWorldPos;
 
-        // 그레이박스 칼 — 스파인이 들어오면 통째로 교체. **판정엔 관여하지 않는다**(연출 전용).
-        // 손에 들리는 것 3종 — 무엇을 보여줄지는 **장착 아이템**이 정한다(UpdateWeaponVisual).
-        //   2026-07-29 이전엔 칼만 무조건 붙어서 **맨손이어도 칼이 보였다**.
+        // 그레이박스 칼 — 3D 칼·방망이 모션이 없는 근접 무기용. **판정엔 관여하지 않는다**(연출 전용).
+        //   무엇을 보여줄지는 **장착 아이템**이 정한다(UpdateWeaponVisual).
+        //   2026-09-11: 그레이박스 주먹(FistVisual)·총(GunVisual) 삭제 — 맨손 공격은 없고(사용자 "근접 손공격은 없어"),
+        //   총은 3D 총기 모델(ChibiPlayerVisual.SetFirearmEquipped)이 맡는다.
         _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.85f, 0.88f, 0.95f), 1.05f);
-        _fistVis   = FistVisual.Attach(transform, new Color(0.42f, 0.36f, 0.30f));          // 장갑 낀 주먹
-        _gunVis    = GunVisual.Attach(transform, new Color(0.46f, 0.47f, 0.50f), 0.62f);    // 총
 
         _hurtbox = GetComponentInChildren<Hurtbox>();
 
@@ -409,7 +408,7 @@ public class TopDownPlayer : MonoBehaviour
 
         float h = GameInput.GetAxisRaw("Horizontal");
         float v = GameInput.GetAxisRaw("Vertical");
-        MoveDirection = new Vector2(h, v);
+        MoveDirection = CameraRelative(h, v);   // W = 화면 위 (대각선 쿼터뷰, 2026-09-11)
         if (MoveDirection.sqrMagnitude > 1f) MoveDirection.Normalize();
 
         float speed = MoveSpd * (IsSprinting ? SprintMult : 1f);
@@ -456,8 +455,8 @@ public class TopDownPlayer : MonoBehaviour
             Vector2 aim = GameInput.AimStick;
             if (aim.sqrMagnitude > 0.01f)
             {
-                // 오른쪽 스틱을 밀면 그 방향을 바라본다.
-                FacingDirection = aim.normalized;
+                // 오른쪽 스틱을 밀면 그 방향을 바라본다 — 스틱 위 = 화면 위(카메라 기준).
+                FacingDirection = CameraRelative(aim.x, aim.y).normalized;
                 MouseWorldPos   = transform.position + Plan3D.ToWorld(FacingDirection) * 3f;
             }
             else if (MoveDirection.sqrMagnitude > 0.01f)
@@ -472,15 +471,57 @@ public class TopDownPlayer : MonoBehaviour
 
         if (_cam == null) return;
 
-        // 마우스 조준 — 커서 광선이 발밑 높이의 바닥면과 만나는 지점을 향한다.
+        // 마우스 조준 — 커서 광선이 발밑 높이의 바닥면과 만나는 지점.
         // (오소 쿼터뷰에서 ScreenToWorldPoint는 의미가 없다 — docs/3d-migration.md)
         if (!Plan3D.ScreenToGround(_cam, GameInput.mousePosition, transform.position.y, out Vector3 m)) return;
         Vector2 dir = Plan3D.ToPlan(m - transform.position);
-        if (dir.sqrMagnitude > 0.01f)
+        MouseWorldPos = m;   // 조준점(근접 부위 판정·조준원·조준 카메라)은 늘 커서다 — 바라보는 방향과 별개
+
+        // 2026-09-11 사용자: "조준 상태에서만 마우스 쪽을 보고, 평소엔 키보드 움직임 방향을 바라보자".
+        //   조준(총 우클릭) 중 = 커서 쪽. 그 외 = 이동 방향, 멈추면 마지막 방향 유지. docs/controls.md §바라보는 방향.
+        //   근접(2026-09-11 "공격 순간 커서 쪽"): 강공 차징(우클릭 홀드) 중엔 조준처럼 커서 쪽을 보고,
+        //   휘두르는 동안엔 공격 순간 돌려 둔 방향을 유지한다(이동 방향으로 되돌아가지 않게). docs/combat.md §무기 구성 결정.
+        if (IsAimingMouse || _state == CombatState.HeavyCharge)
         {
-            FacingDirection = dir.normalized;
-            MouseWorldPos   = m;
+            if (dir.sqrMagnitude > 0.01f) FacingDirection = dir.normalized;
         }
+        else if (_state == CombatState.LightAttack || _state == CombatState.HeavyRelease)
+        {
+            // 휘두르는 중 — 방향 고정
+        }
+        else if (MoveDirection.sqrMagnitude > 0.01f)
+        {
+            FacingDirection = MoveDirection.normalized;
+        }
+    }
+
+    /// <summary>마우스 쪽을 바라보는 상태인가 — 총을 들고 조준(우클릭) 중일 때만.</summary>
+    bool IsAimingMouse => _gun != null && IsRangedEquipped && _gun.IsAiming;
+
+    /// <summary>입력(가로·세로)을 **화면 기준** 평면 방향으로 — W = 화면 위, D = 화면 오른쪽.
+    /// 2026-09-11 카메라가 대각선 쿼터뷰(방위 45°)가 되며 필요해졌다(docs/controls.md). 카메라가 정북이면 예전과 같다(W = +Z).</summary>
+    Vector2 CameraRelative(float h, float v)
+    {
+        var camT = CameraFollow.Instance != null ? CameraFollow.Instance.transform : (_cam != null ? _cam.transform : null);
+        if (camT == null) return new Vector2(h, v);
+        Vector3 f = camT.forward; f.y = 0f;
+        Vector3 r = camT.right;   r.y = 0f;
+        if (f.sqrMagnitude < 1e-4f || r.sqrMagnitude < 1e-4f) return new Vector2(h, v);
+        f.Normalize(); r.Normalize();
+        return new Vector2(r.x * h + f.x * v, r.z * h + f.z * v);
+    }
+
+    /// <summary>월드 평면 방향 → 이동 입력(화면 기준) — <see cref="CameraRelative"/>의 역.
+    /// QA 봇처럼 "월드의 이쪽으로 가라"를 가상 입력으로 넣을 때 쓴다(안 쓰면 대각선 카메라에서 45° 틀어져 걷는다).</summary>
+    public static Vector2 WorldToInput(Vector2 worldPlan)
+    {
+        var camT = CameraFollow.Instance != null ? CameraFollow.Instance.transform : (Camera.main != null ? Camera.main.transform : null);
+        if (camT == null) return worldPlan;
+        Vector3 f = camT.forward; f.y = 0f;
+        Vector3 r = camT.right;   r.y = 0f;
+        if (f.sqrMagnitude < 1e-4f || r.sqrMagnitude < 1e-4f) return worldPlan;
+        f.Normalize(); r.Normalize();
+        return new Vector2(worldPlan.x * r.x + worldPlan.y * r.z, worldPlan.x * f.x + worldPlan.y * f.z);
     }
 
     void UpdateFlip()
@@ -517,8 +558,6 @@ public class TopDownPlayer : MonoBehaviour
     }
 
     MeleeWeaponVisual _weaponVis;
-    FistVisual _fistVis;
-    GunVisual  _gunVis;
 
     /// <summary>주인공 그레이박스 몸통 — **스프라이트도 스파인도 없으면** 네모를 만들어 준다.
     ///
@@ -553,9 +592,9 @@ public class TopDownPlayer : MonoBehaviour
         nsr.sortingOrder = 5;
     }
 
-    /// <summary>손에 뭐가 들려 있나. **장착 아이템이 정한다** — 맨손이면 주먹이 보여야지 칼이 보이면 안 된다.
+    /// <summary>손에 뭐가 들려 있나. **장착 아이템이 정한다.** 빈손이면 아무것도 안 들고 공격도 없다(2026-09-11).
     /// 근접 무기는 WeaponData가 없는 것들이 많아(구형 무기) 카테고리로 판단한다.</summary>
-    enum HandVisual { Fist, Melee, Gun }
+    enum HandVisual { Empty, Melee, Gun }
     bool UsesSwordAnimation => _character3D != null && _character3D.HasSwordAnimations
         && _weapon != null && _weapon.useTwoHandSwordAnimations && InHand == HandVisual.Melee;
     bool UsesBatAnimation => _character3D != null && _character3D.HasBatAnimations
@@ -565,20 +604,20 @@ public class TopDownPlayer : MonoBehaviour
         get
         {
             var it = Equip != null ? Equip.EquippedWeapon : null;
-            if (it == null) return HandVisual.Fist;
+            if (it == null) return HandVisual.Empty;
             if (it.weaponData != null && it.weaponData.isRanged) return HandVisual.Gun;
-            return it.category == ItemCategory.Weapon ? HandVisual.Melee : HandVisual.Fist;
+            return it.category == ItemCategory.Weapon ? HandVisual.Melee : HandVisual.Empty;
         }
     }
 
     /// <summary>칼 비주얼 갱신 — 바라보는 각 + 상태별 자세(차징/평상시). 스윙은 공격 시점에 1회 호출.</summary>
     void UpdateWeaponVisual()
     {
-        // 셋 중 **하나만** 보인다. 안 그러면 총 쏘는데 칼이 같이 떠 있는 식이 된다.
+        // 그레이박스 칼은 3D 모션 없는 근접 무기일 때만. 총은 3D 총기 모델이, 빈손은 아무것도 안 든다(2026-09-11).
         var hand = InHand;
         bool swordAnimation = UsesSwordAnimation || UsesBatAnimation;
         _character3D?.SetMeleeEquipped(swordAnimation, UsesBatAnimation);
-        bool firearmAnimation=_character3D!=null&&_character3D.SetFirearmEquipped(hand==HandVisual.Gun?_weapon:null);
+        _character3D?.SetFirearmEquipped(hand == HandVisual.Gun ? _weapon : null);
 
         if (_weaponVis != null)
         {
@@ -589,29 +628,6 @@ public class TopDownPlayer : MonoBehaviour
                 if (_state == CombatState.HeavyCharge) _weaponVis.Charge(ChargePercent);
                 else if (!_weaponVis.IsSwinging && _state != CombatState.HeavyRelease
                          && _state != CombatState.LightAttack) _weaponVis.Rest();
-            }
-        }
-
-        if (_fistVis != null)
-        {
-            _fistVis.SetVisible(hand == HandVisual.Fist && _character3D == null);
-            if (hand == HandVisual.Fist)
-            {
-                _fistVis.SetFacing(FacingDirection);
-                if (!_fistVis.IsPunching && _state != CombatState.HeavyRelease
-                    && _state != CombatState.LightAttack) _fistVis.Rest();
-            }
-        }
-
-        if (_gunVis != null)
-        {
-            _gunVis.SetVisible(hand == HandVisual.Gun && !firearmAnimation);
-            if (hand == HandVisual.Gun)
-            {
-                _gunVis.SetFacing(FacingDirection);
-                _gunVis.SetState(_gun != null && _gun.IsAiming,
-                                 _gun != null && _gun.IsReloading,
-                                 _gun != null ? _gun.ReloadProgress : 0f);
             }
         }
     }
@@ -669,6 +685,19 @@ public class TopDownPlayer : MonoBehaviour
     /// <summary>약공 콤보 사용 여부 — 2026-07-11 기본 OFF(사용자 결정). Control Panel에서 되살릴 수 있다.</summary>
     static bool ComboOn => GameTuning.Instance != null && GameTuning.Instance.comboEnabled;
 
+    /// <summary>구르기 사용 여부 — 2026-09-11 기본 OFF(사용자 "구르기는 일단 꺼둬", 모션 없음). docs/combat.md §무기 구성 결정.</summary>
+    static bool DodgeOn => GameTuning.Instance != null && GameTuning.Instance.dodgeEnabled;
+
+    /// <summary>근접 공격 순간 커서 쪽으로 몸을 돌린다 — 2026-09-11 사용자 결정(docs/combat.md §무기 구성 결정).
+    /// 평소 바라보는 방향은 이동 방향이라, 이게 없으면 걸어가는 쪽으로 휘두른다. AttackPerformer가 이 방향을 스윙 시작에 고정한다.
+    /// 패드는 오른쪽 스틱이 이미 바라보는 방향을 정하므로 그대로 둔다.</summary>
+    void FaceCursorForMelee()
+    {
+        if (GameInput.PadActive) return;
+        Vector2 d = Plan3D.ToPlan(MouseWorldPos - transform.position);
+        if (d.sqrMagnitude > 0.01f) FacingDirection = d.normalized;
+    }
+
     void HandleCombatInput()
     {
         if (ChannelBusy) return;   // 아이템 사용 중 — 구르기·공격 금지 (취소는 ESC)
@@ -677,7 +706,7 @@ public class TopDownPlayer : MonoBehaviour
         if (!CombatEnabled || _exhausted) return;
 
         // 구르기 (Space) — 총을 들고 있어도 구를 수 있다.
-        if (GameInput.GetKeyDown(KeyCode.Space) && _state != CombatState.Dodge && _dodgeCooldownTimer <= 0f)
+        if (DodgeOn && GameInput.GetKeyDown(KeyCode.Space) && _state != CombatState.Dodge && _dodgeCooldownTimer <= 0f)
         {
             TryDodge();
             return;
@@ -691,6 +720,10 @@ public class TopDownPlayer : MonoBehaviour
             if (_gun != null) _gun.HandleInput(false);
             return;
         }
+
+        // 2026-09-11 사용자: "근접 손공격은 없어" — 무기가 없으면 좌·우클릭 공격(약공·차징 강공)을 받지 않는다.
+        //   구르기는 위에서 이미 처리했다. docs/combat.md §손에 드는 것.
+        if (InHand == HandVisual.Empty) return;
 
         // ★ 약공 선입력 예약 — **반드시 아래 얼리 리턴보다 먼저.**
         //   (2026-07-11 버그픽스) 예전엔 이 분기가 `_state != Idle && != HeavyCharge → return` 뒤에 있어
@@ -757,11 +790,11 @@ public class TopDownPlayer : MonoBehaviour
 
         _state = CombatState.LightAttack;
         _attackStateTimer = atk.Duration;
+        FaceCursorForMelee();
         _performer.Perform(atk);
-        // 손에 든 것에 맞는 동작 — 칼은 휘두르고, 맨손은 정권으로 지른다.
+        // 손에 든 것에 맞는 동작 — 칼은 휘두른다(빈손은 공격 자체가 없다 — HandleCombatInput).
         if (UsesSwordAnimation || UsesBatAnimation) _character3D.PlayMeleeAttack(atk.Duration, FacingDirection, UsesBatAnimation);
         else if (InHand == HandVisual.Melee) _weaponVis?.Swing(atk.Duration);   // 우 → 좌 한 방향
-        else                            _fistVis?.Punch(atk.Duration);
         // 소음은 스윙이 아니라 '적중' 시에만 발생(AttackPerformer.ScanWindow) — 2026-07-11 변경.
         _comboBuffered = false;
     }
@@ -785,10 +818,10 @@ public class TopDownPlayer : MonoBehaviour
         _attackStateTimer = atk != null ? atk.Duration : 0.25f;
         _heavyCooldownTimer = HeavyCooldown;
 
+        FaceCursorForMelee();
         _performer.Perform(atk);
         if (UsesSwordAnimation || UsesBatAnimation) _character3D.PlayMeleeAttack(_attackStateTimer, FacingDirection, UsesBatAnimation);
         else if (InHand == HandVisual.Melee) _weaponVis?.SwingHeavy(_attackStateTimer, full);   // 치켜든 대각에서 크고 빠르게
-        else                            _fistVis?.PunchHeavy(_attackStateTimer, full);    // 더 깊은 정권
         // 강공도 적중 시에만 소음(AttackPerformer.ScanWindow).
     }
 

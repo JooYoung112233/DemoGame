@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
+  m_Name: Cash
+  m_EditorClassIdentifier: Game.Scripts::ItemData
+  itemId: cash
+  displayName: "\uD604\uAE08"
+  description: "\uD2B9\uBCC4\uD55C \uD018\uC2A4\uD2B8\xB7\uC774\uBCA4\uD2B8\uC5D0 \uC4F0\uB294 \uD604\uAE08. \uACE0\uCCA0(\u25C8)\uB85C \uC815\uC0B0\uB418\uC9C0 \uC54A\uB294\uB2E4."
+  icon: {fileID: 0}
+  gridWidth: 1
+  gridHeight: 1
+  category: 4
+  rarity: 0
+  primaryRegionId: 
+  maxStack: 99999
+  weight: 0
+  sellPrice: 1
+  buyPrice: 0
+  isUsable: 0
+  useEffect: 0
+  effectValue: 0
+  useTimeSeconds: 0
+  isThrowable: 0
+  hasDurability: 0
+  maxDurability: 100
+  durabilityCostPerUse: 50
+  equipSlot: 0
+  containerWidth: 0
+  containerHeight: 0
+  isContainer: 0
+  internalWidth: 0
+  internalHeight: 0
+  allowedCategories: 
+  weaponData: {fileID: 0}
+  weaponPartType: 0
+  partMoveSpeedMult: 1
+  partStaminaMult: 1
+  partRangeBonus: 0
+  partRecoilMult: 1
+  magCapacity: 0
+  magCaliber: 
+  ammoCaliber: 
+  ammoDamageMult: 1
+  ammoPenetration: 0
+  ammoSpeedMult: 1
+  ammoRangeMult: 1
+  ammoSpreadMult: 1
+  worldDropPrefab: {fileID: 0}

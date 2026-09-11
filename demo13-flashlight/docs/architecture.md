@@ -13,11 +13,11 @@
  │   StoryLocale / StoryPlayer / StoryTrigger / SceneTransitionManager
  ├─ UIManager → GameHUD / RaidResult / MapSelect / CharacterPanel / Crafting /
  │              Shop / Dialogue / PostRaidEvent / Quest   ← 상점 포함 모든 UI가 씬 배치
- ├─ PlayerRig (Player + Main Camera + Ambient/Cone Light2D + 후처리 Volume)
- ├─ Global Light 2D (Dark) + DayNightCycle + SystemsSceneEnforcer
+ ├─ PlayerRig (Player + Main Camera(오소 62°) + 착용등 WornLamp + 후처리 Volume)
+ ├─ DayNightCycle(태양·앰비언트 — WeatherData) + SystemsSceneEnforcer(2D 시절 글로벌 조명 중복 정리 — 잔재)
  └─ GameBoot
         └─ additive ─┐
-   [Safehouse] / [InGameScene] / [CombatSandbox]  ← 여기만 교체 로드
+   [Safehouse(=마을)] / [Hideout] / [Pawnshop] / [Zone1] / [Int_*]  ← 여기만 교체 로드
      (맵 / 프롭 / 스폰포인트 / 인터랙터블만)
 ```
 
@@ -25,7 +25,7 @@
 | 시작 씬 | 동작 |
 |---------|------|
 | **Systems** | `GameBoot`이 기본 게임플레이 씬(`defaultScene`, 기본 `Safehouse`)을 additive 로드 |
-| **게임플레이 씬**(Safehouse/InGameScene 등) | `SystemsScene.EnsureLoaded`가 Systems를 additive로 끌어와 매니저/플레이어/UI 공급 |
+| **게임플레이 씬**(Safehouse/Zone1 등) | `SystemsScene.EnsureLoaded`가 Systems를 additive로 끌어와 매니저/플레이어/UI 공급. ⚠️ 동작은 하지만 **개발·테스트는 항상 Systems에서 시작**(단독 Play 금지 — 사용자 규칙) |
 | **맵툴 씬**(MapTool*) | 아무것도 안 함(자체 완결) |
 | **Systems 빌드세팅에 없음**(빌더 미실행) | Systems 안 끌어옴 → 기존 코드 스폰 폴백 동작 |
 
@@ -47,28 +47,28 @@ Systems 미빌드 시엔 기존 단일(Single) 로드 + DontDestroyOnLoad로 폴
 - 글로벌 조명 / DayNightCycle / SystemsSceneEnforcer / GameBoot는 DDOL 안 함 →
   Systems 씬에 상주하며, Systems가 언로드되지 않으므로 모든 additive 게임플레이 씬을 비춤.
 - 게임플레이 씬에 남아 있는 **중복 카메라**는 `CameraFollow.DisableOtherCameras`,
-  **중복 Global Light2D**는 `SystemsSceneEnforcer`가 로드 시 비활성화.
+  **중복 Global Light2D**는 `SystemsSceneEnforcer`가 로드 시 비활성화(2D 시절 장치 — 3D에선 잔재, 정리 5단계).
 
 ### 파일 맵
 | 파일 | 역할 |
 |------|------|
 | `Scripts/Systems/SystemsScene.cs` | Systems 씬 판별/로드 유틸 + `EnsureLoaded` 부트스트랩 |
 | `Scripts/Systems/GameBoot.cs` | Systems 단독 진입 시 기본 게임플레이 씬 로드 (씬 배치) |
-| `Scripts/Systems/SystemsSceneEnforcer.cs` | 중복 Global Light2D 비활성화 (씬 배치) |
+| `Scripts/Systems/SystemsSceneEnforcer.cs` | 중복 Global Light2D 비활성화 (씬 배치) — 2D 잔재 |
 | `Editor/SystemsSceneBuilder.cs` | `Tools/TopDown/Build/Systems Scene` — Systems.unity 1발 생성 + 빌드세팅 |
 | `Interaction/SceneTransitionManager.cs` | additive 교체 로드(Systems 유지)로 변경 |
 
 ### 게임플레이 씬 = 맵 콘텐츠 전용
-Safehouse / InGameScene / CombatSandbox 등 게임플레이 씬은 **시스템 오브젝트를 두지 않는다**
-(카메라/조명/EventSystem/매니저/플레이어는 전부 Systems가 공급). 게임플레이 씬엔 **맵 콘텐츠만**:
-Grid/Tilemap, SpawnPoint, 프롭, 인터랙터블, 탈출존, 씬별 마커.
-`Tools/TopDown/Build/InGame|Safehouse Scene`(GameSceneBuilder)는 이제 EventSystem/Global Light를
-만들지 않고 맵 콘텐츠 골격만 생성한다. (2026-06-03 기준 Safehouse/InGameScene은 비어 있어 맵 제작 필요)
+Safehouse(마을) / Hideout / Pawnshop / Zone1 / Int_* 등 게임플레이 씬은 **시스템 오브젝트를 두지 않는다**
+(카메라/EventSystem/매니저/플레이어는 전부 Systems가 공급). 게임플레이 씬엔 **맵 콘텐츠만**:
+3D 지오메트리, SpawnPoint, 프롭, 인터랙터블, 탈출존, 씬별 마커, 맵 태양.
+3D 맵은 빌더가 만든다(`Zone1GreyboxLayout`·`Map3DBuild`·`Safehouse3DLayout`·`Hideout3DLayout` 등).
+⚠️ 2D 시절의 `InGameScene`·`CombatSandbox` 씬은 더 이상 없다 — 이를 등록하려는 옛 빌더(`GameSceneBuilder`·`CombatSandboxBuilder`)는 정리 5단계 대상.
 
 ### 셋업 방법
 1. (PlayerRig 없으면) `Tools/TopDown/Build/Player Rig` 먼저 실행.
 2. `Tools/TopDown/Build/Systems Scene` 실행 → `Assets/Scenes/Systems.unity` 생성 + 빌드세팅 등록.
-3. 맵 콘텐츠 제작: `Tools/TopDown/Build/Safehouse|InGame Scene`로 골격 생성 후 Tilemap/스폰 배치.
+3. 맵 콘텐츠 제작: 3D 맵 빌더(위 목록) 실행. (옛 `Safehouse|InGame Scene` 2D 골격 빌더는 쓰지 않는다)
 4. 전체 게임 테스트: **Systems 씬을 열고 Play**(GameBoot이 Safehouse를 엶).
    게임플레이 씬에서 바로 Play해도 Systems가 자동 additive 로드됨.
 
@@ -81,17 +81,16 @@ Grid/Tilemap, SpawnPoint, 프롭, 인터랙터블, 탈출존, 씬별 마커.
 |------|--------|------|
 | 세이프하우스 | 걸어다니는 허브(timeScale=1) | — |
 | → 맵보드 | `InteractableObject(MapBoard)` 상호작용 | `UIManager.ShowMapSelect()` → `MapSelectUI` |
-| → 레이드 | 지역 선택(현재 scrap_market→InGameScene) | `SceneTransitionManager.TransitionTo(sceneName, spawnId)` |
-| 레이드 | `RaidManager`(타이머/사망/시간초과) | InGameScene 배치, Start에서 `PendingResult=true` |
+| → 레이드 | 지역 선택(`WorldRegionCatalog` — 현재 지역1→`Zone1`만 씬이 있다) | `SceneTransitionManager.TransitionTo(sceneName, spawnId)` |
+| 레이드 | `RaidManager`(20분 타이머/사망/시간초과) | 레이드 씬(Zone1)에 배치, Start에서 `PendingResult=true` |
 | 파밍 | `InteractableObject(Pickup/Container)` | `PlayerInventory` + `RaidManager.TrackLoot` |
 | → 탈출 | `InteractableObject(ExitPoint, exitWaitTime>0)` | `OnExtractSuccess` + `TransitionWithDelay`(거리 이탈 시 취소) |
 | → 보상 | 안전가옥 로드 + `RaidManager.PendingResult` | `RaidResultUI` 자동 표시(루트/생존시간/가치) |
 | → 세이프하우스 | 정산 닫기 | 루프 완료 |
 
 - **정산 트리거**: `RaidManager.PendingResult`(static)로 "레이드를 실제로 다녀왔는지" 판정 → 부팅 직후 진입에서 정산창 오발 방지.
-  additive 로드 순서상 안전가옥 로드 시점엔 InGameScene이 아직 살아있어 `LootedItems` 캡처 가능.
-- **맵 콘텐츠**: `Tools/TopDown/Build/Safehouse|InGame Scene`가 스폰/MapBoard/Bed/Workbench(안전가옥),
-  스폰/RaidManager/줍기5/ExitPoint(인게임)를 배치. 타일맵 바닥/벽 아트는 이후 직접 그림(현재 마커는 빌트인 스프라이트 플레이스홀더).
+  additive 로드 순서상 마을 로드 시점엔 레이드 씬이 아직 살아있어 `LootedItems` 캡처 가능.
+- **맵 콘텐츠**: 3D 맵 빌더가 스폰·지도판·시설(마을/은신처)과 스폰·RaidManager·루팅·탈출구(레이드)를 배치한다.
 
 ## 입력 시스템 (Input System, 2026-06-24 전환)
 
@@ -181,7 +180,7 @@ DDOL 씬으로 옮겨졌는데, 폴더에 넣으면 그게 끊긴다. 그래서:
 `new GameObject()`/`Instantiate`는 **활성 씬**에 생긴다. 그런데 맵을 additive로 로드하면 그 맵의 `Start()`가
 `SetActiveScene(맵)`보다 **먼저** 돈다 — 그 순간 활성 씬은 Systems다. 그래서 루팅 아이템이 Systems에 쌓이고
 맵을 떠나도 안 지워졌다(2026-09-11 실측: Zone1 한 번에 `WorldItem` 32개 누수).
-- `WorldItem.Drop(item, pos, owner)` — 맵 쪽 호출부(ItemSpawnPoint·MapSpawnController·RegionLootBootstrap·
+- `WorldItem.Drop(item, pos, owner)` — 맵 쪽 호출부(ItemSpawnPoint(Fixed 고정 아이템)·MapSpawnController(바닥 루팅)·
   Breakable·EnemyController)는 `this`를 넘긴다. 아이템은 owner의 씬으로 옮겨져 맵과 함께 언로드된다.
 - 플레이어·UI(DDOL) 쪽 드롭은 owner 없이 둔다 — 그땐 이미 활성 씬이 현재 맵이다.
 - 맵 로드 직후 무언가를 스폰하는 새 코드도 같은 규칙: 스폰한 오브젝트를 **자기 씬으로** 옮길 것.
@@ -211,3 +210,4 @@ DDOL 씬으로 옮겨졌는데, 폴더에 넣으면 그게 끊긴다. 그래서:
 | 2026-09-11 | (버그) 레이드 루팅 아이템이 맵이 아니라 Systems 씬에 생겨, 맵을 떠나도 남음 | `WorldItem.Drop`에 owner 인자 — 맵 쪽 호출부는 `this`를 넘겨 자기 씬으로 옮긴다. 검증: Zone1 체류 39개 모두 Zone1, 안전가옥 이동 후 0개 | 맵 `Start()`가 `SetActiveScene` 전에 돈다. §런타임 스폰은 "누구의 씬"인지 넘길 것 |
 | 2026-09-11 | 런타임 스폰된 적도 폴더로 묶어 달라 | `EnemySpawner`가 적을 맵 씬 루트의 `[Runtime]/Enemies`에 넣는다(`HierarchyFolder.RuntimeFolder`) | 적 수십 기가 루트에 평평함. §런타임 스폰물 폴더 |
 | 2026-09-11 | 루팅 아이템도 폴더로 | `WorldItem.Drop`이 게임플레이 씬의 아이템을 `[Runtime]/Loot`에 넣는다 | 같은 이유. §런타임 스폰물 폴더 |
+| 2026-09-11 | (문서 정합) 루팅 정리로 `RegionLootBootstrap` 삭제 · `ItemSpawnPoint` 자체 스폰 제거 | §런타임 스폰은 "누구의 씬인지" 호출부 목록에서 `RegionLootBootstrap` 제거, ItemSpawnPoint = Fixed 고정 아이템만 · 바닥 루팅 = MapSpawnController로 정정 | [region-loot.md §루팅 정리 결정](region-loot.md) |

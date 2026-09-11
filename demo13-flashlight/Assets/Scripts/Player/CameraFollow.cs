@@ -33,6 +33,13 @@ public class CameraFollow : MonoBehaviour
              "⚠️ 그림자 거리(URP 에셋 기본 50m) 안이어야 그림자가 렌더된다.")]
     [SerializeField] float followDistance = 25f;
 
+    // 카메라 각도 — 2026-09-11 사용자 선택 "정면 탑다운 62°"(docs/rendering.md §쿼터뷰 카메라). 대각선 45°에서 되돌림.
+    //   코드가 정하는 게 진실 — Start에서 이 값으로 돌린 뒤 추적 오프셋을 잡는다. 이동은 TopDownPlayer가 카메라 기준으로 돌린다.
+    [Tooltip("내려다보는 각(°). 90이면 정수직.")]
+    [SerializeField] float viewPitch = 62f;
+    [Tooltip("방위각(°). 0 = 정북(정면 탑다운), 45 = 대각선(아이소식 쿼터뷰).")]
+    [SerializeField] float viewYaw = 0f;
+
     Vector3 offset;
 
     // ── 연출 포커스 ──
@@ -60,6 +67,7 @@ public class CameraFollow : MonoBehaviour
     {
         cam = GetComponent<Camera>();
         if (cam != null && cam.orthographic) baseOrthoSize = cam.orthographicSize;
+        transform.rotation = Quaternion.Euler(viewPitch, viewYaw, 0f);   // 오프셋(FindTarget)보다 먼저
         FindTarget();
         DisableOtherCameras();
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -148,6 +156,25 @@ public class CameraFollow : MonoBehaviour
         return -right * (_focusBias.x * viewW) - up * (_focusBias.y * viewH / tilt);
     }
 
+    PlayerGun _aimGun;
+
+    /// <summary>총 조준(우클릭) 중엔 커서 쪽으로 밀어 멀리 본다(2026-09-11 사용자 결정 "조준할 때만").
+    /// 밀림 = 플레이어→커서 × aimLookAhead, 최대 aimLookAheadMax(GameTuning). 스무딩은 위의 추적 감쇠를 그대로 탄다.</summary>
+    Vector3 AimLookAhead()
+    {
+        if (_hasFocus) return Vector3.zero;   // 시설 UI 연출 중엔 끼어들지 않는다
+        var p = TopDownPlayer.Instance;
+        if (p == null) return Vector3.zero;
+        if (_aimGun == null) _aimGun = p.GetComponent<PlayerGun>();
+        if (_aimGun == null || !_aimGun.IsAiming) return Vector3.zero;
+        var gt = GameTuning.Instance;
+        float k = gt != null ? gt.aimLookAhead : 0.35f;
+        float max = gt != null ? gt.aimLookAheadMax : 4f;
+        Vector3 d = p.MouseWorldPos - p.transform.position;
+        d.y = 0f;
+        return Vector3.ClampMagnitude(d * k, max);
+    }
+
     /// <summary>카메라를 타깃 위치로 즉시 스냅(스무딩 건너뜀). 스폰/순간이동 직후 호출 — "슉~" 슬라이드 방지.</summary>
     public void SnapToTarget()
     {
@@ -166,7 +193,7 @@ public class CameraFollow : MonoBehaviour
         }
 
         Vector3 anchor = _hasFocus && _focus != null ? _focus.position : target.position;
-        Vector3 desired = anchor + offset + FramingShift();
+        Vector3 desired = anchor + offset + FramingShift() + AimLookAhead();
         // ⚠️ Lerp(a, b, k*dt)는 **프레임레이트에 의존한다** — 같은 smoothSpeed라도 fps에 따라
         //    따라오는 속도가 달라진다. 지수 감쇠 1-exp(-k*dt)가 프레임레이트와 무관한 정식이다.
         float t = 1f - Mathf.Exp(-smoothSpeed * Time.unscaledDeltaTime);
@@ -197,7 +224,8 @@ public class CameraFollow : MonoBehaviour
         _shakeTime += Time.unscaledDeltaTime;
         float damp = 1f - Mathf.Clamp01(_shakeTime / _shakeDur);     // 1→0
         float mag = _shakeMag * damp * damp;                          // 끝에서 더 빠르게 잦아듦
-        return new Vector3(Random.Range(-mag, mag), Random.Range(-mag, mag), 0f);
+        // 화면 좌우·위아래(카메라 축)로 흔든다 — 월드 (x, y, 0)은 일부가 시선 방향이라 오소 카메라에선 안 보인다(대각선 쿼터뷰, 2026-09-11).
+        return transform.right * Random.Range(-mag, mag) + transform.up * Random.Range(-mag, mag);
     }
 
     // ── 줌 펀치 ─────────────────────────────────────────────
