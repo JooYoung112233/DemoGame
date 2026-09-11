@@ -39,6 +39,8 @@ public class DenseAnomalyController : MonoBehaviour
     Transform _player;
     GameObject _quad;
     Material _mat;
+    Shader _fogShader;
+    bool _shaderChecked;
     static Sprite _sprite;
 
     // 구간(zone) — 플레이어가 들어간 현상 구역들. 가장 큰 값이 목표 강도에 반영.
@@ -68,16 +70,20 @@ public class DenseAnomalyController : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
     }
+
+    // Missing optional art cannot become available on the next frame. Retry only after re-enabling.
+    void OnEnable() { _shaderChecked = false; _fogShader = null; }
+    void OnDisable() => Cleanup();
 
     /// <summary>현상 강도 설정(이벤트/스토리/지역 진입에서 호출). 0=맑음, 1=완전 침식.</summary>
     public void SetIntensity(float v) => intensity = Mathf.Clamp01(v);
 
     void LateUpdate()
     {
-        EnsureQuad();
-        if (_cam == null || _quad == null || _mat == null) return;
+        if (GameInput.GetKeyDown(debugKey))
+            intensity = intensity > 0.5f ? 0f : 1f;
 
         // 목표 강도 = 수동 + 지역 기본 침식도 + 들어간 구간(zone) 중 가장 큰 값
         float target = Mathf.Clamp01(intensity);
@@ -90,6 +96,16 @@ public class DenseAnomalyController : MonoBehaviour
             if (z != null) target = Mathf.Max(target, z.intensity);
 
         _current = Mathf.MoveTowards(_current, target, lerpSpeed * Time.unscaledDeltaTime);
+
+        // Do not initialize a full-screen renderer in clear scenes (village/hideout/startup).
+        if (_current <= 0f)
+        {
+            if (_quad != null) _quad.SetActive(false);
+            return;
+        }
+        EnsureQuad();
+        if (_cam == null || _quad == null || _mat == null) return;
+        _quad.SetActive(true);
 
         FitQuad();
         _mat.SetFloat(IdDensity, _current);
@@ -112,8 +128,6 @@ public class DenseAnomalyController : MonoBehaviour
         Vector3 cp = _cam.transform.position;
         _mat.SetVector(IdWorldOffset, new Vector4(cp.x, cp.y, 0, 0));
 
-        if (GameInput.GetKeyDown(debugKey))
-            intensity = intensity > 0.5f ? 0f : 1f;
     }
 
     Transform GetPlayer()
@@ -131,10 +145,16 @@ public class DenseAnomalyController : MonoBehaviour
         if (_quad != null && _quad.transform.parent == _cam.transform) return;
 
         Cleanup();
-        var shader = Shader.Find("BRB/AnomalyFog");
-        if (shader == null) { Debug.LogWarning("[DenseAnomaly] BRB/AnomalyFog 셰이더 못 찾음."); return; }
+        if (!_shaderChecked)
+        {
+            _shaderChecked = true;
+            _fogShader = Shader.Find("BRB/AnomalyFog");
+            if (_fogShader == null)
+                Debug.LogWarning("[DenseAnomaly] BRB/AnomalyFog 셰이더가 없어 안개 표시를 건너뜁니다. 셰이더 복구 후 컴포넌트를 다시 활성화하면 재시도합니다.", this);
+        }
+        if (_fogShader == null) return;
 
-        _mat = new Material(shader);
+        _mat = new Material(_fogShader);
         _quad = new GameObject("AnomalyFogQuad") { hideFlags = HideFlags.DontSave | HideFlags.NotEditable };
         _quad.transform.SetParent(_cam.transform, false);
 

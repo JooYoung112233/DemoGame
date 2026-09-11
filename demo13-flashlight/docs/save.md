@@ -3,6 +3,12 @@
 > 세이브 스커밍(전투/거래 직전 저장 → 결과 나쁘면 재로드) 방지 + 크래시 복구를 함께 만족하는 저장 모델.
 > 핵심 코드: `Systems/SaveManager.cs`(직렬화·디스크 I/O), `Systems/SaveCheckpoints.cs`(체크포인트 정책), `Systems/CombatStateTracker.cs`(전투 감지).
 
+## 2026-09-12 — 재귀 아이템 저장 경고 수정
+
+- 실행 경고 조사 중 `GridItemEntry.containerItems`의 자기 참조 타입 때문에 `JsonUtility.FromJson<GameSaveData>`가 깊이 10 제한 경고를 3건 출력하는 것을 확인했다. 실제 가방이 비어 있어도 타입 탐색으로 발생했다.
+- `SaveManager`의 저장 스냅샷 직렬화, 실제 로드, 슬롯 요약 파싱을 이미 설치된 JSON.NET으로 통일했다. JSON 필드명·숫자 enum·저장 버전 1은 유지하며 파일 마이그레이션을 요구하지 않는다.
+- 검증: 기존 `save_0.json` 전체 기존 필드 값의 파싱→직렬화 일치 및 원본 파일 불변, 레거시 JSON의 가방 내부 총기/부착물/탄약 복원, 깊이 15 중첩 아이템 왕복 통과. 기존 파일 검증은 메모리에서만 수행했다. `ArtWork/StartupWarnings/save-compatibility.json`에 결과 기록.
+
 ## 1. 설계 결정 (2026-06-18)
 
 질문: 자동 저장을 매 이벤트마다 디스크에 쓰면 세이브 스커밍이 가능하고(전투 직전 저장 후 재시도), 매번 안 쓰면 크래시 시 진행을 잃는다. 어떻게 양립시키나?
