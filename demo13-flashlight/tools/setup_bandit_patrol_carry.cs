@@ -4,6 +4,7 @@ var go=(GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(UnityEditor.Asset
 try{
  go.GetComponentInChildren<Animator>().enabled=false;var bones=go.GetComponentsInChildren<Transform>();Transform Bone(string n)=>bones.Single(t=>t.name==n);
  var chest=Bone("Chest");var upper=chest.GetComponentsInChildren<Transform>().Where(t=>!t.GetComponent<Renderer>()&&!t.GetComponent<MeshFilter>()).ToArray();
+ var neutralWrist=Bone("Hand.R").localRotation;
  var clips=new System.Collections.Generic.List<AnimationClip>();var rows=new System.Collections.Generic.List<object>();
  foreach(var mode in new[]{"Idle","Walk","Run"}){
   var source=UnityEditor.AssetDatabase.LoadAssetAtPath<AnimationClip>(hero+"/"+mode+".anim");
@@ -12,7 +13,6 @@ try{
   var curves=upper.ToDictionary(t=>t,t=>Enumerable.Range(0,7).Select(i=>new System.Collections.Generic.List<Keyframe>()).ToArray());
   var idle=UnityEditor.AssetDatabase.LoadAssetAtPath<AnimationClip>(hero+"/Idle.anim");idle.SampleAnimation(go,0);
   var restArm=Bone("UpperArm.R").localRotation;var restForearm=Bone("Forearm.R").localRotation;
-  var restSocketRotation=Bone("HandSocket.R").rotation;
   int count=Mathf.RoundToInt(length*60);float lowestTip=100;Quaternion previousHand=Quaternion.identity;float maxHandStep=0;
   for(int i=0;i<=count;i++){
    float u=(float)i/count,time=u*length;source.SampleAnimation(go,u*source.length);
@@ -22,9 +22,12 @@ try{
    Bone("UpperArm.R").localRotation=Quaternion.Slerp(restArm,Bone("UpperArm.R").localRotation,mode=="Idle"?1:.30f);
    Bone("Forearm.R").localRotation=Quaternion.Slerp(restForearm,Bone("Forearm.R").localRotation,.35f);
    var hand=Bone("Hand.R");var socket=Bone("HandSocket.R");
-   var direction=new Vector3(.10f,-.55f,-.83f+.06f*Mathf.Sin(2*Mathf.PI*u)).normalized;
-   var socketRotation=Quaternion.FromToRotation(restSocketRotation*Vector3.up,direction)*restSocketRotation;
-   hand.rotation=socketRotation*Quaternion.Inverse(socket.localRotation);
+   // Tilt the carried club with the arm chain, preserving a straight wrist.
+   // Forcing a backward world-space socket direction folded the wrist over 100 degrees.
+   var tiltAxis=go.transform.right;
+   Bone("UpperArm.R").rotation=Quaternion.AngleAxis(18,tiltAxis)*Bone("UpperArm.R").rotation;
+   Bone("Forearm.R").rotation=Quaternion.AngleAxis(12,tiltAxis)*Bone("Forearm.R").rotation;
+   hand.localRotation=neutralWrist;
    if(i>0)maxHandStep=Mathf.Max(maxHandStep,Quaternion.Angle(previousHand,hand.rotation));previousHand=hand.rotation;
    lowestTip=Mathf.Min(lowestTip,(socket.position+socket.up*.636f).y);
    foreach(var t in upper){var p=t.localPosition;var q=t.localRotation;var v=new[]{p.x,p.y,p.z,q.x,q.y,q.z,q.w};for(int c=0;c<7;c++)curves[t][c].Add(new Keyframe(time,v[c]));}

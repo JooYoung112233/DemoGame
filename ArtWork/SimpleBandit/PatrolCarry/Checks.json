@@ -1,8 +1,9 @@
 {
   "passed": true,
-  "maxPalmError": 5.747053E-07,
-  "minTipHeight": 0.273022234,
-  "minFreeHandDistance": 0.6597382,
+  "maxWristDeviation": 0.0,
+  "maxPalmError": 9.006509E-07,
+  "minTipHeight": 0.202420786,
+  "minFreeHandDistance": 0.5980212,
   "checks": [
     "Runtime resource initializes",
     "Patrol uses one-hand carry",
@@ -10,6 +11,7 @@
     "Detected target switches to two-hand ready",
     "Hit reaction retains combat stance",
     "Lost target returns to one-hand carry",
+    "Carry wrist stays neutral across idle, walk, run and blended speeds",
     "Right palm encloses actual bat handle in all casual gaits",
     "Carried bat clears ground",
     "Left hand is free during patrol",

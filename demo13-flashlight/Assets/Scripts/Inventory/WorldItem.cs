@@ -87,6 +87,11 @@ public class WorldItem : MonoBehaviour
                 UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, scene);
         }
 
+        // 하이어라키 정리 — 맵 씬 루트에 수십 개가 평평하게 깔리지 않게 [Runtime]/Loot에 묶는다(적은 [Runtime]/Enemies).
+        //   Systems·맵툴·DDOL 씬엔 폴더를 만들지 않는다.
+        if (SystemsScene.IsGameplayScene(go.scene) && go.scene.name != "DontDestroyOnLoad")
+            go.transform.SetParent(HierarchyFolder.RuntimeFolder(go.scene, "Loot"), true);
+
         // WorldItem 컴포넌트
         var worldItem = go.AddComponent<WorldItem>();
         worldItem.itemInstance = item;
