@@ -33,12 +33,12 @@ public class CameraFollow : MonoBehaviour
              "⚠️ 그림자 거리(URP 에셋 기본 50m) 안이어야 그림자가 렌더된다.")]
     [SerializeField] float followDistance = 25f;
 
-    // 쿼터뷰 각도 — 2026-09-11 사용자 선택 "대각선 45°"(docs/rendering.md §카메라). 예전엔 프리팹 회전(55°·정북)이 곧 각도였다.
+    // 카메라 각도 — 2026-09-11 사용자 선택 "정면 탑다운 62°"(docs/rendering.md §쿼터뷰 카메라). 대각선 45°에서 되돌림.
     //   코드가 정하는 게 진실 — Start에서 이 값으로 돌린 뒤 추적 오프셋을 잡는다. 이동은 TopDownPlayer가 카메라 기준으로 돌린다.
-    [Tooltip("쿼터뷰 — 내려다보는 각(°). 90이면 정수직.")]
-    [SerializeField] float viewPitch = 45f;
-    [Tooltip("쿼터뷰 — 방위각(°). 45 = 대각선(아이소식 쿼터뷰), 0 = 정북.")]
-    [SerializeField] float viewYaw = 45f;
+    [Tooltip("내려다보는 각(°). 90이면 정수직.")]
+    [SerializeField] float viewPitch = 62f;
+    [Tooltip("방위각(°). 0 = 정북(정면 탑다운), 45 = 대각선(아이소식 쿼터뷰).")]
+    [SerializeField] float viewYaw = 0f;
 
     Vector3 offset;
 
