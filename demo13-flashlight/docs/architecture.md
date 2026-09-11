@@ -190,11 +190,13 @@ DDOL 씬으로 옮겨졌는데, 폴더에 넣으면 그게 끊긴다. 그래서:
 | 날짜 | 질문 | 결정 |
 |------|------|------|
 | 2026-09-11 | 런타임 스폰된 적(Zone1 38기)이 맵 씬 루트에 평평하게 깔림 | **폴더로 묶는다.** 맵 씬 루트의 `[Runtime]/Enemies` |
+| 2026-09-11 | 루팅 아이템(Zone1 약 39개)도 루트에 평평함 — 이어서 묶을까 | **묶는다.** `[Runtime]/Loot` — `WorldItem.Drop`이 게임플레이 씬이면 넣는다(플레이어가 버린 것 포함) |
 
 - `HierarchyFolder.RuntimeFolder(scene, "Enemies")` — 씬 루트에 `[Runtime]`(원점·단위 스케일)과 그 아래 이름 폴더를 찾거나 만든다.
   플레이 중에만 생기고 씬 파일엔 저장되지 않으며, 맵 씬과 함께 언로드된다.
 - 에디터 정리 도구가 만드는 `Map/Enemies`(스폰 존)와는 별개다 — `Map`은 저장된 배치물, `[Runtime]`은 플레이 중 생긴 것.
-- 새 런타임 스폰(예: 루팅 아이템)도 여기에 이름 폴더를 더해 넣는다. `transform.root`에 기대는 코드는 없다(2026-09-11 확인).
+- 현재 폴더: `Enemies`(EnemySpawner), `Loot`(WorldItem.Drop — Systems·맵툴·DDOL 씬엔 안 만든다).
+- 새 런타임 스폰도 여기에 이름 폴더를 더해 넣는다. `transform.root`에 기대는 코드는 없다(2026-09-11 확인).
 
 ## 변경 로그
 
@@ -208,3 +210,4 @@ DDOL 씬으로 옮겨졌는데, 폴더에 넣으면 그게 끊긴다. 그래서:
 | 2026-09-11 | 씬 하이어라키가 씬마다 복잡함(Zone1 `Map` 아래 766개 평평, Systems 루트 27개 평평) | **기능별 폴더 규약 + 자동 정리 도구.** 맵 씬은 컴포넌트로 기능별(지형만 이름표로 구조별), Systems는 Core/World/Progress/Story/UI/Player. 빌더 저장 지점에서 자동 적용. DDOL은 `HierarchyFolder.Persist`로(폴더 안이면 루트로 빼고 건다), `TopDownPlayer`는 `OwnerRoot` — 런타임 동작 불변 | 손 정리는 재빌드에 날아간다. 이름 접두사는 뜻이 섞여 있어(SP_ = 소품·상자·스폰) 컴포넌트가 확실하다. §씬 하이어라키 규약 |
 | 2026-09-11 | (버그) 레이드 루팅 아이템이 맵이 아니라 Systems 씬에 생겨, 맵을 떠나도 남음 | `WorldItem.Drop`에 owner 인자 — 맵 쪽 호출부는 `this`를 넘겨 자기 씬으로 옮긴다. 검증: Zone1 체류 39개 모두 Zone1, 안전가옥 이동 후 0개 | 맵 `Start()`가 `SetActiveScene` 전에 돈다. §런타임 스폰은 "누구의 씬"인지 넘길 것 |
 | 2026-09-11 | 런타임 스폰된 적도 폴더로 묶어 달라 | `EnemySpawner`가 적을 맵 씬 루트의 `[Runtime]/Enemies`에 넣는다(`HierarchyFolder.RuntimeFolder`) | 적 수십 기가 루트에 평평함. §런타임 스폰물 폴더 |
+| 2026-09-11 | 루팅 아이템도 폴더로 | `WorldItem.Drop`이 게임플레이 씬의 아이템을 `[Runtime]/Loot`에 넣는다 | 같은 이유. §런타임 스폰물 폴더 |
