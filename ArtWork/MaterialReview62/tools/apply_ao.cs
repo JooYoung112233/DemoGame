@@ -1,0 +1,15 @@
+if(UnityEditor.EditorApplication.isPlaying)throw new System.Exception("Preserve Play; defer renderer changes.");
+var path="Assets/Settings/ForwardRenderer.asset";
+var renderer=UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.Universal.UniversalRendererData>(path);
+var ao=renderer.rendererFeatures.Single(f=>f.GetType().Name=="ScreenSpaceAmbientOcclusion");
+var dest="D:/Demo/ArtWork/MaterialReview62/BeforeFiles/"+path;System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(dest));if(!System.IO.File.Exists(dest))System.IO.File.Copy(path,dest);
+UnityEditor.Undo.RecordObject(ao,"Small contact occlusion for top-down surfaces");
+var so=new UnityEditor.SerializedObject(ao);var settings=so.FindProperty("m_Settings");
+settings.FindPropertyRelative("Intensity").floatValue=.4f;
+settings.FindPropertyRelative("Radius").floatValue=.18f;
+settings.FindPropertyRelative("DirectLightingStrength").floatValue=.1f;
+settings.FindPropertyRelative("Falloff").floatValue=60;
+settings.FindPropertyRelative("Source").enumValueIndex=1;
+settings.FindPropertyRelative("Downsample").boolValue=false;
+so.ApplyModifiedPropertiesWithoutUndo();ao.SetActive(true);UnityEditor.EditorUtility.SetDirty(ao);UnityEditor.AssetDatabase.SaveAssetIfDirty(ao);renderer.SetDirty();
+return "SSAO active: small radius .18m, intensity .4, direct .1, falloff60; depth normals source.";

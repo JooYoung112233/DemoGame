@@ -1,0 +1,1 @@
+{"code":"var r=UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.Universal.UniversalRendererData>(\"Assets/Settings/ForwardRenderer.asset\");var ao=r.rendererFeatures.Single(f=>f.GetType().Name==\"ScreenSpaceAmbientOcclusion\");ao.SetActive(false);r.SetDirty();return \"Temporarily disabled SSAO for runtime A/B\";","timeout":30000}

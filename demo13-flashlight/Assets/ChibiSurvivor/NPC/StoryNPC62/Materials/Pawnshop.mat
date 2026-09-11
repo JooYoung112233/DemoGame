@@ -49,17 +49,17 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BumpScale: 0.35
+    - _BumpScale: 0.6
     - _Cull: 2
     - _Cutoff: 0.5
     - _GrimeObjectSpace: 1
     - _GrimeScale: 3
-    - _GrimeStrength: 0.12
+    - _GrimeStrength: 0.07
     - _GroundGrimeHeight: 0.8
     - _Metallic: 1
     - _OcclusionStrength: 1
-    - _RimStrength: 0.045
-    - _ShadowDesaturation: 0.2
+    - _RimStrength: 0.012
+    - _ShadowDesaturation: 0.14
     - _Smoothness: 1
     - _Surface: 0
     - _UsePackedMask: 1

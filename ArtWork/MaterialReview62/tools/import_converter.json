@@ -1,0 +1,1 @@
+{"code":"if(UnityEditor.EditorApplication.isPlaying)throw new System.Exception(\"Preserve Play\");UnityEditor.AssetDatabase.ImportAsset(\"Assets/Editor/GameLitConverter.cs\",UnityEditor.ImportAssetOptions.ForceUpdate);return \"Converter import requested\";","timeout":30000}

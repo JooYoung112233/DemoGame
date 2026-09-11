@@ -1,0 +1,2 @@
+var paths=new[]{"Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/SimpleHero.prefab","Assets/Resources/Characters/Bandit01.prefab","Assets/Resources/Characters/BanditPistol.prefab","Assets/Resources/Characters/BanditRifle.prefab"};
+return Newtonsoft.Json.JsonConvert.SerializeObject(paths.Select(p=>{var o=UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(p);return new{path=p,renderers=o.GetComponentsInChildren<Renderer>(true).Where(r=>r.enabled).Select(r=>new{r.name,materials=r.sharedMaterials.Where(m=>m!=null).Select(m=>UnityEditor.AssetDatabase.GetAssetPath(m))})};}));

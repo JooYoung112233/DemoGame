@@ -1,0 +1,139 @@
+[
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Asphalt.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Brick.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Brick_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Canvas.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Cloth_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Concrete.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Cream.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_DarkOlive.mat",
+    "specular": true,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Dirt.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Edge.mat",
+    "specular": true,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Steel_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Glass.mat",
+    "specular": true,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Ochre.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Olive.mat",
+    "specular": true,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Paper.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Plaster.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Red.mat",
+    "specular": true,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Roof.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Steel.mat",
+    "specular": true,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Steel_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Wood.mat",
+    "specular": true,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat",
+    "specular": true,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Counter.mat",
+    "specular": true,
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Floor.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Home.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Link.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Plaza.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_ShopFront.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Town_Ground.mat",
+    "specular": false,
+    "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/Pawnshop.mat"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/DistrictWarden.mat"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/VeteranScavenger.mat"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/WanderingMerchant.mat"
+  }
+]

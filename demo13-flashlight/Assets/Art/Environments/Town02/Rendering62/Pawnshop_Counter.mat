@@ -15,7 +15,6 @@ Material:
   - _ENVIRONMENTREFLECTIONS_OFF
   - _GAMELIT_PACKED_MASK
   - _NORMALMAP
-  - _SPECULARHIGHLIGHTS_OFF
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -91,7 +90,7 @@ Material:
     - _AlphaToMask: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
-    - _BumpScale: 0.22
+    - _BumpScale: 0.5
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -106,7 +105,7 @@ Material:
     - _GlossyReflections: 0
     - _GrimeObjectSpace: 0
     - _GrimeScale: 3
-    - _GrimeStrength: 0.14
+    - _GrimeStrength: 0.09
     - _GroundGrimeHeight: 0.8
     - _Metallic: 1
     - _OcclusionStrength: 1
@@ -116,7 +115,7 @@ Material:
     - _RimStrength: 0
     - _ScreenSpaceReflections: 1
     - _ScreenSpaceReflectionsContributeTransparent: 1
-    - _ShadowDesaturation: 0.25
+    - _ShadowDesaturation: 0.18
     - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
