@@ -1,0 +1,465 @@
+{
+  "models": [
+    {
+      "name": "Reuse_Workbench01",
+      "triangles": 1564,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_WoodCrate01",
+      "triangles": 924,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Stool01",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_SupplyCase02",
+      "triangles": 220,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Radio01",
+      "triangles": 644,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_MapBoard01",
+      "triangles": 436,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_MedicalBox01",
+      "triangles": 420,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_LockerPair02",
+      "triangles": 792,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Rug01",
+      "triangles": 2948,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Toolbox02",
+      "triangles": 370,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_UtilitySink02",
+      "triangles": 1800,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Bucket02",
+      "triangles": 1198,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_FireExtinguisher02",
+      "triangles": 846,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_CardboardStack02",
+      "triangles": 528,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_FoldedTarp02",
+      "triangles": 944,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "PawnDisplay62",
+      "triangles": 2440,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "PawnDisplay_Watches62",
+      "triangles": 1668,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "PawnDisplay_Electronics62",
+      "triangles": 1276,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "CashRegister62",
+      "triangles": 924,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Safe62",
+      "triangles": 840,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "SalvageShelf62",
+      "triangles": 4668,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "AntiqueClock62",
+      "triangles": 684,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "AntiqueDesk62",
+      "triangles": 1012,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "ToolBoard62",
+      "triangles": 1012,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "WeldingTrolley62",
+      "triangles": 1948,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "TireStack62",
+      "triangles": 1920,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "MechanicCreeper62",
+      "triangles": 328,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "TreatmentBed62",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "MedicineCabinet62",
+      "triangles": 4788,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "InstrumentCart62",
+      "triangles": 1424,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "IVStand62",
+      "triangles": 336,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "PrivacyScreen62",
+      "triangles": 1980,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reception62",
+      "triangles": 352,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Wardrobe62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "DiningTable62",
+      "triangles": 528,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "WoodChair62",
+      "triangles": 508,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Armchair_Upholstery62",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Armchair_BlueCloth62",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Armchair_Linen62",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "MarketCounter62",
+      "triangles": 2688,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_Floor62",
+      "triangles": 4488,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_RearLining62",
+      "triangles": 132,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_TallLining62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_PreviewCutaway62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_Floor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_RearLining62",
+      "triangles": 132,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_TallLining62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_PreviewCutaway62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_Floor62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_RearLining62",
+      "triangles": 132,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_TallLining62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_PreviewCutaway62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_Floor62",
+      "triangles": 11264,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_RearLining62",
+      "triangles": 132,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_TallLining62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_PreviewCutaway62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_Floor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_RearLining62",
+      "triangles": 132,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_TallLining62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_PreviewCutaway62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    }
+  ],
+  "totalTriangles": 65770,
+  "roomCount": 5,
+  "floorPlanChecks": [
+    {
+      "building": "Pawnshop",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0,
+          0.3
+        ],
+        [
+          0,
+          2.4
+        ]
+      ],
+      "connectedFreeCells": 5092,
+      "allFreeCells": 5092
+    },
+    {
+      "building": "Repair",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          2.5
+        ]
+      ],
+      "connectedFreeCells": 3578,
+      "allFreeCells": 3578
+    },
+    {
+      "building": "Medical",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0,
+          -2.7
+        ],
+        [
+          1,
+          0.05
+        ]
+      ],
+      "connectedFreeCells": 4594,
+      "allFreeCells": 4594
+    },
+    {
+      "building": "Furniture",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0,
+          -2
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "connectedFreeCells": 3404,
+      "allFreeCells": 3404
+    },
+    {
+      "building": "BlackMarket",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0,
+          -3.2
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "connectedFreeCells": 4939,
+      "allFreeCells": 4939
+    }
+  ],
+  "sourceHashesPreserved": true,
+  "notValidated": [
+    "Unity GameLit",
+    "roof/wall occlusion",
+    "runtime NPC interaction and collision",
+    "NavMesh"
+  ]
+}

@@ -1,0 +1,2911 @@
+{
+  "units": "metres",
+  "coordinateConvention": "Unity local x,height,depth; front -depth. Blender (-x,-depth,height).",
+  "camera": [
+    62,
+    0
+  ],
+  "assets": {
+    "Reuse_Workbench01": {
+      "triangles": 1564,
+      "sourcePieces": 35,
+      "reference": "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend",
+      "size": [
+        1.7000001668930054,
+        1.1200000047683716,
+        0.7540002465248108
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.7000001668930054,
+        0.7540002465248108
+      ]
+    },
+    "Reuse_WoodCrate01": {
+      "triangles": 924,
+      "sourcePieces": 21,
+      "reference": "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend",
+      "size": [
+        0.6400001049041748,
+        0.4449999928474426,
+        0.5570000410079956
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.6400001049041748,
+        0.5570000410079956
+      ]
+    },
+    "Reuse_Stool01": {
+      "triangles": 396,
+      "sourcePieces": 9,
+      "reference": "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend",
+      "size": [
+        0.4740000367164612,
+        0.4779432713985443,
+        0.47366827726364136
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.4740000367164612,
+        0.47366827726364136
+      ]
+    },
+    "Reuse_SupplyCase02": {
+      "triangles": 220,
+      "sourcePieces": 5,
+      "reference": "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend",
+      "size": [
+        0.5700000524520874,
+        0.3474999964237213,
+        0.42100004851818085
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.5700000524520874,
+        0.42100004851818085
+      ]
+    },
+    "Reuse_Radio01": {
+      "triangles": 644,
+      "sourcePieces": 15,
+      "reference": "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend",
+      "size": [
+        0.4491075724363327,
+        0.6106731295585632,
+        0.20350006222724915
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.4491075724363327,
+        0.20350006222724915
+      ]
+    },
+    "Reuse_MapBoard01": {
+      "triangles": 436,
+      "sourcePieces": 11,
+      "reference": "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend",
+      "size": [
+        1.2400000095367432,
+        0.7900000214576721,
+        0.09100009873509407
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.2400000095367432,
+        0.09100009873509407
+      ]
+    },
+    "Reuse_MedicalBox01": {
+      "triangles": 420,
+      "sourcePieces": 11,
+      "reference": "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend",
+      "size": [
+        0.5000000596046448,
+        0.41750001907348633,
+        0.2990000545978546
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.5000000596046448,
+        0.2990000545978546
+      ]
+    },
+    "Reuse_LockerPair02": {
+      "triangles": 792,
+      "sourcePieces": 18,
+      "reference": "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend",
+      "size": [
+        1.1500002145767212,
+        1.2999999523162842,
+        0.606000155210495
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.1500002145767212,
+        0.606000155210495
+      ]
+    },
+    "Reuse_Rug01": {
+      "triangles": 2948,
+      "sourcePieces": 67,
+      "reference": "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend",
+      "size": [
+        1.9000003337860107,
+        0.027499999850988388,
+        2.56000018119812
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.9000003337860107,
+        2.56000018119812
+      ]
+    },
+    "Reuse_Toolbox02": {
+      "triangles": 370,
+      "sourcePieces": 11,
+      "reference": "Assets\\Art\\Environments\\TownProps02\\BlenderSource~\\TownProps02.blend",
+      "size": [
+        0.6499999761581421,
+        0.39399998635053635,
+        0.3435000032186508
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.6499999761581421,
+        0.3435000032186508
+      ]
+    },
+    "Reuse_UtilitySink02": {
+      "triangles": 1800,
+      "sourcePieces": 26,
+      "reference": "Assets\\Art\\Environments\\TownProps02\\BlenderSource~\\TownProps02.blend",
+      "size": [
+        1.5,
+        1.3049999475479126,
+        0.6649999916553497
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.5,
+        0.6649999916553497
+      ]
+    },
+    "Reuse_Bucket02": {
+      "triangles": 1198,
+      "sourcePieces": 18,
+      "reference": "Assets\\Art\\Environments\\TownProps02\\BlenderSource~\\TownProps02.blend",
+      "size": [
+        0.3460000157356262,
+        0.4729422191157937,
+        0.3460000157356262
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.3460000157356262,
+        0.3460000157356262
+      ]
+    },
+    "Reuse_FireExtinguisher02": {
+      "triangles": 846,
+      "sourcePieces": 13,
+      "reference": "Assets\\Art\\Environments\\TownProps02\\BlenderSource~\\TownProps02.blend",
+      "size": [
+        0.3580000251531601,
+        0.6430884171277285,
+        0.28200000524520874
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.3580000251531601,
+        0.28200000524520874
+      ]
+    },
+    "Reuse_CardboardStack02": {
+      "triangles": 528,
+      "sourcePieces": 12,
+      "reference": "Assets\\Art\\Environments\\TownProps02\\BlenderSource~\\TownProps02.blend",
+      "size": [
+        1.0400000214576721,
+        0.7700000405311584,
+        0.5349999964237213
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.0400000214576721,
+        0.5349999964237213
+      ]
+    },
+    "Reuse_FoldedTarp02": {
+      "triangles": 944,
+      "sourcePieces": 6,
+      "reference": "Assets\\Art\\Environments\\TownProps02\\BlenderSource~\\TownProps02.blend",
+      "size": [
+        0.6600000262260437,
+        0.13406217843294144,
+        0.46000000834465027
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.6600000262260437,
+        0.46000000834465027
+      ]
+    },
+    "PawnDisplay62": {
+      "triangles": 2440,
+      "sourcePieces": 30,
+      "reference": "Assets/GPT/프랍/전당포프랍1.png",
+      "size": [
+        2.5199999809265137,
+        1.0824999809265137,
+        0.9305000305175781
+      ],
+      "category": "furniture",
+      "footprint": [
+        2.52,
+        0.92
+      ]
+    },
+    "PawnDisplay_Watches62": {
+      "triangles": 1668,
+      "sourcePieces": 35,
+      "reference": "Assets/GPT/프랍/전당포프랍1.png",
+      "size": [
+        2.5199999809265137,
+        1.0824999809265137,
+        0.9305000305175781
+      ],
+      "category": "furniture",
+      "footprint": [
+        2.52,
+        0.92
+      ]
+    },
+    "PawnDisplay_Electronics62": {
+      "triangles": 1276,
+      "sourcePieces": 29,
+      "reference": "Assets/GPT/프랍/전당포프랍1.png",
+      "size": [
+        2.5199999809265137,
+        1.0824999809265137,
+        0.9305000305175781
+      ],
+      "category": "furniture",
+      "footprint": [
+        2.52,
+        0.92
+      ]
+    },
+    "CashRegister62": {
+      "triangles": 924,
+      "sourcePieces": 21,
+      "reference": "Assets/GPT/프랍/전당포프랍1.png",
+      "size": [
+        0.46000000834465027,
+        0.4090000092983246,
+        0.4560000002384186
+      ],
+      "category": "tabletop",
+      "footprint": [
+        0.46000000834465027,
+        0.4560000002384186
+      ]
+    },
+    "Safe62": {
+      "triangles": 840,
+      "sourcePieces": 15,
+      "reference": "Assets/GPT/프랍/전당포프랍1.png",
+      "size": [
+        1.3799999952316284,
+        1.940000057220459,
+        1.1730000376701355
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.38,
+        1.2
+      ]
+    },
+    "SalvageShelf62": {
+      "triangles": 4668,
+      "sourcePieces": 93,
+      "reference": "Assets/GPT/프랍/전당포프랍1.png",
+      "size": [
+        2.619999885559082,
+        2.5179998874664307,
+        0.6899999976158142
+      ],
+      "category": "furniture",
+      "footprint": [
+        2.62,
+        0.69
+      ]
+    },
+    "AntiqueClock62": {
+      "triangles": 684,
+      "sourcePieces": 17,
+      "reference": "Assets/GPT/프랍/전당포프랍2.png",
+      "size": [
+        0.47999998927116394,
+        0.6600000262260437,
+        0.25200000405311584
+      ],
+      "category": "tabletop",
+      "footprint": [
+        0.47999998927116394,
+        0.25200000405311584
+      ]
+    },
+    "AntiqueDesk62": {
+      "triangles": 1012,
+      "sourcePieces": 23,
+      "reference": "Assets/GPT/프랍/전당포프랍2.png",
+      "size": [
+        1.600000023841858,
+        0.9429999589920044,
+        0.7739999890327454
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.6,
+        0.78
+      ]
+    },
+    "ToolBoard62": {
+      "triangles": 1012,
+      "sourcePieces": 23,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_37_36.png",
+      "size": [
+        2.2799999713897705,
+        1.2500000596046448,
+        0.1600000038743019
+      ],
+      "category": "wall",
+      "footprint": [
+        2.2799999713897705,
+        0.1600000038743019
+      ]
+    },
+    "WeldingTrolley62": {
+      "triangles": 1948,
+      "sourcePieces": 14,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_37_36.png",
+      "size": [
+        0.9140000343322754,
+        1.592000037431717,
+        0.6600000262260437
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.82,
+        0.85
+      ]
+    },
+    "TireStack62": {
+      "triangles": 1920,
+      "sourcePieces": 6,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_37_36.png",
+      "size": [
+        0.9100000262260437,
+        0.8099999874830246,
+        0.9100000262260437
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.92,
+        0.92
+      ]
+    },
+    "MechanicCreeper62": {
+      "triangles": 328,
+      "sourcePieces": 6,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_37_36.png",
+      "size": [
+        0.7099999785423279,
+        0.2550000175833702,
+        1.2999999523162842
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.72,
+        1.3
+      ]
+    },
+    "TreatmentBed62": {
+      "triangles": 396,
+      "sourcePieces": 9,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        1.159999966621399,
+        1.1799955368041992,
+        2.2694135904312134
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.16,
+        2.3
+      ]
+    },
+    "MedicineCabinet62": {
+      "triangles": 4788,
+      "sourcePieces": 87,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        1.4800000190734863,
+        2.43500018119812,
+        0.6450000107288361
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.48,
+        0.65
+      ]
+    },
+    "InstrumentCart62": {
+      "triangles": 1424,
+      "sourcePieces": 28,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        0.8100000023841858,
+        1.0581999830901623,
+        0.6299999952316284
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.8,
+        0.65
+      ]
+    },
+    "IVStand62": {
+      "triangles": 336,
+      "sourcePieces": 12,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        0.682561457157135,
+        1.9924999698996544,
+        0.7176876068115234
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.8,
+        0.8
+      ]
+    },
+    "PrivacyScreen62": {
+      "triangles": 1980,
+      "sourcePieces": 6,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        2.2899999618530273,
+        1.8875000551342964,
+        0.6399999856948853
+      ],
+      "category": "furniture",
+      "footprint": [
+        2.3,
+        0.7
+      ]
+    },
+    "Reception62": {
+      "triangles": 352,
+      "sourcePieces": 8,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        2.8299999237060547,
+        1.5349999368190765,
+        0.9599999785423279
+      ],
+      "category": "furniture",
+      "footprint": [
+        2.83,
+        0.96
+      ]
+    },
+    "Wardrobe62": {
+      "triangles": 484,
+      "sourcePieces": 11,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        1.9500000476837158,
+        2.3499999046325684,
+        0.9085000157356262
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.95,
+        0.87
+      ]
+    },
+    "DiningTable62": {
+      "triangles": 528,
+      "sourcePieces": 12,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        2.4000000953674316,
+        0.8849999904632568,
+        1.1139999628067017
+      ],
+      "category": "furniture",
+      "footprint": [
+        2.4,
+        1.12
+      ]
+    },
+    "WoodChair62": {
+      "triangles": 508,
+      "sourcePieces": 13,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        0.5600000023841858,
+        1.0726919174194336,
+        0.5993677377700806
+      ],
+      "category": "furniture",
+      "footprint": [
+        0.62,
+        0.66
+      ]
+    },
+    "Armchair_Upholstery62": {
+      "triangles": 396,
+      "sourcePieces": 9,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        1.0499999523162842,
+        1.2400000095367432,
+        0.8600000143051147
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.05,
+        0.92
+      ]
+    },
+    "Armchair_BlueCloth62": {
+      "triangles": 396,
+      "sourcePieces": 9,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        1.0499999523162842,
+        1.2400000095367432,
+        0.8600000143051147
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.05,
+        0.92
+      ]
+    },
+    "Armchair_Linen62": {
+      "triangles": 396,
+      "sourcePieces": 9,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        1.0499999523162842,
+        1.2400000095367432,
+        0.8600000143051147
+      ],
+      "category": "furniture",
+      "footprint": [
+        1.05,
+        0.92
+      ]
+    },
+    "MarketCounter62": {
+      "triangles": 2688,
+      "sourcePieces": 27,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_37.png",
+      "size": [
+        3.6003599166870117,
+        1.2699999809265137,
+        0.9339999556541443
+      ],
+      "category": "furniture",
+      "footprint": [
+        3.6,
+        1.05
+      ]
+    },
+    "Pawnshop_Floor62": {
+      "triangles": 4488,
+      "sourcePieces": 102,
+      "reference": "Assets/GPT/안전구역/전당포/완전체.png",
+      "size": [
+        15.65999984741211,
+        0.18449999764561653,
+        11.65999984741211
+      ],
+      "category": "architecture",
+      "footprint": [
+        15.65999984741211,
+        11.65999984741211
+      ]
+    },
+    "Pawnshop_RearLining62": {
+      "triangles": 132,
+      "sourcePieces": 3,
+      "reference": "Assets/GPT/안전구역/전당포/완전체.png",
+      "size": [
+        15.640000343322754,
+        3.4000000953674316,
+        0.09499979019165039
+      ],
+      "category": "architecture",
+      "footprint": [
+        15.640000343322754,
+        0.09499979019165039
+      ]
+    },
+    "Pawnshop_TallLining62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/전당포/완전체.png",
+      "size": [
+        15.8100004196167,
+        3.4000000953674316,
+        11.662499904632568
+      ],
+      "category": "occlusion",
+      "footprint": [
+        15.8100004196167,
+        11.662499904632568
+      ]
+    },
+    "Pawnshop_PreviewCutaway62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/전당포/완전체.png",
+      "size": [
+        15.819999694824219,
+        0.36000001430511475,
+        11.819999694824219
+      ],
+      "category": "previewOnly",
+      "footprint": [
+        15.819999694824219,
+        11.819999694824219
+      ]
+    },
+    "Repair_Floor62": {
+      "triangles": 44,
+      "sourcePieces": 1,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_37_36.png",
+      "size": [
+        13.65999984741211,
+        0.1599999964237213,
+        9.65999984741211
+      ],
+      "category": "architecture",
+      "footprint": [
+        13.65999984741211,
+        9.65999984741211
+      ]
+    },
+    "Repair_RearLining62": {
+      "triangles": 132,
+      "sourcePieces": 3,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_37_36.png",
+      "size": [
+        13.640000343322754,
+        3.4000000953674316,
+        0.09499979019165039
+      ],
+      "category": "architecture",
+      "footprint": [
+        13.640000343322754,
+        0.09499979019165039
+      ]
+    },
+    "Repair_TallLining62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_37_36.png",
+      "size": [
+        13.8100004196167,
+        3.4000000953674316,
+        9.662499904632568
+      ],
+      "category": "occlusion",
+      "footprint": [
+        13.8100004196167,
+        9.662499904632568
+      ]
+    },
+    "Repair_PreviewCutaway62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_37_36.png",
+      "size": [
+        13.819999694824219,
+        0.36000001430511475,
+        9.819999694824219
+      ],
+      "category": "previewOnly",
+      "footprint": [
+        13.819999694824219,
+        9.819999694824219
+      ]
+    },
+    "Medical_Floor62": {
+      "triangles": 88,
+      "sourcePieces": 2,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        17.65999984741211,
+        0.18449999764561653,
+        9.65999984741211
+      ],
+      "category": "architecture",
+      "footprint": [
+        17.65999984741211,
+        9.65999984741211
+      ]
+    },
+    "Medical_RearLining62": {
+      "triangles": 132,
+      "sourcePieces": 3,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        17.639999389648438,
+        3.4000000953674316,
+        0.09499979019165039
+      ],
+      "category": "architecture",
+      "footprint": [
+        17.639999389648438,
+        0.09499979019165039
+      ]
+    },
+    "Medical_TallLining62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        17.810001373291016,
+        3.4000000953674316,
+        9.662499904632568
+      ],
+      "category": "occlusion",
+      "footprint": [
+        17.810001373291016,
+        9.662499904632568
+      ]
+    },
+    "Medical_PreviewCutaway62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png",
+      "size": [
+        17.81999969482422,
+        0.36000001430511475,
+        9.819999694824219
+      ],
+      "category": "previewOnly",
+      "footprint": [
+        17.81999969482422,
+        9.819999694824219
+      ]
+    },
+    "Furniture_Floor62": {
+      "triangles": 11264,
+      "sourcePieces": 256,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        9.65999984741211,
+        0.18449999764561653,
+        13.65999984741211
+      ],
+      "category": "architecture",
+      "footprint": [
+        9.65999984741211,
+        13.65999984741211
+      ]
+    },
+    "Furniture_RearLining62": {
+      "triangles": 132,
+      "sourcePieces": 3,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        9.640000343322754,
+        3.4000000953674316,
+        0.09499979019165039
+      ],
+      "category": "architecture",
+      "footprint": [
+        9.640000343322754,
+        0.09499979019165039
+      ]
+    },
+    "Furniture_TallLining62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        9.8100004196167,
+        3.4000000953674316,
+        13.662499904632568
+      ],
+      "category": "occlusion",
+      "footprint": [
+        9.8100004196167,
+        13.662499904632568
+      ]
+    },
+    "Furniture_PreviewCutaway62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png",
+      "size": [
+        9.819999694824219,
+        0.36000001430511475,
+        13.819999694824219
+      ],
+      "category": "previewOnly",
+      "footprint": [
+        9.819999694824219,
+        13.819999694824219
+      ]
+    },
+    "BlackMarket_Floor62": {
+      "triangles": 44,
+      "sourcePieces": 1,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_37.png",
+      "size": [
+        11.65999984741211,
+        0.1599999964237213,
+        13.65999984741211
+      ],
+      "category": "architecture",
+      "footprint": [
+        11.65999984741211,
+        13.65999984741211
+      ]
+    },
+    "BlackMarket_RearLining62": {
+      "triangles": 132,
+      "sourcePieces": 3,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_37.png",
+      "size": [
+        11.640000343322754,
+        3.4000000953674316,
+        0.09499979019165039
+      ],
+      "category": "architecture",
+      "footprint": [
+        11.640000343322754,
+        0.09499979019165039
+      ]
+    },
+    "BlackMarket_TallLining62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_37.png",
+      "size": [
+        11.8100004196167,
+        3.4000000953674316,
+        13.662499904632568
+      ],
+      "category": "occlusion",
+      "footprint": [
+        11.8100004196167,
+        13.662499904632568
+      ]
+    },
+    "BlackMarket_PreviewCutaway62": {
+      "triangles": 176,
+      "sourcePieces": 4,
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_37.png",
+      "size": [
+        11.819999694824219,
+        0.36000001430511475,
+        13.819999694824219
+      ],
+      "category": "previewOnly",
+      "footprint": [
+        11.819999694824219,
+        13.819999694824219
+      ]
+    }
+  },
+  "materials": {
+    "Interior62_Brick": {
+      "color": [
+        0.26,
+        0.13,
+        0.078
+      ],
+      "family": "Brick",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.25
+    },
+    "Interior62_Plaster": {
+      "color": [
+        0.38,
+        0.35,
+        0.27
+      ],
+      "family": "Plaster",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Cream": {
+      "color": [
+        0.46,
+        0.43,
+        0.34
+      ],
+      "family": "Plaster",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Ochre": {
+      "color": [
+        0.32,
+        0.255,
+        0.15
+      ],
+      "family": "Plaster",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Concrete": {
+      "color": [
+        0.26,
+        0.265,
+        0.23
+      ],
+      "family": "Plaster",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Roof": {
+      "color": [
+        0.16,
+        0.158,
+        0.13
+      ],
+      "family": "Roof",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Olive": {
+      "color": [
+        0.16,
+        0.185,
+        0.125
+      ],
+      "family": "PaintedMetal",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_DarkOlive": {
+      "color": [
+        0.08,
+        0.1,
+        0.073
+      ],
+      "family": "PaintedMetal",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Steel": {
+      "color": [
+        0.07,
+        0.084,
+        0.079
+      ],
+      "family": "Steel",
+      "roughness": 0.73,
+      "metallic": 0.52,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Edge": {
+      "color": [
+        0.19,
+        0.205,
+        0.175
+      ],
+      "family": "Steel",
+      "roughness": 0.73,
+      "metallic": 0.52,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Wood": {
+      "color": [
+        0.25,
+        0.17,
+        0.092
+      ],
+      "family": "Wood",
+      "roughness": 0.9,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_WoodDark": {
+      "color": [
+        0.12,
+        0.081,
+        0.044
+      ],
+      "family": "Wood",
+      "roughness": 0.9,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Canvas": {
+      "color": [
+        0.245,
+        0.25,
+        0.175
+      ],
+      "family": "Cloth",
+      "roughness": 0.9,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Red": {
+      "color": [
+        0.3,
+        0.082,
+        0.052
+      ],
+      "family": "PaintedMetal",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Glass": {
+      "color": [
+        0.037,
+        0.062,
+        0.061
+      ],
+      "family": "PaintedMetal",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Paper": {
+      "color": [
+        0.55,
+        0.5,
+        0.37
+      ],
+      "family": "Plaster",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Asphalt": {
+      "color": [
+        0.14,
+        0.151,
+        0.143
+      ],
+      "family": "Asphalt",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Dirt": {
+      "color": [
+        0.2,
+        0.179,
+        0.132
+      ],
+      "family": "Asphalt",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_RoofWarm": {
+      "color": [
+        0.185,
+        0.163,
+        0.12
+      ],
+      "family": "Roof",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_RoofClean": {
+      "color": [
+        0.255,
+        0.26,
+        0.235
+      ],
+      "family": "Roof",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_RoofDark": {
+      "color": [
+        0.088,
+        0.09,
+        0.078
+      ],
+      "family": "Roof",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Graphite": {
+      "color": [
+        0.12,
+        0.119,
+        0.1
+      ],
+      "family": "Brick",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.25
+    },
+    "Interior62_Tile": {
+      "color": [
+        0.52,
+        0.5,
+        0.43
+      ],
+      "family": "Tile",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Sage": {
+      "color": [
+        0.2,
+        0.265,
+        0.235
+      ],
+      "family": "Tile",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Brass": {
+      "color": [
+        0.34,
+        0.255,
+        0.12
+      ],
+      "family": "Steel",
+      "roughness": 0.52,
+      "metallic": 0.52,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Linen": {
+      "color": [
+        0.54,
+        0.5,
+        0.4
+      ],
+      "family": "Cloth",
+      "roughness": 0.9,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Upholstery": {
+      "color": [
+        0.16,
+        0.235,
+        0.21
+      ],
+      "family": "Cloth",
+      "roughness": 0.9,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_BlueCloth": {
+      "color": [
+        0.11,
+        0.175,
+        0.19
+      ],
+      "family": "Cloth",
+      "roughness": 0.9,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_Rubber": {
+      "color": [
+        0.026,
+        0.03,
+        0.027
+      ],
+      "family": "PaintedMetal",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_WoodLight": {
+      "color": [
+        0.275,
+        0.187,
+        0.103
+      ],
+      "family": "Wood",
+      "roughness": 0.9,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_PawnTile": {
+      "color": [
+        0.22,
+        0.225,
+        0.169
+      ],
+      "family": "Tile",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    },
+    "Interior62_DarkConcrete": {
+      "color": [
+        0.105,
+        0.115,
+        0.105
+      ],
+      "family": "Plaster",
+      "roughness": 0.82,
+      "metallic": 0,
+      "normalStrength": 0.11999999731779099
+    }
+  },
+  "layouts": {
+    "Pawnshop": [
+      {
+        "asset": "Pawnshop_Floor62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          15.65999984741211,
+          11.65999984741211
+        ]
+      },
+      {
+        "asset": "Pawnshop_RearLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          15.640000343322754,
+          0.09499979019165039
+        ]
+      },
+      {
+        "asset": "Pawnshop_TallLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          15.8100004196167,
+          11.662499904632568
+        ]
+      },
+      {
+        "asset": "Pawnshop_PreviewCutaway62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          15.819999694824219,
+          11.819999694824219
+        ]
+      },
+      {
+        "asset": "PawnDisplay62",
+        "position": [
+          -2.66,
+          0,
+          1.5
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.52,
+          0.92
+        ]
+      },
+      {
+        "asset": "PawnDisplay_Watches62",
+        "position": [
+          0,
+          0,
+          1.5
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.52,
+          0.92
+        ]
+      },
+      {
+        "asset": "PawnDisplay_Electronics62",
+        "position": [
+          2.66,
+          0,
+          1.5
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.52,
+          0.92
+        ]
+      },
+      {
+        "asset": "CashRegister62",
+        "position": [
+          -2.6,
+          1.07,
+          1.62
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "tabletop",
+        "footprint": [
+          0.46000000834465027,
+          0.4560000002384186
+        ]
+      },
+      {
+        "asset": "SalvageShelf62",
+        "position": [
+          -5.45,
+          0,
+          4.6
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.62,
+          0.69
+        ]
+      },
+      {
+        "asset": "SalvageShelf62",
+        "position": [
+          5.45,
+          0,
+          4.6
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.62,
+          0.69
+        ]
+      },
+      {
+        "asset": "Safe62",
+        "position": [
+          2.1,
+          0,
+          4.75
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.38,
+          1.2
+        ]
+      },
+      {
+        "asset": "ToolBoard62",
+        "position": [
+          -1.1,
+          1.02,
+          5.78
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "wall",
+        "footprint": [
+          2.2799999713897705,
+          0.1600000038743019
+        ]
+      },
+      {
+        "asset": "SalvageShelf62",
+        "position": [
+          -6.7,
+          0,
+          -2.0
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.62,
+          0.69
+        ]
+      },
+      {
+        "asset": "SalvageShelf62",
+        "position": [
+          -6.7,
+          0,
+          1.5
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.62,
+          0.69
+        ]
+      },
+      {
+        "asset": "Reuse_Radio01",
+        "position": [
+          5.4,
+          2.16,
+          4.55
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "tabletop",
+        "footprint": [
+          0.4491075724363327,
+          0.20350006222724915
+        ]
+      },
+      {
+        "asset": "Reuse_WoodCrate01",
+        "position": [
+          -6.2,
+          0,
+          -3.4
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.6400001049041748,
+          0.5570000410079956
+        ]
+      },
+      {
+        "asset": "Reuse_CardboardStack02",
+        "position": [
+          -5.2,
+          0,
+          -4.2
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.0400000214576721,
+          0.5349999964237213
+        ]
+      },
+      {
+        "asset": "Armchair_Upholstery62",
+        "position": [
+          5.8,
+          0,
+          -3.3
+        ],
+        "yaw": -30,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.05,
+          0.92
+        ]
+      },
+      {
+        "asset": "Reuse_Stool01",
+        "position": [
+          4.3,
+          0,
+          -3.6
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.4740000367164612,
+          0.47366827726364136
+        ]
+      },
+      {
+        "asset": "Reuse_Rug01",
+        "position": [
+          0,
+          0,
+          -3.8
+        ],
+        "yaw": 0,
+        "scale": 1.4,
+        "kind": "floorDressing",
+        "footprint": [
+          1.9000003337860107,
+          2.56000018119812
+        ]
+      },
+      {
+        "asset": "AntiqueDesk62",
+        "position": [
+          5.7,
+          0,
+          -0.45
+        ],
+        "yaw": -90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.6,
+          0.78
+        ]
+      },
+      {
+        "asset": "AntiqueClock62",
+        "position": [
+          5.8,
+          0.9,
+          -0.05
+        ],
+        "yaw": -90,
+        "scale": 1,
+        "kind": "tabletop",
+        "footprint": [
+          0.47999998927116394,
+          0.25200000405311584
+        ]
+      },
+      {
+        "asset": "Reuse_Radio01",
+        "position": [
+          5.7,
+          0.9,
+          -0.9
+        ],
+        "yaw": -90,
+        "scale": 1,
+        "kind": "tabletop",
+        "footprint": [
+          0.4491075724363327,
+          0.20350006222724915
+        ]
+      },
+      {
+        "asset": "Reuse_MapBoard01",
+        "position": [
+          5.2,
+          2.2,
+          5.79
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "wall",
+        "footprint": [
+          1.2400000095367432,
+          0.09100009873509407
+        ]
+      },
+      {
+        "asset": "AntiqueClock62",
+        "position": [
+          -5.1,
+          2.14,
+          4.52
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "tabletop",
+        "footprint": [
+          0.47999998927116394,
+          0.25200000405311584
+        ]
+      }
+    ],
+    "Repair": [
+      {
+        "asset": "Repair_Floor62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          13.65999984741211,
+          9.65999984741211
+        ]
+      },
+      {
+        "asset": "Repair_RearLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          13.640000343322754,
+          0.09499979019165039
+        ]
+      },
+      {
+        "asset": "Repair_TallLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          13.8100004196167,
+          9.662499904632568
+        ]
+      },
+      {
+        "asset": "Repair_PreviewCutaway62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          13.819999694824219,
+          9.819999694824219
+        ]
+      },
+      {
+        "asset": "Reuse_Workbench01",
+        "position": [
+          -2.5,
+          0,
+          3.65
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.7000001668930054,
+          0.7540002465248108
+        ]
+      },
+      {
+        "asset": "Reuse_Workbench01",
+        "position": [
+          0,
+          0,
+          3.65
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.7000001668930054,
+          0.7540002465248108
+        ]
+      },
+      {
+        "asset": "Reuse_Workbench01",
+        "position": [
+          2.5,
+          0,
+          3.65
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.7000001668930054,
+          0.7540002465248108
+        ]
+      },
+      {
+        "asset": "ToolBoard62",
+        "position": [
+          -2.5,
+          1.02,
+          4.76
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "wall",
+        "footprint": [
+          2.2799999713897705,
+          0.1600000038743019
+        ]
+      },
+      {
+        "asset": "ToolBoard62",
+        "position": [
+          0,
+          1.02,
+          4.76
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "wall",
+        "footprint": [
+          2.2799999713897705,
+          0.1600000038743019
+        ]
+      },
+      {
+        "asset": "SalvageShelf62",
+        "position": [
+          -5.1,
+          0,
+          3.75
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.62,
+          0.69
+        ]
+      },
+      {
+        "asset": "Reuse_LockerPair02",
+        "position": [
+          5.1,
+          0,
+          3.58
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.1500002145767212,
+          0.606000155210495
+        ]
+      },
+      {
+        "asset": "WeldingTrolley62",
+        "position": [
+          -4.7,
+          0,
+          0.9
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.82,
+          0.85
+        ]
+      },
+      {
+        "asset": "TireStack62",
+        "position": [
+          5.3,
+          0,
+          0.3
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.92,
+          0.92
+        ]
+      },
+      {
+        "asset": "TireStack62",
+        "position": [
+          5.3,
+          0,
+          -0.85
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.92,
+          0.92
+        ]
+      },
+      {
+        "asset": "Reuse_UtilitySink02",
+        "position": [
+          -5,
+          0,
+          -2.3
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.5,
+          0.6649999916553497
+        ]
+      },
+      {
+        "asset": "Reuse_Toolbox02",
+        "position": [
+          -2.6,
+          0.96,
+          3.45
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "tabletop",
+        "footprint": [
+          0.6499999761581421,
+          0.3435000032186508
+        ]
+      },
+      {
+        "asset": "MechanicCreeper62",
+        "position": [
+          2.8,
+          0,
+          -1.8
+        ],
+        "yaw": -22,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.72,
+          1.3
+        ]
+      },
+      {
+        "asset": "Reuse_WoodCrate01",
+        "position": [
+          4.8,
+          0,
+          -3.2
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.6400001049041748,
+          0.5570000410079956
+        ]
+      },
+      {
+        "asset": "Reuse_Bucket02",
+        "position": [
+          -4,
+          0,
+          -3.35
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.3460000157356262,
+          0.3460000157356262
+        ]
+      },
+      {
+        "asset": "Reuse_FireExtinguisher02",
+        "position": [
+          -6.25,
+          0,
+          -3.2
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.3580000251531601,
+          0.28200000524520874
+        ]
+      }
+    ],
+    "Medical": [
+      {
+        "asset": "Medical_Floor62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          17.65999984741211,
+          9.65999984741211
+        ]
+      },
+      {
+        "asset": "Medical_RearLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          17.639999389648438,
+          0.09499979019165039
+        ]
+      },
+      {
+        "asset": "Medical_TallLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          17.810001373291016,
+          9.662499904632568
+        ]
+      },
+      {
+        "asset": "Medical_PreviewCutaway62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          17.81999969482422,
+          9.819999694824219
+        ]
+      },
+      {
+        "asset": "Reception62",
+        "position": [
+          0,
+          0,
+          -1.65
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.83,
+          0.96
+        ]
+      },
+      {
+        "asset": "TreatmentBed62",
+        "position": [
+          -2.6,
+          0,
+          2.6
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.16,
+          2.3
+        ]
+      },
+      {
+        "asset": "TreatmentBed62",
+        "position": [
+          1.0,
+          0,
+          2.6
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.16,
+          2.3
+        ]
+      },
+      {
+        "asset": "IVStand62",
+        "position": [
+          -4.0,
+          0,
+          3.5
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.8,
+          0.8
+        ]
+      },
+      {
+        "asset": "IVStand62",
+        "position": [
+          -0.4,
+          0,
+          3.5
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.8,
+          0.8
+        ]
+      },
+      {
+        "asset": "InstrumentCart62",
+        "position": [
+          -2.6,
+          0,
+          0.9
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.8,
+          0.65
+        ]
+      },
+      {
+        "asset": "InstrumentCart62",
+        "position": [
+          1,
+          0,
+          0.9
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.8,
+          0.65
+        ]
+      },
+      {
+        "asset": "PrivacyScreen62",
+        "position": [
+          -1.1,
+          0,
+          2.5
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.3,
+          0.7
+        ]
+      },
+      {
+        "asset": "MedicineCabinet62",
+        "position": [
+          -6.1,
+          0,
+          3.88
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.48,
+          0.65
+        ]
+      },
+      {
+        "asset": "MedicineCabinet62",
+        "position": [
+          6.15,
+          0,
+          3.88
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.48,
+          0.65
+        ]
+      },
+      {
+        "asset": "MedicineCabinet62",
+        "position": [
+          7.6,
+          0,
+          -1.6
+        ],
+        "yaw": -90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.48,
+          0.65
+        ]
+      },
+      {
+        "asset": "Reuse_UtilitySink02",
+        "position": [
+          -7.15,
+          0,
+          1.3
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.5,
+          0.6649999916553497
+        ]
+      },
+      {
+        "asset": "Armchair_BlueCloth62",
+        "position": [
+          -6.9,
+          0,
+          -3.45
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.05,
+          0.92
+        ]
+      },
+      {
+        "asset": "Armchair_BlueCloth62",
+        "position": [
+          -5.5,
+          0,
+          -3.45
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.05,
+          0.92
+        ]
+      },
+      {
+        "asset": "Armchair_BlueCloth62",
+        "position": [
+          -4.1,
+          0,
+          -3.45
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.05,
+          0.92
+        ]
+      },
+      {
+        "asset": "Reuse_MedicalBox01",
+        "position": [
+          2.7,
+          0,
+          3.0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.5000000596046448,
+          0.2990000545978546
+        ]
+      },
+      {
+        "asset": "Reuse_MapBoard01",
+        "position": [
+          3.8,
+          1.8,
+          4.79
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "wall",
+        "footprint": [
+          1.2400000095367432,
+          0.09100009873509407
+        ]
+      }
+    ],
+    "Furniture": [
+      {
+        "asset": "Furniture_Floor62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          9.65999984741211,
+          13.65999984741211
+        ]
+      },
+      {
+        "asset": "Furniture_RearLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          9.640000343322754,
+          0.09499979019165039
+        ]
+      },
+      {
+        "asset": "Furniture_TallLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          9.8100004196167,
+          13.662499904632568
+        ]
+      },
+      {
+        "asset": "Furniture_PreviewCutaway62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          9.819999694824219,
+          13.819999694824219
+        ]
+      },
+      {
+        "asset": "Wardrobe62",
+        "position": [
+          2.95,
+          0,
+          5.95
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.95,
+          0.87
+        ]
+      },
+      {
+        "asset": "SalvageShelf62",
+        "position": [
+          -2.85,
+          0,
+          5.95
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.62,
+          0.69
+        ]
+      },
+      {
+        "asset": "Armchair_Upholstery62",
+        "position": [
+          -0.3,
+          0,
+          5.55
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.05,
+          0.92
+        ]
+      },
+      {
+        "asset": "DiningTable62",
+        "position": [
+          -0.4,
+          0,
+          1.55
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.4,
+          1.12
+        ]
+      },
+      {
+        "asset": "WoodChair62",
+        "position": [
+          -1.16,
+          0,
+          2.55
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.62,
+          0.66
+        ]
+      },
+      {
+        "asset": "WoodChair62",
+        "position": [
+          -1.16,
+          0,
+          0.55
+        ],
+        "yaw": 180,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.62,
+          0.66
+        ]
+      },
+      {
+        "asset": "WoodChair62",
+        "position": [
+          0.36,
+          0,
+          2.55
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.62,
+          0.66
+        ]
+      },
+      {
+        "asset": "WoodChair62",
+        "position": [
+          0.36,
+          0,
+          0.55
+        ],
+        "yaw": 180,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.62,
+          0.66
+        ]
+      },
+      {
+        "asset": "Armchair_BlueCloth62",
+        "position": [
+          -3.1,
+          0,
+          1.0
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.05,
+          0.92
+        ]
+      },
+      {
+        "asset": "Armchair_Linen62",
+        "position": [
+          -3.1,
+          0,
+          -2.35
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.05,
+          0.92
+        ]
+      },
+      {
+        "asset": "Reuse_Rug01",
+        "position": [
+          -0.35,
+          0,
+          1.6
+        ],
+        "yaw": 0,
+        "scale": 1.9,
+        "kind": "floorDressing",
+        "footprint": [
+          1.9000003337860107,
+          2.56000018119812
+        ]
+      },
+      {
+        "asset": "DiningTable62",
+        "position": [
+          -2.4,
+          0,
+          -4.8
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.4,
+          1.12
+        ]
+      },
+      {
+        "asset": "WoodChair62",
+        "position": [
+          2.1,
+          0,
+          -3.45
+        ],
+        "yaw": -90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.62,
+          0.66
+        ]
+      },
+      {
+        "asset": "WoodChair62",
+        "position": [
+          2.1,
+          0,
+          -4.8
+        ],
+        "yaw": -90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.62,
+          0.66
+        ]
+      },
+      {
+        "asset": "Reuse_WoodCrate01",
+        "position": [
+          -3.9,
+          0,
+          3.8
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.6400001049041748,
+          0.5570000410079956
+        ]
+      },
+      {
+        "asset": "Reuse_CardboardStack02",
+        "position": [
+          3.85,
+          0,
+          2.5
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.0400000214576721,
+          0.5349999964237213
+        ]
+      }
+    ],
+    "BlackMarket": [
+      {
+        "asset": "BlackMarket_Floor62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          11.65999984741211,
+          13.65999984741211
+        ]
+      },
+      {
+        "asset": "BlackMarket_RearLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          11.640000343322754,
+          0.09499979019165039
+        ]
+      },
+      {
+        "asset": "BlackMarket_TallLining62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          11.8100004196167,
+          13.662499904632568
+        ]
+      },
+      {
+        "asset": "BlackMarket_PreviewCutaway62",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "architecture",
+        "footprint": [
+          11.819999694824219,
+          13.819999694824219
+        ]
+      },
+      {
+        "asset": "MarketCounter62",
+        "position": [
+          0,
+          0,
+          -2.1
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          3.6,
+          1.05
+        ]
+      },
+      {
+        "asset": "Safe62",
+        "position": [
+          3.9,
+          0,
+          5.85
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.38,
+          1.2
+        ]
+      },
+      {
+        "asset": "Reuse_WoodCrate01",
+        "position": [
+          -3.7,
+          0,
+          5.25
+        ],
+        "yaw": 0,
+        "scale": 1.25,
+        "kind": "obstacle",
+        "footprint": [
+          0.6400001049041748,
+          0.5570000410079956
+        ]
+      },
+      {
+        "asset": "Reuse_WoodCrate01",
+        "position": [
+          -1.8,
+          0,
+          5.25
+        ],
+        "yaw": 0,
+        "scale": 1.25,
+        "kind": "obstacle",
+        "footprint": [
+          0.6400001049041748,
+          0.5570000410079956
+        ]
+      },
+      {
+        "asset": "Reuse_WoodCrate01",
+        "position": [
+          -3.7,
+          0.99,
+          5.25
+        ],
+        "yaw": 0,
+        "scale": 0.9,
+        "kind": "obstacle",
+        "footprint": [
+          0.6400001049041748,
+          0.5570000410079956
+        ]
+      },
+      {
+        "asset": "SalvageShelf62",
+        "position": [
+          -4.9,
+          0,
+          1.8
+        ],
+        "yaw": 90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.62,
+          0.69
+        ]
+      },
+      {
+        "asset": "SalvageShelf62",
+        "position": [
+          4.9,
+          0,
+          1.8
+        ],
+        "yaw": -90,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          2.62,
+          0.69
+        ]
+      },
+      {
+        "asset": "Reuse_WoodCrate01",
+        "position": [
+          4.4,
+          0,
+          0.3
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.6400001049041748,
+          0.5570000410079956
+        ]
+      },
+      {
+        "asset": "Reuse_WoodCrate01",
+        "position": [
+          4.4,
+          0,
+          3.7
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          0.6400001049041748,
+          0.5570000410079956
+        ]
+      },
+      {
+        "asset": "Reuse_LockerPair02",
+        "position": [
+          1.35,
+          0,
+          5.8
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.1500002145767212,
+          0.606000155210495
+        ]
+      },
+      {
+        "asset": "Reuse_FoldedTarp02",
+        "position": [
+          -1.8,
+          0.5562499910593033,
+          5.25
+        ],
+        "yaw": 0,
+        "scale": 0.7,
+        "kind": "tabletop",
+        "footprint": [
+          0.6600000262260437,
+          0.46000000834465027
+        ]
+      },
+      {
+        "asset": "Reuse_Radio01",
+        "position": [
+          -1.18,
+          1.25,
+          -2.08
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "tabletop",
+        "footprint": [
+          0.4491075724363327,
+          0.20350006222724915
+        ]
+      },
+      {
+        "asset": "Reuse_CardboardStack02",
+        "position": [
+          -4.5,
+          0,
+          -4.8
+        ],
+        "yaw": 0,
+        "scale": 1,
+        "kind": "obstacle",
+        "footprint": [
+          1.0400000214576721,
+          0.5349999964237213
+        ]
+      },
+      {
+        "asset": "Reuse_Rug01",
+        "position": [
+          0,
+          0,
+          -4.6
+        ],
+        "yaw": 0,
+        "scale": 1.4,
+        "kind": "floorDressing",
+        "footprint": [
+          1.9000003337860107,
+          2.56000018119812
+        ]
+      }
+    ]
+  },
+  "buildings": {
+    "Pawnshop": {
+      "width": 16,
+      "depth": 12,
+      "doorWidth": 1.6,
+      "worldPlacementXYZYaw": [
+        34,
+        0,
+        44,
+        0
+      ],
+      "reference": "Assets/GPT/안전구역/전당포/완전체.png"
+    },
+    "Repair": {
+      "width": 14,
+      "depth": 10,
+      "doorWidth": 1.6,
+      "worldPlacementXYZYaw": [
+        12,
+        0,
+        44,
+        0
+      ],
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_37_36.png"
+    },
+    "Medical": {
+      "width": 18,
+      "depth": 10,
+      "doorWidth": 1.6,
+      "worldPlacementXYZYaw": [
+        64,
+        0,
+        44,
+        0
+      ],
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_15.png"
+    },
+    "Furniture": {
+      "width": 10,
+      "depth": 14,
+      "doorWidth": 1.6,
+      "worldPlacementXYZYaw": [
+        12,
+        0,
+        27,
+        90
+      ],
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_42_47.png"
+    },
+    "BlackMarket": {
+      "width": 12,
+      "depth": 14,
+      "doorWidth": 1.6,
+      "worldPlacementXYZYaw": [
+        12,
+        0,
+        10,
+        90
+      ],
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_40_37.png"
+    }
+  },
+  "sourceHashes": {
+    "Assets\\Art\\Environments\\Hideout02\\BlenderSource~\\Hideout02.blend": "a1761c20ae418cd6f08a50f929786295dd1514df0eb895282b1002548058b02a",
+    "Assets\\Art\\Environments\\TownProps02\\BlenderSource~\\TownProps02.blend": "f07996ea42fe24c0158c849d928b1cbdda9fe6252cb3ccf1ab22002553b06b7a"
+  },
+  "pawnshopNpcKeepout": {
+    "center": [
+      0,
+      0,
+      2.4
+    ],
+    "radius": 0.45
+  },
+  "status": "offline art; no Unity import, NPC rewiring, roof handling or collision applied"
+}
