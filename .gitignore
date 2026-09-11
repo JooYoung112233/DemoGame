@@ -6,3 +6,6 @@ tools/qa-mother.log
 tools/qa-agent-request.md
 tools/qa-report-for-claude.md
 demo13-flashlight/tools/__pycache__/
+
+# Claude Code 세션 워크트리 — 세션마다 생기는 임시 폴더라 추적하지 않는다
+.claude/worktrees/
