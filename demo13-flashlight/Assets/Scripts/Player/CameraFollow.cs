@@ -148,6 +148,25 @@ public class CameraFollow : MonoBehaviour
         return -right * (_focusBias.x * viewW) - up * (_focusBias.y * viewH / tilt);
     }
 
+    PlayerGun _aimGun;
+
+    /// <summary>총 조준(우클릭) 중엔 커서 쪽으로 밀어 멀리 본다(2026-09-11 사용자 결정 "조준할 때만").
+    /// 밀림 = 플레이어→커서 × aimLookAhead, 최대 aimLookAheadMax(GameTuning). 스무딩은 위의 추적 감쇠를 그대로 탄다.</summary>
+    Vector3 AimLookAhead()
+    {
+        if (_hasFocus) return Vector3.zero;   // 시설 UI 연출 중엔 끼어들지 않는다
+        var p = TopDownPlayer.Instance;
+        if (p == null) return Vector3.zero;
+        if (_aimGun == null) _aimGun = p.GetComponent<PlayerGun>();
+        if (_aimGun == null || !_aimGun.IsAiming) return Vector3.zero;
+        var gt = GameTuning.Instance;
+        float k = gt != null ? gt.aimLookAhead : 0.35f;
+        float max = gt != null ? gt.aimLookAheadMax : 4f;
+        Vector3 d = p.MouseWorldPos - p.transform.position;
+        d.y = 0f;
+        return Vector3.ClampMagnitude(d * k, max);
+    }
+
     /// <summary>카메라를 타깃 위치로 즉시 스냅(스무딩 건너뜀). 스폰/순간이동 직후 호출 — "슉~" 슬라이드 방지.</summary>
     public void SnapToTarget()
     {
@@ -166,7 +185,7 @@ public class CameraFollow : MonoBehaviour
         }
 
         Vector3 anchor = _hasFocus && _focus != null ? _focus.position : target.position;
-        Vector3 desired = anchor + offset + FramingShift();
+        Vector3 desired = anchor + offset + FramingShift() + AimLookAhead();
         // ⚠️ Lerp(a, b, k*dt)는 **프레임레이트에 의존한다** — 같은 smoothSpeed라도 fps에 따라
         //    따라오는 속도가 달라진다. 지수 감쇠 1-exp(-k*dt)가 프레임레이트와 무관한 정식이다.
         float t = 1f - Mathf.Exp(-smoothSpeed * Time.unscaledDeltaTime);

@@ -38,6 +38,28 @@ public class PlayerGun : MonoBehaviour
     public bool IsAiming { get; private set; }
     public bool IsReloading => _reloadUntil > 0f && Time.time < _reloadUntil;
 
+    Health _hpC;
+    /// <summary>조준원(AimReticle)을 띄울 때인가 — 총 장착 + UI 닫힘 + 투척 조준 아님 + 살아 있음.
+    /// "이번 프레임에 입력을 받았나"로 재면 구르기·스태미너 탈진처럼 입력이 한 프레임 끊길 때 깜빡인다.</summary>
+    public bool ReticleActive
+    {
+        get
+        {
+            var g = Gun;
+            if (g == null || !g.isRanged) return false;
+            if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return false;
+            if (ThrowSystem.Instance != null && ThrowSystem.Instance.IsAiming) return false;   // 투척은 자기 착탄 마커가 있다
+            if (_hpC == null) _hpC = GetComponent<Health>();
+            return _hpC == null || !_hpC.IsDead;
+        }
+    }
+
+    void Awake()
+    {
+        // 조준원은 총과 한 몸 — 따로 배치하지 않아도 붙는다(docs/combat.md §총격전).
+        if (GetComponent<AimReticle>() == null) gameObject.AddComponent<AimReticle>();
+    }
+
     /// <summary>장전 진행도 0~1 (UI용).</summary>
     public float ReloadProgress
     {
@@ -68,7 +90,9 @@ public class PlayerGun : MonoBehaviour
             if (g == null) return 0f;
             float baseSpread = IsAiming ? g.adsSpreadDeg : g.hipSpreadDeg;
             float partMult = _equip != null ? _equip.WeaponPartRecoilMult : 1f;
-            return (baseSpread + _recoil) * Mathf.Max(0.05f, partMult);
+            var ammo = LoadedAmmo(GunInst);
+            float ammoMult = ammo != null ? ammo.ammoSpreadMult : 1f;   // 탄 스펙: 반동·퍼짐 배율
+            return (baseSpread + _recoil) * Mathf.Max(0.05f, partMult) * Mathf.Max(0.05f, ammoMult);
         }
     }
 
@@ -124,15 +148,20 @@ public class PlayerGun : MonoBehaviour
         float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + Random.Range(-spread, spread);
         Vector2 shotDir = new Vector2(Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad));
 
-        float range = g.effectiveRange + (_equip != null ? _equip.WeaponPartRangeBonus : 0f);
+        // 탄 스펙(2026-09-11) — 물린 탄이 데미지·탄속·사거리·관통을 바꾼다. 탄 정보가 없으면 전부 기본값.
+        var ammo = LoadedAmmo(inst);
+        float range = (g.effectiveRange + (_equip != null ? _equip.WeaponPartRangeBonus : 0f))
+                    * (ammo != null ? Mathf.Max(0.1f, ammo.ammoRangeMult) : 1f);
         float dmg = g.damage * AmmoDamageMult(inst);
+        float speed = g.projectileSpeed * (ammo != null ? Mathf.Max(0.1f, ammo.ammoSpeedMult) : 1f);
+        int pierce = ammo != null ? ammo.ammoPenetration : 0;
         Vector2 muzzle = Plan3D.ToPlan(transform.position) + shotDir * 0.55f;
         var muzzle3D=_player.PrepareFirearmShot();
         Vector3 muzzleWorld=muzzle3D!=null?muzzle3D.position:Plan3D.ToWorld(muzzle,transform.position.y+.9f);
         muzzle=Plan3D.ToPlan(muzzleWorld);
 
-        Projectile.Spawn(transform, muzzle, shotDir, g.projectileSpeed, dmg, g.groggy, range,
-                         new Color(1f, 0.93f, 0.6f),worldHeight:muzzleWorld.y);
+        Projectile.Spawn(transform, muzzle, shotDir, speed, dmg, g.groggy, range,
+                         new Color(1f, 0.93f, 0.6f), worldHeight: muzzleWorld.y, pierce: pierce);
 
         _recoil = Mathf.Min(g.recoilMax, _recoil + g.recoilPerShot);
         ShowFlash(muzzleWorld, shotDir);
@@ -218,10 +247,13 @@ public class PlayerGun : MonoBehaviour
         return best;
     }
 
+    /// <summary>물린 탄창에 든 탄 아이템(= 탄 스펙). 없으면 null → 모든 배율 1.</summary>
+    static ItemData LoadedAmmo(ItemInstance gun)
+        => gun == null || string.IsNullOrEmpty(gun.ammoItemId) ? null : ItemDatabase.Get(gun.ammoItemId);
+
     float AmmoDamageMult(ItemInstance gun)
     {
-        if (gun == null || string.IsNullOrEmpty(gun.ammoItemId)) return 1f;
-        var d = ItemDatabase.Get(gun.ammoItemId);
+        var d = LoadedAmmo(gun);
         return d != null ? Mathf.Max(0.1f, d.ammoDamageMult) : 1f;
     }
 

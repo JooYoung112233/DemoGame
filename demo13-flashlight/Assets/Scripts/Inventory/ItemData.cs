@@ -254,6 +254,16 @@ public class ItemData : ScriptableObject
     public string ammoCaliber;
     [Tooltip("탄종 데미지 배율(곱연산). 철갑/저위력탄 등.")]
     public float ammoDamageMult = 1f;
+    // 탄 스펙 (2026-09-11, docs/combat.md §총격전) — 기본값이면 기존과 똑같이 난다.
+    [Tooltip("관통력 — 적 몸을 몇 명까지 뚫고 지나가나(0=첫 명중에서 멈춤). 뚫을 때마다 데미지가 " +
+             "GameTuning.gunPierceDamageKeep 배로 준다. 벽·엄폐는 못 뚫는다(엄폐의 의미를 지키려고).")]
+    [Min(0)] public int ammoPenetration = 0;
+    [Tooltip("탄속 배율(곱연산) — 총기의 projectileSpeed에 곱한다.")]
+    public float ammoSpeedMult = 1f;
+    [Tooltip("사거리 배율(곱연산) — 총기의 effectiveRange에 곱한다. 거리 감쇠도 이 거리 기준.")]
+    public float ammoRangeMult = 1f;
+    [Tooltip("반동·퍼짐 배율(곱연산) — 기본 퍼짐과 연사 누적 퍼짐 모두에 곱한다. 강한 탄 >1, 약한 탄 <1.")]
+    public float ammoSpreadMult = 1f;
 
     /// <summary>무기 부착물 여부</summary>
     public bool IsWeaponPart => weaponPartType != WeaponPartType.None;

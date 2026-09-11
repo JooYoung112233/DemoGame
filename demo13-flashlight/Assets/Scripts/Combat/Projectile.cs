@@ -18,6 +18,8 @@ public class Projectile : MonoBehaviour
     Transform _owner;
     int _ownerLayer;
     bool _dead;
+    int _pierceLeft;                                        // 관통탄: 더 뚫을 수 있는 몸 수(탄 스펙 ammoPenetration)
+    System.Collections.Generic.List<Transform> _pierced;    // 이미 뚫은 몸 — 같은 몸을 두 번 맞지 않게
 
     static readonly RaycastHit[] _buf = new RaycastHit[12];
 
@@ -28,7 +30,8 @@ public class Projectile : MonoBehaviour
     /// <summary>총알 하나를 쏜다. from=총구, dir=단위벡터.</summary>
     public static Projectile Spawn(Transform owner, Vector2 from, Vector2 dir,
                                    float speed, float damage, float groggy, float range,
-                                   Color color, float length = 0.55f, float? worldHeight = null)
+                                   Color color, float length = 0.55f, float? worldHeight = null,
+                                   int pierce = 0)
     {
         var go = new GameObject("Bullet");
         go.transform.position = Plan3D.ToWorld(from, worldHeight ?? ((owner != null ? owner.position.y : 0f) + MuzzleY));
@@ -50,6 +53,7 @@ public class Projectile : MonoBehaviour
         p._groggy = groggy;
         p._rangeLeft = range;
         p._rangeTotal = Mathf.Max(0.01f, range);
+        p._pierceLeft = Mathf.Max(0, pierce);
         return p;
     }
 
@@ -98,6 +102,7 @@ public class Projectile : MonoBehaviour
             var c = _buf[i].collider;
             if (c == null) continue;
             if (_owner != null && (c.transform == _owner || c.transform.IsChildOf(_owner))) continue;
+            if (_pierced != null && IsPierced(c.transform)) continue;   // 이미 뚫고 지나온 몸(허트박스·몸통 콜라이더 모두)
 
             var hb = c.GetComponent<Hurtbox>();
             if (hb == null) hb = c.GetComponentInParent<Hurtbox>();
@@ -108,6 +113,15 @@ public class Projectile : MonoBehaviour
                 // 부위 = **맞은 자리 그대로**. 총은 조준한 곳이 맞는다(2026-07-29 결정).
                 // 사거리 감쇠 — 멀수록 약해진다. 유효사거리 절반까지는 그대로.
                 hb.ReceiveHitAt(_damage * Falloff(), _groggy, _dir, _buf[i].point);
+                if (_pierceLeft > 0)
+                {
+                    // 관통탄(2026-09-11) — 이 몸은 지나가 다음 표적으로. 벽·엄폐는 여전히 막는다(아래 솔리드 분기).
+                    _pierceLeft--;
+                    (_pierced ??= new System.Collections.Generic.List<Transform>()).Add(VictimRoot(hb));
+                    _damage *= GameTuning.Instance != null ? GameTuning.Instance.gunPierceDamageKeep : 0.6f;
+                    Impact(_buf[i].point, true, destroy: false);
+                    continue;
+                }
                 Impact(_buf[i].point, true);
                 return true;
             }
@@ -118,15 +132,29 @@ public class Projectile : MonoBehaviour
         return false;
     }
 
-    void Impact(Vector3 at, bool onFlesh)
+    void Impact(Vector3 at, bool onFlesh, bool destroy = true)
     {
-        _dead = true;
+        if (destroy) _dead = true;
         if (onFlesh)
         {
             Hitstop.Do(0.02f);
             if (CameraFollow.Instance != null) CameraFollow.Instance.Shake(0.06f, 0.08f);
         }
-        Destroy(gameObject);
+        if (destroy) Destroy(gameObject);
+    }
+
+    bool IsPierced(Transform t)
+    {
+        foreach (var v in _pierced)
+            if (v != null && (t == v || t.IsChildOf(v))) return true;
+        return false;
+    }
+
+    /// <summary>허트박스가 속한 몸의 뿌리(체력이 붙은 곳). 그 아래 콜라이더는 전부 같은 몸이다.</summary>
+    static Transform VictimRoot(Hurtbox hb)
+    {
+        var h = hb.GetComponentInParent<Health>();
+        return h != null ? h.transform : hb.transform;
     }
 
     /// <summary>RaycastHit을 거리순으로 — Array.Sort에 넘길 비교자.</summary>
