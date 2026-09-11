@@ -1,0 +1,178 @@
+{
+  "playing": true,
+  "scene": "Safehouse",
+  "pipeline": "URP-3D",
+  "hdr": true,
+  "camera": {
+    "name": "Main Camera",
+    "position": "(45.56, 22.07, 21.00)",
+    "angle": "(62.00, 0.00, 0.00)",
+    "orthographicSize": 3.6,
+    "allowHDR": true,
+    "post": true,
+    "mask": 1
+  },
+  "volumes": [
+    {
+      "name": "PlayerRig Volume",
+      "enabled": true,
+      "isGlobal": true,
+      "weight": 1.0,
+      "priority": 10.0,
+      "layer": 0,
+      "profile": "PlayerRigVolume3D",
+      "instanced": true,
+      "components": [
+        {
+          "type": "Tonemapping",
+          "active": true,
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"Tonemapping(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Tonemapping\",\"active\":true,\"mode\":{\"m_OverrideState\":true,\"m_Value\":1},\"neutralHDRRangeReductionMode\":{\"m_OverrideState\":true,\"m_Value\":2},\"acesPreset\":{\"m_OverrideState\":true,\"m_Value\":3},\"hueShiftAmount\":{\"m_OverrideState\":true,\"m_Value\":0.0},\"detectPaperWhite\":{\"m_OverrideState\":true,\"m_Value\":false},\"paperWhite\":{\"m_OverrideState\":true,\"m_Value\":300.0},\"detectBrightnessLimits\":{\"m_OverrideState\":true,\"m_Value\":true},\"minNits\":{\"m_OverrideState\":true,\"m_Value\":0.004999999888241291},\"maxNits\":{\"m_OverrideState\":true,\"m_Value\":1000.0}}}"
+        },
+        {
+          "type": "ColorAdjustments",
+          "active": true,
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"ColorAdjustments(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.ColorAdjustments\",\"active\":true,\"postExposure\":{\"m_OverrideState\":true,\"m_Value\":0.10000000149011612},\"contrast\":{\"m_OverrideState\":true,\"m_Value\":14.0},\"colorFilter\":{\"m_OverrideState\":true,\"m_Value\":{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}},\"hueShift\":{\"m_OverrideState\":true,\"m_Value\":0.0},\"saturation\":{\"m_OverrideState\":true,\"m_Value\":-6.0}}}"
+        },
+        {
+          "type": "Bloom",
+          "active": true,
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"Bloom(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Bloom\",\"active\":true,\"skipIterations\":{\"m_OverrideState\":true,\"m_Value\":1},\"threshold\":{\"m_OverrideState\":true,\"m_Value\":1.100000023841858},\"intensity\":{\"m_OverrideState\":true,\"m_Value\":0.15000000596046448},\"scatter\":{\"m_OverrideState\":true,\"m_Value\":0.6000000238418579},\"clamp\":{\"m_OverrideState\":true,\"m_Value\":65472.0},\"tint\":{\"m_OverrideState\":true,\"m_Value\":{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}},\"highQualityFiltering\":{\"m_OverrideState\":true,\"m_Value\":false},\"filter\":{\"m_OverrideState\":true,\"m_Value\":0},\"downscale\":{\"m_OverrideState\":true,\"m_Value\":0},\"maxIterations\":{\"m_OverrideState\":true,\"m_Value\":6},\"dirtTexture\":{\"m_OverrideState\":true,\"m_Value\":{\"instanceID\":0},\"dimension\":1},\"dirtIntensity\":{\"m_OverrideState\":true,\"m_Value\":0.0}}}"
+        },
+        {
+          "type": "Vignette",
+          "active": true,
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"Vignette(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Vignette\",\"active\":true,\"color\":{\"m_OverrideState\":true,\"m_Value\":{\"r\":0.0,\"g\":0.0,\"b\":0.0,\"a\":1.0}},\"center\":{\"m_OverrideState\":true,\"m_Value\":{\"x\":0.5,\"y\":0.5}},\"intensity\":{\"m_OverrideState\":true,\"m_Value\":0.1599999964237213},\"smoothness\":{\"m_OverrideState\":true,\"m_Value\":0.44999998807907104},\"rounded\":{\"m_OverrideState\":true,\"m_Value\":false}}}"
+        },
+        {
+          "type": "FilmGrain",
+          "active": true,
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"FilmGrain(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FilmGrain\",\"active\":true,\"type\":{\"m_OverrideState\":true,\"m_Value\":2},\"intensity\":{\"m_OverrideState\":true,\"m_Value\":0.05999999865889549},\"response\":{\"m_OverrideState\":true,\"m_Value\":0.800000011920929},\"texture\":{\"m_OverrideState\":true,\"m_Value\":{\"instanceID\":0}}}}"
+        }
+      ]
+    }
+  ],
+  "lights": [
+    {
+      "name": "PracticalLight",
+      "type": "Point",
+      "enabled": true,
+      "intensity": 6.0,
+      "range": 8.0,
+      "color": "RGBA(1.000, 0.780, 0.530, 1.000)",
+      "pos": "(70.00, 3.20, 25.95)",
+      "shadows": "None"
+    },
+    {
+      "name": "PracticalLight",
+      "type": "Point",
+      "enabled": true,
+      "intensity": 6.0,
+      "range": 8.0,
+      "color": "RGBA(1.000, 0.780, 0.530, 1.000)",
+      "pos": "(58.00, 3.20, 30.95)",
+      "shadows": "None"
+    },
+    {
+      "name": "Bulb",
+      "type": "Point",
+      "enabled": false,
+      "intensity": 4.0,
+      "range": 9.0,
+      "color": "RGBA(1.000, 0.880, 0.740, 1.000)",
+      "pos": "(34.00, 3.20, 44.00)",
+      "shadows": "None"
+    },
+    {
+      "name": "Sun3D",
+      "type": "Directional",
+      "enabled": true,
+      "intensity": 0.95,
+      "range": 10.0,
+      "color": "RGBA(1.000, 0.930, 0.840, 1.000)",
+      "pos": "(0.00, 0.00, 0.00)",
+      "shadows": "Soft"
+    },
+    {
+      "name": "BodyGlow",
+      "type": "Point",
+      "enabled": true,
+      "intensity": 0.35,
+      "range": 1.6,
+      "color": "RGBA(0.720, 0.780, 0.920, 1.000)",
+      "pos": "(45.56, 1.25, 31.94)",
+      "shadows": "None"
+    },
+    {
+      "name": "PracticalLight",
+      "type": "Point",
+      "enabled": true,
+      "intensity": 6.0,
+      "range": 8.0,
+      "color": "RGBA(1.000, 0.780, 0.530, 1.000)",
+      "pos": "(30.00, 3.20, 30.95)",
+      "shadows": "None"
+    },
+    {
+      "name": "PlayerLamp3D",
+      "type": "Spot",
+      "enabled": true,
+      "intensity": 0.2,
+      "range": 10.0,
+      "color": "RGBA(1.000, 0.900, 0.720, 1.000)",
+      "pos": "(45.56, 1.15, 32.74)",
+      "shadows": "Soft"
+    },
+    {
+      "name": "PracticalLight",
+      "type": "Point",
+      "enabled": true,
+      "intensity": 6.0,
+      "range": 8.0,
+      "color": "RGBA(1.000, 0.780, 0.530, 1.000)",
+      "pos": "(52.00, 3.20, 37.95)",
+      "shadows": "None"
+    },
+    {
+      "name": "PorchWarmLight",
+      "type": "Point",
+      "enabled": true,
+      "intensity": 2.4,
+      "range": 6.5,
+      "color": "RGBA(1.000, 0.750, 0.480, 1.000)",
+      "pos": "(34.00, 2.25, 37.50)",
+      "shadows": "Soft"
+    },
+    {
+      "name": "PracticalLight",
+      "type": "Point",
+      "enabled": true,
+      "intensity": 6.0,
+      "range": 8.0,
+      "color": "RGBA(1.000, 0.780, 0.530, 1.000)",
+      "pos": "(52.40, 3.20, 14.45)",
+      "shadows": "None"
+    },
+    {
+      "name": "PracticalLight",
+      "type": "Point",
+      "enabled": true,
+      "intensity": 6.0,
+      "range": 8.0,
+      "color": "RGBA(1.000, 0.780, 0.530, 1.000)",
+      "pos": "(22.00, 3.20, 37.95)",
+      "shadows": "None"
+    },
+    {
+      "name": "LampSpill",
+      "type": "Point",
+      "enabled": true,
+      "intensity": 0.35,
+      "range": 2.4,
+      "color": "RGBA(1.000, 0.900, 0.720, 1.000)",
+      "pos": "(45.56, 1.15, 32.74)",
+      "shadows": "None"
+    }
+  ],
+  "weather": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"WeatherData\",\"m_EditorClassIdentifier\":\"Game.Scripts::WeatherData\",\"dayIntensity\":0.949999988079071,\"dayLightColor\":{\"r\":1.0,\"g\":0.9300000071525574,\"b\":0.8399999737739563,\"a\":1.0},\"daySunAngle\":{\"x\":58.0,\"y\":-30.0,\"z\":0.0},\"dayAmbientColor\":{\"r\":0.28999999165534973,\"g\":0.3199999928474426,\"b\":0.3499999940395355,\"a\":1.0},\"dayAmbientIntensity\":1.0,\"dayFog\":false,\"dayFogColor\":{\"r\":0.6000000238418579,\"g\":0.6000000238418579,\"b\":0.6499999761581421,\"a\":1.0},\"dayFogDensity\":0.009999999776482582,\"nightIntensity\":0.3799999952316284,\"nightLightColor\":{\"r\":0.6600000262260437,\"g\":0.5799999833106995,\"b\":0.8500000238418579,\"a\":1.0},\"nightSunAngle\":{\"x\":58.0,\"y\":-35.0,\"z\":0.0},\"nightAmbientColor\":{\"r\":0.20000000298023224,\"g\":0.17000000178813934,\"b\":0.27000001072883606,\"a\":1.0},\"nightAmbientIntensity\":0.20000000298023224,\"nightFog\":true,\"nightFogColor\":{\"r\":0.05999999865889549,\"g\":0.03999999910593033,\"b\":0.09000000357627869,\"a\":1.0},\"nightFogDensity\":0.02199999988079071,\"weather\":0,\"rainIntensity\":0.6000000238418579,\"rainTint\":{\"r\":0.699999988079071,\"g\":0.75,\"b\":0.8500000238418579,\"a\":1.0},\"groundWetness\":0.699999988079071,\"rippleSpeed\":0.5,\"rippleDensity\":0.5,\"rainParticleRate\":300.0,\"rainSpeed\":12.0,\"rainWindDirection\":{\"x\":0.30000001192092896,\"y\":0.0,\"z\":0.10000000149011612},\"rainOverrideFog\":true,\"rainFogColor\":{\"r\":0.15000000596046448,\"g\":0.17000000178813934,\"b\":0.2199999988079071,\"a\":1.0},\"rainFogDensity\":0.05999999865889549}}",
+  "shaderErrors": []
+}

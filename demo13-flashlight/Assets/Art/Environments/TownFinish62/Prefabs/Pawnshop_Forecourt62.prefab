@@ -43,14 +43,14 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.8, b: 0.56, a: 1}
+  m_Color: {r: 1, g: 0.75, b: 0.48, a: 1}
   m_Intensity: 2.4
-  m_Range: 5
+  m_Range: 6.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
   dayIntensity: 2.4
-  nightIntensity: 4.8
+  nightIntensity: 7.5
 --- !u!1 &1296247882050987469
 GameObject:
   m_ObjectHideFlags: 0
