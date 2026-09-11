@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3684e582e8444924fa14de0d2b1c4df3, type: 3}
   m_Name: WeatherData
   m_EditorClassIdentifier: Game.Scripts::WeatherData
-  dayIntensity: 0.8
-  dayLightColor: {r: 1, g: 0.9, b: 0.79, a: 1}
+  dayIntensity: 0.95
+  dayLightColor: {r: 1, g: 0.93, b: 0.84, a: 1}
   daySunAngle: {x: 58, y: -30, z: 0}
-  dayAmbientColor: {r: 0.34, g: 0.35, b: 0.37, a: 1}
+  dayAmbientColor: {r: 0.29, g: 0.32, b: 0.35, a: 1}
   dayAmbientIntensity: 1
   dayFog: 0
   dayFogColor: {r: 0.6, g: 0.6, b: 0.65, a: 1}

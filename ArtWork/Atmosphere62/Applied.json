@@ -1,0 +1,23 @@
+{
+  "weather": "Assets/Resources/Data/WeatherData.asset",
+  "profile": "Assets/Resources/PlayerRigVolume3D.asset",
+  "scene": "Assets/Scenes/Safehouse.unity",
+  "prefab": "Assets/Art/Environments/TownFinish62/Prefabs/Pawnshop_Forecourt62.prefab",
+  "streetCount": 6,
+  "gameplayAndCollidersUnchanged": true,
+  "dayIntensity": 0.95,
+  "dayColor": "RGBA(1.000, 0.930, 0.840, 1.000)",
+  "dayAmbient": "RGBA(0.290, 0.320, 0.350, 1.000)",
+  "nightSettingsUnchanged": true,
+  "streetDay": 6,
+  "streetNight": 18,
+  "streetRange": 7.5,
+  "porchDay": 2.4,
+  "porchNight": 4.8,
+  "porchRange": 5,
+  "contrast": 14.0,
+  "saturation": -6.0,
+  "exposure": 0.1,
+  "bloom": 0.15,
+  "vignette": 0.16
+}

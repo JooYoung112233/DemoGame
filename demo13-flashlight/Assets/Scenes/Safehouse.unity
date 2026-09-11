@@ -1021,6 +1021,7 @@ GameObject:
   m_Component:
   - component: {fileID: 23791149}
   - component: {fileID: 23791150}
+  - component: {fileID: 23791151}
   m_Layer: 0
   m_Name: PorchWarmLight
   m_TagString: Untagged
@@ -1055,7 +1056,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 0.8, b: 0.56, a: 1}
   m_Intensity: 2.4
-  m_Range: 4.2
+  m_Range: 5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -1108,6 +1109,20 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &23791151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 23791148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::PropLight3D
+  dayIntensity: 2.4
+  nightIntensity: 4.8
 --- !u!1 &24075867
 GameObject:
   m_ObjectHideFlags: 0
@@ -13917,6 +13932,7 @@ GameObject:
   m_Component:
   - component: {fileID: 455859078}
   - component: {fileID: 455859079}
+  - component: {fileID: 455859080}
   m_Layer: 0
   m_Name: PracticalLight
   m_TagString: Untagged
@@ -13949,9 +13965,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.86, b: 0.7, a: 1}
+  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
   m_Intensity: 6
-  m_Range: 6
+  m_Range: 7.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -14004,6 +14020,20 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &455859080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 455859077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::PropLight3D
+  dayIntensity: 6
+  nightIntensity: 18
 --- !u!1 &457669606
 GameObject:
   m_ObjectHideFlags: 0
@@ -29507,6 +29537,7 @@ GameObject:
   m_Component:
   - component: {fileID: 918363234}
   - component: {fileID: 918363235}
+  - component: {fileID: 918363236}
   m_Layer: 0
   m_Name: PracticalLight
   m_TagString: Untagged
@@ -29539,9 +29570,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.86, b: 0.7, a: 1}
+  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
   m_Intensity: 6
-  m_Range: 6
+  m_Range: 7.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -29594,6 +29625,20 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &918363236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918363233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::PropLight3D
+  dayIntensity: 6
+  nightIntensity: 18
 --- !u!1 &918617431
 GameObject:
   m_ObjectHideFlags: 0
@@ -29844,6 +29889,7 @@ GameObject:
   m_Component:
   - component: {fileID: 924404422}
   - component: {fileID: 924404423}
+  - component: {fileID: 924404424}
   m_Layer: 0
   m_Name: PracticalLight
   m_TagString: Untagged
@@ -29876,9 +29922,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.86, b: 0.7, a: 1}
+  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
   m_Intensity: 6
-  m_Range: 6
+  m_Range: 7.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -29931,6 +29977,20 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &924404424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 924404421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::PropLight3D
+  dayIntensity: 6
+  nightIntensity: 18
 --- !u!1001 &926594660
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35659,6 +35719,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1108396121}
   - component: {fileID: 1108396122}
+  - component: {fileID: 1108396123}
   m_Layer: 0
   m_Name: PracticalLight
   m_TagString: Untagged
@@ -35691,9 +35752,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.86, b: 0.7, a: 1}
+  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
   m_Intensity: 6
-  m_Range: 6
+  m_Range: 7.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -35746,6 +35807,20 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1108396123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1108396120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::PropLight3D
+  dayIntensity: 6
+  nightIntensity: 18
 --- !u!1 &1110905636
 GameObject:
   m_ObjectHideFlags: 0
@@ -61451,6 +61526,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1930364535}
   - component: {fileID: 1930364536}
+  - component: {fileID: 1930364537}
   m_Layer: 0
   m_Name: PracticalLight
   m_TagString: Untagged
@@ -61483,9 +61559,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.86, b: 0.7, a: 1}
+  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
   m_Intensity: 6
-  m_Range: 6
+  m_Range: 7.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -61538,6 +61614,20 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1930364537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1930364534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::PropLight3D
+  dayIntensity: 6
+  nightIntensity: 18
 --- !u!1 &1936941342
 GameObject:
   m_ObjectHideFlags: 0
@@ -67762,6 +67852,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2122447305}
   - component: {fileID: 2122447306}
+  - component: {fileID: 2122447307}
   m_Layer: 0
   m_Name: PracticalLight
   m_TagString: Untagged
@@ -67794,9 +67885,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.86, b: 0.7, a: 1}
+  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
   m_Intensity: 6
-  m_Range: 6
+  m_Range: 7.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -67849,6 +67940,20 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &2122447307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2122447304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Scripts::PropLight3D
+  dayIntensity: 6
+  nightIntensity: 18
 --- !u!1001 &2123562476
 PrefabInstance:
   m_ObjectHideFlags: 0

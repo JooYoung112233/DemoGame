@@ -1,0 +1,1 @@
+{"code":"if(UnityEditor.EditorApplication.isPlaying)throw new System.Exception(\"Stop review Play first\"); var s=UnityEngine.SceneManagement.SceneManager.GetSceneByName(\"Safehouse\"); if(!s.isLoaded)throw new System.Exception(\"Safehouse not loaded\"); return UnityEditor.SceneManagement.EditorSceneManager.SaveScene(s);"}
