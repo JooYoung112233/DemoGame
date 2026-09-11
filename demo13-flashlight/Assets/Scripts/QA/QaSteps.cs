@@ -753,7 +753,7 @@ public static class QaSteps
                         if (foeDist >= safeDist) { escaped = true; break; }
 
                         Vector2 away = (Plan3D.ToPlan(player.transform.position) - Plan3D.ToPlan(foe.transform.position)).normalized;
-                        GameInput.VSetMove(away);
+                        GameInput.VSetMove(TopDownPlayer.WorldToInput(away));
                         yield return c.Bot.WaitSec(0.3f);
                     }
 
@@ -1169,7 +1169,7 @@ public static class QaSteps
                 {
                     c.Report.Warn("combat", "DISENGAGE", $"체력 {hp * 100f:0}% — 교전 이탈(도주)");
                     Vector2 away = (Plan3D.ToPlan(player.transform.position) - Plan3D.ToPlan(foe.transform.position)).normalized;
-                    GameInput.VSetMove(away);
+                    GameInput.VSetMove(TopDownPlayer.WorldToInput(away));
                     yield return c.Bot.WaitSec(1.5f);
                     GameInput.VSetMove(Vector2.zero);
                     yield break;
@@ -1185,17 +1185,17 @@ public static class QaSteps
                     // 적이 때리려 한다 — 구르기로 흘리고 물러난다
                     c.Bot.Tap(KeyCode.Space);
                     dodges++;
-                    GameInput.VSetMove(-dir);
+                    GameInput.VSetMove(TopDownPlayer.WorldToInput(-dir));
                     yield return c.Bot.WaitSec(0.45f);
                 }
                 else if (dist > range + 0.4f)
                 {
-                    GameInput.VSetMove(dir);                    // 파고들기
+                    GameInput.VSetMove(TopDownPlayer.WorldToInput(dir));                    // 파고들기
                     yield return c.Bot.WaitSec(0.12f);
                 }
                 else if (dist < range - 0.5f)
                 {
-                    GameInput.VSetMove(-dir);                   // 너무 붙음 — 간격 회복
+                    GameInput.VSetMove(TopDownPlayer.WorldToInput(-dir));                   // 너무 붙음 — 간격 회복
                     yield return c.Bot.WaitSec(0.12f);
                 }
                 else
@@ -1265,7 +1265,7 @@ public static class QaSteps
                     // 계측 대기(최대 0.5초)가 이미 흘렀으니 기존 치고 빠지기 리듬(0.5초)에서 남은 만큼만 채운다.
                     float already = launched ? (launchWait + hitWait) : launchWait;
                     float remain = Mathf.Max(0f, 0.5f - already);
-                    GameInput.VSetMove(-dir);                   // 치고 빠지기
+                    GameInput.VSetMove(TopDownPlayer.WorldToInput(-dir));                   // 치고 빠지기
                     if (remain > 0f) yield return c.Bot.WaitSec(remain);
                 }
             }

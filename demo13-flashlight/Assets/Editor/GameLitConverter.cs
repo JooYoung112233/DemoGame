@@ -23,7 +23,8 @@ public static class GameLitConverter
     const string GameLitName = "BRB/GameLit";
     const string UrpLitName = "Universal Render Pipeline/Lit";
     static readonly string[] SkipPaths = { "/Hideout02/" };
-    static readonly string[] SkipScenes = { "Assets/Scenes/Hideout.unity" };
+    // Safehouse = 마을 — 다른 세션이 Town02로 짓는 중(2026-09-11). 1차 전환 때 한 번 저장했으니 더는 건드리지 않는다.
+    static readonly string[] SkipScenes = { "Assets/Scenes/Hideout.unity", "Assets/Scenes/Safehouse.unity" };
 
     static bool Skipped(string path)
     {
@@ -63,6 +64,12 @@ public static class GameLitConverter
     /// <summary>어두운 사실풍 값 — 캐릭터/환경.</summary>
     static void ApplyLook(Material m, bool character)
     {
+        // 반짝임 줄이기(2026-09-11 사용자 "대리석 같다") — 하늘 반사는 전부 끄고, 스펙 하이라이트는 금속이 아닌 환경만 끈다.
+        //   캐릭터·금속(총·철물)은 하이라이트를 남겨 재질이 읽히게 한다.
+        bool metal = m.HasProperty("_Metallic") && m.GetFloat("_Metallic") > 0.01f;
+        Kw(m, "_ENVIRONMENTREFLECTIONS_OFF", true);
+        Kw(m, "_SPECULARHIGHLIGHTS_OFF", !character && !metal);
+
         if (character)
         {
             // 캐릭터 — 때는 몸에 붙어 따라다니고(오브젝트 공간) 옅게, 어둠 속 실루엣은 림으로 살린다.

@@ -58,13 +58,24 @@ public class WornLamp : MonoBehaviour
     [SerializeField] float bodyGlowRange = 2.6f;
     [Tooltip("캐릭터 글로우 밝기. 실루엣이 읽힐 만큼만 — 키우면 캐릭터만 떠 보인다.")]
     [SerializeField] float bodyGlowIntensity = 0.9f;
-    [Tooltip("글로우를 캐릭터 머리 위 몇 m에 둘지. 메시 안에 두면 밖에서 보이는 면이 전부 광원을 등진다.")]
-    [SerializeField] float bodyGlowHeight = 1.0f;
+    [Tooltip("글로우를 등 위치에서 위로 몇 m에 둘지. 2026-09-11부터 머리 위가 아니라 가슴 높이(0.1) — 위에서 내리꽂으면 '머리 위 태양'이 된다.")]
+    [SerializeField] float bodyGlowHeight = 0.1f;
+    [Tooltip("글로우를 카메라 쪽으로 몇 m 내밀지 — 카메라가 보는 면(얼굴·앞섶)만 옅게 밝힌다. 메시 안에 두면 밖 면이 전부 광원을 등진다.")]
+    [SerializeField] float bodyGlowTowardCamera = 0.8f;
 
     Light _light;
     DayNightCycle _dayNight;
     TopDownPlayer _player;
     float _gradeRange = 1f, _gradeIntensity = 1f;   // 등급 배율(미착용 = 1)
+    bool _indoorPresentation;
+
+    /// <summary>Lit hideout presentation: keep the worn lamp on, but avoid washing out the character.</summary>
+    public void SetIndoorPresentation(bool indoor)
+    {
+        if (_indoorPresentation == indoor) return;
+        _indoorPresentation = indoor;
+        Apply(_dayNight != null && _dayNight.IsNight);
+    }
 
     void Awake()
     {
@@ -127,6 +138,19 @@ public class WornLamp : MonoBehaviour
         _glow.range = bodyGlowRange;
         _glow.color = new Color(0.72f, 0.78f, 0.92f);   // 2D 때 ambientGlow와 같은 계열(찬 색)
         _glow.renderMode = LightRenderMode.ForcePixel;
+
+        // 그림자 해상도 — 점광·스포트 그림자가 추가 광원 아틀라스의 작은 칸을 받아 바닥에 **깍두기처럼** 떨어졌다
+        //   (2026-09-11 사용자 "바닥에 무슨 모듈처럼 그림자가 나온다"). 플레이어 등은 화면에 늘 하나라 높은 등급을 준다.
+        HighShadowTier(_light);
+        HighShadowTier(_spill);
+    }
+
+    static void HighShadowTier(Light l)
+    {
+        if (l == null) return;
+        if (!l.TryGetComponent(out UnityEngine.Rendering.Universal.UniversalAdditionalLightData ad))
+            ad = l.gameObject.AddComponent<UnityEngine.Rendering.Universal.UniversalAdditionalLightData>();
+        ad.additionalLightsShadowResolutionTier = UnityEngine.Rendering.Universal.UniversalAdditionalLightData.AdditionalLightsShadowResolutionTierHigh;
     }
 
     void Start()
@@ -155,7 +179,8 @@ public class WornLamp : MonoBehaviour
     {
         if (_light == null) return;
         _light.range = baseRange * _gradeRange;
-        _light.intensity = (isNight ? nightIntensity : dayIntensity) * _gradeIntensity;
+        float presentation = _indoorPresentation ? .15f : 1f;
+        _light.intensity = (isNight ? nightIntensity : dayIntensity) * _gradeIntensity * presentation;
         _light.spotAngle = coneAngle;
         _light.innerSpotAngle = coneAngle * innerRatio;
         EnsureSpill();
@@ -164,13 +189,13 @@ public class WornLamp : MonoBehaviour
             // 주변광은 빔에 비례하되 **바닥값을 둔다** — 낮이나 실내에서 0에 가까워지면
             // "내 주변은 늘 보인다"가 깨져서, 발밑조차 안 보인다.
             _spill.intensity = Mathf.Max(spillFloor,
-                                         (isNight ? nightIntensity : dayIntensity) * _gradeIntensity * spillRatio);
+                                         (isNight ? nightIntensity : dayIntensity) * _gradeIntensity * spillRatio) * presentation;
             _spill.range   = spillRange * _gradeRange;
             _spill.shadows = spillCastsShadows ? LightShadows.Soft : LightShadows.None;
         }
         if (_glow != null)
         {
-            _glow.intensity = bodyGlowIntensity;
+            _glow.intensity = bodyGlowIntensity * presentation;
             _glow.range = bodyGlowRange;
         }
     }
@@ -189,8 +214,19 @@ public class WornLamp : MonoBehaviour
         //    쿼터뷰(55° 부감)가 보는 건 윗면이라, 위에서 내리비춰야 어깨·모자·팔이 읽힌다.
         //    ⚠️ 이 줄은 **플레이어 조기 반환보다 앞**에 있어야 한다. TopDownPlayer가 없는
         //       룩 체크 씬에서도 글로우는 제자리를 잡아야 검증이 된다(실제로 그래서 안 보였다).
+        // 2026-09-11 사용자 "주변광이 머리 위에 태양 있어요 하는 것 같다" → 머리 위 1m에서 내리비추던 것을
+        //   **가슴 높이·카메라 쪽**으로 옮겼다. 카메라가 보는 면만 옅게 밝혀 실루엣이 읽히게 — 해처럼 위에서 내리꽂지 않는다.
         if (_glow != null)
-            _glow.transform.position = transform.position + Vector3.up * bodyGlowHeight;
+        {
+            Vector3 toCam = Vector3.back;
+            if (CameraFollow.Instance != null)
+            {
+                toCam = -CameraFollow.Instance.transform.forward;
+                toCam.y = 0f;
+                toCam = toCam.sqrMagnitude > 1e-4f ? toCam.normalized : Vector3.back;
+            }
+            _glow.transform.position = transform.position + Vector3.up * bodyGlowHeight + toCam * bodyGlowTowardCamera;
+        }
 
         // LateUpdate여야 한다 — 플레이어의 회전/조준이 같은 프레임에 갱신되므로
         // Update에서 맞추면 한 프레임 뒤처져 빠르게 돌 때 빛이 끌려다닌다.

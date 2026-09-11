@@ -1869,7 +1869,9 @@ Material:
   m_Shader: {fileID: 4800000, guid: 064c68860c54b1c479d8c181f894340e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _ENVIRONMENTREFLECTIONS_OFF
+  - _SPECULARHIGHLIGHTS_OFF
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -1960,8 +1962,8 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _GrimeObjectSpace: 0
-    - _GrimeScale: 0.6
-    - _GrimeStrength: 0.5
+    - _GrimeScale: 2.5
+    - _GrimeStrength: 0.35
     - _GroundGrimeHeight: 0.8
     - _Metallic: 0
     - _Mode: 1
@@ -2054,7 +2056,9 @@ Material:
   m_Shader: {fileID: 4800000, guid: 064c68860c54b1c479d8c181f894340e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _ENVIRONMENTREFLECTIONS_OFF
+  - _SPECULARHIGHLIGHTS_OFF
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -2144,8 +2148,8 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _GrimeObjectSpace: 0
-    - _GrimeScale: 0.6
-    - _GrimeStrength: 0.5
+    - _GrimeScale: 2.5
+    - _GrimeStrength: 0.35
     - _GroundGrimeHeight: 0.8
     - _Metallic: 0
     - _OcclusionStrength: 1
@@ -2507,7 +2511,9 @@ Material:
   m_Shader: {fileID: 4800000, guid: 064c68860c54b1c479d8c181f894340e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _ENVIRONMENTREFLECTIONS_OFF
+  - _SPECULARHIGHLIGHTS_OFF
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -2597,8 +2603,8 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _GrimeObjectSpace: 0
-    - _GrimeScale: 0.6
-    - _GrimeStrength: 0.5
+    - _GrimeScale: 2.5
+    - _GrimeStrength: 0.35
     - _GroundGrimeHeight: 0.8
     - _Metallic: 0
     - _OcclusionStrength: 1
@@ -3518,7 +3524,9 @@ Material:
   m_Shader: {fileID: 4800000, guid: 064c68860c54b1c479d8c181f894340e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _ENVIRONMENTREFLECTIONS_OFF
+  - _SPECULARHIGHLIGHTS_OFF
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -3608,8 +3616,8 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _GrimeObjectSpace: 0
-    - _GrimeScale: 0.6
-    - _GrimeStrength: 0.5
+    - _GrimeScale: 2.5
+    - _GrimeStrength: 0.35
     - _GroundGrimeHeight: 0.8
     - _Metallic: 0
     - _OcclusionStrength: 1

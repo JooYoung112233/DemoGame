@@ -33,6 +33,13 @@ public class CameraFollow : MonoBehaviour
              "⚠️ 그림자 거리(URP 에셋 기본 50m) 안이어야 그림자가 렌더된다.")]
     [SerializeField] float followDistance = 25f;
 
+    // 쿼터뷰 각도 — 2026-09-11 사용자 선택 "대각선 45°"(docs/rendering.md §카메라). 예전엔 프리팹 회전(55°·정북)이 곧 각도였다.
+    //   코드가 정하는 게 진실 — Start에서 이 값으로 돌린 뒤 추적 오프셋을 잡는다. 이동은 TopDownPlayer가 카메라 기준으로 돌린다.
+    [Tooltip("쿼터뷰 — 내려다보는 각(°). 90이면 정수직.")]
+    [SerializeField] float viewPitch = 45f;
+    [Tooltip("쿼터뷰 — 방위각(°). 45 = 대각선(아이소식 쿼터뷰), 0 = 정북.")]
+    [SerializeField] float viewYaw = 45f;
+
     Vector3 offset;
 
     // ── 연출 포커스 ──
@@ -60,6 +67,7 @@ public class CameraFollow : MonoBehaviour
     {
         cam = GetComponent<Camera>();
         if (cam != null && cam.orthographic) baseOrthoSize = cam.orthographicSize;
+        transform.rotation = Quaternion.Euler(viewPitch, viewYaw, 0f);   // 오프셋(FindTarget)보다 먼저
         FindTarget();
         DisableOtherCameras();
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -216,7 +224,8 @@ public class CameraFollow : MonoBehaviour
         _shakeTime += Time.unscaledDeltaTime;
         float damp = 1f - Mathf.Clamp01(_shakeTime / _shakeDur);     // 1→0
         float mag = _shakeMag * damp * damp;                          // 끝에서 더 빠르게 잦아듦
-        return new Vector3(Random.Range(-mag, mag), Random.Range(-mag, mag), 0f);
+        // 화면 좌우·위아래(카메라 축)로 흔든다 — 월드 (x, y, 0)은 일부가 시선 방향이라 오소 카메라에선 안 보인다(대각선 쿼터뷰, 2026-09-11).
+        return transform.right * Random.Range(-mag, mag) + transform.up * Random.Range(-mag, mag);
     }
 
     // ── 줌 펀치 ─────────────────────────────────────────────

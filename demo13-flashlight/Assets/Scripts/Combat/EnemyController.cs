@@ -1346,6 +1346,8 @@ public class EnemyController : MonoBehaviour
             tm.color = new Color(1f, 0.85f, 0.3f);
             var mr = alertMark.GetComponent<MeshRenderer>();
             if (mr != null) mr.sortingOrder = 132;   // 말풍선 층 근처
+            // 카메라를 향하게 — 적 몸에 붙어 같이 돌면 대각선 쿼터뷰(2026-09-11)에서 비스듬히 누워 보인다.
+            Billboard.Attach(alertMark.transform);
         }
         if (alertMark != null) alertMark.SetActive(on);
     }
