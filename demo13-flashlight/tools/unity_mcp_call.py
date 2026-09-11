@@ -30,7 +30,7 @@ try:
         result=request(2,'tools/list',{})
         entries=result.get('result',{}).get('tools',[])
         if not entries:raise RuntimeError('Unity MCP returned no tools; check editor discovery for this project.')
-        result={'names':[t['name'] for t in entries],'schemas':[t for t in entries if t['name'] in ['eval_file','eval','editor_state','console_get_logs']]}
+        result={'names':[t['name'] for t in entries],'schemas':[t for t in entries if t['name'] in ['eval_file','eval','editor_status','editor_play','capture_game_view','get_console_logs']]}
     else:
         arguments=json.loads(Path(sys.argv[2]).read_text(encoding='utf-8-sig')) if len(sys.argv)>2 else {}
         result=request(2,'tools/call',{'name':sys.argv[1],'arguments':arguments})
