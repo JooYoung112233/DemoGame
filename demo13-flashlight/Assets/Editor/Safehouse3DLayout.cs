@@ -99,6 +99,7 @@ public static class Safehouse3DLayout
         Lighting3D.Apply(map, Lighting3D.Preset.Outdoor);
         n++;
 
+        SceneHierarchyOrganizer.Organize(scene);   // 규약대로 기능별 폴더에 묶는다(docs/architecture.md §씬 하이어라키 규약)
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         AddToBuildSettings(ScenePath);

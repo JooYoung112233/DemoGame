@@ -41,7 +41,7 @@ public class ToastManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
         if (!IsGenerated) BuildCanvas();   // 폴백: 프리팹 없이 코드로 생성
     }
 

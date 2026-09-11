@@ -38,7 +38,7 @@ public class SaveManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
         MigrateLegacySave();
     }
 

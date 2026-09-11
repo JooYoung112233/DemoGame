@@ -106,6 +106,9 @@ UI was **migrated from pure-code procedural generation → prefab-baked + Instan
 ### Input (new Input System, 2026-06-24)
 Project uses the **new Input System** (`activeInputHandler:1`, New-only). **Do NOT call `UnityEngine.Input.*` directly** — it throws at runtime in New-only mode. Use the compat shim **`Scripts/Core/GameInput.cs`** instead (`GameInput.GetKeyDown(KeyCode)`, `GameInput.mousePosition`, `GameInput.GetAxisRaw("Horizontal"/"Vertical")`, etc.). It wraps `Keyboard.current`/`Mouse.current` with the same legacy signatures; add new keys to its `KeyCode→Key` map. See `docs/architecture.md` §입력 시스템.
 
+### Scene Hierarchy (2026-09-11)
+Scenes are grouped into **function folders** by `Editor/SceneHierarchyOrganizer.cs` — map scenes: `Map/{Environment/{Ground,Structures,Roads,Scatter,Misc}, Lighting, Gameplay, Loot, Enemies, NPCs, Controllers}`; Systems: `Core/World/Progress/Story/UI/Player`. Classification is by **component**, not name. Every scene builder calls it right before saving (via `EditorSceneBuildUtil.SaveAndClose` or directly), so rebuilds stay organized; existing scenes: `Tools/TopDown/개발/하이어라키 정리`. Folders carry a `HierarchyFolder` marker. **Call `HierarchyFolder.Persist(gameObject)` instead of `DontDestroyOnLoad(gameObject)`** for anything placed in the Systems scene (Unity ignores DDOL on non-root objects), and use `HierarchyFolder.OwnerRoot(transform)` instead of `transform.root`. New Systems manager → add a row to `SystemsTable`. See `docs/architecture.md` §씬 하이어라키 규약.
+
 ### NPC & Quest System
 - **NPCData** (ScriptableObject) — NPC identity, dialogues (state-based + event branching), available quests.
 - **NPCRelationshipManager** (Singleton, DontDestroyOnLoad) — 3-axis affinity (Affinity/Trust/Fear) per NPC.

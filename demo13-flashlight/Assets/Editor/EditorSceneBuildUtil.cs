@@ -112,6 +112,8 @@ public static class EditorSceneBuildUtil
             EditorSceneManager.CloseScene(existing, true);
         }
 
+        // 모든 빌더가 여기로 저장한다 — 여기서 묶으면 재빌드해도 정리가 유지된다.
+        SceneHierarchyOrganizer.Organize(scene);
         EditorSceneManager.MarkSceneDirty(scene);
         bool saved = EditorSceneManager.SaveScene(scene, path);
         if (scene.IsValid() && scene.isLoaded)

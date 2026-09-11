@@ -80,7 +80,7 @@ public class UIManager : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
 
         EnsureEventSystem();
         EnsureChildren();

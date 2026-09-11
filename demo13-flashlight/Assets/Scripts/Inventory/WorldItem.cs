@@ -51,8 +51,11 @@ public class WorldItem : MonoBehaviour
         }
     }
 
-    /// <summary>코드에서 월드 아이템 드롭</summary>
-    public static WorldItem Drop(ItemInstance item, Vector3 position)
+    /// <summary>코드에서 월드 아이템 드롭.
+    /// <paramref name="owner"/>를 주면 그 오브젝트의 **씬**으로 옮긴다 — 맵 씬의 스폰 지점은 반드시 넘길 것.
+    /// ⚠️ 안 넘기면 활성 씬에 생기는데, 맵 로드 직후의 Start()는 <c>SetActiveScene(맵)</c>보다 **먼저** 돈다.
+    ///    그때 활성 씬은 Systems라 루팅 아이템이 Systems에 쌓이고, 맵을 떠나도 안 지워졌다(Zone1 1회 32개 누수).</summary>
+    public static WorldItem Drop(ItemInstance item, Vector3 position, Component owner = null)
     {
         if (item == null || item.data == null) return null;
 
@@ -75,6 +78,14 @@ public class WorldItem : MonoBehaviour
         }
 
         go.name = $"WorldItem_{item.data.itemId}";
+
+        if (owner != null)
+        {
+            var scene = owner.gameObject.scene;
+            // DDOL 씬(플레이어 등)은 MoveGameObjectToScene 대상이 아니다 — 그땐 활성 씬(=현재 맵)에 둔다.
+            if (scene.IsValid() && scene.isLoaded && scene != go.scene && scene.name != "DontDestroyOnLoad")
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, scene);
+        }
 
         // WorldItem 컴포넌트
         var worldItem = go.AddComponent<WorldItem>();

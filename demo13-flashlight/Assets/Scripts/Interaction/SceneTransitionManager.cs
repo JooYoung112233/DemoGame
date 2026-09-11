@@ -59,7 +59,7 @@ public class SceneTransitionManager : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
 
         fadeTex = new Texture2D(1, 1);
         fadeTex.SetPixel(0, 0, Color.white);

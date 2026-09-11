@@ -64,7 +64,7 @@ public class TraitManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
         LoadDefinitions();
     }
 

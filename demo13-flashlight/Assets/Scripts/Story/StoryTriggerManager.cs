@@ -27,7 +27,7 @@ public class StoryTriggerManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
 
         SceneManager.sceneLoaded += OnSceneLoaded;
     }

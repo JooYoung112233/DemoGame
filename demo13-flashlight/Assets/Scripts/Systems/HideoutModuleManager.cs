@@ -57,7 +57,7 @@ public class HideoutModuleManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
         SeedDefaultsIfEmpty();   // 새 게임: 침대(quarters)·창고(stash) 기본 Lv1 건설 상태
     }
 

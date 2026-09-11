@@ -190,9 +190,12 @@ public class TopDownPlayer : MonoBehaviour
     void Awake()
     {
         // PlayerRig(카메라+플레이어+라이트 한 세트)의 루트를 보존/중복제거
-        if (Instance != null && Instance != this) { Destroy(transform.root.gameObject); return; }
+        // ⚠️ transform.root가 아니라 폴더를 건너뛴 소유 루트다. Systems 씬에서 PlayerRig는 Player 폴더 안에
+        //    있어서, transform.root를 쓰면 중복 제거 때 **폴더째** 지우고 DDOL도 폴더에 건다.
+        var rigRoot = HierarchyFolder.OwnerRoot(transform).gameObject;
+        if (Instance != null && Instance != this) { Destroy(rigRoot); return; }
         Instance = this;
-        DontDestroyOnLoad(transform.root.gameObject);
+        HierarchyFolder.Persist(rigRoot);
 
         // ⚠️ Rigidbody2D가 남아 있으면 같은 오브젝트에 3D Rigidbody를 붙일 수 없다.
         //    Destroy는 프레임 끝에 처리되므로 여기서 지우고 바로 붙이는 것도 불가능하다.

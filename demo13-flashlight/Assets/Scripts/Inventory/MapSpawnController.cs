@@ -335,7 +335,7 @@ public class MapSpawnController : MonoBehaviour
                 Vector3 pos = points[p].transform.position + new Vector3(
                     Random.Range(-0.4f, 0.4f), 0f,
                     Random.Range(-0.4f, 0.4f));
-                WorldItem.Drop(items[idx], pos);
+                WorldItem.Drop(items[idx], pos, this);
                 totalSpawned++;
             }
         }

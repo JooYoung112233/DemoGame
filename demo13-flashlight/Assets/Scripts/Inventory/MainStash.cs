@@ -22,7 +22,7 @@ public class MainStash : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
         EnsureGrid();
         TrySubscribe();
     }

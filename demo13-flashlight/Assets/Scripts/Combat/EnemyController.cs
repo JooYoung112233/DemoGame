@@ -1115,7 +1115,7 @@ public class EnemyController : MonoBehaviour
     void DropOne(ItemInstance item)
     {
         Vector2 r = Random.insideUnitCircle * 0.6f;
-        WorldItem.Drop(item, transform.position + new Vector3(r.x, r.y, 0f));
+        WorldItem.Drop(item, transform.position + new Vector3(r.x, r.y, 0f), this);
     }
 
     void OnGroggyTriggered()

@@ -23,7 +23,7 @@ public class RegionLootBootstrap : MonoBehaviour
         DropTier(origin + Vector3.right * 1.5f, region, RegionLootTier.ContainerDay, containerRolls, scatterRadius);
     }
 
-    static void DropTier(Vector3 origin, string region, RegionLootTier tier, int times, float radius)
+    void DropTier(Vector3 origin, string region, RegionLootTier tier, int times, float radius)
     {
         tier = RegionLootCatalog.ResolveTier(tier, region);
         float mult = GameTuning.Instance != null ? GameTuning.Instance.lootCountMult : 1f;
@@ -36,7 +36,7 @@ public class RegionLootBootstrap : MonoBehaviour
                 Vector3 pos = origin + new Vector3(
                     Random.Range(-radius, radius), 0f,
                     Random.Range(-radius, radius) + i * 0.25f);
-                WorldItem.Drop(items[i], pos);
+                WorldItem.Drop(items[i], pos, this);
             }
         }
     }

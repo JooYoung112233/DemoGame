@@ -25,7 +25,7 @@ public class QuestManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
     }
 
     void OnDestroy()

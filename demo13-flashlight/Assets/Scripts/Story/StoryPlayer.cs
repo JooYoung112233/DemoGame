@@ -37,7 +37,7 @@ public class StoryPlayer : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
 
         LoadAllScripts();
     }

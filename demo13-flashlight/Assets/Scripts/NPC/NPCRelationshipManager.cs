@@ -15,7 +15,7 @@ public class NPCRelationshipManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
     }
 
     void OnDestroy()

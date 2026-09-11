@@ -111,6 +111,81 @@ Grid/Tilemap, SpawnPoint, 프롭, 인터랙터블, 탈출존, 씬별 마커.
   포인터/클릭 액션이 비어 **마우스 클릭이 안 먹는다**(중요 함정).
 - `Game.Scripts.asmdef`는 `Unity.InputSystem`을 참조. 패키지: `com.unity.inputsystem`.
 
+## 씬 하이어라키 규약 (2026-09-11)
+
+> 사용자: *"hierarchy 좀 정리해줄래 씬마다 너무 복잡하네 기능별 구조별로 딱딱 나눠줘"*
+
+| 날짜 | 질문 | 결정 |
+|------|------|------|
+| 2026-09-11 | 맵 씬을 어떤 틀로 나눌까 — ①기능별 + 지형만 구조별 ②기능별만 ③구역별 먼저(그 안에 기능별) | **① 기능별 + 지형만 구조별.** 1단계는 컴포넌트로 기능별, 지형(콜라이더+메시뿐인 것)만 2단계로 구조별. ③은 Zone1 빌더(2223줄)를 구역 단위로 뜯어고쳐야 해서 보류. |
+| 2026-09-11 | Systems 씬(매니저 27개가 루트에 평평함) — ①폴더로 묶기 + DDOL 호출 수정 ②구분선만 ③제외 | **① 폴더 + DDOL 수정.** Core / World / Progress / Story / UI / Player. |
+
+### 구조
+
+```
+[맵 씬 — Zone1 · Int_* · Safehouse · Hideout · ScrapMarket · Pawnshop]
+Map
+├─ Environment      지형 — 콜라이더·메시뿐인 것, 컴포넌트 없는 묶음(아트 킷 등)
+│   ├─ Ground          바닥·도로면 (Floor/Ground/Road/LotF…)
+│   ├─ Structures      건물·블록·벽 (Bldg/Apt/Tower/Wall/W_/Rib/Container…, BuildingInterior 건물 포함)
+│   ├─ Roads           도로 차단물·중앙분리대·맵 가장자리 (OB_/MD_/RB_/Edge/JX)
+│   ├─ Scatter         흩뿌린 소품 (SP_/SZ_/P_/Dressing/Board)
+│   └─ Misc            표에 없는 것
+├─ Lighting         Light · Volume · 천장등 묶음 · Sun3D
+├─ Gameplay         SpawnPoint · SceneDoor3D · BuildingEntrance · BlockedPassage · QuestPoiZone ·
+│                   StoryAreaTrigger · InteractableObject · 빈 위치 표식(RoomCenter 등)
+├─ Loot             LootContainer · ItemSpawnPoint · WorldItem
+├─ Enemies          SpawnZone · EnemyController · EnemySpawner
+├─ NPCs             NPCController
+└─ Controllers      MapSpawnController · RaidManager · NavGrid · Hideout* · 이름이 ~Controller/Manager/Director인 비렌더 스크립트
+
+[Systems 씬]
+Core      GameBoot · SaveManager · SceneTransitionManager · ScreenEffectManager · SystemsSceneEnforcer
+World     DayNightCycle · RaidManager · RaidMapManager · HideoutModuleManager
+Progress  Quest · DailyQuest · Achievement · Trait · Reputation · NPCRelationship · Currency · MainStash · PostRaidEvent
+Story     StoryLocale · StoryPlayer · StoryTriggerManager · NarrationUI · NoteUI · TutorialPrompt
+UI        UIManager · ToastManager
+Player    PlayerRig
+
+[Map이 없는 씬 — 룩 체크 등] 같은 판정을 루트 폴더로 + Cameras · Characters
+```
+
+승인안에서 두 가지를 바꿨다: 지형 2단계 `Buildings` → **`Structures`**(실내 벽 `W_*`·하이드아웃 `Rib_*`도 들어가야 해서),
+**`NPCs` 폴더 추가**(안전가옥 NPC 3명 — NPC가 있는 씬에만 생긴다).
+
+### 규칙
+- **분류는 이름이 아니라 컴포넌트로.** 이름 접두사는 뜻이 섞여 있다 — 실측: Zone1의 `SP_`는 소품 188 + 루트 상자 47 +
+  스폰 지점 5가 한 접두사다. 이름 표는 **지형 안을 구조별로 나눌 때만** 쓴다.
+  판정 순서(먼저 맞는 것): Lighting → Controllers → Enemies → Loot → NPCs → Gameplay → Environment.
+  루팅 상자는 `InteractableObject`도 갖고 있어서 Loot가 Gameplay보다 앞이다.
+- **도구 하나로, 빌더가 저장 직전에 부른다.** `Editor/SceneHierarchyOrganizer.cs`. 씬 대부분이 빌더로 생성되므로 손으로
+  정리하면 다음 재빌드에 날아간다. 연결 지점: `EditorSceneBuildUtil.SaveAndClose`(GreyboxBuild → Zone1·실내 전부,
+  Systems, 전당포, 고철시장 등) + 직접 저장하는 `Safehouse3DLayout`·`Hideout3DLayout`·`LookDevScene`.
+  기존 씬은 `Tools ▸ TopDown ▸ 개발 ▸ 하이어라키 정리 (빌드세팅 전체 씬)`.
+- 몇 번 돌려도 결과가 같다 — 이미 폴더에 든 것도 다시 판정해 제자리로 보내고 빈 폴더는 지운다. 폴더는 `HierarchyFolder`
+  컴포넌트로 표시한다. **`Map` 이름은 유지** — `GreyboxBuild.EndScene`(천장등)·`Prop2DCatalogEditor`가 이름으로 찾는다.
+- 옮기지 않는 것: **프리팹 인스턴스 내부**(바깥 루트만 옮김), **싱글톤(정적 `Instance`)이 붙은 떠돌이 루트**(아래 DDOL).
+- 새 Systems 매니저를 추가하면 `SceneHierarchyOrganizer.SystemsTable`에 한 줄 더할 것 — 빠지면 `Misc`로 가고 경고가 뜬다.
+
+### ⚠️ DontDestroyOnLoad와 폴더
+Unity는 **루트가 아닌 오브젝트엔 DDOL을 조용히 무시**하고 경고만 낸다. Systems 매니저 18개는 원래 루트에 있다가 Awake에서
+DDOL 씬으로 옮겨졌는데, 폴더에 넣으면 그게 끊긴다. 그래서:
+- 매니저의 `DontDestroyOnLoad(gameObject)` → **`HierarchyFolder.Persist(gameObject)`**. 부모가 영속 폴더
+  (`detachOnPersist`, Systems 폴더만 켬)면 루트로 뺀 뒤 DDOL을 건다. **런타임 동작은 폴더가 없던 때와 똑같다.**
+  그 외엔 `DontDestroyOnLoad`와 완전히 같다 — UI 패널처럼 다른 부모 밑의 오브젝트는 영향 없음.
+- `TopDownPlayer`는 `transform.root`로 PlayerRig를 잡았는데, Player 폴더가 끼면 **폴더째** 중복 제거·DDOL을 하게 된다.
+  → **`HierarchyFolder.OwnerRoot(transform)`**(폴더를 건너뛴 소유 루트)로 교체.
+- 맵·일반 씬의 싱글톤 루트는 폴더에 넣지 않는다(맵 폴더는 `detachOnPersist`를 끄므로 넣으면 DDOL이 끊긴다).
+
+### ⚠️ 런타임 스폰은 "누구의 씬"인지 넘길 것
+`new GameObject()`/`Instantiate`는 **활성 씬**에 생긴다. 그런데 맵을 additive로 로드하면 그 맵의 `Start()`가
+`SetActiveScene(맵)`보다 **먼저** 돈다 — 그 순간 활성 씬은 Systems다. 그래서 루팅 아이템이 Systems에 쌓이고
+맵을 떠나도 안 지워졌다(2026-09-11 실측: Zone1 한 번에 `WorldItem` 32개 누수).
+- `WorldItem.Drop(item, pos, owner)` — 맵 쪽 호출부(ItemSpawnPoint·MapSpawnController·RegionLootBootstrap·
+  Breakable·EnemyController)는 `this`를 넘긴다. 아이템은 owner의 씬으로 옮겨져 맵과 함께 언로드된다.
+- 플레이어·UI(DDOL) 쪽 드롭은 owner 없이 둔다 — 그땐 이미 활성 씬이 현재 맵이다.
+- 맵 로드 직후 무언가를 스폰하는 새 코드도 같은 규칙: 스폰한 오브젝트를 **자기 씬으로** 옮길 것.
+
 ## 변경 로그
 
 | 날짜 | 질문 | 결정 | 근거 |
@@ -120,3 +195,5 @@ Grid/Tilemap, SpawnPoint, 프롭, 인터랙터블, 탈출존, 씬별 마커.
 | 2026-06-03 | 핵심 게임 루프(안전가옥→맵보드→레이드→파밍→탈출→보상) 골격 | 루프 시스템은 이미 연결돼 있어, 빈 게임플레이 씬에 `GameSceneBuilder`로 루프 오브젝트(스폰/MapBoard/RaidManager/줍기5/ExitPoint) 자동 배치. `RaidResultUI`는 `RaidManager.PendingResult`(static)로 트리거 — 부팅 직후 오발 방지 | "나갔다 돌아오는 루프 먼저" 원칙. 시스템 재사용 + 씬 콘텐츠만 추가. |
 | 2026-06-03 | 안전가옥 timeScale=0이면 Rigidbody2D 이동(FixedUpdate)이 얼어 맵보드까지 못 감 | 안전가옥도 **timeScale=1**(걸어다니는 허브). 낮/밤·지역시계는 `ActiveRegionId=null`+이벤트(T키)로 정지하므로 timeScale과 무관 | 루프 전 단계가 걸어다니는 모델 — 일관성. |
 | 2026-06-24 | 레거시 Input Manager 폐기 예정 경고. 신 Input System으로 옮길지/방식 | 신 Input System으로 전환(`activeInputHandler:1`, New 전용). 입력이 전부 폴링 구조라 액션 에셋·콜백 재배선 대신 **호환 셰임 `GameInput`**(Keyboard/Mouse.current 래핑)으로 87개 호출부를 1:1 치환. UI 입력 모듈은 `InputSystemUIInputModule`로 교체. Spine 예제 폴더(레거시 Input 사용, 본편 미참조) 삭제 | 폐기 경고 제거 + 미래 호환. 셰임 방식이 폴링 코드베이스에 위험·diff 최소. |
+| 2026-09-11 | 씬 하이어라키가 씬마다 복잡함(Zone1 `Map` 아래 766개 평평, Systems 루트 27개 평평) | **기능별 폴더 규약 + 자동 정리 도구.** 맵 씬은 컴포넌트로 기능별(지형만 이름표로 구조별), Systems는 Core/World/Progress/Story/UI/Player. 빌더 저장 지점에서 자동 적용. DDOL은 `HierarchyFolder.Persist`로(폴더 안이면 루트로 빼고 건다), `TopDownPlayer`는 `OwnerRoot` — 런타임 동작 불변 | 손 정리는 재빌드에 날아간다. 이름 접두사는 뜻이 섞여 있어(SP_ = 소품·상자·스폰) 컴포넌트가 확실하다. §씬 하이어라키 규약 |
+| 2026-09-11 | (버그) 레이드 루팅 아이템이 맵이 아니라 Systems 씬에 생겨, 맵을 떠나도 남음 | `WorldItem.Drop`에 owner 인자 — 맵 쪽 호출부는 `this`를 넘겨 자기 씬으로 옮긴다. 검증: Zone1 체류 39개 모두 Zone1, 안전가옥 이동 후 0개 | 맵 `Start()`가 `SetActiveScene` 전에 돈다. §런타임 스폰은 "누구의 씬"인지 넘길 것 |

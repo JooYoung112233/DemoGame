@@ -108,7 +108,7 @@ public class ItemSpawnPoint : MonoBehaviour
             Vector3 pos = transform.position + new Vector3(
                 Random.Range(-0.3f, 0.3f), 0,
                 Random.Range(-0.3f, 0.3f) + offset);
-            WorldItem.Drop(items[i], pos);
+            WorldItem.Drop(items[i], pos, this);
             offset += 0.2f;
         }
     }
@@ -129,7 +129,7 @@ public class ItemSpawnPoint : MonoBehaviour
     {
         if (fixedItem == null) return;
         var item = new ItemInstance(fixedItem, fixedCount);
-        WorldItem.Drop(item, transform.position);
+        WorldItem.Drop(item, transform.position, this);
     }
 
     ItemInstance[] RollLoot()

@@ -28,7 +28,7 @@ public class StoryLocale : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
 
         SetLanguage(defaultLanguage);
     }

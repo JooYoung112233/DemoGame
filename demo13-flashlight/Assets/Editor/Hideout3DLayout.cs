@@ -142,6 +142,7 @@ public static class Hideout3DLayout
         bulb.shadows = LightShadows.Soft;
         n += 2;
 
+        SceneHierarchyOrganizer.Organize(scene);   // 규약대로 기능별 폴더에 묶는다(docs/architecture.md §씬 하이어라키 규약)
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         AddToBuildSettings(ScenePath);

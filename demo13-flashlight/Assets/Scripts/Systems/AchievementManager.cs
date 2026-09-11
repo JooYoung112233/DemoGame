@@ -41,7 +41,7 @@ public class AchievementManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        HierarchyFolder.Persist(gameObject);
 
         RegisterAchievements();
     }

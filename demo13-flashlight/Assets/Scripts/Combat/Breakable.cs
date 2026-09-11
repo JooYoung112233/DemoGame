@@ -319,7 +319,7 @@ public class Breakable : MonoBehaviour
         if (dropItem != null)
         {
             var pos = transform.position + (Vector3)(Random.insideUnitCircle * 0.2f);
-            WorldItem.Drop(new ItemInstance(dropItem, Mathf.Max(1, dropCount)), pos);
+            WorldItem.Drop(new ItemInstance(dropItem, Mathf.Max(1, dropCount)), pos, this);
         }
 
         // 지역 루트 드랍 — 임시 ItemSpawnPoint(Ground)를 스폰해 기존 루트 파이프라인 재사용.
