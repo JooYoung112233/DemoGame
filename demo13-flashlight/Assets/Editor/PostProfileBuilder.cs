@@ -60,40 +60,50 @@ public static class PostProfileBuilder
         tone.mode.overrideState = true;
         tone.mode.value = TonemappingMode.Neutral;
 
-        // ── 색 보정 ── 대비만 살짝. 채도는 거의 건드리지 않는다(세계가 이미 바랜 색이다).
+        // ── 색 보정 ── 2026-09-11 "어두운 사실풍"(docs/rendering.md §게임 전용 셰이더 + 포스트 프로세싱).
+        //    노출은 올리지 않고, 대비를 세우고, 채도를 뺀다. 그늘의 채도는 BRB/GameLit이 이미 빼므로
+        //    여기서는 화면 전체를 한 번 더 바랜 색으로 묶는 정도만. 색조(파랑/노랑 밀기)는 여전히 안 한다.
         var color = profile.Add<ColorAdjustments>(true);
         Keep(profile, color);
-        color.postExposure.overrideState = true; color.postExposure.value = 0.20f;
-        color.contrast.overrideState     = true; color.contrast.value     = 10f;
-        color.saturation.overrideState   = true; color.saturation.value   = -6f;
+        color.postExposure.overrideState = true; color.postExposure.value = 0.0f;
+        color.contrast.overrideState     = true; color.contrast.value     = 18f;
+        color.saturation.overrideState   = true; color.saturation.value   = -18f;
 
-        // ── 블룸 ── 문턱을 높게. 랜턴·창문 같은 실제 광원에만 걸린다.
-        //    문턱이 낮으면 밝은 옷·벽까지 번져 안개 낀 것처럼 된다.
+        // ── 블룸 ── 문턱은 여전히 높게(밝은 옷·벽이 번지면 안개가 된다). 대신 걸리는 광원 —
+        //    랜턴·창문·희귀도 빛기둥 — 은 조금 더 번지게: "빛이 닿는 곳만 살아난다"의 짝.
         var bloom = profile.Add<Bloom>(true);
         Keep(profile, bloom);
-        bloom.threshold.overrideState = true; bloom.threshold.value = 1.10f;
-        bloom.intensity.overrideState = true; bloom.intensity.value = 0.45f;
-        bloom.scatter.overrideState   = true; bloom.scatter.value   = 0.60f;
+        bloom.threshold.overrideState = true; bloom.threshold.value = 1.00f;
+        bloom.intensity.overrideState = true; bloom.intensity.value = 0.60f;
+        bloom.scatter.overrideState   = true; bloom.scatter.value   = 0.65f;
 
-        // ── 비네트 ── 쿼터뷰라 화면 가장자리에 정보가 적다. 살짝 눌러 시선을 가운데로.
+        // ── 비네트 ── 쿼터뷰라 화면 가장자리에 정보가 적다. 어두운 룩이라 조금 더 눌러 시선을 가운데로.
         var vig = profile.Add<Vignette>(true);
         Keep(profile, vig);
-        vig.intensity.overrideState  = true; vig.intensity.value  = 0.24f;
-        vig.smoothness.overrideState = true; vig.smoothness.value = 0.45f;
+        vig.intensity.overrideState  = true; vig.intensity.value  = 0.32f;
+        vig.smoothness.overrideState = true; vig.smoothness.value = 0.40f;
 
-        // ── 필름 그레인 ── 아주 약하게. 로우폴리 면이 매끈하게 뭉치는 걸 깨 준다.
+        // ── 필름 그레인 ── 조금 더. 어두운 면이 매끈하게 뭉치는 걸 깨고 "옛 필름" 질감을 준다.
         var grain = profile.Add<FilmGrain>(true);
         Keep(profile, grain);
         grain.type.overrideState      = true; grain.type.value      = FilmGrainLookup.Medium1;
-        grain.intensity.overrideState = true; grain.intensity.value = 0.14f;
+        grain.intensity.overrideState = true; grain.intensity.value = 0.22f;
         grain.response.overrideState  = true; grain.response.value  = 0.8f;
+
+        // 색 보정은 HDR에서 — 파이프라인이 HDR인데 그레이딩만 LDR(32 LUT)이면 밝은 광원이 잘린 뒤에 보정된다.
+        if (GraphicsSettings.defaultRenderPipeline is UniversalRenderPipelineAsset urp
+            && urp.colorGradingMode != ColorGradingMode.HighDynamicRange)
+        {
+            urp.colorGradingMode = ColorGradingMode.HighDynamicRange;
+            EditorUtility.SetDirty(urp);
+        }
 
         EditorUtility.SetDirty(profile);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
         Debug.Log($"[포스트프로세싱] 생성 — {Path} (컴포넌트 {profile.components.Count}개)\n"
-                + "  톤매핑 Neutral · 노출 +0.20 · 대비 +10 · 채도 −6 · 블룸 문턱 1.10 · 비네트 0.24 · 그레인 0.14\n"
+                + "  톤매핑 Neutral · 노출 0 · 대비 +18 · 채도 −18 · 블룸 문턱 1.00/세기 0.60 · 비네트 0.32 · 그레인 0.22 · 그레이딩 HDR\n"
                 + "  색조는 여기서 안 만든다 — WeatherData의 앰비언트·광원 색이 만든다.");
         if (!ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("포스트프로세싱", $"컴포넌트 {profile.components.Count}개 생성.", "확인");
