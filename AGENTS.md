@@ -15,6 +15,9 @@ Unity 6 기반 top-down 2D 액션 게임 프로토타입 (`demo13-flashlight`). 
 - Unity 작업에 컴퓨터 사용 스킬이나 마우스·키보드·화면 기반 UI 자동화를 사용하지 않는다.
 
 ## 기획 기록 룰 (예외 없음)
+
+- **모델 제작 전에는 항상 `demo13-flashlight/Assets/GPT`의 관련 자료를 먼저 열어 확인한다** (2026-09-11 사용자 지시). 건물은 전체 배치 원화뿐 아니라 해당 건물의 외형·내부·관련 프랍 자료까지 확인하고, 실제 참고 파일과 반영/보류 내용을 해당 시스템 md에 기록한다.
+- 안전구역·하이드아웃 아트는 `demo13-flashlight/docs/safehouse.md`의 **2026-09-11 하이드아웃 아트 기준**을 따른다. 승인된 느낌은 `ArtWork/HideoutReview/InGame.png`, 원화는 `Assets/GPT`를 우선한다.
 - **모든 기획 질문/사용자 결정은 무조건 md에 즉시 기록한다.** 예외 없음.
 - 저장 위치: `demo13-flashlight/docs/` 안 **시스템별 md 파일** (예: `combat.md`, `economy.md`, `inventory.md`)
   - 적절한 시스템 md가 없으면 새로 만든다
