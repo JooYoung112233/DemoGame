@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "inventoryPossessionHidden": true,
+  "equipmentAndAmmoPreserved": true,
+  "sprintOnlyStow": true,
+  "actualProjectileFromMuzzle": true,
+  "meleeStow": true,
+  "rows": [
+    {
+      "stance": "Pistol",
+      "lowerError": 0.0,
+      "gripError": 0.0,
+      "supportError": 0.0,
+      "ammo": 6
+    },
+    {
+      "stance": "AssaultRifle",
+      "lowerError": 0.0,
+      "gripError": 0.0,
+      "supportError": 1.30561727E-06,
+      "ammo": 6
+    }
+  ],
+  "liveInputPlaytest": false
+}

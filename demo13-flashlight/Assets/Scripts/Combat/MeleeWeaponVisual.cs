@@ -37,10 +37,17 @@ public class MeleeWeaponVisual : MonoBehaviour
     float _facingDeg;
     float _from, _to, _dur, _t = 1f;   // _t >= 1 = 스윙 끝
     bool  _charging;
+    bool _stowed;
     float _chargePct;
     float _restAngle = IdleAngle;
 
     public bool IsSwinging => _t < 1f;
+
+    public void SetStowed(bool stowed)
+    {
+        _stowed = stowed;
+        if (stowed && _trail != null) { _trail.emitting = false; _trail.Clear(); }
+    }
 
     /// <summary>owner 밑에 칼을 만들어 붙인다. 이미 있으면 그걸 돌려준다.</summary>
     public static MeleeWeaponVisual Attach(Transform owner, Color bladeColor,
@@ -192,6 +199,14 @@ public class MeleeWeaponVisual : MonoBehaviour
     void Apply(float offsetDeg)
     {
         if (_pivot == null) return;
+        if (_stowed)
+        {
+            var facing = Quaternion.Euler(0f, _facingDeg + 90f, 0f);
+            _pivot.localPosition = facing * new Vector3(.2f, 1.2f, -.40f);
+            _pivot.rotation = facing * Quaternion.FromToRotation(Vector3.right, new Vector3(-.65f, -.75f, 0f));
+            return;
+        }
+        _pivot.localPosition = new Vector3(0f, HandHeight, 0f);
         // ⚠️ 2D에선 Z축 회전이었다. 3D 쿼터뷰에서 스윙은 **XZ 평면**을 도는 것이라 Y축이다.
         //    Z축으로 두면 칼이 수직면에서 돌아 위아래로 까딱거리기만 한다.
         _pivot.rotation = Quaternion.Euler(0f, _facingDeg + offsetDeg, 0f);

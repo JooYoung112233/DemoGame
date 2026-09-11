@@ -28,10 +28,10 @@ public class Projectile : MonoBehaviour
     /// <summary>총알 하나를 쏜다. from=총구, dir=단위벡터.</summary>
     public static Projectile Spawn(Transform owner, Vector2 from, Vector2 dir,
                                    float speed, float damage, float groggy, float range,
-                                   Color color, float length = 0.55f)
+                                   Color color, float length = 0.55f, float? worldHeight = null)
     {
         var go = new GameObject("Bullet");
-        go.transform.position = Plan3D.ToWorld(from, (owner != null ? owner.position.y : 0f) + MuzzleY);
+        go.transform.position = Plan3D.ToWorld(from, worldHeight ?? ((owner != null ? owner.position.y : 0f) + MuzzleY));
         go.transform.rotation = Plan3D.LookRotation(dir, Quaternion.identity);
 
         // ⚠️ 스프라이트는 XY 평면에 납작해서 **local Z 스케일이 아무 일도 하지 않는다** —

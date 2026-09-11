@@ -1,0 +1,80 @@
+[
+  {
+    "kind": "Pistol",
+    "mode": "Aim",
+    "source": "Assets/ChibiSurvivor/Bandit/Firearms/Source/HumanM@Gun_Aim01.fbx",
+    "length": 2.33333349,
+    "supportError": 0.0,
+    "weaponLocal": [
+      -0.09302491,
+      0.978410244,
+      0.03022492,
+      -0.182062
+    ]
+  },
+  {
+    "kind": "Pistol",
+    "mode": "Walk",
+    "source": "Assets/ChibiSurvivor/Bandit/Firearms/Source/HumanM@Gun_Aim01.fbx",
+    "length": 1.2,
+    "supportError": 0.0,
+    "weaponLocal": [
+      -0.09302491,
+      0.978410244,
+      0.03022492,
+      -0.182062
+    ]
+  },
+  {
+    "kind": "Pistol",
+    "mode": "Shoot",
+    "source": "Assets/ChibiSurvivor/Bandit/Firearms/Source/HumanM@Gun_Aim01_Shoot01.fbx",
+    "length": 0.8000001,
+    "supportError": 0.0,
+    "weaponLocal": [
+      -0.09302491,
+      0.978410244,
+      0.03022492,
+      -0.182062
+    ]
+  },
+  {
+    "kind": "Rifle",
+    "mode": "Aim",
+    "source": "Assets/ChibiSurvivor/Bandit/Firearms/Source/HumanM@AssaultRifle_Aim01.fbx",
+    "length": 2.33333349,
+    "supportError": 7.617103E-07,
+    "weaponLocal": [
+      -0.09302543,
+      0.978410244,
+      0.0302251875,
+      -0.18206127
+    ]
+  },
+  {
+    "kind": "Rifle",
+    "mode": "Walk",
+    "source": "Assets/ChibiSurvivor/Bandit/Firearms/Source/HumanM@AssaultRifle_Aim01.fbx",
+    "length": 1.2,
+    "supportError": 8.6130774E-07,
+    "weaponLocal": [
+      -0.09302543,
+      0.978410244,
+      0.0302251875,
+      -0.18206127
+    ]
+  },
+  {
+    "kind": "Rifle",
+    "mode": "Shoot",
+    "source": "Assets/ChibiSurvivor/Bandit/Firearms/Source/HumanM@AssaultRifle_Aim01_Shoot01.fbx",
+    "length": 0.8000001,
+    "supportError": 6.5970255E-07,
+    "weaponLocal": [
+      -0.09302543,
+      0.978410244,
+      0.0302251875,
+      -0.18206127
+    ]
+  }
+]
