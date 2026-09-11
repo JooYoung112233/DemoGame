@@ -8,8 +8,8 @@
     },
     {
       "name": "Pawnshop_Roof",
-      "pieces": 54,
-      "triangles": 2504,
+      "pieces": 90,
+      "triangles": 4040,
       "metricUV0": true
     },
     {
@@ -20,8 +20,8 @@
     },
     {
       "name": "Repair_Roof",
-      "pieces": 54,
-      "triangles": 2504,
+      "pieces": 131,
+      "triangles": 5892,
       "metricUV0": true
     },
     {
@@ -32,8 +32,8 @@
     },
     {
       "name": "Medical_Roof",
-      "pieces": 54,
-      "triangles": 2504,
+      "pieces": 134,
+      "triangles": 6008,
       "metricUV0": true
     },
     {
@@ -44,8 +44,8 @@
     },
     {
       "name": "Furniture_Roof",
-      "pieces": 54,
-      "triangles": 2504,
+      "pieces": 99,
+      "triangles": 4436,
       "metricUV0": true
     },
     {
@@ -56,8 +56,8 @@
     },
     {
       "name": "BlackMarket_Roof",
-      "pieces": 75,
-      "triangles": 2804,
+      "pieces": 163,
+      "triangles": 6900,
       "metricUV0": true
     },
     {
@@ -68,8 +68,8 @@
     },
     {
       "name": "Container_Home_Roof",
-      "pieces": 88,
-      "triangles": 4000,
+      "pieces": 92,
+      "triangles": 4128,
       "metricUV0": true
     },
     {
@@ -109,8 +109,8 @@
       "metricUV0": true
     }
   ],
-  "totalTriangles": 41304,
-  "packedPBRMaterials": 21,
+  "totalTriangles": 55888,
+  "packedPBRMaterials": 24,
   "editableLayout": true,
   "unityFinalImportAndPlaytest": "pending: user is running combat testing; keep Unity play mode untouched"
 }

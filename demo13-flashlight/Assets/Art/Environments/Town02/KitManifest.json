@@ -5,48 +5,48 @@
       "sourcePieces": 60
     },
     "Pawnshop_Roof": {
-      "triangles": 2504,
-      "sourcePieces": 54
+      "triangles": 4040,
+      "sourcePieces": 90
     },
     "Repair_Shell": {
       "triangles": 3932,
       "sourcePieces": 89
     },
     "Repair_Roof": {
-      "triangles": 2504,
-      "sourcePieces": 54
+      "triangles": 5892,
+      "sourcePieces": 131
     },
     "Medical_Shell": {
       "triangles": 2480,
       "sourcePieces": 56
     },
     "Medical_Roof": {
-      "triangles": 2504,
-      "sourcePieces": 54
+      "triangles": 6008,
+      "sourcePieces": 134
     },
     "Furniture_Shell": {
       "triangles": 2924,
       "sourcePieces": 69
     },
     "Furniture_Roof": {
-      "triangles": 2504,
-      "sourcePieces": 54
+      "triangles": 4436,
+      "sourcePieces": 99
     },
     "BlackMarket_Shell": {
       "triangles": 1868,
       "sourcePieces": 45
     },
     "BlackMarket_Roof": {
-      "triangles": 2804,
-      "sourcePieces": 75
+      "triangles": 6900,
+      "sourcePieces": 163
     },
     "Container_Home_Shell": {
       "triangles": 5412,
       "sourcePieces": 123
     },
     "Container_Home_Roof": {
-      "triangles": 4000,
-      "sourcePieces": 88
+      "triangles": 4128,
+      "sourcePieces": 92
     },
     "SpoolTable02": {
       "triangles": 700,
@@ -217,6 +217,30 @@
         0.132
       ],
       "family": "Asphalt"
+    },
+    "Town_RoofWarm": {
+      "color": [
+        0.185,
+        0.163,
+        0.12
+      ],
+      "family": "Roof"
+    },
+    "Town_RoofClean": {
+      "color": [
+        0.255,
+        0.26,
+        0.235
+      ],
+      "family": "Roof"
+    },
+    "Town_RoofDark": {
+      "color": [
+        0.088,
+        0.09,
+        0.078
+      ],
+      "family": "Roof"
     },
     "Town_Graphite": {
       "color": [

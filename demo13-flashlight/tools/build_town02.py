@@ -20,6 +20,7 @@ palette={
  'Canvas':([.245,.25,.175],'Cloth'),'Red':([.30,.082,.052],'PaintedMetal'),
  'Glass':([.037,.062,.061],'PaintedMetal'),'Paper':([.55,.50,.37],'Plaster'),
  'Asphalt':([.14,.151,.143],'Asphalt'),'Dirt':([.20,.179,.132],'Asphalt'),
+ 'RoofWarm':([.185,.163,.12],'Roof'),'RoofClean':([.255,.26,.235],'Roof'),'RoofDark':([.088,.09,.078],'Roof'),
  'Graphite':([.12,.119,.10],'Brick'),'Tile':([.52,.50,.43],'Tile'),'Sage':([.20,.265,.235],'Tile')}
 mats={};assets={};parts=[];rng=random.Random(911)
 for n,(c,f) in palette.items():
@@ -79,43 +80,11 @@ def awning(x,z,w,mat):
   box('Awning slat',(xx,2.94,z-.55),(w/round(w/.28)-.015,.12,1.12),mat,.018)
  for xx in [x-w/2+.10,x+w/2-.10]:box('Awning bracket',(xx,2.66,z-.25),(.065,.49,.44),'Steel')
 def rooftop(n,w,d,h=4.5,metal=False):
- box('Roof membrane',(0,h+.11,0),(w+.35,.22,d+.35),'Olive' if metal else 'Roof')
- for z in [-d/2,d/2]:
-  box('Parapet',(0,h+.37,z),(w+.38,.52,.26),'Concrete' if not metal else 'DarkOlive')
-  box('Coping',(0,h+.65,z),(w+.56,.12,.42),'Concrete' if not metal else 'Edge')
- for x in [-w/2,w/2]:
-  box('Parapet',(x,h+.37,0),(.26,.52,d),'Concrete' if not metal else 'DarkOlive')
-  box('Coping',(x,h+.65,0),(.42,.12,d),'Concrete' if not metal else 'Edge')
- if metal:
-  for i in range(round(w/.32)):box('Roof rib',(-w/2+(i+.5)*w/round(w/.32),h+.26,0),(.07,.10,d-.3),'Olive',.015)
- else:
-  for x,z,ww,dd in [(-w*.26,d*.13,1.7,1.3),(w*.18,-d*.18,1.3,.8)]:box('Roof patch',(x,h+.227,z),(ww,.012,dd),'Concrete',.002)
- x,z=-w*.22,d*.12
- box('HVAC feet',(x,h+.38,z),(1.6,.25,1.6),'Steel')
- box('HVAC casing',(x,h+.88,z),(1.6,.84,1.5),'Edge')
- box('HVAC lid',(x,h+1.34,z),(1.73,.10,1.62),'Steel')
- cyl('Fan recess',(x,h+1.40,z),.57,.06,'DarkOlive')
- for t in range(-4,5):
-  a=t*.115;l=2*math.sqrt(max(0,.54**2-a*a))
-  box('Fan grille',(x+a,h+1.443,z),(.027,.026,l),'Edge',.003)
-  box('Fan grille',(x,h+1.45,z+a),(l,.024,.027),'Edge',.003)
- cyl('Fan hub',(x,h+1.47,z),.11,.055,'Steel')
- for i in range(6):box('Cooling louvers',(x,h+.61+i*.095,z-.77),(1.25,.028,.055),'Steel',.005)
- for x,z in [(w*.24,d*.18),(w*.32,-d*.15)]:
-  cyl('Vent flashing',(x,h+.27,z),.29,.09,'Steel');cyl('Vent pipe',(x,h+.64,z),.12,.69,'Edge');cyl('Rain cap',(x,h+1.01,z),.22,.08,'Steel')
- if not metal:
-  for xx in [-w/2,w/2]:
-   for zz in [-d/2,d/2]:
-    box('Raised corner cap',(xx,h+.68,zz),(.57,.22,.57),'Graphite' if n=='BlackMarket' else 'Cream')
-    box('Recessed cap socket',(xx,h+.795,zz),(.19,.012,.19),'Steel',.002)
- if n=='BlackMarket':
-  xx,zz=w*.3,d*.28;cyl('Antenna pole',(xx,h+1.15,zz),.035,1.8,'Steel')
-  beam('Antenna spine',(xx-.9,h+2.03,zz),(xx+.9,h+2.03,zz),.04,'Edge')
-  for i in range(-3,4):beam('Antenna fin',(xx+i*.25,h+2.03,zz-.33),(xx+i*.25,h+2.03,zz+.33),.027,'Edge')
-  for i in range(12):
-   t=i/12;u=(i+1)/12
-   beam('Roof cable',(-w*.22+t*w*.52,h+.25,d*.12+math.sin(t*5)*.30),(-w*.22+u*w*.52,h+.25,d*.12+math.sin(u*5)*.30),.025,'Steel')
- export(n+'_Roof')
+ import sys
+ sys.path.insert(0,str(Path(__file__).resolve().parent))
+ from town02_roofs import build_roof
+ build_roof(n,w,d,h,metal,box,cyl,beam,export,parts,mats)
+
 specs=[('Pawnshop',16,12,'Brick',False),('Repair',14,10,'Ochre',False),('Medical',18,10,'Tile',False),('Furniture',10,14,'Wood',True),('BlackMarket',12,14,'Graphite',True)]
 for name,w,d,wall,east in specs:
  z=-d/2
