@@ -49,19 +49,17 @@ public class TopDownPlayer : MonoBehaviour
     [SerializeField] AttackData heavyFullAttack;
 
     [Header("기본값 (StatDB 없을 때)")]
-    [SerializeField] float fallbackMoveSpeed = 5f;
+    [SerializeField] float fallbackMoveSpeed = 1.2f;
 
     [Header("이동 감각 (걷는 느낌)")]
     [Tooltip("켜면 걷기/달리기 애니 속도를 **실제 이동거리**에 물린다(발이 미끄러지지 않게). 끄면 고유 속도로만 재생.")]
     [SerializeField] bool animCadenceMatchesSpeed = true;
-    [Tooltip("걷기 클립이 원래 몇 m/s용인가 — 보폭 실측값. 이 속도로 걸을 때 애니 배속이 1이 된다.\n" +
-             "(2026-09-10 실측: 보폭 0.21m × 2걸음 ÷ 1.2s ≈ 0.34m/s)")]
-    [SerializeField] float walkClipSpeed = 0.34f;
-    [Tooltip("달리기 클립의 자연 속도(m/s). 실측 0.52.")]
-    [SerializeField] float runClipSpeed = 0.52f;
-    [Tooltip("애니 배속 상한. 이동속도(4m/s)는 클립(0.34m/s)의 12배라 그대로 물리면 다리가 뭉갠다 —\n" +
-             "여기서 잘라 '빠르게 걷는다'까지만 표현하고 나머지 미끄러짐은 감수한다.")]
-    [SerializeField] float animCadenceMax = 2.4f;
+    [Tooltip("걷기 클립 발 접지 실측 속도(m/s). 2026-09-11: 0.45.")]
+    [SerializeField] float walkClipSpeed = 0.45f;
+    [Tooltip("달리기 클립 발 접지 실측 속도(m/s). 2026-09-11: 2.3.")]
+    [SerializeField] float runClipSpeed = 2.3f;
+    [Tooltip("애니 배속 상한. 현재 걷기 1.2m/s는 원본 대비 약 2.67배로 재생한다.")]
+    [SerializeField] float animCadenceMax = 2.7f;
 
     // ── 퍼블릭 API ───────────────────────────────────────────────────
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
@@ -408,8 +406,10 @@ public class TopDownPlayer : MonoBehaviour
 
         float h = GameInput.GetAxisRaw("Horizontal");
         float v = GameInput.GetAxisRaw("Vertical");
-        // Vector2 속성의 Normalize()는 반환된 복사본만 바꾼다. 결과를 명시적으로 저장한다.
-        MoveDirection = Vector2.ClampMagnitude(CameraRelative(h, v), 1f);
+        // Clamp combined input BEFORE camera conversion: two keys never add sqrt(2) speed.
+        // Keep partial stick input; the orthonormal camera basis below preserves its magnitude.
+        Vector2 input = Vector2.ClampMagnitude(new Vector2(h, v), 1f);
+        MoveDirection = CameraRelative(input.x, input.y);
 
         float speed = MoveSpd * (IsSprinting ? SprintMult : 1f);
         if (_crouching) speed *= Stat.crouchSpeedMultiplier;  // 앉아 이동 = 감속
@@ -503,12 +503,19 @@ public class TopDownPlayer : MonoBehaviour
     Vector2 CameraRelative(float h, float v)
     {
         var camT = CameraFollow.Instance != null ? CameraFollow.Instance.transform : (_cam != null ? _cam.transform : null);
-        if (camT == null) return new Vector2(h, v);
-        Vector3 f = camT.forward; f.y = 0f;
-        Vector3 r = camT.right;   r.y = 0f;
-        if (f.sqrMagnitude < 1e-4f || r.sqrMagnitude < 1e-4f) return new Vector2(h, v);
-        f.Normalize(); r.Normalize();
-        return new Vector2(r.x * h + f.x * v, r.z * h + f.z * v);
+        MovementBasis(camT, out Vector2 right, out Vector2 forward);
+        return right * h + forward * v;
+    }
+
+    static void MovementBasis(Transform cam, out Vector2 right, out Vector2 forward)
+    {
+        right = cam != null ? new Vector2(cam.right.x, cam.right.z) : Vector2.right;
+        if (right.sqrMagnitude < 1e-4f) right = Vector2.right;
+        right.Normalize();
+        // Projecting camera forward/right independently can skew the basis when the camera rolls.
+        forward = new Vector2(-right.y, right.x);
+        if (cam != null && Vector2.Dot(forward, new Vector2(cam.forward.x, cam.forward.z)) < 0f)
+            forward = -forward;
     }
 
     /// <summary>월드 평면 방향 → 이동 입력(화면 기준) — <see cref="CameraRelative"/>의 역.
@@ -516,12 +523,8 @@ public class TopDownPlayer : MonoBehaviour
     public static Vector2 WorldToInput(Vector2 worldPlan)
     {
         var camT = CameraFollow.Instance != null ? CameraFollow.Instance.transform : (Camera.main != null ? Camera.main.transform : null);
-        if (camT == null) return worldPlan;
-        Vector3 f = camT.forward; f.y = 0f;
-        Vector3 r = camT.right;   r.y = 0f;
-        if (f.sqrMagnitude < 1e-4f || r.sqrMagnitude < 1e-4f) return worldPlan;
-        f.Normalize(); r.Normalize();
-        return new Vector2(worldPlan.x * r.x + worldPlan.y * r.z, worldPlan.x * f.x + worldPlan.y * f.z);
+        MovementBasis(camT, out Vector2 right, out Vector2 forward);
+        return new Vector2(Vector2.Dot(worldPlan, right), Vector2.Dot(worldPlan, forward));
     }
 
     void UpdateFlip()
@@ -543,9 +546,10 @@ public class TopDownPlayer : MonoBehaviour
         _weaponVis?.SetStowed(IsSprinting && allowed && speed > .05f);
         if (_character3D == null) return;
         bool running = IsSprinting || _state == CombatState.Dodge;
-        string motion = allowed && speed > .05f ? (running ? "run" : "walk") : "idle";
+        bool moving = allowed && speed > .05f;
+        string motion = moving ? (running ? "run" : _crouching ? "crouch_walk" : "walk") : (_crouching ? "crouch" : "idle");
         float cadence = MotionSpeed(motion);
-        if (animCadenceMatchesSpeed && motion != "idle")
+        if (animCadenceMatchesSpeed && moving)
         {
             // 예전엔 "설정 이동속도 대비 비율"이라, 전속으로 달리면 늘 배속 1 = **클립 고유 속도**였다.
             //   클립은 0.34m/s용인데 몸은 4m/s로 나가니 발이 얼음판처럼 미끄러진다.

@@ -46,11 +46,20 @@ public partial class HideoutDiorama : MonoBehaviour
     TopDownPlayer _player;
     Transform _view;              // Character3D
     Camera _cam;
+    bool _movementCaptured, _previousPlayerEnabled, _previousKinematic, _previousInteractionEnabled;
+    Rigidbody _playerBody;
+    InteractionSystem _playerInteraction;
 
     void Awake() => Active = true;
     void OnDestroy()
     {
         RestorePresentation();
+        if (_movementCaptured)
+        {
+            if (_player != null) _player.enabled = _previousPlayerEnabled;
+            if (_playerBody != null) _playerBody.isKinematic = _previousKinematic;
+            if (_playerInteraction != null) _playerInteraction.enabled = _previousInteractionEnabled;
+        }
         Active = false;
         if (CameraFollow.Instance != null) CameraFollow.Instance.ClearFocus();   // 나갈 때만 캐릭터 추적 복구
     }
@@ -74,9 +83,15 @@ public partial class HideoutDiorama : MonoBehaviour
 
         // 걸어다니지 않는 화면 — 이동·마우스 페이싱을 멈춘다.
         // (컴포넌트를 끄면 ChibiPlayerVisual.UpdateMotion도 안 불리므로 회전은 여기서 준다.)
+        _previousPlayerEnabled = _player.enabled;
+        _playerBody = _player.GetComponent<Rigidbody>();
+        _previousKinematic = _playerBody != null && _playerBody.isKinematic;
+        _playerInteraction = _player.GetComponent<InteractionSystem>();
+        _previousInteractionEnabled = _playerInteraction != null && _playerInteraction.enabled;
+        _movementCaptured = true;
         _player.enabled = false;
         var rb = _player.GetComponent<Rigidbody>();
-        if (rb != null) { rb.linearVelocity = Vector3.zero; rb.isKinematic = true; }
+        if (rb != null) { if (!rb.isKinematic) rb.linearVelocity = Vector3.zero; rb.isKinematic = true; }
 
         // ⚠️ 근접 E 프롬프트를 끈다. 걸어다니지 않는 화면이라 "다가가서 E"가 성립하지 않고,
         //    무엇을 누를 수 있는지는 소품 머리 위 FacilityLabel이 알려준다.

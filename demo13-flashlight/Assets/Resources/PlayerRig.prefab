@@ -194,11 +194,11 @@ MonoBehaviour:
   lightCombo: {fileID: 0}
   heavyAttack: {fileID: 0}
   heavyFullAttack: {fileID: 0}
-  fallbackMoveSpeed: 5
+  fallbackMoveSpeed: 1.2
   animCadenceMatchesSpeed: 1
   walkClipSpeed: 0.45
   runClipSpeed: 2.3
-  animCadenceMax: 2.4
+  animCadenceMax: 2.7
 --- !u!114 &8558418155601727802
 MonoBehaviour:
   m_ObjectHideFlags: 0
