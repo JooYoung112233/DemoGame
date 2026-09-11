@@ -1,0 +1,435 @@
+fileFormatVersion: 2
+guid: 538b8ab7384ddc64fb367311fe8470b3
+ModelImporter:
+  serializedVersion: 24600
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AxeProxy_Red
+    second: {fileID: 2100000, guid: 3e143254e2d26f848b54031f321aef28, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_AnomalyAccent
+    second: {fileID: 2100000, guid: fe5b76474ef730b46a378761b14de29b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_WeaponSteel
+    second: {fileID: 2100000, guid: 6ad2d61dc1ea19940820515037fc9771, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_boots
+    second: {fileID: 2100000, guid: 8f4056b4d2e5b494393b0d2f5bbe4804, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_brim
+    second: {fileID: 2100000, guid: 118c01f9cd803144bba1b7d2e7f526da, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_cap
+    second: {fileID: 2100000, guid: 6e503f3e99b095149afb17e9dd50213a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_cuff
+    second: {fileID: 2100000, guid: 039addd95ba36d344b05be8d4f678d25, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_ear
+    second: {fileID: 2100000, guid: 0f0ee317ea6cb11438ae61bf5ec684bf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_flap
+    second: {fileID: 2100000, guid: 1da5f14f69415f84b804a4c90d68e289, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_hair
+    second: {fileID: 2100000, guid: 2592b0fcc5543c246a5bcf0f91ba7704, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_ink
+    second: {fileID: 2100000, guid: 8cb0aee7eee5ee54db8cd600a1a485fd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_iris
+    second: {fileID: 2100000, guid: 24e19e1335ebbe04f90199dd423d9574, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_jacket
+    second: {fileID: 2100000, guid: d1b6764ba5c031a4eb454d2b23fed8e4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_lamp
+    second: {fileID: 2100000, guid: 3798c0e9dd786584e99e9b6e3ab50a6c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_lapel
+    second: {fileID: 2100000, guid: 6fdc1eec99bc74349804b27e12efca9c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_leather
+    second: {fileID: 2100000, guid: 24dbc2eae783de748804613e85fc5500, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_metal
+    second: {fileID: 2100000, guid: 5e4515c641d94204fb80e3b77acb183d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_mouth
+    second: {fileID: 2100000, guid: f544e05fd875c1c448c16cdfb1b760c0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_nose
+    second: {fileID: 2100000, guid: e411a7a294c52964d8d8dd768d750253, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_pack
+    second: {fileID: 2100000, guid: 1e809b62a14291b4693c5fda82f1b28c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_patch
+    second: {fileID: 2100000, guid: 1576dd156b13066488d0cb69da61b57e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_pupil
+    second: {fileID: 2100000, guid: 0b2a9f8944e378c48bf71f3905bdc081, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_scarf
+    second: {fileID: 2100000, guid: f4a90b6e8a4c92d4cb28d39c21e1574e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_skin
+    second: {fileID: 2100000, guid: bd9e45e497d7bc3498ce6e10419a6585, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_sole
+    second: {fileID: 2100000, guid: 33540e8b1317c814caf1bc620f5c9903, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_trouser_cuff
+    second: {fileID: 2100000, guid: 6c80bfb53967fa94f91c1851233a73fd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_trousers
+    second: {fileID: 2100000, guid: 812f7cecabad757489afb0f93f530790, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_under
+    second: {fileID: 2100000, guid: f45e60ac78ca7104591515f909949886, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hero_white
+    second: {fileID: 2100000, guid: 448e95fcef52af04d824142fc55c0595, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_AnomalyAccent
+    second: {fileID: 2100000, guid: a7788847d50592b47885f60bd35d3592, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_Face
+    second: {fileID: 2100000, guid: 8c918f2a28fa0844692d98084d1074f9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_WeaponSteel
+    second: {fileID: 2100000, guid: 60c29f6a0eab7fc498ec2dbf8b5f0961, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_boots
+    second: {fileID: 2100000, guid: 078ec8973ed2b1e428a97865304e6081, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_brim
+    second: {fileID: 2100000, guid: b70403cd6c44c3d459403656815eb2fa, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_cap
+    second: {fileID: 2100000, guid: bac6551ebc5d1ba4899862750fbc2258, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_cuff
+    second: {fileID: 2100000, guid: 2bfb51ad551d24a4f8fe902af5b45529, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_ear
+    second: {fileID: 2100000, guid: 5d68e72086fda034880aaab746681b08, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_flap
+    second: {fileID: 2100000, guid: 826539c062799724c99545b2458a3c27, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_hair
+    second: {fileID: 2100000, guid: d20f71676a2d76049ac3f62097df8e1d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_ink
+    second: {fileID: 2100000, guid: 1e6d2d5c30af4274089adf8ecf258822, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_iris
+    second: {fileID: 2100000, guid: a64ebdb1d70a57846be03f050d65b613, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_jacket
+    second: {fileID: 2100000, guid: 4c1198c2550f25c4090c58f1551cc01b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_lamp
+    second: {fileID: 2100000, guid: aa438bd0d6b69f84c8ec2f323076f654, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_lapel
+    second: {fileID: 2100000, guid: d68ab4ea3cc22a44c9c25d9f2f77d004, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_leather
+    second: {fileID: 2100000, guid: d5095f2f060be1546b581f2578bdbd01, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_metal
+    second: {fileID: 2100000, guid: ffdd9fe2fafb86541b54ff4553f6da46, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_mouth
+    second: {fileID: 2100000, guid: 89b415a50d4fff348988b4bf937a553b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_nose
+    second: {fileID: 2100000, guid: f3bff2234281fbb4585c7f29fbf41be5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_pack
+    second: {fileID: 2100000, guid: a735dfe6c1b282d4abff0f3f43de10e6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_patch
+    second: {fileID: 2100000, guid: e08666722f46de14ea7ac120836e27f5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_pupil
+    second: {fileID: 2100000, guid: c5aa655cd6a6e5b4aa61098039596d79, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_scarf
+    second: {fileID: 2100000, guid: 2172578f4f6a2e9409e6cbd761ffd15d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_skin
+    second: {fileID: 2100000, guid: a99866b56a5d73c40bd775fd7513f704, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_sole
+    second: {fileID: 2100000, guid: 54c2c97bb99bcee4ab4c1ddd89b2b71d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_trouser_cuff
+    second: {fileID: 2100000, guid: 883cb857fb278b946a328328738d0a2c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_trousers
+    second: {fileID: 2100000, guid: 9bd1df383e41b4e418a8479126ec64b1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_under
+    second: {fileID: 2100000, guid: d6d461bf58b19f34d87ace44c75deba9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Surface_Hero_white
+    second: {fileID: 2100000, guid: d00abe7e5c2b90740bcbd920c76bdcf1, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+    searchTexturesGlobally: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 0
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 0
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: AxeChop01
+      takeName: DarkSurvivor_Rig|AxeChop01
+      internalID: -252371419794083448
+      firstFrame: 0
+      lastFrame: 576
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
+      keepOriginalOrientation: 1
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 1
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000u
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    preBakeConvexCollisionMesh: 0
+    preBakeTriangleCollisionMesh: 0
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    importUVs: -1
+    importVertexColors: 1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+    calculateBlendshapeNormalsDeltaFromImportedNormals: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

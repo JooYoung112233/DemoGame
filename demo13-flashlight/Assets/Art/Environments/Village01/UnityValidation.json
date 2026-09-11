@@ -1,0 +1,203 @@
+{
+  "assets": [
+    {
+      "name": "StreetLamp01",
+      "meshParts": 10,
+      "triangles": 376,
+      "size": [
+        0.48,
+        3.709304,
+        0.9999995
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "Bench01",
+      "meshParts": 14,
+      "triangles": 616,
+      "size": [
+        1.7,
+        0.9994714,
+        0.601208568
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "OilDrum01",
+      "meshParts": 9,
+      "triangles": 338,
+      "size": [
+        0.646,
+        0.9139999,
+        0.646000147
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "Pallet01",
+      "meshParts": 9,
+      "triangles": 396,
+      "size": [
+        1.18000007,
+        0.220000088,
+        0.959999859
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "Sandbags01",
+      "meshParts": 16,
+      "triangles": 704,
+      "size": [
+        1.9000001,
+        0.6550001,
+        0.5749999
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "LowFence01",
+      "meshParts": 14,
+      "triangles": 616,
+      "size": [
+        2.0,
+        1.21999991,
+        0.130000129
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "Window01",
+      "meshParts": 10,
+      "triangles": 440,
+      "size": [
+        1.64,
+        1.4849999,
+        0.399999976
+      ],
+      "colliders": 0
+    },
+    {
+      "name": "Awning01",
+      "meshParts": 25,
+      "triangles": 1100,
+      "size": [
+        3.99500012,
+        0.5467614,
+        1.38772988
+      ],
+      "colliders": 0
+    },
+    {
+      "name": "Shutter01",
+      "meshParts": 16,
+      "triangles": 704,
+      "size": [
+        1.50500011,
+        1.92999971,
+        0.147500157
+      ],
+      "colliders": 0
+    },
+    {
+      "name": "NoticeBoard01",
+      "meshParts": 28,
+      "triangles": 1136,
+      "size": [
+        2.64999986,
+        2.39353013,
+        0.592608452
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "PavingSlab01",
+      "meshParts": 3,
+      "triangles": 89,
+      "size": [
+        1.98,
+        0.0955001041,
+        1.97999978
+      ],
+      "colliders": 0
+    },
+    {
+      "name": "Curb01",
+      "meshParts": 2,
+      "triangles": 88,
+      "size": [
+        1.9849999,
+        0.16,
+        0.23
+      ],
+      "colliders": 0
+    },
+    {
+      "name": "Drain01",
+      "meshParts": 12,
+      "triangles": 528,
+      "size": [
+        0.52,
+        0.0505001172,
+        1.01999986
+      ],
+      "colliders": 0
+    },
+    {
+      "name": "Tires01",
+      "meshParts": 39,
+      "triangles": 2016,
+      "size": [
+        0.722,
+        0.6218654,
+        0.692000031
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "Rubble01",
+      "meshParts": 10,
+      "triangles": 440,
+      "size": [
+        1.49105334,
+        0.204384446,
+        1.087249
+      ],
+      "colliders": 0
+    },
+    {
+      "name": "Brazier01",
+      "meshParts": 16,
+      "triangles": 568,
+      "size": [
+        0.7608453,
+        0.5829598,
+        0.799999952
+      ],
+      "colliders": 1
+    },
+    {
+      "name": "ShopSign01",
+      "meshParts": 8,
+      "triangles": 256,
+      "size": [
+        3.2,
+        0.729999959,
+        0.299
+      ],
+      "colliders": 0
+    },
+    {
+      "name": "Bollard01",
+      "meshParts": 3,
+      "triangles": 100,
+      "size": [
+        0.26,
+        0.8699999,
+        0.259999961
+      ],
+      "colliders": 1
+    }
+  ],
+  "missingMaterials": 0
+}

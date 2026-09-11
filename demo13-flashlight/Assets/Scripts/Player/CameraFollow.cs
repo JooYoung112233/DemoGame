@@ -9,7 +9,19 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class CameraFollow : MonoBehaviour
 {
-    public static CameraFollow Instance { get; private set; }
+    static CameraFollow _instance;
+    public static CameraFollow Instance
+    {
+        get
+        {
+            // A duplicate PlayerRig can awaken, then be removed during bootstrap.
+            // Recover the surviving main camera instead of losing facility framing.
+            if (_instance == null && Camera.main != null)
+                _instance = Camera.main.GetComponent<CameraFollow>();
+            return _instance;
+        }
+        private set => _instance = value;
+    }
 
     // 카메라는 PlayerRig 프리팹에 포함되어 DontDestroyOnLoad로 모든 씬 공유.
     // 씬마다 있는 다른 카메라(메인/AudioListener)는 충돌하므로 씬 로드 시 비활성화한다.
@@ -56,7 +68,7 @@ public class CameraFollow : MonoBehaviour
     void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        if (Instance == this) Instance = null;
+        if (_instance == this) _instance = null;
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)

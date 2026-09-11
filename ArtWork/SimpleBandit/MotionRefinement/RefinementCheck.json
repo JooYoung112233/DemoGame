@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "records": [
+    {
+      "clip": "Bandit_BatWalk",
+      "length": 1.2,
+      "maxFootDrift": 0.0,
+      "maxGripError": 4.28493422E-07,
+      "maxHipRaise": 0.0,
+      "maxChestRotation": 2.62686634
+    },
+    {
+      "clip": "Bandit_BatAttack",
+      "length": 1.43999994,
+      "maxFootDrift": 1.82501211E-07,
+      "maxGripError": 0.000325296569,
+      "maxHipRaise": 0.028,
+      "maxChestRotation": 6.52461624
+    }
+  ],
+  "playerIdleRunUnchanged": true
+}

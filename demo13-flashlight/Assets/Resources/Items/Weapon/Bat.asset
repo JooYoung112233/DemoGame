@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Bat
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: bat
-  displayName: "야구방망이"
-  description: "넓은 스윙"
+  displayName: "\uC57C\uAD6C\uBC29\uB9DD\uC774"
+  description: "\uB113\uC740 \uC2A4\uC719"
   icon: {fileID: 0}
   gridWidth: 3
   gridHeight: 1
   category: 0
   rarity: 0
+  primaryRegionId: 
   maxStack: 1
   weight: 1.2
   sellPrice: 1200
@@ -27,4 +28,26 @@ MonoBehaviour:
   isUsable: 0
   useEffect: 0
   effectValue: 0
+  useTimeSeconds: 0
+  isThrowable: 0
+  hasDurability: 0
+  maxDurability: 100
+  durabilityCostPerUse: 50
+  equipSlot: 0
+  containerWidth: 0
+  containerHeight: 0
+  isContainer: 0
+  internalWidth: 0
+  internalHeight: 0
+  allowedCategories: 
+  weaponData: {fileID: 11400000, guid: 4b773e85576af4f4493065db13d31576, type: 2}
+  weaponPartType: 0
+  partMoveSpeedMult: 1
+  partStaminaMult: 1
+  partRangeBonus: 0
+  partRecoilMult: 1
+  magCapacity: 0
+  magCaliber: 
+  ammoCaliber: 
+  ammoDamageMult: 1
   worldDropPrefab: {fileID: 0}

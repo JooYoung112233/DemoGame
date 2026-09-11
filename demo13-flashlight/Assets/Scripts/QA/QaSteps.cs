@@ -84,9 +84,11 @@ public static class QaSteps
     {
         c.Tele.EndCycle();
         var m = c.Tele.Cycles.Count > 0 ? c.Tele.Cycles[c.Tele.Cycles.Count - 1] : null;
+        // 번호는 **시나리오 루프의 사이클**로 통일한다 — 예전엔 END만 텔레메트리 인덱스를 써서
+        // 복구·재시작이 끼면 "사이클 1 종료 → 사이클 3 시작"처럼 뒤죽박죽으로 찍혔다.
         if (m != null)
             c.Report.Info("cycle", "END",
-                $"사이클 {m.cycle} 종료 — 소지금 {m.moneyStart}→{m.moneyEnd} · Lv {m.levelStart}→{m.levelEnd} · 루팅가치 {m.lootValue} · {m.durationSec:0}s");
+                $"사이클 {c.Cycle} 종료 — 소지금 {m.moneyStart}→{m.moneyEnd} · Lv {m.levelStart}→{m.levelEnd} · 루팅가치 {m.lootValue} · {m.durationSec:0}s");
         yield break;
     }
 
@@ -457,6 +459,13 @@ public static class QaSteps
 
     static IEnumerator RaidEnter(QaStepDef d, QaContext c)
     {
+        // 레이드에 **패널을 열어 둔 채** 들어가면 UIManager가 이동 입력을 막아 봇이 스폰에 붙박인다
+        //   (직전 사이클의 정산창·대화창이 그대로 남아 있었다). 들어가기 전에 정리한다.
+        yield return c.Bot.CloseUi("raid");
+        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen())
+            c.Report.Error("raid", "UI_BLOCKING",
+                $"레이드 진입 시점에 패널이 열려 있다: {QaBot.OpenUiNames()} — 이 판은 움직일 수 없다");
+
         string scene = null;
         if (!string.IsNullOrEmpty(d.param) && d.param != "auto")
         {
@@ -1128,8 +1137,10 @@ public static class QaSteps
             if (approach > range + 4f)
             {
                 bool arrived = false;
+                // 예산: 실효 이동속도는 4m/s가 아니라 길찾기 우회를 포함해 2m/s 남짓이다.
+                //   35m 목표에 20초를 주면 도착 직전에 잘려 APPROACH_FAIL만 쌓인다.
                 yield return c.Bot.MoveTo(foe.transform.position, range + 1.5f,
-                                          Mathf.Clamp(approach / 2.5f + 6f, 8f, 45f), r => arrived = r,
+                                          Mathf.Clamp(approach / 2f + 10f, 12f, 60f), r => arrived = r,
                                           () => foe == null || (foeHp != null && foeHp.IsDead));
                 if (!arrived)
                 {
@@ -1142,7 +1153,11 @@ public static class QaSteps
             }
 
             // ── 한 마리와의 교전 루프 ──
-            while (Time.realtimeSinceStartup < deadline)
+            //   ★ **한 마리당 예산**을 따로 둔다. 예전엔 전체 deadline까지 돌아서, 안 죽는 적
+            //     하나가 180초를 통째로 먹고 "타격 0회"만 남겼다 — 다른 적을 시도해 볼 기회조차 없었다.
+            float foeBudget = Mathf.Clamp(budget / Mathf.Max(1, wantKills), 20f, 60f);
+            float foeDeadline = Mathf.Min(deadline, Time.realtimeSinceStartup + foeBudget);
+            while (Time.realtimeSinceStartup < foeDeadline)
             {
                 player = TopDownPlayer.Instance;
                 if (player == null || foe == null) break;
@@ -1264,6 +1279,15 @@ public static class QaSteps
             c.Report.Info("combat", "TRADE",
                 $"타격 {swingsHere}회 → 적 HP {foeHpStart:0}→{foeHpEnd:0} (준 피해 {dealt:0}) · "
                 + $"내 체력 {myHpStart * 100f:0}%→{PlayerHpRatio() * 100f:0}% (받은 피해 {taken:0}%p)");
+
+            // 한 마리 예산을 다 쓰고도 못 잡았으면 **그 적은 접어 둔다** — 안 그러면 같은 놈을
+            // 계속 다시 골라 전체 예산이 한 마리에게 묶인다(다른 적을 시험할 기회가 사라진다).
+            if (foe != null && (foeHp == null || !foeHp.IsDead))
+            {
+                unreachable.Add(foe);
+                c.Report.Info("combat", "GIVE_UP",
+                    $"{foe.name} — {foeBudget:0}초 안에 못 잡음(타격 {swingsHere}, 준 피해 {dealt:0}) → 다음 적으로");
+            }
 
             if (swingsHere >= 4 && dealt <= 0.1f)
                 c.Report.Error("combat", "NO_DAMAGE",

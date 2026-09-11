@@ -763,18 +763,53 @@ public class QaBot : MonoBehaviour
     /// 닫을 게 없는데 ESC를 누르면 UIManager가 일시정지 메뉴를 연다(UIManager.Update).
     /// 2026-07-28 QA: 루팅 후 무조건 ESC를 눌러 일시정지가 계속 떴다 —
     /// 상태를 안 보고 키를 누른 것이라 봇의 잘못이다. 반드시 이 함수를 쓸 것.</summary>
+    /// <summary>열린 패널을 전부 닫는다.
+    ///
+    /// ESC만 두드리던 예전 방식은 **정산창·대화창을 못 닫았다** — 그 둘은 Enter/클릭으로 닫히고,
+    /// 열린 채 남으면 `UIManager.IsAnyUIOpen()`이 true라 **플레이어 입력이 통째로 막힌다.**
+    /// 그래서 봇이 레이드 내내 스폰에 붙박여 "이동 입력에도 정지"만 찍었다(앞은 비어 있었다).
+    /// ESC → Enter → 클릭 순으로 시도하고, 그래도 안 닫히면 어떤 패널인지 이름을 남긴다.</summary>
     public IEnumerator CloseUi(string step)
     {
         var ui = UIManager.Instance;
         if (ui == null) yield break;
 
-        for (int i = 0; i < 5 && ui.IsAnyUIOpen(); i++)
+        for (int i = 0; i < 6 && ui.IsAnyUIOpen(); i++)
         {
-            GameInput.VTapKey(KeyCode.Escape);
+            if (i % 3 == 0)      GameInput.VTapKey(KeyCode.Escape);
+            else if (i % 3 == 1) GameInput.VTapKey(KeyCode.Return);
+            else                 GameInput.VClickMouse(0);
             yield return WaitSec(0.25f);
         }
         if (ui.IsAnyUIOpen())
-            _rep?.Warn(step, "UI_STUCK", "ESC 5회에도 UI가 안 닫힘 — 닫기 배선 확인");
+            _rep?.Warn(step, "UI_STUCK",
+                $"ESC/Enter/클릭 각 2회에도 안 닫힌 패널: {OpenUiNames()} — 이게 열려 있으면 이동 입력이 막힌다");
+    }
+
+    /// <summary>지금 열려 있는 패널 이름들(진단용).</summary>
+    public static string OpenUiNames()
+    {
+        var names = new List<string>();
+        var ui = UIManager.Instance;
+        if (ui != null)
+        {
+            var t = typeof(UIManager);
+            foreach (var fn in new[] { "raidResultUI", "mapSelectUI", "characterPanelUI", "craftingUI",
+                                       "shopUI", "dialogueUI", "postRaidEventUI" })
+            {
+                var f = t.GetField(fn, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var v = f?.GetValue(ui);
+                if (v == null) continue;
+                var pr = v.GetType().GetProperty("IsShowing");
+                if (pr != null && (bool)pr.GetValue(v)) names.Add(fn);
+            }
+        }
+        if (NoteUI.Instance != null && NoteUI.Instance.IsShowing) names.Add("NoteUI");
+        if (PauseMenu.Instance != null && PauseMenu.Instance.IsShowing) names.Add("PauseMenu");
+        if (GroundPickupUI.IsShowing) names.Add("GroundPickupUI");
+        if (ItemDetailUI.IsShowing) names.Add("ItemDetailUI");
+        if (SettingsUI.IsShowing) names.Add("SettingsUI");
+        return names.Count == 0 ? "(없음)" : string.Join(", ", names);
     }
 
     public IEnumerator WaitSec(float sec)
@@ -855,6 +890,7 @@ public class QaBot : MonoBehaviour
         // 경로 없음 지속 시간 — A*가 길을 못 찾는데도 계속 밀면 벽에 박힌 채 타임아웃까지 낭비한다.
         // (2026-07-28 화면 확인: 2.6m 옆 목표인데 사이에 벽 → NavAgent 직선 폴백 → 12초 내내 벽 밀기)
         float noPathTimer = 0f;
+        int   stuckHits   = 0;   // 이 MoveTo 안에서 몇 번 멈췄나(리포트는 한 줄로 합산)
 
         while (t < timeout)
         {
@@ -922,13 +958,24 @@ public class QaBot : MonoBehaviour
                 if (Vector2.Distance(Plan3D.ToPlan(pos), Plan3D.ToPlan(lastCheck)) < 0.15f)
                 {
                     _stuckTimer += checkTimer;
-                    if (_stuckTimer >= 3f && _stuckReported < 8)
+                    if (_stuckTimer >= 3f)
                     {
-                        _stuckReported++;
-                        // 길찾기가 돌고 있었는지 함께 남긴다 — 아니면 "봇이 직선으로만 밀어서"일 수 있어 신뢰도가 다르다.
-                        string how = _pathingNow ? "A*경로 추종 중" : "직선이동(길찾기 없음 — 봇 한계 가능)";
-                        _rep.Warn(_step, "STUCK", $"이동 입력에도 3초 정지 [{how}] — 위치({pos.x:0.#},{pos.z:0.#}) 목표({target.x:0.#},{target.z:0.#})");
-                        _heat?.AddStuck(Scene, Plan3D.ToPlan(pos), _cycle);
+                        // ★ 같은 목표에서 3초마다 같은 줄을 8번 뱉으면 리포트가 그걸로 도배되고
+                        //   정작 "무엇 때문에 멈췄나"가 안 보인다 — **이 MoveTo 한 건당 한 줄**만 쓰고,
+                        //   반복은 세었다가 끝날 때 합산한다. 막고 있는 콜라이더 이름까지 붙인다.
+                        stuckHits++;
+                        if (stuckHits == 1 && _stuckReported < 8)
+                        {
+                            _stuckReported++;
+                            string how = _pathingNow ? "A*경로" : "직선(길찾기 없음)";
+                            string blocker = "-";
+                            if (Physics.CapsuleCast(pos + new Vector3(0f, 0.35f, 0f), pos + new Vector3(0f, 1.45f, 0f),
+                                                    0.3f, new Vector3(dir.x, 0f, dir.y), out var bh, 1.2f) && !bh.collider.isTrigger)
+                                blocker = bh.collider.name;
+                            _rep.Warn(_step, "STUCK",
+                                $"3초 정지 [{how}] — 위치({pos.x:0.#},{pos.z:0.#}) 목표({target.x:0.#},{target.z:0.#}) 막은것={blocker}");
+                            _heat?.AddStuck(Scene, Plan3D.ToPlan(pos), _cycle);
+                        }
                         _stuckTimer = 0f;
                         // 자유도: 옆으로 빠져나가기 시도(벽 끼임 탈출)
                         yield return Nudge(dir);
@@ -964,6 +1011,8 @@ public class QaBot : MonoBehaviour
         }
 
         GameInput.VSetMove(Vector2.zero);
+        if (stuckHits > 1)
+            _rep?.Info(_step, "STUCK_SUM", $"같은 이동에서 {stuckHits}번 멈췄다 — 목표({target.x:0.#},{target.z:0.#})");
         onDone?.Invoke(false);
     }
 

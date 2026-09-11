@@ -1,0 +1,13 @@
+{
+  "mainPrefab": "Assets/ChibiSurvivor/Player/DarkSurvivor/DarkSurvivor.prefab",
+  "liveUpdated": 0,
+  "clips": [
+    "Idle",
+    "Run",
+    "Walk",
+    "SwordSlash",
+    "SwordWalk"
+  ],
+  "textureMaps": 3,
+  "elbowClearance": true
+}

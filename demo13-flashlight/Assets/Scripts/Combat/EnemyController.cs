@@ -610,6 +610,7 @@ public class EnemyController : MonoBehaviour
     void UpdateAttackWindup()
     {
         windupTimer -= Time.deltaTime;
+        _banditVisual?.SetWindupRemaining(windupTimer);
         SetVelocity(Vector2.zero);
         windupFlashTimer += Time.deltaTime;
         // 강공은 더 진하게/느리게 점멸 — 약공과 구분되어야 피하거나 캔슬을 노릴 수 있다.
@@ -628,6 +629,7 @@ public class EnemyController : MonoBehaviour
         {
             SetVelocity(Vector2.zero);
             _banditAttackElapsed += Time.deltaTime;
+            _banditVisual.SetAttackElapsed(_banditAttackElapsed);
             if (_banditPendingHit && _banditAttackElapsed >= _banditHitAt)
             {
                 _banditPendingHit = false;

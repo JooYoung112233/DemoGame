@@ -1,0 +1,3014 @@
+{
+  "resolution": 2048,
+  "charts": 298,
+  "coverage": 0.41732335090637207,
+  "overlapping_pixels": 696,
+  "regions": {
+    "HEAD_HOOD": [
+      0.02,
+      0.53,
+      0.48,
+      0.45
+    ],
+    "JACKET_ARMS": [
+      0.52,
+      0.53,
+      0.46,
+      0.45
+    ],
+    "TROUSERS": [
+      0.02,
+      0.02,
+      0.42,
+      0.49
+    ],
+    "BOOTS_GEAR": [
+      0.46,
+      0.02,
+      0.52,
+      0.49
+    ]
+  },
+  "layout": [
+    {
+      "part": "Bandit_Belt",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1576,
+        48,
+        312,
+        209
+      ]
+    },
+    {
+      "part": "Bandit_Belt",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1300,
+        863,
+        280,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Belt",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        950,
+        937,
+        124,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Belt",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1596,
+        863,
+        280,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Belt",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1090,
+        937,
+        124,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Belt",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        950,
+        284,
+        312,
+        209
+      ]
+    },
+    {
+      "part": "Bandit_BeltBuckle",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1912,
+        981,
+        42,
+        13
+      ]
+    },
+    {
+      "part": "Bandit_BeltBuckle",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        950,
+        1022,
+        42,
+        13
+      ]
+    },
+    {
+      "part": "Bandit_BeltBuckle",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1634,
+        981,
+        13,
+        20
+      ]
+    },
+    {
+      "part": "Bandit_BeltBuckle",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1663,
+        981,
+        13,
+        20
+      ]
+    },
+    {
+      "part": "Bandit_BeltBuckle",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1530,
+        981,
+        36,
+        20
+      ]
+    },
+    {
+      "part": "Bandit_BeltBuckle",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1582,
+        981,
+        36,
+        20
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1822,
+        284,
+        114,
+        121
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1322,
+        756,
+        65,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1797,
+        646,
+        108,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1403,
+        756,
+        65,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        950,
+        756,
+        108,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1080,
+        509,
+        109,
+        120
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        950,
+        509,
+        114,
+        121
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1484,
+        756,
+        65,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1074,
+        756,
+        108,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1565,
+        756,
+        65,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1198,
+        756,
+        108,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_BootShaft_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1205,
+        509,
+        109,
+        120
+      ]
+    },
+    {
+      "part": "Bandit_Boot_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1270,
+        48,
+        137,
+        211
+      ]
+    },
+    {
+      "part": "Bandit_Boot_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1800,
+        756,
+        112,
+        58
+      ]
+    },
+    {
+      "part": "Bandit_Boot_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1646,
+        509,
+        181,
+        94
+      ]
+    },
+    {
+      "part": "Bandit_Boot_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1541,
+        646,
+        112,
+        94
+      ]
+    },
+    {
+      "part": "Bandit_Boot_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        950,
+        646,
+        181,
+        94
+      ]
+    },
+    {
+      "part": "Bandit_Boot_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1578,
+        284,
+        106,
+        203
+      ]
+    },
+    {
+      "part": "Bandit_Boot_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1423,
+        48,
+        137,
+        211
+      ]
+    },
+    {
+      "part": "Bandit_Boot_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        950,
+        863,
+        112,
+        58
+      ]
+    },
+    {
+      "part": "Bandit_Boot_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1147,
+        646,
+        181,
+        94
+      ]
+    },
+    {
+      "part": "Bandit_Boot_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1669,
+        646,
+        112,
+        94
+      ]
+    },
+    {
+      "part": "Bandit_Boot_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1344,
+        646,
+        181,
+        94
+      ]
+    },
+    {
+      "part": "Bandit_Boot_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1700,
+        284,
+        106,
+        203
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        573,
+        1875,
+        24,
+        24
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        930,
+        1875,
+        17,
+        21
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        608,
+        1921,
+        12,
+        16
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        292,
+        1956,
+        27,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        567,
+        1921,
+        25,
+        16
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        613,
+        1875,
+        24,
+        24
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        963,
+        1875,
+        17,
+        21
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        636,
+        1921,
+        12,
+        16
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        335,
+        1956,
+        27,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_FaceDetails",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        715,
+        1921,
+        25,
+        15
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        541,
+        1713,
+        137,
+        61
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        964,
+        1815,
+        31,
+        30
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        418,
+        1956,
+        23,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        490,
+        1815,
+        51,
+        35
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        756,
+        1921,
+        17,
+        15
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        557,
+        1815,
+        51,
+        34
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        482,
+        1921,
+        27,
+        17
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        157,
+        1921,
+        17,
+        19
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        694,
+        1713,
+        134,
+        59
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        115,
+        1921,
+        26,
+        19
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        457,
+        1956,
+        22,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        624,
+        1815,
+        51,
+        34
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        691,
+        1815,
+        51,
+        33
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        525,
+        1921,
+        26,
+        17
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        190,
+        1921,
+        17,
+        19
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        140,
+        1875,
+        137,
+        29
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        591,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        832,
+        1815,
+        18,
+        31
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        279,
+        1921,
+        19,
+        18
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        664,
+        1921,
+        35,
+        15
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1921,
+        51,
+        19
+      ]
+    },
+    {
+      "part": "Bandit_FaceWrap",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        495,
+        1956,
+        18,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1072,
+        1863,
+        55,
+        54
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1181,
+        1495,
+        65,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1677,
+        1302,
+        93,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1262,
+        1495,
+        65,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1786,
+        1302,
+        93,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1718,
+        1762,
+        61,
+        60
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1143,
+        1863,
+        55,
+        54
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1343,
+        1495,
+        65,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1895,
+        1302,
+        93,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1424,
+        1495,
+        65,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1072,
+        1495,
+        93,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Forearm_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1795,
+        1762,
+        61,
+        60
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_0",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        619,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_0",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        647,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_0",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        117,
+        1815,
+        29,
+        44
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_0",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        675,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_0",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        703,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_0",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        844,
+        1713,
+        29,
+        48
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_0",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        293,
+        1875,
+        32,
+        29
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_0",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        889,
+        1713,
+        19,
+        48
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_0",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        378,
+        1956,
+        24,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        924,
+        1713,
+        53,
+        45
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        154,
+        1956,
+        30,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        529,
+        1956,
+        15,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1815,
+        53,
+        44
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        200,
+        1956,
+        30,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        560,
+        1956,
+        15,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        511,
+        1875,
+        18,
+        27
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        993,
+        1713,
+        14,
+        45
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        246,
+        1956,
+        30,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_1",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        965,
+        1921,
+        38,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_2",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        366,
+        1815,
+        46,
+        36
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_2",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        428,
+        1815,
+        46,
+        36
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_2",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        102,
+        1956,
+        36,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_2",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1956,
+        38,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_2",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        731,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Fringe_2",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        902,
+        1875,
+        12,
+        22
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        842,
+        1588,
+        98,
+        87
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        530,
+        1588,
+        141,
+        96
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        160,
+        1713,
+        98,
+        85
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        223,
+        1921,
+        12,
+        19
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        314,
+        1921,
+        12,
+        18
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        545,
+        1875,
+        12,
+        27
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        996,
+        1875,
+        12,
+        21
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1713,
+        96,
+        86
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        687,
+        1588,
+        139,
+        95
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        274,
+        1713,
+        97,
+        84
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        251,
+        1921,
+        12,
+        19
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        342,
+        1921,
+        12,
+        18
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        759,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        787,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        815,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        348,
+        1588,
+        166,
+        100
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        843,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        871,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        363,
+        1453,
+        148,
+        111
+      ]
+    },
+    {
+      "part": "Bandit_Hair",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        899,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1072,
+        1933,
+        35,
+        32
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1794,
+        1863,
+        27,
+        38
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1570,
+        1863,
+        40,
+        38
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1837,
+        1863,
+        27,
+        38
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1626,
+        1863,
+        40,
+        38
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1123,
+        1933,
+        35,
+        32
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1174,
+        1933,
+        35,
+        32
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1880,
+        1863,
+        27,
+        38
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1682,
+        1863,
+        40,
+        38
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1923,
+        1863,
+        27,
+        38
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1738,
+        1863,
+        40,
+        38
+      ]
+    },
+    {
+      "part": "Bandit_Hands",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1225,
+        1933,
+        35,
+        32
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        202,
+        1588,
+        130,
+        108
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        847,
+        1299,
+        137,
+        120
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        680,
+        1453,
+        96,
+        111
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        527,
+        1453,
+        137,
+        111
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        792,
+        1453,
+        96,
+        111
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1453,
+        140,
+        119
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        370,
+        1921,
+        12,
+        18
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        398,
+        1921,
+        12,
+        18
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        399,
+        1875,
+        12,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        341,
+        1875,
+        13,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        427,
+        1875,
+        12,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        282,
+        1815,
+        26,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        653,
+        1875,
+        12,
+        24
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        927,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        955,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        681,
+        1875,
+        12,
+        24
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        709,
+        1875,
+        12,
+        24
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        426,
+        1921,
+        12,
+        18
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        324,
+        1815,
+        26,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        454,
+        1921,
+        12,
+        18
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        455,
+        1875,
+        12,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        370,
+        1875,
+        13,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        483,
+        1875,
+        12,
+        28
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        737,
+        1875,
+        12,
+        24
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        765,
+        1875,
+        12,
+        24
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        793,
+        1875,
+        12,
+        24
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        983,
+        1956,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Head",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1984,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        48,
+        740,
+        199,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        263,
+        740,
+        190,
+        96
+      ]
+    },
+    {
+      "part": "Bandit_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        675,
+        740,
+        97,
+        96
+      ]
+    },
+    {
+      "part": "Bandit_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        469,
+        740,
+        190,
+        96
+      ]
+    },
+    {
+      "part": "Bandit_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        788,
+        740,
+        97,
+        96
+      ]
+    },
+    {
+      "part": "Bandit_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        310,
+        394,
+        209,
+        135
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1093,
+        183,
+        190
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        804,
+        1093,
+        150,
+        138
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        534,
+        1299,
+        143,
+        126
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1299,
+        148,
+        138
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        204,
+        1453,
+        143,
+        112
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        247,
+        1093,
+        166,
+        168
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        387,
+        1713,
+        138,
+        63
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        212,
+        1299,
+        147,
+        132
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        693,
+        1299,
+        138,
+        124
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        375,
+        1299,
+        143,
+        132
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1588,
+        138,
+        109
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        429,
+        1093,
+        160,
+        161
+      ]
+    },
+    {
+      "part": "Bandit_Hood",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        789,
+        1921,
+        72,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_HoodOpening",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        877,
+        1921,
+        72,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_HoodOpening",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        605,
+        1093,
+        183,
+        142
+      ]
+    },
+    {
+      "part": "Bandit_JacketBody",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1178,
+        1302,
+        226,
+        148
+      ]
+    },
+    {
+      "part": "Bandit_JacketBody",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1072,
+        1093,
+        237,
+        193
+      ]
+    },
+    {
+      "part": "Bandit_JacketBody",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1841,
+        1093,
+        90,
+        177
+      ]
+    },
+    {
+      "part": "Bandit_JacketBody",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1325,
+        1093,
+        237,
+        193
+      ]
+    },
+    {
+      "part": "Bandit_JacketBody",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1072,
+        1302,
+        90,
+        177
+      ]
+    },
+    {
+      "part": "Bandit_JacketBody",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1420,
+        1302,
+        241,
+        131
+      ]
+    },
+    {
+      "part": "Bandit_JacketOpening",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1578,
+        1093,
+        113,
+        192
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1294,
+        1981,
+        43,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1174,
+        1981,
+        44,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1214,
+        1863,
+        45,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1275,
+        1863,
+        45,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1458,
+        1863,
+        12,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1486,
+        1863,
+        12,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1353,
+        1981,
+        43,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1234,
+        1981,
+        44,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1336,
+        1863,
+        45,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1397,
+        1863,
+        45,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1514,
+        1863,
+        12,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_JacketPocket_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1542,
+        1863,
+        12,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_Lapel_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1707,
+        1093,
+        51,
+        180
+      ]
+    },
+    {
+      "part": "Bandit_Lapel_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1774,
+        1093,
+        51,
+        180
+      ]
+    },
+    {
+      "part": "Bandit_LootPouch",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1330,
+        509,
+        65,
+        114
+      ]
+    },
+    {
+      "part": "Bandit_LootPouch",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1411,
+        509,
+        65,
+        114
+      ]
+    },
+    {
+      "part": "Bandit_LootPouch",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1646,
+        756,
+        61,
+        65
+      ]
+    },
+    {
+      "part": "Bandit_LootPouch",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1723,
+        756,
+        61,
+        65
+      ]
+    },
+    {
+      "part": "Bandit_LootPouch",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1492,
+        509,
+        61,
+        96
+      ]
+    },
+    {
+      "part": "Bandit_LootPouch",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1569,
+        509,
+        61,
+        96
+      ]
+    },
+    {
+      "part": "Bandit_Neck",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        162,
+        1815,
+        44,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_Neck",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        866,
+        1815,
+        33,
+        30
+      ]
+    },
+    {
+      "part": "Bandit_Neck",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        48,
+        1875,
+        30,
+        30
+      ]
+    },
+    {
+      "part": "Bandit_Neck",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        915,
+        1815,
+        33,
+        30
+      ]
+    },
+    {
+      "part": "Bandit_Neck",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        94,
+        1875,
+        30,
+        30
+      ]
+    },
+    {
+      "part": "Bandit_Neck",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        222,
+        1815,
+        44,
+        40
+      ]
+    },
+    {
+      "part": "Bandit_NeckKerchief",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        821,
+        1875,
+        65,
+        23
+      ]
+    },
+    {
+      "part": "Bandit_NeckKerchief",
+      "region": "HEAD_HOOD",
+      "rect_pixels": [
+        758,
+        1815,
+        58,
+        31
+      ]
+    },
+    {
+      "part": "Bandit_PouchFlap",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1078,
+        863,
+        13,
+        46
+      ]
+    },
+    {
+      "part": "Bandit_PouchFlap",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1107,
+        863,
+        13,
+        46
+      ]
+    },
+    {
+      "part": "Bandit_PouchFlap",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1748,
+        981,
+        66,
+        13
+      ]
+    },
+    {
+      "part": "Bandit_PouchFlap",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1830,
+        981,
+        66,
+        13
+      ]
+    },
+    {
+      "part": "Bandit_PouchFlap",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1136,
+        863,
+        66,
+        35
+      ]
+    },
+    {
+      "part": "Bandit_PouchFlap",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1218,
+        863,
+        66,
+        35
+      ]
+    },
+    {
+      "part": "Bandit_PouchTab",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1474,
+        981,
+        12,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_PouchTab",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1502,
+        981,
+        12,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_PouchTab",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1008,
+        1022,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_PouchTab",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1036,
+        1022,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Bandit_PouchTab",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1692,
+        981,
+        12,
+        20
+      ]
+    },
+    {
+      "part": "Bandit_PouchTab",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1720,
+        981,
+        12,
+        20
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1280,
+        1637,
+        96,
+        103
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1480,
+        1933,
+        63,
+        22
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1276,
+        1933,
+        86,
+        22
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1559,
+        1933,
+        63,
+        22
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1835,
+        1933,
+        86,
+        17
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1504,
+        1637,
+        93,
+        99
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1392,
+        1637,
+        96,
+        103
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1638,
+        1933,
+        63,
+        22
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1072,
+        1981,
+        86,
+        17
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1717,
+        1933,
+        63,
+        22
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1378,
+        1933,
+        86,
+        22
+      ]
+    },
+    {
+      "part": "Bandit_RolledSleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1613,
+        1637,
+        93,
+        99
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1722,
+        1637,
+        109,
+        98
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1505,
+        1495,
+        107,
+        109
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1072,
+        1637,
+        88,
+        109
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1628,
+        1495,
+        107,
+        109
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1258,
+        1762,
+        88,
+        81
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_-1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1072,
+        1762,
+        77,
+        85
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1847,
+        1637,
+        109,
+        98
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1751,
+        1495,
+        107,
+        109
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1176,
+        1637,
+        88,
+        109
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1874,
+        1495,
+        107,
+        109
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1362,
+        1762,
+        88,
+        81
+      ]
+    },
+    {
+      "part": "Bandit_Sleeve_1",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1165,
+        1762,
+        77,
+        85
+      ]
+    },
+    {
+      "part": "Bandit_Sole_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1278,
+        284,
+        134,
+        208
+      ]
+    },
+    {
+      "part": "Bandit_Sole_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        950,
+        981,
+        115,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_Sole_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1230,
+        937,
+        176,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_Sole_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1081,
+        981,
+        115,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_Sole_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1422,
+        937,
+        176,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_Sole_-1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        950,
+        48,
+        144,
+        220
+      ]
+    },
+    {
+      "part": "Bandit_Sole_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1428,
+        284,
+        134,
+        208
+      ]
+    },
+    {
+      "part": "Bandit_Sole_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1212,
+        981,
+        115,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_Sole_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1614,
+        937,
+        176,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_Sole_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1343,
+        981,
+        115,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_Sole_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1806,
+        937,
+        176,
+        25
+      ]
+    },
+    {
+      "part": "Bandit_Sole_1",
+      "region": "BOOTS_GEAR",
+      "rect_pixels": [
+        1110,
+        48,
+        144,
+        220
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        258,
+        882,
+        90,
+        93
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        676,
+        882,
+        74,
+        42
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        228,
+        993,
+        79,
+        39
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        766,
+        882,
+        74,
+        42
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        323,
+        993,
+        79,
+        39
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        48,
+        882,
+        89,
+        95
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        364,
+        882,
+        90,
+        93
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        48,
+        993,
+        74,
+        42
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        418,
+        993,
+        79,
+        39
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        138,
+        993,
+        74,
+        42
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        513,
+        993,
+        79,
+        39
+      ]
+    },
+    {
+      "part": "Bandit_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        153,
+        882,
+        89,
+        95
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        470,
+        882,
+        87,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        48,
+        48,
+        116,
+        330
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        576,
+        48,
+        115,
+        330
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        180,
+        48,
+        116,
+        330
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        707,
+        48,
+        115,
+        330
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        535,
+        394,
+        119,
+        135
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        573,
+        882,
+        87,
+        91
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        312,
+        48,
+        116,
+        330
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        48,
+        394,
+        115,
+        330
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        444,
+        48,
+        116,
+        330
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        179,
+        394,
+        115,
+        330
+      ]
+    },
+    {
+      "part": "Bandit_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        670,
+        394,
+        119,
+        135
+      ]
+    },
+    {
+      "part": "Bandit_WristWrap",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1636,
+        1762,
+        66,
+        61
+      ]
+    },
+    {
+      "part": "Bandit_WristWrap",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1547,
+        1762,
+        73,
+        61
+      ]
+    },
+    {
+      "part": "Bandit_WristWrap",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1466,
+        1762,
+        65,
+        63
+      ]
+    },
+    {
+      "part": "Bandit_WristWrap",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1872,
+        1762,
+        72,
+        58
+      ]
+    },
+    {
+      "part": "Bandit_WristWrap",
+      "region": "JACKET_ARMS",
+      "rect_pixels": [
+        1796,
+        1933,
+        23,
+        19
+      ]
+    }
+  ]
+}

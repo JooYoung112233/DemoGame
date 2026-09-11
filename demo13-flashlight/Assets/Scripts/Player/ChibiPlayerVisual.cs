@@ -14,6 +14,12 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
     Transform view;
     Animator animator;
     Renderer sword;
+    Renderer bat;
+    bool usingBat;
+    int batHoldLayer = -1;
+    float batLength = 1.6f;
+    int ActiveWalkId => usingBat ? Animator.StringToHash("Base Layer.BatWalk") : SwordWalkId;
+    int ActiveAttackId => usingBat ? Animator.StringToHash("Base Layer.BatSwing") : SwordSlashId;
     bool swordEquipped;
     int holdLayer = -1;
     int motionState = LocomotionId;
@@ -22,6 +28,10 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
 
     public bool HasSwordAnimations => animator != null && sword != null
         && animator.HasState(0, SwordWalkId) && animator.HasState(0, SwordSlashId);
+
+    public bool HasBatAnimations => animator != null && bat != null
+        && animator.HasState(0, Animator.StringToHash("Base Layer.BatWalk"))
+        && animator.HasState(0, Animator.StringToHash("Base Layer.BatSwing"));
 
     public bool Initialize(GameObject model, RuntimeAnimatorController controller, Shader shader, float scale)
     {
@@ -47,13 +57,18 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
         animator.applyRootMotion = false;
         animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
         holdLayer = animator.GetLayerIndex("SwordHold");
+        batHoldLayer = animator.GetLayerIndex("BatHold");
         foreach (AnimationClip clip in controller.animationClips)
+        {
             if (clip.name == "SwordSlash") slashLength = clip.length;
+            if (clip.name == "BatSwing") batLength = clip.length;
+        }
         foreach (Transform child in view.GetComponentsInChildren<Transform>(true))
             child.gameObject.layer = gameObject.layer;
         foreach (Renderer renderer in instance.GetComponentsInChildren<Renderer>(true))
         {
             if (renderer.name == "Hero_SwordProxy") { sword = renderer; sword.enabled = false; }
+            if (renderer.name == "Hero_Bat") { bat = renderer; bat.enabled = false; }
             renderer.shadowCastingMode = ShadowCastingMode.On;
             renderer.receiveShadows = true;
             // A null override keeps the prefab.s editable material assets, including
@@ -101,27 +116,35 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
         return true;
     }
 
-    public void SetSwordEquipped(bool equipped)
+    public void SetSwordEquipped(bool equipped) => SetMeleeEquipped(equipped, false);
+
+    public void SetMeleeEquipped(bool equipped, bool useBat)
     {
-        equipped &= HasSwordAnimations;
-        if (swordEquipped == equipped) return;
+        equipped &= useBat ? HasBatAnimations : HasSwordAnimations;
+        if (swordEquipped == equipped && usingBat == useBat) return;
+        bool changedWeapon = usingBat != useBat;
         swordEquipped = equipped;
-        if (sword != null) sword.enabled = equipped;
-        if (!equipped) CancelAttack();
+        usingBat = useBat;
+        if (sword != null) sword.enabled = equipped && !useBat;
+        if (bat != null) bat.enabled = equipped && useBat;
+        if (!equipped || changedWeapon) CancelAttack();
     }
 
-    public void PlaySwordSlash(float duration, Vector2 facing)
+    public void PlaySwordSlash(float duration, Vector2 facing) => PlayMeleeAttack(duration, facing, false);
+
+    public void PlayMeleeAttack(float duration, Vector2 facing, bool useBat)
     {
-        if (!HasSwordAnimations) return;
-        SetSwordEquipped(true);
+        if (!(useBat ? HasBatAnimations : HasSwordAnimations)) return;
+        SetMeleeEquipped(true, useBat);
         slashRemaining = Mathf.Max(.05f, duration);
         animator.speed = 1f;
-        animator.SetFloat(SlashSpeedId, slashLength / slashRemaining);
+        animator.SetFloat(SlashSpeedId, (useBat ? batLength : slashLength) / slashRemaining);
         if (holdLayer >= 0) animator.SetLayerWeight(holdLayer, 0f);
+        if (batHoldLayer >= 0) animator.SetLayerWeight(batHoldLayer, 0f);
         if (facing.sqrMagnitude > .0001f)
             view.localRotation = Quaternion.Euler(0f, Mathf.Atan2(facing.x, facing.y) * Mathf.Rad2Deg, 0f);
-        animator.CrossFadeInFixedTime(SwordSlashId, .04f, 0, 0f);
-        motionState = SwordSlashId;
+        animator.CrossFadeInFixedTime(ActiveAttackId, .04f, 0, 0f);
+        motionState = ActiveAttackId;
     }
 
     public void CancelAttack()
@@ -129,6 +152,7 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
         slashRemaining = 0f;
         if (animator == null) return;
         if (holdLayer >= 0) animator.SetLayerWeight(holdLayer, 0f);
+        if (batHoldLayer >= 0) animator.SetLayerWeight(batHoldLayer, 0f);
         animator.speed = 1f;
         animator.CrossFadeInFixedTime(LocomotionId, .08f, 0);
         motionState = LocomotionId;
@@ -149,7 +173,7 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
             view.localRotation = Quaternion.Euler(0f, yaw, 0f);
         }
         float motion = allowLocomotion && actualSpeed > .05f ? (sprinting ? 2f : 1f) : 0f;
-        int target = swordEquipped && motion == 1f ? SwordWalkId : LocomotionId;
+        int target = swordEquipped && motion == 1f ? ActiveWalkId : LocomotionId;
         if (target != motionState)
         {
             animator.CrossFadeInFixedTime(target, .12f, 0);
@@ -157,7 +181,8 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
         }
         // Reuse the sword walk's upper-body grip over existing Idle/Run.
         // This adds no separate armed idle/run animation asset.
-        if (holdLayer >= 0) animator.SetLayerWeight(holdLayer, swordEquipped && target == LocomotionId ? 1f : 0f);
+        if (holdLayer >= 0) animator.SetLayerWeight(holdLayer, swordEquipped && !usingBat && target == LocomotionId ? 1f : 0f);
+        if (batHoldLayer >= 0) animator.SetLayerWeight(batHoldLayer, swordEquipped && usingBat && target == LocomotionId ? 1f : 0f);
         animator.SetFloat(SpeedId, motion, .10f, Mathf.Max(0f, deltaTime));
         animator.speed = Mathf.Max(0f, cadence);
     }

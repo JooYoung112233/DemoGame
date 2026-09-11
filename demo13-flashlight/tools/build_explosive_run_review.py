@@ -9,6 +9,8 @@ p=argparse.ArgumentParser()
 p.add_argument('--source',default='Unarmed/Unarmed-Run-Forward');p.add_argument('--base',default='Assets/ChibiSurvivor/Player/WalkReview/CompactSurvivor_WalkReview.blend')
 p.add_argument('--out',default='Assets/ChibiSurvivor/Player/ExplosiveRunReview');p.add_argument('--cache',default='Library/CodexBlender/ExplosiveReview')
 p.add_argument('--action',default='Run_Explosive_Unarmed');p.add_argument('--filename',default='CompactSurvivor_ExplosiveRun');p.add_argument('--forward-gaze',action='store_true')
+p.add_argument('--no-render',action='store_true')
+p.add_argument('--non-loop',action='store_true',help='Keep the final source pose and do not cycle attack curves')
 args=p.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 OUT=ROOT/args.out;OUT.mkdir(exist_ok=True,parents=True)
 CACHE=ROOT/args.cache;CACHE.mkdir(exist_ok=True,parents=True)
@@ -86,7 +88,7 @@ for f,data in enumerate(samples,1):
    p.keyframe_insert('location',frame=f,group=p.name);p.keyframe_insert('rotation_quaternion',frame=f,group=p.name)
 # Calibrate a single floor offset over the cycle, retaining the original hip bounce.
 floor=[]
-for f in range(1,end):
+for f in range(1,end+1 if args.non_loop else end):
  scene.frame_set(f);dg=bpy.context.evaluated_depsgraph_get();ev=bpy.data.objects['Compact_Boots'].evaluated_get(dg);m=ev.to_mesh()
  floor.append(min((ev.matrix_world@v.co).z for v in m.vertices));ev.to_mesh_clear()
 lift=-min(floor)
@@ -104,13 +106,13 @@ if args.forward_gaze:
   head.rotation_quaternion=q@Quaternion((1,0,0),-math.radians(gaze_lift));head.keyframe_insert('rotation_quaternion',frame=f,group='Head')
 for fc in action.fcurves:
  for k in fc.keyframe_points:k.interpolation='LINEAR'
- fc.modifiers.new('CYCLES')
+ if not args.non_loop:fc.modifiers.new('CYCLES')
 for o in source.values():bpy.data.objects.remove(o,do_unlink=True)
 for a in old_actions:
  if '|Take 001|' in a.name and a.users==0:bpy.data.actions.remove(a)
 assert digest()==before_digest,'Character geometry or weights changed'
 assert existing_actions_digest()==before_actions,'An existing animation changed'
-scene.frame_start=1;scene.frame_end=count;scene.render.fps=30;scene.frame_set(1)
+scene.frame_start=1;scene.frame_end=end if args.non_loop else count;scene.render.fps=30;scene.frame_set(1)
 rig['review_source']=f'ExplosiveLLC {clip} (0-{count} original frames)'
 rig['review_status']='Pending user approval; Blender retarget, not Unity Humanoid validation'
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/(args.filename+'.blend')))
@@ -119,7 +121,7 @@ scene.camera.location=(-4.8,-6.2,2.3);scene.camera.rotation_euler=(Vector((0,0,.
 scene.render.engine='BLENDER_EEVEE_NEXT';scene.eevee.taa_render_samples=24
 scene.render.resolution_x=600;scene.render.resolution_y=720;scene.render.resolution_percentage=100
 scene.render.image_settings.file_format='PNG'
-for f in [1,7,13]:
+for f in ([] if args.no_render else [1,7,13]):
  scene.frame_set(f);scene.render.filepath=str(CACHE/f'Pose_{f}.png');bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(CACHE/'Render.blend'))
 print('EXPLOSIVE_RETARGET_READY',flush=True)

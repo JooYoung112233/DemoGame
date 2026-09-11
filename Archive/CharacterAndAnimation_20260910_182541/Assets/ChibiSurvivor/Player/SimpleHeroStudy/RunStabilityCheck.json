@@ -1,0 +1,15 @@
+{
+  "cause": "per-frame sole fitting and abrupt pelvis rotation introduced upper-body chatter",
+  "period_seconds": 0.8,
+  "position_harmonics": 2,
+  "rotation_harmonics": 3,
+  "constant_hip_drop_m": 0.011000000000000003,
+  "before_pelvis_second_difference_m": 0.045417502086037946,
+  "after_pelvis_second_difference_m": 0.011321060070139206,
+  "before_head_second_difference_m": 0.04992908920686259,
+  "after_head_second_difference_m": 0.02352513482332668,
+  "ankle_target_error_m": 9.424321830774485e-08,
+  "geometry_uv_weights_unchanged": true,
+  "other_actions_unchanged": true,
+  "gameplay_applied": false
+}

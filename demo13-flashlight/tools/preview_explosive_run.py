@@ -5,6 +5,7 @@ ROOT=Path(__file__).resolve().parents[1];CACHE=ROOT/'Library/CodexBlender/Explos
 p=argparse.ArgumentParser();p.add_argument('--input');p.add_argument('--out');p.add_argument('--cache');p.add_argument('--stem',default='ExplosiveRunPreview')
 p.add_argument('--label',default='패키지 달리기')
 p.add_argument('--engine',choices=['BLENDER_EEVEE_NEXT','CYCLES'],default='BLENDER_EEVEE_NEXT')
+p.add_argument('--resume',action='store_true')
 args=p.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 source=Path(args.input) if args.input else CACHE/'Render.blend'
 if args.out:OUT=Path(args.out)
@@ -43,6 +44,16 @@ if args.engine=='CYCLES':scene.cycles.device='CPU';scene.cycles.samples=12;scene
 else:scene.eevee.taa_render_samples=24
 scene.render.resolution_x=480;scene.render.resolution_y=600;scene.render.resolution_percentage=100;scene.render.fps=30
 for name,position in [('Front',(-4.8,-7,1.9)),('Side',(-7,-.4,1.65))]:
+ path=CACHE/(name+'.mp4')
+ if args.resume and path.exists():
+  probe_scene=bpy.data.scenes.new('Check_cached_movie')
+  try:
+   probe=probe_scene.sequence_editor_create().strips.new_movie('Check',str(path),channel=1,frame_start=1)
+   valid=probe.frame_duration==count and probe.elements[0].orig_width==480
+  except Exception:valid=False
+  finally:bpy.data.scenes.remove(probe_scene)
+  if valid:
+   print('REUSE_COMPLETE_VIEW',name,flush=True);continue
  scene.camera.location=position;scene.camera.rotation_euler=(Vector((0,0,.79))-scene.camera.location).to_track_quat('-Z','Y').to_euler();scene.camera.data.ortho_scale=1.98
  scene.frame_set(1);movie();path=CACHE/(name+'.mp4');scene.render.filepath=str(path);bpy.ops.render.render(animation=True);exact(path)
  if name=='Front':

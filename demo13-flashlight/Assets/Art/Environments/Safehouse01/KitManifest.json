@@ -1,0 +1,1813 @@
+{
+  "units": "metres",
+  "room_size": [
+    6,
+    4,
+    2.67
+  ],
+  "assets": {
+    "FloorTile01": {
+      "meshes": 6,
+      "triangles": 264,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            -0.06
+          ],
+          "size": [
+            1,
+            1,
+            0.12
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "WallSolid01": {
+      "meshes": 19,
+      "triangles": 752,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            1.335
+          ],
+          "size": [
+            1,
+            0.14,
+            2.67
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "WallWindow01": {
+      "meshes": 48,
+      "triangles": 2112,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            1.335
+          ],
+          "size": [
+            1,
+            0.14,
+            2.67
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "WallDoorFrame01": {
+      "meshes": 18,
+      "triangles": 792,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            -0.472,
+            0,
+            1.1
+          ],
+          "size": [
+            0.055,
+            0.17,
+            2.2
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0.472,
+            0,
+            1.1
+          ],
+          "size": [
+            0.055,
+            0.17,
+            2.2
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            0,
+            2.445
+          ],
+          "size": [
+            1,
+            0.17,
+            0.45
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Door01": {
+      "meshes": 11,
+      "triangles": 426,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0.438,
+            0,
+            1.08
+          ],
+          "size": [
+            0.872,
+            0.082,
+            2.14
+          ],
+          "parent": "Door_Hinge"
+        }
+      ]
+    },
+    "CornerPost01": {
+      "meshes": 3,
+      "triangles": 132,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            1.335
+          ],
+          "size": [
+            0.18,
+            0.18,
+            2.67
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "RoofTile01": {
+      "meshes": 6,
+      "triangles": 264,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.04
+          ],
+          "size": [
+            1,
+            1,
+            0.08
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "EntryStep01": {
+      "meshes": 5,
+      "triangles": 220,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.08
+          ],
+          "size": [
+            1.25,
+            0.7,
+            0.16
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Workbench01": {
+      "meshes": 30,
+      "triangles": 1312,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            -0.71,
+            -0.3,
+            0.43
+          ],
+          "size": [
+            0.075,
+            0.075,
+            0.86
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            -0.71,
+            0.3,
+            0.43
+          ],
+          "size": [
+            0.075,
+            0.075,
+            0.86
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0.71,
+            -0.3,
+            0.43
+          ],
+          "size": [
+            0.075,
+            0.075,
+            0.86
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0.71,
+            0.3,
+            0.43
+          ],
+          "size": [
+            0.075,
+            0.075,
+            0.86
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            0,
+            0.88
+          ],
+          "size": [
+            1.7,
+            0.76,
+            0.095
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            0,
+            0.2
+          ],
+          "size": [
+            1.46,
+            0.7,
+            0.055
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Cot01": {
+      "meshes": 16,
+      "triangles": 704,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.285
+          ],
+          "size": [
+            0.99,
+            2.05,
+            0.57
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Shelf01": {
+      "meshes": 14,
+      "triangles": 616,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            -0.53,
+            -0.205,
+            0.91
+          ],
+          "size": [
+            0.045,
+            0.045,
+            1.82
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            -0.53,
+            0.205,
+            0.91
+          ],
+          "size": [
+            0.045,
+            0.045,
+            1.82
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0.53,
+            -0.205,
+            0.91
+          ],
+          "size": [
+            0.045,
+            0.045,
+            1.82
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0.53,
+            0.205,
+            0.91
+          ],
+          "size": [
+            0.045,
+            0.045,
+            1.82
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            0,
+            0.13
+          ],
+          "size": [
+            1.14,
+            0.49,
+            0.045
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            0,
+            0.66
+          ],
+          "size": [
+            1.14,
+            0.49,
+            0.045
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            0,
+            1.18
+          ],
+          "size": [
+            1.14,
+            0.49,
+            0.045
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            0,
+            1.7
+          ],
+          "size": [
+            1.14,
+            0.49,
+            0.045
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Stool01": {
+      "meshes": 4,
+      "triangles": 176,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.25
+          ],
+          "size": [
+            0.51,
+            0.49,
+            0.49
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "FloorLamp01": {
+      "meshes": 5,
+      "triangles": 196,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.82
+          ],
+          "size": [
+            0.2,
+            0.2,
+            1.64
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "WallLamp01": {
+      "meshes": 5,
+      "triangles": 220,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            -0.05,
+            0
+          ],
+          "size": [
+            0.23,
+            0.22,
+            0.32
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "MapBoard01": {
+      "meshes": 11,
+      "triangles": 436,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1.24,
+            0.07,
+            0.79
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Generator01": {
+      "meshes": 24,
+      "triangles": 1032,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.31
+          ],
+          "size": [
+            0.77,
+            0.55,
+            0.62
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Radio01": {
+      "meshes": 15,
+      "triangles": 644,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.16
+          ],
+          "size": [
+            0.43,
+            0.18,
+            0.32
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "WoodCrate01": {
+      "meshes": 21,
+      "triangles": 924,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.225
+          ],
+          "size": [
+            0.66,
+            0.56,
+            0.45
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Jerrycan01": {
+      "meshes": 8,
+      "triangles": 344,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.27
+          ],
+          "size": [
+            0.31,
+            0.2,
+            0.54
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "MedicalBox01": {
+      "meshes": 9,
+      "triangles": 396,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.2
+          ],
+          "size": [
+            0.51,
+            0.3,
+            0.4
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Rug01": {
+      "meshes": 3,
+      "triangles": 132,
+      "uv_mapped": true,
+      "colliders": []
+    }
+  },
+  "placements": [
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -2.5,
+        -1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -2.5,
+        -1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -2.5,
+        -0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -2.5,
+        -0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -2.5,
+        0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -2.5,
+        0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -2.5,
+        1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -2.5,
+        1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -1.5,
+        -1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -1.5,
+        -1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -1.5,
+        -0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -1.5,
+        -0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -1.5,
+        0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -1.5,
+        0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -1.5,
+        1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -1.5,
+        1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -0.5,
+        -1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -0.5,
+        -1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -0.5,
+        -0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -0.5,
+        -0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -0.5,
+        0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -0.5,
+        0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        -0.5,
+        1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        -0.5,
+        1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        0.5,
+        -1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        0.5,
+        -1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        0.5,
+        -0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        0.5,
+        -0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        0.5,
+        0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        0.5,
+        0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        0.5,
+        1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        0.5,
+        1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        1.5,
+        -1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        1.5,
+        -1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        1.5,
+        -0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        1.5,
+        -0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        1.5,
+        0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        1.5,
+        0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        1.5,
+        1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        1.5,
+        1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        2.5,
+        -1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        2.5,
+        -1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        2.5,
+        -0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        2.5,
+        -0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        2.5,
+        0.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        2.5,
+        0.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "FloorTile01",
+      "position": [
+        2.5,
+        1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Floor",
+      "scale": 1
+    },
+    {
+      "asset": "RoofTile01",
+      "position": [
+        2.5,
+        1.5,
+        2.67
+      ],
+      "rotation_z": 0,
+      "group": "Roof",
+      "scale": 1
+    },
+    {
+      "asset": "WallWindow01",
+      "position": [
+        -2.5,
+        2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        -2.5,
+        -2,
+        0
+      ],
+      "rotation_z": 180,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        -1.5,
+        2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        -1.5,
+        -2,
+        0
+      ],
+      "rotation_z": 180,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        -0.5,
+        2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        -0.5,
+        -2,
+        0
+      ],
+      "rotation_z": 180,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        0.5,
+        2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        0.5,
+        -2,
+        0
+      ],
+      "rotation_z": 180,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallWindow01",
+      "position": [
+        1.5,
+        2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallDoorFrame01",
+      "position": [
+        1.5,
+        -2,
+        0
+      ],
+      "rotation_z": 180,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        2.5,
+        2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        2.5,
+        -2,
+        0
+      ],
+      "rotation_z": 180,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        -3,
+        -1.5,
+        0
+      ],
+      "rotation_z": 90,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        3,
+        -1.5,
+        0
+      ],
+      "rotation_z": -90,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        -3,
+        -0.5,
+        0
+      ],
+      "rotation_z": 90,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        3,
+        -0.5,
+        0
+      ],
+      "rotation_z": -90,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        -3,
+        0.5,
+        0
+      ],
+      "rotation_z": 90,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallWindow01",
+      "position": [
+        3,
+        0.5,
+        0
+      ],
+      "rotation_z": -90,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        -3,
+        1.5,
+        0
+      ],
+      "rotation_z": 90,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "WallSolid01",
+      "position": [
+        3,
+        1.5,
+        0
+      ],
+      "rotation_z": -90,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "CornerPost01",
+      "position": [
+        -3,
+        -2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "CornerPost01",
+      "position": [
+        -3,
+        2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "CornerPost01",
+      "position": [
+        3,
+        -2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "CornerPost01",
+      "position": [
+        3,
+        2,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "VisibleWalls",
+      "scale": 1
+    },
+    {
+      "asset": "Door01",
+      "position": [
+        1.5,
+        -2,
+        0
+      ],
+      "rotation_z": 180,
+      "group": "HiddenWalls",
+      "scale": 1
+    },
+    {
+      "asset": "EntryStep01",
+      "position": [
+        1.5,
+        -2.4,
+        -0.19
+      ],
+      "rotation_z": 0,
+      "group": "Outside",
+      "scale": 1
+    },
+    {
+      "asset": "Workbench01",
+      "position": [
+        0.25,
+        1.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Furniture",
+      "scale": 1
+    },
+    {
+      "asset": "Cot01",
+      "position": [
+        -2.15,
+        0.37,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Furniture",
+      "scale": 1
+    },
+    {
+      "asset": "Shelf01",
+      "position": [
+        2.13,
+        1.65,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Furniture",
+      "scale": 1
+    },
+    {
+      "asset": "Stool01",
+      "position": [
+        0.16,
+        0.56,
+        0
+      ],
+      "rotation_z": -12,
+      "group": "Furniture",
+      "scale": 1
+    },
+    {
+      "asset": "FloorLamp01",
+      "position": [
+        -1.3,
+        0.99,
+        0
+      ],
+      "rotation_z": -25,
+      "group": "Furniture",
+      "scale": 1
+    },
+    {
+      "asset": "MapBoard01",
+      "position": [
+        0.24,
+        1.89,
+        1.94
+      ],
+      "rotation_z": 0,
+      "group": "Furniture",
+      "scale": 1
+    },
+    {
+      "asset": "WallLamp01",
+      "position": [
+        -2.91,
+        0.95,
+        1.98
+      ],
+      "rotation_z": 90,
+      "group": "Furniture",
+      "scale": 1
+    },
+    {
+      "asset": "Generator01",
+      "position": [
+        2.43,
+        -0.72,
+        0
+      ],
+      "rotation_z": -90,
+      "group": "Furniture",
+      "scale": 1
+    },
+    {
+      "asset": "Radio01",
+      "position": [
+        -0.27,
+        1.46,
+        0.934
+      ],
+      "rotation_z": 0,
+      "group": "SmallProps",
+      "scale": 1
+    },
+    {
+      "asset": "MedicalBox01",
+      "position": [
+        2.1,
+        1.63,
+        1.202
+      ],
+      "rotation_z": 0,
+      "group": "SmallProps",
+      "scale": 1
+    },
+    {
+      "asset": "WoodCrate01",
+      "position": [
+        2.1,
+        1.65,
+        0.684
+      ],
+      "rotation_z": 0,
+      "group": "SmallProps",
+      "scale": 1
+    },
+    {
+      "asset": "WoodCrate01",
+      "position": [
+        -2.28,
+        -1.21,
+        0
+      ],
+      "rotation_z": -6,
+      "group": "SmallProps",
+      "scale": 1
+    },
+    {
+      "asset": "Jerrycan01",
+      "position": [
+        1.78,
+        1.65,
+        0.153
+      ],
+      "rotation_z": 0,
+      "group": "SmallProps",
+      "scale": 1
+    },
+    {
+      "asset": "Jerrycan01",
+      "position": [
+        2.16,
+        1.65,
+        0.153
+      ],
+      "rotation_z": 0,
+      "group": "SmallProps",
+      "scale": 1
+    },
+    {
+      "asset": "Jerrycan01",
+      "position": [
+        2.15,
+        -1.3,
+        0
+      ],
+      "rotation_z": -14,
+      "group": "SmallProps",
+      "scale": 1
+    },
+    {
+      "asset": "Rug01",
+      "position": [
+        -0.8,
+        -0.55,
+        0.002
+      ],
+      "rotation_z": -3,
+      "group": "Furniture",
+      "scale": 1
+    },
+    {
+      "asset": "StorageChest01",
+      "position": [
+        -0.73,
+        -1.32,
+        0
+      ],
+      "rotation_z": -4,
+      "group": "Furniture",
+      "scale": 1
+    }
+  ],
+  "palette": {
+    "Safehouse_Olive": {
+      "color": [
+        0.135,
+        0.148,
+        0.102
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_OliveLight": {
+      "color": [
+        0.205,
+        0.215,
+        0.15
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_OliveDark": {
+      "color": [
+        0.075,
+        0.088,
+        0.061
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Steel": {
+      "color": [
+        0.048,
+        0.061,
+        0.058
+      ],
+      "metallic": 0.4,
+      "smoothness": 0.3,
+      "emission": 0
+    },
+    "Safehouse_EdgeMetal": {
+      "color": [
+        0.13,
+        0.15,
+        0.14
+      ],
+      "metallic": 0.4,
+      "smoothness": 0.3,
+      "emission": 0
+    },
+    "Safehouse_Wear": {
+      "color": [
+        0.255,
+        0.225,
+        0.153
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Wood": {
+      "color": [
+        0.185,
+        0.117,
+        0.065
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_WoodLight": {
+      "color": [
+        0.235,
+        0.159,
+        0.095
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_WoodDark": {
+      "color": [
+        0.117,
+        0.078,
+        0.047
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Canvas": {
+      "color": [
+        0.18,
+        0.185,
+        0.136
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Blanket": {
+      "color": [
+        0.075,
+        0.101,
+        0.092
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Linen": {
+      "color": [
+        0.4,
+        0.355,
+        0.257
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Rubber": {
+      "color": [
+        0.024,
+        0.028,
+        0.027
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Paper": {
+      "color": [
+        0.5,
+        0.447,
+        0.33
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Red": {
+      "color": [
+        0.24,
+        0.07,
+        0.041
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Glass": {
+      "color": [
+        0.067,
+        0.108,
+        0.119
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_LampGlow": {
+      "color": [
+        0.95,
+        0.59,
+        0.23
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 2
+    },
+    "Safehouse_Grey": {
+      "color": [
+        0.18,
+        0.19,
+        0.17
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Concrete": {
+      "color": [
+        0.145,
+        0.151,
+        0.142
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_MapLine": {
+      "color": [
+        0.245,
+        0.253,
+        0.193
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Safehouse_Ink": {
+      "color": [
+        0.085,
+        0.106,
+        0.096
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    }
+  }
+}

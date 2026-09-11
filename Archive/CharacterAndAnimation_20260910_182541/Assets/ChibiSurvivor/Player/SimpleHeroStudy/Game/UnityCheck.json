@@ -1,0 +1,47 @@
+{
+  "playerRigUpdated": true,
+  "characterMeshes": 17,
+  "materialCount": 2,
+  "poses": [
+    {
+      "armed": false,
+      "speed": 0.0,
+      "clip": "Idle",
+      "maxGrip": 0.757389665
+    },
+    {
+      "armed": false,
+      "speed": 1.0,
+      "clip": "Walk",
+      "maxGrip": 0.9322075
+    },
+    {
+      "armed": false,
+      "speed": 2.0,
+      "clip": "Run",
+      "maxGrip": 0.771356463
+    },
+    {
+      "armed": true,
+      "speed": 0.0,
+      "clip": "Idle",
+      "maxGrip": 6.103574E-05
+    },
+    {
+      "armed": true,
+      "speed": 1.0,
+      "clip": "SwordWalk",
+      "maxGrip": 6.10355346E-05
+    },
+    {
+      "armed": true,
+      "speed": 2.0,
+      "clip": "Run",
+      "maxGrip": 6.103596E-05
+    }
+  ],
+  "attackGrip": 0.009535224,
+  "attackCancel": true,
+  "unequip": true,
+  "scenePlayTest": false
+}

@@ -1,0 +1,316 @@
+{
+  "resolution": 1024,
+  "charts": 30,
+  "coverage": 0.496917724609375,
+  "overlapping_pixels": 66,
+  "regions": {
+    "HEAD_FACE": [
+      0.015,
+      0.015,
+      0.97,
+      0.97
+    ]
+  },
+  "layout": [
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        418,
+        23,
+        373,
+        277
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        23,
+        342,
+        371,
+        277
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        23,
+        635,
+        218,
+        277
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        410,
+        342,
+        371,
+        277
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        257,
+        635,
+        218,
+        277
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        23,
+        23,
+        379,
+        303
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        317,
+        928,
+        56,
+        41
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        389,
+        928,
+        56,
+        41
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        491,
+        635,
+        69,
+        94
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        831,
+        635,
+        34,
+        72
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        576,
+        635,
+        69,
+        94
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        881,
+        635,
+        34,
+        72
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        73,
+        928,
+        45,
+        61
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        605,
+        928,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        633,
+        928,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        134,
+        928,
+        45,
+        61
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        661,
+        928,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        689,
+        928,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        461,
+        928,
+        56,
+        41
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        661,
+        635,
+        69,
+        94
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        533,
+        928,
+        56,
+        41
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        931,
+        635,
+        34,
+        72
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        746,
+        635,
+        69,
+        94
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        23,
+        928,
+        34,
+        72
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        195,
+        928,
+        45,
+        61
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        717,
+        928,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        745,
+        928,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        256,
+        928,
+        45,
+        61
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        773,
+        928,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Hero_Head",
+      "region": "HEAD_FACE",
+      "rect_pixels": [
+        801,
+        928,
+        12,
+        12
+      ]
+    }
+  ]
+}

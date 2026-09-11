@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "oneBodyMesh": true,
+  "rigidWeapon": true,
+  "maxGripError": 0.00107526057,
+  "maxAttachmentError": 0.0,
+  "singleAttackEntries": 1,
+  "returnedToReady": true,
+  "motions": [
+    {
+      "motion": "Idle",
+      "maxMeshDisplacement": 0.016244553
+    },
+    {
+      "motion": "Walk",
+      "maxMeshDisplacement": 0.3517608
+    },
+    {
+      "motion": "Run",
+      "maxMeshDisplacement": 0.680301547
+    },
+    {
+      "motion": "Attack",
+      "maxMeshDisplacement": 1.04896235
+    }
+  ],
+  "gameplayApplied": false
+}

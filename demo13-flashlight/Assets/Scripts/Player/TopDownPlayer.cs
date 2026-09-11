@@ -545,6 +545,8 @@ public class TopDownPlayer : MonoBehaviour
     enum HandVisual { Fist, Melee, Gun }
     bool UsesSwordAnimation => _character3D != null && _character3D.HasSwordAnimations
         && _weapon != null && _weapon.useTwoHandSwordAnimations && InHand == HandVisual.Melee;
+    bool UsesBatAnimation => _character3D != null && _character3D.HasBatAnimations
+        && _weapon != null && _weapon.useTwoHandBatAnimations && InHand == HandVisual.Melee;
     HandVisual InHand
     {
         get
@@ -561,8 +563,8 @@ public class TopDownPlayer : MonoBehaviour
     {
         // 셋 중 **하나만** 보인다. 안 그러면 총 쏘는데 칼이 같이 떠 있는 식이 된다.
         var hand = InHand;
-        bool swordAnimation = UsesSwordAnimation;
-        _character3D?.SetSwordEquipped(swordAnimation);
+        bool swordAnimation = UsesSwordAnimation || UsesBatAnimation;
+        _character3D?.SetMeleeEquipped(swordAnimation, UsesBatAnimation);
 
         if (_weaponVis != null)
         {
@@ -740,7 +742,7 @@ public class TopDownPlayer : MonoBehaviour
         _attackStateTimer = atk.Duration;
         _performer.Perform(atk);
         // 손에 든 것에 맞는 동작 — 칼은 휘두르고, 맨손은 정권으로 지른다.
-        if (UsesSwordAnimation) _character3D.PlaySwordSlash(atk.Duration, FacingDirection);
+        if (UsesSwordAnimation || UsesBatAnimation) _character3D.PlayMeleeAttack(atk.Duration, FacingDirection, UsesBatAnimation);
         else if (InHand == HandVisual.Melee) _weaponVis?.Swing(atk.Duration);   // 우 → 좌 한 방향
         else                            _fistVis?.Punch(atk.Duration);
         // 소음은 스윙이 아니라 '적중' 시에만 발생(AttackPerformer.ScanWindow) — 2026-07-11 변경.
@@ -767,7 +769,7 @@ public class TopDownPlayer : MonoBehaviour
         _heavyCooldownTimer = HeavyCooldown;
 
         _performer.Perform(atk);
-        if (UsesSwordAnimation) _character3D.PlaySwordSlash(_attackStateTimer, FacingDirection);
+        if (UsesSwordAnimation || UsesBatAnimation) _character3D.PlayMeleeAttack(_attackStateTimer, FacingDirection, UsesBatAnimation);
         else if (InHand == HandVisual.Melee) _weaponVis?.SwingHeavy(_attackStateTimer, full);   // 치켜든 대각에서 크고 빠르게
         else                            _fistVis?.PunchHeavy(_attackStateTimer, full);    // 더 깊은 정권
         // 강공도 적중 시에만 소음(AttackPerformer.ScanWindow).

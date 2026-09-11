@@ -1,0 +1,32 @@
+{
+  "fbx_reimport_passed": true,
+  "bones": 23,
+  "meshes": 17,
+  "uv_weights_valid": true,
+  "clips": [
+    {
+      "clip": "Idle",
+      "seconds": 3.0,
+      "loop_error_m": 0.0,
+      "min_sole_z_m": 0.024999765679240227,
+      "motion_m": 0.022672378670232307,
+      "half_frame_samples": 181
+    },
+    {
+      "clip": "Run",
+      "seconds": 0.8,
+      "loop_error_m": 0.0,
+      "min_sole_z_m": -7.573856419185176e-05,
+      "motion_m": 0.6989896874322622,
+      "half_frame_samples": 49
+    },
+    {
+      "clip": "Walk",
+      "seconds": 1.2,
+      "loop_error_m": 0.0,
+      "min_sole_z_m": -0.001565869664773345,
+      "motion_m": 0.7003387243246302,
+      "half_frame_samples": 73
+    }
+  ]
+}

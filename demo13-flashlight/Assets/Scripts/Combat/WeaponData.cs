@@ -15,6 +15,9 @@ public class WeaponData : ScriptableObject
     [Tooltip("장검 양손 걷기·베기 모션을 사용합니다. 다른 무기와 맨손에는 적용하지 않습니다.")]
     public bool useTwoHandSwordAnimations;
 
+    [Tooltip("양손 방망이 잡기와 1타 스윙 모션을 사용합니다.")]
+    public bool useTwoHandBatAnimations;
+
     [Header("공격 (비우면 맨손 기본)")]
     [Tooltip("약공격 콤보 체인")]
     public AttackComboData lightCombo;

@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "maxPalmError": 5.747053E-07,
+  "minTipHeight": 0.273022234,
+  "minFreeHandDistance": 0.6597382,
+  "checks": [
+    "Runtime resource initializes",
+    "Patrol uses one-hand carry",
+    "Noise investigation keeps casual carry until enemy detected",
+    "Detected target switches to two-hand ready",
+    "Hit reaction retains combat stance",
+    "Lost target returns to one-hand carry",
+    "Right palm encloses actual bat handle in all casual gaits",
+    "Carried bat clears ground",
+    "Left hand is free during patrol",
+    "Close detection starts windup from current carry without snap",
+    "Close detection completes two-hand pickup during windup"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "problems": [],
+  "meshes": 40,
+  "clips": [
+    "Idle",
+    "Run",
+    "Walk",
+    "SwordSlash",
+    "SwordWalk"
+  ],
+  "players": [
+    {
+      "name": "Player",
+      "model": "Assets/ChibiSurvivor/Player/DarkSurvivor/DarkSurvivor.prefab",
+      "shader": null
+    }
+  ]
+}

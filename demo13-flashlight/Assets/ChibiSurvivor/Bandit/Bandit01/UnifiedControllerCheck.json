@@ -1,0 +1,26 @@
+{
+  "runtimeBodyRenderers": 1,
+  "totalRenderers": 2,
+  "bodyMaterialSlots": 1,
+  "toonAtlasPreserved": true,
+  "states": [
+    {
+      "state": "Locomotion",
+      "clips": [
+        "Run"
+      ]
+    },
+    {
+      "state": "SwordWalk",
+      "clips": [
+        "SwordWalk"
+      ]
+    },
+    {
+      "state": "SwordSlash",
+      "clips": [
+        "SwordSlash"
+      ]
+    }
+  ]
+}

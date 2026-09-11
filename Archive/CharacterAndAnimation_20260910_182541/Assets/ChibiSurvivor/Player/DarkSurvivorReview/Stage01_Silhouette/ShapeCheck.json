@@ -1,0 +1,28 @@
+{
+  "stage": 1,
+  "static_review_only": true,
+  "source_unchanged": true,
+  "total_height_m": 1.8,
+  "cap_inclusive_head_height_m": 0.6,
+  "head_units": 3.0,
+  "waist_height_m": 0.78,
+  "chin_height_m": 1.2,
+  "separate_slots": [
+    "Backpack",
+    "Belt",
+    "Body",
+    "Boots",
+    "Cap",
+    "FaceDetails",
+    "Hair",
+    "Hands",
+    "Head",
+    "Jacket",
+    "Lantern",
+    "Scarf",
+    "Trousers"
+  ],
+  "animation_integration": false,
+  "face_redesign": false,
+  "final_materials": false
+}

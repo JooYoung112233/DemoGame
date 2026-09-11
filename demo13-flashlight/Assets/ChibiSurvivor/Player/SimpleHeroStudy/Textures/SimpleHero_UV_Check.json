@@ -1,0 +1,886 @@
+{
+  "resolution": 2048,
+  "charts": 84,
+  "coverage": 0.4876277446746826,
+  "overlapping_pixels": 110,
+  "regions": {
+    "HEAD": [
+      0.02,
+      0.54,
+      0.48,
+      0.44
+    ],
+    "CAP": [
+      0.52,
+      0.62,
+      0.46,
+      0.36
+    ],
+    "JACKET": [
+      0.02,
+      0.26,
+      0.48,
+      0.26
+    ],
+    "TROUSERS": [
+      0.52,
+      0.29,
+      0.46,
+      0.31
+    ],
+    "BOOTS": [
+      0.52,
+      0.02,
+      0.46,
+      0.25
+    ],
+    "HANDS_NECK": [
+      0.02,
+      0.02,
+      0.48,
+      0.22
+    ]
+  },
+  "layout": [
+    {
+      "part": "Study_Head",
+      "region": "HEAD",
+      "rect_pixels": [
+        48,
+        1723,
+        446,
+        274
+      ]
+    },
+    {
+      "part": "Study_Head",
+      "region": "HEAD",
+      "rect_pixels": [
+        48,
+        1113,
+        441,
+        289
+      ]
+    },
+    {
+      "part": "Study_Head",
+      "region": "HEAD",
+      "rect_pixels": [
+        48,
+        1418,
+        263,
+        289
+      ]
+    },
+    {
+      "part": "Study_Head",
+      "region": "HEAD",
+      "rect_pixels": [
+        505,
+        1113,
+        441,
+        289
+      ]
+    },
+    {
+      "part": "Study_Head",
+      "region": "HEAD",
+      "rect_pixels": [
+        327,
+        1418,
+        263,
+        289
+      ]
+    },
+    {
+      "part": "Study_Head",
+      "region": "HEAD",
+      "rect_pixels": [
+        510,
+        1723,
+        406,
+        263
+      ]
+    },
+    {
+      "part": "Study_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1072,
+        1277,
+        366,
+        257
+      ]
+    },
+    {
+      "part": "Study_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1405,
+        1550,
+        317,
+        119
+      ]
+    },
+    {
+      "part": "Study_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1072,
+        1713,
+        226,
+        110
+      ]
+    },
+    {
+      "part": "Study_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1072,
+        1550,
+        317,
+        147
+      ]
+    },
+    {
+      "part": "Study_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1738,
+        1550,
+        226,
+        112
+      ]
+    },
+    {
+      "part": "Study_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1454,
+        1277,
+        324,
+        238
+      ]
+    },
+    {
+      "part": "Study_CapBrim",
+      "region": "CAP",
+      "rect_pixels": [
+        1314,
+        1713,
+        360,
+        108
+      ]
+    },
+    {
+      "part": "Study_CapBrim",
+      "region": "CAP",
+      "rect_pixels": [
+        1072,
+        1839,
+        360,
+        108
+      ]
+    },
+    {
+      "part": "Study_CapBrim",
+      "region": "CAP",
+      "rect_pixels": [
+        1448,
+        1839,
+        360,
+        35
+      ]
+    },
+    {
+      "part": "Study_CapBrim",
+      "region": "CAP",
+      "rect_pixels": [
+        1072,
+        1963,
+        360,
+        35
+      ]
+    },
+    {
+      "part": "Study_CapBrim",
+      "region": "CAP",
+      "rect_pixels": [
+        1448,
+        1963,
+        80,
+        22
+      ]
+    },
+    {
+      "part": "Study_CapBrim",
+      "region": "CAP",
+      "rect_pixels": [
+        1544,
+        1963,
+        80,
+        22
+      ]
+    },
+    {
+      "part": "Study_Neck",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        48,
+        48,
+        157,
+        157
+      ]
+    },
+    {
+      "part": "Study_Neck",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        48,
+        374,
+        157,
+        99
+      ]
+    },
+    {
+      "part": "Study_Neck",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        394,
+        374,
+        106,
+        99
+      ]
+    },
+    {
+      "part": "Study_Neck",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        221,
+        374,
+        157,
+        99
+      ]
+    },
+    {
+      "part": "Study_Neck",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        516,
+        374,
+        106,
+        99
+      ]
+    },
+    {
+      "part": "Study_Neck",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        221,
+        48,
+        157,
+        157
+      ]
+    },
+    {
+      "part": "Study_Torso",
+      "region": "JACKET",
+      "rect_pixels": [
+        607,
+        763,
+        195,
+        116
+      ]
+    },
+    {
+      "part": "Study_Torso",
+      "region": "JACKET",
+      "rect_pixels": [
+        48,
+        540,
+        183,
+        207
+      ]
+    },
+    {
+      "part": "Study_Torso",
+      "region": "JACKET",
+      "rect_pixels": [
+        446,
+        540,
+        110,
+        207
+      ]
+    },
+    {
+      "part": "Study_Torso",
+      "region": "JACKET",
+      "rect_pixels": [
+        247,
+        540,
+        183,
+        207
+      ]
+    },
+    {
+      "part": "Study_Torso",
+      "region": "JACKET",
+      "rect_pixels": [
+        572,
+        540,
+        110,
+        207
+      ]
+    },
+    {
+      "part": "Study_Torso",
+      "region": "JACKET",
+      "rect_pixels": [
+        818,
+        763,
+        169,
+        98
+      ]
+    },
+    {
+      "part": "Study_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1426,
+        856,
+        205,
+        141
+      ]
+    },
+    {
+      "part": "Study_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1183,
+        1111,
+        242,
+        67
+      ]
+    },
+    {
+      "part": "Study_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1699,
+        1111,
+        92,
+        67
+      ]
+    },
+    {
+      "part": "Study_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1441,
+        1111,
+        242,
+        67
+      ]
+    },
+    {
+      "part": "Study_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1807,
+        1111,
+        92,
+        67
+      ]
+    },
+    {
+      "part": "Study_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1168,
+        856,
+        242,
+        149
+      ]
+    },
+    {
+      "part": "Study_Sleeve_-1",
+      "region": "JACKET",
+      "rect_pixels": [
+        234,
+        965,
+        67,
+        78
+      ]
+    },
+    {
+      "part": "Study_Sleeve_-1",
+      "region": "JACKET",
+      "rect_pixels": [
+        912,
+        540,
+        99,
+        186
+      ]
+    },
+    {
+      "part": "Study_Sleeve_-1",
+      "region": "JACKET",
+      "rect_pixels": [
+        698,
+        540,
+        91,
+        198
+      ]
+    },
+    {
+      "part": "Study_Sleeve_-1",
+      "region": "JACKET",
+      "rect_pixels": [
+        48,
+        763,
+        99,
+        186
+      ]
+    },
+    {
+      "part": "Study_Sleeve_-1",
+      "region": "JACKET",
+      "rect_pixels": [
+        393,
+        763,
+        91,
+        186
+      ]
+    },
+    {
+      "part": "Study_Sleeve_-1",
+      "region": "JACKET",
+      "rect_pixels": [
+        48,
+        965,
+        77,
+        91
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        476,
+        221,
+        122,
+        109
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        394,
+        48,
+        140,
+        137
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        614,
+        221,
+        122,
+        109
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        48,
+        221,
+        91,
+        137
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        550,
+        48,
+        140,
+        137
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        155,
+        221,
+        91,
+        137
+      ]
+    },
+    {
+      "part": "Study_Leg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1903,
+        856,
+        95,
+        107
+      ]
+    },
+    {
+      "part": "Study_Leg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1072,
+        601,
+        132,
+        239
+      ]
+    },
+    {
+      "part": "Study_Leg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1664,
+        601,
+        80,
+        239
+      ]
+    },
+    {
+      "part": "Study_Leg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1220,
+        601,
+        132,
+        239
+      ]
+    },
+    {
+      "part": "Study_Leg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1760,
+        601,
+        80,
+        239
+      ]
+    },
+    {
+      "part": "Study_Leg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1647,
+        856,
+        112,
+        132
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1072,
+        48,
+        137,
+        201
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1378,
+        48,
+        204,
+        140
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1512,
+        265,
+        95,
+        140
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1598,
+        48,
+        204,
+        140
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1623,
+        265,
+        95,
+        140
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1072,
+        421,
+        107,
+        123
+      ]
+    },
+    {
+      "part": "Study_Sleeve_1",
+      "region": "JACKET",
+      "rect_pixels": [
+        317,
+        965,
+        67,
+        78
+      ]
+    },
+    {
+      "part": "Study_Sleeve_1",
+      "region": "JACKET",
+      "rect_pixels": [
+        163,
+        763,
+        99,
+        186
+      ]
+    },
+    {
+      "part": "Study_Sleeve_1",
+      "region": "JACKET",
+      "rect_pixels": [
+        500,
+        763,
+        91,
+        186
+      ]
+    },
+    {
+      "part": "Study_Sleeve_1",
+      "region": "JACKET",
+      "rect_pixels": [
+        278,
+        763,
+        99,
+        186
+      ]
+    },
+    {
+      "part": "Study_Sleeve_1",
+      "region": "JACKET",
+      "rect_pixels": [
+        805,
+        540,
+        91,
+        198
+      ]
+    },
+    {
+      "part": "Study_Sleeve_1",
+      "region": "JACKET",
+      "rect_pixels": [
+        141,
+        965,
+        77,
+        91
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        752,
+        221,
+        122,
+        109
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        890,
+        221,
+        122,
+        109
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        706,
+        48,
+        140,
+        137
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        262,
+        221,
+        91,
+        137
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        862,
+        48,
+        140,
+        137
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "HANDS_NECK",
+      "rect_pixels": [
+        369,
+        221,
+        91,
+        137
+      ]
+    },
+    {
+      "part": "Study_Leg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1072,
+        1111,
+        95,
+        107
+      ]
+    },
+    {
+      "part": "Study_Leg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1368,
+        601,
+        132,
+        239
+      ]
+    },
+    {
+      "part": "Study_Leg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1856,
+        601,
+        80,
+        239
+      ]
+    },
+    {
+      "part": "Study_Leg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1516,
+        601,
+        132,
+        239
+      ]
+    },
+    {
+      "part": "Study_Leg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1072,
+        856,
+        80,
+        239
+      ]
+    },
+    {
+      "part": "Study_Leg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        1775,
+        856,
+        112,
+        132
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1225,
+        48,
+        137,
+        201
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1072,
+        265,
+        204,
+        140
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1734,
+        265,
+        95,
+        140
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1292,
+        265,
+        204,
+        140
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1845,
+        265,
+        95,
+        140
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "BOOTS",
+      "rect_pixels": [
+        1195,
+        421,
+        107,
+        123
+      ]
+    }
+  ]
+}

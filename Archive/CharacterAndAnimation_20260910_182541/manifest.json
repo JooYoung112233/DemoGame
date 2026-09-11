@@ -1,0 +1,978 @@
+{
+  "project": "D:\\Demo\\demo13-flashlight",
+  "archive": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541",
+  "planned": [
+    "Assets/ChibiSurvivor/Player/AxeChopReview",
+    "Assets/ChibiSurvivor/Player/AxeChopReview.meta",
+    "Assets/ChibiSurvivor/Player/DarkSurvivor",
+    "Assets/ChibiSurvivor/Player/DarkSurvivor.meta",
+    "Assets/ChibiSurvivor/Player/DarkSurvivorReview",
+    "Assets/ChibiSurvivor/Player/DarkSurvivorReview.meta",
+    "Assets/ChibiSurvivor/Player/ExplosiveRunReview",
+    "Assets/ChibiSurvivor/Player/ExplosiveRunReview.meta",
+    "Assets/ChibiSurvivor/Player/ExplosiveWalkReview",
+    "Assets/ChibiSurvivor/Player/ExplosiveWalkReview.meta",
+    "Assets/ChibiSurvivor/Player/HeroIdentityReview",
+    "Assets/ChibiSurvivor/Player/HeroIdentityReview.meta",
+    "Assets/ChibiSurvivor/Player/HeroRefinement",
+    "Assets/ChibiSurvivor/Player/HeroRefinement.meta",
+    "Assets/ChibiSurvivor/Player/OneHandWalkReview",
+    "Assets/ChibiSurvivor/Player/OneHandWalkReview.meta",
+    "Assets/ChibiSurvivor/Player/RunReview",
+    "Assets/ChibiSurvivor/Player/RunReview.meta",
+    "Assets/ChibiSurvivor/Player/SyntySurvivorStudy",
+    "Assets/ChibiSurvivor/Player/SyntySurvivorStudy.meta",
+    "Assets/ChibiSurvivor/Player/TwoHandSlashReview",
+    "Assets/ChibiSurvivor/Player/TwoHandSlashReview.meta",
+    "Assets/ChibiSurvivor/Player/TwoHandWalkReview",
+    "Assets/ChibiSurvivor/Player/TwoHandWalkReview.meta",
+    "Assets/ChibiSurvivor/Player/WalkReview",
+    "Assets/ChibiSurvivor/Player/WalkReview.meta",
+    "Assets/ChibiSurvivor/ReferenceSurvivor",
+    "Assets/ChibiSurvivor/ReferenceSurvivor.meta",
+    "Assets/ExplosiveLLC",
+    "Assets/ExplosiveLLC.meta",
+    "Assets/Kevin Iglesias",
+    "Assets/Kevin Iglesias.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/MeleeReview",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/MeleeReview.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/RunStabilityCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/RunStabilityCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage1.fbx",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage1.fbx.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage1.glb",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage1.glb.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage2.fbx",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage2.fbx.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage2.glb",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage2.glb.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage3_Idle.fbx",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage3_Idle.fbx.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage4_Locomotion.fbx",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage4_Locomotion.fbx.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1Check.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1Check.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1ExportCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1ExportCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Back.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Back.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Comparison.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Comparison.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Front.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Front.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_GameScale.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_GameScale.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Quarter.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Quarter.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_ReferenceAngle.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_ReferenceAngle.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2Check.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2Check.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2ExportCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2ExportCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Back.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Back.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_GameScale.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_GameScale.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Quarter.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Quarter.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_ReferenceAngle.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_ReferenceAngle.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Side.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Side.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3ExportCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3ExportCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3RigCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3RigCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3_Idle.mp4",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3_Idle.mp4.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3_Idle.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3_Idle.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4ExportCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4ExportCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4MotionCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4MotionCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run.mp4",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run.mp4.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run_Side.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run_Side.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run_Stable.mp4",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run_Stable.mp4.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk.mp4",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk.mp4.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk_Side.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk_Side.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5ExportCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5ExportCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5SlashCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5SlashCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash.mp4",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash.mp4.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_001.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_001.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_010.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_010.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_019.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_019.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_028.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_028.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Study_Face.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Study_Face.png.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/UVSurfaceCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/UVSurfaceCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage1.blend",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage1.blend1",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage2.blend",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage3_Idle.blend",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage4_Locomotion.blend",
+    "ArtSource/MotionReferences",
+    "ArtSource/CharacterArchive",
+    "Assets/ChibiSurvivor/Player/AnimationCheck.json",
+    "Assets/ChibiSurvivor/Player/AnimationCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/AttackSet.json",
+    "Assets/ChibiSurvivor/Player/AttackSet.json.meta",
+    "Assets/ChibiSurvivor/Player/AttackSetPreviewCheck.json",
+    "Assets/ChibiSurvivor/Player/AttackSetPreviewCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/AttackSetWeaponClearance.json",
+    "Assets/ChibiSurvivor/Player/AttackSetWeaponClearance.json.meta",
+    "Assets/ChibiSurvivor/Player/AttackSet_Preview.blend",
+    "Assets/ChibiSurvivor/Player/AttackSet_Preview.blend.meta",
+    "Assets/ChibiSurvivor/Player/AttackSet_Preview.mp4",
+    "Assets/ChibiSurvivor/Player/AttackSet_Preview.mp4.meta",
+    "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Poses.png",
+    "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Poses.png.meta",
+    "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Preview.blend",
+    "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Preview.blend.meta",
+    "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Preview.mp4",
+    "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Preview.mp4.meta",
+    "Assets/ChibiSurvivor/Player/Attack_TwoHand_Chop_Poses.png",
+    "Assets/ChibiSurvivor/Player/Attack_TwoHand_Chop_Poses.png.meta",
+    "Assets/ChibiSurvivor/Player/Attack_TwoHand_Chop_Preview.png",
+    "Assets/ChibiSurvivor/Player/Attack_TwoHand_Chop_Preview.png.meta",
+    "Assets/ChibiSurvivor/Player/Attack_TwoHand_Slash_Poses.png",
+    "Assets/ChibiSurvivor/Player/Attack_TwoHand_Slash_Poses.png.meta",
+    "Assets/ChibiSurvivor/Player/BladeClearanceCheck.json",
+    "Assets/ChibiSurvivor/Player/BladeClearanceCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/CharacterPreview.png",
+    "Assets/ChibiSurvivor/Player/CharacterPreview.png.meta",
+    "Assets/ChibiSurvivor/Player/ChosenReference.png",
+    "Assets/ChibiSurvivor/Player/ChosenReference.png.meta",
+    "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.blend",
+    "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.blend.meta",
+    "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.fbx",
+    "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.fbx.meta",
+    "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.glb",
+    "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.glb.meta",
+    "Assets/ChibiSurvivor/Player/ComparisonCheck.json",
+    "Assets/ChibiSurvivor/Player/ComparisonCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/ExportCheck.json",
+    "Assets/ChibiSurvivor/Player/ExportCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/GameAngle.mp4",
+    "Assets/ChibiSurvivor/Player/GameAngle.mp4.meta",
+    "Assets/ChibiSurvivor/Player/LocomotionPreview.mp4",
+    "Assets/ChibiSurvivor/Player/LocomotionPreview.mp4.meta",
+    "Assets/ChibiSurvivor/Player/PreviewCheck.json",
+    "Assets/ChibiSurvivor/Player/PreviewCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/Preview_GameAngle.png",
+    "Assets/ChibiSurvivor/Player/Preview_GameAngle.png.meta",
+    "Assets/ChibiSurvivor/Player/Preview_Quarter.png",
+    "Assets/ChibiSurvivor/Player/Preview_Quarter.png.meta",
+    "Assets/ChibiSurvivor/Player/Quarter.mp4",
+    "Assets/ChibiSurvivor/Player/Quarter.mp4.meta",
+    "Assets/ChibiSurvivor/Player/Thrust_Comparison.mp4",
+    "Assets/ChibiSurvivor/Player/Thrust_Comparison.mp4.meta",
+    "Assets/ChibiSurvivor/Player/TwoHandAnimationCheck.json",
+    "Assets/ChibiSurvivor/Player/TwoHandAnimationCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/WeaponGripProfiles.json",
+    "Assets/ChibiSurvivor/Player/WeaponGripProfiles.json.meta",
+    "ArtSource/ChibiSurvivor",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/UnityCheck.json",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/UnityCheck.json.meta",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/Unity_PlayerPreview.png",
+    "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/Unity_PlayerPreview.png.meta"
+  ],
+  "moved": [
+    {
+      "from": "Assets/ChibiSurvivor/Player/AxeChopReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AxeChopReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AxeChopReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AxeChopReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/DarkSurvivor",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\DarkSurvivor"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/DarkSurvivor.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\DarkSurvivor.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/DarkSurvivorReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\DarkSurvivorReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/DarkSurvivorReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\DarkSurvivorReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ExplosiveRunReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ExplosiveRunReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ExplosiveRunReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ExplosiveRunReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ExplosiveWalkReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ExplosiveWalkReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ExplosiveWalkReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ExplosiveWalkReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/HeroIdentityReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\HeroIdentityReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/HeroIdentityReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\HeroIdentityReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/HeroRefinement",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\HeroRefinement"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/HeroRefinement.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\HeroRefinement.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/OneHandWalkReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\OneHandWalkReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/OneHandWalkReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\OneHandWalkReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/RunReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\RunReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/RunReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\RunReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SyntySurvivorStudy",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SyntySurvivorStudy"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SyntySurvivorStudy.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SyntySurvivorStudy.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/TwoHandSlashReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\TwoHandSlashReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/TwoHandSlashReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\TwoHandSlashReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/TwoHandWalkReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\TwoHandWalkReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/TwoHandWalkReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\TwoHandWalkReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/WalkReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\WalkReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/WalkReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\WalkReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/ReferenceSurvivor",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\ReferenceSurvivor"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/ReferenceSurvivor.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\ReferenceSurvivor.meta"
+    },
+    {
+      "from": "Assets/ExplosiveLLC",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ExplosiveLLC"
+    },
+    {
+      "from": "Assets/ExplosiveLLC.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ExplosiveLLC.meta"
+    },
+    {
+      "from": "Assets/Kevin Iglesias",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\Kevin Iglesias"
+    },
+    {
+      "from": "Assets/Kevin Iglesias.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\Kevin Iglesias.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/MeleeReview",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\MeleeReview"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/MeleeReview.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\MeleeReview.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/RunStabilityCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\RunStabilityCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/RunStabilityCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\RunStabilityCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage1.fbx",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage1.fbx"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage1.fbx.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage1.fbx.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage1.glb",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage1.glb"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage1.glb.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage1.glb.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage2.fbx",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage2.fbx"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage2.fbx.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage2.fbx.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage2.glb",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage2.glb"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage2.glb.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage2.glb.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage3_Idle.fbx",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage3_Idle.fbx"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage3_Idle.fbx.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage3_Idle.fbx.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage4_Locomotion.fbx",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage4_Locomotion.fbx"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage4_Locomotion.fbx.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\SimpleHero_Stage4_Locomotion.fbx.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1Check.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1Check.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1Check.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1Check.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1ExportCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1ExportCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1ExportCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1ExportCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Back.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_Back.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Back.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_Back.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Comparison.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_Comparison.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Comparison.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_Comparison.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Front.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_Front.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Front.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_Front.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_GameScale.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_GameScale.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_GameScale.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_GameScale.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Quarter.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_Quarter.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_Quarter.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_Quarter.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_ReferenceAngle.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_ReferenceAngle.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage1_ReferenceAngle.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage1_ReferenceAngle.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2Check.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2Check.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2Check.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2Check.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2ExportCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2ExportCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2ExportCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2ExportCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Back.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_Back.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Back.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_Back.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_GameScale.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_GameScale.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_GameScale.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_GameScale.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Quarter.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_Quarter.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Quarter.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_Quarter.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_ReferenceAngle.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_ReferenceAngle.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_ReferenceAngle.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_ReferenceAngle.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Side.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_Side.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage2_Side.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage2_Side.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3ExportCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage3ExportCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3ExportCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage3ExportCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3RigCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage3RigCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3RigCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage3RigCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3_Idle.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage3_Idle.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3_Idle.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage3_Idle.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3_Idle.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage3_Idle.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage3_Idle.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage3_Idle.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4ExportCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4ExportCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4ExportCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4ExportCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4MotionCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4MotionCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4MotionCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4MotionCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Run.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Run.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Run.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Run.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run_Side.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Run_Side.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run_Side.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Run_Side.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run_Stable.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Run_Stable.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Run_Stable.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Run_Stable.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Walk.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Walk.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Walk.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Walk.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk_Side.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Walk_Side.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage4_Walk_Side.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage4_Walk_Side.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5ExportCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5ExportCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5ExportCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5ExportCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5SlashCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5SlashCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5SlashCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5SlashCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_001.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash_001.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_001.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash_001.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_010.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash_010.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_010.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash_010.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_019.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash_019.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_019.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash_019.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_028.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash_028.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Stage5_Slash_028.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Stage5_Slash_028.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Study_Face.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Study_Face.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Study_Face.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Study_Face.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/UVSurfaceCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\UVSurfaceCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/UVSurfaceCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\UVSurfaceCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage1.blend",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\BlenderSource~\\SimpleHero_Stage1.blend"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage1.blend1",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\BlenderSource~\\SimpleHero_Stage1.blend1"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage2.blend",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\BlenderSource~\\SimpleHero_Stage2.blend"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage3_Idle.blend",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\BlenderSource~\\SimpleHero_Stage3_Idle.blend"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage4_Locomotion.blend",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\BlenderSource~\\SimpleHero_Stage4_Locomotion.blend"
+    },
+    {
+      "from": "ArtSource/MotionReferences",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\ArtSource\\MotionReferences"
+    },
+    {
+      "from": "ArtSource/CharacterArchive",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\ArtSource\\CharacterArchive"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AnimationCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AnimationCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AnimationCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AnimationCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSet.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSet.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSet.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSet.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSetPreviewCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSetPreviewCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSetPreviewCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSetPreviewCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSetWeaponClearance.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSetWeaponClearance.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSetWeaponClearance.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSetWeaponClearance.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSet_Preview.blend",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSet_Preview.blend"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSet_Preview.blend.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSet_Preview.blend.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSet_Preview.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSet_Preview.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/AttackSet_Preview.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\AttackSet_Preview.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Poses.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Poses.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Poses.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Poses.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Preview.blend",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Preview.blend"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Preview.blend.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Preview.blend.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Preview.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Preview.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_OneHand_Thrust_Preview.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_OneHand_Thrust_Preview.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_TwoHand_Chop_Poses.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_TwoHand_Chop_Poses.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_TwoHand_Chop_Poses.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_TwoHand_Chop_Poses.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_TwoHand_Chop_Preview.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_TwoHand_Chop_Preview.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_TwoHand_Chop_Preview.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_TwoHand_Chop_Preview.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_TwoHand_Slash_Poses.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_TwoHand_Slash_Poses.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Attack_TwoHand_Slash_Poses.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Attack_TwoHand_Slash_Poses.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/BladeClearanceCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\BladeClearanceCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/BladeClearanceCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\BladeClearanceCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/CharacterPreview.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\CharacterPreview.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/CharacterPreview.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\CharacterPreview.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ChosenReference.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ChosenReference.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ChosenReference.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ChosenReference.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.blend",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.blend"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.blend.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.blend.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.fbx",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.fbx"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.fbx.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.fbx.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.glb",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.glb"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/CompactSurvivor_Combat.glb.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\CompactSurvivor_Combat.glb.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ComparisonCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ComparisonCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ComparisonCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ComparisonCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ExportCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ExportCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/ExportCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\ExportCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/GameAngle.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\GameAngle.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/GameAngle.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\GameAngle.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/LocomotionPreview.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\LocomotionPreview.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/LocomotionPreview.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\LocomotionPreview.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/PreviewCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\PreviewCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/PreviewCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\PreviewCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Preview_GameAngle.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Preview_GameAngle.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Preview_GameAngle.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Preview_GameAngle.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Preview_Quarter.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Preview_Quarter.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Preview_Quarter.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Preview_Quarter.png.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Quarter.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Quarter.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Quarter.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Quarter.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Thrust_Comparison.mp4",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Thrust_Comparison.mp4"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/Thrust_Comparison.mp4.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\Thrust_Comparison.mp4.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/TwoHandAnimationCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\TwoHandAnimationCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/TwoHandAnimationCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\TwoHandAnimationCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/WeaponGripProfiles.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\WeaponGripProfiles.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/WeaponGripProfiles.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\WeaponGripProfiles.json.meta"
+    },
+    {
+      "from": "ArtSource/ChibiSurvivor",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\ArtSource\\ChibiSurvivor"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/UnityCheck.json",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Game\\UnityCheck.json"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/UnityCheck.json.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Game\\UnityCheck.json.meta"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/Unity_PlayerPreview.png",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Game\\Unity_PlayerPreview.png"
+    },
+    {
+      "from": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/Unity_PlayerPreview.png.meta",
+      "to": "D:\\Demo\\Archive\\CharacterAndAnimation_20260910_182541\\Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\Game\\Unity_PlayerPreview.png.meta"
+    }
+  ]
+}

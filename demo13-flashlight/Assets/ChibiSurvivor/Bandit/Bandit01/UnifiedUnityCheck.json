@@ -1,0 +1,32 @@
+{
+  "assets": [
+    {
+      "withBat": false,
+      "renderers": 1,
+      "bodyMaterials": 1,
+      "clips": [
+        "Idle",
+        "Run",
+        "SwordSlash",
+        "SwordWalk",
+        "Walk"
+      ],
+      "avatarValid": true
+    },
+    {
+      "withBat": true,
+      "renderers": 2,
+      "bodyMaterials": 1,
+      "clips": [
+        "Run",
+        "SwordSlash",
+        "SwordWalk",
+        "Idle",
+        "Walk"
+      ],
+      "avatarValid": true
+    }
+  ],
+  "runtimePrefab": "Assets/Resources/Characters/Bandit01.prefab",
+  "runtimeRenderers": 2
+}
