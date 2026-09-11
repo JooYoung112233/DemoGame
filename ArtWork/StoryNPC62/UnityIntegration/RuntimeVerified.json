@@ -1,0 +1,90 @@
+{
+  "date": "2026-09-11",
+  "cameraPitch": 62,
+  "cameraYaw": 0,
+  "npcs": [
+    {
+      "id": "district_warden",
+      "clip": "Idle_Ledger",
+      "seconds": 3.00000024,
+      "loopsElapsed": 22.1244278,
+      "loop": true,
+      "bones": 23,
+      "shader": "BRB/GameLit",
+      "interaction": "NPC",
+      "range": 3.2,
+      "prompt": "대화하기",
+      "canInteract": true
+    },
+    {
+      "id": "wandering_merchant",
+      "clip": "Idle_Pack",
+      "seconds": 3.00000024,
+      "loopsElapsed": 22.1244278,
+      "loop": true,
+      "bones": 23,
+      "shader": "BRB/GameLit",
+      "interaction": "NPC",
+      "range": 3.2,
+      "prompt": "대화하기",
+      "canInteract": true
+    },
+    {
+      "id": "pawnshop",
+      "clip": "Idle_Observe",
+      "seconds": 3.00000024,
+      "loopsElapsed": 22.1244278,
+      "loop": true,
+      "bones": 23,
+      "shader": "BRB/GameLit",
+      "interaction": "NPC",
+      "range": 3.2,
+      "prompt": "대화하기",
+      "canInteract": true
+    },
+    {
+      "id": "veteran_scavenger",
+      "clip": "Idle_Crouch",
+      "seconds": 3.00000024,
+      "loopsElapsed": 22.1244278,
+      "loop": true,
+      "bones": 23,
+      "shader": "BRB/GameLit",
+      "interaction": "NPC",
+      "range": 3.2,
+      "prompt": "대화하기",
+      "canInteract": true
+    }
+  ],
+  "scenes": [
+    "Systems",
+    "Safehouse"
+  ],
+  "roofs": [
+    {
+      "name": "Medical",
+      "inside": false,
+      "roofVisible": true
+    },
+    {
+      "name": "Furniture",
+      "inside": false,
+      "roofVisible": true
+    },
+    {
+      "name": "Pawnshop",
+      "inside": false,
+      "roofVisible": true
+    },
+    {
+      "name": "BlackMarket",
+      "inside": false,
+      "roofVisible": true
+    },
+    {
+      "name": "Repair",
+      "inside": false,
+      "roofVisible": true
+    }
+  ]
+}

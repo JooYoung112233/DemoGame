@@ -1,0 +1,10 @@
+{
+  "id": "veteran_scavenger",
+  "modelName": "VeteranScavenger",
+  "clip": "Idle_Crouch",
+  "seconds": 3.00000024,
+  "shader": "BRB/GameLit",
+  "controller": "Assets/ChibiSurvivor/NPC/StoryNPC62/Animation/VeteranScavenger.controller",
+  "visual": "Assets/ChibiSurvivor/NPC/StoryNPC62/Visuals/VeteranScavenger.prefab",
+  "maskConnected": false
+}
