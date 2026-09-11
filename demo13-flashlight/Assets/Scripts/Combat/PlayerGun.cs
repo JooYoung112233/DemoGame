@@ -127,12 +127,16 @@ public class PlayerGun : MonoBehaviour
         float range = g.effectiveRange + (_equip != null ? _equip.WeaponPartRangeBonus : 0f);
         float dmg = g.damage * AmmoDamageMult(inst);
         Vector2 muzzle = Plan3D.ToPlan(transform.position) + shotDir * 0.55f;
+        var muzzle3D=_player.PrepareFirearmShot();
+        Vector3 muzzleWorld=muzzle3D!=null?muzzle3D.position:Plan3D.ToWorld(muzzle,transform.position.y+.9f);
+        muzzle=Plan3D.ToPlan(muzzleWorld);
 
         Projectile.Spawn(transform, muzzle, shotDir, g.projectileSpeed, dmg, g.groggy, range,
-                         new Color(1f, 0.93f, 0.6f));
+                         new Color(1f, 0.93f, 0.6f),worldHeight:muzzleWorld.y);
 
         _recoil = Mathf.Min(g.recoilMax, _recoil + g.recoilPerShot);
-        ShowFlash(muzzle, shotDir);
+        ShowFlash(muzzleWorld, shotDir);
+        _player.NotifyFirearmShot();
         Visual?.Kick();                 // 손에 든 총이 반동으로 튄다
 
         if (CameraFollow.Instance != null) CameraFollow.Instance.Shake(0.09f, 0.09f);
@@ -222,34 +226,20 @@ public class PlayerGun : MonoBehaviour
     }
 
     // ── 연출 ────────────────────────────────────────────────────────────
-    void ShowFlash(Vector2 at, Vector2 dir)
+    void ShowFlash(Vector3 at, Vector2 dir)
     {
         if (_flash == null)
         {
             var go = new GameObject("MuzzleFlash");
             go.transform.SetParent(transform, false);
-            var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = FlashSprite();
-            sr.color = new Color(1f, 0.86f, 0.45f, 0.95f);
-            sr.sortingOrder = 45;
+            GreyboxMesh.Box(go.transform,"Flash",Vector3.zero,Vector3.one,new Color(1f,.86f,.45f),castShadow:false);
             _flash = go.transform;
         }
         _flash.gameObject.SetActive(true);
         _flash.position = at;
-        _flash.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
-        _flash.localScale = new Vector3(0.7f, 0.34f, 1f);
+        _flash.rotation = Plan3D.LookRotation(dir,Quaternion.identity);
+        _flash.localScale = new Vector3(.07f,.07f,.20f);
         _flashUntil = Time.time + 0.045f;
-    }
-
-    static Sprite _flashSprite;
-    static Sprite FlashSprite()
-    {
-        if (_flashSprite != null) return _flashSprite;
-        var t = new Texture2D(1, 1, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
-        t.SetPixel(0, 0, Color.white);
-        t.Apply();
-        _flashSprite = Sprite.Create(t, new Rect(0, 0, 1, 1), new Vector2(0f, 0.5f), 1f);
-        return _flashSprite;
     }
 
     void DryFireClick() { _nextShotAt = Time.time + 0.25f; }

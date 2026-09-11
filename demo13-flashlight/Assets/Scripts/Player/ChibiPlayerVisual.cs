@@ -13,8 +13,12 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
     readonly List<Material> ownedMaterials = new List<Material>();
     Transform view;
     Animator animator;
+    PlayerFirearmVisual firearms;
+    public bool HasFirearmVisual => firearms != null && firearms.Equipped;
     Renderer sword;
     Renderer bat;
+    Renderer stowedSword, stowedBat;
+    bool sprintWeaponStowed;
     bool usingBat;
     int batHoldLayer = -1;
     float batLength = 1.6f;
@@ -113,10 +117,61 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
             renderer.shadowCastingMode = ShadowCastingMode.On;   // 3D 전환: 접지감이 필요하다
             renderer.receiveShadows = true;
         }
+        // The inventory remains equipped; these are display-only copies for sprinting.
+        stowedSword = CreateStowedMelee(sword);
+        stowedBat = CreateStowedMelee(bat);
         return true;
     }
 
+    Renderer CreateStowedMelee(Renderer source)
+    {
+        if (source == null || source.GetComponent<MeshFilter>() == null) return null;
+        Transform chest = null;
+        foreach (var t in animator.GetComponentsInChildren<Transform>()) if (t.name == "Chest") chest = t;
+        if (chest == null) return null;
+        var go = new GameObject(source.name + "_Stowed");
+        go.layer = gameObject.layer;
+        go.transform.SetParent(chest, false);
+        go.transform.position = animator.transform.TransformPoint(new Vector3(.20f, 1.14f, -.40f));
+        go.transform.rotation = animator.transform.rotation * Quaternion.FromToRotation(Vector3.up, new Vector3(-.65f, -.75f, 0));
+        go.transform.localScale = Vector3.one * (source.transform.lossyScale.x / chest.lossyScale.x);
+        go.AddComponent<MeshFilter>().sharedMesh = source.GetComponent<MeshFilter>().sharedMesh;
+        var renderer = go.AddComponent<MeshRenderer>();
+        renderer.sharedMaterials = source.sharedMaterials;
+        renderer.enabled = false;
+        return renderer;
+    }
+
+    public void SetSprintWeaponStowed(bool stowed)
+    {
+        sprintWeaponStowed = stowed;
+        RefreshMeleeVisibility();
+    }
+
+    void RefreshMeleeVisibility()
+    {
+        if (sword != null) sword.enabled = swordEquipped && !usingBat && !sprintWeaponStowed;
+        if (bat != null) bat.enabled = swordEquipped && usingBat && !sprintWeaponStowed;
+        if (stowedSword != null) stowedSword.enabled = swordEquipped && !usingBat && sprintWeaponStowed;
+        if (stowedBat != null) stowedBat.enabled = swordEquipped && usingBat && sprintWeaponStowed;
+    }
+
     public void SetSwordEquipped(bool equipped) => SetMeleeEquipped(equipped, false);
+
+    public bool SetFirearmEquipped(WeaponData weapon)
+    {
+        if(animator==null)return false;
+        if(weapon==null||!weapon.isRanged){if(firearms!=null)firearms.Clear();return false;}
+        if(firearms==null)firearms=animator.gameObject.AddComponent<PlayerFirearmVisual>();
+        return firearms.Equip(weapon);
+    }
+    public Transform PrepareFirearmShot(Vector2 facing)
+    {
+        if(!HasFirearmVisual)return null;
+        if(facing.sqrMagnitude>.0001f)view.localRotation=Quaternion.Euler(0,Mathf.Atan2(facing.x,facing.y)*Mathf.Rad2Deg,0);
+        firearms.PrepareShot();return firearms.Muzzle;
+    }
+    public void FirearmShot(){if(firearms!=null)firearms.Shot();}
 
     public void SetMeleeEquipped(bool equipped, bool useBat)
     {
@@ -125,8 +180,7 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
         bool changedWeapon = usingBat != useBat;
         swordEquipped = equipped;
         usingBat = useBat;
-        if (sword != null) sword.enabled = equipped && !useBat;
-        if (bat != null) bat.enabled = equipped && useBat;
+        RefreshMeleeVisibility();
         if (!equipped || changedWeapon) CancelAttack();
     }
 
@@ -136,6 +190,7 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
     {
         if (!(useBat ? HasBatAnimations : HasSwordAnimations)) return;
         SetMeleeEquipped(true, useBat);
+        SetSprintWeaponStowed(false);
         slashRemaining = Mathf.Max(.05f, duration);
         animator.speed = 1f;
         animator.SetFloat(SlashSpeedId, (useBat ? batLength : slashLength) / slashRemaining);
@@ -161,6 +216,7 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
     public void UpdateMotion(Vector2 facing, float actualSpeed, bool sprinting, bool allowLocomotion, float cadence, float deltaTime)
     {
         if (view == null || animator == null) return;
+        if(firearms!=null)firearms.SetMotion(allowLocomotion&&actualSpeed>.05f,sprintWeaponStowed,cadence);
         if (slashRemaining > 0f)
         {
             slashRemaining = Mathf.Max(0f, slashRemaining - deltaTime);
@@ -181,8 +237,8 @@ public sealed class ChibiPlayerVisual : MonoBehaviour
         }
         // Reuse the sword walk's upper-body grip over existing Idle/Run.
         // This adds no separate armed idle/run animation asset.
-        if (holdLayer >= 0) animator.SetLayerWeight(holdLayer, swordEquipped && !usingBat && target == LocomotionId ? 1f : 0f);
-        if (batHoldLayer >= 0) animator.SetLayerWeight(batHoldLayer, swordEquipped && usingBat && target == LocomotionId ? 1f : 0f);
+        if (holdLayer >= 0) animator.SetLayerWeight(holdLayer, swordEquipped && !sprintWeaponStowed && !usingBat && target == LocomotionId ? 1f : 0f);
+        if (batHoldLayer >= 0) animator.SetLayerWeight(batHoldLayer, swordEquipped && !sprintWeaponStowed && usingBat && target == LocomotionId ? 1f : 0f);
         animator.SetFloat(SpeedId, motion, .10f, Mathf.Max(0f, deltaTime));
         animator.speed = Mathf.Max(0f, cadence);
     }

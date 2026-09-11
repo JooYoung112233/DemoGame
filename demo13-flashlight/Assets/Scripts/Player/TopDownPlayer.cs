@@ -185,6 +185,17 @@ public class TopDownPlayer : MonoBehaviour
     /// <summary>총을 들고 있나 — 켜져 있으면 좌클릭이 '휘두르기'가 아니라 '사격'이다.</summary>
     public bool IsRangedEquipped => _weapon != null && _weapon.isRanged;
 
+    public Transform PrepareFirearmShot()
+    {
+        if(InHand!=HandVisual.Gun)return null;
+        _firearmSprintBlockedUntil=Time.time+.2f;
+        IsSprinting=false;
+        _character3D?.SetSprintWeaponStowed(false);
+        if(_character3D==null||!_character3D.SetFirearmEquipped(_weapon))return null;
+        return _character3D.PrepareFirearmShot(FacingDirection);
+    }
+    public void NotifyFirearmShot(){_character3D?.FirearmShot();}
+
     // ── Unity 생명주기 ───────────────────────────────────────────────
 
     void Awake()
@@ -486,9 +497,10 @@ public class TopDownPlayer : MonoBehaviour
 
     void UpdateCharacter3D()
     {
-        if (_character3D == null) return;
         float speed = _rb != null ? PlanVelocity.magnitude : 0f;
         bool allowed = !_uiOpen && CanMove && !IsAttacking;
+        _weaponVis?.SetStowed(IsSprinting && allowed && speed > .05f);
+        if (_character3D == null) return;
         bool running = IsSprinting || _state == CombatState.Dodge;
         string motion = allowed && speed > .05f ? (running ? "run" : "walk") : "idle";
         float cadence = MotionSpeed(motion);
@@ -500,6 +512,7 @@ public class TopDownPlayer : MonoBehaviour
             float clipSpeed = Mathf.Max(.05f, motion == "run" ? runClipSpeed : walkClipSpeed);
             cadence *= Mathf.Clamp(speed / clipSpeed, .5f, Mathf.Max(1f, animCadenceMax));
         }
+        _character3D.SetSprintWeaponStowed(IsSprinting && allowed && speed > .05f);
         _character3D.UpdateMotion(FacingDirection, speed, running, allowed, cadence, Time.deltaTime);
     }
 
@@ -565,6 +578,7 @@ public class TopDownPlayer : MonoBehaviour
         var hand = InHand;
         bool swordAnimation = UsesSwordAnimation || UsesBatAnimation;
         _character3D?.SetMeleeEquipped(swordAnimation, UsesBatAnimation);
+        bool firearmAnimation=_character3D!=null&&_character3D.SetFirearmEquipped(hand==HandVisual.Gun?_weapon:null);
 
         if (_weaponVis != null)
         {
@@ -591,7 +605,7 @@ public class TopDownPlayer : MonoBehaviour
 
         if (_gunVis != null)
         {
-            _gunVis.SetVisible(hand == HandVisual.Gun);
+            _gunVis.SetVisible(hand == HandVisual.Gun && !firearmAnimation);
             if (hand == HandVisual.Gun)
             {
                 _gunVis.SetFacing(FacingDirection);
@@ -612,9 +626,12 @@ public class TopDownPlayer : MonoBehaviour
         lightPivot.localPosition = (Vector3)(FacingDirection * lightForwardOffset);
     }
 
+    float _firearmSprintBlockedUntil;
     void UpdateSprint(bool uiOpen)
     {
         bool wantSprint = !uiOpen && !_exhausted && !_crouching && _state == CombatState.Idle
+                          && Time.time >= _firearmSprintBlockedUntil
+                          && !(_gun != null && IsRangedEquipped && (_gun.IsAiming || _gun.IsReloading))
                           && !ChannelBusy                                  // 아이템 사용(채널) 중 달리기 금지
                           && !OverweightSprintBlocked                      // 과적(100%+) 시 스프린트 불가(레이드만)
                           && GameInput.GetKey(KeyCode.LeftShift) && IsMoving

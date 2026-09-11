@@ -39,6 +39,10 @@ public class WeaponData : ScriptableObject
     [Tooltip("켜면 이 무기는 총이다. 좌클릭=사격 / 우클릭=조준 / R=장전.")]
     public bool isRanged = false;
 
+    public enum FirearmStance { Pistol, AssaultRifle }
+    [Tooltip("3D 총기 모션/모델. 기존 권총은 기본값 Pistol을 사용합니다.")]
+    public FirearmStance firearmStance = FirearmStance.Pistol;
+
     [Tooltip("구경(예: 9x19). **탄창의 magCaliber와 같아야** 장착된다.")]
     public string caliber = "9x19";
 
