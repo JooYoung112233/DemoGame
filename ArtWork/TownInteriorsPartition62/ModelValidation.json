@@ -1,0 +1,861 @@
+{
+  "models": [
+    {
+      "name": "Reuse_Workbench01",
+      "triangles": 1564,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_WoodCrate01",
+      "triangles": 924,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Stool01",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_SupplyCase02",
+      "triangles": 220,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Radio01",
+      "triangles": 644,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_MapBoard01",
+      "triangles": 436,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_MedicalBox01",
+      "triangles": 420,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_LockerPair02",
+      "triangles": 792,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Rug01",
+      "triangles": 2948,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Toolbox02",
+      "triangles": 370,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_UtilitySink02",
+      "triangles": 1800,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_Bucket02",
+      "triangles": 1198,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_FireExtinguisher02",
+      "triangles": 846,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_CardboardStack02",
+      "triangles": 528,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reuse_FoldedTarp02",
+      "triangles": 944,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "PawnDisplay62",
+      "triangles": 2440,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "PawnDisplay_Watches62",
+      "triangles": 1668,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "PawnDisplay_Electronics62",
+      "triangles": 1276,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "CashRegister62",
+      "triangles": 924,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Safe62",
+      "triangles": 840,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "SalvageShelf62",
+      "triangles": 4668,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "AntiqueClock62",
+      "triangles": 684,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "AntiqueDesk62",
+      "triangles": 1012,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "ToolBoard62",
+      "triangles": 1012,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "WeldingTrolley62",
+      "triangles": 1948,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "TireStack62",
+      "triangles": 1920,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "MechanicCreeper62",
+      "triangles": 328,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "TreatmentBed62",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "MedicineCabinet62",
+      "triangles": 4788,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "InstrumentCart62",
+      "triangles": 1424,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "IVStand62",
+      "triangles": 336,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "PrivacyScreen62",
+      "triangles": 1980,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Reception62",
+      "triangles": 352,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Wardrobe62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "DiningTable62",
+      "triangles": 528,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "WoodChair62",
+      "triangles": 508,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Armchair_Upholstery62",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Armchair_BlueCloth62",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Armchair_Linen62",
+      "triangles": 396,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "MarketCounter62",
+      "triangles": 3240,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "StorageDoorLeaf62",
+      "triangles": 340,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_Floor62",
+      "triangles": 1672,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_RearLining62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_LeftPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_RightPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_TallLining62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_PreviewCutaway62",
+      "triangles": 264,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_RearClosureRoof62",
+      "triangles": 264,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_RearClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_LeftClosureRoof62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_LeftClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_RightClosureRoof62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_RightClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_ClosedFrontReturn62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_RoomDividers62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Pawnshop_OuterOutline62",
+      "triangles": 220,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_Floor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_RearLining62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_LeftPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_RightPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_TallLining62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_PreviewCutaway62",
+      "triangles": 264,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_RearClosureRoof62",
+      "triangles": 220,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_RearClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_LeftClosureRoof62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_LeftClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_RightClosureRoof62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_RightClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_ClosedFrontReturn62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_RoomDividers62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Repair_OuterOutline62",
+      "triangles": 220,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_Floor62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_RearLining62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_LeftPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_RightPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_TallLining62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_PreviewCutaway62",
+      "triangles": 264,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_RearClosureRoof62",
+      "triangles": 308,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_RearClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_LeftClosureRoof62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_LeftClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_RightClosureRoof62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_RightClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_ClosedFrontReturn62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_RoomDividers62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Medical_OuterOutline62",
+      "triangles": 220,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_Floor62",
+      "triangles": 4444,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_RearLining62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_LeftPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_RightPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_TallLining62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_PreviewCutaway62",
+      "triangles": 264,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_RearClosureRoof62",
+      "triangles": 176,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_RearClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_LeftClosureRoof62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_LeftClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_RightClosureRoof62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_RightClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_ClosedFrontReturn62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_RoomDividers62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "Furniture_OuterOutline62",
+      "triangles": 220,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_Floor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_RearLining62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_LeftPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_RightPartition62",
+      "triangles": 484,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_TallLining62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_PreviewCutaway62",
+      "triangles": 264,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_RearClosureRoof62",
+      "triangles": 220,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_RearClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_LeftClosureRoof62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_LeftClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_RightClosureRoof62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_RightClosedFloor62",
+      "triangles": 44,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_ClosedFrontReturn62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_RoomDividers62",
+      "triangles": 88,
+      "metricUV0": true,
+      "validSurface": true
+    },
+    {
+      "name": "BlackMarket_OuterOutline62",
+      "triangles": 220,
+      "metricUV0": true,
+      "validSurface": true
+    }
+  ],
+  "totalTriangles": 68158,
+  "roomCount": 5,
+  "floorPlanChecks": [
+    {
+      "building": "Pawnshop",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0,
+          -4.1
+        ],
+        [
+          0,
+          -2.1
+        ],
+        [
+          3.05,
+          -0.9949999999999998
+        ],
+        [
+          -3.5050000000000003,
+          -2.75
+        ],
+        [
+          3.5050000000000003,
+          -1.1
+        ]
+      ],
+      "connectedFreeCells": 726,
+      "allFreeCells": 732
+    },
+    {
+      "building": "Repair",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0,
+          -3.6
+        ],
+        [
+          0,
+          -1.3
+        ],
+        [
+          2.5,
+          0.0050000000000002265
+        ],
+        [
+          -2.7550000000000003,
+          -3.9
+        ],
+        [
+          2.7550000000000003,
+          -0.35000000000000014
+        ]
+      ],
+      "connectedFreeCells": 565,
+      "allFreeCells": 574
+    },
+    {
+      "building": "Medical",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0,
+          -4.1
+        ],
+        [
+          0,
+          -2.0
+        ],
+        [
+          2.65,
+          0.0050000000000002265
+        ],
+        [
+          -3.0050000000000003,
+          -2.2
+        ],
+        [
+          3.0050000000000003,
+          -3.0
+        ]
+      ],
+      "connectedFreeCells": 457,
+      "allFreeCells": 457
+    },
+    {
+      "building": "Furniture",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0.9,
+          -6.0
+        ],
+        [
+          1.8,
+          -2.15
+        ],
+        [
+          0.0,
+          -0.9949999999999998
+        ],
+        [
+          -2.5050000000000003,
+          -3.0
+        ],
+        [
+          2.5050000000000003,
+          -2.4
+        ]
+      ],
+      "connectedFreeCells": 540,
+      "allFreeCells": 540
+    },
+    {
+      "building": "BlackMarket",
+      "pedestrianRadius": 0.35,
+      "gridStep": 0.15,
+      "entryWidth": 1.6,
+      "approachTargetsReachable": [
+        [
+          0,
+          -5.7
+        ],
+        [
+          0,
+          -3.4
+        ],
+        [
+          2.5,
+          -1.9949999999999997
+        ],
+        [
+          -2.5050000000000003,
+          -5.1
+        ],
+        [
+          2.5050000000000003,
+          -3.8
+        ]
+      ],
+      "connectedFreeCells": 551,
+      "allFreeCells": 551
+    }
+  ],
+  "sourceHashesPreserved": true,
+  "notValidated": [
+    "Unity GameLit",
+    "roof/wall occlusion",
+    "runtime NPC interaction and collision",
+    "NavMesh"
+  ]
+}

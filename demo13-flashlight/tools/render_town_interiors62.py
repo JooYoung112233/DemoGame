@@ -3,6 +3,8 @@ import bpy,math,json,sys
 from pathlib import Path
 from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT.parent/'ArtWork/TownInteriors62'
+partition='--partition' in sys.argv
+if partition:OUT=ROOT.parent/'ArtWork/TownInteriorsPartition62'
 bpy.ops.wm.open_mainfile(filepath=str(OUT/'BlenderSource~/TownInteriors62.blend'))
 manifest=json.loads((OUT/'KitManifest.json').read_text(encoding='utf8'))
 sc=bpy.context.scene;sc.render.engine='CYCLES';sc.cycles.device='CPU';sc.cycles.samples=24;sc.cycles.use_denoising=True
@@ -39,20 +41,28 @@ if source.exists():
    cp.location=(0,2.5,0);cp.rotation_euler.z=math.pi
   for o in dst.objects:
    if o:o.hide_render=True
-requested=set(sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else None
+requested=set(sys.argv[sys.argv.index('--')+1:])-{'--partition','--service','--same-scale'} if '--' in sys.argv else None
 detail=bool(requested and 'DETAIL' in requested)
 for name,spec in manifest['buildings'].items():
  if requested and name not in requested:continue
  col=bpy.data.collections[name+'_Assembly62'];col.hide_render=False;col.hide_viewport=False
+ for o in review.objects:
+  if o.name.startswith('C_player_scale_witness'):
+   x,z=spec.get('previewPlayer',[0,-2.5]);o.location=(-x,-z,.025)
+ if '--service' in sys.argv:
+  for o in col.objects:
+   if str(o.get('asset','')).endswith(('ClosureRoof62','ClosedFloor62','OuterOutline62','ClosedFrontReturn62','RoomDividers62')):o.hide_render=True
  target=Vector((0,0,.25));angle=math.radians(62);cam.location=target+Vector((0,20*math.cos(angle),20*math.sin(angle)));cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler()
  bpy.context.view_layer.update();pts=[o.matrix_world@Vector(c) for o in col.objects if not o.hide_render for c in o.bound_box]
  view=cam.rotation_euler.to_matrix().transposed();pp=[view@(p-target) for p in pts]
  w=max(p.x for p in pp)-min(p.x for p in pp);h=max(p.y for p in pp)-min(p.y for p in pp)
  data.ortho_scale=max(w,h*sc.render.resolution_x/sc.render.resolution_y)*1.10
+ if '--same-scale' in sys.argv:data.ortho_scale=21
  centre=Vector(((max(p.x for p in pp)+min(p.x for p in pp))/2,(max(p.y for p in pp)+min(p.y for p in pp))/2,0))
  cam.location+=cam.rotation_euler.to_matrix()@centre
  if detail:
   target=Vector((0,-.6,.35));cam.location=target+Vector((0,20*math.cos(angle),20*math.sin(angle)));cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler();data.ortho_scale=10.5
- sc.render.filepath=str(OUT/f'{name}{"Detail" if detail else ""}62.png');bpy.ops.render.render(write_still=True)
+ suffix='Service' if '--service' in sys.argv else 'SameScale' if '--same-scale' in sys.argv else 'Detail' if detail else ''
+ sc.render.filepath=str(OUT/f'{name}{suffix}62.png');bpy.ops.render.render(write_still=True)
  col.hide_render=True;col.hide_viewport=True
 print('TOWN_INTERIORS62_RENDERED')
