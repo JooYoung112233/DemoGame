@@ -1,0 +1,22 @@
+{
+  "bones": 23,
+  "sourceSkeletonPreserved": true,
+  "allSourceActionKeysPreserved": true,
+  "retainedBodyVertices": 1090,
+  "retainedBodyWeightsPreserved": true,
+  "normalisedNewWeights": true,
+  "metricAndAtlasUV0": true,
+  "sampledFrames": 202,
+  "fbxActionCount": 4,
+  "fbxIdleDimensionError": 1.996755599975586e-06,
+  "viewPitchYaw": [
+    62,
+    0
+  ],
+  "notValidated": [
+    "Unity GameLit materials",
+    "firearm aim/shoot/draw/stow",
+    "world-space IK/weapon clipping",
+    "runtime physics"
+  ]
+}
