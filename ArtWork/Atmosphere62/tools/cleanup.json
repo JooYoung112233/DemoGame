@@ -1,0 +1,1 @@
+{"code":"UnityEditor.AssetDatabase.DeleteAsset(\"Assets/Temp/Atmosphere62\"); var p=System.IO.Path.Combine(UnityEngine.Application.dataPath,\"Temp\"); if(System.IO.Directory.Exists(p)&&System.IO.Directory.GetFileSystemEntries(p).Length==0)UnityEditor.AssetDatabase.DeleteAsset(\"Assets/Temp\"); return \"Removed this review's imported screenshot copies\";"}
