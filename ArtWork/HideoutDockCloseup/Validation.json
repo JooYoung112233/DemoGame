@@ -1,0 +1,68 @@
+[
+  {
+    "module": "initial",
+    "ortho": 3.224326,
+    "dimVisible": false
+  },
+  {
+    "module": "workbench",
+    "ortho": 3.22432518,
+    "characterViewport": "(0.24, 0.50, 24.86)",
+    "dimAlpha": 0.32,
+    "dimRaycast": false,
+    "uiOpen": true
+  },
+  {
+    "module": "bed",
+    "ortho": 3.22432518,
+    "characterViewport": "(0.25, 0.42, 24.57)",
+    "dimAlpha": 0.32,
+    "dimRaycast": false,
+    "uiOpen": true
+  },
+  {
+    "module": "cooking",
+    "ortho": 3.22432518,
+    "characterViewport": "(0.30, 0.50, 24.84)",
+    "dimAlpha": 0.32,
+    "dimRaycast": false,
+    "uiOpen": true
+  },
+  {
+    "module": "medical",
+    "ortho": 3.22432518,
+    "characterViewport": "(0.24, 0.50, 24.86)",
+    "dimAlpha": 0.32,
+    "dimRaycast": false,
+    "uiOpen": true
+  },
+  {
+    "module": "radio",
+    "ortho": 3.22432518,
+    "characterViewport": "(0.30, 0.44, 24.64)",
+    "dimAlpha": 0.32,
+    "dimRaycast": false,
+    "uiOpen": true
+  },
+  {
+    "module": "generator",
+    "ortho": 3.22432518,
+    "characterViewport": "(0.30, 0.44, 24.64)",
+    "dimAlpha": 0.32,
+    "dimRaycast": false,
+    "uiOpen": true
+  },
+  {
+    "module": "stash",
+    "ortho": 3.22432518,
+    "characterViewport": "(0.26, 0.43, 24.61)",
+    "dimAlpha": 0.32,
+    "dimRaycast": false,
+    "uiOpen": true
+  },
+  {
+    "module": "closed",
+    "ortho": 3.22432518,
+    "dimVisible": false
+  }
+]

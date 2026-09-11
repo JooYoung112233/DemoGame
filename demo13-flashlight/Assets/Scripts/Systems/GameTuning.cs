@@ -296,6 +296,10 @@ public class GameTuning : ScriptableObject
     [Header("은신처 화면 — 카메라")]
     [Tooltip("방을 담는 카메라 오소 크기. 작을수록 확대(방이 크게 보인다). 기본 7.")]
     [Range(3f, 14f)] public float hideoutRoomOrtho = 7f;
+    [Tooltip("하이드아웃 최초 진입과 시설 창의 공통 확대 배율. 1=방 전체, 2=기존보다 두 배 확대.")]
+    [Range(1f, 3f)] public float hideoutViewZoom = 2f;
+    [Tooltip("우측 시설 UI 뒤 딤의 불투명도. 왼쪽 공간과 시설 버튼은 어둡게 하지 않는다.")]
+    [Range(0f, .7f)] public float hideoutDockDimAlpha = .32f;
     [Tooltip("기본 시야에서 방이 차지하는 가로 반지름 비율(실측 0.29 + 여유). 도크를 피해 줌아웃하는 계산의 기준. 키우면 더 물러난다.")]
     [Range(0.15f, 0.5f)] public float hideoutRoomHalfX = 0.31f;
     [Tooltip("같은 값의 세로판(실측 0.33 + 여유).")]

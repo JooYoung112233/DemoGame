@@ -22,6 +22,7 @@ public partial class HideoutDockPanel : MonoBehaviour
 
     GameObject _root;
     RectTransform _panel;
+    Image _dockDim;
     Text _title, _body;
     Button _openBtn, _closeBtn, _upgradeBtn, _useBtn;
     Text _statusText;
@@ -77,6 +78,10 @@ public partial class HideoutDockPanel : MonoBehaviour
             _panel.sizeDelta = RightDockSize(_module);
             _panel.anchoredPosition = new Vector2(-32f, 0f);
         }
+
+        _dockDim.gameObject.SetActive(dock == HideoutFacilityAnchor.Dock.Right);
+        _dockDim.rectTransform.sizeDelta = new Vector2(RightDockSize(_module).x + RightMargin + 24f, 0f);
+        _dockDim.color = new Color(0f, 0f, 0f, Tune != null ? Tune.hideoutDockDimAlpha : .32f);
 
         // 입양 자리 — 위쪽 88px만 제목(좌)·닫기 X(우)에게 내주고 나머지는 전부 내용이 쓴다.
         // 우측·하단 도크가 같은 규칙이다.
