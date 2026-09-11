@@ -24,10 +24,6 @@ public class PlayerGun : MonoBehaviour
     PlayerEquipment _equip => _equipC != null ? _equipC : (_equipC = GetComponent<PlayerEquipment>());
     PlayerInventory _inv   => _invC   != null ? _invC   : (_invC   = GetComponent<PlayerInventory>());
 
-    GunVisual _visC;
-    /// <summary>손에 든 총 비주얼(반동 연출용). 없을 수도 있으니 항상 ?. 로 부른다.</summary>
-    GunVisual Visual => _visC != null ? _visC : (_visC = GetComponentInChildren<GunVisual>(true));
-
     float _nextShotAt;          // 연사 간격
     float _recoil;              // 누적 탄퍼짐(도)
     float _reloadUntil;         // 장전 끝나는 시각(0=장전 중 아님)
@@ -166,7 +162,6 @@ public class PlayerGun : MonoBehaviour
         _recoil = Mathf.Min(g.recoilMax, _recoil + g.recoilPerShot);
         ShowFlash(muzzleWorld, shotDir);
         _player.NotifyFirearmShot();
-        Visual?.Kick();                 // 손에 든 총이 반동으로 튄다
 
         if (CameraFollow.Instance != null) CameraFollow.Instance.Shake(0.09f, 0.09f);
         return true;

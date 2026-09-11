@@ -267,12 +267,11 @@ public class TopDownPlayer : MonoBehaviour
         // 근접도 **조준한 곳**이 맞는다(2026-07-29 사용자). 마우스 월드 좌표가 곧 부위가 된다.
         _performer.AimPoint = () => MouseWorldPos;
 
-        // 그레이박스 칼 — 스파인이 들어오면 통째로 교체. **판정엔 관여하지 않는다**(연출 전용).
-        // 손에 들리는 것 3종 — 무엇을 보여줄지는 **장착 아이템**이 정한다(UpdateWeaponVisual).
-        //   2026-07-29 이전엔 칼만 무조건 붙어서 **맨손이어도 칼이 보였다**.
+        // 그레이박스 칼 — 3D 칼·방망이 모션이 없는 근접 무기용. **판정엔 관여하지 않는다**(연출 전용).
+        //   무엇을 보여줄지는 **장착 아이템**이 정한다(UpdateWeaponVisual).
+        //   2026-09-11: 그레이박스 주먹(FistVisual)·총(GunVisual) 삭제 — 맨손 공격은 없고(사용자 "근접 손공격은 없어"),
+        //   총은 3D 총기 모델(ChibiPlayerVisual.SetFirearmEquipped)이 맡는다.
         _weaponVis = MeleeWeaponVisual.Attach(transform, new Color(0.85f, 0.88f, 0.95f), 1.05f);
-        _fistVis   = FistVisual.Attach(transform, new Color(0.42f, 0.36f, 0.30f));          // 장갑 낀 주먹
-        _gunVis    = GunVisual.Attach(transform, new Color(0.46f, 0.47f, 0.50f), 0.62f);    // 총
 
         _hurtbox = GetComponentInChildren<Hurtbox>();
 
@@ -517,8 +516,6 @@ public class TopDownPlayer : MonoBehaviour
     }
 
     MeleeWeaponVisual _weaponVis;
-    FistVisual _fistVis;
-    GunVisual  _gunVis;
 
     /// <summary>주인공 그레이박스 몸통 — **스프라이트도 스파인도 없으면** 네모를 만들어 준다.
     ///
@@ -553,9 +550,9 @@ public class TopDownPlayer : MonoBehaviour
         nsr.sortingOrder = 5;
     }
 
-    /// <summary>손에 뭐가 들려 있나. **장착 아이템이 정한다** — 맨손이면 주먹이 보여야지 칼이 보이면 안 된다.
+    /// <summary>손에 뭐가 들려 있나. **장착 아이템이 정한다.** 빈손이면 아무것도 안 들고 공격도 없다(2026-09-11).
     /// 근접 무기는 WeaponData가 없는 것들이 많아(구형 무기) 카테고리로 판단한다.</summary>
-    enum HandVisual { Fist, Melee, Gun }
+    enum HandVisual { Empty, Melee, Gun }
     bool UsesSwordAnimation => _character3D != null && _character3D.HasSwordAnimations
         && _weapon != null && _weapon.useTwoHandSwordAnimations && InHand == HandVisual.Melee;
     bool UsesBatAnimation => _character3D != null && _character3D.HasBatAnimations
@@ -565,20 +562,20 @@ public class TopDownPlayer : MonoBehaviour
         get
         {
             var it = Equip != null ? Equip.EquippedWeapon : null;
-            if (it == null) return HandVisual.Fist;
+            if (it == null) return HandVisual.Empty;
             if (it.weaponData != null && it.weaponData.isRanged) return HandVisual.Gun;
-            return it.category == ItemCategory.Weapon ? HandVisual.Melee : HandVisual.Fist;
+            return it.category == ItemCategory.Weapon ? HandVisual.Melee : HandVisual.Empty;
         }
     }
 
     /// <summary>칼 비주얼 갱신 — 바라보는 각 + 상태별 자세(차징/평상시). 스윙은 공격 시점에 1회 호출.</summary>
     void UpdateWeaponVisual()
     {
-        // 셋 중 **하나만** 보인다. 안 그러면 총 쏘는데 칼이 같이 떠 있는 식이 된다.
+        // 그레이박스 칼은 3D 모션 없는 근접 무기일 때만. 총은 3D 총기 모델이, 빈손은 아무것도 안 든다(2026-09-11).
         var hand = InHand;
         bool swordAnimation = UsesSwordAnimation || UsesBatAnimation;
         _character3D?.SetMeleeEquipped(swordAnimation, UsesBatAnimation);
-        bool firearmAnimation=_character3D!=null&&_character3D.SetFirearmEquipped(hand==HandVisual.Gun?_weapon:null);
+        _character3D?.SetFirearmEquipped(hand == HandVisual.Gun ? _weapon : null);
 
         if (_weaponVis != null)
         {
@@ -589,29 +586,6 @@ public class TopDownPlayer : MonoBehaviour
                 if (_state == CombatState.HeavyCharge) _weaponVis.Charge(ChargePercent);
                 else if (!_weaponVis.IsSwinging && _state != CombatState.HeavyRelease
                          && _state != CombatState.LightAttack) _weaponVis.Rest();
-            }
-        }
-
-        if (_fistVis != null)
-        {
-            _fistVis.SetVisible(hand == HandVisual.Fist && _character3D == null);
-            if (hand == HandVisual.Fist)
-            {
-                _fistVis.SetFacing(FacingDirection);
-                if (!_fistVis.IsPunching && _state != CombatState.HeavyRelease
-                    && _state != CombatState.LightAttack) _fistVis.Rest();
-            }
-        }
-
-        if (_gunVis != null)
-        {
-            _gunVis.SetVisible(hand == HandVisual.Gun && !firearmAnimation);
-            if (hand == HandVisual.Gun)
-            {
-                _gunVis.SetFacing(FacingDirection);
-                _gunVis.SetState(_gun != null && _gun.IsAiming,
-                                 _gun != null && _gun.IsReloading,
-                                 _gun != null ? _gun.ReloadProgress : 0f);
             }
         }
     }
@@ -692,6 +666,10 @@ public class TopDownPlayer : MonoBehaviour
             return;
         }
 
+        // 2026-09-11 사용자: "근접 손공격은 없어" — 무기가 없으면 좌·우클릭 공격(약공·차징 강공)을 받지 않는다.
+        //   구르기는 위에서 이미 처리했다. docs/combat.md §손에 드는 것.
+        if (InHand == HandVisual.Empty) return;
+
         // ★ 약공 선입력 예약 — **반드시 아래 얼리 리턴보다 먼저.**
         //   (2026-07-11 버그픽스) 예전엔 이 분기가 `_state != Idle && != HeavyCharge → return` 뒤에 있어
         //   _state==LightAttack이면 도달 자체가 불가능했다 → _comboBuffered가 영원히 false →
@@ -758,10 +736,9 @@ public class TopDownPlayer : MonoBehaviour
         _state = CombatState.LightAttack;
         _attackStateTimer = atk.Duration;
         _performer.Perform(atk);
-        // 손에 든 것에 맞는 동작 — 칼은 휘두르고, 맨손은 정권으로 지른다.
+        // 손에 든 것에 맞는 동작 — 칼은 휘두른다(빈손은 공격 자체가 없다 — HandleCombatInput).
         if (UsesSwordAnimation || UsesBatAnimation) _character3D.PlayMeleeAttack(atk.Duration, FacingDirection, UsesBatAnimation);
         else if (InHand == HandVisual.Melee) _weaponVis?.Swing(atk.Duration);   // 우 → 좌 한 방향
-        else                            _fistVis?.Punch(atk.Duration);
         // 소음은 스윙이 아니라 '적중' 시에만 발생(AttackPerformer.ScanWindow) — 2026-07-11 변경.
         _comboBuffered = false;
     }
@@ -788,7 +765,6 @@ public class TopDownPlayer : MonoBehaviour
         _performer.Perform(atk);
         if (UsesSwordAnimation || UsesBatAnimation) _character3D.PlayMeleeAttack(_attackStateTimer, FacingDirection, UsesBatAnimation);
         else if (InHand == HandVisual.Melee) _weaponVis?.SwingHeavy(_attackStateTimer, full);   // 치켜든 대각에서 크고 빠르게
-        else                            _fistVis?.PunchHeavy(_attackStateTimer, full);    // 더 깊은 정권
         // 강공도 적중 시에만 소음(AttackPerformer.ScanWindow).
     }
 
