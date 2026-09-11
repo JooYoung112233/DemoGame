@@ -1,0 +1,2346 @@
+{
+  "resolution": 2048,
+  "charts": 233,
+  "coverage": 0.5371417999267578,
+  "overlapping_pixels": 1274,
+  "regions": {
+    "SURFACE": [
+      0.015,
+      0.015,
+      0.97,
+      0.97
+    ]
+  },
+  "layout": [
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1294,
+        1819,
+        56,
+        50
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1832,
+        1718,
+        64,
+        68
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1366,
+        1819,
+        56,
+        50
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        342,
+        1819,
+        41,
+        68
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1912,
+        1718,
+        64,
+        68
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        399,
+        1819,
+        41,
+        68
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1438,
+        1819,
+        56,
+        50
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1510,
+        1819,
+        56,
+        50
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1819,
+        64,
+        68
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        456,
+        1819,
+        41,
+        68
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        118,
+        1819,
+        64,
+        68
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        513,
+        1819,
+        41,
+        68
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        752,
+        1036,
+        98,
+        143
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        414,
+        1351,
+        146,
+        108
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1062,
+        1351,
+        68,
+        108
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        576,
+        1351,
+        146,
+        108
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1146,
+        1351,
+        68,
+        108
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1206,
+        1611,
+        76,
+        88
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        866,
+        1036,
+        98,
+        143
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        738,
+        1351,
+        146,
+        108
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1230,
+        1351,
+        68,
+        108
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        900,
+        1351,
+        146,
+        108
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1314,
+        1351,
+        68,
+        108
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1298,
+        1611,
+        76,
+        88
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1369,
+        832,
+        233,
+        157
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        422,
+        591,
+        231,
+        218
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        832,
+        140,
+        188
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        669,
+        591,
+        231,
+        218
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        194,
+        832,
+        140,
+        188
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        293,
+        1036,
+        217,
+        150
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1162,
+        1718,
+        74,
+        71
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1299,
+        1492,
+        60,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1603,
+        1492,
+        12,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1375,
+        1492,
+        60,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1631,
+        1492,
+        12,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1451,
+        1492,
+        60,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1659,
+        1492,
+        12,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1527,
+        1492,
+        60,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1687,
+        1492,
+        12,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        490,
+        1718,
+        76,
+        76
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1715,
+        1492,
+        12,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1743,
+        1492,
+        12,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1771,
+        1492,
+        12,
+        93
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1799,
+        1492,
+        12,
+        93
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1669,
+        1036,
+        232,
+        137
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1028,
+        341,
+        224,
+        232
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1347,
+        591,
+        116,
+        212
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1268,
+        341,
+        224,
+        232
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1479,
+        591,
+        116,
+        212
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1398,
+        1351,
+        172,
+        107
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        497,
+        1492,
+        150,
+        100
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1390,
+        1611,
+        204,
+        85
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1830,
+        1611,
+        100,
+        85
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1610,
+        1611,
+        204,
+        85
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1718,
+        100,
+        85
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1076,
+        1204,
+        216,
+        127
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        316,
+        1718,
+        71,
+        80
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        336,
+        341,
+        111,
+        234
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        844,
+        341,
+        76,
+        234
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        463,
+        341,
+        111,
+        234
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        916,
+        591,
+        70,
+        215
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        669,
+        1903,
+        12,
+        36
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        154,
+        1718,
+        65,
+        85
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        697,
+        1903,
+        12,
+        36
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1095,
+        1492,
+        86,
+        95
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        591,
+        80,
+        225
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1508,
+        341,
+        112,
+        225
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        134,
+        591,
+        80,
+        225
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1636,
+        341,
+        112,
+        225
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        182,
+        1351,
+        100,
+        119
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        830,
+        1611,
+        78,
+        88
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1277,
+        1903,
+        78,
+        26
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        861,
+        1903,
+        88,
+        26
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        924,
+        1611,
+        78,
+        88
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1371,
+        1903,
+        78,
+        26
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        965,
+        1903,
+        88,
+        26
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        403,
+        1718,
+        71,
+        80
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        590,
+        341,
+        111,
+        234
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1002,
+        591,
+        70,
+        215
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        717,
+        341,
+        111,
+        234
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        936,
+        341,
+        76,
+        234
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        725,
+        1903,
+        12,
+        36
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        235,
+        1718,
+        65,
+        85
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        753,
+        1903,
+        12,
+        36
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1197,
+        1492,
+        86,
+        95
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        230,
+        591,
+        80,
+        225
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1764,
+        341,
+        112,
+        225
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        326,
+        591,
+        80,
+        225
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1892,
+        341,
+        112,
+        225
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        298,
+        1351,
+        100,
+        119
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1018,
+        1611,
+        78,
+        88
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1465,
+        1903,
+        78,
+        26
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1069,
+        1903,
+        88,
+        26
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1112,
+        1611,
+        78,
+        88
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1559,
+        1903,
+        78,
+        26
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1173,
+        1903,
+        88,
+        26
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1586,
+        1351,
+        242,
+        103
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1204,
+        150,
+        131
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        866,
+        832,
+        243,
+        161
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        204,
+        1204,
+        150,
+        131
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        619,
+        832,
+        231,
+        163
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1036,
+        239,
+        152
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1958,
+        226,
+        21
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        522,
+        1958,
+        119,
+        21
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        280,
+        1958,
+        226,
+        21
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        657,
+        1958,
+        119,
+        21
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1618,
+        832,
+        240,
+        152
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1193,
+        1995,
+        27,
+        12
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1653,
+        1903,
+        27,
+        22
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1891,
+        1903,
+        12,
+        22
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1236,
+        1995,
+        27,
+        12
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1696,
+        1903,
+        27,
+        22
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1919,
+        1903,
+        12,
+        22
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        792,
+        1958,
+        36,
+        21
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        570,
+        1819,
+        54,
+        66
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        844,
+        1958,
+        36,
+        21
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1154,
+        1819,
+        19,
+        51
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        640,
+        1819,
+        54,
+        66
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1189,
+        1819,
+        19,
+        51
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1224,
+        1819,
+        19,
+        51
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        710,
+        1819,
+        54,
+        66
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        896,
+        1958,
+        36,
+        21
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        948,
+        1958,
+        36,
+        21
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        780,
+        1819,
+        54,
+        66
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1259,
+        1819,
+        19,
+        51
+      ]
+    },
+    {
+      "part": "Hat brim",
+      "region": "SURFACE",
+      "rect_pixels": [
+        401,
+        38,
+        344,
+        287
+      ]
+    },
+    {
+      "part": "Hat brim",
+      "region": "SURFACE",
+      "rect_pixels": [
+        67,
+        1995,
+        245,
+        12
+      ]
+    },
+    {
+      "part": "Hat brim",
+      "region": "SURFACE",
+      "rect_pixels": [
+        589,
+        1995,
+        203,
+        12
+      ]
+    },
+    {
+      "part": "Hat brim",
+      "region": "SURFACE",
+      "rect_pixels": [
+        328,
+        1995,
+        245,
+        12
+      ]
+    },
+    {
+      "part": "Hat brim",
+      "region": "SURFACE",
+      "rect_pixels": [
+        808,
+        1995,
+        203,
+        12
+      ]
+    },
+    {
+      "part": "Hat brim",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        38,
+        347,
+        287
+      ]
+    },
+    {
+      "part": "Hat crown",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        341,
+        282,
+        234
+      ]
+    },
+    {
+      "part": "Hat crown",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1611,
+        199,
+        91
+      ]
+    },
+    {
+      "part": "Hat crown",
+      "region": "SURFACE",
+      "rect_pixels": [
+        468,
+        1611,
+        165,
+        91
+      ]
+    },
+    {
+      "part": "Hat crown",
+      "region": "SURFACE",
+      "rect_pixels": [
+        253,
+        1611,
+        199,
+        91
+      ]
+    },
+    {
+      "part": "Hat crown",
+      "region": "SURFACE",
+      "rect_pixels": [
+        649,
+        1611,
+        165,
+        91
+      ]
+    },
+    {
+      "part": "Hat crown",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1125,
+        832,
+        228,
+        158
+      ]
+    },
+    {
+      "part": "Hat band",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1000,
+        1958,
+        199,
+        19
+      ]
+    },
+    {
+      "part": "Hat band",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1430,
+        1958,
+        165,
+        19
+      ]
+    },
+    {
+      "part": "Hat band",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1215,
+        1958,
+        199,
+        19
+      ]
+    },
+    {
+      "part": "Hat band",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1611,
+        1958,
+        165,
+        19
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        761,
+        38,
+        253,
+        245
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        526,
+        1036,
+        97,
+        144
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        350,
+        832,
+        253,
+        168
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        639,
+        1036,
+        97,
+        144
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1188,
+        1036,
+        206,
+        138
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1088,
+        591,
+        243,
+        214
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        980,
+        1036,
+        88,
+        139
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1410,
+        1036,
+        243,
+        137
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1084,
+        1036,
+        88,
+        139
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        370,
+        1204,
+        98,
+        131
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        484,
+        1204,
+        98,
+        131
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1611,
+        591,
+        263,
+        194
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1027,
+        1995,
+        67,
+        12
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1511,
+        1995,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1110,
+        1995,
+        67,
+        12
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1539,
+        1995,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        781,
+        1903,
+        24,
+        27
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        821,
+        1903,
+        24,
+        27
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1567,
+        1995,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Poncho",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1595,
+        1995,
+        12,
+        12
+      ]
+    },
+    {
+      "part": "Packed rucksack",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1308,
+        1204,
+        213,
+        127
+      ]
+    },
+    {
+      "part": "Packed rucksack",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1030,
+        38,
+        213,
+        241
+      ]
+    },
+    {
+      "part": "Packed rucksack",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1488,
+        38,
+        127,
+        241
+      ]
+    },
+    {
+      "part": "Packed rucksack",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1537,
+        1204,
+        213,
+        127
+      ]
+    },
+    {
+      "part": "Packed rucksack",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1259,
+        38,
+        213,
+        241
+      ]
+    },
+    {
+      "part": "Packed rucksack",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1631,
+        38,
+        127,
+        241
+      ]
+    },
+    {
+      "part": "Pack canvas lid",
+      "region": "SURFACE",
+      "rect_pixels": [
+        598,
+        1204,
+        223,
+        127
+      ]
+    },
+    {
+      "part": "Pack canvas lid",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1582,
+        1819,
+        223,
+        39
+      ]
+    },
+    {
+      "part": "Pack canvas lid",
+      "region": "SURFACE",
+      "rect_pixels": [
+        277,
+        1903,
+        127,
+        39
+      ]
+    },
+    {
+      "part": "Pack canvas lid",
+      "region": "SURFACE",
+      "rect_pixels": [
+        837,
+        1204,
+        223,
+        127
+      ]
+    },
+    {
+      "part": "Pack canvas lid",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1903,
+        223,
+        39
+      ]
+    },
+    {
+      "part": "Pack canvas lid",
+      "region": "SURFACE",
+      "rect_pixels": [
+        420,
+        1903,
+        127,
+        39
+      ]
+    },
+    {
+      "part": "Bedroll",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1252,
+        1718,
+        274,
+        69
+      ]
+    },
+    {
+      "part": "Bedroll",
+      "region": "SURFACE",
+      "rect_pixels": [
+        582,
+        1718,
+        274,
+        73
+      ]
+    },
+    {
+      "part": "Bedroll",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1542,
+        1718,
+        274,
+        69
+      ]
+    },
+    {
+      "part": "Bedroll",
+      "region": "SURFACE",
+      "rect_pixels": [
+        563,
+        1903,
+        37,
+        39
+      ]
+    },
+    {
+      "part": "Bedroll",
+      "region": "SURFACE",
+      "rect_pixels": [
+        872,
+        1718,
+        274,
+        73
+      ]
+    },
+    {
+      "part": "Bedroll",
+      "region": "SURFACE",
+      "rect_pixels": [
+        616,
+        1903,
+        37,
+        39
+      ]
+    },
+    {
+      "part": "Roll tie -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        975,
+        1492,
+        14,
+        97
+      ]
+    },
+    {
+      "part": "Roll tie -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        377,
+        1492,
+        14,
+        103
+      ]
+    },
+    {
+      "part": "Roll tie -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1844,
+        1351,
+        97,
+        103
+      ]
+    },
+    {
+      "part": "Roll tie -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1005,
+        1492,
+        14,
+        97
+      ]
+    },
+    {
+      "part": "Roll tie -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        407,
+        1492,
+        14,
+        103
+      ]
+    },
+    {
+      "part": "Roll tie -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1492,
+        97,
+        103
+      ]
+    },
+    {
+      "part": "Shoulder strap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1792,
+        1958,
+        16,
+        15
+      ]
+    },
+    {
+      "part": "Shoulder strap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1766,
+        1204,
+        32,
+        125
+      ]
+    },
+    {
+      "part": "Shoulder strap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1814,
+        1204,
+        32,
+        125
+      ]
+    },
+    {
+      "part": "Shoulder strap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1824,
+        1958,
+        16,
+        15
+      ]
+    },
+    {
+      "part": "Shoulder strap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1862,
+        1204,
+        32,
+        125
+      ]
+    },
+    {
+      "part": "Shoulder strap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1910,
+        1204,
+        32,
+        125
+      ]
+    },
+    {
+      "part": "Roll tie 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1035,
+        1492,
+        14,
+        97
+      ]
+    },
+    {
+      "part": "Roll tie 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        437,
+        1492,
+        14,
+        103
+      ]
+    },
+    {
+      "part": "Roll tie 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        151,
+        1492,
+        97,
+        103
+      ]
+    },
+    {
+      "part": "Roll tie 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1065,
+        1492,
+        14,
+        97
+      ]
+    },
+    {
+      "part": "Roll tie 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        467,
+        1492,
+        14,
+        103
+      ]
+    },
+    {
+      "part": "Roll tie 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        264,
+        1492,
+        97,
+        103
+      ]
+    },
+    {
+      "part": "Shoulder strap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1856,
+        1958,
+        16,
+        15
+      ]
+    },
+    {
+      "part": "Shoulder strap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1958,
+        1204,
+        32,
+        125
+      ]
+    },
+    {
+      "part": "Shoulder strap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1351,
+        32,
+        125
+      ]
+    },
+    {
+      "part": "Shoulder strap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1888,
+        1958,
+        16,
+        15
+      ]
+    },
+    {
+      "part": "Shoulder strap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        86,
+        1351,
+        32,
+        125
+      ]
+    },
+    {
+      "part": "Shoulder strap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        134,
+        1351,
+        32,
+        125
+      ]
+    },
+    {
+      "part": "Side satchel",
+      "region": "SURFACE",
+      "rect_pixels": [
+        198,
+        1819,
+        56,
+        68
+      ]
+    },
+    {
+      "part": "Side satchel",
+      "region": "SURFACE",
+      "rect_pixels": [
+        831,
+        1492,
+        56,
+        97
+      ]
+    },
+    {
+      "part": "Side satchel",
+      "region": "SURFACE",
+      "rect_pixels": [
+        663,
+        1492,
+        68,
+        97
+      ]
+    },
+    {
+      "part": "Side satchel",
+      "region": "SURFACE",
+      "rect_pixels": [
+        270,
+        1819,
+        56,
+        68
+      ]
+    },
+    {
+      "part": "Side satchel",
+      "region": "SURFACE",
+      "rect_pixels": [
+        903,
+        1492,
+        56,
+        97
+      ]
+    },
+    {
+      "part": "Side satchel",
+      "region": "SURFACE",
+      "rect_pixels": [
+        747,
+        1492,
+        68,
+        97
+      ]
+    },
+    {
+      "part": "Trade bottle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1739,
+        1903,
+        22,
+        22
+      ]
+    },
+    {
+      "part": "Trade bottle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        850,
+        1819,
+        22,
+        54
+      ]
+    },
+    {
+      "part": "Trade bottle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        888,
+        1819,
+        22,
+        54
+      ]
+    },
+    {
+      "part": "Trade bottle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1777,
+        1903,
+        22,
+        22
+      ]
+    },
+    {
+      "part": "Trade bottle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        926,
+        1819,
+        22,
+        54
+      ]
+    },
+    {
+      "part": "Trade bottle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        964,
+        1819,
+        22,
+        54
+      ]
+    },
+    {
+      "part": "Bottle cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1920,
+        1958,
+        13,
+        13
+      ]
+    },
+    {
+      "part": "Bottle cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1279,
+        1995,
+        13,
+        12
+      ]
+    },
+    {
+      "part": "Bottle cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1308,
+        1995,
+        13,
+        12
+      ]
+    },
+    {
+      "part": "Bottle cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1949,
+        1958,
+        13,
+        13
+      ]
+    },
+    {
+      "part": "Bottle cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1337,
+        1995,
+        13,
+        12
+      ]
+    },
+    {
+      "part": "Bottle cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1366,
+        1995,
+        13,
+        12
+      ]
+    },
+    {
+      "part": "Trade bottle.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1815,
+        1903,
+        22,
+        22
+      ]
+    },
+    {
+      "part": "Trade bottle.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1002,
+        1819,
+        22,
+        54
+      ]
+    },
+    {
+      "part": "Trade bottle.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1040,
+        1819,
+        22,
+        54
+      ]
+    },
+    {
+      "part": "Trade bottle.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1853,
+        1903,
+        22,
+        22
+      ]
+    },
+    {
+      "part": "Trade bottle.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1078,
+        1819,
+        22,
+        54
+      ]
+    },
+    {
+      "part": "Trade bottle.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1116,
+        1819,
+        22,
+        54
+      ]
+    },
+    {
+      "part": "Bottle cap.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1978,
+        1958,
+        13,
+        13
+      ]
+    },
+    {
+      "part": "Bottle cap.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1395,
+        1995,
+        13,
+        12
+      ]
+    },
+    {
+      "part": "Bottle cap.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1424,
+        1995,
+        13,
+        12
+      ]
+    },
+    {
+      "part": "Bottle cap.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1995,
+        13,
+        13
+      ]
+    },
+    {
+      "part": "Bottle cap.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1453,
+        1995,
+        13,
+        12
+      ]
+    },
+    {
+      "part": "Bottle cap.001",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1482,
+        1995,
+        13,
+        12
+      ]
+    }
+  ]
+}

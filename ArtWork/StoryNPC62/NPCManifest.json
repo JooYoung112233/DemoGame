@@ -1,0 +1,83 @@
+{
+  "status": "offline_ready_unity_pending",
+  "cameraPitch": 62,
+  "cameraYaw": 0,
+  "unityAnimationType": "Generic",
+  "applyRootMotion": false,
+  "loopTime": true,
+  "doNotApplyExtraHeightScale": true,
+  "models": [
+    {
+      "npcId": "pawnshop",
+      "displayName": "전당포 주인",
+      "fbx": "Models/Pawnshop.fbx",
+      "blend": "BlenderSource~/Pawnshop.blend",
+      "clip": "Idle_Observe",
+      "frameStart": 1,
+      "frameEnd": 91,
+      "fps": 30,
+      "seconds": 3,
+      "renderer": "NPC_Body",
+      "boneRoot": "SimpleHero_Rig",
+      "textures": {
+        "BaseColor": "Textures/Pawnshop/Pawnshop_BaseColor.png",
+        "Normal": "Textures/Pawnshop/Pawnshop_Normal.png",
+        "Mask": "Textures/Pawnshop/Pawnshop_Mask.png"
+      }
+    },
+    {
+      "npcId": "veteran_scavenger",
+      "displayName": "베테랑 회수꾼",
+      "fbx": "Models/VeteranScavenger.fbx",
+      "blend": "BlenderSource~/VeteranScavenger.blend",
+      "clip": "Idle_Crouch",
+      "frameStart": 1,
+      "frameEnd": 91,
+      "fps": 30,
+      "seconds": 3,
+      "renderer": "NPC_Body",
+      "boneRoot": "SimpleHero_Rig",
+      "textures": {
+        "BaseColor": "Textures/VeteranScavenger/VeteranScavenger_BaseColor.png",
+        "Normal": "Textures/VeteranScavenger/VeteranScavenger_Normal.png",
+        "Mask": "Textures/VeteranScavenger/VeteranScavenger_Mask.png"
+      }
+    },
+    {
+      "npcId": "district_warden",
+      "displayName": "구역 관리인",
+      "fbx": "Models/DistrictWarden.fbx",
+      "blend": "BlenderSource~/DistrictWarden.blend",
+      "clip": "Idle_Ledger",
+      "frameStart": 1,
+      "frameEnd": 91,
+      "fps": 30,
+      "seconds": 3,
+      "renderer": "NPC_Body",
+      "boneRoot": "SimpleHero_Rig",
+      "textures": {
+        "BaseColor": "Textures/DistrictWarden/DistrictWarden_BaseColor.png",
+        "Normal": "Textures/DistrictWarden/DistrictWarden_Normal.png",
+        "Mask": "Textures/DistrictWarden/DistrictWarden_Mask.png"
+      }
+    },
+    {
+      "npcId": "wandering_merchant",
+      "displayName": "떠돌이 상인",
+      "fbx": "Models/WanderingMerchant.fbx",
+      "blend": "BlenderSource~/WanderingMerchant.blend",
+      "clip": "Idle_Pack",
+      "frameStart": 1,
+      "frameEnd": 91,
+      "fps": 30,
+      "seconds": 3,
+      "renderer": "NPC_Body",
+      "boneRoot": "SimpleHero_Rig",
+      "textures": {
+        "BaseColor": "Textures/WanderingMerchant/WanderingMerchant_BaseColor.png",
+        "Normal": "Textures/WanderingMerchant/WanderingMerchant_Normal.png",
+        "Mask": "Textures/WanderingMerchant/WanderingMerchant_Mask.png"
+      }
+    }
+  ]
+}
