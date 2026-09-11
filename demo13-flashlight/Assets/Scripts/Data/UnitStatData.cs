@@ -99,7 +99,12 @@ public class UnitStatData
     // ===== 보상 =====
     [Header("보상")]
     public int expReward = 10;
+    [Tooltip("(미사용 — 어디서도 읽지 않는다. 적 현금은 아래 cashMin/cashMax)")]
     public int goldReward = 5;
+    [Tooltip("시체에 넣는 현금(◈) 최소·최대 — 현금 아이템 1개 = ◈1, 들고 탈출해 귀환하면 스크랩으로 정산. " +
+             "0이면 없음. docs/economy.md §적 현금 드랍.")]
+    [Min(0)] public int cashMin = 0;
+    [Min(0)] public int cashMax = 0;
 
     // ===== 전리품 드랍 (적별 전용 테이블) =====
     [Header("전리품 드랍 (비우면 지역 루트로 폴백)")]

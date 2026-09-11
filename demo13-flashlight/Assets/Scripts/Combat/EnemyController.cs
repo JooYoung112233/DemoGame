@@ -1138,7 +1138,7 @@ public class EnemyController : MonoBehaviour
     {
         state         = State.Dead;
         _banditPendingHit = false;
-        _banditVisual?.Die();
+        _banditVisual?.Die(DeathPush());
         _performer?.Cancel();   // 죽는 순간 진행 중이던 공격 판정이 계속 나가는 것 방지(2026-07-11)
         _rb.detectCollisions = false;
         RestoreTint();
@@ -1200,6 +1200,7 @@ public class EnemyController : MonoBehaviour
         if (_isScavenger) label = "약탈자 " + label;
 
         var items = RollLoot();
+        AddCash(items);   // 현금 — 배그식 사망 루팅 ④ (docs/economy.md §적 현금 드랍)
         // 약탈자 = 플레이어가 잃은 물품을 지님 → 시체 루팅으로 회수.
         if (_isScavenger && _scavengerLoot != null) items.AddRange(_scavengerLoot);
         var overflow = container.SetupAutoSize($"{label} 시체", items);   // 격자 크기 = 내용물에 맞춤(4열, 2~6행)
@@ -1207,6 +1208,27 @@ public class EnemyController : MonoBehaviour
 
         var io = gameObject.AddComponent<InteractableObject>();
         io.SetupAsContainer("시체 뒤지기");
+
+        // 배그식 사망 루팅 ①② — 희귀도 빛기둥(비면 "빈 시체") + 열면 빠른 루팅 목록(InteractableObject가 이걸 보고 고른다)
+        gameObject.AddComponent<CorpseMarker>().Init(container, _label);
+    }
+
+    /// <summary>현금 — 유닛별 cashMin~cashMax(◈). 현금 아이템 1개 = ◈1(스택 수가 곧 금액).</summary>
+    void AddCash(List<ItemInstance> items)
+    {
+        if (unitStat == null || unitStat.cashMax <= 0) return;
+        var cash = ItemDatabase.Get(CashWallet.ItemId);
+        if (cash == null) return;
+        int amount = Random.Range(unitStat.cashMin, Mathf.Max(unitStat.cashMin, unitStat.cashMax) + 1);
+        if (amount > 0) items.Add(new ItemInstance(cash, amount));
+    }
+
+    /// <summary>래그돌이 쓰러질 방향·세기(속도). 맞은 방향 정보가 없어 "플레이어 → 적" 쪽으로 밀어 넘어뜨린다.</summary>
+    Vector3 DeathPush()
+    {
+        Vector3 d = player != null ? transform.position - player.position : -transform.forward;
+        d.y = 0f;
+        return (d.sqrMagnitude > 0.0001f ? d.normalized : Vector3.forward) * 2.5f + Vector3.up * 1.2f;
     }
 
     /// <summary>전리품 롤 — 적별 전용 드랍 테이블(unitStat.drops) 우선, 비면 지상 티어 region 루트 폴백.

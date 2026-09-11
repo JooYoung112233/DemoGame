@@ -132,10 +132,17 @@ public sealed class BanditEnemyVisual : MonoBehaviour
     public void SetAttackElapsed(float elapsed) { attackTime = Mathf.Max(0, elapsed); }
     public void SetWindupRemaining(float remaining) { attackTime = Mathf.Max(0, windupLength - remaining); }
     public void CancelAttack() { winding = attacking = false; windupBones = null; motion = 0; }
-    public void Die()
+    BanditRagdoll ragdoll;
+
+    public void Die(Vector3 push = default)
     {
         CancelAttack(); dead = true; deathTime = 0; SetVisible(true); SetTint(new Color(.45f,.45f,.45f));
         if (aimLine != null) aimLine.enabled = false;
+        // 래그돌(2026-09-11 사용자 "몸 대신 레그돌") — 애니메이터를 끄고 뼈를 물리에 맡긴다.
+        //   애니메이터가 켜져 있으면 speed=0이어도 매 프레임 자세를 덮어써 래그돌과 싸운다. 실패하면 예전 기울기 연출.
+        if (animator != null) animator.enabled = false;
+        ragdoll = BanditRagdoll.Activate(view, push);
+        if (ragdoll == null && animator != null) animator.enabled = true;
     }
 
     void LateUpdate()
@@ -144,6 +151,7 @@ public sealed class BanditEnemyVisual : MonoBehaviour
         float dt = Time.deltaTime;
         if (dead)
         {
+            if (ragdoll != null) return;   // 몸은 래그돌이 맡았다 — 기울기 연출로 덮어쓰지 않는다
             animator.speed = 0; deathTime += dt;
             float t = Mathf.SmoothStep(0, 1, Mathf.Clamp01(deathTime / .35f));
             view.localRotation = Quaternion.Euler(0, Mathf.Atan2(facing.x, facing.y) * Mathf.Rad2Deg, 0) * Quaternion.Euler(0,0,85*t);

@@ -307,6 +307,12 @@ public class RaidManager : MonoBehaviour
 
         SettleXp(true);   // XP 정산(레벨업/PP 포함) — 커밋 전에 확정
 
+        // 현금 정산(docs/economy.md §적 현금 드랍) — 들고 나온 현금을 ◈스크랩으로.
+        //   XP(루팅가치)를 먼저 잰 **뒤에** 뺀다 — 순서가 바뀌면 현금이 루팅 XP에서 빠진다. 세이브 커밋 전에.
+        var cashInv = TopDownPlayer.Instance != null ? TopDownPlayer.Instance.GetComponent<PlayerInventory>() : null;
+        int cash = CashWallet.SettleFromInventory(cashInv);
+        if (cash > 0) Debug.Log($"[RaidManager] 현금 정산 ◈{cash}");
+
         // 탈출 정산 = 체크포인트 커밋(레이드 종료). 인벤/정산 결과를 디스크에 확정.
         SaveCheckpoints.Instance?.RaidEnded();
 
