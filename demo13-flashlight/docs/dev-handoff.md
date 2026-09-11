@@ -1,5 +1,13 @@
 # 개발 핸드오프 (이어서 작업)
 
+## 2026-09-11 — 집 PC Unity 연결 완료
+
+- 사용자 요청: 분위기 작업에 앞서 Unity CLI·MCP·스킬을 먼저 연결한다.
+- Unity CLI `1.0.0-beta.9` 설치, Codex 사용자 설정에 `unity` stdio MCP 등록. 대상 프로젝트는 `E:/personalProject/Demo/demo13-flashlight`; 실행 파일은 이 PC의 `C:/Users/power/AppData/Local/Unity/bin/unity.exe` 절대 경로다. 사용자 설정 파일은 저장소에 포함하지 않는다.
+- 저장소 루트 `.agents/skills/unity-cli`를 설치한 CLI의 공식 스킬로 갱신했다. 중첩 Unity 프로젝트의 `com.unity.pipeline` `0.6.0-exp.1`이 제공하는 `.claude/skills/unity-pipeline/SKILL.md`도 루트 `.agents/skills/unity-pipeline`에 원문 복사했다. Pipeline 패키지를 갱신하면 이 복사본도 다시 맞춘다.
+- 검증: Unity `6000.6.0f1`, 해당 프로젝트의 단일 에디터 `ready`, `compiling=false`, `domainReloadInProgress=false`, `playMode=stopped`. `tools/list`, MCP `editor_status`, `list_open_scenes`, `set_autotick`, `get_console_logs` 호출 성공. 조회 시 콘솔 오류 0, auto-tick 16ms 활성.
+- 에디터는 아직 저장되지 않은 기본 씬을 열고 있다. 게임 검증은 `Systems.unity`에서 시작한다. 분위기 보정·Play 검증은 아직 하지 않았다. 현재 실행 중인 Codex에서 신규 MCP가 도구 목록에 나타나지 않으면 재시작 후 확인한다. 이번 세션에서는 저장소 `tools/unity_mcp_call.py`로 같은 공식 stdio MCP에 연결하여 검증했다.
+
 ## 2026-09-11 — 집에서 이어받기: 아트 마감
 
 - 이번 인계는 **하이드아웃·마을/실내·NPC·캐릭터 아트 및 GameLit 표면/그림자 보정 누적분**, 마지막 **전당포 앞 바닥·생활 소품 6종 마감**이다. 범위·검수는 [safehouse.md](safehouse.md) 상단과 [rendering.md](rendering.md), `ArtWork/TownFinish62/README.md` 참조.
