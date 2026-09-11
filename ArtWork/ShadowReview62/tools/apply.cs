@@ -1,0 +1,12 @@
+if(UnityEditor.EditorApplication.isPlaying)throw new System.Exception("Apply deferred while Play active.");
+var pipeline=UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+var weather=Resources.Load<WeatherData>("Data/WeatherData");
+if(UnityEditor.AssetDatabase.GetAssetPath(pipeline)!="Assets/Settings/URP-3D.asset")throw new System.Exception("Unexpected render pipeline");
+UnityEditor.Undo.RecordObject(weather,"Shorter daytime shadows for top-down view");
+UnityEditor.Undo.RecordObject(pipeline,"Improve top-down shadow cascades and contact");
+weather.daySunAngle=new Vector3(58,-30,0);
+pipeline.shadowCascadeCount=4;pipeline.cascade4Split=new Vector3(.35f,.6f,.85f);
+pipeline.shadowDepthBias=.5f;pipeline.shadowNormalBias=.25f;
+UnityEditor.EditorUtility.SetDirty(weather);UnityEditor.EditorUtility.SetDirty(pipeline);
+UnityEditor.AssetDatabase.SaveAssetIfDirty(weather);UnityEditor.AssetDatabase.SaveAssetIfDirty(pipeline);
+return Newtonsoft.Json.JsonConvert.SerializeObject(new{daySunAngle=weather.daySunAngle.ToString(),pipeline.shadowCascadeCount,cascade4Split=pipeline.cascade4Split.ToString(),pipeline.shadowDistance,pipeline.mainLightShadowmapResolution,pipeline.shadowDepthBias,pipeline.shadowNormalBias,playing=UnityEditor.EditorApplication.isPlaying});

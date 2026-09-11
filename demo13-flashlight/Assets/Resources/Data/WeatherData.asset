@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::WeatherData
   dayIntensity: 0.8
   dayLightColor: {r: 1, g: 0.9, b: 0.79, a: 1}
-  daySunAngle: {x: 50, y: -30, z: 0}
+  daySunAngle: {x: 58, y: -30, z: 0}
   dayAmbientColor: {r: 0.34, g: 0.35, b: 0.37, a: 1}
   dayAmbientIntensity: 1
   dayFog: 0
