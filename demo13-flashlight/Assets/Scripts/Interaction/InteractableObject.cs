@@ -395,6 +395,8 @@ public class InteractableObject : MonoBehaviour, IInteractable
         if (container != null)
         {
             container.Open(playerGO);
+            // 시체 = 배그식 빠른 루팅 목록(docs/combat.md §배그식 사망 루팅 ②). Tab이면 아래 자세히 창.
+            if (GetComponent<CorpseMarker>() != null) { CorpseLootUI.Show(container, playerGO); return; }
             if (UIManager.Instance != null)
                 UIManager.Instance.ShowCharacterPanelWithContainer(container);
         }

@@ -111,6 +111,8 @@ MonoBehaviour:
     spreadDeg: 3
     expReward: 10
     goldReward: 5
+    cashMin: 50
+    cashMax: 150
     drops: []
     motions:
     - anim: idle
@@ -164,6 +166,8 @@ MonoBehaviour:
     spreadDeg: 3
     expReward: 10
     goldReward: 5
+    cashMin: 80
+    cashMax: 200
     drops: []
     motions:
     - anim: idle
@@ -217,6 +221,8 @@ MonoBehaviour:
     spreadDeg: 5
     expReward: 10
     goldReward: 5
+    cashMin: 80
+    cashMax: 200
     drops: []
     motions:
     - anim: idle
@@ -270,6 +276,8 @@ MonoBehaviour:
     spreadDeg: 3
     expReward: 14
     goldReward: 8
+    cashMin: 50
+    cashMax: 150
     drops: []
     motions:
     - anim: idle
@@ -323,6 +331,8 @@ MonoBehaviour:
     spreadDeg: 3
     expReward: 28
     goldReward: 18
+    cashMin: 150
+    cashMax: 400
     drops: []
     motions:
     - anim: idle
@@ -376,6 +386,8 @@ MonoBehaviour:
     spreadDeg: 3
     expReward: 10
     goldReward: 5
+    cashMin: 0
+    cashMax: 0
     drops: []
     motions:
     - anim: idle
