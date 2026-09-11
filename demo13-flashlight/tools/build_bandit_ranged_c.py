@@ -16,7 +16,7 @@ before=signature();materials={};parts=[body]
 def material(name,color,roughness=.88,metallic=0):
  m=bpy.data.materials.new(name);m.diffuse_color=(*color,1);m.use_nodes=True;bs=m.node_tree.nodes['Principled BSDF'];bs.inputs['Base Color'].default_value=(*color,1);bs.inputs['Roughness'].default_value=roughness;bs.inputs['Metallic'].default_value=metallic
  materials[name]={'baseColor':list(color),'roughness':roughness,'metallic':metallic};return m
-cloth=material('Ranged_OliveCloth',(.125,.164,.079));armor=material('Ranged_CharcoalWebbing',(.048,.057,.044));helmet=material('Ranged_HelmetPaint',(.102,.127,.083),.70,.12);edge=material('Ranged_WornEdge',(.21,.215,.16),.63,.22);pouch=material('Ranged_CanvasPouch',(.19,.18,.105));skin=material('Ranged_Skin',(.55,.335,.18));rubber=material('Ranged_Gloves',(.043,.047,.04),.88)
+cloth=material('Ranged_OliveCloth',(.125,.164,.079));armor=material('Ranged_CharcoalWebbing',(.048,.057,.044));helmet=material('Ranged_HelmetPaint',(.095,.12,.073),.86,.03);edge=material('Ranged_WornEdge',(.145,.16,.115),.80,.08);pouch=material('Ranged_CanvasPouch',(.145,.157,.093));skin=material('Ranged_Skin',(.55,.335,.18));rubber=material('Ranged_Gloves',(.043,.047,.04),.88)
 # Retain all original atlas UVs and body weights. Part_* groups identify authored
 # components, so no approximate spatial deletion can remove the face or neck.
 hoodIndex=body.vertex_groups['Part_Bandit_Hood'].index
@@ -35,6 +35,20 @@ for p in body.data.polygons:
  elif any(all(in_part(v,'Part_Study_Mitten_'+s) for v in verts) for s in ['-1','1']):p.material_index=slots[rubber.name]
 for v in body.data.vertices:
  if in_part(v,'Part_Bandit_Mask') and v.co.z<1.25:v.co.z=1.25+(v.co.z-1.25)*.25
+ if in_part(v,'Part_Study_Head') or in_part(v,'Part_Bandit_Mask'):
+  v.co.x*=.82
+  taper=max(0,min(1,(1.48-v.co.z)/.16));v.co.x*=1-.16*taper
+  if in_part(v,'Part_Study_Head') and v.co.y<-.15:
+   # Hood-only source face was a flat panel. Recess forehead under the helmet,
+   # retaining the atlas and skin weights instead of leaving protruding temples.
+   v.co.y+=.012+.03*max(0,min(1,(v.co.z-1.32)/.20))
+ for side in ['-1','1']:
+  if not in_part(v,'Part_Study_Sleeve_'+side) or v.co.z<.80:continue
+  bone=rig.data.bones['UpperArm.R' if side=='-1' else 'UpperArm.L'];a=bone.head_local;b=bone.tail_local
+  t=max(0,min(1,(v.co-a).dot(b-a)/(b-a).length_squared));centre=a+t*(b-a)
+  strength=min(1,(v.co.z-.80)/.15);factor=1-.18*strength
+  v.co=centre+(v.co-centre)*factor
+body.data.update()
 # New vest follows existing torso weights; headgear uses Head only.
 torsoVerts=[v for v in body.data.vertices if in_part(v,'Part_Study_Torso')];kd=KDTree(len(torsoVerts))
 for i,v in enumerate(torsoVerts):kd.insert(v.co,i)
@@ -60,7 +74,7 @@ def box(name,p,s,mat,bone='Chest',followTorso=False):
  mod=temp.modifiers.new('Worn edges','BEVEL');mod.width=min(.012,min(s)*.18);mod.segments=1;bpy.ops.object.modifier_apply(modifier=mod.name)
  vs=[tuple(v.co) for v in temp.data.vertices];fs=[tuple(f.vertices) for f in temp.data.polygons];bpy.data.objects.remove(temp,do_unlink=True)
  return mesh(name,vs,fs,mat,bone,followTorso)
-def rings(name,rows,mat,bone='Head',followTorso=False,cap=True):
+def rings(name,rows,mat,bone='Head',followTorso=False,cap=True,bottom=True):
  vs=[];profile=[(-1,-.60),(-.65,-1),(.65,-1),(1,-.60),(1,.60),(.65,1),(-.65,1),(-1,.60)] if followTorso else None;N=len(profile) if profile else 16
  for z,rx,ry,cy in rows:
   for i in range(N):
@@ -69,29 +83,40 @@ def rings(name,rows,mat,bone='Head',followTorso=False,cap=True):
  fs=[]
  for k in range(len(rows)-1):
   for i in range(N):fs.append((k*N+i,k*N+(i+1)%N,(k+1)*N+(i+1)%N,(k+1)*N+i))
- if cap:fs.extend([tuple(reversed(range(N))),tuple(range((len(rows)-1)*N,len(rows)*N))])
+ if cap:
+  if bottom:fs.append(tuple(reversed(range(N))))
+  fs.append(tuple(range((len(rows)-1)*N,len(rows)*N)))
  return mesh(name,vs,fs,mat,bone,followTorso)
 # The source hood concealed an open rear skull region. Fill it under the helmet.
-box('Skull under helmet',(0,.02,1.417),(.475,.24,.185),skin,'Head')
-rings('Low military helmet',[(1.413,.282,.222,.008),(1.447,.302,.244,.009),(1.548,.274,.225,.014),(1.613,.208,.180,.018),(1.637,.118,.115,.018)],helmet)
-rings('Helmet lower band',[(1.416,.286,.225,.008),(1.443,.306,.246,.009)],armor,cap=False)
-box('Short front brim',(0,-.218,1.446),(.44,.055,.022),helmet,'Head')
+box('Skull under helmet',(0,.015,1.417),(.417,.235,.185),skin,'Head')
+rings('Neck gaiter',[(1.09,.086,.088,0),(1.15,.105,.096,0),(1.23,.12,.105,0),(1.33,.128,.111,0)],armor,'Neck')
+helmetRows=[(1.411,.247,.198,.006),(1.497,.264,.214,.010),(1.553,.250,.211,.013),(1.640,.213,.184,.017),(1.701,.151,.136,.021),(1.731,.071,.068,.024)]
+shell=rings('Rounded military helmet',helmetRows,helmet,bottom=False)
+# Contoured lower rim rises at the forehead; sides/back wrap the head. No flat brim or crown plaque.
+for v in shell.data.vertices:
+ row=helmetRows[v.index//16];a=(v.index%16)*math.tau/16
+ v.co.x=math.copysign(abs(math.sin(a))**.72,math.sin(a))*row[1]
+ v.co.y=row[3]-math.copysign(abs(math.cos(a))**.72,math.cos(a))*row[2]
+ if v.co.z<1.43:
+  front=max(0,-(v.co.y-.006)/.198);v.co.z+=.065*front**4
+for p in shell.data.polygons:p.use_smooth=True
+shell.data.update()
+band=rings('Contoured helmet rim',[(1.411,.249,.200,.006),(1.425,.252,.203,.007)],armor,cap=False)
+for v in band.data.vertices:
+ rx,ry,cy=(.249,.200,.006) if v.index<16 else (.252,.203,.007);a=(v.index%16)*math.tau/16
+ v.co.x=math.copysign(abs(math.sin(a))**.72,math.sin(a))*rx;v.co.y=cy-math.copysign(abs(math.cos(a))**.72,math.cos(a))*ry
+ front=max(0,-(v.co.y-.006)/.200);v.co.z+=.065*front**4
+band.data.update()
 for s in [-1,1]:
- box('Helmet side fixing',(s*.283,-.01,1.455),(.019,.07,.033),edge,'Head')
-box('Crown field patch',(.045,.009,1.641),(.092,.17,.009),pouch,'Head')
-for o in parts:
- if o.name.startswith(('Low military helmet','Helmet lower band','Short front brim','Helmet side fixing','Crown field patch')):
-  # At pitch 62, a low projecting brim hid the entire eye line. Lift the rim
-  # and flatten the crown while keeping the short military helmet silhouette.
-  for v in o.data.vertices:v.co.z=1.49+(v.co.z-1.413)*.82
-  o.data.update()
+ box('Helmet side fixing',(s*.252,-.005,1.467),(.015,.042,.021),edge,'Head')
+ box('Helmet cheek strap',(s*.202,-.184,1.384),(.025,.025,.144),armor,'Head')
 # Sleeveless soft vest, not bulky shoulder armour; keep rifle stow lane clear.
 rings('Soft tactical vest',[(.744,.25,.172,0),(.864,.238,.171,0),(.982,.227,.164,0),(1.065,.192,.151,0)],armor,'Chest',True,False)
 for s in [-1,1]:
  box('Shoulder webbing',(s*.126,0,1.067),(.056,.305,.025),armor,'Chest')
- box('Chest magazine pouch',(s*.094,-.198,.902),(.139,.079,.207),pouch,'Chest',True)
- box('Magazine pouch lid',(s*.094,-.247,.981),(.143,.022,.054),cloth,'Chest',True)
- box('Magazine lid catch',(s*.094,-.261,.965),(.023,.008,.028),edge,'Chest',True)
+ box('Chest magazine pouch',(s*.077,-.182,.902),(.112,.040,.155),pouch,'Chest',True)
+ box('Magazine pouch lid',(s*.077,-.207,.958),(.115,.013,.040),cloth,'Chest',True)
+ box('Magazine lid catch',(s*.077,-.217,.945),(.018,.006,.022),edge,'Chest',True)
  box('Belt side pouch',(s*.224,.058,.727),(.090,.116,.12),armor,'Hips')
 box('Vest lower strap',(0,-.174,.786),(.389,.023,.035),cloth,'Spine',True)
 box('Vest buckle',(.025,-.194,.784),(.057,.018,.032),edge,'Spine',True)

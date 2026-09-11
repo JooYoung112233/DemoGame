@@ -5,7 +5,8 @@ exec(compile(R.read_text(encoding='utf8').split('for group,specs in manifest')[0
 OUT=ROOT.parent/'ArtWork/BanditRoles62';sc.render.resolution_x=1200;sc.render.resolution_y=760;sc.cycles.samples=24
 sources=[ROOT.parent/'ArtWork/CharacterProportionC/BlenderSource~/Bandit_C.blend',OUT/'BlenderSource~/Bandit_Ranged_C.blend']
 target=Vector((0,0,.86));cam.location=target+Vector((0,10,10*math.tan(math.radians(62))));cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler();data.ortho_scale=3.7
-for label,actionName,frame,angle in [('Roles62','Idle',1,math.pi),('Movement62','Walk',12,math.pi+.3),('Rear62','Idle',1,0)]:
+for label,actionName,frame,angle in [('Roles62','Idle',1,math.pi),('Movement62','Walk',12,math.pi+.3),('Rear62','Idle',1,0),('Side62','Idle',1,math.pi*1.5),('Run62','Run',8,math.pi+.3)]:
+ if requested and label not in requested:continue
  frozen=[]
  for index,path in enumerate(sources):
   with bpy.data.libraries.load(str(path),link=False) as (src,dst):dst.objects=[n for n in src.objects if n in ['SimpleHero_Rig','Bandit_Body']];dst.actions=[actionName]
