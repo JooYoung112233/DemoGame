@@ -1,0 +1,24 @@
+[
+  {
+    "kind": "Pistol",
+    "maxWeaponFrameStep": 0.030930534,
+    "maxStepTime": 8.0,
+    "maxRightGripError": 7.016216E-07,
+    "maxLeftGripError": 0.0,
+    "invalidTransforms": 0,
+    "stowedParent": "FirearmStow",
+    "armedParent": "FirearmGrip",
+    "weaponWorldScale": 0.9999999
+  },
+  {
+    "kind": "Rifle",
+    "maxWeaponFrameStep": 0.0520308055,
+    "maxStepTime": 10.6,
+    "maxRightGripError": 6.778141E-07,
+    "maxLeftGripError": 0.000583588146,
+    "invalidTransforms": 0,
+    "stowedParent": "FirearmStow",
+    "armedParent": "FirearmGrip",
+    "weaponWorldScale": 1.00000048
+  }
+]
