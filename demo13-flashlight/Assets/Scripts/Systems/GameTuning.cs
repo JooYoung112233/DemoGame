@@ -92,6 +92,15 @@ public class GameTuning : ScriptableObject
     [Tooltip("적 탄의 비행 거리 = 사격 사거리 × 이 배율. 탄은 비행 거리 절반부터 55%까지 감쇠한다.")]
     [Range(1f, 2f)] public float enemyBulletRangeMult = 1.25f;
 
+    // ── 총격(플레이어) (2026-09-11, docs/combat.md §총격전) — 총마다 수치는 WeaponData, 탄마다는 탄 아이템 ──
+    [Header("총격(플레이어)")]
+    [Tooltip("조준(우클릭) 중 카메라가 커서 쪽으로 밀리는 비율 — 플레이어→커서 거리 × 이 값.")]
+    [Range(0f, 1f)] public float aimLookAhead = 0.35f;
+    [Tooltip("조준 시 카메라가 밀리는 최대 거리(m).")]
+    [Range(0f, 10f)] public float aimLookAheadMax = 4f;
+    [Tooltip("관통탄이 몸 하나를 뚫을 때마다 남는 데미지 비율(탄 스펙 ammoPenetration과 함께).")]
+    [Range(0.1f, 1f)] public float gunPierceDamageKeep = 0.6f;
+
     // ── 도로 장애물 / 막힌 통로 (2026-07-11) ──────────────────────────
     //   "넓은 길인데 그냥 뻥 뚫린 통로" 방지 — 도로 위 잔해로 동선을 꺾고 시야를 끊는다.
     //   밀도/통행폭은 빌더가 읽으므로 바꾸면 `빌드 ▸ 지역1` 재실행 필요.
