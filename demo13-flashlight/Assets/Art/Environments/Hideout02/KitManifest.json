@@ -1,0 +1,1170 @@
+{
+  "units": "metres",
+  "room_size": [
+    6,
+    6,
+    2.4
+  ],
+  "assets": {
+    "BedsideTable02": {
+      "meshes": 1,
+      "triangles": 1144,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.285
+          ],
+          "size": [
+            0.48,
+            0.48,
+            0.57
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "CookingStation02": {
+      "meshes": 1,
+      "triangles": 1388,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.415
+          ],
+          "size": [
+            1.45,
+            0.72,
+            0.83
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Cot01": {
+      "meshes": 1,
+      "triangles": 1716,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.35
+          ],
+          "size": [
+            1.3,
+            2.15,
+            0.7
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Generator01": {
+      "meshes": 1,
+      "triangles": 1032,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.31
+          ],
+          "size": [
+            0.77,
+            0.55,
+            0.62
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "LockerPair02": {
+      "meshes": 1,
+      "triangles": 792,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.65
+          ],
+          "size": [
+            1.15,
+            0.6,
+            1.3
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "MapBoard01": {
+      "meshes": 1,
+      "triangles": 436,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1.24,
+            0.07,
+            0.79
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "MedicalBox01": {
+      "meshes": 1,
+      "triangles": 420,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.2
+          ],
+          "size": [
+            0.51,
+            0.3,
+            0.4
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "MedicalStation02": {
+      "meshes": 1,
+      "triangles": 1448,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.415
+          ],
+          "size": [
+            1.25,
+            0.72,
+            0.83
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Radio01": {
+      "meshes": 1,
+      "triangles": 644,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.16
+          ],
+          "size": [
+            0.43,
+            0.18,
+            0.32
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "RadioTable02": {
+      "meshes": 1,
+      "triangles": 616,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.36
+          ],
+          "size": [
+            0.8,
+            0.64,
+            0.72
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "RoomShell02": {
+      "meshes": 1,
+      "triangles": 19032,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            -0.11
+          ],
+          "size": [
+            6,
+            6,
+            0.2
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            -3,
+            0,
+            1.2
+          ],
+          "size": [
+            0.16,
+            6,
+            2.4
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            3,
+            0,
+            1.2
+          ],
+          "size": [
+            0.16,
+            6,
+            2.4
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            3,
+            1.2
+          ],
+          "size": [
+            6,
+            0.16,
+            2.4
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            -1.88,
+            -3,
+            1.2
+          ],
+          "size": [
+            2.24,
+            0.16,
+            2.4
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            1.88,
+            -3,
+            1.2
+          ],
+          "size": [
+            2.24,
+            0.16,
+            2.4
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Rug01": {
+      "meshes": 1,
+      "triangles": 2948,
+      "uv_mapped": true,
+      "colliders": []
+    },
+    "Shelf01": {
+      "meshes": 1,
+      "triangles": 704,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.72
+          ],
+          "size": [
+            1.46,
+            0.67,
+            1.44
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Stool01": {
+      "meshes": 1,
+      "triangles": 396,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.24
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.49
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "SupplyCase02": {
+      "meshes": 1,
+      "triangles": 220,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.18
+          ],
+          "size": [
+            0.58,
+            0.4,
+            0.36
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Tin02": {
+      "meshes": 1,
+      "triangles": 304,
+      "uv_mapped": true,
+      "colliders": []
+    },
+    "WoodCrate01": {
+      "meshes": 1,
+      "triangles": 924,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.225
+          ],
+          "size": [
+            0.66,
+            0.56,
+            0.45
+          ],
+          "parent": ""
+        }
+      ]
+    },
+    "Workbench01": {
+      "meshes": 1,
+      "triangles": 1564,
+      "uv_mapped": true,
+      "colliders": [
+        {
+          "center": [
+            -0.71,
+            -0.3,
+            0.43
+          ],
+          "size": [
+            0.075,
+            0.075,
+            0.86
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            -0.71,
+            0.3,
+            0.43
+          ],
+          "size": [
+            0.075,
+            0.075,
+            0.86
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0.71,
+            -0.3,
+            0.43
+          ],
+          "size": [
+            0.075,
+            0.075,
+            0.86
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0.71,
+            0.3,
+            0.43
+          ],
+          "size": [
+            0.075,
+            0.075,
+            0.86
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            0,
+            0.88
+          ],
+          "size": [
+            1.7,
+            0.76,
+            0.095
+          ],
+          "parent": ""
+        },
+        {
+          "center": [
+            0,
+            0,
+            0.2
+          ],
+          "size": [
+            1.46,
+            0.7,
+            0.055
+          ],
+          "parent": ""
+        }
+      ]
+    }
+  },
+  "placements": [
+    {
+      "asset": "RoomShell02",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Architecture",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Shelf01",
+      "position": [
+        -2.03,
+        2.5,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Furniture",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Cot01",
+      "position": [
+        0.18,
+        2.06,
+        0
+      ],
+      "rotation_z": 90,
+      "group": "Furniture",
+      "scale": 1,
+      "key": "bed",
+      "stand": [
+        0.1,
+        1.08,
+        0
+      ]
+    },
+    {
+      "asset": "BedsideTable02",
+      "position": [
+        -1.21,
+        2.32,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Furniture",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "MapBoard01",
+      "position": [
+        2.04,
+        2.88,
+        1.48
+      ],
+      "rotation_z": 0,
+      "group": "Furniture",
+      "scale": 1,
+      "key": "dispatch",
+      "stand": [
+        1.73,
+        1.91,
+        0
+      ]
+    },
+    {
+      "asset": "LockerPair02",
+      "position": [
+        -2.32,
+        1.28,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Furniture",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Workbench01",
+      "position": [
+        2.45,
+        0.75,
+        0
+      ],
+      "rotation_z": -90,
+      "group": "Furniture",
+      "scale": 1,
+      "key": "workbench",
+      "stand": [
+        1.62,
+        0.75,
+        0
+      ]
+    },
+    {
+      "asset": "Stool01",
+      "position": [
+        1.38,
+        0.09,
+        0
+      ],
+      "rotation_z": -14,
+      "group": "Furniture",
+      "scale": 1,
+      "key": "idle",
+      "stand": [
+        0.75,
+        0.02,
+        0
+      ]
+    },
+    {
+      "asset": "MedicalStation02",
+      "position": [
+        2.43,
+        -1.46,
+        0
+      ],
+      "rotation_z": -90,
+      "group": "Furniture",
+      "scale": 1,
+      "key": "medical",
+      "stand": [
+        1.6,
+        -1.46,
+        0
+      ]
+    },
+    {
+      "asset": "MedicalBox01",
+      "position": [
+        2.5,
+        -1.14,
+        0.865
+      ],
+      "rotation_z": -90,
+      "group": "SmallProps",
+      "scale": 0.76,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "RadioTable02",
+      "position": [
+        -2.45,
+        -0.16,
+        0
+      ],
+      "rotation_z": 90,
+      "group": "Furniture",
+      "scale": 1,
+      "key": "radio",
+      "stand": [
+        -1.66,
+        -0.16,
+        0
+      ]
+    },
+    {
+      "asset": "Radio01",
+      "position": [
+        -2.45,
+        -0.16,
+        0.757
+      ],
+      "rotation_z": 45,
+      "group": "SmallProps",
+      "scale": 1.2,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Generator01",
+      "position": [
+        -2.42,
+        -1.1,
+        0
+      ],
+      "rotation_z": 90,
+      "group": "Furniture",
+      "scale": 1,
+      "key": "generator",
+      "stand": [
+        -1.66,
+        -1.1,
+        0
+      ]
+    },
+    {
+      "asset": "CookingStation02",
+      "position": [
+        -2.04,
+        -2.47,
+        0
+      ],
+      "rotation_z": 180,
+      "group": "Furniture",
+      "scale": 1,
+      "key": "cooking",
+      "stand": [
+        -1.75,
+        -1.75,
+        0
+      ]
+    },
+    {
+      "asset": "Rug01",
+      "position": [
+        0,
+        -0.73,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "StorageChest01",
+      "position": [
+        -1.1,
+        0.65,
+        0
+      ],
+      "rotation_z": 180,
+      "group": "Furniture",
+      "scale": 1,
+      "key": "stash",
+      "stand": [
+        -1.05,
+        -0.04,
+        0
+      ]
+    },
+    {
+      "asset": "SupplyCase02",
+      "position": [
+        -2.4,
+        2.49,
+        0.218
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "SupplyCase02",
+      "position": [
+        -1.68,
+        2.5,
+        0.218
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "SupplyCase02",
+      "position": [
+        -2.05,
+        2.5,
+        1.228
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "SupplyCase02",
+      "position": [
+        0.62,
+        2.16,
+        0
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "SupplyCase02",
+      "position": [
+        2.42,
+        -1.56,
+        0.25
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Tin02",
+      "position": [
+        -2.38,
+        2.5,
+        0.708
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Tin02",
+      "position": [
+        -2.17,
+        2.5,
+        0.708
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Tin02",
+      "position": [
+        -1.96,
+        2.5,
+        0.708
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Tin02",
+      "position": [
+        -1.67,
+        2.51,
+        1.23
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Tin02",
+      "position": [
+        -2.43,
+        -2.4,
+        0.26
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Tin02",
+      "position": [
+        -2.19,
+        -2.4,
+        0.26
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Tin02",
+      "position": [
+        2.44,
+        -1.02,
+        0.25
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "Tin02",
+      "position": [
+        2.45,
+        -1.26,
+        0.25
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 1,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "WoodCrate01",
+      "position": [
+        2.45,
+        -2.47,
+        0
+      ],
+      "rotation_z": -4,
+      "group": "Dressing",
+      "scale": 0.75,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "WoodCrate01",
+      "position": [
+        -0.4,
+        2.2,
+        0
+      ],
+      "rotation_z": 3,
+      "group": "Dressing",
+      "scale": 0.75,
+      "key": null,
+      "stand": null
+    },
+    {
+      "asset": "WoodCrate01",
+      "position": [
+        -2,
+        -2.46,
+        0.25
+      ],
+      "rotation_z": 0,
+      "group": "Dressing",
+      "scale": 0.75,
+      "key": null,
+      "stand": null
+    }
+  ],
+  "palette": {
+    "Hideout_Olive": {
+      "color": [
+        0.135,
+        0.148,
+        0.102
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_OliveLight": {
+      "color": [
+        0.205,
+        0.215,
+        0.15
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_OliveDark": {
+      "color": [
+        0.075,
+        0.088,
+        0.061
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Steel": {
+      "color": [
+        0.048,
+        0.061,
+        0.058
+      ],
+      "family": "Steel",
+      "metallic": 0.7,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_EdgeMetal": {
+      "color": [
+        0.13,
+        0.15,
+        0.14
+      ],
+      "family": "Steel",
+      "metallic": 0.7,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Wear": {
+      "color": [
+        0.255,
+        0.225,
+        0.153
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Wood": {
+      "color": [
+        0.14,
+        0.075,
+        0.032
+      ],
+      "family": "Wood",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_WoodLight": {
+      "color": [
+        0.21,
+        0.125,
+        0.06
+      ],
+      "family": "Wood",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_WoodDark": {
+      "color": [
+        0.085,
+        0.043,
+        0.019
+      ],
+      "family": "Wood",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Canvas": {
+      "color": [
+        0.23,
+        0.215,
+        0.17
+      ],
+      "family": "Cloth",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Blanket": {
+      "color": [
+        0.11,
+        0.13,
+        0.075
+      ],
+      "family": "Cloth",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Linen": {
+      "color": [
+        0.6,
+        0.54,
+        0.42
+      ],
+      "family": "Cloth",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Rubber": {
+      "color": [
+        0.024,
+        0.028,
+        0.027
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Paper": {
+      "color": [
+        0.5,
+        0.447,
+        0.33
+      ],
+      "family": "Plaster",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Red": {
+      "color": [
+        0.24,
+        0.07,
+        0.041
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Glass": {
+      "color": [
+        0.067,
+        0.108,
+        0.119
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_LampGlow": {
+      "color": [
+        0.95,
+        0.59,
+        0.23
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 1.5
+    },
+    "Hideout_Grey": {
+      "color": [
+        0.125,
+        0.135,
+        0.143
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Concrete": {
+      "color": [
+        0.145,
+        0.151,
+        0.142
+      ],
+      "family": "Plaster",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_MapLine": {
+      "color": [
+        0.245,
+        0.253,
+        0.193
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_Ink": {
+      "color": [
+        0.085,
+        0.106,
+        0.096
+      ],
+      "family": "PaintedMetal",
+      "metallic": 0.15,
+      "smoothness": 0.25,
+      "emission": 0
+    },
+    "Hideout_RugFabric": {
+      "color": [
+        0.12,
+        0.075,
+        0.041
+      ],
+      "family": "Cloth",
+      "metallic": 0,
+      "smoothness": 0.1,
+      "emission": 0
+    }
+  }
+}
