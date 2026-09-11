@@ -1,0 +1,15 @@
+{
+  "shaderErrors": [],
+  "validatedMasks": 29,
+  "converterTests": [
+    "URP mapped metal 0 scalar -> intact mask x 1",
+    "URP unmapped scalar retained",
+    "Repeat conversion preserves authored properties"
+  ],
+  "aoActive": true,
+  "aoIntensity": 0.4,
+  "aoRadius": 0.18,
+  "playing": false,
+  "compiling": false,
+  "temporaryObjects": 0
+}

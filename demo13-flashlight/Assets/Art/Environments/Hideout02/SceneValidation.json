@@ -1,0 +1,64 @@
+{
+  "scene": "Assets/Scenes/Hideout.unity",
+  "roomSize": "6 x 6 metres",
+  "roomYaw": 215,
+  "facilities": [
+    {
+      "key": "bed",
+      "model": "Cot01",
+      "stand": "(7.70, 0.00, 5.33)",
+      "interaction": "Bed"
+    },
+    {
+      "key": "dispatch",
+      "model": "MapBoard01",
+      "stand": "(9.51, 0.00, 5.07)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "workbench",
+      "model": "Workbench01",
+      "stand": "(8.76, 0.00, 4.19)",
+      "interaction": "Workbench"
+    },
+    {
+      "key": "idle",
+      "model": "Stool01",
+      "stand": "(7.63, 0.00, 4.09)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "medical",
+      "model": "MedicalStation02",
+      "stand": "(7.47, 0.00, 2.39)",
+      "interaction": "MedicalBench"
+    },
+    {
+      "key": "radio",
+      "model": "RadioTable02",
+      "stand": "(5.55, 0.00, 5.32)",
+      "interaction": "Radio"
+    },
+    {
+      "key": "generator",
+      "model": "Generator01",
+      "stand": "(5.01, 0.00, 4.55)",
+      "interaction": "Generator"
+    },
+    {
+      "key": "cooking",
+      "model": "CookingStation02",
+      "stand": "(4.56, 0.00, 4.07)",
+      "interaction": "CookingBench"
+    },
+    {
+      "key": "stash",
+      "model": "StorageChest01",
+      "stand": "(6.12, 0.00, 5.07)",
+      "interaction": "Stash"
+    }
+  ],
+  "standPointsClear": true,
+  "activeScenePreserved": true,
+  "combatAssetsUnchanged": true
+}

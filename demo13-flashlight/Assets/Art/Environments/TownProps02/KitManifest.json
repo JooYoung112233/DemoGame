@@ -1,0 +1,819 @@
+{
+  "units": "metres",
+  "assets": {
+    "Clothesline02": {
+      "triangles": 9512,
+      "sourcePieces": 44,
+      "category": "Living",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_21_31.png",
+      "size": [
+        4.265999794006348,
+        2.0999999046325684,
+        0.16600000858306885
+      ],
+      "colliders": [
+        {
+          "center": [
+            -2.05,
+            1.05,
+            0
+          ],
+          "size": [
+            0.15,
+            2.1,
+            0.15
+          ]
+        },
+        {
+          "center": [
+            2.05,
+            1.05,
+            0
+          ],
+          "size": [
+            0.15,
+            2.1,
+            0.15
+          ]
+        }
+      ],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "UtilitySink02": {
+      "triangles": 1800,
+      "sourcePieces": 26,
+      "category": "Living",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_21_31.png",
+      "size": [
+        1.5,
+        1.3049999475479126,
+        0.6649999916553497
+      ],
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.45,
+            0
+          ],
+          "size": [
+            1.5,
+            0.9,
+            0.67
+          ]
+        }
+      ],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "WaterBarrelStand02": {
+      "triangles": 1708,
+      "sourcePieces": 18,
+      "category": "Living",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_24_05.png",
+      "size": [
+        0.8600000143051147,
+        1.477500081062317,
+        0.9330000281333923
+      ],
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.74,
+            0
+          ],
+          "size": [
+            0.87,
+            1.48,
+            0.97
+          ]
+        }
+      ],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "Bucket02": {
+      "triangles": 1198,
+      "sourcePieces": 18,
+      "category": "Living",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_24_05.png",
+      "size": [
+        0.3460000157356262,
+        0.4729422191157937,
+        0.3460000157356262
+      ],
+      "colliders": [],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "LaundryBasket02": {
+      "triangles": 2024,
+      "sourcePieces": 46,
+      "category": "Living",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_24_05.png",
+      "size": [
+        0.6350000500679016,
+        0.3325000014156103,
+        0.4650000035762787
+      ],
+      "colliders": [],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "FoldedTarp02": {
+      "triangles": 944,
+      "sourcePieces": 6,
+      "category": "Supplies",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_24_05.png",
+      "size": [
+        0.6600000262260437,
+        0.13406217843294144,
+        0.46000000834465027
+      ],
+      "colliders": [],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "RopeCoil02": {
+      "triangles": 1632,
+      "sourcePieces": 3,
+      "category": "Supplies",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_24_05.png",
+      "size": [
+        0.7197076976299286,
+        0.03758781962096691,
+        0.5584908425807953
+      ],
+      "colliders": [],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "Ladder02": {
+      "triangles": 464,
+      "sourcePieces": 14,
+      "category": "Workshop",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_24_05.png",
+      "size": [
+        0.5649999976158142,
+        2.3399999141693115,
+        0.08350000157952309
+      ],
+      "colliders": [
+        {
+          "center": [
+            0,
+            1.17,
+            0
+          ],
+          "size": [
+            0.58,
+            2.34,
+            0.09
+          ]
+        }
+      ],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "JunctionBox02": {
+      "triangles": 546,
+      "sourcePieces": 15,
+      "category": "Workshop",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_24_05.png",
+      "size": [
+        0.5600000023841858,
+        1.0783847868442535,
+        0.26899999380111694
+      ],
+      "colliders": [],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "Toolbox02": {
+      "triangles": 370,
+      "sourcePieces": 11,
+      "category": "Workshop",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_24_05.png",
+      "size": [
+        0.6499999761581421,
+        0.39399998635053635,
+        0.3435000032186508
+      ],
+      "colliders": [],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "FireExtinguisher02": {
+      "triangles": 846,
+      "sourcePieces": 13,
+      "category": "Workshop",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_24_05.png",
+      "size": [
+        0.3580000251531601,
+        0.6430884171277285,
+        0.28200000524520874
+      ],
+      "colliders": [],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "OutdoorStove02": {
+      "triangles": 1288,
+      "sourcePieces": 16,
+      "category": "Workshop",
+      "reference": "Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 07_21_31.png",
+      "size": [
+        1.0299999713897705,
+        1.0045000314712524,
+        0.6875
+      ],
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.47,
+            0
+          ],
+          "size": [
+            1.05,
+            0.94,
+            0.68
+          ]
+        }
+      ],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "Dumpster02": {
+      "triangles": 1124,
+      "sourcePieces": 31,
+      "category": "Alley",
+      "reference": "Assets/GPT/프랍/안전구역프랍.png",
+      "size": [
+        1.7305999994277954,
+        1.2799999713897705,
+        0.9800000190734863
+      ],
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.65,
+            0
+          ],
+          "size": [
+            1.67,
+            1.3,
+            1.0
+          ]
+        }
+      ],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "GarbageBags02": {
+      "triangles": 7200,
+      "sourcePieces": 6,
+      "category": "Alley",
+      "reference": "Assets/GPT/프랍/안전구역프랍.png",
+      "size": [
+        0.8557359278202057,
+        0.5524688437581062,
+        0.6760322749614716
+      ],
+      "colliders": [],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "CardboardStack02": {
+      "triangles": 528,
+      "sourcePieces": 12,
+      "category": "Supplies",
+      "reference": "Assets/GPT/프랍/안전구역프랍.png",
+      "size": [
+        1.0400000214576721,
+        0.7700000405311584,
+        0.5349999964237213
+      ],
+      "colliders": [
+        {
+          "center": [
+            0.01,
+            0.39,
+            0.01
+          ],
+          "size": [
+            1.02,
+            0.8,
+            0.57
+          ]
+        }
+      ],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "PatchBarricade02": {
+      "triangles": 3884,
+      "sourcePieces": 50,
+      "category": "Alley",
+      "reference": "Assets/GPT/프랍/안전구역프랍9.png",
+      "size": [
+        2.6500000953674316,
+        2.0399999618530273,
+        0.2850000858306885
+      ],
+      "colliders": [
+        {
+          "center": [
+            0,
+            1.02,
+            0
+          ],
+          "size": [
+            2.7,
+            2.04,
+            0.38
+          ]
+        }
+      ],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "ScrapHeap02": {
+      "triangles": 1456,
+      "sourcePieces": 29,
+      "category": "Alley",
+      "reference": "Assets/GPT/프랍/안전구역프랍8.png",
+      "size": [
+        1.3397704362869263,
+        0.31249997951090336,
+        1.1399999856948853
+      ],
+      "colliders": [],
+      "interaction": "visual only; no gameplay interaction added"
+    },
+    "Bicycle02": {
+      "triangles": 4076,
+      "sourcePieces": 54,
+      "category": "Alley",
+      "reference": "Assets/GPT/프랍/안전구역프랍4.png",
+      "size": [
+        1.8179999589920044,
+        1.123000055551529,
+        0.550000011920929
+      ],
+      "colliders": [
+        {
+          "center": [
+            0,
+            0.6,
+            0
+          ],
+          "size": [
+            1.82,
+            1.19,
+            0.5
+          ]
+        }
+      ],
+      "interaction": "visual only; no gameplay interaction added"
+    }
+  },
+  "palette": {
+    "TownProps_Olive": {
+      "color": [
+        0.16,
+        0.185,
+        0.125
+      ],
+      "family": "PaintedMetal",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.72,
+      "roughnessVariation": 0.04,
+      "metallic": 0.08,
+      "normalStrength": 0.27
+    },
+    "TownProps_DarkOlive": {
+      "color": [
+        0.08,
+        0.1,
+        0.073
+      ],
+      "family": "PaintedMetal",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.72,
+      "roughnessVariation": 0.04,
+      "metallic": 0.08,
+      "normalStrength": 0.27
+    },
+    "TownProps_Steel": {
+      "color": [
+        0.07,
+        0.084,
+        0.079
+      ],
+      "family": "Steel",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.46,
+      "roughnessVariation": 0.04,
+      "metallic": 0.7,
+      "normalStrength": 0.27
+    },
+    "TownProps_Edge": {
+      "color": [
+        0.19,
+        0.205,
+        0.175
+      ],
+      "family": "Steel",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.46,
+      "roughnessVariation": 0.04,
+      "metallic": 0.7,
+      "normalStrength": 0.27
+    },
+    "TownProps_Wood": {
+      "color": [
+        0.25,
+        0.17,
+        0.092
+      ],
+      "family": "Wood",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.85,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.42
+    },
+    "TownProps_WoodDark": {
+      "color": [
+        0.12,
+        0.081,
+        0.044
+      ],
+      "family": "Wood",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.85,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.42
+    },
+    "TownProps_Canvas": {
+      "color": [
+        0.245,
+        0.25,
+        0.175
+      ],
+      "family": "Cloth",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.93,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.18
+    },
+    "TownProps_Red": {
+      "color": [
+        0.3,
+        0.082,
+        0.052
+      ],
+      "family": "PaintedMetal",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.72,
+      "roughnessVariation": 0.04,
+      "metallic": 0.08,
+      "normalStrength": 0.27
+    },
+    "TownProps_Glass": {
+      "color": [
+        0.037,
+        0.062,
+        0.061
+      ],
+      "family": "PaintedMetal",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.72,
+      "roughnessVariation": 0.04,
+      "metallic": 0.08,
+      "normalStrength": 0.27
+    },
+    "TownProps_Paper": {
+      "color": [
+        0.55,
+        0.5,
+        0.37
+      ],
+      "family": "Plaster",
+      "textureFolder": "Assets/Art/Environments/Town02/Textures",
+      "roughness": 0.72,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.27
+    },
+    "TownProps_Blue": {
+      "color": [
+        0.12,
+        0.185,
+        0.19
+      ],
+      "family": "PaintedMetal",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.72,
+      "roughnessVariation": 0.04,
+      "metallic": 0.08,
+      "normalStrength": 0.27
+    },
+    "TownProps_Linen": {
+      "color": [
+        0.46,
+        0.42,
+        0.32
+      ],
+      "family": "Cloth",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.93,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.18
+    },
+    "TownProps_BlueCloth": {
+      "color": [
+        0.12,
+        0.18,
+        0.195
+      ],
+      "family": "Cloth",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.93,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.18
+    },
+    "TownProps_Rubber": {
+      "color": [
+        0.024,
+        0.029,
+        0.027
+      ],
+      "family": "PaintedMetal",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.84,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.1
+    },
+    "TownProps_Rust": {
+      "color": [
+        0.25,
+        0.108,
+        0.055
+      ],
+      "family": "PaintedMetal",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.72,
+      "roughnessVariation": 0.04,
+      "metallic": 0.08,
+      "normalStrength": 0.27
+    },
+    "TownProps_Cardboard": {
+      "color": [
+        0.31,
+        0.215,
+        0.119
+      ],
+      "family": "Wood",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.85,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.42
+    },
+    "TownProps_WoodFaded": {
+      "color": [
+        0.28,
+        0.208,
+        0.129
+      ],
+      "family": "Wood",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.85,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.42
+    },
+    "TownProps_WoodWarm": {
+      "color": [
+        0.235,
+        0.153,
+        0.081
+      ],
+      "family": "Wood",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.85,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.42
+    },
+    "TownProps_Wear": {
+      "color": [
+        0.235,
+        0.243,
+        0.212
+      ],
+      "family": "Steel",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.46,
+      "roughnessVariation": 0.04,
+      "metallic": 0.7,
+      "normalStrength": 0.27
+    },
+    "TownProps_DirtSeam": {
+      "color": [
+        0.073,
+        0.058,
+        0.036
+      ],
+      "family": "Wood",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.85,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.42
+    },
+    "TownProps_BagPlastic": {
+      "color": [
+        0.035,
+        0.041,
+        0.037
+      ],
+      "family": "PaintedMetal",
+      "textureFolder": "Assets/Art/Environments/Hideout02/Textures",
+      "roughness": 0.57,
+      "roughnessVariation": 0.04,
+      "metallic": 0,
+      "normalStrength": 0.1
+    }
+  },
+  "reviewGroups": {
+    "Living": [
+      [
+        "Clothesline02",
+        [
+          0,
+          0,
+          1.25
+        ],
+        0
+      ],
+      [
+        "UtilitySink02",
+        [
+          -1.3,
+          0,
+          -0.4
+        ],
+        0
+      ],
+      [
+        "WaterBarrelStand02",
+        [
+          1.28,
+          0,
+          -0.18
+        ],
+        0
+      ],
+      [
+        "Bucket02",
+        [
+          0.73,
+          0,
+          -0.89
+        ],
+        0
+      ],
+      [
+        "LaundryBasket02",
+        [
+          -0.23,
+          0,
+          0.26
+        ],
+        0
+      ]
+    ],
+    "Workshop": [
+      [
+        "Ladder02",
+        [
+          -1.3,
+          0,
+          0.6
+        ],
+        0
+      ],
+      [
+        "JunctionBox02",
+        [
+          -0.48,
+          0.35,
+          0.66
+        ],
+        0
+      ],
+      [
+        "OutdoorStove02",
+        [
+          0.78,
+          0,
+          0.26
+        ],
+        0
+      ],
+      [
+        "Toolbox02",
+        [
+          -0.8,
+          0,
+          -0.56
+        ],
+        -10
+      ],
+      [
+        "FireExtinguisher02",
+        [
+          0.03,
+          0,
+          -0.37
+        ],
+        0
+      ],
+      [
+        "RopeCoil02",
+        [
+          0.44,
+          0,
+          -0.83
+        ],
+        0
+      ],
+      [
+        "FoldedTarp02",
+        [
+          -0.07,
+          0,
+          -0.97
+        ],
+        0
+      ]
+    ],
+    "Alley": [
+      [
+        "PatchBarricade02",
+        [
+          0,
+          0,
+          1.04
+        ],
+        0
+      ],
+      [
+        "Dumpster02",
+        [
+          -1.15,
+          0,
+          -0.14
+        ],
+        0
+      ],
+      [
+        "GarbageBags02",
+        [
+          -1.52,
+          0,
+          -1.04
+        ],
+        0
+      ],
+      [
+        "CardboardStack02",
+        [
+          0.1,
+          0,
+          -0.04
+        ],
+        0
+      ],
+      [
+        "ScrapHeap02",
+        [
+          0.37,
+          0,
+          -1.08
+        ],
+        0
+      ],
+      [
+        "Bicycle02",
+        [
+          1.6,
+          0,
+          -0.2
+        ],
+        -25
+      ]
+    ]
+  },
+  "reuse": [
+    "Village01: Bench01, StreetLamp01, NoticeBoard01, OilDrum01, Pallet01, Tires01, Sandbags01, Brazier01, LowFence01",
+    "Safehouse01: WoodCrate01, Jerrycan01, Generator01",
+    "Town02: SpoolTable02, YardChair02, Planter02, MerchantCart02"
+  ],
+  "status": "Offline model kit; Unity import, placement and interaction validation pending."
+}

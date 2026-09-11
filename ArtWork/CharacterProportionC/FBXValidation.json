@@ -1,0 +1,70 @@
+[
+  {
+    "model": "Player",
+    "sourceIdleDimensions": [
+      0.8688022196292877,
+      0.7410224676132202,
+      1.8400691114366055
+    ],
+    "fbxIdleDimensions": [
+      0.8688041865825653,
+      0.741022378206253,
+      1.840068582445383
+    ],
+    "maxDimensionError": 1.9669532775878906e-06,
+    "bones": 23,
+    "actionCount": 4,
+    "uvPresent": true
+  },
+  {
+    "model": "PlayerBat",
+    "sourceIdleDimensions": [
+      0.8688022196292877,
+      0.7410224676132202,
+      1.8400691114366055
+    ],
+    "fbxIdleDimensions": [
+      0.8688041865825653,
+      0.741022378206253,
+      1.840068582445383
+    ],
+    "maxDimensionError": 1.9669532775878906e-06,
+    "bones": 23,
+    "actionCount": 4,
+    "uvPresent": true
+  },
+  {
+    "model": "Bandit",
+    "sourceIdleDimensions": [
+      0.8688022196292877,
+      0.5228039473295212,
+      1.8311142288148403
+    ],
+    "fbxIdleDimensions": [
+      0.8688042163848877,
+      0.5228038430213928,
+      1.8311137109994888
+    ],
+    "maxDimensionError": 1.996755599975586e-06,
+    "bones": 23,
+    "actionCount": 4,
+    "uvPresent": true
+  },
+  {
+    "model": "BanditCombat",
+    "sourceIdleDimensions": [
+      0.8688022196292877,
+      0.5228039473295212,
+      1.8311142288148403
+    ],
+    "fbxIdleDimensions": [
+      0.8688042163848877,
+      0.5228038430213928,
+      1.8311137109994888
+    ],
+    "maxDimensionError": 1.996755599975586e-06,
+    "bones": 23,
+    "actionCount": 5,
+    "uvPresent": true
+  }
+]

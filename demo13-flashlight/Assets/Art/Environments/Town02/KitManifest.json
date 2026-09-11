@@ -1,0 +1,292 @@
+{
+  "assets": {
+    "Pawnshop_Shell": {
+      "triangles": 2656,
+      "sourcePieces": 60
+    },
+    "Pawnshop_Roof": {
+      "triangles": 4040,
+      "sourcePieces": 90
+    },
+    "Repair_Shell": {
+      "triangles": 3932,
+      "sourcePieces": 89
+    },
+    "Repair_Roof": {
+      "triangles": 5892,
+      "sourcePieces": 131
+    },
+    "Medical_Shell": {
+      "triangles": 2480,
+      "sourcePieces": 56
+    },
+    "Medical_Roof": {
+      "triangles": 6008,
+      "sourcePieces": 134
+    },
+    "Furniture_Shell": {
+      "triangles": 2924,
+      "sourcePieces": 69
+    },
+    "Furniture_Roof": {
+      "triangles": 4436,
+      "sourcePieces": 99
+    },
+    "BlackMarket_Shell": {
+      "triangles": 1868,
+      "sourcePieces": 45
+    },
+    "BlackMarket_Roof": {
+      "triangles": 6900,
+      "sourcePieces": 163
+    },
+    "Container_Home_Shell": {
+      "triangles": 5412,
+      "sourcePieces": 123
+    },
+    "Container_Home_Roof": {
+      "triangles": 4128,
+      "sourcePieces": 92
+    },
+    "SpoolTable02": {
+      "triangles": 700,
+      "sourcePieces": 13
+    },
+    "YardChair02": {
+      "triangles": 248,
+      "sourcePieces": 10
+    },
+    "Planter02": {
+      "triangles": 1356,
+      "sourcePieces": 57
+    },
+    "MerchantCart02": {
+      "triangles": 1324,
+      "sourcePieces": 30
+    },
+    "PerimeterWall02": {
+      "triangles": 1452,
+      "sourcePieces": 33
+    },
+    "PerimeterPillar02": {
+      "triangles": 132,
+      "sourcePieces": 3
+    }
+  },
+  "palette": {
+    "Town_Brick": {
+      "color": [
+        0.26,
+        0.13,
+        0.078
+      ],
+      "family": "Brick"
+    },
+    "Town_Plaster": {
+      "color": [
+        0.38,
+        0.35,
+        0.27
+      ],
+      "family": "Plaster"
+    },
+    "Town_Cream": {
+      "color": [
+        0.46,
+        0.43,
+        0.34
+      ],
+      "family": "Plaster"
+    },
+    "Town_Ochre": {
+      "color": [
+        0.32,
+        0.255,
+        0.15
+      ],
+      "family": "Plaster"
+    },
+    "Town_Concrete": {
+      "color": [
+        0.26,
+        0.265,
+        0.23
+      ],
+      "family": "Plaster"
+    },
+    "Town_Roof": {
+      "color": [
+        0.16,
+        0.158,
+        0.13
+      ],
+      "family": "Roof"
+    },
+    "Town_Olive": {
+      "color": [
+        0.16,
+        0.185,
+        0.125
+      ],
+      "family": "PaintedMetal"
+    },
+    "Town_DarkOlive": {
+      "color": [
+        0.08,
+        0.1,
+        0.073
+      ],
+      "family": "PaintedMetal"
+    },
+    "Town_Steel": {
+      "color": [
+        0.07,
+        0.084,
+        0.079
+      ],
+      "family": "Steel"
+    },
+    "Town_Edge": {
+      "color": [
+        0.19,
+        0.205,
+        0.175
+      ],
+      "family": "Steel"
+    },
+    "Town_Wood": {
+      "color": [
+        0.25,
+        0.17,
+        0.092
+      ],
+      "family": "Wood"
+    },
+    "Town_WoodDark": {
+      "color": [
+        0.12,
+        0.081,
+        0.044
+      ],
+      "family": "Wood"
+    },
+    "Town_Canvas": {
+      "color": [
+        0.245,
+        0.25,
+        0.175
+      ],
+      "family": "Cloth"
+    },
+    "Town_Red": {
+      "color": [
+        0.3,
+        0.082,
+        0.052
+      ],
+      "family": "PaintedMetal"
+    },
+    "Town_Glass": {
+      "color": [
+        0.037,
+        0.062,
+        0.061
+      ],
+      "family": "PaintedMetal"
+    },
+    "Town_Paper": {
+      "color": [
+        0.55,
+        0.5,
+        0.37
+      ],
+      "family": "Plaster"
+    },
+    "Town_Asphalt": {
+      "color": [
+        0.14,
+        0.151,
+        0.143
+      ],
+      "family": "Asphalt"
+    },
+    "Town_Dirt": {
+      "color": [
+        0.2,
+        0.179,
+        0.132
+      ],
+      "family": "Asphalt"
+    },
+    "Town_RoofWarm": {
+      "color": [
+        0.185,
+        0.163,
+        0.12
+      ],
+      "family": "Roof"
+    },
+    "Town_RoofClean": {
+      "color": [
+        0.255,
+        0.26,
+        0.235
+      ],
+      "family": "Roof"
+    },
+    "Town_RoofDark": {
+      "color": [
+        0.088,
+        0.09,
+        0.078
+      ],
+      "family": "Roof"
+    },
+    "Town_Graphite": {
+      "color": [
+        0.12,
+        0.119,
+        0.1
+      ],
+      "family": "Brick"
+    },
+    "Town_Tile": {
+      "color": [
+        0.52,
+        0.5,
+        0.43
+      ],
+      "family": "Tile"
+    },
+    "Town_Sage": {
+      "color": [
+        0.2,
+        0.265,
+        0.235
+      ],
+      "family": "Tile"
+    }
+  },
+  "buildings": [
+    {
+      "name": "Pawnshop",
+      "east": false
+    },
+    {
+      "name": "Repair",
+      "east": false
+    },
+    {
+      "name": "Medical",
+      "east": false
+    },
+    {
+      "name": "Furniture",
+      "east": true
+    },
+    {
+      "name": "BlackMarket",
+      "east": true
+    }
+  ]
+}

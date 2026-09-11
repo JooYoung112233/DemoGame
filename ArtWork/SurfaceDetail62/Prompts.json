@@ -1,0 +1,32 @@
+[
+  {
+    "key": "warden",
+    "args": {
+      "referenced_image_paths": [
+        "D:/Demo/demo13-flashlight/Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/DistrictWarden/DistrictWarden_BaseColor.png",
+        "D:/Demo/demo13-flashlight/Assets/GPT/NPC/NPCALL7_1.png"
+      ],
+      "prompt": "Edit target Image 1: an exact 2048x2048 UV albedo texture atlas for an existing stylized 3D town warden. Image 2 is CLOTHING SURFACE STYLE REFERENCE ONLY, specifically second character's worn brown jacket. Output ONLY the edited square atlas, never a character render. Preserve EXACT pixel positions, scale, silhouettes and spacing of EVERY UV island from Image 1. Preserve background exactly, all skin-colored islands, face/eyes/mouth, cream paper and colored regions identically. Add restrained medium-scale painted cloth detail ONLY inside existing brown coat and blue-gray trousers islands: 2-3 soft short crease marks per large clothing island, narrow stitched seams slightly inset from long clothing edges, gentle rubbed fabric edges. Dark hair islands: add a few grouped dark-brown directional hair strokes, maintaining value. Keep original average colors and subdued contrast; 62-degree top-down chibi game, details should read without photorealism. No all-over dirt/noise, no big blotches, no baked directional light or cast shadows, no metallic shine, no new pockets or symbols or faces. DO NOT move, rotate, resize or merge islands. Keep all skin pixels unmodified. Return 2048 square UV albedo."
+    }
+  },
+  {
+    "key": "wood",
+    "args": {
+      "referenced_image_paths": [
+        "D:/Demo/demo13-flashlight/Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+        "D:/Demo/demo13-flashlight/Assets/GPT/안전구역/주인공집/ChatGPT Image 2026년 6월 10일 오후 06_13_26.png"
+      ],
+      "prompt": "Create a refined replacement for Image 1, a SEAMLESS TILEABLE NEUTRAL GRAYSCALE wood albedo detail map used with colored material tints in a stylized low-poly survival game. Image 2 is style reference for its workbench wood grain ONLY. Output only a flat square 1024x1024 texture, no scene or object. Original map is too blurry/cloud-like. Use clearly readable flowing HORIZONTAL wood fibers, a few modest elongated knots, occasional thin splits and shallow scuffs. All grain predominantly left-to-right. Hand-painted restrained realism, simplified medium-size grain that remains visible in a 62-degree top-down game. Neutral gray mean around RGB 178, value range approximately 145-200, not brown. No large cloud-shaped stains, no plank seams or separate boards, no nails, bolts, text, borders, baked shadows, lighting gradients, bevels or specular reflections. Perfectly seamless left/right and top/bottom, uniform even unlit albedo. Retain the calm worn timber character of the reference."
+    }
+  },
+  {
+    "key": "steel",
+    "args": {
+      "referenced_image_paths": [
+        "D:/Demo/demo13-flashlight/Assets/Art/Environments/Hideout02/Textures/Steel_Base.png",
+        "D:/Demo/demo13-flashlight/Assets/GPT/안전구역/주인공집/ChatGPT Image 2026년 6월 10일 오후 06_13_26.png"
+      ],
+      "prompt": "Create a refined replacement for Image 1, a SEAMLESS TILEABLE NEUTRAL GRAYSCALE dull steel albedo detail map used with material color tints in a stylized low-poly survival game. Image 2 is worn workbench tools and locker surface style reference ONLY. Output flat 1024x1024 square texture ONLY, no scene or object. Fine horizontal brushed steel marks, a few sparse short crossing scratches and small softly irregular abrasion patches in groups. Readable medium scale restrained hand-painted industrial wear. Neutral gray average RGB 172, range approximately 150-194. Not shiny, no reflected environment, no broad cloudy stains. No rust color, no rivets, bolts, panel seams, borders, text, baked shadows, bevel lighting or directional gradients. Even unlit albedo, seamless edges, most of surface quiet. Goal is quiet distinct steel character rather than clay or concrete."
+    }
+  }
+]

@@ -1,0 +1,134 @@
+{
+  "assets": [
+    {
+      "name": "Clothesline02",
+      "pieces": 44,
+      "triangles": 9512,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "UtilitySink02",
+      "pieces": 26,
+      "triangles": 1800,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "WaterBarrelStand02",
+      "pieces": 18,
+      "triangles": 1708,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "Bucket02",
+      "pieces": 18,
+      "triangles": 1198,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "LaundryBasket02",
+      "pieces": 46,
+      "triangles": 2024,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "FoldedTarp02",
+      "pieces": 6,
+      "triangles": 944,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "RopeCoil02",
+      "pieces": 3,
+      "triangles": 1632,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "Ladder02",
+      "pieces": 14,
+      "triangles": 464,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "JunctionBox02",
+      "pieces": 15,
+      "triangles": 546,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "Toolbox02",
+      "pieces": 11,
+      "triangles": 370,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "FireExtinguisher02",
+      "pieces": 13,
+      "triangles": 846,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "OutdoorStove02",
+      "pieces": 16,
+      "triangles": 1288,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "Dumpster02",
+      "pieces": 31,
+      "triangles": 1124,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "GarbageBags02",
+      "pieces": 6,
+      "triangles": 7200,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "CardboardStack02",
+      "pieces": 12,
+      "triangles": 528,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "PatchBarricade02",
+      "pieces": 50,
+      "triangles": 3884,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "ScrapHeap02",
+      "pieces": 29,
+      "triangles": 1456,
+      "metricUV0": true,
+      "referenceExists": true
+    },
+    {
+      "name": "Bicycle02",
+      "pieces": 54,
+      "triangles": 4076,
+      "metricUV0": true,
+      "referenceExists": true
+    }
+  ],
+  "totalTriangles": 40600,
+  "packedPBRMaterials": 21,
+  "editableLayout": true,
+  "unityImportPlacementAndPlaytest": "pending: preserve ongoing combat testing"
+}

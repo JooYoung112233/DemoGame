@@ -1,0 +1,10 @@
+{
+  "id": "wandering_merchant",
+  "modelName": "WanderingMerchant",
+  "clip": "Idle_Pack",
+  "seconds": 3.00000024,
+  "shader": "BRB/GameLit",
+  "controller": "Assets/ChibiSurvivor/NPC/StoryNPC62/Animation/WanderingMerchant.controller",
+  "visual": "Assets/ChibiSurvivor/NPC/StoryNPC62/Visuals/WanderingMerchant.prefab",
+  "maskConnected": false
+}

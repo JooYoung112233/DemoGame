@@ -1,0 +1,146 @@
+[
+  {
+    "npcId": "pawnshop",
+    "native": {
+      "vertices": 2076,
+      "triangles": 4052,
+      "badWeights": 0,
+      "degenerateTriangles": 0,
+      "uv": {
+        "interiorOverlapPairs": 0,
+        "maxOverlapArea": 0,
+        "examples": []
+      },
+      "loopError": 0.0
+    },
+    "fbx": {
+      "vertices": 2076,
+      "triangles": 4052,
+      "badWeights": 0,
+      "degenerateTriangles": 0,
+      "bones": 23,
+      "clips": [
+        "SimpleHero_Rig|Scene"
+      ],
+      "frameRange": [
+        2.0,
+        92.0
+      ],
+      "loopError": 0.0,
+      "boundsError": 1.341104507446289e-06,
+      "importedImages": [
+        "Pawnshop_BaseColor.png",
+        "Pawnshop_Normal.png",
+        "Pawnshop_BaseColor.png.001"
+      ]
+    }
+  },
+  {
+    "npcId": "veteran_scavenger",
+    "native": {
+      "vertices": 2124,
+      "triangles": 4098,
+      "badWeights": 0,
+      "degenerateTriangles": 0,
+      "uv": {
+        "interiorOverlapPairs": 0,
+        "maxOverlapArea": 0,
+        "examples": []
+      },
+      "loopError": 0.0
+    },
+    "fbx": {
+      "vertices": 2124,
+      "triangles": 4098,
+      "badWeights": 0,
+      "degenerateTriangles": 0,
+      "bones": 23,
+      "clips": [
+        "SimpleHero_Rig|Scene"
+      ],
+      "frameRange": [
+        2.0,
+        92.0
+      ],
+      "loopError": 0.0,
+      "boundsError": 7.413327693939209e-07,
+      "importedImages": [
+        "VeteranScavenger_BaseColor.png",
+        "VeteranScavenger_Normal.png",
+        "VeteranScavenger_BaseColor.png.001"
+      ]
+    }
+  },
+  {
+    "npcId": "district_warden",
+    "native": {
+      "vertices": 2534,
+      "triangles": 4922,
+      "badWeights": 0,
+      "degenerateTriangles": 0,
+      "uv": {
+        "interiorOverlapPairs": 0,
+        "maxOverlapArea": 0,
+        "examples": []
+      },
+      "loopError": 6.340888643145692e-18
+    },
+    "fbx": {
+      "vertices": 2534,
+      "triangles": 4922,
+      "badWeights": 0,
+      "degenerateTriangles": 0,
+      "bones": 23,
+      "clips": [
+        "SimpleHero_Rig|Scene"
+      ],
+      "frameRange": [
+        2.0,
+        92.0
+      ],
+      "loopError": 0.0,
+      "boundsError": 1.341104507446289e-06,
+      "importedImages": [
+        "DistrictWarden_BaseColor.png",
+        "DistrictWarden_Normal.png",
+        "DistrictWarden_BaseColor.png.001"
+      ]
+    }
+  },
+  {
+    "npcId": "wandering_merchant",
+    "native": {
+      "vertices": 2814,
+      "triangles": 5434,
+      "badWeights": 0,
+      "degenerateTriangles": 0,
+      "uv": {
+        "interiorOverlapPairs": 0,
+        "maxOverlapArea": 0,
+        "examples": []
+      },
+      "loopError": 1.0757742071652394e-17
+    },
+    "fbx": {
+      "vertices": 2814,
+      "triangles": 5434,
+      "badWeights": 0,
+      "degenerateTriangles": 0,
+      "bones": 23,
+      "clips": [
+        "SimpleHero_Rig|Scene"
+      ],
+      "frameRange": [
+        2.0,
+        92.0
+      ],
+      "loopError": 4.440892098500626e-16,
+      "boundsError": 1.341104507446289e-06,
+      "importedImages": [
+        "WanderingMerchant_BaseColor.png",
+        "WanderingMerchant_Normal.png",
+        "WanderingMerchant_BaseColor.png.001"
+      ]
+    }
+  }
+]

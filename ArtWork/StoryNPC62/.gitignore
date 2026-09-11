@@ -1,0 +1,6 @@
+# Local Blender backup / Python bytecode, not delivered art.
+*.blend1
+*.blend2
+__pycache__/
+UnityIntegration/Before/
+UnityIntegration/SceneDelta.patch

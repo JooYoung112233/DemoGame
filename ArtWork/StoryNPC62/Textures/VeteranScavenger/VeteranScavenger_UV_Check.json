@@ -1,0 +1,1726 @@
+{
+  "resolution": 2048,
+  "charts": 171,
+  "coverage": 0.573124885559082,
+  "overlapping_pixels": 462,
+  "regions": {
+    "SURFACE": [
+      0.015,
+      0.015,
+      0.97,
+      0.97
+    ]
+  },
+  "layout": [
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        409,
+        1799,
+        76,
+        67
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        154,
+        1686,
+        87,
+        92
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        501,
+        1799,
+        76,
+        67
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        566,
+        1686,
+        56,
+        92
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        257,
+        1686,
+        87,
+        92
+      ]
+    },
+    {
+      "part": "Study_Mitten_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        638,
+        1686,
+        56,
+        92
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        593,
+        1799,
+        76,
+        67
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        685,
+        1799,
+        76,
+        67
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        360,
+        1686,
+        87,
+        92
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        710,
+        1686,
+        56,
+        92
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        463,
+        1686,
+        87,
+        92
+      ]
+    },
+    {
+      "part": "Study_Mitten_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        782,
+        1686,
+        56,
+        92
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        674,
+        994,
+        133,
+        194
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        342,
+        1216,
+        197,
+        147
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1194,
+        1216,
+        92,
+        147
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        555,
+        1216,
+        197,
+        147
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1302,
+        1216,
+        92,
+        147
+      ]
+    },
+    {
+      "part": "Study_Boot_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1550,
+        103,
+        120
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        823,
+        994,
+        133,
+        194
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        768,
+        1216,
+        197,
+        147
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1410,
+        1216,
+        92,
+        147
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        981,
+        1216,
+        197,
+        147
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1518,
+        1216,
+        92,
+        147
+      ]
+    },
+    {
+      "part": "Study_Boot_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        157,
+        1550,
+        103,
+        120
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1298,
+        691,
+        316,
+        212
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        874,
+        371,
+        313,
+        295
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        211,
+        691,
+        190,
+        255
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1203,
+        371,
+        313,
+        295
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        417,
+        691,
+        190,
+        255
+      ]
+    },
+    {
+      "part": "Head",
+      "region": "SURFACE",
+      "rect_pixels": [
+        363,
+        994,
+        295,
+        204
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1686,
+        100,
+        97
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        866,
+        1394,
+        81,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1254,
+        1394,
+        12,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        963,
+        1394,
+        81,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1282,
+        1394,
+        12,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1060,
+        1394,
+        81,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1310,
+        1394,
+        12,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1157,
+        1394,
+        81,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1338,
+        1394,
+        12,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1802,
+        1550,
+        103,
+        103
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1366,
+        1394,
+        12,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1394,
+        1394,
+        12,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1422,
+        1394,
+        12,
+        126
+      ]
+    },
+    {
+      "part": "Neck",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1450,
+        1394,
+        12,
+        126
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        972,
+        994,
+        299,
+        186
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        940,
+        38,
+        289,
+        315
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1754,
+        371,
+        157,
+        287
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1245,
+        38,
+        289,
+        315
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        691,
+        157,
+        287
+      ]
+    },
+    {
+      "part": "Torso",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1626,
+        1216,
+        233,
+        146
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        382,
+        1394,
+        204,
+        136
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        416,
+        1550,
+        263,
+        115
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        974,
+        1550,
+        136,
+        115
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        695,
+        1550,
+        263,
+        115
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1126,
+        1550,
+        136,
+        115
+      ]
+    },
+    {
+      "part": "Hips",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1725,
+        994,
+        279,
+        173
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1576,
+        1550,
+        97,
+        109
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        38,
+        150,
+        317
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        702,
+        38,
+        103,
+        317
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        204,
+        38,
+        150,
+        317
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1532,
+        371,
+        95,
+        291
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        777,
+        1799,
+        16,
+        49
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1278,
+        1550,
+        89,
+        115
+      ]
+    },
+    {
+      "part": "Sleeve_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        809,
+        1799,
+        16,
+        49
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        602,
+        1394,
+        116,
+        129
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        374,
+        371,
+        109,
+        304
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1550,
+        38,
+        152,
+        304
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        499,
+        371,
+        109,
+        304
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1718,
+        38,
+        152,
+        304
+      ]
+    },
+    {
+      "part": "Leg_-1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1216,
+        136,
+        162
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1478,
+        1394,
+        106,
+        120
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1161,
+        1887,
+        106,
+        35
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        617,
+        1887,
+        120,
+        35
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1600,
+        1394,
+        106,
+        120
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1283,
+        1887,
+        106,
+        35
+      ]
+    },
+    {
+      "part": "Boot cuff -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        753,
+        1887,
+        120,
+        35
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1689,
+        1550,
+        97,
+        109
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        370,
+        38,
+        150,
+        317
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1643,
+        371,
+        95,
+        291
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        536,
+        38,
+        150,
+        317
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        821,
+        38,
+        103,
+        317
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        841,
+        1799,
+        16,
+        49
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1383,
+        1550,
+        89,
+        115
+      ]
+    },
+    {
+      "part": "Sleeve_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        873,
+        1799,
+        16,
+        49
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        734,
+        1394,
+        116,
+        129
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        624,
+        371,
+        109,
+        304
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        371,
+        152,
+        304
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        749,
+        371,
+        109,
+        304
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        206,
+        371,
+        152,
+        304
+      ]
+    },
+    {
+      "part": "Leg_1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        190,
+        1216,
+        136,
+        162
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1722,
+        1394,
+        106,
+        120
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1405,
+        1887,
+        106,
+        35
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        889,
+        1887,
+        120,
+        35
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1844,
+        1394,
+        106,
+        120
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1527,
+        1887,
+        106,
+        35
+      ]
+    },
+    {
+      "part": "Boot cuff 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1025,
+        1887,
+        120,
+        35
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1394,
+        328,
+        140
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1287,
+        994,
+        203,
+        178
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        952,
+        691,
+        330,
+        218
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1506,
+        994,
+        203,
+        178
+      ]
+    },
+    {
+      "part": "Hair cap",
+      "region": "SURFACE",
+      "rect_pixels": [
+        623,
+        691,
+        313,
+        221
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        994,
+        309,
+        206
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1949,
+        292,
+        29
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        654,
+        1949,
+        162,
+        29
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        346,
+        1949,
+        292,
+        29
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        832,
+        1949,
+        162,
+        29
+      ]
+    },
+    {
+      "part": "Belt",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1630,
+        691,
+        310,
+        206
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        573,
+        1994,
+        37,
+        12
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1649,
+        1887,
+        37,
+        31
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1755,
+        1887,
+        12,
+        31
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        626,
+        1994,
+        37,
+        12
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1702,
+        1887,
+        37,
+        31
+      ]
+    },
+    {
+      "part": "Belt buckle",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1783,
+        1887,
+        12,
+        31
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1010,
+        1949,
+        48,
+        28
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1208,
+        1686,
+        74,
+        90
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1074,
+        1949,
+        48,
+        28
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        241,
+        1799,
+        26,
+        69
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1298,
+        1686,
+        74,
+        90
+      ]
+    },
+    {
+      "part": "Collar -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        283,
+        1799,
+        26,
+        69
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        325,
+        1799,
+        26,
+        69
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1388,
+        1686,
+        74,
+        90
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1138,
+        1949,
+        48,
+        28
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1202,
+        1949,
+        48,
+        28
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1478,
+        1686,
+        74,
+        90
+      ]
+    },
+    {
+      "part": "Collar 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        367,
+        1799,
+        26,
+        69
+      ]
+    },
+    {
+      "part": "Headband",
+      "region": "SURFACE",
+      "rect_pixels": [
+        905,
+        1799,
+        339,
+        46
+      ]
+    },
+    {
+      "part": "Headband",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1615,
+        1799,
+        215,
+        46
+      ]
+    },
+    {
+      "part": "Headband",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1260,
+        1799,
+        339,
+        46
+      ]
+    },
+    {
+      "part": "Headband",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1887,
+        215,
+        46
+      ]
+    },
+    {
+      "part": "Headband knot",
+      "region": "SURFACE",
+      "rect_pixels": [
+        501,
+        1887,
+        42,
+        42
+      ]
+    },
+    {
+      "part": "Headband knot",
+      "region": "SURFACE",
+      "rect_pixels": [
+        269,
+        1887,
+        42,
+        45
+      ]
+    },
+    {
+      "part": "Headband knot",
+      "region": "SURFACE",
+      "rect_pixels": [
+        327,
+        1887,
+        42,
+        45
+      ]
+    },
+    {
+      "part": "Headband knot",
+      "region": "SURFACE",
+      "rect_pixels": [
+        559,
+        1887,
+        42,
+        42
+      ]
+    },
+    {
+      "part": "Headband knot",
+      "region": "SURFACE",
+      "rect_pixels": [
+        385,
+        1887,
+        42,
+        45
+      ]
+    },
+    {
+      "part": "Headband knot",
+      "region": "SURFACE",
+      "rect_pixels": [
+        443,
+        1887,
+        42,
+        45
+      ]
+    },
+    {
+      "part": "Headband tail",
+      "region": "SURFACE",
+      "rect_pixels": [
+        121,
+        1994,
+        36,
+        14
+      ]
+    },
+    {
+      "part": "Headband tail",
+      "region": "SURFACE",
+      "rect_pixels": [
+        276,
+        1550,
+        54,
+        120
+      ]
+    },
+    {
+      "part": "Headband tail",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1488,
+        1550,
+        28,
+        114
+      ]
+    },
+    {
+      "part": "Headband tail",
+      "region": "SURFACE",
+      "rect_pixels": [
+        173,
+        1994,
+        36,
+        14
+      ]
+    },
+    {
+      "part": "Headband tail",
+      "region": "SURFACE",
+      "rect_pixels": [
+        346,
+        1550,
+        54,
+        120
+      ]
+    },
+    {
+      "part": "Headband tail",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1532,
+        1550,
+        28,
+        114
+      ]
+    },
+    {
+      "part": "Jacket chest pocket -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1726,
+        1949,
+        67,
+        14
+      ]
+    },
+    {
+      "part": "Jacket chest pocket -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1722,
+        1686,
+        67,
+        72
+      ]
+    },
+    {
+      "part": "Jacket chest pocket -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        121,
+        1799,
+        14,
+        72
+      ]
+    },
+    {
+      "part": "Jacket chest pocket -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1809,
+        1949,
+        67,
+        14
+      ]
+    },
+    {
+      "part": "Jacket chest pocket -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1805,
+        1686,
+        67,
+        72
+      ]
+    },
+    {
+      "part": "Jacket chest pocket -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        151,
+        1799,
+        14,
+        72
+      ]
+    },
+    {
+      "part": "Jacket pocket flap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        225,
+        1994,
+        71,
+        12
+      ]
+    },
+    {
+      "part": "Jacket pocket flap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1266,
+        1949,
+        71,
+        21
+      ]
+    },
+    {
+      "part": "Jacket pocket flap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1614,
+        1949,
+        12,
+        21
+      ]
+    },
+    {
+      "part": "Jacket pocket flap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        312,
+        1994,
+        71,
+        12
+      ]
+    },
+    {
+      "part": "Jacket pocket flap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1353,
+        1949,
+        71,
+        21
+      ]
+    },
+    {
+      "part": "Jacket pocket flap -1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1642,
+        1949,
+        12,
+        21
+      ]
+    },
+    {
+      "part": "Jacket chest pocket 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1892,
+        1949,
+        67,
+        14
+      ]
+    },
+    {
+      "part": "Jacket chest pocket 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1888,
+        1686,
+        67,
+        72
+      ]
+    },
+    {
+      "part": "Jacket chest pocket 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        181,
+        1799,
+        14,
+        72
+      ]
+    },
+    {
+      "part": "Jacket chest pocket 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1994,
+        67,
+        14
+      ]
+    },
+    {
+      "part": "Jacket chest pocket 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        38,
+        1799,
+        67,
+        72
+      ]
+    },
+    {
+      "part": "Jacket chest pocket 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        211,
+        1799,
+        14,
+        72
+      ]
+    },
+    {
+      "part": "Jacket pocket flap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        399,
+        1994,
+        71,
+        12
+      ]
+    },
+    {
+      "part": "Jacket pocket flap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1440,
+        1949,
+        71,
+        21
+      ]
+    },
+    {
+      "part": "Jacket pocket flap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1670,
+        1949,
+        12,
+        21
+      ]
+    },
+    {
+      "part": "Jacket pocket flap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        486,
+        1994,
+        71,
+        12
+      ]
+    },
+    {
+      "part": "Jacket pocket flap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1527,
+        1949,
+        71,
+        21
+      ]
+    },
+    {
+      "part": "Jacket pocket flap 1",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1698,
+        1949,
+        12,
+        21
+      ]
+    },
+    {
+      "part": "Hip utility pouch",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1568,
+        1686,
+        61,
+        84
+      ]
+    },
+    {
+      "part": "Hip utility pouch",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1054,
+        1686,
+        61,
+        91
+      ]
+    },
+    {
+      "part": "Hip utility pouch",
+      "region": "SURFACE",
+      "rect_pixels": [
+        854,
+        1686,
+        84,
+        91
+      ]
+    },
+    {
+      "part": "Hip utility pouch",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1645,
+        1686,
+        61,
+        84
+      ]
+    },
+    {
+      "part": "Hip utility pouch",
+      "region": "SURFACE",
+      "rect_pixels": [
+        1131,
+        1686,
+        61,
+        91
+      ]
+    },
+    {
+      "part": "Hip utility pouch",
+      "region": "SURFACE",
+      "rect_pixels": [
+        954,
+        1686,
+        84,
+        91
+      ]
+    }
+  ]
+}

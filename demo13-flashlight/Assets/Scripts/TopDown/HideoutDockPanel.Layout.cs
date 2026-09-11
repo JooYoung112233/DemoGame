@@ -69,6 +69,8 @@ public partial class HideoutDockPanel
         float r = dock == HideoutFacilityAnchor.Dock.None
                 ? 0f
                 : (RightDockSize(moduleKey).x + RightMargin) / RefWidth;
-        return new Rect(0f, 0f, Mathf.Max(1f - r, 0.1f), Mathf.Max(1f - top, 0.1f));
+        // Leave the existing quick slots and bottom navigation usable without covering the room.
+        float bottom = 112f / RefHeight;
+        return new Rect(0f, bottom, Mathf.Max(1f - r, 0.1f), Mathf.Max(1f - top - bottom, 0.1f));
     }
 }

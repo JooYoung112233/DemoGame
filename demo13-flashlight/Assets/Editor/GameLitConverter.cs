@@ -37,11 +37,11 @@ public static class GameLitConverter
 
     static void Kw(Material m, string k, bool on) { if (on) m.EnableKeyword(k); else m.DisableKeyword(k); }
 
-    /// <summary>한 머티리얼 전환. 바뀌었으면 true. 이미 GameLit이면 룩 값만 다시 넣는다(값을 고친 뒤 재실행용).</summary>
+    /// <summary>한 머티리얼 전환. 이미 검수한 GameLit 재질의 개별 룩 값은 보존한다.</summary>
     public static bool Convert(Material m, Shader gameLit, bool character)
     {
         if (m == null || m.shader == null) return false;
-        if (m.shader.name == GameLitName) { ApplyLook(m, character); return true; }
+        if (m.shader.name == GameLitName) return false;
         if (m.shader.name != UrpLitName) return false;
         if (m.HasProperty("_Surface") && m.GetFloat("_Surface") > 0.5f) return false;   // 투명은 그대로
 
@@ -50,12 +50,22 @@ public static class GameLitConverter
         bool normal = m.HasProperty("_BumpMap") && m.GetTexture("_BumpMap") != null;
         bool occlusion = m.HasProperty("_OcclusionMap") && m.GetTexture("_OcclusionMap") != null;
         bool emission = m.IsKeywordEnabled("_EMISSION");
+        bool packedMask = m.IsKeywordEnabled("_METALLICSPECGLOSSMAP") &&
+                          m.HasProperty("_MetallicGlossMap") && m.GetTexture("_MetallicGlossMap") != null;
 
         m.shader = gameLit;
         Kw(m, "_NORMALMAP", normal);
         Kw(m, "_OCCLUSIONMAP", occlusion);
         Kw(m, "_EMISSION", emission);
         Kw(m, "_ALPHATEST_ON", alphaClip);
+        if (packedMask && m.HasProperty("_UsePackedMask"))
+        {
+            // URP's mapped metallic workflow reads R directly, ignoring the scalar.
+            // GameLit multiplies it; preserve the source mask by using a unit multiplier.
+            m.SetFloat("_UsePackedMask", 1f);
+            m.SetFloat("_Metallic", 1f);
+            Kw(m, "_GAMELIT_PACKED_MASK", true);
+        }
         m.renderQueue = alphaClip ? (int)UnityEngine.Rendering.RenderQueue.AlphaTest : -1;
         ApplyLook(m, character);
         return true;

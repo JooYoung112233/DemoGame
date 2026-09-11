@@ -1,0 +1,78 @@
+{
+  "buildings": [
+    {
+      "name": "Pawnshop",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Pawnshop",
+      "meshes": 3,
+      "size": [
+        16.5599976,
+        6.0175004,
+        13.5199966
+      ]
+    },
+    {
+      "name": "Repair",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Repair",
+      "meshes": 4,
+      "size": [
+        14.5600014,
+        6.0175004,
+        11.5199966
+      ]
+    },
+    {
+      "name": "Medical",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Medical",
+      "meshes": 4,
+      "size": [
+        18.5599976,
+        6.0175004,
+        11.5199966
+      ]
+    },
+    {
+      "name": "Furniture",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Furniture",
+      "meshes": 4,
+      "size": [
+        15.52,
+        6.0175004,
+        10.5600052
+      ]
+    },
+    {
+      "name": "BlackMarket",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/BlackMarket",
+      "meshes": 4,
+      "size": [
+        15.5200043,
+        6.0175004,
+        12.5600052
+      ]
+    },
+    {
+      "name": "Container_Home",
+      "source": "Assets/Scenes/Safehouse.unity/Map/Environment/Structures/Container_Home",
+      "meshes": 2,
+      "size": [
+        14.6699982,
+        4.39750051,
+        9.84
+      ]
+    },
+    {
+      "name": "TownOverview",
+      "source": "Assets/Scenes/Safehouse.unity/Map/",
+      "meshes": 2094,
+      "size": [
+        80.0,
+        6.097501,
+        56.0
+      ]
+    }
+  ],
+  "sourceUnchanged": true,
+  "activeScenePreserved": true,
+  "playStatePreserved": true,
+  "note": "Saved scene geometry and materials. Neutral preview lights; each tile framed individually, not a shared scale."
+}

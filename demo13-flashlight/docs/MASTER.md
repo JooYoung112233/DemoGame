@@ -123,7 +123,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`safehouse.md`](safehouse.md) | 덕코프식 물리 공간 안전가옥 — 뒷골목 맵 레이아웃, 시설 목록, 확장 기획, NPC 배치, 가구 시스템 | 방향 확정 + 확장 기획 |
+| [`safehouse.md`](safehouse.md) | 덕코프식 물리 공간 안전가옥 — 뒷골목 맵 레이아웃, 시설 목록, 확장 기획, NPC 배치, 가구 시스템 | 방향 확정 · 전당포 앞 마감/Play 검수 완료 (2026-09-11) |
 | [`safehouse-intel.md`](safehouse-intel.md) | **탐사 정보 루프** — 자원 생산 금지 원칙, 라디오(루디 가동), 랜드마크 재방문 확장 + Phase A~E 작업 계획. ⚠️ **NPC 파견은 2026-09-09 폐기**(인텔 발생원 3→2) | 기획 확정, 구현 전 |
 | [`safehouse-asset-list.md`](safehouse-asset-list.md) | 컨셉아트 기반 에셋 목록 — 바닥/펜스/프랍 분류 + 구현 우선순위 | 정리 완료 |
 | [`safehouse-tile-prompt.md`](safehouse-tile-prompt.md) | 바닥/펜스/프랍 에셋 생성 AI 프롬프트 — 레퍼 첨부용 | 작성 완료 |
@@ -178,7 +178,7 @@
 | 문서 | 내용 | 상태 |
 |------|------|------|
 | [`building-interior.md`](building-interior.md) | ⭐ **걸어 들어가는 실내 (3D)** — 같은 맵에서 진입·지붕/벽 가림·층 전환. **2026-09-11 마을 상점 5채 실내 아트**: GPT 원화 기반 가구/내장·62° 검토, 현재 Town02 면적에 배치. 과거 스케일 미결 사항은 본문 참조. | **실내 모델 준비 / Unity 연결 검증 대기** |
-| [`hideout-3d.md`](hideout-3d.md) | **은신처 3D — 공간 규격·소품 정의서** (3D 전환의 첫 실제 공간). 방 14×9m·벽 2.6m·**천장 없음**(쿼터뷰), 시설 8종 치수/위치/형태 메모(모델 제작용), 조명 값. 빌더 `Editor/Hideout3DLayout.cs` | **그레이박스 (2026-09-08)** |
+| [`hideout-3d.md`](hideout-3d.md) | **은신처 3D — 원화 기반 Hideout02 실내 시안**. 6×6m, 목재 가구·마루/철판 벽, PBR 표면 맵, 시설 9종 배선, 제작·검증 절차 | **1차 아트 패스 (2026-09-11)** |
 | [`3d-migration.md`](3d-migration.md) | ⭐ **3D 쿼터뷰 전환 계획 SSOT** — 결정 4건(완전 3D·오소 고정 쿼터뷰·단차/엄폐·아트 전부 3D) + 2D 결합 실측(66,933 LOC 중 32%, Rigidbody2D 9파일·Physics2D 10곳) + 유지/교체/신규 표 + Stage 0~5 + 리스크·미결 | **Stage 0~4 완료 (2026-09-09)**, Stage 5(2D 잔재 삭제) 남음 |
 | [`topdown-migration.md`](topdown-migration.md) | **아이소 → 탑다운 2D 전환** 배경·유지/제거/신규 목록·단계 계획 | 기록 (2D 시절 — 이후 3D로 재전환) |
 | [`rendering.md`](rendering.md) | **현 구현 = 3D** — URP 3D(Forward)·오소 카메라 62°·게임 전용 셰이더 `BRB/GameLit`·후처리·착용등·낮밤 분위기(상단 「현재 구현 (3D)」 표). 그 아래 URP 2D·Light2D·Tilemap 본문은 2D 시절 기록 | 구현 (3D) |

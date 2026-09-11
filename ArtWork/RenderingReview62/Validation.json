@@ -1,0 +1,104 @@
+{
+  "date": "2026-09-11",
+  "shaderErrors": 0,
+  "materials": [
+    {
+      "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/DistrictWarden.mat",
+      "mask": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/DistrictWarden/DistrictWarden_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/Pawnshop.mat",
+      "mask": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/Pawnshop/Pawnshop_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/VeteranScavenger.mat",
+      "mask": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/VeteranScavenger/VeteranScavenger_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/WanderingMerchant.mat",
+      "mask": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/WanderingMerchant/WanderingMerchant_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Counter.mat",
+      "mask": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Floor.mat",
+      "mask": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Road_Home.mat",
+      "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Road_Link.mat",
+      "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Road_Plaza.mat",
+      "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Road_ShopFront.mat",
+      "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "linear": true
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Town_Ground.mat",
+      "mask": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "linear": true
+    }
+  ],
+  "npcs": [
+    {
+      "id": "pawnshop",
+      "clip": "Idle_Observe",
+      "seconds": 3.00000024,
+      "loop": true
+    },
+    {
+      "id": "veteran_scavenger",
+      "clip": "Idle_Crouch",
+      "seconds": 3.00000024,
+      "loop": true
+    },
+    {
+      "id": "district_warden",
+      "clip": "Idle_Ledger",
+      "seconds": 3.00000024,
+      "loop": true
+    },
+    {
+      "id": "wandering_merchant",
+      "clip": "Idle_Pack",
+      "seconds": 3.00000024,
+      "loop": true
+    }
+  ],
+  "profile": {
+    "contrast": 10.0,
+    "saturation": -8.0,
+    "bloom": 0.18,
+    "grain": 0.06,
+    "vignette": 0.2
+  },
+  "camera": {
+    "pitch": 61.9999962,
+    "yaw": 0.0,
+    "hdr": true,
+    "postProcessing": true,
+    "rendererPostProcessData": "PostProcessData"
+  },
+  "legacyMaskOff": true,
+  "scope": "Final asset checks and current camera only; user switched to Zone1, preserved ongoing play",
+  "nightReview": "Intermediate Bulb 8 captured; final Bulb 4 daytime reviewed. Final night recapture deferred after Zone1 switch."
+}

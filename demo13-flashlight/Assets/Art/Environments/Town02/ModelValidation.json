@@ -1,0 +1,116 @@
+{
+  "assets": [
+    {
+      "name": "Pawnshop_Shell",
+      "pieces": 60,
+      "triangles": 2656,
+      "metricUV0": true
+    },
+    {
+      "name": "Pawnshop_Roof",
+      "pieces": 90,
+      "triangles": 4040,
+      "metricUV0": true
+    },
+    {
+      "name": "Repair_Shell",
+      "pieces": 89,
+      "triangles": 3932,
+      "metricUV0": true
+    },
+    {
+      "name": "Repair_Roof",
+      "pieces": 131,
+      "triangles": 5892,
+      "metricUV0": true
+    },
+    {
+      "name": "Medical_Shell",
+      "pieces": 56,
+      "triangles": 2480,
+      "metricUV0": true
+    },
+    {
+      "name": "Medical_Roof",
+      "pieces": 134,
+      "triangles": 6008,
+      "metricUV0": true
+    },
+    {
+      "name": "Furniture_Shell",
+      "pieces": 69,
+      "triangles": 2924,
+      "metricUV0": true
+    },
+    {
+      "name": "Furniture_Roof",
+      "pieces": 99,
+      "triangles": 4436,
+      "metricUV0": true
+    },
+    {
+      "name": "BlackMarket_Shell",
+      "pieces": 45,
+      "triangles": 1868,
+      "metricUV0": true
+    },
+    {
+      "name": "BlackMarket_Roof",
+      "pieces": 163,
+      "triangles": 6900,
+      "metricUV0": true
+    },
+    {
+      "name": "Container_Home_Shell",
+      "pieces": 123,
+      "triangles": 5412,
+      "metricUV0": true
+    },
+    {
+      "name": "Container_Home_Roof",
+      "pieces": 92,
+      "triangles": 4128,
+      "metricUV0": true
+    },
+    {
+      "name": "SpoolTable02",
+      "pieces": 13,
+      "triangles": 700,
+      "metricUV0": true
+    },
+    {
+      "name": "YardChair02",
+      "pieces": 10,
+      "triangles": 248,
+      "metricUV0": true
+    },
+    {
+      "name": "Planter02",
+      "pieces": 57,
+      "triangles": 1356,
+      "metricUV0": true
+    },
+    {
+      "name": "MerchantCart02",
+      "pieces": 30,
+      "triangles": 1324,
+      "metricUV0": true
+    },
+    {
+      "name": "PerimeterWall02",
+      "pieces": 33,
+      "triangles": 1452,
+      "metricUV0": true
+    },
+    {
+      "name": "PerimeterPillar02",
+      "pieces": 3,
+      "triangles": 132,
+      "metricUV0": true
+    }
+  ],
+  "totalTriangles": 55888,
+  "packedPBRMaterials": 24,
+  "editableLayout": true,
+  "unityFinalImportAndPlaytest": "pending: user is running combat testing; keep Unity play mode untouched"
+}

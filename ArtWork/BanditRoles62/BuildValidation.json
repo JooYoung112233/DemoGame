@@ -1,0 +1,95 @@
+{
+  "source": "D:\\Demo\\ArtWork\\CharacterProportionC\\BlenderSource~\\Bandit_C.blend",
+  "sourceSHA256": "79c1a63fbd54ba9e224210e45495066791d3a53b0955e2911837c5d335957ca3",
+  "sourceUnchanged": true,
+  "skeletonAndAnimationHash": "5835ad1c5714b675c966111316fd9a7ff85368480a14dd7126f0cb1d3ecf9e08",
+  "bones": 23,
+  "actions": [
+    "BatSwing",
+    "Idle",
+    "Run",
+    "Walk"
+  ],
+  "triangles": 3342,
+  "materialSlots": 8,
+  "newMaterials": {
+    "Ranged_OliveCloth": {
+      "baseColor": [
+        0.125,
+        0.164,
+        0.079
+      ],
+      "roughness": 0.88,
+      "metallic": 0
+    },
+    "Ranged_CharcoalWebbing": {
+      "baseColor": [
+        0.048,
+        0.057,
+        0.044
+      ],
+      "roughness": 0.88,
+      "metallic": 0
+    },
+    "Ranged_HelmetPaint": {
+      "baseColor": [
+        0.095,
+        0.12,
+        0.073
+      ],
+      "roughness": 0.86,
+      "metallic": 0.03
+    },
+    "Ranged_WornEdge": {
+      "baseColor": [
+        0.145,
+        0.16,
+        0.115
+      ],
+      "roughness": 0.8,
+      "metallic": 0.08
+    },
+    "Ranged_CanvasPouch": {
+      "baseColor": [
+        0.145,
+        0.157,
+        0.093
+      ],
+      "roughness": 0.88,
+      "metallic": 0
+    },
+    "Ranged_Skin": {
+      "baseColor": [
+        0.55,
+        0.335,
+        0.18
+      ],
+      "roughness": 0.88,
+      "metallic": 0
+    },
+    "Ranged_Gloves": {
+      "baseColor": [
+        0.043,
+        0.047,
+        0.04
+      ],
+      "roughness": 0.88,
+      "metallic": 0
+    }
+  },
+  "renderer": "Bandit_Body",
+  "rootScale": [
+    1.0,
+    1.0,
+    1.0800000429153442
+  ],
+  "viewPitchYaw": [
+    62,
+    0
+  ],
+  "roles": {
+    "melee": "existing CharacterProportionC/Bandit_C",
+    "ranged": "Bandit_Ranged_C; shared pistol/rifle body"
+  },
+  "unityStatus": "staged only; runtime firearm aim, grip and stow pending"
+}

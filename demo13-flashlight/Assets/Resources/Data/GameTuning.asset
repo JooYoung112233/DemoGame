@@ -28,6 +28,10 @@ MonoBehaviour:
   enemyHeavyForceAfter: 3
   enemyHeavyWindupMult: 1.9
   enemyHeavyDamageMult: 1.9
+  enemyAimLockTime: 0.2
+  enemyRangedRecover: 0.35
+  enemyGunDrawTime: 0.6
+  enemyBulletRangeMult: 1.25
   roadObstacleDensity: 1
   roadMinPassWidth: 3
   barricadeClearSeconds: 3.5
@@ -90,9 +94,9 @@ MonoBehaviour:
   narrationTypingSpeed: 0.02
   dialogueTypingSpeed: 0.02
   tutorialDefaultDuration: 4
-  hideoutRoomOrtho: 4.2
-  hideoutRoomHalfX: 0.42
-  hideoutRoomHalfY: 0.42
+  hideoutRoomOrtho: 4.4
+  hideoutRoomHalfX: 0.28
+  hideoutRoomHalfY: 0.45
   hideoutTopBand: 180
   hideoutDockWidth: 840
   hideoutDockHeight: 960

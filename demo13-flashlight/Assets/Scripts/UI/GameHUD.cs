@@ -306,7 +306,7 @@ public class GameHUD : MonoBehaviour
     void SyncHideoutExitButton()
     {
         if (hideoutExitBtnGO == null) return;
-        hideoutExitBtnGO.SetActive(HideoutController.IsActive);
+        hideoutExitBtnGO.SetActive(HideoutController.IsActive && !HideoutDiorama.Active);
     }
 
     void OnHideoutExitClicked()

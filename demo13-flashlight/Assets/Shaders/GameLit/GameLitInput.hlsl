@@ -14,6 +14,7 @@ CBUFFER_START(UnityPerMaterial)
     half   _Cutoff;
     half   _Smoothness;
     half   _Metallic;
+    half   _UsePackedMask;
     half   _BumpScale;
     half   _OcclusionStrength;
     // 어두운 사실풍 (docs/rendering.md §게임 전용 셰이더)
@@ -29,5 +30,6 @@ CBUFFER_START(UnityPerMaterial)
 CBUFFER_END
 
 TEXTURE2D(_OcclusionMap); SAMPLER(sampler_OcclusionMap);
+TEXTURE2D(_MetallicGlossMap); SAMPLER(sampler_MetallicGlossMap);
 
 #endif

@@ -1,0 +1,136 @@
+{
+  "decision": "C approved 2026-09-11: player and bandits",
+  "models": [
+    {
+      "model": "Player",
+      "source": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_Stage5_Slash.blend",
+      "sourceSHA256": "230adc2289a96579fdfee41e2faade5cb7ea4f7ae87d35bff41cdc22fb022619",
+      "sourceUnchanged": true,
+      "preserved": {
+        "skeleton": "2cb40f21e82e9769f43f0c746196af32a9429ecef6c5d3f4dfcec8678b0638f4",
+        "animation": "24e7f54742c795de11c27622f5a23fd5c1065ca083c4d8c4d921ef4c917abd02",
+        "surface": "f545e3196f0f3bbe6de2ef86fa67f16b12a9602621677370757f063a6b0d29f0"
+      },
+      "sampledFrames": 190,
+      "maxRigLocalAttachmentMatrixError": 0,
+      "actions": [
+        "Idle",
+        "Run",
+        "SwordSlash",
+        "Walk"
+      ],
+      "bones": 23,
+      "headWidthBefore": 0.5688000321388245,
+      "headWidthAfter": 0.511920028924942,
+      "blenderRigScale": [
+        1,
+        1,
+        1.08
+      ],
+      "unityVisualScale": [
+        1,
+        1.08,
+        1
+      ]
+    },
+    {
+      "model": "PlayerBat",
+      "source": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/BlenderSource~/SimpleHero_TwoHandBat.blend",
+      "sourceSHA256": "525053e316b27710bfbf39e3d86a0eb618fd4917f8d54f04521f6df0b2dea26a",
+      "sourceUnchanged": true,
+      "preserved": {
+        "skeleton": "2cb40f21e82e9769f43f0c746196af32a9429ecef6c5d3f4dfcec8678b0638f4",
+        "animation": "d2b00c80230111c72bc6d73a43c85cd337926cb22762af3f0e577d4735aa8535",
+        "surface": "68dc81cb279821795e03d9a8098ab9d12272cedfcc95435a459fb1867ef723f6"
+      },
+      "sampledFrames": 202,
+      "maxRigLocalAttachmentMatrixError": 0,
+      "actions": [
+        "BatSwing",
+        "Idle",
+        "Run",
+        "Walk"
+      ],
+      "bones": 23,
+      "headWidthBefore": 0.5688000321388245,
+      "headWidthAfter": 0.511920028924942,
+      "blenderRigScale": [
+        1,
+        1,
+        1.08
+      ],
+      "unityVisualScale": [
+        1,
+        1.08,
+        1
+      ]
+    },
+    {
+      "model": "Bandit",
+      "source": "Assets/ChibiSurvivor/Bandit/SimpleBandit/BlenderSource~/SimpleBandit.blend",
+      "sourceSHA256": "7942e02cb8100a0496964a3625bb6e1f9ed26f9ea68303b8b875a90bf78da040",
+      "sourceUnchanged": true,
+      "preserved": {
+        "skeleton": "2cb40f21e82e9769f43f0c746196af32a9429ecef6c5d3f4dfcec8678b0638f4",
+        "animation": "d2b00c80230111c72bc6d73a43c85cd337926cb22762af3f0e577d4735aa8535",
+        "surface": "2e209f7cec4bbd100c5082062bf1872b1e6141112099bc45385f18a82802afba"
+      },
+      "sampledFrames": 202,
+      "maxRigLocalAttachmentMatrixError": 0,
+      "actions": [
+        "BatSwing",
+        "Idle",
+        "Run",
+        "Walk"
+      ],
+      "bones": 23,
+      "headWidthBefore": 0.7160000205039978,
+      "headWidthAfter": 0.6444000184535981,
+      "blenderRigScale": [
+        1,
+        1,
+        1.08
+      ],
+      "unityVisualScale": [
+        1,
+        1.08,
+        1
+      ]
+    },
+    {
+      "model": "BanditCombat",
+      "source": "Assets/ChibiSurvivor/Bandit/SimpleBandit/BlenderSource~/SimpleBandit_Combat.blend",
+      "sourceSHA256": "880c94726d4c8cd6bc40819501824b8f846d690515323bcd5fcff6b47adfacd1",
+      "sourceUnchanged": true,
+      "preserved": {
+        "skeleton": "2cb40f21e82e9769f43f0c746196af32a9429ecef6c5d3f4dfcec8678b0638f4",
+        "animation": "0dd0f5731100c05b9bc46ac63be5de025c2fc0fe7c350d483e0276b93c8ea2bc",
+        "surface": "e8277be06c1dc81cf7fbd5b8b6483dfefb8749564ece747ee6dbef05e1e5fb3e"
+      },
+      "sampledFrames": 293,
+      "maxRigLocalAttachmentMatrixError": 0,
+      "actions": [
+        "Bandit_BatIdle",
+        "BatSwing",
+        "Idle",
+        "Run",
+        "Walk"
+      ],
+      "bones": 23,
+      "headWidthBefore": 0.7160000205039978,
+      "headWidthAfter": 0.6444000184535981,
+      "blenderRigScale": [
+        1,
+        1,
+        1.08
+      ],
+      "unityVisualScale": [
+        1,
+        1.08,
+        1
+      ]
+    }
+  ],
+  "integration": "Staged only. No live Unity assets replaced. Preserve exported scale exactly once; do not double-apply scale. Attach weapons/stow mounts under same visual root. Unity firearm/grip, feet and ragdoll checks remain pending.",
+  "firearmVariants": "Pistol and rifle share Bandit source; no new enemy archetypes created."
+}

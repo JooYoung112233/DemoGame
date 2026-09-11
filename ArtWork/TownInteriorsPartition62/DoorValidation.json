@@ -1,0 +1,147 @@
+{
+  "rooms": 5,
+  "independentLockedZones": 15,
+  "doors": [
+    {
+      "zone": "pawnshop.rear",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "pawnshop.left",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "pawnshop.right",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "repair.rear",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "repair.left",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "repair.right",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "medical.rear",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "medical.left",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "medical.right",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "furniture.rear",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "furniture.left",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "furniture.right",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "blackmarket.rear",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "blackmarket.left",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    },
+    {
+      "zone": "blackmarket.right",
+      "initiallyLocked": true,
+      "fixedWallPreserved": true,
+      "realOpeningRays": 9,
+      "closedDoorBlocks": true,
+      "ninetyDegreeOpenClear": true,
+      "stableHingePivot": true
+    }
+  ],
+  "notValidated": [
+    "Unity door interaction",
+    "unlock conditions/save state",
+    "Unity colliders/NavMesh",
+    "roof visibility runtime"
+  ]
+}

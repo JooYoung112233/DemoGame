@@ -1,0 +1,4 @@
+var lights=UnityEngine.Object.FindObjectsByType<Light>(FindObjectsInactive.Include,FindObjectsSortMode.None).Select(l=>new {l.name,l.enabled,active=l.gameObject.activeInHierarchy,type=l.type.ToString(),angle=l.transform.eulerAngles.ToString(),l.intensity,shadows=l.shadows.ToString(),l.shadowStrength,l.shadowBias,l.shadowNormalBias,l.shadowNearPlane});
+var casters=UnityEngine.Object.FindObjectsByType<NPCController>(FindObjectsSortMode.None).Select(n=>new {id=n.Data.npcId,renderers=n.GetComponentsInChildren<Renderer>(true).Select(r=>new {r.name,r.enabled,active=r.gameObject.activeInHierarchy,cast=r.shadowCastingMode.ToString(),bounds=r.bounds.ToString()})});
+var pipeline=UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline;
+return Newtonsoft.Json.JsonConvert.SerializeObject(new{playing=UnityEditor.EditorApplication.isPlaying,lights,casters,pipeline=UnityEditor.AssetDatabase.GetAssetPath(pipeline),camera=Camera.main?.transform.position.ToString()});

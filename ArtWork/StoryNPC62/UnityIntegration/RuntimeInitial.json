@@ -1,0 +1,52 @@
+{
+  "playing": true,
+  "paused": false,
+  "timeScale": 1.0,
+  "scenes": [
+    "Systems",
+    "Safehouse",
+    "Systems"
+  ],
+  "npcs": [
+    {
+      "id": "pawnshop",
+      "animator": 0.0,
+      "clip": [
+        "Idle_Observe"
+      ],
+      "bounds": "Center: (34.000, 0.808, 46.370), Extents: (0.484, 0.943, 0.229)",
+      "shader": "BRB/GameLit",
+      "active": true
+    },
+    {
+      "id": "veteran_scavenger",
+      "animator": 0.0,
+      "clip": [
+        "Idle_Crouch"
+      ],
+      "bounds": "Center: (67.000, 0.663, 28.943), Extents: (0.448, 0.799, 0.351)",
+      "shader": "BRB/GameLit",
+      "active": true
+    },
+    {
+      "id": "wandering_merchant",
+      "animator": 0.0,
+      "clip": [
+        "Idle_Pack"
+      ],
+      "bounds": "Center: (36.020, 0.865, 14.067), Extents: (0.504, 1.000, 0.423)",
+      "shader": "BRB/GameLit",
+      "active": true
+    },
+    {
+      "id": "district_warden",
+      "animator": 0.0,
+      "clip": [
+        "Idle_Ledger"
+      ],
+      "bounds": "Center: (50.015, 0.884, 15.936), Extents: (0.499, 1.020, 0.286)",
+      "shader": "BRB/GameLit",
+      "active": true
+    }
+  ]
+}

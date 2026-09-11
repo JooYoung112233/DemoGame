@@ -132,6 +132,13 @@ half4 GameLitFragment(Varyings input) : SV_Target
     surface.alpha = alpha;
     surface.metallic = _Metallic;
     surface.smoothness = _Smoothness * (1.0h - grime * 0.7h);
+    // Explicit opt-in keeps legacy materials unchanged, including materials that
+    // still carry an unused URP metallic-map keyword from an earlier conversion.
+    #if defined(_GAMELIT_PACKED_MASK)
+        half4 packedSurface = SAMPLE_TEXTURE2D(_MetallicGlossMap, sampler_MetallicGlossMap, uv);
+        surface.metallic *= packedSurface.r;
+        surface.smoothness *= packedSurface.a;
+    #endif
     surface.normalTS = half3(0, 0, 1);
     surface.occlusion = occlusion;
     #if defined(_EMISSION)

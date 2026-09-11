@@ -1,0 +1,2614 @@
+[
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Asphalt.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Brick.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Brick_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Brick_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Brick_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Canvas.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Concrete.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Plaster_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Cream.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Plaster_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_DarkOlive.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Dirt.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Edge.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Glass.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Ochre.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Plaster_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Olive.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Paper.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Plaster_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Plaster.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Plaster_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Red.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Roof.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Plaster_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Steel.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Wood.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.28,
+      "_GrimeStrength": 0.35,
+      "_ShadowDesaturation": 0.55,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Counter.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.22,
+      "_GrimeStrength": 0.14,
+      "_ShadowDesaturation": 0.25,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Floor.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.22,
+      "_GrimeStrength": 0.14,
+      "_ShadowDesaturation": 0.25,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Plaster_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Plaster_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Home.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.22,
+      "_GrimeStrength": 0.14,
+      "_ShadowDesaturation": 0.25,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Link.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.22,
+      "_GrimeStrength": 0.14,
+      "_ShadowDesaturation": 0.25,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Plaza.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.22,
+      "_GrimeStrength": 0.14,
+      "_ShadowDesaturation": 0.25,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_ShopFront.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.22,
+      "_GrimeStrength": 0.14,
+      "_ShadowDesaturation": 0.25,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Town_Ground.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_SPECULARHIGHLIGHTS_OFF"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.22,
+      "_GrimeStrength": 0.14,
+      "_ShadowDesaturation": 0.25,
+      "_RimStrength": 0.0,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Town02/Textures/Asphalt_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Blanket.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Canvas.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Concrete.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.16,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Plaster_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Plaster_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Plaster_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_EdgeMetal.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Glass.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Grey.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Ink.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_LampGlow.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Linen.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_MapLine.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Olive.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_OliveDark.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_OliveLight.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Paper.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.16,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Plaster_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Plaster_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Plaster_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Red.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Rubber.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_RugFabric.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Cloth_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Steel.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Steel_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Wear.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Wood.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodDark.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodLight.mat",
+    "shader": "Universal Render Pipeline/Lit",
+    "keywords": [
+      "_METALLICSPECGLOSSMAP",
+      "_NORMALMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.65,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+      "_BumpMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Normal.png",
+      "_MetallicGlossMap": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_BatWood.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.3,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_boots.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.45,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff_Light.001.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff_Light.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff_Shade.001.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff_Shade.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_ear.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.3,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hair.001.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.38,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hair.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.38,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hood.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hood_edge.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hood_Light.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hood_Shade.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_ink.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.05,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_iris.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.8,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Light.001.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Light.002.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Light.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Shade.001.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Shade.002.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Shade.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_leather.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.5,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_mask.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_mask_Light.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_mask_Shade.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_metal.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 0.8,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_mouth.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.35,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_nose.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.3,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants_Light.001.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants_Light.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants_Shade.001.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants_Shade.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_patch.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pupil.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.8,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.001.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.3,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.002.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.3,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.003.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.3,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.004.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.3,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.3,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_sole.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.28,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_Surface.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_NORMALMAP",
+      "_GRIMEOBJECTSPACE_ON",
+      "_METALLICSPECGLOSSMAP"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.3,
+      "_BumpScale": 0.6,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/Bandit/Bandit01/Textures/Bandit_BaseColor.png",
+      "_BumpMap": "Assets/ChibiSurvivor/Bandit/Bandit01/Textures/Bandit_Normal.png",
+      "_MetallicGlossMap": "Assets/ChibiSurvivor/Bandit/Bandit01/Textures/Bandit_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_under.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_white.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.7,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_wrap.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.22,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/LookDev_Bandit_일반.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.08,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/Bandit/Bandit01/Textures/Bandit_BaseColor.png",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/LookDev_Bandit_중장.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.08,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/Bandit/Bandit01/Textures/Bandit_BaseColor.png",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/LookDev_LampHolder.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.08,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/Bandit/Bandit01/Textures/Bandit_BaseColor.png",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Firearms/Gunmetal.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.5,
+      "_Smoothness": 0.3,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Firearms/Holster.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.5,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/SimpleBandit/Materials/SimpleBandit_Surface.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.1,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/Bandit/SimpleBandit/Textures/SimpleBandit_BaseColor.png",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/SimpleBandit/Weapons/Materials/BanditClub_Surface.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.12,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/Bandit/SimpleBandit/Weapons/Textures/BanditClub_BaseColor.png",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/DistrictWarden.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.35,
+      "_GrimeStrength": 0.12,
+      "_ShadowDesaturation": 0.2,
+      "_RimStrength": 0.045,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/DistrictWarden/DistrictWarden_BaseColor.png",
+      "_BumpMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/DistrictWarden/DistrictWarden_Normal.png",
+      "_MetallicGlossMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/DistrictWarden/DistrictWarden_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/Pawnshop.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.35,
+      "_GrimeStrength": 0.12,
+      "_ShadowDesaturation": 0.2,
+      "_RimStrength": 0.045,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/Pawnshop/Pawnshop_BaseColor.png",
+      "_BumpMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/Pawnshop/Pawnshop_Normal.png",
+      "_MetallicGlossMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/Pawnshop/Pawnshop_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/VeteranScavenger.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.35,
+      "_GrimeStrength": 0.12,
+      "_ShadowDesaturation": 0.2,
+      "_RimStrength": 0.045,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/VeteranScavenger/VeteranScavenger_BaseColor.png",
+      "_BumpMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/VeteranScavenger/VeteranScavenger_Normal.png",
+      "_MetallicGlossMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/VeteranScavenger/VeteranScavenger_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/WanderingMerchant.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GAMELIT_PACKED_MASK",
+      "_NORMALMAP",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 1.0,
+      "_Smoothness": 1.0,
+      "_BumpScale": 0.35,
+      "_GrimeStrength": 0.12,
+      "_ShadowDesaturation": 0.2,
+      "_RimStrength": 0.045,
+      "_UsePackedMask": 1.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/WanderingMerchant/WanderingMerchant_BaseColor.png",
+      "_BumpMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/WanderingMerchant/WanderingMerchant_Normal.png",
+      "_MetallicGlossMap": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/WanderingMerchant/WanderingMerchant_Mask.png",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_BatWood.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.120000005,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_wrap.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.120000005,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Gear.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.08,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Textures/SimpleHero_Gear_BaseColor.png",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.08,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Textures/SimpleHero_BaseColor.png",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SwordProxy.mat",
+    "shader": "BRB/GameLit",
+    "keywords": [
+      "_ENVIRONMENTREFLECTIONS_OFF",
+      "_GRIMEOBJECTSPACE_ON"
+    ],
+    "floats": {
+      "_Metallic": 0.0,
+      "_Smoothness": 0.28,
+      "_BumpScale": 1.0,
+      "_GrimeStrength": 0.3,
+      "_ShadowDesaturation": 0.45,
+      "_RimStrength": 0.12,
+      "_UsePackedMask": 0.0,
+      "_OcclusionStrength": 1.0
+    },
+    "textures": {
+      "_BaseMap": "",
+      "_BumpMap": "",
+      "_MetallicGlossMap": "",
+      "_OcclusionMap": ""
+    }
+  }
+]

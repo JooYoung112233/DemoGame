@@ -10,6 +10,8 @@ Shader "BRB/GameLit"
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.3
         _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
+        [Toggle(_GAMELIT_PACKED_MASK)] _UsePackedMask("Use Packed Surface Mask", Float) = 0
+        _MetallicGlossMap("Surface Mask (R Metallic, A Smoothness)", 2D) = "white" {}
         _BumpScale("Normal Scale", Float) = 1.0
         [Normal] _BumpMap("Normal Map", 2D) = "bump" {}
         _OcclusionStrength("Occlusion Strength", Range(0.0, 1.0)) = 1.0
@@ -62,6 +64,7 @@ Shader "BRB/GameLit"
             // 2026-09-11 사용자 "빛반사가 심하다, 반짝반짝 대리석 같다" — 쿼터뷰는 바닥을 비스듬히 봐서 하늘 반사(프레넬)가 크고,
             //   머리 위 램프가 바닥에 하이라이트를 찍는다. 환경 반사는 끄고(전 머티리얼), 스펙 하이라이트는 금속이 아닌 환경에서 끈다(전환 도구).
             #pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
+            #pragma shader_feature_local_fragment _GAMELIT_PACKED_MASK
             #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
 
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
@@ -139,11 +142,13 @@ Shader "BRB/GameLit"
             #pragma vertex DepthNormalsVertex
             #pragma fragment DepthNormalsFragment
             #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local _NORMALMAP
             #pragma multi_compile_instancing
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
 
             #include "GameLitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
+            // Keep SSAO's normals consistent with the visible normal-mapped surface.
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitDepthNormalsPass.hlsl"
             ENDHLSL
         }
     }
