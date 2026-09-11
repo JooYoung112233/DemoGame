@@ -16,12 +16,19 @@ MonoBehaviour:
   nightDuration: 600
   raidDuration: 1200
   lootCountMult: 1
+  searchSpeedMult: 1
+  searchSecCommon: 0.4
+  searchSecUncommon: 0.6
+  searchSecRare: 0.9
+  searchSecEpic: 1.3
+  searchSecLegendary: 1.8
   lootChanceMult: 1
   valuableWeightMult: 1
   itemSpawnCountMult: 1
   interiorLootBudgetMult: 0.25
   buildingEnterRatio: 1
   comboEnabled: 0
+  dodgeEnabled: 0
   meleeFalloffNear: 0.35
   meleeFalloffFar: 0.6
   enemyHeavyChance: 0.3
@@ -32,6 +39,11 @@ MonoBehaviour:
   enemyRangedRecover: 0.35
   enemyGunDrawTime: 0.6
   enemyBulletRangeMult: 1.25
+  gunFalloffStart: 0.5
+  gunFalloffEndMult: 0.55
+  aimLookAhead: 0.35
+  aimLookAheadMax: 4
+  gunPierceDamageKeep: 0.6
   roadObstacleDensity: 1
   roadMinPassWidth: 3
   barricadeClearSeconds: 3.5
@@ -95,6 +107,8 @@ MonoBehaviour:
   dialogueTypingSpeed: 0.02
   tutorialDefaultDuration: 4
   hideoutRoomOrtho: 4.4
+  hideoutViewZoom: 2
+  hideoutDockDimAlpha: 0.32
   hideoutRoomHalfX: 0.28
   hideoutRoomHalfY: 0.45
   hideoutTopBand: 180

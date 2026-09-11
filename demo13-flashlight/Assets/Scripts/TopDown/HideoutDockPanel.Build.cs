@@ -24,6 +24,17 @@ public partial class HideoutDockPanel
         scaler.matchWidthOrHeight = 0.5f;
         _root.AddComponent<GraphicRaycaster>();
 
+        // 우측 영역에만 까는 딤. 도크와 함께 닫히며 버튼의 raycast를 가로채지 않는다.
+        var dimGO = new GameObject("RightDockDim", typeof(RectTransform), typeof(Image));
+        dimGO.transform.SetParent(_root.transform, false);
+        _dockDim = dimGO.GetComponent<Image>();
+        _dockDim.raycastTarget = false;
+        var dimRT = _dockDim.rectTransform;
+        dimRT.anchorMin = new Vector2(1f, 0f);
+        dimRT.anchorMax = new Vector2(1f, 1f);
+        dimRT.pivot = new Vector2(1f, .5f);
+        dimRT.anchoredPosition = Vector2.zero;
+
         var panelGO = new GameObject("Panel");
         panelGO.transform.SetParent(_root.transform, false);
         _panel = panelGO.AddComponent<RectTransform>();
