@@ -84,8 +84,9 @@ public class AttackPerformer : MonoBehaviour
     const float BodyMidY = 0.9f;
     const float BodyHalfH = 0.9f;
 
-    /// <summary>공격자→대상 사이에 솔리드 벽이 있는지. 트리거·플레이어·적 레이어는 무시.</summary>
-    static bool IsBlockedByWall(Vector3 from, Collider target)
+    /// <summary>공격자→대상 사이에 솔리드 벽이 있는지. 트리거·플레이어·적 레이어는 무시.
+    /// 총기 밴딧의 사선 확인(EnemyController.HasLineOfFire)도 이걸 쓴다.</summary>
+    internal static bool IsBlockedByWall(Vector3 from, Collider target)
     {
         Vector3 to = target.bounds.ClosestPoint(from);
         Vector3 d = to - from;
@@ -95,7 +96,9 @@ public class AttackPerformer : MonoBehaviour
         int playerL = LayerMask.NameToLayer("Player");
         int enemyL  = LayerMask.NameToLayer("Enemy");
 
-        int n = Physics.RaycastNonAlloc(from, d / dist, _losBuf, dist, ~0, QueryTriggerInteraction.Collide);
+        // 트리거는 어차피 버린다 — 처음부터 안 받아야 한다. 받으면 총기 사거리(9~12m)에선 루트·존 트리거가
+        //   작은 버퍼를 먼저 채워 정작 벽이 안 잡힐 수 있다(2026-09-11 리뷰).
+        int n = Physics.RaycastNonAlloc(from, d / dist, _losBuf, dist, ~0, QueryTriggerInteraction.Ignore);
         for (int i = 0; i < n; i++)
         {
             var c = _losBuf[i].collider;

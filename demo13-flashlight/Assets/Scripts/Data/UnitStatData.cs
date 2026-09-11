@@ -78,6 +78,24 @@ public class UnitStatData
     public float patrolWaitTime = 2f;
     public float hitStunDuration = 0.3f;
 
+    // ===== 원거리(총기 밴딧) — 2026-09-11, docs/bandit-firearms.md §레이드 배치 결정 =====
+    public enum RangedWeapon { None, Pistol, Rifle }
+
+    [Header("원거리 (None = 근접)")]
+    [Tooltip("None이면 근접 유닛. Pistol/Rifle이면 조준 경고 후 실제 Projectile을 쏜다.\n"
+           + "이때 attackRange=사격 사거리, attackWindup=조준 경고 시간, attackDamage=탄 1발 데미지, attackSpeed=사격 주기.")]
+    public RangedWeapon rangedWeapon = RangedWeapon.None;
+    [Tooltip("사선이 트이면 이 거리까지만 다가가 멈춰 선다(m). attackRange보다 짧게.")]
+    public float preferredRange = 6f;
+    [Tooltip("탄속(m/s). 플레이어 권총은 42 — 적 탄은 느리게 해서 보고 피할 수 있게.")]
+    public float projectileSpeed = 16f;
+    [Tooltip("한 번 사격에 나가는 탄 수(권총 1, 소총 3점사).")]
+    [Min(1)] public int burstCount = 1;
+    [Tooltip("점사 탄 사이 간격(초).")]
+    public float burstInterval = 0.12f;
+    [Tooltip("탄 퍼짐 ±각도(도).")]
+    public float spreadDeg = 3f;
+
     // ===== 보상 =====
     [Header("보상")]
     public int expReward = 10;

@@ -148,7 +148,9 @@ public static class Zone1GreyboxLayout
 
         // ② 폐아파트(C1R0) — 중
         n += Scatter(map, "SZ_Apt", 68f, 18f, 100f, 70f, 5, 4, 22);
-        n += EnemyZone(map, "EZ_Apt", 84f, 44f, 16f, 18f, "bandit_melee_1", 3);
+        // 2026-09-11: 총기 밴딧 배치(docs/bandit-firearms.md §레이드 배치 결정) — 손배치 존 4개를 총기형으로.
+        //   아케이드(입구·약함)는 근접만 둔다. 무리 가중치는 근접과 같은 1(TrimEnemyPacks 결과 불변).
+        n += EnemyZone(map, "EZ_Apt", 84f, 44f, 16f, 18f, "bandit_pistol", 3);
 
         // ③ 식물원 돔·습지(C1R2) — 중상
         n += Scatter(map, "SZ_Dome", 68f, 128f, 100f, 166f, 5, 5, 33);
@@ -157,16 +159,16 @@ public static class Zone1GreyboxLayout
 
         // ④ 유리 R&D 타워(C2R0) — 강함·고급 루트(최심부)
         n += Scatter(map, "SZ_Tower", 116f, 18f, 158f, 70f, 6, 6, 44);
-        n += EnemyZone(map, "EZ_Tower", 140f, 40f, 16f, 14f, "bandit_melee_1", 2);
+        n += EnemyZone(map, "EZ_Tower", 140f, 40f, 16f, 14f, "bandit_rifle", 2);
         n += EnemyZone(map, "EZ_Tower_T", 150f, 52f, 8f, 8f, "bandit_tank", 1);
 
         // ⑤ 무너진 상가(C2R2) — 중상
         n += Scatter(map, "SZ_Mall", 116f, 128f, 158f, 166f, 4, 3, 77);
-        n += EnemyZone(map, "EZ_Mall", 137f, 146f, 16f, 16f, "bandit_melee_1", 2);
+        n += EnemyZone(map, "EZ_Mall", 137f, 146f, 16f, 16f, "bandit_rifle", 2);
 
         // ⑥ 주차장·공원(개활지) — 낮은 밀도, 적 약간
         n += Scatter(map, "SZ_Lot", 116f, 80f, 158f, 112f, 3, 2, 55);
-        n += EnemyZone(map, "EZ_Lot", 137f, 96f, 16f, 16f, "bandit_melee_1", 2);
+        n += EnemyZone(map, "EZ_Lot", 137f, 96f, 16f, 16f, "bandit_pistol", 2);
         n += Scatter(map, "SZ_Park", 18f, 128f, 58f, 166f, 3, 2, 66);
 
         // ⑦ 도로 파밍은 **바닥에 뿌리지 않는다** — 잔해(부서진 차)의 트렁크에 붙는다.

@@ -81,6 +81,17 @@ public class GameTuning : ScriptableObject
     [Tooltip("강공의 데미지 배율.")]
     [Range(1f, 4f)] public float enemyHeavyDamageMult = 1.9f;
 
+    // ── 총기 밴딧 (2026-09-11, docs/combat.md §총기 밴딧) — 유닛별 수치는 StatDB, 공통 타이밍만 여기 ──
+    [Header("총기 밴딧(AI)")]
+    [Tooltip("발사 직전 조준이 **고정**되는 시간(초). 고정된 조준선을 보고 옆으로 빠지면 피한다 — 길수록 쉽다.")]
+    [Range(0f, 1f)] public float enemyAimLockTime = 0.2f;
+    [Tooltip("마지막 탄 뒤 추격으로 돌아가기까지(초).")]
+    [Range(0f, 2f)] public float enemyRangedRecover = 0.35f;
+    [Tooltip("교전 시 총을 꺼내는 시간(초). 다 꺼내기 전엔 조준하지 않는다 — 발견 후 첫 발까지의 여유.")]
+    [Range(0.1f, 2f)] public float enemyGunDrawTime = 0.6f;
+    [Tooltip("적 탄의 비행 거리 = 사격 사거리 × 이 배율. 탄은 비행 거리 절반부터 55%까지 감쇠한다.")]
+    [Range(1f, 2f)] public float enemyBulletRangeMult = 1.25f;
+
     // ── 도로 장애물 / 막힌 통로 (2026-07-11) ──────────────────────────
     //   "넓은 길인데 그냥 뻥 뚫린 통로" 방지 — 도로 위 잔해로 동선을 꺾고 시야를 끊는다.
     //   밀도/통행폭은 빌더가 읽으므로 바꾸면 `빌드 ▸ 지역1` 재실행 필요.
