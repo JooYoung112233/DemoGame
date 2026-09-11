@@ -69,6 +69,7 @@ public class EnemySpawner : MonoBehaviour
 
         int total = 0, zoneCount = 0;
         var spawned = new List<EnemyController>();
+        Transform folder = null;   // [Runtime]/Enemies — 첫 스폰 때 만든다(적 없는 씬엔 폴더도 없음)
         for (int i = 0; i < zones.Length; i++)
         {
             var z = zones[i];
@@ -80,6 +81,8 @@ public class EnemySpawner : MonoBehaviour
                 var e = SpawnOne(z);
                 if (e == null) continue;
                 SceneManager.MoveGameObjectToScene(e, scene);   // 레이드 씬과 함께 언로드되도록
+                if (folder == null) folder = HierarchyFolder.RuntimeFolder(scene, "Enemies");
+                e.transform.SetParent(folder, true);            // 하이어라키 정리 — 씬 루트에 수십 마리가 평평하게 깔리지 않게
                 var ec = e.GetComponent<EnemyController>();
                 if (ec != null) spawned.Add(ec);
                 total++;

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 하이어라키 정리용 **폴더 표시**. 로직은 없다 — "이 오브젝트는 묶음일 뿐"이라는 표식이다.
@@ -35,5 +36,33 @@ public sealed class HierarchyFolder : MonoBehaviour
         if (p != null && p.TryGetComponent(out HierarchyFolder f) && f.detachOnPersist)
             go.transform.SetParent(null, true);
         DontDestroyOnLoad(go);
+    }
+
+    public const string RuntimeRootName = "[Runtime]";
+
+    /// <summary>런타임 스폰물을 담는 <c>[Runtime]/&lt;name&gt;</c> 폴더 — 없으면 만든다.
+    /// 씬 루트에 원점·단위 스케일로 두므로 자식의 월드 위치가 그대로 유지된다.
+    /// 씬 파일엔 저장되지 않는다(플레이 중에만 생김). 맵 씬과 함께 언로드된다.</summary>
+    public static Transform RuntimeFolder(Scene scene, string name)
+    {
+        GameObject root = null;
+        foreach (var r in scene.GetRootGameObjects())
+            if (r.name == RuntimeRootName) { root = r; break; }
+        if (root == null)
+        {
+            root = new GameObject(RuntimeRootName);
+            root.AddComponent<HierarchyFolder>();
+            SceneManager.MoveGameObjectToScene(root, scene);   // new GameObject는 활성 씬에 생긴다
+        }
+
+        var t = root.transform.Find(name);
+        if (t == null)
+        {
+            var go = new GameObject(name);
+            go.AddComponent<HierarchyFolder>();
+            go.transform.SetParent(root.transform, false);
+            t = go.transform;
+        }
+        return t;
     }
 }

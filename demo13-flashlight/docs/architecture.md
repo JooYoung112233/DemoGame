@@ -186,6 +186,16 @@ DDOL 씬으로 옮겨졌는데, 폴더에 넣으면 그게 끊긴다. 그래서:
 - 플레이어·UI(DDOL) 쪽 드롭은 owner 없이 둔다 — 그땐 이미 활성 씬이 현재 맵이다.
 - 맵 로드 직후 무언가를 스폰하는 새 코드도 같은 규칙: 스폰한 오브젝트를 **자기 씬으로** 옮길 것.
 
+### 런타임 스폰물 폴더 `[Runtime]` (2026-09-11)
+| 날짜 | 질문 | 결정 |
+|------|------|------|
+| 2026-09-11 | 런타임 스폰된 적(Zone1 38기)이 맵 씬 루트에 평평하게 깔림 | **폴더로 묶는다.** 맵 씬 루트의 `[Runtime]/Enemies` |
+
+- `HierarchyFolder.RuntimeFolder(scene, "Enemies")` — 씬 루트에 `[Runtime]`(원점·단위 스케일)과 그 아래 이름 폴더를 찾거나 만든다.
+  플레이 중에만 생기고 씬 파일엔 저장되지 않으며, 맵 씬과 함께 언로드된다.
+- 에디터 정리 도구가 만드는 `Map/Enemies`(스폰 존)와는 별개다 — `Map`은 저장된 배치물, `[Runtime]`은 플레이 중 생긴 것.
+- 새 런타임 스폰(예: 루팅 아이템)도 여기에 이름 폴더를 더해 넣는다. `transform.root`에 기대는 코드는 없다(2026-09-11 확인).
+
 ## 변경 로그
 
 | 날짜 | 질문 | 결정 | 근거 |
@@ -197,3 +207,4 @@ DDOL 씬으로 옮겨졌는데, 폴더에 넣으면 그게 끊긴다. 그래서:
 | 2026-06-24 | 레거시 Input Manager 폐기 예정 경고. 신 Input System으로 옮길지/방식 | 신 Input System으로 전환(`activeInputHandler:1`, New 전용). 입력이 전부 폴링 구조라 액션 에셋·콜백 재배선 대신 **호환 셰임 `GameInput`**(Keyboard/Mouse.current 래핑)으로 87개 호출부를 1:1 치환. UI 입력 모듈은 `InputSystemUIInputModule`로 교체. Spine 예제 폴더(레거시 Input 사용, 본편 미참조) 삭제 | 폐기 경고 제거 + 미래 호환. 셰임 방식이 폴링 코드베이스에 위험·diff 최소. |
 | 2026-09-11 | 씬 하이어라키가 씬마다 복잡함(Zone1 `Map` 아래 766개 평평, Systems 루트 27개 평평) | **기능별 폴더 규약 + 자동 정리 도구.** 맵 씬은 컴포넌트로 기능별(지형만 이름표로 구조별), Systems는 Core/World/Progress/Story/UI/Player. 빌더 저장 지점에서 자동 적용. DDOL은 `HierarchyFolder.Persist`로(폴더 안이면 루트로 빼고 건다), `TopDownPlayer`는 `OwnerRoot` — 런타임 동작 불변 | 손 정리는 재빌드에 날아간다. 이름 접두사는 뜻이 섞여 있어(SP_ = 소품·상자·스폰) 컴포넌트가 확실하다. §씬 하이어라키 규약 |
 | 2026-09-11 | (버그) 레이드 루팅 아이템이 맵이 아니라 Systems 씬에 생겨, 맵을 떠나도 남음 | `WorldItem.Drop`에 owner 인자 — 맵 쪽 호출부는 `this`를 넘겨 자기 씬으로 옮긴다. 검증: Zone1 체류 39개 모두 Zone1, 안전가옥 이동 후 0개 | 맵 `Start()`가 `SetActiveScene` 전에 돈다. §런타임 스폰은 "누구의 씬"인지 넘길 것 |
+| 2026-09-11 | 런타임 스폰된 적도 폴더로 묶어 달라 | `EnemySpawner`가 적을 맵 씬 루트의 `[Runtime]/Enemies`에 넣는다(`HierarchyFolder.RuntimeFolder`) | 적 수십 기가 루트에 평평함. §런타임 스폰물 폴더 |
