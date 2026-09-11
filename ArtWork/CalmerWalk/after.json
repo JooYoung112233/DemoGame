@@ -1,0 +1,26 @@
+[
+  {
+    "mode": "walk",
+    "input": "(0.00, 1.00)",
+    "elapsed": 0.499999821,
+    "measured": 1.1993413,
+    "expected": 1.2,
+    "pass": true,
+    "animatorSpeed": 1.33333337,
+    "moveMagnitude": 1.0,
+    "IsSprinting": false,
+    "IsCrouching": false
+  },
+  {
+    "mode": "run",
+    "input": "(0.00, 1.00)",
+    "elapsed": 0.779999733,
+    "measured": 3.60107541,
+    "expected": 3.60000014,
+    "pass": true,
+    "animatorSpeed": 1.56521749,
+    "moveMagnitude": 1.0,
+    "IsSprinting": true,
+    "IsCrouching": false
+  }
+]

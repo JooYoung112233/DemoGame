@@ -31,7 +31,7 @@ public class PlayerStatData
     public List<MotionStat> motions = new List<MotionStat>
     {
         new MotionStat { anim = "idle",        animSpeed = 1f },
-        new MotionStat { anim = "walk",        animSpeed = 1f },
+        new MotionStat { anim = "walk",        animSpeed = 0.5f },
         new MotionStat { anim = "run",         animSpeed = 1f, distance = 0f },
         new MotionStat { anim = "crouch",      animSpeed = 1f },
         new MotionStat { anim = "crouch_walk", animSpeed = 1f },
