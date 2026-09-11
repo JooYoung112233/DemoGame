@@ -9,6 +9,11 @@
 
 ## 결정
 
+### 2026-09-12 — 퇴장 후 이동 상태 복구 버그 수정
+
+- 이동 검수 중 Hideout→Safehouse 이후에도 `TopDownPlayer.enabled=false`, Rigidbody의 `isKinematic=true`가 남는 문제를 확인했다. 디오라마에서 잠근 이동·물리·상호작용 상태를 저장하고 씬 언로드 시 원래 값으로 복구한다.
+- Unity MCP 왕복 검증: Hideout에서 이동/상호작용 비활성·kinematic=true, 마을 복귀 후 둘 다 활성·kinematic=false. 이전 상태를 보존하며 무조건 켜는 방식은 사용하지 않는다. `ArtWork/MovementPace/hideout-state.json`, `returned-town-state.json`에 기록.
+
 ### 2026-09-12 — 시설 UI 뒤 딤과 좌측 공간 확대
 
 - 사용자 요청: “하이드아웃 우측 UI 뒤 약간 딤처리”, “좌측 맵을 지금보다 약 2배 가까이”.
