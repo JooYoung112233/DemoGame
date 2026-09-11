@@ -46,24 +46,24 @@ MonoBehaviour:
     lightDamage: 8
     lightRange: 1.2
     lightStaminaCost: 6
-    lightGroggy: 5
+    lightGroggy: 14
     lightCooldown: 0.12
     lightComboMax: 3
     lightComboWindow: 0.6
     lightCombo2Damage: 9
-    lightCombo2Groggy: 6
+    lightCombo2Groggy: 16
     lightCombo3Damage: 12
-    lightCombo3Groggy: 8
+    lightCombo3Groggy: 20
     lightCombo3StaminaCost: 8
     heavyDamage: 20
     heavyRange: 1.7
     heavyStaminaCost: 22
-    heavyGroggy: 25
+    heavyGroggy: 32
     heavyChargeTime: 0.6
     heavyMaxCharge: 1.5
     heavyFullDamage: 32
     heavyFullStaminaCost: 35
-    heavyFullGroggy: 45
+    heavyFullGroggy: 58
     heavyCooldown: 0.8
     dodgeStaminaCost: 15
     dodgeDistance: 3
@@ -93,8 +93,8 @@ MonoBehaviour:
     attackSpeed: 0.8
     attackWindup: 0.7
     canBeCancelled: 1
-    maxGroggy: 80
-    groggyDecay: 10
+    maxGroggy: 60
+    groggyDecay: 5
     groggyStunDuration: 2.5
     moveSpeed: 2.5
     patrolSpeed: 1
@@ -149,8 +149,8 @@ MonoBehaviour:
     attackSpeed: 0.5
     attackWindup: 0.7
     canBeCancelled: 1
-    maxGroggy: 80
-    groggyDecay: 10
+    maxGroggy: 60
+    groggyDecay: 5
     groggyStunDuration: 2.5
     moveSpeed: 2.2
     patrolSpeed: 1
@@ -205,8 +205,8 @@ MonoBehaviour:
     attackSpeed: 0.38
     attackWindup: 0.85
     canBeCancelled: 1
-    maxGroggy: 80
-    groggyDecay: 10
+    maxGroggy: 60
+    groggyDecay: 5
     groggyStunDuration: 2.5
     moveSpeed: 1.9
     patrolSpeed: 1
@@ -261,8 +261,8 @@ MonoBehaviour:
     attackSpeed: 0.55
     attackWindup: 0.95
     canBeCancelled: 1
-    maxGroggy: 55
-    groggyDecay: 12
+    maxGroggy: 45
+    groggyDecay: 6
     groggyStunDuration: 2.8
     moveSpeed: 2
     patrolSpeed: 0.9
@@ -317,8 +317,8 @@ MonoBehaviour:
     attackSpeed: 0.45
     attackWindup: 1.15
     canBeCancelled: 0
-    maxGroggy: 160
-    groggyDecay: 8
+    maxGroggy: 120
+    groggyDecay: 4
     groggyStunDuration: 2
     moveSpeed: 1.9
     patrolSpeed: 0.8
