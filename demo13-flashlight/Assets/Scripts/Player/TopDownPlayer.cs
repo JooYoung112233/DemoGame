@@ -408,7 +408,7 @@ public class TopDownPlayer : MonoBehaviour
 
         float h = GameInput.GetAxisRaw("Horizontal");
         float v = GameInput.GetAxisRaw("Vertical");
-        MoveDirection = new Vector2(h, v);
+        MoveDirection = CameraRelative(h, v);   // W = 화면 위 (대각선 쿼터뷰, 2026-09-11)
         if (MoveDirection.sqrMagnitude > 1f) MoveDirection.Normalize();
 
         float speed = MoveSpd * (IsSprinting ? SprintMult : 1f);
@@ -455,8 +455,8 @@ public class TopDownPlayer : MonoBehaviour
             Vector2 aim = GameInput.AimStick;
             if (aim.sqrMagnitude > 0.01f)
             {
-                // 오른쪽 스틱을 밀면 그 방향을 바라본다.
-                FacingDirection = aim.normalized;
+                // 오른쪽 스틱을 밀면 그 방향을 바라본다 — 스틱 위 = 화면 위(카메라 기준).
+                FacingDirection = CameraRelative(aim.x, aim.y).normalized;
                 MouseWorldPos   = transform.position + Plan3D.ToWorld(FacingDirection) * 3f;
             }
             else if (MoveDirection.sqrMagnitude > 0.01f)
@@ -471,15 +471,51 @@ public class TopDownPlayer : MonoBehaviour
 
         if (_cam == null) return;
 
-        // 마우스 조준 — 커서 광선이 발밑 높이의 바닥면과 만나는 지점을 향한다.
+        // 마우스 조준 — 커서 광선이 발밑 높이의 바닥면과 만나는 지점.
         // (오소 쿼터뷰에서 ScreenToWorldPoint는 의미가 없다 — docs/3d-migration.md)
         if (!Plan3D.ScreenToGround(_cam, GameInput.mousePosition, transform.position.y, out Vector3 m)) return;
         Vector2 dir = Plan3D.ToPlan(m - transform.position);
-        if (dir.sqrMagnitude > 0.01f)
+        MouseWorldPos = m;   // 조준점(근접 부위 판정·조준원·조준 카메라)은 늘 커서다 — 바라보는 방향과 별개
+
+        // 2026-09-11 사용자: "조준 상태에서만 마우스 쪽을 보고, 평소엔 키보드 움직임 방향을 바라보자".
+        //   조준(총 우클릭) 중 = 커서 쪽. 그 외 = 이동 방향, 멈추면 마지막 방향 유지. docs/controls.md §바라보는 방향.
+        if (IsAimingMouse)
         {
-            FacingDirection = dir.normalized;
-            MouseWorldPos   = m;
+            if (dir.sqrMagnitude > 0.01f) FacingDirection = dir.normalized;
         }
+        else if (MoveDirection.sqrMagnitude > 0.01f)
+        {
+            FacingDirection = MoveDirection.normalized;
+        }
+    }
+
+    /// <summary>마우스 쪽을 바라보는 상태인가 — 총을 들고 조준(우클릭) 중일 때만.</summary>
+    bool IsAimingMouse => _gun != null && IsRangedEquipped && _gun.IsAiming;
+
+    /// <summary>입력(가로·세로)을 **화면 기준** 평면 방향으로 — W = 화면 위, D = 화면 오른쪽.
+    /// 2026-09-11 카메라가 대각선 쿼터뷰(방위 45°)가 되며 필요해졌다(docs/controls.md). 카메라가 정북이면 예전과 같다(W = +Z).</summary>
+    Vector2 CameraRelative(float h, float v)
+    {
+        var camT = CameraFollow.Instance != null ? CameraFollow.Instance.transform : (_cam != null ? _cam.transform : null);
+        if (camT == null) return new Vector2(h, v);
+        Vector3 f = camT.forward; f.y = 0f;
+        Vector3 r = camT.right;   r.y = 0f;
+        if (f.sqrMagnitude < 1e-4f || r.sqrMagnitude < 1e-4f) return new Vector2(h, v);
+        f.Normalize(); r.Normalize();
+        return new Vector2(r.x * h + f.x * v, r.z * h + f.z * v);
+    }
+
+    /// <summary>월드 평면 방향 → 이동 입력(화면 기준) — <see cref="CameraRelative"/>의 역.
+    /// QA 봇처럼 "월드의 이쪽으로 가라"를 가상 입력으로 넣을 때 쓴다(안 쓰면 대각선 카메라에서 45° 틀어져 걷는다).</summary>
+    public static Vector2 WorldToInput(Vector2 worldPlan)
+    {
+        var camT = CameraFollow.Instance != null ? CameraFollow.Instance.transform : (Camera.main != null ? Camera.main.transform : null);
+        if (camT == null) return worldPlan;
+        Vector3 f = camT.forward; f.y = 0f;
+        Vector3 r = camT.right;   r.y = 0f;
+        if (f.sqrMagnitude < 1e-4f || r.sqrMagnitude < 1e-4f) return worldPlan;
+        f.Normalize(); r.Normalize();
+        return new Vector2(worldPlan.x * r.x + worldPlan.y * r.z, worldPlan.x * f.x + worldPlan.y * f.z);
     }
 
     void UpdateFlip()

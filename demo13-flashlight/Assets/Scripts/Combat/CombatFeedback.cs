@@ -147,7 +147,7 @@ public class CombatFeedback : MonoBehaviour
         if (GetComponent<TopDownPlayer>() != null) yield break;
 
         Vector3 dir = (transform.position - playerGO.transform.position);
-        dir.z = 0; // 2D XY 평면
+        dir.y = 0; // 평면(XZ) — 2026-09-11: 2D 시절대로 z를 지워 **X축으로만** 밀리고 위아래로 들렸다
         if (dir.sqrMagnitude < 0.01f) yield break;   // 방향을 못 구하면 밀지 않는다(엉뚱한 방향 금지)
         dir.Normalize();
 
@@ -257,8 +257,9 @@ public class DamagePopup : MonoBehaviour
     public static DamagePopup Create(Vector3 worldPos, float damage, DamageType type = DamageType.Normal)
     {
         var go = new GameObject("DmgPopup");
-        // 2D: XY 평면. 엔티티 위(+Y)로 살짝, 좌우 랜덤. Z(깊이)는 건드리지 않음.
-        go.transform.position = worldPos + new Vector3(Random.Range(-0.2f, 0.2f), 0.9f, 0f);
+        // 엔티티 위(+Y)로 살짝, **화면 좌우**로 랜덤 — 월드 X는 대각선 쿼터뷰(2026-09-11)에서 화면 대각선이다.
+        Vector3 right = Camera.main != null ? Camera.main.transform.right : Vector3.right;
+        go.transform.position = worldPos + right * Random.Range(-0.2f, 0.2f) + Vector3.up * 0.9f;
 
         var popup = go.AddComponent<DamagePopup>();
         popup.Init(damage, type);
@@ -326,8 +327,9 @@ public class DamagePopup : MonoBehaviour
         transform.localScale = Vector3.one * startScale;
         lifetime = maxLifetime;
 
-        // 살짝 랜덤 방향으로 튀기 (XY, Z=0)
-        velocity = new Vector3(Random.Range(-0.3f, 0.3f), floatSpeed, 0f);
+        // 살짝 랜덤 방향으로 튀기 — 화면 좌우(카메라 오른쪽) + 위
+        Vector3 sideways = Camera.main != null ? Camera.main.transform.right : Vector3.right;
+        velocity = sideways * Random.Range(-0.3f, 0.3f) + Vector3.up * floatSpeed;
 
         // 카메라가 고정된 2D — 빌보드는 생성 시 1회만 (매 프레임 갱신 불필요)
         if (mainCam != null) transform.rotation = mainCam.transform.rotation;

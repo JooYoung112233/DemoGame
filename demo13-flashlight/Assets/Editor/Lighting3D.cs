@@ -56,7 +56,8 @@ public static class Lighting3D
                 sun.intensity = 0.45f;
                 sun.color = new Color(0.86f, 0.88f, 1f);
                 sun.shadows = LightShadows.None;
-                sun.transform.rotation = Quaternion.Euler(60f, 25f, 0f);
+                // 2026-09-11 카메라가 방위 45°가 되며 25°는 카메라 방향과 20°밖에 안 벌어져 그림자가 물건 뒤로 숨는다 → −40°.
+                sun.transform.rotation = Quaternion.Euler(60f, -40f, 0f);
                 break;
 
             case Preset.Hideout:

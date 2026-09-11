@@ -751,6 +751,8 @@ public class QaBot : MonoBehaviour
     public static void Move8(Vector2 dir)
     {
         if (dir.sqrMagnitude < 0.0001f) { GameInput.VSetMove(Vector2.zero); return; }
+        // 2026-09-11 대각선 쿼터뷰 — 이동 입력은 화면 기준이다. 월드 방향을 먼저 입력 공간으로 돌린 뒤 8방향으로 스냅(사람이 누르는 WASD와 같게).
+        dir = TopDownPlayer.WorldToInput(dir);
         dir.Normalize();
         float x = Mathf.Abs(dir.x) < 0.383f ? 0f : Mathf.Sign(dir.x);
         float y = Mathf.Abs(dir.y) < 0.383f ? 0f : Mathf.Sign(dir.y);
@@ -947,7 +949,7 @@ public class QaBot : MonoBehaviour
             else dir = to.normalized;   // NavGrid 없는 씬 → 직선 폴백
 
             _pathingNow = pathing;
-            GameInput.VSetMove(dir);
+            GameInput.VSetMove(TopDownPlayer.WorldToInput(dir));   // 월드 방향 → 화면 기준 입력
             var cam = Camera.main;
             // dir은 평면(XZ) 방향 — (Vector3)로 캐스트하면 (x, y, 0)이 되어 하늘을 겨눈다.
             if (cam != null) GameInput.VSetMousePos(cam.WorldToScreenPoint(pos + new Vector3(dir.x, 0f, dir.y) * 3f));
@@ -1166,7 +1168,7 @@ public class QaBot : MonoBehaviour
     {
         Vector2 side = new Vector2(-dir.y, dir.x);
         if (_rng != null && _rng.Next(2) == 0) side = -side;
-        GameInput.VSetMove(side);
+        GameInput.VSetMove(TopDownPlayer.WorldToInput(side));
         yield return WaitSec(0.6f);
         GameInput.VSetMove(Vector2.zero);
     }
@@ -1181,7 +1183,7 @@ public class QaBot : MonoBehaviour
         {
             float ang = ctx.Rand01() * Mathf.PI * 2f;
             Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
-            GameInput.VSetMove(dir);
+            GameInput.VSetMove(TopDownPlayer.WorldToInput(dir));
             var cam = Camera.main;
             if (cam != null) GameInput.VSetMousePos(cam.WorldToScreenPoint(player.transform.position + new Vector3(dir.x, 0f, dir.y) * 3f));
             yield return WaitSec(0.5f + ctx.Rand01());

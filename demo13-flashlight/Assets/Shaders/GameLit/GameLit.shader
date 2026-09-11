@@ -59,6 +59,10 @@ Shader "BRB/GameLit"
             #pragma shader_feature_local_fragment _ALPHATEST_ON
             #pragma shader_feature_local_fragment _EMISSION
             #pragma shader_feature_local_fragment _OCCLUSIONMAP
+            // 2026-09-11 사용자 "빛반사가 심하다, 반짝반짝 대리석 같다" — 쿼터뷰는 바닥을 비스듬히 봐서 하늘 반사(프레넬)가 크고,
+            //   머리 위 램프가 바닥에 하이라이트를 찍는다. 환경 반사는 끄고(전 머티리얼), 스펙 하이라이트는 금속이 아닌 환경에서 끈다(전환 도구).
+            #pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
+            #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
 
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS

@@ -66,7 +66,8 @@ public class AimReticle : MonoBehaviour
 
     void LateUpdate()
     {
-        bool want = _gun != null && _gun.ReticleActive && _player != null && !_player.IsSprinting && Cam() != null;
+        // 2026-09-11: 조준(우클릭) 중에만 — 평소엔 몸이 이동 방향을 보고 탄도 그쪽으로 나가므로, 커서에 원을 띄우면 거짓말이 된다.
+        bool want = _gun != null && _gun.ReticleActive && _gun.IsAiming && _player != null && !_player.IsSprinting && Cam() != null;
         if (want != _shown)
         {
             _shown = want;
