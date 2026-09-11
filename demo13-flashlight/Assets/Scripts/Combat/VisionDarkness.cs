@@ -41,6 +41,9 @@ public class VisionDarkness : MonoBehaviour
         if (MapToolScene.IsActive) return;
         if (Instance != null) return;
         if (FindFirstObjectByType<VisionDarkness>(FindObjectsInactive.Include) != null) return;
+        // Shader cleanup removed this optional overlay. Do not auto-create a renderer that cannot run.
+        // Explicitly placed components still report a missing shader in Awake.
+        if (Shader.Find("BRB/VisionDarkness") == null) return;
 
         var go = new GameObject("[VisionDarkness]", typeof(MeshFilter), typeof(MeshRenderer));
         DontDestroyOnLoad(go);

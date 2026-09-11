@@ -222,8 +222,13 @@ public class SaveManager : MonoBehaviour
     /// <summary>GameSaveData → JSON 문자열 (직렬화만; 디스크 X). 스냅샷 보관용.</summary>
     public string ToJson(GameSaveData data)
     {
-        return JsonUtility.ToJson(data, true);
+        // GridItemEntry.containerItems is recursive. Unity's serializer walks the type tree
+        // and hits its depth limit even with empty inventories; JSON.NET visits actual items.
+        return Newtonsoft.Json.JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
     }
+
+    // Field names and numeric enums match the existing JsonUtility save format; no migration needed.
+    static GameSaveData ParseJson(string json) => Newtonsoft.Json.JsonConvert.DeserializeObject<GameSaveData>(json);
 
     /// <summary>스냅샷(GameSaveData)을 직렬화하여 디스크에 기록.</summary>
     public void WriteToDisk(GameSaveData data)
@@ -276,7 +281,7 @@ public class SaveManager : MonoBehaviour
         }
 
         string json = File.ReadAllText(SavePath);
-        var data = JsonUtility.FromJson<GameSaveData>(json);
+        var data = ParseJson(json);
 
         if (data == null || data.version != SAVE_VERSION)
         {
@@ -488,7 +493,7 @@ public class SaveManager : MonoBehaviour
         {
             string path = SlotPath(slot);
             if (!File.Exists(path)) return s;
-            var data = JsonUtility.FromJson<GameSaveData>(File.ReadAllText(path));
+            var data = ParseJson(File.ReadAllText(path));
             if (data == null) return s;
             s.exists = true;
             s.level = data.progress != null ? Mathf.Max(1, data.progress.level) : 1;
