@@ -14,12 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: coin_scrap
   displayName: "\uC2A4\uD06C\uB7A9 \uCF54\uC778"
-  description: "\uC791\uC740 \uAC70\uB798 \uB2E8\uC704."
+  description: "\uC61B \uC2A4\uD06C\uB7A9 \uCF54\uC778 \u2014 \uACE0\uCCA0(\u25C8)\uB85C \uD569\uCCD0\uC84C\uB2E4. \uB4E4\uACE0 \uD0C8\uCD9C\uD558\uBA74 1\uAC1C\uB2F9 \u25C8100\uC73C\uB85C \uBC14\uB010\uB2E4."
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 1
   category: 4
   rarity: 0
+  primaryRegionId: 
   maxStack: 50
   weight: 0.01
   sellPrice: 100
@@ -27,7 +28,30 @@ MonoBehaviour:
   isUsable: 0
   useEffect: 0
   effectValue: 0
+  useTimeSeconds: 0
+  isThrowable: 0
   hasDurability: 0
   maxDurability: 100
   durabilityCostPerUse: 50
+  equipSlot: 0
+  containerWidth: 0
+  containerHeight: 0
+  isContainer: 0
+  internalWidth: 0
+  internalHeight: 0
+  allowedCategories: 
+  weaponData: {fileID: 0}
+  weaponPartType: 0
+  partMoveSpeedMult: 1
+  partStaminaMult: 1
+  partRangeBonus: 0
+  partRecoilMult: 1
+  magCapacity: 0
+  magCaliber: 
+  ammoCaliber: 
+  ammoDamageMult: 1
+  ammoPenetration: 0
+  ammoSpeedMult: 1
+  ammoRangeMult: 1
+  ammoSpreadMult: 1
   worldDropPrefab: {fileID: 0}

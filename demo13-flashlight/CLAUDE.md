@@ -48,14 +48,15 @@ Naming trap: the scene called `Safehouse` is the village; `Hideout` is the playe
 ### Combat
 - **EnemyController** — 3D state-machine AI (melee and firearm bandits; firearm bandits aim-warn before firing dodgeable bullets). Pathfinding is a custom grid A* (`NavGrid`/`NavAgent`, not NavMesh). Uses `unitKey` → StatDB.
 - **StatDB** (`Resources/Data/StatDB.asset`) — central stats. `StatDB.Instance.GetUnit(key)`, `StatDB.Instance.playerStat`.
-- **Death loot (PUBG-style)** — `BanditRagdoll` + `CorpseMarker` (rarity beam) + `CorpseLootUI` quick list; cash via `CashWallet`.
+- **Death loot (PUBG-style)** — `BanditRagdoll` + `CorpseMarker` (rarity beam) + `LootListUI` list; scrap currency (`scrap_money`) via `ScrapWallet` (cash is quest/event-only).
 - A gun is currently described in several places (ItemData, WeaponData, PlayerFirearmSet, StatDB) — cleanup step 2.
 
 ### Inventory & Items
 - **ItemData** (ScriptableObject) — categories Weapon/Medical/Consumable/Material/Valuable/Key/Misc, rarity, stacking. (`gridWidth/Height` are hidden and unread.)
 - **RecipeData** (`Resources/Data/Recipes/`), **CraftingSystem** — recipes, crafting, weapon repair. `docs/crafting.md`.
 - **LootContainer**, **WorldItem** (drops go under `[Runtime]/Loot`), **GroundPickupUI**.
-- Spawn tables: `SpawnTable`, region loot (`RegionLootCatalog` + `Resources/region_loot.txt`), `MapSpawnProfile`, per-container loot — several owners, cleanup step 3.
+- **Loot (2026-09-11, `docs/region-loot.md` §루팅 정리 결정)**: `MapSpawnController` decides **how many & where** (budget = rolls; scrap sources — registers/safes/stalls — always filled). **What** comes only from `RegionLootCatalog`: `Resources/region_loot.txt` (region × time) + `Resources/loot_tables.txt` (region × container kind: junk/trunk/stall/crate/register/safe/ground/corpse/int_*). `LootContainer.lootKind` picks the table; `ItemSpawnPoint` is an anchor only. Scrap currency only from stall/register/safe/corpses.
+- **Loot UI**: field containers & corpses open `LootListUI` (search reveal, then take all / one by one, no value shown); `GroundPickupUI` for ground piles; storage uses the character panel. Recording goes through `LootTake`.
 
 ### Lighting & Atmosphere
 - **DayNightCycle** — day/night phase (`isNight`, `OnPhaseChanged`, `SetNight(bool)`); colors/intensities from **`Resources/Data/WeatherData.asset`** (day = warm orange, night/"evening" = dim purple). **SunLight** = the map's sun.

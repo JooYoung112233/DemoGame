@@ -79,7 +79,7 @@
 | 캐비닛 | `junk_sock_pair`, `junk_magazine`, `coupon_faded` | `bandage`, `cloth_rag`, `disinfectant` | `val_earring_pair` |
 | 편의점 진열대 | `junk_can_empty`, `junk_battery_dead`, `canned_food` | `battery_aa`, `painkiller`, `energy_bar`, `ingredient_salt`, `ingredient_flour`, `ingredient_sugar` | `val_watch_wrist`, `recipe_bread` |
 | 주방/식당 | `junk_mug_chipped`, `junk_pan_rust`, `junk_food_moldy` | `junk_kettle`, `water_bottle`, `ingredient_meat`, `ingredient_vegetable`, `ingredient_salt`, `recipe_stew` | `val_whiskey_bottle`, `recipe_special` |
-| 시체 | `junk_cigarette_pack`, `coin_scrap`, `val_dental_gold` | `val_ring_silver`, `knife`, `splint_makeshift` | `map_fragment`, `morphine_ampule` |
+| 시체 | `junk_cigarette_pack`, `scrap_money`(고철 화폐, 구 `coin_scrap`), `val_dental_gold` | `val_ring_silver`, `knife`, `splint_makeshift` | `map_fragment`, `morphine_ampule` |
 | 잠긴 상자 | `junk_nail_box`, `junk_tape_duct` | `tool_part`, `ruby_shard`, `hemostatic_powder` | `ruby_crystal`, `trauma_kit` |
 | 금고 | `val_coin_collect` | `val_necklace_gold`, `val_watch_pocket` | `val_statue_mini`, `val_ruby_set` |
 | 작업대 | `junk_wire_tangle`, `junk_glass_shard` | `scrap_metal`, `screw`, `cast_bandage` | `circuit_board`, `field_surgery_kit` |
@@ -100,7 +100,7 @@
 3. 재료 3: `scrap_metal`, `cloth_rag`, `screw`
 4. 루디 1: `ruby_shard`
 5. 무기 2: `knife`, `pipe`
-6. 기타 2: `key_rusty`, `coin_scrap`
+6. 기타 2: `key_rusty`, ~~`coin_scrap`~~(2026-09-11 고철 화폐 `scrap_money`로 합침)
 7. 테스트 1: `first_aid_kit` (구급상자 연동 확인)
 
 ### Stage 4 (폐상가 파밍) — **+40종 권장**

@@ -15,12 +15,14 @@
 - 탈출 성공 시 RaidManager에 기록 → Safehouse 복귀 → RaidResultUI 표시
 
 ### 루팅
-- LootContainer에 `initialLoot` 배열로 초기 아이템 설정 (Inspector)
-  - itemId, count, chance(스폰확률) per entry
-- 상자 열면(E키) 내부 아이템 전부 자동으로 PlayerInventory로 이동
-- 공간 부족 시 남은 아이템은 상자에 유지
-- 모든 아이템 획득 시 IsLooted = true (재상호작용 시 "비어있음" 표시)
-- 획득한 아이템은 RaidManager에 추적 기록
+> 현 상태 2026-09-11 — 결정·표 상세: [region-loot.md §루팅 정리 결정 · §2 · §5](region-loot.md)
+
+- **채우기**: 씬의 `MapSpawnController`가 레이드 진입 때 채운다. 예산(몇 개·어디에) + 상자 종류(`LootContainer.lootKind`)별 루팅 표(무엇이·몇 개씩). 매 판 상자를 섞어서 예산 밖 상자는 비어 있다(매 판 다른 상자). 고철이 나오는 계산대·금고·좌판은 예산과 무관하게 늘 채운다.
+- **열기(E)**: 필드 상자·시체는 **루팅 목록**(`LootListUI`)으로 열린다. 창고·보관함은 캐릭터 패널, 바닥 더미는 `GroundPickupUI`.
+  - 처음 여는 상자는 칸이 "? ? ?"로 가려져 있다가 위에서부터 하나씩 드러난다. 한 칸 = 희귀도별 `GameTuning.searchSec*` ÷ `searchSpeedMult`. 닫아도 진행은 상자에 남는다(`LootContainer.RevealedCount`).
+  - 다 드러나면 [전부 가져가기 F] / 하나씩(클릭·E), [자세히 Tab] → 캐릭터 패널. 가치(◈) 표기는 없다(사용자 결정).
+- 공간 부족 시 못 가져간 아이템은 상자에 남는다.
+- **기록**: 가져온 아이템은 `LootTake`가 `RaidManager.TrackLoot` + 수집 퀘스트에 기록한다. 루팅 목록, 캐릭터 패널의 필드 상자 TAKE ALL·드래그 모두 기록한다(창고·보관함 이동은 기록하지 않는다).
 
 ### 광원 운용 — 빛의 역설 〔확정 방향 · 수치 TBD〕
 
@@ -63,6 +65,7 @@
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-09-11 | **§루팅 현행화 (루팅 정리, 결정 = [region-loot.md §루팅 정리 결정](region-loot.md)).** 상자 `initialLoot`·"열면 전부 자동 이동"은 폐기. 지금은 `MapSpawnController` 예산 + 상자 종류별 루팅 표로 채우고(매 판 섞음, 계산대·금고는 늘 채움), 필드 상자·시체는 `LootListUI`로 연다(옛 수색 연출 되살림 → 전부/하나씩, 가치 표기 없음). 기록은 `LootTake`. |
 | 2026-07-11 | **⑧ 재정의: 「시간 잔상」 폐기 → 「약탈자 회수」 구현 (사용자 결정).** 정적 회수 지점 대신 능동 사냥 루프. 사망 시 소지품(보안 제외)을 `ScavengerLoot` 대기열로 **캡처**(삭제 X) → **다음 레이드 스폰 적 중 `GameTuning.scavengerCount`(3)마리를 '약탈자'로 지정**해 라운드로빈 분배(②`LootContainer` 재사용) → 잡아 시체 뒤지면 회수. **한 번의 기회**(분배 시 대기열 비움, 못 챙기면 영구 소실). 식별 = HUD 표식 없이 **보랏빛 틴트** + 시체 라벨. 세션 런타임(세이브 후속). 신규 `Combat/ScavengerLoot.cs` + `RaidManager.OnPlayerDeath` 캡처 + `EnemySpawner` 스폰 후 Distribute + `EnemyController.MakeScavenger`. F1 씬 탭 "잃은 물건 시뮬". | 「죽으면 회수꾼이 턴다」 §5.0 정합 + 정적 회수보다 능동적·게임적. ⑧ 슬롯 대체. |
 | 2026-07-10 | **시체 회수 「시간 잔상」 확정 (기획, 구현 전 — 갭 분석 A그룹).** 사망 시 소지품(세큐어 제외)이 사망 지점에 잔상 컨테이너로 응고(기존 "가방 전부 소멸" 대체), 최신 1개만(재사망 시 이전 잔상 소멸), 기한 없음, 회수=열어 꺼내기. SaveManager 영속(병렬 핫파일 — 시점 조율 필요). §시체 회수 신설. A+B 통합 구현 순서 8번째(dev-roadmap.md). | gdd-core §5 시간역행 정합. |
 | 2026-07-10 | **지도 + 시계 나침반 확정 (기획, 구현 전 — 갭 분석 A그룹).** 상시 미니맵 없음 / M키 전체지도(map_fragment 구역 해금·안개) / 시계 나침반(활성 탈출구 방향, 2차=시간 잔상 방향). §지도+시계 나침반 신설 + backlog-ui.csv U22(MapUI). A+B 통합 구현 순서 10번째(마지막). | S-014 나침반 떡밥 회수(story-script 정합). |

@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
-  m_Name: Cash
+  m_Name: ScrapMoney
   m_EditorClassIdentifier: Game.Scripts::ItemData
-  itemId: cash
-  displayName: "\uD604\uAE08"
-  description: "\uD2B9\uBCC4\uD55C \uD018\uC2A4\uD2B8\xB7\uC774\uBCA4\uD2B8\uC5D0 \uC4F0\uB294 \uD604\uAE08. \uACE0\uCCA0(\u25C8)\uB85C \uC815\uC0B0\uB418\uC9C0 \uC54A\uB294\uB2E4."
+  itemId: scrap_money
+  displayName: "\u25C8 \uACE0\uCCA0"
+  description: "\uB808\uC774\uB4DC\uC5D0\uC11C \uC8FC\uC6B4 \uACE0\uCCA0 \uD654\uD3D0. \uB4E4\uACE0 \uD0C8\uCD9C\uD574 \uB3CC\uC544\uC624\uBA74 \u25C8\uC5D0 \uB354\uD574\uC9C4\uB2E4. \uC8FD\uC73C\uBA74 \uC783\uB294\uB2E4. (\uC81C\uC791 \uC7AC\uB8CC '\uACE0\uCCA0 \uC870\uAC01'\uACFC\uB294 \uB2E4\uB974\uB2E4)"
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 1

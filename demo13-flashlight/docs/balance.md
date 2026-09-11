@@ -13,17 +13,17 @@
 | 밸런스 영역 | 단일 진실원(SSOT) | 조정 방법 |
 |------------|-------------------|-----------|
 | 시간(낮/밤) · 레이드 · 수색 · 드랍 배율 · 아노말리 · **생존** · **수면** · **약탈자 회수**(`scavengerCount`) | **`GameTuning`** SO (`Assets/Resources/Data/GameTuning.asset`) | **Control Panel** (`Tools ▸ TopDown ▸ 컨트롤 패널`) — 필드 자동 노출 |
-| 맵별 드랍 테이블 (어떤 아이템이 얼마나 나오나) | `tools/region_loot.csv` → `Assets/Resources/region_loot.txt` (런타임은 `.txt`를 `RegionLootCatalog`가 읽음) | CSV 편집 후 `.txt`로 반영 (드랍 **수량 배율**만 GameTuning.lootCountMult) |
+| 루팅 표 (무엇이·몇 개씩 나오나) — 상자·바닥·시체 | `Assets/Resources/region_loot.txt`(지역×시간대 일반 표, 소스 `tools/region_loot.csv`) + `Assets/Resources/loot_tables.txt`(지역×상자 종류 표, 2026-09-11 신설) — 둘 다 `RegionLootCatalog`가 읽음 | Control Panel「지역 루트」탭 / 「CSV 밸런스」탭. **몇 개·어디에(예산)**는 `MapSpawnProfile` + GameTuning `lootCountMult`·`itemSpawnCountMult`·`interiorLootBudgetMult` ([region-loot.md §2 · §5](region-loot.md)) |
 | 전투·이동 수치 (플레이어/적 스탯, **이동속도 포함**) | `StatDB` SO (`Assets/Resources/Data/StatDB.asset`) — `playerStat.moveSpeed` 등 | **Control Panel ▸ 🎮 스탯 DB 섹션** (한 창에서 조정) / StatDB 에디터 / 인스펙터 |
 | 평판/평판 티어 | `tools/balance/reputation.csv`, `tools/balance/reputation_tiers.csv` | CSV 편집 (→ `ReputationManager`/`ReputationTier`) |
 | 회복 아이템 수치 (음식 effectValue 등) | `Assets/Resources/Items/**/*.asset` (ItemData SO) | 아이템 인스펙터 (→ [survival.md §4](survival.md), [items.md](items.md)) |
 | **상점 해금 평판 + 재고 회전** (희귀도별 진열 해금 등급 · 일일 회전 슬롯 수) | **`GameTuning`** (`shopTierRare`/`shopTierEpic`/`shopTierLegendary`/`shopRotationSlots`) | **Control Panel** — `ShopUI`가 읽음 (재고 회전 → [economy.md §A](economy.md)) |
 | **스토리/대화 페이싱** (프롤로그 대기·wait 배율·페이드인·타이핑 속도·튜토 표시) | **`GameTuning`** (`prologueStartDelay`/`storyWaitScale`/`storyFadeInDuration`/`narrationTypingSpeed`/`dialogueTypingSpeed`/`tutorialDefaultDuration`) | **Control Panel** — `StoryPlayer`/`GameStartHandler`/`NarrationUI`/`DialogueUI`가 읽음 |
-| **건물 내부**(진입 가능 비율 · 내부 루팅 예산 배율) | **`GameTuning`** (`buildingEnterRatio`/`interiorLootBudgetMult`) | **Control Panel** — 비율은 `빌드 ▸ 지역1` 재실행 시 반영, 예산은 런타임 즉시. 루트 **테이블**은 지역 확률 그대로(regionId) → 내부 파밍도 지역 확률에 맞춰 나옴. QA가 "건물을 더 열지/파밍을 늘릴지" 판단해 조절 |
+| **건물 내부**(진입 가능 비율 · 내부 루팅 예산 배율) | **`GameTuning`** (`buildingEnterRatio`/`interiorLootBudgetMult`) | **Control Panel** — 비율은 `빌드 ▸ 지역1` 재실행 시 반영, 예산은 런타임 즉시. 루트 **표**는 건물 종류별 `int_*` 상자 종류 표(`loot_tables.txt`, [region-loot.md §2.2](region-loot.md)) — 2026-09-11부터(그 전엔 지역 일반 표). QA가 "건물을 더 열지/파밍을 늘릴지" 판단해 조절 |
 | **투척물 유인** (돌 사거리·착탄 유인 반경·비행·조사 시간) | **`GameTuning`** (`throwRange`/`throwNoiseRadius`/`throwSpeed`/`noisePulseDuration`/`noiseInvestigateLook`) | **Control Panel** — `ThrowSystem`/`Distraction`/`EnemyController`가 읽음. ⚠️ 소음 시스템은 2026-09-09 폐기 — 행동별 소음 필드(`noiseWalk`/`noiseRun`/`noiseAttack`/`noiseDoor`/`noiseUiMax`) 삭제됨 (→ [combat.md §유인](combat.md)) |
 | **근접 전투** (콤보 on/off · 적 강공 확률·강제주기·예비동작/데미지 배율) | **`GameTuning`** (`comboEnabled`/`enemyHeavyChance`/`enemyHeavyForceAfter`/`enemyHeavyWindupMult`/`enemyHeavyDamageMult`) | **Control Panel** — 런타임 즉시. 콤보는 2026-07-11 사용자 결정으로 **기본 OFF**(데이터는 보존) (→ [combat.md](combat.md)) |
-| **원거리 적(총기 밴딧)** (사거리·멈추는 거리·조준 경고·탄속·점사·퍼짐) | **`StatDB`** 유닛별 (`rangedWeapon`/`attackRange`/`preferredRange`/`attackWindup`/`projectileSpeed`/`burstCount`/`burstInterval`/`spreadDeg`) + 공통 타이밍은 **`GameTuning`** (`enemyAimLockTime` 0.2 / `enemyRangedRecover` 0.35 / `enemyGunDrawTime` 0.6 / `enemyBulletRangeMult` 1.25) | **Control Panel ▸ 🎮 스탯 DB** + 총기 밴딧(AI). 점사 간격은 플레이어 피격 무적창 0.35초보다 길게 (→ [combat.md §총기 밴딧](combat.md)) |
-| **적 현금 드랍** (유닛별 현금 범위) | **`StatDB`** 유닛별 `cashMin`/`cashMax` (일반 50~150 · 총기 80~200 · 탱크 150~400) — 현금 아이템 1개 = ◈1 | **Control Panel ▸ 🎮 스탯 DB** (→ [economy.md §적 현금 드랍](economy.md)) |
+| **원거리 적(총기 밴딧)** (사거리·멈추는 거리·조준 경고·탄속·점사·퍼짐) | 총 자체는 **`WeaponData`**(플레이어와 같은 에셋) · 적 전용은 **`StatDB`** 유닛별 (`rangedWeaponData`/`rangedDamageMult`/`rangedBulletSpeedMult`/`attackRange`/`preferredRange`/`attackWindup`/`burstCount`/`burstInterval`/`spreadDeg` — 2026-09-11 총 수치 통합) + 공통 타이밍은 **`GameTuning`** (`enemyAimLockTime` 0.2 / `enemyRangedRecover` 0.35 / `enemyGunDrawTime` 0.6 / `enemyBulletRangeMult` 1.25) | **Control Panel ▸ 🎮 스탯 DB** + 총기 밴딧(AI). 점사 간격은 플레이어 피격 무적창 0.35초보다 길게 (→ [combat.md §총기 밴딧](combat.md)) |
+| **적 고철 드랍** (유닛별 고철 범위) | **`StatDB`** 유닛별 `cashMin`/`cashMax`(이름은 옛 현금 시절 그대로) (일반 50~150 · 총기 80~200 · 탱크 150~400) — 고철 화폐 아이템(`scrap_money`) 1개 = ◈1. 2026-09-11 현금 → 고철 교체(현금은 퀘스트·이벤트 전용) | **Control Panel ▸ 🎮 스탯 DB** (→ [economy.md §적 고철 드랍](economy.md)) |
 | **총격(플레이어)** (총기 스펙 · 탄 스펙 · 조준 카메라 · 관통 감쇠) | 총마다 **`WeaponData`** (`rpm`/`damage`/`projectileSpeed`/`effectiveRange`/`hip·adsSpreadDeg`/`recoilPerShot·Max·Recover`/`reloadSeconds`/`adsMoveMult`) · 탄마다 **탄 아이템 `ItemData`** (`ammoDamageMult`/`ammoPenetration`/`ammoSpeedMult`/`ammoRangeMult`/`ammoSpreadMult`) · 공통 **`GameTuning`** (`aimLookAhead` 0.35 / `aimLookAheadMax` 4 / `gunPierceDamageKeep` 0.6) | 무기·탄 SO 인스펙터 + **Control Panel ▸ 총격(플레이어)** (→ [combat.md §총격전](combat.md)) |
 | **도로 장애물·막힌 통로** (장애물 밀도·최소 통행폭, 잔해 치우기/강제돌파 시간) | **`GameTuning`** (`roadObstacleDensity`/`roadMinPassWidth`/`barricadeClearSeconds`/`barricadeBreachSeconds`) | **Control Panel** — 밀도·통행폭은 `빌드 ▸ 지역1` 재실행 시 반영, 시간은 런타임 즉시. ⚠️ `barricadeNoiseRadius`는 소음 폐기(2026-09-09)로 삭제 — **돌파의 대가는 시간뿐** (→ [level-scrapmarket.md 2026-07-11](level-scrapmarket.md)) |
 | NPC 상점별 판매 목록 (뭘 파나) · 가격배율 · 위탁허용 | `ShopData` SO (`Assets/Resources/Data/Shops/Shop_*.asset`: stock/buyRate/sellRate/allowConsignment) | 상점 에셋 인스펙터 (※ Control Panel 통합 상점 에디터는 후속 과제) |
@@ -39,15 +39,18 @@
 
 `Assets/Scripts/Systems/GameTuning.cs`. `GameTuning.Instance.필드`로 읽고, **에셋이 없으면 각 시스템이 자체 기본값으로 폴백**(크래시 없음).
 
-### 수색
+### 수색 (2026-09-09 삭제 → 2026-09-11 되살림)
+
+> 볼륨 축소(2026-09-09) 때 수색 연출과 함께 지웠다가, 2026-09-11 사용자 요청으로 루팅 목록(`LootListUI`)에 되살렸다([region-loot.md §루팅 정리 결정](region-loot.md)). 처음 여는 필드 상자·시체에서 칸이 위에서부터 하나씩 드러나는 시간이다. 옛 `CharacterPanelUI.GetSearchDelay`는 없다 — `LootListUI.RevealDelay`가 읽는다.
+
 | 필드 | 기본값 | 의미 | 읽는 곳 |
 |------|--------|------|---------|
-| `searchSpeedMult` | 1 | 루팅 상자 아이템 공개 딜레이 배율 (>1 느림) | `CharacterPanelUI.GetSearchDelay` |
-| `searchSecCommon` | 0.4 | Common 수색 기본 딜레이(초). ×searchSpeedMult | `CharacterPanelUI.GetSearchDelay` |
-| `searchSecUncommon` | 0.6 | Uncommon 수색 기본 딜레이(초) | `CharacterPanelUI.GetSearchDelay` |
-| `searchSecRare` | 0.9 | Rare 수색 기본 딜레이(초) | `CharacterPanelUI.GetSearchDelay` |
-| `searchSecEpic` | 1.3 | Epic 수색 기본 딜레이(초) | `CharacterPanelUI.GetSearchDelay` |
-| `searchSecLegendary` | 1.8 | Legendary 수색 기본 딜레이(초). 고급일수록 늦게 공개 | `CharacterPanelUI.GetSearchDelay` |
+| `searchSpeedMult` | 1 | 수색 속도 배율. 한 칸 시간 = `searchSec*` ÷ 이 값 → **>1 빠름**, <1 느림 | `LootListUI.RevealDelay` |
+| `searchSecCommon` | 0.4 | Common 한 칸이 드러나는 시간(초) | `LootListUI.RevealDelay` |
+| `searchSecUncommon` | 0.6 | Uncommon (초) | `LootListUI.RevealDelay` |
+| `searchSecRare` | 0.9 | Rare (초) | `LootListUI.RevealDelay` |
+| `searchSecEpic` | 1.3 | Epic (초) | `LootListUI.RevealDelay` |
+| `searchSecLegendary` | 1.8 | Legendary (초). 고급일수록 늦게 공개 | `LootListUI.RevealDelay` |
 
 ### 시간 / 현상
 | 필드 | 기본값 | 의미 | 읽는 곳 |
@@ -63,9 +66,9 @@
 ### 드랍
 | 필드 | 기본값 | 의미 | 읽는 곳 |
 |------|--------|------|---------|
-| `lootCountMult` | 1 | 지역 루트 바닥 스폰 **수량** 배율 (테이블 자체는 region_loot) | `RegionLootBootstrap.DropTier` |
-| `lootChanceMult` | 1 | 루트 롤이 실제로 떨어질 **확률** 배율(전역). 1=항상 통과(기존 동작), <1=빈손 증가 | `RegionLootCatalog.Roll` |
-| `valuableWeightMult` | 1 | **귀중품(Valuable)** 카테고리 등장 가중치 배율. 1=동일, >1=귀중품 더 자주 | `RegionLootCatalog.Roll` |
+| `lootCountMult` | 1 | 맵 루팅 **예산(뽑기 횟수)** 배율 — 바닥·상자 둘 다(2026-09-11~, 그 전엔 삭제된 `RegionLootBootstrap`만 읽음). 표 자체는 region_loot·loot_tables | `MapSpawnController.ExecuteSpawn` |
+| `lootChanceMult` | 1 | 루트 롤이 실제로 떨어질 **확률** 배율(전역). 1=항상 통과(기존 동작), <1=빈손 증가 | `RegionLootCatalog.RollOnce` |
+| `valuableWeightMult` | 1 | **귀중품(Valuable)** 카테고리 등장 가중치 배율. 1=동일, >1=귀중품 더 자주 | `RegionLootCatalog.RollOnce` |
 | `itemSpawnCountMult` | 1 | 맵 아이템 스폰 **총량** 전역 배율 (프로파일 spawnMultiplier에 추가로 곱) | `MapSpawnProfile.GetGroundBudget`/`GetContainerBudget` |
 
 > ~~몹 스폰 마릿수/밀도는 외부화하지 않음~~ — **해소됨.** `EnemySpawner`가 씬의 `SpawnZone`을 읽어 실제로 스폰하므로 `enemySpawnCountMult`는 살아 있는 노브다(위 §근접/적 표 참조).
@@ -155,9 +158,10 @@
 
 | 파일 | 무엇 | 읽는 코드 |
 |------|------|-----------|
-| `Assets/Resources/region_loot.txt` (소스 `tools/region_loot.csv`) | **맵별 드랍 테이블** — 지역×티어별 아이템·확률·수량 | `RegionLootCatalog` |
+| `Assets/Resources/region_loot.txt` (소스 `tools/region_loot.csv`) | **일반 루팅 표** — 지역×시간대 티어(container/ground × day/night/anomaly)별 아이템·가중치·수량 | `RegionLootCatalog` |
+| `Assets/Resources/loot_tables.txt` (2026-09-11 신설) | **상자 종류 루팅 표** — 지역×상자 종류(junk·trunk·stall·crate·register·safe·ground·corpse·int_*). 종류 표가 일반 표보다 먼저. 현재 scrap_market만·가안 | `RegionLootCatalog.TryFindPool` ([region-loot.md §2.2~2.4](region-loot.md)) |
 | `Assets/Resources/Data/StatDB.asset` | **전투 수치** — 플레이어 스탯 + 유닛(적)별 스탯 | `StatDB.Instance.GetUnit(key)` / `.playerStat` |
-| `Assets/Resources/Data/SpawnProfiles/*.asset` (`MapSpawnProfile`) | **맵별 루팅 예산** — 바닥/상자 아이템 총량(min~max)·희귀도 가중·카테고리 쿼터·밤 보정. **2026-07-11 `Zone1` 신설**(그 전엔 에셋 0개 = 예산제 미개통). 총량엔 `GameTuning.itemSpawnCountMult`가 추가로 곱해짐 | 씬의 `MapSpawnController`(profile 참조) → `ItemSpawnPoint` 앵커에 분배 |
+| `Assets/Resources/Data/MapSpawn/*.asset` (`MapSpawnProfile`) | **맵별 루팅 예산**(뽑기 횟수) — 바닥/상자 min~max·`spawnMultiplier`·밤 배율. 5지역 5개 에셋, 씬(Zone1·실내)이 쓰는 건 **`scrap_market.asset`뿐**. 희귀도·카테고리 필드는 2026-09-11부터 안 쓴다(내용물 = 루팅 표). 예산엔 GameTuning `itemSpawnCountMult`·`lootCountMult`(실내면 `interiorLootBudgetMult`)가 곱해진다 | 씬의 `MapSpawnController`(profile 참조) → `ItemSpawnPoint` 앵커 ([region-loot.md §5](region-loot.md)) |
 | `tools/balance/reputation.csv` | 평판 변동 값 | `ReputationManager` |
 | `tools/balance/reputation_tiers.csv` | 평판 티어 경계 | `ReputationTier` |
 | `Assets/Resources/Items/**/*.asset` | 아이템 개별 수치(가격·무게·회복량 등) | `ItemDatabase` |
@@ -181,4 +185,5 @@
 | 2026-06-18 | 사용자: "플레이어 이속을 밸런스 툴에서도 조절하게 — 모든 밸런스는 통일." (이속이 StatDB라 Control Panel 밖에 있었음) | **`StatDB`(플레이어/적 스탯, 이동속도 포함)를 Control Panel에 「🎮 스탯 DB」 섹션으로 임베드** — GameTuning + StatDB가 한 창에서 조정. 이속 = Player Stat ▸ Move Speed. `GameControlPanel.cs`에 SerializedObject 제너릭 드로우 추가. §1 표 갱신. | "모든 밸런스 = 하나의 컨트롤 표면" 컨벤션 강화: 전역 스칼라(GameTuning) + 표형 SO(StatDB)를 같은 창에 모음. |
 | 2026-06-18 | 사용자: "밸런스 에디터에서 NPC 상점마다 뭘 팔고 평판 몇에 열리고 같은 기능 밸런스도 추가. 앞으로 밸런스는 전부 거기에 병합하고 그렇게 가자." | **컨벤션 확정: 모든 신규 밸런스 → 이 컨트롤 표면(GameTuning/Control Panel + balance.md 색인)에 병합.** 구체: **상점 희귀도별 해금 평판**을 `GameTuning.shopTierRare/Epic/Legendary`로 외부화(ShopUI가 읽음, 폴백 D/B/A). NPC 상점별 판매목록은 `ShopData` SO에 두고 §1 표에 색인(통합 상점 에디터는 후속). | 밸런스 산재 방지 + 디자이너 단일 창 조정. 앞으로 기능 밸런스도 가능한 GameTuning으로. |
 | 2026-07-10 | 무게 초과 페널티(inventory.md 2026-07-10 확정)의 튜닝 수치를 어디에 두나 | **GameTuning 필드 예정 항목으로 색인 등재(구현 전, 기획 확정)** — `overweightSoftPct=1.0`/`overweightSprintBlockPct`/`overweightSlow1=0.15`/`overweightSlow2=0.30`/`overweightHardPct=1.3`. §2 「무게 초과 페널티」 표 신설. 구현 시 GameTuning.cs에 추가 + Control Panel 자동 노출. | 2026-06-18 컨벤션(모든 신규 밸런스 = 이 컨트롤 표면에 병합·색인) 준수. 수치는 1차 초안, 플레이 조정 전제. |
+| 2026-09-11 | 루팅 정리(결정 = [region-loot.md §루팅 정리 결정](region-loot.md)) — 문서가 삭제된 코드를 가리킴 | **색인 현행화.** ①§1·§3 루팅 표 = `region_loot.txt` + 신설 `loot_tables.txt`(상자 종류), 예산은 별도. ②§2 수색 6필드 **복귀**(2026-09-09 삭제 → 되살림), 읽는 곳 `LootListUI.RevealDelay`, `searchSpeedMult`는 나누는 값(>1 빠름 — 예전 ">1 느림"은 반대였음). ③`lootCountMult` = `MapSpawnController` 예산 배율(`RegionLootBootstrap` 삭제). `lootChanceMult`·`valuableWeightMult` 읽는 곳 = `RegionLootCatalog.RollOnce`. ④프로파일 경로 `Data/SpawnProfiles/` → 실제 `Data/MapSpawn/`(씬은 `scrap_market.asset`만). ⑤건물 내부 루트 표 = `int_*` 종류 표. **값 변경 없음.** | 코드 = 진실. |
 | 2026-06-18 | 밸런스 수치가 코드·SO·CSV에 흩어져 "어디서 고치지?"가 매번 발생. 단일 컨트롤 표면이 필요. (값은 바꾸지 말고 위치만 중앙화) | **생존(`SurvivalStats`)·수면(`SleepUI`) 수치를 `GameTuning` 필드로 외부화** — survivalWater/SatietyMinutesToEmpty, survivalStarveHpPerSec, sleep4h/8h(HpPct/Water/Satiety). 각 시스템은 GameTuning 경유로 읽고 **에셋 없으면 기존 값으로 폴백**(값 동일 유지). 드랍 테이블·StatDB·reputation은 데이터 파일에 유지하고 이 문서에 단일 진실원 표로 정리. | 디자이너가 Control Panel 한 창에서 전역 스칼라 조정, 행이 많은 테이블은 데이터 파일에 분리. 단일 색인으로 "밸런스가 어디 있는지"를 고정. |

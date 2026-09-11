@@ -37,8 +37,19 @@ public class GameTuning : ScriptableObject
 
     // ── 드랍 ─────────────────────────────────────────────────────────
     [Header("드랍 (맵 전체)")]
-    [Tooltip("지역 루트 수량 배율. 1=기본, 0.5=절반, 2=두 배. RegionLootBootstrap가 읽음.")]
+    [Tooltip("맵 루팅 예산 배율(바닥·상자 뽑기 횟수). 1=기본, 0.5=절반, 2=두 배. MapSpawnController가 읽는다\n" +
+             "(2026-09-11 — 이걸 읽던 RegionLootBootstrap은 어디에도 없어 삭제).")]
     [Range(0f, 3f)] public float lootCountMult = 1f;
+
+    [Tooltip("상자 수색 연출 속도 배율 — 클수록 빨리 드러난다. 2026-09-11 되살림(사용자 \"상자 연 뒤 연출은 원래 있던 그 느낌\")\n" +
+             "— 2026-09-09 볼륨 축소 때 뺀 옛 수색 딜레이. LootListUI가 처음 여는 상자에서 칸을 하나씩 드러낸다.")]
+    [Range(0.25f, 5f)] public float searchSpeedMult = 1f;
+    [Tooltip("희귀도별로 한 칸이 드러나는 시간(초). searchSpeedMult로 나눈다. 고급일수록 길게(옛 값 그대로).")]
+    public float searchSecCommon = 0.4f;
+    public float searchSecUncommon = 0.6f;
+    public float searchSecRare = 0.9f;
+    public float searchSecEpic = 1.3f;
+    public float searchSecLegendary = 1.8f;
     [Tooltip("루트 롤이 실제로 떨어질 확률 배율(전역). 1=기존과 동일(항상 통과), <1=빈손 증가. RegionLootCatalog.Roll이 롤마다 게이트.")]
     [Range(0f, 1f)] public float lootChanceMult = 1f;
     [Tooltip("귀중품(Valuable) 카테고리 등장 가중치 배율. 1=동일, >1=귀중품 더 자주. RegionLootCatalog.Roll의 Valuable 항목 weight에 곱함.")]

@@ -10,10 +10,10 @@
 ## 현재 튜닝 값 (연동 완료)
 | 값 | 영향 | 읽는 곳 |
 |---|---|---|
-| `searchSpeedMult` | 루팅 상자 수색(아이템 공개) 속도. >1 느리게, <1 빠르게 | `CharacterPanelUI.GetSearchDelay` |
+| `searchSpeedMult` | 루팅 목록 수색(아이템 공개) 속도. 한 칸 시간 = `searchSec*` ÷ 이 값 → >1 빠르게, <1 느리게 | `LootListUI.RevealDelay` |
 | `dayDuration` / `nightDuration` | 지역 낮·밤(현상) 길이(초) | `RegionTimeManager.InitRegions` |
 | `raidDuration` | 레이드 제한 시간(초) | `RaidManager.Start` |
-| `lootCountMult` | 지역 루트 바닥 스폰 수량 배율 | `RegionLootBootstrap.DropTier` |
+| `lootCountMult` | 맵 루팅 예산(뽑기 횟수) 배율 — 바닥·상자 둘 다 | `MapSpawnController.ExecuteSpawn` |
 
 ## 값 추가법 (확장)
 1. `GameTuning.cs`에 필드 하나 추가.
@@ -28,4 +28,5 @@
 ## 변경 로그
 | 날짜 | 질문 | 결정 | 근거 |
 |---|---|---|---|
+| 2026-09-11 | (문서 정합) 루팅 정리로 읽는 곳이 바뀜 | `searchSpeedMult` → `LootListUI.RevealDelay`(한 칸 시간 = searchSec* ÷ 값, >1 빠름 — 예전 ">1 느리게" 서술은 반대였음). `lootCountMult` → `MapSpawnController` 맵 예산 배율(`RegionLootBootstrap` 삭제) | [region-loot.md §루팅 정리 결정](region-loot.md), 전체 표는 [balance.md §2](balance.md) |
 | 2026-06-05 | 수색 속도가 너무 빠르고, 문 개방·현상 전환 등 타이밍/드랍을 코드 뒤져 고쳐야 함 — 한 곳에서 보고 조절·추가하고 싶음 | **중앙 `GameTuning` SO + Control Panel(Tools▸TopDown▸Control Panel)** 신설. 시스템은 `GameTuning.Instance` 읽고 폴백. 1차 연동: 수색속도·낮밤길이·레이드시간·드랍배율. 맵 통계 집계 포함 | 디자이너가 한 창에서 실시간 튜닝, 값 추가가 쉬움(SO 필드만 추가→자동 노출). 단일 소스로 흩어짐 방지. |

@@ -8,7 +8,7 @@
 > | 아이템 크기 | 1×1 ~ 3×3 footprint | **전부 슬롯 1칸** |
 > | 90도 회전 (R키) | 있음 | **없음** |
 > | 용량 제한 | 칸 면적 + 무게 | **칸 수 + 무게** (무게 유지) |
-> | 컨테이너 수색 연출 | 희귀도별 딜레이·프로그레스바·"?" 가림 | **없음 — 열면 바로 다 보인다** |
+> | 컨테이너 수색 연출 | 희귀도별 딜레이·프로그레스바·"?" 가림 | ~~없음 — 열면 바로 다 보인다~~ → **2026-09-11 되살림**(사용자 요청): 필드 상자·시체의 루팅 목록(`LootListUI`)에서 "? ? ?"로 가려졌다가 위에서부터 하나씩 드러난다 — [region-loot.md §루팅 정리 결정](region-loot.md) |
 > | 무기 파츠 | 조준경·소염기·탄창·손잡이 4종 | **탄창 1종** |
 > | 자동 정렬 | 큰 것 먼저(패킹 효율) | 카테고리 → 희귀도 → 이름 |
 >
@@ -18,7 +18,7 @@
 > 남았지만 **어디서도 읽지 않는다**(SO 236개의 직렬화 값을 날리지 않으려는 목적뿐).
 > 기존 세이브는 그대로 열린다 — 옛 배치는 슬롯이 더 넉넉해질 뿐 좁아지지 않는다.
 >
-> **딸려 사라진 것**: `GameTuning`의 수색 딜레이 6종(`searchSpeedMult`/`searchSec*`),
+> **딸려 사라진 것**: `GameTuning`의 수색 딜레이 6종(`searchSpeedMult`/`searchSec*` — **2026-09-11 되살림**, `LootListUI`가 읽는다 · [balance.md §2 수색](balance.md)),
 > 특성 `search_speed`(빠른 손 — 특성 축소에서 함께 삭제), 소염기의 총성 반경 감소(소음 폐기로 이미 소멸).
 >
 > **탄창을 남긴 이유**: 파츠를 전부 없애면 **탄창 없는 총은 발사 불가**라 총기가 통째로 죽는다.
@@ -214,37 +214,27 @@ List<PlacedItem> GetAll()                         // 전체 아이템 목록
 - 아이템을 버리면 월드에 3D 오브젝트 생성
 - 주우면 인벤토리에 추가 (E키 또는 드래그)
 - 루팅 상자와 별도 — **독립된 바닥 아이템**
-- 루팅 상자 위에는 바닥 아이템 스폰하지 않음 (기획 결정)
+- 바닥 루팅은 Ground 앵커에만 떨어지고, 상자 내용물은 상자 안에만 들어간다(상자 위에 바닥 아이템을 따로 뿌리지 않는다). 한 앵커엔 최대 2개.
 
-## 아이템 스폰 시스템
+## 아이템 스폰 시스템 (2026-09-11 정리)
 
-### SpawnTable (ScriptableObject)
-```
-SpawnTable
-├── tableId     : string
-├── entries[]   : SpawnEntry[]
-│   ├── itemData   : ItemData
-│   ├── weight     : float (확률 가중치)
-│   ├── minCount   : int
-│   ├── maxCount   : int
-│   └── rarity     : ItemRarity (필터용)
-└── rollCount   : int (한 번에 뽑는 횟수)
-```
+> **무엇이·몇 개씩** = 루팅 표(`region_loot.txt` 지역×시간대 + `loot_tables.txt` 지역×상자 종류, `RegionLootCatalog`). **몇 개·어디에** = `MapSpawnController` 예산. 상세·찾는 순서: [region-loot.md §2 · §5](region-loot.md).
+> 옛 `SpawnTable`(SO)과 `ItemSpawnPoint`의 자체 스폰·재스폰·`linkedContainer`·`useRegionLoot`는 삭제됐다.
 
-### ItemSpawnPoint (씬 배치 컴포넌트)
+### ItemSpawnPoint (씬 배치 앵커)
 ```
 ItemSpawnPoint
-├── spawnTable  : SpawnTable
-├── spawnType   : SpawnType (Container / Ground / Fixed)
-├── respawn     : bool (재스폰 여부)
-├── respawnTime : float
-└── hasSpawned  : bool
+├── spawnType   : SpawnType (Ground / Container / Fixed)
+├── fixedItem   : ItemData (Fixed용)
+├── fixedCount  : int (Fixed용)
+└── managedByController : bool (MapSpawnController가 수집했는지 — 런타임)
 ```
 
 ### SpawnType
-- **Container**: 루팅 상자에 아이템 채우기 (상자 열면 내부 격자에 아이템)
-- **Ground**: 바닥에 아이템 오브젝트 배치
-- **Fixed**: 항상 같은 아이템 (열쇠 등 고정 아이템)
+- **Container**: 같은(또는 부모·자식) 오브젝트의 `LootContainer`를 표시 — `MapSpawnController`가 그 상자의 종류(`lootKind`) 표로 채운다
+- **Ground**: 바닥 위치 표시 — `MapSpawnController`가 `ground` 표로 채운다
+- **Fixed**: 항상 같은 아이템(열쇠 등) — **이것만 스스로** 한 번 놓는다
+- 씬에 `MapSpawnController`가 없으면 Ground/Container 앵커는 경고만 남기고 비어 있다.
 
 ## UI 레이아웃
 
@@ -271,8 +261,8 @@ ItemSpawnPoint
 - 좌측: **캐릭터 장비창 = "01 캐릭터 상태"** — 착용 슬롯(헬멧/방어구/백팩/무기/포켓 등) + 가방 5×8 격자 + **캐릭터 스탯(HP · 스태미너 텍스트, 추후 수분/무게)**. **HP는 여기에만 표시 — 상시 HUD에서는 제거됨**(2026-06-17, 아래). 수분은 허기·수분 시스템 생기면 추가([→ safehouse.md 침대 수면 UI 미결]).
 - 우측: 상황에 따라
   - **안전구역(Tab) → 메인 창고(`MainStash`) 격자 — 항상 표시 (우측이 비면 안 됨, 2026-06-17 확정).** 현재 10×14 고정(그레이박스), 추후 하이드아웃 stash 모듈 레벨 비례 확장("창고 레벨 N").
-  - **레이드 중 → 우측은 기본 비어 있음.** 상자에 다가가 **E로 수색**할 때만 그 상자의 파밍 칸이 우측에 채워짐.
-  - 루팅 상자 열었을 때 → 상자 격자
+  - **레이드 중 → 우측은 기본 비어 있음.** 필드 상자·시체를 E로 열면 먼저 **루팅 목록(`LootListUI`)**이 뜬다(2026-09-11). 거기서 **[자세히 Tab]**을 누를 때만 이 캐릭터 패널에 그 상자 격자가 채워진다.
+  - 창고·보관함 열었을 때 → 그 격자(루팅 목록 없이 바로)
 - 하단: 무게 표시 + 호버 중인 아이템 상세 정보
 
 ### 상시 HUD 구성 — HP 제외 (2026-06-17)
@@ -476,7 +466,7 @@ containerHeight  : int         // 장착 시 제공하는 격자 세로 (가방/
 3. **InventoryGrid** 로직 (UI 없이 데이터만)
 4. **InventoryUI** 격자 렌더링 + 드래그앤드롭
 5. **WorldItem** 바닥 아이템
-6. **SpawnTable + ItemSpawnPoint**
+6. **SpawnTable + ItemSpawnPoint** (2026-09-11: `SpawnTable` 삭제 — 루팅 표 + 앵커로 대체, 위 §아이템 스폰 시스템)
 7. **루팅 상자 연동** (InteractableObject.Container)
 8. **창고 연동** (안전가옥)
 
@@ -520,6 +510,7 @@ durabilityCostPerUse : float (1회 사용 시 소모량, 예: 50)
 
 | 날짜 | 내용 |
 |---|---|
+| **2026-09-11** | **루팅 정리 반영 (결정 = [region-loot.md §루팅 정리 결정](region-loot.md)).** ①컨테이너 수색 연출 **되살림**(사용자 요청 — 필드 상자·시체의 루팅 목록 `LootListUI`에서 "? ? ?" → 하나씩 공개, `searchSpeedMult`·`searchSec*` 복귀). 상단 전환 안내 표 갱신. ②§아이템 스폰 시스템 현행화: `SpawnTable` 삭제, `ItemSpawnPoint` = 앵커(Ground/Container는 `MapSpawnController`가 루팅 표로 채움, Fixed만 자체 스폰). ③§UI 레이아웃: 레이드 중 필드 상자는 루팅 목록이 먼저, Tab 자세히일 때만 캐릭터 패널. |
 | **2026-09-09** | **테트리스식 격자 폐기 → 슬롯형(RPG식) 전환 (볼륨 축소 3/6).** 질문: "인벤토리/장비창은 어떻게 할까 — 슬롯형 전환 / 격자 유지+부수요소 제거 / 무게만 제거 / 그대로?" / 사용자 결정: **"격자 폐기, 무게만 유지하고 나머지 폐기."** 구현: `InventoryGrid`를 **아이템 1개=슬롯 1칸**으로 전환(클래스·API 이름은 세이브 호환 위해 유지, `EffectiveWidth/Height`=1 고정). 90도 회전(R키)·`ItemData` footprint·컨테이너 수색 연출(딜레이/프로그레스바/"?" 가림) 전부 제거. `GameTuning` 수색 필드 6종 삭제. **무기 파츠 4종 → 탄창 1종**(탄창 없는 총은 발사 불가라 이것만 남김). 자동 정렬 기준 = 면적 → **카테고리·희귀도**. **무게 제한(3구간 과적 페널티)은 그대로 유지.** [→ scope-cut.md](scope-cut.md) |
 | 2026-07-10 | **루팅 상자(시체/필드 상자) UI 간소화 (구현 완료, b7d86ec).** 질문: 시체 컨테이너 UI가 창고 UI(카테고리 분류탭 + 풀사이즈 패널)를 그대로 써서 어색함. **결정: 루팅 상자는 간소 레이아웃 — ①카테고리 분류탭 숨김(필터 ALL 강제) ②좌측 패널 세로 크기를 격자 내용(헤더+격자+푸터)에 맞춰 축소. 창고/가구 보관함/메인 스태시는 기존 풀 레이아웃 유지.** 구현 = `CharacterPanelUI.ApplyLeftLootLayout`(`openContainer != null`일 때). §루팅 상자 간소 레이아웃 신설. |
 | 2026-07-10 | **착용형 컨테이너 회수 시 착용 우선 (구현 완료, b7d86ec).** 질문: 시체에서 가방을 가져오면 주머니/보안에 들어가버림. **결정: 루팅 상자에서 착용형 컨테이너(가방 등 `IsWearableContainer`)를 꺼낼 때 해당 슬롯이 미착용이면 착용이 우선(타르코프식) — 드래그로 플레이어 격자에 놓는 경우 + TAKE ALL 모두 적용. 착용 중이면 일반 배치.** §장비 시스템에 규칙 신설. |

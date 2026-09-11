@@ -1,16 +1,19 @@
 using UnityEngine;
 
 /// <summary>
-/// 아이템 스폰 포인트.
-/// 씬에 배치. 게임 시작/진입 시 SpawnTable에 따라 아이템 생성.
+/// 루팅 앵커 — "여기에 루팅이 놓일 수 있다"를 표시한다.
+/// Ground/Container는 MapSpawnController(예산)가 루팅 표(RegionLootCatalog)로 채운다 — 스스로 스폰하지 않는다.
+/// Fixed만 자기 고정 아이템을 한 번 놓는다(열쇠 등).
+/// 2026-09-11 정리(docs/region-loot.md §루팅 정리 결정): 자체 스폰(SpawnTable·지역 루트)·재스폰·linkedContainer 제거 —
+/// 컨트롤러가 있으면 늘 무시됐고, 없으면 루팅이 0개가 되는 폴백만 남아 있었다.
 /// </summary>
 public class ItemSpawnPoint : MonoBehaviour
 {
     public enum SpawnType
     {
-        Ground,     // 바닥에 WorldItem 배치
-        Container,  // 루팅 상자 내부 격자에 채우기
-        Fixed,      // 항상 같은 고정 아이템
+        Ground,     // 바닥에 WorldItem 배치(컨트롤러가)
+        Container,  // 같은 오브젝트(또는 부모·자식)의 LootContainer를 채움(컨트롤러가)
+        Fixed,      // 항상 같은 고정 아이템(스스로)
     }
 
     [Header("스폰 설정")]
@@ -20,127 +23,28 @@ public class ItemSpawnPoint : MonoBehaviour
     /// <summary>외부에서 스폰 타입 조회</summary>
     public SpawnType Type => spawnType;
 
-    [Tooltip("스폰 테이블 (Ground/Container용). 비우고 지역 루트 사용 가능")]
-    [SerializeField] SpawnTable spawnTable;
-
-    [Tooltip("true면 RegionLootCatalog에서 현재 지역 테이블 사용")]
-    [SerializeField] bool useRegionLoot = true;
-
-    [Tooltip("비우면 RegionTimeManager 활성 지역. 씬 고정 테스트용")]
-    [SerializeField] string regionIdOverride;
-
     [Tooltip("고정 아이템 (Fixed용)")]
     [SerializeField] ItemData fixedItem;
 
     [Tooltip("고정 아이템 수량")]
     [SerializeField] int fixedCount = 1;
 
-    [Header("옵션")]
-    [Tooltip("이미 스폰했는지")]
-    [SerializeField] bool hasSpawned;
-
-    [Tooltip("재스폰 여부")]
-    [SerializeField] bool respawn;
-
-    [Tooltip("재스폰 대기 시간 (초)")]
-    [SerializeField] float respawnTime = 300f;
-
-    [Header("Container 전용")]
-    [Tooltip("연결된 루팅 상자 (Container 타입일 때)")]
-    [SerializeField] LootContainer linkedContainer;
-
-    float respawnTimer;
-
-    /// <summary>MapSpawnController가 관리 중이면 자체 스폰 스킵</summary>
+    /// <summary>MapSpawnController가 수집했는지. Ground/Container인데 false면 채워 줄 컨트롤러가 없는 씬이다.</summary>
     [HideInInspector] public bool managedByController;
+
+    bool _spawned;
 
     void Start()
     {
-        if (hasSpawned) return;
-
-        // MapSpawnController가 있으면 Fixed만 자체 스폰, 나머지는 컨트롤러가 분배
-        if (managedByController && spawnType != SpawnType.Fixed)
+        if (spawnType != SpawnType.Fixed)
+        {
+            if (!managedByController)
+                Debug.LogWarning($"[ItemSpawnPoint] MapSpawnController가 없는 씬 — '{name}'은 채워지지 않는다", this);
             return;
-
-        DoSpawn();
-    }
-
-    void Update()
-    {
-        if (hasSpawned && respawn)
-        {
-            respawnTimer += Time.deltaTime;
-            if (respawnTimer >= respawnTime)
-            {
-                hasSpawned = false;
-                respawnTimer = 0f;
-                DoSpawn();
-            }
         }
-    }
-
-    void DoSpawn()
-    {
-        hasSpawned = true;
-
-        switch (spawnType)
-        {
-            case SpawnType.Ground:
-                SpawnGround();
-                break;
-            case SpawnType.Container:
-                SpawnContainer();
-                break;
-            case SpawnType.Fixed:
-                SpawnFixed();
-                break;
-        }
-    }
-
-    void SpawnGround()
-    {
-        var items = RollLoot();
-        if (items == null || items.Length == 0) return;
-        float offset = 0f;
-
-        for (int i = 0; i < items.Length; i++)
-        {
-            Vector3 pos = transform.position + new Vector3(
-                Random.Range(-0.3f, 0.3f), 0,
-                Random.Range(-0.3f, 0.3f) + offset);
-            WorldItem.Drop(items[i], pos, this);
-            offset += 0.2f;
-        }
-    }
-
-    void SpawnContainer()
-    {
-        if (linkedContainer == null) return;
-
-        var items = RollLoot();
-        if (items == null || items.Length == 0) return;
-        for (int i = 0; i < items.Length; i++)
-        {
-            linkedContainer.Grid.TryAutoPlace(items[i]);
-        }
-    }
-
-    void SpawnFixed()
-    {
-        if (fixedItem == null) return;
-        var item = new ItemInstance(fixedItem, fixedCount);
-        WorldItem.Drop(item, transform.position, this);
-    }
-
-    ItemInstance[] RollLoot()
-    {
-        if (spawnTable != null)
-            return spawnTable.Roll();
-
-        if (!useRegionLoot) return null;
-
-        var tier = RegionLootCatalog.TierForSpawnType(spawnType);
-        return RegionLootCatalog.RollForActiveRegion(tier, regionIdOverride);
+        if (_spawned || fixedItem == null) return;
+        _spawned = true;
+        WorldItem.Drop(new ItemInstance(fixedItem, fixedCount), transform.position, this);
     }
 
     void OnDrawGizmos()

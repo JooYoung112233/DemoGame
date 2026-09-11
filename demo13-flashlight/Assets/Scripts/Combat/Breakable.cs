@@ -322,16 +322,18 @@ public class Breakable : MonoBehaviour
             WorldItem.Drop(new ItemInstance(dropItem, Mathf.Max(1, dropCount)), pos, this);
         }
 
-        // 지역 루트 드랍 — 임시 ItemSpawnPoint(Ground)를 스폰해 기존 루트 파이프라인 재사용.
-        // (Breakable은 곧 파괴될 수 있으므로 별도 루트 오브젝트로 분리)
+        // 지역 루트 드랍 — 이 씬 루팅 지역의 '바닥' 표에서 한 번(2026-09-11).
+        //   예전엔 임시 ItemSpawnPoint를 띄워 자체 스폰에 맡겼는데, 앵커가 스스로 스폰하지 않게 정리되며 그 경로가 사라졌다.
         if (dropRegionLoot)
         {
-            var g = new GameObject("BreakLoot");
-            g.transform.position = transform.position;
-            var sp = g.AddComponent<ItemSpawnPoint>();
-            SetPrivate(sp, "spawnType", ItemSpawnPoint.SpawnType.Ground);
-            SetPrivate(sp, "useRegionLoot", true);
-            // sp.Start()가 다음 프레임에 RollLoot→WorldItem.Drop 수행
+            string region = !string.IsNullOrEmpty(MapSpawnController.CurrentRegionId)
+                ? MapSpawnController.CurrentRegionId : RegionLootCatalog.GetActiveRegionId();
+            if (RegionLootCatalog.TryFindPool(region, "ground", RegionLootCatalog.IsNightInRegion(region), out var pool))
+            {
+                var it = RegionLootCatalog.RollOnce(pool);
+                var r = Random.insideUnitCircle * 0.3f;
+                if (it != null) WorldItem.Drop(it, transform.position + new Vector3(r.x, 0f, r.y), this);
+            }
         }
     }
 

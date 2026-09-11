@@ -30,6 +30,7 @@ public static class Zone1Interiors
         var m = InteriorBuild.Begin(out var scene);
         int n = 0;
         const float W = 18f, H = 16f;
+        InteriorBuild.CrateKind = "int_medical";   // 루팅 표 종류(2026-09-11)
 
         n += InteriorBuild.Shell(m, W, H);                                                     // 사방 밀폐
         n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 9f, Outside, BuildingReturn.BackSpawnId, 2.4f);  // 남쪽 정문(포탈)
@@ -47,7 +48,7 @@ public static class Zone1Interiors
         n += InteriorBuild.GroundLoot(m, "P_G0", 5f, 6f);
         n += InteriorBuild.GroundLoot(m, "P_G1", 12f, 6f);
         n += InteriorBuild.GroundLoot(m, "P_G2", 14f, 3f);
-        n += InteriorBuild.Crate(m, "P_Counter_Crate", 8f, 8.8f);   // key_pharmacy 자리(고정 열쇠는 후속)
+        n += InteriorBuild.Crate(m, "P_Counter_Crate", 8f, 8.8f, "register");   // 카운터 = 계산대(고철). key_pharmacy 자리(고정 열쇠는 후속)
         n += InteriorBuild.Crate(m, "P_SQ002_Box", 12f, 8.8f);      // 외부에서 이전(SQ002_Box)
 
         // 약품실(잠긴 방) — 의료 루트 집중 + 회수꾼 철제 상자
@@ -73,6 +74,7 @@ public static class Zone1Interiors
         var m = InteriorBuild.Begin(out var scene);
         int n = 0;
         const float W = 12f, H = 9f;
+        InteriorBuild.CrateKind = "int_shop";
 
         n += InteriorBuild.Shell(m, W, H);
         n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 6f, Outside, BuildingReturn.BackSpawnId, 2.2f);
@@ -97,6 +99,7 @@ public static class Zone1Interiors
     {
         var m = InteriorBuild.Begin(out var scene);
         int n = 0; const float W = 14f, H = 11f;
+        InteriorBuild.CrateKind = "int_tools";
 
         n += InteriorBuild.Shell(m, W, H);
         n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 7f, Outside, BuildingReturn.BackSpawnId, 2.4f);
@@ -124,6 +127,7 @@ public static class Zone1Interiors
     {
         var m = InteriorBuild.Begin(out var scene);
         int n = 0; const float W = 17f, H = 14f;
+        InteriorBuild.CrateKind = "int_tools";
 
         n += InteriorBuild.Shell(m, W, H);
         n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 8.5f, Outside, BuildingReturn.BackSpawnId, 2.6f);   // 셔터
@@ -163,6 +167,7 @@ public static class Zone1Interiors
     {
         var m = InteriorBuild.Begin(out var scene);
         int n = 0; const float W = 19f, H = 15f;
+        InteriorBuild.CrateKind = "int_basement";
 
         // 지하는 남쪽 '문'이 아니라 **올라가는 계단**으로 창고에 복귀한다(사방 밀폐 유지).
         n += InteriorBuild.Shell(m, W, H);
@@ -203,6 +208,7 @@ public static class Zone1Interiors
     {
         var m = InteriorBuild.Begin(out var scene);
         int n = 0; const float W = 22f, H = 18f;
+        InteriorBuild.CrateKind = "int_shop";
 
         n += InteriorBuild.Shell(m, W, H);
         n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 11f, Outside, BuildingReturn.BackSpawnId, 2.4f);
@@ -243,18 +249,18 @@ public static class Zone1Interiors
     [MenuItem("Tools/TopDown/빌드/내부/철물점", priority = -84)]
     public static void BuildHardware() => BuildDensityShop(
         "Assets/Scenes/Int_Hardware.unity", "from_hardware", 13f, 10f, "HW",
-        "철물점 — 공구·부품·못(제작·수리 재료)", crates: 3, ground: 2, enemy: 1, mult: 1.3f);
+        "철물점 — 공구·부품·못(제작·수리 재료)", crates: 3, ground: 2, enemy: 1, mult: 1.3f, kind: "int_tools");
 
     [MenuItem("Tools/TopDown/빌드/내부/분식집", priority = -83)]
     public static void BuildDiner() => BuildDensityShop(
         "Assets/Scenes/Int_Diner.unity", "from_diner", 13f, 11f, "DN",
-        "분식집 — 캔푸드·물(주방 뒤 창고)", crates: 2, ground: 3, enemy: 0, backRoom: true, mult: 1.0f);
+        "분식집 — 캔푸드·물(주방 뒤 창고)", crates: 2, ground: 3, enemy: 0, backRoom: true, mult: 1.0f, kind: "int_food");
 
     [MenuItem("Tools/TopDown/빌드/내부/컴퓨터가게", priority = -82)]
     public static void BuildElectronics() => BuildDensityShop(
         "Assets/Scenes/Int_Electronics.unity", "from_electronics", 12f, 10f, "EL",
         "컴퓨터가게 — 배터리·전선·전자부품(라디오/발전기 업글 재료)", crates: 3, ground: 2, enemy: 2,
-        mult: 1.4f, lootRegion: "industrial");
+        mult: 1.4f, lootRegion: "industrial", kind: "int_electronics");
 
     [MenuItem("Tools/TopDown/빌드/내부/세탁소", priority = -81)]
     public static void BuildLaundry() => BuildDensityShop(
@@ -269,10 +275,11 @@ public static class Zone1Interiors
     /// <summary>밀도 점포 공용 — 껍데기+진입/출구+선반+앵커. 성격은 크기·앵커 수·뒷방 + **예산 배율·루트 지역**으로.</summary>
     static void BuildDensityShop(string path, string returnSpawn, float W, float H, string pre,
                                  string label, int crates, int ground, int enemy, bool backRoom = false,
-                                 float mult = 1f, string lootRegion = null)
+                                 float mult = 1f, string lootRegion = null, string kind = "int_shop")
     {
         var m = InteriorBuild.Begin(out var scene);
         int n = 0;
+        InteriorBuild.CrateKind = kind;   // 루팅 표 종류(2026-09-11)
 
         n += InteriorBuild.Shell(m, W, H);
         n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", W * 0.5f, Outside, BuildingReturn.BackSpawnId, 2.2f);
@@ -290,7 +297,8 @@ public static class Zone1Interiors
         }
 
         for (int i = 0; i < crates; i++)
-            n += InteriorBuild.Crate(m, $"{pre}_Crate{i}", 2.5f + i * (W - 5f) / Mathf.Max(1, crates), H - 2.2f);
+            n += InteriorBuild.Crate(m, $"{pre}_Crate{i}", 2.5f + i * (W - 5f) / Mathf.Max(1, crates), H - 2.2f,
+                                     i == 0 ? "register" : null);   // 첫 상자 = 계산대(고철은 계산대·금고·좌판·시체에서만)
         for (int i = 0; i < ground; i++)
             n += InteriorBuild.GroundLoot(m, $"{pre}_G{i}", 3f + i * (W - 6f) / Mathf.Max(1, ground), H * 0.5f);
 
@@ -313,6 +321,7 @@ public static class Zone1Interiors
     {
         var m = InteriorBuild.Begin(out var scene);
         int n = 0; const float W = 20f, H = 15f;
+        InteriorBuild.CrateKind = "int_jewelry";
 
         n += InteriorBuild.Shell(m, W, H);
         n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 10f, Outside, BuildingReturn.BackSpawnId, 2.2f);
@@ -323,7 +332,7 @@ public static class Zone1Interiors
         n += GreyboxBuild.WallSeg(m, "JW_Case2", 12f, 5f, 18f, 5.9f);
         n += InteriorBuild.GroundLoot(m, "JW_G0", 5f, 7.5f);
         n += InteriorBuild.GroundLoot(m, "JW_G1", 15f, 7.5f);
-        n += InteriorBuild.Crate(m, "JW_Counter", 10f, 7.5f);
+        n += InteriorBuild.Crate(m, "JW_Counter", 10f, 7.5f, "register");
 
         // 금고실 칸막이(y=9) — 문 갭 x9~11이 **금고문**
         n += GreyboxBuild.WallSeg(m, "JW_Div_a", 1f, 9f, 9f, 10f);
@@ -333,9 +342,9 @@ public static class Zone1Interiors
                                 "번호를 모른다. 경찰이 압수해 뒀다는 소문이 있었는데.");
 
         // 금고 안 — 최고 보상
-        n += InteriorBuild.Crate(m, "JW_Vault1", 5f, 12.5f);
-        n += InteriorBuild.Crate(m, "JW_Vault2", 10f, 12.5f);
-        n += InteriorBuild.Crate(m, "JW_Vault3", 15f, 12.5f);
+        n += InteriorBuild.Crate(m, "JW_Vault1", 5f, 12.5f, "safe");
+        n += InteriorBuild.Crate(m, "JW_Vault2", 10f, 12.5f, "safe");
+        n += InteriorBuild.Crate(m, "JW_Vault3", 15f, 12.5f, "safe");
         n += InteriorBuild.GroundLoot(m, "JW_G2", 12.5f, 11f);
 
         // 위험도 — 매장에 근접 2, 금고 앞 견제 1
@@ -357,6 +366,7 @@ public static class Zone1Interiors
     {
         var m = InteriorBuild.Begin(out var scene);
         int n = 0; const float W = 22f, H = 17f;
+        InteriorBuild.CrateKind = "int_police";
 
         n += InteriorBuild.Shell(m, W, H);
         n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 11f, Outside, BuildingReturn.BackSpawnId, 2.4f);
@@ -370,7 +380,7 @@ public static class Zone1Interiors
         n += InteriorBuild.GroundLoot(m, "PL_G1", 14f, 9f);
 
         // ★ 압수품 보관함 옆 쪽지 = **보석상 금고 번호**(쪽지 파밍으로 코드 획득)
-        n += InteriorBuild.Crate(m, "PL_Evidence", 4f, 9.5f);
+        n += InteriorBuild.Crate(m, "PL_Evidence", 4f, 9.5f, "safe");   // 압수품 보관함 = 금고(고철)
         n += InteriorBuild.KnowledgeNote(m, "PL_Note_Code", 6.5f, 9.5f,
             "압수품 대장",
             "…압수: 보석상 금고 개방번호. 대장 여백에 급히 갈겨쓴 네 자리 숫자가 보인다.\n" +
@@ -413,6 +423,7 @@ public static class Zone1Interiors
     {
         var m = InteriorBuild.Begin(out var scene);
         int n = 0; const float W = 16f, H = 14f;
+        InteriorBuild.CrateKind = "int_basement";
 
         n += InteriorBuild.Shell(m, W, H);
         n += InteriorBuild.ExitDoorSouth(m, "Exit_ToZone1", 8f, Outside, BuildingReturn.BackSpawnId, 2.2f);
@@ -422,7 +433,7 @@ public static class Zone1Interiors
             "key_dome_code로 여는 최고 보상 구역. 유리타워 상층 R&D에서 코드 획득.");
 
         // 외부에 있던 Dome_Reward / Dome_RareA / Dome_RareB를 이곳으로 이전
-        n += InteriorBuild.Crate(m, "D_Reward", 8f, 8f);
+        n += InteriorBuild.Crate(m, "D_Reward", 8f, 8f, "safe");   // 최고 보상 = 금고
         n += InteriorBuild.Crate(m, "D_RareA", 4f, 6f);
         n += InteriorBuild.Crate(m, "D_RareB", 12f, 6f);
         n += InteriorBuild.GroundLoot(m, "D_G0", 6f, 10f);

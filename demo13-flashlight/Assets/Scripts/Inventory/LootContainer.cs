@@ -2,12 +2,10 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// 루팅 상자 / 창고 컴포넌트.
-/// 자체 InventoryGrid를 소유.
-/// InteractableObject.Container와 연동.
+/// 루팅 상자 / 창고 컴포넌트. 자체 InventoryGrid를 소유. InteractableObject.Container와 연동.
 ///
-/// 현재 동작: 열면 내부 아이템을 전부 플레이어 인벤토리로 자동 이동.
-/// 향후: UI 패널에서 드래그앤드롭으로 선택적 루팅.
+/// 레이드 상자의 내용물은 MapSpawnController가 이 상자의 **종류(lootKind)** 루팅 표에서 채운다
+/// (2026-09-11 docs/region-loot.md §루팅 정리 결정). 창고·보관함·시체도 같은 컴포넌트를 쓴다.
 /// </summary>
 public class LootContainer : MonoBehaviour
 {
@@ -21,80 +19,43 @@ public class LootContainer : MonoBehaviour
     [Tooltip("상자 이름 (UI에 표시)")]
     [SerializeField] string containerName = "상자";
 
-    [Header("초기 아이템 (스폰)")]
-    [Tooltip("상자 생성 시 자동으로 들어갈 아이템 목록")]
-    [SerializeField] LootEntry[] initialLoot;
+    [Header("루팅 종류")]
+    [Tooltip("루팅 표의 상자 종류 — junk(길가 잡동사니)·trunk(차량 트렁크)·stall(노점 좌판)·crate(나무상자)·\n" +
+             "register(계산대)·safe(금고)·int_*(실내 건물 종류). MapSpawnController가 이 종류의 표(Resources/loot_tables.txt)로 채운다.\n" +
+             "고철(◈)은 register·safe·stall에서만 나온다. 이 셋은 예산과 무관하게 늘 채운다.")]
+    [SerializeField] string lootKind = "crate";
 
     public InventoryGrid Grid { get; private set; }
     public string ContainerName => containerName;
+    public string LootKind => string.IsNullOrEmpty(lootKind) ? "crate" : lootKind;
     public bool IsOpen { get; private set; }
     public bool IsLooted { get; private set; }
 
-    /// <summary>이미 연 적 있는 상자인지. (수색 연출은 2026-09-09 폐기 — 지금은 방문 기록 용도)</summary>
+    /// <summary>다 뒤진 상자인지 — 수색 연출(하나씩 드러남)은 처음 열 때만(2026-09-11 되살림, LootListUI).</summary>
     public bool HasBeenSearched { get; set; }
 
-    [System.Serializable]
-    public struct LootEntry
-    {
-        [Tooltip("ItemDatabase에 등록된 아이템 ID")]
-        public string itemId;
-        [Tooltip("수량")]
-        public int count;
-        [Tooltip("스폰 확률 (0~1, 1이면 항상)")]
-        [Range(0f, 1f)]
-        public float chance;
-    }
+    /// <summary>수색 중 몇 칸이 드러났나 — 도중에 닫아도 다음에 이어서 드러난다.</summary>
+    public int RevealedCount { get; set; }
 
     void Awake()
     {
         Grid = new InventoryGrid(gridWidth, gridHeight);
     }
 
-    void Start()
-    {
-        // 초기 아이템 생성
-        if (initialLoot != null)
-        {
-            for (int i = 0; i < initialLoot.Length; i++)
-            {
-                if (Random.value > initialLoot[i].chance) continue;
+    /// <summary>빌더용 — 루팅 종류 지정.</summary>
+    public void SetLootKind(string kind) => lootKind = kind;
 
-                var data = ItemDatabase.Get(initialLoot[i].itemId);
-                if (data == null)
-                {
-                    Debug.LogWarning($"[LootContainer] ItemDatabase에 '{initialLoot[i].itemId}' 없음");
-                    continue;
-                }
-
-                int count = Mathf.Max(1, initialLoot[i].count);
-                var item = new ItemInstance(data, count);
-                Grid.TryAutoPlace(item);
-            }
-        }
-    }
-
-    /// <summary>상자 열기 → CharacterPanelUI에서 드래그앤드롭으로 루팅</summary>
+    /// <summary>상자 열기(상태 표시). 실제 루팅은 루팅 목록 UI / 캐릭터 패널이 한다.</summary>
     public void Open(GameObject playerGO)
     {
         IsOpen = true;
-
-        if (IsLooted)
-        {
-            Debug.Log($"[LootContainer] {containerName}: 이미 루팅됨 (비어있음)");
-            return;
-        }
-
-        Debug.Log($"[LootContainer] {containerName} 열기 ({Grid.ItemCount}개 아이템)");
     }
 
     /// <summary>상자 닫기</summary>
     public void Close()
     {
         IsOpen = false;
-
-        // 비어있으면 루팅 완료 처리
-        if (Grid.ItemCount == 0)
-            IsLooted = true;
+        if (Grid.ItemCount == 0) IsLooted = true;   // 비어 있으면 루팅 완료 처리
     }
 
     /// <summary>코드에서 아이템 추가</summary>
@@ -114,7 +75,7 @@ public class LootContainer : MonoBehaviour
     }
 
     /// <summary>내용물에 맞춰 격자 크기를 정하고 배치하는 초기화(시체 등 동적 컨테이너).
-    /// 행 수 = 필요 칸수/columns 올림 +1줄 여유(모양이 안 맞아 남는 자투리 대비), minRows~maxRows로 클램프.
+    /// 행 수 = 필요 칸수/columns 올림 +1줄 여유, minRows~maxRows로 클램프.
     /// 반환 = 그래도 못 들어간 초과분(호출자가 바닥 드랍 등으로 처리).</summary>
     public List<ItemInstance> SetupAutoSize(string name, List<ItemInstance> items, int columns = 4, int minRows = 2, int maxRows = 6)
     {

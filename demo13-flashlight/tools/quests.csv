@@ -1,5 +1,5 @@
 id,cat,title,giver,type,target,qty,unlock,reward_scrap,reward_items,reward_rep,reward_trust,reward_unlock,repeat,flavor
-MQ-001,MQ,민이를 찾아 주세요,board→veteran_scavenger,탐색,민이 흔적(창고 노크규칙),1,S-004,소,coin_scrap:10,10,,SQ-002,일회,프롤로그 민이찾기
+MQ-001,MQ,민이를 찾아 주세요,board→veteran_scavenger,탐색,민이 흔적(창고 노크규칙),1,S-004,소,scrap_money:1000,10,,SQ-002,일회,프롤로그 민이찾기
 MQ-002,MQ,첫 루디 회수,board→veteran_scavenger→pawnshop,납품,ruby_shard,1,평판해금/S-013,중,,15,,전당포정식거래·DQ,일회,짙은현상 첫 루디
 SQ-001,SQ,잔해 속 목소리,발견형,탐색/구출,갇힌 생존자,1,평판E·발견,중,랜덤,5,,2지역단서·파견인력,일회,파견 첫 인력 연결
 SQ-002,SQ,회수꾼의 상자,veteran_scavenger,회수,약국 철제상자,1,MQ-001후,-,,,,거처(컨테이너),일회,동료유품 떡밥

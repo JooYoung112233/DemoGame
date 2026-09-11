@@ -1205,7 +1205,7 @@ public class EnemyController : MonoBehaviour
         if (_isScavenger) label = "약탈자 " + label;
 
         var items = RollLoot();
-        AddCash(items);   // 현금 — 배그식 사망 루팅 ④ (docs/economy.md §적 현금 드랍)
+        AddScrap(items);   // 고철 화폐 — 배그식 사망 루팅 ④ (docs/economy.md §적 고철 드랍)
         // 약탈자 = 플레이어가 잃은 물품을 지님 → 시체 루팅으로 회수.
         if (_isScavenger && _scavengerLoot != null) items.AddRange(_scavengerLoot);
         var overflow = container.SetupAutoSize($"{label} 시체", items);   // 격자 크기 = 내용물에 맞춤(4열, 2~6행)
@@ -1218,14 +1218,15 @@ public class EnemyController : MonoBehaviour
         gameObject.AddComponent<CorpseMarker>().Init(container, _label);
     }
 
-    /// <summary>현금 — 유닛별 cashMin~cashMax(◈). 현금 아이템 1개 = ◈1(스택 수가 곧 금액).</summary>
-    void AddCash(List<ItemInstance> items)
+    /// <summary>고철 화폐 — 유닛별 cashMin~cashMax(◈, 필드 이름은 옛 현금 시절 그대로). 1개 = ◈1(스택 수가 곧 금액).
+    /// 2026-09-11 재화 역할 결정으로 현금 → 고철(docs/economy.md §재화 역할) — 현금은 퀘스트·이벤트 전용.</summary>
+    void AddScrap(List<ItemInstance> items)
     {
         if (unitStat == null || unitStat.cashMax <= 0) return;
-        var cash = ItemDatabase.Get(CashWallet.ItemId);
-        if (cash == null) return;
+        var scrap = ItemDatabase.Get(ScrapWallet.ItemId);
+        if (scrap == null) return;
         int amount = Random.Range(unitStat.cashMin, Mathf.Max(unitStat.cashMin, unitStat.cashMax) + 1);
-        if (amount > 0) items.Add(new ItemInstance(cash, amount));
+        if (amount > 0) items.Add(new ItemInstance(scrap, amount));
     }
 
     /// <summary>래그돌이 쓰러질 방향·세기(속도). 맞은 방향 정보가 없어 "플레이어 → 적" 쪽으로 밀어 넘어뜨린다.</summary>
@@ -1239,6 +1240,10 @@ public class EnemyController : MonoBehaviour
     /// <summary>전리품 롤 — 적별 전용 드랍 테이블(unitStat.drops) 우선, 비면 지상 티어 region 루트 폴백.
     /// GameTuning.enemyDropChance로 전역 게이트(실패 = 빈손 시체 — 뒤질 수는 있음).
     /// 추가로 corpseBagChance 확률로 가방(컨테이너 아이템)이 통째로 — 안에 지역 루트 1~2개(타르코프식, 가방째 회수 가능).</summary>
+    /// <summary>시체 루팅 표의 지역 — 이 씬의 루팅 지역(MapSpawnController), 없으면 활성 지역.</summary>
+    static string CorpseRegion => !string.IsNullOrEmpty(MapSpawnController.CurrentRegionId)
+        ? MapSpawnController.CurrentRegionId : RegionLootCatalog.GetActiveRegionId();
+
     List<ItemInstance> RollLoot()
     {
         var items = new List<ItemInstance>();
@@ -1261,8 +1266,8 @@ public class EnemyController : MonoBehaviour
             }
             else
             {
-                // 폴백: 지역(Ground) 루트
-                var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
+                // 폴백: 이 씬 루팅 지역의 '시체' 표(2026-09-11 — 예전엔 활성 지역 바닥 표). 실내면 그 건물 지역.
+                var loot = RegionLootCatalog.RollSource(CorpseRegion, "corpse", RegionLootCatalog.IsNightInRegion(CorpseRegion));
                 if (loot != null)
                     for (int i = 0; i < loot.Length; i++)
                         if (loot[i] != null) items.Add(loot[i]);
@@ -1286,7 +1291,7 @@ public class EnemyController : MonoBehaviour
         var inner = bag.ContainerGrid;
         if (inner != null)
         {
-            var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
+            var loot = RegionLootCatalog.RollSource(CorpseRegion, "corpse", RegionLootCatalog.IsNightInRegion(CorpseRegion));
             int put = 0, max = Random.Range(1, 3);   // 1~2개
             if (loot != null)
                 for (int i = 0; i < loot.Length && put < max; i++)

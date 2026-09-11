@@ -180,7 +180,7 @@ DDOL 씬으로 옮겨졌는데, 폴더에 넣으면 그게 끊긴다. 그래서:
 `new GameObject()`/`Instantiate`는 **활성 씬**에 생긴다. 그런데 맵을 additive로 로드하면 그 맵의 `Start()`가
 `SetActiveScene(맵)`보다 **먼저** 돈다 — 그 순간 활성 씬은 Systems다. 그래서 루팅 아이템이 Systems에 쌓이고
 맵을 떠나도 안 지워졌다(2026-09-11 실측: Zone1 한 번에 `WorldItem` 32개 누수).
-- `WorldItem.Drop(item, pos, owner)` — 맵 쪽 호출부(ItemSpawnPoint·MapSpawnController·RegionLootBootstrap·
+- `WorldItem.Drop(item, pos, owner)` — 맵 쪽 호출부(ItemSpawnPoint(Fixed 고정 아이템)·MapSpawnController(바닥 루팅)·
   Breakable·EnemyController)는 `this`를 넘긴다. 아이템은 owner의 씬으로 옮겨져 맵과 함께 언로드된다.
 - 플레이어·UI(DDOL) 쪽 드롭은 owner 없이 둔다 — 그땐 이미 활성 씬이 현재 맵이다.
 - 맵 로드 직후 무언가를 스폰하는 새 코드도 같은 규칙: 스폰한 오브젝트를 **자기 씬으로** 옮길 것.
@@ -210,3 +210,4 @@ DDOL 씬으로 옮겨졌는데, 폴더에 넣으면 그게 끊긴다. 그래서:
 | 2026-09-11 | (버그) 레이드 루팅 아이템이 맵이 아니라 Systems 씬에 생겨, 맵을 떠나도 남음 | `WorldItem.Drop`에 owner 인자 — 맵 쪽 호출부는 `this`를 넘겨 자기 씬으로 옮긴다. 검증: Zone1 체류 39개 모두 Zone1, 안전가옥 이동 후 0개 | 맵 `Start()`가 `SetActiveScene` 전에 돈다. §런타임 스폰은 "누구의 씬"인지 넘길 것 |
 | 2026-09-11 | 런타임 스폰된 적도 폴더로 묶어 달라 | `EnemySpawner`가 적을 맵 씬 루트의 `[Runtime]/Enemies`에 넣는다(`HierarchyFolder.RuntimeFolder`) | 적 수십 기가 루트에 평평함. §런타임 스폰물 폴더 |
 | 2026-09-11 | 루팅 아이템도 폴더로 | `WorldItem.Drop`이 게임플레이 씬의 아이템을 `[Runtime]/Loot`에 넣는다 | 같은 이유. §런타임 스폰물 폴더 |
+| 2026-09-11 | (문서 정합) 루팅 정리로 `RegionLootBootstrap` 삭제 · `ItemSpawnPoint` 자체 스폰 제거 | §런타임 스폰은 "누구의 씬인지" 호출부 목록에서 `RegionLootBootstrap` 제거, ItemSpawnPoint = Fixed 고정 아이템만 · 바닥 루팅 = MapSpawnController로 정정 | [region-loot.md §루팅 정리 결정](region-loot.md) |

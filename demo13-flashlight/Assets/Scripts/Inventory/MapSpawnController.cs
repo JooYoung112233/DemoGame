@@ -2,33 +2,31 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 맵 단위 아이템 스폰 총괄 컨트롤러.
-/// 맵 진입 시 프로파일 기반으로 아이템 예산을 산정하고,
-/// 씬의 ItemSpawnPoint들에 아이템을 분배.
+/// 맵 루팅 총괄 — **몇 개·어디에**(예산)를 정한다. **무엇이·몇 개씩**은 RegionLootCatalog(루팅 표)가 정한다.
+/// 2026-09-11 사용자 결정 "예산 + 지역 표"(docs/region-loot.md §루팅 정리 결정) — 예전엔 아이템 DB 전체에서
+/// 카테고리·희귀도로 무작위로 뽑아 루팅 표가 상자에 안 쓰였다(고철 300~1,000이 1~5로, 현금까지 섞여 나왔다).
 ///
-/// 흐름:
-/// 1. 씬의 모든 ItemSpawnPoint 수집
-/// 2. Fixed 포인트 → 고정 아이템 먼저 스폰
-/// 3. 프로파일 예산 산정 (총량, 희귀도, 카테고리)
-/// 4. 예산 내에서 아이템 풀 생성
-/// 5. Ground/Container 포인트에 분배
+/// 흐름(씬 로드 시 1회):
+/// 1. 씬의 ItemSpawnPoint 수집 → Ground / Container(상자) / Fixed(자체 스폰)
+/// 2. 예산 = 프로파일(바닥·상자 min~max, 밤 배율) × GameTuning.lootCountMult × 실내 배율 × 이 씬 배율. 단위 = 뽑기 횟수
+/// 3. 상자: 섞은 뒤 **계산대·금고·좌판을 먼저**(예산과 무관하게 늘 채움 — 고철은 여기와 시체에서만),
+///    나머지는 예산이 닿는 데까지. 상자마다 자기 종류(LootContainer.LootKind) 표에서 roll_count번 뽑는다.
+///    예산 밖 상자는 비어 있다 — 섞기 때문에 매 판 다른 상자다.
+/// 4. 바닥: 섞은 지점마다 최대 2개씩 'ground' 표에서.
 /// </summary>
 public class MapSpawnController : MonoBehaviour
 {
     [Header("프로파일")]
-    [Tooltip("이 맵의 스폰 프로파일")]
+    [Tooltip("예산(바닥·상자 개수 범위, 밤 배율). 희귀도·카테고리 가중치는 2026-09-11부터 안 쓴다 — 무엇이 나올지는 루팅 표가 정한다.")]
     [SerializeField] MapSpawnProfile profile;
 
-    [Tooltip("프로파일 없으면 RegionLootCatalog 폴백 사용")]
-    [SerializeField] bool fallbackToRegionLoot = true;
-
     [Header("지역")]
-    [Tooltip("비우면 RegionTimeManager 활성 지역 사용")]
+    [Tooltip("루팅 표 지역. 비우면 RegionTimeManager 활성 지역")]
     [SerializeField] string regionIdOverride;
 
     [Header("건물 내부")]
     [Tooltip("이 씬이 '건물 내부'인가. true면 예산에 GameTuning.interiorLootBudgetMult를 곱한다\n" +
-             "(내부는 맵 전체가 아니라 한 채이므로). 루트 테이블 자체는 지역 확률 그대로 사용.")]
+             "(내부는 맵 전체가 아니라 한 채이므로).")]
     [SerializeField] bool isInterior;
 
     [Tooltip("이 씬만의 루팅 예산 배율. **유니크 건물**(보석상·경찰서 등)을 일반 점포보다 후하게 만드는 값.\n" +
@@ -38,21 +36,27 @@ public class MapSpawnController : MonoBehaviour
     [Header("디버그")]
     [SerializeField] bool logSpawnDetails = true;
 
+    const int FallbackGroundBudget = 20, FallbackContainerBudget = 30;
+    const int MaxPerGroundPoint = 2;
+
+    /// <summary>지금 씬의 루팅 지역 — 시체 루팅이 같은 표를 쓰게(실내 보석상에서 쓰러뜨린 적은 보석상 지역 표).
+    /// 씬이 바뀌면 새 컨트롤러가 덮는다.</summary>
+    public static string CurrentRegionId { get; private set; }
+
     // 런타임
     bool hasSpawned;
-    List<ItemSpawnPoint> groundPoints = new List<ItemSpawnPoint>();
-    List<ItemSpawnPoint> containerPoints = new List<ItemSpawnPoint>();
-    List<ItemSpawnPoint> fixedPoints = new List<ItemSpawnPoint>();
+    readonly List<ItemSpawnPoint> groundPoints = new List<ItemSpawnPoint>();
+    readonly List<ItemSpawnPoint> containerPoints = new List<ItemSpawnPoint>();
+    readonly List<ItemSpawnPoint> fixedPoints = new List<ItemSpawnPoint>();
 
     // 스폰 결과 통계
     int totalSpawned;
-    Dictionary<ItemRarity, int> rarityStats = new Dictionary<ItemRarity, int>();
-    Dictionary<ItemCategory, int> categoryStats = new Dictionary<ItemCategory, int>();
+    readonly Dictionary<ItemRarity, int> rarityStats = new Dictionary<ItemRarity, int>();
+    readonly Dictionary<ItemCategory, int> categoryStats = new Dictionary<ItemCategory, int>();
 
     void Awake()
     {
-        // Awake에서 스폰 포인트 수집 + managedByController 플래그 설정
-        // → ItemSpawnPoint.Start()보다 먼저 실행되어 자체 스폰을 차단
+        // ItemSpawnPoint.Start()보다 먼저 수집해 둔다(앵커는 스스로 스폰하지 않는다 — Fixed만 예외).
         CollectSpawnPoints();
     }
 
@@ -69,27 +73,16 @@ public class MapSpawnController : MonoBehaviour
         containerPoints.Clear();
         fixedPoints.Clear();
 
-        var allPoints = FindObjectsByType<ItemSpawnPoint>(
-            FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-
+        var allPoints = FindObjectsByType<ItemSpawnPoint>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         for (int i = 0; i < allPoints.Length; i++)
         {
             var sp = allPoints[i];
-
-            // 컨트롤러 관리 플래그 설정 (Fixed 제외)
             sp.managedByController = true;
-
             switch (sp.Type)
             {
-                case ItemSpawnPoint.SpawnType.Ground:
-                    groundPoints.Add(sp);
-                    break;
-                case ItemSpawnPoint.SpawnType.Container:
-                    containerPoints.Add(sp);
-                    break;
-                case ItemSpawnPoint.SpawnType.Fixed:
-                    fixedPoints.Add(sp);
-                    break;
+                case ItemSpawnPoint.SpawnType.Ground:    groundPoints.Add(sp); break;
+                case ItemSpawnPoint.SpawnType.Container: containerPoints.Add(sp); break;
+                case ItemSpawnPoint.SpawnType.Fixed:     fixedPoints.Add(sp); break;
             }
         }
 
@@ -105,359 +98,154 @@ public class MapSpawnController : MonoBehaviour
         rarityStats.Clear();
         categoryStats.Clear();
 
-        string regionId = string.IsNullOrEmpty(regionIdOverride)
-            ? RegionLootCatalog.GetActiveRegionId()
-            : regionIdOverride;
-
+        string regionId = string.IsNullOrEmpty(regionIdOverride) ? RegionLootCatalog.GetActiveRegionId() : regionIdOverride;
+        CurrentRegionId = regionId;
         bool isNight = RegionLootCatalog.IsNightInRegion(regionId);
 
-        // 1. Fixed 아이템 먼저 (프로파일 예산과 무관)
-        SpawnFixedItems();
-
-        // 프로파일 없으면 폴백
-        if (profile == null)
+        int groundBudget, containerBudget;
+        if (profile != null)
         {
-            if (fallbackToRegionLoot)
-                FallbackRegionLootSpawn(regionId, isNight);
-            else if (logSpawnDetails)
-                Debug.LogWarning("[MapSpawnController] 프로파일 없음, 폴백 비활성");
-            return;
+            groundBudget = profile.GetGroundBudget(isNight);
+            containerBudget = profile.GetContainerBudget(isNight);
+        }
+        else
+        {
+            groundBudget = FallbackGroundBudget;
+            containerBudget = FallbackContainerBudget;
+            Debug.LogWarning($"[MapSpawnController] 프로파일 없음 — 기본 예산(바닥 {groundBudget}·상자 {containerBudget})으로 채운다");
         }
 
-        // 2. 예산 산정
-        int groundBudget = profile.GetGroundBudget(isNight);
-        int containerBudget = profile.GetContainerBudget(isNight);
-
-        // 2026-07-11: **내부 씬은 '한 채'라 맵 전체 예산을 그대로 쓰면 과다**(내부가 12개면 12맵치가 뿌려짐).
-        //   GameTuning.interiorLootBudgetMult로 줄인다 — QA가 "파밍을 늘릴지"를 판단해 조절하는 노브.
-        if (isInterior)
-        {
-            float im = GameTuning.Instance != null ? GameTuning.Instance.interiorLootBudgetMult : 0.25f;
-            groundBudget    = Mathf.Max(1, Mathf.RoundToInt(groundBudget * im));
-            containerBudget = Mathf.Max(1, Mathf.RoundToInt(containerBudget * im));
-        }
-
-        // 유니크 건물 가산 — 이 씬만 더 후하게(보석상·경찰서). 내부 여부와 무관하게 곱한다.
-        if (budgetMult > 0f && !Mathf.Approximately(budgetMult, 1f))
-        {
-            groundBudget    = Mathf.Max(1, Mathf.RoundToInt(groundBudget * budgetMult));
-            containerBudget = Mathf.Max(1, Mathf.RoundToInt(containerBudget * budgetMult));
-        }
+        var gt = GameTuning.Instance;
+        float mult = gt != null ? gt.lootCountMult : 1f;
+        // 2026-07-11: 내부 씬은 '한 채'라 맵 전체 예산을 그대로 쓰면 과다 — interiorLootBudgetMult로 줄인다.
+        if (isInterior) mult *= gt != null ? gt.interiorLootBudgetMult : 0.25f;
+        // 유니크 건물 가산 — 이 씬만 더 후하게(보석상·경찰서).
+        if (budgetMult > 0f) mult *= budgetMult;
+        groundBudget = Mathf.Max(0, Mathf.RoundToInt(groundBudget * mult));
+        containerBudget = Mathf.Max(0, Mathf.RoundToInt(containerBudget * mult));
 
         if (logSpawnDetails)
-            Debug.Log($"[MapSpawnController] 예산: Ground={groundBudget}, Container={containerBudget} " +
-                      $"(night={isNight}, interior={isInterior})");
+            Debug.Log($"[MapSpawnController] 예산(뽑기): Ground={groundBudget}, Container={containerBudget} " +
+                      $"(region={regionId}, night={isNight}, interior={isInterior})");
 
-        // 3. 아이템 풀 생성
-        var groundItems = GenerateItemPool(groundBudget, regionId, isNight);
-        var containerItems = GenerateItemPool(containerBudget, regionId, isNight);
+        FillContainers(regionId, isNight, containerBudget);
+        FillGround(regionId, isNight, groundBudget);
 
-        // 4. 분배
-        DistributeToPoints(groundItems, groundPoints, ItemSpawnPoint.SpawnType.Ground);
-        DistributeToContainers(containerItems, containerPoints);
-
-        // 5. 통계 로그
-        if (logSpawnDetails)
-            LogStats();
+        if (logSpawnDetails) LogStats();
     }
 
-    /// <summary>Fixed 포인트는 각자 자체 스폰</summary>
-    void SpawnFixedItems()
+    /// <summary>고철이 나오는 오브젝트 — 계산대·금고·좌판. 예산과 무관하게 늘 채운다.
+    /// (2026-09-11 검증: 좌판을 보통 상자와 같이 섞었더니 Zone1 상자 117개 중 예산 42뽑기에 밀려 좌판 4개가 전부 비었다 → 고철 0)</summary>
+    static bool IsSpecial(string kind) => kind == "register" || kind == "safe" || kind == "stall";
+
+    /// <summary>상자 채우기 — 고철 오브젝트(계산대·금고·좌판) 먼저(늘), 나머지는 섞은 순서로 예산이 닿는 데까지.</summary>
+    void FillContainers(string regionId, bool night, int budget)
     {
-        for (int i = 0; i < fixedPoints.Count; i++)
+        var special = new List<LootContainer>();
+        var normal = new List<LootContainer>();
+        for (int i = 0; i < containerPoints.Count; i++)
         {
-            // ItemSpawnPoint.DoSpawn()이 Start에서 호출되므로,
-            // 여기서는 별도 처리 불필요 (Fixed는 자체 처리)
-        }
-    }
-
-    /// <summary>
-    /// 프로파일 기반으로 아이템 인스턴스 풀 생성.
-    /// 카테고리 → 희귀도 → 해당 조건의 아이템 중 랜덤 선택.
-    /// </summary>
-    List<ItemInstance> GenerateItemPool(int budget, string regionId, bool isNight)
-    {
-        var result = new List<ItemInstance>(budget);
-        if (budget <= 0) return result;
-
-        float[] rarityWeights = profile.GetRarityWeights(isNight);
-        float[] categoryWeights = profile.GetCategoryWeights();
-
-        // ItemDatabase에서 지역 + 카테고리별 아이템 캐시
-        var itemsByCategory = BuildCategoryCache(regionId);
-
-        for (int i = 0; i < budget; i++)
-        {
-            // 카테고리 선택
-            var category = (ItemCategory)WeightedRandom(categoryWeights);
-
-            // 해당 카테고리에 아이템이 없으면 다른 카테고리 시도
-            if (!itemsByCategory.ContainsKey(category) || itemsByCategory[category].Count == 0)
-            {
-                category = FindFallbackCategory(itemsByCategory, categoryWeights);
-                if (!itemsByCategory.ContainsKey(category)) continue;
-            }
-
-            var candidates = itemsByCategory[category];
-
-            // 희귀도 선택
-            var rarity = (ItemRarity)WeightedRandom(rarityWeights);
-
-            // 해당 희귀도 아이템 필터링
-            var filtered = FilterByRarity(candidates, rarity);
-
-            // 정확한 희귀도가 없으면 가장 가까운 것으로
-            if (filtered.Count == 0)
-                filtered = FindClosestRarity(candidates, rarity);
-
-            if (filtered.Count == 0) continue;
-
-            // 랜덤 선택
-            var chosen = filtered[Random.Range(0, filtered.Count)];
-            int count = chosen.maxStack > 1
-                ? Random.Range(1, Mathf.Min(chosen.maxStack, 5) + 1)
-                : 1;
-
-            result.Add(new ItemInstance(chosen, count));
-
-            // 통계
-            TrackStats(chosen);
-        }
-
-        return result;
-    }
-
-    /// <summary>지역 기반 카테고리별 아이템 캐시 구축</summary>
-    Dictionary<ItemCategory, List<ItemData>> BuildCategoryCache(string regionId)
-    {
-        var cache = new Dictionary<ItemCategory, List<ItemData>>();
-
-        var allItems = ItemDatabase.GetAll();
-        if (allItems == null) return cache;
-
-        foreach (var item in allItems)
-        {
-            // 지역 필터: 공용 아이템 + 해당 지역 전용 아이템만
-            if (!string.IsNullOrEmpty(item.primaryRegionId) && item.primaryRegionId != regionId)
-                continue;
-
-            // 열쇠/스토리 아이템은 Fixed로만 스폰 (예산 풀에서 제외)
-            if (item.category == ItemCategory.Key) continue;
-
-            if (!cache.ContainsKey(item.category))
-                cache[item.category] = new List<ItemData>();
-
-            cache[item.category].Add(item);
-        }
-
-        return cache;
-    }
-
-    List<ItemData> FilterByRarity(List<ItemData> items, ItemRarity target)
-    {
-        var result = new List<ItemData>();
-        for (int i = 0; i < items.Count; i++)
-        {
-            if (items[i].rarity == target)
-                result.Add(items[i]);
-        }
-        return result;
-    }
-
-    /// <summary>정확한 희귀도가 없으면 가장 가까운 낮은 등급으로</summary>
-    List<ItemData> FindClosestRarity(List<ItemData> items, ItemRarity target)
-    {
-        // 낮은 등급부터 올라가며 찾기
-        for (int delta = 1; delta <= 4; delta++)
-        {
-            int lower = (int)target - delta;
-            int higher = (int)target + delta;
-
-            if (lower >= 0)
-            {
-                var result = FilterByRarity(items, (ItemRarity)lower);
-                if (result.Count > 0) return result;
-            }
-            if (higher <= 4)
-            {
-                var result = FilterByRarity(items, (ItemRarity)higher);
-                if (result.Count > 0) return result;
-            }
-        }
-        return new List<ItemData>();
-    }
-
-    ItemCategory FindFallbackCategory(Dictionary<ItemCategory, List<ItemData>> cache, float[] weights)
-    {
-        // 가중치 순으로 비어있지 않은 카테고리 반환
-        var sorted = new List<(ItemCategory cat, float w)>();
-        for (int i = 0; i < weights.Length; i++)
-        {
-            if (weights[i] > 0 && cache.ContainsKey((ItemCategory)i) && cache[(ItemCategory)i].Count > 0)
-                sorted.Add(((ItemCategory)i, weights[i]));
-        }
-
-        if (sorted.Count == 0) return ItemCategory.Misc;
-
-        float total = 0;
-        for (int i = 0; i < sorted.Count; i++) total += sorted[i].w;
-        float roll = Random.Range(0f, total);
-        float cum = 0;
-        for (int i = 0; i < sorted.Count; i++)
-        {
-            cum += sorted[i].w;
-            if (roll <= cum) return sorted[i].cat;
-        }
-        return sorted[sorted.Count - 1].cat;
-    }
-
-    /// <summary>Ground 아이템을 스폰 포인트들에 균등 분배</summary>
-    void DistributeToPoints(List<ItemInstance> items, List<ItemSpawnPoint> points,
-                            ItemSpawnPoint.SpawnType type)
-    {
-        if (points.Count == 0 || items.Count == 0) return;
-
-        // 셔플
-        ShuffleList(items);
-
-        int perPoint = Mathf.Max(1, items.Count / points.Count);
-        int idx = 0;
-
-        for (int p = 0; p < points.Count && idx < items.Count; p++)
-        {
-            // 마지막 포인트는 남은 아이템 전부
-            int count = (p == points.Count - 1)
-                ? items.Count - idx
-                : Mathf.Min(perPoint, items.Count - idx);
-
-            for (int i = 0; i < count && idx < items.Count; i++, idx++)
-            {
-                Vector3 pos = points[p].transform.position + new Vector3(
-                    Random.Range(-0.4f, 0.4f), 0f,
-                    Random.Range(-0.4f, 0.4f));
-                WorldItem.Drop(items[idx], pos, this);
-                totalSpawned++;
-            }
-        }
-    }
-
-    /// <summary>Container 아이템을 상자들에 분배</summary>
-    void DistributeToContainers(List<ItemInstance> items, List<ItemSpawnPoint> points)
-    {
-        if (points.Count == 0 || items.Count == 0) return;
-
-        ShuffleList(items);
-
-        // 각 상자에 연결된 LootContainer를 찾아서 배치
-        var containers = new List<LootContainer>();
-        for (int i = 0; i < points.Count; i++)
-        {
-            var lc = points[i].GetComponent<LootContainer>();
-            if (lc == null) lc = points[i].GetComponentInChildren<LootContainer>();
+            var p = containerPoints[i];
+            var lc = p.GetComponent<LootContainer>();
+            if (lc == null) lc = p.GetComponentInChildren<LootContainer>();
+            if (lc == null && p.transform.parent != null) lc = p.transform.parent.GetComponent<LootContainer>();
             if (lc == null)
             {
-                // 같은 GO 또는 부모에서 탐색
-                var parent = points[i].transform.parent;
-                if (parent != null) lc = parent.GetComponent<LootContainer>();
+                if (logSpawnDetails) Debug.LogWarning($"[MapSpawnController] 상자 앵커에 LootContainer 없음: {p.name}", p);
+                continue;
             }
-            if (lc != null) containers.Add(lc);
+            var list = IsSpecial(lc.LootKind) ? special : normal;
+            if (!list.Contains(lc)) list.Add(lc);
         }
+        Shuffle(normal);
 
-        if (containers.Count == 0)
+        int left = budget;
+        foreach (var c in special) FillOne(c, regionId, night, ref left, true);
+        foreach (var c in normal)
         {
-            // 컨테이너 없으면 바닥에 스폰
-            DistributeToPoints(items, points, ItemSpawnPoint.SpawnType.Ground);
-            return;
-        }
-
-        int idx = 0;
-        int perContainer = Mathf.Max(1, items.Count / containers.Count);
-
-        for (int c = 0; c < containers.Count && idx < items.Count; c++)
-        {
-            int count = (c == containers.Count - 1)
-                ? items.Count - idx
-                : Mathf.Min(perContainer, items.Count - idx);
-
-            for (int i = 0; i < count && idx < items.Count; i++, idx++)
-            {
-                if (containers[c].Grid.TryAutoPlace(items[idx]))
-                    totalSpawned++;
-            }
+            if (left <= 0) break;
+            FillOne(c, regionId, night, ref left, false);
         }
     }
 
-    /// <summary>프로파일 없을 때 기존 RegionLootCatalog 폴백</summary>
-    void FallbackRegionLootSpawn(string regionId, bool isNight)
+    void FillOne(LootContainer c, string regionId, bool night, ref int left, bool ignoreBudget)
     {
-        if (logSpawnDetails)
-            Debug.Log($"[MapSpawnController] 프로파일 없음 → RegionLootCatalog 폴백 ({regionId})");
+        if (!RegionLootCatalog.TryFindPool(regionId, c.LootKind, night, out var pool))
+        {
+            Debug.LogWarning($"[MapSpawnController] 루팅 표 없음: {regionId}/{c.LootKind}", c);
+            return;
+        }
+        int rolls = Mathf.Max(1, pool.rollCount);
+        for (int i = 0; i < rolls; i++)
+        {
+            if (!ignoreBudget)
+            {
+                if (left <= 0) return;
+                left--;
+            }
+            var it = RegionLootCatalog.RollOnce(pool);
+            if (it != null && c.AddItem(it)) Track(it);
+        }
+    }
 
-        // 각 스폰 포인트가 자체 Start()에서 스폰하도록 내버려둠
-        // (ItemSpawnPoint.useRegionLoot = true 상태)
+    /// <summary>바닥 — 섞은 지점마다 최대 2개씩(예전엔 마지막 지점에 남은 걸 전부 몰아 15개 더미가 생겼다).</summary>
+    void FillGround(string regionId, bool night, int budget)
+    {
+        if (groundPoints.Count == 0 || budget <= 0) return;
+        if (!RegionLootCatalog.TryFindPool(regionId, "ground", night, out var pool))
+        {
+            Debug.LogWarning($"[MapSpawnController] 바닥 루팅 표 없음: {regionId}");
+            return;
+        }
+        var pts = new List<ItemSpawnPoint>(groundPoints);
+        Shuffle(pts);
+        int left = budget;
+        for (int pass = 0; pass < MaxPerGroundPoint && left > 0; pass++)
+            for (int p = 0; p < pts.Count && left > 0; p++)
+            {
+                left--;
+                var it = RegionLootCatalog.RollOnce(pool);
+                if (it == null) continue;
+                Vector3 pos = pts[p].transform.position + new Vector3(Random.Range(-0.4f, 0.4f), 0f, Random.Range(-0.4f, 0.4f));
+                WorldItem.Drop(it, pos, this);
+                Track(it);
+            }
     }
 
     // ── 유틸리티 ──
 
-    /// <summary>가중치 배열에서 랜덤 인덱스 선택</summary>
-    static int WeightedRandom(float[] weights)
-    {
-        float total = 0f;
-        for (int i = 0; i < weights.Length; i++) total += weights[i];
-        if (total <= 0f) return 0;
-
-        float roll = Random.Range(0f, total);
-        float cum = 0f;
-        for (int i = 0; i < weights.Length; i++)
-        {
-            cum += weights[i];
-            if (roll <= cum) return i;
-        }
-        return weights.Length - 1;
-    }
-
-    static void ShuffleList<T>(List<T> list)
+    static void Shuffle<T>(List<T> list)
     {
         for (int i = list.Count - 1; i > 0; i--)
         {
             int j = Random.Range(0, i + 1);
-            var tmp = list[i];
-            list[i] = list[j];
-            list[j] = tmp;
+            (list[i], list[j]) = (list[j], list[i]);
         }
     }
 
-    void TrackStats(ItemData item)
+    void Track(ItemInstance it)
     {
-        if (!rarityStats.ContainsKey(item.rarity))
-            rarityStats[item.rarity] = 0;
-        rarityStats[item.rarity]++;
-
-        if (!categoryStats.ContainsKey(item.category))
-            categoryStats[item.category] = 0;
-        categoryStats[item.category]++;
+        totalSpawned++;
+        if (it?.data == null) return;
+        rarityStats.TryGetValue(it.data.rarity, out int r); rarityStats[it.data.rarity] = r + 1;
+        categoryStats.TryGetValue(it.data.category, out int c); categoryStats[it.data.category] = c + 1;
     }
 
     void LogStats()
     {
         var sb = new System.Text.StringBuilder();
         sb.AppendLine($"[MapSpawnController] 스폰 완료: 총 {totalSpawned}개");
-
         sb.Append("  희귀도: ");
-        foreach (var kv in rarityStats)
-            sb.Append($"{kv.Key}={kv.Value} ");
+        foreach (var kv in rarityStats) sb.Append($"{kv.Key}={kv.Value} ");
         sb.AppendLine();
-
         sb.Append("  카테고리: ");
-        foreach (var kv in categoryStats)
-            sb.Append($"{kv.Key}={kv.Value} ");
-
+        foreach (var kv in categoryStats) sb.Append($"{kv.Key}={kv.Value} ");
         Debug.Log(sb.ToString());
     }
 
     // ── 외부 API ──
 
-    /// <summary>수동 리스폰 (맵 재입장 등)</summary>
+    /// <summary>수동 리스폰 — 기존 내용물 위에 **더한다**(비우지 않는다).</summary>
     public void Respawn()
     {
         hasSpawned = false;
@@ -466,14 +254,9 @@ public class MapSpawnController : MonoBehaviour
     }
 
     /// <summary>런타임 프로파일 교체</summary>
-    public void SetProfile(MapSpawnProfile newProfile)
-    {
-        profile = newProfile;
-    }
+    public void SetProfile(MapSpawnProfile newProfile) => profile = newProfile;
 
     /// <summary>스폰 통계 반환</summary>
     public (int total, Dictionary<ItemRarity, int> rarity, Dictionary<ItemCategory, int> category) GetStats()
-    {
-        return (totalSpawned, new Dictionary<ItemRarity, int>(rarityStats), new Dictionary<ItemCategory, int>(categoryStats));
-    }
+        => (totalSpawned, new Dictionary<ItemRarity, int>(rarityStats), new Dictionary<ItemCategory, int>(categoryStats));
 }

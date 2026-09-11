@@ -59,6 +59,7 @@ public static class KoLabels
         },
         ["region_loot.csv"] = RegionLoot,
         ["region_loot.txt"] = RegionLoot,
+        ["loot_tables.txt"] = RegionLoot,   // 2026-09-11 지역 × 상자 종류 표(같은 컬럼 — tier 칸 = 상자 종류)
         ["barter.csv"] = new Dictionary<string, string>
         {
             { "npc",     "NPC" },
