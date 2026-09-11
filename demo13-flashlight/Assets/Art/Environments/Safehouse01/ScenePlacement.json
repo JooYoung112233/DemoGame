@@ -1,0 +1,70 @@
+{
+  "scene": "Assets/Scenes/Hideout.unity",
+  "roomSize": "6 x 4 metres",
+  "scale": "(1.00, 1.00, 1.00)",
+  "facilities": [
+    {
+      "key": "bed",
+      "model": "Cot01",
+      "position": "(5.45, 0.00, 6.04)",
+      "stand": "(6.11, 0.00, 5.18)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "radio",
+      "model": "Radio01",
+      "position": "(7.62, 0.93, 5.85)",
+      "stand": "(6.95, 0.00, 5.39)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "workbench",
+      "model": "Workbench01",
+      "position": "(8.07, 0.00, 5.59)",
+      "stand": "(7.61, 0.00, 4.93)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "stash",
+      "model": "StorageChest01",
+      "position": "(5.64, 0.00, 3.84)",
+      "stand": "(6.05, 0.00, 4.41)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "medical",
+      "model": "MedicalBox01",
+      "position": "(9.66, 1.20, 4.63)",
+      "stand": "(9.28, 0.00, 4.13)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "cooking",
+      "model": "CookingBench_Temporary",
+      "position": "(4.43, 0.00, 4.31)",
+      "stand": "(4.82, 0.00, 4.88)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "dispatch",
+      "model": "MapBoard01",
+      "position": "(8.28, 1.94, 5.91)",
+      "stand": "(7.60, 0.00, 4.84)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "generator",
+      "model": "Generator01",
+      "position": "(8.58, 0.00, 2.52)",
+      "stand": "(8.00, 0.00, 2.92)",
+      "interaction": "Generic"
+    },
+    {
+      "key": "idle",
+      "model": "Stool01",
+      "position": "(7.66, 0.00, 3.79)",
+      "stand": "(7.23, 0.00, 3.87)",
+      "interaction": "Generic"
+    }
+  ]
+}

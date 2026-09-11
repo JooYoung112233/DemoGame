@@ -1,0 +1,41 @@
+{
+  "source": "Assets\\ExplosiveLLC\\RPG Character Mecanim Animation Pack FREE\\Animations\\2Hand-Sword\\RPG-Character@2Hand-Sword-Attack5.FBX",
+  "action": "AxeChop01",
+  "frames": [
+    1,
+    37
+  ],
+  "fps": 30,
+  "seconds": 1.2,
+  "mapped_bones": {
+    "Hips": "B_Pelvis",
+    "Spine": "B_Spine1",
+    "Chest": "B_Spine2",
+    "Neck": "B_Neck",
+    "Head": "B_Head",
+    "Clavicle.L": "B_L_Clavicle",
+    "UpperArm.L": "B_L_UpperArm",
+    "Forearm.L": "B_L_Forearm",
+    "Hand.L": "B_L_Hand",
+    "Thigh.L": "B_L_Thigh",
+    "Shin.L": "B_L_Calf",
+    "Foot.L": "B_L_Foot",
+    "Clavicle.R": "B_R_Clavicle",
+    "UpperArm.R": "B_R_UpperArm",
+    "Forearm.R": "B_R_Forearm",
+    "Hand.R": "B_R_Hand",
+    "Thigh.R": "B_R_Thigh",
+    "Shin.R": "B_R_Calf",
+    "Foot.R": "B_R_Foot"
+  },
+  "leg_scale": 0.5059623268499718,
+  "floor_offset_m": 0.032854706048965454,
+  "min_sole_height_after_offset": 0.0,
+  "geometry_and_weights_unchanged": true,
+  "existing_actions_preserved": true,
+  "existing_actions_digest": "300d5669ce956be5da55a45a44b547625aa34546de707132a5702a435ef957c7",
+  "humanoid_validated": false,
+  "approval": "pending",
+  "head_gaze_adjusted": false,
+  "head_pitch_lift_degrees": 0
+}

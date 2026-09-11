@@ -1,0 +1,19 @@
+{
+  "status": "runtime_applied_isolated_checks_passed",
+  "prefab": "D:/Demo/demo13-flashlight/Assets/ChibiSurvivor/Bandit/SimpleBandit/SimpleBandit.prefab",
+  "weapon_prefab": "D:/Demo/demo13-flashlight/Assets/ChibiSurvivor/Bandit/SimpleBandit/Weapons/BanditClub.prefab",
+  "blender_source": "D:/Demo/demo13-flashlight/Assets/ChibiSurvivor/Bandit/SimpleBandit/BlenderSource~/SimpleBandit_Combat.blend",
+  "video": "Bandit_Combat_Review.mp4",
+  "video_capture": "Actual Unity Animator evaluated at 30 Hz; meshes baked per frame for two-angle review",
+  "video_seconds": 10,
+  "motions": ["Bandit_BatIdle", "Bandit_BatWalk", "Bandit_BatRun", "Bandit_BatAttack"],
+  "attack_seconds": 1.44,
+  "controller_parameters": {"Speed": "0 idle, 1 walk, 2 run", "Attack": "single-hit trigger, automatic return"},
+  "weapon_attachment": "Rigid MeshRenderer under HandSocket.R; source character and player animations preserved",
+  "validation": ["BlenderCheck.json", "UnityCheck.json", "CaptureStatus.json", "CaptureSamples.json"],
+  "gameplay_replacement_applied": true,
+  "runtime_validation": "RuntimeCheck.json",
+  "next_step": "Full raid playtest to assess combat pacing at the gameplay camera distance.",
+  "runtime_timing": {"windup_end": 0.30, "impact": 0.385, "clock": "EnemyController damage clock"},
+  "build_order": ["build_simple_bandit.py (only for body changes)", "setup_simple_bandit.cs (only after body rebuild)", "build_simple_bandit_combat.py", "setup_simple_bandit_combat.cs", "verify_simple_bandit_combat.cs", "capture_simple_bandit_combat.cs", "package_simple_bandit_review.py"]
+}

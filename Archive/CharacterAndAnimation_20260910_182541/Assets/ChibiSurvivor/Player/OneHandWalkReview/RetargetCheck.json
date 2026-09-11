@@ -1,0 +1,32 @@
+{
+  "source": "ExplosiveLLC Unarmed-Strafe-Forward with authored right-arm sword carry",
+  "action": "Walk_OneHand_Sword",
+  "frames": [
+    1,
+    25
+  ],
+  "fps": 30,
+  "seconds": 0.8,
+  "head_gaze_adjusted": true,
+  "geometry_and_weights_unchanged": true,
+  "existing_actions_preserved": true,
+  "unchanged_actions_digest": "fe238f9a8a0fd1e2d7405d50081de0f449fef1de11ee4e68bb4f97a7df5af7a9",
+  "lower_body_and_left_arm_unchanged": true,
+  "changed_bones": [
+    "Forearm.R",
+    "Hand.R",
+    "UpperArm.R"
+  ],
+  "weapon_surface_intersections": [],
+  "min_blade_height_m": 0.6522517204284668,
+  "approval": "pending",
+  "humanoid_validated": false,
+  "preview_description": "Blender guard-walk adaptation: source gait with authored right-arm sword carry and removable sword proxy.",
+  "loop_seam_max_vertex_m": 0.00011143107868875317,
+  "review_findings": [
+    "Existing sleeve geometry and weights have not been modified.",
+    "Head gaze adjusted; original oscillation preserved.",
+    "No Unity Humanoid Avatar validation performed."
+  ],
+  "preview": "Blender guard-walk adaptation: source gait with authored right-arm sword carry and removable sword proxy."
+}

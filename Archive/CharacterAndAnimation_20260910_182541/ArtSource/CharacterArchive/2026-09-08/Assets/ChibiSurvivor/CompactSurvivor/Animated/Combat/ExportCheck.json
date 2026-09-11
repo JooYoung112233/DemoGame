@@ -1,0 +1,46 @@
+{
+  "fbx_meshes": 13,
+  "fbx_bones": 23,
+  "clips": {
+    "Attack_OneHand": {
+      "frames": [
+        1,
+        40
+      ],
+      "max_loop_seam_m": 0.0,
+      "max_motion_m": 0.46958521502686734
+    },
+    "Idle": {
+      "frames": [
+        1,
+        91
+      ],
+      "max_loop_seam_m": 0.0,
+      "max_motion_m": 0.01508644389419431
+    },
+    "Run": {
+      "frames": [
+        1,
+        21
+      ],
+      "max_loop_seam_m": 0.0,
+      "max_motion_m": 0.2864900182455435
+    },
+    "Walk": {
+      "frames": [
+        1,
+        31
+      ],
+      "max_loop_seam_m": 0.0,
+      "max_motion_m": 0.14327961770050357
+    }
+  },
+  "glb_animations": [
+    "Attack_OneHand",
+    "Idle",
+    "Run",
+    "Walk"
+  ],
+  "glb_skinned_mesh_nodes": 13,
+  "unity_checked": false
+}

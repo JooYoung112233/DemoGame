@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60d7863c3de5f054fac23b83dab5f1fb, type: 3}
+  m_Name: Shop_scavenger
+  m_EditorClassIdentifier: Game.Scripts::ShopData
+  shopId: scavenger
+  shopName: "회수꾼 물자"
+  stock:
+  - {fileID: 11400000, guid: dcff95c536f0bed43bd685d3fce684ba, type: 2}
+  - {fileID: 11400000, guid: 1976dc33a61044eaada4a6f6f3190ab6, type: 2}
+  - {fileID: 11400000, guid: bbf9ba9b9f7447e0a12a8cc11bcf6c27, type: 2}
+  - {fileID: 11400000, guid: 63792546bcc848a08033d8e17afb4ef8, type: 2}
+  - {fileID: 11400000, guid: 9f5da3b5f1ad4ea495d128bd8980bd58, type: 2}
+  - {fileID: 11400000, guid: 31c4fef5d42b4274b7160cd529c51a06, type: 2}
+  - {fileID: 11400000, guid: eec9f64859a24281a9fce85ff753961a, type: 2}
+  - {fileID: 11400000, guid: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6, type: 2}
+  buyRate: 1.2
+  sellRate: 0.4

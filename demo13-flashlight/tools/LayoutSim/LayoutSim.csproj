@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    맵 배치 시뮬레이터 — Unity 없이 그레이박스 빌더를 그대로 실행해 연결성을 검사한다.
+    ★ Assets/ **밖**에 있어야 한다. 안에 두면 유니티가 Stubs.cs를 같이 컴파일해
+      진짜 UnityEngine 타입과 충돌한다.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>disable</Nullable>
+    <LangVersion>9.0</LangVersion>
+    <DefineConstants>UNITY_EDITOR</DefineConstants>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AssemblyName>LayoutSim</AssemblyName>
+    <RootNamespace>LayoutSim</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 검사 대상 = 실제 빌더 소스. 복사하지 않고 직접 참조하므로 항상 최신이다. -->
+    <Compile Include="../../Assets/Editor/Zone1GreyboxLayout.cs" />
+    <Compile Include="../../Assets/Editor/ScrapMarketGreyboxLayout.cs" />
+    <Compile Include="Stubs.cs" />
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c1a4c71717c7e24c98ddaff2395df52, type: 3}
+  m_Name: floor_0001
+  m_EditorClassIdentifier: Game.Scripts::Prop2DDefinition
+  propId: floor_0001
+  displayName: floor_0001
+  category: 0
+  sprite: {fileID: 21300000, guid: 29b7edc4440692a42a61b95a0e79e42d, type: 3}
+  material: {fileID: 2100000, guid: 8f1cf44743a69da4e8f6c70e2fbd2362, type: 2}
+  sortingLayer: Ground
+  sortingOffset: -5
+  drawMode: 2
+  tiledSize: {x: 64, y: 64}
+  tileMode: 0
+  prefab: {fileID: 5150069028411347808, guid: 7248630dd433d0145a3ea3660d40db52, type: 3}
+  colliderMode: 0
+  isTrigger: 1
+  boxSizeScale: {x: 1, y: 1}
+  boxOffset: {x: 0, y: 0}
+  compositeBoxes: []
+  castShadow: 0
+  shadowCasting: 0
+  shadowAlphaCutoff: 0.1
+  function: 0
+  interactType: 0
+  functionPrompt: 
+  interactRange: 1.5
+  spawnPointId: default
+  lootGridWidth: 4
+  lootGridHeight: 5
+  lootUseRegionLoot: 1
+  noVisual: 0
+  itemId: 
+  itemCount: 1
+  npcId: 
+  doorLockType: 0
+  doorKeyId: 
+  doorQuestId: 
+  triggerTargetScene: 
+  triggerTargetSpawnId: 
+  triggerSize: {x: 2, y: 2}
+  triggerAutoEnter: 1

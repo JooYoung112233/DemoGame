@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a89e73a0aac8e2443a4ec19f3c23d473, type: 3}
+  m_Name: district_warden
+  m_EditorClassIdentifier: Game.Scripts::NPCData
+  npcId: district_warden
+  displayName: "\uAD6C\uC5ED \uAD00\uB9AC\uC778"
+  role: "\uAD00\uB9AC\uC778"
+  initialAffinity: 10
+  initialTrust: 5
+  initialFear: 0
+  defaultDialogues:
+  - id: greet
+    lines:
+    - "\uC790\uB9BF\uC138\uB294 \uBE5A\uC73C\uB85C \uB2EC\uC544\uB1A8\uB2E4."
+    - "\uAC1A\uC744 \uC0DD\uAC01\uC740 \uD558\uACE0 \uC788\uACE0?"
+    conditions:
+      minAffinity: 0
+      minTrust: 0
+      minFear: 0
+      requiredQuest: 
+      requiredFlag: 
+    priority: 0
+  eventDialogues:
+  - id: trade
+    triggerCondition:
+      minAffinity: 30
+      minTrust: 0
+      minFear: 0
+      requiredQuest: 
+      requiredFlag: 
+    npcLines:
+    - "...\uC790\uB124\uD55C\uD14C\uB9CC \uD2B9\uBCC4\uD788. \uBCF4\uAE09\uD488 \uC880
+      \uC788\uC5B4."
+    choices:
+    - text: "\uBCF4\uAE09\uD488 \uBCF4\uAE30"
+      affinityChange: 0
+      trustChange: 0
+      fearChange: 0
+      reputationChange: 0
+      resultLines: []
+      triggerQuest: 
+      setFlag: 
+      openShop: 1
+    - text: "\uB2E4\uC74C\uC5D0"
+      affinityChange: 0
+      trustChange: 0
+      fearChange: 0
+      reputationChange: 0
+      resultLines:
+      - "\uAE09\uD558\uC9C0 \uC54A\uC73C\uBA74 \uB2E4\uC74C\uC5D0."
+      triggerQuest: 
+      setFlag: 
+      openShop: 0
+    oneShot: 0
+  shopData: {fileID: 11400000, guid: 8b4e2c3d5f6a7b8091a2b3c4d5e6f7a9, type: 2}
+  availableQuests: []
+  shopInventory: []

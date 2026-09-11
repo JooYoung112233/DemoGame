@@ -1,0 +1,3633 @@
+{
+  "geometry_weights_rig_animation_preserved": true,
+  "invariant": "c1899c3b682ad96a53b0f0dfc766fba61565f1cf3154b9da3122a792c1b5c04a",
+  "resolution": 2048,
+  "charts": 326,
+  "regions": {
+    "FACE_BODY": [
+      0.02,
+      0.62,
+      0.44,
+      0.36
+    ],
+    "SHIRT": [
+      0.48,
+      0.62,
+      0.5,
+      0.36
+    ],
+    "TROUSERS": [
+      0.02,
+      0.28,
+      0.44,
+      0.32
+    ],
+    "CAP": [
+      0.48,
+      0.3,
+      0.3,
+      0.3
+    ],
+    "BACKPACK": [
+      0.79,
+      0.3,
+      0.19,
+      0.3
+    ],
+    "SMALL_PARTS": [
+      0.02,
+      0.02,
+      0.96,
+      0.24
+    ]
+  },
+  "coverage": 0.3466377258300781,
+  "layout": [
+    {
+      "part": "Hero_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1803,
+        792,
+        141,
+        86
+      ],
+      "faces": 21
+    },
+    {
+      "part": "Hero_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1625,
+        622,
+        136,
+        154
+      ],
+      "faces": 24
+    },
+    {
+      "part": "Hero_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1625,
+        792,
+        73,
+        154
+      ],
+      "faces": 16
+    },
+    {
+      "part": "Hero_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1777,
+        622,
+        136,
+        154
+      ],
+      "faces": 24
+    },
+    {
+      "part": "Hero_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1714,
+        792,
+        73,
+        154
+      ],
+      "faces": 16
+    },
+    {
+      "part": "Hero_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1797,
+        1056,
+        121,
+        65
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BackpackClosure",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1636,
+        308,
+        14,
+        58
+      ],
+      "faces": 6
+    },
+    {
+      "part": "Hero_BackpackClosure",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1764,
+        507,
+        16,
+        14
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_BackpackClosure",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1666,
+        308,
+        14,
+        58
+      ],
+      "faces": 6
+    },
+    {
+      "part": "Hero_BackpackClosure",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1696,
+        308,
+        14,
+        58
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_BackpackClosure",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1726,
+        308,
+        14,
+        58
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_BackpackClosure",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1796,
+        507,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BackpackFlap",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1797,
+        1143,
+        156,
+        14
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_BackpackFlap",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1969,
+        1143,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BackpackFlap",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1625,
+        962,
+        53,
+        78
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_BackpackFlap",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1625,
+        1206,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BackpackFlap",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1694,
+        962,
+        53,
+        78
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_BackpackFlap",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1625,
+        1143,
+        156,
+        47
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_BackpackFlap",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1625,
+        1056,
+        156,
+        71
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_BackpackFlap",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        1763,
+        962,
+        142,
+        72
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Belt",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        48,
+        308,
+        169,
+        111
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Belt",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        811,
+        435,
+        152,
+        17
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Belt",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1147,
+        435,
+        66,
+        17
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_Belt",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        979,
+        435,
+        152,
+        17
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Belt",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1229,
+        435,
+        66,
+        17
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_Belt",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        233,
+        308,
+        169,
+        111
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BeltBuckle",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1381,
+        435,
+        14,
+        16
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_BeltBuckle",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1411,
+        435,
+        14,
+        16
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_BeltBuckle",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1311,
+        435,
+        19,
+        16
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_BeltBuckle",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1346,
+        435,
+        19,
+        16
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_BeltBuckle",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1694,
+        507,
+        19,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BeltBuckle",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1729,
+        507,
+        19,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BootShaft_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        480,
+        308,
+        64,
+        71
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BootShaft_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        127,
+        435,
+        37,
+        56
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_BootShaft_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1756,
+        308,
+        63,
+        56
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_BootShaft_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        180,
+        435,
+        37,
+        56
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_BootShaft_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1835,
+        308,
+        63,
+        56
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_BootShaft_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        640,
+        308,
+        62,
+        70
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BootShaft_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        560,
+        308,
+        64,
+        71
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_BootShaft_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        233,
+        435,
+        37,
+        56
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_BootShaft_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1914,
+        308,
+        63,
+        56
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_BootShaft_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        286,
+        435,
+        37,
+        56
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_BootShaft_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        48,
+        435,
+        63,
+        56
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_BootShaft_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        718,
+        308,
+        62,
+        70
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Boot_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1318,
+        48,
+        78,
+        123
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Boot_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        475,
+        435,
+        63,
+        36
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Boot_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        994,
+        308,
+        105,
+        58
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Boot_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1478,
+        308,
+        63,
+        58
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Boot_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1115,
+        308,
+        105,
+        58
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Boot_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1690,
+        48,
+        60,
+        118
+      ],
+      "faces": 5
+    },
+    {
+      "part": "Hero_Boot_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1412,
+        48,
+        78,
+        123
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Boot_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        554,
+        435,
+        63,
+        36
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Boot_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1236,
+        308,
+        105,
+        58
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Boot_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1557,
+        308,
+        63,
+        58
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Boot_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1357,
+        308,
+        105,
+        58
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Boot_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1766,
+        48,
+        60,
+        118
+      ],
+      "faces": 5
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        991,
+        622,
+        247,
+        198
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        991,
+        992,
+        185,
+        86
+      ],
+      "faces": 14
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1393,
+        992,
+        149,
+        60
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1192,
+        992,
+        185,
+        86
+      ],
+      "faces": 18
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        991,
+        1094,
+        149,
+        60
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1254,
+        622,
+        230,
+        169
+      ],
+      "faces": 65
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        991,
+        836,
+        223,
+        140
+      ],
+      "faces": 32
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1230,
+        836,
+        223,
+        140
+      ],
+      "faces": 32
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1554,
+        1170,
+        18,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        991,
+        1170,
+        195,
+        20
+      ],
+      "faces": 14
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        991,
+        1206,
+        18,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1202,
+        1170,
+        88,
+        17
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1241,
+        1094,
+        216,
+        24
+      ],
+      "faces": 16
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1306,
+        1170,
+        88,
+        17
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1156,
+        1094,
+        69,
+        33
+      ],
+      "faces": 61
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1091,
+        1206,
+        16,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1123,
+        1206,
+        16,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1155,
+        1206,
+        16,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1410,
+        1170,
+        20,
+        17
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1482,
+        1170,
+        20,
+        14
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1025,
+        1206,
+        17,
+        14
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1446,
+        1170,
+        20,
+        17
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1518,
+        1170,
+        20,
+        14
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_Cap",
+      "region": "CAP",
+      "rect_pixels": [
+        1058,
+        1206,
+        17,
+        14
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        737,
+        1847,
+        32,
+        29
+      ],
+      "faces": 72
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        406,
+        1909,
+        22,
+        25
+      ],
+      "faces": 63
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        818,
+        1909,
+        14,
+        20
+      ],
+      "faces": 144
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        48,
+        1954,
+        35,
+        14
+      ],
+      "faces": 54
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        150,
+        1954,
+        33,
+        14
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        785,
+        1847,
+        32,
+        29
+      ],
+      "faces": 72
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        444,
+        1909,
+        22,
+        25
+      ],
+      "faces": 63
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        848,
+        1909,
+        14,
+        20
+      ],
+      "faces": 144
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        99,
+        1954,
+        35,
+        14
+      ],
+      "faces": 54
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        199,
+        1954,
+        33,
+        14
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        389,
+        1954,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        419,
+        1954,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        323,
+        1954,
+        17,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        356,
+        1954,
+        17,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        248,
+        1954,
+        25,
+        14
+      ],
+      "faces": 67
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        449,
+        1954,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        479,
+        1954,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        509,
+        1954,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        539,
+        1954,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        569,
+        1954,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        289,
+        1954,
+        18,
+        14
+      ],
+      "faces": 26
+    },
+    {
+      "part": "Hero_FaceDetails",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        599,
+        1954,
+        14,
+        14
+      ],
+      "faces": 10
+    },
+    {
+      "part": "Hero_Forearm_-1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        511,
+        1847,
+        33,
+        35
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Forearm_-1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        598,
+        1592,
+        49,
+        114
+      ],
+      "faces": 22
+    },
+    {
+      "part": "Hero_Forearm_-1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        250,
+        1592,
+        71,
+        114
+      ],
+      "faces": 28
+    },
+    {
+      "part": "Hero_Forearm_-1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        663,
+        1592,
+        49,
+        114
+      ],
+      "faces": 22
+    },
+    {
+      "part": "Hero_Forearm_-1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        337,
+        1592,
+        71,
+        114
+      ],
+      "faces": 28
+    },
+    {
+      "part": "Hero_Forearm_-1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        195,
+        1847,
+        37,
+        39
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Forearm_1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        560,
+        1847,
+        33,
+        35
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Forearm_1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        728,
+        1592,
+        49,
+        114
+      ],
+      "faces": 22
+    },
+    {
+      "part": "Hero_Forearm_1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        424,
+        1592,
+        71,
+        114
+      ],
+      "faces": 28
+    },
+    {
+      "part": "Hero_Forearm_1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        793,
+        1592,
+        49,
+        114
+      ],
+      "faces": 22
+    },
+    {
+      "part": "Hero_Forearm_1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        511,
+        1592,
+        71,
+        114
+      ],
+      "faces": 28
+    },
+    {
+      "part": "Hero_Forearm_1",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        248,
+        1847,
+        37,
+        39
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        48,
+        1724,
+        113,
+        107
+      ],
+      "faces": 161
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        724,
+        1441,
+        188,
+        117
+      ],
+      "faces": 295
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        304,
+        1724,
+        114,
+        104
+      ],
+      "faces": 163
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        562,
+        1724,
+        28,
+        63
+      ],
+      "faces": 17
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        649,
+        1724,
+        27,
+        55
+      ],
+      "faces": 17
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        177,
+        1724,
+        111,
+        106
+      ],
+      "faces": 161
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        48,
+        1592,
+        186,
+        116
+      ],
+      "faces": 295
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        434,
+        1724,
+        112,
+        103
+      ],
+      "faces": 163
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        606,
+        1724,
+        27,
+        63
+      ],
+      "faces": 11
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        692,
+        1724,
+        26,
+        54
+      ],
+      "faces": 10
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        629,
+        1954,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        489,
+        1441,
+        219,
+        125
+      ],
+      "faces": 64
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        659,
+        1954,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        878,
+        1909,
+        14,
+        19
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        689,
+        1954,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Hair",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        249,
+        1277,
+        196,
+        139
+      ],
+      "faces": 64
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        482,
+        1909,
+        25,
+        23
+      ],
+      "faces": 60
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        266,
+        1909,
+        19,
+        27
+      ],
+      "faces": 24
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        86,
+        1909,
+        29,
+        27
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        301,
+        1909,
+        19,
+        27
+      ],
+      "faces": 24
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        131,
+        1909,
+        29,
+        27
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        523,
+        1909,
+        25,
+        23
+      ],
+      "faces": 60
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        564,
+        1909,
+        25,
+        23
+      ],
+      "faces": 60
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        336,
+        1909,
+        19,
+        27
+      ],
+      "faces": 24
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        176,
+        1909,
+        29,
+        27
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        371,
+        1909,
+        19,
+        27
+      ],
+      "faces": 24
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        221,
+        1909,
+        29,
+        27
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_Hands",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        605,
+        1909,
+        25,
+        23
+      ],
+      "faces": 60
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        461,
+        1277,
+        182,
+        135
+      ],
+      "faces": 125
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        659,
+        1277,
+        181,
+        135
+      ],
+      "faces": 72
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        245,
+        1441,
+        106,
+        135
+      ],
+      "faces": 47
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        48,
+        1441,
+        181,
+        135
+      ],
+      "faces": 70
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        367,
+        1441,
+        106,
+        135
+      ],
+      "faces": 47
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        48,
+        1277,
+        185,
+        148
+      ],
+      "faces": 81
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        646,
+        1909,
+        27,
+        20
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        689,
+        1909,
+        27,
+        20
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        866,
+        1724,
+        33,
+        46
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        609,
+        1847,
+        16,
+        35
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        48,
+        1847,
+        33,
+        46
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        641,
+        1847,
+        16,
+        35
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        833,
+        1847,
+        22,
+        29
+      ],
+      "faces": 44
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        719,
+        1954,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        749,
+        1954,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        871,
+        1847,
+        22,
+        29
+      ],
+      "faces": 44
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        779,
+        1954,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        809,
+        1954,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        732,
+        1909,
+        27,
+        20
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        97,
+        1847,
+        33,
+        46
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        775,
+        1909,
+        27,
+        20
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        673,
+        1847,
+        16,
+        35
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        146,
+        1847,
+        33,
+        46
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        705,
+        1847,
+        16,
+        35
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        909,
+        1847,
+        22,
+        29
+      ],
+      "faces": 44
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        839,
+        1954,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        869,
+        1954,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        48,
+        1909,
+        22,
+        29
+      ],
+      "faces": 44
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        899,
+        1954,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Head",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        48,
+        1984,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        457,
+        908,
+        165,
+        103
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        638,
+        908,
+        157,
+        90
+      ],
+      "faces": 18
+    },
+    {
+      "part": "Hero_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        221,
+        1035,
+        79,
+        90
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        48,
+        1035,
+        157,
+        90
+      ],
+      "faces": 18
+    },
+    {
+      "part": "Hero_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        316,
+        1035,
+        79,
+        90
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_Hips",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        268,
+        908,
+        173,
+        110
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_JacketBody",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1764,
+        1277,
+        235,
+        155
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_JacketBody",
+      "region": "SHIRT",
+      "rect_pixels": [
+        991,
+        1277,
+        234,
+        238
+      ],
+      "faces": 44
+    },
+    {
+      "part": "Hero_JacketBody",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1548,
+        1277,
+        92,
+        218
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_JacketBody",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1241,
+        1277,
+        234,
+        238
+      ],
+      "faces": 44
+    },
+    {
+      "part": "Hero_JacketBody",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1656,
+        1277,
+        92,
+        218
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_JacketBody",
+      "region": "SHIRT",
+      "rect_pixels": [
+        991,
+        1531,
+        235,
+        121
+      ],
+      "faces": 41
+    },
+    {
+      "part": "Hero_JacketOpening",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1491,
+        1277,
+        41,
+        237
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternAccent",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        415,
+        435,
+        14,
+        37
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternAccent",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        339,
+        435,
+        22,
+        37
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternAccent",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        445,
+        435,
+        14,
+        37
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternAccent",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        377,
+        435,
+        22,
+        37
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternAccent",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1546,
+        507,
+        22,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternAccent",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1584,
+        507,
+        22,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternBlock",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        796,
+        308,
+        37,
+        62
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_LanternBlock",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        849,
+        308,
+        37,
+        62
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_LanternBlock",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        902,
+        308,
+        30,
+        62
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_LanternBlock",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        948,
+        308,
+        30,
+        62
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_LanternBlock",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        633,
+        435,
+        30,
+        30
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternBlock",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        679,
+        435,
+        30,
+        30
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternLoop",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        725,
+        435,
+        27,
+        18
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_LanternLoop",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1622,
+        507,
+        20,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_LanternLoop",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        768,
+        435,
+        27,
+        18
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_LanternLoop",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1658,
+        507,
+        20,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Lapel_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1202,
+        1783,
+        61,
+        77
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Lapel_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1279,
+        1783,
+        61,
+        77
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Neck",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        734,
+        1724,
+        50,
+        46
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Neck",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        301,
+        1847,
+        38,
+        35
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_Neck",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        409,
+        1847,
+        35,
+        35
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_Neck",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        355,
+        1847,
+        38,
+        35
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_Neck",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        460,
+        1847,
+        35,
+        35
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_Neck",
+      "region": "FACE_BODY",
+      "rect_pixels": [
+        800,
+        1724,
+        50,
+        46
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_PackStrap_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        776,
+        48,
+        29,
+        131
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_PackStrap_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1150,
+        48,
+        26,
+        128
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_PackStrap_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1060,
+        48,
+        29,
+        128
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_PackStrap_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1234,
+        48,
+        26,
+        126
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_PackStrap_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        128,
+        48,
+        146,
+        144
+      ],
+      "faces": 5
+    },
+    {
+      "part": "Hero_PackStrap_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1826,
+        507,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_PackStrap_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        290,
+        48,
+        146,
+        144
+      ],
+      "faces": 5
+    },
+    {
+      "part": "Hero_PackStrap_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        821,
+        48,
+        29,
+        131
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_PackStrap_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1192,
+        48,
+        26,
+        128
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_PackStrap_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1105,
+        48,
+        29,
+        128
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_PackStrap_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1276,
+        48,
+        26,
+        126
+      ],
+      "faces": 4
+    },
+    {
+      "part": "Hero_PackStrap_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        452,
+        48,
+        146,
+        144
+      ],
+      "faces": 5
+    },
+    {
+      "part": "Hero_PackStrap_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1856,
+        507,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_PackStrap_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        614,
+        48,
+        146,
+        144
+      ],
+      "faces": 5
+    },
+    {
+      "part": "Hero_RolledSleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1242,
+        1531,
+        99,
+        109
+      ],
+      "faces": 19
+    },
+    {
+      "part": "Hero_RolledSleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1157,
+        1940,
+        91,
+        26
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_RolledSleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1783,
+        1889,
+        67,
+        27
+      ],
+      "faces": 7
+    },
+    {
+      "part": "Hero_RolledSleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1569,
+        1889,
+        91,
+        27
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_RolledSleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1866,
+        1889,
+        67,
+        27
+      ],
+      "faces": 7
+    },
+    {
+      "part": "Hero_RolledSleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1472,
+        1531,
+        98,
+        105
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_RolledSleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1357,
+        1531,
+        99,
+        109
+      ],
+      "faces": 19
+    },
+    {
+      "part": "Hero_RolledSleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1264,
+        1940,
+        91,
+        26
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_RolledSleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        991,
+        1940,
+        67,
+        27
+      ],
+      "faces": 7
+    },
+    {
+      "part": "Hero_RolledSleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1074,
+        1940,
+        67,
+        27
+      ],
+      "faces": 7
+    },
+    {
+      "part": "Hero_RolledSleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1676,
+        1889,
+        91,
+        27
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_RolledSleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1586,
+        1531,
+        98,
+        105
+      ],
+      "faces": 9
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1426,
+        1889,
+        127,
+        32
+      ],
+      "faces": 94
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1719,
+        1783,
+        127,
+        44
+      ],
+      "faces": 134
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1242,
+        1983,
+        14,
+        14
+      ],
+      "faces": 6
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1178,
+        1983,
+        16,
+        14
+      ],
+      "faces": 6
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1281,
+        1889,
+        129,
+        33
+      ],
+      "faces": 91
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1574,
+        1783,
+        129,
+        48
+      ],
+      "faces": 139
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1272,
+        1983,
+        14,
+        14
+      ],
+      "faces": 5
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1210,
+        1983,
+        16,
+        14
+      ],
+      "faces": 5
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1882,
+        1940,
+        21,
+        20
+      ],
+      "faces": 10
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1737,
+        1940,
+        129,
+        20
+      ],
+      "faces": 24
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1110,
+        1983,
+        19,
+        14
+      ],
+      "faces": 10
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1145,
+        1983,
+        17,
+        14
+      ],
+      "faces": 3
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        991,
+        1983,
+        103,
+        15
+      ],
+      "faces": 19
+    },
+    {
+      "part": "Hero_ScarfFront",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1302,
+        1983,
+        14,
+        14
+      ],
+      "faces": 2
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1085,
+        1889,
+        82,
+        34
+      ],
+      "faces": 21
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1826,
+        1531,
+        108,
+        102
+      ],
+      "faces": 46
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1862,
+        1783,
+        78,
+        35
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1183,
+        1889,
+        82,
+        34
+      ],
+      "faces": 21
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        991,
+        1889,
+        78,
+        35
+      ],
+      "faces": 20
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1700,
+        1531,
+        110,
+        104
+      ],
+      "faces": 32
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1371,
+        1940,
+        78,
+        25
+      ],
+      "faces": 16
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1559,
+        1940,
+        73,
+        25
+      ],
+      "faces": 16
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1465,
+        1940,
+        78,
+        25
+      ],
+      "faces": 16
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1648,
+        1940,
+        73,
+        25
+      ],
+      "faces": 16
+    },
+    {
+      "part": "Hero_ScarfWrap",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1088,
+        1783,
+        98,
+        89
+      ],
+      "faces": 32
+    },
+    {
+      "part": "Hero_Sleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        991,
+        1668,
+        115,
+        99
+      ],
+      "faces": 15
+    },
+    {
+      "part": "Hero_Sleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1471,
+        1668,
+        92,
+        90
+      ],
+      "faces": 19
+    },
+    {
+      "part": "Hero_Sleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1253,
+        1668,
+        93,
+        90
+      ],
+      "faces": 30
+    },
+    {
+      "part": "Hero_Sleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1579,
+        1668,
+        92,
+        90
+      ],
+      "faces": 19
+    },
+    {
+      "part": "Hero_Sleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1356,
+        1783,
+        93,
+        56
+      ],
+      "faces": 18
+    },
+    {
+      "part": "Hero_Sleeve_-1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1903,
+        1668,
+        81,
+        90
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Sleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1122,
+        1668,
+        115,
+        99
+      ],
+      "faces": 15
+    },
+    {
+      "part": "Hero_Sleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1687,
+        1668,
+        92,
+        90
+      ],
+      "faces": 19
+    },
+    {
+      "part": "Hero_Sleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1795,
+        1668,
+        92,
+        90
+      ],
+      "faces": 19
+    },
+    {
+      "part": "Hero_Sleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1362,
+        1668,
+        93,
+        90
+      ],
+      "faces": 30
+    },
+    {
+      "part": "Hero_Sleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        1465,
+        1783,
+        93,
+        56
+      ],
+      "faces": 18
+    },
+    {
+      "part": "Hero_Sleeve_1",
+      "region": "SHIRT",
+      "rect_pixels": [
+        991,
+        1783,
+        81,
+        90
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Sole_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1506,
+        48,
+        76,
+        121
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Sole_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        284,
+        507,
+        65,
+        15
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Sole_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1685,
+        435,
+        102,
+        15
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Sole_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        365,
+        507,
+        65,
+        15
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Sole_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1803,
+        435,
+        102,
+        15
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Sole_-1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        866,
+        48,
+        81,
+        128
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Sole_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1598,
+        48,
+        76,
+        121
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_Sole_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        446,
+        507,
+        65,
+        15
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Sole_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        48,
+        507,
+        102,
+        15
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Sole_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        527,
+        507,
+        65,
+        15
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Sole_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        166,
+        507,
+        102,
+        15
+      ],
+      "faces": 8
+    },
+    {
+      "part": "Hero_Sole_1",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        963,
+        48,
+        81,
+        128
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1441,
+        435,
+        106,
+        15
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        608,
+        507,
+        15,
+        15
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1563,
+        435,
+        106,
+        15
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        639,
+        507,
+        15,
+        15
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        418,
+        308,
+        15,
+        106
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        449,
+        308,
+        15,
+        106
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1886,
+        507,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1190,
+        507,
+        53,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1916,
+        507,
+        14,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1259,
+        507,
+        53,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1328,
+        507,
+        53,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1397,
+        507,
+        53,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        670,
+        507,
+        244,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1466,
+        507,
+        24,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        930,
+        507,
+        244,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        1506,
+        507,
+        24,
+        14
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        48,
+        48,
+        24,
+        244
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_SwordProxy",
+      "region": "SMALL_PARTS",
+      "rect_pixels": [
+        88,
+        48,
+        24,
+        244
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        601,
+        1035,
+        80,
+        85
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        139,
+        1141,
+        66,
+        39
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        467,
+        1141,
+        72,
+        37
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        221,
+        1141,
+        66,
+        39
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        555,
+        1141,
+        72,
+        37
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_TrouserCuff_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        411,
+        1035,
+        79,
+        86
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        697,
+        1035,
+        80,
+        85
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        303,
+        1141,
+        66,
+        39
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        643,
+        1141,
+        72,
+        37
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        385,
+        1141,
+        66,
+        39
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        731,
+        1141,
+        72,
+        37
+      ],
+      "faces": 12
+    },
+    {
+      "part": "Hero_TrouserCuff_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        506,
+        1035,
+        79,
+        86
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        793,
+        1035,
+        75,
+        79
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        536,
+        581,
+        78,
+        311
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        48,
+        581,
+        106,
+        311
+      ],
+      "faces": 54
+    },
+    {
+      "part": "Hero_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        630,
+        581,
+        78,
+        311
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        170,
+        581,
+        106,
+        311
+      ],
+      "faces": 54
+    },
+    {
+      "part": "Hero_TrouserLeg_-1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        48,
+        908,
+        94,
+        111
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        48,
+        1141,
+        75,
+        79
+      ],
+      "faces": 1
+    },
+    {
+      "part": "Hero_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        724,
+        581,
+        78,
+        311
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        292,
+        581,
+        106,
+        311
+      ],
+      "faces": 54
+    },
+    {
+      "part": "Hero_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        818,
+        581,
+        78,
+        311
+      ],
+      "faces": 36
+    },
+    {
+      "part": "Hero_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        414,
+        581,
+        106,
+        311
+      ],
+      "faces": 54
+    },
+    {
+      "part": "Hero_TrouserLeg_1",
+      "region": "TROUSERS",
+      "rect_pixels": [
+        158,
+        908,
+        94,
+        111
+      ],
+      "faces": 1
+    }
+  ]
+}

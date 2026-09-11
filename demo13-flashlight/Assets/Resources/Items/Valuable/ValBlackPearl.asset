@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
+  m_Name: ValBlackPearl
+  m_EditorClassIdentifier: Game.Scripts::ItemData
+  itemId: val_black_pearl
+  displayName: "\uAC80\uC740 \uC9C4\uC8FC"
+  description: "\uC774\uC0C1\uD604\uC0C1 \uC9C0\uC5ED \uD76C\uADC0\uD488. \uC804\uB2F9\uD3EC
+    \uC8FC\uC778\uC774 \uC88B\uC544\uD55C\uB2E4."
+  icon: {fileID: 0}
+  gridWidth: 1
+  gridHeight: 1
+  category: 4
+  rarity: 3
+  maxStack: 1
+  weight: 0.05
+  sellPrice: 250000
+  buyPrice: 0
+  isUsable: 0
+  useEffect: 0
+  effectValue: 0
+  hasDurability: 0
+  maxDurability: 100
+  durabilityCostPerUse: 50
+  worldDropPrefab: {fileID: 0}

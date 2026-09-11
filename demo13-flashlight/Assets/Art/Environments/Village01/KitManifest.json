@@ -1,0 +1,465 @@
+{
+  "units": "metres",
+  "assets": {
+    "StreetLamp01": {
+      "meshes": 10,
+      "triangles": 376,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            1.75
+          ],
+          "size": [
+            0.22,
+            0.22,
+            3.5
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    },
+    "Bench01": {
+      "meshes": 14,
+      "triangles": 616,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.49
+          ],
+          "size": [
+            1.72,
+            0.65,
+            0.98
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    },
+    "OilDrum01": {
+      "meshes": 9,
+      "triangles": 338,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.46
+          ],
+          "size": [
+            0.65,
+            0.65,
+            0.92
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    },
+    "Pallet01": {
+      "meshes": 9,
+      "triangles": 396,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.11
+          ],
+          "size": [
+            1.18,
+            0.96,
+            0.22
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    },
+    "Sandbags01": {
+      "meshes": 16,
+      "triangles": 704,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.34
+          ],
+          "size": [
+            1.88,
+            0.57,
+            0.68
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    },
+    "LowFence01": {
+      "meshes": 14,
+      "triangles": 616,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.6
+          ],
+          "size": [
+            2,
+            0.15,
+            1.2
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    },
+    "Window01": {
+      "meshes": 10,
+      "triangles": 440,
+      "colliders": [],
+      "uv_mapped": true
+    },
+    "Awning01": {
+      "meshes": 25,
+      "triangles": 1100,
+      "colliders": [],
+      "uv_mapped": true
+    },
+    "Shutter01": {
+      "meshes": 16,
+      "triangles": 704,
+      "colliders": [],
+      "uv_mapped": true
+    },
+    "NoticeBoard01": {
+      "meshes": 28,
+      "triangles": 1136,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            1.17
+          ],
+          "size": [
+            2.5,
+            0.3,
+            2.34
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    },
+    "PavingSlab01": {
+      "meshes": 3,
+      "triangles": 89,
+      "colliders": [],
+      "uv_mapped": true
+    },
+    "Curb01": {
+      "meshes": 2,
+      "triangles": 88,
+      "colliders": [],
+      "uv_mapped": true
+    },
+    "Drain01": {
+      "meshes": 12,
+      "triangles": 528,
+      "colliders": [],
+      "uv_mapped": true
+    },
+    "Tires01": {
+      "meshes": 39,
+      "triangles": 2016,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.37
+          ],
+          "size": [
+            0.72,
+            0.72,
+            0.74
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    },
+    "Rubble01": {
+      "meshes": 10,
+      "triangles": 440,
+      "colliders": [],
+      "uv_mapped": true
+    },
+    "Brazier01": {
+      "meshes": 16,
+      "triangles": 568,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.3
+          ],
+          "size": [
+            0.82,
+            0.82,
+            0.6
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    },
+    "ShopSign01": {
+      "meshes": 8,
+      "triangles": 256,
+      "colliders": [],
+      "uv_mapped": true
+    },
+    "Bollard01": {
+      "meshes": 3,
+      "triangles": 100,
+      "colliders": [
+        {
+          "center": [
+            0,
+            0,
+            0.45
+          ],
+          "size": [
+            0.19,
+            0.19,
+            0.9
+          ],
+          "parent": ""
+        }
+      ],
+      "uv_mapped": true
+    }
+  },
+  "palette": {
+    "Village_Olive": {
+      "color": [
+        0.135,
+        0.148,
+        0.102
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_OliveLight": {
+      "color": [
+        0.205,
+        0.215,
+        0.15
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_OliveDark": {
+      "color": [
+        0.075,
+        0.088,
+        0.061
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Steel": {
+      "color": [
+        0.048,
+        0.061,
+        0.058
+      ],
+      "metallic": 0.4,
+      "smoothness": 0.3,
+      "emission": 0
+    },
+    "Village_EdgeMetal": {
+      "color": [
+        0.13,
+        0.15,
+        0.14
+      ],
+      "metallic": 0.4,
+      "smoothness": 0.3,
+      "emission": 0
+    },
+    "Village_Wear": {
+      "color": [
+        0.255,
+        0.225,
+        0.153
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Wood": {
+      "color": [
+        0.185,
+        0.117,
+        0.065
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_WoodLight": {
+      "color": [
+        0.235,
+        0.159,
+        0.095
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_WoodDark": {
+      "color": [
+        0.117,
+        0.078,
+        0.047
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Canvas": {
+      "color": [
+        0.18,
+        0.185,
+        0.136
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Blanket": {
+      "color": [
+        0.075,
+        0.101,
+        0.092
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Linen": {
+      "color": [
+        0.4,
+        0.355,
+        0.257
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Rubber": {
+      "color": [
+        0.024,
+        0.028,
+        0.027
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Paper": {
+      "color": [
+        0.5,
+        0.447,
+        0.33
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Red": {
+      "color": [
+        0.24,
+        0.07,
+        0.041
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Glass": {
+      "color": [
+        0.067,
+        0.108,
+        0.119
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_LampGlow": {
+      "color": [
+        0.95,
+        0.59,
+        0.23
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 1.1
+    },
+    "Village_Grey": {
+      "color": [
+        0.18,
+        0.19,
+        0.17
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Concrete": {
+      "color": [
+        0.145,
+        0.151,
+        0.142
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_MapLine": {
+      "color": [
+        0.245,
+        0.253,
+        0.193
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    },
+    "Village_Ink": {
+      "color": [
+        0.085,
+        0.106,
+        0.096
+      ],
+      "metallic": 0,
+      "smoothness": 0.14,
+      "emission": 0
+    }
+  }
+}

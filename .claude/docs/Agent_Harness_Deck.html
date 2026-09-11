@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 에이전트 하네스 & 문서관리 방법론 — 신뢰도 검증 덱</title>
+<style>
+  :root{
+    --bg:#0a0e14; --panel:#121a26; --panel2:#0f1620; --ink:#e6edf3; --muted:#8b949e;
+    --border:#26303d; --accent:#58a6ff; --accent2:#7ee787;
+    --official:#3fb950; --empirical:#58a6ff; --consensus:#d29922; --anecdotal:#db6d28; --viral:#f85149;
+    --shadow:0 10px 40px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(1200px 800px at 75% -10%, #15233a 0%, var(--bg) 55%) fixed, var(--bg);
+    color:var(--ink); overflow:hidden;
+    font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo","Segoe UI",system-ui,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  code,.mono{font-family:"JetBrains Mono","Consolas","D2Coding",monospace}
+
+  /* progress + chrome */
+  #bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;z-index:50;transition:width .25s ease}
+  .chrome{position:fixed;z-index:40;color:var(--muted);font-size:12.5px;letter-spacing:.3px}
+  #section-label{bottom:18px;left:24px}
+  #counter{bottom:18px;right:24px}
+  #hint{top:16px;left:24px;opacity:.7}
+  #menuBtn{top:12px;right:20px;cursor:pointer;background:var(--panel);border:1px solid var(--border);color:var(--ink);
+    padding:6px 12px;border-radius:8px;font-size:13px}
+  #menuBtn:hover{border-color:var(--accent)}
+
+  /* slide area */
+  .stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:64px 56px 72px}
+  .slide{display:none;width:100%;max-width:1080px;animation:fade .4s ease}
+  .slide.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  .chip{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    color:var(--accent);background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);
+    padding:4px 12px;border-radius:999px;margin-bottom:18px}
+  h1{font-size:40px;line-height:1.2;font-weight:800;letter-spacing:-.5px;margin-bottom:14px}
+  h2{font-size:31px;line-height:1.25;font-weight:800;letter-spacing:-.4px;margin-bottom:18px}
+  h2 .em{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:18px;color:var(--muted);margin-bottom:24px}
+  p{font-size:17px;margin-bottom:12px}
+  ul{list-style:none;margin:6px 0 6px}
+  li{font-size:16.5px;margin:11px 0;padding-left:26px;position:relative}
+  li:before{content:"▸";position:absolute;left:0;color:var(--accent);font-weight:700}
+  li.no:before{content:"✕";color:var(--viral)}
+  li.ok:before{content:"✓";color:var(--official)}
+  strong{color:#fff;font-weight:700}
+  .muted{color:var(--muted)} .small{font-size:13.5px}
+  .src{margin-top:22px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px}
+  .src b{color:#b9c2cc;font-weight:600}
+
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);
+    border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+  .card h3{font-size:16px;margin-bottom:8px;color:#fff}
+  .card p,.card li{font-size:14.5px;margin:6px 0}
+  .card li{padding-left:22px}
+
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:14.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--accent);font-size:12.5px;text-transform:uppercase;letter-spacing:.4px}
+  tr:last-child td{border-bottom:none}
+  td.c{text-align:center;white-space:nowrap}
+
+  /* credibility badges */
+  .b{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:6px;white-space:nowrap}
+  .b.of{color:#0a0e14;background:var(--official)} .b.em{color:#0a0e14;background:var(--empirical)}
+  .b.co{color:#0a0e14;background:var(--consensus)} .b.an{color:#0a0e14;background:var(--anecdotal)}
+  .b.vi{color:#fff;background:var(--viral)}
+  .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:middle}
+
+  .big{display:flex;gap:26px;flex-wrap:wrap;margin:8px 0}
+  .stat{flex:1;min-width:150px;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center}
+  .stat .n{font-size:42px;font-weight:800;letter-spacing:-1px;line-height:1}
+  .stat .n.r{color:var(--viral)}.stat .n.g{color:var(--official)}.stat .n.b{color:var(--empirical)}.stat .n.y{color:var(--consensus)}
+  .stat .l{font-size:13.5px;color:var(--muted);margin-top:9px}
+
+  .quote{border-left:3px solid var(--accent);background:rgba(88,166,255,.06);padding:12px 18px;border-radius:0 10px 10px 0;
+    font-size:15.5px;color:#cdd6e0;margin:12px 0}
+  .warn{border-left:3px solid var(--viral);background:rgba(248,81,73,.07)}
+  .good{border-left:3px solid var(--official);background:rgba(63,185,80,.07)}
+  .kbd{font-family:monospace;background:var(--panel);border:1px solid var(--border);border-bottom-width:2px;border-radius:6px;padding:1px 7px;font-size:13px}
+
+  .navzone{position:fixed;top:0;bottom:0;width:22%;z-index:30;cursor:pointer}
+  #zprev{left:0}#znext{right:0;width:40%}
+
+  /* TOC overlay */
+  #toc{position:fixed;inset:0;background:rgba(5,8,12,.96);z-index:60;display:none;padding:48px 56px;overflow:auto}
+  #toc.open{display:block}
+  #toc h3{font-size:14px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin:22px 0 12px}
+  #toc .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .ti{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:11px 14px;cursor:pointer;font-size:14px;display:flex;gap:10px}
+  .ti:hover{border-color:var(--accent);background:#16202e}
+  .ti .num{color:var(--muted);font-family:monospace;font-size:12.5px;min-width:24px}
+  #toc .close{position:absolute;top:20px;right:28px;font-size:26px;color:var(--muted);cursor:pointer}
+  @media (max-width:720px){ .stage{padding:54px 22px 64px} h1{font-size:30px} h2{font-size:24px} .g2,.g3{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="hint" class="chrome"><span class="kbd">←</span> <span class="kbd">→</span> 이동 · <span class="kbd">M</span> 목차</div>
+<div id="menuBtn" class="chrome">☰ 목차</div>
+<div id="section-label" class="chrome"></div>
+<div id="counter" class="chrome"></div>
+<div class="navzone" id="zprev"></div>
+<div class="navzone" id="znext"></div>
+
+<div class="stage">
+
+<!-- 1 -->
+<section class="slide active" data-section="표지" data-title="표지">
+  <div class="chip">다출처 신뢰도 검증 · 2026-06-03</div>
+  <h1>AI 에이전트 <span style="color:var(--accent)">하네스</span> &amp; 문서관리 방법론</h1>
+  <p class="sub">— 하네스 · 컨텍스트 · CLAUDE.md · Skills · MCP · Subagents · Hooks · Obsidian/문서관리 —<br>
+  <strong>무엇이 진짜이고, 무엇이 바이럴(과장)인가</strong></p>
+  <div class="big">
+    <div class="stat"><div class="n b">50+</div><div class="l">교차검증 소스</div></div>
+    <div class="stat"><div class="n g">50</div><div class="l">3표 반론검증 통과 주장</div></div>
+    <div class="stat"><div class="n y">14</div><div class="l">정리 노트 + 매트릭스</div></div>
+    <div class="stat"><div class="n r">6</div><div class="l">적발한 바이럴 과장</div></div>
+  </div>
+  <div class="src">방법: 5각도 병렬 검색 → 소스 fetch → 3표 적대적 검증(2/3 반박 시 폐기) → 1차 출처 직접 인용 · deep-research 하네스 ×2</div>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-section="틀" data-title="신뢰도 등급 체계">
+  <div class="chip">읽는 법</div>
+  <h2>신뢰도 <span class="em">5등급</span> — 모든 주장에 배지를 붙였다</h2>
+  <table>
+    <tr><td class="c"><span class="b of">🟢 공식</span></td><td>벤더 1차 출처 (Anthropic·OpenAI 공식 docs·엔지니어링 블로그·명세)</td></tr>
+    <tr><td class="c"><span class="b em">🔵 실증</span></td><td>동료심사 논문 · 다중 벤더 재현 · 공개 벤치마크</td></tr>
+    <tr><td class="c"><span class="b co">🟡 실무합의</span></td><td>저명 실무자(Karpathy·Willison)·잘 관리되는 OSS의 폭넓은 합의</td></tr>
+    <tr><td class="c"><span class="b an">🟠 일화</span></td><td>단일 사례 또는 <strong>벤더 자체 내부 벤치마크</strong>(독립 재현 없음)</td></tr>
+    <tr><td class="c"><span class="b vi">🔴 바이럴</span></td><td>출처 약한 "N배 빨라진다" 류 — <strong>인용 시 주의 ⚠️</strong></td></tr>
+  </table>
+  <div class="quote warn">⚠️ 전체 한계: 이 분야 1차 근거는 대부분 <strong>단일 벤더(Anthropic)</strong>에서 나온다. "공식" ≠ "독립 검증". 특히 효과 <strong>수치</strong>는 벤더 내부 벤치다.</div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-section="틀" data-title="핵심 요약 7줄">
+  <div class="chip">한눈 요약</div>
+  <h2>결론: <span class="em">골격은 진짜, 수치·"최고" 주장은 과장</span></h2>
+  <ul>
+    <li><strong>컨텍스트가 왕</strong> — 윈도우가 차면 성능이 썩는다(context rot). 🔵 18모델·동료심사로 입증</li>
+    <li><strong>그래서 "적게·정확히"</strong> — 최소 고신호 토큰셋·JIT·`/clear`·메모리 외부화 🟢🔵</li>
+    <li><strong>에이전트 루프는 학술 계보</strong>(ReAct/Reflexion) 위. Anthropic은 "단순성 우선"을 공식 강조 🟢</li>
+    <li><strong>설정 3종 역할 분담</strong> — CLAUDE.md(권고)·Skills(온디맨드)·Hooks(강제)</li>
+    <li><strong>멀티에이전트는 조건부</strong> — 리서치엔 이득, 대부분 코딩엔 부적합(벤더 본인 인정)</li>
+    <li><strong>관리 도구</strong> — "로컬 평문 MD+git"이 AI 친화적, Obsidian은 그 UI</li>
+    <li class="no"><strong>체감 ≠ 실측</strong> — METR: AI로 19% 느려졌는데 빨라졌다 착각 🔵</li>
+  </ul>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-section="틀" data-title="METR 생산성 역설">
+  <div class="chip">가장 중요한 한 가지</div>
+  <h2>METR 역설 — <span style="color:var(--viral)">체감을 믿지 마라</span></h2>
+  <p class="sub">AI 도구 효과를 <strong>유일하게 RCT(무작위 대조)</strong>로 측정 — 숙련 개발자 16명 · 실제 이슈 246개</p>
+  <div class="big">
+    <div class="stat"><div class="n y">+24%</div><div class="l">빨라질 거라 <b>예측</b></div></div>
+    <div class="stat"><div class="n r">−19%</div><div class="l">실제로는 <b>더 느려짐</b></div></div>
+    <div class="stat"><div class="n r">+20%</div><div class="l">그런데도 빨라졌다 <b>착각</b></div></div>
+  </div>
+  <div class="quote warn">"N배 빨라졌다"는 <strong>자기보고를 신뢰하지 말 것.</strong> 항상 출처·측정을 요구하라.</div>
+  <div class="src"><span class="b em">🔵 실증</span> &nbsp; 한정: 자기 repo 잘 아는 숙련자·초기2025 도구 — 모든 맥락 일반화 금지 · <b>metr.org</b> 2025-07</div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-section="A. 하네스·컨텍스트" data-title="에이전트 루프 & 하네스">
+  <div class="chip">A · 02</div>
+  <h2>에이전트 루프 &amp; 하네스 <span class="b of">🟢 공식</span></h2>
+  <div class="grid g2">
+    <div class="card"><h3>Workflow vs Agent</h3>
+      <p><strong>Workflow</strong>: 사전정의된 <em>코드 경로</em>로 오케스트레이션</p>
+      <p><strong>Agent</strong>: LLM이 <em>스스로</em> 프로세스·도구 사용을 동적으로 지휘</p></div>
+    <div class="card"><h3>에이전트 루프</h3>
+      <p>"환경 피드백을 받아 <strong>도구를 루프에서 쓰는 LLM</strong>". 매 단계 환경의 ground truth로 진척 평가</p></div>
+  </div>
+  <div class="quote">하네스(scaffold) = 모델을 에이전트로 작동시키는 시스템. Claude Agent SDK는 <strong>여러 컨텍스트 윈도우에 걸친 루프</strong>로 동작.</div>
+  <p class="small">학술 뿌리 <span class="b em">🔵</span>: ReAct(2210.03629) · Reflexion(2303.11366) · Toolformer · Generative Agents — 마케팅 신조어가 아님</p>
+  <div class="src"><b>Anthropic</b> Building Effective Agents · Agent SDK</div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-section="A. 하네스·컨텍스트" data-title="5대 워크플로우 패턴 · 단순성">
+  <div class="chip">A · 02</div>
+  <h2>5대 패턴 &amp; <span class="em">"단순성 우선"</span> <span class="b of">🟢 공식</span></h2>
+  <div class="grid g3">
+    <div class="card"><h3>Prompt chaining</h3><p class="small">순차 연결 + 중간 검증 게이트</p></div>
+    <div class="card"><h3>Routing</h3><p class="small">분류 후 전문 경로로 분기</p></div>
+    <div class="card"><h3>Parallelization</h3><p class="small">독립 하위과제 동시 실행</p></div>
+    <div class="card" style="border-color:var(--accent)"><h3>Orchestrator-workers ★</h3><p class="small">중앙 LLM이 위임·종합 → <strong>subagent 공식 근거</strong></p></div>
+    <div class="card"><h3>Evaluator-optimizer</h3><p class="small">생성 ↔ 피드백 반복</p></div>
+    <div class="card good"><h3>설계 철학</h3><p class="small">"가장 단순한 해법부터, 입증될 때만 복잡성 추가"</p></div>
+  </div>
+  <div class="quote warn">⚠️ "에이전트·도구가 많을수록 좋다"는 통념을 <strong>Anthropic이 공식 부정</strong>. 에이전트는 지연·비용을 성능과 맞바꾼다.</div>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-section="A. 하네스·컨텍스트" data-title="컨텍스트 엔지니어링">
+  <div class="chip">A · 03</div>
+  <h2>컨텍스트 엔지니어링 <span class="b of">🟢 공식</span></h2>
+  <div class="quote">"추론 내내 <strong>최적의 토큰(정보) 집합을 큐레이션·유지</strong>하는 전략의 총체" — 프롬프트 한 번이 아니라 컨텍스트 윈도우 전체의 상태 관리</div>
+  <p>목표 = <strong>"가장 작은 고신호(high-signal) 토큰셋"</strong></p>
+  <div class="grid g2">
+    <div class="card"><h3>핵심 기법</h3><ul>
+      <li class="small">적정 고도 시스템 프롬프트</li><li class="small">JIT 로딩(경량 식별자→런타임 회수)</li>
+      <li class="small">Compaction(요약)</li><li class="small">메모리 외부화(NOTES.md)</li></ul></div>
+    <div class="card"><h3>Claude Code 정전 예시</h3>
+      <p class="small">선주입 = <span class="mono">CLAUDE.md</span> · 온디맨드 = <span class="mono">glob/grep</span> (just-in-time)</p>
+      <p class="small muted">최고 에이전트는 선주입+자율탐색 <strong>하이브리드</strong></p></div>
+  </div>
+  <div class="src"><b>Anthropic</b> Effective context engineering for AI agents</div>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-section="A. 하네스·컨텍스트" data-title="Context Rot 실증">
+  <div class="chip">A · 04</div>
+  <h2>"큰 윈도우 = 좋음"은 <span style="color:var(--viral)">틀렸다</span> <span class="b em">🔵 실증</span></h2>
+  <p class="sub">바이럴이 아니라 다중 벤더·동료심사로 입증된 실증 — Context Rot</p>
+  <div class="big">
+    <div class="stat"><div class="n r">11/13</div><div class="l">32K에서 단문 성능의<br><b>50% 미만</b>으로 하락 (NoLiMa)</div></div>
+    <div class="stat"><div class="n b">18</div><div class="l">모델·4벤더에서<br>비균일 저하 (Chroma)</div></div>
+    <div class="stat"><div class="n y">U자형</div><div class="l">정보가 <b>중간</b>이면<br>정확도 급락</div></div>
+  </div>
+  <ul>
+    <li><strong>실효 길이 ≪ 광고 길이</strong> — GPT-4o도 단문 99.3% → 32K 69.7%</li>
+    <li><strong>초점 프롬프트 우세</strong> — 관련 근거만 담은 짧은 프롬프트가 전체 장문을 능가(모든 계열)</li>
+  </ul>
+  <div class="src">Chroma Context Rot · Lost in the Middle(TACL) · NoLiMa(ICML'25) · RULER(COLM'24)</div>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-section="A. 하네스·컨텍스트" data-title="토큰 관리 기법">
+  <div class="chip">A · 04</div>
+  <h2>토큰 = 비용·지연 → <span class="em">관리 기법</span></h2>
+  <table>
+    <tr><th>기법</th><th>무엇</th></tr>
+    <tr><td class="mono">/clear</td><td>무관 작업 사이 컨텍스트 <strong>전체 리셋</strong> (가장 강력·단순)</td></tr>
+    <tr><td class="mono">/compact</td><td>히스토리 요약 — 코드·결정 보존, 중복 출력 폐기</td></tr>
+    <tr><td>context editing</td><td>한도 임박 시 stale 도구호출 자동 정리(서버사이드)</td></tr>
+    <tr><td>메모리 외부화</td><td>NOTES.md·claude-progress.txt로 컨텍스트 <strong>밖</strong> 저장</td></tr>
+    <tr><td>subagent</td><td>탐색을 격리해 요약만 회수</td></tr>
+    <tr><td>도구응답 절단</td><td>Claude Code 기본 <strong>25,000토큰</strong> 절단</td></tr>
+  </table>
+  <div class="quote">실패 패턴: "2회 교정 후에도 틀림" → <strong>/clear 후 더 나은 프롬프트로 새 세션</strong>이 긴 세션보다 거의 항상 낫다</div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-section="A. 하네스·컨텍스트" data-title="프롬프트 캐싱">
+  <div class="chip">A · 04</div>
+  <h2>프롬프트 캐싱 — 토큰=비용 직접 절감 <span class="b of">🟢 공식</span></h2>
+  <div class="grid g2">
+    <div class="card"><h3>Anthropic</h3>
+      <p>캐시 읽기 = 입력가의 <strong>0.1x (90%↓)</strong></p>
+      <p class="small">TTL 기본 <strong>5분</strong> / 선택 1시간 · 쓰기는 프리미엄(1.25~2x)</p>
+      <p class="small muted">5분캐시 1회 읽기부터, 1시간 2회부터 이득</p></div>
+    <div class="card"><h3>OpenAI</h3>
+      <p><strong>자동 적용</strong> · 지연 최대 80%↓</p>
+      <p class="small">모델별 차등: 4o <strong>50%</strong> / 4.1 <strong>75%</strong> / 5.x <strong>90%</strong></p>
+      <p class="small muted">⚠️ "90%"를 전체로 일반화 금지</p></div>
+  </div>
+  <div class="quote good">💡 코딩 에이전트: <strong>안정적 부분(시스템 프롬프트·도구정의)을 앞에</strong> 배치 → 캐시 적중↑</div>
+  <div class="src">⏱️ 시간민감: 가격·TTL은 자주 변동(2026-06 기준) · platform.claude.com · openai.com/pricing</div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-section="B. 설정·확장" data-title="CLAUDE.md">
+  <div class="chip">B · 05</div>
+  <h2>CLAUDE.md — 매 세션 읽는 설명서 <span class="b of">🟢 공식</span></h2>
+  <div class="grid g2">
+    <div class="card"><h3>4계층 (넓은→구체)</h3><ul>
+      <li class="small">Managed policy (조직)</li><li class="small">User <span class="mono">~/.claude/</span></li>
+      <li class="small">Project <span class="mono">./CLAUDE.md</span></li><li class="small">Local <span class="mono">.local.md</span></li></ul></div>
+    <div class="card"><h3>200줄 목표</h3>
+      <p class="small">"길수록 컨텍스트 소비·준수도↓"</p>
+      <p class="small">각 줄: <em>"빼면 Claude가 실수하나?"</em> 아니면 삭제</p>
+      <p class="small" style="color:var(--viral)">⚠️ 비대하면 실제 지시를 무시!</p></div>
+  </div>
+  <table>
+    <tr><th>✅ 넣기</th><th>❌ 빼기</th></tr>
+    <tr><td class="small">추측 불가 bash·스타일·테스트·아키텍처 결정</td><td class="small">코드 보면 아는 것·표준 관례·자주 바뀌는 정보</td></tr>
+  </table>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-section="B. 설정·확장" data-title="CLAUDE.md는 권고일 뿐">
+  <div class="chip">B · 05</div>
+  <h2>함정: CLAUDE.md는 <span style="color:var(--viral)">강제가 아니다</span></h2>
+  <div class="quote warn">CLAUDE.md는 시스템 프롬프트가 아니라 <strong>그 뒤의 user message</strong>로 전달 → "강제 설정이 아닌 <strong>컨텍스트</strong>"로 취급. 모호·충돌 시 준수 보장 없음.</div>
+  <ul>
+    <li class="no"><strong>"CLAUDE.md 한 장이면 완벽 제어"</strong> = <span class="b vi">🔴 바이럴</span> ⚠️</li>
+    <li class="ok">행동을 <strong>확실히 차단</strong>하려면 → <strong>PreToolUse Hook</strong>(결정론적) 사용</li>
+  </ul>
+  <div class="grid g2" style="margin-top:8px">
+    <div class="card"><h3>AGENTS.md 표준 <span class="b of">🟢</span></h3>
+      <p class="small"><strong>60k+ repos · 30+ 도구</strong>(Codex·Copilot·Cursor·Zed…) · Linux Foundation</p>
+      <p class="small muted">Claude Code는 CLAUDE.md만 읽음 → <span class="mono">@AGENTS.md</span> import로 연결</p></div>
+    <div class="card"><h3>Auto memory <span class="b of">🟢</span></h3>
+      <p class="small">Claude가 교정·선호 보고 스스로 노트. MEMORY.md 첫 200줄/25KB만 로드 → JIT</p></div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-section="B. 설정·확장" data-title="Agent Skills">
+  <div class="chip">B · 06</div>
+  <h2>Agent Skills — <span class="em">progressive disclosure</span> <span class="b of">🟢 공식</span></h2>
+  <p class="sub">"필요할 때 발견·로드하는 명령·스크립트·리소스 폴더" — 핵심은 필요한 만큼만 컨텍스트에 올림</p>
+  <table>
+    <tr><th>단계</th><th>로드되는 것</th><th>비유</th></tr>
+    <tr><td>① Startup</td><td>모든 skill의 <strong>name+description만</strong> 사전 로드</td><td class="muted">목차</td></tr>
+    <tr><td>② Trigger</td><td>관련 판단 시 <strong>전체 SKILL.md</strong></td><td class="muted">해당 챕터</td></tr>
+    <tr><td>③ On-demand</td><td>번들 파일·스크립트를 <strong>필요할 때만</strong></td><td class="muted">상세 부록</td></tr>
+  </table>
+  <div class="quote">번들 컨텍스트가 <strong>사실상 무제한</strong> · Claude.ai/Code/SDK/Platform 전반 이식 · <span class="mono">.claude/skills/&lt;name&gt;/SKILL.md</span></div>
+  <div class="src">name·description만 필수 · Simon Willison <span class="b co">🟡</span> 호평</div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-section="B. 설정·확장" data-title="MCP">
+  <div class="chip">B · 07</div>
+  <h2>MCP — "AI용 USB-C" <span class="b of">🟢 공식</span></h2>
+  <div class="grid g2">
+    <div class="card"><h3>정의 · 구조</h3>
+      <p class="small">AI 앱을 외부 데이터·도구에 연결하는 <strong>개방 표준</strong> · client-server</p>
+      <p class="small">3요소: <strong>Tools</strong>(호출) · <strong>Resources</strong>(읽기) · <strong>Prompts</strong>(템플릿)</p>
+      <p class="small muted">Claude·ChatGPT·VS Code·Cursor 횡단 지원</p></div>
+    <div class="card warn"><h3>보안 = 약한 고리 <span class="b em">🔵</span></h3>
+      <p class="small"><strong>Tool poisoning</strong>: 도구 설명에 악성 지시 → OWASP LLM Top10 <strong>#1</strong></p>
+      <p class="small">prompt injection · 정의 변조(rug pull) · lethal trifecta</p>
+      <p class="small" style="color:var(--viral)">⚠️ "붙이면 안전하게 만능" = 과장. 신뢰 서버만·권한 최소화</p></div>
+  </div>
+  <div class="src">modelcontextprotocol.io · OWASP MCP Top10 · CISA(2025-05) · Simon Willison</div>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-section="B. 설정·확장" data-title="Subagents · 멀티에이전트 논쟁">
+  <div class="chip">B · 08</div>
+  <h2>멀티에이전트 = <span style="color:var(--viral)">"N배 빠르다"는 조건부</span></h2>
+  <div class="grid g2">
+    <div class="card"><h3>찬성: Anthropic <span class="b an">🟠</span></h3>
+      <p class="small">멀티(Opus리드+Sonnet) <strong>+90.2%</strong> — 단 <strong>breadth-first 리서치 한정</strong>, 내부평가</p>
+      <p class="small">토큰 <strong>~15배</strong> · 토큰량이 성능분산 80% 설명</p></div>
+    <div class="card"><h3>반대: Cognition <span class="b co">🟡</span></h3>
+      <p class="small">"멀티에이전트 만들지 마라 — <strong>컨텍스트를 공유하라</strong>"</p>
+      <p class="small">병렬 서브에이전트는 <strong>암묵적 결정 충돌</strong>로 붕괴 → 단일 스레드</p></div>
+  </div>
+  <div class="quote warn"><strong>Anthropic 본인도 명시</strong>: "대부분의 코딩 작업은 리서치보다 병렬화 가능한 부분이 적다" → <strong>코딩엔 부적합</strong>. 외부재현(arXiv): 동일 토큰예산이면 단일이 멀티를 능가.</div>
+  <div class="src">두 글은 사실 정렬 — "right tool for the job"</div>
+</section>
+
+<!-- 16 -->
+<section class="slide" data-section="B. 설정·확장" data-title="올바른 오케스트레이션 vs 안티패턴">
+  <div class="chip">B · 08 · 실전</div>
+  <h2><span class="em">"메인에서 plan 먼저 → 위임"</span>은 비효율인가?</h2>
+  <div class="quote good">→ <strong>아니다. 그게 권장 패턴이다.</strong> plan을 메인에서 먼저 정의하면 그것이 서브에이전트의 <strong>공유 컨텍스트</strong>가 됨(Cognition 원칙①) + 메인이 종합 = orchestrator-workers.</div>
+  <p>효율을 가르는 건 "plan 했나"가 아니라 ↓</p>
+  <table>
+    <tr><th>기준</th><th class="c">✅ 잘 됨</th><th class="c">❌ 깨짐</th></tr>
+    <tr><td>하위작업 독립성</td><td>독립·읽기중심(탐색·검증)</td><td>맞물리는 쓰기(출력 충돌)</td></tr>
+    <tr><td>종합</td><td>메인이 요약 받아 해소</td><td>동급끼리 서로 덮어씀</td></tr>
+    <tr><td>비용 대비 가치</td><td>고가치·컨텍스트 초과</td><td>작은 작업에 15배 낭비</td></tr>
+  </table>
+  <p class="small">예: 이 리서치 fan-out(독립 검색→종합)=✅ 정석 · "덱을 조각내 동시작성"=❌ Flappy Bird식 불일치</p>
+</section>
+
+<!-- 17 -->
+<section class="slide" data-section="B. 설정·확장" data-title="Hooks · Plan mode">
+  <div class="chip">B · 09 · 10</div>
+  <h2>Hooks(강제) &amp; Plan mode <span class="b of">🟢 공식</span></h2>
+  <div class="grid g2">
+    <div class="card"><h3>Hooks = 결정론적 강제</h3>
+      <p class="small">"CLAUDE.md는 권고, <strong>Hook은 보장</strong>". 라이프사이클마다 스크립트 자동 실행</p>
+      <p class="small mono">PreToolUse·PostToolUse·Stop·SubagentStop·PreCompact…</p>
+      <p class="small">exit code <strong>2 = 차단</strong> · ⚠️ 사용자 권한 실행(악성 hook 주의)</p></div>
+    <div class="card"><h3>Plan mode = 탐색·계획 분리</h3>
+      <p class="small">Explore → Plan → Implement → Commit</p>
+      <p class="small">"엉뚱한 문제 풀기" 예방</p>
+      <p class="small muted">⚠️ 한 문장 diff면 <strong>건너뛰라</strong>(오버헤드)</p></div>
+  </div>
+  <div class="quote">용례: 편집 후 자동 lint · migrations 쓰기 차단 · 커밋 전 테스트 게이트(Stop hook)</div>
+</section>
+
+<!-- 18 -->
+<section class="slide" data-section="C. 문서·지식 관리" data-title="LLM Wiki 패턴">
+  <div class="chip">C · 11</div>
+  <h2>Karpathy <span class="em">LLM Wiki</span> — LLM이 유지보수하는 위키 <span class="b co">🟡</span></h2>
+  <div class="grid g2">
+    <div class="card"><h3>3계층</h3><ul>
+      <li class="small"><strong>Raw sources</strong> — 불변 원본(코드·로그)</li>
+      <li class="small"><strong>Wiki</strong> — LLM 생성 markdown</li>
+      <li class="small"><strong>Schema</strong> — CLAUDE.md/AGENTS.md</li></ul></div>
+    <div class="card"><h3>3연산</h3><ul>
+      <li class="small"><strong>Ingest</strong> — 1소스가 10~15페이지 갱신</li>
+      <li class="small"><strong>Query</strong> — 인용 답변, 좋으면 페이지로 환원</li>
+      <li class="small"><strong>Lint</strong> — 모순·stale·orphan 점검</li></ul></div>
+  </div>
+  <p class="small">부기: <span class="mono">index.md</span>(카탈로그) · <span class="mono">log.md</span>(append-only 활동기록)</p>
+  <div class="quote">핵심: 위키는 <strong>영속적·누적되는(compounding) 산물</strong> — 매번 다시 도출하지 않는다 <span class="b an">🟠 효과는 개념적</span></div>
+  <div class="src">이 vault의 <b>AN Games</b> 하네스 v2가 이 패턴 기반</div>
+</section>
+
+<!-- 19 -->
+<section class="slide" data-section="C. 문서·지식 관리" data-title="PKM 방법론 비교">
+  <div class="chip">C · 11</div>
+  <h2>전통 PKM 방법론 <span class="b co">🟡 실무합의</span></h2>
+  <table>
+    <tr><th>방법론</th><th>핵심</th><th>AI 적합성</th></tr>
+    <tr><td><strong>Zettelkasten</strong></td><td>원자적 노트 + 고유ID + 촘촘한 링크</td><td>링크 그래프 유리, 엄격 형식은 과함</td></tr>
+    <tr><td><strong>MOC</strong></td><td>허브 노트로 느슨하게 묶기(80/20)</td><td>LLM도 진입점으로 사용</td></tr>
+    <tr><td><strong>PARA</strong></td><td>Projects/Areas/Resources/Archives</td><td>사람 워크플로 중심</td></tr>
+    <tr><td><strong>Second Brain</strong></td><td>Capture·Organize·Distill·Express</td><td>ingest와 유사 철학</td></tr>
+  </table>
+  <div class="quote">차이: 전통 PKM은 <strong>사람이 유지보수</strong> · LLM Wiki는 <strong>LLM이 유지보수</strong>(연산·스키마·로그) — AI 시대의 결정적 진화</div>
+</section>
+
+<!-- 20 -->
+<section class="slide" data-section="C. 문서·지식 관리" data-title="도구 비교 — 사실 vs 의견">
+  <div class="chip">C · 12 · 핵심 질문</div>
+  <h2>Obsidian이 최고? — <span class="em">사실과 의견을 가르자</span></h2>
+  <div class="quote warn">🔴 바이럴(의견): "Obsidian/Notion이 무조건 최고" — 용도 안 가린 취향 싸움. (이 영역은 다출처 검증에서 통과 주장 0 = 객관 근거 빈약)</div>
+  <table>
+    <tr><th>🟢 검증가능 사실</th><th>근거</th></tr>
+    <tr><td><strong>Obsidian</strong> = 로컬 폴더의 평문 <span class="mono">.md</span> 파일(독자포맷 아님)</td><td class="small">obsidian.md/help</td></tr>
+    <tr><td><strong>Notion</strong> = 독자 블록 DB, 접근은 <strong>API만</strong>(평균 3 req/s, 블록 1000·500KB 제한)</td><td class="small">developers.notion.com</td></tr>
+    <tr><td><strong>순수 MD+git</strong> = diff·grep·버전관리 네이티브</td><td class="small">AGENTS.md·LLM Wiki substrate</td></tr>
+  </table>
+  <div class="quote good">결정적 차이: 코딩 에이전트는 <strong>파일시스템</strong>에서 동작 → <span class="mono">.md</span>는 직접 R/W, Notion은 API 뒤라 <strong>간접</strong>(rate limit·마크다운 손실)</div>
+</section>
+
+<!-- 21 -->
+<section class="slide" data-section="C. 문서·지식 관리" data-title="도구 비교 — 8축">
+  <div class="chip">C · 12</div>
+  <h2>AI 친화도 8축 비교</h2>
+  <table>
+    <tr><th>축</th><th class="c">MD+git</th><th class="c">Obsidian</th><th class="c">Logseq</th><th class="c">Foam(VSC)</th><th class="c">Notion</th></tr>
+    <tr><td>에이전트 filesystem 직접 R/W</td><td class="c">✅</td><td class="c">✅</td><td class="c">✅</td><td class="c">✅</td><td class="c" style="color:var(--viral)">❌ API</td></tr>
+    <tr><td>markdown 네이티브(diff)</td><td class="c">✅</td><td class="c">✅</td><td class="c">◐</td><td class="c">✅</td><td class="c" style="color:var(--viral)">❌ 블록</td></tr>
+    <tr><td>git 버전관리</td><td class="c">✅</td><td class="c">✅</td><td class="c">✅</td><td class="c">✅</td><td class="c" style="color:var(--viral)">❌</td></tr>
+    <tr><td>API 의존/rate-limit</td><td class="c">없음</td><td class="c">없음</td><td class="c">없음</td><td class="c">없음</td><td class="c" style="color:var(--anecdotal)">⚠️3/s</td></tr>
+    <tr><td>백링크/그래프</td><td class="c">✗</td><td class="c">✅</td><td class="c">✅</td><td class="c">◐</td><td class="c">✅</td></tr>
+    <tr><td>포맷 잠금</td><td class="c">없음</td><td class="c">없음</td><td class="c">없음</td><td class="c">없음</td><td class="c" style="color:var(--anecdotal)">⚠️</td></tr>
+    <tr><td>협업·비개발 공유</td><td class="c">✗</td><td class="c">◐</td><td class="c">◐</td><td class="c">✗</td><td class="c" style="color:var(--official)">✅</td></tr>
+  </table>
+  <p class="small">→ AI가 읽고·쓰고·수정하는 핵심 축에서 <strong>로컬 마크다운 진영이 압도</strong>. 협업만 Notion 우위.</p>
+</section>
+
+<!-- 22 -->
+<section class="slide" data-section="C. 문서·지식 관리" data-title="도구 비교 — 권고">
+  <div class="chip">C · 12 · 답</div>
+  <h2>용도별 권고 <span class="b co">🟡 사실기반 추론</span></h2>
+  <table>
+    <tr><th>용도</th><th>권고</th><th>이유</th></tr>
+    <tr><td><strong>AI로 코딩·분석하며 관리</strong>(이 사용자)</td><td>로컬 <strong>MD+git</strong>, UI는 <strong>Obsidian</strong></td><td class="small">에이전트가 직접 편집·grep, 코드와 같은 git</td></tr>
+    <tr><td>자동화·CLI 중심</td><td>순수 MD+git</td><td class="small">UI 오버헤드 0</td></tr>
+    <tr><td>VS Code서 코드+노트</td><td>Foam/Dendron</td><td class="small">같은 창</td></tr>
+    <tr><td>비개발자 협업·DB·웹공유</td><td><strong>Notion</strong></td><td class="small">구조화·권한·실시간(AI는 간접)</td></tr>
+  </table>
+  <div class="quote good">정답은 "Obsidian이 최고"가 아니라 <strong>"로컬 평문 마크다운이 AI 친화적이고, Obsidian은 그 좋은 UI"</strong>. 당신의 현재 셋업(git 안 vault를 AI가 .md로 직접 편집) = <strong>사실상 권고안 그 자체</strong>.</div>
+</section>
+
+<!-- 23 -->
+<section class="slide" data-section="C. 문서·지식 관리" data-title="코드↔문서 정합성">
+  <div class="chip">C · 13</div>
+  <h2>코드↔문서 정합성 — stale 방지 <span class="b co">🟡</span></h2>
+  <p class="sub">코드가 바뀌면 분석문서는 낡는다(stale). 어떻게 추적하나?</p>
+  <ul>
+    <li><strong>docs-as-code</strong> — 문서를 코드처럼: 평문·git·PR 리뷰·같은 repo</li>
+    <li><strong>심볼+git diff stale 감지</strong> — frontmatter <span class="mono">source_refs: "file::symbol"</span> → <span class="mono">git log --since=&lt;updated&gt;</span>로 바뀐 문서 플래그</li>
+  </ul>
+  <div class="quote warn">⚠️ 한계: 파일 단위 diff는 <strong>오탐 많음</strong>(4400줄 한 줄 바뀌어도 전 문서 플래그) → 심볼 단위로 좁히고 <strong>report-only</strong></div>
+  <div class="quote">권고: <strong>감지·플래그는 자동, 갱신은 사람 승인</strong>. "AI가 완전 자동 동기화" <span class="b an">🟠 미성숙</span></div>
+  <div class="src">이 vault <b>Analysis_AI_Convention §12</b> · lint_wiki.py가 실제 구현</div>
+</section>
+
+<!-- 24 -->
+<section class="slide" data-section="D. 종합" data-title="신뢰도 매트릭스">
+  <div class="chip">D · 14</div>
+  <h2>신뢰도 종합 매트릭스</h2>
+  <table>
+    <tr><th>방법론 / 주장</th><th class="c">등급</th></tr>
+    <tr><td>context rot · lost-in-the-middle · ReAct/Reflexion · METR · MCP 보안</td><td class="c"><span class="b em">🔵 실증</span></td></tr>
+    <tr><td>컨텍스트 엔지니어링·에이전트 루프·CLAUDE.md·Skills·MCP·Hooks·Plan·캐싱·Subagent 격리</td><td class="c"><span class="b of">🟢 공식</span></td></tr>
+    <tr><td>LLM Wiki·MOC·PARA·docs-as-code·"로컬MD+git 최적"(추론)</td><td class="c"><span class="b co">🟡 합의</span></td></tr>
+    <tr><td>+39%·+90.2%·−84% 수치 · "위키 compounding" · AI 자동 문서동기화</td><td class="c"><span class="b an">🟠 벤더/일화</span></td></tr>
+    <tr><td>"멀티=N배"·"CLAUDE.md면 완벽"·"Obsidian/Notion 절대최고"·자기보고 생산성</td><td class="c"><span class="b vi">🔴 바이럴</span></td></tr>
+  </table>
+  <div class="quote warn">수치는 의심하라: +39%·+90.2%·−84%는 대부분 <strong>벤더 내부 벤치</strong> → "내부·미검증" 꼬리표 필수</div>
+</section>
+
+<!-- 25 -->
+<section class="slide" data-section="D. 종합" data-title="바이럴 블랙리스트">
+  <div class="chip">D · 14</div>
+  <h2><span style="color:var(--viral)">바이럴 과장</span> 블랙리스트 — 인용 주의</h2>
+  <ul>
+    <li class="no">"멀티에이전트/병렬이면 무조건 N배 빠르다" → <strong>코딩엔 반증</strong></li>
+    <li class="no">"CLAUDE.md 한 장이면 완벽 제어" → 권고일 뿐, 강제는 <strong>Hook</strong></li>
+    <li class="no">"Obsidian(또는 Notion)이 그냥 최고" → <strong>용도로 갈라야</strong></li>
+    <li class="no">"컨텍스트 윈도우 크면 다 넣어도 됨" → <strong>context rot로 반증</strong></li>
+    <li class="no">"AI가 알아서 문서까지 항상 최신화" → 감지는 OK, <strong>자동 갱신은 미성숙</strong></li>
+    <li class="no">자기보고 "AI로 N배 생산성↑" → <strong>METR이 체감≠실측 입증</strong></li>
+  </ul>
+</section>
+
+<!-- 26 -->
+<section class="slide" data-section="D. 종합" data-title="메타 결론 & 마무리">
+  <div class="chip">D · 마무리</div>
+  <h2>3가지 메타 결론</h2>
+  <div class="grid g3">
+    <div class="card good"><h3>① 골격은 진짜</h3><p class="small">컨텍스트 엔지니어링·루프·CLAUDE.md·Skills·MCP·Hooks·Subagent = 공식/동료심사. 안심하고 채택.</p></div>
+    <div class="card warn"><h3>② 수치는 의심</h3><p class="small">효과 % 대부분 벤더 내부 벤치. "내부·미검증" 표기.</p></div>
+    <div class="card"><h3>③ 단일 벤더 의존</h3><p class="small">1차 근거 다수가 Anthropic. arXiv·다벤더·METR로 교차확인.</p></div>
+  </div>
+  <div class="quote" style="margin-top:18px">전체 노트: <span class="mono">04. Work/AI/Agent_Harness/</span> · 진입점 <span class="mono">00_Index.md</span> · 신뢰도 <span class="mono">14_Credibility_Matrix.md</span></div>
+  <div class="src"><b>1차 출처</b> Anthropic engineering·docs.claude.com · modelcontextprotocol.io · agents.md · Karpathy LLM Wiki gist · Chroma/NoLiMa/RULER/TACL · Cognition · METR · OWASP · Notion/Obsidian docs</div>
+  <p class="small muted" style="margin-top:14px">작성 2026-06-03 · 이 분야는 빠르게 진화(다수 기능 beta) → 버전·임계치는 변동 가능</p>
+</section>
+
+</div>
+
+<!-- TOC -->
+<div id="toc">
+  <div class="close" onclick="closeTOC()">✕</div>
+  <h3>목차 — 클릭하여 이동 (<span class="kbd">M</span> 토글)</h3>
+  <div class="items" id="tocItems"></div>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const bar = document.getElementById('bar');
+  const counter = document.getElementById('counter');
+  const sectionLabel = document.getElementById('section-label');
+  const toc = document.getElementById('toc');
+  let cur = 0;
+
+  function show(i){
+    cur = Math.max(0, Math.min(slides.length-1, i));
+    slides.forEach((s,idx)=> s.classList.toggle('active', idx===cur));
+    bar.style.width = ((cur+1)/slides.length*100)+'%';
+    counter.textContent = (cur+1)+' / '+slides.length;
+    sectionLabel.textContent = slides[cur].dataset.section || '';
+    document.querySelector('.stage').scrollTop = 0;
+  }
+  const next=()=>show(cur+1), prev=()=>show(cur-1);
+
+  document.addEventListener('keydown', e=>{
+    if(toc.classList.contains('open')){ if(e.key==='Escape'||e.key.toLowerCase()==='m') closeTOC(); return; }
+    const k=e.key.toLowerCase();
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();next();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
+    else if(e.key==='Home'){show(0);} else if(e.key==='End'){show(slides.length-1);}
+    else if(k==='m'){openTOC();}
+  });
+
+  document.getElementById('znext').addEventListener('click',next);
+  document.getElementById('zprev').addEventListener('click',prev);
+  document.getElementById('menuBtn').addEventListener('click',openTOC);
+
+  // swipe
+  let tx=0;
+  document.addEventListener('touchstart',e=>tx=e.changedTouches[0].clientX,{passive:true});
+  document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx; if(Math.abs(dx)>50){dx<0?next():prev();}},{passive:true});
+
+  // build TOC
+  const items=document.getElementById('tocItems');
+  slides.forEach((s,idx)=>{
+    const d=document.createElement('div'); d.className='ti';
+    d.innerHTML='<span class="num">'+String(idx+1).padStart(2,'0')+'</span><span>'+(s.dataset.title||'')+'</span>';
+    d.onclick=()=>{show(idx);closeTOC();}; items.appendChild(d);
+  });
+  function openTOC(){toc.classList.add('open');}
+  function closeTOC(){toc.classList.remove('open');}
+
+  show(0);
+</script>
+</body>
+</html>

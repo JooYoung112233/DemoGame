@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>다녀올게 (BRB) — 1지역 대사집 S-000~S-018</title>
+<style>
+  @page { margin: 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    font-size: 11pt;
+    line-height: 1.55;
+    color: #1a1a1a;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 12mm 14mm;
+    background: #fff;
+  }
+  .cover {
+    text-align: center;
+    padding: 28mm 0 20mm;
+    border-bottom: 2px solid #222;
+    margin-bottom: 10mm;
+    page-break-after: always;
+  }
+  .cover h1 { font-size: 22pt; font-weight: 700; margin: 0 0 6mm; letter-spacing: -0.02em; }
+  .cover .sub { font-size: 12pt; color: #444; margin: 2mm 0; }
+  .cover .meta { font-size: 9.5pt; color: #666; margin-top: 10mm; }
+  .toc { page-break-after: always; }
+  .toc h2 { font-size: 14pt; border-bottom: 1px solid #ccc; padding-bottom: 3mm; }
+  .toc ol { padding-left: 6mm; }
+  .toc li { margin: 2mm 0; }
+  .toc a { color: #222; text-decoration: none; }
+  .scene {
+    margin-bottom: 8mm;
+    page-break-inside: avoid;
+  }
+  .scene-header {
+    background: #f0f0f0;
+    border-left: 4px solid #333;
+    padding: 3mm 4mm;
+    margin-bottom: 4mm;
+  }
+  .scene-id { font-size: 9pt; color: #555; font-weight: 600; }
+  .scene-title { font-size: 13pt; font-weight: 700; margin: 1mm 0 0; }
+  .scene-note { font-size: 8.5pt; color: #666; margin-top: 2mm; }
+  .line { display: flex; gap: 4mm; margin: 2mm 0; padding: 1.5mm 0; border-bottom: 1px dotted #e8e8e8; }
+  .speaker {
+    flex: 0 0 22mm;
+    font-weight: 700;
+    font-size: 9.5pt;
+    color: #333;
+  }
+  .speaker.player { color: #1a5a8a; }
+  .speaker.choice { color: #6a4a00; font-style: italic; }
+  .speaker.unknown { color: #555; }
+  .text { flex: 1; }
+  .no-dialogue { font-size: 9pt; color: #888; font-style: italic; padding: 2mm 0; }
+  .footer {
+    margin-top: 12mm;
+    padding-top: 4mm;
+    border-top: 1px solid #ddd;
+    font-size: 8pt;
+    color: #888;
+    text-align: center;
+  }
+  @media print {
+    body { padding: 0; }
+    .scene { page-break-inside: auto; }
+    .scene-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="cover">
+  <h1>다녀올게 (BRB)</h1>
+  <p class="sub">1지역 본선 대사집</p>
+  <p class="sub">S-000 ~ S-018</p>
+  <p class="meta">출처: docs/story-script.md · 폐상가 교역 지구 프롤로그<br>
+  NPC/주인공 대사 · 선택지 · 의뢰서 본문 수록 (연출·시스템 태그 제외)</p>
+</div>
+<div class="toc">
+  <h2>목차</h2>
+  <ol>
+    <li><a href="#T000">T-000 — 타이틀 화면</a></li>
+    <li><a href="#S000">S-000 — 프롤로그 — 암전</a></li>
+    <li><a href="#S001">S-001 — 골목 — 첫 이동</a></li>
+    <li><a href="#S002">S-002 — 전당포 — 입장 & 첫 대면</a></li>
+    <li><a href="#S003">S-003 — 전당포 우측 — 베테랑 회수꾼 (암구호 "불씨")</a></li>
+    <li><a href="#S004">S-004 — 첫 출발 — 의뢰 수령 & 출격</a></li>
+    <li><a href="#S005">S-005 — 폐상가 (낮) — 첫 레이드 (파밍 · 전투 · 민이의 흔적)</a></li>
+    <li><a href="#S006">S-006 — 폐상가 (낮) — 맨홀 임시 탈출</a></li>
+    <li><a href="#S007">S-007 — 귀환 — 회수꾼에게 의뢰 보고</a></li>
+    <li><a href="#S008">S-008 — 안전가옥 — 회수꾼의 개인 의뢰 (거처 알선)</a></li>
+    <li><a href="#S009">S-009 — 폐상가 (낮) — 회수꾼의 상자 (자유 레이드)</a></li>
+    <li><a href="#S010">S-010 — 안전가옥 — 상자 전달 & 거처 (구역 관리인 첫 등장)</a></li>
+    <li><a href="#S011">S-011 — 컨테이너 — 첫 귀가 (정리 · 수면 · 저장)</a></li>
+    <li><a href="#S012">S-012 — 안전가옥 인근 — 떠돌이 상인 (보급 · 스크랩)</a></li>
+    <li><a href="#S013">S-013 — 안전가옥 — 새 의뢰 (짙은 현상 출격 준비)</a></li>
+    <li><a href="#S014">S-014 — 안전가옥 — 게이트 출격 (짙은 현상)</a></li>
+    <li><a href="#S015">S-015 — 폐상가 — 짙은 현상 레이드 (MQ-002)</a></li>
+    <li><a href="#S016">S-016 — 안전가옥 — 귀환 · 회수꾼 보고</a></li>
+    <li><a href="#S017">S-017 — 전당포 — 첫 루디 납품 · 1차 마무리</a></li>
+    <li><a href="#S018">S-018 — 안전가옥 — 잠든 사이 (1차 에필로그)</a></li>
+  </ol>
+</div>
+<section class="scene" id="T000">
+  <div class="scene-header">
+    <div class="scene-id">T-000</div>
+    <div class="scene-title">타이틀 화면</div>
+  </div>
+  <p class="no-dialogue">(이 씬에 추출된 NPC/주인공 대사 없음)</p>
+</section>
+<section class="scene" id="S000">
+  <div class="scene-header">
+    <div class="scene-id">S-000</div>
+    <div class="scene-title">프롤로그 — 암전</div>
+    <div class="scene-note">대사 없음 (연출만)</div>
+  </div>
+  <p class="no-dialogue">(이 씬에 추출된 NPC/주인공 대사 없음)</p>
+</section>
+<section class="scene" id="S001">
+  <div class="scene-header">
+    <div class="scene-id">S-001</div>
+    <div class="scene-title">골목 — 첫 이동</div>
+    <div class="scene-note">대사 없음 (튜토리얼·이동)</div>
+  </div>
+  <p class="no-dialogue">(이 씬에 추출된 NPC/주인공 대사 없음)</p>
+</section>
+<section class="scene" id="S002">
+  <div class="scene-header">
+    <div class="scene-id">S-002</div>
+    <div class="scene-title">전당포 — 입장 & 첫 대면</div>
+  </div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">……뭐야. 이 시간에.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">뭐가 필요해서 왔나?</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">여긴 적선하는 데 아니야.</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">이거…… 값이 됩니까?</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">이게…… 이거, 어디서 났어.</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">잘 모릅니다.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">이 시계는 못받아 다른거 없어?</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">더이상 가진게 없습니다.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">……밖에. 우측으로 가면, 길바닥에 사람이 하나 있을 거야.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">거기서 '불씨' 라고 말해</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">불씨요? ……그게 무슨 뜻입니까?</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">가보면 돼 나가, 장사 방해하지 말고.</span></div>
+</section>
+<section class="scene" id="S003">
+  <div class="scene-header">
+    <div class="scene-id">S-003</div>
+    <div class="scene-title">전당포 우측 — 베테랑 회수꾼 (암구호 "불씨")</div>
+  </div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……누구야?</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">불씨.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">……아닙니다.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……'불씨'?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">영감이 또 넘겼구만. ……의뢰를 하려고 왔다면, 맞게 왔어.</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">의뢰요?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">그래. 의뢰 니 수준에 맞는 걸 하나 추천해주지 폐상가 쪽 이 하나있을꺼야</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">더 좋은 의뢰는 이 지역에서 너의 수준을 올려야해. 신참한텐 안 맡겨.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……궁금한 거 있으면 물어봐. 말할 수 있는 선에선 대답해주지.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">어디로 가야 합니까?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">저기 게시판에 적혀 있어. 가서 의뢰를 수령해</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">위험합니까?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">살아 돌아올지는…… 장담 못 해.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">되도록 소리내지마, 그 지역의 약탈꾼들이 있어.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">게시판에 수준에 맞게 골라</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……알았으면 가봐.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">의뢰를 수령하고 나서 다시 나한테 말을 걸어</span></div>
+</section>
+<section class="scene" id="S004">
+  <div class="scene-header">
+    <div class="scene-id">S-004</div>
+    <div class="scene-title">첫 출발 — 의뢰 수령 & 출격</div>
+  </div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">[아이를 찾아 주세요]</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">찾고 있는 아이가 있습니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">이름은.... 잘 모릅니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">다들 그냥 “민이”라고 불렀어요.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">작고, 잘 울고, 무서우면 숨어요</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">혹시 흔적을 찾으면, 게시판에 이 의뢰서와 함께 표시를 남겨 주세요.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">보상은 제가 가진 건 전부 두고 갑니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">- 수아 -</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">보상 : 스크랩 동전 x10</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">의뢰 가져왓어? ……근데 너, 빈손으로 갈껀 아니지?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">맨손에 의약품도 없이 들어가면, 아무리 낮이라고 해도 약탈꾼들에게 걸리면 죽을수도 있어.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">받아. 호신용으로 쓸 나무 각목이랑 의료템 몇 개.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">오랜만에 신참이니 이 정도 투자는 해주지. 다만, 이번 한 번만이야. 다음은 없어.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">앞으로 장비는 알아서 구하고.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">준비됐으면 옆에 보이는 큰 문으로 가면 돼.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">지금 거기는…… 낮이겠군. 살아서 보자고, 신참.</span></div>
+</section>
+<section class="scene" id="S005">
+  <div class="scene-header">
+    <div class="scene-id">S-005</div>
+    <div class="scene-title">폐상가 (낮) — 첫 레이드 (파밍 · 전투 · 민이의 흔적)</div>
+    <div class="scene-note">레이드 구간 — 말풍선·내레이션 위주, 본문 대사 최소</div>
+  </div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">첫 파밍 (기본 동작) ——</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">무게 / 슬롯 (골라 담기) ——</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">파밍 다양성 (어딜 뒤지느냐) ——</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">약탈꾼 전투 (공격 학습 · 무법지대) ——</span></div>
+</section>
+<section class="scene" id="S006">
+  <div class="scene-header">
+    <div class="scene-id">S-006</div>
+    <div class="scene-title">폐상가 (낮) — 맨홀 임시 탈출</div>
+    <div class="scene-note">대사 없음 (탈출)</div>
+  </div>
+  <p class="no-dialogue">(이 씬에 추출된 NPC/주인공 대사 없음)</p>
+</section>
+<section class="scene" id="S007">
+  <div class="scene-header">
+    <div class="scene-id">S-007</div>
+    <div class="scene-title">귀환 — 회수꾼에게 의뢰 보고</div>
+  </div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……살아서 돌아왔구만</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">그래, 의뢰는?</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">……아이 흔적을 찾았습니다. 폐상가 창고에.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">....규칙이군. 부모나 보호자가 나갈때 아이를 보호하기 위한 수단중 하나이지</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">아이는 죽었나?</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">아이 시체는 따로 없었습니다..</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">쪽지와 흔적 정도는 찾았으니 저 의뢰서에 표시 남겨. 의뢰자가 확인할 거다.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">보수는…… 의뢰자가 두고 간 거. 많진 않아. 받아</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……근데 너, 이름이 뭐야?</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">……모릅니다. 기억이 없습니다</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">하. 여기 딱 어울리는 놈이군.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">그럼 음 어디보자 이 꿀꿀한 세계의 시작이라는 의미로 '새볔' 이라고 불러도 되나?</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">상관 없습니다...</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">'새볔' 이름을 찾기 전까진 그걸로 불러주지.</span></div>
+</section>
+<section class="scene" id="S008">
+  <div class="scene-header">
+    <div class="scene-id">S-008</div>
+    <div class="scene-title">안전가옥 — 회수꾼의 개인 의뢰 (거처 알선)</div>
+  </div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……새벽. 지낼 데는 있고?</span></div>
+  <div class="line"><span class="speaker player">새벽</span><span class="text">……없습니다.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">그럴 줄 알았어. 비맞은 똥 강아지 꼴이구만,</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">마침, 하나 부탁할 게 있어. 의뢰 하나 하지</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">폐상가 북쪽에 무너진 약국이 있어,</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">거기 내가 두고 온 게 있어. 작은 철제 상자. ……급하게 나오느라 못 챙겼거든.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">그걸 회수해와. 그럼 이 구역 건물 관리인한테 말 넣어주지. 비를 피할곳을 하나 내줄 거야.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">가져오겠습니다.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">무리하지 말고. 살아서 돌아오는 것만 생각해.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">그 상자, 뭡니까?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">너무 많이 알려 하지마</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">모르는게 약이라는 말이 있지 잔말 말고 다녀와</span></div>
+</section>
+<section class="scene" id="S009">
+  <div class="scene-header">
+    <div class="scene-id">S-009</div>
+    <div class="scene-title">폐상가 (낮) — 회수꾼의 상자 (자유 레이드)</div>
+  </div>
+  <p class="no-dialogue">(이 씬에 추출된 NPC/주인공 대사 없음)</p>
+</section>
+<section class="scene" id="S010">
+  <div class="scene-header">
+    <div class="scene-id">S-010</div>
+    <div class="scene-title">안전가옥 — 상자 전달 & 거처 (구역 관리인 첫 등장)</div>
+  </div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……살아 돌아왔군</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">…….</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">그래. ……수고했어.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">(말없이 기다린다)</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……뭘 기대하는거야?</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">내용물은 확인 안합니까?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">볼 필요 없어. 난 뭐가 들었는지 아니까.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……너는 관심 갖지마.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">보상을 줘야겠지, 건물 관리인한테 말은 넣어놨어.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">저 안쪽, 컨테이너 사이에 장부 끼고 서 있는 여자 보이지. 이 구역 관리인이야.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">가서 '새벽'이라고 해. 빈 곳 하나 내줄 거다.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……텃세 좀 부려도 참아. 원래 그런 인간이니까.</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">……뭐야. 못 보던 낯짝인데.</span></div>
+  <div class="line"><span class="speaker player">새벽</span><span class="text">새벽입니다. 회수꾼이 보냈습니다.</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">아—. 그 게시판 늙은이가 말한 게 너구만.</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">빈 곳이 어디보자..... 저기 끝쪽 건물 중 하나써</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">건물 보수는 알아서 하고, 안에 굴러다니는 잡동사니는 네가 가지던 치우던 알아서해.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">공짜인가요?</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">공짜는 없지. ……근데 그 늙은이 부탁이니. 기한은 줄께</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">자릿세는 나중에 벌어서 내면되</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">자릿세를 못 내면 어떻게 됩니까?</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">그럴일이 없길 바라지만, 기한 넘기면 문부터 잠그지.</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">……그 늙은이 부탁이라 이번만 봐주는 거고, 다음은 없어.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">다른 데는 없습니까?</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">니 수준엔 여기 뿐이야</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">그중에서 제일 나은 곳이야, 불평하지마</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">아! 절대! 남의 물건에 손대지 마.</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">여기의 규칙이야 ……알아들어?</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">……예.</span></div>
+  <div class="line"><span class="speaker ">구역 관리인</span><span class="text">가 봐. 비 때문에 집이 물바다 되기 전에</span></div>
+</section>
+<section class="scene" id="S011">
+  <div class="scene-header">
+    <div class="scene-id">S-011</div>
+    <div class="scene-title">컨테이너 — 첫 귀가 (정리 · 수면 · 저장)</div>
+  </div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">잔다.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">아직.</span></div>
+</section>
+<section class="scene" id="S012">
+  <div class="scene-header">
+    <div class="scene-id">S-012</div>
+    <div class="scene-title">안전가옥 인근 — 떠돌이 상인 (보급 · 스크랩)</div>
+  </div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">오, 새 얼굴이네. ……관리인이 새로 들인 친구구만?</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">뭐 필요한 거 있어? 없는 거 빼곤 다 있어.</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">마실 거랑 먹을 거 있습니까?</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">암, 그게 제일 잘 나가지. 산 사람은 먹고 마셔야 하니까.</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">근데 미리 말해두는데, 내 물건은 좀 비싸. 발품값이라고 생각해.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">왜 이렇게 비쌉니까.</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">이 동네까지 이걸 끌고 온 사람이 나 말고 또 있나?</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">싫으면 사지마</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">지역 상점은 없습니까?</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">하, 상점? 그건 수준 있는 놈들 얘기지.</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">네가 이 바닥에서 좀 알려지면, 저 닫힌 가게들도 셔터 올릴 거야.</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">자, 골라. 스크랩으로 받는다.</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">귀한 것까지 교환할 물건까진 없어.</span></div>
+  <div class="line"><span class="speaker ">떠돌이 상인</span><span class="text">살아서 보자구</span></div>
+</section>
+<section class="scene" id="S013">
+  <div class="scene-header">
+    <div class="scene-id">S-013</div>
+    <div class="scene-title">안전가옥 — 새 의뢰 (짙은 현상 출격 준비)</div>
+  </div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">낯빛이 좀 폈네. 잠은 좀 잤고?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……마침 잘 왔어 너에게 적당한 의뢰서 하나가 생겼어</span></div>
+  <div class="line"><span class="speaker player">주인공</span><span class="text">…….</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">슬슬 진짜 돈 되는 걸 해야지</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">저 게시판에 새 의뢰 하나 걸려 있을꺼야 가져와.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">[불을 꺼뜨리지 말아 주세요]</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">날마다, 창가에 랜턴을 하나 켜 둡니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">그 사람이 돌아오는 길을 잃지 않도록요.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">떠나기 전, 그는 이 불빛을 보고 돌아오겠다고 했습니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">그래서 아무리 늦은 밤에도, 한 번도 불을 꺼뜨리지 않았습니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">하지만 요즘 랜턴의 빛이 자꾸 약해집니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">안에 들어 있는 전력체가 거의 수명을 다한 것 같습니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">이대로라면 며칠 안에 완전히 꺼질 겁니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">아직 사용할 수 있는 전력체를 하나만 구해다 주세요.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">새것이 아니어도 괜찮습니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">그 사람이 멀리서 창가의 불빛을 알아볼 수 있을 만큼만 남아 있으면 됩니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">혹시 그가 돌아오는 날,</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">이곳이 어두워 그냥 지나쳐 버릴까 봐 두렵습니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">사례는 반드시 하겠습니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">부디, 이 불이 꺼지기 전에 부탁드립니다.</span></div>
+  <div class="line"><span class="speaker choice">【의뢰서】</span><span class="text">- 익명 -</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">의뢰서는?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……내용은 확인했나?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……글만 봐도 알겠더라. 누군가 돌아올 사람을 기다리는 거지.</span></div>
+  <div class="line"><span class="speaker player">새벽</span><span class="text">폐상가 안쪽입니까?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">그래. 저번에 다녀온 그 길이야. 길은 익숙할 거다.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">근데 주의할 게 있어. 짙은 현상, 아나?</span></div>
+  <div class="line"><span class="speaker player">새벽</span><span class="text">……아니요.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">도시를 갉아먹는 검은 안개 같은거야</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">가끔 공기가 가라앉으면서 눈앞이 잡아 먹혀</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……탐지등 없으면 방향도 모르고 한치앞도 안보일수도 있어</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">자, 소싯적 내가 매고 다니던 거야. 낡았지만 받아.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">안에 빛나는 조각 넣어뒀어. 이걸 '루디'라고 불러.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">현상 안에서 앞을 밝혀 줄 거야.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">가까우면 덜컥거리기도 해. ……위험 신호지.</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">이 의뢰는 누가 요청한건가요?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">글씨체만 봤지. 누군지는 모른다. 게시판에 붙이는 사람은 여러 명이야.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……다만 전당포 영감이 이 건은 유독 챙기더라.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">이유는 묻지 않았어</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">짙은 현상이 정확히 뭔가요?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">하…… 셋만 기억해.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">하나, 탐지등. 닳기전에 루디로 채워. 안그럼 어둠에 잡아먹혀 그리고 덜컥거리기 시작하면 현상이 가까워지는 거다.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">둘, 시간. 한 군데서 너무 오래 머물지마</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">셋, 발소리. 현상내에선 다른 괴물들이 나온다 소리를 크게 내면 들켜. 급하지 않으면 뛰지 않는걸 추천하지</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……여기 까지 내가 해줄 수 있는 충고야</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">의뢰서의 전력체는 어디서 구합니까?</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">빛나는 돌이야. '루디'</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">하나만 구해다 의뢰와 함께 동봉하면 된다</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……넉넉하게 남는다면 전당포 영감한테 넘겨. 그 양반이 매입 하거든</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">알겠습니다.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">너의 앞길에 행운을 빌지</span></div>
+</section>
+<section class="scene" id="S014">
+  <div class="scene-header">
+    <div class="scene-id">S-014</div>
+    <div class="scene-title">안전가옥 — 게이트 출격 (짙은 현상)</div>
+    <div class="scene-note">대사 없음 (출격 확인·연출)</div>
+  </div>
+  <div class="line"><span class="speaker choice">【말풍선】</span><span class="text">……살아서 와.</span></div>
+</section>
+<section class="scene" id="S015">
+  <div class="scene-header">
+    <div class="scene-id">S-015</div>
+    <div class="scene-title">폐상가 — 짙은 현상 레이드 (MQ-002)</div>
+    <div class="scene-note">레이드 통합 — NPC 대사 없음 (튜토리얼 UI·시계 떡밥)</div>
+  </div>
+  <p class="no-dialogue">(이 씬에 추출된 NPC/주인공 대사 없음)</p>
+</section>
+<section class="scene" id="S016">
+  <div class="scene-header">
+    <div class="scene-id">S-016</div>
+    <div class="scene-title">안전가옥 — 귀환 · 회수꾼 보고</div>
+  </div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">……살아서 왔네.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">의뢰서는? 루디는?</span></div>
+  <div class="line"><span class="speaker player">새벽</span><span class="text">……운좋게 구했습니다.</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">완료 표시 남겨서 전당포로 가져가</span></div>
+  <div class="line"><span class="speaker ">회수꾼</span><span class="text">앞으로 전달 물품과 의뢰서와 같이 전당포에 가져다 주면 되 영감이 알아서 처리해 줄꺼다</span></div>
+  <div class="line"><span class="speaker player">새벽</span><span class="text">알겠습니다</span></div>
+</section>
+<section class="scene" id="S017">
+  <div class="scene-header">
+    <div class="scene-id">S-017</div>
+    <div class="scene-title">전당포 — 첫 루디 납품 · 1차 마무리</div>
+  </div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">왔군.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">의뢰서 완료 인가?</span></div>
+  <div class="line"><span class="speaker player">새벽</span><span class="text">의뢰서 에 적혀있는 전력체입니다.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">진짜 구만,</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">짙은 현상 속에서 처음 살아 돌아온 것도 대단한데.</span></div>
+  <div class="line"><span class="speaker player">새벽</span><span class="text">시계가 멈췄습니다. 시계가 되돌가 가기도 했습니다. 시계가 방향을 알려주기도 했습니다.</span></div>
+  <div class="line"><span class="speaker player">새벽</span><span class="text">혹시 아시는게 있을까요?</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">……시계가 반응했다고?</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">무슨 뜻입니까?</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">그 시계... 잘 간직해</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">나머진.. 다음에 기회될때 알려주지...</span></div>
+  <div class="line"><span class="speaker choice">【선택지】</span><span class="text">알겠습니다.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">일단 잘했어.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">이제 여기서 정식으로 거래할 수 있어.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">시계는 무슨일이 있어도 절대 빼지 마.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">……오늘은 쉬어.</span></div>
+</section>
+<section class="scene" id="S018">
+  <div class="scene-header">
+    <div class="scene-id">S-018</div>
+    <div class="scene-title">안전가옥 — 잠든 사이 (1차 에필로그)</div>
+  </div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">저만…… 살아 남았습니다.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">애는 너무 어려요.…… 돌봐 줄 형편이 아닙니다.</span></div>
+  <div class="line"><span class="speaker unknown">???</span><span class="text">자리는 빡빡해요.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">저 혼자서는…… 정말 못 키웁니다.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">……이것도 받아 주십시오.</span></div>
+  <div class="line"><span class="speaker unknown">???</span><span class="text">…….</span></div>
+  <div class="line"><span class="speaker unknown">???</span><span class="text">일단…… 서류부터 보죠.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">어디든…… 괜찮습니다.</span></div>
+  <div class="line"><span class="speaker ">전당포 주인</span><span class="text">제발…… 잘 지낼 수 있게만 해 주세요.</span></div>
+</section>
+
+<div class="footer">
+  다녀올게 (BRB) · 1지역 스토리 대사집 · 자동 생성 · 브라우저 인쇄(Ctrl+P)로 PDF 저장 가능
+</div>
+</body>
+</html>

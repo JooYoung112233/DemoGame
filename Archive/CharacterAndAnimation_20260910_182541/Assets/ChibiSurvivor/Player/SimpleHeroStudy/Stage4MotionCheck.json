@@ -1,0 +1,54 @@
+{
+  "stage": 4,
+  "existing_walk_run_reused": true,
+  "idle_keys_preserved": true,
+  "leg_length_scale": 0.7098659465281154,
+  "bend_loops": [
+    {
+      "part": "Study_Torso",
+      "before_vertices": 60,
+      "after_vertices": 144
+    },
+    {
+      "part": "Study_Sleeve_-1",
+      "before_vertices": 96,
+      "after_vertices": 192
+    },
+    {
+      "part": "Study_Leg_-1",
+      "before_vertices": 24,
+      "after_vertices": 72
+    },
+    {
+      "part": "Study_Sleeve_1",
+      "before_vertices": 96,
+      "after_vertices": 192
+    },
+    {
+      "part": "Study_Leg_1",
+      "before_vertices": 24,
+      "after_vertices": 72
+    }
+  ],
+  "clips": [
+    {
+      "clip": "Walk",
+      "frames": 37,
+      "seconds": 1.2,
+      "min_sole_z": -1.30385160446167e-08,
+      "max_lowest_sole_z": 2.7567148208618164e-07,
+      "loop_error_m": 0.0,
+      "max_vertical_fit_m": 0.024974577914311083
+    },
+    {
+      "clip": "Run",
+      "frames": 25,
+      "seconds": 0.8,
+      "min_sole_z": 8.940696716308594e-08,
+      "max_lowest_sole_z": 0.12548840045928955,
+      "loop_error_m": 0.0,
+      "max_vertical_fit_m": 0.10386669384584699
+    }
+  ],
+  "gameplay_applied": false
+}

@@ -1,0 +1,26 @@
+{
+  "changed": "Run: Head rotation only",
+  "other_actions_and_all_other_run_channels_unchanged": true,
+  "head_joint_translation_unchanged": true,
+  "source": "D:\\Demo\\demo13-flashlight\\Assets\\ChibiSurvivor\\Player\\RunReview\\CompactSurvivor_RunReview_v3.blend",
+  "lag_seconds": 0.075,
+  "loop_seam_m": 0.0,
+  "before_ranges": {
+    "pitch_degrees": 1.598,
+    "roll_degrees": 5.7,
+    "yaw_degrees": 7.787
+  },
+  "after_ranges": {
+    "pitch_degrees": 11.172,
+    "roll_degrees": 8.534,
+    "yaw_degrees": 16.646
+  },
+  "frames": [
+    1,
+    25
+  ],
+  "fps": 30,
+  "nominal_forward_speed_mps": 2.13235294117647,
+  "approval": "pending",
+  "unity_connected": false
+}

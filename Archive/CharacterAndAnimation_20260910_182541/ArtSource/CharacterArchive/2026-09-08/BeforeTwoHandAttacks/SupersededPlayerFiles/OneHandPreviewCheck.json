@@ -1,0 +1,95 @@
+{
+  "fps": 30,
+  "frames": 576,
+  "seconds": 19.2,
+  "clips": [
+    {
+      "weapon": "Sword",
+      "clip": "Attack_OneHand",
+      "view": "Quarter",
+      "start": 1,
+      "frames": 52
+    },
+    {
+      "weapon": "Sword",
+      "clip": "Attack_OneHand",
+      "view": "Quarter",
+      "start": 53,
+      "frames": 52
+    },
+    {
+      "weapon": "Dagger",
+      "clip": "Attack_OneHand_Thrust",
+      "view": "Quarter",
+      "start": 105,
+      "frames": 40
+    },
+    {
+      "weapon": "Dagger",
+      "clip": "Attack_OneHand_Thrust",
+      "view": "Quarter",
+      "start": 145,
+      "frames": 40
+    },
+    {
+      "weapon": "Axe",
+      "clip": "Attack_OneHand_Chop",
+      "view": "Quarter",
+      "start": 185,
+      "frames": 52
+    },
+    {
+      "weapon": "Axe",
+      "clip": "Attack_OneHand_Chop",
+      "view": "Quarter",
+      "start": 237,
+      "frames": 52
+    },
+    {
+      "weapon": "Sword",
+      "clip": "Attack_OneHand",
+      "view": "GameAngle",
+      "start": 289,
+      "frames": 52
+    },
+    {
+      "weapon": "Sword",
+      "clip": "Attack_OneHand",
+      "view": "GameAngle",
+      "start": 341,
+      "frames": 52
+    },
+    {
+      "weapon": "Dagger",
+      "clip": "Attack_OneHand_Thrust",
+      "view": "GameAngle",
+      "start": 393,
+      "frames": 40
+    },
+    {
+      "weapon": "Dagger",
+      "clip": "Attack_OneHand_Thrust",
+      "view": "GameAngle",
+      "start": 433,
+      "frames": 40
+    },
+    {
+      "weapon": "Axe",
+      "clip": "Attack_OneHand_Chop",
+      "view": "GameAngle",
+      "start": 473,
+      "frames": 52
+    },
+    {
+      "weapon": "Axe",
+      "clip": "Attack_OneHand_Chop",
+      "view": "GameAngle",
+      "start": 525,
+      "frames": 52
+    }
+  ],
+  "source": "Actual Blender character and animations",
+  "weapons_are_preview_proxies": true,
+  "display_transform": "Standard; no second AgX pass",
+  "unity_connected": false
+}

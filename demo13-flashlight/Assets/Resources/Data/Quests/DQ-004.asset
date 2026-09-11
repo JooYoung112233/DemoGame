@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb7a23f8e25eea74ba9cecc7af67cdeb, type: 3}
+  m_Name: DQ-004
+  m_EditorClassIdentifier: Game.Scripts::QuestData
+  questId: DQ-004
+  title: "희귀품 사들임"
+  description: "희귀한 물건이 들어왔다는 소문이다. 한 점 구해 오면 후하게 쳐주겠다."
+  questType: 3
+  giverNpcId: pawnshop
+  objectives:
+  - type: 0
+    targetId: val_diamond_ring
+    requiredCount: 1
+    description: "희귀 귀중품 1점 납품"
+  rewards:
+  - type: 1
+    itemId:
+    amount: 14000
+    npcId:
+  - type: 3
+    itemId:
+    amount: 1
+    npcId: pawnshop
+  unlockCondition:
+    requiredAffinity: 0
+    requiredTrust: 0
+    requiredQuest: MQ-002
+    requiredFlag:
+  region: scrap_market
+  isRepeatable: 1
+  expiresOnRaid: 0

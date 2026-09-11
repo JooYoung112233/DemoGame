@@ -1,0 +1,76 @@
+{
+  "resolution": 512,
+  "charts": 6,
+  "coverage": 0.15068817138671875,
+  "overlapping_pixels": 0,
+  "regions": {
+    "CLUB": [
+      0.02,
+      0.02,
+      0.96,
+      0.96
+    ]
+  },
+  "layout": [
+    {
+      "part": "Bandit_Club",
+      "region": "CLUB",
+      "rect_pixels": [
+        415,
+        462,
+        23,
+        22
+      ]
+    },
+    {
+      "part": "Bandit_Club",
+      "region": "CLUB",
+      "rect_pixels": [
+        18,
+        415,
+        381,
+        31
+      ]
+    },
+    {
+      "part": "Bandit_Club",
+      "region": "CLUB",
+      "rect_pixels": [
+        18,
+        18,
+        43,
+        381
+      ]
+    },
+    {
+      "part": "Bandit_Club",
+      "region": "CLUB",
+      "rect_pixels": [
+        18,
+        462,
+        381,
+        31
+      ]
+    },
+    {
+      "part": "Bandit_Club",
+      "region": "CLUB",
+      "rect_pixels": [
+        77,
+        18,
+        43,
+        381
+      ]
+    },
+    {
+      "part": "Bandit_Club",
+      "region": "CLUB",
+      "rect_pixels": [
+        136,
+        18,
+        38,
+        36
+      ]
+    }
+  ]
+}

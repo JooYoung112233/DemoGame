@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a3bc92e1f4d5e6a8b9c0d1e2f3a4b5c, type: 3}
+  m_Name: WorkbenchWoodClub
+  m_EditorClassIdentifier: Game.Scripts::RecipeData
+  recipeId: craft_wood_club
+  displayName: "나무 몽둥이 제작"
+  description: "나무 판자를 깎아 만든 손쉬운 둔기."
+  station: 0
+  ingredients:
+  - itemId: wood_plank
+    count: 2
+  resultItemId: wood_club
+  resultCount: 1
+  unlockedByDefault: 1
+  unlockRecipeItemId:

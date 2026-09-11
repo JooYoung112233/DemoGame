@@ -1,0 +1,36 @@
+{
+  "clips": {
+    "Attack_TwoHand_Slash": {
+      "frames": [
+        1,
+        40
+      ],
+      "contact_frame": 16,
+      "grip_spacing_m": 0.11,
+      "max_grip_error_m": 3.795142348374713e-07,
+      "max_grip_rotation_error_rad": 0,
+      "max_foot_drift_m": 2.0934478915284395e-07,
+      "ready_pose_seam_m": 5.421010862427522e-20,
+      "min_sole_z_m": 3.854435703942727e-08,
+      "max_arm_clamp_m": 0
+    },
+    "Attack_TwoHand_Chop": {
+      "frames": [
+        1,
+        43
+      ],
+      "contact_frame": 18,
+      "grip_spacing_m": 0.11,
+      "max_grip_error_m": 6.123022524655206e-07,
+      "max_grip_rotation_error_rad": 0,
+      "max_foot_drift_m": 1.709796710376376e-07,
+      "ready_pose_seam_m": 5.421010862427522e-20,
+      "min_sole_z_m": 2.9680942148502254e-08,
+      "max_arm_clamp_m": 0
+    }
+  },
+  "dagger_and_locomotion_unchanged": true,
+  "geometry_and_weights_unchanged": true,
+  "attack_clip_count": 3,
+  "unity_connected": false
+}

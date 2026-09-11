@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "bodyRenderers": 1,
+  "bodyMaterials": 1,
+  "weaponSeparate": true,
+  "states": [
+    {
+      "state": "Locomotion",
+      "maxGripError": 6.103684E-05
+    },
+    {
+      "state": "SwordWalk",
+      "maxGripError": 6.103681E-05
+    },
+    {
+      "state": "SwordSlash",
+      "maxGripError": 0.0007738519
+    }
+  ],
+  "existingBanditsReplaced": false
+}

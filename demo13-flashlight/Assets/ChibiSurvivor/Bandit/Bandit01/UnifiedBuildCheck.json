@@ -1,0 +1,59 @@
+{
+  "original_body_renderers": 41,
+  "body_renderers": 1,
+  "body_materials": 1,
+  "weapon_separate": true,
+  "body_vertices": 5727,
+  "triangles": 10950,
+  "unweighted_vertices": 0,
+  "skeleton_and_motion_preserved": true,
+  "bat_preserved": true,
+  "body_bounds_before": [
+    -0.36991918087005615,
+    -0.22505272924900055,
+    0.0,
+    0.36164000630378723,
+    0.3499999940395355,
+    1.7350000143051147
+  ],
+  "body_bounds_after": [
+    -0.3945299983024597,
+    -0.20704850554466248,
+    0.0,
+    0.3945299983024597,
+    0.32199999690055847,
+    1.7029000520706177
+  ],
+  "uv": {
+    "resolution": 2048,
+    "charts": 298,
+    "coverage": 0.41732335090637207,
+    "overlapping_pixels": 696,
+    "regions": {
+      "HEAD_HOOD": [
+        0.02,
+        0.53,
+        0.48,
+        0.45
+      ],
+      "JACKET_ARMS": [
+        0.52,
+        0.53,
+        0.46,
+        0.45
+      ],
+      "TROUSERS": [
+        0.02,
+        0.02,
+        0.42,
+        0.49
+      ],
+      "BOOTS_GEAR": [
+        0.46,
+        0.02,
+        0.52,
+        0.49
+      ]
+    }
+  }
+}

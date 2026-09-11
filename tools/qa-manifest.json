@@ -1,0 +1,76 @@
+{
+  "_note": "QA 시스템의 단일 진실원(SSOT). 대시보드 GUI·에이전트·문서가 모두 이 파일을 본다. 게임에 새 시스템이 추가되면 qa-runner 에이전트가 coverage에 행을 추가하고, 검증 op가 없으면 ops에 먼저 만든다.",
+  "updated": "2026-07-11",
+
+  "ops": [
+    { "op": "cycle.begin",        "group": "지표",   "params": "-",                          "does": "사이클 지표 구간 시작" },
+    { "op": "cycle.end",          "group": "지표",   "params": "-",                          "does": "사이클 지표 구간 종료" },
+    { "op": "title.newgame",      "group": "시작",   "params": "count(슬롯)",                 "does": "타이틀에서 새 게임 — 신규 유저 경로" },
+    { "op": "title.continue",     "group": "시작",   "params": "count(슬롯)",                 "does": "타이틀에서 이어하기" },
+    { "op": "story.skip",         "group": "시작",   "params": "budgetSec",                  "does": "프롤로그·대화·튜토를 Space로 넘김" },
+    { "op": "goto",               "group": "이동",   "params": "param(InteractType)",        "does": "대상까지 실제로 걸어가서 E — 도달성·상호작용·UI오픈 검증" },
+    { "op": "safehouse.ensure",   "group": "이동",   "params": "budgetSec",                  "does": "안전가옥 복귀" },
+    { "op": "inventory.organize", "group": "정비",   "params": "-",                          "does": "비의료·비소비를 창고로, 무게 초과 점검" },
+    { "op": "shop.sell",          "group": "정비",   "params": "ratio, param(shopId)",       "does": "창고 잡템 판매(sellRate 적용)" },
+    { "op": "shop.buy",           "group": "정비",   "params": "param(카테고리), ratio, count", "does": "구매(BuyPrice 적용)" },
+    { "op": "quest.accept",       "group": "정비",   "params": "count",                      "does": "게시판 수주(BD→BQ)" },
+    { "op": "raid.enter",         "group": "모험",   "params": "param(regionId/auto)",       "does": "레이드 진입" },
+    { "op": "raid.explore",       "group": "모험",   "params": "budgetSec, count, wander",   "does": "탐색·루팅(+무작위 배회). 건물 출입 시 목표 재선정" },
+    { "op": "combat.engage",      "group": "전투",   "params": "budgetSec, count, ratio(탐색반경)", "does": "카이팅 교전(윈드업 회피·치고빠지기) + 시체 파밍. 체력 35% 미만이면 이탈" },
+    { "op": "ai.play",            "group": "AI",     "params": "budgetSec, param(oracle면 전지)", "does": "**플레이어 AI** — 본 것만 알고 목표를 스스로 고른다(루팅/시체/교전/탐색/이탈/탈출/도주). 결정은 qa-decisions.jsonl, 애매하면 qa-ask.json" },
+    { "op": "raid.extract",       "group": "모험",   "params": "budgetSec",                  "does": "탈출구 이동·탈출" },
+    { "op": "settle.verify",      "group": "모험",   "params": "-",                          "does": "정산 확인 + 루팅 가치 집계" },
+    { "op": "wait",               "group": "기타",   "params": "budgetSec",                  "does": "대기" }
+  ],
+
+  "checks": [
+    { "name": "사이클 완주",      "fails": "계획한 사이클을 못 돌면" },
+    { "name": "레이드 탈출",      "fails": "탈출 실패가 하나라도 있으면" },
+    { "name": "루팅 획득",        "fails": "총 루팅가치가 0이면" },
+    { "name": "예외 없음",        "fails": "EXCEPTION/LOG_ERROR 발생" },
+    { "name": "아이템 유실 없음", "fails": "ITEM_LOST 발생" },
+    { "name": "씬 전환 정상",     "fails": "SCENE_TIMEOUT/EXTRACT_TIMEOUT" },
+    { "name": "진행 막힘 없음",   "fails": "STUCK_HOTSPOT/BLOCKED_HOTSPOT/NO_EXIT" },
+    { "name": "UI 잠김 없음",     "fails": "UI_STUCK" }
+  ],
+
+  "coverage": [
+    { "id": 1,  "system": "타이틀·세이브 슬롯",        "op": "title.newgame / title.continue", "status": "untested" },
+    { "id": 2,  "system": "프롤로그·스토리·튜토",      "op": "story.skip",                     "status": "untested" },
+    { "id": 3,  "system": "씬 전환(허브↔레이드)",      "op": "safehouse.ensure / raid.enter",  "status": "untested" },
+    { "id": 4,  "system": "레이드 스폰/탈출",          "op": "raid.extract",                   "status": "untested" },
+    { "id": 5,  "system": "루팅·예산제",               "op": "raid.explore",                   "status": "untested" },
+    { "id": 6,  "system": "인벤토리 격자",             "op": "inventory.organize",             "status": "untested" },
+    { "id": 7,  "system": "경제(상점 매매)",           "op": "shop.sell / shop.buy",           "status": "untested" },
+    { "id": 8,  "system": "퀘스트/게시판",             "op": "quest.accept",                   "status": "untested" },
+    { "id": 9,  "system": "XP·레벨·PP",                "op": "settle.verify + 추세",           "status": "untested" },
+    { "id": 10, "system": "정산(RaidResultUI)",        "op": "settle.verify",                  "status": "untested" },
+    { "id": 11, "system": "맵 밸런스(파밍효율·반복성)", "op": "QaHeatmap",                      "status": "untested" },
+    { "id": 12, "system": "길찾기·지오메트리",         "op": "QaHeatmap 스턱 클러스터",         "status": "untested" },
+    { "id": 13, "system": "상호작용 배선·UI 오픈",     "op": "goto",                           "status": "untested" },
+    { "id": 14, "system": "씬·데이터 배선",            "op": "IntegrityValidator",             "status": "passed", "note": "2026-07-11 오류0/통과49" },
+    { "id": 15, "system": "루트테이블·경제 분포",      "op": "QaBalanceSim",                   "status": "untested" },
+    { "id": 16, "system": "도감",                      "op": "inventory.organize(부분)",       "status": "partial" },
+    { "id": 17, "system": "전투(약/강/구르기/그로기)", "op": "combat.engage",                  "status": "untested", "note": "2026-07-28 카이팅 교전 op 추가. 강공격·그로기는 아직 미사용" },
+    { "id": 29, "system": "건물 내부 출입(트리거)",    "op": "raid.extract(내부 이탈) / raid.explore(재선정)", "status": "untested", "note": "2026-07-28 건물=씬전환 대응" },
+    { "id": 30, "system": "시체 파밍(전리품 회수)",    "op": "combat.engage → LootCorpse",     "status": "untested" },
+    { "id": 31, "system": "발견성(상자·탈출구를 찾는가)", "op": "ai.play (플레이어 모드 vs oracle 차이)", "status": "untested", "note": "전지 상태로는 원리적으로 못 잡던 영역. 발견율 = 발견/존재" },
+    { "id": 18, "system": "의료·부상",                 "op": "",                               "status": "blind" },
+    { "id": 19, "system": "생존(수분·포만감)",         "op": "",                               "status": "blind" },
+    { "id": 20, "system": "특성(퍽) 해금",             "op": "",                               "status": "blind" },
+    { "id": 21, "system": "제작·수리",                 "op": "",                               "status": "blind" },
+    { "id": 22, "system": "하이드아웃 강화",           "op": "",                               "status": "blind" },
+    { "id": 23, "system": "건물 내부 전환",            "op": "LeaveBuildingIfInside",          "status": "untested", "note": "2026-07-28: 봇이 3사이클 전부 Int_Generic에 갇혀 NO_EXIT로 끝나던 것 대응" },
+    { "id": 24, "system": "소음·투척물·시야(FOV)",     "op": "",                               "status": "blind" },
+    { "id": 25, "system": "약탈자 회수(사망 루프)",    "op": "사망 감지만",                     "status": "partial" },
+    { "id": 26, "system": "낮/밤·짙은현상",            "op": "",                               "status": "blind" },
+    { "id": 27, "system": "게임패드 입력",             "op": "",                               "status": "blind" },
+    { "id": 28, "system": "지도·나침반",               "op": "",                               "status": "notimpl", "note": "갭분석 ⑩ 게임 미구현" }
+  ],
+
+  "limits": [
+    "가상 입력은 GameInput 폴링 소비자만 구동한다 — uGUI EventSystem 버튼(타이틀·상점·제작)은 못 누르고 API로 대신한다. 버튼 자체의 배선 오류는 이 QA로 못 잡는다.",
+    "전투는 '맞닥뜨리면 대응' 수준 — 의도적 교전·회피·콤보 검증 op가 없다.",
+    "blind 상태 시스템은 QA가 아무것도 보장하지 않는다."
+  ]
+}

@@ -1,0 +1,80 @@
+id,cat,title,giver,type,target,qty,unlock,reward_scrap,reward_items,reward_rep,reward_trust,reward_unlock,repeat,flavor
+MQ-001,MQ,민이를 찾아 주세요,board→veteran_scavenger,탐색,민이 흔적(창고 노크규칙),1,S-004,소,coin_scrap:10,10,,SQ-002,일회,프롤로그 민이찾기
+MQ-002,MQ,첫 루디 회수,board→veteran_scavenger→pawnshop,납품,ruby_shard,1,평판해금/S-013,중,,15,,전당포정식거래·DQ,일회,짙은현상 첫 루디
+SQ-001,SQ,잔해 속 목소리,발견형,탐색/구출,갇힌 생존자,1,평판E·발견,중,랜덤,5,,2지역단서·파견인력,일회,파견 첫 인력 연결
+SQ-002,SQ,회수꾼의 상자,veteran_scavenger,회수,약국 철제상자,1,MQ-001후,-,,,,거처(컨테이너),일회,동료유품 떡밥
+SQ-003,SQ,멈춘 지하철,zone_manager,회수/운반,subway_motor+부품4종,5,평판B+,특대,,+,,지하철수리(2지역훅),일회,1지역 capstone
+BD-01,BD,고철 수거,board,수집,scrap_metal,5,prologue_complete,소,tool_part:1,,,,반복,고철 다섯덩이만
+BD-02,BD,통조림 구함,board,수집,canned_food,3,prologue_complete,소,water_bottle:1,,,,반복,아이가 굶고 있소
+BD-03,BD,붕대 급구,board,수집,bandage,2,prologue_complete,소,painkiller:1,,,,반복,지혈할 천이 없소
+BD-04,BD,배터리 요청,board,수집,battery_aa,2,prologue_complete,소,junk_*:1,,,,반복,손전등이 죽었소
+BD-05,BD,잡동사니 수집,board,수집,junk_*,8,prologue_complete,중,junk_*:1,,,,반복,쓸만한거 여덟
+BD-06,BD,기계 부품 구함,board,수집,tool_part,3,prologue_complete,중,repair_kit:1,,,,반복,수리할 물건이 밀렸소
+BD-07,BD,약탈꾼 정리,board,처치,밴딧(안전),3,prologue_complete,중,ammo_rounds:1,,,,반복,골목에 약탈꾼 셋
+BD-08,BD,길목 청소,board,처치,밴딧(골목),2,prologue_complete,소,,,1(vendor),,반복,장보러갈 길을 막소
+BD-09,BD,거친 놈 하나,board,처치,정예 밴딧,1,prologue_complete,중,knife:1|coat_light:1,,,랜덤,반복,사나운 놈 하나
+BD-10,BD,현상 구역 솎기,board,처치,현상 밴딧(탐지등),2,평판C,중,battery_aa:2,,,,반복,불빛 챙겨 가시오
+BD-12,BD,창고 소리 조사,board,탐색,창고 POI,1,prologue_complete,소,map_fragment:1,,,,반복,창고서 소리가 나오
+BD-13,BD,북쪽 길 확인,board,탐색,북쪽 진입로 POI,1,prologue_complete,소,map_fragment:1,,,,반복,★떡밥 북쪽 길
+BD-14,BD,무너진 상점,board,탐색,붕괴 상점,1,평판E,소,랜덤,,,SQ-001힌트,반복,옛 상점이 무너졌다
+BD-15,BD,현상 경계 정찰,board,탐색,현상 경계 POI,2,평판C,중,ruby_shard:1,,,,반복,★경계가 움직였소
+BD-16,BD,이상한 신호,board,탐색,신호원 POI,1,prologue_complete,중,junk_*:1,,,단서플래그,반복,★라디오 잡음
+BD-17,BD,전력체 매입,board,납품,ruby_shard,1,평판C,대,,1,1(pawnshop),,반복,전력체 후하게(가중10%)
+BD-18,BD,근방 정밀 수색,board,탐색,파밍 포인트,3,prologue_complete,소,루트테이블롤,,,,반복,근방 싹 훑어주오
+BD-19,BD,분실물을 찾소,board,수집,note_nameplate,1,prologue_complete,중,랜덤,,1(veteran),,반복,★서명 없는 의뢰
+BD-20,BD,묻지 마시오,board,수집,pkg_marked,1,prologue_complete,중×2,미지보상(희귀롤),,,,반복,★표식만 남은 의뢰
+BQ-E01,BQ,고철 좀 줍게,board→veteran,수집,scrap_metal,5,평판E,소,,3,,,반복,
+BQ-E02,BQ,통조림 구해 주세요,board→veteran,수집,canned_food,3,평판E,소,,,,,반복,
+BQ-E03,BQ,창고 쪽 소리,board→veteran,탐색,창고 POI,1,평판E,소,,,1(veteran),,반복,
+BQ-E04,BQ,약탈꾼 좀 막아,board→veteran,처치,밴딧(안전),2,평판E,중,,,,,반복,
+BQ-D01,BQ,약국 앞 정리,board→veteran,처치,밴딧(약국),3,평판D,중,,4,,,반복,
+BQ-D02,BQ,배터리 모아 주세요,board→veteran,수집,battery_aa,2,평판D,중,,,,,반복,
+BQ-D03,BQ,무너진 간판,board→veteran,탐색,붕괴 상점,1,평판D,소,,,,SQ-001힌트,반복,
+BQ-D04,BQ,골목 쓰레기,board→zone_manager,수집,잡템,8,평판D,중,,,,자릿세-5%,반복,
+BQ-C01,BQ,불을 꺼뜨리지 말아주오,board→veteran→pawnshop,납품,ruby_shard,1,평판C,대,,5,,,반복,
+BQ-C02,BQ,현상 구역 정찰,board→veteran,탐색,현상 POI,2,평판C,중,,,,연료힌트,반복,
+BQ-C03,BQ,귀중품 회수,board→pawnshop,수집,val_*,1,평판C,대,,,1(pawnshop),,반복,B등급+
+BQ-B01,BQ,연속 회수,board,납품,ruby_shard,2,평판B,특대,,,,,반복,
+BQ-B02,BQ,협상꾼 밀어붙이기,board,처치,협상꾼구역+처치1,1,평판B,중,,,,두려움/신뢰분기,반복,
+BQ-A01,BQ,북쪽 봉인 확인,board,탐색,현상 심층,1,평판A,,,,,2지역단서·칭호,반복,
+DQ-001,DQ,귀중품 매입,pawnshop,납품,val_*,1,MQ-002후,중,,,1,,일일,
+DQ-002,DQ,감정 의뢰,pawnshop,회수,장물,1,MQ-002후,소,감정정보,,,,일일,
+DQ-003,DQ,낡은 부품 매입,pawnshop,수집,tool_part,2,MQ-002후,중,,,,,일일,
+DQ-004,DQ,희귀품 사들임,pawnshop,납품,희귀도Rare+,1,MQ-002후,중,,,1,,일일,
+DQ-005,DQ,재고 보충,pawnshop,수집,bandage:3|canned_food:4,1,MQ-002후,중,,,,,일일,상점재고
+DQ-006,DQ,루디 납품,pawnshop,납품,ruby_shard,1,MQ-002후,대,,3,,,일일,가중10%
+DQ-007,DQ,루디 다량 납품,pawnshop,납품,ruby_shard,3,MQ-002후,특대,,5,,,일일,가중10%
+DQ-008,DQ,장부 정리,pawnshop,수집,잡템,6,MQ-002후,소,랜덤잡화,,,,일일,
+DQ-009,DQ,특별 매입,pawnshop,납품,희귀+2/연구잔해,1,신뢰도50,대,,,2,,일일,호감구간 해금
+NQ-V01,NQ,상자 뒤의 밤,veteran_scavenger,처치,약국 밴딧(안전),1,SQ-002완료,중,,,5,,일회,동료 죽은 자리
+NQ-V02,NQ,말 넣은 사람,veteran_scavenger,회수,약국 유품,1,신뢰도50,소,,,5,BQ-D03힌트,일회,상자 언급 회피
+NQ-V03,NQ,또 다른 의뢰인,veteran_scavenger,납품,ruby_shard(전당포),1,신뢰도70,,,5,5,,일회,난 루디 안써
+NQ-V04,NQ,그날 나만 나왔다,veteran_scavenger,처치,현상 3회 생환,3,평판80,대,,,8,회수꾼 인장,일회,동료 죽음 고백
+NQ-V05,NQ,길잡이,veteran_scavenger,탐색,파밍포인트 마킹,3,-,소,,,2,,일회,
+NQ-V06,NQ,동료가 모으던 물건,veteran_scavenger,수집,scrap_metal,8,-,소,,,1,,반복,
+NQ-V07,NQ,동료 죽은 골목,veteran_scavenger,처치,밴딧(안전),3,-,중,,,1,,반복,
+NQ-V08,NQ,신참 몫,veteran_scavenger,수집,bandage:2|battery_aa:1,1,-,소,,,2,회수꾼 인망,일회,
+NQ-P01,NQ,시계가 반응했어,pawnshop,이벤트,시계 이상 보고,1,watch_anomaly_seen,,,,,story단계1,일회,말 돌림
+NQ-P02,NQ,창고 잔해,pawnshop,수집,clock_part/anomaly_residue,1,신뢰도50,중,,,5,연구잔해 창구,일회,한눈에 알아봄
+NQ-P03,NQ,비싼 물건,pawnshop,납품,희귀 잡화,1,신뢰도70,,,,3,시계·전자 라인+DQ가중,일회,그냥 시계 아냐
+NQ-P04,NQ,두고 온 말,pawnshop,납품,ruby_shard(생환3),1,신뢰도90,대,,,8,강무진 전용거래·매입가+5%,일회,넌 아니 됐다
+NQ-P05,NQ,감정 회수,pawnshop,수집,val_*,1,-,중,,,1,,반복,
+NQ-P06,NQ,분류 납품,pawnshop,납품,scrap_metal:5/canned_food:3,1,-,소,,,1,,반복,
+NQ-P07,NQ,외상 회수,pawnshop,탐색/처치,외상 물건+밴딧1,1,-,중,,,2,,일회,
+NQ-P08,NQ,단골,pawnshop,마일스톤,누적 거래 10,10,-,,,,2,매입가+3%,일회,
+NQ-M01,NQ,자릿세,zone_manager,납품,scrap(자릿세),1,거처/S-010,,,,5,창고슬롯+1,일회,골목에 들어온 값
+NQ-M02,NQ,골목 규칙,zone_manager,수집,잡템(BQ-D04연계),1,신뢰도50,,,,3,제작계 도면·자릿세할인3일,일회,빈 점포 비워둠
+NQ-M03,NQ,텃세,zone_manager,처치,밴딧(안전),3,신뢰도70,,,,5,전력계 도면·창고슬롯+1,일회,말없이 슬롯+1
+NQ-M04,NQ,빈 칸 하나 더,zone_manager,납품,시설 자재,1,평판80,대,,,5,파견보드·시설슬롯,일회,원래 더 북적였어
+NQ-M05,NQ,자릿세 수금,zone_manager,탐색/처치,입주자 POI+밴딧1,1,-,중,,,1,,반복,
+NQ-M06,NQ,골목 보수,zone_manager,수집,scrap_metal,6,-,,,,1,자릿세-5%,반복,
+NQ-M07,NQ,골목 순찰,zone_manager,처치,밴딧(입구),2,-,소,,,1,,반복,
+NQ-M08,NQ,빈집 정리,zone_manager,수집,잡템,10,-,,,,2,창고슬롯+1,일회,
+NQ-W01,NQ,목마른 날,wandering_merchant,납품,water_bottle:1|canned_food:1,2,S-012후,,,,5,다음방문할인,일회,정착 씨앗
+NQ-W02,NQ,다리가 무거워,wandering_merchant,탐색,POI 물건 회수,1,신뢰도50,,,,8,시그니처 희귀재고,일회,다리가 예전같지않아
+NQ-W03,NQ,자리 하나만,wandering_merchant,마일스톤,누적 거래 10,10,신뢰도70,,,,5,지역상점·가구점정착,일회,철도쪽 빈 가구점
+NQ-W04,NQ,재료 납품,wandering_merchant,수집,잡템,5,-,,,,1,다음거래할인,반복,
+NQ-W05,NQ,보급로 정리,wandering_merchant,처치,밴딧,2,-,소,,,1,,반복,
+NQ-W06,NQ,POI 회수,wandering_merchant,탐색,POI 물건,1,-,,,,2,희귀품 입고,일회,
+NQ-W07,NQ,단골,wandering_merchant,마일스톤,누적 거래 5,5,-,,,,2,신뢰보너스,일회,AM-042연동
+NQ-W08,NQ,귀한 손님,wandering_merchant,납품,귀중품,1,-,,,,2,희귀 재고 해금,일회,

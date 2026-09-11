@@ -1,0 +1,27 @@
+{
+    "name": "표준 순환 (스크립트 재생 — 정해진 순서대로)",
+    "seed": 20260711,
+    "cycles": 3,
+    "steps": [
+        { "op": "cycle.begin",        "budgetSec": 0,   "count": 0, "param": "",         "ratio": 0,   "wander": false },
+        { "op": "safehouse.ensure",   "budgetSec": 30,  "count": 0, "param": "",         "ratio": 0,   "wander": false },
+        { "op": "story.skip",         "budgetSec": 20,  "count": 0, "param": "",         "ratio": 0,   "wander": false },
+
+        { "op": "goto",               "budgetSec": 40,  "count": 0, "param": "Stash",    "ratio": 0,   "wander": false },
+        { "op": "inventory.organize", "budgetSec": 15,  "count": 0, "param": "",         "ratio": 0,   "wander": false },
+
+        { "op": "goto",               "budgetSec": 40,  "count": 0, "param": "NPC",      "ratio": 0,   "wander": false },
+        { "op": "shop.sell",          "budgetSec": 0,   "count": 0, "param": "",         "ratio": 0.7, "wander": false },
+        { "op": "shop.buy",           "budgetSec": 0,   "count": 2, "param": "Medical",  "ratio": 0.4, "wander": false },
+
+        { "op": "goto",               "budgetSec": 40,  "count": 0, "param": "MapBoard", "ratio": 0,   "wander": false },
+        { "op": "quest.accept",       "budgetSec": 0,   "count": 2, "param": "",         "ratio": 0,   "wander": false },
+
+        { "op": "raid.enter",         "budgetSec": 30,  "count": 0, "param": "auto",     "ratio": 0,   "wander": false },
+        { "op": "raid.explore",       "budgetSec": 150, "count": 6, "param": "",         "ratio": 0,   "wander": true  },
+        { "op": "combat.engage",      "budgetSec": 60,  "count": 2, "param": "",         "ratio": 14,  "wander": false },
+        { "op": "raid.extract",       "budgetSec": 120, "count": 0, "param": "",         "ratio": 0,   "wander": false },
+        { "op": "settle.verify",      "budgetSec": 10,  "count": 0, "param": "",         "ratio": 0,   "wander": false },
+        { "op": "cycle.end",          "budgetSec": 0,   "count": 0, "param": "",         "ratio": 0,   "wander": false }
+    ]
+}

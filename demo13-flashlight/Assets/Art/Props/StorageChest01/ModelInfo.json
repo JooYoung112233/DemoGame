@@ -1,0 +1,17 @@
+{
+  "mesh_parts": 39,
+  "triangles": 1750,
+  "lid_pivot": [
+    0.0,
+    0.23800000548362732,
+    0.35499998927116394
+  ],
+  "frames": 100,
+  "fps": 30,
+  "uv_mapped": true,
+  "non_manifold_shell_edges": {
+    "Body_SteelShell": 0,
+    "Lid_SteelShell": 0,
+    "Base_ReinforcedBand": 0
+  }
+}

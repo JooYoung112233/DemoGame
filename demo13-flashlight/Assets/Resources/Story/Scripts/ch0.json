@@ -1,0 +1,204 @@
+{
+  "scenes": [
+    {
+      "id": "S-000",
+      "title": "프롤로그 — 암전",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "effect", "effect": "fade_out", "floatParam": 0.01 },
+        { "type": "effect", "effect": "wait", "floatParam": 2.0 },
+        { "type": "narration", "textKeys": ["S000_N01"] },
+        { "type": "effect", "effect": "fade_in" },
+        { "type": "narration", "textKeys": ["S000_N02", "S000_N03"] }
+      ]
+    },
+
+    {
+      "id": "S-001",
+      "title": "골목 — 첫 이동",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S001_N01", "S001_N02"] },
+        { "type": "tutorial", "textKey": "TUT_MOVE", "duration": 3, "tutId": "move" },
+        { "type": "narration", "textKeys": ["S001_N03", "S001_N04"] },
+        { "type": "tutorial", "textKey": "TUT_INVENTORY", "duration": 3, "tutId": "inventory" }
+      ]
+    },
+
+    {
+      "id": "S-002",
+      "title": "전당포 — 입장 & 첫 대면",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S002_N01"] },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D01"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D02", "S002_D03"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S002_D04"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D05"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S002_D06"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D07"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S002_D08"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D09", "S002_D10"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S002_D11"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "pawnshop",
+          "speakerKey": "NPC_PAWNSHOP",
+          "textKeys": ["S002_D12"]
+        },
+        { "type": "system", "action": "set_flag", "param": "met_pawnshop" },
+        { "type": "system", "action": "set_flag", "param": "got_password_ember" }
+      ]
+    },
+
+    {
+      "id": "S-003",
+      "title": "전당포 우측 — 베테랑 회수꾼 (암구호 불씨)",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        { "type": "narration", "textKeys": ["S003_N01"] },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S003_D01"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S003_D02"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S003_D03", "S003_D04"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "player",
+          "speakerKey": "NPC_PLAYER",
+          "textKeys": ["S003_D05"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S003_D06", "S003_D07", "S003_D08"]
+        },
+        {
+          "type": "choice",
+          "choiceId": "veteran_intro",
+          "options": [
+            {
+              "textKey": "S003_C02",
+              "responseKeys": ["S003_R06", "S003_R07"],
+              "effects": []
+            },
+            {
+              "textKey": "S003_C03",
+              "responseKeys": ["S003_R09", "S003_R10", "S003_R11"],
+              "effects": []
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S003_D09", "S003_D10"]
+        },
+        { "type": "system", "action": "set_flag", "param": "veteran_met" }
+      ]
+    },
+
+    {
+      "id": "S-004",
+      "title": "첫 출발 — 의뢰 수령 & 출격",
+      "triggerFlag": "",
+      "oneShot": true,
+      "nodes": [
+        {
+          "type": "dialogue",
+          "speaker": "",
+          "speakerKey": "",
+          "textKeys": ["S004_NOTE"]
+        },
+        { "type": "system", "action": "quest_accept", "param": "MQ-001" },
+        { "type": "narration", "textKeys": ["S004_N01"] },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S004_D01", "S004_D02"]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S004_D03", "S004_D04", "S004_D05"]
+        },
+        { "type": "system", "action": "give_item", "param": "wood_club", "intParam": 1 },
+        { "type": "system", "action": "give_item", "param": "bandage", "intParam": 2 },
+        { "type": "tutorial", "textKey": "TUT_HOTKEY", "duration": 5, "tutId": "hotkey" },
+        {
+          "type": "dialogue",
+          "speaker": "veteran",
+          "speakerKey": "NPC_VETERAN",
+          "textKeys": ["S004_D06", "S004_D07"]
+        },
+        { "type": "system", "action": "set_flag", "param": "mq001_briefed" }
+      ]
+    }
+  ]
+}

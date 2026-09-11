@@ -1,0 +1,86 @@
+{
+  "stage": 3,
+  "source_idle_reused": true,
+  "clips": [
+    "Idle"
+  ],
+  "seconds": 3.0,
+  "bones": 23,
+  "meshes": 17,
+  "rest_shape_error": 1.201947465904182e-07,
+  "uv_preserved": true,
+  "max_boot_drift_m": 1.471843292201937e-07,
+  "loop_error_m": 0.0,
+  "max_motion_m": 0.02267201571492167,
+  "weights": {
+    "Study_Head": {
+      "vertices": 192,
+      "max_influences": 1
+    },
+    "Study_Cap": {
+      "vertices": 60,
+      "max_influences": 1
+    },
+    "Study_CapBrim": {
+      "vertices": 78,
+      "max_influences": 1
+    },
+    "Study_Neck": {
+      "vertices": 16,
+      "max_influences": 1
+    },
+    "Study_Torso": {
+      "vertices": 60,
+      "max_influences": 2
+    },
+    "Study_Hips": {
+      "vertices": 16,
+      "max_influences": 1
+    },
+    "Study_Sleeve_-1": {
+      "vertices": 96,
+      "max_influences": 2
+    },
+    "Study_Mitten_-1": {
+      "vertices": 222,
+      "max_influences": 1
+    },
+    "Study_Leg_-1": {
+      "vertices": 24,
+      "max_influences": 2
+    },
+    "Study_Boot_-1": {
+      "vertices": 32,
+      "max_influences": 1
+    },
+    "Study_Sleeve_1": {
+      "vertices": 96,
+      "max_influences": 2
+    },
+    "Study_Mitten_1": {
+      "vertices": 222,
+      "max_influences": 1
+    },
+    "Study_Leg_1": {
+      "vertices": 24,
+      "max_influences": 2
+    },
+    "Study_Boot_1": {
+      "vertices": 32,
+      "max_influences": 1
+    },
+    "Gear_Scarf": {
+      "vertices": 34,
+      "max_influences": 1
+    },
+    "Gear_Backpack": {
+      "vertices": 912,
+      "max_influences": 2
+    },
+    "Gear_Charm": {
+      "vertices": 36,
+      "max_influences": 1
+    }
+  },
+  "gameplay_applied": false
+}

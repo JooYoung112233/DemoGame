@@ -1,0 +1,51 @@
+{
+  "scene": "Assets/Scenes/Hideout.unity",
+  "rootScale": "(1.00, 1.00, 1.00)",
+  "roomMetres": "6 x 4",
+  "heroHeight": 1.8776381,
+  "cameraRecovered": true,
+  "checks": [
+    {
+      "key": "bed",
+      "type": "Bed",
+      "dockOpened": true,
+      "standDistance": 0.0
+    },
+    {
+      "key": "workbench",
+      "type": "Workbench",
+      "dockOpened": true,
+      "standDistance": 0.0
+    },
+    {
+      "key": "stash",
+      "type": "Stash",
+      "dockOpened": true,
+      "standDistance": 0.0
+    },
+    {
+      "key": "radio",
+      "type": "Radio",
+      "dockOpened": true,
+      "standDistance": 0.0
+    },
+    {
+      "key": "medical",
+      "type": "MedicalBench",
+      "dockOpened": true,
+      "standDistance": 0.0
+    },
+    {
+      "key": "cooking",
+      "type": "CookingBench",
+      "dockOpened": true,
+      "standDistance": 0.0
+    },
+    {
+      "key": "generator",
+      "type": "Generator",
+      "dockOpened": true,
+      "standDistance": 0.0
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: SwordUpperBody
+  m_Mask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000u
+  m_Elements:
+  - m_Path: 
+    m_Weight: 0
+  - m_Path: Gear_Backpack
+    m_Weight: 0
+  - m_Path: Gear_Charm
+    m_Weight: 0
+  - m_Path: Gear_Scarf
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig/Root
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig/Root/Hips
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Backpack
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.L
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.L/UpperArm.L
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.L/UpperArm.L/Forearm.L
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.L/UpperArm.L/Forearm.L/Hand.L
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.L/UpperArm.L/Forearm.L/Hand.L/HandSocket.L
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.R
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.R/UpperArm.R
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.R/UpperArm.R/Forearm.R
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.R/UpperArm.R/Forearm.R/Hand.R
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Clavicle.R/UpperArm.R/Forearm.R/Hand.R/HandSocket.R
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Neck
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Spine/Chest/Neck/Head
+    m_Weight: 1
+  - m_Path: SimpleHero_Rig/Root/Hips/Thigh.L
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig/Root/Hips/Thigh.L/Shin.L
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig/Root/Hips/Thigh.L/Shin.L/Foot.L
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig/Root/Hips/Thigh.R
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig/Root/Hips/Thigh.R/Shin.R
+    m_Weight: 0
+  - m_Path: SimpleHero_Rig/Root/Hips/Thigh.R/Shin.R/Foot.R
+    m_Weight: 0
+  - m_Path: Study_Boot_-1
+    m_Weight: 0
+  - m_Path: Study_Boot_1
+    m_Weight: 0
+  - m_Path: Study_Cap
+    m_Weight: 0
+  - m_Path: Study_CapBrim
+    m_Weight: 0
+  - m_Path: Study_Head
+    m_Weight: 0
+  - m_Path: Study_Hips
+    m_Weight: 0
+  - m_Path: Study_Leg_-1
+    m_Weight: 0
+  - m_Path: Study_Leg_1
+    m_Weight: 0
+  - m_Path: Study_Mitten_-1
+    m_Weight: 0
+  - m_Path: Study_Mitten_1
+    m_Weight: 0
+  - m_Path: Study_Neck
+    m_Weight: 0
+  - m_Path: Study_Sleeve_-1
+    m_Weight: 0
+  - m_Path: Study_Sleeve_1
+    m_Weight: 0
+  - m_Path: Study_Torso
+    m_Weight: 0

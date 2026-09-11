@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce1660046064aab44811087048683b72, type: 3}
+  m_Name: Bat_Light
+  m_EditorClassIdentifier: Game.Scripts::AttackData
+  attackId: Bat_Light
+  fps: 30
+  totalFrames: 48
+  cancelFromFrame: -1
+  damage: 8
+  groggy: 5
+  hitstop: 1
+  hitstopDuration: 0.03
+  windows:
+  - label: hit
+    startFrame: 17
+    endFrame: 21
+    shape: 0
+    offset: {x: 0.90000004, y: 0}
+    boxSize: {x: 1.2, y: 0.7}
+    angle: 0
+    radius: 0.6
+    damageMult: 1
+    groggyMult: 1

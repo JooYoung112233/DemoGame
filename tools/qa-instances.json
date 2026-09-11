@@ -1,0 +1,23 @@
+{
+  "_note": "QA 인스턴스 레지스트리. kind=editor는 사람이 Unity에서 F9로 띄우는 것(자동 기동 불가), kind=build는 exePath를 orchestrator가 직접 실행한다. instance 이름이 곧 파일 접두(A-qa-command.json). 빈 문자열은 접두 없음(에디터 기본).",
+  "dataDir": "C:\\Users\\admin\\AppData\\LocalLow\\Studio Pod Games\\demo13-flashlight",
+  "instances": [
+    {
+      "name": "",
+      "kind": "editor",
+      "label": "Unity 에디터 (F9 수동)",
+      "exePath": "",
+      "extraArgs": []
+    },
+    {
+      "name": "A",
+      "kind": "build",
+      "label": "빌드 A",
+      "exePath": "",
+      "extraArgs": [
+        "-qa-serve",
+        "-qa-minutes=10"
+      ]
+    }
+  ]
+}

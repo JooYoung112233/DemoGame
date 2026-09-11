@@ -1,0 +1,23 @@
+id,ui,purpose,status,priority,system,doc
+U01,NewspaperUI,온보딩 소식지 전면(헤드라인+본문+컷),신규,P1,온보딩,onboarding.md
+U02,NewspaperArchive,거점 소식판 발행분 재열람,신규,P2,온보딩,onboarding.md
+U03,ShopUI,상점 카탈로그(신뢰도/평판 해금+할인 배수),확장,P0,상점,quests-region1 §9.7
+U04,BarterUI,물물교환(아이템 묶음→아이템) 별도 슬롯,신규,P1,상점,quests-region1 §9.7
+U05,BoardUI,게시판 BD/BQ 의뢰 목록·수령·평판 잠금,확장(MapSelectUI),P0,의뢰,quests-region1 §9.3
+U06,ReputationHUD,평판 수치·등급(F~A) 표시,신규,P1,평판,quests-region1 §9.2
+U07,RelationshipUI,NPC 신뢰도/두려움 표시(대화·상점 내),신규,P2,관계,npc-dialogue.md
+U08,HideoutUI,시설 아이콘 뷰(타르코프식) → 아이콘 클릭 시 우측 패널 = 업그레이드(Lv업 비용·재료·현→다음Lv 효과) 또는 제작(레시피 목록). 모듈 트리·도면 잠금,신규,P1,하이드아웃,safehouse.md §하이드아웃 UI · quests-region1 §9.7
+U09,DispatchUI,파견 편성(인력·팀2·장비3슬롯·파견지·결과),신규,P1,파견,quests-region1 §9.7 G
+U10,RadioUI,채널(소식/시장/구조)·리드 수신,신규,P2,라디오,safehouse-intel.md
+U11,ContainerUI,보관함 내부 격자(중첩 인벤 패널),신규,P1,인벤,inventory.md
+U12,SubwayRepairUI,지하철 부품 진행도·납품(SQ-003),신규,P2,지하철,quests-region1 §6-2
+U13,QuestHUD,진행 퀘스트 트래커+알림,있음,-,의뢰,quest.md
+U14,DialogueUI,대화·의뢰 제안/보고·선택지,있음,-,관계,npc-dialogue.md
+U15,CharacterPanel,가방+창고(Tab) 인벤,있음,-,인벤,inventory.md
+U16,CraftingUI,제작(작업대/의료대/취사대),있음,-,제작,crafting.md
+U17,RaidResultUI,레이드 결과 정산,있음,-,레이드,-
+U18,MedicalHUD,부위별 부상 표시,있음,-,의료,medical.md
+U19,SettingsUI,설정 메뉴(마스터/BGM/SFX 볼륨·해상도+창모드·키 안내 보기 전용) — ESC 일시정지에서 진입·PlayerPrefs 저장·키 리바인딩은 2차,신규,P0,설정,dev-roadmap.md
+U20,CodexUI,아이템 도감(U키·좌 카테고리 탭·아이콘 격자·미발견 실루엣+???·첫 획득 기록),있음,P1,도감,items.md
+U21,QuickSlotUI,퀵슬롯 핫바 4칸(1~4키·인벤 드래그 할당·즉시 사용·세이브 저장),신규,P0,인벤,inventory.md
+U22,MapUI,전체화면 지도(M키·map_fragment 구역 해금·안개)+시계 나침반(활성 탈출구 방향)·발견 존 세이브 영속,있음,P1,레이드,raid.md

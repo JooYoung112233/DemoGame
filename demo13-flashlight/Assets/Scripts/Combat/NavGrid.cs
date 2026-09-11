@@ -1,0 +1,179 @@
+using UnityEngine;
+
+/// <summary>
+/// 길찾기 격자 (쿼터뷰). 맵의 **XZ 평면**을 cellSize 격자로 나눠 셀별 막힘을 베이크.
+/// 막힘 = 비-트리거 Collider가 셀 기둥에 겹침 (Player/Enemy 레이어는 제외 — 장애물 아님).
+/// 셀 검사는 **바닥이 아니라 사람 키 높이의 기둥**으로 한다 — 바닥 턱·연석까지 벽으로 세면
+/// 갈 수 있는 길이 사라진다.
+/// 에이전트 바디 반경만큼 막힘을 dilate → "전신"이 벽에 안 끼는 경로만 통과.
+/// 씬에 1개 배치(빌더가 생성). NavAgent가 Instance로 조회. 정적 맵 가정(필요 시 Rebuild).
+/// </summary>
+public class NavGrid : MonoBehaviour
+{
+    public static NavGrid Instance { get; private set; }
+
+    [Header("영역 (이 오브젝트 위치 중심)")]
+    [SerializeField] Vector2 areaSize = new Vector2(60f, 60f);
+    [SerializeField] float cellSize = 0.5f;
+
+    [Header("장애물")]
+    [Tooltip("막힘으로 검사할 레이어 (기본 전부 — 코드에서 트리거/Player/Enemy 제외)")]
+    [SerializeField] LayerMask obstacleMask = ~0;
+    [Tooltip("에이전트 바디 반경 — 이만큼 막힘을 부풀려 전신 통과 보장")]
+    [SerializeField] float agentRadius = 0.35f;
+
+    [Header("베이크")]
+    [SerializeField] bool bakeOnStart = true;
+    [SerializeField] bool drawGizmos = false;
+
+    int _w, _h;
+    Vector2 _origin;            // 셀(0,0) 중심의 월드 좌표
+    bool[,] _blocked;           // dilate 반영된 최종 막힘
+    int _ignoreMask;            // Player|Enemy
+    readonly Collider[] _buf = new Collider[16];
+
+    /// <summary>셀 막힘 검사 기둥 — 지면 위 이 높이 구간만 본다.</summary>
+    const float ProbeBottom = 0.25f, ProbeTop = 1.9f;
+
+    public bool Ready => _blocked != null;
+    public int  Width  => _w;
+    public int  Height => _h;
+    public float CellSize => cellSize;
+
+    /// <summary>막힘 셀 비율(0~1). 0이면 장애물을 하나도 못 잡은 것 — 베이크 시점 의심.</summary>
+    public float BlockedRatio
+    {
+        get
+        {
+            if (_blocked == null || _w * _h == 0) return 0f;
+            int n = 0;
+            foreach (bool b in _blocked) if (b) n++;
+            return (float)n / (_w * _h);
+        }
+    }
+
+    /// <summary>런타임 자동 배치용 — 영역·해상도를 코드에서 정하고 즉시 굽는다.
+    /// (씬에 손으로 배치한 경우엔 인스펙터 값이 그대로 쓰이므로 호출되지 않는다.)</summary>
+    public void Configure(Vector2 center, Vector2 area, float cell, float radius)
+    {
+        // center는 **평면 좌표**(x=월드X, y=월드Z). 높이는 지금 있는 값을 유지한다.
+        transform.position = Plan3D.ToWorld(center, transform.position.y);
+        areaSize = area;
+        cellSize = Mathf.Max(0.05f, cell);
+        agentRadius = Mathf.Max(0f, radius);
+        bakeOnStart = false;   // 여기서 굽는다 — Start에서 중복 베이크 방지
+        Rebuild();
+    }
+
+    void Awake()
+    {
+        Instance = this;
+        int p = LayerMask.NameToLayer("Player");
+        int e = LayerMask.NameToLayer("Enemy");
+        if (p >= 0) _ignoreMask |= 1 << p;
+        if (e >= 0) _ignoreMask |= 1 << e;
+    }
+
+    void OnDestroy() { if (Instance == this) Instance = null; }
+
+    void Start() { if (bakeOnStart) Rebuild(); }
+
+    /// <summary>격자를 다시 굽는다. 맵이 바뀌면 호출.</summary>
+    public void Rebuild()
+    {
+        _w = Mathf.Max(1, Mathf.RoundToInt(areaSize.x / cellSize));
+        _h = Mathf.Max(1, Mathf.RoundToInt(areaSize.y / cellSize));
+        Vector2 c = Plan3D.ToPlan(transform.position);
+        _origin = c - areaSize * 0.5f + Vector2.one * (cellSize * 0.5f);
+
+        var raw = new bool[_w, _h];
+        Vector2 box = Vector2.one * (cellSize * 0.95f);
+        for (int x = 0; x < _w; x++)
+            for (int y = 0; y < _h; y++)
+                raw[x, y] = CellHasObstacle(CellToWorld(x, y), box);
+
+        // 팽창은 **반올림**이다. Ceil을 쓰면 셀이 굵을 때 과다 팽창한다 —
+        // 2026-07-28 QA: Zone1이 셀 1.54m라 ceil(0.35/1.54)=1 → 벽을 1.54m 부풀려(필요치의 4.4배)
+        // 폭 1~3m 통로가 통째로 막히고 봇·적이 갇혔다. 굵은 셀은 그 자체로 벽을 과대표현하므로
+        // 반경이 셀의 절반보다 작으면 팽창하지 않는 게 맞다.
+        int r = Mathf.Max(0, Mathf.RoundToInt(agentRadius / cellSize));
+        if (r == 0) { _blocked = raw; return; }
+
+        var dil = new bool[_w, _h];
+        for (int x = 0; x < _w; x++)
+            for (int y = 0; y < _h; y++)
+                if (raw[x, y]) MarkDisk(dil, x, y, r);
+        _blocked = dil;
+    }
+
+    bool CellHasObstacle(Vector2 center, Vector2 box)
+    {
+        // 셀 하나를 **기둥**으로 본다. 지면 바로 위(0.25m)부터 키 높이(1.9m)까지에
+        // 솔리드가 걸리면 막힘 — 바닥 자체나 낮은 턱은 통과로 남는다.
+        float baseY = transform.position.y;
+        Vector3 c = Plan3D.ToWorld(center, baseY + (ProbeBottom + ProbeTop) * 0.5f);
+        Vector3 half = new Vector3(box.x * 0.5f, (ProbeTop - ProbeBottom) * 0.5f, box.y * 0.5f);
+
+        int n = Physics.OverlapBoxNonAlloc(c, half, _buf, Quaternion.identity,
+                                           obstacleMask, QueryTriggerInteraction.Collide);
+        for (int i = 0; i < n; i++)
+        {
+            var col = _buf[i];
+            if (col == null || col.isTrigger) continue;
+            if (((1 << col.gameObject.layer) & _ignoreMask) != 0) continue;
+            return true;
+        }
+        return false;
+    }
+
+    static void MarkDisk(bool[,] g, int cx, int cy, int r)
+    {
+        int w = g.GetLength(0), h = g.GetLength(1);
+        for (int dx = -r; dx <= r; dx++)
+            for (int dy = -r; dy <= r; dy++)
+            {
+                if (dx * dx + dy * dy > r * r) continue;
+                int x = cx + dx, y = cy + dy;
+                if (x >= 0 && x < w && y >= 0 && y < h) g[x, y] = true;
+            }
+    }
+
+    // ── 좌표 변환 / 쿼리 ─────────────────────────────────────────────
+    public Vector2 CellToWorld(int x, int y) => _origin + new Vector2(x * cellSize, y * cellSize);
+
+    public Vector2Int WorldToCell(Vector2 p) => new Vector2Int(
+        Mathf.RoundToInt((p.x - _origin.x) / cellSize),
+        Mathf.RoundToInt((p.y - _origin.y) / cellSize));
+
+    public bool InBounds(int x, int y) => x >= 0 && x < _w && y >= 0 && y < _h;
+    public bool IsWalkable(int x, int y) => InBounds(x, y) && _blocked != null && !_blocked[x, y];
+
+    /// <summary>막힘 안/밖이면 가장 가까운 walkable 셀로 보정.</summary>
+    public Vector2Int NearestWalkable(Vector2Int c, int maxR = 8)
+    {
+        if (IsWalkable(c.x, c.y)) return c;
+        for (int r = 1; r <= maxR; r++)
+            for (int dx = -r; dx <= r; dx++)
+                for (int dy = -r; dy <= r; dy++)
+                {
+                    if (Mathf.Abs(dx) != r && Mathf.Abs(dy) != r) continue; // 링만
+                    int x = c.x + dx, y = c.y + dy;
+                    if (IsWalkable(x, y)) return new Vector2Int(x, y);
+                }
+        return c;
+    }
+
+#if UNITY_EDITOR
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
+        // 격자는 XZ 평면 — 예전 (x, y, 0)은 2D 시절 값이라 3D에선 벽처럼 세로로 섰다.
+        Gizmos.DrawWireCube(transform.position, new Vector3(areaSize.x, 0f, areaSize.y));
+        if (!drawGizmos || _blocked == null) return;
+        Gizmos.color = new Color(1f, 0f, 0f, 0.4f);
+        for (int x = 0; x < _w; x++)
+            for (int y = 0; y < _h; y++)
+                if (_blocked[x, y]) Gizmos.DrawCube(Plan3D.ToWorld(CellToWorld(x, y), transform.position.y), new Vector3(cellSize * 0.9f, 0.05f, cellSize * 0.9f));
+    }
+#endif
+}

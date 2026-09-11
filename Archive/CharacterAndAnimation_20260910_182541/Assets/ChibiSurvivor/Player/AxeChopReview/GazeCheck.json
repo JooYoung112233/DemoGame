@@ -1,0 +1,10 @@
+{
+  "before_min_degrees": -44.249030894670966,
+  "after_min_degrees": -3.5487129275194387,
+  "after_max_degrees": -2.8130332834878398,
+  "changed_channels": [
+    "pose.bones[\"Head\"].rotation_quaternion",
+    "pose.bones[\"Neck\"].rotation_quaternion"
+  ],
+  "body_and_weapon_channels_preserved": true
+}

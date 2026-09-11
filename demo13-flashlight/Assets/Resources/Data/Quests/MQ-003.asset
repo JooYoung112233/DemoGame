@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb7a23f8e25eea74ba9cecc7af67cdeb, type: 3}
+  m_Name: MQ-003
+  m_EditorClassIdentifier: Game.Scripts::QuestData
+  questId: MQ-003
+  title: "침묵 너머로"
+  description: "지도판에 새로 열린 '침묵 생활 지구' 진입로를 확인하라. 2지역으로 가는 길이 열린다."
+  questType: 2
+  giverNpcId: pawnshop
+  objectives:
+  - type: 2
+    targetId: mq003_silence_gate
+    requiredCount: 1
+    description: "침묵 생활 지구 진입로 도달"
+  rewards:
+  - type: 1
+    itemId:
+    amount: 30000
+    npcId:
+  - type: 0
+    itemId: map_fragment
+    amount: 1
+    npcId:
+  - type: 3
+    itemId:
+    amount: 8
+    npcId: pawnshop
+  unlockCondition:
+    requiredAffinity: 0
+    requiredTrust: 0
+    requiredQuest: MQ-002
+    requiredFlag: prologue_complete
+  region: scrap_market
+  isRepeatable: 0
+  expiresOnRaid: 0

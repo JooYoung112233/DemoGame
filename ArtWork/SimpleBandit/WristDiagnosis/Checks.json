@@ -1,0 +1,144 @@
+{
+  "rows": [
+    {
+      "clip": "Bandit_CarryIdle",
+      "phase": 0.0,
+      "wristFromBindDegrees": 150.141083,
+      "wristLocalEuler": "(22.4, 161.6, 118.2)",
+      "forearmToPalmDegrees": 115.0682
+    },
+    {
+      "clip": "Bandit_CarryIdle",
+      "phase": 0.25,
+      "wristFromBindDegrees": 146.326187,
+      "wristLocalEuler": "(26.7, 160.3, 120.6)",
+      "forearmToPalmDegrees": 116.060135
+    },
+    {
+      "clip": "Bandit_CarryIdle",
+      "phase": 0.5,
+      "wristFromBindDegrees": 150.141083,
+      "wristLocalEuler": "(22.4, 161.6, 118.2)",
+      "forearmToPalmDegrees": 115.0682
+    },
+    {
+      "clip": "Bandit_CarryIdle",
+      "phase": 0.75,
+      "wristFromBindDegrees": 153.725967,
+      "wristLocalEuler": "(18.3, 162.7, 115.6)",
+      "forearmToPalmDegrees": 113.587616
+    },
+    {
+      "clip": "Bandit_CarryWalk",
+      "phase": 0.0,
+      "wristFromBindDegrees": 156.847427,
+      "wristLocalEuler": "(12.4, 157.2, 123.9)",
+      "forearmToPalmDegrees": 122.468559
+    },
+    {
+      "clip": "Bandit_CarryWalk",
+      "phase": 0.25,
+      "wristFromBindDegrees": 145.626724,
+      "wristLocalEuler": "(26.8, 158.7, 121.9)",
+      "forearmToPalmDegrees": 117.14698
+    },
+    {
+      "clip": "Bandit_CarryWalk",
+      "phase": 0.5,
+      "wristFromBindDegrees": 142.919815,
+      "wristLocalEuler": "(35.3, 167.5, 118.3)",
+      "forearmToPalmDegrees": 111.57016
+    },
+    {
+      "clip": "Bandit_CarryWalk",
+      "phase": 0.75,
+      "wristFromBindDegrees": 151.242447,
+      "wristLocalEuler": "(23.8, 165.6, 119.8)",
+      "forearmToPalmDegrees": 116.158325
+    },
+    {
+      "clip": "Bandit_CarryRun",
+      "phase": 0.0,
+      "wristFromBindDegrees": 146.028564,
+      "wristLocalEuler": "(27.7, 162.6, 110.7)",
+      "forearmToPalmDegrees": 107.29142
+    },
+    {
+      "clip": "Bandit_CarryRun",
+      "phase": 0.25,
+      "wristFromBindDegrees": 144.943726,
+      "wristLocalEuler": "(34.1, 168.7, 101.9)",
+      "forearmToPalmDegrees": 98.76735
+    },
+    {
+      "clip": "Bandit_CarryRun",
+      "phase": 0.5,
+      "wristFromBindDegrees": 149.40593,
+      "wristLocalEuler": "(12.3, 143.0, 121.2)",
+      "forearmToPalmDegrees": 119.866653
+    },
+    {
+      "clip": "Bandit_CarryRun",
+      "phase": 0.75,
+      "wristFromBindDegrees": 155.274963,
+      "wristLocalEuler": "(4.9, 139.0, 126.9)",
+      "forearmToPalmDegrees": 126.470993
+    },
+    {
+      "clip": "Bandit_BatIdle",
+      "phase": 0.0,
+      "wristFromBindDegrees": 53.0959,
+      "wristLocalEuler": "(20.4, 6.9, 318.2)",
+      "forearmToPalmDegrees": 44.8941727
+    },
+    {
+      "clip": "Bandit_BatIdle",
+      "phase": 0.25,
+      "wristFromBindDegrees": 53.0959,
+      "wristLocalEuler": "(20.4, 6.9, 318.2)",
+      "forearmToPalmDegrees": 44.89424
+    },
+    {
+      "clip": "Bandit_BatIdle",
+      "phase": 0.5,
+      "wristFromBindDegrees": 53.0959,
+      "wristLocalEuler": "(20.4, 6.9, 318.2)",
+      "forearmToPalmDegrees": 44.89417
+    },
+    {
+      "clip": "Bandit_BatIdle",
+      "phase": 0.75,
+      "wristFromBindDegrees": 53.0959,
+      "wristLocalEuler": "(20.4, 6.9, 318.2)",
+      "forearmToPalmDegrees": 44.894146
+    },
+    {
+      "clip": "Bandit_BatWalk",
+      "phase": 0.0,
+      "wristFromBindDegrees": 53.0959,
+      "wristLocalEuler": "(20.4, 6.9, 318.2)",
+      "forearmToPalmDegrees": 44.8941345
+    },
+    {
+      "clip": "Bandit_BatWalk",
+      "phase": 0.25,
+      "wristFromBindDegrees": 53.0959,
+      "wristLocalEuler": "(20.4, 6.9, 318.2)",
+      "forearmToPalmDegrees": 44.89424
+    },
+    {
+      "clip": "Bandit_BatWalk",
+      "phase": 0.5,
+      "wristFromBindDegrees": 53.0959,
+      "wristLocalEuler": "(20.4, 6.9, 318.2)",
+      "forearmToPalmDegrees": 44.8943367
+    },
+    {
+      "clip": "Bandit_BatWalk",
+      "phase": 0.75,
+      "wristFromBindDegrees": 53.0959,
+      "wristLocalEuler": "(20.4, 6.9, 318.2)",
+      "forearmToPalmDegrees": 44.8941956
+    }
+  ]
+}

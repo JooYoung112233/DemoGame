@@ -1,0 +1,15 @@
+{
+  "ranges": {
+    "previous": {
+      "chest_yaw_range_degrees": 13.89128281687897,
+      "head_lateral_range_m": 0.054002776741981506,
+      "right_hand_fore_aft_range_m": 0.3435958409681916
+    },
+    "revised": {
+      "chest_yaw_range_degrees": 13.638066666755151,
+      "head_lateral_range_m": 0.05212017148733139,
+      "right_hand_fore_aft_range_m": 0.3775766119360924
+    }
+  },
+  "hand_surface_intersections": []
+}

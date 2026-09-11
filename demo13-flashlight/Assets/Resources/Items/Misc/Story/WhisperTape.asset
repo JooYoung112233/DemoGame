@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
+  m_Name: WhisperTape
+  m_EditorClassIdentifier: Game.Scripts::ItemData
+  itemId: whisper_tape
+  displayName: "속삭임 테이프"
+  description: "스토리"
+  icon: {fileID: 0}
+  gridWidth: 1
+  gridHeight: 1
+  category: 6
+  rarity: 2
+  maxStack: 1
+  weight: 0.05
+  sellPrice: 4000
+  buyPrice: 0
+  isUsable: 0
+  useEffect: 0
+  effectValue: 0
+  worldDropPrefab: {fileID: 0}

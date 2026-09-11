@@ -1,0 +1,19 @@
+{
+  "prefab": "Assets/Art/Props/StorageChest01/StorageChest01.prefab",
+  "meshes": 39,
+  "openingAngle": 105.000008,
+  "pivotDrift": 0.0,
+  "closeError": 0.0,
+  "size": [
+    0.900000155,
+    0.452300042,
+    0.532
+  ],
+  "clips": [
+    "Closed",
+    "Close",
+    "Open",
+    "Opened"
+  ],
+  "materialsValidated": true
+}

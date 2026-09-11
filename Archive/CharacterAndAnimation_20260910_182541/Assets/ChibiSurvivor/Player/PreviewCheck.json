@@ -1,0 +1,34 @@
+{
+  "fps": 30,
+  "resolution": [
+    640,
+    720
+  ],
+  "frames": 172,
+  "seconds": 5.733333333333333,
+  "views": [
+    {
+      "view": "Quarter",
+      "start": 1,
+      "frames": 43
+    },
+    {
+      "view": "Quarter",
+      "start": 44,
+      "frames": 43
+    },
+    {
+      "view": "GameAngle",
+      "start": 87,
+      "frames": 43
+    },
+    {
+      "view": "GameAngle",
+      "start": 130,
+      "frames": 43
+    }
+  ],
+  "source": "Actual Blender model and animation",
+  "preview_only_knife": true,
+  "display_transform": "Standard; no second AgX pass"
+}

@@ -1,0 +1,538 @@
+{
+  "resolution": 1024,
+  "charts": 51,
+  "coverage": 0.3494539260864258,
+  "overlapping_pixels": 4,
+  "regions": {
+    "SCARF": [
+      0.02,
+      0.57,
+      0.48,
+      0.41
+    ],
+    "BACKPACK": [
+      0.52,
+      0.02,
+      0.46,
+      0.96
+    ],
+    "CHARM": [
+      0.02,
+      0.02,
+      0.48,
+      0.52
+    ]
+  },
+  "layout": [
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        201,
+        591,
+        139,
+        127
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        28,
+        876,
+        145,
+        37
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        350,
+        876,
+        107,
+        37
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        189,
+        876,
+        145,
+        37
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        28,
+        929,
+        107,
+        37
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        28,
+        591,
+        157,
+        145
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        28,
+        752,
+        190,
+        108
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        234,
+        752,
+        190,
+        108
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        421,
+        929,
+        45,
+        21
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        151,
+        929,
+        190,
+        30
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        357,
+        929,
+        48,
+        21
+      ]
+    },
+    {
+      "part": "Gear_Scarf",
+      "region": "SCARF",
+      "rect_pixels": [
+        28,
+        982,
+        162,
+        12
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        634,
+        783,
+        170,
+        93
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        540,
+        231,
+        170,
+        178
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        726,
+        231,
+        170,
+        178
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        697,
+        425,
+        57,
+        166
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        770,
+        425,
+        57,
+        166
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        820,
+        783,
+        140,
+        74
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        568,
+        920,
+        22,
+        12
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        722,
+        28,
+        71,
+        187
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        912,
+        231,
+        37,
+        174
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        540,
+        28,
+        75,
+        187
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        592,
+        425,
+        37,
+        169
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        540,
+        920,
+        12,
+        32
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        587,
+        783,
+        31,
+        120
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        927,
+        615,
+        31,
+        123
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        843,
+        425,
+        68,
+        152
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        927,
+        425,
+        68,
+        152
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        708,
+        615,
+        27,
+        130
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        751,
+        615,
+        27,
+        130
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        606,
+        920,
+        22,
+        12
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        644,
+        920,
+        22,
+        12
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        540,
+        425,
+        36,
+        174
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        809,
+        28,
+        71,
+        187
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        976,
+        783,
+        12,
+        43
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        645,
+        425,
+        36,
+        169
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        631,
+        28,
+        75,
+        187
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        540,
+        783,
+        31,
+        121
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        880,
+        615,
+        31,
+        124
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        540,
+        615,
+        68,
+        152
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        624,
+        615,
+        68,
+        152
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        794,
+        615,
+        27,
+        130
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        837,
+        615,
+        27,
+        130
+      ]
+    },
+    {
+      "part": "Gear_Backpack",
+      "region": "BACKPACK",
+      "rect_pixels": [
+        682,
+        920,
+        22,
+        12
+      ]
+    },
+    {
+      "part": "Gear_Charm",
+      "region": "CHARM",
+      "rect_pixels": [
+        96,
+        337,
+        142,
+        64
+      ]
+    },
+    {
+      "part": "Gear_Charm",
+      "region": "CHARM",
+      "rect_pixels": [
+        28,
+        28,
+        169,
+        293
+      ]
+    },
+    {
+      "part": "Gear_Charm",
+      "region": "CHARM",
+      "rect_pixels": [
+        398,
+        28,
+        44,
+        293
+      ]
+    },
+    {
+      "part": "Gear_Charm",
+      "region": "CHARM",
+      "rect_pixels": [
+        213,
+        28,
+        169,
+        293
+      ]
+    },
+    {
+      "part": "Gear_Charm",
+      "region": "CHARM",
+      "rect_pixels": [
+        458,
+        28,
+        44,
+        293
+      ]
+    },
+    {
+      "part": "Gear_Charm",
+      "region": "CHARM",
+      "rect_pixels": [
+        254,
+        337,
+        132,
+        64
+      ]
+    },
+    {
+      "part": "Gear_Charm",
+      "region": "CHARM",
+      "rect_pixels": [
+        28,
+        337,
+        52,
+        139
+      ]
+    }
+  ]
+}

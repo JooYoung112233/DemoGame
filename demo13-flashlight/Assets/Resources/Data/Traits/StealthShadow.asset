@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c3730e547514f3d9800a5ed1cce3758, type: 3}
+  m_Name: StealthShadow
+  m_EditorClassIdentifier: Game.Scripts::TraitData
+  traitId: stealth_shadow
+  displayName: "\uADF8\uB9BC\uC790"
+  description: 
+  category: 3
+  tier: 1
+  ppCost: 1
+  prereqTraitId: 
+  tradeoff: 0
+  effectSummary: "\uC801 \uAC10\uC9C0 \uBC18\uACBD -20% (\uC6C5\uD06C\uB9BC -35%)"
+  effects:
+  - effectKey: detect_radius
+    op: mul
+    value: -0.2

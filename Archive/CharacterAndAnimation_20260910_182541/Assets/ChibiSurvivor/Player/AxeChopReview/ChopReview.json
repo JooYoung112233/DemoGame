@@ -1,0 +1,23 @@
+{
+  "source": "ExplosiveLLC/2Hand-Sword-Attack5",
+  "clips": {
+    "AxeChop01": {
+      "frames": 37,
+      "seconds": 1.2,
+      "max_support_hand_error_m": 2.443972150513042e-07
+    }
+  },
+  "amplitude_from_guard": {
+    "torso": 0.6,
+    "legs": 0.55,
+    "arms": 0.78,
+    "head_neck": 0.68
+  },
+  "axe_head_roll_degrees": 90,
+  "grip_spacing_m": 0.16,
+  "gameplay_connected": false,
+  "existing_actions_unchanged": true,
+  "status": "Awaiting visual approval",
+  "export_sampling_fps": 480,
+  "dense_support_hand_error_m": 3.681069411944039e-07
+}

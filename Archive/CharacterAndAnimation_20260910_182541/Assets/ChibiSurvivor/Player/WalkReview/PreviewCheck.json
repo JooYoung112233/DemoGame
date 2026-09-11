@@ -1,0 +1,41 @@
+{
+  "frames": 408,
+  "fps": 30,
+  "seconds": 13.6,
+  "sequence": [
+    {
+      "view": "Previous",
+      "start": 1,
+      "frames": 60
+    },
+    {
+      "view": "Previous",
+      "start": 61,
+      "frames": 60
+    },
+    {
+      "view": "Revised",
+      "start": 121,
+      "frames": 72
+    },
+    {
+      "view": "Revised",
+      "start": 193,
+      "frames": 72
+    },
+    {
+      "view": "Side",
+      "start": 265,
+      "frames": 72
+    },
+    {
+      "view": "Side",
+      "start": 337,
+      "frames": 72
+    }
+  ],
+  "source": "Actual Blender render",
+  "world_travel_matches_each_walk_speed": true,
+  "approval": "pending",
+  "display_transform": "Standard; rendered colors not transformed twice"
+}

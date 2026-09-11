@@ -1,0 +1,42 @@
+{
+  "fbx_reimport_passed": true,
+  "bones": 23,
+  "character_meshes": 17,
+  "review_weapon_exported": false,
+  "uv_weights_valid": true,
+  "clips": [
+    {
+      "clip": "Idle",
+      "seconds": 3.0,
+      "loop": true,
+      "min_sole_z_m": 0.024999765679240227,
+      "max_grip_error_m": null,
+      "motion_m": 0.022672378670232307
+    },
+    {
+      "clip": "Run",
+      "seconds": 0.8,
+      "loop": true,
+      "min_sole_z_m": -7.573856419185176e-05,
+      "max_grip_error_m": null,
+      "motion_m": 0.6989896874322622
+    },
+    {
+      "clip": "SwordSlash",
+      "seconds": 1.2,
+      "loop": false,
+      "min_sole_z_m": -0.00010894108709180728,
+      "max_grip_error_m": 0.00039497453997778794,
+      "motion_m": 0.9439031877674833
+    },
+    {
+      "clip": "Walk",
+      "seconds": 1.2,
+      "loop": true,
+      "min_sole_z_m": -0.001565869664773345,
+      "max_grip_error_m": null,
+      "motion_m": 0.7003387243246302
+    }
+  ],
+  "gameplay_applied": false
+}

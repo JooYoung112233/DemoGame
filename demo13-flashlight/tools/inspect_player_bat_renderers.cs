@@ -1,0 +1,1 @@
+var p=UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/ChibiSurvivor/Player/SimpleHeroStudy/Game/SimpleHero.prefab");return p.GetComponentsInChildren<Renderer>(true).Select(r=>new{r.name,r.enabled,type=r.GetType().Name}).ToArray();

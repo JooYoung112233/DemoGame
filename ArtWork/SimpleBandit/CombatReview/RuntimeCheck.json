@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "mode": "Isolated Editor scene / real EnemyController attack methods",
+  "maxGripError": 0.00107639423,
+  "maxPalmToHandleError": 0.00519936,
+  "checks": [
+    "Loads prepared bandit through runtime Resources path",
+    "Single skinned character body",
+    "Rigid club attached to right socket",
+    "New dedicated motion controller",
+    "FOV hides body and weapon",
+    "FOV restores body and weapon",
+    "Attack start does not deal instant damage",
+    "Contact samples new bat clip at 38.5 percent",
+    "Visual update does not advance damage clock",
+    "Damage on contact",
+    "Only one damage event per swing",
+    "Recovery returns to chase",
+    "Animation returns to locomotion",
+    "Hit reaction cancels pending attack",
+    "Out of range target takes no damage",
+    "Palm lies along wrapped grip",
+    "Two-hand grip holds through walk, run and attack",
+    "Actual palm meshes surround club handle, not just attachment sockets",
+    "Death presentation keeps corpse visible"
+  ],
+  "fullRaidPlaytest": false
+}

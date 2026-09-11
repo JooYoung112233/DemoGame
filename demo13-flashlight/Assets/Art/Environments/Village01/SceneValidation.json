@@ -1,0 +1,282 @@
+{
+  "materialsInvalid": [],
+  "routeSamples": 388,
+  "blocked": [
+    {
+      "position": [
+        40.0,
+        31.0
+      ],
+      "collider": "Bench01"
+    },
+    {
+      "position": [
+        40.0,
+        31.25
+      ],
+      "collider": "Bench01"
+    },
+    {
+      "position": [
+        40.0,
+        31.5
+      ],
+      "collider": "Bench01"
+    },
+    {
+      "position": [
+        40.0,
+        31.75
+      ],
+      "collider": "Bench01"
+    },
+    {
+      "position": [
+        40.0,
+        32.0
+      ],
+      "collider": "Bench01"
+    },
+    {
+      "position": [
+        43.5,
+        29.0
+      ],
+      "collider": "Brazier01"
+    },
+    {
+      "position": [
+        43.75,
+        29.0
+      ],
+      "collider": "Brazier01"
+    },
+    {
+      "position": [
+        44.0,
+        29.0
+      ],
+      "collider": "Brazier01"
+    },
+    {
+      "position": [
+        44.25,
+        29.0
+      ],
+      "collider": "Brazier01"
+    },
+    {
+      "position": [
+        44.5,
+        29.0
+      ],
+      "collider": "Brazier01"
+    },
+    {
+      "position": [
+        70.0,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        70.0,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        70.25,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        70.5,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        70.75,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        71.0,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        71.25,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        71.5,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        71.75,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        72.0,
+        22.5
+      ],
+      "collider": "Container_D2"
+    },
+    {
+      "position": [
+        66.86667,
+        29.56
+      ],
+      "collider": "회수꾼"
+    },
+    {
+      "position": [
+        67.1,
+        29.48
+      ],
+      "collider": "회수꾼"
+    },
+    {
+      "position": [
+        67.3333359,
+        29.4
+      ],
+      "collider": "회수꾼"
+    },
+    {
+      "position": [
+        67.5666656,
+        29.32
+      ],
+      "collider": "회수꾼"
+    },
+    {
+      "position": [
+        70.25,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        70.5,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        70.75,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        71.0,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        71.25,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        71.5,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        71.75,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        72.0,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        72.25,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        72.5,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        72.75,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        73.0,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        73.25,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        73.5,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    },
+    {
+      "position": [
+        73.75,
+        29.0
+      ],
+      "collider": "Board_Quest"
+    }
+  ],
+  "meshRenderers": 2085,
+  "decorPrefabs": 384,
+  "missingMeshes": 0
+}

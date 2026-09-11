@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
+  m_Name: LongSword
+  m_EditorClassIdentifier: Game.Scripts::ItemData
+  itemId: long_sword
+  displayName: "\uC7A5\uAC80"
+  description: "\uC0AC\uAC70\uB9AC"
+  icon: {fileID: 0}
+  gridWidth: 2
+  gridHeight: 3
+  category: 0
+  rarity: 2
+  primaryRegionId: 
+  maxStack: 1
+  weight: 1.8
+  sellPrice: 4800
+  buyPrice: 12000
+  isUsable: 0
+  useEffect: 0
+  effectValue: 0
+  useTimeSeconds: 0
+  isThrowable: 0
+  hasDurability: 0
+  maxDurability: 100
+  durabilityCostPerUse: 50
+  equipSlot: 0
+  containerWidth: 0
+  containerHeight: 0
+  isContainer: 0
+  internalWidth: 0
+  internalHeight: 0
+  allowedCategories: 
+  weaponData: {fileID: 11400000, guid: b645f5976aecc894cb7ceb4d1897605c, type: 2}
+  weaponPartType: 0
+  partMoveSpeedMult: 1
+  partStaminaMult: 1
+  partRangeBonus: 0
+  partRecoilMult: 1
+  magCapacity: 0
+  magCaliber: 
+  ammoCaliber: 
+  ammoDamageMult: 1
+  worldDropPrefab: {fileID: 0}

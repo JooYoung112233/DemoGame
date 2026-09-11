@@ -1,0 +1,20 @@
+factor,value,note
+operative_apprentice,5,인력 견습 기여(명당)
+operative_skilled,12,인력 숙련 기여
+operative_veteran,20,인력 베테랑 기여
+specialty_match,10,특기 일치
+team_solo_penalty,-15,단독 페널티(보상 -30%)
+team_complement,8,보완 2인 시너지
+team_same_bonus_pct,25,같은 특기 보상%↑
+dispatch_lv1,0,파견 보드 Lv
+dispatch_lv2,5,파견 보드 Lv
+dispatch_lv3,10,파견 보드 Lv
+rep_D,0,평판 보정
+rep_C,5,평판 보정
+rep_B,10,평판 보정
+weapon_low,3,장비 지급 성공+
+weapon_mid,6,장비 지급 성공+
+weapon_high,10,장비 지급 성공+
+map_fragment,8,지도 지급 성공+
+success_cap,95,성공률 상한
+success_floor,5,성공률 하한
