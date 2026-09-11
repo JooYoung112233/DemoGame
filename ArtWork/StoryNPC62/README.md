@@ -28,7 +28,7 @@
 
 - `Assets/ChibiSurvivor/NPC/StoryNPC62`에 FBX/텍스처/재질/단일 상태 Animator/시각 프리팹 4세트를 생성했다. 기존 `Assets/Resources/NPC` 프리팹 4개 및 `Safehouse`의 기존 4명에 연결했다. NPCData·대화·퀘스트·상호작용 설정, 씬 NPC 위치와 충돌체를 보존했다.
 - Generic, Loop Time, Root Motion 끔. C 높이 1.08을 추가 적용하지 않았다. 기존 씬 캡슐 스케일은 시각 자식에서 상쇄하고 발은 지면에 맞췄다. 월드 높이는 전당포 1.751m, 회수꾼 1.416m, 관리인 1.904m, 상인 1.865m다. 회수꾼의 낮은 높이는 앉은 포즈다.
-- BRB/GameLit에 BaseColor(sRGB)와 Normal(Normal Map)을 연결했다. Normal strength 0.35, Smoothness 0.08, Metallic 0으로 무광 표면을 유지한다. **현재 GameLit은 Mask 텍스처 슬롯이 없어 Mask는 Linear로 임포트만 했고 연결하지 않았다.**
+- BRB/GameLit에 BaseColor(sRGB)와 Normal(Normal Map)을 연결했다. 후속 렌더링 개선으로 **Mask(Linear)의 R 금속성/A 매끄러움도 연결 완료**했다. 스칼라 Metallic/Smoothness는 마스크 배율 1, Normal strength .35, Grime .12, ShadowDesaturation .20, Rim .045다. 표면의 실제 무광 정도는 제작된 Mask에서 읽는다. 비교·검증 자료는 `ArtWork/RenderingReview62`에 기록한다.
 - 재질·스킨·실행 애니메이션 확인 자료는 `UnityIntegration/`. 초기 BakeMesh 출력에 FBX scale이 중복 적용되는 측정 오류를 발견해 bone world matrix × bindpose로 실제 정점을 계산하고 접지/마커 높이를 교정했다.
 - 실행 검수에서 발견한 마을 5개 건물의 끊어진 지붕 참조를 현재 `Roof_Art02`로 복구했다. 전당포 실내 조명도 기존 내부 조명에 연결했다. 새 기능을 추가한 것이 아니라 기존 진입 시 지붕 숨김 동작의 참조를 복원했다.
 - Unity 변경은 MCP로만 수행했으며 컴퓨터 화면 조작은 사용하지 않았다. 기존 전투 테스트는 종료된 상태였으며 검증용 플레이를 새로 시작했다.

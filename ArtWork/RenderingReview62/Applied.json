@@ -1,0 +1,51 @@
+{
+  "materials": [
+    {
+      "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/Pawnshop.mat",
+      "mask": "Pawnshop_Mask"
+    },
+    {
+      "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/VeteranScavenger.mat",
+      "mask": "VeteranScavenger_Mask"
+    },
+    {
+      "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/DistrictWarden.mat",
+      "mask": "DistrictWarden_Mask"
+    },
+    {
+      "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/WanderingMerchant.mat",
+      "mask": "WanderingMerchant_Mask"
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Floor.mat",
+      "tiling": "(8.00, 6.00)"
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Counter.mat",
+      "tiling": "(4.00, 1.00)"
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Town_Ground.mat",
+      "tiling": "(20.00, 14.00)"
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Road_Home.mat",
+      "tiling": "(1.25, 6.00)"
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Road_Plaza.mat",
+      "tiling": "(14.50, 1.50)"
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Road_ShopFront.mat",
+      "tiling": "(16.50, 1.25)"
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Road_Link.mat",
+      "tiling": "(1.25, 3.00)"
+    }
+  ],
+  "shaderMessages": [],
+  "weather": "day warm key + neutral ambient; night unchanged",
+  "profile": "contrast10 saturation-8 bloom0.18 grain0.06 vignette0.20"
+}

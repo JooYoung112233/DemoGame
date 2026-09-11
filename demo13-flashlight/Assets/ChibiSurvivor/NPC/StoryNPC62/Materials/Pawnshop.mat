@@ -13,8 +13,10 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ENVIRONMENTREFLECTIONS_OFF
+  - _GAMELIT_PACKED_MASK
   - _NORMALMAP
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _GRIMEOBJECTSPACE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -37,6 +39,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 2800000, guid: 41e231771fa2a074e8a02bde4ec8522d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -48,18 +54,19 @@ Material:
     - _Cutoff: 0.5
     - _GrimeObjectSpace: 1
     - _GrimeScale: 3
-    - _GrimeStrength: 0.3
+    - _GrimeStrength: 0.12
     - _GroundGrimeHeight: 0.8
-    - _Metallic: 0
+    - _Metallic: 1
     - _OcclusionStrength: 1
-    - _RimStrength: 0.12
-    - _ShadowDesaturation: 0.45
-    - _Smoothness: 0.08
+    - _RimStrength: 0.045
+    - _ShadowDesaturation: 0.2
+    - _Smoothness: 1
     - _Surface: 0
+    - _UsePackedMask: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _GrimeColor: {r: 0.55, g: 0.5, b: 0.44, a: 1}
+    - _GrimeColor: {r: 0.65, g: 0.62, b: 0.59, a: 1}
     - _RimColor: {r: 0.6, g: 0.65, b: 0.75, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
