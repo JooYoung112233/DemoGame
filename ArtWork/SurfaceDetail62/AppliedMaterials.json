@@ -1,0 +1,47 @@
+[
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Wood.mat",
+    "oldTexture": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+    "texturePath": "Assets/Art/SurfaceDetail62/Textures/Wood_Base_v2.png",
+    "oldColor": "RGBA(0.537, 0.449, 0.335, 1.000)",
+    "newColor": "RGBA(0.728, 0.626, 0.489, 1.000)",
+    "normal": "Assets/Art/Environments/Hideout02/Textures/Wood_Normal.png",
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat",
+    "oldTexture": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+    "texturePath": "Assets/Art/SurfaceDetail62/Textures/Wood_Base_v2.png",
+    "oldColor": "RGBA(0.381, 0.315, 0.232, 1.000)",
+    "newColor": "RGBA(0.517, 0.439, 0.338, 1.000)",
+    "normal": "Assets/Art/Environments/Hideout02/Textures/Wood_Normal.png",
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Steel.mat",
+    "oldTexture": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png",
+    "texturePath": "Assets/Art/SurfaceDetail62/Textures/Steel_Base_v2.png",
+    "oldColor": "RGBA(0.293, 0.321, 0.311, 1.000)",
+    "newColor": "RGBA(0.491, 0.543, 0.535, 1.000)",
+    "normal": "Assets/Art/Environments/Hideout02/Textures/Steel_Normal.png",
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Steel_Mask.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Counter.mat",
+    "oldTexture": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+    "texturePath": "Assets/Art/SurfaceDetail62/Textures/Wood_Base_v2.png",
+    "oldColor": "RGBA(0.520, 0.400, 0.280, 1.000)",
+    "newColor": "RGBA(0.705, 0.558, 0.408, 1.000)",
+    "normal": "Assets/Art/Environments/Hideout02/Textures/Wood_Normal.png",
+    "mask": "Assets/Art/Environments/Hideout02/Textures/Wood_Mask.png"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/DistrictWarden.mat",
+    "oldTexture": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/DistrictWarden/DistrictWarden_BaseColor.png",
+    "texturePath": "Assets/Art/SurfaceDetail62/Textures/DistrictWarden_BaseColor_v2.png",
+    "oldColor": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "newColor": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "normal": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/DistrictWarden/DistrictWarden_Normal.png",
+    "mask": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/DistrictWarden/DistrictWarden_Mask.png"
+  }
+]

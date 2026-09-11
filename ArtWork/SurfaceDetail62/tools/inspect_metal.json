@@ -1,0 +1,1 @@
+{"code":"return Newtonsoft.Json.JsonConvert.SerializeObject(UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None).Where(r=>r.sharedMaterials.Any(m=>m!=null&&(m.name==\"Town_Steel\"||m.name==\"Town_Edge\"))).Take(50).Select(r=>new{name=r.name,parent=r.transform.parent.name,center=r.bounds.center.ToString(),size=r.bounds.size.ToString()}));","timeout":30000}

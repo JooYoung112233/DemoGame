@@ -1,0 +1,67 @@
+{
+  "materials": [
+    {
+      "path": "Assets/Art/Environments/Town02/Materials/Town_Wood.mat",
+      "shader": "BRB/GameLit",
+      "texture": "Wood_Base_v2",
+      "width": 1254,
+      "height": 1254,
+      "sRGBTexture": true,
+      "mipmapEnabled": true,
+      "normalMaskPreserved": true,
+      "shaderErrors": 0
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat",
+      "shader": "BRB/GameLit",
+      "texture": "Wood_Base_v2",
+      "width": 1254,
+      "height": 1254,
+      "sRGBTexture": true,
+      "mipmapEnabled": true,
+      "normalMaskPreserved": true,
+      "shaderErrors": 0
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Materials/Town_Steel.mat",
+      "shader": "BRB/GameLit",
+      "texture": "Steel_Base_v2",
+      "width": 1254,
+      "height": 1254,
+      "sRGBTexture": true,
+      "mipmapEnabled": true,
+      "normalMaskPreserved": true,
+      "shaderErrors": 0
+    },
+    {
+      "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Counter.mat",
+      "shader": "BRB/GameLit",
+      "texture": "Wood_Base_v2",
+      "width": 1254,
+      "height": 1254,
+      "sRGBTexture": true,
+      "mipmapEnabled": true,
+      "normalMaskPreserved": true,
+      "shaderErrors": 0
+    },
+    {
+      "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/DistrictWarden.mat",
+      "shader": "BRB/GameLit",
+      "texture": "DistrictWarden_BaseColor_v2",
+      "width": 1254,
+      "height": 1254,
+      "sRGBTexture": true,
+      "mipmapEnabled": true,
+      "normalMaskPreserved": true,
+      "shaderErrors": 0
+    }
+  ],
+  "playing": true,
+  "scenes": [
+    "Systems",
+    "Safehouse"
+  ],
+  "cameraRotation": "(62.00, 0.00, 0.00)",
+  "cameraPosition": "(-0.30, 22.07, -11.74)",
+  "temporaryCameras": 0
+}
