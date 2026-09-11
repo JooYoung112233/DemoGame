@@ -11,38 +11,28 @@
 |------|------|
 | **제목** | 다녀올게 (Be Right Back) |
 | **프로젝트명** | **BRB** (Be Right Back). 구 "Night City / 밤의 도시" 코드네임 폐기 |
-| **장르** | 탑다운 2D 근접 생존 루팅 액션 |
-| **엔진** | Unity 6 (URP **2D** Renderer) |
+| **장르** | **3D 루팅 RPG 슈터** — 돈벌이·좋은 아이템 루팅 + 총격전 (2026-09-11 방향, 레퍼런스 낙원) |
+| **엔진** | Unity 6.6 (6000.6.0f1), URP **3D** (Forward, `URP-3D.asset`) |
 | **언어** | C# |
-| **아트** | 전환 중 — 플레이어는 **3D 로우폴리**(치비), 맵·적·프랍은 아직 탑다운 2D 스프라이트. 카메라는 2D Orthographic. Spine 제거됨(2026-09-07) |
-| **핵심 루프** | 안전가옥 → 지역 선택 → 15분 레이드(파밍/전투) → 탈출 → 정산 → 안전가옥 성장 |
+| **아트** | **3D 로우폴리**(치비 2.5등신) — 플레이어·밴딧·마을·은신처. 게임 전용 셰이더 `BRB/GameLit` + 포스트 프로세싱. 카메라 **오소 정면 탑다운 62°**(방위 0°) |
+| **핵심 루프** | 마을(안전구역) → 지역 선택 → 20분 레이드(루팅/총격전) → 탈출 → 정산 → 마을·은신처 |
 | **핵심 감정** | "한 번만 더 들어갈까?" / "지금 나갈까, 한 개 더 주울까?" |
 
 ---
 
 ## 현재 개발 상태
 
-**2026-09-07 추가:** 3D 쿼터뷰 전환의 첫 에셋으로 귀여운 2.5등신 로우폴리 캐릭터·Idle/Walk/Run 제작 후, **플레이어 표시를 이 3D 모델로 교체**(`ChibiPlayerVisual`, Spine/스프라이트 대체). 이동/전투/충돌/URP 2D 렌더러는 그대로. [3D 캐릭터 패키지/사용법](chibi-survivor-3d.md), [캐릭터 결정](char-art.md).
+**2026-09-11 기준 — 이어서 작업할 땐 [`dev-handoff.md`](dev-handoff.md)부터.**
 
-**2026-09-07 방향 확정:** 프로젝트를 **완전 3D 쿼터뷰로 전환**하기로 결정(고정 오소 카메라 / 단차·엄폐 / 아트 전부 3D 재제작). **아직 미착수** — 현 구현은 URP 2D 그대로다. 실측·단계 계획·리스크는 [3D 전환 계획](3d-migration.md).
+| 항목 | 상태 |
+|---|---|
+| **3D 전환** | ✅ Stage 0~4 완료(2026-09-07~09 — 좌표계·물리·조명·맵·캐릭터). ⬜ Stage 5(2D 잔재 삭제) 남음 → [`3d-migration.md`](3d-migration.md) |
+| **볼륨 축소** | ✅ 2026-09-09 — 타르코프식 하드코어를 RPG식으로(부위 의료·소음·격자 인벤·파견 폐기, 특성 11종) → [`scope-cut.md`](scope-cut.md) |
+| **방향** | 2026-09-11 — **낙원식 RPG: 돈벌이·좋은 아이템 루팅 + 총격전.** 맨손 공격 폐기 |
+| **최근 구현** (PR #16~#22, 병합 대기) | 총기 밴딧(권총·소총) · 플레이어 총격(조준원·반동·탄 스펙) · 배그식 사망 루팅(래그돌·희귀도 빛기둥·현금) · 게임 전용 셰이더 `BRB/GameLit` + 후처리 · 착용등·낮 주황/저녁 보라 · 카메라 정면 62° |
+| **지금** | **시스템 정리 6단계** 진행 중 — 1 입구 문서 ✅ → 2 전투·총기 → 3 루팅·경제 → 4 거점 → 5 조명 잔재·레이드/실내 → 6 폴더·거대 파일. [`dev-roadmap.md` §시스템 정리](dev-roadmap.md) |
 
-**로드맵 Stage 2 진행 중** (안전가옥 컨테이너 맵)
-
-| 단계 | 내용 | 상태 |
-|:---:|---|---|
-| 1 | 캐릭터 이동 + 상호작용 | ✅ 완료 |
-| 2 | 안전가옥 컨테이너 맵 | 🔄 진행 중 |
-| 3 | 기본 인벤토리 | ⬜ 대기 |
-| 4 | 폐상가 낮 맵 + 파밍 | 🔄 그레이박스 프리팹 추가 |
-| 5 | 15분 타이머 + 탈출구 | ⬜ 대기 |
-| 5.5 | 부위별 의료/치료 | ⬜ 대기 |
-| 6 | 근접 전투 기본 | ⬜ 대기 (프로토타입 별도 완료) |
-| 7 | 적 AI + 밤 맵 | ⬜ 대기 |
-| 8 | 그로기/캔슬 + 전투 다듬기 | ⬜ 대기 |
-| 9 | 안전가옥 강화 + 전당포 거래 | ⬜ 대기 |
-| 10 | 이상현상 + 스토리 단서 | ⬜ 대기 |
-
-상세: [`docs/dev-roadmap.md`](dev-roadmap.md)
+> 옛 「로드맵 Stage 1~10」 표(2D 근접 게임 기준, Stage 2 진행 중)는 현실과 맞지 않아 여기서 뺐다 — 기록은 [`dev-roadmap.md`](dev-roadmap.md)에 남아 있다.
 
 ---
 
@@ -94,10 +84,11 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`combat.md`](combat.md) | 근접 전투 시스템 — 약공(3타 콤보)/강공(차징)/구르기/스태미너/그로기/적 캔슬. 수치 확정 | 프로토타입 완료 |
+| [`combat.md`](combat.md) | 전투 — **총격(조준원·반동·탄 스펙)이 주력**(§총기), 배그식 사망 루팅(§사망 루팅). 근접(방망이 등)·구르기·스태미너·그로기는 2D 시절 설계가 코드에 남아 있다(맨손 공격은 2026-09-11 폐기). ⚠️ 문서 첫머리는 아직 "소울라이크 근접" — 정리 2단계에서 재작성 | 개정 필요 |
+| [`enemy-ai.md`](enemy-ai.md) | 적 AI 설계. ⚠️ 2026-09-09 폐기된 소음 시스템 서술이 남아 있음 — 정리 2단계에서 갱신 | 개정 필요 |
 | [`traits.md`](traits.md) | **캐릭터 특성(퍽) 시스템** — 진행형 퍽 트리 + 부정 특성(환급). **2026-09-09 41종 → 11종 축소**(기준 = 코드가 실제로 읽는 `effectKey`가 있는 퍽만). ⚠️ **★현상 트리 7종 전부 삭제** — 기획은 §3.6에 보존, 재개통 1순위 | SO **11종**·`TraitManager`·`TraitPanelUI`(K) 구현 |
 
-핵심 코드: `TopDownPlayer.cs` (이동·조준·손전등), `EnemyController.cs` (Rigidbody2D AI 상태머신), `StatDB` (스탯 DB)
+핵심 코드: `TopDownPlayer.cs` (이동·바라보는 방향·근접 — 이름만 TopDown), `PlayerGun.cs` (플레이어 총격), `EnemyController.cs` (3D AI 상태머신 — 근접·총기 밴딧), `CorpseMarker.cs`·`BanditRagdoll.cs` (사망 루팅), `StatDB` (스탯 DB)
 
 ### 🎒 인벤토리 · 아이템 · 제작
 
@@ -126,7 +117,7 @@
 | [`medical.md`](medical.md) | **단일 HP + 회복 아이템(RPG식)** — **2026-09-09 부위별 의료 전면 폐기**(5부위 × 출혈/골절/통증). 의료 아이템 13종은 HP 회복 15~50으로 전환. 부위 피격 배율·적 부위 부상은 전투 쪽에 존치 | 기획 확정, 코드 구현 |
 | [`survival.md`](survival.md) | 생존 스탯(수분/포만감) — 레이드 중 시간 기반 차감, 0 시 HP DoT, 수면·음식 회복. 차감속도/수면/음식 effectValue 수치(2026-06-18 튜닝) | 코드 구현 |
 
-핵심 코드: `PlayerMedicalSystem.cs`, `MedicalHUD.cs`, `MedicalItemData.cs`, `SurvivalStats.cs`, `SleepUI.cs`
+핵심 코드: `Health.cs` (단일 HP), `SurvivalStats.cs`, `SleepUI.cs` — (`PlayerMedicalSystem`·`MedicalHUD`·`MedicalItemData`는 2026-09-09 삭제)
 
 ### 🏠 안전가옥
 
@@ -147,7 +138,7 @@
 | [`level-scrapmarket.md`](level-scrapmarket.md) | 폐상가 **레벨 디자인** — 상가골목(낮) 튜토 v6(건물기반 그레이박스) + 약국 조각 + 전체 지역1(1000×900) 통합 관계 | 진행 |
 | [`level-apartment.md`](level-apartment.md) | **폐아파트** 레벨 디자인 — ⚠️구버전 보존(지역1 랜드마크 제외, 2026-07-07). 지역2 「잠든 주거 단지」 참고용 — 수직 side-by-side + 열쇠 체인 기법 | 구버전 보존 |
 | [`level-tower.md`](level-tower.md) | **유리 R&D 타워** 레벨 디자인 — ⚠️구버전 보존(지역1 랜드마크 제외, 2026-07-07). 지역3+ 참고용 — 카드키 게이트·저층→상층 기법 | 구버전 보존 |
-| [`raid.md`](raid.md) | 15분 타이머, 탈출 시스템, 루팅 흐름, 귀환 정산(RaidResultUI), 시간초과 페널티 | 기획 확정, 코드 구현 |
+| [`raid.md`](raid.md) | 20분 타이머(`GameTuning.raidDuration` 1200초), 탈출 시스템, 루팅 흐름, 귀환 정산(RaidResultUI), 시간초과 페널티 | 기획 확정, 코드 구현 |
 | [`post-raid-event.md`](post-raid-event.md) | 레이드 후 랜덤 이벤트 — 40% 확률, 텍스트 선택지, 보상/페널티 | 기획 확정, 코드 구현 |
 | [`anomaly.md`](anomaly.md) | **짙은현상 구간 메커닉** — 위험/보상 타임어택(루트·몬스터 스폰→붕괴 증발). 세계관=gdd-core §5.1 위임, 시각=rendering.md `DenseAnomalyController` | 기획(수치 TBD) |
 | [`replayability.md`](replayability.md) | 반복성·엔드게임 progression — 장비 부품 모딩, 지역 격상, 밴딧 생태계, Co-op 멀티 | 검토 중 (확정 전) |
@@ -188,9 +179,9 @@
 |------|------|------|
 | [`building-interior.md`](building-interior.md) | ⭐ **걸어 들어가는 실내 (3D)** — 실내 별도 씬 전환 폐기, 같은 맵에서 진입. 지붕 끄기(`BuildingInterior`)·층 전환(`FloorPortal`, 계단 오르기 대신 지점 전환)·컷어웨이의 역할 구분. ⚠️ **스케일 재조정 미결**(은신처 내부 14×9 > 외관 8×5 모순) | **결정 (2026-09-08), 배선 전** |
 | [`hideout-3d.md`](hideout-3d.md) | **은신처 3D — 공간 규격·소품 정의서** (3D 전환의 첫 실제 공간). 방 14×9m·벽 2.6m·**천장 없음**(쿼터뷰), 시설 8종 치수/위치/형태 메모(모델 제작용), 조명 값. 빌더 `Editor/Hideout3DLayout.cs` | **그레이박스 (2026-09-08)** |
-| [`3d-migration.md`](3d-migration.md) | ⭐ **3D 쿼터뷰 전환 계획 SSOT** — 결정 4건(완전 3D·오소 고정 쿼터뷰·단차/엄폐·아트 전부 3D) + 2D 결합 실측(66,933 LOC 중 32%, Rigidbody2D 9파일·Physics2D 10곳) + 유지/교체/신규 표 + Stage 0~5 + 리스크·미결 | **계획 (2026-09-07), 미착수** |
-| [`topdown-migration.md`](topdown-migration.md) | **아이소 → 탑다운 2D 전환** 배경·유지/제거/신규 목록·단계 계획 | 진행 중 |
-| [`rendering.md`](rendering.md) | **현 구현 = 순수 탑다운 2D** — URP 2D Renderer, 2D Orthographic 카메라, Light2D, Tilemap, Prop2D, BRB/ 셰이더 10종. 상단에 3D 전환 방향 결정 등재(계획은 `3d-migration.md`) | 확정 (전환 예정) |
+| [`3d-migration.md`](3d-migration.md) | ⭐ **3D 쿼터뷰 전환 계획 SSOT** — 결정 4건(완전 3D·오소 고정 쿼터뷰·단차/엄폐·아트 전부 3D) + 2D 결합 실측(66,933 LOC 중 32%, Rigidbody2D 9파일·Physics2D 10곳) + 유지/교체/신규 표 + Stage 0~5 + 리스크·미결 | **Stage 0~4 완료 (2026-09-09)**, Stage 5(2D 잔재 삭제) 남음 |
+| [`topdown-migration.md`](topdown-migration.md) | **아이소 → 탑다운 2D 전환** 배경·유지/제거/신규 목록·단계 계획 | 기록 (2D 시절 — 이후 3D로 재전환) |
+| [`rendering.md`](rendering.md) | **현 구현 = 3D** — URP 3D(Forward)·오소 카메라 62°·게임 전용 셰이더 `BRB/GameLit`·후처리·착용등·낮밤 분위기(상단 「현재 구현 (3D)」 표). 그 아래 URP 2D·Light2D·Tilemap 본문은 2D 시절 기록 | 구현 (3D) |
 | [`destructible.md`](destructible.md) | 파괴 가능 오브젝트 — `Breakable` + `BRB/DamageOverlay`(오버레이라 전 셰이더 호환), 단계별 부서짐→파괴, Health 자동 연동 | 구현 |
 | [`topdown-art-spec.md`](topdown-art-spec.md) | AI 이미지 생성 스펙 — near-overhead 시점, 마젠타 배경, 플랫 라이팅, 엔진 조명값 | 작성 완료 |
 
@@ -198,7 +189,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`map-tool.md`](map-tool.md) | 탑다운 2D 맵 도구 **사양·결정 로그** — Prop2D 카탈로그 + 씬 빌더 | 사용 가능 |
+| [`map-tool.md`](map-tool.md) | 탑다운 2D 맵 도구 **사양·결정 로그** — Prop2D 카탈로그 + 씬 빌더. ⚠️ 2D 시절 도구 — 3D 맵은 `Zone1GreyboxLayout`·`Map3DBuild`·`Greybox3D` 등이 만든다(문서 갱신은 정리 5단계) | 기록 (2D) |
 | [`map-tool-guide.md`](map-tool-guide.md) | 맵툴 **사용 설명서**(신규 사용자용) — 셋업→등록→배치→기능→저장→테스트 단계별 | 작성 완료 |
 
 ---
@@ -206,12 +197,12 @@
 ## 씬 구조
 
 ```
-Safehouse (timeScale=0, 안전 허브)
-  → MapSelectUI (지역 선택)
-    → InGameScene (레이드 맵, 15분 제한)
-      → 탈출 성공 → PostRaidEvent (40% 확률)
-        → RaidResultUI (정산)
-          → Safehouse 복귀
+Systems (영속 부트 씬 — 매니저·UI·PlayerRig. 항상 여기서 Play)
+  → Safehouse (= 마을, 걸어다니는 안전구역) ↔ Hideout(은신처 방) · Pawnshop(전당포 실내)
+    → MapSelectUI (지역 선택)
+      → Zone1 (지역1 레이드, 20분 제한) · Int_* 실내 15씬(건물 문으로 전환)
+        → 탈출 성공 → PostRaidEvent (40% 확률)
+          → RaidResultUI (정산) → 마을 복귀
 ```
 
 ---
@@ -220,7 +211,7 @@ Safehouse (timeScale=0, 안전 허브)
 
 | 싱글톤 | 역할 |
 |--------|------|
-| TopDownPlayer | 이동(Rigidbody2D), 마우스 조준, 손전등(Light2D). Resources/TopDownPlayer 프리팹 자동 스폰 |
+| TopDownPlayer | 이동(Rigidbody 3D, 화면 기준 WASD)·바라보는 방향(평소 이동 방향, 조준 중 커서)·총격. `Resources/PlayerRig.prefab`(플레이어+카메라+착용등+후처리)으로 Systems 씬에 배치 |
 | SceneTransitionManager | 씬 전환, 페이드, 탈출 카운트다운 |
 | UIManager | UI 상태 관리, 플레이어 입력 차단 |
 | NPCRelationshipManager | NPC 3축 호감도 추적 |
@@ -233,7 +224,7 @@ Safehouse (timeScale=0, 안전 허브)
 
 > ⭐ **기능·콘텐츠 추가는 [`dev-protocol.md`](dev-protocol.md)(기능 추가 규칙) 게이트를 따른다** — "기능 하나 = 열고 같은 세션에 코드·값·기획·색인을 닫는다." 아래 규칙들은 그 게이트의 구성요소.
 
-1. **Phaser Container 사용 금지** — 이 프로젝트는 Unity지만, depth 정렬 버그 방지를 위해 Container 패턴 사용 X
+1. **항상 `Systems` 씬에서 Play** — 게임플레이 씬(Safehouse·Zone1 등) 단독 실행 금지(사용자 규칙). 에디터를 여러 세션이 같이 쓰므로 커밋은 내 파일만
 2. **Editor State Preservation** — 런타임 스크립트는 `Start()`에서 값을 적용하지 않음. 이벤트(`OnPhaseChanged` 등)로만 변경
 3. **UI는 프리팹 베이크 + Instantiate** (2026-06~ 전환) — 각 패널 `EditorBake()`로 `Resources/UI/*.prefab` 굽고 부트스트랩이 Instantiate(없으면 코드 생성 폴백). 뷰=`[SerializeField]`, onClick=`WireEvents`, 동적 폰트=`ApplyFonts`. 상세 [`ui-prefab-plan.md`](ui-prefab-plan.md). 해상도 기준: 1920x1080
 4. **기획 결정 즉시 기록** — `docs/` 내 시스템별 md에 날짜 + 질문 + 결정 기록. 세션 끝까지 미루지 않음
@@ -245,6 +236,7 @@ Safehouse (timeScale=0, 안전 허브)
 
 | 날짜 | 내용 |
 |------|------|
+| **2026-09-11** | **입구 문서 현행화 (시스템 정리 1단계).** 사용자 "시스템 하나씩 정리 좀 해보자, 지금 전혀 정리가 안 돼서" → 전수 조사 후 6단계 정리 순서 합의(`dev-roadmap.md` §시스템 정리). 이 파일: 게임 정보(3D 루팅 RPG 슈터·URP 3D·카메라 62°·20분 — 코드 `raidDuration` 1200초 기준, 옛 15분 표기 교정) · 현재 개발 상태(옛 2D 로드맵 표 → 3D 전환·볼륨 축소·방향·PR·정리 단계 표) · 전투/의료 핵심 코드(삭제된 의료 3파일 제거) · 렌더링 행(3d-migration 「미착수」→Stage 0~4 완료, rendering 「현 구현 2D」→3D) · 씬 구조(Systems/마을/은신처/Zone1/Int_*) · 싱글톤 · 핵심 규칙 #1(의미 없던 Phaser Container 금지 → Systems에서 Play) · `enemy-ai.md` 색인 등재. 함께 고친 입구 문서: 두 `CLAUDE.md`·`dev-handoff.md`·`rendering.md`·`architecture.md`. |
 | **2026-09-09** | **볼륨 축소 — 타르코프식 하드코어 → RPG식 단순화 (6건 완료, `scope-cut.md` 신설).** 사용자 판단: "코드·문서 다이어트 + 기획적 기능 축소. 부위별 치료 같은 타르코프 시스템 삭제하고 장비창도 간단하게 RPG처럼." ①**부위별 의료 폐기** → 단일 HP + 회복 아이템 ②**소음 시스템 폐기** → 적 발견은 시야 단일 축(투척물 유인만 `Distraction`으로 존치) ③**격자 인벤 폐기** → 슬롯 1칸·회전/수색 제거, **무게는 유지**, 무기 파츠 4→1(탄창) ④**파견 + 아르바이트 보드 삭제** ⑤**특성 41종 → 11종**(코드가 읽는 effectKey만) ⑥**QA 자동화 분리**(`QA_ENABLED` 어셈블리 게이트, 삭제 아님). 관련 SSOT 전부 개정: medical/combat/inventory/traits/economy/safehouse/safehouse-intel/balance/qa. |
 | 2026-07-10 | **기능 추가 규칙 신설(`dev-protocol.md`).** 지속 개발 시 방향이 어긋나지 않도록 기존 규율(SSOT·즉시기록·GameTuning·5대 런타임 규약 R1~R5·브랜치PR)을 "기능 하나 = 열고 같은 세션에 닫는다" 단일 게이트로 통합. BEFORE/DURING/DONE 체크리스트 + 정리 주기. 핵심 규칙 섹션 상단·문서 맵(기획총괄)·CLAUDE.md에 등재. 실제 겪은 드리프트(색인 누락 8종·로어 중복 재서술·stale 서술 = 06-30/06-16 교정) 재발 방지. |
 | 2026-07-09 | **게임패드 지원 T0/T1 + `controls.md` 신설.** 입력 기반 = GameInput 셰임 확장(신규 액션 에셋 대신 `Gamepad.current` 병합), 범위 = 레이드 조작(T1). 왼쪽 스틱 이동·오른쪽 스틱 조준·버튼 맵(E→A/Space→B/Shift→L3/C→Y/Esc→Start/Tab→Select/1~4→D패드/좌우클릭→RT·LT)·디바이스 전환(`PadActive`). UI 기본 내비는 기존 `InputSystemUIInputModule`. T2(메뉴 포커스·스크롤·글리프)/T3(격자 인벤 스틱 커서) 후속. 매핑 상세 = [`controls.md`](controls.md). |
