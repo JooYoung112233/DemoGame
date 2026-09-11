@@ -285,7 +285,7 @@ for spec in SPECS:
    elif spec['id']=='district_warden' and s==1:target=chest_skin@Vector((.38,-.26,.80));pole=Vector((1,.1,-.4))
    elif spec['id']=='wandering_merchant' and s==1:target=chest_skin@Vector((.24,-.25,1.015));pole=Vector((1,.15,-.3))
    else:
-    shoulder=rig.pose.bones['UpperArm.'+side].head.copy();target=shoulder+Vector((s*.16,-.045,---.386));pole=Vector((s*.5,-1,-.3))
+    shoulder=rig.pose.bones['UpperArm.'+side].head.copy();target=shoulder+Vector((s*.16,-.045,-.386));pole=Vector((s*.5,-1,-.3))
    limb('UpperArm.'+side,'Forearm.'+side,'Hand.'+side,target,pole)
    if spec['id']=='district_warden' and s==1:segment('Hand.L',target,target+chest_skin.to_3x3()@Vector((-.09,.0,.02)))
    if spec['id']=='wandering_merchant' and s==1:segment('Hand.L',target,target+chest_skin.to_3x3()@Vector((-.065,.06,.018)))
