@@ -20,6 +20,9 @@ for name,spec in manifest['assets'].items():
  assert count==spec['triangles'],name
  report.append({'name':name,'pieces':len(meshes),'triangles':count,'metricUV0':True,'referenceExists':True})
 for name in manifest['palette']:
+ spec=manifest['palette'][name]
+ for key in ['roughness','roughnessVariation','metallic','normalStrength']:assert math.isfinite(spec[key]) and 0<=spec[key]<=1,(name,key)
+ if name.endswith(('Rubber','BagPlastic')):assert spec['metallic']==0,name
  mat=bpy.data.materials[name];images=[n.image for n in mat.node_tree.nodes if n.type=='TEX_IMAGE']
  assert len(images)==3 and all(im.packed_file for im in images),name
 for group,specs in manifest['reviewGroups'].items():

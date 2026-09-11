@@ -9,7 +9,9 @@
 
 ## 재질과 후속 적용
 
-16개 재질의 `textureFolder`와 `family`를 조합하여 기존 Hideout02/Town02의 `{family}_Base.png`, `_Normal.png`, `_Mask.png`를 재사용한다. Blender에는 연결되어 있으나 FBX만 드래그한다고 프로젝트용 재질 설정이 완성되는 것은 아니다. `palette.color`는 선형 색상 기준이다. 별도 비트맵을 복제하거나 현재 공용 재질을 수정할 필요가 없다.
+21개 재질의 `textureFolder`와 `family`를 조합하여 기존 Hideout02/Town02의 `{family}_Base.png`, `_Normal.png`, `_Mask.png`를 재사용한다. Blender에는 연결되어 있으나 FBX만 드래그한다고 프로젝트용 재질 설정이 완성되는 것은 아니다. `palette.color`는 선형 색상 기준이다. 별도 비트맵을 복제하거나 현재 공용 재질을 수정할 필요가 없다.
+
+후속 질감 수정: `palette.roughness`, `roughnessVariation`, `metallic`, `normalStrength`를 재질별로 추가했다. 기존 Mask의 알파를 roughness ± variation 구간에 매핑하며 금속성은 새 스칼라 값을 사용한다. 고무/봉투는 metallic=0으로 강제한다. Unity에서 새 필드를 무시하고 예전 마스크만 연결하면 이 미리보기의 재료 구분이 재현되지 않는다. 현재 프로젝트 GameLit의 지원 속성을 확인하고 roughness→smoothness 변환까지 반영해야 한다. 나무 판자 색 변화·국소 마모는 별도 재질 슬롯과 메시로 표현되어 있다. 천과 봉투는 형태 자체를 보완했다.
 
 전투 테스트 중이므로 Unity MCP 호출, 씬 조작, 명시적 리프레시, 프리팹 생성은 수행하지 않았다. 테스트가 끝난 뒤 다음 순서로 진행한다.
 

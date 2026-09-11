@@ -3,21 +3,21 @@
     {
       "name": "Clothesline02",
       "pieces": 44,
-      "triangles": 3896,
+      "triangles": 9512,
       "metricUV0": true,
       "referenceExists": true
     },
     {
       "name": "UtilitySink02",
-      "pieces": 22,
-      "triangles": 1020,
+      "pieces": 26,
+      "triangles": 1800,
       "metricUV0": true,
       "referenceExists": true
     },
     {
       "name": "WaterBarrelStand02",
-      "pieces": 14,
-      "triangles": 1684,
+      "pieces": 18,
+      "triangles": 1708,
       "metricUV0": true,
       "referenceExists": true
     },
@@ -51,29 +51,29 @@
     },
     {
       "name": "Ladder02",
-      "pieces": 10,
-      "triangles": 440,
+      "pieces": 14,
+      "triangles": 464,
       "metricUV0": true,
       "referenceExists": true
     },
     {
       "name": "JunctionBox02",
-      "pieces": 12,
-      "triangles": 528,
+      "pieces": 15,
+      "triangles": 546,
       "metricUV0": true,
       "referenceExists": true
     },
     {
       "name": "Toolbox02",
-      "pieces": 8,
-      "triangles": 352,
+      "pieces": 11,
+      "triangles": 370,
       "metricUV0": true,
       "referenceExists": true
     },
     {
       "name": "FireExtinguisher02",
-      "pieces": 10,
-      "triangles": 828,
+      "pieces": 13,
+      "triangles": 846,
       "metricUV0": true,
       "referenceExists": true
     },
@@ -86,15 +86,15 @@
     },
     {
       "name": "Dumpster02",
-      "pieces": 26,
-      "triangles": 1208,
+      "pieces": 31,
+      "triangles": 1124,
       "metricUV0": true,
       "referenceExists": true
     },
     {
       "name": "GarbageBags02",
       "pieces": 6,
-      "triangles": 1572,
+      "triangles": 7200,
       "metricUV0": true,
       "referenceExists": true
     },
@@ -108,7 +108,7 @@
     {
       "name": "PatchBarricade02",
       "pieces": 50,
-      "triangles": 2480,
+      "triangles": 3884,
       "metricUV0": true,
       "referenceExists": true
     },
@@ -127,8 +127,8 @@
       "referenceExists": true
     }
   ],
-  "totalTriangles": 27154,
-  "packedPBRMaterials": 16,
+  "totalTriangles": 40600,
+  "packedPBRMaterials": 21,
   "editableLayout": true,
   "unityImportPlacementAndPlaytest": "pending: preserve ongoing combat testing"
 }

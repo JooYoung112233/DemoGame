@@ -1,0 +1,18 @@
+{
+  "source": "Assets\\ChibiSurvivor\\Player\\SimpleHeroStudy\\BlenderSource~\\SimpleHero_Stage5_Slash.blend",
+  "sourceSHA256": "230adc2289a96579fdfee41e2faade5cb7ea4f7ae87d35bff41cdc22fb022619",
+  "sourceUnchanged": true,
+  "sourceHeightMetres": 1.7761926297098398,
+  "sourceHeadWidth": 0.5688000321388245,
+  "cameraPitchYaw": [
+    45,
+    45
+  ],
+  "variants": {
+    "A": "Source proportions, illustrative 2m high-contrast joints; NOT a reconstruction of screenshot tile size",
+    "B": "Same hero, 0.8m lower-contrast paving",
+    "C": "B ground; head/cap 90%, body height 108%, torso depth 112%; frozen design proposal only"
+  },
+  "runtimeChanges": false,
+  "unityLightingMatch": false
+}

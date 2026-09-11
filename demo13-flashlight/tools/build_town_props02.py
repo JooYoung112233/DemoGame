@@ -9,8 +9,13 @@ exec(compile(head,str(HELPERS),'exec'),globals())
 for n,c,f in [('Blue',(.12,.185,.19),'PaintedMetal'),('Linen',(.46,.42,.32),'Cloth'),('BlueCloth',(.12,.18,.195),'Cloth'),('Rubber',(.024,.029,.027),'PaintedMetal'),('Rust',(.25,.108,.055),'PaintedMetal'),('Cardboard',(.31,.215,.119),'Wood')]:
  palette[n]=(c,f);m=bpy.data.materials.new('TownProps_'+n);m.diffuse_color=(*c,1);m.use_nodes=True;mats[n]=m
 inventory={}
+for n,c,f in [('WoodFaded',(.28,.208,.129),'Wood'),('WoodWarm',(.235,.153,.081),'Wood'),('Wear',(.235,.243,.212),'Steel'),('DirtSeam',(.073,.058,.036),'Wood'),('BagPlastic',(.035,.041,.037),'PaintedMetal')]:
+ palette[n]=(c,f);m=bpy.data.materials.new('TownProps_'+n);m.diffuse_color=(*c,1);m.use_nodes=True;mats[n]=m
 REF='Assets/GPT/안전구역/ChatGPT Image 2026년 6월 11일 오후 '
 def finish(name,category,reference,colliders=None):
+ for i,o in enumerate(parts):
+  if o.data.materials and o.data.materials[0]==mats['Wood'] and i%3:
+   o.data.materials[0]=mats['WoodFaded' if i%3==1 else 'WoodWarm']
  vs=[v.co for o in parts for v in o.data.vertices]
  lo=[min(v[i] for v in vs) for i in range(3)];hi=[max(v[i] for v in vs) for i in range(3)]
  export(name)
@@ -35,19 +40,34 @@ def ring(name,p,r,thickness,mat,axis='y'):
  bpy.ops.object.transform_apply(location=True,rotation=True,scale=True);o.data.materials.append(mats[mat]);parts.append(o);return o
 def cloth(name,cx,cy,cz,w,ht,mat,shape='towel'):
  # Curved double-sided cloth with distinct sag and folded edges, not a flat billboard.
- vs=[];nx,ny=10,9
+ vs=[];nx,ny=21,21
  for j in range(ny):
   t=j/(ny-1)
   for i in range(nx):
-   u=i/(nx-1);width=w*(1 if shape=='towel' else .78+.28*max(0,1-t*4))
-   xx=cx+(u-.5)*width;yy=cy-t*ht-.025*math.sin(u*math.pi);zz=cz+math.sin(u*math.pi*5+.4)*(.012+.035*t)+.035*t*t
+   u=i/(nx-1)
+   width=w*(1 if shape=='towel' else (.68+.32*max(0,1-t/.32) if shape=='shirt' else .85))
+   xx=cx+(u-.5)*width+.021*t*t*math.sin(t*3+cx)
+   yy=cy-t*ht-.045*math.sin(u*math.pi)+.022*t*t*math.sin(u*9+cx)
+   zz=cz+.024*math.sin(u*math.pi*3+t*1.8+cx)*(0.25+t)+.029*t*t*math.sin(u*7+cx)+.035*t*t
    # Split trouser legs with a narrow raised central hem.
-   if shape=='trousers' and t>.72 and abs(u-.5)<.12:yy+=ht*.23*(t-.72)/.28
+   if shape=='trousers' and t>.43 and abs(u-.5)<.13:yy+=ht*.48*(t-.43)/.57
    vs.append((xx,yy,zz))
  fs=[]
  for j in range(ny-1):
   for i in range(nx-1):a=j*nx+i;fs.append((a,a+1,a+1+nx,a+nx))
- o=mesh(name,vs,fs,mat);mod=o.modifiers.new('Cloth thickness','SOLIDIFY');mod.thickness=.008;bpy.context.view_layer.objects.active=o;bpy.ops.object.modifier_apply(modifier=mod.name)
+ o=mesh(name,vs,fs,mat)
+ for p in o.data.polygons:p.use_smooth=True
+ mod=o.modifiers.new('Soft fabric edge','SOLIDIFY');mod.thickness=.004;bpy.context.view_layer.objects.active=o;bpy.ops.object.modifier_apply(modifier=mod.name)
+
+def front_wear(name,x,y,z,w,h,mat='Wear'):
+ points=[(x+dx*w,y+dy*h,z) for dx,dy in [(-.5,-.16),(-.32,-.48),(.05,-.24),(.49,-.35),(.39,.13),(.08,.48),(-.13,.16),(-.48,.31)]]
+ return mesh(name,points,[tuple(range(8))],mat)
+
+def barrel_wear(x,y,z,r,angle,w,h,mat='Wear'):
+ pts=[]
+ for dx,dy in [(-.5,-.2),(-.29,-.5),(.07,-.26),(.5,-.32),(.38,.2),(.1,.45),(-.19,.25),(-.45,.32)]:
+  a=angle+dx*w/r;pts.append((x+math.sin(a)*(r+.0015),y+dy*h,z-math.cos(a)*(r+.0015)))
+ mesh('Chipped curved paint',pts,[tuple(range(8))],mat)
 def hollow(name,cx,cz,rings,mat,verts=16):
  vs=[]
  for y,rx,rz in rings:
@@ -81,6 +101,8 @@ for x in [-.38,.38]:
  fs.append(tuple(range(16,24)));mesh('Inset wash basin',vs,fs,'Edge');cyl('Drain',(x,.686,0),.041,.012,'Steel')
 line('Tap spout',[(0,.92,.28),(0,1.20,.28),(0,1.28,.20),(0,1.28,.08),(0,1.19,.03)],.025,'Edge')
 for x in [-.11,.11]:cyl('Tap valve',(x,.95,.26),.04,.075,'Steel')
+for x in [-.66,.66]:front_wear('Sink foot oxidation',x,.09,-.308,.052,.07,'Rust')
+for x in [-.38,.38]:ring('Drain residue',(x,.688,0),.048,.0035,'DirtSeam')
 line('Waste pipe',[(-.38,.68,0),(-.38,.40,0),(-.30,.33,0),(-.17,.33,0),(-.11,.40,0),(-.11,.56,.20)],.035,'Steel')
 finish('UtilitySink02','Living',REF+'07_21_31.png',[collider([0,.45,0],[1.5,.9,.67])])
 
@@ -90,6 +112,7 @@ box('Water stand platform',(0,.60,0),(.86,.10,.86),'Wood');cyl('Water drum',(0,1
 for y in [.69,1.05,1.39]:ring('Drum hoop',(0,y,0),.385,.018,'Edge')
 cyl('Water lid',(0,1.43,0),.39,.045,'Blue');cyl('Filling cap',(.12,1.46,.1),.065,.035,'Steel')
 line('Water tap',[(0,.79,-.36),(0,.79,-.48),(0,.70,-.48)],.023,'Edge');box('Tap handle',(0,.85,-.42),(.12,.025,.035),'Red',.003)
+for a,y in [(-.85,.74),(-.36,1.36),(.54,1.12),(1.08,1.38)]:barrel_wear(0,y,0,.38,a,.075,.024)
 finish('WaterBarrelStand02','Living',REF+'07_24_05.png',[collider([0,.74,0],[.87,1.48,.97])])
 
 hollow('Open metal bucket',0,0,[(.015,.12,.12),(.30,.17,.17),(.31,.154,.154),(.045,.105,.105)],'Edge')
@@ -130,6 +153,7 @@ finish('RopeCoil02','Supplies',REF+'07_24_05.png')
 # Workshop and service equipment.
 for x in [-.25,.25]:box('Ladder stile',(x,1.17,0),(.065,2.34,.075),'WoodDark')
 for i in range(8):box('Ladder rung',(0,.20+i*.28,-.005),(.51,.055,.08),'Wood')
+for i in [1,3,5,7]:front_wear('Worn ladder tread',-.03,.20+i*.28,-.046,.23,.013,'WoodFaded')
 finish('Ladder02','Workshop',REF+'07_24_05.png',[collider([0,1.17,0],[.58,2.34,.09])])
 
 box('Meter box',(0,.44,0),(.56,.86,.22),'Edge');box('Meter door',(0,.44,-.125),(.49,.75,.04),'Olive')
@@ -137,18 +161,22 @@ box('Meter window',(0,.63,-.151),(.25,.16,.015),'Glass',.008)
 for i in range(4):box('Vent slit',(0,.20+i*.035,-.151),(.25,.014,.016),'Steel',.002)
 for x in [-.17,.17]:line('Cable conduit',[(x,.06,0),(x,-.13,0),(x+.06,-.19,0)],.026,'Steel')
 box('Identification plate',(.07,.40,-.153),(.19,.075,.012),'Paper',.003)
+for x,y in [(-.19,.13),(.17,.78),(-.16,.77)]:front_wear('Meter paint nick',x,y,-.146,.07,.018)
 finish('JunctionBox02','Workshop',REF+'07_24_05.png')
 
 box('Toolbox case',(0,.13,0),(.63,.24,.30),'Rust');box('Toolbox lid',(0,.27,0),(.65,.075,.32),'Red')
 for x in [-.24,.24]:box('Toolbox latch',(x,.245,-.172),(.06,.09,.023),'Edge',.006)
 line('Toolbox grip',[(-.12,.31,0),(-.12,.39,0),(.12,.39,0),(.12,.31,0)],.014,'Steel')
 box('Worn label',(.10,.14,-.154),(.17,.066,.012),'Paper',.005)
+for x in [-.27,.26]:front_wear('Toolbox edge wear',x,.23,-.152,.085,.018)
+front_wear('Toolbox base grime',-.16,.029,-.152,.18,.018,'DirtSeam')
 finish('Toolbox02','Workshop',REF+'07_24_05.png')
 
 cyl('Extinguisher body',(0,.275,0),.12,.50,'Red');cyl('Extinguisher shoulder',(0,.54,0),.082,.075,'Red');cyl('Bottle valve',(0,.60,0),.035,.065,'Edge')
 ring('Extinguisher base',(0,.04,0),.123,.018,'Steel');box('Safety lever',(.025,.65,0),(.17,.035,.05),'Steel',.008)
 line('Extinguisher hose',[(0,.61,.035),(.14,.62,.02),(.20,.51,0),(.20,.20,0),(.14,.12,-.02)],.017,'Rubber')
 box('Instruction label',(0,.31,-.121),(.13,.15,.012),'Paper',.004)
+for a,y in [(-.8,.09),(.3,.49),(1.0,.24)]:barrel_wear(0,y,0,.12,a,.045,.012)
 finish('FireExtinguisher02','Workshop',REF+'07_24_05.png')
 
 for x in [-.46,.46]:
@@ -170,18 +198,25 @@ for x in [-.55,.55]:
  for z in [-.30,.30]:cyl('Caster stem',(x,.07,z),.045,.14,'Steel')
 for x in [-.77,.77]:line('Bin lifting handle',[(x,.84,-.16),(x*1.09,.84,-.16),(x*1.09,.84,.16),(x,.84,.16)],.026,'Edge')
 box('Municipal label',(.40,.88,-.466),(.26,.13,.01),'Paper',.004)
-for x,y in [(-.42,.43),(.20,.30),(.52,.69)]:box('Local paint chip',(x,y,-.467),(.09,.025,.013),'Rust',.003)
+for x,y,w,h in [(-.60,.18,.17,.035),(.20,.15,.22,.028),(.57,1.06,.16,.016),(-.62,1.04,.11,.020),(-.48,.40,.066,.012)]:front_wear('Bin chipped enamel',x,y,-.464,w,h,'Rust')
+for x in [-.51,-.11,.54]:front_wear('Bin seam residue',x,.125,-.464,.19,.025,'DirtSeam')
 finish('Dumpster02','Alley','Assets/GPT/프랍/안전구역프랍.png',[collider([0,.65,0],[1.67,1.3,1.0])])
 
 for j,(x,z,r) in enumerate([(-.24,0,.23),(.18,.06,.20),(0,-.26,.17)]):
- levels=[(.015,r*.55),(.10,r),(.32,r*.87),(.46,r*.35),(.50,r*.13),(.56,r*.27)]
- vs=[];segments=12
+ levels=[(.015,r*.60),(.055,r*.87),(.13,r),(.24,r*.97),(.34,r*.82),(.42,r*.52),(.465,r*.23),(.49,r*.12),(.51,r*.12),(.55,r*.30),(.565,r*.29)]
+ vs=[];segments=24
  for k,(y,rad) in enumerate(levels):
-  for i in range(segments):a=i*math.tau/segments;rr=rad*(1+.13*math.sin(i*3+k));vs.append((x+math.cos(a)*rr,y*(1-j*.12),z+math.sin(a)*rr))
+  for i in range(segments):
+   a=i*math.tau/segments;crease=.035+.075*(y/.565)**2
+   rr=rad*(1+.07*math.sin(a*3+j)+crease*math.sin(a*8+.3*k));vs.append((x+math.cos(a)*rr+.025*math.sin(y*6+j),y*(1-j*.12),z+math.sin(a)*rr))
  fs=[tuple(reversed(range(segments)))]
  for k in range(len(levels)-1):
   for i in range(segments):fs.append((k*segments+i,k*segments+(i+1)%segments,(k+1)*segments+(i+1)%segments,(k+1)*segments+i))
- fs.append(tuple(range((len(levels)-1)*segments,len(levels)*segments)));mesh('Tied refuse bag',vs,fs,'Rubber');ring('Bag tie',(x,.49*(1-j*.12),z),r*.15,.008,'Canvas')
+ fs.append(tuple(range((len(levels)-1)*segments,len(levels)*segments)))
+ bag=mesh('Tied refuse bag',vs,fs,'BagPlastic');bpy.context.view_layer.objects.active=bag
+ sub=bag.modifiers.new('Compressed soft bag','SUBSURF');sub.levels=1;bpy.ops.object.modifier_apply(modifier=sub.name)
+ for p in bag.data.polygons:p.use_smooth=True
+ ring('Bag tie',(x+.025*math.sin(.49*6+j),.49*(1-j*.12),z),r*.15,.008,'Canvas')
 finish('GarbageBags02','Alley','Assets/GPT/프랍/안전구역프랍.png')
 
 for x,y,z,w,h,d in [(-.23,.22,0,.53,.43,.51),(.31,.18,.05,.47,.35,.43),(-.20,.61,.01,.42,.32,.43)]:
@@ -236,10 +271,14 @@ for name,(color,family) in palette.items():
  for kind in ['Base','Normal','Mask']:
   t=nodes.new('ShaderNodeTexImage');t.image=bpy.data.images.load(str(textureRoot/f'{family}_{kind}.png'),check_existing=True);t.image.colorspace_settings.name='sRGB' if kind=='Base' else 'Non-Color';t.image.pack();maps[kind]=t
  tint=nodes.new('ShaderNodeMixRGB');tint.blend_type='MULTIPLY';tint.inputs[0].default_value=1;tint.inputs[2].default_value=(*color,1);links.new(maps['Base'].outputs['Color'],tint.inputs[1]);links.new(tint.outputs[0],bsdf.inputs['Base Color'])
- norm=nodes.new('ShaderNodeNormalMap');norm.inputs['Strength'].default_value=.28;links.new(maps['Normal'].outputs['Color'],norm.inputs['Color']);links.new(norm.outputs[0],bsdf.inputs['Normal'])
- inv=nodes.new('ShaderNodeMath');inv.operation='SUBTRACT';inv.inputs[0].default_value=1;links.new(maps['Mask'].outputs['Alpha'],inv.inputs[1]);links.new(inv.outputs[0],bsdf.inputs['Roughness'])
- split=nodes.new('ShaderNodeSeparateColor');links.new(maps['Mask'].outputs['Color'],split.inputs[0]);links.new(split.outputs[0],bsdf.inputs['Metallic'])
- pal[mat.name]={'color':list(color),'family':family,'textureFolder':f'Assets/Art/Environments/{folder}/Textures'}
+ rough=.93 if family=='Cloth' else .85 if family=='Wood' else .46 if family=='Steel' else .72
+ metal=.70 if family=='Steel' else .08 if family=='PaintedMetal' else 0
+ strength=.18 if family=='Cloth' else .42 if family=='Wood' else .27
+ if name in ['Rubber','BagPlastic']:rough=.84 if name=='Rubber' else .57;metal=0;strength=.10
+ norm=nodes.new('ShaderNodeNormalMap');norm.inputs['Strength'].default_value=strength;links.new(maps['Normal'].outputs['Color'],norm.inputs['Color']);links.new(norm.outputs[0],bsdf.inputs['Normal'])
+ variation=nodes.new('ShaderNodeMapRange');variation.inputs['To Min'].default_value=max(.05,rough-.04);variation.inputs['To Max'].default_value=min(1,rough+.04);links.new(maps['Mask'].outputs['Alpha'],variation.inputs['Value']);links.new(variation.outputs[0],bsdf.inputs['Roughness'])
+ bsdf.inputs['Metallic'].default_value=metal
+ pal[mat.name]={'color':list(color),'family':family,'textureFolder':f'Assets/Art/Environments/{folder}/Textures','roughness':rough,'roughnessVariation':.04,'metallic':metal,'normalStrength':strength}
 groups={
  'Living':[('Clothesline02',(0,0,1.25),0),('UtilitySink02',(-1.30,0,-.40),0),('WaterBarrelStand02',(1.28,0,-.18),0),('Bucket02',(.73,0,-.89),0),('LaundryBasket02',(-.23,0,.26),0)],
  'Workshop':[('Ladder02',(-1.30,0,.60),0),('JunctionBox02',(-.48,.35,.66),0),('OutdoorStove02',(.78,0,.26),0),('Toolbox02',(-.80,0,-.56),-10),('FireExtinguisher02',(.03,0,-.37),0),('RopeCoil02',(.44,0,-.83),0),('FoldedTarp02',(-.07,0,-.97),0)],
