@@ -116,8 +116,9 @@ MonoBehaviour:
   coneAngle: 56
   innerRatio: 0.74
   spillRange: 2.4
-  spillRatio: 0.16
-  spillFloor: 0.35
+  spillRatio: 0.04
+  spillFloor: 0.08
+  spillHeightOffset: -0.65
   spillCastsShadows: 0
   bodyGlowRange: 1.6
   bodyGlowIntensity: 0.35

@@ -44,9 +44,11 @@ public class WornLamp : MonoBehaviour
     [Tooltip("주변광 반경(m). 2D 때 core 반경 3.0이 기준이었다. 내가 선 방 정도가 읽히는 크기.")]
     [SerializeField] float spillRange = 4.6f;
     [Tooltip("빔 밝기 대비 주변광 비율. 너무 키우면 빔의 방향감이 죽는다.")]
-    [Range(0f, 1f)][SerializeField] float spillRatio = 0.16f;
+    [Range(0f, 1f)][SerializeField] float spillRatio = 0.04f;
     [Tooltip("낮·실내에서도 최소한 이만큼은 켜 둔다 — '내 주변은 늘 보인다'가 사실이어야 한다.")]
-    [SerializeField] float spillFloor = 0.35f;
+    [SerializeField] float spillFloor = 0.08f;
+    [Tooltip("등 기준 주변 퍼짐광의 월드 높이 차이(m). 가방 윗면을 직접 밝히지 않고 발밑을 읽게 한다.")]
+    [SerializeField] float spillHeightOffset = -0.65f;
     [Tooltip("⚠️ 끄면 주변광이 벽을 통과한다 — 위에서 내려다보듯 장애물 건너편까지 밝아진다. "
            + "2D의 ShadowCaster2D 가림에 해당하는 자리다.")]
     [SerializeField] bool spillCastsShadows = true;
@@ -231,15 +233,22 @@ public class WornLamp : MonoBehaviour
         // LateUpdate여야 한다 — 플레이어의 회전/조준이 같은 프레임에 갱신되므로
         // Update에서 맞추면 한 프레임 뒤처져 빠르게 돌 때 빛이 끌려다닌다.
         if (_player == null) _player = TopDownPlayer.Instance;
-        if (_player == null) return;
+        if (_player != null)
+        {
+            Vector2 f = _player.FacingDirection;
+            if (f.sqrMagnitude >= 0.0001f)
+            {
+                // 평면 방향(x=월드X, y=월드Z) → 월드 전방. 그 상태에서 아래로 숙인다.
+                Vector3 fwd = Plan3D.ToWorld(f.normalized);
+                transform.rotation = Quaternion.LookRotation(fwd, Vector3.up)
+                                   * Quaternion.Euler(TiltDown, 0f, 0f);
+            }
+        }
 
-        Vector2 f = _player.FacingDirection;
-        if (f.sqrMagnitude < 0.0001f) return;
-
-        // 평면 방향(x=월드X, y=월드Z) → 월드 전방. 그 상태에서 아래로 숙인다.
-        Vector3 fwd = Plan3D.ToWorld(f.normalized);
-        transform.rotation = Quaternion.LookRotation(fwd, Vector3.up)
-                           * Quaternion.Euler(TiltDown, 0f, 0f);
+        // 회전 완료 뒤 월드 높이를 맞춘다. 빔의 기울기/방향이 바뀌어도 가방 높이로 돌아가지 않는다.
+        // 룩 체크처럼 플레이어가 없는 경우에도 발밑 퍼짐광 위치를 유지한다.
+        if (_spill != null)
+            _spill.transform.position = transform.position + Vector3.up * spillHeightOffset;
     }
 
     /// <summary>착용한 랜턴 등급을 반영한다(반경·밝기 배율). 미착용은 (1, 1).
