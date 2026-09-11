@@ -156,7 +156,7 @@ flags, environment variables, and exit codes above apply throughout. Every comma
 | `projects` (list / create / new / clone / open / link / require / upgrade / export / import / pin / size / clean / exec), `releases`, `templates` (list / info / create / pack / delete) | [projects-templates.md](references/projects-templates.md) |
 | `config` (proxy / update-check), `hub install` | [config-hub.md](references/config-hub.md) |
 | `run`, `test`, `build` | [build-run-test.md](references/build-run-test.md) |
-| `logs`, `doctor`, `env`, `cache`, `analytics`, `changelog`, `language`, `completion`, `bug`, `self-update`, `self-uninstall`, `diagnose proxy` | [diagnostics-maintenance.md](references/diagnostics-maintenance.md) |
+| `logs`, `doctor`, `env`, `version`, `cache`, `ci init`, `analytics`, `changelog`, `language`, `completion`, `bug`, `self-update`, `self-uninstall`, `diagnose proxy` | [diagnostics-maintenance.md](references/diagnostics-maintenance.md) |
 | `mcp` (+ `configure`), `skill` (install / refresh), connected editors (`pipeline` / `command` / `status` / `list`), `shell` | [integration-advanced.md](references/integration-advanced.md) |
 | `collaboration` (alias `collab`) — `annotations` / `attachments` / `thumbnail` / `reactions` / `read` / `subscribe` / `jira` | [collaboration.md](references/collaboration.md) |
 

@@ -48,6 +48,57 @@ unity doctor --tail 50
 
 ---
 
+### CI init — scaffold a working CI workflow
+
+`unity ci init` writes a committed CI workflow generated from the project. Use it instead of assembling the steps by hand — it wires up the CLI's own CI features in the right order and encodes the parts that are otherwise learned by trial and error.
+
+```bash
+# GitHub Actions -> .github/workflows/unity.yml (the default provider).
+# With no --project-path, it works on the directory you ran it from.
+unity ci init
+
+# GitLab CI -> .gitlab-ci.yml
+unity ci init --provider gitlab
+
+# Scope the workflow to a build target (validated like `unity build --target`)
+unity ci init --target Android
+
+# Review it before committing to anything
+unity ci init --dry-run
+
+# Another project; replace a workflow that is already there
+unity ci init --project-path ./MyProject --overwrite
+```
+
+The generated workflow installs the CLI, restores the editor download cache and the project's `Library/` folder, installs the editor version from `ProjectSettings/ProjectVersion.txt`, activates a license, runs `unity doctor --ci` as a preflight, runs the tests with a JUnit report, builds, uploads the report and the build, and returns the license seat in a teardown step that runs even when the job failed or was cancelled.
+
+What it derives from the project: the editor version (rejected unless it parses as a real Unity version, since it is interpolated into an install command on the runner), and the editor module the build target needs where that is unambiguous — `Android`, `iOS`, `tvOS`, `WebGL`, `WindowsStoreApps`, `VisionOS`, `Lumin`. The standalone desktop targets get no module, because each has il2cpp / mono / server variants and picking one from the target alone would be a guess; asking for `StandaloneOSX` or `StandaloneWindows64` warns that the install step needs a `--module` you choose.
+
+Secrets are referenced by name only. The command never reads a credential and the generated file never contains one — it expects `UNITY_SERVICE_ACCOUNT_ID`, `UNITY_SERVICE_ACCOUNT_SECRET`, and `UNITY_LICENSE_SERIAL` to exist as repository secrets, and reports which ones to add after it writes.
+
+Two things about licensing that the workflow states in comments, because they surprise people: service-account auth covers Unity *services*, not the editor licence, and `unity license activate --personal` is rejected outright for a service account. The generated step therefore activates from a serial, and ships the floating-server and offline-`.ulf` alternatives as commented blocks beside it.
+
+The project rides `--project-path`, like `list`, `status`, `mcp configure`, `pipeline install` and `collaboration` — not a positional operand as on `build` / `test` / `cache key`. It takes a path, not a registry project name, and defaults to the current directory, so the common case is a bare `unity ci init` from the project root.
+
+**Interactive vs scripted.** On a real terminal, anything you didn't pass is asked for: a picker for the provider, one for the build target, and one for how many parallel jobs to split the tests across (all three open on their default, so Enter accepts), plus a confirm before replacing a workflow that already exists. A flag always wins over its prompt, so `--provider gitlab --target Android --shards 4` asks nothing.
+
+Nothing prompts when any one of these holds — `--non-interactive` (or `UNITY_NON_INTERACTIVE`), a machine `--format` (`json`, `ndjson`, `tsv`), `--format github`, or a redirected stdout. In that case the unpassed values take their defaults (`github`, `StandaloneLinux64`, no sharding) and an existing workflow is an exit-2 error naming `--overwrite` rather than a question. That means a CI job or a script gets identical behaviour whether or not it happens to be attached to a terminal.
+
+**Splitting the suite: `--shards <n>`.** Off by default, and offered by the picker on a terminal. Accepts 2 to 64 — `1` is rejected rather than generating a one-leg matrix, so there is no flag spelling for "no sharding"; omit it instead. More shards than tests is safe, because `unity test --shard` reports an empty slice and skips the editor instead of quietly running the whole suite.
+
+```bash
+unity ci init --shards 4
+unity ci init --provider gitlab --shards 8
+```
+
+Two things the generated matrix handles that a hand-written one usually does not. `unity test --shard N/M` splits the suite using an NUnit report from an *earlier* run, because the Editor cannot enumerate tests without running them — so a cold pipeline has nothing to split. Rather than fail, one shard runs the whole suite to write that inventory while the rest stand down: the first run is green and costs exactly one full suite. And a *stale* inventory is the dangerous case, since a test added after it was written would belong to no shard and run nowhere — green, and not running the new test. So the cached inventory is bound to a hash of every `.cs`, `.asmdef`, `.asmref` and `packages-lock.json` in the repository, and any change to them re-seeds the suite in full. (`unity cache key` deliberately ignores script changes, which is right for a `Library/` cache and wrong for this, so the inventory gets its own key.)
+
+The trade: a run that touches C# pays for one full unsharded suite, and a run that does not — assets, scenes, shaders, config, a retry, a scheduled build — is split `n` ways. Never slower than the unsharded workflow, and never under-tested. The build gets its own job, since inside the matrix it would run once per shard and burn `n` licence seats; both providers aggregate the per-shard JUnit reports themselves, so there is no merge step.
+
+`--dry-run` prints the workflow to stdout and nothing else, so it pipes into a file or a diff. `--format json` reports the written paths in `data.paths`, plus the resolved provider, editor version, build target, and module. Exit 2 on an unknown `--provider`, an invalid `--target`, an existing workflow file without `--overwrite`, or a stray positional argument; exit 6 when the directory isn't a Unity project or its editor version can't be read. Templates are embedded in the binary, so this works offline and always matches the CLI it ships with.
+
+---
+
 ### Doctor --ci — preflight before a long pipeline step
 
 ```bash
@@ -101,6 +152,25 @@ unity env --format json
 
 # Returns: user data path, editor install path, download cache path, config path, CLI version, resolved proxy
 ```
+
+---
+
+### Version — machine-readable version object
+
+```bash
+# Bare version string (backward compatible, unchanged)
+unity --version
+
+# Structured version object
+unity version --format json
+
+# The --version flag also honors an explicit format set before it
+unity --format json --version
+```
+
+`unity version` reports the CLI version, release channel (`stable`, `beta`, …), commit, platform, architecture, and runtime — the same version fact `env` and `doctor` carry, as one parseable object. It honors `--format` (`human`, `json`, `tsv`, `ndjson`); human output is the bare version string.
+
+A bare `unity --version` still prints only the version string, so scripts that parse it are unaffected. The `--version` flag switches to the structured object only when an explicit machine format is given *before* it (`unity --json --version`, `unity --format json --version`, or `UNITY_FORMAT=json unity --version`) — the flag terminates parsing, so a trailing format after `--version` is not seen. For order-independent machine output, prefer the `unity version` subcommand.
 
 ---
 

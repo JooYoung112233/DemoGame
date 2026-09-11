@@ -233,7 +233,7 @@ unity install 6000.0.47f1 --dry-run --format json
 
 # List the editor's available modules and exit without installing
 # (a drop-in alias for `unity modules list <version>`)
-unity install 6000.0.47f1 --list-components --format json
+unity install 6000.0.47f1 --list-modules --format json
 
 # Space-separated module values after a single -m are equivalent to repeating -m
 unity install 6000.0.47f1 -m android ios          # space-separated
