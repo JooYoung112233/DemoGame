@@ -59,13 +59,17 @@ public class Projectile : MonoBehaviour
 
     /// <summary>날아간 거리에 따른 데미지 배율. 유효사거리의 절반까지는 그대로,
     /// 그 뒤로 끝에서 55%까지 선형으로 준다. 총도 "멀면 약하다"가 있어야
-    /// 거리를 좁힐 이유가 생긴다 — 안 그러면 사거리 끝에서만 쏘는 게 항상 정답이다.</summary>
+    /// 거리를 좁힐 이유가 생긴다 — 안 그러면 사거리 끝에서만 쏘는 게 항상 정답이다.
+    /// 값은 GameTuning(gunFalloffStart·gunFalloffEndMult) — 2026-09-11 상수에서 옮김(총 수치 정리).</summary>
     float Falloff()
     {
         float traveled = _rangeTotal - _rangeLeft;
         float t = Mathf.Clamp01(traveled / _rangeTotal);
-        if (t <= 0.5f) return 1f;
-        return Mathf.Lerp(1f, 0.55f, Mathf.InverseLerp(0.5f, 1f, t));
+        var gt = GameTuning.Instance;
+        float start   = gt != null ? gt.gunFalloffStart   : 0.5f;
+        float endMult = gt != null ? gt.gunFalloffEndMult : 0.55f;
+        if (t <= start) return 1f;
+        return Mathf.Lerp(1f, endMult, Mathf.InverseLerp(start, 1f, t));
     }
 
     void Update()

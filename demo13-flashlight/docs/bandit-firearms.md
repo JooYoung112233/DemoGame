@@ -34,7 +34,7 @@
 
 ### 구현 (2026-09-11)
 
-- 유닛: StatDB `bandit_pistol`·`bandit_rifle` — `bandit_melee_1`을 복제해 드랍 테이블이 같다. 원거리 필드는 `UnitStatData.rangedWeapon` 외 5개.
+- 유닛: StatDB `bandit_pistol`·`bandit_rifle` — `bandit_melee_1`을 복제해 드랍 테이블이 같다. 원거리 필드: 쥔 총 `rangedWeaponData`(플레이어와 같은 `WeaponData` — 2026-09-11 총 수치 통합) + 적 전용 `rangedDamageMult`·`rangedBulletSpeedMult`·`preferredRange`·`burstCount`·`burstInterval`·`spreadDeg`. 모델(권총/소총)은 총의 `firearmStance`로 고른다.
 - AI: `EnemyController` 원거리 분기 — 근접과 같은 상태(AttackWindup=조준 경고, Attack=발사)를 써서 피격 캔슬·스턴·사망 흐름을 그대로 탄다. 탄은 실제 `Projectile`.
 - 모델: 시안 프리팹의 변형 `Resources/Characters/BanditPistol`·`BanditRifle`을 `BanditEnemyVisual` 총기 모드가 `BanditFirearmPreview.Sample()`로 구동(교전 시 꺼냄·조준·반동, 순찰 시 수납). 시안 자체 자동 연출·가짜 트레이서는 끈다.
 - 배치: Zone1 손배치 존 4개(폐아파트·주차장=권총, 무너진 상가·유리타워=소총, 9기). 빌더 `Zone1GreyboxLayout`과 씬을 같이 바꿨다.

@@ -86,7 +86,7 @@
 - 적 공격 전 0.8초 예비동작 (빨간색 깜빡임)
 - 예비동작 중 강공격 적중 → 공격 캔슬 + 긴 경직
 
-### 적 스폰 (SpawnZone → EnemySpawner) — 2026-06-19
+### 적 스폰 (SpawnZone → EnemySpawner) — 2026-06-19 (그레이박스 폴백의 Rigidbody2D·"붉은 사각" 서술은 2D 시절 — 지금은 3D 밴딧 모델)
 - **`SpawnZone`**(씬 배치): 영역(폭 size.x·높이 size.z, 2D XY) + `enemyCount` + `unitKey`(StatDB). 기즈모로 영역 표시.
 - **`EnemySpawner`**(런타임, 부팅 시 자가 생성·DontDestroyOnLoad): 게임플레이 씬이 로드되면 그 씬의 SpawnZone들을 읽어 존마다 **`round(enemyCount × GameTuning.enemySpawnCountMult)`** 마리를 영역 랜덤 위치에 스폰(씬당 1회, 언로드 시 가드 해제→재입장 재스폰). 안전구역은 존이 없어 0기.
   - 유닛 프리팹(`UnitStatData.generatedPrefab`) 있으면 그걸, 없으면 **런타임 그레이박스 적**(붉은 사각 + Rigidbody2D/Collider/Hurtbox/Health/CombatFeedback/EnemyController) 생성 후 `SetUnitKey`.
@@ -98,7 +98,7 @@
 - **적 처치 전리품(2026-06-19)**: `EnemyController.DropLoot`가 **적별 전용 드랍 테이블(`UnitStatData.drops`) 우선**, 비면 **지상(Ground) 티어 region 루트 폴백**(컨테이너보다 약함). `GameTuning.enemyDropChance`로 전역 게이트.
   - **적별 드랍 테이블** = `List<EnemyDropEntry>{ itemId, chance(0~1), minQty, maxQty }`. **Control Panel ▸ StatDB ▸ Units ▸ 전리품 드랍**에서 유닛별로 직접 편집(비우면 지역 루트). 처치 시 각 항목을 chance로 굴려 `Random(min,max)`개 드랍. [→ balance.md](balance.md) [→ economy.md](economy.md)
 
-## 무기 파츠 (부착물) — 2026-06-19 결정
+## 무기 파츠 (부착물) — 2026-06-19 결정 · ⚠️ 2026-09-09 탄창 1종만 남음(조준경·소염기·손잡이 폐기, scope-cut.md)
 
 > **질문**: 무기 파츠를 어떻게 구성/구현할지. **결정: ① 파츠 4종 — 조준경(Scope)/소염기(Muzzle)/탄창(Magazine)/손잡이(Grip). ② 현재 근접 무기뿐(총기 없음) → 시스템 먼저 구축, 총은 나중(파츠 시스템 재사용). ③ 파츠는 무기 개별 인스턴스에 귀속(타르코프식) — 그 무기를 끼웠다 빼도 파츠 유지.**
 
@@ -114,7 +114,7 @@
 ## 시야 (FOV) — 2026-06-19 결정
 - **결정: 좀보이드(Project Zomboid)와 동일한 시야콘** — 플레이어 정면 부채꼴 밖은 가려짐(적/오브젝트 비가시), 지역/시간별 어둠 혼합. 기존 손전등-주광 방식 폐기. 후속 구현(렌더링/가시성 시스템). [→ rendering.md](rendering.md)
 
-## 시각 피드백 (애니메이션 없이)
+## 시각 피드백 (애니메이션 없이) — (2D 스프라이트 시절 기록)
 
 | 상태 | 표현 |
 |---|---|
@@ -130,7 +130,7 @@
 
 ---
 
-## 타격감 연출 (Hit Feel) — 2026-06-02 설계
+## 타격감 연출 (Hit Feel) — 2026-06-02 설계 · ⚠️ 2D 시절: `BRB/SpriteFlash` 셰이더는 없고(2026-09-10 셰이더 백지화) 부위 의료(`PlayerMedicalSystem`)도 폐기됨. 히트스탑·화면 연출은 유효
 
 > 설계 원칙: ① **어둠/시야가 최대 무기** ② **약공 ≠ 강공**(무게 차이를 몸으로) ③ **플레이어 피격 = 화면 연출 / 적 피격 = 엔티티 연출** 분리 ④ **레이어별 on/off·강도 노브**.
 > 토대 재사용: `CombatFeedback.cs`(플래시·스케일펀치·넉백·돌진), `ScreenEffectManager.cs`(셰이크·색수차·플래시·프리즈).
@@ -173,7 +173,7 @@
 
 ---
 
-## 공격 중 이동 잠금 + 애니메이션 구조 (2026-06-02)
+## 공격 중 이동 잠금 + 애니메이션 구조 (2026-06-02) — (Spine 시절 기록 — 지금은 3D 치비 Animator, 방망이·장검 모션)
 
 ### 공격 시 이동 잠금 (다크소울식)
 - 공격 애니메이션 재생 중 **이동 불가** (애니 끝나야 다시 이동)
@@ -206,7 +206,7 @@
 
 ---
 
-## 적 AI 길찾기 (Pathfinding) — 2026-06-02
+## 적 AI 길찾기 (Pathfinding) — 2026-06-02 · 지금은 `NavGrid`가 3D 콜라이더(`Physics.OverlapBox`)로 굽고 `NavGridBootstrap`이 씬마다 깐다(아래 Tilemap 서술은 2D 시절, [enemy-ai.md](enemy-ai.md))
 
 > 결정: **Tilemap 그리드 A\*** (자체 구현, 외부 에셋·NavMesh 의존성 0). 맵이 Tilemap+Collider2D라 가장 자연스러움.
 > 플레이어는 **WASD 직접 이동 유지**(길찾기 미사용) + 전신 콜라이더만, **적만** 길찾기. 그리드는 플레이어를 장애물로 안 치고 추격 타겟으로만 취급.
@@ -312,6 +312,7 @@ GameTuning `noiseIdle/Crouch/Walk/Run/Attack/Door/UiMax`, `barricadeNoiseRadius`
 | 날짜 | 내용 |
 |---|---|
 | **2026-09-11** | **전환·방향·총 데이터·그로기 결정 (§무기 구성 결정).** 질문 4개 → 사용자: 무기 전환 = **퀵슬롯 숫자키** · 근접 방향 = **공격 순간 커서 쪽** · 총 수치 = **`WeaponData` 한 곳으로 전부**(밴딧 포함) · 그로기 = **데이터 유지**(80·160, 문서가 틀렸던 것). |
+| **2026-09-11** | **총 수치 `WeaponData` 한 곳으로 통합 (사용자 "한 곳으로 전부").** 총기 밴딧이 총 종류 enum + 절대 수치(`attackDamage`=탄 피해, `projectileSpeed`)를 따로 들던 것을 → StatDB `rangedWeaponData`(플레이어와 같은 에셋) + 적 전용 `rangedDamageMult`·`rangedBulletSpeedMult`로. 배율은 **기존 값이 그대로 나오게**(권총 14×0.643=9 / 42×0.381=16, 소총 12×0.5=6 / 50×0.4=20). 밴딧 모델도 총의 `firearmStance`로. **`Weapon_Rifle545` 신설**(5.45x39·연사 600rpm·피해 12·탄속 50·사거리 20 — **가안**, 플레이어 소총 아이템은 아직 없음). 거리 감쇠 상수 → `GameTuning.gunFalloffStart/EndMult`. `WeaponData`를 공통/근접/총 칸으로 정리 + `WeaponDataEditor`(해당 칸만 표시). 검증: Zone1에서 권총 밴딧 탄 9.00·16.00, 소총 6.00·20.00(통합 전과 같음), 근접 밴딧은 근접 그대로. |
 | **2026-09-11** | **근접 = 주력으로 정정.** 사용자: "근접도 주력이긴 해, 좀보이드처럼" — 바로 아래 행의 "근접 = 보조 무기"를 **총과 근접 둘 다 주력**으로 고쳤다. |
 | **2026-09-11** | **구르기 꺼 둠.** 사용자: "구르기는 일단 꺼둬" — 모션이 없어 미끄러지기만 하므로. `GameTuning.dodgeEnabled`(기본 false)로 입력을 막고 코드·특성은 그대로 둔다. 모션 제작 후 켠다. |
 | **2026-09-11** | **무기 구성 결정 (§무기 구성 결정, 시스템 정리 2단계).** 질문: 근접 무기를 남길지 / 구르기를 남길지 → 사용자: "근접 무기는 남기고 구르기도 유지하자, 근데 구르기는 모션이 없어서 일단 보류". 총 = 주무기, 근접 = 보조 무기. 구르기 시스템은 두되 모션 전까지 다듬지 않는다. |
@@ -507,14 +508,16 @@ GameTuning `noiseIdle/Crouch/Walk/Run/Attack/Door/UiMax`, `barricadeNoiseRadius`
 ### 데이터 구조
 | 어디 | 무엇 | 비고 |
 |---|---|---|
-| `WeaponData` | `isRanged`, `fireMode`, `rpm`, `damage`, `projectileSpeed`, `effectiveRange`, `hipSpreadDeg`/`adsSpreadDeg`, `recoilPerShot`/`recoilRecover`, `reloadSeconds`, `noiseRadius`, `caliber`, `adsMoveMult` | 근접 필드와 같은 SO에 둔다(무기 하나가 둘 다일 일은 없다) |
+| `WeaponData` | **총 수치의 유일한 출처**(2026-09-11) — `isRanged`, `firearmStance`(총 종류 → 플레이어 총기 모양·모션, 밴딧 모델), `caliber`, `fireMode`, `rpm`, `damage`, `groggy`, `projectileSpeed`, `effectiveRange`, `hipSpreadDeg`/`adsSpreadDeg`, `recoilPerShot`/`recoilRecover`/`recoilMax`, `reloadSeconds`, `adsMoveMult` | 근접 필드와 같은 SO, 칸만 나눔 — 인스펙터(`WeaponDataEditor`)가 근접이면 근접 칸, 총이면 총 칸만 보여 준다. 총기 밴딧도 StatDB에서 이 에셋을 참조 |
+| `StatDB` 유닛 | 총기 밴딧의 **적 전용 값만**: `rangedWeaponData`(쥔 총) · `rangedDamageMult` · `rangedBulletSpeedMult` · `preferredRange` · `burstCount`/`burstInterval` · `spreadDeg` + `attackRange`(사거리)·`attackWindup`(조준 경고)·`attackSpeed`(사격 주기) | 2026-09-11 전엔 총 종류 enum과 절대 수치를 따로 들고 있었다 |
+| `GameTuning` | 거리 감쇠 `gunFalloffStart`(0.5)·`gunFalloffEndMult`(0.55) — 플레이어·적 공용 | 2026-09-11 `Projectile` 상수에서 옮김 |
 | `ItemData` | `magCapacity`(탄창 장탄수) · `magCaliber` · `ammoCaliber`(탄약 아이템) | `magCapacity`는 기존 `partMagBonus`를 **이름만 바꾼 것**(`[FormerlySerializedAs]`로 값 보존). "가산"이 아니라 **탄창 자체의 용량**으로 뜻이 바뀐다 |
 | `ItemInstance` | `ammoCount` · `ammoItemId` | **탄창 인스턴스**엔 그 탄창에 든 탄, **총기 인스턴스**엔 장착 탄창에 남은 탄. 중첩 인스턴스를 안 만들려고 같은 필드를 양쪽이 쓴다(유니티 직렬화는 자기참조 타입을 못 다룬다) |
 
 - 장전 = 인벤의 탄창 인스턴스 M을 골라 → 총기의 `ammoCount/ammoItemId`를 M 것으로 교체, 빼낸 탄창은 **남은 탄을 실은 새 인스턴스**로 인벤에 돌아간다. 이래서 반쯤 쓴 탄창이 보존된다.
 - 탄창 없는 총은 **발사 불가**("탄창 없음"). 탄창은 주워야 하는 물건이다.
 
-### 파츠 4종의 실효과 (여태 필드만 있던 것)
+### 파츠 4종의 실효과 (여태 필드만 있던 것) — ⚠️ 2026-09-09 탄창만 남음
 | 파츠 | 필드 | 총기에서의 뜻 |
 |---|---|---|
 | 조준경 Scope | `partRangeBonus` | 유효사거리 +m, 조준 시 시야콘 보정 |
@@ -538,7 +541,7 @@ GameTuning `noiseIdle/Crouch/Walk/Run/Attack/Door/UiMax`, `barricadeNoiseRadius`
 | `bandit_pistol` | 34 | 9 | 9m / 6.5m | 0.7s | 2.0s | 16m/s | 1발 / ±3° |
 | `bandit_rifle` | 44 | 6 | 12m / 9m | 0.85s | 2.6s | 20m/s | 3발·0.4s / ±5° |
 
-- 수치는 StatDB 유닛별(`rangedWeapon`/`preferredRange`/`projectileSpeed`/`burstCount`/`burstInterval`/`spreadDeg` + 기존 `attackRange`=사거리, `attackWindup`=조준 경고, `attackSpeed`=사격 주기) — Control Panel ▸ 🎮 스탯 DB. 드랍은 `bandit_melee_1`과 같은 테이블.
+- 수치: **총 자체는 `WeaponData`**(권총 = 플레이어와 같은 `Weapon_Pistol9`, 소총 = `Weapon_Rifle545`) — 피해·탄속은 StatDB `rangedDamageMult`·`rangedBulletSpeedMult`를 곱한 값이 위 표다(2026-09-11 통합, 표의 값은 그대로 유지). 적 전용 값(`preferredRange`/`burstCount`/`burstInterval`/`spreadDeg` + `attackRange`=사거리, `attackWindup`=조준 경고, `attackSpeed`=사격 주기)은 StatDB 유닛별 — Control Panel ▸ 🎮 스탯 DB. 드랍은 `bandit_melee_1`과 같은 테이블.
 - **이동:** 추격 중 사선(벽 없음)이 트이고 사거리 안이면 멈춰 조준, 트였지만 멀면 멈추는 거리까지만 다가간다. 벽에 가리면 길찾기로 돌아 들어온다. 총을 다 꺼내기(0.6초) 전엔 조준하지 않는다.
 - **조준 경고 = 공격 예비동작.** 붉은 점멸 + 총구에서 뻗는 붉은 조준선(벽에서 끊김). 끝 0.2초 전에 조준이 **고정**되고(선이 굵어지며 노랗게 깜빡) 그 방향으로 쏜다 — 고정된 선을 보고 옆으로 빠지면 빗나간다. 조준선은 시야콘 밖이어도 보인다(경고가 목적).
 - **탄은 실제 `Projectile`** — 플레이어 총과 같은 규칙: 벽·엄폐·다른 적의 몸에 막히고, 사거리 절반 이후 55%까지 감쇠한다. 구르기 무적 중엔 몸에 흡수돼 피해가 없다.

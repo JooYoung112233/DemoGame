@@ -103,9 +103,10 @@ MonoBehaviour:
     patrolRadius: 4
     patrolWaitTime: 2
     hitStunDuration: 0.3
-    rangedWeapon: 0
+    rangedWeaponData: {fileID: 0}
+    rangedDamageMult: 1
+    rangedBulletSpeedMult: 0.4
     preferredRange: 6
-    projectileSpeed: 16
     burstCount: 1
     burstInterval: 0.12
     spreadDeg: 3
@@ -158,9 +159,10 @@ MonoBehaviour:
     patrolRadius: 4
     patrolWaitTime: 2
     hitStunDuration: 0.3
-    rangedWeapon: 1
+    rangedWeaponData: {fileID: 11400000, guid: 9f10a2b3c4d5e6f708192a3b4c5d6e7f, type: 2}
+    rangedDamageMult: 0.64285713
+    rangedBulletSpeedMult: 0.3809524
     preferredRange: 6.5
-    projectileSpeed: 16
     burstCount: 1
     burstInterval: 0.12
     spreadDeg: 3
@@ -213,9 +215,10 @@ MonoBehaviour:
     patrolRadius: 4
     patrolWaitTime: 2
     hitStunDuration: 0.3
-    rangedWeapon: 2
+    rangedWeaponData: {fileID: 11400000, guid: 0dcb09b2aa62b104ab24a6deeb38ca9e, type: 2}
+    rangedDamageMult: 0.5
+    rangedBulletSpeedMult: 0.4
     preferredRange: 9
-    projectileSpeed: 20
     burstCount: 3
     burstInterval: 0.4
     spreadDeg: 5
@@ -268,9 +271,10 @@ MonoBehaviour:
     patrolRadius: 4
     patrolWaitTime: 2
     hitStunDuration: 0.4
-    rangedWeapon: 0
+    rangedWeaponData: {fileID: 0}
+    rangedDamageMult: 1
+    rangedBulletSpeedMult: 0.4
     preferredRange: 6
-    projectileSpeed: 16
     burstCount: 1
     burstInterval: 0.12
     spreadDeg: 3
@@ -323,9 +327,10 @@ MonoBehaviour:
     patrolRadius: 3
     patrolWaitTime: 3
     hitStunDuration: 0.15
-    rangedWeapon: 0
+    rangedWeaponData: {fileID: 0}
+    rangedDamageMult: 1
+    rangedBulletSpeedMult: 0.4
     preferredRange: 6
-    projectileSpeed: 16
     burstCount: 1
     burstInterval: 0.12
     spreadDeg: 3
@@ -378,9 +383,10 @@ MonoBehaviour:
     patrolRadius: 5
     patrolWaitTime: 2
     hitStunDuration: 0.3
-    rangedWeapon: 0
+    rangedWeaponData: {fileID: 0}
+    rangedDamageMult: 1
+    rangedBulletSpeedMult: 0.4
     preferredRange: 6
-    projectileSpeed: 16
     burstCount: 1
     burstInterval: 0.12
     spreadDeg: 3

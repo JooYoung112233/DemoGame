@@ -96,6 +96,12 @@ public class GameTuning : ScriptableObject
     [Tooltip("적 탄의 비행 거리 = 사격 사거리 × 이 배율. 탄은 비행 거리 절반부터 55%까지 감쇠한다.")]
     [Range(1f, 2f)] public float enemyBulletRangeMult = 1.25f;
 
+    [Tooltip("총알 거리 감쇠 시작 — 유효사거리의 이 비율까지는 데미지 그대로(플레이어·적 공용).\n" +
+             "2026-09-11 Projectile 상수에서 옮김(총 수치 정리, docs/combat.md §무기 구성 결정).")]
+    [Range(0f, 1f)] public float gunFalloffStart = 0.5f;
+    [Tooltip("사거리 끝에서의 데미지 배율 — 감쇠 시작부터 끝까지 선형으로 이 값까지 준다.")]
+    [Range(0.1f, 1f)] public float gunFalloffEndMult = 0.55f;
+
     // ── 총격(플레이어) (2026-09-11, docs/combat.md §총격전) — 총마다 수치는 WeaponData, 탄마다는 탄 아이템 ──
     [Header("총격(플레이어)")]
     [Tooltip("조준(우클릭) 중 카메라가 커서 쪽으로 밀리는 비율 — 플레이어→커서 거리 × 이 값.")]
