@@ -111,6 +111,10 @@ PostRaidEventData
 
 ## 기획 결정 로그
 
+### 2026-09-12
+- **구현(버그 수정)**: `EventCondition`의 `nightOnly`·`requiredRegion`을 검사하지 않던 TODO 해소. 판정 기준 = **탈출 시점**의 밤 여부·지역(`RaidManager.LastExtractWasNight`/`LastExtractRegionId`) — 이벤트는 귀환 뒤에 뽑히므로 지금 시각·씬이 아니다.
+  - ⚠️ 여전히 `Systems.unity`의 `allEvents`가 비어 있고 `PostRaidEventData` 에셋이 0개라 이벤트는 뜨지 않는다. 이벤트 콘텐츠를 만들지, 시스템을 끌지는 결정 대기.
+
 ### 2026-05-26
 - **질문**: 레이드 후 이벤트 형태 (랜덤 팝업 / 귀환 씬 / 결과 통합)?
   - **결정**: 랜덤 이벤트 팝업 (텍스트 + 선택지 → 결과). 낙원 스타일.

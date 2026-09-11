@@ -18,6 +18,14 @@ public class MapZoneVolume : MonoBehaviour
     MapZone _zone;
     float _pollTimer;
 
+    /// <summary>런타임 생성용(기본 구역) — 비활성 상태에서 설정한 뒤 켜야 OnEnable 등록에 반영된다.</summary>
+    public void Configure(string id, string name, Vector2 areaSize)
+    {
+        zoneId = id;
+        displayName = name;
+        size = areaSize;
+    }
+
     Rect ComputeBounds()
     {
         var box = GetComponent<BoxCollider2D>();

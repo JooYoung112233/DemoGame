@@ -10,24 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe39bfb873cc9304c8d8106a9584fe35, type: 3}
-  m_Name: Battery
+  m_Name: KeyPoliceArmory
   m_EditorClassIdentifier: Game.Scripts::ItemData
-  itemId: battery_aa
-  displayName: "건전지"
-  description: "낡은 건전지. 제작 재료나 판매용이다."
+  itemId: key_police_armory
+  displayName: "경찰서 무기고 열쇠"
+  description: "경찰서 무기고 문"
   icon: {fileID: 0}
   gridWidth: 1
   gridHeight: 1
-  category: 2
-  rarity: 0
-  maxStack: 5
-  weight: 0.1
-  sellPrice: 500
-  buyPrice: 1200
+  category: 5
+  rarity: 1
+  maxStack: 1
+  weight: 0.05
+  sellPrice: 0
+  buyPrice: 0
   isUsable: 0
   useEffect: 0
-  effectValue: 27
-  hasDurability: 0
-  maxDurability: 100
-  durabilityCostPerUse: 50
+  effectValue: 0
   worldDropPrefab: {fileID: 0}

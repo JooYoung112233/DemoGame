@@ -40,6 +40,16 @@ public class NavGrid : MonoBehaviour
     public int  Height => _h;
     public float CellSize => cellSize;
 
+    /// <summary>격자 영역(평면 좌표 x=월드X, y=월드Z). 레이드 맵 기본 지도 구역이 이 범위를 쓴다.</summary>
+    public Rect PlanBounds
+    {
+        get
+        {
+            Vector2 c = Plan3D.ToPlan(transform.position);
+            return new Rect(c - areaSize * 0.5f, areaSize);
+        }
+    }
+
     /// <summary>막힘 셀 비율(0~1). 0이면 장애물을 하나도 못 잡은 것 — 베이크 시점 의심.</summary>
     public float BlockedRatio
     {

@@ -473,7 +473,6 @@
           "speakerKey": "NPC_VETERAN",
           "textKeys": ["S013_D10", "S013_D11", "S013_D12", "S013_D13", "S013_D14", "S013_D15", "S013_D16"]
         },
-        { "type": "system", "action": "give_item", "param": "lantern_basic", "intParam": 1 },
         { "type": "system", "action": "set_flag", "param": "veteran_lantern_given" },
         {
           "type": "choice",

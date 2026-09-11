@@ -59,7 +59,6 @@ public class RaidResultUI : MonoBehaviour
         {
             RaidManager.PendingResult = false;   // 1회 소비
             CaptureRaidData();
-            RefillBattery();
 
             // PostRaidEvent 먼저 체크 → 이벤트 끝나면 정산 표시
             if (PostRaidEventManager.Instance != null && PostRaidEventUI.Instance != null)
@@ -215,16 +214,6 @@ public class RaidResultUI : MonoBehaviour
                     levelLine;
             }
         }
-    }
-
-    /// <summary>안전가옥 귀환 시 배터리 자동 충전</summary>
-    void RefillBattery()
-    {
-        var player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null) return;
-        var flashlight = player.GetComponentInChildren<FlashlightController>();
-        if (flashlight != null)
-            flashlight.AddBattery(9999f); // 풀 충전 (maxBattery로 클램프됨)
     }
 
     public void Hide()

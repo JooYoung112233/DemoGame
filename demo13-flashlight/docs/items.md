@@ -127,8 +127,8 @@
 
 | 우선 | itemId | 표시명 | 격자 | 스택 | 무게 | 희귀 | useEffect | 비고 |
 |:---:|---|---|:---:|:---:|:---:|---|---|---|
-| P0 | `battery_aa` | 건전지 | 1×1 | 5 | 0.05 | Common | AddBattery | 장비 전력. ✅ id 정합 완료(2026-06-10): SO `Battery.asset` itemId=`battery_aa`로 통일 |
-| P0 | `lantern_basic` | 탐지등 | 1×2 | - | 0.8 | Common | Equip(Light) | 회수꾼 소싯적 양도(S-013). 착용 시 시야(주변광+콘) 확대·증광·현상 근접 시 점멸. 토글X·상시. **루디 광원(빛의 역설 예외=안전)**. 레이드 중 **약하게 방전 → 여분 루디로 교체**(가혹X). → rendering.md, [gdd-core §5.2/§5.3](gdd-core.md) |
+| P0 | `battery_aa` | 건전지 | 1×1 | 5 | 0.05 | Common | ~~AddBattery~~ None | **2026-09-12 사용 효과 제거 → 재료·판매용**(손전등 삭제, 변경 로그). ✅ id 정합 완료(2026-06-10): SO `Battery.asset` itemId=`battery_aa`로 통일 |
+| P0 | `lantern_basic` | 탐지등 | 1×2 | - | 0.8 | Common | Equip(Light) | ⚠️ 미제작 — 2026-09-12 ch1 스토리 보상 줄 삭제(변경 로그). 회수꾼 소싯적 양도(S-013). 착용 시 시야(주변광+콘) 확대·증광·현상 근접 시 점멸. 토글X·상시. **루디 광원(빛의 역설 예외=안전)**. 레이드 중 **약하게 방전 → 여분 루디로 교체**(가혹X). → rendering.md, [gdd-core §5.2/§5.3](gdd-core.md) |
 | P0 | `canned_food` | 통조림 | 1×1 | 3 | 0.3 | Common | Eat | 허기 +40. → survival.md |
 | P0 | `water_bottle` | 물병 | 1×2 | 2 | 0.5 | Common | Drink | 수분 +45. → survival.md |
 | P1 | `energy_bar` | 에너지바 | 1×1 | 4 | 0.1 | Common | Food + RestoreStamina | 약한 회복 복합 |
@@ -337,6 +337,7 @@
 | P0 | `key_rusty` | 녹슨 열쇠 | 1×1 | Common | 잠긴 상자 기본 |
 | P1 | `key_warehouse` | 창고 열쇠 | 1×1 | Uncommon | 지역 고정 스폰 |
 | P1 | `key_rooftop` | 옥상 열쇠 | 1×1 | Uncommon | 조건 탈출구 |
+| P1 | `key_police_armory` | 경찰서 무기고 열쇠 | 1×1 | Uncommon | `Int_Police` 무기고 문. 경찰서 실내 루팅(`int_police` 가중치 2, 가안). ✅ SO `Key/KeyPoliceArmory.asset`(2026-09-12) |
 | P1 | `note_scrap` | 낡은 쪽지 | 1×1 | Common | 상호작용만, 인벤 불필요(오브젝트) |
 | P1 | `map_fragment` | 지도 조각 | 1×2 | Rare | 루디 위치 후보 표시 |
 | P2 | `code_paper` | 암호 메모 | 1×1 | Uncommon | 금고 비밀번호 |
@@ -629,6 +630,9 @@ Unity 재생 시 **202종** 아이템 + **10종** `RecipeData` (`Data/Recipes/`)
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-09-12 | **배터리(`battery_aa`) 사용 효과 제거 → 재료·판매용.** 질문: 손전등(`FlashlightController`)이 씬 어디에도 없어 배터리 '사용'이 효과 0("충전할 손전등이 없다")이다 — 사용 효과 빼고 재료·판매용 / 몸에 찬 등(`WornLamp`)에 배터리 개념 추가 / 배터리 아이템 제거. **결정: 사용 효과 빼고 재료·판매용**(사용자 선택). `Battery.asset` isUsable 0·useEffect None, 죽은 손전등 참조 코드와 `FlashlightController` 삭제. `ItemUseEffect.AddBattery`는 SO 인덱스 보존용으로 enum에만 남김. |
+| 2026-09-12 | **스토리 랜턴 보상(`lantern_basic`) 삭제.** 질문: ch1 S-013 베테랑 보상 `give_item lantern_basic` — 아이템도 랜턴 기능도 없어 지급이 로그 없이 무시되고 플래그만 켜진다 — 보상 줄 삭제 / 다른 기존 아이템으로 교체 / 새 아이템 추가. **결정: 보상 줄 삭제**(사용자 선택). 대사와 `veteran_lantern_given` 플래그는 유지. §2의 `lantern_basic` 행은 미제작 기획으로 남는다. |
+| 2026-09-12 | **`key_police_armory`(경찰서 무기고 열쇠) 신설.** 질문: `Int_Police` 무기고 문(`BlockedPassage` Locked)이 요구하는 열쇠 아이템이 없어 강제 돌파로만 열린다 — 실내 결정 때 같이 / 열쇠 만들고 경찰서 루팅에 넣기 / 열쇠 요구 없애기. **결정: 열쇠 만들고 경찰서 루팅에 넣기**(사용자 선택). Key 카테고리 · Uncommon · 0.05kg · 거래 불가(buy/sell 0, 다른 열쇠와 같음) — **수치 가안**. `loot_tables.txt` `int_police` 가중치 2(가안). ⚠️ 실내 씬은 아직 들어갈 문이 없다(실내 처리 결정 대기). §8 표에 추가. |
 | 2026-07-10 | **아이템 도감 확정 (기획, 구현 전).** 질문: 아이템 수집 기록(도감)을 넣나? **결정: 첫 획득 시 발견 기록(세이브에 itemId set) + 도감 UI 패널(카테고리 탭, 미발견=실루엣). 1차 = 기록·열람만(보상 없음), 수집률 보상(PP/스크랩)은 2차 검토. 이상현상 카테고리 아이템의 도감 설명 = 로어 조각(세계관 연결).** §아이템 도감 신설, backlog-ui.csv U20(CodexUI) 등재. 갭 분석 5종 구현 순서 4번째. | 근거: 낙원식 수집 동기, 아이템 204종의 가치 표면화. |
 | 2026-06-23 | **소비 아이템 useEffect 오태깅 교정** (`Resources/Items/Consumable/*.asset`). 인게임 "먹기/사용" 미작동 버그 수정 — `PlayerInventory.UseItem`가 처리하는 작동 효과는 HealHP(1)/HealInjury(2)/AddBattery(4)/Food(5)뿐, RestoreStamina(3)는 비구현. useEffect(before→after): `canned_food` 1→5(+effectValue 25→40, §2 "허기+40"), `protein_shake` 1→5, `coffee` 0→5, `energy_soup` 0→5, `stim_injector` 0→5. `adrenaline_shot`은 HealHP(1) 유지(전투 HP 회복). coffee/energy_soup/stim_injector는 본래 RestoreStamina 의도지만 enum 미구현이라 **임시 Food(5) 대체**(포만감+수분 절반 회복) → 스태미너 소비템 효과 재설계는 기획 결정 대기(survival.md §8-A). 식음료 hasDurability는 이미 0(변경 없음). meta/GUID 미변경. |
 | 2026-06-19 | **무기 부착물(파츠) SO 4종 신규.** `ItemData` 무기 파츠 필드(`weaponPartType`/`partMoveSpeedMult`/`partStaminaMult`/`partRangeBonus`/`partRecoilMult`/`partMagBonus`)를 채운 실제 SO를 `Assets/Resources/Items/Misc/WeaponPart/`에 생성: `scope_basic`(Scope, 2×1, Uncommon, 사거리+1.0·반동×0.9), `muzzle_basic`(Muzzle, 1×1, Uncommon, 반동×0.85), `mag_extended`(Magazine, 1×2, Uncommon, 장탄+10), `grip_tactical`(Grip, 1×1, Common, 이속×1.05·스태미너×0.92·반동×0.92). 전부 category=Misc·equipSlot=None·isUsable=false·hasDurability=false. ItemDatabase가 `Resources.LoadAll("Items")`로 자동 로드. 근거: 무기 부착물 시스템 도입 대비 콘텐츠 선제작. 총기 시스템 미도입이라 효과 수치는 도입 시 활용, 아이콘 미할당(에디터 연결 필요). |

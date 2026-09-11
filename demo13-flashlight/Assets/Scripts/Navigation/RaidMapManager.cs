@@ -85,6 +85,32 @@ public class RaidMapManager : MonoBehaviour
         return s;
     }
 
+    // ── 기본 구역 (2026-09-12) ──
+    // 설계(navigation.md §3.1): 모든 레이드 맵은 미니맵 구역을 기본 1개 가진다. 옛 GameSceneBuilder만 이걸 깔았고
+    // 3D 맵 빌더(Zone1 등)는 빠뜨려 지도·나침반이 비어 있었다 → 구역이 하나도 없는 레이드 맵이면 런타임에 1개 깐다.
+
+    public void RequestDefaultZone(UnityEngine.SceneManagement.Scene scene)
+    {
+        StartCoroutine(CreateDefaultZoneNextFrame(scene));
+    }
+
+    System.Collections.IEnumerator CreateDefaultZoneNextFrame(UnityEngine.SceneManagement.Scene scene)
+    {
+        yield return null;   // 씬에 배치된 구역(OnEnable 등록)과 NavGrid 런타임 배치가 끝난 뒤에 본다
+        if (!scene.IsValid() || !scene.isLoaded || _zones.Count > 0) yield break;
+        var grid = NavGrid.Instance;
+        if (grid == null) yield break;
+
+        Rect r = grid.PlanBounds;
+        var go = new GameObject("MapZone_All");
+        go.SetActive(false);   // Configure 뒤에 켜야 OnEnable 등록에 크기가 반영된다
+        UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, scene);
+        go.transform.SetParent(HierarchyFolder.RuntimeFolder(scene, "Map"), false);
+        go.transform.position = Plan3D.ToWorld(r.center, 0f);
+        go.AddComponent<MapZoneVolume>().Configure("MapZone_All", "지역 전체", r.size);
+        go.SetActive(true);
+    }
+
     // ── 존 등록 (MapZoneVolume) ──
 
     public void RegisterZone(MapZone zone)

@@ -249,6 +249,7 @@ tier 칸 = 상자 종류(`LootContainer.lootKind`). **지금은 `scrap_market`�
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-09-12 | `loot_tables.txt` `int_police`(경찰서 실내)에 `key_police_armory`(경찰서 무기고 열쇠) 가중치 2 추가(가안) — `Int_Police` 무기고 문 열쇠. 결정은 [items.md 변경 로그](items.md). |
 | 2026-05-25 | 7지구 지역 전용 아이템 14종·`region_loot.csv` 드롭 테이블·`RegionLootCatalog`·ItemSpawnPoint 연동. (현재: 5지역 — 2026-06-11 병합. ItemSpawnPoint 연동은 2026-09-11 앵커로 대체) |
 | 2026-05-26 | **맵 스폰 컨트롤러 구현.** MapSpawnProfile(SO) + MapSpawnController(씬). 총량 예산·희귀도 분포·카테고리 쿼터·낮밤 보정. 7개 지역 프리셋 자동 생성(Tools > Dev Tools > Data > Generate Map Spawn Profiles). ItemSpawnPoint에 managedByController 가드 추가. (현재: 프로파일 에셋 5개(5지역), 씬이 쓰는 건 `scrap_market.asset`뿐. 생성 메뉴는 현존하지 않음. 희귀도·카테고리는 2026-09-11 폐기) |
 | 2026-05-28 | **맵 빌더 스폰 연동.** PlacedMapObject에 스폰 필드 추가. MapObjectSpawner에서 LootContainer/ItemDrop/EnemySpawn → ItemSpawnPoint+LootContainer 자동 부착. MapSpawnController 자동 생성. MapBuilderUI에 스폰 설정 패널 추가. MapSerializer 직렬화 대응. (현재: 이 맵 빌더 계열은 현존하지 않음 — §6) |

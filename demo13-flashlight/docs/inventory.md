@@ -152,7 +152,7 @@ ItemUseEffect
 ├── HealHP        : HP 회복 (effectValue = 회복량)
 ├── HealInjury    : 부상 치료 (MedicalItemData 연동)
 ├── RestoreStamina: 스태미너 회복
-├── AddBattery    : 배터리 충전
+├── AddBattery    : 배터리 충전 — ⚠️ 2026-09-12 손전등 삭제로 미사용(enum 인덱스 보존용, items.md 변경 로그)
 └── Food          : 포만감 (향후 확장)
 ```
 

@@ -71,7 +71,6 @@ public class PlayerInventory : MonoBehaviour
 
     // 캐시
     Health health;
-    FlashlightController flashlight;
     PlayerEquipment equipment;
 
     void Awake()
@@ -88,7 +87,6 @@ public class PlayerInventory : MonoBehaviour
         SecureGrid.OnItemPlaced  += MarkDiscovered;
 
         health = GetComponent<Health>();
-        flashlight = GetComponentInChildren<FlashlightController>();
         equipment = GetComponent<PlayerEquipment>();
     }
 
@@ -281,13 +279,9 @@ public class PlayerInventory : MonoBehaviour
                 else ToastManager.Show("체력이 이미 가득 찼다", ToastManager.ToastType.Info);
                 break;
 
+            // 손전등 삭제(2026-09-12) — 배터리는 재료·판매용(items.md). 옛 SO가 남아 있어도 소모하지 않는다.
             case ItemUseEffect.AddBattery:
-                if (flashlight != null)
-                {
-                    flashlight.AddBattery(item.data.effectValue);
-                    used = true;
-                }
-                else ToastManager.Show("충전할 손전등이 없다", ToastManager.ToastType.Info);
+                ToastManager.Show("지금은 쓸 곳이 없다 — 재료나 판매용이다", ToastManager.ToastType.Info);
                 break;
 
             case ItemUseEffect.Food:

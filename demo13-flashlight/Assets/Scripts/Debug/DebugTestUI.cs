@@ -20,7 +20,6 @@ public class DebugTestUI : MonoBehaviour
     Health health;
     PlayerInventory inventory;
     PlayerEquipment equipment;
-    FlashlightController flashlight;
 
     // 드래그 이동
     Rect windowRect;
@@ -79,7 +78,7 @@ public class DebugTestUI : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // 씬 전환 시 레퍼런스 리셋
-        health = null; inventory = null; equipment = null; flashlight = null;
+        health = null; inventory = null; equipment = null;
     }
 
     void FindPlayer()
@@ -90,7 +89,6 @@ public class DebugTestUI : MonoBehaviour
             health = playerGO.GetComponent<Health>();
             inventory = playerGO.GetComponent<PlayerInventory>();
             equipment = playerGO.GetComponent<PlayerEquipment>();
-            flashlight = playerGO.GetComponentInChildren<FlashlightController>();
         }
     }
 

@@ -19,7 +19,6 @@ public class CharacterPanelUI : MonoBehaviour
     PlayerInventory playerInventory;
     Health health;
     GameObject playerGO; // 플레이어 GO 참조 (컴포넌트는 GetComponent로 접근)
-    FlashlightController flashlight;
 
     // 루팅 중인 상자 또는 창고
     LootContainer openContainer;
@@ -553,7 +552,6 @@ public class CharacterPanelUI : MonoBehaviour
         health = null;
         playerInventory = null;
         playerEquipment = null;
-        flashlight = null;
     }
 
     void FindRefs()
@@ -565,7 +563,6 @@ public class CharacterPanelUI : MonoBehaviour
         health = go.GetComponent<Health>();
         playerInventory = go.GetComponent<PlayerInventory>();
         playerEquipment = go.GetComponent<PlayerEquipment>();
-        flashlight = go.GetComponentInChildren<FlashlightController>();
     }
 
     #endregion
@@ -3129,7 +3126,21 @@ public class CharacterPanelUI : MonoBehaviour
         // 자세히 (항상) — 아이템 1개 상세 팝업
         AddContextButton("자세히", UITheme.TextBright, y, () =>
         {
-            ItemDetailUI.Show(contextTarget.item);
+            // 상세 창의 착용/버리기 = 이 메뉴의 "착용"·"버리기"와 같은 경로(교체 복원·확인창 포함).
+            var capPlacedD = contextTarget;
+            var capGridD = grid;
+            System.Action equip = IsEquippable(capPlacedD.item.data)
+                ? () => EquipFromGrid(capPlacedD.item, capGridD)
+                : (System.Action)null;
+            System.Action drop = isPlayerGrid
+                ? () => ShowConfirm($"'{capPlacedD.item.DisplayName}'을(를) 버릴까요?", () =>
+                    {
+                        capGridD.Remove(capPlacedD);
+                        DropOrReturnItem(capPlacedD.item);
+                        RefreshAllGrids();
+                    })
+                : (System.Action)null;
+            ItemDetailUI.Show(capPlacedD.item, equip, drop);
             HideContextMenu();
         });
         y -= 26f;

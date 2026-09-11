@@ -33,8 +33,8 @@
 
 | 순서 | 메뉴 | 결과 |
 |---|---|---|
-| 1 | `Tools ▸ TopDown ▸ Build ▸ Player Rig` (없으면) | `Resources/PlayerRig.prefab` 생성 (플레이어+카메라+조명) |
-| 2 | `Tools ▸ TopDown ▸ Build ▸ Systems Scene` | `Systems.unity` 생성(매니저+UI+PlayerRig+조명) + 빌드세팅 등록 |
+| 1 | ~~`Tools ▸ TopDown ▸ Build ▸ Player Rig`~~ (빌더 삭제됨) | `Resources/PlayerRig.prefab`은 이미 있다 — 새로 만들지 않는다 |
+| 2 | `Tools ▸ TopDown ▸ 개발 ▸ 시스템 씬` | `Systems.unity` 생성(매니저+UI+PlayerRig+조명) + 빌드세팅 등록 |
 | 3 | `Tools ▸ TopDown ▸ Build ▸ Map Tool Scene` | `MapTool2D.unity` 생성(맵 그리기 전용 작업 씬) |
 
 > **맵툴 씬은 게임 HUD/플레이어를 자동 스폰하지 않는다**(씬 이름에 "MapTool" 포함 시 스킵). 순수 편집용.

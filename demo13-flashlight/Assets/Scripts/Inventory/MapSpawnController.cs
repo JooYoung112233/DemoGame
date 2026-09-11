@@ -64,6 +64,10 @@ public class MapSpawnController : MonoBehaviour
     {
         if (hasSpawned) return;
         ExecuteSpawn();
+
+        // 지도 구역이 없는 레이드 맵이면 기본 구역 1개(navigation.md §3.1) — 지도·나침반이 비지 않게.
+        var map = RaidMapManager.Instance;
+        if (map != null) map.RequestDefaultZone(gameObject.scene);
     }
 
     /// <summary>씬의 모든 ItemSpawnPoint 수집 및 분류</summary>

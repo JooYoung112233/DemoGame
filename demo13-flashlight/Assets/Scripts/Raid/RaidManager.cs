@@ -317,31 +317,39 @@ public class RaidManager : MonoBehaviour
         // 탈출 정산 = 체크포인트 커밋(레이드 종료). 인벤/정산 결과를 디스크에 확정.
         SaveCheckpoints.Instance?.RaidEnded();
 
+        // 탈출 시점의 밤/지역 — 스토리 트리거와 포스트레이드 이벤트 조건(PostRaidEventManager)이 같이 쓴다.
+        bool wasNight = false;
+        string activeId = RegionTimeManager.Instance != null ? RegionTimeManager.Instance.ActiveRegionId : null;
+        if (RegionTimeManager.Instance != null)
+        {
+            if (!string.IsNullOrEmpty(activeId))
+            {
+                var rt = RegionTimeManager.Instance.GetRegion(activeId);
+                if (rt != null) wasNight = rt.isNight;
+            }
+        }
+        else
+        {
+            var dnc = FindFirstObjectByType<DayNightCycle>();
+            if (dnc != null) wasNight = dnc.IsNight;
+        }
+        LastExtractWasNight = wasNight;
+        LastExtractRegionId = !string.IsNullOrEmpty(activeId) ? activeId : MapSpawnController.CurrentRegionId;
+
         // 스토리 트리거: 탈출 성공 → 플래그 설정
         if (StoryTriggerManager.Instance != null)
         {
-            bool wasNight = false;
-            if (RegionTimeManager.Instance != null)
-            {
-                string activeId = RegionTimeManager.Instance.ActiveRegionId;
-                if (!string.IsNullOrEmpty(activeId))
-                {
-                    var rt = RegionTimeManager.Instance.GetRegion(activeId);
-                    if (rt != null) wasNight = rt.isNight;
-                }
-            }
-            else
-            {
-                var dnc = FindFirstObjectByType<DayNightCycle>();
-                if (dnc != null) wasNight = dnc.IsNight;
-            }
-
             bool hasRudi = lootedItems.Exists(i =>
                 i.data != null && (i.data.itemId == "ruby_shard" || i.data.itemId == "rudi_shard" || i.data.itemId == "rudi"));
 
             StoryTriggerManager.Instance.OnRaidExtract(wasNight, hasRudi);
         }
     }
+
+    /// <summary>마지막 탈출 시점이 밤이었는지 — 포스트레이드 이벤트 nightOnly 조건.</summary>
+    public static bool LastExtractWasNight { get; private set; }
+    /// <summary>마지막 탈출 지역 id — 포스트레이드 이벤트 requiredRegion 조건.</summary>
+    public static string LastExtractRegionId { get; private set; }
 
     /// <summary>시간초과</summary>
     void OnTimeOver()

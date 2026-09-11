@@ -35,6 +35,7 @@ public class DenseAnomalyController : MonoBehaviour
     public KeyCode debugKey = KeyCode.P;
 
     float _current;
+    static bool s_fogShaderMissing;   // 셰이더가 없으면 한 번만 알리고 매 프레임 다시 찾지 않는다
     Camera _cam;
     Transform _player;
     GameObject _quad;
@@ -130,9 +131,15 @@ public class DenseAnomalyController : MonoBehaviour
         if (_cam == null) return;
         if (_quad != null && _quad.transform.parent == _cam.transform) return;
 
+        if (s_fogShaderMissing) return;
         Cleanup();
         var shader = Shader.Find("BRB/AnomalyFog");
-        if (shader == null) { Debug.LogWarning("[DenseAnomaly] BRB/AnomalyFog 셰이더 못 찾음."); return; }
+        if (shader == null)
+        {
+            s_fogShaderMissing = true;
+            Debug.LogWarning("[DenseAnomaly] BRB/AnomalyFog 셰이더 못 찾음 — 현상 안개를 끈다(한 번만 알림).");
+            return;
+        }
 
         _mat = new Material(shader);
         _quad = new GameObject("AnomalyFogQuad") { hideFlags = HideFlags.DontSave | HideFlags.NotEditable };

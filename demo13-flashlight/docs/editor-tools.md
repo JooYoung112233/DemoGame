@@ -17,7 +17,7 @@
 
 | 메뉴 | 무엇 | 파일 |
 |------|------|------|
-| 빌드 ▸ 시스템 씬 | Systems.unity(매니저+UI+PlayerRig) 생성 | SystemsSceneBuilder |
+| 개발 ▸ 시스템 씬 | Systems.unity(매니저+UI+PlayerRig) 생성 — 실제 메뉴 `Tools/TopDown/개발/시스템 씬` | SystemsSceneBuilder |
 | 빌드 ▸ 인게임 씬 / 안전가옥 씬 | 게임플레이 씬 생성 | GameSceneBuilder |
 | 빌드 ▸ 맵 편집 씬 | 맵툴 씬 생성 | MapTool2DSceneBuilder |
 | 빌드 ▸ 전투 샌드박스 씬 / 적 프리팹 | 전투 테스트용 | CombatSandboxBuilder |

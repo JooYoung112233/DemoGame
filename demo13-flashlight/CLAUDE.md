@@ -30,7 +30,7 @@ Systems (persistent boot scene — managers, all UI, PlayerRig)
 Naming trap: the scene called `Safehouse` is the village; `Hideout` is the player's room; docs also say 안전구역/안전가옥/Town. Cleanup step 4 will settle the names. Only region 1 of 5 has a scene (`WorldRegionCatalog`). `ScrapMarket_GB` is an old raid map (debug only), `MapTool_LookDev` a look-dev scene.
 
 ### Systems Boot Scene (persistent additive) — 2026-06-03
-`Assets/Scenes/Systems.unity` (built by `Tools/TopDown/Build/Systems Scene`) holds **all managers + UIManager (+every UI panel) + PlayerRig (player, camera, worn lamp, post-process Volume) + GameBoot**. Gameplay scenes are loaded **additively on top** and swapped by `SceneTransitionManager` (Systems is never unloaded). Old auto-bootstraps early-return when `SystemsScene.ProvidesSystems`. **See `docs/architecture.md`.**
+`Assets/Scenes/Systems.unity` (built by `Tools/TopDown/개발/시스템 씬`) holds **all managers + UIManager (+every UI panel) + PlayerRig (player, camera, worn lamp, post-process Volume) + GameBoot**. Gameplay scenes are loaded **additively on top** and swapped by `SceneTransitionManager` (Systems is never unloaded). Old auto-bootstraps early-return when `SystemsScene.ProvidesSystems`. **See `docs/architecture.md`.**
 
 ### Singletons
 - **TopDownPlayer** — in `Resources/PlayerRig.prefab`. Persists across scenes. (Name is historical.)

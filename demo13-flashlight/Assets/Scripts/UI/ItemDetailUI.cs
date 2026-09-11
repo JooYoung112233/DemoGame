@@ -13,11 +13,16 @@ public class ItemDetailUI : MonoBehaviour
 
     public static bool IsShowing => Instance != null && Instance.isShowing;
     public static void Hide() { if (Instance != null) Instance.Close(); }
-    public static void Show(ItemInstance item) { Ensure().Open(item); }
+    public static void Show(ItemInstance item) { Ensure().Open(item, null, null); }
+
+    /// <summary>내 소지품에서 연 경우 — 장착/버리기 동작을 부른 쪽(캐릭터 패널)이 넘긴다. null이면 그 버튼을 숨긴다.</summary>
+    public static void Show(ItemInstance item, System.Action onEquip, System.Action onDrop)
+    { Ensure().Open(item, onEquip, onDrop); }
 
     bool isShowing;
     int openFrame = -1;
     ItemInstance current;
+    System.Action onEquipAction, onDropAction;
 
     // ── 직렬화 뷰(프리팹 베이크 보존) ───────────────────────────────
     [SerializeField] Canvas canvas;
@@ -76,11 +81,17 @@ public class ItemDetailUI : MonoBehaviour
 
     // ── 데이터 바인딩 ───────────────────────────────────────────────
 
-    void Open(ItemInstance item)
+    void Open(ItemInstance item, System.Action onEquip, System.Action onDrop)
     {
         if (item == null || item.data == null) return;
         if (!IsGenerated) GenerateUI();
         current = item;
+        onEquipAction = onEquip;
+        onDropAction = onDrop;
+        // 동작이 없는 버튼은 숨긴다(상점·장비 슬롯에서 연 경우). 분해(SCRAP)는 시스템이 없어 항상 숨김.
+        if (equipBtn != null) equipBtn.gameObject.SetActive(onEquipAction != null);
+        if (dropBtn != null) dropBtn.gameObject.SetActive(onDropAction != null);
+        if (scrapBtn != null) scrapBtn.gameObject.SetActive(false);
         var d = item.data;
 
         nameText.text = d.displayName;
@@ -137,6 +148,8 @@ public class ItemDetailUI : MonoBehaviour
         if (!isShowing) return;
         isShowing = false;
         current = null;
+        onEquipAction = null;
+        onDropAction = null;
         if (panelRoot != null) panelRoot.SetActive(false);
     }
 
@@ -147,10 +160,10 @@ public class ItemDetailUI : MonoBehaviour
         if (GameInput.GetKeyDown(KeyCode.Escape)) Close();   // 바깥 클릭은 Dim 버튼이 처리
     }
 
-    // ── 버튼 동작 (TODO: 인벤토리 컨텍스트 연결 — 현재는 닫기 + 로그 placeholder) ──
-    void OnEquip() { Debug.Log($"[ItemDetail] EQUIP {current?.data?.displayName} (액션 연결 TODO)"); Close(); }
-    void OnDrop()  { Debug.Log($"[ItemDetail] DROP {current?.data?.displayName} (액션 연결 TODO)");  Close(); }
-    void OnScrap() { Debug.Log($"[ItemDetail] SCRAP {current?.data?.displayName} (액션 연결 TODO)"); Close(); }
+    // ── 버튼 동작 — 부른 쪽이 넘긴 동작을 창을 닫은 뒤 실행(확인창이 이 창 뒤에 깔리지 않게) ──
+    void OnEquip() { var a = onEquipAction; Close(); a?.Invoke(); }
+    void OnDrop()  { var a = onDropAction;  Close(); a?.Invoke(); }
+    void OnScrap() { Close(); }   // 분해 시스템 없음 — 버튼은 Open에서 숨긴다
 
     void WireEvents()
     {

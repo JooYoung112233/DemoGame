@@ -55,7 +55,7 @@ Systems 미빌드 시엔 기존 단일(Single) 로드 + DontDestroyOnLoad로 폴
 | `Scripts/Systems/SystemsScene.cs` | Systems 씬 판별/로드 유틸 + `EnsureLoaded` 부트스트랩 |
 | `Scripts/Systems/GameBoot.cs` | Systems 단독 진입 시 기본 게임플레이 씬 로드 (씬 배치) |
 | `Scripts/Systems/SystemsSceneEnforcer.cs` | 중복 Global Light2D 비활성화 (씬 배치) — 2D 잔재 |
-| `Editor/SystemsSceneBuilder.cs` | `Tools/TopDown/Build/Systems Scene` — Systems.unity 1발 생성 + 빌드세팅 |
+| `Editor/SystemsSceneBuilder.cs` | `Tools/TopDown/개발/시스템 씬` — Systems.unity 1발 생성 + 빌드세팅 |
 | `Interaction/SceneTransitionManager.cs` | additive 교체 로드(Systems 유지)로 변경 |
 
 ### 게임플레이 씬 = 맵 콘텐츠 전용
@@ -66,8 +66,8 @@ Safehouse(마을) / Hideout / Pawnshop / Zone1 / Int_* 등 게임플레이 씬�
 ⚠️ 2D 시절의 `InGameScene`·`CombatSandbox` 씬은 더 이상 없다 — 이를 등록하려는 옛 빌더(`GameSceneBuilder`·`CombatSandboxBuilder`)는 정리 5단계 대상.
 
 ### 셋업 방법
-1. (PlayerRig 없으면) `Tools/TopDown/Build/Player Rig` 먼저 실행.
-2. `Tools/TopDown/Build/Systems Scene` 실행 → `Assets/Scenes/Systems.unity` 생성 + 빌드세팅 등록.
+1. PlayerRig는 `Assets/Resources/PlayerRig.prefab`으로 이미 있다 — 옛 `Player Rig` 빌더(`TopDownPlayerBuilder`)는 삭제됐으니 새로 만들지 않는다.
+2. `Tools/TopDown/개발/시스템 씬` 실행 → `Assets/Scenes/Systems.unity` 생성 + 빌드세팅 등록.
 3. 맵 콘텐츠 제작: 3D 맵 빌더(위 목록) 실행. (옛 `Safehouse|InGame Scene` 2D 골격 빌더는 쓰지 않는다)
 4. 전체 게임 테스트: **Systems 씬을 열고 Play**(GameBoot이 Safehouse를 엶).
    게임플레이 씬에서 바로 Play해도 Systems가 자동 additive 로드됨.

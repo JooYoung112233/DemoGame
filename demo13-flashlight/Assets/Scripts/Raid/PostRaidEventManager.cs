@@ -95,7 +95,12 @@ public class PostRaidEventManager : MonoBehaviour
             if (RaidManager.Instance.LootedItems.Count < cond.minLootCount) return false;
         }
 
-        // TODO: region, nightOnly 조건 체크
+        // 밤/지역 조건 — 탈출 시점 값을 RaidManager가 기록해 둔다(이 호출은 귀환 뒤라 지금 시각·씬이 아니다).
+        if (cond.nightOnly && !RaidManager.LastExtractWasNight) return false;
+
+        if (!string.IsNullOrEmpty(cond.requiredRegion)
+            && !string.Equals(cond.requiredRegion, RaidManager.LastExtractRegionId, System.StringComparison.OrdinalIgnoreCase))
+            return false;
 
         return true;
     }
