@@ -410,7 +410,7 @@ public class UIManager : MonoBehaviour
         if (ItemDetailUI.IsShowing) { ItemDetailUI.Hide(); return true; }
         if (NoteUI.Instance != null && NoteUI.Instance.IsShowing) { NoteUI.Instance.Close(); return true; }
         if (GroundPickupUI.IsShowing) { GroundPickupUI.Hide(); return true; }
-        if (CorpseLootUI.IsShowing) { CorpseLootUI.Hide(); return true; }
+        if (LootListUI.IsShowing) { LootListUI.Hide(); return true; }
         if (TraitPanelUI.IsShowing) { TraitPanelUI.Hide(); return true; }
         if (CodexUI.IsShowing) { CodexUI.Hide(); return true; }
 
@@ -465,7 +465,7 @@ public class UIManager : MonoBehaviour
         if (QuestLogUI.IsShowing) QuestLogUI.Hide();
         if (RaidMapUI.IsShowing) RaidMapUI.Hide();
         if (GroundPickupUI.IsShowing) GroundPickupUI.Hide();
-        if (CorpseLootUI.IsShowing) CorpseLootUI.Hide();
+        if (LootListUI.IsShowing) LootListUI.Hide();
         if (ItemDetailUI.IsShowing) ItemDetailUI.Hide();
         if (SettingsUI.IsShowing) SettingsUI.Hide();
     }
@@ -489,7 +489,7 @@ public class UIManager : MonoBehaviour
         if (QuestLogUI.IsShowing) return true;
         if (RaidMapUI.IsShowing) return true;
         if (GroundPickupUI.IsShowing) return true;
-        if (CorpseLootUI.IsShowing) return true;
+        if (LootListUI.IsShowing) return true;
         if (ItemDetailUI.IsShowing) return true;
         if (TraitPanelUI.IsShowing) return true;
         if (CodexUI.IsShowing) return true;

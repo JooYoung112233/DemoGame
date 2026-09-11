@@ -2,33 +2,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>배그식 빠른 루팅 목록 — 시체를 열면 내용물을 **목록**으로 띄워 클릭 한 번에 가져온다
-/// (docs/combat.md §배그식 사망 루팅 ②, 2026-09-11 사용자 결정). 틀은 GroundPickupUI(바닥 목록)와 같다.
-///
-/// [클릭/E] 선택 가져오기 · [F] 전부 가져가기 · [Tab] 자세히(캐릭터 패널의 컨테이너 창) · [Esc] 닫기.
-/// 가져오기는 바닥 줍기와 같은 훅(정산 TrackLoot · 수집 퀘스트)을 탄다 — 컨테이너 드래그엔 없던 것.
-/// 멀어지면(3m) 닫힌다. UIManager.IsAnyUIOpen()에 포함 — 열려 있는 동안 이동·전투 입력이 막힌다.
-/// 자가 생성(씬 배치 불필요).</summary>
+/// <summary>루팅 목록 — 필드 상자·시체를 열면 뜨는 목록(2026-09-11, docs/region-loot.md §루팅 정리 결정).
+/// 처음 여는 상자는 **옛 수색 연출**(2026-09-09 볼륨 축소 때 뺀 것을 사용자 요청으로 되살림): 칸이 '?'로 가려져
+/// 있다가 위에서부터 하나씩 드러난다 — 희귀할수록 오래 걸린다(GameTuning.searchSec* × searchSpeedMult).
+/// 다 드러나면 [전부 가져가기] / 하나씩(클릭·E). **가치(◈) 표기는 넣지 않는다**(사용자).
+/// [클릭/E] 하나 · [F] 전부 · [Tab] 자세히(캐릭터 패널) · [Esc] 닫기. 멀어지면(3m) 닫힌다 — 수색 진행은 상자에 남는다.
+/// 가져오기는 LootTake(정산 TrackLoot · 수집 퀘스트)를 탄다. 창고·보관함은 캐릭터 패널. 자가 생성(씬 배치 불필요).
+/// (구 CorpseLootUI — 시체 전용이던 것을 모든 필드 상자로 넓힘)</summary>
 [DefaultExecutionOrder(60)]   // InteractionSystem(0)보다 늦게 — 연 프레임의 E를 다시 처리하지 않게
-public class CorpseLootUI : MonoBehaviour
+public class LootListUI : MonoBehaviour
 {
-    public static CorpseLootUI Instance { get; private set; }
+    public static LootListUI Instance { get; private set; }
     public static bool IsShowing => Instance != null && Instance._showing;
     public static void Hide() { if (Instance != null) Instance.Close(); }
 
     const int SortingOrder = 108;   // GroundPickupUI와 같은 층
-    const float PanelWidth = 360f, RowHeight = 32f, RowGap = 3f, CloseDistance = 3f;
+    const float PanelWidth = 340f, RowHeight = 32f, RowGap = 3f, CloseDistance = 3f;
 
     bool _showing, _dirty;
     int _openFrame = -1, _selected;
+    float _revealLeft;   // 다음 칸이 드러날 때까지 남은 시간
     LootContainer _box;
     GameObject _player;
     readonly List<InventoryGrid.PlacedItem> _rows = new List<InventoryGrid.PlacedItem>();
 
     Canvas _canvas;
-    GameObject _root;
+    GameObject _root, _takeAllBtn, _detailBtn;
     RectTransform _panel, _list;
-    Text _header;
+    Text _header, _hint;
     Font _font;
 
     public static void Show(LootContainer box, GameObject player)
@@ -36,8 +37,8 @@ public class CorpseLootUI : MonoBehaviour
         if (box == null || player == null) return;
         if (Instance == null)
         {
-            var go = new GameObject("[CorpseLootUI]");
-            go.AddComponent<CorpseLootUI>();
+            var go = new GameObject("[LootListUI]");
+            go.AddComponent<LootListUI>();
             DontDestroyOnLoad(go);
         }
         Instance.Open(box, player);
@@ -53,6 +54,8 @@ public class CorpseLootUI : MonoBehaviour
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
+    bool Revealing => _box != null && !_box.HasBeenSearched && _box.RevealedCount < _rows.Count;
+
     void Open(LootContainer box, GameObject player)
     {
         if (_showing) Close();
@@ -63,6 +66,9 @@ public class CorpseLootUI : MonoBehaviour
         _openFrame = Time.frameCount;
         _root.SetActive(true);
         if (_box.Grid != null) _box.Grid.OnChanged += OnGridChanged;
+        RefreshRows();
+        if (_box.HasBeenSearched || _rows.Count == 0) _box.HasBeenSearched = true;
+        else _revealLeft = RevealDelay(_box.RevealedCount);
         Rebuild();
     }
 
@@ -87,11 +93,25 @@ public class CorpseLootUI : MonoBehaviour
         if (!_showing) return;
         if (_box == null || _player == null) { Close(); return; }
         if (Vector3.Distance(_player.transform.position, _box.transform.position) > CloseDistance) { Close(); return; }
-        if (_dirty) { _dirty = false; Rebuild(); }
-        if (_rows.Count == 0) { Close(); return; }
+        if (_dirty) { _dirty = false; RefreshRows(); Rebuild(); }
         if (Time.frameCount == _openFrame) return;   // 연 프레임의 입력 무시
-
         if (GameInput.GetKeyDown(KeyCode.Escape)) { Close(); return; }
+
+        // 수색 중 — 하나씩 드러난다. 가져오기·자세히는 다 드러난 뒤에.
+        if (Revealing)
+        {
+            _revealLeft -= Time.deltaTime;
+            if (_revealLeft <= 0f)
+            {
+                _box.RevealedCount++;
+                if (_box.RevealedCount >= _rows.Count) _box.HasBeenSearched = true;
+                else _revealLeft = RevealDelay(_box.RevealedCount);
+                Rebuild();
+            }
+            return;
+        }
+
+        if (_rows.Count == 0) { Close(); return; }
         if (GameInput.GetKeyDown(KeyCode.Tab)) { OpenDetail(); return; }
 
         float wheel = GameInput.mouseScrollDelta.y;
@@ -101,6 +121,25 @@ public class CorpseLootUI : MonoBehaviour
         if (GameInput.GetKeyDown(KeyCode.F)) { TakeAll(); return; }
         if (GameInput.GetKeyDown(KeyCode.E) || GameInput.GetKeyDown(KeyCode.Return) || GameInput.GetKeyDown(KeyCode.KeypadEnter))
             TakeAt(_selected);
+    }
+
+    /// <summary>index번째 칸이 드러나는 데 걸리는 시간 — 희귀할수록 길게(옛 수색 딜레이 값 그대로).</summary>
+    float RevealDelay(int index)
+    {
+        var it = index >= 0 && index < _rows.Count ? _rows[index]?.item : null;
+        var gt = GameTuning.Instance;
+        float sec = 0.4f;
+        if (it?.data != null)
+            sec = it.data.rarity switch
+            {
+                ItemRarity.Uncommon  => gt != null ? gt.searchSecUncommon  : 0.6f,
+                ItemRarity.Rare      => gt != null ? gt.searchSecRare      : 0.9f,
+                ItemRarity.Epic      => gt != null ? gt.searchSecEpic      : 1.3f,
+                ItemRarity.Legendary => gt != null ? gt.searchSecLegendary : 1.8f,
+                _                    => gt != null ? gt.searchSecCommon    : 0.4f,
+            };
+        float mult = gt != null ? gt.searchSpeedMult : 1f;
+        return sec / Mathf.Max(0.05f, mult);
     }
 
     void Move(int dir)
@@ -113,25 +152,9 @@ public class CorpseLootUI : MonoBehaviour
     /// <summary>한 줄 가져오기. 성공하면 true. 실패(공간·가방)는 토스트로 알린다.</summary>
     public bool TakeAt(int index)
     {
-        if (_box == null || _player == null || index < 0 || index >= _rows.Count) return false;
-        var placed = _rows[index];
-        var it = placed?.item;
-        if (it == null) { _dirty = true; return false; }
+        if (Revealing || _box == null || _player == null || index < 0 || index >= _rows.Count) return false;
         var inv = _player.GetComponent<PlayerInventory>();
-        if (inv == null) return false;
-
-        if (!inv.TryAutoPlaceAnywhere(it, true))
-        {
-            ToastManager.Show(inv.HasBackpack ? "인벤토리 공간 부족" : "가방을 장착하세요", ToastManager.ToastType.Warning);
-            return false;
-        }
-        _box.Grid.Remove(placed);
-
-        // 바닥 줍기(WorldItem.TryPickup)와 같은 훅 — 정산 획득 목록 + 수집형 퀘스트
-        if (RaidManager.Instance != null) RaidManager.Instance.TrackLoot(it);
-        if (QuestManager.Instance != null && it.data != null)
-            QuestManager.Instance.UpdateObjective(ObjectiveType.CollectItem, it.data.itemId, Mathf.Max(1, it.stackCount));
-
+        if (!LootTake.Take(inv, _box.Grid, _rows[index])) return false;
         _dirty = true;
         return true;
     }
@@ -139,6 +162,7 @@ public class CorpseLootUI : MonoBehaviour
     /// <summary>위에서부터 전부 — 공간이 모자라면 거기서 멈춘다(나머지는 남긴다).</summary>
     public int TakeAll()
     {
+        if (Revealing) return 0;
         int taken = 0;
         while (_rows.Count > 0 && _box != null)
         {
@@ -173,25 +197,32 @@ public class CorpseLootUI : MonoBehaviour
     static string Label(ItemInstance it)
     {
         if (it == null || it.data == null) return "(사라짐)";
-        if (it.data.itemId == ScrapWallet.ItemId) return $"고철 ◈{it.stackCount:N0}";
         // DisplayName엔 이미 수량이 붙어 있어 "x2 x2"가 됐다 — 원래 이름에 한 번만 붙인다.
         return it.stackCount > 1 ? $"{it.data.displayName} x{it.stackCount}" : it.data.displayName;
     }
 
     void Rebuild()
     {
-        RefreshRows();
         for (int i = _list.childCount - 1; i >= 0; i--) Destroy(_list.GetChild(i).gameObject);
 
-        _header.text = $"{(_box != null ? _box.ContainerName : "시체")} — {_rows.Count}개";
+        bool revealing = Revealing;
+        int shown = _box != null ? (_box.HasBeenSearched ? _rows.Count : Mathf.Min(_box.RevealedCount, _rows.Count)) : 0;
+        string name = _box != null ? _box.ContainerName : "상자";
+        _header.text = revealing ? $"{name} — 뒤지는 중… ({shown}/{_rows.Count})"
+                     : _rows.Count == 0 ? $"{name} — 비어 있다" : $"{name} — {_rows.Count}개";
+        _hint.text = revealing ? "[Esc] 닫기 (진행은 남는다)" : "[클릭/E] 하나씩   [휠/↑↓] 선택   [Esc] 닫기";
+        _takeAllBtn.SetActive(!revealing && _rows.Count > 0);
+        _detailBtn.SetActive(!revealing && _rows.Count > 0);
+
         float listH = _rows.Count * (RowHeight + RowGap);
         _panel.sizeDelta = new Vector2(PanelWidth, 44f + listH + 44f + 26f);
         _list.sizeDelta = new Vector2(-16f, listH);
 
         for (int i = 0; i < _rows.Count; i++)
         {
+            bool hidden = i >= shown;
             var it = _rows[i]?.item;
-            Color rarity = it != null && it.data != null ? it.data.RarityColor : Color.gray;
+            Color rarity = hidden ? UITheme.TextDim : (it != null && it.data != null ? it.data.RarityColor : Color.gray);
             int captured = i;
 
             var row = new GameObject($"Row_{i}", typeof(RectTransform), typeof(Image), typeof(Button));
@@ -200,8 +231,10 @@ public class CorpseLootUI : MonoBehaviour
             rt.anchorMin = new Vector2(0, 1); rt.anchorMax = new Vector2(1, 1); rt.pivot = new Vector2(0.5f, 1f);
             rt.sizeDelta = new Vector2(0, RowHeight);
             rt.anchoredPosition = new Vector2(0, -i * (RowHeight + RowGap));
-            row.GetComponent<Image>().color = RowColor(i == _selected);
-            row.GetComponent<Button>().onClick.AddListener(() => { _selected = captured; TakeAt(captured); });
+            row.GetComponent<Image>().color = RowColor(!revealing && i == _selected);
+            var btn = row.GetComponent<Button>();
+            btn.interactable = !hidden && !revealing;
+            btn.onClick.AddListener(() => { _selected = captured; TakeAt(captured); });
 
             var sw = new GameObject("Swatch", typeof(RectTransform), typeof(Image));
             sw.transform.SetParent(row.transform, false);
@@ -210,15 +243,9 @@ public class CorpseLootUI : MonoBehaviour
             swRT.anchoredPosition = new Vector2(8, 0); swRT.sizeDelta = new Vector2(12, 12);
             sw.GetComponent<Image>().color = rarity;
 
-            var name = MakeText(row.transform, "Name", 15, FontStyle.Bold, rarity, TextAnchor.MiddleLeft);
-            name.text = Label(it);
-            Stretch((RectTransform)name.transform, 28, -80);
-
-            // 값어치 — "좋은 게 나왔다"가 숫자로도 읽히게(낙원식 돈벌이 방향)
-            int value = it != null && it.data != null ? it.data.sellPrice * Mathf.Max(1, it.stackCount) : 0;
-            var val = MakeText(row.transform, "Value", 13, FontStyle.Normal, UITheme.TextMuted, TextAnchor.MiddleRight);
-            val.text = value > 0 ? $"◈{value:N0}" : "";
-            Stretch((RectTransform)val.transform, 28, -8);
+            var label = MakeText(row.transform, "Name", 15, hidden ? FontStyle.Normal : FontStyle.Bold, rarity, TextAnchor.MiddleLeft);
+            label.text = hidden ? "? ? ?" : Label(it);
+            Stretch((RectTransform)label.transform, 28, -8);
         }
     }
 
@@ -243,7 +270,7 @@ public class CorpseLootUI : MonoBehaviour
 
     void Build()
     {
-        var cgo = new GameObject("CorpseLootUI_Canvas");
+        var cgo = new GameObject("LootListUI_Canvas");
         cgo.transform.SetParent(transform, false);
         _canvas = cgo.AddComponent<Canvas>();
         _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -282,20 +309,19 @@ public class CorpseLootUI : MonoBehaviour
         _list.sizeDelta = new Vector2(-16f, 0f);
         _list.anchoredPosition = new Vector2(0, -40);
 
-        // 하단 버튼 — 전부 가져가기 / 자세히
-        MakeButton(panel.transform, "TakeAll", "전부 가져가기 [F]", new Vector2(0.02f, 0f), new Vector2(0.62f, 0f), () => TakeAll());
-        MakeButton(panel.transform, "Detail", "자세히 [Tab]", new Vector2(0.64f, 0f), new Vector2(0.98f, 0f), OpenDetail);
+        // 하단 버튼 — 다 드러난 뒤에만 보인다
+        _takeAllBtn = MakeButton(panel.transform, "TakeAll", "전부 가져가기 [F]", new Vector2(0.02f, 0f), new Vector2(0.62f, 0f), () => TakeAll());
+        _detailBtn  = MakeButton(panel.transform, "Detail", "자세히 [Tab]", new Vector2(0.64f, 0f), new Vector2(0.98f, 0f), OpenDetail);
 
-        var hint = MakeText(panel.transform, "Hint", 12, FontStyle.Italic, UITheme.TextMuted, TextAnchor.MiddleCenter);
-        hint.text = "[클릭/E] 가져오기   [휠/↑↓] 선택   [Esc] 닫기";
-        var hintRT = (RectTransform)hint.transform;
+        _hint = MakeText(panel.transform, "Hint", 12, FontStyle.Italic, UITheme.TextMuted, TextAnchor.MiddleCenter);
+        var hintRT = (RectTransform)_hint.transform;
         hintRT.anchorMin = new Vector2(0, 0); hintRT.anchorMax = new Vector2(1, 0); hintRT.pivot = new Vector2(0.5f, 0f);
         hintRT.offsetMin = new Vector2(6, 4); hintRT.offsetMax = new Vector2(-6, 22);
 
         _root.SetActive(false);
     }
 
-    void MakeButton(Transform parent, string name, string label, Vector2 aMin, Vector2 aMax, UnityEngine.Events.UnityAction onClick)
+    GameObject MakeButton(Transform parent, string name, string label, Vector2 aMin, Vector2 aMax, UnityEngine.Events.UnityAction onClick)
     {
         var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
         go.transform.SetParent(parent, false);
@@ -307,6 +333,7 @@ public class CorpseLootUI : MonoBehaviour
         var t = MakeText(go.transform, "Label", 14, FontStyle.Bold, Color.white, TextAnchor.MiddleCenter);
         t.text = label;
         Stretch((RectTransform)t.transform, 0, 0);
+        return go;
     }
 
     Text MakeText(Transform parent, string name, int size, FontStyle style, Color color, TextAnchor anchor)

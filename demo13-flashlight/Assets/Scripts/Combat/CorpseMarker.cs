@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>시체 루팅 표시 — 안에 든 **가장 좋은 물건의 희귀도 색** 빛기둥
 /// (docs/combat.md §배그식 사망 루팅 ①, 2026-09-11 사용자 결정).
 /// 다 비우면 꺼지고 머리 위 라벨이 "빈 시체"가 된다. 플레이어 시야콘 밖에선 숨긴다(멀리서 위치가 새지 않게).
-/// 이 컴포넌트가 붙은 시체는 InteractableObject가 빠른 루팅 목록(CorpseLootUI)으로 연다.</summary>
+/// 시체는 다른 필드 상자처럼 루팅 목록(LootListUI — 옛 수색 연출 → 전부/하나씩)으로 열린다(2026-09-11).</summary>
 public sealed class CorpseMarker : MonoBehaviour
 {
     LootContainer _box;

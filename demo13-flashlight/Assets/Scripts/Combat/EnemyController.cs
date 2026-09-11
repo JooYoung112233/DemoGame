@@ -1240,6 +1240,10 @@ public class EnemyController : MonoBehaviour
     /// <summary>전리품 롤 — 적별 전용 드랍 테이블(unitStat.drops) 우선, 비면 지상 티어 region 루트 폴백.
     /// GameTuning.enemyDropChance로 전역 게이트(실패 = 빈손 시체 — 뒤질 수는 있음).
     /// 추가로 corpseBagChance 확률로 가방(컨테이너 아이템)이 통째로 — 안에 지역 루트 1~2개(타르코프식, 가방째 회수 가능).</summary>
+    /// <summary>시체 루팅 표의 지역 — 이 씬의 루팅 지역(MapSpawnController), 없으면 활성 지역.</summary>
+    static string CorpseRegion => !string.IsNullOrEmpty(MapSpawnController.CurrentRegionId)
+        ? MapSpawnController.CurrentRegionId : RegionLootCatalog.GetActiveRegionId();
+
     List<ItemInstance> RollLoot()
     {
         var items = new List<ItemInstance>();
@@ -1262,8 +1266,8 @@ public class EnemyController : MonoBehaviour
             }
             else
             {
-                // 폴백: 지역(Ground) 루트
-                var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
+                // 폴백: 이 씬 루팅 지역의 '시체' 표(2026-09-11 — 예전엔 활성 지역 바닥 표). 실내면 그 건물 지역.
+                var loot = RegionLootCatalog.RollSource(CorpseRegion, "corpse", RegionLootCatalog.IsNightInRegion(CorpseRegion));
                 if (loot != null)
                     for (int i = 0; i < loot.Length; i++)
                         if (loot[i] != null) items.Add(loot[i]);
@@ -1287,7 +1291,7 @@ public class EnemyController : MonoBehaviour
         var inner = bag.ContainerGrid;
         if (inner != null)
         {
-            var loot = RegionLootCatalog.RollForActiveRegion(RegionLootTier.GroundDay);
+            var loot = RegionLootCatalog.RollSource(CorpseRegion, "corpse", RegionLootCatalog.IsNightInRegion(CorpseRegion));
             int put = 0, max = Random.Range(1, 3);   // 1~2개
             if (loot != null)
                 for (int i = 0; i < loot.Length && put < max; i++)
