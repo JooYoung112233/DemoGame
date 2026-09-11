@@ -92,7 +92,7 @@ public static class GameSceneBuilder
             MakePickup("Loot_Knife",      new Vector3(-3, 1, 0),    "knife",       1);
             MakePickup("Loot_CannedFood", new Vector3(3, 1, 0),     "canned_food", 1);
             MakePickup("Loot_ScrapMetal", new Vector3(-2, 3, 0),    "scrap_metal", 2);
-            MakePickup("Loot_CoinScrap",  new Vector3(2, 3, 0),     "coin_scrap",  3);
+            MakePickup("Loot_Scrap",      new Vector3(2, 3, 0),     "scrap_money", 300);   // 스크랩 코인 → 고철 화폐(2026-09-11)
             MakePickup("Loot_RubyShard",  new Vector3(0, 4.5f, 0),  "ruby_shard",  1);
 
             // 탈출구 — 상호작용 후 5초 대기(거리 이탈 시 취소) → 안전가옥 raid_return

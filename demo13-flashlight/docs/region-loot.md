@@ -64,7 +64,7 @@
 
 ### 폐상가 교역 (`scrap_market`) — 1차 데모
 - **시그니처**: 네온관, 할인권 묶음
-- **낮**: `coin_scrap`, `battery_aa`, `canned_food`, `val_lottery_ticket`, **조리** `ingredient_salt/flour/sugar`, 희귀 `recipe_bread`
+- **낮**: `scrap_money`(고철 화폐 — 2026-09-11 스크랩 코인에서 교체, 수량 ×100), `battery_aa`, `canned_food`, `val_lottery_ticket`, **조리** `ingredient_salt/flour/sugar`, 희귀 `recipe_bread`
 - **밤**: `val_chip_credit`, `smoke_bomb`, `stim_injector`, `hemostatic_powder`, 조리 재료 소량
 
 ### 침묵 생활 · 공연 (`silence_living`, `entertainment`) — 주방 루트

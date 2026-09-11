@@ -12,6 +12,10 @@ public static class ScrapWallet
     /// <summary>현금 — 특별한 퀘스트·이벤트 전용이라 정산하지 않는다. (2026-09-11 전까진 밴딧 드랍이었다)</summary>
     public const string CashItemId = "cash";
 
+    /// <summary>옛 "스크랩 코인" — 2026-09-11 고철로 합침(사용자 "스크랩 코인을 고철로"). 새로 스폰되지 않고,
+    /// 세이브에 남은 코인은 탈출 정산 때 1개 = 판매가(◈100)로 바뀐다.</summary>
+    public const string LegacyCoinId = "coin_scrap";
+
     /// <summary>인벤(주머니·가방·보안 + 그 안에 든 가방)의 고철 화폐를 전부 빼서 ◈에 넣는다. 반환 = 넣은 금액.</summary>
     public static int SettleFromInventory(PlayerInventory inv)
     {
@@ -30,9 +34,11 @@ public static class ScrapWallet
         {
             var it = p.item;
             if (it == null || it.data == null) continue;
-            if (it.data.itemId == ItemId)
+            if (it.data.itemId == ItemId || it.data.itemId == LegacyCoinId)
             {
-                sum += Mathf.Max(1, it.stackCount);
+                // 옛 스크랩 코인은 1개 = 판매가(◈100)만큼 — 고철 화폐와 가치를 같게.
+                int per = it.data.itemId == ItemId ? 1 : Mathf.Max(1, Mathf.RoundToInt(it.data.sellPrice));
+                sum += Mathf.Max(1, it.stackCount) * per;
                 g.Remove(p);
                 continue;
             }
