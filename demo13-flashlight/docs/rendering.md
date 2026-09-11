@@ -1,5 +1,11 @@
 # Rendering System
 
+## 2026-09-11 — 하이드아웃 인게임 표현 보정
+
+- 질문·제안: 캐릭터가 지나치게 밝고 방이 차갑게 보이는 하이드아웃 시안을 조정할지?
+- 사용자 결정: 인게임 평가 후 “수정해줘”로 비율·조명·생활감 개선 승인.
+- 반영: 하이드아웃의 따뜻한 조명 아래에서는 `WornLamp.SetIndoorPresentation(true)`로 빔·주변광·몸 보조광의 강도를 0.15배로 낮춘다. 상시 점등과 랜턴 등급·낮밤 반응은 유지하며, 하이드아웃 종료 시 현재 낮밤·등급 기준 밝기로 복원한다. 씬 조명값과 검증 결과는 [hideout-3d.md](hideout-3d.md)에 기록한다.
+
 ## 2026-09-07 방향 결정
 
 - 질문: 현재 2D 프로젝트를 3D 쿼터뷰로 만들 수 있을까?
@@ -183,6 +189,7 @@ URP 2D 렌더러는 `Tags{ "LightMode"="Universal2D" }` 패스만 그린다. 유
 
 | 날짜 | 결정 | 근거 |
 |---|---|---|
+| 2026-09-11 | **게임 전용 셰이더 + 포스트 프로세싱 결정** — 캐릭터+환경 공용 Lit 셰이더 1개, 어두운 사실풍, 색보정·톤매핑 + 블룸 + 비네팅·필름 그레인. §게임 전용 셰이더 + 포스트 프로세싱 | 사용자 요청 "우리 게임에 맞는 셰이더 하나 + 포스트 프로세싱". Into the Dead 분위기, 툰 폐기 이후 |
 | 2026-05-23~31 | (폐기) 벽/건물 = 3D 큐브, 바닥 = 2D Plane 하이브리드. 스텐실 바닥, 스팟라이트 차폐, BuildingInterior 알파 페이드, WallOcclusionOutline 아웃라인, ShadowProxyBuilder, 커스텀 MapBuilder(WallBuilder/PropQuadBuilder/층 시스템). | 전부 2026-06-02 탑다운 2D 전환으로 **삭제**. 상세 이력은 git history 참고. |
 | 2026-06-01 | (폐기) 비주얼 = 2D 평면, 빛 차폐 = 안 보이는 3D 박스(ShadowsOnly) 하이브리드. | URP 2D 렌더러 + Light2D 전환으로 ShadowCaster2D가 대체. |
 | 2026-06-02 | **탑다운 2D 전환 확정.** 렌더 파이프라인 URP-3D→URP-2D, 카메라 2D Orthographic, 좌표계 XY, 조명 Light2D, 맵 Tilemap, 이동 Rigidbody2D. 아이소 식별자 전면 정리(`Isometric*`→`TopDown*`), 3D 큐브/스텐실/스팟라이트/오클루전/MapBuilder 제거. | [`topdown-migration.md`](topdown-migration.md) 참고. |
@@ -430,3 +437,53 @@ Forward+를 쓰려면 URP의 `LIGHT_LOOP_BEGIN/END` 매크로로 바꿔야 한�
 `Prop2D*` · `PropLight2D` · `GroundShadow2D` · `MapTriggerZone2D` · `GreyboxPaletteBuilder` ·
 `Prop2DCatalogEditor` · `PropSyncMenu` · `Resources/Props2D` 는 **전부 살아 있는 자산이다.**
 진짜로 걷어내려면 `GreyboxBuild`를 `GreyboxMesh`(절차적 박스) 위로 옮기는 포팅이 선행돼야 한다.
+
+## 게임 전용 셰이더 + 포스트 프로세싱 (2026-09-11 결정 · 구현 중)
+
+> 사용자: *"다 작업하고 우리 게임에 맞는 셰이더 하나 만들어보자, 포스트 프로세싱도 그렇고"* — 방향성 [gdd-core §게임 방향성](gdd-core.md).
+> 룩 레퍼런스: Into the Dead: Our Darkest Days 분위기(사용자 "분위기는 딱 내가 원하는 건데"), 툰은 폐기(2026-09-10).
+
+| 날짜 | 질문(선택지) | 사용자 결정 |
+|---|---|---|
+| 2026-09-11 | 적용 대상 — 캐릭터+환경 공용 / 캐릭터만 / 환경만 | **캐릭터 + 환경 공용** — 게임 전용 Lit 셰이더 하나를 플레이어·밴딧·건물·소품에 같이 |
+| 2026-09-11 | 룩 — 어두운 사실풍 / 살짝 스타일라이즈드 / 레퍼런스 제공 | **어두운 사실풍** — 채도 낮고 그림자 깊게, 빛이 닿는 곳만 살아나고 먼지·때 질감 |
+| 2026-09-11 | 포스트 프로세싱 — 색보정·톤매핑 / 비네팅·필름 그레인 / 블룸 / 깊이 안개·피격 효과 (복수) | **색보정·톤매핑 + 블룸 + 비네팅·필름 그레인** (깊이 안개·피격 효과는 제외) |
+| 2026-09-11 | 에디터 — 다른 세션이 끝나면 / 지금 같이 | **지금 같이 써도 됨** |
+
+- 새 셰이더는 위 **함정 두 개**를 처음부터 피한다: 추가 광원은 3인자 `GetAdditionalLight(i, posWS, half4(1,1,1,1))`로 그림자를 받고, 루프는 `LIGHT_LOOP_BEGIN/END`(Forward+ 대응).
+
+### 구현 (2026-09-11)
+
+**셰이더 `BRB/GameLit`** (`Assets/Shaders/GameLit/`) — 조명은 URP `UniversalFragmentPBR`에 맡긴다. 그러면 위 함정 두 개가
+구조적으로 사라진다(URP 내부가 그림자 받는 추가 광원 오버로드와 `_CLUSTER_LIGHT_LOOP` 루프를 쓴다 — URP 17, Unity 6.6 확인).
+이 셰이더가 더하는 건 조명 앞뒤의 룩뿐:
+1. **때(grime)** — 절차적 노이즈. 잘게(두 옥타브), 벽 밑동(바닥 가까운 세운 면)에 모이고, 윗면엔 약하게. 더러운 곳은 무광.
+   캐릭터는 오브젝트 공간(걸어도 무늬가 몸에 붙어 있다), 환경은 월드 공간.
+2. **그늘 채도 빼기** — 받은 빛이 적을수록 잿빛(`_ShadowDesaturation`). "빛이 닿는 곳만 살아난다".
+3. **실루엣 림** — 캐릭터만(0.12). 어둠 속에서도 형태가 읽히게. 쿼터뷰(오소 55°) 카메라 기준 가장자리.
+- 속성 이름은 URP/Lit과 같다(`_BaseMap`·`_BaseColor`·`_BumpMap`·`_Smoothness`·`_Metallic`·`_OcclusionMap`·`_EmissionColor`) —
+  셰이더만 바꿔도 값이 넘어오고, `_BaseColor` MaterialPropertyBlock(피격 틴트 등)도 그대로. SRP Batcher 호환(코드 0 확인).
+- 패스: ForwardLit · ShadowCaster · DepthOnly · DepthNormals(SSAO용). 불투명 전용 — 투명 머티리얼은 URP/Lit 유지.
+- **룩 A/B 전역 스위치** `Shader.SetGlobalFloat("_GameLitLookOff", 1)` → 때·채도·림을 끄고 순수 PBR. 머티리얼을 안 건드리고 비교할 때.
+
+**전환 도구 `Tools ▸ TopDown ▸ 렌더 ▸ 게임 셰이더로 전환`** (`Editor/GameLitConverter.cs`) — URP/Lit → GameLit, 키워드(노멀·AO·발광·알파 자르기) 자동,
+캐릭터(경로에 ChibiSurvivor·Characters·Bandit)/환경 룩 값. 이미 GameLit이면 룩 값만 다시 넣는다. **되돌리기** 메뉴도 있다.
+씬은 추가로 열었다 닫는다(열려 있는 작업 씬을 안 닫게). 다른 세션 작업 중인 `Hideout02` 폴더·`Hideout` 씬은 건너뛴다.
+- 2026-09-11 실행: 머티리얼 에셋 캐릭터 60 · 환경 88, 씬에 박힌 것 Safehouse 35 · Zone1 6 · 고철시장 5 · 실내 15곳 4~5 · 룩씬 9.
+
+**포스트 프로세싱** (`Editor/PostProfileBuilder.cs` → `Resources/PlayerRigVolume3D.asset`, PlayerRig의 전역 Volume 하나) —
+원칙은 그대로(색조는 조명이 만든다 — 파랑/노랑 밀기 없음). 노출 +0.20 → **0** · 대비 10 → **18** · 채도 −6 → **−18** ·
+블룸 문턱 1.10 → **1.00**/세기 0.45 → **0.60** · 비네트 0.24 → **0.32** · 그레인 0.14 → **0.22** · 톤매핑 Neutral 유지 ·
+**색 보정 HDR**(URP 에셋이 HDR인데 그레이딩만 LDR이던 것).
+
+**확인 (Systems에서 시작)**
+- Zone1: 전환 전 GameLit 4 / URP/Lit 51 → 후 GameLit 53 / URP/Lit 0(주변 머티리얼 슬롯). 콘솔 에러 0.
+- 마을(Safehouse 씬, 사용자 "셰이더는 마을에서 확인하면 될 듯"): GameLit 2605 슬롯, 콘솔 에러 0. 포스트 프로세싱 on/off 차이는 뚜렷(어둡고 바랜 색),
+  룩 효과는 텍스처 있는 바닥에서 잔 때 얼룩 정도로 **은은하다** — 세기 조절은 사용자 확인 후.
+- ⚠️ 1차 때 값(낮은 주파수 0.6 + 바닥·윗면 가산)은 바닥·지붕에 큰 얼룩이 깔려 **구름·안개처럼** 보였다 → 잘게(2.5)·약하게(0.35)·벽 밑동 위주로 수정.
+
+⚠️ **병합 순서** — 다른 세션이 작업 중인(아직 커밋 안 된) `Town02` 머티리얼과 `Safehouse.unity`에 박힌 머티리얼도 전환 도구가 GameLit으로 바꿨다.
+그 작업을 이 셰이더보다 **먼저** 병합하면 해당 머티리얼이 마젠타가 된다 → 셰이더 PR을 먼저 병합하거나, 되돌리기 메뉴로 URP/Lit으로 돌린 뒤 병합할 것.
+
+**아직 셰이더가 없어 꺼져 있는 기능**(2026-09-10 백지화 때 사라진 것, 이번 범위 밖): 이상현상 안개(`BRB/AnomalyFog` — 매 프레임 경고),
+시야 어둠(`BRB/VisionDarkness`), 피격 플래시(`BRB/SpriteFlash`), 파손 오버레이(`BRB/DamageOverlay`), 벽 픽셀(`BRB/WallPixel`).

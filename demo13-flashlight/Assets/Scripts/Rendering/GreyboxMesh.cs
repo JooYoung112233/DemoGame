@@ -37,14 +37,14 @@ public static class GreyboxMesh
 
     /// <summary>색만 다른 단색 머티리얼(색별 공유).
     ///
-    /// Stage 0에서 정한 <c>BRB/Stylized</c>(무광·부드러운 명암·림라이트)를 쓴다 —
-    /// 적 몸·무기·떨어진 아이템이 맵과 같은 룩으로 서야 한 화면으로 읽힌다.
-    /// 림라이트는 어두운 팔레트에서 실루엣이 배경에 묻히는 문제에 직접 듣는다.</summary>
+    /// 게임 전용 셰이더 <c>BRB/GameLit</c>(어두운 사실풍 — 때·그늘 채도, docs/rendering.md §게임 전용 셰이더)을 쓴다 —
+    /// 떨어진 아이템·런타임 상자가 맵과 같은 룩으로 서야 한 화면으로 읽힌다.
+    /// ⚠️ 셰이더를 못 찾으면 URP/Lit으로 — null이면 맵이 통째로 마젠타로 뜬다(2026-09-10 실측).</summary>
     public static Material Material(Color c)
     {
         if (_mats.TryGetValue(c, out var cached) && cached != null) return cached;
 
-        var sh = Shader.Find("Universal Render Pipeline/Lit")
+        var sh = Shader.Find("BRB/GameLit")
               ?? Shader.Find("Universal Render Pipeline/Lit")
               ?? Shader.Find("Standard");
         var m = new Material(sh) { name = $"gb_{ColorUtility.ToHtmlStringRGB(c)}" };
