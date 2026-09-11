@@ -181,7 +181,7 @@
 | [`hideout-3d.md`](hideout-3d.md) | **은신처 3D — 원화 기반 Hideout02 실내 시안**. 6×6m, 목재 가구·마루/철판 벽, PBR 표면 맵, 시설 9종 배선, 제작·검증 절차 | **1차 아트 패스 (2026-09-11)** |
 | [`3d-migration.md`](3d-migration.md) | ⭐ **3D 쿼터뷰 전환 계획 SSOT** — 결정 4건(완전 3D·오소 고정 쿼터뷰·단차/엄폐·아트 전부 3D) + 2D 결합 실측(66,933 LOC 중 32%, Rigidbody2D 9파일·Physics2D 10곳) + 유지/교체/신규 표 + Stage 0~5 + 리스크·미결 | **Stage 0~4 완료 (2026-09-09)**, Stage 5(2D 잔재 삭제) 남음 |
 | [`topdown-migration.md`](topdown-migration.md) | **아이소 → 탑다운 2D 전환** 배경·유지/제거/신규 목록·단계 계획 | 기록 (2D 시절 — 이후 3D로 재전환) |
-| [`rendering.md`](rendering.md) | **현 구현 = 3D** — URP 3D(Forward)·오소 카메라 62°·게임 전용 셰이더 `BRB/GameLit`·후처리·착용등. 2026-09-11 마을 분위기 보정: 낮 색감/Volume, `PropLight3D` 가로등·현관등 낮밤 분리, Play 자체 검수. 그 아래 URP 2D·Light2D·Tilemap 본문은 2D 시절 기록 | 구현 (3D) · 마을 분위기 자체 검수 완료 |
+| [`rendering.md`](rendering.md) | **현 구현 = 3D** — URP 3D(Forward)·오소 카메라 62°·게임 전용 셰이더 `BRB/GameLit`·후처리·착용등. 2026-09-11 마을 분위기 보정: 낮 색감/Volume·실용등 낮밤 분리, 밋밋함 피드백 후 밤 중간 명암·전당포 입구 초점/그림자 보완. 저장·재실행 자체 검수. 그 아래 URP 2D·Light2D·Tilemap 본문은 2D 시절 기록 | 구현 (3D) · 마을 분위기 자체 검수 완료 |
 | [`destructible.md`](destructible.md) | 파괴 가능 오브젝트 — `Breakable` + `BRB/DamageOverlay`(오버레이라 전 셰이더 호환), 단계별 부서짐→파괴, Health 자동 연동 | 구현 |
 | [`topdown-art-spec.md`](topdown-art-spec.md) | AI 이미지 생성 스펙 — near-overhead 시점, 마젠타 배경, 플랫 라이팅, 엔진 조명값 | 작성 완료 |
 

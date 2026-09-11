@@ -1054,14 +1054,14 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.8, b: 0.56, a: 1}
+  m_Color: {r: 1, g: 0.75, b: 0.48, a: 1}
   m_Intensity: 2.4
-  m_Range: 5
+  m_Range: 6.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -1122,7 +1122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
   dayIntensity: 2.4
-  nightIntensity: 4.8
+  nightIntensity: 7.5
 --- !u!1 &24075867
 GameObject:
   m_ObjectHideFlags: 0
@@ -13965,9 +13965,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
+  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
   m_Intensity: 6
-  m_Range: 7.5
+  m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -14033,7 +14033,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
   dayIntensity: 6
-  nightIntensity: 18
+  nightIntensity: 14
 --- !u!1 &457669606
 GameObject:
   m_ObjectHideFlags: 0
@@ -29570,9 +29570,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
+  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
   m_Intensity: 6
-  m_Range: 7.5
+  m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -29638,7 +29638,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
   dayIntensity: 6
-  nightIntensity: 18
+  nightIntensity: 14
 --- !u!1 &918617431
 GameObject:
   m_ObjectHideFlags: 0
@@ -29922,9 +29922,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
+  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
   m_Intensity: 6
-  m_Range: 7.5
+  m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -29990,7 +29990,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
   dayIntensity: 6
-  nightIntensity: 18
+  nightIntensity: 14
 --- !u!1001 &926594660
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35752,9 +35752,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
+  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
   m_Intensity: 6
-  m_Range: 7.5
+  m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -35820,7 +35820,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
   dayIntensity: 6
-  nightIntensity: 18
+  nightIntensity: 14
 --- !u!1 &1110905636
 GameObject:
   m_ObjectHideFlags: 0
@@ -61559,9 +61559,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
+  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
   m_Intensity: 6
-  m_Range: 7.5
+  m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -61627,7 +61627,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
   dayIntensity: 6
-  nightIntensity: 18
+  nightIntensity: 14
 --- !u!1 &1936941342
 GameObject:
   m_ObjectHideFlags: 0
@@ -67885,9 +67885,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.8, b: 0.57, a: 1}
+  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
   m_Intensity: 6
-  m_Range: 7.5
+  m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -67953,7 +67953,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
   dayIntensity: 6
-  nightIntensity: 18
+  nightIntensity: 14
 --- !u!1001 &2123562476
 PrefabInstance:
   m_ObjectHideFlags: 0
