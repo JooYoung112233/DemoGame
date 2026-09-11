@@ -56,12 +56,12 @@ try{
      var gunQ=socket.rotation*weaponLocal;var gunP=socket.position-gunQ*gripOffset;
      if(kind=="Rifle"){
       // The adult source's grip sits too far from the short opposite arm.
-      // Keep its hand orientation/recoil, fit the shared weapon anchor to the compact chest.
+      // Keep its hand orientation/recoil, seat the stock on the right shoulder instead of centering the weapon.
       var sourceHand=sb["B-hand.R"];var sourceChest=sb["B-chest"];
-      var anchor=tb["Chest"].position+new Vector3(-.015f,-.015f,.15f)+(sourceHand.position-sourceChest.position-new Vector3(.206f,-.058f,.159f))*.35f;
+      var anchor=tb["Chest"].position+new Vector3(.145f,.10f,.18f)+(sourceHand.position-sourceChest.position-new Vector3(.206f,-.058f,.159f))*.35f;
       Solve("R",anchor,tb["Hand.R"].rotation);
       gunP=socket.position-gunQ*gripOffset;
-      var desired=gunP+gunQ*new Vector3(0,-.04f,.18f);
+      var desired=gunP+gunQ*new Vector3(0,-.04f,.155f);
       Solve("L",desired,tb["Hand.L"].rotation);supportError=Mathf.Max(supportError,Vector3.Distance(tb["HandSocket.L"].position,desired));
      }
      foreach(var t in tracks){var p=t.localPosition;var q=t.localRotation;float[] vals={p.x,p.y,p.z,q.x,q.y,q.z,q.w};for(int c=0;c<7;c++)curves[t][c].Add(new Keyframe(time,vals[c]));}
