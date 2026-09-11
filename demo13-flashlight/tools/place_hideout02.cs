@@ -13,7 +13,7 @@ try{
  var manifest=Newtonsoft.Json.Linq.JObject.Parse(System.IO.File.ReadAllText(folder+"/KitManifest.json"));
  var kit=(GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(folder+"/Hideout02_Interior.prefab"),scene);
  UnityEditor.PrefabUtility.UnpackPrefabInstance(kit,UnityEditor.PrefabUnpackMode.OutermostRoot,UnityEditor.InteractionMode.AutomatedAction);
- kit.name="Hideout02_Placed";kit.transform.SetParent(old.parent,false);kit.transform.position=old.position;kit.transform.rotation=Quaternion.Euler(0,180,0);
+ kit.name="Hideout02_Placed";kit.transform.SetParent(old.parent,false);kit.transform.position=old.position;kit.transform.rotation=Quaternion.Euler(0,215,0);
  var reports=new System.Collections.Generic.List<object>();
  foreach(var spec in manifest["placements"].Where(p=>(string)p["key"]!=null)){
   string key=(string)spec["key"],name=(string)spec["asset"],group=(string)spec["group"];
@@ -29,7 +29,7 @@ try{
  var focus=all.FirstOrDefault(t=>t.name=="RoomCenter_ModelReview");
  if(focus==null){focus=new GameObject("RoomCenter_ModelReview").transform;focus.SetParent(dio.transform,false);}
  focus.position=kit.transform.position+Vector3.up*.52f;
- var ds=new UnityEditor.SerializedObject(dio);ds.FindProperty("roomCenter").objectReferenceValue=focus;ds.FindProperty("roomOrthoSize").floatValue=3.6f;ds.ApplyModifiedPropertiesWithoutUndo();
+ var ds=new UnityEditor.SerializedObject(dio);ds.FindProperty("roomCenter").objectReferenceValue=focus;ds.FindProperty("roomOrthoSize").floatValue=4.4f;ds.ApplyModifiedPropertiesWithoutUndo();
  var spawn=all.Select(t=>t.GetComponent<SpawnPoint>()).FirstOrDefault(s=>s!=null);
  if(spawn!=null)spawn.transform.position=kit.GetComponentsInChildren<HideoutFacilityAnchor>().Single(a=>a.moduleKey=="idle").StandPosition;
  var bulb=all.FirstOrDefault(t=>t.name=="Bulb");if(bulb!=null){var l=bulb.GetComponent<Light>();if(l!=null){l.intensity=.7f;l.range=8;l.color=new Color(1,.82f,.64f);bulb.position=kit.transform.position+new Vector3(-.5f,3.2f,-.5f);}}
@@ -45,7 +45,9 @@ try{
   }
  }
  if(anchors.Length!=9||anchors.Select(a=>a.moduleKey).Distinct().Count()!=9)throw new System.Exception("Facility set changed.");
+ var tuning=UnityEditor.AssetDatabase.LoadAssetAtPath<GameTuning>("Assets/Resources/Data/GameTuning.asset");
+ var ts=new UnityEditor.SerializedObject(tuning);ts.FindProperty("hideoutRoomOrtho").floatValue=4.4f;ts.FindProperty("hideoutRoomHalfX").floatValue=.28f;ts.FindProperty("hideoutRoomHalfY").floatValue=.45f;ts.ApplyModifiedPropertiesWithoutUndo();UnityEditor.AssetDatabase.SaveAssetIfDirty(tuning);
  UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(scene);if(!UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene))throw new System.Exception("Hideout save failed.");
- var report=new{scene=path,roomSize="6 x 6 metres",roomYaw=180,facilities=reports,standPointsClear=true,activeScenePreserved=active==UnityEngine.SceneManagement.SceneManager.GetActiveScene(),combatAssetsUnchanged=true};
+ var report=new{scene=path,roomSize="6 x 6 metres",roomYaw=215,facilities=reports,standPointsClear=true,activeScenePreserved=active==UnityEngine.SceneManagement.SceneManager.GetActiveScene(),combatAssetsUnchanged=true};
  System.IO.File.WriteAllText(folder+"/SceneValidation.json",Newtonsoft.Json.JsonConvert.SerializeObject(report,Newtonsoft.Json.Formatting.Indented));return report;
 }finally{if(opened)UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scene,true);if(active.IsValid()&&active.isLoaded)UnityEditor.SceneManagement.EditorSceneManager.SetActiveScene(active);}
