@@ -154,17 +154,22 @@ public class PlayerEquipment : MonoBehaviour
     {
         if (item == null || item.category != ItemCategory.Weapon) return false;
         // equipSlot이 None인 무기도 PrimaryWeapon으로 취급
-        if (item.equipSlot == EquipSlot.None)
-        {
-            if (GetSlot(EquipSlot.PrimaryWeapon) == item) { Unequip(EquipSlot.PrimaryWeapon); return true; }
-            if (slots.ContainsKey(EquipSlot.PrimaryWeapon)) Unequip(EquipSlot.PrimaryWeapon);
-            slots[EquipSlot.PrimaryWeapon] = item;
-            if (player != null) player.SetWeapon(item.weaponData);
-            OnEquipChanged?.Invoke(EquipSlot.PrimaryWeapon, item);
-            Debug.Log($"[Equip] 무기 장착: {item.displayName}");
-            return true;
-        }
+        if (item.equipSlot == EquipSlot.None) return ToggleAsPrimary(item);
         return Equip(item);
+    }
+
+    /// <summary>무기를 주무기 칸에 꺼내 든다(같은 무기면 넣는다) — 전투는 주무기 칸만 읽는다.
+    /// 아이템의 equipSlot과 무관하게 주무기로 — 퀵슬롯 무기 전환(2026-09-11, docs/combat.md §무기 구성 결정)이 쓴다.</summary>
+    public bool ToggleAsPrimary(ItemData item)
+    {
+        if (item == null || item.category != ItemCategory.Weapon) return false;
+        if (GetSlot(EquipSlot.PrimaryWeapon) == item) { Unequip(EquipSlot.PrimaryWeapon); return true; }
+        if (slots.ContainsKey(EquipSlot.PrimaryWeapon)) Unequip(EquipSlot.PrimaryWeapon);
+        slots[EquipSlot.PrimaryWeapon] = item;
+        if (player != null) player.SetWeapon(item.weaponData);
+        OnEquipChanged?.Invoke(EquipSlot.PrimaryWeapon, item);
+        Debug.Log($"[Equip] 무기 장착: {item.displayName}");
+        return true;
     }
 
     public void Unequip(EquipSlot slot)

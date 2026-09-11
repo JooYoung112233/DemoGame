@@ -63,6 +63,10 @@ public class GameTuning : ScriptableObject
              "타격 리듬이 안 읽혔다. 데이터(AttackComboData)는 그대로 두고 진행만 막는다(되살리기 쉽게).")]
     public bool comboEnabled = false;
 
+    [Tooltip("구르기(Space / 패드 B) 사용. 2026-09-11 사용자 결정으로 **기본 OFF** — 구르기 모션이 없어\n" +
+             "달리기 모션으로 미끄러지기만 했다. 코드·특성(dodge_iframe 등)은 그대로 두고 입력만 막는다(모션이 생기면 켠다).")]
+    public bool dodgeEnabled = false;
+
     // ── 근접 사거리 감쇠 (2026-07-29) ──
     //   "닿기만 하면 같은 데미지"면 사거리가 긴 무기가 무조건 이득이라 거리 판단이 사라진다.
     //   품 안으로 파고들면 100%, 끝에 걸치면 farMult까지.

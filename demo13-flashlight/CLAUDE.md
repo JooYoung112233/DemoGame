@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Unity **3D** looter RPG-shooter seen from a **straight-on top-down orthographic camera (62° pitch, yaw 0)**. Core loop: village (safe zone) → pick a region → 20-minute raid (loot, gunfights) → extract → settle → back to the village/hideout.
 
-**Direction (2026-09-11):** an RPG like 낙원 — **earn money and loot good items**, plus **gunfights** (aim reticle, recoil, gun/ammo specs). Unarmed melee was removed; bats/blades and dodge still exist in code, pending a decision (cleanup step 2). Earlier the same month the Tarkov-style hardcore systems were cut back (`docs/scope-cut.md`: body-part medical, noise, grid inventory, dispatch, 41→11 traits).
+**Direction (2026-09-11):** an RPG like 낙원 — **earn money and loot good items**. Combat has **two primary pillars, Zomboid-style: guns** (aim reticle, recoil, gun/ammo specs) **and melee weapons** (bats, blades…). Unarmed attacks were removed. Dodge is **switched off** until it has an animation (`GameTuning.dodgeEnabled`). Decisions: `docs/combat.md` §무기 구성 결정. Earlier the same month the Tarkov-style hardcore systems were cut back (`docs/scope-cut.md`: body-part medical, noise, grid inventory, dispatch, 41→11 traits).
 
 > **History:** isometric → pure top-down 2D (2026-06) → **full 3D (2026-09-07~09, Stages 0–4 done)**. Plan, measurements and the leftover-2D ledger: `docs/3d-migration.md`. Many class names still say "TopDown"/"2D" for history only. Stage 5 (deleting 2D leftovers) is open — see "Known leftovers" below.
 
@@ -38,7 +38,7 @@ Naming trap: the scene called `Safehouse` is the village; `Hideout` is the playe
 - **UIManager** — UI state, blocks player input while UI is open.
 
 ### Player
-**TopDownPlayer** — movement (Rigidbody + 3D collider, WASD **camera-relative**: `CameraRelative`, inverse `WorldToInput` for the QA bot), **facing = movement direction; mouse only while aiming** (right-click), sprint, and the legacy melee state machine (light/heavy attack, dodge, stamina). Plan-space logic stays `Vector2` (x = world X, y = world Z) and converts at the physics/transform boundary via **`Core/Plan3D`** — so public APIs like `FacingDirection` stayed 2D.
+**TopDownPlayer** — movement (Rigidbody + 3D collider, WASD **camera-relative**: `CameraRelative`, inverse `WorldToInput` for the QA bot), **facing = movement direction; mouse only while aiming** (right-click), sprint, and the melee state machine (light/heavy attack, stamina; dodge is gated off by `GameTuning.dodgeEnabled`). The melee code dates from the 2D era and is being cleaned up (cleanup step 2), not removed. Plan-space logic stays `Vector2` (x = world X, y = world Z) and converts at the physics/transform boundary via **`Core/Plan3D`** — so public APIs like `FacingDirection` stayed 2D.
 - **PlayerGun** — player firearms: cursor reticle (`AimReticle`, shown only while aiming), aim camera, recoil/spread, ammo specs. `PlayerFirearmVisual` for the model.
 - **ChibiPlayerVisual** — 3D low-poly chibi model + Animator.
 - **PlayerInventory** — **slot-based** (1 item = 1 slot) + weight limit since 2026-09-09. Class/API names (`InventoryGrid`, `gridX/gridY`, `rotated`) are kept for save compatibility. See `docs/inventory.md`.
