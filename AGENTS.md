@@ -10,6 +10,10 @@ Unity 6 기반 top-down 2D 액션 게임 프로토타입 (`demo13-flashlight`). 
 - **브랜치를 따서 작업 후 PR로 main에 병합할 것** (main 직접 push 금지)
 - Netlify 사용하지 않음
 
+## Unity 연결 방식
+- Unity Editor 조작·에셋 임포트·검증은 **Unity MCP 연결로 진행한다** (2026-09-11 사용자 지시).
+- Unity 작업에 컴퓨터 사용 스킬이나 마우스·키보드·화면 기반 UI 자동화를 사용하지 않는다.
+
 ## 기획 기록 룰 (예외 없음)
 - **모든 기획 질문/사용자 결정은 무조건 md에 즉시 기록한다.** 예외 없음.
 - 저장 위치: `demo13-flashlight/docs/` 안 **시스템별 md 파일** (예: `combat.md`, `economy.md`, `inventory.md`)

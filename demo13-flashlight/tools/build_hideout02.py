@@ -475,6 +475,11 @@ for x,y,z in [(-2.40,2.49,.218),(-1.68,2.5,.218),(-2.05,2.50,1.228),(.62,2.16,0)
 for x,y,z in [(-2.38,2.5,.708),(-2.17,2.5,.708),(-1.96,2.5,.708),(-1.67,2.51,1.23),(-2.43,-2.4,.26),(-2.19,-2.4,.26),(2.44,-1.02,.25),(2.45,-1.26,.25)]:p('Tin02',x,y,z,group='Dressing')
 for x,y,z,rz in [(2.45,-2.47,0,-4),(-.40,2.20,0,3),(-2,-2.46,.25,0)]:p('WoodCrate01',x,y,z,rz,group='Dressing',scale=.75)
 
+# Refine the mattress, pillow and blanket before metric UVs/export.
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from hideout02_bedding import refine_bedding
+refine_bedding(assets['Cot01']['col'],assets['Cot01']['root'],mats)
+
 # Only used assets are exported. Each has metric UV0; UV1 is a unique lightmap unwrap.
 used={v['asset'] for v in placements}-{'StorageChest01'}
 texture_family={n:('Wood' if n.startswith('Wood') else 'Cloth' if n in ['Canvas','Blanket','Linen'] else 'Steel' if n in ['Steel','EdgeMetal'] else 'Plaster' if n in ['Concrete','Paper'] else 'PaintedMetal') for n in palette}
