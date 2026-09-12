@@ -1,0 +1,9 @@
+{
+  "date": "2026-09-12",
+  "project": "E:/personalProject/Demo/demo13-flashlight",
+  "scope": "Paving crossing, Hideout entrance trigger, exit and confirmation UI, return to Safehouse",
+  "warnings": 0,
+  "errors": 0,
+  "shaderErrors": false,
+  "note": "Initial harness redundantly loaded Safehouse and emitted a duplicate sun warning. Removed the redundant load, cleared console, repeated the full entrance and exit test, and read both severity logs through Unity MCP."
+}

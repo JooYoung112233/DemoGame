@@ -1,0 +1,2571 @@
+{
+  "playing": false,
+  "path": "Assets/Scenes/Safehouse.unity",
+  "isDirty": false,
+  "scenes": [
+    {
+      "name": "Systems",
+      "isDirty": false
+    },
+    {
+      "name": "Safehouse",
+      "isDirty": false
+    }
+  ],
+  "doors": [
+    {
+      "name": "Hideout_Entrance",
+      "TargetScene": "Hideout",
+      "pos": "(56.40, 0.00, 12.00)"
+    }
+  ],
+  "near": [
+    {
+      "path": "Map/Environment/Structures/Repair/Repair_S_a",
+      "center": "(8.10, 2.25, 39.00)",
+      "size": "(6.20, 4.50, 0.30)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Plaster.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Repair_S_b",
+      "center": "(15.90, 2.25, 39.00)",
+      "size": "(6.20, 4.50, 0.30)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Plaster.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Roof/Roof_Coping",
+      "center": "(12.00, 4.79, 39.00)",
+      "size": "(14.50, 0.14, 0.18)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/DoorFrame",
+      "center": "(12.00, 1.20, 39.00)",
+      "size": "(1.90, 2.40, 0.14)",
+      "enabled": false,
+      "mats": [
+        ""
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Shutter",
+      "center": "(12.00, 1.20, 39.00)",
+      "size": "(1.60, 2.40, 0.20)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Boarded_Corner",
+      "center": "(7.96, 1.77, 38.69)",
+      "size": "(0.53, 0.52, 0.11)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Dark_Glass",
+      "center": "(7.52, 2.10, 38.76)",
+      "size": "(1.33, 1.21, 0.03)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Glass.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Deep_Sill",
+      "center": "(7.52, 1.37, 38.65)",
+      "size": "(1.64, 0.13, 0.40)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Concrete.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Recess",
+      "center": "(7.52, 2.10, 38.81)",
+      "size": "(1.50, 1.38, 0.07)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Rail",
+      "center": "(7.52, 1.45, 38.73)",
+      "size": "(1.48, 0.05, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Rail.001",
+      "center": "(7.52, 2.22, 38.73)",
+      "size": "(1.48, 0.06, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Rail.002",
+      "center": "(7.52, 2.75, 38.73)",
+      "size": "(1.48, 0.05, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Upright",
+      "center": "(6.81, 2.10, 38.74)",
+      "size": "(0.05, 1.38, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Upright.001",
+      "center": "(7.52, 2.10, 38.74)",
+      "size": "(0.06, 1.38, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Upright.002",
+      "center": "(8.23, 2.10, 38.74)",
+      "size": "(0.05, 1.38, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Boarded_Corner",
+      "center": "(16.92, 1.77, 38.69)",
+      "size": "(0.53, 0.52, 0.11)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Dark_Glass",
+      "center": "(16.48, 2.10, 38.76)",
+      "size": "(1.33, 1.21, 0.03)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Glass.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Deep_Sill",
+      "center": "(16.48, 1.37, 38.65)",
+      "size": "(1.64, 0.13, 0.40)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Concrete.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Recess",
+      "center": "(16.48, 2.10, 38.81)",
+      "size": "(1.50, 1.38, 0.07)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Rail",
+      "center": "(16.48, 1.45, 38.73)",
+      "size": "(1.48, 0.05, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Rail.001",
+      "center": "(16.48, 2.22, 38.73)",
+      "size": "(1.48, 0.06, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Rail.002",
+      "center": "(16.48, 2.75, 38.73)",
+      "size": "(1.48, 0.05, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Upright",
+      "center": "(15.77, 2.10, 38.74)",
+      "size": "(0.05, 1.38, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Upright.001",
+      "center": "(16.48, 2.10, 38.74)",
+      "size": "(0.06, 1.38, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Window01/Window01/Window_Upright.002",
+      "center": "(17.19, 2.10, 38.74)",
+      "size": "(0.05, 1.38, 0.06)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof",
+      "center": "(10.20, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof.001",
+      "center": "(10.60, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof.002",
+      "center": "(11.00, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof.003",
+      "center": "(11.40, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof.004",
+      "center": "(11.80, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof.005",
+      "center": "(12.20, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof.006",
+      "center": "(12.60, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof.007",
+      "center": "(13.00, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof.008",
+      "center": "(13.40, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Roof.009",
+      "center": "(13.80, 2.74, 38.15)",
+      "size": "(0.40, 0.28, 1.37)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance",
+      "center": "(10.20, 2.53, 37.47)",
+      "size": "(0.40, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance.001",
+      "center": "(10.60, 2.53, 37.47)",
+      "size": "(0.39, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance.002",
+      "center": "(11.00, 2.53, 37.47)",
+      "size": "(0.40, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance.003",
+      "center": "(11.40, 2.53, 37.47)",
+      "size": "(0.40, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance.004",
+      "center": "(11.80, 2.53, 37.47)",
+      "size": "(0.40, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance.005",
+      "center": "(12.20, 2.53, 37.47)",
+      "size": "(0.40, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance.006",
+      "center": "(12.60, 2.53, 37.47)",
+      "size": "(0.40, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance.007",
+      "center": "(13.00, 2.53, 37.47)",
+      "size": "(0.40, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance.008",
+      "center": "(13.40, 2.53, 37.47)",
+      "size": "(0.39, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Canvas_Valance.009",
+      "center": "(13.80, 2.53, 37.47)",
+      "size": "(0.40, 0.19, 0.04)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Front_Rail",
+      "center": "(12.00, 2.61, 37.47)",
+      "size": "(3.98, 0.05, 0.05)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Roof_Rib",
+      "center": "(10.35, 2.74, 38.14)",
+      "size": "(0.05, 0.27, 1.36)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Roof_Rib.001",
+      "center": "(13.65, 2.74, 38.14)",
+      "size": "(0.05, 0.27, 1.36)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Wall_Bracket",
+      "center": "(10.35, 2.49, 38.19)",
+      "size": "(0.05, 0.32, 1.26)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Awning01/Awning01/Wall_Bracket.001",
+      "center": "(13.65, 2.49, 38.19)",
+      "size": "(0.05, 0.32, 1.26)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/ShopSign01/ShopSign01/Mount",
+      "center": "(10.95, 3.52, 38.70)",
+      "size": "(0.05, 0.05, 0.22)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/ShopSign01/ShopSign01/Mount.001",
+      "center": "(13.05, 3.52, 38.70)",
+      "size": "(0.05, 0.05, 0.22)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/ShopSign01/ShopSign01/Painted_Face",
+      "center": "(12.00, 3.52, 38.54)",
+      "size": "(3.02, 0.56, 0.03)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/ShopSign01/ShopSign01/Screw",
+      "center": "(10.52, 3.30, 38.52)",
+      "size": "(0.04, 0.05, 0.02)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_EdgeMetal.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/ShopSign01/ShopSign01/Screw.001",
+      "center": "(10.52, 3.74, 38.52)",
+      "size": "(0.04, 0.05, 0.02)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_EdgeMetal.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/ShopSign01/ShopSign01/Screw.002",
+      "center": "(13.48, 3.30, 38.52)",
+      "size": "(0.04, 0.05, 0.02)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_EdgeMetal.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/ShopSign01/ShopSign01/Screw.003",
+      "center": "(13.48, 3.74, 38.52)",
+      "size": "(0.04, 0.05, 0.02)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_EdgeMetal.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/ShopSign01/ShopSign01/Sign_Frame",
+      "center": "(12.00, 3.52, 38.61)",
+      "size": "(3.20, 0.73, 0.12)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Plinth",
+      "center": "(8.00, 0.22, 38.86)",
+      "size": "(6.00, 0.44, 0.20)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Plinth",
+      "center": "(16.00, 0.22, 38.86)",
+      "size": "(6.00, 0.44, 0.20)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Corner_Repair",
+      "center": "(5.00, 2.20, 39.00)",
+      "size": "(0.28, 4.40, 0.28)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Repair/Village01_Detail/Corner_Repair",
+      "center": "(19.00, 2.20, 39.00)",
+      "size": "(0.28, 4.40, 0.28)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Furniture/Furniture_N",
+      "center": "(12.00, 2.25, 32.00)",
+      "size": "(14.30, 4.50, 0.30)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Plaster.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Furniture/Roof/Roof_Coping",
+      "center": "(12.00, 4.79, 32.00)",
+      "size": "(14.50, 0.14, 0.18)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Furniture/Village01_Detail/Window01/Window01/Boarded_Corner",
+      "center": "(19.32, 1.77, 30.44)",
+      "size": "(0.11, 0.52, 0.53)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Furniture/Village01_Detail/Window01/Window01/Window_Upright.002",
+      "center": "(19.27, 2.10, 30.71)",
+      "size": "(0.06, 1.38, 0.05)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Furniture/Village01_Detail/Corner_Repair",
+      "center": "(5.00, 2.20, 32.00)",
+      "size": "(0.28, 4.40, 0.28)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Furniture/Village01_Detail/Corner_Repair",
+      "center": "(19.00, 2.20, 32.00)",
+      "size": "(0.28, 4.40, 0.28)",
+      "enabled": false,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Bent_Arm",
+      "center": "(22.00, 3.58, 38.23)",
+      "size": "(0.07, 0.26, 0.57)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Concrete_Foot",
+      "center": "(22.00, 0.10, 38.50)",
+      "size": "(0.42, 0.20, 0.42)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Concrete.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Lamp_Base",
+      "center": "(22.00, 3.15, 37.95)",
+      "size": "(0.30, 0.05, 0.30)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Lamp_Hanger",
+      "center": "(22.00, 3.53, 37.95)",
+      "size": "(0.04, 0.30, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Lens_Guard",
+      "center": "(21.88, 3.24, 37.95)",
+      "size": "(0.02, 0.16, 0.02)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Lens_Guard.001",
+      "center": "(22.12, 3.24, 37.95)",
+      "size": "(0.02, 0.16, 0.02)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Post",
+      "center": "(22.00, 1.80, 38.50)",
+      "size": "(0.11, 3.40, 0.11)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Service_Box",
+      "center": "(22.00, 1.12, 38.57)",
+      "size": "(0.17, 0.29, 0.14)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Shade",
+      "center": "(22.00, 3.35, 37.95)",
+      "size": "(0.48, 0.10, 0.48)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/Plaza/StreetLamp01/StreetLamp01/Warm_Lens",
+      "center": "(22.00, 3.25, 37.95)",
+      "size": "(0.24, 0.14, 0.24)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_LampGlow.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/Pallet01/Pallet01/Deck_Plank",
+      "center": "(7.50, 0.19, 38.40)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/Pallet01/Pallet01/Deck_Plank.001",
+      "center": "(7.30, 0.19, 38.40)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/Pallet01/Pallet01/Deck_Plank.002",
+      "center": "(7.10, 0.19, 38.40)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/Pallet01/Pallet01/Deck_Plank.003",
+      "center": "(6.90, 0.19, 38.40)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/Pallet01/Pallet01/Deck_Plank.004",
+      "center": "(6.70, 0.19, 38.40)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/Pallet01/Pallet01/Deck_Plank.005",
+      "center": "(6.50, 0.19, 38.40)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/Pallet01/Pallet01/Runner",
+      "center": "(7.48, 0.08, 38.40)",
+      "size": "(0.12, 0.16, 0.90)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/Pallet01/Pallet01/Runner.001",
+      "center": "(7.00, 0.08, 38.40)",
+      "size": "(0.12, 0.16, 0.90)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/Pallet01/Pallet01/Runner.002",
+      "center": "(6.52, 0.08, 38.40)",
+      "size": "(0.12, 0.16, 0.90)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board",
+      "center": "(6.78, 0.31, 38.64)",
+      "size": "(0.64, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.001",
+      "center": "(6.78, 0.44, 38.64)",
+      "size": "(0.64, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.002",
+      "center": "(6.78, 0.57, 38.64)",
+      "size": "(0.64, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.003",
+      "center": "(6.78, 0.31, 38.16)",
+      "size": "(0.64, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.004",
+      "center": "(6.78, 0.44, 38.16)",
+      "size": "(0.64, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.005",
+      "center": "(6.78, 0.57, 38.16)",
+      "size": "(0.64, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Bottom",
+      "center": "(6.78, 0.26, 38.40)",
+      "size": "(0.60, 0.06, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace",
+      "center": "(7.02, 0.44, 38.67)",
+      "size": "(0.05, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace.001",
+      "center": "(7.02, 0.43, 38.13)",
+      "size": "(0.05, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace.002",
+      "center": "(6.55, 0.44, 38.67)",
+      "size": "(0.05, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace.003",
+      "center": "(6.55, 0.43, 38.13)",
+      "size": "(0.05, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board",
+      "center": "(7.08, 0.31, 38.40)",
+      "size": "(0.04, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.001",
+      "center": "(7.08, 0.44, 38.40)",
+      "size": "(0.04, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.002",
+      "center": "(7.08, 0.57, 38.40)",
+      "size": "(0.04, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.003",
+      "center": "(6.48, 0.31, 38.40)",
+      "size": "(0.04, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.004",
+      "center": "(6.48, 0.44, 38.40)",
+      "size": "(0.04, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.005",
+      "center": "(6.48, 0.57, 38.40)",
+      "size": "(0.04, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank",
+      "center": "(7.02, 0.65, 38.40)",
+      "size": "(0.15, 0.04, 0.53)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank.001",
+      "center": "(6.86, 0.65, 38.40)",
+      "size": "(0.15, 0.04, 0.53)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank.002",
+      "center": "(6.70, 0.65, 38.40)",
+      "size": "(0.15, 0.04, 0.53)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank.003",
+      "center": "(6.54, 0.65, 38.40)",
+      "size": "(0.15, 0.04, 0.53)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board",
+      "center": "(7.58, 0.31, 38.56)",
+      "size": "(0.04, 0.12, 0.64)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.001",
+      "center": "(7.58, 0.44, 38.56)",
+      "size": "(0.04, 0.12, 0.64)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.002",
+      "center": "(7.58, 0.57, 38.56)",
+      "size": "(0.04, 0.12, 0.64)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.003",
+      "center": "(7.10, 0.31, 38.56)",
+      "size": "(0.04, 0.12, 0.64)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.004",
+      "center": "(7.10, 0.44, 38.56)",
+      "size": "(0.04, 0.12, 0.64)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.005",
+      "center": "(7.10, 0.57, 38.56)",
+      "size": "(0.04, 0.12, 0.64)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Bottom",
+      "center": "(7.34, 0.26, 38.56)",
+      "size": "(0.46, 0.06, 0.60)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace",
+      "center": "(7.61, 0.44, 38.33)",
+      "size": "(0.03, 0.40, 0.05)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace.001",
+      "center": "(7.07, 0.43, 38.33)",
+      "size": "(0.03, 0.40, 0.05)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace.002",
+      "center": "(7.61, 0.44, 38.80)",
+      "size": "(0.03, 0.40, 0.05)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace.003",
+      "center": "(7.07, 0.43, 38.80)",
+      "size": "(0.03, 0.40, 0.05)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board",
+      "center": "(7.34, 0.31, 38.26)",
+      "size": "(0.46, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.001",
+      "center": "(7.34, 0.44, 38.26)",
+      "size": "(0.46, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.002",
+      "center": "(7.34, 0.57, 38.26)",
+      "size": "(0.46, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.003",
+      "center": "(7.34, 0.31, 38.86)",
+      "size": "(0.46, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.004",
+      "center": "(7.34, 0.44, 38.86)",
+      "size": "(0.46, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.005",
+      "center": "(7.34, 0.57, 38.86)",
+      "size": "(0.46, 0.12, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank",
+      "center": "(7.34, 0.65, 38.32)",
+      "size": "(0.53, 0.04, 0.15)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank.001",
+      "center": "(7.34, 0.65, 38.48)",
+      "size": "(0.53, 0.04, 0.15)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank.002",
+      "center": "(7.34, 0.65, 38.64)",
+      "size": "(0.53, 0.04, 0.15)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank.003",
+      "center": "(7.34, 0.65, 38.80)",
+      "size": "(0.53, 0.04, 0.15)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board",
+      "center": "(6.80, 0.76, 38.64)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.001",
+      "center": "(6.80, 0.89, 38.64)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.002",
+      "center": "(6.80, 1.02, 38.64)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.003",
+      "center": "(6.76, 0.76, 38.16)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.004",
+      "center": "(6.76, 0.89, 38.16)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Board.005",
+      "center": "(6.76, 1.02, 38.16)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Bottom",
+      "center": "(6.78, 0.71, 38.40)",
+      "size": "(0.64, 0.06, 0.51)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace",
+      "center": "(7.04, 0.89, 38.64)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace.001",
+      "center": "(6.99, 0.89, 38.11)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace.002",
+      "center": "(6.57, 0.89, 38.69)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Crate_Brace.003",
+      "center": "(6.52, 0.89, 38.16)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board",
+      "center": "(7.08, 0.76, 38.37)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.001",
+      "center": "(7.08, 0.89, 38.37)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.002",
+      "center": "(7.08, 1.02, 38.37)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.003",
+      "center": "(6.48, 0.76, 38.43)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.004",
+      "center": "(6.48, 0.89, 38.43)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/End_Board.005",
+      "center": "(6.48, 1.02, 38.43)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank",
+      "center": "(7.02, 1.10, 38.38)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank.001",
+      "center": "(6.86, 1.10, 38.39)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank.002",
+      "center": "(6.70, 1.10, 38.41)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/WoodCrate01/WoodCrate01/Lid_Plank.003",
+      "center": "(6.54, 1.10, 38.42)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/OilDrum01/OilDrum01/Bung",
+      "center": "(7.96, 0.91, 38.55)",
+      "size": "(0.11, 0.02, 0.11)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/OilDrum01/OilDrum01/Drum",
+      "center": "(8.10, 0.45, 38.50)",
+      "size": "(0.79, 0.88, 0.79)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/OilDrum01/OilDrum01/Faded_Label",
+      "center": "(8.21, 0.49, 38.79)",
+      "size": "(0.16, 0.13, 0.07)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/OilDrum01/OilDrum01/Lid",
+      "center": "(8.10, 0.90, 38.50)",
+      "size": "(0.75, 0.02, 0.75)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/OilDrum01/OilDrum01/Paint_Chip",
+      "center": "(8.30, 0.22, 38.75)",
+      "size": "(0.11, 0.09, 0.04)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Village01/Materials/Village_Wear.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/OilDrum01/OilDrum01/Rolled_Rim",
+      "center": "(8.10, 0.04, 38.50)",
+      "size": "(0.83, 0.04, 0.83)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/OilDrum01/OilDrum01/Rolled_Rim.001",
+      "center": "(8.10, 0.29, 38.50)",
+      "size": "(0.83, 0.04, 0.83)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/OilDrum01/OilDrum01/Rolled_Rim.002",
+      "center": "(8.10, 0.64, 38.50)",
+      "size": "(0.83, 0.04, 0.83)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Structures/Village01_Placed/HomeYard/OilDrum01/OilDrum01/Rolled_Rim.003",
+      "center": "(8.10, 0.88, 38.50)",
+      "size": "(0.83, 0.04, 0.83)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Environment/Scatter/Dressing/Sign_수리점",
+      "center": "(12.00, 3.70, 38.78)",
+      "size": "(1.15, 0.25, 0.35)",
+      "enabled": true,
+      "mats": [
+        "Library/unity default resources"
+      ]
+    },
+    {
+      "path": "Map/Environment/Scatter/Dressing/Lamp_Shop_W_Pole",
+      "center": "(22.00, 1.60, 38.50)",
+      "size": "(0.18, 3.20, 0.18)",
+      "enabled": true,
+      "mats": [
+        ""
+      ]
+    },
+    {
+      "path": "Map/Environment/Scatter/Dressing/Junk",
+      "center": "(5.00, 0.45, 33.00)",
+      "size": "(1.00, 0.90, 1.00)",
+      "enabled": true,
+      "mats": [
+        ""
+      ]
+    },
+    {
+      "path": "Map/Environment/Scatter/Dressing/Junk",
+      "center": "(6.20, 0.35, 34.00)",
+      "size": "(0.80, 0.70, 0.80)",
+      "enabled": true,
+      "mats": [
+        ""
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank",
+      "center": "(6.50, 0.19, 37.70)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.001",
+      "center": "(6.30, 0.19, 37.70)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.002",
+      "center": "(6.10, 0.19, 37.70)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.003",
+      "center": "(5.90, 0.19, 37.70)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.004",
+      "center": "(5.70, 0.19, 37.70)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.005",
+      "center": "(5.50, 0.19, 37.70)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Runner",
+      "center": "(6.48, 0.08, 37.70)",
+      "size": "(0.12, 0.16, 0.90)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Runner.001",
+      "center": "(6.00, 0.08, 37.70)",
+      "size": "(0.12, 0.16, 0.90)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Runner.002",
+      "center": "(5.52, 0.08, 37.70)",
+      "size": "(0.12, 0.16, 0.90)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board",
+      "center": "(5.68, 0.31, 37.94)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.001",
+      "center": "(5.68, 0.44, 37.94)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.002",
+      "center": "(5.68, 0.57, 37.94)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.003",
+      "center": "(5.72, 0.31, 37.46)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.004",
+      "center": "(5.72, 0.44, 37.46)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.005",
+      "center": "(5.72, 0.57, 37.46)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Bottom",
+      "center": "(5.70, 0.26, 37.70)",
+      "size": "(0.64, 0.06, 0.51)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace",
+      "center": "(5.91, 0.44, 37.99)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.001",
+      "center": "(5.96, 0.43, 37.46)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.002",
+      "center": "(5.44, 0.44, 37.94)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.003",
+      "center": "(5.49, 0.43, 37.41)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board",
+      "center": "(6.00, 0.31, 37.73)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.001",
+      "center": "(6.00, 0.44, 37.73)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.002",
+      "center": "(6.00, 0.57, 37.73)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.003",
+      "center": "(5.40, 0.31, 37.67)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.004",
+      "center": "(5.40, 0.44, 37.67)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.005",
+      "center": "(5.40, 0.57, 37.67)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank",
+      "center": "(5.94, 0.65, 37.72)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.001",
+      "center": "(5.78, 0.65, 37.71)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.002",
+      "center": "(5.62, 0.65, 37.69)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.003",
+      "center": "(5.46, 0.65, 37.68)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board",
+      "center": "(6.43, 0.31, 38.04)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.001",
+      "center": "(6.43, 0.44, 38.04)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.002",
+      "center": "(6.43, 0.57, 38.04)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.003",
+      "center": "(6.37, 0.31, 37.56)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.004",
+      "center": "(6.37, 0.44, 37.56)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.005",
+      "center": "(6.37, 0.57, 37.56)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Bottom",
+      "center": "(6.40, 0.26, 37.80)",
+      "size": "(0.66, 0.06, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace",
+      "center": "(6.67, 0.44, 38.03)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.001",
+      "center": "(6.60, 0.43, 37.50)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.002",
+      "center": "(6.20, 0.44, 38.10)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.003",
+      "center": "(6.13, 0.43, 37.57)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board",
+      "center": "(6.70, 0.31, 37.76)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.001",
+      "center": "(6.70, 0.44, 37.76)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.002",
+      "center": "(6.70, 0.57, 37.76)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.003",
+      "center": "(6.10, 0.31, 37.84)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.004",
+      "center": "(6.10, 0.44, 37.84)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.005",
+      "center": "(6.10, 0.57, 37.84)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank",
+      "center": "(6.64, 0.65, 37.77)",
+      "size": "(0.23, 0.04, 0.55)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.001",
+      "center": "(6.48, 0.65, 37.79)",
+      "size": "(0.23, 0.04, 0.55)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.002",
+      "center": "(6.32, 0.65, 37.81)",
+      "size": "(0.23, 0.04, 0.55)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.003",
+      "center": "(6.16, 0.65, 37.83)",
+      "size": "(0.23, 0.04, 0.55)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Bung",
+      "center": "(6.96, 0.91, 37.84)",
+      "size": "(0.11, 0.02, 0.11)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Drum",
+      "center": "(7.10, 0.45, 37.80)",
+      "size": "(0.76, 0.88, 0.76)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Faded_Label",
+      "center": "(7.18, 0.49, 38.10)",
+      "size": "(0.17, 0.13, 0.05)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Lid",
+      "center": "(7.10, 0.90, 37.80)",
+      "size": "(0.72, 0.02, 0.72)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Paint_Chip",
+      "center": "(7.27, 0.22, 38.06)",
+      "size": "(0.12, 0.09, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Rolled_Rim",
+      "center": "(7.10, 0.04, 37.80)",
+      "size": "(0.79, 0.04, 0.79)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Rolled_Rim.001",
+      "center": "(7.10, 0.29, 37.80)",
+      "size": "(0.79, 0.04, 0.79)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Rolled_Rim.002",
+      "center": "(7.10, 0.64, 37.80)",
+      "size": "(0.79, 0.04, 0.79)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Rolled_Rim.003",
+      "center": "(7.10, 0.88, 37.80)",
+      "size": "(0.79, 0.04, 0.79)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank",
+      "center": "(20.60, 0.19, 30.50)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.001",
+      "center": "(20.40, 0.19, 30.50)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.002",
+      "center": "(20.20, 0.19, 30.50)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.003",
+      "center": "(20.00, 0.19, 30.50)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.004",
+      "center": "(19.80, 0.19, 30.50)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Deck_Plank.005",
+      "center": "(19.60, 0.19, 30.50)",
+      "size": "(0.18, 0.06, 0.96)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Runner",
+      "center": "(20.58, 0.08, 30.50)",
+      "size": "(0.12, 0.16, 0.90)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Runner.001",
+      "center": "(20.10, 0.08, 30.50)",
+      "size": "(0.12, 0.16, 0.90)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/Pallet01/Pallet01/Runner.002",
+      "center": "(19.62, 0.08, 30.50)",
+      "size": "(0.12, 0.16, 0.90)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board",
+      "center": "(19.78, 0.31, 30.74)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.001",
+      "center": "(19.78, 0.44, 30.74)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.002",
+      "center": "(19.78, 0.57, 30.74)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.003",
+      "center": "(19.82, 0.31, 30.26)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.004",
+      "center": "(19.82, 0.44, 30.26)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.005",
+      "center": "(19.82, 0.57, 30.26)",
+      "size": "(0.64, 0.12, 0.10)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Bottom",
+      "center": "(19.80, 0.26, 30.50)",
+      "size": "(0.64, 0.06, 0.51)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace",
+      "center": "(20.01, 0.44, 30.79)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.001",
+      "center": "(20.06, 0.43, 30.26)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.002",
+      "center": "(19.54, 0.44, 30.74)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.003",
+      "center": "(19.59, 0.43, 30.21)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board",
+      "center": "(20.10, 0.31, 30.53)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.001",
+      "center": "(20.10, 0.44, 30.53)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.002",
+      "center": "(20.10, 0.57, 30.53)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.003",
+      "center": "(19.50, 0.31, 30.47)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.004",
+      "center": "(19.50, 0.44, 30.47)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.005",
+      "center": "(19.50, 0.57, 30.47)",
+      "size": "(0.08, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank",
+      "center": "(20.04, 0.65, 30.52)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.001",
+      "center": "(19.88, 0.65, 30.51)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.002",
+      "center": "(19.72, 0.65, 30.49)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.003",
+      "center": "(19.56, 0.65, 30.48)",
+      "size": "(0.20, 0.04, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board",
+      "center": "(20.53, 0.31, 30.84)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.001",
+      "center": "(20.53, 0.44, 30.84)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.002",
+      "center": "(20.53, 0.57, 30.84)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.003",
+      "center": "(20.47, 0.31, 30.36)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.004",
+      "center": "(20.47, 0.44, 30.36)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Board.005",
+      "center": "(20.47, 0.57, 30.36)",
+      "size": "(0.64, 0.12, 0.13)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Bottom",
+      "center": "(20.50, 0.26, 30.60)",
+      "size": "(0.66, 0.06, 0.54)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace",
+      "center": "(20.77, 0.44, 30.83)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.001",
+      "center": "(20.70, 0.43, 30.30)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.002",
+      "center": "(20.30, 0.44, 30.90)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Crate_Brace.003",
+      "center": "(20.23, 0.43, 30.37)",
+      "size": "(0.06, 0.40, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board",
+      "center": "(20.80, 0.31, 30.56)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.001",
+      "center": "(20.80, 0.44, 30.56)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.002",
+      "center": "(20.80, 0.57, 30.56)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.003",
+      "center": "(20.20, 0.31, 30.64)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.004",
+      "center": "(20.20, 0.44, 30.64)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/End_Board.005",
+      "center": "(20.20, 0.57, 30.64)",
+      "size": "(0.10, 0.12, 0.46)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank",
+      "center": "(20.74, 0.65, 30.57)",
+      "size": "(0.23, 0.04, 0.55)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.001",
+      "center": "(20.58, 0.65, 30.59)",
+      "size": "(0.23, 0.04, 0.55)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.002",
+      "center": "(20.42, 0.65, 30.61)",
+      "size": "(0.23, 0.04, 0.55)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/WoodCrate01/WoodCrate01/Lid_Plank.003",
+      "center": "(20.26, 0.65, 30.63)",
+      "size": "(0.23, 0.04, 0.55)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Wood.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Bung",
+      "center": "(21.06, 0.91, 30.64)",
+      "size": "(0.11, 0.02, 0.11)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Drum",
+      "center": "(21.20, 0.45, 30.60)",
+      "size": "(0.76, 0.88, 0.76)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Faded_Label",
+      "center": "(21.28, 0.49, 30.90)",
+      "size": "(0.17, 0.13, 0.05)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Canvas.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Lid",
+      "center": "(21.20, 0.90, 30.60)",
+      "size": "(0.72, 0.02, 0.72)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Paint_Chip",
+      "center": "(21.37, 0.22, 30.86)",
+      "size": "(0.12, 0.09, 0.03)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Olive.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Rolled_Rim",
+      "center": "(21.20, 0.04, 30.60)",
+      "size": "(0.79, 0.04, 0.79)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Rolled_Rim.001",
+      "center": "(21.20, 0.29, 30.60)",
+      "size": "(0.79, 0.04, 0.79)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Rolled_Rim.002",
+      "center": "(21.20, 0.64, 30.60)",
+      "size": "(0.79, 0.04, 0.79)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    },
+    {
+      "path": "Map/Town02_Dressing/OilDrum01/OilDrum01/Rolled_Rim.003",
+      "center": "(21.20, 0.88, 30.60)",
+      "size": "(0.79, 0.04, 0.79)",
+      "enabled": true,
+      "mats": [
+        "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+      ]
+    }
+  ]
+}
