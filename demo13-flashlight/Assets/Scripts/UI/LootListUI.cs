@@ -277,7 +277,7 @@ public class LootListUI : MonoBehaviour
         _canvas.sortingOrder = SortingOrder;
         var scaler = cgo.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         scaler.matchWidthOrHeight = 0.5f;
         cgo.AddComponent<GraphicRaycaster>();
 

@@ -635,9 +635,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\uD589\uC744 \uD074\uB9AD\uD574 PP\uB85C \uD574\uAE08 \xB7 \uBD80\uC815
-    \uD2B9\uC131(\uB099\uC778)\uC740 PP \uD658\uAE09 \xB7 \uBD80\uC815 \uCD5C\uB300
-    3\uAC1C \xB7 K/ESC \uB2EB\uAE30"
+  m_Text: "\uD589\uC744 \uD074\uB9AD\uD574 PP\uB85C \uD574\uAE08 \xB7 \uBD80\uC815 \uD2B9\uC131(\uB099\uC778)\uC740 PP \uD658\uAE09 \xB7 \uBD80\uC815 \uCD5C\uB300 3\uAC1C \xB7 K/ESC \uB2EB\uAE30"
 --- !u!1 &2345659127318020156
 GameObject:
   m_ObjectHideFlags: 0
@@ -931,6 +929,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -952,7 +951,7 @@ MonoBehaviour:
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
-  m_ScreenMatchMode: 0
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96

@@ -699,6 +699,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -720,7 +721,7 @@ MonoBehaviour:
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
-  m_ScreenMatchMode: 0
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -1209,8 +1210,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\xB7 \uB3D9\uD5A5 \uBCF4\uACE0\uB294 \uC9C0\uC5ED1 \uC704\uC8FC\uB85C
-    \uAC31\uC2E0\uB429\uB2C8\uB2E4."
+  m_Text: "\xB7 \uB3D9\uD5A5 \uBCF4\uACE0\uB294 \uC9C0\uC5ED1 \uC704\uC8FC\uB85C \uAC31\uC2E0\uB429\uB2C8\uB2E4."
 --- !u!1 &2481462228551032874
 GameObject:
   m_ObjectHideFlags: 0
@@ -1410,8 +1410,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\xB7 \uC57D\uD0C8\uC790 \uBB34\uB9AC \uBAA9\uACA9\uB2F4 \u2192 \uB808\uC774\uB4DC
-    \uC704\uD5D8\uB3C4 \uCC38\uACE0."
+  m_Text: "\xB7 \uC57D\uD0C8\uC790 \uBB34\uB9AC \uBAA9\uACA9\uB2F4 \u2192 \uB808\uC774\uB4DC \uC704\uD5D8\uB3C4 \uCC38\uACE0."
 --- !u!1 &2758247914840676057
 GameObject:
   m_ObjectHideFlags: 0
@@ -2156,8 +2155,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\uB3C4\uC6C0 \uBB38\uC11C \xB7 \uD78C\uD2B8  <size=13><color=#8A8270>[\uC18C\uC2DD
-    \uCC44\uB110]</color></size>"
+  m_Text: "\uB3C4\uC6C0 \uBB38\uC11C \xB7 \uD78C\uD2B8  <size=13><color=#8A8270>[\uC18C\uC2DD \uCC44\uB110]</color></size>"
 --- !u!1 &4628425606276266157
 GameObject:
   m_ObjectHideFlags: 0
@@ -2891,8 +2889,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<color=#8A8270>\uC8FC\uD30C\uC218\uB97C \uB9DE\uCD94\uACE0 [\uC218\uC2E0]
-    \uBC84\uD2BC\uC744 \uB204\uB974\uC138\uC694\u2026</color>"
+  m_Text: "<color=#8A8270>\uC8FC\uD30C\uC218\uB97C \uB9DE\uCD94\uACE0 [\uC218\uC2E0] \uBC84\uD2BC\uC744 \uB204\uB974\uC138\uC694\u2026</color>"
 --- !u!1 &6519449786142286090
 GameObject:
   m_ObjectHideFlags: 0

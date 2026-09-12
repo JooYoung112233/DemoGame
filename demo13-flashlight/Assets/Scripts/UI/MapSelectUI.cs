@@ -109,7 +109,7 @@ public class MapSelectUI : MonoBehaviour
 
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         scaler.matchWidthOrHeight = 0.5f;
 
         canvasGO.AddComponent<GraphicRaycaster>();
@@ -174,6 +174,7 @@ public class MapSelectUI : MonoBehaviour
         ttRT.anchorMax = new Vector2(0, 1);
         ttRT.pivot = new Vector2(0, 0.5f);
         ttRT.anchoredPosition = new Vector2(28, 0);
+        ttRT.sizeDelta = new Vector2(900, 0);
         titleText.fontStyle = FontStyle.Bold;
 
         // 닫기 ✕ 버튼 (우측 끝, 48x40)

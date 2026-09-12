@@ -141,7 +141,7 @@ public class NoteUI : MonoBehaviour
 
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         canvasGO.AddComponent<GraphicRaycaster>();
 
         // 페이드 + 입력 차단(레이캐스트)용 그룹 = panelRoot.

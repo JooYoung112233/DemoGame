@@ -111,7 +111,7 @@ public class TraitPanelUI : MonoBehaviour
         canvas.sortingOrder = 920;
         var scaler = uiRoot.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         uiRoot.AddComponent<GraphicRaycaster>();
 
         // 배경(클릭 차단)

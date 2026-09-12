@@ -57,20 +57,21 @@ public partial class HideoutDockPanel
     /// 방이 UI 밑으로 들어가거나 화면 밖으로 잘린다.</summary>
     public static Rect FreeScreenRect(string moduleKey, HideoutFacilityAnchor.Dock dock)
     {
-        float top = TopBandHeight / RefHeight;
+        Vector2 canvasSize = UITheme.CanvasSize;
+        float top = TopBandHeight / canvasSize.y;
 
         if (dock == HideoutFacilityAnchor.Dock.Bottom)
         {
-            float b = (BottomDockHeight(moduleKey) + BottomMargin) / RefHeight;
+            float b = (BottomDockHeight(moduleKey) + BottomMargin) / canvasSize.y;
             return new Rect(0f, b, 1f, Mathf.Max(1f - top - b, 0.1f));
         }
 
         // 도크가 없으면(대기 상태) 상단 띠만 피하고 화면 전체를 쓴다.
         float r = dock == HideoutFacilityAnchor.Dock.None
                 ? 0f
-                : (RightDockSize(moduleKey).x + RightMargin) / RefWidth;
+                : (RightDockSize(moduleKey).x + RightMargin) / canvasSize.x;
         // Leave the existing quick slots and bottom navigation usable without covering the room.
-        float bottom = 112f / RefHeight;
+        float bottom = 112f / canvasSize.y;
         return new Rect(0f, bottom, Mathf.Max(1f - r, 0.1f), Mathf.Max(1f - top - bottom, 0.1f));
     }
 }

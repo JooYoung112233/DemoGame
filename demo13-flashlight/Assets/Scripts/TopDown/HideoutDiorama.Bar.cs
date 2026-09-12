@@ -33,7 +33,7 @@ public partial class HideoutDiorama
         canvas.sortingOrder = 35;                       // 인벤토리(40)·도크(60)보다 아래
         var scaler = _barRoot.AddComponent<UnityEngine.UI.CanvasScaler>();
         scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        UITheme.ConfigureCanvasScale(scaler);
         scaler.matchWidthOrHeight = 0.5f;
         _barRoot.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
@@ -51,7 +51,7 @@ public partial class HideoutDiorama
         listed.Sort((a,b)=>System.Array.IndexOf(order,a.moduleKey).CompareTo(System.Array.IndexOf(order,b.moduleKey)));
         if (listed.Count == 0) return;
 
-        float avail = 1920f - HideoutDockPanel.RightMargin
+        float avail = UITheme.CanvasSize.x - HideoutDockPanel.RightMargin
                     - HideoutDockPanel.MaxRightDockWidth - BarLeft - 16f;
         float btnW = Mathf.Min(BarBtnW, (avail - BarGap * (listed.Count - 1)) / listed.Count);
 
@@ -103,5 +103,20 @@ public partial class HideoutDiorama
         for (int i = 0; i < _barBtns.Count; i++)
             if (_barBtns[i] != null)
                 _barBtns[i].color = (_barKeys[i] == _current) ? BarOn : BarIdle;
+    }
+
+    void LayoutFacilityBar()
+    {
+        if (_barBtns.Count == 0) return;
+        float available = UITheme.CanvasSize.x - HideoutDockPanel.RightMargin
+            - HideoutDockPanel.MaxRightDockWidth - BarLeft - 16;
+        float width = Mathf.Min(BarBtnW, (available - BarGap * (_barBtns.Count - 1)) / _barBtns.Count);
+        for (int i = 0; i < _barBtns.Count; i++)
+        {
+            if (_barBtns[i] == null) continue;
+            var rt = _barBtns[i].rectTransform;
+            rt.sizeDelta = new Vector2(width, BarBtnH);
+            rt.anchoredPosition = new Vector2(BarLeft + i * (width + BarGap), BarTop);
+        }
     }
 }

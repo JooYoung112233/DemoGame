@@ -83,7 +83,7 @@ public class TitleScreen : MonoBehaviour
         canvas.sortingOrder = 500; // 모든 UI 위
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         canvasGO.AddComponent<GraphicRaycaster>();
 
         // 배경(어두운 풀스크린)

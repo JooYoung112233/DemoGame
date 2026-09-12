@@ -66,7 +66,7 @@ public class PauseMenu : MonoBehaviour
         canvas.sortingOrder = 600; // 모든 UI 위
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         canvasGO.AddComponent<GraphicRaycaster>();
 
         // 어두운 반투명 오버레이(뒤 게임 보이되 흐리게)
