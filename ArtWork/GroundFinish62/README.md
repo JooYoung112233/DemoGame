@@ -1,7 +1,7 @@
 # GroundFinish62 — Blender 바닥·입구 마감 6종
 
-2026-09-12. **Blender 오프라인 결과이며 Unity 임포트·게임 씬 적용은 하지 않았다.**
-사용자 지시: “유니티 실행하지말고 일단 블렌더 먼저만들어”.
+2026-09-12. **Blender 제작 후 최신 Demo/demo13의 하이드아웃 서쪽 입구에 Unity 적용·자체 검수 완료.**
+사용자 지시: Blender 선제작 후 “unity 켜도된다”, 적용 대상은 “최신 Demo/demo13에 적용”으로 확정.
 
 ## 파일
 
@@ -51,16 +51,20 @@ Asphalt/Plaster Base·Normal·Mask를 재사용하고, 반짝임 없는 작은 �
 - 62° 전체/확대 및 25° 낮은 시점으로 수정 결과 재검수.
 - 각 모델 UV0·탄젠트 생성, 퇴화 삼각형 0, 독립 FBX 재임포트의 크기·삼각형 수·정점 알파 검사.
 
-자체 검수는 사용자 최종 아트 승인을 대신하지 않는다. **Unity의 실제 조명·카메라·충돌 검수는 미실시**다.
+자체 검수는 사용자 최종 아트 승인을 대신하지 않는다. 아래 Unity 검수까지 완료했다.
 
-## 향후 Unity 연결 시 확인
+## Unity 적용 및 검사
 
-- `GroundFade` 정점 색상의 Alpha를 Soil/DryDust 재질의 투명도에 연결해야 한다.
-  FBX의 형상·정점 색상은 보존되지만 Blender 노드 그래프는 GameLit에 자동 대응되지 않는다.
-  현행 셰이더가 정점 알파를 처리하는지 확인하고 적절한 표면 재질 또는 베이크 방식을 선택한다.
+- `Assets/Art/Environments/GroundFinish62`: 모델 6개, 재질 9개, 개별 프리팹 6개와 `HideoutGroundFinish62` 조합 프리팹.
+- `GroundFade` 정점 Alpha를 전용 `BRB/GroundFadeLit`의 투명도에 연결했다. 기존 GameLit의 조명·노멀·마스크 계산을 재사용한다.
 - 얇은 균열·먼지 표면은 그림자를 받되 별도 떠 있는 그림자를 만들지 않도록 설정한다.
 - 원점은 Blender Z-up/미터 기준이며 FBX는 -Z forward/Y up으로 내보낸다.
-- 기존 지면 높이에 맞춰 표면을 밀착하고 입구 통행·캐릭터 가림·깜빡임을 현장 검수한다.
+- Safehouse 하이드아웃 서쪽 기존 포장 3칸의 Renderer 9개를 숨기고 새 모듈 8개를 배치했다. 기존 충돌/입구 값은 보존, 신규 콜라이더는 0개다.
+- 포장 명도를 기존 판에 맞추고 상면을 약 0.044m로 내려 배수구를 노출했다. 원래 FBX 축 보정을 유지하면서 파손 면을 바깥으로 돌렸다.
+- `Unity/Runtime_*.png`: 실제 씬 재진입 후 별도 62° 검수 카메라 렌더. `Night_*.png`: 임시 야간 조명 검수 후 조명 복원. `Review/` 이미지는 Blender 렌더다.
+- `Unity/playtest.json`: 새 포장 3.833m 통과 → 입구 트리거 진입 → 나가기/확인 버튼으로 귀환 통과. 최종 출입 재검사 경고 0·오류 0, 셰이더 오류 0.
+- 초기 테스트의 동일 Safehouse 중복 로드로 태양 중복 경고가 발생해 검사 스크립트에서 이미 로드된 마을을 재로드하지 않게 수정하고 재검사했다.
+- 재현 도구는 Unity MCP `run_script`로 실행한다. 새 구역에 최초 배치할 때 `import.json` → `place.json` → `refine.json` 순서. `Placement.json`은 초기값, `Refinement.json`이 최종 보정이다. 현재 씬은 이미 적용되어 있어 Place를 다시 실행하면 중복 방지로 중단한다. 플레이 검사는 `run-playtest.json`이 입력, `playtest.json`이 결과다.
 
 재생성: Blender 4.5 LTS에서 `--background --python-exit-code 1 --python build_ground_finish.py`.
 검사: 같은 방식으로 `validate_ground_finish.py`. 모든 산출물은 현재 폴더에만 기록한다.
