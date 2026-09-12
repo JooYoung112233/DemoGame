@@ -11,8 +11,8 @@ public class PlayerStatData
     public float maxHp = 100f;
 
     [Header("이동")]
-    public float moveSpeed = 5f;
-    public float sprintSpeedMultiplier = 1.6f;
+    public float moveSpeed = 1.2f;
+    public float sprintSpeedMultiplier = 3f;
     public float crouchSpeedMultiplier = 0.5f;
 
     [Header("이동 감각 (걷는 느낌)")]
@@ -31,7 +31,7 @@ public class PlayerStatData
     public List<MotionStat> motions = new List<MotionStat>
     {
         new MotionStat { anim = "idle",        animSpeed = 1f },
-        new MotionStat { anim = "walk",        animSpeed = 1f },
+        new MotionStat { anim = "walk",        animSpeed = 0.5f },
         new MotionStat { anim = "run",         animSpeed = 1f, distance = 0f },
         new MotionStat { anim = "crouch",      animSpeed = 1f },
         new MotionStat { anim = "crouch_walk", animSpeed = 1f },

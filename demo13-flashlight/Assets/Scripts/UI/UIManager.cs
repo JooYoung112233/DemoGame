@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour
 
     [Tooltip("통합 캐릭터 패널 (인벤토리/의료/정보 탭)")]
     [SerializeField] CharacterPanelUI characterPanelUI;
+    public bool IsInventoryOpen => characterPanelUI != null && characterPanelUI.IsShowing;
 
     [Tooltip("제작/수리 UI (작업대/의료대/조리대)")]
     [SerializeField] CraftingUI craftingUI;
@@ -240,6 +241,7 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
+        if (HideoutController.ExitConfirmationOpen) return;
         // ── ESC: 맨 위(가장 최근) UI 1개만 닫기(LIFO). 없으면 일시정지 (중앙 권위) ──
         if (GameInput.GetKeyDown(KeyCode.Escape))
         {
@@ -473,6 +475,7 @@ public class UIManager : MonoBehaviour
     /// <summary>현재 어떤 UI든 열려있는지</summary>
     public bool IsAnyUIOpen()
     {
+        if (HideoutController.ExitConfirmationOpen) return true;
         if (AnyRegisteredOpen()) return true;
         if (raidResultUI != null && raidResultUI.IsShowing) return true;
         if (mapSelectUI != null && mapSelectUI.IsShowing) return true;

@@ -1,0 +1,23 @@
+[
+  {
+    "mode": "crouch",
+    "cases": 9,
+    "passed": 9,
+    "min": 0.5999016,
+    "max": 0.6011965
+  },
+  {
+    "mode": "run",
+    "cases": 9,
+    "passed": 9,
+    "min": 3.59940958,
+    "max": 3.60107565
+  },
+  {
+    "mode": "walk",
+    "cases": 9,
+    "passed": 9,
+    "min": 1.1993413,
+    "max": 1.19980323
+  }
+]

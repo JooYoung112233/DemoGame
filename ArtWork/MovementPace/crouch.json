@@ -1,0 +1,110 @@
+[
+  {
+    "mode": "crouch",
+    "input": "(0.00, 1.00)",
+    "elapsed": 0.499999821,
+    "measured": 0.6011965,
+    "expected": 0.6,
+    "pass": true,
+    "animatorSpeed": 1.33333337,
+    "moveMagnitude": 1.0,
+    "IsSprinting": false,
+    "IsCrouching": true
+  },
+  {
+    "mode": "crouch",
+    "input": "(1.00, 0.00)",
+    "elapsed": 0.499999821,
+    "measured": 0.6011965,
+    "expected": 0.6,
+    "pass": true,
+    "animatorSpeed": 1.33333337,
+    "moveMagnitude": 1.0,
+    "IsSprinting": false,
+    "IsCrouching": true
+  },
+  {
+    "mode": "crouch",
+    "input": "(0.00, -1.00)",
+    "elapsed": 0.499999821,
+    "measured": 0.6011965,
+    "expected": 0.6,
+    "pass": true,
+    "animatorSpeed": 1.33333337,
+    "moveMagnitude": 1.0,
+    "IsSprinting": false,
+    "IsCrouching": true
+  },
+  {
+    "mode": "crouch",
+    "input": "(-1.00, 0.00)",
+    "elapsed": 0.499999821,
+    "measured": 0.6011965,
+    "expected": 0.6,
+    "pass": true,
+    "animatorSpeed": 1.33333337,
+    "moveMagnitude": 1.0,
+    "IsSprinting": false,
+    "IsCrouching": true
+  },
+  {
+    "mode": "crouch",
+    "input": "(1.00, 1.00)",
+    "elapsed": 0.499999821,
+    "measured": 0.5999016,
+    "expected": 0.6,
+    "pass": true,
+    "animatorSpeed": 1.33333337,
+    "moveMagnitude": 1.0,
+    "IsSprinting": false,
+    "IsCrouching": true
+  },
+  {
+    "mode": "crouch",
+    "input": "(-1.00, 1.00)",
+    "elapsed": 0.499999821,
+    "measured": 0.5999016,
+    "expected": 0.6,
+    "pass": true,
+    "animatorSpeed": 1.33333337,
+    "moveMagnitude": 1.0,
+    "IsSprinting": false,
+    "IsCrouching": true
+  },
+  {
+    "mode": "crouch",
+    "input": "(1.00, -1.00)",
+    "elapsed": 0.499999821,
+    "measured": 0.5999016,
+    "expected": 0.6,
+    "pass": true,
+    "animatorSpeed": 1.33333337,
+    "moveMagnitude": 1.0,
+    "IsSprinting": false,
+    "IsCrouching": true
+  },
+  {
+    "mode": "crouch",
+    "input": "(-1.00, -1.00)",
+    "elapsed": 0.499999821,
+    "measured": 0.5999016,
+    "expected": 0.6,
+    "pass": true,
+    "animatorSpeed": 1.33333337,
+    "moveMagnitude": 1.0,
+    "IsSprinting": false,
+    "IsCrouching": true
+  },
+  {
+    "mode": "crouch",
+    "input": "(0.30, 0.40)",
+    "elapsed": 0.499999821,
+    "measured": 0.300904065,
+    "expected": 0.3,
+    "pass": true,
+    "animatorSpeed": 0.6666667,
+    "moveMagnitude": 0.5,
+    "IsSprinting": false,
+    "IsCrouching": true
+  }
+]

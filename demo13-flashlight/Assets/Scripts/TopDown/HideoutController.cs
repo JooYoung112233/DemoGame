@@ -17,6 +17,7 @@ public class HideoutController : MonoBehaviour
 {
     /// <summary>하이드아웃 실내 화면이 떠 있는 동안 true. UIManager가 ESC=PauseMenu를 양보(여기서 처리).</summary>
     public static bool IsActive { get; private set; }
+    public static bool ExitConfirmationOpen { get; private set; }
 
     [Header("고정 카메라(은신처 프레이밍)")]
     [Tooltip("카메라가 바라볼 방 중심(월드 XY)")]
@@ -162,6 +163,7 @@ public class HideoutController : MonoBehaviour
     void OnDestroy()
     {
         IsActive = false;
+        ExitConfirmationOpen = false;
         if (_hadPlayer && _player != null) _player.SetCanMove(_prevCanMove);
         foreach (var r in _hiddenRenderers) if (r != null) r.enabled = true;
         foreach (var lt in _hiddenLights) if (lt != null) lt.enabled = true;
@@ -201,8 +203,8 @@ public class HideoutController : MonoBehaviour
                 ToastManager.Show("사용 취소", ToastManager.ToastType.Info);
                 return;
             }
-            if (uiOpen) return;                                 // 열린 UI는 UIManager가 닫음 — 여기선 나가지 않음
             if (_confirmShowing) { HideExitConfirm(); return; } // 확인창 떠 있으면 ESC=취소
+            if (uiOpen) return;                                 // 열린 UI는 UIManager가 닫음 — 여기선 나가지 않음
             ShowExitConfirm();                                  // UI 없을 때만 '나가기 확인창'
             return;
         }
@@ -230,6 +232,9 @@ public class HideoutController : MonoBehaviour
 
     void ExitHideout()
     {
+        UIManager.Instance?.CloseAll();
+        HideoutDockPanel.Instance?.Hide();
+        HideExitConfirm();
         if (SceneTransitionManager.Instance != null)
             SceneTransitionManager.Instance.TransitionTo(safehouseScene, safehouseSpawn);
     }
@@ -243,12 +248,16 @@ public class HideoutController : MonoBehaviour
         if (_krFont == null) _krFont = LoadKoreanFont();
 
         _uiRoot = new GameObject("HideoutScreenUI");
+        // Additive 로드 중 ActiveScene은 아직 이전 마을이다. 부모 없이 만들면
+        // 마을 언로드와 함께 출구/확인창까지 파괴되므로 이 컨트롤러 씬에 귀속시킨다.
+        _uiRoot.transform.SetParent(transform, false);
         var canvas = _uiRoot.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 50;
+        canvas.sortingOrder = 35; // 인벤토리(40) 아래, 확인창만 별도 모달 레이어
         var scaler = _uiRoot.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.matchWidthOrHeight = .5f;
         _uiRoot.AddComponent<GraphicRaycaster>();
 
         // 제목 · 안내
@@ -260,19 +269,19 @@ public class HideoutController : MonoBehaviour
                  ? (1920f - DockMargin - DockW) / 2f - 960f     // 왼쪽 영역 중심 - 화면 중심
                  : 0f;
 
-        MakeText("Title", "은신처", 40, TextAnchor.UpperCenter,
+        MakeText("Title", "하이드아웃", 32, TextAnchor.UpperCenter,
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(hx, -28f), new Vector2(600f, 60f),
             new Color(0.95f, 0.95f, 0.9f, 1f));
         MakeText("Hint",
             HideoutDiorama.Active
-                ? "소품 클릭 또는 상단 목록  ·  인벤토리 = Tab/버튼  ·  ESC로 나가기"
+                ? "시설을 선택하세요  ·  Tab 인벤토리  ·  Esc 닫기 / 나가기"
                 : "시설 클릭 = 건설 · 업그레이드 · 사용  ·  인벤토리 = Tab/버튼  ·  ESC로 나가기",
-            22, TextAnchor.UpperCenter,
+            18, TextAnchor.UpperCenter,
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(hx, -78f), new Vector2(1000f, 36f),
             new Color(0.8f, 0.82f, 0.85f, 0.9f));
 
         // 좌하단 버튼: 나가기 + 인벤토리만(시설은 방 안 타일을 클릭).
-        MakeButton("ExitButton",      "← 나가기",  new Vector2(40f, 40f),  new Vector2(200f, 64f), ShowExitConfirm);
+        MakeButton("ExitButton",      "마을로 나가기",  new Vector2(40f, 40f),  new Vector2(200f, 64f), ShowExitConfirm);
         MakeButton("InventoryButton", "인벤토리",  new Vector2(250f, 40f), new Vector2(200f, 64f), OpenInventory);
 
         BuildConfirmDialog();
@@ -287,6 +296,10 @@ public class HideoutController : MonoBehaviour
         rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
         rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
         _confirmRoot.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);  // 화면 딤(클릭 차단)
+        var modal = _confirmRoot.AddComponent<Canvas>();
+        modal.overrideSorting = true;
+        modal.sortingOrder = 130;
+        _confirmRoot.AddComponent<GraphicRaycaster>();
 
         // 중앙 박스
         var box = new GameObject("Box");
@@ -294,16 +307,16 @@ public class HideoutController : MonoBehaviour
         var boxRT = box.AddComponent<RectTransform>();
         boxRT.anchorMin = boxRT.anchorMax = boxRT.pivot = new Vector2(0.5f, 0.5f);
         boxRT.sizeDelta = new Vector2(560f, 240f);
-        box.AddComponent<Image>().color = new Color(0.12f, 0.12f, 0.16f, 0.98f);
+        box.AddComponent<Image>().color = UITheme.Panel;
 
-        MakeTextIn(box.transform, "Msg", "안전구역으로 나가시겠습니까?", 26, TextAnchor.MiddleCenter,
+        MakeTextIn(box.transform, "Msg", "마을로 나가시겠습니까?", 26, TextAnchor.MiddleCenter,
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -54f), new Vector2(520f, 50f),
             new Color(0.95f, 0.95f, 0.92f, 1f));
 
         MakeButtonIn(box.transform, "Yes", "나가기", new Vector2(0.5f, 0f), new Vector2(-150f, 40f),
-            new Vector2(220f, 64f), new Color(0.5f, 0.22f, 0.22f, 0.95f), ExitHideout);
+            new Vector2(220f, 64f), UITheme.Accent, ExitHideout);
         MakeButtonIn(box.transform, "No",  "취소",   new Vector2(0.5f, 0f), new Vector2(150f, 40f),
-            new Vector2(220f, 64f), new Color(0.18f, 0.2f, 0.26f, 0.95f), HideExitConfirm);
+            new Vector2(220f, 64f), UITheme.Cell, HideExitConfirm);
 
         _confirmRoot.SetActive(false);
     }
@@ -312,22 +325,19 @@ public class HideoutController : MonoBehaviour
     {
         if (_confirmRoot == null) return;
 
-        // ⚠️ 시설 UI가 열려 있으면 나가기를 막는다. 제작·파견 도중에 씬이 바뀌면
-        //    그 UI가 붙은 채로 넘어가거나(도크가 남의 패널을 들고 있다) 작업이 통째로 날아간다.
-        //    먼저 UI를 닫게 한다 — 닫기는 우상단 X 또는 ESC.
-        if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen())
-        {
-            ToastManager.Show("열려 있는 창을 먼저 닫아라", ToastManager.ToastType.Warning);
-            return;
-        }
+        // 도킹한 패널을 먼저 원래 부모로 돌려놓고 닫는다.
+        HideoutDockPanel.Instance?.Hide();
+        UIManager.Instance?.CloseAll();
 
         _confirmShowing = true;
+        ExitConfirmationOpen = true;
         _confirmRoot.SetActive(true);
     }
 
     void HideExitConfirm()
     {
         _confirmShowing = false;
+        ExitConfirmationOpen = false;
         if (_confirmRoot != null) _confirmRoot.SetActive(false);
     }
 
@@ -342,7 +352,7 @@ public class HideoutController : MonoBehaviour
         var btnGO = new GameObject(name);
         btnGO.transform.SetParent(_uiRoot.transform, false);
         var img = btnGO.AddComponent<Image>();
-        img.color = new Color(0.15f, 0.16f, 0.2f, 0.92f);
+        img.color = UITheme.Cell;
         var brt = btnGO.GetComponent<RectTransform>();
         brt.anchorMin = brt.anchorMax = new Vector2(0f, 0f);
         brt.pivot = new Vector2(0f, 0f);
@@ -354,6 +364,7 @@ public class HideoutController : MonoBehaviour
         lblGO.transform.SetParent(btnGO.transform, false);
         var lbl = lblGO.AddComponent<Text>();
         lbl.text = label;
+        lbl.raycastTarget = false;
         lbl.font = _krFont;
         lbl.fontSize = 22;
         lbl.alignment = TextAnchor.MiddleCenter;
@@ -370,6 +381,7 @@ public class HideoutController : MonoBehaviour
         go.transform.SetParent(_uiRoot.transform, false);
         var t = go.AddComponent<Text>();
         t.text = text;
+        t.raycastTarget = false;
         t.font = _krFont;
         t.fontSize = size;
         t.fontStyle = FontStyle.Bold;
@@ -398,6 +410,7 @@ public class HideoutController : MonoBehaviour
         lblGO.transform.SetParent(btnGO.transform, false);
         var lbl = lblGO.AddComponent<Text>();
         lbl.text = label; lbl.font = _krFont; lbl.fontSize = 22;
+        lbl.raycastTarget = false;
         lbl.alignment = TextAnchor.MiddleCenter;
         lbl.color = new Color(0.95f, 0.95f, 0.95f, 1f);
         var lrt = lbl.GetComponent<RectTransform>();
@@ -412,6 +425,7 @@ public class HideoutController : MonoBehaviour
         go.transform.SetParent(parent, false);
         var t = go.AddComponent<Text>();
         t.text = text; t.font = _krFont; t.fontSize = size; t.fontStyle = FontStyle.Bold;
+        t.raycastTarget = false;
         t.alignment = anchor; t.color = color;
         t.horizontalOverflow = HorizontalWrapMode.Overflow;
         var rt = t.GetComponent<RectTransform>();
