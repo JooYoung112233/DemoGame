@@ -1,0 +1,101 @@
+[
+  {
+    "mode": "walk",
+    "route": "entry",
+    "elapsed": 2.519999,
+    "travelled": 3.017784,
+    "expected": 3.023999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 39.7178)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "walk",
+    "route": "inside",
+    "elapsed": 2.499999,
+    "travelled": 2.99378586,
+    "expected": 2.999999,
+    "pass": true,
+    "position": "(36.9938, 0.0000, 39.5000)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "walk",
+    "route": "exit",
+    "elapsed": 2.499999,
+    "travelled": 2.99378586,
+    "expected": 2.999999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 36.5062)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "run",
+    "route": "entry",
+    "elapsed": 0.8599997,
+    "travelled": 2.98794556,
+    "expected": 3.095999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 39.6880)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "run",
+    "route": "inside",
+    "elapsed": 0.8399997,
+    "travelled": 2.915947,
+    "expected": 3.023999,
+    "pass": true,
+    "position": "(36.9160, 0.0000, 39.5000)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "run",
+    "route": "exit",
+    "elapsed": 0.8399997,
+    "travelled": 2.915947,
+    "expected": 3.023999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 36.5841)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "crouch",
+    "route": "entry",
+    "elapsed": 4.999998,
+    "travelled": 3.0002594,
+    "expected": 2.999999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 39.7003)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "crouch",
+    "route": "inside",
+    "elapsed": 5.019998,
+    "travelled": 3.01226044,
+    "expected": 3.011999,
+    "pass": true,
+    "position": "(37.0123, 0.0000, 39.5000)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "crouch",
+    "route": "exit",
+    "elapsed": 4.999998,
+    "travelled": 3.0002594,
+    "expected": 2.999999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 36.4997)",
+    "floorOverlap": false,
+    "depth": 0.0
+  }
+]

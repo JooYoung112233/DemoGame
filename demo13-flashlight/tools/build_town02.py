@@ -100,7 +100,8 @@ for name,w,d,wall,east in specs:
   window(xx,z-.24,2.5 if name=='Medical' else 2.15)
   if name in ['Furniture','BlackMarket']:
    for yy,tilt in [(1.85,.16),(2.26,-.13)]:beam('Boarded window',(xx-1,yy,z-.48),(xx+1,yy+tilt,z-.48),.16,'WoodDark' if name=='BlackMarket' else 'Wood')
- if name!='BlackMarket':awning(0,z-.2,3.8,'Wood' if name=='Pawnshop' else 'Sage' if name=='Medical' else 'Olive')
+ if name not in ['BlackMarket','Pawnshop']:awning(0,z-.2,3.8,'Sage' if name=='Medical' else 'Olive')
+ if name=='Pawnshop':box('Entry stone inset',(0,.049,z-.42),(1.56,.012,1.12),'Concrete',.004)
  sw=6 if name=='Pawnshop' else 1.4 if name=='BlackMarket' else 4.2
  box('Sign backing',(0,3.78,z-.28),(sw,1.05,.22),'WoodDark')
  box('Sign face',(0,3.78,z-.415),(sw-.22,.82,.08),'Paper' if name=='Medical' else 'Wood' if name in ['Pawnshop','Furniture'] else 'Graphite' if name=='BlackMarket' else 'Olive')

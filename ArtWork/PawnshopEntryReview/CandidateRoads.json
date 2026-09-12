@@ -1,0 +1,68 @@
+[
+  {
+    "mode": "walk",
+    "route": "entry",
+    "elapsed": 2.499999,
+    "travelled": 2.99378586,
+    "expected": 2.999999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 39.6938)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "walk",
+    "route": "inside",
+    "elapsed": 2.499999,
+    "travelled": 2.99378586,
+    "expected": 2.999999,
+    "pass": true,
+    "position": "(36.9938, 0.0000, 39.5000)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "walk",
+    "route": "exit",
+    "elapsed": 2.499999,
+    "travelled": 2.99378586,
+    "expected": 2.999999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 36.5062)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "run",
+    "route": "entry",
+    "elapsed": 0.8599997,
+    "travelled": 2.98557281,
+    "expected": 3.095999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 39.6856)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "run",
+    "route": "inside",
+    "elapsed": 0.8399997,
+    "travelled": 2.915947,
+    "expected": 3.023999,
+    "pass": true,
+    "position": "(36.9160, 0.0000, 39.5000)",
+    "floorOverlap": false,
+    "depth": 0.0
+  },
+  {
+    "mode": "run",
+    "route": "exit",
+    "elapsed": 0.8599997,
+    "travelled": 2.98794556,
+    "expected": 3.095999,
+    "pass": true,
+    "position": "(34.0000, 0.0000, 36.5121)",
+    "floorOverlap": false,
+    "depth": 0.0
+  }
+]

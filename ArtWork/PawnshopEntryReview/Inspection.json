@@ -1,0 +1,1513 @@
+{
+  "project": "E:/personalProject/Demo/demo13-flashlight/Assets",
+  "player": {
+    "pos": [
+      54.2000046,
+      0.0,
+      12.0
+    ],
+    "CanMove": true,
+    "IsSprinting": false,
+    "IsCrouching": false,
+    "gravity": false,
+    "constraints": 116,
+    "velocity": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stat": "{\"maxHp\":100.0,\"moveSpeed\":1.2000000476837158,\"sprintSpeedMultiplier\":3.0,\"crouchSpeedMultiplier\":0.5,\"moveAccel\":45.0,\"moveDecel\":80.0,\"sprintStaminaCost\":12.0,\"sprintMinStamina\":10.0,\"motions\":[{\"anim\":\"idle\",\"animSpeed\":1.0,\"distance\":0.0},{\"anim\":\"walk\",\"animSpeed\":0.5,\"distance\":0.0},{\"anim\":\"run\",\"animSpeed\":1.0,\"distance\":0.0},{\"anim\":\"crouch\",\"animSpeed\":1.0,\"distance\":0.0},{\"anim\":\"crouch_walk\",\"animSpeed\":1.0,\"distance\":0.0},{\"anim\":\"attack\",\"animSpeed\":1.0,\"distance\":0.0},{\"anim\":\"roll\",\"animSpeed\":1.0,\"distance\":0.0}],\"lightDamage\":8.0,\"lightRange\":1.2000000476837158,\"lightStaminaCost\":6.0,\"lightGroggy\":14.0,\"lightCooldown\":0.11999999731779099,\"lightComboMax\":3,\"lightComboWindow\":0.6000000238418579,\"lightCombo2Damage\":9.0,\"lightCombo2Groggy\":16.0,\"lightCombo3Damage\":12.0,\"lightCombo3Groggy\":20.0,\"lightCombo3StaminaCost\":8.0,\"heavyDamage\":20.0,\"heavyRange\":1.7000000476837158,\"heavyStaminaCost\":22.0,\"heavyGroggy\":32.0,\"heavyChargeTime\":0.6000000238418579,\"heavyMaxCharge\":1.5,\"heavyFullDamage\":32.0,\"heavyFullStaminaCost\":35.0,\"heavyFullGroggy\":58.0,\"heavyCooldown\":0.800000011920929,\"dodgeStaminaCost\":15.0,\"dodgeDistance\":3.0,\"dodgeDuration\":0.30000001192092896,\"dodgeInvincibleDuration\":0.25999999046325684,\"dodgeCooldown\":0.5,\"maxStamina\":100.0,\"staminaRegen\":15.0,\"staminaRegenDelay\":1.0,\"exhaustionDuration\":0.800000011920929}",
+    "colliders": [
+      {
+        "path": "PlayerRig/Player",
+        "enabled": true,
+        "isTrigger": false,
+        "min": [
+          53.9,
+          0.0,
+          11.7
+        ],
+        "max": [
+          54.5,
+          1.8,
+          12.3
+        ],
+        "shape": "{\"CapsuleCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":false,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"2\",\"m_Radius\":0.30000001192092896,\"m_Height\":1.7999999523162842,\"m_Direction\":1,\"m_Center\":{\"x\":0.0,\"y\":0.8999999761581421,\"z\":0.0}}}"
+      },
+      {
+        "path": "PlayerRig/Player/Hurtbox",
+        "enabled": true,
+        "isTrigger": true,
+        "min": [
+          53.8500023,
+          0.0499999523,
+          11.65
+        ],
+        "max": [
+          54.55,
+          1.6500001,
+          12.35
+        ],
+        "shape": "{\"BoxCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":true,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"3\",\"m_Size\":{\"x\":0.699999988079071,\"y\":1.600000023841858,\"z\":0.699999988079071},\"m_Center\":{\"x\":0.0,\"y\":0.8500000238418579,\"z\":0.0}}}"
+      }
+    ]
+  },
+  "pawn": {
+    "pos": [
+      34.0,
+      0.0,
+      44.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "PlayerInside": false,
+    "colliders": [
+      {
+        "path": "Map/Environment/Structures/Pawnshop",
+        "enabled": true,
+        "isTrigger": true,
+        "min": [
+          26.0999985,
+          0.0,
+          38.1
+        ],
+        "max": [
+          41.9,
+          4.5,
+          49.9
+        ],
+        "material": "default",
+        "shape": "{\"BoxCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":true,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"3\",\"m_Size\":{\"x\":15.800000190734863,\"y\":4.5,\"z\":11.800000190734863},\"m_Center\":{\"x\":0.0,\"y\":2.25,\"z\":0.0}}}"
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Floor_In",
+        "enabled": true,
+        "isTrigger": false,
+        "min": [
+          26.0,
+          -0.02,
+          38.0
+        ],
+        "max": [
+          42.0,
+          0.06,
+          50.0
+        ],
+        "material": "default",
+        "shape": "{\"BoxCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":false,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"3\",\"m_Size\":{\"x\":1.0,\"y\":1.0,\"z\":1.0},\"m_Center\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_S_a",
+        "enabled": true,
+        "isTrigger": false,
+        "min": [
+          26.0,
+          0.0,
+          37.85
+        ],
+        "max": [
+          33.2,
+          4.5,
+          38.15
+        ],
+        "material": "default",
+        "shape": "{\"BoxCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":false,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"3\",\"m_Size\":{\"x\":1.0,\"y\":1.0,\"z\":1.0},\"m_Center\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_S_b",
+        "enabled": true,
+        "isTrigger": false,
+        "min": [
+          34.8000031,
+          0.0,
+          37.85
+        ],
+        "max": [
+          42.0,
+          4.5,
+          38.15
+        ],
+        "material": "default",
+        "shape": "{\"BoxCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":false,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"3\",\"m_Size\":{\"x\":1.0,\"y\":1.0,\"z\":1.0},\"m_Center\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_N",
+        "enabled": true,
+        "isTrigger": false,
+        "min": [
+          25.8499985,
+          0.0,
+          49.85
+        ],
+        "max": [
+          42.15,
+          4.5,
+          50.15
+        ],
+        "material": "default",
+        "shape": "{\"BoxCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":false,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"3\",\"m_Size\":{\"x\":1.0,\"y\":1.0,\"z\":1.0},\"m_Center\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_W",
+        "enabled": true,
+        "isTrigger": false,
+        "min": [
+          25.85,
+          0.0,
+          37.85
+        ],
+        "max": [
+          26.15,
+          4.5,
+          50.15
+        ],
+        "material": "default",
+        "shape": "{\"BoxCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":false,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"3\",\"m_Size\":{\"x\":1.0,\"y\":1.0,\"z\":1.0},\"m_Center\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_E",
+        "enabled": true,
+        "isTrigger": false,
+        "min": [
+          41.85,
+          0.0,
+          37.85
+        ],
+        "max": [
+          42.15,
+          4.5,
+          50.15
+        ],
+        "material": "default",
+        "shape": "{\"BoxCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":false,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"3\",\"m_Size\":{\"x\":1.0,\"y\":1.0,\"z\":1.0},\"m_Center\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof",
+        "enabled": true,
+        "isTrigger": false,
+        "min": [
+          25.7,
+          4.5,
+          37.7
+        ],
+        "max": [
+          42.3,
+          4.8,
+          50.3
+        ],
+        "material": "default",
+        "shape": "{\"BoxCollider\":{\"m_Material\":{\"instanceID\":0},\"m_IncludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_ExcludeLayers\":{\"serializedVersion\":\"2\",\"m_Bits\":0},\"m_LayerOverridePriority\":0,\"m_IsTrigger\":false,\"m_ProvidesContacts\":false,\"m_Enabled\":true,\"serializedVersion\":\"3\",\"m_Size\":{\"x\":1.0,\"y\":1.0,\"z\":1.0},\"m_Center\":{\"x\":0.0,\"y\":0.0,\"z\":0.0}}}"
+      }
+    ],
+    "meshes": [
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Floor_In",
+        "mesh": "Library/unity default resources",
+        "enabled": true,
+        "min": [
+          26.0,
+          -0.02,
+          38.0
+        ],
+        "max": [
+          42.0,
+          0.06,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_S_a",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          26.0,
+          0.0,
+          37.85
+        ],
+        "max": [
+          33.2,
+          4.5,
+          38.15
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_S_b",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          34.8000031,
+          0.0,
+          37.85
+        ],
+        "max": [
+          42.0,
+          4.5,
+          38.15
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_N",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          25.85,
+          0.0,
+          49.85
+        ],
+        "max": [
+          42.15,
+          4.5,
+          50.15
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_W",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          25.85,
+          0.0,
+          37.85
+        ],
+        "max": [
+          26.15,
+          4.5,
+          50.15
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Pawnshop_E",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          41.85,
+          0.0,
+          37.85
+        ],
+        "max": [
+          42.15,
+          4.5,
+          50.15
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          25.7,
+          4.5,
+          37.7
+        ],
+        "max": [
+          42.3,
+          4.8,
+          50.3
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Coping",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          25.75,
+          4.72,
+          37.91
+        ],
+        "max": [
+          42.25,
+          4.86,
+          38.09
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Coping",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          25.75,
+          4.72,
+          49.91
+        ],
+        "max": [
+          42.25,
+          4.86,
+          50.09
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          26.3725,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          26.4275,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          27.5725,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          27.6275,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          28.772501,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          28.8275013,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          29.9725018,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          30.0275021,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          31.1725025,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          31.2275028,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          32.3725,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          32.4275,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          33.5725021,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          33.6275024,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          34.7725029,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          34.8275032,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          35.9725037,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          36.027504,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          37.1725044,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          37.2275047,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          38.3725052,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          38.4275055,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          39.572506,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          39.6275063,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Seam",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          40.7725067,
+          4.7925,
+          38.0
+        ],
+        "max": [
+          40.827507,
+          4.8275,
+          50.0
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_VentBase",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          37.98,
+          4.82,
+          44.6
+        ],
+        "max": [
+          38.98,
+          5.02,
+          45.4
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof/Roof_Vent",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          38.13,
+          5.00999975,
+          44.725
+        ],
+        "max": [
+          38.829998,
+          5.23,
+          45.275
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/DoorFrame",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          33.05,
+          0.0,
+          37.93
+        ],
+        "max": [
+          34.95,
+          2.4,
+          38.07
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Boarded_Corner",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          29.0533638,
+          1.51170707,
+          37.63
+        ],
+        "max": [
+          29.58664,
+          2.028293,
+          37.74
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Dark_Glass",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          28.215,
+          1.49499989,
+          37.7505
+        ],
+        "max": [
+          29.545002,
+          2.705,
+          37.7755
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Deep_Sill",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          28.0600014,
+          1.30500007,
+          37.45
+        ],
+        "max": [
+          29.7,
+          1.435,
+          37.8500023
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Recess",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          28.1300011,
+          1.41,
+          37.7775
+        ],
+        "max": [
+          29.6300011,
+          2.79,
+          37.8425026
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Rail",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          28.1400013,
+          1.4225,
+          37.7045021
+        ],
+        "max": [
+          29.62,
+          1.47750008,
+          37.7595024
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Rail.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          28.1400013,
+          2.19249988,
+          37.7045021
+        ],
+        "max": [
+          29.62,
+          2.2474997,
+          37.7595024
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Rail.002",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          28.1400013,
+          2.72249985,
+          37.7045021
+        ],
+        "max": [
+          29.62,
+          2.77749968,
+          37.7595024
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Upright",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          28.1425018,
+          1.41,
+          37.7075
+        ],
+        "max": [
+          28.1975021,
+          2.79,
+          37.7625
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Upright.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          28.8525,
+          1.41,
+          37.7075
+        ],
+        "max": [
+          28.9075012,
+          2.79,
+          37.7625
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Upright.002",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          29.5625,
+          1.41,
+          37.7075
+        ],
+        "max": [
+          29.6175,
+          2.79,
+          37.7625
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Boarded_Corner",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          39.2933578,
+          1.51170707,
+          37.63
+        ],
+        "max": [
+          39.8266373,
+          2.028293,
+          37.74
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Dark_Glass",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          38.454998,
+          1.49499989,
+          37.7505
+        ],
+        "max": [
+          39.785,
+          2.705,
+          37.7755
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Deep_Sill",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          38.3,
+          1.30500007,
+          37.45
+        ],
+        "max": [
+          39.94,
+          1.435,
+          37.8500023
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Recess",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          38.37,
+          1.41,
+          37.7775
+        ],
+        "max": [
+          39.87,
+          2.79,
+          37.8425026
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Rail",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          38.3799973,
+          1.4225,
+          37.7045021
+        ],
+        "max": [
+          39.86,
+          1.47750008,
+          37.7595024
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Rail.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          38.3799973,
+          2.19249988,
+          37.7045021
+        ],
+        "max": [
+          39.86,
+          2.2474997,
+          37.7595024
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Rail.002",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          38.3799973,
+          2.72249985,
+          37.7045021
+        ],
+        "max": [
+          39.86,
+          2.77749968,
+          37.7595024
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Upright",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          38.3825,
+          1.41,
+          37.7075
+        ],
+        "max": [
+          38.4375,
+          2.79,
+          37.7625
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Upright.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          39.0925,
+          1.41,
+          37.7075
+        ],
+        "max": [
+          39.1475,
+          2.79,
+          37.7625
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Window01/Window01/Window_Upright.002",
+        "mesh": "Assets/Art/Environments/Village01/Models/Window01.fbx",
+        "enabled": false,
+        "min": [
+          39.8024979,
+          1.41,
+          37.7075
+        ],
+        "max": [
+          39.8575,
+          2.79,
+          37.7625
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          32.0025024,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          32.3975,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          32.4025,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          32.7974968,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof.002",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          32.8025,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          33.1975,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof.003",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          33.2025032,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          33.5975,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof.004",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          33.6025,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          33.9974976,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof.005",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          34.0025024,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          34.3975,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof.006",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          34.4025,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          34.7974968,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof.007",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          34.8025,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          35.1975,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof.008",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          35.2025032,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          35.5975,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Roof.009",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          35.6025,
+          2.593719,
+          36.46727
+        ],
+        "max": [
+          35.9974976,
+          2.87628078,
+          37.8327332
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          32.0025024,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          32.3975,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          32.4025,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          32.7974968,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance.002",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          32.8025,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          33.1975,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance.003",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          33.2025032,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          33.5975,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance.004",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          33.6025,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          33.9974976,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance.005",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          34.0025024,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          34.3975,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance.006",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          34.4025,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          34.7974968,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance.007",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          34.8025,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          35.1975,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance.008",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          35.2025032,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          35.5975,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Canvas_Valance.009",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          35.6025,
+          2.43500018,
+          36.45
+        ],
+        "max": [
+          35.9974976,
+          2.62500024,
+          36.49
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Front_Rail",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          32.01,
+          2.585,
+          36.445
+        ],
+        "max": [
+          35.99,
+          2.63500023,
+          36.4950027
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Roof_Rib",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          32.3275,
+          2.598953,
+          36.4573555
+        ],
+        "max": [
+          32.3724976,
+          2.87104678,
+          37.81265
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Roof_Rib.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          35.6275024,
+          2.598953,
+          36.4573555
+        ],
+        "max": [
+          35.6725,
+          2.87104678,
+          37.81265
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Wall_Bracket",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          32.3275,
+          2.32951951,
+          36.55656
+        ],
+        "max": [
+          32.3724976,
+          2.65048051,
+          37.8134422
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Awning01/Awning01/Wall_Bracket.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/Awning01.fbx",
+        "enabled": false,
+        "min": [
+          35.6275024,
+          2.32951951,
+          36.55656
+        ],
+        "max": [
+          35.6725,
+          2.65048051,
+          37.8134422
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/ShopSign01/ShopSign01/Mount",
+        "mesh": "Assets/Art/Environments/Village01/Models/ShopSign01.fbx",
+        "enabled": false,
+        "min": [
+          32.925,
+          3.495,
+          37.59
+        ],
+        "max": [
+          32.9750023,
+          3.545,
+          37.81
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/ShopSign01/ShopSign01/Mount.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/ShopSign01.fbx",
+        "enabled": false,
+        "min": [
+          35.0249977,
+          3.495,
+          37.59
+        ],
+        "max": [
+          35.075,
+          3.545,
+          37.81
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/ShopSign01/ShopSign01/Painted_Face",
+        "mesh": "Assets/Art/Environments/Village01/Models/ShopSign01.fbx",
+        "enabled": false,
+        "min": [
+          32.49,
+          3.24,
+          37.5285
+        ],
+        "max": [
+          35.51,
+          3.8,
+          37.5535
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/ShopSign01/ShopSign01/Screw",
+        "mesh": "Assets/Art/Environments/Village01/Models/ShopSign01.fbx",
+        "enabled": false,
+        "min": [
+          32.4992142,
+          3.276,
+          37.511
+        ],
+        "max": [
+          32.5407867,
+          3.324,
+          37.529
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/ShopSign01/ShopSign01/Screw.001",
+        "mesh": "Assets/Art/Environments/Village01/Models/ShopSign01.fbx",
+        "enabled": false,
+        "min": [
+          32.4992142,
+          3.716,
+          37.511
+        ],
+        "max": [
+          32.5407867,
+          3.764,
+          37.529
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/ShopSign01/ShopSign01/Screw.002",
+        "mesh": "Assets/Art/Environments/Village01/Models/ShopSign01.fbx",
+        "enabled": false,
+        "min": [
+          35.4592133,
+          3.276,
+          37.511
+        ],
+        "max": [
+          35.5007858,
+          3.324,
+          37.529
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/ShopSign01/ShopSign01/Screw.003",
+        "mesh": "Assets/Art/Environments/Village01/Models/ShopSign01.fbx",
+        "enabled": false,
+        "min": [
+          35.4592133,
+          3.716,
+          37.511
+        ],
+        "max": [
+          35.5007858,
+          3.764,
+          37.529
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/ShopSign01/ShopSign01/Sign_Frame",
+        "mesh": "Assets/Art/Environments/Village01/Models/ShopSign01.fbx",
+        "enabled": false,
+        "min": [
+          32.4,
+          3.155,
+          37.55
+        ],
+        "max": [
+          35.6,
+          3.885,
+          37.670002
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Plinth",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          26.0,
+          0.0,
+          37.7600021
+        ],
+        "max": [
+          33.0,
+          0.44,
+          37.96
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Plinth",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          35.0,
+          0.0,
+          37.7600021
+        ],
+        "max": [
+          42.0,
+          0.44,
+          37.96
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Corner_Repair",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          25.86,
+          0.0,
+          37.86
+        ],
+        "max": [
+          26.14,
+          4.4,
+          38.14
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Corner_Repair",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          25.86,
+          0.0,
+          49.86
+        ],
+        "max": [
+          26.14,
+          4.4,
+          50.14
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Corner_Repair",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          41.86,
+          0.0,
+          37.86
+        ],
+        "max": [
+          42.14,
+          4.4,
+          38.14
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Corner_Repair",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          41.86,
+          0.0,
+          49.86
+        ],
+        "max": [
+          42.14,
+          4.4,
+          50.14
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Village01_Detail/Wall_RepairPanel",
+        "mesh": "Library/unity default resources",
+        "enabled": false,
+        "min": [
+          25.789999,
+          0.349999964,
+          42.9
+        ],
+        "max": [
+          25.87,
+          2.25,
+          45.1
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Shell_Art02/Pawnshop_Shell",
+        "mesh": "Assets/Art/Environments/Town02/Models/Pawnshop_Shell.fbx",
+        "enabled": true,
+        "min": [
+          25.7799988,
+          -7.15255737E-07,
+          36.69
+        ],
+        "max": [
+          42.22,
+          4.5,
+          50.1499977
+        ]
+      },
+      {
+        "path": "Map/Environment/Structures/Pawnshop/Roof_Art02/Pawnshop_Roof",
+        "mesh": "Assets/Art/Environments/Town02/Models/Pawnshop_Roof.fbx",
+        "enabled": true,
+        "min": [
+          25.725,
+          4.49999857,
+          37.7250023
+        ],
+        "max": [
+          42.275,
+          5.81250048,
+          50.2749977
+        ]
+      }
+    ]
+  }
+}

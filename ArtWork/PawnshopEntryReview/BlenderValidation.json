@@ -1,0 +1,37 @@
+{
+  "removedCanopyPieces": [
+    "Awning slat",
+    "Awning slat.001",
+    "Awning slat.002",
+    "Awning slat.003",
+    "Awning slat.004",
+    "Awning slat.005",
+    "Awning slat.006",
+    "Awning slat.007",
+    "Awning slat.008",
+    "Awning slat.009",
+    "Awning slat.010",
+    "Awning slat.011",
+    "Awning slat.012",
+    "Awning slat.013",
+    "Awning bracket",
+    "Awning bracket.001"
+  ],
+  "sourcePieces": 45,
+  "triangles": 1996,
+  "uvLayers": 1,
+  "materialNames": [
+    "Town_Brick",
+    "Town_Concrete",
+    "Town_WoodDark",
+    "Town_Glass",
+    "Town_Olive",
+    "Town_Edge",
+    "Town_Wood",
+    "Town_Paper",
+    "Town_Steel"
+  ],
+  "floorInsetTop": 0.055,
+  "finiteVertices": true,
+  "positiveFaceAreas": true
+}

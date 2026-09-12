@@ -1,0 +1,2 @@
+var cols=UnityEngine.Object.FindObjectsByType<UnityEngine.Collider>().Where(c=>!c.isTrigger&&c.enabled&&c.bounds.Intersects(new UnityEngine.Bounds(new UnityEngine.Vector3(34,.4f,38),new UnityEngine.Vector3(4,1.1f,4)))).Select(c=>new{path=UnityEditor.AnimationUtility.CalculateTransformPath(c.transform,null),min=c.bounds.min.ToString("F4"),max=c.bounds.max.ToString("F4"),type=c.GetType().Name});
+return Newtonsoft.Json.JsonConvert.SerializeObject(cols,Newtonsoft.Json.Formatting.Indented);
