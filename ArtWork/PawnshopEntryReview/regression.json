@@ -1,0 +1,30 @@
+[
+  {
+    "check": "Inside hides roof",
+    "pass": true
+  },
+  {
+    "check": "Outside restores roof",
+    "pass": true
+  },
+  {
+    "check": "Nine decorative floor and road colliders disabled",
+    "pass": true
+  },
+  {
+    "check": "Ground still supports the interior at Y=0",
+    "pass": true
+  },
+  {
+    "check": "Front wall still solid",
+    "pass": true
+  },
+  {
+    "check": "Doorway open at body height",
+    "pass": true
+  },
+  {
+    "check": "Updated art adds no physical step",
+    "pass": true
+  }
+]

@@ -135,8 +135,9 @@ public static class Safehouse3DLayout
 
         float hw = w * .5f, hd = d * .5f;
 
-        // 실내 바닥(외부 지면보다 살짝 위 — 문턱)
-        n += Box(root, "Floor_In", new Vector3(cx, 0.02f, cz), new Vector3(w, 0.08f, d), _shopFloor);
+        // Visual floor overlay. Ground is the walking surface at Y=0; a raised collider
+        // penetrates the Y-locked player capsule and turns friction into a movement lock.
+        n += Box(root, "Floor_In", new Vector3(cx, -0.035f, cz), new Vector3(w, 0.08f, d), _shopFloor, false);
 
         // 네 벽. 문이 있는 면은 두 토막으로 나눠 가운데를 비운다.
         n += WallRun(root, name + "_S", cx, cz - hd, w, h, true,  doorSide == "S");
@@ -236,7 +237,7 @@ public static class Safehouse3DLayout
         return m;
     }
 
-    static int Box(GameObject parent, string name, Vector3 center, Vector3 size, Material mat)
+    static int Box(GameObject parent, string name, Vector3 center, Vector3 size, Material mat, bool solid = true)
     {
         var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
         go.name = name;
@@ -244,6 +245,7 @@ public static class Safehouse3DLayout
         go.transform.position = center;
         go.transform.localScale = size;
         go.GetComponent<MeshRenderer>().sharedMaterial = mat;
+        go.GetComponent<Collider>().enabled = solid;
         return 1;
     }
 
@@ -413,10 +415,10 @@ public static class Safehouse3DLayout
 
         // ① 골목 — 상가 앞 동서 대로 + 광장에서 게이트로 나가는 동서 길 + 남북 연결로.
         //    지면과 살짝 다른 색이면 충분하다. 길이 보이면 마을이 격자로 읽힌다.
-        n += Box(root, "Road_ShopFront", new Vector3(38f, 0.01f, 36.5f), new Vector3(66f, 0.02f, 5f), road);
-        n += Box(root, "Road_Plaza",     new Vector3(44f, 0.01f, 29f),   new Vector3(58f, 0.02f, 6f), road);
-        n += Box(root, "Road_Link",      new Vector3(40f, 0.01f, 32.5f), new Vector3(5f,  0.02f, 12f), road);
-        n += Box(root, "Road_Home",      new Vector3(58f, 0.01f, 16f),   new Vector3(5f,  0.02f, 24f), road);
+        n += Box(root, "Road_ShopFront", new Vector3(38f, 0.01f, 36.5f), new Vector3(66f, 0.02f, 5f), road, false);
+        n += Box(root, "Road_Plaza",     new Vector3(44f, 0.01f, 29f),   new Vector3(58f, 0.02f, 6f), road, false);
+        n += Box(root, "Road_Link",      new Vector3(40f, 0.01f, 32.5f), new Vector3(5f,  0.02f, 12f), road, false);
+        n += Box(root, "Road_Home",      new Vector3(58f, 0.01f, 16f),   new Vector3(5f,  0.02f, 24f), road, false);
 
         // ② 간판 — 어느 가게인지 문 위에서 알려준다. 잠긴 가게도 이름은 보인다.
         n += Sign(root, "전당포",  34f, 37.6f);

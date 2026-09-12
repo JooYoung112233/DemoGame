@@ -1,0 +1,3 @@
+var pawn=UnityEngine.Object.FindObjectsByType<BuildingInterior>().Single(b=>b.name=="Pawnshop");
+var rs=UnityEngine.Object.FindObjectsByType<UnityEngine.Renderer>().Where(r=>r.enabled&&r.bounds.max.y<.3f&&r.bounds.Contains(new UnityEngine.Vector3(34,r.bounds.center.y,37.5f))).Select(r=>new{path=UnityEditor.AnimationUtility.CalculateTransformPath(r.transform,null),min=r.bounds.min.ToString("F4"),max=r.bounds.max.ToString("F4")});
+return Newtonsoft.Json.JsonConvert.SerializeObject(new{pawn.PlayerInside,roof=pawn.transform.Find("Roof_Art02").GetComponentInChildren<UnityEngine.Renderer>().enabled,surfaces=rs},Newtonsoft.Json.Formatting.Indented);

@@ -1,0 +1,55 @@
+{
+  "changes": [
+    {
+      "path": "Environment/Structures/Pawnshop/Floor_In",
+      "beforeTop": 0.06
+    },
+    {
+      "path": "Environment/Structures/Repair/Floor_In",
+      "beforeTop": 0.06
+    },
+    {
+      "path": "Environment/Structures/Medical/Floor_In",
+      "beforeTop": 0.06
+    },
+    {
+      "path": "Environment/Structures/Furniture/Floor_In",
+      "beforeTop": 0.06
+    },
+    {
+      "path": "Environment/Structures/BlackMarket/Floor_In",
+      "beforeTop": 0.06
+    },
+    {
+      "path": "Environment/Scatter/Dressing/Road_ShopFront",
+      "beforeTop": 0.02
+    },
+    {
+      "path": "Environment/Scatter/Dressing/Road_Plaza",
+      "beforeTop": 0.02
+    },
+    {
+      "path": "Environment/Scatter/Dressing/Road_Link",
+      "beforeTop": 0.02
+    },
+    {
+      "path": "Environment/Scatter/Dressing/Road_Home",
+      "beforeTop": 0.02
+    }
+  ],
+  "groundTop": 0.0,
+  "obstaclesAndInteractionsPreserved": true,
+  "missingScripts": 0,
+  "triangles": 1996,
+  "materialPaths": [
+    "Assets/Art/Environments/Town02/Materials/Town_Brick.mat",
+    "Assets/Art/Environments/Town02/Materials/Town_Concrete.mat",
+    "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat",
+    "Assets/Art/Environments/Town02/Materials/Town_Glass.mat",
+    "Assets/Art/Environments/Town02/Materials/Town_Olive.mat",
+    "Assets/Art/Environments/Town02/Materials/Town_Edge.mat",
+    "Assets/Art/Environments/Town02/Materials/Town_Wood.mat",
+    "Assets/Art/Environments/Town02/Materials/Town_Paper.mat",
+    "Assets/Art/Environments/Town02/Materials/Town_Steel.mat"
+  ]
+}
