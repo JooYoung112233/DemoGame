@@ -1,6 +1,6 @@
 # Player cartoon texture concepts — 2026-09-12
 
-Status: concept comparison self-review complete; user selection pending. This sheet is an illustration, not a UV texture, Blender render, or Unity screenshot. No runtime assets were changed.
+Status: concept comparison self-review complete; user selected B on 2026-09-12, including graphic painted shadows. This sheet is an illustration, not a UV texture, Blender render, or Unity screenshot. No runtime assets were changed.
 
 ## Proposals
 
@@ -22,4 +22,4 @@ Subject references: `../PlayerIdentity62/Unity/B_Details_Front.png` and `B_Detai
 - Small rear illustrations provide approximate elevated-view readability only. They are not calibrated 62-degree camera evidence. Actual 62-degree Unity inspection follows user selection and UV production.
 - B includes illustrative contour emphasis; only surface seams/folds are a texture proposal. A screen-space silhouette outline would require a separate rendering decision and is not included in this texture-only scope.
 - Painted light/shadow shapes illustrate the art direction; actual brightness under game lighting remains unverified. Minor illustrated hand/contour differences are not proposed mesh edits.
-- No new model, UV, rig, animation, shader, lighting, material or scene changes were made. User approval is required before producing/applying the selected texture direction.
+- No new model, UV, rig, animation, shader, lighting, material or scene changes were made. User selected B; its first actual texture implementation is documented in ../PlayerComic62/README.md. Final in-game appearance approval remains separate.
