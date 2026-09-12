@@ -1,13 +1,16 @@
 #ifndef BRB_GAMELIT_FORWARD_INCLUDED
 #define BRB_GAMELIT_FORWARD_INCLUDED
 
-// BRB/GameLit 앞면 패스 — 어두운 사실풍(docs/rendering.md §게임 전용 셰이더 + 포스트 프로세싱, 2026-09-11).
+// BRB/GameLit forward pass — matte lighting for painted Comic B textures (2026-09-13).
 //
 // 조명 계산은 URP의 UniversalFragmentPBR에 맡긴다. 그러면 옛 셰이더가 빠졌던 함정 두 개가 구조적으로 사라진다:
 //   ① 추가 광원 그림자 — URP 내부가 그림자를 받는 GetAdditionalLight 오버로드를 쓴다(2인자 함정 없음).
 //   ② Forward+ — URP 내부가 LIGHT_LOOP_BEGIN/END(_CLUSTER_LIGHT_LOOP)로 돈다(개수 0 함정 없음).
-// 이 셰이더가 더하는 건 조명 **앞뒤의 룩**뿐이다: 때(grime) → PBR 조명 → 그늘 채도 빼기 → 실루엣 림.
+// Painted mode preserves texture ink and hue; legacy grime/desaturation/rim remain opt-in.
 
+// Specular workflow lets painted surfaces set reflectance to zero without replacing
+// URP's light loops. Shadows, light cookies, Forward+ and additional lights stay native.
+#define _SPECULAR_SETUP 1
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
 // 룩 A/B 비교용 전역 스위치 — Shader.SetGlobalFloat("_GameLitLookOff", 1)이면 때·그늘 채도·림을 끄고 순수 PBR만 남긴다.
@@ -98,22 +101,25 @@ half4 GameLitFragment(Varyings input) : SV_Target
     half4 albedoAlpha = SampleAlbedoAlpha(uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
     half alpha = Alpha(albedoAlpha.a, _BaseColor, _Cutoff);
     half3 albedo = albedoAlpha.rgb * _BaseColor.rgb;
+    half comic = saturate(_ComicLighting);
 
     half3 normalWS = normalize(input.normalWS);
     #if defined(_NORMALMAP)
-        half3 normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
+        half bump = lerp(_BumpScale, min(_BumpScale, 0.12h), comic);
+        half3 normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), bump);
         half3 bitangent = input.tangentWS.w * cross(input.normalWS, input.tangentWS.xyz);
         normalWS = normalize(TransformTangentToWorld(normalTS, half3x3(input.tangentWS.xyz, bitangent, input.normalWS)));
     #endif
 
     // ① 때 — 색은 흙빛으로, 표면은 무광으로
-    half look = 1.0h - saturate(_GameLitLookOff);   // A/B 스위치(전역) — 0이면 룩 효과를 모두 끈다
+    half look = (1.0h - saturate(_GameLitLookOff)) * (1.0h - comic);
     half grime = GameGrime(input.positionWS, input.positionOS, normalWS) * _GrimeStrength * look;
     albedo = lerp(albedo, albedo * _GrimeColor.rgb, grime);
 
     half occlusion = 1.0h;
     #if defined(_OCCLUSIONMAP)
-        occlusion = lerp(1.0h, SAMPLE_TEXTURE2D(_OcclusionMap, sampler_OcclusionMap, uv).g, _OcclusionStrength);
+        half aoStrength = lerp(_OcclusionStrength, min(_OcclusionStrength, 0.35h), comic);
+        occlusion = lerp(1.0h, SAMPLE_TEXTURE2D(_OcclusionMap, sampler_OcclusionMap, uv).g, aoStrength);
     #endif
 
     InputData inputData = (InputData)0;
@@ -139,6 +145,11 @@ half4 GameLitFragment(Varyings input) : SV_Target
         surface.metallic *= packedSurface.r;
         surface.smoothness *= packedSurface.a;
     #endif
+    // Preserve the old metallic material's reflectance at zero strength, then remove
+    // reflective highlights for inked textures. No emission/ambient floor is added:
+    // an unlit area remains dark, including the backpack and nighttime interiors.
+    surface.specular = lerp(lerp(half3(0.04h, 0.04h, 0.04h), albedo, surface.metallic), half3(0, 0, 0), comic);
+    surface.smoothness *= 1.0h - comic;
     surface.normalTS = half3(0, 0, 1);
     surface.occlusion = occlusion;
     #if defined(_EMISSION)

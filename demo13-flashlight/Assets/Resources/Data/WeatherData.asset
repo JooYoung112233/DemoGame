@@ -12,22 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3684e582e8444924fa14de0d2b1c4df3, type: 3}
   m_Name: WeatherData
   m_EditorClassIdentifier: Game.Scripts::WeatherData
-  dayIntensity: 0.95
-  dayLightColor: {r: 1, g: 0.93, b: 0.84, a: 1}
+  dayIntensity: 0.82
+  dayLightColor: {r: 1, g: 0.98, b: 0.94, a: 1}
   daySunAngle: {x: 58, y: -30, z: 0}
-  dayAmbientColor: {r: 0.29, g: 0.32, b: 0.35, a: 1}
+  dayAmbientColor: {r: 0.25, g: 0.28, b: 0.32, a: 1}
   dayAmbientIntensity: 1
   dayFog: 0
   dayFogColor: {r: 0.6, g: 0.6, b: 0.65, a: 1}
   dayFogDensity: 0.01
-  nightIntensity: 0.38
-  nightLightColor: {r: 0.66, g: 0.58, b: 0.85, a: 1}
+  nightIntensity: 0.3
+  nightLightColor: {r: 0.63, g: 0.7, b: 0.88, a: 1}
   nightSunAngle: {x: 58, y: -35, z: 0}
-  nightAmbientColor: {r: 0.2, g: 0.17, b: 0.27, a: 1}
+  nightAmbientColor: {r: 0.13, g: 0.16, b: 0.23, a: 1}
   nightAmbientIntensity: 0.2
   nightFog: 1
-  nightFogColor: {r: 0.06, g: 0.04, b: 0.09, a: 1}
-  nightFogDensity: 0.022
+  nightFogColor: {r: 0.06, g: 0.08, b: 0.12, a: 1}
+  nightFogDensity: 0.016
   weather: 0
   rainIntensity: 0.6
   rainTint: {r: 0.7, g: 0.75, b: 0.85, a: 1}

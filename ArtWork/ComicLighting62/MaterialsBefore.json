@@ -1,0 +1,1082 @@
+[
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Architecture_Roof.mat",
+    "name": "Architecture_Roof",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Grey.mat",
+    "name": "Village_Grey",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.461, 0.473, 0.449, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Wood.mat",
+    "name": "Town_Wood",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(0.728, 0.626, 0.489, 1.000)",
+    "grime": 0.09,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Canvas.mat",
+    "name": "Town_Canvas",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Cloth_Comic.png",
+    "color": "RGBA(0.532, 0.537, 0.455, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Rubber.mat",
+    "name": "Village_Rubber",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.168, 0.183, 0.179, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Steel.mat",
+    "name": "Town_Steel",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.491, 0.543, 0.535, 1.000)",
+    "grime": 0.09,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Concrete.mat",
+    "name": "Town_Concrete",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.547, 0.552, 0.517, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat",
+    "name": "Town_WoodDark",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(0.517, 0.439, 0.338, 1.000)",
+    "grime": 0.09,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Glass.mat",
+    "name": "Town_Glass",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.212, 0.276, 0.274, 1.000)",
+    "grime": 0.09,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Olive.mat",
+    "name": "Town_Olive",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.437, 0.467, 0.389, 1.000)",
+    "grime": 0.09,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Edge.mat",
+    "name": "Town_Edge",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png",
+    "color": "RGBA(0.473, 0.490, 0.455, 1.000)",
+    "grime": 0.09,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Paper.mat",
+    "name": "Town_Paper",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Paper_Comic.png",
+    "color": "RGBA(0.767, 0.735, 0.642, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat",
+    "name": "Architecture_Footing",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Steel.mat",
+    "name": "Village_Steel",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.243, 0.274, 0.267, 1.000)",
+    "grime": 0.35,
+    "metal": 0.4,
+    "smooth": 0.3
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_WoodDark.mat",
+    "name": "Village_WoodDark",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(0.377, 0.309, 0.240, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_OliveDark.mat",
+    "name": "Village_OliveDark",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.304, 0.328, 0.274, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Concrete.mat",
+    "name": "Village_Concrete",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.417, 0.425, 0.413, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat",
+    "name": "Village_OliveLight",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.490, 0.501, 0.424, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Olive.mat",
+    "name": "Village_Olive",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.403, 0.421, 0.353, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Architecture_Plaster.mat",
+    "name": "Architecture_Plaster",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Rubber.mat",
+    "name": "Safehouse_Rubber",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.168, 0.183, 0.179, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/Scene_Metal_13ba72c858fc.mat",
+    "name": "Scene_Metal_13ba72c858fc",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.5,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat",
+    "name": "Village_Canvas",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Cloth_Comic.png",
+    "color": "RGBA(0.461, 0.467, 0.404, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_LampGlow.mat",
+    "name": "Village_LampGlow",
+    "shader": "BRB/GameLit",
+    "texture": "",
+    "color": "RGBA(0.978, 0.792, 0.517, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Plaza.mat",
+    "name": "Road_Plaza",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Asphalt_Comic.png",
+    "color": "RGBA(0.410, 0.425, 0.414, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_MapLine.mat",
+    "name": "Village_MapLine",
+    "shader": "BRB/GameLit",
+    "texture": "",
+    "color": "RGBA(0.532, 0.540, 0.477, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/Scene_Wood_13ba72c858fc.mat",
+    "name": "Scene_Wood_13ba72c858fc",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.5,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_DarkOlive.mat",
+    "name": "Town_DarkOlive",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.313, 0.349, 0.300, 1.000)",
+    "grime": 0.09,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Red.mat",
+    "name": "Town_Red",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.584, 0.317, 0.253, 1.000)",
+    "grime": 0.09,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Wear.mat",
+    "name": "Village_Wear",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.542, 0.512, 0.428, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Glass.mat",
+    "name": "Village_Glass",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.287, 0.362, 0.380, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Ochre.mat",
+    "name": "Town_Ochre",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.601, 0.542, 0.424, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Red.mat",
+    "name": "Village_Red",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.527, 0.293, 0.224, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_ConcreteDark.mat",
+    "name": "Ground62_ConcreteDark",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Earth_Comic.png",
+    "color": "RGBA(0.509, 0.513, 0.481, 0.930)",
+    "grime": 0.06,
+    "metal": 0.0,
+    "smooth": 0.15
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Soil.mat",
+    "name": "Ground62_Soil",
+    "shader": "BRB/GroundFadeLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Earth_Comic.png",
+    "color": "RGBA(0.485, 0.447, 0.380, 1.000)",
+    "grime": 0.06,
+    "metal": 0.0,
+    "smooth": 0.15
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Concrete.mat",
+    "name": "Ground62_Concrete",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Earth_Comic.png",
+    "color": "RGBA(0.530, 0.535, 0.501, 0.970)",
+    "grime": 0.06,
+    "metal": 0.0,
+    "smooth": 0.15
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Stone.mat",
+    "name": "Ground62_Stone",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Earth_Comic.png",
+    "color": "RGBA(0.454, 0.458, 0.429, 0.830)",
+    "grime": 0.06,
+    "metal": 0.0,
+    "smooth": 0.15
+  },
+  {
+    "path": "",
+    "name": "gb_D9E0F2",
+    "shader": "BRB/GameLit",
+    "texture": "",
+    "color": "RGBA(0.850, 0.880, 0.950, 1.000)",
+    "grime": 0.5,
+    "metal": 0.0,
+    "smooth": 0.05
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Brick.mat",
+    "name": "Town_Brick",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Brick_Comic.png",
+    "color": "RGBA(0.547, 0.396, 0.309, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Canvas.mat",
+    "name": "TownProps_Canvas",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Cloth_Comic.png",
+    "color": "RGBA(0.532, 0.537, 0.455, 1.000)",
+    "grime": 0.08,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Edge.mat",
+    "name": "TownProps_Edge",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png",
+    "color": "RGBA(0.473, 0.490, 0.455, 1.000)",
+    "grime": 0.08,
+    "metal": 0.7,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Dirt.mat",
+    "name": "Town_Dirt",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Earth_Comic.png",
+    "color": "RGBA(0.485, 0.460, 0.399, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/c1f74b91_Town_RoofDark.mat",
+    "name": "c1f74b91_Town_RoofDark",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.088, 0.090, 0.078, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/c1f74b91_Town_Graphite.mat",
+    "name": "c1f74b91_Town_Graphite",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Brick_Comic.png",
+    "color": "RGBA(0.120, 0.119, 0.100, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Slab_1.mat",
+    "name": "Forecourt_Slab_1",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.533, 0.538, 0.504, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "",
+    "name": "Spike/OccluderFX",
+    "shader": "BRB/GameLit",
+    "texture": "",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.5,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Counter.mat",
+    "name": "Pawnshop_Counter",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(0.705, 0.558, 0.408, 1.000)",
+    "grime": 0.09,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Paper.mat",
+    "name": "Village_Paper",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Paper_Comic.png",
+    "color": "RGBA(0.735, 0.699, 0.610, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.14
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_EdgeMetal.mat",
+    "name": "Village_EdgeMetal",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.396, 0.424, 0.410, 1.000)",
+    "grime": 0.35,
+    "metal": 0.4,
+    "smooth": 0.3
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/326c45e4_Town_RoofClean.mat",
+    "name": "326c45e4_Town_RoofClean",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.255, 0.260, 0.235, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Cream.mat",
+    "name": "Town_Cream",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.708, 0.687, 0.618, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/326c45e4_Town_Sage.mat",
+    "name": "326c45e4_Town_Sage",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.200, 0.265, 0.235, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/326c45e4_Town_Tile.mat",
+    "name": "326c45e4_Town_Tile",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.520, 0.500, 0.430, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Slab_0.mat",
+    "name": "Forecourt_Slab_0",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.503, 0.508, 0.476, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Linen.mat",
+    "name": "Hideout_Linen",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Cloth_Comic.png",
+    "color": "RGBA(0.798, 0.761, 0.680, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Canvas.mat",
+    "name": "Hideout_Canvas",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Cloth_Comic.png",
+    "color": "RGBA(0.517, 0.501, 0.449, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Red.mat",
+    "name": "Hideout_Red",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.527, 0.293, 0.224, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Steel.mat",
+    "name": "Hideout_Steel",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.243, 0.274, 0.267, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/1d4d1c59_Town_RoofWarm.mat",
+    "name": "1d4d1c59_Town_RoofWarm",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.185, 0.163, 0.120, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/1d4d1c59_Town_RoofDark.mat",
+    "name": "1d4d1c59_Town_RoofDark",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.088, 0.090, 0.078, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Aggregate.mat",
+    "name": "Forecourt_Aggregate",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.390, 0.370, 0.310, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Architecture_Wood.mat",
+    "name": "Architecture_Wood",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.35,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_CrackLip.mat",
+    "name": "Ground62_CrackLip",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png",
+    "color": "RGBA(0.381, 0.387, 0.362, 1.000)",
+    "grime": 0.06,
+    "metal": 0.0,
+    "smooth": 0.15
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Crack.mat",
+    "name": "Ground62_Crack",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png",
+    "color": "RGBA(0.285, 0.283, 0.262, 1.000)",
+    "grime": 0.06,
+    "metal": 0.0,
+    "smooth": 0.15
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Cardboard.mat",
+    "name": "TownProps_Cardboard",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Paper_Comic.png",
+    "color": "RGBA(0.593, 0.501, 0.380, 1.000)",
+    "grime": 0.08,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Linen.mat",
+    "name": "TownProps_Linen",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Cloth_Comic.png",
+    "color": "RGBA(0.708, 0.680, 0.601, 1.000)",
+    "grime": 0.08,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Paper.mat",
+    "name": "TownProps_Paper",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Paper_Comic.png",
+    "color": "RGBA(0.767, 0.735, 0.642, 1.000)",
+    "grime": 0.08,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SwordProxy.mat",
+    "name": "SwordProxy",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.506, 0.527, 0.537, 1.000)",
+    "grime": 0.3,
+    "metal": 0.0,
+    "smooth": 0.28
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Floor.mat",
+    "name": "Pawnshop_Floor",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.500, 0.480, 0.440, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_DryDust.mat",
+    "name": "Ground62_DryDust",
+    "shader": "BRB/GroundFadeLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Earth_Comic.png",
+    "color": "RGBA(0.542, 0.512, 0.444, 1.000)",
+    "grime": 0.06,
+    "metal": 0.0,
+    "smooth": 0.15
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Town_Ground.mat",
+    "name": "Town_Ground",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Earth_Comic.png",
+    "color": "RGBA(0.485, 0.460, 0.399, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Link.mat",
+    "name": "Road_Link",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Asphalt_Comic.png",
+    "color": "RGBA(0.410, 0.425, 0.414, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/Scene_Plaster_13ba72c858fc.mat",
+    "name": "Scene_Plaster_13ba72c858fc",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.5,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_OliveDark.mat",
+    "name": "Hideout_OliveDark",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.304, 0.328, 0.274, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Olive.mat",
+    "name": "Hideout_Olive",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.403, 0.421, 0.353, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Wear.mat",
+    "name": "Hideout_Wear",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.542, 0.512, 0.428, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Home.mat",
+    "name": "Road_Home",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Asphalt_Comic.png",
+    "color": "RGBA(0.410, 0.425, 0.414, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Slab_2.mat",
+    "name": "Forecourt_Slab_2",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.563, 0.568, 0.532, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_BatWood.mat",
+    "name": "Player_Bandit_BatWood",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(0.461, 0.341, 0.229, 1.000)",
+    "grime": 0.3,
+    "metal": 0.0,
+    "smooth": 0.120000005
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_wrap.mat",
+    "name": "Player_Bandit_wrap",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Cloth_Comic.png",
+    "color": "RGBA(0.485, 0.458, 0.409, 1.000)",
+    "grime": 0.3,
+    "metal": 0.0,
+    "smooth": 0.120000005
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Grass.mat",
+    "name": "Ground62_Grass",
+    "shader": "BRB/GameLit",
+    "texture": "",
+    "color": "RGBA(0.430, 0.455, 0.326, 1.000)",
+    "grime": 0.06,
+    "metal": 0.0,
+    "smooth": 0.15
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_DryGrass.mat",
+    "name": "Ground62_DryGrass",
+    "shader": "BRB/GameLit",
+    "texture": "",
+    "color": "RGBA(0.566, 0.533, 0.413, 1.000)",
+    "grime": 0.06,
+    "metal": 0.0,
+    "smooth": 0.15
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Asphalt.mat",
+    "name": "Forecourt_Asphalt",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Asphalt_Comic.png",
+    "color": "RGBA(0.430, 0.440, 0.400, 1.000)",
+    "grime": 0.07,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Rust.mat",
+    "name": "TownProps_Rust",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.537, 0.362, 0.260, 1.000)",
+    "grime": 0.08,
+    "metal": 0.08,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Red.mat",
+    "name": "TownProps_Red",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.584, 0.317, 0.253, 1.000)",
+    "grime": 0.08,
+    "metal": 0.08,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Steel.mat",
+    "name": "TownProps_Steel",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.293, 0.321, 0.311, 1.000)",
+    "grime": 0.08,
+    "metal": 0.7,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Wear.mat",
+    "name": "TownProps_Wear",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.522, 0.530, 0.498, 1.000)",
+    "grime": 0.08,
+    "metal": 0.7,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_DirtSeam.mat",
+    "name": "TownProps_DirtSeam",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png",
+    "color": "RGBA(0.300, 0.267, 0.209, 1.000)",
+    "grime": 0.08,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Wood.mat",
+    "name": "Hideout_Wood",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(0.410, 0.304, 0.196, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodLight.mat",
+    "name": "Hideout_WoodLight",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(0.496, 0.389, 0.272, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodDark.mat",
+    "name": "Hideout_WoodDark",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Wood_Comic.png",
+    "color": "RGBA(0.323, 0.229, 0.147, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_EdgeMetal.mat",
+    "name": "Hideout_EdgeMetal",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Metal_Comic.png",
+    "color": "RGBA(0.396, 0.424, 0.410, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/c366020b_Town_RoofWarm.mat",
+    "name": "c366020b_Town_RoofWarm",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.185, 0.163, 0.120, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_ShopFront.mat",
+    "name": "Road_ShopFront",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Asphalt_Comic.png",
+    "color": "RGBA(0.410, 0.425, 0.414, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "",
+    "name": "gb_403833",
+    "shader": "BRB/GameLit",
+    "texture": "",
+    "color": "RGBA(0.250, 0.220, 0.200, 1.000)",
+    "grime": 0.5,
+    "metal": 0.0,
+    "smooth": 0.05
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/89cb1f6b_Town_RoofWarm.mat",
+    "name": "89cb1f6b_Town_RoofWarm",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.185, 0.163, 0.120, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/40402199_Town_Graphite.mat",
+    "name": "40402199_Town_Graphite",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Brick_Comic.png",
+    "color": "RGBA(0.120, 0.119, 0.100, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Plaster.mat",
+    "name": "Town_Plaster",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.650, 0.626, 0.556, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Roof.mat",
+    "name": "Town_Roof",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.437, 0.434, 0.396, 1.000)",
+    "grime": 0.12,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/099aab52_Town_Tile.mat",
+    "name": "099aab52_Town_Tile",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.520, 0.500, 0.430, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/Art/WorldComic62/Materials/099aab52_Town_Sage.mat",
+    "name": "099aab52_Town_Sage",
+    "shader": "Universal Render Pipeline/Lit",
+    "texture": "Assets/Art/WorldComic62/Textures/Plaster_Comic.png",
+    "color": "RGBA(0.200, 0.265, 0.235, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.160000026
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/PlayerGear_Painted.mat",
+    "name": "PlayerGear_Painted",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/ChibiSurvivor/Player/Painted62/Textures/PlayerGear_Comic_B.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.1,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+    "name": "Player_Painted",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Comic_B.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.1,
+    "metal": 0.0,
+    "smooth": 0.08
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/Pawnshop.mat",
+    "name": "Pawnshop",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/Pawnshop_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.07,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/VeteranScavenger.mat",
+    "name": "VeteranScavenger",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/VeteranScavenger_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.07,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/DistrictWarden.mat",
+    "name": "DistrictWarden",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/DistrictWarden_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.07,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/WanderingMerchant.mat",
+    "name": "WanderingMerchant",
+    "shader": "BRB/GameLit",
+    "texture": "Assets/Art/WorldComic62/Textures/WanderingMerchant_Comic.png",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.07,
+    "metal": 1.0,
+    "smooth": 1.0
+  },
+  {
+    "path": "",
+    "name": "Universal Render Pipeline/Particles/Unlit",
+    "shader": "Universal Render Pipeline/Particles/Unlit",
+    "texture": "",
+    "color": "RGBA(1.000, 1.000, 1.000, 1.000)",
+    "grime": 0.0,
+    "metal": 0.0,
+    "smooth": 0.0
+  }
+]

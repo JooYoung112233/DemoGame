@@ -1,0 +1,136 @@
+{
+  "pass": true,
+  "phasePass": true,
+  "phases": [
+    {
+      "night": false,
+      "name": "PorchWarmLight",
+      "expected": 0.65,
+      "actual": 0.65,
+      "pass": true
+    },
+    {
+      "night": false,
+      "name": "PracticalLight",
+      "expected": 2.5,
+      "actual": 2.5,
+      "pass": true
+    },
+    {
+      "night": false,
+      "name": "PracticalLight",
+      "expected": 2.5,
+      "actual": 2.5,
+      "pass": true
+    },
+    {
+      "night": false,
+      "name": "PracticalLight",
+      "expected": 2.5,
+      "actual": 2.5,
+      "pass": true
+    },
+    {
+      "night": false,
+      "name": "PracticalLight",
+      "expected": 2.5,
+      "actual": 2.5,
+      "pass": true
+    },
+    {
+      "night": false,
+      "name": "PracticalLight",
+      "expected": 2.5,
+      "actual": 2.5,
+      "pass": true
+    },
+    {
+      "night": false,
+      "name": "PracticalLight",
+      "expected": 2.5,
+      "actual": 2.5,
+      "pass": true
+    },
+    {
+      "night": true,
+      "name": "PorchWarmLight",
+      "expected": 2.8,
+      "actual": 2.8,
+      "pass": true
+    },
+    {
+      "night": true,
+      "name": "PracticalLight",
+      "expected": 9.0,
+      "actual": 9.0,
+      "pass": true
+    },
+    {
+      "night": true,
+      "name": "PracticalLight",
+      "expected": 9.0,
+      "actual": 9.0,
+      "pass": true
+    },
+    {
+      "night": true,
+      "name": "PracticalLight",
+      "expected": 9.0,
+      "actual": 9.0,
+      "pass": true
+    },
+    {
+      "night": true,
+      "name": "PracticalLight",
+      "expected": 9.0,
+      "actual": 9.0,
+      "pass": true
+    },
+    {
+      "night": true,
+      "name": "PracticalLight",
+      "expected": 9.0,
+      "actual": 9.0,
+      "pass": true
+    },
+    {
+      "night": true,
+      "name": "PracticalLight",
+      "expected": 9.0,
+      "actual": 9.0,
+      "pass": true
+    }
+  ],
+  "shaderMessages": [],
+  "missing": [],
+  "legacy": [],
+  "postControllers": [],
+  "volumes": [
+    {
+      "name": "PlayerRig Volume",
+      "profile": "PlayerRigVolume3D",
+      "components": [
+        {
+          "type": "Tonemapping",
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"Tonemapping(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Tonemapping\",\"active\":true,\"mode\":{\"m_OverrideState\":true,\"m_Value\":1},\"neutralHDRRangeReductionMode\":{\"m_OverrideState\":true,\"m_Value\":2},\"acesPreset\":{\"m_OverrideState\":true,\"m_Value\":3},\"hueShiftAmount\":{\"m_OverrideState\":true,\"m_Value\":0.0},\"detectPaperWhite\":{\"m_OverrideState\":true,\"m_Value\":false},\"paperWhite\":{\"m_OverrideState\":true,\"m_Value\":300.0},\"detectBrightnessLimits\":{\"m_OverrideState\":true,\"m_Value\":true},\"minNits\":{\"m_OverrideState\":true,\"m_Value\":0.004999999888241291},\"maxNits\":{\"m_OverrideState\":true,\"m_Value\":1000.0}}}"
+        },
+        {
+          "type": "ColorAdjustments",
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"ColorAdjustments(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.ColorAdjustments\",\"active\":true,\"postExposure\":{\"m_OverrideState\":true,\"m_Value\":0.05000000074505806},\"contrast\":{\"m_OverrideState\":true,\"m_Value\":6.0},\"colorFilter\":{\"m_OverrideState\":true,\"m_Value\":{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}},\"hueShift\":{\"m_OverrideState\":true,\"m_Value\":0.0},\"saturation\":{\"m_OverrideState\":true,\"m_Value\":5.0}}}"
+        },
+        {
+          "type": "Bloom",
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"Bloom(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Bloom\",\"active\":true,\"skipIterations\":{\"m_OverrideState\":true,\"m_Value\":1},\"threshold\":{\"m_OverrideState\":true,\"m_Value\":1.399999976158142},\"intensity\":{\"m_OverrideState\":true,\"m_Value\":0.03999999910593033},\"scatter\":{\"m_OverrideState\":true,\"m_Value\":0.3499999940395355},\"clamp\":{\"m_OverrideState\":true,\"m_Value\":65472.0},\"tint\":{\"m_OverrideState\":true,\"m_Value\":{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}},\"highQualityFiltering\":{\"m_OverrideState\":true,\"m_Value\":false},\"filter\":{\"m_OverrideState\":true,\"m_Value\":0},\"downscale\":{\"m_OverrideState\":true,\"m_Value\":0},\"maxIterations\":{\"m_OverrideState\":true,\"m_Value\":6},\"dirtTexture\":{\"m_OverrideState\":true,\"m_Value\":{\"instanceID\":0},\"dimension\":1},\"dirtIntensity\":{\"m_OverrideState\":true,\"m_Value\":0.0}}}"
+        },
+        {
+          "type": "Vignette",
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"Vignette(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Vignette\",\"active\":true,\"color\":{\"m_OverrideState\":true,\"m_Value\":{\"r\":0.0,\"g\":0.0,\"b\":0.0,\"a\":1.0}},\"center\":{\"m_OverrideState\":true,\"m_Value\":{\"x\":0.5,\"y\":0.5}},\"intensity\":{\"m_OverrideState\":true,\"m_Value\":0.10000000149011612},\"smoothness\":{\"m_OverrideState\":true,\"m_Value\":0.44999998807907104},\"rounded\":{\"m_OverrideState\":true,\"m_Value\":false}}}"
+        },
+        {
+          "type": "FilmGrain",
+          "data": "{\"MonoBehaviour\":{\"m_Enabled\":true,\"m_EditorHideFlags\":0,\"m_Name\":\"FilmGrain(Clone)\",\"m_EditorClassIdentifier\":\"Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FilmGrain\",\"active\":true,\"type\":{\"m_OverrideState\":true,\"m_Value\":2},\"intensity\":{\"m_OverrideState\":true,\"m_Value\":0.0},\"response\":{\"m_OverrideState\":true,\"m_Value\":0.800000011920929},\"texture\":{\"m_OverrideState\":true,\"m_Value\":{\"instanceID\":0}}}}"
+        }
+      ]
+    }
+  ]
+}

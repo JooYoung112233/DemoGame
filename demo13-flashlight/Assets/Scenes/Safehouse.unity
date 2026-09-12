@@ -1127,9 +1127,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.75, b: 0.48, a: 1}
-  m_Intensity: 2.4
-  m_Range: 6.5
+  m_Color: {r: 1, g: 0.87, b: 0.69, a: 1}
+  m_Intensity: 0.65
+  m_Range: 4.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -1194,8 +1194,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
-  dayIntensity: 2.4
-  nightIntensity: 7.5
+  dayIntensity: 0.65
+  nightIntensity: 2.8
 --- !u!1 &24075867
 GameObject:
   m_ObjectHideFlags: 0
@@ -14239,8 +14239,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
-  m_Intensity: 6
+  m_Color: {r: 1, g: 0.87, b: 0.69, a: 1}
+  m_Intensity: 2.5
   m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -14306,8 +14306,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
-  dayIntensity: 6
-  nightIntensity: 14
+  dayIntensity: 2.5
+  nightIntensity: 9
 --- !u!1 &457669606
 GameObject:
   m_ObjectHideFlags: 0
@@ -29853,8 +29853,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
-  m_Intensity: 6
+  m_Color: {r: 1, g: 0.87, b: 0.69, a: 1}
+  m_Intensity: 2.5
   m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -29920,8 +29920,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
-  dayIntensity: 6
-  nightIntensity: 14
+  dayIntensity: 2.5
+  nightIntensity: 9
 --- !u!1 &918617431
 GameObject:
   m_ObjectHideFlags: 0
@@ -30258,8 +30258,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
-  m_Intensity: 6
+  m_Color: {r: 1, g: 0.87, b: 0.69, a: 1}
+  m_Intensity: 2.5
   m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -30325,8 +30325,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
-  dayIntensity: 6
-  nightIntensity: 14
+  dayIntensity: 2.5
+  nightIntensity: 9
 --- !u!1001 &925616469
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -36182,8 +36182,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
-  m_Intensity: 6
+  m_Color: {r: 1, g: 0.87, b: 0.69, a: 1}
+  m_Intensity: 2.5
   m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -36249,8 +36249,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
-  dayIntensity: 6
-  nightIntensity: 14
+  dayIntensity: 2.5
+  nightIntensity: 9
 --- !u!1 &1110905636
 GameObject:
   m_ObjectHideFlags: 0
@@ -61255,8 +61255,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.88, b: 0.74, a: 1}
-  m_Intensity: 4
+  m_Color: {r: 1, g: 0.92, b: 0.8, a: 1}
+  m_Intensity: 1.8
   m_Range: 9
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -62935,8 +62935,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
-  m_Intensity: 6
+  m_Color: {r: 1, g: 0.87, b: 0.69, a: 1}
+  m_Intensity: 2.5
   m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -63002,8 +63002,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
-  dayIntensity: 6
-  nightIntensity: 14
+  dayIntensity: 2.5
+  nightIntensity: 9
 --- !u!1 &1936941342
 GameObject:
   m_ObjectHideFlags: 0
@@ -68930,8 +68930,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 1, g: 0.78, b: 0.53, a: 1}
-  m_Intensity: 6
+  m_Color: {r: 1, g: 0.87, b: 0.69, a: 1}
+  m_Intensity: 2.5
   m_Range: 8
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -68997,8 +68997,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a71be24f409f9641b5e72ba027ea975, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Scripts::PropLight3D
-  dayIntensity: 6
-  nightIntensity: 14
+  dayIntensity: 2.5
+  nightIntensity: 9
 --- !u!1001 &2123562476
 PrefabInstance:
   m_ObjectHideFlags: 0
