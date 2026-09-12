@@ -31,7 +31,7 @@ public class TopDownPlayer : MonoBehaviour
     [SerializeField] bool flipInvert = true;
 
     [Header("시야 라이트 (부채꼴, 앞 방향)")]
-    [Tooltip("PlayerLight(Light2D) Transform. 마우스 방향으로 회전 + 앞으로 오프셋")]
+    [Tooltip("시야 라이트 Transform. 마우스 방향으로 회전 + 앞으로 오프셋")]
     [SerializeField] Transform lightPivot;
     [Tooltip("라이트 원점을 앞으로 미는 거리 (본인 주변 어둡게, 앞을 밝게)")]
     [SerializeField] float lightForwardOffset = 0.45f;
@@ -206,17 +206,6 @@ public class TopDownPlayer : MonoBehaviour
         Instance = this;
         HierarchyFolder.Persist(rigRoot);
 
-        // ⚠️ Rigidbody2D가 남아 있으면 같은 오브젝트에 3D Rigidbody를 붙일 수 없다.
-        //    Destroy는 프레임 끝에 처리되므로 여기서 지우고 바로 붙이는 것도 불가능하다.
-        //    즉 **프리팹을 3D로 고쳐야만** 한다 — 조용히 실패하면 3D 캐릭터가 통째로 안 붙으므로
-        //    (Awake가 여기서 끊긴다) 눈에 띄게 알린다.
-        var rb2d = GetComponent<Rigidbody2D>();
-        if (rb2d != null)
-        {
-            Debug.LogError("[TopDownPlayer] Rigidbody2D가 남아 있다 — PlayerRig 프리팹을 3D로 갱신할 것. " +
-                           "3D 전환(이동·조준·캐릭터 표시)이 적용되지 않는다.", this);
-            Destroy(rb2d);
-        }
         _rb = GetComponent<Rigidbody>();
         if (_rb == null) _rb = gameObject.AddComponent<Rigidbody>();
         _rb.isKinematic = false;                            // 벽에 막히려면 Dynamic

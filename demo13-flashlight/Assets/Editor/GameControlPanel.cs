@@ -5,7 +5,6 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.Tilemaps;
 
 /// <summary>
 /// 밸런스·컨트롤 통합 패널. (Tools ▸ TopDown ▸ 밸런스·컨트롤)
@@ -489,8 +488,6 @@ public class GameControlPanel : EditorWindow
         Row("아이템 스폰(ItemSpawnPoint)", Count<ItemSpawnPoint>());
         Row("월드 아이템(WorldItem)", Count<WorldItem>());
         Row("파괴 가능(Breakable)", Count<Breakable>());
-        Row("Light2D", Count<Light2D>());
-        Row("Tilemap", Count<Tilemap>());
         Row("SpriteRenderer(총)", Count<SpriteRenderer>());
         EditorGUI.indentLevel--;
 

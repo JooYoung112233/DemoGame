@@ -3,14 +3,14 @@ using UnityEngine;
 /// <summary>
 /// 레이드 맵의 한 구역을 정의·등록하는 씬 컴포넌트.
 /// 플레이어가 영역에 들어오면 해당 존을 발견(fog 해제) 처리.
-/// 영역: 본인 BoxCollider2D가 있으면 그 bounds, 없으면 size로 직접 지정.
+/// 영역: 본인 BoxCollider(3D)가 있으면 그 bounds, 없으면 size로 직접 지정.
 /// 설계: docs/navigation.md §3.1
 /// </summary>
 public class MapZoneVolume : MonoBehaviour
 {
     [SerializeField] string zoneId = "zone";
     [SerializeField] string displayName = "구역";
-    [Tooltip("BoxCollider2D가 없을 때 사용할 영역 크기(월드 단위).")]
+    [Tooltip("BoxCollider가 없을 때 사용할 영역 크기(월드 단위, 평면 x·z).")]
     [SerializeField] Vector2 size = new Vector2(10f, 10f);
     [Tooltip("발견 판정 폴링 간격(초).")]
     [SerializeField] float pollInterval = 0.25f;
@@ -28,12 +28,12 @@ public class MapZoneVolume : MonoBehaviour
 
     Rect ComputeBounds()
     {
-        var box = GetComponent<BoxCollider2D>();
+        // 3D 박스 콜라이더가 있으면 그 월드 영역(평면 x=월드X, y=월드Z). 2D 시절 BoxCollider2D 경로는 2026-09-12 제거.
+        var box = GetComponent<BoxCollider>();
         if (box != null)
         {
-            Vector2 c = Plan3D.ToPlan(transform.position) + box.offset;
-            Vector2 s = Vector2.Scale(box.size, (Vector2)transform.lossyScale);
-            return new Rect(c.x - s.x * 0.5f, c.y - s.y * 0.5f, s.x, s.y);
+            var b = box.bounds;
+            return new Rect(b.min.x, b.min.z, b.size.x, b.size.z);
         }
         Vector2 cc = Plan3D.ToPlan(transform.position);
         return new Rect(cc.x - size.x * 0.5f, cc.y - size.y * 0.5f, size.x, size.y);

@@ -3,15 +3,7 @@ using UnityEngine.Rendering.Universal;
 
 public class DayNightCycle : MonoBehaviour
 {
-    [Header("2D Global Light (탑다운 주 조명)")]
-    [Tooltip("비우면 씬의 Global Light2D 자동 탐색")]
-    [SerializeField] Light2D globalLight;
-    [SerializeField] float dayGlobalIntensity = 1f;
-    [SerializeField] float nightGlobalIntensity = 0.18f;
-    [SerializeField] Color dayGlobalColor = new Color(1f, 0.97f, 0.9f);
-    [SerializeField] Color nightGlobalColor = new Color(0.35f, 0.42f, 0.62f);
-
-    [Header("3D Lighting (레거시 — 2D에선 보통 미사용)")]
+    [Header("3D Lighting (태양 — 비우면 씬에서 찾는다)")]
     [SerializeField] Light directionalLight;
     [SerializeField] float dayIntensity = 1f;
     [SerializeField] float nightIntensity = 0f;
@@ -64,15 +56,6 @@ public class DayNightCycle : MonoBehaviour
     /// <summary>낮↔밤 토글.</summary>
     public void ToggleDayNight() => SetNight(!isNight);
 
-    /// <summary>씬의 Global Light2D 자동 탐색.</summary>
-    Light2D FindGlobalLight()
-    {
-        var all = FindObjectsByType<Light2D>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        foreach (var l in all)
-            if (l.lightType == Light2D.LightType.Global) return l;
-        return null;
-    }
-
     void Start()
     {
         // RegionTimeManager가 없거나 ActiveRegionId가 비어있으면 독립 모드
@@ -100,7 +83,6 @@ public class DayNightCycle : MonoBehaviour
     void OnSceneLoaded(UnityEngine.SceneManagement.Scene s, UnityEngine.SceneManagement.LoadSceneMode m)
     {
         directionalLight = null;   // 새 씬의 태양을 다시 찾게 한다(옛 태양은 이미 파괴됨)
-        globalLight = null;
         ApplyLighting();
     }
 
@@ -201,15 +183,6 @@ public class DayNightCycle : MonoBehaviour
                 directionalLight.intensity = isNight ? nightIntensity : dayIntensity;
                 directionalLight.color     = isNight ? nightColor : dayColor;
             }
-        }
-
-        // ── 2D 글로벌 라이트 (남아 있는 2D 씬용) ──────────────────────
-        // 3D 씬엔 없다. 찾지 못해도 조용히 넘어간다.
-        if (globalLight == null) globalLight = FindGlobalLight();
-        if (globalLight != null)
-        {
-            globalLight.intensity = isNight ? nightGlobalIntensity : dayGlobalIntensity;
-            globalLight.color     = isNight ? nightGlobalColor : dayGlobalColor;
         }
     }
 

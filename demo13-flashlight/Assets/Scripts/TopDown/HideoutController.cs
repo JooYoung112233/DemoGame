@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// 은신처(Hideout) 실내 = 타르코프식 '화면'. (docs/safehouse.md '실내 맵(별도 씬)')
@@ -33,9 +32,6 @@ public class HideoutController : MonoBehaviour
     TopDownPlayer _player;
     Camera _cam;            // 클릭 레이캐스트용(= PlayerRig 카메라 그대로 사용)
     Camera _rigCam;         // PlayerRig 카메라 — 은신처 동안 방 중심으로 이동·리사이즈해 그대로 렌더
-    Light2D _systemsGlobal; // 하이드아웃 동안 밝게 덮어쓸 기존 Systems 글로벌 라이트
-    float _prevGlobalIntensity;
-    Color _prevGlobalColor;
     // 카메라 원복용
     bool _hadCam;
     Vector3 _prevCamPos;
@@ -47,7 +43,6 @@ public class HideoutController : MonoBehaviour
     bool _prevInteractionEnabled;
     // SpriteRenderer + MeshRenderer(3D 캐릭터) 등 모든 렌더러를 함께 숨긴다
     readonly List<Renderer> _hiddenRenderers = new List<Renderer>();
-    readonly List<Light2D> _hiddenLights = new List<Light2D>();
 
     GameObject _uiRoot;
     GameObject _confirmRoot;   // 나가기 확인창 패널
@@ -79,8 +74,6 @@ public class HideoutController : MonoBehaviour
             _player.SetCanMove(false);
             foreach (var r in _player.GetComponentsInChildren<Renderer>(true))
                 if (r.enabled) { r.enabled = false; _hiddenRenderers.Add(r); }
-            foreach (var lt in _player.GetComponentsInChildren<Light2D>(true))
-                if (lt.enabled) { lt.enabled = false; _hiddenLights.Add(lt); }
         }
 
         // 걸어다니며 E 줍는 기존 상호작용(범위/프롬프트) 정지 — 여기선 클릭만.
@@ -113,34 +106,10 @@ public class HideoutController : MonoBehaviour
             _rigCam.transform.position = new Vector3(cameraCenter.x, cameraCenter.y, _prevCamPos.z);
         }
 
-        // 은신처는 밤/낮 영향 없이 항상 환하게.
-        // ★ 새 글로벌 라이트를 만들면 기존 Systems 글로벌과 겹쳐 "More than one global light" 에러가 난다.
-        //   → 새로 만들지 말고, 이미 모든 레이어를 비추는 Systems 글로벌을 잠시 밝게 덮어쓰고 OnDestroy에서 복원.
-        _systemsGlobal = FindActiveGlobalLight();
-        if (_systemsGlobal != null)
-        {
-            _prevGlobalIntensity = _systemsGlobal.intensity;
-            _prevGlobalColor     = _systemsGlobal.color;
-            _systemsGlobal.intensity = 1.1f;
-            _systemsGlobal.color     = Color.white;
-        }
-        else
-        {
-            Debug.LogWarning("[Hideout] 활성 글로벌 라이트를 못 찾음 — 방이 어두울 수 있음.");
-        }
-
+        // (2D 시절엔 여기서 Systems 글로벌 Light2D를 밝게 덮어썼다 — 3D 은신처 조명은 Hideout 씬이 가진다. 2026-09-12 제거)
         Debug.Log($"<color=lime>[Hideout]</color> 카메라 준비 완료 — rigCam={(_rigCam != null)} " +
                   $"위치={(_rigCam != null ? _rigCam.transform.position.ToString() : "없음")}, orthoSize={cameraSize}, " +
-                  $"player={(_player != null)}, 활성카메라수={Camera.allCamerasCount}, 글로벌라이트={(_systemsGlobal != null)}");
-    }
-
-    /// <summary>현재 활성(enabled) 글로벌 Light2D 1개를 찾는다 — Systems 씬이 소유한 글로벌(SystemsSceneEnforcer가 유일하게 켜둠).</summary>
-    static Light2D FindActiveGlobalLight()
-    {
-        foreach (var l in FindObjectsByType<Light2D>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
-            if (l != null && l.enabled && l.lightType == Light2D.LightType.Global)
-                return l;
-        return null;
+                  $"player={(_player != null)}, 활성카메라수={Camera.allCamerasCount}");
     }
 
     /// <summary>은신처 카메라 상태 유지 — 추적이 되살아나거나 카메라가 꺼지면 매 프레임 되돌린다.</summary>
@@ -166,13 +135,7 @@ public class HideoutController : MonoBehaviour
         ExitConfirmationOpen = false;
         if (_hadPlayer && _player != null) _player.SetCanMove(_prevCanMove);
         foreach (var r in _hiddenRenderers) if (r != null) r.enabled = true;
-        foreach (var lt in _hiddenLights) if (lt != null) lt.enabled = true;
         if (_interaction != null) _interaction.enabled = _prevInteractionEnabled;
-        if (_systemsGlobal != null)                                    // 글로벌 라이트 원복(밝기/색)
-        {
-            _systemsGlobal.intensity = _prevGlobalIntensity;
-            _systemsGlobal.color     = _prevGlobalColor;
-        }
         if (_hadCam && _rigCam != null)                                // 카메라 정사영/크기 원복(위치는 CameraFollow가 스냅)
         {
             _rigCam.orthographic     = _prevCamOrtho;
@@ -218,14 +181,14 @@ public class HideoutController : MonoBehaviour
 
         if (HideoutDiorama.Active) return;   // 3D 클릭은 디오라마가 레이캐스트로 처리
 
-        Vector3 mw = _cam.ScreenToWorldPoint(GameInput.mousePosition);
-        var hits = Physics2D.OverlapPointAll(new Vector2(mw.x, mw.y));
+        // 3D 레이캐스트(2026-09-12 — 2D OverlapPoint에서 이식). 디오라마가 없을 때의 폴백 경로다.
+        var hits = Physics.RaycastAll(_cam.ScreenPointToRay(GameInput.mousePosition), 200f);
         if (hits == null || hits.Length == 0) return;
 
         var pgo = _player != null ? _player.gameObject : GameObject.FindGameObjectWithTag("Player");
         foreach (var h in hits)
         {
-            var io = h.GetComponentInParent<InteractableObject>();
+            var io = h.collider.GetComponentInParent<InteractableObject>();
             if (io != null) { io.Interact(pgo); break; }                     // 침대/작업대/의료대/조리대 → 기존 UI
         }
     }

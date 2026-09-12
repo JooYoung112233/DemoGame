@@ -28,8 +28,7 @@ public class SaveCheckpoints : MonoBehaviour
     {
         "Safehouse",        // 안전가옥 허브
         "Hideout",          // 은신처 실내
-        "Pawnshop",         // 전당포 실내(캐릭터 진입, 안전 맥락)
-        // ※ ScrapMarket_GB / Zone1 / InGameScene 등은 레이드 맵 → 안전 허브 아님(세이브 스커밍 대상).
+        // ※ Zone1 등 레이드 맵은 안전 허브 아님(세이브 스커밍 대상). 전당포는 마을(Safehouse) 안에서 걸어 들어간다.
     };
 
     // ── 런타임 ──

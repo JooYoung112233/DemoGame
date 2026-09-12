@@ -57,8 +57,8 @@ public class StoryTriggerManager : MonoBehaviour
         {
             OnSafehouseLoaded();
         }
-        // 안전 실내 씬(은신처/전당포)은 레이드가 아님 — 레이드 스토리 트리거 제외.
-        else if (sceneName != SCENE_SYSTEMS && sceneName != SCENE_HIDEOUT && sceneName != "Pawnshop")
+        // 안전 실내 씬(은신처)은 레이드가 아님 — 레이드 스토리 트리거 제외.
+        else if (sceneName != SCENE_SYSTEMS && sceneName != SCENE_HIDEOUT)
         {
             OnRaidSceneLoaded();
         }

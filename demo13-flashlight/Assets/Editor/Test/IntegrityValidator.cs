@@ -168,7 +168,7 @@ public static class IntegrityValidator
         }
 
         // 6) 레이드/내부 씬 스모크 — 스폰이 하나도 없으면 진입 후 플레이어가 어디 설지 모호
-        bool looksPlayable = name == "Zone1" || name.StartsWith("Int_") || name == "ScrapMarket_GB";
+        bool looksPlayable = name == "Zone1";
         if (looksPlayable && spawns.Count == 0)
             Warn(name, "게임플레이 씬인데 SpawnPoint가 0개 → 진입 스폰 불명확");
     }

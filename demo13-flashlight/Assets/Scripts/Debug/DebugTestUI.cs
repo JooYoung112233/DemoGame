@@ -823,12 +823,6 @@ public class DebugTestUI : MonoBehaviour
         }
         GUILayout.EndHorizontal();
 
-        if (GUILayout.Button("→ ScrapMarket (레이드)", btnStyle, GUILayout.Height(28)))
-        {
-            if (SceneTransitionManager.Instance != null)
-                SceneTransitionManager.Instance.TransitionTo("ScrapMarket_GB", "Gate_Spawn");
-        }
-
         // ── 지역1(Zone1) 직행/복귀 — 랜덤 스폰 + 매치 탈출 확인용 ──
         GUILayout.Space(4);
         GUILayout.Label($"지역1: 매 판 스폰 5곳 중 랜덤 1 + 탈출 고정1(중앙)+반대편 2  |  이번 판 스폰: {(string.IsNullOrEmpty(RaidSpawnDirector.ChosenSpawn) ? "-" : RaidSpawnDirector.ChosenSpawn)}", labelStyle);

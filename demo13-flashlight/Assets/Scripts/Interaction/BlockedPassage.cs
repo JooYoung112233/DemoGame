@@ -15,7 +15,7 @@ using UnityEngine;
 ///   **아직 ItemData가 없다.** 폴백이 없으면 존재하지 않는 열쇠 때문에 맵이 영구 소프트락된다.
 ///   나중에 열쇠 아이템이 생기면 열쇠 경로가 저절로 살아난다(코드 수정 불필요).
 ///
-/// 부착: 같은 GO에 `InteractableObject`(type = Passage) + 솔리드 콜라이더(3D `Collider`, 2D 시절 맵은 `Collider2D`).
+/// 부착: 같은 GO에 `InteractableObject`(type = Passage) + 솔리드 3D `Collider`.
 /// </summary>
 [RequireComponent(typeof(InteractableObject))]
 public class BlockedPassage : MonoBehaviour
@@ -44,8 +44,6 @@ public class BlockedPassage : MonoBehaviour
     [SerializeField] float breachSeconds;
 
     [Header("참조 (비우면 자동)")]
-    [Tooltip("통행을 막는 솔리드 콜라이더(2D 시절 맵). 열리면 비활성화된다.")]
-    [SerializeField] Collider2D blocker;
     [Tooltip("통행을 막는 솔리드 3D 콜라이더. 열리면 비활성화된다. 비우면 자식에서 트리거 아닌 것을 찾는다.")]
     [SerializeField] Collider blocker3D;
     [Tooltip("열릴 때 숨길 비주얼(잔해 스프라이트 등)")]
@@ -66,14 +64,7 @@ public class BlockedPassage : MonoBehaviour
     {
         _io = GetComponent<InteractableObject>();
 
-        if (blocker == null)
-        {
-            // 솔리드(트리거 아님) 우선 — 진입 발판(트리거)과 같은 GO에 있을 수 있다.
-            var cols = GetComponentsInChildren<Collider2D>();
-            foreach (var c in cols) { if (!c.isTrigger) { blocker = c; break; } }
-        }
-
-        // 3D 맵(지역1·실내)은 BoxCollider 같은 3D 솔리드로 막는다 — 2D만 끄면 치워도 계속 막혀 있었다.
+        // 솔리드(트리거 아님) 우선 — 진입 발판(트리거)과 같은 GO에 있을 수 있다.
         if (blocker3D == null)
         {
             var cols3 = GetComponentsInChildren<Collider>();
@@ -161,7 +152,6 @@ public class BlockedPassage : MonoBehaviour
     void Open(string msg)
     {
         _open = true;
-        if (blocker != null) blocker.enabled = false;
         if (blocker3D != null) blocker3D.enabled = false;
         if (visual != null) visual.SetActive(false);
         else

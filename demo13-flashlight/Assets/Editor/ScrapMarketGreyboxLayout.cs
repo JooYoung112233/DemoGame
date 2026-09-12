@@ -8,7 +8,7 @@ using UnityEngine;
 /// (docs/level-scrapmarket.md §1 — MQ-001 첫 낮 레이드 / 스토리 동선 그대로 / 일방통행 선형)
 ///
 /// **이 레이아웃은 두 경로로 쓰인다:**
-///   • 단독 씬(메뉴): Tools ▸ TopDown ▸ Map ▸ Build ScrapMarket Greybox Layout → ScrapMarket_GB.unity
+///   • (단독 씬 ScrapMarket_GB와 그 빌드 메뉴는 2026-09-12 사용자 결정으로 삭제 — docs/level-scrapmarket.md)
 ///   • **Zone1 통합**: Zone1GreyboxLayout이 `Place(map, ox, oy)`로 **좌하단(SW)에 그대로 배치**(v7 유기적 대각 버전 폐기).
 ///       → 사용자 피드백 "대각선 너무 많다 / 잘 만든 튜토 그대로 좌하단" (2026-06-06). 직교 v6를 오프셋만 줘서 재사용.
 ///
@@ -23,8 +23,6 @@ using UnityEngine;
 /// </summary>
 public static class ScrapMarketGreyboxLayout
 {
-    const string SceneDir   = "Assets/Scenes";
-    const string ScenePath  = SceneDir + "/ScrapMarket_GB.unity";
     const string PrefabRoot = "Props2D/Prefabs/";   // Resources.Load 기준 경로
 
     // 맵 규모(문서 §1.2). 바닥/주석용. v6: 44 × 56 유지.
@@ -40,48 +38,6 @@ public static class ScrapMarketGreyboxLayout
         "gb_floor", "gb_wall", "gb_barricade", "gb_door", "gb_crate", "gb_enter",
         "gb_shelf", "gb_note", "gb_spawn", "gb_exit", "gb_enemy", "gb_prop",
     };
-
-    [MenuItem("Tools/TopDown/개발/고철시장 그레이박스(단독)")]
-    public static void Build()
-    {
-        // ── 빈 씬 새로 시작(멱등: 같은 경로로 저장하면 기존 씬 덮어씀) ──
-        var scene = EditorSceneBuildUtil.NewDetachedScene(out var prevActive);  // 현재 씬 유지(폴더에만 생성)
-        var map = new GameObject("Map");
-
-        // ── 그레이박스 팔레트(gb_*) 보장 + 레이드 매니저(단독 씬일 때만) ──
-        EnsureGreyboxPalette();
-        new GameObject("RaidManager").AddComponent<RaidManager>();
-
-        // ── v6 레이아웃 배치(오프셋 0) ──
-        int placed = Place(map, 0f, 0f);
-
-        // ── 저장 ──
-        Selection.activeObject = null;
-        bool saved = EditorSceneBuildUtil.SaveAndClose(scene, ScenePath, prevActive);  // 저장 후 닫기(현재 씬 유지)
-
-        if (!saved)
-        {
-            Debug.LogError("[ScrapMarketGB] 씬 저장 실패: " + ScenePath);
-            if (!Application.isBatchMode)
-                EditorUtility.DisplayDialog("ScrapMarket Greybox", "씬 저장 실패:\n" + ScenePath, "확인");
-            return;
-        }
-
-        AddToBuildSettings(ScenePath);
-        AssetDatabase.SaveAssets();
-
-        Debug.Log($"<color=cyan>[ScrapMarketGB]</color> 생성 완료(v6): {ScenePath} — Map 하위 그레이박스 {placed}개 배치.\n" +
-                  "  • 동선: 철문 진입 → [폐상점] → [차고] → 골목 공터(밴딧·차) → [창고: 흔적·쪽지] → 맨홀(골목 끝).\n" +
-                  "  • 각 건물은 서벽 출입문 1칸으로만 연결되는 막다른 폐쇄 공간(안에서 루팅). 맵 44×56.\n" +
-                  "  • ※ Zone1엔 ScrapMarketGreyboxLayout.Place(map, 좌하단)로 그대로 통합됨.");
-
-        if (!Application.isBatchMode && !ContentBuildAll.Quiet)
-            EditorUtility.DisplayDialog("ScrapMarket Greybox",
-                $"{ScenePath} 생성 완료(v6).\n\nMap 루트 하위에 그레이박스 {placed}개 배치.\n" +
-                "철문 → [폐상점] → [차고] → 골목 공터(밴딧·차) → [창고: 흔적·쪽지] → 맨홀.\n\n" +
-                "맵 콘텐츠만 담긴 씬입니다(팔레트 gb_*는 없으면 자동 생성). Systems 부트 씬이 카메라/조명/매니저/플레이어를 공급합니다.",
-                "확인");
-    }
 
     // ─────────────────────────────────────────────────────────────────────
     //  v6 레이아웃을 map 루트 하위에 (ox,oy) 오프셋으로 배치(단독·Zone1 통합 공용). 반환 = 배치 수.
@@ -522,16 +478,6 @@ public static class ScrapMarketGreyboxLayout
         return 1;
     }
 
-    /// <summary>씬을 빌드세팅에 등록(이미 있으면 무시).</summary>
-    static void AddToBuildSettings(string scenePath)
-    {
-        var cur = EditorBuildSettings.scenes;
-        foreach (var s in cur) if (s.path == scenePath) return;
-        var arr = new EditorBuildSettingsScene[cur.Length + 1];
-        System.Array.Copy(cur, arr, cur.Length);
-        arr[cur.Length] = new EditorBuildSettingsScene(scenePath, true);
-        EditorBuildSettings.scenes = arr;
-    }
 
     static GameObject Spawn(string prefabId, string name, GameObject parent)
     {
