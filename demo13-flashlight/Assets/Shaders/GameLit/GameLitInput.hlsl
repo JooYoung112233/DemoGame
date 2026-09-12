@@ -17,6 +17,7 @@ CBUFFER_START(UnityPerMaterial)
     half   _UsePackedMask;
     half   _BumpScale;
     half   _OcclusionStrength;
+    half   _ComicLighting;
     // 어두운 사실풍 (docs/rendering.md §게임 전용 셰이더)
     half4  _GrimeColor;
     half   _GrimeStrength;

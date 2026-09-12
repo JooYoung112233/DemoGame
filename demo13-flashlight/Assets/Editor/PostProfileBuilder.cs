@@ -60,34 +60,31 @@ public static class PostProfileBuilder
         tone.mode.overrideState = true;
         tone.mode.value = TonemappingMode.Neutral;
 
-        // ── 색 보정 ── 2026-09-11 "어두운 사실풍"(docs/rendering.md §게임 전용 셰이더 + 포스트 프로세싱).
-        //    노출은 올리지 않고, 대비를 세우고, 채도를 뺀다. 그늘의 채도는 BRB/GameLit이 이미 빼므로
-        //    여기서는 화면 전체를 한 번 더 바랜 색으로 묶는 정도만. 색조(파랑/노랑 밀기)는 여전히 안 한다.
+        // Comic B: retain painted ink, hue and shadow bands (docs/rendering.md, 2026-09-13).
         var color = profile.Add<ColorAdjustments>(true);
         Keep(profile, color);
-        color.postExposure.overrideState = true; color.postExposure.value = 0.0f;
-        color.contrast.overrideState     = true; color.contrast.value     = 18f;
-        color.saturation.overrideState   = true; color.saturation.value   = -18f;
+        color.postExposure.overrideState = true; color.postExposure.value = 0.05f;
+        color.contrast.overrideState     = true; color.contrast.value     = 6f;
+        color.saturation.overrideState   = true; color.saturation.value   = 5f;
 
-        // ── 블룸 ── 문턱은 여전히 높게(밝은 옷·벽이 번지면 안개가 된다). 대신 걸리는 광원 —
-        //    랜턴·창문·희귀도 빛기둥 — 은 조금 더 번지게: "빛이 닿는 곳만 살아난다"의 짝.
+        // Restrained bloom on emissive lamps, without washing out painted surfaces.
         var bloom = profile.Add<Bloom>(true);
         Keep(profile, bloom);
-        bloom.threshold.overrideState = true; bloom.threshold.value = 1.00f;
-        bloom.intensity.overrideState = true; bloom.intensity.value = 0.60f;
-        bloom.scatter.overrideState   = true; bloom.scatter.value   = 0.65f;
+        bloom.threshold.overrideState = true; bloom.threshold.value = 1.4f;
+        bloom.intensity.overrideState = true; bloom.intensity.value = 0.04f;
+        bloom.scatter.overrideState   = true; bloom.scatter.value   = 0.35f;
 
-        // ── 비네트 ── 쿼터뷰라 화면 가장자리에 정보가 적다. 어두운 룩이라 조금 더 눌러 시선을 가운데로.
+        // Keep map edges readable.
         var vig = profile.Add<Vignette>(true);
         Keep(profile, vig);
-        vig.intensity.overrideState  = true; vig.intensity.value  = 0.32f;
-        vig.smoothness.overrideState = true; vig.smoothness.value = 0.40f;
+        vig.intensity.overrideState  = true; vig.intensity.value  = 0.10f;
+        vig.smoothness.overrideState = true; vig.smoothness.value = 0.45f;
 
-        // ── 필름 그레인 ── 조금 더. 어두운 면이 매끈하게 뭉치는 걸 깨고 "옛 필름" 질감을 준다.
+        // Surface texture supplies the grain; avoid animated film noise over the ink.
         var grain = profile.Add<FilmGrain>(true);
         Keep(profile, grain);
         grain.type.overrideState      = true; grain.type.value      = FilmGrainLookup.Medium1;
-        grain.intensity.overrideState = true; grain.intensity.value = 0.22f;
+        grain.intensity.overrideState = true; grain.intensity.value = 0f;
         grain.response.overrideState  = true; grain.response.value  = 0.8f;
 
         // 색 보정은 HDR에서 — 파이프라인이 HDR인데 그레이딩만 LDR(32 LUT)이면 밝은 광원이 잘린 뒤에 보정된다.
@@ -103,7 +100,7 @@ public static class PostProfileBuilder
         AssetDatabase.Refresh();
 
         Debug.Log($"[포스트프로세싱] 생성 — {Path} (컴포넌트 {profile.components.Count}개)\n"
-                + "  톤매핑 Neutral · 노출 0 · 대비 +18 · 채도 −18 · 블룸 문턱 1.00/세기 0.60 · 비네트 0.32 · 그레인 0.22 · 그레이딩 HDR\n"
+                + "  톤매핑 Neutral · 노출 +0.05 · 대비 +6 · 채도 +5 · 블룸 문턱 1.4/세기 0.04 · 비네트 0.10 · 그레인 0 · 그레이딩 HDR\n"
                 + "  색조는 여기서 안 만든다 — WeatherData의 앰비언트·광원 색이 만든다.");
         if (!ContentBuildAll.Quiet)
             EditorUtility.DisplayDialog("포스트프로세싱", $"컴포넌트 {profile.components.Count}개 생성.", "확인");

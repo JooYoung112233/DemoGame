@@ -1,5 +1,5 @@
 // BRB/GameLit — 게임 전용 Lit 셰이더(캐릭터 + 환경 공용). docs/rendering.md §게임 전용 셰이더 + 포스트 프로세싱 (2026-09-11).
-// 룩: 어두운 사실풍(Into the Dead 분위기) — 때 · 그늘 채도 빼기 · 실루엣 림을 URP PBR 조명 앞뒤에 얹는다.
+// 룩: 만화 텍스처를 살리는 무광 확산 조명. URP 그림자·추가 광원·SSAO·안개는 유지한다.
 // 속성 이름은 URP/Lit과 같다 → 셰이더만 바꿔도 기존 값이 넘어온다. 키워드(_NORMALMAP 등)는 전환 도구가 켠다.
 Shader "BRB/GameLit"
 {
@@ -16,10 +16,11 @@ Shader "BRB/GameLit"
         [Normal] _BumpMap("Normal Map", 2D) = "bump" {}
         _OcclusionStrength("Occlusion Strength", Range(0.0, 1.0)) = 1.0
         _OcclusionMap("Occlusion", 2D) = "white" {}
+        _ComicLighting("Painted Diffuse Lighting", Range(0.0, 1.0)) = 1.0
         [HDR] _EmissionColor("Emission", Color) = (0,0,0,1)
         _EmissionMap("Emission Map", 2D) = "white" {}
 
-        [Header(Dark Realism)]
+        [Header(Legacy Look When Painted Lighting Is Off)]
         _GrimeColor("Grime Color", Color) = (0.55, 0.50, 0.44, 1)
         _GrimeStrength("Grime", Range(0.0, 1.0)) = 0.5
         _GrimeScale("Grime Scale", Float) = 0.6

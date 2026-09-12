@@ -13,10 +13,11 @@ Shader "BRB/GroundFadeLit"
         [Normal] _BumpMap("Normal Map", 2D) = "bump" {}
         _OcclusionStrength("Occlusion Strength", Range(0.0, 1.0)) = 1.0
         _OcclusionMap("Occlusion", 2D) = "white" {}
+        _ComicLighting("Painted Diffuse Lighting", Range(0.0, 1.0)) = 1.0
         [HDR] _EmissionColor("Emission", Color) = (0,0,0,1)
         _EmissionMap("Emission Map", 2D) = "white" {}
 
-        [Header(Dark Realism)]
+        [Header(Legacy Look When Painted Lighting Is Off)]
         _GrimeColor("Grime Color", Color) = (0.55, 0.50, 0.44, 1)
         _GrimeStrength("Grime", Range(0.0, 1.0)) = 0.5
         _GrimeScale("Grime Scale", Float) = 0.6
