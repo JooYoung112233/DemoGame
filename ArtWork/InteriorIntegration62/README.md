@@ -1,5 +1,7 @@
 # Town interiors — connected in Unity, 2026-09-13
 
+> Follow-up: [InteriorSeams62](../InteriorSeams62/README.md) connects exterior signs to interior visibility and corrects locked-room roof/floor/front-return joins. Apply its correction after the initial Import/Apply/Finish sequence below.
+
 The user found that previously produced interiors were absent from gameplay. `TownInteriorsPartition62` was still an offline package, and the earlier ComicLighting62 review had inspected the old temporary pawnshop interior. This integration closes that gap.
 
 ## Saved assets
