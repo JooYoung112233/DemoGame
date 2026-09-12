@@ -3,7 +3,17 @@ guid: f88185bd5712c384187daadbd769fcbd
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_BagPlastic
+    second: {fileID: 2100000, guid: 9549e6c8d66431c438683e582e23e4b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Canvas
+    second: {fileID: 2100000, guid: bb5c072c10921a04ba1ee9ed9dd7f2ba, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

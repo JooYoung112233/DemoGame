@@ -3,7 +3,17 @@ guid: c6bfac66a7adcbe44b12dbdbe9410aa2
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Rust
+    second: {fileID: 2100000, guid: 191cde16f8673b54faecdf1a2b9ba35c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Steel
+    second: {fileID: 2100000, guid: 464bd4b1fe3ec0349aca6285d09bbd34, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

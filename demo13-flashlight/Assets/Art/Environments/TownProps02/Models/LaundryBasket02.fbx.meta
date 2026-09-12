@@ -3,7 +3,22 @@ guid: f902e4c042274ee4691342d8fe632da6
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_BlueCloth
+    second: {fileID: 2100000, guid: f2c783c4a4361294cb43a5287ffbedfb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Canvas
+    second: {fileID: 2100000, guid: 27789bc316c1df4408b446fb07b09ea0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Linen
+    second: {fileID: 2100000, guid: f2a54e40a1f6b70438e5b38f6033c964, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

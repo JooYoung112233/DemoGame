@@ -3,7 +3,27 @@ guid: c861e5ff94a5a4c40bf9fe17580156f6
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Wood
+    second: {fileID: 2100000, guid: e95b62c5d7b852b46b6bbdaa99268b09, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_WoodDark
+    second: {fileID: 2100000, guid: 658d32d7cb3092d47b7bfddd6fb13c78, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_WoodFaded
+    second: {fileID: 2100000, guid: cfb3cd9956e23ef4ba7bdd5b27b82f1b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_WoodWarm
+    second: {fileID: 2100000, guid: 0dcf7cdb267c90448ba02c7a7f4f07de, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

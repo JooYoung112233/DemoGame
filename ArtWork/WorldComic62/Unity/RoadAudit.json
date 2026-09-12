@@ -1,0 +1,162 @@
+[
+  {
+    "name": "Ground",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/Environments/Town02/Rendering62/Town_Ground.mat:Town_Ground"
+    ],
+    "uvMin": [
+      0.0,
+      -0.1
+    ],
+    "uvMax": [
+      80.0,
+      56.0
+    ]
+  },
+  {
+    "name": "Floor_In",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Floor.mat:Pawnshop_Floor"
+    ],
+    "uvMin": [
+      0.0,
+      0.0
+    ],
+    "uvMax": [
+      1.0,
+      1.0
+    ]
+  },
+  {
+    "name": "Floor_In",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/WorldComic62/Materials/Scene_Plaster_FFFFFFFF.mat:Scene_Plaster_FFFFFFFF"
+    ],
+    "uvMin": [
+      0.0,
+      0.0
+    ],
+    "uvMax": [
+      1.0,
+      1.0
+    ]
+  },
+  {
+    "name": "Floor_In",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/WorldComic62/Materials/Scene_Plaster_FFFFFFFF.mat:Scene_Plaster_FFFFFFFF"
+    ],
+    "uvMin": [
+      0.0,
+      0.0
+    ],
+    "uvMax": [
+      1.0,
+      1.0
+    ]
+  },
+  {
+    "name": "Floor_In",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/WorldComic62/Materials/Scene_Plaster_FFFFFFFF.mat:Scene_Plaster_FFFFFFFF"
+    ],
+    "uvMin": [
+      0.0,
+      0.0
+    ],
+    "uvMax": [
+      1.0,
+      1.0
+    ]
+  },
+  {
+    "name": "Floor_In",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/WorldComic62/Materials/Scene_Plaster_FFFFFFFF.mat:Scene_Plaster_FFFFFFFF"
+    ],
+    "uvMin": [
+      0.0,
+      0.0
+    ],
+    "uvMax": [
+      1.0,
+      1.0
+    ]
+  },
+  {
+    "name": "Road_ShopFront",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/Environments/Town02/Rendering62/Road_ShopFront.mat:Road_ShopFront"
+    ],
+    "uvMin": [
+      5.0,
+      0.0
+    ],
+    "uvMax": [
+      71.0,
+      39.0
+    ]
+  },
+  {
+    "name": "Road_Plaza",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/Environments/Town02/Rendering62/Road_Plaza.mat:Road_Plaza"
+    ],
+    "uvMin": [
+      15.0,
+      0.0
+    ],
+    "uvMax": [
+      73.0,
+      32.0
+    ]
+  },
+  {
+    "name": "Road_Link",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/Environments/Town02/Rendering62/Road_Link.mat:Road_Link"
+    ],
+    "uvMin": [
+      26.5,
+      0.0
+    ],
+    "uvMax": [
+      42.5,
+      38.5
+    ]
+  },
+  {
+    "name": "Road_Home",
+    "active": true,
+    "enabled": true,
+    "materials": [
+      "Assets/Art/Environments/Town02/Rendering62/Road_Home.mat:Road_Home"
+    ],
+    "uvMin": [
+      4.0,
+      0.0
+    ],
+    "uvMax": [
+      60.5,
+      28.0
+    ]
+  }
+]

@@ -3,7 +3,12 @@ guid: f49f4aa74c8c28641a4799fd7e3671f6
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BanditClub_Surface
+    second: {fileID: 2100000, guid: 43a056012761c454187fd4c28c180bf8, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

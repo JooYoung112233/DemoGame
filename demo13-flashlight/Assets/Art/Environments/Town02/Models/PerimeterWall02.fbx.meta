@@ -3,7 +3,17 @@ guid: 528a7c5afe107614dbf7d88d484cbf32
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Concrete
+    second: {fileID: 2100000, guid: d7cf99b0efca49547a2dad2b11ef64a2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Cream
+    second: {fileID: 2100000, guid: 604993b6663f9be4da363a55196181a5, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

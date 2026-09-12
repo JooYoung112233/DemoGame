@@ -3,7 +3,27 @@ guid: 13f47aad94d22a54abb932071a9000da
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Ground62_Concrete
+    second: {fileID: 2100000, guid: cd9563a7edbb14d41ad22a6c6f3f0477, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Ground62_ConcreteDark
+    second: {fileID: 2100000, guid: 36e9a3c81d94def43a0f3ad219208369, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Ground62_Soil
+    second: {fileID: 2100000, guid: ee548056bde52244dabc5aad43b41e65, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Ground62_Stone
+    second: {fileID: 2100000, guid: 550ffe913e78e794ba8803e58f97c5d9, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -82,8 +82,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Town_Sage
+    second: {fileID: 2100000, guid: 6957d3879ad62ff428dbfb7271f0ae2a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Town_Steel
     second: {fileID: 2100000, guid: b9722c56626149846bd5de812b1d2d1d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Tile
+    second: {fileID: 2100000, guid: dd14fe03c9a48c44ebb503840fccb7dc, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

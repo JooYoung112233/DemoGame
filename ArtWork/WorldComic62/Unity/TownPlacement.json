@@ -1,0 +1,806 @@
+{
+  "props": [
+    {
+      "group": "Repair_Workyard",
+      "name": "Workbench01",
+      "path": "Assets/Art/Environments/Hideout02/Prefabs/Workbench01.prefab",
+      "position": [
+        17.0,
+        0.05500005,
+        36.0
+      ],
+      "center": [
+        17.0,
+        0.61499995,
+        36.0
+      ],
+      "size": [
+        1.70000076,
+        1.11999989,
+        0.7539978
+      ],
+      "yaw": 180.0
+    },
+    {
+      "group": "Repair_Workyard",
+      "name": "Bicycle02",
+      "path": "Assets/Art/Environments/TownProps02/Models/Bicycle02.fbx",
+      "position": [
+        20.5,
+        0.05400005,
+        36.3999977
+      ],
+      "center": [
+        20.5,
+        0.616500258,
+        36.3999977
+      ],
+      "size": [
+        1.89647293,
+        1.12300038,
+        1.1386261
+      ],
+      "yaw": -20.0
+    },
+    {
+      "group": "Repair_Workyard",
+      "name": "Toolbox02",
+      "path": "Assets/Art/Environments/TownProps02/Models/Toolbox02.fbx",
+      "position": [
+        15.1030416,
+        0.0449999869,
+        35.91135
+      ],
+      "center": [
+        15.1,
+        0.251999974,
+        35.9
+      ],
+      "size": [
+        0.7167568,
+        0.394,
+        0.5000305
+      ],
+      "yaw": 15.0
+    },
+    {
+      "group": "Repair_Workyard",
+      "name": "ScrapHeap02",
+      "path": "Assets/Art/Environments/TownProps02/Models/ScrapHeap02.fbx",
+      "position": [
+        15.974741,
+        0.0325001478,
+        35.3368454
+      ],
+      "center": [
+        16.0,
+        0.211250126,
+        35.3000031
+      ],
+      "size": [
+        1.48538971,
+        0.312500238,
+        1.31536865
+      ],
+      "yaw": -8.0
+    },
+    {
+      "group": "Repair_Workyard",
+      "name": "FireExtinguisher02",
+      "path": "Assets/Art/Environments/TownProps02/Models/FireExtinguisher02.fbx",
+      "position": [
+        18.762,
+        0.0305884778,
+        37.1
+      ],
+      "center": [
+        18.8,
+        0.3765442,
+        37.1
+      ],
+      "size": [
+        0.3580017,
+        0.6430884,
+        0.281997681
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "Repair_Workyard",
+      "name": "Ladder02",
+      "path": "Assets/Art/Environments/TownProps02/Models/Ladder02.fbx",
+      "position": [
+        18.50425,
+        0.05500003,
+        37.4
+      ],
+      "center": [
+        18.5,
+        1.225,
+        37.4
+      ],
+      "size": [
+        0.08349991,
+        2.34,
+        0.565002441
+      ],
+      "yaw": 90.0
+    },
+    {
+      "group": "Medical_SupplyWash",
+      "name": "MedicalBox01",
+      "path": "Assets/Art/Environments/Hideout02/Prefabs/MedicalBox01.prefab",
+      "position": [
+        68.0,
+        0.0500000119,
+        36.9905
+      ],
+      "center": [
+        68.0,
+        0.263750017,
+        37.0
+      ],
+      "size": [
+        0.5,
+        0.417500019,
+        0.2990036
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "Medical_SupplyWash",
+      "name": "SupplyCase02",
+      "path": "Assets/Art/Environments/Hideout02/Prefabs/SupplyCase02.prefab",
+      "position": [
+        69.09857,
+        0.0450000465,
+        36.97955
+      ],
+      "center": [
+        69.1,
+        0.22875,
+        37.0
+      ],
+      "size": [
+        0.5979767,
+        0.347500026,
+        0.459732056
+      ],
+      "yaw": 4.0
+    },
+    {
+      "group": "Medical_SupplyWash",
+      "name": "UtilitySink02",
+      "path": "Assets/Art/Environments/TownProps02/Models/UtilitySink02.fbx",
+      "position": [
+        70.4,
+        0.0550000668,
+        35.915
+      ],
+      "center": [
+        70.4,
+        0.7074999,
+        35.9
+      ],
+      "size": [
+        1.5,
+        1.30499983,
+        0.6650009
+      ],
+      "yaw": 180.0
+    },
+    {
+      "group": "Medical_SupplyWash",
+      "name": "WaterBarrelStand02",
+      "path": "Assets/Art/Environments/TownProps02/Models/WaterBarrelStand02.fbx",
+      "position": [
+        72.2,
+        0.055000037,
+        35.9365
+      ],
+      "center": [
+        72.2,
+        0.79375,
+        35.9
+      ],
+      "size": [
+        0.8600006,
+        1.4775,
+        0.932998657
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "Medical_SupplyWash",
+      "name": "Bucket02",
+      "path": "Assets/Art/Environments/TownProps02/Models/Bucket02.fbx",
+      "position": [
+        70.7,
+        0.03999999,
+        34.5
+      ],
+      "center": [
+        70.7,
+        0.291471124,
+        34.5
+      ],
+      "size": [
+        0.410369873,
+        0.472942322,
+        0.4103775
+      ],
+      "yaw": 12.0
+    },
+    {
+      "group": "Medical_SupplyWash",
+      "name": "CardboardStack02",
+      "path": "Assets/Art/Environments/TownProps02/Models/CardboardStack02.fbx",
+      "position": [
+        67.77523,
+        0.05000013,
+        35.4963264
+      ],
+      "center": [
+        67.8,
+        0.440000147,
+        35.5
+      ],
+      "size": [
+        1.08267212,
+        0.77000016,
+        0.6236038
+      ],
+      "yaw": -5.0
+    },
+    {
+      "group": "Home_LaundryKitchen",
+      "name": "Clothesline02",
+      "path": "Assets/Art/Environments/TownProps02/Models/Clothesline02.fbx",
+      "position": [
+        75.5,
+        0.055,
+        12.0
+      ],
+      "center": [
+        75.5,
+        1.1049999,
+        12.0
+      ],
+      "size": [
+        4.26600647,
+        2.1,
+        0.166000366
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "Home_LaundryKitchen",
+      "name": "LaundryBasket02",
+      "path": "Assets/Art/Environments/TownProps02/Models/LaundryBasket02.fbx",
+      "position": [
+        73.5,
+        0.0450000465,
+        10.8
+      ],
+      "center": [
+        73.5,
+        0.221250057,
+        10.8
+      ],
+      "size": [
+        0.717803955,
+        0.3325001,
+        0.586862564
+      ],
+      "yaw": -12.0
+    },
+    {
+      "group": "Home_LaundryKitchen",
+      "name": "UtilitySink02",
+      "path": "Assets/Art/Environments/TownProps02/Models/UtilitySink02.fbx",
+      "position": [
+        74.5,
+        0.0550000668,
+        8.115001
+      ],
+      "center": [
+        74.5,
+        0.7074999,
+        8.1
+      ],
+      "size": [
+        1.5,
+        1.30499983,
+        0.6650009
+      ],
+      "yaw": 180.0
+    },
+    {
+      "group": "Home_LaundryKitchen",
+      "name": "OutdoorStove02",
+      "path": "Assets/Art/Environments/TownProps02/Models/OutdoorStove02.fbx",
+      "position": [
+        76.5,
+        0.0550000668,
+        8.07625
+      ],
+      "center": [
+        76.5,
+        0.557249963,
+        8.1
+      ],
+      "size": [
+        1.02999878,
+        1.00449991,
+        0.6875
+      ],
+      "yaw": 180.0
+    },
+    {
+      "group": "Home_LaundryKitchen",
+      "name": "WaterBarrelStand02",
+      "path": "Assets/Art/Environments/TownProps02/Models/WaterBarrelStand02.fbx",
+      "position": [
+        78.0,
+        0.055000037,
+        9.0365
+      ],
+      "center": [
+        78.0,
+        0.79375,
+        9.0
+      ],
+      "size": [
+        0.8600006,
+        1.4775,
+        0.933000565
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "Home_LaundryKitchen",
+      "name": "Bucket02",
+      "path": "Assets/Art/Environments/TownProps02/Models/Bucket02.fbx",
+      "position": [
+        73.7,
+        0.03999999,
+        8.6
+      ],
+      "center": [
+        73.7,
+        0.291471124,
+        8.6
+      ],
+      "size": [
+        0.390792847,
+        0.472942322,
+        0.390787125
+      ],
+      "yaw": 8.0
+    },
+    {
+      "group": "Home_LaundryKitchen",
+      "name": "RopeCoil02",
+      "path": "Assets/Art/Environments/TownProps02/Models/RopeCoil02.fbx",
+      "position": [
+        77.12746,
+        0.04658857,
+        10.4363794
+      ],
+      "center": [
+        77.2,
+        0.07379402,
+        10.4
+      ],
+      "size": [
+        0.8673248,
+        0.03758803,
+        0.770963669
+      ],
+      "yaw": 20.0
+    },
+    {
+      "group": "Home_LaundryKitchen",
+      "name": "Planter02",
+      "path": "Assets/Art/Environments/Town02/Models/Planter02.fbx",
+      "position": [
+        75.5,
+        0.03000015,
+        5.4
+      ],
+      "center": [
+        75.5,
+        0.445000172,
+        5.4
+      ],
+      "size": [
+        2.350006,
+        0.7800001,
+        1.07999992
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "Community_RestCorner",
+      "name": "SpoolTable02",
+      "path": "Assets/Art/Environments/Town02/Models/SpoolTable02.fbx",
+      "position": [
+        44.0,
+        0.0450000763,
+        23.0
+      ],
+      "center": [
+        44.0,
+        0.4835001,
+        23.0
+      ],
+      "size": [
+        1.699997,
+        0.857000232,
+        1.70000076
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "Community_RestCorner",
+      "name": "YardChair02",
+      "path": "Assets/Art/Environments/Town02/Models/YardChair02.fbx",
+      "position": [
+        42.7145462,
+        0.0574745238,
+        22.9947071
+      ],
+      "center": [
+        42.7,
+        0.617611647,
+        23.0
+      ],
+      "size": [
+        0.827278137,
+        1.12522316,
+        0.808776855
+      ],
+      "yaw": -70.0
+    },
+    {
+      "group": "Community_RestCorner",
+      "name": "YardChair02",
+      "path": "Assets/Art/Environments/Town02/Models/YardChair02.fbx",
+      "position": [
+        45.191124,
+        0.0574744642,
+        22.2126789
+      ],
+      "center": [
+        45.2,
+        0.617611468,
+        22.2
+      ],
+      "size": [
+        0.88507843,
+        1.12522292,
+        0.8926811
+      ],
+      "yaw": 145.0
+    },
+    {
+      "group": "Community_RestCorner",
+      "name": "YardChair02",
+      "path": "Assets/Art/Environments/Town02/Models/YardChair02.fbx",
+      "position": [
+        44.49731,
+        0.0574744642,
+        24.2847557
+      ],
+      "center": [
+        44.5,
+        0.617611468,
+        24.3
+      ],
+      "size": [
+        0.726806641,
+        1.12522292,
+        0.751915
+      ],
+      "yaw": 10.0
+    },
+    {
+      "group": "Community_RestCorner",
+      "name": "Planter02",
+      "path": "Assets/Art/Environments/Town02/Models/Planter02.fbx",
+      "position": [
+        47.8,
+        0.030000031,
+        23.8000011
+      ],
+      "center": [
+        47.8,
+        0.445000082,
+        23.8000011
+      ],
+      "size": [
+        1.08000183,
+        0.780000269,
+        2.34999847
+      ],
+      "yaw": 90.0
+    },
+    {
+      "group": "Furniture_Display",
+      "name": "SpoolTable02",
+      "path": "Assets/Art/Environments/Town02/Models/SpoolTable02.fbx",
+      "position": [
+        23.0,
+        0.0450003147,
+        22.4
+      ],
+      "center": [
+        23.0,
+        0.483500332,
+        22.4
+      ],
+      "size": [
+        1.84169769,
+        0.85700047,
+        1.84169769
+      ],
+      "yaw": 5.0
+    },
+    {
+      "group": "Furniture_Display",
+      "name": "YardChair02",
+      "path": "Assets/Art/Environments/Town02/Models/YardChair02.fbx",
+      "position": [
+        21.4859715,
+        0.0574745238,
+        23.59346
+      ],
+      "center": [
+        21.5,
+        0.617611647,
+        23.6
+      ],
+      "size": [
+        0.8556442,
+        1.12522316,
+        0.840671539
+      ],
+      "yaw": 65.0
+    },
+    {
+      "group": "Furniture_Display",
+      "name": "YardChair02",
+      "path": "Assets/Art/Environments/Town02/Models/YardChair02.fbx",
+      "position": [
+        24.3145428,
+        0.0574745238,
+        22.3947067
+      ],
+      "center": [
+        24.3,
+        0.617611647,
+        22.4
+      ],
+      "size": [
+        0.827278137,
+        1.12522316,
+        0.808776855
+      ],
+      "yaw": -70.0
+    },
+    {
+      "group": "Furniture_Display",
+      "name": "FoldedTarp02",
+      "path": "Assets/Art/Environments/TownProps02/Models/FoldedTarp02.fbx",
+      "position": [
+        22.8,
+        0.04400006,
+        24.3
+      ],
+      "center": [
+        22.8,
+        0.122031145,
+        24.3
+      ],
+      "size": [
+        0.723835,
+        0.13406229,
+        0.557582855
+      ],
+      "yaw": -9.0
+    },
+    {
+      "group": "Furniture_Display",
+      "name": "Planter02",
+      "path": "Assets/Art/Environments/Town02/Models/Planter02.fbx",
+      "position": [
+        21.3,
+        0.03000015,
+        20.5
+      ],
+      "center": [
+        21.3,
+        0.445000172,
+        20.5
+      ],
+      "size": [
+        2.34999847,
+        0.7800001,
+        1.08000183
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "BlackMarket_Unloading",
+      "name": "MerchantCart02",
+      "path": "Assets/Art/Environments/Town02/Models/MerchantCart02.fbx",
+      "position": [
+        24.6456585,
+        0.025000453,
+        7.42468262
+      ],
+      "center": [
+        25.0,
+        1.13678133,
+        7.5
+      ],
+      "size": [
+        3.75161362,
+        2.1635623,
+        2.684019
+      ],
+      "yaw": -12.0
+    },
+    {
+      "group": "BlackMarket_Unloading",
+      "name": "FoldedTarp02",
+      "path": "Assets/Art/Environments/TownProps02/Models/FoldedTarp02.fbx",
+      "position": [
+        23.0,
+        0.04400006,
+        6.0
+      ],
+      "center": [
+        23.0,
+        0.122031145,
+        6.0
+      ],
+      "size": [
+        0.717597961,
+        0.134062275,
+        0.5473776
+      ],
+      "yaw": 8.0
+    },
+    {
+      "group": "BlackMarket_Unloading",
+      "name": "CardboardStack02",
+      "path": "Assets/Art/Environments/TownProps02/Models/CardboardStack02.fbx",
+      "position": [
+        24.375639,
+        0.05000004,
+        5.294182
+      ],
+      "center": [
+        24.4,
+        0.440000057,
+        5.3
+      ],
+      "size": [
+        1.11710358,
+        0.7700001,
+        0.7074661
+      ],
+      "yaw": -10.0
+    },
+    {
+      "group": "BlackMarket_Unloading",
+      "name": "Toolbox02",
+      "path": "Assets/Art/Environments/TownProps02/Models/Toolbox02.fbx",
+      "position": [
+        26.5,
+        0.0449999869,
+        6.11175
+      ],
+      "center": [
+        26.5,
+        0.251999974,
+        6.1
+      ],
+      "size": [
+        0.6500015,
+        0.394,
+        0.343500137
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "BlackMarket_Unloading",
+      "name": "RopeCoil02",
+      "path": "Assets/Art/Environments/TownProps02/Models/RopeCoil02.fbx",
+      "position": [
+        26.9245644,
+        0.04658851,
+        8.22991848
+      ],
+      "center": [
+        27.0,
+        0.07379396,
+        8.2
+      ],
+      "size": [
+        0.8397331,
+        0.03758788,
+        0.7257347
+      ],
+      "yaw": 15.0
+    },
+    {
+      "group": "West_ServiceAlley",
+      "name": "Dumpster02",
+      "path": "Assets/Art/Environments/TownProps02/Models/Dumpster02.fbx",
+      "position": [
+        3.0,
+        0.0550000668,
+        35.0
+      ],
+      "center": [
+        3.0,
+        0.695,
+        35.0
+      ],
+      "size": [
+        1.73059988,
+        1.28,
+        0.980003357
+      ],
+      "yaw": 0.0
+    },
+    {
+      "group": "West_ServiceAlley",
+      "name": "GarbageBags02",
+      "path": "Assets/Art/Environments/TownProps02/Models/GarbageBags02.fbx",
+      "position": [
+        4.8529,
+        0.0428429842,
+        33.8688354
+      ],
+      "center": [
+        4.8,
+        0.331234485,
+        33.8
+      ],
+      "size": [
+        1.061264,
+        0.5524689,
+        0.974342346
+      ],
+      "yaw": 25.0
+    },
+    {
+      "group": "West_ServiceAlley",
+      "name": "CardboardStack02",
+      "path": "Assets/Art/Environments/TownProps02/Models/CardboardStack02.fbx",
+      "position": [
+        3.075858,
+        0.05000013,
+        32.8933372
+      ],
+      "center": [
+        3.1,
+        0.440000147,
+        32.9
+      ],
+      "size": [
+        1.12850618,
+        0.77000016,
+        0.7395401
+      ],
+      "yaw": -12.0
+    }
+  ],
+  "originalColliderCount": 150,
+  "originalBehaviourCount": 42,
+  "existingGameplayPreserved": true,
+  "missingScripts": 0
+}

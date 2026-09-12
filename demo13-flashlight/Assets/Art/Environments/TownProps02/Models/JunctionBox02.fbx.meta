@@ -3,7 +3,32 @@ guid: ba59b6914a854e24c89d73b1d1ef74f9
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Glass
+    second: {fileID: 2100000, guid: f5e5f0581034e6a42b5ae05ecbfb0ca3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Olive
+    second: {fileID: 2100000, guid: e7d0d8954725793469d36cfda5e9090a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Paper
+    second: {fileID: 2100000, guid: 29f5146e9ee562645b881fb25a529454, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Steel
+    second: {fileID: 2100000, guid: 4f3e835a4e5126e49a5caed960b4c28c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Wear
+    second: {fileID: 2100000, guid: a044fe2b22008f747afc9722be61e7a1, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

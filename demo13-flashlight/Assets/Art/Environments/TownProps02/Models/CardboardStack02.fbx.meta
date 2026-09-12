@@ -3,7 +3,22 @@ guid: 27907ee603c4eaf44b21fbb392a98de5
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Cardboard
+    second: {fileID: 2100000, guid: 4ea572c24b4edd940aab912ff05d0810, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Linen
+    second: {fileID: 2100000, guid: 0f2b72e291e43d541b5e0401cd8766c3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Paper
+    second: {fileID: 2100000, guid: 15484d308a4f4e44d91ff625cec12866, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

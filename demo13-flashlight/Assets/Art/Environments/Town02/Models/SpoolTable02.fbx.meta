@@ -3,7 +3,22 @@ guid: f4e257a3fbd5e3d47b05164e888fd413
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Steel
+    second: {fileID: 2100000, guid: f8171fda207935e41ba415103f98b71e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Wood
+    second: {fileID: 2100000, guid: c32de026725b61e4a8e7e9677e70a782, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_WoodDark
+    second: {fileID: 2100000, guid: 0ba9236243aff9947b5774e84ed6e603, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
