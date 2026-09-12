@@ -150,7 +150,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`navigation.md`](navigation.md) | **시계 나침반 + 미니맵/맵 시스템** — 시계 3역할(나침반·공명·시간역행 암시) 통합, RaidMap+fog, 통로 주석(사일런트힐식), 지도 아이템 해금 | 기반 구현(검토 중) |
+| [`navigation.md`](navigation.md) | **시계 나침반 + 미니맵/맵 시스템** — 마을 상시 미니맵(위치·건물·입구·잠김), 레이드 시계·RaidMap+fog·지도 아이템 해금 | 마을 지도 구현, 레이드 기반 유지 |
 
 핵심 코드: `RaidMapManager.cs`, `NavigationHUD.cs`, `MapZoneVolume.cs`, `PassageMarker.cs`, `CompassTarget.cs`, `MapFragmentReveal.cs` (`Assets/Scripts/Navigation/`)
 

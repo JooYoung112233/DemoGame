@@ -4,6 +4,28 @@ using System.Collections.Generic;
 
 public class QuestHUD : MonoBehaviour
 {
+    bool townMapVisible;
+    Vector2 originalPanelOffsetMax;
+    Vector2 originalPanelOffsetMin;
+    public void SetTownMapVisible(bool visible)
+    {
+        if (panelRoot == null || visible == townMapVisible) return;
+        var rt = panelRoot.GetComponent<RectTransform>();
+        if (visible)
+        {
+            originalPanelOffsetMax = rt.offsetMax;
+            originalPanelOffsetMin = rt.offsetMin;
+            float shift = Mathf.Min(0f, -354f - rt.offsetMax.y);
+            rt.offsetMin += new Vector2(0, shift);
+            rt.offsetMax = new Vector2(rt.offsetMax.x, Mathf.Min(rt.offsetMax.y, -354f));
+        }
+        else
+        {
+            rt.offsetMin = originalPanelOffsetMin;
+            rt.offsetMax = originalPanelOffsetMax;
+        }
+        townMapVisible = visible;
+    }
     [SerializeField] Canvas canvas;
     [SerializeField] GameObject panelRoot;
     [SerializeField] Text questListText;

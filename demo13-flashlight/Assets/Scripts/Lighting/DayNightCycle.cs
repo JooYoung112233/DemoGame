@@ -92,14 +92,30 @@ public class DayNightCycle : MonoBehaviour
         //    씬을 갈아끼우면 캐시된 태양이 파괴되고 새 씬의 태양은 구운 값(=낮) 그대로다 —
         //    밤에 레이드에 들어가도 T를 한 번 누르기 전까지 대낮이었다. 로드마다 다시 건다.
         UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+        UnityEngine.SceneManagement.SceneManager.activeSceneChanged += OnActiveSceneChanged;
     }
 
     void OnDestroy()
-        => UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+        UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= OnActiveSceneChanged;
+    }
+
+    UnityEngine.SceneManagement.Scene lightingScene;
+    void OnActiveSceneChanged(UnityEngine.SceneManagement.Scene oldScene, UnityEngine.SceneManagement.Scene newScene)
+    {
+        if (!SystemsScene.IsGameplayScene(newScene)) return;
+        lightingScene = newScene;
+        directionalLight = null;
+        globalLight = null;
+        ApplyLighting(); // SetActiveScene 뒤 새 씬의 RenderSettings에도 현재 낮밤을 적용한다.
+    }
 
     void OnSceneLoaded(UnityEngine.SceneManagement.Scene s, UnityEngine.SceneManagement.LoadSceneMode m)
     {
-        directionalLight = null;   // 새 씬의 태양을 다시 찾게 한다(옛 태양은 이미 파괴됨)
+        if (!SystemsScene.IsGameplayScene(s)) return;
+        lightingScene = s;
+        directionalLight = null;   // additive 로드 중 옛 씬도 남아 있으므로 목적지로 한정한다.
         globalLight = null;
         ApplyLighting();
     }
@@ -268,6 +284,7 @@ public class DayNightCycle : MonoBehaviour
         foreach (var l in FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
         {
             if (l.type != LightType.Directional) continue;
+            if (lightingScene.IsValid() && lightingScene.isLoaded && l.gameObject.scene != lightingScene) continue;
 
             var mark = l.GetComponent<SunLight>();
             if (mark != null && !mark.followDayNight) continue;   // 고정 조명 씬(은신처 등)
