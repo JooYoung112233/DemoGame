@@ -3,29 +3,15 @@
 > 모든 커스텀 에디터 메뉴는 **`Tools/TopDown/`** 한 루트 아래 카테고리로 묶음 (2026-06-02 통합).
 > 이전엔 `BRB` / `TopDown 2D` / `TopDown Combat` / `Dev Tools` 4개 루트로 흩어져 있었음.
 > (서드파티 메뉴, `Create ▸ …` 에셋 생성 메뉴는 범위 밖.)
+>
+> ⚠️ **현행 메뉴 목록은 [`editor-tools.md`](editor-tools.md)가 정본이다.** 이 문서의 영문 메뉴 표는 2D 시절 기록이다. 2026-09-12 시스템 정리 5단계에서 옛 씬 빌더(`TopDownPlayerBuilder`·`GameSceneBuilder`·`CombatSandboxBuilder`)와 2D 맵 도구(`Prop2DCatalogEditor`·`SceneLightingBuilder`)를 지워 해당 행을 뺐다.
 
 ## 카테고리별 메뉴 (`Tools ▸ TopDown ▸ …`)
-
-### 🏗 Build — 프리팹·씬 생성
-| 메뉴 | 클래스 | 역할 |
-|---|---|---|
-| Build ▸ Player Rig | `TopDownPlayerBuilder` | `Resources/PlayerRig.prefab` — **카메라+플레이어+라이트+후처리 한 세트**(DontDestroyOnLoad, 모든 씬 공유) |
-| Build ▸ Enemy Prefab | `CombatSandboxBuilder` | `Resources/Enemy.prefab` — 바디 스프라이트+Hurtbox+Health+CombatFeedback+EnemyController(+NavAgent 자동) |
-| Build ▸ InGame Scene | `GameSceneBuilder` | 인게임 레이드 씬 골격(라이트·Tilemap·SpawnPoint) |
-| Build ▸ Safehouse Scene | `GameSceneBuilder` | 안전가옥 씬 골격 |
-| Build ▸ Combat Sandbox Scene | `CombatSandboxBuilder` | 타격감/히트박스 테스트 아레나(적 3기 + NavGrid + 우회 벽 2개) |
-| Build ▸ Map Tool Scene | `MapTool2DSceneBuilder` | 맵 편집용 씬(Grid + Floor/Walls Tilemap) |
 
 ### ⚔ Combat — 전투
 | 메뉴 | 클래스 | 역할 |
 |---|---|---|
 | Combat ▸ Attack Editor | `AttackDataEditorWindow` | **히트박스 타임라인 에디터** — AttackData / AttackComboData 편집 (상세 아래) |
-
-### 🗺 Map — 맵·프롭·조명
-| 메뉴 | 클래스 | 역할 |
-|---|---|---|
-| Map ▸ Prop Catalog | `Prop2DCatalogEditor` | Prop2D 정의 등록/편집 + 콜라이더 미리보기 + 씬 클릭 배치 |
-| Map ▸ Setup Scene Lighting | `SceneLightingBuilder` | 현재 씬에 어두운 글로벌 Light2D 셋업(Darkwood 룩) |
 
 ### 📊 Data
 | 메뉴 | 클래스 | 역할 |

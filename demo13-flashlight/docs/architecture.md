@@ -63,7 +63,7 @@ Safehouse(마을) / Hideout / Pawnshop / Zone1 등 게임플레이 씬은 **시�
 (카메라/EventSystem/매니저/플레이어는 전부 Systems가 공급). 게임플레이 씬엔 **맵 콘텐츠만**:
 3D 지오메트리, SpawnPoint, 프롭, 인터랙터블, 탈출존, 씬별 마커, 맵 태양.
 3D 맵은 빌더가 만든다(`Zone1GreyboxLayout`·`Map3DBuild`·`Safehouse3DLayout`·`Hideout3DLayout` 등).
-⚠️ 2D 시절의 `InGameScene`·`CombatSandbox` 씬은 더 이상 없다 — 이를 등록하려는 옛 빌더(`GameSceneBuilder`·`CombatSandboxBuilder`)는 정리 5단계 대상.
+⚠️ 2D 시절의 `InGameScene`·`CombatSandbox` 씬과 이를 만들던 옛 빌더(`GameSceneBuilder`·`CombatSandboxBuilder`)는 2026-09-12 정리 5단계에서 삭제했다.
 
 ### 셋업 방법
 1. PlayerRig는 `Assets/Resources/PlayerRig.prefab`으로 이미 있다 — 옛 `Player Rig` 빌더(`TopDownPlayerBuilder`)는 삭제됐으니 새로 만들지 않는다.
@@ -75,7 +75,7 @@ Safehouse(마을) / Hideout / Pawnshop / Zone1 등 게임플레이 씬은 **시�
 ## 게임 루프 (안전가옥 ↔ 레이드)
 
 세이프하우스 → 맵보드 → 레이드 → 파밍 → 탈출 → 보상 → 세이프하우스.
-모든 단계가 이미 코드로 연결돼 있고, 씬엔 '맵 콘텐츠' 오브젝트만 배치하면 동작한다(`GameSceneBuilder`가 생성).
+모든 단계가 이미 코드로 연결돼 있고, 씬엔 '맵 콘텐츠' 오브젝트만 배치하면 동작한다(3D 맵 빌더가 배치).
 
 | 단계 | 트리거 | 코드 |
 |------|--------|------|
@@ -105,7 +105,7 @@ Safehouse(마을) / Hideout / Pawnshop / Zone1 등 게임플레이 씬은 **시�
   WASD 이동·마우스 조준 등 기존 로직은 폴링 구조 그대로 유지(액션 에셋/콜백으로 재배선하지 않음).
 - **UI 입력 모듈**: 코드로 EventSystem 생성 시 `StandaloneInputModule` 대신
   **`UnityEngine.InputSystem.UI.InputSystemUIInputModule`** 를 붙이고 **반드시 `.AssignDefaultActions()` 호출**
-  (UIManager/PauseMenu/TitleScreen/HideoutController + Editor/CombatSandboxBuilder).
+  (UIManager/PauseMenu/TitleScreen/HideoutController).
   New 전용에서 레거시 모듈은 UI 입력을 못 받고, 코드로 붙인 신 모듈도 `AssignDefaultActions()` 없이는
   포인터/클릭 액션이 비어 **마우스 클릭이 안 먹는다**(중요 함정).
 - `Game.Scripts.asmdef`는 `Unity.InputSystem`을 참조. 패키지: `com.unity.inputsystem`.
@@ -131,7 +131,7 @@ Map
 │   ├─ Scatter         흩뿌린 소품 (SP_/SZ_/P_/Dressing/Board)
 │   └─ Misc            표에 없는 것
 ├─ Lighting         Light · Volume · 천장등 묶음 · Sun3D
-├─ Gameplay         SpawnPoint · SceneDoor3D · BuildingEntrance · BlockedPassage · QuestPoiZone ·
+├─ Gameplay         SpawnPoint · SceneDoor3D · BlockedPassage · QuestPoiZone ·
 │                   StoryAreaTrigger · InteractableObject · 빈 위치 표식(RoomCenter 등)
 ├─ Loot             LootContainer · ItemSpawnPoint · WorldItem
 ├─ Enemies          SpawnZone · EnemyController · EnemySpawner
@@ -159,7 +159,7 @@ Player    PlayerRig
   루팅 상자는 `InteractableObject`도 갖고 있어서 Loot가 Gameplay보다 앞이다.
 - **도구 하나로, 빌더가 저장 직전에 부른다.** `Editor/SceneHierarchyOrganizer.cs`. 씬 대부분이 빌더로 생성되므로 손으로
   정리하면 다음 재빌드에 날아간다. 연결 지점: `EditorSceneBuildUtil.SaveAndClose`(GreyboxBuild → Zone1·실내 전부,
-  Systems, 전당포, 고철시장 등) + 직접 저장하는 `Safehouse3DLayout`·`Hideout3DLayout`·`LookDevScene`.
+  Systems 등) + 직접 저장하는 `Safehouse3DLayout`·`Hideout3DLayout`.
   기존 씬은 `Tools ▸ TopDown ▸ 개발 ▸ 하이어라키 정리 (빌드세팅 전체 씬)`.
 - 몇 번 돌려도 결과가 같다 — 이미 폴더에 든 것도 다시 판정해 제자리로 보내고 빈 폴더는 지운다. 폴더는 `HierarchyFolder`
   컴포넌트로 표시한다. **`Map` 이름은 유지** — `GreyboxBuild.EndScene`(천장등)·`Prop2DCatalogEditor`가 이름으로 찾는다.

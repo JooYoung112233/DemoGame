@@ -27,7 +27,7 @@ Systems (persistent boot scene — managers, all UI, PlayerRig)
       → Zone1 (region 1 raid, 20 min) — interiors are walk-in inside the map (the old `Int_*` scenes were deleted 2026-09-12)
         → extract → PostRaidEvent (40%) → RaidResultUI → back to the village
 ```
-Naming trap: the scene called `Safehouse` is the village; `Hideout` is the player's room; docs also say 안전구역/안전가옥/Town. Cleanup step 4 will settle the names. Only region 1 of 5 has a scene (`WorldRegionCatalog`). `ScrapMarket_GB` is an old raid map (debug only), `MapTool_LookDev` a look-dev scene.
+Naming trap: the scene called `Safehouse` is the village; `Hideout` is the player's room; docs also say 안전구역/안전가옥/Town. Cleanup step 4 will settle the names. Only region 1 of 5 has a scene (`WorldRegionCatalog`). The old `ScrapMarket_GB` raid map, `MapTool_LookDev` look-dev scene and 2D `Pawnshop` interior were deleted 2026-09-12 (cleanup step 5); the build list is Systems · Safehouse · Hideout · Zone1.
 
 ### Systems Boot Scene (persistent additive) — 2026-06-03
 `Assets/Scenes/Systems.unity` (built by `Tools/TopDown/개발/시스템 씬`) holds **all managers + UIManager (+every UI panel) + PlayerRig (player, camera, worn lamp, post-process Volume) + GameBoot**. Gameplay scenes are loaded **additively on top** and swapped by `SceneTransitionManager` (Systems is never unloaded). Old auto-bootstraps early-return when `SystemsScene.ProvidesSystems`. **See `docs/architecture.md`.**
@@ -64,13 +64,13 @@ Naming trap: the scene called `Safehouse` is the village; `Hideout` is the playe
 - **DenseAnomalyController/Zone** — anomaly fog; its shader is missing (see leftovers).
 
 ### Rendering
-- **Pipeline:** URP 3D, Forward. **Camera:** orthographic, `CameraFollow.viewPitch/viewYaw` = **62/0** (also saved on the PlayerRig prefab and mirrored in `LookDevScene` constants).
+- **Pipeline:** URP 3D, Forward. **Camera:** orthographic, `CameraFollow.viewPitch/viewYaw` = **62/0** (also saved on the PlayerRig prefab).
 - **Shader:** one game shader **`BRB/GameLit`** (characters + environment, dark realistic look). Convert materials with the `GameLitConverter` editor tool. Post-processing lives on the PlayerRig Volume (color grading/tonemapping, bloom, vignette, film grain).
 - **Occlusion:** screen-space cutaway (decided in Stage 0).
 - SSOT: **`docs/rendering.md`** (top table = current 3D implementation; the URP 2D body below it is history).
 
 ### Scene Transition & Extraction
-`SceneTransitionManager.TransitionWithDelay()` handles extraction: countdown UI, distance-based cancel. 3D doors use `SceneDoor3D`; `BuildingEntrance` is the 2D-era door still used in places. `SpawnPoint` marks arrival points.
+`SceneTransitionManager.TransitionWithDelay()` handles extraction: countdown UI, distance-based cancel. Scene-change doors use `SceneDoor3D` (the 2D-era `BuildingEntrance` was deleted 2026-09-12); buildings in raid maps are walk-in rooms on the same map. `SpawnPoint` marks arrival points.
 
 ### Data Layer
 - **StatDB** — central stats (above).
@@ -79,7 +79,7 @@ Naming trap: the scene called `Safehouse` is the village; `Hideout` is the playe
 - **WorldRegionCatalog** — 5 districts; only region 1 has a scene. **RegionTimeManager** — per-region day/night clocks.
 
 ### Known leftovers (don't build on them)
-- 2D physics/lights still in ~16 runtime files (`HideoutController`, `BuildingEntrance`, `Prop2D*`, `MapTriggerZone2D`, …) and 2D-era editor tools.
+- 2D code is gone (2026-09-12 cleanup stage 5: 2D prop pipeline, `gb_*` palette, `BuildingEntrance`, 2D packages). Map builders (`GreyboxBuild`/`Greybox3D`) build 3D primitives only; `"gb_*"` strings are just kind keys. `Resources/Greybox/gb_npc.asset` stays (NPC prefabs use it).
 - `FlashlightController` is looked up by a few scripts but exists on no prefab/scene.
 - Code loads 5 shaders that no longer exist: `BRB/AnomalyFog`, `VisionDarkness`, `SpriteFlash`, `DamageOverlay`, `WallPixel`.
 - The full ranked list and cleanup order: `docs/dev-roadmap.md` §시스템 정리.

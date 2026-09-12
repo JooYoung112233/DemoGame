@@ -67,7 +67,7 @@ public static class SceneHierarchyOrganizer
     static readonly System.Type[] EnemyTypes = { typeof(SpawnZone), typeof(EnemyController), typeof(EnemySpawner) };
     static readonly System.Type[] LootTypes = { typeof(LootContainer), typeof(ItemSpawnPoint), typeof(WorldItem) };
     static readonly System.Type[] GameplayTypes =
-        { typeof(SpawnPoint), typeof(SceneDoor3D), typeof(BuildingEntrance),
+        { typeof(SpawnPoint), typeof(SceneDoor3D),
           typeof(BlockedPassage), typeof(QuestPoiZone), typeof(StoryAreaTrigger), typeof(InteractableObject) };
 
     // ── 메뉴 ─────────────────────────────────────────────────────────────

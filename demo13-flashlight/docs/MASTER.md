@@ -189,7 +189,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`map-tool.md`](map-tool.md) | 탑다운 2D 맵 도구 **사양·결정 로그** — Prop2D 카탈로그 + 씬 빌더. ⚠️ 2D 시절 도구 — 3D 맵은 `Zone1GreyboxLayout`·`Map3DBuild`·`Greybox3D` 등이 만든다(문서 갱신은 정리 5단계) | 기록 (2D) |
+| [`map-tool.md`](map-tool.md) | 탑다운 2D 맵 도구 **사양·결정 로그** — Prop2D 카탈로그 + 씬 빌더. ⚠️ **2026-09-12 도구 전부 삭제(기록용)** — 3D 맵은 `빌드3D/지역1`(`Map3DBuild`→`Zone1GreyboxLayout`→`Greybox3D`)이 만든다 | 기록 (2D·삭제됨) |
 | [`map-tool-guide.md`](map-tool-guide.md) | 맵툴 **사용 설명서**(신규 사용자용) — 셋업→등록→배치→기능→저장→테스트 단계별 | 작성 완료 |
 
 ---

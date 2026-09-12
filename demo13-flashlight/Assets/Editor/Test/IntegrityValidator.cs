@@ -123,7 +123,6 @@ public static class IntegrityValidator
 
         var spawns    = Collect<SpawnPoint>(roots);
         var exitsIO   = Collect<InteractableObject>(roots).Where(i => i.Type == InteractableObject.InteractType.ExitPoint).ToList();
-        var entrances = Collect<BuildingEntrance>(roots);
         var zones     = Collect<SpawnZone>(roots);
         var controllers = Collect<MapSpawnController>(roots);
         var anchors   = Collect<ItemSpawnPoint>(roots);
@@ -140,9 +139,9 @@ public static class IntegrityValidator
         foreach (var io in exitsIO)
             CheckTargetScene(name, $"ExitPoint '{io.name}'", io.TargetScene, buildScenes);
 
-        // 3) BuildingEntrance targetScene 유효 (진입/출구 공통)
-        foreach (var be in entrances)
-            CheckTargetScene(name, $"BuildingEntrance '{be.name}'", be.TargetScene, buildScenes);
+        // 3) SceneDoor3D targetScene 유효 (2026-09-12: 2D BuildingEntrance 삭제로 대체)
+        foreach (var sd in Collect<SceneDoor3D>(roots))
+            CheckTargetScene(name, $"SceneDoor3D '{sd.name}'", sd.TargetScene, buildScenes);
 
         // 4) SpawnZone.UnitKey가 StatDB에 실재
         foreach (var z in zones)

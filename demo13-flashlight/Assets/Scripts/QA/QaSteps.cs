@@ -498,59 +498,21 @@ public static class QaSteps
         yield return c.Bot.WaitSec(1f);
     }
 
-    // ── 건물 안/밖 (2026-07-11 "건물 = 전당포식 씬 전환") ────────────────
-    //  건물 내부는 **별도 씬**이고, 출입은 E키가 아니라 BuildingEntrance **트리거**다.
-    //  봇은 밖에서 상자로 걸어가다 입구를 밟아 그냥 빨려 들어간다 — 2026-07-28 QA에서
-    //  3사이클 전부 Int_Generic에 갇혀 NO_EXIT로 끝났다(내부엔 탈출구가 없다).
+    // ── 건물 안/밖 ────────────────────────────────────────────────────
+    //  2026-09-08 별도 실내 씬(Int_*)을 폐기해 건물은 같은 맵에서 걸어 들어간다.
+    //  2026-09-12 시스템 정리 5단계에서 씬 전환 입구(2D BuildingEntrance)를 삭제했다 —
+    //  그래서 '건물 진입/이탈' 목표는 고를 대상이 없다(문 거리 -1). 목표 자체는 QaBrain에 남겨 둔다.
 
-    /// <summary>레이드가 이어지는 씬인가(외부 맵 또는 그 건물 내부).</summary>
+    /// <summary>레이드가 이어지는 씬인가(외부 맵).</summary>
     static bool IsRaidScene(string n) =>
-        !string.IsNullOrEmpty(n) && (n.StartsWith("Int_") || (n != "Safehouse" && n != "Hideout"
-            && n != "Systems" && n != "Pawnshop" && n != "ScrapMarket_GB"));
+        !string.IsNullOrEmpty(n) && n != "Safehouse" && n != "Hideout" && n != "Systems";
 
     static bool IsInterior() => SceneManager.GetActiveScene().name.StartsWith("Int_");
 
-    /// <summary>건물 안이면 나가는 문(트리거)을 밟아 밖으로 나온다. 중첩 대비 최대 3번.</summary>
+    /// <summary>실내 씬이 없어져 할 일이 없다(호출부 유지용).</summary>
     static IEnumerator LeaveBuildingIfInside(QaContext c)
     {
-        for (int hop = 0; hop < 3 && IsInterior(); hop++)
-        {
-            var player = TopDownPlayer.Instance;
-            if (player == null) yield break;
-
-            string from = SceneManager.GetActiveScene().name;
-            BuildingEntrance door = null; float bestD = float.MaxValue;
-            foreach (var be in Object.FindObjectsByType<BuildingEntrance>(FindObjectsSortMode.None))
-            {
-                if (be == null || !be.IsExit || string.IsNullOrEmpty(be.TargetScene)) continue;
-                if (!be.gameObject.activeInHierarchy) continue;
-                float dist = Vector2.Distance(Plan3D.ToPlan(be.transform.position), Plan3D.ToPlan(player.transform.position));
-                if (dist < bestD) { bestD = dist; door = be; }
-            }
-
-            if (door == null)
-            {
-                c.Report.Error("building", "NO_INTERIOR_EXIT",
-                    $"[{from}] 건물 내부인데 나가는 문(BuildingEntrance isExit)이 없다 — 플레이어가 갇힌다");
-                yield break;
-            }
-
-            bool reached = false;
-            // 트리거(문 1.3×1.0)를 실제로 밟아야 발동하므로 도착 판정을 좁게 잡는다.
-            yield return c.Bot.MoveTo(door.transform.position, 0.6f, 25f, r => reached = r);
-            yield return c.Bot.WaitSec(1.5f);   // 페이드 + additive 전환 대기
-
-            string now = SceneManager.GetActiveScene().name;
-            if (now != from)
-            {
-                c.Report.Info("building", "LEAVE", $"건물 밖으로 나옴 {from} → {now}");
-                continue;
-            }
-
-            c.Report.Error("building", "EXIT_DOOR_FAIL",
-                $"[{from}] 출구 문까지 {(reached ? "도달했는데" : "도달 못 해")} 씬이 안 바뀜 — 트리거 미발동 의심");
-            yield break;
-        }
+        yield break;
     }
 
     // ══════════════════════════════════════════════════════════════════
@@ -639,25 +601,13 @@ public static class QaSteps
     static readonly HashSet<EntityId> _visitedDoors = new HashSet<EntityId>();
     static string _doorScene = "";
 
-    /// <summary>아직 안 들어가 본 건물 입구 중 가장 가까운 것.
-    /// 2026-07-28 커밋 b2b3937로 루트가 실내로 옮겨져, 진입이 파밍의 전제가 됐다.</summary>
-    static BuildingEntrance NearestUnvisitedDoor(Vector2 from, bool omniscient)
+    /// <summary>아직 안 들어가 본 씬 전환 건물 입구 — 2026-09-12 입구(BuildingEntrance) 삭제로 항상 없음.
+    /// 건물은 같은 맵의 방이라 상자 탐색(KnownCrates)이 곧 건물 탐색이다.</summary>
+    static Transform NearestUnvisitedDoor(Vector2 from, bool omniscient)
     {
         string scene = SceneManager.GetActiveScene().name;
         if (scene != _doorScene) { _doorScene = scene; _visitedDoors.Clear(); }
-
-        BuildingEntrance best = null; float bestD = float.MaxValue;
-        foreach (var be in Object.FindObjectsByType<BuildingEntrance>(FindObjectsSortMode.None))
-        {
-            if (be == null || be.IsExit || string.IsNullOrEmpty(be.TargetScene)) continue;   // 들어가는 문만
-            if (!be.gameObject.activeInHierarchy) continue;
-            if (_visitedDoors.Contains(be.GetEntityId())) continue;
-            // 입구도 눈에 보여야 안다(오라클 모드 제외)
-            if (!omniscient && !PlayerVision.CanSee(be.transform.position)) continue;
-            float d = Vector2.Distance(Plan3D.ToPlan(be.transform.position), from);
-            if (d < bestD) { bestD = d; best = be; }
-        }
-        return best;
+        return null;
     }
 
     /// <summary>AI가 스스로 판단하며 논다. 레이드 안에서 쓰는 것을 전제.</summary>

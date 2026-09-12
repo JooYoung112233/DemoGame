@@ -429,9 +429,6 @@ public class InteractableObject : MonoBehaviour, IInteractable
         var passage = GetComponent<BlockedPassage>();
         if (passage != null && !passage.IsOpen) { passage.TryPass(playerGO); return; }
 
-        var entrance = GetComponent<BuildingEntrance>();
-        if (entrance != null) { entrance.Interact(playerGO); return; }
-
         var door = GetComponent<DoorController>();
         if (door != null)
             door.TryOpen(playerGO);

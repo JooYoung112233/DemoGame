@@ -94,8 +94,8 @@
 | 대상 | 실측 | 무엇이 막고 있나 | 풀리는 시점 |
 |---|---|---|---|
 | ~~전투 12파일~~ | ✅ **2026-09-08 이식 완료** — 2D 물리 참조 0 | — | 완료 |
-| `Prop2DDefinition` · `Prop2DBuilder` | 씬·프리팹 **63곳**이 `Prop2DDefinition`을 참조 | 레이드 맵 소품이 전부 이 카탈로그로 서 있다 | **Stage 3** (`Prop3D*` 대체 후) |
-| `BuildingEntrance` | 씬 **18곳** 참조, 코드 14곳 | 2D 실내 진입이 아직 이걸로 돈다. 3D는 `SceneDoor3D` | Stage 3 (실내씬 3D화) |
+| ~~`Prop2DDefinition` · `Prop2DBuilder`~~ | ✅ **2026-09-12 삭제** — 빌더를 팔레트 없이 3D로 이식한 뒤 `gb_*` 팔레트째 제거 | — | 완료 |
+| ~~`BuildingEntrance`~~ | ✅ **2026-09-12 삭제** — 씬 참조 0, 코드 소비처(상호작용·표시·검증·QA) 정리 | — | 완료 |
 | `Light2D` 11파일 (`DayNightCycle` `PropLight2D` `FlashlightController` `VisionDarkness` …) | 파일당 1~8회 | 낮밤·시야·랜턴이 전부 2D 조명 위에 있다 | **Stage 2** |
 | 레이드 맵 씬 | `Int_*` **15개** + `Zone1` + `ScrapMarket_GB` | 3D 대응 **없음**. 지우면 게임에 갈 곳이 없다 | Stage 3 |
 | 2D 씬 이름 문자열 (`"Safehouse"` `"Hideout"` `"Pawnshop"`) | 코드 **13파일 25곳** — 스토리 트리거·QA·세이브 체크포인트·디버그 UI | 씬만 지워도 흐름이 끊긴다. **문자열 교체가 선행**되어야 한다 | Stage 3 이후 |
@@ -254,6 +254,7 @@
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-09-12 | **Stage 5 실행 — 맵 빌더 3D 전용화 + 2D 파이프라인 삭제.** `GreyboxBuild.Use3D`를 항상 true인 속성으로 바꾸고 2D 경로(`PrefabRoot`·`EnsurePalette`·`Spawn`·`Relabel`·라벨 역스케일)를 걷어냈다 — 3D 결과를 만드는 코드는 그대로다. `ScrapMarketGreyboxLayout`(지역1 튜토 구역 `Place`만 남음)·`Zone1GreyboxLayout`의 2D 분기와 2D 메뉴(`빌드/지역1` — 누르면 Zone1을 2D로 덮어쓰던 것) 제거, `InteriorBuild`는 상자 부착 헬퍼(`MakeSearchable` 등)만 남김. `Map3DBuild`의 고철시장 단독 메뉴 삭제. 삭제: `GreyboxPaletteBuilder`·`Prop2DBuilder`·`Prop2DDefinition`·`NpcPrefabBuilder`·`BuildingEntrance`·`BuildingReturn`·`Resources/Props2D`·`Resources/Greybox`(`gb_npc.asset` 제외 — NPC 프리팹 4개가 참조). manifest에서 2D 패키지 5개, `Game.Scripts.asmdef`에서 URP 2D 런타임 참조 제거. 에디터 없이 csc로 두 어셈블리 컴파일 통과. **Unity에서 확인할 것:** 패키지 재해석 오류 없음 · `빌드3D/지역1` 재빌드 결과가 전과 같음. |
 | 2026-09-12 | **Stage 5 착수 결정(시스템 정리 5단계).** 사용자: 전당포 옛 실내 씬 `Pawnshop.unity`와 빌더 삭제 · 옛 디버그 레이드맵 `ScrapMarket_GB`·룩 체크 씬 `MapTool_LookDev` 삭제 · 2D 프롭 파이프라인 전부 삭제 · 2D 패키지 manifest에서 제거. 결정 원문은 [dev-roadmap.md 변경 로그](dev-roadmap.md). 2D 프롭 파이프라인은 3D 맵 빌더가 쓰던 `gb_*` 팔레트까지 전부 지우고, 빌더를 팔레트 없이 3D로 짓도록 이식하기로 재확인(사용자 — dev-roadmap.md). |
 | 2026-09-09 | **★ 적을 때려도 데미지가 0이었다 — 스폰된 적 44기 전부.** `EnemySpawner`가 조립 순서를 **허트박스 → Health**로 두고 있었다. `AddComponent`는 그 자리에서 `Awake()`를 부르므로, `Hurtbox.Awake`가 `GetComponentInParent<Health>()`를 부를 때 루트에 Health가 아직 없어 **null이 그대로 굳었다.** 그 결과 `ReceiveHitAt`이 아무 일도 하지 않았다 — 적은 플레이어를 정상적으로 때리는데(HP 100→41 확인) 플레이어의 타격만 먹지 않는, 한쪽만 도는 전투였다. 두 겹으로 고쳤다: ① `Hurtbox`의 `Health`·`Enemy`를 **지연 해석 프로퍼티**로(조립 순서에 안 휘둘린다) ② 스포너 순서를 Health 먼저로. **검증**: 타격 시 HP 33→21→9, 그로기 0→25→44%, 상태 `Hit`. **오늘 두 번째로 나온 같은 부류다** — 상호작용 하이라이트도 "빈 캐시가 굳어" 죽어 있었다. Awake에서 한 번 찾아 캐시하는 코드는 대상이 나중에 생기면 조용히 죽는다. |
 | 2026-09-09 | **마을에 출전 지도판이 없어 레이드로 나갈 수단이 아예 없었다.** 3D 마을을 새로 지으면서 게시판을 장식용 `Prop`으로만 세웠고, `MapBoard` 상호작용(→ `MapSelectUI`)이 빠졌다. 핵심 루프의 "나가서"가 통째로 끊긴 상태. `Board_Dispatch`를 동쪽 게이트 길목(72, 24)에 추가. **검증**: 누르면 `MapSelectUI`가 실제로 열리고, 지역1(폐상가 교역 지구 → Zone1) 출전 시 `SP1_S`에 스폰, 적 44기·루팅 90개·탈출구(맨홀) 배치까지 확인. |

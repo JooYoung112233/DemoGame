@@ -3,8 +3,7 @@ using UnityEngine;
 /// <summary>
 /// 3D 씬 전환 문 — 밟으면 다른 씬으로 넘어간다.
 ///
-/// 2D판 <see cref="BuildingEntrance"/>의 3D 대응. 그쪽은 <c>BoxCollider2D</c>에
-/// <c>triggerSize</c>(Vector2)를 강제하는 구조라 3D 맵에서 동작하지 않는다.
+/// 2D판 BuildingEntrance(BoxCollider2D 트리거)의 3D 대응 — 그쪽은 2026-09-12 시스템 정리 5단계에서 삭제했다.
 /// 전환 자체는 같은 <see cref="SceneTransitionManager"/>를 쓴다 — 캐릭터·Systems 씬은 유지.
 ///
 /// ⚠️ **복귀 스폰은 이 트리거 밖에 두어야 한다.** 안에 두면 복귀하자마자 다시 밟아

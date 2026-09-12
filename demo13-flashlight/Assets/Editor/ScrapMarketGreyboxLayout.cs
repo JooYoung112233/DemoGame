@@ -23,7 +23,6 @@ using UnityEngine;
 /// </summary>
 public static class ScrapMarketGreyboxLayout
 {
-    const string PrefabRoot = "Props2D/Prefabs/";   // Resources.Load 기준 경로
 
     // 맵 규모(문서 §1.2). 바닥/주석용. v6: 44 × 56 유지.
     const float MapW = 44f;
@@ -31,13 +30,6 @@ public static class ScrapMarketGreyboxLayout
 
     // 배치 오프셋(좌하단 통합용). Place() 시작에서 설정. 단독 빌드=0,0.
     static float OX = 0f, OY = 0f;
-
-    // 이 레이아웃이 쓰는 gb_* 프리팹(하나라도 없으면 빌드 시 팔레트 자동 생성).
-    static readonly string[] RequiredPrefabIds =
-    {
-        "gb_floor", "gb_wall", "gb_barricade", "gb_door", "gb_crate", "gb_enter",
-        "gb_shelf", "gb_note", "gb_spawn", "gb_exit", "gb_enemy", "gb_prop",
-    };
 
     // ─────────────────────────────────────────────────────────────────────
     //  v6 레이아웃을 map 루트 하위에 (ox,oy) 오프셋으로 배치(단독·Zone1 통합 공용). 반환 = 배치 수.
@@ -164,22 +156,9 @@ public static class ScrapMarketGreyboxLayout
         return placed;
     }
 
-    /// <summary>이 레이아웃이 쓰는 gb_* 프리팹이 하나라도 없으면 팔레트 전체를 자동 생성(별도 메뉴 불필요).</summary>
-    static void EnsureGreyboxPalette()
-    {
-        foreach (var id in RequiredPrefabIds)
-        {
-            if (Resources.Load<GameObject>(PrefabRoot + id) == null)
-            {
-                Debug.Log($"<color=cyan>[ScrapMarketGB]</color> 그레이박스 프리팹 '{id}' 없음 → 팔레트 자동 생성(GreyboxPaletteBuilder.Generate).");
-                GreyboxPaletteBuilder.Generate();
-                return;
-            }
-        }
-    }
-
     // ─────────────────────────────────────────────────────────────────────
-    // 배치 헬퍼 (모두 PrefabUtility.InstantiatePrefab → gb_* 링크 유지, (OX,OY) 오프셋 적용)
+    // 배치 헬퍼 — 전부 Greybox3D로 3D 배치((OX,OY) 오프셋 적용). "gb_*"는 종류 키일 뿐 프리팹이 아니다
+    // (2026-09-12 시스템 정리 5단계: 2D 경로·팔레트 프리팹 삭제).
     // ─────────────────────────────────────────────────────────────────────
 
     static int Wall(GameObject parent, string name, float cx, float cy, float lenX, float thickY)
@@ -282,22 +261,11 @@ public static class ScrapMarketGreyboxLayout
         if (t == null) return 1;
         var go = t.gameObject;
 
-        // 솔리드 콜라이더(통행 차단). 2D는 BoxCollider2D, 3D는 BoxCollider다.
-        // ⚠️ 3D 상자에 2D 콜라이더를 붙이면 AddComponent가 null을 돌려주고 다음 줄에서 죽는다.
-        if (GreyboxBuild.Use3D)
-        {
-            var box3 = go.GetComponent<BoxCollider>();
-            if (box3 == null) box3 = go.AddComponent<BoxCollider>();
-            box3.isTrigger = false;
-            box3.size = Vector3.one;
-        }
-        else
-        {
-            var box = go.GetComponent<BoxCollider2D>();
-            if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-            box.isTrigger = false;
-            box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
-        }
+        // 솔리드 콜라이더(통행 차단).
+        var box3 = go.GetComponent<BoxCollider>();
+        if (box3 == null) box3 = go.AddComponent<BoxCollider>();
+        box3.isTrigger = false;
+        box3.size = Vector3.one;
 
         var io = go.GetComponent<InteractableObject>();
         if (io == null) io = go.AddComponent<InteractableObject>();
@@ -324,32 +292,18 @@ public static class ScrapMarketGreyboxLayout
     static int Barricade(GameObject parent, string name, float cx, float cy, float lenX, float thickY)
         => Bar(parent, "gb_barricade", name, cx, cy, lenX, thickY);
 
-    static int Bar(GameObject parent, string prefabId, string name, float cx, float cy, float lenX, float thickY)
-    {
-        // 3D 모드면 프리미티브를 Greybox3D로 넘긴다 — 이 빌더는 GreyboxBuild를 안 쓰고
-        // 자체 헬퍼를 갖고 있어서, 스위치를 여기에도 달아야 3D로 나온다.
-        if (GreyboxBuild.Use3D) return Greybox3D.Bar(prefabId, parent, name, cx + OX, cy + OY, lenX, thickY);
+    static int Bar(GameObject parent, string kind, string name, float cx, float cy, float lenX, float thickY)
+        => Greybox3D.Bar(kind, parent, name, cx + OX, cy + OY, lenX, thickY);
 
-        var go = Spawn(prefabId, name, parent);
-        if (go == null) return 0;
-        go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);
-        go.transform.localScale    = new Vector3(lenX, thickY, 1f);
-        CounterScaleLabel(go);
-        return 1;
-    }
-
-    /// <summary>탐색 의뢰 POI 존 배치 — 프리팹 없이 GameObject + BoxCollider2D(trigger) + QuestPoiZone.
+    /// <summary>탐색 의뢰 POI 존 배치 — 프리팹 없이 GameObject + BoxCollider(trigger) + QuestPoiZone.
     /// (cx,cy)=중심, (w,h)=크기. poiId는 의뢰 SO의 ReachPoint targetId와 일치.</summary>
     static int Poi(GameObject parent, string name, string poiId, string displayName, float cx, float cy, float w, float h)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent.transform, false);
-        go.transform.localPosition = GreyboxBuild.Use3D
-            ? new Vector3(cx + OX, 0f, cy + OY)
-            : new Vector3(cx + OX, cy + OY, 0f);
+        go.transform.localPosition = new Vector3(cx + OX, 0f, cy + OY);
 
-        // 퀘스트 POI 존 = 밟히기만 하면 되는 트리거. QuestPoiZone이 3D 콜라이더를 요구하므로
-        // (2026-09-08 3D 전환) 2D 경로에서도 3D 상자를 쓴다 — 2D 맵은 어차피 폐기 예정이다.
+        // 퀘스트 POI 존 = 밟히기만 하면 되는 트리거(QuestPoiZone은 3D 콜라이더를 요구한다).
         var col = go.AddComponent<BoxCollider>();
         col.isTrigger = true;
         col.size = new Vector3(w, 2.4f, h);
@@ -361,34 +315,18 @@ public static class ScrapMarketGreyboxLayout
     }
 
     static int Floor(GameObject parent, string name, float cx, float cy, float w, float h)
-    {
-        if (GreyboxBuild.Use3D) return Greybox3D.Floor(parent, name, cx + OX, cy + OY, w, h);
-        var go = Spawn("gb_floor", name, parent);
-        if (go == null) return 0;
-        go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);
-        go.transform.localScale    = new Vector3(w, h, 1f);
-        CounterScaleLabel(go);
-        return 1;
-    }
+        => Greybox3D.Floor(parent, name, cx + OX, cy + OY, w, h);
 
-    static int Marker(GameObject parent, string prefabId, string name, float x, float y)
-    {
-        // 3D 모드 — 마커도 XZ 평면에 세운다. 이걸 빼면 스폰·문이 (x, y, 0)에 남아
-        // 맵 모양은 3D인데 시작 지점이 엉뚱한 곳이 된다(플레이 불가).
-        if (GreyboxBuild.Use3D) return Greybox3D.Marker(parent, prefabId, name, x + OX, y + OY);
-        var go = Spawn(prefabId, name, parent);
-        if (go == null) return 0;
-        go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
-        return 1;
-    }
+    /// <summary>마커 — XZ 평면에 세운다(스폰·문이 (x, y, 0)에 남으면 시작 지점이 엉뚱해진다).</summary>
+    static int Marker(GameObject parent, string kind, string name, float x, float y)
+        => Greybox3D.Marker(parent, kind, name, x + OX, y + OY);
 
     /// <summary>적 스폰 존(SpawnZone): 영역(폭 w·높이 h)·유닛키·마릿수 설정. 런타임 EnemySpawner가 읽어 적 생성.</summary>
     static int EnemyZone(GameObject parent, string name, float cx, float cy, float w, float h, string unitKey, int count)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent.transform, false);
-        go.transform.localPosition = new Vector3(cx + OX, cy + OY, 0f);
-        if (GreyboxBuild.Use3D) go.transform.localPosition = new Vector3(cx + OX, 0f, cy + OY);
+        go.transform.localPosition = new Vector3(cx + OX, 0f, cy + OY);
         go.AddComponent<SpawnZone>().Setup(new Vector3(w, 0f, h), count, unitKey);
         return 1;
     }
@@ -396,75 +334,27 @@ public static class ScrapMarketGreyboxLayout
     /// <summary>쪽지(gb_note): 좌표 배치 + InteractableObject에 내용/제목 주입(읽으면 NoteUI 전체화면).</summary>
     static int Note(GameObject parent, string name, float x, float y, string title, string content)
     {
-        if (GreyboxBuild.Use3D)
-        {
-            if (Greybox3D.Marker(parent, "gb_note", name, x + OX, y + OY) == 0) return 0;
-            var t3 = parent.transform.Find(name);
-            if (t3 == null) return 1;
-            var io3 = t3.GetComponent<InteractableObject>() ?? t3.gameObject.AddComponent<InteractableObject>();
-            io3.SetNote(content, title, "읽기");
-            return 1;
-        }
-
-        var go = Spawn("gb_note", name, parent);
-        if (go == null) return 0;
-        go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
-        var io = go.GetComponentInChildren<InteractableObject>();
-        if (io != null) io.SetNote(content, title, "읽기");
+        if (Greybox3D.Marker(parent, "gb_note", name, x + OX, y + OY) == 0) return 0;
+        var t3 = parent.transform.Find(name);
+        if (t3 == null) return 1;
+        var io3 = t3.GetComponent<InteractableObject>() ?? t3.gameObject.AddComponent<InteractableObject>();
+        io3.SetNote(content, title, "읽기");
         return 1;
     }
 
-    /// <summary>건물 진입 문 — E로 여는 문(밟는 발판 아님).</summary>
+    /// <summary>건물 진입 문 — 2026-09-08 별도 실내 씬 폐기로 3D에서는 씬 전환 문을 세우지 않는다
+    /// (실내는 Greybox3D.Room이 만든다). 호출부를 그대로 두려고 시그니처만 남긴다.</summary>
     static int Enter(GameObject parent, string name, float x, float y, string targetScene,
-                     float tw = 1.2f, float th = 1.2f)
-    {
-        // 2026-09-08: 별도 실내 씬 폐기 — 건물은 같은 맵에서 걸어 들어간다.
-        // 3D에서는 씬 전환 문을 세우지 않는다(실내는 Greybox3D.Room이 만든다).
-        if (GreyboxBuild.Use3D) return 0;
-
-        var go = Spawn("gb_door", name, parent);
-        if (go == null) return 0;
-        go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
-
-        var dc = go.GetComponent<DoorController>();   // 팔레트 기본 DoorController는 진입과 이중 → 제거
-        if (dc != null) Object.DestroyImmediate(dc);
-
-        var box = go.GetComponent<BoxCollider2D>();
-        if (box == null) box = go.AddComponent<BoxCollider2D>();     // ??는 Unity 가짜 null을 통과시켜 못 씀
-        box.isTrigger = true;
-        box.size = new Vector2(tw, th);
-
-        var be = go.GetComponent<BuildingEntrance>();
-        if (be == null) be = go.AddComponent<BuildingEntrance>();
-        // 2026-07-11: 크기를 함께 넘긴다 — 안 넘기면 Awake가 기본 1.3×1.0으로 덮어써서
-        //   **문 갭보다 좁은 발판**이 되고, 옆으로 비껴 들어가 빈 껍데기 안에 갇힌다.
-        be.Configure(targetScene, "default", false, new Vector2(tw, th));
-        be.SetRequireInteract(true);   // 문은 밟는 게 아니라 **E로 여는 것**(2026-07-11 사용자 결정)
-
-        var io2 = go.GetComponent<InteractableObject>();
-        if (io2 == null) io2 = go.AddComponent<InteractableObject>();
-        io2.Configure(InteractableObject.InteractType.Door, "들어가기", 2.0f);
-        return 1;
-    }
+                     float tw = 1.2f, float th = 1.2f) => 0;
 
     static int Exit(GameObject parent, string name, float x, float y, string targetScene, string spawnId, float wait)
     {
-        GameObject go;
-        if (GreyboxBuild.Use3D)
-        {
-            if (Greybox3D.Marker(parent, "gb_exit", name, x + OX, y + OY) == 0) return 0;
-            var t3 = parent.transform.Find(name);
-            if (t3 == null) return 1;
-            go = t3.gameObject;
-            var io3 = go.GetComponent<InteractableObject>() ?? go.AddComponent<InteractableObject>();
-            io3.Configure(InteractableObject.InteractType.ExitPoint, "탈출하기", 2.0f);
-        }
-        else
-        {
-            go = Spawn("gb_exit", name, parent);
-            if (go == null) return 0;
-            go.transform.localPosition = new Vector3(x + OX, y + OY, 0f);
-        }
+        if (Greybox3D.Marker(parent, "gb_exit", name, x + OX, y + OY) == 0) return 0;
+        var t3 = parent.transform.Find(name);
+        if (t3 == null) return 1;
+        var go = t3.gameObject;
+        var io3 = go.GetComponent<InteractableObject>() ?? go.AddComponent<InteractableObject>();
+        io3.Configure(InteractableObject.InteractType.ExitPoint, "탈출하기", 2.0f);
 
         var io = go.GetComponentInChildren<InteractableObject>();
         if (io != null)
@@ -478,33 +368,5 @@ public static class ScrapMarketGreyboxLayout
         return 1;
     }
 
-
-    static GameObject Spawn(string prefabId, string name, GameObject parent)
-    {
-        var prefab = Resources.Load<GameObject>(PrefabRoot + prefabId);
-        if (prefab == null)
-        {
-            Debug.LogError($"[ScrapMarketGB] 프리팹 로드 실패: Resources/{PrefabRoot}{prefabId} " +
-                           "(먼저 'Tools/TopDown/Map/Generate Greybox Palette' 실행 필요)");
-            return null;
-        }
-        var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent.transform);
-        go.name = name;
-        go.transform.localPosition = Vector3.zero;
-        go.transform.localRotation = Quaternion.identity;
-        go.transform.localScale    = Vector3.one;
-        return go;
-    }
-
-    /// <summary>막대/블록 스케일 시 자식 'Label' 글자 비율 보정(콜라이더 무관, 가독성만).</summary>
-    static void CounterScaleLabel(GameObject go)
-    {
-        var label = go.transform.Find("Label");
-        if (label == null) return;
-        var s = go.transform.localScale;
-        float ix = Mathf.Approximately(s.x, 0f) ? 1f : 1f / s.x;
-        float iy = Mathf.Approximately(s.y, 0f) ? 1f : 1f / s.y;
-        label.localScale = new Vector3(ix, iy, 1f);
-    }
 }
 #endif

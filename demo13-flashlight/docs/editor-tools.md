@@ -18,9 +18,7 @@
 | 메뉴 | 무엇 | 파일 |
 |------|------|------|
 | 개발 ▸ 시스템 씬 | Systems.unity(매니저+UI+PlayerRig) 생성 — 실제 메뉴 `Tools/TopDown/개발/시스템 씬` | SystemsSceneBuilder |
-| 빌드 ▸ 인게임 씬 / 안전가옥 씬 | 게임플레이 씬 생성 | GameSceneBuilder |
 | 빌드 ▸ 맵 편집 씬 | 맵툴 씬 생성 | MapTool2DSceneBuilder |
-| 빌드 ▸ 전투 샌드박스 씬 / 적 프리팹 | 전투 테스트용 | CombatSandboxBuilder |
 | 빌드 ▸ ▶ 안전구역 일괄 빌드 | 안전구역 관련 일괄 빌드 | ContentBuildAll |
 | 빌드 ▸ 이상현상 구역 배치 | 씬에 이상현상 존 배치 | AnomalyTools |
 | 콘텐츠 ▸ 안전가옥 NPC 빌드 | 안전가옥 NPC 자동 배치 | SafehouseNpcBuilder |
@@ -29,12 +27,7 @@
 
 | 메뉴 | 무엇 | 파일 |
 |------|------|------|
-| 맵 ▸ 프롭 카탈로그 | Prop2D 카탈로그 편집(타일·프롭) | Prop2DCatalogEditor |
-| 맵 ▸ 프롭 ID 정규화 | 프롭 itemId 정리 | Prop2DCatalogEditor |
-| 맵 ▸ 그레이박스 팔레트 생성 | 색박스+라벨 그레이박스 팔레트 | GreyboxPaletteBuilder |
-| 맵 ▸ 데칼 브러시 | 데칼 스캐터 배치 | DecalScatterBrush |
-| 맵 ▸ 조명 쿠키 생성 / 씬 조명 셋업 | Light2D 쿠키·씬 조명 | LightCookieGenerator·SceneLightingBuilder |
-| 맵 ▸ 그레이박스(안전가옥/고철시장/1구역/은신처) | 레이아웃 그레이박스 빌더 | *GreyboxLayout 4종 |
+| 빌드3D ▸ 지역1 | 지역1 3D 그레이박스 맵 생성(튜토 구역 = 고철시장 배치 포함) | Map3DBuild → Zone1GreyboxLayout |
 | 맵 ▸ 이상현상 구역 생성 | 현상 존 생성 | DenseAnomalyZone |
 | ~~맵 ▸ 낮밤 라이트 드라이버 부착~~ | 폐기(2026-09-09) — 낮밤은 `DayNightCycle`이 맵 씬 태양+앰비언트를 직접 몬다 | ~~DayNightLightDriver~~ |
 
@@ -48,7 +41,7 @@
 
 **검사 항목** (이번 지역1 작업에서 사람이 놓쳤던 부류 기반):
 - SpawnPoint `pointId` 공백 / 게임플레이 씬에 스폰 0개
-- ExitPoint·BuildingEntrance의 `targetScene` 공백 or **빌드세팅 미등록**(→ LoadSceneAsync 실패)
+- ExitPoint·SceneDoor3D의 `targetScene` 공백 or **빌드세팅 미등록**(→ LoadSceneAsync 실패)
 - SpawnZone `unitKey`가 **StatDB에 없음**(→ 적이 기본 스탯 폴백) / 빈 키
 - MapSpawnController `profile` 미지정(→ 예산제 무동작=루팅 0) / 앵커 0개
 - MapSpawnProfile `profileId` 공백·중복
@@ -60,15 +53,12 @@
 
 | 메뉴 | 무엇 | 파일 |
 |------|------|------|
-| 테스트 ▸ 비오는 밤 무드 | 어두운 PP+가로등+네온+젖은바닥+비 조합 씬에 추가 | Test/RainyNightMoodTest |
 
 ## ⚙️ 초기설정 (1회성 셋업)
 
 | 메뉴 | 무엇 | 파일 |
 |------|------|------|
-| 초기설정 ▸ 글로벌 라이트 점검 / 1개만 남기기 | Light2D 글로벌 정리 | GlobalLightDoctor |
 | 초기설정 ▸ Destructible·Ceiling 레이어 보장 | 레이어/정렬레이어 셋업 | GameLayers |
-| 초기설정 ▸ 플레이어 머티리얼 생성 | 플레이어 머티리얼 | PlayerMaterialSetup |
 | (Assets 우클릭) Color → Alpha | 스프라이트 배경 투명화 | ColorToAlpha |
 
 ## 정리 메모 (2026-06-10)

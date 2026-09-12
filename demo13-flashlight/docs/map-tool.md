@@ -1,5 +1,10 @@
 # 맵 도구 (탑다운 2D)
 
+> ⚠️ **2026-09-12 — 이 문서의 도구는 전부 삭제됐다(기록용).** 시스템 정리 5단계에서 Prop2D 카탈로그·`Prop2DDefinition`/`Prop2DBuilder`·
+> `gb_*` 그레이박스 팔레트(`GreyboxPaletteBuilder`, `Resources/Props2D`)·`GameSceneBuilder`·`MapTool2DSceneBuilder`와 2D 패키지를 지웠다.
+> 지금 맵은 3D로 짓는다: 메뉴 `Tools ▸ TopDown ▸ 빌드3D ▸ 지역1`(`Map3DBuild` → `Zone1GreyboxLayout` → `GreyboxBuild`/`Greybox3D`).
+> 현재 도구 목록은 [`editor-tools.md`](editor-tools.md), 전환 기록은 [`3d-migration.md`](3d-migration.md).
+
 > **현 상태 = 진실.** 2026-06-02 아이소메트릭 맵빌더(WallBuilder/PropQuadBuilder/MapBuilderManager 등) **전면 폐기**.
 > 탑다운 2D는 Unity 네이티브 **Tilemap** + **Prop2D 카탈로그** + 씬 빌더 에디터로 구성.
 > 렌더 전제는 [`rendering.md`](rendering.md), 전환 배경은 [`topdown-migration.md`](topdown-migration.md).

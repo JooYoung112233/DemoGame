@@ -29,7 +29,6 @@ public class InteractionSystem : MonoBehaviour
     Texture2D bgTex;
     Camera mainCam;
     SceneDoor3D[] sceneDoors = System.Array.Empty<SceneDoor3D>();
-    BuildingEntrance[] buildingDoors = System.Array.Empty<BuildingEntrance>();
     GUIStyle entryStyle;
 
     void Awake()
@@ -59,7 +58,6 @@ public class InteractionSystem : MonoBehaviour
     void RefreshEntrances()
     {
         sceneDoors = FindObjectsByType<SceneDoor3D>();
-        buildingDoors = FindObjectsByType<BuildingEntrance>();
     }
 
     void Update()
@@ -218,16 +216,6 @@ public class InteractionSystem : MonoBehaviour
         foreach (var d in sceneDoors)
             if(d != null && d.isActiveAndEnabled && !string.IsNullOrEmpty(d.TargetScene))
                 DrawEntry(d.transform, d.TargetScene == "Hideout" ? "하이드아웃 · 진입" : "입구 · 진입");
-        foreach (var d in buildingDoors)
-        {
-            if(d == null || !d.isActiveAndEnabled || string.IsNullOrEmpty(d.TargetScene)) continue;
-            var io=d.GetComponent<InteractableObject>();
-            if(io == currentTarget && io != null) continue;
-            var lockState=d.GetComponent<BlockedPassage>();
-            string label=lockState != null && !lockState.IsOpen ? "문 · 잠김"
-                : d.IsExit ? "출구" : "입장 가능";
-            DrawEntry(d.transform,label);
-        }
         foreach(var io in InteractableObject.All)
         {
             if(io == null || !io.CanInteract || io == currentTarget) continue;

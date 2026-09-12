@@ -570,11 +570,18 @@ Light GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask) // 3인자
 Forward+를 쓰려면 URP의 `LIGHT_LOOP_BEGIN/END` 매크로로 바꿔야 한다.
 (이 저장소는 이미 비슷한 사고를 한 번 겪었다 — `637e7cc` "추가 광원을 아예 안 받던 문제".)
 
-### 2D 잔재 정리 — **여기까지만 가능했다**
+### 2D 잔재 정리
 지운 것: `Settings/Renderer2D.asset`, `Settings/URP-2D.asset`(둘 다 어디서도 참조 안 됨),
 `Editor/MapTool2DSceneBuilder.cs`(참조 0).
 
-⚠️ **나머지 2D는 못 지운다. 3D 맵 빌더가 그 위에 서 있다.**
+✅ **2026-09-12 시스템 정리 5단계에서 나머지도 걷어냈다.** 아래 '못 지운다'는 그 전 기록이다.
+`GreyboxBuild`의 2D 경로와 `PrefabRoot`를 없애 3D 빌드가 `Greybox3D` 프리미티브만 쓰게 옮긴 뒤,
+`Prop2D*` · `GreyboxPaletteBuilder` · `NpcPrefabBuilder` · `BuildingEntrance`/`BuildingReturn` ·
+`Resources/Props2D` · `Resources/Greybox`(단 `gb_npc.asset`은 NPC 프리팹이 써서 남김)를 지우고
+2D 패키지(2d.animation·2d.sprite·2d.tilemap·physics2d·physicscore2d)와 URP 2D 런타임 참조도 뺐다.
+저장된 씬(Zone1 등)은 이 프리팹을 guid로 물고 있지 않음을 확인했다. 지역1 재빌드 결과가 전과 같은지는 Unity 실행 때 확인.
+
+(이전 기록) ⚠️ **나머지 2D는 못 지운다. 3D 맵 빌더가 그 위에 서 있다.**
 `GreyboxBuild.PrefabRoot = "Props2D/Prefabs/"` 이고, `Zone1GreyboxLayout`·`InteriorBuild`·
 `Zone1Interiors`·`Map3DBuild`가 전부 `GreyboxBuild.Floor/Wall/Prop/Car/…`를 부른다.
 즉 3D 그레이박스 맵은 **2D 프롭 프리팹 63개를 인스턴스화해서** 만들어지고, 이미 저장된

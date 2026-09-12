@@ -62,7 +62,8 @@ public static class Zone1GreyboxLayout
     // (구 점포 크기 풀 WS/DS는 폐기 — 크기를 뽑아 쓰면 블록 끝에 자투리가 남아 빈 땅이 됐다.
     //  지금은 Shops가 블록을 남김없이 분할하고 필지 크기를 가중치로 흔든다.)
 
-    [MenuItem("Tools/TopDown/빌드/지역1", priority = -98)]
+    /// <summary>지역1 씬을 짓는다. 메뉴는 Tools/TopDown/빌드3D/지역1(<see cref="Map3DBuild"/>) —
+    /// 높이·평면 배율·조명을 거기서 정하므로 직접 부르지 말 것(2026-09-12 2D 메뉴 삭제).</summary>
     public static void Build()
     {
         var map = GreyboxBuild.BeginScene(out var scene);
@@ -266,7 +267,7 @@ public static class Zone1GreyboxLayout
         //   이걸 빠뜨려서 Exit_Fixed·PX_* 4곳이 상호작용 없는 장식으로 남았고,
         //   지역1의 실제 탈출구는 맨홀 하나뿐이었다(고정1+랜덤2 설계가 통째로 죽어 있었다).
         var io = go.GetComponentInChildren<InteractableObject>();
-        if (io == null && GreyboxBuild.Use3D)
+        if (io == null)
         {
             io = go.gameObject.AddComponent<InteractableObject>();
             io.Configure(InteractableObject.InteractType.ExitPoint, "탈출하기", 2.0f);
@@ -819,25 +820,14 @@ public static class Zone1GreyboxLayout
     static int BandBuilding(GameObject m, string name, float x0, float y0, float x1, float y1,
                             char side, float doorAt, string scene = null, bool force = false)
     {
-        // 3D — 별도 실내 씬 없이 **같은 맵에서 걸어 들어간다.**
+        // 별도 실내 씬 없이 **같은 맵에서 걸어 들어간다**(scene·force는 실내 씬 시절 인자 — 지금은 안 쓴다).
         // 작은 창고·헛간은 방으로 만들 수 없으니(사람이 낀다) 막힌 덩어리로 둔다.
-        if (GreyboxBuild.Use3D)
-        {
-            if (!Greybox3D.CanBeRoom(x0, y0, x1, y1)) return BandMass(m, name, x0, y0, x1, y1);
+        if (!Greybox3D.CanBeRoom(x0, y0, x1, y1)) return BandMass(m, name, x0, y0, x1, y1);
 
-            DoorPad(x0, y0, x1, y1, side, doorAt, out float ex, out float ey, out float _, out float _2);
-            float gapAt = (side == 'S' || side == 'N') ? ex - 1.2f : ey - 1.2f;
-            MarkBuilding(x0, y0, x1, y1);
-            return Greybox3D.Room(m, name, x0, y0, x1, y1, side, gapAt);
-        }
-
-        int n = BandMass(m, name, x0, y0, x1, y1);
-        if (n == 0) return 0;
-        DoorPad(x0, y0, x1, y1, side, doorAt, out float ex2, out float ey2, out float tw, out float th);
-        if (!string.IsNullOrEmpty(scene)) n += Enter(m, $"{name}_Door", ex2, ey2, scene, "default", tw, th);
-        else if (force)                   n += Enter(m, $"{name}_Door", ex2, ey2, "Int_Generic", "default", tw, th);
-        else                              n += EnterGeneric(m, $"{name}_Door", ex2, ey2, tw, th);
-        return n;
+        DoorPad(x0, y0, x1, y1, side, doorAt, out float ex, out float ey, out float _, out float _2);
+        float gapAt = (side == 'S' || side == 'N') ? ex - 1.2f : ey - 1.2f;
+        MarkBuilding(x0, y0, x1, y1);
+        return Greybox3D.Room(m, name, x0, y0, x1, y1, side, gapAt);
     }
 
     /// <summary>아치(통로) 자리를 '비워 둘 곳'으로 등록 — 프랍·도로 잔해가 통로를 막으면
@@ -1843,60 +1833,10 @@ public static class Zone1GreyboxLayout
                       "경찰 압수 야적장 ★★",
                       "컨테이너와 압수 차량이 줄지어 있다. 담장 너머로 다 보이는 만큼, 안에서도 다 보인다.");
 
-    /// <summary>**문 = 입구.** gb_door 하나가 표시이자 진입 트리거(BuildingEntrance)다.
-    /// 밟으면 내부 씬으로 전환(페이드+캐릭터 유지). 복귀 스폰은 Zone1의 from_&lt;건물&gt;.</summary>
+    /// <summary>실내 씬 진입 문 — 2026-09-08 별도 실내 씬 폐기로 세우지 않는다(건물은 같은 맵에서
+    /// 걸어 들어간다). 2026-09-12 2D 경로 삭제 때 몸통을 걷어내고, 호출부를 두려고 시그니처만 남겼다.</summary>
     static int Enter(GameObject m, string name, float x, float y, string targetScene, string spawnId = "default",
-                     float tw = 2f, float th = 1f)
-    {
-        // 3D — 건물은 같은 맵에서 걸어 들어간다. 씬 전환 문을 세우지 않는다.
-        // (2026-09-08 결정: 별도 실내 씬 폐기)
-        if (GreyboxBuild.Use3D) return 0;
-        if (GreyboxBuild.Marker(m, "gb_door", name, x, y) == 0) return 0;
-        KeepOut(x, y);   // 건물 입구 앞도 비워 둔다(문이 잔해로 막히면 못 들어간다)
-        var t = FindChild(m.transform, name);
-        if (t == null) return 0;
-        var go = t.gameObject;
-
-        // **문 = 표시 + 상호작용 진입**. E로만 들어간다(밟기 아님) → 지나가다 실수로 안 들어간다.
-        var io = go.GetComponentInChildren<InteractableObject>();
-        if (io == null) io = go.AddComponent<InteractableObject>();
-        io.Configure(InteractableObject.InteractType.Door, "들어가기", 2.0f);
-
-        // 진입 몸통. 2D는 BoxCollider2D(trigger) + BuildingEntrance,
-        // 3D는 BoxCollider + InteractableObject.ExitPoint로 씬 전환을 직접 건다
-        // (BuildingEntrance는 BoxCollider2D 전제라 3D 맵에서 동작하지 않는다).
-        if (GreyboxBuild.Use3D)
-        {
-            var box3 = go.GetComponent<BoxCollider>();
-            if (box3 == null) box3 = go.AddComponent<BoxCollider>();
-            box3.isTrigger = false;                       // 문은 막는 몸 — E로 통과한다
-            box3.size = new Vector3(tw, 2.4f, th);
-            box3.center = new Vector3(0f, 1.2f, 0f);
-
-            io.Configure(InteractableObject.InteractType.ExitPoint, "들어가기", 2.0f);
-            var so3 = new SerializedObject(io);
-            var ts3 = so3.FindProperty("targetScene");   if (ts3 != null) ts3.stringValue = targetScene;
-            var sp3 = so3.FindProperty("spawnPointId");  if (sp3 != null) sp3.stringValue = spawnId;
-            so3.ApplyModifiedPropertiesWithoutUndo();
-        }
-        else
-        {
-            var box = go.GetComponent<BoxCollider2D>();
-            if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-            box.isTrigger = true;
-            box.size = new Vector2(tw, th);
-
-            var be = go.GetComponent<BuildingEntrance>();
-            if (be == null) be = go.AddComponent<BuildingEntrance>();
-            be.Configure(targetScene, spawnId, false, new Vector2(tw, th));
-            be.SetRequireInteract(true);
-        }
-
-        // 문 앞 DoorController(팔레트 기본)는 진입과 이중이라 제거 — 문 하나가 한 가지 일만 하게.
-        var dc = go.GetComponent<DoorController>();
-        if (dc != null) Object.DestroyImmediate(dc);
-        return 1;
-    }
+                     float tw = 2f, float th = 1f) => 0;
 
     /// <summary>**문 = 입구.** 정면선(facade) 한가운데에 놓이는 문의 중심·크기.
     ///
@@ -1933,41 +1873,18 @@ public static class Zone1GreyboxLayout
         if (x1 - x0 > MaxSpan || y1 - y0 > MaxSpan)
             return SolidCluster(m, name, x0, y0, x1, y1, side, doorAt, scene, returnSpawn);
 
-        // ── 3D: 걸어 들어가는 방 ──────────────────────────────────────
+        // ── 걸어 들어가는 방 ──────────────────────────────────────────
         // 별도 실내 씬으로 넘기지 않고 **같은 맵 안에서** 들어간다(2026-09-08 결정).
         // 발자국이 너무 작으면 사람이 낄 상자라 방으로 만들지 않고 막힌 덩어리로 둔다.
-        if (GreyboxBuild.Use3D)
-        {
-            MarkBuilding(x0, y0, x1, y1);
-            if (Greybox3D.CanBeRoom(x0, y0, x1, y1))
-            {
-                DoorPad(x0, y0, x1, y1, side, doorAt, out float rex, out float rey, out float rtw, out float rth);
-                // 문 갭 시작 좌표 = 문 면을 따라가는 축의 값에서 폭의 절반을 뺀 것.
-                float gapAt = (side == 'S' || side == 'N') ? rex - 1.2f : rey - 1.2f;
-                return Greybox3D.Room(m, name, x0, y0, x1, y1, side, gapAt);
-            }
-            return GreyboxBuild.Wall(m, name, (x0 + x1) * 0.5f, (y0 + y1) * 0.5f, x1 - x0, y1 - y0);
-        }
-
-        int n = GreyboxBuild.Wall(m, name, (x0 + x1) * 0.5f, (y0 + y1) * 0.5f, x1 - x0, y1 - y0);
         MarkBuilding(x0, y0, x1, y1);
-        if (string.IsNullOrEmpty(scene) && !EnterableHere(name)) return n;   // 문 없는 덩어리
-
-        // **문 = 입구.** 오브젝트 하나(gb_door)가 표시이자 트리거다.
-        DoorPad(x0, y0, x1, y1, side, doorAt, out float ex, out float ey, out float tw, out float th);
-        if (string.IsNullOrEmpty(scene))
-            n += EnterGeneric(m, $"{name}_Door", ex, ey, tw, th);
-        else
+        if (Greybox3D.CanBeRoom(x0, y0, x1, y1))
         {
-            n += Enter(m, $"{name}_Door", ex, ey, scene, "default", tw, th);
-            if (!string.IsNullOrEmpty(returnSpawn))
-            {
-                float rx = ex + (side == 'W' ? -2.4f : side == 'E' ? 2.4f : 0f);
-                float ry = ey + (side == 'S' ? -2.4f : side == 'N' ? 2.4f : 0f);
-                // 복귀 스폰 마커는 두지 않는다 — BuildingReturn이 **들어온 문 앞**으로 되돌린다(2026-07-11).
-            }
+            DoorPad(x0, y0, x1, y1, side, doorAt, out float rex, out float rey, out float rtw, out float rth);
+            // 문 갭 시작 좌표 = 문 면을 따라가는 축의 값에서 폭의 절반을 뺀 것.
+            float gapAt = (side == 'S' || side == 'N') ? rex - 1.2f : rey - 1.2f;
+            return Greybox3D.Room(m, name, x0, y0, x1, y1, side, gapAt);
         }
-        return n;
+        return GreyboxBuild.Wall(m, name, (x0 + x1) * 0.5f, (y0 + y1) * 0.5f, x1 - x0, y1 - y0);
     }
 
     /// <summary>큰 건물을 **단지(여러 채)** 로 쪼갠다 — 외부 대형 건물 리소스를 못 구하기 때문.
@@ -2035,16 +1952,6 @@ public static class Zone1GreyboxLayout
         return n;
     }
 
-    /// <summary>이름 해시로 '들어갈 수 있는 집'인지 결정 — GameTuning.buildingEnterRatio와 같은 규칙.</summary>
-    static bool EnterableHere(string name)
-    {
-        float ratio = GameTuning.Instance != null ? GameTuning.Instance.buildingEnterRatio : 1f;
-        if (ratio >= 1f) return true;
-        if (ratio <= 0f) return false;
-        uint h = 2166136261u;
-        for (int i = 0; i < name.Length; i++) { h ^= name[i]; h *= 16777619u; }
-        return (h % 1000u) / 1000f < ratio;
-    }
 
     /// <summary>공용 내부(Int_Generic)로 들어가는 진입 트리거. 복귀는 `__back__`(들어온 문 앞).
     /// 전용 내부가 만들어진 건물은 Enter()로 개별 지정하고, 나머지 절차 생성 건물이 이걸 쓴다.
@@ -2052,22 +1959,8 @@ public static class Zone1GreyboxLayout
     /// **진입 가능 비율은 `GameTuning.buildingEnterRatio` 노브**(1=전부, 0.5=절반).
     /// "건물을 더 열지"는 QA 플레이 결과로 판단 — 값만 바꾸고 이 빌더를 다시 돌리면 반영된다.
     /// 선택은 이름 해시 기반이라 **결정론적**(같은 값이면 같은 건물이 열림).</summary>
-    static int EnterGeneric(GameObject m, string name, float x, float y, float tw = 2f, float th = 1f)
-    {
-        if (GreyboxBuild.Use3D) return 0;   // 3D — 씬 전환 문 없음(같은 맵에서 들어간다)
-        float ratio = GameTuning.Instance != null ? GameTuning.Instance.buildingEnterRatio : 1f;
-        if (ratio < 1f)
-        {
-            if (ratio <= 0f) return 0;
-            // 이름 해시 → 0~1 균등. ratio 미만인 건물만 연다.
-            uint h = 2166136261u;
-            for (int i = 0; i < name.Length; i++) { h ^= name[i]; h *= 16777619u; }
-            if ((h % 1000u) / 1000f >= ratio) return 0;
-        }
-        // 진입 스폰은 내부 씬의 "default". `__back__`은 **나올 때** 쓰는 값이라(내부 씬 출구가 보유)
-        //   여기 넣으면 매번 "스폰 __back__ 미발견" 경고만 찍힌다.
-        return Enter(m, name, x, y, "Int_Generic", "default", tw, th);
-    }
+    /// 2026-09-12: 실내 씬 폐기로 문을 세우지 않는다 — 시그니처만 남긴다.</summary>
+    static int EnterGeneric(GameObject m, string name, float x, float y, float tw = 2f, float th = 1f) => 0;
 
     /// <summary>내부에서 돌아왔을 때 서는 자리(from_&lt;건물&gt;). 건물 문 앞.</summary>
     static int ReturnSpawn(GameObject m, string pointId, float x, float y)
@@ -2238,23 +2131,11 @@ public static class Zone1GreyboxLayout
         if (t == null) return 0;
         var go = t.gameObject;
 
-        // 솔리드 콜라이더(통행 차단). 2D는 BoxCollider2D, 3D는 BoxCollider다.
-        // ⚠️ 3D 상자에 2D 콜라이더를 붙이면 AddComponent가 null을 돌려주고 바로 다음 줄에서
-        //    NullReference가 난다(실내 빌더에서도 같은 자리에 걸렸다).
-        if (GreyboxBuild.Use3D)
-        {
-            var box3 = go.GetComponent<BoxCollider>();
-            if (box3 == null) box3 = go.AddComponent<BoxCollider>();
-            box3.isTrigger = false;
-            box3.size = Vector3.one;   // 부모 스케일(w, 높이, h)이 곱해진다
-        }
-        else
-        {
-            var box = go.GetComponent<BoxCollider2D>();
-            if (box == null) box = go.AddComponent<BoxCollider2D>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
-            box.isTrigger = false;
-            box.size = Vector2.one;   // 부모 스케일(w,h)이 곱해진다
-        }
+        // 솔리드 콜라이더(통행 차단).
+        var box3 = go.GetComponent<BoxCollider>();
+        if (box3 == null) box3 = go.AddComponent<BoxCollider>();   // ??는 Unity 가짜 null을 통과시켜 못 씀
+        box3.isTrigger = false;
+        box3.size = Vector3.one;   // 부모 스케일(w, 높이, h)이 곱해진다
 
         var io = go.GetComponent<InteractableObject>();
         if (io == null) io = go.AddComponent<InteractableObject>();
