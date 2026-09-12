@@ -1,0 +1,56 @@
+{
+  "cameraPitch": 61.99999649322925,
+  "packedImageCount": 21,
+  "editableAssetScenes": 6,
+  "exports": {
+    "CrackBranch_A": {
+      "meshCount": 1,
+      "triangles": 460,
+      "boundsMaxDeltaMetres": 8.9290551841259e-08,
+      "UV0": true,
+      "GroundFadeExported": false,
+      "passed": true
+    },
+    "CrackBranch_B": {
+      "meshCount": 1,
+      "triangles": 460,
+      "boundsMaxDeltaMetres": 8.381903171539307e-08,
+      "UV0": true,
+      "GroundFadeExported": false,
+      "passed": true
+    },
+    "BrokenPaving_A": {
+      "meshCount": 1,
+      "triangles": 1587,
+      "boundsMaxDeltaMetres": 5.960464477539063e-08,
+      "UV0": true,
+      "GroundFadeExported": true,
+      "passed": true
+    },
+    "BrokenPaving_B": {
+      "meshCount": 1,
+      "triangles": 1563,
+      "boundsMaxDeltaMetres": 4.470348358154297e-08,
+      "UV0": true,
+      "GroundFadeExported": true,
+      "passed": true
+    },
+    "DirtGravel_Transition": {
+      "meshCount": 1,
+      "triangles": 3000,
+      "boundsMaxDeltaMetres": 5.774199962615967e-08,
+      "UV0": true,
+      "GroundFadeExported": true,
+      "passed": true
+    },
+    "WallWeeds_Dust": {
+      "meshCount": 1,
+      "triangles": 1925,
+      "boundsMaxDeltaMetres": 2.9802322387695312e-08,
+      "UV0": true,
+      "GroundFadeExported": true,
+      "passed": true
+    }
+  },
+  "unityImported": false
+}
