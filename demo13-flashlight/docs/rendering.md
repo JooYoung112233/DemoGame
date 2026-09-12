@@ -1,5 +1,11 @@
 # Rendering System
 
+## 2026-09-12 — 바닥 마감 정점 알파 재질
+
+- 요청·결정: Blender 제작 후 사용자가 Unity 실행과 최신 Demo/demo13 적용을 승인했다. 하이드아웃 서쪽 입구의 흙·먼지 경계를 위해 `BRB/GroundFadeLit`을 추가했다.
+- 방식: 기존 GameLit PBR 입력/Forward 함수를 재사용하고 GroundFade 정점 색상 Alpha만 최종 투명도에 곱한다. Transparent-20, ZWrite Off, 그림자 투사·깊이 패스 없음. Soil/DryDust에만 연결하며 기존 GameLit 재질·공통 HLSL은 수정하지 않았다.
+- 검수: 기존 바닥과 명도·높이를 맞춘 뒤 62° 낮밤과 재진입 렌더 검사, 셰이더 컴파일 오류 0. 상세·실제 적용 범위는 [safehouse.md](safehouse.md), 증빙은 `ArtWork/GroundFinish62/Unity`에 기록했다.
+
 ## 2026-09-12 — 실행 경고 반복 초기화 수정
 
 - 증상: 실행 중 수집한 최근 경고 300개가 모두 `BRB/AnomalyFog` 누락이었다. 약 2초 동안 매 프레임 `DenseAnomalyController.EnsureQuad`가 실패한 셰이더 검색을 반복했다.
