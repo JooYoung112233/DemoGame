@@ -1,0 +1,1481 @@
+{
+  "models": 101,
+  "materials": 50,
+  "remapped": [
+    {
+      "model": "Pawnshop_Floor62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Pawnshop_Floor62",
+      "slot": "Interior62_PawnTile",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_PawnTile.mat"
+    },
+    {
+      "model": "Pawnshop_Floor62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "Pawnshop_Floor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Pawnshop_RearLining62",
+      "slot": "Interior62_Brick",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brick.mat"
+    },
+    {
+      "model": "Pawnshop_RearLining62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Pawnshop_RearLining62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Pawnshop_RearLining62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Pawnshop_RearLining62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Pawnshop_TallLining62",
+      "slot": "Interior62_Brick",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brick.mat"
+    },
+    {
+      "model": "Pawnshop_LeftPartition62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Pawnshop_LeftPartition62",
+      "slot": "Interior62_Brick",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brick.mat"
+    },
+    {
+      "model": "Pawnshop_LeftPartition62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Pawnshop_LeftPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Pawnshop_LeftPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Pawnshop_RightPartition62",
+      "slot": "Interior62_Brick",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brick.mat"
+    },
+    {
+      "model": "Pawnshop_RightPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Pawnshop_RightPartition62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Pawnshop_RightPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Pawnshop_RightPartition62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Pawnshop_RearClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Pawnshop_RearClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Pawnshop_LeftClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Pawnshop_LeftClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Pawnshop_RightClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Pawnshop_RightClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Pawnshop_RearClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Pawnshop_LeftClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Pawnshop_RightClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "StorageDoorLeaf62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "StorageDoorLeaf62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "StorageDoorLeaf62",
+      "slot": "Interior62_Edge",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Edge.mat"
+    },
+    {
+      "model": "StorageDoorLeaf62",
+      "slot": "Interior62_DarkOlive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_DarkOlive.mat"
+    },
+    {
+      "model": "StorageDoorLeaf62",
+      "slot": "Interior62_Olive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Olive.mat"
+    },
+    {
+      "model": "Pawnshop_ClosedFrontReturn62",
+      "slot": "Interior62_Brick",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brick.mat"
+    },
+    {
+      "model": "Pawnshop_RoomDividers62",
+      "slot": "Interior62_Brick",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brick.mat"
+    },
+    {
+      "model": "PawnDisplay62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "PawnDisplay62",
+      "slot": "Interior62_Brass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brass.mat"
+    },
+    {
+      "model": "PawnDisplay62",
+      "slot": "Interior62_DarkOlive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_DarkOlive.mat"
+    },
+    {
+      "model": "PawnDisplay62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "PawnDisplay62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "PawnDisplay62",
+      "slot": "Interior62_DisplayGlass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_DisplayGlass.mat"
+    },
+    {
+      "model": "PawnDisplay62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "PawnDisplay62",
+      "slot": "Interior62_Olive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Olive.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_Glass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Glass.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_DisplayGlass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_DisplayGlass.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_Edge",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Edge.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_Brass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brass.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_Olive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Olive.mat"
+    },
+    {
+      "model": "PawnDisplay_Electronics62",
+      "slot": "Interior62_DarkOlive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_DarkOlive.mat"
+    },
+    {
+      "model": "CashRegister62",
+      "slot": "Interior62_Glass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Glass.mat"
+    },
+    {
+      "model": "CashRegister62",
+      "slot": "Interior62_Olive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Olive.mat"
+    },
+    {
+      "model": "CashRegister62",
+      "slot": "Interior62_Edge",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Edge.mat"
+    },
+    {
+      "model": "CashRegister62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "CashRegister62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "SalvageShelf62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "SalvageShelf62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "SalvageShelf62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "SalvageShelf62",
+      "slot": "Interior62_Olive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Olive.mat"
+    },
+    {
+      "model": "SalvageShelf62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "SalvageShelf62",
+      "slot": "Interior62_Brass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brass.mat"
+    },
+    {
+      "model": "SalvageShelf62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "SalvageShelf62",
+      "slot": "Interior62_DarkOlive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_DarkOlive.mat"
+    },
+    {
+      "model": "Safe62",
+      "slot": "Interior62_Edge",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Edge.mat"
+    },
+    {
+      "model": "Safe62",
+      "slot": "Interior62_Brass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brass.mat"
+    },
+    {
+      "model": "Safe62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Safe62",
+      "slot": "Interior62_Rubber",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Rubber.mat"
+    },
+    {
+      "model": "AntiqueClock62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "AntiqueClock62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "AntiqueClock62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "AntiqueClock62",
+      "slot": "Interior62_Brass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brass.mat"
+    },
+    {
+      "model": "AntiqueDesk62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "AntiqueDesk62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "AntiqueDesk62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "AntiqueDesk62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "Reuse_Radio01",
+      "slot": "Hideout_EdgeMetal",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_EdgeMetal.mat"
+    },
+    {
+      "model": "Reuse_Radio01",
+      "slot": "Hideout_OliveDark",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_OliveDark.mat"
+    },
+    {
+      "model": "Reuse_Radio01",
+      "slot": "Hideout_Steel",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Steel.mat"
+    },
+    {
+      "model": "Reuse_Radio01",
+      "slot": "Hideout_Paper",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Paper.mat"
+    },
+    {
+      "model": "Reuse_Radio01",
+      "slot": "Hideout_Rubber",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Rubber.mat"
+    },
+    {
+      "model": "Armchair_Upholstery62",
+      "slot": "Interior62_Upholstery",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Upholstery.mat"
+    },
+    {
+      "model": "Armchair_Upholstery62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Armchair_Upholstery62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Reuse_WoodCrate01",
+      "slot": "Hideout_Wood",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Wood.mat"
+    },
+    {
+      "model": "Reuse_WoodCrate01",
+      "slot": "Hideout_WoodDark",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodDark.mat"
+    },
+    {
+      "model": "Reuse_WoodCrate01",
+      "slot": "Hideout_WoodLight",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodLight.mat"
+    },
+    {
+      "model": "Reuse_CardboardStack02",
+      "slot": "TownProps_Linen",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Linen.mat"
+    },
+    {
+      "model": "Reuse_CardboardStack02",
+      "slot": "TownProps_Cardboard",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Cardboard.mat"
+    },
+    {
+      "model": "Reuse_CardboardStack02",
+      "slot": "TownProps_Paper",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Paper.mat"
+    },
+    {
+      "model": "Reuse_Rug01",
+      "slot": "Hideout_Canvas",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Canvas.mat"
+    },
+    {
+      "model": "Reuse_Rug01",
+      "slot": "Hideout_RugFabric",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_RugFabric.mat"
+    },
+    {
+      "model": "Repair_Floor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Repair_RearLining62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Repair_RearLining62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Repair_RearLining62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Repair_RearLining62",
+      "slot": "Interior62_Ochre",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Ochre.mat"
+    },
+    {
+      "model": "Repair_RearLining62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Repair_TallLining62",
+      "slot": "Interior62_Ochre",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Ochre.mat"
+    },
+    {
+      "model": "Repair_LeftPartition62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Repair_LeftPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Repair_LeftPartition62",
+      "slot": "Interior62_Ochre",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Ochre.mat"
+    },
+    {
+      "model": "Repair_LeftPartition62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Repair_LeftPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Repair_RightPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Repair_RightPartition62",
+      "slot": "Interior62_Ochre",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Ochre.mat"
+    },
+    {
+      "model": "Repair_RightPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Repair_RightPartition62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Repair_RightPartition62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Repair_RearClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Repair_RearClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Repair_LeftClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Repair_LeftClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Repair_RightClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Repair_RightClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Repair_RearClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Repair_LeftClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Repair_RightClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Repair_ClosedFrontReturn62",
+      "slot": "Interior62_Ochre",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Ochre.mat"
+    },
+    {
+      "model": "Repair_RoomDividers62",
+      "slot": "Interior62_Ochre",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Ochre.mat"
+    },
+    {
+      "model": "Reuse_Workbench01",
+      "slot": "Hideout_Wood",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Wood.mat"
+    },
+    {
+      "model": "Reuse_Workbench01",
+      "slot": "Hideout_WoodDark",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodDark.mat"
+    },
+    {
+      "model": "Reuse_Workbench01",
+      "slot": "Hideout_WoodLight",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodLight.mat"
+    },
+    {
+      "model": "Reuse_Workbench01",
+      "slot": "Hideout_EdgeMetal",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_EdgeMetal.mat"
+    },
+    {
+      "model": "Reuse_Workbench01",
+      "slot": "Hideout_OliveDark",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_OliveDark.mat"
+    },
+    {
+      "model": "Reuse_Workbench01",
+      "slot": "Hideout_Steel",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Steel.mat"
+    },
+    {
+      "model": "ToolBoard62",
+      "slot": "Interior62_Edge",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Edge.mat"
+    },
+    {
+      "model": "ToolBoard62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "ToolBoard62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "ToolBoard62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "Reuse_Toolbox02",
+      "slot": "TownProps_DirtSeam",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_DirtSeam.mat"
+    },
+    {
+      "model": "Reuse_Toolbox02",
+      "slot": "TownProps_Edge",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Edge.mat"
+    },
+    {
+      "model": "Reuse_Toolbox02",
+      "slot": "TownProps_Red",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Red.mat"
+    },
+    {
+      "model": "Reuse_Toolbox02",
+      "slot": "TownProps_Wear",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Wear.mat"
+    },
+    {
+      "model": "Reuse_Toolbox02",
+      "slot": "TownProps_Paper",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Paper.mat"
+    },
+    {
+      "model": "Reuse_Toolbox02",
+      "slot": "TownProps_Rust",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Rust.mat"
+    },
+    {
+      "model": "Reuse_Toolbox02",
+      "slot": "TownProps_Steel",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Steel.mat"
+    },
+    {
+      "model": "Reuse_LockerPair02",
+      "slot": "Hideout_EdgeMetal",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_EdgeMetal.mat"
+    },
+    {
+      "model": "Reuse_LockerPair02",
+      "slot": "Hideout_Grey",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Grey.mat"
+    },
+    {
+      "model": "Reuse_LockerPair02",
+      "slot": "Hideout_Linen",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Linen.mat"
+    },
+    {
+      "model": "Reuse_LockerPair02",
+      "slot": "Hideout_Steel",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Steel.mat"
+    },
+    {
+      "model": "Reuse_LockerPair02",
+      "slot": "Hideout_Canvas",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Canvas.mat"
+    },
+    {
+      "model": "WeldingTrolley62",
+      "slot": "Interior62_Olive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Olive.mat"
+    },
+    {
+      "model": "WeldingTrolley62",
+      "slot": "Interior62_Red",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Red.mat"
+    },
+    {
+      "model": "WeldingTrolley62",
+      "slot": "Interior62_Rubber",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Rubber.mat"
+    },
+    {
+      "model": "WeldingTrolley62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "WeldingTrolley62",
+      "slot": "Interior62_Brass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brass.mat"
+    },
+    {
+      "model": "TireStack62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "TireStack62",
+      "slot": "Interior62_Rubber",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Rubber.mat"
+    },
+    {
+      "model": "Reuse_UtilitySink02",
+      "slot": "TownProps_DirtSeam",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_DirtSeam.mat"
+    },
+    {
+      "model": "Reuse_UtilitySink02",
+      "slot": "TownProps_Edge",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Edge.mat"
+    },
+    {
+      "model": "Reuse_UtilitySink02",
+      "slot": "TownProps_Rust",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Rust.mat"
+    },
+    {
+      "model": "Reuse_UtilitySink02",
+      "slot": "TownProps_Steel",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Steel.mat"
+    },
+    {
+      "model": "MechanicCreeper62",
+      "slot": "Interior62_Red",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Red.mat"
+    },
+    {
+      "model": "MechanicCreeper62",
+      "slot": "Interior62_Rubber",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Rubber.mat"
+    },
+    {
+      "model": "MechanicCreeper62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Reuse_FireExtinguisher02",
+      "slot": "TownProps_Wear",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Wear.mat"
+    },
+    {
+      "model": "Reuse_FireExtinguisher02",
+      "slot": "TownProps_Edge",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Edge.mat"
+    },
+    {
+      "model": "Reuse_FireExtinguisher02",
+      "slot": "TownProps_Red",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Red.mat"
+    },
+    {
+      "model": "Reuse_FireExtinguisher02",
+      "slot": "TownProps_Rubber",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/TownProps_Rubber.mat"
+    },
+    {
+      "model": "Reuse_FireExtinguisher02",
+      "slot": "TownProps_Paper",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Paper.mat"
+    },
+    {
+      "model": "Reuse_FireExtinguisher02",
+      "slot": "TownProps_Steel",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Steel.mat"
+    },
+    {
+      "model": "Medical_Floor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Medical_Floor62",
+      "slot": "Interior62_Tile",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Tile.mat"
+    },
+    {
+      "model": "Medical_RearLining62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "Medical_RearLining62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Medical_RearLining62",
+      "slot": "Interior62_Sage",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Sage.mat"
+    },
+    {
+      "model": "Medical_RearLining62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Medical_TallLining62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "Medical_LeftPartition62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "Medical_LeftPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Medical_LeftPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Medical_LeftPartition62",
+      "slot": "Interior62_Sage",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Sage.mat"
+    },
+    {
+      "model": "Medical_RightPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Medical_RightPartition62",
+      "slot": "Interior62_Sage",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Sage.mat"
+    },
+    {
+      "model": "Medical_RightPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Medical_RightPartition62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "Medical_RearClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Medical_RearClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Medical_LeftClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Medical_LeftClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Medical_RightClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Medical_RightClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Medical_RearClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Medical_LeftClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Medical_RightClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Medical_ClosedFrontReturn62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "Medical_RoomDividers62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "Reception62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Reception62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "Reception62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "Reception62",
+      "slot": "Interior62_Sage",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Sage.mat"
+    },
+    {
+      "model": "Reception62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "TreatmentBed62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "TreatmentBed62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "TreatmentBed62",
+      "slot": "Interior62_Upholstery",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Upholstery.mat"
+    },
+    {
+      "model": "MedicineCabinet62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "MedicineCabinet62",
+      "slot": "Interior62_Olive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Olive.mat"
+    },
+    {
+      "model": "MedicineCabinet62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "MedicineCabinet62",
+      "slot": "Interior62_Sage",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Sage.mat"
+    },
+    {
+      "model": "MedicineCabinet62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "IVStand62",
+      "slot": "Interior62_Edge",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Edge.mat"
+    },
+    {
+      "model": "IVStand62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "IVStand62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "IVStand62",
+      "slot": "Interior62_Sage",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Sage.mat"
+    },
+    {
+      "model": "InstrumentCart62",
+      "slot": "Interior62_Linen",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Linen.mat"
+    },
+    {
+      "model": "InstrumentCart62",
+      "slot": "Interior62_Paper",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Paper.mat"
+    },
+    {
+      "model": "InstrumentCart62",
+      "slot": "Interior62_Rubber",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Rubber.mat"
+    },
+    {
+      "model": "InstrumentCart62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "InstrumentCart62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "PrivacyScreen62",
+      "slot": "Interior62_Cream",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Cream.mat"
+    },
+    {
+      "model": "PrivacyScreen62",
+      "slot": "Interior62_Upholstery",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Upholstery.mat"
+    },
+    {
+      "model": "Armchair_BlueCloth62",
+      "slot": "Interior62_BlueCloth",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_BlueCloth.mat"
+    },
+    {
+      "model": "Armchair_BlueCloth62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Armchair_BlueCloth62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Reuse_Stool01",
+      "slot": "Hideout_WoodLight",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodLight.mat"
+    },
+    {
+      "model": "Reuse_Stool01",
+      "slot": "Hideout_WoodDark",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodDark.mat"
+    },
+    {
+      "model": "Reuse_Stool01",
+      "slot": "Hideout_Wood",
+      "material": "Assets/Art/Environments/Hideout02/Materials/Hideout_Wood.mat"
+    },
+    {
+      "model": "Furniture_Floor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Furniture_Floor62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Furniture_Floor62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "Furniture_RearLining62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Furniture_RearLining62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Furniture_RearLining62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Furniture_RearLining62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Furniture_TallLining62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Furniture_LeftPartition62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Furniture_LeftPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Furniture_LeftPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Furniture_LeftPartition62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Furniture_RightPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "Furniture_RightPartition62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Furniture_RightPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Furniture_RightPartition62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Furniture_RearClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Furniture_RearClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "Furniture_LeftClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Furniture_RightClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "Furniture_RearClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Furniture_LeftClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Furniture_RightClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "Furniture_ClosedFrontReturn62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Furniture_RoomDividers62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Wardrobe62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "Wardrobe62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Wardrobe62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "Wardrobe62",
+      "slot": "Interior62_Brass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brass.mat"
+    },
+    {
+      "model": "DiningTable62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "DiningTable62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "DiningTable62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "WoodChair62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "WoodChair62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "WoodChair62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Armchair_Linen62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "Armchair_Linen62",
+      "slot": "Interior62_Linen",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Linen.mat"
+    },
+    {
+      "model": "Armchair_Linen62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "BlackMarket_Floor62",
+      "slot": "Interior62_DarkConcrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_DarkConcrete.mat"
+    },
+    {
+      "model": "BlackMarket_RearLining62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "BlackMarket_RearLining62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "BlackMarket_RearLining62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "BlackMarket_RearLining62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "BlackMarket_RearLining62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "BlackMarket_TallLining62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "BlackMarket_LeftPartition62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "BlackMarket_LeftPartition62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "BlackMarket_LeftPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "BlackMarket_LeftPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "BlackMarket_LeftPartition62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "BlackMarket_RightPartition62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "BlackMarket_RightPartition62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "BlackMarket_RightPartition62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "BlackMarket_RightPartition62",
+      "slot": "Interior62_Steel",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Steel.mat"
+    },
+    {
+      "model": "BlackMarket_RightPartition62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "BlackMarket_RearClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "BlackMarket_RearClosureRoof62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "BlackMarket_LeftClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "BlackMarket_RightClosureRoof62",
+      "slot": "Interior62_ClosedRoof",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_ClosedRoof.mat"
+    },
+    {
+      "model": "BlackMarket_RearClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "BlackMarket_LeftClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "BlackMarket_RightClosedFloor62",
+      "slot": "Interior62_Concrete",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Concrete.mat"
+    },
+    {
+      "model": "BlackMarket_ClosedFrontReturn62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "BlackMarket_RoomDividers62",
+      "slot": "Interior62_Graphite",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Graphite.mat"
+    },
+    {
+      "model": "MarketCounter62",
+      "slot": "Interior62_Olive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Olive.mat"
+    },
+    {
+      "model": "MarketCounter62",
+      "slot": "Interior62_Wood",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Wood.mat"
+    },
+    {
+      "model": "MarketCounter62",
+      "slot": "Interior62_WoodLight",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodLight.mat"
+    },
+    {
+      "model": "MarketCounter62",
+      "slot": "Interior62_Brass",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Brass.mat"
+    },
+    {
+      "model": "MarketCounter62",
+      "slot": "Interior62_Canvas",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Canvas.mat"
+    },
+    {
+      "model": "MarketCounter62",
+      "slot": "Interior62_Linen",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_Linen.mat"
+    },
+    {
+      "model": "MarketCounter62",
+      "slot": "Interior62_WoodDark",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_WoodDark.mat"
+    },
+    {
+      "model": "MarketCounter62",
+      "slot": "Interior62_DarkOlive",
+      "material": "Assets/Art/Environments/TownInteriors62/Materials/Interior62_DarkOlive.mat"
+    },
+    {
+      "model": "Reuse_FoldedTarp02",
+      "slot": "TownProps_Canvas",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Canvas.mat"
+    },
+    {
+      "model": "Reuse_FoldedTarp02",
+      "slot": "TownProps_Edge",
+      "material": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Edge.mat"
+    }
+  ]
+}

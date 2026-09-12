@@ -1,0 +1,1 @@
+{"code":"UIManager.Instance.CloseAll();var p=TopDownPlayer.Instance;var pos=new UnityEngine.Vector3(34,0,39);p.transform.position=pos;var rb=p.GetComponent<UnityEngine.Rigidbody>();rb.position=pos;rb.linearVelocity=UnityEngine.Vector3.zero;UnityEngine.Physics.SyncTransforms();return \"Player in saved pawnshop service room\";"}

@@ -26,6 +26,7 @@ public class BuildingInterior : MonoBehaviour
     [SerializeField] bool lightsFollowRoof = true;
 
     readonly List<Renderer> _roofRenderers = new List<Renderer>();
+    readonly HashSet<Collider> _playerColliders = new HashSet<Collider>();
     bool _inside;
 
     public bool PlayerInside => _inside;
@@ -58,12 +59,20 @@ public class BuildingInterior : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         if (!IsPlayer(other)) return;
+        _playerColliders.Add(other);
         SetInside(true);
     }
 
     void OnTriggerExit(Collider other)
     {
-        if (!IsPlayer(other)) return;
+        if (!_playerColliders.Remove(other)) return;
+        _playerColliders.RemoveWhere(c => c == null || !c.enabled || !c.gameObject.activeInHierarchy);
+        if (_playerColliders.Count == 0) SetInside(false);
+    }
+
+    void OnDisable()
+    {
+        _playerColliders.Clear();
         SetInside(false);
     }
 

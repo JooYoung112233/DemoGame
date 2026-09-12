@@ -1,0 +1,62 @@
+[
+  {
+    "name": "BlackMarket",
+    "distance": 2.38040376,
+    "y": 0.0,
+    "entered": true,
+    "roofHidden": true,
+    "exited": true,
+    "roofRestored": true,
+    "npcTarget": null,
+    "dialogueOpened": false,
+    "pass": true
+  },
+  {
+    "name": "Furniture",
+    "distance": 2.3940146,
+    "y": 0.0,
+    "entered": true,
+    "roofHidden": true,
+    "exited": true,
+    "roofRestored": true,
+    "npcTarget": null,
+    "dialogueOpened": false,
+    "pass": true
+  },
+  {
+    "name": "Medical",
+    "distance": 1.920002,
+    "y": 0.0,
+    "entered": true,
+    "roofHidden": true,
+    "exited": true,
+    "roofRestored": true,
+    "npcTarget": null,
+    "dialogueOpened": false,
+    "pass": true
+  },
+  {
+    "name": "Pawnshop",
+    "distance": 2.41783142,
+    "y": 0.0,
+    "entered": true,
+    "roofHidden": true,
+    "exited": true,
+    "roofRestored": true,
+    "npcTarget": "전당포 주인",
+    "dialogueOpened": true,
+    "pass": true
+  },
+  {
+    "name": "Repair",
+    "distance": 2.39382935,
+    "y": 0.0,
+    "entered": true,
+    "roofHidden": true,
+    "exited": true,
+    "roofRestored": true,
+    "npcTarget": null,
+    "dialogueOpened": false,
+    "pass": true
+  }
+]
