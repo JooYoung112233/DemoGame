@@ -1,0 +1,197 @@
+[
+  {
+    "name": "Pawnshop",
+    "targets": [
+      {
+        "x": 29,
+        "z": 12,
+        "reachable": true
+      },
+      {
+        "x": 50,
+        "z": 33,
+        "reachable": true
+      },
+      {
+        "x": 6,
+        "z": 21,
+        "reachable": true
+      },
+      {
+        "x": 53,
+        "z": 32,
+        "reachable": true
+      }
+    ],
+    "doors": [
+      {
+        "id": "pawnshop.rear",
+        "blocked": true
+      },
+      {
+        "id": "pawnshop.left",
+        "blocked": true
+      },
+      {
+        "id": "pawnshop.right",
+        "blocked": true
+      }
+    ]
+  },
+  {
+    "name": "Repair",
+    "targets": [
+      {
+        "x": 24,
+        "z": 9,
+        "reachable": true
+      },
+      {
+        "x": 41,
+        "z": 33,
+        "reachable": true
+      },
+      {
+        "x": 6,
+        "z": 7,
+        "reachable": true
+      },
+      {
+        "x": 43,
+        "z": 30,
+        "reachable": true
+      }
+    ],
+    "doors": [
+      {
+        "id": "repair.rear",
+        "blocked": true
+      },
+      {
+        "id": "repair.left",
+        "blocked": true
+      },
+      {
+        "id": "repair.right",
+        "blocked": true
+      }
+    ]
+  },
+  {
+    "name": "Furniture",
+    "targets": [
+      {
+        "x": 29,
+        "z": 6,
+        "reachable": true
+      },
+      {
+        "x": 23,
+        "z": 40,
+        "reachable": true
+      },
+      {
+        "x": 6,
+        "z": 26,
+        "reachable": true
+      },
+      {
+        "x": 40,
+        "z": 30,
+        "reachable": true
+      }
+    ],
+    "doors": [
+      {
+        "id": "furniture.rear",
+        "blocked": true
+      },
+      {
+        "id": "furniture.left",
+        "blocked": true
+      },
+      {
+        "id": "furniture.right",
+        "blocked": true
+      }
+    ]
+  },
+  {
+    "name": "BlackMarket",
+    "targets": [
+      {
+        "x": 23,
+        "z": 8,
+        "reachable": true
+      },
+      {
+        "x": 40,
+        "z": 33,
+        "reachable": true
+      },
+      {
+        "x": 6,
+        "z": 12,
+        "reachable": true
+      },
+      {
+        "x": 40,
+        "z": 21,
+        "reachable": true
+      }
+    ],
+    "doors": [
+      {
+        "id": "blackmarket.rear",
+        "blocked": true
+      },
+      {
+        "id": "blackmarket.left",
+        "blocked": true
+      },
+      {
+        "id": "blackmarket.right",
+        "blocked": true
+      }
+    ]
+  },
+  {
+    "name": "Medical",
+    "targets": [
+      {
+        "x": 26,
+        "z": 6,
+        "reachable": true
+      },
+      {
+        "x": 44,
+        "z": 33,
+        "reachable": true
+      },
+      {
+        "x": 6,
+        "z": 18,
+        "reachable": true
+      },
+      {
+        "x": 46,
+        "z": 13,
+        "reachable": true
+      }
+    ],
+    "doors": [
+      {
+        "id": "medical.rear",
+        "blocked": true
+      },
+      {
+        "id": "medical.left",
+        "blocked": true
+      },
+      {
+        "id": "medical.right",
+        "blocked": true
+      }
+    ]
+  }
+]

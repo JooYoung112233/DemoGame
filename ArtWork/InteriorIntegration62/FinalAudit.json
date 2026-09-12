@@ -1,0 +1,113 @@
+{
+  "pass": true,
+  "buildings": 5,
+  "meshInstances": 131,
+  "materialCount": 50,
+  "missingUv": [],
+  "badMaterials": [],
+  "shaderMessages": [],
+  "lockedZones": [
+    {
+      "name": "pawnshop.rear",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "pawnshop.left",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "pawnshop.right",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "repair.rear",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "repair.left",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "repair.right",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "furniture.rear",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "furniture.left",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "furniture.right",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "blackmarket.rear",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "blackmarket.left",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "blackmarket.right",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "medical.rear",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "medical.left",
+      "enabled": true,
+      "isTrigger": false
+    },
+    {
+      "name": "medical.right",
+      "enabled": true,
+      "isTrigger": false
+    }
+  ],
+  "shopLocks": [
+    {
+      "name": "Repair",
+      "UnlockFlag": "shop_repair_unlocked",
+      "IsOpen": false,
+      "shutter": true
+    },
+    {
+      "name": "Furniture",
+      "UnlockFlag": "shop_furniture_unlocked",
+      "IsOpen": false,
+      "shutter": true
+    },
+    {
+      "name": "BlackMarket",
+      "UnlockFlag": "shop_blackmarket_unlocked",
+      "IsOpen": false,
+      "shutter": true
+    },
+    {
+      "name": "Medical",
+      "UnlockFlag": "shop_medical_unlocked",
+      "IsOpen": false,
+      "shutter": true
+    }
+  ],
+  "npcPosition": "(32.40, 0.00, 41.80)"
+}

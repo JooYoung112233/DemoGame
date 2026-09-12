@@ -1,0 +1,45 @@
+{
+  "buildings": [
+    {
+      "name": "Pawnshop",
+      "instances": 28,
+      "meshColliders": 16,
+      "lockedRooms": 3,
+      "world": "(34.00, 0.00, 44.00)",
+      "yaw": 0.0
+    },
+    {
+      "name": "Repair",
+      "instances": 26,
+      "meshColliders": 16,
+      "lockedRooms": 3,
+      "world": "(12.00, 0.00, 44.00)",
+      "yaw": 0.0
+    },
+    {
+      "name": "Medical",
+      "instances": 25,
+      "meshColliders": 17,
+      "lockedRooms": 3,
+      "world": "(64.00, 0.00, 44.00)",
+      "yaw": 0.0
+    },
+    {
+      "name": "Furniture",
+      "instances": 27,
+      "meshColliders": 18,
+      "lockedRooms": 3,
+      "world": "(12.00, 0.00, 27.00)",
+      "yaw": 270.0
+    },
+    {
+      "name": "BlackMarket",
+      "instances": 25,
+      "meshColliders": 14,
+      "lockedRooms": 3,
+      "world": "(12.00, 0.00, 10.00)",
+      "yaw": 270.0
+    }
+  ],
+  "npcPosition": "(34.00, 0.00, 41.90)"
+}
