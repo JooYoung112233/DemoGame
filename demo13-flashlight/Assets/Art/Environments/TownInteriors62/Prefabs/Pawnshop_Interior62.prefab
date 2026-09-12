@@ -444,8 +444,8 @@ Transform:
   m_GameObject: {fileID: 2764681265182502242}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.025, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.6119027, y: 0.025, z: -0.101282164}
+  m_LocalScale: {x: 1.0791044, y: 1, z: 0.98290604}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9188348074010733887}
@@ -572,8 +572,8 @@ Transform:
   m_GameObject: {fileID: 3698069549373137500}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.025, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.6119027, y: 0.025, z: -0.101282164}
+  m_LocalScale: {x: 1.0791044, y: 1, z: 0.98290604}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5915704724224635967}
@@ -636,8 +636,8 @@ Transform:
   m_GameObject: {fileID: 4043886833849533954}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.6119027, y: 0, z: -0.101281695}
+  m_LocalScale: {x: 1.0791044, y: 1, z: 0.98290604}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5894956790500076231}
@@ -915,8 +915,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 15.7, y: 3, z: 6}
-  m_Center: {x: 0, y: 1.5, z: 3}
+  m_Size: {x: 15.88, y: 3, z: 6.1000004}
+  m_Center: {x: 0, y: 1.5, z: 2.875}
 --- !u!1 &5858786479468403093
 GameObject:
   m_ObjectHideFlags: 0
@@ -968,8 +968,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3.35, y: 3, z: 5.85}
-  m_Center: {x: 6.25, y: 1.5, z: -3}
+  m_Size: {x: 3.6150002, y: 3, z: 5.75}
+  m_Center: {x: 6.1324997, y: 1.5, z: -3.0500002}
 --- !u!1 &6206114077256679530
 GameObject:
   m_ObjectHideFlags: 0
@@ -1021,8 +1021,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3.35, y: 3, z: 5.85}
-  m_Center: {x: -6.25, y: 1.5, z: -3}
+  m_Size: {x: 3.6150002, y: 3, z: 5.75}
+  m_Center: {x: -6.1324997, y: 1.5, z: -3.0500002}
 --- !u!1 &6382560898504618632
 GameObject:
   m_ObjectHideFlags: 0
@@ -1112,8 +1112,8 @@ Transform:
   m_GameObject: {fileID: 6577242664948941337}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.025, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.0000001841745, y: 0.025, z: -0.175}
+  m_LocalScale: {x: 1.0114651, y: 1, z: 1.0166668}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8882934215979902229}
@@ -1144,8 +1144,8 @@ Transform:
   m_GameObject: {fileID: 8236493440660216020}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.0000001841745, y: 0, z: -0.1749995}
+  m_LocalScale: {x: 1.0114651, y: 1, z: 1.0166668}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4845050727728848575}
@@ -1176,8 +1176,8 @@ Transform:
   m_GameObject: {fileID: 8356789723240873539}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.6119027, y: 0, z: -0.101281695}
+  m_LocalScale: {x: 1.0791044, y: 1, z: 0.98290604}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6351616955429651609}
@@ -2555,6 +2555,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5754084199372789682, guid: 4ae556104c5ff754c894f10b39198688, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4300000, guid: 6ca0496e23f09a643ab3c918864f2d7c, type: 2}
     - target: {fileID: 919132149155446097, guid: 4ae556104c5ff754c894f10b39198688, type: 3}
       propertyPath: m_Name
       value: Pawnshop_ClosedFrontReturn62
@@ -2593,7 +2597,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: -7755029357487263367, guid: 4ae556104c5ff754c894f10b39198688, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 6ca0496e23f09a643ab3c918864f2d7c, type: 2}
 --- !u!4 &5399379188347529318 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4ae556104c5ff754c894f10b39198688, type: 3}

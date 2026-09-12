@@ -1,0 +1,99 @@
+{
+  "pass": true,
+  "joinOrder": [
+    "left roof / wall",
+    "right roof / wall",
+    "rear roof / wall",
+    "left front return / wall",
+    "right front return / wall",
+    "rear / left lid",
+    "rear / right lid"
+  ],
+  "buildings": [
+    {
+      "name": "BlackMarket",
+      "pass": true,
+      "joinsMetres": [
+        -0.08000088,
+        -0.08000088,
+        -0.07999897,
+        -0.07999992,
+        -0.07999897,
+        -4.76837158E-07,
+        0.0
+      ],
+      "prefabMatches": true,
+      "blockersAligned": true,
+      "signBindings": 1,
+      "originalShopLockPreserved": true
+    },
+    {
+      "name": "Furniture",
+      "pass": true,
+      "joinsMetres": [
+        -0.08000183,
+        -0.08000088,
+        -0.07999951,
+        -0.08000183,
+        -0.08000088,
+        0.0,
+        0.0
+      ],
+      "prefabMatches": true,
+      "blockersAligned": true,
+      "signBindings": 1,
+      "originalShopLockPreserved": true
+    },
+    {
+      "name": "Medical",
+      "pass": true,
+      "joinsMetres": [
+        -0.08000183,
+        -0.0799942,
+        -0.07999802,
+        -0.0799942,
+        -0.08000183,
+        0.0,
+        0.0
+      ],
+      "prefabMatches": true,
+      "blockersAligned": true,
+      "signBindings": 1,
+      "originalShopLockPreserved": true
+    },
+    {
+      "name": "Pawnshop",
+      "pass": true,
+      "joinsMetres": [
+        -0.08000183,
+        -0.08000183,
+        -0.07999802,
+        -0.07999992,
+        -0.07999802,
+        0.0,
+        0.0
+      ],
+      "prefabMatches": true,
+      "blockersAligned": true,
+      "signBindings": 1,
+      "originalShopLockPreserved": true
+    },
+    {
+      "name": "Repair",
+      "pass": true,
+      "joinsMetres": [
+        -0.07999992,
+        -0.07999992,
+        -0.07999802,
+        -0.07999992,
+        -0.07999992,
+        0.0,
+        0.0
+      ],
+      "prefabMatches": true,
+      "blockersAligned": true,
+      "signBindings": 1,
+      "originalShopLockPreserved": true
+    }
+  ]
+}

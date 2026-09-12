@@ -25,8 +25,8 @@ Transform:
   m_GameObject: {fileID: 161904565247236020}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.65313745, y: 0, z: -0.11837606}
+  m_LocalScale: {x: 1.1127658, y: 1, z: 0.982906}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1196782012652222740}
@@ -57,8 +57,8 @@ Transform:
   m_GameObject: {fileID: 374498511903791328}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.025, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.65313745, y: 0.025, z: -0.11837612}
+  m_LocalScale: {x: 1.1127658, y: 1, z: 0.98290604}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7528052690599539634}
@@ -307,8 +307,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.35, y: 3, z: 5.85}
-  m_Center: {x: -4.75, y: 1.5, z: -4}
+  m_Size: {x: 2.615, y: 3, z: 5.75}
+  m_Center: {x: -4.6325, y: 1.5, z: -4.05}
 --- !u!1 &2849390694765880692
 GameObject:
   m_ObjectHideFlags: 0
@@ -334,8 +334,8 @@ Transform:
   m_GameObject: {fileID: 2849390694765880692}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.00000018926767, y: 0, z: -0.16249955}
+  m_LocalScale: {x: 1.0153847, y: 1, z: 1.0125002}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7590013594432251357}
@@ -392,8 +392,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.35, y: 3, z: 5.85}
-  m_Center: {x: 4.75, y: 1.5, z: -4}
+  m_Size: {x: 2.615, y: 3, z: 5.75}
+  m_Center: {x: 4.6325, y: 1.5, z: -4.05}
 --- !u!1 &3296789439077664261
 GameObject:
   m_ObjectHideFlags: 0
@@ -580,8 +580,8 @@ Transform:
   m_GameObject: {fileID: 4330816069718986821}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.65313745, y: 0, z: -0.11837606}
+  m_LocalScale: {x: 1.1127658, y: 1, z: 0.982906}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4192529632895224218}
@@ -638,8 +638,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 11.7, y: 3, z: 8}
-  m_Center: {x: 0, y: 1.5, z: 3}
+  m_Size: {x: 11.88, y: 3, z: 8.1}
+  m_Center: {x: 0, y: 1.5, z: 2.875}
 --- !u!1 &5595455166488963924
 GameObject:
   m_ObjectHideFlags: 0
@@ -761,8 +761,8 @@ Transform:
   m_GameObject: {fileID: 6078403129150177493}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.025, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.65313745, y: 0.025, z: -0.11837612}
+  m_LocalScale: {x: 1.1127658, y: 1, z: 0.98290604}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8918027282362798040}
@@ -891,8 +891,8 @@ Transform:
   m_GameObject: {fileID: 6738902002948574192}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.025, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.00000018926767, y: 0.025, z: -0.1624999}
+  m_LocalScale: {x: 1.0153847, y: 1, z: 1.0125}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1324894003520220705}
@@ -2950,6 +2950,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5754084199372789682, guid: 053af408771363f428d254961f61f317, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4300000, guid: 5f811485d9fa7be4ca26efac88e03e37, type: 2}
     - target: {fileID: 919132149155446097, guid: 053af408771363f428d254961f61f317, type: 3}
       propertyPath: m_Name
       value: BlackMarket_ClosedFrontReturn62
@@ -2993,7 +2997,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 8574967159600715640, guid: 053af408771363f428d254961f61f317, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 5f811485d9fa7be4ca26efac88e03e37, type: 2}
 --- !u!1001 &8815707980987065269
 PrefabInstance:
   m_ObjectHideFlags: 0
