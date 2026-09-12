@@ -1,0 +1,400 @@
+[
+  {
+    "name": "Ground",
+    "parent": "Environment",
+    "p": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "components": [
+      "Transform",
+      "HierarchyFolder"
+    ],
+    "data": null
+  },
+  {
+    "name": "Ground",
+    "parent": "Ground",
+    "p": [
+      40.0,
+      -0.05,
+      28.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "BoxCollider",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "HideoutGroundFinish62",
+    "parent": "Ground",
+    "p": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "components": [
+      "Transform"
+    ],
+    "data": null
+  },
+  {
+    "name": "DoorFrame",
+    "parent": "Pawnshop",
+    "p": [
+      34.0,
+      1.2,
+      38.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "전당포 주인",
+    "parent": "Pawnshop_Interior",
+    "p": [
+      34.0,
+      0.9,
+      46.4
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "CapsuleCollider",
+      "MeshRenderer",
+      "InteractableObject",
+      "NPCController",
+      "NPCQuestMarker"
+    ],
+    "data": "{\"type\":3,\"promptText\":\"대화하기\",\"interactRange\":3.200000047683716,\"oneShot\":false,\"highlightColor\":{\"r\":1.0,\"g\":1.0,\"b\":0.5,\"a\":1.0},\"targetScene\":\"\",\"spawnPointId\":\"\",\"exitWaitTime\":0.0,\"noteContent\":\"\",\"noteStorySceneId\":\"\",\"noteTitle\":\"\",\"grantsKnowledgeId\":\"\",\"storyNpcId\":\"\",\"itemId\":\"\",\"itemCount\":1}"
+  },
+  {
+    "name": "DoorFrame",
+    "parent": "Repair",
+    "p": [
+      12.0,
+      1.2,
+      39.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "DoorFrame",
+    "parent": "Medical",
+    "p": [
+      64.0,
+      1.2,
+      39.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "DoorFrame",
+    "parent": "Furniture",
+    "p": [
+      19.0,
+      1.2,
+      27.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "DoorFrame",
+    "parent": "BlackMarket",
+    "p": [
+      19.0,
+      1.2,
+      10.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "Container_Home",
+    "parent": "Structures",
+    "p": [
+      64.0,
+      1.45,
+      12.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "BoxCollider",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "Container_Home_Shell",
+    "parent": "Shell_Art02",
+    "p": [
+      64.0,
+      1.1920929E-07,
+      12.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "Container_Home_Roof",
+    "parent": "Roof_Art02",
+    "p": [
+      64.0,
+      1.1920929E-07,
+      12.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "ReclaimedHome62",
+    "parent": "Container_Home",
+    "p": [
+      64.0,
+      0.0,
+      12.0
+    ],
+    "components": [
+      "Transform"
+    ],
+    "data": null
+  },
+  {
+    "name": "HomeYard",
+    "parent": "Village01_Placed",
+    "p": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "components": [
+      "Transform"
+    ],
+    "data": null
+  },
+  {
+    "name": "Container_Home_Detail",
+    "parent": "HomeYard",
+    "p": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "components": [
+      "Transform"
+    ],
+    "data": null
+  },
+  {
+    "name": "Home_Door",
+    "parent": "HomeYard",
+    "p": [
+      56.94,
+      1.05,
+      12.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "Home_Door_Handle",
+    "parent": "HomeYard",
+    "p": [
+      56.87,
+      1.0,
+      11.59
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "GroundWear",
+    "parent": "Village01_Placed",
+    "p": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "components": [
+      "Transform"
+    ],
+    "data": null
+  },
+  {
+    "name": "Road_Home",
+    "parent": "Dressing",
+    "p": [
+      58.0,
+      0.01,
+      16.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "BoxCollider",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "Lamp_Home_Pole",
+    "parent": "Dressing",
+    "p": [
+      58.0,
+      1.6,
+      16.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "BoxCollider",
+      "MeshRenderer"
+    ],
+    "data": null
+  },
+  {
+    "name": "Lamp_Home_Light",
+    "parent": "Dressing",
+    "p": [
+      58.0,
+      3.3,
+      16.0
+    ],
+    "components": [
+      "Transform",
+      "Light"
+    ],
+    "data": null
+  },
+  {
+    "name": "Board_Dispatch",
+    "parent": "Gameplay",
+    "p": [
+      72.0,
+      1.1,
+      24.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "BoxCollider",
+      "MeshRenderer",
+      "InteractableObject"
+    ],
+    "data": "{\"type\":8,\"promptText\":\"출전 준비\",\"interactRange\":3.0,\"oneShot\":false,\"highlightColor\":{\"r\":1.0,\"g\":1.0,\"b\":0.5,\"a\":1.0},\"targetScene\":\"\",\"spawnPointId\":\"\",\"exitWaitTime\":0.0,\"noteContent\":\"\",\"noteStorySceneId\":\"\",\"noteTitle\":\"\",\"grantsKnowledgeId\":\"\",\"storyNpcId\":\"\",\"itemId\":\"\",\"itemCount\":1}"
+  },
+  {
+    "name": "회수꾼",
+    "parent": "NPCs",
+    "p": [
+      67.0,
+      0.9,
+      29.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "CapsuleCollider",
+      "MeshRenderer",
+      "InteractableObject",
+      "NPCController",
+      "NPCQuestMarker"
+    ],
+    "data": "{\"type\":3,\"promptText\":\"대화하기\",\"interactRange\":3.200000047683716,\"oneShot\":false,\"highlightColor\":{\"r\":1.0,\"g\":1.0,\"b\":0.5,\"a\":1.0},\"targetScene\":\"\",\"spawnPointId\":\"\",\"exitWaitTime\":0.0,\"noteContent\":\"\",\"noteStorySceneId\":\"\",\"noteTitle\":\"\",\"grantsKnowledgeId\":\"\",\"storyNpcId\":\"\",\"itemId\":\"\",\"itemCount\":1}"
+  },
+  {
+    "name": "떠돌이 상인",
+    "parent": "NPCs",
+    "p": [
+      36.0,
+      0.9,
+      14.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "CapsuleCollider",
+      "MeshRenderer",
+      "InteractableObject",
+      "NPCController",
+      "NPCQuestMarker"
+    ],
+    "data": "{\"type\":3,\"promptText\":\"대화하기\",\"interactRange\":3.200000047683716,\"oneShot\":false,\"highlightColor\":{\"r\":1.0,\"g\":1.0,\"b\":0.5,\"a\":1.0},\"targetScene\":\"\",\"spawnPointId\":\"\",\"exitWaitTime\":0.0,\"noteContent\":\"\",\"noteStorySceneId\":\"\",\"noteTitle\":\"\",\"grantsKnowledgeId\":\"\",\"storyNpcId\":\"\",\"itemId\":\"\",\"itemCount\":1}"
+  },
+  {
+    "name": "구역 관리인",
+    "parent": "NPCs",
+    "p": [
+      50.0,
+      0.9,
+      16.0
+    ],
+    "components": [
+      "Transform",
+      "MeshFilter",
+      "CapsuleCollider",
+      "MeshRenderer",
+      "InteractableObject",
+      "NPCController",
+      "NPCQuestMarker"
+    ],
+    "data": "{\"type\":3,\"promptText\":\"대화하기\",\"interactRange\":3.200000047683716,\"oneShot\":false,\"highlightColor\":{\"r\":1.0,\"g\":1.0,\"b\":0.5,\"a\":1.0},\"targetScene\":\"\",\"spawnPointId\":\"\",\"exitWaitTime\":0.0,\"noteContent\":\"\",\"noteStorySceneId\":\"\",\"noteTitle\":\"\",\"grantsKnowledgeId\":\"\",\"storyNpcId\":\"\",\"itemId\":\"\",\"itemCount\":1}"
+  },
+  {
+    "name": "Home_LaundryKitchen",
+    "parent": "TownLife_Comic62",
+    "p": [
+      5.5,
+      0.0,
+      0.0
+    ],
+    "components": [
+      "Transform"
+    ],
+    "data": null
+  }
+]

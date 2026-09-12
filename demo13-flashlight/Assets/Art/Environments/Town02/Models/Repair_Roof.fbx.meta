@@ -82,6 +82,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Town_RoofWarm
+    second: {fileID: 2100000, guid: 2bee77142f7480d4c8fd5a728eb246c2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Town_Steel
     second: {fileID: 2100000, guid: b9722c56626149846bd5de812b1d2d1d, type: 2}
   - first:

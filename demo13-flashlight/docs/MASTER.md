@@ -15,7 +15,7 @@
 | **엔진** | Unity 6.6 (6000.6.0f1), URP **3D** (Forward, `URP-3D.asset`) |
 | **언어** | C# |
 | **아트** | **3D 로우폴리**(치비 2.5등신) — 플레이어·밴딧·마을·은신처. 게임 전용 셰이더 `BRB/GameLit` + 포스트 프로세싱. 카메라 **오소 정면 탑다운 62°**(방위 0°) |
-| **텍스처 방향** | **손그림 애니풍** — 현재 플레이어 색면·주름·봉제·국소 마모를 캐릭터/환경 전체의 기준으로 채택(2026-09-12). 플레이어 V2 적용, 나머지 자산은 순차 전환. [rendering.md](rendering.md)·[char-art.md](char-art.md) |
+| **텍스처 방향** | **B 만화풍** — 진한 표면 선과 직접 그린 색면 그림자. 승인된 플레이어 B를 유지하고 NPC·현용 적·장비·실내외 모델에 아틀라스 6종/공용 표면 8종 적용. 마을 생활 프랍 38개 추가 배치(2026-09-12). [rendering.md](rendering.md)·[char-art.md](char-art.md)·[safehouse.md](safehouse.md) |
 | **핵심 루프** | 마을(안전구역) → 지역 선택 → 20분 레이드(루팅/총격전) → 탈출 → 정산 → 마을·은신처 |
 | **핵심 감정** | "한 번만 더 들어갈까?" / "지금 나갈까, 한 개 더 주울까?" |
 
@@ -150,7 +150,7 @@
 
 | 문서 | 내용 | 상태 |
 |------|------|------|
-| [`navigation.md`](navigation.md) | **시계 나침반 + 미니맵/맵 시스템** — 시계 3역할(나침반·공명·시간역행 암시) 통합, RaidMap+fog, 통로 주석(사일런트힐식), 지도 아이템 해금 | 기반 구현(검토 중) |
+| [`navigation.md`](navigation.md) | **시계 나침반 + 미니맵/맵 시스템** — 마을 상시 미니맵(위치·건물·입구·잠김), 레이드 시계·RaidMap+fog·지도 아이템 해금 | 마을 지도 구현, 레이드 기반 유지 |
 
 핵심 코드: `RaidMapManager.cs`, `NavigationHUD.cs`, `MapZoneVolume.cs`, `PassageMarker.cs`, `CompassTarget.cs`, `MapFragmentReveal.cs` (`Assets/Scripts/Navigation/`)
 

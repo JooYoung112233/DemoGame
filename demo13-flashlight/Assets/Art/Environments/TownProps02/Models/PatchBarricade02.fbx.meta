@@ -3,7 +3,47 @@ guid: ed46c2bfae61ac2479f979fa480da3bd
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Canvas
+    second: {fileID: 2100000, guid: dd233c46088e1ff4ca95278fbae7b658, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Linen
+    second: {fileID: 2100000, guid: bbaa1c2ccd73f0844bb7a33ddf72822f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Olive
+    second: {fileID: 2100000, guid: 331465bc10a526d48b92adef4d55d74e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Steel
+    second: {fileID: 2100000, guid: a0e7da50bb3ce164dadce2acc033343a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_Wood
+    second: {fileID: 2100000, guid: 858383c6e233dcc46b6f682ed73ee5ff, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_WoodDark
+    second: {fileID: 2100000, guid: 87121ee021a5b7e40a402f52d67bc57e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_WoodFaded
+    second: {fileID: 2100000, guid: 0cb11180f84a2294185bc8aec9e228af, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TownProps_WoodWarm
+    second: {fileID: 2100000, guid: c9676d63ab421be4a8f295998b3f76aa, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

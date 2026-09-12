@@ -1,0 +1,51 @@
+[
+  {
+    "check": "town visible and movement XZ",
+    "passed": true,
+    "delta": [
+      -11.8928566,
+      11.8928566
+    ]
+  },
+  {
+    "check": "modal hides map",
+    "passed": true
+  },
+  {
+    "check": "modal closes restores map",
+    "passed": true
+  },
+  {
+    "check": "no input interception",
+    "passed": true
+  },
+  {
+    "check": "six building footprints",
+    "passed": true
+  },
+  {
+    "check": "quest below map",
+    "passed": true,
+    "questSize": [
+      310.0,
+      460.0
+    ]
+  },
+  {
+    "check": "quest size preserved",
+    "passed": true
+  },
+  {
+    "check": "hideout hides map",
+    "passed": true
+  },
+  {
+    "check": "return town restores one map",
+    "passed": true
+  },
+  {
+    "check": "day/night sun bound to destination town",
+    "passed": true,
+    "scene": "Safehouse"
+  }
+]

@@ -52,6 +52,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Town_Graphite
+    second: {fileID: 2100000, guid: 6b986bafbfaaf5b43a58a60c021abb5a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Town_Ochre
     second: {fileID: 2100000, guid: be9ff0b21ec36b943adb1628a50b7369, type: 2}
   - first:
@@ -79,6 +84,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Town_Roof
     second: {fileID: 2100000, guid: c43f08a45635f7041ab7c01d8e9a9f6d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_RoofDark
+    second: {fileID: 2100000, guid: 42ec170d911c3394f825f1a6146d3f20, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

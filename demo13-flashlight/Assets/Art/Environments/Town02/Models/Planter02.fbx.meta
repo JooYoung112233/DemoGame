@@ -3,7 +3,32 @@ guid: 46885ff6a7940b74495161c27072be1e
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_DarkOlive
+    second: {fileID: 2100000, guid: 3fd5b0fd3056bff4b9173c15762bc404, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Dirt
+    second: {fileID: 2100000, guid: 4e25fec35f8a28945bac58d0cc3dbc70, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Olive
+    second: {fileID: 2100000, guid: 9a24009a3a70bf14ba88df11b5a2dd05, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Wood
+    second: {fileID: 2100000, guid: 454301a7ed576d14cae6add95609a593, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_WoodDark
+    second: {fileID: 2100000, guid: 5b2cb3909db27aa44aed813267724356, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

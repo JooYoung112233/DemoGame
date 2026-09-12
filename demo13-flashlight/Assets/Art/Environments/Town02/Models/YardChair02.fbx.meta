@@ -3,7 +3,17 @@ guid: c5bd7dce0c6e94d489daab97a0d6fca8
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Olive
+    second: {fileID: 2100000, guid: d211db6a1514c8640855927759f6cf61, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Steel
+    second: {fileID: 2100000, guid: 231d36cbcc791b4478c5758b4740c0fb, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

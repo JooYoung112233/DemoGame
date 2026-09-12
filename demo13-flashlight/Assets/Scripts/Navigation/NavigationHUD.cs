@@ -53,6 +53,7 @@ public class NavigationHUD : MonoBehaviour
         // UIManager 자식으로 배치 → 부모(UIManager)의 DontDestroyOnLoad를 따라 영속.
         if (!IsGenerated) BuildUI();   // 폴백: 프리팹 없이 코드로 생성
         else ReapplyProceduralSprites();   // 프리팹 경로: 절차 생성 스프라이트는 직렬화 불가 → 재적용
+        if (GetComponent<TownMinimapHUD>() == null) gameObject.AddComponent<TownMinimapHUD>();
     }
 
     /// <summary>PlaceholderSprite.Circle 같은 런타임 생성 스프라이트는 에셋이 아니라 프리팹에 못 구워진다

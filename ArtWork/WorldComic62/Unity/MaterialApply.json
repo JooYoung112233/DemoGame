@@ -1,0 +1,2117 @@
+[
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Concrete.mat",
+    "name": "Ground62_Concrete",
+    "status": "textured",
+    "family": "Earth",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_ConcreteDark.mat",
+    "name": "Ground62_ConcreteDark",
+    "status": "textured",
+    "family": "Earth",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Crack.mat",
+    "name": "Ground62_Crack",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_CrackLip.mat",
+    "name": "Ground62_CrackLip",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_DryDust.mat",
+    "name": "Ground62_DryDust",
+    "status": "textured",
+    "family": "Earth",
+    "previous": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_DryGrass.mat",
+    "name": "Ground62_DryGrass",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Grass.mat",
+    "name": "Ground62_Grass",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Soil.mat",
+    "name": "Ground62_Soil",
+    "status": "textured",
+    "family": "Earth",
+    "previous": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Stone.mat",
+    "name": "Ground62_Stone",
+    "status": "textured",
+    "family": "Earth",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Blanket.mat",
+    "name": "Hideout_Blanket",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Canvas.mat",
+    "name": "Hideout_Canvas",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Concrete.mat",
+    "name": "Hideout_Concrete",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_EdgeMetal.mat",
+    "name": "Hideout_EdgeMetal",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Glass.mat",
+    "name": "Hideout_Glass",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Grey.mat",
+    "name": "Hideout_Grey",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Ink.mat",
+    "name": "Hideout_Ink",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_LampGlow.mat",
+    "name": "Hideout_LampGlow",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Linen.mat",
+    "name": "Hideout_Linen",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_MapLine.mat",
+    "name": "Hideout_MapLine",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Olive.mat",
+    "name": "Hideout_Olive",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_OliveDark.mat",
+    "name": "Hideout_OliveDark",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_OliveLight.mat",
+    "name": "Hideout_OliveLight",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Paper.mat",
+    "name": "Hideout_Paper",
+    "status": "textured",
+    "family": "Paper",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Red.mat",
+    "name": "Hideout_Red",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Rubber.mat",
+    "name": "Hideout_Rubber",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_RugFabric.mat",
+    "name": "Hideout_RugFabric",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Steel.mat",
+    "name": "Hideout_Steel",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Wear.mat",
+    "name": "Hideout_Wear",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_Wood.mat",
+    "name": "Hideout_Wood",
+    "status": "textured",
+    "family": "Wood",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodDark.mat",
+    "name": "Hideout_WoodDark",
+    "status": "textured",
+    "family": "Wood",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Hideout02/Materials/Hideout_WoodLight.mat",
+    "name": "Hideout_WoodLight",
+    "status": "textured",
+    "family": "Wood",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/PaintedSurface62/Materials/Painted62_Concrete.mat",
+    "name": "Painted62_Concrete",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/PaintedSurface62/Textures/Concrete_Painted_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/PaintedSurface62/Materials/Painted62_ConcreteDark.mat",
+    "name": "Painted62_ConcreteDark",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/PaintedSurface62/Textures/Concrete_Painted_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/PaintedSurface62/Materials/Painted62_DryDust.mat",
+    "name": "Painted62_DryDust",
+    "status": "textured",
+    "family": "Earth",
+    "previous": "Assets/Art/Environments/PaintedSurface62/Textures/Earth_Painted_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/PaintedSurface62/Materials/Painted62_Soil.mat",
+    "name": "Painted62_Soil",
+    "status": "textured",
+    "family": "Earth",
+    "previous": "Assets/Art/Environments/PaintedSurface62/Textures/Earth_Painted_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/PaintedSurface62/Materials/Painted62_Stone.mat",
+    "name": "Painted62_Stone",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/PaintedSurface62/Textures/Concrete_Painted_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Blanket.mat",
+    "name": "Safehouse_Blanket",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Canvas.mat",
+    "name": "Safehouse_Canvas",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Concrete.mat",
+    "name": "Safehouse_Concrete",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_EdgeMetal.mat",
+    "name": "Safehouse_EdgeMetal",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Glass.mat",
+    "name": "Safehouse_Glass",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Grey.mat",
+    "name": "Safehouse_Grey",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Ink.mat",
+    "name": "Safehouse_Ink",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_LampGlow.mat",
+    "name": "Safehouse_LampGlow",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Linen.mat",
+    "name": "Safehouse_Linen",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_MapLine.mat",
+    "name": "Safehouse_MapLine",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Olive.mat",
+    "name": "Safehouse_Olive",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_OliveDark.mat",
+    "name": "Safehouse_OliveDark",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_OliveLight.mat",
+    "name": "Safehouse_OliveLight",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Paper.mat",
+    "name": "Safehouse_Paper",
+    "status": "textured",
+    "family": "Paper",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Red.mat",
+    "name": "Safehouse_Red",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Rubber.mat",
+    "name": "Safehouse_Rubber",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Steel.mat",
+    "name": "Safehouse_Steel",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Wear.mat",
+    "name": "Safehouse_Wear",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_Wood.mat",
+    "name": "Safehouse_Wood",
+    "status": "textured",
+    "family": "Wood",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_WoodDark.mat",
+    "name": "Safehouse_WoodDark",
+    "status": "textured",
+    "family": "Wood",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Safehouse01/Materials/Safehouse_WoodLight.mat",
+    "name": "Safehouse_WoodLight",
+    "status": "textured",
+    "family": "Wood",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Asphalt.mat",
+    "name": "Town_Asphalt",
+    "status": "textured",
+    "family": "Asphalt",
+    "previous": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Brick.mat",
+    "name": "Town_Brick",
+    "status": "textured",
+    "family": "Brick",
+    "previous": "Assets/Art/Environments/Town02/Textures/Brick_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Canvas.mat",
+    "name": "Town_Canvas",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Concrete.mat",
+    "name": "Town_Concrete",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Cream.mat",
+    "name": "Town_Cream",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_DarkOlive.mat",
+    "name": "Town_DarkOlive",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Dirt.mat",
+    "name": "Town_Dirt",
+    "status": "textured",
+    "family": "Earth",
+    "previous": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Edge.mat",
+    "name": "Town_Edge",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Glass.mat",
+    "name": "Town_Glass",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Ochre.mat",
+    "name": "Town_Ochre",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Olive.mat",
+    "name": "Town_Olive",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Paper.mat",
+    "name": "Town_Paper",
+    "status": "textured",
+    "family": "Paper",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Plaster.mat",
+    "name": "Town_Plaster",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Red.mat",
+    "name": "Town_Red",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Roof.mat",
+    "name": "Town_Roof",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Steel.mat",
+    "name": "Town_Steel",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/SurfaceDetail62/Textures/Steel_Base_v2.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_Wood.mat",
+    "name": "Town_Wood",
+    "status": "textured",
+    "family": "Wood",
+    "previous": "Assets/Art/SurfaceDetail62/Textures/Wood_Base_v2.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Materials/Town_WoodDark.mat",
+    "name": "Town_WoodDark",
+    "status": "textured",
+    "family": "Wood",
+    "previous": "Assets/Art/SurfaceDetail62/Textures/Wood_Base_v2.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Counter.mat",
+    "name": "Pawnshop_Counter",
+    "status": "textured",
+    "family": "Wood",
+    "previous": "Assets/Art/SurfaceDetail62/Textures/Wood_Base_v2.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Pawnshop_Floor.mat",
+    "name": "Pawnshop_Floor",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Home.mat",
+    "name": "Road_Home",
+    "status": "textured",
+    "family": "Asphalt",
+    "previous": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Link.mat",
+    "name": "Road_Link",
+    "status": "textured",
+    "family": "Asphalt",
+    "previous": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_Plaza.mat",
+    "name": "Road_Plaza",
+    "status": "textured",
+    "family": "Asphalt",
+    "previous": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Road_ShopFront.mat",
+    "name": "Road_ShopFront",
+    "status": "textured",
+    "family": "Asphalt",
+    "previous": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Rendering62/Town_Ground.mat",
+    "name": "Town_Ground",
+    "status": "textured",
+    "family": "Earth",
+    "previous": "Assets/Art/Environments/Town02/Textures/Asphalt_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Aggregate.mat",
+    "name": "Forecourt_Aggregate",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Asphalt.mat",
+    "name": "Forecourt_Asphalt",
+    "status": "textured",
+    "family": "Asphalt",
+    "previous": "Assets/Art/Environments/TownFinish62/Textures/Forecourt_Asphalt.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Seam.mat",
+    "name": "Forecourt_Seam",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Slab_0.mat",
+    "name": "Forecourt_Slab_0",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Slab_1.mat",
+    "name": "Forecourt_Slab_1",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/Forecourt_Slab_2.mat",
+    "name": "Forecourt_Slab_2",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Canvas.mat",
+    "name": "TownProps_Canvas",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Cardboard.mat",
+    "name": "TownProps_Cardboard",
+    "status": "textured",
+    "family": "Paper",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Wood_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_DirtSeam.mat",
+    "name": "TownProps_DirtSeam",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Edge.mat",
+    "name": "TownProps_Edge",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Linen.mat",
+    "name": "TownProps_Linen",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Cloth_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Paper.mat",
+    "name": "TownProps_Paper",
+    "status": "textured",
+    "family": "Paper",
+    "previous": "Assets/Art/Environments/Town02/Textures/Plaster_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Red.mat",
+    "name": "TownProps_Red",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Rust.mat",
+    "name": "TownProps_Rust",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/PaintedMetal_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Steel.mat",
+    "name": "TownProps_Steel",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/TownFinish62/Materials/TownProps_Wear.mat",
+    "name": "TownProps_Wear",
+    "status": "textured",
+    "family": "Metal",
+    "previous": "Assets/Art/Environments/Hideout02/Textures/Steel_Base.png"
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Architecture_Footing.mat",
+    "name": "Architecture_Footing",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Architecture_Plaster.mat",
+    "name": "Architecture_Plaster",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Architecture_Roof.mat",
+    "name": "Architecture_Roof",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Architecture_Wood.mat",
+    "name": "Architecture_Wood",
+    "status": "textured",
+    "family": "Wood",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Ground_Dirt.mat",
+    "name": "Ground_Dirt",
+    "status": "textured",
+    "family": "Earth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Ground_Road.mat",
+    "name": "Ground_Road",
+    "status": "textured",
+    "family": "Earth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Blanket.mat",
+    "name": "Village_Blanket",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Canvas.mat",
+    "name": "Village_Canvas",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Concrete.mat",
+    "name": "Village_Concrete",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_EdgeMetal.mat",
+    "name": "Village_EdgeMetal",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Glass.mat",
+    "name": "Village_Glass",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Grey.mat",
+    "name": "Village_Grey",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Ink.mat",
+    "name": "Village_Ink",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_LampGlow.mat",
+    "name": "Village_LampGlow",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Linen.mat",
+    "name": "Village_Linen",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_MapLine.mat",
+    "name": "Village_MapLine",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Olive.mat",
+    "name": "Village_Olive",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_OliveDark.mat",
+    "name": "Village_OliveDark",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_OliveLight.mat",
+    "name": "Village_OliveLight",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Paper.mat",
+    "name": "Village_Paper",
+    "status": "textured",
+    "family": "Paper",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Red.mat",
+    "name": "Village_Red",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Rubber.mat",
+    "name": "Village_Rubber",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Steel.mat",
+    "name": "Village_Steel",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Wear.mat",
+    "name": "Village_Wear",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_Wood.mat",
+    "name": "Village_Wood",
+    "status": "textured",
+    "family": "Wood",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_WoodDark.mat",
+    "name": "Village_WoodDark",
+    "status": "textured",
+    "family": "Wood",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/Village01/Materials/Village_WoodLight.mat",
+    "name": "Village_WoodLight",
+    "status": "textured",
+    "family": "Wood",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Base.mat",
+    "name": "Chest_Base",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_EdgeWear.mat",
+    "name": "Chest_EdgeWear",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Hardware.mat",
+    "name": "Chest_Hardware",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Inside.mat",
+    "name": "Chest_Inside",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Label.mat",
+    "name": "Chest_Label",
+    "status": "textured",
+    "family": "Paper",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_LabelEdge.mat",
+    "name": "Chest_LabelEdge",
+    "status": "textured",
+    "family": "Paper",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Lid.mat",
+    "name": "Chest_Lid",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Lid_facet0.mat",
+    "name": "Chest_Lid_facet0",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Lid_facet1.mat",
+    "name": "Chest_Lid_facet1",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Olive.mat",
+    "name": "Chest_Olive",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Olive_facet0.mat",
+    "name": "Chest_Olive_facet0",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Olive_facet1.mat",
+    "name": "Chest_Olive_facet1",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Props/StorageChest01/Materials/Chest_Pin.mat",
+    "name": "Chest_Pin",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_BatWood.mat",
+    "name": "Bandit_BatWood",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_boots.mat",
+    "name": "Bandit_boots",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff.mat",
+    "name": "Bandit_cuff",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff_Light.001.mat",
+    "name": "Bandit_cuff_Light.001",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff_Light.mat",
+    "name": "Bandit_cuff_Light",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff_Shade.001.mat",
+    "name": "Bandit_cuff_Shade.001",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_cuff_Shade.mat",
+    "name": "Bandit_cuff_Shade",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_ear.mat",
+    "name": "Bandit_ear",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hair.001.mat",
+    "name": "Bandit_hair.001",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hair.mat",
+    "name": "Bandit_hair",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hood.mat",
+    "name": "Bandit_hood",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hood_edge.mat",
+    "name": "Bandit_hood_edge",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hood_Light.mat",
+    "name": "Bandit_hood_Light",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_hood_Shade.mat",
+    "name": "Bandit_hood_Shade",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_ink.mat",
+    "name": "Bandit_ink",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_iris.mat",
+    "name": "Bandit_iris",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket.mat",
+    "name": "Bandit_jacket",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Light.001.mat",
+    "name": "Bandit_jacket_Light.001",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Light.002.mat",
+    "name": "Bandit_jacket_Light.002",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Light.mat",
+    "name": "Bandit_jacket_Light",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Shade.001.mat",
+    "name": "Bandit_jacket_Shade.001",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Shade.002.mat",
+    "name": "Bandit_jacket_Shade.002",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_jacket_Shade.mat",
+    "name": "Bandit_jacket_Shade",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_leather.mat",
+    "name": "Bandit_leather",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_mask.mat",
+    "name": "Bandit_mask",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_mask_Light.mat",
+    "name": "Bandit_mask_Light",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_mask_Shade.mat",
+    "name": "Bandit_mask_Shade",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_metal.mat",
+    "name": "Bandit_metal",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_mouth.mat",
+    "name": "Bandit_mouth",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_nose.mat",
+    "name": "Bandit_nose",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants.mat",
+    "name": "Bandit_pants",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants_Light.001.mat",
+    "name": "Bandit_pants_Light.001",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants_Light.mat",
+    "name": "Bandit_pants_Light",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants_Shade.001.mat",
+    "name": "Bandit_pants_Shade.001",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pants_Shade.mat",
+    "name": "Bandit_pants_Shade",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_patch.mat",
+    "name": "Bandit_patch",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_pupil.mat",
+    "name": "Bandit_pupil",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.001.mat",
+    "name": "Bandit_skin.001",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.002.mat",
+    "name": "Bandit_skin.002",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.003.mat",
+    "name": "Bandit_skin.003",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.004.mat",
+    "name": "Bandit_skin.004",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_skin.mat",
+    "name": "Bandit_skin",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_sole.mat",
+    "name": "Bandit_sole",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_Surface.mat",
+    "name": "Bandit_Surface",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_under.mat",
+    "name": "Bandit_under",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_white.mat",
+    "name": "Bandit_white",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/Bandit_wrap.mat",
+    "name": "Bandit_wrap",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/LookDev_Bandit_일반.mat",
+    "name": "LookDev_Bandit_일반",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/LookDev_Bandit_중장.mat",
+    "name": "LookDev_Bandit_중장",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Bandit01/Materials/LookDev_LampHolder.mat",
+    "name": "LookDev_LampHolder",
+    "status": "legacy-bandit"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Firearms/Gunmetal.mat",
+    "name": "Gunmetal",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/Firearms/Holster.mat",
+    "name": "Holster",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/SimpleBandit/Materials/SimpleBandit_Surface.mat",
+    "name": "SimpleBandit_Surface",
+    "status": "textured",
+    "family": "SimpleBandit",
+    "previous": "Assets/ChibiSurvivor/Bandit/SimpleBandit/Textures/SimpleBandit_BaseColor.png"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/SimpleBandit/Weapons/Materials/BanditClub_Surface.mat",
+    "name": "BanditClub_Surface",
+    "status": "textured",
+    "family": "BanditClub",
+    "previous": "Assets/ChibiSurvivor/Bandit/SimpleBandit/Weapons/Textures/BanditClub_BaseColor.png"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/DistrictWarden.mat",
+    "name": "DistrictWarden",
+    "status": "textured",
+    "family": "DistrictWarden",
+    "previous": "Assets/Art/SurfaceDetail62/Textures/DistrictWarden_BaseColor_v2.png"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/Pawnshop.mat",
+    "name": "Pawnshop",
+    "status": "textured",
+    "family": "Pawnshop",
+    "previous": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/Pawnshop/Pawnshop_BaseColor.png"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/VeteranScavenger.mat",
+    "name": "VeteranScavenger",
+    "status": "textured",
+    "family": "VeteranScavenger",
+    "previous": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/VeteranScavenger/VeteranScavenger_BaseColor.png"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/NPC/StoryNPC62/Materials/WanderingMerchant.mat",
+    "name": "WanderingMerchant",
+    "status": "textured",
+    "family": "WanderingMerchant",
+    "previous": "Assets/ChibiSurvivor/NPC/StoryNPC62/Textures/WanderingMerchant/WanderingMerchant_BaseColor.png"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+    "name": "Player_Painted",
+    "status": "approved-player"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/PlayerGear_Painted.mat",
+    "name": "PlayerGear_Painted",
+    "status": "approved-player"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_BatWood.mat",
+    "name": "Player_Bandit_BatWood",
+    "status": "textured",
+    "family": "Wood",
+    "previous": ""
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_wrap.mat",
+    "name": "Player_Bandit_wrap",
+    "status": "textured",
+    "family": "Cloth",
+    "previous": ""
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Gear.mat",
+    "name": "SimpleHero_Gear",
+    "status": "player-source"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SimpleHero_Surface.mat",
+    "name": "SimpleHero_Surface",
+    "status": "player-source"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SwordProxy.mat",
+    "name": "SwordProxy",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Resources/Materials/Ceiling.mat",
+    "name": "Ceiling",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Resources/Materials/Decal.mat",
+    "name": "Decal",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Resources/Materials/Floor.mat",
+    "name": "Floor",
+    "status": "textured",
+    "family": "Asphalt",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Resources/Materials/PlayerSprite.mat",
+    "name": "PlayerSprite",
+    "status": "intentional-flat"
+  },
+  {
+    "path": "Assets/Resources/Materials/Prop.mat",
+    "name": "Prop",
+    "status": "textured",
+    "family": "Metal",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Resources/Materials/Wall.mat",
+    "name": "Wall",
+    "status": "textured",
+    "family": "Plaster",
+    "previous": ""
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/BrokenPaving_A.fbx",
+    "name": "Ground62_Stone",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/13f47aad_Ground62_Stone.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/BrokenPaving_A.fbx",
+    "name": "Ground62_Soil",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/13f47aad_Ground62_Soil.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/BrokenPaving_A.fbx",
+    "name": "Ground62_ConcreteDark",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/13f47aad_Ground62_ConcreteDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/BrokenPaving_A.fbx",
+    "name": "Ground62_Concrete",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/13f47aad_Ground62_Concrete.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/BrokenPaving_B.fbx",
+    "name": "Ground62_Soil",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/d05f1f82_Ground62_Soil.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/BrokenPaving_B.fbx",
+    "name": "Ground62_Stone",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/d05f1f82_Ground62_Stone.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/BrokenPaving_B.fbx",
+    "name": "Ground62_ConcreteDark",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/d05f1f82_Ground62_ConcreteDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/BrokenPaving_B.fbx",
+    "name": "Ground62_Concrete",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/d05f1f82_Ground62_Concrete.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/CrackBranch_A.fbx",
+    "name": "Ground62_Stone",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/806d5680_Ground62_Stone.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/CrackBranch_B.fbx",
+    "name": "Ground62_Stone",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/acad5fca_Ground62_Stone.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/DirtGravel_Transition.fbx",
+    "name": "Ground62_Soil",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/51bb2c74_Ground62_Soil.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/DirtGravel_Transition.fbx",
+    "name": "Ground62_Stone",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/51bb2c74_Ground62_Stone.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/DirtGravel_Transition.fbx",
+    "name": "Ground62_DryDust",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/51bb2c74_Ground62_DryDust.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/WallWeeds_Dust.fbx",
+    "name": "Ground62_Stone",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/24944177_Ground62_Stone.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/GroundFinish62/Models/WallWeeds_Dust.fbx",
+    "name": "Ground62_Soil",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/24944177_Ground62_Soil.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/BlackMarket_Roof.fbx",
+    "name": "Town_Graphite",
+    "status": "external-remap",
+    "family": "Brick",
+    "target": "Assets/Art/WorldComic62/Materials/c1f74b91_Town_Graphite.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/BlackMarket_Roof.fbx",
+    "name": "Town_RoofDark",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/c1f74b91_Town_RoofDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/BlackMarket_Shell.fbx",
+    "name": "Town_Graphite",
+    "status": "external-remap",
+    "family": "Brick",
+    "target": "Assets/Art/WorldComic62/Materials/40402199_Town_Graphite.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Furniture_Roof.fbx",
+    "name": "Town_RoofWarm",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/c366020b_Town_RoofWarm.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Medical_Roof.fbx",
+    "name": "Town_Tile",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/326c45e4_Town_Tile.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Medical_Roof.fbx",
+    "name": "Town_Sage",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/326c45e4_Town_Sage.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Medical_Roof.fbx",
+    "name": "Town_RoofClean",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/326c45e4_Town_RoofClean.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Medical_Shell.fbx",
+    "name": "Town_Tile",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/099aab52_Town_Tile.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Medical_Shell.fbx",
+    "name": "Town_Sage",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/099aab52_Town_Sage.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/MerchantCart02.fbx",
+    "name": "Town_Canvas",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/07689ba8_Town_Canvas.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/MerchantCart02.fbx",
+    "name": "Town_WoodDark",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/07689ba8_Town_WoodDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/MerchantCart02.fbx",
+    "name": "Town_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/07689ba8_Town_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/MerchantCart02.fbx",
+    "name": "Town_Wood",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/07689ba8_Town_Wood.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Pawnshop_Roof.fbx",
+    "name": "Town_RoofDark",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/1d4d1c59_Town_RoofDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Pawnshop_Roof.fbx",
+    "name": "Town_RoofWarm",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/1d4d1c59_Town_RoofWarm.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/PerimeterPillar02.fbx",
+    "name": "Town_Concrete",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/0522f83b_Town_Concrete.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/PerimeterPillar02.fbx",
+    "name": "Town_Cream",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/0522f83b_Town_Cream.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/PerimeterPillar02.fbx",
+    "name": "Town_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/0522f83b_Town_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/PerimeterWall02.fbx",
+    "name": "Town_Cream",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/528a7c5a_Town_Cream.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/PerimeterWall02.fbx",
+    "name": "Town_Concrete",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/528a7c5a_Town_Concrete.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Planter02.fbx",
+    "name": "Town_DarkOlive",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/46885ff6_Town_DarkOlive.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Planter02.fbx",
+    "name": "Town_Dirt",
+    "status": "external-remap",
+    "family": "Earth",
+    "target": "Assets/Art/WorldComic62/Materials/46885ff6_Town_Dirt.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Planter02.fbx",
+    "name": "Town_Wood",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/46885ff6_Town_Wood.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Planter02.fbx",
+    "name": "Town_WoodDark",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/46885ff6_Town_WoodDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Planter02.fbx",
+    "name": "Town_Olive",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/46885ff6_Town_Olive.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/Repair_Roof.fbx",
+    "name": "Town_RoofWarm",
+    "status": "external-remap",
+    "family": "Plaster",
+    "target": "Assets/Art/WorldComic62/Materials/89cb1f6b_Town_RoofWarm.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/SpoolTable02.fbx",
+    "name": "Town_Wood",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/f4e257a3_Town_Wood.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/SpoolTable02.fbx",
+    "name": "Town_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/f4e257a3_Town_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/SpoolTable02.fbx",
+    "name": "Town_WoodDark",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/f4e257a3_Town_WoodDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/YardChair02.fbx",
+    "name": "Town_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/c5bd7dce_Town_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/Town02/Models/YardChair02.fbx",
+    "name": "Town_Olive",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/c5bd7dce_Town_Olive.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Bicycle02.fbx",
+    "name": "TownProps_Rust",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/071b6644_TownProps_Rust.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Bicycle02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/071b6644_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Bicycle02.fbx",
+    "name": "TownProps_Rubber",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/071b6644_TownProps_Rubber.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Bucket02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/c7e51917_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/CardboardStack02.fbx",
+    "name": "TownProps_Paper",
+    "status": "external-remap",
+    "family": "Paper",
+    "target": "Assets/Art/WorldComic62/Materials/27907ee6_TownProps_Paper.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/CardboardStack02.fbx",
+    "name": "TownProps_Cardboard",
+    "status": "external-remap",
+    "family": "Paper",
+    "target": "Assets/Art/WorldComic62/Materials/27907ee6_TownProps_Cardboard.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/CardboardStack02.fbx",
+    "name": "TownProps_Linen",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/27907ee6_TownProps_Linen.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Clothesline02.fbx",
+    "name": "TownProps_BlueCloth",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/85babe5c_TownProps_BlueCloth.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Clothesline02.fbx",
+    "name": "TownProps_Canvas",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/85babe5c_TownProps_Canvas.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Clothesline02.fbx",
+    "name": "TownProps_Wood",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/85babe5c_TownProps_Wood.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Clothesline02.fbx",
+    "name": "TownProps_WoodDark",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/85babe5c_TownProps_WoodDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Clothesline02.fbx",
+    "name": "TownProps_WoodFaded",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/85babe5c_TownProps_WoodFaded.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Clothesline02.fbx",
+    "name": "TownProps_Linen",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/85babe5c_TownProps_Linen.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Dumpster02.fbx",
+    "name": "TownProps_DarkOlive",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/6e04dfd7_TownProps_DarkOlive.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Dumpster02.fbx",
+    "name": "TownProps_Olive",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/6e04dfd7_TownProps_Olive.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Dumpster02.fbx",
+    "name": "TownProps_Paper",
+    "status": "external-remap",
+    "family": "Paper",
+    "target": "Assets/Art/WorldComic62/Materials/6e04dfd7_TownProps_Paper.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Dumpster02.fbx",
+    "name": "TownProps_Rubber",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/6e04dfd7_TownProps_Rubber.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Dumpster02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/6e04dfd7_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Dumpster02.fbx",
+    "name": "TownProps_Rust",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/6e04dfd7_TownProps_Rust.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/FireExtinguisher02.fbx",
+    "name": "TownProps_Paper",
+    "status": "external-remap",
+    "family": "Paper",
+    "target": "Assets/Art/WorldComic62/Materials/70ff0ea4_TownProps_Paper.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/FireExtinguisher02.fbx",
+    "name": "TownProps_Red",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/70ff0ea4_TownProps_Red.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/FireExtinguisher02.fbx",
+    "name": "TownProps_Rubber",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/70ff0ea4_TownProps_Rubber.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/FireExtinguisher02.fbx",
+    "name": "TownProps_Wear",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/70ff0ea4_TownProps_Wear.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/FireExtinguisher02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/70ff0ea4_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/FoldedTarp02.fbx",
+    "name": "TownProps_Canvas",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/b41929f7_TownProps_Canvas.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/GarbageBags02.fbx",
+    "name": "TownProps_Canvas",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/f88185bd_TownProps_Canvas.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/GarbageBags02.fbx",
+    "name": "TownProps_BagPlastic",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/f88185bd_TownProps_BagPlastic.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/JunctionBox02.fbx",
+    "name": "TownProps_Glass",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/ba59b691_TownProps_Glass.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/JunctionBox02.fbx",
+    "name": "TownProps_Olive",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/ba59b691_TownProps_Olive.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/JunctionBox02.fbx",
+    "name": "TownProps_Paper",
+    "status": "external-remap",
+    "family": "Paper",
+    "target": "Assets/Art/WorldComic62/Materials/ba59b691_TownProps_Paper.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/JunctionBox02.fbx",
+    "name": "TownProps_Wear",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/ba59b691_TownProps_Wear.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/JunctionBox02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/ba59b691_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Ladder02.fbx",
+    "name": "TownProps_WoodDark",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/c861e5ff_TownProps_WoodDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Ladder02.fbx",
+    "name": "TownProps_WoodFaded",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/c861e5ff_TownProps_WoodFaded.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Ladder02.fbx",
+    "name": "TownProps_WoodWarm",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/c861e5ff_TownProps_WoodWarm.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Ladder02.fbx",
+    "name": "TownProps_Wood",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/c861e5ff_TownProps_Wood.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/LaundryBasket02.fbx",
+    "name": "TownProps_BlueCloth",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/f902e4c0_TownProps_BlueCloth.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/LaundryBasket02.fbx",
+    "name": "TownProps_Canvas",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/f902e4c0_TownProps_Canvas.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/LaundryBasket02.fbx",
+    "name": "TownProps_Linen",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/f902e4c0_TownProps_Linen.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/OutdoorStove02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/96402951_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/OutdoorStove02.fbx",
+    "name": "TownProps_Rubber",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/96402951_TownProps_Rubber.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/PatchBarricade02.fbx",
+    "name": "TownProps_Linen",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/ed46c2bf_TownProps_Linen.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/PatchBarricade02.fbx",
+    "name": "TownProps_Olive",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/ed46c2bf_TownProps_Olive.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/PatchBarricade02.fbx",
+    "name": "TownProps_Wood",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/ed46c2bf_TownProps_Wood.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/PatchBarricade02.fbx",
+    "name": "TownProps_WoodDark",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/ed46c2bf_TownProps_WoodDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/PatchBarricade02.fbx",
+    "name": "TownProps_WoodFaded",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/ed46c2bf_TownProps_WoodFaded.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/PatchBarricade02.fbx",
+    "name": "TownProps_Canvas",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/ed46c2bf_TownProps_Canvas.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/PatchBarricade02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/ed46c2bf_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/PatchBarricade02.fbx",
+    "name": "TownProps_WoodWarm",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/ed46c2bf_TownProps_WoodWarm.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/RopeCoil02.fbx",
+    "name": "TownProps_Canvas",
+    "status": "external-remap",
+    "family": "Cloth",
+    "target": "Assets/Art/WorldComic62/Materials/f80683b5_TownProps_Canvas.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/ScrapHeap02.fbx",
+    "name": "TownProps_Rubber",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/639e200f_TownProps_Rubber.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/ScrapHeap02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/639e200f_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/ScrapHeap02.fbx",
+    "name": "TownProps_WoodDark",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/639e200f_TownProps_WoodDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/ScrapHeap02.fbx",
+    "name": "TownProps_Olive",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/639e200f_TownProps_Olive.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Toolbox02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/d63a5113_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Toolbox02.fbx",
+    "name": "TownProps_Wear",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/d63a5113_TownProps_Wear.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Toolbox02.fbx",
+    "name": "TownProps_Paper",
+    "status": "external-remap",
+    "family": "Paper",
+    "target": "Assets/Art/WorldComic62/Materials/d63a5113_TownProps_Paper.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Toolbox02.fbx",
+    "name": "TownProps_Rust",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/d63a5113_TownProps_Rust.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/Toolbox02.fbx",
+    "name": "TownProps_Red",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/d63a5113_TownProps_Red.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/UtilitySink02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/c6bfac66_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/UtilitySink02.fbx",
+    "name": "TownProps_Rust",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/c6bfac66_TownProps_Rust.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/WaterBarrelStand02.fbx",
+    "name": "TownProps_Red",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/5cedb4cd_TownProps_Red.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/WaterBarrelStand02.fbx",
+    "name": "TownProps_Steel",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/5cedb4cd_TownProps_Steel.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/WaterBarrelStand02.fbx",
+    "name": "TownProps_WoodDark",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/5cedb4cd_TownProps_WoodDark.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/WaterBarrelStand02.fbx",
+    "name": "TownProps_WoodFaded",
+    "status": "external-remap",
+    "family": "Wood",
+    "target": "Assets/Art/WorldComic62/Materials/5cedb4cd_TownProps_WoodFaded.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/WaterBarrelStand02.fbx",
+    "name": "TownProps_Blue",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/5cedb4cd_TownProps_Blue.mat"
+  },
+  {
+    "path": "Assets/Art/Environments/TownProps02/Models/WaterBarrelStand02.fbx",
+    "name": "TownProps_Wear",
+    "status": "external-remap",
+    "family": "Metal",
+    "target": "Assets/Art/WorldComic62/Materials/5cedb4cd_TownProps_Wear.mat"
+  },
+  {
+    "path": "Assets/ChibiSurvivor/Bandit/SimpleBandit/Weapons/BanditClub.fbx",
+    "name": "BanditClub_Surface",
+    "status": "external-remap",
+    "family": "BanditClub",
+    "target": "Assets/Art/WorldComic62/Materials/f49f4aa7_BanditClub_Surface.mat"
+  }
+]

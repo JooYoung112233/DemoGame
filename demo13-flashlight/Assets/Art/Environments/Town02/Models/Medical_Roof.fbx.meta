@@ -82,8 +82,23 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Town_RoofClean
+    second: {fileID: 2100000, guid: 8862d1a7441f4014a8d9c76c7e543b48, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Sage
+    second: {fileID: 2100000, guid: b136d7c1e9671d54d9462837071707f1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Town_Steel
     second: {fileID: 2100000, guid: b9722c56626149846bd5de812b1d2d1d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Town_Tile
+    second: {fileID: 2100000, guid: 96989c1c8d8f79a4687cc5e8a2292dc3, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

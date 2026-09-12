@@ -1,0 +1,80 @@
+{
+  "newColliderCount": 29,
+  "oversized": [],
+  "overlaps": [],
+  "selfOverlaps": [],
+  "lanes": [
+    {
+      "point": [
+        12.0,
+        0.6,
+        36.5
+      ],
+      "blockedBy": []
+    },
+    {
+      "point": [
+        34.0,
+        0.6,
+        35.0
+      ],
+      "blockedBy": []
+    },
+    {
+      "point": [
+        64.0,
+        0.6,
+        36.5
+      ],
+      "blockedBy": []
+    },
+    {
+      "point": [
+        22.0,
+        0.6,
+        27.0
+      ],
+      "blockedBy": []
+    },
+    {
+      "point": [
+        22.0,
+        0.6,
+        10.0
+      ],
+      "blockedBy": []
+    },
+    {
+      "point": [
+        51.0,
+        0.6,
+        12.0
+      ],
+      "blockedBy": []
+    }
+  ],
+  "missingScripts": 0,
+  "errorShaders": [],
+  "untexturedActive": [
+    {
+      "name": "Ground62_Grass",
+      "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_Grass.mat"
+    },
+    {
+      "name": "Ground62_DryGrass",
+      "path": "Assets/Art/Environments/GroundFinish62/Materials/Ground62_DryGrass.mat"
+    },
+    {
+      "name": "Spike/OccluderFX",
+      "path": ""
+    },
+    {
+      "name": "Village_LampGlow",
+      "path": "Assets/Art/Environments/Village01/Materials/Village_LampGlow.mat"
+    },
+    {
+      "name": "Village_MapLine",
+      "path": "Assets/Art/Environments/Village01/Materials/Village_MapLine.mat"
+    }
+  ]
+}
