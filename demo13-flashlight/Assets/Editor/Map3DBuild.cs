@@ -44,12 +44,6 @@ public static class Map3DBuild
         }
     }
 
-    [MenuItem("Tools/TopDown/빌드3D/실내 전체(15씬)", priority = -80)]
-    public static void BuildInteriorsAll() => In3D(Zone1Interiors.BuildAll, Greybox3D.Indoor, 1f, Lighting3D.Preset.Indoor);
-
-    [MenuItem("Tools/TopDown/빌드3D/실내 · 약국", priority = -79)]
-    public static void BuildPharmacy() => In3D(Zone1Interiors.BuildPharmacy, Greybox3D.Indoor, 1f, Lighting3D.Preset.Indoor);
-
     [MenuItem("Tools/TopDown/빌드3D/고철시장", priority = -70)]
     public static void BuildScrapMarket() => In3D(ScrapMarketGreyboxLayout.Build, Greybox3D.Default, OutdoorScale);
 

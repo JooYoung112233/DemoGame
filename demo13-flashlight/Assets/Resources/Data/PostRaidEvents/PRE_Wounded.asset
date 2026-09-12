@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dac2823edea3b042983bfa365e4c42a, type: 3}
+  m_Name: PRE_Wounded
+  m_EditorClassIdentifier: Game.Scripts::PostRaidEventData
+  eventId: evt_wounded
+  title: "부상자 발견"
+  description: "건물 잔해 사이에서 신음 소리가 들린다. 다리에 피를 흘리는 사람이 보인다."
+  choices:
+  - text: "의료품으로 치료한다"
+    resultText: "붕대를 감아 주자 그가 떨리는 손으로 고개를 숙였다. 베테랑 회수꾼 쪽 사람이라고 했다."
+    rewards:
+    - type: 4
+      itemId:
+      amount: 3
+      npcId: veteran_scavenger
+    penalties:
+    - type: 3
+      amount: 1
+      itemId: bandage
+  - text: "물자를 주고 떠난다"
+    resultText: "통조림 하나를 곁에 두고 자리를 떴다."
+    rewards:
+    - type: 3
+      itemId:
+      amount: 1
+      npcId: veteran_scavenger
+    penalties:
+    - type: 3
+      amount: 1
+      itemId: canned_food
+  - text: "무시한다"
+    resultText: "신음 소리를 뒤로하고 걸었다."
+    rewards: []
+    penalties: []
+  conditions:
+    minRaidTime: 0
+    requiredRegion:
+    minLootCount: 0
+    nightOnly: 0
+  weight: 1
+  oneShot: 0

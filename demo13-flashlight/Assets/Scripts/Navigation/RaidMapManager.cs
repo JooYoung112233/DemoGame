@@ -214,8 +214,4 @@ public class RaidMapManager : MonoBehaviour
         if (KnownPassageSet(CurrentRegionId).Add(passageId))
             OnMapChanged?.Invoke();
     }
-
-    // ── 세이브 훅(스텁) ──
-    // TODO(SaveManager 연동): _discoveredByRegion / _knownPassagesByRegion 직렬화·복원.
-    //   영속 대상은 '고정 요소'(구역 발견 + 잠김 통로)뿐. 확률 막힘은 저장 안 함.
 }

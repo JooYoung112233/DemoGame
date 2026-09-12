@@ -30,6 +30,10 @@ public class PostRaidEventManager : MonoBehaviour
         }
         Instance = this;
         HierarchyFolder.Persist(gameObject);
+
+        // Systems 씬에 등록된 이벤트가 없으면 Resources의 이벤트 데이터를 쓴다(2026-09-12 — 예시 3종, post-raid-event.md §4).
+        if (allEvents == null || allEvents.Length == 0)
+            allEvents = Resources.LoadAll<PostRaidEventData>("Data/PostRaidEvents");
     }
 
     void OnDestroy()

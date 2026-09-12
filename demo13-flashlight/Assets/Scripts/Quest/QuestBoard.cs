@@ -13,7 +13,7 @@ using UnityEngine;
 ///    수집·납품형 보고 = 보유 검사 + 원자 차감(OwnedItems.TryRemove) 후 완료.
 ///    처치형 보고 = QuestManager 목표(ReadyToReport) 게이트.
 ///  - 회전 풀 자동 게이트: 목표 itemId/unitKey가 실존하는 의뢰만 노출(탐색형=POI 시스템 전 제외).
-///  - 오늘 완료 슬롯은 소진(런타임 전용 — 재시작 시 재노출되나 반복 의뢰라 무해. 위탁/수배 원칙).
+///  - 오늘 완료 슬롯은 소진(세이브에 저장 — 2026-09-12, 재시작해도 다시 안 뜸).
 /// </summary>
 public static class QuestBoard
 {
@@ -42,6 +42,26 @@ public static class QuestBoard
         today.Clear();
         doneToday.Clear();
         rolledDay = -1;
+    }
+
+    // ── 세이브 (2026-09-12 — 전당포 의뢰와 저장 방식 통일, quests-region1.md §9.3) ──
+    // 오늘 완료한 게시판 의뢰를 저장한다. 날짜가 바뀐 세이브면 버린다(오늘 게시 목록은 일자 시드라 저장할 필요 없음).
+    [Serializable]
+    public class BoardSaveData
+    {
+        public int day;
+        public List<string> doneToday = new List<string>();
+    }
+
+    public static BoardSaveData GetSaveData()
+        => new BoardSaveData { day = TodayStamp, doneToday = new List<string>(doneToday) };
+
+    public static void LoadSaveData(BoardSaveData d)
+    {
+        ResetRuntime();
+        if (d == null || d.doneToday == null || d.day != TodayStamp) return;
+        foreach (var id in d.doneToday) doneToday.Add(id);
+        rolledDay = d.day;   // 같은 날 — EnsureToday가 완료 기록을 지우지 않고 오늘 목록만 다시 뽑는다
     }
 
     // ═══════════════════════════

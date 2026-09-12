@@ -318,12 +318,7 @@ public class TraitManager : MonoBehaviour
     //  세이브/로드 (ReputationManager / NPCRelationshipManager 패턴)
     // ═══════════════════════════
     //
-    // TODO(말단 배선 — SaveManager 훅): SaveManager.BuildSaveData()/Load()에 아래 한 쌍을 추가하면 영속화 완성.
-    //   저장:  if (TraitManager.Instance != null) data.traits = TraitManager.Instance.GetSaveData();
-    //   로드:  if (TraitManager.Instance != null && data.traits != null)
-    //              TraitManager.Instance.LoadSaveData(data.traits);
-    //   그리고 GameSaveData에  public TraitSaveData traits;  필드 추가.
-    //   (이번 작업은 기존 SaveManager/GameSaveData를 수정하지 않으므로 구조체만 제공하고 배선은 TODO로 남김.)
+    // 저장/로드는 SaveManager가 아래 두 메서드로 한다(GameSaveData.traits).
 
     /// <summary>현재 상태 → 직렬화 구조체.</summary>
     public TraitSaveData GetSaveData()
@@ -354,7 +349,7 @@ public class TraitManager : MonoBehaviour
     }
 }
 
-/// <summary>특성 세이브 구조체. GameSaveData에 필드로 얹는다(배선 TODO).</summary>
+/// <summary>특성 세이브 구조체 — GameSaveData.traits.</summary>
 [System.Serializable]
 public class TraitSaveData
 {

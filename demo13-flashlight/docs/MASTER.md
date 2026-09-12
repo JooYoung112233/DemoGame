@@ -182,7 +182,7 @@
 | [`3d-migration.md`](3d-migration.md) | ⭐ **3D 쿼터뷰 전환 계획 SSOT** — 결정 4건(완전 3D·오소 고정 쿼터뷰·단차/엄폐·아트 전부 3D) + 2D 결합 실측(66,933 LOC 중 32%, Rigidbody2D 9파일·Physics2D 10곳) + 유지/교체/신규 표 + Stage 0~5 + 리스크·미결 | **Stage 0~4 완료 (2026-09-09)**, Stage 5(2D 잔재 삭제) 남음 |
 | [`topdown-migration.md`](topdown-migration.md) | **아이소 → 탑다운 2D 전환** 배경·유지/제거/신규 목록·단계 계획 | 기록 (2D 시절 — 이후 3D로 재전환) |
 | [`rendering.md`](rendering.md) | **현 구현 = 3D** — URP 3D(Forward)·오소 카메라 62°·게임 전용 셰이더 `BRB/GameLit`·후처리·착용등. 2026-09-11 마을 분위기 보정: 낮 색감/Volume·실용등 낮밤 분리, 밋밋함 피드백 후 밤 중간 명암·전당포 입구 초점/그림자 보완. 저장·재실행 자체 검수. 그 아래 URP 2D·Light2D·Tilemap 본문은 2D 시절 기록 | 구현 (3D) · 마을 분위기 자체 검수 완료 |
-| [`destructible.md`](destructible.md) | 파괴 가능 오브젝트 — `Breakable` + `BRB/DamageOverlay`(오버레이라 전 셰이더 호환), 단계별 부서짐→파괴, Health 자동 연동 | ⚠️ 2D 시절 구현 — `BRB/DamageOverlay` 셰이더가 없어 오버레이 미동작, 3D 미이식 |
+| [`destructible.md`](destructible.md) | 파괴 가능 오브젝트 — `Breakable` + `BRB/DamageOverlay`(오버레이라 전 셰이더 호환), 단계별 부서짐→파괴, Health 자동 연동 | 단계·파괴 로직만 — 균열 오버레이(`BRB/DamageOverlay`)는 2026-09-12 제거 |
 | [`topdown-art-spec.md`](topdown-art-spec.md) | AI 이미지 생성 스펙 — near-overhead 시점, 마젠타 배경, 플랫 라이팅, 엔진 조명값 | 작성 완료 |
 
 ### 🔧 맵 도구
@@ -200,7 +200,7 @@
 Systems (영속 부트 씬 — 매니저·UI·PlayerRig. 항상 여기서 Play)
   → Safehouse (= 마을, 걸어다니는 안전구역) ↔ Hideout(은신처 방) · Pawnshop(전당포 실내)
     → MapSelectUI (지역 선택)
-      → Zone1 (지역1 레이드, 20분 제한) · Int_* 실내 15씬(건물 문으로 전환)
+      → Zone1 (지역1 레이드, 20분 제한) — 실내는 맵 안에서 걸어 들어간다(옛 `Int_*` 실내 15씬은 2026-09-12 삭제)
         → 탈출 성공 → PostRaidEvent (40% 확률)
           → RaidResultUI (정산) → 마을 복귀
 ```

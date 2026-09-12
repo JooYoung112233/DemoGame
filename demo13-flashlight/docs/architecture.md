@@ -17,7 +17,7 @@
  ├─ DayNightCycle(태양·앰비언트 — WeatherData) + SystemsSceneEnforcer(2D 시절 글로벌 조명 중복 정리 — 잔재)
  └─ GameBoot
         └─ additive ─┐
-   [Safehouse(=마을)] / [Hideout] / [Pawnshop] / [Zone1] / [Int_*]  ← 여기만 교체 로드
+   [Safehouse(=마을)] / [Hideout] / [Pawnshop] / [Zone1]  ← 여기만 교체 로드 (옛 `Int_*` 실내 씬은 2026-09-12 삭제)
      (맵 / 프롭 / 스폰포인트 / 인터랙터블만)
 ```
 
@@ -59,7 +59,7 @@ Systems 미빌드 시엔 기존 단일(Single) 로드 + DontDestroyOnLoad로 폴
 | `Interaction/SceneTransitionManager.cs` | additive 교체 로드(Systems 유지)로 변경 |
 
 ### 게임플레이 씬 = 맵 콘텐츠 전용
-Safehouse(마을) / Hideout / Pawnshop / Zone1 / Int_* 등 게임플레이 씬은 **시스템 오브젝트를 두지 않는다**
+Safehouse(마을) / Hideout / Pawnshop / Zone1 등 게임플레이 씬은 **시스템 오브젝트를 두지 않는다**
 (카메라/EventSystem/매니저/플레이어는 전부 Systems가 공급). 게임플레이 씬엔 **맵 콘텐츠만**:
 3D 지오메트리, SpawnPoint, 프롭, 인터랙터블, 탈출존, 씬별 마커, 맵 태양.
 3D 맵은 빌더가 만든다(`Zone1GreyboxLayout`·`Map3DBuild`·`Safehouse3DLayout`·`Hideout3DLayout` 등).
@@ -122,7 +122,7 @@ Safehouse(마을) / Hideout / Pawnshop / Zone1 / Int_* 등 게임플레이 씬�
 ### 구조
 
 ```
-[맵 씬 — Zone1 · Int_* · Safehouse · Hideout · ScrapMarket · Pawnshop]
+[맵 씬 — Zone1 · Safehouse · Hideout · ScrapMarket · Pawnshop]
 Map
 ├─ Environment      지형 — 콜라이더·메시뿐인 것, 컴포넌트 없는 묶음(아트 킷 등)
 │   ├─ Ground          바닥·도로면 (Floor/Ground/Road/LotF…)

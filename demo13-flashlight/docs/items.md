@@ -337,7 +337,7 @@
 | P0 | `key_rusty` | 녹슨 열쇠 | 1×1 | Common | 잠긴 상자 기본 |
 | P1 | `key_warehouse` | 창고 열쇠 | 1×1 | Uncommon | 지역 고정 스폰 |
 | P1 | `key_rooftop` | 옥상 열쇠 | 1×1 | Uncommon | 조건 탈출구 |
-| P1 | `key_police_armory` | 경찰서 무기고 열쇠 | 1×1 | Uncommon | `Int_Police` 무기고 문. 경찰서 실내 루팅(`int_police` 가중치 2, 가안). ✅ SO `Key/KeyPoliceArmory.asset`(2026-09-12) |
+| P1 | `key_police_armory` | 경찰서 무기고 열쇠 | 1×1 | Uncommon | 경찰서 건물·건물 안 문 열쇠 — 걸어 들어가는 건물 작업 때 문에 연결할 예정. **현재 획득처 없음**(2026-09-12 실내 씬·경찰서 실내 루팅표 삭제). ✅ SO `Key/KeyPoliceArmory.asset` |
 | P1 | `note_scrap` | 낡은 쪽지 | 1×1 | Common | 상호작용만, 인벤 불필요(오브젝트) |
 | P1 | `map_fragment` | 지도 조각 | 1×2 | Rare | 루디 위치 후보 표시 |
 | P2 | `code_paper` | 암호 메모 | 1×1 | Uncommon | 금고 비밀번호 |
@@ -630,6 +630,7 @@ Unity 재생 시 **202종** 아이템 + **10종** `RecipeData` (`Data/Recipes/`)
 
 | 날짜 | 내용 |
 |---|---|
+| 2026-09-12 | **`key_police_armory` 유지.** 질문: `Int_*` 실내 씬 삭제로 무기고 문과 경찰서 실내 루팅표가 사라져 열쇠를 쓸 곳·얻을 곳이 없어진다 — 열쇠도 삭제 / 아이템만 남기기. **결정(사용자): "건물 자체를 문 열고 들어가거나 건물 안에서 문 열게 할 거라 열쇠 있어야 해" → 아이템 유지.** 얻는 곳과 여는 문은 걸어 들어가는 건물 작업 때 정한다. |
 | 2026-09-12 | **배터리(`battery_aa`) 사용 효과 제거 → 재료·판매용.** 질문: 손전등(`FlashlightController`)이 씬 어디에도 없어 배터리 '사용'이 효과 0("충전할 손전등이 없다")이다 — 사용 효과 빼고 재료·판매용 / 몸에 찬 등(`WornLamp`)에 배터리 개념 추가 / 배터리 아이템 제거. **결정: 사용 효과 빼고 재료·판매용**(사용자 선택). `Battery.asset` isUsable 0·useEffect None, 죽은 손전등 참조 코드와 `FlashlightController` 삭제. `ItemUseEffect.AddBattery`는 SO 인덱스 보존용으로 enum에만 남김. |
 | 2026-09-12 | **스토리 랜턴 보상(`lantern_basic`) 삭제.** 질문: ch1 S-013 베테랑 보상 `give_item lantern_basic` — 아이템도 랜턴 기능도 없어 지급이 로그 없이 무시되고 플래그만 켜진다 — 보상 줄 삭제 / 다른 기존 아이템으로 교체 / 새 아이템 추가. **결정: 보상 줄 삭제**(사용자 선택). 대사와 `veteran_lantern_given` 플래그는 유지. §2의 `lantern_basic` 행은 미제작 기획으로 남는다. |
 | 2026-09-12 | **`key_police_armory`(경찰서 무기고 열쇠) 신설.** 질문: `Int_Police` 무기고 문(`BlockedPassage` Locked)이 요구하는 열쇠 아이템이 없어 강제 돌파로만 열린다 — 실내 결정 때 같이 / 열쇠 만들고 경찰서 루팅에 넣기 / 열쇠 요구 없애기. **결정: 열쇠 만들고 경찰서 루팅에 넣기**(사용자 선택). Key 카테고리 · Uncommon · 0.05kg · 거래 불가(buy/sell 0, 다른 열쇠와 같음) — **수치 가안**. `loot_tables.txt` `int_police` 가중치 2(가안). ⚠️ 실내 씬은 아직 들어갈 문이 없다(실내 처리 결정 대기). §8 표에 추가. |

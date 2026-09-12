@@ -91,14 +91,7 @@ tier 칸 = 상자 종류(`LootContainer.lootKind`). **지금은 `scrap_market`�
 | `safe` | 금고 — 예산과 무관하게 늘 채움 | 2 | ◈ |
 | `ground` | 바닥 | 1 | |
 | `corpse` | 시체 (+ 시체 가방 속) | 2 | 유닛별 `cashMin/cashMax`로 따로 |
-| `int_shop` | 실내: 폐가게·붕괴 쇼핑몰·세탁소·골목 상점·공용 | 2 | |
-| `int_food` | 실내: 식당 | 2 | |
-| `int_medical` | 실내: 약국 | 2 | |
-| `int_tools` | 실내: 차고·창고·철물점 | 2 | |
-| `int_electronics` | 실내: 컴퓨터가게 | 2 | |
-| `int_police` | 실내: 경찰서 | 2 | |
-| `int_jewelry` | 실내: 보석상 | 2 | |
-| `int_basement` | 실내: 짙은현상 지하·돔 | 2 | |
+| ~~`int_*` 8종~~ | 실내(폐가게·식당·약국·공구·컴퓨터·경찰서·보석상·지하) — **2026-09-12 `Int_*` 실내 씬과 함께 삭제**([building-interior.md](building-interior.md)) | | |
 
 ### 2.3 표 찾는 순서 — `RegionLootCatalog.TryFindPool`
 
@@ -249,6 +242,7 @@ tier 칸 = 상자 종류(`LootContainer.lootKind`). **지금은 `scrap_market`�
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-09-12 | **실내 루팅표 `int_*` 8종 삭제** — `Int_*` 실내 씬 삭제 결정([building-interior.md](building-interior.md))에 따라. 같은 날 넣었던 `key_police_armory`(int_police 가중치 2)도 함께 빠졌고, 열쇠 아이템은 유지([items.md](items.md)). |
 | 2026-09-12 | `loot_tables.txt` `int_police`(경찰서 실내)에 `key_police_armory`(경찰서 무기고 열쇠) 가중치 2 추가(가안) — `Int_Police` 무기고 문 열쇠. 결정은 [items.md 변경 로그](items.md). |
 | 2026-05-25 | 7지구 지역 전용 아이템 14종·`region_loot.csv` 드롭 테이블·`RegionLootCatalog`·ItemSpawnPoint 연동. (현재: 5지역 — 2026-06-11 병합. ItemSpawnPoint 연동은 2026-09-11 앵커로 대체) |
 | 2026-05-26 | **맵 스폰 컨트롤러 구현.** MapSpawnProfile(SO) + MapSpawnController(씬). 총량 예산·희귀도 분포·카테고리 쿼터·낮밤 보정. 7개 지역 프리셋 자동 생성(Tools > Dev Tools > Data > Generate Map Spawn Profiles). ItemSpawnPoint에 managedByController 가드 추가. (현재: 프로파일 에셋 5개(5지역), 씬이 쓰는 건 `scrap_market.asset`뿐. 생성 메뉴는 현존하지 않음. 희귀도·카테고리는 2026-09-11 폐기) |

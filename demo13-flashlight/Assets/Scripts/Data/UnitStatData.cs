@@ -83,19 +83,25 @@ public class UnitStatData
     //  (docs/combat.md §무기 구성 결정). 여기엔 적 전용 값만: 피해·탄속 배율, 조준 경고·사격 주기·교전 거리, 점사·정확도.
     [Header("원거리 (총 = WeaponData, 비우면 근접)")]
     [Tooltip("이 적이 쓰는 총 — 플레이어와 같은 WeaponData. 비우면 근접 유닛. 채우면 조준 경고 후 실제 Projectile을 쏜다.\n"
-           + "이때 attackRange=사격 사거리, attackWindup=조준 경고 시간, attackSpeed=사격 주기. 모델은 총 종류(firearmStance)로 고른다.")]
+           + "이때 사거리·연사·퍼짐 = WeaponData × 아래 배율, attackWindup=조준 경고 시간. 모델은 총 종류(firearmStance)로 고른다.")]
     public WeaponData rangedWeaponData;
     [Tooltip("총 피해 배율 — 탄 1발 = WeaponData.damage × 이 값.")]
     public float rangedDamageMult = 1f;
     [Tooltip("탄속 배율 — WeaponData.projectileSpeed × 이 값. 적 탄은 느리게 해서 보고 피할 수 있게.")]
     public float rangedBulletSpeedMult = 0.4f;
+    [Tooltip("사거리 배율 — WeaponData.effectiveRange × 이 값 = 적 사격 사거리(m). 2026-09-12 총 수치 통합 마무리.")]
+    public float rangedRangeMult = 1f;
+    [Tooltip("연사 배율 — (WeaponData.rpm / 60) × 이 값 = 적 초당 사격 횟수. 적은 플레이어보다 훨씬 드물게 쏜다.")]
+    public float rangedRateMult = 1f;
+    [Tooltip("퍼짐 배율 — WeaponData.hipSpreadDeg × 이 값 = 적 탄 퍼짐 ±각도(도).")]
+    public float rangedSpreadMult = 1f;
     [Tooltip("사선이 트이면 이 거리까지만 다가가 멈춰 선다(m). attackRange보다 짧게.")]
     public float preferredRange = 6f;
     [Tooltip("한 번 사격에 나가는 탄 수(권총 1, 소총 3점사).")]
     [Min(1)] public int burstCount = 1;
     [Tooltip("점사 탄 사이 간격(초).")]
     public float burstInterval = 0.12f;
-    [Tooltip("탄 퍼짐 ±각도(도).")]
+    [Tooltip("(총이 없을 때만) 탄 퍼짐 ±각도(도). 총을 쥐면 WeaponData.hipSpreadDeg × rangedSpreadMult.")]
     public float spreadDeg = 3f;
 
     // ===== 보상 =====

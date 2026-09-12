@@ -162,6 +162,9 @@ MonoBehaviour:
     rangedWeaponData: {fileID: 11400000, guid: 9f10a2b3c4d5e6f708192a3b4c5d6e7f, type: 2}
     rangedDamageMult: 0.64285713
     rangedBulletSpeedMult: 0.3809524
+    rangedRangeMult: 0.64285713
+    rangedRateMult: 0.09375
+    rangedSpreadMult: 0.375
     preferredRange: 6.5
     burstCount: 1
     burstInterval: 0.12
@@ -218,6 +221,9 @@ MonoBehaviour:
     rangedWeaponData: {fileID: 11400000, guid: 0dcb09b2aa62b104ab24a6deeb38ca9e, type: 2}
     rangedDamageMult: 0.5
     rangedBulletSpeedMult: 0.4
+    rangedRangeMult: 0.6
+    rangedRateMult: 0.038
+    rangedSpreadMult: 0.625
     preferredRange: 9
     burstCount: 3
     burstInterval: 0.4

@@ -196,6 +196,9 @@ public class SaveManager : MonoBehaviour
             data.dailyQuest = DailyQuestManager.Instance.GetSaveData();
         }
 
+        // 게시판 의뢰(BD) 오늘 완료 — 전당포 의뢰와 같이 세이브에 남긴다(2026-09-12)
+        data.questBoard = QuestBoard.GetSaveData();
+
         // 튜토리얼
         if (TutorialPrompt.Instance != null)
         {
@@ -339,9 +342,8 @@ public class SaveManager : MonoBehaviour
         // 위탁(전당포) 슬롯
         ShopUI.LoadConsignSave(data.consignSlots);
 
-        // 아르바이트 보드 — 런타임 전용 상태라 로드 시 초기화(슬롯 간 이월 방지)
-        // 의뢰 게시판(BD) — 동일 원칙 (오늘의 의뢰는 일자 시드라 재추첨돼도 같은 2장)
-        QuestBoard.ResetRuntime();
+        // 의뢰 게시판(BD) — 오늘 게시 목록은 일자 시드라 재추첨돼도 같은 2장, 오늘 완료는 세이브에서 복원(2026-09-12)
+        QuestBoard.LoadSaveData(data.questBoard);
 
         // 도감 발견 기록 — ★반드시 플레이어 격자 복원(아래)보다 먼저.
         // 격자 복원은 TryPlace를 타 OnItemPlaced(도감 발견 훅)를 발화시키는데, 발견 set이 먼저 채워져 있어야
@@ -657,6 +659,9 @@ public class GameSaveData
 
     // 일일 의뢰
     public DailyQuestManager.DailyQuestSaveData dailyQuest;
+
+    // 게시판 의뢰(BD) 오늘 완료 (2026-09-12)
+    public QuestBoard.BoardSaveData questBoard;
 
     // 튜토리얼
     public List<string> shownTutorials = new List<string>();

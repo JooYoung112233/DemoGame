@@ -1136,7 +1136,6 @@ public class Prop2DCatalogEditor : EditorWindow
         {
             if (savedRoot == null) return;
             foreach (var g in savedRoot.GetComponentsInChildren<GroundShadow2D>(true)) if (g != null) g.Rebuild();
-            foreach (var w in savedRoot.GetComponentsInChildren<Weathered>(true)) if (w != null) w.Rebuild();
             foreach (var b in savedRoot.GetComponentsInChildren<Breakable>(true)) if (b != null) b.RebuildOverlay();
         };
     }

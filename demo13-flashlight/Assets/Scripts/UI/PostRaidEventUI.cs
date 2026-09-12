@@ -92,145 +92,148 @@ public class PostRaidEventUI : MonoBehaviour
     {
         var choice = currentEvent.choices[index];
 
-        ApplyRewards(choice);
-        ApplyPenalties(choice);
+        choicePanel.SetActive(false);
+        resultPanel.SetActive(true);
+
+        // 소모할 물건이 모자라면 아무것도 적용하지 않는다(물건 없이 보상만 받는 걸 막는다 — 2026-09-12 ConsumeItem).
+        string missing = MissingConsumable(choice);
+        if (missing != null)
+        {
+            resultText.text = $"{missing}이(가) 없다. 그냥 지나칠 수밖에 없었다.";
+            rewardText.text = "";
+            return;
+        }
+
+        // 적용과 표시를 한 번에 — 무작위 아이템(itemId 'a|b|c')도 실제로 받은 것이 그대로 보인다.
+        string penaltyStr = ApplyPenalties(choice);
+        string rewardStr = ApplyRewards(choice);
 
         // 선택 결과 확정 커밋 — 미커밋이면 강제종료→재로드로 페널티 무효 + 이벤트 재추첨(세이브 스커밍)
         SaveCheckpoints.Instance?.InventoryChanged();
 
-        choicePanel.SetActive(false);
-        resultPanel.SetActive(true);
-
         resultText.text = choice.resultText;
-
-        string rewardStr = "";
-        if (choice.rewards != null)
-        {
-            foreach (var r in choice.rewards)
-            {
-                switch (r.type)
-                {
-                    case EventRewardType.Item:
-                        var item = ItemDatabase.Get(r.itemId);
-                        rewardStr += $"\n  ✦ 획득: {(item != null ? item.displayName : r.itemId)} x{r.amount}";
-                        break;
-                    case EventRewardType.Currency:
-                        rewardStr += $"\n  ✦ {r.amount} 스크랩";
-                        break;
-                    case EventRewardType.Heal:
-                        rewardStr += $"\n  ✦ HP +{r.amount}";
-                        break;
-                    case EventRewardType.Affinity:
-                        rewardStr += $"\n  ✦ 호감도 +{r.amount}";
-                        break;
-                    case EventRewardType.Trust:
-                        rewardStr += $"\n  ✦ 신뢰도 +{r.amount}";
-                        break;
-                }
-            }
-        }
-        if (choice.penalties != null)
-        {
-            foreach (var p in choice.penalties)
-            {
-                switch (p.type)
-                {
-                    case EventPenaltyType.Damage:
-                        rewardStr += $"\n  ▾ HP -{p.amount}";
-                        break;
-                    case EventPenaltyType.LoseCurrency:
-                        rewardStr += $"\n  ▾ -{p.amount} 스크랩";
-                        break;
-                    case EventPenaltyType.LoseItem:
-                        rewardStr += $"\n  ▾ 아이템 일부 손실";
-                        break;
-                }
-            }
-        }
-        rewardText.text = rewardStr;
+        rewardText.text = rewardStr + penaltyStr;
     }
 
-    void ApplyRewards(EventChoice choice)
+    static string PickItemId(string id)
     {
-        if (choice.rewards == null) return;
+        if (string.IsNullOrEmpty(id) || id.IndexOf('|') < 0) return id;
+        var opts = id.Split('|');
+        return opts[Random.Range(0, opts.Length)].Trim();
+    }
+
+    /// <summary>ConsumeItem 페널티에 필요한 물건이 모자라면 그 이름, 충분하면 null.</summary>
+    static string MissingConsumable(EventChoice choice)
+    {
+        if (choice.penalties == null) return null;
         var player = GameObject.FindGameObjectWithTag("Player");
+        var inv = player != null ? player.GetComponent<PlayerInventory>() : null;
+        foreach (var p in choice.penalties)
+        {
+            if (p.type != EventPenaltyType.ConsumeItem) continue;
+            if (inv == null || inv.CountItemAll(p.itemId) < Mathf.Max(1, p.amount))
+            {
+                var d = ItemDatabase.Get(p.itemId);
+                return d != null ? d.displayName : p.itemId;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>보상 적용 + 표시 문자열.</summary>
+    string ApplyRewards(EventChoice choice)
+    {
+        if (choice.rewards == null) return "";
+        var player = GameObject.FindGameObjectWithTag("Player");
+        string s = "";
 
         foreach (var r in choice.rewards)
         {
             switch (r.type)
             {
                 case EventRewardType.Item:
-                    if (player != null)
-                    {
-                        var data = ItemDatabase.Get(r.itemId);
-                        if (data != null)
-                        {
-                            var inv = player.GetComponent<PlayerInventory>();
-                            if (inv != null)
-                                inv.TryPickup(new ItemInstance(data, r.amount));
-                        }
-                    }
+                {
+                    var data = ItemDatabase.Get(PickItemId(r.itemId));
+                    if (data == null) break;
+                    int n = Mathf.Max(1, r.amount);
+                    var inv = player != null ? player.GetComponent<PlayerInventory>() : null;
+                    if (inv != null) inv.TryPickup(new ItemInstance(data, n));
+                    s += $"\n  ✦ 획득: {data.displayName} x{n}";
                     break;
+                }
                 case EventRewardType.Heal:
-                    if (player != null)
-                    {
-                        var health = player.GetComponent<Health>();
-                        if (health != null) health.Heal(r.amount);
-                    }
+                {
+                    var health = player != null ? player.GetComponent<Health>() : null;
+                    if (health != null) health.Heal(r.amount);
+                    s += $"\n  ✦ HP +{r.amount}";
                     break;
+                }
                 case EventRewardType.Affinity:
                     if (NPCRelationshipManager.Instance != null)
                         NPCRelationshipManager.Instance.ModifyAffinity(r.npcId, r.amount);
+                    s += $"\n  {(r.amount >= 0 ? "✦" : "▾")} 호감도 {r.amount:+0;-0}";
                     break;
                 case EventRewardType.Trust:
                     if (NPCRelationshipManager.Instance != null)
                         NPCRelationshipManager.Instance.ModifyTrust(r.npcId, r.amount);
+                    s += $"\n  {(r.amount >= 0 ? "✦" : "▾")} 신뢰도 {r.amount:+0;-0}";
                     break;
                 case EventRewardType.Currency:
                     if (CurrencyManager.Instance != null)
                         CurrencyManager.Instance.Add(r.amount, "레이드 후 이벤트");
+                    s += $"\n  ✦ {r.amount} 스크랩";
                     break;
             }
         }
+        return s;
     }
 
-    void ApplyPenalties(EventChoice choice)
+    /// <summary>페널티 적용 + 표시 문자열.</summary>
+    string ApplyPenalties(EventChoice choice)
     {
-        if (choice.penalties == null) return;
+        if (choice.penalties == null) return "";
         var player = GameObject.FindGameObjectWithTag("Player");
+        var inv = player != null ? player.GetComponent<PlayerInventory>() : null;
+        string s = "";
 
         foreach (var p in choice.penalties)
         {
             switch (p.type)
             {
                 case EventPenaltyType.Damage:
-                    if (player != null)
-                    {
-                        var health = player.GetComponent<Health>();
-                        if (health != null) health.TakeDamage(p.amount);
-                    }
+                {
+                    var health = player != null ? player.GetComponent<Health>() : null;
+                    if (health != null) health.TakeDamage(p.amount);
+                    s += $"\n  ▾ HP -{p.amount}";
                     break;
+                }
                 case EventPenaltyType.LoseCurrency:
                     if (CurrencyManager.Instance != null)
                         CurrencyManager.Instance.Lose(p.amount, "레이드 후 이벤트");
+                    s += $"\n  ▾ -{p.amount} 스크랩";
                     break;
                 case EventPenaltyType.LoseItem:
-                    if (player != null)
+                    // 가방 격자에서 무작위로 amount개(최소 1) 잃는다.
+                    for (int k = 0; k < Mathf.Max(1, p.amount); k++)
                     {
-                        var inv = player.GetComponent<PlayerInventory>();
-                        if (inv != null)
-                        {
-                            var items = inv.Grid.GetAll();
-                            if (items.Count > 0)
-                            {
-                                int idx = Random.Range(0, items.Count);
-                                inv.Grid.Remove(items[idx]);
-                            }
-                        }
+                        var items = inv != null ? inv.Grid.GetAll() : null;
+                        if (items == null || items.Count == 0) break;
+                        var lost = items[Random.Range(0, items.Count)];
+                        inv.Grid.Remove(lost);
+                        s += $"\n  ▾ 잃음: {lost.item.DisplayName}";
                     }
                     break;
+                case EventPenaltyType.ConsumeItem:
+                {
+                    int need = Mathf.Max(1, p.amount);
+                    if (inv != null) inv.ConsumeItemAll(p.itemId, need);
+                    var d = ItemDatabase.Get(p.itemId);
+                    s += $"\n  ▾ 사용: {(d != null ? d.displayName : p.itemId)} x{need}";
+                    break;
+                }
             }
         }
+        return s;
     }
 
     void OnContinue()

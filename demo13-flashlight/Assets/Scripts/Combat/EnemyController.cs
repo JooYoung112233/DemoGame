@@ -70,9 +70,6 @@ public class EnemyController : MonoBehaviour
     [Tooltip("타격 대상 레이어 (Player)")]
     [SerializeField] LayerMask playerMask = 1 << 6;
 
-    [Header("References")]
-    [SerializeField] SkeletonAnimController animController;
-
     // 런타임
     State          state = State.Patrol;
     Transform      player;
@@ -129,8 +126,11 @@ public class EnemyController : MonoBehaviour
     float InjDecay  => Inj != null ? Inj.GroggyDecayMult : 1f;
 
     float Damage          => (unitStat != null ? unitStat.attackDamage        : attackDamage) * InjAtk;
-    float AtkRange        => unitStat != null ? unitStat.attackRange         : attackRange;
-    float AtkCooldown     => 1f / Mathf.Max(unitStat != null ? unitStat.attackSpeed : attackSpeed, 0.1f);
+    // 총을 쥔 적은 사거리·연사를 총(WeaponData) × 적 배율로 — 2026-09-12 총 수치 통합 마무리(docs/bandit-firearms.md).
+    float AtkRange        => IsRanged ? unitStat.rangedWeaponData.effectiveRange * unitStat.rangedRangeMult
+                           : unitStat != null ? unitStat.attackRange : attackRange;
+    float AtkCooldown     => 1f / Mathf.Max(IsRanged ? unitStat.rangedWeaponData.rpm / 60f * unitStat.rangedRateMult
+                           : unitStat != null ? unitStat.attackSpeed : attackSpeed, 0.1f);
     float DetectRng       => (unitStat != null ? unitStat.detectRange : detectRange) * TraitManager.Mod("detect_radius");   // 잠행: 그림자 감지반경 -20%
     float LoseRng         => unitStat != null ? unitStat.loseRange           : loseRange;
     float MoveSpd         => (unitStat != null ? unitStat.moveSpeed          : moveSpeed) * InjMove;
@@ -144,7 +144,7 @@ public class EnemyController : MonoBehaviour
     float GroggyDecayRate => (unitStat != null ? unitStat.groggyDecay        : groggyDecay) * InjDecay;
     float StunDuration    => unitStat != null ? unitStat.groggyStunDuration  : groggyStunDuration;
     bool  IsRanged        => unitStat != null && unitStat.rangedWeaponData != null && unitStat.rangedWeaponData.isRanged;
-    float PreferredRange  => unitStat != null ? Mathf.Min(unitStat.preferredRange, unitStat.attackRange) : attackRange;
+    float PreferredRange  => unitStat != null ? Mathf.Min(unitStat.preferredRange, AtkRange) : attackRange;
 
     public State CurrentState  => state;
     public bool  IsInWindup    => state == State.AttackWindup;
@@ -246,9 +246,6 @@ public class EnemyController : MonoBehaviour
         if (_performer == null) _performer = gameObject.AddComponent<AttackPerformer>();
         _performer.Configure(playerMask, () => _attackDir);
 
-        if (animController == null)
-            animController = GetComponentInChildren<SkeletonAnimController>();
-
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         renderers      = GetComponentsInChildren<Renderer>();
 
@@ -315,7 +312,6 @@ public class EnemyController : MonoBehaviour
                 _banditVisual = visual;
                 if (_limbs != null) { Destroy(_limbs.gameObject); _limbs = null; }
                 if (_weaponVis != null) { Destroy(_weaponVis.gameObject); _weaponVis = null; }
-                if (animController != null) { animController.enabled = false; animController = null; }
                 if (spriteRenderer != null) spriteRenderer.enabled = false;
                 _banditVisual.SetVisible(_visionVisible);
             }
@@ -407,7 +403,6 @@ public class EnemyController : MonoBehaviour
         if (toTarget.magnitude < 0.4f)
         {
             SetVelocity(Vector2.zero);
-            animController?.Play("idle");
             patrolTimer += Time.deltaTime;
             if (patrolTimer >= PatrolWait) SetPatrolTarget();
         }
@@ -416,7 +411,6 @@ public class EnemyController : MonoBehaviour
             Vector2 dir = toTarget.normalized;
             SetVelocity(dir * PatrolSpd);
             FlipSprite(dir);
-            animController?.Play("walk");
         }
     }
 
@@ -473,14 +467,12 @@ public class EnemyController : MonoBehaviour
 
             SetVelocity(d * PatrolSpd);
             FlipSprite(d);
-            animController?.Play("walk");
         }
         else
         {
             // 도착 → 두리번(대기).
             SetVelocity(Vector2.zero);
             _nav?.Stop();
-            animController?.Play("idle");
             investigateLook += Time.deltaTime;
             if (investigateLook >= look)   // look = 위에서 계산됨
             {
@@ -498,7 +490,6 @@ public class EnemyController : MonoBehaviour
             state = State.Patrol;
             _nav?.Stop();
             SetVelocity(Vector2.zero);
-            animController?.Play("idle");
             return;
         }
 
@@ -538,7 +529,6 @@ public class EnemyController : MonoBehaviour
             _nav?.Stop();
             SetVelocity(Vector2.zero);
             FacePlayer();
-            animController?.Play("idle");
             return;
         }
 
@@ -575,7 +565,6 @@ public class EnemyController : MonoBehaviour
 
         SetVelocity(d * MoveSpd);
         FlipSprite(d);
-        animController?.Play("walk");
     }
 
     /// <summary>근처 동료로부터 밀어내는 방향(정규화 전 합). 겹침 방지용 — 반경 안에서 거리 반비례.</summary>
@@ -680,15 +669,14 @@ public class EnemyController : MonoBehaviour
             }
             return;
         }
-        if (animController == null || animController.IsAnimComplete)
-            state = State.Chase;
+        state = State.Chase;
     }
 
     void UpdateHit()
     {
         hitTimer -= Time.deltaTime;
         SetVelocity(Vector2.zero);
-        if (hitTimer <= 0 || (animController != null && animController.IsAnimComplete))
+        if (hitTimer <= 0)
         {
             RestoreTint();
             state = State.Chase;
@@ -699,7 +687,6 @@ public class EnemyController : MonoBehaviour
     {
         SetVelocity(Vector2.zero);
         SetTint(Mathf.Sin(Time.time * 6f) > 0 ? new Color(1f, 1f, 0.2f) : new Color(0.6f, 0.6f, 0.1f));
-        animController?.Play("idle");
     }
 
     #endregion
@@ -748,13 +735,10 @@ public class EnemyController : MonoBehaviour
         if (attackData != null)
         {
             _performer.Perform(attackData);
-            animController?.PlayOneShot("attack");
-            if (animController == null) state = State.Chase;
+            state = State.Chase;
         }
         else
         {
-            animController?.PlayOneShot("attack", () => ImmediateMeleeHit());
-            if (animController == null)
             {
                 ImmediateMeleeHit();
                 state = State.Chase;
@@ -870,11 +854,12 @@ public class EnemyController : MonoBehaviour
         Vector3 muzzle = _banditVisual != null ? _banditVisual.MuzzlePosition : transform.position + Vector3.up;
         // 탄 높이는 플레이어 허트박스 안(0.6~1.3m)으로 — 총구가 어깨 위면 머리 위로 날아간다.
         float y = transform.position.y + Mathf.Clamp(muzzle.y - transform.position.y, 0.6f, 1.3f);
-        float spread = Random.Range(-unitStat.spreadDeg, unitStat.spreadDeg) * Mathf.Deg2Rad;
-        float c = Mathf.Cos(spread), s = Mathf.Sin(spread);
-        Vector2 dir = new Vector2(_aimDir.x * c - _aimDir.y * s, _aimDir.x * s + _aimDir.y * c);
         // 총 자체 수치는 쥔 총(WeaponData)이 진실, 적 전용은 배율만 — 2026-09-11 총 수치 통합(docs/combat.md §무기 구성 결정).
         var gun = unitStat.rangedWeaponData;
+        float spreadDeg = gun.hipSpreadDeg * unitStat.rangedSpreadMult;
+        float spread = Random.Range(-spreadDeg, spreadDeg) * Mathf.Deg2Rad;
+        float c = Mathf.Cos(spread), s = Mathf.Sin(spread);
+        Vector2 dir = new Vector2(_aimDir.x * c - _aimDir.y * s, _aimDir.x * s + _aimDir.y * c);
         float speed  = gun.projectileSpeed * unitStat.rangedBulletSpeedMult;
         float damage = gun.damage * unitStat.rangedDamageMult * InjAtk;   // 부상 배율은 근접과 같게
         Projectile.Spawn(transform, Plan3D.ToPlan(muzzle), dir, speed, damage, 0f,
@@ -936,7 +921,6 @@ public class EnemyController : MonoBehaviour
         SetVelocity(Vector2.zero);
         RestoreTint();
         SetTint(new Color(1f, 1f, 0.5f));
-        animController?.PlayOneShot("gethit");
     }
 
     /// <summary>예비동작 캔슬 보너스(1.5배 경직) 보호 창 — 같은 타격의 OnDamaged가 곧바로 덮어쓰는 것을 막는다.
@@ -1136,7 +1120,6 @@ public class EnemyController : MonoBehaviour
         if (Time.time >= _cancelBonusUntil) hitTimer = HitStun;
         SetVelocity(Vector2.zero);
         SetTint(new Color(1f, 0.5f, 0.5f));
-        animController?.PlayOneShot("gethit");
     }
 
     void OnDeath()
@@ -1147,7 +1130,6 @@ public class EnemyController : MonoBehaviour
         _performer?.Cancel();   // 죽는 순간 진행 중이던 공격 판정이 계속 나가는 것 방지(2026-07-11)
         _rb.detectCollisions = false;
         RestoreTint();
-        animController?.PlayOneShot("death");
         if (hpBarBg   != null) hpBarBg.SetActive(false);
         if (hpBarFill != null) hpBarFill.SetActive(false);
         if (groggyBarBg   != null) groggyBarBg.SetActive(false);    // 시체 잔존화로 바가 영구 남는 것 방지
@@ -1376,7 +1358,6 @@ public class EnemyController : MonoBehaviour
     {
         if (player == null) return;
         Vector2 dir = (Plan3D.ToPlan(player.position) - Plan3D.ToPlan(transform.position)).normalized;
-        animController?.SetDirection(dir);
         FlipSprite(dir);
     }
 

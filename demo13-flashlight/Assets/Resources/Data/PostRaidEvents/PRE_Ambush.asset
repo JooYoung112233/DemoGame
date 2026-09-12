@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dac2823edea3b042983bfa365e4c42a, type: 3}
+  m_Name: PRE_Ambush
+  m_EditorClassIdentifier: Game.Scripts::PostRaidEventData
+  eventId: evt_ambush
+  title: "매복"
+  description: "좁은 골목을 지나는데 인기척이 느껴진다. 무장한 그림자가 길을 막는다."
+  choices:
+  - text: "싸운다"
+    resultText: "짧고 거친 싸움 끝에 그림자는 물러났다. 놈이 흘린 것을 챙겼다."
+    rewards:
+    - type: 0
+      itemId: "ammo_9x19|bandage|scrap_metal|canned_food"
+      amount: 1
+      npcId:
+    penalties:
+    - type: 2
+      amount: 20
+      itemId:
+  - text: "도망친다"
+    resultText: "골목을 내달려 빠져나왔다. 뛰다가 뭔가를 흘렸다."
+    rewards: []
+    penalties:
+    - type: 0
+      amount: 1
+      itemId:
+  - text: "협상한다"
+    resultText: "고철 몇 뭉치를 건네자 길을 비켜 줬다."
+    rewards: []
+    penalties:
+    - type: 1
+      amount: 500
+      itemId:
+  conditions:
+    minRaidTime: 0
+    requiredRegion:
+    minLootCount: 0
+    nightOnly: 0
+  weight: 1
+  oneShot: 0

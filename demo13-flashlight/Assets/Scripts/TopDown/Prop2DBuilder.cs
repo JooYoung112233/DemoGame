@@ -96,13 +96,7 @@ public static class Prop2DBuilder
             }
         }
 
-        // 정적 풍화(낡음/녹/폐허) — 부서짐과 별개, 항상 표시. 절차적(이미지 0장).
-        if (def.weathered && !def.noVisual)
-        {
-            var w = go.AddComponent<Weathered>();
-            w.amount = def.weatherAmount;
-            w.tint = def.weatherTint;
-        }
+        // 정적 풍화(Weathered)는 쓰던 셰이더(BRB/DamageOverlay)가 없어져 2026-09-12 제거(docs/destructible.md).
 
         ApplyLight(go, def);    // 발광(Light2D Sprite 쿠키) — 램프/창문/네온 등 동적 조명
 

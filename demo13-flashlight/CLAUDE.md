@@ -24,7 +24,7 @@ Open `Assets/Scenes/Systems.unity` and press Play. **Never play a gameplay scene
 Systems (persistent boot scene — managers, all UI, PlayerRig)
   → Safehouse (= the VILLAGE, walkable safe zone) ↔ Hideout (hideout room) · Pawnshop (interior)
     → MapSelectUI (region select)
-      → Zone1 (region 1 raid, 20 min) · Int_* (15 building-interior scenes via doors)
+      → Zone1 (region 1 raid, 20 min) — interiors are walk-in inside the map (the old `Int_*` scenes were deleted 2026-09-12)
         → extract → PostRaidEvent (40%) → RaidResultUI → back to the village
 ```
 Naming trap: the scene called `Safehouse` is the village; `Hideout` is the player's room; docs also say 안전구역/안전가옥/Town. Cleanup step 4 will settle the names. Only region 1 of 5 has a scene (`WorldRegionCatalog`). `ScrapMarket_GB` is an old raid map (debug only), `MapTool_LookDev` a look-dev scene.

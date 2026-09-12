@@ -14,12 +14,14 @@ public enum EventPenaltyType
     LoseItem,
     LoseCurrency,
     Damage,
+    ConsumeItem,   // 2026-09-12 — 특정 아이템 소모(itemId × amount). 모자라면 그 선택지는 아무것도 적용되지 않는다.
 }
 
 [System.Serializable]
 public class EventReward
 {
     public EventRewardType type;
+    [Tooltip("Item일 때. 'a|b|c'로 적으면 그중 하나를 무작위로 준다.")]
     public string itemId;
     public int amount;
     [Tooltip("Affinity/Trust 대상 NPC")]
@@ -31,6 +33,8 @@ public class EventPenalty
 {
     public EventPenaltyType type;
     public int amount;
+    [Tooltip("ConsumeItem일 때 소모할 아이템 id")]
+    public string itemId;
 }
 
 [System.Serializable]

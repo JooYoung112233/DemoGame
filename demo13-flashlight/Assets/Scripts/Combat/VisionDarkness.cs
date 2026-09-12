@@ -41,9 +41,9 @@ public class VisionDarkness : MonoBehaviour
         if (MapToolScene.IsActive) return;
         if (Instance != null) return;
         if (FindFirstObjectByType<VisionDarkness>(FindObjectsInactive.Include) != null) return;
-        // Shader cleanup removed this optional overlay. Do not auto-create a renderer that cannot run.
-        // Explicitly placed components still report a missing shader in Awake.
-        if (Shader.Find("BRB/VisionDarkness") == null) return;
+        // 쓸 셰이더가 하나도 없으면 렌더러를 만들지 않는다(BuildMaterial과 같은 후보).
+        if (Shader.Find("BRB/VisionDarkness") == null
+            && Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default") == null) return;
 
         var go = new GameObject("[VisionDarkness]", typeof(MeshFilter), typeof(MeshRenderer));
         DontDestroyOnLoad(go);
@@ -65,7 +65,7 @@ public class VisionDarkness : MonoBehaviour
         if (mat == null)
         {
             // 전용 셰이더가 없다 = 이 기능은 지금 없는 것이다. 렌더러를 끄고 갱신도 멈춘다.
-            Debug.LogWarning("[VisionDarkness] BRB/VisionDarkness 셰이더 없음 — 시야 어둠을 끈다.");
+            Debug.LogWarning("[VisionDarkness] 시야 어둠에 쓸 셰이더 없음 — 시야 어둠을 끈다.");
             _mr.enabled = false;
             enabled = false;
             return;
@@ -93,7 +93,11 @@ public class VisionDarkness : MonoBehaviour
     ///    셰이더가 없으면 기능을 끄는 게 맞다 — 어둠이 없는 것보다 화면이 가려지는 게 훨씬 나쁘다.</summary>
     static Material BuildMaterial()
     {
-        var sh = Shader.Find("BRB/VisionDarkness");
+        // 전용 셰이더는 2026-09-10 정리로 없어졌다 → URP 스프라이트 Unlit으로 대신한다(2026-09-12 결정 — combat.md).
+        //   스프라이트 셰이더는 기본이 반투명 + 정점 색이라 부채꼴의 밝음↔어둠 그라디언트가 그대로 살고,
+        //   위 경고의 URP/Lit처럼 불투명 흰 판이 될 걱정이 없다.
+        var sh = Shader.Find("BRB/VisionDarkness")
+              ?? Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
         if (sh == null) return null;
         return new Material(sh) { name = "VisionDarknessMat" };
     }

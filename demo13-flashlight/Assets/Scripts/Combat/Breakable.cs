@@ -4,15 +4,14 @@ using System.Collections;
 /// <summary>
 /// 파괴 가능한 오브젝트(상자·항아리·판자벽 등). 때리면 단계별로 부서지고 마지막 단계에 파괴된다.
 ///
-/// "모든 셰이더와 같이 쓸 수 있는" 구조: 손상 비주얼은 베이스 스프라이트 위에 덧씌우는
-/// <b>자식 오버레이</b>(BRB/DamageOverlay)로 그린다 → 베이스 셰이더(Wall/Prop/Floor/스프라이트-Lit 등)를
-/// 전혀 건드리지 않으므로 어떤 셰이더든 호환. (필요시 단계별 스프라이트 교체·베이스 어둡게도 옵션)
+/// 손상 비주얼 = 단계별 스프라이트 교체·베이스 어둡게(옵션). 예전의 균열 오버레이(BRB/DamageOverlay)는
+/// 셰이더가 없어져 2026-09-12 결정으로 제거했다(docs/destructible.md).
 ///
 /// 데미지 입력:
 ///   • Health 컴포넌트가 있고 syncWithHealth면 전투 데미지에 <b>자동 연동</b>(OnDamaged→단계, OnDeath→파괴).
 ///   • 없으면 자체 내구도(maxHp). 공격 측에서 <see cref="Hit"/> 또는 <see cref="ApplyDamage"/> 호출.
 ///
-/// 에디터에서 previewStage로 단계 미리보기 가능([ExecuteAlways], 오버레이만 — 스프라이트 교체는 런타임만).
+/// 에디터에서 previewStage로 단계 미리보기 가능([ExecuteAlways], 베이스 어둡게만 — 스프라이트 교체는 런타임만).
 /// </summary>
 [ExecuteAlways]
 [DisallowMultipleComponent]
@@ -27,15 +26,8 @@ public class Breakable : MonoBehaviour
     [Tooltip("Health 컴포넌트가 있으면 그걸로 단계 구동(전투 데미지 자동 연동). 없으면 자체 내구도.")]
     public bool syncWithHealth = true;
 
-    [Header("Visual · Damage Overlay (모든 셰이더 호환)")]
-    [Tooltip("자식 오버레이로 균열/그을음을 덧씌움(BRB/DamageOverlay). 베이스 셰이더 무관.")]
-    public bool useOverlay = true;
-    [Range(0f, 2f)] public float overlayIntensity = 1f;
-    public Color crackColor = new(0.02f, 0.02f, 0.03f, 1f);
-    public Color grimeColor = new(0.15f, 0.13f, 0.10f, 1f);
-
     [Header("Visual · Optional Sprite Swap")]
-    [Tooltip("단계별 베이스 스프라이트 교체(있으면). [0]=1단계 … 비우면 오버레이만 사용. (런타임만 적용)")]
+    [Tooltip("단계별 베이스 스프라이트 교체(있으면). [0]=1단계 … 비우면 베이스 어둡게만. (런타임만 적용)")]
     public Sprite[] stageSprites;
 
     [Header("Visual · Base Darken")]
@@ -57,6 +49,8 @@ public class Breakable : MonoBehaviour
     [Tooltip("파괴 시 튀는 파편 개수(절차적). 0=없음.")]
     [Min(0)] public int debrisCount = 6;
     public float debrisLifetime = 0.8f;
+    [Tooltip("절차적 파편 색.")]
+    public Color grimeColor = new(0.15f, 0.13f, 0.10f, 1f);
     [Tooltip("파괴 VFX 프리팹(선택). 있으면 절차적 파편 대신 이걸 스폰.")]
     public GameObject breakVfxPrefab;
 
@@ -68,7 +62,7 @@ public class Breakable : MonoBehaviour
     public bool dropRegionLoot = false;
 
     [Header("Editor Preview")]
-    [Tooltip("에디터에서 손상 단계 미리보기(오버레이만). 0=온전.")]
+    [Tooltip("에디터에서 손상 단계 미리보기(베이스 어둡게만). 0=온전.")]
     [Range(0, 8)] public int previewStage = 0;
 
     /// <summary>단계가 바뀔 때(int=새 단계).</summary>
@@ -86,17 +80,10 @@ public class Breakable : MonoBehaviour
     Health _health;
     HitFlash _flash;
     MaterialPropertyBlock _mpb;
-    GameObject _overlayGO;
-    SpriteRenderer _overlaySR;
-    Material _overlayMat;
     float _baseBrightness = 1f;
     Vector3 _basePos;
     Coroutine _shake;
 
-    static readonly int IdDamage = Shader.PropertyToID("_Damage");
-    static readonly int IdIntensity = Shader.PropertyToID("_Intensity");
-    static readonly int IdCrackColor = Shader.PropertyToID("_CrackColor");
-    static readonly int IdGrimeColor = Shader.PropertyToID("_GrimeColor");
     static readonly int IdBrightness = Shader.PropertyToID("_Brightness");
 
     void OnEnable()
@@ -121,7 +108,6 @@ public class Breakable : MonoBehaviour
             }
         }
 
-        if (useOverlay) BuildOverlay();
         ApplyPreviewOrRefresh();
     }
 
@@ -132,7 +118,6 @@ public class Breakable : MonoBehaviour
             _health.OnDamaged -= OnHealthDamaged;
             _health.OnDeath -= HandleHealthDeath;
         }
-        CleanupOverlay();
     }
 
     void OnValidate()
@@ -142,15 +127,11 @@ public class Breakable : MonoBehaviour
         UnityEditor.EditorApplication.delayCall += () =>
         {
             if (this == null || !isActiveAndEnabled || Application.isPlaying) return;
-            CleanupOverlay();
             CacheBaseBrightness();
-            if (useOverlay) BuildOverlay();
             ApplyPreviewOrRefresh();
         };
 #endif
     }
-
-    void OnDestroy() => CleanupOverlay();
 
     // ───────────────── 데미지 입력 API ─────────────────
 
@@ -209,9 +190,6 @@ public class Breakable : MonoBehaviour
     void RefreshVisual()
     {
         float d = stageCount > 0 ? (float)_stage / stageCount : 0f;
-
-        if (_overlayMat != null)
-            _overlayMat.SetFloat(IdDamage, d);
 
         // 스프라이트 교체는 베이스 에셋을 바꾸므로 런타임만(에디터 직렬화 오염 방지).
         if (Application.isPlaying && stageSprites != null && stageSprites.Length > 0 &&
@@ -279,7 +257,6 @@ public class Breakable : MonoBehaviour
         {
             foreach (var c in GetComponents<Collider>()) c.enabled = false;
             if (rubbleSprite != null && _baseSR != null) _baseSR.sprite = rubbleSprite;
-            // 오버레이는 최대 손상치(_Damage=1)로 남아 폐허 느낌 유지.
         }
     }
 
@@ -344,7 +321,7 @@ public class Breakable : MonoBehaviour
         if (f != null) f.SetValue(target, value);
     }
 
-    // ───────────────── 오버레이 자식 관리 (GroundShadow2D 패턴) ─────────────────
+    // ───────────────── 베이스 밝기 ─────────────────
 
     void CacheBaseBrightness()
     {
@@ -354,70 +331,12 @@ public class Breakable : MonoBehaviour
             _baseBrightness = 1f;
     }
 
-    /// <summary>손상 오버레이 자식을 강제로 다시 만든다(맵 저장 후 DontSave 자식이 떨어졌을 때 등).</summary>
+    /// <summary>에디터 도구 호환용 — 오버레이가 없어져(2026-09-12) 지금은 비주얼 갱신만 한다.</summary>
     public void RebuildOverlay()
     {
         if (!gameObject.scene.IsValid()) return;
         if (_baseSR == null) _baseSR = GetComponent<SpriteRenderer>();
-        if (useOverlay) BuildOverlay();
         RefreshVisual();
-    }
-
-    void BuildOverlay()
-    {
-        if (_baseSR == null || _baseSR.sprite == null) return;
-        CleanupOverlay();
-
-        // 재컴파일/중복 대비: 기존 고아 자식 제거
-        for (int i = transform.childCount - 1; i >= 0; i--)
-        {
-            var c = transform.GetChild(i);
-            if (c != null && c.name == "DamageOverlay") DestroySafe(c.gameObject);
-        }
-
-        var shader = Shader.Find("BRB/DamageOverlay");
-        if (shader == null) { Debug.LogWarning("[Breakable] BRB/DamageOverlay 못 찾음."); return; }
-
-        _overlayMat = new Material(shader);
-        _overlayMat.SetFloat(IdIntensity, overlayIntensity);
-        _overlayMat.SetColor(IdCrackColor, crackColor);
-        _overlayMat.SetColor(IdGrimeColor, grimeColor);
-        _overlayMat.SetFloat(IdDamage, 0f);
-
-        _overlayGO = new GameObject("DamageOverlay");
-        _overlayGO.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
-        _overlayGO.transform.SetParent(transform, false);
-        _overlayGO.transform.localPosition = Vector3.zero;
-
-        _overlaySR = _overlayGO.AddComponent<SpriteRenderer>();
-        _overlaySR.sprite = _baseSR.sprite;          // 베이스 실루엣/알파를 그대로 마스크로
-        _overlaySR.flipX = _baseSR.flipX;
-        _overlaySR.flipY = _baseSR.flipY;
-        _overlaySR.drawMode = _baseSR.drawMode;
-        if (_baseSR.drawMode != SpriteDrawMode.Simple)
-        {
-            _overlaySR.tileMode = _baseSR.tileMode;
-            _overlaySR.size = _baseSR.size;
-        }
-        _overlaySR.sortingLayerID = _baseSR.sortingLayerID;
-        _overlaySR.sortingOrder = _baseSR.sortingOrder + 1;   // 본체 바로 위
-        _overlaySR.sharedMaterial = _overlayMat;
-    }
-
-    void CleanupOverlay()
-    {
-        if (_overlayGO != null) DestroySafe(_overlayGO);
-        if (_overlayMat != null) DestroySafe(_overlayMat);
-        _overlayGO = null; _overlaySR = null; _overlayMat = null;
-    }
-
-    static void DestroySafe(Object o)
-    {
-        if (o == null) return;
-#if UNITY_EDITOR
-        if (!Application.isPlaying) { DestroyImmediate(o); return; }
-#endif
-        Destroy(o);
     }
 }
 
