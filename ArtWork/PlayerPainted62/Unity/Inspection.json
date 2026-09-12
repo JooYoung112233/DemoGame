@@ -1,0 +1,494 @@
+[
+  {
+    "name": "Gear_Backpack",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.92, 0.92, 17.41), Extents: (0.22, 0.22, 0.25)",
+    "materials": [
+      {
+        "name": "PlayerGear_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/PlayerGear_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/PlayerGear_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Gear_Charm",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.72, 0.59, 17.16), Extents: (0.03, 0.07, 0.02)",
+    "materials": [
+      {
+        "name": "PlayerGear_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/PlayerGear_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/PlayerGear_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Gear_Scarf",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.92, 1.06, 17.28), Extents: (0.15, 0.09, 0.15)",
+    "materials": [
+      {
+        "name": "PlayerGear_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/PlayerGear_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/PlayerGear_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Hero_SwordProxy",
+    "active": true,
+    "type": "MeshRenderer",
+    "bounds": "Center: (45.65, 0.60, 16.96), Extents: (0.19, 0.06, 0.50)",
+    "materials": [
+      {
+        "name": "SwordProxy",
+        "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SwordProxy.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": ""
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Hero_Bat",
+    "active": true,
+    "type": "MeshRenderer",
+    "bounds": "Center: (45.54, 0.57, 17.00), Extents: (0.18, 0.09, 0.45)",
+    "materials": [
+      {
+        "name": "Player_Bandit_BatWood",
+        "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_BatWood.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": ""
+      },
+      {
+        "name": "Player_Bandit_wrap",
+        "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_wrap.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": ""
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Hero_SwordProxy_Stowed",
+    "active": true,
+    "type": "MeshRenderer",
+    "bounds": "Center: (45.92, 0.93, 17.71), Extents: (0.38, 0.42, 0.02)",
+    "materials": [
+      {
+        "name": "SwordProxy",
+        "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/SwordProxy.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": ""
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Hero_Bat_Stowed",
+    "active": true,
+    "type": "MeshRenderer",
+    "bounds": "Center: (45.81, 0.91, 17.74), Extents: (0.34, 0.38, 0.06)",
+    "materials": [
+      {
+        "name": "Player_Bandit_BatWood",
+        "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_BatWood.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": ""
+      },
+      {
+        "name": "Player_Bandit_wrap",
+        "path": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/Materials/Player_Bandit_wrap.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": ""
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Study_Boot_-1",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.79, 0.12, 17.28), Extents: (0.10, 0.21, 0.23)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Boot_1",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (46.05, 0.12, 17.28), Extents: (0.10, 0.21, 0.23)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Cap",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.92, 1.67, 17.31), Extents: (0.31, 0.14, 0.24)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_CapBrim",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.92, 1.54, 17.02), Extents: (0.31, 0.05, 0.10)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Head",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.92, 1.38, 17.30), Extents: (0.29, 0.23, 0.21)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Hips",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.92, 0.60, 17.33), Extents: (0.22, 0.08, 0.14)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Leg_-1",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.81, 0.40, 17.30), Extents: (0.10, 0.24, 0.15)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Leg_1",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (46.04, 0.39, 17.30), Extents: (0.10, 0.24, 0.15)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Mitten_-1",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.57, 0.58, 17.26), Extents: (0.11, 0.12, 0.11)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Mitten_1",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (46.27, 0.57, 17.26), Extents: (0.11, 0.12, 0.11)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Neck",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.92, 1.11, 17.31), Extents: (0.08, 0.05, 0.08)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Sleeve_-1",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.66, 0.88, 17.31), Extents: (0.21, 0.29, 0.16)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Sleeve_1",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (46.19, 0.88, 17.31), Extents: (0.21, 0.29, 0.16)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "Study_Torso",
+    "active": true,
+    "type": "SkinnedMeshRenderer",
+    "bounds": "Center: (45.92, 0.86, 17.31), Extents: (0.24, 0.26, 0.16)",
+    "materials": [
+      {
+        "name": "Player_Painted",
+        "path": "Assets/ChibiSurvivor/Player/Painted62/Materials/Player_Painted.mat",
+        "shader": "BRB/GameLit",
+        "baseMap": "Assets/ChibiSurvivor/Player/Painted62/Textures/Player_Painted_BaseColor.png"
+      }
+    ],
+    "mesh": "Assets/ChibiSurvivor/Player/SimpleHeroStudy/SimpleHero_Stage5_Slash.fbx"
+  },
+  {
+    "name": "BG",
+    "active": true,
+    "type": "SpriteRenderer",
+    "bounds": "Center: (45.92, 2.17, 17.31), Extents: (0.43, 0.11, 0.09)",
+    "materials": [
+      {
+        "name": "Sprite-Unlit-Default",
+        "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+        "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "baseMap": null
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Fill",
+    "active": true,
+    "type": "SpriteRenderer",
+    "bounds": "Center: (45.92, 2.17, 17.31), Extents: (0.43, 0.11, 0.09)",
+    "materials": [
+      {
+        "name": "Sprite-Unlit-Default",
+        "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+        "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "baseMap": null
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Zone0",
+    "active": true,
+    "type": "SpriteRenderer",
+    "bounds": "Center: (45.92, 0.02, 17.31), Extents: (0.50, 0.32, 0.49)",
+    "materials": [
+      {
+        "name": "Sprite-Unlit-Default",
+        "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+        "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "baseMap": null
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Zone1",
+    "active": true,
+    "type": "SpriteRenderer",
+    "bounds": "Center: (45.92, 0.02, 17.31), Extents: (0.50, 0.32, 0.49)",
+    "materials": [
+      {
+        "name": "Sprite-Unlit-Default",
+        "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+        "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "baseMap": null
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Zone2",
+    "active": true,
+    "type": "SpriteRenderer",
+    "bounds": "Center: (45.92, 0.02, 17.31), Extents: (0.50, 0.32, 0.49)",
+    "materials": [
+      {
+        "name": "Sprite-Unlit-Default",
+        "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+        "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "baseMap": null
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Zone3",
+    "active": true,
+    "type": "SpriteRenderer",
+    "bounds": "Center: (45.92, 0.02, 17.31), Extents: (0.50, 0.32, 0.49)",
+    "materials": [
+      {
+        "name": "Sprite-Unlit-Default",
+        "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+        "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "baseMap": null
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Zone4",
+    "active": true,
+    "type": "SpriteRenderer",
+    "bounds": "Center: (45.92, 0.02, 17.31), Extents: (0.50, 0.32, 0.49)",
+    "materials": [
+      {
+        "name": "Sprite-Unlit-Default",
+        "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+        "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "baseMap": null
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Zone5",
+    "active": true,
+    "type": "SpriteRenderer",
+    "bounds": "Center: (45.92, 0.02, 17.31), Extents: (0.50, 0.32, 0.49)",
+    "materials": [
+      {
+        "name": "Sprite-Unlit-Default",
+        "path": "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat",
+        "shader": "Universal Render Pipeline/2D/Sprite-Unlit-Default",
+        "baseMap": null
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Guard",
+    "active": true,
+    "type": "MeshRenderer",
+    "bounds": "Center: (46.04, 1.07, 17.40), Extents: (0.17, 0.13, 0.17)",
+    "materials": [
+      {
+        "name": "gb_403833",
+        "path": "",
+        "shader": "BRB/GameLit",
+        "baseMap": ""
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Blade",
+    "active": true,
+    "type": "MeshRenderer",
+    "bounds": "Center: (46.57, 1.07, 17.82), Extents: (0.45, 0.06, 0.37)",
+    "materials": [
+      {
+        "name": "gb_D9E0F2",
+        "path": "",
+        "shader": "BRB/GameLit",
+        "baseMap": ""
+      }
+    ],
+    "mesh": null
+  },
+  {
+    "name": "Tip",
+    "active": true,
+    "type": "TrailRenderer",
+    "bounds": "Center: (23.49, 0.54, 9.07), Extents: (23.99, 1.04, 9.57)",
+    "materials": [
+      {
+        "name": "Universal Render Pipeline/Particles/Unlit",
+        "path": "",
+        "shader": "Universal Render Pipeline/Particles/Unlit",
+        "baseMap": ""
+      }
+    ],
+    "mesh": null
+  }
+]

@@ -233,46 +233,90 @@ PrefabInstance:
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -7718006426138101636, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a7f7ec33f8ddffa4d8653e4830751661, type: 2}
     - target: {fileID: -6532427882381338554, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -6532427882381338554, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: -5687835274428869479, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -5687835274428869479, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: -5330760086212570821, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -5330760086212570821, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a7f7ec33f8ddffa4d8653e4830751661, type: 2}
     - target: {fileID: -5193845347260477138, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -5193845347260477138, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: -4939113402261081005, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -4939113402261081005, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: -4102720475225611872, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -4102720475225611872, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: -1012487215422011813, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -1012487215422011813, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: 531109136242415040, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 531109136242415040, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: 815273561431707368, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 815273561431707368, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: 831761593858099084, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 831761593858099084, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: 919132149155446097, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_Name
       value: SimpleHero
@@ -281,14 +325,26 @@ PrefabInstance:
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1412051535725293545, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: 2349669597970204077, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2349669597970204077, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: 5511045675950231597, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5511045675950231597, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: 5866666021909216657, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_Controller
       value: 
@@ -301,14 +357,26 @@ PrefabInstance:
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8048612221665806336, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     - target: {fileID: 8330710874699389738, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8330710874699389738, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a7f7ec33f8ddffa4d8653e4830751661, type: 2}
     - target: {fileID: 8534330040824793058, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8534330040824793058, guid: 90e6c6e5a2f34774bbefb193a7ee692e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48975951c35f0184889584fa0f029c2b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
