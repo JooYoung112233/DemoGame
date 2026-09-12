@@ -5,7 +5,8 @@ using UnityEngine.SceneManagement;
 /// <summary>Safehouse 야외 전용 지도. 씬의 도로·건물·문 좌표를 캐시하고 플레이어만 갱신한다.</summary>
 public sealed class TownMinimapHUD : MonoBehaviour
 {
-    const float Width = 340f, Height = 238f;
+    const float Width = 308f, Height = 216f;
+    public const float PanelHeight = Height + 72f;
     readonly List<ShopMarker> shops = new List<ShopMarker>();
     RectTransform panel, map, playerDot, heading;
     Rect world;
@@ -31,14 +32,14 @@ public sealed class TownMinimapHUD : MonoBehaviour
         questHUD = GetComponentInParent<UIManager>()?.GetComponentInChildren<QuestHUD>(true);
         var canvas = GetComponentInChildren<Canvas>(true);
         if (canvas == null) { enabled = false; return; }
-        panel = Box(canvas.transform, "TownMinimap", new Vector2(368, 310), new Color(.065f, .075f, .07f, .96f));
+        panel = Box(canvas.transform, "TownMinimap", new Vector2(Width + 28, PanelHeight), new Color(.065f, .075f, .07f, .96f));
         panel.anchorMin = panel.anchorMax = panel.pivot = Vector2.one;
         panel.anchoredPosition = new Vector2(-24, -24);
-        Label(panel, "마을 안내", new Vector2(-108, 132), new Vector2(120, 24), 18, paper);
-        Label(panel, "N ↑", new Vector2(147, 132), new Vector2(50, 24), 16, paper);
+        Label(panel, "마을 안내", new Vector2(-92, Height / 2 + 13), new Vector2(120, 24), 18, paper);
+        Label(panel, "N ↑", new Vector2(131, Height / 2 + 13), new Vector2(50, 24), 16, paper);
         map = Box(panel, "TownPlan", new Vector2(Width, Height), new Color(.23f, .25f, .22f, 1));
         map.anchoredPosition = new Vector2(0, -1);
-        Label(panel, "● 내 위치   ■ 입구   × 잠김", new Vector2(0, -136), new Vector2(340, 22), 14, paper);
+        Label(panel, "● 내 위치   ■ 입구   × 잠김", new Vector2(0, -Height / 2 - 18), new Vector2(Width, 22), 14, paper);
         panel.gameObject.SetActive(false);
     }
 

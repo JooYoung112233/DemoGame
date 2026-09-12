@@ -1,0 +1,504 @@
+{
+  "screen": [
+    1920,
+    1080
+  ],
+  "canvases": [
+    {
+      "path": "Story/NoteUI/NoteUI_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 110,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.0,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/GameHUD/HUD_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 10,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "Story/NarrationUI/NarrationUI_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 90,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.0,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/MapSelectUI/MapSelect_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 50,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "Story/TutorialPrompt/TutorialPrompt_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 85,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.0,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/RaidResultUI/RaidResult_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 100,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/QuestHUD/QuestHUD_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 10,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/NavigationHUD/Nav_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 50,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/ShopUI/Shop_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 50,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "[UseActionManager]/UseChannelCanvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 950,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.0,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/PostRaidEventUI/PostRaidEvent_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 105,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "ToastManager/Toast_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 200,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "Core/ScreenEffectManager/FadeCanvas",
+      "active": false,
+      "enabled": true,
+      "sortingOrder": 999,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": null
+    },
+    {
+      "path": "TraitPanelUI/TraitPanelCanvas",
+      "active": false,
+      "enabled": true,
+      "sortingOrder": 920,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.0,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/DialogueUI/Dialogue_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 90,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "[QuickSlotBar]/QuickSlot_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 30,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "PauseMenu/Pause_Canvas",
+      "active": false,
+      "enabled": true,
+      "sortingOrder": 600,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.0,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/CharacterPanelUI/CharPanel_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 40,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    },
+    {
+      "path": "UIManager/CraftingUI/CraftingUI_Canvas",
+      "active": true,
+      "enabled": true,
+      "sortingOrder": 50,
+      "renderMode": 0,
+      "scaleFactor": 1.0,
+      "rect": "(x:-960.00, y:-540.00, width:1920.00, height:1080.00)",
+      "scaler": {
+        "mode": "ScaleWithScreenSize",
+        "res": "(1920.00, 1080.00)",
+        "match": 0.5,
+        "screenMatch": "MatchWidthOrHeight"
+      }
+    }
+  ],
+  "prefabs": [
+    {
+      "path": "Assets/Resources/UI/CharacterPanelUI.prefab",
+      "name": "CharPanel_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/CraftingUI.prefab",
+      "name": "CraftingUI_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/DialogueUI.prefab",
+      "name": "Dialogue_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/GameHUD.prefab",
+      "name": "HUD_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/GroundPickupUI.prefab",
+      "name": "GroundPickupUI_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/HideoutUI.prefab",
+      "name": "Hideout_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/ItemDetailUI.prefab",
+      "name": "ItemDetailUI_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/MapSelectUI.prefab",
+      "name": "MapSelect_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/NarrationUI.prefab",
+      "name": "NarrationUI_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.0
+    },
+    {
+      "path": "Assets/Resources/UI/NavigationHUD.prefab",
+      "name": "Nav_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/NoteUI.prefab",
+      "name": "NoteUI_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.0
+    },
+    {
+      "path": "Assets/Resources/UI/PauseMenu.prefab",
+      "name": "Pause_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.0
+    },
+    {
+      "path": "Assets/Resources/UI/PostRaidEventUI.prefab",
+      "name": "PostRaidEvent_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/QuestHUD.prefab",
+      "name": "QuestHUD_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/QuestLogUI.prefab",
+      "name": "QuestLogUI_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/QuickSlotBar.prefab",
+      "name": "QuickSlot_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/RadioUI.prefab",
+      "name": "RadioUI_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/RaidMapUI.prefab",
+      "name": "RaidMapUI_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/RaidResultUI.prefab",
+      "name": "RaidResult_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/SettingsUI.prefab",
+      "name": "Settings_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.0
+    },
+    {
+      "path": "Assets/Resources/UI/ShopUI.prefab",
+      "name": "Shop_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/SleepUI.prefab",
+      "name": "Sleep_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/TitleScreen.prefab",
+      "name": "Title_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.0
+    },
+    {
+      "path": "Assets/Resources/UI/ToastManager.prefab",
+      "name": "Toast_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.5
+    },
+    {
+      "path": "Assets/Resources/UI/TraitPanelUI.prefab",
+      "name": "TraitPanelCanvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.0
+    },
+    {
+      "path": "Assets/Resources/UI/TutorialPrompt.prefab",
+      "name": "TutorialPrompt_Canvas",
+      "mode": "ScaleWithScreenSize",
+      "reference": "(1920.00, 1080.00)",
+      "matchWidthOrHeight": 0.0
+    }
+  ],
+  "gameView": [
+    {
+      "Name": "selectedSizeIndex",
+      "type": "System.Int32",
+      "CanWrite": true
+    },
+    {
+      "Name": "currentGameViewSize",
+      "type": "UnityEditor.GameViewSize",
+      "CanWrite": false
+    },
+    {
+      "Name": "targetRenderSize",
+      "type": "UnityEngine.Vector2",
+      "CanWrite": false
+    },
+    {
+      "Name": "targetSize",
+      "type": "UnityEngine.Vector2",
+      "CanWrite": true
+    },
+    {
+      "Name": "minSize",
+      "type": "UnityEngine.Vector2",
+      "CanWrite": true
+    },
+    {
+      "Name": "maxSize",
+      "type": "UnityEngine.Vector2",
+      "CanWrite": true
+    }
+  ]
+}

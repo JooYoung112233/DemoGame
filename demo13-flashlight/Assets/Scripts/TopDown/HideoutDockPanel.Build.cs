@@ -20,7 +20,7 @@ public partial class HideoutDockPanel
         canvas.sortingOrder = 60;
         var scaler = _root.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(RefW, RefH);
+        UITheme.ConfigureCanvasScale(scaler);
         scaler.matchWidthOrHeight = 0.5f;
         _root.AddComponent<GraphicRaycaster>();
 
@@ -41,12 +41,12 @@ public partial class HideoutDockPanel
         var bg = panelGO.AddComponent<Image>();
         bg.color = new Color(0.07f, 0.07f, 0.085f, 0.93f);
 
-        _title   = MakeText(panelGO.transform, "Title", 40, TextAnchor.UpperLeft,
+        _title   = MakeText(panelGO.transform, "Title", 32, TextAnchor.UpperLeft,
                             // ⚠️ 상단 stretch에서 offMax.y는 위쪽 바깥으로 나가는 값이다.
                             // +56이면 제목이 패널 밖으로 떠서 씬 헤더와 겹친다. 안쪽(-)으로 잡는다.
                             // 우상단 X 자리(-90)를 비워 둔다.
                             new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(28f, -84f), new Vector2(-90f, -24f));
-        _body    = MakeText(panelGO.transform, "Body", 26, TextAnchor.UpperLeft,
+        _body    = MakeText(panelGO.transform, "Body", 22, TextAnchor.UpperLeft,
                             new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(28f, 96f), new Vector2(-56f, -190f));
         _body.color = new Color(0.78f, 0.78f, 0.74f);
 

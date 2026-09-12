@@ -155,14 +155,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uC774\uC0C1\uD55C \uC2E0\uD638</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uB77C\uB514\uC624\uC5D0 \uC774\uC0C1\uD55C
-    \uC18C\uB9AC\uAC00 \uC7A1\uD788\uC624. \uC5B4\uB514\uC11C \uB098\uB294\uC9C0
-    \uCC3E\uC544\uB9CC \uC8FC\uC624.\n\u2014 \uBB34\uC804\uC218</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uC2E0\uD638\uC6D0 \uCD94\uC801
-    (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD77000, junk_wire_tangle \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uC774\uC0C1\uD55C \uC2E0\uD638</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uB77C\uB514\uC624\uC5D0 \uC774\uC0C1\uD55C \uC18C\uB9AC\uAC00 \uC7A1\uD788\uC624. \uC5B4\uB514\uC11C \uB098\uB294\uC9C0 \uCC3E\uC544\uB9CC \uC8FC\uC624.\n\u2014 \uBB34\uC804\uC218</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uC2E0\uD638\uC6D0 \uCD94\uC801 (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD77000, junk_wire_tangle \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &426899181737630873
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,6 +252,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &499605543781283005
 GameObject:
   m_ObjectHideFlags: 0
@@ -747,6 +742,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &1045258682636602424
 GameObject:
   m_ObjectHideFlags: 0
@@ -944,14 +941,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uCC3D\uACE0 \uC18C\uB9AC \uC870\uC0AC</color></b> 
-    <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uCC3D\uACE0\uC5D0\uC11C
-    \uBC24\uB9C8\uB2E4 \uC18C\uB9AC\uAC00 \uB098\uC624. \uD55C \uBC88 \uC0B4\uD3B4\uBD10
-    \uC8FC\uC624.\n\u2014 \uCC3D\uACE0\uC9C0\uAE30</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uCC3D\uACE0 \uC778\uADFC \uC870\uC0AC
-    (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD72500, map_fragment \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uCC3D\uACE0 \uC18C\uB9AC \uC870\uC0AC</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uCC3D\uACE0\uC5D0\uC11C \uBC24\uB9C8\uB2E4 \uC18C\uB9AC\uAC00 \uB098\uC624. \uD55C \uBC88 \uC0B4\uD3B4\uBD10 \uC8FC\uC624.\n\u2014 \uCC3D\uACE0\uC9C0\uAE30</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uCC3D\uACE0 \uC778\uADFC \uC870\uC0AC (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD72500, map_fragment \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &1111785377524332292
 GameObject:
   m_ObjectHideFlags: 0
@@ -1246,6 +1236,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &1383983543076776808
 GameObject:
   m_ObjectHideFlags: 0
@@ -1643,8 +1635,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "@ \uAC8C\uC2DC\uD310 \uC758\uB8B0  <size=12><color=#8A8270>\xB7 \uC775\uBA85
-    \uC758\uB8B0</color></size>"
+  m_Text: "@ \uAC8C\uC2DC\uD310 \uC758\uB8B0  <size=12><color=#8A8270>\xB7 \uC775\uBA85 \uC758\uB8B0</color></size>"
 --- !u!1 &1500479058185857903
 GameObject:
   m_ObjectHideFlags: 0
@@ -1959,13 +1950,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uACE0\uCCA0 \uC218\uAC70</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uACE0\uCCA0 \uB2E4\uC12F \uB369\uC774\uB9CC
-    \uBAA8\uC544\uB2E4 \uC8FC\uBA74 \uAC12\uC740 \uC81C\uB300\uB85C \uCCD0\uC8FC\uACA0\uC18C.\n\u2014
-    \uD3D0\uD488\uC0C1</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color>
-    <color=#CCCCCC>\uACE0\uCCA0 \uC870\uAC01 x5 \uB0A9\uD488 (0/5)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD72500, tool_part \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uACE0\uCCA0 \uC218\uAC70</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uACE0\uCCA0 \uB2E4\uC12F \uB369\uC774\uB9CC \uBAA8\uC544\uB2E4 \uC8FC\uBA74 \uAC12\uC740 \uC81C\uB300\uB85C \uCCD0\uC8FC\uACA0\uC18C.\n\u2014 \uD3D0\uD488\uC0C1</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uACE0\uCCA0 \uC870\uAC01 x5 \uB0A9\uD488 (0/5)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD72500, tool_part \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &1786523613950992923
 GameObject:
   m_ObjectHideFlags: 0
@@ -2282,13 +2267,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uBD95\uB300 \uAE09\uAD6C</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC9C0\uD608\uD560 \uCC9C\uC774 \uB2E4 \uB5A8\uC5B4\uC84C\uC18C.
-    \uBD95\uB300 \uB450 \uAC1C\uB9CC \uAD6C\uD574\uB2E4 \uC8FC\uC624.\n\u2014 \uC57D\uBC29
-    \uC2EC\uBD80\uB984\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color>
-    <color=#CCCCCC>\uBD95\uB300 x2 \uB0A9\uD488 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD72500, painkiller \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uBD95\uB300 \uAE09\uAD6C</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC9C0\uD608\uD560 \uCC9C\uC774 \uB2E4 \uB5A8\uC5B4\uC84C\uC18C. \uBD95\uB300 \uB450 \uAC1C\uB9CC \uAD6C\uD574\uB2E4 \uC8FC\uC624.\n\u2014 \uC57D\uBC29 \uC2EC\uBD80\uB984\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uBD95\uB300 x2 \uB0A9\uD488 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD72500, painkiller \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &2018582734136093522
 GameObject:
   m_ObjectHideFlags: 0
@@ -2424,6 +2403,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &2174192698656258190
 GameObject:
   m_ObjectHideFlags: 0
@@ -2776,13 +2757,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uAC70\uCE5C \uB188 \uD558\uB098</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC720\uB09C\uD788 \uC0AC\uB098\uC6B4 \uB188
-    \uD558\uB098\uAC00 \uC0AC\uB78C\uC744 \uD574\uCCE4\uC18C. \uADF8\uB188\uB9CC
-    \uCC98\uB9AC\uD574 \uC8FC\uC624.\n\u2014 \uD53C\uD574\uC790 \uAC00\uC871</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uC815\uC608 \uBC34\uB527 x1 \uCC98\uCE58
-    (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD77000, knife \xD71, coat_light \xD71</color>"
+  m_Text: "<b><color=#DBBC6B>\uAC70\uCE5C \uB188 \uD558\uB098</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC720\uB09C\uD788 \uC0AC\uB098\uC6B4 \uB188 \uD558\uB098\uAC00 \uC0AC\uB78C\uC744 \uD574\uCCE4\uC18C. \uADF8\uB188\uB9CC \uCC98\uB9AC\uD574 \uC8FC\uC624.\n\u2014 \uD53C\uD574\uC790 \uAC00\uC871</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uC815\uC608 \uBC34\uB527 x1 \uCC98\uCE58 (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD77000, knife \xD71, coat_light \xD71</color>"
 --- !u!1 &2538609448681061243
 GameObject:
   m_ObjectHideFlags: 0
@@ -2998,6 +2973,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &2753338729671206691
 GameObject:
   m_ObjectHideFlags: 0
@@ -3076,13 +3053,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uC57D\uD0C8\uAFBC \uC815\uB9AC</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uACE8\uBAA9\uC5D0 \uC57D\uD0C8\uAFBC\uC774
-    \uC14B\uC774\uB098 \uC8FD\uCE58\uACE0 \uC788\uC18C. \uC880 \uCE58\uC6CC \uC8FC\uBA74
-    \uC0AC\uB840\uD558\uACA0\uC18C.\n\u2014 \uC810\uD3EC \uC8FC\uC778</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uC548\uC804 \uAD6C\uAC04 \uC57D\uD0C8\uAFBC
-    x3 \uCC98\uCE58 (0/3)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD77000, ammo_rounds \xD71</color>"
+  m_Text: "<b><color=#DBBC6B>\uC57D\uD0C8\uAFBC \uC815\uB9AC</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uACE8\uBAA9\uC5D0 \uC57D\uD0C8\uAFBC\uC774 \uC14B\uC774\uB098 \uC8FD\uCE58\uACE0 \uC788\uC18C. \uC880 \uCE58\uC6CC \uC8FC\uBA74 \uC0AC\uB840\uD558\uACA0\uC18C.\n\u2014 \uC810\uD3EC \uC8FC\uC778</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uC548\uC804 \uAD6C\uAC04 \uC57D\uD0C8\uAFBC x3 \uCC98\uCE58 (0/3)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD77000, ammo_rounds \xD71</color>"
 --- !u!1 &3187589572705150592
 GameObject:
   m_ObjectHideFlags: 0
@@ -3179,6 +3150,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &3192174599157592196
 GameObject:
   m_ObjectHideFlags: 0
@@ -3475,6 +3448,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &3610977167586917292
 GameObject:
   m_ObjectHideFlags: 0
@@ -3553,14 +3528,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uC804\uB825\uCCB4 \uB9E4\uC785</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC804\uB825\uCCB4\uB97C \uAC00\uC838\uC624\uBA74
-    \uD6C4\uD558\uAC8C \uCCD0\uC8FC\uACA0\uC18C. \uAE68\uC9C0\uC9C0 \uC54A\uAC8C
-    \uAC00\uC838\uC624\uC2DC\uC624.\n\u2014 \uC804\uB2F9\uD3EC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uB8E8\uB514 \uC870\uAC01 x1 \uB0A9\uD488
-    (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD735000, \uC2E0\uB8B0 +1</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uC804\uB825\uCCB4 \uB9E4\uC785</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC804\uB825\uCCB4\uB97C \uAC00\uC838\uC624\uBA74 \uD6C4\uD558\uAC8C \uCCD0\uC8FC\uACA0\uC18C. \uAE68\uC9C0\uC9C0 \uC54A\uAC8C \uAC00\uC838\uC624\uC2DC\uC624.\n\u2014 \uC804\uB2F9\uD3EC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uB8E8\uB514 \uC870\uAC01 x1 \uB0A9\uD488 (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD735000, \uC2E0\uB8B0 +1</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &3616072343603288590
 GameObject:
   m_ObjectHideFlags: 0
@@ -3755,13 +3723,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uD604\uC0C1 \uAD6C\uC5ED \uC18E\uAE30</color></b> 
-    <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uBD88\uBE5B \uAF2D
-    \uCC59\uACA8 \uAC00\uC2DC\uC624. \uC9D9\uC740 \uACF3\uC5D0\uC11C \uB458\uB9CC
-    \uC904\uC5EC \uC8FC\uBA74 \uD6C4\uD788 \uCE58\uB974\uACA0\uC18C.\n\u2014 \uC57C\uACBD\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uD604\uC0C1 \uAD6C\uC5ED \uBC34\uB527
-    x2 \uCC98\uCE58 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD77000, battery_aa \xD72</color>"
+  m_Text: "<b><color=#DBBC6B>\uD604\uC0C1 \uAD6C\uC5ED \uC18E\uAE30</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uBD88\uBE5B \uAF2D \uCC59\uACA8 \uAC00\uC2DC\uC624. \uC9D9\uC740 \uACF3\uC5D0\uC11C \uB458\uB9CC \uC904\uC5EC \uC8FC\uBA74 \uD6C4\uD788 \uCE58\uB974\uACA0\uC18C.\n\u2014 \uC57C\uACBD\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uD604\uC0C1 \uAD6C\uC5ED \uBC34\uB527 x2 \uCC98\uCE58 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD77000, battery_aa \xD72</color>"
 --- !u!1 &3808981012792930198
 GameObject:
   m_ObjectHideFlags: 0
@@ -3977,6 +3939,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &3924582056611650427
 GameObject:
   m_ObjectHideFlags: 0
@@ -4528,14 +4492,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uAE30\uACC4 \uBD80\uD488 \uAD6C\uD568</color></b> 
-    <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC218\uB9AC\uD560
-    \uBB3C\uAC74\uC774 \uBC00\uB838\uC18C. \uBD80\uD488 \uC138 \uAC1C\uB9CC \uB9DE\uCDB0\uB2E4
-    \uC8FC\uC624.\n\u2014 \uACE8\uBAA9 \uC218\uB9AC\uC7C1\uC774</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uACF5\uAD6C \uBD80\uD488 x3 \uB0A9\uD488
-    (0/3)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD77000, repair_kit \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uAE30\uACC4 \uBD80\uD488 \uAD6C\uD568</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC218\uB9AC\uD560 \uBB3C\uAC74\uC774 \uBC00\uB838\uC18C. \uBD80\uD488 \uC138 \uAC1C\uB9CC \uB9DE\uCDB0\uB2E4 \uC8FC\uC624.\n\u2014 \uACE8\uBAA9 \uC218\uB9AC\uC7C1\uC774</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uACF5\uAD6C \uBD80\uD488 x3 \uB0A9\uD488 (0/3)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD77000, repair_kit \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &4726640616329702208
 GameObject:
   m_ObjectHideFlags: 0
@@ -4711,6 +4668,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &4903630411526498811
 GameObject:
   m_ObjectHideFlags: 0
@@ -4789,14 +4748,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uBD84\uC2E4\uBB3C\uC744 \uCC3E\uC18C</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC774\uB984 \uC801\uD78C \uBA85\uD328\uB97C
-    \uC783\uC5C8\uC18C. \uAC12\uC740 \uC548 \uB530\uC9C8 \uD14C\uB2C8 \uAF2D \uCC3E\uC544
-    \uC8FC\uC624.\n(\uC11C\uBA85 \uC5C6\uC74C)</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uC774\uB984 \uC801\uD78C \uBA85\uD328
-    x1 \uB0A9\uD488 (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD77000, \uC2E0\uB8B0 +1</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uBD84\uC2E4\uBB3C\uC744 \uCC3E\uC18C</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC774\uB984 \uC801\uD78C \uBA85\uD328\uB97C \uC783\uC5C8\uC18C. \uAC12\uC740 \uC548 \uB530\uC9C8 \uD14C\uB2C8 \uAF2D \uCC3E\uC544 \uC8FC\uC624.\n(\uC11C\uBA85 \uC5C6\uC74C)</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uC774\uB984 \uC801\uD78C \uBA85\uD328 x1 \uB0A9\uD488 (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD77000, \uC2E0\uB8B0 +1</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &5086601841560705605
 GameObject:
   m_ObjectHideFlags: 0
@@ -5048,6 +5000,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &5144644450017471465
 GameObject:
   m_ObjectHideFlags: 0
@@ -5126,13 +5080,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uD1B5\uC870\uB9BC \uAD6C\uD568</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC544\uC774\uAC00 \uAD76\uACE0 \uC788\uC18C.
-    \uD1B5\uC870\uB9BC \uC138 \uAC1C\uBA74 \uBB50\uB4E0 \uAC12\uC744 \uCE58\uB974\uACA0\uC18C.\n\u2014
-    \uACE8\uBAA9 \uC544\uB099</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color>
-    <color=#CCCCCC>\uD1B5\uC870\uB9BC x3 \uB0A9\uD488 (0/3)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD72500, water_bottle \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uD1B5\uC870\uB9BC \uAD6C\uD568</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC544\uC774\uAC00 \uAD76\uACE0 \uC788\uC18C. \uD1B5\uC870\uB9BC \uC138 \uAC1C\uBA74 \uBB50\uB4E0 \uAC12\uC744 \uCE58\uB974\uACA0\uC18C.\n\u2014 \uACE8\uBAA9 \uC544\uB099</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uD1B5\uC870\uB9BC x3 \uB0A9\uD488 (0/3)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD72500, water_bottle \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &5174786491493954935
 GameObject:
   m_ObjectHideFlags: 0
@@ -5485,13 +5433,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uADFC\uBC29 \uC815\uBC00 \uC218\uC0C9</color></b> 
-    <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC774 \uADFC\uBC29\uC744
-    \uC2F9 \uD6D1\uC5B4 \uC8FC\uC624. \uBE60\uC9C4 \uB370 \uC5C6\uC774.\n\u2014 \uD68C\uC218\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uD30C\uBC0D \uD3EC\uC778\uD2B8
-    x3 \uC218\uC0C9 (0/3)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD72500</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market
-    \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uADFC\uBC29 \uC815\uBC00 \uC218\uC0C9</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC774 \uADFC\uBC29\uC744 \uC2F9 \uD6D1\uC5B4 \uC8FC\uC624. \uBE60\uC9C4 \uB370 \uC5C6\uC774.\n\u2014 \uD68C\uC218\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uD30C\uBC0D \uD3EC\uC778\uD2B8 x3 \uC218\uC0C9 (0/3)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD72500</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &5648440436823013846
 GameObject:
   m_ObjectHideFlags: 0
@@ -5588,6 +5530,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &5680720087329032929
 GameObject:
   m_ObjectHideFlags: 0
@@ -5805,6 +5749,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &5814139919649277339
 GameObject:
   m_ObjectHideFlags: 0
@@ -6393,6 +6339,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &6450544350478025835
 GameObject:
   m_ObjectHideFlags: 0
@@ -6547,13 +6495,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uC794\uD574 \uC18D \uBAA9\uC18C\uB9AC</color></b> 
-    <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uBB34\uB108\uC9C4
-    \uC0C1\uC810\uC5D0 \uAC07\uD78C \uC0DD\uC874\uC790\uB97C \uAD6C\uCD9C\uD558\uB77C.</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uAC07\uD78C \uC0DD\uC874\uC790
-    \uAD6C\uCD9C (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD76000, bandage \xD72</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uC794\uD574 \uC18D \uBAA9\uC18C\uB9AC</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uBB34\uB108\uC9C4 \uC0C1\uC810\uC5D0 \uAC07\uD78C \uC0DD\uC874\uC790\uB97C \uAD6C\uCD9C\uD558\uB77C.</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uAC07\uD78C \uC0DD\uC874\uC790 \uAD6C\uCD9C (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD76000, bandage \xD72</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &6581120107390689499
 GameObject:
   m_ObjectHideFlags: 0
@@ -6729,6 +6671,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &6664328069465620907
 GameObject:
   m_ObjectHideFlags: 0
@@ -6825,6 +6769,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &6724241821963463883
 GameObject:
   m_ObjectHideFlags: 0
@@ -7262,13 +7208,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uBD81\uCABD \uAE38 \uD655\uC778</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uBD81\uCABD \uAE38\uC774 \uB6AB\uB838\uB294\uC9C0
-    \uBD10 \uC8FC\uC624. \uC9C0\uB3C4\uAC12\uC740 \uB530\uB85C \uCCD0\uC8FC\uACA0\uC18C.\n\u2014
-    \uAE38\uC7A1\uC774</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color>
-    <color=#CCCCCC>\uBD81\uCABD \uC9C4\uC785\uB85C \uC870\uC0AC (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD72500, map_fragment \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uBD81\uCABD \uAE38 \uD655\uC778</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uBD81\uCABD \uAE38\uC774 \uB6AB\uB838\uB294\uC9C0 \uBD10 \uC8FC\uC624. \uC9C0\uB3C4\uAC12\uC740 \uB530\uB85C \uCCD0\uC8FC\uACA0\uC18C.\n\u2014 \uAE38\uC7A1\uC774</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uBD81\uCABD \uC9C4\uC785\uB85C \uC870\uC0AC (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD72500, map_fragment \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &7085115452505983051
 GameObject:
   m_ObjectHideFlags: 0
@@ -7700,12 +7640,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uAE38\uBAA9 \uCCAD\uC18C</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC7A5 \uBCF4\uB7EC \uAC08 \uAE38\uC744
-    \uB458\uC774 \uB9C9\uACE0 \uC788\uC18C. \uB6AB\uC5B4\uB9CC \uC8FC\uC624.\n\u2014
-    \uB178\uC810\uC0C1</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color>
-    <color=#CCCCCC>\uACE8\uBAA9 \uC57D\uD0C8\uAFBC x2 \uCC98\uCE58 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD72500, \uC2E0\uB8B0 +1</color>"
+  m_Text: "<b><color=#DBBC6B>\uAE38\uBAA9 \uCCAD\uC18C</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC7A5 \uBCF4\uB7EC \uAC08 \uAE38\uC744 \uB458\uC774 \uB9C9\uACE0 \uC788\uC18C. \uB6AB\uC5B4\uB9CC \uC8FC\uC624.\n\u2014 \uB178\uC810\uC0C1</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uACE8\uBAA9 \uC57D\uD0C8\uAFBC x2 \uCC98\uCE58 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD72500, \uC2E0\uB8B0 +1</color>"
 --- !u!1 &7402968029756092299
 GameObject:
   m_ObjectHideFlags: 0
@@ -7784,13 +7719,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uBB34\uB108\uC9C4 \uC0C1\uC810</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC61B \uC0C1\uC810\uC774 \uBB34\uB108\uC84C\uB2E4\uB294\uB370,
-    \uC548\uC774 \uAD81\uAE08\uD558\uC624. \uD55C \uBC88 \uB458\uB7EC\uBD10 \uC8FC\uC624.\n\u2014
-    \uD638\uC0AC\uAC00</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color>
-    <color=#CCCCCC>\uBD95\uAD34 \uC0C1\uC810 \uC870\uC0AC (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD72500</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market
-    \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uBB34\uB108\uC9C4 \uC0C1\uC810</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC61B \uC0C1\uC810\uC774 \uBB34\uB108\uC84C\uB2E4\uB294\uB370, \uC548\uC774 \uAD81\uAE08\uD558\uC624. \uD55C \uBC88 \uB458\uB7EC\uBD10 \uC8FC\uC624.\n\u2014 \uD638\uC0AC\uAC00</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uBD95\uAD34 \uC0C1\uC810 \uC870\uC0AC (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD72500</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &7640267868752194444
 GameObject:
   m_ObjectHideFlags: 0
@@ -7887,6 +7816,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &7642334100525516799
 GameObject:
   m_ObjectHideFlags: 0
@@ -7983,6 +7914,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &7859143792995372292
 GameObject:
   m_ObjectHideFlags: 0
@@ -8458,13 +8391,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uBB3B\uC9C0 \uB9C8\uC2DC\uC624</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uBB3B\uC9C0 \uB9D0\uACE0 \uAC00\uC838\uB2E4\uB9CC
-    \uC8FC\uC624. \uAC12\uC740 \uB450 \uBC30\uB85C \uCE58\uB974\uACA0\uC18C.\n(\uD45C\uC2DD\uB9CC
-    \u25B2)</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color>
-    <color=#CCCCCC>\uD45C\uC2DD \uBD09\uD22C x1 \uB0A9\uD488 (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD714000</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market
-    \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uBB3B\uC9C0 \uB9C8\uC2DC\uC624</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uBB3B\uC9C0 \uB9D0\uACE0 \uAC00\uC838\uB2E4\uB9CC \uC8FC\uC624. \uAC12\uC740 \uB450 \uBC30\uB85C \uCE58\uB974\uACA0\uC18C.\n(\uD45C\uC2DD\uB9CC \u25B2)</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uD45C\uC2DD \uBD09\uD22C x1 \uB0A9\uD488 (0/1)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD714000</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &8051837477765649594
 GameObject:
   m_ObjectHideFlags: 0
@@ -8857,6 +8784,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -8878,7 +8806,7 @@ MonoBehaviour:
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
-  m_ScreenMatchMode: 0
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -9413,14 +9341,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uD604\uC0C1 \uACBD\uACC4 \uC815\uCC30</color></b> 
-    <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uACBD\uACC4\uAC00
-    \uC6C0\uC9C1\uC778 \uAC83 \uAC19\uC18C. \uB450 \uACF3\uB9CC \uD655\uC778\uD574
-    \uC8FC\uBA74 \uAC12\uC744 \uCE58\uB974\uACA0\uC18C.\n\u2014 \uC57C\uACBD\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n 
-    <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uD604\uC0C1 \uACBD\uACC4 POI x2
-    \uC815\uCC30 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD77000, ruby_shard \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uD604\uC0C1 \uACBD\uACC4 \uC815\uCC30</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uACBD\uACC4\uAC00 \uC6C0\uC9C1\uC778 \uAC83 \uAC19\uC18C. \uB450 \uACF3\uB9CC \uD655\uC778\uD574 \uC8FC\uBA74 \uAC12\uC744 \uCE58\uB974\uACA0\uC18C.\n\u2014 \uC57C\uACBD\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uD604\uC0C1 \uACBD\uACC4 POI x2 \uC815\uCC30 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD77000, ruby_shard \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &8512145408551962507
 GameObject:
   m_ObjectHideFlags: 0
@@ -9517,6 +9438,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &8601178999411270865
 GameObject:
   m_ObjectHideFlags: 0
@@ -9595,13 +9518,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uC7A1\uB3D9\uC0AC\uB2C8 \uC218\uC9D1</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC4F8 \uB9CC\uD55C \uAC70\uBA74 \uBB50\uB4E0
-    \uC88B\uC18C. \uC5EC\uB35F \uAC00\uC9C0\uB9CC \uCC44\uC6CC\uB2E4 \uC8FC\uC624.\n\u2014
-    \uACE0\uBB3C\uC0C1</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color>
-    <color=#CCCCCC>\uC7AC\uB5A8\uC774 x8 \uB0A9\uD488 (0/8)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD77000, junk_tape_duct \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uC7A1\uB3D9\uC0AC\uB2C8 \uC218\uC9D1</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC4F8 \uB9CC\uD55C \uAC70\uBA74 \uBB50\uB4E0 \uC88B\uC18C. \uC5EC\uB35F \uAC00\uC9C0\uB9CC \uCC44\uC6CC\uB2E4 \uC8FC\uC624.\n\u2014 \uACE0\uBB3C\uC0C1</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uC7AC\uB5A8\uC774 x8 \uB0A9\uD488 (0/8)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD77000, junk_tape_duct \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &8663718431460645622
 GameObject:
   m_ObjectHideFlags: 0
@@ -9883,13 +9800,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "<b><color=#DBBC6B>\uBC30\uD130\uB9AC \uC694\uCCAD</color></b>  <color=#FF8C73>\u25CF
-    \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC190\uC804\uB4F1\uC774 \uC8FD\uC5B4 \uBC24\uC774
-    \uBB34\uC12D\uC18C. \uBC30\uD130\uB9AC \uB450 \uAC1C\uBA74 \uB418\uC624.\n\u2014
-    \uC57C\uACBD\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color>
-    <color=#CCCCCC>\uAC74\uC804\uC9C0 x2 \uB0A9\uD488 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527
-    \xD72500, flashlight_bulb \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED:
-    scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
+  m_Text: "<b><color=#DBBC6B>\uBC30\uD130\uB9AC \uC694\uCCAD</color></b>  <color=#FF8C73>\u25CF \uC2E0\uADDC</color>\n<color=#EBE5D6>\uC190\uC804\uB4F1\uC774 \uC8FD\uC5B4 \uBC24\uC774 \uBB34\uC12D\uC18C. \uBC30\uD130\uB9AC \uB450 \uAC1C\uBA74 \uB418\uC624.\n\u2014 \uC57C\uACBD\uAFBC</color>\n\n<color=#8A8270>\uBAA9\uD45C</color>\n  <color=#CCCCCC>\u2610</color> <color=#CCCCCC>\uAC74\uC804\uC9C0 x2 \uB0A9\uD488 (0/2)</color>\n\n<color=#8A8270>\uBCF4\uC0C1</color>\n<color=#EBE5D6>\uD06C\uB808\uB527 \xD72500, flashlight_bulb \xD71</color>\n\n<color=#665F52>[\uCCA8\uBD80] \uC9C0\uC5ED: scrap_market \xB7 \uC9C0\uB3C4 \uCCA8\uBD80</color>"
 --- !u!1 &9040375209298104049
 GameObject:
   m_ObjectHideFlags: 0
@@ -10144,6 +10055,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &9152933876799973514
 GameObject:
   m_ObjectHideFlags: 0
@@ -10395,3 +10308,5 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1

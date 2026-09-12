@@ -375,6 +375,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -396,7 +397,7 @@ MonoBehaviour:
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
-  m_ScreenMatchMode: 0
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -533,5 +534,4 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "[\uD720/\u2191\u2193] \uC120\uD0DD   [E] \uC90D\uAE30   [F] \uC804\uBD80  
-    [Esc] \uB2EB\uAE30"
+  m_Text: "[\uD720/\u2191\u2193] \uC120\uD0DD   [E] \uC90D\uAE30   [F] \uC804\uBD80   [Esc] \uB2EB\uAE30"

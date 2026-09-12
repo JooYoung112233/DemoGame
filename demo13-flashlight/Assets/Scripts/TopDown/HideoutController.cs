@@ -256,7 +256,7 @@ public class HideoutController : MonoBehaviour
         canvas.sortingOrder = 35; // 인벤토리(40) 아래, 확인창만 별도 모달 레이어
         var scaler = _uiRoot.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         scaler.matchWidthOrHeight = .5f;
         _uiRoot.AddComponent<GraphicRaycaster>();
 
@@ -279,6 +279,17 @@ public class HideoutController : MonoBehaviour
             18, TextAnchor.UpperCenter,
             new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(hx, -78f), new Vector2(1000f, 36f),
             new Color(0.8f, 0.82f, 0.85f, 0.9f));
+
+        // Stretch within the room side of the canvas, including non-16:9 displays.
+        float reserved = HideoutDiorama.Active ? DockW + DockMargin : 0f;
+        foreach (string headerName in new[] { "Title", "Hint" })
+        {
+            var header = _uiRoot.transform.Find(headerName).GetComponent<RectTransform>();
+            header.anchorMin = new Vector2(0, 1);
+            header.anchorMax = Vector2.one;
+            header.offsetMin = new Vector2(40, headerName == "Title" ? -70 : -114);
+            header.offsetMax = new Vector2(-reserved - 40, headerName == "Title" ? -28 : -78);
+        }
 
         // 좌하단 버튼: 나가기 + 인벤토리만(시설은 방 안 타일을 클릭).
         MakeButton("ExitButton",      "마을로 나가기",  new Vector2(40f, 40f),  new Vector2(200f, 64f), ShowExitConfirm);

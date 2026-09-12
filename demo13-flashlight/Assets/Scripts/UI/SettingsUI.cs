@@ -193,7 +193,7 @@ public class SettingsUI : MonoBehaviour
         canvas.sortingOrder = 620;   // PauseMenu(600) 위
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         canvasGO.AddComponent<GraphicRaycaster>();
 
         // 어두운 오버레이 + 중앙 패널

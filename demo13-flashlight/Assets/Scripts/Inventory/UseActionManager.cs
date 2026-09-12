@@ -97,7 +97,7 @@ public class UseActionManager : MonoBehaviour
         canvas.sortingOrder = 950;   // HUD 위, 인벤 패널 비슷
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         canvasGO.AddComponent<GraphicRaycaster>();
 
         // 컨테이너(하단 중앙)

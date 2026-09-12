@@ -15,9 +15,10 @@ public class QuestHUD : MonoBehaviour
         {
             originalPanelOffsetMax = rt.offsetMax;
             originalPanelOffsetMin = rt.offsetMin;
-            float shift = Mathf.Min(0f, -354f - rt.offsetMax.y);
+            float top = -TownMinimapHUD.PanelHeight - 44f;
+            float shift = Mathf.Min(0f, top - rt.offsetMax.y);
             rt.offsetMin += new Vector2(0, shift);
-            rt.offsetMax = new Vector2(rt.offsetMax.x, Mathf.Min(rt.offsetMax.y, -354f));
+            rt.offsetMax = new Vector2(rt.offsetMax.x, Mathf.Min(rt.offsetMax.y, top));
         }
         else
         {
@@ -169,7 +170,7 @@ public class QuestHUD : MonoBehaviour
 
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         scaler.matchWidthOrHeight = 0.5f;
 
         // 우측 퀘스트 패널

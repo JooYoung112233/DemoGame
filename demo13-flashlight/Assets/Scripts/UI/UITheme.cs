@@ -12,6 +12,22 @@ using UnityEngine.UI;
 /// </summary>
 public static class UITheme
 {
+    /// <summary>Fit the full 1920×1080 design on every aspect ratio; never crop a fixed-size menu.</summary>
+    public static void ConfigureCanvasScale(UnityEngine.UI.CanvasScaler scaler)
+    {
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.Expand;
+    }
+
+    public static Vector2 CanvasSize
+    {
+        get
+        {
+            float scale = Mathf.Max(.01f, Mathf.Min(Screen.width / 1920f, Screen.height / 1080f));
+            return new Vector2(Screen.width / scale, Screen.height / scale);
+        }
+    }
     // ── 배경 계층 (어두움 → 밝음) ─────────────────────────────
     public static readonly Color Backdrop   = new Color(0.085f, 0.082f, 0.072f, 0.99f);  // 전체화면 모달 배경
     public static readonly Color Panel       = new Color(0.135f, 0.130f, 0.115f, 1.00f);  // 패널/카드

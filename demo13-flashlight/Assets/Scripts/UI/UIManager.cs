@@ -470,6 +470,8 @@ public class UIManager : MonoBehaviour
         if (LootListUI.IsShowing) LootListUI.Hide();
         if (ItemDetailUI.IsShowing) ItemDetailUI.Hide();
         if (SettingsUI.IsShowing) SettingsUI.Hide();
+        if (CodexUI.IsShowing) CodexUI.Hide();
+        if (TraitPanelUI.IsShowing) TraitPanelUI.Hide();
     }
 
     /// <summary>현재 어떤 UI든 열려있는지</summary>

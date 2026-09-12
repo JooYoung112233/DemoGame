@@ -1,0 +1,42 @@
+[
+  {
+    "check": "one active EventSystem",
+    "pass": true
+  },
+  {
+    "check": "CloseAll clears codex",
+    "pass": true
+  },
+  {
+    "check": "CloseAll clears traits",
+    "pass": true
+  },
+  {
+    "check": "inventory hides town map",
+    "pass": true
+  },
+  {
+    "check": "inventory close button raycast and action",
+    "pass": true
+  },
+  {
+    "check": "settings close restores pause",
+    "pass": true
+  },
+  {
+    "check": "pause resume button and time",
+    "pass": true
+  },
+  {
+    "check": "quest content visible and scrolls",
+    "pass": true
+  },
+  {
+    "check": "quest close button raycast and action",
+    "pass": true
+  },
+  {
+    "check": "root canvas scaling consistent",
+    "pass": true
+  }
+]

@@ -154,6 +154,7 @@ public class CharacterPanelUI : MonoBehaviour
     void Awake()
     {
         if (!IsGenerated) GenerateUI();
+        ApplyReadableTypography();
         WireEvents();   // onClick은 프리팹에 직렬화 안 됨 → 양쪽 경로(코드생성/프리팹)에서 정적 버튼 리스너 재부착
         BindEvents();
     }
@@ -584,7 +585,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         scaler.matchWidthOrHeight = 0.5f;
 
         canvasGO.AddComponent<GraphicRaycaster>();
@@ -622,11 +623,24 @@ public class CharacterPanelUI : MonoBehaviour
         cBtn.onClick.AddListener(Hide);
         MakeChildText(closeGO.transform, "✕", 18, UITheme.TextBright);
 
+        ApplyReadableTypography();
         panelRoot.SetActive(false);
     }
 
     public void BindEvents()
     {
+    }
+
+    public void ApplyReadableTypography()
+    {
+        if (panelRoot == null) return;
+        foreach (var text in panelRoot.GetComponentsInChildren<UnityEngine.UI.Text>(true))
+        {
+            text.fontSize = Mathf.Max(16, text.fontSize);
+            if (text.name == "MidTitle" || text.name == "CharTitle") text.fontSize = 24;
+            if (text == charHpText || text == charStaminaText || text == charWaterText ||
+                text == charFoodText || text == charWeightText) text.fontSize = 18;
+        }
     }
 
 #if UNITY_EDITOR
@@ -3776,7 +3790,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         var txt = go.AddComponent<Text>();
         txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        txt.fontSize = fontSize;
+        txt.fontSize = Mathf.Max(16, fontSize);
         txt.color = color;
         txt.text = content;
         txt.alignment = align;
@@ -3798,7 +3812,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         var txt = go.AddComponent<Text>();
         txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        txt.fontSize = fontSize;
+        txt.fontSize = Mathf.Max(16, fontSize);
         txt.fontStyle = FontStyle.Bold;
         txt.color = color;
         txt.text = content;

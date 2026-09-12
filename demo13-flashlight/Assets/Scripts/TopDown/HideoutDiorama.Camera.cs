@@ -62,7 +62,7 @@ public partial class HideoutDiorama
         Vector2 projectedCenter = Vector2.zero;
         _wantedBias = overrideBias != Vector2.zero ? overrideBias : center - new Vector2(0.5f, 0.5f);
         // The default room also has a vertical bias because of HUD margins; it is not an open dock.
-        _framed = free.width < .999f || free.yMin > 112f / HideoutDockPanel.RefHeight + .001f;
+        _framed = free.width < .999f || free.yMin > 112f / UITheme.CanvasSize.y + .001f;
         _frameWidth = Screen.width; _frameHeight = Screen.height;
         if (_cam != null) _frameRotation = _cam.transform.rotation;
 

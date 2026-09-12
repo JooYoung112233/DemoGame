@@ -129,6 +129,7 @@ public partial class HideoutDiorama : MonoBehaviour
         bool dockOpen = HideoutDockPanel.Instance != null && HideoutDockPanel.Instance.IsOpen;
         if (_frameWidth != Screen.width || _frameHeight != Screen.height || (_cam != null && Quaternion.Angle(_frameRotation, _cam.transform.rotation) > .1f))
         {
+            LayoutFacilityBar();
             if (dockOpen && _current != null)
                 FrameInto(HideoutDockPanel.FreeScreenRect(_current.moduleKey, _current.dock), _current.cameraBias);
             else FrameRoom();

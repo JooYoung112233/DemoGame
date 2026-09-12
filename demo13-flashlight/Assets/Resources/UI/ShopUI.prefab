@@ -155,8 +155,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\uC67C\uCABD \uC0C1\uC778 \uC7AC\uACE0\uC5D0\uC11C\n\uAD6C\uB9E4\uD560
-    \uBB3C\uAC74\uC744 \uC120\uD0DD\uD558\uC138\uC694."
+  m_Text: "\uC67C\uCABD \uC0C1\uC778 \uC7AC\uACE0\uC5D0\uC11C\n\uAD6C\uB9E4\uD560 \uBB3C\uAC74\uC744 \uC120\uD0DD\uD558\uC138\uC694."
 --- !u!1 &82580532861215676
 GameObject:
   m_ObjectHideFlags: 0
@@ -1112,6 +1111,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1133,7 +1133,7 @@ MonoBehaviour:
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
-  m_ScreenMatchMode: 0
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -2413,8 +2413,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\uD310\uB9E4 \uD2B8\uB808\uC774  (\uCC3D\uACE0 \uC544\uC774\uD15C \uD074\uB9AD
-    = \uB2F4\uAE30)"
+  m_Text: "\uD310\uB9E4 \uD2B8\uB808\uC774  (\uCC3D\uACE0 \uC544\uC774\uD15C \uD074\uB9AD = \uB2F4\uAE30)"
 --- !u!1 &2230492907193342483
 GameObject:
   m_ObjectHideFlags: 0

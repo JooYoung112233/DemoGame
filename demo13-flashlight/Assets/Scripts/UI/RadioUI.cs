@@ -190,7 +190,7 @@ public class RadioUI : MonoBehaviour
         canvas.sortingOrder = 55;
         var scaler = uiRoot.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         scaler.matchWidthOrHeight = 0.5f;
         uiRoot.AddComponent<GraphicRaycaster>();
 

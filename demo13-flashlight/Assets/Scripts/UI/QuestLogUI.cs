@@ -318,7 +318,7 @@ public class QuestLogUI : MonoBehaviour
         canvas.sortingOrder = 58;
         var scaler = uiRoot.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UITheme.ConfigureCanvasScale(scaler);
         scaler.matchWidthOrHeight = 0.5f;
         uiRoot.AddComponent<GraphicRaycaster>();
         // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
@@ -376,7 +376,7 @@ public class QuestLogUI : MonoBehaviour
         sidebar.AddComponent<Image>().color = CPanel2;
 
         MakeLabel(sidebar.transform, "SbTitle", "의뢰인", 16, CFaint, TextAnchor.MiddleLeft,
-            new Vector2(0, 1), new Vector2(1, 1), new Vector2(16, -10), new Vector2(-16, -34), true);
+            new Vector2(0, 1), new Vector2(1, 1), new Vector2(16, -34), new Vector2(-16, -10), true);
 
         sidebarContent = MakeScrollView(sidebar.transform, "SbScroll",
             new Vector2(0, 0), new Vector2(1, 1), new Vector2(6, 8), new Vector2(-6, -40));
@@ -462,12 +462,12 @@ public class QuestLogUI : MonoBehaviour
 
             // 이름
             MakeLabel(item.transform, "Name", s.displayName, 15, CText, TextAnchor.LowerLeft,
-                new Vector2(0, 0), new Vector2(1, 1), new Vector2(64, 6), new Vector2(-10, -8), true);
+                new Vector2(0, 1), new Vector2(1, 1), new Vector2(64, -30), new Vector2(-68, -6), true);
 
             // 한줄 미리보기 (최근 의뢰 제목)
             string preview = s.entries.Count > 0 ? EntryTitle(s.entries[s.entries.Count - 1]) : "(의뢰 없음)";
             MakeLabel(item.transform, "Preview", preview, 12, CFaint, TextAnchor.UpperLeft,
-                new Vector2(0, 0), new Vector2(1, 1), new Vector2(64, 8), new Vector2(-10, -34), false);
+                new Vector2(0, 1), new Vector2(1, 1), new Vector2(64, -56), new Vector2(-10, -34), false);
 
             // 뱃지 (신규/보고)
             if (s.hasReportable || s.newCount > 0)
@@ -891,7 +891,7 @@ public class QuestLogUI : MonoBehaviour
         vpRT.offsetMin = offsetMin; vpRT.offsetMax = offsetMax;
         var vpImg = viewport.AddComponent<Image>();
         vpImg.color = new Color(0, 0, 0, 0.001f); // 거의 투명, raycast target용
-        viewport.AddComponent<Mask>().showMaskGraphic = false;
+        viewport.AddComponent<RectMask2D>(); // Alpha-clipped stencil masks erase content when the backing Image is almost transparent.
 
         var scroll = viewport.AddComponent<ScrollRect>();
         scroll.horizontal = false;
