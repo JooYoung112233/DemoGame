@@ -1,0 +1,143 @@
+{
+  "units": "metres",
+  "cameraPitch": 62,
+  "unityImported": false,
+  "newAssets": {
+    "CrackBranch_A": {
+      "triangles": 460,
+      "editablePieces": 25,
+      "boundsXYZ": [
+        [
+          -1.3521325588226318,
+          1.3714312314987183
+        ],
+        [
+          -0.7605050206184387,
+          0.5481939315795898
+        ],
+        [
+          0.0010000000474974513,
+          0.010999999940395355
+        ]
+      ],
+      "UV0": true,
+      "tangents": true,
+      "degenerateTriangles": 0,
+      "rig": "none: static ground dressing"
+    },
+    "CrackBranch_B": {
+      "triangles": 460,
+      "editablePieces": 25,
+      "boundsXYZ": [
+        [
+          -1.3520928621292114,
+          1.3701449632644653
+        ],
+        [
+          -0.8525110483169556,
+          0.514373779296875
+        ],
+        [
+          0.0010000000474974513,
+          0.010999999940395355
+        ]
+      ],
+      "UV0": true,
+      "tangents": true,
+      "degenerateTriangles": 0,
+      "rig": "none: static ground dressing"
+    },
+    "BrokenPaving_A": {
+      "triangles": 1587,
+      "editablePieces": 58,
+      "boundsXYZ": [
+        [
+          -2.007495164871216,
+          2.1064417362213135
+        ],
+        [
+          -0.7466592788696289,
+          0.5199999809265137
+        ],
+        [
+          0.0020000000949949026,
+          0.07298167794942856
+        ]
+      ],
+      "UV0": true,
+      "tangents": true,
+      "degenerateTriangles": 0,
+      "rig": "none: static ground dressing"
+    },
+    "BrokenPaving_B": {
+      "triangles": 1563,
+      "editablePieces": 58,
+      "boundsXYZ": [
+        [
+          -1.9142096042633057,
+          1.987402319908142
+        ],
+        [
+          -0.7552977800369263,
+          0.5199999809265137
+        ],
+        [
+          0.0020000000949949026,
+          0.07296934723854065
+        ]
+      ],
+      "UV0": true,
+      "tangents": true,
+      "degenerateTriangles": 0,
+      "rig": "none: static ground dressing"
+    },
+    "DirtGravel_Transition": {
+      "triangles": 3000,
+      "editablePieces": 132,
+      "boundsXYZ": [
+        [
+          -1.8838958740234375,
+          1.8800427913665771
+        ],
+        [
+          -0.5834851264953613,
+          0.7440309524536133
+        ],
+        [
+          0.0020000000949949026,
+          0.02783319167792797
+        ]
+      ],
+      "UV0": true,
+      "tangents": true,
+      "degenerateTriangles": 0,
+      "rig": "none: static ground dressing"
+    },
+    "WallWeeds_Dust": {
+      "triangles": 1925,
+      "editablePieces": 96,
+      "boundsXYZ": [
+        [
+          -1.648755669593811,
+          1.481164813041687
+        ],
+        [
+          -0.32067903876304626,
+          0.3185093104839325
+        ],
+        [
+          0.0020000000949949026,
+          0.23971405625343323
+        ]
+      ],
+      "UV0": true,
+      "tangents": true,
+      "degenerateTriangles": 0,
+      "rig": "none: static ground dressing"
+    }
+  },
+  "totalTriangles": 8995,
+  "reusedContext": "Town02 Repair shell and roof; excluded from six FBX files",
+  "surfaces": "Existing Town02 Base/Normal/Mask packed; nonmetallic; no emissive materials",
+  "futureUnityIntegration": "Soil/DryDust require GroundFade vertex alpha in the destination material; FBX alone does not reproduce Blender nodes. Ground overlays must receive shadows but not cast offset shadows."
+}
