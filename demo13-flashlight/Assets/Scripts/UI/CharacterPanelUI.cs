@@ -145,6 +145,12 @@ public class CharacterPanelUI : MonoBehaviour
     ItemInstance selectedItem;        // 현재 선택된 아이템(클릭 시)
     InventoryGrid selectedGrid;       // 선택 아이템이 속한 격자
     EquipSlot selectedEquipSlot = EquipSlot.None;
+    EquipSlot lastEquipClickSlot = EquipSlot.None;
+    ItemInstance lastEquipClickInstance;
+    ItemData lastEquipClickData;
+    float lastEquipClickTime = float.NegativeInfinity;
+    const float EquipDoubleClickSeconds = .3f;
+    const string ControlHintText = "장비 더블클릭: 해제    |    우클릭: 메뉴    |    Ctrl+클릭: 창고 ↔ 가방    |    선택 후 1~6: 퀵슬롯";
     readonly HashSet<EquipSlot> highlightSlots = new HashSet<EquipSlot>();  // 하이라이트할 좌측 슬롯
     Vector2 dragStartMouse;           // 드래그 시작 시 마우스 위치(클릭 판정용)
     const float CLICK_MOVE_THRESHOLD = 6f;  // 이 거리 미만 이동이면 클릭(선택)으로 간주
@@ -263,6 +269,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     public void Show()
     {
+        ResetEquipClick();
         FindRefs();
         isShowing = true;
         // 캔버스가 꺼진 채 베이크/편집돼도 안전하게 보이도록 강제 활성.
@@ -297,6 +304,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     public void Hide()
     {
+        ResetEquipClick();
         bool saveSafeInventory = isShowing && IsSafeArea()
             && SaveCheckpoints.Instance != null && !SaveCheckpoints.Instance.InRaid;
         HideContextMenu();
@@ -613,7 +621,7 @@ public class CharacterPanelUI : MonoBehaviour
         BuildLeftPanel(panelRoot.transform);       // 우측 = 창고/파밍
         BuildCharacterPanel(panelRoot.transform);  // 좌측 = 캐릭터/장비
 
-        var hint = MakeText(rootRT, "ControlHint", "우클릭: 착용·보관 메뉴    |    Ctrl+클릭: 창고 ↔ 가방    |    아이템 선택 후 1~6: 퀵슬롯 등록",
+        var hint = MakeText(rootRT, "ControlHint", ControlHintText,
             Vector2.zero, Vector2.zero, 16, UITheme.TextBright, TextAnchor.MiddleCenter);
         var hintRT = (RectTransform)hint.transform;
         hintRT.anchorMin = new Vector2(.03f, .94f); hintRT.anchorMax = new Vector2(.93f, .995f);
@@ -646,7 +654,11 @@ public class CharacterPanelUI : MonoBehaviour
         if (panelRoot == null) return;
         foreach (var text in panelRoot.GetComponentsInChildren<UnityEngine.UI.Text>(true))
         {
-            if (text.name == "ControlHint" && leftTitleText != null) text.font = leftTitleText.font;
+            if (text.name == "ControlHint")
+            {
+                text.text = ControlHintText;
+                if (leftTitleText != null) text.font = leftTitleText.font;
+            }
             text.fontSize = Mathf.Max(16, text.fontSize);
             if (text.name == "MidTitle" || text.name == "CharTitle") text.fontSize = 24;
             if (text == charHpText || text == charStaminaText || text == charWaterText ||
@@ -1144,16 +1156,33 @@ public class CharacterPanelUI : MonoBehaviour
     void OnEquipSlotClicked(EquipSlot slot)
     {
         if (playerEquipment == null) return;
-        if (playerEquipment.GetSlot(slot) == null) return;
+        var data = playerEquipment.GetSlot(slot);
+        if (data == null) { ResetEquipClick(); return; }
+        var instance = playerEquipment.GetSlotInstance(slot);
 
-        // 좌클릭은 실물을 움직이지 않고 퀵슬롯 등록 대상으로 선택한다.
-        if (!(GameInput.GetKey(KeyCode.LeftControl) || GameInput.GetKey(KeyCode.RightControl)))
+        bool ctrl = GameInput.GetKey(KeyCode.LeftControl) || GameInput.GetKey(KeyCode.RightControl);
+        bool doubleClick = lastEquipClickSlot == slot && lastEquipClickData == data
+            && lastEquipClickInstance == instance
+            && Time.unscaledTime - lastEquipClickTime <= EquipDoubleClickSeconds;
+        if (ctrl || doubleClick)
         {
-            SelectEquippedItem(slot);
+            ResetEquipClick();
+            UnequipToInventory(slot);
             return;
         }
+        lastEquipClickSlot = slot;
+        lastEquipClickInstance = instance;
+        lastEquipClickData = data;
+        lastEquipClickTime = Time.unscaledTime;
+        SelectEquippedItem(slot);
+    }
 
-        UnequipToInventory(slot);
+    void ResetEquipClick()
+    {
+        lastEquipClickSlot = EquipSlot.None;
+        lastEquipClickInstance = null;
+        lastEquipClickData = null;
+        lastEquipClickTime = float.NegativeInfinity;
     }
 
     /// <summary>해당 슬롯의 착용 아이템을 인벤(가방/주머니/보안)으로 해제. 부착물 보존 위해 실제 인스턴스 회수.</summary>

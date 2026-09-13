@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Bat_Light",
+    "Duration": 0.8,
+    "fps": 60,
+    "totalFrames": 48,
+    "hitStart": 0.283333331,
+    "hitEndExclusive": 0.366666675
+  },
+  {
+    "name": "Bat_Heavy",
+    "Duration": 1.0,
+    "fps": 48,
+    "totalFrames": 48,
+    "hitStart": 0.354166657,
+    "hitEndExclusive": 0.458333343
+  },
+  {
+    "name": "Bat_HeavyFull",
+    "Duration": 1.2,
+    "fps": 40,
+    "totalFrames": 48,
+    "hitStart": 0.425,
+    "hitEndExclusive": 0.55
+  }
+]
