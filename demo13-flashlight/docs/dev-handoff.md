@@ -1,5 +1,12 @@
 # 개발 핸드오프 (이어서 작업)
 
+## 2026-09-13 — 시작 시 마을 구석/원점으로 되돌아가는 결함
+
+- 사용자는 Systems가 아닌 씬에서 시작해서 그런지 질문했다. 실제로 Systems 활성+Safehouse additive 구성에서 재현됐으며 씬 선택 문제가 아니었다.
+- 기존 GameBoot는 Transform만 default=(53.5,0,12)로 옮겼지만 Rigidbody는 (-.3,0,0)에 남아 다음 물리 프레임에서 원점으로 복귀했다. SaveManager는 플레이어 위치를 저장·복원하지 않는다.
+- `SpawnPoint.PlacePlayer`로 Transform/Rigidbody 위치·잔여 속도·물리 동기화·카메라 스냅을 묶고 GameBoot/SceneTransitionManager의 스폰에 연결했다.
+- Unity MCP 실제 Play 재시작 및 하이드아웃 왕복 등 8/8 통과, 콘솔 오류 0. `ArtWork/StartupSpawn`에 재현 전/후와 게임 화면. 최종 플레이어는 기존 마을 집 앞 default 지점이다.
+
 ## 2026-09-13 — 방망이 손잡이·선후딜·장비 더블클릭
 
 - 사용자: 방망이가 손에 안 맞음, 장비 더블클릭 해제·편의성 개선, 모션 선후딜 확인 요청.
