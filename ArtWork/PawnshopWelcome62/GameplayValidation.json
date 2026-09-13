@@ -1,0 +1,29 @@
+{
+  "pass": true,
+  "entry": "(34.00, 0.00, 38.32)",
+  "npc": "(34.00, 0.90, 40.10)",
+  "feetY": -2.38418579E-07,
+  "headY": 1.75583744,
+  "ownerInViewport": true,
+  "viewportMin": "(0.46, 0.70, 24.26)",
+  "viewportMax": "(0.54, 0.85, 25.88)",
+  "outside": true,
+  "entered": true,
+  "signHidden": true,
+  "npcTarget": "전당포 주인",
+  "dialogueOpened": true,
+  "sideApproaches": [
+    {
+      "side": -1,
+      "position": "(32.97, 0.00, 39.52)",
+      "pass": true
+    },
+    {
+      "side": 1,
+      "position": "(35.03, 0.00, 39.52)",
+      "pass": true
+    }
+  ],
+  "exited": true,
+  "signRestored": true
+}

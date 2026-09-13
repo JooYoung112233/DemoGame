@@ -10,7 +10,7 @@ The user found that previously produced interiors were absent from gameplay. `To
 - 131 model placements in five stores, 15 independent locked-room blockers, exact mesh collision for doors/partitions/furniture, five reusable interior prefabs, and entry-controlled service lighting.
 - 50 mapped materials (28 newly externalized, others reused), current Comic B surfaces; 25 authored colors recovered from linear Blender values. Glass stays lightly transparent so display goods remain visible.
 - Five building roots retain existing dimensions/positions/colliders/quest flags. East entrances require Unity yaw -90°, correcting the offline manifest's +90° placement.
-- Old pawnshop furniture is inactive. The original NPC/interaction remains, moved to local (-1.6,0,-2.2). The market crate and tarp move to z=-2.8 to clear the rear door approach.
+- Old pawnshop furniture is inactive. The original NPC/interaction remains; its latest position is local (0,.9,-3.9) at the central welcome spot. [PawnshopWelcome62](../PawnshopWelcome62/README.md) corrects the initial below-ground pivot and left-counter placement. The market crate and tarp move to z=-2.8 to clear the rear door approach.
 - Floor render offset +.025m and rugs +.06m avoid coplanar surfaces. They have no raised floor collider; the player remains on the existing Y=0 ground.
 - BuildingInterior hides the exterior shell/roof and obstructing upper lining while inside; locked-room roof covers remain. A collider set prevents a player's hurtbox exit from closing the roof before the body exits.
 

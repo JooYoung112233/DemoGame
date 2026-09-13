@@ -1,0 +1,41 @@
+[
+  {
+    "name": "Pawnshop",
+    "targets": [
+      {
+        "x": 29,
+        "z": 4,
+        "reachable": true
+      },
+      {
+        "x": 50,
+        "z": 33,
+        "reachable": true
+      },
+      {
+        "x": 6,
+        "z": 21,
+        "reachable": true
+      },
+      {
+        "x": 53,
+        "z": 32,
+        "reachable": true
+      }
+    ],
+    "doors": [
+      {
+        "id": "pawnshop.rear",
+        "blocked": true
+      },
+      {
+        "id": "pawnshop.left",
+        "blocked": true
+      },
+      {
+        "id": "pawnshop.right",
+        "blocked": true
+      }
+    ]
+  }
+]
