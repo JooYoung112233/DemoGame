@@ -1,0 +1,54 @@
+{
+  "pass": true,
+  "checks": {
+    "single_click_keeps_equipped": true,
+    "double_click_unequips_while_paused": true,
+    "slow_clicks_do_not_unequip": true,
+    "different_slots_not_double_click": true,
+    "reopen_resets_click_pair": true,
+    "ctrl_click_still_unequips": true,
+    "full_inventory_double_click_preserves_weapon": true,
+    "single_click_number_registration_kept": true,
+    "hint_explains_double_click": true,
+    "idle_both_grips_aligned": true,
+    "attack_0_duration": true,
+    "attack_0_hit_window": true,
+    "attack_0_grips": true,
+    "attack_0_visual_sync": true,
+    "attack_1_duration": true,
+    "attack_1_hit_window": true,
+    "attack_1_grips": true,
+    "attack_1_visual_sync": true,
+    "attack_2_duration": true,
+    "attack_2_hit_window": true,
+    "attack_2_grips": true,
+    "attack_2_visual_sync": true,
+    "walk_both_grips_aligned": true
+  },
+  "measured": [
+    {
+      "variant": 0,
+      "duration": 0.8007965,
+      "firstHit": 0.284500122,
+      "lastHit": 0.365875244,
+      "maxGrip": 0.00055815425,
+      "maxPhase": 0.00554919243
+    },
+    {
+      "variant": 1,
+      "duration": 1.00004578,
+      "firstHit": 0.356628418,
+      "lastHit": 0.455505371,
+      "maxGrip": 0.000841501344,
+      "maxPhase": 0.0122045279
+    },
+    {
+      "variant": 2,
+      "duration": 1.20184326,
+      "firstHit": 0.425857544,
+      "lastHit": 0.5477905,
+      "maxGrip": 0.0009036277,
+      "maxPhase": 0.00384363532
+    }
+  ]
+}

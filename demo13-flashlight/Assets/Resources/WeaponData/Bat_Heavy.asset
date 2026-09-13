@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Bat_Heavy
   m_EditorClassIdentifier: Game.Scripts::AttackData
   attackId: Bat_Heavy
-  fps: 30
+  fps: 48
   totalFrames: 48
   cancelFromFrame: -1
   damage: 20
