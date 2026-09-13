@@ -54,7 +54,8 @@ public static class InteriorApply
   }
   var old=map.GetComponentsInChildren<Transform>(true).Single(t=>t.name=="Pawnshop_Interior");
   var npc=old.GetComponentsInChildren<InteractableObject>(true).Single();
-  var pawn=buildings.Single(b=>b.name=="Pawnshop");npc.transform.position=pawn.transform.position+new Vector3(0,0,-2.1f);
+  // NPC pivot is its capsule centre (.9m), not the player's ground pivot.
+  var pawn=buildings.Single(b=>b.name=="Pawnshop");npc.transform.position=pawn.transform.position+new Vector3(0,.9f,-3.9f);
   foreach(Transform t in old)if(t!=npc.transform)t.gameObject.SetActive(false);
   EditorUtility.SetDirty(npc.transform);EditorSceneManager.MarkSceneDirty(scene);if(!EditorSceneManager.SaveScene(scene))throw new Exception("Save failed");
   var result=JsonConvert.SerializeObject(new{buildings=report,npcPosition=npc.transform.position.ToString()},Formatting.Indented);File.WriteAllText(Path.GetFullPath("../ArtWork/InteriorIntegration62/Applied.json"),result);return result;
