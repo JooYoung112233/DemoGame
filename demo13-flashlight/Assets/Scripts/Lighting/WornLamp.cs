@@ -32,6 +32,10 @@ public class WornLamp : MonoBehaviour
     [SerializeField] float dayIntensity = 0.2f;
 
     [Header("몸에 달린 느낌")]
+    [Tooltip("3D 캐릭터의 Chest 뼈를 따라 옷 앞섶에 광원을 배치한다. 모델이 없으면 씬에 배치된 위치를 유지한다.")]
+    [SerializeField] bool followAnimatedBody = true;
+    [Tooltip("가슴 뼈 회전 기준 미터 단위 오프셋. FBX 뼈의 100배 스케일은 적용하지 않는다.")]
+    [SerializeField] Vector3 bodyMountOffset = new Vector3(.12f, -.04f, .22f);
     [Tooltip("빛이 퍼지는 각도. 좁을수록 '가슴에 단 등'으로 읽힌다. 360°에 가까우면 머리 위 전등처럼 보인다.")]
     [Range(20f, 170f)][SerializeField] float coneAngle = 56f;
     [Tooltip("콘 안쪽(풀 밝기) 각도 비율. 가장자리를 부드럽게 풀어 준다.")]
@@ -68,6 +72,7 @@ public class WornLamp : MonoBehaviour
     Light _light;
     DayNightCycle _dayNight;
     TopDownPlayer _player;
+    Transform _bodyAnchor;
     float _gradeRange = 1f, _gradeIntensity = 1f;   // 등급 배율(미착용 = 1)
     bool _indoorPresentation;
 
@@ -210,6 +215,16 @@ public class WornLamp : MonoBehaviour
 
     void LateUpdate()
     {
+        if (_player == null) _player = TopDownPlayer.Instance;
+        if (followAnimatedBody && _player != null)
+        {
+            if (_bodyAnchor == null)
+                foreach (var bone in _player.GetComponentsInChildren<Transform>(true))
+                    if (bone.name == "Chest") { _bodyAnchor = bone; break; }
+            // Animator 평가 후의 가슴 위치를 사용한다. 루트의 고정 Y는 숙인 머리 안에 남는다.
+            if (_bodyAnchor != null)
+                transform.position = _bodyAnchor.position + _bodyAnchor.rotation * bodyMountOffset;
+        }
         // ⚠️ 몸을 밝히는 글로우는 **등보다 위**, 월드 기준으로 올린다.
         //    등과 같은 자리(가슴)에 두면 점광이 메시 **안**에 갇혀, 밖에서 보이는 면이 전부
         //    광원을 등지게 된다 — 실제로 그렇게 뒀다가 캐릭터가 계속 새까맸다.
@@ -232,7 +247,6 @@ public class WornLamp : MonoBehaviour
 
         // LateUpdate여야 한다 — 플레이어의 회전/조준이 같은 프레임에 갱신되므로
         // Update에서 맞추면 한 프레임 뒤처져 빠르게 돌 때 빛이 끌려다닌다.
-        if (_player == null) _player = TopDownPlayer.Instance;
         if (_player != null)
         {
             Vector2 f = _player.FacingDirection;

@@ -1,0 +1,36 @@
+{
+  "pass": true,
+  "checks": {
+    "night_lamp_remains_on": true,
+    "idle_clear_of_head": true,
+    "idle_mount_follows_chest": true,
+    "attack_0_head_clear": true,
+    "attack_0_mount_tracks": true,
+    "attack_1_head_clear": true,
+    "attack_1_mount_tracks": true,
+    "attack_2_head_clear": true,
+    "attack_2_mount_tracks": true,
+    "walking_head_clear": true,
+    "walking_mount_tracks": true
+  },
+  "measurements": [
+    {
+      "variant": 0,
+      "frames": 245,
+      "overlaps": 0,
+      "maxError": 0.0
+    },
+    {
+      "variant": 1,
+      "frames": 302,
+      "overlaps": 0,
+      "maxError": 0.0
+    },
+    {
+      "variant": 2,
+      "frames": 376,
+      "overlaps": 0,
+      "maxError": 0.0
+    }
+  ]
+}
