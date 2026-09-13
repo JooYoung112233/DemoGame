@@ -71,7 +71,8 @@ public class GameStartHandler : MonoBehaviour
         // 세이브 로드 시도 (이어하기)
         if (SaveManager.Instance != null && SaveManager.Instance.HasSave())
         {
-            SaveManager.Instance.Load();
+            bool loaded = SaveManager.Instance.Load();
+            if (loaded && MainStash.Ensure().GrantStarterArmory()) SaveManager.Instance.Save();
             Debug.Log("[GameStart] 세이브 로드 완료. 정상 진행.");
 
             // 자동 트리거 체크 (로드된 플래그 기반)
@@ -89,6 +90,7 @@ public class GameStartHandler : MonoBehaviour
 
         // 새 게임 시작 상태(Lv1·돈0·특성 없음)를 슬롯에 즉시 기록 → 저장 슬롯 카드에 바로 뜬다.
         // 위 HasSave 분기를 이미 지난 뒤라 프롤로그 재생엔 영향 없음(타이틀에서 미리 저장하면 HasSave=true라 프롤로그 스킵됨).
+        MainStash.Ensure().GrantStarterArmory();
         SaveManager.Instance?.Save();
 
         var stm  = SceneTransitionManager.Instance;

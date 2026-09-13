@@ -30,7 +30,9 @@ public class InteractionSystem : MonoBehaviour
     Camera mainCam;
     SceneDoor3D[] sceneDoors = System.Array.Empty<SceneDoor3D>();
     BuildingEntrance[] buildingDoors = System.Array.Empty<BuildingEntrance>();
+    BuildingInterior[] interiors = System.Array.Empty<BuildingInterior>();
     GUIStyle entryStyle;
+    readonly RaycastHit[] visibilityHits = new RaycastHit[64];
 
     void Awake()
     {
@@ -60,19 +62,19 @@ public class InteractionSystem : MonoBehaviour
     {
         sceneDoors = FindObjectsByType<SceneDoor3D>();
         buildingDoors = FindObjectsByType<BuildingEntrance>();
+        interiors = FindObjectsByType<BuildingInterior>();
     }
 
     void Update()
     {
         // 사망 시 상호작용 불가
-        if (playerHealth != null && playerHealth.IsDead) return;
+        if (playerHealth != null && playerHealth.IsDead) { currentTarget = null; return; }
 
         // UI가 열려있으면 상호작용·프롬프트 차단 (타겟·하이라이트 해제 → OnGUI 프롬프트도 사라짐)
         if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen())
         {
             if (currentTarget != null)
             {
-                currentTarget.SetHighlight(false);
                 currentTarget = null;
             }
             // ★ 2026-07-29 (사용자: "E 눌러서 UI 작동 중인데 또 E 누르면 또 UI가 뜬다").
@@ -86,6 +88,7 @@ public class InteractionSystem : MonoBehaviour
         // 채널(탐색·치료 등) 진행 중에도 잠근다 — 안 그러면 같은 탐색이 겹쳐 시작된다.
         if (UseActionManager.Instance != null && UseActionManager.Instance.IsBusy)
         {
+            currentTarget = null;
             _interactLockUntil = Time.unscaledTime + InteractLock;
             return;
         }
@@ -105,9 +108,8 @@ public class InteractionSystem : MonoBehaviour
             currentTarget.Interact(gameObject);
 
             // 일회용 오브���트가 비활성화되었으면 타겟 해제
-            if (!currentTarget.gameObject.activeInHierarchy || !currentTarget.CanInteract)
+            if (currentTarget == null || !currentTarget.gameObject.activeInHierarchy || !currentTarget.CanInteract)
             {
-                currentTarget.SetHighlight(false);
                 currentTarget = null;
             }
         }
@@ -127,14 +129,13 @@ public class InteractionSystem : MonoBehaviour
             if (obj == null) continue;
             if (!obj.CanInteract) continue;
 
-            // XY 평면 거리 (top-down 2D)
+            // XZ 바닥 평면 거리. NPC 루트는 몸 중앙, 플레이어 루트는 발바닥이다.
             Vector2 diff = Plan3D.ToPlan(obj.transform.position) - Plan3D.ToPlan(playerPos);
             float dist = diff.magnitude;
 
-            // 히스테리시스: 현재 타겟은 이탈 범위(1.3배)로, 새 타겟은 진입 범위로 판정
-            float range = Mathf.Min(obj.InteractRange, maxDetectRadius);
-            float effectiveRange = (obj == currentTarget) ? range * 1.3f : range;
-            if (dist > effectiveRange) continue;
+            float cap = GameTuning.Instance != null ? GameTuning.Instance.interactionDistance : 1.8f;
+            float range = Mathf.Min(obj.InteractRange, Mathf.Min(maxDetectRadius, cap));
+            if (dist > range || !HasAccess(obj.transform)) continue;
 
             if (dist < closestDist)
             {
@@ -143,17 +144,52 @@ public class InteractionSystem : MonoBehaviour
             }
         }
 
-        // 타겟 변경 시 하이라이트 갱신
+        // 안내 문구만 사용한다. 재질 색은 원래 만화 텍스처를 유지한다.
         if (closest != currentTarget)
         {
-            if (currentTarget != null)
-                currentTarget.SetHighlight(false);
-
             currentTarget = closest;
 
-            if (currentTarget != null)
-                currentTarget.SetHighlight(true);
         }
+    }
+
+    /// <summary>실제 E 입력과 프롬프트가 같은 거리/벽 판정을 사용한다.</summary>
+    public bool HasAccess(Transform target)
+    {
+        if (target == null || !target.gameObject.activeInHierarchy) return false;
+        var eye = transform.position + Vector3.up * 1.1f;
+        var point = new Vector3(target.position.x, eye.y, target.position.z);
+        foreach (var interior in interiors)
+        {
+            if (interior == null || !interior.isActiveAndEnabled || interior.PlayerInside) continue;
+            var volume = interior.GetComponent<BoxCollider>();
+            if (volume != null && volume.bounds.Contains(point)) return false;
+        }
+        return ClearRay(eye, point, target, false) && IsVisible(target, point);
+    }
+
+    bool IsVisible(Transform target, Vector3 point)
+        => mainCam == null || ClearRay(mainCam.transform.position, point, target, true);
+
+    bool ClearRay(Vector3 from, Vector3 to, Transform target, bool cameraRay)
+    {
+        Vector3 delta = to - from;
+        if (delta.sqrMagnitude < .001f) return true;
+        int count = Physics.RaycastNonAlloc(from, delta.normalized, visibilityHits,
+            delta.magnitude, ~0, QueryTriggerInteraction.Ignore);
+        if (count == visibilityHits.Length) return false;
+        for (int i = 0; i < count; i++)
+        {
+            var hit = visibilityHits[i].collider;
+            if (hit == null || hit.transform.IsChildOf(transform) || hit.transform.IsChildOf(target)) continue;
+            // 지붕을 숨긴 실내에서도 이동 벽은 남는다. 카메라 가림만 숨긴 렌더러를 무시한다.
+            if (cameraRay)
+            {
+                var renderer = hit.GetComponent<Renderer>();
+                if (renderer != null && !renderer.enabled) continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     #region 프롬프트 UI (OnGUI)
@@ -166,7 +202,7 @@ public class InteractionSystem : MonoBehaviour
 
         InitStyles();
         DrawEntranceMarkers();
-        if (currentTarget == null) return;
+        if (currentTarget == null || !HasAccess(currentTarget.transform)) return;
 
         // 오브젝트 머리 위 → 화면 좌표
         Vector3 worldPos = currentTarget.transform.position + Vector3.up * 1.2f;
@@ -241,6 +277,7 @@ public class InteractionSystem : MonoBehaviour
     void DrawEntry(Transform target, string label)
     {
         if(Plan3D.PlanDistance(transform.position,target.position)>18f) return;
+        if(!HasAccess(target)) return;
         var screen=mainCam.WorldToScreenPoint(target.position+Vector3.up*.5f);
         if(screen.z<=0 || screen.x<24 || screen.x>Screen.width-24 || screen.y<64 || screen.y>Screen.height-24) return;
         var size=entryStyle.CalcSize(new GUIContent(label));

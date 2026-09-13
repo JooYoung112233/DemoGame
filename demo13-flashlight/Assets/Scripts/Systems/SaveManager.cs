@@ -87,6 +87,7 @@ public class SaveManager : MonoBehaviour
     public GameSaveData BuildSaveData()
     {
         var data = new GameSaveData();
+        data.starterArmoryClaimed = MainStash.Instance != null && MainStash.Instance.StarterArmoryClaimed;
         data.version = SAVE_VERSION;
         data.saveTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
@@ -171,6 +172,7 @@ public class SaveManager : MonoBehaviour
             {
                 data.equippedWeapon = eq.GetSaveData();
                 data.equippedWeaponAttachments = eq.GetEquippedWeaponAttachments();
+                data.equippedWeaponStates = eq.GetWeaponStates();
             }
             var survival = SurvivalStats.Get();
             if (survival != null) data.survival = survival.GetSaveData();
@@ -358,6 +360,7 @@ public class SaveManager : MonoBehaviour
         RaidMapManager.InstanceIfExists?.LoadSaveData(data.raidMap);
 
         // 메인 창고(보관함)
+        MainStash.Ensure().RestoreStarterArmoryClaim(data.starterArmoryClaimed);
         if (data.mainStash != null)
         {
             MainStash.Ensure().LoadSaveData(data.mainStash);
@@ -377,6 +380,7 @@ public class SaveManager : MonoBehaviour
             {
                 eq.LoadSaveData(data.equippedWeapon);
                 eq.SetEquippedWeaponAttachments(data.equippedWeaponAttachments);
+                eq.RestoreWeaponStates(data.equippedWeaponStates);
             }
 
             var inv = playerGO.GetComponent<PlayerInventory>();
@@ -549,6 +553,7 @@ public class SaveManager : MonoBehaviour
 
         // ── 창고 / 상점 / 안전가옥 가구 ──
         MainStash.Ensure()?.GetGrid()?.Clear();
+        MainStash.Ensure().StarterArmoryClaimed = false;
         ShopUI.LoadConsignSave(null);   // 위탁 슬롯 비움
         ShopUI.ClearSellTray();         // 판매 트레이 비움
         SafehouseStorage.ResetForNewGame();   // 가구 격자 = static 리스트라 씬 재로드로 안 비워짐(검수 반영)
@@ -601,6 +606,7 @@ public class SaveManager : MonoBehaviour
 [System.Serializable]
 public class GameSaveData
 {
+    public bool starterArmoryClaimed;
     public int version;
     public string saveTime;
 
@@ -639,6 +645,7 @@ public class GameSaveData
     public List<GridItemEntry> secureItems = new List<GridItemEntry>();   // 보안 컨테이너 3×3
     public string equippedWeapon;
     public string[] equippedWeaponAttachments;   // 장착 주무기 부착물 itemId[4]
+    public List<PlayerEquipment.WeaponState> equippedWeaponStates; // 주/보조/근접 실물 상태(탄종·잔탄·내구도)
 
     // 퀵슬롯(1~6) — itemId 6개(빈 칸은 "")
     public List<string> quickSlots;

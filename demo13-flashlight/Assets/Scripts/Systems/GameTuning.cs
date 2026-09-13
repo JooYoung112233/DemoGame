@@ -23,6 +23,10 @@ public class GameTuning : ScriptableObject
     }
 
 
+    [Header("상호작용")]
+    [Tooltip("상호작용 최대 거리(m). 개별 오브젝트의 더 짧은 범위는 유지. 런타임 즉시 반영.")]
+    [Range(.5f, 4f)] public float interactionDistance = 1.8f;
+
     // ── 시간 / 현상 (지역 낮·밤 길이) ─────────────────────────────────
     [Header("시간 / 현상 (지역 낮·밤, 초)")]
     [Tooltip("낮 지속 시간(초). RegionTimeManager가 읽음.")]

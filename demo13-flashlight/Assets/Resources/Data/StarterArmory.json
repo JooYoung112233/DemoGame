@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "itemId": "pistol9", "count": 1, "durability": 1, "attachments": ["", "", "mag_9x19", ""], "ammoCount": 15, "ammoItemId": "ammo_9x19" },
+    { "itemId": "bat", "count": 1, "durability": 1 },
+    { "itemId": "mag_9x19", "count": 1, "durability": 1, "ammoCount": 15, "ammoItemId": "ammo_9x19" },
+    { "itemId": "ammo_9x19", "count": 30, "durability": 1 }
+  ]
+}

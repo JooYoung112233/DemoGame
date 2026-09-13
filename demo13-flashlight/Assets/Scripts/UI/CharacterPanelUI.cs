@@ -296,6 +296,8 @@ public class CharacterPanelUI : MonoBehaviour
 
     public void Hide()
     {
+        bool saveSafeInventory = isShowing && IsSafeArea()
+            && SaveCheckpoints.Instance != null && !SaveCheckpoints.Instance.InRaid;
         HideContextMenu();
         if (isDragging) CancelDrag();
         ClearSelection();
@@ -303,6 +305,7 @@ public class CharacterPanelUI : MonoBehaviour
         if (panelRoot != null)
             panelRoot.SetActive(false);
         CloseContainer();
+        if (saveSafeInventory) SaveCheckpoints.Instance.InventoryChanged();
     }
 
     /// <summary>창고 시설 클릭 → 인벤 + 우측 메인 창고 강제 표시 (지역 무관).</summary>
@@ -609,6 +612,12 @@ public class CharacterPanelUI : MonoBehaviour
         BuildLeftPanel(panelRoot.transform);       // 우측 = 창고/파밍
         BuildCharacterPanel(panelRoot.transform);  // 좌측 = 캐릭터/장비
 
+        var hint = MakeText(rootRT, "ControlHint", "우클릭: 착용·보관 메뉴    |    Ctrl+클릭: 창고 ↔ 가방    |    아이템 선택 후 1~6: 퀵슬롯 등록",
+            Vector2.zero, Vector2.zero, 16, UITheme.TextBright, TextAnchor.MiddleCenter);
+        var hintRT = (RectTransform)hint.transform;
+        hintRT.anchorMin = new Vector2(.03f, .94f); hintRT.anchorMax = new Vector2(.93f, .995f);
+        hintRT.offsetMin = hintRT.offsetMax = Vector2.zero;
+
         // 우측 상단 닫기(X) 버튼
         var closeGO = new GameObject("CloseBtn", typeof(RectTransform), typeof(Image), typeof(Button));
         closeGO.transform.SetParent(panelRoot.transform, false);
@@ -636,6 +645,7 @@ public class CharacterPanelUI : MonoBehaviour
         if (panelRoot == null) return;
         foreach (var text in panelRoot.GetComponentsInChildren<UnityEngine.UI.Text>(true))
         {
+            if (text.name == "ControlHint" && leftTitleText != null) text.font = leftTitleText.font;
             text.fontSize = Mathf.Max(16, text.fontSize);
             if (text.name == "MidTitle" || text.name == "CharTitle") text.fontSize = 24;
             if (text == charHpText || text == charStaminaText || text == charWaterText ||
@@ -829,7 +839,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         // ── 헤더: 무게(우상단 끝, 밝은 텍스트 — 어두운 storage 프레임 위) ──
         leftWeightText = MakeText(leftPanel, "LeftWeight", "0.0 KG",
-            Vector2.zero, new Vector2(180, 30), 17, UITheme.TextBright, TextAnchor.MiddleRight);
+            Vector2.zero, new Vector2(250, 30), 17, UITheme.TextBright, TextAnchor.MiddleRight);
         leftWeightText.fontStyle = FontStyle.Bold;
         var lwRT = (RectTransform)leftWeightText.transform;
         lwRT.anchorMin = lwRT.anchorMax = lwRT.pivot = new Vector2(1, 1);
@@ -1198,8 +1208,7 @@ public class CharacterPanelUI : MonoBehaviour
         if (IsSafeArea())
             return TryPlaceInStash(item)
                 || (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(item));
-        return (playerInventory != null && playerInventory.TryAutoPlaceAnywhere(item))
-            || TryPlaceInStash(item);
+        return playerInventory != null && playerInventory.TryAutoPlaceAnywhere(item);
     }
 
     /// <summary>착용 아이템을 완전히 제거(해제 후 레이드=바닥 산포 / 안전구역=인벤·창고 복귀).</summary>
@@ -1884,7 +1893,7 @@ public class CharacterPanelUI : MonoBehaviour
     {
         if (leftWeightText == null) return;
         var grid = LeftGrid;
-        leftWeightText.text = grid != null ? $"{grid.TotalWeight:0.0} KG" : "";
+        leftWeightText.text = grid != null ? $"{grid.ItemCount}/{grid.width * grid.height}칸 · {grid.TotalWeight:0.0} kg" : "";
     }
 
     /// <summary>푸터 TAKE ALL: 좌측 격자의 모든 아이템을 플레이어 인벤(가방→주머니→보안)으로 이동.
@@ -2290,8 +2299,8 @@ public class CharacterPanelUI : MonoBehaviour
                         RefreshAllGrids();
                         return;
                     }
-                    // 장착 가능 → 자동 착용
-                    if (IsEquippable(item.data)) { EquipFromGrid(item, pGrid); return; }
+                    // 창고를 열었으면 Ctrl+클릭은 종류에 상관없이 보관. 착용은 우클릭/슬롯 드래그.
+                    if (leftGrid == null && IsEquippable(item.data)) { EquipFromGrid(item, pGrid); return; }
                     // 그 외 → 좌측(상자/창고)로 이동
                     if (leftGrid != null)
                     {
@@ -2325,8 +2334,7 @@ public class CharacterPanelUI : MonoBehaviour
                         RefreshAllGrids();
                         return;
                     }
-                    // 장착 가능 → 자동 착용
-                    if (IsEquippable(item.data)) { EquipFromGrid(item, leftGrid); return; }
+                    // Ctrl+클릭은 회수. 무기도 가방으로 이동한다.
                     // 그 외 → 플레이어(가방→주머니→보안)로 이동. 하드컷(130%) 넘으면 원위치 복원.
                     leftGrid.Remove(placed);
                     if (!playerInventory.TryAutoPlaceAnywhere(item, respectWeightCap: true))
@@ -3242,6 +3250,27 @@ public class CharacterPanelUI : MonoBehaviour
         });
         y -= 26f;
 
+        if (data.category == ItemCategory.Weapon && slot != EquipSlot.PrimaryWeapon)
+        {
+            AddContextButton("손에 들기", UITheme.AccentBright, y, () =>
+            {
+                if (!playerEquipment.TryDrawWeapon(capSlot))
+                    ToastManager.Show("교체할 무기를 둘 공간이 없다", ToastManager.ToastType.Warning);
+                HideContextMenu(); RefreshAllGrids();
+            });
+            y -= 26f;
+        }
+        if (data.category == ItemCategory.Weapon && IsSafeArea() && openStashGrid != null)
+        {
+            AddContextButton("창고에 보관", UITheme.AccentBright, y, () =>
+            {
+                if (!playerEquipment.TryStoreWeapon(capSlot, openStashGrid))
+                    ToastManager.Show("창고 공간 부족", ToastManager.ToastType.Warning);
+                HideContextMenu(); RefreshAllGrids();
+            });
+            y -= 26f;
+        }
+
         AddContextButton("자세히", UITheme.TextBright, y, () =>
         {
             ItemDetailUI.Show(capInst);
@@ -3565,6 +3594,13 @@ public class CharacterPanelUI : MonoBehaviour
     {
         outSlots.Clear();
         if (data == null) return;
+        if (data.category == ItemCategory.Weapon)
+        {
+            outSlots.Add(EquipSlot.PrimaryWeapon);
+            outSlots.Add(EquipSlot.SecondaryWeapon);
+            if (PlayerEquipment.CanEquipWeapon(data, EquipSlot.Melee)) outSlots.Add(EquipSlot.Melee);
+            return;
+        }
 
         if (data.equipSlot != EquipSlot.None)
         {
@@ -3636,6 +3672,14 @@ public class CharacterPanelUI : MonoBehaviour
     void EquipFromGrid(ItemInstance item, InventoryGrid grid, EquipSlot forcedSlot = EquipSlot.None)
     {
         if (item == null || item.data == null || playerEquipment == null) return;
+        if (item.data.category == ItemCategory.Weapon)
+        {
+            var slot = forcedSlot == EquipSlot.None ? EquipSlot.PrimaryWeapon : forcedSlot;
+            if (!playerEquipment.TryEquipWeaponFromGrid(item, grid, slot))
+                ToastManager.Show("장착할 수 없거나 교체품을 둘 공간이 없다", ToastManager.ToastType.Warning);
+            ClearSelection(); HideContextMenu(); RefreshAllGrids();
+            return;
+        }
         if (!IsEquippable(item.data))
         {
             ToastManager.Show("장착할 수 없는 아이템", ToastManager.ToastType.Warning);

@@ -15,6 +15,28 @@ public class MainStash : MonoBehaviour
     public const int HeightPerLevel = 7;   // stash 모듈 레벨당 +7줄
 
     public InventoryGrid Grid { get; private set; }
+    public bool StarterArmoryClaimed { get; set; }
+    public void RestoreStarterArmoryClaim(bool claimed) => StarterArmoryClaimed = claimed;
+
+    [System.Serializable]
+    class ArmoryContents { public List<GridItemEntry> items; }
+
+    /// <summary>첫 무기 세트. 저장 플래그로 1회만 보급하고, 기존 창고는 유지한다.</summary>
+    public bool GrantStarterArmory()
+    {
+        if (StarterArmoryClaimed) return false;
+        var asset = Resources.Load<TextAsset>("Data/StarterArmory");
+        if (asset == null) return false;
+        var entries = Newtonsoft.Json.JsonConvert.DeserializeObject<ArmoryContents>(asset.text)?.items;
+        if (entries == null || entries.Count == 0) return false;
+        EnsureGrid();
+        var incoming = new InventoryGrid(entries.Count, 1);
+        incoming.LoadSaveData(entries);
+        if (incoming.ItemCount != entries.Count || Grid.width * Grid.height - Grid.ItemCount < entries.Count) return false;
+        foreach (var p in incoming.GetAll()) Grid.TryAutoPlace(p.item);
+        StarterArmoryClaimed = true;
+        return true;
+    }
 
     bool subscribed;
 

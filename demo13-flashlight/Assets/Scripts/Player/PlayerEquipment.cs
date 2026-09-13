@@ -101,6 +101,100 @@ public class PlayerEquipment : MonoBehaviour
 
     public IEnumerable<KeyValuePair<EquipSlot, ItemData>> GetAllEquipped() => slots;
 
+    public static bool CanEquipWeapon(ItemData item, EquipSlot slot)
+        => item != null && item.category == ItemCategory.Weapon
+        && (slot == EquipSlot.PrimaryWeapon || slot == EquipSlot.SecondaryWeapon
+            || (slot == EquipSlot.Melee && (item.weaponData == null || !item.weaponData.isRanged)));
+
+    void PutWeapon(EquipSlot slot, ItemInstance item)
+    {
+        slots.Remove(slot);
+        slotInstances.Remove(slot);
+        if (item != null) { slots[slot] = item.data; slotInstances[slot] = item; }
+        if (slot == EquipSlot.PrimaryWeapon && player != null) player.SetWeapon(item?.data.weaponData);
+        OnEquipChanged?.Invoke(slot, item?.data);
+    }
+
+    /// <summary>무기는 가방/창고 또는 장비 중 한 곳만 소유한다. 교체품은 출발 칸으로 돌아간다.</summary>
+    public bool TryEquipWeaponFromGrid(ItemInstance item, InventoryGrid source, EquipSlot slot = EquipSlot.PrimaryWeapon)
+    {
+        if (!CanEquipWeapon(item?.data, slot) || source == null) return false;
+        InventoryGrid.PlacedItem placed = null;
+        foreach (var p in source.GetAll()) if (p.item == item) { placed = p; break; }
+        if (placed == null) return false;
+        var previous = GetSlotInstance(slot) ?? (GetSlot(slot) != null ? new ItemInstance(GetSlot(slot)) : null);
+        source.Remove(placed);
+        if (previous != null && !source.TryPlace(previous, placed.gridX, placed.gridY))
+        {
+            source.TryPlace(item, placed.gridX, placed.gridY);
+            return false;
+        }
+        PutWeapon(slot, item);
+        return true;
+    }
+
+    public bool TryStoreWeapon(EquipSlot slot, InventoryGrid destination)
+    {
+        var data = GetSlot(slot);
+        if (data == null || data.category != ItemCategory.Weapon || destination == null) return false;
+        var item = GetSlotInstance(slot) ?? new ItemInstance(data);
+        if (!destination.TryAutoPlace(item)) return false;
+        PutWeapon(slot, null);
+        return true;
+    }
+
+    /// <summary>보조/근접 슬롯의 무기를 손으로 꺼내고, 기존 손 무기를 그 슬롯으로 교환한다.</summary>
+    public bool TryDrawWeapon(EquipSlot from)
+    {
+        if (from == EquipSlot.PrimaryWeapon) return false;
+        var data = GetSlot(from);
+        if (!CanEquipWeapon(data, EquipSlot.PrimaryWeapon)) return false;
+        var held = GetSlotInstance(EquipSlot.PrimaryWeapon)
+            ?? (EquippedWeapon != null ? new ItemInstance(EquippedWeapon) : null);
+        var next = GetSlotInstance(from) ?? new ItemInstance(data);
+        // 근접 칸에 총을 넣을 수 없으므로 손의 총은 휴대 격자로 회수한다.
+        if (held != null && !CanEquipWeapon(held.data, from))
+        {
+            if (inventory == null || !inventory.TryAutoPlaceAnywhere(held)) return false;
+            held = null;
+        }
+        PutWeapon(from, held);
+        PutWeapon(EquipSlot.PrimaryWeapon, next);
+        return true;
+    }
+
+    [System.Serializable]
+    public class WeaponState
+    {
+        public EquipSlot slot;
+        public List<GridItemEntry> items;
+    }
+
+    public List<WeaponState> GetWeaponStates()
+    {
+        var result = new List<WeaponState>();
+        foreach (var kv in slots)
+        {
+            if (kv.Value == null || kv.Value.category != ItemCategory.Weapon) continue;
+            var grid = new InventoryGrid(1, 1);
+            grid.TryAutoPlace(GetSlotInstance(kv.Key) ?? new ItemInstance(kv.Value));
+            result.Add(new WeaponState { slot = kv.Key, items = grid.GetSaveData() });
+        }
+        return result;
+    }
+
+    public void RestoreWeaponStates(List<WeaponState> saved)
+    {
+        if (saved == null) return; // 구 세이브는 기존 장비/부착물 로드 유지
+        foreach (var state in saved)
+        {
+            var grid = new InventoryGrid(1, 1);
+            grid.LoadSaveData(state.items);
+            foreach (var p in grid.GetAll())
+                if (CanEquipWeapon(p.item.data, state.slot)) PutWeapon(state.slot, p.item);
+        }
+    }
+
     /// <summary>장비 총 무게 (kg)</summary>
     public float TotalEquipWeight
     {
@@ -216,6 +310,8 @@ public class PlayerEquipment : MonoBehaviour
     public void LoadSaveData(string data)
     {
         slots.Clear();
+        slotInstances.Clear();
+        if (player != null) player.SetWeapon(null);
         if (string.IsNullOrEmpty(data))
         {
             if (player != null) player.SetWeapon(null);

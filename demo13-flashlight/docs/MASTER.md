@@ -23,6 +23,8 @@
 
 ## 현재 개발 상태
 
+- **2026-09-13:** 상호작용 가림·거리 단축, 권총/야구방망이 장비와 창고 흐름 연결 및 Unity 검증 완료. [inventory.md](inventory.md) · [building-interior.md](building-interior.md) · [dev-handoff.md](dev-handoff.md).
+
 **2026-09-11 기준 — 이어서 작업할 땐 [`dev-handoff.md`](dev-handoff.md)부터.**
 
 | 항목 | 상태 |
