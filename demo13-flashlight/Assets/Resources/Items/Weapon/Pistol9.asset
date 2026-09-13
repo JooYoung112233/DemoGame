@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: Pistol9
   m_EditorClassIdentifier: Game.Scripts::ItemData
   itemId: pistol9
-  displayName: "9mm 권총"
-  description: "가벼고 조용한 편. 그래봐야 총이다 — 한 발이면 블록 하나가 다 듣는다."
-  icon: {fileID: 0}
+  displayName: "9mm \uAD8C\uCD1D"
+  description: "\uAC00\uBCBC\uACE0 \uC870\uC6A9\uD55C \uD3B8. \uADF8\uB798\uBD10\uC57C \uCD1D\uC774\uB2E4 \u2014 \uD55C \uBC1C\uC774\uBA74 \uBE14\uB85D \uD558\uB098\uAC00 \uB2E4 \uB4E3\uB294\uB2E4."
+  icon: {fileID: 21300000, guid: 6d02f9741d5381d4294b7cb4b70bdcaa, type: 3}
   gridWidth: 2
   gridHeight: 1
   category: 0
   rarity: 1
+  primaryRegionId: 
   maxStack: 1
   weight: 1.1
   sellPrice: 2500
@@ -27,6 +28,30 @@ MonoBehaviour:
   isUsable: 0
   useEffect: 0
   effectValue: 0
+  useTimeSeconds: 0
+  isThrowable: 0
+  hasDurability: 0
+  maxDurability: 100
+  durabilityCostPerUse: 50
   equipSlot: 5
+  containerWidth: 0
+  containerHeight: 0
+  isContainer: 0
+  internalWidth: 0
+  internalHeight: 0
+  allowedCategories: 
   weaponData: {fileID: 11400000, guid: 9f10a2b3c4d5e6f708192a3b4c5d6e7f, type: 2}
+  weaponPartType: 0
+  partMoveSpeedMult: 1
+  partStaminaMult: 1
+  partRangeBonus: 0
+  partRecoilMult: 1
+  magCapacity: 0
+  magCaliber: 
+  ammoCaliber: 
+  ammoDamageMult: 1
+  ammoPenetration: 0
+  ammoSpeedMult: 1
+  ammoRangeMult: 1
+  ammoSpreadMult: 1
   worldDropPrefab: {fileID: 0}

@@ -1,0 +1,58 @@
+{
+  "starterArmoryClaimed": true,
+  "version": 0,
+  "saveTime": null,
+  "completedQuests": [],
+  "flags": [],
+  "activeQuests": [],
+  "relationships": null,
+  "achievements": null,
+  "currency": 0,
+  "reputation": 0,
+  "hideoutModules": null,
+  "consignSlots": null,
+  "mainStash": null,
+  "sellTray": null,
+  "bagItems": [],
+  "pocketItems": [],
+  "secureItems": [],
+  "equippedWeapon": "5:pistol9|6:bat",
+  "equippedWeaponAttachments": null,
+  "equippedWeaponStates": [
+    {
+      "slot": 5,
+      "items": [
+        {
+          "itemId": "pistol9",
+          "count": 1,
+          "durability": 1.0,
+          "x": 0,
+          "y": 0,
+          "rotated": false,
+          "attachments": [
+            null,
+            null,
+            "mag_9x19",
+            null
+          ],
+          "ammoCount": 7,
+          "ammoItemId": "ammo_9x19",
+          "containerItems": null
+        }
+      ]
+    }
+  ],
+  "quickSlots": null,
+  "survival": null,
+  "traits": null,
+  "progress": null,
+  "storageUnits": [],
+  "dailyQuest": null,
+  "shownTutorials": [],
+  "playedScenes": [],
+  "discoveredItems": [],
+  "raidMap": {
+    "discovered": [],
+    "passages": []
+  }
+}

@@ -206,13 +206,13 @@ public class QuickSlotBar : MonoBehaviour
         if (i < 0 || i >= SlotCount) return;
         string id = _slotIds[i];
         if (string.IsNullOrEmpty(id) || inventory == null) return;
-        if (inventory.CountItemAll(id) <= 0)
+        var data = ItemDatabase.Get(id);
+        if ((data == null || data.category != ItemCategory.Weapon) && inventory.CountItemAll(id) <= 0)
         {
             ToastManager.Show("아이템 없음", ToastManager.ToastType.Warning);
             return;
         }
         // 투척물은 '사용' 대신 조준 모드 진입(좌클릭 착탄에서 소모). 그 외는 즉시 사용.
-        var data = ItemDatabase.Get(id);
         // 무기(총·근접)는 꺼내 든다 — 이미 들고 있으면 넣는다. 2026-09-11 무기 전환 = 퀵슬롯 숫자키(docs/combat.md §무기 구성 결정).
         if (data != null && data.category == ItemCategory.Weapon)
         {
@@ -402,6 +402,9 @@ public class QuickSlotBar : MonoBehaviour
                 continue;
             }
             int n = inventory != null ? inventory.CountItemAll(id) : 0;
+            if (eq != null)
+                foreach (var kv in eq.GetAllEquipped())
+                    if (kv.Value != null && kv.Value.itemId == id) n++;
             slotCounts[i].text = n > 0 ? n.ToString() : "";
             bool holding = held != null && held.itemId == id;
             slotBgs[i].color = holding ? UITheme.Accent

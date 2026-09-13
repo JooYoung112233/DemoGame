@@ -1,0 +1,31 @@
+{
+  "pass": true,
+  "checks": {
+    "near_npc_target": true,
+    "no_colour_highlight": true,
+    "beyond_1_8m_hidden": true,
+    "solid_wall_blocks_target": true,
+    "wall_blocks_E": true,
+    "roofed_interior_hidden": true,
+    "near_E_opens_dialogue": true,
+    "UI_pistol_equip": true,
+    "UI_secondary_slot_honoured": true,
+    "quick_draw_equipped_bat": true,
+    "bat_model_visible": true,
+    "quick_draw_equipped_pistol": true,
+    "pistol_model_visible": true,
+    "fire_consumes_one_round": true,
+    "store_equipped_pistol": true,
+    "sort_preserves_ammo": true,
+    "retrieve_then_quick_draw": true,
+    "save_roundtrip_all_weapon_states": true,
+    "switch_during_reload_cancels_without_loss": true,
+    "full_pockets_reload_returns_old_magazine": true,
+    "Ctrl_retrieves_weapon_without_equipping": true,
+    "Ctrl_stores_weapon_without_equipping": true,
+    "full_stash_no_loss": true,
+    "no_weapon_alias_in_inventory": true,
+    "starter_granted_only_once": true,
+    "control_hint_present": true
+  }
+}

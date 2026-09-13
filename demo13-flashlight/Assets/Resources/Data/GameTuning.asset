@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc1962bb26eb9844ea1de55f2168bebc, type: 3}
   m_Name: GameTuning
   m_EditorClassIdentifier: Game.Scripts::GameTuning
+  interactionDistance: 1.8
   dayDuration: 120
   nightDuration: 600
   raidDuration: 1200

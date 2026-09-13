@@ -181,11 +181,13 @@ public class PlayerGun : MonoBehaviour
         _reloadStartedAt = Time.time;
         _reloadUntil = Time.time + Mathf.Max(0.2f, g.reloadSeconds);
         _pendingMag = best;
+        _reloadGun = inst;
         return true;
     }
 
     InventoryGrid.PlacedItem _pendingMag;
     InventoryGrid _pendingGrid;
+    ItemInstance _reloadGun;
 
     void FinishReload()
     {
@@ -193,6 +195,9 @@ public class PlayerGun : MonoBehaviour
         var inst = GunInst;
         var placed = _pendingMag;
         _pendingMag = null;
+        var expected = _reloadGun;
+        _reloadGun = null;
+        if (inst != expected || Gun == null || !Gun.isRanged) { Notify("무기 전환 — 장전 취소"); return; }
         if (inst == null || placed == null || placed.item == null) return;
 
         // 장전 도중 그 탄창이 사라졌을 수 있다(버리기·정리). 다시 확인한다.
@@ -207,8 +212,13 @@ public class PlayerGun : MonoBehaviour
             var old = new ItemInstance(oldMagData);
             old.ammoCount = inst.ammoCount;
             old.ammoItemId = inst.ammoItemId;
-            if (_inv == null || !_inv.TryAutoPlaceAnywhere(old))
-                Notify("빈 탄창 둘 자리가 없다 — 버림");   // 자리가 없으면 사라진다(무게 규칙과 같은 취급)
+            // 새 탄창이 비운 칸으로 교환한다. 복귀가 불가능하면 장전 전체를 취소한다.
+            if (!_pendingGrid.TryPlace(old, placed.gridX, placed.gridY))
+            {
+                _pendingGrid.TryPlace(newMag, placed.gridX, placed.gridY);
+                Notify("탄창을 돌려놓을 수 없어 장전 취소");
+                return;
+            }
         }
 
         // ② 새 탄창을 물린다.
