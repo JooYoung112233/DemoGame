@@ -323,8 +323,7 @@ public class SceneTransitionManager : MonoBehaviour
         var target = match ?? fallbackDefault ?? anyInScene;
         if (target != null)
         {
-            playerGO.transform.position = target.transform.position;
-            CameraFollow.Instance?.SnapToTarget();   // 카메라도 즉시 스냅 → 슬라이드 방지
+            SpawnPoint.PlacePlayer(playerGO, target.transform.position);
             if (match == null)
                 Debug.LogWarning($"[SceneTransition] 스폰 '{PendingSpawnPointId}' 미발견 → 대체 '{target.PointId}' 사용 (씬 {scene.name}).");
             else

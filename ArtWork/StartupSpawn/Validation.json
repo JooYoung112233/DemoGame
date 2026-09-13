@@ -1,0 +1,21 @@
+{
+  "pass": true,
+  "checks": {
+    "fresh_start_at_default": true,
+    "fresh_start_body_matches": true,
+    "spawn_clears_velocity": true,
+    "spawn_survives_physics": true,
+    "hideout_transition_completed": true,
+    "safehouse_transition_completed": true,
+    "return_transform_at_default": true,
+    "return_body_at_default": true
+  },
+  "details": [
+    {
+      "initial": "(53.50, 0.00, 12.00)",
+      "returned": "(53.50, 0.00, 12.00)",
+      "body": "(53.50, 0.00, 12.00)",
+      "expected": "(53.50, 0.00, 12.00)"
+    }
+  ]
+}

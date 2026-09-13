@@ -80,8 +80,7 @@ public class GameBoot : MonoBehaviour
 
         if (target != null)
         {
-            playerGO.transform.position = target.transform.position;
-            CameraFollow.Instance?.SnapToTarget();   // 카메라 즉시 스냅 → 슬라이드 방지
+            SpawnPoint.PlacePlayer(playerGO, target.transform.position);
         }
     }
 }
