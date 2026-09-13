@@ -144,6 +144,7 @@ public class CharacterPanelUI : MonoBehaviour
     // ── 아이템 선택(클릭) → 착용 버튼 + 좌측 슬롯 하이라이트 ──
     ItemInstance selectedItem;        // 현재 선택된 아이템(클릭 시)
     InventoryGrid selectedGrid;       // 선택 아이템이 속한 격자
+    EquipSlot selectedEquipSlot = EquipSlot.None;
     readonly HashSet<EquipSlot> highlightSlots = new HashSet<EquipSlot>();  // 하이라이트할 좌측 슬롯
     Vector2 dragStartMouse;           // 드래그 시작 시 마우스 위치(클릭 판정용)
     const float CLICK_MOVE_THRESHOLD = 6f;  // 이 거리 미만 이동이면 클릭(선택)으로 간주
@@ -1145,10 +1146,12 @@ public class CharacterPanelUI : MonoBehaviour
         if (playerEquipment == null) return;
         if (playerEquipment.GetSlot(slot) == null) return;
 
-        // 좌클릭만으로는 해제하지 않는다(실수 방지). Ctrl+좌클릭일 때만 해제.
-        // 일반 해제/제거는 우클릭 메뉴(착용해제/제거)로.
+        // 좌클릭은 실물을 움직이지 않고 퀵슬롯 등록 대상으로 선택한다.
         if (!(GameInput.GetKey(KeyCode.LeftControl) || GameInput.GetKey(KeyCode.RightControl)))
+        {
+            SelectEquippedItem(slot);
             return;
+        }
 
         UnequipToInventory(slot);
     }
@@ -2166,6 +2169,7 @@ public class CharacterPanelUI : MonoBehaviour
                 TryDiscardItemUnderMouse();
 
             // 숫자키 1~6: 클릭 선택한 아이템을 해당 퀵슬롯에 등록 (2026-07-10 — 드래그 등록과 병행 UX)
+            ValidateSelection();
             if (selectedItem != null && selectedItem.data != null && QuickSlotBar.Instance != null)
             {
                 for (int k = 0; k < QuickSlotBar.SlotCount; k++)
@@ -3243,6 +3247,18 @@ public class CharacterPanelUI : MonoBehaviour
         var capInst = inst;
         var capName = data.displayName;
 
+        if (data.category == ItemCategory.Weapon)
+        {
+            AddContextButton("퀵슬롯 등록 (1~6)", UITheme.AccentBright, y, () =>
+            {
+                // 메뉴가 열린 동안 교체된 아이템에 오래된 동작을 적용하지 않는다.
+                if (playerEquipment != null && playerEquipment.GetSlotInstance(capSlot) == capInst)
+                    SelectEquippedItem(capSlot);
+                HideContextMenu();
+            });
+            y -= 26f;
+        }
+
         AddContextButton("착용해제", UITheme.AccentBright, y, () =>
         {
             UnequipToInventory(capSlot);
@@ -3626,6 +3642,7 @@ public class CharacterPanelUI : MonoBehaviour
         if (item == null || item.data == null) { ClearSelection(); return; }
         selectedItem = item;
         selectedGrid = grid;
+        selectedEquipSlot = EquipSlot.None;
 
         // 장착 가능한 아이템만 좌측 슬롯 하이라이트(헬멧→Head, 가방→Backpack, 무기→Primary/Secondary…).
         if (IsEquippable(item.data))
@@ -3634,10 +3651,23 @@ public class CharacterPanelUI : MonoBehaviour
             highlightSlots.Clear();
     }
 
+    void SelectEquippedItem(EquipSlot slot)
+    {
+        ClearSelection();
+        var item = playerEquipment != null ? playerEquipment.GetSlotInstance(slot) : null;
+        if (item == null || item.data == null || item.data.category != ItemCategory.Weapon) return;
+        selectedItem = item;
+        selectedEquipSlot = slot;
+        highlightSlots.Add(slot);
+        UpdateEquipSlots();
+        ToastManager.Show($"{item.DisplayName}: 1~6을 눌러 퀵슬롯 등록", ToastManager.ToastType.Info);
+    }
+
     void ClearSelection()
     {
         selectedItem = null;
         selectedGrid = null;
+        selectedEquipSlot = EquipSlot.None;
         highlightSlots.Clear();
     }
 
@@ -3650,11 +3680,13 @@ public class CharacterPanelUI : MonoBehaviour
             highlightSlots.Clear();
     }
 
-    /// <summary>선택 아이템이 여전히 유효(해당 격자에 존재)한지 확인. 아니면 해제.</summary>
+    /// <summary>선택 실물이 원래 격자 또는 장비 슬롯에 있는지 확인. 아니면 해제.</summary>
     void ValidateSelection()
     {
         if (selectedItem == null) return;
-        bool stillThere = selectedGrid != null && GridContains(selectedGrid, selectedItem);
+        bool stillThere = selectedEquipSlot != EquipSlot.None
+            ? playerEquipment != null && playerEquipment.GetSlotInstance(selectedEquipSlot) == selectedItem
+            : selectedGrid != null && GridContains(selectedGrid, selectedItem);
         if (!stillThere)
             ClearSelection();
     }

@@ -1,0 +1,14 @@
+{
+  "pass": true,
+  "checks": {
+    "click_selects_equipped_instance": true,
+    "number_registers_without_unequipping": true,
+    "only_selected_equipment_highlighted": true,
+    "secondary_numpad_six": true,
+    "stored_selection_cannot_register": true,
+    "same_id_replacement_invalidates_selection": true,
+    "context_menu_selects_for_number_key": true,
+    "grid_selection_still_registers": true,
+    "ctrl_click_still_unequips": true
+  }
+}
