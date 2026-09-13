@@ -1,0 +1,406 @@
+{
+  "op": "walk",
+  "success": false,
+  "seconds": 7.6313324,
+  "notes": [
+    "WALK_BLOCKED goal=(56.40, 12.00) actual=(7.63, 4.09) canMove=True"
+  ],
+  "before": {
+    "scene": "Safehouse",
+    "scenes": [
+      "Systems",
+      "Safehouse"
+    ],
+    "player": {
+      "x": 53.5,
+      "y": 0.0,
+      "z": 12.000001
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": false,
+    "target": null,
+    "hidden": false,
+    "buttons": [
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_2",
+        "interactable": true,
+        "text": "2  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_5",
+        "interactable": true,
+        "text": "5  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_1",
+        "interactable": true,
+        "text": "1  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_3",
+        "interactable": true,
+        "text": "3  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_6",
+        "interactable": true,
+        "text": "6  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_4",
+        "interactable": true,
+        "text": "4  "
+      }
+    ],
+    "texts": [
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_4/Num",
+        "text": "4"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_1/Num",
+        "text": "1"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/TownPlan/Building_BlackMarket/Label",
+        "text": "암시장 ×"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/Label",
+        "text": "마을 안내"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/TownPlan/Building_Pawnshop/Label",
+        "text": "전당포"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/TownPlan/Building_Repair/Label",
+        "text": "수리점 ×"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_2/Num",
+        "text": "2"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/TownPlan/Building_Furniture/Label",
+        "text": "가구점 ×"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/TownPlan/Departure/Label",
+        "text": "출전"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/Label",
+        "text": "N ↑"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/Label",
+        "text": "● 내 위치   ■ 입구   × 잠김"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/TownPlan/Building_Container_Home/Label",
+        "text": "하이드\n아웃"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/TownMinimap/TownPlan/Building_Medical/Label",
+        "text": "의료소 ×"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_3/Num",
+        "text": "3"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_6/Num",
+        "text": "6"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_5/Num",
+        "text": "5"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Board_Dispatch",
+        "type": "MapBoard",
+        "position": {
+          "x": 72.0,
+          "y": 1.1,
+          "z": 24.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.0
+      },
+      {
+        "name": "구역 관리인",
+        "type": "NPC",
+        "position": {
+          "x": 50.0,
+          "y": 0.9,
+          "z": 16.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "떠돌이 상인",
+        "type": "NPC",
+        "position": {
+          "x": 36.0,
+          "y": 0.9,
+          "z": 14.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "전당포 주인",
+        "type": "NPC",
+        "position": {
+          "x": 34.0,
+          "y": 0.9,
+          "z": 40.1
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "회수꾼",
+        "type": "NPC",
+        "position": {
+          "x": 67.0,
+          "y": 0.9,
+          "z": 29.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      }
+    ],
+    "doors": [
+      {
+        "name": "Hideout_Entrance",
+        "position": {
+          "x": 56.4,
+          "y": 0.0,
+          "z": 12.0
+        }
+      }
+    ],
+    "suppressWrites": true
+  },
+  "after": {
+    "scene": "Hideout",
+    "scenes": [
+      "Systems",
+      "Hideout"
+    ],
+    "player": {
+      "x": 7.62583542,
+      "y": 0.0,
+      "z": 4.08620071
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": false,
+    "target": null,
+    "hidden": true,
+    "buttons": [
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_radio",
+        "interactable": true,
+        "text": "라디오"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_medical",
+        "interactable": true,
+        "text": "의료대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_generator",
+        "interactable": true,
+        "text": "발전기"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_bed",
+        "interactable": true,
+        "text": "침대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_workbench",
+        "interactable": true,
+        "text": "작업대"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/ExitButton",
+        "interactable": true,
+        "text": "마을로 나가기"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_stash",
+        "interactable": true,
+        "text": "창고"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_cooking",
+        "interactable": true,
+        "text": "조리대"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/InventoryButton",
+        "interactable": true,
+        "text": "인벤토리"
+      }
+    ],
+    "texts": [
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_medical/Label",
+        "text": "의료대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_radio/Label",
+        "text": "라디오"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_bed/Label",
+        "text": "침대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_cooking/Label",
+        "text": "조리대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_generator/Label",
+        "text": "발전기"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/InventoryButton/Label",
+        "text": "인벤토리"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/ExitButton/Label",
+        "text": "마을로 나가기"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_stash/Label",
+        "text": "창고"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/Hint",
+        "text": "시설을 선택하세요  ·  Tab 인벤토리  ·  Esc 닫기 / 나가기"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/Title",
+        "text": "하이드아웃"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_workbench/Label",
+        "text": "작업대"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "MedicalStation02",
+        "type": "MedicalBench",
+        "position": {
+          "x": 8.153118,
+          "y": 0.0,
+          "z": 1.91024733
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Cot01",
+        "type": "Bed",
+        "position": {
+          "x": 8.329015,
+          "y": 0.0,
+          "z": 6.08420944
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Stool01",
+        "type": "Generic",
+        "position": {
+          "x": 8.182052,
+          "y": 0.0,
+          "z": 3.78218842
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "CookingStation02",
+        "type": "CookingBench",
+        "position": {
+          "x": 3.91219616,
+          "y": 0.0,
+          "z": 3.64679
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "RadioTable02",
+        "type": "Radio",
+        "position": {
+          "x": 4.901305,
+          "y": 0.0,
+          "z": 5.77419758
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "MapBoard01",
+        "type": "Generic",
+        "position": {
+          "x": 10.32297,
+          "y": 1.48,
+          "z": 5.689062
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Workbench01",
+        "type": "Workbench",
+        "position": {
+          "x": 9.437105,
+          "y": 0.0,
+          "z": 3.70910168
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "StorageChest01",
+        "type": "Stash",
+        "position": {
+          "x": 6.47175741,
+          "y": 0.0,
+          "z": 5.66338253
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Generator01",
+        "type": "Generator",
+        "position": {
+          "x": 4.386718,
+          "y": 0.0,
+          "z": 4.986988
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      }
+    ],
+    "doors": [],
+    "suppressWrites": true
+  }
+}

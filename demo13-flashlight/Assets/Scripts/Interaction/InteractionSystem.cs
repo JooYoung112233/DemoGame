@@ -197,6 +197,9 @@ public class InteractionSystem : MonoBehaviour
     void OnGUI()
     {
         if (mainCam == null || TitleScreen.IsShowing || HideoutController.IsActive) return;
+        if (StoryPlayer.Instance != null && StoryPlayer.Instance.IsPlaying) return;
+        if (NarrationUI.Instance != null && NarrationUI.Instance.IsShowing) return;
+        if (SceneTransitionManager.Instance != null && SceneTransitionManager.Instance.IsTransitioning) return;
         // UI 열려있으면 프롬프트 숨김 (인벤 등 위로 뚫고 나오는 것 방지)
         if (UIManager.Instance != null && UIManager.Instance.IsAnyUIOpen()) return;
 

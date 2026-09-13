@@ -273,6 +273,8 @@ public class UIManager : MonoBehaviour
     /// <summary>캐릭터 패널 표시 (인벤토리/의료/정보 탭)</summary>
     public void ShowCharacterPanel()
     {
+        // Restore any adopted facility UI before opening the full inventory.
+        HideoutDockPanel.Instance?.Hide();
         if (characterPanelUI != null)
             characterPanelUI.Show();
     }

@@ -1,0 +1,279 @@
+{
+  "op": "key",
+  "success": true,
+  "seconds": 1.21136475,
+  "notes": [],
+  "before": {
+    "scene": "Safehouse",
+    "scenes": [
+      "Systems",
+      "Safehouse"
+    ],
+    "player": {
+      "x": 34.0031853,
+      "y": 0.0,
+      "z": 38.34244
+    },
+    "canMove": true,
+    "title": false,
+    "story": true,
+    "ui": true,
+    "target": null,
+    "hidden": false,
+    "buttons": [],
+    "texts": [
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/Dialogue",
+        "text": "팔 거라도 있나?"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/ContinueHint",
+        "text": "[E] 계속 ▶"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/Relation",
+        "text": "[경계]"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/NPCName",
+        "text": "전당포 주인"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Board_Dispatch",
+        "type": "MapBoard",
+        "position": {
+          "x": 72.0,
+          "y": 1.1,
+          "z": 24.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.0
+      },
+      {
+        "name": "구역 관리인",
+        "type": "NPC",
+        "position": {
+          "x": 50.0,
+          "y": 0.9,
+          "z": 16.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "떠돌이 상인",
+        "type": "NPC",
+        "position": {
+          "x": 36.0,
+          "y": 0.9,
+          "z": 14.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "회수꾼",
+        "type": "NPC",
+        "position": {
+          "x": 67.0,
+          "y": 0.9,
+          "z": 29.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "전당포 주인",
+        "type": "NPC",
+        "position": {
+          "x": 34.0,
+          "y": 0.9,
+          "z": 40.1
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      }
+    ],
+    "doors": [
+      {
+        "name": "Hideout_Entrance",
+        "position": {
+          "x": 56.4,
+          "y": 0.0,
+          "z": 12.0
+        }
+      }
+    ],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  },
+  "after": {
+    "scene": "Safehouse",
+    "scenes": [
+      "Systems",
+      "Safehouse"
+    ],
+    "player": {
+      "x": 34.0031853,
+      "y": 0.0,
+      "z": 38.34244
+    },
+    "canMove": true,
+    "title": false,
+    "story": true,
+    "ui": true,
+    "target": null,
+    "hidden": false,
+    "buttons": [
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/ChoicePanel/Choice0",
+        "interactable": true,
+        "text": "  ▶ 1. 거래하기"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/ChoicePanel/Choice1",
+        "interactable": true,
+        "text": "     2. 됐어"
+      }
+    ],
+    "texts": [
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/Dialogue",
+        "text": "팔 거라도 있나?"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/ChoicePanel/Choice0/Text",
+        "text": "  ▶ 1. 거래하기"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/Relation",
+        "text": "[경계]"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/NPCName",
+        "text": "전당포 주인"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/ChoicePanel/Choice1/Text",
+        "text": "     2. 됐어"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Board_Dispatch",
+        "type": "MapBoard",
+        "position": {
+          "x": 72.0,
+          "y": 1.1,
+          "z": 24.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.0
+      },
+      {
+        "name": "구역 관리인",
+        "type": "NPC",
+        "position": {
+          "x": 50.0,
+          "y": 0.9,
+          "z": 16.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "떠돌이 상인",
+        "type": "NPC",
+        "position": {
+          "x": 36.0,
+          "y": 0.9,
+          "z": 14.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "회수꾼",
+        "type": "NPC",
+        "position": {
+          "x": 67.0,
+          "y": 0.9,
+          "z": 29.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "전당포 주인",
+        "type": "NPC",
+        "position": {
+          "x": 34.0,
+          "y": 0.9,
+          "z": 40.1
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      }
+    ],
+    "doors": [
+      {
+        "name": "Hideout_Entrance",
+        "position": {
+          "x": 56.4,
+          "y": 0.0,
+          "z": 12.0
+        }
+      }
+    ],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  }
+}
