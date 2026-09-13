@@ -23,6 +23,8 @@
 
 ## 현재 개발 상태
 
+- **2026-09-13 앞단 QA:** 새 게임부터 첫 출전/이동은 실행 확인. **전당포 첫 대면 비활성으로 스토리·첫 의뢰 연결은 미통과**. 프롤로그 가림/하이드아웃 UI 중첩 수정 및 재검증. [qa.md](qa.md) · [dev-handoff.md](dev-handoff.md).
+
 - **2026-09-13:** 상호작용 가림·거리 단축, 권총/야구방망이 장비와 창고 흐름 연결 및 Unity 검증 완료. [inventory.md](inventory.md) · [building-interior.md](building-interior.md) · [dev-handoff.md](dev-handoff.md).
 
 **2026-09-11 기준 — 이어서 작업할 땐 [`dev-handoff.md`](dev-handoff.md)부터.**

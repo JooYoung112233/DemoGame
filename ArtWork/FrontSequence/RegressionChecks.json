@@ -1,0 +1,42 @@
+[
+  {
+    "name": "All save entry points honor suppression",
+    "ok": true
+  },
+  {
+    "name": "Existing save bytes unchanged",
+    "ok": true
+  },
+  {
+    "name": "No extra saves",
+    "ok": true
+  },
+  {
+    "name": "Inventory visible after facility button",
+    "ok": true
+  },
+  {
+    "name": "Facility dock closed before inventory",
+    "ok": true
+  },
+  {
+    "name": "Adopted module panel closed",
+    "ok": true
+  },
+  {
+    "name": "Narration above story fade",
+    "ok": true
+  },
+  {
+    "name": "Prologue chain completed",
+    "ok": true
+  },
+  {
+    "name": "One starter kit only",
+    "ok": true
+  },
+  {
+    "name": "Virtual input released",
+    "ok": true
+  }
+]

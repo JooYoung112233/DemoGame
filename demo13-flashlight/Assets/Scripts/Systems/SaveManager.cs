@@ -242,6 +242,8 @@ public class SaveManager : MonoBehaviour
     /// (크래시 복구 등에서 보관해 둔 스냅샷 JSON을 재수집 없이 그대로 커밋할 때 사용)</summary>
     public void WriteJson(string json)
     {
+        // All disk entry points, including crash recovery, must honor QA isolation.
+        if (SuppressWrites) return;
         if (string.IsNullOrEmpty(json)) return;
         WriteAtomic(SavePath, json);
         Debug.Log($"[Save] 저장 완료: {SavePath}");

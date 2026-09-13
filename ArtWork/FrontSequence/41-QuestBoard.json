@@ -1,0 +1,507 @@
+{
+  "op": "button",
+  "success": true,
+  "seconds": 1.206665,
+  "notes": [],
+  "before": {
+    "scene": "Safehouse",
+    "scenes": [
+      "Systems",
+      "Safehouse"
+    ],
+    "player": {
+      "x": 72.0551,
+      "y": 0.0,
+      "z": 25.6939583
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": true,
+    "target": null,
+    "hidden": false,
+    "buttons": [
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/ArbeitBtn",
+        "interactable": true,
+        "text": "아르바이트"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/BoardBtn",
+        "interactable": true,
+        "text": "의뢰"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_eternal_night_core",
+        "interactable": false,
+        "text": "🔒 중앙 영야 심장\n● 0:51"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_silence_living",
+        "interactable": false,
+        "text": "🔒 침묵 생활 지구\n● 4:51"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/CloseBtn",
+        "interactable": true,
+        "text": "✕"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_entertainment",
+        "interactable": false,
+        "text": "🔒 기억의 극장 지구\n● 2:11"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_industrial",
+        "interactable": false,
+        "text": "🔒 묻힌 정비창\n● 4:51"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/ConfirmBtn",
+        "interactable": false,
+        "text": "출전"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_scrap_market",
+        "interactable": true,
+        "text": "◈ 폐상가 교역 지구\n● 6:51"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/CancelBtn2",
+        "interactable": true,
+        "text": "취소  [ESC]"
+      }
+    ],
+    "texts": [
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/CloseBtn/Text",
+        "text": "✕"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/InfoText",
+        "text": "<color=#8A8170>맵에서 지역 마커를 선택하세요.</color>"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/MapHint",
+        "text": "도시 구역 — 마커를 선택해 정찰/출전 지역을 고르세요"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_eternal_night_core/Label",
+        "text": "중앙 영야 심장\n● 0:51"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/Title",
+        "text": "출전 지역 — 다녀올게"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_eternal_night_core/Icon",
+        "text": "🔒"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_industrial/Label",
+        "text": "묻힌 정비창\n● 4:51"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_entertainment/Icon",
+        "text": "🔒"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/InfoTitleText",
+        "text": "지역 정보"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_silence_living/Label",
+        "text": "침묵 생활 지구\n● 4:51"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_silence_living/Icon",
+        "text": "🔒"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_scrap_market/Icon",
+        "text": "◈"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/ArbeitBtn/Text",
+        "text": "아르바이트"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/BoardBtn/Text",
+        "text": "의뢰"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_scrap_market/Label",
+        "text": "폐상가 교역 지구\n● 6:51"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_entertainment/Label",
+        "text": "기억의 극장 지구\n● 2:11"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/ConfirmBtn/Text",
+        "text": "출전"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/CancelBtn2/Text",
+        "text": "취소  [ESC]"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_industrial/Icon",
+        "text": "🔒"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Board_Dispatch",
+        "type": "MapBoard",
+        "position": {
+          "x": 72.0,
+          "y": 1.1,
+          "z": 24.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.0
+      },
+      {
+        "name": "구역 관리인",
+        "type": "NPC",
+        "position": {
+          "x": 50.0,
+          "y": 0.9,
+          "z": 16.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "떠돌이 상인",
+        "type": "NPC",
+        "position": {
+          "x": 36.0,
+          "y": 0.9,
+          "z": 14.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "회수꾼",
+        "type": "NPC",
+        "position": {
+          "x": 67.0,
+          "y": 0.9,
+          "z": 29.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "전당포 주인",
+        "type": "NPC",
+        "position": {
+          "x": 34.0,
+          "y": 0.9,
+          "z": 40.1
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      }
+    ],
+    "doors": [
+      {
+        "name": "Hideout_Entrance",
+        "position": {
+          "x": 56.4,
+          "y": 0.0,
+          "z": 12.0
+        }
+      }
+    ],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  },
+  "after": {
+    "scene": "Safehouse",
+    "scenes": [
+      "Systems",
+      "Safehouse"
+    ],
+    "player": {
+      "x": 72.0551,
+      "y": 0.0,
+      "z": 25.69396
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": true,
+    "target": null,
+    "hidden": false,
+    "buttons": [
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/ArbeitBtn",
+        "interactable": true,
+        "text": "아르바이트"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/BoardBtn",
+        "interactable": true,
+        "text": "의뢰"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_eternal_night_core",
+        "interactable": false,
+        "text": "🔒 중앙 영야 심장\n● 0:50"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_silence_living",
+        "interactable": false,
+        "text": "🔒 침묵 생활 지구\n● 4:50"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/CloseBtn",
+        "interactable": true,
+        "text": "✕"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_entertainment",
+        "interactable": false,
+        "text": "🔒 기억의 극장 지구\n● 2:10"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_industrial",
+        "interactable": false,
+        "text": "🔒 묻힌 정비창\n● 4:50"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/ConfirmBtn",
+        "interactable": false,
+        "text": "출전"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_scrap_market",
+        "interactable": true,
+        "text": "◈ 폐상가 교역 지구\n● 6:50"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/BoardOverlay/BoardPanel/BoardClose",
+        "interactable": true,
+        "text": "닫기  [ESC]"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/CancelBtn2",
+        "interactable": true,
+        "text": "취소  [ESC]"
+      }
+    ],
+    "texts": [
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/CloseBtn/Text",
+        "text": "✕"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/InfoText",
+        "text": "<color=#8A8170>맵에서 지역 마커를 선택하세요.</color>"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/MapHint",
+        "text": "도시 구역 — 마커를 선택해 정찰/출전 지역을 고르세요"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_eternal_night_core/Label",
+        "text": "중앙 영야 심장\n● 0:50"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/Title",
+        "text": "출전 지역 — 다녀올게"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_eternal_night_core/Icon",
+        "text": "🔒"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/BoardOverlay/BoardPanel/BoardHint",
+        "text": "의뢰서를 떼면(수주) 목표 완수 후 이 게시판에서 보고한다. 동시 수주 2건."
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_industrial/Label",
+        "text": "묻힌 정비창\n● 4:50"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_entertainment/Icon",
+        "text": "🔒"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/InfoTitleText",
+        "text": "지역 정보"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_silence_living/Label",
+        "text": "침묵 생활 지구\n● 4:50"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_silence_living/Icon",
+        "text": "🔒"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_scrap_market/Icon",
+        "text": "◈"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/BoardOverlay/BoardPanel/BoardViewport/BoardList/Empty",
+        "text": "붙은 의뢰서가 없다. (해금 전이거나 오늘 의뢰를 모두 끝냈다)"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/ArbeitBtn/Text",
+        "text": "아르바이트"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Header/BoardBtn/Text",
+        "text": "의뢰"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_scrap_market/Label",
+        "text": "폐상가 교역 지구\n● 6:50"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_entertainment/Label",
+        "text": "기억의 극장 지구\n● 2:10"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/ConfirmBtn/Text",
+        "text": "출전"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/BoardOverlay/BoardPanel/BoardTitle",
+        "text": "의뢰 게시판 — 오늘의 의뢰서"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/BoardOverlay/BoardPanel/BoardClose/Text",
+        "text": "닫기  [ESC]"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/InfoPanel/CancelBtn2/Text",
+        "text": "취소  [ESC]"
+      },
+      {
+        "path": "UIManager/MapSelectUI/MapSelect_Canvas/PanelRoot/Body/MapArea/Marker_industrial/Icon",
+        "text": "🔒"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Board_Dispatch",
+        "type": "MapBoard",
+        "position": {
+          "x": 72.0,
+          "y": 1.1,
+          "z": 24.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.0
+      },
+      {
+        "name": "구역 관리인",
+        "type": "NPC",
+        "position": {
+          "x": 50.0,
+          "y": 0.9,
+          "z": 16.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "떠돌이 상인",
+        "type": "NPC",
+        "position": {
+          "x": 36.0,
+          "y": 0.9,
+          "z": 14.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "회수꾼",
+        "type": "NPC",
+        "position": {
+          "x": 67.0,
+          "y": 0.9,
+          "z": 29.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "전당포 주인",
+        "type": "NPC",
+        "position": {
+          "x": 34.0,
+          "y": 0.9,
+          "z": 40.1
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      }
+    ],
+    "doors": [
+      {
+        "name": "Hideout_Entrance",
+        "position": {
+          "x": 56.4,
+          "y": 0.0,
+          "z": 12.0
+        }
+      }
+    ],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  }
+}

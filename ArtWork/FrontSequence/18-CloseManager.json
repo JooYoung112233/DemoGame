@@ -1,0 +1,280 @@
+{
+  "op": "key",
+  "success": true,
+  "seconds": 1.21282959,
+  "notes": [],
+  "before": {
+    "scene": "Safehouse",
+    "scenes": [
+      "Systems",
+      "Safehouse"
+    ],
+    "player": {
+      "x": 50.0165939,
+      "y": 0.0,
+      "z": 14.290802
+    },
+    "canMove": true,
+    "title": false,
+    "story": true,
+    "ui": true,
+    "target": null,
+    "hidden": false,
+    "buttons": [],
+    "texts": [
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/Dialogue",
+        "text": "자릿세는 빚으로 달아놨다."
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/ContinueHint",
+        "text": "[E] 계속 ▶"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/Relation",
+        "text": "[경계]"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/NPCName",
+        "text": "구역 관리인"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Board_Dispatch",
+        "type": "MapBoard",
+        "position": {
+          "x": 72.0,
+          "y": 1.1,
+          "z": 24.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.0
+      },
+      {
+        "name": "구역 관리인",
+        "type": "NPC",
+        "position": {
+          "x": 50.0,
+          "y": 0.9,
+          "z": 16.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "떠돌이 상인",
+        "type": "NPC",
+        "position": {
+          "x": 36.0,
+          "y": 0.9,
+          "z": 14.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "회수꾼",
+        "type": "NPC",
+        "position": {
+          "x": 67.0,
+          "y": 0.9,
+          "z": 29.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "전당포 주인",
+        "type": "NPC",
+        "position": {
+          "x": 34.0,
+          "y": 0.9,
+          "z": 40.1
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      }
+    ],
+    "doors": [
+      {
+        "name": "Hideout_Entrance",
+        "position": {
+          "x": 56.4,
+          "y": 0.0,
+          "z": 12.0
+        }
+      }
+    ],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  },
+  "after": {
+    "scene": "Safehouse",
+    "scenes": [
+      "Systems",
+      "Safehouse"
+    ],
+    "player": {
+      "x": 50.0165939,
+      "y": 0.0,
+      "z": 14.290802
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": true,
+    "target": null,
+    "hidden": false,
+    "buttons": [
+      {
+        "path": "PauseMenu/Pause_Canvas/Btn_설정",
+        "interactable": true,
+        "text": "설정"
+      },
+      {
+        "path": "PauseMenu/Pause_Canvas/Btn_게임 종료",
+        "interactable": true,
+        "text": "게임 종료"
+      },
+      {
+        "path": "PauseMenu/Pause_Canvas/Btn_계속하기",
+        "interactable": true,
+        "text": "계속하기"
+      }
+    ],
+    "texts": [
+      {
+        "path": "PauseMenu/Pause_Canvas/Title",
+        "text": "일시정지"
+      },
+      {
+        "path": "PauseMenu/Pause_Canvas/Btn_계속하기/Label",
+        "text": "계속하기"
+      },
+      {
+        "path": "PauseMenu/Pause_Canvas/Btn_게임 종료/Label",
+        "text": "게임 종료"
+      },
+      {
+        "path": "PauseMenu/Pause_Canvas/Btn_설정/Label",
+        "text": "설정"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Board_Dispatch",
+        "type": "MapBoard",
+        "position": {
+          "x": 72.0,
+          "y": 1.1,
+          "z": 24.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.0
+      },
+      {
+        "name": "구역 관리인",
+        "type": "NPC",
+        "position": {
+          "x": 50.0,
+          "y": 0.9,
+          "z": 16.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "떠돌이 상인",
+        "type": "NPC",
+        "position": {
+          "x": 36.0,
+          "y": 0.9,
+          "z": 14.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "회수꾼",
+        "type": "NPC",
+        "position": {
+          "x": 67.0,
+          "y": 0.9,
+          "z": 29.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "전당포 주인",
+        "type": "NPC",
+        "position": {
+          "x": 34.0,
+          "y": 0.9,
+          "z": 40.1
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      }
+    ],
+    "doors": [
+      {
+        "name": "Hideout_Entrance",
+        "position": {
+          "x": 56.4,
+          "y": 0.0,
+          "z": 12.0
+        }
+      }
+    ],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  }
+}

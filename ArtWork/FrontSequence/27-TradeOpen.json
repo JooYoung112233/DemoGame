@@ -1,0 +1,409 @@
+{
+  "op": "key",
+  "success": true,
+  "seconds": 1.25762939,
+  "notes": [],
+  "before": {
+    "scene": "Safehouse",
+    "scenes": [
+      "Systems",
+      "Safehouse"
+    ],
+    "player": {
+      "x": 34.0031853,
+      "y": 0.0,
+      "z": 38.34244
+    },
+    "canMove": true,
+    "title": false,
+    "story": true,
+    "ui": true,
+    "target": null,
+    "hidden": false,
+    "buttons": [
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/ChoicePanel/Choice0",
+        "interactable": true,
+        "text": "  ▶ 1. 거래하기"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/ChoicePanel/Choice1",
+        "interactable": true,
+        "text": "     2. 됐어"
+      }
+    ],
+    "texts": [
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/Dialogue",
+        "text": "팔 거라도 있나?"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/ChoicePanel/Choice0/Text",
+        "text": "  ▶ 1. 거래하기"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/Relation",
+        "text": "[경계]"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/DialogueBG/NPCName",
+        "text": "전당포 주인"
+      },
+      {
+        "path": "UIManager/DialogueUI/Dialogue_Canvas/PanelRoot/ChoicePanel/Choice1/Text",
+        "text": "     2. 됐어"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Board_Dispatch",
+        "type": "MapBoard",
+        "position": {
+          "x": 72.0,
+          "y": 1.1,
+          "z": 24.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.0
+      },
+      {
+        "name": "구역 관리인",
+        "type": "NPC",
+        "position": {
+          "x": 50.0,
+          "y": 0.9,
+          "z": 16.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "떠돌이 상인",
+        "type": "NPC",
+        "position": {
+          "x": 36.0,
+          "y": 0.9,
+          "z": 14.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "회수꾼",
+        "type": "NPC",
+        "position": {
+          "x": 67.0,
+          "y": 0.9,
+          "z": 29.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "전당포 주인",
+        "type": "NPC",
+        "position": {
+          "x": 34.0,
+          "y": 0.9,
+          "z": 40.1
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      }
+    ],
+    "doors": [
+      {
+        "name": "Hideout_Entrance",
+        "position": {
+          "x": 56.4,
+          "y": 0.0,
+          "z": 12.0
+        }
+      }
+    ],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  },
+  "after": {
+    "scene": "Safehouse",
+    "scenes": [
+      "Systems",
+      "Safehouse"
+    ],
+    "player": {
+      "x": 34.0031853,
+      "y": 0.0,
+      "z": 38.34244
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": true,
+    "target": null,
+    "hidden": false,
+    "buttons": [
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColCenter/SellTrayBox/TraySellBtn",
+        "interactable": true,
+        "text": "판매  ◈0"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColCenter/SellTrayBox/ReturnBtn",
+        "interactable": true,
+        "text": "되돌리기"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/CloseBtn",
+        "interactable": true,
+        "text": "✕"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/TabBar/Tab_거래",
+        "interactable": true,
+        "text": "거래"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem",
+        "interactable": true,
+        "text": "통조림 x5"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem",
+        "interactable": true,
+        "text": "물병 x5"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem",
+        "interactable": true,
+        "text": "건전지 x5"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/TabBar/Tab_위탁",
+        "interactable": true,
+        "text": "위탁"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/TabBar/Tab_수배",
+        "interactable": true,
+        "text": "수배"
+      }
+    ],
+    "texts": [
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem/Name",
+        "text": "통조림"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/Header/Text",
+        "text": "상인 재고"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/CloseBtn/Text",
+        "text": "✕"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/TabBar/Tab_수배/Text",
+        "text": "수배"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem/Name",
+        "text": "건전지"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem/Qty",
+        "text": "x5"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem/Qty",
+        "text": "x5"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColCenter/BuyBox/Header/HeaderText",
+        "text": "구매  BUY"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColCenter/SellTrayBox/TraySellBtn/Text",
+        "text": "판매  ◈0"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/TabBar/Tab_위탁/Text",
+        "text": "위탁"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColCenter/SellTrayBox/ReturnBtn/Text",
+        "text": "되돌리기"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/Portrait/Text",
+        "text": "상\n인"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColRight/Header/HeaderText",
+        "text": "창고"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColCenter/BuyBox/Empty",
+        "text": "왼쪽 상인 재고에서\n구매할 물건을 선택하세요."
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/TraderName",
+        "text": "전당포"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem/Qty",
+        "text": "x5"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/TabBar/Tab_거래/Text",
+        "text": "거래"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColRight/ScrollArea/InvContent/ItemRoot/I_4/T",
+        "text": "x30"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem/Name",
+        "text": "물병"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColRight/ScrollArea/InvContent/ItemRoot/I_3/T",
+        "text": "9x19 탄창 (15발)"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/Trust",
+        "text": "평판 0 [신참 F]"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColRight/ScrollArea/InvContent/ItemRoot/I_4/T",
+        "text": "9x19 탄약"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColLeft/ScrollArea/Content/StockItemRoot/StockItem/Name",
+        "text": "아드레날린"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/TopBar/Balance",
+        "text": "◈ 0"
+      },
+      {
+        "path": "UIManager/ShopUI/Shop_Canvas/Panel/Body/ColCenter/SellTrayBox/Header/Text",
+        "text": "판매 트레이  (창고 아이템 클릭 = 담기)"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Board_Dispatch",
+        "type": "MapBoard",
+        "position": {
+          "x": 72.0,
+          "y": 1.1,
+          "z": 24.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.0
+      },
+      {
+        "name": "구역 관리인",
+        "type": "NPC",
+        "position": {
+          "x": 50.0,
+          "y": 0.9,
+          "z": 16.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "떠돌이 상인",
+        "type": "NPC",
+        "position": {
+          "x": 36.0,
+          "y": 0.9,
+          "z": 14.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "회수꾼",
+        "type": "NPC",
+        "position": {
+          "x": 67.0,
+          "y": 0.9,
+          "z": 29.0
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      },
+      {
+        "name": "전당포 주인",
+        "type": "NPC",
+        "position": {
+          "x": 34.0,
+          "y": 0.9,
+          "z": 40.1
+        },
+        "CanInteract": true,
+        "InteractRange": 3.2
+      }
+    ],
+    "doors": [
+      {
+        "name": "Hideout_Entrance",
+        "position": {
+          "x": 56.4,
+          "y": 0.0,
+          "z": 12.0
+        }
+      }
+    ],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  }
+}

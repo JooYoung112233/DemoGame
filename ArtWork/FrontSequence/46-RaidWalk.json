@@ -1,0 +1,5024 @@
+{
+  "op": "walk",
+  "success": true,
+  "seconds": 2.840088,
+  "notes": [],
+  "before": {
+    "scene": "Zone1",
+    "scenes": [
+      "Systems",
+      "Zone1"
+    ],
+    "player": {
+      "x": 277.1,
+      "y": 0.0,
+      "z": 163.200012
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": false,
+    "target": null,
+    "hidden": false,
+    "buttons": [
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_2",
+        "interactable": true,
+        "text": "2  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_5",
+        "interactable": true,
+        "text": "5  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_1",
+        "interactable": true,
+        "text": "1  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_3",
+        "interactable": true,
+        "text": "3  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_6",
+        "interactable": true,
+        "text": "6  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_4",
+        "interactable": true,
+        "text": "4  "
+      }
+    ],
+    "texts": [
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/Compass/TargetLabel",
+        "text": "탈출구"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_4/Num",
+        "text": "4"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_1/Num",
+        "text": "1"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_2/Num",
+        "text": "2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "Story/TutorialPrompt/TutorialPrompt_Canvas/PromptPanel/Text",
+        "text": "탐지등 — 착용 시 시야가 넓어집니다. 불빛이 덜컥거리면 짙은 현상이 가까워진 것입니다."
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x3"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_3/Num",
+        "text": "3"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_6/Num",
+        "text": "6"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_5/Num",
+        "text": "5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Tower_yc0",
+        "type": "Container",
+        "position": {
+          "x": 215.405014,
+          "y": 0.45,
+          "z": 53.13422
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_10",
+        "type": "Container",
+        "position": {
+          "x": 170.479019,
+          "y": 0.5,
+          "z": 202.994919
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 64.557724,
+          "y": 0.0,
+          "z": 246.1657
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_215",
+        "type": "Container",
+        "position": {
+          "x": 102.831665,
+          "y": 0.5,
+          "z": 176.004883
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 78.50584,
+          "y": 0.0,
+          "z": 189.566467
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "OB_ArtV_4",
+        "type": "Container",
+        "position": {
+          "x": 175.610016,
+          "y": 0.75,
+          "z": 104.890007
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "SP_295",
+        "type": "Container",
+        "position": {
+          "x": 90.86774,
+          "y": 0.5,
+          "z": 103.737946
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "CollapsedMall_rc3",
+        "type": "Container",
+        "position": {
+          "x": 210.628845,
+          "y": 0.45,
+          "z": 274.678162
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ColV_4",
+        "type": "Container",
+        "position": {
+          "x": 104.21,
+          "y": 0.75,
+          "z": 143.14
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "SZ_Apt_C2",
+        "type": "Container",
+        "position": {
+          "x": 132.628036,
+          "y": 0.45,
+          "z": 42.3966255
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Tower_C5",
+        "type": "Container",
+        "position": {
+          "x": 236.797867,
+          "y": 0.45,
+          "z": 80.8675842
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ArtV_7",
+        "type": "Container",
+        "position": {
+          "x": 175.610016,
+          "y": 0.75,
+          "z": 155.89
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "CollapsedMall_rc0",
+        "type": "Container",
+        "position": {
+          "x": 258.464661,
+          "y": 0.45,
+          "z": 274.657349
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Lot_C1",
+        "type": "Container",
+        "position": {
+          "x": 257.8172,
+          "y": 0.45,
+          "z": 139.23735
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 207.914246,
+          "y": 0.0,
+          "z": 59.36261
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 214.4388,
+          "y": 0.0,
+          "z": 273.848053
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_155",
+        "type": "Container",
+        "position": {
+          "x": 71.47071,
+          "y": 0.5,
+          "z": 244.400116
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_160",
+        "type": "Container",
+        "position": {
+          "x": 240.185959,
+          "y": 0.5,
+          "z": 47.95352
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Lot_yc3",
+        "type": "Container",
+        "position": {
+          "x": 232.364456,
+          "y": 0.45,
+          "z": 142.958313
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Pharmacy_Barricade_N",
+        "type": "Passage",
+        "position": {
+          "x": 45.9,
+          "y": 0.5,
+          "z": 119.850006
+        },
+        "CanInteract": true,
+        "InteractRange": 4.8
+      },
+      {
+        "name": "Laundry_Label",
+        "type": "Note",
+        "position": {
+          "x": 130.05,
+          "y": 0.075,
+          "z": 166.634018
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Dome_C4",
+        "type": "Container",
+        "position": {
+          "x": 166.292145,
+          "y": 0.45,
+          "z": 253.597
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 232.834274,
+          "y": 0.0,
+          "z": 79.88896
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "OB_ColH_7",
+        "type": "Container",
+        "position": {
+          "x": 213.605011,
+          "y": 0.75,
+          "z": 124.950005
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "SZ_Dome_C3",
+        "type": "Container",
+        "position": {
+          "x": 166.275864,
+          "y": 0.45,
+          "z": 248.203568
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "AW_st15",
+        "type": "Container",
+        "position": {
+          "x": 44.2,
+          "y": 1.5,
+          "z": 185.470016
+        },
+        "CanInteract": true,
+        "InteractRange": 3.6
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 126.490181,
+          "y": 0.0,
+          "z": 255.003464
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Park_C1",
+        "type": "Container",
+        "position": {
+          "x": 63.21353,
+          "y": 0.45,
+          "z": 261.379639
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Manhole_Exit",
+        "type": "ExitPoint",
+        "position": {
+          "x": 42.5,
+          "y": 0.04,
+          "z": 117.3
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_50",
+        "type": "Container",
+        "position": {
+          "x": 166.119812,
+          "y": 0.5,
+          "z": 254.539413
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_125",
+        "type": "Container",
+        "position": {
+          "x": 144.63916,
+          "y": 0.5,
+          "z": 200.17453
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_75",
+        "type": "Container",
+        "position": {
+          "x": 243.558258,
+          "y": 0.5,
+          "z": 273.006775
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Apt_Yard",
+        "type": "Note",
+        "position": {
+          "x": 142.8,
+          "y": 0.075,
+          "z": 34.0
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 58.955822,
+          "y": 0.0,
+          "z": 252.208038
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 218.985413,
+          "y": 0.0,
+          "z": 149.574188
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Arcade_C2",
+        "type": "Container",
+        "position": {
+          "x": 50.23804,
+          "y": 0.45,
+          "z": 174.306335
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingS_1",
+        "type": "Container",
+        "position": {
+          "x": 82.11,
+          "y": 0.75,
+          "z": 19.5500011
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "BLK_ColH",
+        "type": "Passage",
+        "position": {
+          "x": 156.400009,
+          "y": 0.5,
+          "z": 127.5
+        },
+        "CanInteract": true,
+        "InteractRange": 4.8
+      },
+      {
+        "name": "UR_yc2",
+        "type": "Container",
+        "position": {
+          "x": 137.080917,
+          "y": 0.45,
+          "z": 159.399048
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Apt_C0",
+        "type": "Container",
+        "position": {
+          "x": 156.19429,
+          "y": 0.45,
+          "z": 93.25292
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingN_1",
+        "type": "Container",
+        "position": {
+          "x": 81.855,
+          "y": 0.75,
+          "z": 293.25
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "PX_SW",
+        "type": "ExitPoint",
+        "position": {
+          "x": 22.1,
+          "y": 0.04,
+          "z": 22.1
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "AlleyShop_Label",
+        "type": "Note",
+        "position": {
+          "x": 78.2000046,
+          "y": 0.075,
+          "z": 189.55
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_250",
+        "type": "Container",
+        "position": {
+          "x": 226.612686,
+          "y": 0.5,
+          "z": 84.67838
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Lot_C0",
+        "type": "Container",
+        "position": {
+          "x": 240.495483,
+          "y": 0.45,
+          "z": 172.4023
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "CollapsedMall_rc2",
+        "type": "Container",
+        "position": {
+          "x": 258.598022,
+          "y": 0.45,
+          "z": 235.574081
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_70",
+        "type": "Container",
+        "position": {
+          "x": 233.298859,
+          "y": 0.5,
+          "z": 103.06855
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "CollapsedMall_Yard",
+        "type": "Note",
+        "position": {
+          "x": 209.24202,
+          "y": 0.075,
+          "z": 227.1332
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "OB_ArtV_13",
+        "type": "Container",
+        "position": {
+          "x": 175.015,
+          "y": 0.75,
+          "z": 253.64
+        },
+        "CanInteract": true,
+        "InteractRange": 3.80000019
+      },
+      {
+        "name": "PX_NW",
+        "type": "ExitPoint",
+        "position": {
+          "x": 22.1,
+          "y": 0.04,
+          "z": 290.7
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_380",
+        "type": "Container",
+        "position": {
+          "x": 180.120758,
+          "y": 0.5,
+          "z": 227.102036
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ColV_1",
+        "type": "Container",
+        "position": {
+          "x": 109.65,
+          "y": 0.75,
+          "z": 60.2650032
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "OB_ColH_4",
+        "type": "Container",
+        "position": {
+          "x": 143.14,
+          "y": 0.75,
+          "z": 130.39
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "OB_ColV_10",
+        "type": "Container",
+        "position": {
+          "x": 110.245,
+          "y": 0.75,
+          "z": 290.275
+        },
+        "CanInteract": true,
+        "InteractRange": 2.85
+      },
+      {
+        "name": "Apt_gc0",
+        "type": "Container",
+        "position": {
+          "x": 129.0459,
+          "y": 0.45,
+          "z": 93.9875
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 214.194519,
+          "y": 0.0,
+          "z": 273.818665
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_90",
+        "type": "Container",
+        "position": {
+          "x": 235.289856,
+          "y": 0.5,
+          "z": 19.6557732
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Dome_C0",
+        "type": "Container",
+        "position": {
+          "x": 126.036446,
+          "y": 0.45,
+          "z": 246.040787
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_210",
+        "type": "Container",
+        "position": {
+          "x": 91.334,
+          "y": 0.5,
+          "z": 179.631073
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Tower_C3",
+        "type": "Container",
+        "position": {
+          "x": 241.360031,
+          "y": 0.45,
+          "z": 75.7506
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Apt_Label",
+        "type": "Note",
+        "position": {
+          "x": 177.82,
+          "y": 0.075,
+          "z": 69.7000046
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 229.897034,
+          "y": 0.0,
+          "z": 49.9223976
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_185",
+        "type": "Container",
+        "position": {
+          "x": 104.172852,
+          "y": 0.5,
+          "z": 34.52948
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 233.838791,
+          "y": 0.0,
+          "z": 270.6682
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "AW_st00",
+        "type": "Container",
+        "position": {
+          "x": 33.405,
+          "y": 1.5,
+          "z": 141.355011
+        },
+        "CanInteract": true,
+        "InteractRange": 3.94999981
+      },
+      {
+        "name": "OB_ArtH_4",
+        "type": "Container",
+        "position": {
+          "x": 98.855,
+          "y": 0.75,
+          "z": 208.42
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "SP_35",
+        "type": "Container",
+        "position": {
+          "x": 115.361755,
+          "y": 0.5,
+          "z": 219.663864
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 152.0076,
+          "y": 0.0,
+          "z": 86.01908
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "CollapsedMall_Label",
+        "type": "Note",
+        "position": {
+          "x": 232.900009,
+          "y": 0.075,
+          "z": 209.780014
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 208.427155,
+          "y": 0.0,
+          "z": 59.731472
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_360",
+        "type": "Container",
+        "position": {
+          "x": 234.93956,
+          "y": 0.5,
+          "z": 125.412315
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Pharmacy_Note",
+        "type": "Note",
+        "position": {
+          "x": 54.4,
+          "y": 0.075,
+          "z": 142.8
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 58.89945,
+          "y": 0.0,
+          "z": 252.191452
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "UR_yc1",
+        "type": "Container",
+        "position": {
+          "x": 139.950562,
+          "y": 0.45,
+          "z": 157.425552
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_60",
+        "type": "Container",
+        "position": {
+          "x": 230.423813,
+          "y": 0.5,
+          "z": 48.69024
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_45",
+        "type": "Container",
+        "position": {
+          "x": 268.379425,
+          "y": 0.5,
+          "z": 186.52095
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_405",
+        "type": "Container",
+        "position": {
+          "x": 271.301178,
+          "y": 0.5,
+          "z": 260.4681
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 43.0848274,
+          "y": 0.0,
+          "z": 167.2487
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "Park_yc0",
+        "type": "Container",
+        "position": {
+          "x": 52.84744,
+          "y": 0.45,
+          "z": 241.720673
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 126.572792,
+          "y": 0.0,
+          "z": 240.74028
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "UR_yc3",
+        "type": "Container",
+        "position": {
+          "x": 138.051819,
+          "y": 0.45,
+          "z": 169.352631
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 257.043762,
+          "y": 0.0,
+          "z": 240.123581
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "BLK_ColV",
+        "type": "Passage",
+        "position": {
+          "x": 107.100006,
+          "y": 0.5,
+          "z": 170.0
+        },
+        "CanInteract": true,
+        "InteractRange": 4.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 234.294022,
+          "y": 0.0,
+          "z": 270.455933
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 250.210739,
+          "y": 0.0,
+          "z": 144.499817
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 78.31531,
+          "y": 0.0,
+          "z": 189.87204
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_275",
+        "type": "Container",
+        "position": {
+          "x": 253.090912,
+          "y": 0.5,
+          "z": 148.248047
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_260",
+        "type": "Container",
+        "position": {
+          "x": 131.418442,
+          "y": 0.5,
+          "z": 163.555725
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 232.443848,
+          "y": 0.0,
+          "z": 79.7797
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 129.8668,
+          "y": 0.0,
+          "z": 55.25185
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 257.243744,
+          "y": 0.0,
+          "z": 240.3131
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 215.103043,
+          "y": 0.0,
+          "z": 220.471832
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "AW_st11",
+        "type": "Container",
+        "position": {
+          "x": 43.605,
+          "y": 1.5,
+          "z": 150.875
+        },
+        "CanInteract": true,
+        "InteractRange": 3.94999981
+      },
+      {
+        "name": "OB_RingW_4",
+        "type": "Container",
+        "position": {
+          "x": 25.585001,
+          "y": 0.75,
+          "z": 175.44
+        },
+        "CanInteract": true,
+        "InteractRange": 3.80000019
+      },
+      {
+        "name": "SP_280",
+        "type": "Container",
+        "position": {
+          "x": 275.934662,
+          "y": 0.5,
+          "z": 86.8919144
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 129.715073,
+          "y": 0.0,
+          "z": 92.6886444
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 218.523819,
+          "y": 0.0,
+          "z": 79.3701859
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_270",
+        "type": "Container",
+        "position": {
+          "x": 210.771332,
+          "y": 0.5,
+          "z": 248.848862
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_55",
+        "type": "Container",
+        "position": {
+          "x": 148.383514,
+          "y": 0.5,
+          "z": 125.254166
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 225.087845,
+          "y": 0.0,
+          "z": 40.06474
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 215.687134,
+          "y": 0.0,
+          "z": 220.2922
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Apt_C3",
+        "type": "Container",
+        "position": {
+          "x": 168.05896,
+          "y": 0.45,
+          "z": 112.508728
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Apt_C1",
+        "type": "Container",
+        "position": {
+          "x": 149.451889,
+          "y": 0.45,
+          "z": 114.342773
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Lot_yc0",
+        "type": "Container",
+        "position": {
+          "x": 257.6967,
+          "y": 0.45,
+          "z": 148.769318
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 139.00647,
+          "y": 0.0,
+          "z": 32.3333664
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "OB_ArtH_13",
+        "type": "Container",
+        "position": {
+          "x": 251.855,
+          "y": 0.75,
+          "z": 199.58
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "Electronics_Label",
+        "type": "Note",
+        "position": {
+          "x": 152.796,
+          "y": 0.075,
+          "z": 160.514
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 62.25858,
+          "y": 0.0,
+          "z": 165.920486
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 165.982529,
+          "y": 0.0,
+          "z": 262.804047
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 231.7718,
+          "y": 0.0,
+          "z": 160.485046
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_230",
+        "type": "Container",
+        "position": {
+          "x": 226.052231,
+          "y": 0.5,
+          "z": 91.09113
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_80",
+        "type": "Container",
+        "position": {
+          "x": 47.4076843,
+          "y": 0.5,
+          "z": 258.343353
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_350",
+        "type": "Container",
+        "position": {
+          "x": 27.3574142,
+          "y": 0.5,
+          "z": 76.8250046
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 158.019379,
+          "y": 0.0,
+          "z": 235.542358
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "Diner_Label",
+        "type": "Note",
+        "position": {
+          "x": 56.7460022,
+          "y": 0.075,
+          "z": 209.780014
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "CollapsedMall_rc1",
+        "type": "Container",
+        "position": {
+          "x": 206.222641,
+          "y": 0.45,
+          "z": 261.309143
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ArtV_1",
+        "type": "Container",
+        "position": {
+          "x": 175.610016,
+          "y": 0.75,
+          "z": 53.8900032
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "BLK_ArtH",
+        "type": "Passage",
+        "position": {
+          "x": 102.0,
+          "y": 0.5,
+          "z": 204.0
+        },
+        "CanInteract": true,
+        "InteractRange": 7.8
+      },
+      {
+        "name": "SP_25",
+        "type": "Container",
+        "position": {
+          "x": 24.1897717,
+          "y": 0.5,
+          "z": 285.892883
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingW_1",
+        "type": "Container",
+        "position": {
+          "x": 24.99,
+          "y": 0.75,
+          "z": 87.89001
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 158.156036,
+          "y": 0.0,
+          "z": 235.498718
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Tower_C2",
+        "type": "Container",
+        "position": {
+          "x": 226.893646,
+          "y": 0.45,
+          "z": 76.4185
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Hardware_Label",
+        "type": "Note",
+        "position": {
+          "x": 147.016,
+          "y": 0.075,
+          "z": 174.981
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_430",
+        "type": "Container",
+        "position": {
+          "x": 224.719513,
+          "y": 0.5,
+          "z": 87.73843
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_390",
+        "type": "Container",
+        "position": {
+          "x": 112.670738,
+          "y": 0.5,
+          "z": 269.5997
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_65",
+        "type": "Container",
+        "position": {
+          "x": 58.1807175,
+          "y": 0.5,
+          "z": 229.106934
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 126.615746,
+          "y": 0.0,
+          "z": 253.167877
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 224.8074,
+          "y": 0.0,
+          "z": 40.26157
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_385",
+        "type": "Container",
+        "position": {
+          "x": 55.261673,
+          "y": 0.5,
+          "z": 251.1973
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_Label",
+        "type": "Note",
+        "position": {
+          "x": 189.38,
+          "y": 0.075,
+          "z": 89.57797
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "GH_Label",
+        "type": "Note",
+        "position": {
+          "x": 119.0,
+          "y": 0.075,
+          "z": 219.3
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Lot_Yard",
+        "type": "Note",
+        "position": {
+          "x": 219.3,
+          "y": 0.075,
+          "z": 137.7
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Mall_C0",
+        "type": "Container",
+        "position": {
+          "x": 233.317352,
+          "y": 0.45,
+          "z": 270.3461
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 43.72064,
+          "y": 0.0,
+          "z": 167.257385
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 232.088,
+          "y": 0.0,
+          "z": 159.92395
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Tower_C1",
+        "type": "Container",
+        "position": {
+          "x": 226.842545,
+          "y": 0.45,
+          "z": 116.325684
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Lot_yc1",
+        "type": "Container",
+        "position": {
+          "x": 246.7952,
+          "y": 0.45,
+          "z": 150.611328
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 234.2409,
+          "y": 0.0,
+          "z": 66.70835
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "PD_Label",
+        "type": "Note",
+        "position": {
+          "x": 52.7,
+          "y": 0.075,
+          "z": 187.0
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 218.829727,
+          "y": 0.0,
+          "z": 79.18651
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 71.40649,
+          "y": 0.0,
+          "z": 224.2524
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "BLK_NightAlley",
+        "type": "Passage",
+        "position": {
+          "x": 277.1,
+          "y": 0.5,
+          "z": 221.0
+        },
+        "CanInteract": true,
+        "InteractRange": 4.8
+      },
+      {
+        "name": "SZ_Mall_C2",
+        "type": "Container",
+        "position": {
+          "x": 210.651321,
+          "y": 0.45,
+          "z": 258.959045
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ArtH_1",
+        "type": "Container",
+        "position": {
+          "x": 51.68,
+          "y": 0.75,
+          "z": 195.755
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "OB_ArtH_10",
+        "type": "Container",
+        "position": {
+          "x": 201.110016,
+          "y": 0.75,
+          "z": 206.55
+        },
+        "CanInteract": true,
+        "InteractRange": 6.1
+      },
+      {
+        "name": "SP_255",
+        "type": "Container",
+        "position": {
+          "x": 170.800385,
+          "y": 0.5,
+          "z": 232.348526
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 71.76015,
+          "y": 0.0,
+          "z": 224.641571
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "Police_Label",
+        "type": "Note",
+        "position": {
+          "x": 189.38,
+          "y": 0.075,
+          "z": 164.224457
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_0",
+        "type": "Container",
+        "position": {
+          "x": 187.339249,
+          "y": 0.5,
+          "z": 61.3846
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingE_1",
+        "type": "Container",
+        "position": {
+          "x": 274.550018,
+          "y": 0.75,
+          "z": 81.855
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 250.290436,
+          "y": 0.0,
+          "z": 144.91832
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_195",
+        "type": "Container",
+        "position": {
+          "x": 24.85493,
+          "y": 0.5,
+          "z": 151.411758
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Park_Yard",
+        "type": "Note",
+        "position": {
+          "x": 48.6200027,
+          "y": 0.075,
+          "z": 235.552
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Arcade_C1",
+        "type": "Container",
+        "position": {
+          "x": 44.5110779,
+          "y": 0.45,
+          "z": 167.720444
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_325",
+        "type": "Container",
+        "position": {
+          "x": 179.517014,
+          "y": 0.5,
+          "z": 194.401611
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingE_7",
+        "type": "Container",
+        "position": {
+          "x": 273.955,
+          "y": 0.75,
+          "z": 269.28
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "SP_235",
+        "type": "Container",
+        "position": {
+          "x": 228.1585,
+          "y": 0.5,
+          "z": 208.112686
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_yc3",
+        "type": "Container",
+        "position": {
+          "x": 221.032944,
+          "y": 0.45,
+          "z": 63.34674
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 139.086929,
+          "y": 0.0,
+          "z": 32.7506371
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Tower_C4",
+        "type": "Container",
+        "position": {
+          "x": 216.401443,
+          "y": 0.45,
+          "z": 94.61882
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Apt_gc1",
+        "type": "Container",
+        "position": {
+          "x": 152.949219,
+          "y": 0.45,
+          "z": 89.14962
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_5",
+        "type": "Container",
+        "position": {
+          "x": 115.784737,
+          "y": 0.5,
+          "z": 200.636551
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Exit_Fixed",
+        "type": "ExitPoint",
+        "position": {
+          "x": 183.6,
+          "y": 0.04,
+          "z": 204.0
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Jewelry_Label",
+        "type": "Note",
+        "position": {
+          "x": 138.448013,
+          "y": 0.075,
+          "z": 156.468
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Dome_C2",
+        "type": "Container",
+        "position": {
+          "x": 130.781677,
+          "y": 0.45,
+          "z": 271.422974
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Dome_C1",
+        "type": "Container",
+        "position": {
+          "x": 148.7741,
+          "y": 0.45,
+          "z": 271.5341
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_140",
+        "type": "Container",
+        "position": {
+          "x": 184.7374,
+          "y": 0.5,
+          "z": 94.1653
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ColV_7",
+        "type": "Container",
+        "position": {
+          "x": 110.245,
+          "y": 0.75,
+          "z": 217.430008
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "SP_395",
+        "type": "Container",
+        "position": {
+          "x": 82.85497,
+          "y": 0.5,
+          "z": 253.482346
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "RV_Label",
+        "type": "Note",
+        "position": {
+          "x": 149.6,
+          "y": 0.075,
+          "z": 290.7
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Tower_C0",
+        "type": "Container",
+        "position": {
+          "x": 231.681213,
+          "y": 0.45,
+          "z": 88.14829
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_yc2",
+        "type": "Container",
+        "position": {
+          "x": 241.168854,
+          "y": 0.45,
+          "z": 79.71281
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 126.323433,
+          "y": 0.0,
+          "z": 253.076752
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Arcade_C0",
+        "type": "Container",
+        "position": {
+          "x": 48.9761658,
+          "y": 0.45,
+          "z": 151.966553
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "BLK_Overpass",
+        "type": "Passage",
+        "position": {
+          "x": 183.6,
+          "y": 0.5,
+          "z": 112.200005
+        },
+        "CanInteract": true,
+        "InteractRange": 7.8
+      },
+      {
+        "name": "Lot_yc2",
+        "type": "Container",
+        "position": {
+          "x": 222.106064,
+          "y": 0.45,
+          "z": 180.575714
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 129.738266,
+          "y": 0.0,
+          "z": 55.29581
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "UR_Yard",
+        "type": "Note",
+        "position": {
+          "x": 131.988,
+          "y": 0.075,
+          "z": 155.78801
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 127.005142,
+          "y": 0.0,
+          "z": 255.227341
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_225",
+        "type": "Container",
+        "position": {
+          "x": 245.580429,
+          "y": 0.5,
+          "z": 52.0715981
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Park_C0",
+        "type": "Container",
+        "position": {
+          "x": 47.13578,
+          "y": 0.45,
+          "z": 262.658875
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_110",
+        "type": "Container",
+        "position": {
+          "x": 104.53051,
+          "y": 0.5,
+          "z": 190.699356
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "CollapsedMall_rc4",
+        "type": "Container",
+        "position": {
+          "x": 209.068512,
+          "y": 0.45,
+          "z": 248.84256
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_30",
+        "type": "Container",
+        "position": {
+          "x": 78.70766,
+          "y": 0.5,
+          "z": 240.309464
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 154.584274,
+          "y": 0.0,
+          "z": 55.6089
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "Park_yc1",
+        "type": "Container",
+        "position": {
+          "x": 61.9694252,
+          "y": 0.45,
+          "z": 246.174
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_375",
+        "type": "Container",
+        "position": {
+          "x": 22.28341,
+          "y": 0.5,
+          "z": 195.1908
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_yc1",
+        "type": "Container",
+        "position": {
+          "x": 217.66156,
+          "y": 0.45,
+          "z": 61.6559944
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 43.17809,
+          "y": 0.0,
+          "z": 167.696732
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Mall_C1",
+        "type": "Container",
+        "position": {
+          "x": 231.0167,
+          "y": 0.45,
+          "z": 244.396454
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 229.435135,
+          "y": 0.0,
+          "z": 50.2160378
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 62.71598,
+          "y": 0.0,
+          "z": 166.338913
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_410",
+        "type": "Container",
+        "position": {
+          "x": 191.458725,
+          "y": 0.5,
+          "z": 104.399818
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_Yard",
+        "type": "Note",
+        "position": {
+          "x": 213.655991,
+          "y": 0.075,
+          "z": 46.784
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "UR_yc0",
+        "type": "Container",
+        "position": {
+          "x": 141.109543,
+          "y": 0.45,
+          "z": 169.338348
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 126.954666,
+          "y": 0.0,
+          "z": 240.777786
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "AW_st04",
+        "type": "Container",
+        "position": {
+          "x": 33.405,
+          "y": 1.5,
+          "z": 177.310013
+        },
+        "CanInteract": true,
+        "InteractRange": 3.69999981
+      },
+      {
+        "name": "SP_15",
+        "type": "Container",
+        "position": {
+          "x": 272.712921,
+          "y": 0.5,
+          "z": 125.418777
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_420",
+        "type": "Container",
+        "position": {
+          "x": 275.57605,
+          "y": 0.5,
+          "z": 133.380722
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      }
+    ],
+    "doors": [],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  },
+  "after": {
+    "scene": "Zone1",
+    "scenes": [
+      "Systems",
+      "Zone1"
+    ],
+    "player": {
+      "x": 278.7971,
+      "y": 0.0,
+      "z": 163.200012
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": false,
+    "target": null,
+    "hidden": false,
+    "buttons": [
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_2",
+        "interactable": true,
+        "text": "2  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_5",
+        "interactable": true,
+        "text": "5  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_1",
+        "interactable": true,
+        "text": "1  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_3",
+        "interactable": true,
+        "text": "3  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_6",
+        "interactable": true,
+        "text": "6  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_4",
+        "interactable": true,
+        "text": "4  "
+      }
+    ],
+    "texts": [
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "UIManager/NavigationHUD/Nav_Canvas/Compass/TargetLabel",
+        "text": "탈출구"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_4/Num",
+        "text": "4"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_1/Num",
+        "text": "1"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_2/Num",
+        "text": "2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "Story/TutorialPrompt/TutorialPrompt_Canvas/PromptPanel/Text",
+        "text": "탐지등 — 착용 시 시야가 넓어집니다. 불빛이 덜컥거리면 짙은 현상이 가까워진 것입니다."
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_val_watch_broken/WorldLabel/Name",
+        "text": "망가진 시계"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x3"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_reg_scrap_neon_tube/WorldLabel/Name",
+        "text": "네온관 잔해 x2"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_3/Num",
+        "text": "3"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x2"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_6/Num",
+        "text": "6"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x5"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_5/Num",
+        "text": "5"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_junk_glass_shard/WorldLabel/Name",
+        "text": "유리 조각 x4"
+      },
+      {
+        "path": "[Runtime]/Loot/WorldItem_coffee/WorldLabel/Name",
+        "text": "커피"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Tower_yc0",
+        "type": "Container",
+        "position": {
+          "x": 215.405014,
+          "y": 0.45,
+          "z": 53.13422
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_10",
+        "type": "Container",
+        "position": {
+          "x": 170.479019,
+          "y": 0.5,
+          "z": 202.994919
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 64.557724,
+          "y": 0.0,
+          "z": 246.1657
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_215",
+        "type": "Container",
+        "position": {
+          "x": 102.831665,
+          "y": 0.5,
+          "z": 176.004883
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 78.50584,
+          "y": 0.0,
+          "z": 189.566467
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "OB_ArtV_4",
+        "type": "Container",
+        "position": {
+          "x": 175.610016,
+          "y": 0.75,
+          "z": 104.890007
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "SP_295",
+        "type": "Container",
+        "position": {
+          "x": 90.86774,
+          "y": 0.5,
+          "z": 103.737946
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "CollapsedMall_rc3",
+        "type": "Container",
+        "position": {
+          "x": 210.628845,
+          "y": 0.45,
+          "z": 274.678162
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ColV_4",
+        "type": "Container",
+        "position": {
+          "x": 104.21,
+          "y": 0.75,
+          "z": 143.14
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "SZ_Apt_C2",
+        "type": "Container",
+        "position": {
+          "x": 132.628036,
+          "y": 0.45,
+          "z": 42.3966255
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Tower_C5",
+        "type": "Container",
+        "position": {
+          "x": 236.797867,
+          "y": 0.45,
+          "z": 80.8675842
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ArtV_7",
+        "type": "Container",
+        "position": {
+          "x": 175.610016,
+          "y": 0.75,
+          "z": 155.89
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "CollapsedMall_rc0",
+        "type": "Container",
+        "position": {
+          "x": 258.464661,
+          "y": 0.45,
+          "z": 274.657349
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Lot_C1",
+        "type": "Container",
+        "position": {
+          "x": 257.8172,
+          "y": 0.45,
+          "z": 139.23735
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 207.914246,
+          "y": 0.0,
+          "z": 59.36261
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 214.4388,
+          "y": 0.0,
+          "z": 273.848053
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_155",
+        "type": "Container",
+        "position": {
+          "x": 71.47071,
+          "y": 0.5,
+          "z": 244.400116
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_160",
+        "type": "Container",
+        "position": {
+          "x": 240.185959,
+          "y": 0.5,
+          "z": 47.95352
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Lot_yc3",
+        "type": "Container",
+        "position": {
+          "x": 232.364456,
+          "y": 0.45,
+          "z": 142.958313
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Pharmacy_Barricade_N",
+        "type": "Passage",
+        "position": {
+          "x": 45.9,
+          "y": 0.5,
+          "z": 119.850006
+        },
+        "CanInteract": true,
+        "InteractRange": 4.8
+      },
+      {
+        "name": "Laundry_Label",
+        "type": "Note",
+        "position": {
+          "x": 130.05,
+          "y": 0.075,
+          "z": 166.634018
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Dome_C4",
+        "type": "Container",
+        "position": {
+          "x": 166.292145,
+          "y": 0.45,
+          "z": 253.597
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 232.834274,
+          "y": 0.0,
+          "z": 79.88896
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "OB_ColH_7",
+        "type": "Container",
+        "position": {
+          "x": 213.605011,
+          "y": 0.75,
+          "z": 124.950005
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "SZ_Dome_C3",
+        "type": "Container",
+        "position": {
+          "x": 166.275864,
+          "y": 0.45,
+          "z": 248.203568
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "AW_st15",
+        "type": "Container",
+        "position": {
+          "x": 44.2,
+          "y": 1.5,
+          "z": 185.470016
+        },
+        "CanInteract": true,
+        "InteractRange": 3.6
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 126.490181,
+          "y": 0.0,
+          "z": 255.003464
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Park_C1",
+        "type": "Container",
+        "position": {
+          "x": 63.21353,
+          "y": 0.45,
+          "z": 261.379639
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Manhole_Exit",
+        "type": "ExitPoint",
+        "position": {
+          "x": 42.5,
+          "y": 0.04,
+          "z": 117.3
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_50",
+        "type": "Container",
+        "position": {
+          "x": 166.119812,
+          "y": 0.5,
+          "z": 254.539413
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_125",
+        "type": "Container",
+        "position": {
+          "x": 144.63916,
+          "y": 0.5,
+          "z": 200.17453
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_75",
+        "type": "Container",
+        "position": {
+          "x": 243.558258,
+          "y": 0.5,
+          "z": 273.006775
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Apt_Yard",
+        "type": "Note",
+        "position": {
+          "x": 142.8,
+          "y": 0.075,
+          "z": 34.0
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 58.955822,
+          "y": 0.0,
+          "z": 252.208038
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 218.985413,
+          "y": 0.0,
+          "z": 149.574188
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Arcade_C2",
+        "type": "Container",
+        "position": {
+          "x": 50.23804,
+          "y": 0.45,
+          "z": 174.306335
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingS_1",
+        "type": "Container",
+        "position": {
+          "x": 82.11,
+          "y": 0.75,
+          "z": 19.5500011
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "BLK_ColH",
+        "type": "Passage",
+        "position": {
+          "x": 156.400009,
+          "y": 0.5,
+          "z": 127.5
+        },
+        "CanInteract": true,
+        "InteractRange": 4.8
+      },
+      {
+        "name": "UR_yc2",
+        "type": "Container",
+        "position": {
+          "x": 137.080917,
+          "y": 0.45,
+          "z": 159.399048
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Apt_C0",
+        "type": "Container",
+        "position": {
+          "x": 156.19429,
+          "y": 0.45,
+          "z": 93.25292
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingN_1",
+        "type": "Container",
+        "position": {
+          "x": 81.855,
+          "y": 0.75,
+          "z": 293.25
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "PX_SW",
+        "type": "ExitPoint",
+        "position": {
+          "x": 22.1,
+          "y": 0.04,
+          "z": 22.1
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "AlleyShop_Label",
+        "type": "Note",
+        "position": {
+          "x": 78.2000046,
+          "y": 0.075,
+          "z": 189.55
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_250",
+        "type": "Container",
+        "position": {
+          "x": 226.612686,
+          "y": 0.5,
+          "z": 84.67838
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Lot_C0",
+        "type": "Container",
+        "position": {
+          "x": 240.495483,
+          "y": 0.45,
+          "z": 172.4023
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "CollapsedMall_rc2",
+        "type": "Container",
+        "position": {
+          "x": 258.598022,
+          "y": 0.45,
+          "z": 235.574081
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_70",
+        "type": "Container",
+        "position": {
+          "x": 233.298859,
+          "y": 0.5,
+          "z": 103.06855
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "CollapsedMall_Yard",
+        "type": "Note",
+        "position": {
+          "x": 209.24202,
+          "y": 0.075,
+          "z": 227.1332
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "OB_ArtV_13",
+        "type": "Container",
+        "position": {
+          "x": 175.015,
+          "y": 0.75,
+          "z": 253.64
+        },
+        "CanInteract": true,
+        "InteractRange": 3.80000019
+      },
+      {
+        "name": "PX_NW",
+        "type": "ExitPoint",
+        "position": {
+          "x": 22.1,
+          "y": 0.04,
+          "z": 290.7
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_380",
+        "type": "Container",
+        "position": {
+          "x": 180.120758,
+          "y": 0.5,
+          "z": 227.102036
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ColV_1",
+        "type": "Container",
+        "position": {
+          "x": 109.65,
+          "y": 0.75,
+          "z": 60.2650032
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "OB_ColH_4",
+        "type": "Container",
+        "position": {
+          "x": 143.14,
+          "y": 0.75,
+          "z": 130.39
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "OB_ColV_10",
+        "type": "Container",
+        "position": {
+          "x": 110.245,
+          "y": 0.75,
+          "z": 290.275
+        },
+        "CanInteract": true,
+        "InteractRange": 2.85
+      },
+      {
+        "name": "Apt_gc0",
+        "type": "Container",
+        "position": {
+          "x": 129.0459,
+          "y": 0.45,
+          "z": 93.9875
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 214.194519,
+          "y": 0.0,
+          "z": 273.818665
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_90",
+        "type": "Container",
+        "position": {
+          "x": 235.289856,
+          "y": 0.5,
+          "z": 19.6557732
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Dome_C0",
+        "type": "Container",
+        "position": {
+          "x": 126.036446,
+          "y": 0.45,
+          "z": 246.040787
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_210",
+        "type": "Container",
+        "position": {
+          "x": 91.334,
+          "y": 0.5,
+          "z": 179.631073
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Tower_C3",
+        "type": "Container",
+        "position": {
+          "x": 241.360031,
+          "y": 0.45,
+          "z": 75.7506
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Apt_Label",
+        "type": "Note",
+        "position": {
+          "x": 177.82,
+          "y": 0.075,
+          "z": 69.7000046
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 229.897034,
+          "y": 0.0,
+          "z": 49.9223976
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_185",
+        "type": "Container",
+        "position": {
+          "x": 104.172852,
+          "y": 0.5,
+          "z": 34.52948
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 233.838791,
+          "y": 0.0,
+          "z": 270.6682
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "AW_st00",
+        "type": "Container",
+        "position": {
+          "x": 33.405,
+          "y": 1.5,
+          "z": 141.355011
+        },
+        "CanInteract": true,
+        "InteractRange": 3.94999981
+      },
+      {
+        "name": "OB_ArtH_4",
+        "type": "Container",
+        "position": {
+          "x": 98.855,
+          "y": 0.75,
+          "z": 208.42
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "SP_35",
+        "type": "Container",
+        "position": {
+          "x": 115.361755,
+          "y": 0.5,
+          "z": 219.663864
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 152.0076,
+          "y": 0.0,
+          "z": 86.01908
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "CollapsedMall_Label",
+        "type": "Note",
+        "position": {
+          "x": 232.900009,
+          "y": 0.075,
+          "z": 209.780014
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 208.427155,
+          "y": 0.0,
+          "z": 59.731472
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_360",
+        "type": "Container",
+        "position": {
+          "x": 234.93956,
+          "y": 0.5,
+          "z": 125.412315
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Pharmacy_Note",
+        "type": "Note",
+        "position": {
+          "x": 54.4,
+          "y": 0.075,
+          "z": 142.8
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 58.89945,
+          "y": 0.0,
+          "z": 252.191452
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "UR_yc1",
+        "type": "Container",
+        "position": {
+          "x": 139.950562,
+          "y": 0.45,
+          "z": 157.425552
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_60",
+        "type": "Container",
+        "position": {
+          "x": 230.423813,
+          "y": 0.5,
+          "z": 48.69024
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_45",
+        "type": "Container",
+        "position": {
+          "x": 268.379425,
+          "y": 0.5,
+          "z": 186.52095
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_405",
+        "type": "Container",
+        "position": {
+          "x": 271.301178,
+          "y": 0.5,
+          "z": 260.4681
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 43.0848274,
+          "y": 0.0,
+          "z": 167.2487
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "Park_yc0",
+        "type": "Container",
+        "position": {
+          "x": 52.84744,
+          "y": 0.45,
+          "z": 241.720673
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 126.572792,
+          "y": 0.0,
+          "z": 240.74028
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "UR_yc3",
+        "type": "Container",
+        "position": {
+          "x": 138.051819,
+          "y": 0.45,
+          "z": 169.352631
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 257.043762,
+          "y": 0.0,
+          "z": 240.123581
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "BLK_ColV",
+        "type": "Passage",
+        "position": {
+          "x": 107.100006,
+          "y": 0.5,
+          "z": 170.0
+        },
+        "CanInteract": true,
+        "InteractRange": 4.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 234.294022,
+          "y": 0.0,
+          "z": 270.455933
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 250.210739,
+          "y": 0.0,
+          "z": 144.499817
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 78.31531,
+          "y": 0.0,
+          "z": 189.87204
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_275",
+        "type": "Container",
+        "position": {
+          "x": 253.090912,
+          "y": 0.5,
+          "z": 148.248047
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_260",
+        "type": "Container",
+        "position": {
+          "x": 131.418442,
+          "y": 0.5,
+          "z": 163.555725
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 232.443848,
+          "y": 0.0,
+          "z": 79.7797
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 129.8668,
+          "y": 0.0,
+          "z": 55.25185
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 257.243744,
+          "y": 0.0,
+          "z": 240.3131
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 215.103043,
+          "y": 0.0,
+          "z": 220.471832
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "AW_st11",
+        "type": "Container",
+        "position": {
+          "x": 43.605,
+          "y": 1.5,
+          "z": 150.875
+        },
+        "CanInteract": true,
+        "InteractRange": 3.94999981
+      },
+      {
+        "name": "OB_RingW_4",
+        "type": "Container",
+        "position": {
+          "x": 25.585001,
+          "y": 0.75,
+          "z": 175.44
+        },
+        "CanInteract": true,
+        "InteractRange": 3.80000019
+      },
+      {
+        "name": "SP_280",
+        "type": "Container",
+        "position": {
+          "x": 275.934662,
+          "y": 0.5,
+          "z": 86.8919144
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 129.715073,
+          "y": 0.0,
+          "z": 92.6886444
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 218.523819,
+          "y": 0.0,
+          "z": 79.3701859
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_270",
+        "type": "Container",
+        "position": {
+          "x": 210.771332,
+          "y": 0.5,
+          "z": 248.848862
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_55",
+        "type": "Container",
+        "position": {
+          "x": 148.383514,
+          "y": 0.5,
+          "z": 125.254166
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 225.087845,
+          "y": 0.0,
+          "z": 40.06474
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 215.687134,
+          "y": 0.0,
+          "z": 220.2922
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Apt_C3",
+        "type": "Container",
+        "position": {
+          "x": 168.05896,
+          "y": 0.45,
+          "z": 112.508728
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Apt_C1",
+        "type": "Container",
+        "position": {
+          "x": 149.451889,
+          "y": 0.45,
+          "z": 114.342773
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Lot_yc0",
+        "type": "Container",
+        "position": {
+          "x": 257.6967,
+          "y": 0.45,
+          "z": 148.769318
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 139.00647,
+          "y": 0.0,
+          "z": 32.3333664
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "OB_ArtH_13",
+        "type": "Container",
+        "position": {
+          "x": 251.855,
+          "y": 0.75,
+          "z": 199.58
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "Electronics_Label",
+        "type": "Note",
+        "position": {
+          "x": 152.796,
+          "y": 0.075,
+          "z": 160.514
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 62.25858,
+          "y": 0.0,
+          "z": 165.920486
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 165.982529,
+          "y": 0.0,
+          "z": 262.804047
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 231.7718,
+          "y": 0.0,
+          "z": 160.485046
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_230",
+        "type": "Container",
+        "position": {
+          "x": 226.052231,
+          "y": 0.5,
+          "z": 91.09113
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_80",
+        "type": "Container",
+        "position": {
+          "x": 47.4076843,
+          "y": 0.5,
+          "z": 258.343353
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_350",
+        "type": "Container",
+        "position": {
+          "x": 27.3574142,
+          "y": 0.5,
+          "z": 76.8250046
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 158.019379,
+          "y": 0.0,
+          "z": 235.542358
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "Diner_Label",
+        "type": "Note",
+        "position": {
+          "x": 56.7460022,
+          "y": 0.075,
+          "z": 209.780014
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "CollapsedMall_rc1",
+        "type": "Container",
+        "position": {
+          "x": 206.222641,
+          "y": 0.45,
+          "z": 261.309143
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ArtV_1",
+        "type": "Container",
+        "position": {
+          "x": 175.610016,
+          "y": 0.75,
+          "z": 53.8900032
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "BLK_ArtH",
+        "type": "Passage",
+        "position": {
+          "x": 102.0,
+          "y": 0.5,
+          "z": 204.0
+        },
+        "CanInteract": true,
+        "InteractRange": 7.8
+      },
+      {
+        "name": "SP_25",
+        "type": "Container",
+        "position": {
+          "x": 24.1897717,
+          "y": 0.5,
+          "z": 285.892883
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingW_1",
+        "type": "Container",
+        "position": {
+          "x": 24.99,
+          "y": 0.75,
+          "z": 87.89001
+        },
+        "CanInteract": true,
+        "InteractRange": 6.29999971
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 158.156036,
+          "y": 0.0,
+          "z": 235.498718
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Tower_C2",
+        "type": "Container",
+        "position": {
+          "x": 226.893646,
+          "y": 0.45,
+          "z": 76.4185
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Hardware_Label",
+        "type": "Note",
+        "position": {
+          "x": 147.016,
+          "y": 0.075,
+          "z": 174.981
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_430",
+        "type": "Container",
+        "position": {
+          "x": 224.719513,
+          "y": 0.5,
+          "z": 87.73843
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_390",
+        "type": "Container",
+        "position": {
+          "x": 112.670738,
+          "y": 0.5,
+          "z": 269.5997
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_65",
+        "type": "Container",
+        "position": {
+          "x": 58.1807175,
+          "y": 0.5,
+          "z": 229.106934
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 126.615746,
+          "y": 0.0,
+          "z": 253.167877
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 224.8074,
+          "y": 0.0,
+          "z": 40.26157
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_385",
+        "type": "Container",
+        "position": {
+          "x": 55.261673,
+          "y": 0.5,
+          "z": 251.1973
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_Label",
+        "type": "Note",
+        "position": {
+          "x": 189.38,
+          "y": 0.075,
+          "z": 89.57797
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "GH_Label",
+        "type": "Note",
+        "position": {
+          "x": 119.0,
+          "y": 0.075,
+          "z": 219.3
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Lot_Yard",
+        "type": "Note",
+        "position": {
+          "x": 219.3,
+          "y": 0.075,
+          "z": 137.7
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Mall_C0",
+        "type": "Container",
+        "position": {
+          "x": 233.317352,
+          "y": 0.45,
+          "z": 270.3461
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 43.72064,
+          "y": 0.0,
+          "z": 167.257385
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 232.088,
+          "y": 0.0,
+          "z": 159.92395
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Tower_C1",
+        "type": "Container",
+        "position": {
+          "x": 226.842545,
+          "y": 0.45,
+          "z": 116.325684
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Lot_yc1",
+        "type": "Container",
+        "position": {
+          "x": 246.7952,
+          "y": 0.45,
+          "z": 150.611328
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 234.2409,
+          "y": 0.0,
+          "z": 66.70835
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "PD_Label",
+        "type": "Note",
+        "position": {
+          "x": 52.7,
+          "y": 0.075,
+          "z": 187.0
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 218.829727,
+          "y": 0.0,
+          "z": 79.18651
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 71.40649,
+          "y": 0.0,
+          "z": 224.2524
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "BLK_NightAlley",
+        "type": "Passage",
+        "position": {
+          "x": 277.1,
+          "y": 0.5,
+          "z": 221.0
+        },
+        "CanInteract": true,
+        "InteractRange": 4.8
+      },
+      {
+        "name": "SZ_Mall_C2",
+        "type": "Container",
+        "position": {
+          "x": 210.651321,
+          "y": 0.45,
+          "z": 258.959045
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ArtH_1",
+        "type": "Container",
+        "position": {
+          "x": 51.68,
+          "y": 0.75,
+          "z": 195.755
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "OB_ArtH_10",
+        "type": "Container",
+        "position": {
+          "x": 201.110016,
+          "y": 0.75,
+          "z": 206.55
+        },
+        "CanInteract": true,
+        "InteractRange": 6.1
+      },
+      {
+        "name": "SP_255",
+        "type": "Container",
+        "position": {
+          "x": 170.800385,
+          "y": 0.5,
+          "z": 232.348526
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 71.76015,
+          "y": 0.0,
+          "z": 224.641571
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "Police_Label",
+        "type": "Note",
+        "position": {
+          "x": 189.38,
+          "y": 0.075,
+          "z": 164.224457
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SP_0",
+        "type": "Container",
+        "position": {
+          "x": 187.339249,
+          "y": 0.5,
+          "z": 61.3846
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingE_1",
+        "type": "Container",
+        "position": {
+          "x": 274.550018,
+          "y": 0.75,
+          "z": 81.855
+        },
+        "CanInteract": true,
+        "InteractRange": 3.1
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 250.290436,
+          "y": 0.0,
+          "z": 144.91832
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_195",
+        "type": "Container",
+        "position": {
+          "x": 24.85493,
+          "y": 0.5,
+          "z": 151.411758
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Park_Yard",
+        "type": "Note",
+        "position": {
+          "x": 48.6200027,
+          "y": 0.075,
+          "z": 235.552
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Arcade_C1",
+        "type": "Container",
+        "position": {
+          "x": 44.5110779,
+          "y": 0.45,
+          "z": 167.720444
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_325",
+        "type": "Container",
+        "position": {
+          "x": 179.517014,
+          "y": 0.5,
+          "z": 194.401611
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_RingE_7",
+        "type": "Container",
+        "position": {
+          "x": 273.955,
+          "y": 0.75,
+          "z": 269.28
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "SP_235",
+        "type": "Container",
+        "position": {
+          "x": 228.1585,
+          "y": 0.5,
+          "z": 208.112686
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_yc3",
+        "type": "Container",
+        "position": {
+          "x": 221.032944,
+          "y": 0.45,
+          "z": 63.34674
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 139.086929,
+          "y": 0.0,
+          "z": 32.7506371
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Tower_C4",
+        "type": "Container",
+        "position": {
+          "x": 216.401443,
+          "y": 0.45,
+          "z": 94.61882
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Apt_gc1",
+        "type": "Container",
+        "position": {
+          "x": 152.949219,
+          "y": 0.45,
+          "z": 89.14962
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_5",
+        "type": "Container",
+        "position": {
+          "x": 115.784737,
+          "y": 0.5,
+          "z": 200.636551
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Exit_Fixed",
+        "type": "ExitPoint",
+        "position": {
+          "x": 183.6,
+          "y": 0.04,
+          "z": 204.0
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Jewelry_Label",
+        "type": "Note",
+        "position": {
+          "x": 138.448013,
+          "y": 0.075,
+          "z": 156.468
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Dome_C2",
+        "type": "Container",
+        "position": {
+          "x": 130.781677,
+          "y": 0.45,
+          "z": 271.422974
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Dome_C1",
+        "type": "Container",
+        "position": {
+          "x": 148.7741,
+          "y": 0.45,
+          "z": 271.5341
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_140",
+        "type": "Container",
+        "position": {
+          "x": 184.7374,
+          "y": 0.5,
+          "z": 94.1653
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "OB_ColV_7",
+        "type": "Container",
+        "position": {
+          "x": 110.245,
+          "y": 0.75,
+          "z": 217.430008
+        },
+        "CanInteract": true,
+        "InteractRange": 5.0
+      },
+      {
+        "name": "SP_395",
+        "type": "Container",
+        "position": {
+          "x": 82.85497,
+          "y": 0.5,
+          "z": 253.482346
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "RV_Label",
+        "type": "Note",
+        "position": {
+          "x": 149.6,
+          "y": 0.075,
+          "z": 290.7
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "SZ_Tower_C0",
+        "type": "Container",
+        "position": {
+          "x": 231.681213,
+          "y": 0.45,
+          "z": 88.14829
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_yc2",
+        "type": "Container",
+        "position": {
+          "x": 241.168854,
+          "y": 0.45,
+          "z": 79.71281
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 126.323433,
+          "y": 0.0,
+          "z": 253.076752
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Arcade_C0",
+        "type": "Container",
+        "position": {
+          "x": 48.9761658,
+          "y": 0.45,
+          "z": 151.966553
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "BLK_Overpass",
+        "type": "Passage",
+        "position": {
+          "x": 183.6,
+          "y": 0.5,
+          "z": 112.200005
+        },
+        "CanInteract": true,
+        "InteractRange": 7.8
+      },
+      {
+        "name": "Lot_yc2",
+        "type": "Container",
+        "position": {
+          "x": 222.106064,
+          "y": 0.45,
+          "z": 180.575714
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_reg_scrap_neon_tube",
+        "type": "Pickup",
+        "position": {
+          "x": 129.738266,
+          "y": 0.0,
+          "z": 55.29581
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "UR_Yard",
+        "type": "Note",
+        "position": {
+          "x": 131.988,
+          "y": 0.075,
+          "z": 155.78801
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 127.005142,
+          "y": 0.0,
+          "z": 255.227341
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_225",
+        "type": "Container",
+        "position": {
+          "x": 245.580429,
+          "y": 0.5,
+          "z": 52.0715981
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SZ_Park_C0",
+        "type": "Container",
+        "position": {
+          "x": 47.13578,
+          "y": 0.45,
+          "z": 262.658875
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_110",
+        "type": "Container",
+        "position": {
+          "x": 104.53051,
+          "y": 0.5,
+          "z": 190.699356
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "CollapsedMall_rc4",
+        "type": "Container",
+        "position": {
+          "x": 209.068512,
+          "y": 0.45,
+          "z": 248.84256
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_30",
+        "type": "Container",
+        "position": {
+          "x": 78.70766,
+          "y": 0.5,
+          "z": 240.309464
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 154.584274,
+          "y": 0.0,
+          "z": 55.6089
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "Park_yc1",
+        "type": "Container",
+        "position": {
+          "x": 61.9694252,
+          "y": 0.45,
+          "z": 246.174
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_375",
+        "type": "Container",
+        "position": {
+          "x": 22.28341,
+          "y": 0.5,
+          "z": 195.1908
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_yc1",
+        "type": "Container",
+        "position": {
+          "x": 217.66156,
+          "y": 0.45,
+          "z": 61.6559944
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_coffee",
+        "type": "Pickup",
+        "position": {
+          "x": 43.17809,
+          "y": 0.0,
+          "z": 167.696732
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SZ_Mall_C1",
+        "type": "Container",
+        "position": {
+          "x": 231.0167,
+          "y": 0.45,
+          "z": 244.396454
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_junk_glass_shard",
+        "type": "Pickup",
+        "position": {
+          "x": 229.435135,
+          "y": 0.0,
+          "z": 50.2160378
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 62.71598,
+          "y": 0.0,
+          "z": 166.338913
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "SP_410",
+        "type": "Container",
+        "position": {
+          "x": 191.458725,
+          "y": 0.5,
+          "z": 104.399818
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "Tower_Yard",
+        "type": "Note",
+        "position": {
+          "x": 213.655991,
+          "y": 0.075,
+          "z": 46.784
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "UR_yc0",
+        "type": "Container",
+        "position": {
+          "x": 141.109543,
+          "y": 0.45,
+          "z": 169.338348
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "WorldItem_val_watch_broken",
+        "type": "Pickup",
+        "position": {
+          "x": 126.954666,
+          "y": 0.0,
+          "z": 240.777786
+        },
+        "CanInteract": true,
+        "InteractRange": 1.5
+      },
+      {
+        "name": "AW_st04",
+        "type": "Container",
+        "position": {
+          "x": 33.405,
+          "y": 1.5,
+          "z": 177.310013
+        },
+        "CanInteract": true,
+        "InteractRange": 3.69999981
+      },
+      {
+        "name": "SP_15",
+        "type": "Container",
+        "position": {
+          "x": 272.712921,
+          "y": 0.5,
+          "z": 125.418777
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      },
+      {
+        "name": "SP_420",
+        "type": "Container",
+        "position": {
+          "x": 275.57605,
+          "y": 0.5,
+          "z": 133.380722
+        },
+        "CanInteract": true,
+        "InteractRange": 1.8
+      }
+    ],
+    "doors": [],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      },
+      {
+        "id": "pistol9",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      }
+    ],
+    "equipment": "5:bat"
+  }
+}

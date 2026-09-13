@@ -45,6 +45,9 @@ public class NarrationUI : MonoBehaviour
         }
         Instance = this;
         if (!IsGenerated) GenerateUI();
+        // The prologue deliberately speaks during a full story fade (order 999).
+        // Apply to baked canvases too, so its first line and continue hint remain visible.
+        canvas.sortingOrder = 1000;
     }
 
     void OnDestroy()
@@ -59,7 +62,7 @@ public class NarrationUI : MonoBehaviour
         canvasGO.transform.SetParent(transform, false);
         canvas = canvasGO.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 90; // DialogueUI(100)보다 아래
+        canvas.sortingOrder = 1000; // 암전(999) 위에서도 독백/계속 안내 표시
 
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;

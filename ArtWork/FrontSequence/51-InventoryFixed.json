@@ -1,0 +1,849 @@
+{
+  "op": "button",
+  "success": true,
+  "seconds": 2.020111,
+  "notes": [],
+  "before": {
+    "scene": "Hideout",
+    "scenes": [
+      "Systems",
+      "Hideout"
+    ],
+    "player": {
+      "x": 6.116947,
+      "y": 0.0,
+      "z": 5.069489
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": true,
+    "target": null,
+    "hidden": true,
+    "buttons": [
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_radio",
+        "interactable": true,
+        "text": "라디오"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_cooking",
+        "interactable": true,
+        "text": "조리대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Close",
+        "interactable": true,
+        "text": "✕"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Body/Content/Button",
+        "interactable": false,
+        "text": "건설"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_bed",
+        "interactable": true,
+        "text": "침대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Close",
+        "interactable": true,
+        "text": "✕"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_medical",
+        "interactable": true,
+        "text": "의료대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_workbench",
+        "interactable": true,
+        "text": "작업대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_stash",
+        "interactable": true,
+        "text": "창고"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_generator",
+        "interactable": true,
+        "text": "발전기"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/InventoryButton",
+        "interactable": true,
+        "text": "인벤토리"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/ExitButton",
+        "interactable": true,
+        "text": "마을로 나가기"
+      }
+    ],
+    "texts": [
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/ExitButton/Label",
+        "text": "마을로 나가기"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Body/Content/Row",
+        "text": "── 건설 비용 ──"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_bed/Label",
+        "text": "침대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Close/Label",
+        "text": "✕"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Text",
+        "text": "◈ 0"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_medical/Label",
+        "text": "의료대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Body/Content/Row",
+        "text": "고철 조각  x5   (보유 0)"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Body/Content/Row",
+        "text": "건설 후 사용 가능"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_radio/Label",
+        "text": "라디오"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Body/Content/Row",
+        "text": "나사  x6   (보유 0)"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_cooking/Label",
+        "text": "조리대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Body/Content/Row",
+        "text": "스크랩  ◈ 10,000   (보유 0)"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/Title",
+        "text": "하이드아웃"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Body/Content/Button/T",
+        "text": "건설"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_stash/Label",
+        "text": "창고"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Body/Content/Row",
+        "text": "현재: Lv 0 / 10"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/InventoryButton/Label",
+        "text": "인벤토리"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Text",
+        "text": "창고"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Title",
+        "text": "창고"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_generator/Label",
+        "text": "발전기"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Body/Content/Row",
+        "text": "── 기능 ──"
+      },
+      {
+        "path": "Map/Controllers/HideoutDockPanel/HideoutDockPanel/Panel/Content/Window/Close/T",
+        "text": "✕"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/Hint",
+        "text": "시설을 선택하세요  ·  Tab 인벤토리  ·  Esc 닫기 / 나가기"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_workbench/Label",
+        "text": "작업대"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Stool01",
+        "type": "Generic",
+        "position": {
+          "x": 8.182052,
+          "y": 0.0,
+          "z": 3.78218842
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Workbench01",
+        "type": "Workbench",
+        "position": {
+          "x": 9.437105,
+          "y": 0.0,
+          "z": 3.70910168
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "CookingStation02",
+        "type": "CookingBench",
+        "position": {
+          "x": 3.91219616,
+          "y": 0.0,
+          "z": 3.64679
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Generator01",
+        "type": "Generator",
+        "position": {
+          "x": 4.386718,
+          "y": 0.0,
+          "z": 4.986988
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "MedicalStation02",
+        "type": "MedicalBench",
+        "position": {
+          "x": 8.153118,
+          "y": 0.0,
+          "z": 1.91024733
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "RadioTable02",
+        "type": "Radio",
+        "position": {
+          "x": 4.901305,
+          "y": 0.0,
+          "z": 5.77419758
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Cot01",
+        "type": "Bed",
+        "position": {
+          "x": 8.329015,
+          "y": 0.0,
+          "z": 6.08420944
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "MapBoard01",
+        "type": "Generic",
+        "position": {
+          "x": 10.32297,
+          "y": 1.48,
+          "z": 5.689062
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "StorageChest01",
+        "type": "Stash",
+        "position": {
+          "x": 6.47175741,
+          "y": 0.0,
+          "z": 5.66338253
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      }
+    ],
+    "doors": [],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "pistol9",
+        "gridX": 0,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "bat",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 0
+      },
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      }
+    ],
+    "equipment": ""
+  },
+  "after": {
+    "scene": "Hideout",
+    "scenes": [
+      "Systems",
+      "Hideout"
+    ],
+    "player": {
+      "x": 6.116947,
+      "y": 0.0,
+      "z": 5.069489
+    },
+    "canMove": true,
+    "title": false,
+    "story": false,
+    "ui": true,
+    "target": null,
+    "hidden": true,
+    "buttons": [
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_1",
+        "interactable": true,
+        "text": "1  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_3",
+        "interactable": true,
+        "text": "3  "
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Special",
+        "interactable": true,
+        "text": "특수창"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_radio",
+        "interactable": true,
+        "text": "라디오"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Rig",
+        "interactable": true,
+        "text": "조끼"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_소모품",
+        "interactable": true,
+        "text": "소모품"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Head",
+        "interactable": true,
+        "text": "헬멧"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/SortBtn",
+        "interactable": true,
+        "text": "정렬"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_기타",
+        "interactable": true,
+        "text": "기타"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_cooking",
+        "interactable": true,
+        "text": "조리대"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Melee",
+        "interactable": true,
+        "text": "근접"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_6",
+        "interactable": true,
+        "text": "6  "
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Armor",
+        "interactable": true,
+        "text": "방탄복"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_무기",
+        "interactable": true,
+        "text": "무기"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_전체",
+        "interactable": true,
+        "text": "전체"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_2",
+        "interactable": true,
+        "text": "2  "
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_장비",
+        "interactable": true,
+        "text": "장비"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CloseBtn",
+        "interactable": true,
+        "text": "✕"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Backpack",
+        "interactable": true,
+        "text": "가방"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_bed",
+        "interactable": true,
+        "text": "침대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_medical",
+        "interactable": true,
+        "text": "의료대"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_PrimaryWeapon",
+        "interactable": true,
+        "text": "주무기"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_workbench",
+        "interactable": true,
+        "text": "작업대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_stash",
+        "interactable": true,
+        "text": "창고"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_SecondaryWeapon",
+        "interactable": true,
+        "text": "보조"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_4",
+        "interactable": true,
+        "text": "4  "
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_5",
+        "interactable": true,
+        "text": "5  "
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_generator",
+        "interactable": true,
+        "text": "발전기"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/InventoryButton",
+        "interactable": true,
+        "text": "인벤토리"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/ExitButton",
+        "interactable": true,
+        "text": "마을로 나가기"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_재료",
+        "interactable": true,
+        "text": "재료"
+      }
+    ],
+    "texts": [
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftViewport/ContainerGrid/CItem_4/Stack",
+        "text": "x30"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Backpack/Lbl_Backpack",
+        "text": "가방"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/ExitButton/Label",
+        "text": "마을로 나가기"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_6/Num",
+        "text": "6"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_bed/Label",
+        "text": "침대"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_medical/Label",
+        "text": "의료대"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftWeight",
+        "text": "4/160칸 · 3.0 kg"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/CharTitle",
+        "text": "캐릭터 상태"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/SortBtn/Text",
+        "text": "정렬"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_radio/Label",
+        "text": "라디오"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/CharLevel",
+        "text": "Lv.1  <color=#8A8170>XP 0/100</color>  ·  평판 0 <color=#8A8170>[신참]</color>"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_재료/Text",
+        "text": "재료"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/RightPanel/MidContent/WeaponPartsBox/WPHdr",
+        "text": "탄창"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/EquipHdr",
+        "text": "── 장비 ──"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_4/Num",
+        "text": "4"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CloseBtn/Text",
+        "text": "✕"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_장비/Text",
+        "text": "장비"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/RightPanel/MidContent/BagHeader",
+        "text": "가방 (미장착)"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Special/Lbl_Special",
+        "text": "특수창"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_2/Num",
+        "text": "2"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/CharHp",
+        "text": "HP: 100 / 100"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_cooking/Label",
+        "text": "조리대"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/CharFood",
+        "text": "포만감: 100 / 100"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftTitleTag/Text",
+        "text": "창고"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/Title",
+        "text": "하이드아웃"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/CharWeight",
+        "text": "무게: 0.0 / 30 kg"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_소모품/Text",
+        "text": "소모품"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftViewport/ContainerGrid/CItem_4/Text",
+        "text": "9x19 탄약"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_기타/Text",
+        "text": "기타"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/RightPanel/MidContent/WeaponPartsBox/WPNone",
+        "text": "총을 장착하면 탄창 슬롯이 열립니다"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_전체/Text",
+        "text": "전체"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_stash/Label",
+        "text": "창고"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/RightPanel/MidContent/InvPlaceholder/Text",
+        "text": "가방 미장착 — 가방을 장착하면 격자가 열립니다"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_SecondaryWeapon/Lbl_SecondaryWeapon",
+        "text": "보조"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftViewport/ContainerGrid/CItem_3/Text",
+        "text": "9x19 탄창 (15발)"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_5/Num",
+        "text": "5"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Rig/Lbl_Rig",
+        "text": "조끼"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/LeftPanel/LeftCategoryTabs/Tab_무기/Text",
+        "text": "무기"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/InventoryButton/Label",
+        "text": "인벤토리"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/RightPanel/MidContent/SecureHeader",
+        "text": "보안 컨테이너"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Armor/Lbl_Armor",
+        "text": "방탄복"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_3/Num",
+        "text": "3"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Head/Lbl_Head",
+        "text": "헬멧"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_generator/Label",
+        "text": "발전기"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/RightPanel/MidContent/PocketsHeader",
+        "text": "주머니"
+      },
+      {
+        "path": "[QuickSlotBar]/QuickSlot_Canvas/Bar/Slot_1/Num",
+        "text": "1"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/RightPanel/MidContent/Weight",
+        "text": "무게: 0.0 / 30 kg  |  아이템: 0개"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/ControlHint",
+        "text": "장비 더블클릭: 해제    |    우클릭: 메뉴    |    Ctrl+클릭: 창고 ↔ 가방    |    선택 후 1~6: 퀵슬롯"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/RightPanel/MidTitle",
+        "text": "장비 / 소지품"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/CharStamina",
+        "text": "스태미너: 100 / 100"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/CharWater",
+        "text": "수분: 100 / 100"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_PrimaryWeapon/Lbl_PrimaryWeapon",
+        "text": "주무기"
+      },
+      {
+        "path": "Map/Controllers/HideoutController/HideoutScreenUI/Hint",
+        "text": "시설을 선택하세요  ·  Tab 인벤토리  ·  Esc 닫기 / 나가기"
+      },
+      {
+        "path": "UIManager/CharacterPanelUI/CharPanel_Canvas/PanelRoot/CharacterPanel/Slot_Melee/Lbl_Melee",
+        "text": "근접"
+      },
+      {
+        "path": "Map/Controllers/HideoutDiorama/HideoutFacilityBar/Btn_workbench/Label",
+        "text": "작업대"
+      }
+    ],
+    "interactions": [
+      {
+        "name": "Stool01",
+        "type": "Generic",
+        "position": {
+          "x": 8.182052,
+          "y": 0.0,
+          "z": 3.78218842
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Workbench01",
+        "type": "Workbench",
+        "position": {
+          "x": 9.437105,
+          "y": 0.0,
+          "z": 3.70910168
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "CookingStation02",
+        "type": "CookingBench",
+        "position": {
+          "x": 3.91219616,
+          "y": 0.0,
+          "z": 3.64679
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Generator01",
+        "type": "Generator",
+        "position": {
+          "x": 4.386718,
+          "y": 0.0,
+          "z": 4.986988
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "MedicalStation02",
+        "type": "MedicalBench",
+        "position": {
+          "x": 8.153118,
+          "y": 0.0,
+          "z": 1.91024733
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "RadioTable02",
+        "type": "Radio",
+        "position": {
+          "x": 4.901305,
+          "y": 0.0,
+          "z": 5.77419758
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "Cot01",
+        "type": "Bed",
+        "position": {
+          "x": 8.329015,
+          "y": 0.0,
+          "z": 6.08420944
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "MapBoard01",
+        "type": "Generic",
+        "position": {
+          "x": 10.32297,
+          "y": 1.48,
+          "z": 5.689062
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      },
+      {
+        "name": "StorageChest01",
+        "type": "Stash",
+        "position": {
+          "x": 6.47175741,
+          "y": 0.0,
+          "z": 5.66338253
+        },
+        "CanInteract": true,
+        "InteractRange": 2.0
+      }
+    ],
+    "doors": [],
+    "suppressWrites": true,
+    "stash": [
+      {
+        "id": "pistol9",
+        "gridX": 0,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "bat",
+        "gridX": 1,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 0
+      },
+      {
+        "id": "mag_9x19",
+        "gridX": 2,
+        "gridY": 0,
+        "stackCount": 1,
+        "ammoCount": 15
+      },
+      {
+        "id": "ammo_9x19",
+        "gridX": 3,
+        "gridY": 0,
+        "stackCount": 30,
+        "ammoCount": 0
+      }
+    ],
+    "equipment": ""
+  }
+}
